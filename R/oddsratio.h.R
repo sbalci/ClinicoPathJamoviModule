@@ -24,6 +24,7 @@ oddsratioOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             private$..explanatory <- jmvcore::OptionVariables$new(
                 "explanatory",
                 explanatory,
+                default=NULL,
                 suggested=list(
                     "nominal",
                     "continuous"),
@@ -33,6 +34,7 @@ oddsratioOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             private$..outcome <- jmvcore::OptionVariable$new(
                 "outcome",
                 outcome,
+                default=NULL,
                 suggested=list(
                     "ordinal",
                     "nominal"),
@@ -311,8 +313,8 @@ oddsratioBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' @export
 oddsratio <- function(
     data,
-    explanatory,
-    outcome,
+    explanatory = NULL,
+    outcome = NULL,
     outcomeLevel,
     diagnosticPredictor = NULL,
     predictorLevel,

@@ -146,6 +146,11 @@ survivalcontClass <- if (requireNamespace("jmvcore")) {
         private = list(
             # Private fields for storing analysis results
             residuals_data = NULL,
+            # Result of .defineEventIndicator(), kept so .run() can render the
+            # recode disclosure without redoing the work.
+            .eventRecode = NULL,
+            # TRUE below 10 events: descriptive output runs, cut-offs suppressed.
+            .lowEventCount = FALSE,
 
             # Competing Risk Helper Functions ----
             .isCompetingRisk = function() {
@@ -251,16 +256,32 @@ survivalcontClass <- if (requireNamespace("jmvcore")) {
             .generateClinicalSentence = function(analysis_type, variable_name, result_values) {
                 switch(analysis_type,
                     "cox_regression" = {
-                        # Safe access to Cox regression results with robust error handling
-                        val <- result_values$hr
-                        if (is.null(val) || length(val) == 0 || is.na(val) || val == "-") {
+                        # `hr` arrives from finalfit pre-formatted, e.g.
+                        # "0.30 (0.24-0.38, p<0.001)". as.numeric() on that returns
+                        # NA *with a coercion warning*, and the warning handler
+                        # below turned it into "N/A" -- so the sentence read
+                        # "could not determine hazard ratio" for every perfectly
+                        # valid model. Prefer a raw numeric when the caller
+                        # supplies one (hr_numeric), otherwise pull the leading
+                        # number out of the formatted string.
+                        val <- result_values$hr_numeric
+                        if (is.null(val) || length(val) == 0)
+                            val <- result_values$hr
+
+                        # `hr` can be a vector when a group has several rows; `||`
+                        # on a vector errors under R >= 4.3, so reduce first.
+                        if (length(val) > 1) val <- val[1]
+
+                        if (is.null(val) || length(val) == 0 || all(is.na(val)) ||
+                            identical(as.character(val), "-")) {
                             hr_val <- "N/A"
+                        } else if (is.numeric(val)) {
+                            hr_val <- round(val, 2)
                         } else {
-                            hr_val <- tryCatch(
-                                round(as.numeric(val), 2),
-                                error = function(e) "N/A",
-                                warning = function(w) "N/A"
-                            )
+                            # Leading number of a formatted "est (lo-hi, p=...)" string.
+                            num <- suppressWarnings(
+                                as.numeric(sub("^\\s*([0-9.eE+-]+).*$", "\\1", as.character(val))))
+                            hr_val <- if (is.na(num)) "N/A" else round(num, 2)
                         }
 
                         if (identical(hr_val, "N/A")) {
@@ -880,90 +901,30 @@ survivalcontClass <- if (requireNamespace("jmvcore")) {
             myoutcome_labelled <- labelled_data$myoutcome_labelled
 
 
-                contin <- c("integer", "numeric", "double")
+                # Delegated to the shared coder in survival_utils.R. This block
+                # previously had no null-check on outcomeLevel (it crashed with a
+                # raw "replacement has 0 rows" error) and returned NULL silently
+                # on a bad numeric outcome, leaving the user with a blank
+                # analysis and no explanation.
+                res <- .defineEventIndicator(
+                    outcome      = mydata[[myoutcome_labelled]],
+                    outcomeLevel = self$options$outcomeLevel,
+                    multievent   = self$options$multievent,
+                    analysistype = self$options$analysistype,
+                    dod          = self$options$dod,
+                    dooc         = self$options$dooc,
+                    awd          = self$options$awd,
+                    awod         = self$options$awod,
+                    outcome_name = self$options$outcome
+                )
 
-                outcomeLevel <- self$options$outcomeLevel
-                multievent <- self$options$multievent
-
-                outcome1 <- mydata[[myoutcome_labelled]]
-
-                if (!multievent) {
-                    if (inherits(outcome1, contin)) {
-                        if (!((length(unique(
-                            outcome1[!is.na(outcome1)]
-                        )) == 2) && (sum(unique(
-                            outcome1[!is.na(outcome1)]
-                        )) == 1))) {
-                            unique_vals <- paste(unique(outcome1[!is.na(outcome1)]), collapse = ", ")
-                            return(NULL)
-                        }
-
-                        mydata[["myoutcome"]] <- mydata[[myoutcome_labelled]]
-                            # mydata[[self$options$outcome]]
-
-                    } else if (inherits(outcome1, "factor")) {
-                        mydata[["myoutcome"]] <-
-                            ifelse(
-                                test = outcome1 == outcomeLevel,
-                                yes = 1,
-                                no = 0
-                            )
-
-                    } else {
-                        return(NULL)
-                    }
-
-                } else if (multievent) {
-                    analysistype <- self$options$analysistype
-
-                    dod <- self$options$dod
-                    dooc <- self$options$dooc
-                    awd <- self$options$awd
-                    awod <- self$options$awod
-
-                    if (analysistype == 'overall') {
-                        # Overall ----
-                        # (Alive) <=> (Dead of Disease & Dead of Other Causes)
-
-
-                        mydata[["myoutcome"]] <- NA_integer_
-
-                        mydata[["myoutcome"]][outcome1 == awd] <- 0
-                        mydata[["myoutcome"]][outcome1 == awod] <- 0
-                        mydata[["myoutcome"]][outcome1 == dod] <- 1
-                        mydata[["myoutcome"]][outcome1 == dooc] <- 1
-
-
-
-                    } else if (analysistype == 'cause') {
-                        # Cause Specific ----
-                        # (Alive & Dead of Other Causes) <=> (Dead of Disease)
-
-
-                        mydata[["myoutcome"]] <- NA_integer_
-
-                        mydata[["myoutcome"]][outcome1 == awd] <- 0
-                        mydata[["myoutcome"]][outcome1 == awod] <- 0
-                        mydata[["myoutcome"]][outcome1 == dod] <- 1
-                        mydata[["myoutcome"]][outcome1 == dooc] <- 0
-
-                    } else if (analysistype == 'compete') {
-                        # Competing Risks ----
-                        # Alive <=> Dead of Disease accounting for Dead of Other Causes
-
-                        # https://www.emilyzabor.com/tutorials/survival_analysis_in_r_tutorial.html#part_3:_competing_risks
-
-
-                        mydata[["myoutcome"]] <- NA_integer_
-
-                        mydata[["myoutcome"]][outcome1 == awd] <- 0
-                        mydata[["myoutcome"]][outcome1 == awod] <- 0
-                        mydata[["myoutcome"]][outcome1 == dod] <- 1
-                        mydata[["myoutcome"]][outcome1 == dooc] <- 2
-
-                    }
-
+                if (!is.null(res$error)) {
+                    private$.addHtmlMessage("error", "Outcome variable problem", res$error)
+                    return(NULL)
                 }
+
+                private$.eventRecode <- res
+                mydata[["myoutcome"]] <- res$status
 
                 df_outcome <- mydata %>% jmvcore::select(c("row_names", "myoutcome"))
 
@@ -1174,6 +1135,25 @@ survivalcontClass <- if (requireNamespace("jmvcore")) {
                 }
 
 
+                ## Competing risks are not implemented here ----
+                # Gated once, at the top, rather than at each consumer: this
+                # analysis has ~15 places that build a survfit/coxph and only
+                # .cox was ever guarded. survival::Surv() accepts the 0/1/2
+                # competing-risk coding with a warning jamovi never displays and
+                # then remaps 1 to censored, 2 to event and 0 to NA -- so every
+                # one of those outputs would render inverted. There is also no
+                # cumulative-incidence implementation here to fall back on.
+                if (self$options$multievent && self$options$analysistype == "compete") {
+                    private$.addHtmlMessage(
+                        "error",
+                        "Competing risks not available in this analysis",
+                        paste0(
+                            "Cut-off analysis for a continuous predictor does not support competing risks. ",
+                            "Use Survival Analysis or Multivariable Survival Analysis for competing-risk ",
+                            "models, or set survival type to Overall, Cause Specific, or Disease-Free here."))
+                    return()
+                }
+
                 ## Input Validation and Data Checks ----
 
                 # Enhanced input validation using helper method
@@ -1186,6 +1166,14 @@ survivalcontClass <- if (requireNamespace("jmvcore")) {
                 # Get Clean Data ----
                 results <- private$.cleandata()
 
+                # Always disclose how the outcome was recoded. A silent recode is a
+                # clinical-safety hazard: the reader of a survival curve cannot otherwise
+                # see which levels were collapsed into "censored", nor which estimand
+                # the probability-scale outputs actually correspond to.
+                if (!is.null(private$.eventRecode))
+                    self$results$eventRecodeInfo$setContent(
+                        .describeEventIndicator(private$.eventRecode, self$options$outcome))
+
                 # Event Count Validation (Critical for Survival Analysis) ----
                 if (!is.null(results) && !is.null(results$cleanData) && !is.null(results$name2outcome)) {
                     # Calculate event count
@@ -1193,13 +1181,16 @@ survivalcontClass <- if (requireNamespace("jmvcore")) {
                     n_total <- nrow(results$cleanData)
 
                     # ERROR: < 10 events (insufficient for analysis)
-                    if (n_events < 10) {
+                    # Warn and continue with descriptive output; cut-point
+                    # determination stays suppressed because a cut chosen from
+                    # this few events would not generalise.
+                    private$.lowEventCount <- n_events < 10
+                    if (private$.lowEventCount) {
                         private$.addHtmlMessage(
-                            type = "error",
-                            title = "Insufficient Events",
-                            message = sprintf('Only %d event(s) detected (n=%d total). Survival analysis requires a minimum of 10 events for even minimally reliable estimation. Cox regression, cut-off determination, and survival tables cannot be computed and are left blank. Collect more events or extend follow-up before interpreting any results.', n_events, n_total)
+                            type = "warning",
+                            title = sprintf("Only %d event(s) observed", n_events),
+                            message = sprintf('Only %d event(s) detected (n=%d total). Descriptive results are shown, but estimates from this many events are unstable with very wide confidence intervals. Cut-off determination is suppressed.', n_events, n_total)
                         )
-                        return()
                     }
 
                     # STRONG_WARNING: 10-19 events (very limited reliability)
@@ -1374,6 +1365,11 @@ survivalcontClass <- if (requireNamespace("jmvcore")) {
                     private$.calculateResiduals(results)
                 }
 
+                ## Stratified Cox (if enabled) ----
+                if (self$options$stratified_cox) {
+                    private$.stratifiedCox(results)
+                }
+
                 ## Run Multiple Cut-offs Analysis (INDEPENDENT) ----
                 multicut_results <- NULL
 
@@ -1381,7 +1377,8 @@ survivalcontClass <- if (requireNamespace("jmvcore")) {
 
                 if (self$options$multiple_cutoffs) {
                     # Use the original clean data, before any single cutoff processing
-                    multicut_results <- private$.multipleCutoffs(results)
+                    multicut_results <- if (private$.lowEventCount) NULL
+                                        else private$.multipleCutoffs(results)
                     if (!is.null(multicut_results)) {
                         private$.multipleCutoffTables(multicut_results)
 
@@ -1421,7 +1418,7 @@ survivalcontClass <- if (requireNamespace("jmvcore")) {
                 ## Run Cut-off calculation and further analysis ----
                 # Only the cut-off-specific block below depends on findcut; the
                 # completion notices and educational explanations further down always run.
-                if (self$options$findcut) {
+                if (self$options$findcut && !private$.lowEventCount) {
 
 
                 ## Run Cut-off calculation ----
@@ -1719,21 +1716,34 @@ survivalcontClass <- if (requireNamespace("jmvcore")) {
                         }
                     }
                 }, error = function(e) {
-                    # PH testing failed - silently continue (might fail with small samples)
-                    if (!grepl("singular|convergence", e$message, ignore.case = TRUE)) {
-                        private$.addHtmlMessage(
-                            type = "info",
-                            title = "PH Test Could Not Be Performed",
-                            message = 'Proportional hazards assumption test could not be performed. This may occur with very small samples or perfect separation. Interpret Cox results cautiously and consider visual inspection with log-log plots.'
-                        )
-                    }
+                    # A failed PH test must never look like a passed one.
+                    #
+                    # This used to suppress the notice exactly when the message
+                    # matched "singular" or "convergence" -- the two cases most
+                    # worth reporting. The user then saw no proportional-hazards
+                    # warning anywhere and had every reason to conclude the
+                    # assumption held, when in fact the test never ran. The
+                    # notice is now unconditional; only its wording varies.
+                    fit_failure <- grepl("singular|convergence|infinite|did not converge",
+                                         e$message, ignore.case = TRUE)
+
+                    private$.addHtmlMessage(
+                        type = "warning",
+                        title = "Proportional Hazards Test Could Not Be Performed",
+                        message = if (fit_failure) {
+                            sprintf('The Cox model underlying the proportional hazards test did not converge (%s), so the assumption could NOT be tested. This is not evidence that proportional hazards holds. It usually means a covariate is collinear or perfectly separates the outcome, or that there are too few events. Check the Cox results below for implausibly large hazard ratios or very wide confidence intervals before interpreting them, and consider a log-log plot for visual assessment.',
+                                    trimws(e$message))
+                        } else {
+                            'The proportional hazards assumption could NOT be tested, so no conclusion about it should be drawn from the absence of a warning. This may occur with very small samples or perfect separation. Interpret the Cox results cautiously and consider visual inspection with log-log plots.'
+                        }
+                    )
                 })
 
                 # Create enhanced Cox results with clinical context
                 cox_tooltip <- private$.createClinicalTooltip(
                     .("Cox Regression Analysis"),
                     .("Cox regression estimates the hazard ratio (HR) which represents the risk of the event occurring at any time for one group relative to another. HR > 1 indicates increased risk, HR < 1 indicates decreased risk."),
-                    .("HR = 2.5 means the group has 2.5 times higher risk of the event")
+                    .("HR = 2.5 means the group has 2.5 times the hazard (instantaneous event rate); it is not a cumulative risk ratio")
                 )
 
                 tCoxtext2 <- glue::glue(.(
@@ -1848,7 +1858,12 @@ survivalcontClass <- if (requireNamespace("jmvcore")) {
 
                     self$results$coxSummary$setContent(enhanced_summary)
                 } else {
-                    self$results$coxSummary$setContent(.("No significant associations found in Cox regression analysis."))
+                    # Reaching here means the filter above removed every row (no
+                    # usable HR), not that anything was tested and found null.
+                    # Reporting it as "no significant associations" invented a
+                    # substantive negative finding out of an empty result.
+                    self$results$coxSummary$setContent(
+                        .("No Cox regression results are available to summarise. This usually means the model could not be fitted, or every hazard ratio was missing."))
                 }
             }
 
@@ -2775,7 +2790,8 @@ survivalcontClass <- if (requireNamespace("jmvcore")) {
                         num_cuts = num_cuts,
                         original_data = mydata,
                         mytime = mytime,
-                        myoutcome = myoutcome
+                        myoutcome = myoutcome,
+                        mycontexpl = mycontexpl
                     ))
                 }, error = function(e) {
                     warning(.('Error in multiple cutoffs analysis: {error}'), error = e$message)
@@ -2786,16 +2802,20 @@ survivalcontClass <- if (requireNamespace("jmvcore")) {
             # Quantile-based cutoffs ----
             ,
             .quantileCutoffs = function(cont_var, num_cuts) {
-                if (num_cuts == 2) {
-                    quantiles <- c(1/3, 2/3)
-                } else if (num_cuts == 3) {
-                    quantiles <- c(0.25, 0.5, 0.75)
-                } else if (num_cuts == 4) {
-                    quantiles <- c(0.2, 0.4, 0.6, 0.8)
-                }
+                # Equally spaced interior quantiles for ANY number of cuts.
+                #
+                # This previously had branches only for num_cuts 2, 3 and 4, so
+                # `quantiles` was never assigned for num_cuts == 1 and the call
+                # below threw "object 'quantiles' not found". That throw escaped
+                # the inner tryCatch in .recursiveCutoffs and took out the whole
+                # multiple-cut-off feature -- no tables, no plot, no output
+                # column -- leaving only a warning() the user never sees.
+                num_cuts <- as.integer(num_cuts)
+                if (is.na(num_cuts) || num_cuts < 1) return(numeric(0))
 
-                cutoffs <- quantile(cont_var, probs = quantiles, na.rm = TRUE)
-                return(as.numeric(cutoffs))
+                quantiles <- seq_len(num_cuts) / (num_cuts + 1)
+                cutoffs <- stats::quantile(cont_var, probs = quantiles, na.rm = TRUE)
+                return(unname(as.numeric(cutoffs)))
             }
 
             # Recursive optimal cutoffs ----
@@ -2876,8 +2896,42 @@ survivalcontClass <- if (requireNamespace("jmvcore")) {
                         return(private$.quantileCutoffs(mydata[[mycontexpl]], num_cuts))
                     }
 
-                    cutoffs <- unique(splits[splits[,1] == mycontexpl, "index"])
-                    cutoffs <- sort(cutoffs)
+                    # rpart stores the splitting variable in rownames(splits),
+                    # not in a column. The old test `splits[,1] == mycontexpl`
+                    # compared the numeric `count` column against the variable
+                    # NAME (e.g. "228" == "Age"), so it was FALSE on every row and
+                    # `cutoffs` was always numeric(0). The rpart fit above was
+                    # computed and thrown away, and the block below quietly
+                    # substituted quantile cut-points -- making "tree" a silent
+                    # alias for "quantile".
+                    #
+                    # Keep primary continuous splits only (ncat != 0 marks
+                    # categorical splits, whose `index` is a category code rather
+                    # than a cut-point).
+                    split_rows <- rownames(splits)
+                    is_var <- if (is.null(split_rows)) rep(FALSE, nrow(splits))
+                              else split_rows == mycontexpl
+                    # In rpart, a continuous split has abs(ncat) == 1 (the sign is
+                    # the direction); anything larger is a categorical split whose
+                    # `index` is a category code, not a cut-point.
+                    if ("ncat" %in% colnames(splits))
+                        is_var <- is_var & abs(splits[, "ncat"]) == 1
+                    is_var[is.na(is_var)] <- FALSE
+
+                    cutoffs <- if (any(is_var))
+                        sort(unique(as.numeric(splits[is_var, "index"]))) else numeric(0)
+
+                    if (length(cutoffs) == 0) {
+                        # Say so rather than silently returning quantiles under a
+                        # "tree" label.
+                        private$.addHtmlMessage(
+                            "warning",
+                            "Tree-based cut-points unavailable",
+                            paste0("The survival tree produced no usable split for '", mycontexpl,
+                                   "'. Quantile cut-points are shown instead. This usually means ",
+                                   "the tree found no split meeting the complexity and minimum ",
+                                   "group-size criteria."))
+                    }
 
                     if (length(cutoffs) > num_cuts) {
                         cutoffs <- cutoffs[1:num_cuts]
@@ -2960,21 +3014,32 @@ survivalcontClass <- if (requireNamespace("jmvcore")) {
             # Create risk groups from cutoffs ----
             ,
             .createRiskGroups = function(cont_var, cutoffs) {
+                # Labels describe the MARKER VALUE, not risk.
+                #
+                # These groups are formed purely by ordering the biomarker, with
+                # no reference to the hazard direction. Calling the lowest-value
+                # group "Low Risk" is therefore an assumption that high marker
+                # values are harmful -- and it is exactly backwards for a
+                # protective marker. On a test dataset where high values were
+                # strongly protective, the group carrying 76/80 events was
+                # labelled "Low Risk" and the group with 19/80 events "High
+                # Risk". Neutral value-based labels cannot be wrong in that way;
+                # the hazard ratios in the tables tell the reader the direction.
                 if (length(cutoffs) == 2) {
-                    groups <- ifelse(cont_var <= cutoffs[1], "Low Risk",
-                                   ifelse(cont_var <= cutoffs[2], "Medium Risk", "High Risk"))
-                    level_order <- c("Low Risk", "Medium Risk", "High Risk")
+                    groups <- ifelse(cont_var <= cutoffs[1], "Low marker",
+                                   ifelse(cont_var <= cutoffs[2], "Middle marker", "High marker"))
+                    level_order <- c("Low marker", "Middle marker", "High marker")
                 } else if (length(cutoffs) == 3) {
-                    groups <- ifelse(cont_var <= cutoffs[1], "Low Risk",
-                                   ifelse(cont_var <= cutoffs[2], "Medium-Low Risk",
-                                         ifelse(cont_var <= cutoffs[3], "Medium-High Risk", "High Risk")))
-                    level_order <- c("Low Risk", "Medium-Low Risk", "Medium-High Risk", "High Risk")
+                    groups <- ifelse(cont_var <= cutoffs[1], "Lowest marker",
+                                   ifelse(cont_var <= cutoffs[2], "Low-middle marker",
+                                         ifelse(cont_var <= cutoffs[3], "High-middle marker", "Highest marker")))
+                    level_order <- c("Lowest marker", "Low-middle marker", "High-middle marker", "Highest marker")
                 } else if (length(cutoffs) == 4) {
-                    groups <- ifelse(cont_var <= cutoffs[1], "Very Low Risk",
-                                   ifelse(cont_var <= cutoffs[2], "Low Risk",
-                                         ifelse(cont_var <= cutoffs[3], "Medium Risk",
-                                               ifelse(cont_var <= cutoffs[4], "High Risk", "Very High Risk"))))
-                    level_order <- c("Very Low Risk", "Low Risk", "Medium Risk", "High Risk", "Very High Risk")
+                    groups <- ifelse(cont_var <= cutoffs[1], "Lowest marker",
+                                   ifelse(cont_var <= cutoffs[2], "Low marker",
+                                         ifelse(cont_var <= cutoffs[3], "Middle marker",
+                                               ifelse(cont_var <= cutoffs[4], "High marker", "Highest marker"))))
+                    level_order <- c("Lowest marker", "Low marker", "Middle marker", "High marker", "Highest marker")
                 } else {
                     # Fallback for other numbers of cutoffs
                     groups <- cut(cont_var, breaks = c(-Inf, cutoffs, Inf),
@@ -3069,6 +3134,7 @@ survivalcontClass <- if (requireNamespace("jmvcore")) {
                     mydata$risk_groups <- multicut_results$risk_groups
                     mytime <- multicut_results$mytime
                     myoutcome <- multicut_results$myoutcome
+                    mycontexpl <- multicut_results$mycontexpl
 
                     # Perform log-rank test comparing all groups
                     escaped_time <- private$.escapeVariableNames(mytime)
@@ -3084,14 +3150,55 @@ survivalcontClass <- if (requireNamespace("jmvcore")) {
                                              " (df = ", length(logrank_test$n) - 1, "), p = ",
                                              ifelse(overall_pval < 0.001, "< 0.001", round(overall_pval, 3)))
 
-                        # Add interpretation
-                        interpretation <- if (overall_pval < 0.05) {
-                            "The multiple cutoffs significantly differentiate survival between risk groups."
-                        } else {
-                            "The multiple cutoffs do not significantly differentiate survival between risk groups."
-                        }
+                        # Selection-adjusted p-value.
+                        #
+                        # The log-rank p above is computed on the SAME data the
+                        # cut-points were chosen from, so it is not a valid test
+                        # of anything -- it is the maximum of many statistics
+                        # reported as if it were one pre-specified test. The
+                        # previous text went further and asserted the cut-points
+                        # "significantly differentiate survival". Report the
+                        # maximally-selected-rank-statistic p instead, which is
+                        # the null distribution the search actually implies, and
+                        # demote the naive value to exploratory.
+                        adj_text <- tryCatch({
+                            if (!requireNamespace("maxstat", quietly = TRUE)) {
+                                "Selection-adjusted p-value unavailable (package 'maxstat' not installed)."
+                            } else {
+                                # pmethod: "Lau94" is a Bonferroni-type UPPER BOUND, not a
+                                # probability -- it routinely returns values above 1
+                                # (observed 2.65 where the exact method gives 0.70), and it
+                                # does so precisely on non-significant results, i.e. exactly
+                                # when the clinician is deciding whether a cut-point is real.
+                                # "condMC" is the exact conditional Monte-Carlo p-value.
+                                mt_fml <- .asSurvivalFormula(paste0(
+                                    "survival::Surv(", private$.escapeVariableNames(mytime), ", ",
+                                    private$.escapeVariableNames(myoutcome), ") ~ ",
+                                    private$.escapeVariableNames(mycontexpl)))
+                                mt <- maxstat::maxstat.test(
+                                    mt_fml, data = mydata, smethod = "LogRank",
+                                    pmethod = "condMC", B = 9999)
+                                adj_p <- min(1, mt$p.value)   # belt and braces
+                                paste0("Selection-adjusted p for the single best split of ",
+                                       mycontexpl, " (maximally selected rank statistic, ",
+                                       "exact conditional Monte-Carlo) = ",
+                                       ifelse(adj_p < 0.001, "< 0.001", round(adj_p, 3)),
+                                       ". It accounts for a cut-point having been chosen to ",
+                                       "maximise separation in these data. Note it refers to ",
+                                       "ONE optimal split, not to the ", length(multicut_results$cutoff_values),
+                                       " cut-points in the table above, and it does not depend ",
+                                       "on which cut-off method was used.")
+                            }
+                        }, error = function(e)
+                            "Selection-adjusted p-value could not be computed for this variable.")
 
-                        full_text <- paste(logrank_text, interpretation, sep = "\n\n")
+                        interpretation <- paste0(
+                            "The log-rank p above is EXPLORATORY: the cut-points were selected from ",
+                            "these same data, so it is the largest of many statistics reported as a ",
+                            "single test and is optimistic. Validate any cut-point in independent data ",
+                            "before clinical use.")
+
+                        full_text <- paste(logrank_text, adj_text, interpretation, sep = "\n\n")
 
                         # Store in a text result (we'll need to check what text output is available)
                         # For now, let's use a preformatted result
@@ -3401,51 +3508,38 @@ survivalcontClass <- if (requireNamespace("jmvcore")) {
                             surv_probs <- c(surv_probs, surv_at_tau)
                         }
 
-                        # Calculate RMST using trapezoidal rule
+                        # RMST and its SE come from survival::survfit itself.
+                        #
+                        # The hand-rolled version this replaces was wrong twice
+                        # over. Kaplan-Meier is a right-continuous STEP function,
+                        # so RMST is sum(S(t_i) * dt_i); averaging the interval
+                        # endpoints (the trapezoidal rule) systematically
+                        # UNDERestimates it. And the variance accumulated
+                        # S^2 * Var(S) * dt, which has units of time^1 where
+                        # Var(RMST) needs time^2 -- the resulting interval was
+                        # dimensionally wrong and far too narrow. The fallback was
+                        # worse still: sd(time)/sqrt(n) is the SE of the mean
+                        # OBSERVATION time, ignores censoring entirely, and was
+                        # printed as a 95% CI.
+                        #
+                        # summary(fit, rmean = tau) returns both, computed correctly.
                         if (length(times) > 1) {
-                            time_diffs <- diff(times)
-                            surv_avg <- (surv_probs[-length(surv_probs)] + surv_probs[-1]) / 2
-                            rmst <- sum(time_diffs * surv_avg)
+                            rmean_tbl <- summary(km_fit, rmean = tau, extend = TRUE)$table
 
-                            # Calculate proper RMST variance using Greenwood's formula
-                            # Based on Andersen et al. (1993) and Uno et al. (2014)
-                            # Var(RMST) = integral of S(t)^2 * Var(S(t)) from 0 to tau
+                            # $table is a named vector for a single-group fit and a
+                            # matrix when there are strata.
+                            rmst <- if (is.matrix(rmean_tbl))
+                                unname(rmean_tbl[1, "rmean"]) else unname(rmean_tbl[["rmean"]])
+                            se_rmst <- if (is.matrix(rmean_tbl))
+                                unname(rmean_tbl[1, "se(rmean)"]) else unname(rmean_tbl[["se(rmean)"]])
 
-                            # Extract survival variance from KM fit
-                            km_times <- km_fit$time
-                            km_surv <- km_fit$surv
-                            km_var <- (km_fit$std.err)^2  # Greenwood variance from survfit
-
-                            # For each interval, calculate contribution to RMST variance
-                            # Approximate integral using trapezoidal rule on S(t)^2 * Var(S(t))
-                            var_rmst <- 0
-
-                            # Match km_fit times to our truncated times for variance calculation
-                            for (i in seq_along(km_times)) {
-                                if (km_times[i] <= tau) {
-                                    # Weight by time interval to next event or tau
-                                    if (i < length(km_times)) {
-                                        dt <- min(km_times[i + 1], tau) - km_times[i]
-                                    } else {
-                                        dt <- tau - km_times[i]
-                                    }
-                                    # Add weighted variance contribution
-                                    var_rmst <- var_rmst + (km_surv[i]^2) * km_var[i] * dt
-                                }
-                            }
-
-                            se_rmst <- sqrt(var_rmst)
-
-                            # Fallback for edge cases (insufficient variance information)
-                            if (is.na(se_rmst) || se_rmst == 0 || !is.finite(se_rmst)) {
-                                # Use bootstrap-based approximation: SE ~ SD(survival times) / sqrt(n)
-                                se_rmst <- sd(group_data[[mytime]], na.rm = TRUE) / sqrt(nrow(group_data))
-
+                            if (is.na(se_rmst) || !is.finite(se_rmst)) {
                                 private$.addHtmlMessage(
                                     type = "warning",
-                                    title = "RMST Standard Error Approximation",
-                                    message = sprintf('RMST standard error calculation used fallback method for group "%s" due to insufficient variance information. Results should be interpreted cautiously.', as.character(group))
+                                    title = "RMST standard error unavailable",
+                                    message = sprintf('The restricted mean survival time for group "%s" could not be given a standard error (too few events). The point estimate is shown without a confidence interval.', as.character(group))
                                 )
+                                se_rmst <- NA_real_
                             }
 
                             # Calculate confidence intervals
@@ -3596,16 +3690,77 @@ survivalcontClass <- if (requireNamespace("jmvcore")) {
             # Stratified Cox Regression ----
             ,
             .stratifiedCox = function(results, cutoffdata = NULL) {
-                if (!self$options$stratified_cox || is.null(self$options$strata_variable)) {
+                # Previously a stub: it was never called from anywhere, and even
+                # if it had been it only appended a note telling the user to go
+                # and use a different analysis. Both options (stratified_cox,
+                # strata_variable) were therefore inert, while the
+                # PH-violation warning actively recommended them.
+                if (!self$options$stratified_cox) return()
+
+                tbl <- self$results$stratifiedCoxTable
+                tbl$deleteRows()
+
+                strata_var <- self$options$strata_variable
+                if (is.null(strata_var) || length(strata_var) == 0) {
+                    tbl$setNote("novar", "Select a stratification variable to fit a stratified Cox model.")
                     return()
                 }
 
-                # This would require additional implementation
-                # For now, add note that this feature is available in the main survival function
-                self$results$coxSummary$setContent(c(
-                    self$results$coxSummary$content,
-                    "\nNote: Stratified Cox regression is available in the main Survival Analysis function."
-                ))
+                mydata <- if (!is.null(cutoffdata)) cutoffdata else results$cleanData
+                mytime    <- results$name1time
+                myoutcome <- results$analysis_outcome
+                if (is.null(myoutcome)) myoutcome <- results$name2outcome
+
+                # The stratification variable is not carried through .cleandata(),
+                # so pull it from the source frame and align by row name.
+                labelled <- private$.getData()
+                sv <- names(labelled$all_labels)[labelled$all_labels == strata_var]
+                if (length(sv) == 0 || !sv[1] %in% names(labelled$mydata_labelled)) {
+                    tbl$setNote("missing", "The stratification variable could not be located in the data.")
+                    return()
+                }
+                src <- labelled$mydata_labelled
+                mydata[[".strata"]] <- src[[sv[1]]][match(rownames(mydata), src$row_names)]
+                mydata <- mydata[!is.na(mydata[[".strata"]]), , drop = FALSE]
+                mydata[[".strata"]] <- droplevels(as.factor(mydata[[".strata"]]))
+
+                if (nlevels(mydata[[".strata"]]) < 2) {
+                    tbl$setNote("onelevel", "The stratification variable has fewer than two levels in the analysed rows.")
+                    return()
+                }
+
+                contexpl <- results$name4contexpl
+                if (is.null(contexpl)) contexpl <- results$name3contexpl
+
+                fit <- tryCatch({
+                    fml <- .asSurvivalFormula(paste0(
+                        "survival::Surv(", .escapeVariableNames(mytime), ", ",
+                        .escapeVariableNames(myoutcome), ") ~ ",
+                        .escapeVariableNames(contexpl), " + strata(.strata)"))
+                    survival::coxph(fml, data = mydata)
+                }, error = function(e) e)
+
+                if (inherits(fit, "error")) {
+                    tbl$setNote("err", paste("Stratified Cox model could not be fitted:", conditionMessage(fit)))
+                    return()
+                }
+
+                sm <- summary(fit)$coefficients
+                ci <- summary(fit)$conf.int
+                for (i in seq_len(nrow(sm))) {
+                    tbl$addRow(rowKey = i, values = list(
+                        term     = rownames(sm)[i],
+                        hr       = unname(sm[i, "exp(coef)"]),
+                        ci_lower = unname(ci[i, "lower .95"]),
+                        ci_upper = unname(ci[i, "upper .95"]),
+                        pvalue   = unname(sm[i, ncol(sm)])
+                    ))
+                }
+
+                tbl$setNote("method", paste0(
+                    "Baseline hazard allowed to differ across the ", nlevels(mydata[[".strata"]]),
+                    " levels of '", strata_var, "'. Stratification removes the proportional-hazards ",
+                    "assumption for that variable, so no hazard ratio is estimated for it."))
             }
 
             # Log-Log Plot Function ----
@@ -3813,12 +3968,12 @@ survivalcontClass <- if (requireNamespace("jmvcore")) {
                             <tr style="background-color: #fffbf0;">
                                 <td style="padding: 8px; border: 1px solid #ffc107;"><strong>HR > 1.0</strong></td>
                                 <td style="padding: 8px; border: 1px solid #ffc107;">Increased risk</td>
-                                <td style="padding: 8px; border: 1px solid #ffc107;">HR = 1.05: 5% higher risk per unit</td>
+                                <td style="padding: 8px; border: 1px solid #ffc107;">HR = 1.05: 5% higher hazard per unit</td>
                             </tr>
                             <tr>
                                 <td style="padding: 8px; border: 1px solid #ffc107;"><strong>HR < 1.0</strong></td>
                                 <td style="padding: 8px; border: 1px solid #ffc107;">Decreased risk (protective)</td>
-                                <td style="padding: 8px; border: 1px solid #ffc107;">HR = 0.95: 5% lower risk per unit</td>
+                                <td style="padding: 8px; border: 1px solid #ffc107;">HR = 0.95: 5% lower hazard per unit</td>
                             </tr>
                         </table>
                     </div>
@@ -3830,8 +3985,8 @@ survivalcontClass <- if (requireNamespace("jmvcore")) {
                             <strong>Example 1: Age and Cancer Survival</strong>
                             <p style="margin: 5px 0;">Age HR = 1.03 (95% CI: 1.01-1.05, p=0.001)</p>
                             <ul style="margin: 5px 0; padding-left: 20px;">
-                                <li><strong>Interpretation:</strong> Each additional year of age increases death risk by 3%</li>
-                                <li><strong>10-year difference:</strong> 1.03^10 = 34% higher risk for 70 vs 60 years old</li>
+                                <li><strong>Interpretation:</strong> Each additional year of age multiplies the hazard by 1.03</li>
+                                <li><strong>10-year difference:</strong> 1.03^10 = 1.34 x the hazard for 70 vs 60 years old - a hazard ratio, not a 34% cumulative-risk difference</li>
                                 <li><strong>Significance:</strong> p<0.05 means this effect is statistically significant</li>
                             </ul>
                         </div>
@@ -3840,8 +3995,8 @@ survivalcontClass <- if (requireNamespace("jmvcore")) {
                             <strong>Example 2: Biomarker Level</strong>
                             <p style="margin: 5px 0;">Protein X HR = 0.98 (95% CI: 0.96-0.99, p=0.02)</p>
                             <ul style="margin: 5px 0; padding-left: 20px;">
-                                <li><strong>Protective factor:</strong> Higher protein X levels reduce death risk by 2% per unit</li>
-                                <li><strong>Range effect:</strong> 20-point increase \u2192 0.98^20 = 33% risk reduction</li>
+                                <li><strong>Protective factor:</strong> Higher protein X levels multiply the hazard by 0.98 per unit</li>
+                                <li><strong>Range effect:</strong> 20-point increase \u2192 0.98^20 = 0.67 x the hazard; absolute benefit depends on baseline risk</li>
                             </ul>
                         </div>
                     </div>
@@ -4080,8 +4235,8 @@ survivalcontClass <- if (requireNamespace("jmvcore")) {
                         <div style="background-color: white; padding: 10px; border-radius: 5px; margin: 10px 0;">
                             <strong> Risk Stratification:</strong>
                             <ul style="margin: 5px 0; padding-left: 20px;">
-                                <li>High group: May need more intensive monitoring/treatment</li>
-                                <li>Low group: Could be suitable for less intensive approaches</li>
+                                <li>High group: higher observed event rate in these data</li>
+                                <li>Low group: lower observed event rate in these data</li>
                                 <li>Consider clinical context, not just statistical significance</li>
                             </ul>
                         </div>

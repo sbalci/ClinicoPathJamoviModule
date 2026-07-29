@@ -6,6 +6,21 @@ jrs:   '1.1'
 
 items:
 
+
+    - name:  eventRecodeInfo
+      title: 'Outcome Recode'
+      type:  Html
+      visible: true
+      clearWith:
+          - outcome
+          - outcomeLevel
+          - multievent
+          - analysistype
+          - dod
+          - dooc
+          - awd
+          - awod
+
     - name:  todo
       title: To Do
       type:  Html
@@ -19,6 +34,11 @@ items:
           - dxdate
           - tint
           - multievent
+          - use_stratify
+          - stratvar
+          - interactions
+          - uselandmark
+          - landmark
           # - use_modelSelection
 
     - name:  errors
@@ -73,6 +93,11 @@ items:
           - dxdate
           - tint
           - multievent
+          - use_stratify
+          - stratvar
+          - interactions
+          - uselandmark
+          - landmark
           # - use_modelSelection
       
 
@@ -90,6 +115,11 @@ items:
           - dxdate
           - tint
           - multievent
+          - use_stratify
+          - stratvar
+          - interactions
+          - uselandmark
+          - landmark
           # - use_modelSelection
 
     - name: interactionExplanation
@@ -199,6 +229,11 @@ items:
           - dxdate
           - tint
           - multievent
+          - use_stratify
+          - stratvar
+          - interactions
+          - uselandmark
+          - landmark
 
     # Statistical Glossary Panel
     - name: glossaryPanel
@@ -526,12 +561,15 @@ items:
           # - use_modelSelection
 
 
-    - name: cox_ph
+    - name: cox_phTable
       title: 'Proportional Hazards Assumption'
-      type:  Preformatted
+      type: Table
+      rows: 0
       visible: (ph_cox)
+      refs: survival
       clearWith:
           - explanatory
+          - contexpl
           - outcome
           - outcomeLevel
           - elapsedtime
@@ -539,12 +577,51 @@ items:
           - dxdate
           - tint
           - multievent
+          - use_stratify
+          - stratvar
+          - interactions
+      columns:
+          - name: term
+            title: 'Term'
+            type: text
+          - name: chisq
+            title: 'Chi-square'
+            type: number
+            format: zto
+          - name: df
+            title: 'df'
+            type: integer
+          - name: p
+            title: 'p'
+            type: number
+            format: zto,pvalue
+
+    # Retained for the failure case only (cox.zph could not be computed) and
+    # hidden otherwise; the numbers themselves now live in cox_phTable above.
+    - name: cox_ph
+      title: 'Proportional Hazards Diagnostics'
+      type:  Preformatted
+      visible: (ph_cox)
+      clearWith:
+          - explanatory
+          - contexpl
+          - outcome
+          - outcomeLevel
+          - elapsedtime
+          - fudate
+          - dxdate
+          - tint
+          - multievent
+          - use_stratify
+          - stratvar
+          - interactions
+          - multievent
           - contexpl
           # - use_modelSelection
 
 
     - name: plot8
-      title: 'Proportional Hazards Assumption'
+      title: 'Proportional Hazards: Schoenfeld Residual Plots'
       type: Image
       width:  600
       height: 450

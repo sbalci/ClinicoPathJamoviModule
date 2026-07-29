@@ -169,6 +169,8 @@ options:
           name: overall
         - title: Cause Specific
           name: cause
+        - title: Disease-Free
+          name: dfs
         - title: Competing Risk
           name: compete
       default: overall

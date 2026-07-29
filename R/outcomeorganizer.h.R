@@ -11,6 +11,7 @@ outcomeorganizerOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6
             recurrence = NULL,
             recurrenceLevel = NULL,
             patientID = NULL,
+            followupTime = NULL,
             analysistype = "os",
             multievent = FALSE,
             dod = NULL,
@@ -39,6 +40,7 @@ outcomeorganizerOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6
             private$..outcome <- jmvcore::OptionVariable$new(
                 "outcome",
                 outcome,
+                default=NULL,
                 suggested=list(
                     "ordinal",
                     "nominal",
@@ -53,6 +55,7 @@ outcomeorganizerOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6
             private$..recurrence <- jmvcore::OptionVariable$new(
                 "recurrence",
                 recurrence,
+                default=NULL,
                 suggested=list(
                     "ordinal",
                     "nominal"),
@@ -64,7 +67,16 @@ outcomeorganizerOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6
                 variable="(recurrence)")
             private$..patientID <- jmvcore::OptionVariable$new(
                 "patientID",
-                patientID)
+                patientID,
+                default=NULL)
+            private$..followupTime <- jmvcore::OptionVariable$new(
+                "followupTime",
+                followupTime,
+                suggested=list(
+                    "continuous"),
+                permitted=list(
+                    "numeric"),
+                default=NULL)
             private$..analysistype <- jmvcore::OptionList$new(
                 "analysistype",
                 analysistype,
@@ -116,17 +128,20 @@ outcomeorganizerOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6
                 default=FALSE)
             private$..intervalStart <- jmvcore::OptionVariable$new(
                 "intervalStart",
-                intervalStart)
+                intervalStart,
+                default=NULL)
             private$..intervalEnd <- jmvcore::OptionVariable$new(
                 "intervalEnd",
-                intervalEnd)
+                intervalEnd,
+                default=NULL)
             private$..adminCensoring <- jmvcore::OptionBool$new(
                 "adminCensoring",
                 adminCensoring,
                 default=FALSE)
             private$..adminDate <- jmvcore::OptionVariable$new(
                 "adminDate",
-                adminDate)
+                adminDate,
+                default=NULL)
             private$..outputTable <- jmvcore::OptionBool$new(
                 "outputTable",
                 outputTable,
@@ -155,6 +170,7 @@ outcomeorganizerOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6
             self$.addOption(private$..recurrence)
             self$.addOption(private$..recurrenceLevel)
             self$.addOption(private$..patientID)
+            self$.addOption(private$..followupTime)
             self$.addOption(private$..analysistype)
             self$.addOption(private$..multievent)
             self$.addOption(private$..dod)
@@ -181,6 +197,7 @@ outcomeorganizerOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6
         recurrence = function() private$..recurrence$value,
         recurrenceLevel = function() private$..recurrenceLevel$value,
         patientID = function() private$..patientID$value,
+        followupTime = function() private$..followupTime$value,
         analysistype = function() private$..analysistype$value,
         multievent = function() private$..multievent$value,
         dod = function() private$..dod$value,
@@ -206,6 +223,7 @@ outcomeorganizerOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6
         ..recurrence = NA,
         ..recurrenceLevel = NA,
         ..patientID = NA,
+        ..followupTime = NA,
         ..analysistype = NA,
         ..multievent = NA,
         ..dod = NA,
@@ -231,6 +249,7 @@ outcomeorganizerResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6
     "outcomeorganizerResults",
     inherit = jmvcore::Group,
     active = list(
+        eventRecodeInfo = function() private$.items[["eventRecodeInfo"]],
         todo = function() private$.items[["todo"]],
         errors = function() private$.items[["errors"]],
         strongWarnings = function() private$.items[["strongWarnings"]],
@@ -261,6 +280,20 @@ outcomeorganizerResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6
                     "janitor",
                     "labelled",
                     "glue"))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="eventRecodeInfo",
+                title="Outcome Recode",
+                visible=TRUE,
+                clearWith=list(
+                    "outcome",
+                    "outcomeLevel",
+                    "multievent",
+                    "analysistype",
+                    "dod",
+                    "dooc",
+                    "awd",
+                    "awod")))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="todo",
@@ -449,7 +482,9 @@ outcomeorganizerResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6
                     "useHierarchy",
                     "eventPriority",
                     "intervalCensoring",
-                    "adminCensoring")))}))
+                    "adminCensoring",
+                    "adminDate",
+                    "followupTime")))}))
 
 outcomeorganizerBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
     "outcomeorganizerBase",
@@ -488,6 +523,11 @@ outcomeorganizerBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
 #'   occurred.
 #' @param patientID Patient identifier for handling multiple records or
 #'   applying event hierarchies.
+#' @param followupTime Optional follow-up time. Supplying it lets
+#'   administrative censoring actually truncate follow-up and reset event
+#'   status, and lets the event hierarchy keep the earliest priority event per
+#'   patient instead of writing a later one back onto earlier records. Leave
+#'   empty to keep the previous behaviour.
 #' @param analysistype The type of survival analysis to prepare the outcome
 #'   for.
 #' @param multievent If true, allows for multiple event types (e.g., death
@@ -522,6 +562,7 @@ outcomeorganizerBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
 #' @param showGlossary Display definitions of survival analysis terms.
 #' @return A results object containing:
 #' \tabular{llllll}{
+#'   \code{results$eventRecodeInfo} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$todo} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$errors} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$strongWarnings} \tab \tab \tab \tab \tab a html \cr
@@ -545,11 +586,12 @@ outcomeorganizerBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
 #' @export
 outcomeorganizer <- function(
     data,
-    outcome,
+    outcome = NULL,
     outcomeLevel,
-    recurrence,
+    recurrence = NULL,
     recurrenceLevel,
-    patientID,
+    patientID = NULL,
+    followupTime = NULL,
     analysistype = "os",
     multievent = FALSE,
     dod,
@@ -559,10 +601,10 @@ outcomeorganizer <- function(
     useHierarchy = FALSE,
     eventPriority = 1,
     intervalCensoring = FALSE,
-    intervalStart,
-    intervalEnd,
+    intervalStart = NULL,
+    intervalEnd = NULL,
     adminCensoring = FALSE,
-    adminDate,
+    adminDate = NULL,
     outputTable = FALSE,
     diagnostics = FALSE,
     visualization = FALSE,
@@ -575,6 +617,7 @@ outcomeorganizer <- function(
     if ( ! missing(outcome)) outcome <- jmvcore::resolveQuo(jmvcore::enquo(outcome))
     if ( ! missing(recurrence)) recurrence <- jmvcore::resolveQuo(jmvcore::enquo(recurrence))
     if ( ! missing(patientID)) patientID <- jmvcore::resolveQuo(jmvcore::enquo(patientID))
+    if ( ! missing(followupTime)) followupTime <- jmvcore::resolveQuo(jmvcore::enquo(followupTime))
     if ( ! missing(intervalStart)) intervalStart <- jmvcore::resolveQuo(jmvcore::enquo(intervalStart))
     if ( ! missing(intervalEnd)) intervalEnd <- jmvcore::resolveQuo(jmvcore::enquo(intervalEnd))
     if ( ! missing(adminDate)) adminDate <- jmvcore::resolveQuo(jmvcore::enquo(adminDate))
@@ -584,6 +627,7 @@ outcomeorganizer <- function(
             `if`( ! missing(outcome), outcome, NULL),
             `if`( ! missing(recurrence), recurrence, NULL),
             `if`( ! missing(patientID), patientID, NULL),
+            `if`( ! missing(followupTime), followupTime, NULL),
             `if`( ! missing(intervalStart), intervalStart, NULL),
             `if`( ! missing(intervalEnd), intervalEnd, NULL),
             `if`( ! missing(adminDate), adminDate, NULL))
@@ -596,6 +640,7 @@ outcomeorganizer <- function(
         recurrence = recurrence,
         recurrenceLevel = recurrenceLevel,
         patientID = patientID,
+        followupTime = followupTime,
         analysistype = analysistype,
         multievent = multievent,
         dod = dod,

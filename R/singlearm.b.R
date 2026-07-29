@@ -70,6 +70,9 @@ singlearmClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
     # Constants and cache
     private = list(
         .cache = new.env(parent = emptyenv()),
+        # Result of .defineEventIndicator(), kept so .run() can render the
+        # recode disclosure without redoing the work.
+        .eventRecode = NULL,
         .errorMessages = character(0),
         .warningMessages = character(0),
         .infoMessages = character(0),
@@ -356,9 +359,25 @@ singlearmClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
 
         # Basic data quality metrics
         n_total <- nrow(mydata)
-        # FIX: Count events properly - any non-zero value is an event (handles competing risk with code 2)
-        n_events <- sum(mydata[[myoutcome]] >= 1, na.rm = TRUE)
-        n_censored <- n_total - n_events
+        # Count the EVENT OF INTEREST only.
+        #
+        # `>= 1` swept competing events (code 2) in with target events (code 1),
+        # so a cohort with 2 disease deaths and 88 deaths from other causes read
+        # as 90 events and the "fewer than 10 events" warning never fired -- on a
+        # dataset with far too few events to support any inference about the
+        # event of interest. For competing risks, a competing event is not an
+        # event of interest; it is a distinct terminal state.
+        n_events    <- sum(mydata[[myoutcome]] == 1, na.rm = TRUE)
+        n_competing <- sum(mydata[[myoutcome]] == 2, na.rm = TRUE)
+        n_censored  <- n_total - n_events - n_competing
+
+        if (n_competing > 0) {
+            private$.addInfo(sprintf(
+                paste0("%d competing event(s) are present. Counts and the minimum-event ",
+                       "check below refer to the event of interest only; competing events ",
+                       "are a separate terminal state, not events."),
+                n_competing))
+        }
         
         # Time-related quality checks
         time_vals <- mydata[[mytime]]
@@ -709,119 +728,37 @@ singlearmClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
         myoutcome_labelled <- labelled_data$myoutcome_labelled
 
 
-        contin <- c("integer", "numeric", "double")
+        # Delegated to the shared coder in survival_utils.R so that all five
+        # analyses that build an event indicator agree on validation and on what
+        # happens to unselected levels and to NA.
+        res <- .defineEventIndicator(
+            outcome      = mydata[[myoutcome_labelled]],
+            outcomeLevel = self$options$outcomeLevel,
+            multievent   = self$options$multievent,
+            analysistype = self$options$analysistype,
+            dod          = self$options$dod,
+            dooc         = self$options$dooc,
+            awd          = self$options$awd,
+            awod         = self$options$awod,
+            outcome_name = self$options$outcome
+        )
 
-        outcomeLevel <- self$options$outcomeLevel
-        multievent <- self$options$multievent
-
-        outcome1 <- mydata[[myoutcome_labelled]]
-
-        if (!multievent) {
-          if (inherits(outcome1, contin)) {
-            unique_vals <- unique(outcome1[!is.na(outcome1)])
-            if (!((length(unique_vals) == 2) && (sum(unique_vals) == 1))) {
-              private$.addError(sprintf('Outcome variable must contain only 0 (censored) and 1 (event). Found: %s. Please recode your outcome or convert to factor and select event level.', paste(sort(unique_vals), collapse = ', ')))
-              return(NULL)
-            }
-
-            mydata[["myoutcome"]] <- mydata[[myoutcome_labelled]]
-            # mydata[[self$options$outcome]]
-
-          } else if (inherits(outcome1, "factor")) {
-
-            if (is.null(outcomeLevel)) {
-                private$.addError('Event Level not selected. Please select the level representing the event (e.g., "Dead", "Recurrence") from the Event Level dropdown.')
-                return(NULL)
-            }
-            
-            mydata[["myoutcome"]] <-
-              ifelse(
-                test = outcome1 == outcomeLevel,
-                yes = 1,
-                no = 0
-              )
-
-          } else {
-            private$.addError('Invalid outcome variable type. Outcome must be either: (1) numeric with values 0/1, or (2) factor with event level selected. Please verify outcome variable format.')
-            return(NULL)
-          }
-
-        } else if (multievent) {
-          analysistype <- self$options$analysistype
-
-          dod <- self$options$dod
-          dooc <- self$options$dooc
-          awd <- self$options$awd
-          awod <- self$options$awod
-
-          if (analysistype == 'overall') {
-            # Overall ----
-            # (Alive) <=> (Dead of Disease & Dead of Other Causes)
-
-
-            mydata[["myoutcome"]] <- NA_integer_
-
-            mydata[["myoutcome"]][outcome1 == awd] <- 0
-            mydata[["myoutcome"]][outcome1 == awod] <- 0
-            mydata[["myoutcome"]][outcome1 == dod] <- 1
-            mydata[["myoutcome"]][outcome1 == dooc] <- 1
-
-
-
-          } else if (analysistype == 'cause') {
-            # Cause Specific ----
-            # (Alive & Dead of Other Causes) <=> (Dead of Disease)
-
-
-            mydata[["myoutcome"]] <- NA_integer_
-
-            mydata[["myoutcome"]][outcome1 == awd] <- 0
-            mydata[["myoutcome"]][outcome1 == awod] <- 0
-            mydata[["myoutcome"]][outcome1 == dod] <- 1
-            mydata[["myoutcome"]][outcome1 == dooc] <- 0
-
-          } else if (analysistype == 'compete') {
-            # Competing Risks ----
-            # Alive <=> Dead of Disease accounting for Dead of Other Causes
-
-            # https://www.emilyzabor.com/tutorials/survival_analysis_in_r_tutorial.html#part_3:_competing_risks
-
-
-            mydata[["myoutcome"]] <- NA_integer_
-
-            mydata[["myoutcome"]][outcome1 == awd] <- 0
-            mydata[["myoutcome"]][outcome1 == awod] <- 0
-            mydata[["myoutcome"]][outcome1 == dod] <- 1
-            mydata[["myoutcome"]][outcome1 == dooc] <- 2
-
-          }
-
-          unmatched_levels <- setdiff(unique(outcome1[!is.na(outcome1)]),
-                                      c(awd, awod, dod, dooc))
-          if (length(unmatched_levels) > 0) {
-            private$.addError(sprintf('Outcome contains unmapped levels: %s. For multi-event analysis, all levels must be assigned to one category: Dead of Disease, Dead of Other, Alive with Disease, or Alive without Disease.', paste(unmatched_levels, collapse = ', ')))
-            return(NULL)
-          }
-
-        }
-
-        # Validate recoded outcome values
-        outcome_values <- mydata[["myoutcome"]]
-        invalid_values <- outcome_values[!is.na(outcome_values) & !outcome_values %in% c(0, 1, 2)]
-
-        if (length(invalid_values) > 0) {
-          unique_invalid <- unique(invalid_values)
-          private$.addError(sprintf('Outcome variable contains unexpected values: %s. Expected values are 0 (censored), 1 (event), or 2 (competing event). Please verify your outcome variable is correctly coded or select the appropriate event level.',
-                                   paste(unique_invalid, collapse = ', ')))
+        if (!is.null(res$error)) {
+          private$.addError(res$error)
           return(NULL)
         }
 
-        # Check for missing values in outcome
-        if (any(is.na(outcome_values))) {
-          n_missing <- sum(is.na(outcome_values))
+        private$.eventRecode <- res
+        mydata[["myoutcome"]] <- res$status
+
+        if (res$n_missing > 0) {
           private$.addWarning(sprintf('Outcome variable contains %d missing value%s. These observations will be excluded from the analysis.',
-                                     n_missing, ifelse(n_missing == 1, '', 's')))
+                                      res$n_missing, ifelse(res$n_missing == 1, '', 's')))
         }
+
+        # (The old 0/1/2 range check and second missing-value warning lived here.
+        # .defineEventIndicator() now guarantees the range, and warning twice in
+        # one run is exactly how notices end up duplicated across run cycles.)
 
         df_outcome <- mydata %>% jmvcore::select(c("row_names", "myoutcome"))
 
@@ -1029,6 +966,14 @@ singlearmClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
         ## Get Clean Data ----
         results <- private$.cleandata()
 
+        # Always disclose how the outcome was recoded. A silent recode is a
+        # clinical-safety hazard: the reader of a survival curve cannot otherwise
+        # see which levels were collapsed into "censored", nor which estimand
+        # the probability-scale outputs actually correspond to.
+        if (!is.null(private$.eventRecode))
+            self$results$eventRecodeInfo$setContent(
+                .describeEventIndicator(private$.eventRecode, self$options$outcome))
+
         # Check if cleandata failed (returned NULL due to validation errors)
         if (is.null(results)) {
           return()
@@ -1043,9 +988,13 @@ singlearmClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
 
         ## Minimum Event Count Guard ----
         # Prevent analysis with critically low event counts (< 3 events = unreliable)
+        # Warn, but still compute. This used to return() and leave the whole
+        # analysis blank below 3 events; a KM curve, median and counts are
+        # legitimate descriptive output for a small series.
         if (data_quality$n_events < 3) {
-          private$.addError(sprintf('Insufficient events (%d) for survival analysis. At least 3 events are required for reliable estimates. Current data: %d events, %d censored. Recommendations: (1) Extend follow-up period; (2) Combine with additional datasets; (3) Use descriptive statistics instead of formal survival analysis.', data_quality$n_events, data_quality$n_events, data_quality$n_censored))
-          return()
+          private$.addWarning(sprintf(
+            'Only %d event(s) observed (%d censored). Descriptive results are shown, but estimates from this many events are highly unstable with very wide confidence intervals. Do not use them for modelling or inference.',
+            data_quality$n_events, data_quality$n_censored))
         }
 
         ## Data Quality Notices ----
@@ -1215,50 +1164,22 @@ singlearmClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             median_time <- cif_times[median_idx]
           }
 
-          # Calculate confidence intervals for median using variance estimates from cmprsk
-          cif_var <- cif_1$var
+          # No confidence interval is reported for the competing-risk median.
+          #
+          # What used to be here was not a confidence interval. It transformed the
+          # POINTWISE variance of the CIF at the median to the cloglog scale,
+          # inverted those probability bounds against the POINT ESTIMATE of the
+          # CIF to read off two times, and -- when cmprsk returned no variance,
+          # or when the resulting bounds fell on the wrong side of the estimate --
+          # substituted median * 0.8 and median * 1.2. Those +/-20% numbers have
+          # no inferential basis whatsoever and were printed as a 95% CI.
+          #
+          # A valid interval for a quantile is obtained by inverting a confidence
+          # BAND for the CIF (the set of times whose band contains 0.5), or by
+          # bootstrapping. Until one of those is implemented, reporting nothing is
+          # the honest option: survfit itself returns NA rather than guessing.
           median_lower <- NA
           median_upper <- NA
-
-          # Calculate CI if median is reached and variance data available
-          if (!is.na(median_time) && length(cif_var) >= median_idx && !is.na(cif_var[median_idx])) {
-            # Standard error at the median CIF (0.5)
-            se_at_median <- sqrt(cif_var[median_idx])
-
-            # Use complementary log-log transformation for better CI coverage
-            # cloglog(p) = log(-log(1-p))
-            cloglog_0.5 <- log(-log(1 - 0.5))
-            se_cloglog <- se_at_median / ((1 - 0.5) * abs(log(1 - 0.5)))
-
-            # Calculate CI on cloglog scale
-            lower_cloglog <- cloglog_0.5 - 1.96 * se_cloglog
-            upper_cloglog <- cloglog_0.5 + 1.96 * se_cloglog
-
-            # Back-transform to probability scale
-            lower_cif <- 1 - exp(-exp(lower_cloglog))
-            upper_cif <- 1 - exp(-exp(upper_cloglog))
-
-            # Find corresponding times where CIF crosses these boundaries
-            # Lower time: when CIF first reaches lower_cif
-            lower_idx <- which(cif_est >= lower_cif)[1]
-            if (!is.na(lower_idx)) median_lower <- cif_times[lower_idx]
-
-            # Upper time: when CIF first reaches upper_cif
-            upper_idx <- which(cif_est >= upper_cif)[1]
-            if (!is.na(upper_idx)) median_upper <- cif_times[upper_idx]
-
-            # Sanity check: median should be between lower and upper
-            if (!is.na(median_lower) && median_lower > median_time) {
-              median_lower <- median_time * 0.8  # Fallback
-            }
-            if (!is.na(median_upper) && median_upper < median_time) {
-              median_upper <- median_time * 1.2  # Fallback
-            }
-          } else if (!is.na(median_time)) {
-            # Fallback: Use conservative +/-20% if variance not available
-            median_lower <- median_time * 0.8
-            median_upper <- median_time * 1.2
-          }
 
           # Create results table in same format as KM
           n_total <- nrow(mydata)
@@ -1427,7 +1348,7 @@ singlearmClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                         <ul style="margin: 5px 0; padding-left: 20px;">
                             <li>At 24 months: 50% of patients have experienced the event</li>
                             <li>At 24 months: 50% of patients are still event-free</li>
-                            <li>Half the patients will survive longer than 24 months</li>
+                            <li>Half the patients remained event-free beyond 24 months</li>
                         </ul>
                     </div>
                 </div>
@@ -1466,8 +1387,8 @@ singlearmClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                         <p style="margin: 5px 0;">"The median survival is 36 months (95% CI: 28-45 months)"</p>
                         <ul style="margin: 5px 0; padding-left: 20px;">
                             <li>Half of patients survived longer than 3 years</li>
-                            <li>The true median is likely between 28-45 months</li>
-                            <li>This provides concrete information for patient counseling</li>
+                            <li>Medians from 28 to 45 months are compatible with these data</li>
+                            <li>This describes the observed cohort; individual prognosis depends on factors not in this model</li>
                         </ul>
                     </div>
                     
@@ -1475,7 +1396,7 @@ singlearmClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                         <strong> When Median is "Not Reached" (NR):</strong>
                         <p style="margin: 5px 0;">More than 50% of patients remain event-free</p>
                         <ul style="margin: 5px 0; padding-left: 20px;">
-                            <li>Excellent prognosis - most patients doing well</li>
+                            <li>Fewer than half the patients had the event during the observed follow-up. Short follow-up or heavy censoring produces the same result, so read this together with the number at risk.</li>
                             <li>Need longer follow-up to determine median</li>
                             <li>Can still report survival rates at specific time points</li>
                         </ul>
@@ -1680,8 +1601,8 @@ singlearmClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                         <strong> Example Interpretation:</strong>
                         <p style="margin: 5px 0;">If 5-year survival = 75% (95% CI: 68-82%)</p>
                         <ul style="margin: 5px 0; padding-left: 20px;">
-                            <li>75% of patients are expected to be alive at 5 years</li>
-                            <li>25% are expected to have experienced the event by 5 years</li>
+                            <li>an estimated 75% remained event-free at 5 years</li>
+                            <li>an estimated 25% had the event by 5 years</li>
                             <li>The true rate is likely between 68-82%</li>
                         </ul>
                     </div>
@@ -1728,13 +1649,13 @@ singlearmClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                     
                     <div style="background-color: white; padding: 10px; border-radius: 5px; margin: 10px 0;">
                         <strong> Patient Counseling:</strong>
-                        <p style="margin: 5px 0;">"Based on our data, about 8 out of 10 patients with your condition are doing well at 3 years"</p>
+                        <p style="margin: 5px 0;">"In this cohort, about 8 out of 10 patients were event-free at 3 years"</p>
                     </div>
                     
                     <div style="background-color: #f3e5f5; padding: 10px; border-radius: 5px; margin: 10px 0;">
                         <strong> Treatment Planning:</strong>
                         <ul style="margin: 5px 0; padding-left: 20px;">
-                            <li>High early survival rates \u2192 consider less intensive follow-up</li>
+                            <li>Survival estimates describe this cohort; they do not by themselves indicate a follow-up schedule</li>
                             <li>Declining rates over time \u2192 focus on long-term monitoring</li>
                             <li>Wide confidence intervals \u2192 need more data or longer follow-up</li>
                         </ul>
@@ -2050,55 +1971,49 @@ singlearmClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
           # Calculate Nelson-Aalen estimator for better hazard estimates
           nelsen_aalen <- survival::survfit(surv_obj ~ 1, data = mydata, type = "fh")
           
-          # Get time points and cumulative hazard
-          time_points <- nelsen_aalen$time
-          cum_hazard <- -log(nelsen_aalen$surv)
-          
-          # Calculate instantaneous hazard (approximate)
-          if (length(time_points) > 1) {
-            # Calculate differences for hazard rate
-            time_diff <- diff(c(0, time_points))
-            hazard_diff <- diff(c(0, cum_hazard))
-            hazard_rate <- hazard_diff / time_diff
-            
-            # Remove infinite/NaN values
-            valid_indices <- is.finite(hazard_rate) & hazard_rate > 0
-            time_points <- time_points[valid_indices]
-            hazard_rate <- hazard_rate[valid_indices]
-            
-            # Calculate confidence intervals using log-hazard transformation
-            # This ensures CIs are always positive and provides better coverage for rate parameters
-            tryCatch({
-              surv_summary <- summary(nelsen_aalen)
-              if (length(surv_summary$n.risk) >= length(valid_indices)) {
-                n_risk <- surv_summary$n.risk[valid_indices]
-                n_events_in_interval <- diff(c(0, surv_summary$n.event[valid_indices]))
+          # Piecewise occurrence/exposure hazard rate.
+          #
+          # What this replaces was not a valid interval estimate. It
+          # finite-differenced the cumulative hazard, then differenced
+          # `n.event` as if that were a cumulative event count -- in a survfit
+          # object n.event is the number of events AT each time, so
+          # diff(n.event) is meaningless. Its fallbacks were worse: an SE of
+          # sqrt(hazard / number_of_timepoints), and failing that a flat
+          # 50%-150% band, both printed as 95% confidence intervals.
+          #
+          # The estimator below is the standard one for a piecewise-constant
+          # hazard: in each interval the rate is (events in the interval) /
+          # (person-time at risk in the interval), with a Poisson interval on
+          # the log scale, SE(log rate) = 1/sqrt(events). Intervals containing
+          # no events have an estimated rate of 0 and no defined interval, so
+          # they are omitted rather than given a fabricated one.
+          fit_times <- nelsen_aalen$time
+          d_i       <- nelsen_aalen$n.event      # events AT each time, not cumulative
+          n_risk    <- nelsen_aalen$n.risk
 
-                # Use log-hazard transformation for asymmetric, always-positive CI
-                # SE(log(hazard)) = 1/sqrt(n_events)
-                se_log_hazard <- 1 / sqrt(pmax(1, n_events_in_interval))
-                log_hazard <- log(hazard_rate)
+          if (length(fit_times) > 1) {
+            dt          <- diff(c(0, fit_times))            # interval widths
+            person_time <- n_risk * dt                      # exposure in each interval
+            hazard_rate <- ifelse(person_time > 0, d_i / person_time, NA_real_)
 
-                # Calculate CI on log scale, then back-transform
-                log_lower <- log_hazard - 1.96 * se_log_hazard
-                log_upper <- log_hazard + 1.96 * se_log_hazard
+            # Only intervals that actually contain events support a rate and an
+            # interval; the rest are estimated as zero and carry no CI.
+            keep <- is.finite(hazard_rate) & d_i > 0 & person_time > 0
+            time_points <- fit_times[keep]
+            hazard_rate <- hazard_rate[keep]
+            events_i    <- d_i[keep]
 
-                hazard_lower <- exp(log_lower)
-                hazard_upper <- exp(log_upper)
+            se_log       <- 1 / sqrt(events_i)
+            hazard_lower <- hazard_rate * exp(-1.96 * se_log)
+            hazard_upper <- hazard_rate * exp( 1.96 * se_log)
 
-              } else {
-                # Improved fallback using Poisson variance assumption
-                # Var(hazard) ~ hazard / person-time
-                se_hazard <- sqrt(hazard_rate / length(valid_indices))
-                hazard_lower <- pmax(0, hazard_rate - 1.96 * se_hazard)
-                hazard_upper <- hazard_rate + 1.96 * se_hazard
-              }
-            }, error = function(e) {
-              # Conservative fallback with wider intervals (+/-50% instead of +/-20%)
-              hazard_lower <- hazard_rate * 0.5
-              hazard_upper <- hazard_rate * 1.5
-            })
-            
+            self$results$baselineHazardTable$setNote(
+              "method",
+              paste0("Piecewise hazard rate: events divided by person-time at risk in each ",
+                     "interval between consecutive event times. 95% CI from the Poisson ",
+                     "log-rate approximation, rate x exp(+/-1.96/sqrt(events)). Intervals ",
+                     "with no events are omitted."))
+
             # Populate baseline hazard table
             for (i in seq_along(time_points)) {
               self$results$baselineHazardTable$addRow(rowKey = i, values = list(
@@ -2112,23 +2027,63 @@ singlearmClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             # Generate summary if requested
             if (self$options$showSummaries) {
               time_unit <- self$options$timetypeoutput
-              mean_hazard <- round(mean(hazard_rate), 4)
-              median_hazard <- round(stats::median(hazard_rate), 4)
-              max_hazard <- round(max(hazard_rate), 4)
-              max_hazard_time <- round(time_points[which.max(hazard_rate)], 1)
-              
-              # Test for constant hazard (exponential assumption)
-              # Simple test: coefficient of variation
-              cv_hazard <- round(stats::sd(hazard_rate) / mean(hazard_rate), 3)
+
+              # These summaries must be computed on the exposure-weighted scale.
+              #
+              # `hazard_rate` is a per-interval rate d_i / (n_risk * dt_i). Taking
+              # an unweighted mean over intervals weights a one-day gap between
+              # two deaths exactly as heavily as a year of event-free follow-up,
+              # and because dt_i shrinks toward zero, 1/dt_i has no finite
+              # expectation -- so mean, max and SD were all driven by whichever
+              # interval happened to be narrowest, not by the hazard. On
+              # constant-hazard data the reported mean could be off by more than
+              # an order of magnitude. The pooled occurrence/exposure rate
+              # (total events / total person-time) is the right estimator, and it
+              # must run over ALL intervals, including the event-free ones that
+              # the display filter drops.
+              tot_events <- sum(d_i, na.rm = TRUE)
+              tot_ptime  <- sum(person_time, na.rm = TRUE)
+              mean_hazard <- round(if (tot_ptime > 0) tot_events / tot_ptime else NA_real_, 4)
+
+              # Peak and variability are read off bins holding enough events to
+              # give a stable rate, rather than off single-event intervals.
+              n_bins <- max(1L, min(10L, floor(tot_events / 10)))
+              if (n_bins >= 2 && tot_events > 0) {
+                cum_ev  <- cumsum(d_i)
+                bin     <- cut(cum_ev, breaks = seq(0, tot_events, length.out = n_bins + 1),
+                               include.lowest = TRUE, labels = FALSE)
+                ev_b    <- tapply(d_i, bin, sum)
+                pt_b    <- tapply(person_time, bin, sum)
+                t_b     <- tapply(fit_times, bin, max)
+                ok      <- is.finite(ev_b) & is.finite(pt_b) & pt_b > 0
+                rates_b <- ev_b[ok] / pt_b[ok]
+                t_b     <- t_b[ok]
+              } else {
+                rates_b <- mean_hazard
+                t_b     <- max(fit_times, na.rm = TRUE)
+              }
+
+              median_hazard <- round(stats::median(rates_b), 4)
+              max_hazard <- round(max(rates_b), 4)
+              max_hazard_time <- round(t_b[which.max(rates_b)], 1)
+
+              # Test for constant hazard (exponential assumption): coefficient of
+              # variation across the binned rates.
+              cv_hazard <- round(
+                if (length(rates_b) > 1 && mean(rates_b) > 0)
+                  stats::sd(rates_b) / mean(rates_b) else 0, 3)
               constant_hazard_assessment <- ifelse(cv_hazard < 0.5, 
                 "relatively constant", "highly variable")
               
               summary_html <- glue::glue("
                 <div style='background-color: #fff9e6; border-left: 4px solid #ffc107; padding: 12px; margin-bottom: 15px;'>
                   <p style='margin: 5px 0;'><strong> Methodological Note:</strong>
-                  Hazard rates are estimated using finite-difference approximations of the cumulative hazard.
-                  Confidence intervals are approximate and based on simplified variance estimates.
-                  For rigorous hazard function analysis, consider using specialized survival analysis packages.</p>
+                  Hazard rates are estimated as events divided by person-time at risk within each
+                  interval between consecutive event times, with 95% confidence intervals from the
+                  Poisson log-rate approximation. The mean hazard reported below is the pooled rate
+                  (total events / total person-time); the peak and the coefficient of variation are
+                  computed over bins holding enough events to give a stable rate, because a single
+                  short interval between two deaths does not estimate a hazard reliably.</p>
                 </div>
                 <h4>Baseline Hazard Analysis Summary</h4>
                 <p><strong>Hazard Function Characteristics:</strong></p>
@@ -2378,6 +2333,12 @@ singlearmClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
       # https://rpkgs.datanovia.com/survminer/survminer_cheatsheet.pdf
       ,
       .plot2 = function(image2, ggtheme, theme, ...) {
+        # Competing-risk mode codes the outcome 0/1/2. survival::Surv() does
+        # not reject that -- it warns and remaps 1 to censored, 2 to event and
+        # 0 to NA, so this plot would render inverted with no visible warning.
+        if (self$options$multievent && self$options$analysistype == "compete")
+          return()
+
         ce <- self$options$ce
 
         if (!ce)
@@ -2448,6 +2409,12 @@ singlearmClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
       # Cumulative Hazard ----
       ,
       .plot3 = function(image3, ggtheme, theme, ...) {
+        # Competing-risk mode codes the outcome 0/1/2. survival::Surv() does
+        # not reject that -- it warns and remaps 1 to censored, 2 to event and
+        # 0 to NA, so this plot would render inverted with no visible warning.
+        if (self$options$multievent && self$options$analysistype == "compete")
+          return()
+
         ch <- self$options$ch
 
         if (!ch)
@@ -2517,6 +2484,12 @@ singlearmClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
       # KMunicate Style ----
       ,
       .plot6 = function(image6, ggtheme, theme, ...) {
+        # Competing-risk mode codes the outcome 0/1/2. survival::Surv() does
+        # not reject that -- it warns and remaps 1 to censored, 2 to event and
+        # 0 to NA, so this plot would render inverted with no visible warning.
+        if (self$options$multievent && self$options$analysistype == "compete")
+          return()
+
         kmunicate <- self$options$kmunicate
 
         if (!kmunicate)
@@ -2580,6 +2553,12 @@ singlearmClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
 
       # Baseline Hazard Plot Function ----
       .baselineHazardPlot = function(image, ggtheme, theme, ...) {
+        # Competing-risk mode codes the outcome 0/1/2. survival::Surv() does
+        # not reject that -- it warns and remaps 1 to censored, 2 to event and
+        # 0 to NA, so this plot would render inverted with no visible warning.
+        if (self$options$multievent && self$options$analysistype == "compete")
+          return()
+
         if (!self$options$baseline_hazard)
           return()
 
@@ -2618,10 +2597,19 @@ singlearmClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
           # Calculate instantaneous hazard from cumulative hazard
           if (nrow(basehaz_data) > 1) {
             # Approximate instantaneous hazard as differences
-            basehaz_data$inst_hazard <- c(basehaz_data$hazard[1], diff(basehaz_data$hazard))
-            
-            # Remove negative or zero hazards
-            basehaz_data <- basehaz_data[basehaz_data$inst_hazard > 0, ]
+            # diff(cumulative hazard) is the Nelson-Aalen INCREMENT d_i / n_i --
+            # a dimensionless conditional probability, not a rate. Plotting it
+            # against an axis labelled "Hazard Rate" understates the hazard by a
+            # factor of the interval width, so the curve changed shape whenever
+            # event times bunched up. Dividing by the interval width puts it on
+            # the same events-per-person-time scale as the table.
+            .dt <- c(basehaz_data$time[1], diff(basehaz_data$time))
+            .dh <- c(basehaz_data$hazard[1], diff(basehaz_data$hazard))
+            basehaz_data$inst_hazard <- ifelse(.dt > 0, .dh / .dt, NA_real_)
+
+            # Remove negative, zero or undefined hazards
+            basehaz_data <- basehaz_data[is.finite(basehaz_data$inst_hazard) &
+                                         basehaz_data$inst_hazard > 0, ]
             
             if (nrow(basehaz_data) == 0) {
               return(NULL)
@@ -2654,6 +2642,12 @@ singlearmClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
 
       # Smoothed Hazard Plot Function ----
       .smoothedHazardPlot = function(image, ggtheme, theme, ...) {
+        # Competing-risk mode codes the outcome 0/1/2. survival::Surv() does
+        # not reject that -- it warns and remaps 1 to censored, 2 to event and
+        # 0 to NA, so this plot would render inverted with no visible warning.
+        if (self$options$multievent && self$options$analysistype == "compete")
+          return()
+
         if (!self$options$hazard_smoothing)
           return()
 
@@ -2687,10 +2681,19 @@ singlearmClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
           
           if (nrow(basehaz_data) > 5) {
             # Calculate instantaneous hazard from cumulative hazard
-            basehaz_data$inst_hazard <- c(basehaz_data$hazard[1], diff(basehaz_data$hazard))
-            
-            # Remove negative or zero hazards
-            basehaz_data <- basehaz_data[basehaz_data$inst_hazard > 0, ]
+            # diff(cumulative hazard) is the Nelson-Aalen INCREMENT d_i / n_i --
+            # a dimensionless conditional probability, not a rate. Plotting it
+            # against an axis labelled "Hazard Rate" understates the hazard by a
+            # factor of the interval width, so the curve changed shape whenever
+            # event times bunched up. Dividing by the interval width puts it on
+            # the same events-per-person-time scale as the table.
+            .dt <- c(basehaz_data$time[1], diff(basehaz_data$time))
+            .dh <- c(basehaz_data$hazard[1], diff(basehaz_data$hazard))
+            basehaz_data$inst_hazard <- ifelse(.dt > 0, .dh / .dt, NA_real_)
+
+            # Remove negative, zero or undefined hazards
+            basehaz_data <- basehaz_data[is.finite(basehaz_data$inst_hazard) &
+                                         basehaz_data$inst_hazard > 0, ]
             
             # Create data frame for smoothing with actual event-based hazards
             smooth_data <- data.frame(

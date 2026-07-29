@@ -6,6 +6,21 @@ jrs:   '1.1'
 
 items:
 
+
+    - name:  eventRecodeInfo
+      title: 'Outcome Recode'
+      type:  Html
+      visible: true
+      clearWith:
+          - outcome
+          - outcomeLevel
+          - multievent
+          - analysistype
+          - dod
+          - dooc
+          - awd
+          - awod
+
     - name:  todo
       title: To Do
       type:  Html
@@ -121,6 +136,40 @@ items:
           - awod
           - cutp
           - min_group_size
+
+    - name: stratifiedCoxTable
+      title: 'Stratified Cox Regression'
+      type: Table
+      visible: (stratified_cox)
+      clearWith:
+          - outcome
+          - outcomeLevel
+          - elapsedtime
+          - contexpl
+          - stratified_cox
+          - strata_variable
+          - multievent
+          - analysistype
+      columns:
+          - name: term
+            title: 'Term'
+            type: text
+          - name: hr
+            title: 'HR'
+            type: number
+            format: zto
+          - name: ci_lower
+            title: 'Lower'
+            type: number
+            format: zto
+          - name: ci_upper
+            title: 'Upper'
+            type: number
+            format: zto
+          - name: pvalue
+            title: 'p'
+            type: number
+            format: zto,pvalue
 
     - name:  tCoxtext2
       title: ''

@@ -43,6 +43,7 @@ options:
     - name: explanatory
       title: Explanatory Variables
       type: Variables
+      default: NULL
       suggested: [ nominal, continuous ]
       permitted: [ factor, numeric ]
       description:
@@ -54,6 +55,7 @@ options:
     - name: outcome
       title: Mortality or Recurrence
       type: Variable
+      default: NULL
       suggested: [ ordinal, nominal ]
       permitted: [ factor ]
       description:

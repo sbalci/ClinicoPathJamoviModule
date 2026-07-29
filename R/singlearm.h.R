@@ -53,6 +53,7 @@ singlearmOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             private$..elapsedtime <- jmvcore::OptionVariable$new(
                 "elapsedtime",
                 elapsedtime,
+                default=NULL,
                 suggested=list(
                     "continuous"),
                 permitted=list(
@@ -64,6 +65,7 @@ singlearmOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             private$..dxdate <- jmvcore::OptionVariable$new(
                 "dxdate",
                 dxdate,
+                default=NULL,
                 suggested=list(
                     "continuous",
                     "nominal"),
@@ -73,6 +75,7 @@ singlearmOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             private$..fudate <- jmvcore::OptionVariable$new(
                 "fudate",
                 fudate,
+                default=NULL,
                 suggested=list(
                     "continuous",
                     "nominal"),
@@ -84,6 +87,7 @@ singlearmOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             private$..outcome <- jmvcore::OptionVariable$new(
                 "outcome",
                 outcome,
+                default=NULL,
                 suggested=list(
                     "ordinal",
                     "nominal",
@@ -121,6 +125,7 @@ singlearmOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 options=list(
                     "overall",
                     "cause",
+                    "dfs",
                     "compete"),
                 default="overall")
             private$..outcomeredefined <- jmvcore::OptionOutput$new(
@@ -374,6 +379,7 @@ singlearmResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
     "singlearmResults",
     inherit = jmvcore::Group,
     active = list(
+        eventRecodeInfo = function() private$.items[["eventRecodeInfo"]],
         todo = function() private$.items[["todo"]],
         errors = function() private$.items[["errors"]],
         warnings = function() private$.items[["warnings"]],
@@ -427,6 +433,20 @@ singlearmResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "ClinicoPathJamoviModule",
                     "survivaltutorial",
                     "survivalrwnahhas"))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="eventRecodeInfo",
+                title="Outcome Recode",
+                visible=TRUE,
+                clearWith=list(
+                    "outcome",
+                    "outcomeLevel",
+                    "multievent",
+                    "analysistype",
+                    "dod",
+                    "dooc",
+                    "awd",
+                    "awod")))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="todo",
@@ -1279,6 +1299,7 @@ singlearmBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   reliability and  analysis quality without affecting core results.
 #' @return A results object containing:
 #' \tabular{llllll}{
+#'   \code{results$eventRecodeInfo} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$todo} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$errors} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$warnings} \tab \tab \tab \tab \tab a html \cr
@@ -1329,11 +1350,11 @@ singlearmBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' @export
 singlearm <- function(
     data,
-    elapsedtime,
+    elapsedtime = NULL,
     tint = FALSE,
-    dxdate,
-    fudate,
-    outcome,
+    dxdate = NULL,
+    fudate = NULL,
+    outcome = NULL,
     outcomeLevel,
     dod,
     dooc,

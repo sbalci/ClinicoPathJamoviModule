@@ -4,6 +4,21 @@ title: Enhanced Outcome Organizer for Survival Analysis
 jrs:   '1.1'
 
 items:
+
+    - name:  eventRecodeInfo
+      title: 'Outcome Recode'
+      type:  Html
+      visible: true
+      clearWith:
+          - outcome
+          - outcomeLevel
+          - multievent
+          - analysistype
+          - dod
+          - dooc
+          - awd
+          - awod
+
     - name:  todo
       title: To Do
       type:  Html
@@ -186,6 +201,11 @@ items:
           - eventPriority
           - intervalCensoring
           - adminCensoring
+          # Both of these change the exported values: adminCensoring is a no-op
+          # without a follow-up time, and the cut-off date decides which rows
+          # are truncated back to censored.
+          - adminDate
+          - followupTime
 
 refs:
     - survival

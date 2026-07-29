@@ -80,3 +80,6 @@ jamovi-library-audit/
 /MERGED_NEEDS_TESTING.md
 /backlog.json
 pony-tail-audit/
+/node_modules
+package-lock.json
+package.json

@@ -63,17 +63,30 @@ bootstrapNRI <- function(new_values, ref_values, actual,
             next
         }
 
-        tryCatch({
-            boot_result <- computeNRI(boot_new, boot_ref, boot_actual, direction, thresholds)
-            boot_nri[i] <- boot_result$nri
-            boot_event_nri[i] <- boot_result$event_nri
-            boot_non_event_nri[i] <- boot_result$non_event_nri
-            valid_boots <- valid_boots + 1
-        }, error = function(e) {
+        # Take the result FROM tryCatch, not from inside the error handler.
+        #
+        # `boot_nri[i] <- NA` written in the handler assigns into that function's
+        # own frame and never reaches this one, so a failed replicate kept its
+        # preallocated 0.0 -- which then survived the !is.na() filter below and
+        # was averaged into the confidence interval and counted in both p-value
+        # tails as though it were a real estimate of no reclassification. The
+        # "many bootstraps failed" warning could never fire from this path
+        # either. Same defect as bootstrapIDI() in utils.R.
+        res_i <- tryCatch({
+            r <- computeNRI(boot_new, boot_ref, boot_actual, direction, thresholds)
+            if (is.null(r$nri) || is.na(r$nri)) NULL else r
+        }, error = function(e) NULL)
+
+        if (is.null(res_i)) {
             boot_nri[i] <- NA
             boot_event_nri[i] <- NA
             boot_non_event_nri[i] <- NA
-        })
+        } else {
+            boot_nri[i] <- res_i$nri
+            boot_event_nri[i] <- res_i$event_nri
+            boot_non_event_nri[i] <- res_i$non_event_nri
+            valid_boots <- valid_boots + 1
+        }
     }
 
     # Remove failed iterations
@@ -91,11 +104,18 @@ bootstrapNRI <- function(new_values, ref_values, actual,
     ci_lower <- quantile(boot_nri, alpha/2, na.rm = TRUE)
     ci_upper <- quantile(boot_nri, 1 - alpha/2, na.rm = TRUE)
 
-    # Calculate p-value
-    p_value <- 2 * min(
-        mean(boot_nri <= 0, na.rm = TRUE),
-        mean(boot_nri >= 0, na.rm = TRUE)
-    )
+    # Calculate p-value.
+    #
+    # (1 + count) / (B + 1) rather than count / B -- the uncorrected form
+    # returns exactly 0 whenever every replicate falls on one side, implying
+    # precision a finite bootstrap cannot deliver. Same correction as
+    # bootstrapIDI() in utils.R.
+    boot_nri_valid <- boot_nri[!is.na(boot_nri)]
+    B <- length(boot_nri_valid)
+    p_value <- if (B == 0) NA_real_ else min(1, 2 * min(
+        (1 + sum(boot_nri_valid <= 0)) / (B + 1),
+        (1 + sum(boot_nri_valid >= 0)) / (B + 1)
+    ))
 
     return(list(
         nri = original_nri$nri,
@@ -128,6 +148,19 @@ computeNRI <- function(new_values, ref_values, actual,
 
     # Check for sufficient data
     if (sum(events) == 0 || sum(non_events) == 0) {
+        return(list(nri = NA, event_nri = NA, non_event_nri = NA))
+    }
+
+    # Unusable predicted probabilities must yield NA, not 0.
+    #
+    # Every count below is taken with na.rm = TRUE, so if raw_to_prob could not
+    # fit a model and returned NA, all four counts come out 0, every proportion
+    # comes out 0, and the NRI is reported as exactly 0 -- which reads as "the
+    # new marker reclassifies nobody", a substantive negative finding
+    # manufactured out of a fitting failure.
+    if (all(is.na(new_probs)) || all(is.na(ref_probs))) {
+        warning("computeNRI: predicted probabilities are unavailable (the logistic fit failed); returning NA rather than an NRI of 0.",
+                call. = FALSE)
         return(list(nri = NA, event_nri = NA, non_event_nri = NA))
     }
 

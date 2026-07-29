@@ -845,8 +845,16 @@ oddsratioClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     # derived from an undefined metric are also shown as undefined.
                     sens_txt <- if (is.na(lr_results$sensitivity)) "undefined (no positive cases)" else paste0(round(lr_results$sensitivity * 100, 1), "%")
                     spec_txt <- if (is.na(lr_results$specificity)) "undefined (no negative cases)" else paste0(round(lr_results$specificity * 100, 1), "%")
-                    plr_txt  <- if (is.na(lr_results$positive_lr)) "undefined" else as.character(round(lr_results$positive_lr, 2))
-                    nlr_txt  <- if (is.na(lr_results$negative_lr)) "undefined" else as.character(round(lr_results$negative_lr, 2))
+                    # Inf is a real (diverging) value, not a missing one, so it
+                    # needs its own wording -- previously only is.na was caught
+                    # and "Inf" was printed verbatim.
+                    fmt_lr <- function(v) {
+                        if (is.null(v) || length(v) == 0 || is.na(v)) "undefined (no informative cells)"
+                        else if (is.infinite(v)) "infinite (zero false results in this cell)"
+                        else as.character(round(v, 2))
+                    }
+                    plr_txt  <- fmt_lr(lr_results$positive_lr)
+                    nlr_txt  <- fmt_lr(lr_results$negative_lr)
 
                     # Build full metrics text with all features
                     metrics_text <- paste0(
@@ -1076,9 +1084,21 @@ oddsratioClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 positive_lr <- NA_real_
                 negative_lr <- NA_real_
             } else {
-                # Handle edge cases where a ratio diverges (perfect separation).
-                positive_lr <- if (specificity == 1) Inf else sensitivity / (1 - specificity)
-                negative_lr <- if (specificity == 0) Inf else (1 - sensitivity) / specificity
+                # Distinguish a diverging ratio from an indeterminate one.
+                #
+                # The old guards short-circuited on specificity alone, so they
+                # fired regardless of the numerator. That reported Inf -- i.e.
+                # infinitely strong evidence -- for the two genuinely 0/0 cases:
+                # LR+ when the test flagged nobody (fp == 0 and tp == 0), and
+                # LR- when it missed nobody (tn == 0 and fn == 0). Those are
+                # undefined, not infinite.
+                positive_lr <- if (specificity == 1) {
+                    if (sensitivity == 0) NA_real_ else Inf
+                } else sensitivity / (1 - specificity)
+
+                negative_lr <- if (specificity == 0) {
+                    if (sensitivity == 1) NA_real_ else Inf
+                } else (1 - sensitivity) / specificity
             }
             
             # Create diagnostic information
@@ -1253,6 +1273,36 @@ oddsratioClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     )
 
                     private$.checkpoint()
+
+                    # finalfit::or_plot() fits its own unpenalized glm internally
+                    # and has no way to accept a logistf object (there is no
+                    # fit2df.logistf method). With Firth enabled the plot
+                    # therefore drew maximum-likelihood odds ratios beside a
+                    # table of penalized ones -- two different answers for the
+                    # same model on the same page, which is exactly the case
+                    # where they diverge most (sparse data and separation).
+                    if (isTRUE(self$options$usePenalized) &&
+                        requireNamespace("logistf", quietly = TRUE)) {
+
+                        firth_plot <- private$.firthOrPlot(
+                            .data       = plotDataWithOriginalNames$data,
+                            dependent   = plotDataWithOriginalNames$formulaDependent,
+                            explanatory = plotDataWithOriginalNames$formulaExplanatory,
+                            outcome_label = plotList$originalOutcomeName
+                        )
+
+                        if (!is.null(firth_plot)) {
+                            # arrangeGrob() returns a gtable, which must be drawn
+                            # with grid.draw(); print() would not render it.
+                            grid::grid.newpage()
+                            grid::grid.draw(firth_plot)
+                            return(TRUE)
+                        }
+                        # Fall through only if the penalized fit failed; the
+                        # notice below keeps the mismatch from being silent.
+                        private$.addNotice(jmvcore::NoticeType$WARNING,
+                            "The penalized (Firth) forest plot could not be produced, so the plot below shows unpenalized maximum-likelihood odds ratios. These will not match the penalized estimates in the table above.")
+                    }
 
                     # Use or_plot with original names
                     # The function returns formulas with original variable names that match the restored data
@@ -1695,6 +1745,177 @@ oddsratioClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         # Helper function to fit Firth penalized logistic regression
         # Mimics the output structure of finalfit::finalfit for compatibility
         ,
+        # Forest plot drawn from the PENALIZED fit.
+        #
+        # finalfit::or_plot() cannot render a logistf object, so when Firth is
+        # requested the plot is built here from the penalized coefficients and
+        # their profile-likelihood intervals. Returns NULL on any failure, and
+        # the caller then falls back to the unpenalized plot WITH a warning
+        # rather than silently showing mismatched numbers.
+        # finalfit's p-value convention: "p<0.001" below the threshold.
+        .fmtP = function(p) {
+            if (is.na(p)) return("p=NA")
+            if (p < 0.001) "p<0.001" else sprintf("p=%.3f", p)
+        }
+        ,
+        .firthOrPlot = function(.data, dependent, explanatory, outcome_label = NULL) {
+            tryCatch({
+                # These are restored ORIGINAL variable names, so they may contain
+                # spaces or other non-syntactic characters. composeTerm
+                # backtick-quotes them, which is correct here because this is a
+                # formula string (never use it as a data[[ ]] key).
+                fml <- stats::as.formula(paste0(
+                    jmvcore::composeTerm(dependent), " ~ ",
+                    paste(vapply(explanatory, jmvcore::composeTerm, character(1)),
+                          collapse = " + ")))
+                fit <- logistf::logistf(fml, data = .data)
+
+                cf <- stats::coef(fit)
+                nm <- names(cf)
+                est <- data.frame(
+                    term  = nm,
+                    or    = exp(unname(cf)),
+                    lower = exp(unname(fit$ci.lower)),
+                    upper = exp(unname(fit$ci.upper)),
+                    p     = unname(fit$prob),
+                    stringsAsFactors = FALSE)
+                est <- est[est$term != "(Intercept)", , drop = FALSE]
+                if (nrow(est) == 0) return(NULL)
+
+                # Rebuild the variable/level structure finalfit's or_plot shows.
+                # logistf reports coefficients as paste0(variable, level), so the
+                # split is by longest matching variable name.
+                n_total <- nrow(.data)
+                rows <- list()
+                for (v in explanatory) {
+                    col <- .data[[v]]
+                    if (is.null(col)) next
+
+                    if (is.factor(col) || is.character(col) || is.logical(col)) {
+                        col <- as.factor(col)
+                        lvls <- levels(col)
+                        for (j in seq_along(lvls)) {
+                            lv <- lvls[j]
+                            n_lv <- sum(!is.na(col) & col == lv)
+                            pct  <- if (n_total > 0) 100 * n_lv / n_total else NA_real_
+                            if (j == 1) {
+                                # reference level: no estimate, shown as "-"
+                                rows[[length(rows) + 1]] <- data.frame(
+                                    variable = v, level = lv,
+                                    n_show = sprintf("%d (%.1f)", n_lv, pct),
+                                    or = NA_real_, lower = NA_real_, upper = NA_real_,
+                                    or_text = "-", stringsAsFactors = FALSE)
+                            } else {
+                                hit <- est[est$term == paste0(v, lv), , drop = FALSE]
+                                if (nrow(hit) == 0) next
+                                rows[[length(rows) + 1]] <- data.frame(
+                                    variable = v, level = lv,
+                                    n_show = sprintf("%d (%.1f)", n_lv, pct),
+                                    or = hit$or[1], lower = hit$lower[1], upper = hit$upper[1],
+                                    or_text = sprintf("%.2f (%.2f-%.2f, %s)",
+                                                      hit$or[1], hit$lower[1], hit$upper[1],
+                                                      private$.fmtP(hit$p[1])),
+                                    stringsAsFactors = FALSE)
+                            }
+                        }
+                    } else {
+                        hit <- est[est$term == v, , drop = FALSE]
+                        if (nrow(hit) == 0) next
+                        num <- jmvcore::toNumeric(col)
+                        rows[[length(rows) + 1]] <- data.frame(
+                            variable = v, level = "Mean (SD)",
+                            n_show = sprintf("%.1f (%.1f)", mean(num, na.rm = TRUE),
+                                             stats::sd(num, na.rm = TRUE)),
+                            or = hit$or[1], lower = hit$lower[1], upper = hit$upper[1],
+                            or_text = sprintf("%.2f (%.2f-%.2f, %s)",
+                                              hit$or[1], hit$lower[1], hit$upper[1],
+                                              private$.fmtP(hit$p[1])),
+                            stringsAsFactors = FALSE)
+                    }
+                }
+                if (length(rows) == 0) return(NULL)
+                df <- do.call(rbind, rows)
+
+                # Only the first row of each variable block carries its name, as
+                # in the finalfit table.
+                df$var_show <- ifelse(duplicated(df$variable), "", df$variable)
+
+                # Top row first, like or_plot.
+                df$y <- rev(seq_len(nrow(df)))
+                ylim <- c(0.4, nrow(df) + 1.1)
+                hdr  <- nrow(df) + 0.85
+
+                sz <- 3.3
+                t1 <- ggplot2::ggplot(df) +
+                    ggplot2::geom_text(ggplot2::aes(x = 0,    y = y, label = var_show),
+                                       hjust = 0, size = sz) +
+                    ggplot2::geom_text(ggplot2::aes(x = 1.05, y = y, label = level),
+                                       hjust = 0, size = sz) +
+                    ggplot2::geom_text(ggplot2::aes(x = 2.05, y = y, label = n_show),
+                                       hjust = 1, size = sz) +
+                    ggplot2::geom_text(ggplot2::aes(x = 2.25, y = y, label = or_text),
+                                       hjust = 0, size = sz) +
+                    ggplot2::annotate("text", x = 0,    y = hdr, label = "Variable",
+                                      hjust = 0, fontface = "bold", size = sz) +
+                    ggplot2::annotate("text", x = 2.05, y = hdr, label = "all",
+                                      hjust = 1, fontface = "bold", size = sz) +
+                    ggplot2::annotate("text", x = 2.25, y = hdr,
+                                      label = "OR (95% CI, p-value)",
+                                      hjust = 0, fontface = "bold", size = sz) +
+                    ggplot2::scale_x_continuous(limits = c(0, 4.3), expand = c(0, 0)) +
+                    ggplot2::scale_y_continuous(limits = ylim, expand = c(0, 0)) +
+                    ggplot2::labs(x = "OR, 95% CI (Firth penalized)", y = NULL) +
+                    ggplot2::theme_classic() +
+                    # The right-hand panel carries an x-axis, which consumes
+                    # vertical space. theme_void() here would make this panel
+                    # taller, and every row would then sit at a different height
+                    # from its own confidence interval. Keeping the same axis
+                    # furniture but drawing it in invisible ink makes the two
+                    # panel bodies exactly the same height.
+                    ggplot2::theme(
+                        axis.title.x = ggplot2::element_text(size = 12, colour = NA),
+                        axis.text.x  = ggplot2::element_text(colour = NA),
+                        axis.ticks.x = ggplot2::element_line(colour = NA),
+                        axis.line.x  = ggplot2::element_line(colour = NA),
+                        axis.title.y = ggplot2::element_blank(),
+                        axis.text.y  = ggplot2::element_blank(),
+                        axis.ticks.y = ggplot2::element_blank(),
+                        axis.line.y  = ggplot2::element_blank())
+
+                fin <- is.finite(df$or) & is.finite(df$lower) & is.finite(df$upper)
+                xr  <- range(c(df$lower[fin], df$upper[fin], 1), na.rm = TRUE)
+
+                g1 <- ggplot2::ggplot(df[fin, , drop = FALSE]) +
+                    ggplot2::geom_vline(xintercept = 1, linetype = "longdash",
+                                        colour = "black") +
+                    ggplot2::geom_errorbarh(
+                        ggplot2::aes(x = or, y = y, xmin = lower, xmax = upper),
+                        height = 0.2, na.rm = TRUE) +
+                    ggplot2::geom_point(ggplot2::aes(x = or, y = y),
+                                        size = 2.4, shape = 22, fill = "black",
+                                        na.rm = TRUE) +
+                    ggplot2::scale_x_continuous(trans = "log10", limits = xr) +
+                    ggplot2::scale_y_continuous(limits = ylim, expand = c(0, 0)) +
+                    ggplot2::labs(x = "OR, 95% CI (Firth penalized)", y = NULL) +
+                    ggplot2::theme_classic() +
+                    ggplot2::theme(
+                        axis.title.x = ggplot2::element_text(size = 12),
+                        axis.text.y  = ggplot2::element_blank(),
+                        axis.ticks.y = ggplot2::element_blank(),
+                        axis.line.y  = ggplot2::element_blank())
+
+                ttl <- if (!is.null(outcome_label))
+                    grid::textGrob(paste0(outcome_label, ": OR (95% CI, p-value)"),
+                                   gp = grid::gpar(fontsize = 14)) else NULL
+
+                gridExtra::arrangeGrob(
+                    t1, g1, ncol = 2, widths = c(3, 2), top = ttl,
+                    bottom = grid::textGrob(
+                        "Firth penalized likelihood; profile-likelihood confidence intervals.",
+                        gp = grid::gpar(fontsize = 9, col = "grey30")))
+            }, error = function(e) NULL)
+        }
+        ,
         .fitFirthModel = function(.data, dependent, explanatory) {
             # Construct formula. Convention (unified with .prepareRmsNomogram): callers pass
             # RAW variable names; this helper escapes them via jmvcore::composeTerm/composeTerms,
@@ -1763,11 +1984,22 @@ oddsratioClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             summary_table[[1]] <- var_names
             
             # Calculate model metrics for tOdds[[2]]
-            aic_val <- 2 * length(coefs) - 2 * fit$loglik[2]
+            # logistf returns loglik = c(full = ..., null = ...) -- verified
+            # against the installed package, where the vector is literally named
+            # and loglik[1] > loglik[2]. Index [2] is the NULL model, so the AIC
+            # was computed as 2k - 2*logLik(null): it charged for every parameter
+            # while crediting none of them, inflating the AIC by exactly the
+            # likelihood-ratio statistic. (The ?logistf prose lists the two the
+            # other way round, which is presumably how this arose.)
+            loglik_full <- unname(fit$loglik[1])
+            loglik_null <- unname(fit$loglik[2])
+            aic_val <- 2 * length(coefs) - 2 * loglik_full
             metrics <- list(
                 paste("Observations: ", length(fit$y)),
-                paste("Firth Log-Likelihood: ", round(fit$loglik[2], 2)),
-                paste("AIC: ", round(aic_val, 2))
+                paste("Firth Log-Likelihood: ", round(loglik_full, 2)),
+                paste("AIC: ", round(aic_val, 2)),
+                paste("Likelihood-ratio test vs null: ",
+                      round(2 * (loglik_full - loglik_null), 3))
             )
             
             return(list(summary_table, metrics))

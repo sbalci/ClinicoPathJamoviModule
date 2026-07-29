@@ -8,6 +8,14 @@ outcomeorganizerClass <- if (requireNamespace('jmvcore')) R6::R6Class(
     inherit = outcomeorganizerBase,
     private = list(
 
+        # Result of .defineEventIndicator(), kept so .run() can render the
+        # recode disclosure without redoing the work.
+        .eventRecode = NULL,
+        # Censored/Event/Competing factor for the competing-risk output, so the
+        # coding survives the hand-off to survival / multisurvival instead of
+        # being silently binarised back to cause-specific.
+        .causeFactor = NULL,
+
         # Notice management helpers ----
         # Notices render to dedicated Html outputs (errors / strongWarnings /
         # warnings / infoMessages) to avoid the protobuf serialization error
@@ -137,6 +145,7 @@ outcomeorganizerClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             outcome_var <- get_cleaned_var(self$options$outcome)
             recurrence_var <- get_cleaned_var(self$options$recurrence)
             id_var <- get_cleaned_var(self$options$patientID)
+            followup_var <- get_cleaned_var(self$options$followupTime)
 
             # Apply labels using correct mapping
             # We use the original names as labels for the cleaned variables
@@ -161,6 +170,7 @@ outcomeorganizerClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 "outcome_var" = outcome_var,
                 "recurrence_var" = recurrence_var,
                 "id_var" = id_var,
+                "followup_var" = followup_var,
                 "original_outcome" = self$options$outcome
             ))
         },
@@ -351,99 +361,26 @@ outcomeorganizerClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
             # Create a new outcome variable based on the analysis type
             if (!multievent) {
-                # Check for simple binary outcome coding (0/1)
-                outcome1 <- mydata[[outcome_var]]
-                
-                # Convert ordered factors to character/unordered factor to avoid issues
-                if (is.ordered(outcome1)) {
-                    outcome1 <- as.character(outcome1)
-                }
+                # Delegated to the shared coder in survival_utils.R so the five
+                # analyses that build an event indicator agree on validation.
+                res <- .defineEventIndicator(
+                    outcome      = mydata[[outcome_var]],
+                    outcomeLevel = outcomeLevel,
+                    multievent   = FALSE,
+                    outcome_name = self$options$outcome
+                )
 
-                contin <- c("integer", "numeric", "double")
+                if (!is.null(res$error))
+                    jmvcore::reject(res$error)
 
-                if (inherits(outcome1, contin)) {
-                    # FIX: Properly validate and recode binary outcomes
-                    # Check unique values
-                    unique_vals <- sort(unique(outcome1[!is.na(outcome1)]))
+                private$.eventRecode <- res
+                mydata[["myoutcome"]] <- res$status
 
-                    # Validate that we have exactly 2 values for binary analysis
-                    if (length(unique_vals) < 2) {
-                        jmvcore::reject('Outcome variable must have at least 2 different values. Found: ',
-                             paste(unique_vals, collapse = ", "))
-                    } else if (length(unique_vals) > 2) {
-                        jmvcore::reject('Binary outcome variable must have exactly 2 unique values for non-multievent analysis. Found ',
-                             length(unique_vals), ' values: ', paste(unique_vals, collapse = ", "),
-                             '. Enable "Multiple Event Types" if you have more than 2 outcome categories.')
-                    }
-
-                    # Check if already properly coded as 0/1
-                    if ((length(unique_vals) == 2) && all(unique_vals == c(0, 1))) {
-                        # Perfect - already 0/1 coded
-                        mydata[["myoutcome"]] <- mydata[[outcome_var]]
-                        diagnostics$binary_check <- "Outcome already properly coded as 0/1"
-                    } else {
-                        # NOT 0/1 - need to recode based on outcomeLevel
-                        # This prevents the critical bug where 1=alive, 2=dead gets passed through as-is
-                        if (is.null(outcomeLevel)) {
-                            jmvcore::reject('Outcome variable is not coded as 0/1 (found values: ',
-                                 paste(unique_vals, collapse = ", "),
-                                 '). Please select which value represents the event using the "Outcome Level" option.')
-                        }
-
-                        # Verify outcomeLevel exists in data
-                        if (!outcomeLevel %in% unique_vals) {
-                            jmvcore::reject('Selected outcome level "', outcomeLevel,
-                                 '" not found in data. Available values: ',
-                                 paste(unique_vals, collapse = ", "))
-                        }
-
-                        # Recode: outcomeLevel becomes 1, other value becomes 0
-                        mydata[["myoutcome"]] <- ifelse(
-                            test = outcome1 == outcomeLevel,
-                            yes = 1,
-                            no = 0
-                        )
-
-                        # Add diagnostic information about the recoding
-                        other_val <- setdiff(unique_vals, outcomeLevel)
-                        diagnostics$binary_check <- sprintf(
-                            "Outcome recoded: '%s' (event) \u2192 1, '%s' (non-event) \u2192 0. Original coding was NOT 0/1.",
-                            outcomeLevel, other_val
-                        )
-                    }
-
-                } else if (inherits(outcome1, c("factor", "character"))) {
-                    # Check if outcomeLevel is provided
-                    if (is.null(outcomeLevel)) {
-                        jmvcore::reject('Please select which value represents the event using the "Outcome Level" option.')
-                    }
-
-                    # Verify the selected event level actually occurs in the data.
-                    # Without this, a stale level (e.g. left over after switching
-                    # variables, or a factor level with zero observations) silently
-                    # produces all-zero (no events) with no warning.
-                    factor_vals <- unique(as.character(outcome1[!is.na(outcome1)]))
-                    if (!as.character(outcomeLevel) %in% factor_vals) {
-                        jmvcore::reject(paste0(
-                            'Selected outcome level "', outcomeLevel,
-                            '" not found in data. Available values: ',
-                            paste(factor_vals, collapse = ", ")))
-                    }
-
-                    # Convert to 1s and 0s based on the event level
-                    mydata[["myoutcome"]] <- ifelse(
-                        test = outcome1 == outcomeLevel,
-                        yes = 1,
-                        no = 0
-                    )
-
-                    # Add diagnostic information
-                    diagnostics$event_levels <- paste("Event level:", outcomeLevel)
-                    diagnostics$conversion <- "Factor converted to binary (0/1) coding"
-
-                } else {
-                    jmvcore::reject('Outcome variable must be numeric, factor, or character')
-                }
+                diagnostics$binary_check <- sprintf(
+                    "Event level '%s' -> 1 (%d rows); %s -> 0 (%d rows); %d row(s) missing.",
+                    res$event_label, res$n_event,
+                    if (length(res$censored_labels)) paste(sprintf("'%s'", res$censored_labels), collapse = ", ") else "no other level",
+                    res$n_censored, res$n_missing)
 
                 # Special handling for RFS/PFS/DFS if selected
                 if (analysistype %in% c('rfs', 'pfs', 'dfs') && !is.null(recurrence_var)) {
@@ -472,19 +409,47 @@ outcomeorganizerClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                         no = 0
                     )
 
-                    # Combine with death events based on analysis type
-                    if (analysistype == 'rfs') {
-                        # Recurrence-free survival: event is recurrence or death from disease
-                        mydata[["myoutcome"]] <- pmax(recurrence_events, mydata[["myoutcome"]], na.rm = TRUE)
-                        diagnostics$rfs_handling <- "RFS: Events include recurrence and death"
-                    } else if (analysistype == 'pfs') {
-                        # Progression-free survival: event is progression or death from any cause
-                        mydata[["myoutcome"]] <- pmax(recurrence_events, mydata[["myoutcome"]], na.rm = TRUE)
-                        diagnostics$pfs_handling <- "PFS: Events include progression and death"
-                    } else if (analysistype == 'dfs') {
-                        # Disease-free survival: event is recurrence, second primary, or death from any cause
-                        mydata[["myoutcome"]] <- pmax(recurrence_events, mydata[["myoutcome"]], na.rm = TRUE)
-                        diagnostics$dfs_handling <- "DFS: Events include disease events and death"
+                    # Combine with death events. RFS/PFS/DFS all take the event as
+                    # "recurrence OR death", so the composite is the elementwise max.
+                    #
+                    # `na.rm = TRUE` used to be passed here, and pmax(NA, 0, na.rm=TRUE)
+                    # is 0 -- so a patient with a MISSING vital status or a missing
+                    # recurrence status was silently recorded as event-free. That
+                    # fabricates censoring out of missing data. Without na.rm the NA
+                    # propagates and the row is dropped downstream, which is the
+                    # honest complete-case behaviour.
+                    #
+                    # One asymmetry is still worth keeping: if either component is a
+                    # known event, the composite is an event regardless of whether the
+                    # other component is missing.
+                    composite <- pmax(recurrence_events, mydata[["myoutcome"]])
+                    known_event <- (!is.na(recurrence_events) & recurrence_events == 1) |
+                                   (!is.na(mydata[["myoutcome"]]) & mydata[["myoutcome"]] == 1)
+                    composite[known_event] <- 1
+                    mydata[["myoutcome"]] <- composite
+
+                    diagnostics[[paste0(analysistype, "_handling")]] <- sprintf(
+                        "%s: events include recurrence/progression and death (%d events, %d censored, %d missing).",
+                        toupper(analysistype),
+                        sum(composite == 1, na.rm = TRUE),
+                        sum(composite == 0, na.rm = TRUE),
+                        sum(is.na(composite)))
+
+                    # The shared coder built the indicator from the outcome alone
+                    # and labelled it "overall survival". The composite is a
+                    # different estimand and now has different counts, so correct
+                    # both before the disclosure block reports them.
+                    if (!is.null(private$.eventRecode)) {
+                        private$.eventRecode$estimand <- switch(analysistype,
+                            rfs = "recurrence-free survival",
+                            pfs = "progression-free survival",
+                            dfs = "disease-free survival",
+                            private$.eventRecode$estimand)
+                        private$.eventRecode$n_event    <- sum(composite == 1, na.rm = TRUE)
+                        private$.eventRecode$n_censored <- sum(composite == 0, na.rm = TRUE)
+                        private$.eventRecode$n_missing  <- sum(is.na(composite))
+                        private$.eventRecode$event_label <- paste0(
+                            private$.eventRecode$event_label, " or recurrence/progression")
                     }
                 } else if (analysistype == 'ttp' && !is.null(recurrence_var)) {
                     # Time to progression: only progression counts as event, deaths are censored
@@ -508,6 +473,30 @@ outcomeorganizerClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                         no = 0
                     )
                     diagnostics$ttp_handling <- "TTP: Only progression events counted, deaths censored"
+
+                    # TTP replaces the outcome-derived indicator entirely.
+                    if (!is.null(private$.eventRecode)) {
+                        ttp <- mydata[["myoutcome"]]
+                        private$.eventRecode$estimand    <- "time to progression (deaths censored)"
+                        private$.eventRecode$event_label <- "progression"
+                        private$.eventRecode$n_event     <- sum(ttp == 1, na.rm = TRUE)
+                        private$.eventRecode$n_censored  <- sum(ttp == 0, na.rm = TRUE)
+                        private$.eventRecode$n_missing   <- sum(is.na(ttp))
+                    }
+                }
+
+                # The event hierarchy is implemented only in the multi-event
+                # branch below. Requesting it here used to be read and then
+                # silently discarded, so the user got no hierarchy and no hint
+                # that the option had been ignored.
+                if (isTRUE(self$options$useHierarchy)) {
+                    private$.addHtmlMessage(
+                        "warning",
+                        "Event hierarchy not applied",
+                        paste0(
+                            "Event hierarchy is only available with Multiple Event Levels ",
+                            "enabled. It was requested but has been ignored for this ",
+                            "single-event-level analysis, and the outcome is unchanged."))
                 }
 
             } else {
@@ -521,62 +510,68 @@ outcomeorganizerClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 # Note: Validation of required level selections is now handled in .run()
                 # with helpful notices instead of hard errors
 
-                # Validate that selected levels actually exist in the data
-                outcome_levels_in_data <- unique(outcome1[!is.na(outcome1)])
-                selected_levels <- c(dod, dooc, awd, awod)
-                missing_in_data <- selected_levels[!selected_levels %in% outcome_levels_in_data]
+                # os/cause/compete share their semantics with the four survival
+                # analyses, so they go through the shared coder -- which is where
+                # the "every observed level must be assigned" check lives. Without
+                # it, an unassigned level became NA and jmvcore::naOmit() then
+                # deleted those patients, shrinking the denominator silently.
+                # multistate is unique to this analysis and stays local.
+                if (analysistype %in% c('os', 'cause', 'compete')) {
 
-                if (length(missing_in_data) > 0) {
-                    jmvcore::reject('Selected outcome levels not found in data: ',
-                         paste(missing_in_data, collapse = ", "),
-                         '. Available values in outcome variable: ',
-                         paste(outcome_levels_in_data, collapse = ", "))
-                }
+                    res <- .defineEventIndicator(
+                        outcome      = outcome1,
+                        multievent   = TRUE,
+                        analysistype = switch(analysistype, os = "overall", analysistype),
+                        dod = dod, dooc = dooc, awd = awd, awod = awod,
+                        outcome_name = self$options$outcome
+                    )
 
-                # Check for duplicate selections (same level selected for multiple categories)
-                if (length(unique(selected_levels)) != 4) {
-                    jmvcore::reject('Each outcome level must be unique. You have selected the same level for multiple categories. ',
-                         'Selected levels: dod="', dod, '", dooc="', dooc, '", awd="', awd, '", awod="', awod, '"')
-                }
+                    if (!is.null(res$error))
+                        jmvcore::reject(res$error)
 
-                # Initialize all as NA
-                mydata[["myoutcome"]] <- NA_integer_
+                    private$.eventRecode <- res
+                    mydata[["myoutcome"]] <- res$status
+                    private$.causeFactor <- res$status_factor
 
-                if (analysistype == 'os') {
-                    # Overall survival: Dead (any cause) vs Alive
-                    mydata[["myoutcome"]][outcome1 == awd] <- 0
-                    mydata[["myoutcome"]][outcome1 == awod] <- 0
-                    mydata[["myoutcome"]][outcome1 == dod] <- 1
-                    mydata[["myoutcome"]][outcome1 == dooc] <- 1
-
-                    diagnostics$overall_coding <- "Overall survival: All deaths coded as events (1)"
-
-                } else if (analysistype == 'cause') {
-                    # Cause-specific: Dead of disease vs Others
-                    mydata[["myoutcome"]][outcome1 == awd] <- 0
-                    mydata[["myoutcome"]][outcome1 == awod] <- 0
-                    mydata[["myoutcome"]][outcome1 == dod] <- 1
-                    mydata[["myoutcome"]][outcome1 == dooc] <- 0
-
-                    diagnostics$cause_coding <- "Cause-specific: Only disease-related deaths as events (1)"
-
-                } else if (analysistype == 'compete') {
-                    # Competing risks: Multiple event types
-                    mydata[["myoutcome"]][outcome1 == awd] <- 0
-                    mydata[["myoutcome"]][outcome1 == awod] <- 0
-                    mydata[["myoutcome"]][outcome1 == dod] <- 1
-                    mydata[["myoutcome"]][outcome1 == dooc] <- 2
-
-                    diagnostics$compete_coding <- "Competing risks: Disease deaths (1), other deaths (2)"
+                    diagnostics$multievent_coding <- sprintf(
+                        "%s: %d event(s), %d censored, %d competing, %d missing.",
+                        res$estimand, res$n_event, res$n_censored,
+                        res$n_competing, res$n_missing)
 
                 } else if (analysistype == 'multistate') {
+
+                    unmapped <- setdiff(as.character(unique(outcome1[!is.na(outcome1)])),
+                                        as.character(c(dod, dooc, awd, awod)))
+                    if (length(unmapped) > 0)
+                        jmvcore::reject(paste0(
+                            'Outcome level(s) not assigned to any state: ',
+                            paste(unmapped, collapse = ", "),
+                            '. Assign every level to one of the four states; unassigned ',
+                            'levels would otherwise be dropped from the analysis.'))
+
                     # Multistate model: Different states given different codes
-                    mydata[["myoutcome"]][outcome1 == awod] <- 0  # Baseline state
-                    mydata[["myoutcome"]][outcome1 == awd] <- 1   # Disease state
-                    mydata[["myoutcome"]][outcome1 == dod] <- 2   # Death from disease
-                    mydata[["myoutcome"]][outcome1 == dooc] <- 3  # Death from other causes
+                    mydata[["myoutcome"]] <- NA_integer_
+                    mydata[["myoutcome"]][!is.na(outcome1) & outcome1 == awod] <- 0  # Baseline state
+                    mydata[["myoutcome"]][!is.na(outcome1) & outcome1 == awd]  <- 1  # Disease state
+                    mydata[["myoutcome"]][!is.na(outcome1) & outcome1 == dod]  <- 2  # Death from disease
+                    mydata[["myoutcome"]][!is.na(outcome1) & outcome1 == dooc] <- 3  # Death from other causes
 
                     diagnostics$multistate_coding <- "Multistate: Healthy (0), Disease (1), Death-disease (2), Death-other (3)"
+
+                } else {
+                    # rfs / pfs / dfs / ttp are offered in the analysis-type list
+                    # but are only implemented on the single-event-level path,
+                    # where the recurrence variable supplies the second endpoint.
+                    # Reaching here left myoutcome entirely NA and the run failed
+                    # with the misleading "all values are NA", which reads as a
+                    # data problem rather than an unsupported combination.
+                    jmvcore::reject(paste0(
+                        "'", toupper(analysistype), "' is not available with Multiple Event Levels ",
+                        "enabled. Recurrence-based endpoints (RFS, PFS, DFS, TTP) are built from ",
+                        "the Recurrence/Progression variable together with the outcome, not from ",
+                        "the four vital-status categories. Turn Multiple Event Levels off and ",
+                        "select a Recurrence/Progression variable, or choose Overall Survival, ",
+                        "Cause-Specific, Competing Risks or Multistate."))
                 }
 
                 # FIX: Verify that recoding actually worked (not all NAs)
@@ -611,28 +606,107 @@ outcomeorganizerClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                             dplyr::ungroup()
 
                         if (nrow(duplicate_ids) == 0) {
-                            diagnostics$hierarchy <- "Event hierarchy requested but no duplicate patient IDs found. Each patient has only one record."
+                            # One row per patient -- which is the normal jamovi
+                            # layout -- so the hierarchy has nothing to collapse
+                            # and the outcome is left exactly as recoded. Stay
+                            # quiet rather than implying something was applied.
+                            diagnostics$hierarchy <- paste0(
+                                "Event hierarchy not applied: each patient has a single record, ",
+                                "so there is nothing to collapse. The outcome is unchanged.")
                         } else {
                             # Apply hierarchy
-                            mydata <- mydata %>%
-                                dplyr::group_by(!!dplyr::sym(id_var)) %>%
-                                dplyr::mutate(
-                                    myoutcome = ifelse(
-                                        any(myoutcome == highest_priority, na.rm = TRUE),
-                                        highest_priority,
-                                        myoutcome
-                                    )
-                                ) %>%
-                                dplyr::ungroup()
+                            # `any()` returns a single value, so ifelse() returned a
+                            # length-1 vector that dplyr then recycled across the whole
+                            # group. For a patient with no priority event that meant
+                            # every record inherited the FIRST record's code -- e.g.
+                            # (2, 0) came out as (2, 2). if/else keeps `myoutcome`
+                            # whole when the hierarchy does not apply.
+                            # With a follow-up time supplied, keep the EARLIEST
+                            # priority event per patient: mark that row and
+                            # censor the patient's later rows. Without one we can
+                            # only stamp every row, which back-propagates a later
+                            # event onto earlier records -- the behaviour the
+                            # warning below describes.
+                            fu_var_h <- labelled_data$followup_var
+                            has_time <- !is.null(fu_var_h) && length(fu_var_h) > 0 &&
+                                        fu_var_h[1] %in% names(mydata)
+
+                            if (has_time) {
+                                mydata[[".hier_t"]] <- jmvcore::toNumeric(mydata[[fu_var_h[1]]])
+                                mydata <- mydata %>%
+                                    dplyr::group_by(!!dplyr::sym(id_var)) %>%
+                                    dplyr::mutate(
+                                        .first_pri = suppressWarnings(min(
+                                            .hier_t[myoutcome == highest_priority], na.rm = TRUE)),
+                                        myoutcome = dplyr::case_when(
+                                            !is.finite(.first_pri)          ~ myoutcome,
+                                            .hier_t == .first_pri           ~ highest_priority,
+                                            TRUE                            ~ 0
+                                        )
+                                    ) %>%
+                                    dplyr::ungroup() %>%
+                                    dplyr::select(-".first_pri", -".hier_t")
+                            } else {
+                                mydata <- mydata %>%
+                                    dplyr::group_by(!!dplyr::sym(id_var)) %>%
+                                    dplyr::mutate(
+                                        myoutcome = if (any(myoutcome == highest_priority, na.rm = TRUE))
+                                            highest_priority
+                                        else
+                                            myoutcome
+                                    ) %>%
+                                    dplyr::ungroup()
+                            }
 
                             n_affected <- duplicate_ids %>%
                                 dplyr::distinct(!!dplyr::sym(id_var)) %>%
                                 nrow()
 
+                            # The hierarchy stamps the priority code onto EVERY row
+                            # belonging to a patient who has it on any row. It does
+                            # not collapse the patient to one record and it cannot
+                            # order the rows, because this analysis has no
+                            # follow-up-time variable. So if a patient's rows are
+                            # successive time points, an event occurring at the LAST
+                            # one is written back onto the earlier ones -- which,
+                            # fed into a survival model, would move the event
+                            # earlier in time. Anyone using long-format data needs
+                            # to know that before they trust the output.
                             diagnostics$hierarchy <- sprintf(
-                                "Event hierarchy applied (priority: %s) to %d patients with multiple records.",
-                                highest_priority, n_affected
-                            )
+                                "Event hierarchy applied (priority: %s) to %d patient(s) with multiple records.",
+                                highest_priority, n_affected)
+
+                            # Duplicate IDs mean long-format data, which is the
+                            # only situation where this option does anything --
+                            # and the one where it can do harm. Say plainly what
+                            # it did and what the consequence is, as a visible
+                            # warning rather than a diagnostic the user may never
+                            # open.
+                            if (has_time) {
+                                private$.addHtmlMessage(
+                                    "info",
+                                    "Event hierarchy applied using follow-up time",
+                                    sprintf(paste0(
+                                        "%d patient(s) have more than one row. For each, the EARLIEST ",
+                                        "record carrying the priority outcome (%s) was kept as the event ",
+                                        "and their later rows were censored, so the event is not moved ",
+                                        "earlier in time."),
+                                        n_affected, highest_priority))
+                            } else
+                            private$.addHtmlMessage(
+                                "warning",
+                                "Event hierarchy applied to repeated patient records",
+                                sprintf(paste0(
+                                    "%d patient(s) have more than one row. For each of them the ",
+                                    "priority outcome (%s) has been written to EVERY one of their ",
+                                    "rows. Because this analysis has no follow-up-time variable it ",
+                                    "cannot order those rows, so if they are successive time points ",
+                                    "a later event is copied back onto the earlier ones - which in a ",
+                                    "survival model would place the event earlier than it happened, ",
+                                    "and count it once per row. Reduce your data to one row per ",
+                                    "patient (keeping the earliest priority event and its date) ",
+                                    "before using this option."),
+                                    n_affected, highest_priority))
                             applied$hierarchy <- TRUE
                         }
                     }
@@ -652,7 +726,21 @@ outcomeorganizerClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     # Add interval variables to output for use with survival::Surv()
                     mydata[["interval_L"]] <- mydata[[start_var[1]]]
                     mydata[["interval_R"]] <- mydata[[end_var[1]]]
-                    diagnostics$interval_censoring <- "Interval censoring enabled. Use Surv(interval_L, interval_R, myoutcome, type='interval2') in survival analysis."
+                    # type = "interval2" takes exactly two endpoints and infers
+                    # the censoring type from them (NA on the left = left-censored,
+                    # NA on the right = right-censored, equal = exact). Passing a
+                    # third event argument, as this guidance used to, fails with
+                    # "Wrong number of args for this type of survival data".
+                    #
+                    # These two columns are computed here but NOT written to the
+                    # spreadsheet: this analysis has a single Output slot and it
+                    # carries the recoded outcome. Say so rather than implying a
+                    # column the user will go looking for.
+                    diagnostics$interval_censoring <- paste0(
+                        "Interval endpoints prepared (not written to the spreadsheet - this ",
+                        "analysis exports only the recoded outcome). In survival analysis use ",
+                        "Surv(<start>, <end>, type='interval2') with your two interval columns; ",
+                        "note interval2 takes two time arguments and no event argument.")
                     applied$interval <- TRUE
                 } else {
                     diagnostics$interval_censoring <- "Interval censoring: variables not found in dataset"
@@ -671,10 +759,41 @@ outcomeorganizerClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 }
 
                 if (length(admin_date_var) > 0) {
-                    # Store administrative censoring date for use in survival analysis
                     mydata[["admin_censor_date"]] <- mydata[[admin_date_var[1]]]
-                    diagnostics$admin_censoring <- "Administrative censoring date stored. Apply in survival analysis: time_censored = pmin(time, admin_censor_date)"
-                    applied$admin <- TRUE
+
+                    # With a follow-up time supplied we can actually apply the
+                    # cut-off: truncate follow-up at it and reset the status of
+                    # anyone whose event falls after it. Without one this can only
+                    # record the date, which is what it used to do while implying
+                    # more.
+                    fu_var <- labelled_data$followup_var
+
+                    if (!is.null(fu_var) && length(fu_var) > 0 && fu_var[1] %in% names(mydata)) {
+                        fu   <- jmvcore::toNumeric(mydata[[fu_var[1]]])
+                        cut  <- jmvcore::toNumeric(mydata[["admin_censor_date"]])
+                        keep <- !is.na(fu) & !is.na(cut)
+
+                        n_trunc <- sum(keep & fu > cut)
+                        n_reset <- sum(keep & fu > cut & !is.na(mydata[["myoutcome"]]) &
+                                       mydata[["myoutcome"]] > 0)
+
+                        mydata[["admin_time"]] <- fu
+                        mydata[["admin_time"]][keep] <- pmin(fu[keep], cut[keep])
+                        # Anyone whose event happened after the cut-off is
+                        # censored at the cut-off, not counted as an event.
+                        mydata[["myoutcome"]][keep & fu > cut] <- 0
+
+                        diagnostics$admin_censoring <- sprintf(
+                            "Administrative censoring applied at the supplied cut-off: follow-up truncated for %d patient(s); %d event(s) occurring after the cut-off were reset to censored.",
+                            n_trunc, n_reset)
+                        applied$admin <- TRUE
+                    } else {
+                        diagnostics$admin_censoring <- paste0(
+                            "Administrative cut-off date read, but NOT applied: no Follow-up Time ",
+                            "variable was selected, so no follow-up was truncated and no event ",
+                            "status was reset. Select a Follow-up Time variable to apply it here.")
+                        applied$admin <- FALSE
+                    }
                 } else {
                     diagnostics$admin_censoring <- "Administrative censoring: date variable not found in dataset"
                 }
@@ -742,7 +861,7 @@ outcomeorganizerClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 <dd>Time to disease progression only. Deaths without progression are censored.</dd>
 
                 <dt><b>Multistate Model</b></dt>
-                <dd>Models transitions between health states (e.g., healthy \u2192 disease \u2192 death).</dd>
+                <dd>Assigns each patient a state code (disease-free, disease, death from disease, death from other causes). Fitting an actual multistate model additionally needs transition times and a subject identifier in long format, which this analysis does not produce.</dd>
 
                 <dt><b>Censoring</b></dt>
                 <dd>Incomplete observation of survival time (patient still alive, lost to follow-up, or event not observed).</dd>
@@ -793,6 +912,13 @@ outcomeorganizerClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         .run = function() {
             # Reset notices at start of each run
             private$.resetNotices()
+
+            # Reset the per-run recode state. .causeFactor persists on the R6
+            # object between runs, so after a competing-risks run a switch to
+            # binary or multistate mode would export the PREVIOUS run's
+            # Censored/Event/Competing column instead of the current outcome.
+            private$.causeFactor <- NULL
+            private$.eventRecode <- NULL
 
             # Initial validation
             if (is.null(self$options$outcome)) {
@@ -957,7 +1083,7 @@ outcomeorganizerClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                         - Dead of disease ({esc_dod}): coded as 2<br>
                         - Dead of other causes ({esc_dooc}): coded as 3<br>
                         <br>
-                        <i>This coding allows for multistate modeling with transitions between health states.</i>
+                        <i>This is a state code, one row per patient. Multistate models additionally require transition times and from/to states in long format (id, tstart, tstop, from, to), which are not produced here.</i>
                         "
                     )
                 }
@@ -1039,7 +1165,7 @@ outcomeorganizerClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             } else if (analysistype == 'compete') {
                 summary_text <- paste(summary_text, "- Fine-Gray subdistribution hazard model<br>- Cumulative incidence function accounting for competing risks<br>")
             } else if (analysistype == 'multistate') {
-                summary_text <- paste(summary_text, "- Multi-state models (e.g., illness-death model)<br>- Transition probabilities between states<br>")
+                summary_text <- paste(summary_text, "- A per-patient state code (0 = disease-free, 1 = disease, 2 = death from disease, 3 = death from other causes)<br>- Note: fitting a multistate or illness-death model requires transition times and a subject identifier in long format, which this analysis does not export<br>")
             } else if (analysistype %in% c('rfs', 'pfs', 'dfs')) {
                 summary_text <- paste(summary_text, "- Standard survival analysis (Kaplan-Meier, Cox)<br>- Consider competing risks if appropriate<br>")
             } else if (analysistype == 'ttp') {
@@ -1101,10 +1227,49 @@ outcomeorganizerClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 ))
             }
 
-            # Add recoded outcome to data if requested
+            # Always disclose how the outcome was recoded. A silent recode is a
+            # clinical-safety hazard: the reader cannot otherwise see which
+            # levels were collapsed into "censored", nor which estimand the
+            # downstream probability-scale outputs correspond to.
+            if (!is.null(private$.eventRecode))
+                self$results$eventRecodeInfo$setContent(
+                    .describeEventIndicator(private$.eventRecode, self$options$outcome))
+
+            # Add recoded outcome to data if requested.
+            #
+            # For competing risks the column is written as Censored/Event/Competing
+            # rather than 0/1/2. The numeric form did not survive the hand-off: it
+            # comes back as a nominal factor with levels "0"/"1"/"2", takes the
+            # single-event-level branch in survival / multisurvival, and level "2"
+            # silently becomes censored -- quietly turning a competing-risks
+            # analysis back into a cause-specific one. The labelled form is the
+            # representation those analyses already recognise ("Event" %in% levels).
             if (self$options$addOutcome) {
                 self$results$addOutcome$setRowNums(df_outcome$row_names)
-                self$results$addOutcome$setValues(df_outcome$myoutcome)
+                # Rebuild the labels from the FINAL status vector.
+                #
+                # private$.causeFactor is a snapshot taken immediately after the
+                # initial recode, before the event hierarchy and administrative
+                # censoring mutate myoutcome. Exporting the snapshot meant the
+                # spreadsheet column disagreed with the status this analysis had
+                # itself just reported: a patient censored at the administrative
+                # cut-off was written out as "Event". Downstream that is not
+                # cosmetic -- survival and multisurvival re-decode the
+                # Censored/Event/Competing hand-off and map "Event" to 1, so the
+                # patient re-entered as an event, at untruncated follow-up,
+                # silently inflating the event count.
+                #
+                # .causeFactor now serves only as the "this was a competing-risks
+                # run" flag; both branches read the same post-mutation vector, so
+                # they agree by construction.
+                if (!is.null(private$.causeFactor)) {
+                    .lbl <- c("Censored", "Event", "Competing")
+                    .idx <- suppressWarnings(as.integer(df_outcome$myoutcome)) + 1L
+                    .idx[is.na(.idx) | .idx < 1L | .idx > length(.lbl)] <- NA_integer_
+                    self$results$addOutcome$setValues(.lbl[.idx])
+                } else {
+                    self$results$addOutcome$setValues(df_outcome$myoutcome)
+                }
             }
 
             # Natural language summary for reports (if requested)

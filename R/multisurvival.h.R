@@ -170,6 +170,7 @@ multisurvivalOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                 options=list(
                     "overall",
                     "cause",
+                    "dfs",
                     "compete"),
                 default="overall")
             private$..outcomeredefined <- jmvcore::OptionOutput$new(
@@ -542,6 +543,7 @@ multisurvivalResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
     "multisurvivalResults",
     inherit = jmvcore::Group,
     active = list(
+        eventRecodeInfo = function() private$.items[["eventRecodeInfo"]],
         todo = function() private$.items[["todo"]],
         errors = function() private$.items[["errors"]],
         strongWarnings = function() private$.items[["strongWarnings"]],
@@ -567,6 +569,7 @@ multisurvivalResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
         survivalPlotsHeading = function() private$.items[["survivalPlotsHeading"]],
         plot = function() private$.items[["plot"]],
         plot3 = function() private$.items[["plot3"]],
+        cox_phTable = function() private$.items[["cox_phTable"]],
         cox_ph = function() private$.items[["cox_ph"]],
         plot8 = function() private$.items[["plot8"]],
         plotKM = function() private$.items[["plotKM"]],
@@ -631,6 +634,20 @@ multisurvivalResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                     "survminer"))
             self$add(jmvcore::Html$new(
                 options=options,
+                name="eventRecodeInfo",
+                title="Outcome Recode",
+                visible=TRUE,
+                clearWith=list(
+                    "outcome",
+                    "outcomeLevel",
+                    "multievent",
+                    "analysistype",
+                    "dod",
+                    "dooc",
+                    "awd",
+                    "awod")))
+            self$add(jmvcore::Html$new(
+                options=options,
                 name="todo",
                 title="To Do",
                 clearWith=list(
@@ -642,7 +659,12 @@ multisurvivalResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                     "fudate",
                     "dxdate",
                     "tint",
-                    "multievent")))
+                    "multievent",
+                    "use_stratify",
+                    "stratvar",
+                    "interactions",
+                    "uselandmark",
+                    "landmark")))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="errors",
@@ -681,7 +703,12 @@ multisurvivalResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                     "fudate",
                     "dxdate",
                     "tint",
-                    "multievent")))
+                    "multievent",
+                    "use_stratify",
+                    "stratvar",
+                    "interactions",
+                    "uselandmark",
+                    "landmark")))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="text2",
@@ -696,7 +723,12 @@ multisurvivalResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                     "fudate",
                     "dxdate",
                     "tint",
-                    "multievent")))
+                    "multievent",
+                    "use_stratify",
+                    "stratvar",
+                    "interactions",
+                    "uselandmark",
+                    "landmark")))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="interactionExplanation",
@@ -815,7 +847,12 @@ multisurvivalResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                     "fudate",
                     "dxdate",
                     "tint",
-                    "multievent")))
+                    "multievent",
+                    "use_stratify",
+                    "stratvar",
+                    "interactions",
+                    "uselandmark",
+                    "landmark")))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="glossaryPanel",
@@ -1025,13 +1062,16 @@ multisurvivalResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                     "dxdate",
                     "tint",
                     "multievent")))
-            self$add(jmvcore::Preformatted$new(
+            self$add(jmvcore::Table$new(
                 options=options,
-                name="cox_ph",
+                name="cox_phTable",
                 title="Proportional Hazards Assumption",
+                rows=0,
                 visible="(ph_cox)",
+                refs="survival",
                 clearWith=list(
                     "explanatory",
+                    "contexpl",
                     "outcome",
                     "outcomeLevel",
                     "elapsedtime",
@@ -1039,11 +1079,52 @@ multisurvivalResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                     "dxdate",
                     "tint",
                     "multievent",
+                    "use_stratify",
+                    "stratvar",
+                    "interactions"),
+                columns=list(
+                    list(
+                        `name`="term", 
+                        `title`="Term", 
+                        `type`="text"),
+                    list(
+                        `name`="chisq", 
+                        `title`="Chi-square", 
+                        `type`="number", 
+                        `format`="zto"),
+                    list(
+                        `name`="df", 
+                        `title`="df", 
+                        `type`="integer"),
+                    list(
+                        `name`="p", 
+                        `title`="p", 
+                        `type`="number", 
+                        `format`="zto,pvalue"))))
+            self$add(jmvcore::Preformatted$new(
+                options=options,
+                name="cox_ph",
+                title="Proportional Hazards Diagnostics",
+                visible="(ph_cox)",
+                clearWith=list(
+                    "explanatory",
+                    "contexpl",
+                    "outcome",
+                    "outcomeLevel",
+                    "elapsedtime",
+                    "fudate",
+                    "dxdate",
+                    "tint",
+                    "multievent",
+                    "use_stratify",
+                    "stratvar",
+                    "interactions",
+                    "multievent",
                     "contexpl")))
             self$add(jmvcore::Image$new(
                 options=options,
                 name="plot8",
-                title="Proportional Hazards Assumption",
+                title="Proportional Hazards: Schoenfeld Residual Plots",
                 width=600,
                 height=450,
                 renderFun=".plot8",
@@ -1856,6 +1937,7 @@ multisurvivalBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   visual clutter when summaries are not needed.
 #' @return A results object containing:
 #' \tabular{llllll}{
+#'   \code{results$eventRecodeInfo} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$todo} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$errors} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$strongWarnings} \tab \tab \tab \tab \tab a html \cr
@@ -1881,6 +1963,7 @@ multisurvivalBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   \code{results$survivalPlotsHeading} \tab \tab \tab \tab \tab a preformatted \cr
 #'   \code{results$plot} \tab \tab \tab \tab \tab an image \cr
 #'   \code{results$plot3} \tab \tab \tab \tab \tab an image \cr
+#'   \code{results$cox_phTable} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$cox_ph} \tab \tab \tab \tab \tab a preformatted \cr
 #'   \code{results$plot8} \tab \tab \tab \tab \tab an image \cr
 #'   \code{results$plotKM} \tab \tab \tab \tab \tab an image \cr

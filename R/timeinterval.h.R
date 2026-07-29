@@ -32,6 +32,7 @@ timeintervalOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
             private$..dx_date <- jmvcore::OptionVariable$new(
                 "dx_date",
                 dx_date,
+                default=NULL,
                 suggested=list(
                     "continuous",
                     "nominal"),
@@ -41,6 +42,7 @@ timeintervalOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
             private$..fu_date <- jmvcore::OptionVariable$new(
                 "fu_date",
                 fu_date,
+                default=NULL,
                 suggested=list(
                     "continuous",
                     "nominal"),
@@ -321,7 +323,7 @@ timeintervalBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' @param remove_extreme Identify and flag potentially extreme time intervals
 #'   for quality review. Uses statistical outlier detection methods.
 #' @param extreme_multiplier Multiplier for 99th percentile to define extreme
-#'   values. Default 2.0 means values >2× the 99th percentile are flagged.
+#'   values. Default 2.0 means values >2x the 99th percentile are flagged.
 #'   Higher values are more conservative (fewer flagged values).
 #' @param add_times Appends calculated time intervals as a new variable for
 #'   downstream analysis. Useful for subsequent survival analysis or person-time
@@ -357,8 +359,8 @@ timeintervalBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' @export
 timeinterval <- function(
     data,
-    dx_date,
-    fu_date,
+    dx_date = NULL,
+    fu_date = NULL,
     time_format = "auto",
     output_unit = "months",
     time_basis = "standardized",

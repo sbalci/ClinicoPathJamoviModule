@@ -14,7 +14,19 @@
 .mapInteractionTerms <- function(interactions, all_labels) {
   if (is.null(interactions) || length(interactions) == 0)
     return(list())
+
+  # Accept a formula as well as the Terms list. `interactions = ~sex:age` is the
+  # documented R interface, but the value can arrive here still carrying the
+  # formula's tilde glued to the first variable -- list(c("~sex", "age")) -- which
+  # then built the term `~sex`:age, matched no column, and left the interaction
+  # and covariate-contribution tables silently empty.
+  if (inherits(interactions, "formula"))
+    interactions <- jmvcore::decomposeFormula(interactions)
+
   lapply(interactions, function(term) {
+    # Strip a leading tilde and surrounding whitespace, and drop empty pieces.
+    term <- trimws(sub("^\\s*~\\s*", "", as.character(term)))
+    term <- term[nzchar(term)]
     vapply(term, function(component) {
       real <- names(all_labels)[match(component, all_labels)]
       if (length(real) == 0 || is.na(real)) component else real

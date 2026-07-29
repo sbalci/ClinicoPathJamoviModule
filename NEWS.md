@@ -1,5 +1,78 @@
 # ClinicoPath News
 
+# ClinicoPath 1.0.1 — jsurvival event-level correctness pass (2026-07-28)
+
+Review of the event-level selection logic across the eight `jsurvival` analyses. Several of these
+fixes change reported statistics and should be verified against reference datasets before release.
+
+## Added
+
+- **Disease-Free survival type (`survival`, `singlearm`, `survivalcont`, `multisurvival`):** a new
+  `analysistype` option, `dfs`. "Alive with Disease" was previously mapped to *censored* in every
+  branch of every multi-event analysis type, so the `awd` level picker could not influence any
+  result and disease-free survival was not expressible. Under `dfs`, Alive with Disease counts as
+  an event.
+- **Outcome recode disclosure (all five analyses that build an event indicator):** a new
+  `eventRecodeInfo` output states which level became the event, which levels were collapsed into
+  "censored", how many rows were excluded as missing, and which estimand the results correspond to.
+  When the outcome has three or more levels and only one is the event, it also warns that the
+  remaining levels are being cause-specific censored — Cox hazard ratios stay valid under that
+  assumption, but the Kaplan-Meier curve, median survival and x-year survival are biased upward if
+  any collapsed level is a competing event.
+
+## Fixed
+
+### jsurvival
+
+- **Competing-risk outcomes were silently inverted in unguarded outputs (`survival`, `singlearm`,
+  `survivalcont`):** `survival::Surv()` does not reject a 0/1/2 status vector — it emits a warning
+  jamovi never displays and then remaps 1 to censored, 2 to event and 0 to `NA`. Restricted mean
+  survival time and survival-estimate export in `survival`, five plot renderers in `singlearm`, and
+  effectively the whole of `survivalcont` were computing on that inverted vector. All are now
+  blocked with an explanation rather than rendering inverted results.
+- **Excel serial dates were wrong by a factor of 86 400 (`datetimeconverter`):** serial numbers count
+  days but `as.POSIXct.numeric` reads seconds, so every Excel date collapsed onto its origin (45000
+  became 1899-12-30 12:30:00 instead of 2023-03-15). Unix-epoch conversions were already correct and
+  are unchanged.
+- **Event hierarchy overwrote a patient's records with the first record's code (`outcomeorganizer`):**
+  `any()` returns a single value, so `ifelse()` returned length 1 and dplyr recycled it across the
+  group; a patient with records (2, 0) and no priority event came out as (2, 2).
+- **Restricted mean survival time was biased low with a dimensionally wrong standard error
+  (`survivalcont`):** RMST was integrated with the trapezoidal rule over a step function, which
+  systematically underestimates it, and the variance summed `S^2 * Var(S) * dt` — units of time
+  rather than time squared — so the confidence interval was far too narrow. The fallback substituted
+  `sd(time)/sqrt(n)`, which ignores censoring, and printed it as a 95% CI. Now delegated to
+  `summary(survfit, rmean = tau)`.
+- **A text-level factor outcome aborted the whole analysis (`multisurvival`):** `.eventIndicator()`
+  rejected any factor whose levels were neither `"Event"` nor numeric-coercible — including an
+  ordinary "Alive"/"Dead" outcome, the exact case the Event Level option exists to handle. It now
+  consults the selected event level.
+- **Missing outcomes were converted into censored observations (`multisurvival`,
+  `outcomeorganizer`):** the competing-risk branch pre-filled the vector with `"Censored"`, and the
+  RFS/PFS/DFS composite used `pmax(..., na.rm = TRUE)` where `pmax(NA, 0, na.rm = TRUE)` is `0`. In
+  both cases a patient with unknown vital status entered the model as event-free. Missing values now
+  stay missing and the row is dropped, with the count reported.
+- **Competing-risk coding was lost handing off from `outcomeorganizer`:** the recoded column was
+  written as numeric 0/1/2, came back as a nominal factor with levels "0"/"1"/"2", took the
+  single-event-level branch downstream, and level "2" silently became censored — turning a
+  competing-risks analysis back into a cause-specific one. It is now written as
+  Censored/Event/Competing, the representation the survival analyses already recognise.
+- **Unassigned outcome levels deleted patients instead of erroring (`survivalcont`, `multisurvival`,
+  `outcomeorganizer`):** in multi-event mode a level not assigned to one of the four categories
+  became `NA` and was then dropped by `jmvcore::naOmit()`, shrinking the denominator and inflating
+  the event rate (mapping only "Dead of Disease" produced a 100% event rate that looked valid).
+  `survival` and `singlearm` already caught this; the check is now shared. A blank category is also
+  no longer misreported as a duplicate selection.
+- **Event-coding validation unified across the five analyses** into `.defineEventIndicator()` in
+  `R/survival_utils.R`, resolving drift between five near-identical copies:
+  `survivalcont` crashed with a raw "replacement has 0 rows" error when no event level was selected
+  and failed silently on a non-0/1 numeric outcome; `singlearm`, `survivalcont` and `multisurvival`
+  tested numeric outcomes with `sum(unique(x)) == 1`, which accepted nonsense codings such as
+  {-1, 2} and rejected legitimate all-event or all-censored cohorts; no analysis except
+  `outcomeorganizer` checked that the selected event level actually occurs in the data, so a stale
+  level produced zero events and a flat survival curve with no error; and numeric outcomes ignored
+  the selected event level entirely, so a 0 = dead / 1 = alive column ran inverted.
+
 # ClinicoPath 1.0.0 — shipping-function bug-fix pass (2026-07-14)
 
 Post-release correctness/robustness pass over the shipping (submodule-distributed) analyses. Many

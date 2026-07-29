@@ -60,7 +60,10 @@
 }
 
 # Helper function for comprehensive data validation
-.validateSurvivalData <- function(data, time_var = "mytime", outcome_var = "myoutcome") {
+.validateSurvivalData <- function(data, time_var = "mytime", outcome_var = "myoutcome",
+                                  event_level = NULL, multievent = FALSE,
+                                  analysistype = "overall",
+                                  dod = NULL, dooc = NULL, awd = NULL, awod = NULL) {
   issues <- list()
   warnings <- list()
   event_indicator <- NULL
@@ -104,17 +107,35 @@
   if (outcome_var %in% names(data)) {
     outcome_vec <- data[[outcome_var]]
 
-    # Build an event indicator safely (handles factors, logicals, numeric)
-    event_indicator <- .eventIndicator(outcome_vec)
+    # In multi-event mode the four-level clinical outcome (e.g. DOD / DOOC /
+    # AWD / AWOD) is mapped by dod/dooc/awd/awod, not by event_level, and the
+    # mapping happens later in .definemyoutcome(). Validating the RAW outcome
+    # here with .eventIndicator() rejected exactly the input this mode exists to
+    # accept: "Outcome Factor Has Unsupported Levels ... AWD, AWOD, DOD, DOOC",
+    # which made the whole Fine-Gray pathway unreachable from its normal
+    # clinical input. Use the same shared coder the analysis will use.
+    if (isTRUE(multievent)) {
+      res <- .defineEventIndicator(outcome_vec, multievent = TRUE,
+                                   analysistype = analysistype,
+                                   dod = dod, dooc = dooc, awd = awd, awod = awod)
+      # A mapping problem is reported by .definemyoutcome() with a far better
+      # message than this validator can give, so only the derived indicator is
+      # taken here.
+      event_indicator <- if (is.null(res$error)) res$status == 1 else NULL
 
-    # Only enforce binary check when the underlying values are numeric/logical
-    if (is.numeric(outcome_vec) || is.logical(outcome_vec)) {
-      unique_outcomes <- unique(outcome_vec[!is.na(outcome_vec)])
-      if (!all(unique_outcomes %in% c(0, 1, TRUE, FALSE))) {
-        issues <- append(issues, "Outcome should be binary (0/1 or TRUE/FALSE)")
+    } else {
+      # Build an event indicator safely (handles factors, logicals, numeric)
+      event_indicator <- .eventIndicator(outcome_vec, event_level)
+
+      # Only enforce binary check when the underlying values are numeric/logical
+      if (is.numeric(outcome_vec) || is.logical(outcome_vec)) {
+        unique_outcomes <- unique(outcome_vec[!is.na(outcome_vec)])
+        if (!all(unique_outcomes %in% c(0, 1, TRUE, FALSE))) {
+          issues <- append(issues, "Outcome should be binary (0/1 or TRUE/FALSE)")
+        }
+      } else if (is.factor(outcome_vec) && length(levels(outcome_vec)) > 2) {
+        warnings <- append(warnings, "Outcome has multiple levels; analysis will treat non-event levels as censored where applicable.")
       }
-    } else if (is.factor(outcome_vec) && length(levels(outcome_vec)) > 2) {
-      warnings <- append(warnings, "Outcome has multiple levels; analysis will treat non-event levels as censored where applicable.")
     }
 
     # Check event rate when we have a usable indicator
@@ -139,26 +160,35 @@
 }
 
 # Helper to derive a consistent event indicator (TRUE/FALSE) from various encodings
-.eventIndicator <- function(outcome_vec) {
+#
+# `event_level` is the user's Event Level selection. Passing it matters: this
+# helper used to reject any factor whose levels were neither "Event" nor
+# numeric-coercible, which killed the whole analysis for an ordinary
+# "Alive"/"Dead" outcome -- the exact case the Event Level option exists to
+# handle. It is reached from .validateSurvivalData() and ten other call sites,
+# so the rejection was not a corner case.
+.eventIndicator <- function(outcome_vec, event_level = NULL) {
   if (is.null(outcome_vec)) {
     return(NULL)
   }
 
   # Factor handling: competing risk encoding uses an "Event" level
-  if (is.factor(outcome_vec)) {
+  if (is.factor(outcome_vec) || is.character(outcome_vec)) {
     if ("Event" %in% levels(outcome_vec)) {
       return(outcome_vec == "Event")
+    }
+    # An explicitly selected event level wins over any guessing below.
+    if (!is.null(event_level) && length(event_level) > 0 &&
+        as.character(event_level) %in% as.character(outcome_vec)) {
+      return(as.character(outcome_vec) == as.character(event_level))
     }
     # Try to coerce factor levels to numeric (e.g., "0"/"1")
     suppressWarnings(num_levels <- as.numeric(as.character(outcome_vec)))
     if (!all(is.na(num_levels))) {
       return(num_levels >= 1)
     }
-    # IMPROVEMENT: Throw error instead of silent NA return for unsupported factor levels
-    # This prevents misleading results from incorrectly encoded outcomes
     jmvcore::reject(sprintf(
-      "Outcome Factor Has Unsupported Levels: The outcome variable has non-numeric levels that cannot be interpreted as events: %s\n\nTo Fix:\n1. For binary outcomes: Recode as numeric (0 = censored, 1 = event) or logical (FALSE/TRUE)\n2. For competing risks: Use factor with exactly 3 levels: 'Censored', 'Event', 'Competing'\n3. In jamovi: Use Transform > Recode to convert to appropriate format\n4. Example numeric coding: 0 = Alive/Censored, 1 = Dead/Event occurred\n\nCurrent levels detected: %s",
-      paste(levels(outcome_vec), collapse=", "),
+      "Outcome Factor Has Unsupported Levels: the outcome variable has non-numeric levels that cannot be interpreted as events: %s\n\nTo Fix:\n1. Select which level represents the event using the Event Level option.\n2. Or recode as numeric (0 = censored, 1 = event) or logical (FALSE/TRUE).\n3. For competing risks, use a factor with levels 'Censored', 'Event', 'Competing'.",
       paste(levels(outcome_vec), collapse=", ")
     ))
   }
@@ -188,8 +218,32 @@
     strongest_effect <- NULL
 
     tryCatch({
-      if (is.data.frame(results) && "p" %in% names(results)) {
-        p_values <- as.numeric(results$p)
+      # `results` is summary(coxph)$coefficients, which is a MATRIX, not a data
+      # frame -- so `is.data.frame(results)` was FALSE on every single run and
+      # sig_count stayed hard-wired at 0. The Clinical Summary therefore always
+      # declared "No statistically significant associations were identified",
+      # printed directly above hazard ratios with p < 1e-15. A false negative
+      # inside a box labelled "Clinical Summary" is about the worst place for
+      # one, so accept a matrix and locate the p column by its actual name
+      # (coxph calls it "Pr(>|z|)", or "Pr(>|z|)" with a robust variance).
+      res_df <- if (is.matrix(results)) as.data.frame(results, stringsAsFactors = FALSE)
+                else results
+
+      p_col <- NULL
+      if (is.data.frame(res_df)) {
+        cand <- c("p", "Pr(>|z|)", "Pr(>|t|)", "p.value", "pvalue")
+        hit  <- intersect(cand, names(res_df))
+        if (length(hit) > 0) p_col <- hit[1]
+        # Fall back to any column whose name starts with "Pr(".
+        if (is.null(p_col)) {
+          pr <- grep("^Pr\\(", names(res_df), value = TRUE)
+          if (length(pr) > 0) p_col <- pr[1]
+        }
+      }
+
+      if (is.data.frame(res_df) && !is.null(p_col)) {
+        results <- res_df
+        p_values <- suppressWarnings(as.numeric(res_df[[p_col]]))
         sig_indices <- which(p_values < 0.05 & !is.na(p_values))
         sig_count <- length(sig_indices)
 
@@ -259,7 +313,7 @@
 
       summary_parts$interpretation <- paste0(
         "Clinical Significance:", " ", risk_interpretation, " ",
-        "Consider this factor in clinical decision-making and patient counseling."
+        "This is an association observed in these data."
       )
     }
 
@@ -372,6 +426,9 @@ multisurvivalClass <- if (requireNamespace('jmvcore'))
       # They are reset at the top of .run() via .resetComputeCaches() so a
       # re-run with changed options recomputes rather than serving stale results.
       .dataCache = NULL,
+      # Result of .defineEventIndicator(), kept so .run() can render the
+      # recode disclosure without redoing the work.
+      .eventRecode = NULL,
       .dataComputed = FALSE,
       .coxCache = NULL,
       .coxComputed = FALSE,
@@ -1114,13 +1171,13 @@ multisurvivalClass <- if (requireNamespace('jmvcore'))
               <h4 style='color: #0056b3; margin-top: 0;'>Statistical Terms Glossary</h4>
               <dl style='line-height: 1.6;'>
                 <dt><b>Hazard Ratio (HR)</b></dt>
-                <dd style='margin-bottom: 10px;'>Effect size for time-to-event outcomes. HR &gt; 1 indicates increased risk of the event; HR &lt; 1 indicates decreased risk (protective effect); HR = 1 indicates no effect. For example, HR = 2.0 means the hazard is doubled.</dd>
+                <dd style='margin-bottom: 10px;'>Effect size for time-to-event outcomes. HR &gt; 1 indicates increased risk of the event; HR &lt; 1 indicates decreased risk (protective effect); HR = 1 indicates no effect. For example, HR = 2.0 means the instantaneous event rate is doubled.</dd>
                 <dt><b>C-index (Concordance Index)</b></dt>
                 <dd style='margin-bottom: 10px;'>Measures the model's ability to discriminate between patients who experience the event and those who don't. C-index &gt; 0.7 indicates good discrimination; 0.6-0.7 is acceptable; &lt; 0.6 suggests limited predictive ability. Similar to AUC in logistic regression.</dd>
                 <dt><b>EPV (Events Per Variable)</b></dt>
                 <dd style='margin-bottom: 10px;'>Number of events divided by number of predictors in the model. EPV \u2265 10 is recommended to avoid overfitting and optimism in model performance estimates. Low EPV increases risk of unstable coefficient estimates.</dd>
                 <dt><b>Proportional Hazards (PH) Assumption</b></dt>
-                <dd style='margin-bottom: 10px;'>Core assumption of Cox regression that the hazard ratio stays constant over time. Tested using cox.zph test; p &gt; 0.05 suggests assumption is met. If violated, consider time-varying effects or stratification.</dd>
+                <dd style='margin-bottom: 10px;'>Core assumption of Cox regression that the hazard ratio stays constant over time. Tested using cox.zph; p &gt; 0.05 means no departure was detected, which is not the same as the assumption holding. If violated, consider time-varying effects or stratification.</dd>
                 <dt><b>Fine-Gray Model (Competing Risks)</b></dt>
                 <dd style='margin-bottom: 10px;'>Extension of Cox regression for competing risks that models subdistribution hazards. Appropriate when interested in cumulative incidence functions. Hazard ratios are not directly comparable to cause-specific Cox models.</dd>
                 <dt><b>Censoring</b></dt>
@@ -1479,7 +1536,13 @@ multisurvivalClass <- if (requireNamespace('jmvcore'))
         }
 
         # Perform comprehensive data validation
-        validation_results <- .validateSurvivalData(mydata_labelled, mytime, myoutcome)
+        validation_results <- .validateSurvivalData(
+          mydata_labelled, mytime, myoutcome,
+          event_level  = self$options$outcomeLevel,
+          multievent   = self$options$multievent,
+          analysistype = self$options$analysistype,
+          dod = self$options$dod, dooc = self$options$dooc,
+          awd = self$options$awd, awod = self$options$awod)
 
         # Handle validation issues and warnings
         if (length(validation_results$issues) > 0) {
@@ -1734,101 +1797,32 @@ multisurvivalClass <- if (requireNamespace('jmvcore'))
         myoutcome_labelled <- labelled_data$myoutcome_labelled
 
 
-        contin <- c("integer", "numeric", "double")
+        # Delegated to the shared coder in survival_utils.R. Note the two
+        # behaviour changes here: the numeric check used sum(unique(x)) == 1,
+        # which accepted nonsense pairs such as {-1, 2}; and the competing-risk
+        # branch pre-filled the vector with "Censored", so patients with unknown
+        # vital status silently entered the Fine-Gray model as event-free.
+        # .defineEventIndicator() preserves NA in both cases.
+        res <- .defineEventIndicator(
+            outcome      = mydata[[myoutcome_labelled]],
+            outcomeLevel = self$options$outcomeLevel,
+            multievent   = self$options$multievent,
+            analysistype = self$options$analysistype,
+            dod          = self$options$dod,
+            dooc         = self$options$dooc,
+            awd          = self$options$awd,
+            awod         = self$options$awod,
+            outcome_name = self$options$outcome
+        )
 
-        outcomeLevel <- self$options$outcomeLevel
-        multievent <- self$options$multievent
+        if (!is.null(res$error))
+          jmvcore::reject(res$error, code = "outcome_recode")
 
-        # Check if outcome variable is selected
-        if (is.null(myoutcome_labelled) || length(myoutcome_labelled) == 0) {
-          # Return empty data frame with proper structure
-          return(data.frame(row_names = character(0), myoutcome = numeric(0)))
-        }
+        private$.eventRecode <- res
 
-        outcome1 <- mydata[[myoutcome_labelled]]
-
-        if (!multievent) {
-          if (inherits(outcome1, contin)) {
-            if (!((length(unique(outcome1[!is.na(outcome1)])) == 2) &&
-                  (sum(unique(outcome1[!is.na(outcome1)])) == 1))) {
-              jmvcore::reject(
-                'When using continuous variable as an outcome, it must only contain 1s and 0s. If patient is dead or event (recurrence) occured it is 1. If censored (patient is alive or free of disease) at the last visit it is 0.'
-              )
-
-            }
-
-            mydata[["myoutcome"]] <- mydata[[myoutcome_labelled]]
-            # mydata[[self$options$outcome]]
-
-          } else if (inherits(outcome1, "factor")) {
-            if (is.null(outcomeLevel)) {
-              jmvcore::reject("Please select an event level for the outcome variable.")
-            }
-            mydata[["myoutcome"]] <-
-              ifelse(test = outcome1 == outcomeLevel,
-                     yes = 1,
-                     no = 0)
-
-          } else {
-            jmvcore::reject(
-              'When using continuous variable as an outcome, it must only contain 1s and 0s. If patient is dead or event (recurrence) occured it is 1. If censored (patient is alive or free of disease) at the last visit it is 0. If you are using a factor as an outcome, please check the levels and content.'
-            )
-
-          }
-
-        } else if (multievent) {
-          analysistype <- self$options$analysistype
-
-          dod <- self$options$dod
-          dooc <- self$options$dooc
-          awd <- self$options$awd
-          awod <- self$options$awod
-
-          if (analysistype == 'overall') {
-            # Overall ----
-            # (Alive) <=> (Dead of Disease & Dead of Other Causes)
-
-
-            mydata[["myoutcome"]] <- NA_integer_
-
-            mydata[["myoutcome"]][outcome1 == awd] <- 0
-            mydata[["myoutcome"]][outcome1 == awod] <- 0
-            mydata[["myoutcome"]][outcome1 == dod] <- 1
-            mydata[["myoutcome"]][outcome1 == dooc] <- 1
-
-
-
-          } else if (analysistype == 'cause') {
-            # Cause Specific ----
-            # (Alive & Dead of Other Causes) <=> (Dead of Disease)
-
-
-            mydata[["myoutcome"]] <- NA_integer_
-
-            mydata[["myoutcome"]][outcome1 == awd] <- 0
-            mydata[["myoutcome"]][outcome1 == awod] <- 0
-            mydata[["myoutcome"]][outcome1 == dod] <- 1
-            mydata[["myoutcome"]][outcome1 == dooc] <- 0
-
-          } else if (analysistype == 'compete') {
-            # Competing Risks ----
-            # Alive <=> Dead of Disease accounting for Dead of Other Causes
-
-            # Create factor for Fine-Gray analysis
-            # 0=Censored, 1=Event, 2=Competing
-            
-            temp_outcome <- rep("Censored", length(outcome1))
-            
-            if (!is.null(awd)) temp_outcome[outcome1 == awd] <- "Censored"
-            if (!is.null(awod)) temp_outcome[outcome1 == awod] <- "Censored"
-            if (!is.null(dod)) temp_outcome[outcome1 == dod] <- "Event"
-            if (!is.null(dooc)) temp_outcome[outcome1 == dooc] <- "Competing"
-            
-            mydata[["myoutcome"]] <- factor(temp_outcome, levels = c("Censored", "Event", "Competing"))
-
-          }
-
-        }
+        # Fine-Gray needs the labelled factor; everything else wants 0/1.
+        mydata[["myoutcome"]] <- if (!is.null(res$status_factor))
+          res$status_factor else res$status
 
         df_outcome <- mydata %>% jmvcore::select(c("row_names", "myoutcome"))
 
@@ -1850,13 +1844,21 @@ multisurvivalClass <- if (requireNamespace('jmvcore'))
 
         mydata <- mydata_labelled
 
+        # The stratification variable has to be carried into the analysis frame
+        # too. It was omitted here, so the Cox formula asked for strata(<var>) on
+        # a column that did not exist in cleanData: the fit failed and every
+        # stratified output came back blank, with no error -- while the module's
+        # own proportional-hazards note actively recommends stratifying.
+        mystratvar_labelled <- labelled_data$mystratvar_labelled
+
         df_factor <- mydata %>%
           jmvcore::select(unique(
             c(
               "row_names",
               myexplanatory_labelled,
               adjexplanatory_labelled,
-              mycontexpl_labelled
+              mycontexpl_labelled,
+              mystratvar_labelled
             )
           ))
 
@@ -2309,6 +2311,14 @@ multisurvivalClass <- if (requireNamespace('jmvcore'))
           return()
         }
 
+        # Always disclose how the outcome was recoded. A silent recode is a
+        # clinical-safety hazard: the reader of a survival curve cannot otherwise
+        # see which levels were collapsed into "censored", nor which estimand
+        # the probability-scale outputs actually correspond to.
+        if (!is.null(private$.eventRecode))
+          self$results$eventRecodeInfo$setContent(
+              .describeEventIndicator(private$.eventRecode, self$options$outcome))
+
         # Generate analysis completion summary notice
         # This provides confidence that analysis completed and summarizes key metrics
         tryCatch({
@@ -2321,13 +2331,35 @@ multisurvivalClass <- if (requireNamespace('jmvcore'))
           median_followup <- median(mydata$mytime, na.rm = TRUE)
           time_unit <- self$options$timetypeoutput
 
+          # Reconcile against the recode disclosure shown just above.
+          #
+          # That panel counts the OUTCOME column only, so it reports every row
+          # whose outcome was readable. The model additionally drops rows with a
+          # missing follow-up time or a missing covariate. A report could
+          # therefore state "Event level 1: 149" directly above "140 events" with
+          # nothing accounting for the 9, which reads as a contradiction.
+          recode_note <- ""
+          rc <- private$.eventRecode
+          if (!is.null(rc)) {
+            rc_total <- sum(c(rc$n_event, rc$n_censored, rc$n_missing), na.rm = TRUE)
+            dropped <- rc_total - n_obs
+            dropped_ev <- if (!is.null(rc$n_event)) rc$n_event - n_events else NA_integer_
+            if (!is.na(dropped) && dropped > 0)
+              recode_note <- sprintf(
+                .(" A further %d row(s)%s were excluded from the model because the follow-up time or at least one selected covariate was missing; the outcome recode shown above counts the outcome column alone."),
+                dropped,
+                if (!is.na(dropped_ev) && dropped_ev > 0)
+                  sprintf(.(" (%d of them events)"), dropped_ev) else ""
+              )
+          }
+
           private$.addHtmlMessage(
             "info",
             .("Analysis complete"),
-            sprintf(
+            paste0(sprintf(
               .("Analysis completed successfully using %d observations with %d events (%.1f%% event rate) over %.1f %s median follow-up."),
               n_obs, n_events, event_rate, median_followup, time_unit
-            )
+            ), recode_note)
           )
         }, error = function(e) {
           # Notice Disabled
@@ -2485,7 +2517,16 @@ multisurvivalClass <- if (requireNamespace('jmvcore'))
         all_labels <- labelled::var_label(mydata_labelled)
 
         # Build formula parts (exclude strata from covariates)
+        #
+        # The comment above was aspirational: strata variables were left in the
+        # predictor list AND passed separately as strata_vars below, so the
+        # formula became `... + treatment + strata(treatment)`. coxph then
+        # returns a singular NA coefficient for the duplicated term, which in
+        # turn inflates the coefficient count used for the events-per-variable
+        # check and can trip a spurious "too few events" warning.
         formula_parts <- c(myexplanatory, mycontexpl)
+        if (length(mystratvar) > 0)
+          formula_parts <- setdiff(formula_parts, mystratvar)
 
         # Map interaction terms (display labels -> real names) and build the
         # escaped, colon-joined terms for the Cox formula RHS.
@@ -2619,16 +2660,32 @@ multisurvivalClass <- if (requireNamespace('jmvcore'))
               return(NULL)
             }
 
-            fg_data <- survival::finegray(coxformula, data = mydata, etype = "Event")
-            
+            # id = keeps a subject identifier on the expanded rows so the fit
+            # below can cluster on it.
+            mydata$fgid <- seq_len(nrow(mydata))
+            # finegray() keeps only the variables named in the formula, so the
+            # subject id has to be carried on the right-hand side for it to
+            # survive into the expanded data. It is dropped again from the
+            # modelling formula below, which is rebuilt from the original.
+            fg_data <- survival::finegray(update(coxformula, . ~ . + fgid),
+                                          data = mydata, etype = "Event", id = fgid)
+
             # Update formula to use Fine-Gray variables
             fg_formula <- update(coxformula, survival::Surv(fgstart, fgstop, fgstatus) ~ .)
-            
-            # Fit Cox model on expanded data with weights
+
+            # Fit Cox model on expanded data with weights.
+            #
+            # finegray() splits one subject into several rows, so those rows are
+            # not independent. Without clustering, the naive weighted-likelihood
+            # variance treats them as independent observations and understates
+            # the standard errors -- making the subdistribution CIs too narrow
+            # and the p-values too small. survival::finegray's documentation
+            # calls for a robust variance on the expanded data.
             cox_model <- survival::coxph(
               fg_formula,
               data = fg_data,
               weights = fgwt,
+              cluster = fgid,
               x = TRUE,
               y = TRUE,
               model = TRUE
@@ -3202,20 +3259,86 @@ multisurvivalClass <- if (requireNamespace('jmvcore'))
           tps <- sort(unique(tps[!is.na(tps) & tps > 0 & tps < max_time]))
 
           if (length(tps) > 0) {
+            # Refitting needs every variable the model formula names, including
+            # the stratification variables. cleanData does not always carry
+            # them, so the refit died with a bare "object 'stage' not found"
+            # that surfaced to the clinician as a raw R error. Pull anything
+            # missing from the labelled frame, matched on row_names.
+            .need <- all.vars(stats::formula(cox_model))
+            .miss <- setdiff(.need, names(mydata))
+            if (length(.miss) > 0) {
+              .src <- cleaneddata$mydata_labelled
+              if (!is.null(.src) && all(.miss %in% names(.src)) &&
+                  !is.null(mydata[["row_names"]]) && !is.null(.src[["row_names"]])) {
+                .idx <- match(mydata[["row_names"]], .src[["row_names"]])
+                for (.v in .miss) mydata[[.v]] <- .src[[.v]][.idx]
+                .miss <- setdiff(.need, names(mydata))
+              }
+            }
+            if (length(.miss) > 0) {
+              private$.addHtmlMessage(
+                "warning",
+                .("Model performance metrics unavailable"),
+                sprintf(.("Performance metrics could not be computed because the analysis dataset does not carry: %s. This usually happens when a stratification variable is not retained alongside the model covariates."),
+                        paste(.miss, collapse = ", ")))
+              return(invisible(NULL))
+            }
+
             cox_local <- survival::coxph(stats::formula(cox_model), data = mydata,
                                          x = TRUE, y = TRUE)
+            # riskRegression's response parser does not accept a
+            # namespace-qualified `survival::Surv(...)` on the left-hand side --
+            # it fails with "Cannot assign response type", which was swallowed
+            # into a generic notice, leaving only Harrell's C in the table.
+            # Its documented interface takes a bare `Surv(...)`, which
+            # .asSurvivalFormula() already allow-lists.
+            score_formula <- .asSurvivalFormula("Surv(mytime, myoutcome) ~ 1")
+
+            # riskRegression refuses a model carrying NA coefficients, and its
+            # message ("One or several parameters ... have no value") does not
+            # say why. NA coefficients mean a term is aliased -- a covariate
+            # that is constant, or collinear with another, after listwise
+            # deletion. Name the offending terms instead of surfacing a generic
+            # "performance metric error".
+            na_coefs <- names(stats::coef(cox_local))[is.na(stats::coef(cox_local))]
+            if (length(na_coefs) > 0) {
+              self$results$survMetricsSummary$setContent(paste0(
+                "<p><b>Performance metrics unavailable.</b> The model could not estimate a ",
+                "coefficient for: <i>", paste(na_coefs, collapse = ", "), "</i>. ",
+                "This happens when a covariate is constant, or is collinear with another ",
+                "covariate, in the rows remaining after missing values are dropped. ",
+                "Brier score, time-dependent AUC and IBS require a fully identified model - ",
+                "remove or combine the affected term(s) and re-run.</p>"))
+              return(invisible(NULL))
+            }
+
+            # Integrate the Brier score over a DENSE grid, not just the handful
+            # of timepoints the user typed. IBS is an integral: evaluating it at
+            # 3-4 points materially misstates it (on the bundled data a 4-point
+            # IBS read 0.144 against 0.166 over a dense grid through the same
+            # horizon). Per-timepoint rows below still report only the requested
+            # timepoints.
+            dense <- unique(sort(c(tps, seq(0, max(tps), length.out = 100))))
+            dense <- dense[dense > 0 & dense <= max(tps)]
+
+            # null.model = TRUE gives the Kaplan-Meier (covariate-free) reference.
+            # Without it there is nothing to judge a Brier score against except a
+            # fixed cut-off, and 0.25 is the non-informative benchmark only when
+            # the event probability happens to be 50%.
             sc <- riskRegression::Score(
               list(Cox = cox_local),
-              formula   = survival::Surv(mytime, myoutcome) ~ 1,
+              formula   = score_formula,
               data      = mydata,
-              times     = tps,
+              times     = dense,
               metrics   = c("brier", "auc"),
               summary   = "ibs",
               se.fit    = FALSE,
               conf.int  = FALSE,
-              null.model = FALSE
+              null.model = TRUE
             )
-            br <- as.data.frame(sc$Brier$score); br <- br[br$model == "Cox", , drop = FALSE]
+            br_all <- as.data.frame(sc$Brier$score)
+            br     <- br_all[br_all$model == "Cox", , drop = FALSE]
+            br_ref <- br_all[br_all$model != "Cox", , drop = FALSE]
             au <- as.data.frame(sc$AUC$score);   au <- au[au$model == "Cox", , drop = FALSE]
 
             for (t in tps) {
@@ -3225,8 +3348,19 @@ multisurvivalClass <- if (requireNamespace('jmvcore'))
                 tbl$addRow(rowKey = rk, values = list(
                   metric   = paste0("Brier score (t = ", t, " ", self$options$timetypeoutput, ")"),
                   value    = bval, ci_lower = NA_real_, ci_upper = NA_real_,
-                  interpretation = if (bval < 0.15) "Excellent accuracy"
-                                   else if (bval < 0.25) "Good accuracy" else "Poor accuracy"
+                  # Judged against the Kaplan-Meier reference at the same
+                  # timepoint (IPA = 1 - Brier_model / Brier_null), not against a
+                  # universal cut-off. IPA <= 0 means the model predicts no better
+                  # than ignoring the covariates entirely.
+                  interpretation = {
+                    rval <- br_ref$Brier[br_ref$times == t]
+                    if (length(rval) == 1 && !is.na(rval) && rval > 0) {
+                      ipa <- 1 - bval / rval
+                      paste0(sprintf("%+.1f%%", ipa * 100),
+                             " vs Kaplan-Meier (", sprintf("%.3f", rval), ")",
+                             if (ipa <= 0) " - no better than ignoring covariates" else "")
+                    } else "no reference available"
+                  }
                 ))
               }
               aval <- au$AUC[au$times == t]
@@ -3250,8 +3384,15 @@ multisurvivalClass <- if (requireNamespace('jmvcore'))
                 tbl$addRow(rowKey = rk, values = list(
                   metric   = paste0("Integrated Brier Score (0 to ", max(tps), " ", self$options$timetypeoutput, ")"),
                   value    = ibs, ci_lower = NA_real_, ci_upper = NA_real_,
-                  interpretation = if (ibs < 0.15) "Excellent overall prediction"
-                                   else if (ibs < 0.25) "Good overall prediction" else "Poor overall prediction"
+                  interpretation = {
+                    rref <- utils::tail(br_ref$IBS[!is.na(br_ref$IBS)], 1)
+                    if (length(rref) == 1 && rref > 0) {
+                      ipa <- 1 - ibs / rref
+                      paste0(sprintf("%+.1f%%", ipa * 100),
+                             " vs Kaplan-Meier (", sprintf("%.3f", rref), ")",
+                             if (ipa <= 0) " - no better than ignoring covariates" else "")
+                    } else "no reference available"
+                  }
                 ))
               }
             }
@@ -3262,10 +3403,18 @@ multisurvivalClass <- if (requireNamespace('jmvcore'))
               "<h4>Model Performance Summary</h4>",
               "<p><b>Discrimination</b> (Harrell's C = ", round(c_index, 3), "): the probability that, ",
               "for a random pair of subjects, the one predicted higher-risk experiences the event first. ",
-              "C &gt; 0.7 is good, 0.6-0.7 acceptable. <b>Time-dependent AUC</b> extends this to each timepoint.</p>",
+              "0.5 is chance. <b>Time-dependent AUC</b> extends this to each timepoint.</p>",
               "<p><b>Brier score</b> is the inverse-probability-of-censoring-weighted mean squared error ",
-              "between predicted survival and observed status at a timepoint (lower is better; &lt; 0.25 acceptable). ",
-              "The <b>Integrated Brier Score</b> averages it over the follow-up.</p>",
+              "between predicted survival and observed status at a timepoint (lower is better). It is ",
+              "reported against the Kaplan-Meier model fitted to the same data, because a fixed cut-off ",
+              "such as 0.25 is the non-informative benchmark only when the event probability is 50%. ",
+              "The <b>Integrated Brier Score</b> integrates it over a dense grid across the follow-up.</p>",
+              "<p style='background:#fff4e5;border-left:4px solid #e67e22;padding:8px;margin:10px 0;'>",
+              "<b>These are apparent (in-sample) estimates.</b> The model was fitted and evaluated on the ",
+              "same observations, with no bootstrap correction, cross-validation or held-out set, so every ",
+              "value here is optimistic - typically substantially so with many covariates or few events. ",
+              "Treat them as an upper bound on the performance this model would show in new patients ",
+              "(TRIPOD, Collins et al. 2015).</p>",
               "<p style='color:#666;font-size:0.9em;'><i>Brier / AUC / IBS computed with riskRegression using Kaplan-Meier censoring weights.</i></p>"
             ))
           }
@@ -3304,22 +3453,35 @@ multisurvivalClass <- if (requireNamespace('jmvcore'))
                                        x = TRUE, y = TRUE)
           sc <- riskRegression::Score(
             list(Cox = cox_local),
-            formula = survival::Surv(mytime, myoutcome) ~ 1,
+            # Bare Surv(): riskRegression's response parser rejects a
+            # namespace-qualified survival::Surv() with "Cannot assign response
+            # type". null.model = TRUE supplies the real reference curve.
+            formula = .asSurvivalFormula("Surv(mytime, myoutcome) ~ 1"),
             data = mydata, times = grid, metrics = "brier",
-            se.fit = FALSE, conf.int = FALSE, null.model = FALSE
+            se.fit = FALSE, conf.int = FALSE, null.model = TRUE
           )
-          br <- as.data.frame(sc$Brier$score)
-          br <- br[br$model == "Cox" & !is.na(br$Brier), c("times", "Brier")]
+          br_all <- as.data.frame(sc$Brier$score)
+          br  <- br_all[br_all$model == "Cox" & !is.na(br_all$Brier), c("times", "Brier")]
+          ref <- br_all[br_all$model != "Cox" & !is.na(br_all$Brier), c("times", "Brier")]
           if (nrow(br) == 0) return(FALSE)
-          ggplot2::ggplot(br, ggplot2::aes(x = times, y = Brier)) +
-            ggplot2::geom_line(linewidth = 1.1, colour = "#2E8B57") +
-            ggplot2::geom_hline(yintercept = 0.25, linetype = "dashed",
-                                colour = "red", alpha = 0.6) +
-            ggplot2::labs(
+
+          # The old flat line at 0.25 was labelled the "random-prediction
+          # reference". That is only true when the event probability is 50%; at
+          # any other prevalence it is meaningless, and it was drawn even though
+          # null.model was FALSE so no reference had been computed at all. The
+          # honest reference is the Kaplan-Meier (covariate-free) Brier curve,
+          # which varies with time.
+          g <- ggplot2::ggplot(br, ggplot2::aes(x = times, y = Brier)) +
+            ggplot2::geom_line(linewidth = 1.1, colour = "#2E8B57")
+          if (nrow(ref) > 0)
+            g <- g + ggplot2::geom_line(data = ref, linetype = "dashed",
+                                        colour = "#B22222", alpha = 0.8)
+          g + ggplot2::labs(
               title = "Brier Score Over Time",
               x = paste0("Time (", self$options$timetypeoutput, ")"),
               y = "Brier score (IPCW)",
-              caption = "Lower is better. Dashed line = 0.25 (random-prediction reference)."
+              caption = paste0("Lower is better. Solid = model; dashed = Kaplan-Meier ",
+                               "(no covariates). Apparent, in-sample estimates.")
             ) +
             ggtheme
         }, error = function(e) NULL)
@@ -3348,7 +3510,8 @@ multisurvivalClass <- if (requireNamespace('jmvcore'))
         mydata <- private$.cleandata()$cleanData
 
         tryCatch({
-          full_local  <- survival::coxph(stats::formula(full), data = mydata, x = TRUE, y = TRUE)
+          full_formula <- stats::formula(full)
+          full_local  <- survival::coxph(full_formula, data = mydata, x = TRUE, y = TRUE)
           term_labels <- attr(stats::terms(full_local), "term.labels")
           if (length(term_labels) < 2) {
             self$results$modelContributionSummary$setContent(
@@ -3357,23 +3520,105 @@ multisurvivalClass <- if (requireNamespace('jmvcore'))
             return()
           }
 
-          dd       <- stats::drop1(full_local, test = "Chisq")
           full_aic <- stats::AIC(full_local)
+          full_ll  <- as.numeric(stats::logLik(full_local))
 
           tbl <- self$results$modelContributionTable
           tbl$deleteRows()
           rk <- 0L
-          for (term in rownames(dd)) {
-            if (term == "<none>") next
-            pval <- dd[term, "Pr(>Chi)"]
+
+          # Refit each reduced model explicitly rather than calling stats::drop1().
+          #
+          # drop1() refits by re-evaluating the model's stored call via update(),
+          # and it does so in the environment of the model's formula rather than
+          # here. That environment does not hold `mydata`, so every refit failed
+          # with "object 'mydata' not found" -- swallowed by the tryCatch below,
+          # leaving an empty table and a blank summary with no indication that
+          # anything had gone wrong. Building each reduced formula and fitting it
+          # directly sidesteps the environment question entirely.
+          # Respect marginality, as stats::drop1() does: a main effect that
+          # appears inside a higher-order term cannot be dropped on its own.
+          # Dropping `age` while keeping `sex:age` leaves a model that is not
+          # nested in any meaningful way -- it came back with df = 0 and "not
+          # estimable" rather than being skipped.
+          tf         <- stats::terms(full_local)
+          fac        <- attr(tf, "factors")
+
+          # strata()/cluster()/frailty() are not covariates and must never enter
+          # a single-term-deletion table. Dropping strata() replaces a set of
+          # separate baseline hazards with one pooled baseline, which changes the
+          # likelihood enormously while contributing no coefficients -- so the
+          # row came out as a huge LRT (660.9) on df = 0 with p = NaN, labelled
+          # "not estimable (term is aliased)". It is not aliased; it simply is
+          # not the kind of term this test applies to.
+          special_terms <- grepl("^(strata|cluster|frailty|tt)\\(", term_labels)
+          keep_terms    <- term_labels[!special_terms]
+          if (length(keep_terms) == 0) {
+            self$results$modelContributionSummary$setContent(
+              "<p>No covariates are available for single-term deletion; the model contains only stratification or clustering terms.</p>")
+            return()
+          }
+          # The special terms must still be carried in every reduced formula --
+          # a model stratified on treatment stays stratified when `age` is
+          # dropped -- so keep them separately rather than discarding them.
+          carry_terms <- term_labels[special_terms]
+          order_all   <- attr(tf, "order")
+          names(order_all) <- term_labels
+          term_labels <- keep_terms
+
+          droppable  <- term_labels
+          if (!is.null(fac) && ncol(fac) > 0) {
+            # Subset by NAME so the marginality check below cannot index a
+            # column belonging to a term that is no longer in term_labels.
+            fac       <- fac[, colnames(fac) %in% term_labels, drop = FALSE]
+            order_of  <- order_all[term_labels]
+            droppable <- term_labels[vapply(seq_along(term_labels), function(i) {
+              # A term is droppable if no higher-order term contains all of its
+              # variables.
+              vars_i <- rownames(fac)[fac[, i] > 0]
+              !any(vapply(seq_along(term_labels), function(j) {
+                if (j == i || order_of[j] <= order_of[i]) return(FALSE)
+                all(vars_i %in% rownames(fac)[fac[, j] > 0])
+              }, logical(1)))
+            }, logical(1))]
+          }
+
+          if (length(droppable) == 0) {
+            self$results$modelContributionSummary$setContent(
+              "<p>No term can be dropped while preserving model hierarchy.</p>")
+            return()
+          }
+
+          skipped <- setdiff(term_labels, droppable)
+
+          for (term in droppable) {
+            # carry_terms keeps strata()/cluster() in every reduced model, so
+            # each LRT compares like with like: the same stratification, one
+            # covariate fewer. Omitting them would compare a stratified model
+            # against an unstratified one and attribute the whole difference in
+            # baseline hazard to the dropped covariate.
+            reduced_terms <- c(setdiff(term_labels, term), carry_terms)
+            rhs <- if (length(reduced_terms)) paste(reduced_terms, collapse = " + ") else "1"
+            lhs <- deparse(full_formula[[2]])
+
+            fit_red <- try(survival::coxph(
+              .asSurvivalFormula(paste(lhs, "~", rhs)), data = mydata), silent = TRUE)
+            if (inherits(fit_red, "try-error")) next
+
+            red_ll  <- as.numeric(stats::logLik(fit_red))
+            lrt     <- 2 * (full_ll - red_ll)
+            df_diff <- length(stats::coef(full_local)) - length(stats::coef(fit_red))
+            pval    <- if (df_diff > 0) stats::pchisq(lrt, df_diff, lower.tail = FALSE) else NA_real_
+
             rk <- rk + 1L
             tbl$addRow(rowKey = rk, values = list(
-              term  = term,
-              df    = dd[term, "Df"],
-              aic   = dd[term, "AIC"],
-              lrt   = dd[term, "LRT"],
+              term   = term,
+              df     = df_diff,
+              aic    = stats::AIC(fit_red),
+              lrt    = lrt,
               pvalue = pval,
               interpretation = if (isTRUE(pval < 0.05)) "Significant contribution to fit"
+                               else if (is.na(pval)) "Not estimable (term is aliased)"
                                else "No significant contribution"
             ))
           }
@@ -3383,7 +3628,12 @@ multisurvivalClass <- if (requireNamespace('jmvcore'))
               "<p>Each row is a likelihood-ratio test comparing the full model against the model with that ",
               "single covariate removed (all others retained). A small p-value indicates the covariate ",
               "significantly improves fit. An <b>AIC if dropped</b> below the full-model AIC (",
-              round(full_aic, 1), ") indicates the covariate could be removed without penalising fit.</p>"
+              round(full_aic, 1), ") indicates the covariate could be removed without penalising fit.</p>",
+              if (length(skipped))
+                paste0("<p>Not tested, because each appears inside a higher-order term and ",
+                       "dropping it alone would break model hierarchy: <i>",
+                       paste(skipped, collapse = ", "), "</i>. Remove the interaction first ",
+                       "if you want to test the main effect.</p>") else ""
             ))
           }
         }, error = function(e) {
@@ -3930,30 +4180,52 @@ multisurvivalClass <- if (requireNamespace('jmvcore'))
 
 
 
+        # The cox.zph result is rendered as a proper jamovi table rather than a
+        # console dump. The Preformatted element is kept for the failure case
+        # only, and hidden when the diagnostics computed successfully.
+        phTable <- self$results$cox_phTable
+        phTable$deleteRows()
+
         if (inherits(zph, "multisurvival_ph_error")) {
+          self$results$cox_ph$setVisible(TRUE)
           self$results$cox_ph$setContent(paste0(
             "Unable to compute proportional hazards diagnostics (cox.zph):\n",
-            htmltools::htmlEscape(zph$error)
+            zph$error
           ))
         } else {
           zph_table <- zph$table
+          self$results$cox_ph$setVisible(FALSE)
+          self$results$cox_ph$setContent("")
 
-          ph_text <- htmltools::htmlEscape(paste(utils::capture.output(print(zph_table)), collapse = "\n"))
+          if (!is.null(zph_table) && nrow(zph_table) > 0) {
+            cn <- colnames(zph_table)
+            col_chisq <- if ("chisq" %in% cn) "chisq" else cn[1]
+            col_df    <- if ("df" %in% cn) "df" else cn[min(2, length(cn))]
+            col_p     <- if ("p" %in% cn) "p" else cn[length(cn)]
+            terms <- rownames(zph_table)
 
-          suggestion <- ""
-          if (!is.null(zph_table) && nrow(zph_table) > 0 && "p" %in% colnames(zph_table)) {
-            violating <- rownames(zph_table)[which(zph_table[, "p"] < 0.05)]
-            violating <- setdiff(violating, "GLOBAL")
+            for (i in seq_len(nrow(zph_table))) {
+              phTable$addRow(rowKey = i, values = list(
+                term  = terms[i],
+                chisq = unname(zph_table[i, col_chisq]),
+                df    = as.integer(round(unname(zph_table[i, col_df]))),
+                p     = unname(zph_table[i, col_p])
+              ))
+            }
+
+            violating <- setdiff(terms[which(zph_table[, col_p] < 0.05)], "GLOBAL")
             if (length(violating) > 0) {
-              suggestion <- paste0(
-                "\n\nNote: The proportional hazards assumption appears to be violated for: ",
-                paste(htmltools::htmlEscape(violating), collapse = ", "),
-                ". Consider using these as stratification variables instead of covariates."
-              )
+              phTable$setNote("ph", paste0(
+                "The proportional hazards assumption appears to be violated for: ",
+                paste(violating, collapse = ", "),
+                ". Consider using these as stratification variables instead of covariates.\n\n",
+                "A non-significant test is <i>no evidence of a violation</i>, which is not the same as confirming the assumption holds."))
+            } else {
+              phTable$setNote("ph", paste0(
+                "A non-significant test is <i>no evidence of a violation</i>, which is not the same as ",
+                "confirming proportional hazards holds. GLOBAL is the joint test across all terms."))
             }
           }
-
-          self$results$cox_ph$setContent(paste0(ph_text, suggestion))
         }
 
 
@@ -4564,7 +4836,30 @@ multisurvivalClass <- if (requireNamespace('jmvcore'))
       .calculateRiskScore = function(cox_model, mydata) {
 
         ### Calculate risk scores ----
+        #
+        # In competing-risks mode cox_model is a Fine-Gray fit on the EXPANDED
+        # data (finegray() splits one subject into several rows), so predict()
+        # returns one value per expanded row -- more than nrow(mydata). Assigning
+        # that back aborted the entire analysis with a replacement-length error,
+        # for the entirely reasonable combination of competing risks plus a risk
+        # score. Recompute the linear predictor on the unexpanded frame instead.
         risk_scores <- predict(cox_model, type = "risk")
+
+        if (length(risk_scores) != nrow(mydata)) {
+            risk_scores <- tryCatch(
+                predict(cox_model, newdata = mydata, type = "risk"),
+                error = function(e) NULL)
+        }
+
+        if (is.null(risk_scores) || length(risk_scores) != nrow(mydata)) {
+            private$.addHtmlMessage(
+                "warning",
+                "Risk score unavailable for this model",
+                paste0("A per-patient risk score could not be produced for this fit ",
+                       "(the competing-risks model is fitted on an expanded dataset with ",
+                       "more rows than patients). All other results are unaffected."))
+            return(invisible(NULL))
+        }
 
         ### Add risk scores to data ----
         mydata$risk_score <- risk_scores
@@ -4661,6 +4956,25 @@ multisurvivalClass <- if (requireNamespace('jmvcore'))
           }
         }
 
+
+        # If no grouping could be formed at any size, `result` is NULL -- and
+        # `mydata$risk_group <- NULL` DELETES the column rather than creating an
+        # empty one. Everything below then ran against a missing column, and
+        # tapply(event_indicator, NULL, ...) aborted the ENTIRE analysis with
+        # "arguments must have same length". This is not rare: a single two-level
+        # predictor gives the linear predictor only two distinct values, so the
+        # quantile break points collapse and every group size fails.
+        if (is.null(result)) {
+            private$.addHtmlMessage(
+                "warning",
+                "Risk groups could not be formed",
+                paste0("The risk score takes too few distinct values to be split into ",
+                       "groups -- this happens when the model contains only categorical ",
+                       "predictors with few levels. The risk score itself is unaffected, ",
+                       "and all other results below are unchanged. Add a continuous ",
+                       "predictor if you want risk groups."))
+            return(invisible(NULL))
+        }
 
         mydata$risk_group <- result
 
@@ -6341,6 +6655,27 @@ where 0.5 suggests no discriminative ability and 1.0 indicates perfect discrimin
 
   # Combine all explanatory variables (+ interaction terms)
   explanatory_formula <- c(myexplanatory, mycontexpl)
+
+  # Carry stratification into the *displayed* model.
+  #
+  # This table used to be fitted with no strata term whatever the user chose,
+  # while cox.zph and the footer below described a stratified fit. A single
+  # report then claimed the model was stratified by, say, treatment and stage
+  # and simultaneously printed hazard ratios *for* treatment and stage --
+  # impossible, since a stratified variable is absorbed into the baseline
+  # hazard and has no coefficient. The give-away was the likelihood ratio df,
+  # which counted the strata as covariates.
+  strata_ff <- NULL
+  if (isTRUE(self$options$use_stratify) && !is.null(self$options$stratvar)) {
+    strata_ff <- as.vector(cleaneddata$mystratvar_labelled)
+    strata_ff <- strata_ff[!is.na(strata_ff) & nzchar(strata_ff)]
+    if (length(strata_ff) == 0) strata_ff <- NULL
+    # `explanatory_formula` is deliberately left intact: a stratified variable
+    # still has a meaningful UNIVARIABLE hazard ratio, and dropping it from the
+    # table altogether would hide information the unstratified report showed.
+    # It is excluded from the multivariable fit only, at the call below.
+  }
+
   if (length(self$options$interactions) > 0) {
     .all_labels_ff <- labelled::var_label(cleaneddata$mydata_labelled)
     explanatory_formula <- c(
@@ -6358,12 +6693,39 @@ where 0.5 suggests no discriminative ability and 1.0 indicates perfect discrimin
 
   # Use finalfit to generate nicely formatted Cox regression table
   tryCatch({
-    finalfit::finalfit(
-      .data = mydata,
-      dependent = dependent_formula,
-      explanatory = explanatory_formula,
-      metrics = TRUE
-    ) -> tCox
+    # `explanatory_multi` keeps the strata out of the univariable column: a
+    # univariable fit of `Surv(...) ~ strata(v)` has no covariate at all and
+    # would come back empty.
+    if (is.null(strata_ff)) {
+      finalfit::finalfit(
+        .data = mydata,
+        dependent = dependent_formula,
+        explanatory = explanatory_formula,
+        metrics = TRUE
+      ) -> tCox
+    } else {
+      covars_multi <- explanatory_formula[!explanatory_formula %in% strata_ff]
+
+      # Every selected covariate is also a stratification variable, so the
+      # multivariable model has nothing left to estimate. finalfit would fail
+      # with a formula parser error shown verbatim to the clinician.
+      if (length(covars_multi) == 0) {
+        private$.addHtmlMessage(
+          "warning",
+          .("No covariates left to estimate"),
+          .("Every selected explanatory variable is also a stratification variable. A stratified variable is absorbed into the baseline hazard and has no hazard ratio, so no multivariable model can be fitted. Remove at least one variable from the stratification list, or add a covariate that is not stratified.")
+        )
+        return(invisible(NULL))
+      }
+
+      finalfit::finalfit(
+        .data = mydata,
+        dependent = dependent_formula,
+        explanatory = explanatory_formula,
+        explanatory_multi = c(covars_multi, paste0("strata(", strata_ff, ")")),
+        metrics = TRUE
+      ) -> tCox
+    }
 
     # Convert finalfit table to HTML with nice formatting
     # escape = TRUE: finalfit HR cells are plain text, so HTML-escaping keeps
@@ -6414,47 +6776,21 @@ where 0.5 suggests no discriminative ability and 1.0 indicates perfect discrimin
         # Extract data from finalfit table for summary generation
         cox_table <- tCox[[1]]
 
-        # Count significant variables (p < 0.05)
-        sig_count <- 0
-        strongest_var <- NULL
-        strongest_hr <- 1
-        strongest_effect <- NULL
+        # Significance counting is shared with the clinical summary so the two
+        # can no longer report different numbers for the same model. This path
+        # counted significant coefficient ROWS but printed the total as a count
+        # of VARIABLES, so a model with 3 significant variables across 5 level
+        # rows was announced as "5 out of 8 factors".
+        .sig <- private$.summariseCoxSignificance(cox_table)
+        sig_count       <- .sig$n_sig_vars
+        sig_rows        <- .sig$n_sig_rows
+        strongest_var   <- .sig$strongest_label
+        strongest_hr    <- if (is.na(.sig$strongest_hr)) 1 else .sig$strongest_hr
+        strongest_effect <- if (nzchar(.sig$strongest_effect)) .sig$strongest_effect else NULL
 
-        # Parse the HR column to find significant predictors
-        if ("HR (multivariable)" %in% names(cox_table)) {
-          hr_col <- cox_table[["HR (multivariable)"]]
-
-          # Skip the header row if it exists
-          data_rows <- which(!is.na(hr_col) & hr_col != "-" & hr_col != "")
-
-          for (i in data_rows) {
-            hr_text <- as.character(hr_col[i])
-
-            # Extract HR value and p-value from text like "1.50 (1.20-2.00, p=0.001)"
-            hr_match <- regmatches(hr_text, regexpr("[0-9]+\\.?[0-9]*", hr_text))
-            p_match <- regmatches(hr_text, regexpr("p[=<][0-9\\.]+", hr_text))
-
-            if (length(hr_match) > 0 && length(p_match) > 0) {
-              hr_val <- as.numeric(hr_match[1])
-              p_text <- gsub("p[=<]", "", p_match[1])
-              p_val <- as.numeric(p_text)
-
-              if (!is.na(p_val) && p_val < 0.05) {
-                sig_count <- sig_count + 1
-
-                # Track strongest effect
-                if (!is.na(hr_val) && abs(log(hr_val)) > abs(log(strongest_hr))) {
-                  strongest_hr <- hr_val
-                  strongest_var <- as.character(cox_table[i, 1])  # First column = variable name
-                  strongest_effect <- if (hr_val > 1) "increased risk" else "decreased risk"
-                }
-              }
-            }
-          }
-        }
-
-        # Count total variables analyzed
-        n_vars <- length(c(self$options$explanatory, self$options$contexpl))
+        # Count total variables analyzed, as actually carried into the table.
+        n_vars <- if (.sig$n_total_vars > 0) .sig$n_total_vars
+                  else length(c(self$options$explanatory, self$options$contexpl))
 
         # Count events from the data
         cleaneddata <- private$.cleandata()
@@ -6475,7 +6811,11 @@ where 0.5 suggests no discriminative ability and 1.0 indicates perfect discrimin
         if (sig_count > 0) {
           summary_parts$findings <- paste0(
             "<br><br><b>Key Finding:</b> ", sig_count, " out of ", n_vars, " ",
-            "factors showed statistically significant associations with the outcome (p < 0.05)."
+            "factors showed statistically significant associations with the outcome (p < 0.05)",
+            if (!is.null(sig_rows) && sig_rows > sig_count)
+              paste0(", across ", sig_rows, " coefficient levels")
+            else "",
+            "."
           )
 
           if (!is.null(strongest_var) && !is.null(strongest_effect)) {
@@ -6498,7 +6838,7 @@ where 0.5 suggests no discriminative ability and 1.0 indicates perfect discrimin
           if (risk_interpretation != "") {
             summary_parts$interpretation <- paste0(
               "<br><br><b>Clinical Significance:</b> ", risk_interpretation, " ",
-              "Consider this factor in clinical decision-making and patient counseling."
+              "This is an association observed in these data."
             )
           }
         } else {
@@ -7160,7 +7500,7 @@ where 0.5 suggests no discriminative ability and 1.0 indicates perfect discrimin
             <ul>
                 <li><strong>Covariate Adjustment:</strong> Controls for confounding variables that might bias group comparisons</li>
                 <li><strong>Average Patient:</strong> Shows survival for a typical patient with average covariate values</li>
-                <li><strong>True Group Effect:</strong> Isolates the effect of the grouping variable from other factors</li>
+                <li><strong>Adjusted Group Association:</strong> Adjusts for modelled covariates; unmeasured confounders are not removed</li>
                 <li><strong>Fair Comparison:</strong> Enables valid comparisons between groups with different baseline characteristics</li>
             </ul>
             <p><em>When to use:</em> Essential when comparing groups that differ in important prognostic factors.</p>
@@ -7241,7 +7581,7 @@ where 0.5 suggests no discriminative ability and 1.0 indicates perfect discrimin
                     <ul style="margin: 5px 0; padding-left: 20px;">
                         <li><strong>Covariate-adjusted:</strong> Controls for differences in patient characteristics</li>
                         <li><strong>Population-averaged:</strong> Shows survival for typical patients with average risk factors</li>
-                        <li><strong>Isolates group effect:</strong> Separates the true effect of the grouping variable</li>
+                        <li><strong>Adjusts for modelled covariates:</strong> does not establish a causal effect</li>
                         <li><strong>Clinical relevance:</strong> Provides realistic survival estimates for clinical decision-making</li>
                     </ul>
                 </div>
@@ -7301,7 +7641,7 @@ where 0.5 suggests no discriminative ability and 1.0 indicates perfect discrimin
                     <strong>1. Treatment Comparison:</strong>
                     <ul style="margin: 5px 0; padding-left: 20px;">
                         <li>Adjusted curves eliminate confounding by patient characteristics</li>
-                        <li>Shows true treatment effect independent of baseline differences</li>
+                        <li>Shows the treatment association after adjusting for modelled covariates; residual confounding may remain</li>
                         <li>Critical for observational studies with treatment selection bias</li>
                     </ul>
 
@@ -7997,55 +8337,91 @@ where 0.5 suggests no discriminative ability and 1.0 indicates perfect discrimin
 
         # Helper Functions for Summary Generation ----
         ,
+
+        # Single source of truth for "how many predictors were significant".
+        #
+        # Two summaries used to answer this question separately and disagree in
+        # the same report -- one said "1 out of 8", the other "5 out of 8", for a
+        # model with 3 significant variables spread over 5 coefficient rows. The
+        # first read a column named "p" that a finalfit table does not have (the
+        # p-value is embedded in the HR string); the second counted coefficient
+        # ROWS but printed them against a count of VARIABLES. Both now call this.
+        .summariseCoxSignificance = function(cox_table) {
+            out <- list(n_sig_vars = 0, n_total_vars = 0, n_sig_rows = 0,
+                        strongest_label = NULL, strongest_hr = NA_real_,
+                        strongest_effect = "")
+            if (is.null(cox_table) || !is.data.frame(cox_table) || nrow(cox_table) == 0)
+                return(out)
+
+            hr_name <- if ("HR (multivariable)" %in% names(cox_table)) "HR (multivariable)"
+                       else if ("HR (univariable)" %in% names(cox_table)) "HR (univariable)"
+                       else return(out)
+
+            # finalfit prints the variable name on the FIRST row of each block
+            # only, so a level row carries "". Reading column 1 directly is why
+            # the strongest predictor rendered as an empty name whenever it was
+            # not the reference level -- "stage IV" arrived as "".
+            var_col <- as.character(cox_table[[1]])
+            var_col[is.na(var_col) | !nzchar(trimws(var_col))] <- NA_character_
+            for (k in seq_along(var_col))
+                if (is.na(var_col[k]) && k > 1) var_col[k] <- var_col[k - 1]
+
+            lvl_col <- if (ncol(cox_table) >= 2) as.character(cox_table[[2]])
+                       else rep("", nrow(cox_table))
+            hr_txt <- as.character(cox_table[[hr_name]])
+
+            out$n_total_vars <- length(unique(stats::na.omit(var_col)))
+            sig_vars <- character(0)
+            best <- 0
+
+            for (i in seq_along(hr_txt)) {
+                txt <- hr_txt[i]
+                if (is.na(txt) || !nzchar(trimws(txt)) || identical(trimws(txt), "-")) next
+                hr_m <- regmatches(trimws(txt), regexpr("^[0-9]+\\.?[0-9]*", trimws(txt)))
+                p_m  <- regmatches(txt, regexpr("p[=<][0-9.]+", txt))
+                if (length(hr_m) == 0 || length(p_m) == 0) next
+                hr_val <- suppressWarnings(as.numeric(hr_m[1]))
+                p_val  <- suppressWarnings(as.numeric(sub("p[=<]", "", p_m[1])))
+                if (is.na(hr_val) || is.na(p_val) || p_val >= 0.05) next
+
+                out$n_sig_rows <- out$n_sig_rows + 1
+                if (!is.na(var_col[i])) sig_vars <- c(sig_vars, var_col[i])
+
+                if (hr_val > 0 && abs(log(hr_val)) > best) {
+                    best <- abs(log(hr_val))
+                    # var_col[i] is still NA when the very first row carried a
+                    # blank label (nothing earlier to forward-fill from), which
+                    # would render the literal string "NA (level)".
+                    lbl <- if (is.na(var_col[i])) trimws(lvl_col[i]) else var_col[i]
+                    if (!is.na(var_col[i]) && !is.na(lvl_col[i]) &&
+                        nzchar(trimws(lvl_col[i])) &&
+                        !grepl("^Mean|^Median", trimws(lvl_col[i])))
+                        lbl <- paste0(lbl, " (", trimws(lvl_col[i]), ")")
+                    if (!nzchar(lbl)) next
+                    out$strongest_label  <- lbl
+                    out$strongest_hr     <- hr_val
+                    out$strongest_effect <- if (hr_val > 1) .("increased hazard")
+                                            else .("decreased hazard")
+                }
+            }
+            out$n_sig_vars <- length(unique(sig_vars))
+            out
+        }
+        ,
         .generateSignificantPredictorsSummary = function(cox_table) {
             tryCatch({
-                # Count significant predictors
-                significant_count <- 0
-                total_predictors <- 0
-                strongest_predictor <- NULL
-                strongest_hr <- 0
-                strongest_effect <- ""
+                # This used to index cox_table[i, "p"] and
+                # cox_table[i, "HR (95% CI, p-value)"] -- neither column exists
+                # in a finalfit table, so the count was near-meaningless and
+                # contradicted the natural-language summary on the same page.
+                s <- private$.summariseCoxSignificance(cox_table)
 
-                # Parse the table to identify significant predictors
-                if (!is.null(cox_table) && nrow(cox_table) > 0) {
-                    for (i in seq_len(nrow(cox_table))) {
-                        if (!is.na(cox_table[i, "p"]) && cox_table[i, "p"] != "") {
-                            p_value <- as.numeric(cox_table[i, "p"])
-                            if (!is.na(p_value)) {
-                                total_predictors <- total_predictors + 1
-                                if (p_value < 0.05) {
-                                    significant_count <- significant_count + 1
-                                    # Track strongest predictor
-                                    hr_value <- cox_table[i, "HR (95% CI, p-value)"]
-                                    if (!is.na(hr_value) && hr_value != "" && hr_value != "-") {
-                                        # Extract HR value from the formatted string
-                                        hr_match <- regmatches(hr_value, regexpr("[0-9]+\\.?[0-9]*", hr_value))
-                                        if (length(hr_match) > 0) {
-                                            hr_numeric <- as.numeric(hr_match[1])
-                                            if (!is.na(hr_numeric)) {
-                                                # Calculate effect size (distance from 1.0)
-                                                effect_size <- abs(log(hr_numeric))
-                                                if (effect_size > abs(log(strongest_hr + 0.001))) {
-                                                    strongest_hr <- hr_numeric
-                                                    strongest_predictor <- cox_table[i, 1]
-                                                    strongest_effect <- if (hr_numeric > 1) .("increased hazard") else .("decreased hazard")
-                                                }
-                                            }
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-
-                # Return the significant predictors data
                 return(list(
-                    significant_count = significant_count,
-                    total_predictors = total_predictors,
-                    strongest_predictor = strongest_predictor,
-                    strongest_hr = strongest_hr,
-                    strongest_effect = strongest_effect
+                    significant_count = s$n_sig_vars,
+                    total_predictors = s$n_total_vars,
+                    strongest_predictor = s$strongest_label,
+                    strongest_hr = if (is.na(s$strongest_hr)) 0 else s$strongest_hr,
+                    strongest_effect = s$strongest_effect
                 ))
             }, error = function(e) {
                 return(list(

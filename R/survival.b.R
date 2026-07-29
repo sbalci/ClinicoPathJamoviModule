@@ -45,7 +45,8 @@
 #' @param dooc Dead of other causes level (for competing risks analysis)
 #' @param awd Alive with disease level (for competing risks analysis)
 #' @param awod Alive without disease level (for competing risks analysis)
-#' @param analysistype Type of survival analysis: "overall", "cause", or "compete"
+#' @param analysistype Type of survival analysis: "overall", "cause", "dfs"
+#'   (disease-free: Alive with Disease counts as an event), or "compete"
 #' @param cutp Time points for survival probability estimation (comma-separated)
 #' @param timetypedata Date format in data: "ymd", "dmy", "mdy", etc.
 #' @param timetypeoutput Time unit for output: "days", "weeks", "months", "years"
@@ -238,6 +239,11 @@ survivalClass <- if (requireNamespace('jmvcore'))
             .parametric_model_name = NULL,
             .parametric_results = NULL,
             .cachedGetData = NULL,
+            # Result of .defineEventIndicator(), kept so .run() can render the
+            # recode disclosure without redoing the work.
+            .eventRecode = NULL,
+            # TRUE below 10 events: descriptive output runs, models suppressed.
+            .lowEventCount = FALSE,
 
             # HTML notice helper (avoids the protobuf serialization error caused by
             # passing jmvcore::Notice objects to self$results$insert / $add).
@@ -289,6 +295,22 @@ survivalClass <- if (requireNamespace('jmvcore'))
             },
 
             # Unified survival formula builder - always escapes variable names
+            # Original row indices for a cleaned frame.
+            #
+            # Consumers pull extra covariates out of self$data by POSITION. They
+            # used as.integer(rownames(mydata)), which is correct only for as
+            # long as every upstream step preserves rownames -- it does today
+            # (cleanData is a data.frame), but a tibble anywhere in the chain
+            # would silently renumber them to 1:n and join each patient to
+            # somebody else's covariate with no error. cleanData is assembled by
+            # left_join on a row_names column, so that column is the reliable
+            # key; rownames stay as the fallback.
+            .originalRowIndex = function(mydata) {
+                if (!is.null(mydata[["row_names"]]))
+                    return(suppressWarnings(as.integer(as.character(mydata[["row_names"]]))))
+                suppressWarnings(as.integer(rownames(mydata)))
+            }
+            ,
             .buildSurvFormula = function(time_var, outcome_var, group_var = NULL, ns_prefix = TRUE) {
                 esc_time <- .escapeVariableNames(time_var)
                 esc_outcome <- .escapeVariableNames(outcome_var)
@@ -903,133 +925,32 @@ survivalClass <- if (requireNamespace('jmvcore'))
             myoutcome_labelled <- labelled_data$myoutcome_labelled
 
 
-                contin <- c("integer", "numeric", "double")
+                # Delegated to the shared coder in survival_utils.R so that all
+                # five analyses that build an event indicator agree on validation
+                # and on what happens to unselected levels and to NA.
+                res <- .defineEventIndicator(
+                    outcome      = mydata[[myoutcome_labelled]],
+                    outcomeLevel = self$options$outcomeLevel,
+                    multievent   = self$options$multievent,
+                    analysistype = self$options$analysistype,
+                    dod          = self$options$dod,
+                    dooc         = self$options$dooc,
+                    awd          = self$options$awd,
+                    awod         = self$options$awod,
+                    outcome_name = self$options$outcome
+                )
 
-                outcomeLevel <- self$options$outcomeLevel
-                multievent <- self$options$multievent
+                if (!is.null(res$error))
+                    jmvcore::reject(res$error, code = "outcome_recode")
 
-                outcome1 <- mydata[[myoutcome_labelled]]
+                private$.eventRecode <- res
+                mydata[["myoutcome"]] <- res$status
 
-                if (!multievent) {
-                    if (inherits(outcome1, contin)) {
-                        unique_values <- unique(outcome1[!is.na(outcome1)])
-                        if (!(length(unique_values) == 2 && all(unique_values %in% c(0, 1)))) {
-                            jmvcore::reject(sprintf(
-                                .('Outcome variable must be binary (0/1) for survival analysis.\n- Use 0 for censored observations (alive/disease-free)\n- Use 1 for events (death/recurrence)\nCurrent values found: %s\n\nFor multi-state outcomes, enable "Multiple Event Levels" option.'),
-                                paste(unique_values, collapse = ", ")
-                            ))
-
-                        }
-
-                        mydata[["myoutcome"]] <- mydata[[myoutcome_labelled]]
-                            # mydata[[self$options$outcome]]
-
-                    } else if (inherits(outcome1, "factor")) {
-                        # Validate that outcomeLevel is specified for factor outcomes
-                        if (is.null(outcomeLevel) || length(outcomeLevel) == 0) {
-                            jmvcore::reject(sprintf(
-                                .('Event level must be specified for factor outcomes.\nOutcome variable "%s" has levels: %s\nPlease select which level represents the event (death/recurrence) in the analysis options.'),
-                                myoutcome_labelled,
-                                paste(levels(outcome1), collapse = ", ")
-                            ))
-                        }
-
-                        mydata[["myoutcome"]] <-
-                            ifelse(
-                                test = outcome1 == outcomeLevel,
-                                yes = 1,
-                                no = 0
-                            )
-
-                    } else {
-                        jmvcore::reject(sprintf(
-                            .('Invalid outcome variable format.\nFor survival analysis, the outcome variable must be:\n- Binary numeric (0/1): 0=censored, 1=event\n- Factor variable: Select appropriate event level\n\nCurrent variable type: %s\nFor complex outcomes with multiple states, enable "Multiple Event Levels" option.'),
-                            class(outcome1)[1]
-                        ))
-
-                    }
-
-                } else if (multievent) {
-                    analysistype <- self$options$analysistype
-
-                    dod <- self$options$dod
-                    dooc <- self$options$dooc
-                    awd <- self$options$awd
-                    awod <- self$options$awod
-
-                    if (analysistype == 'overall') {
-                        # Overall ----
-                        # (Alive) <=> (Dead of Disease & Dead of Other Causes)
-
-
-                        mydata[["myoutcome"]] <- NA_integer_
-
-                        mydata[["myoutcome"]][outcome1 == awd] <- 0
-                        mydata[["myoutcome"]][outcome1 == awod] <- 0
-                        mydata[["myoutcome"]][outcome1 == dod] <- 1
-                        mydata[["myoutcome"]][outcome1 == dooc] <- 1
-
-
-
-                    } else if (analysistype == 'cause') {
-                        # Cause Specific ----
-                        # (Alive & Dead of Other Causes) <=> (Dead of Disease)
-
-
-                        mydata[["myoutcome"]] <- NA_integer_
-
-                        mydata[["myoutcome"]][outcome1 == awd] <- 0
-                        mydata[["myoutcome"]][outcome1 == awod] <- 0
-                        mydata[["myoutcome"]][outcome1 == dod] <- 1
-                        mydata[["myoutcome"]][outcome1 == dooc] <- 0
-
-                    } else if (analysistype == 'compete') {
-                        # Competing Risks ----
-                        # Alive <=> Dead of Disease accounting for Dead of Other Causes
-
-                        # https://www.emilyzabor.com/tutorials/survival_analysis_in_r_tutorial.html#part_3:_competing_risks
-
-
-                        mydata[["myoutcome"]] <- NA_integer_
-
-                        mydata[["myoutcome"]][outcome1 == awd] <- 0
-                        mydata[["myoutcome"]][outcome1 == awod] <- 0
-                        mydata[["myoutcome"]][outcome1 == dod] <- 1
-                        mydata[["myoutcome"]][outcome1 == dooc] <- 2
-
-                    }
-
-                    # Ensure all outcome levels were mapped
-                    unmapped <- setdiff(unique(outcome1), c(awd, awod, dod, dooc))
-                    unmapped <- unmapped[!is.na(unmapped)]
-                    if (length(unmapped) > 0) {
-                        jmvcore::reject(glue::glue("Outcome contains levels not mapped to event/censoring: {paste(unmapped, collapse = ', ')}. Please select all four levels for multievent analysis."))
-                    }
-
-                }
-
-                # Validate recode set is limited to 0/1/2
-                # Note: NAs are allowed (they'll be dropped during analysis)
-                #       Only error on invalid non-NA values
-                outcome_values <- mydata[["myoutcome"]]
-                non_na_values <- outcome_values[!is.na(outcome_values)]
-                invalid_values <- non_na_values[!(non_na_values %in% c(0, 1, 2))]
-
-                if (length(invalid_values) > 0) {
-                    unique_invalid <- unique(invalid_values)
-                    jmvcore::reject(sprintf(
-                        .('Outcome recode produced invalid values: %s\n\nExpected values: 0=censored, 1=event, 2=competing risk\n\nPossible causes:\n- For binary outcomes: Ensure numeric values are exactly 0 and 1\n- For factor outcomes: Verify "Event Level" is selected in analysis options\n- For multi-state outcomes: Enable "Multiple Event Levels" and select all outcome levels (Dead of Disease, Dead of Other Causes, Alive with Disease, Alive without Disease)'),
-                        paste(unique_invalid, collapse = ", ")
-                    ))
-                }
-
-                # Note: NAs are automatically excluded by jmvcore::naOmit() during cleandata
-                if (length(invalid_values) == 0 && any(!complete.cases(mydata[, "myoutcome", drop = FALSE]))) {
-                    n_missing <- sum(!complete.cases(mydata[, "myoutcome", drop = FALSE]))
+                if (res$n_missing > 0) {
                     private$.addHtmlMessage(
                         "warning",
                         "Missing outcome values excluded",
-                        sprintf("%d row(s) with missing outcome were excluded by jmvcore::naOmit() before model fitting.", n_missing)
+                        sprintf("%d row(s) with missing outcome were excluded by jmvcore::naOmit() before model fitting.", res$n_missing)
                     )
                 }
 
@@ -1247,6 +1168,14 @@ survivalClass <- if (requireNamespace('jmvcore'))
                 # Get Clean Data ----
                 results <- private$.cleandata()
 
+                # Always disclose how the outcome was recoded. A silent recode is a
+                # clinical-safety hazard: the reader of a survival curve cannot otherwise
+                # see which levels were collapsed into "censored", nor which estimand
+                # the probability-scale outputs actually correspond to.
+                if (!is.null(private$.eventRecode))
+                    self$results$eventRecodeInfo$setContent(
+                        .describeEventIndicator(private$.eventRecode, self$options$outcome))
+
                 private$.checkpoint()  # Add checkpoint here
 
 
@@ -1260,12 +1189,20 @@ survivalClass <- if (requireNamespace('jmvcore'))
                 n_events <- sum(mydata[[outcome_col]] == 1, na.rm = TRUE)
                 n_total <- nrow(mydata)
 
-                # CRITICAL: < 10 events - ERROR (block analysis)
-                if (n_events < 10) {
-                    jmvcore::reject(sprintf(
-                        .('CRITICAL: Only %d events detected\nMinimum 10 events required for reliable survival analysis\nResults cannot be computed\nPlease collect more data before proceeding'),
-                        n_events
-                    ))
+                # Very few events: warn, but still produce descriptive output.
+                # This used to jmvcore::reject(), so the user got nothing at all.
+                # There is no universal safe event count independent of model
+                # complexity, and a small series still has a legitimate KM curve,
+                # median and event count. Model-based output is gated separately
+                # below, where a low event count genuinely does invalidate it.
+                private$.lowEventCount <- n_events < 10
+                if (private$.lowEventCount) {
+                    private$.addHtmlMessage(
+                        "warning",
+                        sprintf("Only %d event(s) observed", n_events),
+                        paste0("Descriptive results (Kaplan-Meier, median, counts) are shown, but with ",
+                               n_events, " event(s) they are unstable and confidence intervals will be ",
+                               "very wide. Hazard ratios and other model-based output are suppressed."))
                 }
 
                 # Low event count warnings via table notes (safe from serialization issues)
@@ -1283,7 +1220,15 @@ survivalClass <- if (requireNamespace('jmvcore'))
                 private$.checkpoint()  # Add checkpoint here
                 
                 ## RMST Analysis ----
-                if (self$options$rmst_analysis) {
+                # RMST assumes a single event type. With the competing-risk 0/1/2
+                # coding survival::Surv() does not error -- it warns and remaps
+                # 1 to censored, 2 to event and 0 to NA, which jamovi never shows.
+                # The table would look authoritative and be inverted.
+                if (self$options$rmst_analysis &&
+                    self$options$multievent && self$options$analysistype == "compete") {
+                    self$results$rmstTable$setNote(
+                        "cr", .competingRiskUnavailable("Restricted mean survival time"))
+                } else if (self$options$rmst_analysis) {
                     rmst_tau <- if (is.null(self$options$rmst_tau) || self$options$rmst_tau <= 0) {
                         NULL  # Use default (75th percentile)
                     } else {
@@ -1321,7 +1266,12 @@ survivalClass <- if (requireNamespace('jmvcore'))
 
                 ## Cox ----
                 if (!(self$options$multievent && self$options$analysistype == "compete")) {
-                    private$.cox(results)
+                    if (private$.lowEventCount) {
+                        self$results$coxTable$setNote("lowevents",
+                            "Cox regression suppressed: fewer than 10 events.")
+                    } else {
+                        private$.cox(results)
+                    }
                 }
                 # Note: Competing risk analysis skips Cox regression
                 if (self$options$multievent && self$options$analysistype == "compete") {
@@ -1362,7 +1312,12 @@ survivalClass <- if (requireNamespace('jmvcore'))
                 private$.checkpoint()  # Add checkpoint here
                 
                 ## Export Survival Data ----
-                private$.exportSurvivalData(results)
+                # Same reason as RMST above: the exported survival estimates come
+                # from a survfit built on the 0/1/2 status, which Surv() silently
+                # inverts.
+                if (!(self$options$multievent && self$options$analysistype == "compete")) {
+                    private$.exportSurvivalData(results)
+                }
                 private$.checkpoint()  # Add checkpoint here
 
                 ## Parametric Survival Models (flexsurv) ----
@@ -1374,7 +1329,7 @@ survivalClass <- if (requireNamespace('jmvcore'))
                 ## Calibration Curves ----
                 if (self$options$calibration_curves) {
                     if (!(self$options$multievent && self$options$analysistype == "compete")) {
-                        private$.calculateCalibration(results)
+                        if (!private$.lowEventCount) private$.calculateCalibration(results)
                     }
                 }
                 private$.checkpoint()
@@ -1406,7 +1361,7 @@ survivalClass <- if (requireNamespace('jmvcore'))
                 ## Bootstrap Internal Validation ----
                 if (self$options$bootstrapValidation) {
                     if (!(self$options$multievent && self$options$analysistype == "compete")) {
-                        private$.calculateBootstrapValidation(results)
+                        if (!private$.lowEventCount) private$.calculateBootstrapValidation(results)
                     }
                 }
                 private$.checkpoint()
@@ -1802,7 +1757,7 @@ survivalClass <- if (requireNamespace('jmvcore'))
                     # Pull strata variable from self$data (not cleanData which only has time/outcome/factor)
                     if (strata_var %in% names(self$data)) {
                         strata_col <- self$data[[strata_var]]
-                        mydata[[strata_var]] <- strata_col[as.integer(rownames(mydata))]
+                        mydata[[strata_var]] <- strata_col[private$.originalRowIndex(mydata)]
                         mydata <- mydata[!is.na(mydata[[strata_var]]), , drop = FALSE]
                     } else {
                         warning(jmvcore::format(
@@ -1854,6 +1809,7 @@ survivalClass <- if (requireNamespace('jmvcore'))
 
                 # Manually calculate and override stratified HRs if strata requested
                 if (!is.null(strata_var) && strata_var %in% names(mydata)) {
+                    strat_applied <- FALSE
                     factors_list <- trimws(unlist(strsplit(explanatory_formula, "\\+")))
                     for (var in factors_list) {
                         strat_form <- .asSurvivalFormula(paste(myformula, "~", var, "+ strata(", jmvcore::composeTerm(strata_var), ")"))
@@ -1871,11 +1827,29 @@ survivalClass <- if (requireNamespace('jmvcore'))
                                 pval_str <- if (pval < 0.001) "<0.001" else sprintf("%.3f", pval)
                                 formatted_hr <- sprintf("%s (%s-%s, p=%s)", hr, lower, upper, pval_str)
                                 level_name <- sub(paste0("^", var), "", term_name)
-                                # Overwrite univariable HR column
-                                idx <- which(tCox[[1]][, 1] == var & tCox[[1]][, 2] == level_name)
-                                if (length(idx) == 1) {
-                                    tCox[[1]][idx, 4] <- formatted_hr
-                                    tCox[[1]][idx, 5] <- formatted_hr
+                                # Overwrite univariable HR column.
+                                #
+                                # finalfit prints the variable name only on the
+                                # FIRST row of each block and leaves continuation
+                                # rows blank/NA, so matching column 1 against
+                                # `var` never found the row carrying the level
+                                # (for a two-level factor that is always the
+                                # non-reference row). The overwrite therefore
+                                # never fired: the table kept the UNSTRATIFIED
+                                # hazard ratios while the metrics line below was
+                                # unconditionally relabelled "Stratified by ...".
+                                # Forward-fill the variable column before matching.
+                                var_col <- as.character(tCox[[1]][, 1])
+                                var_col[var_col == ""] <- NA_character_
+                                for (k in seq_along(var_col))
+                                    if (is.na(var_col[k]) && k > 1) var_col[k] <- var_col[k - 1]
+
+                                idx <- which(var_col == var &
+                                             as.character(tCox[[1]][, 2]) == level_name)
+                                if (length(idx) >= 1) {
+                                    tCox[[1]][idx[1], 4] <- formatted_hr
+                                    tCox[[1]][idx[1], 5] <- formatted_hr
+                                    strat_applied <- TRUE
                                 }
                             }
                         }
@@ -1884,8 +1858,13 @@ survivalClass <- if (requireNamespace('jmvcore'))
                     # Update model metrics for multivariable stratified model
                     multi_form <- .asSurvivalFormula(paste(myformula, "~", explanatory_formula, "+ strata(", jmvcore::composeTerm(strata_var), ")"))
                     multi_mod <- try(survival::coxph(multi_form, data = mydata), silent = TRUE)
-                    if (!inherits(multi_mod, "try-error")) {
+                    if (!inherits(multi_mod, "try-error") && isTRUE(strat_applied)) {
                         tCox[[2]][[1]] <- paste("Stratified by", strata_var, "-", tCox[[2]][[1]])
+                    } else if (!isTRUE(strat_applied)) {
+                        # Never claim stratification that was not applied.
+                        tCox[[2]][[1]] <- paste(
+                            "NOT stratified (the stratified estimates could not be matched to the table) -",
+                            tCox[[2]][[1]])
                     }
                 }
                 
@@ -2016,7 +1995,7 @@ survivalClass <- if (requireNamespace('jmvcore'))
                         <h4 style="margin-top: 0; color: #2c3e50;">Understanding Cox Proportional Hazards Regression</h4>
                         <p style="margin-bottom: 10px;">Cox regression models the relationship between explanatory variables and the hazard (risk) of experiencing the event:</p>
                         <ul style="margin-left: 20px;">
-                            <li><strong>Hazard Ratio (HR):</strong> Risk multiplier compared to reference group</li>
+                            <li><strong>Hazard Ratio (HR):</strong> Ratio of instantaneous event rates versus the reference group (a relative rate, not a cumulative risk)</li>
                             <li><strong>HR > 1:</strong> Increased risk of event occurrence</li>
                             <li><strong>HR < 1:</strong> Decreased risk of event occurrence</li>
                             <li><strong>P-value:</strong> Statistical significance of the association</li>
@@ -2024,8 +2003,8 @@ survivalClass <- if (requireNamespace('jmvcore'))
                         </ul>
                         <p style="margin-bottom: 5px;"><strong>Clinical interpretation:</strong></p>
                         <ul style="margin-left: 20px;">
-                            <li>HR = 2.0 means double the risk compared to reference</li>
-                            <li>HR = 0.5 means half the risk compared to reference</li>
+                            <li>HR = 2.0 means twice the hazard compared to reference</li>
+                            <li>HR = 0.5 means half the hazard compared to reference</li>
                             <li>Use for identifying prognostic factors and risk stratification</li>
                             <li>Assumes proportional hazards over time</li>
                             <li>Consider both statistical and clinical significance</li>
@@ -2185,7 +2164,7 @@ survivalClass <- if (requireNamespace('jmvcore'))
                     } else {
                         html <- paste0(html,
                             "<div style='background-color: #d4edda; border-left: 4px solid #28a745; padding: 15px; margin: 15px 0; border-radius: 4px;'>",
-                            "<strong style='color: #155724;'> Proportional Hazards Assumption Appears Satisfied</strong><br/>",
+                            "<strong style='color: #155724;'> No Evidence Against the Proportional Hazards Assumption</strong><br/>",
                             sprintf("<p style='margin: 10px 0 0 0;'>Global test p-value = %.4f (p \u2265 0.05)</p>", p_value),
                             "</div>"
                         )
@@ -2230,8 +2209,10 @@ survivalClass <- if (requireNamespace('jmvcore'))
                         html <- paste0(html,
                             "<div style='background-color: #e8f5e9; padding: 15px; border-radius: 4px; margin: 15px 0;'>",
                             "<h5 style='color: #2e7d32; margin-top: 0;'> Next Steps:</h5>",
-                            "<p style='margin: 5px 0;'>The Cox proportional hazards model appears appropriate for your data. ",
-                            "You can proceed with confidence in interpreting the hazard ratios as constant effects over time.</p>",
+                            "<p style='margin: 5px 0;'>The test did not detect a departure from proportional hazards. ",
+                            "That is absence of evidence, not evidence of absence: a non-significant test is also ",
+                            "what you see with few events or short follow-up. Inspect the Schoenfeld residual plot ",
+                            "before relying on a constant hazard ratio.</p>",
                             "<p style='margin: 10px 0 0 0;'><em>Note: Also examine the Schoenfeld residual plot above for visual confirmation.</em></p>",
                             "</div>"
                         )
@@ -3765,11 +3746,11 @@ survivalClass <- if (requireNamespace('jmvcore'))
                         </tr>
                         <tr>
                             <td style="padding: 5px;"><strong>95% CI</strong></td>
-                            <td style="padding: 5px;">Range where we are 95% confident the true median lies</td>
+                            <td style="padding: 5px;">Range of median values compatible with the data (over repeated studies, 95% of such intervals contain the true median)</td>
                         </tr>
                         <tr style="background-color: #f8f9fa;">
                             <td style="padding: 5px;"><strong>Not Reached (NR)</strong></td>
-                            <td style="padding: 5px;">Good news! Less than half the patients had the event</td>
+                            <td style="padding: 5px;">Fewer than half the patients had the event during the observed follow-up. This may mean long survival, but short follow-up or heavy censoring gives the same result.</td>
                         </tr>
                     </table>
                     
@@ -3777,7 +3758,7 @@ survivalClass <- if (requireNamespace('jmvcore'))
                     <p>If median survival = 24 months with 95% CI (18-30):</p>
                     <ul>
                         <li>Half your patients survived longer than 24 months</li>
-                        <li>You can be 95% confident the true median is between 18 and 30 months</li>
+                        <li>Medians from 18 to 30 months are compatible with these data; over repeated studies, 95% of such intervals would contain the true median</li>
                         <li>This helps predict typical patient outcomes for treatment planning</li>
                     </ul>
                     
@@ -3812,29 +3793,29 @@ survivalClass <- if (requireNamespace('jmvcore'))
                         </tr>
                         <tr style="background-color: #ffebee;">
                             <td style="padding: 8px;"><strong>HR = 2.0</strong></td>
-                            <td style="padding: 8px;">Doubled risk</td>
-                            <td style="padding: 8px;">Group has 2\u00d7 higher risk of event</td>
+                            <td style="padding: 8px;">Twice the hazard</td>
+                            <td style="padding: 8px;">Event rate is 2\u00d7 as high at any given moment</td>
                         </tr>
                         <tr style="background-color: #e8f5e9;">
                             <td style="padding: 8px;"><strong>HR = 0.5</strong></td>
-                            <td style="padding: 8px;">Halved risk</td>
-                            <td style="padding: 8px;">Group has 50% lower risk of event</td>
+                            <td style="padding: 8px;">Half the hazard</td>
+                            <td style="padding: 8px;">Event rate is half as high at any given moment</td>
                         </tr>
                         <tr style="background-color: #ffebee;">
                             <td style="padding: 8px;"><strong>HR = 3.0</strong></td>
-                            <td style="padding: 8px;">Tripled risk</td>
-                            <td style="padding: 8px;">Group has 3\u00d7 higher risk of event</td>
+                            <td style="padding: 8px;">Three times the hazard</td>
+                            <td style="padding: 8px;">Event rate is 3\u00d7 as high at any given moment</td>
                         </tr>
                         <tr style="background-color: #e8f5e9;">
                             <td style="padding: 8px;"><strong>HR = 0.25</strong></td>
-                            <td style="padding: 8px;">Quarter risk</td>
-                            <td style="padding: 8px;">Group has 75% lower risk of event</td>
+                            <td style="padding: 8px;">Quarter the hazard</td>
+                            <td style="padding: 8px;">Event rate is one quarter as high at any given moment</td>
                         </tr>
                     </table>
                     
                     <h5> Statistical Significance:</h5>
                     <ul>
-                        <li><strong>P-value < 0.05:</strong> The difference is statistically significant (likely real, not due to chance)</li>
+                        <li><strong>P-value < 0.05:</strong> The data are unlikely under the hypothesis of no difference. This is not the probability that the finding is due to chance.</li>
                         <li><strong>95% CI includes 1.0:</strong> The difference is NOT statistically significant</li>
                         <li><strong>95% CI excludes 1.0:</strong> The difference IS statistically significant</li>
                     </ul>
@@ -3842,14 +3823,14 @@ survivalClass <- if (requireNamespace('jmvcore'))
                     <h5> Clinical Example:</h5>
                     <p>If Treatment A vs Treatment B shows HR = 0.60 (95% CI: 0.40-0.85, p=0.004):</p>
                     <ul style="background-color: #e8f5e9; padding: 10px; border-radius: 5px;">
-                        <li>Treatment A reduces risk by 40% compared to Treatment B</li>
+                        <li>Treatment A has 0.60 times the hazard of Treatment B at any moment - a relative rate, not a 40% cut in cumulative risk</li>
                         <li>The result is statistically significant (p < 0.05 and CI excludes 1.0)</li>
-                        <li>We can be 95% confident the true risk reduction is between 15% and 60%</li>
+                        <li>The interval 0.40 to 0.85 is the range of hazard ratios compatible with the data; it does not translate directly into a cumulative risk difference</li>
                     </ul>
                     
                     <h5> Important Considerations:</h5>
                     <ul>
-                        <li>HR assumes proportional hazards (risk ratio stays constant over time)</li>
+                        <li>HR assumes proportional hazards (the hazard ratio stays constant over time); it is not a cumulative risk ratio</li>
                         <li>Wide confidence intervals suggest uncertainty (often from small sample size)</li>
                         <li>Statistical significance does not always mean clinical importance</li>
                     </ul>
@@ -3915,8 +3896,8 @@ survivalClass <- if (requireNamespace('jmvcore'))
                     </table>
                     <p>This means:</p>
                     <ul>
-                        <li>72% of patients are expected to survive beyond 5 years</li>
-                        <li>You can be 95% confident the true rate is between 65% and 79%</li>
+                        <li>an estimated 72% remained event-free at 5 years</li>
+                        <li>Rates from 65% to 79% are compatible with these data; over repeated studies, 95% of such intervals would contain the true rate</li>
                         <li>This can be compared to published rates for similar populations</li>
                     </ul>
                     
@@ -4136,31 +4117,30 @@ survivalClass <- if (requireNamespace('jmvcore'))
                             }
                         }, error = function(e) NA)
                         
+                        # Report the estimate and its uncertainty; do not grade it.
+                        #
+                        # "Median not reached" was previously called a favorable
+                        # prognostic finding. It is not, on its own: short
+                        # follow-up and heavy censoring produce exactly the same
+                        # result as genuinely good survival. Likewise, thresholds
+                        # at 6 / 12 / 36 / 60 declared "urgent intervention",
+                        # "chronic condition" or "excellent long-term prognosis"
+                        # without knowing the disease, the endpoint, the treatment
+                        # setting -- or even the time unit, since the sentence was
+                        # hard-coded to "months" while the unit is user-selectable.
+                        time_unit <- self$options$timetypeoutput
+
                         if (is.na(median_val) || median_val == "NR") {
                             clinical_meaning <- jmvcore::format(
-                                .("In the {group} group, fewer than half of the patients experienced the event during follow-up. This is typically considered a favorable prognostic finding."),
+                                .("In the {group} group the median was not reached: fewer than half of the patients had the event during the observed follow-up. This may reflect genuinely long survival, but short follow-up or heavy censoring produces the same result, so it should be read together with the number at risk over time."),
                                 group = group_name
                             )
                         } else {
-                            # Generate time-specific clinical context
-                            time_context <- ""
-                            if (median_val <= 6) {
-                                time_context <- .("indicating a rapidly progressing condition requiring urgent intervention")
-                            } else if (median_val <= 12) {
-                                time_context <- .("suggesting an acute condition with significant short-term impact")
-                            } else if (median_val <= 36) {
-                                time_context <- .("indicating a condition with moderate progression timeline")
-                            } else if (median_val <= 60) {
-                                time_context <- .("suggesting a chronic condition with extended survival")
-                            } else {
-                                time_context <- .("indicating excellent long-term prognosis")
-                            }
-                            
                             clinical_meaning <- jmvcore::format(
-                                .("In the {group} group, half of the patients experienced the event by {median} months, {context}. The 95% confidence interval ({lower} to {upper}) describes the uncertainty around this estimate."),
+                                .("In the {group} group, half of the patients had the event by {median} {unit} (95% CI {lower} to {upper})."),
                                 group = group_name,
                                 median = median_val,
-                                context = time_context,
+                                unit = time_unit,
                                 lower = ci_lower,
                                 upper = ci_upper
                             )
@@ -4229,62 +4209,46 @@ survivalClass <- if (requireNamespace('jmvcore'))
                         }, error = function(e) NA)
                         
                         if (!is.na(hr)) {
-                            # Clinical interpretation based on HR magnitude
-                            risk_interpretation <- ""
-                            clinical_significance <- ""
-                            
-                            if (hr < 0.5) {
-                                risk_interpretation <- jmvcore::format(
-                                    .("strongly protective effect ({percent}% risk reduction)"),
-                                    percent = round((1 - hr) * 100, 0)
-                                )
-                                clinical_significance <- .("This represents a clinically meaningful protective effect")
-                            } else if (hr < 0.8) {
-                                risk_interpretation <- jmvcore::format(
-                                    .("moderate protective effect ({percent}% risk reduction)"),
-                                    percent = round((1 - hr) * 100, 0)
-                                )
-                                clinical_significance <- .("This suggests a moderate clinical benefit")
-                            } else if (hr < 1.2) {
-                                risk_interpretation <- .("minimal difference in risk")
-                                clinical_significance <- .("This difference may not be clinically meaningful")
-                            } else if (hr < 2.0) {
-                                risk_interpretation <- jmvcore::format(
-                                    .("moderately increased risk ({percent}% higher risk)"),
-                                    percent = round((hr - 1) * 100, 0)
-                                )
-                                clinical_significance <- .("This suggests a moderate increase in clinical risk")
+                            # Describe the hazard ratio; do not convert it into a
+                            # cumulative "% risk reduction" and do not grade its
+                            # clinical importance.
+                            #
+                            # A hazard ratio is a ratio of instantaneous hazards,
+                            # averaged over follow-up under proportional hazards.
+                            # "HR 0.62 = 38% risk reduction" reads as an absolute
+                            # cumulative-risk statement, which it is not: the
+                            # absolute benefit depends on the baseline risk, the
+                            # endpoint, and the length of follow-up. Nor can a
+                            # fixed HR cut-off decide clinical meaningfulness
+                            # without knowing any of those. (Hernan, "The Hazards
+                            # of Hazard Ratios", Epidemiology 2010.)
+                            direction <- if (hr < 1)
+                                .("a lower hazard") else if (hr > 1)
+                                .("a higher hazard") else .("the same hazard")
+
+                            statistical_context <- if (is.na(p_val)) {
+                                .("p-value not available")
+                            } else if (p_val < 0.001) {
+                                .("p < 0.001")
                             } else {
-                                risk_interpretation <- jmvcore::format(
-                                    .("substantially increased risk ({percent}% higher risk)"),
-                                    percent = round((hr - 1) * 100, 0)
-                                )
-                                clinical_significance <- .("This represents a clinically significant increase in risk")
+                                jmvcore::format(.("p = {p}"), p = format(round(p_val, 3), nsmall = 3))
                             }
-                            
-                            # Statistical vs Clinical Significance
-                            statistical_context <- ""
-                            if (p_val < 0.001) {
-                                statistical_context <- .("with very strong statistical evidence")
-                            } else if (p_val < 0.01) {
-                                statistical_context <- .("with strong statistical evidence")
-                            } else if (p_val < 0.05) {
-                                statistical_context <- .("with statistical significance")
-                            } else {
-                                statistical_context <- .("but without statistical significance")
-                            }
-                            
+
+                            crosses_one <- !is.na(ci_lower) && !is.na(ci_upper) &&
+                                           ci_lower < 1 && ci_upper > 1
+
                             clinical_meaning <- jmvcore::format(
-                                .("{comparison} shows a {risk_interpretation} {statistical_context}. {clinical_significance}. The hazard ratio was {hr} (95% CI: {lower} to {upper}), indicating the relative risk between groups."),
+                                .("{comparison}: hazard ratio {hr} (95% CI {lower} to {upper}, {stats}) - {direction} in the compared group relative to the reference. The hazard ratio is a relative rate, not a cumulative risk difference; the absolute benefit or harm depends on the baseline risk, the endpoint and the length of follow-up.{ci_note}"),
                                 comparison = comparison,
-                                risk_interpretation = risk_interpretation,
-                                statistical_context = statistical_context,
-                                clinical_significance = clinical_significance,
                                 hr = round(hr, 2),
                                 lower = round(ci_lower, 2),
-                                upper = round(ci_upper, 2)
+                                upper = round(ci_upper, 2),
+                                stats = statistical_context,
+                                direction = direction,
+                                ci_note = if (crosses_one)
+                                    .(" The confidence interval includes 1, so the data are compatible with no difference.") else ""
                             )
-                            
+
                             interpretations[[paste("cox", gsub(" ", "_", comparison))]] <- clinical_meaning
                         }
                     }
@@ -4313,15 +4277,15 @@ survivalClass <- if (requireNamespace('jmvcore'))
                         </div>
                         
                         <div style="background-color: white; padding: 10px; border-radius: 5px;">
-                            <strong>Hazard Ratio (HR):</strong> Risk multiplier comparing two groups (HR=2 means twice the risk)
+                            <strong>Hazard Ratio (HR):</strong> Ratio of instantaneous event rates between two groups (HR=2 means the event rate is twice as high at any given moment). It is a relative rate, not a cumulative risk ratio - the absolute difference depends on baseline risk and follow-up length.
                         </div>
                         
                         <div style="background-color: white; padding: 10px; border-radius: 5px;">
-                            <strong>95% Confidence Interval:</strong> Range where we are 95% confident the true value lies
+                            <strong>95% Confidence Interval:</strong> Range of values compatible with the data; over repeated studies, 95% of such intervals contain the true value
                         </div>
                         
                         <div style="background-color: white; padding: 10px; border-radius: 5px;">
-                            <strong>P-value:</strong> Probability that observed differences occurred by chance (p&lt;0.05 = statistically significant)
+                            <strong>P-value:</strong> How compatible the data are with no difference - the probability of a result at least this extreme if there were truly no difference. It is not the probability that the finding occurred by chance, nor that the null hypothesis is true.
                         </div>
                         
                         <div style="background-color: white; padding: 10px; border-radius: 5px;">
@@ -4396,15 +4360,21 @@ survivalClass <- if (requireNamespace('jmvcore'))
                         }, error = function(e) NA)
                         
                         if (is.na(median_val) || median_val == "NR") {
+                            # "Not reached" is a statement about the observed
+                            # follow-up, not a favourable prognosis -- short
+                            # follow-up produces the same result.
                             sentence <- jmvcore::format(
-                                .("Median survival was not reached for the {group} group, indicating that fewer than half of patients experienced the event during follow-up."),
+                                .("Median survival was not reached for the {group} group: fewer than half of the patients had the event during the observed follow-up."),
                                 group = group_name
                             )
                         } else {
+                            # The unit is user-selectable; this sentence used to
+                            # say "months" whatever the user had chosen.
                             sentence <- jmvcore::format(
-                                .("Median survival for the {group} group was {median} months (95% CI: {lower} to {upper} months)."),
+                                .("Median survival for the {group} group was {median} {unit} (95% CI: {lower} to {upper} {unit})."),
                                 group = group_name,
                                 median = median_val,
+                                unit = self$options$timetypeoutput,
                                 lower = ci_lower,
                                 upper = ci_upper
                             )
@@ -4475,10 +4445,12 @@ survivalClass <- if (requireNamespace('jmvcore'))
                         
                         if (!is.na(hr)) {
                             significance <- ifelse(p_val < 0.05, .("statistically significant"), .("not statistically significant"))
-                            direction <- ifelse(hr < 1, .("reduced"), .("increased"))
-                            
+                            # "reduced/increased risk" reads as a cumulative-risk
+                            # claim. A hazard ratio is a relative rate.
+                            direction <- ifelse(hr < 1, .("a lower hazard"), .("a higher hazard"))
+
                             sentence <- jmvcore::format(
-                                .("Cox regression showed {direction} risk for {comparison}, with a hazard ratio of {hr} (95% CI: {lower} to {upper}, p = {p}), which was {significance}."),
+                                .("Cox regression showed {direction} for {comparison}, with a hazard ratio of {hr} (95% CI: {lower} to {upper}, p = {p}), which was {significance}."),
                                 direction = direction,
                                 comparison = comparison,
                                 hr = round(hr, 2),
@@ -4498,9 +4470,17 @@ survivalClass <- if (requireNamespace('jmvcore'))
                 if (!is.null(results$survTable) && nrow(results$survTable) > 0) {
                     surv_sentences <- c()
                     
-                    # Common time points for reporting
-                    common_times <- c(12, 36, 60)
-                    
+                    # Report at the cutpoints the user actually asked for, in the
+                    # unit they chose. This used to be hard-coded to 12/36/60 and
+                    # then divided by 12 to print "1-year", "3-year", "5-year" --
+                    # so a cohort measured in days was reported as 1/3/5 years
+                    # when the cutpoints happened to be 12, 36 and 60 days.
+                    common_times <- suppressWarnings(as.numeric(trimws(
+                        unlist(strsplit(self$options$cutp, ",")))))
+                    common_times <- common_times[!is.na(common_times)]
+                    if (length(common_times) == 0) common_times <- c(12, 36, 60)
+                    time_unit <- self$options$timetypeoutput
+
                     for (time_point in common_times) {
                         surv_at_time <- results$survTable[results$survTable$time == time_point, ]
                         
@@ -4511,10 +4491,10 @@ survivalClass <- if (requireNamespace('jmvcore'))
                                 ci_lower <- round(surv_at_time[[j, "lower"]] * 100, 1)
                                 ci_upper <- round(surv_at_time[[j, "upper"]] * 100, 1)
                                 
-                                years <- time_point / 12
                                 sentence <- jmvcore::format(
-                                    .("The {years}-year survival rate for the {group} group was {survival}% (95% CI: {lower}% to {upper}%)."),
-                                    years = years,
+                                    .("Survival at {time} {unit} for the {group} group was {survival}% (95% CI: {lower}% to {upper}%)."),
+                                    time = time_point,
+                                    unit = time_unit,
                                     group = group,
                                     survival = survival,
                                     lower = ci_lower,
@@ -4650,19 +4630,29 @@ survivalClass <- if (requireNamespace('jmvcore'))
                     extra_term <- NULL
                     if (!is.null(rcs_var) && rcs_var %in% names(self$data)) {
                         rcs_col <- jmvcore::toNumeric(self$data[[rcs_var]])
-                        mydata[[rcs_var]] <- rcs_col[as.integer(rownames(mydata))]
+                        mydata[[rcs_var]] <- rcs_col[private$.originalRowIndex(mydata)]
                         mydata <- mydata[!is.na(mydata[[rcs_var]]), , drop = FALSE]
                         extra_term <- jmvcore::composeTerm(rcs_var)
                     }
 
-                    # Need Cox model - fit it
-                    rhs <- myfactor
-                    if (!is.null(extra_term)) {
-                        rhs <- paste0(myfactor, ' + ', extra_term)
-                    }
-                    esc_rhs <- .escapeVariableNames(rhs)
+                    # Need Cox model - fit it.
+                    #
+                    # Escape each term separately and join afterwards. Escaping
+                    # the assembled string instead back-quoted the whole thing as
+                    # a single name -- `grp + age` -- which is not a column, so
+                    # the fit died with "object 'grp + age' not found" whenever a
+                    # second covariate was added.
+                    rhs_terms <- c(myfactor, extra_term)
+                    esc_rhs <- paste(.escapeVariableNames(rhs_terms), collapse = " + ")
                     formula <- .asSurvivalFormula(paste(private$.buildSurvFormula(mytime, myoutcome), "~", esc_rhs))
-                    cox_model <- survival::coxph(formula, data = mydata)
+                    # Point the formula at this frame and keep the model frame on
+                    # the fit. Without it, survival's methods try to re-evaluate
+                    # `data = mydata` in the formula's environment, which does not
+                    # hold it -- the whole output failed with
+                    # "Calibration error: object 'mydata' not found".
+                    environment(formula) <- environment()
+                    cox_model <- survival::coxph(formula, data = mydata,
+                                                 x = TRUE, y = TRUE, model = TRUE)
 
                     # Determine calibration time point
                     time_col <- mydata[[mytime]]
@@ -4759,66 +4749,98 @@ survivalClass <- if (requireNamespace('jmvcore'))
                         }
                     }
 
-                    # Calibration metrics
+                    # Calibration metrics.
+                    #
+                    # These used to be an ordinary least-squares regression of
+                    # grouped observed survival on grouped predicted survival,
+                    # with its slope labelled "calibration slope" and its
+                    # intercept "calibration-in-the-large". Neither is the
+                    # survival estimand of that name: the OLS fit ignores
+                    # censoring, uses only the handful of group means, and its
+                    # intercept is not a measure of mean calibration. R-squared
+                    # and mean-absolute-error thresholds were arbitrary on top of
+                    # that.
+                    #
+                    # Replaced with the standard pair:
+                    #   * calibration slope  - the coefficient of the model's own
+                    #     linear predictor when refitted as the sole covariate
+                    #     (Van Houwelingen). 1.0 means the predicted spread of
+                    #     risk matches the observed spread; below 1 indicates
+                    #     over-fitted, too-extreme predictions.
+                    #   * mean calibration   - observed Kaplan-Meier survival at
+                    #     the calibration time minus mean predicted survival.
+                    #     Kaplan-Meier handles censoring, which the OLS did not.
                     cal_table <- self$results$calibrationTable
-                    if (length(group_pred) >= 3) {
-                        # Calibration slope (linear regression of observed on predicted)
-                        cal_lm <- lm(group_obs ~ group_pred)
-                        cal_slope <- coef(cal_lm)[2]
-                        cal_intercept <- coef(cal_lm)[1]
-                        cal_ci <- confint(cal_lm)
 
-                        # Calibration slope
-                        slope_interp <- if (abs(cal_slope - 1) < 0.1) "Well calibrated"
-                                        else if (cal_slope < 0.9) "Overfitting (shrink predictions)"
-                                        else if (cal_slope > 1.1) "Underfitting"
-                                        else "Acceptable"
+                    # --- calibration slope --------------------------------------
+                    slope_fit <- tryCatch(
+                        survival::coxph(survival::Surv(time_col, event_col) ~ lp),
+                        error = function(e) NULL)
 
+                    if (!is.null(slope_fit)) {
+                        cal_slope <- unname(stats::coef(slope_fit)[1])
+                        slope_ci  <- tryCatch(stats::confint(slope_fit),
+                                              error = function(e) matrix(NA_real_, 1, 2))
                         cal_table$addRow(rowKey = "slope", values = list(
-                            metric = "Calibration Slope",
+                            metric = "Calibration slope",
                             value = cal_slope,
-                            ci_lower = cal_ci[2, 1],
-                            ci_upper = cal_ci[2, 2],
+                            ci_lower = slope_ci[1, 1],
+                            ci_upper = slope_ci[1, 2],
                             ideal = "1.0",
-                            interpretation = slope_interp
+                            interpretation = if (is.na(cal_slope)) "Not estimable"
+                                else "Apparent slope - 1 by construction on the development data"
                         ))
 
-                        # Calibration-in-the-large (intercept)
-                        int_interp <- if (abs(cal_intercept) < 0.05) "No systematic bias"
-                                      else if (cal_intercept > 0) "Under-prediction"
-                                      else "Over-prediction"
+                        # Refitting a model's own linear predictor on the data it
+                        # was fitted to returns a slope of exactly 1 every time.
+                        # The number only carries information when the model is
+                        # applied to data it has not seen, or after bootstrap /
+                        # cross-validation. Saying so prevents it being read as
+                        # evidence of good calibration.
+                        cal_table$setNote("slope_apparent",
+                            paste0("The calibration slope is 1 by construction here, because the ",
+                                   "model is evaluated on the same data it was fitted to. It becomes ",
+                                   "informative only on external data or after internal validation ",
+                                   "(bootstrap or cross-validation). The same optimism affects the ",
+                                   "other rows in this table."))
+                    }
 
-                        cal_table$addRow(rowKey = "intercept", values = list(
-                            metric = "Calibration-in-the-Large",
-                            value = cal_intercept,
-                            ci_lower = cal_ci[1, 1],
-                            ci_upper = cal_ci[1, 2],
+                    # --- mean calibration at the calibration time ----------------
+                    km_overall <- tryCatch(
+                        summary(survival::survfit(survival::Surv(time_col, event_col) ~ 1),
+                                times = cal_time, extend = TRUE),
+                        error = function(e) NULL)
+
+                    if (!is.null(km_overall) && length(km_overall$surv) == 1) {
+                        obs_overall  <- km_overall$surv
+                        pred_overall <- mean(pred_surv, na.rm = TRUE)
+                        cal_table$addRow(rowKey = "meancal", values = list(
+                            metric = paste0("Mean calibration (observed - predicted at t = ",
+                                            round(cal_time, 1), ")"),
+                            value = obs_overall - pred_overall,
+                            ci_lower = km_overall$lower - pred_overall,
+                            ci_upper = km_overall$upper - pred_overall,
                             ideal = "0.0",
-                            interpretation = int_interp
+                            interpretation = sprintf("Observed %.3f vs predicted %.3f",
+                                                     obs_overall, pred_overall)
                         ))
+                    }
 
-                        # R-squared
-                        r_sq <- summary(cal_lm)$r.squared
-                        cal_table$addRow(rowKey = "r2", values = list(
-                            metric = "R-squared",
-                            value = r_sq,
-                            ci_lower = NA,
-                            ci_upper = NA,
-                            ideal = "1.0",
-                            interpretation = if (r_sq >= 0.9) "Excellent" else if (r_sq >= 0.7) "Good" else "Poor"
-                        ))
-
-                        # Mean absolute error
+                    # --- group-level agreement, reported without a grade ---------
+                    if (length(group_pred) >= 3) {
                         mae <- mean(abs(group_obs - group_pred))
                         cal_table$addRow(rowKey = "mae", values = list(
-                            metric = "Mean Absolute Error",
+                            metric = "Mean absolute difference across risk groups",
                             value = mae,
                             ci_lower = NA,
                             ci_upper = NA,
                             ideal = "0.0",
-                            interpretation = if (mae < 0.05) "Excellent" else if (mae < 0.1) "Good" else "Needs improvement"
+                            interpretation = sprintf("Averaged over %d risk groups; descriptive only",
+                                                     length(group_pred))
                         ))
+                    }
 
+                    if (TRUE) {
                         # C-index (discrimination)
                         c_index <- tryCatch({
                             survival::concordance(cox_model)$concordance
@@ -4832,8 +4854,10 @@ survivalClass <- if (requireNamespace('jmvcore'))
                             cal_table$addRow(rowKey = "cindex", values = list(
                                 metric = "C-index (Discrimination)",
                                 value = c_index,
-                                ci_lower = if (!is.na(c_se)) c_index - 1.96 * c_se else NA,
-                                ci_upper = if (!is.na(c_se)) c_index + 1.96 * c_se else NA,
+                                # A concordance index lives in [0, 1]; the Wald
+                                # limits were previously printed unconstrained.
+                                ci_lower = if (!is.na(c_se)) max(0, c_index - 1.96 * c_se) else NA,
+                                ci_upper = if (!is.na(c_se)) min(1, c_index + 1.96 * c_se) else NA,
                                 ideal = "1.0",
                                 interpretation = if (c_index >= 0.8) "Excellent" else if (c_index >= 0.7) "Good"
                                                  else if (c_index >= 0.6) "Moderate" else "Poor"
@@ -4933,7 +4957,7 @@ survivalClass <- if (requireNamespace('jmvcore'))
                     rcs_col <- jmvcore::toNumeric(self$data[[rcs_var]])
                     # Align with cleanData rows (cleanData has row_names or is naOmit'd)
                     # Add the variable to mydata using original row indices
-                    mydata[[rcs_var]] <- rcs_col[as.integer(rownames(mydata))]
+                    mydata[[rcs_var]] <- rcs_col[private$.originalRowIndex(mydata)]
                     # Remove rows where RCS variable is NA
                     mydata <- mydata[!is.na(mydata[[rcs_var]]), , drop = FALSE]
 
@@ -5137,6 +5161,63 @@ survivalClass <- if (requireNamespace('jmvcore'))
             # These prevent crashes if use_parametric is accidentally enabled
             # ================================================================
             ,
+            # How to read a covariate coefficient, per distribution.
+            #
+            # This used to state, for every distribution, that coefficients were
+            # on the log-time (AFT) scale and that a negative value meant shorter
+            # survival. That is wrong for the rate-parameterised families: in
+            # flexsurv, exp, gompertz and gamma place covariates on the log-RATE
+            # parameter, where the sign is inverted -- a positive coefficient
+            # means shorter survival. For exponential and Gompertz that
+            # parameterisation is proportional hazards, so exp(coef) is a hazard
+            # ratio rather than a time ratio.
+            #
+            # The scale is read from flexsurv itself rather than hard-coded, so a
+            # new distribution added to the option list cannot silently inherit
+            # the wrong wording.
+            .covariateScaleNote = function(dist) {
+
+                if (identical(dist, "survspline")) {
+                    return(switch(self$options$spline_scale,
+                        hazard = paste0("Covariate coefficients are log hazard ratios ",
+                            "(proportional hazards); a positive value indicates a higher ",
+                            "hazard, i.e. shorter survival."),
+                        # All three spline links are increasing in the covariate
+                        # effect, and increasing each one lowers S(t). Verified by
+                        # inverting the links at S = 0.6: hazard 0.536, odds 0.551,
+                        # normal 0.521 -- every one shorter. The odds and normal
+                        # cases previously said "longer survival", which is
+                        # backwards: for scale="odds" the model is on the log odds
+                        # of FAILURE, not of surviving.
+                        odds = paste0("Covariate coefficients are log odds ratios for ",
+                            "failure (proportional odds); a <b>positive</b> value indicates ",
+                            "higher odds of the event, i.e. shorter survival."),
+                        normal = paste0("Covariate coefficients are on the probit scale, ",
+                            "where the link is -qnorm(S(t)); a <b>positive</b> value lowers ",
+                            "the survival probability, i.e. shorter survival."),
+                        paste0("The covariate coefficient scale depends on the spline scale ",
+                            "selected.")))
+                }
+
+                loc <- tryCatch(flexsurv::flexsurv.dists[[dist]]$location,
+                                error = function(e) NULL)
+
+                if (identical(loc, "rate")) {
+                    ph <- dist %in% c("exp", "gompertz")
+                    paste0("Covariate coefficients are on the log-rate scale; a ",
+                           "<b>positive</b> value indicates shorter survival",
+                           if (ph) paste0(". This is a proportional-hazards parameterisation, ",
+                                          "so exp(coefficient) is a hazard ratio.") else ".")
+                } else if (!is.null(loc)) {
+                    paste0("Covariate coefficients are on the log-time (accelerated failure ",
+                           "time) scale; a <b>negative</b> value indicates shorter survival, ",
+                           "and exp(coefficient) is a time ratio.")
+                } else {
+                    paste0("The covariate coefficient scale depends on the selected ",
+                           "distribution; see the flexsurv documentation.")
+                }
+            }
+            ,
             .distLabel = function(dist) {
                 labs <- c(exp = "Exponential", weibull = "Weibull", lnorm = "Log-Normal",
                           llogis = "Log-Logistic", gamma = "Gamma", gengamma = "Generalized Gamma",
@@ -5221,7 +5302,7 @@ survivalClass <- if (requireNamespace('jmvcore'))
                     private$.distLabel(dist), " model - AIC ", round(AIC(fit), 1),
                     ", BIC ", round(BIC(fit), 1),
                     ", log-likelihood ", round(as.numeric(stats::logLik(fit)), 1),
-                    if (useCov) ". Covariate coefficients are on the log-time (AFT) scale; a negative value indicates shorter survival." else "."
+                    if (useCov) paste0(". ", private$.covariateScaleNote(dist)) else "."
                 ))
 
                 # ---- Distribution comparison (AIC / BIC / logLik) ----
@@ -5315,7 +5396,7 @@ survivalClass <- if (requireNamespace('jmvcore'))
                     return(list(mydata = mydata, age_col_name = NULL))
                 }
                 age_col <- jmvcore::toNumeric(self$data[[age_var]])
-                mydata[[age_var]] <- age_col[as.integer(rownames(mydata))]
+                mydata[[age_var]] <- age_col[private$.originalRowIndex(mydata)]
                 mydata <- mydata[!is.na(mydata[[age_var]]), , drop = FALSE]
                 return(list(mydata = mydata, age_col_name = age_var))
             }
@@ -5364,7 +5445,7 @@ survivalClass <- if (requireNamespace('jmvcore'))
                     existing_strata_var <- self$options$strata_variable
                     if (existing_strata_var %in% names(self$data)) {
                         strata_col <- self$data[[existing_strata_var]]
-                        mydata[[existing_strata_var]] <- strata_col[as.integer(rownames(mydata))]
+                        mydata[[existing_strata_var]] <- strata_col[private$.originalRowIndex(mydata)]
                         mydata <- mydata[!is.na(mydata[[existing_strata_var]]), , drop = FALSE]
                     } else {
                         existing_strata_var <- NULL
@@ -5696,6 +5777,29 @@ survivalClass <- if (requireNamespace('jmvcore'))
                         "survival::Surv(age_entry, age_exit, ", myoutcome, ") ~ ", myfactor)
                     cox_age <- survival::coxph(.asSurvivalFormula(formula_str), data = mydata)
 
+                    # Refuse to publish a non-converged fit.
+                    #
+                    # With few events on the age time scale coxph can diverge and
+                    # still return an object. It was written straight to the
+                    # table, producing hazard ratios like 1,615,474,749 with a CI
+                    # of (0, Inf) and an interpretation panel underneath
+                    # narrating it as though it had estimated something. A
+                    # coefficient whose |value| is enormous, or whose standard
+                    # error is not finite, is a divergence, not a finding.
+                    cf <- stats::coef(cox_age)
+                    se <- suppressWarnings(sqrt(diag(stats::vcov(cox_age))))
+                    diverged <- length(cf) == 0 || any(!is.finite(cf)) ||
+                                any(abs(cf) > 20) || any(!is.finite(se)) || any(se > 20)
+
+                    if (isTRUE(diverged)) {
+                        self$results$ageTimeScaleTable$setNote("noconverge", paste0(
+                            "Age-as-time-scale model did not converge, so no hazard ratio is ",
+                            "reported. This normally means one group has no events on the age ",
+                            "scale, or the groups are perfectly separated. Use the standard ",
+                            "time scale, or combine categories, before interpreting."))
+                        return()
+                    }
+
                     cox_summary <- summary(cox_age)
                     coefs <- cox_summary$conf.int
 
@@ -5791,23 +5895,40 @@ survivalClass <- if (requireNamespace('jmvcore'))
                         # Expected deaths = sum(age-specific rate in reference * person-time in study)
                         age_groups <- levels(mydata$age_group)
 
-                        # Overall age-specific event rates (reference)
-                        ref_rates <- tapply(event_col == 1, mydata$age_group, mean, na.rm = TRUE)
+                        # Age-specific reference rates on the PERSON-TIME scale.
+                        #
+                        # These were previously the proportion of each age group
+                        # that ever had an event -- tapply(event == 1, ..., mean).
+                        # A proportion is not a rate: it rises simply because
+                        # follow-up is longer, and it treats a censored patient
+                        # the same as one followed to the end. Expected counts
+                        # built from it, and the SMR and Poisson interval built
+                        # from those, all inherit that dependence on follow-up
+                        # while being presented as age-standardized mortality.
+                        # events / person-time is the quantity the SMR needs.
+                        time_col_std <- jmvcore::toNumeric(mydata[[mytime]])
+                        ref_events <- tapply(event_col == 1, mydata$age_group, sum, na.rm = TRUE)
+                        ref_pt     <- tapply(time_col_std,   mydata$age_group, sum, na.rm = TRUE)
+                        ref_rates  <- ifelse(!is.na(ref_pt) & ref_pt > 0,
+                                             ref_events / ref_pt, NA_real_)
 
                         for (g_idx in seq_along(groups)) {
                             g <- groups[g_idx]
                             group_mask <- group_col == g
                             group_data <- mydata[group_mask, ]
+                            group_time <- time_col_std[group_mask]
 
                             observed <- sum(group_data[[myoutcome]] == 1, na.rm = TRUE)
 
-                            # Expected: apply reference rates to this group's age distribution
+                            # Expected: reference rate x this group's person-time
+                            # in each age band.
                             expected <- 0
                             for (ag in age_groups) {
-                                n_in_ag <- sum(group_data$age_group == ag, na.rm = TRUE)
+                                in_ag <- which(group_data$age_group == ag)
+                                pt_in_ag <- sum(group_time[in_ag], na.rm = TRUE)
                                 rate <- ref_rates[ag]
-                                if (!is.na(rate)) {
-                                    expected <- expected + n_in_ag * rate
+                                if (!is.na(rate) && pt_in_ag > 0) {
+                                    expected <- expected + pt_in_ag * rate
                                 }
                             }
 
@@ -5859,23 +5980,37 @@ survivalClass <- if (requireNamespace('jmvcore'))
                         age_groups <- levels(mydata$age_group)
                         total_n <- nrow(mydata)
 
-                        # Standard weights: overall age distribution
-                        std_weights <- table(mydata$age_group) / total_n
+                        # Standard weights: the cohort's age distribution of
+                        # PERSON-TIME, and group rates on the same scale. As with
+                        # the indirect method above, the age-specific quantity was
+                        # the proportion ever having an event, which is not a rate
+                        # and depends on how long each group happened to be
+                        # followed.
+                        time_col_std <- jmvcore::toNumeric(mydata[[mytime]])
+                        std_pt <- tapply(time_col_std, mydata$age_group, sum, na.rm = TRUE)
+                        std_pt[is.na(std_pt)] <- 0
+                        total_pt <- sum(std_pt)
+                        std_weights <- if (total_pt > 0) std_pt / total_pt else std_pt
 
                         for (g_idx in seq_along(groups)) {
                             g <- groups[g_idx]
                             group_mask <- group_col == g
                             group_data <- mydata[group_mask, ]
+                            group_time <- time_col_std[group_mask]
 
                             observed <- sum(group_data[[myoutcome]] == 1, na.rm = TRUE)
 
-                            # Age-specific rates in this group
-                            group_rates <- tapply(
-                                group_data[[myoutcome]] == 1,
-                                group_data$age_group,
-                                mean, na.rm = TRUE)
+                            # Age-specific event RATES in this group (events per
+                            # unit person-time), not proportions.
+                            g_events <- tapply(group_data[[myoutcome]] == 1,
+                                               group_data$age_group, sum, na.rm = TRUE)
+                            g_pt     <- tapply(group_time, group_data$age_group,
+                                               sum, na.rm = TRUE)
+                            group_rates <- ifelse(!is.na(g_pt) & g_pt > 0,
+                                                  g_events / g_pt, NA_real_)
 
-                            # Standardized rate
+                            # Directly standardized rate: group rates weighted by
+                            # the standard person-time distribution.
                             std_rate <- 0
                             for (ag in names(std_weights)) {
                                 rate <- group_rates[ag]
@@ -5884,24 +6019,51 @@ survivalClass <- if (requireNamespace('jmvcore'))
                                 }
                             }
 
-                            # Expected under standardized rate
-                            expected <- std_rate * total_n
-
-                            smr <- if (expected > 0) observed / expected else NA
+                            # Report the DIRECTLY STANDARDIZED RATE, not an O/E ratio.
+                            #
+                            # O/E is the INDIRECT estimand. Computing it here as
+                            # observed / (std_rate * total_pt) divided every group by
+                            # the same whole-cohort person-time, so the ratio collapsed:
+                            # on data where group B's age-specific mortality was exactly
+                            # DOUBLE group A's in every band, both groups printed
+                            # SMR = 0.5 and the real two-fold difference vanished. The
+                            # standardized rates themselves (the quantity direct
+                            # standardization exists to produce) were never shown.
+                            #
+                            # A directly standardized rate is a weighted sum of
+                            # independent Poisson rates, so its variance is
+                            # sum(w_i^2 * d_i / pt_i^2); the CI is taken on the log
+                            # scale to keep it positive.
+                            var_std <- 0
+                            for (ag in names(std_weights)) {
+                                d_ag  <- g_events[ag]; pt_ag <- g_pt[ag]
+                                if (!is.na(d_ag) && !is.na(pt_ag) && pt_ag > 0)
+                                    var_std <- var_std +
+                                        (as.numeric(std_weights[ag])^2) * d_ag / (pt_ag^2)
+                            }
+                            se_log <- if (std_rate > 0 && var_std > 0)
+                                sqrt(var_std) / std_rate else NA_real_
+                            rate_lo <- if (is.na(se_log)) NA_real_ else std_rate * exp(-1.96 * se_log)
+                            rate_hi <- if (is.na(se_log)) NA_real_ else std_rate * exp( 1.96 * se_log)
 
                             smrTable$addRow(rowKey = g_idx, values = list(
                                 group = g,
                                 observed = observed,
-                                expected = round(as.numeric(expected), 2),
-                                smr = round(as.numeric(smr), 3),
-                                smr_ci_lower = NA,
-                                smr_ci_upper = NA,
+                                expected = round(as.numeric(std_rate * sum(g_pt, na.rm = TRUE)), 2),
+                                smr = round(as.numeric(std_rate), 5),
+                                smr_ci_lower = round(as.numeric(rate_lo), 5),
+                                smr_ci_upper = round(as.numeric(rate_hi), 5),
                                 pvalue = NA
                             ))
                         }
 
-                        smrTable$setNote("directci",
-                            "Direct standardization CIs not computed. Use indirect (SMR) method for confidence intervals.")
+                        smrTable$setNote("directrate", paste0(
+                            "Direct method: the 'SMR' column holds the DIRECTLY STANDARDIZED RATE ",
+                            "(events per unit person-time, using the cohort's person-time age ",
+                            "distribution as the standard), with a log-scale 95% interval. ",
+                            "Compare groups by the ratio of these rates. 'Expected' is the events ",
+                            "this group's standardized rate implies over its own person-time. ",
+                            "Switch to the indirect method if you want an observed/expected SMR."))
 
                         interpretation <- paste0(
                             "<h4>Direct Age Standardization</h4>",

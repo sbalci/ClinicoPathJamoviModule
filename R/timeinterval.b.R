@@ -997,8 +997,8 @@ timeintervalClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                             Their follow-up time contributes to person-time even though the event wasn't observed.</dd>
 
                             <dt style='font-weight: bold; margin-top: 10px;'>Confidence Interval (CI)</dt>
-                            <dd style='margin-left: 20px;'>Range likely to contain the true mean follow-up time.
-                            Example: Mean = 12 months (95% CI: 10-14) means we're 95% confident the true mean is between 10 and 14 months.</dd>
+                            <dd style='margin-left: 20px;'>Range of mean follow-up values compatible with these data.
+                            Example: Mean = 12 months (95% CI: 10-14) means values from 10 to 14 are compatible with these data; over repeated studies 95% of such intervals contain the true mean.</dd>
                         </dl>
                     </div>
                 "

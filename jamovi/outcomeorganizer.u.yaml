@@ -83,17 +83,25 @@ children:
                 name: patientID
                 maxItemCount: 1
                 isTarget: true
+          - type: TargetLayoutBox
+            label: Follow-up Time
+            children:
+              - type: VariablesListBox
+                name: followupTime
+                maxItemCount: 1
+                isTarget: true
       - type: LayoutBox
         margin: large
         children:
           - type: CheckBox
             name: useHierarchy
-            label: Event hierarchy
+            label: Event hierarchy (long-format data only)
+            enable: (patientID)
             children:
               - type: TextBox
                 name: eventPriority
                 format: number
-                enable: (useHierarchy)
+                enable: (useHierarchy && patientID)
 
   - type: CollapseBox
     label: Censoring Options

@@ -6,6 +6,21 @@ jrs:   '1.1'
 
 
 items:
+
+    - name:  eventRecodeInfo
+      title: 'Outcome Recode'
+      type:  Html
+      visible: true
+      clearWith:
+          - outcome
+          - outcomeLevel
+          - multievent
+          - analysistype
+          - dod
+          - dooc
+          - awd
+          - awod
+
     - name: subtitle
       title: '`Survival Analysis - ${explanatory}`'
       type:  Preformatted

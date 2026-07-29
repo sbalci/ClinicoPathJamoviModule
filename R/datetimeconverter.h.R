@@ -35,6 +35,7 @@ datetimeconverterOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R
             private$..datetime_var <- jmvcore::OptionVariable$new(
                 "datetime_var",
                 datetime_var,
+                default=NULL,
                 suggested=list(
                     "continuous",
                     "nominal"),
@@ -602,7 +603,7 @@ datetimeconverterBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
 #' @export
 datetimeconverter <- function(
     data,
-    datetime_var,
+    datetime_var = NULL,
     datetime_format = "auto",
     timezone = "system",
     preview_rows = 20,

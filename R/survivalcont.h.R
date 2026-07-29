@@ -63,6 +63,7 @@ survivalcontOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
             private$..elapsedtime <- jmvcore::OptionVariable$new(
                 "elapsedtime",
                 elapsedtime,
+                default=NULL,
                 suggested=list(
                     "continuous"),
                 permitted=list(
@@ -74,6 +75,7 @@ survivalcontOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
             private$..dxdate <- jmvcore::OptionVariable$new(
                 "dxdate",
                 dxdate,
+                default=NULL,
                 suggested=list(
                     "continuous",
                     "nominal"),
@@ -83,6 +85,7 @@ survivalcontOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
             private$..fudate <- jmvcore::OptionVariable$new(
                 "fudate",
                 fudate,
+                default=NULL,
                 suggested=list(
                     "continuous",
                     "nominal"),
@@ -94,6 +97,7 @@ survivalcontOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
             private$..contexpl <- jmvcore::OptionVariable$new(
                 "contexpl",
                 contexpl,
+                default=NULL,
                 suggested=list(
                     "continuous"),
                 permitted=list(
@@ -101,6 +105,7 @@ survivalcontOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
             private$..outcome <- jmvcore::OptionVariable$new(
                 "outcome",
                 outcome,
+                default=NULL,
                 suggested=list(
                     "ordinal",
                     "nominal",
@@ -138,6 +143,7 @@ survivalcontOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
                 options=list(
                     "overall",
                     "cause",
+                    "dfs",
                     "compete"),
                 default="overall")
             private$..outcomeredefined <- jmvcore::OptionOutput$new(
@@ -297,7 +303,8 @@ survivalcontOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
                 default=FALSE)
             private$..strata_variable <- jmvcore::OptionVariable$new(
                 "strata_variable",
-                strata_variable)
+                strata_variable,
+                default=NULL)
             private$..loglog <- jmvcore::OptionBool$new(
                 "loglog",
                 loglog,
@@ -477,6 +484,7 @@ survivalcontResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
     "survivalcontResults",
     inherit = jmvcore::Group,
     active = list(
+        eventRecodeInfo = function() private$.items[["eventRecodeInfo"]],
         todo = function() private$.items[["todo"]],
         clinicalWarnings = function() private$.items[["clinicalWarnings"]],
         errors = function() private$.items[["errors"]],
@@ -486,6 +494,7 @@ survivalcontResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
         coxRegressionHeading = function() private$.items[["coxRegressionHeading"]],
         coxSummary = function() private$.items[["coxSummary"]],
         coxTable = function() private$.items[["coxTable"]],
+        stratifiedCoxTable = function() private$.items[["stratifiedCoxTable"]],
         tCoxtext2 = function() private$.items[["tCoxtext2"]],
         coxRegressionHeading3 = function() private$.items[["coxRegressionHeading3"]],
         coxRegressionExplanation = function() private$.items[["coxRegressionExplanation"]],
@@ -542,6 +551,20 @@ survivalcontResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
                     "survivaltutorial",
                     "survivalrwnahhas",
                     "ClinicoPathJamoviModule"))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="eventRecodeInfo",
+                title="Outcome Recode",
+                visible=TRUE,
+                clearWith=list(
+                    "outcome",
+                    "outcomeLevel",
+                    "multievent",
+                    "analysistype",
+                    "dod",
+                    "dooc",
+                    "awd",
+                    "awod")))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="todo",
@@ -654,6 +677,45 @@ survivalcontResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
                     "awod",
                     "cutp",
                     "min_group_size")))
+            self$add(jmvcore::Table$new(
+                options=options,
+                name="stratifiedCoxTable",
+                title="Stratified Cox Regression",
+                visible="(stratified_cox)",
+                clearWith=list(
+                    "outcome",
+                    "outcomeLevel",
+                    "elapsedtime",
+                    "contexpl",
+                    "stratified_cox",
+                    "strata_variable",
+                    "multievent",
+                    "analysistype"),
+                columns=list(
+                    list(
+                        `name`="term", 
+                        `title`="Term", 
+                        `type`="text"),
+                    list(
+                        `name`="hr", 
+                        `title`="HR", 
+                        `type`="number", 
+                        `format`="zto"),
+                    list(
+                        `name`="ci_lower", 
+                        `title`="Lower", 
+                        `type`="number", 
+                        `format`="zto"),
+                    list(
+                        `name`="ci_upper", 
+                        `title`="Upper", 
+                        `type`="number", 
+                        `format`="zto"),
+                    list(
+                        `name`="pvalue", 
+                        `title`="p", 
+                        `type`="number", 
+                        `format`="zto,pvalue"))))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="tCoxtext2",
@@ -1981,6 +2043,7 @@ survivalcontBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   reproduces the previous fixed behaviour.
 #' @return A results object containing:
 #' \tabular{llllll}{
+#'   \code{results$eventRecodeInfo} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$todo} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$clinicalWarnings} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$errors} \tab \tab \tab \tab \tab a html \cr
@@ -1990,6 +2053,7 @@ survivalcontBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   \code{results$coxRegressionHeading} \tab \tab \tab \tab \tab a preformatted \cr
 #'   \code{results$coxSummary} \tab \tab \tab \tab \tab a preformatted \cr
 #'   \code{results$coxTable} \tab \tab \tab \tab \tab a table \cr
+#'   \code{results$stratifiedCoxTable} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$tCoxtext2} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$coxRegressionHeading3} \tab \tab \tab \tab \tab a preformatted \cr
 #'   \code{results$coxRegressionExplanation} \tab \tab \tab \tab \tab a html \cr
@@ -2042,12 +2106,12 @@ survivalcontBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' @export
 survivalcont <- function(
     data,
-    elapsedtime,
+    elapsedtime = NULL,
     tint = FALSE,
-    dxdate,
-    fudate,
-    contexpl,
-    outcome,
+    dxdate = NULL,
+    fudate = NULL,
+    contexpl = NULL,
+    outcome = NULL,
     outcomeLevel,
     dod,
     dooc,
@@ -2084,7 +2148,7 @@ survivalcont <- function(
     rmst_tau = 0,
     residual_diagnostics = FALSE,
     stratified_cox = FALSE,
-    strata_variable,
+    strata_variable = NULL,
     loglog = FALSE,
     showExplanations = FALSE,
     showSummaries = FALSE,

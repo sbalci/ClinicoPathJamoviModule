@@ -18,6 +18,7 @@ options:
     - name: elapsedtime
       title: 'Time Elapsed'
       type: Variable
+      default: NULL
       suggested: [ continuous ]
       permitted: [ numeric ]
       description: >-
@@ -38,6 +39,7 @@ options:
     - name: dxdate
       title: 'Diagnosis Date'
       type: Variable
+      default: NULL
       suggested: [ continuous, nominal ]
       permitted: [ numeric, factor ]
       description: >-
@@ -48,6 +50,7 @@ options:
     - name: fudate
       title: 'Follow-up Date'
       type: Variable
+      default: NULL
       suggested: [ continuous, nominal ]
       permitted: [ numeric, factor ]
       description: >-
@@ -65,6 +68,7 @@ options:
     - name: contexpl
       title: Continuous Explanatory Variable
       type: Variable
+      default: NULL
       suggested: [ continuous ]
       permitted: [ numeric ]
       description: >-
@@ -73,6 +77,7 @@ options:
     - name: outcome
       title: 'Outcome'
       type: Variable
+      default: NULL
       suggested: [ ordinal, nominal, continuous ]
       permitted: [ factor, numeric ]
       description: >-
@@ -118,6 +123,8 @@ options:
           name: overall
         - title: Cause Specific
           name: cause
+        - title: Disease-Free
+          name: dfs
         - title: Competing Risk
           name: compete
       default: overall
@@ -463,6 +470,7 @@ options:
     - name: strata_variable
       title: "Stratification Variable"
       type: Variable
+      default: NULL
       description: >-
         Variable to use for stratification in Cox regression. Should be a categorical variable 
         that defines different risk groups or populations.

@@ -176,6 +176,7 @@ survivalOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 options=list(
                     "overall",
                     "cause",
+                    "dfs",
                     "compete"),
                 default="overall")
             private$..outcomeredefined <- jmvcore::OptionOutput$new(
@@ -767,6 +768,7 @@ survivalResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
     "survivalResults",
     inherit = jmvcore::Group,
     active = list(
+        eventRecodeInfo = function() private$.items[["eventRecodeInfo"]],
         subtitle = function() private$.items[["subtitle"]],
         todo = function() private$.items[["todo"]],
         errors = function() private$.items[["errors"]],
@@ -871,6 +873,20 @@ survivalResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "survivalrviews",
                     "appliedsurvivalanalysisR",
                     "lubridate"))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="eventRecodeInfo",
+                title="Outcome Recode",
+                visible=TRUE,
+                clearWith=list(
+                    "outcome",
+                    "outcomeLevel",
+                    "multievent",
+                    "analysistype",
+                    "dod",
+                    "dooc",
+                    "awd",
+                    "awod")))
             self$add(jmvcore::Preformatted$new(
                 options=options,
                 name="subtitle",
@@ -2604,6 +2620,7 @@ survivalBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   reproduces the previous fixed behaviour.
 #' @return A results object containing:
 #' \tabular{llllll}{
+#'   \code{results$eventRecodeInfo} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$subtitle} \tab \tab \tab \tab \tab a preformatted \cr
 #'   \code{results$todo} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$errors} \tab \tab \tab \tab \tab a html \cr

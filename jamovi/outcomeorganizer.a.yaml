@@ -69,6 +69,7 @@ options:
     - name: outcome
       title: 'Outcome Variable'
       type: Variable
+      default: NULL
       suggested: [ ordinal, nominal, continuous ]
       permitted: [ factor, numeric ]
       description:
@@ -86,6 +87,7 @@ options:
     - name: recurrence
       title: 'Recurrence/Progression Variable'
       type: Variable
+      default: NULL
       suggested: [ ordinal, nominal ]
       permitted: [ factor ]
       description:
@@ -103,9 +105,24 @@ options:
     - name: patientID
       title: 'Patient ID'
       type: Variable
+      default: NULL
       description:
           R: >
             Patient identifier for handling multiple records or applying event hierarchies.
+
+    - name: followupTime
+      title: 'Follow-up Time'
+      type: Variable
+      suggested: [ continuous ]
+      permitted: [ numeric ]
+      default: NULL
+      description:
+          R: >
+            Optional follow-up time. Supplying it lets administrative censoring
+            actually truncate follow-up and reset event status, and lets the event
+            hierarchy keep the earliest priority event per patient instead of
+            writing a later one back onto earlier records. Leave empty to keep the
+            previous behaviour.
 
     - name: analysistype
       title: 'Survival Analysis Type'
@@ -203,6 +220,7 @@ options:
     - name: intervalStart
       title: "Interval Start Variable"
       type: Variable
+      default: NULL
       description:
           R: >
             Variable containing the start of the interval when the event might have occurred.
@@ -210,6 +228,7 @@ options:
     - name: intervalEnd
       title: "Interval End Variable"
       type: Variable
+      default: NULL
       description:
           R: >
             Variable containing the end of the interval when the event might have occurred.
@@ -225,6 +244,7 @@ options:
     - name: adminDate
       title: "Administrative Censoring Date"
       type: Variable
+      default: NULL
       description:
           R: >
             Variable containing the administrative censoring date.

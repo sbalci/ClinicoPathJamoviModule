@@ -100,37 +100,38 @@ raw_to_prob <- function(values, actual, direction = ">=") {
 
     glm_result <- tryCatch({
         model <- stats::glm(actual_clean ~ predictor, family = binomial(link = "logit"))
-        # Get fitted probabilities for the complete cases
-        fitted_probs <- model$fitted.values
         # Predict for ALL original values (including those with NA in actual)
         new_predictor <- if (direction == "<=") -values else values
         stats::predict(model, newdata = data.frame(predictor = new_predictor), type = "response")
     }, warning = function(w) {
-        # glm may warn about convergence or fitted probabilities near 0/1
-        # Suppress and continue
+        # Refit with warnings muted, but PASS THE WARNING ON.
+        #
+        # This used to swallow it silently. The two warnings glm raises here are
+        # exactly the ones the caller needs to know about: "fitted probabilities
+        # numerically 0 or 1 occurred" means separation, and "algorithm did not
+        # converge" means the fit is unusable. Both produce predicted risks that
+        # look plausible and are not, and IDI/NRI are computed from them.
+        warning(sprintf(
+            "raw_to_prob: logistic fit reported '%s'. Predicted probabilities may be unreliable (separation or non-convergence); interpret IDI/NRI with caution.",
+            conditionMessage(w)), call. = FALSE)
         suppressWarnings({
             model <- stats::glm(actual_clean ~ predictor, family = binomial(link = "logit"))
             new_predictor <- if (direction == "<=") -values else values
             stats::predict(model, newdata = data.frame(predictor = new_predictor), type = "response")
         })
     }, error = function(e) {
-        # Fallback: use empirical CDF-based rank probabilities
-        # This handles perfect separation and other glm failures
-        warning("Logistic regression failed; using rank-based probability estimates")
-        rank_probs <- rep(NA, length(values))
-        ranks <- rank(values_clean, ties.method = "average")
-        normalized_ranks <- ranks / (length(ranks) + 1)
-        # Map clean ranks to original positions
-        for (i in seq_along(values)) {
-            if (!is.na(values[i])) {
-                match_idx <- which(values_clean == values[i])
-                if (length(match_idx) > 0) {
-                    rank_probs[i] <- mean(normalized_ranks[match_idx])
-                }
-            }
-        }
-        if (direction == "<=") rank_probs <- 1 - rank_probs
-        rank_probs
+        # Fail rather than substitute a non-probability.
+        #
+        # The previous fallback returned rank(x)/(n+1) -- the empirical
+        # percentile of the PREDICTOR. It never touched `actual`, so its mean is
+        # ~0.5 whatever the outcome prevalence and it is not an estimate of
+        # P(Y = 1 | x) in any sense. Feeding that to IDI (a difference of mean
+        # predicted risk between events and non-events) or to NRI category cuts
+        # silently swaps a calibrated risk scale for a uniform rank scale.
+        warning(sprintf(
+            "raw_to_prob: logistic regression failed (%s); returning NA rather than a rank-based substitute, which would not be a probability.",
+            conditionMessage(e)), call. = FALSE)
+        rep(NA_real_, length(values))
     })
 
     probs <- as.numeric(glm_result)
@@ -211,30 +212,50 @@ bootstrapIDI <- function(new_values, ref_values, actual,
             next
         }
         
-        # Calculate probabilities for bootstrap sample
-        tryCatch({
+        # Calculate probabilities for bootstrap sample.
+        #
+        # The result is assigned from the value of tryCatch(), NOT from inside
+        # the error handler. `boot_idi[i] <- NA` written in the handler assigns
+        # into the handler function's own frame and never reaches this one, so
+        # every failed replicate silently kept its preallocated 0.0 -- dragging
+        # the estimate and the CI toward zero and counting in BOTH p-value
+        # tails. It also meant the "many bootstraps failed" warning below could
+        # never fire from this path.
+        boot_idi[i] <- tryCatch({
             boot_new_probs <- raw_to_prob(boot_new, boot_actual, direction)
             boot_ref_probs <- raw_to_prob(boot_ref, boot_actual, direction)
-            
+
             # Calculate IDI
             boot_events <- boot_actual == 1
             boot_non_events <- boot_actual == 0
-            
-            boot_idi[i] <- (mean(boot_new_probs[boot_events], na.rm = TRUE) -
-                            mean(boot_new_probs[boot_non_events], na.rm = TRUE)) -
+
+            val <- (mean(boot_new_probs[boot_events], na.rm = TRUE) -
+                    mean(boot_new_probs[boot_non_events], na.rm = TRUE)) -
                 (mean(boot_ref_probs[boot_events], na.rm = TRUE) -
                  mean(boot_ref_probs[boot_non_events], na.rm = TRUE))
-            valid_boots <- valid_boots + 1
-        }, error = function(e) {
-            boot_idi[i] <- NA
-        })
+            if (is.finite(val)) {
+                valid_boots <- valid_boots + 1
+                val
+            } else NA_real_
+        }, error = function(e) NA_real_)
     }
     
     # Remove failed bootstrap samples
     boot_idi_valid <- boot_idi[!is.na(boot_idi)]
     
+    if (length(boot_idi_valid) == 0) {
+        # Nothing to summarise. Returning quantile(numeric(0)) and
+        # mean(logical(0)) would hand back ci = NA and p = NaN with no
+        # indication that every replicate had failed.
+        warning("All bootstrap replicates failed; no confidence interval or p-value can be computed.",
+                call. = FALSE)
+        return(list(idi = original_idi, ci_lower = NA_real_, ci_upper = NA_real_,
+                    p_value = NA_real_, n_valid_boots = 0))
+    }
+
     if (length(boot_idi_valid) < n_boot * 0.5) {
-        warning("Many bootstrap samples failed - results may be unreliable")
+        warning(sprintf("Only %d of %d bootstrap replicates succeeded - results may be unreliable",
+                        length(boot_idi_valid), n_boot), call. = FALSE)
     }
     
     # Calculate confidence intervals
@@ -242,11 +263,17 @@ bootstrapIDI <- function(new_values, ref_values, actual,
     ci_lower <- quantile(boot_idi_valid, alpha/2, na.rm = TRUE)
     ci_upper <- quantile(boot_idi_valid, 1 - alpha/2, na.rm = TRUE)
     
-    # Calculate p-value (two-sided test for IDI = 0)
-    p_value <- 2 * min(
-        mean(boot_idi_valid <= 0, na.rm = TRUE),
-        mean(boot_idi_valid >= 0, na.rm = TRUE)
-    )
+    # Calculate p-value (two-sided test for IDI = 0).
+    #
+    # (1 + count) / (B + 1) rather than count / B: a bootstrap p-value can never
+    # legitimately be exactly 0, and the uncorrected form returned 0 whenever
+    # every replicate fell on one side, implying impossible precision from a
+    # finite number of replicates.
+    B <- length(boot_idi_valid)
+    p_value <- min(1, 2 * min(
+        (1 + sum(boot_idi_valid <= 0)) / (B + 1),
+        (1 + sum(boot_idi_valid >= 0)) / (B + 1)
+    ))
     
     return(list(
         idi = original_idi,

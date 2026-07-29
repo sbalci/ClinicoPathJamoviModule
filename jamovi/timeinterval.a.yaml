@@ -50,6 +50,7 @@ options:
     - name: dx_date
       title: Start Date Variable
       type: Variable
+      default: NULL
       suggested:
         - continuous
         - nominal
@@ -64,6 +65,7 @@ options:
     - name: fu_date
       title: End Date Variable  
       type: Variable
+      default: NULL
       suggested:
         - continuous
         - nominal
@@ -183,7 +185,7 @@ options:
       description:
           R: >
             Multiplier for 99th percentile to define extreme values.
-            Default 2.0 means values >2× the 99th percentile are flagged.
+            Default 2.0 means values >2x the 99th percentile are flagged.
             Higher values are more conservative (fewer flagged values).
 
     # === OUTPUT OPTIONS ===

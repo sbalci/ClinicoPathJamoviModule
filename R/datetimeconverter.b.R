@@ -385,7 +385,9 @@ datetimeconverterClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             # Honor manual override: force the requested numeric interpretation
             # regardless of the range-based heuristics below.
             if (!is.null(force_format) && force_format == 'excel_serial') {
-                parsed_dates <- as.POSIXct(numeric_vector, origin = '1899-12-30', tz = 'UTC')
+                # Excel serials count DAYS; as.POSIXct.numeric reads SECONDS. Without
+                # the * 86400 every Excel date collapsed onto the origin itself.
+                parsed_dates <- as.POSIXct(numeric_vector * 86400, origin = '1899-12-30', tz = 'UTC')
                 notes <- c(notes, 'Forced Excel serial interpretation (1900 system); converted using origin 1899-12-30 (UTC).')
                 return(list(
                     original_display = original_display,
@@ -418,7 +420,9 @@ datetimeconverterClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             unix_ms_like <- all(non_missing >= 1e12 & non_missing <= 4e12)
 
             if (excel_like) {
-                parsed_dates <- as.POSIXct(numeric_vector, origin = '1899-12-30', tz = 'UTC')
+                # Excel serials count DAYS; as.POSIXct.numeric reads SECONDS. Without
+                # the * 86400 every Excel date collapsed onto the origin itself.
+                parsed_dates <- as.POSIXct(numeric_vector * 86400, origin = '1899-12-30', tz = 'UTC')
                 notes <- c(notes, 'Detected Excel serial numbers (1900 system); converted using origin 1899-12-30 (UTC).')
                 return(list(
                     original_display = original_display,
@@ -432,7 +436,9 @@ datetimeconverterClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             }
 
             if (excel_1904_like) {
-                parsed_dates <- as.POSIXct(numeric_vector, origin = '1904-01-01', tz = 'UTC')
+                # Excel serials count DAYS; as.POSIXct.numeric reads SECONDS. Without
+                # the * 86400 every Excel date collapsed onto the origin itself.
+                parsed_dates <- as.POSIXct(numeric_vector * 86400, origin = '1904-01-01', tz = 'UTC')
                 notes <- c(notes, 'Detected Excel serial numbers (1904 system); converted using origin 1904-01-01 (UTC).')
                 return(list(
                     original_display = original_display,

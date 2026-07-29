@@ -46,6 +46,7 @@ options:
     - name: datetime_var
       title: DateTime Variable
       type: Variable
+      default: NULL
       suggested:
         - continuous
         - nominal
