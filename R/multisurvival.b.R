@@ -206,7 +206,14 @@
 }
 
 # Helper function for generating clinical interpretation summaries
-.generateClinicalSummary <- function(results, analysis_type = "cox", n_vars = 0, n_events = 0) {
+.generateClinicalSummary <- function(results, analysis_type = "cox", n_vars = 0, n_events = 0,
+                                     term_map = NULL) {
+  # `term_map` is coxph's $assign: a named list mapping each model TERM to the
+  # coefficient indices it owns. Without it this function counted significant
+  # coefficient ROWS and printed the total as a count of VARIABLES, so a single
+  # three-level factor with two significant contrasts announced "2 out of 1
+  # factors showed statistically significant associations" -- more significant
+  # factors than factors examined.
 
   # Extract key statistics based on analysis type
   if (analysis_type == "cox" && !is.null(results)) {
@@ -245,7 +252,18 @@
         results <- res_df
         p_values <- suppressWarnings(as.numeric(res_df[[p_col]]))
         sig_indices <- which(p_values < 0.05 & !is.na(p_values))
-        sig_count <- length(sig_indices)
+
+        # Count VARIABLES, not coefficient rows. A term counts once if any of
+        # its contrasts is significant; without the map fall back to rows but
+        # never report more of them than there are variables.
+        if (!is.null(term_map) && length(term_map) > 0) {
+          sig_count <- sum(vapply(term_map, function(idx) {
+            idx <- idx[idx >= 1 & idx <= length(p_values)]
+            length(idx) > 0 && any(p_values[idx] < 0.05, na.rm = TRUE)
+          }, logical(1)))
+        } else {
+          sig_count <- min(length(sig_indices), if (n_vars > 0) n_vars else length(sig_indices))
+        }
 
         if (sig_count > 0) {
           # Find strongest effect (furthest from HR = 1)
@@ -916,9 +934,31 @@ multisurvivalClass <- if (requireNamespace('jmvcore'))
       # These functions provide proper cumulative incidence function (CIF)
       # support for competing risk scenarios (analysistype = "compete")
 
-      .isCompetingRisk = function() {
-        # Check if current analysis is competing risk mode
-        return(self$options$multievent && self$options$analysistype == "compete")
+      .isCompetingRisk = function(state = NULL) {
+        # Check if competing risk analysis is active.
+        #
+        # The STATUS VECTOR decides this, not the options. This used to
+        # read `self$options$multievent && analysistype == "compete"`
+        # alone, which is blind to the outcomeorganizer hand-off: a
+        # recoded Censored/Event/Competing column arrives already 0/1/2
+        # with multievent = FALSE -- the user never fills
+        # dod/dooc/awd/awod, that is the whole point of the recoded
+        # column. The guard was therefore FALSE and the 0/1/2 vector
+        # went into an ordinary survival::Surv(), which for a max status
+        # of 2 subtracts 1 and NAs anything outside 0/1: Censored became
+        # NA (row silently DELETED), Event became censored, and
+        # Competing became the event. If this ever reverts to testing
+        # the options alone, competing-risk data is analysed backwards
+        # again with no warning.
+        #
+        # `state` is a plot's image$state. jmvcore's .load() restores
+        # results from disk without calling .run(), so a renderer can
+        # execute where private$.eventRecode is still NULL; the flag
+        # then has to come off the serialised state.
+        isTRUE(state$has_competing) ||
+            isTRUE(private$.eventRecode$has_competing) ||
+            (isTRUE(self$options$multievent) &&
+                 identical(self$options$analysistype, "compete"))
       },
 
       .competingRiskCumInc = function(mydata, mytime, myoutcome) {
@@ -2133,7 +2173,10 @@ multisurvivalClass <- if (requireNamespace('jmvcore'))
           private$.calculateOptimismCIndex()
 
           # Generate clinical interpretation summary
-          private$.generateAndDisplayClinicalSummary(cleaneddata)
+          # Honour the option. This ran unconditionally, so unticking
+          # "Show summaries" left the Clinical Summary panel on the page.
+          if (isTRUE(self$options$showSummaries))
+            private$.generateAndDisplayClinicalSummary(cleaneddata)
 
           # Store timing information
           private$.analysis_times <- list(
@@ -2285,13 +2328,6 @@ multisurvivalClass <- if (requireNamespace('jmvcore'))
         cleaneddata <- private$.cleandata()
         if (is.null(cleaneddata$cleanData)) {
           return()
-        }
-
-        if (self$options$multievent && self$options$analysistype == "compete") {
-          # Notice Disabled
-          # notice <- jmvcore::Notice$new(...)
-          
-          # self$results$insert(3, notice)
         }
 
         private$.calculateRiskScore(cox_model, cleaneddata$cleanData)
@@ -2516,6 +2552,40 @@ multisurvivalClass <- if (requireNamespace('jmvcore'))
         mydata_labelled <- cleaneddata$mydata_labelled
         all_labels <- labelled::var_label(mydata_labelled)
 
+        # Say out loud how a few-valued continuous predictor is being modelled.
+        #
+        # jmvcore rejects a genuine factor in `contexpl` before .run() is
+        # reached ("Argument 'contexpl' requires a numeric variable"), so there
+        # is no factor to coerce. The silent path was the reverse one:
+        # finalfit auto-factorised any numeric covariate with < 5 distinct
+        # values (see cont_cut in .final_fit2), so an ordinal score was fitted
+        # as a factor in the main table and as a linear trend everywhere else.
+        # That coercion is now off; this notice states the consequence, so the
+        # linear-trend assumption is a documented choice and not a silent one.
+        if (length(mycontexpl) > 0) {
+          .ndist <- vapply(mycontexpl, function(v) {
+            x <- mydata[[v]]
+            if (is.numeric(x)) length(unique(x[!is.na(x)])) else NA_integer_
+          }, integer(1))
+          .few <- mycontexpl[!is.na(.ndist) & .ndist < 5L]
+          if (length(.few) > 0) {
+            .shown <- vapply(.few, function(v) {
+              lbl <- all_labels[[v]]
+              if (is.null(lbl)) v else as.character(lbl)
+            }, character(1))
+            private$.addHtmlMessage(
+              "info",
+              .("Continuous predictor with few distinct values"),
+              paste0(
+                .("Entered as continuous:"), " ",
+                paste(sprintf("%s (%d distinct values)", .shown, .ndist[.few]),
+                      collapse = "; "), ". ",
+                .("The hazard ratio is the effect per one-unit increase, assuming a constant step in log hazard between consecutive values. If the categories are not equally spaced, move the variable to Explanatory Variables to estimate a separate hazard ratio for each level.")
+              )
+            )
+          }
+        }
+
         # Build formula parts (exclude strata from covariates)
         #
         # The comment above was aspirational: strata variables were left in the
@@ -2647,8 +2717,15 @@ multisurvivalClass <- if (requireNamespace('jmvcore'))
         # EXPERIMENTAL:           }
         # EXPERIMENTAL:         }
 
-        # Check for competing risks analysis
-        if (self$options$multievent && self$options$analysistype == 'compete') {
+        # Check for competing risks analysis.
+        #
+        # .isCompetingRisk(), not `multievent && analysistype == "compete"`: an
+        # outcomeorganizer hand-off arrives already coded 0/1/2 with multievent
+        # unset, so the option pair sent it down the STANDARD Cox branch below
+        # with a three-level status. .definemyoutcome() hands Fine-Gray the
+        # Censored/Event/Competing factor, which is exactly what finegray()
+        # needs, so the hand-off belongs in this branch.
+        if (private$.isCompetingRisk()) {
             # Use Fine-Gray model
             # Create Fine-Gray dataset (outcome is factor from .definemyoutcome)
             if (is.factor(mydata$myoutcome) && !"Event" %in% levels(mydata$myoutcome)) {
@@ -2718,11 +2795,11 @@ multisurvivalClass <- if (requireNamespace('jmvcore'))
             data = mydata,
             real_interactions = real_interactions,
             conf_level = 0.95,
-            is_finegray = (self$options$multievent && self$options$analysistype == 'compete')
+            is_finegray = private$.isCompetingRisk()
           )
         }
 
-        if (self$options$multievent && self$options$analysistype == 'compete') {
+        if (private$.isCompetingRisk()) {
           private$.addHtmlMessage(
             "info",
             .("Competing-risk model"),
@@ -2849,6 +2926,13 @@ multisurvivalClass <- if (requireNamespace('jmvcore'))
 
 
 
+
+        # Exact (Garwood) bounds: a row with almost no accrued person-time
+        # genuinely cannot rule out a very high rate. Correct, but it looks
+        # like a bug without a footnote saying so. Do not cap it.
+        self$results$personTimeTable$setNote(
+          "ci",
+          .("Exact (Garwood) Poisson 95% CI. Rows with 0 events give a one-sided 97.5% upper bound; intervals with very little accrued person-time yield correspondingly wide bounds."))
 
         # Add to personTimeTable - first the overall row
         self$results$personTimeTable$addRow(rowKey=1, values=list(
@@ -2983,7 +3067,9 @@ multisurvivalClass <- if (requireNamespace('jmvcore'))
               # Add to personTimeTable (interval rows use an "int_" key namespace
               # disjoint from the "grp_" group rows above)
               self$results$personTimeTable$addRow(rowKey=paste0("int_", i+1), values=list(
-                interval=paste0(start_time, "-", end_time),
+                # The final interval's upper bound is the observed maximum
+                # follow-up, a raw double, so the label read "60-134.449661066093".
+                interval=paste0(.fmtTimeLabel(start_time), "-", .fmtTimeLabel(end_time)),
                 events=events_in_interval,
                 person_time=round(person_time_in_interval, 2),
                 rate=round(interval_rate, 2),
@@ -3008,8 +3094,40 @@ multisurvivalClass <- if (requireNamespace('jmvcore'))
 
       ,
       # AFT Model (Accelerated Failure Time) ----
-      # DISABLED: Options commented out in .a.yaml and .u.yaml
-      # Function call commented out in .run() (line ~1914)
+      # DISABLED: `use_aft` is commented out in .a.yaml/.u.yaml, all five AFT
+      # result items are commented out in .r.yaml, and the only call site is
+      # commented out in .performSurvivalAnalysis(). The `if (TRUE) return()`
+      # below is a third layer of the same switch.
+      #
+      # DO NOT REVIVE THIS WITHOUT FIXING THE FOLLOWING. They were found while
+      # fixing the identical problems in the live Cox output, and this code
+      # predates those fixes, so it still carries every one of them:
+      #
+      # 1. RAW COEFFICIENT NAMES. `var_name <- rownames(coef_table)[i]` below
+      #    yields model-matrix names such as "stageIV" or "treatmentTreatment A".
+      #    The adjusted Cox table shipped those to clinicians until it was fixed.
+      #    Use private$.coefTerms(), which already resolves a fitted model's
+      #    coefficients into variable / level / reference level.
+      #
+      # 2. FACTOR CONTRASTS ARE NOT "UNIT INCREASES". Whatever prose is written
+      #    here, a factor level is "<level> compared with <reference>", never
+      #    "per 1-unit increase". Only genuinely continuous predictors get the
+      #    per-unit phrasing.
+      #
+      # 3. THIS IS A TIME-RATIO MODEL, NOT A HAZARD MODEL. survreg gives
+      #    acceleration factors: TR > 1 means LONGER survival, the opposite
+      #    direction to HR > 1. Do not copy wording from the Cox summaries --
+      #    the existing "% longer survival time" text below is right in kind and
+      #    must stay that way.
+      #
+      # 4. IF IT EVER CALLS finalfit, PIN cont_cut = 0. The default of 5
+      #    silently converts any numeric predictor with fewer than 5 distinct
+      #    values into a factor, which is how the Cox table and the adjusted Cox
+      #    table came to be two different models fitted on the same data.
+      #
+      # 5. STRATIFICATION AND COMPETING RISKS are not handled anywhere below.
+      #    Decide deliberately whether to support or refuse them; silently
+      #    ignoring a strata() selection is what caused MS-03.
       .calculate_aft = function() {
         # SAFEGUARD: Feature disabled
         if (TRUE) return()
@@ -3020,7 +3138,7 @@ multisurvivalClass <- if (requireNamespace('jmvcore'))
         # }
 
 
-        if (self$options$multievent && self$options$analysistype == "compete") {
+        if (private$.isCompetingRisk()) {
           private$.addHtmlMessage(
             "info",
             .("AFT not run under competing risks"),
@@ -3205,7 +3323,7 @@ multisurvivalClass <- if (requireNamespace('jmvcore'))
         # Performance metrics are defined for standard (single-event) survival
         # models. Competing-risks / Fine-Gray fits use a different prediction
         # target, so skip with an explanatory note rather than report a wrong number.
-        if (self$options$multievent && self$options$analysistype == "compete") {
+        if (private$.isCompetingRisk()) {
           self$results$survMetricsSummary$setContent(
             "<p>Model performance metrics (Brier score, IBS, time-dependent AUC) are computed for standard survival models and are not shown for competing-risks / Fine-Gray analyses.</p>"
           )
@@ -3275,17 +3393,44 @@ multisurvivalClass <- if (requireNamespace('jmvcore'))
                 .miss <- setdiff(.need, names(mydata))
               }
             }
-            if (length(.miss) > 0) {
+            # riskRegression's Brier/AUC scoring does not reliably support a
+            # stratified Cox model: predictCox rebuilds the strata from the
+            # prediction data and rejects the result ("New data has a strata not
+            # found in the original model") even when the fit and the prediction
+            # data are the same rows. Harrell's C above is computed directly
+            # from the fit and is unaffected, so it is kept. Say plainly that
+            # the time-dependent metrics are unavailable rather than surfacing a
+            # raw R error the reader cannot act on.
+            if (length(attr(stats::terms(stats::formula(cox_model)), "term.labels")) > 0 &&
+                any(grepl("^strata\\(", attr(stats::terms(stats::formula(cox_model)), "term.labels")))) {
+              private$.addHtmlMessage(
+                "info",
+                .("Time-dependent metrics unavailable for a stratified model"),
+                .("Harrell's C-index above is reported as usual. The Brier score, integrated Brier score and time-dependent AUC are not computed for stratified Cox models, because each stratum has its own baseline hazard and the scoring routine cannot form a single absolute-risk prediction across strata. To obtain these metrics, re-run without stratification, or fit the stratification variable as an ordinary covariate."))
+
+              # Clear what a previous run left behind. Returning early does not
+              # overwrite these, so the old "Performance metric error ... has new
+              # levels" text and an empty Brier frame stayed on the page next to
+              # the notice explaining that the metrics were not computed.
+              try(self$results$survMetricsSummary$setContent(""), silent = TRUE)
+              try(self$results$survMetricsSummary$setVisible(FALSE), silent = TRUE)
+              try(self$results$survMetricsPlot$setVisible(FALSE), silent = TRUE)
+              return(invisible(NULL))
+            }
+
+            .refit <- private$.coxRefitForScore(cox_model, mydata)
+            if (inherits(.refit, "multisurvival_refit_error")) {
               private$.addHtmlMessage(
                 "warning",
                 .("Model performance metrics unavailable"),
                 sprintf(.("Performance metrics could not be computed because the analysis dataset does not carry: %s. This usually happens when a stratification variable is not retained alongside the model covariates."),
-                        paste(.miss, collapse = ", ")))
+                        paste(.refit$missing, collapse = ", ")))
               return(invisible(NULL))
             }
-
-            cox_local <- survival::coxph(stats::formula(cox_model), data = mydata,
-                                         x = TRUE, y = TRUE)
+            cox_local <- .refit$fit
+            # Score must see the SAME frame the model was fitted on, including
+            # the dropped factor levels.
+            mydata    <- .refit$data
             # riskRegression's response parser does not accept a
             # namespace-qualified `survival::Surv(...)` on the left-hand side --
             # it fails with "Cannot assign response type", which was swallowed
@@ -3434,7 +3579,7 @@ multisurvivalClass <- if (requireNamespace('jmvcore'))
           return(FALSE)
         }
         # Standard survival models only (see .calculate_survmetrics)
-        if (self$options$multievent && self$options$analysistype == "compete") {
+        if (private$.isCompetingRisk(image$state)) {
           return(FALSE)
         }
         if (!requireNamespace("riskRegression", quietly = TRUE)) {
@@ -3449,8 +3594,16 @@ multisurvivalClass <- if (requireNamespace('jmvcore'))
           max_time <- max(mydata$mytime, na.rm = TRUE)
           # Grid of timepoints strictly inside the observed follow-up
           grid <- seq(max_time / 50, max_time * 0.98, length.out = 40)
-          cox_local <- survival::coxph(stats::formula(cox_model), data = mydata,
-                                       x = TRUE, y = TRUE)
+          # Same limitation as the metrics table: no Brier curve for a
+          # stratified model. The table above explains why; returning FALSE
+          # here leaves the plot area empty rather than drawing a broken curve.
+          .tl <- attr(stats::terms(stats::formula(cox_model)), "term.labels")
+          if (length(.tl) > 0 && any(grepl("^strata\\(", .tl))) return(FALSE)
+
+          .refit <- private$.coxRefitForScore(cox_model, mydata)
+          if (inherits(.refit, "multisurvival_refit_error")) return(FALSE)
+          cox_local <- .refit$fit
+          mydata    <- .refit$data
           sc <- riskRegression::Score(
             list(Cox = cox_local),
             # Bare Surv(): riskRegression's response parser rejects a
@@ -3500,7 +3653,7 @@ multisurvivalClass <- if (requireNamespace('jmvcore'))
         if (is.null(full)) return()
 
         # Single-term deletion is defined for standard Cox models.
-        if (self$options$multievent && self$options$analysistype == "compete") {
+        if (private$.isCompetingRisk()) {
           self$results$modelContributionSummary$setContent(
             "<p>Covariate contribution (single-term deletion) is shown for standard Cox models and is not available for competing-risks / Fine-Gray analyses.</p>"
           )
@@ -3713,8 +3866,44 @@ multisurvivalClass <- if (requireNamespace('jmvcore'))
 
         # Get baseline Cox model (to check for Fine-Gray)
         cox_model <- private$.cox_model()
-        
-        is_finegray <- !is.null(cox_model$weights) && self$options$multievent && self$options$analysistype == 'compete'
+
+        # A stratified model has no single nomogram.
+        #
+        # rms::cph needs rms's own strat(), not survival::strata(), so the fit
+        # failed outright -- but even if it fitted, a nomogram converts a total
+        # point score into ONE absolute risk, and a stratified model has a
+        # different baseline hazard per stratum. There is no single risk scale
+        # to print. The previous code silently took the FIRST stratum's baseline
+        # survival and labelled it as the model's, which would have given every
+        # patient outside that stratum a wrong absolute risk. Refusing is the
+        # safe behaviour; the summary panel explains it.
+        if (isTRUE(self$options$use_stratify) && length(strata_vars) > 0) {
+          private$.addHtmlMessage(
+            "info",
+            .("Nomogram not available for a stratified model"),
+            sprintf(.("The model is stratified by %s. A nomogram maps a total point score onto a single absolute-risk scale, but a stratified model has a separate baseline hazard for each stratum, so no single scale applies to all patients. Remove the stratification, or enter these variables as ordinary covariates, to obtain a nomogram."),
+                    paste(strata_vars, collapse = ", ")))
+
+          # Withdraw the whole nomogram section, not just the plot.
+          #
+          # Returning early leaves every sibling panel showing whatever the
+          # previous run put there: an empty plot frame, a "How to read the
+          # nomogram" walkthrough, and a scoring guide -- all describing a
+          # nomogram that was deliberately not produced. An explanation of how
+          # to read something that is not on the page is worse than silence.
+          for (nm in c("nomogramHeading", "plot_nomogram", "nomogram_display",
+                       "nomogramSummaryHeading", "nomogramSummary",
+                       "nomogramExplanation")) {
+            it <- try(self$results[[nm]], silent = TRUE)
+            if (!inherits(it, "try-error") && !is.null(it)) {
+              try(it$setVisible(FALSE), silent = TRUE)
+              try(it$setContent(""), silent = TRUE)
+            }
+          }
+          return(FALSE)
+        }
+
+        is_finegray <- !is.null(cox_model$weights) && private$.isCompetingRisk()
 
         base_formula <- .buildSurvivalFormula(
           time_var = "mytime",
@@ -4141,6 +4330,38 @@ multisurvivalClass <- if (requireNamespace('jmvcore'))
 
       # coxph Proportional Hazards Assumption  ----
       ,
+      # Refit a Cox model so that riskRegression can score it.
+      #
+      # riskRegression re-evaluates the model's terms when it predicts, and it
+      # does so in the environment of the model's FORMULA. .asSurvivalFormula()
+      # leaves that environment pointing at the frame it was built in, which no
+      # longer holds the analysis data -- so a model containing strata(stage)
+      # failed with a bare "object 'stage' not found" that surfaced to the
+      # clinician as a raw R error. Binding the data into the formula's
+      # environment makes every later lookup resolve. Same class of defect as
+      # the one that used to stop cox.zph re-finding its data.
+      .coxRefitForScore = function(cox_model, mydata) {
+        fml <- stats::formula(cox_model)
+        need <- all.vars(fml)
+        miss <- setdiff(need, names(mydata))
+        if (length(miss) > 0) return(structure(list(missing = miss),
+                                               class = "multisurvival_refit_error"))
+        # Drop factor levels that no longer occur.
+        #
+        # Rows are removed upstream (listwise deletion on the covariates), but
+        # the factor columns keep their original level sets. coxph silently
+        # ignores an empty stratum while riskRegression's predictCox compares
+        # the level sets and rejects the mismatch with "New data has a strata
+        # not found in the original model". Dropping the empty levels first
+        # makes the fitted model and the prediction data agree.
+        for (v in intersect(need, names(mydata)))
+          if (is.factor(mydata[[v]])) mydata[[v]] <- droplevels(mydata[[v]])
+
+        environment(fml) <- list2env(as.list(mydata), parent = environment(fml))
+        list(fit = survival::coxph(fml, data = mydata, x = TRUE, y = TRUE),
+             data = mydata)
+      }
+      ,
       .cox_ph = function(cox_model) {
         # cleaneddata <- private$.cleandata()
         #
@@ -4368,11 +4589,53 @@ multisurvivalClass <- if (requireNamespace('jmvcore'))
           return(TRUE)
         }
 
+        # Competing risks: the shared model is Fine-Gray, so its estimates are
+        # SUBdistribution hazard ratios. Drawing them on an axis labelled
+        # "HR, 95% CI" beside a report whose main table is suppressed for exactly
+        # this reason (see .final_fit2) would reintroduce the two-estimands-in-one
+        # -report problem from a different direction.
+        if (isTRUE(self$options$multievent) &&
+            identical(self$options$analysistype, "compete")) {
+          grid::grid.newpage()
+          grid::grid.text(
+            paste0("Hazard-ratio forest plot is not shown for competing risks.\n",
+                   "The model is Fine-Gray, whose estimates are subdistribution\n",
+                   "hazard ratios and must not be read as ordinary hazard ratios."),
+            x = 0.05, y = 0.95, just = c("left", "top"),
+            gp = grid::gpar(fontsize = 11))
+          return(TRUE)
+        }
+
+        # Build the descriptive column ourselves so that cont_cut = 0 applies.
+        #
+        # hr_plot() has no cont_cut argument and does NOT forward its `...` to
+        # summary_factorlist -- it calls summary_factorlist(.data, dependent,
+        # explanatory, fit_id = TRUE) with finalfit's default cont_cut = 5, which
+        # silently splits any numeric predictor having fewer than 5 distinct
+        # values into factor levels. The two Cox tables were pinned to
+        # cont_cut = 0 for precisely this reason, so leaving the plot on the
+        # default let it describe a variable as categorical while both tables
+        # described it as continuous. Falls back to hr_plot's own default if
+        # this fails, rather than losing the plot entirely.
+        hr_factorlist <- tryCatch(
+          finalfit::summary_factorlist(mydata, myformula, formula2,
+                                       cont_cut = 0, fit_id = TRUE),
+          error = function(e) NULL)
+
         plot <- tryCatch({
           finalfit::hr_plot(
             .data = mydata,
             dependent = myformula,
             explanatory = formula2,
+            # Reuse the ALREADY-FITTED model. Left NULL, hr_plot runs
+            # `coxphmulti(.data, dependent, explanatory)` internally -- a third
+            # fit of the same data, on top of .cox_model() and the finalfit
+            # table. That refit is built from raw columns, so it silently loses
+            # stratification: a stratified analysis drew its forest plot from an
+            # UNSTRATIFIED model, which is the defect that opened this whole
+            # review (MS-03), reappearing in the plot layer.
+            coxfit = cox_model,
+            factorlist = hr_factorlist,
             dependent_label = "Survival",
             table_text_size = 4,
             title_text_size = 14,
@@ -4513,7 +4776,7 @@ multisurvivalClass <- if (requireNamespace('jmvcore'))
         }
 
         # Check if it is a Fine-Gray model
-        is_finegray <- !is.null(cox_model$weights) && self$options$multievent && self$options$analysistype == 'compete'
+        is_finegray <- !is.null(cox_model$weights) && private$.isCompetingRisk()
         
         plot3 <- tryCatch({
           if (is_finegray) {
@@ -5031,9 +5294,21 @@ multisurvivalClass <- if (requireNamespace('jmvcore'))
         }
 
         ### Create metrics summary ----
-        c_index <- survival::concordance(cox_model)$concordance
+        # Harrell's concordance is not a competing-risks statistic.
+        #
+        # Under competing risks cox_model is the Fine-Gray fit, whose rows are
+        # finegray()-expanded pseudo-observations rather than patients, so
+        # concordance() ranks pseudo-rows and reports the result as a patient
+        # discrimination index. Report nothing rather than a number that cannot
+        # be interpreted; a cause- and horizon-specific measure would be needed.
+        .cr_mode <- isTRUE(self$options$multievent) &&
+                    identical(self$options$analysistype, "compete")
 
-        c_index_formatted <- sprintf("%.3f", c_index)
+        c_index <- if (.cr_mode) NA_real_ else
+                     survival::concordance(cox_model)$concordance
+
+        c_index_formatted <- if (is.na(c_index))
+          .("not reported for competing risks") else sprintf("%.3f", c_index)
 
         # Create dynamic group summary text
         group_summary <- character()
@@ -5047,8 +5322,8 @@ multisurvivalClass <- if (requireNamespace('jmvcore'))
           "
 <br>
 <b>Risk Score Model Performance:</b><br>
-Harrell's C-index (apparent, in-sample): {sprintf('%.3f', c_index)}<br>
-<i>This apparent concordance is optimistic; see the C-index validation table for an optimism-corrected estimate.</i><br>
+Harrell's C-index (apparent, in-sample): {c_index_formatted}<br>
+<i>{if (is.na(c_index)) 'Harrell&apos;s C assumes a single event type. Under competing risks it would be computed from expanded pseudo-observations rather than patients, so it is not reported here.' else 'This apparent concordance is optimistic; see the C-index validation table for an optimism-corrected estimate.'}</i><br>
 <br>"
 # Number of patients in risk groups:<br>
 # {group_text}<br>
@@ -5075,8 +5350,7 @@ Patients were then divided into {as.character(length(levels(mydata$risk_group)))
  <br>
 - Scores below the {percentile_text}.<br>
 <br>
-The Harrell's C-index of {c_index_formatted} indicates the model's discriminative ability,
-where 0.5 suggests no discriminative ability and 1.0 indicates perfect discrimination between risk groups.
+{if (is.na(c_index)) 'Discrimination is not summarised by Harrell\\'s C here: it assumes a single event type, and under competing risks it would rank expanded pseudo-observations rather than patients.' else paste0(\"The Harrell's C-index of \", c_index_formatted, \" indicates the model's discriminative ability, where 0.5 suggests no discriminative ability and 1.0 indicates perfect discrimination between risk groups.\")}
 <br><br>
 "
         )
@@ -5177,6 +5451,57 @@ where 0.5 suggests no discriminative ability and 1.0 indicates perfect discrimin
           return()
         }
         plotData$status[is.na(plotData$status)] <- FALSE
+
+        # Competing risks: plot cumulative incidence, not 1 - Kaplan-Meier.
+        #
+        # `.eventIndicator()` above maps the 0/1/2 outcome to a binary flag, so
+        # a competing event became a CENSORING. Kaplan-Meier then treats those
+        # patients as though they remained at risk of the event of interest,
+        # which they no longer are, and the resulting curve overstates
+        # event-free probability -- the more competing events, the larger the
+        # overstatement. survfit() on the multi-state factor gives the
+        # Aalen-Johansen cumulative incidence, which accounts for them.
+        is_cr <- isTRUE(self$options$multievent) &&
+                 identical(self$options$analysistype, "compete") &&
+                 is.factor(riskData$myoutcome) &&
+                 "Competing" %in% levels(riskData$myoutcome)
+
+        if (is_cr) {
+          cr_df <- data.frame(time = riskData$mytime,
+                              st   = riskData$myoutcome,
+                              group = riskData$risk_group)
+          cr_df <- cr_df[!is.na(cr_df$time) & !is.na(cr_df$st) & !is.na(cr_df$group), , drop = FALSE]
+          cr_df$st <- droplevels(cr_df$st)
+
+          aj <- try(survival::survfit(survival::Surv(time, st) ~ group, data = cr_df),
+                    silent = TRUE)
+          if (inherits(aj, "try-error")) return(FALSE)
+
+          # pstate carries one column per state; take the event-of-interest one.
+          st_names <- colnames(aj$pstate)
+          ev_col <- if ("Event" %in% st_names) which(st_names == "Event")[1] else 2L
+          grp <- rep(names(aj$strata), aj$strata)
+          cif <- data.frame(time  = aj$time,
+                            cif   = aj$pstate[, ev_col],
+                            group = sub("^group=", "", grp),
+                            stringsAsFactors = FALSE)
+
+          p <- ggplot2::ggplot(cif, ggplot2::aes(x = time, y = cif, colour = group)) +
+            ggplot2::geom_step(linewidth = 0.8, na.rm = TRUE) +
+            ggplot2::scale_y_continuous(limits = c(0, 1)) +
+            ggplot2::labs(
+              x = paste0("Time (", self$options$timetypeoutput, ")"),
+              y = .("Cumulative incidence"),
+              colour = .("Risk group"),
+              title = .("Cumulative Incidence by Risk Group"),
+              subtitle = .("Aalen-Johansen estimator"),
+              caption = .("Competing events are accounted for; this is not 1 - Kaplan-Meier.")) +
+            ggplot2::theme_bw() +
+            ggplot2::theme(plot.caption = ggplot2::element_text(hjust = 0, size = 8))
+
+          print(p)
+          return(TRUE)
+        }
 
         # Create survival object and fit
         fit <- survival::survfit(survival::Surv(time, status) ~ group, data = plotData)
@@ -5321,7 +5646,7 @@ where 0.5 suggests no discriminative ability and 1.0 indicates perfect discrimin
           return(NULL)
         }
 
-        if (self$options$multievent && self$options$analysistype == "compete") {
+        if (private$.isCompetingRisk()) {
           private$.addHtmlMessage(
             "info",
             .("Adjusted curves use Fine-Gray"),
@@ -5340,33 +5665,320 @@ where 0.5 suggests no discriminative ability and 1.0 indicates perfect discrimin
           return(NULL)
         }
 
+        # State the estimand before anything is drawn. Rendered here rather than
+        # inside the ac_summary block because it explains the CURVE as much as
+        # the tables, and the curve is shown even when the tables are not.
+        private$.renderAdjustedEstimandPanel(data, adj_var, self$options$ac_method)
+
         # Numeric adjusted-survival tables (opt-in via ac_summary): adjusted
         # survival at the cutpoint timepoints, adjusted median survival, and the
         # adjusted Cox hazard-ratio table. Each backend populates its own result
         # slots. The adjusted survival curve itself is drawn by .plot_adj().
         if (self$options$ac_summary) {
           private$.checkpoint()
-          private$.adjustedSurvTable(cleaneddata, cox_model)
-          private$.adjustedMedianSurv(cleaneddata, cox_model)
+          # One estimator for both tables (and, in .plot_adj, for the curve).
+          # Computed once here because the g-computation branch predicts every
+          # patient under every level and is the expensive part of this run.
+          curves <- private$.adjustedCurveData(cox_model, data, adj_var,
+                                               self$options$ac_method)
+          private$.adjustedSurvTable(cleaneddata, cox_model, curves)
+          private$.adjustedMedianSurv(cleaneddata, cox_model, curves)
           private$.adjustedCox(cleaneddata, cox_model)
         }
 
         return(invisible(NULL))
     }
 
+      ,
+    ## Shared adjusted-curve estimator ----
+    # CR-3. `ac_method` used to be read in exactly ONE place: the `method=`
+    # argument of survminer::ggadjustedcurves() in .plot_adj(). The adjusted
+    # survival table, the adjusted median table and both narratives ignored it
+    # and built their own prediction instead -- survfit() on a single mean/mode
+    # covariate profile per level. Switching between "average" and "conditional"
+    # therefore redrew the plot while leaving the tables byte-identical, so one
+    # report could show a curve and a table answering two different questions.
+    # Every adjusted output now comes from this one function; plot and tables
+    # cannot disagree by construction.
+    #
+    # Naming: survminer's option names do not mean what a survival analyst
+    # expects. Its "conditional" is the g-computation curve (each patient set to
+    # every level in turn, then averaged) and its "average" averages patients
+    # only within their OWN observed level. This module's UI has always read
+    # "Average" / "Conditional Mean", so the names below follow the usual
+    # marginal-versus-conditional distinction instead: `average` = standardised
+    # over the observed patients, `conditional` = one curve at the mean/mode
+    # covariate profile. The estimand is printed under every table and on the
+    # plot, so the reader never has to infer which question was answered.
+    #
+    # Returns a tidy data frame (time, surv, lower, upper, group) or NULL. NULL
+    # means the method was refused and a notice has already been emitted -- it
+    # must never be turned into a fallback to another method.
+    .adjustedCurveData = function(cox_model, mydata, adj_var, method) {
+      if (is.null(cox_model) || is.null(mydata) || is.null(adj_var)) return(NULL)
+      if (!(adj_var %in% names(mydata)) || nrow(mydata) == 0) return(NULL)
+
+      # sort(unique(x)) keeps a factor a factor with its original level set, so
+      # assigning one element back into the column below cannot drop levels and
+      # cannot turn the column into the NA-producing character/factor mismatch
+      # that the old table code risked.
+      lv <- sort(unique(mydata[[adj_var]]))
+
+      # Standardised (g-computation) curve for one target population: predict
+      # every row of `nd` and average the predicted survival across rows. This
+      # is the same shape as the Fine-Gray CIF branch of .plot_adj().
+      standardised <- function(nd, label) {
+        sf <- survival::survfit(cox_model, newdata = nd)
+        cm <- private$.survfitCurveMatrix(sf)
+        data.frame(time  = c(0, cm$time),
+                   surv  = c(1, rowMeans(cm$surv, na.rm = TRUE)),
+                   lower = NA_real_,
+                   upper = NA_real_,
+                   group = label,
+                   stringsAsFactors = FALSE)
+      }
+
+      out <- tryCatch({
+        if (identical(method, "single")) {
+          # survminer's "single": the cohort's own expected survival with every
+          # patient at their observed covariates; the adjustment variable is not
+          # varied, so there is one curve. Identical to survexp(~ 1, ratetable).
+          standardised(mydata, .("Overall"))
+
+        } else if (identical(method, "average")) {
+          do.call(rbind, lapply(seq_along(lv), function(k) {
+            nd <- mydata
+            nd[[adj_var]] <- lv[k]
+            standardised(nd, as.character(lv[k]))
+          }))
+
+        } else if (identical(method, "conditional")) {
+          ref <- private$.adjustedReferenceProfile(mydata, adj_var)
+          do.call(rbind, lapply(seq_along(lv), function(k) {
+            nd <- ref
+            nd[[adj_var]] <- lv[k]
+            sf <- survival::survfit(cox_model, newdata = nd)
+            cm <- private$.survfitCurveMatrix(sf)
+            col <- function(x) if (is.null(x)) rep(NA_real_, length(cm$time)) else as.numeric(x[, 1])
+            data.frame(time  = c(0, cm$time),
+                       surv  = c(1, as.numeric(cm$surv[, 1])),
+                       lower = c(1, col(cm$lower)),
+                       upper = c(1, col(cm$upper)),
+                       group = as.character(lv[k]),
+                       stringsAsFactors = FALSE)
+          }))
+
+        } else if (identical(method, "marginal")) {
+          # Refuse WITHOUT calling survminer.
+          #
+          # Inverse-probability weighting is survminer's estimator, and its
+          # implementation builds a propensity glm by string surgery on the Cox
+          # formula. When the adjustment variable is also a model covariate --
+          # the usual case here -- the response lands on the right-hand side and
+          # the weighted fit is unusable. Calling it anyway did not merely fail:
+          # on real data it ran without returning, so the plot renderer never
+          # completed and jamovi span on a loading animation forever. The table
+          # path had already refused, so the report showed a refusal notice
+          # beside a plot that never stopped loading.
+          #
+          # There is nothing to learn from attempting it, so do not attempt it.
+          # Writing our own IPTW estimator is a separate piece of work (weight
+          # truncation, multi-level treatment, robust CIs); a subtly wrong one
+          # would be worse than none.
+          NULL
+        } else {
+          NULL
+        }
+      }, error = function(e) e)
+
+      if (inherits(out, "error") || !is.data.frame(out) || nrow(out) == 0) {
+        # Refuse explicitly. The old .plot_adj() silently retried "marginal" as
+        # "average" and printed the result under the requested name; that kind
+        # of silent substitution is how this whole defect stayed invisible.
+        detail <- if (identical(method, "marginal"))
+          .("The marginal (inverse-probability-weighted) curve is computed by survminer, whose implementation fails whenever the adjustment variable is also a covariate of the Cox model - which is the usual case here.")
+        else
+          .("The model could not be evaluated under this adjustment method.")
+        private$.addHtmlMessage(
+          "warning",
+          .("Adjusted curves unavailable"),
+          paste(paste0(.("Adjustment method: "), method, "."), detail,
+                .("No adjusted curve or table is shown; nothing was substituted for it. Choose Average (standardised over the observed patients) or Conditional Mean instead."))
+        )
+        return(NULL)
+      }
+
+      out[order(out$group, out$time), , drop = FALSE]
+    }
+
+      ,
+    # survfit() returns two different shapes and averaging the wrong one is
+    # silent nonsense. Unstratified: $surv is a times-by-subjects matrix on one
+    # common grid. Stratified (use_stratify): the per-subject curves are
+    # concatenated, each on its own stratum's time grid, with $strata holding the
+    # block lengths -- rowMeans() on that would average unrelated time points.
+    # Re-evaluating on the union grid gives one matrix in both cases.
+    .survfitCurveMatrix = function(sf) {
+      as_matrix <- function(x, nr) {
+        if (is.null(x)) return(NULL)
+        if (is.null(dim(x))) matrix(x, nrow = nr) else x
+      }
+      if (is.null(sf$strata)) {
+        return(list(time  = sf$time,
+                    surv  = as_matrix(sf$surv,  length(sf$time)),
+                    lower = as_matrix(sf$lower, length(sf$time)),
+                    upper = as_matrix(sf$upper, length(sf$time))))
+      }
+      grid <- sort(unique(sf$time))
+      sm <- summary(sf, times = grid, extend = TRUE)
+      list(time  = grid,
+           surv  = as_matrix(sm$surv,  length(grid)),
+           lower = as_matrix(sm$lower, length(grid)),
+           upper = as_matrix(sm$upper, length(grid)))
+    }
+
+      ,
+    # The mean/mode covariate profile the adjusted tables have always used; it is
+    # now the `conditional` branch only. Factor levels are preserved on purpose:
+    # assigning the bare mode string into a factor column yields NA and survfit()
+    # then predicts for a patient who does not exist.
+    .adjustedReferenceProfile = function(mydata, adj_var) {
+      ref <- mydata[1, , drop = FALSE]
+      for (var in names(mydata)) {
+        if (var %in% c("mytime", "myoutcome", "row_names", adj_var)) next
+        v <- mydata[[var]]
+        if (is.numeric(v)) {
+          ref[[var]] <- mean(v, na.rm = TRUE)
+        } else if (is.factor(v)) {
+          ref[[var]] <- factor(names(which.max(table(v))), levels = levels(v))
+        }
+      }
+      ref
+    }
+
+      ,
+    # Read the step function the plot draws: the estimate in force at time t is
+    # the last one at or before t. Tables read the curve through this, so a
+    # tabulated number is exactly the height of the plotted curve at that time.
+    # Beyond the last observed time nothing is estimable, so the row is dropped
+    # rather than carried forward (the plotted curve stops there too).
+    .adjustedCurveAt = function(g, t) {
+      idx <- which(g$time <= t)
+      if (length(idx) == 0 || t > max(g$time, na.rm = TRUE)) return(NULL)
+      g[max(idx), , drop = FALSE]
+    }
+
+      ,
+    # One sentence naming the estimand, attached to every adjusted table. Without
+    # it "Adjusted Survival" is ambiguous between a standardised whole-cohort
+    # quantity and a single reference patient, which is what let CR-3 hide.
+    # Up-front, plain-language statement of the estimand.
+    #
+    # The methods answer different questions, and until now the only place that
+    # said so was a footnote under the tables -- read, if at all, after the
+    # reader had already interpreted the curve. Naming the actual variable, its
+    # levels and the cohort size makes it concrete rather than generic.
+    .renderAdjustedEstimandPanel = function(mydata, adj_var, method) {
+      item <- try(self$results$adjustedEstimandPanel, silent = TRUE)
+      if (inherits(item, "try-error") || is.null(item)) return(invisible(NULL))
+
+      esc <- function(x) htmltools::htmlEscape(as.character(x))
+      var_show <- esc(if (!is.null(self$options$adjexplanatory))
+                        self$options$adjexplanatory else adj_var)
+
+      lv <- tryCatch({
+        col <- mydata[[adj_var]]
+        if (is.null(col)) character(0) else levels(droplevels(as.factor(col)))
+      }, error = function(e) character(0))
+      n_pat <- tryCatch(nrow(mydata), error = function(e) NA_integer_)
+
+      lv_txt <- if (length(lv) > 0)
+        paste0(" (", paste(esc(lv), collapse = ", "), ")") else ""
+
+      body <- switch(
+        method,
+        "average" = paste0(
+          "<p><b>", .("Standardised over cohort (g-computation)"), "</b></p>",
+          "<p>", sprintf(.("Every one of the %s patients is set to <i>%s</i> = each level in turn%s, a survival curve is predicted for each patient from the fitted model, and those curves are averaged. The procedure repeats for every level."),
+                         esc(n_pat), var_show, lv_txt), "</p>",
+          # Do NOT name example covariates here: the text is generic and the
+          # model may not contain them. An earlier draft said "the age, grade and
+          # treatment mix", which asserted three variables that were absent from
+          # the fitted model on the very first dataset it was run against.
+          "<p>", .("Because the same patients underlie every curve, the curves differ <i>only</i> by the adjustment variable - the distribution of every other covariate in the model is identical across them. This is what most published papers mean by an adjusted survival curve."), "</p>",
+          "<p>", .("Confidence intervals are left blank: a standardised curve has no closed-form interval and would need bootstrapping."), "</p>"),
+        "conditional" = paste0(
+          "<p><b>", .("At reference covariate profile"), "</b></p>",
+          "<p>", sprintf(.("One curve is predicted per level of <i>%s</i>%s for a single reference patient: the mean of every numeric covariate and the most common level of every categorical covariate."),
+                         var_show, lv_txt), "</p>",
+          "<p>", .("This describes one hypothetical patient, not your cohort. If your covariates are skewed, that reference patient may resemble nobody in the data. Choose \"Standardised over cohort\" if you want a curve that represents the patients you actually have."), "</p>",
+          "<p>", .("Confidence intervals are those of that single prediction."), "</p>"),
+        "single" = paste0(
+          "<p><b>", .("Whole-cohort expected survival"), "</b></p>",
+          "<p>", sprintf(.("One curve is produced for the whole cohort, each patient at their own observed covariate values. <i>%s</i> is <b>not</b> varied, so this output does <b>not</b> compare its levels."),
+                         var_show), "</p>",
+          "<p>", .("Use this to see the model's overall fitted survival. If you selected an adjustment variable expecting to compare groups, choose \"Standardised over cohort\" instead."), "</p>",
+          "<p>", .("Confidence intervals require bootstrapping and are left blank."), "</p>"),
+        paste0("<p>", .("Model-based adjusted survival."), "</p>")
+      )
+
+      caveat <- paste0(
+        "<p style='margin-top:10px;'><i>",
+        .("These are model-based predictions. They rely on the Cox model being correctly specified and on proportional hazards holding, and they adjust only for variables in the model - not for anything unmeasured."),
+        "</i></p>")
+
+      if (isTRUE(self$options$multievent) && identical(self$options$analysistype, "compete"))
+        caveat <- paste0(
+          "<p style='margin-top:10px;'><b>", .("Competing risks:"), "</b> ",
+          .("the fitted model is Fine-Gray, so the quantity plotted is cumulative incidence of the event of interest, which accounts for competing events. It is not 1 minus Kaplan-Meier."),
+          "</p>", caveat)
+
+      item$setContent(paste0(
+        "<div style='font-family: -apple-system, BlinkMacSystemFont, \"Segoe UI\", Roboto, sans-serif; ",
+        "line-height:1.55; max-width:820px; background:#f5f8fc; border-left:4px solid #0056b3; ",
+        "padding:12px 16px;'>", body, caveat, "</div>"))
+
+      invisible(NULL)
+    }
+    ,
+    .adjustedEstimandNote = function(method) {
+      base <- switch(
+        method,
+        "average" = .("Estimand: survival standardised over the observed patients - every patient is set to the stated level in turn and the model-predicted curves are averaged (g-computation). Confidence intervals require bootstrapping and are left blank."),
+        "conditional" = .("Estimand: the model-predicted curve for one reference patient - the mean of every numeric covariate and the most common level of every categorical covariate. Confidence intervals are those of that single prediction."),
+        "single" = .("Estimand: one curve for the whole cohort with each patient at their own covariate values; the adjustment variable is not varied. Confidence intervals require bootstrapping and are left blank."),
+        "marginal" = .("Estimand: survival reweighted by the inverse probability of the observed level (survminer's marginal method). Confidence intervals are not available and are left blank."),
+        .("Estimand: model-based adjusted survival.")
+      )
+      if (isTRUE(self$options$multievent) && identical(self$options$analysistype, "compete")) {
+        base <- paste(base, .("The fitted model is Fine-Gray, so these are subdistribution survival probabilities (1 - cumulative incidence), not cause-specific survival."))
+      }
+      base
+    }
+
 
 
       ,
     ## Adjusted Survival Table ----
-    .adjustedSurvTable = function(results, cox_model) {
-      # Get data components
-      mytime <- results$name1time
-      myoutcome <- results$name2outcome
+    .adjustedSurvTable = function(results, cox_model, curves = NULL) {
       adj_var <- results$adjexplanatory_name
       mydata <- results$cleanData
 
       # Input validation
       if (is.null(mydata) || is.null(cox_model)) {
+        return(NULL)
+      }
+
+      method <- self$options$ac_method
+      if (is.null(curves)) {
+        curves <- private$.adjustedCurveData(cox_model, mydata, adj_var, method)
+      }
+      if (is.null(curves)) {
+        # The method was refused. jamovi does not clear a result item just
+        # because the code that fills it was skipped, so wipe both explicitly or
+        # last run's numbers stay on screen under the new method's name.
+        self$results$adjustedSurvTable$deleteRows()
+        self$results$adjustedSurvTableSummary$setContent("")
         return(NULL)
       }
 
@@ -5377,86 +5989,73 @@ where 0.5 suggests no discriminative ability and 1.0 indicates perfect discrimin
         if (length(pts) == 0) c(12, 36, 60) else pts
       }, error = function(e) c(12, 36, 60))
 
-      # Get levels
-      levels <- sort(unique(mydata[[adj_var]]))
+      # Observed follow-up, used only for the observed counts below.
+      obs_time <- mydata[["mytime"]]
+      obs_event <- .eventIndicator(mydata[["myoutcome"]])
+      if (is.null(obs_event)) obs_event <- rep(NA_real_, nrow(mydata))
+      obs_group <- as.character(mydata[[adj_var]])
 
-      # Create base prediction data
-      pred_base <- list()
-      for (var in names(mydata)) {
-        if (var != "mytime" && var != adj_var && var != "row_names" && var != myoutcome) {
-          if (is.numeric(mydata[[var]])) {
-            pred_base[[var]] <- mean(mydata[[var]], na.rm = TRUE)
-          } else if (is.factor(mydata[[var]])) {
-            pred_base[[var]] <- names(which.max(table(mydata[[var]])))
-          }
-        }
-      }
+      pct <- function(x) if (is.na(x)) "" else scales::percent(x, accuracy = 0.1)
 
-      # Calculate survival for each level
       all_results <- list()
+      for (grp in unique(curves$group)) {
+        g <- curves[curves$group == grp, , drop = FALSE]
 
-      for (level in levels) {
-        # Single-row covariate profile for this level. Summarising ONE curve at
-        # the requested timepoints keeps surv[i] aligned with timepoints[i];
-        # multiple identical rows produced multiple curves whose flattened
-        # summary()$surv silently mis-mapped the later timepoints.
-        pred_data <- mydata[1, , drop = FALSE]
+        # n.risk / n.event used to be lifted from the model's common risk set,
+        # so every group showed the SAME numbers while carrying a group label.
+        # These are genuine observed counts: patients whose observed level is
+        # this one ("single" has no level, so the whole cohort). They describe
+        # the data, not the standardised curve -- the column titles and the
+        # table note say so.
+        in_grp <- if (identical(method, "single")) rep(TRUE, nrow(mydata)) else obs_group == grp
 
-        # Add mean/mode covariates
-        for (var in names(pred_base)) {
-          pred_data[[var]] <- pred_base[[var]]
-        }
-
-        # Add level
-        pred_data[[adj_var]] <- level
-
-        # Calculate survival
-        surv_fit <- survival::survfit(cox_model, newdata = pred_data)
-        surv_summ <- summary(surv_fit, times = timepoints)
-
-        # Store results
-        for (i in seq_along(timepoints)) {
-          if (i <= length(surv_summ$time)) {
-            all_results[[length(all_results) + 1]] <- list(
-              strata = level,
-              time = timepoints[i],
-              atrisk = surv_summ$n.risk[i],
-              events = surv_summ$n.event[i],
-              surv = scales::percent(surv_summ$surv[i], accuracy = 0.1),
-              lower = scales::percent(surv_summ$lower[i], accuracy = 0.1),
-              upper = scales::percent(surv_summ$upper[i], accuracy = 0.1)
-            )
-          }
+        for (tp in timepoints) {
+          row <- private$.adjustedCurveAt(g, tp)
+          if (is.null(row)) next
+          all_results[[length(all_results) + 1]] <- list(
+            strata = grp,
+            time   = tp,
+            atrisk = sum(in_grp & obs_time >= tp, na.rm = TRUE),
+            events = sum(in_grp & obs_time <= tp & obs_event == 1, na.rm = TRUE),
+            surv   = pct(row$surv),
+            lower  = pct(row$lower),
+            upper  = pct(row$upper)
+          )
         }
       }
 
-      # Add results to table
-      if (length(all_results) > 0) {
-        # Clear existing rows (jmvcore Table has no setRows(); deleteRows() clears all)
-        self$results$adjustedSurvTable$deleteRows()
+      # Clear existing rows (jmvcore Table has no setRows(); deleteRows() clears all)
+      self$results$adjustedSurvTable$deleteRows()
 
-        # Add new rows
+      if (length(all_results) > 0) {
         for (i in seq_along(all_results)) {
-          row <- all_results[[i]]
           self$results$adjustedSurvTable$addRow(
             rowKey = i,
-            values = row
+            values = all_results[[i]]
           )
         }
 
         # Generate natural language interpretations
         summaries <- sapply(all_results, function(row) {
+          ci <- if (nzchar(row$lower) && nzchar(row$upper))
+            glue::glue(" [{row$lower}-{row$upper}, 95% CI]") else ""
           glue::glue(
-            "For {row$strata} at {row$time} {self$options$timetypeoutput}, adjusted survival is {row$surv} ",
-            "[{row$lower}-{row$upper}, 95% CI]. ",
-            "At this timepoint, {row$atrisk} subjects were at risk ",
-            "and {row$events} events had occurred. ",
-            "These estimates account for the average values of covariates."
+            "For {row$strata} at {row$time} {self$options$timetypeoutput}, adjusted survival is {row$surv}{ci}. ",
+            "Among the {row$atrisk} patients still under observation at that time, ",
+            "{row$events} events had been observed in this group."
           )
         })
 
-        self$results$adjustedSurvTableSummary$setContent(paste(summaries, collapse = "<br><br>"))
+        self$results$adjustedSurvTableSummary$setContent(
+          paste(c(summaries, private$.adjustedEstimandNote(method)), collapse = "<br><br>"))
+      } else {
+        self$results$adjustedSurvTableSummary$setContent("")
       }
+
+      self$results$adjustedSurvTable$setNote("estimand", private$.adjustedEstimandNote(method))
+      self$results$adjustedSurvTable$setNote(
+        "counts",
+        .("Observed at risk and observed events are counts in the data, not properties of the adjusted curve."))
 
       return(all_results)
     }
@@ -5610,75 +6209,119 @@ where 0.5 suggests no discriminative ability and 1.0 indicates perfect discrimin
         }
 
         # Check if it is a Fine-Gray model
-        is_finegray <- !is.null(cox_model$weights) && self$options$multievent && self$options$analysistype == 'compete'
+        is_finegray <- !is.null(cox_model$weights) && private$.isCompetingRisk()
         
         # Use correct data for plotting
         plot_data <- mydata
+
         if (is_finegray) {
-             # Re-create Fine-Gray data for plotting
-             # This duplicates logic from .cox_model but is necessary without refactoring state management
-             # Note: myoutcome is factor "Censored", "Event", "Competing"
-             
-             # Re-construct formula for finegray() call
-             fg_formula_str <- paste("survival::Surv(mytime, myoutcome) ~", paste(formula2, collapse = " + "))
-             fg_formula_obj <- .asSurvivalFormula(fg_formula_str)
-             
-             plot_data <- survival::finegray(fg_formula_obj, data = mydata, etype = "Event")
+          # Competing risks: standardise the CUMULATIVE INCIDENCE over the
+          # original patients.
+          #
+          # This used to rebuild the finegray()-expanded dataset and hand it to
+          # ggadjustedcurves as the target population. Those rows are not
+          # patients: finegray() splits each subject into several time-interval
+          # pseudo-observations carrying weights, so subjects with long
+          # follow-up contributed many more rows than others and the "adjusted"
+          # curve was averaged over pseudo-rows rather than people. It was also
+          # labelled "Adjusted Survival", whereas the quantity a Fine-Gray model
+          # targets is the cumulative incidence of the event of interest.
+          #
+          # Instead: for each level of the adjustment variable, set every
+          # ORIGINAL patient to that level, predict the subdistribution survival
+          # for each, and average across patients (g-computation). survfit() on
+          # a Fine-Gray fit returns subdistribution survival, so CIF = 1 - surv.
+          adj_col <- mydata[[adjexplanatory_name]]
+          if (is.null(adj_col)) return(FALSE)
+          if (!is.factor(adj_col)) adj_col <- as.factor(adj_col)
+          lv <- levels(droplevels(adj_col))
+
+          cif_df <- tryCatch({
+            parts <- lapply(lv, function(l) {
+              nd <- mydata
+              nd[[adjexplanatory_name]] <- factor(l, levels = levels(adj_col))
+              sf <- survival::survfit(cox_model, newdata = nd)
+              sm <- sf$surv
+              if (is.null(dim(sm))) sm <- matrix(sm, ncol = 1)
+              data.frame(time  = sf$time,
+                         cif   = 1 - rowMeans(sm, na.rm = TRUE),
+                         group = l, stringsAsFactors = FALSE)
+            })
+            do.call(rbind, parts)
+          }, error = function(e) NULL)
+
+          if (is.null(cif_df) || nrow(cif_df) == 0) {
+            private$.addHtmlMessage(
+              "warning",
+              .("Adjusted competing-risks curve unavailable"),
+              .("The adjusted cumulative-incidence curve could not be computed from the Fine-Gray model."))
+            return(FALSE)
+          }
+
+          if (!is.null(self$options$endplot) && is.finite(self$options$endplot))
+            cif_df <- cif_df[cif_df$time <= self$options$endplot, , drop = FALSE]
+
+          p <- ggplot2::ggplot(cif_df,
+                 ggplot2::aes(x = time, y = cif, colour = group)) +
+            ggplot2::geom_step(linewidth = 0.8, na.rm = TRUE) +
+            ggplot2::scale_y_continuous(limits = c(0, 1)) +
+            ggplot2::labs(
+              x = paste0("Time (", self$options$timetypeoutput, ")"),
+              y = .("Cumulative incidence"),
+              colour = self$options$adjexplanatory,
+              title = paste0(.("Adjusted Cumulative Incidence for "),
+                             self$options$adjexplanatory),
+              subtitle = .("Fine-Gray model, standardised over the observed patients"),
+              caption = .("Cumulative incidence, not 1 - Kaplan-Meier: competing events are accounted for.")) +
+            ggplot2::theme_bw() +
+            ggplot2::theme(plot.caption = ggplot2::element_text(hjust = 0, size = 8))
+
+          print(p)
+          return(TRUE)
         }
 
-        # Validate method and try fallback if needed
         method <- self$options$ac_method
 
-        # Try to create plot with specified method
-        plot <- tryCatch({
-          survminer::ggadjustedcurves(
-            fit = cox_model,
-            data = plot_data,  # Use expanded data if Fine-Gray
-            variable = adjexplanatory_name,
-            method = method,
-            conf.int = self$options$ci95,
-            risk.table = self$options$risktable,
-            xlab = paste0('Time (', self$options$timetypeoutput, ')'),
-            title = paste0("Adjusted Survival Curves for ", self$options$adjexplanatory,
-                           " (", method, " adjustment)"),
-            pval = self$options$pplot,
-            pval.method = self$options$pplot,
-            legend = "none",
-            break.time.by = self$options$byplot,
-            xlim = c(0, self$options$endplot),
-            censor = self$options$censored,
-            surv.median.line = self$options$medianline
+        # Draw the SAME object the adjusted tables are built from. This used to
+        # call survminer::ggadjustedcurves() directly, which made the plot the
+        # only consumer of ac_method in the whole analysis; the tables computed
+        # their own curve and never moved when the method changed. It also fell
+        # back from "marginal" to "average" on error while keeping the requested
+        # name in the title, so a failed run looked like a successful one.
+        curves <- private$.adjustedCurveData(cox_model, plot_data,
+                                             adjexplanatory_name, method)
+        if (is.null(curves)) return(FALSE)   # refused; notice already emitted
 
+        if (!is.null(self$options$endplot) && is.finite(self$options$endplot))
+          curves <- curves[curves$time <= self$options$endplot, , drop = FALSE]
+        if (nrow(curves) == 0) return(FALSE)
 
+        plot <- ggplot2::ggplot(curves,
+                 ggplot2::aes(x = time, y = surv, colour = group)) +
+          ggplot2::geom_step(linewidth = 0.8, na.rm = TRUE) +
+          ggplot2::scale_y_continuous(limits = c(0, 1)) +
+          ggplot2::labs(
+            x = paste0("Time (", self$options$timetypeoutput, ")"),
+            y = .("Adjusted survival"),
+            colour = self$options$adjexplanatory,
+            fill = self$options$adjexplanatory,
+            title = paste0(.("Adjusted Survival Curves for "), self$options$adjexplanatory),
+            subtitle = private$.adjustedEstimandNote(method)) +
+          ggplot2::theme_bw() +
+          ggplot2::theme(plot.subtitle = ggplot2::element_text(size = 8),
+                         plot.caption = ggplot2::element_text(hjust = 0, size = 8))
 
-          )
-        }, error = function(e) {
-          # If marginal method fails, try average method instead
-          if (method == "marginal") {
-            warning(.("Marginal method failed, falling back to average method"))
-            survminer::ggadjustedcurves(
-              fit = cox_model,
-              data = plot_data, # Use expanded data
-              variable = adjexplanatory_name,
-              method = "average",  # Fallback to average method
-              conf.int = self$options$ci95,
-              risk.table = self$options$risktable,
-              xlab = paste0('Time (', self$options$timetypeoutput, ')'),
-              title = paste0("Adjusted Survival Curves for ",
-                             self$options$adjexplanatory,
-                             " (average adjustment - marginal failed)"),
-              pval = self$options$pplot,
-              pval.method = self$options$pplot,
-              legend = "none",
-              break.time.by = self$options$byplot,
-              xlim = c(0, self$options$endplot),
-              censor = self$options$censored,
-              surv.median.line = self$options$medianline
-            )
-          } else {
-            jmvcore::reject(paste("Error creating adjusted curves:", e$message))
-          }
-        })
+        # Only `conditional` carries a confidence band; the standardised methods
+        # return NA limits rather than borrowing someone else's interval.
+        if (isTRUE(self$options$ci95) && any(is.finite(curves$lower)))
+          plot <- plot + ggplot2::geom_ribbon(
+            ggplot2::aes(ymin = lower, ymax = upper, fill = group),
+            alpha = 0.15, colour = NA, na.rm = TRUE)
+
+        if (!is.null(self$options$byplot) && is.finite(self$options$byplot) &&
+            self$options$byplot > 0)
+          plot <- plot + ggplot2::scale_x_continuous(
+            breaks = seq(0, max(curves$time, na.rm = TRUE), by = self$options$byplot))
 
 
 
@@ -5883,100 +6526,84 @@ where 0.5 suggests no discriminative ability and 1.0 indicates perfect discrimin
 
       ,
     ## Adjusted Median Survival ----
-    .adjustedMedianSurv = function(results, cox_model) {
-      # Get required data. cleanData carries the standardized survival columns
-      # "mytime"/"myoutcome" (see .definemytime/.definemyoutcome); results$name*
-      # hold the *display labels*, which are not column names.
-      mytime <- "mytime"
-      myoutcome <- "myoutcome"
+    .adjustedMedianSurv = function(results, cox_model, curves = NULL) {
+      # cleanData carries the standardized survival columns "mytime"/"myoutcome"
+      # (see .definemytime/.definemyoutcome); results$name* hold the *display
+      # labels*, which are not column names.
       adj_var <- results$adjexplanatory_name
       mydata <- results$cleanData
+      medianTable <- self$results$adjustedMedianTable
 
-      event_indicator <- .eventIndicator(mydata[[myoutcome]])
+      method <- self$options$ac_method
+      if (is.null(curves)) {
+        curves <- private$.adjustedCurveData(cox_model, mydata, adj_var, method)
+      }
+      medianTable$deleteRows()
+      if (is.null(curves)) {
+        self$results$adjustedMedianSummary$setContent("")
+        return(invisible(NULL))
+      }
+
+      event_indicator <- .eventIndicator(mydata[["myoutcome"]])
       if (is.null(event_indicator)) {
         event_indicator <- rep(NA, nrow(mydata))
       }
+      obs_group <- as.character(mydata[[adj_var]])
 
-      # Get levels of adjustment variable
-      levels <- sort(unique(mydata[[adj_var]]))
-
-      # Build a SINGLE covariate profile (one row): means for numeric covariates,
-      # modes for factors, with factor levels preserved. survfit() on one row
-      # yields exactly one adjusted survival curve, so summary()$table returns a
-      # named vector with a single median/CI. (The previous version used
-      # sort(unique(mytime)) as newdata rows, producing many curves and a matrix
-      # $table whose ["median"] lookup silently returned NA.)
-      pred_data <- mydata[1, , drop = FALSE]
-      for (var in names(mydata)) {
-        if (var != "mytime" && var != adj_var && var != "row_names") {
-          if (is.numeric(mydata[[var]])) {
-            pred_data[[var]] <- mean(mydata[[var]], na.rm = TRUE)
-          } else if (is.factor(mydata[[var]])) {
-            pred_data[[var]] <- factor(names(which.max(table(mydata[[var]]))),
-                                       levels = levels(mydata[[var]]))
-          }
-        }
+      # The median is read off the SAME curve the plot draws: the first time the
+      # adjusted survival is at or below 0.5. The confidence limits come from the
+      # confidence band -- the lower band crosses 0.5 first, so it gives the
+      # LOWER limit of the median. Deriving them here instead of from a private
+      # survfit() is the point of CR-3: the median can no longer describe a
+      # different estimand from the curve above it.
+      crossing <- function(x, tm) {
+        if (is.null(x) || all(is.na(x))) return(NA_real_)
+        i <- which(!is.na(x) & x <= 0.5)
+        if (length(i) == 0) NA_real_ else tm[min(i)]
       }
 
-      # Calculate adjusted survival for each level
-      results_list <- list()
-
-      for (level in levels) {
-        level_data <- pred_data
-        level_data[[adj_var]] <- level
-
-        # Calculate adjusted survival (one curve for this covariate profile)
-        adj_surv <- survival::survfit(cox_model, newdata = level_data)
-
-        # Get summary stats
-        surv_summary <- summary(adj_surv)
-
-        # Extract median and CI
-        median_time <- surv_summary$table["median"]
-        lcl <- surv_summary$table["0.95LCL"]
-        ucl <- surv_summary$table["0.95UCL"]
-
-        results_list[[level]] <- list(
-          factor = level,
-          median = median_time,
-          x0_95lcl = lcl,
-          x0_95ucl = ucl,
-          records = sum(!is.na(mydata[[mytime]][mydata[[adj_var]] == level])),
-          events = sum(event_indicator[mydata[[adj_var]] == level], na.rm = TRUE)
+      rows <- list()
+      for (grp in unique(curves$group)) {
+        g <- curves[curves$group == grp, , drop = FALSE]
+        in_grp <- if (identical(method, "single")) rep(TRUE, nrow(mydata)) else obs_group == grp
+        rows[[length(rows) + 1]] <- list(
+          factor   = grp,
+          records  = sum(in_grp & !is.na(mydata[["mytime"]])),
+          events   = sum(event_indicator[in_grp] == 1, na.rm = TRUE),
+          median   = crossing(g$surv,  g$time),
+          x0_95lcl = crossing(g$lower, g$time),
+          x0_95ucl = crossing(g$upper, g$time)
         )
       }
 
-      # Convert to data frame
-      results_df <- do.call(rbind, lapply(results_list, as.data.frame))
-      results_df <- as.data.frame(results_df)
-
-      # Add to results table
-      medianTable <- self$results$adjustedMedianTable
-      for (i in seq_len(nrow(results_df))) {
-        medianTable$addRow(
-          rowKey = i,
-          values = list(
-            factor = results_df$factor[i],
-            records = results_df$records[i],
-            events = results_df$events[i],
-            median = round(results_df$median[i], 1),
-            x0_95lcl = round(results_df$x0_95lcl[i], 1),
-            x0_95ucl = round(results_df$x0_95ucl[i], 1)
-          )
+      for (i in seq_along(rows)) {
+        r <- rows[[i]]
+        # Omit the CI cells entirely when there is no interval, rather than
+        # setting them to NA. R's NA_real_ carries a NaN bit pattern, so a
+        # `type: number` column rendered it as the literal string "NaN" -- in a
+        # table whose own note says the intervals are "left blank". An unset
+        # cell renders blank, which is what the note promises.
+        vals <- list(
+          factor  = r$factor,
+          records = r$records,
+          events  = r$events,
+          median  = round(r$median, 1)
         )
+        if (!is.na(r$x0_95lcl)) vals$x0_95lcl <- round(r$x0_95lcl, 1)
+        if (!is.na(r$x0_95ucl)) vals$x0_95ucl <- round(r$x0_95ucl, 1)
+        medianTable$addRow(rowKey = i, values = vals)
       }
 
       # Create natural language summaries
-      summaries <- lapply(levels, function(level) {
-        result <- results_df[results_df$factor == level,]
-
+      summaries <- lapply(rows, function(r) {
+        ci <- if (is.na(r$x0_95lcl) && is.na(r$x0_95ucl)) "" else
+          glue::glue(" [{round(r$x0_95lcl, 1)} - {round(r$x0_95ucl, 1)}, 95% CI]")
         description <- glue::glue(
-          "For {adj_var} = {level}, adjusted median survival is {round(result$median, 1)} ",
-          "[{round(result$x0_95lcl, 1)} - {round(result$x0_95ucl, 1)}, 95% CI] ",
+          "For {adj_var} = {r$factor}, adjusted median survival is {round(r$median, 1)}{ci} ",
           self$options$timetypeoutput, "."
         )
 
-        if (is.na(result$median)) {
+        if (is.na(r$median)) {
           description <- paste0(
             description,
             "\nNote: The adjusted survival curve for this group does not drop below 1/2 during ",
@@ -5991,13 +6618,110 @@ where 0.5 suggests no discriminative ability and 1.0 indicates perfect discrimin
       medianSummary <- c(
         unlist(summaries),
         "The median survival time is when 50% of subjects have experienced the event.",
-        "These estimates account for the average values of all other covariates in the model."
+        private$.adjustedEstimandNote(method)
       )
 
       self$results$adjustedMedianSummary$setContent(paste(medianSummary, collapse = "<br><br>"))
+      medianTable$setNote("estimand", private$.adjustedEstimandNote(method))
+      medianTable$setNote(
+        "counts",
+        .("Records and observed events are counts in the data, not properties of the adjusted curve."))
+      invisible(NULL)
     }
 
 
+      ,
+    # Recover variable / level / reference for each coefficient of a coxph.
+    #
+    # The rows of summary(coxph)$coefficients are DESIGN-MATRIX columns, not
+    # variables: "stageIV" is level IV of `stage` measured against `stage`'s
+    # reference level, and janitor::clean_names() has already renamed the column
+    # the clinician actually chose. Printing that string raw produced
+    # "For stageIV ... 653.4 % increase in hazard for each unit increase in
+    # stageIV" -- a per-unit slope claim about a contrast that has no units,
+    # attached to a comparison that was never named.
+    #
+    # The string cannot be split back apart, because a level may repeat the term
+    # name ("treatmentTreatment A"). The fitted object carries the answer:
+    #   $assign     named list, term -> coefficient indices
+    #   $contrasts  named only for terms that got one; ABSENT => continuous
+    #               (a logical predictor has an entry here but none in $xlevels)
+    #   $xlevels    the levels; [1] is the reference under treatment contrasts
+    # coxph is fitted with x/y/model = TRUE, and the Fine-Gray branch is still a
+    # coxph, so all three are always present.
+    .coefTerms = function(cox_model, display = NULL) {
+      nms  <- rownames(summary(cox_model)$coefficients)
+      amap <- cox_model$assign
+      ctr  <- cox_model$contrasts
+      xl   <- cox_model$xlevels
+
+      # $assign carries the term as written in the formula, i.e. BACKTICKED for
+      # a non-syntactic name (`my stage`), while $contrasts / $xlevels are keyed
+      # on the bare name. Without this the lookup returns NULL and every level
+      # silently degrades to the unnamed-contrast branch.
+      bare  <- function(t) gsub("^`|`$", "", t)
+      shown <- function(t) {
+        t <- bare(t)
+        if (!is.null(display) && t %in% names(display)) unname(display[[t]]) else t
+      }
+
+      term_of <- rep(NA_character_, length(nms))
+      pos_in  <- rep(NA_integer_, length(nms))
+      if (is.list(amap)) {
+        for (tm in names(amap)) {
+          idx <- amap[[tm]]
+          idx <- idx[idx >= 1L & idx <= length(nms)]
+          term_of[idx] <- tm
+          pos_in[idx]  <- seq_along(idx)
+        }
+      }
+
+      lapply(seq_along(nms), function(i) {
+        tm <- term_of[i]
+        if (is.na(tm))
+          return(list(kind = "unknown", var = nms[i]))
+        if (grepl(":", tm, fixed = TRUE)) {
+          # Name the LEVEL of each crossed component. A 3-level factor crossed
+          # with a 2-level one contributes two coefficients that share the same
+          # term, so a term-only label prints the same string twice with
+          # different hazard ratios beside it. Coefficient names are
+          # paste0(term, level) joined by ":", and colons are not permitted in
+          # factor levels, so the split is unambiguous; fall back to the bare
+          # terms if the pieces do not line up.
+          comps  <- strsplit(tm, ":", fixed = TRUE)[[1]]
+          pieces <- strsplit(nms[i], ":", fixed = TRUE)[[1]]
+          lab <- if (length(pieces) == length(comps)) {
+            vapply(seq_along(comps), function(k) {
+              lv <- substring(pieces[k], nchar(comps[k]) + 1L)
+              if (nzchar(lv)) sprintf("%s: %s", shown(comps[k]), lv) else shown(comps[k])
+            }, character(1))
+          } else {
+            vapply(comps, shown, character(1))
+          }
+          return(list(kind = "interaction", var = paste(lab, collapse = " \u{00D7} ")))
+        }
+        u <- bare(tm)
+        if (!(u %in% names(ctr)))
+          return(list(kind = "continuous", var = shown(tm)))
+        lv <- xl[[u]]
+        # Gate on treatment contrasts. An ORDERED factor gets contr.poly, whose
+        # coefficients are .L/.Q polynomial trends -- still nlevels-1 of them,
+        # so a positional level lookup would confidently print the WRONG
+        # reference level. Obviously wrong beats subtly wrong; keep the gate.
+        if (identical(unname(ctr[[u]]), "contr.treatment") &&
+            !is.null(lv) && length(amap[[tm]]) == length(lv) - 1L)
+          return(list(kind = "level", var = shown(tm),
+                      level = lv[pos_in[i] + 1L], ref = lv[1L]))
+        # Coefficient names are paste0(term, suffix), so substring is safe where
+        # sub("^term", ...) would treat a term containing regex metacharacters
+        # as a pattern.
+        if (is.null(lv))   # logical predictor: contrast, but no levels recorded
+          return(list(kind = "level", var = shown(tm),
+                      level = substring(nms[i], nchar(tm) + 1L), ref = "FALSE"))
+        list(kind = "contrast", var = shown(tm),
+             suffix = substring(nms[i], nchar(tm) + 1L))
+      })
+    }
       ,
     ## Adjusted Cox ----
     .adjustedCox = function(results, cox_model) {
@@ -6027,23 +6751,69 @@ where 0.5 suggests no discriminative ability and 1.0 indicates perfect discrimin
 
       self$results$adjustedCoxText$setContent(tCoxtext2)
 
-      # Extract hazard ratios and CIs
+      # Extract hazard ratios and CIs BY COLUMN NAME, never by position.
+      #
+      # summary(coxph)$coefficients has 5 columns for an ordinary fit
+      #   coef | exp(coef) | se(coef) | z | Pr(>|z|)
+      # but SIX for a clustered/robust fit (as used for Fine-Gray):
+      #   coef | exp(coef) | se(coef) | robust se | z | Pr(>|z|)
+      #
+      # Indexing positionally therefore silently reported the Z STATISTIC as the
+      # p-value whenever clustering was in play -- which is how a "p-value" of
+      # -11.5 reaches the screen -- and built the confidence interval from the
+      # NAIVE standard error, ignoring the robust one the model was fitted to
+      # produce, so the intervals were too narrow as well.
+      cf <- cox_summary$coefficients
+      cn <- colnames(cf)
+
+      col_coef <- if ("coef" %in% cn) "coef" else 1L
+      # Prefer the robust SE when the model carries one.
+      col_se   <- if ("robust se" %in% cn) "robust se" else
+                  if ("se(coef)" %in% cn) "se(coef)" else 3L
+      col_p    <- if ("Pr(>|z|)" %in% cn) "Pr(>|z|)" else
+                  if ("Pr(>|t|)" %in% cn) "Pr(>|t|)" else ncol(cf)
+
+      .beta <- cf[, col_coef]
+      .se   <- cf[, col_se]
+      .p    <- cf[, col_p]
+
+      # qnorm(0.975), not 1.96: finalfit builds the main table's intervals with
+      # the exact quantile, and this table is now required to agree with it.
+      .z <- stats::qnorm(0.975)
       coef_matrix <- cbind(
-        exp(cox_summary$coefficients[, 1]),  # HR
-        exp(cox_summary$coefficients[, 1] - 1.96 * cox_summary$coefficients[, 3]),  # Lower CI
-        exp(cox_summary$coefficients[, 1] + 1.96 * cox_summary$coefficients[, 3]),  # Upper CI
-        cox_summary$coefficients[, 5]  # p-value
+        exp(.beta),                       # HR
+        exp(.beta - .z * .se),            # Lower CI
+        exp(.beta + .z * .se),            # Upper CI
+        .p                                # p-value
       )
+
+      # Render variable + level from the fitted object, never the raw
+      # coefficient string. mydata_labelled carries janitor's cleaned name ->
+      # the clinician's original column name for EVERY column, so strata and
+      # interaction components are covered too.
+      display <- tryCatch({
+        lb <- labelled::var_label(results$mydata_labelled)
+        lb <- lb[!vapply(lb, is.null, logical(1))]
+        stats::setNames(as.character(unlist(lb)), names(lb))
+      }, error = function(e) NULL)
+      terms <- private$.coefTerms(cox_model, display)
 
       # Create Cox table
       coxTable <- self$results$adjustedCoxTable
-      rownames <- row.names(cox_summary$coefficients)
 
       for (i in seq_len(nrow(coef_matrix))) {
+        tt <- terms[[i]]
         coxTable$addRow(
           rowKey = i,
           values = list(
-            Variable = rownames[i],
+            Variable = switch(
+              tt$kind,
+              level       = sprintf("%s: %s (vs %s)", tt$var, tt$level, tt$ref),
+              continuous  = sprintf("%s (per 1-unit increase)", tt$var),
+              contrast    = sprintf("%s (%s contrast)", tt$var, tt$suffix),
+              interaction = sprintf("%s (interaction)", tt$var),
+              tt$var
+            ),
             HR = sprintf("%.2f (%.2f-%.2f)",
                          coef_matrix[i,1], coef_matrix[i,2], coef_matrix[i,3]),
             Pvalue = coef_matrix[i,4]
@@ -6051,26 +6821,44 @@ where 0.5 suggests no discriminative ability and 1.0 indicates perfect discrimin
         )
       }
 
-      # Create interpretive summary
-      coxSummary <- sapply(seq_len(nrow(coef_matrix)), function(i) {
-        hr <- coef_matrix[i,1]
-        var_name <- rownames[i]
+      # Interpretive summary. adjustedCoxSummary is type: Html, i.e. a raw-HTML
+      # sink, and variable names and factor levels come from imported .csv/.omv
+      # data -- escape both.
+      .esc <- function(x) htmltools::htmlEscape(as.character(x))
+      .ci  <- function(i) sprintf("%.2f (%.2f-%.2f, 95%% CI)",
+                                  coef_matrix[i,1], coef_matrix[i,2], coef_matrix[i,3])
 
-        glue::glue(
-          "For {var_name}, the adjusted hazard ratio is {round(hr,2)} ",
-          "({round(coef_matrix[i,2],2)}-{round(coef_matrix[i,3],2)}, 95% CI). ",
-          "This means that, after adjusting for other covariates, ",
-          "{ifelse(hr > 1,
-                paste('there is a', round((hr-1)*100,1), '% increase in hazard'),
-                paste('there is a', round((1-hr)*100,1), '% decrease in hazard'))} ",
-          "for each unit increase in {var_name}."
+      coxSummary <- vapply(seq_len(nrow(coef_matrix)), function(i) {
+        tt <- terms[[i]]
+        v  <- .esc(tt$var)
+        switch(
+          tt$kind,
+          level = sprintf(
+            "For %s = %s compared with %s = %s, the adjusted hazard ratio is %s, holding the other covariates in the model constant.",
+            v, .esc(tt$level), v, .esc(tt$ref), .ci(i)),
+          continuous = sprintf(
+            "For %s, the adjusted hazard ratio is %s per 1-unit increase in %s, holding the other covariates in the model constant.",
+            v, .ci(i), v),
+          contrast = sprintf(
+            "For the %s %s contrast, the adjusted hazard ratio is %s. %s is an ordered factor, so this is a polynomial trend across its levels, not a comparison with one reference level.",
+            v, .esc(tt$suffix), .ci(i), v),
+          interaction = sprintf(
+            "For the interaction %s, the adjusted hazard ratio is %s. This is a ratio of hazard ratios - how one variable's effect differs across the other - not the hazard ratio for any single group.",
+            v, .ci(i)),
+          # Term not resolvable from the model: state the estimate and claim
+          # nothing about what a change in it would mean.
+          sprintf("For %s, the adjusted hazard ratio is %s.", v, .ci(i))
         )
-      })
+      }, character(1))
 
+      # The old closing line quoted "(hr-1)*100 % increase in hazard" per row.
+      # It is only defensible for a continuous per-unit slope, it turned HR 7.53
+      # into "653.4 % increase", and the HR with its CI already carries the
+      # magnitude on the scale the model estimated. Deleted, not reworded.
       coxSummary <- c(
-        unlist(coxSummary),
-        "A hazard ratio greater than 1 indicates increased risk, while less than 1 indicates decreased risk.",
-        "All estimates are adjusted for other variables in the model."
+        coxSummary,
+        "A hazard ratio above 1 means a higher instantaneous event rate and below 1 a lower one. It is a rate ratio, not a ratio of cumulative risks and not a difference in survival time.",
+        "All estimates are mutually adjusted for the other variables in this model. These are associations observed in these data."
       )
 
       self$results$adjustedCoxSummary$setContent(paste(coxSummary, collapse = "<br><br>"))
@@ -6620,6 +7408,31 @@ where 0.5 suggests no discriminative ability and 1.0 indicates perfect discrimin
 ,
     ## Final Fit ----
 .final_fit2 = function() {
+
+  # Never print a second, different model in competing-risks mode.
+  #
+  # The central model here is Fine-Gray (subdistribution hazards, fitted on
+  # finegray()-expanded data with subject-clustered robust variance). This
+  # function, however, collapses "Competing" to 0 below and hands the result to
+  # finalfit, which fits an ordinary CAUSE-SPECIFIC Cox model -- a different
+  # estimand answering a different question. Both were then displayed in the
+  # same panel: the Fine-Gray clinical narrative was prepended onto a
+  # cause-specific hazard-ratio table, and the model-metrics line underneath
+  # carried the Fine-Gray concordance. On simulated data where a covariate
+  # raises only the competing hazard this printed sHR 0.29 as HR 0.90.
+  #
+  # There is no way to label this out of trouble: two estimands in one table is
+  # a reader trap. The Fine-Gray results above are the competing-risks answer.
+  if (isTRUE(self$options$multievent) &&
+      identical(self$options$analysistype, "compete")) {
+    private$.addHtmlMessage(
+      "info",
+      .("Multivariable table not shown for competing risks"),
+      .("Competing-risks mode fits a Fine-Gray subdistribution model, whose results are reported above. The standard multivariable table is not shown because producing it requires treating competing events as censored, which yields cause-specific hazard ratios - a different quantity that must not be read alongside subdistribution hazard ratios. To obtain cause-specific hazard ratios, set the survival type to cause-specific.")
+    )
+    return(invisible(NULL))
+  }
+
   # Retrieve cleaned data and variable information
   cleaneddata <- private$.cleandata()
 
@@ -6696,11 +7509,32 @@ where 0.5 suggests no discriminative ability and 1.0 indicates perfect discrimin
     # `explanatory_multi` keeps the strata out of the univariable column: a
     # univariable fit of `Surv(...) ~ strata(v)` has no covariate at all and
     # would come back empty.
+    #
+    # cont_cut = 0 stops finalfit re-specifying the model behind our back.
+    #
+    # finalfit::finalfit() runs
+    #   cont_distinct = select(contains(explanatory)) %>% summarise_if(is.numeric, n_distinct) %>% keep(~ .x < cont_cut)
+    #   .data = mutate_at(.data, cont_distinct, as.factor)
+    # with cont_cut = 5 by default, then fits ITS OWN coxph on the mutated
+    # frame. Any numeric covariate with fewer than 5 distinct values -- an
+    # ordinal score such as performance status 0/1/2 -- was therefore silently
+    # promoted to a factor here while .cox_model() kept it numeric. One report
+    # then carried two different models: this table showed two rows for
+    # performance_status with LR df = 7, the Adjusted Cox table showed one row
+    # with df = 6, and because the adjustment sets differed every SHARED
+    # coefficient moved too (gradePoor p .129 vs .127). cont_cut = 0 makes
+    # keep(~ .x < 0) match nothing, so finalfit fits exactly the specification
+    # the user declared -- the same one .cox_model() fits.
+    #
+    # It also neutralises the substring match in that select(contains(...)):
+    # a column merely CONTAINING an explanatory name could be dragged in and
+    # factorised. Do not "tidy away" this argument.
     if (is.null(strata_ff)) {
       finalfit::finalfit(
         .data = mydata,
         dependent = dependent_formula,
         explanatory = explanatory_formula,
+        cont_cut = 0,
         metrics = TRUE
       ) -> tCox
     } else {
@@ -6723,6 +7557,7 @@ where 0.5 suggests no discriminative ability and 1.0 indicates perfect discrimin
         dependent = dependent_formula,
         explanatory = explanatory_formula,
         explanatory_multi = c(covars_multi, paste0("strata(", strata_ff, ")")),
+        cont_cut = 0,
         metrics = TRUE
       ) -> tCox
     }
@@ -6744,6 +7579,30 @@ where 0.5 suggests no discriminative ability and 1.0 indicates perfect discrimin
 
     # Extract and format model metrics from finalfit
     metrics_text <- unlist(tCox[[2]])
+
+    # One C-index per report.
+    #
+    # finalfit computes its own concordance from its own fit, which differed
+    # from the value every other panel shows (Model Performance Metrics, the
+    # risk-score summary and the nomogram summary all read
+    # summary(.cox_model())$concordance). A single report therefore stated
+    # C = 0.591 here and C = 0.572 three panels later, leaving no way to tell
+    # which to cite. The .cox_model() fit is the one the rest of the analysis is
+    # built on, so its concordance wins and finalfit's is overwritten here.
+    conc_model <- tryCatch({
+      cm <- private$.cox_model()
+      if (is.null(cm)) NULL else summary(cm)$concordance
+    }, error = function(e) NULL)
+
+    if (!is.null(conc_model) && length(conc_model) >= 1 && is.finite(conc_model[1])) {
+      conc_txt <- if (length(conc_model) >= 2 && is.finite(conc_model[2]))
+        sprintf("Concordance = %.3f (SE = %.3f)", conc_model[1], conc_model[2])
+      else
+        sprintf("Concordance = %.3f", conc_model[1])
+
+      metrics_text <- sub("Concordance = [0-9.]+( \\(SE = [0-9.]+\\))?",
+                          conc_txt, metrics_text)
+    }
 
     # Create the model metrics text for text2
     text2_html <- glue::glue("
@@ -8503,10 +9362,27 @@ where 0.5 suggests no discriminative ability and 1.0 indicates perfect discrimin
                 predictors <- c(cleaneddata$myexplanatory_labelled,
                                 cleaneddata$mycontexpl_labelled)
                 predictors <- predictors[!is.na(predictors) & nzchar(predictors)]
+
+                # Stratification variables are NOT predictors of this nomogram.
+                # They are absorbed into separate baseline hazards and carry no
+                # coefficient, so listing them told the reader to look for point
+                # scales the nomogram does not and cannot have.
+                strat_nom <- if (isTRUE(self$options$use_stratify))
+                    cleaneddata$mystratvar_labelled else NULL
+                strat_nom <- strat_nom[!is.na(strat_nom) & nzchar(strat_nom)]
+                if (length(strat_nom) > 0)
+                    predictors <- setdiff(predictors, strat_nom)
+
                 pred_html <- if (length(predictors))
                     paste0("<li>", htmltools::htmlEscape(predictors), "</li>", collapse = "")
                 else
                     paste0("<li>", .("(none specified)"), "</li>")
+
+                strat_html <- if (length(strat_nom) > 0)
+                    paste0("<p><b>", .("Stratification variables (not shown on the nomogram):"),
+                           "</b> ", htmltools::htmlEscape(paste(strat_nom, collapse = ", ")),
+                           ". ", .("These define separate baseline hazards and have no point scale, so the nomogram applies within a stratum."), "</p>")
+                else ""
 
                 n_patients <- if (!is.null(cox_model$n)) cox_model$n else NA_integer_
                 n_events   <- if (!is.null(cox_model$nevent)) cox_model$nevent else NA_integer_
@@ -8521,6 +9397,11 @@ where 0.5 suggests no discriminative ability and 1.0 indicates perfect discrimin
 
                 avail_html <- if (nomogram_ok)
                     paste0("<p style='color:#2e7d32;'>", .("The point-scoring guide and the nomogram plot are shown below."), "</p>")
+                else if (length(strat_nom) > 0)
+                    # Deliberately withheld, not a failure -- distinguish the two
+                    # so the reader does not go looking for a plot that should
+                    # never appear for this model.
+                    paste0("<p style='color:#b71c1c;'>", .("No nomogram is drawn for a stratified model: each stratum has its own baseline hazard, so a single point-to-risk scale would be wrong for patients outside whichever stratum it was drawn from."), "</p>")
                 else
                     paste0("<p style='color:#b71c1c;'>", .("The nomogram plot could not be constructed for this model; the summary above still describes the fitted model."), "</p>")
 
@@ -8529,6 +9410,7 @@ where 0.5 suggests no discriminative ability and 1.0 indicates perfect discrimin
                     "<p>", sprintf(.("This nomogram is a visual calculator derived from a multivariable Cox proportional-hazards model fitted on <b>%s patients</b> with <b>%s events</b>. It turns the model into a point-scoring tool so an individual patient's risk can be read off directly."),
                                    format(n_patients), format(n_events)), "</p>",
                     "<p><b>", .("Predictors included:"), "</b></p><ul>", pred_html, "</ul>",
+                    strat_html,
                     "<p>", sprintf(.("The nomogram estimates the probability of the event within <b>%g months</b> of follow-up. Model discrimination (Harrell's C-index) is <b>%s</b>, where 0.5 is no better than chance and 1.0 is perfect separation."),
                                    horizon, cidx_html), "</p>",
                     "<p><b>", .("How to read the nomogram:"), "</b></p><ol>",
@@ -8594,11 +9476,19 @@ where 0.5 suggests no discriminative ability and 1.0 indicates perfect discrimin
             })
 
             # Generate clinical summary
+            # coxph's $assign maps each term to the coefficients it owns, which
+            # is what lets the summary count variables rather than contrasts.
+            .tmap <- tryCatch({
+              a <- cox_model$assign
+              if (is.list(a) && length(a) > 0) a else NULL
+            }, error = function(e) NULL)
+
             clinical_summary <- .generateClinicalSummary(
               results = cox_results,
               analysis_type = "cox",
               n_vars = n_vars,
-              n_events = n_events
+              n_events = n_events,
+              term_map = .tmap
             )
 
             # Format for display

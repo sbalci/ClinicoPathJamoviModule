@@ -78,10 +78,20 @@ test_that("D3: numeric outcomes honour an explicitly chosen event level", {
                  c(0L, 1L, 0L))
 })
 
-test_that("D4: an event level absent from the data errors instead of giving 0 events", {
+test_that("D4: an event level that is not a level of the variable errors", {
+    # REVISED. This used to also reject a DECLARED but unobserved level, which
+    # threw away a legitimate fully censored cohort (see
+    # test-singlearm-zero-event-and-estimand.R). Only a level the variable does
+    # not have at all is unusable.
     x <- factor(c("Alive", "Alive"), levels = c("Alive", "Dead"))
+    expect_match(.defineEventIndicator(x, outcomeLevel = "Deceased")$error,
+                 "is not a level of")
+
+    # ... and the declared-but-unobserved level is now analysed, with 0 events.
     r <- .defineEventIndicator(x, outcomeLevel = "Dead")
-    expect_match(r$error, "does not occur in the data")
+    expect_null(r$error)
+    expect_equal(r$n_event, 0)
+    expect_equal(r$n_censored, 2)
 })
 
 test_that("M3: an unassigned level errors instead of deleting those patients", {
@@ -178,6 +188,42 @@ test_that("a genuine Censored/Event/Competing hand-off is still recognised", {
     expect_true(r$has_competing)
     # ... and still recognised when the event level names one of its own levels
     expect_equal(.defineEventIndicator(x, outcomeLevel = "Event")$status, c(0L, 1L, 2L))
+})
+
+test_that("a declared hand-off stays in competing-risk mode when one state is unused", {
+    x <- factor(c("Censored", "Event", "Censored", "Event"),
+                levels = c("Censored", "Event", "Competing"))
+    r <- .defineEventIndicator(x, outcomeLevel = "Event")
+    expect_null(r$error)
+    expect_true(r$has_competing)
+    expect_equal(r$n_competing, 0)
+    expect_equal(r$estimand, "competing risks")
+    expect_equal(levels(r$status_factor), c("Censored", "Event", "Competing"))
+})
+
+test_that("Censored cannot be selected as the event in the hand-off format", {
+    x <- factor(c("Censored", "Event", "Competing"),
+                levels = c("Censored", "Event", "Competing"))
+    expect_match(.defineEventIndicator(x, outcomeLevel = "Censored")$error,
+                 "cannot be selected as the event")
+})
+
+test_that("an ordinary Censored/Event binary factor is not forced into competing-risk mode", {
+    x <- factor(c("Censored", "Event", "Censored"),
+                levels = c("Censored", "Event"))
+    r <- .defineEventIndicator(x, outcomeLevel = "Event")
+    expect_equal(r$status, c(0L, 1L, 0L))
+    expect_false(r$has_competing)
+    expect_equal(r$estimand, "overall survival")
+})
+
+test_that("competing-event labels are disclosed, not left blank", {
+    x <- factor(c("Censored", "Event", "Competing"),
+                levels = c("Censored", "Event", "Competing"))
+    html <- .describeEventIndicator(.defineEventIndicator(x, outcomeLevel = "Event"),
+                                    "Outcome")
+    expect_match(html, "Competing event")
+    expect_match(html, '"Competing"')
 })
 
 test_that("logical outcomes honour an explicitly selected FALSE event level", {

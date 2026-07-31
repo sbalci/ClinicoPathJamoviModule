@@ -766,9 +766,49 @@ survivalClass <- if (requireNamespace('jmvcore'))
             # These functions provide proper cumulative incidence function (CIF)
             # support for competing risk scenarios (analysistype = "compete")
 
-            .isCompetingRisk = function() {
-                # Check if current analysis is competing risk mode
-                return(self$options$multievent && self$options$analysistype == "compete")
+            .isCompetingRisk = function(state = NULL) {
+                # Check if competing risk analysis is active.
+                #
+                # The STATUS VECTOR decides this, not the options. This used to
+                # read `self$options$multievent && analysistype == "compete"`
+                # alone, which is blind to the outcomeorganizer hand-off: a
+                # recoded Censored/Event/Competing column arrives already 0/1/2
+                # with multievent = FALSE -- the user never fills
+                # dod/dooc/awd/awod, that is the whole point of the recoded
+                # column. The guard was therefore FALSE and the 0/1/2 vector
+                # went into an ordinary survival::Surv(), which for a max status
+                # of 2 subtracts 1 and NAs anything outside 0/1: Censored became
+                # NA (row silently DELETED), Event became censored, and
+                # Competing became the event. If this ever reverts to testing
+                # the options alone, competing-risk data is analysed backwards
+                # again with no warning.
+                #
+                # `state` is a plot's image$state. jmvcore's .load() restores
+                # results from disk without calling .run(), so a renderer can
+                # execute where private$.eventRecode is still NULL; the flag
+                # then has to come off the serialised state.
+                isTRUE(state$has_competing) ||
+                    isTRUE(private$.eventRecode$has_competing) ||
+                    (isTRUE(self$options$multievent) &&
+                         identical(self$options$analysistype, "compete"))
+            },
+
+            .competingRiskPlotRefusal = function(feature, ggtheme = NULL) {
+                # A renderer that just return()s under competing risks leaves an
+                # empty panel, which reads as a rendering glitch rather than a
+                # deliberate refusal -- and an empty panel is exactly what the
+                # user sees when the plot IS broken. Draw the reason instead.
+                p <- ggplot2::ggplot() +
+                    ggplot2::annotate(
+                        "text", x = 0, y = 0, hjust = 0.5, vjust = 0.5, size = 4,
+                        lineheight = 1.2,
+                        label = paste(
+                            strwrap(.competingRiskUnavailable(feature), width = 60),
+                            collapse = "\n")
+                    ) +
+                    ggplot2::theme_void()
+                print(p)
+                TRUE
             },
 
             .competingRiskCumInc = function(mydata, mytime, myoutcome, myfactor = NULL) {
@@ -1081,7 +1121,13 @@ survivalClass <- if (requireNamespace('jmvcore'))
                     "name1time" = name1time,
                     "name2outcome" = name2outcome,
                     "name3explanatory" = name3explanatory,
-                    "cleanData" = cleanData
+                    "cleanData" = cleanData,
+                    # The competing-risk flag has to TRAVEL WITH THE STATE.
+                    # jmvcore's Analysis$.load() restores results from disk and
+                    # can render a plot without ever calling .run(), so
+                    # private$.eventRecode is NULL in that instance and the
+                    # renderer's guard would silently fall through to FALSE.
+                    "has_competing" = private$.isCompetingRisk()
                 )
 
                 image <- self$results$plot
@@ -1220,15 +1266,14 @@ survivalClass <- if (requireNamespace('jmvcore'))
                 private$.checkpoint()  # Add checkpoint here
                 
                 ## RMST Analysis ----
-                # RMST assumes a single event type. With the competing-risk 0/1/2
-                # coding survival::Surv() does not error -- it warns and remaps
-                # 1 to censored, 2 to event and 0 to NA, which jamovi never shows.
-                # The table would look authoritative and be inverted.
-                if (self$options$rmst_analysis &&
-                    self$options$multievent && self$options$analysistype == "compete") {
-                    self$results$rmstTable$setNote(
-                        "cr", .competingRiskUnavailable("Restricted mean survival time"))
-                } else if (self$options$rmst_analysis) {
+                # The competing-risk refusal now lives INSIDE .calculateRMST()
+                # (single gate, single note). The gate used to be here and tested
+                # `multievent && analysistype == "compete"`, which is FALSE for an
+                # outcomeorganizer hand-off -- so a 0/1/2 status walked straight
+                # into survfit() and the table was populated with inverted RMSTs
+                # (39.01 / 39.54 instead of 42.27 / 42.66) computed on 20 of 30
+                # records, under a comment saying that must not happen.
+                if (self$options$rmst_analysis) {
                     rmst_tau <- if (is.null(self$options$rmst_tau) || self$options$rmst_tau <= 0) {
                         NULL  # Use default (75th percentile)
                     } else {
@@ -1265,27 +1310,45 @@ survivalClass <- if (requireNamespace('jmvcore'))
                 private$.checkpoint()  # Add checkpoint here
 
                 ## Cox ----
-                if (!(self$options$multievent && self$options$analysistype == "compete")) {
-                    if (private$.lowEventCount) {
-                        self$results$coxTable$setNote("lowevents",
-                            "Cox regression suppressed: fewer than 10 events.")
-                    } else {
-                        private$.cox(results)
-                    }
-                }
-                # Note: Competing risk analysis skips Cox regression
-                if (self$options$multievent && self$options$analysistype == "compete") {
+                # Every competing-risk gate below asks private$.isCompetingRisk(),
+                # never `multievent && analysistype == "compete"`. The option pair
+                # is blind to the outcomeorganizer hand-off, which delivers an
+                # already-recoded 0/1/2 status with multievent = FALSE -- so every
+                # one of these blocks used to run on a status vector that
+                # survival::Surv() silently inverts (1 -> censored, 2 -> event,
+                # 0 -> NA). And each refusal now says so on the output it blocks:
+                # an empty table with no note reads as a glitch, not a decision.
+                if (private$.isCompetingRisk()) {
+                    # Every producer below is skipped, so its setState() never
+                    # runs -- and a state left over from the PREVIOUS (valid)
+                    # outcome variable would still render: a correct-looking
+                    # curve sitting next to a refusal note. Drop them. The KM
+                    # family (plot/plot2/plot3/plot6/plot7) does not need this;
+                    # its state is written every run and carries has_competing,
+                    # so those renderers refuse on their own.
+                    for (p in c("plot8", "residualsPlot", "calibrationPlot",
+                                "rcsPlot", "parametricSurvivalPlot"))
+                        self$results[[p]]$setState(NULL)
+                    self$results$coxTable$setNote("cr", .competingRiskUnavailable("Cox regression"))
                     private$.addHtmlMessage(
                         "info",
                         "Cox regression skipped (competing risks)",
                         "Competing-risk mode is selected; standard Cox regression is skipped because cause-specific hazards require a different model (e.g., Fine-Gray subdistribution)."
                     )
+                } else if (private$.lowEventCount) {
+                    self$results$coxTable$setNote("lowevents",
+                        "Cox regression suppressed: fewer than 10 events.")
+                } else {
+                    private$.cox(results)
                 }
                 private$.checkpoint()  # Add checkpoint here
 
                 ## Age-Adjusted Cox ----
                 if (self$options$age_adjustment && !is.null(self$options$age_variable)) {
-                    if (!(self$options$multievent && self$options$analysistype == "compete")) {
+                    if (private$.isCompetingRisk()) {
+                        self$results$ageAdjustedCoxTable$setNote(
+                            "cr", .competingRiskUnavailable("Age-adjusted Cox regression"))
+                    } else {
                         private$.ageAdjustedCox(results)
                     }
                 }
@@ -1293,7 +1356,10 @@ survivalClass <- if (requireNamespace('jmvcore'))
 
                 ## Age as Time Scale ----
                 if (self$options$age_adjustment && self$options$age_time_scale && !is.null(self$options$age_variable)) {
-                    if (!(self$options$multievent && self$options$analysistype == "compete")) {
+                    if (private$.isCompetingRisk()) {
+                        self$results$ageTimeScaleTable$setNote(
+                            "cr", .competingRiskUnavailable("Age as time scale"))
+                    } else {
                         private$.ageTimeScaleCox(results)
                     }
                 }
@@ -1301,7 +1367,10 @@ survivalClass <- if (requireNamespace('jmvcore'))
 
                 ## Age Standardization (SMR) ----
                 if (self$options$age_adjustment && self$options$age_standardization && !is.null(self$options$age_variable)) {
-                    if (!(self$options$multievent && self$options$analysistype == "compete")) {
+                    if (private$.isCompetingRisk()) {
+                        self$results$ageStandardizationTable$setNote(
+                            "cr", .competingRiskUnavailable("Age standardization (SMR)"))
+                    } else {
                         private$.ageStandardization(results)
                     }
                 }
@@ -1310,17 +1379,24 @@ survivalClass <- if (requireNamespace('jmvcore'))
                 ## Survival Table ----
                     private$.survTable(results)
                 private$.checkpoint()  # Add checkpoint here
-                
+
                 ## Export Survival Data ----
                 # Same reason as RMST above: the exported survival estimates come
                 # from a survfit built on the 0/1/2 status, which Surv() silently
                 # inverts.
-                if (!(self$options$multievent && self$options$analysistype == "compete")) {
+                if (private$.isCompetingRisk()) {
+                    private$.addHtmlMessage(
+                        "warning",
+                        "Survival data export skipped (competing risks)",
+                        .competingRiskUnavailable("Exported survival estimates")
+                    )
+                } else {
                     private$.exportSurvivalData(results)
                 }
                 private$.checkpoint()  # Add checkpoint here
 
                 ## Parametric Survival Models (flexsurv) ----
+                # .parametricSurvival() carries its own .isCompetingRisk() gate.
                 if (self$options$use_parametric) {
                     private$.parametricSurvival(results)
                 }
@@ -1328,15 +1404,21 @@ survivalClass <- if (requireNamespace('jmvcore'))
 
                 ## Calibration Curves ----
                 if (self$options$calibration_curves) {
-                    if (!(self$options$multievent && self$options$analysistype == "compete")) {
-                        if (!private$.lowEventCount) private$.calculateCalibration(results)
+                    if (private$.isCompetingRisk()) {
+                        self$results$calibrationTable$setNote(
+                            "cr", .competingRiskUnavailable("Calibration curves"))
+                    } else if (!private$.lowEventCount) {
+                        private$.calculateCalibration(results)
                     }
                 }
                 private$.checkpoint()
 
                 ## Non-Linearity Assessment (RCS) ----
                 if (self$options$rcs_analysis && !is.null(self$options$rcs_variable)) {
-                    if (!(self$options$multievent && self$options$analysistype == "compete")) {
+                    if (private$.isCompetingRisk()) {
+                        self$results$rcsTestTable$setNote(
+                            "cr", .competingRiskUnavailable("Restricted cubic spline assessment"))
+                    } else {
                         private$.calculateRCS(results)
                     }
                 }
@@ -1344,15 +1426,20 @@ survivalClass <- if (requireNamespace('jmvcore'))
 
                 ## Pairwise ----
                 if (self$options$pw) {
-                    if (!(self$options$multievent && self$options$analysistype == "compete")) {
+                    if (private$.isCompetingRisk()) {
+                        self$results$pairwiseTable$setNote(
+                            "cr", .competingRiskUnavailable("Pairwise log-rank comparisons"))
+                    } else {
                         private$.pairwise(results)
                     }
-                    # Notice already added above for competing risk limitations
                 }
 
                 ## Weighted Log-Rank Tests ----
                 if (self$options$weightedLogRank) {
-                    if (!(self$options$multievent && self$options$analysistype == "compete")) {
+                    if (private$.isCompetingRisk()) {
+                        self$results$weightedLogRankTable$setNote(
+                            "cr", .competingRiskUnavailable("Weighted log-rank tests"))
+                    } else {
                         private$.calculateWeightedLogRank(results)
                     }
                 }
@@ -1360,8 +1447,11 @@ survivalClass <- if (requireNamespace('jmvcore'))
 
                 ## Bootstrap Internal Validation ----
                 if (self$options$bootstrapValidation) {
-                    if (!(self$options$multievent && self$options$analysistype == "compete")) {
-                        if (!private$.lowEventCount) private$.calculateBootstrapValidation(results)
+                    if (private$.isCompetingRisk()) {
+                        self$results$bootstrapValidationTable$setNote(
+                            "cr", .competingRiskUnavailable("Bootstrap internal validation"))
+                    } else if (!private$.lowEventCount) {
+                        private$.calculateBootstrapValidation(results)
                     }
                 }
                 private$.checkpoint()
@@ -1377,10 +1467,12 @@ survivalClass <- if (requireNamespace('jmvcore'))
 
                 # Run person-time analysis if enabled
                 if (self$options$person_time) {
-                    if (!(self$options$multievent && self$options$analysistype == "compete")) {
+                    if (private$.isCompetingRisk()) {
+                        self$results$personTimeTable$setNote(
+                            "cr", .competingRiskUnavailable("Person-time incidence rates"))
+                    } else {
                         private$.personTimeAnalysis(results)
                     }
-                    # Notice already added above for competing risk limitations
                 }
                 
                 ## Additional Model Diagnostics ----
@@ -1434,6 +1526,19 @@ survivalClass <- if (requireNamespace('jmvcore'))
             ,
             .calculateRMST = function(results, tau = NULL) {
                 # Restricted Mean Survival Time calculation
+                #
+                # RMST is the area under a Kaplan-Meier curve, so it assumes a
+                # single event type. Under the competing-risk 0/1/2 coding
+                # survival::Surv() does not error -- it warns "Invalid status
+                # value, converted to NA" and remaps 1 to censored, 2 to event and
+                # 0 to NA. The table stays populated and looks authoritative while
+                # being computed backwards on a shrunken denominator. Refuse here
+                # rather than at the call site, so every caller is covered.
+                if (private$.isCompetingRisk()) {
+                    self$results$rmstTable$setNote(
+                        "cr", .competingRiskUnavailable("Restricted mean survival time"))
+                    return(NULL)
+                }
                 tryCatch({
                     mytime <- results$name1time
                     myoutcome <- results$name2outcome
@@ -3015,6 +3120,13 @@ survivalClass <- if (requireNamespace('jmvcore'))
                 # Initialize global row counter
                 rowKey_counter <- 1
 
+                # Exact (Garwood) bounds: a row with almost no accrued person-time
+                # genuinely cannot rule out a very high rate. Correct, but it looks
+                # like a bug without a footnote saying so. Do not cap it.
+                self$results$personTimeTable$setNote(
+                    "ci",
+                    .("Exact (Garwood) Poisson 95% CI. Rows with 0 events give a one-sided 97.5% upper bound; intervals with very little accrued person-time yield correspondingly wide bounds."))
+
                 # Add to personTimeTable - first the overall row
                 self$results$personTimeTable$addRow(rowKey=rowKey_counter, values=list(
                     interval=paste0("Overall (0-max)"),
@@ -3195,15 +3307,21 @@ survivalClass <- if (requireNamespace('jmvcore'))
             # Survival Curve ----
             ,
             .plot = function(image, ggtheme, theme, ...) {
-                # Skip if competing risk analysis
-                if (self$options$multievent && self$options$analysistype == "compete") {
-                    return()
-                }
-                
                 sc <- self$options$sc
 
                 if (!sc)
                     return()
+
+                # Ask .isCompetingRisk(state), not the options. The option pair
+                # `multievent && analysistype == "compete"` is FALSE for an
+                # outcomeorganizer hand-off (0/1/2 status, multievent unset), so
+                # this guard never fired and the curve rendered fully INVERTED:
+                # the group holding every real event drew a flat line at 1.000
+                # while the group with zero real events fell to 0.225. The flag is
+                # read off image$state because .load() can render without .run().
+                if (private$.isCompetingRisk(image$state))
+                    return(private$.competingRiskPlotRefusal(
+                        "The Kaplan-Meier survival curve", ggtheme))
 
                 results <- image$state
 
@@ -3273,15 +3391,16 @@ survivalClass <- if (requireNamespace('jmvcore'))
             # https://rpkgs.datanovia.com/survminer/survminer_cheatsheet.pdf
             ,
             .plot2 = function(image2, ggtheme, theme, ...) {
-                # Skip if competing risk analysis
-                if (self$options$multievent && self$options$analysistype == "compete") {
-                    return()
-                }
-                
                 ce <- self$options$ce
 
                 if (!ce)
                     return()
+
+                # See .plot(): the option pair misses the outcomeorganizer
+                # hand-off and this curve renders inverted.
+                if (private$.isCompetingRisk(image2$state))
+                    return(private$.competingRiskPlotRefusal(
+                        "The cumulative-events plot", ggtheme))
 
                 results <- image2$state
 
@@ -3349,15 +3468,16 @@ survivalClass <- if (requireNamespace('jmvcore'))
             # Cumulative Hazard ----
             ,
             .plot3 = function(image3, ggtheme, theme, ...) {
-                # Skip if competing risk analysis
-                if (self$options$multievent && self$options$analysistype == "compete") {
-                    return()
-                }
-                
                 ch <- self$options$ch
 
                 if (!ch)
                     return()
+
+                # See .plot(): the option pair misses the outcomeorganizer
+                # hand-off and this curve renders inverted.
+                if (private$.isCompetingRisk(image3$state))
+                    return(private$.competingRiskPlotRefusal(
+                        "The cumulative-hazard plot", ggtheme))
 
                 results <- image3$state
 
@@ -3423,15 +3543,16 @@ survivalClass <- if (requireNamespace('jmvcore'))
             # Log-Log Survival Plot (for PH assumption) ----
             ,
             .plot7 = function(image7, ggtheme, theme, ...) {
-                # Skip if competing risk analysis
-                if (self$options$multievent && self$options$analysistype == "compete") {
-                    return()
-                }
-                
                 loglog <- self$options$loglog
 
                 if (!loglog)
                     return()
+
+                # See .plot(): the option pair misses the outcomeorganizer
+                # hand-off and this curve renders inverted.
+                if (private$.isCompetingRisk(image7$state))
+                    return(private$.competingRiskPlotRefusal(
+                        "The log-log survival plot", ggtheme))
 
                 results <- image7$state
 
@@ -3527,15 +3648,16 @@ survivalClass <- if (requireNamespace('jmvcore'))
             # KMunicate Style ----
             ,
             .plot6 = function(image6, ggtheme, theme, ...) {
-                # Skip if competing risk analysis
-                if (self$options$multievent && self$options$analysistype == "compete") {
-                    return()
-                }
-                
                 kmunicate <- self$options$kmunicate
 
                 if (!kmunicate)
                     return()
+
+                # See .plot(): the option pair misses the outcomeorganizer
+                # hand-off and this curve renders inverted.
+                if (private$.isCompetingRisk(image6$state))
+                    return(private$.competingRiskPlotRefusal(
+                        "The KMunicate-style plot", ggtheme))
 
                 results <- image6$state
 
@@ -3591,15 +3713,17 @@ survivalClass <- if (requireNamespace('jmvcore'))
             # Residuals Plot ----
             ,
             .plot9 = function(image9, ggtheme, theme, ...) {
-                # Skip if competing risk analysis
-                if (self$options$multievent && self$options$analysistype == "compete") {
-                    return()
-                }
-                
                 residual_diagnostics <- self$options$residual_diagnostics
 
                 if (!residual_diagnostics)
                     return()
+
+                # Residuals come from the Cox fit, which is refused under
+                # competing risks -- see .plot() for why the option pair alone
+                # let the hand-off through.
+                if (private$.isCompetingRisk(image9$state))
+                    return(private$.competingRiskPlotRefusal(
+                        "Cox residual diagnostics", ggtheme))
 
                 plot_state <- image9$state
 
@@ -3638,15 +3762,17 @@ survivalClass <- if (requireNamespace('jmvcore'))
             # cox.zph ----
             ,
             .plot8 = function(image8, ggtheme, theme, ...) {
-                # Skip if competing risk analysis
-                if (self$options$multievent && self$options$analysistype == "compete") {
-                    return()
-                }
-
                 ph_cox <- self$options$ph_cox
 
                 if (!ph_cox)
                     return()
+
+                # Schoenfeld residuals come from the Cox fit, which is refused
+                # under competing risks -- see .plot() for why the option pair
+                # alone let the hand-off through.
+                if (private$.isCompetingRisk(image8$state))
+                    return(private$.competingRiskPlotRefusal(
+                        "The proportional-hazards (Schoenfeld) plot", ggtheme))
 
                 zph_state <- image8$state
 
@@ -6094,6 +6220,14 @@ survivalClass <- if (requireNamespace('jmvcore'))
                 if (!self$options$age_adjustment || !self$options$age_stratified_km) {
                     return(FALSE)
                 }
+                # This renderer rebuilds its own 0/1 indicator from self$data
+                # rather than the recoded status, so it is not inverted -- but
+                # the age-adjusted TABLES it belongs with are refused under
+                # competing risks, and a lone surviving curve there reads as a
+                # result the analysis is standing behind.
+                if (private$.isCompetingRisk())
+                    return(private$.competingRiskPlotRefusal(
+                        "Age-stratified Kaplan-Meier curves", ggtheme))
                 if (is.null(self$options$age_variable)) {
                     return(FALSE)
                 }
@@ -6185,6 +6319,12 @@ survivalClass <- if (requireNamespace('jmvcore'))
                 if (!self$options$age_adjustment || !self$options$adjusted_curves) {
                     return(FALSE)
                 }
+                # Same as .plotAgeStratifiedKM: rebuilt from self$data, so not
+                # inverted, but it belongs to an age-adjusted block that is
+                # refused under competing risks.
+                if (private$.isCompetingRisk())
+                    return(private$.competingRiskPlotRefusal(
+                        "Age-adjusted survival curves", ggtheme))
                 if (is.null(self$options$age_variable) || is.null(self$options$explanatory)) {
                     return(FALSE)
                 }
@@ -6312,7 +6452,10 @@ survivalClass <- if (requireNamespace('jmvcore'))
                 has_km <- TRUE  # survival function always shows KM
                 has_cox <- TRUE  # Cox is always computed
                 has_age_adj <- self$options$age_adjustment
-                has_competing <- self$options$multievent && self$options$analysistype == "compete"
+                # Not the option test: an outcomeorganizer 0/1/2 hand-off has
+                # multievent = FALSE, so the checklist would claim no competing
+                # risks for the one analysis that actually has them.
+                has_competing <- private$.isCompetingRisk()
 
                 methods_note <- paste0(
                     "Kaplan-Meier estimation",

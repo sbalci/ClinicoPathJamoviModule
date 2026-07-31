@@ -27,7 +27,7 @@ multisurvivalOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
             multievent = FALSE,
             hr = FALSE,
             sty = "t1",
-            ph_cox = TRUE,
+            ph_cox = FALSE,
             km = FALSE,
             endplot = 60,
             byplot = 12,
@@ -214,7 +214,7 @@ multisurvivalOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
             private$..ph_cox <- jmvcore::OptionBool$new(
                 "ph_cox",
                 ph_cox,
-                default=TRUE)
+                default=FALSE)
             private$..km <- jmvcore::OptionBool$new(
                 "km",
                 km,
@@ -305,8 +305,7 @@ multisurvivalOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                 options=list(
                     "average",
                     "conditional",
-                    "single",
-                    "marginal"),
+                    "single"),
                 default="average")
             private$..ac_summary <- jmvcore::OptionBool$new(
                 "ac_summary",
@@ -588,6 +587,7 @@ multisurvivalResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
         addRiskScore = function() private$.items[["addRiskScore"]],
         addRiskGroup = function() private$.items[["addRiskGroup"]],
         adjustedSurvivalHeading = function() private$.items[["adjustedSurvivalHeading"]],
+        adjustedEstimandPanel = function() private$.items[["adjustedEstimandPanel"]],
         plot_adj = function() private$.items[["plot_adj"]],
         adjustedSurvivalSummaryHeading = function() private$.items[["adjustedSurvivalSummaryHeading"]],
         adjustedSurvivalSummary = function() private$.items[["adjustedSurvivalSummary"]],
@@ -896,6 +896,8 @@ multisurvivalResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                         `title`="Interpretation", 
                         `type`="text")),
                 clearWith=list(
+                    "use_stratify",
+                    "stratvar",
                     "outcome",
                     "outcomeLevel",
                     "elapsedtime",
@@ -909,6 +911,8 @@ multisurvivalResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                 title="",
                 visible="(show_survmetrics && showSummaries)",
                 clearWith=list(
+                    "use_stratify",
+                    "stratvar",
                     "outcome",
                     "explanatory",
                     "contexpl",
@@ -923,6 +927,8 @@ multisurvivalResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                 renderFun=".plotSurvMetrics",
                 visible="(show_survmetrics && survmetrics_show_plots)",
                 clearWith=list(
+                    "use_stratify",
+                    "stratvar",
                     "outcome",
                     "outcomeLevel",
                     "elapsedtime",
@@ -1394,6 +1400,24 @@ multisurvivalResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                 name="adjustedSurvivalHeading",
                 title="Adjusted Survival Analysis",
                 visible="(ac)"))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="adjustedEstimandPanel",
+                title="What is being computed",
+                visible="(ac)",
+                clearWith=list(
+                    "ac",
+                    "ac_method",
+                    "adjexplanatory",
+                    "explanatory",
+                    "contexpl",
+                    "outcome",
+                    "outcomeLevel",
+                    "elapsedtime",
+                    "multievent",
+                    "analysistype",
+                    "use_stratify",
+                    "stratvar")))
             self$add(jmvcore::Image$new(
                 options=options,
                 name="plot_adj",
@@ -1423,7 +1447,10 @@ multisurvivalResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                     "adjexplanatory",
                     "pplot",
                     "censored",
-                    "medianline")))
+                    "medianline",
+                    "analysistype",
+                    "use_stratify",
+                    "stratvar")))
             self$add(jmvcore::Preformatted$new(
                 options=options,
                 name="adjustedSurvivalSummaryHeading",
@@ -1470,7 +1497,10 @@ multisurvivalResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                 options=options,
                 name="nomogram_display",
                 title="Nomogram Scoring Guide",
-                visible="(showNomogram)"))
+                visible="(showNomogram)",
+                clearWith=list(
+                    "use_stratify",
+                    "stratvar")))
             self$add(jmvcore::Preformatted$new(
                 options=options,
                 name="nomogramSummaryHeading",
@@ -1482,6 +1512,8 @@ multisurvivalResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                 title="",
                 visible="(showNomogram && showSummaries)",
                 clearWith=list(
+                    "use_stratify",
+                    "stratvar",
                     "showNomogram",
                     "explanatory",
                     "outcome")))
@@ -1502,11 +1534,11 @@ multisurvivalResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                         `type`="number"),
                     list(
                         `name`="atrisk", 
-                        `title`="Number at Risk", 
+                        `title`="Observed at Risk", 
                         `type`="integer"),
                     list(
                         `name`="events", 
-                        `title`="Events", 
+                        `title`="Observed Events", 
                         `type`="integer"),
                     list(
                         `name`="surv", 
@@ -1525,7 +1557,19 @@ multisurvivalResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                     "ac_summary",
                     "cutp",
                     "adjexplanatory",
-                    "ac_method")))
+                    "ac_method",
+                    "outcome",
+                    "outcomeLevel",
+                    "elapsedtime",
+                    "explanatory",
+                    "contexpl",
+                    "fudate",
+                    "dxdate",
+                    "tint",
+                    "multievent",
+                    "analysistype",
+                    "use_stratify",
+                    "stratvar")))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="adjustedSurvTableSummary",
@@ -1536,7 +1580,19 @@ multisurvivalResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                     "ac_summary",
                     "cutp",
                     "adjexplanatory",
-                    "ac_method")))
+                    "ac_method",
+                    "outcome",
+                    "outcomeLevel",
+                    "elapsedtime",
+                    "explanatory",
+                    "contexpl",
+                    "fudate",
+                    "dxdate",
+                    "tint",
+                    "multievent",
+                    "analysistype",
+                    "use_stratify",
+                    "stratvar")))
             self$add(jmvcore::Table$new(
                 options=options,
                 name="adjustedMedianTable",
@@ -1550,11 +1606,11 @@ multisurvivalResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                         `type`="text"),
                     list(
                         `name`="records", 
-                        `title`="Records", 
+                        `title`="Observed Records", 
                         `type`="integer"),
                     list(
                         `name`="events", 
-                        `title`="Events", 
+                        `title`="Observed Events", 
                         `type`="integer"),
                     list(
                         `name`="median", 
@@ -1574,7 +1630,19 @@ multisurvivalResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                     "ac",
                     "ac_summary",
                     "adjexplanatory",
-                    "ac_method")))
+                    "ac_method",
+                    "outcome",
+                    "outcomeLevel",
+                    "elapsedtime",
+                    "explanatory",
+                    "contexpl",
+                    "fudate",
+                    "dxdate",
+                    "tint",
+                    "multievent",
+                    "analysistype",
+                    "use_stratify",
+                    "stratvar")))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="adjustedMedianSummary",
@@ -1584,7 +1652,19 @@ multisurvivalResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                     "ac",
                     "ac_summary",
                     "adjexplanatory",
-                    "ac_method")))
+                    "ac_method",
+                    "outcome",
+                    "outcomeLevel",
+                    "elapsedtime",
+                    "explanatory",
+                    "contexpl",
+                    "fudate",
+                    "dxdate",
+                    "tint",
+                    "multievent",
+                    "analysistype",
+                    "use_stratify",
+                    "stratvar")))
             self$add(jmvcore::Table$new(
                 options=options,
                 name="adjustedCoxTable",
@@ -1609,7 +1689,19 @@ multisurvivalResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                     "ac",
                     "ac_summary",
                     "adjexplanatory",
-                    "ac_method")))
+                    "ac_method",
+                    "outcome",
+                    "outcomeLevel",
+                    "elapsedtime",
+                    "explanatory",
+                    "contexpl",
+                    "fudate",
+                    "dxdate",
+                    "tint",
+                    "multievent",
+                    "analysistype",
+                    "use_stratify",
+                    "stratvar")))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="adjustedCoxText",
@@ -1619,7 +1711,19 @@ multisurvivalResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                     "ac",
                     "ac_summary",
                     "adjexplanatory",
-                    "ac_method")))
+                    "ac_method",
+                    "outcome",
+                    "outcomeLevel",
+                    "elapsedtime",
+                    "explanatory",
+                    "contexpl",
+                    "fudate",
+                    "dxdate",
+                    "tint",
+                    "multievent",
+                    "analysistype",
+                    "use_stratify",
+                    "stratvar")))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="adjustedCoxSummary",
@@ -1629,7 +1733,19 @@ multisurvivalResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                     "ac",
                     "ac_summary",
                     "adjexplanatory",
-                    "ac_method")))
+                    "ac_method",
+                    "outcome",
+                    "outcomeLevel",
+                    "elapsedtime",
+                    "explanatory",
+                    "contexpl",
+                    "fudate",
+                    "dxdate",
+                    "tint",
+                    "multievent",
+                    "analysistype",
+                    "use_stratify",
+                    "stratvar")))
             self$add(jmvcore::Preformatted$new(
                 options=options,
                 name="adjustedCoxPH",
@@ -1895,7 +2011,13 @@ multisurvivalBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   take longer to compute.
 #' @param ac .
 #' @param adjexplanatory .
-#' @param ac_method Method for computing adjusted survival curves
+#' @param ac_method Estimand for the adjusted survival curves. "Standardised
+#'   over cohort" sets every observed patient to each level in turn and averages
+#'   the model-predicted curves (g-computation), so the curves differ only by
+#'   the adjustment variable. "At reference covariate profile" predicts a single
+#'   curve per level at the mean/mode of the other covariates. "Whole-cohort
+#'   expected survival" returns one curve for the cohort at its observed
+#'   covariates and does not contrast the levels at all.
 #' @param ac_summary Display numeric adjusted-survival outputs (survival at
 #'   the cutpoint timepoints with 95\% CI, adjusted median survival, and the
 #'   adjusted Cox hazard-ratio table) in addition to the adjusted-survival
@@ -1982,6 +2104,7 @@ multisurvivalBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   \code{results$addRiskScore} \tab \tab \tab \tab \tab an output \cr
 #'   \code{results$addRiskGroup} \tab \tab \tab \tab \tab an output \cr
 #'   \code{results$adjustedSurvivalHeading} \tab \tab \tab \tab \tab a preformatted \cr
+#'   \code{results$adjustedEstimandPanel} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$plot_adj} \tab \tab \tab \tab \tab an image \cr
 #'   \code{results$adjustedSurvivalSummaryHeading} \tab \tab \tab \tab \tab a preformatted \cr
 #'   \code{results$adjustedSurvivalSummary} \tab \tab \tab \tab \tab a html \cr
@@ -2041,7 +2164,7 @@ multisurvival <- function(
     multievent = FALSE,
     hr = FALSE,
     sty = "t1",
-    ph_cox = TRUE,
+    ph_cox = FALSE,
     km = FALSE,
     endplot = 60,
     byplot = 12,

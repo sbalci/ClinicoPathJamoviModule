@@ -21,6 +21,11 @@ test_that('singlearm analysis works', {
     dxdate = 'dxdate',
     fudate = 'fudate',
     outcome = 'outcome',
+    outcomeLevel = 'B',
+    dod = NULL,
+    dooc = NULL,
+    awd = NULL,
+    awod = NULL,
     analysistype = 'overall',
     timetypedata = 'ymd',
     timetypeoutput = 'months',
@@ -64,4 +69,3 @@ test_that('singlearm analysis works', {
 
   expect_true(file.exists(omv_path))
 })
-

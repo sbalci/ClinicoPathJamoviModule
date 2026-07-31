@@ -375,6 +375,15 @@ outcomeorganizerClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
                 private$.eventRecode <- res
                 mydata[["myoutcome"]] <- res$status
+                # Ask the returned VECTOR, not the options branch. .defineEventIndicator()'s
+                # hand-off path fires on a Censored/Event/Competing factor regardless of
+                # `multievent`, so this branch can return 0/1/2 with a non-NULL status_factor.
+                # Leaving .causeFactor NULL made the export at ~line 1271 write the raw
+                # numeric, which jamovi returns as a nominal factor with levels "0"/"1"/"2";
+                # round-tripping that with outcomeLevel = "1" turned every competing event
+                # into a CENSORED observation. NULL for any ordinary binary outcome, so this
+                # is a no-op everywhere else.
+                private$.causeFactor <- res$status_factor
 
                 diagnostics$binary_check <- sprintf(
                     "Event level '%s' -> 1 (%d rows); %s -> 0 (%d rows); %d row(s) missing.",

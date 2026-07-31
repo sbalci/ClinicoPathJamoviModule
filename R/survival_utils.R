@@ -47,9 +47,11 @@
 #' \itemize{
 #'   \item On the single-event-level path every level that is *not* the selected
 #'     event level becomes 0 (censored). With three or more levels this is
-#'     cause-specific censoring: Cox hazard ratios stay valid, but Kaplan-Meier
-#'     survival, median survival and x-year survival are biased upward. The
-#'     caller is expected to surface `estimand` and `censored_labels` to the user.
+#'     cause-specific censoring. Kaplan-Meier survival, median survival and
+#'     x-year survival then describe net/cause-specific survival and generally
+#'     overstate real-world event-free probability when the other outcome is a
+#'     competing terminal event. The caller is expected to surface `estimand`
+#'     and `censored_labels` to the user.
 #'   \item `NA` is never converted to a value. It stays `NA` and the row is
 #'     dropped downstream by `jmvcore::naOmit()` (complete-case analysis).
 #'     Coding it 0 would fabricate censoring.
@@ -69,7 +71,8 @@
 #' @return A list with `status` (0/1 or 0/1/2, `NA` preserved), `status_factor`
 #'   (Censored/Event/Competing, only when competing), the counts `n_event`,
 #'   `n_censored`, `n_competing`, `n_missing`, the labels `event_label` and
-#'   `censored_labels`, `n_levels`, `has_competing`, `estimand`, and `error`
+#'   `censored_labels`, `competing_labels`, `n_levels`, `has_competing`,
+#'   `estimand`, and `error`
 #'   (`NULL`, or a ready-to-display message the caller should reject with).
 #' @keywords internal
 .defineEventIndicator <- function(outcome,
@@ -82,7 +85,8 @@
     fail <- function(msg) list(status = NULL, error = msg)
 
     ok <- function(status, event_label, censored_labels, estimand,
-                   n_levels, status_factor = NULL) {
+                   n_levels, status_factor = NULL,
+                   competing_labels = character(0), competing_mode = NULL) {
         list(
             status          = status,
             status_factor   = status_factor,
@@ -92,8 +96,15 @@
             n_missing       = sum(is.na(status)),
             event_label     = event_label,
             censored_labels = censored_labels,
+            competing_labels = competing_labels,
             n_levels        = n_levels,
-            has_competing   = any(status == 2, na.rm = TRUE),
+            # This flag means that competing-risk METHODS are required. It must
+            # remain TRUE when a competing state is declared but happens to have
+            # zero observations in the current cohort; otherwise the same
+            # outcome silently changes from Aalen-Johansen/CIF to Kaplan-Meier
+            # merely because one state is absent in a subset.
+            has_competing   = if (is.null(competing_mode))
+                any(status == 2, na.rm = TRUE) else isTRUE(competing_mode),
             estimand        = estimand,
             error           = NULL
         )
@@ -185,13 +196,16 @@
 
         event_labels <- unlist(buckets[filled][codes[names(buckets)[filled]] == 1])
         cens_labels  <- unlist(buckets[filled][codes[names(buckets)[filled]] == 0])
+        comp_labels  <- unlist(buckets[filled][codes[names(buckets)[filled]] == 2])
 
         return(ok(status,
                   event_label     = paste(event_labels, collapse = ", "),
                   censored_labels = as.character(cens_labels),
                   estimand        = estimand,
                   n_levels        = length(observed),
-                  status_factor   = status_factor))
+                  status_factor   = status_factor,
+                  competing_labels = as.character(comp_labels),
+                  competing_mode  = identical(analysistype, "compete")))
     }
 
     # ---- labelled cause factor handed over from outcomeorganizer ----------
@@ -203,16 +217,30 @@
     # "Event"/"No event" was read as a hand-off, so choosing "No event" as the
     # event level silently selected "Event" instead AND mapped every "No event"
     # row to NA -- deleting those patients and reporting a 100% event rate.
-    # Require that EVERY observed level is one of the three emitted names, and
-    # that the user has not pointed outcomeLevel somewhere else.
+    # Require the complete DECLARED level set, not merely a subset of the names
+    # among observed rows. A user-created binary factor with levels
+    # Censored/Event is an ordinary outcome; conversely, an outcomeorganizer
+    # hand-off remains a competing-risk outcome when its Competing level is
+    # declared but unused in this particular cohort.
     cause_levels <- c("Censored", "Event", "Competing")
     looks_like_handoff <- is.factor(outcome) &&
+        all(cause_levels %in% levels(outcome)) &&
         all(observed_chr %in% cause_levels) &&
         (is.null(outcomeLevel) || length(outcomeLevel) == 0 ||
          identical(as.character(outcomeLevel), "") ||
          as.character(outcomeLevel) %in% cause_levels)
 
     if (looks_like_handoff) {
+        # "Censored" has an explicit structural meaning in this interchange
+        # format. Treating it as the event would turn both actual event states
+        # into censoring and produce a clinically meaningless analysis that
+        # nevertheless looks valid. Refuse the configuration instead.
+        if (!is.null(outcomeLevel) && length(outcomeLevel) > 0 &&
+            identical(as.character(outcomeLevel), "Censored"))
+            return(fail(paste0(
+                "'Censored' cannot be selected as the event level for a ",
+                "Censored/Event/Competing outcome. Select 'Event' or 'Competing'.")))
+
         # An explicit choice of "Competing" as the event means the user wants a
         # cause-specific analysis of the competing cause: it becomes the event
         # and the original Event level is censored. Previously the selection was
@@ -229,15 +257,16 @@
             status[!is.na(outcome) & outcome == "Event"]     <- 1L
             status[!is.na(outcome) & outcome == "Competing"] <- 2L
         }
-        has_comp <- any(status == 2, na.rm = TRUE)
         return(ok(status,
                   event_label     = if (focus_competing) "Competing" else "Event",
                   censored_labels = "Censored",
-                  estimand        = if (has_comp) "competing risks" else "overall survival",
+                  competing_labels = if (focus_competing) "Event" else "Competing",
+                  estimand        = "competing risks",
                   n_levels        = length(observed),
-                  status_factor   = if (has_comp) factor(
+                  status_factor   = factor(
                       c("Censored", "Event", "Competing")[status + 1L],
-                      levels = c("Censored", "Event", "Competing")) else NULL))
+                      levels = c("Censored", "Event", "Competing")),
+                  competing_mode  = TRUE))
     }
 
     # ---- single event level ----------------------------------------------
@@ -261,14 +290,26 @@
                 "' has levels: ", paste(observed_chr, collapse = ", "),
                 ". Select the level that represents the event (e.g. death, recurrence).")))
 
-        # A level with zero observations -- left over after a row filter or a
-        # variable change -- used to yield an all-zero indicator and a flat
-        # survival curve at 1.0 with no error at all.
-        if (!as.character(outcomeLevel) %in% observed_chr)
+        # A DECLARED level with zero observations is a legitimate cohort, not an
+        # error. Everyone is censored: S(t) = 1 throughout, the median is not
+        # reached, the number at risk and the follow-up are reportable. Refusing
+        # it threw a valid analysis away -- and did so inconsistently, since an
+        # all-zero NUMERIC outcome was accepted a few dozen lines below.
+        #
+        # What remains unusable is a level the variable does not have AT ALL
+        # (a stale selection left behind when the outcome variable changed, or a
+        # typo): nothing can be coded from it, so that still fails.
+        #
+        # WHAT THIS COSTS: picking the WRONG event level now produces a silent
+        # all-censored analysis where it used to error. `.describeEventIndicator()`
+        # therefore flags any zero-event recode prominently -- if that block is
+        # ever removed, restore the rejection with it.
+        declared <- if (is.factor(outcome)) levels(outcome) else observed_chr
+        if (!as.character(outcomeLevel) %in% declared)
             return(fail(paste0(
-                "Selected Event Level '", outcomeLevel, "' does not occur in the data. ",
-                "Values found in '", outcome_name, "': ",
-                paste(observed_chr, collapse = ", "), ".")))
+                "Selected Event Level '", outcomeLevel, "' is not a level of '",
+                outcome_name, "'. Levels available: ",
+                paste(declared, collapse = ", "), ".")))
 
         status <- ifelse(as.character(outcome) == as.character(outcomeLevel), 1L, 0L)
         cens   <- setdiff(observed_chr, as.character(outcomeLevel))
@@ -343,37 +384,100 @@
 
     if (is.null(res) || !is.null(res$error)) return("")
 
+    esc <- function(x) as.character(htmltools::htmlEscape(as.character(x)))
+    event_label <- esc(res$event_label)
+    outcome_name <- esc(outcome_name)
+    censored_labels <- esc(res$censored_labels)
+    competing_labels <- esc(res$competing_labels)
+
     cens <- if (length(res$censored_labels) > 0)
-        paste(sprintf('"%s"', res$censored_labels), collapse = ", ") else "(none)"
+        paste(sprintf('"%s"', censored_labels), collapse = ", ") else "(none)"
+    comp <- if (length(res$competing_labels) > 0)
+        paste(sprintf('"%s"', competing_labels), collapse = ", ") else "(not labelled)"
 
     rows <- paste0(
-        "<tr><td>Event level</td><td>\"", res$event_label,
+        "<tr><td>Event level</td><td>\"", event_label,
             "\"</td><td align='right'>", res$n_event, "</td></tr>",
         "<tr><td>Censored</td><td>", cens,
             "</td><td align='right'>", res$n_censored, "</td></tr>",
-        if (res$n_competing > 0)
-            paste0("<tr><td>Competing event</td><td>&nbsp;</td><td align='right'>",
+        if (isTRUE(res$has_competing))
+            paste0("<tr><td>Competing event</td><td>", comp,
+                   "</td><td align='right'>",
                    res$n_competing, "</td></tr>") else "",
         "<tr><td>Excluded (missing outcome)</td><td>&nbsp;</td><td align='right'>",
             res$n_missing, "</td></tr>",
         "<tr><td>Estimand</td><td colspan='2'>", res$estimand, "</td></tr>")
 
     warn <- ""
-    if (res$n_levels > 2 && res$n_competing == 0) {
+    # Gate on the ESTIMAND, not the level count. n_levels > 2 misses the
+    # multievent path's commonest cause-specific case: an outcome with only DOD
+    # and DOOC observed has 2 levels, yet analysistype = "cause" codes DOOC to 0
+    # (survival_utils.R:161) -- a death silently entered as a censoring. For the
+    # single-event path this is exactly equivalent, since that path sets
+    # "cause-specific survival" iff length(observed) > 2 (:281-282).
+    if (identical(res$estimand, "cause-specific survival") && res$n_competing == 0) {
         warn <- paste0(
-            "<p style='margin-top:8px'><b>Note.</b> '", outcome_name,
-            "' has ", res$n_levels, " levels but only one was selected as the event. ",
-            "The remaining level(s) are being treated as <i>censored</i>, which assumes ",
-            "censoring is independent of the event. Cox hazard ratios remain valid under ",
-            "this assumption, but if any collapsed level is a competing event (for example ",
+            "<p style='margin-top:8px'><b>Note.</b> Level(s) ", cens,
+            " are being treated as <i>censored</i>, which assumes ",
+            "censoring is independent of the event. If any collapsed level is a competing ",
+            "event (for example ",
             "death from another cause) the Kaplan-Meier curve, median survival and x-year ",
             "survival are biased upward. For competing events use Multiple Event Levels ",
             "with survival type Competing Risk.</p>")
     }
 
+    # A zero-event cohort is now ACCEPTED rather than rejected (see the declared-
+    # level check in .defineEventIndicator). That is the right call statistically
+    # -- a fully censored series is analysable -- but it means a mis-selected
+    # event level no longer announces itself as an error, so it has to announce
+    # itself here instead. This block is the safety net for that change and must
+    # stay as loud as the error it replaced.
+    zero <- ""
+    if (isTRUE(res$n_event == 0)) {
+        zero <- paste0(
+            "<p style='margin-top:8px;padding:8px;border-left:4px solid #c0392b;",
+            "background-color:#fdecea'><b>No events: check the event level.</b> ",
+            "The event level (", event_label, ") occurs in <b>0</b> of the ",
+            res$n_event + res$n_censored + res$n_competing,
+            " rows with a non-missing '", outcome_name, "' value. ",
+            if (isTRUE(res$has_competing)) paste0(
+                res$n_competing, " competing event(s) did occur; these are a separate ",
+                "terminal state, not censoring, and the target-event cumulative incidence ",
+                "is estimated as 0 throughout") else
+                "This is a fully censored analysis cohort: every subject is treated as censored and survival is estimated as 100% throughout",
+            if (isTRUE(res$has_competing))
+                ". The median time to the target event is not reached" else
+                ". Median survival is not reached",
+            ", and the numbers at risk and the ",
+            "follow-up duration are still reportable. <b>But if you expected events, ",
+            "the wrong event level is selected</b>: check the level named above against ",
+            "your data before using any of the results below.</p>")
+    }
+
+    # Disease-free survival makes a timing assumption that nothing in the data
+    # can verify, so it has to be stated wherever the user chooses DFS. Alive
+    # with Disease is coded as an EVENT at whatever time the time variable holds
+    # for that subject; if that time is diagnosis-to-last-follow-up (what a
+    # follow-up date normally means, and what the UI suggests) the recurrence is
+    # recorded later than it happened and DFS is biased upward. This is a silent
+    # bias, not a detectable error -- there is no signature in the data to test.
+    dfs <- ""
+    if (identical(res$estimand, "disease-free survival")) {
+        dfs <- paste0(
+            "<p style='margin-top:8px;padding:8px;border-left:4px solid #d68910;",
+            "background-color:#fef5e7'><b>Disease-free survival requires a time to the ",
+            "DFS event.</b> \"Alive with Disease\" is counted as an event, and it is placed ",
+            "at whatever time the time variable gives for that subject. These results are ",
+            "correct only if that time is the time to recurrence or progression. If it is ",
+            "instead the time from diagnosis to the LAST FOLLOW-UP, every recurrence is ",
+            "dated later than it occurred and disease-free survival is over-estimated. ",
+            "For subjects with disease, supply the date of recurrence as the follow-up date ",
+            "(or an elapsed time measured to recurrence).</p>")
+    }
+
     paste0(
         "<div><b>Outcome recode for '", outcome_name, "'</b>",
-        "<table style='margin-top:4px'>", rows, "</table>", warn, "</div>")
+        "<table style='margin-top:4px'>", rows, "</table>", warn, zero, dfs, "</div>")
 }
 
 #' Message shown when an output is unavailable in competing-risks mode
@@ -458,10 +562,41 @@
   # Add stratification if specified (applies whether or not predictors exist)
   if (!is.null(strata_vars) && length(strata_vars) > 0) {
     escaped_strata <- .escapeVariableNames(strata_vars)
-    strata_term <- paste0("strata(", paste(escaped_strata, collapse = ", "), ")")
+
+    # One strata() call PER variable, not a single multi-argument strata().
+    #
+    # `strata(a, b)` collapses the variables into one combined factor whose
+    # levels are pasted labels ("Control, I"). Anything that re-evaluates the
+    # model terms on new data -- predict.coxph, and therefore riskRegression's
+    # Brier/AUC scoring -- rebuilds that factor from the new data and gets a
+    # level set that does not match the one recorded at fit time, failing with
+    # "factor strata(a, b) has new levels Control, I, I, ...". Separate
+    # strata() terms are handled per variable and survive the round trip.
+    #
+    # This is a representation change only: survival crosses multiple strata
+    # terms internally, so `strata(a) + strata(b)` and `strata(a, b)` give
+    # identical coefficients and log-likelihood (verified).
+    strata_term <- paste0("strata(", escaped_strata, ")")
+    strata_term <- paste(strata_term, collapse = " + ")
     rhs <- if (identical(rhs, "1")) strata_term else paste(rhs, strata_term, sep = " + ")
   }
 
   formula_string <- paste0(lhs, " ~ ", rhs)
   return(.asSurvivalFormula(formula_string))
+}
+
+#' Format a follow-up time for display in an interval label
+#'
+#' Interval labels are built from raw numeric bounds, and the final bound is the
+#' observed maximum follow-up -- an unrounded double that rendered as
+#' "60-134.449661066093". Whole numbers stay integer-looking; anything else is
+#' shown to one decimal, which is the precision follow-up times are reported in.
+#'
+#' @param x numeric time value
+#' @return character scalar
+#' @keywords internal
+.fmtTimeLabel <- function(x) {
+    if (length(x) == 0 || is.na(x)) return("NA")
+    if (isTRUE(all.equal(x, round(x)))) format(round(x), trim = TRUE)
+    else format(round(x, 1), nsmall = 1, trim = TRUE)
 }

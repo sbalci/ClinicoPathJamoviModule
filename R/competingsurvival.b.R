@@ -982,6 +982,13 @@ This function uses survival, survminer, finalfit, and cmprsk packages.
                             <p>Median survival time shown in months.</p>"
                         )
                         self$results$summary$setContent(summary_text)
+                        # The early return skipped .generateInterpretation() (called at
+                        # :1009 on the normal path), so the ungrouped run silently lost
+                        # BOTH the Clinical Interpretation and the Assumptions & Caveats
+                        # panel -- including the independent-censoring caveat, which is
+                        # exactly the disclosure a cause-specific run needs, since every
+                        # non-DOD level (dooc included) is recoded to 0 at :221-226.
+                        private$.generateInterpretation(analysis_type)
                         return()  # Exit early to avoid overwriting summary
                     } else {
                         # No HR and no descriptive data - show message

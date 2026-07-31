@@ -153,9 +153,31 @@ survivalcontClass <- if (requireNamespace("jmvcore")) {
             .lowEventCount = FALSE,
 
             # Competing Risk Helper Functions ----
-            .isCompetingRisk = function() {
-                # Check if competing risk analysis is active
-                return(self$options$multievent && self$options$analysistype == "compete")
+            .isCompetingRisk = function(state = NULL) {
+                # Check if competing risk analysis is active.
+                #
+                # The STATUS VECTOR decides this, not the options. This used to
+                # read `self$options$multievent && analysistype == "compete"`
+                # alone, which is blind to the outcomeorganizer hand-off: a
+                # recoded Censored/Event/Competing column arrives already 0/1/2
+                # with multievent = FALSE -- the user never fills
+                # dod/dooc/awd/awod, that is the whole point of the recoded
+                # column. The guard was therefore FALSE and the 0/1/2 vector
+                # went into an ordinary survival::Surv(), which for a max status
+                # of 2 subtracts 1 and NAs anything outside 0/1: Censored became
+                # NA (row silently DELETED), Event became censored, and
+                # Competing became the event. If this ever reverts to testing
+                # the options alone, competing-risk data is analysed backwards
+                # again with no warning.
+                #
+                # `state` is a plot's image$state. jmvcore's .load() restores
+                # results from disk without calling .run(), so a renderer can
+                # execute where private$.eventRecode is still NULL; the flag
+                # then has to come off the serialised state.
+                isTRUE(state$has_competing) ||
+                    isTRUE(private$.eventRecode$has_competing) ||
+                    (isTRUE(self$options$multievent) &&
+                         identical(self$options$analysistype, "compete"))
             },
 
             .competingRiskCumInc = function(mydata, mytime, myoutcome) {
@@ -1135,25 +1157,6 @@ survivalcontClass <- if (requireNamespace("jmvcore")) {
                 }
 
 
-                ## Competing risks are not implemented here ----
-                # Gated once, at the top, rather than at each consumer: this
-                # analysis has ~15 places that build a survfit/coxph and only
-                # .cox was ever guarded. survival::Surv() accepts the 0/1/2
-                # competing-risk coding with a warning jamovi never displays and
-                # then remaps 1 to censored, 2 to event and 0 to NA -- so every
-                # one of those outputs would render inverted. There is also no
-                # cumulative-incidence implementation here to fall back on.
-                if (self$options$multievent && self$options$analysistype == "compete") {
-                    private$.addHtmlMessage(
-                        "error",
-                        "Competing risks not available in this analysis",
-                        paste0(
-                            "Cut-off analysis for a continuous predictor does not support competing risks. ",
-                            "Use Survival Analysis or Multivariable Survival Analysis for competing-risk ",
-                            "models, or set survival type to Overall, Cause Specific, or Disease-Free here."))
-                    return()
-                }
-
                 ## Input Validation and Data Checks ----
 
                 # Enhanced input validation using helper method
@@ -1173,6 +1176,42 @@ survivalcontClass <- if (requireNamespace("jmvcore")) {
                 if (!is.null(private$.eventRecode))
                     self$results$eventRecodeInfo$setContent(
                         .describeEventIndicator(private$.eventRecode, self$options$outcome))
+
+                ## Competing risks are not implemented here ----
+                # Gated once, rather than at each consumer: this analysis has ~15
+                # places that build a survfit/coxph and only .cox was ever guarded.
+                # survival::Surv() accepts the 0/1/2 competing-risk coding with a
+                # warning jamovi never displays and then remaps 1 to censored,
+                # 2 to event and 0 to NA -- so every one of those outputs would
+                # render inverted. There is also no cumulative-incidence
+                # implementation here to fall back on.
+                #
+                # This gate sits AFTER .cleandata(), not before it. It used to test
+                # `multievent && analysistype == "compete"` at the very top of
+                # .run(), which is FALSE for an outcomeorganizer hand-off -- the
+                # 0/1/2 status arrives with multievent unset -- so exactly the case
+                # that needs blocking walked straight past. .isCompetingRisk() reads
+                # private$.eventRecode, which only exists once .cleandata() has run,
+                # so the gate has to follow it. Running .cleandata() first also lets
+                # the recode disclosure above explain WHY the analysis stopped.
+                if (private$.isCompetingRisk()) {
+                    private$.addHtmlMessage(
+                        "error",
+                        "Competing risks not available in this analysis",
+                        paste0(
+                            "Cut-off analysis for a continuous predictor does not support competing risks. ",
+                            "Use Survival Analysis or Multivariable Survival Analysis for competing-risk ",
+                            "models, or set survival type to Overall, Cause Specific, or Disease-Free here."))
+                    # Returning here means the setState() block further down never
+                    # runs, so a plot state left over from the PREVIOUS (valid)
+                    # outcome variable would still be rendered -- a correct-looking
+                    # curve sitting under an error message. Drop them.
+                    for (p in c("plot2", "plot3", "plot4", "plot5", "plot6", "plot7",
+                                "plotMultipleCutoffs", "plotMultipleSurvival",
+                                "residualsPlot"))
+                        self$results[[p]]$setState(NULL)
+                    return()
+                }
 
                 # Event Count Validation (Critical for Survival Analysis) ----
                 if (!is.null(results) && !is.null(results$cleanData) && !is.null(results$name2outcome)) {
@@ -2256,6 +2295,13 @@ survivalcontClass <- if (requireNamespace("jmvcore")) {
                 ci_lower <- (stats::qchisq(0.025, 2*total_events) / 2) / total_time * rate_multiplier
                 ci_upper <- (stats::qchisq(0.975, 2*(total_events + 1)) / 2) / total_time * rate_multiplier
 
+                # Exact (Garwood) bounds: a row with almost no accrued person-time
+                # genuinely cannot rule out a very high rate. Correct, but it looks
+                # like a bug without a footnote saying so. Do not cap it.
+                self$results$personTimeTable$setNote(
+                    "ci",
+                    .("Exact (Garwood) Poisson 95% CI. Rows with 0 events give a one-sided 97.5% upper bound; intervals with very little accrued person-time yield correspondingly wide bounds."))
+
                 # Add to personTimeTable - first the overall row
                 self$results$personTimeTable$addRow(rowKey=1, values=list(
                     interval=paste0("Overall (0-max)"),
@@ -2342,7 +2388,7 @@ survivalcontClass <- if (requireNamespace("jmvcore")) {
                 }
 
                 # Create summary text with interpretation
-                event_scope <- if (self$options$multievent && self$options$analysistype == "compete") {
+                event_scope <- if (private$.isCompetingRisk()) {
                     .("Event counts reflect the event of interest; competing events are treated as censored for rates.")
                 } else if (self$options$multievent && self$options$analysistype == "overall") {
                     .("Event counts include all-cause events as defined in the outcome mapping.")

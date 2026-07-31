@@ -1044,13 +1044,12 @@ analyses:
     menuTitle: Single Arm Survival
     menuSubtitle: Survival for whole group, no explanatory factor
     description: >-
-      Performs survival analysis for a single cohort of patients without group
-      comparisons. The analysis calculates total person-time follow-up (the sum
-      of all individual  observation periods) and uses this to derive accurate
-      survival estimates that account  for varying follow-up durations. Use this
-      when you want to analyze overall survival  characteristics of your entire
-      study population - for example, to determine median  survival time or
-      1/3/5-year survival rates for all patients collectively.
+      Performs survival analysis for a single cohort without group comparisons.
+      Kaplan-Meier estimates use event times and risk sets; in competing-risk
+      mode, cumulative incidence retains competing terminal events as separate
+      states. Optional person-time rates use the sum of individual observation
+      periods as their denominator. This is descriptive analysis of one cohort,
+      not a treatment-effect estimate.
     ribbon: analyses
     category: analyses
   - title: Survival Analysis

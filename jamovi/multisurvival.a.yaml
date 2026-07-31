@@ -415,7 +415,7 @@ options:
     - name: ph_cox
       title: Proportional hazards assumption
       type: Bool
-      default: true
+      default: false
       description:
         R: >
           If true, tests the proportional hazards assumption for the Cox model
@@ -611,18 +611,91 @@ options:
     - name: ac_method
       title: Adjustment Method
       type: List
+      # Labels state the ESTIMAND rather than a package's method name.
+      #
+      # WHY THE LABELS CHANGED
+      # "Average" and "Conditional Mean" did not say what was being computed,
+      # and the words are actively booby-trapped: survminer uses the same two
+      # words for the OPPOSITE pair. survminer's `conditional` is the
+      # standardised (g-computation) curve; its `average` averages patients
+      # within their own observed level. Verified empirically, not from the
+      # docs. So a reader who knew survminer and a reader who did not would
+      # each be confident, and one of them would be wrong. The label now names
+      # the estimand, which is the only description that cannot be misread.
+      #
+      # WHY THE KEYS DID NOT CHANGE (`average`, `conditional`)
+      # The key is what jamovi writes into a saved .omv file and what appears
+      # in generated R syntax. Renaming `conditional` to, say,
+      # `reference_profile` would silently invalidate every saved analysis that
+      # selected it: on reopening, jamovi would fall back to the default and the
+      # user would get a DIFFERENT ESTIMAND than the one they saved, with no
+      # error and no notice. That is exactly the class of silent substitution
+      # this option's whole history has been about eliminating -- the previous
+      # code silently ran `average` when `marginal` failed, while keeping the
+      # requested name in the title.
+      #
+      # So the keys stay. They are internal, they are stable, and they are now
+      # documented here rather than being self-describing. The cost is that a
+      # maintainer reading `identical(method, "conditional")` in the backend
+      # must know it means the reference-profile curve and NOT survminer's
+      # conditional. That is what this comment is for.
+      #
+      # If the keys are ever renamed, it is a BREAKING CHANGE and needs a
+      # migration path for saved files, not just a find-and-replace.
       options:
-        - title: Average
+        - title: Standardised over cohort (g-computation)
           name: average
-        - title: Conditional Mean
+        - title: At reference covariate profile
           name: conditional
-        - title: Single
+        # "Single" does NOT contrast the adjustment variable at all. It returns
+        # ONE curve, labelled "Overall": every patient at their own observed
+        # covariates, averaged. (Identical to survexp(~ 1, ratetable = fit),
+        # checked to 2e-15.) Someone choosing it expecting adjusted curves per
+        # group gets a single line and no comparison, so the label has to say so
+        # -- "Single" alone reads like "a single method", not "a single curve".
+        - title: Whole-cohort expected survival (one curve, no group contrast)
           name: single
-        - title: Marginal
-          name: marginal
+        # `marginal` (inverse-probability weighting) is DELIBERATELY NOT OFFERED.
+        #
+        # It is survminer's estimator. Its implementation builds the propensity
+        # model by string surgery on the Cox formula, so when the adjustment
+        # variable is also a model covariate -- the normal case here -- the
+        # response ends up on the right-hand side and the weighted fit is
+        # unusable. It fails on survminer's own documented example. On real data
+        # it did not even fail fast: it ran without returning, leaving the plot
+        # spinning indefinitely.
+        #
+        # Offering an option that can never produce output is a trap: the user
+        # spends time choosing it, waits, and gets nothing. Listing it as
+        # "(not available)" is only marginally better -- it still invites the
+        # click. So it is removed from the menu entirely.
+        #
+        # SAVED-FILE NOTE: removing a List option is normally the breaking change
+        # warned about above, but not here. `marginal` never actually produced a
+        # marginal curve: the old code caught survminer's failure and silently
+        # re-ran `average` under the requested name. So a saved analysis that
+        # selected `marginal` was computing `average` all along, and now falls
+        # back to `average` -- the same numbers it was already showing, except
+        # the menu will now display what is really being computed instead of a
+        # method that was never running.
+        #
+        # The `marginal` branch is retained in the backend as a guard, so a
+        # hand-edited or older file passing "marginal" refuses rather than
+        # silently computing something else.
+        #
+        # Reinstating it means writing a real IPTW estimator (weight truncation,
+        # multi-level treatment, robust confidence intervals) -- a separate piece
+        # of statistical work, not a wiring fix.
       default: average
       description:
-          R: Method for computing adjusted survival curves
+          R: >
+            Estimand for the adjusted survival curves. "Standardised over cohort"
+            sets every observed patient to each level in turn and averages the
+            model-predicted curves (g-computation), so the curves differ only by
+            the adjustment variable. "At reference covariate profile" predicts a
+            single curve per level at the mean/mode of the other covariates.
+            "Whole-cohort expected survival" returns one curve for the cohort at
+            its observed covariates and does not contrast the levels at all.
 
     - name: ac_summary
       title: Adjusted survival summary tables

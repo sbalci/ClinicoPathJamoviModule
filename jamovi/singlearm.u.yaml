@@ -80,9 +80,14 @@ children:
                       - type: ComboBox
                         name: timetypedata
                         enable: (tint)
+                      # NOT enable: (tint). With pre-calculated elapsed time
+                      # this box declares the unit the time column is already
+                      # recorded in -- it drives cutpoint scaling, follow-up
+                      # thresholds and axis labels. Disabling it pinned every
+                      # such analysis to "months", so a column of days was
+                      # reported as months with no way to say otherwise.
                       - type: ComboBox
                         name: timetypeoutput
-                        enable: (tint)
       - type: Label
         label: Landmark Time
         fitToGrid: true

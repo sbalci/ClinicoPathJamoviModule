@@ -48,7 +48,7 @@ test_that("the mean baseline hazard recovers the true constant rate", {
         as.numeric(regmatches(m, regexpr("[0-9.]+$", m)))
     }
 
-    mean_hz <- grab("Mean hazard rate")
+    mean_hz <- grab("Pooled event rate")
     expect_false(is.na(mean_hz))
 
     # The pooled occurrence/exposure rate is the correct estimator, and on this
@@ -79,10 +79,19 @@ test_that("constant-hazard data is not described as highly variable", {
     txt <- gsub("[[:space:]]+", " ", gsub("<[^>]*>", " ", txt))
     skip_if(!nzchar(trimws(txt)), "summary not rendered in this harness")
 
-    # The module classifies CV < 0.5 as "relatively constant". With a genuinely
-    # constant hazard it must not reach the "highly variable" verdict.
-    if (grepl("highly variable|relatively constant", txt))
-        expect_match(txt, "relatively constant")
+    # The module classifies CV < 0.5 as "little variation". With a genuinely
+    # constant hazard it must not reach the "substantial variation" verdict.
+    #
+    # Asserted unconditionally on purpose. This used to read
+    #   if (grepl("highly variable|relatively constant", txt)) expect_match(...)
+    # and when the verdict wording was reworded to "little/substantial variation"
+    # the guard stopped matching, the body never ran, and testthat recorded the
+    # whole test as an empty SKIP -- a rewording silently disarmed the only check
+    # that the constant-hazard verdict is right. n = 500 at lambda = 0.05 yields
+    # 423 events / 42 candidate bins, far past the >= 3 bins the verdict needs,
+    # so this branch is always reachable and a miss is a real failure.
+    expect_match(txt, "little variation")
+    expect_false(grepl("substantial variation", txt, fixed = TRUE))
 })
 
 test_that("the exposure-weighted rate differs from the unweighted interval mean", {
@@ -102,17 +111,18 @@ test_that("the exposure-weighted rate differs from the unweighted interval mean"
     expect_gt(unweighted, 3 * pooled)               # the old one, badly biased
 })
 
-test_that("the plotted instantaneous hazard is a rate, not a Nelson-Aalen increment", {
+test_that("the piecewise hazard plot uses exact interval person-time", {
     gen <- get("singlearmClass", envir = .bh_ns)
-    src <- paste(vapply(gen$private_methods,
-                        function(f) paste(deparse(f), collapse = " "),
-                        character(1)), collapse = " ")
-    src <- gsub("[[:space:]]+", " ", src)
+    f <- gen$private_methods$.hazardIntervals
+    set.seed(19)
+    d <- .bh_data(lambda = 0.08, n = 240, seed = 19)
+    hz <- f(d$t, d$ev)
 
-    # diff(cumulative hazard) alone is d_i/n_i, a dimensionless conditional
-    # probability. Plotting it on an axis labelled "Hazard Rate" understates the
-    # hazard by a factor of the interval width.
-    expect_false(grepl("inst_hazard <- c(basehaz_data$hazard[1], diff(basehaz_data$hazard))",
-                       src, fixed = TRUE))
-    expect_true(grepl(".dh/.dt", gsub(" ", "", src), fixed = TRUE))
+    # Adaptive intervals form a non-overlapping partition of follow-up, so
+    # exposure and events must add back to the cohort totals exactly.
+    expect_equal(sum(hz$person_time), sum(d$t), tolerance = 1e-10)
+    expect_equal(sum(hz$events), sum(d$ev))
+    expect_equal(sum(hz$events) / sum(hz$person_time),
+                 sum(d$ev) / sum(d$t), tolerance = 1e-12)
+    expect_true(all(hz$lower <= hz$rate & hz$rate <= hz$upper))
 })

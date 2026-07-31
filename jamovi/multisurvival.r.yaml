@@ -361,6 +361,8 @@ items:
           title: "Interpretation"
           type: text
       clearWith:
+        - use_stratify
+        - stratvar
         - outcome
         - outcomeLevel
         - elapsedtime
@@ -374,6 +376,8 @@ items:
       type: Html
       visible: (show_survmetrics && showSummaries)
       clearWith:
+        - use_stratify
+        - stratvar
         - outcome
         - explanatory
         - contexpl
@@ -388,6 +392,8 @@ items:
       renderFun: .plotSurvMetrics
       visible: (show_survmetrics && survmetrics_show_plots)
       clearWith:
+        - use_stratify
+        - stratvar
         - outcome
         - outcomeLevel
         - elapsedtime
@@ -975,7 +981,29 @@ items:
       title: Adjusted Survival Analysis
       type:  Preformatted
       visible: (ac)
-      
+
+    # Placed BEFORE the curve on purpose. The four adjustment methods answer
+    # genuinely different questions, and the estimand was previously stated only
+    # in a footnote underneath the tables -- after the reader had already formed
+    # an interpretation from the plot. This says what is being computed before
+    # anything is shown.
+    - name: adjustedEstimandPanel
+      title: 'What is being computed'
+      type: Html
+      visible: (ac)
+      clearWith:
+          - ac
+          - ac_method
+          - adjexplanatory
+          - explanatory
+          - contexpl
+          - outcome
+          - outcomeLevel
+          - elapsedtime
+          - multievent
+          - analysistype
+          - use_stratify
+          - stratvar
 
     - name: plot_adj
       title: Adjusted Survival Plot
@@ -1006,6 +1034,9 @@ items:
           - pplot
           - censored
           - medianline
+          - analysistype
+          - use_stratify
+          - stratvar
           # - use_modelSelection
 
     # Adjusted Survival Summary (right after adjusted survival analysis)
@@ -1067,8 +1098,12 @@ items:
       title: "Nomogram Scoring Guide"
       type: Html
       visible: (showNomogram)
+      clearWith:
+          - use_stratify
+          - stratvar
 
     # Nomogram Summary (right after nomogram analysis)
+
     - name: nomogramSummaryHeading
       title: 'Nomogram Natural Language Summary'
       type: Preformatted
@@ -1079,6 +1114,8 @@ items:
       type: Html
       visible: (showNomogram && showSummaries)
       clearWith:
+          - use_stratify
+          - stratvar
           - showNomogram
           - explanatory
           - outcome
@@ -1324,11 +1361,14 @@ items:
         - name: time
           title: "Time"
           type: number
+        # Observed counts, not properties of the adjusted curve. These used to be
+        # the model's common risk set, identical for every level while labelled
+        # per level; the titles now say what they are.
         - name: atrisk
-          title: "Number at Risk"
+          title: "Observed at Risk"
           type: integer
         - name: events
-          title: "Events"
+          title: "Observed Events"
           type: integer
         - name: surv
           title: "Adjusted Survival"
@@ -1345,6 +1385,23 @@ items:
           - cutp
           - adjexplanatory
           - ac_method
+          # The adjusted outputs are all predictions from the Cox model, so they
+          # go stale whenever the model does. Only ac/ac_summary/adjexplanatory/
+          # ac_method were listed, and jamovi keeps a panel's last content until
+          # a listed option moves -- changing the covariates left the previous
+          # run's adjusted numbers on screen next to a refitted model.
+          - outcome
+          - outcomeLevel
+          - elapsedtime
+          - explanatory
+          - contexpl
+          - fudate
+          - dxdate
+          - tint
+          - multievent
+          - analysistype
+          - use_stratify
+          - stratvar
 
     - name: adjustedSurvTableSummary
       title: Adjusted Survival Summary
@@ -1356,6 +1413,19 @@ items:
           - cutp
           - adjexplanatory
           - ac_method
+          # Model-defining options; see adjustedSurvTable above.
+          - outcome
+          - outcomeLevel
+          - elapsedtime
+          - explanatory
+          - contexpl
+          - fudate
+          - dxdate
+          - tint
+          - multievent
+          - analysistype
+          - use_stratify
+          - stratvar
 
     - name: adjustedMedianTable
       title: Adjusted Median Survival
@@ -1367,10 +1437,10 @@ items:
           title: "Level"
           type: text
         - name: records
-          title: "Records"
+          title: "Observed Records"
           type: integer
         - name: events
-          title: "Events"
+          title: "Observed Events"
           type: integer
         - name: median
           title: "Median"
@@ -1388,6 +1458,19 @@ items:
           - ac_summary
           - adjexplanatory
           - ac_method
+          # Model-defining options; see adjustedSurvTable above.
+          - outcome
+          - outcomeLevel
+          - elapsedtime
+          - explanatory
+          - contexpl
+          - fudate
+          - dxdate
+          - tint
+          - multievent
+          - analysistype
+          - use_stratify
+          - stratvar
 
     - name: adjustedMedianSummary
       title: Adjusted Median Survival Summary
@@ -1398,6 +1481,19 @@ items:
           - ac_summary
           - adjexplanatory
           - ac_method
+          # Model-defining options; see adjustedSurvTable above.
+          - outcome
+          - outcomeLevel
+          - elapsedtime
+          - explanatory
+          - contexpl
+          - fudate
+          - dxdate
+          - tint
+          - multievent
+          - analysistype
+          - use_stratify
+          - stratvar
 
     - name: adjustedCoxTable
       title: Adjusted Cox Model Results
@@ -1420,6 +1516,19 @@ items:
           - ac_summary
           - adjexplanatory
           - ac_method
+          # Model-defining options; see adjustedSurvTable above.
+          - outcome
+          - outcomeLevel
+          - elapsedtime
+          - explanatory
+          - contexpl
+          - fudate
+          - dxdate
+          - tint
+          - multievent
+          - analysistype
+          - use_stratify
+          - stratvar
 
     - name: adjustedCoxText
       title: Adjusted Cox Model Metrics
@@ -1430,6 +1539,19 @@ items:
           - ac_summary
           - adjexplanatory
           - ac_method
+          # Model-defining options; see adjustedSurvTable above.
+          - outcome
+          - outcomeLevel
+          - elapsedtime
+          - explanatory
+          - contexpl
+          - fudate
+          - dxdate
+          - tint
+          - multievent
+          - analysistype
+          - use_stratify
+          - stratvar
 
     - name: adjustedCoxSummary
       title: Adjusted Cox Model Interpretation
@@ -1440,6 +1562,22 @@ items:
           - ac_summary
           - adjexplanatory
           - ac_method
+          # This narrative now names each variable, its level and its reference
+          # level, so a panel left over from a previous covariate set is not
+          # merely stale but actively wrong. Same model-defining list as
+          # adjustedCoxTable above.
+          - outcome
+          - outcomeLevel
+          - elapsedtime
+          - explanatory
+          - contexpl
+          - fudate
+          - dxdate
+          - tint
+          - multievent
+          - analysistype
+          - use_stratify
+          - stratvar
 
     - name: adjustedCoxPH
       title: Proportional Hazards Test (Adjusted Cox)
