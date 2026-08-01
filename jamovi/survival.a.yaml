@@ -1,10 +1,10 @@
 ---
 name:  survival
 title: Survival Analysis
-menuGroup: SurvivalT
+menuGroup: Survival
 menuSubgroup: ClinicoPath Survival
 menuSubtitle: 'Univariate Survival Analysis, Cox, Kaplan-Meier, 1,3,5-yr'
-version: '1.0.1'
+version: '1.0.2'
 jas: '1.2'
 
 description:
@@ -658,30 +658,19 @@ options:
         Scale for spline-based models. Hazard scale models log hazard function,
         odds scale models log cumulative odds, normal scale models normal scores.
 
-    - name: parametric_extrapolation
-      title: "Extrapolation analysis"
-      type: Bool
-      default: false
-      description: >-
-        Reserved for backward compatibility. Survival extrapolation is not
-        available in the current release and is not shown in the user interface.
-
-    - name: extrapolation_time
-      title: "Extrapolation Time Horizon"
-      type: Number
-      default: 0
-      description: >-
-        Reserved for backward compatibility. This value is not used in the
-        current release.
-
-    - name: parametric_diagnostics
-      title: "Model diagnostics"
-      type: Bool
-      default: true
-      description: >-
-        Reserved for backward compatibility. Dedicated parametric diagnostics
-        are not available in the current release; use distribution comparison
-        to review AIC and BIC.
+    # REMOVED: parametric_extrapolation, extrapolation_time, parametric_diagnostics,
+    # hazard_plots.
+    #
+    # These were kept as "reserved for backward compatibility" options whose
+    # backends are stubs (.plotHazardFunction/.plotExtrapolation returned FALSE,
+    # extrapolation_time was never read) and whose result items are visible: false.
+    # That is not inert: the jus compiler ADDS a control for every option missing
+    # from the .u.yaml, so jmvtools::prepare() regenerated four live checkboxes at
+    # the bottom of the options panel -- one of them ("Model diagnostics") ticked
+    # by default -- that a clinician could toggle to no effect and with no message.
+    # A reserved option cannot be hidden from the UI, so the only way to stop
+    # advertising a feature that does not exist is to remove the option.
+    # Restore them alongside a working implementation, not before.
 
     - name: compare_distributions
       title: "Compare multiple distributions"
@@ -698,14 +687,6 @@ options:
       description: >-
         Generate survival curves from fitted parametric models with confidence
         intervals. Compare with Kaplan-Meier estimates for model validation.
-
-    - name: hazard_plots
-      title: "Hazard function plots"
-      type: Bool
-      default: false
-      description: >-
-        Reserved for backward compatibility. Parametric hazard plots are not
-        available in the current release and are not shown in the user interface.
 
     # Calibration Curves for Survival Models
     - name: calibration_curves

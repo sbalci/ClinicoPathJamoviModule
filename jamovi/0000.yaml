@@ -1039,7 +1039,7 @@ analyses:
   - title: Single Arm Survival
     name: singlearm
     ns: ClinicoPath
-    menuGroup: SurvivalT
+    menuGroup: Survival
     menuSubgroup: ClinicoPath Survival
     menuTitle: Single Arm Survival
     menuSubtitle: Survival for whole group, no explanatory factor
@@ -1060,13 +1060,11 @@ analyses:
     menuTitle: Survival Analysis
     menuSubtitle: Univariate Survival Analysis, Cox, Kaplan-Meier, 1,3,5-yr
     description: >-
-      Performs univariate survival analysis comparing survival between groups.
-      This analysis  calculates person-time follow-up for each group and uses
-      this to derive accurate  survival estimates and incidence rates that
-      account for varying follow-up durations  across groups. The Cox
-      proportional hazards model incorporates person-time by modeling  the
-      hazard function, which represents the instantaneous event rate per unit of
-      person-time.
+      Performs univariate time-to-event analysis comparing groups using
+      Kaplan-Meier estimates, log-rank tests, and Cox proportional hazards
+      regression. Optional outputs include restricted mean survival time and
+      crude person-time incidence rates. These methods describe associations and
+      do not establish causality.
     ribbon: analyses
     category: analyses
   - title: Survival Analysis for Continuous Variable

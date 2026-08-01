@@ -137,6 +137,15 @@ items:
           - dxdate
           - tint
           - multievent
+          # Rows are appended by Table$addRow(), which does not de-duplicate keys;
+          # anything that changes the event coding or the risk set must clear them.
+          - analysistype
+          - dod
+          - dooc
+          - awd
+          - awod
+          - uselandmark
+          - landmark
 
     # Median Survival Explanation
     - name:  medianSurvivalHeading3
@@ -605,6 +614,19 @@ items:
           - dxdate
           - tint
           - multievent
+          # cutp defines the rows of this table. jmvcore's Table$addRow() appends
+          # unconditionally -- it has no duplicate-key check -- so a table that is
+          # not cleared when the cutpoints change ends up holding the old time
+          # points AND the new ones. analysistype/dod/dooc/awd/awod change the
+          # event coding and therefore every probability in the table.
+          - cutp
+          - analysistype
+          - dod
+          - dooc
+          - awd
+          - awod
+          - uselandmark
+          - landmark
 
 
 
@@ -675,6 +697,17 @@ items:
         - dxdate
         - tint
         - multievent
+        # This table carries one row per level of the explanatory variable, so it
+        # must clear when that variable changes; Table$addRow() appends without a
+        # duplicate-key check and would stack the new groups under the old ones.
+        - explanatory
+        - analysistype
+        - dod
+        - dooc
+        - awd
+        - awod
+        - uselandmark
+        - landmark
 
     - name: personTimeSummary
       title: 'Person-Time Summary'
@@ -751,6 +784,19 @@ items:
         - outcome
         - outcomeLevel
         - elapsedtime
+        # One row per group; must clear on anything that changes the groups, the
+        # event coding or the time scale (Table$addRow() does not de-duplicate).
+        - multievent
+        - analysistype
+        - dod
+        - dooc
+        - awd
+        - awod
+        - tint
+        - fudate
+        - dxdate
+        - uselandmark
+        - landmark
 
     - name: rmstSummary
       title: 'RMST Interpretation'
@@ -1422,16 +1468,6 @@ items:
         - explanatory
         - outcome
 
-    - name: parametricDiagnostics
-      title: 'Parametric Model Diagnostics'
-      type: Html
-      visible: false
-      clearWith:
-        - use_parametric
-        - parametric_diagnostics
-        - parametric_distribution
-        - explanatory
-        - outcome
 
     - name: parametricSurvivalPlot
       title: 'Parametric Survival Curves'
@@ -1448,68 +1484,8 @@ items:
         - explanatory
         - outcome
 
-    - name: hazardFunctionPlot
-      title: 'Hazard Function Plot'
-      type: Image
-      width: 600
-      height: 450
-      renderFun: .plotHazardFunction
-      requiresData: true
-      visible: false
-      clearWith:
-        - use_parametric
-        - hazard_plots
-        - parametric_distribution
-        - explanatory
-        - outcome
 
-    - name: extrapolationPlot
-      title: 'Survival Extrapolation Plot'
-      type: Image
-      width: 600
-      height: 450
-      renderFun: .plotExtrapolation
-      requiresData: true
-      visible: false
-      clearWith:
-        - use_parametric
-        - parametric_extrapolation
-        - extrapolation_time
-        - parametric_distribution
-        - explanatory
-        - outcome
 
-    - name: extrapolationTable
-      title: 'Extrapolated Survival Estimates'
-      type: Table
-      visible: false
-      rows: 0
-      columns:
-        - name: time
-          title: 'Time'
-          type: number
-          format: zto
-        - name: survival
-          title: 'Survival'
-          type: number
-          format: proportion
-        - name: ci_lower
-          title: 'Lower'
-          superTitle: '95% CI'
-          type: number
-          format: proportion
-        - name: ci_upper
-          title: 'Upper'
-          superTitle: '95% CI'
-          type: number
-          format: proportion
-      clearWith:
-        - use_parametric
-        - parametric_extrapolation
-        - extrapolation_time
-        - parametric_distribution
-        - explanatory
-        - outcome
 
     # Parametric Models Explanation
     - name: parametricModelsExplanation

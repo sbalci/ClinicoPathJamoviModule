@@ -280,7 +280,7 @@ test_that("Error handling works correctly", {
       awod = NULL,
       explanatory = "treatment"
     )
-  }, regexp = "Outcome variable must be binary")
+  }, regexp = "coded 0/1")
   
   # Test with missing required variables
   expect_error({
@@ -303,7 +303,7 @@ test_that("Multiple event levels work", {
   
   # Create multi-state outcome
   test_data$multi_outcome <- factor(
-    sample(c("Alive", "Dead_Disease", "Dead_Other"), 
+    sample(c("Alive_Free", "Dead_Disease", "Dead_Other"), 
            nrow(test_data), replace = TRUE)
   )
   
@@ -316,8 +316,8 @@ test_that("Multiple event levels work", {
       multievent = TRUE,
       dod = "Dead_Disease",
       dooc = "Dead_Other",
-      awd = "Alive",
-      awod = "Alive",
+      awd = NULL,
+      awod = "Alive_Free",
       analysistype = "overall",
       explanatory = "treatment"
     )

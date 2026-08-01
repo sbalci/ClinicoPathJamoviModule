@@ -187,7 +187,7 @@ statsplot2Base <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             super$initialize(
                 package = "ClinicoPath",
                 name = "statsplot2",
-                version = c(1,0,1),
+                version = c(1,0,2),
                 options = options,
                 results = statsplot2Results$new(options=options),
                 data = data,
