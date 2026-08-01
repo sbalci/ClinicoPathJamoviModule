@@ -63,9 +63,8 @@ Is it mathematically and statistically accurate?
 Evaluate if data flow is correct. Are arguments from .a.yaml correctly read. Is the data flow in .b.R correct. Are the results displayed in .r.yaml appropriately. Evaluate if .u.yaml is user friendly and contains all necessary options.
 Is it ready to be used by clinicians and pathologists?
 Is it ready for release?
-Evaluate it for clinical, statistical, logical, and mathematical problems. 
-Fix issues and implement recommendations. Do not remove functionality. 
-
+Evaluate it for clinical, statistical, logical, and mathematical problems.
+Fix issues and implement recommendations. Do not remove functionality.
 
 > how does FUNC_NAME handle varibale with empty spaces and characters in them.
 Is it necessary to implement escapeVariableNames logic from modelbuilder to FUNC_NAME.
@@ -2972,7 +2971,7 @@ out-of-scope findings from the same audit, deferred for separate work.
   may see blank result panels.
 
   | Function | Outputs | Setters | Ratio |
-  |---|---|---|---|
+  | --- | --- | --- | --- |
   | `agreement` | 396 | 131 | 3.0× |
   | `enhancedROC` | 173 | 60 | 2.9× |
   | `psychopdaROC` | 158 | 59 | 2.7× |
@@ -3005,17 +3004,9 @@ out-of-scope findings from the same audit, deferred for separate work.
 - This is a refactor, not a behaviour change. Defer until after the
   statistical-parity reviews above.
 
-
-
-
-
-
-
-
 ---
 
-# Release Review Prompt:
-
+# release-review-function prompt
 
 You are an expert R package and jamovi module developer with advanced expertise in biostatistics, clinical research, pathology, and clinician-facing software.
 
@@ -3190,7 +3181,3 @@ Complete the implementation, then report:
    - Not ready for release
 
 Begin by locating the relevant development guides and all files associated with `FUNC_NAME`. Then inspect the implementation, establish expected behavior, make targeted corrections, and verify the final result.
-
-
-
-
