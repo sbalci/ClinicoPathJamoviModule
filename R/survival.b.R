@@ -2195,8 +2195,7 @@ survivalClass <- if (requireNamespace('jmvcore'))
                             # Add residuals plot data
                             image9 <- self$results$residualsPlot
                             image9$setState(list(
-                                residuals_data = residuals_data,
-                                cox_model = cox_model
+                                residuals_data = residuals_data
                             ))
                         }
                     }

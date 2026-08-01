@@ -9,7 +9,7 @@ items:
     - name:  eventRecodeInfo
       title: 'Outcome Recode'
       type:  Html
-      visible: true
+      visible: (showExplanations)
       clearWith:
           - outcome
           - outcomeLevel
@@ -724,13 +724,13 @@ items:
     - name:  survivalPlotsHeading3
       title: Plots Explanations
       type:  Preformatted
-      visible: ((sc || ce || ch || kmunicate) && showExplanations)
+      visible: (showExplanations && (sc || ce || ch || kmunicate))
 
     # Survival Plots Explanation
     - name: survivalPlotsExplanation
       title: Understanding Survival Curves and Plots
       type: Html
-      visible: ((sc || ce || ch || kmunicate) && showExplanations)
+      visible: (showExplanations && (sc || ce || ch || kmunicate))
       clearWith:
           - sc
           - ce

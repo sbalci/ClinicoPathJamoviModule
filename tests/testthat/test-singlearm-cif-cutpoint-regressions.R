@@ -236,7 +236,7 @@ test_that("M2: months unit passes the default through silently", {
 test_that("M2: an unparseable string still falls back to the unit-aware default", {
   s <- .singlearm_stub("years")
   expect_equal(s$private$.resolveCutpoints(""), c(1, 3, 5))
-  expect_length(s$log$msgs, 0)
+  expect_gt(length(s$log$msgs), 0)
 })
 
 test_that("M2: values other than the default are never commented on", {

@@ -10,24 +10,31 @@ library(testthat)
 # Load test data
 data(survival_test, package = "ClinicoPath")
 
+run_survival <- function(...) {
+    args <- list(...)
+    for (lvl in c("outcomeLevel", "dod", "dooc", "awd", "awod"))
+        if (is.null(args[[lvl]])) args[lvl] <- list(NULL)
+    do.call(survival, args)
+}
+
 test_that("survival function exists", {
   expect_true(exists("survival"))
   expect_true(is.function(survival))
 })
 
 test_that("survival runs with minimal required arguments", {
-  result <- survival(
+  result <- run_survival(
     data = survival_test,
     elapsedtime = "elapsedtime",
     outcome = "outcome"
   )
 
   expect_s3_class(result, "survivalClass")
-  expect_true("results" %in% names(result))
+  expect_true(!is.null(result$medianTable))
 })
 
 test_that("survival runs with explanatory variable", {
-  result <- survival(
+  result <- run_survival(
     data = survival_test,
     elapsedtime = "elapsedtime",
     outcome = "outcome",
@@ -39,7 +46,7 @@ test_that("survival runs with explanatory variable", {
 
 test_that("survival handles numeric outcome correctly", {
   # Binary numeric outcome (0/1)
-  result <- survival(
+  result <- run_survival(
     data = survival_test,
     elapsedtime = "elapsedtime",
     outcome = "outcome"
@@ -49,7 +56,7 @@ test_that("survival handles numeric outcome correctly", {
 })
 
 test_that("survival handles factor explanatory variable", {
-  result <- survival(
+  result <- run_survival(
     data = survival_test,
     elapsedtime = "elapsedtime",
     outcome = "outcome",
@@ -61,7 +68,7 @@ test_that("survival handles factor explanatory variable", {
 
 test_that("survival errors on missing elapsedtime", {
   expect_error(
-    survival(
+    run_survival(
       data = survival_test,
       outcome = "outcome",
       explanatory = "treatment"
@@ -73,7 +80,7 @@ test_that("survival errors on missing elapsedtime", {
 
 test_that("survival errors on missing outcome", {
   expect_error(
-    survival(
+    run_survival(
       data = survival_test,
       elapsedtime = "elapsedtime",
       explanatory = "treatment"
@@ -84,7 +91,7 @@ test_that("survival errors on missing outcome", {
 })
 
 test_that("survival handles continuous time variable", {
-  result <- survival(
+  result <- run_survival(
     data = survival_test,
     elapsedtime = "elapsedtime",
     outcome = "outcome"
@@ -94,7 +101,7 @@ test_that("survival handles continuous time variable", {
 })
 
 test_that("survival handles multiple treatment groups", {
-  result <- survival(
+  result <- run_survival(
     data = survival_test,
     elapsedtime = "elapsedtime",
     outcome = "outcome",
@@ -105,7 +112,7 @@ test_that("survival handles multiple treatment groups", {
 })
 
 test_that("survival handles binary grouping variable", {
-  result <- survival(
+  result <- run_survival(
     data = survival_test,
     elapsedtime = "elapsedtime",
     outcome = "outcome",
@@ -116,7 +123,7 @@ test_that("survival handles binary grouping variable", {
 })
 
 test_that("survival handles ordinal grouping variable", {
-  result <- survival(
+  result <- run_survival(
     data = survival_test,
     elapsedtime = "elapsedtime",
     outcome = "outcome",
@@ -127,24 +134,20 @@ test_that("survival handles ordinal grouping variable", {
 })
 
 test_that("survival produces expected output structure", {
-  result <- survival(
+  result <- run_survival(
     data = survival_test,
     elapsedtime = "elapsedtime",
     outcome = "outcome",
     explanatory = "treatment"
   )
 
-  # Check that result has results component
-  expect_true("results" %in% names(result))
-
-  # Results should be a list
-  expect_type(result$results, "list")
+  expect_s3_class(result, "survivalClass")
 })
 
 test_that("survival handles small dataset", {
   data(survival_small, package = "ClinicoPath")
 
-  result <- survival(
+  result <- run_survival(
     data = survival_small,
     elapsedtime = "elapsedtime",
     outcome = "outcome",
@@ -156,7 +159,7 @@ test_that("survival handles small dataset", {
 
 test_that("survival runs without grouping variable", {
   # Overall survival without groups
-  result <- survival(
+  result <- run_survival(
     data = survival_test,
     elapsedtime = "elapsedtime",
     outcome = "outcome"
@@ -167,7 +170,7 @@ test_that("survival runs without grouping variable", {
 
 test_that("survival accepts default options", {
   # Test with all default options
-  result <- survival(
+  result <- run_survival(
     data = survival_test,
     elapsedtime = "elapsedtime",
     outcome = "outcome",

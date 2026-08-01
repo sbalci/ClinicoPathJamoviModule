@@ -9,9 +9,16 @@ data(singlearm_mdy, package = "ClinicoPath")
 data(singlearm_datetime, package = "ClinicoPath")
 data(singlearm_persontime, package = "ClinicoPath")
 
+run_singlearm <- function(...) {
+    args <- list(...)
+    for (lvl in c("outcomeLevel", "dod", "dooc", "awd", "awod"))
+        if (is.null(args[[lvl]])) args[lvl] <- list(NULL)
+    do.call(singlearm, args)
+}
+
 test_that("singlearm respects different time output formats", {
   # Days
-  result_days <- singlearm(
+  result_days <- run_singlearm(
     data = singlearm_test,
     elapsedtime = "time_months",
     outcome = "outcome",
@@ -21,7 +28,7 @@ test_that("singlearm respects different time output formats", {
   expect_no_error(result_days)
 
   # Weeks
-  result_weeks <- singlearm(
+  result_weeks <- run_singlearm(
     data = singlearm_test,
     elapsedtime = "time_months",
     outcome = "outcome",
@@ -31,7 +38,7 @@ test_that("singlearm respects different time output formats", {
   expect_no_error(result_weeks)
 
   # Months
-  result_months <- singlearm(
+  result_months <- run_singlearm(
     data = singlearm_test,
     elapsedtime = "time_months",
     outcome = "outcome",
@@ -41,7 +48,7 @@ test_that("singlearm respects different time output formats", {
   expect_no_error(result_months)
 
   # Years
-  result_years <- singlearm(
+  result_years <- run_singlearm(
     data = singlearm_test,
     elapsedtime = "time_months",
     outcome = "outcome",
@@ -53,7 +60,7 @@ test_that("singlearm respects different time output formats", {
 
 test_that("singlearm respects different date formats", {
   # YMD format
-  result_ymd <- singlearm(
+  result_ymd <- run_singlearm(
     data = singlearm_dates,
     tint = TRUE,
     dxdate = "diagnosis_date",
@@ -65,7 +72,7 @@ test_that("singlearm respects different date formats", {
   expect_no_error(result_ymd)
 
   # DMY format
-  result_dmy <- singlearm(
+  result_dmy <- run_singlearm(
     data = singlearm_dmy,
     tint = TRUE,
     dxdate = "diagnosis_date",
@@ -77,7 +84,7 @@ test_that("singlearm respects different date formats", {
   expect_no_error(result_dmy)
 
   # MDY format
-  result_mdy <- singlearm(
+  result_mdy <- run_singlearm(
     data = singlearm_mdy,
     tint = TRUE,
     dxdate = "diagnosis_date",
@@ -89,7 +96,7 @@ test_that("singlearm respects different date formats", {
   expect_no_error(result_mdy)
 
   # YMDHMS format
-  result_hms <- singlearm(
+  result_hms <- run_singlearm(
     data = singlearm_datetime,
     tint = TRUE,
     dxdate = "diagnosis_datetime",
@@ -102,7 +109,7 @@ test_that("singlearm respects different date formats", {
 })
 
 test_that("singlearm respects plot customization options", {
-  result <- singlearm(
+  result <- run_singlearm(
     data = singlearm_test,
     elapsedtime = "time_months",
     outcome = "outcome",
@@ -117,7 +124,7 @@ test_that("singlearm respects plot customization options", {
 })
 
 test_that("singlearm respects person-time analysis options", {
-  result <- singlearm(
+  result <- run_singlearm(
     data = singlearm_persontime,
     elapsedtime = "time_months",
     outcome = "outcome",
@@ -130,7 +137,7 @@ test_that("singlearm respects person-time analysis options", {
 })
 
 test_that("singlearm respects explanation and summary options", {
-  result <- singlearm(
+  result <- run_singlearm(
     data = singlearm_test,
     elapsedtime = "time_months",
     outcome = "outcome",
@@ -142,7 +149,7 @@ test_that("singlearm respects explanation and summary options", {
 })
 
 test_that("singlearm respects advanced diagnostics option", {
-  result <- singlearm(
+  result <- run_singlearm(
     data = singlearm_test,
     elapsedtime = "time_months",
     outcome = "outcome",
@@ -153,7 +160,7 @@ test_that("singlearm respects advanced diagnostics option", {
 })
 
 test_that("singlearm handles all visualization options together", {
-  result <- singlearm(
+  result <- run_singlearm(
     data = singlearm_test,
     elapsedtime = "time_months",
     outcome = "outcome",
@@ -171,7 +178,7 @@ test_that("singlearm handles all visualization options together", {
 })
 
 test_that("singlearm handles hazard smoothing options", {
-  result <- singlearm(
+  result <- run_singlearm(
     data = singlearm_test,
     elapsedtime = "time_months",
     outcome = "outcome",

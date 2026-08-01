@@ -13,8 +13,15 @@ data(singlearm_shortfu, package = "ClinicoPath")
 data(singlearm_longfu, package = "ClinicoPath")
 data(singlearm_test, package = "ClinicoPath")
 
+run_singlearm <- function(...) {
+    args <- list(...)
+    for (lvl in c("outcomeLevel", "dod", "dooc", "awd", "awod"))
+        if (is.null(args[[lvl]])) args[lvl] <- list(NULL)
+    do.call(singlearm, args)
+}
+
 test_that("singlearm handles small datasets", {
-  result <- singlearm(
+  result <- run_singlearm(
     data = singlearm_small,
     elapsedtime = "time_months",
     outcome = "outcome",
@@ -29,7 +36,7 @@ test_that("singlearm handles all censored data", {
     singlearm_censored$outcome,
     levels = c("Alive", "Dead")
   )
-  result <- singlearm(
+  result <- run_singlearm(
     data = singlearm_censored,
     elapsedtime = "time_months",
     outcome = "outcome",
@@ -41,7 +48,7 @@ test_that("singlearm handles all censored data", {
 })
 
 test_that("singlearm handles all events data", {
-  result <- singlearm(
+  result <- run_singlearm(
     data = singlearm_allevents,
     elapsedtime = "time_months",
     outcome = "outcome",
@@ -53,7 +60,7 @@ test_that("singlearm handles all events data", {
 })
 
 test_that("singlearm handles very early events", {
-  result <- singlearm(
+  result <- run_singlearm(
     data = singlearm_early,
     elapsedtime = "time_months",
     outcome = "outcome",
@@ -65,7 +72,7 @@ test_that("singlearm handles very early events", {
 })
 
 test_that("singlearm handles missing outcome values", {
-  result <- singlearm(
+  result <- run_singlearm(
     data = singlearm_missing,
     elapsedtime = "time_months",
     outcome = "outcome",
@@ -75,7 +82,7 @@ test_that("singlearm handles missing outcome values", {
 })
 
 test_that("singlearm handles missing time values", {
-  result <- singlearm(
+  result <- run_singlearm(
     data = singlearm_missing,
     elapsedtime = "time_months",
     outcome = "outcome",
@@ -87,7 +94,7 @@ test_that("singlearm handles missing time values", {
 })
 
 test_that("singlearm handles zero time values", {
-  result <- singlearm(
+  result <- run_singlearm(
     data = singlearm_zerotime,
     elapsedtime = "time_months",
     outcome = "outcome",
@@ -99,7 +106,7 @@ test_that("singlearm handles zero time values", {
 })
 
 test_that("singlearm handles large datasets efficiently", {
-  result <- singlearm(
+  result <- run_singlearm(
     data = singlearm_large,
     elapsedtime = "time_months",
     outcome = "outcome",
@@ -110,7 +117,7 @@ test_that("singlearm handles large datasets efficiently", {
 })
 
 test_that("singlearm handles very short follow-up", {
-  result <- singlearm(
+  result <- run_singlearm(
     data = singlearm_shortfu,
     elapsedtime = "time_months",
     outcome = "outcome",
@@ -120,7 +127,7 @@ test_that("singlearm handles very short follow-up", {
 })
 
 test_that("singlearm handles very long follow-up", {
-  result <- singlearm(
+  result <- run_singlearm(
     data = singlearm_longfu,
     elapsedtime = "time_months",
     outcome = "outcome",
@@ -131,7 +138,7 @@ test_that("singlearm handles very long follow-up", {
 
 test_that("singlearm handles single observation", {
   test_data <- singlearm_small[1, ]
-  result <- singlearm(
+  result <- run_singlearm(
     data = test_data,
     elapsedtime = "time_months",
     outcome = "outcome",
@@ -141,7 +148,7 @@ test_that("singlearm handles single observation", {
 })
 
 test_that("singlearm handles extreme cutpoints", {
-  result <- singlearm(
+  result <- run_singlearm(
     data = singlearm_test,
     elapsedtime = "time_months",
     outcome = "outcome",
