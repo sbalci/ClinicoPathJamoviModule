@@ -98,7 +98,8 @@ singlearmOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             private$..outcomeLevel <- jmvcore::OptionLevel$new(
                 "outcomeLevel",
                 outcomeLevel,
-                variable="(outcome)")
+                variable="(outcome)",
+                allowNone=TRUE)
             private$..dod <- jmvcore::OptionLevel$new(
                 "dod",
                 dod,
@@ -403,6 +404,7 @@ singlearmResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         personTimeHeading3 = function() private$.items[["personTimeHeading3"]],
         personTimeExplanation = function() private$.items[["personTimeExplanation"]],
         plot = function() private$.items[["plot"]],
+        plot_cif = function() private$.items[["plot_cif"]],
         plot6 = function() private$.items[["plot6"]],
         plot2 = function() private$.items[["plot2"]],
         plot3 = function() private$.items[["plot3"]],
@@ -522,11 +524,11 @@ singlearmResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                         `type`="integer"),
                     list(
                         `name`="rmean", 
-                        `title`="Restricted Mean Survival Time",
+                        `title`="Restricted Mean Survival Time", 
                         `type`="number"),
                     list(
                         `name`="se_rmean", 
-                        `title`="SE of Restricted Mean",
+                        `title`="SE of Restricted Mean", 
                         `type`="number"),
                     list(
                         `name`="median", 
@@ -622,7 +624,7 @@ singlearmResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     list(
                         `name`="time", 
                         `title`="time", 
-                        `type`="number",
+                        `type`="number", 
                         `format`="zto"),
                     list(
                         `name`="n.risk", 
@@ -817,7 +819,42 @@ singlearmResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 width=600,
                 height=450,
                 renderFun=".plot",
-                visible="(sc)",
+                visible="(sc && (!multievent || analysistype:overall || analysistype:cause || analysistype:dfs))",
+                requiresData=TRUE,
+                clearWith=list(
+                    "sc",
+                    "endplot",
+                    "byplot",
+                    "ybegin_plot",
+                    "yend_plot",
+                    "ci95",
+                    "risktable",
+                    "censored",
+                    "outcome",
+                    "outcomeLevel",
+                    "elapsedtime",
+                    "fudate",
+                    "dxdate",
+                    "tint",
+                    "multievent",
+                    "analysistype",
+                    "dod",
+                    "dooc",
+                    "awd",
+                    "awod",
+                    "uselandmark",
+                    "landmark",
+                    "timetypeoutput",
+                    "timetypedata",
+                    "medianline")))
+            self$add(jmvcore::Image$new(
+                options=options,
+                name="plot_cif",
+                title="Cumulative Incidence Function",
+                width=600,
+                height=450,
+                renderFun=".plotCIF",
+                visible="(sc && multievent && analysistype:compete)",
                 requiresData=TRUE,
                 clearWith=list(
                     "sc",
@@ -1097,12 +1134,12 @@ singlearmResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             self$add(jmvcore::Preformatted$new(
                 options=options,
                 name="dataQualityHeading",
-                title="Data Quality Assessment",
+                title="Descriptive Data Diagnostics",
                 visible="(advancedDiagnostics)"))
             self$add(jmvcore::Table$new(
                 options=options,
                 name="dataQualityTable",
-                title="Data Quality Metrics",
+                title="Descriptive Data Metrics",
                 visible="(advancedDiagnostics)",
                 rows=0,
                 columns=list(
@@ -1133,7 +1170,7 @@ singlearmResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             self$add(jmvcore::Html$new(
                 options=options,
                 name="dataQualitySummary",
-                title="Data Quality Assessment Summary",
+                title="Descriptive Data Diagnostics Summary",
                 visible="(advancedDiagnostics && showSummaries)",
                 clearWith=list(
                     "outcome",
@@ -1199,11 +1236,11 @@ singlearmBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 
 #' Single Arm Survival
 #'
-#' Performs survival analysis for a single cohort without group comparisons.
-#' Kaplan-Meier estimates use event times and risk sets; in competing-risk
-#' mode, cumulative incidence retains competing terminal events as separate
-#' states. Optional person-time rates use the sum of individual observation
-#' periods as their denominator. This is descriptive analysis of one cohort,
+#' Performs survival analysis for a single cohort without group comparisons. 
+#' Kaplan-Meier estimates use event times and risk sets; in competing-risk 
+#' mode, cumulative incidence retains competing terminal events as separate 
+#' states. Optional person-time rates use the sum of individual observation 
+#' periods as their denominator. This is descriptive analysis of one cohort, 
 #' not a treatment-effect estimate.
 #' @param data The data as a data frame.
 #' @param elapsedtime The time-to-event or follow-up duration for each
@@ -1347,14 +1384,18 @@ singlearmBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   must be greater than zero; a negative or zero value is rejected and the
 #'   person-time analysis is not performed.
 #' @param baseline_hazard Estimate exploratory interval event rates as events
-#'   divided by exact person-time in adaptive intervals. These are piecewise
-#'   occurrence/exposure rates, not exact instantaneous hazards or Cox-model
-#'   coefficients, and should not be used alone to choose treatment or
-#'   surveillance timing.
+#'   divided by exact person-time in equal-width intervals. The number of
+#'   intervals is limited according to the total event count to reduce sparsity.
+#'   These are piecewise occurrence/exposure rates, not exact instantaneous
+#'   hazards or Cox-model coefficients, and should not be used alone to choose
+#'   treatment or surveillance timing. The rate output is not estimated when an
+#'   event occurs at time zero, because such an event is a probability mass at
+#'   the origin rather than a finite continuous hazard.
 #' @param hazard_smoothing Generate smoothed hazard rate estimates to better
 #'   visualize patterns in event risk over time. (There is no
 #'   proportional-hazards assumption to assess here: a single-arm analysis has
-#'   no groups to compare.)
+#'   no groups to compare.) No curve is estimated with zero observed events or
+#'   an event at time zero.
 #' @param showExplanations Display detailed explanations for each analysis
 #'   component to help interpret the statistical methods and results.
 #' @param showSummaries Display natural language summaries alongside tables
@@ -1391,6 +1432,7 @@ singlearmBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   \code{results$personTimeHeading3} \tab \tab \tab \tab \tab a preformatted \cr
 #'   \code{results$personTimeExplanation} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$plot} \tab \tab \tab \tab \tab an image \cr
+#'   \code{results$plot_cif} \tab \tab \tab \tab \tab an image \cr
 #'   \code{results$plot6} \tab \tab \tab \tab \tab an image \cr
 #'   \code{results$plot2} \tab \tab \tab \tab \tab an image \cr
 #'   \code{results$plot3} \tab \tab \tab \tab \tab an image \cr
@@ -1520,3 +1562,4 @@ singlearm <- function(
 
     analysis$results
 }
+

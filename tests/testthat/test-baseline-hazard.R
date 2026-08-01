@@ -9,13 +9,17 @@
 # against the 0.5 threshold the module uses, told the clinician the hazard was
 # "highly variable" when by construction it was constant.
 
-.bh_ns <- NULL
-for (.p in c("ClinicoPath", "jsurvival")) {
-    if (.p %in% loadedNamespaces() || requireNamespace(.p, quietly = TRUE)) {
-        .cand <- asNamespace(.p)
-        if (exists("singlearm", envir = .cand, inherits = FALSE)) {
-            .bh_ns <- .cand
-            break
+.bh_ns <- if (exists("singlearmClass", inherits = TRUE) &&
+              exists("singlearm", inherits = TRUE))
+    environment(get("singlearm", inherits = TRUE)) else NULL
+if (is.null(.bh_ns)) {
+    for (.p in c("ClinicoPath", "jsurvival")) {
+        if (.p %in% loadedNamespaces() || requireNamespace(.p, quietly = TRUE)) {
+            .cand <- asNamespace(.p)
+            if (exists("singlearm", envir = .cand, inherits = FALSE)) {
+                .bh_ns <- .cand
+                break
+            }
         }
     }
 }
@@ -61,14 +65,14 @@ test_that("the mean baseline hazard recovers the true constant rate", {
     expect_lt(mean_hz, 0.10)
 
     # The peak must be a plausible hazard, not a one-event artefact (old: 5.26).
-    peak <- grab("Peak hazard rate")
+    peak <- grab("Highest interval rate")
     if (!is.na(peak)) {
         expect_lt(peak, 10 * lambda)
         expect_gt(peak, 0)
     }
 })
 
-test_that("constant-hazard data is not described as highly variable", {
+test_that("constant-hazard data receives no qualitative constancy verdict", {
     d <- .bh_data(0.05)
     r <- quiet(get("singlearm", envir = .bh_ns)(
         data = d, elapsedtime = "t", outcome = "ev", outcomeLevel = NULL,
@@ -79,19 +83,11 @@ test_that("constant-hazard data is not described as highly variable", {
     txt <- gsub("[[:space:]]+", " ", gsub("<[^>]*>", " ", txt))
     skip_if(!nzchar(trimws(txt)), "summary not rendered in this harness")
 
-    # The module classifies CV < 0.5 as "little variation". With a genuinely
-    # constant hazard it must not reach the "substantial variation" verdict.
-    #
-    # Asserted unconditionally on purpose. This used to read
-    #   if (grepl("highly variable|relatively constant", txt)) expect_match(...)
-    # and when the verdict wording was reworded to "little/substantial variation"
-    # the guard stopped matching, the body never ran, and testthat recorded the
-    # whole test as an empty SKIP -- a rewording silently disarmed the only check
-    # that the constant-hazard verdict is right. n = 500 at lambda = 0.05 yields
-    # 423 events / 42 candidate bins, far past the >= 3 bins the verdict needs,
-    # so this branch is always reachable and a miss is a real failure.
-    expect_match(txt, "little variation")
-    expect_false(grepl("substantial variation", txt, fixed = TRUE))
+    # A visual interval range is not a formal test of constant hazard. The
+    # module must report the range without classifying it as little/substantial.
+    expect_match(txt, "descriptive range")
+    expect_false(grepl("little variation|substantial variation|highly variable",
+                       txt))
 })
 
 test_that("the exposure-weighted rate differs from the unweighted interval mean", {
@@ -118,11 +114,35 @@ test_that("the piecewise hazard plot uses exact interval person-time", {
     d <- .bh_data(lambda = 0.08, n = 240, seed = 19)
     hz <- f(d$t, d$ev)
 
-    # Adaptive intervals form a non-overlapping partition of follow-up, so
+    # Equal-width intervals form a non-overlapping partition of follow-up, so
     # exposure and events must add back to the cohort totals exactly.
     expect_equal(sum(hz$person_time), sum(d$t), tolerance = 1e-10)
     expect_equal(sum(hz$events), sum(d$ev))
     expect_equal(sum(hz$events) / sum(hz$person_time),
                  sum(d$ev) / sum(d$t), tolerance = 1e-12)
     expect_true(all(hz$lower <= hz$rate & hz$rate <= hz$upper))
+})
+
+test_that("hazard interval boundaries are not selected from event quantiles", {
+    gen <- get("singlearmClass", envir = .bh_ns)
+    f <- gen$private_methods$.hazardIntervals
+    # Strongly cluster events near the origin. Event-quantile bins would have
+    # visibly unequal widths; fixed equal-width bins must not follow them.
+    time <- c(seq(0.1, 2, length.out = 40), seq(3, 20, length.out = 20))
+    status <- c(rep(1L, 40), rep(0L, 20))
+    hz <- f(time, status, target_events = 10L)
+
+    expect_equal(diff(hz$end), rep(diff(hz$end)[1], nrow(hz) - 1L),
+                 tolerance = 1e-12)
+    expect_equal(sum(hz$events), sum(status))
+})
+
+test_that("piecewise rates do not spread time-zero event mass over follow-up", {
+    gen <- get("singlearmClass", envir = .bh_ns)
+    f <- gen$private_methods$.hazardIntervals
+
+    # Later subjects accrue person-time, but that does not turn an event at the
+    # origin into a finite continuous-time occurrence/exposure rate.
+    hz <- f(time = c(0, 1, 2, 3), status = c(1L, 0L, 1L, 0L))
+    expect_equal(nrow(hz), 0L)
 })

@@ -6,7 +6,7 @@
 \usage{
 datetimeconverter(
   data,
-  datetime_var,
+  datetime_var = NULL,
   datetime_format = "auto",
   timezone = "system",
   preview_rows = 20,

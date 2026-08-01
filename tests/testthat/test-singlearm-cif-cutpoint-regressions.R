@@ -130,6 +130,12 @@ test_that("B2: .resolveCutpoints returns an ascending, de-duplicated vector", {
   expect_equal(s$private$.resolveCutpoints("24, 12, 24"),     c(12, 24))
 })
 
+test_that("B2: non-numeric cutpoint tokens are ignored with an explicit warning", {
+  s <- .singlearm_stub("months")
+  expect_equal(s$private$.resolveCutpoints("6, l2, 24"), c(6, 24))
+  expect_true(any(grepl('non-numeric value\\(s\\).*"l2"', s$log$msgs)))
+})
+
 test_that("B2: unsorted cutpoints used to corrupt n.event", {
   skip_if_not_installed("survival")
   set.seed(7)

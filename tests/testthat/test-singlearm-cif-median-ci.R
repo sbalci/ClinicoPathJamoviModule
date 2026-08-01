@@ -52,7 +52,7 @@ test_that("the ordinary Kaplan-Meier summary still reports its confidence interv
         timetypeoutput = "months", showSummaries = TRUE))
     txt <- as.character(r$clinicalSummary$content)
 
-    expect_true(grepl("Median survival was", txt, fixed = TRUE))
+    expect_true(grepl("Median event-free time was", txt, fixed = TRUE))
     expect_true(grepl("95% CI:", txt, fixed = TRUE))
     expect_false(grepl("NA-NA", txt, fixed = TRUE))
 })

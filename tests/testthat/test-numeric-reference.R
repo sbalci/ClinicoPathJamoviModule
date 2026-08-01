@@ -76,13 +76,30 @@ test_that("baseline hazard is an occurrence/exposure rate with a Poisson interva
     tb <- as.data.frame(r$baselineHazardTable)
     skip_if(nrow(tb) == 0, "baseline hazard table not produced")
 
-    # Every rate must be positive and bracketed by its interval, and the
+    # Every rate must be non-negative and bracketed by its interval, and the
     # interval must be multiplicative (the Poisson log form), never the old
     # fixed 50%-150% band.
-    expect_true(all(tb$hazard > 0))
+    #
+    # `>= 0`, not `> 0`: .hazardIntervals() uses EQUAL-WIDTH bins on purpose, so
+    # that the Poisson interval model is not invalidated by choosing boundaries
+    # from the observed event quantiles. A consequence is that a late bin can
+    # legitimately contain exposure but no events, giving an occurrence/exposure
+    # rate of exactly 0 with lower = 0 and a finite, informative upper limit.
+    # That is a correct estimate, not a defect. The previous implementation hid
+    # those rows behind an `inst_hazard > 0` filter, which discarded exactly the
+    # tail exposure that makes the estimate interpretable.
+    #
+    # `any(tb$hazard > 0)` is kept alongside it deliberately: relaxing to `>= 0`
+    # alone would let an all-zero hazard column -- the real breakage this test
+    # exists to catch -- pass silently.
+    expect_true(all(tb$hazard >= 0))
+    expect_true(any(tb$hazard > 0))
     expect_true(all(tb$hazard_lower <= tb$hazard))
     expect_true(all(tb$hazard_upper >= tb$hazard))
-    ratio <- tb$hazard_upper / tb$hazard
+    # Ratio is only meaningful where the rate is non-zero (0 would give Inf).
+    pos <- tb$hazard > 0
+    expect_true(any(pos))
+    ratio <- tb$hazard_upper[pos] / tb$hazard[pos]
     expect_false(isTRUE(all.equal(unique(round(ratio, 6)), 1.5)))
 })
 

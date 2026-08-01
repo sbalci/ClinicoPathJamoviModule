@@ -83,7 +83,8 @@ Time Input Type is Date/Time).}
 \item{timeDisplay}{Choose whether to align all start times to 0 or use
 absolute start times.}
 
-\item{maxMilestones}{Maximum number of milestone events to support.}
+\item{maxMilestones}{Maximum number of milestone events to support
+(milestone slots 1-5 are defined).}
 
 \item{milestone1Name}{Name for the first milestone event (e.g., Surgery,
 Treatment Start).}

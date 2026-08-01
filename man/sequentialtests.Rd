@@ -20,7 +20,7 @@ sequentialtests(
   show_explanation = FALSE,
   show_formulas = FALSE,
   show_cost_analysis = FALSE,
-  show_nomogram = FALSE
+  show_plots = FALSE
 )
 }
 \arguments{
@@ -57,7 +57,7 @@ counts. Does not affect probabilities.}
 
 \item{show_cost_analysis}{.}
 
-\item{show_nomogram}{.}
+\item{show_plots}{.}
 }
 \value{
 A results object containing:

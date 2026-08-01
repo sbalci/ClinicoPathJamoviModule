@@ -100,8 +100,8 @@ evidence strength for clinical decision-making.}
 
 \item{resultssubtitle}{.}
 
-\item{conflevel}{Confidence level for confidence intervals (between 0 and
-1).}
+\item{conflevel}{Confidence level for confidence intervals (between 0.50
+and 0.999).}
 
 \item{bfmessage}{Whether to display Bayes Factor in the subtitle when using
 Bayesian analysis.}
@@ -149,6 +149,7 @@ A results object containing:
 \code{results$todo} \tab \tab \tab \tab \tab a html \cr
 \code{results$presetInfo} \tab \tab \tab \tab \tab a html \cr
 \code{results$explanations} \tab \tab \tab \tab \tab a html \cr
+\code{results$warnings} \tab \tab \tab \tab \tab a html \cr
 \code{results$plot2} \tab \tab \tab \tab \tab an image \cr
 \code{results$plot} \tab \tab \tab \tab \tab an image \cr
 \code{results$plot3} \tab \tab \tab \tab \tab an image \cr

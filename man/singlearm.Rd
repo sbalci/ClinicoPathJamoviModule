@@ -221,15 +221,19 @@ must be greater than zero; a negative or zero value is rejected and the
 person-time analysis is not performed.}
 
 \item{baseline_hazard}{Estimate exploratory interval event rates as events
-divided by exact person-time in adaptive intervals. These are piecewise
-occurrence/exposure rates, not exact instantaneous hazards or Cox-model
-coefficients, and should not be used alone to choose treatment or
-surveillance timing.}
+divided by exact person-time in equal-width intervals. The number of
+intervals is limited according to the total event count to reduce sparsity.
+These are piecewise occurrence/exposure rates, not exact instantaneous
+hazards or Cox-model coefficients, and should not be used alone to choose
+treatment or surveillance timing. The rate output is not estimated when an
+event occurs at time zero, because such an event is a probability mass at
+the origin rather than a finite continuous hazard.}
 
 \item{hazard_smoothing}{Generate smoothed hazard rate estimates to better
 visualize patterns in event risk over time. (There is no
 proportional-hazards assumption to assess here: a single-arm analysis has
-no groups to compare.)}
+no groups to compare.) No curve is estimated with zero observed events or
+an event at time zero.}
 
 \item{showExplanations}{Display detailed explanations for each analysis
 component to help interpret the statistical methods and results.}
@@ -248,46 +252,47 @@ representativeness, or adequacy for a particular clinical decision.}
 \value{
 A results object containing:
 \tabular{llllll}{
-  \code{results$eventRecodeInfo} \tab \tab \tab \tab \tab a html \cr
-  \code{results$todo} \tab \tab \tab \tab \tab a html \cr
-  \code{results$errors} \tab \tab \tab \tab \tab a html \cr
-  \code{results$warnings} \tab \tab \tab \tab \tab a html \cr
-  \code{results$info} \tab \tab \tab \tab \tab a html \cr
-  \code{results$medianHeading} \tab \tab \tab \tab \tab a preformatted \cr
-  \code{results$medianTable} \tab \tab \tab \tab \tab a table \cr
-  \code{results$clinicalSummary} \tab \tab \tab \tab \tab a html \cr
-  \code{results$medianSummary} \tab \tab \tab \tab \tab a preformatted \cr
-  \code{results$medianHeading3} \tab \tab \tab \tab \tab a preformatted \cr
-  \code{results$medianSurvivalExplanation} \tab \tab \tab \tab \tab a html \cr
-  \code{results$survTableHeading} \tab \tab \tab \tab \tab a preformatted \cr
-  \code{results$survTable} \tab \tab \tab \tab \tab a table \cr
-  \code{results$survTableSummary} \tab \tab \tab \tab \tab a preformatted \cr
-  \code{results$survTableHeading3} \tab \tab \tab \tab \tab a preformatted \cr
-  \code{results$survivalProbabilityExplanation} \tab \tab \tab \tab \tab a html \cr
-  \code{results$personTimeHeading} \tab \tab \tab \tab \tab a preformatted \cr
-  \code{results$personTimeTable} \tab \tab \tab \tab \tab a table \cr
-  \code{results$personTimeHeading2} \tab \tab \tab \tab \tab a preformatted \cr
-  \code{results$personTimeSummary} \tab \tab \tab \tab \tab a html \cr
-  \code{results$personTimeHeading3} \tab \tab \tab \tab \tab a preformatted \cr
-  \code{results$personTimeExplanation} \tab \tab \tab \tab \tab a html \cr
-  \code{results$plot} \tab \tab \tab \tab \tab an image \cr
-  \code{results$plot6} \tab \tab \tab \tab \tab an image \cr
-  \code{results$plot2} \tab \tab \tab \tab \tab an image \cr
-  \code{results$plot3} \tab \tab \tab \tab \tab an image \cr
-  \code{results$survivalPlotsHeading3} \tab \tab \tab \tab \tab a preformatted \cr
-  \code{results$survivalPlotsExplanation} \tab \tab \tab \tab \tab a html \cr
-  \code{results$baselineHazardHeading} \tab \tab \tab \tab \tab a preformatted \cr
-  \code{results$baselineHazardTable} \tab \tab \tab \tab \tab a table \cr
-  \code{results$baselineHazardPlot} \tab \tab \tab \tab \tab an image \cr
-  \code{results$smoothedHazardPlot} \tab \tab \tab \tab \tab an image \cr
-  \code{results$baselineHazardSummary} \tab \tab \tab \tab \tab a html \cr
-  \code{results$baselineHazardHeading3} \tab \tab \tab \tab \tab a preformatted \cr
-  \code{results$baselineHazardExplanation} \tab \tab \tab \tab \tab a html \cr
-  \code{results$dataQualityHeading} \tab \tab \tab \tab \tab a preformatted \cr
-  \code{results$dataQualityTable} \tab \tab \tab \tab \tab a table \cr
-  \code{results$dataQualitySummary} \tab \tab \tab \tab \tab a html \cr
-  \code{results$calculatedtime} \tab \tab \tab \tab \tab an output \cr
-  \code{results$outcomeredefined} \tab \tab \tab \tab \tab an output \cr
+\code{results$eventRecodeInfo} \tab \tab \tab \tab \tab a html \cr
+\code{results$todo} \tab \tab \tab \tab \tab a html \cr
+\code{results$errors} \tab \tab \tab \tab \tab a html \cr
+\code{results$warnings} \tab \tab \tab \tab \tab a html \cr
+\code{results$info} \tab \tab \tab \tab \tab a html \cr
+\code{results$medianHeading} \tab \tab \tab \tab \tab a preformatted \cr
+\code{results$medianTable} \tab \tab \tab \tab \tab a table \cr
+\code{results$clinicalSummary} \tab \tab \tab \tab \tab a html \cr
+\code{results$medianSummary} \tab \tab \tab \tab \tab a preformatted \cr
+\code{results$medianHeading3} \tab \tab \tab \tab \tab a preformatted \cr
+\code{results$medianSurvivalExplanation} \tab \tab \tab \tab \tab a html \cr
+\code{results$survTableHeading} \tab \tab \tab \tab \tab a preformatted \cr
+\code{results$survTable} \tab \tab \tab \tab \tab a table \cr
+\code{results$survTableSummary} \tab \tab \tab \tab \tab a preformatted \cr
+\code{results$survTableHeading3} \tab \tab \tab \tab \tab a preformatted \cr
+\code{results$survivalProbabilityExplanation} \tab \tab \tab \tab \tab a html \cr
+\code{results$personTimeHeading} \tab \tab \tab \tab \tab a preformatted \cr
+\code{results$personTimeTable} \tab \tab \tab \tab \tab a table \cr
+\code{results$personTimeHeading2} \tab \tab \tab \tab \tab a preformatted \cr
+\code{results$personTimeSummary} \tab \tab \tab \tab \tab a html \cr
+\code{results$personTimeHeading3} \tab \tab \tab \tab \tab a preformatted \cr
+\code{results$personTimeExplanation} \tab \tab \tab \tab \tab a html \cr
+\code{results$plot} \tab \tab \tab \tab \tab an image \cr
+\code{results$plot_cif} \tab \tab \tab \tab \tab an image \cr
+\code{results$plot6} \tab \tab \tab \tab \tab an image \cr
+\code{results$plot2} \tab \tab \tab \tab \tab an image \cr
+\code{results$plot3} \tab \tab \tab \tab \tab an image \cr
+\code{results$survivalPlotsHeading3} \tab \tab \tab \tab \tab a preformatted \cr
+\code{results$survivalPlotsExplanation} \tab \tab \tab \tab \tab a html \cr
+\code{results$baselineHazardHeading} \tab \tab \tab \tab \tab a preformatted \cr
+\code{results$baselineHazardTable} \tab \tab \tab \tab \tab a table \cr
+\code{results$baselineHazardPlot} \tab \tab \tab \tab \tab an image \cr
+\code{results$smoothedHazardPlot} \tab \tab \tab \tab \tab an image \cr
+\code{results$baselineHazardSummary} \tab \tab \tab \tab \tab a html \cr
+\code{results$baselineHazardHeading3} \tab \tab \tab \tab \tab a preformatted \cr
+\code{results$baselineHazardExplanation} \tab \tab \tab \tab \tab a html \cr
+\code{results$dataQualityHeading} \tab \tab \tab \tab \tab a preformatted \cr
+\code{results$dataQualityTable} \tab \tab \tab \tab \tab a table \cr
+\code{results$dataQualitySummary} \tab \tab \tab \tab \tab a html \cr
+\code{results$calculatedtime} \tab \tab \tab \tab \tab an output \cr
+\code{results$outcomeredefined} \tab \tab \tab \tab \tab an output \cr
 }
 
 Tables can be converted to data frames with \code{asDF} or \code{\link{as.data.frame}}. For example:

@@ -360,6 +360,7 @@ reproduces the previous fixed behaviour.}
 \value{
 A results object containing:
 \tabular{llllll}{
+\code{results$eventRecodeInfo} \tab \tab \tab \tab \tab a html \cr
 \code{results$subtitle} \tab \tab \tab \tab \tab a preformatted \cr
 \code{results$todo} \tab \tab \tab \tab \tab a html \cr
 \code{results$errors} \tab \tab \tab \tab \tab a html \cr

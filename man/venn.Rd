@@ -109,9 +109,13 @@ condition.}
 
 \item{show_ggVennDiagram}{.}
 
-\item{sortBy}{How to sort the intersections in the UpSet plot.}
+\item{sortBy}{How to sort the intersections in the UpSet plot. 'None'
+(unsorted) applies to the ComplexUpset engine only; the UpSetR engine
+always orders intersections by frequency.}
 
-\item{minSize}{Minimum size of intersections to display.}
+\item{minSize}{Minimum size of intersections to display. Applies to the
+ComplexUpset engine only; UpSetR does not filter intersections by minimum
+size.}
 
 \item{showAnnotations}{Add percentage labels to intersection sizes in
 ComplexUpset plots or enhanced text scaling in UpSetR plots.}

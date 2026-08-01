@@ -54,7 +54,8 @@ transparent, 1 = opaque.}
 
 \item{show_labels}{If TRUE, displays group labels inside hull regions.}
 
-\item{point_size}{Size of scatter plot points.}
+\item{point_size}{Size of scatter plot points. Ignored when a Size Variable
+is selected, because point size is then mapped to that variable's values.}
 
 \item{point_alpha}{Transparency level for scatter plot points.}
 

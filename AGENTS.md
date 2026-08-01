@@ -1,5 +1,31 @@
 # Repository Guidelines
 
+## Jamovi development playbooks — read these first
+
+Task-specific procedures for this module (create, review, fix, document, translate, or
+release-check a single jamovi analysis) live in [`.claude/commands/`](.claude/commands/) as plain
+markdown with YAML frontmatter. Nothing in them needs a Claude-specific runtime — any agent can
+read and follow one. `ls .claude/commands/` is the list; each file's frontmatter `description`
+says when it applies.
+
+**Before starting jamovi work, open the playbook matching the task and read the whole file.**
+The frontmatter is only a routing hint; the body is the procedure. Translate Claude-Code
+vocabulary as you go: `$ARGUMENTS` means the target the user named (usually one analysis, e.g.
+`singlearm`); "the Skill tool", "invoke the skill", and `/some-command` all just mean *read the
+corresponding file and follow it*.
+
+Also read [`CLAUDE.md`](CLAUDE.md). Despite the name it is repository-wide guidance —
+architecture, the generated-file policy, and a long list of hard-won pitfalls — and it applies
+regardless of which agent you are.
+
+Some machines carry extra local-only playbooks under `.claude/skills/`, deliberately not
+committed. If `.claude/PLAYBOOKS.md` is present it indexes everything available on this machine;
+regenerate it with `python3 .claude/scripts/build_playbook_index.py`. Its absence is normal — the
+commands above are the committed baseline.
+
+The rules below are the short version; the playbooks are the detailed version. Where they
+disagree, the playbooks win.
+
 ## Project Structure & Module Organization
 
 - `R/` holds hand-written analyses (`*.b.R`) and generated bases (`*.h.R`); helper utilities live alongside.

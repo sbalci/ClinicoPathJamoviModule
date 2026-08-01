@@ -216,6 +216,8 @@
 ^\.\.Rcheck/00check\.log$
 ^tests/testthat/_snaps/.*$
 ^\.claude/.*$
+^\.agents$
+^\.agents/.*$
 ^\.venv/.*$
 ^_updateModules_config\.yaml$
 ^\.tmp/.*$

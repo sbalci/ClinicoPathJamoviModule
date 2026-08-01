@@ -46,8 +46,8 @@ the values used for the Alluvial Diagram.}
 \item{fill}{A list for the argument fill for selecting the variable to be
 represented by color. Default is 'first_variable'.}
 
-\item{fillGgalluvial}{A string naming the variable from \code{data} that
-will be used to color the flows in the ggalluvial plot.}
+\item{fillGgalluvial}{A string naming the categorical variable from
+\code{data} that will be used to color the flows in the ggalluvial plot.}
 
 \item{bin}{Display labels for bin categories. Note: This controls label
 text only, not the binning method. easyalluvial uses its own internal
@@ -63,7 +63,8 @@ analysis.}
 \item{maxvars}{Maximum number of variables to include in the alluvial plot.}
 
 \item{custombinlabels}{Custom labels for bins, separated by commas (e.g.,
-"Low,Medium,High"). Leave empty to use bin option defaults.}
+"Low,Medium,High"). The number of labels determines the number of bins.
+Leave empty to use the selected bin-label method.}
 
 \item{colorPalette}{Color palette for the diagram flows.}
 

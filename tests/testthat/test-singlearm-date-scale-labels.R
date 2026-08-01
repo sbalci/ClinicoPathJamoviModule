@@ -1,7 +1,7 @@
 # Regression tests for R/singlearm.b.R:
 #
 #   1. .definemytime()            - numeric-date epoch scale (days vs seconds)
-#   2. .baselineHazardAnalysis()  - hazard "constant" verdict below 20 events
+#   2. .baselineHazardAnalysis()  - avoid an arbitrary minimum-event verdict
 #   3. .competingRiskPlotRefusal()- advice must match why competing risks are on
 #   4. .survTable()               - competing-risk titles and explanation panel
 #
@@ -53,6 +53,11 @@ bind_method <- function(name, options, private_extra = list(), results = NULL) {
         .checkpoint  = function(...) invisible(NULL),
         .displayMessages = function() invisible(NULL),
         .isCompetingRisk = function(...) FALSE,
+        .estimandMeta = function(...) list(
+            probability = "Kaplan-Meier event-free probability",
+            median = "Median event-free time",
+            median_lower = "median event-free time",
+            curve = "Event-Free Probability for the Selected Event"),
         .safeExecute = function(expr, context = NULL) expr,
         .yearInUnits = function() switch(options$timetypeoutput,
             days = 365.25, weeks = 52.18, months = 12, years = 1, 12)
@@ -63,7 +68,7 @@ bind_method <- function(name, options, private_extra = list(), results = NULL) {
 
 
 # ---------------------------------------------------------------------------
-# 1. Numeric date columns: ONE scale for BOTH columns, chosen on the median
+# 1. Numeric date columns: classify each column and reject ambiguity
 # ---------------------------------------------------------------------------
 # The per-column all(x < 1e5) heuristic let a single sentinel or typo flip one
 # column to Unix seconds while the other stayed on days-since-epoch: diagnosis
@@ -94,26 +99,33 @@ test_that("a single out-of-range value does not flip the epoch scale", {
     dx[3] <- 999999                                      # sentinel / typo
 
     out <- run_definemytime(dx, fu)
-    msgs <- c(out$log$errors, out$log$warnings, out$log$infos)
-
-    # Whatever the resolution, it must not be a silent ~48-year cohort.
-    expect_true(is.null(out$df) || max(out$df$mytime, na.rm = TRUE) < 20)
-    expect_true(length(c(out$log$errors, out$log$warnings)) > 0)
-    expect_true(any(grepl("DAYS", msgs)))
+    expect_null(out$df)
+    expect_true(any(grepl("both sides of the date-encoding boundary",
+                          out$log$errors, fixed = TRUE)))
 })
 
 test_that("an implausible individual follow-up is flagged, not printed", {
     skip_if_not_installed("lubridate")
 
-    dx <- c(17000, 17010, 17020, 17030, 17040, 17050)
-    fu <- dx + 365
-    fu[3] <- 999999                # sentinel in the follow-up column instead
+    dx <- seq(1.5e9, 1.5e9 + 5e6, length.out = 6)
+    fu <- dx + 365 * 86400
+    fu[3] <- dx[3] + 200 * 365.25 * 86400
 
     out <- run_definemytime(dx, fu)
-    expect_false(is.null(out$df))
-    expect_true(any(grepl("longer than 150 years", out$log$warnings, fixed = TRUE)))
-    # The five good rows are still one year apart.
-    expect_equal(stats::median(out$df$mytime[-3]), 1, tolerance = 0.01)
+    expect_null(out$df)
+    expect_true(any(grepl("exceed 150 years", out$log$errors, fixed = TRUE)))
+})
+
+test_that("different numeric encodings across date columns are rejected", {
+    skip_if_not_installed("lubridate")
+
+    dx <- seq(17000, 17050, by = 10)
+    fu <- seq(1.5e9, 1.5e9 + 5e6, length.out = 6)
+    out <- run_definemytime(dx, fu)
+
+    expect_null(out$df)
+    expect_true(any(grepl("different numeric encodings",
+                          out$log$errors, fixed = TRUE)))
 })
 
 test_that("ordinary numeric-day dates are unchanged (no new false alarm)", {
@@ -213,19 +225,21 @@ test_that("no constant-hazard verdict when there are too few events", {
     out <- run_hazard_summary(n = 18)
     expect_lt(out$n_events, 30)
     expect_false(grepl("relatively constant", out$html, fixed = TRUE))
-    expect_true(grepl("not assessable", out$html, fixed = TRUE))
+    expect_true(grepl("not summarized", out$html, fixed = TRUE))
     # A "peak" read off a single bin is just the pooled mean.
     expect_true(grepl("not separable from the pooled rate", out$html, fixed = TRUE))
 })
 
-test_that("with enough events the verdict is reported as exploratory scatter", {
+test_that("with enough events the interval range remains descriptive", {
     skip_if_not_installed("survival")
 
     out <- run_hazard_summary(n = 200)
     expect_gte(out$n_events, 30)
-    expect_false(grepl("not assessable", out$html, fixed = TRUE))
-    expect_true(grepl("CV = ", out$html, fixed = TRUE))
+    expect_false(grepl("not summarized", out$html, fixed = TRUE))
+    expect_true(grepl("equal-width intervals", out$html, fixed = TRUE))
+    expect_true(grepl("descriptive range", out$html, fixed = TRUE))
     expect_true(grepl("not a test of a constant-hazard", out$html, fixed = TRUE))
+    expect_false(grepl("little variation|substantial variation", out$html))
 })
 
 
@@ -333,13 +347,16 @@ test_that("competing-risk table is titled cumulative incidence and explained", {
     expect_true(grepl("Cumulative Incidence", rec$titles$explanationHeading, fixed = TRUE))
 })
 
-test_that("the ordinary Kaplan-Meier table keeps survival wording", {
+test_that("the ordinary Kaplan-Meier table uses endpoint-neutral wording", {
     skip_if_not_installed("survival")
     rec <- run_survtable(competing = FALSE)
 
     expect_false(grepl("Cumulative Incidence", rec$titles$table, fixed = TRUE))
-    expect_true(grepl("Survival at Selected Time Points", rec$titles$table, fixed = TRUE))
-    expect_equal(rec$titles[["col.surv"]], "Survival")
+    expect_true(grepl("Kaplan-Meier event-free probability at Selected Time Points",
+                      rec$titles$table, fixed = TRUE))
+    expect_equal(rec$titles[["col.surv"]],
+                 "Kaplan-Meier event-free probability")
     expect_true(nzchar(rec$content$explanation))
-    expect_equal(rec$titles$explanationTitle, "Understanding Survival Probabilities")
+    expect_equal(rec$titles$explanationTitle,
+                 "Understanding Kaplan-Meier event-free probability")
 })

@@ -108,6 +108,7 @@ visualizations}
 A results object containing:
 \tabular{llllll}{
 \code{results$instructions} \tab \tab \tab \tab \tab a html \cr
+\code{results$notices} \tab \tab \tab \tab \tab a html \cr
 \code{results$dataInfo} \tab \tab \tab \tab \tab a table \cr
 \code{results$priorSpecification} \tab \tab \tab \tab \tab a table \cr
 \code{results$posteriorSummary} \tab \tab \tab \tab \tab a table \cr

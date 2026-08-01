@@ -2,6 +2,7 @@
 # and for the outcomeorganizer hand-off.
 
 get_util <- function(nm) {
+    if (exists(nm, inherits = TRUE)) return(get(nm, inherits = TRUE))
     pkg <- intersect(c("ClinicoPath", "jsurvival"), loadedNamespaces())[1]
     if (is.na(pkg)) return(NULL)
     tryCatch(get(nm, envir = asNamespace(pkg)), error = function(e) NULL)
@@ -24,7 +25,7 @@ test_that("cause-specific censoring is disclosed even with only two observed lev
     expect_null(res$error)
     expect_equal(res$estimand, "cause-specific survival")
     expect_equal(res$n_levels, 2L)
-    expect_true(grepl("biased upward", describe(res, "outcome"), fixed = TRUE))
+    expect_true(grepl("overstates", describe(res, "outcome"), fixed = TRUE))
     expect_true(grepl("DOOC", describe(res, "outcome"), fixed = TRUE))
 })
 
@@ -35,19 +36,55 @@ test_that("three-level cause-specific censoring is still disclosed", {
 
     oc <- factor(rep(c("Dead", "Alive", "Lost"), each = 20))
     res <- define(outcome = oc, outcomeLevel = "Dead", outcome_name = "outcome")
-    expect_equal(res$estimand, "cause-specific survival")
-    expect_true(grepl("biased upward", describe(res, "outcome"), fixed = TRUE))
+    expect_equal(res$estimand, "Kaplan-Meier survival for the selected event")
+    expect_true(grepl("overstates", describe(res, "outcome"), fixed = TRUE))
 })
 
-test_that("an ordinary two-level outcome gets no censoring warning", {
+test_that("an ordinary two-level outcome is not mislabeled as overall survival", {
     define   <- get_util(".defineEventIndicator")
     describe <- get_util(".describeEventIndicator")
     skip_if(is.null(define) || is.null(describe), "survival_utils not available")
 
     oc <- factor(rep(c("Dead", "Alive"), each = 20))
     res <- define(outcome = oc, outcomeLevel = "Dead", outcome_name = "outcome")
-    expect_equal(res$estimand, "overall survival")
-    expect_false(grepl("biased upward", describe(res, "outcome"), fixed = TRUE))
+    expect_equal(res$estimand, "Kaplan-Meier survival for the selected event")
+    expect_true(grepl("right-censored", describe(res, "outcome"), fixed = TRUE))
+    expect_true(grepl("If a collapsed level is a competing terminal event",
+                      describe(res, "outcome"), fixed = TRUE))
+})
+
+test_that("the censoring assumption is disclosed for explicit overall survival", {
+    define   <- get_util(".defineEventIndicator")
+    describe <- get_util(".describeEventIndicator")
+    skip_if(is.null(define) || is.null(describe), "survival_utils not available")
+
+    oc <- factor(c("DOD", "DOOC", "AWD", "AWOD"))
+    res <- define(outcome = oc, multievent = TRUE, analysistype = "overall",
+                  dod = "DOD", dooc = "DOOC", awd = "AWD", awod = "AWOD")
+    expect_null(res$error)
+    expect_match(describe(res), "Censoring assumption")
+    expect_match(describe(res), "independent/non-informative")
+})
+
+test_that("an invalid logical event level is rejected", {
+    define <- get_util(".defineEventIndicator")
+    skip_if(is.null(define), "survival_utils not available")
+
+    res <- define(c(TRUE, FALSE, TRUE), outcomeLevel = "Dead",
+                  outcome_name = "logical_status")
+    expect_match(res$error, "Select TRUE or FALSE")
+})
+
+test_that("a factor with extra declared levels is not hijacked as a hand-off", {
+    define <- get_util(".defineEventIndicator")
+    skip_if(is.null(define), "survival_utils not available")
+
+    oc <- factor(c("Censored", "Event", "Competing"),
+                 levels = c("Censored", "Event", "Competing", "Unknown"))
+    res <- define(oc, outcomeLevel = "Event", outcome_name = "status")
+    expect_null(res$error)
+    expect_false(res$has_competing)
+    expect_equal(res$estimand, "Kaplan-Meier survival for the selected event")
 })
 
 test_that("the outcomeorganizer hand-off keeps its competing-risk labels", {

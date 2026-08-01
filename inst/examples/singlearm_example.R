@@ -34,6 +34,7 @@ singlearm(
   data = singlearm_compete,
   elapsedtime = "time_months",
   outcome = "outcome",
+  multievent = TRUE,
   analysistype = "compete",
   dod = "Dead_Disease",
   dooc = "Dead_Other",
@@ -49,8 +50,8 @@ singlearm(
   data = singlearm_causespecific,
   elapsedtime = "time_months",
   outcome = "outcome",
+  outcomeLevel = "Dead_Cancer",
   analysistype = "cause",
-  dod = "Dead_Cancer",
   sc = TRUE,
   risktable = TRUE
 )

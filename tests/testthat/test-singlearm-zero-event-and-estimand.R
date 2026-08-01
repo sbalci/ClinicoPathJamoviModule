@@ -148,8 +148,7 @@ test_that("L4: event / competing / censored counts sum to the analysed total", {
               awd = "AWD", awod = "AWOD", outcome_name = "Status")
   expect_equal(r$n_event + r$n_competing + r$n_censored + r$n_missing, 5)
   expect_equal(r$n_competing, 1)
-  # The notice prints n_total - n_events - n_censored as the competing count;
-  # that identity is what makes the three numbers add up.
+  # The three states reconcile to the analysed total.
   n_total <- r$n_event + r$n_competing + r$n_censored
   expect_equal(n_total - r$n_event - r$n_censored, r$n_competing)
 })
@@ -159,5 +158,5 @@ test_that("L4: the completion notice reports competing events", {
   expect_false(is.null(src))
   code <- paste(readLines(src, warn = FALSE), collapse = "\n")
   expect_match(code, "competing event\\(s\\), %d censored")
-  expect_match(code, "n_competing_total <- data_quality\\$n_total")
+  expect_match(code, "n_competing_total <- data_quality\\$n_competing")
 })

@@ -118,11 +118,6 @@ A results object containing:
 \code{results$notices} \tab \tab \tab \tab \tab a html \cr
 \code{results$plot2} \tab \tab \tab \tab \tab an image \cr
 \code{results$plot} \tab \tab \tab \tab \tab an image \cr
-\code{results$interpretation} \tab \tab \tab \tab \tab a html \cr
-\code{results$assumptions} \tab \tab \tab \tab \tab a html \cr
-\code{results$reportSentence} \tab \tab \tab \tab \tab a html \cr
-\code{results$guidedSteps} \tab \tab \tab \tab \tab a html \cr
-\code{results$recommendations} \tab \tab \tab \tab \tab a html \cr
 }
 }
 \description{

@@ -50,6 +50,20 @@ test_that("events at time zero are retained instead of rejecting the analysis", 
     expect_match(strip_html(res$warnings$content), "follow-up time zero")
 })
 
+test_that("Kaplan-Meier boundary intervals are not displayed as exact certainty", {
+    d <- data.frame(
+        time = 1:6,
+        status = factor(rep("Alive", 6), levels = c("Alive", "Dead")))
+    res <- run_singlearm(data = d, elapsedtime = "time", outcome = "status",
+                         outcomeLevel = "Dead", cutp = "1, 3, 6")
+
+    for (i in seq_len(res$survTable$rowCount)) {
+        expect_equal(res$survTable$getCell(rowNo = i, "surv")$value, 1)
+        expect_true(is.na(res$survTable$getCell(rowNo = i, "lower")$value))
+        expect_true(is.na(res$survTable$getCell(rowNo = i, "upper")$value))
+    }
+})
+
 test_that("inactive retained date selections do not invalidate elapsed-time analysis", {
     d <- simple_data(1:6, c(TRUE, FALSE, TRUE, FALSE, TRUE, FALSE))
     d$dx <- 1:6
@@ -314,7 +328,7 @@ test_that("the copy-ready clinical summary makes no prognosis claim", {
     summary_text <- strip_html(res$clinicalSummary$content)
     expect_false(grepl("favorable|concerning|moderate prognosis", summary_text))
     expect_false(grepl("prognosis for this patient population", summary_text))
-    expect_match(summary_text, "Median survival was not reached")
+    expect_match(summary_text, "Median event-free time was not reached")
     expect_match(summary_text, "do not establish prognosis")
 })
 

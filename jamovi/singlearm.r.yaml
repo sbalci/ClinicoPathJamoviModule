@@ -31,6 +31,11 @@ items:
           - dxdate
           - tint
           - multievent
+          - analysistype
+          - dod
+          - dooc
+          - awd
+          - awod
 
     - name:  errors
       title: Errors
@@ -45,6 +50,22 @@ items:
           - tint
           - multievent
           - analysistype
+          - dod
+          - dooc
+          - awd
+          - awod
+          - uselandmark
+          - landmark
+          - timetypedata
+          - timetypeoutput
+          - cutp
+          - person_time
+          - time_intervals
+          - rate_multiplier
+          - endplot
+          - byplot
+          - ybegin_plot
+          - yend_plot
 
     - name:  warnings
       title: Warnings
@@ -59,6 +80,20 @@ items:
           - tint
           - multievent
           - analysistype
+          - dod
+          - dooc
+          - awd
+          - awod
+          - uselandmark
+          - landmark
+          - timetypedata
+          - timetypeoutput
+          - cutp
+          - person_time
+          - time_intervals
+          - rate_multiplier
+          - baseline_hazard
+          - hazard_smoothing
 
     - name:  info
       title: Information
@@ -73,26 +108,50 @@ items:
           - tint
           - multievent
           - analysistype
+          - dod
+          - dooc
+          - awd
+          - awod
+          - uselandmark
+          - landmark
+          - timetypedata
+          - timetypeoutput
+          - cutp
+          - person_time
+          - time_intervals
+          - baseline_hazard
+          - hazard_smoothing
+          - sc
+          - kmunicate
+          - risktable
+          - censored
+          - medianline
 
 
     # Median section. Under competing risks the number in this table is a
     # QUANTILE OF THE CUMULATIVE INCIDENCE FUNCTION, not median survival, and it
     # deliberately carries no confidence interval. The titles below are the
-    # Kaplan-Meier defaults; .medianSurv() overrides every one of them (heading,
+    # Neutral defaults; .medianSurv() overrides every one of them (heading,
     # table, median column, summary, explanation heading and explanation) on
     # each run, in BOTH branches, so a title can neither claim the wrong
     # estimand nor carry over from a previous mode. Do not "fix" these titles
     # here - fix them in .medianSurv().
     - name:  medianHeading
-      title: Median Survival Analysis
+      title: Median Time-to-Event Analysis
       type:  Preformatted
 
 
 
     - name:  medianTable
-      title: Median Survival Table
+      title: Median Time-to-Event Table
       type:  Table
       rows: 0
+      refs:
+          - KaplanMeier1958
+          - BrookmeyerCrowley1982
+          - RoystonParmar2013
+          - AalenJohansen1978
+          - AustinLeeFine2016
       columns:
         - name: records
           title: "Records"
@@ -101,7 +160,7 @@ items:
           title: "Events"
           type: integer
         - name: rmean
-          title: "Restricted Mean Survival Time"
+          title: "Restricted Mean Event-Free Time"
           type: number
         - name: se_rmean
           title: "SE of Restricted Mean"
@@ -138,7 +197,7 @@ items:
 
 
     - name:  clinicalSummary
-      title: 'Clinical Summary (Copy-Ready for Reports)'
+      title: 'Descriptive Cohort Summary (Copy-Ready)'
       type:  Html
       visible: (showSummaries)
       clearWith:
@@ -150,12 +209,18 @@ items:
           - tint
           - multievent
           - analysistype
+          - dod
+          - dooc
+          - awd
+          - awod
           - uselandmark
           - landmark
           - timetypeoutput
+          - timetypedata
+          - showSummaries
 
     - name:  medianSummary
-      title: Median Survival Analysis Natural Language Summary
+      title: Median Time-to-Event Natural Language Summary
       type:  Preformatted
       visible: (showSummaries)
       clearWith:
@@ -166,17 +231,26 @@ items:
           - dxdate
           - tint
           - multievent
-          - showExplanations
+          - analysistype
+          - dod
+          - dooc
+          - awd
+          - awod
+          - uselandmark
+          - landmark
+          - timetypeoutput
+          - timetypedata
+          - showSummaries
 
 
     - name:  medianHeading3
-      title: Median Survival Analysis Explanations
+      title: Median Time-to-Event Explanations
       type:  Preformatted
       visible: (showExplanations)
 
 
     - name: medianSurvivalExplanation
-      title: 'Understanding Median Survival Analysis'
+      title: 'Understanding the Kaplan-Meier Median'
       type: Html
       visible: (showExplanations)
       clearWith:
@@ -187,6 +261,15 @@ items:
           - dxdate
           - tint
           - multievent
+          - analysistype
+          - dod
+          - dooc
+          - awd
+          - awod
+          - uselandmark
+          - landmark
+          - timetypeoutput
+          - timetypedata
           - showExplanations
 
 
@@ -198,15 +281,19 @@ items:
     # not survival. .medianSurv() and .survTable() set the precise titles at
     # run time with setTitle().
     - name:  survTableHeading
-      title: 'Survival at Selected Time Points'
+      title: 'Time-Specific Probability Estimates'
       type:  Preformatted
 
 
 
     - name:  survTable
-      title: 'Survival at Selected Time Points'
+      title: 'Time-Specific Probability Estimates'
       type:  Table
       rows: 0
+      refs:
+          - KaplanMeier1958
+          - AalenJohansen1978
+          - AustinLeeFine2016
       columns:
         - name: 'time'
           title: "time"
@@ -216,10 +303,10 @@ items:
           title: "Number at Risk"
           type: integer
         - name: n.event
-          title: "Number of Events"
+          title: "Events Since Prior Row"
           type: integer
         - name: surv
-          title: "Survival"
+          title: "Probability Estimate"
           type: number
           format: pc
         - name: lower
@@ -249,7 +336,6 @@ items:
           - landmark
           - timetypeoutput
           - timetypedata
-          - showExplanations
           - cutp
 
 
@@ -266,12 +352,17 @@ items:
           - dxdate
           - tint
           - multievent
-          - showExplanations
           - analysistype
+          - dod
+          - dooc
+          - awd
+          - awod
           - uselandmark
           - landmark
           - timetypeoutput
+          - timetypedata
           - cutp
+          - showSummaries
 
 
     - name:  survTableHeading3
@@ -291,6 +382,16 @@ items:
           - dxdate
           - tint
           - multievent
+          - analysistype
+          - dod
+          - dooc
+          - awd
+          - awod
+          - uselandmark
+          - landmark
+          - timetypeoutput
+          - timetypedata
+          - cutp
           - showExplanations
 
 
@@ -306,6 +407,8 @@ items:
       type: Table
       visible: (person_time)
       rows: 0
+      refs:
+          - Garwood1936
       columns:
         - name: interval
           title: "Time Interval"
@@ -318,7 +421,7 @@ items:
           type: number
           format: zto
         - name: rate
-          title: "Incidence Rate"
+          title: "Crude Event Rate"
           type: number
           format: zto
         - name: rate_ci_lower
@@ -351,7 +454,6 @@ items:
         - landmark
         - timetypeoutput
         - timetypedata
-        - showExplanations
 
 
     - name:  personTimeHeading2
@@ -364,6 +466,8 @@ items:
       title: 'Person-Time Summary'
       type: Html
       visible: (person_time && showSummaries)
+      refs:
+          - SchemperSmith1996
       clearWith:
         - outcome
         - outcomeLevel
@@ -371,12 +475,20 @@ items:
         - rate_multiplier
         - time_intervals
         - person_time
-        - outcome
-        - outcomeLevel
         - fudate
         - dxdate
         - tint
         - multievent
+        - analysistype
+        - dod
+        - dooc
+        - awd
+        - awod
+        - uselandmark
+        - landmark
+        - timetypeoutput
+        - timetypedata
+        - showSummaries
 
     - name:  personTimeHeading3
       title: Person-Time Analysis Explanations
@@ -394,6 +506,19 @@ items:
         - outcome
         - outcomeLevel
         - elapsedtime
+        - fudate
+        - dxdate
+        - tint
+        - multievent
+        - analysistype
+        - dod
+        - dooc
+        - awd
+        - awod
+        - uselandmark
+        - landmark
+        - timetypeoutput
+        - timetypedata
         - showExplanations
 
 
@@ -404,7 +529,57 @@ items:
       width:  600
       height: 450
       renderFun: .plot
-      visible: (sc)
+      refs:
+          - KaplanMeier1958
+      # Kaplan-Meier only. Under competing risks plot_cif below takes over, so
+      # the heading never contradicts what is drawn. .run() re-asserts both
+      # visibilities from the recode, which also catches a 0/1/2 outcome
+      # arriving with multievent = FALSE (outcomeorganizer hand-off).
+      visible: (sc && (!multievent || analysistype:overall || analysistype:cause || analysistype:dfs))
+      requiresData: true
+      clearWith:
+          - sc
+          - endplot
+          - byplot
+          - ybegin_plot
+          - yend_plot
+          - ci95
+          - risktable
+          - censored
+          - outcome
+          - outcomeLevel
+          - elapsedtime
+          - fudate
+          - dxdate
+          - tint
+          - multievent
+          - analysistype
+          - dod
+          - dooc
+          - awd
+          - awod
+          - uselandmark
+          - landmark
+          - timetypeoutput
+          - timetypedata
+          - medianline
+
+
+    # Competing-risks counterpart of `plot`. Same option set, same state; only
+    # one of the two is ever visible. NOTE: a visible: expression must start
+    # with "(" followed by a letter -- jmvcore's Options$eval() routes on
+    # ^\([\$A-Za-z].*\)$ and a leading "!" silently falls through, leaving the
+    # item permanently visible.
+    - name: plot_cif
+      title: 'Cumulative Incidence Function'
+      type: Image
+      width:  600
+      height: 450
+      renderFun: .plotCIF
+      refs:
+          - AalenJohansen1978
+          - AustinLeeFine2016
+      visible: (sc && multievent && analysistype:compete)
       requiresData: true
       clearWith:
           - sc
@@ -446,6 +621,8 @@ items:
           - kmunicate
           - endplot
           - byplot
+          - ci95
+          - risktable
           - outcome
           - outcomeLevel
           - elapsedtime
@@ -463,6 +640,7 @@ items:
           - timetypeoutput
           - timetypedata
       refs:
+          - KaplanMeier1958
           - KMunicate
           - KMunicate2
 
@@ -473,6 +651,8 @@ items:
       width:  600
       height: 450
       renderFun: .plot2
+      refs:
+          - KaplanMeier1958
       visible: (ce)
       requiresData: true
       clearWith:
@@ -500,6 +680,7 @@ items:
           - landmark
           - timetypeoutput
           - timetypedata
+          - medianline
 
 
 
@@ -509,6 +690,8 @@ items:
       width:  600
       height: 450
       renderFun: .plot3
+      refs:
+          - KaplanMeier1958
       visible: (ch)
       requiresData: true
       clearWith:
@@ -534,11 +717,12 @@ items:
           - landmark
           - timetypeoutput
           - timetypedata
+          - medianline
 
 
 
     - name:  survivalPlotsHeading3
-      title: Survival Plots Explanations
+      title: Plots Explanations
       type:  Preformatted
       visible: ((sc || ce || ch || kmunicate) && showExplanations)
 
@@ -554,6 +738,21 @@ items:
           - kmunicate
           - outcome
           - outcomeLevel
+          - elapsedtime
+          - fudate
+          - dxdate
+          - tint
+          - multievent
+          - analysistype
+          - dod
+          - dooc
+          - awd
+          - awod
+          - uselandmark
+          - landmark
+          - timetypeoutput
+          - timetypedata
+          - showExplanations
 
 
 
@@ -568,6 +767,8 @@ items:
       type: Table
       visible: (baseline_hazard)
       rows: 0
+      refs:
+          - Garwood1936
       columns:
         - name: time
           title: "Time"
@@ -639,6 +840,8 @@ items:
       width:  600
       height: 450
       renderFun: .smoothedHazardPlot
+      refs:
+          - Cleveland1979
       visible: (hazard_smoothing)
       requiresData: true
       clearWith:
@@ -672,6 +875,15 @@ items:
         - dxdate
         - tint
         - multievent
+        - analysistype
+        - dod
+        - dooc
+        - awd
+        - awod
+        - uselandmark
+        - landmark
+        - timetypeoutput
+        - timetypedata
         - baseline_hazard
         - showSummaries
 
@@ -686,20 +898,38 @@ items:
       visible: (baseline_hazard && showExplanations)
       clearWith:
         - baseline_hazard
+        - outcome
+        - outcomeLevel
+        - elapsedtime
+        - fudate
+        - dxdate
+        - tint
+        - multievent
+        - analysistype
+        - dod
+        - dooc
+        - awd
+        - awod
+        - uselandmark
+        - landmark
+        - timetypeoutput
+        - timetypedata
         - showExplanations
 
 
     # Advanced Diagnostics Outputs
     - name:  dataQualityHeading
-      title: Data Quality Assessment
+      title: Descriptive Data Diagnostics
       type:  Preformatted
       visible: (advancedDiagnostics)
 
     - name: dataQualityTable
-      title: 'Data Quality Metrics'
+      title: 'Descriptive Data Metrics'
       type: Table
       visible: (advancedDiagnostics)
       rows: 0
+      refs:
+          - SchemperSmith1996
       columns:
         - name: metric
           title: "Metric"
@@ -719,12 +949,18 @@ items:
         - dxdate
         - tint
         - multievent
+        - analysistype
+        - dod
+        - dooc
+        - awd
+        - awod
         - uselandmark
         - landmark
         - timetypeoutput
+        - timetypedata
 
     - name: dataQualitySummary
-      title: 'Data Quality Assessment Summary'
+      title: 'Descriptive Data Diagnostics Summary'
       type: Html
       visible: (advancedDiagnostics && showSummaries)
       clearWith:
@@ -736,9 +972,15 @@ items:
         - dxdate
         - tint
         - multievent
+        - analysistype
+        - dod
+        - dooc
+        - awd
+        - awod
         - uselandmark
         - landmark
         - timetypeoutput
+        - timetypedata
         - showSummaries
 
 
@@ -771,10 +1013,13 @@ items:
           - awod
 
 refs:
+    - ClinicoPathJamoviModule
     - finalfit
     - survival
     - survminer
-    - ClinicoPathJamoviModule
+    - cmprsk
+    - KMunicate
+    - Dafni2011
     - survivaltutorial
     - survivalrwnahhas
 

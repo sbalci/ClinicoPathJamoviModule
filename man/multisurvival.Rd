@@ -27,7 +27,7 @@ multisurvival(
   multievent = FALSE,
   hr = FALSE,
   sty = "t1",
-  ph_cox = TRUE,
+  ph_cox = FALSE,
   km = FALSE,
   endplot = 60,
   byplot = 12,
@@ -45,17 +45,17 @@ multisurvival(
   ac = FALSE,
   adjexplanatory = NULL,
   ac_method = "average",
+  ac_summary = FALSE,
   showNomogram = FALSE,
+  compare_models = FALSE,
   use_stratify = FALSE,
   stratvar = NULL,
   person_time = FALSE,
   time_intervals = "12, 36, 60",
   rate_multiplier = 100,
-  use_tree = FALSE,
-  min_node = 20,
-  complexity = 0.01,
-  max_depth = 5,
-  show_terminal_nodes = FALSE,
+  show_survmetrics = FALSE,
+  survmetrics_timepoints = "12, 24, 36, 60",
+  survmetrics_show_plots = FALSE,
   showExplanations = FALSE,
   showSummaries = TRUE
 )
@@ -199,9 +199,24 @@ take longer to compute.}
 
 \item{adjexplanatory}{.}
 
-\item{ac_method}{Method for computing adjusted survival curves}
+\item{ac_method}{Estimand for the adjusted survival curves. "Standardised
+over cohort" sets every observed patient to each level in turn and averages
+the model-predicted curves (g-computation), so the curves differ only by
+the adjustment variable. "At reference covariate profile" predicts a single
+curve per level at the mean/mode of the other covariates. "Whole-cohort
+expected survival" returns one curve for the cohort at its observed
+covariates and does not contrast the levels at all.}
+
+\item{ac_summary}{Display numeric adjusted-survival outputs (survival at
+the cutpoint timepoints with 95\\% CI, adjusted median survival, and the
+adjusted Cox hazard-ratio table) in addition to the adjusted-survival
+curve.}
 
 \item{showNomogram}{.}
+
+\item{compare_models}{If true, reports a likelihood-ratio test and AIC for
+dropping each covariate from the full model (base R drop1). Shows which
+covariates significantly improve model fit.}
 
 \item{use_stratify}{If true, uses stratification to handle variables that
 violate the proportional hazards assumption. Stratification creates
@@ -223,23 +238,18 @@ For example,  "12, 36, 60" will create intervals 0-12, 12-36, 36-60, and
 \item{rate_multiplier}{Specify the multiplier for incidence rates (e.g.,
 100 for rates per 100 person-years, 1000 for rates per 1000 person-years).}
 
-\item{use_tree}{If true, fits a survival decision tree to identify
-subgroups with different survival outcomes. Decision trees provide an
-intuitive alternative to Cox regression for identifying risk factors.}
+\item{show_survmetrics}{Report model performance metrics for the Cox model:
+Harrell's concordance (C-index), inverse-probability-of-censoring-weighted
+(IPCW) Brier score and time-dependent AUC at the chosen timepoints, and the
+Integrated Brier Score. Computed with the riskRegression package.}
 
-\item{min_node}{The minimum number of observations required in a terminal
-node. Larger values create simpler trees that may be more generalizable but
-potentially miss important subgroups.}
+\item{survmetrics_timepoints}{Comma-separated timepoints at which to report
+the Brier score and time-dependent AUC. Timepoints beyond the observed
+follow-up are ignored. Should correspond to clinically meaningful follow-up
+times.}
 
-\item{complexity}{The complexity parameter for tree pruning. Higher values
-result in smaller trees. This parameter controls the trade-off between tree
-size and goodness of fit.}
-
-\item{max_depth}{The maximum depth of the decision tree. Limits the
-complexity of the tree to avoid overfitting.}
-
-\item{show_terminal_nodes}{If true, displays Kaplan-Meier survival curves
-for each terminal node of the decision tree.}
+\item{survmetrics_show_plots}{Display a plot of the IPCW Brier score across
+follow-up time.}
 
 \item{showExplanations}{Display detailed explanations for each analysis
 component to help interpret the statistical methods and results.}
@@ -252,7 +262,7 @@ visual clutter when summaries are not needed.}
 \value{
 A results object containing:
 \tabular{llllll}{
-\code{results$notices} \tab \tab \tab \tab \tab a preformatted \cr
+\code{results$eventRecodeInfo} \tab \tab \tab \tab \tab a html \cr
 \code{results$todo} \tab \tab \tab \tab \tab a html \cr
 \code{results$errors} \tab \tab \tab \tab \tab a html \cr
 \code{results$strongWarnings} \tab \tab \tab \tab \tab a html \cr
@@ -268,6 +278,9 @@ A results object containing:
 \code{results$multivariableCoxSummary} \tab \tab \tab \tab \tab a html \cr
 \code{results$glossaryPanel} \tab \tab \tab \tab \tab a html \cr
 \code{results$assumptionsPanel} \tab \tab \tab \tab \tab a html \cr
+\code{results$survMetricsTable} \tab \tab \tab \tab \tab a table \cr
+\code{results$survMetricsSummary} \tab \tab \tab \tab \tab a html \cr
+\code{results$survMetricsPlot} \tab \tab \tab \tab \tab an image \cr
 \code{results$personTimeHeading} \tab \tab \tab \tab \tab a preformatted \cr
 \code{results$personTimeTable} \tab \tab \tab \tab \tab a table \cr
 \code{results$personTimeSummaryHeading} \tab \tab \tab \tab \tab a preformatted \cr
@@ -275,6 +288,7 @@ A results object containing:
 \code{results$survivalPlotsHeading} \tab \tab \tab \tab \tab a preformatted \cr
 \code{results$plot} \tab \tab \tab \tab \tab an image \cr
 \code{results$plot3} \tab \tab \tab \tab \tab an image \cr
+\code{results$cox_phTable} \tab \tab \tab \tab \tab a table \cr
 \code{results$cox_ph} \tab \tab \tab \tab \tab a preformatted \cr
 \code{results$plot8} \tab \tab \tab \tab \tab an image \cr
 \code{results$plotKM} \tab \tab \tab \tab \tab an image \cr
@@ -293,6 +307,7 @@ A results object containing:
 \code{results$addRiskScore} \tab \tab \tab \tab \tab an output \cr
 \code{results$addRiskGroup} \tab \tab \tab \tab \tab an output \cr
 \code{results$adjustedSurvivalHeading} \tab \tab \tab \tab \tab a preformatted \cr
+\code{results$adjustedEstimandPanel} \tab \tab \tab \tab \tab a html \cr
 \code{results$plot_adj} \tab \tab \tab \tab \tab an image \cr
 \code{results$adjustedSurvivalSummaryHeading} \tab \tab \tab \tab \tab a preformatted \cr
 \code{results$adjustedSurvivalSummary} \tab \tab \tab \tab \tab a html \cr
@@ -301,6 +316,16 @@ A results object containing:
 \code{results$nomogram_display} \tab \tab \tab \tab \tab a html \cr
 \code{results$nomogramSummaryHeading} \tab \tab \tab \tab \tab a preformatted \cr
 \code{results$nomogramSummary} \tab \tab \tab \tab \tab a html \cr
+\code{results$adjustedSurvTable} \tab \tab \tab \tab \tab a table \cr
+\code{results$adjustedSurvTableSummary} \tab \tab \tab \tab \tab a html \cr
+\code{results$adjustedMedianTable} \tab \tab \tab \tab \tab a table \cr
+\code{results$adjustedMedianSummary} \tab \tab \tab \tab \tab a html \cr
+\code{results$adjustedCoxTable} \tab \tab \tab \tab \tab a table \cr
+\code{results$adjustedCoxText} \tab \tab \tab \tab \tab a html \cr
+\code{results$adjustedCoxSummary} \tab \tab \tab \tab \tab a html \cr
+\code{results$adjustedCoxPH} \tab \tab \tab \tab \tab a preformatted \cr
+\code{results$modelContributionTable} \tab \tab \tab \tab \tab a table \cr
+\code{results$modelContributionSummary} \tab \tab \tab \tab \tab a html \cr
 \code{results$multivariableCoxExplanation} \tab \tab \tab \tab \tab a html \cr
 \code{results$multivariableCoxHeading3} \tab \tab \tab \tab \tab a preformatted \cr
 \code{results$adjustedSurvivalExplanation} \tab \tab \tab \tab \tab a html \cr

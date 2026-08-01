@@ -6,8 +6,8 @@
 \usage{
 timeinterval(
   data,
-  dx_date,
-  fu_date,
+  dx_date = NULL,
+  fu_date = NULL,
   time_format = "auto",
   output_unit = "months",
   time_basis = "standardized",
@@ -65,7 +65,7 @@ date before start date). Recommended for data quality assurance.}
 for quality review. Uses statistical outlier detection methods.}
 
 \item{extreme_multiplier}{Multiplier for 99th percentile to define extreme
-values. Default 2.0 means values >2× the 99th percentile are flagged.
+values. Default 2.0 means values >2x the 99th percentile are flagged.
 Higher values are more conservative (fewer flagged values).}
 
 \item{add_times}{Appends calculated time intervals as a new variable for

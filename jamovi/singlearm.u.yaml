@@ -15,6 +15,7 @@ children:
             name: elapsedtime
             maxItemCount: 1
             isTarget: true
+            enable: (!tint)
       - type: TargetLayoutBox
         label: Outcome
         children:
@@ -58,6 +59,7 @@ children:
                             name: dxdate
                             maxItemCount: 1
                             isTarget: true
+                            enable: (tint)
                             fitToGrid: true
                             stretchFactor: 1
                       - type: TargetLayoutBox
@@ -66,6 +68,7 @@ children:
                             name: fudate
                             maxItemCount: 1
                             isTarget: true
+                            enable: (tint)
                             fitToGrid: true
                             stretchFactor: 1
               - type: Label
@@ -166,14 +169,29 @@ children:
           - type: LayoutBox
             fitToGrid: true
             children:
+              # `sc` is deliberately NOT gated: under competing risks it
+              # switches to the Cumulative Incidence Function output
+              # (plot_cif in singlearm.r.yaml).
+              #
+              # The other four assume a single event type. Under competing
+              # risks the outcome is coded 0/1/2 and survival::Surv() would
+              # silently plot it inverted, so they are disabled here rather
+              # than left tickable and answered with a refusal panel.
+              # The backend refusals in singlearm.b.R stay in place: a stale
+              # .omv or an R-syntax call can still reach the renderers with
+              # these options TRUE, and a silent empty panel would be worse
+              # than the refusal.
               - type: CheckBox
                 name: sc
               - type: CheckBox
                 name: kmunicate
+                enable: (!multievent || analysistype:overall || analysistype:cause || analysistype:dfs)
               - type: CheckBox
                 name: ce
+                enable: (!multievent || analysistype:overall || analysistype:cause || analysistype:dfs)
               - type: CheckBox
                 name: ch
+                enable: (!multievent || analysistype:overall || analysistype:cause || analysistype:dfs)
       - type: Label
         label: Plot Arguments
         children:
@@ -231,6 +249,7 @@ children:
           - type: TextBox
             name: rate_multiplier
             format: number
+            enable: (person_time)
   - type: CollapseBox
     label: Hazard Analysis
     collapsed: true
@@ -238,10 +257,14 @@ children:
       - type: LayoutBox
         margin: large
         children:
+          # Both hazard estimators assume a single event type; see the note on
+          # the plot checkboxes above. Backend refusals kept as the safety net.
           - type: CheckBox
             name: baseline_hazard
+            enable: (!multievent || analysistype:overall || analysistype:cause || analysistype:dfs)
           - type: CheckBox
             name: hazard_smoothing
+            enable: (!multievent || analysistype:overall || analysistype:cause || analysistype:dfs)
   - type: CollapseBox
     label: Detailed Output
     collapsed: false

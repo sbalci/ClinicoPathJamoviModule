@@ -10,7 +10,7 @@ decisioncombine(
   goldPositive,
   test1,
   test1Positive,
-  test2,
+  test2 = NULL,
   test2Positive,
   test3 = NULL,
   test3Positive,
@@ -58,18 +58,19 @@ analysis.}
 
 \item{showForest}{Boolean to display forest plot.}
 
-\item{showDecisionTree}{Boolean to display decision tree visualization.}
+\item{showDecisionTree}{Boolean to display the decision-space (sensitivity
+vs specificity) scatter plot.}
 
 \item{showRecommendation}{Boolean to show optimal pattern recommendation
 table.}
 
 \item{addPatternToData}{Boolean to add test pattern column to the dataset.}
 
-\item{filterStatistic}{Character indicating which statistic to display
-(default: all).}
+\item{filterStatistic}{Character indicating which statistic to display in
+the plots (default: all).}
 
-\item{filterPattern}{Character indicating which pattern type to display
-(default: all).}
+\item{filterPattern}{Character indicating which pattern type to display in
+the plots (default: all).}
 }
 \value{
 A results object containing:
@@ -87,8 +88,9 @@ A results object containing:
 \code{results$barPlot} \tab \tab \tab \tab \tab Grouped bar chart comparing sensitivity, specificity, PPV, NPV, and accuracy across test combinations \cr
 \code{results$heatmapPlot} \tab \tab \tab \tab \tab Color-coded heatmap showing all diagnostic metrics for each test pattern \cr
 \code{results$forestPlot} \tab \tab \tab \tab \tab Forest plot displaying 95 percent confidence intervals for key diagnostic metrics \cr
-\code{results$decisionTreePlot} \tab \tab \tab \tab \tab Hierarchical decision tree showing test patterns with performance-based recommendations \cr
+\code{results$decisionTreePlot} \tab \tab \tab \tab \tab Decision-space scatter plot positioning each test pattern by its sensitivity and specificity, with point size scaled by Youden's J \cr
 \code{results$recommendationTable} \tab \tab \tab \tab \tab Recommended optimal test combination pattern based on Youden index and clinical performance metrics \cr
+\code{results$addedPattern} \tab \tab \tab \tab \tab an output \cr
 \code{results$notices} \tab \tab \tab \tab \tab a html \cr
 }
 

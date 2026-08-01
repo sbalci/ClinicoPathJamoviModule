@@ -6,11 +6,12 @@
 \usage{
 outcomeorganizer(
   data,
-  outcome,
+  outcome = NULL,
   outcomeLevel,
-  recurrence,
+  recurrence = NULL,
   recurrenceLevel,
-  patientID,
+  patientID = NULL,
+  followupTime = NULL,
   analysistype = "os",
   multievent = FALSE,
   dod,
@@ -20,10 +21,10 @@ outcomeorganizer(
   useHierarchy = FALSE,
   eventPriority = 1,
   intervalCensoring = FALSE,
-  intervalStart,
-  intervalEnd,
+  intervalStart = NULL,
+  intervalEnd = NULL,
   adminCensoring = FALSE,
-  adminDate,
+  adminDate = NULL,
   outputTable = FALSE,
   diagnostics = FALSE,
   visualization = FALSE,
@@ -48,6 +49,12 @@ occurred.}
 
 \item{patientID}{Patient identifier for handling multiple records or
 applying event hierarchies.}
+
+\item{followupTime}{Optional follow-up time. Supplying it lets
+administrative censoring actually truncate follow-up and reset event
+status, and lets the event hierarchy keep the earliest priority event per
+patient instead of writing a later one back onto earlier records. Leave
+empty to keep the previous behaviour.}
 
 \item{analysistype}{The type of survival analysis to prepare the outcome
 for.}
@@ -102,6 +109,7 @@ suitable for copying to reports.}
 \value{
 A results object containing:
 \tabular{llllll}{
+\code{results$eventRecodeInfo} \tab \tab \tab \tab \tab a html \cr
 \code{results$todo} \tab \tab \tab \tab \tab a html \cr
 \code{results$errors} \tab \tab \tab \tab \tab a html \cr
 \code{results$strongWarnings} \tab \tab \tab \tab \tab a html \cr

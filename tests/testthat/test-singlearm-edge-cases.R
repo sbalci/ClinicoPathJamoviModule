@@ -11,25 +11,31 @@ data(singlearm_zerotime, package = "ClinicoPath")
 data(singlearm_large, package = "ClinicoPath")
 data(singlearm_shortfu, package = "ClinicoPath")
 data(singlearm_longfu, package = "ClinicoPath")
+data(singlearm_test, package = "ClinicoPath")
 
 test_that("singlearm handles small datasets", {
   result <- singlearm(
     data = singlearm_small,
     elapsedtime = "time_months",
-    outcome = "outcome"
+    outcome = "outcome",
+    outcomeLevel = "Dead"
   )
-  expect_s3_class(result, "singlearmClass")
+  expect_s3_class(result, "singlearmResults")
   expect_true(nrow(singlearm_small) == 15)
 })
 
 test_that("singlearm handles all censored data", {
+  singlearm_censored$outcome <- factor(
+    singlearm_censored$outcome,
+    levels = c("Alive", "Dead")
+  )
   result <- singlearm(
     data = singlearm_censored,
     elapsedtime = "time_months",
     outcome = "outcome",
     outcomeLevel = "Dead"
   )
-  expect_s3_class(result, "singlearmClass")
+  expect_s3_class(result, "singlearmResults")
   # All observations should be censored
   expect_true(all(singlearm_censored$outcome == "Alive"))
 })
@@ -41,7 +47,7 @@ test_that("singlearm handles all events data", {
     outcome = "outcome",
     outcomeLevel = "Dead"
   )
-  expect_s3_class(result, "singlearmClass")
+  expect_s3_class(result, "singlearmResults")
   # All observations should have events
   expect_true(all(singlearm_allevents$outcome == "Dead"))
 })
@@ -53,7 +59,7 @@ test_that("singlearm handles very early events", {
     outcome = "outcome",
     outcomeLevel = "Dead"
   )
-  expect_s3_class(result, "singlearmClass")
+  expect_s3_class(result, "singlearmResults")
   # Check that data has very short follow-up times
   expect_true(mean(singlearm_early$time_months) < 5)
 })
@@ -62,18 +68,20 @@ test_that("singlearm handles missing outcome values", {
   result <- singlearm(
     data = singlearm_missing,
     elapsedtime = "time_months",
-    outcome = "outcome"
+    outcome = "outcome",
+    outcomeLevel = "Dead"
   )
-  expect_s3_class(result, "singlearmClass")
+  expect_s3_class(result, "singlearmResults")
 })
 
 test_that("singlearm handles missing time values", {
   result <- singlearm(
     data = singlearm_missing,
     elapsedtime = "time_months",
-    outcome = "outcome"
+    outcome = "outcome",
+    outcomeLevel = "Dead"
   )
-  expect_s3_class(result, "singlearmClass")
+  expect_s3_class(result, "singlearmResults")
   # Should have some NA values
   expect_true(any(is.na(singlearm_missing$time_months)))
 })
@@ -82,9 +90,10 @@ test_that("singlearm handles zero time values", {
   result <- singlearm(
     data = singlearm_zerotime,
     elapsedtime = "time_months",
-    outcome = "outcome"
+    outcome = "outcome",
+    outcomeLevel = "Dead"
   )
-  expect_s3_class(result, "singlearmClass")
+  expect_s3_class(result, "singlearmResults")
   # Check that data has some zero times
   expect_true(any(singlearm_zerotime$time_months == 0))
 })
@@ -96,7 +105,7 @@ test_that("singlearm handles large datasets efficiently", {
     outcome = "outcome",
     outcomeLevel = "Dead"
   )
-  expect_s3_class(result, "singlearmClass")
+  expect_s3_class(result, "singlearmResults")
   expect_true(nrow(singlearm_large) == 500)
 })
 
@@ -107,7 +116,7 @@ test_that("singlearm handles very short follow-up", {
     outcome = "outcome",
     outcomeLevel = "Dead"
   )
-  expect_s3_class(result, "singlearmClass")
+  expect_s3_class(result, "singlearmResults")
 })
 
 test_that("singlearm handles very long follow-up", {
@@ -117,7 +126,7 @@ test_that("singlearm handles very long follow-up", {
     outcome = "outcome",
     outcomeLevel = "Dead"
   )
-  expect_s3_class(result, "singlearmClass")
+  expect_s3_class(result, "singlearmResults")
 })
 
 test_that("singlearm handles single observation", {
@@ -125,9 +134,10 @@ test_that("singlearm handles single observation", {
   result <- singlearm(
     data = test_data,
     elapsedtime = "time_months",
-    outcome = "outcome"
+    outcome = "outcome",
+    outcomeLevel = "Dead"
   )
-  expect_s3_class(result, "singlearmClass")
+  expect_s3_class(result, "singlearmResults")
 })
 
 test_that("singlearm handles extreme cutpoints", {
@@ -135,7 +145,8 @@ test_that("singlearm handles extreme cutpoints", {
     data = singlearm_test,
     elapsedtime = "time_months",
     outcome = "outcome",
+    outcomeLevel = "Dead",
     cutp = "1, 120, 240"
   )
-  expect_s3_class(result, "singlearmClass")
+  expect_s3_class(result, "singlearmResults")
 })

@@ -63,6 +63,7 @@ checking}
 A results object containing:
 \tabular{llllll}{
 \code{results$instructions} \tab \tab \tab \tab \tab a html \cr
+\code{results$notices} \tab \tab \tab \tab \tab a html \cr
 \code{results$modelSummary} \tab \tab \tab \tab \tab a table \cr
 \code{results$studyEffects} \tab \tab \tab \tab \tab a table \cr
 \code{results$mcmcDiagnostics} \tab \tab \tab \tab \tab a table \cr

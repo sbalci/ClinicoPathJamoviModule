@@ -39,8 +39,10 @@ test_that("smoothed hazard curve recovers a constant hazard", {
         translate        = function(text, n = 1) text))
     env$private <- list(
         .isCompetingRisk       = function(...) FALSE,
-        .safeExecute           = function(expr, context = NULL) expr,
-        .calculateAdaptiveSpan = function(n_points) 0.3)
+        .safeExecute           = function(expr, context = NULL) eval(substitute(expr)),
+        .calculateAdaptiveSpan = function(n_points) 0.3,
+        .hazardIntervals       = cls$private_methods$.hazardIntervals)
+    env$. <- function(text, ...) text
     env$print <- function(x, ...) { captured <<- x; invisible(x) }
     environment(f) <- env
 

@@ -7,13 +7,16 @@
 # file ships to both the umbrella package and the jsurvival distribution, so
 # resolve them from whichever namespace actually carries them instead of
 # assuming they are on the search path.
-.event_ns <- NULL
-for (.p in c("ClinicoPath", "jsurvival")) {
-    if (.p %in% loadedNamespaces() || requireNamespace(.p, quietly = TRUE)) {
-        .cand <- asNamespace(.p)
-        if (exists(".defineEventIndicator", envir = .cand, inherits = FALSE)) {
-            .event_ns <- .cand
-            break
+.event_ns <- if (exists(".defineEventIndicator", inherits = TRUE))
+    environment(get(".defineEventIndicator", inherits = TRUE)) else NULL
+if (is.null(.event_ns)) {
+    for (.p in c("ClinicoPath", "jsurvival")) {
+        if (.p %in% loadedNamespaces() || requireNamespace(.p, quietly = TRUE)) {
+            .cand <- asNamespace(.p)
+            if (exists(".defineEventIndicator", envir = .cand, inherits = FALSE)) {
+                .event_ns <- .cand
+                break
+            }
         }
     }
 }
@@ -29,7 +32,7 @@ test_that("factor outcome: event level maps to 1, every other level to 0", {
     expect_equal(r$status, c(0L, 1L, 0L, 1L))
     expect_equal(r$n_event, 2)
     expect_equal(r$n_censored, 2)
-    expect_equal(r$estimand, "overall survival")
+    expect_equal(r$estimand, "Kaplan-Meier survival for the selected event")
 })
 
 test_that("NA is preserved, never coded as censored", {
@@ -45,10 +48,11 @@ test_that("three-level outcome collapses extras to censored and flags the estima
     r <- .defineEventIndicator(x, outcomeLevel = "DOD")
     expect_equal(r$status, c(0L, 1L, 0L, 0L))
     expect_equal(r$n_levels, 3)
-    expect_equal(r$estimand, "cause-specific survival")
+    expect_equal(r$estimand, "Kaplan-Meier survival for the selected event")
     expect_setequal(r$censored_labels, c("Alive", "DOOC"))
-    # The disclosure must warn that the probability-scale outputs are biased.
-    expect_match(.describeEventIndicator(r, "Outcome2"), "biased upward")
+    # The disclosure must distinguish net survival from absolute risk if a
+    # collapsed label is a competing event.
+    expect_match(.describeEventIndicator(r, "Outcome2"), "overstates")
 })
 
 test_that("D1: missing event level is a message, not a crash", {
@@ -161,7 +165,7 @@ test_that("the recode disclosure reports event, censored and excluded counts", {
                                     "Death")
     expect_match(html, "Event level")
     expect_match(html, "Excluded \\(missing outcome\\)")
-    expect_match(html, "overall survival")
+    expect_match(html, "Kaplan-Meier survival for the selected event")
 })
 
 # --- regressions found in the second review -------------------------------
@@ -214,7 +218,7 @@ test_that("an ordinary Censored/Event binary factor is not forced into competing
     r <- .defineEventIndicator(x, outcomeLevel = "Event")
     expect_equal(r$status, c(0L, 1L, 0L))
     expect_false(r$has_competing)
-    expect_equal(r$estimand, "overall survival")
+    expect_equal(r$estimand, "Kaplan-Meier survival for the selected event")
 })
 
 test_that("competing-event labels are disclosed, not left blank", {

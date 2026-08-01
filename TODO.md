@@ -56,17 +56,16 @@ gemini: ctrl+s copy mode
 
 use gemini to make Readiness for Clinicians and Pathologists assessment and Use Case Example Generation for each function.
 
-You are an expert R-package and jamovi developer.
-You are an expert in biostatistics working with pathologists and clinicians.
-Critically evaluate lassocox function.
+You are an expert R-package and jamovi developer and an expert in biostatistics working with pathologists and clinicians.
+Development guides is under vignettes folder starting with jamovi_
+Critically evaluate FUNC_NAME function.
 Is it mathematically and statistically accurate?
 Evaluate if data flow is correct. Are arguments from .a.yaml correctly read. Is the data flow in .b.R correct. Are the results displayed in .r.yaml appropriately. Evaluate if .u.yaml is user friendly and contains all necessary options.
 Is it ready to be used by clinicians and pathologists?
 Is it ready for release?
-Suggest improvements.
-Do not remove functionality.
+Evaluate it for clinical, statistical, logical, and mathematical problems. 
+Fix issues and implement recommendations. Do not remove functionality. 
 
-> fix issues and implement recommendations. favor functionality over explanations and guidence parts.
 
 > how does FUNC_NAME handle varibale with empty spaces and characters in them.
 Is it necessary to implement escapeVariableNames logic from modelbuilder to FUNC_NAME.
@@ -3005,3 +3004,193 @@ out-of-scope findings from the same audit, deferred for separate work.
   keeping the R6 class definition slim.
 - This is a refactor, not a behaviour change. Defer until after the
   statistical-parity reviews above.
+
+
+
+
+
+
+
+
+---
+
+## Prompt:
+
+
+You are an expert R package and jamovi module developer with advanced expertise in biostatistics, clinical research, pathology, and clinician-facing software.
+
+Your task is to perform a rigorous end-to-end review and improvement of the jamovi analysis `FUNC_NAME`.
+
+Before making changes, read and follow all relevant development guides in the `vignettes/` directory whose filenames begin with `jamovi_`. Also inspect repository-level guidance such as `AGENTS.md`, `CONTRIBUTING.md`, and existing conventions in similar analyses.
+
+## Scope
+
+Identify every file and component associated with `FUNC_NAME`, including:
+
+- The underlying R computation functions
+- `.a.yaml` analysis definition
+- `.b.R` backend implementation
+- `.r.yaml` results definition
+- `.u.yaml` user interface definition
+- Generated files, tests, documentation, examples, and translations, where applicable
+
+Trace the complete data flow:
+
+```text
+User interface → .u.yaml → .a.yaml arguments → .b.R processing
+→ statistical computation → .r.yaml results → displayed output
+```
+
+## Review requirements
+
+### 1. Mathematical and statistical validity
+
+Critically evaluate whether the analysis is mathematically and statistically correct.
+
+Check:
+
+- Definitions, formulas, estimators, and algorithms
+- Assumptions and whether they are stated or tested appropriately
+- Handling of categorical, continuous, ordinal, paired, repeated, censored, weighted, and missing data, as relevant
+- Factor coding, reference levels, contrasts, transformations, and interactions
+- Confidence intervals, standard errors, test statistics, degrees of freedom, and p-values
+- Multiple-testing adjustments
+- Effect sizes and their interpretation
+- Numerical stability, convergence, boundary cases, and singular models
+- Agreement between labels, documentation, implementation, and reported statistics
+- Whether interpretations avoid causal or clinical claims unsupported by the method
+
+Independently verify important calculations against trusted R packages, published formulas, or small hand-calculated examples when feasible.
+
+### 2. Argument and data flow
+
+Confirm that:
+
+- Every `.a.yaml` option is declared with the correct name, type, default, allowed values, and variable constraints
+- Every option is read and used correctly in `.b.R`
+- Defaults are consistent across `.a.yaml`, `.u.yaml`, backend code, documentation, and tests
+- UI selections reach the intended computation without silent coercion or loss of information
+- Variable types and measurement levels are validated appropriately
+- Invalid or incompatible option combinations are prevented or handled clearly
+- Missing, empty, filtered, and grouped datasets are handled safely
+- Recalculation and state restoration work correctly when inputs change
+- No declared argument is unused, and no backend behavior lacks a corresponding exposed option unless intentionally internal
+
+### 3. Backend implementation
+
+Review `.b.R` and supporting R code for:
+
+- Logical correctness and consistency with the intended method
+- Safe preprocessing and correct row alignment
+- Correct subsetting, filtering, grouping, and missing-data handling
+- Robust error and warning handling
+- Clear, actionable messages for users
+- Proper jamovi lifecycle and results-population patterns
+- Performance on realistically sized clinical datasets
+- Reproducibility and deterministic behavior where expected
+- Maintainability and consistency with neighboring analyses
+- Avoidance of duplicated or dead code
+
+### 4. Results and presentation
+
+Confirm that `.r.yaml` and the backend produce clinically meaningful, internally consistent output.
+
+Check:
+
+- Tables, plots, headings, footnotes, and notes
+- Correct result types, formats, precision, and visibility conditions
+- Appropriate units, labels, reference groups, and confidence levels
+- Consistency between numerical results and narrative interpretations
+- Clear differentiation between estimates, uncertainty, and significance
+- Visibility of sample sizes, excluded observations, missing-data handling, and relevant assumptions
+- Graceful presentation when a result cannot be computed
+- Absence of misleading precision, ambiguous abbreviations, or overstated conclusions
+
+### 5. User interface and usability
+
+Evaluate `.u.yaml` from the perspective of clinicians and pathologists who may not be statisticians.
+
+Ensure that:
+
+- All necessary analytical options are available
+- Options are logically grouped and ordered
+- Labels use clear clinical language while remaining statistically accurate
+- Defaults are safe, conventional, and useful
+- Advanced options do not overwhelm routine users
+- Mutually incompatible choices are disabled or validated
+- Required inputs and expected variable types are obvious
+- Help text, tooltips, and option descriptions explain consequences
+- The interface follows conventions used by other analyses in the module
+- The analysis supports a coherent workflow from data selection to interpretation
+
+Do not add options merely for completeness. Each exposed option must have a defensible clinical or statistical use.
+
+### 6. Clinical readiness and safety
+
+Assess whether the analysis is suitable for use by clinicians and pathologists.
+
+Look specifically for:
+
+- Clinically misleading labels or interpretations
+- Incorrect treatment of diagnostic, prognostic, survival, agreement, repeated-measure, or laboratory data, where relevant
+- Confusion between statistical significance and clinical importance
+- Inadequate reporting of uncertainty
+- Unsupported diagnostic or treatment recommendations
+- Edge cases common in clinical datasets, including sparse groups, rare events, perfect separation, zero cells, ties, detection limits, and heavy missingness
+- Privacy or data-leakage concerns in output or diagnostics
+- Situations requiring explicit limitations or warnings
+
+Treat the analysis as decision-support software, not as an autonomous medical decision maker.
+
+### 7. Testing and release readiness
+
+Inspect existing tests and add or improve tests as needed. Include:
+
+- Typical valid analyses
+- Independently verifiable numerical reference cases
+- Defaults and every meaningful option branch
+- Missing data and filtered rows
+- Empty selections and insufficient sample sizes
+- Constant variables, zero-variance groups, sparse categories, and extreme values
+- Invalid and incompatible inputs
+- Previously identified regressions
+- Result visibility and output structure
+- UI-to-backend argument consistency
+
+Run the most relevant tests and package/module checks available in the repository. Regenerate derived jamovi files only through the project’s documented workflow.
+
+## Implementation rules
+
+- Fix confirmed problems and implement justified improvements.
+- Do not remove existing functionality.
+- Preserve backward compatibility unless retaining a behavior would produce materially incorrect or unsafe results.
+- If compatibility conflicts with correctness, document the conflict and choose the safest minimal change.
+- Avoid unrelated refactoring.
+- Follow the repository’s established coding and formatting conventions.
+- Do not edit generated files directly when they have an authoritative source file.
+- Do not silently change statistical defaults; explain and test any necessary default change.
+- Add clear validation messages rather than allowing cryptic downstream errors.
+- Support every substantive conclusion with code evidence, test evidence, or a statistical reference.
+- Do not claim release readiness if important checks could not be completed.
+
+## Required deliverables
+
+Complete the implementation, then report:
+
+1. **Overall verdict:** whether `FUNC_NAME` is mathematically valid, clinically appropriate, and release-ready.
+2. **Findings:** problems grouped by severity—critical, major, moderate, and minor—with affected files.
+3. **Changes made:** concise explanation of each correction or improvement.
+4. **Statistical verification:** how important calculations were independently checked.
+5. **Data-flow audit:** confirmation of mappings among `.u.yaml`, `.a.yaml`, `.b.R`, and `.r.yaml`, including unused or missing mappings.
+6. **Test results:** commands or checks run and their outcomes.
+7. **Remaining limitations:** unresolved risks, assumptions, or manual checks.
+8. **Release recommendation:** one of:
+   - Ready for release
+   - Ready after specified minor actions
+   - Not ready for release
+
+Begin by locating the relevant development guides and all files associated with `FUNC_NAME`. Then inspect the implementation, establish expected behavior, make targeted corrections, and verify the final result.
+
+
+
+

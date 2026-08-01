@@ -46,12 +46,11 @@
 #' Semantics, stated explicitly because they are easy to get wrong:
 #' \itemize{
 #'   \item On the single-event-level path every level that is *not* the selected
-#'     event level becomes 0 (censored). With three or more levels this is
-#'     cause-specific censoring. Kaplan-Meier survival, median survival and
-#'     x-year survival then describe net/cause-specific survival and generally
-#'     overstate real-world event-free probability when the other outcome is a
-#'     competing terminal event. The caller is expected to surface `estimand`
-#'     and `censored_labels` to the user.
+#'     event level becomes 0 (right-censored). Labels alone cannot establish
+#'     whether this is ordinary censoring or a competing terminal event. In the
+#'     latter case Kaplan-Meier outputs describe net/cause-specific survival,
+#'     not absolute event risk. The caller is expected to surface `estimand` and
+#'     `censored_labels` to the user.
 #'   \item `NA` is never converted to a value. It stays `NA` and the row is
 #'     dropped downstream by `jmvcore::naOmit()` (complete-case analysis).
 #'     Coding it 0 would fabricate censoring.
@@ -224,7 +223,7 @@
     # declared but unused in this particular cohort.
     cause_levels <- c("Censored", "Event", "Competing")
     looks_like_handoff <- is.factor(outcome) &&
-        all(cause_levels %in% levels(outcome)) &&
+        setequal(levels(outcome), cause_levels) &&
         all(observed_chr %in% cause_levels) &&
         (is.null(outcomeLevel) || length(outcomeLevel) == 0 ||
          identical(as.character(outcomeLevel), "") ||
@@ -241,10 +240,10 @@
                 "'Censored' cannot be selected as the event level for a ",
                 "Censored/Event/Competing outcome. Select 'Event' or 'Competing'.")))
 
-        # An explicit choice of "Competing" as the event means the user wants a
-        # cause-specific analysis of the competing cause: it becomes the event
-        # and the original Event level is censored. Previously the selection was
-        # ignored and Event was always coded 1.
+        # An explicit choice of "Competing" as the event refocuses the
+        # competing-risk analysis: it becomes code 1 and the original Event
+        # becomes code 2. Previously the selection was ignored and Event was
+        # always coded 1.
         focus_competing <- !is.null(outcomeLevel) && length(outcomeLevel) > 0 &&
                            identical(as.character(outcomeLevel), "Competing")
 
@@ -276,9 +275,16 @@
         # the analysis.
         lvl <- if (!is.null(outcomeLevel) && length(outcomeLevel) > 0)
             toupper(as.character(outcomeLevel)) else "TRUE"
+        if (!lvl %in% c("TRUE", "FALSE"))
+            return(fail(paste0(
+                "Selected Event Level '", outcomeLevel,
+                "' is invalid for logical outcome '", outcome_name,
+                "'. Select TRUE or FALSE.")))
         if (identical(lvl, "FALSE"))
-            return(ok(as.integer(!outcome), "FALSE", "TRUE", "overall survival", 2L))
-        return(ok(as.integer(outcome), "TRUE", "FALSE", "overall survival", 2L))
+            return(ok(as.integer(!outcome), "FALSE", "TRUE",
+                      "Kaplan-Meier survival for the coded event", 2L))
+        return(ok(as.integer(outcome), "TRUE", "FALSE",
+                  "Kaplan-Meier survival for the coded event", 2L))
     }
 
     if (is.factor(outcome) || is.character(outcome)) {
@@ -317,10 +323,11 @@
         return(ok(status,
                   event_label     = as.character(outcomeLevel),
                   censored_labels = cens,
-                  # Three or more levels means the extras are being cause-specific
-                  # censored, which biases the probability-scale outputs.
-                  estimand        = if (length(observed) > 2) "cause-specific survival"
-                                    else "overall survival",
+                  # Labels alone cannot establish that the selected event is
+                  # death from any cause. Calling every binary factor "overall
+                  # survival" silently turns recurrence, discharge, toxicity,
+                  # or one of two causes of death into OS.
+                  estimand        = "Kaplan-Meier survival for the selected event",
                   n_levels        = length(observed)))
     }
 
@@ -343,8 +350,7 @@
             return(ok(status,
                       event_label     = as.character(lvl),
                       censored_labels = as.character(sort(setdiff(observed, lvl))),
-                      estimand        = if (length(observed) > 2) "cause-specific survival"
-                                        else "overall survival",
+                      estimand        = "Kaplan-Meier survival for the selected event",
                       n_levels        = length(observed)))
         }
 
@@ -353,7 +359,8 @@
         # nobody did) and used to be rejected. `sum(unique(x)) == 1` was the old
         # test in three of the five copies and wrongly accepted e.g. {-1, 2}.
         if (all(observed %in% c(0, 1)))
-            return(ok(as.integer(outcome), "1", "0", "overall survival",
+            return(ok(as.integer(outcome), "1", "0",
+                      "Kaplan-Meier survival for the coded event",
                       length(observed)))
 
         return(fail(paste0(
@@ -409,21 +416,29 @@
         "<tr><td>Estimand</td><td colspan='2'>", res$estimand, "</td></tr>")
 
     warn <- ""
-    # Gate on the ESTIMAND, not the level count. n_levels > 2 misses the
-    # multievent path's commonest cause-specific case: an outcome with only DOD
-    # and DOOC observed has 2 levels, yet analysistype = "cause" codes DOOC to 0
-    # (survival_utils.R:161) -- a death silently entered as a censoring. For the
-    # single-event path this is exactly equivalent, since that path sets
-    # "cause-specific survival" iff length(observed) > 2 (:281-282).
-    if (identical(res$estimand, "cause-specific survival") && res$n_competing == 0) {
+    # Every Kaplan-Meier or cumulative-incidence analysis relies on an
+    # independent/non-informative right-censoring assumption. Previously this
+    # disclosure appeared only for two selected-event estimands, so an overall,
+    # disease-free, logical, numeric, or competing-risk analysis could be shown
+    # without stating its central identifying assumption.
+    if (length(res$censored_labels) > 0) {
+        collapsed_terminal <- res$estimand %in% c(
+            "cause-specific survival",
+            "Kaplan-Meier survival for the selected event",
+            "Kaplan-Meier survival for the coded event") &&
+            res$n_competing == 0
         warn <- paste0(
-            "<p style='margin-top:8px'><b>Note.</b> Level(s) ", cens,
-            " are being treated as <i>censored</i>, which assumes ",
-            "censoring is independent of the event. If any collapsed level is a competing ",
-            "event (for example ",
-            "death from another cause) the Kaplan-Meier curve, median survival and x-year ",
-            "survival are biased upward. For competing events use Multiple Event Levels ",
-            "with survival type Competing Risk.</p>")
+            "<p style='margin-top:8px'><b>Censoring assumption.</b> Level(s) ", cens,
+            " are being treated as <i>right-censored</i>. The estimates require censoring ",
+            "to be independent/non-informative for the endpoint, conditional on the analysis. ",
+            if (collapsed_terminal) paste0(
+                "If a collapsed level is a competing terminal event (for example death from ",
+                "another cause), Kaplan-Meier estimates net/cause-specific survival rather ",
+                "than absolute event risk and generally overstates the real-world probability ",
+                "of remaining event-free. Use Multiple Event Levels with survival type ",
+                "Competing Risk to estimate cumulative incidence."
+            ) else "This assumption cannot be verified from the displayed summaries.",
+            "</p>")
     }
 
     # A zero-event cohort is now ACCEPTED rather than rejected (see the declared-
@@ -444,10 +459,10 @@
                 res$n_competing, " competing event(s) did occur; these are a separate ",
                 "terminal state, not censoring, and the target-event cumulative incidence ",
                 "is estimated as 0 throughout") else
-                "This is a fully censored analysis cohort: every subject is treated as censored and survival is estimated as 100% throughout",
+                "This is a fully censored analysis cohort: every subject is treated as censored and the Kaplan-Meier point estimate is 100% throughout. This boundary estimate does not prove 100% population survival",
             if (isTRUE(res$has_competing))
                 ". The median time to the target event is not reached" else
-                ". Median survival is not reached",
+                ". The Kaplan-Meier median time-to-event is not reached",
             ", and the numbers at risk and the ",
             "follow-up duration are still reportable. <b>But if you expected events, ",
             "the wrong event level is selected</b>: check the level named above against ",
@@ -476,7 +491,8 @@
     }
 
     paste0(
-        "<div><b>Outcome recode for '", outcome_name, "'</b>",
+        "<div><b>Outcome recode for '", outcome_name,
+        "' (before analysis-specific row exclusions)</b>",
         "<table style='margin-top:4px'>", rows, "</table>", warn, zero, dfs, "</div>")
 }
 

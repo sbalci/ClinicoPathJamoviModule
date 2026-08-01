@@ -15,6 +15,7 @@ test_that("singlearm respects different time output formats", {
     data = singlearm_test,
     elapsedtime = "time_months",
     outcome = "outcome",
+    outcomeLevel = "Dead",
     timetypeoutput = "days"
   )
   expect_no_error(result_days)
@@ -24,6 +25,7 @@ test_that("singlearm respects different time output formats", {
     data = singlearm_test,
     elapsedtime = "time_months",
     outcome = "outcome",
+    outcomeLevel = "Dead",
     timetypeoutput = "weeks"
   )
   expect_no_error(result_weeks)
@@ -33,6 +35,7 @@ test_that("singlearm respects different time output formats", {
     data = singlearm_test,
     elapsedtime = "time_months",
     outcome = "outcome",
+    outcomeLevel = "Dead",
     timetypeoutput = "months"
   )
   expect_no_error(result_months)
@@ -42,6 +45,7 @@ test_that("singlearm respects different time output formats", {
     data = singlearm_test,
     elapsedtime = "time_months",
     outcome = "outcome",
+    outcomeLevel = "Dead",
     timetypeoutput = "years"
   )
   expect_no_error(result_years)
@@ -55,6 +59,7 @@ test_that("singlearm respects different date formats", {
     dxdate = "diagnosis_date",
     fudate = "followup_date",
     outcome = "outcome",
+    outcomeLevel = "Dead",
     timetypedata = "ymd"
   )
   expect_no_error(result_ymd)
@@ -66,6 +71,7 @@ test_that("singlearm respects different date formats", {
     dxdate = "diagnosis_date",
     fudate = "followup_date",
     outcome = "outcome",
+    outcomeLevel = "Dead",
     timetypedata = "dmy"
   )
   expect_no_error(result_dmy)
@@ -77,6 +83,7 @@ test_that("singlearm respects different date formats", {
     dxdate = "diagnosis_date",
     fudate = "followup_date",
     outcome = "outcome",
+    outcomeLevel = "Dead",
     timetypedata = "mdy"
   )
   expect_no_error(result_mdy)
@@ -88,6 +95,7 @@ test_that("singlearm respects different date formats", {
     dxdate = "diagnosis_datetime",
     fudate = "followup_datetime",
     outcome = "outcome",
+    outcomeLevel = "Dead",
     timetypedata = "ymdhms"
   )
   expect_no_error(result_hms)
@@ -126,6 +134,7 @@ test_that("singlearm respects explanation and summary options", {
     data = singlearm_test,
     elapsedtime = "time_months",
     outcome = "outcome",
+    outcomeLevel = "Dead",
     showExplanations = TRUE,
     showSummaries = TRUE
   )
@@ -137,6 +146,7 @@ test_that("singlearm respects advanced diagnostics option", {
     data = singlearm_test,
     elapsedtime = "time_months",
     outcome = "outcome",
+    outcomeLevel = "Dead",
     advancedDiagnostics = TRUE
   )
   expect_no_error(result)
@@ -165,6 +175,7 @@ test_that("singlearm handles hazard smoothing options", {
     data = singlearm_test,
     elapsedtime = "time_months",
     outcome = "outcome",
+    outcomeLevel = "Dead",
     baseline_hazard = TRUE,
     hazard_smoothing = TRUE
   )

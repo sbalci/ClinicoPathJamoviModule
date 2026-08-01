@@ -1,7 +1,7 @@
 ---
 name:  singlearm
 title: Single Arm Survival
-menuGroup: Survival
+menuGroup: SurvivalT
 menuSubgroup: ClinicoPath Survival
 menuSubtitle: 'Survival for whole group, no explanatory factor'
 version: '1.0.1'
@@ -63,10 +63,12 @@ options:
       permitted: [ numeric, factor ]
       description: >-
         The date of diagnosis or study entry. Accepts: (1) Date/datetime text (e.g., "2024-01-15"),
-        (2) Numeric values. Numeric columns are interpreted by magnitude: values below
-        100000 are read as DAYS since 1970-01-01 (the R Date encoding), larger values as
-        Unix epoch SECONDS (the DateTime Converter's corrected_datetime_numeric output).
-        Time intervals are calculated as the difference from the follow-up date.
+        (2) Numeric values. Each bare numeric date column is classified by its overall
+        magnitude: values below 100000 indicate DAYS since 1970-01-01 (the R Date
+        encoding), whereas values at or above 100000 indicate Unix epoch SECONDS (the
+        DateTime Converter's corrected_datetime_numeric output). Columns with inconsistent
+        scales or values on both sides of this boundary are rejected. Time intervals are
+        calculated as the difference from the follow-up date.
 
     - name: fudate
       title: 'Follow-up Date'
@@ -76,9 +78,10 @@ options:
       permitted: [ numeric, factor ]
       description: >-
         The date of last follow-up or event. Accepts: (1) Date/datetime text (e.g., "2024-01-15"),
-        (2) Numeric values, interpreted by magnitude exactly as for the diagnosis date
-        (below 100000 = days since 1970-01-01; larger = Unix epoch seconds). Must be in the
-        same format as the diagnosis date.
+        (2) Numeric values, classified by column magnitude exactly as for the diagnosis
+        date (below 100000 = days since 1970-01-01; at or above 100000 = Unix epoch
+        seconds). Mixed values within a column and inconsistent numeric encodings between
+        columns are rejected. Must be in the same format as the diagnosis date.
 
 
     - name: calculatedtime
@@ -106,6 +109,7 @@ options:
       title: Event Level
       type: Level
       variable: (outcome)
+      allowNone: true
       description: >-
         Select the level of the outcome variable that represents the event of interest.
         For example, if the outcome variable is "death_status" with levels "Alive" and
@@ -192,8 +196,9 @@ options:
         "12, 36, 60" is written in months, so under a different unit it means 12, 36 and 60
         of that unit; an information notice explains how to enter 1, 3 and 5 years instead.
         Points beyond follow-up are omitted unless every remaining subject has had a terminal
-        event, in which case the final KM/CIF state is carried forward. Negative and non-finite
-        values are ignored. Time zero is accepted because events can occur at the origin.
+        event, in which case the final KM/CIF state is carried forward. Negative, non-finite,
+        and non-numeric entries are ignored with a warning. Time zero is accepted because
+        events can occur at the origin.
 
 
     - name: timetypedata
@@ -237,7 +242,7 @@ options:
         from dates, dates are CONVERTED to this unit. When a pre-calculated elapsed-time
         variable is supplied, no conversion is possible (the column carries no unit), so
         this option DECLARES the unit that variable is already recorded in. Either way it
-        determines how cutpoints are interpreted, which follow-up thresholds are applied,
+        determines how cutpoints and plausibility checks are interpreted,
         and how axes are labelled - so
         selecting the wrong unit for pre-calculated time changes the reported results,
         not just the labels.
@@ -279,8 +284,9 @@ options:
       default: false
       description: >-
         Enable this option to generate a publication-ready survival plot in the style of
-        KMunicate. This plot shows the estimated survival probability over time with
-        confidence intervals and is suitable for publication or presentation.
+        KMunicate. The 95 percent CI and Risk table options control its pointwise interval
+        ribbon and risk/censoring panel. Individual censoring marks and median reference
+        lines are not supported on this plot.
 
 
     - name: ce
@@ -319,18 +325,20 @@ options:
       type: Number
       default: 0.00
       description: >-
-        The minimum value for the y-axis in the survival plots. The axis carries a
-        survival probability, so this must be between 0 and 1 and below the end value;
-        anything else is rejected rather than drawn.
+        The minimum value for the probability y-axis in the Kaplan-Meier,
+        cumulative-incidence, and cumulative-event plots. It must be between 0 and 1 and
+        below the end value. Cumulative hazard is auto-scaled and the KMunicate-style plot
+        manages its own y-axis.
 
     - name: yend_plot
       title: End y-axis
       type: Number
       default: 1.00
       description: >-
-        The maximum value for the y-axis in the survival plots. The axis carries a
-        survival probability, so this must be between 0 and 1 and above the start value;
-        anything else is rejected rather than drawn.
+        The maximum value for the probability y-axis in the Kaplan-Meier,
+        cumulative-incidence, and cumulative-event plots. It must be between 0 and 1 and
+        above the start value. Cumulative hazard is auto-scaled and the KMunicate-style
+        plot manages its own y-axis.
 
     - name: byplot
       title: Time Interval
@@ -394,7 +402,9 @@ options:
       default: none
       description: >-
         Display a horizontal and/or vertical reference line at the Kaplan-Meier median,
-        when estimable. Median reference lines are not drawn on the competing-risk CIF plot.
+        when estimable. On the cumulative-hazard plot the horizontal reference is log(2),
+        corresponding to S(t) = 0.5. Median reference lines are not drawn on the
+        competing-risk CIF or KMunicate-style plots.
 
 
     - name: person_time
@@ -403,8 +413,10 @@ options:
       default: false
       description: >-
         Enable this option to calculate and display person-time metrics, including
-        total follow-up time and incidence rates. These metrics help quantify the
-        rate of events per unit of time in your study population.
+        total follow-up time and crude occurrence/exposure rates. A person-time rate is
+        events divided by observed time at risk; it is not an event probability. With
+        competing risks it is a crude cause-specific rate for the target event, not the
+        cumulative incidence or absolute risk.
 
     - name: time_intervals
       title: "Time Interval Stratification"
@@ -415,10 +427,10 @@ options:
         the selected Time Unit. For example "12, 36, 60" creates the intervals 0-12, 12-36,
         36-60 and 60+. Values are always interpreted in the selected Time Unit; the built-in
         text is 12, 36 and 60 of that unit and is not silently rescaled.
-        Boundaries that are not greater than zero are ignored with a warning (a zero-width
-        interval accrues no person-time), as are boundaries at or beyond the longest
-        observed follow-up: person-time cannot accrue before the start of observation or
-        after the last one.
+        A zero boundary is silently treated as the origin because the analysis already
+        starts at zero. Negative, non-finite, or non-numeric boundaries are ignored with a warning.
+        Boundaries at or beyond the longest observed follow-up are also omitted because
+        person-time cannot accrue before the start of observation or after the last one.
 
     - name: rate_multiplier
       title: "Rate Multiplier"
@@ -437,18 +449,24 @@ options:
       default: false
       description: >-
         Estimate exploratory interval event rates as events divided by exact person-time
-        in adaptive intervals. These are piecewise occurrence/exposure rates, not exact
+        in equal-width intervals. The number of intervals is limited according to the total
+        event count to reduce sparsity. These are piecewise occurrence/exposure rates, not exact
         instantaneous hazards or Cox-model coefficients, and should not be used alone to
-        choose treatment or surveillance timing.
+        choose treatment or surveillance timing. The rate output is not estimated when an
+        event occurs at time zero, because such an event is a probability mass at the origin
+        rather than a finite continuous hazard.
 
     - name: hazard_smoothing
       title: "Smoothed hazard function"
       type: Bool
       default: false
       description: >-
-        Generate smoothed hazard rate estimates to better visualize patterns
-        in event risk over time. (There is no proportional-hazards assumption
-        to assess here: a single-arm analysis has no groups to compare.)
+        Smooth the equal-width interval rates with a person-time-weighted,
+        local-constant LOESS curve. This is an exploratory, bandwidth-dependent trend,
+        not an exact instantaneous hazard. At least three usable automatic intervals are
+        required; otherwise the plot explains why no curve was estimated. There is no
+        proportional-hazards assumption to assess in a single-arm analysis. No curve is
+        estimated with zero observed events or an event at time zero.
 
 
 
@@ -472,7 +490,7 @@ options:
         results. Turn off to reduce visual clutter when summaries are not needed.
 
     - name: advancedDiagnostics
-      title: "Advanced diagnostics & quality assessment"
+      title: "Descriptive data diagnostics"
       type: Bool
       default: false
       description: >-

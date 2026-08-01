@@ -12,7 +12,9 @@ benford(data, var, digits = 2)
 \item{var}{a string naming the variable from \code{data} that contains the
 continuous values used for the report}
 
-\item{digits}{Number of first digits to analyze (default: 2)}
+\item{digits}{Number of first digits to analyze (default: 2). Limited to
+1-3 digits; the benford.analysis package does not provide a MAD conformity
+classification beyond 3 digits.}
 }
 \value{
 A results object containing:

@@ -329,6 +329,13 @@ When updating documentation links in README.Rmd, ensure they point to these subm
 
 - Update NEWS.md when there is version change
 - When updating NEWS.md use the current version from DESCRIPTION file
+- After adding, renaming, or changing the `description:` of anything in `.claude/commands/` or
+  `.claude/skills/`, run `python3 .claude/scripts/build_playbook_index.py`. It regenerates
+  `.claude/PLAYBOOKS.md` and `.agents/skills/jamovi-playbooks/SKILL.md`, which are how other
+  agents on this machine (Codex, Gemini CLI, Cursor, Copilot, …) discover these playbooks. Both
+  are generated and both are gitignored, because they index `.claude/skills/` which is itself
+  local-only — edit the source playbook, never the index. `--check` exits non-zero when stale.
+  Committed agents read `.claude/commands/` directly via `AGENTS.md` / `GEMINI.md`.
 
 ### Module Update Command
 
@@ -374,8 +381,8 @@ See `R/waterfall.b.R` for complete working example.
   - "Context low" or "Context window exceeded" or "Error: File content (40897 tokens) exceeds maximum allowed tokens (25000). Please use offset and limit parameters to read specific portions of the file, or use the GrepTool to search for specific content."
 - in .u.yaml Label is not allowed to have the additional property "visible"
 - in .u.yaml description is not allowed
-- in .a.yaml type: Level is not allowed to have default
-- official jamovi documentation is here './vignettes/dev.jamovi.org-master'
+- in .a.yaml type: Level is not allowed to have default (verified: 163/163 Level options in this module carry none). Because it can never have a default, a Level is ALWAYS a required argument of the generated R wrapper. Which types do/don't take a `default:`, and which accept NULL, is tabulated in `.claude/skills/release-review-function/SKILL.md`
+- official jamovi documentation is here './development-documentations-dev.jamovi.org-master' (an old snapshot: its options reference covers only Data, Bool, Integer, Number, List, Variable, Variables — silence there about a newer type is not permission)
 - README.md is overwritten. make changes in README.Rmd
 - errors or warnings with jmvtools::prepare() means that the module cannot function in jamovi. there should be no errors.
 - private$.checkpoint() is internal jamovi function we do not define it

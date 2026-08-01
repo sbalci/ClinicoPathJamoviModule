@@ -6,8 +6,8 @@
 \usage{
 oddsratio(
   data,
-  explanatory,
-  outcome,
+  explanatory = NULL,
+  outcome = NULL,
   outcomeLevel,
   diagnosticPredictor = NULL,
   predictorLevel,
@@ -24,8 +24,8 @@ oddsratio(
 \item{outcome}{The outcome variable to be used in the analysis.}
 
 \item{outcomeLevel}{Specify which outcome level represents the positive
-case for likelihood ratio calculations. If not specified, the function will
-use the second level alphabetically.}
+case for likelihood ratio calculations. A positive outcome level is
+required; the analysis stops with an error if it is not specified.}
 
 \item{diagnosticPredictor}{Specify the predictor to drive likelihood
 ratios; must be binary. Defaults to the first explanatory variable.}

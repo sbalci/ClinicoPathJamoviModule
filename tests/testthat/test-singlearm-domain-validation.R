@@ -29,6 +29,13 @@ for (.p in c("ClinicoPath", "jsurvival")) {
 if (is.null(.sa_ns))
     stop("singlearm namespace not found: cannot reach internal singlearmOptions/singlearmClass")
 
+# Bind the two internal generators ONCE, here, so every helper below can name
+# them plainly. Resolving them at each call site is what let run_with_outputs()
+# keep a bare `singlearmOptions` reference long after render_km() was fixed --
+# the file then failed only in the two tests that happened to use that helper.
+singlearmOptions <- get("singlearmOptions", envir = .sa_ns)
+singlearmClass   <- get("singlearmClass",   envir = .sa_ns)
+
 run_singlearm <- function(...) {
     args <- list(...)
     # Keep this helper compatible with installed versions whose generated
@@ -124,6 +131,51 @@ test_that("a valid rate multiplier still scales the incidence rate", {
     expect_equal(r1000$personTimeTable$getCell(rowNo = 1, "rate")$value, 90.91)
 })
 
+test_that("a user variable named row_names is not overwritten by the join key", {
+    d <- data.frame(
+        row_names = c(100, 200, 300, 400, 500, 600),
+        status = factor(c("Dead", "Dead", "Dead", "Alive", "Alive", "Alive"),
+                        levels = c("Alive", "Dead")))
+    res <- run_singlearm(data = d, elapsedtime = "row_names",
+                         outcome = "status", outcomeLevel = "Dead")
+
+    expect_equal(strip_html(res$errors$content), "")
+    expect_equal(res$medianTable$getCell(rowNo = 1, "median")$value, 300)
+})
+
+test_that("the same variable cannot serve as elapsed time and outcome", {
+    d <- data.frame(x = c(0, 1, 1, 0, 1))
+    res <- run_singlearm(data = d, elapsedtime = "x", outcome = "x",
+                         outcomeLevel = "1")
+
+    expect_match(strip_html(res$errors$content),
+                 "Elapsed time and outcome must be different variables")
+    expect_equal(res$medianTable$rowCount, 0)
+})
+
+test_that("start and end dates must be different variables", {
+    d <- data.frame(
+        date = as.Date("2020-01-01") + 0:4,
+        status = factor(c("Alive", "Dead", "Alive", "Dead", "Alive")))
+    res <- run_singlearm(data = d, tint = TRUE, dxdate = "date", fudate = "date",
+                         outcome = "status", outcomeLevel = "Dead")
+
+    expect_match(strip_html(res$errors$content),
+                 "must be different variables")
+    expect_equal(res$medianTable$rowCount, 0)
+})
+
+test_that("a time-zero event is not divided by later person-time", {
+    d <- simple_data(c(0, 2, 4, 6), c(TRUE, FALSE, TRUE, FALSE))
+    res <- run_singlearm(data = d, elapsedtime = "time", outcome = "status",
+                         outcomeLevel = "Dead", person_time = TRUE)
+
+    expect_equal(res$personTimeTable$rowCount, 0)
+    expect_match(strip_html(res$warnings$content),
+                 "Person-time rates were not calculated.*time zero")
+    expect_equal(res$medianTable$rowCount, 1)
+})
+
 
 test_that("negative person-time interval boundaries cannot invent person-time", {
     # Was: time_intervals = "-5, 5" built breaks c(0, -5, 5, max*1.1). The
@@ -135,7 +187,7 @@ test_that("negative person-time interval boundaries cannot invent person-time", 
                          person_time = TRUE, time_intervals = "-5, 5")
 
     expect_match(strip_html(res$warnings$content),
-                 "Person-time intervals must be finite and greater than zero: -5 ignored")
+                 "Person-time intervals must be finite and zero or positive: -5 ignored")
 
     intervals <- col_of(res$personTimeTable, "interval")
     # "0-5" legitimately contains "-5"; what must not appear is a boundary that
@@ -267,8 +319,8 @@ render_km <- function(...) {
     args <- list(...)
     data <- args$data
     args$data <- NULL
-    opts <- do.call(get("singlearmOptions", envir = .sa_ns)$new, args)
-    analysis <- get("singlearmClass", envir = .sa_ns)$new(options = opts, data = data)
+    opts <- do.call(singlearmOptions$new, args)
+    analysis <- singlearmClass$new(options = opts, data = data)
     analysis$run()
     drawn_text(analysis$.__enclos_env__$private$.plot(
         analysis$results$plot, ggplot2::theme_bw(), NULL))
@@ -443,11 +495,17 @@ test_that("the observed event proportion is reported but not graded", {
     expect_equal(col_of(res$dataQualityTable, "value")[rate_row], "50%")
 })
 
-test_that("event scarcity produces exactly one warning, not four", {
-    # Was: .assessDataQuality() emitted "Very few events observed - results may
-    # be unreliable" AND "Low event rate - consider longer follow-up", while
-    # .run() emitted its own "< 3 events" and "< 10 events" notices from the
-    # same two numbers.
+test_that("descriptive diagnostics assign no arbitrary adequacy grades", {
+    res <- run_singlearm(data = ten_subjects(), elapsedtime = "time",
+                         outcome = "status", outcomeLevel = "Dead",
+                         advancedDiagnostics = TRUE)
+
+    grades <- col_of(res$dataQualityTable, "assessment")
+    expect_true(length(grades) >= 6)
+    expect_true(all(grades == "not graded"))
+})
+
+test_that("event scarcity is reported without an arbitrary warning threshold", {
     d <- simple_data(c(2, 4, 6, 8, 10, 12, 14, 16, 18, 20),
                      c(TRUE, FALSE, FALSE, FALSE, TRUE, FALSE, FALSE, TRUE, FALSE, FALSE))
 
@@ -455,15 +513,12 @@ test_that("event scarcity produces exactly one warning, not four", {
                          outcomeLevel = "Dead")
 
     warned <- strip_html(res$warnings$content)
-    expect_equal(lengths(regmatches(warned, gregexpr("Very few events", warned)))[[1]], 1L)
+    expect_false(grepl("Very few events|Limited events", warned))
     expect_false(grepl("Low observed event proportion", warned))
-    # The count and the proportion are both stated, once.
-    expect_match(warned, "Very few events observed: 3 \\(30\\.0% of 10 subjects\\)")
+    expect_equal(res$medianTable$getCell(rowNo = 1, "events")$value, 3)
 })
 
-test_that("a low event proportion with an adequate event count still gets its own notice", {
-    # The regression risk of the test above: folding four notices into one must
-    # not drop the case the count check cannot see.
+test_that("a low observed event proportion is not labelled inadequate", {
     set.seed(1)
     n <- 250
     d <- simple_data(rep(c(13, 15, 17, 19, 21), length.out = n),
@@ -473,6 +528,6 @@ test_that("a low event proportion with an adequate event count still gets its ow
                          outcomeLevel = "Dead")
 
     warned <- strip_html(res$warnings$content)
-    expect_match(warned, "Low observed event proportion")
+    expect_false(grepl("Low observed event proportion", warned))
     expect_false(grepl("Very few events", warned))
 })

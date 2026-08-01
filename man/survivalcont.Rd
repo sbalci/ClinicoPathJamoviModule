@@ -6,12 +6,12 @@
 \usage{
 survivalcont(
   data,
-  elapsedtime,
+  elapsedtime = NULL,
   tint = FALSE,
-  dxdate,
-  fudate,
-  contexpl,
-  outcome,
+  dxdate = NULL,
+  fudate = NULL,
+  contexpl = NULL,
+  outcome = NULL,
   outcomeLevel,
   dod,
   dooc,
@@ -48,7 +48,7 @@ survivalcont(
   rmst_tau = 0,
   residual_diagnostics = FALSE,
   stratified_cox = FALSE,
-  strata_variable,
+  strata_variable = NULL,
   loglog = FALSE,
   showExplanations = FALSE,
   showSummaries = FALSE,
@@ -238,6 +238,7 @@ reproduces the previous fixed behaviour.}
 \value{
 A results object containing:
 \tabular{llllll}{
+\code{results$eventRecodeInfo} \tab \tab \tab \tab \tab a html \cr
 \code{results$todo} \tab \tab \tab \tab \tab a html \cr
 \code{results$clinicalWarnings} \tab \tab \tab \tab \tab a html \cr
 \code{results$errors} \tab \tab \tab \tab \tab a html \cr
@@ -247,6 +248,7 @@ A results object containing:
 \code{results$coxRegressionHeading} \tab \tab \tab \tab \tab a preformatted \cr
 \code{results$coxSummary} \tab \tab \tab \tab \tab a preformatted \cr
 \code{results$coxTable} \tab \tab \tab \tab \tab a table \cr
+\code{results$stratifiedCoxTable} \tab \tab \tab \tab \tab a table \cr
 \code{results$tCoxtext2} \tab \tab \tab \tab \tab a html \cr
 \code{results$coxRegressionHeading3} \tab \tab \tab \tab \tab a preformatted \cr
 \code{results$coxRegressionExplanation} \tab \tab \tab \tab \tab a html \cr
