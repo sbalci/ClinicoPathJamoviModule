@@ -755,7 +755,7 @@ options:
       type: Variable
       suggested: [continuous]
       permitted: [numeric]
-      default: NULL
+      default: null
       description: >-
         Select a continuous predictor variable to assess for non-linear effects.
         The variable will be modeled with restricted cubic splines and compared
