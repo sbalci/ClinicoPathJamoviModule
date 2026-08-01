@@ -29,7 +29,7 @@ test_that("survival runs with minimal required arguments", {
     outcome = "outcome"
   )
 
-  expect_s3_class(result, "survivalClass")
+  expect_s3_class(result, "survivalResults")
   expect_true(!is.null(result$medianTable))
 })
 
@@ -41,7 +41,7 @@ test_that("survival runs with explanatory variable", {
     explanatory = "treatment"
   )
 
-  expect_s3_class(result, "survivalClass")
+  expect_s3_class(result, "survivalResults")
 })
 
 test_that("survival handles numeric outcome correctly", {
@@ -52,7 +52,7 @@ test_that("survival handles numeric outcome correctly", {
     outcome = "outcome"
   )
 
-  expect_s3_class(result, "survivalClass")
+  expect_s3_class(result, "survivalResults")
 })
 
 test_that("survival handles factor explanatory variable", {
@@ -63,31 +63,29 @@ test_that("survival handles factor explanatory variable", {
     explanatory = "treatment"
   )
 
-  expect_s3_class(result, "survivalClass")
+  expect_s3_class(result, "survivalResults")
 })
 
-test_that("survival errors on missing elapsedtime", {
-  expect_error(
-    run_survival(
-      data = survival_test,
-      outcome = "outcome",
-      explanatory = "treatment"
-    ),
-    regexp = "elapsed|time.*required|missing",
-    ignore.case = TRUE
+test_that("survival shows setup guidance when elapsed time is missing", {
+  result <- run_survival(
+    data = survival_test,
+    outcome = "outcome",
+    explanatory = "treatment"
   )
+  expect_s3_class(result, "survivalResults")
+  expect_true(result$todo$visible)
+  expect_match(result$todo$content, "time", ignore.case = TRUE)
 })
 
-test_that("survival errors on missing outcome", {
-  expect_error(
-    run_survival(
-      data = survival_test,
-      elapsedtime = "elapsedtime",
-      explanatory = "treatment"
-    ),
-    regexp = "outcome.*required|missing",
-    ignore.case = TRUE
+test_that("survival shows setup guidance when outcome is missing", {
+  result <- run_survival(
+    data = survival_test,
+    elapsedtime = "elapsedtime",
+    explanatory = "treatment"
   )
+  expect_s3_class(result, "survivalResults")
+  expect_true(result$todo$visible)
+  expect_match(result$todo$content, "outcome", ignore.case = TRUE)
 })
 
 test_that("survival handles continuous time variable", {
@@ -97,7 +95,7 @@ test_that("survival handles continuous time variable", {
     outcome = "outcome"
   )
 
-  expect_s3_class(result, "survivalClass")
+  expect_s3_class(result, "survivalResults")
 })
 
 test_that("survival handles multiple treatment groups", {
@@ -108,7 +106,7 @@ test_that("survival handles multiple treatment groups", {
     explanatory = "treatment"  # 3 levels: Control, Treatment A, Treatment B
   )
 
-  expect_s3_class(result, "survivalClass")
+  expect_s3_class(result, "survivalResults")
 })
 
 test_that("survival handles binary grouping variable", {
@@ -119,7 +117,7 @@ test_that("survival handles binary grouping variable", {
     explanatory = "sex"  # 2 levels: Male, Female
   )
 
-  expect_s3_class(result, "survivalClass")
+  expect_s3_class(result, "survivalResults")
 })
 
 test_that("survival handles ordinal grouping variable", {
@@ -130,7 +128,7 @@ test_that("survival handles ordinal grouping variable", {
     explanatory = "stage"  # 4 ordered levels: I-IV
   )
 
-  expect_s3_class(result, "survivalClass")
+  expect_s3_class(result, "survivalResults")
 })
 
 test_that("survival produces expected output structure", {
@@ -141,7 +139,7 @@ test_that("survival produces expected output structure", {
     explanatory = "treatment"
   )
 
-  expect_s3_class(result, "survivalClass")
+  expect_s3_class(result, "survivalResults")
 })
 
 test_that("survival handles small dataset", {
@@ -154,7 +152,7 @@ test_that("survival handles small dataset", {
     explanatory = "treatment"
   )
 
-  expect_s3_class(result, "survivalClass")
+  expect_s3_class(result, "survivalResults")
 })
 
 test_that("survival runs without grouping variable", {
@@ -165,7 +163,7 @@ test_that("survival runs without grouping variable", {
     outcome = "outcome"
   )
 
-  expect_s3_class(result, "survivalClass")
+  expect_s3_class(result, "survivalResults")
 })
 
 test_that("survival accepts default options", {
@@ -177,6 +175,6 @@ test_that("survival accepts default options", {
     explanatory = "treatment"
   )
 
-  expect_s3_class(result, "survivalClass")
+  expect_s3_class(result, "survivalResults")
   expect_no_error(result)
 })

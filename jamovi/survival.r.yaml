@@ -401,7 +401,7 @@ items:
           type: number
           format: zto
         - name: smr
-          title: "SMR"
+          title: "SMR / Standardized Rate"
           type: number
           format: zto
         - name: smr_ci_lower
@@ -1425,7 +1425,7 @@ items:
     - name: parametricDiagnostics
       title: 'Parametric Model Diagnostics'
       type: Html
-      visible: (use_parametric && parametric_diagnostics)
+      visible: false
       clearWith:
         - use_parametric
         - parametric_diagnostics
@@ -1455,7 +1455,7 @@ items:
       height: 450
       renderFun: .plotHazardFunction
       requiresData: true
-      visible: (use_parametric && hazard_plots)
+      visible: false
       clearWith:
         - use_parametric
         - hazard_plots
@@ -1470,7 +1470,7 @@ items:
       height: 450
       renderFun: .plotExtrapolation
       requiresData: true
-      visible: (use_parametric && parametric_extrapolation)
+      visible: false
       clearWith:
         - use_parametric
         - parametric_extrapolation
@@ -1482,7 +1482,7 @@ items:
     - name: extrapolationTable
       title: 'Extrapolated Survival Estimates'
       type: Table
-      visible: (use_parametric && parametric_extrapolation)
+      visible: false
       rows: 0
       columns:
         - name: time

@@ -9,11 +9,10 @@ jas: '1.2'
 
 description:
     main: >-
-        Performs univariate survival analysis comparing survival between groups. This analysis 
-        calculates person-time follow-up for each group and uses this to derive accurate 
-        survival estimates and incidence rates that account for varying follow-up durations 
-        across groups. The Cox proportional hazards model incorporates person-time by modeling 
-        the hazard function, which represents the instantaneous event rate per unit of person-time.
+        Performs univariate time-to-event analysis comparing groups using Kaplan-Meier
+        estimates, log-rank tests, and Cox proportional hazards regression. Optional
+        outputs include restricted mean survival time and crude person-time incidence
+        rates. These methods describe associations and do not establish causality.
     # R:
     #     dontrun: true
     #     usage: |
@@ -425,8 +424,10 @@ options:
       type: Number
       default: 0
       description: >-
-        Time horizon for RMST calculation. If 0 or not specified, uses the 75th percentile
-        of follow-up time. Should be specified in the same units as the survival time.
+        Common time horizon for RMST calculation. If 0, uses the smaller of the
+        overall 75th percentile of follow-up and the maximum follow-up supported
+        in every group. A custom value must not exceed that common support and
+        must use the same units as the survival time.
 
     - name: stratified_cox
       title: "Stratified Cox regression"
@@ -662,26 +663,25 @@ options:
       type: Bool
       default: false
       description: >-
-        Perform survival extrapolation beyond observed follow-up time using
-        fitted parametric models. Useful for health economic modeling and
-        long-term prognosis assessment.
+        Reserved for backward compatibility. Survival extrapolation is not
+        available in the current release and is not shown in the user interface.
 
     - name: extrapolation_time
       title: "Extrapolation Time Horizon"
       type: Number
       default: 0
       description: >-
-        Maximum time for survival extrapolation (in same units as survival time).
-        If 0, uses 2x maximum observed time. Use with caution as extrapolation
-        relies on distributional assumptions.
+        Reserved for backward compatibility. This value is not used in the
+        current release.
 
     - name: parametric_diagnostics
       title: "Model diagnostics"
       type: Bool
       default: true
       description: >-
-        Display model diagnostics including AIC/BIC for model comparison,
-        residual plots, and goodness-of-fit statistics for parametric models.
+        Reserved for backward compatibility. Dedicated parametric diagnostics
+        are not available in the current release; use distribution comparison
+        to review AIC and BIC.
 
     - name: compare_distributions
       title: "Compare multiple distributions"
@@ -704,8 +704,8 @@ options:
       type: Bool
       default: false
       description: >-
-        Plot estimated hazard functions from parametric models. Shows how
-        instantaneous risk changes over time for different distributions.
+        Reserved for backward compatibility. Parametric hazard plots are not
+        available in the current release and are not shown in the user interface.
 
     # Calibration Curves for Survival Models
     - name: calibration_curves

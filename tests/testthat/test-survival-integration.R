@@ -12,14 +12,14 @@ data(survival_test, package = "ClinicoPath")
 
 test_that("survival produces consistent results across runs", {
   # Run the same analysis twice
-  result1 <- survival(
+  result1 <- run_survival(
     data = survival_test,
     elapsedtime = "elapsedtime",
     outcome = "outcome",
     explanatory = "treatment"
   )
 
-  result2 <- survival(
+  result2 <- run_survival(
     data = survival_test,
     elapsedtime = "elapsedtime",
     outcome = "outcome",
@@ -27,22 +27,22 @@ test_that("survival produces consistent results across runs", {
   )
 
   # Results should be identical (no randomness)
-  expect_s3_class(result1, "survivalClass")
-  expect_s3_class(result2, "survivalClass")
+  expect_s3_class(result1, "survivalResults")
+  expect_s3_class(result2, "survivalResults")
 })
 
 test_that("survival workflow: basic → plots → diagnostics", {
   # Step 1: Basic analysis
-  basic <- survival(
+  basic <- run_survival(
     data = survival_test,
     elapsedtime = "elapsedtime",
     outcome = "outcome",
     explanatory = "treatment"
   )
-  expect_s3_class(basic, "survivalClass")
+  expect_s3_class(basic, "survivalResults")
 
   # Step 2: Add plots
-  with_plots <- survival(
+  with_plots <- run_survival(
     data = survival_test,
     elapsedtime = "elapsedtime",
     outcome = "outcome",
@@ -51,10 +51,10 @@ test_that("survival workflow: basic → plots → diagnostics", {
     risktable = TRUE,
     ci95 = TRUE
   )
-  expect_s3_class(with_plots, "survivalClass")
+  expect_s3_class(with_plots, "survivalResults")
 
   # Step 3: Add diagnostics
-  with_diagnostics <- survival(
+  with_diagnostics <- run_survival(
     data = survival_test,
     elapsedtime = "elapsedtime",
     outcome = "outcome",
@@ -63,14 +63,14 @@ test_that("survival workflow: basic → plots → diagnostics", {
     ph_cox = TRUE,
     residual_diagnostics = TRUE
   )
-  expect_s3_class(with_diagnostics, "survivalClass")
+  expect_s3_class(with_diagnostics, "survivalResults")
 })
 
 test_that("survival workflow: date-based → calculated time → analysis", {
   data(survival_dates, package = "ClinicoPath")
 
   # Calculate time from dates
-  result <- survival(
+  result <- run_survival(
     data = survival_dates,
     tint = TRUE,
     dxdate = "dxdate",
@@ -81,14 +81,14 @@ test_that("survival workflow: date-based → calculated time → analysis", {
     timetypeoutput = "months"
   )
 
-  expect_s3_class(result, "survivalClass")
+  expect_s3_class(result, "survivalResults")
 })
 
 test_that("survival workflow: competing risks complete analysis", {
   data(survival_competing, package = "ClinicoPath")
 
   # Complete competing risks workflow
-  result <- survival(
+  result <- run_survival(
     data = survival_competing,
     elapsedtime = "elapsedtime",
     outcome = "outcome",
@@ -105,23 +105,23 @@ test_that("survival workflow: competing risks complete analysis", {
     risktable = TRUE
   )
 
-  expect_s3_class(result, "survivalClass")
+  expect_s3_class(result, "survivalResults")
 })
 
 test_that("survival workflow: landmark analysis", {
   data(survival_landmark, package = "ClinicoPath")
 
   # Step 1: Overall survival
-  overall <- survival(
+  overall <- run_survival(
     data = survival_landmark,
     elapsedtime = "elapsedtime",
     outcome = "outcome",
     explanatory = "treatment"
   )
-  expect_s3_class(overall, "survivalClass")
+  expect_s3_class(overall, "survivalResults")
 
   # Step 2: Landmark analysis from 6 months
-  landmark <- survival(
+  landmark <- run_survival(
     data = survival_landmark,
     elapsedtime = "elapsedtime",
     outcome = "outcome",
@@ -129,24 +129,24 @@ test_that("survival workflow: landmark analysis", {
     landmark = 6,
     explanatory = "response_6mo"
   )
-  expect_s3_class(landmark, "survivalClass")
+  expect_s3_class(landmark, "survivalResults")
 })
 
 test_that("survival workflow: stratified Cox regression", {
   data(survival_stratified, package = "ClinicoPath")
 
   # Step 1: Test proportional hazards
-  ph_test <- survival(
+  ph_test <- run_survival(
     data = survival_stratified,
     elapsedtime = "elapsedtime",
     outcome = "outcome",
     explanatory = "treatment",
     ph_cox = TRUE
   )
-  expect_s3_class(ph_test, "survivalClass")
+  expect_s3_class(ph_test, "survivalResults")
 
   # Step 2: Stratify on non-proportional variable
-  stratified <- survival(
+  stratified <- run_survival(
     data = survival_stratified,
     elapsedtime = "elapsedtime",
     outcome = "outcome",
@@ -154,14 +154,14 @@ test_that("survival workflow: stratified Cox regression", {
     stratified_cox = TRUE,
     strata_variable = "sex"
   )
-  expect_s3_class(stratified, "survivalClass")
+  expect_s3_class(stratified, "survivalResults")
 })
 
 test_that("survival workflow: person-time analysis", {
   data(survival_person_time, package = "ClinicoPath")
 
   # Complete person-time analysis
-  result <- survival(
+  result <- run_survival(
     data = survival_person_time,
     elapsedtime = "elapsedtime",
     outcome = "outcome",
@@ -172,14 +172,14 @@ test_that("survival workflow: person-time analysis", {
     sc = TRUE
   )
 
-  expect_s3_class(result, "survivalClass")
+  expect_s3_class(result, "survivalResults")
 })
 
 test_that("survival workflow: RMST analysis", {
   data(survival_rmst, package = "ClinicoPath")
 
   # RMST with specified time horizon
-  result <- survival(
+  result <- run_survival(
     data = survival_rmst,
     elapsedtime = "elapsedtime",
     outcome = "outcome",
@@ -189,7 +189,7 @@ test_that("survival workflow: RMST analysis", {
     sc = TRUE
   )
 
-  expect_s3_class(result, "survivalClass")
+  expect_s3_class(result, "survivalResults")
 })
 
 test_that("survival handles data from CSV import", {
@@ -200,14 +200,14 @@ test_that("survival handles data from CSV import", {
   # Read it back
   csv_data <- read.csv(temp_csv)
 
-  result <- survival(
+  result <- run_survival(
     data = csv_data,
     elapsedtime = "elapsedtime",
     outcome = "outcome",
     explanatory = "treatment"
   )
 
-  expect_s3_class(result, "survivalClass")
+  expect_s3_class(result, "survivalResults")
 
   # Clean up
   unlink(temp_csv)
@@ -221,14 +221,14 @@ test_that("survival handles data from Excel import", {
   # Read it back
   xlsx_data <- readxl::read_excel(temp_xlsx)
 
-  result <- survival(
+  result <- run_survival(
     data = as.data.frame(xlsx_data),
     elapsedtime = "elapsedtime",
     outcome = "outcome",
     explanatory = "treatment"
   )
 
-  expect_s3_class(result, "survivalClass")
+  expect_s3_class(result, "survivalResults")
 
   # Clean up
   unlink(temp_xlsx)
@@ -239,31 +239,31 @@ test_that("survival handles different data structures consistently", {
   library(tibble)
   tibble_data <- as_tibble(survival_test)
 
-  result_tibble <- survival(
+  result_tibble <- run_survival(
     data = tibble_data,
     elapsedtime = "elapsedtime",
     outcome = "outcome",
     explanatory = "treatment"
   )
 
-  expect_s3_class(result_tibble, "survivalClass")
+  expect_s3_class(result_tibble, "survivalResults")
 
   # Test with data.frame
   df_data <- as.data.frame(survival_test)
 
-  result_df <- survival(
+  result_df <- run_survival(
     data = df_data,
     elapsedtime = "elapsedtime",
     outcome = "outcome",
     explanatory = "treatment"
   )
 
-  expect_s3_class(result_df, "survivalClass")
+  expect_s3_class(result_df, "survivalResults")
 })
 
 test_that("survival workflow: complete publication-ready analysis", {
   # Comprehensive analysis for publication
-  result <- survival(
+  result <- run_survival(
     data = survival_test,
     elapsedtime = "elapsedtime",
     outcome = "outcome",
@@ -287,33 +287,33 @@ test_that("survival workflow: complete publication-ready analysis", {
     showSummaries = TRUE
   )
 
-  expect_s3_class(result, "survivalClass")
+  expect_s3_class(result, "survivalResults")
 })
 
 test_that("survival workflow: subgroup analysis", {
   # Analyze different subgroups
-  result_stage1 <- survival(
+  result_stage1 <- run_survival(
     data = survival_test[survival_test$stage == "I", ],
     elapsedtime = "elapsedtime",
     outcome = "outcome",
     explanatory = "treatment"
   )
-  expect_s3_class(result_stage1, "survivalClass")
+  expect_s3_class(result_stage1, "survivalResults")
 
-  result_stage4 <- survival(
+  result_stage4 <- run_survival(
     data = survival_test[survival_test$stage == "IV", ],
     elapsedtime = "elapsedtime",
     outcome = "outcome",
     explanatory = "treatment"
   )
-  expect_s3_class(result_stage4, "survivalClass")
+  expect_s3_class(result_stage4, "survivalResults")
 })
 
 test_that("survival workflow: multiple outcome comparisons", {
   data(survival_competing, package = "ClinicoPath")
 
   # Disease-specific death
-  result_dod <- survival(
+  result_dod <- run_survival(
     data = survival_competing,
     elapsedtime = "elapsedtime",
     outcome = "outcome",
@@ -321,10 +321,10 @@ test_that("survival workflow: multiple outcome comparisons", {
     analysistype = "cause",
     explanatory = "treatment"
   )
-  expect_s3_class(result_dod, "survivalClass")
+  expect_s3_class(result_dod, "survivalResults")
 
   # Other causes of death
-  result_dooc <- survival(
+  result_dooc <- run_survival(
     data = survival_competing,
     elapsedtime = "elapsedtime",
     outcome = "outcome",
@@ -332,36 +332,36 @@ test_that("survival workflow: multiple outcome comparisons", {
     analysistype = "cause",
     explanatory = "treatment"
   )
-  expect_s3_class(result_dooc, "survivalClass")
+  expect_s3_class(result_dooc, "survivalResults")
 })
 
 test_that("survival workflow: sensitivity analysis with different cutpoints", {
   # Cutpoints at 1, 3, 5 years
-  result1 <- survival(
+  result1 <- run_survival(
     data = survival_test,
     elapsedtime = "elapsedtime",
     outcome = "outcome",
     explanatory = "treatment",
     cutp = "12, 36, 60"
   )
-  expect_s3_class(result1, "survivalClass")
+  expect_s3_class(result1, "survivalResults")
 
   # Different cutpoints
-  result2 <- survival(
+  result2 <- run_survival(
     data = survival_test,
     elapsedtime = "elapsedtime",
     outcome = "outcome",
     explanatory = "treatment",
     cutp = "6, 24, 48"
   )
-  expect_s3_class(result2, "survivalClass")
+  expect_s3_class(result2, "survivalResults")
 })
 
 test_that("survival integrates with small dataset workflow", {
   data(survival_small, package = "ClinicoPath")
 
   # Quick analysis with small dataset
-  result <- survival(
+  result <- run_survival(
     data = survival_small,
     elapsedtime = "elapsedtime",
     outcome = "outcome",
@@ -369,14 +369,14 @@ test_that("survival integrates with small dataset workflow", {
     sc = TRUE
   )
 
-  expect_s3_class(result, "survivalClass")
+  expect_s3_class(result, "survivalResults")
 })
 
 test_that("survival workflow: comparing analysis types", {
   data(survival_competing, package = "ClinicoPath")
 
-  # Overall survival (ignores cause)
-  result_overall <- survival(
+  # Overall run_survival(ignores cause)
+  result_overall <- run_survival(
     data = survival_competing,
     elapsedtime = "elapsedtime",
     outcome = "outcome",
@@ -384,10 +384,10 @@ test_that("survival workflow: comparing analysis types", {
     analysistype = "overall",
     explanatory = "treatment"
   )
-  expect_s3_class(result_overall, "survivalClass")
+  expect_s3_class(result_overall, "survivalResults")
 
   # Cause-specific (censors other causes)
-  result_cause <- survival(
+  result_cause <- run_survival(
     data = survival_competing,
     elapsedtime = "elapsedtime",
     outcome = "outcome",
@@ -395,10 +395,10 @@ test_that("survival workflow: comparing analysis types", {
     analysistype = "cause",
     explanatory = "treatment"
   )
-  expect_s3_class(result_cause, "survivalClass")
+  expect_s3_class(result_cause, "survivalResults")
 
   # Competing risk (accounts for other causes)
-  result_compete <- survival(
+  result_compete <- run_survival(
     data = survival_competing,
     elapsedtime = "elapsedtime",
     outcome = "outcome",
@@ -411,5 +411,5 @@ test_that("survival workflow: comparing analysis types", {
     multievent = TRUE,
     explanatory = "treatment"
   )
-  expect_s3_class(result_compete, "survivalClass")
+  expect_s3_class(result_compete, "survivalResults")
 })

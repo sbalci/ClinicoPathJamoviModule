@@ -13,7 +13,7 @@ data(survival_test, package = "ClinicoPath")
 test_that("survival handles date-based time calculation", {
   data(survival_dates, package = "ClinicoPath")
 
-  result <- survival(
+  result <- run_survival(
     data = survival_dates,
     tint = TRUE,
     dxdate = "dxdate",
@@ -24,13 +24,13 @@ test_that("survival handles date-based time calculation", {
     timetypeoutput = "months"
   )
 
-  expect_s3_class(result, "survivalClass")
+  expect_s3_class(result, "survivalResults")
 })
 
 test_that("survival handles competing risks analysis", {
   data(survival_competing, package = "ClinicoPath")
 
-  result <- survival(
+  result <- run_survival(
     data = survival_competing,
     elapsedtime = "elapsedtime",
     outcome = "outcome",
@@ -44,13 +44,13 @@ test_that("survival handles competing risks analysis", {
     explanatory = "treatment"
   )
 
-  expect_s3_class(result, "survivalClass")
+  expect_s3_class(result, "survivalResults")
 })
 
 test_that("survival handles landmark analysis", {
   data(survival_landmark, package = "ClinicoPath")
 
-  result <- survival(
+  result <- run_survival(
     data = survival_landmark,
     elapsedtime = "elapsedtime",
     outcome = "outcome",
@@ -59,13 +59,13 @@ test_that("survival handles landmark analysis", {
     explanatory = "response_6mo"
   )
 
-  expect_s3_class(result, "survivalClass")
+  expect_s3_class(result, "survivalResults")
 })
 
 test_that("survival handles stratified Cox regression", {
   data(survival_stratified, package = "ClinicoPath")
 
-  result <- survival(
+  result <- run_survival(
     data = survival_stratified,
     elapsedtime = "elapsedtime",
     outcome = "outcome",
@@ -74,13 +74,13 @@ test_that("survival handles stratified Cox regression", {
     strata_variable = "sex"
   )
 
-  expect_s3_class(result, "survivalClass")
+  expect_s3_class(result, "survivalResults")
 })
 
 test_that("survival calculates person-time metrics", {
   data(survival_person_time, package = "ClinicoPath")
 
-  result <- survival(
+  result <- run_survival(
     data = survival_person_time,
     elapsedtime = "elapsedtime",
     outcome = "outcome",
@@ -90,13 +90,13 @@ test_that("survival calculates person-time metrics", {
     rate_multiplier = 100
   )
 
-  expect_s3_class(result, "survivalClass")
+  expect_s3_class(result, "survivalResults")
 })
 
 test_that("survival performs RMST analysis", {
   data(survival_rmst, package = "ClinicoPath")
 
-  result <- survival(
+  result <- run_survival(
     data = survival_rmst,
     elapsedtime = "elapsedtime",
     outcome = "outcome",
@@ -105,11 +105,11 @@ test_that("survival performs RMST analysis", {
     rmst_tau = 48  # 48 month time horizon
   )
 
-  expect_s3_class(result, "survivalClass")
+  expect_s3_class(result, "survivalResults")
 })
 
 test_that("survival generates survival plots", {
-  result <- survival(
+  result <- run_survival(
     data = survival_test,
     elapsedtime = "elapsedtime",
     outcome = "outcome",
@@ -119,11 +119,11 @@ test_that("survival generates survival plots", {
     byplot = 12
   )
 
-  expect_s3_class(result, "survivalClass")
+  expect_s3_class(result, "survivalResults")
 })
 
 test_that("survival generates KMunicate-style plot", {
-  result <- survival(
+  result <- run_survival(
     data = survival_test,
     elapsedtime = "elapsedtime",
     outcome = "outcome",
@@ -131,11 +131,11 @@ test_that("survival generates KMunicate-style plot", {
     kmunicate = TRUE
   )
 
-  expect_s3_class(result, "survivalClass")
+  expect_s3_class(result, "survivalResults")
 })
 
 test_that("survival includes risk table", {
-  result <- survival(
+  result <- run_survival(
     data = survival_test,
     elapsedtime = "elapsedtime",
     outcome = "outcome",
@@ -144,11 +144,11 @@ test_that("survival includes risk table", {
     risktable = TRUE
   )
 
-  expect_s3_class(result, "survivalClass")
+  expect_s3_class(result, "survivalResults")
 })
 
 test_that("survival includes 95% confidence intervals", {
-  result <- survival(
+  result <- run_survival(
     data = survival_test,
     elapsedtime = "elapsedtime",
     outcome = "outcome",
@@ -157,11 +157,11 @@ test_that("survival includes 95% confidence intervals", {
     ci95 = TRUE
   )
 
-  expect_s3_class(result, "survivalClass")
+  expect_s3_class(result, "survivalResults")
 })
 
 test_that("survival marks censored observations", {
-  result <- survival(
+  result <- run_survival(
     data = survival_test,
     elapsedtime = "elapsedtime",
     outcome = "outcome",
@@ -170,11 +170,11 @@ test_that("survival marks censored observations", {
     censored = TRUE
   )
 
-  expect_s3_class(result, "survivalClass")
+  expect_s3_class(result, "survivalResults")
 })
 
 test_that("survival shows p-value on plot", {
-  result <- survival(
+  result <- run_survival(
     data = survival_test,
     elapsedtime = "elapsedtime",
     outcome = "outcome",
@@ -183,11 +183,11 @@ test_that("survival shows p-value on plot", {
     pplot = TRUE
   )
 
-  expect_s3_class(result, "survivalClass")
+  expect_s3_class(result, "survivalResults")
 })
 
 test_that("survival shows median survival line", {
-  result <- survival(
+  result <- run_survival(
     data = survival_test,
     elapsedtime = "elapsedtime",
     outcome = "outcome",
@@ -196,11 +196,11 @@ test_that("survival shows median survival line", {
     medianline = "hv"  # both horizontal and vertical
   )
 
-  expect_s3_class(result, "survivalClass")
+  expect_s3_class(result, "survivalResults")
 })
 
 test_that("survival generates cumulative events plot", {
-  result <- survival(
+  result <- run_survival(
     data = survival_test,
     elapsedtime = "elapsedtime",
     outcome = "outcome",
@@ -208,11 +208,11 @@ test_that("survival generates cumulative events plot", {
     ce = TRUE
   )
 
-  expect_s3_class(result, "survivalClass")
+  expect_s3_class(result, "survivalResults")
 })
 
 test_that("survival generates cumulative hazard plot", {
-  result <- survival(
+  result <- run_survival(
     data = survival_test,
     elapsedtime = "elapsedtime",
     outcome = "outcome",
@@ -220,11 +220,11 @@ test_that("survival generates cumulative hazard plot", {
     ch = TRUE
   )
 
-  expect_s3_class(result, "survivalClass")
+  expect_s3_class(result, "survivalResults")
 })
 
 test_that("survival tests proportional hazards assumption", {
-  result <- survival(
+  result <- run_survival(
     data = survival_test,
     elapsedtime = "elapsedtime",
     outcome = "outcome",
@@ -232,11 +232,11 @@ test_that("survival tests proportional hazards assumption", {
     ph_cox = TRUE
   )
 
-  expect_s3_class(result, "survivalClass")
+  expect_s3_class(result, "survivalResults")
 })
 
 test_that("survival generates log-log plot", {
-  result <- survival(
+  result <- run_survival(
     data = survival_test,
     elapsedtime = "elapsedtime",
     outcome = "outcome",
@@ -244,11 +244,11 @@ test_that("survival generates log-log plot", {
     loglog = TRUE
   )
 
-  expect_s3_class(result, "survivalClass")
+  expect_s3_class(result, "survivalResults")
 })
 
 test_that("survival performs pairwise comparisons", {
-  result <- survival(
+  result <- run_survival(
     data = survival_test,
     elapsedtime = "elapsedtime",
     outcome = "outcome",
@@ -257,12 +257,12 @@ test_that("survival performs pairwise comparisons", {
     padjustmethod = "holm"
   )
 
-  expect_s3_class(result, "survivalClass")
+  expect_s3_class(result, "survivalResults")
 })
 
 test_that("survival handles different p-value adjustment methods", {
   # Test with Bonferroni
-  result1 <- survival(
+  result1 <- run_survival(
     data = survival_test,
     elapsedtime = "elapsedtime",
     outcome = "outcome",
@@ -270,10 +270,10 @@ test_that("survival handles different p-value adjustment methods", {
     pw = TRUE,
     padjustmethod = "bonferroni"
   )
-  expect_s3_class(result1, "survivalClass")
+  expect_s3_class(result1, "survivalResults")
 
   # Test with FDR
-  result2 <- survival(
+  result2 <- run_survival(
     data = survival_test,
     elapsedtime = "elapsedtime",
     outcome = "outcome",
@@ -281,11 +281,11 @@ test_that("survival handles different p-value adjustment methods", {
     pw = TRUE,
     padjustmethod = "fdr"
   )
-  expect_s3_class(result2, "survivalClass")
+  expect_s3_class(result2, "survivalResults")
 })
 
 test_that("survival calculates residual diagnostics", {
-  result <- survival(
+  result <- run_survival(
     data = survival_test,
     elapsedtime = "elapsedtime",
     outcome = "outcome",
@@ -293,11 +293,11 @@ test_that("survival calculates residual diagnostics", {
     residual_diagnostics = TRUE
   )
 
-  expect_s3_class(result, "survivalClass")
+  expect_s3_class(result, "survivalResults")
 })
 
 test_that("survival shows analysis explanations", {
-  result <- survival(
+  result <- run_survival(
     data = survival_test,
     elapsedtime = "elapsedtime",
     outcome = "outcome",
@@ -305,11 +305,11 @@ test_that("survival shows analysis explanations", {
     showExplanations = TRUE
   )
 
-  expect_s3_class(result, "survivalClass")
+  expect_s3_class(result, "survivalResults")
 })
 
 test_that("survival shows natural language summaries", {
-  result <- survival(
+  result <- run_survival(
     data = survival_test,
     elapsedtime = "elapsedtime",
     outcome = "outcome",
@@ -317,11 +317,11 @@ test_that("survival shows natural language summaries", {
     showSummaries = TRUE
   )
 
-  expect_s3_class(result, "survivalClass")
+  expect_s3_class(result, "survivalResults")
 })
 
 test_that("survival handles custom cutpoints", {
-  result <- survival(
+  result <- run_survival(
     data = survival_test,
     elapsedtime = "elapsedtime",
     outcome = "outcome",
@@ -329,14 +329,14 @@ test_that("survival handles custom cutpoints", {
     cutp = "6, 12, 24, 36"
   )
 
-  expect_s3_class(result, "survivalClass")
+  expect_s3_class(result, "survivalResults")
 })
 
 test_that("survival handles different time output types", {
   data(survival_dates, package = "ClinicoPath")
 
   # Test with years output
-  result1 <- survival(
+  result1 <- run_survival(
     data = survival_dates,
     tint = TRUE,
     dxdate = "dxdate",
@@ -345,10 +345,10 @@ test_that("survival handles different time output types", {
     timetypedata = "ymd",
     timetypeoutput = "years"
   )
-  expect_s3_class(result1, "survivalClass")
+  expect_s3_class(result1, "survivalResults")
 
   # Test with days output
-  result2 <- survival(
+  result2 <- run_survival(
     data = survival_dates,
     tint = TRUE,
     dxdate = "dxdate",
@@ -357,13 +357,13 @@ test_that("survival handles different time output types", {
     timetypedata = "ymd",
     timetypeoutput = "days"
   )
-  expect_s3_class(result2, "survivalClass")
+  expect_s3_class(result2, "survivalResults")
 })
 
 test_that("survival handles cause-specific survival", {
   data(survival_competing, package = "ClinicoPath")
 
-  result <- survival(
+  result <- run_survival(
     data = survival_competing,
     elapsedtime = "elapsedtime",
     outcome = "outcome",
@@ -372,12 +372,12 @@ test_that("survival handles cause-specific survival", {
     explanatory = "treatment"
   )
 
-  expect_s3_class(result, "survivalClass")
+  expect_s3_class(result, "survivalResults")
 })
 
 test_that("survival combines multiple features", {
   # Comprehensive analysis with many options
-  result <- survival(
+  result <- run_survival(
     data = survival_test,
     elapsedtime = "elapsedtime",
     outcome = "outcome",
@@ -396,5 +396,5 @@ test_that("survival combines multiple features", {
     showSummaries = TRUE
   )
 
-  expect_s3_class(result, "survivalClass")
+  expect_s3_class(result, "survivalResults")
 })

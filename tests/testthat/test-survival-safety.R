@@ -27,7 +27,9 @@ surv_args <- function(...) {
     awod = "",
     explanatory = "treatment"
   )
-  modifyList(defaults, list(...))
+  supplied <- list(...)
+  defaults[names(supplied)] <- supplied
+  defaults
 }
 
 # ─── Negative Survival Time Validation ────────────────────
@@ -46,17 +48,16 @@ test_that("survival errors on negative elapsed times", {
 
 # ─── Event Count Blocking (<10 events) ───────────────────
 
-test_that("survival blocks analysis with fewer than 10 events", {
+test_that("survival keeps descriptive output with fewer than 10 events", {
   test_data <- survival_test
   test_data$outcome <- 0
   test_data$outcome[1:5] <- 1
 
   args <- surv_args(data = test_data)
-  expect_error(
-    do.call(survival, args),
-    regexp = "CRITICAL|events|minimum",
-    ignore.case = TRUE
-  )
+  result <- do.call(survival, args)
+  expect_s3_class(result, "survivalResults")
+  expect_gt(result$medianTable$rowCount, 0)
+  expect_equal(result$coxTable$rowCount, 0)
 })
 
 # ─── RMST with Default Tau ───────────────────────────────
@@ -65,6 +66,46 @@ test_that("survival RMST with tau=0 uses 75th percentile default", {
   args <- surv_args(rmst_analysis = TRUE, rmst_tau = 0)
   result <- do.call(survival, args)
   expect_true(inherits(result, "R6"))
+})
+
+test_that("survival RMST agrees with survival::survfit reference values", {
+  data(survival_rmst, package = "ClinicoPath")
+  args <- surv_args(
+    data = survival_rmst,
+    explanatory = "treatment",
+    rmst_analysis = TRUE,
+    rmst_tau = 48
+  )
+  result <- do.call(survival, args)
+  observed <- result$rmstTable$asDF
+
+  reference_fit <- survival::survfit(
+    survival::Surv(elapsedtime, outcome) ~ treatment,
+    data = survival_rmst
+  )
+  reference <- summary(reference_fit, rmean = 48, extend = TRUE)$table
+
+  expect_equal(observed$rmst, unname(round(reference[, "rmean"], 2)), tolerance = 1e-8)
+  expect_equal(observed$se, unname(round(reference[, "se(rmean)"], 2)), tolerance = 1e-8)
+  expect_equal(
+    observed$ci_lower,
+    unname(round(reference[, "rmean"] - 1.96 * reference[, "se(rmean)"], 2)),
+    tolerance = 1e-8
+  )
+})
+
+test_that("survival RMST rejects a horizon beyond common group support", {
+  data(survival_rmst, package = "ClinicoPath")
+  args <- surv_args(
+    data = survival_rmst,
+    explanatory = "treatment",
+    rmst_analysis = TRUE,
+    rmst_tau = 1e6
+  )
+  result <- do.call(survival, args)
+
+  expect_equal(result$rmstTable$rowCount, 0)
+  expect_true(length(result$rmstTable$notes) > 0)
 })
 
 # ─── Basic Cox Regression Runs ───────────────────────────
@@ -97,7 +138,7 @@ test_that("survival handles variable names with spaces", {
 # ─── Weighted Log-Rank Tests ─────────────────────────────
 
 test_that("survival weighted log-rank tests run correctly", {
-  args <- surv_args(weightedLogRank = TRUE, survivalTestType = "gehan_breslow")
+  args <- surv_args(weightedLogRank = TRUE, survivalTestType = "fh_rho0_5")
   result <- do.call(survival, args)
   expect_true(inherits(result, "R6"))
 })

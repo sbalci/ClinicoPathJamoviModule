@@ -9,7 +9,7 @@
 
 ## 1. Overview
 
-The `survival` function is the largest single analysis in the ClinicoPath jamovi module. It provides a comprehensive univariate survival analysis toolkit covering Kaplan-Meier estimation, Cox proportional hazards regression, competing risks, RMST, person-time incidence rates, calibration curves, restricted cubic splines for non-linearity, bootstrap internal validation, age-adjusted analysis, and parametric survival models (currently disabled).
+The `survival` function is the largest single analysis in the ClinicoPath jamovi module. It provides a comprehensive univariate survival analysis toolkit covering Kaplan-Meier estimation, Cox proportional hazards regression, competing risks, RMST, person-time incidence rates, calibration curves, restricted cubic splines for non-linearity, bootstrap internal validation, age-adjusted analysis, and core parametric survival models.
 
 ### Files
 
@@ -180,14 +180,10 @@ Controls are grouped by CollapseBox sections in `survival.u.yaml`. Each row maps
 | CheckBox | checkbox | Enable Parametric Models | `use_parametric` | Bool | false | - |
 | ComboBox | dropdown | Distribution | `parametric_distribution` | List | weibull | `(use_parametric)` |
 | CheckBox | checkbox | Include Covariates | `parametric_covariates` | Bool | true | `(use_parametric)` |
-| TextBox | number | Spline Knots | `spline_knots` | Integer | 3 | `(use_parametric)` |
-| ComboBox | dropdown | Spline Scale | `spline_scale` | List | hazard | `(use_parametric)` |
-| CheckBox | checkbox | Extrapolation Analysis | `parametric_extrapolation` | Bool | false | `(use_parametric)` |
-| TextBox | number | Extrapolation Time Horizon | `extrapolation_time` | Number | 0 | `(use_parametric && parametric_extrapolation)` |
-| CheckBox | checkbox | Model Diagnostics | `parametric_diagnostics` | Bool | true | `(use_parametric)` |
+| TextBox | number | Spline Knots | `spline_knots` | Integer | 3 | `(use_parametric && parametric_distribution:survspline)` |
+| ComboBox | dropdown | Spline Scale | `spline_scale` | List | hazard | `(use_parametric && parametric_distribution:survspline)` |
 | CheckBox | checkbox | Compare Multiple Distributions | `compare_distributions` | Bool | false | `(use_parametric)` |
 | CheckBox | checkbox | Parametric Survival Plots | `parametric_survival_plots` | Bool | false | `(use_parametric)` |
-| CheckBox | checkbox | Hazard Function Plots | `hazard_plots` | Bool | false | `(use_parametric)` |
 
 ---
 
@@ -794,9 +790,14 @@ This prevents incompatible analyses from running when `multievent && analysistyp
 
 Inserted between every major analysis step to yield control back to jamovi's event loop. This prevents the UI from freezing during long-running analyses (especially bootstrap validation with up to 1000 resamples).
 
-### Parametric models: defined but disabled
+### Parametric models
 
-The full parametric survival model infrastructure (options, UI controls, result definitions, and stub plot methods) is in place but commented out in `.run()`. The `.plotParametricSurvival()`, `.plotHazardFunction()`, and `.plotExtrapolation()` methods exist as empty stubs. This is staged for a future release.
+The current release fits exponential, Weibull, log-normal, log-logistic, gamma,
+generalized-gamma, Gompertz, and Royston-Parmar spline models through `flexsurv`.
+It reports parameter estimates, can compare distributions using AIC/BIC, and can
+compare fitted survival curves with Kaplan-Meier estimates. Dedicated parametric
+diagnostics, hazard plots, and extrapolation remain reserved compatibility options
+and are not exposed in the UI because their backend renderers are not implemented.
 
 ### Bootstrap validation: `reverse = TRUE`
 
@@ -805,7 +806,7 @@ The bootstrap validation uses `survival::concordance(cox_fit, reverse = TRUE)` b
 ### Event count safety thresholds
 
 Three tiers enforced in `.run()`:
-- **< 10 events**: `stop()` - blocks analysis entirely with error message
+- **< 10 events**: descriptive output remains available, with model-based output suppressed and a warning
 - **10-19 events**: `setNote("lowevents", ...)` - caution warning
 - **20-49 events**: `setNote("moderateevents", ...)` - informational note about limitations for complex analyses
 

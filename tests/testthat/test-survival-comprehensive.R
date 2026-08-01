@@ -26,7 +26,7 @@ data(survival_comprehensive, package = "ClinicoPath")
 # ───────────────────────────────────────────────────────────
 
 test_that("Basic KM analysis with time + outcome + explanatory works", {
-  result <- survival(
+  result <- run_survival(
     data = survival_comprehensive,
     elapsedtime = "FollowUpMonths",
     outcome = "Status",
@@ -38,13 +38,13 @@ test_that("Basic KM analysis with time + outcome + explanatory works", {
     explanatory = "TumorStage"
   )
 
-  expect_s3_class(result, "survivalClass")
-  expect_true("results" %in% names(result))
+  expect_s3_class(result, "survivalResults")
+  expect_false(is.null(result$medianTable))
 })
 
 
 test_that("KM analysis without explanatory variable (overall survival)", {
-  result <- survival(
+  result <- run_survival(
     data = survival_comprehensive,
     elapsedtime = "FollowUpMonths",
     outcome = "Status",
@@ -55,12 +55,12 @@ test_that("KM analysis without explanatory variable (overall survival)", {
     awod = "Alive without Disease"
   )
 
-  expect_s3_class(result, "survivalClass")
+  expect_s3_class(result, "survivalResults")
 })
 
 
 test_that("KM analysis with two-level explanatory variable", {
-  result <- survival(
+  result <- run_survival(
     data = survival_comprehensive,
     elapsedtime = "FollowUpMonths",
     outcome = "Status",
@@ -72,12 +72,12 @@ test_that("KM analysis with two-level explanatory variable", {
     explanatory = "Sex"
   )
 
-  expect_s3_class(result, "survivalClass")
+  expect_s3_class(result, "survivalResults")
 })
 
 
 test_that("KM analysis with TumorGrade as explanatory", {
-  result <- survival(
+  result <- run_survival(
     data = survival_comprehensive,
     elapsedtime = "FollowUpMonths",
     outcome = "Status",
@@ -89,7 +89,7 @@ test_that("KM analysis with TumorGrade as explanatory", {
     explanatory = "TumorGrade"
   )
 
-  expect_s3_class(result, "survivalClass")
+  expect_s3_class(result, "survivalResults")
 })
 
 
@@ -98,7 +98,7 @@ test_that("KM analysis with TumorGrade as explanatory", {
 # ───────────────────────────────────────────────────────────
 
 test_that("Cox regression with age adjustment works", {
-  result <- survival(
+  result <- run_survival(
     data = survival_comprehensive,
     elapsedtime = "FollowUpMonths",
     outcome = "Status",
@@ -112,12 +112,12 @@ test_that("Cox regression with age adjustment works", {
     age_variable = "Age"
   )
 
-  expect_s3_class(result, "survivalClass")
+  expect_s3_class(result, "survivalResults")
 })
 
 
 test_that("Age interaction test works", {
-  result <- survival(
+  result <- run_survival(
     data = survival_comprehensive,
     elapsedtime = "FollowUpMonths",
     outcome = "Status",
@@ -132,12 +132,12 @@ test_that("Age interaction test works", {
     age_interaction = TRUE
   )
 
-  expect_s3_class(result, "survivalClass")
+  expect_s3_class(result, "survivalResults")
 })
 
 
 test_that("Age-stratified Cox model works", {
-  result <- survival(
+  result <- run_survival(
     data = survival_comprehensive,
     elapsedtime = "FollowUpMonths",
     outcome = "Status",
@@ -153,7 +153,7 @@ test_that("Age-stratified Cox model works", {
     age_group_cutpoints = "50, 65, 75"
   )
 
-  expect_s3_class(result, "survivalClass")
+  expect_s3_class(result, "survivalResults")
 })
 
 
@@ -162,7 +162,7 @@ test_that("Age-stratified Cox model works", {
 # ───────────────────────────────────────────────────────────
 
 test_that("Competing risks analysis works", {
-  result <- survival(
+  result <- run_survival(
     data = survival_comprehensive,
     elapsedtime = "FollowUpMonths",
     outcome = "Status",
@@ -176,12 +176,12 @@ test_that("Competing risks analysis works", {
     multievent = TRUE
   )
 
-  expect_s3_class(result, "survivalClass")
+  expect_s3_class(result, "survivalResults")
 })
 
 
 test_that("Cause-specific survival analysis works", {
-  result <- survival(
+  result <- run_survival(
     data = survival_comprehensive,
     elapsedtime = "FollowUpMonths",
     outcome = "Status",
@@ -195,7 +195,7 @@ test_that("Cause-specific survival analysis works", {
     multievent = TRUE
   )
 
-  expect_s3_class(result, "survivalClass")
+  expect_s3_class(result, "survivalResults")
 })
 
 
@@ -204,7 +204,7 @@ test_that("Cause-specific survival analysis works", {
 # ───────────────────────────────────────────────────────────
 
 test_that("Date-based survival time calculation works", {
-  result <- survival(
+  result <- run_survival(
     data = survival_comprehensive,
     tint = TRUE,
     dxdate = "DiagnosisDate",
@@ -220,12 +220,12 @@ test_that("Date-based survival time calculation works", {
     explanatory = "TumorStage"
   )
 
-  expect_s3_class(result, "survivalClass")
+  expect_s3_class(result, "survivalResults")
 })
 
 
 test_that("Date-based time with days output works", {
-  result <- survival(
+  result <- run_survival(
     data = survival_comprehensive,
     tint = TRUE,
     dxdate = "DiagnosisDate",
@@ -241,7 +241,7 @@ test_that("Date-based time with days output works", {
     explanatory = "Sex"
   )
 
-  expect_s3_class(result, "survivalClass")
+  expect_s3_class(result, "survivalResults")
 })
 
 
@@ -250,7 +250,7 @@ test_that("Date-based time with days output works", {
 # ───────────────────────────────────────────────────────────
 
 test_that("Person-time metrics calculation works", {
-  result <- survival(
+  result <- run_survival(
     data = survival_comprehensive,
     elapsedtime = "FollowUpMonths",
     outcome = "Status",
@@ -265,12 +265,12 @@ test_that("Person-time metrics calculation works", {
     rate_multiplier = 100
   )
 
-  expect_s3_class(result, "survivalClass")
+  expect_s3_class(result, "survivalResults")
 })
 
 
 test_that("Person-time with custom intervals and multiplier", {
-  result <- survival(
+  result <- run_survival(
     data = survival_comprehensive,
     elapsedtime = "FollowUpMonths",
     outcome = "Status",
@@ -285,7 +285,7 @@ test_that("Person-time with custom intervals and multiplier", {
     rate_multiplier = 1000
   )
 
-  expect_s3_class(result, "survivalClass")
+  expect_s3_class(result, "survivalResults")
 })
 
 
@@ -294,7 +294,7 @@ test_that("Person-time with custom intervals and multiplier", {
 # ───────────────────────────────────────────────────────────
 
 test_that("RMST analysis with default tau works", {
-  result <- survival(
+  result <- run_survival(
     data = survival_comprehensive,
     elapsedtime = "FollowUpMonths",
     outcome = "Status",
@@ -308,12 +308,12 @@ test_that("RMST analysis with default tau works", {
     rmst_tau = 0
   )
 
-  expect_s3_class(result, "survivalClass")
+  expect_s3_class(result, "survivalResults")
 })
 
 
 test_that("RMST analysis with custom tau works", {
-  result <- survival(
+  result <- run_survival(
     data = survival_comprehensive,
     elapsedtime = "FollowUpMonths",
     outcome = "Status",
@@ -327,7 +327,7 @@ test_that("RMST analysis with custom tau works", {
     rmst_tau = 60
   )
 
-  expect_s3_class(result, "survivalClass")
+  expect_s3_class(result, "survivalResults")
 })
 
 
@@ -336,7 +336,7 @@ test_that("RMST analysis with custom tau works", {
 # ───────────────────────────────────────────────────────────
 
 test_that("Pairwise comparisons with 4-level explanatory work", {
-  result <- survival(
+  result <- run_survival(
     data = survival_comprehensive,
     elapsedtime = "FollowUpMonths",
     outcome = "Status",
@@ -350,12 +350,12 @@ test_that("Pairwise comparisons with 4-level explanatory work", {
     padjustmethod = "holm"
   )
 
-  expect_s3_class(result, "survivalClass")
+  expect_s3_class(result, "survivalResults")
 })
 
 
 test_that("Pairwise with BH correction works", {
-  result <- survival(
+  result <- run_survival(
     data = survival_comprehensive,
     elapsedtime = "FollowUpMonths",
     outcome = "Status",
@@ -369,7 +369,7 @@ test_that("Pairwise with BH correction works", {
     padjustmethod = "BH"
   )
 
-  expect_s3_class(result, "survivalClass")
+  expect_s3_class(result, "survivalResults")
 })
 
 
@@ -378,7 +378,7 @@ test_that("Pairwise with BH correction works", {
 # ───────────────────────────────────────────────────────────
 
 test_that("Stratified Cox regression works", {
-  result <- survival(
+  result <- run_survival(
     data = survival_comprehensive,
     elapsedtime = "FollowUpMonths",
     outcome = "Status",
@@ -392,7 +392,7 @@ test_that("Stratified Cox regression works", {
     strata_variable = "Sex"
   )
 
-  expect_s3_class(result, "survivalClass")
+  expect_s3_class(result, "survivalResults")
 })
 
 
@@ -401,7 +401,7 @@ test_that("Stratified Cox regression works", {
 # ───────────────────────────────────────────────────────────
 
 test_that("Landmark analysis works", {
-  result <- survival(
+  result <- run_survival(
     data = survival_comprehensive,
     elapsedtime = "FollowUpMonths",
     outcome = "Status",
@@ -415,7 +415,7 @@ test_that("Landmark analysis works", {
     landmark = 12
   )
 
-  expect_s3_class(result, "survivalClass")
+  expect_s3_class(result, "survivalResults")
 })
 
 
@@ -424,9 +424,8 @@ test_that("Landmark analysis works", {
 # ───────────────────────────────────────────────────────────
 
 test_that("Weighted log-rank tests work (all types)", {
-  for (test_type in c("logrank", "gehan_breslow", "tarone_ware",
-                       "peto_peto", "fleming_harrington")) {
-    result <- survival(
+  for (test_type in c("logrank", "fh_rho0_5", "fh_rho1")) {
+    result <- run_survival(
       data = survival_comprehensive,
       elapsedtime = "FollowUpMonths",
       outcome = "Status",
@@ -440,8 +439,7 @@ test_that("Weighted log-rank tests work (all types)", {
       survivalTestType = test_type
     )
 
-    expect_s3_class(result, "survivalClass",
-                    info = paste("Failed for test type:", test_type))
+    expect_s3_class(result, "survivalResults")
   }
 })
 
@@ -451,7 +449,7 @@ test_that("Weighted log-rank tests work (all types)", {
 # ───────────────────────────────────────────────────────────
 
 test_that("PH assumption test works", {
-  result <- survival(
+  result <- run_survival(
     data = survival_comprehensive,
     elapsedtime = "FollowUpMonths",
     outcome = "Status",
@@ -464,7 +462,7 @@ test_that("PH assumption test works", {
     ph_cox = TRUE
   )
 
-  expect_s3_class(result, "survivalClass")
+  expect_s3_class(result, "survivalResults")
 })
 
 
@@ -473,7 +471,7 @@ test_that("PH assumption test works", {
 # ───────────────────────────────────────────────────────────
 
 test_that("Residual diagnostics work", {
-  result <- survival(
+  result <- run_survival(
     data = survival_comprehensive,
     elapsedtime = "FollowUpMonths",
     outcome = "Status",
@@ -486,7 +484,7 @@ test_that("Residual diagnostics work", {
     residual_diagnostics = TRUE
   )
 
-  expect_s3_class(result, "survivalClass")
+  expect_s3_class(result, "survivalResults")
 })
 
 
@@ -495,7 +493,7 @@ test_that("Residual diagnostics work", {
 # ───────────────────────────────────────────────────────────
 
 test_that("Survival curve plot generation works", {
-  result <- survival(
+  result <- run_survival(
     data = survival_comprehensive,
     elapsedtime = "FollowUpMonths",
     outcome = "Status",
@@ -515,12 +513,12 @@ test_that("Survival curve plot generation works", {
     medianline = "hv"
   )
 
-  expect_s3_class(result, "survivalClass")
+  expect_s3_class(result, "survivalResults")
 })
 
 
 test_that("Cumulative events and hazard plots work", {
-  result <- survival(
+  result <- run_survival(
     data = survival_comprehensive,
     elapsedtime = "FollowUpMonths",
     outcome = "Status",
@@ -534,12 +532,12 @@ test_that("Cumulative events and hazard plots work", {
     ch = TRUE
   )
 
-  expect_s3_class(result, "survivalClass")
+  expect_s3_class(result, "survivalResults")
 })
 
 
 test_that("Log-log plot works", {
-  result <- survival(
+  result <- run_survival(
     data = survival_comprehensive,
     elapsedtime = "FollowUpMonths",
     outcome = "Status",
@@ -552,12 +550,12 @@ test_that("Log-log plot works", {
     loglog = TRUE
   )
 
-  expect_s3_class(result, "survivalClass")
+  expect_s3_class(result, "survivalResults")
 })
 
 
 test_that("KMunicate-style plot works", {
-  result <- survival(
+  result <- run_survival(
     data = survival_comprehensive,
     elapsedtime = "FollowUpMonths",
     outcome = "Status",
@@ -570,7 +568,7 @@ test_that("KMunicate-style plot works", {
     kmunicate = TRUE
   )
 
-  expect_s3_class(result, "survivalClass")
+  expect_s3_class(result, "survivalResults")
 })
 
 
@@ -579,7 +577,7 @@ test_that("KMunicate-style plot works", {
 # ───────────────────────────────────────────────────────────
 
 test_that("RCS non-linearity assessment with Age works", {
-  result <- survival(
+  result <- run_survival(
     data = survival_comprehensive,
     elapsedtime = "FollowUpMonths",
     outcome = "Status",
@@ -594,12 +592,12 @@ test_that("RCS non-linearity assessment with Age works", {
     rcs_knots = 4
   )
 
-  expect_s3_class(result, "survivalClass")
+  expect_s3_class(result, "survivalResults")
 })
 
 
 test_that("RCS with Ki67 (contains NAs) works", {
-  result <- survival(
+  result <- run_survival(
     data = survival_comprehensive,
     elapsedtime = "FollowUpMonths",
     outcome = "Status",
@@ -614,7 +612,7 @@ test_that("RCS with Ki67 (contains NAs) works", {
     rcs_knots = 3
   )
 
-  expect_s3_class(result, "survivalClass")
+  expect_s3_class(result, "survivalResults")
 })
 
 
@@ -623,7 +621,7 @@ test_that("RCS with Ki67 (contains NAs) works", {
 # ───────────────────────────────────────────────────────────
 
 test_that("Calibration curves with default timepoint work", {
-  result <- survival(
+  result <- run_survival(
     data = survival_comprehensive,
     elapsedtime = "FollowUpMonths",
     outcome = "Status",
@@ -638,12 +636,12 @@ test_that("Calibration curves with default timepoint work", {
     calibration_ngroups = 5
   )
 
-  expect_s3_class(result, "survivalClass")
+  expect_s3_class(result, "survivalResults")
 })
 
 
 test_that("Calibration curves with custom timepoint work", {
-  result <- survival(
+  result <- run_survival(
     data = survival_comprehensive,
     elapsedtime = "FollowUpMonths",
     outcome = "Status",
@@ -658,7 +656,7 @@ test_that("Calibration curves with custom timepoint work", {
     calibration_ngroups = 4
   )
 
-  expect_s3_class(result, "survivalClass")
+  expect_s3_class(result, "survivalResults")
 })
 
 
@@ -667,7 +665,7 @@ test_that("Calibration curves with custom timepoint work", {
 # ───────────────────────────────────────────────────────────
 
 test_that("Bootstrap internal validation works", {
-  result <- survival(
+  result <- run_survival(
     data = survival_comprehensive,
     elapsedtime = "FollowUpMonths",
     outcome = "Status",
@@ -681,7 +679,7 @@ test_that("Bootstrap internal validation works", {
     bootstrapValN = 50   # small N for speed in testing
   )
 
-  expect_s3_class(result, "survivalClass")
+  expect_s3_class(result, "survivalResults")
 })
 
 
@@ -690,7 +688,7 @@ test_that("Bootstrap internal validation works", {
 # ───────────────────────────────────────────────────────────
 
 test_that("Parametric Weibull model works", {
-  result <- survival(
+  result <- run_survival(
     data = survival_comprehensive,
     elapsedtime = "FollowUpMonths",
     outcome = "Status",
@@ -704,12 +702,12 @@ test_that("Parametric Weibull model works", {
     parametric_distribution = "weibull"
   )
 
-  expect_s3_class(result, "survivalClass")
+  expect_s3_class(result, "survivalResults")
 })
 
 
 test_that("Parametric distribution comparison works", {
-  result <- survival(
+  result <- run_survival(
     data = survival_comprehensive,
     elapsedtime = "FollowUpMonths",
     outcome = "Status",
@@ -725,7 +723,7 @@ test_that("Parametric distribution comparison works", {
     parametric_diagnostics = TRUE
   )
 
-  expect_s3_class(result, "survivalClass")
+  expect_s3_class(result, "survivalResults")
 })
 
 
@@ -734,7 +732,7 @@ test_that("Parametric distribution comparison works", {
 # ───────────────────────────────────────────────────────────
 
 test_that("Age standardization (indirect) works", {
-  result <- survival(
+  result <- run_survival(
     data = survival_comprehensive,
     elapsedtime = "FollowUpMonths",
     outcome = "Status",
@@ -750,7 +748,7 @@ test_that("Age standardization (indirect) works", {
     age_standardization_method = "indirect"
   )
 
-  expect_s3_class(result, "survivalClass")
+  expect_s3_class(result, "survivalResults")
 })
 
 
@@ -759,7 +757,7 @@ test_that("Age standardization (indirect) works", {
 # ───────────────────────────────────────────────────────────
 
 test_that("Comprehensive analysis with many features enabled works", {
-  result <- survival(
+  result <- run_survival(
     data = survival_comprehensive,
     elapsedtime = "FollowUpMonths",
     outcome = "Status",
@@ -783,7 +781,7 @@ test_that("Comprehensive analysis with many features enabled works", {
     byplot = 12
   )
 
-  expect_s3_class(result, "survivalClass")
+  expect_s3_class(result, "survivalResults")
 })
 
 
@@ -792,7 +790,7 @@ test_that("Comprehensive analysis with many features enabled works", {
 # ───────────────────────────────────────────────────────────
 
 test_that("Single-group analysis (no explanatory) works", {
-  result <- survival(
+  result <- run_survival(
     data = survival_comprehensive,
     elapsedtime = "FollowUpMonths",
     outcome = "Status",
@@ -803,12 +801,12 @@ test_that("Single-group analysis (no explanatory) works", {
     awod = "Alive without Disease"
   )
 
-  expect_s3_class(result, "survivalClass")
+  expect_s3_class(result, "survivalResults")
 })
 
 
 test_that("Binary explanatory variable works", {
-  result <- survival(
+  result <- run_survival(
     data = survival_comprehensive,
     elapsedtime = "FollowUpMonths",
     outcome = "Status",
@@ -820,12 +818,12 @@ test_that("Binary explanatory variable works", {
     explanatory = "LymphovascularInvasion"
   )
 
-  expect_s3_class(result, "survivalClass")
+  expect_s3_class(result, "survivalResults")
 })
 
 
 test_that("Three-level explanatory variable works (MarginStatus)", {
-  result <- survival(
+  result <- run_survival(
     data = survival_comprehensive,
     elapsedtime = "FollowUpMonths",
     outcome = "Status",
@@ -837,7 +835,7 @@ test_that("Three-level explanatory variable works (MarginStatus)", {
     explanatory = "MarginStatus"
   )
 
-  expect_s3_class(result, "survivalClass")
+  expect_s3_class(result, "survivalResults")
 })
 
 
@@ -845,7 +843,7 @@ test_that("Small subset analysis works", {
   # Take first 30 observations as a small dataset
   small_data <- survival_comprehensive[1:30, ]
 
-  result <- survival(
+  result <- run_survival(
     data = small_data,
     elapsedtime = "FollowUpMonths",
     outcome = "Status",
@@ -857,12 +855,12 @@ test_that("Small subset analysis works", {
     explanatory = "Sex"
   )
 
-  expect_s3_class(result, "survivalClass")
+  expect_s3_class(result, "survivalResults")
 })
 
 
 test_that("Analysis with HER2Status (3 levels including Equivocal) works", {
-  result <- survival(
+  result <- run_survival(
     data = survival_comprehensive,
     elapsedtime = "FollowUpMonths",
     outcome = "Status",
@@ -874,12 +872,12 @@ test_that("Analysis with HER2Status (3 levels including Equivocal) works", {
     explanatory = "HER2Status"
   )
 
-  expect_s3_class(result, "survivalClass")
+  expect_s3_class(result, "survivalResults")
 })
 
 
 test_that("REMARK checklist generation works", {
-  result <- survival(
+  result <- run_survival(
     data = survival_comprehensive,
     elapsedtime = "FollowUpMonths",
     outcome = "Status",
@@ -892,12 +890,12 @@ test_that("REMARK checklist generation works", {
     remark_checklist = TRUE
   )
 
-  expect_s3_class(result, "survivalClass")
+  expect_s3_class(result, "survivalResults")
 })
 
 
 test_that("Show explanations and summaries options work", {
-  result <- survival(
+  result <- run_survival(
     data = survival_comprehensive,
     elapsedtime = "FollowUpMonths",
     outcome = "Status",
@@ -911,7 +909,7 @@ test_that("Show explanations and summaries options work", {
     showSummaries = TRUE
   )
 
-  expect_s3_class(result, "survivalClass")
+  expect_s3_class(result, "survivalResults")
 })
 
 

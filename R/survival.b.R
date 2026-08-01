@@ -1066,6 +1066,13 @@ survivalClass <- if (requireNamespace('jmvcore'))
                     dplyr::filter(mytime >= landmark) %>%
                     dplyr::mutate(mytime = mytime - landmark)
 
+                  if (nrow(cleanData) == 0) {
+                      jmvcore::reject(sprintf(
+                          .("Landmark time %.2f is beyond all observed follow-up times; no patients remain at risk."),
+                          landmark
+                      ))
+                  }
+
                   # Add landmark exclusion info as table note (safe from serialization)
                   n_excluded_landmark <- n_before_landmark - nrow(cleanData)
                   if (n_excluded_landmark > 0) {
@@ -1303,7 +1310,7 @@ survivalClass <- if (requireNamespace('jmvcore'))
                         if (is.null(self$options$rmst_tau) || self$options$rmst_tau <= 0) {
                             actual_tau <- rmst_results$table$Tau[1]
                             self$results$rmstTable$setNote("tau_default",
-                                sprintf("Time horizon (tau) was automatically set to %.1f (75th percentile of follow-up). Specify a custom tau in the options for a clinically meaningful time horizon.", actual_tau))
+                                sprintf("Time horizon (tau) was automatically set to %.1f: the smaller of the overall 75th percentile of follow-up and the maximum follow-up supported in every group. Specify a supported custom tau for a clinically meaningful horizon.", actual_tau))
                         }
                     }
                 }
@@ -1547,9 +1554,34 @@ survivalClass <- if (requireNamespace('jmvcore'))
                     
                     mydata[[mytime]] <- jmvcore::toNumeric(mydata[[mytime]])
                     
-                    # Set default tau to 75th percentile of follow-up time if not specified
+                    # RMST comparisons require a common horizon supported by every
+                    # group. survival::summary(..., extend = TRUE) otherwise carries
+                    # the last KM estimate beyond a group's final observation, which
+                    # is extrapolation rather than observed restricted mean survival.
+                    group_max <- tapply(mydata[[mytime]], mydata[[myfactor]], max,
+                                        na.rm = TRUE)
+                    max_supported_tau <- min(group_max[is.finite(group_max)])
+                    if (!is.finite(max_supported_tau) || max_supported_tau <= 0) {
+                        self$results$rmstTable$setNote(
+                            "support",
+                            "RMST could not be calculated because no positive follow-up horizon is supported in every group.")
+                        return(NULL)
+                    }
+
                     if (is.null(tau)) {
-                        tau <- quantile(mydata[[mytime]], 0.75, na.rm = TRUE)
+                        tau <- min(
+                            as.numeric(stats::quantile(mydata[[mytime]], 0.75,
+                                                       na.rm = TRUE, names = FALSE)),
+                            max_supported_tau
+                        )
+                    } else if (!is.finite(tau) || tau <= 0 || tau > max_supported_tau) {
+                        self$results$rmstTable$setNote(
+                            "support",
+                            sprintf(
+                                "RMST time horizon must be greater than 0 and no larger than %.2f, the maximum follow-up supported in every group.",
+                                max_supported_tau
+                            ))
+                        return(NULL)
                     }
 
                     formula <- .asSurvivalFormula(private$.buildSurvFormula(mytime, myoutcome, myfactor))
@@ -1561,17 +1593,19 @@ survivalClass <- if (requireNamespace('jmvcore'))
                     # Calculate RMST for each group
                     rmst_summary <- summary(km_fit, rmean = tau, extend = TRUE)
                     
+                    rmst_values <- rmst_summary$table[, "rmean"]
+                    rmst_se <- rmst_summary$table[, "se(rmean)"]
                     rmst_table <- data.frame(
                         Group = gsub(paste0(myfactor, "="), "", names(km_fit$strata)),
-                        RMST = round(rmst_summary$table[, "rmean"], 2),
-                        SE = round(rmst_summary$table[, "se(rmean)"], 2),
+                        RMST = round(rmst_values, 2),
+                        SE = round(rmst_se, 2),
                         Tau = rep(round(tau, 1), length(km_fit$strata)),
                         stringsAsFactors = FALSE
                     )
-                    
-                    # Add confidence intervals (approximate)
-                    rmst_table$CI_Lower <- round(rmst_table$RMST - 1.96 * rmst_table$SE, 2)
-                    rmst_table$CI_Upper <- round(rmst_table$RMST + 1.96 * rmst_table$SE, 2)
+
+                    # Wald intervals supplied on the unrounded estimate scale.
+                    rmst_table$CI_Lower <- round(rmst_values - 1.96 * rmst_se, 2)
+                    rmst_table$CI_Upper <- round(rmst_values + 1.96 * rmst_se, 2)
                     
                     return(list(
                         table = rmst_table,
@@ -1760,35 +1794,49 @@ survivalClass <- if (requireNamespace('jmvcore'))
 
                 ## Median Survival Summary ----
 
-                results2table %>%
-                    dplyr::mutate(
-                        description =
-                            glue::glue(
-                                "When {factor}, median survival is {round(median, digits = 1)} [{round(x0_95lcl, digits = 1)} - {round(x0_95ucl, digits = 1)}, 95% CI] ",
-                                self$options$timetypeoutput,
-                                "."
-                            )
-                    ) %>%
-                  dplyr::mutate(
-                    description = dplyr::case_when(
-                      is.na(median) ~ paste0(
-                        glue::glue("{description} \n Note that when {factor}, the survival curve does not drop below 1/2 during \n the observation period, thus the median survival is undefined.")),
-                      TRUE ~ paste0(description)
-                    )
-                  ) %>%
-                  dplyr::mutate(description = gsub(
-                    pattern = "=",
-                    replacement = " is ",
-                    x = description
-                  )) %>%
-                  dplyr::mutate(description = gsub(
-                    pattern = myexplanatory_labelled,
-                    replacement = self$options$explanatory,
-                    x = description,
-                    fixed = TRUE
-                  )) %>%
-                    dplyr::select(description) %>%
-                    dplyr::pull(.) -> km_fit_median_definition
+                # survfit may return character "NA" values for undefined
+                # medians/CIs in very small or single-group datasets. Coerce
+                # explicitly before formatting; round("NA") raises and used to
+                # abort an otherwise valid descriptive analysis.
+                median_num <- suppressWarnings(as.numeric(results2table$median))
+                lower_num <- suppressWarnings(as.numeric(results2table$x0_95lcl))
+                upper_num <- suppressWarnings(as.numeric(results2table$x0_95ucl))
+
+                km_fit_median_definition <- vapply(
+                    seq_len(nrow(results2table)),
+                    function(i) {
+                        factor_label <- as.character(results2table$factor[i])
+                        factor_label <- gsub("=", " is ", factor_label)
+                        factor_label <- gsub(
+                            myexplanatory_labelled,
+                            self$options$explanatory,
+                            factor_label,
+                            fixed = TRUE
+                        )
+
+                        if (!is.finite(median_num[i])) {
+                            return(paste0(
+                                "When ", factor_label,
+                                ", median survival is undefined because the survival curve ",
+                                "does not fall to 0.5 during observed follow-up."
+                            ))
+                        }
+
+                        ci_text <- if (is.finite(lower_num[i]) && is.finite(upper_num[i])) {
+                            sprintf(" [%.1f - %.1f, 95%% CI]", lower_num[i], upper_num[i])
+                        } else {
+                            " [95% CI not estimable]"
+                        }
+                        sprintf(
+                            "When %s, median survival is %.1f%s %s.",
+                            factor_label,
+                            median_num[i],
+                            ci_text,
+                            self$options$timetypeoutput
+                        )
+                    },
+                    character(1)
+                )
 
                 medianSummary <- c(km_fit_median_definition,
                                    "The median survival time is when 50% of subjects have experienced the event.",
@@ -1857,6 +1905,15 @@ survivalClass <- if (requireNamespace('jmvcore'))
 
                 # Add stratified Cox regression if enabled
                 strata_var <- NULL
+                if (isTRUE(self$options$stratified_cox) &&
+                    (is.null(self$options$strata_variable) ||
+                     identical(self$options$strata_variable, ""))) {
+                    self$results$coxTable$setNote(
+                        "strata_required",
+                        "Stratified Cox regression was requested, but no stratification variable was selected. The Cox model was not fitted."
+                    )
+                    return()
+                }
                 if (self$options$stratified_cox && !is.null(self$options$strata_variable) && self$options$strata_variable != "") {
                     strata_var <- self$options$strata_variable
                     # Pull strata variable from self$data (not cleanData which only has time/outcome/factor)
@@ -1864,6 +1921,13 @@ survivalClass <- if (requireNamespace('jmvcore'))
                         strata_col <- self$data[[strata_var]]
                         mydata[[strata_var]] <- strata_col[private$.originalRowIndex(mydata)]
                         mydata <- mydata[!is.na(mydata[[strata_var]]), , drop = FALSE]
+                        if (length(unique(mydata[[strata_var]])) < 2) {
+                            self$results$coxTable$setNote(
+                                "constant_strata",
+                                "The selected stratification variable has fewer than two observed levels. The Cox model was not fitted."
+                            )
+                            return()
+                        }
                     } else {
                         warning(jmvcore::format(
                             .("Stratification variable {variable} not found. Using standard Cox regression."),
@@ -1874,6 +1938,14 @@ survivalClass <- if (requireNamespace('jmvcore'))
                 }
 
                 private$.checkpoint()
+
+                if (length(unique(mydata[[myfactor]])) < 2) {
+                    self$results$coxTable$setNote(
+                        "single_group",
+                        "Cox regression requires at least two observed groups. Descriptive survival results remain available."
+                    )
+                    return()
+                }
 
                 # EPV (events per variable) check
                 n_events_cox <- sum(mydata[[myoutcome]] == 1, na.rm = TRUE)
@@ -2439,15 +2511,21 @@ survivalClass <- if (requireNamespace('jmvcore'))
 
                 km_fit_summary <- summary(km_fit, times = utimes, extend = TRUE)
 
-                km_fit_df <-
-                    as.data.frame(km_fit_summary[c("strata",
-                                                   "time",
-                                                   "n.risk",
-                                                   "n.event",
-                                                   "surv",
-                                                   "std.err",
-                                                   "lower",
-                                                   "upper")])
+                summary_strata <- km_fit_summary$strata
+                if (is.null(summary_strata))
+                    summary_strata <- rep("Overall", length(km_fit_summary$time))
+
+                km_fit_df <- data.frame(
+                    strata = as.character(summary_strata),
+                    time = km_fit_summary$time,
+                    n.risk = km_fit_summary$n.risk,
+                    n.event = km_fit_summary$n.event,
+                    surv = km_fit_summary$surv,
+                    std.err = km_fit_summary$std.err,
+                    lower = km_fit_summary$lower,
+                    upper = km_fit_summary$upper,
+                    stringsAsFactors = FALSE
+                )
 
                 # self$results$tableview$setContent(km_fit_df)
 
@@ -4182,7 +4260,7 @@ survivalClass <- if (requireNamespace('jmvcore'))
                         <li><strong>Gamma:</strong> Flexible hazard shape with gamma distribution</li>
                         <li><strong>Splines:</strong> Flexible non-parametric hazard estimation</li>
                     </ul>
-                    <p><em>Advantages:</em> Allow extrapolation, provide explicit survival functions, enable economic modeling.</p>
+                    <p><em>Advantages:</em> Provide explicit survival functions and permit direct comparison of distributional assumptions. Extrapolation is not provided by this analysis.</p>
                     <p><em>Model Selection:</em> Compare AIC/BIC values - lower is better. Visual fit assessment with Kaplan-Meier overlay.</p>
                 </div>
                 ')
@@ -4220,6 +4298,10 @@ survivalClass <- if (requireNamespace('jmvcore'))
                             col_names <- names(results$medianData)
                             if ("lcl" %in% col_names) {
                                 results$medianData[[i, "lcl"]]
+                            } else if ("x0_95lcl" %in% col_names) {
+                                results$medianData[[i, "x0_95lcl"]]
+                            } else if ("x0_95lcl" %in% col_names) {
+                                results$medianData[[i, "x0_95lcl"]]
                             } else if ("lower" %in% col_names) {
                                 results$medianData[[i, "lower"]]
                             } else if ("conf.low" %in% col_names) {
@@ -4233,6 +4315,10 @@ survivalClass <- if (requireNamespace('jmvcore'))
                             col_names <- names(results$medianData)
                             if ("ucl" %in% col_names) {
                                 results$medianData[[i, "ucl"]]
+                            } else if ("x0_95ucl" %in% col_names) {
+                                results$medianData[[i, "x0_95ucl"]]
+                            } else if ("x0_95ucl" %in% col_names) {
+                                results$medianData[[i, "x0_95ucl"]]
                             } else if ("upper" %in% col_names) {
                                 results$medianData[[i, "upper"]]
                             } else if ("conf.high" %in% col_names) {
@@ -4612,7 +4698,7 @@ survivalClass <- if (requireNamespace('jmvcore'))
                         if (nrow(surv_at_time) > 0) {
                             for (j in seq_len(nrow(surv_at_time))) {
                                 group <- surv_at_time[[j, 1]]
-                                survival <- round(surv_at_time[[j, "survival"]] * 100, 1)
+                                survival <- round(surv_at_time[[j, "surv"]] * 100, 1)
                                 ci_lower <- round(surv_at_time[[j, "lower"]] * 100, 1)
                                 ci_upper <- round(surv_at_time[[j, "upper"]] * 100, 1)
                                 
@@ -4647,7 +4733,7 @@ survivalClass <- if (requireNamespace('jmvcore'))
                 tryCatch({
                     if (!is.null(self$results$medianTable) && 
                         self$results$medianTable$rowCount > 0) {
-                        df <- self$results$medianTable$asDF()
+                        df <- self$results$medianTable$asDF
                         if (nrow(df) > 0 && ncol(df) > 0) {
                             results$medianData <- df
                         }
@@ -4663,7 +4749,7 @@ survivalClass <- if (requireNamespace('jmvcore'))
                 tryCatch({
                     if (!is.null(self$results$coxTable) && 
                         self$results$coxTable$rowCount > 0) {
-                        df <- self$results$coxTable$asDF()
+                        df <- self$results$coxTable$asDF
                         if (nrow(df) > 0 && ncol(df) > 0) {
                             results$coxData <- df
                         }
@@ -4679,7 +4765,7 @@ survivalClass <- if (requireNamespace('jmvcore'))
                 tryCatch({
                     if (!is.null(self$results$survTable) && 
                         self$results$survTable$rowCount > 0) {
-                        df <- self$results$survTable$asDF()
+                        df <- self$results$survTable$asDF
                         if (nrow(df) > 0 && ncol(df) > 0) {
                             results$survTable <- df
                         }

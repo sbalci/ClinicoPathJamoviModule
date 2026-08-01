@@ -166,18 +166,20 @@
 
 ---
 
-## 16. Parametric Models (Disabled in Current Release)
+## 16. Parametric Models
 
 | Feature | .a.yaml Option(s) | .u.yaml Section | .r.yaml Output(s) | .b.R Method |
 |---------|-------------------|-----------------|-------------------|-------------|
-| Enable parametric models | `use_parametric` (Bool) | CollapseBox "Parametric Survival Models" | `parametricModelSummary` (Table), `parametricModelComparison` (Table), `parametricDiagnostics` (Html) | *disabled in .run()* |
-| Distribution selection | `parametric_distribution` (List: exp/weibull/lnorm/llogis/gamma/gengamma/gompertz/survspline) | ComboBox | - | *disabled* |
-| Include covariates | `parametric_covariates` (Bool) | CheckBox | - | *disabled* |
-| Spline knots / scale | `spline_knots` (Int, 1-10), `spline_scale` (List) | TextBox, ComboBox | - | *disabled* |
-| Extrapolation | `parametric_extrapolation` (Bool), `extrapolation_time` (Number) | CheckBox, TextBox | `extrapolationPlot` (Image), `extrapolationTable` (Table) | *disabled* |
-| Compare distributions | `compare_distributions` (Bool) | CheckBox | `parametricModelComparison` (Table) | *disabled* |
-| Parametric survival plots | `parametric_survival_plots` (Bool) | CheckBox | `parametricSurvivalPlot` (Image) | `.plotParametricSurvival()` *disabled* |
-| Hazard function plots | `hazard_plots` (Bool) | CheckBox | `hazardFunctionPlot` (Image) | `.plotHazardFunction()` *disabled* |
+| Enable parametric models | `use_parametric` (Bool) | CollapseBox "Parametric Survival Models" | `parametricModelSummary` (Table) | `.parametricSurvival()` |
+| Distribution selection | `parametric_distribution` (List: exp/weibull/lnorm/llogis/gamma/gengamma/gompertz/survspline) | ComboBox | `parametricModelSummary` | `.parametricSurvival()` |
+| Include group covariate | `parametric_covariates` (Bool) | CheckBox | `parametricModelSummary` | `.parametricSurvival()` |
+| Spline knots / scale | `spline_knots` (Int, 1-10), `spline_scale` (List) | TextBox, ComboBox | `parametricModelSummary` | `.parametricSurvival()` |
+| Compare distributions | `compare_distributions` (Bool) | CheckBox | `parametricModelComparison` (Table) | `.parametricSurvival()` |
+| Parametric survival plots | `parametric_survival_plots` (Bool) | CheckBox | `parametricSurvivalPlot` (Image) | `.plotParametricSurvival()` |
+
+The retained `parametric_extrapolation`, `extrapolation_time`,
+`parametric_diagnostics`, and `hazard_plots` arguments are reserved for backward
+compatibility. They are not shown in the UI and do not produce results in this release.
 
 ---
 

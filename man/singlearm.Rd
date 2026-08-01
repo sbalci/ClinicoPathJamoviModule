@@ -59,17 +59,20 @@ diagnosis date and follow-up date and want to calculate the time elapsed
 between them.}
 
 \item{dxdate}{The date of diagnosis or study entry. Accepts: (1)
-Date/datetime text (e.g., "2024-01-15"), (2) Numeric values. Numeric
-columns are interpreted by magnitude: values below 100000 are read as DAYS
-since 1970-01-01 (the R Date encoding), larger values as Unix epoch SECONDS
-(the DateTime Converter's corrected_datetime_numeric output). Time
-intervals are calculated as the difference from the follow-up date.}
+Date/datetime text (e.g., "2024-01-15"), (2) Numeric values. Each bare
+numeric date column is classified by its overall magnitude: values below
+100000 indicate DAYS since 1970-01-01 (the R Date encoding), whereas values
+at or above 100000 indicate Unix epoch SECONDS (the DateTime Converter's
+corrected_datetime_numeric output). Columns with inconsistent scales or
+values on both sides of this boundary are rejected. Time intervals are
+calculated as the difference from the follow-up date.}
 
 \item{fudate}{The date of last follow-up or event. Accepts: (1)
-Date/datetime text (e.g., "2024-01-15"), (2) Numeric values, interpreted by
-magnitude exactly as for the diagnosis date (below 100000 = days since
-1970-01-01; larger = Unix epoch seconds). Must be in the same format as the
-diagnosis date.}
+Date/datetime text (e.g., "2024-01-15"), (2) Numeric values, classified by
+column magnitude exactly as for the diagnosis date (below 100000 = days
+since 1970-01-01; at or above 100000 = Unix epoch seconds). Mixed values
+within a column and inconsistent numeric encodings between columns are
+rejected. Must be in the same format as the diagnosis date.}
 
 \item{outcome}{The outcome or event of interest for each patient. Should be
 a factor or numeric variable indicating whether the patient experienced the
@@ -112,9 +115,9 @@ exactly as entered. The built-in text "12, 36, 60" is written in months, so
 under a different unit it means 12, 36 and 60 of that unit; an information
 notice explains how to enter 1, 3 and 5 years instead. Points beyond
 follow-up are omitted unless every remaining subject has had a terminal
-event, in which case the final KM/CIF state is carried forward. Negative
-and non-finite values are ignored. Time zero is accepted because events can
-occur at the origin.}
+event, in which case the final KM/CIF state is carried forward. Negative,
+non-finite, and non-numeric entries are ignored with a warning. Time zero
+is accepted because events can occur at the origin.}
 
 \item{timetypedata}{select the time type in data (e.g., YYYY-MM-DD)}
 
@@ -123,9 +126,9 @@ survival time is calculated from dates, dates are CONVERTED to this unit.
 When a pre-calculated elapsed-time variable is supplied, no conversion is
 possible (the column carries no unit), so this option DECLARES the unit
 that variable is already recorded in. Either way it determines how
-cutpoints are interpreted, which follow-up thresholds are applied, and how
-axes are labelled - so selecting the wrong unit for pre-calculated time
-changes the reported results, not just the labels.}
+cutpoints and plausibility checks are interpreted, and how axes are
+labelled - so selecting the wrong unit for pre-calculated time changes the
+reported results, not just the labels.}
 
 \item{uselandmark}{Performs a conditional landmark description: only
 subjects still event-free and under observation after the landmark are
@@ -145,9 +148,10 @@ Confidence intervals are shown only when the separate 95 percent CI option
 is selected.}
 
 \item{kmunicate}{Enable this option to generate a publication-ready
-survival plot in the style of KMunicate. This plot shows the estimated
-survival probability over time with confidence intervals and is suitable
-for publication or presentation.}
+survival plot in the style of KMunicate. The 95 percent CI and Risk table
+options control its pointwise interval ribbon and risk/censoring panel.
+Individual censoring marks and median reference lines are not supported on
+this plot.}
 
 \item{ce}{Plot the cumulative probability of the event over time, 1 - S(t),
 estimated by Kaplan-Meier. This is a probability on a 0-1 scale, not a
@@ -164,13 +168,15 @@ This is the end time for the survival curves and cumulative event/hazard
 plots, in the selected Time Unit. Must be greater than zero; zero or a
 negative value is rejected rather than drawn.}
 
-\item{ybegin_plot}{The minimum value for the y-axis in the survival plots.
-The axis carries a survival probability, so this must be between 0 and 1
-and below the end value; anything else is rejected rather than drawn.}
+\item{ybegin_plot}{The minimum value for the probability y-axis in the
+Kaplan-Meier, cumulative-incidence, and cumulative-event plots. It must be
+between 0 and 1 and below the end value. Cumulative hazard is auto-scaled
+and the KMunicate-style plot manages its own y-axis.}
 
-\item{yend_plot}{The maximum value for the y-axis in the survival plots.
-The axis carries a survival probability, so this must be between 0 and 1
-and above the start value; anything else is rejected rather than drawn.}
+\item{yend_plot}{The maximum value for the probability y-axis in the
+Kaplan-Meier, cumulative-incidence, and cumulative-event plots. It must be
+between 0 and 1 and above the start value. Cumulative hazard is auto-scaled
+and the KMunicate-style plot manages its own y-axis.}
 
 \item{byplot}{The spacing between tick marks on the time axis. Must be
 greater than zero; zero or a negative value is rejected rather than drawn.}
@@ -197,22 +203,27 @@ supported Kaplan-Meier curves. This display option is not available on the
 competing-risk CIF plot.}
 
 \item{medianline}{Display a horizontal and/or vertical reference line at
-the Kaplan-Meier median, when estimable. Median reference lines are not
-drawn on the competing-risk CIF plot.}
+the Kaplan-Meier median, when estimable. On the cumulative-hazard plot the
+horizontal reference is log(2), corresponding to S(t) = 0.5. Median
+reference lines are not drawn on the competing-risk CIF or KMunicate-style
+plots.}
 
 \item{person_time}{Enable this option to calculate and display person-time
-metrics, including total follow-up time and incidence rates. These metrics
-help quantify the rate of events per unit of time in your study population.}
+metrics, including total follow-up time and crude occurrence/exposure
+rates. A person-time rate is events divided by observed time at risk; it is
+not an event probability. With competing risks it is a crude cause-specific
+rate for the target event, not the cumulative incidence or absolute risk.}
 
 \item{time_intervals}{Time intervals for stratified person-time analysis,
 as a comma-separated list in the selected Time Unit. For example "12, 36,
 60" creates the intervals 0-12, 12-36, 36-60 and 60+. Values are always
 interpreted in the selected Time Unit; the built-in text is 12, 36 and 60
-of that unit and is not silently rescaled. Boundaries that are not greater
-than zero are ignored with a warning (a zero-width interval accrues no
-person-time), as are boundaries at or beyond the longest observed
-follow-up: person-time cannot accrue before the start of observation or
-after the last one.}
+of that unit and is not silently rescaled. A zero boundary is silently
+treated as the origin because the analysis already starts at zero.
+Negative, non-finite, or non-numeric boundaries are ignored with a warning.
+Boundaries at or beyond the longest observed follow-up are also omitted
+because person-time cannot accrue before the start of observation or after
+the last one.}
 
 \item{rate_multiplier}{Specify the multiplier for incidence rates (e.g.,
 100 for rates per 100 units of person-time in the selected Time Unit, or
@@ -229,11 +240,13 @@ treatment or surveillance timing. The rate output is not estimated when an
 event occurs at time zero, because such an event is a probability mass at
 the origin rather than a finite continuous hazard.}
 
-\item{hazard_smoothing}{Generate smoothed hazard rate estimates to better
-visualize patterns in event risk over time. (There is no
-proportional-hazards assumption to assess here: a single-arm analysis has
-no groups to compare.) No curve is estimated with zero observed events or
-an event at time zero.}
+\item{hazard_smoothing}{Smooth the equal-width interval rates with a
+person-time-weighted, local-constant LOESS curve. This is an exploratory,
+bandwidth-dependent trend, not an exact instantaneous hazard. At least
+three usable automatic intervals are required; otherwise the plot explains
+why no curve was estimated. There is no proportional-hazards assumption to
+assess in a single-arm analysis. No curve is estimated with zero observed
+events or an event at time zero.}
 
 \item{showExplanations}{Display detailed explanations for each analysis
 component to help interpret the statistical methods and results.}
