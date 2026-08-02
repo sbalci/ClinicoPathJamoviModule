@@ -20,6 +20,8 @@ items:
           - dooc
           - awd
           - awod
+          - timetypeoutput
+          - timetypedata
 
     - name:  todo
       title: To Do
@@ -91,6 +93,9 @@ items:
           - awod
           - cutp
           - min_group_size
+          - seed
+          - timetypeoutput
+          - timetypedata
 
     - name:  coxTable
       title: '`Cox Table- ${contexpl}`'
@@ -107,10 +112,10 @@ items:
           title: "all"
           type: text
         - name: 'HR_univariable'
-          title: "HR (Univariable)"
+          title: "HR (Unadjusted)"
           type: text
         - name: 'HR_multivariable'
-          title: "HR (Multivariable)"
+          title: "HR (One-Predictor Model)"
           type: text
       clearWith:
           - sc
@@ -136,6 +141,9 @@ items:
           - awod
           - cutp
           - min_group_size
+          - seed
+          - timetypeoutput
+          - timetypedata
 
     - name: stratifiedCoxTable
       title: 'Stratified Cox Regression'
@@ -150,6 +158,8 @@ items:
           - strata_variable
           - multievent
           - analysistype
+          - timetypeoutput
+          - timetypedata
       columns:
           - name: term
             title: 'Term'
@@ -199,6 +209,9 @@ items:
           - awod
           - cutp
           - min_group_size
+          - seed
+          - timetypeoutput
+          - timetypedata
 
     # - name:  mydataview_personTimeAnalysis
     #   title: mydataview_personTimeAnalysis
@@ -221,6 +234,8 @@ items:
       clearWith:
           - contexpl
           - outcome
+          - timetypeoutput
+          - timetypedata
 
 
 
@@ -289,6 +304,9 @@ items:
         - awod
         - cutp
         - min_group_size
+        - seed
+        - timetypeoutput
+        - timetypedata
 
     - name: personTimeSummary
       title: 'Person-Time Summary'
@@ -317,6 +335,9 @@ items:
         - awod
         - cutp
         - min_group_size
+        - seed
+        - timetypeoutput
+        - timetypedata
 
 
 
@@ -330,6 +351,8 @@ items:
           - person_time
           - contexpl
           - outcome
+          - timetypeoutput
+          - timetypedata
 
 
 
@@ -352,6 +375,9 @@ items:
         - name: group
           title: "Group"
           type: text
+        - name: n
+          title: "N"
+          type: integer
         - name: rmst
           title: "RMST"
           type: number
@@ -380,6 +406,11 @@ items:
         - contexpl
         - outcome
         - outcomeLevel
+        - elapsedtime
+        - fudate
+        - dxdate
+        - tint
+        - multievent
         - findcut
         - multiple_cutoffs
         - uselandmark
@@ -389,6 +420,8 @@ items:
         - dooc
         - awd
         - awod
+        - timetypeoutput
+        - timetypedata
 
     - name: rmstSummary
       title: 'RMST Interpretation'
@@ -409,6 +442,8 @@ items:
         - dooc
         - awd
         - awod
+        - timetypeoutput
+        - timetypedata
 
 
 
@@ -422,6 +457,9 @@ items:
           - rmst_analysis
           - contexpl
           - outcome
+          - showExplanations
+          - timetypeoutput
+          - timetypedata
 
 
 
@@ -431,7 +469,7 @@ items:
 
 
     - name: residualsTable
-      title: 'Cox Model Residuals'
+      title: 'Case-Level Cox Model Residuals'
       type: Table
       visible: (residual_diagnostics)
       rows: 0
@@ -452,7 +490,7 @@ items:
           type: number
           format: zto
         - name: schoenfeld
-          title: "Schoenfeld"
+          title: "Schoenfeld (not case-aligned)"
           type: number
           format: zto
       clearWith:
@@ -460,6 +498,11 @@ items:
         - contexpl
         - outcome
         - outcomeLevel
+        - elapsedtime
+        - fudate
+        - dxdate
+        - tint
+        - multievent
         - findcut
         - uselandmark
         - landmark
@@ -468,6 +511,39 @@ items:
         - dooc
         - awd
         - awod
+        - timetypeoutput
+        - timetypedata
+
+    - name: schoenfeldResidualsTable
+      title: 'Schoenfeld Residuals at Event Times'
+      type: Table
+      visible: (residual_diagnostics)
+      rows: 0
+      columns:
+        - name: event_time
+          title: "Event Time"
+          type: number
+          format: zto
+        - name: residual
+          title: "Schoenfeld Residual"
+          type: number
+          format: zto
+      clearWith:
+        - residual_diagnostics
+        - contexpl
+        - outcome
+        - outcomeLevel
+        - elapsedtime
+        - findcut
+        - uselandmark
+        - landmark
+        - analysistype
+        - dod
+        - dooc
+        - awd
+        - awod
+        - timetypeoutput
+        - timetypedata
 
 
     # Residual Diagnostics Explanation
@@ -479,6 +555,9 @@ items:
           - residual_diagnostics
           - contexpl
           - outcome
+          - showExplanations
+          - timetypeoutput
+          - timetypedata
 
 
 
@@ -527,6 +606,9 @@ items:
           - awod
           - cutp
           - min_group_size
+          - seed
+          - timetypeoutput
+          - timetypedata
 
 
 
@@ -548,6 +630,8 @@ items:
           - findcut
           - contexpl
           - outcome
+          - timetypeoutput
+          - timetypedata
 
 
 
@@ -590,6 +674,9 @@ items:
           - awod
           - cutp
           - min_group_size
+          - seed
+          - timetypeoutput
+          - timetypedata
 
     - name: plot5
       title: '`Survival Plot - ${contexpl} Grouped with New Cut-Off`'
@@ -623,6 +710,13 @@ items:
           - awod
           - cutp
           - min_group_size
+          - seed
+          - timetypeoutput
+          - timetypedata
+          - censored
+          - medianline
+          - ybegin_plot
+          - yend_plot
 
     - name:  medianSummary
       # title: Median Survival Summary and Table
@@ -653,6 +747,9 @@ items:
           - awod
           - cutp
           - min_group_size
+          - seed
+          - timetypeoutput
+          - timetypedata
 
 
     - name:  medianTable
@@ -719,11 +816,14 @@ items:
           - awod
           - cutp
           - min_group_size
+          - seed
+          - timetypeoutput
+          - timetypedata
 
 
 
     - name:  survTableSummary
-      title: '`1, 3, 5-yr Survival Summary and Table  - ${contexpl}`'
+      title: '`Survival at Selected Time Points - ${contexpl}`'
       type:  Preformatted
       visible: (findcut && showSummaries)
       clearWith:
@@ -750,10 +850,13 @@ items:
           - awod
           - cutp
           - min_group_size
+          - seed
+          - timetypeoutput
+          - timetypedata
 
 
     - name:  survTable
-      title: '`1, 3, 5 year Survival - ${contexpl}`'
+      title: '`Survival at Selected Time Points - ${contexpl}`'
       type:  Table
       rows: 0
       columns:
@@ -809,6 +912,9 @@ items:
           - awod
           - cutp
           - min_group_size
+          - seed
+          - timetypeoutput
+          - timetypedata
 
     - name: plot2
       title: '`Cumulative Events  - ${contexpl} Grouped with New Cut-Off`'
@@ -842,6 +948,13 @@ items:
           - awod
           - cutp
           - min_group_size
+          - seed
+          - timetypeoutput
+          - timetypedata
+          - censored
+          - medianline
+          - ybegin_plot
+          - yend_plot
 
     - name: plot3
       title: '`Cumulative Hazard  - ${contexpl} Grouped with New Cut-Off`'
@@ -875,6 +988,13 @@ items:
           - awod
           - cutp
           - min_group_size
+          - seed
+          - timetypeoutput
+          - timetypedata
+          - censored
+          - medianline
+          - ybegin_plot
+          - yend_plot
 
     - name: plot6
       title: '`KMunicate-Style Plot  - ${contexpl} Grouped with New Cut-Off`'
@@ -908,6 +1028,13 @@ items:
           - awod
           - cutp
           - min_group_size
+          - seed
+          - timetypeoutput
+          - timetypedata
+          - censored
+          - medianline
+          - ybegin_plot
+          - yend_plot
       refs:
           - KMunicate
           - KMunicate2
@@ -932,6 +1059,8 @@ items:
           - kmunicate
           - contexpl
           - outcome
+          - timetypeoutput
+          - timetypedata
 
 
 
@@ -972,6 +1101,9 @@ items:
         - awod
         - cutp
         - min_group_size
+        - seed
+        - timetypeoutput
+        - timetypedata
 
 
 
@@ -984,6 +1116,8 @@ items:
           - loglog
           - contexpl
           - outcome
+          - timetypeoutput
+          - timetypedata
 
 
 
@@ -1003,6 +1137,11 @@ items:
         - contexpl
         - outcome
         - outcomeLevel
+        - elapsedtime
+        - fudate
+        - dxdate
+        - tint
+        - multievent
         - findcut
         - uselandmark
         - landmark
@@ -1011,13 +1150,15 @@ items:
         - dooc
         - awd
         - awod
+        - timetypeoutput
+        - timetypedata
 
 
     - name: calculatedtime
       title: Add Calculated Time to Data
       type: Output
-      varTitle: '`Calculated Time in Continious Survival Function - from ${ dxdate } to { fudate }`'
-      varDescription: Calculated Time from given Dates in Continious Survival Function
+      varTitle: '`Calculated Time in Continuous Survival Function - from ${ dxdate } to ${ fudate }`'
+      varDescription: Calculated time from the selected dates in the continuous survival function
       clearWith:
           - tint
           - dxdate
@@ -1045,12 +1186,15 @@ items:
           - awod
           - cutp
           - min_group_size
+          - seed
+          - timetypeoutput
+          - timetypedata
 
     - name: outcomeredefined
       title: Add Redefined Outcome to Data
       type: Output
-      varTitle: '`Redefined Outcome in Continious Survival Function - from ${ outcome } for analysis { analysistype }`'
-      varDescription: Redefined Outcome from Outcome based on Analysis Type in Continious Survival Function
+      varTitle: '`Redefined Outcome in Continuous Survival Function - from ${ outcome } for analysis ${ analysistype }`'
+      varDescription: Redefined Outcome from Outcome based on Analysis Type in Continuous Survival Function
       clearWith:
           - outcome
           - analysistype
@@ -1078,12 +1222,15 @@ items:
           - awod
           - cutp
           - min_group_size
+          - seed
+          - timetypeoutput
+          - timetypedata
 
     - name: calculatedcutoff
       title: Add Calculated Cut-off Group to Data
       type: Output
       varTitle: '`Calculated Cut-off Group - from ${ contexpl }`'
-      varDescription: Calculated Cut-off Group from given Cut-off in Continious Survival Function
+      varDescription: Calculated Cut-off Group from given Cut-off in Continuous Survival Function
       clearWith:
           - outcome
           - analysistype
@@ -1113,6 +1260,9 @@ items:
           - awod
           - cutp
           - min_group_size
+          - seed
+          - timetypeoutput
+          - timetypedata
 
 
 
@@ -1145,6 +1295,7 @@ items:
           - num_cutoffs
           - cutoff_method
           - min_group_size
+          - seed
           - contexpl
           - outcome
           - outcomeLevel
@@ -1168,6 +1319,9 @@ items:
           - awod
           - cutp
           - min_group_size
+          - seed
+          - timetypeoutput
+          - timetypedata
 
     - name: multipleMedianTable
       title: '`Median Survival by Multiple Cut-offs: ${contexpl}`'
@@ -1175,7 +1329,7 @@ items:
       rows: 0
       columns:
         - name: risk_group
-          title: "Risk Group"
+          title: "Marker Group"
           type: text
         - name: n_patients
           title: "N"
@@ -1200,6 +1354,7 @@ items:
           - num_cutoffs
           - cutoff_method
           - min_group_size
+          - seed
           - contexpl
           - outcome
           - outcomeLevel
@@ -1223,6 +1378,9 @@ items:
           - awod
           - cutp
           - min_group_size
+          - seed
+          - timetypeoutput
+          - timetypedata
 
 
     # Multiple Cutoffs Explanation
@@ -1234,6 +1392,8 @@ items:
           - multiple_cutoffs
           - contexpl
           - outcome
+          - timetypeoutput
+          - timetypedata
 
 
 
@@ -1245,7 +1405,7 @@ items:
       rows: 0
       columns:
         - name: risk_group
-          title: "Risk Group"
+          title: "Marker Group"
           type: text
         - name: time_point
           title: "Time"
@@ -1273,6 +1433,7 @@ items:
           - num_cutoffs
           - cutoff_method
           - min_group_size
+          - seed
           - contexpl
           - outcome
           - outcomeLevel
@@ -1296,6 +1457,9 @@ items:
           - awod
           - cutp
           - min_group_size
+          - seed
+          - timetypeoutput
+          - timetypedata
 
     - name: plotMultipleCutoffs
       title: '`Multiple Cut-offs Visualization - ${contexpl}`'
@@ -1310,6 +1474,7 @@ items:
           - num_cutoffs
           - cutoff_method
           - min_group_size
+          - seed
           - contexpl
           - outcome
           - outcomeLevel
@@ -1333,6 +1498,9 @@ items:
           - awod
           - cutp
           - min_group_size
+          - seed
+          - timetypeoutput
+          - timetypedata
 
     - name: plotMultipleSurvival
       title: '`Survival Plot with Multiple Cut-offs - ${contexpl}`'
@@ -1347,6 +1515,7 @@ items:
           - num_cutoffs
           - cutoff_method
           - min_group_size
+          - seed
           - contexpl
           - outcome
           - outcomeLevel
@@ -1370,6 +1539,13 @@ items:
           - awod
           - cutp
           - min_group_size
+          - seed
+          - timetypeoutput
+          - timetypedata
+          - censored
+          - medianline
+          - ybegin_plot
+          - yend_plot
 
     - name: calculatedmulticut
       title: Add Multiple Cut-off Groups to Data
@@ -1381,6 +1557,7 @@ items:
           - num_cutoffs
           - cutoff_method
           - min_group_size
+          - seed
           - contexpl
           - outcome
           - analysistype
@@ -1407,6 +1584,9 @@ items:
           - awod
           - cutp
           - min_group_size
+          - seed
+          - timetypeoutput
+          - timetypedata
 
 
 

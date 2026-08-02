@@ -10,6 +10,7 @@ survivalcont(
   elapsedtime = "time_months",
   outcome = "outcome",
   outcomeLevel = "Dead",
+  dod = NULL, dooc = NULL, awd = NULL, awod = NULL,
   contexpl = "biomarker",
   sc = TRUE
 )
@@ -21,6 +22,7 @@ survivalcont(
   elapsedtime = "time_months",
   outcome = "outcome",
   outcomeLevel = "Dead",
+  dod = NULL, dooc = NULL, awd = NULL, awod = NULL,
   contexpl = "ki67_percent",
   findcut = TRUE,
   sc = TRUE
@@ -33,6 +35,7 @@ survivalcont(
   elapsedtime = "time_months",
   outcome = "outcome",
   outcomeLevel = "Dead",
+  dod = NULL, dooc = NULL, awd = NULL, awod = NULL,
   contexpl = "psa_level",
   findcut = TRUE,
   cutp = "12, 24, 36, 60",
@@ -40,13 +43,14 @@ survivalcont(
   kmunicate = TRUE
 )
 
-# ═══ EXAMPLE 4: Hemoglobin Level with Competing Risks ═══
+# ═══ EXAMPLE 4: Hemoglobin Level with Event and Hazard Plots ═══
 data(survivalcont_hemoglobin)
 survivalcont(
   data = survivalcont_hemoglobin,
   elapsedtime = "time_months",
   outcome = "outcome",
   outcomeLevel = "Dead",
+  dod = NULL, dooc = NULL, awd = NULL, awod = NULL,
   contexpl = "hemoglobin_gL",
   findcut = TRUE,
   sc = TRUE,
@@ -61,6 +65,7 @@ survivalcont(
   elapsedtime = "time_months",
   outcome = "outcome",
   outcomeLevel = "Dead",
+  dod = NULL, dooc = NULL, awd = NULL, awod = NULL,
   contexpl = "tumor_size_cm",
   findcut = TRUE,
   sc = TRUE
@@ -73,6 +78,7 @@ survivalcont(
   elapsedtime = "time_months",
   outcome = "outcome",
   outcomeLevel = "Dead",
+  dod = NULL, dooc = NULL, awd = NULL, awod = NULL,
   contexpl = "age_years",
   findcut = TRUE,
   sc = TRUE,
@@ -86,6 +92,7 @@ survivalcont(
   elapsedtime = "time_months",
   outcome = "outcome",
   outcomeLevel = "Dead",
+  dod = NULL, dooc = NULL, awd = NULL, awod = NULL,
   contexpl = "risk_score",
   multiple_cutoffs = TRUE,
   num_cutoffs = "two",
@@ -100,6 +107,7 @@ survivalcont(
   elapsedtime = "time_months",
   outcome = "outcome",
   outcomeLevel = "Dead",
+  dod = NULL, dooc = NULL, awd = NULL, awod = NULL,
   contexpl = "gene_expression",
   findcut = TRUE,
   sc = TRUE
@@ -112,6 +120,7 @@ survivalcont(
   elapsedtime = "time_months",
   outcome = "outcome",
   outcomeLevel = "Dead",
+  dod = NULL, dooc = NULL, awd = NULL, awod = NULL,
   contexpl = "early_response_score",
   uselandmark = TRUE,
   landmark = 6,
@@ -119,18 +128,16 @@ survivalcont(
   sc = TRUE
 )
 
-# ═══ EXAMPLE 10: Complete Analysis with All Features ═══
+# ═══ EXAMPLE 10: Complete Single Cut-off Analysis ═══
 data(survivalcont_test)
 survivalcont(
   data = survivalcont_test,
   elapsedtime = "time_months",
   outcome = "outcome",
   outcomeLevel = "Dead",
+  dod = NULL, dooc = NULL, awd = NULL, awod = NULL,
   contexpl = "biomarker",
   findcut = TRUE,
-  multiple_cutoffs = TRUE,
-  num_cutoffs = "two",
-  cutoff_method = "recursive",
   min_group_size = 10,
   cutp = "12, 24, 36, 48, 60",
   sc = TRUE,

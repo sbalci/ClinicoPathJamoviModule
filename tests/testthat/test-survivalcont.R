@@ -3,7 +3,6 @@
 
 # Load required libraries for testing
 library(testthat)
-library(ClinicoPathJamoviModule)
 
 # Test data setup
 setup_survivalcont_test_data <- function() {
@@ -40,7 +39,7 @@ test_that("Basic survivalcont analysis works", {
   
   # Test basic survival analysis with continuous variable
   expect_no_error({
-    result <- survivalcont(
+    result <- run_survivalcont(
       data = test_data,
       elapsedtime = "time",
       outcome = "event",
@@ -54,7 +53,7 @@ test_that("Date-based survivalcont calculation works", {
   
   # Test date-based survival
   expect_no_error({
-    result <- survivalcont(
+    result <- run_survivalcont(
       data = test_data,
       tint = TRUE,
       dxdate = "dx_date",
@@ -72,7 +71,7 @@ test_that("Optimal cutoff analysis works", {
   
   # Test optimal cutoff finding
   expect_no_error({
-    result <- survivalcont(
+    result <- run_survivalcont(
       data = test_data,
       elapsedtime = "time",
       outcome = "event",
@@ -91,7 +90,7 @@ test_that("Multiple cutoffs analysis works", {
   
   for (method in methods) {
     expect_no_error({
-      result <- survivalcont(
+      result <- run_survivalcont(
         data = test_data,
         elapsedtime = "time",
         outcome = "event",
@@ -102,7 +101,7 @@ test_that("Multiple cutoffs analysis works", {
         min_group_size = 15,
         sc = TRUE
       )
-    }, info = paste("Method:", method))
+    })
   }
 })
 
@@ -111,7 +110,7 @@ test_that("Person-time analysis works", {
   
   # Test person-time analysis
   expect_no_error({
-    result <- survivalcont(
+    result <- run_survivalcont(
       data = test_data,
       elapsedtime = "time",
       outcome = "event",
@@ -128,7 +127,7 @@ test_that("RMST analysis works", {
   
   # Test RMST analysis
   expect_no_error({
-    result <- survivalcont(
+    result <- run_survivalcont(
       data = test_data,
       elapsedtime = "time",
       outcome = "event",
@@ -140,7 +139,7 @@ test_that("RMST analysis works", {
   
   # Test RMST with cutoff analysis
   expect_no_error({
-    result <- survivalcont(
+    result <- run_survivalcont(
       data = test_data,
       elapsedtime = "time",
       outcome = "event",
@@ -157,7 +156,7 @@ test_that("Residual diagnostics work", {
   
   # Test residual diagnostics
   expect_no_error({
-    result <- survivalcont(
+    result <- run_survivalcont(
       data = test_data,
       elapsedtime = "time",
       outcome = "event",
@@ -168,7 +167,7 @@ test_that("Residual diagnostics work", {
   
   # Test residual diagnostics with cutoff analysis
   expect_no_error({
-    result <- survivalcont(
+    result <- run_survivalcont(
       data = test_data,
       elapsedtime = "time",
       outcome = "event",
@@ -184,7 +183,7 @@ test_that("Landmark analysis works", {
   
   # Test landmark analysis
   expect_no_error({
-    result <- survivalcont(
+    result <- run_survivalcont(
       data = test_data,
       elapsedtime = "time",
       outcome = "event",
@@ -201,7 +200,7 @@ test_that("Plot generation works", {
   
   # Test various plot types
   expect_no_error({
-    result <- survivalcont(
+    result <- run_survivalcont(
       data = test_data,
       elapsedtime = "time",
       outcome = "event",
@@ -221,14 +220,13 @@ test_that("Multiple event levels work", {
   
   # Test with multi-state outcome - overall survival
   expect_no_error({
-    result <- survivalcont(
+    result <- run_survivalcont(
       data = test_data,
       elapsedtime = "time",
       outcome = "multi_outcome",
       multievent = TRUE,
       dod = "Dead_Disease",
       dooc = "Dead_Other",
-      awd = "Alive",
       awod = "Alive",
       analysistype = "overall",
       contexpl = "biomarker"
@@ -237,14 +235,13 @@ test_that("Multiple event levels work", {
   
   # Test with multi-state outcome - cause-specific
   expect_no_error({
-    result <- survivalcont(
+    result <- run_survivalcont(
       data = test_data,
       elapsedtime = "time",
       outcome = "multi_outcome",
       multievent = TRUE,
       dod = "Dead_Disease",
       dooc = "Dead_Other",
-      awd = "Alive",
       awod = "Alive",
       analysistype = "cause",
       contexpl = "age"
@@ -256,41 +253,41 @@ test_that("Data export functionality works", {
   test_data <- setup_survivalcont_test_data()
   
   # Test cutoff group export
-  expect_no_error({
-    result <- survivalcont(
+  cutoff_analysis <- run_survivalcont_jamovi(
       data = test_data,
       elapsedtime = "time",
       outcome = "event",
       contexpl = "biomarker",
       findcut = TRUE,
-      calculatedcutoff = TRUE
-    )
-  })
+      .outputs = "calculatedcutoff"
+  )
+  expect_no_error(cutoff_analysis$run())
+  expect_true(cutoff_analysis$results$calculatedcutoff$isFilled())
   
   # Test multiple cutoff export
-  expect_no_error({
-    result <- survivalcont(
+  multiple_analysis <- run_survivalcont_jamovi(
       data = test_data,
       elapsedtime = "time",
       outcome = "event",
       contexpl = "age",
       multiple_cutoffs = TRUE,
-      calculatedmulticut = TRUE
-    )
-  })
+      .outputs = "calculatedmulticut"
+  )
+  expect_no_error(multiple_analysis$run())
+  expect_true(multiple_analysis$results$calculatedmulticut$isFilled())
   
   # Test calculated time export
-  expect_no_error({
-    result <- survivalcont(
+  time_analysis <- run_survivalcont_jamovi(
       data = test_data,
       tint = TRUE,
       dxdate = "dx_date",
       fudate = "fu_date",
       outcome = "event",
       contexpl = "biomarker",
-      calculatedtime = TRUE
-    )
-  })
+      .outputs = "calculatedtime"
+  )
+  expect_no_error(time_analysis$run())
+  expect_true(time_analysis$results$calculatedtime$isFilled())
 })
 
 test_that("Error handling works correctly", {
@@ -299,24 +296,26 @@ test_that("Error handling works correctly", {
   # Test with invalid outcome variable (more than 2 levels for binary)
   test_data$bad_outcome <- sample(0:3, nrow(test_data), replace = TRUE)
   
-  expect_error({
-    result <- survivalcont(
-      data = test_data,
-      elapsedtime = "time",
-      outcome = "bad_outcome",
-      contexpl = "age"
-    )
-  })
+  bad_outcome_result <- run_survivalcont(
+    data = test_data,
+    elapsedtime = "time",
+    outcome = "bad_outcome",
+    contexpl = "age"
+  )
+  expect_s3_class(bad_outcome_result, "survivalcontResults")
+  expect_match(bad_outcome_result$errors$content, "Outcome variable problem")
+  expect_equal(bad_outcome_result$coxTable$rowCount, 0)
   
   # Test with missing required variables
-  expect_error({
-    result <- survivalcont(
+  expect_error(
+    run_survivalcont(
       data = test_data,
       elapsedtime = "nonexistent_time",
       outcome = "event",
       contexpl = "age"
-    )
-  })
+    ),
+    regexp = "nonexistent_time|does not exist|undefined columns"
+  )
 })
 
 test_that("Comprehensive analysis with all features works", {
@@ -324,7 +323,7 @@ test_that("Comprehensive analysis with all features works", {
   
   # Test comprehensive analysis with multiple features enabled
   expect_no_error({
-    result <- survivalcont(
+    result <- run_survivalcont(
       data = test_data,
       elapsedtime = "time",
       outcome = "event",
@@ -355,7 +354,7 @@ test_that("Different cutoff methods work", {
   
   for (method in cutoff_methods) {
     expect_no_error({
-      result <- survivalcont(
+      result <- run_survivalcont(
         data = test_data,
         elapsedtime = "time",
         outcome = "event",
@@ -365,7 +364,7 @@ test_that("Different cutoff methods work", {
         num_cutoffs = "two",
         min_group_size = 10
       )
-    }, info = paste("Testing cutoff method:", method))
+    })
   }
 })
 
@@ -376,7 +375,7 @@ test_that("Different numbers of cutoffs work", {
   
   for (num_cuts in num_cutoffs_options) {
     expect_no_error({
-      result <- survivalcont(
+      result <- run_survivalcont(
         data = test_data,
         elapsedtime = "time",
         outcome = "event",
@@ -386,7 +385,7 @@ test_that("Different numbers of cutoffs work", {
         cutoff_method = "quantile",
         min_group_size = 8
       )
-    }, info = paste("Testing number of cutoffs:", num_cuts))
+    })
   }
 })
 
@@ -405,7 +404,7 @@ test_that("Performance with larger dataset", {
   # Should complete within reasonable time
   expect_no_error({
     start_time <- Sys.time()
-    result <- survivalcont(
+    result <- run_survivalcont(
       data = large_data,
       elapsedtime = "time",
       outcome = "event",
@@ -426,7 +425,7 @@ test_that("Edge cases are handled", {
   # Test with very small dataset
   small_data <- test_data[1:20, ]
   expect_no_error({
-    result <- survivalcont(
+    result <- run_survivalcont(
       data = small_data,
       elapsedtime = "time",
       outcome = "event",
@@ -439,7 +438,7 @@ test_that("Edge cases are handled", {
   no_events_data <- test_data
   no_events_data$event <- 0
   expect_no_error({
-    result <- survivalcont(
+    result <- run_survivalcont(
       data = no_events_data,
       elapsedtime = "time",
       outcome = "event",

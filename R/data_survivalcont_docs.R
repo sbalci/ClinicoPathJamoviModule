@@ -189,6 +189,7 @@
 #'   elapsedtime = "time_months",
 #'   outcome = "outcome",
 #'   outcomeLevel = "Dead",
+#'   dod = NULL, dooc = NULL, awd = NULL, awod = NULL,
 #'   contexpl = "biomarker",
 #'   findcut = TRUE,
 #'   sc = TRUE

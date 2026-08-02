@@ -98,17 +98,18 @@ different event types in your data. For example, you might have separate
 levels for "Dead of Disease" and "Alive w Disease" in a survival analysis
 of cancer patients.}
 
-\item{analysistype}{Select the type of survival analysis to perform.
-"Overall" survival analysis considers all events as equivalent, while
-"Cause Specific" analysis distinguishes between different event types.
-"Competing Risk" analysis accounts for competing risks that may prevent the
-event of interest from occurring.}
+\item{analysistype}{Select the survival estimand. Overall counts both death
+categories as events; Cause Specific treats other-cause death as censored;
+Disease-Free counts disease, recurrence, and death categories as events
+according to the selected mapping. Competing-risk coding is retained for
+compatibility but is not analysed by this continuous cut-off function;
+select it to receive guidance to a competing-risk analysis.}
 
-\item{cutp}{Specify the time points for survival probability calculations.
-The default "12, 36, 60"  represents 1, 3, and 5 years (compatible with
-literature standards). You can customize  these values by entering your own
-comma-separated time points (e.g., "6, 18, 30" for  6 months, 18 months, 30
-months). Use "default" to restore standard 1,3,5-year analysis.}
+\item{cutp}{Specify time points for survival-probability estimates. The
+historical factory value "12, 36, 60" and the word "default" both select
+unit-aware 1-, 3-, and 5-year points (for example 365, 1095, and 1825 for
+days, or 1, 3, and 5 for years). Enter any other comma- or space-separated
+positive values to request custom points in the selected output time scale.}
 
 \item{timetypedata}{select the time type in data}
 
@@ -121,8 +122,8 @@ at a specified time point.}
 probabilities in landmark analysis. This option is only available if you
 enable the "Use Landmark Time" option.}
 
-\item{sc}{Enable this option to create a Kaplan-Meier survival plot for the
-continuous explanatory variable.}
+\item{sc}{Create Kaplan-Meier curves after the continuous explanatory
+variable has been divided by a selected single or multiple cut-off method.}
 
 \item{kmunicate}{Enable this option to create a KMunicate-style survival
 plot for the continuous explanatory variable.}
@@ -133,8 +134,11 @@ time for the continuous explanatory variable.}
 \item{ch}{Enable this option to create a plot of cumulative hazard over
 time for the continuous explanatory variable.}
 
-\item{endplot}{Specify the end time for the survival plots. This option
-determines the maximum time point to include in the plots.}
+\item{endplot}{Specify the end time for the survival plots; this is the
+maximum time point shown on the x-axis. The factory value 60 is interpreted
+as five years in the selected output time scale (1825 for days, 260 for
+weeks, 60 for months, 5 for years). Enter any other value to set the axis
+limit explicitly in that scale.}
 
 \item{ybegin_plot}{Specify the starting value for the y-axis in the
 survival plots. This option allows you to customize the range of the
@@ -143,24 +147,26 @@ y-axis.}
 \item{yend_plot}{Specify the ending value for the y-axis in the survival
 plots. This option allows you to customize the range of the y-axis.}
 
-\item{byplot}{Specify the time interval for the survival plots. This option
-determines the spacing of tick marks on the x-axis.}
+\item{byplot}{Specify the spacing of x-axis tick marks on the survival
+plots. The factory value 12 is interpreted as one year in the selected
+output time scale (365 for days, 52 for weeks, 12 for months, 1 for years).
+Enter any other value to set the spacing explicitly in that scale.}
 
-\item{findcut}{Enable this option to automatically find the optimal cut-off
-point for the continuous explanatory variable using the maximally selected
-rank statistic. This option is only available if you enable the "Survival
-Plot" option. The optimal cut-off point will be displayed on the survival
-plot as a vertical dashed line.}
+\item{findcut}{Derive a single data-dependent cut-off for the continuous
+explanatory variable using a maximally selected rank statistic. Treat the
+continuous Cox model as the primary analysis and validate the selected
+cut-off in independent data.}
 
-\item{multiple_cutoffs}{Enable this option to find multiple optimal cut-off
-points for the continuous explanatory variable. This extends the single
-cutoff analysis to identify 2-4 optimal cut-off points that maximize
-survival group separation. Creates stratified groups for enhanced survival
-analysis.}
+\item{multiple_cutoffs}{Enable this option to derive multiple candidate
+cut-off points for the continuous explanatory variable. Depending on the
+selected method, these may be quantile-based, tree-derived, recursively
+optimized, or minimum-p-value cut-offs. All data-derived cut-offs are
+exploratory and require external validation.}
 
 \item{num_cutoffs}{Select the number of cut-off points to identify. This
-will create multiple risk groups for stratified survival analysis (e.g., 2
-cut-offs create Low, Medium, High risk groups).}
+creates ordered marker-value groups (for example, 2 cut-offs create 3
+groups); the observed survival ordering must be read from the results and
+is not assumed in advance.}
 
 \item{cutoff_method}{Method for finding multiple cut-offs. Quantile-based
 uses tertiles/quartiles, Recursive finds sequential optimal points,
@@ -196,28 +202,33 @@ analysis. Enter a  comma-separated list of time points to create intervals.
 For example,  "12, 36, 60" will create intervals 0-12, 12-36, 36-60, and
 60+.}
 
-\item{rate_multiplier}{Specify the multiplier for incidence rates (e.g.,
-100 for rates per 100 person-years, 1000 for rates per 1000 person-years).}
+\item{rate_multiplier}{Specify the multiplier for incidence rates (for
+example, 100 reports events per 100 units of the selected output time
+scale).}
 
-\item{rmst_analysis}{Enable Restricted Mean Survival Time (RMST) analysis.
-RMST provides the average  survival time up to a specified time horizon,
-useful when median survival is undefined.}
+\item{rmst_analysis}{Report Restricted Mean Survival Time (RMST) up to a
+specified horizon. Without a cut-off this is an overall cohort summary;
+with a single cut-off, the displayed groups are compared descriptively at a
+common observed horizon.}
 
 \item{rmst_tau}{Specify the time horizon for RMST calculation. If left as
 0, will use 75th percentile  of observed survival times. This represents
 the maximum follow-up time for RMST calculation.}
 
 \item{residual_diagnostics}{Enable Cox model residual diagnostics including
-Martingale, Deviance, Score, and  Schoenfeld residuals. Useful for checking
-model assumptions and identifying outliers.}
+case-level Martingale, Deviance, and Score residuals plus event-time
+Schoenfeld residuals. These are diagnostic aids; Schoenfeld residuals alone
+are not a formal proportional-hazards test.}
 
 \item{stratified_cox}{Enable stratified Cox regression analysis. This
 allows for different baseline hazards  across strata while maintaining
 proportional hazards within strata.}
 
-\item{strata_variable}{Variable to use for stratification in Cox
-regression. Should be a categorical variable  that defines different risk
-groups or populations.}
+\item{strata_variable}{Categorical variable used for stratification in Cox
+regression, allowing a different baseline hazard in each stratum. Must be a
+factor with a small number of reasonably sized groups (for example treating
+centre or stage). A near-continuous variable would give one stratum per
+patient and no estimable hazard ratio.}
 
 \item{loglog}{Enable log-log plot for assessing proportional hazards
 assumption. Parallel lines  in the log-log plot suggest that proportional
@@ -231,9 +242,8 @@ and plots. These summaries provide plain-language interpretations of the
 statistical results. Turn off to reduce visual clutter when summaries are
 not needed.}
 
-\item{seed}{Random seed for the reproducible optimal cut-point search.
-Change this value to obtain a different search; the default (12345)
-reproduces the previous fixed behaviour.}
+\item{seed}{Random seed for Monte Carlo components of minimum-p-value and
+selection-adjusted cut-point calculations.}
 }
 \value{
 A results object containing:
@@ -261,6 +271,7 @@ A results object containing:
 \code{results$rmstSummary} \tab \tab \tab \tab \tab a preformatted \cr
 \code{results$rmstExplanation} \tab \tab \tab \tab \tab a html \cr
 \code{results$residualsTable} \tab \tab \tab \tab \tab a table \cr
+\code{results$schoenfeldResidualsTable} \tab \tab \tab \tab \tab a table \cr
 \code{results$residualDiagnosticsExplanation} \tab \tab \tab \tab \tab a html \cr
 \code{results$cutoffAnalysisHeading} \tab \tab \tab \tab \tab a preformatted \cr
 \code{results$rescutTable} \tab \tab \tab \tab \tab a table \cr

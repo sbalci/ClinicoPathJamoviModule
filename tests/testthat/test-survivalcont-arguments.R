@@ -9,20 +9,22 @@ data(survivalcont_multicut, package = "ClinicoPath")
 
 test_that("survivalcont respects different analysis types", {
   # Overall survival
-  result_overall <- survivalcont(
+  result_overall <- run_survivalcont(
     data = survivalcont_test,
     elapsedtime = "time_months",
     outcome = "outcome",
+    outcomeLevel = "Dead",
     contexpl = "biomarker",
     analysistype = "overall"
   )
   expect_no_error(result_overall)
 
   # Cause-specific
-  result_cause <- survivalcont(
+  result_cause <- run_survivalcont(
     data = survivalcont_test,
     elapsedtime = "time_months",
     outcome = "outcome",
+    outcomeLevel = "Dead",
     contexpl = "biomarker",
     analysistype = "cause",
     dod = "Dead"
@@ -31,7 +33,7 @@ test_that("survivalcont respects different analysis types", {
 })
 
 test_that("survivalcont respects date-based time calculation", {
-  result <- survivalcont(
+  result <- run_survivalcont(
     data = survivalcont_dates,
     tint = TRUE,
     dxdate = "diagnosis_date",
@@ -47,30 +49,33 @@ test_that("survivalcont respects date-based time calculation", {
 
 test_that("survivalcont respects different time output formats", {
   # Days
-  result_days <- survivalcont(
+  result_days <- run_survivalcont(
     data = survivalcont_test,
     elapsedtime = "time_months",
     outcome = "outcome",
+    outcomeLevel = "Dead",
     contexpl = "biomarker",
     timetypeoutput = "days"
   )
   expect_no_error(result_days)
 
   # Months
-  result_months <- survivalcont(
+  result_months <- run_survivalcont(
     data = survivalcont_test,
     elapsedtime = "time_months",
     outcome = "outcome",
+    outcomeLevel = "Dead",
     contexpl = "biomarker",
     timetypeoutput = "months"
   )
   expect_no_error(result_months)
 
   # Years
-  result_years <- survivalcont(
+  result_years <- run_survivalcont(
     data = survivalcont_test,
     elapsedtime = "time_months",
     outcome = "outcome",
+    outcomeLevel = "Dead",
     contexpl = "biomarker",
     timetypeoutput = "years"
   )
@@ -78,7 +83,7 @@ test_that("survivalcont respects different time output formats", {
 })
 
 test_that("survivalcont respects landmark analysis option", {
-  result <- survivalcont(
+  result <- run_survivalcont(
     data = survivalcont_landmark,
     elapsedtime = "time_months",
     outcome = "outcome",
@@ -91,7 +96,7 @@ test_that("survivalcont respects landmark analysis option", {
 })
 
 test_that("survivalcont respects plot customization options", {
-  result <- survivalcont(
+  result <- run_survivalcont(
     data = survivalcont_test,
     elapsedtime = "time_months",
     outcome = "outcome",
@@ -108,7 +113,7 @@ test_that("survivalcont respects plot customization options", {
 
 test_that("survivalcont respects multiple cutoff options", {
   # 2 cutoffs (3 groups)
-  result_2cut <- survivalcont(
+  result_2cut <- run_survivalcont(
     data = survivalcont_multicut,
     elapsedtime = "time_months",
     outcome = "outcome",
@@ -120,7 +125,7 @@ test_that("survivalcont respects multiple cutoff options", {
   expect_no_error(result_2cut)
 
   # 3 cutoffs (4 groups)
-  result_3cut <- survivalcont(
+  result_3cut <- run_survivalcont(
     data = survivalcont_multicut,
     elapsedtime = "time_months",
     outcome = "outcome",
@@ -134,7 +139,7 @@ test_that("survivalcont respects multiple cutoff options", {
 
 test_that("survivalcont respects different cutoff methods", {
   # Quantile-based
-  result_quantile <- survivalcont(
+  result_quantile <- run_survivalcont(
     data = survivalcont_multicut,
     elapsedtime = "time_months",
     outcome = "outcome",
@@ -146,7 +151,7 @@ test_that("survivalcont respects different cutoff methods", {
   expect_no_error(result_quantile)
 
   # Recursive optimal
-  result_recursive <- survivalcont(
+  result_recursive <- run_survivalcont(
     data = survivalcont_multicut,
     elapsedtime = "time_months",
     outcome = "outcome",
@@ -159,7 +164,7 @@ test_that("survivalcont respects different cutoff methods", {
 })
 
 test_that("survivalcont respects minimum group size", {
-  result <- survivalcont(
+  result <- run_survivalcont(
     data = survivalcont_multicut,
     elapsedtime = "time_months",
     outcome = "outcome",
@@ -172,7 +177,7 @@ test_that("survivalcont respects minimum group size", {
 })
 
 test_that("survivalcont handles all visualization options together", {
-  result <- survivalcont(
+  result <- run_survivalcont(
     data = survivalcont_test,
     elapsedtime = "time_months",
     outcome = "outcome",

@@ -112,7 +112,7 @@ children:
                             maxItemCount: 1
                             isTarget: true
               - type: Label
-                label: Time Type Settings
+                label: Date Format in Data
                 enable: (tint)
                 children:
                   - type: LayoutBox
@@ -121,13 +121,19 @@ children:
                       - type: ComboBox
                         name: timetypedata
                         label: Input time type
-                      - type: ComboBox
-                        name: timetypeoutput
-                        label: Output time type
               - type: Output
                 name: calculatedtime
                 enable: (tint)
                 label: Calculated Time Preview
+      - type: Label
+        label: Time Unit of the Analysis
+        children:
+          - type: LayoutBox
+            margin: large
+            children:
+              - type: ComboBox
+                name: timetypeoutput
+                label: Output time type
       - type: Label
         label: Landmark Analysis
         children:
@@ -200,19 +206,19 @@ children:
                 label: Survival curves (Kaplan-Meier)
               - type: CheckBox
                 name: kmunicate
-                enable: (findcut || multiple_cutoffs)
+                enable: (findcut)
                 label: KMunicate-style plot (publication ready)
               - type: CheckBox
                 name: ce
-                enable: (findcut || multiple_cutoffs)
+                enable: (findcut)
                 label: Cumulative events plot
               - type: CheckBox
                 name: ch
-                enable: (findcut || multiple_cutoffs)
+                enable: (findcut)
                 label: Cumulative hazard plot
               - type: CheckBox
                 name: loglog
-                enable: (findcut || multiple_cutoffs)
+                enable: (findcut)
                 label: Log-log plot (proportional hazards check)
       - type: Label
         label: Plot Customization
@@ -299,6 +305,7 @@ children:
                         name: strata_variable
                         maxItemCount: 1
                         isTarget: true
+                        enable: (stratified_cox)
       - type: Label
         label: Restricted Mean Survival Time
         children:
@@ -312,6 +319,7 @@ children:
                 name: rmst_tau
                 format: number
                 label: Tau (Restriction Time)
+                enable: (rmst_analysis)
   - type: CollapseBox
     label: Person-Time Analysis
     collapsed: true
@@ -335,6 +343,7 @@ children:
                 name: rate_multiplier
                 format: number
                 label: Rate Multiplier
+                enable: (person_time)
   - type: CollapseBox
     label: Detailed Output
     collapsed: false
