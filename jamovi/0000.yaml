@@ -6,7 +6,7 @@ jms: '1.0'
 authors:
   - Serdar Balci
 maintainer: Serdar Balci <serdarbalci@serdarbalci.com>
-date: '2026-08-01'
+date: '2026-08-02'
 type: R
 description: >-
   ClinicoPath help researchers to generate natural language summaries of their
@@ -1079,7 +1079,7 @@ analyses:
   - title: Multivariable Survival Analysis
     name: multisurvival
     ns: ClinicoPath
-    menuGroup: Survival
+    menuGroup: SurvivalT
     menuSubgroup: ClinicoPath Survival
     menuTitle: Multivariable Survival Analysis
     menuSubtitle: Multivariable Cox-regression, Adjusted Survival

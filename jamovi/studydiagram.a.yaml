@@ -53,6 +53,7 @@ options:
     - name: participant_id
       title: Participant ID Variable
       type: Variable
+      default: NULL
       suggested: [ id ]
       permitted: [ factor, numeric ]
       description:
@@ -61,6 +62,7 @@ options:
     - name: step_excluded
       title: Step Number Excluded
       type: Variable
+      default: NULL
       suggested: [ ordinal ]
       permitted: [ numeric, factor ]
       description:
@@ -69,6 +71,7 @@ options:
     - name: exclusion_reason_participant
       title: Exclusion Reason Variable
       type: Variable
+      default: NULL
       suggested: [ nominal ]
       permitted: [ factor ]
       description:
@@ -78,6 +81,7 @@ options:
     - name: step_name
       title: Step Name Variable
       type: Variable
+      default: NULL
       suggested: [ nominal ]
       permitted: [ factor ]
       description:
@@ -86,6 +90,7 @@ options:
     - name: participant_count
       title: Participant Count Variable
       type: Variable
+      default: NULL
       suggested: [ continuous ]
       permitted: [ numeric ]
       description:
@@ -94,6 +99,7 @@ options:
     - name: exclusion_reason_summary
       title: Exclusion Reason Variable
       type: Variable
+      default: NULL
       suggested: [ nominal ]
       permitted: [ factor ]
       description:
@@ -103,6 +109,7 @@ options:
     - name: participant_id_mapping
       title: Participant ID Variable
       type: Variable
+      default: NULL
       suggested: [ id ]
       permitted: [ factor, numeric ]
       description:
@@ -111,6 +118,7 @@ options:
     - name: exclusion_reason_mapping
       title: Exclusion Reason Variable
       type: Variable
+      default: NULL
       suggested: [ nominal ]
       permitted: [ factor ]
       description:

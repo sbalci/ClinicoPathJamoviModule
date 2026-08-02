@@ -40,6 +40,7 @@ rpasurvivalOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
             private$..time <- jmvcore::OptionVariable$new(
                 "time",
                 time,
+                default=NULL,
                 suggested=list(
                     "continuous"),
                 permitted=list(
@@ -47,6 +48,7 @@ rpasurvivalOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
             private$..event <- jmvcore::OptionVariable$new(
                 "event",
                 event,
+                default=NULL,
                 suggested=list(
                     "nominal",
                     "ordinal"),
@@ -55,6 +57,7 @@ rpasurvivalOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
             private$..predictors <- jmvcore::OptionVariables$new(
                 "predictors",
                 predictors,
+                default=NULL,
                 suggested=list(
                     "nominal",
                     "ordinal",
@@ -645,9 +648,9 @@ rpasurvivalBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' @export
 rpasurvival <- function(
     data,
-    time,
-    event,
-    predictors,
+    time = NULL,
+    event = NULL,
+    predictors = NULL,
     eventValue = "1",
     time_unit = "months",
     minbucket = 20,

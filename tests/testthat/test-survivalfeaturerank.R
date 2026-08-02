@@ -35,7 +35,8 @@ test_that('survivalfeaturerank analysis works', {
     pplot = TRUE,
     showSummary = TRUE,
     alphaLevel = 0.05,
-    showFullTable = TRUE
+    showFullTable = TRUE,
+    eventLevel = NULL
     )
   })
 

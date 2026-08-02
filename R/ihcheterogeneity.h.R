@@ -43,6 +43,7 @@ ihcheterogeneityOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6
             private$..biopsy1 <- jmvcore::OptionVariable$new(
                 "biopsy1",
                 biopsy1,
+                default=NULL,
                 suggested=list(
                     "continuous"),
                 permitted=list(
@@ -713,7 +714,7 @@ ihcheterogeneityBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
 ihcheterogeneity <- function(
     data,
     wholesection = NULL,
-    biopsy1,
+    biopsy1 = NULL,
     biopsy2 = NULL,
     biopsy3 = NULL,
     biopsy4 = NULL,

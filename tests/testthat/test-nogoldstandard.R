@@ -16,7 +16,10 @@ test_that("nogoldstandard basic functionality works", {
     test2 = "test2_result", 
     test2Positive = "positive",
     method = "composite",
-    bootstrap = FALSE
+    bootstrap = FALSE,
+    test3Positive = NULL,
+    test4Positive = NULL,
+    test5Positive = NULL
   )
   
   expect_s3_class(result, "nogoldstandardResults")
@@ -52,7 +55,9 @@ test_that("nogoldstandard works with all methods", {
       test3 = "test3_result",
       test3Positive = "positive",
       method = method,
-      bootstrap = FALSE
+      bootstrap = FALSE,
+      test4Positive = NULL,
+      test5Positive = NULL
     )
     
     expect_s3_class(result, "nogoldstandardResults")
@@ -84,7 +89,9 @@ test_that("nogoldstandard handles missing data correctly", {
     test3 = "test3_result",
     test3Positive = "positive",
     method = "composite",
-    bootstrap = FALSE
+    bootstrap = FALSE,
+    test4Positive = NULL,
+    test5Positive = NULL
   )
   
   expect_s3_class(result, "nogoldstandardResults")
@@ -105,7 +112,10 @@ test_that("nogoldstandard bootstrap CI works", {
     method = "composite",
     bootstrap = TRUE,
     nboot = 50,  # Small number for testing
-    alpha = 0.05
+    alpha = 0.05,
+    test3Positive = NULL,
+    test4Positive = NULL,
+    test5Positive = NULL
   )
   
   expect_s3_class(result, "nogoldstandardResults")
@@ -124,8 +134,12 @@ test_that("nogoldstandard validates inputs correctly", {
     nogoldstandard(
       data = nogoldstandard_test_data_small,
       test1 = "test1_result",
-      test1Positive = "positive"
+      test1Positive = "positive",
       # Missing test2
+      test2Positive = NULL,
+      test3Positive = NULL,
+      test4Positive = NULL,
+      test5Positive = NULL
     ),
     "At least two tests must be specified"
   )
@@ -137,7 +151,10 @@ test_that("nogoldstandard validates inputs correctly", {
       test1 = "test1_result",
       test1Positive = "invalid_level",  # This level doesn't exist
       test2 = "test2_result",
-      test2Positive = "positive"
+      test2Positive = "positive",
+      test3Positive = NULL,
+      test4Positive = NULL,
+      test5Positive = NULL
     ),
     "Level 'invalid_level' not found"
   )
@@ -152,7 +169,10 @@ test_that("nogoldstandard validates inputs correctly", {
       test1 = "numeric_col",  # Not a factor
       test1Positive = "positive",
       test2 = "test2_result",
-      test2Positive = "positive"
+      test2Positive = "positive",
+      test3Positive = NULL,
+      test4Positive = NULL,
+      test5Positive = NULL
     ),
     "must be a factor"
   )
@@ -192,7 +212,10 @@ test_that("nogoldstandard PPV/NPV calculations are reasonable", {
     test2 = "test2_result", 
     test2Positive = "positive",
     method = "composite",
-    bootstrap = FALSE
+    bootstrap = FALSE,
+    test3Positive = NULL,
+    test4Positive = NULL,
+    test5Positive = NULL
   )
   
   metrics_df <- result$test_metrics$asDF
@@ -215,7 +238,10 @@ test_that("nogoldstandard handles empty data appropriately", {
       test1 = "test1_result",
       test1Positive = "positive",
       test2 = "test2_result", 
-      test2Positive = "positive"
+      test2Positive = "positive",
+      test3Positive = NULL,
+      test4Positive = NULL,
+      test5Positive = NULL
     ),
     "Data contains no rows"
   )
@@ -236,7 +262,9 @@ test_that("nogoldstandard method differences are reasonable", {
       test3 = "test3_result",
       test3Positive = "positive",
       method = methods[i],
-      bootstrap = FALSE
+      bootstrap = FALSE,
+      test4Positive = NULL,
+      test5Positive = NULL
     )
     
     prevalences[i] <- result$prevalence$asDF$estimate[1]

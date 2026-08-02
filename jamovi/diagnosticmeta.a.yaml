@@ -33,6 +33,7 @@ options:
     - name: study
       title: Study Identifier
       type: Variable
+      default: NULL
       suggested:
           - nominal
       permitted:
@@ -44,6 +45,7 @@ options:
     - name: true_positives
       title: True Positives (TP)
       type: Variable
+      default: NULL
       suggested:
           - continuous
       permitted:
@@ -54,6 +56,7 @@ options:
     - name: false_positives
       title: False Positives (FP)
       type: Variable
+      default: NULL
       suggested:
           - continuous
       permitted:
@@ -64,6 +67,7 @@ options:
     - name: false_negatives
       title: False Negatives (FN)
       type: Variable
+      default: NULL
       suggested:
           - continuous
       permitted:
@@ -74,6 +78,7 @@ options:
     - name: true_negatives
       title: True Negatives (TN)
       type: Variable
+      default: NULL
       suggested:
           - continuous
       permitted:

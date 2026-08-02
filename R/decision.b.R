@@ -427,8 +427,12 @@ decisionClass <- if (requireNamespace("jmvcore"))
                 has_gold_negative <- length(self$options$goldNegative) > 0 && nchar(self$options$goldNegative) > 0
                 has_test_negative <- length(self$options$testNegative) > 0 && nchar(self$options$testNegative) > 0
 
-                gold_negative_level <- if (has_gold_negative) self$options$goldNegative else NULL
-                test_negative_level <- if (has_test_negative) self$options$testNegative else NULL
+                # NA_character_ rather than NULL: case_when() evaluates every branch, and
+                # `x == NULL` returns logical(0), which fails the size check even when the
+                # branch is unreachable. Comparing against NA yields a full-length, never-
+                # matching condition instead.
+                gold_negative_level <- if (has_gold_negative) self$options$goldNegative else NA_character_
+                test_negative_level <- if (has_test_negative) self$options$testNegative else NA_character_
 
                 # Check for levels that will be excluded (not positive, not negative)
                 gold_used_levels <- c(self$options$goldPositive, gold_negative_level)

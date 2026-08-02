@@ -23,10 +23,12 @@ crosstableOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 
             private$..vars <- jmvcore::OptionVariables$new(
                 "vars",
-                vars)
+                vars,
+                default=NULL)
             private$..group <- jmvcore::OptionVariable$new(
                 "group",
                 group,
+                default=NULL,
                 suggested=list(
                     "ordinal",
                     "nominal"),
@@ -378,8 +380,8 @@ crosstableBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' @export
 crosstable <- function(
     data,
-    vars,
-    group,
+    vars = NULL,
+    group = NULL,
     sty = "nejm",
     excl = FALSE,
     cont = "mean",

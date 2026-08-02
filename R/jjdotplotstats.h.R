@@ -52,6 +52,7 @@ jjdotplotstatsOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
             private$..grvar <- jmvcore::OptionVariable$new(
                 "grvar",
                 grvar,
+                default=NULL,
                 suggested=list(
                     "ordinal",
                     "nominal"),
@@ -397,7 +398,7 @@ jjdotplotstats <- function(
     data,
     dep,
     group,
-    grvar,
+    grvar = NULL,
     typestatistics = "parametric",
     effsizetype = "biased",
     centralityplotting = FALSE,

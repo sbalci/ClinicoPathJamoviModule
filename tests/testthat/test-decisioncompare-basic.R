@@ -15,7 +15,8 @@ test_that("decisioncompare creates proper class", {
     test1 = "Test1",
     test1Positive = "Positive",
     test2 = "Test2",
-    test2Positive = "Positive"
+    test2Positive = "Positive",
+    test3Positive = NULL
   )
   expect_s3_class(result, "decisioncompareClass")
 })
@@ -28,7 +29,8 @@ test_that("decisioncompare handles basic two-test comparison", {
     test1 = "Test1",
     test1Positive = "Positive",
     test2 = "Test2",
-    test2Positive = "Positive"
+    test2Positive = "Positive",
+    test3Positive = NULL
   )
   expect_s3_class(result, "decisioncompareClass")
   expect_true(length(result$results) > 0)
@@ -72,7 +74,8 @@ test_that("decisioncompare handles screening vs diagnostic tests", {
     test1 = "ScreeningTest",
     test1Positive = "Positive",
     test2 = "DiagnosticTest",
-    test2Positive = "Positive"
+    test2Positive = "Positive",
+    test3Positive = NULL
   )
   expect_s3_class(result, "decisioncompareClass")
 })
@@ -86,7 +89,8 @@ test_that("decisioncompare handles confidence intervals", {
     test1Positive = "Positive",
     test2 = "Test2",
     test2Positive = "Positive",
-    ci = TRUE
+    ci = TRUE,
+    test3Positive = NULL
   )
   expect_no_error(result)
 })
@@ -100,7 +104,8 @@ test_that("decisioncompare handles comparison plot", {
     test1Positive = "Positive",
     test2 = "Test2",
     test2Positive = "Positive",
-    plot = TRUE
+    plot = TRUE,
+    test3Positive = NULL
   )
   expect_no_error(result)
 })
@@ -130,7 +135,8 @@ test_that("decisioncompare handles statistical comparison", {
     test1Positive = "Positive",
     test2 = "Test2",
     test2Positive = "Positive",
-    statComp = TRUE
+    statComp = TRUE,
+    test3Positive = NULL
   )
   expect_s3_class(result, "decisioncompareClass")
 })
@@ -144,7 +150,8 @@ test_that("decisioncompare handles original data display", {
     test1Positive = "Positive",
     test2 = "Test2",
     test2Positive = "Positive",
-    od = TRUE
+    od = TRUE,
+    test3Positive = NULL
   )
   expect_no_error(result)
 })

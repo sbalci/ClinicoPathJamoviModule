@@ -8,7 +8,7 @@ jjpubr(
   data,
   plotType = "boxplot",
   xvar,
-  yvar,
+  yvar = NULL,
   groupvar = NULL,
   facetvar = NULL,
   addStats = FALSE,

@@ -126,7 +126,11 @@ test_that("competingsurvival handles edge cases", {
     # Test 1: Empty variable selection should show instructions
     testthat::expect_no_error({
         results <- competingsurvival(
-            data = minimal_data
+            data = minimal_data,
+            dod = NULL,
+            dooc = NULL,
+            awd = NULL,
+            awod = NULL
         )
     })
     
@@ -135,7 +139,11 @@ test_that("competingsurvival handles edge cases", {
         results <- competingsurvival(
             data = minimal_data,
             explanatory = "group",
-            overalltime = "time"
+            overalltime = "time",
+            dod = NULL,
+            dooc = NULL,
+            awd = NULL,
+            awod = NULL
         )
     })
     
@@ -144,7 +152,11 @@ test_that("competingsurvival handles edge cases", {
         results <- competingsurvival(
             data = minimal_data,
             explanatory = "group",
-            outcome = "outcome"
+            outcome = "outcome",
+            dod = NULL,
+            dooc = NULL,
+            awd = NULL,
+            awod = NULL
         )
     })
     
@@ -153,7 +165,11 @@ test_that("competingsurvival handles edge cases", {
         results <- competingsurvival(
             data = minimal_data,
             overalltime = "time",
-            outcome = "outcome"
+            outcome = "outcome",
+            dod = NULL,
+            dooc = NULL,
+            awd = NULL,
+            awod = NULL
         )
     })
     

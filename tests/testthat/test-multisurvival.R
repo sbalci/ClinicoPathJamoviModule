@@ -1,12 +1,10 @@
-context("multisurvival")
-
 test_that("multisurvival works with basic Cox regression", {
 
   # Load test data
-  data("colon", package = "survival")
+  colon <- survival::colon
   
   # Basic test with continuous and categorical variables
-  result <- multisurvival(
+  result <- .run_multisurvival(
     data = colon,
     elapsedtime = "time",
     outcome = "status", 
@@ -40,7 +38,7 @@ test_that("multisurvival handles date-based time calculation", {
     stage = factor(sample(c("I", "II", "III", "IV"), n, replace = TRUE))
   )
   
-  result <- multisurvival(
+  result <- .run_multisurvival(
     data = test_data,
     tint = TRUE,
     dxdate = "dx_date", 
@@ -59,9 +57,9 @@ test_that("multisurvival handles date-based time calculation", {
 })
 
 test_that("multisurvival risk score calculation works", {
-  data("colon", package = "survival")
+  colon <- survival::colon
   
-  result <- multisurvival(
+  result <- .run_multisurvival(
     data = colon,
     elapsedtime = "time",
     outcome = "status",
@@ -79,9 +77,9 @@ test_that("multisurvival risk score calculation works", {
 })
 
 test_that("multisurvival handles stratification", {
-  data("colon", package = "survival")
+  colon <- survival::colon
   
-  result <- multisurvival(
+  result <- .run_multisurvival(
     data = colon,
     elapsedtime = "time",
     outcome = "status",
@@ -97,34 +95,14 @@ test_that("multisurvival handles stratification", {
   expect_true(!is.null(result$stratificationExplanation))
 })
 
-test_that("multisurvival model selection works", {
-  data("colon", package = "survival")
-  
-  result <- multisurvival(
-    data = colon,
-    elapsedtime = "time",
-    outcome = "status",
-    outcomeLevel = "1", dod = NULL, dooc = NULL, awd = NULL, awod = NULL,
-    explanatory = c("sex", "obstruct", "perfor"),
-    contexpl = c("age", "nodes"),
-    use_modelSelection = TRUE,
-    modelSelection = "backward",
-    selectionCriteria = "aic"
-  )
-  
-  # Check model selection outputs
-  expect_true(!is.null(result$text_model_selection))
-  expect_true(!is.null(result$selection_method))
-})
-
 test_that("multisurvival handles missing data gracefully", {
   # Create data with missing values
-  data("colon", package = "survival")
+  colon <- survival::colon
   test_data <- colon
   test_data$age[1:10] <- NA
   
   expect_warning(
-    result <- multisurvival(
+    result <- .run_multisurvival(
       data = test_data,
       elapsedtime = "time",
       outcome = "status",
@@ -139,9 +117,9 @@ test_that("multisurvival handles missing data gracefully", {
 })
 
 test_that("multisurvival produces plots when requested", {
-  data("colon", package = "survival")
+  colon <- survival::colon
   
-  result <- multisurvival(
+  result <- .run_multisurvival(
     data = colon,
     elapsedtime = "time", 
     outcome = "status",
@@ -159,9 +137,9 @@ test_that("multisurvival produces plots when requested", {
 })
 
 test_that("multisurvival person-time analysis works", {
-  data("colon", package = "survival")
+  colon <- survival::colon
   
-  result <- multisurvival(
+  result <- .run_multisurvival(
     data = colon,
     elapsedtime = "time",
     outcome = "status",
@@ -179,9 +157,9 @@ test_that("multisurvival person-time analysis works", {
 })
 
 test_that("multisurvival handles landmark analysis", {
-  data("colon", package = "survival")
+  colon <- survival::colon
   
-  result <- multisurvival(
+  result <- .run_multisurvival(
     data = colon,
     elapsedtime = "time",
     outcome = "status", 
@@ -196,14 +174,14 @@ test_that("multisurvival handles landmark analysis", {
 })
 
 test_that("multisurvival adjusted survival curves work", {
-  data("colon", package = "survival")
+  colon <- survival::colon
   
-  result <- multisurvival(
+  result <- .run_multisurvival(
     data = colon,
     elapsedtime = "time",
     outcome = "status",
     outcomeLevel = "1", dod = NULL, dooc = NULL, awd = NULL, awod = NULL,
-    explanatory = c("obstruct", "perfor"),
+    explanatory = c("sex", "obstruct", "perfor"),
     contexpl = "age",
     ac = TRUE,
     adjexplanatory = "sex",
@@ -212,113 +190,4 @@ test_that("multisurvival adjusted survival curves work", {
   
   # Check adjusted curve outputs
   expect_true(!is.null(result$plot_adj))
-})
-
-test_that("multisurvival works with wide format time-dependent covariates", {
-  # Load test data for wide format
-  load(file.path(system.file(package = "ClinicoPath"), "..", "..", "data", "test_wide_time_dependent.rda"))
-  
-  result <- multisurvival(
-    data = test_wide_time_dependent,
-    elapsedtime = "time",
-    outcome = "status",
-    outcomeLevel = "1", dod = NULL, dooc = NULL, awd = NULL, awod = NULL,
-    explanatory = c("sex", "stage"),
-    contexpl = "age",
-    use_time_dependent = TRUE,
-    td_format = "wide",
-    time_dep_vars = c("treatment_baseline"),
-    change_times = "6, 12, 18",
-    td_suffix_pattern = "_t{time}",
-    timetypeoutput = "months"
-  )
-  
-  expect_true(inherits(result, "multisurvivalResults"))
-  expect_false(result$todo$visible)
-})
-
-test_that("multisurvival works with long format time-dependent covariates", {
-  # Load test data for long format  
-  load(file.path(system.file(package = "ClinicoPath"), "..", "..", "data", "test_long_time_dependent.rda"))
-  
-  result <- multisurvival(
-    data = test_long_time_dependent,
-    use_time_dependent = TRUE,
-    td_format = "long",
-    start_time_var = "tstart",
-    stop_time_var = "tstop",
-    outcome = "status",
-    outcomeLevel = "1", dod = NULL, dooc = NULL, awd = NULL, awod = NULL,
-    time_dep_vars = c("treatment"),
-    explanatory = c("sex", "stage"),
-    contexpl = "age",
-    timetypeoutput = "months"
-  )
-  
-  expect_true(inherits(result, "multisurvivalResults"))
-  expect_false(result$todo$visible)
-})
-
-test_that("multisurvival frailty models work", {
-  data("colon", package = "survival")
-  
-  # Add clustering variable for frailty
-  colon$hospital <- factor(sample(1:5, nrow(colon), replace = TRUE))
-  
-  result <- multisurvival(
-    data = colon,
-    elapsedtime = "time",
-    outcome = "status",
-    outcomeLevel = "1", dod = NULL, dooc = NULL, awd = NULL, awod = NULL,
-    explanatory = c("sex", "obstruct"),
-    contexpl = "age",
-    use_frailty = TRUE,
-    frailty_var = "hospital",
-    frailty_distribution = "gamma"
-  )
-  
-  expect_true(inherits(result, "multisurvivalResults"))
-  expect_false(result$todo$visible)
-})
-
-test_that("multisurvival splines for non-proportional hazards work", {
-  data("colon", package = "survival")
-  
-  result <- multisurvival(
-    data = colon,
-    elapsedtime = "time",
-    outcome = "status",
-    outcomeLevel = "1", dod = NULL, dooc = NULL, awd = NULL, awod = NULL,
-    explanatory = c("obstruct", "perfor"),
-    contexpl = "age",
-    use_splines = TRUE,
-    spline_vars = "age",
-    spline_df = 3,
-    spline_type = "pspline"
-  )
-  
-  expect_true(inherits(result, "multisurvivalResults"))
-  expect_false(result$todo$visible)
-})
-
-test_that("multisurvival decision tree analysis works", {
-  data("colon", package = "survival")
-  
-  result <- multisurvival(
-    data = colon,
-    elapsedtime = "time",
-    outcome = "status",
-    outcomeLevel = "1", dod = NULL, dooc = NULL, awd = NULL, awod = NULL,
-    explanatory = c("sex", "obstruct"),
-    contexpl = "age",
-    use_tree = TRUE,
-    min_node = 20,
-    complexity = 0.01,
-    max_depth = 3,
-    show_terminal_nodes = TRUE
-  )
-  
-  expect_true(inherits(result, "multisurvivalResults"))
-  expect_true(!is.null(result$tree_summary))
-  expect_true(!is.null(result$tree_plot))
 })

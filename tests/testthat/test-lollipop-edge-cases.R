@@ -22,7 +22,8 @@ test_that("lollipop handles missing values in dep variable", {
     data = lollipop_test,
     dep = "hemoglobin",
     group = "treatment_group",
-    aggregation = "mean"
+    aggregation = "mean",
+    highlight = NULL
   )
   expect_s3_class(result, "lollipopResults")
 })
@@ -36,7 +37,8 @@ test_that("lollipop handles all missing values in dep", {
     lollipop(
       data = test_data_all_na,
       dep = "measurement",
-      group = "category"
+      group = "category",
+      highlight = NULL
     ),
     regexp = "missing|NA|no.*data|empty",
     ignore.case = TRUE
@@ -52,7 +54,8 @@ test_that("lollipop handles missing values in group variable", {
     data = test_data_na_group,
     dep = "hemoglobin",
     group = "treatment_group",
-    aggregation = "mean"
+    aggregation = "mean",
+    highlight = NULL
   )
   # Should either work (removing NAs) or warn
   expect_s3_class(result, "lollipopResults")
@@ -70,7 +73,8 @@ test_that("lollipop handles very small datasets", {
   result <- lollipop(
     data = tiny_data,
     dep = "measurement",
-    group = "category"
+    group = "category",
+    highlight = NULL
   )
   expect_s3_class(result, "lollipopResults")
 })
@@ -83,7 +87,8 @@ test_that("lollipop handles single group", {
   result <- lollipop(
     data = single_group_data,
     dep = "hemoglobin",
-    group = "treatment_group"
+    group = "treatment_group",
+    highlight = NULL
   )
   expect_s3_class(result, "lollipopResults")
 })
@@ -100,7 +105,8 @@ test_that("lollipop handles very large values", {
   result <- lollipop(
     data = test_data_large,
     dep = "measurement",
-    group = "category"
+    group = "category",
+    highlight = NULL
   )
   expect_s3_class(result, "lollipopResults")
 })
@@ -113,7 +119,8 @@ test_that("lollipop handles very small values", {
   result <- lollipop(
     data = test_data_small,
     dep = "measurement",
-    group = "category"
+    group = "category",
+    highlight = NULL
   )
   expect_s3_class(result, "lollipopResults")
 })
@@ -126,7 +133,8 @@ test_that("lollipop handles negative values", {
   result <- lollipop(
     data = test_data_neg,
     dep = "measurement",
-    group = "category"
+    group = "category",
+    highlight = NULL
   )
   expect_s3_class(result, "lollipopResults")
 })
@@ -139,7 +147,8 @@ test_that("lollipop handles zero values", {
   result <- lollipop(
     data = test_data_zero,
     dep = "measurement",
-    group = "category"
+    group = "category",
+    highlight = NULL
   )
   expect_s3_class(result, "lollipopResults")
 })
@@ -156,7 +165,8 @@ test_that("lollipop handles constant dep variable", {
   result <- lollipop(
     data = test_data_const,
     dep = "measurement",
-    group = "category"
+    group = "category",
+    highlight = NULL
   )
   expect_s3_class(result, "lollipopResults")
 })
@@ -174,7 +184,8 @@ test_that("lollipop handles variable names with spaces", {
   result <- lollipop(
     data = test_data_spaces,
     dep = "my measurement",
-    group = "group category"
+    group = "group category",
+    highlight = NULL
   )
   expect_s3_class(result, "lollipopResults")
 })
@@ -188,7 +199,8 @@ test_that("lollipop handles long category names", {
     data = test_data_long,
     dep = "measurement",
     group = "category",
-    orientation = "horizontal"
+    orientation = "horizontal",
+    highlight = NULL
   )
   expect_s3_class(result, "lollipopResults")
 })
@@ -203,7 +215,8 @@ test_that("lollipop errors on non-existent variables", {
     lollipop(
       data = lollipop_test,
       dep = "nonexistent_var",
-      group = "treatment_group"
+      group = "treatment_group",
+      highlight = NULL
     ),
     regexp = "not found|does not exist|invalid",
     ignore.case = TRUE
@@ -216,7 +229,8 @@ test_that("lollipop errors on non-numeric dep variable", {
     lollipop(
       data = lollipop_test,
       dep = "treatment_group",  # This is categorical
-      group = "disease_severity"
+      group = "disease_severity",
+      highlight = NULL
     ),
     regexp = "numeric|continuous|not.*number",
     ignore.case = TRUE
@@ -235,7 +249,8 @@ test_that("lollipop handles Inf values", {
   result <- lollipop(
     data = test_data_inf,
     dep = "measurement",
-    group = "category"
+    group = "category",
+    highlight = NULL
   )
   expect_s3_class(result, "lollipopResults")
 })
@@ -248,7 +263,8 @@ test_that("lollipop handles -Inf values", {
   result <- lollipop(
     data = test_data_neginf,
     dep = "measurement",
-    group = "category"
+    group = "category",
+    highlight = NULL
   )
   expect_s3_class(result, "lollipopResults")
 })
@@ -261,7 +277,8 @@ test_that("lollipop handles NaN values", {
   result <- lollipop(
     data = test_data_nan,
     dep = "measurement",
-    group = "category"
+    group = "category",
+    highlight = NULL
   )
   expect_s3_class(result, "lollipopResults")
 })
@@ -280,7 +297,8 @@ test_that("lollipop handles very unequal group sizes", {
     data = test_data_unequal,
     dep = "hemoglobin",
     group = "treatment_group",
-    aggregation = "mean"
+    aggregation = "mean",
+    highlight = NULL
   )
   expect_s3_class(result, "lollipopResults")
 })
@@ -315,7 +333,8 @@ test_that("lollipop errors on empty dataset", {
     lollipop(
       data = empty_data,
       dep = "measurement",
-      group = "category"
+      group = "category",
+      highlight = NULL
     ),
     regexp = "empty|no.*data|zero.*rows",
     ignore.case = TRUE
@@ -334,7 +353,8 @@ test_that("lollipop handles factor grouping variable", {
   result <- lollipop(
     data = test_data_factor,
     dep = "hemoglobin",
-    group = "treatment_group"
+    group = "treatment_group",
+    highlight = NULL
   )
   expect_s3_class(result, "lollipopResults")
 })
@@ -347,7 +367,8 @@ test_that("lollipop handles character grouping variable", {
   result <- lollipop(
     data = test_data_char,
     dep = "hemoglobin",
-    group = "treatment_group"
+    group = "treatment_group",
+    highlight = NULL
   )
   expect_s3_class(result, "lollipopResults")
 })
@@ -364,7 +385,8 @@ test_that("lollipop handles duplicate rows", {
     data = test_data_dup,
     dep = "measurement",
     group = "category",
-    aggregation = "mean"
+    aggregation = "mean",
+    highlight = NULL
   )
   expect_s3_class(result, "lollipopResults")
 })
@@ -380,7 +402,8 @@ test_that("lollipop handles threshold above all values", {
     dep = "measurement",
     group = "category",
     conditionalColor = TRUE,
-    colorThreshold = 1000
+    colorThreshold = 1000,
+    highlight = NULL
   )
   expect_s3_class(result, "lollipopResults")
 })
@@ -392,7 +415,8 @@ test_that("lollipop handles threshold below all values", {
     dep = "measurement",
     group = "category",
     conditionalColor = TRUE,
-    colorThreshold = -1000
+    colorThreshold = -1000,
+    highlight = NULL
   )
   expect_s3_class(result, "lollipopResults")
 })
@@ -408,7 +432,8 @@ test_that("lollipop handles tibble input", {
   result <- lollipop(
     data = test_tibble,
     dep = "measurement",
-    group = "category"
+    group = "category",
+    highlight = NULL
   )
   expect_s3_class(result, "lollipopResults")
 })
@@ -420,7 +445,8 @@ test_that("lollipop handles data.frame input", {
   result <- lollipop(
     data = test_df,
     dep = "measurement",
-    group = "category"
+    group = "category",
+    highlight = NULL
   )
   expect_s3_class(result, "lollipopResults")
 })

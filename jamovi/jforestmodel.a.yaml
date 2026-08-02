@@ -28,6 +28,7 @@ options:
     - name: predictor_vars
       title: Predictor Variables
       type: Variables
+      default: NULL
       description: Independent variables to include in the model
 
     - name: model_type
@@ -48,6 +49,7 @@ options:
     - name: time_var
       title: Time Variable (for Cox model)
       type: Variable
+      default: NULL
       suggested:
         - continuous
       permitted:
@@ -57,6 +59,7 @@ options:
     - name: event_var
       title: Event Variable (for Cox model)
       type: Variable
+      default: NULL
       suggested:
         - nominal
         - ordinal
@@ -115,6 +118,7 @@ options:
     - name: covariates
       title: Specific Covariates to Display
       type: Variables
+      default: NULL
       description: Optional subset of variables to include in plot
 
     - name: sort_variables

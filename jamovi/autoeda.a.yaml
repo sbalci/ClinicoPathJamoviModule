@@ -76,6 +76,7 @@ options:
     - name: target_var
       title: 'Target Variable'
       type: Variable
+      default: NULL
       suggested: [ continuous, nominal, ordinal ]
       permitted: [ numeric, factor ]
       description:

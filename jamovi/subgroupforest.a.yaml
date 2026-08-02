@@ -79,6 +79,7 @@ options:
     - name: time
       title: Time Variable (for survival)
       type: Variable
+      default: NULL
       suggested: [continuous]
       description:
           R: >
@@ -88,6 +89,7 @@ options:
     - name: event
       title: Event Variable (for survival)
       type: Variable
+      default: NULL
       suggested: [nominal]
       permitted: [factor]
       description:

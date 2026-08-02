@@ -9,7 +9,7 @@ circos(
   inputMode = "edges",
   fromVar,
   toVar,
-  valueVar,
+  valueVar = NULL,
   directional = TRUE,
   symmetric = FALSE,
   gridPalette = "Set2",

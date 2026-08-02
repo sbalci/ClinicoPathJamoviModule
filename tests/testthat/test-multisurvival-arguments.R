@@ -18,19 +18,22 @@ data(multisurvival_persontime, package = "ClinicoPath")
 
 test_that("multisurvival handles all time format combinations", {
   # YMD format
-  result_ymd <- multisurvival(
+  result_ymd <- .run_multisurvival(
     data = multisurvival_dates,
     tint = TRUE,
     dxdate = "dxdate",
     fudate = "fudate",
     timetypedata = "ymd",
-    outcome = "outcome"
+    outcome = "outcome",
+    outcomeLevel = "Dead",
+    explanatory = "treatment"
   )
-  expect_s3_class(result_ymd, "multisurvivalClass")
+  expect_s3_class(result_ymd, "multisurvivalResults")
+  expect_false(result_ymd$todo$visible)
 })
 
 test_that("multisurvival handles competing risks analysis", {
-  result <- multisurvival(
+  result <- .run_multisurvival(
     data = multisurvival_competing,
     elapsedtime = "elapsedtime",
     outcome = "outcome",
@@ -44,11 +47,11 @@ test_that("multisurvival handles competing risks analysis", {
     explanatory = c("treatment", "stage")
   )
   
-  expect_s3_class(result, "multisurvivalClass")
+  expect_s3_class(result, "multisurvivalResults")
 })
 
 test_that("multisurvival handles cause-specific survival", {
-  result <- multisurvival(
+  result <- .run_multisurvival(
     data = multisurvival_competing,
     elapsedtime = "elapsedtime",
     outcome = "outcome",
@@ -57,11 +60,11 @@ test_that("multisurvival handles cause-specific survival", {
     explanatory = "treatment"
   )
   
-  expect_s3_class(result, "multisurvivalClass")
+  expect_s3_class(result, "multisurvivalResults")
 })
 
 test_that("multisurvival calculates risk scores", {
-  result <- multisurvival(
+  result <- .run_multisurvival(
     data = multisurvival_risk,
     elapsedtime = "elapsedtime",
     outcome = "outcome",
@@ -71,12 +74,12 @@ test_that("multisurvival calculates risk scores", {
     numRiskGroups = "three"
   )
   
-  expect_s3_class(result, "multisurvivalClass")
+  expect_s3_class(result, "multisurvivalResults")
 })
 
 test_that("multisurvival handles different risk group numbers", {
   # Two groups
-  result_two <- multisurvival(
+  result_two <- .run_multisurvival(
     data = multisurvival_risk,
     elapsedtime = "elapsedtime",
     outcome = "outcome",
@@ -85,10 +88,10 @@ test_that("multisurvival handles different risk group numbers", {
     calculateRiskScore = TRUE,
     numRiskGroups = "two"
   )
-  expect_s3_class(result_two, "multisurvivalClass")
+  expect_s3_class(result_two, "multisurvivalResults")
   
   # Four groups
-  result_four <- multisurvival(
+  result_four <- .run_multisurvival(
     data = multisurvival_risk,
     elapsedtime = "elapsedtime",
     outcome = "outcome",
@@ -97,11 +100,11 @@ test_that("multisurvival handles different risk group numbers", {
     calculateRiskScore = TRUE,
     numRiskGroups = "four"
   )
-  expect_s3_class(result_four, "multisurvivalClass")
+  expect_s3_class(result_four, "multisurvivalResults")
 })
 
 test_that("multisurvival plots risk group survival", {
-  result <- multisurvival(
+  result <- .run_multisurvival(
     data = multisurvival_risk,
     elapsedtime = "elapsedtime",
     outcome = "outcome",
@@ -112,11 +115,11 @@ test_that("multisurvival plots risk group survival", {
     numRiskGroups = "three"
   )
   
-  expect_s3_class(result, "multisurvivalClass")
+  expect_s3_class(result, "multisurvivalResults")
 })
 
 test_that("multisurvival handles landmark analysis", {
-  result <- multisurvival(
+  result <- .run_multisurvival(
     data = multisurvival_landmark,
     elapsedtime = "elapsedtime",
     outcome = "outcome",
@@ -126,11 +129,11 @@ test_that("multisurvival handles landmark analysis", {
     contexpl = "age"
   )
   
-  expect_s3_class(result, "multisurvivalClass")
+  expect_s3_class(result, "multisurvivalResults")
 })
 
 test_that("multisurvival handles stratification", {
-  result <- multisurvival(
+  result <- .run_multisurvival(
     data = multisurvival_stratify,
     elapsedtime = "elapsedtime",
     outcome = "outcome",
@@ -140,11 +143,11 @@ test_that("multisurvival handles stratification", {
     stratvar = "sex"
   )
   
-  expect_s3_class(result, "multisurvivalClass")
+  expect_s3_class(result, "multisurvivalResults")
 })
 
 test_that("multisurvival calculates person-time metrics", {
-  result <- multisurvival(
+  result <- .run_multisurvival(
     data = multisurvival_persontime,
     elapsedtime = "elapsedtime",
     outcome = "outcome",
@@ -154,12 +157,12 @@ test_that("multisurvival calculates person-time metrics", {
     rate_multiplier = 1000
   )
   
-  expect_s3_class(result, "multisurvivalClass")
+  expect_s3_class(result, "multisurvivalResults")
 })
 
 test_that("multisurvival handles adjusted survival curves", {
   # Average method
-  result_avg <- multisurvival(
+  result_avg <- .run_multisurvival(
     data = multisurvival_test,
     elapsedtime = "elapsedtime",
     outcome = "outcome",
@@ -169,10 +172,10 @@ test_that("multisurvival handles adjusted survival curves", {
     adjexplanatory = "treatment",
     ac_method = "average"
   )
-  expect_s3_class(result_avg, "multisurvivalClass")
+  expect_s3_class(result_avg, "multisurvivalResults")
   
   # Conditional method
-  result_cond <- multisurvival(
+  result_cond <- .run_multisurvival(
     data = multisurvival_test,
     elapsedtime = "elapsedtime",
     outcome = "outcome",
@@ -182,11 +185,11 @@ test_that("multisurvival handles adjusted survival curves", {
     adjexplanatory = "treatment",
     ac_method = "conditional"
   )
-  expect_s3_class(result_cond, "multisurvivalClass")
+  expect_s3_class(result_cond, "multisurvivalResults")
 })
 
 test_that("multisurvival shows nomogram", {
-  result <- multisurvival(
+  result <- .run_multisurvival(
     data = multisurvival_test,
     elapsedtime = "elapsedtime",
     outcome = "outcome",
@@ -195,12 +198,14 @@ test_that("multisurvival shows nomogram", {
     showNomogram = TRUE
   )
   
-  expect_s3_class(result, "multisurvivalClass")
+  expect_s3_class(result, "multisurvivalResults")
+  expect_true(result$plot_nomogram$visible)
+  expect_false(grepl("could not be constructed", result$nomogramSummary$content))
 })
 
 test_that("multisurvival handles different HR plot styles", {
   # finalfit style
-  result_finalfit <- multisurvival(
+  result_finalfit <- .run_multisurvival(
     data = multisurvival_test,
     elapsedtime = "elapsedtime",
     outcome = "outcome",
@@ -209,10 +214,10 @@ test_that("multisurvival handles different HR plot styles", {
     hr = TRUE,
     sty = "t1"
   )
-  expect_s3_class(result_finalfit, "multisurvivalClass")
+  expect_s3_class(result_finalfit, "multisurvivalResults")
   
   # survminer style
-  result_survminer <- multisurvival(
+  result_survminer <- .run_multisurvival(
     data = multisurvival_test,
     elapsedtime = "elapsedtime",
     outcome = "outcome",
@@ -221,11 +226,11 @@ test_that("multisurvival handles different HR plot styles", {
     hr = TRUE,
     sty = "t3"
   )
-  expect_s3_class(result_survminer, "multisurvivalClass")
+  expect_s3_class(result_survminer, "multisurvivalResults")
 })
 
 test_that("multisurvival handles KM plot options", {
-  result <- multisurvival(
+  result <- .run_multisurvival(
     data = multisurvival_test,
     elapsedtime = "elapsedtime",
     outcome = "outcome",
@@ -240,12 +245,12 @@ test_that("multisurvival handles KM plot options", {
     byplot = 12
   )
   
-  expect_s3_class(result, "multisurvivalClass")
+  expect_s3_class(result, "multisurvivalResults")
 })
 
 test_that("multisurvival handles median line options", {
   # Horizontal
-  result_h <- multisurvival(
+  result_h <- .run_multisurvival(
     data = multisurvival_test,
     elapsedtime = "elapsedtime",
     outcome = "outcome",
@@ -253,10 +258,10 @@ test_that("multisurvival handles median line options", {
     km = TRUE,
     medianline = "h"
   )
-  expect_s3_class(result_h, "multisurvivalClass")
+  expect_s3_class(result_h, "multisurvivalResults")
   
   # Vertical
-  result_v <- multisurvival(
+  result_v <- .run_multisurvival(
     data = multisurvival_test,
     elapsedtime = "elapsedtime",
     outcome = "outcome",
@@ -264,11 +269,11 @@ test_that("multisurvival handles median line options", {
     km = TRUE,
     medianline = "v"
   )
-  expect_s3_class(result_v, "multisurvivalClass")
+  expect_s3_class(result_v, "multisurvivalResults")
 })
 
 test_that("multisurvival shows explanations and summaries", {
-  result <- multisurvival(
+  result <- .run_multisurvival(
     data = multisurvival_test,
     elapsedtime = "elapsedtime",
     outcome = "outcome",
@@ -278,11 +283,11 @@ test_that("multisurvival shows explanations and summaries", {
     showSummaries = TRUE
   )
   
-  expect_s3_class(result, "multisurvivalClass")
+  expect_s3_class(result, "multisurvivalResults")
 })
 
 test_that("multisurvival handles comprehensive multivariable model", {
-  result <- multisurvival(
+  result <- .run_multisurvival(
     data = multisurvival_test,
     elapsedtime = "elapsedtime",
     outcome = "outcome",
@@ -297,11 +302,11 @@ test_that("multisurvival handles comprehensive multivariable model", {
     showSummaries = TRUE
   )
   
-  expect_s3_class(result, "multisurvivalClass")
+  expect_s3_class(result, "multisurvivalResults")
 })
 
 test_that("multisurvival handles complete workflow with all features", {
-  result <- multisurvival(
+  result <- .run_multisurvival(
     data = multisurvival_risk,
     elapsedtime = "elapsedtime",
     outcome = "outcome",
@@ -323,5 +328,5 @@ test_that("multisurvival handles complete workflow with all features", {
     showSummaries = TRUE
   )
   
-  expect_s3_class(result, "multisurvivalClass")
+  expect_s3_class(result, "multisurvivalResults")
 })

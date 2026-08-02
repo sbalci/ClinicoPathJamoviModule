@@ -13,7 +13,7 @@ jjcoefstats(
   confLow = NULL,
   confHigh = NULL,
   pValue = NULL,
-  degreesOfFreedom,
+  degreesOfFreedom = 0,
   outcome = NULL,
   predictors = NULL,
   modelType = "lm",

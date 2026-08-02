@@ -59,6 +59,7 @@ options:
     - name: personTime
       title: Person-Time
       type: Variable
+      default: NULL
       suggested: [continuous]
       permitted: [numeric]
       description:
@@ -69,6 +70,7 @@ options:
     - name: refRate
       title: Reference Rate
       type: Variable
+      default: NULL
       suggested: [continuous]
       permitted: [numeric]
       description:
@@ -79,6 +81,7 @@ options:
     - name: expected
       title: Expected Events
       type: Variable
+      default: NULL
       suggested: [continuous]
       permitted: [numeric]
       description:
@@ -87,6 +90,7 @@ options:
     - name: stratum
       title: Stratum Label (optional)
       type: Variable
+      default: NULL
       suggested: [nominal, ordinal]
       permitted: [factor]
       description:

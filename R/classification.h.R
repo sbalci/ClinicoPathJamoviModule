@@ -10,10 +10,10 @@ classificationOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
             indep = NULL,
             testSize = 0.33,
             noOfFolds = 10,
-            testing = NULL,
+            testing = "trainSet",
             reporting = list(
                 "classifMetrices"),
-            classifier = NULL,
+            classifier = "singleDecisionTree",
             minSplit = 20,
             complexity = 0.01,
             maxCompete = 4,
@@ -22,7 +22,7 @@ classificationOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
             noOfTrees = 10,
             maxDepthRandFor = 30,
             sampleFraction = 1,
-            splitRule = NULL,
+            splitRule = "gini",
             knnNeighbors = 5,
             knnDistance = "euclidean",
             svmKernel = "radial",
@@ -55,6 +55,7 @@ classificationOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
             private$..dep <- jmvcore::OptionVariable$new(
                 "dep",
                 dep,
+                default=NULL,
                 suggested=list(
                     "nominal"),
                 permitted=list(
@@ -62,6 +63,7 @@ classificationOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
             private$..indep <- jmvcore::OptionVariables$new(
                 "indep",
                 indep,
+                default=NULL,
                 suggested=list(
                     "nominal",
                     "continuous"),
@@ -79,6 +81,7 @@ classificationOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
             private$..testing <- jmvcore::OptionList$new(
                 "testing",
                 testing,
+                default="trainSet",
                 options=list(
                     "trainSet",
                     "split",
@@ -95,6 +98,7 @@ classificationOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
             private$..classifier <- jmvcore::OptionList$new(
                 "classifier",
                 classifier,
+                default="singleDecisionTree",
                 options=list(
                     "singleDecisionTree",
                     "randomForest",
@@ -137,6 +141,7 @@ classificationOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
             private$..splitRule <- jmvcore::OptionList$new(
                 "splitRule",
                 splitRule,
+                default="gini",
                 options=list(
                     "gini",
                     "extratrees",
@@ -752,14 +757,14 @@ classificationBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
 #' @export
 classification <- function(
     data,
-    dep,
-    indep,
+    dep = NULL,
+    indep = NULL,
     testSize = 0.33,
     noOfFolds = 10,
-    testing,
+    testing = "trainSet",
     reporting = list(
                 "classifMetrices"),
-    classifier,
+    classifier = "singleDecisionTree",
     minSplit = 20,
     complexity = 0.01,
     maxCompete = 4,
@@ -768,7 +773,7 @@ classification <- function(
     noOfTrees = 10,
     maxDepthRandFor = 30,
     sampleFraction = 1,
-    splitRule,
+    splitRule = "gini",
     knnNeighbors = 5,
     knnDistance = "euclidean",
     svmKernel = "radial",

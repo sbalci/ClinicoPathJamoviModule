@@ -63,6 +63,7 @@ vennOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             private$..var1 <- jmvcore::OptionVariable$new(
                 "var1",
                 var1,
+                default=NULL,
                 suggested=list(
                     "ordinal",
                     "nominal"),
@@ -75,6 +76,7 @@ vennOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             private$..var2 <- jmvcore::OptionVariable$new(
                 "var2",
                 var2,
+                default=NULL,
                 suggested=list(
                     "ordinal",
                     "nominal"),
@@ -850,9 +852,9 @@ vennBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' @export
 venn <- function(
     data,
-    var1,
+    var1 = NULL,
     var1true,
-    var2,
+    var2 = NULL,
     var2true,
     var3 = NULL,
     var3true,

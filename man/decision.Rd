@@ -6,9 +6,9 @@
 \usage{
 decision(
   data,
-  gold,
+  gold = NULL,
   goldPositive,
-  newtest,
+  newtest = NULL,
   testPositive,
   goldNegative,
   testNegative,

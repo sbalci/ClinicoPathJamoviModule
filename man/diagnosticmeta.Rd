@@ -6,11 +6,11 @@
 \usage{
 diagnosticmeta(
   data,
-  study,
-  true_positives,
-  false_positives,
-  false_negatives,
-  true_negatives,
+  study = NULL,
+  true_positives = NULL,
+  false_positives = NULL,
+  false_negatives = NULL,
+  true_negatives = NULL,
   covariate = NULL,
   bivariate_analysis = TRUE,
   hsroc_analysis = FALSE,

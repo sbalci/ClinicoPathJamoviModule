@@ -34,6 +34,12 @@ items:
           - dxdate
           - tint
           - multievent
+          - analysistype
+          - dod
+          - dooc
+          - awd
+          - awod
+          - timetypeoutput
           - use_stratify
           - stratvar
           - interactions
@@ -75,7 +81,7 @@ items:
 
 
     - name:  multivariableCoxHeading
-      title: Multivariable Cox Regression
+      title: Multivariable Survival Model
       type:  Preformatted
       
 
@@ -93,6 +99,12 @@ items:
           - dxdate
           - tint
           - multievent
+          - analysistype
+          - dod
+          - dooc
+          - awd
+          - awod
+          - timetypeoutput
           - use_stratify
           - stratvar
           - interactions
@@ -115,6 +127,12 @@ items:
           - dxdate
           - tint
           - multievent
+          - analysistype
+          - dod
+          - dooc
+          - awd
+          - awod
+          - timetypeoutput
           - use_stratify
           - stratvar
           - interactions
@@ -144,6 +162,15 @@ items:
         - elapsedtime
         - outcomeLevel
         - multievent
+        - analysistype
+        - dod
+        - dooc
+        - awd
+        - awod
+        - use_stratify
+        - stratvar
+        - uselandmark
+        - landmark
         - tint
         - dxdate
         - fudate
@@ -179,6 +206,15 @@ items:
         - elapsedtime
         - outcomeLevel
         - multievent
+        - analysistype
+        - dod
+        - dooc
+        - awd
+        - awod
+        - use_stratify
+        - stratvar
+        - uselandmark
+        - landmark
         - tint
         - dxdate
         - fudate
@@ -229,6 +265,12 @@ items:
           - dxdate
           - tint
           - multievent
+          - analysistype
+          - dod
+          - dooc
+          - awd
+          - awod
+          - timetypeoutput
           - use_stratify
           - stratvar
           - interactions
@@ -459,6 +501,25 @@ items:
         - dxdate
         - tint
         - multievent
+        - analysistype
+        - dod
+        - dooc
+        - awd
+        - awod
+        - explanatory
+        # Person-time is computed on the complete-case set over ALL selected
+        # variables, so any variable that enters the model changes the
+        # denominator. Adding one continuous covariate with missing values moved
+        # the overall row from 134 events / 8235.5 person-time to 94 / 6005.47 --
+        # while `contexpl` was absent here, so the old rates stayed on screen.
+        # The same reasoning applies to the remaining model-defining options.
+        - contexpl
+        - interactions
+        - use_stratify
+        - stratvar
+        - timetypeoutput
+        - uselandmark
+        - landmark
         # - use_modelSelection
         - person_time
 
@@ -486,6 +547,15 @@ items:
         - dxdate
         - tint
         - multievent
+        - analysistype
+        - dod
+        - dooc
+        - awd
+        - awod
+        - explanatory
+        - timetypeoutput
+        - uselandmark
+        - landmark
         # - use_modelSelection
         - person_time
 
@@ -521,6 +591,16 @@ items:
           - dxdate
           - tint
           - multievent
+          - analysistype
+          - dod
+          - dooc
+          - awd
+          - awod
+          - use_stratify
+          - stratvar
+          - interactions
+          - uselandmark
+          - landmark
           # - use_modelSelection
 
 
@@ -564,6 +644,16 @@ items:
           - dxdate
           - tint
           - multievent
+          - analysistype
+          - dod
+          - dooc
+          - awd
+          - awod
+          - use_stratify
+          - stratvar
+          - interactions
+          - uselandmark
+          - landmark
           # - use_modelSelection
 
 
@@ -622,6 +712,16 @@ items:
           - stratvar
           - interactions
           - multievent
+          - analysistype
+          - dod
+          - dooc
+          - awd
+          - awod
+          - use_stratify
+          - stratvar
+          - interactions
+          - uselandmark
+          - landmark
           - contexpl
           # - use_modelSelection
 
@@ -646,6 +746,16 @@ items:
           - dxdate
           - tint
           - multievent
+          - analysistype
+          - dod
+          - dooc
+          - awd
+          - awod
+          - use_stratify
+          - stratvar
+          - interactions
+          - uselandmark
+          - landmark
           - contexpl
           # - use_modelSelection
 
@@ -698,6 +808,16 @@ items:
           - dxdate
           - tint
           - multievent
+          - analysistype
+          - dod
+          - dooc
+          - awd
+          - awod
+          - use_stratify
+          - stratvar
+          - interactions
+          - uselandmark
+          - landmark
           - adjexplanatory
           - pplot
           - censored
@@ -747,6 +867,21 @@ items:
           - explanatory
           - contexpl
           - numRiskGroups
+          - elapsedtime
+          - fudate
+          - dxdate
+          - tint
+          - multievent
+          - analysistype
+          - dod
+          - dooc
+          - awd
+          - awod
+          - use_stratify
+          - stratvar
+          - interactions
+          - uselandmark
+          - landmark
           # - use_modelSelection
 
 
@@ -761,6 +896,21 @@ items:
           - explanatory
           - contexpl
           - numRiskGroups
+          - elapsedtime
+          - fudate
+          - dxdate
+          - tint
+          - multievent
+          - analysistype
+          - dod
+          - dooc
+          - awd
+          - awod
+          - use_stratify
+          - stratvar
+          - interactions
+          - uselandmark
+          - landmark
           # - use_modelSelection
 
     - name:  riskScoreHeading
@@ -778,14 +928,14 @@ items:
     - name: riskScoreTable
       title: Risk Score Summary
       type: Table
-      visible: (calculateRiskScore && showSummaries)
+      visible: (calculateRiskScore)
       rows: 0
       columns:
         - name: group
           title: Risk Group
           type: text
         - name: n_patients
-          title: N
+          title: 'N'
           type: integer
         - name: percent
           title: Percent
@@ -803,6 +953,21 @@ items:
           - explanatory
           - contexpl
           - numRiskGroups
+          - elapsedtime
+          - fudate
+          - dxdate
+          - tint
+          - multievent
+          - analysistype
+          - dod
+          - dooc
+          - awd
+          - awod
+          - use_stratify
+          - stratvar
+          - interactions
+          - uselandmark
+          - landmark
           # - use_modelSelection
 
     - name: riskScoreSummary
@@ -817,6 +982,20 @@ items:
           - numRiskGroups
           - outcomeLevel
           - elapsedtime
+          - fudate
+          - dxdate
+          - tint
+          - multievent
+          - analysistype
+          - dod
+          - dooc
+          - awd
+          - awod
+          - use_stratify
+          - stratvar
+          - interactions
+          - uselandmark
+          - landmark
 
 
     - name: riskScoreMetrics
@@ -830,6 +1009,21 @@ items:
           - explanatory
           - contexpl
           - numRiskGroups
+          - elapsedtime
+          - fudate
+          - dxdate
+          - tint
+          - multievent
+          - analysistype
+          - dod
+          - dooc
+          - awd
+          - awod
+          - use_stratify
+          - stratvar
+          - interactions
+          - uselandmark
+          - landmark
           # - use_modelSelection
 
 
@@ -841,7 +1035,7 @@ items:
       height: 450
       renderFun: .plotRiskGroups
       requiresData: true
-      visible: (plotRiskGroups)
+      visible: (calculateRiskScore && plotRiskGroups)
       clearWith:
           - calculateRiskScore
           - outcome
@@ -849,6 +1043,26 @@ items:
           - explanatory
           - contexpl
           - numRiskGroups
+          - plotRiskGroups
+          - ci95
+          - risktable
+          - censored
+          - medianline
+          - elapsedtime
+          - fudate
+          - dxdate
+          - tint
+          - multievent
+          - analysistype
+          - dod
+          - dooc
+          - awd
+          - awod
+          - use_stratify
+          - stratvar
+          - interactions
+          - uselandmark
+          - landmark
           # - use_modelSelection
 
     - name: cindexValidation
@@ -877,6 +1091,10 @@ items:
           - contexpl
           - multievent
           - analysistype
+          - dod
+          - dooc
+          - awd
+          - awod
           - tint
           - dxdate
           - fudate
@@ -925,6 +1143,11 @@ items:
           - outcome
           - analysistype
           - multievent
+          - outcomeLevel
+          - dod
+          - dooc
+          - awd
+          - awod
 
 
 
@@ -945,6 +1168,17 @@ items:
           - dxdate
           - tint
           - multievent
+          - analysistype
+          - dod
+          - dooc
+          - awd
+          - awod
+          - use_stratify
+          - stratvar
+          - interactions
+          - uselandmark
+          - landmark
+          - numRiskGroups
           - addRiskGroup
 
 
@@ -965,6 +1199,17 @@ items:
           - dxdate
           - tint
           - multievent
+          - analysistype
+          - dod
+          - dooc
+          - awd
+          - awod
+          - use_stratify
+          - stratvar
+          - interactions
+          - uselandmark
+          - landmark
+          - numRiskGroups
           - addRiskGroup
 
 
@@ -978,7 +1223,7 @@ items:
     #   type:  Preformatted
 
     - name:  adjustedSurvivalHeading
-      title: Adjusted Survival Analysis
+      title: Adjusted Probability Analysis
       type:  Preformatted
       visible: (ac)
 
@@ -1004,9 +1249,20 @@ items:
           - analysistype
           - use_stratify
           - stratvar
+          - fudate
+          - dxdate
+          - tint
+          - dod
+          - dooc
+          - awd
+          - awod
+          - interactions
+          - uselandmark
+          - landmark
+          - timetypeoutput
 
     - name: plot_adj
-      title: Adjusted Survival Plot
+      title: Adjusted Probability Plot
       type: Image
       width: 600
       height: 450
@@ -1037,11 +1293,19 @@ items:
           - analysistype
           - use_stratify
           - stratvar
+          - dod
+          - dooc
+          - awd
+          - awod
+          - interactions
+          - uselandmark
+          - landmark
+          - timetypeoutput
           # - use_modelSelection
 
     # Adjusted Survival Summary (right after adjusted survival analysis)
     - name: adjustedSurvivalSummaryHeading
-      title: 'Adjusted Survival Natural Language Summary'
+      title: 'Adjusted Probability Natural Language Summary'
       type: Preformatted
       visible: (ac && showSummaries)
 
@@ -1056,6 +1320,23 @@ items:
           - ac_method
           - explanatory
           - contexpl
+          - outcomeLevel
+          - elapsedtime
+          - fudate
+          - dxdate
+          - tint
+          - multievent
+          - analysistype
+          - dod
+          - dooc
+          - awd
+          - awod
+          - use_stratify
+          - stratvar
+          - interactions
+          - uselandmark
+          - landmark
+          - timetypeoutput
 
 
 # Nomogram
@@ -1093,12 +1374,34 @@ items:
           - dxdate
           - tint
           - multievent
+          - analysistype
+          - dod
+          - dooc
+          - awd
+          - awod
+          - cutp
+          - timetypeoutput
+          - use_stratify
+          - stratvar
+          - interactions
+          - uselandmark
+          - landmark
 
     - name: nomogram_display
       title: "Nomogram Scoring Guide"
       type: Html
       visible: (showNomogram)
       clearWith:
+          - showNomogram
+          - cutp
+          - outcome
+          - outcomeLevel
+          - elapsedtime
+          - explanatory
+          - contexpl
+          - multievent
+          - analysistype
+          - interactions
           - use_stratify
           - stratvar
 
@@ -1118,7 +1421,24 @@ items:
           - stratvar
           - showNomogram
           - explanatory
+          - contexpl
           - outcome
+          - outcomeLevel
+          - elapsedtime
+          - fudate
+          - dxdate
+          - tint
+          - multievent
+          - analysistype
+          - dod
+          - dooc
+          - awd
+          - awod
+          - cutp
+          - timetypeoutput
+          - interactions
+          - uselandmark
+          - landmark
 
     # # Survival Decision Tree ----
     # 
@@ -1350,7 +1670,7 @@ items:
     #       - adjexplanatory
 
     - name: adjustedSurvTable
-      title: Adjusted Survival at Timepoints
+      title: Adjusted Probability at Timepoints
       type: Table
       rows: 0
       visible: (ac && ac_summary)
@@ -1371,7 +1691,7 @@ items:
           title: "Observed Events"
           type: integer
         - name: surv
-          title: "Adjusted Survival"
+          title: "Adjusted Estimate"
           type: text
         - name: lower
           title: "95% CI Lower"
@@ -1402,9 +1722,17 @@ items:
           - analysistype
           - use_stratify
           - stratvar
+          - dod
+          - dooc
+          - awd
+          - awod
+          - interactions
+          - uselandmark
+          - landmark
+          - timetypeoutput
 
     - name: adjustedSurvTableSummary
-      title: Adjusted Survival Summary
+      title: Adjusted Probability Summary
       type: Html
       visible: (ac && ac_summary)
       clearWith:
@@ -1426,9 +1754,17 @@ items:
           - analysistype
           - use_stratify
           - stratvar
+          - dod
+          - dooc
+          - awd
+          - awod
+          - interactions
+          - uselandmark
+          - landmark
+          - timetypeoutput
 
     - name: adjustedMedianTable
-      title: Adjusted Median Survival
+      title: Adjusted Median Time to Event
       type: Table
       rows: 0
       visible: (ac && ac_summary)
@@ -1471,9 +1807,17 @@ items:
           - analysistype
           - use_stratify
           - stratvar
+          - dod
+          - dooc
+          - awd
+          - awod
+          - interactions
+          - uselandmark
+          - landmark
+          - timetypeoutput
 
     - name: adjustedMedianSummary
-      title: Adjusted Median Survival Summary
+      title: Adjusted Median Time-to-Event Summary
       type: Html
       visible: (ac && ac_summary)
       clearWith:
@@ -1494,9 +1838,17 @@ items:
           - analysistype
           - use_stratify
           - stratvar
+          - dod
+          - dooc
+          - awd
+          - awod
+          - interactions
+          - uselandmark
+          - landmark
+          - timetypeoutput
 
     - name: adjustedCoxTable
-      title: Adjusted Cox Model Results
+      title: Adjusted Model Results
       type: Table
       rows: 0
       visible: (ac && ac_summary)
@@ -1505,7 +1857,7 @@ items:
           title: "Variable"
           type: text
         - name: HR
-          title: "HR (95% CI)"
+          title: "Effect (95% CI)"
           type: text
         - name: Pvalue
           title: "P-value"
@@ -1529,9 +1881,17 @@ items:
           - analysistype
           - use_stratify
           - stratvar
+          - dod
+          - dooc
+          - awd
+          - awod
+          - interactions
+          - uselandmark
+          - landmark
+          - timetypeoutput
 
     - name: adjustedCoxText
-      title: Adjusted Cox Model Metrics
+      title: Adjusted Model Metrics
       type: Html
       visible: (ac && ac_summary)
       clearWith:
@@ -1552,9 +1912,17 @@ items:
           - analysistype
           - use_stratify
           - stratvar
+          - dod
+          - dooc
+          - awd
+          - awod
+          - interactions
+          - uselandmark
+          - landmark
+          - timetypeoutput
 
     - name: adjustedCoxSummary
-      title: Adjusted Cox Model Interpretation
+      title: Adjusted Model Interpretation
       type: Html
       visible: (ac && ac_summary)
       clearWith:
@@ -1578,6 +1946,14 @@ items:
           - analysistype
           - use_stratify
           - stratvar
+          - dod
+          - dooc
+          - awd
+          - awod
+          - interactions
+          - uselandmark
+          - landmark
+          - timetypeoutput
 
     - name: adjustedCoxPH
       title: Proportional Hazards Test (Adjusted Cox)
@@ -1589,6 +1965,25 @@ items:
           - adjexplanatory
           - ph_cox
           - ac_method
+          - outcome
+          - outcomeLevel
+          - elapsedtime
+          - explanatory
+          - contexpl
+          - fudate
+          - dxdate
+          - tint
+          - multievent
+          - analysistype
+          - dod
+          - dooc
+          - awd
+          - awod
+          - use_stratify
+          - stratvar
+          - interactions
+          - uselandmark
+          - landmark
 
 
 
@@ -1624,6 +2019,20 @@ items:
         - explanatory
         - contexpl
         - compare_models
+        - fudate
+        - dxdate
+        - tint
+        - multievent
+        - analysistype
+        - dod
+        - dooc
+        - awd
+        - awod
+        - use_stratify
+        - stratvar
+        - interactions
+        - uselandmark
+        - landmark
 
     - name: modelContributionSummary
       title: ''
@@ -1634,6 +2043,22 @@ items:
         - explanatory
         - contexpl
         - compare_models
+        - outcomeLevel
+        - elapsedtime
+        - fudate
+        - dxdate
+        - tint
+        - multievent
+        - analysistype
+        - dod
+        - dooc
+        - awd
+        - awod
+        - use_stratify
+        - stratvar
+        - interactions
+        - uselandmark
+        - landmark
 
 
 

@@ -9,7 +9,8 @@ test_that('fragilityindex summary input works', {
       events2 = 25, n2 = 100,
       testType = 'fisher', alpha = 0.05,
       showCounts = TRUE, showTrajectory = TRUE,
-      showPlot = TRUE, showSummary = TRUE, showExplanation = TRUE
+      showPlot = TRUE, showSummary = TRUE, showExplanation = TRUE,
+      outcomeEvent = NULL
     )
   })
   expect_true(inherits(model, 'jmvcoreClass'))
@@ -28,7 +29,8 @@ test_that('fragilityindex reverse index for non-significant result', {
   model <- fragilityindex(
     dataFormat = 'summary',
     events1 = 18, n1 = 100, events2 = 25, n2 = 100,
-    testType = 'fisher', alpha = 0.05)
+    testType = 'fisher', alpha = 0.05,
+    outcomeEvent = NULL)
   res <- model$results$mainTable$asDF
   # baseline non-significant -> reverse fragility index is reported and > 0
   fi <- res$value[grepl('Fragility Index', res$statistic)]

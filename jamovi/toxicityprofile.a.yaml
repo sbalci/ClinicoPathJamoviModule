@@ -43,6 +43,7 @@ options:
     - name: treatment
       title: Treatment Group
       type: Variable
+      default: NULL
       suggested: [nominal]
       permitted: [factor]
       description:
@@ -52,6 +53,7 @@ options:
     - name: systemOrganClass
       title: System Organ Class
       type: Variable
+      default: NULL
       suggested: [nominal]
       permitted: [factor]
       description:
@@ -61,6 +63,7 @@ options:
     - name: timeToEvent
       title: Time to Event
       type: Variable
+      default: NULL
       suggested: [continuous]
       description:
           R: >

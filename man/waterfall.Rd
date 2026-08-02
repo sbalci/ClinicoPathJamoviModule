@@ -6,8 +6,8 @@
 \usage{
 waterfall(
   data,
-  patientID,
-  responseVar,
+  patientID = NULL,
+  responseVar = NULL,
   timeVar = NULL,
   groupVar = NULL,
   inputType = "percentage",

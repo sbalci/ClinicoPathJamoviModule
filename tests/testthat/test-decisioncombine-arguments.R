@@ -20,7 +20,8 @@ test_that("decisioncombine shows individual test statistics", {
     test1Positive = "Positive",
     test2 = "rater2",
     test2Positive = "Positive",
-    showIndividual = TRUE
+    showIndividual = TRUE,
+    test3Positive = NULL
   )
 
   expect_s3_class(result, "decisioncombineClass")
@@ -35,7 +36,8 @@ test_that("decisioncombine shows frequency tables", {
     test1Positive = "Positive",
     test2 = "rater2",
     test2Positive = "Positive",
-    showFrequency = TRUE
+    showFrequency = TRUE,
+    test3Positive = NULL
   )
 
   expect_s3_class(result, "decisioncombineClass")
@@ -50,7 +52,8 @@ test_that("decisioncombine generates bar plot", {
     test1Positive = "Positive",
     test2 = "rater2",
     test2Positive = "Positive",
-    showBarPlot = TRUE
+    showBarPlot = TRUE,
+    test3Positive = NULL
   )
 
   expect_s3_class(result, "decisioncombineClass")
@@ -65,7 +68,8 @@ test_that("decisioncombine generates heatmap", {
     test1Positive = "Positive",
     test2 = "rater2",
     test2Positive = "Positive",
-    showHeatmap = TRUE
+    showHeatmap = TRUE,
+    test3Positive = NULL
   )
 
   expect_s3_class(result, "decisioncombineClass")
@@ -80,7 +84,8 @@ test_that("decisioncombine generates forest plot", {
     test1Positive = "Positive",
     test2 = "rater2",
     test2Positive = "Positive",
-    showForest = TRUE
+    showForest = TRUE,
+    test3Positive = NULL
   )
 
   expect_s3_class(result, "decisioncombineClass")
@@ -95,7 +100,8 @@ test_that("decisioncombine generates decision tree", {
     test1Positive = "Positive",
     test2 = "rater2",
     test2Positive = "Positive",
-    showDecisionTree = TRUE
+    showDecisionTree = TRUE,
+    test3Positive = NULL
   )
 
   expect_s3_class(result, "decisioncombineClass")
@@ -110,7 +116,8 @@ test_that("decisioncombine shows optimal pattern recommendation", {
     test1Positive = "Positive",
     test2 = "rater2",
     test2Positive = "Positive",
-    showRecommendation = TRUE
+    showRecommendation = TRUE,
+    test3Positive = NULL
   )
 
   expect_s3_class(result, "decisioncombineClass")
@@ -125,7 +132,8 @@ test_that("decisioncombine adds pattern to data", {
     test1Positive = "Positive",
     test2 = "rater2",
     test2Positive = "Positive",
-    addPatternToData = TRUE
+    addPatternToData = TRUE,
+    test3Positive = NULL
   )
 
   expect_s3_class(result, "decisioncombineClass")
@@ -140,7 +148,8 @@ test_that("decisioncombine filters by sensitivity", {
     test1Positive = "Positive",
     test2 = "rater2",
     test2Positive = "Positive",
-    filterStatistic = "sens"
+    filterStatistic = "sens",
+    test3Positive = NULL
   )
 
   expect_s3_class(result, "decisioncombineClass")
@@ -155,7 +164,8 @@ test_that("decisioncombine filters by specificity", {
     test1Positive = "Positive",
     test2 = "rater2",
     test2Positive = "Positive",
-    filterStatistic = "spec"
+    filterStatistic = "spec",
+    test3Positive = NULL
   )
 
   expect_s3_class(result, "decisioncombineClass")
@@ -170,7 +180,8 @@ test_that("decisioncombine filters by PPV", {
     test1Positive = "Positive",
     test2 = "rater2",
     test2Positive = "Positive",
-    filterStatistic = "ppv"
+    filterStatistic = "ppv",
+    test3Positive = NULL
   )
 
   expect_s3_class(result, "decisioncombineClass")
@@ -185,7 +196,8 @@ test_that("decisioncombine filters by Youden's J", {
     test1Positive = "Positive",
     test2 = "rater2",
     test2Positive = "Positive",
-    filterStatistic = "youden"
+    filterStatistic = "youden",
+    test3Positive = NULL
   )
 
   expect_s3_class(result, "decisioncombineClass")
@@ -200,7 +212,8 @@ test_that("decisioncombine filters by pattern: all positive", {
     test1Positive = "Positive",
     test2 = "rater2",
     test2Positive = "Positive",
-    filterPattern = "allPositive"
+    filterPattern = "allPositive",
+    test3Positive = NULL
   )
 
   expect_s3_class(result, "decisioncombineClass")
@@ -215,7 +228,8 @@ test_that("decisioncombine filters by pattern: all negative", {
     test1Positive = "Positive",
     test2 = "rater2",
     test2Positive = "Positive",
-    filterPattern = "allNegative"
+    filterPattern = "allNegative",
+    test3Positive = NULL
   )
 
   expect_s3_class(result, "decisioncombineClass")
@@ -230,7 +244,8 @@ test_that("decisioncombine filters by pattern: parallel strategy", {
     test1Positive = "Positive",
     test2 = "rater2",
     test2Positive = "Positive",
-    filterPattern = "parallel"
+    filterPattern = "parallel",
+    test3Positive = NULL
   )
 
   expect_s3_class(result, "decisioncombineClass")
@@ -245,7 +260,8 @@ test_that("decisioncombine filters by pattern: serial strategy", {
     test1Positive = "Positive",
     test2 = "rater2",
     test2Positive = "Positive",
-    filterPattern = "serial"
+    filterPattern = "serial",
+    test3Positive = NULL
   )
 
   expect_s3_class(result, "decisioncombineClass")
@@ -295,7 +311,8 @@ test_that("decisioncombine combines multiple visualizations", {
     test2Positive = "Positive",
     showBarPlot = TRUE,
     showHeatmap = TRUE,
-    showForest = TRUE
+    showForest = TRUE,
+    test3Positive = NULL
   )
 
   expect_s3_class(result, "decisioncombineClass")
@@ -316,7 +333,8 @@ test_that("decisioncombine combines all output options", {
     showHeatmap = TRUE,
     showForest = TRUE,
     showDecisionTree = TRUE,
-    showRecommendation = TRUE
+    showRecommendation = TRUE,
+    test3Positive = NULL
   )
 
   expect_s3_class(result, "decisioncombineClass")
@@ -333,7 +351,8 @@ test_that("decisioncombine handles different test scenarios", {
     test1 = "screening_test",
     test1Positive = "Positive",
     test2 = "confirmatory_test",
-    test2Positive = "Positive"
+    test2Positive = "Positive",
+    test3Positive = NULL
   )
   expect_s3_class(result_screening, "decisioncombineClass")
 
@@ -347,7 +366,8 @@ test_that("decisioncombine handles different test scenarios", {
     test1 = "ct_scan",
     test1Positive = "Positive",
     test2 = "mri_scan",
-    test2Positive = "Positive"
+    test2Positive = "Positive",
+    test3Positive = NULL
   )
   expect_s3_class(result_imaging, "decisioncombineClass")
 })
@@ -363,7 +383,8 @@ test_that("decisioncombine handles serial testing scenario", {
     test1Positive = "Positive",
     test2 = "repeat_test",
     test2Positive = "Positive",
-    filterPattern = "serial"
+    filterPattern = "serial",
+    test3Positive = NULL
   )
 
   expect_s3_class(result, "decisioncombineClass")

@@ -227,6 +227,7 @@ options:
       title: Landmark Time
       type: Integer
       default: 3
+      min: 0
       description:
         R: >
           The time point (in the units defined by `timetypeoutput`) at which to start landmark analyses.
@@ -365,14 +366,17 @@ options:
     - name: interactions
       title: Interaction Terms
       type: Terms
-      default:
+      default: null
       description:
         R: >
           Interaction (crossed) terms added to the Cox model, built from
           variables already selected as explanatory or continuous explanatory
           variables. Each term tests effect modification - e.g. Treatment x
-          Biomarker for predictive-biomarker analysis. For a 2-way term the
-          first variable is the focal effect and the second is the moderator.
+          Biomarker. Calling a treatment interaction predictive requires an
+          appropriate treatment-comparison design and pre-specified validation;
+          an interaction alone does not establish clinical utility. For a 2-way
+          term the first variable is the focal effect and the second is the
+          moderator.
 
 # Multievent ----
 
@@ -444,6 +448,7 @@ options:
       title: Plot End Time
       type: Integer
       default: 60
+      min: 1
       description:
         R: >
           The maximum follow-up time (in units defined by `timetypeoutput`) to display on survival plots.
@@ -453,6 +458,7 @@ options:
       title: Time Interval
       type: Integer
       default: 12
+      min: 1
       description:
         R: >
           The interval (in units defined by `timetypeoutput`) at which time points or labels are shown on plots.
@@ -497,7 +503,8 @@ options:
       default: none
       description:
         R: >
-          If true, displays a line indicating the median survival time on the survival plot.
+          Selects whether horizontal, vertical, both, or no median-survival
+          reference lines are displayed on survival plots.
 
 
     - name: pplot
@@ -514,6 +521,12 @@ options:
       title: Cutpoints
       type: String
       default: '12, 36, 60'
+      description:
+        R: >
+          Positive, comma-separated prediction timepoints in the selected time
+          unit. They are used by adjusted-probability tables and the nomogram;
+          invalid values and nomogram timepoints beyond observed follow-up are
+          omitted with a warning.
 
 
 
@@ -527,7 +540,9 @@ options:
       default: false
       description:
         R: >
-          If true, calculates a risk score from the Cox model coefficients for each individual.
+          If true, calculates the Cox relative-risk score, exp(centered linear
+          predictor), for each individual. This ranks fitted hazard and is not
+          an absolute event probability; clinical use requires external validation.
 
 
     - name: numRiskGroups
@@ -597,7 +612,7 @@ options:
 # Adjusted Survival ----
 
     - name: ac
-      title: Adjusted survival curve
+      title: Adjusted probability curve
       type: Bool
       default: false
 
@@ -607,6 +622,12 @@ options:
       suggested: [ ordinal, nominal ]
       permitted: [ factor ]
       default: null
+      description:
+          R: >
+            Categorical model variable whose levels are contrasted in the
+            adjusted curves. The variable must also be selected as an
+            explanatory or stratification variable so it is part of the fitted
+            model.
 
     - name: ac_method
       title: Adjustment Method
@@ -698,14 +719,15 @@ options:
             its observed covariates and does not contrast the levels at all.
 
     - name: ac_summary
-      title: Adjusted survival summary tables
+      title: Adjusted probability summary tables
       type: Bool
       default: false
       description:
           R: >
-            Display numeric adjusted-survival outputs (survival at the cutpoint
-            timepoints with 95% CI, adjusted median survival, and the adjusted
-            Cox hazard-ratio table) in addition to the adjusted-survival curve.
+            Display numeric model-adjusted probability outputs at the cutpoint
+            timepoints, adjusted median time to event, and adjusted model effects.
+            In competing-risk mode, probabilities are cumulative incidence and
+            effects are Fine-Gray subdistribution hazard ratios.
 
     # ac_timepoints intentionally not exposed: the adjusted-survival tables reuse
     # the existing `cutp` option for their timepoints.
@@ -723,6 +745,11 @@ options:
       title: Nomogram
       type: Bool
       default: false
+      description:
+        R: >
+          Display a Cox-model nomogram for the requested prediction timepoints.
+          Predictions are apparent estimates from the fitted data and are not a
+          point-of-care tool without calibration and external validation.
 
 
 
@@ -994,9 +1021,12 @@ options:
       title: "Rate Multiplier"
       type: Integer
       default: 100
+      min: 1
       description: >-
-        Specify the multiplier for incidence rates (e.g., 100 for rates per 100 person-years,
-        1000 for rates per 1000 person-years).
+        Specify the multiplier for incidence rates (for example, 100 for rates
+        per 100 person-time units). The person-time unit is the unit selected
+        in `timetypeoutput`; choose years there before interpreting a rate as
+        events per person-year.
 
 # SurvMetrics - Enhanced Model Performance Metrics ----
 # COMMENTED OUT - Corresponding UI elements commented out in multisurvival.u.yaml

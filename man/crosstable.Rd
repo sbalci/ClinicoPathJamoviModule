@@ -6,8 +6,8 @@
 \usage{
 crosstable(
   data,
-  vars,
-  group,
+  vars = NULL,
+  group = NULL,
   sty = "nejm",
   excl = FALSE,
   cont = "mean",

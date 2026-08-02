@@ -21,6 +21,7 @@ options:
     - name: group_var
       title: Grouping Variable
       type: Variable
+      default: NULL
       suggested: [ordinal, nominal]
       permitted: [factor]
       description: Grouping variable for comparisons

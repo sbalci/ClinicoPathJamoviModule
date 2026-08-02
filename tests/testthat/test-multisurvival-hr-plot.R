@@ -5,7 +5,7 @@ test_that("multisurvival HR plot renders (finalfit)", {
 
   colon <- survival::colon
 
-  result <- suppressWarnings(multisurvival(
+  result <- suppressWarnings(.run_multisurvival(
     data = colon,
     elapsedtime = "time",
     outcome = "status",

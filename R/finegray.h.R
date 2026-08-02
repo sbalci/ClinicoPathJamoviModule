@@ -38,6 +38,7 @@ finegrayOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             private$..survivalTime <- jmvcore::OptionVariable$new(
                 "survivalTime",
                 survivalTime,
+                default=NULL,
                 suggested=list(
                     "continuous"),
                 permitted=list(
@@ -45,6 +46,7 @@ finegrayOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             private$..status <- jmvcore::OptionVariable$new(
                 "status",
                 status,
+                default=NULL,
                 suggested=list(
                     "nominal",
                     "ordinal"),
@@ -61,6 +63,7 @@ finegrayOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             private$..covariates <- jmvcore::OptionVariables$new(
                 "covariates",
                 covariates,
+                default=NULL,
                 suggested=list(
                     "continuous",
                     "nominal",
@@ -71,6 +74,7 @@ finegrayOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             private$..groupVar <- jmvcore::OptionVariable$new(
                 "groupVar",
                 groupVar,
+                default=NULL,
                 suggested=list(
                     "nominal"),
                 permitted=list(
@@ -640,12 +644,12 @@ finegrayBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' @export
 finegray <- function(
     data,
-    survivalTime,
-    status,
+    survivalTime = NULL,
+    status = NULL,
     eventOfInterest,
     censorLevel,
-    covariates,
-    groupVar,
+    covariates = NULL,
+    groupVar = NULL,
     showCoefficientTable = TRUE,
     exponentiate = TRUE,
     confLevel = 0.95,

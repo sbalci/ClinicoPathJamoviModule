@@ -52,6 +52,7 @@ toolssummaryOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
             private$..groupVar <- jmvcore::OptionVariable$new(
                 "groupVar",
                 groupVar,
+                default=NULL,
                 suggested=list(
                     "nominal",
                     "ordinal"),
@@ -265,7 +266,7 @@ toolssummary <- function(
     useSummarytools = TRUE,
     showDfSummary = TRUE,
     showDescr = TRUE,
-    groupVar,
+    groupVar = NULL,
     showCrosstabs = FALSE) {
 
     if ( ! requireNamespace("jmvcore", quietly=TRUE))

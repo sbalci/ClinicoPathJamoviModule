@@ -14,7 +14,8 @@ test_that("oddsratio runs with minimal arguments", {
     data = oddsratio_test,
     explanatory = "stage",
     outcome = "outcome",
-    outcomeLevel = "Dead"
+    outcomeLevel = "Dead",
+    predictorLevel = NULL
   )
   expect_s3_class(result, "oddsratioClass")
 })
@@ -24,7 +25,8 @@ test_that("oddsratio handles multiple predictors", {
     data = oddsratio_test,
     explanatory = c("stage", "treatment", "biomarker_status"),
     outcome = "outcome",
-    outcomeLevel = "Dead"
+    outcomeLevel = "Dead",
+    predictorLevel = NULL
   )
   expect_no_error(result)
 })
@@ -33,7 +35,9 @@ test_that("oddsratio handles continuous predictors", {
   result <- oddsratio(
     data = oddsratio_test,
     explanatory = c("age", "tumor_size"),
-    outcome = "outcome"
+    outcome = "outcome",
+    outcomeLevel = NULL,
+    predictorLevel = NULL
   )
   expect_no_error(result)
 })
@@ -42,14 +46,16 @@ test_that("oddsratio handles mixed predictors", {
   result <- oddsratio(
     data = oddsratio_test,
     explanatory = c("age", "stage", "tumor_size"),
-    outcome = "outcome"
+    outcome = "outcome",
+    outcomeLevel = NULL,
+    predictorLevel = NULL
   )
   expect_no_error(result)
 })
 
 test_that("oddsratio errors on missing required arguments", {
-  expect_error(oddsratio(data = oddsratio_test, outcome = "outcome"))
-  expect_error(oddsratio(data = oddsratio_test, explanatory = "stage"))
+  expect_error(oddsratio(data = oddsratio_test, outcome = "outcome", outcomeLevel = NULL, predictorLevel = NULL))
+  expect_error(oddsratio(data = oddsratio_test, explanatory = "stage", outcomeLevel = NULL, predictorLevel = NULL))
 })
 
 test_that("oddsratio handles nomogram option", {
@@ -57,7 +63,9 @@ test_that("oddsratio handles nomogram option", {
     data = oddsratio_diagnostic,
     explanatory = "test_result",
     outcome = "disease_status",
-    showNomogram = TRUE
+    showNomogram = TRUE,
+    outcomeLevel = NULL,
+    predictorLevel = NULL
   )
   expect_no_error(result)
 })
@@ -67,7 +75,9 @@ test_that("oddsratio handles explanations option", {
     data = oddsratio_test,
     explanatory = "stage",
     outcome = "outcome",
-    showExplanations = TRUE
+    showExplanations = TRUE,
+    outcomeLevel = NULL,
+    predictorLevel = NULL
   )
   expect_no_error(result)
 })

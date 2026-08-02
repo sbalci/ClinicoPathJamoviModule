@@ -43,11 +43,13 @@ options:
     - name: vars
       title: Dependent variables
       type: Variables
+      default: NULL
       description: >
             The variable(s) that will appear as rows in the cross table.
     - name: group
       title: Grouping variable
       type: Variable
+      default: NULL
       suggested: [ ordinal, nominal ]
       permitted: [ factor ]
       description: >

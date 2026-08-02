@@ -6,8 +6,8 @@
 \usage{
 jjbarstats(
   data,
-  dep,
-  group,
+  dep = NULL,
+  group = NULL,
   grvar = NULL,
   counts = NULL,
   excl = FALSE,

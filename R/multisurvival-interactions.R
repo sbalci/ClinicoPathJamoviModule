@@ -94,6 +94,64 @@
   )
 }
 
+# Joint (multi-df) Wald test for each interaction TERM.
+#
+# .interactionTestTable() emits one row per interaction COEFFICIENT, each with
+# its own 1-df Wald p. When the moderator or the focal variable has more than two
+# levels, a single term produces several coefficients, and no individual row
+# answers "is there effect modification by this variable at all?".
+#
+# On a 3-level stage x 2-level treatment interaction the two rows came out at
+# p = 0.077 and p = 0.726, which reads as a borderline interaction; the joint
+# 2-df test over the same model is p = 0.154. Reporting only per-coefficient
+# Wald tests for a multi-df term is a well-known way to over-read a subgroup
+# effect, so the joint test is reported alongside them.
+#
+# Wald rather than a likelihood-ratio refit, deliberately:
+#   * it needs only the fitted model (b and its covariance), so it cannot hit the
+#     refit-environment failure documented in .compare_models(), and
+#   * it is valid for the Fine-Gray fit too, where vcov() is the robust
+#     covariance and a naive LRT on the weighted partial likelihood is not.
+# Agreement is close: on the case above Wald gives chisq = 3.7426, df = 2,
+# p = 0.1539 against the LRT's 3.7466 / 2 / 0.1536.
+#
+# Returns a data.frame(term, chisq, df, p) with one row per interaction term
+# that contributes MORE THAN ONE coefficient, or NULL when there is none (a
+# 1-df term's joint test is identical to the row already shown).
+.interactionJointTests <- function(cox_model) {
+  asg <- cox_model$assign
+  if (!is.list(asg) || length(asg) == 0) return(NULL)
+
+  b <- stats::coef(cox_model)
+  V <- try(stats::vcov(cox_model), silent = TRUE)
+  if (inherits(V, "try-error") || is.null(V) || is.null(b)) return(NULL)
+
+  int_terms <- names(asg)[grepl(":", names(asg), fixed = TRUE)]
+  rows <- list()
+  for (tm in int_terms) {
+    idx <- asg[[tm]]
+    # A single-coefficient term adds nothing beyond its own row.
+    if (length(idx) < 2) next
+    if (any(idx > length(b)) || anyNA(b[idx])) next
+
+    Vs <- V[idx, idx, drop = FALSE]
+    chi <- try(as.numeric(t(b[idx]) %*% solve(Vs) %*% b[idx]), silent = TRUE)
+    # A singular sub-covariance means the term is aliased (empty cross-cell);
+    # report nothing rather than a fabricated chi-square.
+    if (inherits(chi, "try-error") || !is.finite(chi) || chi < 0) next
+
+    rows[[length(rows) + 1]] <- data.frame(
+      term  = tm,
+      chisq = chi,
+      df    = length(idx),
+      p     = stats::pchisq(chi, df = length(idx), lower.tail = FALSE),
+      stringsAsFactors = FALSE
+    )
+  }
+  if (length(rows) == 0) return(NULL)
+  do.call(rbind, rows)
+}
+
 # Within-subgroup HRs for a 2-way interaction with a CATEGORICAL moderator.
 # Relevels `moderator` to each level, refits the SAME full model, and reads the
 # focal main-effect coefficient(s) - i.e. the fully-adjusted focal effect within

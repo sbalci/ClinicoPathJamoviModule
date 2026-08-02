@@ -57,7 +57,9 @@ test_that('grouplasso analysis works', {
     adaptive_weights_method = 'ridge',
     warm_start = TRUE,
     parallel_computing = FALSE,
-    random_seed = 123
+    random_seed = 123,
+    outcomeLevel = NULL,
+    censorLevel = NULL
     )
   })
 

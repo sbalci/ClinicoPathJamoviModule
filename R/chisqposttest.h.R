@@ -35,6 +35,7 @@ chisqposttestOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
             private$..rows <- jmvcore::OptionVariable$new(
                 "rows",
                 rows,
+                default=NULL,
                 suggested=list(
                     "ordinal",
                     "nominal"),
@@ -43,6 +44,7 @@ chisqposttestOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
             private$..cols <- jmvcore::OptionVariable$new(
                 "cols",
                 cols,
+                default=NULL,
                 suggested=list(
                     "ordinal",
                     "nominal"),
@@ -567,8 +569,8 @@ chisqposttestBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' @export
 chisqposttest <- function(
     data,
-    rows,
-    cols,
+    rows = NULL,
+    cols = NULL,
     counts = NULL,
     posthoc = "bonferroni",
     sig = 0.05,

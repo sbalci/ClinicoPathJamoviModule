@@ -80,6 +80,7 @@ options:
     - name: custom_order
       title: Custom Order (comma-separated)
       type: String
+      default: ""
       description:
           R: >
             Custom ordering of factor levels when trend_direction is 'custom' (e.g., 'baseline,week1,month1,month6')

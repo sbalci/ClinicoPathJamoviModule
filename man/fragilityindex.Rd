@@ -7,8 +7,8 @@
 fragilityindex(
   data,
   dataFormat = "summary",
-  group,
-  outcome,
+  group = NULL,
+  outcome = NULL,
   outcomeEvent,
   events1 = 10,
   n1 = 100,

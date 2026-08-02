@@ -590,6 +590,7 @@ options:
     - name: outcome_var
       title: Outcome / Event
       type: Variable
+      default: NULL
       suggested: [nominal, ordinal]
       permitted: [factor, numeric]
       description:
@@ -606,6 +607,7 @@ options:
     - name: cutpoint_time_var
       title: Survival Time (for survival outcome)
       type: Variable
+      default: NULL
       suggested: [continuous]
       permitted: [numeric]
       description:

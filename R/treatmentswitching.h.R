@@ -23,7 +23,7 @@ treatmentswitchingOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::
             causalEstimate = TRUE,
             methodComparison = TRUE,
             bootstrapSamples = 1000,
-            psModel = NULL,
+            psModel = "",
             accelerationFactor = NULL,
             treatmentLag = 0,
             plotWidth = 700,
@@ -150,7 +150,8 @@ treatmentswitchingOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::
                 default=1000)
             private$..psModel <- jmvcore::OptionString$new(
                 "psModel",
-                psModel)
+                psModel,
+                default="")
             private$..accelerationFactor <- jmvcore::OptionNumber$new(
                 "accelerationFactor",
                 accelerationFactor)
@@ -617,7 +618,7 @@ treatmentswitching <- function(
     causalEstimate = TRUE,
     methodComparison = TRUE,
     bootstrapSamples = 1000,
-    psModel,
+    psModel = "",
     accelerationFactor,
     treatmentLag = 0,
     plotWidth = 700,

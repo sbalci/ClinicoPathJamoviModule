@@ -23,7 +23,8 @@ test_that("lollipop handles conditional coloring with threshold", {
     dep = "creatinine",
     group = "age_group",
     conditionalColor = TRUE,
-    colorThreshold = 1.2
+    colorThreshold = 1.2,
+    highlight = NULL
   )
   expect_s3_class(result, "lollipopResults")
 })
@@ -34,7 +35,8 @@ test_that("lollipop handles conditional coloring without threshold (uses 0)", {
     data = lollipop_treatment,
     dep = "tumor_reduction",
     group = "treatment",
-    conditionalColor = TRUE
+    conditionalColor = TRUE,
+    highlight = NULL
   )
   expect_s3_class(result, "lollipopResults")
 })
@@ -50,7 +52,8 @@ test_that("lollipop handles custom baseline values", {
     data = lollipop_test,
     dep = "platelet_count",
     group = "hospital",
-    baseline = 0
+    baseline = 0,
+    highlight = NULL
   )
   expect_s3_class(result_zero, "lollipopResults")
 
@@ -59,7 +62,8 @@ test_that("lollipop handles custom baseline values", {
     data = lollipop_test,
     dep = "platelet_count",
     group = "hospital",
-    baseline = 150
+    baseline = 150,
+    highlight = NULL
   )
   expect_s3_class(result_clinical, "lollipopResults")
 })
@@ -75,7 +79,8 @@ test_that("lollipop handles different point sizes", {
     data = lollipop_test,
     dep = "hemoglobin",
     group = "treatment_group",
-    pointSize = 1
+    pointSize = 1,
+    highlight = NULL
   )
   expect_s3_class(result_small, "lollipopResults")
 
@@ -84,7 +89,8 @@ test_that("lollipop handles different point sizes", {
     data = lollipop_test,
     dep = "hemoglobin",
     group = "treatment_group",
-    pointSize = 10
+    pointSize = 10,
+    highlight = NULL
   )
   expect_s3_class(result_large, "lollipopResults")
 })
@@ -96,7 +102,8 @@ test_that("lollipop handles different line widths", {
     data = lollipop_test,
     dep = "albumin",
     group = "disease_severity",
-    lineWidth = 0.5
+    lineWidth = 0.5,
+    highlight = NULL
   )
   expect_s3_class(result_thin, "lollipopResults")
 
@@ -105,7 +112,8 @@ test_that("lollipop handles different line widths", {
     data = lollipop_test,
     dep = "albumin",
     group = "disease_severity",
-    lineWidth = 5
+    lineWidth = 5,
+    highlight = NULL
   )
   expect_s3_class(result_thick, "lollipopResults")
 })
@@ -154,7 +162,8 @@ test_that("lollipop handles aggregation with different sort orders", {
     dep = "hemoglobin",
     group = "treatment_group",
     aggregation = "mean",
-    sortBy = "value_asc"
+    sortBy = "value_asc",
+    highlight = NULL
   )
   expect_s3_class(result1, "lollipopResults")
 
@@ -164,7 +173,8 @@ test_that("lollipop handles aggregation with different sort orders", {
     dep = "albumin",
     group = "disease_severity",
     aggregation = "median",
-    sortBy = "value_desc"
+    sortBy = "value_desc",
+    highlight = NULL
   )
   expect_s3_class(result2, "lollipopResults")
 
@@ -174,7 +184,8 @@ test_that("lollipop handles aggregation with different sort orders", {
     dep = "platelet_count",
     group = "hospital",
     aggregation = "sum",
-    sortBy = "group_alpha"
+    sortBy = "group_alpha",
+    highlight = NULL
   )
   expect_s3_class(result3, "lollipopResults")
 })
@@ -209,7 +220,8 @@ test_that("lollipop handles horizontal orientation with sorting", {
     group = "treatment_group",
     orientation = "horizontal",
     sortBy = "value_desc",
-    aggregation = "mean"
+    aggregation = "mean",
+    highlight = NULL
   )
   expect_s3_class(result, "lollipopResults")
 })
@@ -231,7 +243,8 @@ test_that("lollipop handles all theme and color scheme combinations", {
         group = "treatment_group",
         theme = theme_val,
         colorScheme = color_val,
-        aggregation = "mean"
+        aggregation = "mean",
+        highlight = NULL
       )
       expect_s3_class(result, "lollipopResults")
     }
@@ -252,7 +265,8 @@ test_that("lollipop handles multiple visual enhancements", {
     showMean = TRUE,
     lineType = "dotted",
     pointSize = 5,
-    orientation = "horizontal"
+    orientation = "horizontal",
+    highlight = NULL
   )
   expect_s3_class(result, "lollipopResults")
 })
@@ -298,7 +312,8 @@ test_that("lollipop handles treatment response data comprehensively", {
     theme = "publication",
     title = "Quality of Life by Treatment",
     xlabel = "QoL Score (0-100)",
-    ylabel = "Treatment Groups"
+    ylabel = "Treatment Groups",
+    highlight = NULL
   )
   expect_s3_class(result, "lollipopResults")
 })
@@ -312,7 +327,8 @@ test_that("lollipop handles minimal configuration", {
   result_min <- lollipop(
     data = lollipop_test,
     dep = "hemoglobin",
-    group = "treatment_group"
+    group = "treatment_group",
+    highlight = NULL
   )
   expect_s3_class(result_min, "lollipopResults")
 })
@@ -361,7 +377,8 @@ test_that("lollipop handles different clinical lab parameters", {
       data = lollipop_test,
       dep = param,
       group = "treatment_group",
-      aggregation = "mean"
+      aggregation = "mean",
+      highlight = NULL
     )
     expect_s3_class(result, "lollipopResults")
   }

@@ -58,6 +58,7 @@ jjhistostatsOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
             private$..grvar <- jmvcore::OptionVariable$new(
                 "grvar",
                 grvar,
+                default=NULL,
                 suggested=list(
                     "ordinal",
                     "nominal"),
@@ -601,7 +602,7 @@ jjhistostatsBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 jjhistostats <- function(
     data,
     dep,
-    grvar,
+    grvar = NULL,
     typestatistics = "parametric",
     centralityline = FALSE,
     changebinwidth = FALSE,

@@ -96,6 +96,7 @@ options:
     - name: strata
       title: Stratification Variable
       type: Variable
+      default: NULL
       suggested: [nominal, ordinal]
       description:
           R: >

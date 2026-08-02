@@ -6,7 +6,7 @@ library(testthat)
 library(survival)
 
 # Test data: use colon cancer dataset from survival package
-data(colon, package = "survival")
+colon <- survival::colon
 colon_clean <- colon[colon$etype == 2, ]  # Only recurrence events
 
 test_that("Event indicator correctly identifies events", {
@@ -36,17 +36,14 @@ test_that("Event indicator throws error for unsupported factor levels", {
   outcome_bad <- factor(c("Dead", "Alive", "Dead"))
   expect_error(
     ClinicoPath:::.eventIndicator(outcome_bad),
-    "Outcome factor has non-numeric, non-'Event' levels"
+    "Outcome Factor Has Unsupported Levels"
   )
 })
 
-test_that("Event indicator throws error for unsupported types", {
-  # Character vector should throw error
+test_that("Event indicator accepts numeric character encodings", {
+  # Imported text columns containing 0/1 are safely interpretable.
   outcome_char <- c("0", "1", "0")
-  expect_error(
-    ClinicoPath:::.eventIndicator(outcome_char),
-    "Outcome variable type .* is not supported"
-  )
+  expect_equal(ClinicoPath:::.eventIndicator(outcome_char), c(FALSE, TRUE, FALSE))
 })
 
 test_that("Variable name escaping handles special characters", {
@@ -111,7 +108,7 @@ test_that("Clinical summary generation handles empty results", {
   })
 })
 
-# Note: Full integration tests comparing multisurvival() output to survival::coxph()
+# Note: Full integration tests comparing .run_multisurvival() output to survival::coxph()
 # would require mocking jmvcore infrastructure. These should be added in future work.
 # See tests/verify_multisurvival.R for manual verification approach.
 

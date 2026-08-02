@@ -43,6 +43,7 @@ jjcorrmatOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             private$..grvar <- jmvcore::OptionVariable$new(
                 "grvar",
                 grvar,
+                default=NULL,
                 suggested=list(
                     "ordinal",
                     "nominal"),
@@ -435,7 +436,7 @@ jjcorrmatBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 jjcorrmat <- function(
     data,
     dep,
-    grvar,
+    grvar = NULL,
     typestatistics = "parametric",
     matrixtype = "upper",
     matrixmethod = "square",

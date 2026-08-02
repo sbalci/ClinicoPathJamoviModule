@@ -46,6 +46,7 @@ options:
     - name: screening_exclusions
       title: Screening Exclusion Reasons
       type: Variables
+      default: NULL
       suggested: [ nominal ]
       permitted: [ factor, numeric ]
       description:
@@ -59,6 +60,7 @@ options:
     - name: enrollment_exclusions
       title: Enrollment Exclusion Reasons
       type: Variables
+      default: NULL
       suggested: [ nominal ]
       permitted: [ factor, numeric ]
       description:
@@ -73,6 +75,7 @@ options:
     - name: randomization_var
       title: Randomization/Group Assignment
       type: Variable
+      default: NULL
       suggested: [ nominal ]
       permitted: [ factor ]
       description:
@@ -85,6 +88,7 @@ options:
     - name: allocation_exclusions
       title: Post-Randomization Exclusions
       type: Variables
+      default: NULL
       suggested: [ nominal ]
       permitted: [ factor, numeric ]
       description:
@@ -98,6 +102,7 @@ options:
     - name: followup_exclusions
       title: Follow-up Exclusions
       type: Variables
+      default: NULL
       suggested: [ nominal ]
       permitted: [ factor, numeric ]
       description:
@@ -111,6 +116,7 @@ options:
     - name: analysis_exclusions
       title: Analysis Exclusions
       type: Variables
+      default: NULL
       suggested: [ nominal ]
       permitted: [ factor, numeric ]
       description:

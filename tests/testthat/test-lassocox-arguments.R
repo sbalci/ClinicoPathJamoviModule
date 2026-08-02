@@ -192,7 +192,8 @@ test_that("lassocox handles continuous-only explanatory variables", {
     explanatory = c("age", "tumor_size_cm", "hemoglobin_g_dl",
                      "wbc_count_k_ul", "platelet_count_k_ul",
                      "creatinine_mg_dl"),
-    cv_plot = FALSE, coef_plot = FALSE, survival_plot = FALSE
+    cv_plot = FALSE, coef_plot = FALSE, survival_plot = FALSE,
+    censorLevel = NULL
   )
 
   expect_true(!is.null(result$results))
@@ -209,7 +210,8 @@ test_that("lassocox handles factor-only explanatory variables", {
     outcomeLevel = "Yes",
     explanatory = c("gender", "smoking_status", "histology", "stage",
                      "ecog_performance_status", "treatment_type"),
-    cv_plot = FALSE, coef_plot = FALSE, survival_plot = FALSE
+    cv_plot = FALSE, coef_plot = FALSE, survival_plot = FALSE,
+    censorLevel = NULL
   )
 
   expect_true(!is.null(result$results))

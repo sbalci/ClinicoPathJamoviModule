@@ -50,6 +50,7 @@ options:
     - name: x_var
       title: "Category Variable (X-axis)"
       type: Variable
+      default: NULL
       suggested: [nominal, ordinal]
       permitted: [factor]
       description:
@@ -59,6 +60,7 @@ options:
     - name: y_var
       title: "Value Variable (Y-axis)"
       type: Variable
+      default: NULL
       suggested: [continuous]
       permitted: [numeric]
       description:
@@ -68,6 +70,7 @@ options:
     - name: fill_var
       title: "Segment Variable (Fill)"
       type: Variable
+      default: NULL
       suggested: [nominal, ordinal]
       permitted: [factor]
       description:

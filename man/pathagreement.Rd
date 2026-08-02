@@ -6,7 +6,7 @@
 \usage{
 pathagreement(
   data,
-  vars,
+  vars = NULL,
   sft = FALSE,
   heatmap = FALSE,
   heatmapDetails = FALSE,

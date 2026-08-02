@@ -6,8 +6,8 @@
 \usage{
 jjarcdiagram(
   data,
-  source,
-  target,
+  source = NULL,
+  target = NULL,
   weight = NULL,
   group = NULL,
   analysisPreset = "custom",

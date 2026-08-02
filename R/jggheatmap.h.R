@@ -46,6 +46,7 @@ jggheatmapOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             private$..matrix_vars <- jmvcore::OptionVariables$new(
                 "matrix_vars",
                 matrix_vars,
+                default=NULL,
                 permitted=list(
                     "numeric"))
             private$..row_var <- jmvcore::OptionVariable$new(
@@ -466,7 +467,7 @@ jggheatmapBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' @export
 jggheatmap <- function(
     data,
-    matrix_vars,
+    matrix_vars = NULL,
     row_var = NULL,
     col_var = NULL,
     value_var = NULL,

@@ -41,6 +41,7 @@ decisioncompareOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
             private$..gold <- jmvcore::OptionVariable$new(
                 "gold",
                 gold,
+                default=NULL,
                 suggested=list(
                     "nominal"),
                 permitted=list(
@@ -52,6 +53,7 @@ decisioncompareOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
             private$..test1 <- jmvcore::OptionVariable$new(
                 "test1",
                 test1,
+                default=NULL,
                 suggested=list(
                     "nominal"),
                 permitted=list(
@@ -63,6 +65,7 @@ decisioncompareOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
             private$..test2 <- jmvcore::OptionVariable$new(
                 "test2",
                 test2,
+                default=NULL,
                 suggested=list(
                     "nominal"),
                 permitted=list(
@@ -901,11 +904,11 @@ decisioncompareBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
 #' @export
 decisioncompare <- function(
     data,
-    gold,
+    gold = NULL,
     goldPositive,
-    test1,
+    test1 = NULL,
     test1Positive,
-    test2,
+    test2 = NULL,
     test2Positive,
     test3 = NULL,
     test3Positive,

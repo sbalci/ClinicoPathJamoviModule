@@ -6,12 +6,12 @@
 \usage{
 finegray(
   data,
-  survivalTime,
-  status,
+  survivalTime = NULL,
+  status = NULL,
   eventOfInterest,
   censorLevel,
-  covariates,
-  groupVar,
+  covariates = NULL,
+  groupVar = NULL,
   showCoefficientTable = TRUE,
   exponentiate = TRUE,
   confLevel = 0.95,

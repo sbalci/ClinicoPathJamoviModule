@@ -69,6 +69,7 @@ options:
     - name: source
       title: Source Node (From)
       type: Variable
+      default: NULL
       suggested: [ nominal ]
       permitted: [ factor ]
       description:
@@ -85,6 +86,7 @@ options:
     - name: target
       title: Target Node (To)
       type: Variable
+      default: NULL
       suggested: [ nominal ]
       permitted: [ factor ]
       description:

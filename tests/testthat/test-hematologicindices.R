@@ -14,7 +14,8 @@ test_that('hematologicindices computes NLR/PLR/SII/PNI correctly', {
       albuminUnit = 'gdl', crp = 'crp',
       indices = c('nlr', 'plr', 'lmr', 'sii', 'pni', 'car', 'gps'),
       gpsType = 'modified',
-      showIndicesTable = TRUE, showPlot = FALSE, showExplanation = TRUE)
+      showIndicesTable = TRUE, showPlot = FALSE, showExplanation = TRUE,
+      eventLevel = NULL)
   })
   expect_true(inherits(model, 'jmvcoreClass'))
 
@@ -36,7 +37,8 @@ test_that('mGPS scoring follows CRP/albumin thresholds', {
   model <- hematologicindices(
     data = data, neutrophils = 'neut', lymphocytes = 'lymph', platelets = 'plt',
     albumin = 'alb', albuminUnit = 'gl', crp = 'crp',
-    indices = c('gps'), gpsType = 'modified')
+    indices = c('gps'), gpsType = 'modified',
+    eventLevel = NULL)
   gt <- model$results$gpsTable$asDF
   expect_equal(gt$n[gt$score == 'mGPS = 2'], 1)
 })

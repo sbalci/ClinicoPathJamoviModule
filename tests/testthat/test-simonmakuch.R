@@ -62,7 +62,9 @@ test_that('simonmakuch analysis works', {
     performSensitivityAnalysis = FALSE,
     showExplanations = TRUE,
     showMethodologyNotes = FALSE,
-    includeClinicalGuidance = FALSE
+    includeClinicalGuidance = FALSE,
+    eventLevel = NULL,
+    exposedLevel = NULL
     )
   })
 

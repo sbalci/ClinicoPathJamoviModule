@@ -61,6 +61,7 @@ lymphnoderatioOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
             private$..survivalTime <- jmvcore::OptionVariable$new(
                 "survivalTime",
                 survivalTime,
+                default=NULL,
                 suggested=list(
                     "continuous"),
                 permitted=list(
@@ -68,6 +69,7 @@ lymphnoderatioOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
             private$..survivalStatus <- jmvcore::OptionVariable$new(
                 "survivalStatus",
                 survivalStatus,
+                default=NULL,
                 suggested=list(
                     "nominal"),
                 permitted=list(
@@ -392,8 +394,8 @@ lymphnoderatio <- function(
     minYield = 12,
     stratMethod = "fixed",
     thresholds = "0.2, 0.5",
-    survivalTime,
-    survivalStatus,
+    survivalTime = NULL,
+    survivalStatus = NULL,
     eventLevel,
     conf_level = 0.95,
     showRatioSummary = TRUE,

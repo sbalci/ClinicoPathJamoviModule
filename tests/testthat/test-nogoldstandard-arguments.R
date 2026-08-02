@@ -16,7 +16,10 @@ test_that("nogoldstandard respects all analysis methods", {
       test1Positive = "Positive",
       test2 = "Test2",
       test2Positive = "Positive",
-      method = method
+      method = method,
+      test3Positive = NULL,
+      test4Positive = NULL,
+      test5Positive = NULL
     )
     expect_s3_class(result, "nogoldstandardClass")
   }
@@ -31,7 +34,10 @@ test_that("nogoldstandard respects bootstrap parameter", {
     test2 = "Test2",
     test2Positive = "Positive",
     method = "latent_class",
-    bootstrap = FALSE
+    bootstrap = FALSE,
+    test3Positive = NULL,
+    test4Positive = NULL,
+    test5Positive = NULL
   )
   expect_s3_class(result_no_boot, "nogoldstandardClass")
 
@@ -44,7 +50,10 @@ test_that("nogoldstandard respects bootstrap parameter", {
     test2Positive = "Positive",
     method = "latent_class",
     bootstrap = TRUE,
-    nboot = 100
+    nboot = 100,
+    test3Positive = NULL,
+    test4Positive = NULL,
+    test5Positive = NULL
   )
   expect_s3_class(result_boot, "nogoldstandardClass")
 })
@@ -59,7 +68,10 @@ test_that("nogoldstandard respects nboot parameter", {
     test2Positive = "Positive",
     method = "latent_class",
     bootstrap = TRUE,
-    nboot = 100
+    nboot = 100,
+    test3Positive = NULL,
+    test4Positive = NULL,
+    test5Positive = NULL
   )
   expect_no_error(result_small)
 
@@ -72,7 +84,10 @@ test_that("nogoldstandard respects nboot parameter", {
     test2Positive = "Positive",
     method = "latent_class",
     bootstrap = TRUE,
-    nboot = 500
+    nboot = 500,
+    test3Positive = NULL,
+    test4Positive = NULL,
+    test5Positive = NULL
   )
   expect_no_error(result_large)
 })
@@ -85,7 +100,10 @@ test_that("nogoldstandard respects alpha parameter", {
     test1Positive = "Positive",
     test2 = "Test2",
     test2Positive = "Positive",
-    alpha = 0.05
+    alpha = 0.05,
+    test3Positive = NULL,
+    test4Positive = NULL,
+    test5Positive = NULL
   )
   expect_no_error(result_95)
 
@@ -96,7 +114,10 @@ test_that("nogoldstandard respects alpha parameter", {
     test1Positive = "Positive",
     test2 = "Test2",
     test2Positive = "Positive",
-    alpha = 0.01
+    alpha = 0.01,
+    test3Positive = NULL,
+    test4Positive = NULL,
+    test5Positive = NULL
   )
   expect_no_error(result_99)
 })
@@ -109,7 +130,10 @@ test_that("nogoldstandard respects verbose parameter", {
     test1Positive = "Positive",
     test2 = "Test2",
     test2Positive = "Positive",
-    verbose = FALSE
+    verbose = FALSE,
+    test3Positive = NULL,
+    test4Positive = NULL,
+    test5Positive = NULL
   )
   expect_no_error(result_quiet)
 
@@ -120,7 +144,10 @@ test_that("nogoldstandard respects verbose parameter", {
     test1Positive = "Positive",
     test2 = "Test2",
     test2Positive = "Positive",
-    verbose = TRUE
+    verbose = TRUE,
+    test3Positive = NULL,
+    test4Positive = NULL,
+    test5Positive = NULL
   )
   expect_no_error(result_verbose)
 })
@@ -136,7 +163,10 @@ test_that("nogoldstandard respects clinical presets", {
       test1Positive = "Positive",
       test2 = "Test2",
       test2Positive = "Positive",
-      clinicalPreset = preset
+      clinicalPreset = preset,
+      test3Positive = NULL,
+      test4Positive = NULL,
+      test5Positive = NULL
     )
     expect_s3_class(result, "nogoldstandardClass")
   }
@@ -151,7 +181,9 @@ test_that("nogoldstandard handles diagnostic_validation preset", {
     test2Positive = "Positive",
     test3 = "Reference2",
     test3Positive = "Positive",
-    clinicalPreset = "diagnostic_validation"
+    clinicalPreset = "diagnostic_validation",
+    test4Positive = NULL,
+    test5Positive = NULL
   )
   expect_no_error(result)
 })
@@ -165,7 +197,9 @@ test_that("nogoldstandard handles pathology_agreement preset", {
     test2Positive = "Malignant",
     test3 = "Pathologist3",
     test3Positive = "Malignant",
-    clinicalPreset = "pathology_agreement"
+    clinicalPreset = "pathology_agreement",
+    test4Positive = NULL,
+    test5Positive = NULL
   )
   expect_no_error(result)
 })
@@ -177,7 +211,10 @@ test_that("nogoldstandard handles different numbers of tests", {
     test1 = "Test1",
     test1Positive = "Positive",
     test2 = "Test2",
-    test2Positive = "Positive"
+    test2Positive = "Positive",
+    test3Positive = NULL,
+    test4Positive = NULL,
+    test5Positive = NULL
   )
   expect_no_error(result_2)
 
@@ -189,7 +226,9 @@ test_that("nogoldstandard handles different numbers of tests", {
     test2 = "Pathologist2",
     test2Positive = "Malignant",
     test3 = "Pathologist3",
-    test3Positive = "Malignant"
+    test3Positive = "Malignant",
+    test4Positive = NULL,
+    test5Positive = NULL
   )
   expect_no_error(result_3)
 })

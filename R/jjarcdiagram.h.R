@@ -42,6 +42,7 @@ jjarcdiagramOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
             private$..source <- jmvcore::OptionVariable$new(
                 "source",
                 source,
+                default=NULL,
                 suggested=list(
                     "nominal"),
                 permitted=list(
@@ -49,6 +50,7 @@ jjarcdiagramOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
             private$..target <- jmvcore::OptionVariable$new(
                 "target",
                 target,
+                default=NULL,
                 suggested=list(
                     "nominal"),
                 permitted=list(
@@ -508,8 +510,8 @@ jjarcdiagramBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' @export
 jjarcdiagram <- function(
     data,
-    source,
-    target,
+    source = NULL,
+    target = NULL,
     weight = NULL,
     group = NULL,
     analysisPreset = "custom",

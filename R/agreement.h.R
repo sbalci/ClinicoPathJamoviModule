@@ -165,7 +165,8 @@ agreementOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 
             private$..vars <- jmvcore::OptionVariables$new(
                 "vars",
-                vars)
+                vars,
+                default=NULL)
             private$..baConfidenceLevel <- jmvcore::OptionNumber$new(
                 "baConfidenceLevel",
                 baConfidenceLevel,
@@ -4566,7 +4567,7 @@ agreementBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' @export
 agreement <- function(
     data,
-    vars,
+    vars = NULL,
     baConfidenceLevel = 0.95,
     confLevel = 0.95,
     proportionalBias = FALSE,

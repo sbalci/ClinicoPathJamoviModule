@@ -66,7 +66,8 @@ test_that('spatialbayesiansurvival analysis works', {
     n_cores = 1,
     clinical_context = 'cancer_epidemiology',
     set_seed = TRUE,
-    seed_value = 42
+    seed_value = 42,
+    statusLevel = NULL
     )
   })
 

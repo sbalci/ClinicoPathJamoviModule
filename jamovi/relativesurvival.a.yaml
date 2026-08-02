@@ -90,6 +90,7 @@ options:
     - name: covariates
       title: 'Additional Covariates'
       type: Variables
+      default: NULL
       suggested: [ continuous, nominal ]
       permitted: [ numeric, factor ]
       description:

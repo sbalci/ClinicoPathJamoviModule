@@ -55,6 +55,7 @@ autoedaOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             private$..target_var <- jmvcore::OptionVariable$new(
                 "target_var",
                 target_var,
+                default=NULL,
                 suggested=list(
                     "continuous",
                     "nominal",
@@ -310,7 +311,7 @@ autoeda <- function(
     data,
     vars,
     analysis_type = "overview",
-    target_var,
+    target_var = NULL,
     include_plots = TRUE,
     missing_threshold = 5,
     correlation_method = "pearson",

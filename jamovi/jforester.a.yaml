@@ -24,16 +24,19 @@ options:
     - name: estimates
       title: Effect Estimates
       type: Variable
+      default: NULL
       description: Point estimates (odds ratios, risk ratios, mean differences, etc.)
 
     - name: ci_lower
       title: Lower Confidence Interval
       type: Variable
+      default: NULL
       description: Lower bounds of confidence intervals
 
     - name: ci_upper
       title: Upper Confidence Interval
       type: Variable
+      default: NULL
       description: Upper bounds of confidence intervals
 
     - name: sample_sizes

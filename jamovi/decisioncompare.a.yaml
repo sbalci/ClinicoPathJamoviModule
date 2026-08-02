@@ -70,6 +70,7 @@ options:
     - name: gold
       title: Golden Standard (Reference Test)
       type: Variable
+      default: NULL
       suggested: [ nominal ]
       permitted: [ factor ]
       description:
@@ -95,6 +96,7 @@ options:
     - name: test1
       title: Test 1 (Required)
       type: Variable
+      default: NULL
       suggested: [ nominal ]
       permitted: [ factor ]
       description:
@@ -119,6 +121,7 @@ options:
     - name: test2
       title: Test 2 (Required for Comparison)
       type: Variable
+      default: NULL
       suggested: [ nominal ]
       permitted: [ factor ]
       description:

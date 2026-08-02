@@ -7,7 +7,7 @@
 jextractggstats(
   data,
   dep_var,
-  group_var,
+  group_var = NULL,
   test_value = 0,
   analysis_type = "between_stats",
   extract_components = "all",

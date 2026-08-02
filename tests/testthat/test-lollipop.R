@@ -53,7 +53,8 @@ test_that("lollipop creates valid output structure", {
   result <- lollipop(
     data = test_data,
     dep = "biomarker_level",
-    group = "patient_id"
+    group = "patient_id",
+    highlight = NULL
   )
 
   expect_s3_class(result, "Group")
@@ -68,14 +69,16 @@ test_that("lollipop requires both dep and group variables", {
   result_no_dep <- lollipop(
     data = test_data,
     dep = NULL,
-    group = "patient_id"
+    group = "patient_id",
+    highlight = NULL
   )
   expect_s3_class(result_no_dep, "Group")
 
   result_no_group <- lollipop(
     data = test_data,
     dep = "biomarker_level",
-    group = NULL
+    group = NULL,
+    highlight = NULL
   )
   expect_s3_class(result_no_group, "Group")
 })
@@ -89,7 +92,8 @@ test_that("lollipop handles minimal valid data", {
   result <- lollipop(
     data = minimal_data,
     dep = "val",
-    group = "cat"
+    group = "cat",
+    highlight = NULL
   )
 
   expect_s3_class(result, "Group")
@@ -106,7 +110,8 @@ test_that("lollipop aggregates by mean correctly", {
     data = test_data,
     dep = "value",
     group = "group",
-    aggregation = "mean"
+    aggregation = "mean",
+    highlight = NULL
   )
 
   expect_s3_class(result, "Group")
@@ -124,7 +129,8 @@ test_that("lollipop aggregates by median correctly", {
     data = test_data,
     dep = "value",
     group = "group",
-    aggregation = "median"
+    aggregation = "median",
+    highlight = NULL
   )
 
   expect_s3_class(result, "Group")
@@ -140,7 +146,8 @@ test_that("lollipop aggregates by sum correctly", {
     data = test_data,
     dep = "value",
     group = "group",
-    aggregation = "sum"
+    aggregation = "sum",
+    highlight = NULL
   )
 
   expect_s3_class(result, "Group")
@@ -156,7 +163,8 @@ test_that("lollipop handles no aggregation with unique groups", {
     data = test_data,
     dep = "biomarker_level",
     group = "patient_id",
-    aggregation = "none"
+    aggregation = "none",
+    highlight = NULL
   )
 
   expect_s3_class(result, "Group")
@@ -174,7 +182,8 @@ test_that("lollipop detects over-plotting scenario", {
       data = test_data,
       dep = "value",
       group = "group",
-      aggregation = "none"
+      aggregation = "none",
+      highlight = NULL
     ),
     regexp = "Multiple observations per group"
   )
@@ -192,7 +201,8 @@ test_that("lollipop applies value ascending sort", {
     dep = "response_score",
     group = "treatment",
     aggregation = "mean",
-    sortBy = "value_asc"
+    sortBy = "value_asc",
+    highlight = NULL
   )
 
   expect_s3_class(result, "Group")
@@ -209,7 +219,8 @@ test_that("lollipop applies value descending sort", {
     dep = "response_score",
     group = "treatment",
     aggregation = "mean",
-    sortBy = "value_desc"
+    sortBy = "value_desc",
+    highlight = NULL
   )
 
   expect_s3_class(result, "Group")
@@ -226,7 +237,8 @@ test_that("lollipop applies alphabetical sort", {
     dep = "response_score",
     group = "treatment",
     aggregation = "mean",
-    sortBy = "group_alpha"
+    sortBy = "group_alpha",
+    highlight = NULL
   )
 
   expect_s3_class(result, "Group")
@@ -242,7 +254,8 @@ test_that("lollipop preserves original order when requested", {
     dep = "response_score",
     group = "treatment",
     aggregation = "mean",
-    sortBy = "original"
+    sortBy = "original",
+    highlight = NULL
   )
 
   expect_s3_class(result, "Group")
@@ -261,7 +274,8 @@ test_that("lollipop calculates summary statistics", {
     data = test_data,
     dep = "value",
     group = "group",
-    aggregation = "none"
+    aggregation = "none",
+    highlight = NULL
   )
 
   expect_s3_class(result, "Group")
@@ -281,7 +295,8 @@ test_that("lollipop summary reflects aggregated data when aggregation is used", 
     data = test_data,
     dep = "value",
     group = "group",
-    aggregation = "mean"
+    aggregation = "mean",
+    highlight = NULL
   )
 
   expect_s3_class(result_mean, "Group")
@@ -343,7 +358,8 @@ test_that("lollipop applies conditional coloring based on threshold", {
     group = "treatment",
     aggregation = "mean",
     conditionalColor = TRUE,
-    colorThreshold = 70
+    colorThreshold = 70,
+    highlight = NULL
   )
 
   expect_s3_class(result, "Group")
@@ -362,7 +378,8 @@ test_that("lollipop handles conditional coloring at extremes", {
     group = "treatment",
     aggregation = "mean",
     conditionalColor = TRUE,
-    colorThreshold = 1000
+    colorThreshold = 1000,
+    highlight = NULL
   )
   expect_s3_class(result_high, "Group")
 
@@ -373,7 +390,8 @@ test_that("lollipop handles conditional coloring at extremes", {
     group = "treatment",
     aggregation = "mean",
     conditionalColor = TRUE,
-    colorThreshold = -1000
+    colorThreshold = -1000,
+    highlight = NULL
   )
   expect_s3_class(result_low, "Group")
 })
@@ -389,7 +407,8 @@ test_that("lollipop creates vertical orientation", {
     data = test_data,
     dep = "biomarker_level",
     group = "patient_id",
-    orientation = "vertical"
+    orientation = "vertical",
+    highlight = NULL
   )
 
   expect_s3_class(result, "Group")
@@ -402,7 +421,8 @@ test_that("lollipop creates horizontal orientation", {
     data = test_data,
     dep = "biomarker_level",
     group = "patient_id",
-    orientation = "horizontal"
+    orientation = "horizontal",
+    highlight = NULL
   )
 
   expect_s3_class(result, "Group")
@@ -423,7 +443,8 @@ test_that("lollipop applies various color schemes", {
       dep = "response_score",
       group = "treatment",
       aggregation = "mean",
-      colorScheme = scheme
+      colorScheme = scheme,
+      highlight = NULL
     )
     expect_s3_class(result, "Group")
   }
@@ -440,7 +461,8 @@ test_that("lollipop applies various themes", {
       dep = "response_score",
       group = "treatment",
       aggregation = "mean",
-      theme = theme_name
+      theme = theme_name,
+      highlight = NULL
     )
     expect_s3_class(result, "Group")
   }
@@ -455,7 +477,8 @@ test_that("lollipop applies point size and line width", {
     group = "treatment",
     aggregation = "mean",
     pointSize = 5,
-    lineWidth = 2
+    lineWidth = 2,
+    highlight = NULL
   )
 
   expect_s3_class(result, "Group")
@@ -472,7 +495,8 @@ test_that("lollipop applies line types", {
       dep = "response_score",
       group = "treatment",
       aggregation = "mean",
-      lineType = line_type
+      lineType = line_type,
+      highlight = NULL
     )
     expect_s3_class(result, "Group")
   }
@@ -487,7 +511,8 @@ test_that("lollipop shows values and mean line", {
     group = "treatment",
     aggregation = "mean",
     showValues = TRUE,
-    showMean = TRUE
+    showMean = TRUE,
+    highlight = NULL
   )
 
   expect_s3_class(result, "Group")
@@ -501,7 +526,8 @@ test_that("lollipop applies custom baseline", {
     dep = "response_score",
     group = "treatment",
     aggregation = "mean",
-    baseline = 50
+    baseline = 50,
+    highlight = NULL
   )
 
   expect_s3_class(result, "Group")
@@ -517,7 +543,8 @@ test_that("lollipop applies custom labels and title", {
     aggregation = "mean",
     xlabel = "Treatment Groups",
     ylabel = "Response Score (%)",
-    title = "Treatment Efficacy Comparison"
+    title = "Treatment Efficacy Comparison",
+    highlight = NULL
   )
 
   expect_s3_class(result, "Group")
@@ -532,7 +559,8 @@ test_that("lollipop applies custom plot dimensions", {
     group = "treatment",
     aggregation = "mean",
     width = 1000,
-    height = 800
+    height = 800,
+    highlight = NULL
   )
 
   expect_s3_class(result, "Group")
@@ -549,7 +577,8 @@ test_that("lollipop handles missing values in dependent variable", {
   result <- lollipop(
     data = test_data,
     dep = "biomarker_level",
-    group = "patient_id"
+    group = "patient_id",
+    highlight = NULL
   )
 
   expect_s3_class(result, "Group")
@@ -563,7 +592,8 @@ test_that("lollipop handles all missing values", {
   result <- lollipop(
     data = test_data,
     dep = "biomarker_level",
-    group = "patient_id"
+    group = "patient_id",
+    highlight = NULL
   )
 
   expect_s3_class(result, "Group")
@@ -578,7 +608,8 @@ test_that("lollipop handles identical values", {
   result <- lollipop(
     data = constant_data,
     dep = "val",
-    group = "cat"
+    group = "cat",
+    highlight = NULL
   )
 
   expect_s3_class(result, "Group")
@@ -593,7 +624,8 @@ test_that("lollipop handles negative values", {
   result <- lollipop(
     data = negative_data,
     dep = "val",
-    group = "cat"
+    group = "cat",
+    highlight = NULL
   )
 
   expect_s3_class(result, "Group")
@@ -608,7 +640,8 @@ test_that("lollipop handles very small values", {
   result <- lollipop(
     data = small_data,
     dep = "val",
-    group = "cat"
+    group = "cat",
+    highlight = NULL
   )
 
   expect_s3_class(result, "Group")
@@ -623,7 +656,8 @@ test_that("lollipop handles large number of groups", {
   result <- lollipop(
     data = large_group_data,
     dep = "val",
-    group = "cat"
+    group = "cat",
+    highlight = NULL
   )
 
   expect_s3_class(result, "Group")
@@ -638,7 +672,8 @@ test_that("lollipop handles highly skewed data", {
   result <- lollipop(
     data = skewed_data,
     dep = "val",
-    group = "cat"
+    group = "cat",
+    highlight = NULL
   )
 
   expect_s3_class(result, "Group")
@@ -656,7 +691,8 @@ test_that("lollipop handles unbalanced groups when aggregating", {
     data = unbalanced_data,
     dep = "value",
     group = "group",
-    aggregation = "mean"
+    aggregation = "mean",
+    highlight = NULL
   )
 
   expect_s3_class(result, "Group")
@@ -673,7 +709,8 @@ test_that("lollipop handles small sample size", {
   result <- lollipop(
     data = small_sample,
     dep = "val",
-    group = "cat"
+    group = "cat",
+    highlight = NULL
   )
 
   expect_s3_class(result, "Group")
@@ -690,7 +727,8 @@ test_that("lollipop handles many groups relative to sample size", {
   result <- lollipop(
     data = many_groups,
     dep = "val",
-    group = "cat"
+    group = "cat",
+    highlight = NULL
   )
 
   expect_s3_class(result, "Group")
@@ -718,7 +756,8 @@ test_that("lollipop works with patient biomarker scenario", {
     conditionalColor = TRUE,
     colorThreshold = 12,  # Anemia threshold
     sortBy = "value_asc",
-    title = "Hemoglobin Levels by Patient"
+    title = "Hemoglobin Levels by Patient",
+    highlight = NULL
   )
 
   expect_s3_class(result, "Group")
@@ -744,7 +783,8 @@ test_that("lollipop works with treatment comparison scenario", {
     sortBy = "value_desc",
     showMean = TRUE,
     showValues = TRUE,
-    title = "Treatment Efficacy: Mean Tumor Reduction (%)"
+    title = "Treatment Efficacy: Mean Tumor Reduction (%)",
+    highlight = NULL
   )
 
   expect_s3_class(result, "Group")
@@ -766,7 +806,8 @@ test_that("lollipop works with lab test timeline scenario", {
     colorThreshold = 1.3,  # Upper limit of normal
     baseline = 1.0,
     sortBy = "original",
-    title = "Creatinine Levels Over Treatment Course"
+    title = "Creatinine Levels Over Treatment Course",
+    highlight = NULL
   )
 
   expect_s3_class(result, "Group")

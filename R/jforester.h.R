@@ -51,13 +51,16 @@ jforesterOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 study_labels)
             private$..estimates <- jmvcore::OptionVariable$new(
                 "estimates",
-                estimates)
+                estimates,
+                default=NULL)
             private$..ci_lower <- jmvcore::OptionVariable$new(
                 "ci_lower",
-                ci_lower)
+                ci_lower,
+                default=NULL)
             private$..ci_upper <- jmvcore::OptionVariable$new(
                 "ci_upper",
-                ci_upper)
+                ci_upper,
+                default=NULL)
             private$..sample_sizes <- jmvcore::OptionVariable$new(
                 "sample_sizes",
                 sample_sizes,
@@ -516,9 +519,9 @@ jforesterBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 jforester <- function(
     data,
     study_labels,
-    estimates,
-    ci_lower,
-    ci_upper,
+    estimates = NULL,
+    ci_lower = NULL,
+    ci_upper = NULL,
     sample_sizes = NULL,
     events = NULL,
     effect_type = "or",

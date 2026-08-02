@@ -35,21 +35,25 @@ options:
     - name: dependent_var
       title: Dependent Variable
       type: Variable
+      default: NULL
       description: "Main outcome variable for analysis"
 
     - name: independent_vars
       title: Independent Variables
       type: Variables
+      default: NULL
       description: "Predictor variables for model"
 
     - name: grouping_var
       title: Grouping Variable
       type: Variable
+      default: NULL
       description: "Variable for grouping/stratification"
 
     - name: weight_var
       title: Weight Variable
       type: Variable
+      default: NULL
       description: "Variable containing survey weights"
 
     - name: model_formula
@@ -189,6 +193,7 @@ options:
     - name: facet_var
       title: Facet Variable
       type: Variable
+      default: NULL
       description: "Variable for creating plot facets"
 
     - name: facet_type

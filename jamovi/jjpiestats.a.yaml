@@ -55,6 +55,7 @@ options:
     - name: dep
       title: Dependent Variable
       type: Variable
+      default: NULL
       suggested: [ ordinal, nominal ]
       permitted: [ factor ]
       description:

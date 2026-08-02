@@ -13,8 +13,8 @@ effectsizeOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             measures_hedges_g = TRUE,
             measures_glass_delta = FALSE,
             testValue = 0,
-            group1Value = NULL,
-            group2Value = NULL,
+            group1Value = "",
+            group2Value = "",
             ciWidth = 95,
             interpretation = TRUE,
             descriptives = TRUE,
@@ -109,10 +109,12 @@ effectsizeOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 default=0)
             private$..group1Value <- jmvcore::OptionString$new(
                 "group1Value",
-                group1Value)
+                group1Value,
+                default="")
             private$..group2Value <- jmvcore::OptionString$new(
                 "group2Value",
-                group2Value)
+                group2Value,
+                default="")
             private$..ciWidth <- jmvcore::OptionNumber$new(
                 "ciWidth",
                 ciWidth,
@@ -1242,8 +1244,8 @@ effectsize <- function(
     measures_hedges_g = TRUE,
     measures_glass_delta = FALSE,
     testValue = 0,
-    group1Value,
-    group2Value,
+    group1Value = "",
+    group2Value = "",
     ciWidth = 95,
     interpretation = TRUE,
     descriptives = TRUE,

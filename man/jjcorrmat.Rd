@@ -7,7 +7,7 @@
 jjcorrmat(
   data,
   dep,
-  grvar,
+  grvar = NULL,
   typestatistics = "parametric",
   matrixtype = "upper",
   matrixmethod = "square",

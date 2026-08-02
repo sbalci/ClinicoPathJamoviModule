@@ -110,6 +110,7 @@ options:
     - name: degreesOfFreedom
       title: Degrees of Freedom (Optional)
       type: Integer
+      default: 0
       description: >
         Degrees of freedom for t-distribution. If provided, t-distribution will be used
         for confidence intervals and p-values instead of normal approximation.

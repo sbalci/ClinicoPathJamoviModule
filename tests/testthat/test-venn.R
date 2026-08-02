@@ -75,7 +75,9 @@ test_that("venn requires minimum variables", {
                  var6 = NULL,
                  var6true = NULL,
                  var7 = NULL,
-                 var7true = NULL))
+                 var7true = NULL,
+                 var1true = NULL,
+                 var2true = NULL))
   expect_error(venn(data = mtcars, var1 = "vs",
                  var3 = NULL,
                  var3true = NULL,
@@ -86,7 +88,9 @@ test_that("venn requires minimum variables", {
                  var6 = NULL,
                  var6true = NULL,
                  var7 = NULL,
-                 var7true = NULL))
+                 var7true = NULL,
+                 var1true = NULL,
+                 var2true = NULL))
   expect_error(venn(data = mtcars, var1 = "vs", var1true = "1",
                  var3 = NULL,
                  var3true = NULL,
@@ -97,7 +101,8 @@ test_that("venn requires minimum variables", {
                  var6 = NULL,
                  var6true = NULL,
                  var7 = NULL,
-                 var7true = NULL))
+                 var7true = NULL,
+                 var2true = NULL))
 })
 
 test_that("venn handles factor conversion", {

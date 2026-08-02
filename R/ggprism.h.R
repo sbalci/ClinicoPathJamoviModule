@@ -62,6 +62,7 @@ ggprismOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             private$..group_var <- jmvcore::OptionVariable$new(
                 "group_var",
                 group_var,
+                default=NULL,
                 suggested=list(
                     "nominal",
                     "ordinal"),
@@ -71,6 +72,7 @@ ggprismOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             private$..facet_var <- jmvcore::OptionVariable$new(
                 "facet_var",
                 facet_var,
+                default=NULL,
                 suggested=list(
                     "nominal",
                     "ordinal"),
@@ -626,8 +628,8 @@ ggprism <- function(
     data,
     x_var,
     y_var,
-    group_var,
-    facet_var,
+    group_var = NULL,
+    facet_var = NULL,
     plot_type = "violin",
     prism_theme = "default",
     prism_palette = "floral",

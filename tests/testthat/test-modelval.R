@@ -27,7 +27,8 @@ test_that("modelval works with basic inputs", {
       validationType = 'general',
       calibrationGroups = 10,
       showNetBenefit = FALSE,
-      showFlexibleCalibration = FALSE
+      showFlexibleCalibration = FALSE,
+      outcomePositive = NULL
     )
   })
   
@@ -59,7 +60,8 @@ test_that("modelval returns results object", {
     data = data,
     outcome = 'out',
     predicted = 'pred',
-    subgroup = NULL
+    subgroup = NULL,
+    outcomePositive = NULL
   )
   
   expect_true(inherits(result, "modelvalResults"))

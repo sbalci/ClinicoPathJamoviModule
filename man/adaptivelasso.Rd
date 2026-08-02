@@ -11,7 +11,7 @@ adaptivelasso(
   event_level,
   censor_level,
   predictors,
-  strata,
+  strata = NULL,
   suitabilityCheck = TRUE,
   weight_method = "ridge",
   alpha = 1,

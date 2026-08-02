@@ -46,7 +46,8 @@ jforestmodelOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
                     "ordinal"))
             private$..predictor_vars <- jmvcore::OptionVariables$new(
                 "predictor_vars",
-                predictor_vars)
+                predictor_vars,
+                default=NULL)
             private$..model_type <- jmvcore::OptionList$new(
                 "model_type",
                 model_type,
@@ -59,6 +60,7 @@ jforestmodelOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
             private$..time_var <- jmvcore::OptionVariable$new(
                 "time_var",
                 time_var,
+                default=NULL,
                 suggested=list(
                     "continuous"),
                 permitted=list(
@@ -66,6 +68,7 @@ jforestmodelOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
             private$..event_var <- jmvcore::OptionVariable$new(
                 "event_var",
                 event_var,
+                default=NULL,
                 suggested=list(
                     "nominal",
                     "ordinal"),
@@ -105,7 +108,8 @@ jforestmodelOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
                 default=TRUE)
             private$..covariates <- jmvcore::OptionVariables$new(
                 "covariates",
-                covariates)
+                covariates,
+                default=NULL)
             private$..sort_variables <- jmvcore::OptionList$new(
                 "sort_variables",
                 sort_variables,
@@ -457,17 +461,17 @@ jforestmodelBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 jforestmodel <- function(
     data,
     dependent_var,
-    predictor_vars,
+    predictor_vars = NULL,
     model_type = "lm",
-    time_var,
-    event_var,
+    time_var = NULL,
+    event_var = NULL,
     family = "binomial",
     exponentiate = FALSE,
     show_p_values = TRUE,
     show_confidence_intervals = TRUE,
     confidence_level = 0.95,
     factor_separate_line = TRUE,
-    covariates,
+    covariates = NULL,
     sort_variables = "none",
     plot_title = "Forest Plot",
     x_axis_label = "",

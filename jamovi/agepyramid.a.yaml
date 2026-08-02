@@ -18,6 +18,7 @@ options:
     - name: age
       title: Age
       type: Variable
+      default: NULL
       suggested: [ continuous ]
       permitted: [ numeric, factor ]
       description:
@@ -31,6 +32,7 @@ options:
     - name: gender
       title: Gender
       type: Variable
+      default: NULL
       suggested: [ ordinal, nominal ]
       permitted: [ factor ]
       description:

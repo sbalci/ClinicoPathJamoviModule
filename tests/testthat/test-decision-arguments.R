@@ -14,7 +14,9 @@ test_that("decision respects pp parameter", {
     newtest = "NewTest",
     testPositive = "Positive",
     pp = TRUE,
-    pprob = 0.10
+    pprob = 0.10,
+    goldNegative = NULL,
+    testNegative = NULL
   )
   expect_no_error(result_custom)
 
@@ -25,7 +27,9 @@ test_that("decision respects pp parameter", {
     goldPositive = "Positive",
     newtest = "NewTest",
     testPositive = "Positive",
-    pp = FALSE
+    pp = FALSE,
+    goldNegative = NULL,
+    testNegative = NULL
   )
   expect_no_error(result_default)
 })
@@ -39,7 +43,9 @@ test_that("decision respects different prevalence values", {
     newtest = "NewTest",
     testPositive = "Positive",
     pp = TRUE,
-    pprob = 0.05
+    pprob = 0.05,
+    goldNegative = NULL,
+    testNegative = NULL
   )
   expect_no_error(result_low)
 
@@ -51,7 +57,9 @@ test_that("decision respects different prevalence values", {
     newtest = "NewTest",
     testPositive = "Positive",
     pp = TRUE,
-    pprob = 0.70
+    pprob = 0.70,
+    goldNegative = NULL,
+    testNegative = NULL
   )
   expect_no_error(result_high)
 })
@@ -64,7 +72,9 @@ test_that("decision respects ci parameter", {
     goldPositive = "Positive",
     newtest = "NewTest",
     testPositive = "Positive",
-    ci = TRUE
+    ci = TRUE,
+    goldNegative = NULL,
+    testNegative = NULL
   )
   expect_no_error(result_ci)
 
@@ -75,7 +85,9 @@ test_that("decision respects ci parameter", {
     goldPositive = "Positive",
     newtest = "NewTest",
     testPositive = "Positive",
-    ci = FALSE
+    ci = FALSE,
+    goldNegative = NULL,
+    testNegative = NULL
   )
   expect_no_error(result_no_ci)
 })
@@ -88,7 +100,9 @@ test_that("decision respects od parameter", {
     goldPositive = "Positive",
     newtest = "NewTest",
     testPositive = "Positive",
-    od = TRUE
+    od = TRUE,
+    goldNegative = NULL,
+    testNegative = NULL
   )
   expect_no_error(result_od)
 
@@ -99,7 +113,9 @@ test_that("decision respects od parameter", {
     goldPositive = "Positive",
     newtest = "NewTest",
     testPositive = "Positive",
-    od = FALSE
+    od = FALSE,
+    goldNegative = NULL,
+    testNegative = NULL
   )
   expect_no_error(result_no_od)
 })
@@ -111,7 +127,9 @@ test_that("decision respects fnote parameter", {
     goldPositive = "Positive",
     newtest = "NewTest",
     testPositive = "Positive",
-    fnote = TRUE
+    fnote = TRUE,
+    goldNegative = NULL,
+    testNegative = NULL
   )
   expect_no_error(result)
 })
@@ -123,7 +141,9 @@ test_that("decision respects fagan parameter", {
     goldPositive = "Positive",
     newtest = "NewTest",
     testPositive = "Positive",
-    fagan = TRUE
+    fagan = TRUE,
+    goldNegative = NULL,
+    testNegative = NULL
   )
   expect_no_error(result)
 })
@@ -135,7 +155,9 @@ test_that("decision respects showNaturalLanguage parameter", {
     goldPositive = "Positive",
     newtest = "NewTest",
     testPositive = "Positive",
-    showNaturalLanguage = TRUE
+    showNaturalLanguage = TRUE,
+    goldNegative = NULL,
+    testNegative = NULL
   )
   expect_no_error(result)
 })
@@ -147,7 +169,9 @@ test_that("decision respects showClinicalInterpretation parameter", {
     goldPositive = "Positive",
     newtest = "NewTest",
     testPositive = "Positive",
-    showClinicalInterpretation = TRUE
+    showClinicalInterpretation = TRUE,
+    goldNegative = NULL,
+    testNegative = NULL
   )
   expect_no_error(result)
 })
@@ -160,7 +184,9 @@ test_that("decision respects showMisclassified with maxCasesShow", {
     newtest = "NewTest",
     testPositive = "Positive",
     showMisclassified = TRUE,
-    maxCasesShow = 20
+    maxCasesShow = 20,
+    goldNegative = NULL,
+    testNegative = NULL
   )
   expect_no_error(result)
 })
@@ -179,7 +205,9 @@ test_that("decision handles all options combined", {
     fnote = TRUE,
     fagan = TRUE,
     showNaturalLanguage = TRUE,
-    showClinicalInterpretation = TRUE
+    showClinicalInterpretation = TRUE,
+    goldNegative = NULL,
+    testNegative = NULL
   )
   expect_no_error(result)
 })

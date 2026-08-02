@@ -48,7 +48,8 @@ test_that('LNR rejects invalid node counts gracefully', {
   data <- data.frame(positive = c(3, 1), examined = c(0, 0))   # examined = 0
   expect_no_error({
     model <- lymphnoderatio(data = data, positiveNodes = 'positive',
-                            examinedNodes = 'examined')
+                            examinedNodes = 'examined',
+                            eventLevel = NULL)
   })
   expect_true(inherits(model, 'jmvcoreClass'))
 })

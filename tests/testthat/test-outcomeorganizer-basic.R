@@ -14,7 +14,13 @@ test_that("outcomeorganizer creates proper class", {
   result <- outcomeorganizer(
     data = outcomeorganizer_os,
     outcome = "vital_status",
-    time = "time_months"
+    time = "time_months",
+    outcomeLevel = NULL,
+    recurrenceLevel = NULL,
+    dod = NULL,
+    dooc = NULL,
+    awd = NULL,
+    awod = NULL
   )
   expect_s3_class(result, "outcomeorganizerClass")
 })
@@ -25,7 +31,13 @@ test_that("outcomeorganizer handles overall survival (OS)", {
     outcome = "vital_status",
     time = "time_months",
     dead = "Dead",
-    alive = "Alive"
+    alive = "Alive",
+    outcomeLevel = NULL,
+    recurrenceLevel = NULL,
+    dod = NULL,
+    dooc = NULL,
+    awd = NULL,
+    awod = NULL
   )
   expect_s3_class(result, "outcomeorganizerClass")
   expect_true(length(result$results) > 0)
@@ -35,7 +47,13 @@ test_that("outcomeorganizer handles competing risks data", {
   result <- outcomeorganizer(
     data = outcomeorganizer_compete,
     outcome = "outcome_status",
-    time = "time"
+    time = "time",
+    outcomeLevel = NULL,
+    recurrenceLevel = NULL,
+    dod = NULL,
+    dooc = NULL,
+    awd = NULL,
+    awod = NULL
   )
   expect_s3_class(result, "outcomeorganizerClass")
 })
@@ -44,7 +62,13 @@ test_that("outcomeorganizer handles progression-free survival (PFS)", {
   result <- outcomeorganizer(
     data = outcomeorganizer_pfs,
     outcome = "progression",
-    time = "time_months"
+    time = "time_months",
+    outcomeLevel = NULL,
+    recurrenceLevel = NULL,
+    dod = NULL,
+    dooc = NULL,
+    awd = NULL,
+    awod = NULL
   )
   expect_s3_class(result, "outcomeorganizerClass")
 })
@@ -53,7 +77,13 @@ test_that("outcomeorganizer handles recurrence-free survival (RFS)", {
   result <- outcomeorganizer(
     data = outcomeorganizer_rfs,
     outcome = "recurrence",
-    time = "fu_time"
+    time = "fu_time",
+    outcomeLevel = NULL,
+    recurrenceLevel = NULL,
+    dod = NULL,
+    dooc = NULL,
+    awd = NULL,
+    awod = NULL
   )
   expect_s3_class(result, "outcomeorganizerClass")
 })
@@ -62,7 +92,13 @@ test_that("outcomeorganizer handles cause-specific survival", {
   result <- outcomeorganizer(
     data = outcomeorganizer_causespecific,
     outcome = "death_status",
-    time = "time"
+    time = "time",
+    outcomeLevel = NULL,
+    recurrenceLevel = NULL,
+    dod = NULL,
+    dooc = NULL,
+    awd = NULL,
+    awod = NULL
   )
   expect_s3_class(result, "outcomeorganizerClass")
 })
@@ -71,7 +107,13 @@ test_that("outcomeorganizer handles multistate models", {
   result <- outcomeorganizer(
     data = outcomeorganizer_multistate,
     outcome = "current_state",
-    time = "time"
+    time = "time",
+    outcomeLevel = NULL,
+    recurrenceLevel = NULL,
+    dod = NULL,
+    dooc = NULL,
+    awd = NULL,
+    awod = NULL
   )
   expect_s3_class(result, "outcomeorganizerClass")
 })
@@ -80,7 +122,13 @@ test_that("outcomeorganizer handles disease-free survival (DFS)", {
   result <- outcomeorganizer(
     data = outcomeorganizer_dfs,
     outcome = "status",
-    time = "time_years"
+    time = "time_years",
+    outcomeLevel = NULL,
+    recurrenceLevel = NULL,
+    dod = NULL,
+    dooc = NULL,
+    awd = NULL,
+    awod = NULL
   )
   expect_s3_class(result, "outcomeorganizerClass")
 })
@@ -90,7 +138,13 @@ test_that("outcomeorganizer output table option works", {
     data = outcomeorganizer_os,
     outcome = "vital_status",
     time = "time_months",
-    outputTable = TRUE
+    outputTable = TRUE,
+    outcomeLevel = NULL,
+    recurrenceLevel = NULL,
+    dod = NULL,
+    dooc = NULL,
+    awd = NULL,
+    awod = NULL
   )
   expect_s3_class(result, "outcomeorganizerClass")
   expect_true(!is.null(result$results$outputTable))
@@ -101,7 +155,13 @@ test_that("outcomeorganizer diagnostics option works", {
     data = outcomeorganizer_os,
     outcome = "vital_status",
     time = "time_months",
-    diagnostics = TRUE
+    diagnostics = TRUE,
+    outcomeLevel = NULL,
+    recurrenceLevel = NULL,
+    dod = NULL,
+    dooc = NULL,
+    awd = NULL,
+    awod = NULL
   )
   expect_s3_class(result, "outcomeorganizerClass")
   expect_true(!is.null(result$results$diagnosticsTable))
@@ -113,7 +173,13 @@ test_that("outcomeorganizer handles multiple covariates", {
     outcome = "vital_status",
     time = "time_months",
     dead = "Dead",
-    alive = "Alive"
+    alive = "Alive",
+    outcomeLevel = NULL,
+    recurrenceLevel = NULL,
+    dod = NULL,
+    dooc = NULL,
+    awd = NULL,
+    awod = NULL
   )
   expect_s3_class(result, "outcomeorganizerClass")
   expect_true(nrow(outcomeorganizer_os) == 150)
@@ -123,7 +189,13 @@ test_that("outcomeorganizer handles different time units", {
   result <- outcomeorganizer(
     data = outcomeorganizer_dfs,
     outcome = "status",
-    time = "time_years"
+    time = "time_years",
+    outcomeLevel = NULL,
+    recurrenceLevel = NULL,
+    dod = NULL,
+    dooc = NULL,
+    awd = NULL,
+    awod = NULL
   )
   expect_s3_class(result, "outcomeorganizerClass")
 })
@@ -132,7 +204,13 @@ test_that("outcomeorganizer handles complex outcome categories", {
   result <- outcomeorganizer(
     data = outcomeorganizer_compete,
     outcome = "outcome_status",
-    time = "time"
+    time = "time",
+    outcomeLevel = NULL,
+    recurrenceLevel = NULL,
+    dod = NULL,
+    dooc = NULL,
+    awd = NULL,
+    awod = NULL
   )
   expect_s3_class(result, "outcomeorganizerClass")
   # Check that data has 4 outcome categories

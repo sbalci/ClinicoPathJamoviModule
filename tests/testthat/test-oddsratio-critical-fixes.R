@@ -34,7 +34,8 @@ test_that("Outcome releveling: Dead as positive (standard coding)", {
     data = test_data,
     explanatory = "treatment",
     outcome = "outcome",
-    outcomeLevel = "Dead"
+    outcomeLevel = "Dead",
+    predictorLevel = NULL
   )
 
   # The odds ratio for Drug vs Control should be > 1 (Drug has higher mortality)
@@ -79,7 +80,8 @@ test_that("Outcome releveling: Dead as positive (reversed coding)", {
     data = test_data,
     explanatory = "treatment",
     outcome = "outcome",
-    outcomeLevel = "Dead"
+    outcomeLevel = "Dead",
+    predictorLevel = NULL
   )
 
   expect_s3_class(result, "oddsratioResults")
@@ -121,7 +123,8 @@ test_that("Outcome releveling: Alive as positive (inverted interpretation)", {
     data = test_data,
     explanatory = "treatment",
     outcome = "outcome",
-    outcomeLevel = "Alive"  # Modeling survival instead of death
+    outcomeLevel = "Alive",  # Modeling survival instead of death
+    predictorLevel = NULL
   )
 
   expect_s3_class(result, "oddsratioResults")
@@ -165,7 +168,8 @@ test_that("Outcome releveling: Event vs No Event (standard epidemiology)", {
     data = test_data,
     explanatory = "exposure",
     outcome = "disease",
-    outcomeLevel = "Event"
+    outcomeLevel = "Event",
+    predictorLevel = NULL
   )
 
   expect_s3_class(result, "oddsratioResults")
@@ -400,7 +404,8 @@ test_that("Edge case: Single binary predictor", {
     data = test_data,
     explanatory = "treatment",
     outcome = "outcome",
-    outcomeLevel = "Dead"
+    outcomeLevel = "Dead",
+    predictorLevel = NULL
   )
 
   expect_s3_class(result, "oddsratioResults")
@@ -431,7 +436,8 @@ test_that("Edge case: Multiple predictors", {
     data = test_data,
     explanatory = c("treatment", "smoking"),
     outcome = "outcome",
-    outcomeLevel = "Dead"
+    outcomeLevel = "Dead",
+    predictorLevel = NULL
   )
 
   expect_s3_class(result, "oddsratioResults")
@@ -450,7 +456,8 @@ test_that("Edge case: Continuous predictor (should work with logistic regression
     data = test_data,
     explanatory = "age",
     outcome = "outcome",
-    outcomeLevel = "Event"
+    outcomeLevel = "Event",
+    predictorLevel = NULL
   )
 
   expect_s3_class(result, "oddsratioResults")

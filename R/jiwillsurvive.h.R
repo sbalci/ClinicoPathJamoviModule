@@ -51,6 +51,7 @@ jiwillsurviveOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
             private$..time_var <- jmvcore::OptionVariable$new(
                 "time_var",
                 time_var,
+                default=NULL,
                 suggested=list(
                     "continuous"),
                 permitted=list(
@@ -58,6 +59,7 @@ jiwillsurviveOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
             private$..event_var <- jmvcore::OptionVariable$new(
                 "event_var",
                 event_var,
+                default=NULL,
                 suggested=list(
                     "nominal",
                     "ordinal"),
@@ -67,6 +69,7 @@ jiwillsurviveOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
             private$..group_var <- jmvcore::OptionVariable$new(
                 "group_var",
                 group_var,
+                default=NULL,
                 suggested=list(
                     "nominal",
                     "ordinal"),
@@ -75,6 +78,7 @@ jiwillsurviveOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
             private$..start_date_var <- jmvcore::OptionVariable$new(
                 "start_date_var",
                 start_date_var,
+                default=NULL,
                 suggested=list(
                     "continuous"),
                 permitted=list(
@@ -82,6 +86,7 @@ jiwillsurviveOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
             private$..end_date_var <- jmvcore::OptionVariable$new(
                 "end_date_var",
                 end_date_var,
+                default=NULL,
                 suggested=list(
                     "continuous"),
                 permitted=list(
@@ -516,11 +521,11 @@ jiwillsurviveBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 jiwillsurvive <- function(
     data,
     analysis_type = "survival_model",
-    time_var,
-    event_var,
-    group_var,
-    start_date_var,
-    end_date_var,
+    time_var = NULL,
+    event_var = NULL,
+    group_var = NULL,
+    start_date_var = NULL,
+    end_date_var = NULL,
     derive_followup = FALSE,
     followup_units = "days",
     confidence_level = 0.95,

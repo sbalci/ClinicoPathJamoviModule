@@ -212,6 +212,7 @@ options:
     - name: psModel
       title: Propensity Score Model
       type: String
+      default: ""
       description:
           R: >
             Formula for propensity score model (for IPCW method)

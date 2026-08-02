@@ -18,7 +18,8 @@ test_that("decisioncompare respects prior probability parameter", {
     test2 = "Test2",
     test2Positive = "Positive",
     pp = TRUE,
-    pprob = 0.15
+    pprob = 0.15,
+    test3Positive = NULL
   )
   expect_s3_class(result_custom, "decisioncompareClass")
 
@@ -31,7 +32,8 @@ test_that("decisioncompare respects prior probability parameter", {
     test1Positive = "Positive",
     test2 = "Test2",
     test2Positive = "Positive",
-    pp = FALSE
+    pp = FALSE,
+    test3Positive = NULL
   )
   expect_s3_class(result_default, "decisioncompareClass")
 })
@@ -47,7 +49,8 @@ test_that("decisioncompare respects different prevalence values", {
     test2 = "Test2",
     test2Positive = "Positive",
     pp = TRUE,
-    pprob = 0.05
+    pprob = 0.05,
+    test3Positive = NULL
   )
   expect_no_error(result_screen)
 
@@ -61,7 +64,8 @@ test_that("decisioncompare respects different prevalence values", {
     test2 = "Test2",
     test2Positive = "Positive",
     pp = TRUE,
-    pprob = 0.60
+    pprob = 0.60,
+    test3Positive = NULL
   )
   expect_no_error(result_clinical)
 })
@@ -76,7 +80,8 @@ test_that("decisioncompare respects ci parameter", {
     test1Positive = "Positive",
     test2 = "Test2",
     test2Positive = "Positive",
-    ci = TRUE
+    ci = TRUE,
+    test3Positive = NULL
   )
   expect_no_error(result_ci)
 
@@ -89,7 +94,8 @@ test_that("decisioncompare respects ci parameter", {
     test1Positive = "Positive",
     test2 = "Test2",
     test2Positive = "Positive",
-    ci = FALSE
+    ci = FALSE,
+    test3Positive = NULL
   )
   expect_no_error(result_no_ci)
 })
@@ -104,7 +110,8 @@ test_that("decisioncompare respects plot parameter", {
     test1Positive = "Positive",
     test2 = "Test2",
     test2Positive = "Positive",
-    plot = TRUE
+    plot = TRUE,
+    test3Positive = NULL
   )
   expect_no_error(result_plot)
 
@@ -117,7 +124,8 @@ test_that("decisioncompare respects plot parameter", {
     test1Positive = "Positive",
     test2 = "Test2",
     test2Positive = "Positive",
-    plot = FALSE
+    plot = FALSE,
+    test3Positive = NULL
   )
   expect_no_error(result_no_plot)
 })
@@ -164,7 +172,8 @@ test_that("decisioncompare respects statComp parameter", {
     test1Positive = "Positive",
     test2 = "Test2",
     test2Positive = "Positive",
-    statComp = TRUE
+    statComp = TRUE,
+    test3Positive = NULL
   )
   expect_no_error(result_stat)
 
@@ -177,7 +186,8 @@ test_that("decisioncompare respects statComp parameter", {
     test1Positive = "Positive",
     test2 = "Test2",
     test2Positive = "Positive",
-    statComp = FALSE
+    statComp = FALSE,
+    test3Positive = NULL
   )
   expect_no_error(result_no_stat)
 })
@@ -192,7 +202,8 @@ test_that("decisioncompare respects excludeIndeterminate parameter", {
     test1Positive = "Positive",
     test2 = "Test2",
     test2Positive = "Positive",
-    excludeIndeterminate = FALSE
+    excludeIndeterminate = FALSE,
+    test3Positive = NULL
   )
   expect_s3_class(result_include, "decisioncompareClass")
 
@@ -205,7 +216,8 @@ test_that("decisioncompare respects excludeIndeterminate parameter", {
     test1Positive = "Positive",
     test2 = "Test2",
     test2Positive = "Positive",
-    excludeIndeterminate = TRUE
+    excludeIndeterminate = TRUE,
+    test3Positive = NULL
   )
   expect_s3_class(result_exclude, "decisioncompareClass")
 })
@@ -220,7 +232,8 @@ test_that("decisioncompare respects od parameter", {
     test1Positive = "Positive",
     test2 = "Test2",
     test2Positive = "Positive",
-    od = TRUE
+    od = TRUE,
+    test3Positive = NULL
   )
   expect_no_error(result_od)
 
@@ -233,7 +246,8 @@ test_that("decisioncompare respects od parameter", {
     test1Positive = "Positive",
     test2 = "Test2",
     test2Positive = "Positive",
-    od = FALSE
+    od = FALSE,
+    test3Positive = NULL
   )
   expect_no_error(result_no_od)
 })

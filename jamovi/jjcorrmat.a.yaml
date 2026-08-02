@@ -73,6 +73,7 @@ options:
     - name: grvar
       title: 'Split By (Optional)'
       type: Variable
+      default: NULL
       suggested: [ ordinal, nominal ]
       permitted: [ factor ]
       description:

@@ -41,6 +41,7 @@ options:
     - name: gold
       title: Gold Standard (Reference Test)
       type: Variable
+      default: NULL
       suggested: [ nominal ]
       permitted: [ factor ]
       description:
@@ -63,6 +64,7 @@ options:
     - name: test1
       title: Test 1 (Required)
       type: Variable
+      default: NULL
       suggested: [ nominal ]
       permitted: [ factor ]
       description:

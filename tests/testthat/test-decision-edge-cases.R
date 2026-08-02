@@ -17,7 +17,9 @@ test_that("decision handles small datasets", {
     gold = "GoldStandard",
     goldPositive = "Positive",
     newtest = "NewTest",
-    testPositive = "Positive"
+    testPositive = "Positive",
+    goldNegative = NULL,
+    testNegative = NULL
   )
   expect_s3_class(result, "decisionClass")
   expect_true(nrow(decision_small) == 30)
@@ -29,7 +31,9 @@ test_that("decision handles large datasets efficiently", {
     gold = "GoldStandard",
     goldPositive = "Positive",
     newtest = "NewTest",
-    testPositive = "Positive"
+    testPositive = "Positive",
+    goldNegative = NULL,
+    testNegative = NULL
   )
   expect_s3_class(result, "decisionClass")
   expect_true(nrow(decision_large) == 500)
@@ -41,7 +45,9 @@ test_that("decision handles perfect test performance", {
     gold = "GoldStandard",
     goldPositive = "Positive",
     newtest = "PerfectTest",
-    testPositive = "Positive"
+    testPositive = "Positive",
+    goldNegative = NULL,
+    testNegative = NULL
   )
   expect_s3_class(result, "decisionClass")
 })
@@ -52,7 +58,9 @@ test_that("decision handles poor test performance", {
     gold = "GoldStandard",
     goldPositive = "Positive",
     newtest = "PoorTest",
-    testPositive = "Positive"
+    testPositive = "Positive",
+    goldNegative = NULL,
+    testNegative = NULL
   )
   expect_s3_class(result, "decisionClass")
 })
@@ -63,7 +71,9 @@ test_that("decision handles rare disease prevalence", {
     gold = "GoldStandard",
     goldPositive = "Positive",
     newtest = "NewTest",
-    testPositive = "Positive"
+    testPositive = "Positive",
+    goldNegative = NULL,
+    testNegative = NULL
   )
   expect_s3_class(result, "decisionClass")
   # Check prevalence is low
@@ -77,7 +87,9 @@ test_that("decision handles common disease prevalence", {
     gold = "GoldStandard",
     goldPositive = "Positive",
     newtest = "NewTest",
-    testPositive = "Positive"
+    testPositive = "Positive",
+    goldNegative = NULL,
+    testNegative = NULL
   )
   expect_s3_class(result, "decisionClass")
   # Check prevalence is high
@@ -91,7 +103,9 @@ test_that("decision handles missing data", {
     gold = "GoldStandard",
     goldPositive = "Positive",
     newtest = "NewTest",
-    testPositive = "Positive"
+    testPositive = "Positive",
+    goldNegative = NULL,
+    testNegative = NULL
   )
   expect_s3_class(result, "decisionClass")
   expect_true(any(is.na(decision_missing$GoldStandard)) ||
@@ -105,7 +119,9 @@ test_that("decision handles multilevel variables", {
     gold = "GoldStandard",
     goldPositive = "Positive",
     newtest = "NewTest",
-    testPositive = "Positive"
+    testPositive = "Positive",
+    goldNegative = NULL,
+    testNegative = NULL
   )
   expect_s3_class(result, "decisionClass")
 })
@@ -116,7 +132,10 @@ test_that("decision validates required arguments", {
     decision(
       data = decision_small,
       gold = "GoldStandard",
-      goldPositive = "Positive"
+      goldPositive = "Positive",
+      testPositive = NULL,
+      goldNegative = NULL,
+      testNegative = NULL
     ),
     regexp = "newtest|required|missing",
     ignore.case = TRUE
@@ -127,7 +146,10 @@ test_that("decision validates required arguments", {
     decision(
       data = decision_small,
       newtest = "NewTest",
-      testPositive = "Positive"
+      testPositive = "Positive",
+      goldPositive = NULL,
+      goldNegative = NULL,
+      testNegative = NULL
     ),
     regexp = "gold|required|missing",
     ignore.case = TRUE
@@ -144,7 +166,9 @@ test_that("decision validates prevalence bounds", {
       newtest = "NewTest",
       testPositive = "Positive",
       pp = TRUE,
-      pprob = 0.0005  # Below minimum (0.001)
+      pprob = 0.0005,  # Below minimum (0.001)
+      goldNegative = NULL,
+      testNegative = NULL
     ),
     regexp = "prevalence|probability|0.001|0.999",
     ignore.case = TRUE
@@ -159,7 +183,9 @@ test_that("decision validates prevalence bounds", {
       newtest = "NewTest",
       testPositive = "Positive",
       pp = TRUE,
-      pprob = 1.0  # Above maximum (0.999)
+      pprob = 1.0,  # Above maximum (0.999)
+      goldNegative = NULL,
+      testNegative = NULL
     ),
     regexp = "prevalence|probability|0.001|0.999",
     ignore.case = TRUE
@@ -175,7 +201,9 @@ test_that("decision handles extreme prevalence values", {
     newtest = "NewTest",
     testPositive = "Positive",
     pp = TRUE,
-    pprob = 0.001
+    pprob = 0.001,
+    goldNegative = NULL,
+    testNegative = NULL
   )
   expect_no_error(result_low)
 
@@ -187,7 +215,9 @@ test_that("decision handles extreme prevalence values", {
     newtest = "NewTest",
     testPositive = "Positive",
     pp = TRUE,
-    pprob = 0.999
+    pprob = 0.999,
+    goldNegative = NULL,
+    testNegative = NULL
   )
   expect_no_error(result_high)
 })
@@ -201,7 +231,9 @@ test_that("decision handles maxCasesShow bounds", {
     newtest = "NewTest",
     testPositive = "Positive",
     showMisclassified = TRUE,
-    maxCasesShow = 10
+    maxCasesShow = 10,
+    goldNegative = NULL,
+    testNegative = NULL
   )
   expect_no_error(result_min)
 
@@ -213,7 +245,9 @@ test_that("decision handles maxCasesShow bounds", {
     newtest = "NewTest",
     testPositive = "Positive",
     showMisclassified = TRUE,
-    maxCasesShow = 500
+    maxCasesShow = 500,
+    goldNegative = NULL,
+    testNegative = NULL
   )
   expect_no_error(result_max)
 })
@@ -231,7 +265,9 @@ test_that("decision handles all output options with small sample", {
     fagan = TRUE,
     showNaturalLanguage = TRUE,
     showClinicalInterpretation = TRUE,
-    showMisclassified = TRUE
+    showMisclassified = TRUE,
+    goldNegative = NULL,
+    testNegative = NULL
   )
   expect_s3_class(result, "decisionClass")
 })

@@ -20,7 +20,8 @@ test_that("decisioncompare handles small datasets", {
     test1 = "Test1",
     test1Positive = "Positive",
     test2 = "Test2",
-    test2Positive = "Positive"
+    test2Positive = "Positive",
+    test3Positive = NULL
   )
   expect_s3_class(result, "decisioncompareClass")
   expect_true(nrow(decisioncompare_small) == 30)
@@ -50,7 +51,8 @@ test_that("decisioncompare handles perfect test performance", {
     test1 = "PerfectTest",
     test1Positive = "Positive",
     test2 = "ImperfectTest",
-    test2Positive = "Positive"
+    test2Positive = "Positive",
+    test3Positive = NULL
   )
   expect_s3_class(result, "decisioncompareClass")
 })
@@ -63,7 +65,8 @@ test_that("decisioncompare handles poor test performance", {
     test1 = "PoorTest1",
     test1Positive = "Positive",
     test2 = "PoorTest2",
-    test2Positive = "Positive"
+    test2Positive = "Positive",
+    test3Positive = NULL
   )
   expect_s3_class(result, "decisioncompareClass")
 })
@@ -76,7 +79,8 @@ test_that("decisioncompare handles rare disease prevalence", {
     test1 = "Test1",
     test1Positive = "Positive",
     test2 = "Test2",
-    test2Positive = "Positive"
+    test2Positive = "Positive",
+    test3Positive = NULL
   )
   expect_s3_class(result, "decisioncompareClass")
   # Check prevalence is low
@@ -92,7 +96,8 @@ test_that("decisioncompare handles common disease prevalence", {
     test1 = "Test1",
     test1Positive = "Positive",
     test2 = "Test2",
-    test2Positive = "Positive"
+    test2Positive = "Positive",
+    test3Positive = NULL
   )
   expect_s3_class(result, "decisioncompareClass")
   # Check prevalence is high
@@ -108,7 +113,8 @@ test_that("decisioncompare handles identical tests", {
     test1 = "Test1",
     test1Positive = "Positive",
     test2 = "Test2",
-    test2Positive = "Positive"
+    test2Positive = "Positive",
+    test3Positive = NULL
   )
   # Tests are identical - should complete without error
   expect_s3_class(result, "decisioncompareClass")
@@ -141,7 +147,8 @@ test_that("decisioncompare handles indeterminate results", {
     test1Positive = "Positive",
     test2 = "Test2",
     test2Positive = "Positive",
-    excludeIndeterminate = FALSE
+    excludeIndeterminate = FALSE,
+    test3Positive = NULL
   )
   expect_s3_class(result_include, "decisioncompareClass")
 
@@ -154,7 +161,8 @@ test_that("decisioncompare handles indeterminate results", {
     test1Positive = "Positive",
     test2 = "Test2",
     test2Positive = "Positive",
-    excludeIndeterminate = TRUE
+    excludeIndeterminate = TRUE,
+    test3Positive = NULL
   )
   expect_s3_class(result_exclude, "decisioncompareClass")
 })
@@ -167,7 +175,9 @@ test_that("decisioncompare validates required arguments", {
       gold = "GoldStandard",
       goldPositive = "Positive",
       test1 = "Test1",
-      test1Positive = "Positive"
+      test1Positive = "Positive",
+      test2Positive = NULL,
+      test3Positive = NULL
     ),
     regexp = "test2|required|missing",
     ignore.case = TRUE
@@ -180,7 +190,9 @@ test_that("decisioncompare validates required arguments", {
       test1 = "Test1",
       test1Positive = "Positive",
       test2 = "Test2",
-      test2Positive = "Positive"
+      test2Positive = "Positive",
+      goldPositive = NULL,
+      test3Positive = NULL
     ),
     regexp = "gold|required|missing",
     ignore.case = TRUE
@@ -199,7 +211,8 @@ test_that("decisioncompare validates prevalence bounds", {
       test2 = "Test2",
       test2Positive = "Positive",
       pp = TRUE,
-      pprob = 0.0005  # Below minimum (0.001)
+      pprob = 0.0005,  # Below minimum (0.001)
+      test3Positive = NULL
     ),
     regexp = "prevalence|probability|0.001|0.999",
     ignore.case = TRUE
@@ -216,7 +229,8 @@ test_that("decisioncompare validates prevalence bounds", {
       test2 = "Test2",
       test2Positive = "Positive",
       pp = TRUE,
-      pprob = 1.0  # Above maximum (0.999)
+      pprob = 1.0,  # Above maximum (0.999)
+      test3Positive = NULL
     ),
     regexp = "prevalence|probability|0.001|0.999",
     ignore.case = TRUE
@@ -234,7 +248,8 @@ test_that("decisioncompare handles extreme prevalence values", {
     test2 = "Test2",
     test2Positive = "Positive",
     pp = TRUE,
-    pprob = 0.001
+    pprob = 0.001,
+    test3Positive = NULL
   )
   expect_no_error(result_low)
 
@@ -248,7 +263,8 @@ test_that("decisioncompare handles extreme prevalence values", {
     test2 = "Test2",
     test2Positive = "Positive",
     pp = TRUE,
-    pprob = 0.999
+    pprob = 0.999,
+    test3Positive = NULL
   )
   expect_no_error(result_high)
 })
@@ -265,7 +281,8 @@ test_that("decisioncompare handles all output options with small sample", {
     ci = TRUE,
     plot = TRUE,
     statComp = TRUE,
-    od = TRUE
+    od = TRUE,
+    test3Positive = NULL
   )
   expect_s3_class(result, "decisioncompareClass")
 })

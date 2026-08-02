@@ -48,7 +48,8 @@ test_that('modelperformance analysis works', {
     showROC = FALSE,
     showCalibration = FALSE,
     autoRecommend = TRUE,
-    recommendBy = 'aic'
+    recommendBy = 'aic',
+    outcomeLevel = NULL
     )
   })
 

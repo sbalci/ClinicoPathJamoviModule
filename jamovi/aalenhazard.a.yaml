@@ -120,6 +120,7 @@ options:
   - name: constant_effects
     title: Constant Effects Variables
     type: Variables
+    default: NULL
     suggested:
         - continuous
         - nominal

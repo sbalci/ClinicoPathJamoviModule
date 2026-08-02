@@ -44,6 +44,7 @@ residualcancerburdenOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6
             private$..d1 <- jmvcore::OptionVariable$new(
                 "d1",
                 d1,
+                default=NULL,
                 suggested=list(
                     "continuous"),
                 permitted=list(
@@ -51,6 +52,7 @@ residualcancerburdenOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6
             private$..d2 <- jmvcore::OptionVariable$new(
                 "d2",
                 d2,
+                default=NULL,
                 suggested=list(
                     "continuous"),
                 permitted=list(
@@ -58,6 +60,7 @@ residualcancerburdenOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6
             private$..cellularity <- jmvcore::OptionVariable$new(
                 "cellularity",
                 cellularity,
+                default=NULL,
                 suggested=list(
                     "continuous"),
                 permitted=list(
@@ -65,6 +68,7 @@ residualcancerburdenOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6
             private$..cis <- jmvcore::OptionVariable$new(
                 "cis",
                 cis,
+                default=NULL,
                 suggested=list(
                     "continuous"),
                 permitted=list(
@@ -72,6 +76,7 @@ residualcancerburdenOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6
             private$..positiveNodes <- jmvcore::OptionVariable$new(
                 "positiveNodes",
                 positiveNodes,
+                default=NULL,
                 suggested=list(
                     "continuous"),
                 permitted=list(
@@ -79,6 +84,7 @@ residualcancerburdenOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6
             private$..metSize <- jmvcore::OptionVariable$new(
                 "metSize",
                 metSize,
+                default=NULL,
                 suggested=list(
                     "continuous"),
                 permitted=list(
@@ -118,6 +124,7 @@ residualcancerburdenOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6
             private$..survivalTime <- jmvcore::OptionVariable$new(
                 "survivalTime",
                 survivalTime,
+                default=NULL,
                 suggested=list(
                     "continuous"),
                 permitted=list(
@@ -125,6 +132,7 @@ residualcancerburdenOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6
             private$..survivalStatus <- jmvcore::OptionVariable$new(
                 "survivalStatus",
                 survivalStatus,
+                default=NULL,
                 suggested=list(
                     "nominal"),
                 permitted=list(
@@ -506,20 +514,20 @@ residualcancerburdenBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R
 residualcancerburden <- function(
     data,
     inputMode = "data",
-    d1,
-    d2,
-    cellularity,
-    cis,
-    positiveNodes,
-    metSize,
+    d1 = NULL,
+    d2 = NULL,
+    cellularity = NULL,
+    cis = NULL,
+    positiveNodes = NULL,
+    metSize = NULL,
     mD1 = 20,
     mD2 = 15,
     mCellularity = 10,
     mCis = 0,
     mNodes = 0,
     mMetSize = 0,
-    survivalTime,
-    survivalStatus,
+    survivalTime = NULL,
+    survivalStatus = NULL,
     eventLevel,
     showDistribution = TRUE,
     showPlot = TRUE,

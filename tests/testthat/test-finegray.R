@@ -34,7 +34,9 @@ test_that('finegray analysis works', {
     cifConfInt = FALSE,
     cifConfLevel = 0.95,
     predictCovariatePattern = 'mean',
-    showInterpretation = TRUE
+    showInterpretation = TRUE,
+    eventOfInterest = NULL,
+    censorLevel = NULL
     )
   })
 

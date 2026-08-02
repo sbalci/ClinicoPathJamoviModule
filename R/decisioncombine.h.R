@@ -34,6 +34,7 @@ decisioncombineOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
             private$..gold <- jmvcore::OptionVariable$new(
                 "gold",
                 gold,
+                default=NULL,
                 suggested=list(
                     "nominal"),
                 permitted=list(
@@ -45,6 +46,7 @@ decisioncombineOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
             private$..test1 <- jmvcore::OptionVariable$new(
                 "test1",
                 test1,
+                default=NULL,
                 suggested=list(
                     "nominal"),
                 permitted=list(
@@ -750,9 +752,9 @@ decisioncombineBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
 #' @export
 decisioncombine <- function(
     data,
-    gold,
+    gold = NULL,
     goldPositive,
-    test1,
+    test1 = NULL,
     test1Positive,
     test2 = NULL,
     test2Positive,

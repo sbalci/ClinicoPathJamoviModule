@@ -68,7 +68,8 @@ test_that('ihcscoring analysis works', {
     language = 'english',
     colorblind_safe = TRUE,
     high_contrast = FALSE,
-    font_size = 'normal'
+    font_size = 'normal',
+    outcome_positive = NULL
     )
   })
 

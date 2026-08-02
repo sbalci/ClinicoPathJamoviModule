@@ -98,7 +98,7 @@ test_that("decisioncompare handles missing data gracefully", {
 })
 
 test_that("decisioncompare fails gracefully with invalid input", {
-  expect_error(decisioncompare(data = diagnostic_sample))
+  expect_error(decisioncompare(data = diagnostic_sample, goldPositive = NULL, test1Positive = NULL, test2Positive = NULL, test3Positive = NULL))
 })
 
 test_that("decisioncompare plotting functionality works", {

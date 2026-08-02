@@ -8,7 +8,7 @@ jjdotplotstats(
   data,
   dep,
   group,
-  grvar,
+  grvar = NULL,
   typestatistics = "parametric",
   effsizetype = "biased",
   centralityplotting = FALSE,

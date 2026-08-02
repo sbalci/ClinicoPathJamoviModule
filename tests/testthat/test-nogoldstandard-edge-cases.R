@@ -20,7 +20,10 @@ test_that("nogoldstandard handles small datasets", {
     test1 = "Test1",
     test1Positive = "Positive",
     test2 = "Test2",
-    test2Positive = "Positive"
+    test2Positive = "Positive",
+    test3Positive = NULL,
+    test4Positive = NULL,
+    test5Positive = NULL
   )
   expect_s3_class(result, "nogoldstandardClass")
   expect_true(nrow(nogoldstandard_small) == 30)
@@ -34,7 +37,9 @@ test_that("nogoldstandard handles large datasets efficiently", {
     test2 = "Test2",
     test2Positive = "Positive",
     test3 = "Test3",
-    test3Positive = "Positive"
+    test3Positive = "Positive",
+    test4Positive = NULL,
+    test5Positive = NULL
   )
   expect_s3_class(result, "nogoldstandardClass")
   expect_true(nrow(nogoldstandard_large) == 500)
@@ -47,7 +52,10 @@ test_that("nogoldstandard handles high agreement between tests", {
     test1Positive = "Positive",
     test2 = "Test2",
     test2Positive = "Positive",
-    method = "latent_class"
+    method = "latent_class",
+    test3Positive = NULL,
+    test4Positive = NULL,
+    test5Positive = NULL
   )
   expect_s3_class(result, "nogoldstandardClass")
 })
@@ -59,7 +67,10 @@ test_that("nogoldstandard handles low agreement between tests", {
     test1Positive = "Positive",
     test2 = "Test2",
     test2Positive = "Positive",
-    method = "latent_class"
+    method = "latent_class",
+    test3Positive = NULL,
+    test4Positive = NULL,
+    test5Positive = NULL
   )
   expect_s3_class(result, "nogoldstandardClass")
 })
@@ -70,7 +81,10 @@ test_that("nogoldstandard handles perfect agreement", {
     test1 = "Test1",
     test1Positive = "Positive",
     test2 = "Test2",
-    test2Positive = "Positive"
+    test2Positive = "Positive",
+    test3Positive = NULL,
+    test4Positive = NULL,
+    test5Positive = NULL
   )
   # Should complete, though may have warnings about perfect agreement
   expect_s3_class(result, "nogoldstandardClass")
@@ -85,7 +99,9 @@ test_that("nogoldstandard handles rare disease prevalence", {
     test2Positive = "Positive",
     test3 = "Test3",
     test3Positive = "Positive",
-    method = "latent_class"
+    method = "latent_class",
+    test4Positive = NULL,
+    test5Positive = NULL
   )
   expect_s3_class(result, "nogoldstandardClass")
 })
@@ -97,7 +113,10 @@ test_that("nogoldstandard handles common disease prevalence", {
     test1Positive = "Positive",
     test2 = "Test2",
     test2Positive = "Positive",
-    method = "latent_class"
+    method = "latent_class",
+    test3Positive = NULL,
+    test4Positive = NULL,
+    test5Positive = NULL
   )
   expect_s3_class(result, "nogoldstandardClass")
 })
@@ -110,7 +129,10 @@ test_that("nogoldstandard handles all positive results", {
       test1 = "Test1",
       test1Positive = "Positive",
       test2 = "Test2",
-      test2Positive = "Positive"
+      test2Positive = "Positive",
+      test3Positive = NULL,
+      test4Positive = NULL,
+      test5Positive = NULL
     )
   )
 })
@@ -123,7 +145,10 @@ test_that("nogoldstandard handles all negative results", {
       test1 = "Test1",
       test1Positive = "Positive",
       test2 = "Test2",
-      test2Positive = "Positive"
+      test2Positive = "Positive",
+      test3Positive = NULL,
+      test4Positive = NULL,
+      test5Positive = NULL
     )
   )
 })
@@ -135,7 +160,10 @@ test_that("nogoldstandard handles imbalanced test characteristics", {
     test1Positive = "Positive",
     test2 = "Specific_Test",
     test2Positive = "Positive",
-    method = "latent_class"
+    method = "latent_class",
+    test3Positive = NULL,
+    test4Positive = NULL,
+    test5Positive = NULL
   )
   expect_s3_class(result, "nogoldstandardClass")
 })
@@ -148,7 +176,9 @@ test_that("nogoldstandard handles missing data", {
     test2 = "Test2",
     test2Positive = "Positive",
     test3 = "Test3",
-    test3Positive = "Positive"
+    test3Positive = "Positive",
+    test4Positive = NULL,
+    test5Positive = NULL
   )
   # Should handle with warnings or listwise deletion
   expect_s3_class(result, "nogoldstandardClass")
@@ -163,7 +193,10 @@ test_that("nogoldstandard handles bootstrap with small nboot", {
     test2 = "Test2",
     test2Positive = "Positive",
     bootstrap = TRUE,
-    nboot = 100
+    nboot = 100,
+    test3Positive = NULL,
+    test4Positive = NULL,
+    test5Positive = NULL
   )
   expect_s3_class(result, "nogoldstandardClass")
 })
@@ -175,7 +208,10 @@ test_that("nogoldstandard handles different positive level specifications", {
     test1 = "Test1",
     test1Positive = "Negative",
     test2 = "Test2",
-    test2Positive = "Negative"
+    test2Positive = "Negative",
+    test3Positive = NULL,
+    test4Positive = NULL,
+    test5Positive = NULL
   )
   expect_condition(result)
 })
@@ -186,7 +222,11 @@ test_that("nogoldstandard validates required test arguments", {
     nogoldstandard(
       data = nogoldstandard_small,
       test1 = "Test1",
-      test1Positive = "Positive"
+      test1Positive = "Positive",
+      test2Positive = NULL,
+      test3Positive = NULL,
+      test4Positive = NULL,
+      test5Positive = NULL
     ),
     regexp = "test2|required|missing",
     ignore.case = TRUE
@@ -198,7 +238,11 @@ test_that("nogoldstandard validates required test arguments", {
       data = nogoldstandard_small,
       test1 = "Test1",
       test2 = "Test2",
-      test2Positive = "Positive"
+      test2Positive = "Positive",
+      test1Positive = NULL,
+      test3Positive = NULL,
+      test4Positive = NULL,
+      test5Positive = NULL
     ),
     regexp = "positive|level|required",
     ignore.case = TRUE

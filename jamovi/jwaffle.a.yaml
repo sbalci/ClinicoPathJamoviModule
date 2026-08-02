@@ -30,6 +30,7 @@ options:
     - name: groups
       title: Groups
       type: Variable
+      default: NULL
       suggested: [ nominal, ordinal ]
       permitted: [ factor ]
       description:

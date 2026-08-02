@@ -57,6 +57,7 @@ studydiagramOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
             private$..participant_id <- jmvcore::OptionVariable$new(
                 "participant_id",
                 participant_id,
+                default=NULL,
                 suggested=list(
                     "id"),
                 permitted=list(
@@ -65,6 +66,7 @@ studydiagramOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
             private$..step_excluded <- jmvcore::OptionVariable$new(
                 "step_excluded",
                 step_excluded,
+                default=NULL,
                 suggested=list(
                     "ordinal"),
                 permitted=list(
@@ -73,6 +75,7 @@ studydiagramOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
             private$..exclusion_reason_participant <- jmvcore::OptionVariable$new(
                 "exclusion_reason_participant",
                 exclusion_reason_participant,
+                default=NULL,
                 suggested=list(
                     "nominal"),
                 permitted=list(
@@ -80,6 +83,7 @@ studydiagramOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
             private$..step_name <- jmvcore::OptionVariable$new(
                 "step_name",
                 step_name,
+                default=NULL,
                 suggested=list(
                     "nominal"),
                 permitted=list(
@@ -87,6 +91,7 @@ studydiagramOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
             private$..participant_count <- jmvcore::OptionVariable$new(
                 "participant_count",
                 participant_count,
+                default=NULL,
                 suggested=list(
                     "continuous"),
                 permitted=list(
@@ -94,6 +99,7 @@ studydiagramOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
             private$..exclusion_reason_summary <- jmvcore::OptionVariable$new(
                 "exclusion_reason_summary",
                 exclusion_reason_summary,
+                default=NULL,
                 suggested=list(
                     "nominal"),
                 permitted=list(
@@ -101,6 +107,7 @@ studydiagramOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
             private$..participant_id_mapping <- jmvcore::OptionVariable$new(
                 "participant_id_mapping",
                 participant_id_mapping,
+                default=NULL,
                 suggested=list(
                     "id"),
                 permitted=list(
@@ -109,6 +116,7 @@ studydiagramOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
             private$..exclusion_reason_mapping <- jmvcore::OptionVariable$new(
                 "exclusion_reason_mapping",
                 exclusion_reason_mapping,
+                default=NULL,
                 suggested=list(
                     "nominal"),
                 permitted=list(
@@ -538,14 +546,14 @@ studydiagram <- function(
     data,
     data_format = "step_summary",
     diagram_type = "consort_standard",
-    participant_id,
-    step_excluded,
-    exclusion_reason_participant,
-    step_name,
-    participant_count,
-    exclusion_reason_summary,
-    participant_id_mapping,
-    exclusion_reason_mapping,
+    participant_id = NULL,
+    step_excluded = NULL,
+    exclusion_reason_participant = NULL,
+    step_name = NULL,
+    participant_count = NULL,
+    exclusion_reason_summary = NULL,
+    participant_id_mapping = NULL,
+    exclusion_reason_mapping = NULL,
     exclusions_after_step1,
     exclusions_after_step2,
     exclusions_after_step3,

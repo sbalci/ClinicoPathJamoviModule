@@ -11,7 +11,9 @@ test_that("oddsratio handles small datasets", {
   result <- oddsratio(
     data = oddsratio_small,
     explanatory = "predictor",
-    outcome = "outcome"
+    outcome = "outcome",
+    outcomeLevel = NULL,
+    predictorLevel = NULL
   )
   expect_s3_class(result, "oddsratioClass")
 })
@@ -20,7 +22,9 @@ test_that("oddsratio handles large datasets", {
   result <- oddsratio(
     data = oddsratio_large,
     explanatory = c("var1", "var2"),
-    outcome = "outcome"
+    outcome = "outcome",
+    outcomeLevel = NULL,
+    predictorLevel = NULL
   )
   expect_no_error(result)
 })
@@ -29,7 +33,9 @@ test_that("oddsratio handles perfect separation", {
   result <- oddsratio(
     data = oddsratio_perfect,
     explanatory = "predictor",
-    outcome = "outcome"
+    outcome = "outcome",
+    outcomeLevel = NULL,
+    predictorLevel = NULL
   )
   # May warn about perfect separation
   expect_s3_class(result, "oddsratioClass")
@@ -39,7 +45,9 @@ test_that("oddsratio handles zero cells", {
   result <- oddsratio(
     data = oddsratio_zerocell,
     explanatory = "predictor",
-    outcome = "outcome"
+    outcome = "outcome",
+    outcomeLevel = NULL,
+    predictorLevel = NULL
   )
   # May warn about zero cells
   expect_s3_class(result, "oddsratioClass")

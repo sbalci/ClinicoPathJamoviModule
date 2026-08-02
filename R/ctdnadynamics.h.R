@@ -50,6 +50,7 @@ ctdnadynamicsOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
             private$..timeBetween <- jmvcore::OptionVariable$new(
                 "timeBetween",
                 timeBetween,
+                default=NULL,
                 suggested=list(
                     "continuous"),
                 permitted=list(
@@ -57,6 +58,7 @@ ctdnadynamicsOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
             private$..group <- jmvcore::OptionVariable$new(
                 "group",
                 group,
+                default=NULL,
                 suggested=list(
                     "nominal",
                     "ordinal"),
@@ -65,6 +67,7 @@ ctdnadynamicsOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
             private$..survivalTime <- jmvcore::OptionVariable$new(
                 "survivalTime",
                 survivalTime,
+                default=NULL,
                 suggested=list(
                     "continuous"),
                 permitted=list(
@@ -72,6 +75,7 @@ ctdnadynamicsOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
             private$..survivalStatus <- jmvcore::OptionVariable$new(
                 "survivalStatus",
                 survivalStatus,
+                default=NULL,
                 suggested=list(
                     "nominal",
                     "ordinal"),
@@ -375,10 +379,10 @@ ctdnadynamics <- function(
     baselineVaf,
     followupVaf,
     detectionThreshold = 0.05,
-    timeBetween,
-    group,
-    survivalTime,
-    survivalStatus,
+    timeBetween = NULL,
+    group = NULL,
+    survivalTime = NULL,
+    survivalStatus = NULL,
     eventLevel,
     conf_level = 0.95,
     showClassification = TRUE,

@@ -26,6 +26,7 @@ options:
     - name: survivalTime
       title: Survival Time
       type: Variable
+      default: NULL
       suggested: [ continuous ]
       permitted: [ numeric ]
       description:
@@ -35,6 +36,7 @@ options:
     - name: status
       title: Event Status
       type: Variable
+      default: NULL
       suggested: [ nominal, ordinal ]
       permitted: [ factor ]
       description:
@@ -62,6 +64,7 @@ options:
     - name: covariates
       title: Covariates
       type: Variables
+      default: NULL
       suggested: [ continuous, nominal, ordinal ]
       permitted: [ numeric, factor ]
       description:
@@ -83,6 +86,7 @@ options:
     - name: groupVar
       title: Grouping Variable (for CIF plots)
       type: Variable
+      default: NULL
       suggested: [ nominal ]
       permitted: [ factor ]
       description:

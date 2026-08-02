@@ -58,7 +58,8 @@ jsummarytoolsOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                 default="dfsummary")
             private$..vars <- jmvcore::OptionVariables$new(
                 "vars",
-                vars)
+                vars,
+                default=NULL)
             private$..group_var <- jmvcore::OptionVariable$new(
                 "group_var",
                 group_var,
@@ -618,7 +619,7 @@ jsummarytoolsBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 jsummarytools <- function(
     data,
     analysis_type = "dfsummary",
-    vars,
+    vars = NULL,
     group_var = NULL,
     weights_var = NULL,
     cross_var1 = NULL,

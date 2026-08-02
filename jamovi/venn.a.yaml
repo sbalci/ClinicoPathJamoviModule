@@ -20,6 +20,7 @@ options:
     - name: var1
       title: 'Variable 1 (required)'
       type: Variable
+      default: NULL
       suggested: [ ordinal, nominal ]
       permitted: [ factor ]
       description:
@@ -41,6 +42,7 @@ options:
     - name: var2
       title: 'Variable 2 (required)'
       type: Variable
+      default: NULL
       suggested: [ ordinal, nominal ]
       permitted: [ factor ]
       description:

@@ -100,7 +100,6 @@ children:
                         enable: (tint)
                       - type: ComboBox
                         name: timetypeoutput
-                        enable: (tint)
       - type: Label
         label: Landmark Time
         fitToGrid: true
@@ -194,7 +193,7 @@ children:
               - type: CheckBox
                 name: ph_cox
       - type: Label
-        label: Kaplan-Meier for 2 Explanatory Variables
+        label: Kaplan-Meier by 1 or 2 Categorical Variables
         fitToGrid: true
         children:
           - type: LayoutBox
@@ -217,13 +216,13 @@ children:
                 enable: (ac || km || plotRiskGroups)
               - type: CheckBox
                 name: risktable
-                enable: (ac || km || plotRiskGroups)
+                enable: (km || plotRiskGroups)
               - type: CheckBox
                 name: censored
-                enable: (ac || km || plotRiskGroups)
+                enable: (km || plotRiskGroups)
               - type: CheckBox
                 name: pplot
-                enable: (ac || km || plotRiskGroups)
+                enable: (km || plotRiskGroups)
               - type: TextBox
                 name: endplot
                 format: number
@@ -234,7 +233,7 @@ children:
                 enable: (ac || km || plotRiskGroups)
               - type: ComboBox
                 name: medianline
-                enable: (ac || km || plotRiskGroups)
+                enable: (km || plotRiskGroups)
           - type: LayoutBox
             margin: large
             children:
@@ -287,12 +286,12 @@ children:
                         format: number
                         enable: (ci_optimism)
   - type: CollapseBox
-    label: Adjusted Survival Analysis
+    label: Adjusted Probability Analysis
     collapsed: true
     stretchFactor: 1
     children:
       - type: Label
-        label: Adjusted Survival Curves
+        label: Adjusted Probability Curves
         fitToGrid: true
         stretchFactor: 1
         children:
@@ -313,7 +312,7 @@ children:
                     stretchFactor: 1
                     children:
                       - type: TargetLayoutBox
-                        label: Adjustment Variable
+                        label: Categorical Model Variable
                         children:
                           - type: VariablesListBox
                             name: adjexplanatory
@@ -329,7 +328,7 @@ children:
             name: ac_method
             enable: (ac)
       - type: Label
-        label: Adjusted Survival Tables
+        label: Adjusted Probability Tables
         children:
           - type: CheckBox
             name: ac_summary
@@ -408,6 +407,7 @@ children:
           - type: TextBox
             name: rate_multiplier
             format: number
+            enable: (person_time)
   - type: CollapseBox
     label: Output and Display Options
     collapsed: true

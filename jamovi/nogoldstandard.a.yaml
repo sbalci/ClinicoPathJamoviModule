@@ -108,6 +108,7 @@ options:
     - name: test2
       title: Test 2
       type: Variable
+      default: NULL
       suggested: [ nominal ]
       permitted: [ factor ]
       description:

@@ -39,6 +39,7 @@ diagnosticmetaOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
             private$..study <- jmvcore::OptionVariable$new(
                 "study",
                 study,
+                default=NULL,
                 suggested=list(
                     "nominal"),
                 permitted=list(
@@ -47,6 +48,7 @@ diagnosticmetaOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
             private$..true_positives <- jmvcore::OptionVariable$new(
                 "true_positives",
                 true_positives,
+                default=NULL,
                 suggested=list(
                     "continuous"),
                 permitted=list(
@@ -54,6 +56,7 @@ diagnosticmetaOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
             private$..false_positives <- jmvcore::OptionVariable$new(
                 "false_positives",
                 false_positives,
+                default=NULL,
                 suggested=list(
                     "continuous"),
                 permitted=list(
@@ -61,6 +64,7 @@ diagnosticmetaOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
             private$..false_negatives <- jmvcore::OptionVariable$new(
                 "false_negatives",
                 false_negatives,
+                default=NULL,
                 suggested=list(
                     "continuous"),
                 permitted=list(
@@ -68,6 +72,7 @@ diagnosticmetaOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
             private$..true_negatives <- jmvcore::OptionVariable$new(
                 "true_negatives",
                 true_negatives,
+                default=NULL,
                 suggested=list(
                     "continuous"),
                 permitted=list(
@@ -733,11 +738,11 @@ diagnosticmetaBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
 #' @export
 diagnosticmeta <- function(
     data,
-    study,
-    true_positives,
-    false_positives,
-    false_negatives,
-    true_negatives,
+    study = NULL,
+    true_positives = NULL,
+    false_positives = NULL,
+    false_negatives = NULL,
+    true_negatives = NULL,
     covariate = NULL,
     bivariate_analysis = TRUE,
     hsroc_analysis = FALSE,

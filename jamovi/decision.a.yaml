@@ -27,6 +27,7 @@ options:
     - name: gold
       title: Gold Standard (Reference)
       type: Variable
+      default: NULL
       suggested: [ nominal ]
       permitted: [ factor ]
       description:
@@ -51,6 +52,7 @@ options:
     - name: newtest
       title: Test Under Evaluation
       type: Variable
+      default: NULL
       suggested: [ nominal ]
       permitted: [ factor ]
       description:

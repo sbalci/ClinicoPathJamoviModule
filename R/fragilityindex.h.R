@@ -38,6 +38,7 @@ fragilityindexOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
             private$..group <- jmvcore::OptionVariable$new(
                 "group",
                 group,
+                default=NULL,
                 suggested=list(
                     "nominal"),
                 permitted=list(
@@ -45,6 +46,7 @@ fragilityindexOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
             private$..outcome <- jmvcore::OptionVariable$new(
                 "outcome",
                 outcome,
+                default=NULL,
                 suggested=list(
                     "nominal"),
                 permitted=list(
@@ -395,8 +397,8 @@ fragilityindexBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
 fragilityindex <- function(
     data,
     dataFormat = "summary",
-    group,
-    outcome,
+    group = NULL,
+    outcome = NULL,
     outcomeEvent,
     events1 = 10,
     n1 = 100,

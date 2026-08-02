@@ -14,7 +14,7 @@ data(multisurvival_risk, package = "ClinicoPath")
 
 test_that("multisurvival produces consistent results across runs", {
   # Run the same analysis twice
-  result1 <- multisurvival(
+  result1 <- .run_multisurvival(
     data = multisurvival_test,
     elapsedtime = "elapsedtime",
     outcome = "outcome",
@@ -22,7 +22,7 @@ test_that("multisurvival produces consistent results across runs", {
     contexpl = c("age", "nodes")
   )
 
-  result2 <- multisurvival(
+  result2 <- .run_multisurvival(
     data = multisurvival_test,
     elapsedtime = "elapsedtime",
     outcome = "outcome",
@@ -31,32 +31,32 @@ test_that("multisurvival produces consistent results across runs", {
   )
 
   # Results should be identical
-  expect_s3_class(result1, "multisurvivalClass")
-  expect_s3_class(result2, "multisurvivalClass")
+  expect_s3_class(result1, "multisurvivalResults")
+  expect_s3_class(result2, "multisurvivalResults")
 })
 
 test_that("multisurvival workflow: basic → multivariable → risk stratification", {
   # Step 1: Univariable analysis
-  basic <- multisurvival(
+  basic <- .run_multisurvival(
     data = multisurvival_risk,
     elapsedtime = "elapsedtime",
     outcome = "outcome",
     explanatory = "stage"
   )
-  expect_s3_class(basic, "multisurvivalClass")
+  expect_s3_class(basic, "multisurvivalResults")
 
   # Step 2: Multivariable model
-  multivariable <- multisurvival(
+  multivariable <- .run_multisurvival(
     data = multisurvival_risk,
     elapsedtime = "elapsedtime",
     outcome = "outcome",
     explanatory = c("stage", "grade", "molecular_subtype"),
     contexpl = c("age", "ki67")
   )
-  expect_s3_class(multivariable, "multisurvivalClass")
+  expect_s3_class(multivariable, "multisurvivalResults")
 
   # Step 3: Risk stratification
-  risk_strat <- multisurvival(
+  risk_strat <- .run_multisurvival(
     data = multisurvival_risk,
     elapsedtime = "elapsedtime",
     outcome = "outcome",
@@ -66,12 +66,12 @@ test_that("multisurvival workflow: basic → multivariable → risk stratificati
     numRiskGroups = "three",
     plotRiskGroups = TRUE
   )
-  expect_s3_class(risk_strat, "multisurvivalClass")
+  expect_s3_class(risk_strat, "multisurvivalResults")
 })
 
 test_that("multisurvival workflow: date-based analysis pipeline", {
   # Step 1: Calculate survival time from dates
-  date_calc <- multisurvival(
+  date_calc <- .run_multisurvival(
     data = multisurvival_dates,
     tint = TRUE,
     dxdate = "dxdate",
@@ -80,10 +80,10 @@ test_that("multisurvival workflow: date-based analysis pipeline", {
     timetypeoutput = "months",
     outcome = "outcome"
   )
-  expect_s3_class(date_calc, "multisurvivalClass")
+  expect_s3_class(date_calc, "multisurvivalResults")
 
   # Step 2: Add explanatory variables
-  with_predictors <- multisurvival(
+  with_predictors <- .run_multisurvival(
     data = multisurvival_dates,
     tint = TRUE,
     dxdate = "dxdate",
@@ -94,10 +94,10 @@ test_that("multisurvival workflow: date-based analysis pipeline", {
     explanatory = c("treatment", "stage"),
     contexpl = "age"
   )
-  expect_s3_class(with_predictors, "multisurvivalClass")
+  expect_s3_class(with_predictors, "multisurvivalResults")
 
   # Step 3: Complete analysis with visualization
-  complete <- multisurvival(
+  complete <- .run_multisurvival(
     data = multisurvival_dates,
     tint = TRUE,
     dxdate = "dxdate",
@@ -111,7 +111,7 @@ test_that("multisurvival workflow: date-based analysis pipeline", {
     km = TRUE,
     risktable = TRUE
   )
-  expect_s3_class(complete, "multisurvivalClass")
+  expect_s3_class(complete, "multisurvivalResults")
 })
 
 test_that("multisurvival handles data from CSV import", {
@@ -122,14 +122,14 @@ test_that("multisurvival handles data from CSV import", {
   # Read it back
   csv_data <- read.csv(temp_csv)
 
-  result <- multisurvival(
+  result <- .run_multisurvival(
     data = csv_data,
     elapsedtime = "elapsedtime",
     outcome = "outcome",
     explanatory = "treatment"
   )
 
-  expect_s3_class(result, "multisurvivalClass")
+  expect_s3_class(result, "multisurvivalResults")
 
   # Clean up
   unlink(temp_csv)
@@ -143,14 +143,14 @@ test_that("multisurvival handles data from Excel import", {
   # Read it back
   xlsx_data <- readxl::read_excel(temp_xlsx)
 
-  result <- multisurvival(
+  result <- .run_multisurvival(
     data = as.data.frame(xlsx_data),
     elapsedtime = "elapsedtime",
     outcome = "outcome",
     explanatory = "treatment"
   )
 
-  expect_s3_class(result, "multisurvivalClass")
+  expect_s3_class(result, "multisurvivalResults")
 
   # Clean up
   unlink(temp_xlsx)
@@ -161,31 +161,31 @@ test_that("multisurvival handles different data structures consistently", {
   library(tibble)
   tibble_data <- as_tibble(multisurvival_test)
 
-  result_tibble <- multisurvival(
+  result_tibble <- .run_multisurvival(
     data = tibble_data,
     elapsedtime = "elapsedtime",
     outcome = "outcome",
     explanatory = "treatment"
   )
 
-  expect_s3_class(result_tibble, "multisurvivalClass")
+  expect_s3_class(result_tibble, "multisurvivalResults")
 
   # Test with data.frame
   df_data <- as.data.frame(multisurvival_test)
 
-  result_df <- multisurvival(
+  result_df <- .run_multisurvival(
     data = df_data,
     elapsedtime = "elapsedtime",
     outcome = "outcome",
     explanatory = "treatment"
   )
 
-  expect_s3_class(result_df, "multisurvivalClass")
+  expect_s3_class(result_df, "multisurvivalResults")
 })
 
 test_that("multisurvival workflow: clinical trial analysis pipeline", {
   # Step 1: Overall survival by treatment
-  overall <- multisurvival(
+  overall <- .run_multisurvival(
     data = multisurvival_test,
     elapsedtime = "elapsedtime",
     outcome = "outcome",
@@ -193,10 +193,10 @@ test_that("multisurvival workflow: clinical trial analysis pipeline", {
     km = TRUE,
     risktable = TRUE
   )
-  expect_s3_class(overall, "multisurvivalClass")
+  expect_s3_class(overall, "multisurvivalResults")
 
   # Step 2: Adjusted for baseline characteristics
-  adjusted <- multisurvival(
+  adjusted <- .run_multisurvival(
     data = multisurvival_test,
     elapsedtime = "elapsedtime",
     outcome = "outcome",
@@ -204,10 +204,10 @@ test_that("multisurvival workflow: clinical trial analysis pipeline", {
     contexpl = c("age", "performance_status"),
     hr = TRUE
   )
-  expect_s3_class(adjusted, "multisurvivalClass")
+  expect_s3_class(adjusted, "multisurvivalResults")
 
   # Step 3: Check proportional hazards assumption
-  ph_check <- multisurvival(
+  ph_check <- .run_multisurvival(
     data = multisurvival_test,
     elapsedtime = "elapsedtime",
     outcome = "outcome",
@@ -215,10 +215,10 @@ test_that("multisurvival workflow: clinical trial analysis pipeline", {
     contexpl = "age",
     ph_cox = TRUE
   )
-  expect_s3_class(ph_check, "multisurvivalClass")
+  expect_s3_class(ph_check, "multisurvivalResults")
 
   # Step 4: Publication-ready output with nomogram
-  publication <- multisurvival(
+  publication <- .run_multisurvival(
     data = multisurvival_test,
     elapsedtime = "elapsedtime",
     outcome = "outcome",
@@ -231,7 +231,7 @@ test_that("multisurvival workflow: clinical trial analysis pipeline", {
     showNomogram = TRUE,
     showSummaries = TRUE
   )
-  expect_s3_class(publication, "multisurvivalClass")
+  expect_s3_class(publication, "multisurvivalResults")
 })
 
 test_that("multisurvival workflow: prognostic model development", {
@@ -239,7 +239,7 @@ test_that("multisurvival workflow: prognostic model development", {
   # (In practice, would run multiple univariable analyses)
 
   # Step 2: Build multivariable model
-  multivariable <- multisurvival(
+  multivariable <- .run_multisurvival(
     data = multisurvival_risk,
     elapsedtime = "elapsedtime",
     outcome = "outcome",
@@ -247,10 +247,10 @@ test_that("multisurvival workflow: prognostic model development", {
     contexpl = c("age", "ki67", "tumor_size", "nodes_positive"),
     hr = TRUE
   )
-  expect_s3_class(multivariable, "multisurvivalClass")
+  expect_s3_class(multivariable, "multisurvivalResults")
 
   # Step 3: Calculate risk scores
-  risk_model <- multisurvival(
+  risk_model <- .run_multisurvival(
     data = multisurvival_risk,
     elapsedtime = "elapsedtime",
     outcome = "outcome",
@@ -259,10 +259,10 @@ test_that("multisurvival workflow: prognostic model development", {
     calculateRiskScore = TRUE,
     numRiskGroups = "three"
   )
-  expect_s3_class(risk_model, "multisurvivalClass")
+  expect_s3_class(risk_model, "multisurvivalResults")
 
   # Step 4: Visualize risk group survival
-  risk_viz <- multisurvival(
+  risk_viz <- .run_multisurvival(
     data = multisurvival_risk,
     elapsedtime = "elapsedtime",
     outcome = "outcome",
@@ -274,10 +274,10 @@ test_that("multisurvival workflow: prognostic model development", {
     km = TRUE,
     risktable = TRUE
   )
-  expect_s3_class(risk_viz, "multisurvivalClass")
+  expect_s3_class(risk_viz, "multisurvivalResults")
 
   # Step 5: Create nomogram for clinical use
-  nomogram <- multisurvival(
+  nomogram <- .run_multisurvival(
     data = multisurvival_risk,
     elapsedtime = "elapsedtime",
     outcome = "outcome",
@@ -285,14 +285,14 @@ test_that("multisurvival workflow: prognostic model development", {
     contexpl = c("age", "ki67"),
     showNomogram = TRUE
   )
-  expect_s3_class(nomogram, "multisurvivalClass")
+  expect_s3_class(nomogram, "multisurvivalResults")
 })
 
 test_that("multisurvival workflow: competing risks analysis", {
   data(multisurvival_competing, package = "ClinicoPath")
 
   # Step 1: Overall survival (all-cause mortality)
-  overall <- multisurvival(
+  overall <- .run_multisurvival(
     data = multisurvival_competing,
     elapsedtime = "elapsedtime",
     outcome = "outcome",
@@ -300,10 +300,10 @@ test_that("multisurvival workflow: competing risks analysis", {
     analysistype = "overall",
     explanatory = "treatment"
   )
-  expect_s3_class(overall, "multisurvivalClass")
+  expect_s3_class(overall, "multisurvivalResults")
 
   # Step 2: Cause-specific survival (disease-specific mortality)
-  cause_specific <- multisurvival(
+  cause_specific <- .run_multisurvival(
     data = multisurvival_competing,
     elapsedtime = "elapsedtime",
     outcome = "outcome",
@@ -311,10 +311,10 @@ test_that("multisurvival workflow: competing risks analysis", {
     analysistype = "cause",
     explanatory = c("treatment", "stage")
   )
-  expect_s3_class(cause_specific, "multisurvivalClass")
+  expect_s3_class(cause_specific, "multisurvivalResults")
 
   # Step 3: Competing risks analysis
-  competing <- multisurvival(
+  competing <- .run_multisurvival(
     data = multisurvival_competing,
     elapsedtime = "elapsedtime",
     outcome = "outcome",
@@ -327,24 +327,24 @@ test_that("multisurvival workflow: competing risks analysis", {
     multievent = TRUE,
     explanatory = "treatment"
   )
-  expect_s3_class(competing, "multisurvivalClass")
+  expect_s3_class(competing, "multisurvivalResults")
 })
 
 test_that("multisurvival workflow: person-time incidence rate analysis", {
   data(multisurvival_persontime, package = "ClinicoPath")
 
   # Step 1: Overall incidence rate
-  overall_rate <- multisurvival(
+  overall_rate <- .run_multisurvival(
     data = multisurvival_persontime,
     elapsedtime = "elapsedtime",
     outcome = "outcome",
     person_time = TRUE,
     rate_multiplier = 1000
   )
-  expect_s3_class(overall_rate, "multisurvivalClass")
+  expect_s3_class(overall_rate, "multisurvivalResults")
 
   # Step 2: Stratified by exposure
-  stratified_rate <- multisurvival(
+  stratified_rate <- .run_multisurvival(
     data = multisurvival_persontime,
     elapsedtime = "elapsedtime",
     outcome = "outcome",
@@ -353,10 +353,10 @@ test_that("multisurvival workflow: person-time incidence rate analysis", {
     time_intervals = "12, 36, 60",
     rate_multiplier = 1000
   )
-  expect_s3_class(stratified_rate, "multisurvivalClass")
+  expect_s3_class(stratified_rate, "multisurvivalResults")
 
   # Step 3: Adjusted rate ratios
-  adjusted_rate <- multisurvival(
+  adjusted_rate <- .run_multisurvival(
     data = multisurvival_persontime,
     elapsedtime = "elapsedtime",
     outcome = "outcome",
@@ -367,12 +367,12 @@ test_that("multisurvival workflow: person-time incidence rate analysis", {
     rate_multiplier = 1000,
     hr = TRUE
   )
-  expect_s3_class(adjusted_rate, "multisurvivalClass")
+  expect_s3_class(adjusted_rate, "multisurvivalResults")
 })
 
 test_that("multisurvival handles comprehensive publication workflow", {
   # Complete analysis for research publication
-  result <- multisurvival(
+  result <- .run_multisurvival(
     data = multisurvival_test,
     elapsedtime = "elapsedtime",
     outcome = "outcome",
@@ -396,5 +396,5 @@ test_that("multisurvival handles comprehensive publication workflow", {
     showSummaries = TRUE
   )
 
-  expect_s3_class(result, "multisurvivalClass")
+  expect_s3_class(result, "multisurvivalResults")
 })

@@ -53,6 +53,7 @@ tumorgrowthOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
             private$..patientId <- jmvcore::OptionVariable$new(
                 "patientId",
                 patientId,
+                default=NULL,
                 suggested=list(
                     "nominal"),
                 permitted=list(
@@ -83,6 +84,7 @@ tumorgrowthOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
             private$..treatmentEffect <- jmvcore::OptionVariable$new(
                 "treatmentEffect",
                 treatmentEffect,
+                default=NULL,
                 suggested=list(
                     "nominal",
                     "ordinal"),
@@ -91,6 +93,7 @@ tumorgrowthOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
             private$..treatmentTime <- jmvcore::OptionVariable$new(
                 "treatmentTime",
                 treatmentTime,
+                default=NULL,
                 suggested=list(
                     "continuous"),
                 permitted=list(
@@ -579,11 +582,11 @@ tumorgrowth <- function(
     data,
     time,
     tumorSize,
-    patientId,
+    patientId = NULL,
     covariates = list(),
     growthModel = "gompertz",
-    treatmentEffect,
-    treatmentTime,
+    treatmentEffect = NULL,
+    treatmentTime = NULL,
     modelApproach = "nlme",
     confidenceLevel = 95,
     modelSummary = TRUE,

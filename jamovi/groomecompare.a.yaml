@@ -69,6 +69,7 @@ options:
     - name: time
       title: Survival Time
       type: Variable
+      default: NULL
       suggested:
         - continuous
       permitted:
@@ -80,6 +81,7 @@ options:
     - name: event
       title: Event Status
       type: Variable
+      default: NULL
       suggested:
         - nominal
         - ordinal
@@ -92,6 +94,7 @@ options:
     - name: stage1
       title: Staging System 1
       type: Variable
+      default: NULL
       suggested:
         - nominal
         - ordinal
@@ -104,6 +107,7 @@ options:
     - name: stage2
       title: Staging System 2
       type: Variable
+      default: NULL
       suggested:
         - nominal
         - ordinal

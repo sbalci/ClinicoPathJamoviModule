@@ -16,7 +16,12 @@ test_that("studydiagram works with participant_step format", {
         data_format = "participant_step",
         participant_id = "id",
         step_excluded = "step_excl",
-        exclusion_reason_participant = "reason"
+        exclusion_reason_participant = "reason",
+        exclusions_after_step1 = NULL,
+        exclusions_after_step2 = NULL,
+        exclusions_after_step3 = NULL,
+        exclusions_after_step4 = NULL,
+        exclusions_after_step5 = NULL
     )
     
     # Check results
@@ -44,7 +49,12 @@ test_that("studydiagram works with step_summary format", {
         data_format = "step_summary",
         step_name = "step",
         participant_count = "count",
-        exclusion_reason_summary = "reasons"
+        exclusion_reason_summary = "reasons",
+        exclusions_after_step1 = NULL,
+        exclusions_after_step2 = NULL,
+        exclusions_after_step3 = NULL,
+        exclusions_after_step4 = NULL,
+        exclusions_after_step5 = NULL
     )
     
     # Check results
@@ -72,7 +82,12 @@ test_that("studydiagram works with exclusion_mapping format", {
         participant_id_mapping = "id",
         exclusion_reason_mapping = "reason",
         step1_exclusions = "Ineligible",
-        step2_exclusions = "Withdrew"
+        step2_exclusions = "Withdrew",
+        exclusions_after_step1 = NULL,
+        exclusions_after_step2 = NULL,
+        exclusions_after_step3 = NULL,
+        exclusions_after_step4 = NULL,
+        exclusions_after_step5 = NULL
     )
     
     # Check results
@@ -104,7 +119,12 @@ test_that("studydiagram handles different diagram types", {
             data_format = "step_summary",
             step_name = "step",
             participant_count = "count",
-            diagram_type = type
+            diagram_type = type,
+            exclusions_after_step1 = NULL,
+            exclusions_after_step2 = NULL,
+            exclusions_after_step3 = NULL,
+            exclusions_after_step4 = NULL,
+            exclusions_after_step5 = NULL
         )
         expect_s3_class(results, "studydiagramResults")
         expect_true(!is.null(results$plot))
@@ -119,7 +139,12 @@ test_that("studydiagram handles missing data gracefully", {
         data = data,
         data_format = "participant_step",
         participant_id = "id",
-        step_excluded = "step"
+        step_excluded = "step",
+        exclusions_after_step1 = NULL,
+        exclusions_after_step2 = NULL,
+        exclusions_after_step3 = NULL,
+        exclusions_after_step4 = NULL,
+        exclusions_after_step5 = NULL
     )
     
     expect_s3_class(results, "studydiagramResults")
@@ -133,7 +158,12 @@ test_that("studydiagram validates required variables", {
     results <- ClinicoPath::studydiagram(
         data = data,
         data_format = "participant_step",
-        participant_id = "id"
+        participant_id = "id",
+        exclusions_after_step1 = NULL,
+        exclusions_after_step2 = NULL,
+        exclusions_after_step3 = NULL,
+        exclusions_after_step4 = NULL,
+        exclusions_after_step5 = NULL
     )
     
     expect_s3_class(results, "studydiagramResults")

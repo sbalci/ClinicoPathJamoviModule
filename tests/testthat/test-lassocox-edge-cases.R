@@ -74,7 +74,8 @@ test_that("lassocox handles missing data in predictors", {
       outcome = "status",
       outcomeLevel = "event",
       explanatory = paste0("var", 1:5),
-      cv_plot = FALSE, coef_plot = FALSE, survival_plot = FALSE
+      cv_plot = FALSE, coef_plot = FALSE, survival_plot = FALSE,
+      censorLevel = NULL
     )
   })
 })
@@ -92,7 +93,8 @@ test_that("lassocox handles all-censored data gracefully", {
       outcome = "status",
       outcomeLevel = "event",
       explanatory = paste0("var", 1:5),
-      cv_plot = FALSE, coef_plot = FALSE, survival_plot = FALSE
+      cv_plot = FALSE, coef_plot = FALSE, survival_plot = FALSE,
+      censorLevel = NULL
     )
   )
 })
@@ -114,7 +116,8 @@ test_that("lassocox handles very few events", {
       outcome = "status",
       outcomeLevel = "event",
       explanatory = paste0("var", 1:5),
-      cv_plot = FALSE, coef_plot = FALSE, survival_plot = FALSE
+      cv_plot = FALSE, coef_plot = FALSE, survival_plot = FALSE,
+      censorLevel = NULL
     )
   )
 })
@@ -132,7 +135,8 @@ test_that("lassocox handles constant predictor variables", {
       outcome = "status",
       outcomeLevel = "event",
       explanatory = paste0("var", 1:5),
-      cv_plot = FALSE, coef_plot = FALSE, survival_plot = FALSE
+      cv_plot = FALSE, coef_plot = FALSE, survival_plot = FALSE,
+      censorLevel = NULL
     )
   })
 })
@@ -151,7 +155,8 @@ test_that("lassocox handles single-level factor variable", {
       outcome = "status",
       outcomeLevel = "event",
       explanatory = c(paste0("var", 1:3), "group"),
-      cv_plot = FALSE, coef_plot = FALSE, survival_plot = FALSE
+      cv_plot = FALSE, coef_plot = FALSE, survival_plot = FALSE,
+      censorLevel = NULL
     )
   })
 })
@@ -172,7 +177,8 @@ test_that("lassocox handles variables with very different scales", {
       outcomeLevel = "event",
       explanatory = paste0("var", 1:5),
       standardize = TRUE,
-      cv_plot = FALSE, coef_plot = FALSE, survival_plot = FALSE
+      cv_plot = FALSE, coef_plot = FALSE, survival_plot = FALSE,
+      censorLevel = NULL
     )
   })
 })
@@ -191,7 +197,8 @@ test_that("lassocox small cohort dataset runs correctly", {
                        "biomarker_b", "biomarker_c",
                        "treatment_group", "severity_score"),
       nfolds = 5,
-      cv_plot = FALSE, coef_plot = FALSE, survival_plot = FALSE
+      cv_plot = FALSE, coef_plot = FALSE, survival_plot = FALSE,
+      censorLevel = NULL
     )
   })
 })
@@ -209,7 +216,8 @@ test_that("lassocox handles negative time values appropriately", {
       outcome = "status",
       outcomeLevel = "event",
       explanatory = paste0("var", 1:5),
-      cv_plot = FALSE, coef_plot = FALSE, survival_plot = FALSE
+      cv_plot = FALSE, coef_plot = FALSE, survival_plot = FALSE,
+      censorLevel = NULL
     )
   )
 })
@@ -227,7 +235,8 @@ test_that("lassocox handles zero time values", {
       outcome = "status",
       outcomeLevel = "event",
       explanatory = paste0("var", 1:5),
-      cv_plot = FALSE, coef_plot = FALSE, survival_plot = FALSE
+      cv_plot = FALSE, coef_plot = FALSE, survival_plot = FALSE,
+      censorLevel = NULL
     )
   )
 })
@@ -251,7 +260,8 @@ test_that("lassocox handles data with many missing rows", {
         outcome = "status",
         outcomeLevel = "event",
         explanatory = paste0("var", 1:5),
-        cv_plot = FALSE, coef_plot = FALSE, survival_plot = FALSE
+        cv_plot = FALSE, coef_plot = FALSE, survival_plot = FALSE,
+        censorLevel = NULL
       )
     })
   } else {
@@ -262,7 +272,8 @@ test_that("lassocox handles data with many missing rows", {
         outcome = "status",
         outcomeLevel = "event",
         explanatory = paste0("var", 1:5),
-        cv_plot = FALSE, coef_plot = FALSE, survival_plot = FALSE
+        cv_plot = FALSE, coef_plot = FALSE, survival_plot = FALSE,
+        censorLevel = NULL
       )
     )
   }
@@ -282,7 +293,8 @@ test_that("lassocox handles perfectly correlated predictors", {
       outcome = "status",
       outcomeLevel = "event",
       explanatory = paste0("var", 1:5),
-      cv_plot = FALSE, coef_plot = FALSE, survival_plot = FALSE
+      cv_plot = FALSE, coef_plot = FALSE, survival_plot = FALSE,
+      censorLevel = NULL
     )
   })
 })
@@ -299,7 +311,8 @@ test_that("lassocox handles two-predictor minimum", {
       outcome = "status",
       outcomeLevel = "event",
       explanatory = c("var1", "var2"),
-      cv_plot = FALSE, coef_plot = FALSE, survival_plot = FALSE
+      cv_plot = FALSE, coef_plot = FALSE, survival_plot = FALSE,
+      censorLevel = NULL
     )
   })
 })

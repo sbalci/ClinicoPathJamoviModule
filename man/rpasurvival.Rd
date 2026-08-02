@@ -6,9 +6,9 @@
 \usage{
 rpasurvival(
   data,
-  time,
-  event,
-  predictors,
+  time = NULL,
+  event = NULL,
+  predictors = NULL,
   eventValue = "1",
   time_unit = "months",
   minbucket = 20,

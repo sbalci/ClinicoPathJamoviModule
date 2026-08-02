@@ -47,6 +47,7 @@ synopticcompletenessOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6
             private$..group <- jmvcore::OptionVariable$new(
                 "group",
                 group,
+                default=NULL,
                 suggested=list(
                     "nominal",
                     "ordinal"),
@@ -55,6 +56,7 @@ synopticcompletenessOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6
             private$..timeVar <- jmvcore::OptionVariable$new(
                 "timeVar",
                 timeVar,
+                default=NULL,
                 suggested=list(
                     "continuous",
                     "ordinal"),
@@ -373,8 +375,8 @@ synopticcompleteness <- function(
     items,
     presenceRule = "nonmissing",
     presentValue = "",
-    group,
-    timeVar,
+    group = NULL,
+    timeVar = NULL,
     completeThreshold = 100,
     showOverall = TRUE,
     showPerItem = TRUE,

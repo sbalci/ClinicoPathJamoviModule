@@ -40,6 +40,7 @@ options:
     - name: vars
       title: Variables for Plotting
       type: Variables
+      default: NULL
       suggested: [continuous]
       permitted: [numeric]
       description: >

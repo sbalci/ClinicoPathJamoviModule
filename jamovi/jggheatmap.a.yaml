@@ -13,6 +13,7 @@ options:
     - name: matrix_vars
       title: Matrix Variables
       type: Variables
+      default: NULL
       description: "Variables to include in the heatmap matrix"
       permitted:
         - numeric

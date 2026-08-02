@@ -62,6 +62,7 @@ options:
     - name: groupVar
       title: Grouping Variable
       type: Variable
+      default: NULL
       suggested:
         - nominal
         - ordinal

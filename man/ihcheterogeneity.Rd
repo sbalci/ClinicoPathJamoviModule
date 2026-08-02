@@ -7,7 +7,7 @@
 ihcheterogeneity(
   data,
   wholesection = NULL,
-  biopsy1,
+  biopsy1 = NULL,
   biopsy2 = NULL,
   biopsy3 = NULL,
   biopsy4 = NULL,

@@ -6,9 +6,9 @@
 \usage{
 venn(
   data,
-  var1,
+  var1 = NULL,
   var1true,
-  var2,
+  var2 = NULL,
   var2true,
   var3 = NULL,
   var3true,

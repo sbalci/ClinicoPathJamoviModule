@@ -71,6 +71,7 @@ aalenhazardOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
             private$..constant_effects <- jmvcore::OptionVariables$new(
                 "constant_effects",
                 constant_effects,
+                default=NULL,
                 suggested=list(
                     "continuous",
                     "nominal",
@@ -435,7 +436,7 @@ aalenhazard <- function(
     covariates,
     outcomeLevel = "1",
     model_type = "additive",
-    constant_effects,
+    constant_effects = NULL,
     test_constant_effects = TRUE,
     bandwidth = 1,
     robust_se = TRUE,

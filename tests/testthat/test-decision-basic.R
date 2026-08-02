@@ -13,7 +13,9 @@ test_that("decision returns proper class", {
     gold = "GoldStandard",
     goldPositive = "Positive",
     newtest = "NewTest",
-    testPositive = "Positive"
+    testPositive = "Positive",
+    goldNegative = NULL,
+    testNegative = NULL
   )
   expect_s3_class(result, "decisionClass")
 })
@@ -24,7 +26,9 @@ test_that("decision handles basic two-level test", {
     gold = "GoldStandard",
     goldPositive = "Positive",
     newtest = "NewTest",
-    testPositive = "Positive"
+    testPositive = "Positive",
+    goldNegative = NULL,
+    testNegative = NULL
   )
   expect_no_error(result)
 })
@@ -35,7 +39,9 @@ test_that("decision handles screening scenario (low prevalence)", {
     gold = "Biopsy",
     goldPositive = "Malignant",
     newtest = "ScreeningTest",
-    testPositive = "Positive"
+    testPositive = "Positive",
+    goldNegative = NULL,
+    testNegative = NULL
   )
   expect_no_error(result)
 })
@@ -46,7 +52,9 @@ test_that("decision handles diagnostic scenario (high prevalence)", {
     gold = "GoldStandard",
     goldPositive = "Present",
     newtest = "ClinicalTest",
-    testPositive = "Positive"
+    testPositive = "Positive",
+    goldNegative = NULL,
+    testNegative = NULL
   )
   expect_no_error(result)
 })
@@ -57,7 +65,9 @@ test_that("decision handles cardiac biomarker test", {
     gold = "Angiography",
     goldPositive = "MI",
     newtest = "Troponin",
-    testPositive = "Elevated"
+    testPositive = "Elevated",
+    goldNegative = NULL,
+    testNegative = NULL
   )
   expect_no_error(result)
 })
@@ -69,7 +79,9 @@ test_that("decision produces results with confidence intervals", {
     goldPositive = "Positive",
     newtest = "NewTest",
     testPositive = "Positive",
-    ci = TRUE
+    ci = TRUE,
+    goldNegative = NULL,
+    testNegative = NULL
   )
   expect_no_error(result)
 })
@@ -82,7 +94,9 @@ test_that("decision works with custom prevalence", {
     newtest = "NewTest",
     testPositive = "Positive",
     pp = TRUE,
-    pprob = 0.15
+    pprob = 0.15,
+    goldNegative = NULL,
+    testNegative = NULL
   )
   expect_no_error(result)
 })
@@ -94,7 +108,9 @@ test_that("decision generates Fagan nomogram", {
     goldPositive = "Positive",
     newtest = "NewTest",
     testPositive = "Positive",
-    fagan = TRUE
+    fagan = TRUE,
+    goldNegative = NULL,
+    testNegative = NULL
   )
   expect_no_error(result)
 })
@@ -106,7 +122,9 @@ test_that("decision shows natural language summary", {
     goldPositive = "Positive",
     newtest = "NewTest",
     testPositive = "Positive",
-    showNaturalLanguage = TRUE
+    showNaturalLanguage = TRUE,
+    goldNegative = NULL,
+    testNegative = NULL
   )
   expect_no_error(result)
 })
@@ -118,7 +136,9 @@ test_that("decision shows misclassified cases", {
     goldPositive = "Positive",
     newtest = "NewTest",
     testPositive = "Positive",
-    showMisclassified = TRUE
+    showMisclassified = TRUE,
+    goldNegative = NULL,
+    testNegative = NULL
   )
   expect_no_error(result)
 })

@@ -9,7 +9,7 @@ nogoldstandard(
   clinicalPreset = "none",
   test1,
   test1Positive,
-  test2,
+  test2 = NULL,
   test2Positive,
   test3 = NULL,
   test3Positive,

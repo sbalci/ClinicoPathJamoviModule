@@ -70,6 +70,7 @@ jjpubrOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             private$..yvar <- jmvcore::OptionVariable$new(
                 "yvar",
                 yvar,
+                default=NULL,
                 suggested=list(
                     "continuous"),
                 permitted=list(
@@ -636,7 +637,7 @@ jjpubr <- function(
     data,
     plotType = "boxplot",
     xvar,
-    yvar,
+    yvar = NULL,
     groupvar = NULL,
     facetvar = NULL,
     addStats = FALSE,

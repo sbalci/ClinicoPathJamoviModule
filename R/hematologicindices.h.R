@@ -60,6 +60,7 @@ hematologicindicesOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::
             private$..monocytes <- jmvcore::OptionVariable$new(
                 "monocytes",
                 monocytes,
+                default=NULL,
                 suggested=list(
                     "continuous"),
                 permitted=list(
@@ -67,6 +68,7 @@ hematologicindicesOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::
             private$..albumin <- jmvcore::OptionVariable$new(
                 "albumin",
                 albumin,
+                default=NULL,
                 suggested=list(
                     "continuous"),
                 permitted=list(
@@ -81,6 +83,7 @@ hematologicindicesOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::
             private$..crp <- jmvcore::OptionVariable$new(
                 "crp",
                 crp,
+                default=NULL,
                 suggested=list(
                     "continuous"),
                 permitted=list(
@@ -111,6 +114,7 @@ hematologicindicesOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::
             private$..survivalTime <- jmvcore::OptionVariable$new(
                 "survivalTime",
                 survivalTime,
+                default=NULL,
                 suggested=list(
                     "continuous"),
                 permitted=list(
@@ -118,6 +122,7 @@ hematologicindicesOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::
             private$..survivalStatus <- jmvcore::OptionVariable$new(
                 "survivalStatus",
                 survivalStatus,
+                default=NULL,
                 suggested=list(
                     "nominal"),
                 permitted=list(
@@ -505,18 +510,18 @@ hematologicindices <- function(
     neutrophils,
     lymphocytes,
     platelets,
-    monocytes,
-    albumin,
+    monocytes = NULL,
+    albumin = NULL,
     albuminUnit = "gdl",
-    crp,
+    crp = NULL,
     indices = list(
                 "nlr",
                 "plr",
                 "sii",
                 "pni"),
     gpsType = "modified",
-    survivalTime,
-    survivalStatus,
+    survivalTime = NULL,
+    survivalStatus = NULL,
     eventLevel,
     survivalIndex = "nlr",
     splitMethod = "median",

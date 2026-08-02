@@ -98,8 +98,8 @@ test_that("the average curve is the g-computation standardisation, not a referen
         mean(sf$surv[max(i), ])
     }
     for (i in seq_len(nrow(ta))) {
-        expect_equal(.msac_pct(ta$surv[i]) / 100,
-                     ref(ta$strata[i], ta$time[i]), tolerance = 1e-3)
+        expect_lte(abs(.msac_pct(ta$surv[i]) / 100 -
+                       ref(ta$strata[i], ta$time[i])), 5.1e-4)
     }
 })
 
@@ -117,8 +117,9 @@ test_that("the plotted curve and the tabulated numbers are the same estimator", 
             g <- pd[pd$group == tb$strata[i] & pd$time <= tb$time[i], , drop = FALSE]
             if (nrow(g) == 0) next   # timepoint beyond the plotted x range
             # A step curve: its height at t is the last estimate at or before t.
-            expect_equal(g$surv[nrow(g)], .msac_pct(tb$surv[i]) / 100,
-                         tolerance = 1e-3, info = paste(m, tb$strata[i], tb$time[i]))
+            expect_lte(
+                abs(g$surv[nrow(g)] - .msac_pct(tb$surv[i]) / 100),
+                5.1e-4)
             checked <- checked + 1
         }
         expect_gt(checked, 0)
@@ -204,8 +205,8 @@ test_that("a stratified Cox fit is standardised over the union time grid, not av
         mean(m[max(i), ])
     }
     for (i in seq_len(nrow(tb))) {
-        expect_equal(.msac_pct(tb$surv[i]) / 100,
-                     ref(tb$strata[i], tb$time[i]), tolerance = 2e-3)
+        expect_lte(abs(.msac_pct(tb$surv[i]) / 100 -
+                       ref(tb$strata[i], tb$time[i])), 5.1e-4)
     }
 })
 
@@ -245,4 +246,16 @@ test_that("CR-5 does not regress: the Fine-Gray branch still draws cumulative in
         v <- pd$cif[pd$group == g]
         expect_true(all(diff(v) >= -1e-8))
     }
+
+    # The numeric table reports the same cumulative-incidence estimand as the
+    # plot, rounded to 0.1 percentage point for display.
+    tb <- as.data.frame(res$adjustedSurvTable)
+    for (i in seq_len(nrow(tb))) {
+        g <- pd[pd$group == tb$strata[i] & pd$time <= tb$time[i], , drop = FALSE]
+        if (nrow(g) == 0) next
+        expect_lte(abs(g$cif[nrow(g)] - .msac_pct(tb$surv[i]) / 100),
+                   5.1e-4)
+    }
+    expect_match(as.character(res$adjustedSurvTableSummary$content),
+                 "displayed probability is cumulative incidence")
 })

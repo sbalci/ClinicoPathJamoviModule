@@ -43,7 +43,8 @@ test_that("ctdnadynamics handles all-cleared edge case", {
   expect_no_error({
     model <- ctdnadynamics(
       data = data, baselineVaf = "baseline_vaf", followupVaf = "followup_vaf",
-      detectionThreshold = 0.05, showSurvival = FALSE)
+      detectionThreshold = 0.05, showSurvival = FALSE,
+      eventLevel = NULL)
   })
   cls <- model$results$classificationTable$asDF
   expect_equal(cls$n[cls$category == "Cleared / MRD-negative"], 30)

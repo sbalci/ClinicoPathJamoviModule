@@ -46,6 +46,7 @@ options:
     - name: timeBetween
       title: Time Between Draws (optional)
       type: Variable
+      default: NULL
       suggested: [continuous]
       permitted: [numeric]
       description:
@@ -56,6 +57,7 @@ options:
     - name: group
       title: Grouping Variable (optional)
       type: Variable
+      default: NULL
       suggested: [nominal, ordinal]
       permitted: [factor]
       description:
@@ -65,12 +67,14 @@ options:
     - name: survivalTime
       title: Survival Time (optional)
       type: Variable
+      default: NULL
       suggested: [continuous]
       permitted: [numeric]
 
     - name: survivalStatus
       title: Survival Event (optional)
       type: Variable
+      default: NULL
       suggested: [nominal, ordinal]
       permitted: [factor, numeric]
 

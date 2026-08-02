@@ -62,6 +62,7 @@ jjsegmentedtotalbarOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6:
             private$..x_var <- jmvcore::OptionVariable$new(
                 "x_var",
                 x_var,
+                default=NULL,
                 suggested=list(
                     "nominal",
                     "ordinal"),
@@ -70,6 +71,7 @@ jjsegmentedtotalbarOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6:
             private$..y_var <- jmvcore::OptionVariable$new(
                 "y_var",
                 y_var,
+                default=NULL,
                 suggested=list(
                     "continuous"),
                 permitted=list(
@@ -77,6 +79,7 @@ jjsegmentedtotalbarOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6:
             private$..fill_var <- jmvcore::OptionVariable$new(
                 "fill_var",
                 fill_var,
+                default=NULL,
                 suggested=list(
                     "nominal",
                     "ordinal"),
@@ -709,9 +712,9 @@ jjsegmentedtotalbarBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6
 jjsegmentedtotalbar <- function(
     data,
     analysis_preset = "custom",
-    x_var,
-    y_var,
-    fill_var,
+    x_var = NULL,
+    y_var = NULL,
+    fill_var = NULL,
     facet_var = NULL,
     show_plot = FALSE,
     plot_type = "stacked",

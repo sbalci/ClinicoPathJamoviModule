@@ -25,6 +25,7 @@ options:
     - name: xvar
       title: X Variable
       type: Variable
+      default: NULL
       suggested:
         - continuous
         - ordinal
@@ -36,6 +37,7 @@ options:
     - name: yvar
       title: Y Variable  
       type: Variable
+      default: NULL
       suggested:
         - continuous
       permitted:
@@ -44,6 +46,7 @@ options:
     - name: color
       title: Color Variable
       type: Variable
+      default: NULL
       suggested:
         - nominal
         - ordinal
@@ -54,6 +57,7 @@ options:
     - name: group
       title: Group Variable
       type: Variable
+      default: NULL
       suggested:
         - nominal
         - ordinal
@@ -64,6 +68,7 @@ options:
     - name: facet
       title: Facet Variable
       type: Variable
+      default: NULL
       suggested:
         - nominal
         - ordinal

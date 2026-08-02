@@ -6,11 +6,11 @@
 \usage{
 decisioncompare(
   data,
-  gold,
+  gold = NULL,
   goldPositive,
-  test1,
+  test1 = NULL,
   test1Positive,
-  test2,
+  test2 = NULL,
   test2Positive,
   test3 = NULL,
   test3Positive,

@@ -390,6 +390,7 @@ ihcscoringOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             private$..outcome_var <- jmvcore::OptionVariable$new(
                 "outcome_var",
                 outcome_var,
+                default=NULL,
                 suggested=list(
                     "nominal",
                     "ordinal"),
@@ -403,6 +404,7 @@ ihcscoringOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             private$..cutpoint_time_var <- jmvcore::OptionVariable$new(
                 "cutpoint_time_var",
                 cutpoint_time_var,
+                default=NULL,
                 suggested=list(
                     "continuous"),
                 permitted=list(
@@ -1852,9 +1854,9 @@ ihcscoring <- function(
     optimal_cutpoint = FALSE,
     optimize_score = "hscore",
     outcome_type = "binary",
-    outcome_var,
+    outcome_var = NULL,
     outcome_positive,
-    cutpoint_time_var) {
+    cutpoint_time_var = NULL) {
 
     if ( ! requireNamespace("jmvcore", quietly=TRUE))
         stop("ihcscoring requires jmvcore to be installed (restart may be required)")

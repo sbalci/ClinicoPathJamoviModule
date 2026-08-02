@@ -74,6 +74,7 @@ options:
     - name: group
       title: Grouping Variable
       type: Variable
+      default: NULL
       suggested: [nominal, ordinal]
       permitted: [factor]
 

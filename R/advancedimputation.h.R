@@ -25,7 +25,7 @@ advancedimputationOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::
             level2_vars = NULL,
             min_bucket_size = 5,
             exclude_vars = NULL,
-            passive_imputation = NULL,
+            passive_imputation = "",
             ridge_penalty = 0.00001,
             remove_collinear = TRUE,
             collinearity_threshold = 0.95,
@@ -182,7 +182,8 @@ advancedimputationOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::
                 exclude_vars)
             private$..passive_imputation <- jmvcore::OptionString$new(
                 "passive_imputation",
-                passive_imputation)
+                passive_imputation,
+                default="")
             private$..ridge_penalty <- jmvcore::OptionNumber$new(
                 "ridge_penalty",
                 ridge_penalty,
@@ -573,7 +574,7 @@ advancedimputation <- function(
     level2_vars,
     min_bucket_size = 5,
     exclude_vars,
-    passive_imputation,
+    passive_imputation = "",
     ridge_penalty = 0.00001,
     remove_collinear = TRUE,
     collinearity_threshold = 0.95,

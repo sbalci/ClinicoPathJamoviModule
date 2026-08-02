@@ -13,7 +13,10 @@ test_that("nogoldstandard creates proper class", {
     test1 = "Test1",
     test1Positive = "Positive",
     test2 = "Test2",
-    test2Positive = "Positive"
+    test2Positive = "Positive",
+    test3Positive = NULL,
+    test4Positive = NULL,
+    test5Positive = NULL
   )
   expect_s3_class(result, "nogoldstandardClass")
 })
@@ -25,7 +28,10 @@ test_that("nogoldstandard handles basic two-test analysis", {
     test1Positive = "Positive",
     test2 = "Test2",
     test2Positive = "Positive",
-    method = "all_positive"
+    method = "all_positive",
+    test3Positive = NULL,
+    test4Positive = NULL,
+    test5Positive = NULL
   )
   expect_s3_class(result, "nogoldstandardClass")
   expect_true(length(result$results) > 0)
@@ -38,7 +44,10 @@ test_that("nogoldstandard handles latent class analysis", {
     test1Positive = "Positive",
     test2 = "Test2",
     test2Positive = "Positive",
-    method = "latent_class"
+    method = "latent_class",
+    test3Positive = NULL,
+    test4Positive = NULL,
+    test5Positive = NULL
   )
   expect_s3_class(result, "nogoldstandardClass")
 })
@@ -52,7 +61,9 @@ test_that("nogoldstandard handles three-test pathology data", {
     test2Positive = "Malignant",
     test3 = "Pathologist3",
     test3Positive = "Malignant",
-    method = "latent_class"
+    method = "latent_class",
+    test4Positive = NULL,
+    test5Positive = NULL
   )
   expect_s3_class(result, "nogoldstandardClass")
 })
@@ -68,7 +79,8 @@ test_that("nogoldstandard handles four-test tumor marker data", {
     test3Positive = "Elevated",
     test4 = "AFP",
     test4Positive = "Elevated",
-    method = "composite"
+    method = "composite",
+    test5Positive = NULL
   )
   expect_s3_class(result, "nogoldstandardClass")
 })
@@ -98,7 +110,10 @@ test_that("nogoldstandard handles composite reference method", {
     test1Positive = "Positive",
     test2 = "Test2",
     test2Positive = "Positive",
-    method = "composite"
+    method = "composite",
+    test3Positive = NULL,
+    test4Positive = NULL,
+    test5Positive = NULL
   )
   expect_s3_class(result, "nogoldstandardClass")
 })
@@ -112,7 +127,9 @@ test_that("nogoldstandard handles all positive method", {
     test2Positive = "Malignant",
     test3 = "Pathologist3",
     test3Positive = "Malignant",
-    method = "all_positive"
+    method = "all_positive",
+    test4Positive = NULL,
+    test5Positive = NULL
   )
   expect_no_error(result)
 })
@@ -126,7 +143,9 @@ test_that("nogoldstandard handles any positive method", {
     test2Positive = "Malignant",
     test3 = "Pathologist3",
     test3Positive = "Malignant",
-    method = "any_positive"
+    method = "any_positive",
+    test4Positive = NULL,
+    test5Positive = NULL
   )
   expect_no_error(result)
 })
@@ -138,7 +157,10 @@ test_that("nogoldstandard handles Bayesian analysis method", {
     test1Positive = "Positive",
     test2 = "Test2",
     test2Positive = "Positive",
-    method = "bayesian"
+    method = "bayesian",
+    test3Positive = NULL,
+    test4Positive = NULL,
+    test5Positive = NULL
   )
   expect_s3_class(result, "nogoldstandardClass")
 })

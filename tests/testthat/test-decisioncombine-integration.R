@@ -19,7 +19,8 @@ test_that("decisioncombine produces consistent results across runs", {
     test1 = "rater1",
     test1Positive = "Positive",
     test2 = "rater2",
-    test2Positive = "Positive"
+    test2Positive = "Positive",
+    test3Positive = NULL
   )
 
   result2 <- decisioncombine(
@@ -29,7 +30,8 @@ test_that("decisioncombine produces consistent results across runs", {
     test1 = "rater1",
     test1Positive = "Positive",
     test2 = "rater2",
-    test2Positive = "Positive"
+    test2Positive = "Positive",
+    test3Positive = NULL
   )
 
   # Results should be identical (deterministic)
@@ -46,7 +48,8 @@ test_that("decisioncombine workflow: basic → individual → visualization", {
     test1 = "rater1",
     test1Positive = "Positive",
     test2 = "rater2",
-    test2Positive = "Positive"
+    test2Positive = "Positive",
+    test3Positive = NULL
   )
   expect_s3_class(basic, "decisioncombineClass")
 
@@ -59,7 +62,8 @@ test_that("decisioncombine workflow: basic → individual → visualization", {
     test1Positive = "Positive",
     test2 = "rater2",
     test2Positive = "Positive",
-    showIndividual = TRUE
+    showIndividual = TRUE,
+    test3Positive = NULL
   )
   expect_s3_class(with_individual, "decisioncombineClass")
 
@@ -74,7 +78,8 @@ test_that("decisioncombine workflow: basic → individual → visualization", {
     test2Positive = "Positive",
     showIndividual = TRUE,
     showBarPlot = TRUE,
-    showHeatmap = TRUE
+    showHeatmap = TRUE,
+    test3Positive = NULL
   )
   expect_s3_class(with_viz, "decisioncombineClass")
 })
@@ -92,7 +97,8 @@ test_that("decisioncombine workflow: pathology rater agreement study", {
     showIndividual = TRUE,
     showFrequency = TRUE,
     showBarPlot = TRUE,
-    showRecommendation = TRUE
+    showRecommendation = TRUE,
+    test3Positive = NULL
   )
 
   expect_s3_class(result, "decisioncombineClass")
@@ -113,7 +119,8 @@ test_that("decisioncombine workflow: screening + confirmatory strategy", {
     showIndividual = TRUE,
     filterPattern = "serial",  # Serial strategy (both must be positive)
     showBarPlot = TRUE,
-    showRecommendation = TRUE
+    showRecommendation = TRUE,
+    test3Positive = NULL
   )
 
   expect_s3_class(result, "decisioncombineClass")
@@ -131,7 +138,8 @@ test_that("decisioncombine workflow: parallel vs serial comparison", {
     test1Positive = "Positive",
     test2 = "specific_test",
     test2Positive = "Positive",
-    filterPattern = "parallel"
+    filterPattern = "parallel",
+    test3Positive = NULL
   )
   expect_s3_class(parallel, "decisioncombineClass")
 
@@ -144,7 +152,8 @@ test_that("decisioncombine workflow: parallel vs serial comparison", {
     test1Positive = "Positive",
     test2 = "specific_test",
     test2Positive = "Positive",
-    filterPattern = "serial"
+    filterPattern = "serial",
+    test3Positive = NULL
   )
   expect_s3_class(serial, "decisioncombineClass")
 })
@@ -164,7 +173,8 @@ test_that("decisioncombine workflow: multi-modal imaging comparison", {
     showIndividual = TRUE,
     showBarPlot = TRUE,
     showHeatmap = TRUE,
-    showRecommendation = TRUE
+    showRecommendation = TRUE,
+    test3Positive = NULL
   )
 
   expect_s3_class(result, "decisioncombineClass")
@@ -231,7 +241,8 @@ test_that("decisioncombine workflow: serial testing with temporal component", {
     showIndividual = TRUE,
     showBarPlot = TRUE,
     filterPattern = "serial",
-    showRecommendation = TRUE
+    showRecommendation = TRUE,
+    test3Positive = NULL
   )
 
   expect_s3_class(result, "decisioncombineClass")
@@ -257,7 +268,8 @@ test_that("decisioncombine handles data from CSV import", {
     test1 = "rater1",
     test1Positive = "Positive",
     test2 = "rater2",
-    test2Positive = "Positive"
+    test2Positive = "Positive",
+    test3Positive = NULL
   )
 
   expect_s3_class(result, "decisioncombineClass")
@@ -287,7 +299,8 @@ test_that("decisioncombine handles data from Excel import", {
     test1 = "rater1",
     test1Positive = "Positive",
     test2 = "rater2",
-    test2Positive = "Positive"
+    test2Positive = "Positive",
+    test3Positive = NULL
   )
 
   expect_s3_class(result, "decisioncombineClass")
@@ -308,7 +321,8 @@ test_that("decisioncombine handles different data structures consistently", {
     test1 = "rater1",
     test1Positive = "Positive",
     test2 = "rater2",
-    test2Positive = "Positive"
+    test2Positive = "Positive",
+    test3Positive = NULL
   )
 
   expect_s3_class(result_tibble, "decisioncombineClass")
@@ -323,7 +337,8 @@ test_that("decisioncombine handles different data structures consistently", {
     test1 = "rater1",
     test1Positive = "Positive",
     test2 = "rater2",
-    test2Positive = "Positive"
+    test2Positive = "Positive",
+    test3Positive = NULL
   )
 
   expect_s3_class(result_df, "decisioncombineClass")
@@ -345,7 +360,8 @@ test_that("decisioncombine workflow: complete publication-ready analysis", {
     showHeatmap = TRUE,
     showForest = TRUE,
     showDecisionTree = TRUE,
-    showRecommendation = TRUE
+    showRecommendation = TRUE,
+    test3Positive = NULL
   )
 
   expect_s3_class(result, "decisioncombineClass")
@@ -364,7 +380,8 @@ test_that("decisioncombine workflow: sensitivity analysis by filtering", {
       test1Positive = "Positive",
       test2 = "rater2",
       test2Positive = "Positive",
-      filterStatistic = stat
+      filterStatistic = stat,
+      test3Positive = NULL
     )
     expect_s3_class(result, "decisioncombineClass")
   }
@@ -383,7 +400,8 @@ test_that("decisioncombine workflow: pattern-specific analysis", {
       test1Positive = "Positive",
       test2 = "rater2",
       test2Positive = "Positive",
-      filterPattern = pattern
+      filterPattern = pattern,
+      test3Positive = NULL
     )
     expect_s3_class(result, "decisioncombineClass")
   }
@@ -402,7 +420,8 @@ test_that("decisioncombine workflow: concordance vs discordance comparison", {
     test1Positive = "Positive",
     test2 = "test_b",
     test2Positive = "Positive",
-    showRecommendation = TRUE
+    showRecommendation = TRUE,
+    test3Positive = NULL
   )
   expect_s3_class(result_concordant, "decisioncombineClass")
 
@@ -415,7 +434,8 @@ test_that("decisioncombine workflow: concordance vs discordance comparison", {
     test1Positive = "Positive",
     test2 = "specific_test",
     test2Positive = "Positive",
-    showRecommendation = TRUE
+    showRecommendation = TRUE,
+    test3Positive = NULL
   )
   expect_s3_class(result_discordant, "decisioncombineClass")
 })
@@ -430,7 +450,8 @@ test_that("decisioncombine workflow: add pattern to data and downstream analysis
     test1Positive = "Positive",
     test2 = "rater2",
     test2Positive = "Positive",
-    addPatternToData = TRUE
+    addPatternToData = TRUE,
+    test3Positive = NULL
   )
 
   expect_s3_class(result, "decisioncombineClass")
@@ -450,7 +471,8 @@ test_that("decisioncombine integrates with small dataset workflow", {
     test1Positive = "Positive",
     test2 = "test2",
     test2Positive = "Positive",
-    showBarPlot = TRUE
+    showBarPlot = TRUE,
+    test3Positive = NULL
   )
 
   expect_s3_class(result, "decisioncombineClass")
@@ -469,7 +491,8 @@ test_that("decisioncombine workflow: visual comparison across all plot types", {
     showBarPlot = TRUE,
     showHeatmap = TRUE,
     showForest = TRUE,
-    showDecisionTree = TRUE
+    showDecisionTree = TRUE,
+    test3Positive = NULL
   )
 
   expect_s3_class(result, "decisioncombineClass")

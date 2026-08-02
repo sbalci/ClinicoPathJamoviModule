@@ -6,8 +6,8 @@
 \usage{
 statsplot2(
   data,
-  dep,
-  group,
+  dep = NULL,
+  group = NULL,
   grvar = NULL,
   direction = "independent",
   distribution = "p",

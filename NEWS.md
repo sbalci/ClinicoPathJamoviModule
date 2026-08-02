@@ -1,5 +1,50 @@
 # ClinicoPath News
 
+# ClinicoPath 1.0.2 — R-callable argument pass and release automation (2026-08-02)
+
+Every jamovi analysis is also a plain R function, and that surface had drifted: 1,546 calls across
+the test suite could not run at all because the generated wrapper demanded arguments the analysis
+does not actually need. Fixing that exposed one crash on a default code path. No statistical
+method changed.
+
+## Fixed
+
+- **`decision` crashed whenever "Disease Absent Level" or "Test Negative Level" was left unset.**
+  `dplyr::case_when()` evaluates every branch regardless of which one matches, so the unreachable
+  `test == <negative level>` comparison still ran with the level `NULL`, produced a zero-length
+  condition, and aborted the analysis with `Can't recycle ... size 0`. Both levels now use
+  `NA_character_` as the "unset" sentinel, which compares to a full-length, never-matching
+  condition. Behaviour with the levels *set* is unchanged: an explicitly chosen negative level
+  still restricts the analysis to those two levels and drops the rest.
+- **158 options across 66 analyses were required arguments of the generated R function.** An
+  option with no `default:` in its `.a.yaml` compiles to a bare parameter, so calling the analysis
+  from R without it failed with `argument "X" is missing, with no default` before any of the
+  analysis's own validation could run — even for plainly optional inputs such as
+  `jjhistostats(grvar =)`, `tidyplots(facet =, color =)` or `jforestmodel(covariates =)`. The
+  affected `Variable`/`Variables` options now carry `default: NULL`; `classification`'s
+  `classifier`, `splitRule` and `testing` carry their first declared level; `jjcoefstats`'s
+  `degreesOfFreedom` carries `0`, which its backend already treats as "not supplied". The jamovi
+  GUI is unaffected — it never passed these positionally — and users now reach the analysis's own
+  message instead of an R argument-matching error.
+
+## Changed
+
+- **Test suite: `type: Level` options are now passed explicitly.** A `Level` can never carry a
+  `default:` (the jamovi compiler rejects it), so it is always a required argument of the R
+  wrapper and every caller must supply it — `NULL` when the paired variable is not selected. 901
+  such arguments were added across 517 call sites in 59 test files. Several `expect_error()` tests
+  were passing only because the missing argument threw; with the argument supplied they now
+  exercise the assertion they claim to make, and a handful of genuine validation gaps became
+  visible.
+
+## Added
+
+- **Automated GitHub release (`.github/workflows/release.yaml`).** A push to the default branch
+  touching `DESCRIPTION` or `jamovi/0000.yaml` cross-checks the two version strings, refuses to
+  proceed if they disagree, and — if the tag does not already exist — tags `v<version>` and
+  publishes a release whose notes are the matching section of this file. Re-running it is
+  harmless.
+
 # ClinicoPath 1.0.1 — jsurvival event-level correctness pass (2026-07-28)
 
 Review of the event-level selection logic across the eight `jsurvival` analyses. Several of these

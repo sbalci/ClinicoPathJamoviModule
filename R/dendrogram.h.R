@@ -79,6 +79,7 @@ dendrogramOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             private$..group <- jmvcore::OptionVariable$new(
                 "group",
                 group,
+                default=NULL,
                 suggested=list(
                     "nominal",
                     "ordinal"),
@@ -415,7 +416,7 @@ dendrogram <- function(
     standardize = TRUE,
     showLabels = TRUE,
     colorGroups = FALSE,
-    group,
+    group = NULL,
     plotHeight = 600,
     plotWidth = 800,
     plotType = "linear",

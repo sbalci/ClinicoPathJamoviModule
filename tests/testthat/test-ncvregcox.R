@@ -28,7 +28,9 @@ test_that('ncvregcox analysis works', {
     standardize = TRUE,
     plot_path = TRUE,
     plot_cv = TRUE,
-    variable_importance = TRUE
+    variable_importance = TRUE,
+    outcomeLevel = NULL,
+    censorLevel = NULL
     )
   })
 

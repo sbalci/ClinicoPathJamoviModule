@@ -48,6 +48,7 @@ options:
     - name: d1
       title: Tumor Bed Dimension 1 (mm)
       type: Variable
+      default: NULL
       suggested: [continuous]
       permitted: [numeric]
       description:
@@ -56,6 +57,7 @@ options:
     - name: d2
       title: Tumor Bed Dimension 2 (mm)
       type: Variable
+      default: NULL
       suggested: [continuous]
       permitted: [numeric]
       description:
@@ -64,6 +66,7 @@ options:
     - name: cellularity
       title: Overall Cancer Cellularity (%)
       type: Variable
+      default: NULL
       suggested: [continuous]
       permitted: [numeric]
       description:
@@ -72,6 +75,7 @@ options:
     - name: cis
       title: In-situ Fraction (%) (optional)
       type: Variable
+      default: NULL
       suggested: [continuous]
       permitted: [numeric]
       description:
@@ -80,6 +84,7 @@ options:
     - name: positiveNodes
       title: Number of Positive Nodes
       type: Variable
+      default: NULL
       suggested: [continuous]
       permitted: [numeric]
       description:
@@ -88,6 +93,7 @@ options:
     - name: metSize
       title: Largest Nodal Metastasis (mm) (optional)
       type: Variable
+      default: NULL
       suggested: [continuous]
       permitted: [numeric]
       description:
@@ -148,6 +154,7 @@ options:
     - name: survivalTime
       title: Survival Time (optional)
       type: Variable
+      default: NULL
       suggested: [continuous]
       permitted: [numeric]
       description:
@@ -156,6 +163,7 @@ options:
     - name: survivalStatus
       title: Event Status (optional)
       type: Variable
+      default: NULL
       suggested: [nominal]
       permitted: [factor, numeric]
       description:

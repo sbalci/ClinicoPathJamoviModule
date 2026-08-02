@@ -57,6 +57,7 @@ toxicityprofileOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
             private$..treatment <- jmvcore::OptionVariable$new(
                 "treatment",
                 treatment,
+                default=NULL,
                 suggested=list(
                     "nominal"),
                 permitted=list(
@@ -64,6 +65,7 @@ toxicityprofileOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
             private$..systemOrganClass <- jmvcore::OptionVariable$new(
                 "systemOrganClass",
                 systemOrganClass,
+                default=NULL,
                 suggested=list(
                     "nominal"),
                 permitted=list(
@@ -71,6 +73,7 @@ toxicityprofileOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
             private$..timeToEvent <- jmvcore::OptionVariable$new(
                 "timeToEvent",
                 timeToEvent,
+                default=NULL,
                 suggested=list(
                     "continuous"))
             private$..plotType <- jmvcore::OptionList$new(
@@ -426,9 +429,9 @@ toxicityprofile <- function(
     patientID,
     adverseEvent,
     grade,
-    treatment,
-    systemOrganClass,
-    timeToEvent,
+    treatment = NULL,
+    systemOrganClass = NULL,
+    timeToEvent = NULL,
     plotType = "stacked_bar",
     sortBy = "frequency",
     showHighGradeOnly = FALSE,

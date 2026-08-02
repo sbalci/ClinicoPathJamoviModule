@@ -7,7 +7,7 @@
 jjhistostats(
   data,
   dep,
-  grvar,
+  grvar = NULL,
   typestatistics = "parametric",
   centralityline = FALSE,
   changebinwidth = FALSE,

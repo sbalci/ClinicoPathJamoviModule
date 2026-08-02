@@ -6,8 +6,8 @@
 \usage{
 chisqposttest(
   data,
-  rows,
-  cols,
+  rows = NULL,
+  cols = NULL,
   counts = NULL,
   posthoc = "bonferroni",
   sig = 0.05,

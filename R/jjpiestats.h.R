@@ -38,6 +38,7 @@ jjpiestatsOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             private$..dep <- jmvcore::OptionVariable$new(
                 "dep",
                 dep,
+                default=NULL,
                 suggested=list(
                     "ordinal",
                     "nominal"),
@@ -464,7 +465,7 @@ jjpiestatsBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' @export
 jjpiestats <- function(
     data,
-    dep,
+    dep = NULL,
     group = NULL,
     grvar = NULL,
     typestatistics = "parametric",

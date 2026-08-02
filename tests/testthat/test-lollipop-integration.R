@@ -26,7 +26,8 @@ test_that("lollipop handles complete clinical lab analysis workflow", {
     data = lollipop_test,
     dep = "hemoglobin",
     group = "treatment_group",
-    aggregation = "mean"
+    aggregation = "mean",
+    highlight = NULL
   )
   expect_s3_class(result1, "lollipopResults")
 
@@ -48,7 +49,8 @@ test_that("lollipop handles complete clinical lab analysis workflow", {
     group = "age_group",
     conditionalColor = TRUE,
     colorThreshold = 1.2,
-    aggregation = "mean"
+    aggregation = "mean",
+    highlight = NULL
   )
   expect_s3_class(result3, "lollipopResults")
 
@@ -64,7 +66,8 @@ test_that("lollipop handles complete clinical lab analysis workflow", {
     colorScheme = "clinical",
     theme = "publication",
     title = "Mean Platelet Counts by Hospital",
-    ylabel = "Platelet Count (×10³/μL)"
+    ylabel = "Platelet Count (×10³/μL)",
+    highlight = NULL
   )
   expect_s3_class(result4, "lollipopResults")
 })
@@ -87,7 +90,8 @@ test_that("lollipop handles treatment comparison workflow", {
     colorThreshold = 30,
     baseline = 0,
     title = "Tumor Size Reduction by Treatment",
-    ylabel = "Reduction (%)"
+    ylabel = "Reduction (%)",
+    highlight = NULL
   )
   expect_s3_class(result1, "lollipopResults")
 
@@ -100,7 +104,8 @@ test_that("lollipop handles treatment comparison workflow", {
     orientation = "horizontal",
     showValues = TRUE,
     colorScheme = "viridis",
-    theme = "publication"
+    theme = "publication",
+    highlight = NULL
   )
   expect_s3_class(result2, "lollipopResults")
 
@@ -113,7 +118,8 @@ test_that("lollipop handles treatment comparison workflow", {
     conditionalColor = TRUE,
     colorThreshold = 20,
     colorScheme = "clinical",
-    title = "Side Effect Scores by Treatment (Lower is Better)"
+    title = "Side Effect Scores by Treatment (Lower is Better)",
+    highlight = NULL
   )
   expect_s3_class(result3, "lollipopResults")
 })
@@ -134,7 +140,8 @@ test_that("lollipop handles biomarker panel workflow", {
       aggregation = "median",
       sortBy = "value_desc",
       colorScheme = "clinical",
-      theme = "publication"
+      theme = "publication",
+      highlight = NULL
     )
     expect_s3_class(result, "lollipopResults")
   }
@@ -156,7 +163,8 @@ test_that("lollipop handles hospital quality metrics workflow", {
     showValues = TRUE,
     conditionalColor = TRUE,
     colorThreshold = 80,
-    title = "Hospital Survival Rates"
+    title = "Hospital Survival Rates",
+    highlight = NULL
   )
   expect_s3_class(result1, "lollipopResults")
 
@@ -170,7 +178,8 @@ test_that("lollipop handles hospital quality metrics workflow", {
     showValues = TRUE,
     conditionalColor = TRUE,
     colorThreshold = 15,
-    title = "Hospital Complication Rates (Lower is Better)"
+    title = "Hospital Complication Rates (Lower is Better)",
+    highlight = NULL
   )
   expect_s3_class(result2, "lollipopResults")
 
@@ -182,7 +191,8 @@ test_that("lollipop handles hospital quality metrics workflow", {
     sortBy = "value_desc",
     showMean = TRUE,
     colorScheme = "viridis",
-    theme = "publication"
+    theme = "publication",
+    highlight = NULL
   )
   expect_s3_class(result3, "lollipopResults")
 })
@@ -200,7 +210,8 @@ test_that("lollipop handles all datasets with consistent parameters", {
     group = "treatment_group",
     aggregation = "mean",
     sortBy = "value_desc",
-    colorScheme = "clinical"
+    colorScheme = "clinical",
+    highlight = NULL
   )
   expect_s3_class(result1, "lollipopResults")
 
@@ -210,7 +221,8 @@ test_that("lollipop handles all datasets with consistent parameters", {
     dep = "tumor_reduction",
     group = "treatment",
     sortBy = "value_desc",
-    colorScheme = "clinical"
+    colorScheme = "clinical",
+    highlight = NULL
   )
   expect_s3_class(result2, "lollipopResults")
 
@@ -221,7 +233,8 @@ test_that("lollipop handles all datasets with consistent parameters", {
     group = "cancer_type",
     aggregation = "median",
     sortBy = "value_desc",
-    colorScheme = "clinical"
+    colorScheme = "clinical",
+    highlight = NULL
   )
   expect_s3_class(result3, "lollipopResults")
 
@@ -231,7 +244,8 @@ test_that("lollipop handles all datasets with consistent parameters", {
     dep = "survival_rate",
     group = "hospital",
     sortBy = "value_desc",
-    colorScheme = "clinical"
+    colorScheme = "clinical",
+    highlight = NULL
   )
   expect_s3_class(result4, "lollipopResults")
 
@@ -241,7 +255,8 @@ test_that("lollipop handles all datasets with consistent parameters", {
     dep = "measurement",
     group = "category",
     sortBy = "value_desc",
-    colorScheme = "clinical"
+    colorScheme = "clinical",
+    highlight = NULL
   )
   expect_s3_class(result5, "lollipopResults")
 
@@ -251,7 +266,8 @@ test_that("lollipop handles all datasets with consistent parameters", {
     dep = "mean_income",
     group = "region",
     sortBy = "value_desc",
-    colorScheme = "clinical"
+    colorScheme = "clinical",
+    highlight = NULL
   )
   expect_s3_class(result6, "lollipopResults")
 })
@@ -268,7 +284,8 @@ test_that("lollipop produces consistent results for vertical and horizontal orie
     dep = "albumin",
     group = "disease_severity",
     aggregation = "mean",
-    orientation = "vertical"
+    orientation = "vertical",
+    highlight = NULL
   )
   expect_s3_class(result_vert, "lollipopResults")
 
@@ -278,7 +295,8 @@ test_that("lollipop produces consistent results for vertical and horizontal orie
     dep = "albumin",
     group = "disease_severity",
     aggregation = "mean",
-    orientation = "horizontal"
+    orientation = "horizontal",
+    highlight = NULL
   )
   expect_s3_class(result_horiz, "lollipopResults")
 })
@@ -293,7 +311,8 @@ test_that("lollipop handles progressive feature addition", {
   result1 <- lollipop(
     data = lollipop_test,
     dep = "white_blood_cells",
-    group = "treatment_group"
+    group = "treatment_group",
+    highlight = NULL
   )
   expect_s3_class(result1, "lollipopResults")
 
@@ -302,7 +321,8 @@ test_that("lollipop handles progressive feature addition", {
     data = lollipop_test,
     dep = "white_blood_cells",
     group = "treatment_group",
-    aggregation = "mean"
+    aggregation = "mean",
+    highlight = NULL
   )
   expect_s3_class(result2, "lollipopResults")
 
@@ -312,7 +332,8 @@ test_that("lollipop handles progressive feature addition", {
     dep = "white_blood_cells",
     group = "treatment_group",
     aggregation = "mean",
-    sortBy = "value_desc"
+    sortBy = "value_desc",
+    highlight = NULL
   )
   expect_s3_class(result3, "lollipopResults")
 
@@ -399,7 +420,8 @@ test_that("lollipop handles multiple analyses from same dataset", {
       sortBy = "value_desc",
       showMean = TRUE,
       colorScheme = "clinical",
-      theme = "publication"
+      theme = "publication",
+      highlight = NULL
     )
     expect_s3_class(results[[param]], "lollipopResults")
   }
@@ -419,21 +441,24 @@ test_that("lollipop produces consistent results on repeated calls", {
     data = lollipop_test,
     dep = "hemoglobin",
     group = "treatment_group",
-    aggregation = "mean"
+    aggregation = "mean",
+    highlight = NULL
   )
 
   result2 <- lollipop(
     data = lollipop_test,
     dep = "hemoglobin",
     group = "treatment_group",
-    aggregation = "mean"
+    aggregation = "mean",
+    highlight = NULL
   )
 
   result3 <- lollipop(
     data = lollipop_test,
     dep = "hemoglobin",
     group = "treatment_group",
-    aggregation = "mean"
+    aggregation = "mean",
+    highlight = NULL
   )
 
   expect_s3_class(result1, "lollipopResults")
@@ -455,7 +480,8 @@ test_that("lollipop handles multi-center comparison workflow", {
     aggregation = "mean",
     sortBy = "value_desc",
     showValues = TRUE,
-    colorScheme = "clinical"
+    colorScheme = "clinical",
+    highlight = NULL
   )
   expect_s3_class(result1, "lollipopResults")
 
@@ -468,7 +494,8 @@ test_that("lollipop handles multi-center comparison workflow", {
     sortBy = "value_desc",
     baseline = 150,
     showValues = TRUE,
-    colorScheme = "clinical"
+    colorScheme = "clinical",
+    highlight = NULL
   )
   expect_s3_class(result2, "lollipopResults")
 })

@@ -54,16 +54,20 @@ jggstatsOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 default="ggcoef_model")
             private$..dependent_var <- jmvcore::OptionVariable$new(
                 "dependent_var",
-                dependent_var)
+                dependent_var,
+                default=NULL)
             private$..independent_vars <- jmvcore::OptionVariables$new(
                 "independent_vars",
-                independent_vars)
+                independent_vars,
+                default=NULL)
             private$..grouping_var <- jmvcore::OptionVariable$new(
                 "grouping_var",
-                grouping_var)
+                grouping_var,
+                default=NULL)
             private$..weight_var <- jmvcore::OptionVariable$new(
                 "weight_var",
-                weight_var)
+                weight_var,
+                default=NULL)
             private$..model_formula <- jmvcore::OptionString$new(
                 "model_formula",
                 model_formula,
@@ -157,7 +161,8 @@ jggstatsOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 default="")
             private$..facet_var <- jmvcore::OptionVariable$new(
                 "facet_var",
-                facet_var)
+                facet_var,
+                default=NULL)
             private$..facet_type <- jmvcore::OptionList$new(
                 "facet_type",
                 facet_type,
@@ -421,10 +426,10 @@ jggstatsBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 jggstats <- function(
     data,
     analysis_type = "ggcoef_model",
-    dependent_var,
-    independent_vars,
-    grouping_var,
-    weight_var,
+    dependent_var = NULL,
+    independent_vars = NULL,
+    grouping_var = NULL,
+    weight_var = NULL,
     model_formula = "",
     model_type = "lm",
     family = "gaussian",
@@ -441,7 +446,7 @@ jggstats <- function(
     plot_subtitle = "",
     x_label = "",
     y_label = "",
-    facet_var,
+    facet_var = NULL,
     facet_type = "wrap",
     show_model_summary = TRUE,
     show_interpretation = TRUE,

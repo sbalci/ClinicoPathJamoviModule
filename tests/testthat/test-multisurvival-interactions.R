@@ -29,6 +29,7 @@ if (is.na(.root)) .root <- .find_root(getwd())
 if (is.na(.root)) stop("Could not locate repo root (marker file R/utils.R not found)")
 
 source(file.path(.root, "R", "utils.R"))
+source(file.path(.root, "R", "survival_utils.R"))
 source(file.path(.root, "R", "multisurvival-interactions.R"))
 
 # Local-only verification shim (does NOT touch production code): the CRAN
@@ -52,7 +53,7 @@ test_that(".buildSurvivalFormula appends escaped interaction terms", {
     predictors = c("arm", "bio"),
     interaction_terms = "`arm`:`bio`"
   )
-  rhs <- as.character(f)[3]
+  rhs <- paste(deparse(f[[3]]), collapse = " ")
   expect_true(grepl("arm", rhs))
   expect_true(grepl("bio", rhs))
   expect_true(grepl(":", rhs))
@@ -60,7 +61,7 @@ test_that(".buildSurvivalFormula appends escaped interaction terms", {
 
 test_that(".buildSurvivalFormula still works with no interactions", {
   f <- .buildSurvivalFormula("mytime", "myoutcome", c("arm", "bio"))
-  rhs <- as.character(f)[3]
+  rhs <- paste(deparse(f[[3]]), collapse = " ")
   expect_false(grepl(":", rhs))
   expect_true(grepl("arm", rhs) && grepl("bio", rhs))
 })
@@ -69,7 +70,7 @@ test_that(".buildSurvivalFormula keeps strata after interactions", {
   f <- .buildSurvivalFormula("mytime", "myoutcome", c("arm"),
                              strata_vars = "site",
                              interaction_terms = "`arm`:`bio`")
-  rhs <- as.character(f)[3]
+  rhs <- paste(deparse(f[[3]]), collapse = " ")
   expect_true(grepl("strata\\(", rhs))
   expect_true(grepl(":", rhs))
 })
@@ -78,7 +79,7 @@ test_that(".buildSurvivalFormula applies strata even when predictors are empty",
   f <- .buildSurvivalFormula("mytime", "myoutcome",
                              predictors = character(0),
                              strata_vars = "site")
-  rhs <- as.character(f)[3]
+  rhs <- paste(deparse(f[[3]]), collapse = " ")
   expect_true(grepl("strata\\(", rhs))
   expect_false(grepl(":", rhs))
 })

@@ -26,6 +26,7 @@ options:
     - name: patientID
       title: Patient ID
       type: Variable
+      default: NULL
       suggested: [nominal]
       permitted: [numeric, factor, id]
       description:
@@ -39,6 +40,7 @@ options:
     - name: responseVar
       title: Response Value (Raw or Percentage)
       type: Variable
+      default: NULL
       suggested: [continuous]
       permitted: [numeric]
       description:

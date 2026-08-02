@@ -8,6 +8,9 @@
 ^\.Rhistory$
 ^\.RData$
 ^\.Ruserdata$
+^\.git$
+^\.lintr$
+^\.superpowers$
 ^_pkgdown\.yml$
 ^\.github/
 ^docs/
@@ -16,6 +19,10 @@
 ^img/
 ^renv/
 ^renv\.lock$
+^node_modules$
+^package\.json$
+^package-lock\.json$
+^jamovi-library-audit$
 ^VIGNETTE_INTEGRATION_SUMMARY\.md$
 ^function_listing\.md$
 ^omv_test_data_listing\.md$
@@ -78,6 +85,7 @@
 ^preparations-1\.R$
 ^quarto\.R$
 ^test_.*\.R$
+^tests/verify_timeinterval copy\.R$
 ^\.travis\.yml$
 ^codecov\.yml$
 ^\.gitlab-ci\.yml$

@@ -12,7 +12,7 @@ dendrogram(
   standardize = TRUE,
   showLabels = TRUE,
   colorGroups = FALSE,
-  group,
+  group = NULL,
   plotHeight = 600,
   plotWidth = 800,
   plotType = "linear",

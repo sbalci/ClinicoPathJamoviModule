@@ -132,8 +132,10 @@ the Cox model.}
 \item{interactions}{Interaction (crossed) terms added to the Cox model,
 built from variables already selected as explanatory or continuous
 explanatory variables. Each term tests effect modification - e.g. Treatment
-x Biomarker for predictive-biomarker analysis. For a 2-way term the first
-variable is the focal effect and the second is the moderator.}
+x Biomarker. Calling a treatment interaction predictive requires an
+appropriate treatment-comparison design and pre-specified validation; an
+interaction alone does not establish clinical utility. For a 2-way term the
+first variable is the focal effect and the second is the moderator.}
 
 \item{multievent}{If true, multiple event levels will be considered for
 competing risks analysis. Requires specifying \code{dod}, \code{dooc}, etc.}
@@ -168,16 +170,21 @@ time point below the survival plot.}
 \item{censored}{If true, marks censored observations (e.g., using tick
 marks) on the survival plot.}
 
-\item{medianline}{If true, displays a line indicating the median survival
-time on the survival plot.}
+\item{medianline}{Selects whether horizontal, vertical, both, or no
+median-survival reference lines are displayed on survival plots.}
 
 \item{pplot}{If true, displays the p-value from the survival comparison
 test on the survival plot.}
 
-\item{cutp}{.}
+\item{cutp}{Positive, comma-separated prediction timepoints in the selected
+time unit. They are used by adjusted-probability tables and the nomogram;
+invalid values and nomogram timepoints beyond observed follow-up are
+omitted with a warning.}
 
-\item{calculateRiskScore}{If true, calculates a risk score from the Cox
-model coefficients for each individual.}
+\item{calculateRiskScore}{If true, calculates the Cox relative-risk score,
+exp(centered linear predictor), for each individual. This ranks fitted
+hazard and is not an absolute event probability; clinical use requires
+external validation.}
 
 \item{numRiskGroups}{Select the number of risk groups to create from the
 risk scores. The data will be divided into equal quantiles based on this
@@ -197,7 +204,9 @@ take longer to compute.}
 
 \item{ac}{.}
 
-\item{adjexplanatory}{.}
+\item{adjexplanatory}{Categorical model variable whose levels are
+contrasted in the adjusted curves. The variable must also be selected as an
+explanatory or stratification variable so it is part of the fitted model.}
 
 \item{ac_method}{Estimand for the adjusted survival curves. "Standardised
 over cohort" sets every observed patient to each level in turn and averages
@@ -207,12 +216,15 @@ curve per level at the mean/mode of the other covariates. "Whole-cohort
 expected survival" returns one curve for the cohort at its observed
 covariates and does not contrast the levels at all.}
 
-\item{ac_summary}{Display numeric adjusted-survival outputs (survival at
-the cutpoint timepoints with 95\\% CI, adjusted median survival, and the
-adjusted Cox hazard-ratio table) in addition to the adjusted-survival
-curve.}
+\item{ac_summary}{Display numeric model-adjusted probability outputs at the
+cutpoint timepoints, adjusted median time to event, and adjusted model
+effects. In competing-risk mode, probabilities are cumulative incidence and
+effects are Fine-Gray subdistribution hazard ratios.}
 
-\item{showNomogram}{.}
+\item{showNomogram}{Display a Cox-model nomogram for the requested
+prediction timepoints. Predictions are apparent estimates from the fitted
+data and are not a point-of-care tool without calibration and external
+validation.}
 
 \item{compare_models}{If true, reports a likelihood-ratio test and AIC for
 dropping each covariate from the full model (base R drop1). Shows which
@@ -235,8 +247,10 @@ analysis. Enter a  comma-separated list of time points to create intervals.
 For example,  "12, 36, 60" will create intervals 0-12, 12-36, 36-60, and
 60+.}
 
-\item{rate_multiplier}{Specify the multiplier for incidence rates (e.g.,
-100 for rates per 100 person-years, 1000 for rates per 1000 person-years).}
+\item{rate_multiplier}{Specify the multiplier for incidence rates (for
+example, 100 for rates per 100 person-time units). The person-time unit is
+the unit selected in \code{timetypeoutput}; choose years there before
+interpreting a rate as events per person-year.}
 
 \item{show_survmetrics}{Report model performance metrics for the Cox model:
 Harrell's concordance (C-index), inverse-probability-of-censoring-weighted

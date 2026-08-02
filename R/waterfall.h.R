@@ -48,6 +48,7 @@ waterfallOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             private$..patientID <- jmvcore::OptionVariable$new(
                 "patientID",
                 patientID,
+                default=NULL,
                 suggested=list(
                     "nominal"),
                 permitted=list(
@@ -57,6 +58,7 @@ waterfallOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             private$..responseVar <- jmvcore::OptionVariable$new(
                 "responseVar",
                 responseVar,
+                default=NULL,
                 suggested=list(
                     "continuous"),
                 permitted=list(
@@ -916,8 +918,8 @@ waterfallBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' @export
 waterfall <- function(
     data,
-    patientID,
-    responseVar,
+    patientID = NULL,
+    responseVar = NULL,
     timeVar = NULL,
     groupVar = NULL,
     inputType = "percentage",

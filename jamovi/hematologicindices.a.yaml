@@ -58,6 +58,7 @@ options:
     - name: monocytes
       title: Monocytes (10^9/L) (optional)
       type: Variable
+      default: NULL
       suggested: [continuous]
       permitted: [numeric]
       description:
@@ -66,6 +67,7 @@ options:
     - name: albumin
       title: Albumin (g/dL) (optional)
       type: Variable
+      default: NULL
       suggested: [continuous]
       permitted: [numeric]
       description:
@@ -86,6 +88,7 @@ options:
     - name: crp
       title: CRP (mg/L) (optional)
       type: Variable
+      default: NULL
       suggested: [continuous]
       permitted: [numeric]
       description:
@@ -132,6 +135,7 @@ options:
     - name: survivalTime
       title: Survival Time (optional)
       type: Variable
+      default: NULL
       suggested: [continuous]
       permitted: [numeric]
       description:
@@ -140,6 +144,7 @@ options:
     - name: survivalStatus
       title: Event Status (optional)
       type: Variable
+      default: NULL
       suggested: [nominal]
       permitted: [factor, numeric]
       description:

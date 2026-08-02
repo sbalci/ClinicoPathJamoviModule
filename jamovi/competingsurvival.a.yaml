@@ -34,12 +34,14 @@ options:
     - name: overalltime
       title: 'Overall Time (in months)'
       type: Variable
+      default: NULL
       suggested: [ continuous ]
       permitted: [ numeric ]
 
     - name: outcome
       title: Outcome
       type: Variable
+      default: NULL
       suggested: [ ordinal, nominal ]
       permitted: [ factor ]
 

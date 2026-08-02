@@ -36,7 +36,9 @@ test_that("highdimcox handles basic input validation", {
       data = test_data,
       elapsedtime = "time", 
       outcome = "event",
-      predictors = paste0("X", 1:10)
+      predictors = paste0("X", 1:10),
+      outcomeLevel = NULL,
+      censorLevel = NULL
     )
   })
 })

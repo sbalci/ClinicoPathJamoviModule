@@ -48,6 +48,7 @@ options:
     - name: group
       title: Group By (subspecialty / pathologist)
       type: Variable
+      default: NULL
       suggested: [nominal, ordinal]
       permitted: [factor]
       description:
@@ -56,6 +57,7 @@ options:
     - name: timeVar
       title: Time / Period (optional)
       type: Variable
+      default: NULL
       suggested: [continuous, ordinal]
       permitted: [numeric]
       description:

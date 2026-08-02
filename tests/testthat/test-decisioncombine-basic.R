@@ -23,7 +23,8 @@ test_that("decisioncombine runs with minimal required arguments", {
     test1 = "rater1",
     test1Positive = "Positive",
     test2 = "rater2",
-    test2Positive = "Positive"
+    test2Positive = "Positive",
+    test3Positive = NULL
   )
 
   expect_s3_class(result, "decisioncombineClass")
@@ -38,7 +39,8 @@ test_that("decisioncombine handles two-test combination", {
     test1 = "rater1",
     test1Positive = "Positive",
     test2 = "rater2",
-    test2Positive = "Positive"
+    test2Positive = "Positive",
+    test3Positive = NULL
   )
 
   expect_s3_class(result, "decisioncombineClass")
@@ -51,7 +53,9 @@ test_that("decisioncombine errors on missing gold standard", {
       test1 = "rater1",
       test1Positive = "Positive",
       test2 = "rater2",
-      test2Positive = "Positive"
+      test2Positive = "Positive",
+      goldPositive = NULL,
+      test3Positive = NULL
     ),
     regexp = "gold.*required|missing.*gold",
     ignore.case = TRUE
@@ -65,7 +69,9 @@ test_that("decisioncombine errors on missing test1", {
       gold = "gold_standard",
       goldPositive = "Malignant",
       test2 = "rater2",
-      test2Positive = "Positive"
+      test2Positive = "Positive",
+      test1Positive = NULL,
+      test3Positive = NULL
     ),
     regexp = "test.*required|missing.*test",
     ignore.case = TRUE
@@ -79,7 +85,9 @@ test_that("decisioncombine errors on missing test2", {
       gold = "gold_standard",
       goldPositive = "Malignant",
       test1 = "rater1",
-      test1Positive = "Positive"
+      test1Positive = "Positive",
+      test2Positive = NULL,
+      test3Positive = NULL
     ),
     regexp = "test2.*required|missing.*test",
     ignore.case = TRUE
@@ -94,7 +102,8 @@ test_that("decisioncombine handles binary gold standard correctly", {
     test1 = "rater1",
     test1Positive = "Positive",
     test2 = "rater2",
-    test2Positive = "Positive"
+    test2Positive = "Positive",
+    test3Positive = NULL
   )
 
   expect_s3_class(result, "decisioncombineClass")
@@ -108,7 +117,8 @@ test_that("decisioncombine handles binary test results", {
     test1 = "rater1",
     test1Positive = "Positive",
     test2 = "rater2",
-    test2Positive = "Positive"
+    test2Positive = "Positive",
+    test3Positive = NULL
   )
 
   expect_s3_class(result, "decisioncombineClass")
@@ -122,7 +132,8 @@ test_that("decisioncombine produces expected output structure", {
     test1 = "rater1",
     test1Positive = "Positive",
     test2 = "rater2",
-    test2Positive = "Positive"
+    test2Positive = "Positive",
+    test3Positive = NULL
   )
 
   # Check that result has results component
@@ -140,7 +151,8 @@ test_that("decisioncombine handles different positive class labels", {
     test1 = "rater1",
     test1Positive = "Negative",
     test2 = "rater2",
-    test2Positive = "Negative"
+    test2Positive = "Negative",
+    test3Positive = NULL
   )
 
   expect_s3_class(result, "decisioncombineClass")
@@ -156,7 +168,8 @@ test_that("decisioncombine handles small dataset", {
     test1 = "test1",
     test1Positive = "Positive",
     test2 = "test2",
-    test2Positive = "Positive"
+    test2Positive = "Positive",
+    test3Positive = NULL
   )
 
   expect_s3_class(result, "decisioncombineClass")
@@ -171,7 +184,8 @@ test_that("decisioncombine accepts default options", {
     test1 = "rater1",
     test1Positive = "Positive",
     test2 = "rater2",
-    test2Positive = "Positive"
+    test2Positive = "Positive",
+    test3Positive = NULL
   )
 
   expect_s3_class(result, "decisioncombineClass")
@@ -188,7 +202,8 @@ test_that("decisioncombine handles concordant tests", {
     test1 = "test_a",
     test1Positive = "Positive",
     test2 = "test_b",
-    test2Positive = "Positive"
+    test2Positive = "Positive",
+    test3Positive = NULL
   )
 
   expect_s3_class(result, "decisioncombineClass")
@@ -204,7 +219,8 @@ test_that("decisioncombine handles discordant tests", {
     test1 = "sensitive_test",
     test1Positive = "Positive",
     test2 = "specific_test",
-    test2Positive = "Positive"
+    test2Positive = "Positive",
+    test3Positive = NULL
   )
 
   expect_s3_class(result, "decisioncombineClass")

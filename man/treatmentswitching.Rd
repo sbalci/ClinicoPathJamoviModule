@@ -23,7 +23,7 @@ treatmentswitching(
   causalEstimate = TRUE,
   methodComparison = TRUE,
   bootstrapSamples = 1000,
-  psModel,
+  psModel = "",
   accelerationFactor,
   treatmentLag = 0,
   plotWidth = 700,

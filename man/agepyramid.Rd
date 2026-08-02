@@ -6,8 +6,8 @@
 \usage{
 agepyramid(
   data,
-  age,
-  gender,
+  age = NULL,
+  gender = NULL,
   female,
   male,
   age_groups = "custom",

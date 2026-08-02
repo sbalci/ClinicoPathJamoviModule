@@ -62,7 +62,8 @@ test_that("lollipop basic vertical chart", {
     data = test_data,
     dep = "response_score",
     group = "treatment",
-    aggregation = "mean"
+    aggregation = "mean",
+    highlight = NULL
   )
 
   plot <- extract_plot(result, "plot")
@@ -87,7 +88,8 @@ test_that("lollipop basic horizontal chart", {
     dep = "response_score",
     group = "treatment",
     aggregation = "mean",
-    orientation = "horizontal"
+    orientation = "horizontal",
+    highlight = NULL
   )
 
   plot <- extract_plot(result, "plot")
@@ -116,7 +118,8 @@ test_that("lollipop sorted ascending", {
     dep = "response_score",
     group = "treatment",
     aggregation = "mean",
-    sortBy = "value_asc"
+    sortBy = "value_asc",
+    highlight = NULL
   )
 
   plot <- extract_plot(result, "plot")
@@ -141,7 +144,8 @@ test_that("lollipop sorted descending", {
     dep = "response_score",
     group = "treatment",
     aggregation = "mean",
-    sortBy = "value_desc"
+    sortBy = "value_desc",
+    highlight = NULL
   )
 
   plot <- extract_plot(result, "plot")
@@ -166,7 +170,8 @@ test_that("lollipop sorted alphabetically", {
     dep = "response_score",
     group = "treatment",
     aggregation = "mean",
-    sortBy = "group_alpha"
+    sortBy = "group_alpha",
+    highlight = NULL
   )
 
   plot <- extract_plot(result, "plot")
@@ -194,7 +199,8 @@ test_that("lollipop with mean aggregation", {
     data = test_data,
     dep = "response_score",
     group = "treatment",
-    aggregation = "mean"
+    aggregation = "mean",
+    highlight = NULL
   )
 
   plot <- extract_plot(result, "plot")
@@ -218,7 +224,8 @@ test_that("lollipop with median aggregation", {
     data = test_data,
     dep = "response_score",
     group = "treatment",
-    aggregation = "median"
+    aggregation = "median",
+    highlight = NULL
   )
 
   plot <- extract_plot(result, "plot")
@@ -242,7 +249,8 @@ test_that("lollipop with sum aggregation", {
     data = test_data,
     dep = "patient_count",
     group = "treatment",
-    aggregation = "sum"
+    aggregation = "sum",
+    highlight = NULL
   )
 
   plot <- extract_plot(result, "plot")
@@ -329,7 +337,8 @@ test_that("lollipop with conditional coloring", {
     group = "treatment",
     aggregation = "mean",
     conditionalColor = TRUE,
-    colorThreshold = 60
+    colorThreshold = 60,
+    highlight = NULL
   )
 
   plot <- extract_plot(result, "plot")
@@ -386,7 +395,8 @@ test_that("lollipop default color scheme", {
     dep = "response_score",
     group = "treatment",
     aggregation = "mean",
-    colorScheme = "default"
+    colorScheme = "default",
+    highlight = NULL
   )
 
   plot <- extract_plot(result, "plot")
@@ -411,7 +421,8 @@ test_that("lollipop clinical color scheme", {
     dep = "response_score",
     group = "treatment",
     aggregation = "mean",
-    colorScheme = "clinical"
+    colorScheme = "clinical",
+    highlight = NULL
   )
 
   plot <- extract_plot(result, "plot")
@@ -436,7 +447,8 @@ test_that("lollipop viridis color scheme", {
     dep = "response_score",
     group = "treatment",
     aggregation = "mean",
-    colorScheme = "viridis"
+    colorScheme = "viridis",
+    highlight = NULL
   )
 
   plot <- extract_plot(result, "plot")
@@ -461,7 +473,8 @@ test_that("lollipop colorblind safe scheme", {
     dep = "response_score",
     group = "treatment",
     aggregation = "mean",
-    colorScheme = "colorblind"
+    colorScheme = "colorblind",
+    highlight = NULL
   )
 
   plot <- extract_plot(result, "plot")
@@ -490,7 +503,8 @@ test_that("lollipop minimal theme", {
     dep = "response_score",
     group = "treatment",
     aggregation = "mean",
-    theme = "minimal"
+    theme = "minimal",
+    highlight = NULL
   )
 
   plot <- extract_plot(result, "plot")
@@ -515,7 +529,8 @@ test_that("lollipop classic theme", {
     dep = "response_score",
     group = "treatment",
     aggregation = "mean",
-    theme = "classic"
+    theme = "classic",
+    highlight = NULL
   )
 
   plot <- extract_plot(result, "plot")
@@ -540,7 +555,8 @@ test_that("lollipop publication theme", {
     dep = "response_score",
     group = "treatment",
     aggregation = "mean",
-    theme = "publication"
+    theme = "publication",
+    highlight = NULL
   )
 
   plot <- extract_plot(result, "plot")
@@ -569,7 +585,8 @@ test_that("lollipop with value labels", {
     dep = "response_score",
     group = "treatment",
     aggregation = "mean",
-    showValues = TRUE
+    showValues = TRUE,
+    highlight = NULL
   )
 
   plot <- extract_plot(result, "plot")
@@ -594,7 +611,8 @@ test_that("lollipop with mean reference line", {
     dep = "response_score",
     group = "treatment",
     aggregation = "mean",
-    showMean = TRUE
+    showMean = TRUE,
+    highlight = NULL
   )
 
   plot <- extract_plot(result, "plot")
@@ -620,7 +638,8 @@ test_that("lollipop with values and mean line", {
     group = "treatment",
     aggregation = "mean",
     showValues = TRUE,
-    showMean = TRUE
+    showMean = TRUE,
+    highlight = NULL
   )
 
   plot <- extract_plot(result, "plot")
@@ -645,7 +664,8 @@ test_that("lollipop with custom baseline", {
     dep = "response_score",
     group = "treatment",
     aggregation = "mean",
-    baseline = 50
+    baseline = 50,
+    highlight = NULL
   )
 
   plot <- extract_plot(result, "plot")
@@ -670,7 +690,8 @@ test_that("lollipop with large points", {
     dep = "response_score",
     group = "treatment",
     aggregation = "mean",
-    pointSize = 6
+    pointSize = 6,
+    highlight = NULL
   )
 
   plot <- extract_plot(result, "plot")
@@ -695,7 +716,8 @@ test_that("lollipop with thick lines", {
     dep = "response_score",
     group = "treatment",
     aggregation = "mean",
-    lineWidth = 3
+    lineWidth = 3,
+    highlight = NULL
   )
 
   plot <- extract_plot(result, "plot")
@@ -720,7 +742,8 @@ test_that("lollipop with dashed lines", {
     dep = "response_score",
     group = "treatment",
     aggregation = "mean",
-    lineType = "dashed"
+    lineType = "dashed",
+    highlight = NULL
   )
 
   plot <- extract_plot(result, "plot")
@@ -745,7 +768,8 @@ test_that("lollipop with dotted lines", {
     dep = "response_score",
     group = "treatment",
     aggregation = "mean",
-    lineType = "dotted"
+    lineType = "dotted",
+    highlight = NULL
   )
 
   plot <- extract_plot(result, "plot")
@@ -772,7 +796,8 @@ test_that("lollipop with custom labels and title", {
     aggregation = "mean",
     xlabel = "Treatment Groups",
     ylabel = "Response Score (%)",
-    title = "Treatment Efficacy Comparison"
+    title = "Treatment Efficacy Comparison",
+    highlight = NULL
   )
 
   plot <- extract_plot(result, "plot")
@@ -849,7 +874,8 @@ test_that("lollipop complete customization", {
     baseline = 0,
     xlabel = "Treatment",
     ylabel = "Efficacy Score",
-    title = "Comprehensive Lollipop Customization"
+    title = "Comprehensive Lollipop Customization",
+    highlight = NULL
   )
 
   plot <- extract_plot(result, "plot")
@@ -881,7 +907,8 @@ test_that("lollipop with many categories", {
     data = many_cat_data,
     dep = "value",
     group = "category",
-    sortBy = "value_desc"
+    sortBy = "value_desc",
+    highlight = NULL
   )
 
   plot <- extract_plot(result, "plot")
@@ -907,7 +934,8 @@ test_that("lollipop with negative values", {
   result <- lollipop(
     data = negative_data,
     dep = "value",
-    group = "category"
+    group = "category",
+    highlight = NULL
   )
 
   plot <- extract_plot(result, "plot")
@@ -934,7 +962,8 @@ test_that("lollipop with very small values", {
     data = small_data,
     dep = "value",
     group = "category",
-    showValues = TRUE
+    showValues = TRUE,
+    highlight = NULL
   )
 
   plot <- extract_plot(result, "plot")

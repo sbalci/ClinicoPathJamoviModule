@@ -32,6 +32,7 @@ options:
     - name: rows
       title: Rows
       type: Variable
+      default: NULL
       suggested: [ ordinal, nominal ]
       permitted: [ factor ]
       description: >
@@ -40,6 +41,7 @@ options:
     - name: cols 
       title: Columns
       type: Variable
+      default: NULL
       suggested: [ ordinal, nominal ]
       permitted: [ factor ]
       description: >

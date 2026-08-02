@@ -42,6 +42,7 @@ standardizedratioOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R
             private$..personTime <- jmvcore::OptionVariable$new(
                 "personTime",
                 personTime,
+                default=NULL,
                 suggested=list(
                     "continuous"),
                 permitted=list(
@@ -49,6 +50,7 @@ standardizedratioOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R
             private$..refRate <- jmvcore::OptionVariable$new(
                 "refRate",
                 refRate,
+                default=NULL,
                 suggested=list(
                     "continuous"),
                 permitted=list(
@@ -56,6 +58,7 @@ standardizedratioOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R
             private$..expected <- jmvcore::OptionVariable$new(
                 "expected",
                 expected,
+                default=NULL,
                 suggested=list(
                     "continuous"),
                 permitted=list(
@@ -63,6 +66,7 @@ standardizedratioOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R
             private$..stratum <- jmvcore::OptionVariable$new(
                 "stratum",
                 stratum,
+                default=NULL,
                 suggested=list(
                     "nominal",
                     "ordinal"),
@@ -366,10 +370,10 @@ standardizedratio <- function(
     data,
     inputMode = "rate",
     observed,
-    personTime,
-    refRate,
-    expected,
-    stratum,
+    personTime = NULL,
+    refRate = NULL,
+    expected = NULL,
+    stratum = NULL,
     ratioType = "sir",
     conf_level = 0.95,
     perStratum = TRUE,

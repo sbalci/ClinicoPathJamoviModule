@@ -20,7 +20,8 @@ test_that('winratio primary-endpoint analysis works', {
       conf_level = 0.95, ciMethod = 'analytic',
       showWinOdds = TRUE, showNetBenefit = TRUE,
       showComponents = TRUE, showPlot = TRUE,
-      showSummary = TRUE, showExplanation = TRUE
+      showSummary = TRUE, showExplanation = TRUE,
+      eventLevel2 = NULL
     )
   })
 

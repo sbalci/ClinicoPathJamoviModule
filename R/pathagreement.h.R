@@ -78,6 +78,7 @@ pathagreementOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
             private$..vars <- jmvcore::OptionVariables$new(
                 "vars",
                 vars,
+                default=NULL,
                 suggested=list(
                     "ordinal",
                     "nominal"),
@@ -1909,7 +1910,7 @@ pathagreementBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' @export
 pathagreement <- function(
     data,
-    vars,
+    vars = NULL,
     sft = FALSE,
     heatmap = FALSE,
     heatmapDetails = FALSE,

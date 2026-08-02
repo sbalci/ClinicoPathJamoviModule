@@ -45,6 +45,7 @@ consortdiagramOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
             private$..screening_exclusions <- jmvcore::OptionVariables$new(
                 "screening_exclusions",
                 screening_exclusions,
+                default=NULL,
                 suggested=list(
                     "nominal"),
                 permitted=list(
@@ -53,6 +54,7 @@ consortdiagramOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
             private$..enrollment_exclusions <- jmvcore::OptionVariables$new(
                 "enrollment_exclusions",
                 enrollment_exclusions,
+                default=NULL,
                 suggested=list(
                     "nominal"),
                 permitted=list(
@@ -61,6 +63,7 @@ consortdiagramOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
             private$..randomization_var <- jmvcore::OptionVariable$new(
                 "randomization_var",
                 randomization_var,
+                default=NULL,
                 suggested=list(
                     "nominal"),
                 permitted=list(
@@ -68,6 +71,7 @@ consortdiagramOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
             private$..allocation_exclusions <- jmvcore::OptionVariables$new(
                 "allocation_exclusions",
                 allocation_exclusions,
+                default=NULL,
                 suggested=list(
                     "nominal"),
                 permitted=list(
@@ -76,6 +80,7 @@ consortdiagramOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
             private$..followup_exclusions <- jmvcore::OptionVariables$new(
                 "followup_exclusions",
                 followup_exclusions,
+                default=NULL,
                 suggested=list(
                     "nominal"),
                 permitted=list(
@@ -84,6 +89,7 @@ consortdiagramOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
             private$..analysis_exclusions <- jmvcore::OptionVariables$new(
                 "analysis_exclusions",
                 analysis_exclusions,
+                default=NULL,
                 suggested=list(
                     "nominal"),
                 permitted=list(
@@ -514,12 +520,12 @@ consortdiagramBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
 consortdiagram <- function(
     data,
     participant_id,
-    screening_exclusions,
-    enrollment_exclusions,
-    randomization_var,
-    allocation_exclusions,
-    followup_exclusions,
-    analysis_exclusions,
+    screening_exclusions = NULL,
+    enrollment_exclusions = NULL,
+    randomization_var = NULL,
+    allocation_exclusions = NULL,
+    followup_exclusions = NULL,
+    analysis_exclusions = NULL,
     show_exclusion_details = FALSE,
     diagram_width = 800,
     diagram_height = 600,

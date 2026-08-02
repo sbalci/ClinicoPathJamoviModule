@@ -75,6 +75,7 @@ relativesurvivalOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6
             private$..covariates <- jmvcore::OptionVariables$new(
                 "covariates",
                 covariates,
+                default=NULL,
                 suggested=list(
                     "continuous",
                     "nominal"),
@@ -697,7 +698,7 @@ relativesurvival <- function(
     age,
     sex,
     year,
-    covariates,
+    covariates = NULL,
     ratetable = "us",
     method = "poharperme",
     time_scale = "years",

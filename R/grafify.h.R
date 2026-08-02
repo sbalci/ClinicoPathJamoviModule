@@ -52,6 +52,7 @@ grafifyOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             private$..vars <- jmvcore::OptionVariables$new(
                 "vars",
                 vars,
+                default=NULL,
                 suggested=list(
                     "continuous"),
                 permitted=list(
@@ -691,7 +692,7 @@ grafifyBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' @export
 grafify <- function(
     data,
-    vars,
+    vars = NULL,
     groups = NULL,
     blocks = NULL,
     facet_var = NULL,

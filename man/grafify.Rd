@@ -6,7 +6,7 @@
 \usage{
 grafify(
   data,
-  vars,
+  vars = NULL,
   groups = NULL,
   blocks = NULL,
   facet_var = NULL,

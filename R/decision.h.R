@@ -34,6 +34,7 @@ decisionOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             private$..gold <- jmvcore::OptionVariable$new(
                 "gold",
                 gold,
+                default=NULL,
                 suggested=list(
                     "nominal"),
                 permitted=list(
@@ -45,6 +46,7 @@ decisionOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             private$..newtest <- jmvcore::OptionVariable$new(
                 "newtest",
                 newtest,
+                default=NULL,
                 suggested=list(
                     "nominal"),
                 permitted=list(
@@ -720,9 +722,9 @@ decisionBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' @export
 decision <- function(
     data,
-    gold,
+    gold = NULL,
     goldPositive,
-    newtest,
+    newtest = NULL,
     testPositive,
     goldNegative,
     testNegative,

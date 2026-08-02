@@ -24,6 +24,7 @@ options:
     - name: vars
       title: Raters
       type: Variables
+      default: NULL
       description:
           R: >
             A string naming the variable from `data` that contains the

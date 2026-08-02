@@ -125,7 +125,8 @@ multisurvivalOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
             private$..landmark <- jmvcore::OptionInteger$new(
                 "landmark",
                 landmark,
-                default=3)
+                default=3,
+                min=0)
             private$..calculatedtime <- jmvcore::OptionOutput$new(
                 "calculatedtime")
             private$..outcome <- jmvcore::OptionVariable$new(
@@ -222,11 +223,13 @@ multisurvivalOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
             private$..endplot <- jmvcore::OptionInteger$new(
                 "endplot",
                 endplot,
-                default=60)
+                default=60,
+                min=1)
             private$..byplot <- jmvcore::OptionInteger$new(
                 "byplot",
                 byplot,
-                default=12)
+                default=12,
+                min=1)
             private$..ci95 <- jmvcore::OptionBool$new(
                 "ci95",
                 ci95,
@@ -343,7 +346,8 @@ multisurvivalOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
             private$..rate_multiplier <- jmvcore::OptionInteger$new(
                 "rate_multiplier",
                 rate_multiplier,
-                default=100)
+                default=100,
+                min=1)
             private$..show_survmetrics <- jmvcore::OptionBool$new(
                 "show_survmetrics",
                 show_survmetrics,
@@ -660,6 +664,12 @@ multisurvivalResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                     "dxdate",
                     "tint",
                     "multievent",
+                    "analysistype",
+                    "dod",
+                    "dooc",
+                    "awd",
+                    "awod",
+                    "timetypeoutput",
                     "use_stratify",
                     "stratvar",
                     "interactions",
@@ -688,7 +698,7 @@ multisurvivalResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
             self$add(jmvcore::Preformatted$new(
                 options=options,
                 name="multivariableCoxHeading",
-                title="Multivariable Cox Regression"))
+                title="Multivariable Survival Model"))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="text",
@@ -704,6 +714,12 @@ multisurvivalResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                     "dxdate",
                     "tint",
                     "multievent",
+                    "analysistype",
+                    "dod",
+                    "dooc",
+                    "awd",
+                    "awod",
+                    "timetypeoutput",
                     "use_stratify",
                     "stratvar",
                     "interactions",
@@ -724,6 +740,12 @@ multisurvivalResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                     "dxdate",
                     "tint",
                     "multievent",
+                    "analysistype",
+                    "dod",
+                    "dooc",
+                    "awd",
+                    "awod",
+                    "timetypeoutput",
                     "use_stratify",
                     "stratvar",
                     "interactions",
@@ -752,6 +774,15 @@ multisurvivalResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                     "elapsedtime",
                     "outcomeLevel",
                     "multievent",
+                    "analysistype",
+                    "dod",
+                    "dooc",
+                    "awd",
+                    "awod",
+                    "use_stratify",
+                    "stratvar",
+                    "uselandmark",
+                    "landmark",
                     "tint",
                     "dxdate",
                     "fudate"),
@@ -792,6 +823,15 @@ multisurvivalResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                     "elapsedtime",
                     "outcomeLevel",
                     "multievent",
+                    "analysistype",
+                    "dod",
+                    "dooc",
+                    "awd",
+                    "awod",
+                    "use_stratify",
+                    "stratvar",
+                    "uselandmark",
+                    "landmark",
                     "tint",
                     "dxdate",
                     "fudate"),
@@ -848,6 +888,12 @@ multisurvivalResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                     "dxdate",
                     "tint",
                     "multievent",
+                    "analysistype",
+                    "dod",
+                    "dooc",
+                    "awd",
+                    "awod",
+                    "timetypeoutput",
                     "use_stratify",
                     "stratvar",
                     "interactions",
@@ -993,6 +1039,19 @@ multisurvivalResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                     "dxdate",
                     "tint",
                     "multievent",
+                    "analysistype",
+                    "dod",
+                    "dooc",
+                    "awd",
+                    "awod",
+                    "explanatory",
+                    "contexpl",
+                    "interactions",
+                    "use_stratify",
+                    "stratvar",
+                    "timetypeoutput",
+                    "uselandmark",
+                    "landmark",
                     "person_time")))
             self$add(jmvcore::Preformatted$new(
                 options=options,
@@ -1018,6 +1077,15 @@ multisurvivalResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                     "dxdate",
                     "tint",
                     "multievent",
+                    "analysistype",
+                    "dod",
+                    "dooc",
+                    "awd",
+                    "awod",
+                    "explanatory",
+                    "timetypeoutput",
+                    "uselandmark",
+                    "landmark",
                     "person_time")))
             self$add(jmvcore::Preformatted$new(
                 options=options,
@@ -1045,7 +1113,17 @@ multisurvivalResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                     "fudate",
                     "dxdate",
                     "tint",
-                    "multievent")))
+                    "multievent",
+                    "analysistype",
+                    "dod",
+                    "dooc",
+                    "awd",
+                    "awod",
+                    "use_stratify",
+                    "stratvar",
+                    "interactions",
+                    "uselandmark",
+                    "landmark")))
             self$add(jmvcore::Image$new(
                 options=options,
                 name="plot3",
@@ -1067,7 +1145,17 @@ multisurvivalResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                     "fudate",
                     "dxdate",
                     "tint",
-                    "multievent")))
+                    "multievent",
+                    "analysistype",
+                    "dod",
+                    "dooc",
+                    "awd",
+                    "awod",
+                    "use_stratify",
+                    "stratvar",
+                    "interactions",
+                    "uselandmark",
+                    "landmark")))
             self$add(jmvcore::Table$new(
                 options=options,
                 name="cox_phTable",
@@ -1126,6 +1214,16 @@ multisurvivalResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                     "stratvar",
                     "interactions",
                     "multievent",
+                    "analysistype",
+                    "dod",
+                    "dooc",
+                    "awd",
+                    "awod",
+                    "use_stratify",
+                    "stratvar",
+                    "interactions",
+                    "uselandmark",
+                    "landmark",
                     "contexpl")))
             self$add(jmvcore::Image$new(
                 options=options,
@@ -1148,6 +1246,16 @@ multisurvivalResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                     "dxdate",
                     "tint",
                     "multievent",
+                    "analysistype",
+                    "dod",
+                    "dooc",
+                    "awd",
+                    "awod",
+                    "use_stratify",
+                    "stratvar",
+                    "interactions",
+                    "uselandmark",
+                    "landmark",
                     "contexpl")))
             self$add(jmvcore::Image$new(
                 options=options,
@@ -1174,6 +1282,16 @@ multisurvivalResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                     "dxdate",
                     "tint",
                     "multievent",
+                    "analysistype",
+                    "dod",
+                    "dooc",
+                    "awd",
+                    "awod",
+                    "use_stratify",
+                    "stratvar",
+                    "interactions",
+                    "uselandmark",
+                    "landmark",
                     "adjexplanatory",
                     "pplot",
                     "censored",
@@ -1189,7 +1307,22 @@ multisurvivalResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                     "outcomeLevel",
                     "explanatory",
                     "contexpl",
-                    "numRiskGroups")))
+                    "numRiskGroups",
+                    "elapsedtime",
+                    "fudate",
+                    "dxdate",
+                    "tint",
+                    "multievent",
+                    "analysistype",
+                    "dod",
+                    "dooc",
+                    "awd",
+                    "awod",
+                    "use_stratify",
+                    "stratvar",
+                    "interactions",
+                    "uselandmark",
+                    "landmark")))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="risk_score_analysis2",
@@ -1201,7 +1334,22 @@ multisurvivalResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                     "outcomeLevel",
                     "explanatory",
                     "contexpl",
-                    "numRiskGroups")))
+                    "numRiskGroups",
+                    "elapsedtime",
+                    "fudate",
+                    "dxdate",
+                    "tint",
+                    "multievent",
+                    "analysistype",
+                    "dod",
+                    "dooc",
+                    "awd",
+                    "awod",
+                    "use_stratify",
+                    "stratvar",
+                    "interactions",
+                    "uselandmark",
+                    "landmark")))
             self$add(jmvcore::Preformatted$new(
                 options=options,
                 name="riskScoreHeading",
@@ -1216,7 +1364,7 @@ multisurvivalResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                 options=options,
                 name="riskScoreTable",
                 title="Risk Score Summary",
-                visible="(calculateRiskScore && showSummaries)",
+                visible="(calculateRiskScore)",
                 rows=0,
                 columns=list(
                     list(
@@ -1245,7 +1393,22 @@ multisurvivalResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                     "outcomeLevel",
                     "explanatory",
                     "contexpl",
-                    "numRiskGroups")))
+                    "numRiskGroups",
+                    "elapsedtime",
+                    "fudate",
+                    "dxdate",
+                    "tint",
+                    "multievent",
+                    "analysistype",
+                    "dod",
+                    "dooc",
+                    "awd",
+                    "awod",
+                    "use_stratify",
+                    "stratvar",
+                    "interactions",
+                    "uselandmark",
+                    "landmark")))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="riskScoreSummary",
@@ -1258,7 +1421,21 @@ multisurvivalResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                     "contexpl",
                     "numRiskGroups",
                     "outcomeLevel",
-                    "elapsedtime")))
+                    "elapsedtime",
+                    "fudate",
+                    "dxdate",
+                    "tint",
+                    "multievent",
+                    "analysistype",
+                    "dod",
+                    "dooc",
+                    "awd",
+                    "awod",
+                    "use_stratify",
+                    "stratvar",
+                    "interactions",
+                    "uselandmark",
+                    "landmark")))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="riskScoreMetrics",
@@ -1270,7 +1447,22 @@ multisurvivalResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                     "outcomeLevel",
                     "explanatory",
                     "contexpl",
-                    "numRiskGroups")))
+                    "numRiskGroups",
+                    "elapsedtime",
+                    "fudate",
+                    "dxdate",
+                    "tint",
+                    "multievent",
+                    "analysistype",
+                    "dod",
+                    "dooc",
+                    "awd",
+                    "awod",
+                    "use_stratify",
+                    "stratvar",
+                    "interactions",
+                    "uselandmark",
+                    "landmark")))
             self$add(jmvcore::Image$new(
                 options=options,
                 name="riskGroupPlot",
@@ -1279,14 +1471,34 @@ multisurvivalResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                 height=450,
                 renderFun=".plotRiskGroups",
                 requiresData=TRUE,
-                visible="(plotRiskGroups)",
+                visible="(calculateRiskScore && plotRiskGroups)",
                 clearWith=list(
                     "calculateRiskScore",
                     "outcome",
                     "outcomeLevel",
                     "explanatory",
                     "contexpl",
-                    "numRiskGroups")))
+                    "numRiskGroups",
+                    "plotRiskGroups",
+                    "ci95",
+                    "risktable",
+                    "censored",
+                    "medianline",
+                    "elapsedtime",
+                    "fudate",
+                    "dxdate",
+                    "tint",
+                    "multievent",
+                    "analysistype",
+                    "dod",
+                    "dooc",
+                    "awd",
+                    "awod",
+                    "use_stratify",
+                    "stratvar",
+                    "interactions",
+                    "uselandmark",
+                    "landmark")))
             self$add(jmvcore::Table$new(
                 options=options,
                 name="cindexValidation",
@@ -1317,6 +1529,10 @@ multisurvivalResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                     "contexpl",
                     "multievent",
                     "analysistype",
+                    "dod",
+                    "dooc",
+                    "awd",
+                    "awod",
                     "tint",
                     "dxdate",
                     "fudate",
@@ -1356,7 +1572,12 @@ multisurvivalResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                 clearWith=list(
                     "outcome",
                     "analysistype",
-                    "multievent")))
+                    "multievent",
+                    "outcomeLevel",
+                    "dod",
+                    "dooc",
+                    "awd",
+                    "awod")))
             self$add(jmvcore::Output$new(
                 options=options,
                 name="addRiskScore",
@@ -1375,6 +1596,17 @@ multisurvivalResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                     "dxdate",
                     "tint",
                     "multievent",
+                    "analysistype",
+                    "dod",
+                    "dooc",
+                    "awd",
+                    "awod",
+                    "use_stratify",
+                    "stratvar",
+                    "interactions",
+                    "uselandmark",
+                    "landmark",
+                    "numRiskGroups",
                     "addRiskGroup")))
             self$add(jmvcore::Output$new(
                 options=options,
@@ -1394,11 +1626,22 @@ multisurvivalResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                     "dxdate",
                     "tint",
                     "multievent",
+                    "analysistype",
+                    "dod",
+                    "dooc",
+                    "awd",
+                    "awod",
+                    "use_stratify",
+                    "stratvar",
+                    "interactions",
+                    "uselandmark",
+                    "landmark",
+                    "numRiskGroups",
                     "addRiskGroup")))
             self$add(jmvcore::Preformatted$new(
                 options=options,
                 name="adjustedSurvivalHeading",
-                title="Adjusted Survival Analysis",
+                title="Adjusted Probability Analysis",
                 visible="(ac)"))
             self$add(jmvcore::Html$new(
                 options=options,
@@ -1417,11 +1660,22 @@ multisurvivalResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                     "multievent",
                     "analysistype",
                     "use_stratify",
-                    "stratvar")))
+                    "stratvar",
+                    "fudate",
+                    "dxdate",
+                    "tint",
+                    "dod",
+                    "dooc",
+                    "awd",
+                    "awod",
+                    "interactions",
+                    "uselandmark",
+                    "landmark",
+                    "timetypeoutput")))
             self$add(jmvcore::Image$new(
                 options=options,
                 name="plot_adj",
-                title="Adjusted Survival Plot",
+                title="Adjusted Probability Plot",
                 width=600,
                 height=450,
                 renderFun=".plot_adj",
@@ -1450,11 +1704,19 @@ multisurvivalResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                     "medianline",
                     "analysistype",
                     "use_stratify",
-                    "stratvar")))
+                    "stratvar",
+                    "dod",
+                    "dooc",
+                    "awd",
+                    "awod",
+                    "interactions",
+                    "uselandmark",
+                    "landmark",
+                    "timetypeoutput")))
             self$add(jmvcore::Preformatted$new(
                 options=options,
                 name="adjustedSurvivalSummaryHeading",
-                title="Adjusted Survival Natural Language Summary",
+                title="Adjusted Probability Natural Language Summary",
                 visible="(ac && showSummaries)"))
             self$add(jmvcore::Html$new(
                 options=options,
@@ -1467,7 +1729,24 @@ multisurvivalResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                     "outcome",
                     "ac_method",
                     "explanatory",
-                    "contexpl")))
+                    "contexpl",
+                    "outcomeLevel",
+                    "elapsedtime",
+                    "fudate",
+                    "dxdate",
+                    "tint",
+                    "multievent",
+                    "analysistype",
+                    "dod",
+                    "dooc",
+                    "awd",
+                    "awod",
+                    "use_stratify",
+                    "stratvar",
+                    "interactions",
+                    "uselandmark",
+                    "landmark",
+                    "timetypeoutput")))
             self$add(jmvcore::Preformatted$new(
                 options=options,
                 name="nomogramHeading",
@@ -1492,13 +1771,35 @@ multisurvivalResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                     "fudate",
                     "dxdate",
                     "tint",
-                    "multievent")))
+                    "multievent",
+                    "analysistype",
+                    "dod",
+                    "dooc",
+                    "awd",
+                    "awod",
+                    "cutp",
+                    "timetypeoutput",
+                    "use_stratify",
+                    "stratvar",
+                    "interactions",
+                    "uselandmark",
+                    "landmark")))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="nomogram_display",
                 title="Nomogram Scoring Guide",
                 visible="(showNomogram)",
                 clearWith=list(
+                    "showNomogram",
+                    "cutp",
+                    "outcome",
+                    "outcomeLevel",
+                    "elapsedtime",
+                    "explanatory",
+                    "contexpl",
+                    "multievent",
+                    "analysistype",
+                    "interactions",
                     "use_stratify",
                     "stratvar")))
             self$add(jmvcore::Preformatted$new(
@@ -1516,11 +1817,28 @@ multisurvivalResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                     "stratvar",
                     "showNomogram",
                     "explanatory",
-                    "outcome")))
+                    "contexpl",
+                    "outcome",
+                    "outcomeLevel",
+                    "elapsedtime",
+                    "fudate",
+                    "dxdate",
+                    "tint",
+                    "multievent",
+                    "analysistype",
+                    "dod",
+                    "dooc",
+                    "awd",
+                    "awod",
+                    "cutp",
+                    "timetypeoutput",
+                    "interactions",
+                    "uselandmark",
+                    "landmark")))
             self$add(jmvcore::Table$new(
                 options=options,
                 name="adjustedSurvTable",
-                title="Adjusted Survival at Timepoints",
+                title="Adjusted Probability at Timepoints",
                 rows=0,
                 visible="(ac && ac_summary)",
                 columns=list(
@@ -1542,7 +1860,7 @@ multisurvivalResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                         `type`="integer"),
                     list(
                         `name`="surv", 
-                        `title`="Adjusted Survival", 
+                        `title`="Adjusted Estimate", 
                         `type`="text"),
                     list(
                         `name`="lower", 
@@ -1569,11 +1887,19 @@ multisurvivalResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                     "multievent",
                     "analysistype",
                     "use_stratify",
-                    "stratvar")))
+                    "stratvar",
+                    "dod",
+                    "dooc",
+                    "awd",
+                    "awod",
+                    "interactions",
+                    "uselandmark",
+                    "landmark",
+                    "timetypeoutput")))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="adjustedSurvTableSummary",
-                title="Adjusted Survival Summary",
+                title="Adjusted Probability Summary",
                 visible="(ac && ac_summary)",
                 clearWith=list(
                     "ac",
@@ -1592,11 +1918,19 @@ multisurvivalResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                     "multievent",
                     "analysistype",
                     "use_stratify",
-                    "stratvar")))
+                    "stratvar",
+                    "dod",
+                    "dooc",
+                    "awd",
+                    "awod",
+                    "interactions",
+                    "uselandmark",
+                    "landmark",
+                    "timetypeoutput")))
             self$add(jmvcore::Table$new(
                 options=options,
                 name="adjustedMedianTable",
-                title="Adjusted Median Survival",
+                title="Adjusted Median Time to Event",
                 rows=0,
                 visible="(ac && ac_summary)",
                 columns=list(
@@ -1642,11 +1976,19 @@ multisurvivalResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                     "multievent",
                     "analysistype",
                     "use_stratify",
-                    "stratvar")))
+                    "stratvar",
+                    "dod",
+                    "dooc",
+                    "awd",
+                    "awod",
+                    "interactions",
+                    "uselandmark",
+                    "landmark",
+                    "timetypeoutput")))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="adjustedMedianSummary",
-                title="Adjusted Median Survival Summary",
+                title="Adjusted Median Time-to-Event Summary",
                 visible="(ac && ac_summary)",
                 clearWith=list(
                     "ac",
@@ -1664,11 +2006,19 @@ multisurvivalResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                     "multievent",
                     "analysistype",
                     "use_stratify",
-                    "stratvar")))
+                    "stratvar",
+                    "dod",
+                    "dooc",
+                    "awd",
+                    "awod",
+                    "interactions",
+                    "uselandmark",
+                    "landmark",
+                    "timetypeoutput")))
             self$add(jmvcore::Table$new(
                 options=options,
                 name="adjustedCoxTable",
-                title="Adjusted Cox Model Results",
+                title="Adjusted Model Results",
                 rows=0,
                 visible="(ac && ac_summary)",
                 columns=list(
@@ -1678,7 +2028,7 @@ multisurvivalResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                         `type`="text"),
                     list(
                         `name`="HR", 
-                        `title`="HR (95% CI)", 
+                        `title`="Effect (95% CI)", 
                         `type`="text"),
                     list(
                         `name`="Pvalue", 
@@ -1701,11 +2051,19 @@ multisurvivalResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                     "multievent",
                     "analysistype",
                     "use_stratify",
-                    "stratvar")))
+                    "stratvar",
+                    "dod",
+                    "dooc",
+                    "awd",
+                    "awod",
+                    "interactions",
+                    "uselandmark",
+                    "landmark",
+                    "timetypeoutput")))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="adjustedCoxText",
-                title="Adjusted Cox Model Metrics",
+                title="Adjusted Model Metrics",
                 visible="(ac && ac_summary)",
                 clearWith=list(
                     "ac",
@@ -1723,11 +2081,19 @@ multisurvivalResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                     "multievent",
                     "analysistype",
                     "use_stratify",
-                    "stratvar")))
+                    "stratvar",
+                    "dod",
+                    "dooc",
+                    "awd",
+                    "awod",
+                    "interactions",
+                    "uselandmark",
+                    "landmark",
+                    "timetypeoutput")))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="adjustedCoxSummary",
-                title="Adjusted Cox Model Interpretation",
+                title="Adjusted Model Interpretation",
                 visible="(ac && ac_summary)",
                 clearWith=list(
                     "ac",
@@ -1745,7 +2111,15 @@ multisurvivalResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                     "multievent",
                     "analysistype",
                     "use_stratify",
-                    "stratvar")))
+                    "stratvar",
+                    "dod",
+                    "dooc",
+                    "awd",
+                    "awod",
+                    "interactions",
+                    "uselandmark",
+                    "landmark",
+                    "timetypeoutput")))
             self$add(jmvcore::Preformatted$new(
                 options=options,
                 name="adjustedCoxPH",
@@ -1756,7 +2130,26 @@ multisurvivalResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                     "ac_summary",
                     "adjexplanatory",
                     "ph_cox",
-                    "ac_method")))
+                    "ac_method",
+                    "outcome",
+                    "outcomeLevel",
+                    "elapsedtime",
+                    "explanatory",
+                    "contexpl",
+                    "fudate",
+                    "dxdate",
+                    "tint",
+                    "multievent",
+                    "analysistype",
+                    "dod",
+                    "dooc",
+                    "awd",
+                    "awod",
+                    "use_stratify",
+                    "stratvar",
+                    "interactions",
+                    "uselandmark",
+                    "landmark")))
             self$add(jmvcore::Table$new(
                 options=options,
                 name="modelContributionTable",
@@ -1795,7 +2188,21 @@ multisurvivalResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                     "elapsedtime",
                     "explanatory",
                     "contexpl",
-                    "compare_models")))
+                    "compare_models",
+                    "fudate",
+                    "dxdate",
+                    "tint",
+                    "multievent",
+                    "analysistype",
+                    "dod",
+                    "dooc",
+                    "awd",
+                    "awod",
+                    "use_stratify",
+                    "stratvar",
+                    "interactions",
+                    "uselandmark",
+                    "landmark")))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="modelContributionSummary",
@@ -1805,7 +2212,23 @@ multisurvivalResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                     "outcome",
                     "explanatory",
                     "contexpl",
-                    "compare_models")))
+                    "compare_models",
+                    "outcomeLevel",
+                    "elapsedtime",
+                    "fudate",
+                    "dxdate",
+                    "tint",
+                    "multievent",
+                    "analysistype",
+                    "dod",
+                    "dooc",
+                    "awd",
+                    "awod",
+                    "use_stratify",
+                    "stratvar",
+                    "interactions",
+                    "uselandmark",
+                    "landmark")))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="multivariableCoxExplanation",
@@ -1965,8 +2388,10 @@ multisurvivalBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' @param interactions Interaction (crossed) terms added to the Cox model,
 #'   built from variables already selected as explanatory or continuous
 #'   explanatory variables. Each term tests effect modification - e.g. Treatment
-#'   x Biomarker for predictive-biomarker analysis. For a 2-way term the first
-#'   variable is the focal effect and the second is the moderator.
+#'   x Biomarker. Calling a treatment interaction predictive requires an
+#'   appropriate treatment-comparison design and pre-specified validation; an
+#'   interaction alone does not establish clinical utility. For a 2-way term the
+#'   first variable is the focal effect and the second is the moderator.
 #' @param multievent If true, multiple event levels will be considered for
 #'   competing risks analysis. Requires specifying \code{dod}, \code{dooc}, etc.
 #' @param hr If true, generates a plot of hazard ratios for each explanatory
@@ -1990,13 +2415,18 @@ multisurvivalBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   time point below the survival plot.
 #' @param censored If true, marks censored observations (e.g., using tick
 #'   marks) on the survival plot.
-#' @param medianline If true, displays a line indicating the median survival
-#'   time on the survival plot.
+#' @param medianline Selects whether horizontal, vertical, both, or no
+#'   median-survival reference lines are displayed on survival plots.
 #' @param pplot If true, displays the p-value from the survival comparison
 #'   test on the survival plot.
-#' @param cutp .
-#' @param calculateRiskScore If true, calculates a risk score from the Cox
-#'   model coefficients for each individual.
+#' @param cutp Positive, comma-separated prediction timepoints in the selected
+#'   time unit. They are used by adjusted-probability tables and the nomogram;
+#'   invalid values and nomogram timepoints beyond observed follow-up are
+#'   omitted with a warning.
+#' @param calculateRiskScore If true, calculates the Cox relative-risk score,
+#'   exp(centered linear predictor), for each individual. This ranks fitted
+#'   hazard and is not an absolute event probability; clinical use requires
+#'   external validation.
 #' @param numRiskGroups Select the number of risk groups to create from the
 #'   risk scores. The data will be divided into equal quantiles based on this
 #'   selection.
@@ -2010,7 +2440,9 @@ multisurvivalBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   correction of the C-index. Larger values give more stable estimates but
 #'   take longer to compute.
 #' @param ac .
-#' @param adjexplanatory .
+#' @param adjexplanatory Categorical model variable whose levels are
+#'   contrasted in the adjusted curves. The variable must also be selected as an
+#'   explanatory or stratification variable so it is part of the fitted model.
 #' @param ac_method Estimand for the adjusted survival curves. "Standardised
 #'   over cohort" sets every observed patient to each level in turn and averages
 #'   the model-predicted curves (g-computation), so the curves differ only by
@@ -2018,11 +2450,14 @@ multisurvivalBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   curve per level at the mean/mode of the other covariates. "Whole-cohort
 #'   expected survival" returns one curve for the cohort at its observed
 #'   covariates and does not contrast the levels at all.
-#' @param ac_summary Display numeric adjusted-survival outputs (survival at
-#'   the cutpoint timepoints with 95\% CI, adjusted median survival, and the
-#'   adjusted Cox hazard-ratio table) in addition to the adjusted-survival
-#'   curve.
-#' @param showNomogram .
+#' @param ac_summary Display numeric model-adjusted probability outputs at the
+#'   cutpoint timepoints, adjusted median time to event, and adjusted model
+#'   effects. In competing-risk mode, probabilities are cumulative incidence and
+#'   effects are Fine-Gray subdistribution hazard ratios.
+#' @param showNomogram Display a Cox-model nomogram for the requested
+#'   prediction timepoints. Predictions are apparent estimates from the fitted
+#'   data and are not a point-of-care tool without calibration and external
+#'   validation.
 #' @param compare_models If true, reports a likelihood-ratio test and AIC for
 #'   dropping each covariate from the full model (base R drop1). Shows which
 #'   covariates significantly improve model fit.
@@ -2039,8 +2474,10 @@ multisurvivalBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   analysis. Enter a  comma-separated list of time points to create intervals.
 #'   For example,  "12, 36, 60" will create intervals 0-12, 12-36, 36-60, and
 #'   60+.
-#' @param rate_multiplier Specify the multiplier for incidence rates (e.g.,
-#'   100 for rates per 100 person-years, 1000 for rates per 1000 person-years).
+#' @param rate_multiplier Specify the multiplier for incidence rates (for
+#'   example, 100 for rates per 100 person-time units). The person-time unit is
+#'   the unit selected in \code{timetypeoutput}; choose years there before
+#'   interpreting a rate as events per person-year.
 #' @param show_survmetrics Report model performance metrics for the Cox model:
 #'   Harrell's concordance (C-index), inverse-probability-of-censoring-weighted
 #'   (IPCW) Brier score and time-dependent AUC at the chosen timepoints, and the

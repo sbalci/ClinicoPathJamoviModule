@@ -42,7 +42,8 @@ test_that("adaptivelasso runs with explicit event level and custom lambda range"
       plot_survival_curves = FALSE,
       plot_baseline_hazard = FALSE,
       plot_diagnostics = FALSE,
-      random_seed = 123
+      random_seed = 123,
+      censor_level = NULL
     )
   })
 
@@ -93,7 +94,8 @@ test_that("adaptivelasso works when strata is omitted and single lambda mode is 
       plot_survival_curves = FALSE,
       plot_baseline_hazard = FALSE,
       plot_diagnostics = FALSE,
-      random_seed = 321
+      random_seed = 321,
+      censor_level = NULL
     )
   })
 

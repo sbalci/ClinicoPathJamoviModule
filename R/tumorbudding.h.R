@@ -36,6 +36,7 @@ tumorbuddingOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
             private$..caseId <- jmvcore::OptionVariable$new(
                 "caseId",
                 caseId,
+                default=NULL,
                 suggested=list(
                     "nominal",
                     "ordinal"),
@@ -50,6 +51,7 @@ tumorbuddingOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
             private$..group <- jmvcore::OptionVariable$new(
                 "group",
                 group,
+                default=NULL,
                 suggested=list(
                     "nominal",
                     "ordinal"),
@@ -58,6 +60,7 @@ tumorbuddingOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
             private$..survivalTime <- jmvcore::OptionVariable$new(
                 "survivalTime",
                 survivalTime,
+                default=NULL,
                 suggested=list(
                     "continuous"),
                 permitted=list(
@@ -65,6 +68,7 @@ tumorbuddingOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
             private$..survivalStatus <- jmvcore::OptionVariable$new(
                 "survivalStatus",
                 survivalStatus,
+                default=NULL,
                 suggested=list(
                     "nominal",
                     "ordinal"),
@@ -356,11 +360,11 @@ tumorbuddingBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 tumorbudding <- function(
     data,
     budCount,
-    caseId,
+    caseId = NULL,
     fieldArea = 0.785,
-    group,
-    survivalTime,
-    survivalStatus,
+    group = NULL,
+    survivalTime = NULL,
+    survivalStatus = NULL,
     eventLevel,
     showGrading = TRUE,
     showPerCase = FALSE,

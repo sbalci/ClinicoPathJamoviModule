@@ -63,7 +63,10 @@ test_that('qtwist analysis works', {
     showExplanations = TRUE,
     showClinicalGuidance = TRUE,
     showFormulas = FALSE,
-    showReferences = TRUE
+    showReferences = TRUE,
+    event_os_level = NULL,
+    event_pfs_level = NULL,
+    toxicity_indicator_level = NULL
     )
   })
 

@@ -7,9 +7,9 @@
 jjsegmentedtotalbar(
   data,
   analysis_preset = "custom",
-  x_var,
-  y_var,
-  fill_var,
+  x_var = NULL,
+  y_var = NULL,
+  fill_var = NULL,
   facet_var = NULL,
   show_plot = FALSE,
   plot_type = "stacked",

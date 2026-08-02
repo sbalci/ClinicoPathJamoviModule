@@ -50,6 +50,7 @@ options:
     - name: group
       title: Group Variable
       type: Variable
+      default: NULL
       suggested: [nominal]
       permitted: [factor]
       description:
@@ -58,6 +59,7 @@ options:
     - name: outcome
       title: Outcome Variable
       type: Variable
+      default: NULL
       suggested: [nominal]
       permitted: [factor]
       description:

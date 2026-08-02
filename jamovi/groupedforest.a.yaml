@@ -87,6 +87,7 @@ options:
     - name: covariates
       title: Covariates (Optional)
       type: Variables
+      default: NULL
       suggested:
         - continuous
         - nominal

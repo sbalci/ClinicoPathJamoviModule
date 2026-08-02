@@ -52,6 +52,7 @@ circosOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             private$..valueVar <- jmvcore::OptionVariable$new(
                 "valueVar",
                 valueVar,
+                default=NULL,
                 suggested=list(
                     "continuous"),
                 permitted=list(
@@ -273,7 +274,7 @@ circos <- function(
     inputMode = "edges",
     fromVar,
     toVar,
-    valueVar,
+    valueVar = NULL,
     directional = TRUE,
     symmetric = FALSE,
     gridPalette = "Set2",

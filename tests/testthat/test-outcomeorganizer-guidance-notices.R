@@ -29,7 +29,13 @@ test_that("missing multievent selections show helpful guidance instead of errors
       analysistype = "os",
       multievent = TRUE,
       # Missing: dod, dooc, awd, awod selections
-      outputTable = FALSE
+      outputTable = FALSE,
+      outcomeLevel = NULL,
+      recurrenceLevel = NULL,
+      dod = NULL,
+      dooc = NULL,
+      awd = NULL,
+      awod = NULL
     )
   })
 })
@@ -59,7 +65,11 @@ test_that("partial multievent selections identify which fields are missing", {
       dod = "DOD",
       dooc = "DOOC",
       # Missing: awd, awod
-      outputTable = FALSE
+      outputTable = FALSE,
+      outcomeLevel = NULL,
+      recurrenceLevel = NULL,
+      awd = NULL,
+      awod = NULL
     )
   })
 })
@@ -90,7 +100,9 @@ test_that("complete multievent selections process without notices", {
       dooc = "DOOC",
       awd = "AWD",
       awod = "AWOD",
-      outputTable = TRUE
+      outputTable = TRUE,
+      outcomeLevel = NULL,
+      recurrenceLevel = NULL
     )
   })
 })
@@ -118,7 +130,12 @@ test_that("binary outcome analysis works without multievent selections", {
       outcomeLevel = "Dead",
       analysistype = "os",
       multievent = FALSE,
-      outputTable = TRUE
+      outputTable = TRUE,
+      recurrenceLevel = NULL,
+      dod = NULL,
+      dooc = NULL,
+      awd = NULL,
+      awod = NULL
     )
   })
 })
@@ -149,7 +166,13 @@ test_that("different analysis types handle missing multievent selections", {
         analysistype = atype,
         multievent = TRUE,
         # Missing all selections
-        outputTable = FALSE
+        outputTable = FALSE,
+        outcomeLevel = NULL,
+        recurrenceLevel = NULL,
+        dod = NULL,
+        dooc = NULL,
+        awd = NULL,
+        awod = NULL
       )
     }, info = paste("Analysis type:", atype))
   }
@@ -179,7 +202,13 @@ test_that("guidance works with international outcome labels", {
       outcome = "Sonuc",
       analysistype = "os",
       multievent = TRUE,
-      outputTable = FALSE
+      outputTable = FALSE,
+      outcomeLevel = NULL,
+      recurrenceLevel = NULL,
+      dod = NULL,
+      dooc = NULL,
+      awd = NULL,
+      awod = NULL
     )
   })
 })
@@ -206,7 +235,13 @@ test_that("guidance works with numeric outcome coding", {
       outcome = "Outcome",
       analysistype = "compete",
       multievent = TRUE,
-      outputTable = FALSE
+      outputTable = FALSE,
+      outcomeLevel = NULL,
+      recurrenceLevel = NULL,
+      dod = NULL,
+      dooc = NULL,
+      awd = NULL,
+      awod = NULL
     )
   })
 })
@@ -237,7 +272,10 @@ test_that("identifies when only one selection is missing", {
       dooc = "DOOC",
       awd = "AWD",
       # Missing: awod
-      outputTable = FALSE
+      outputTable = FALSE,
+      outcomeLevel = NULL,
+      recurrenceLevel = NULL,
+      awod = NULL
     )
   })
 })
@@ -263,7 +301,13 @@ test_that("analysis proceeds after all selections are filled", {
     outcome = "Outcome",
     analysistype = "compete",
     multievent = TRUE,
-    outputTable = FALSE
+    outputTable = FALSE,
+    outcomeLevel = NULL,
+    recurrenceLevel = NULL,
+    dod = NULL,
+    dooc = NULL,
+    awd = NULL,
+    awod = NULL
   )
 
   # Second attempt - all selections filled (should process)
@@ -277,7 +321,9 @@ test_that("analysis proceeds after all selections are filled", {
     awd = "AWD",
     awod = "AWOD",
     outputTable = TRUE,
-    addOutcome = TRUE
+    addOutcome = TRUE,
+    outcomeLevel = NULL,
+    recurrenceLevel = NULL
   )
 
   # Second result should have output
@@ -303,7 +349,13 @@ test_that("guidance adapts to different numbers of unique outcome values", {
       data = data_4,
       outcome = "Outcome",
       multievent = TRUE,
-      analysistype = "os"
+      analysistype = "os",
+      outcomeLevel = NULL,
+      recurrenceLevel = NULL,
+      dod = NULL,
+      dooc = NULL,
+      awd = NULL,
+      awod = NULL
     )
   })
 
@@ -319,7 +371,13 @@ test_that("guidance adapts to different numbers of unique outcome values", {
       data = data_5,
       outcome = "Outcome",
       multievent = TRUE,
-      analysistype = "os"
+      analysistype = "os",
+      outcomeLevel = NULL,
+      recurrenceLevel = NULL,
+      dod = NULL,
+      dooc = NULL,
+      awd = NULL,
+      awod = NULL
     )
   })
 
@@ -335,7 +393,13 @@ test_that("guidance adapts to different numbers of unique outcome values", {
       data = data_3,
       outcome = "Outcome",
       multievent = TRUE,
-      analysistype = "os"
+      analysistype = "os",
+      outcomeLevel = NULL,
+      recurrenceLevel = NULL,
+      dod = NULL,
+      dooc = NULL,
+      awd = NULL,
+      awod = NULL
     )
   })
 })

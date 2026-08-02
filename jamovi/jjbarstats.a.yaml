@@ -28,12 +28,14 @@ options:
     - name: dep
       title: Dependent Variable
       type: Variables
+      default: NULL
       suggested: [ ordinal, nominal ]
       permitted: [ factor ]
 
     - name: group
       title: Grouping Variable
       type: Variable
+      default: NULL
       suggested: [ ordinal, nominal ]
       permitted: [ factor ]
 

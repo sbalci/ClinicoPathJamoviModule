@@ -34,6 +34,7 @@ options:
     - name: y_var
       title: Y-Axis Variable
       type: Variable
+      default: NULL
       suggested:
         - continuous
       permitted:
@@ -45,6 +46,7 @@ options:
     - name: x_var
       title: X-Axis Variable (Grouping)
       type: Variable
+      default: NULL
       suggested:
         - nominal
         - ordinal

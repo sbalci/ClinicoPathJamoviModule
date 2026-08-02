@@ -10,7 +10,7 @@ pagetrendtestOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
             subject = NULL,
             within = NULL,
             trend_direction = "increasing",
-            custom_order = NULL,
+            custom_order = "",
             method = "asymptotic",
             alpha = 0.05,
             effect_size = TRUE,
@@ -60,7 +60,8 @@ pagetrendtestOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                 default="increasing")
             private$..custom_order <- jmvcore::OptionString$new(
                 "custom_order",
-                custom_order)
+                custom_order,
+                default="")
             private$..method <- jmvcore::OptionList$new(
                 "method",
                 method,
@@ -618,7 +619,7 @@ pagetrendtest <- function(
     subject,
     within,
     trend_direction = "increasing",
-    custom_order,
+    custom_order = "",
     method = "asymptotic",
     alpha = 0.05,
     effect_size = TRUE,

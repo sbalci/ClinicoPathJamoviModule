@@ -30,6 +30,7 @@ options:
     - name: caseId
       title: Case ID (for multiple fields per case)
       type: Variable
+      default: NULL
       suggested: [nominal, ordinal]
       permitted: [factor, id]
       description:
@@ -50,6 +51,7 @@ options:
     - name: group
       title: Grouping Variable (optional)
       type: Variable
+      default: NULL
       suggested: [nominal, ordinal]
       permitted: [factor]
 
@@ -57,12 +59,14 @@ options:
     - name: survivalTime
       title: Survival Time (optional)
       type: Variable
+      default: NULL
       suggested: [continuous]
       permitted: [numeric]
 
     - name: survivalStatus
       title: Survival Event (optional)
       type: Variable
+      default: NULL
       suggested: [nominal, ordinal]
       permitted: [factor, numeric]
 

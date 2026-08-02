@@ -80,11 +80,13 @@ options:
     - name: group1Value
       title: 'Group 1 Value'
       type: String
+      default: ""
       description: 'Specific value for first group (optional)'
 
     - name: group2Value
       title: 'Group 2 Value'
       type: String
+      default: ""
       description: 'Specific value for second group (optional)'
 
     - name: ciWidth

@@ -59,9 +59,9 @@ ihcscoring(
   optimal_cutpoint = FALSE,
   optimize_score = "hscore",
   outcome_type = "binary",
-  outcome_var,
+  outcome_var = NULL,
   outcome_positive,
-  cutpoint_time_var
+  cutpoint_time_var = NULL
 )
 }
 \arguments{

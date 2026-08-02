@@ -6,11 +6,11 @@
 \usage{
 tidyplots(
   data,
-  xvar,
-  yvar,
-  color,
-  group,
-  facet,
+  xvar = NULL,
+  yvar = NULL,
+  color = NULL,
+  group = NULL,
+  facet = NULL,
   plotType = "points",
   pointType = "basic",
   lineType = "direct",

@@ -6,7 +6,8 @@ test_that("tumorbudding assigns ITBCC grades at the correct cutoffs", {
   expect_no_error({
     model <- tumorbudding(
       data = data, budCount = "bud_count", fieldArea = 0.785,
-      showGrading = TRUE, showPerCase = TRUE, showSurvival = FALSE, showPlot = TRUE)
+      showGrading = TRUE, showPerCase = TRUE, showSurvival = FALSE, showPlot = TRUE,
+      eventLevel = NULL)
   })
   expect_true(inherits(model, "jmvcoreClass"))
 
@@ -26,7 +27,8 @@ test_that("tumorbudding normalizes non-standard field area and takes the hotspot
     bud_count = c(3, 6, 12, 2))
   model <- tumorbudding(
     data = data, budCount = "bud_count", caseId = "case_id", fieldArea = 0.5,
-    showGrading = TRUE, showPerCase = TRUE, showSurvival = FALSE)
+    showGrading = TRUE, showPerCase = TRUE, showSurvival = FALSE,
+    eventLevel = NULL)
   pc <- model$results$perCaseTable$asDF
   expect_equal(nrow(pc), 2)                      # two cases
   # case A hotspot = 6 raw -> 9.4 normalized -> Bd2

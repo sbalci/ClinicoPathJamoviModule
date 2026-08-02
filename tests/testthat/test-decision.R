@@ -16,7 +16,9 @@ test_that("decision function works with basic parameters", {
       gold = "Golden Standart",
       goldPositive = "1",
       newtest = "New Test",
-      testPositive = "1"
+      testPositive = "1",
+      goldNegative = NULL,
+      testNegative = NULL
     )
   })
   
@@ -26,7 +28,9 @@ test_that("decision function works with basic parameters", {
     gold = "Golden Standart",
     goldPositive = "1",
     newtest = "New Test",
-    testPositive = "1"
+    testPositive = "1",
+    goldNegative = NULL,
+    testNegative = NULL
   )
   
   expect_s3_class(result, "Group")
@@ -49,7 +53,9 @@ test_that("decision function works with confidence intervals", {
       goldPositive = "1",
       newtest = "New Test",
       testPositive = "1",
-      ci = TRUE
+      ci = TRUE,
+      goldNegative = NULL,
+      testNegative = NULL
     )
   })
   
@@ -59,7 +65,9 @@ test_that("decision function works with confidence intervals", {
     goldPositive = "1",
     newtest = "New Test",
     testPositive = "1",
-    ci = TRUE
+    ci = TRUE,
+    goldNegative = NULL,
+    testNegative = NULL
   )
   
   # Check that CI tables are included
@@ -79,7 +87,9 @@ test_that("decision function works with prior probability", {
       newtest = "New Test",
       testPositive = "1",
       pp = TRUE,
-      pprob = 0.05
+      pprob = 0.05,
+      goldNegative = NULL,
+      testNegative = NULL
     )
   })
 })
@@ -95,7 +105,9 @@ test_that("decision function works with Fagan nomogram", {
       goldPositive = "1",
       newtest = "New Test",
       testPositive = "1",
-      fagan = TRUE
+      fagan = TRUE,
+      goldNegative = NULL,
+      testNegative = NULL
     )
   })
   
@@ -105,7 +117,9 @@ test_that("decision function works with Fagan nomogram", {
     goldPositive = "1",
     newtest = "New Test",
     testPositive = "1",
-    fagan = TRUE
+    fagan = TRUE,
+    goldNegative = NULL,
+    testNegative = NULL
   )
   
   # Check that plot is included
@@ -122,7 +136,9 @@ test_that("decision function works with alternative datasets", {
       gold = "cancer_status",
       goldPositive = "1",
       newtest = "mammography",
-      testPositive = "1"
+      testPositive = "1",
+      goldNegative = NULL,
+      testNegative = NULL
     )
   })
   
@@ -135,7 +151,9 @@ test_that("decision function works with alternative datasets", {
       gold = "covid_status",
       goldPositive = "1",
       newtest = "rapid_antigen",
-      testPositive = "1"
+      testPositive = "1",
+      goldNegative = NULL,
+      testNegative = NULL
     )
   })
 })
@@ -152,7 +170,9 @@ test_that("decision function validates parameters correctly", {
       newtest = "New Test",
       testPositive = "1",
       pp = TRUE,
-      pprob = 1.5  # Invalid: > 1
+      pprob = 1.5,  # Invalid: > 1
+      goldNegative = NULL,
+      testNegative = NULL
     )
   })
   
@@ -164,7 +184,9 @@ test_that("decision function validates parameters correctly", {
       newtest = "New Test",
       testPositive = "1",
       pp = TRUE,
-      pprob = -0.1  # Invalid: < 0
+      pprob = -0.1,  # Invalid: < 0
+      goldNegative = NULL,
+      testNegative = NULL
     )
   })
 })
@@ -183,7 +205,9 @@ test_that("decision function handles missing data appropriately", {
       gold = "Golden Standart",
       goldPositive = "1",
       newtest = "New Test",
-      testPositive = "1"
+      testPositive = "1",
+      goldNegative = NULL,
+      testNegative = NULL
     )
   })
 })
@@ -200,7 +224,9 @@ test_that("decision function produces correct metrics", {
     gold = "gold_standard",
     goldPositive = "1",
     newtest = "new_test",
-    testPositive = "1"
+    testPositive = "1",
+    goldNegative = NULL,
+    testNegative = NULL
   )
   
   # Check that result structure is correct
@@ -223,7 +249,9 @@ test_that("decision function output structure is complete", {
     od = TRUE,
     fnote = TRUE,
     ci = TRUE,
-    fagan = TRUE
+    fagan = TRUE,
+    goldNegative = NULL,
+    testNegative = NULL
   )
   
   # Check all expected output components exist
@@ -249,7 +277,9 @@ test_that("decision handles NA values without misclassification", {
     gold = "gold",
     goldPositive = "pos",
     newtest = "assay",
-    testPositive = "pos"
+    testPositive = "pos",
+    goldNegative = NULL,
+    testNegative = NULL
   )
 
   c_table <- result$cTable$asDF
@@ -276,7 +306,9 @@ test_that("decision ignores missing values in unrelated variables", {
     gold = "gold",
     goldPositive = "pos",
     newtest = "assay",
-    testPositive = "pos"
+    testPositive = "pos",
+    goldNegative = NULL,
+    testNegative = NULL
   )
 
   n_table <- result$nTable$asDF
@@ -296,7 +328,9 @@ test_that("decision allows population prevalence with confidence intervals", {
     testPositive = "1",
     pp = TRUE,
     pprob = 0.2,
-    ci = TRUE
+    ci = TRUE,
+    goldNegative = NULL,
+    testNegative = NULL
   )
 
   ratio <- result$ratioTable$asDF
@@ -317,7 +351,9 @@ test_that("natural language summary reports NPV correctly", {
     gold = "gold",
     goldPositive = "pos",
     newtest = "assay",
-    testPositive = "pos"
+    testPositive = "pos",
+    goldNegative = NULL,
+    testNegative = NULL
   )
 
   ratio <- result$ratioTable$asDF
@@ -341,7 +377,9 @@ test_that("decision handles absence of gold standard negatives", {
     gold = "gold",
     goldPositive = "pos",
     newtest = "assay",
-    testPositive = "pos"
+    testPositive = "pos",
+    goldNegative = NULL,
+    testNegative = NULL
   )
 
   ratio <- result$ratioTable$asDF

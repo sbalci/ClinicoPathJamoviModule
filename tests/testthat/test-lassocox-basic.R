@@ -71,7 +71,8 @@ test_that("lassocox runs with breast cancer dataset (standard scenario)", {
       outcomeLevel = "Dead",
       explanatory = c("age", "tumor_size_cm", "grade", "stage",
                        "lymph_nodes_positive", "ki67_percent",
-                       "er_status", "her2_status", "lvi")
+                       "er_status", "her2_status", "lvi"),
+                       censorLevel = NULL
     )
   })
 })
@@ -87,7 +88,8 @@ test_that("lassocox runs with small cohort dataset (minimal viable)", {
       outcome = "event_occurred",
       outcomeLevel = "Yes",
       explanatory = c("age", "gender", "biomarker_a", "biomarker_b",
-                       "biomarker_c", "treatment_group", "severity_score")
+                       "biomarker_c", "treatment_group", "severity_score"),
+                       censorLevel = NULL
     )
   })
 })
@@ -105,7 +107,8 @@ test_that("lassocox produces expected output items", {
                      "lymph_nodes_positive", "ki67_percent"),
     cv_plot = FALSE,
     coef_plot = FALSE,
-    survival_plot = FALSE
+    survival_plot = FALSE,
+    censorLevel = NULL
   )
 
   # Should have results object
@@ -137,7 +140,8 @@ test_that("lassocox with lambda.min vs lambda.1se produces different models", {
     outcomeLevel = "Dead",
     explanatory = explanatory_vars,
     lambda = "lambda.min",
-    cv_plot = FALSE, coef_plot = FALSE, survival_plot = FALSE
+    cv_plot = FALSE, coef_plot = FALSE, survival_plot = FALSE,
+    censorLevel = NULL
   )
 
   result_1se <- lassocox(
@@ -147,7 +151,8 @@ test_that("lassocox with lambda.min vs lambda.1se produces different models", {
     outcomeLevel = "Dead",
     explanatory = explanatory_vars,
     lambda = "lambda.1se",
-    cv_plot = FALSE, coef_plot = FALSE, survival_plot = FALSE
+    cv_plot = FALSE, coef_plot = FALSE, survival_plot = FALSE,
+    censorLevel = NULL
   )
 
   # Both should complete without error

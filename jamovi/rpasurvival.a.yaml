@@ -87,6 +87,7 @@ options:
     - name: time
       title: Survival Time
       type: Variable
+      default: NULL
       suggested:
         - continuous
       permitted:
@@ -99,6 +100,7 @@ options:
     - name: event
       title: Event Status
       type: Variable
+      default: NULL
       suggested:
         - nominal
         - ordinal
@@ -112,6 +114,7 @@ options:
     - name: predictors
       title: Predictor Variables
       type: Variables
+      default: NULL
       suggested:
         - nominal
         - ordinal

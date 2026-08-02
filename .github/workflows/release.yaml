@@ -1,0 +1,95 @@
+# Tags and publishes a GitHub Release when the package version changes.
+#
+# Trigger: a push to the default branch that touches DESCRIPTION or jamovi/0000.yaml.
+# Guard:   DESCRIPTION `Version:` and jamovi/0000.yaml `version:` must agree — a mismatch
+#          fails the run loudly rather than shipping an inconsistent module.
+# Idempotent: the release is created only if the tag v<version> does not already exist,
+#          so re-pushing, editing DESCRIPTION again, or a manual dispatch is harmless.
+on:
+  push:
+    branches: [master, main]
+    paths:
+      - DESCRIPTION
+      - jamovi/0000.yaml
+  workflow_dispatch:
+
+name: Release
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    if: "!contains(github.event.head_commit.message, 'WIP')"
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Read and cross-check versions
+        id: version
+        run: |
+          set -euo pipefail
+          desc=$(sed -n 's/^Version:[[:space:]]*//p' DESCRIPTION | head -n1 | tr -d '\r')
+          yml=$(sed -n 's/^version:[[:space:]]*//p' jamovi/0000.yaml | head -n1 | tr -d "\r\"'")
+          printf 'DESCRIPTION: %s\n0000.yaml:   %s\n' "$desc" "$yml"
+          if [ "$desc" != "$yml" ]; then
+            echo "::error::Version mismatch - DESCRIPTION is '$desc' but jamovi/0000.yaml is '$yml'. Bump both together."
+            exit 1
+          fi
+          # Anything that is not a plain dotted version is a malformed file, not a release.
+          case "$desc" in
+            ''|*[!0-9.]*) echo "::error::Unusable version string '$desc'"; exit 1 ;;
+          esac
+          echo "version=$desc" >> "$GITHUB_OUTPUT"
+          echo "tag=v$desc" >> "$GITHUB_OUTPUT"
+
+      - name: Skip if the tag already exists
+        id: tag
+        env:
+          TAG: ${{ steps.version.outputs.tag }}
+        run: |
+          set -euo pipefail
+          if git rev-parse -q --verify "refs/tags/$TAG" >/dev/null; then
+            echo "$TAG already exists - nothing to release."
+            echo "exists=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "exists=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Extract release notes from NEWS.md
+        if: steps.tag.outputs.exists == 'false'
+        env:
+          VERSION: ${{ steps.version.outputs.version }}
+        run: |
+          set -euo pipefail
+          : > RELEASE_NOTES.md
+          if [ -f NEWS.md ]; then
+            # Print the first heading that mentions this version, up to the next
+            # heading at the same level or shallower.
+            awk -v v="$VERSION" '
+              BEGIN { esc = v; gsub(/\./, "\\.", esc); re = "(^|[^0-9.])" esc "([^0-9.]|$)" }
+              /^#+[[:space:]]/ {
+                level = index($0, " ") - 1
+                if (inside && level <= want) exit
+                if (!inside && $0 ~ re) { inside = 1; want = level; print; next }
+              }
+              inside { print }
+            ' NEWS.md > RELEASE_NOTES.md
+          fi
+          if [ ! -s RELEASE_NOTES.md ]; then
+            printf 'Release %s.\n' "$VERSION" > RELEASE_NOTES.md
+          fi
+          cat RELEASE_NOTES.md
+
+      - name: Create tag and release
+        if: steps.tag.outputs.exists == 'false'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          TAG: ${{ steps.version.outputs.tag }}
+        run: |
+          set -euo pipefail
+          git tag "$TAG"
+          git push origin "$TAG"
+          gh release create "$TAG" --title "$TAG" --notes-file RELEASE_NOTES.md

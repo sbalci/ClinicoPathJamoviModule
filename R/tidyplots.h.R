@@ -115,6 +115,7 @@ tidyplotsOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             private$..xvar <- jmvcore::OptionVariable$new(
                 "xvar",
                 xvar,
+                default=NULL,
                 suggested=list(
                     "continuous",
                     "ordinal",
@@ -125,6 +126,7 @@ tidyplotsOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             private$..yvar <- jmvcore::OptionVariable$new(
                 "yvar",
                 yvar,
+                default=NULL,
                 suggested=list(
                     "continuous"),
                 permitted=list(
@@ -132,6 +134,7 @@ tidyplotsOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             private$..color <- jmvcore::OptionVariable$new(
                 "color",
                 color,
+                default=NULL,
                 suggested=list(
                     "nominal",
                     "ordinal"),
@@ -141,6 +144,7 @@ tidyplotsOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             private$..group <- jmvcore::OptionVariable$new(
                 "group",
                 group,
+                default=NULL,
                 suggested=list(
                     "nominal",
                     "ordinal"),
@@ -150,6 +154,7 @@ tidyplotsOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             private$..facet <- jmvcore::OptionVariable$new(
                 "facet",
                 facet,
+                default=NULL,
                 suggested=list(
                     "nominal",
                     "ordinal"),
@@ -1282,11 +1287,11 @@ tidyplotsBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' @export
 tidyplots <- function(
     data,
-    xvar,
-    yvar,
-    color,
-    group,
-    facet,
+    xvar = NULL,
+    yvar = NULL,
+    color = NULL,
+    group = NULL,
+    facet = NULL,
     plotType = "points",
     pointType = "basic",
     lineType = "direct",

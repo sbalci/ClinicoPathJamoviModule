@@ -51,11 +51,13 @@ subgroupforestOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
             private$..time <- jmvcore::OptionVariable$new(
                 "time",
                 time,
+                default=NULL,
                 suggested=list(
                     "continuous"))
             private$..event <- jmvcore::OptionVariable$new(
                 "event",
                 event,
+                default=NULL,
                 suggested=list(
                     "nominal"),
                 permitted=list(
@@ -412,8 +414,8 @@ subgroupforest <- function(
     outcome,
     treatment,
     subgroups,
-    time,
-    event,
+    time = NULL,
+    event = NULL,
     outcomeType = "survival",
     effectMeasure = "hr",
     confidenceLevel = "0.95",

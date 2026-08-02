@@ -8,7 +8,8 @@ test_that('RCB reproduces the Symmans worked example (single case)', {
       inputMode = 'manual',
       mD1 = 24, mD2 = 18, mCellularity = 10, mCis = 5,
       mNodes = 3, mMetSize = 4,
-      showPlot = TRUE, showSummary = TRUE, showExplanation = TRUE)
+      showPlot = TRUE, showSummary = TRUE, showExplanation = TRUE,
+      eventLevel = NULL)
   })
   expect_true(inherits(model, 'jmvcoreClass'))
 
@@ -49,6 +50,7 @@ test_that('RCB class boundaries follow the 1.36 / 3.28 cutpoints', {
   # node-negative cases at controlled index values
   # pCR (all zero) -> RCB-0
   m0 <- residualcancerburden(data = data.frame(x = 1), inputMode = 'manual',
-    mD1 = 0, mD2 = 0, mCellularity = 0, mCis = 0, mNodes = 0, mMetSize = 0)
+    mD1 = 0, mD2 = 0, mCellularity = 0, mCis = 0, mNodes = 0, mMetSize = 0,
+    eventLevel = NULL)
   expect_match(m0$results$caseTable$notes[['idx']], 'RCB-0')
 })

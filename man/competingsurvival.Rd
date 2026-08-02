@@ -7,8 +7,8 @@
 competingsurvival(
   data,
   explanatory = NULL,
-  overalltime,
-  outcome,
+  overalltime = NULL,
+  outcome = NULL,
   dod,
   dooc,
   awd,

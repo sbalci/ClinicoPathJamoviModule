@@ -41,6 +41,7 @@ jextractggstatsOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
             private$..group_var <- jmvcore::OptionVariable$new(
                 "group_var",
                 group_var,
+                default=NULL,
                 suggested=list(
                     "ordinal",
                     "nominal"),
@@ -310,7 +311,7 @@ jextractggstatsBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
 jextractggstats <- function(
     data,
     dep_var,
-    group_var,
+    group_var = NULL,
     test_value = 0,
     analysis_type = "between_stats",
     extract_components = "all",

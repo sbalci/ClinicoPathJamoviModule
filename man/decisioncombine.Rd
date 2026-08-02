@@ -6,9 +6,9 @@
 \usage{
 decisioncombine(
   data,
-  gold,
+  gold = NULL,
   goldPositive,
-  test1,
+  test1 = NULL,
   test1Positive,
   test2 = NULL,
   test2Positive,

@@ -10,7 +10,7 @@ pagetrendtest(
   subject,
   within,
   trend_direction = "increasing",
-  custom_order,
+  custom_order = "",
   method = "asymptotic",
   alpha = 0.05,
   effect_size = TRUE,

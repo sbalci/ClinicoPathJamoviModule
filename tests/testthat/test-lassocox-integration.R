@@ -57,7 +57,8 @@ test_that("lassocox integration: breast cancer clinicopathological", {
     suitabilityCheck = TRUE,
     showVariableImportance = TRUE,
     showModelComparison = TRUE,
-    cv_plot = FALSE, coef_plot = FALSE, survival_plot = FALSE
+    cv_plot = FALSE, coef_plot = FALSE, survival_plot = FALSE,
+    censorLevel = NULL
   )
 
   # Verify output structure
@@ -92,7 +93,8 @@ test_that("lassocox integration: lung cancer clinical trial", {
                      "treatment_type"),
     lambda = "lambda.min",
     nfolds = 10,
-    cv_plot = FALSE, coef_plot = FALSE, survival_plot = FALSE
+    cv_plot = FALSE, coef_plot = FALSE, survival_plot = FALSE,
+    censorLevel = NULL
   )
 
   expect_true(!is.null(result$results$modelSummary))
@@ -125,7 +127,8 @@ test_that("lassocox integration: cardiovascular risk study", {
     lambda = "lambda.1se",
     nfolds = 10,
     suitabilityCheck = TRUE,
-    cv_plot = FALSE, coef_plot = FALSE, survival_plot = FALSE
+    cv_plot = FALSE, coef_plot = FALSE, survival_plot = FALSE,
+    censorLevel = NULL
   )
 
   expect_true(!is.null(result$results$modelSummary))
@@ -149,7 +152,8 @@ test_that("lassocox integration: small cohort with limited events", {
                      "biomarker_b", "biomarker_c",
                      "treatment_group", "severity_score"),
     nfolds = 5,
-    cv_plot = FALSE, coef_plot = FALSE, survival_plot = FALSE
+    cv_plot = FALSE, coef_plot = FALSE, survival_plot = FALSE,
+    censorLevel = NULL
   )
 
   expect_true(!is.null(result$results$modelSummary))
@@ -177,7 +181,8 @@ test_that("lassocox integration: high-dimensional genomic data", {
     standardize = TRUE,
     suitabilityCheck = TRUE,
     showVariableImportance = TRUE,
-    cv_plot = FALSE, coef_plot = FALSE, survival_plot = FALSE
+    cv_plot = FALSE, coef_plot = FALSE, survival_plot = FALSE,
+    censorLevel = NULL
   )
 
   expect_true(!is.null(result$results$modelSummary))
@@ -213,7 +218,8 @@ test_that("lassocox integration: multicollinearity scenario", {
     nfolds = 10,
     suitabilityCheck = TRUE,
     showModelComparison = TRUE,
-    cv_plot = FALSE, coef_plot = FALSE, survival_plot = FALSE
+    cv_plot = FALSE, coef_plot = FALSE, survival_plot = FALSE,
+    censorLevel = NULL
   )
 
   expect_true(!is.null(result$results$modelSummary))
@@ -290,7 +296,8 @@ test_that("lassocox full workflow with all options enabled", {
     showMethodologyNotes = TRUE,
     includeClinicalGuidance = TRUE,
     showVariableImportance = TRUE,
-    showModelComparison = TRUE
+    showModelComparison = TRUE,
+    censorLevel = NULL
   )
 
   # All output items should exist

@@ -95,6 +95,7 @@ adaptivelassoOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
             private$..strata <- jmvcore::OptionVariable$new(
                 "strata",
                 strata,
+                default=NULL,
                 suggested=list(
                     "nominal",
                     "ordinal"))
@@ -1069,7 +1070,7 @@ adaptivelasso <- function(
     event_level,
     censor_level,
     predictors,
-    strata,
+    strata = NULL,
     suitabilityCheck = TRUE,
     weight_method = "ridge",
     alpha = 1,

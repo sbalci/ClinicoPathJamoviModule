@@ -13,7 +13,7 @@ jjcoefstatsOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
             confLow = NULL,
             confHigh = NULL,
             pValue = NULL,
-            degreesOfFreedom = NULL,
+            degreesOfFreedom = 0,
             outcome = NULL,
             predictors = NULL,
             modelType = "lm",
@@ -98,7 +98,8 @@ jjcoefstatsOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
                 default=NULL)
             private$..degreesOfFreedom <- jmvcore::OptionInteger$new(
                 "degreesOfFreedom",
-                degreesOfFreedom)
+                degreesOfFreedom,
+                default=0)
             private$..outcome <- jmvcore::OptionVariable$new(
                 "outcome",
                 outcome,
@@ -557,7 +558,7 @@ jjcoefstats <- function(
     confLow = NULL,
     confHigh = NULL,
     pValue = NULL,
-    degreesOfFreedom,
+    degreesOfFreedom = 0,
     outcome = NULL,
     predictors = NULL,
     modelType = "lm",

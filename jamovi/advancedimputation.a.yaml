@@ -262,6 +262,7 @@ options:
     - name: passive_imputation
       title: Passive Imputation Variables
       type: String
+      default: ""
       description:
           R: R expressions for passive imputation (e.g., "bmi ~ I(weight/height^2)")
 

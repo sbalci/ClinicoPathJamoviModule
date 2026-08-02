@@ -25,7 +25,7 @@ advancedimputation(
   level2_vars,
   min_bucket_size = 5,
   exclude_vars,
-  passive_imputation,
+  passive_imputation = "",
   ridge_penalty = 1e-05,
   remove_collinear = TRUE,
   collinearity_threshold = 0.95,

@@ -48,6 +48,7 @@ options:
     - name: dep
       title: 'Outcome - Dependent Variable (y-axis)'
       type: Variable
+      default: NULL
       description:
           ui: Select the main outcome you want to analyze (e.g., tumor size, survival time, biomarker level, treatment response)
           R: >-
@@ -56,6 +57,7 @@ options:
     - name: group
       title: 'Comparison Groups (x-axis)'
       type: Variable
+      default: NULL
       description:
           ui: Select the groups to compare (e.g., treatment vs control, tumor grade G1/G2/G3, positive vs negative)
           R: >-

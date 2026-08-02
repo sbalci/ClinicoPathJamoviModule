@@ -33,6 +33,7 @@ groomecompareOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
             private$..time <- jmvcore::OptionVariable$new(
                 "time",
                 time,
+                default=NULL,
                 suggested=list(
                     "continuous"),
                 permitted=list(
@@ -40,6 +41,7 @@ groomecompareOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
             private$..event <- jmvcore::OptionVariable$new(
                 "event",
                 event,
+                default=NULL,
                 suggested=list(
                     "nominal",
                     "ordinal"),
@@ -48,6 +50,7 @@ groomecompareOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
             private$..stage1 <- jmvcore::OptionVariable$new(
                 "stage1",
                 stage1,
+                default=NULL,
                 suggested=list(
                     "nominal",
                     "ordinal"),
@@ -56,6 +59,7 @@ groomecompareOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
             private$..stage2 <- jmvcore::OptionVariable$new(
                 "stage2",
                 stage2,
+                default=NULL,
                 suggested=list(
                     "nominal",
                     "ordinal"),
@@ -571,10 +575,10 @@ groomecompareBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' @export
 groomecompare <- function(
     data,
-    time,
-    event,
-    stage1,
-    stage2,
+    time = NULL,
+    event = NULL,
+    stage1 = NULL,
+    stage2 = NULL,
     eventValue = "1",
     stage1name = "Staging System 1",
     stage2name = "Staging System 2",

@@ -55,7 +55,8 @@ test_that('surveysurvival analysis works', {
     risktable = FALSE,
     design_summary = TRUE,
     showSummaries = FALSE,
-    showExplanations = FALSE
+    showExplanations = FALSE,
+    outcomeLevel = NULL
     )
   })
 

@@ -41,6 +41,7 @@ competingsurvivalOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R
             private$..overalltime <- jmvcore::OptionVariable$new(
                 "overalltime",
                 overalltime,
+                default=NULL,
                 suggested=list(
                     "continuous"),
                 permitted=list(
@@ -48,6 +49,7 @@ competingsurvivalOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R
             private$..outcome <- jmvcore::OptionVariable$new(
                 "outcome",
                 outcome,
+                default=NULL,
                 suggested=list(
                     "ordinal",
                     "nominal"),
@@ -515,8 +517,8 @@ competingsurvivalBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
 competingsurvival <- function(
     data,
     explanatory = NULL,
-    overalltime,
-    outcome,
+    overalltime = NULL,
+    outcome = NULL,
     dod,
     dooc,
     awd,

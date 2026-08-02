@@ -26,7 +26,12 @@ test_that("Step Summary Logic", {
      step2_exclusions = NULL,
      step3_exclusions = NULL,
      step4_exclusions = NULL,
-     step5_exclusions = NULL
+     step5_exclusions = NULL,
+     exclusions_after_step1 = NULL,
+     exclusions_after_step2 = NULL,
+     exclusions_after_step3 = NULL,
+     exclusions_after_step4 = NULL,
+     exclusions_after_step5 = NULL
   )
   
 
@@ -60,7 +65,12 @@ test_that("Step Summary Logic", {
      step2_exclusions = NULL,
      step3_exclusions = NULL,
      step4_exclusions = NULL,
-     step5_exclusions = NULL
+     step5_exclusions = NULL,
+     exclusions_after_step1 = NULL,
+     exclusions_after_step2 = NULL,
+     exclusions_after_step3 = NULL,
+     exclusions_after_step4 = NULL,
+     exclusions_after_step5 = NULL
   )
 
   
@@ -121,7 +131,12 @@ test_that("Exclusion Mapping Logic (Sequential)", {
      exclusion_reason_summary = NULL,
      step3_exclusions = NULL,
      step4_exclusions = NULL,
-     step5_exclusions = NULL
+     step5_exclusions = NULL,
+     exclusions_after_step1 = NULL,
+     exclusions_after_step2 = NULL,
+     exclusions_after_step3 = NULL,
+     exclusions_after_step4 = NULL,
+     exclusions_after_step5 = NULL
   )
   
 
@@ -149,7 +164,12 @@ test_that("Exclusion Mapping Logic (Sequential)", {
      exclusion_reason_summary = NULL,
      step3_exclusions = NULL,
      step4_exclusions = NULL,
-     step5_exclusions = NULL
+     step5_exclusions = NULL,
+     exclusions_after_step1 = NULL,
+     exclusions_after_step2 = NULL,
+     exclusions_after_step3 = NULL,
+     exclusions_after_step4 = NULL,
+     exclusions_after_step5 = NULL
   )
   module$run()
   
