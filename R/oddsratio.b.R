@@ -17,8 +17,8 @@
 #' }
 #'
 #' The function automatically cleans variable names using janitor::clean_names()
-#' and preserves original variable labels for display. It handles missing data
-#' through complete case analysis.
+#' and preserves original variable labels for display. The regression uses
+#' complete cases for the selected outcome and explanatory variables only.
 #'
 #' @section International Usage:
 #' For international users, the function includes an outcomeLevel parameter to
@@ -28,7 +28,7 @@
 #' @section Nomogram Features:
 #' When showNomogram is enabled, the function generates:
 #' \itemize{
-#'   \item Interactive nomogram for risk prediction
+#'   \item Prediction nomogram based on the fitted logistic model
 #'   \item Diagnostic metrics (sensitivity, specificity, likelihood ratios)
 #'   \item Contingency table analysis
 #'   \item User guidance for interpretation
@@ -187,6 +187,9 @@ oddsratioClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             if (!is.null(dependent_var) && dependent_var %in% names(mydata)) {
                 outcome_data <- mydata[[dependent_var]]
                 outcome_data <- outcome_data[!is.na(outcome_data)]
+                if (is.factor(outcome_data)) {
+                    outcome_data <- droplevels(outcome_data)
+                }
                 
                 if (length(outcome_data) == 0) {
                     validation_results$errors <- c(validation_results$errors,
@@ -252,6 +255,9 @@ oddsratioClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     if (var_name %in% names(mydata)) {
                         var_data <- mydata[[var_name]]
                         var_data_clean <- var_data[!is.na(var_data)]
+                        if (is.factor(var_data_clean)) {
+                            var_data_clean <- droplevels(var_data_clean)
+                        }
                         
                         if (length(var_data_clean) == 0) {
                             validation_results$warnings <- c(validation_results$warnings,
@@ -261,8 +267,13 @@ oddsratioClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                                 glue::glue("Explanatory variable '{var_name}' has no variation (all values are the same). It will not contribute to the model."))
                         } else if (is.factor(var_data)) {
                             # Factor variable validation
-                            factor_levels <- levels(var_data)
-                            factor_counts <- table(var_data)
+                            factor_levels <- levels(var_data_clean)
+                            factor_counts <- table(var_data_clean)
+
+                            if (is.ordered(var_data)) {
+                                validation_results$info <- c(validation_results$info,
+                                    glue::glue("Ordered factor '{var_name}' will be treated as nominal (unordered) for modeling and output."))
+                            }
                             
                             if (length(factor_levels) > 10) {
                                 validation_results$warnings <- c(validation_results$warnings,
@@ -292,9 +303,6 @@ oddsratioClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                                 validation_results$info <- c(validation_results$info,
                                     glue::glue("Explanatory variable '{var_name}' may contain extreme outliers ({extreme_high + extreme_low} potential outliers)."))
                             }
-                        } else if (is.ordered(var_data)) {
-                            validation_results$info <- c(validation_results$info,
-                                glue::glue("Ordered factor '{var_name}' will be treated as nominal (unordered) for modeling and output."))
                         }
                     }
                 }
@@ -333,6 +341,7 @@ oddsratioClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
             # Reset notices at start of each run
             private$.resetNotices()
+            private$.nom_object <- NULL
 
 
 
@@ -348,17 +357,14 @@ oddsratioClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 todo <- glue::glue("
                     <br>Welcome to ClinicoPath
                     <br><br>
-                        This tool will help you produce an odds ratio table and plot.
+                    Select one binary outcome, identify its positive/event level,
+                    and add one or more categorical or continuous explanatory variables.
+                    The analysis reports logistic-regression odds ratios with confidence
+                    intervals and a matching forest plot.
                     <br><br>
-                        Explanatory variables can be categorical (ordinal or nominal) or continuous.
-                    <br><br>
-                        Outcome variable should be coded binary, defining whether the patient is dead or event (recurrence) occured
-                    or censored (patient is alive or free of disease) at the last visit.
-                    <br><br>
-                        Variable names with spaces or special characters are automatically cleaned for analysis while preserving original names in output.
-                    <br><br>
-                        This function uses finalfit package. Please cite jamovi and the packages as given below.
-                    <br><br>
+                    Missing observations are removed only for variables used by each
+                    calculation. Variable names with spaces or special characters are
+                    handled automatically and restored in the output.
                     ")
 
                 # https://finalfit.org/articles/all_tables_examples.html#default-1
@@ -425,11 +431,32 @@ oddsratioClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 # CHECKPOINT: Before data preprocessing - which can be time-consuming
                 private$.checkpoint()
 
-                mydata <- self$data
+                # Restrict all preprocessing to variables used by this analysis.
+                # In particular, missing values in unrelated dataset columns must
+                # not remove observations from the regression.
+                model_columns <- unique(c(self$options$outcome, self$options$explanatory))
+                selected_columns <- model_columns
+                if (isTRUE(self$options$showNomogram) &&
+                    !is.null(self$options$diagnosticPredictor)) {
+                    selected_columns <- unique(c(
+                        selected_columns,
+                        self$options$diagnosticPredictor
+                    ))
+                }
+
+                missing_columns <- setdiff(selected_columns, names(self$data))
+                if (length(missing_columns) > 0) {
+                    jmvcore::reject(paste0(
+                        "Selected variable(s) not found in the data: ",
+                        paste(missing_columns, collapse = ", "), "."
+                    ))
+                }
+
+                mydata <- self$data[, selected_columns, drop = FALSE]
 
                 # Perform input validation before processing
                 validation_results <- private$.validateInputs(
-                    mydata,
+                    mydata[, model_columns, drop = FALSE],
                     self$options$outcome,
                     self$options$explanatory,
                     self$options$outcomeLevel
@@ -452,13 +479,7 @@ oddsratioClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     jmvcore::reject(critical_message)
                 }
 
-                mydata <- jmvcore::naOmit(mydata)
-                
                 original_names <- names(mydata)
-
-                # Save original names as a named vector where the names are the original names,
-                # and the values are the labels you want to set, which are also the original names.
-                labels <- setNames(original_names, original_names)
 
                 # Clean variable names
                 mydata <- mydata %>% janitor::clean_names()
@@ -478,6 +499,11 @@ oddsratioClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
                 # Retrieve the variable name from the label
                 dependent_variable_name_from_label <- names(all_labels)[all_labels == self$options$outcome]
+                if (length(dependent_variable_name_from_label) == 0) {
+                    jmvcore::reject(
+                        "The selected outcome could not be mapped after variable-name normalization."
+                    )
+                }
                 if (length(dependent_variable_name_from_label) > 1) {
                     # Ambiguous label; pick first but warn
                     validation_results$warnings <- c(validation_results$warnings,
@@ -572,6 +598,72 @@ oddsratioClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     }
                 }
 
+                # Keep a cleaned copy for the independent 2x2 diagnostic
+                # calculation. Its complete cases are outcome + diagnostic
+                # predictor, whereas the regression complete cases are outcome +
+                # explanatory variables. Neither path is affected by unrelated
+                # columns or by missingness in the other path.
+                diagnostic_source <- mydata
+
+                model_names <- unique(c(
+                    dependent_variable_name_from_label,
+                    explanatory_variable_names
+                ))
+                model_names <- model_names[!is.na(model_names) & nzchar(model_names)]
+                mydata <- mydata[, model_names, drop = FALSE]
+                mydata <- mydata[stats::complete.cases(mydata), , drop = FALSE]
+
+                if (nrow(mydata) == 0) {
+                    jmvcore::reject(
+                        "No complete observations remain for the selected outcome and explanatory variables."
+                    )
+                }
+
+                for (v in names(mydata)) {
+                    if (is.factor(mydata[[v]])) {
+                        mydata[[v]] <- droplevels(mydata[[v]])
+                    }
+                }
+
+                observed_outcome <- mydata[[dependent_variable_name_from_label]]
+                if (!is.factor(observed_outcome)) {
+                    observed_outcome <- factor(observed_outcome)
+                    mydata[[dependent_variable_name_from_label]] <- observed_outcome
+                }
+                if (nlevels(observed_outcome) != 2 ||
+                    !(self$options$outcomeLevel %in% levels(observed_outcome))) {
+                    jmvcore::reject(paste0(
+                        "After removing incomplete cases for the selected model, the outcome must retain exactly two observed levels including the selected positive level '",
+                        self$options$outcomeLevel, "'."
+                    ))
+                }
+
+                no_variation <- vapply(
+                    explanatory_variable_names,
+                    function(v) length(unique(mydata[[v]])) < 2,
+                    logical(1)
+                )
+                if (any(no_variation)) {
+                    jmvcore::reject(paste0(
+                        "The following explanatory variable(s) have no variation after complete-case filtering: ",
+                        paste(self$options$explanatory[no_variation], collapse = ", "),
+                        "."
+                    ))
+                }
+
+                non_finite <- vapply(
+                    explanatory_variable_names,
+                    function(v) is.numeric(mydata[[v]]) && any(!is.finite(mydata[[v]])),
+                    logical(1)
+                )
+                if (any(non_finite)) {
+                    jmvcore::reject(paste0(
+                        "The following numeric explanatory variable(s) contain infinite values: ",
+                        paste(self$options$explanatory[non_finite], collapse = ", "),
+                        ". Replace infinite values before fitting the model."
+                    ))
+                }
+
                 # Additional diagnostics: EPV and separation checks
                 extra_warnings <- c()
                 if (!is.null(dependent_variable_name_from_label) && !is.null(self$options$outcomeLevel)) {
@@ -617,7 +709,9 @@ oddsratioClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
                 # Merge extra warnings into validation results now that they're populated
                 if (length(extra_warnings) > 0) {
-                    validation_results$warnings <- c(validation_results$warnings, extra_warnings)
+                    for (warn_msg in extra_warnings) {
+                        private$.addNotice(jmvcore::NoticeType$WARNING, warn_msg)
+                    }
                 }
 
                 formulaDependent <- jmvcore::constructFormula(
@@ -639,6 +733,26 @@ oddsratioClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 # CHECKPOINT: Before running finalfit - which can be computationally intensive
                 private$.checkpoint()
 
+                fit_standard_model <- function() {
+                    tryCatch(
+                        finalfit::finalfit(
+                            .data = mydata,
+                            dependent = formulaDependent,
+                            explanatory = formulaExplanatory,
+                            metrics = TRUE
+                        ),
+                        error = function(e) {
+                            message <- paste0(
+                                "Standard logistic regression could not be fitted: ",
+                                conditionMessage(e),
+                                ". Review outcome coding, predictor variation, sparse categories, and separation; consider Firth penalized regression when appropriate."
+                            )
+                            private$.addNotice(jmvcore::NoticeType$ERROR, message)
+                            jmvcore::reject(message)
+                        }
+                    )
+                }
+
                 # Use Firth penalized logistic regression if requested and package is available
                 if (isTRUE(self$options$usePenalized)) {
                     if (requireNamespace("logistf", quietly = TRUE)) {
@@ -656,19 +770,10 @@ oddsratioClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                         private$.addNotice(jmvcore::NoticeType$STRONG_WARNING,
                             "The 'logistf' package is required for Firth penalized regression but is not installed. Falling back to standard logistic regression.")
                         
-                        finalfit::finalfit(.data = mydata,
-                                           dependent = formulaDependent,
-                                           explanatory = formulaExplanatory,
-                                           metrics = TRUE
-                                           ) -> tOdds
+                        tOdds <- fit_standard_model()
                     }
                 } else {
-                    finalfit::finalfit(.data = mydata,
-                                       dependent = formulaDependent,
-                                       explanatory = formulaExplanatory,
-                                       # formula = myformula,
-                                       metrics = TRUE
-                                       ) -> tOdds
+                    tOdds <- fit_standard_model()
                 }
                 
                 # Restore original variable names in the finalfit output table
@@ -754,13 +859,12 @@ oddsratioClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     # Select predictor for diagnostic metrics
                     diagnostic_predictor <- NULL
                     diagnostic_predictor_original_name <- NULL
-                    user_selected_predictor <- FALSE
+                    diagnostics_ok <- TRUE
 
                     # Check if user explicitly selected a diagnostic predictor
                     if (!is.null(self$options$diagnosticPredictor)) {
                         diagnostic_predictor <- names(all_labels)[match(self$options$diagnosticPredictor, all_labels)]
                         diagnostic_predictor_original_name <- self$options$diagnosticPredictor
-                        user_selected_predictor <- TRUE
 
                         if (length(diagnostic_predictor) > 1) {
                             warn_msg <- glue::glue("Diagnostic predictor label matches multiple variables; using '{diagnostic_predictor_original_name}'.")
@@ -793,38 +897,68 @@ oddsratioClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     }
 
                     # Ensure diagnostic predictor is available
-                    if (is.null(diagnostic_predictor) || !(diagnostic_predictor %in% names(mydata))) {
+                    if (is.null(diagnostic_predictor) ||
+                        !(diagnostic_predictor %in% names(diagnostic_source))) {
                         private$.addNotice(jmvcore::NoticeType$WARNING,
-                            "No diagnostic predictor available; skipping likelihood ratios/nomogram. Please select a binary variable for diagnostic metrics.")
-                        return()
+                            "No diagnostic predictor is available. Diagnostic metrics were skipped; the prediction nomogram can still be generated from the regression model.")
+                        self$results$diagnosticMetrics$setContent(
+                            "<p>Diagnostic metrics were not calculated because no diagnostic predictor was available.</p>"
+                        )
+                        diagnostics_ok <- FALSE
                     }
 
-                    # Convert to factor if needed
-                    if (!is.factor(mydata[[diagnostic_predictor]])) {
-                        mydata[[diagnostic_predictor]] <- factor(mydata[[diagnostic_predictor]])
+                    if (diagnostics_ok) {
+                        diagnostic_data <- diagnostic_source[, c(
+                            dependent_variable_name_from_label,
+                            diagnostic_predictor
+                        ), drop = FALSE]
+                        diagnostic_data <- diagnostic_data[
+                            stats::complete.cases(diagnostic_data),
+                            , drop = FALSE
+                        ]
+
+                        diagnostic_data[[dependent_variable_name_from_label]] <- droplevels(factor(
+                            diagnostic_data[[dependent_variable_name_from_label]]
+                        ))
+                        diagnostic_data[[diagnostic_predictor]] <- droplevels(factor(
+                            diagnostic_data[[diagnostic_predictor]]
+                        ))
+
+                        diagnostic_levels <- nlevels(diagnostic_data[[diagnostic_predictor]])
+                        outcome_levels_n <- nlevels(diagnostic_data[[dependent_variable_name_from_label]])
+                        if (nrow(diagnostic_data) == 0 || diagnostic_levels != 2 ||
+                            outcome_levels_n != 2) {
+                            private$.addNotice(jmvcore::NoticeType$WARNING,
+                                glue::glue("Diagnostic metrics for '{diagnostic_predictor_original_name}' require paired complete observations with exactly two observed predictor levels and two observed outcome levels. The prediction nomogram is unaffected."))
+                            self$results$diagnosticMetrics$setContent(
+                                "<p>Diagnostic metrics were not calculated because a valid paired 2×2 table could not be formed.</p>"
+                            )
+                            diagnostics_ok <- FALSE
+                        }
                     }
 
-                    # Ensure diagnostic predictor is binary
-                    if (nlevels(mydata[[diagnostic_predictor]]) != 2) {
-                        private$.addNotice(jmvcore::NoticeType$WARNING,
-                            glue::glue("Diagnostic predictor '{diagnostic_predictor_original_name}' has {nlevels(mydata[[diagnostic_predictor]])} levels but must be binary (exactly 2 levels) for likelihood ratio calculations. Please select a different variable or recode this variable to binary."))
-                        return()
-                    }
-
-                    # Calculate likelihood ratios with support for specified predictor level
-                    lr_results <- private$.calculateLikelihoodRatios(
-                        mydata,
-                        dependent_variable_name_from_label,
-                        diagnostic_predictor,
-                        self$options$outcomeLevel,  # User-specified positive outcome level
-                        self$options$predictorLevel # User-specified positive predictor level
-                    )
+                    if (diagnostics_ok) {
+                        # Calculate likelihood ratios with support for specified predictor level
+                        lr_results <- private$.calculateLikelihoodRatios(
+                            diagnostic_data,
+                            dependent_variable_name_from_label,
+                            diagnostic_predictor,
+                            self$options$outcomeLevel,
+                            self$options$predictorLevel
+                        )
                     
-                    # Check if likelihood ratio calculation failed
-                    if (!is.null(lr_results$error) && lr_results$error) {
-                        jmvcore::reject(lr_results$message)
+                        # A diagnostic configuration error should not discard a
+                        # successfully fitted regression model or prediction nomogram.
+                        if (!is.null(lr_results$error) && lr_results$error) {
+                            private$.addNotice(jmvcore::NoticeType$WARNING, lr_results$message)
+                            self$results$diagnosticMetrics$setContent(paste0(
+                                "<p>", htmltools::htmlEscape(lr_results$message), "</p>"
+                            ))
+                            diagnostics_ok <- FALSE
+                        }
                     }
 
+                    if (diagnostics_ok) {
                     # Create diagnostic metrics text with explanatory information
                     # Using paste0() for reliability (glue had template issues)
 
@@ -897,47 +1031,55 @@ oddsratioClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                         "<b> How to Use:</b><br>",
                         "1. Check that the positive outcome level is correct for your study<br>",
                         "2. If incorrect, use the 'Positive Outcome Level' dropdown to specify the correct level<br>",
-                        "3. The nomogram calculations depend on these interpretations being correct<br>",
+                        "3. These unadjusted diagnostic metrics depend on these interpretations being correct<br>",
                         "4. Different languages/coding may require manual specification",
                         "</small>",
                         "</div>",
                         "<br>"
                     )
 
-                    # metrics_text now complete with all features
-                    private$.checkpoint()
-
-                    # Prepare data for nomogram
-                    nom_results <- private$.prepareRmsNomogram(
-                        mydata,
-                        dependent_variable_name_from_label,
-                        explanatory_variable_names
-                    )
-
-                    # Create nomogram if preparation was successful
-                    if (!is.null(nom_results$fit)) {
-                        private$.createNomogram(nom_results$fit, nom_results$dd)
-                    } else {
-                        # Nomogram preparation failed - add user-friendly notice
-                        private$.addNotice(jmvcore::NoticeType$WARNING,
-                            "Nomogram could not be generated due to model fitting issues. The odds ratio analysis completed successfully, but the nomogram visualization is not available. This may occur with: (1) perfect separation in the data, (2) convergence issues, or (3) insufficient sample size. The main analysis results are still valid.")
+                        self$results$diagnosticMetrics$setContent(metrics_text)
                     }
 
-                    # Persist the serializable ingredients (data + raw variable names)
-                    # needed to rebuild the nomogram. private$.nom_object is not
-                    # serialized, so on reload the render function refits from this
-                    # state instead of showing a blank plot. The nomogram object
-                    # itself is not stored (it carries function references that would
-                    # break protobuf serialization).
-                    self$results$plot_nomogram$setState(list(
-                        data = mydata,
-                        dependent = dependent_variable_name_from_label,
-                        explanatory = explanatory_variable_names
-                    ))
+                    private$.checkpoint()
 
-                    # Update results with diagnostic metrics
-                    # Set the separate diagnosticMetrics output
-                    self$results$diagnosticMetrics$setContent(metrics_text)
+                    # rms::nomogram represents an ordinary maximum-likelihood
+                    # lrm model. Do not display it beside Firth estimates because
+                    # that would silently present two different fitted models.
+                    if (isTRUE(self$options$usePenalized)) {
+                        self$results$nomogram$setContent(
+                            paste0(
+                                "<p><strong>Prediction nomogram not generated.</strong> ",
+                                "The odds-ratio model uses Firth penalized likelihood, ",
+                                "whereas the available nomogram implementation uses ",
+                                "ordinary maximum-likelihood logistic regression.</p>"
+                            )
+                        )
+                        private$.addNotice(jmvcore::NoticeType$WARNING,
+                            "The prediction nomogram was not generated because Firth penalized regression is selected. Diagnostic metrics, when available, remain unadjusted 2x2 estimates.")
+                    } else {
+                        # Prepare data for the prediction nomogram.
+                        nom_results <- private$.prepareRmsNomogram(
+                            mydata,
+                            dependent_variable_name_from_label,
+                            explanatory_variable_names
+                        )
+
+                        if (!is.null(nom_results$fit)) {
+                            private$.createNomogram(nom_results$fit, nom_results$dd)
+                        } else {
+                            private$.addNotice(jmvcore::NoticeType$WARNING,
+                                "Prediction nomogram could not be generated due to model fitting issues. The odds ratio analysis completed successfully. The nomogram is an unvalidated visualization and its failure does not alter the fitted odds-ratio table.")
+                        }
+
+                        # Persist only serializable ingredients needed to rebuild
+                        # the nomogram after save/reload.
+                        self$results$plot_nomogram$setState(list(
+                            data = mydata,
+                            dependent = dependent_variable_name_from_label,
+                            explanatory = explanatory_variable_names
+                        ))
+                    }
                 }
                 # Educational Explanations ----
                 if (self$options$showExplanations) {
@@ -1000,7 +1142,20 @@ oddsratioClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             outcome_determination_method <- "User-specified"
             
             # Determine positive predictor level
-            if (!is.null(user_positive_predictor) && user_positive_predictor %in% predictor_levels) {
+            if (!is.null(user_positive_predictor) &&
+                !(user_positive_predictor %in% predictor_levels)) {
+                return(list(
+                    error = TRUE,
+                    message = paste0(
+                        "The selected positive predictor level '",
+                        user_positive_predictor,
+                        "' is not present among paired complete observations. Available levels: ",
+                        paste(predictor_levels, collapse = ", "), "."
+                    )
+                ))
+            }
+
+            if (!is.null(user_positive_predictor)) {
                 positive_predictor_level <- user_positive_predictor
                 predictor_determination_method <- "User-specified"
             } else {
@@ -1142,7 +1297,9 @@ oddsratioClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         .prepareRmsNomogram = function(data, dependent, explanatory) {
             tryCatch({
                 # First create datadist object
-                dd <- rms::datadist(data[, explanatory])
+                dd <- rms::datadist(data[, explanatory, drop = FALSE])
+                old_datadist <- getOption("datadist")
+                on.exit(options(datadist = old_datadist), add = TRUE)
                 options(datadist = dd)
 
                 # Create formula for model
@@ -1209,6 +1366,10 @@ oddsratioClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
         # Plots the nomogram using base R graphics
         .plot_nomogram = function(image, ggtheme, theme, ...) {
+            if (isTRUE(self$options$usePenalized)) {
+                return(FALSE)
+            }
+
             oldpar <- graphics::par(no.readonly = TRUE)
             on.exit(graphics::par(oldpar), add = TRUE)
 
@@ -1340,7 +1501,7 @@ oddsratioClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             # Create HTML display for the nomogram information
             html_content <- '<div style="background-color: #f8f9fa; padding: 15px; border-radius: 8px; margin: 10px 0;">'
             html_content <- paste0(html_content, '<h4 style="color: #495057; margin-top: 0;">Nomogram Information</h4>')
-            html_content <- paste0(html_content, '<p>The nomogram plot above provides a visual tool for risk prediction based on the logistic regression model.</p>')
+            html_content <- paste0(html_content, '<p>The nomogram plot above provides a visual tool for prediction based on the maximum-likelihood logistic regression model.</p>')
             html_content <- paste0(html_content, '<p><strong>Components:</strong></p>')
             html_content <- paste0(html_content, '<ul style="margin: 5px 0; padding-left: 20px;">')
             html_content <- paste0(html_content, '<li><strong>Points:</strong> Top scale showing point values for each predictor</li>')
@@ -1348,6 +1509,7 @@ oddsratioClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             html_content <- paste0(html_content, '<li><strong>Total Points:</strong> Sum of all individual predictor points</li>')
             html_content <- paste0(html_content, '<li><strong>Predicted Probability:</strong> Bottom scale showing the predicted outcome probability</li>')
             html_content <- paste0(html_content, '</ul>')
+            html_content <- paste0(html_content, '<p><strong>Validation note:</strong> This display does not establish calibration, discrimination, or external validity. Validate the fitted model before clinical use.</p>')
             html_content <- paste0(html_content, '</div>')
             
             return(html_content)
@@ -1365,7 +1527,7 @@ oddsratioClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 <ul>
                     <li><strong>Interpretation:</strong> OR > 1 indicates increased odds, OR < 1 indicates decreased odds</li>
                     <li><strong>Magnitude:</strong> Distance from 1.0 indicates strength of association</li>
-                    <li><strong>Confidence Intervals:</strong> Provide precision estimates and statistical significance</li>
+                    <li><strong>Confidence Intervals:</strong> Quantify uncertainty around each estimated odds ratio</li>
                     <li><strong>Case-Control Studies:</strong> Primary measure for retrospective study designs</li>
                 </ul>
                 <p><em>Clinical interpretation:</em> An OR of 2.0 means the odds of the outcome are twice as high in the exposed group.</p>
@@ -1392,7 +1554,7 @@ oddsratioClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 <ul>
                     <li><strong>Definition:</strong> Ratio of risks (proportions) between exposed and unexposed groups</li>
                     <li><strong>Use case:</strong> Cohort studies, randomized trials with follow-up data</li>
-                    <li><strong>Note:</strong> When outcome is rare (<10%), OR approximates RR</li>
+                    <li><strong>Note:</strong> OR approaches RR as outcome risk becomes low; the degree of approximation also depends on baseline risk and effect size</li>
                 </ul>
                 <p><em>Clinical note:</em> This analysis provides Odds Ratios from logistic regression. For Risk Ratios, use cohort analysis tools.</p>
             </div>
@@ -1438,8 +1600,9 @@ oddsratioClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                         </ul>
                     </li>
                 </ul>
+                <p><small>The LR magnitude bands above are rough interpretive guides, not universal clinical decision thresholds.</small></p>
                 <p><strong>Note:</strong> PPV and NPV are NOT calculated by this function as they depend on disease prevalence in your specific population.</p>
-                <p><em>Clinical application:</em> These metrics help evaluate diagnostic tests and biomarkers. Use the nomogram to convert likelihood ratios into post-test probabilities.</p>
+                <p><em>Clinical application:</em> These unadjusted metrics help evaluate a binary test or biomarker. The prediction nomogram is a separate multivariable model display and does not convert likelihood ratios into post-test probabilities.</p>
             </div>
             ')
 
@@ -1451,30 +1614,18 @@ oddsratioClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             tryCatch({
                 self$results$nomogramAnalysisExplanation$setContent('
             <div style="margin-bottom: 20px; padding: 15px; background-color: #f8d7da; border-left: 4px solid #dc3545;">
-                <h4 style="margin-top: 0; color: #721c24;">Understanding Diagnostic Nomogram</h4>
+                <h4 style="margin-top: 0; color: #721c24;">Understanding Prediction and Diagnostic Outputs</h4>
 
-                <p><strong>What is a Diagnostic Nomogram?</strong></p>
-                <p>A Fagan nomogram is a visual tool for converting pre-test probability to post-test probability using likelihood ratios from a diagnostic test. Unlike the risk prediction nomogram (which uses all variables), the diagnostic nomogram evaluates how well a SINGLE binary predictor performs as a diagnostic test.</p>
+                <p><strong>Prediction nomogram:</strong> The plotted nomogram assigns points to all explanatory variables in the maximum-likelihood logistic regression model and maps total points to predicted outcome probability. It is not a Fagan nomogram and does not display pre-test-to-post-test probability conversion.</p>
 
-                <h5 style="color: #721c24;">Key Components:</h5>
+                <h5 style="color: #721c24;">Prediction Nomogram Components:</h5>
                 <ul>
-                    <li><strong>Pre-test Probability:</strong> Baseline probability of the outcome before testing (e.g., population prevalence)</li>
-                    <li><strong>Likelihood Ratio (LR):</strong> How much the test result changes the odds
-                        <ul style="margin-top: 5px;">
-                            <li>LR+ > 1: Positive test increases probability</li>
-                            <li>LR- < 1: Negative test decreases probability</li>
-                        </ul>
-                    </li>
-                    <li><strong>Post-test Probability:</strong> Updated probability after incorporating test results</li>
+                    <li><strong>Points:</strong> Contribution assigned to each predictor value</li>
+                    <li><strong>Total Points:</strong> Sum of predictor contributions</li>
+                    <li><strong>Predicted Probability:</strong> Model-based probability corresponding to total points</li>
                 </ul>
 
-                <h5 style="color: #721c24;">How to Use the Nomogram:</h5>
-                <ol>
-                    <li>Start with pre-test probability (left axis)</li>
-                    <li>Draw a straight line through the likelihood ratio (middle axis)</li>
-                    <li>Read the post-test probability (right axis)</li>
-                    <li>Determine if this information is sufficient for clinical decision-making</li>
-                </ol>
+                <p><strong>Important:</strong> The plot is a visual representation of the fitted model, not evidence of calibration, discrimination, transportability, or clinical utility. Internal and external validation are required before clinical use. It is not generated when Firth regression is selected because that would mix different estimation methods.</p>
 
                 <hr style="margin: 15px 0; border: none; border-top: 1px solid #f5c6cb;">
 
@@ -1484,7 +1635,7 @@ oddsratioClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
                 <div style="background-color: #fff3cd; padding: 10px; border-radius: 5px; margin: 10px 0;">
                     <strong>Example:</strong> If you select "LVI" (Lymphovascular Invasion: Absent/Present) as the diagnostic predictor,
-                    the nomogram answers: <em>"How good is LVI at predicting my outcome?"</em>
+                    the diagnostic table answers: <em>"How well does LVI alone distinguish the selected outcome states?"</em>
                 </div>
 
                 <p><strong>Requirements:</strong></p>
@@ -1515,13 +1666,13 @@ oddsratioClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 <p><strong>Selection Guidelines:</strong></p>
                 <ul>
                     <li><strong>Not specified:</strong> Uses first explanatory variable automatically</li>
-                    <li><strong>In your regression model:</strong> Evaluates its performance while controlling for other variables</li>
-                    <li><strong>Not in your model:</strong> Evaluates it independently (useful for comparing tests)</li>
+                    <li><strong>In your regression model:</strong> Diagnostic metrics are still unadjusted and use only its paired 2×2 table</li>
+                    <li><strong>Not in your model:</strong> Evaluates it independently using paired complete outcome/test observations</li>
                 </ul>
 
                 <div style="background-color: #d1ecf1; padding: 10px; border-radius: 5px; margin: 10px 0;">
                     <strong> Clinical Tip:</strong> If your first variable is continuous (e.g., Age), you must manually select
-                    a binary variable for the diagnostic predictor, or the nomogram will not be generated.
+                    a binary diagnostic predictor to obtain sensitivity, specificity, and likelihood ratios. The prediction nomogram can still be generated from the regression variables.
                 </div>
             </div>
             ')
@@ -1983,22 +2134,17 @@ oddsratioClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             # Fill label column (index 1)
             summary_table[[1]] <- var_names
             
-            # Calculate model metrics for tOdds[[2]]
-            # logistf returns loglik = c(full = ..., null = ...) -- verified
-            # against the installed package, where the vector is literally named
-            # and loglik[1] > loglik[2]. Index [2] is the NULL model, so the AIC
-            # was computed as 2k - 2*logLik(null): it charged for every parameter
-            # while crediting none of them, inflating the AIC by exactly the
-            # likelihood-ratio statistic. (The ?logistf prose lists the two the
-            # other way round, which is presumably how this arose.)
-            loglik_full <- unname(fit$loglik[1])
-            loglik_null <- unname(fit$loglik[2])
-            aic_val <- 2 * length(coefs) - 2 * loglik_full
+            # Calculate model metrics for tOdds[[2]]. Use names rather than
+            # positional indices and delegate the penalized AIC definition to
+            # logistf's extractAIC method.
+            loglik_full <- unname(fit$loglik["full"])
+            loglik_null <- unname(fit$loglik["null"])
+            penalized_aic <- unname(stats::extractAIC(fit)[2])
             metrics <- list(
                 paste("Observations: ", length(fit$y)),
                 paste("Firth Log-Likelihood: ", round(loglik_full, 2)),
-                paste("AIC: ", round(aic_val, 2)),
-                paste("Likelihood-ratio test vs null: ",
+                paste("Penalized AIC (logistf): ", round(penalized_aic, 2)),
+                paste("Penalized likelihood-ratio statistic vs null: ",
                       round(2 * (loglik_full - loglik_null), 3))
             )
             

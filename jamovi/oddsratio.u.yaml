@@ -35,13 +35,13 @@ children:
       - type: CheckBox
         name: showExplanations
   - type: CollapseBox
-    label: Nomogram Options
+    label: Prediction and Diagnostic Options
     collapsed: true
     margin: large
     children:
       - type: CheckBox
         name: showNomogram
-        label: Diagnostic nomogram
+        label: Prediction nomogram and diagnostic metrics
       - type: VariableSupplier
         name: diagnosticPredictorSupplier
         persistentItems: true

@@ -1079,7 +1079,7 @@ analyses:
   - title: Multivariable Survival Analysis
     name: multisurvival
     ns: ClinicoPath
-    menuGroup: SurvivalT
+    menuGroup: Survival
     menuSubgroup: ClinicoPath Survival
     menuTitle: Multivariable Survival Analysis
     menuSubtitle: Multivariable Cox-regression, Adjusted Survival
@@ -1114,11 +1114,13 @@ analyses:
   - title: Odds Ratio Table and Plot
     name: oddsratio
     ns: ClinicoPath
-    menuGroup: Survival
+    menuGroup: SurvivalT
     menuSubgroup: General Statistics
     menuTitle: Odds Ratio Table and Plot
     menuSubtitle: Odds Ratio for Binary Outcomes
-    description: Function for Odds Ratio Table and Plot.
+    description: >-
+      Logistic regression odds-ratio table, forest plot, prediction nomogram,
+      and optional binary diagnostic metrics.
     ribbon: analyses
     category: analyses
   - title: Comprehensive Time Interval Calculator

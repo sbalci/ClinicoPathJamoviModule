@@ -137,7 +137,8 @@ oddsratioResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 title="To Do",
                 clearWith=list(
                     "explanatory",
-                    "outcome")))
+                    "outcome",
+                    "outcomeLevel")))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="errors",
@@ -216,12 +217,17 @@ oddsratioResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             self$add(jmvcore::Image$new(
                 options=options,
                 name="plot_nomogram",
-                title="Nomogram",
+                title="Prediction Nomogram",
                 width=800,
                 height=600,
                 requiresData=TRUE,
                 renderFun=".plot_nomogram",
-                visible="(showNomogram)"))
+                visible="(showNomogram && !usePenalized)",
+                clearWith=list(
+                    "explanatory",
+                    "outcome",
+                    "outcomeLevel",
+                    "usePenalized")))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="diagnosticMetrics",
@@ -236,8 +242,13 @@ oddsratioResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             self$add(jmvcore::Html$new(
                 options=options,
                 name="nomogram",
-                title="Nomogram Details",
-                visible="(showNomogram)"))
+                title="Prediction Nomogram Details",
+                visible="(showNomogram)",
+                clearWith=list(
+                    "explanatory",
+                    "outcome",
+                    "outcomeLevel",
+                    "usePenalized")))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="nomogramAnalysisExplanation",
@@ -271,13 +282,15 @@ oddsratioBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 
 #' Odds Ratio Table and Plot
 #'
-#' Function for Odds Ratio Table and Plot.
+#' Logistic regression odds-ratio table, forest plot, prediction nomogram, and 
+#' optional binary diagnostic metrics.
 #' @param data The data as a data frame.
 #' @param explanatory The explanatory variables to be used in the analysis.
 #' @param outcome The outcome variable to be used in the analysis.
-#' @param outcomeLevel Specify which outcome level represents the positive
-#'   case for likelihood ratio calculations. A positive outcome level is
-#'   required; the analysis stops with an error if it is not specified.
+#' @param outcomeLevel Specify which outcome level is modeled as the event in
+#'   logistic regression and used as positive for diagnostic metrics. A positive
+#'   outcome level is required; the analysis stops with an error if it is not
+#'   specified.
 #' @param diagnosticPredictor Specify the predictor to drive likelihood
 #'   ratios; must be binary. Defaults to the first explanatory variable.
 #' @param predictorLevel Specify which level of the diagnostic predictor
@@ -285,12 +298,14 @@ oddsratioBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' @param usePenalized Use Firth penalized likelihood logistic regression.
 #'   This is recommended when there is separation (zero cells), small sample
 #'   sizes, or low events-per-variable.
-#' @param showNomogram Display an interactive nomogram for converting pre-test
-#'   to post-test probabilities using likelihood ratios calculated from the
-#'   data.
-#' @param showExplanations Display educational explanations for each analysis
-#'   type to help interpret  odds ratios, risk ratios, diagnostic test
-#'   performance, ROC analysis,  and likelihood ratios.
+#' @param showNomogram Display a prediction nomogram from the
+#'   maximum-likelihood logistic model and, when a binary diagnostic predictor
+#'   is available, separate unadjusted sensitivity, specificity, and
+#'   likelihood-ratio estimates. The prediction nomogram is not generated when
+#'   Firth penalized regression is selected.
+#' @param showExplanations Display educational explanations for odds ratios,
+#'   their distinction from risk ratios, binary diagnostic-test performance,
+#'   likelihood ratios, and prediction nomograms.
 #' @return A results object containing:
 #' \tabular{llllll}{
 #'   \code{results$todo} \tab \tab \tab \tab \tab a html \cr

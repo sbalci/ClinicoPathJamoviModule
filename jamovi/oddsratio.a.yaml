@@ -8,7 +8,7 @@ version: '1.0.2'
 jas: '1.2'
 
 description:
-    main: Function for Odds Ratio Table and Plot.
+    main: Logistic regression odds-ratio table, forest plot, prediction nomogram, and optional binary diagnostic metrics.
 
     # R:
     #     dontrun: true
@@ -53,7 +53,7 @@ options:
               The explanatory variables to be used in the analysis.
 
     - name: outcome
-      title: Mortality or Recurrence
+      title: Binary Outcome
       type: Variable
       default: NULL
       suggested: [ ordinal, nominal ]
@@ -73,8 +73,9 @@ options:
               Specify which outcome level represents the positive case (e.g., "Dead", "Event", "Yes").
               This is important for correct calculation of likelihood ratios and diagnostic metrics.
           R: >
-            Specify which outcome level represents the positive case for likelihood ratio calculations.
-            A positive outcome level is required; the analysis stops with an error if it is not specified.
+            Specify which outcome level is modeled as the event in logistic regression and
+            used as positive for diagnostic metrics. A positive outcome level is required;
+            the analysis stops with an error if it is not specified.
 
     - name: diagnosticPredictor
       title: Diagnostic Predictor (for LRs)
@@ -84,8 +85,9 @@ options:
       default: null
       description:
           main: >
-              Choose which binary predictor to use for sensitivity/specificity and likelihood ratios in the nomogram.
-              If left empty, the first explanatory variable is used. Ensure it has exactly two levels.
+              Choose which binary predictor to use for the separate, unadjusted sensitivity,
+              specificity, and likelihood-ratio calculations. If left empty, the first
+              explanatory variable is used when it is binary.
           R: >
               Specify the predictor to drive likelihood ratios; must be binary. Defaults to the first explanatory variable.
 
@@ -95,8 +97,9 @@ options:
       variable: (diagnosticPredictor)
       description:
           main: >
-              Specify which level of the diagnostic predictor represents the positive case (e.g., "Present", "Test+", "Yes").
-              Required for correct sensitivity, specificity, and likelihood ratio calculations.
+              Specify which level of the diagnostic predictor represents the positive case
+              (e.g., "Present", "Test+", "Yes"). If omitted, the module attempts automatic
+              detection and displays the selected level for verification.
           R: >
               Specify which level of the diagnostic predictor represents the positive case.
 
@@ -113,13 +116,15 @@ options:
 # Nomogram ----
 
     - name: showNomogram
-      title: Diagnostic nomogram
+      title: Prediction nomogram and diagnostic metrics
       type: Bool
       default: false
       description:
           R: >
-            Display an interactive nomogram for converting pre-test to post-test
-            probabilities using likelihood ratios calculated from the data.
+            Display a prediction nomogram from the maximum-likelihood logistic model and,
+            when a binary diagnostic predictor is available, separate unadjusted sensitivity,
+            specificity, and likelihood-ratio estimates. The prediction nomogram is not
+            generated when Firth penalized regression is selected.
 
     - name: showExplanations
       title: "Educational explanations"
@@ -127,9 +132,9 @@ options:
       default: false
       description:
           R: >
-            Display educational explanations for each analysis type to help interpret 
-            odds ratios, risk ratios, diagnostic test performance, ROC analysis, 
-            and likelihood ratios.
+            Display educational explanations for odds ratios, their distinction from risk
+            ratios, binary diagnostic-test performance, likelihood ratios, and prediction
+            nomograms.
 
 
 

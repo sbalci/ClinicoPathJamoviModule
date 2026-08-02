@@ -11,6 +11,7 @@ items:
       clearWith:
           - explanatory
           - outcome
+          - outcomeLevel
 
     - name:  errors
       title: Critical Errors
@@ -93,13 +94,18 @@ items:
 
     # === NOMOGRAM ANALYSIS ===
     - name: plot_nomogram
-      title: Nomogram
+      title: Prediction Nomogram
       type: Image
       width: 800
       height: 600
       requiresData: true
       renderFun: .plot_nomogram
-      visible: (showNomogram)
+      visible: (showNomogram && !usePenalized)
+      clearWith:
+          - explanatory
+          - outcome
+          - outcomeLevel
+          - usePenalized
 
     - name: diagnosticMetrics
       title: Diagnostic Test Performance
@@ -113,9 +119,14 @@ items:
           - predictorLevel
 
     - name: nomogram
-      title: "Nomogram Details"
+      title: "Prediction Nomogram Details"
       type: Html
       visible: (showNomogram)
+      clearWith:
+          - explanatory
+          - outcome
+          - outcomeLevel
+          - usePenalized
 
     # Nomogram Explanations (right after nomogram analysis)
     - name: nomogramAnalysisExplanation
