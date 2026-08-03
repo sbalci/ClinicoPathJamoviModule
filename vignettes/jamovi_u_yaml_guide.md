@@ -1504,9 +1504,27 @@ ClinicoPath already uses the short-form `enable: (option && !other)`. SummaryTab
 |------|----------|---------|
 | **Short form** | Simple Bool/List logic | `enable: (addCi)` |
 | **Negated List value** | "not equal to a List value" | `enable: (!(missing:no))` |
+| **Double negation** | "this VariablesListBox is filled at all", without JS | `enable: (!(!group))` |
 | **JS arrow function** | Needs variable presence, list length, or array introspection | `enable: ({return !!ui['groupVar'].value();})` |
 | **Length check** | Enable only when N variables selected | `enable: ({return (ui['strata'].value() \|\| []).length > 0;})` |
 | **Multi-condition JS** | Several variables/options must agree | `enable: ({return !!ui['groupVar'].value() && ui['addCi'].value();})` |
+
+> **Before reaching for any of these, consider not disabling the control at all.**
+> Damian Dropmann (jamovi core) on the developer forum: *"generally we discourage the use of
+> enabling/disabling options unless it's clear to the user what the relationship is (i.e. a
+> checkbox with nested options underneath it) … you might be better off running the analysis, and
+> presenting a notice at the top, explaining why an option can't be honoured … these types of
+> situations usually indicate that design wise something is amiss."*
+> ([forum.jamovi.org t=4175](https://forum.jamovi.org/viewtopic.php?t=4175), Jul 2026)
+>
+> A greyed-out control with no visible cause is a dead end for the user — they cannot tell whether
+> they are missing a prerequisite or hitting a bug. A notice can say *which* input is missing and
+> *why* the option was ignored. This module already uses that pattern in several places, e.g.
+> `outcomeorganizer` runs and emits "Event hierarchy not applied — only available with Multiple
+> Event Levels enabled … the outcome is unchanged" rather than silently disabling the checkbox,
+> and `survival` notes when a requested stratification variable was not supplied instead of
+> blocking the model. Reserve `enable:` for the obvious parent/child case (a checkbox with its own
+> nested settings), which is exactly the case Dropmann exempts.
 
 **YAML folding for long expressions** keeps them readable:
 ```yaml

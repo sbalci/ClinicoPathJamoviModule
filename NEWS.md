@@ -1,13 +1,97 @@
 # ClinicoPath News
 
-# ClinicoPath 1.0.2 — R-callable argument pass and release automation (2026-08-02)
+# ClinicoPath 1.0.2 — R-callable argument pass, pre-release review, and release automation (2026-08-03)
 
 Every jamovi analysis is also a plain R function, and that surface had drifted: 1,546 calls across
 the test suite could not run at all because the generated wrapper demanded arguments the analysis
-does not actually need. Fixing that exposed one crash on a default code path. No statistical
-method changed.
+does not actually need. Fixing that exposed one crash on a default code path. A pre-release review
+of the six survival-family analyses then checked every reported quantity against an independent
+reference; the estimators were already correct, but several outputs overstated what they knew, and
+a package-wide namespace collision was found to be silently corrupting date and number formatting.
+No statistical method changed.
 
 ## Fixed
+
+### Package-wide
+
+- **A blanket `import(jmvcore)` silently disabled `format()` in 8 analyses.** `NAMESPACE` imports
+  all of jmvcore, which exports its own `format()` — a `{}`-placeholder string templater. Inside
+  the package a bare `format(x, "%Y")` therefore resolved to jmvcore's, which **returns its first
+  argument untouched** and discards every other argument. Consequences ranged from cosmetic to
+  data-corrupting:
+  `datevalidator` extracted the Date's internal day count instead of the year, and because the
+  literal `1900` was then compared against a day count (day 1900 = 1975-03-16) **every date before
+  March 1975 was flagged "out of plausible range"** — for a module handling birth dates and
+  archival specimens, typically most of the column, while the genuine pre-1900 test never ran;
+  `groupsummary` date binning by hour/day/week/month/year returned the untouched timestamp, so
+  every bin collapsed to the full timestamp; `outbreakanalysis` weekly and monthly epidemic-curve
+  bins likewise; `relativesurvival` extracted the diagnosis year feeding its ratetable lookup; and
+  `advancedbarplot`, `highdimcox`, `lassocox` and `jggheatmap` silently ignored
+  `scientific = TRUE` (in `jggheatmap` the cell-label option literally named "scientific" produced
+  no scientific notation). All 23 call sites are now `base::format`, verified AST-identical to the
+  originals apart from the qualifier. `trim = TRUE` was added at the five vectorised label sites,
+  because `base::format` pads a vector to a common width where jmvcore's stringifier did not.
+  **91 further instances survive in 27 other files** — the underlying shadowing is not yet fixed
+  at its root.
+
+### Survival family (also released in `jsurvival`)
+
+All eight analyses in this family were reviewed for this release. The items below are the
+headlines; `jsurvival`'s NEWS carries the full detail for each.
+
+- **Changing the adjustment method moved the plot but not the tables.** `ac_method` was read only
+  by the plot; the adjusted survival table, the adjusted median table and the narrative each built
+  their own single mean/mode prediction, so `average` and `conditional` produced byte-identical
+  tables while the plot changed — two estimands in one report, with nothing saying so. All
+  consumers now share one estimator. The "at risk" and "events" columns in those tables were also
+  whole-cohort numbers wearing a group label, and are now titled for what they are.
+  (`multisurvival`, `singlearm`)
+- **"Adjusted Cox Model Results" was a different model from the main table** — 13 likelihood-ratio
+  degrees of freedom against 12, because one code path honoured a column's factor type and the
+  other coerced it to a score. Both now derive from the same fitted object. (`multisurvival`)
+- **Competing-risk detection ignored a recoded outcome column**, because it tested the options
+  rather than the status vector and was therefore blind to the `outcomeorganizer` hand-off.
+- **`singlearm` and `survivalcont` were audited earlier in the cycle** — `clearWith` completeness,
+  multi-event level validation that silently dropped unset levels, a mislabelled median-CI method,
+  cutpoint parsing and support checking, and a `.run()` restructure in `survivalcont` so results
+  are no longer stranded when cut-point search runs.
+- **`survival` reported survival probabilities beyond the observed follow-up.** With the default
+  cutpoints (12, 36, 60) and two years of follow-up the 1/3/5-year table printed a "60-month
+  survival" with a confidence interval computed from zero patients at risk — 0.0% in one group,
+  4.5% (0.8–25.7%) in another. Unsupported cutpoints are now omitted with a note.
+- **`survival` aborted entirely when a cutpoint was mistyped**, taking the median table, Cox
+  output and every plot with it (`as.numeric("abc")` → `NA` → `times contains missing values`).
+- **`survival` tables did not always refresh** when `cutp`, `analysistype`, the event-level
+  mappings or the landmark options changed; `Table$addRow()` appends with no duplicate-key check.
+- **`survival` told users to judge significance by eye** from two confidence intervals.
+- **`multisurvival` reported no joint test for a multi-df interaction** — two 1-df rows at
+  p = 0.077 and p = 0.726 where the joint 2-df test is p = 0.154.
+- **`multisurvival` person-time could show a previous covariate set's figures** (134 events /
+  8235.5 person-time against 94 / 6005.47 after adding one covariate with missing values).
+- **`oddsratio` printed a non-estimable odds ratio as a precise number** —
+  `118848049086800030859264.00 (0.00-Inf, p=1.000)` under separation; now `not estimable`.
+- **`oddsratio` reported diagnostic metrics with no uncertainty**; sensitivity, specificity and
+  the likelihood ratios now carry intervals reproducing `epiR::epi.tests()` bit-identically
+  (maximum difference 0 over 4,156 tables), with the arithmetic adapted from epiR (GPL ≥ 2,
+  credited in source) rather than adding a dependency to the shipping submodule.
+- **`datetimeconverter` warned "Implausible Dates Detected" on every successful conversion**, and
+  showed and re-parsed Unix epochs as `1.7e+09`; its glossary gave Excel serial 45000 as "May 18,
+  2023" (it is 15 March 2023) and claimed the numeric output was timezone-independent (it is not).
+- **`timeinterval` could write its calculated column back with no row mapping**, and its
+  extreme-value filter deleted genuine follow-up when the 99th percentile was zero.
+- **`outcomeorganizer` lost the competing-risk flag** when a cohort contained no competing event,
+  because the exported column declared only the levels that occurred.
+
+  Full detail for each of these is in `jsurvival`'s NEWS for this release.
+
+### Diagnostic decisions (also released in `meddecide`)
+
+- **Three analyses named the wrong confidence-interval method.** `epiR::epi.tests()` defaults to
+  `method = "exact"` (Clopper-Pearson), not Wilson; `decision` and `decisioncompare` said Wilson.
+  No interval changed. `decisioncompare` also advertised Simel likelihood-ratio intervals it never
+  computes, and `decisioncalculator` overstated which quantities its continuity correction reaches.
+
+### Earlier in this release
 
 - **`decision` crashed whenever "Disease Absent Level" or "Test Negative Level" was left unset.**
   `dplyr::case_when()` evaluates every branch regardless of which one matches, so the unreachable
