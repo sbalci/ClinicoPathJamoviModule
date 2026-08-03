@@ -542,8 +542,11 @@ datetimeconverterBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
 #'   formats. Can handle character strings, numeric values, or factors with
 #'   datetime representations.
 #' @param datetime_format DateTime format specification. 'Auto-detect'
-#'   attempts to identify the format automatically. Manual selection ensures
-#'   accurate parsing for specific datetime formats.
+#'   attempts to identify the format automatically and warns when day-first and
+#'   month-first parsing both succeed but disagree; manual selection ensures
+#'   accurate parsing for specific datetime formats. Excel serial numbers use
+#'   the 1899-12-30 origin, which is exact for dates from 1900-03-01 onward
+#'   (Excel's 1900 system wrongly counts a 29 February 1900).
 #' @param timezone Timezone for datetime parsing. Provide an Olson identifier
 #'   such as "Europe/Istanbul", "America/New_York", "UTC", or "system" to use
 #'   the local machine timezone. Excel serial and Unix epoch conversions always
@@ -562,6 +565,9 @@ datetimeconverterBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
 #'   table.
 #' @param extract_dayname Extract and display day name in preview table.
 #' @param extract_weeknum Extract and display week number in preview table.
+#'   This is lubridate::week() (day-of-year divided into 7-day blocks starting 1
+#'   January), NOT the ISO-8601 week. The two differ around the new year:
+#'   2021-01-01 is week 1 here and ISO week 53 of 2020.
 #' @param extract_quarter Extract and display quarter in preview table.
 #' @param extract_dayofyear Extract and display day of year in preview table.
 #' @param show_quality_metrics Display comprehensive quality metrics including

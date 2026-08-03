@@ -69,7 +69,7 @@ options:
     - name: outcome
       title: 'Outcome Variable'
       type: Variable
-      default: NULL
+      default: null
       suggested: [ ordinal, nominal, continuous ]
       permitted: [ factor, numeric ]
       description:
@@ -87,7 +87,7 @@ options:
     - name: recurrence
       title: 'Recurrence/Progression Variable'
       type: Variable
-      default: NULL
+      default: null
       suggested: [ ordinal, nominal ]
       permitted: [ factor ]
       description:
@@ -105,7 +105,7 @@ options:
     - name: patientID
       title: 'Patient ID'
       type: Variable
-      default: NULL
+      default: null
       description:
           R: >
             Patient identifier for handling multiple records or applying event hierarchies.
@@ -115,7 +115,7 @@ options:
       type: Variable
       suggested: [ continuous ]
       permitted: [ numeric ]
-      default: NULL
+      default: null
       description:
           R: >
             Optional follow-up time. Supplying it lets administrative censoring
@@ -220,7 +220,7 @@ options:
     - name: intervalStart
       title: "Interval Start Variable"
       type: Variable
-      default: NULL
+      default: null
       description:
           R: >
             Variable containing the start of the interval when the event might have occurred.
@@ -228,7 +228,7 @@ options:
     - name: intervalEnd
       title: "Interval End Variable"
       type: Variable
-      default: NULL
+      default: null
       description:
           R: >
             Variable containing the end of the interval when the event might have occurred.
@@ -244,7 +244,7 @@ options:
     - name: adminDate
       title: "Administrative Censoring Date"
       type: Variable
-      default: NULL
+      default: null
       description:
           R: >
             Variable containing the administrative censoring date.

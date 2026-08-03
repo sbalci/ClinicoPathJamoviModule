@@ -490,11 +490,16 @@ outbreakanalysisClass <- R6::R6Class(
                 time_periods <- seq(from = min(case_dates), to = max(case_dates), by = "day")
                 case_counts <- table(case_dates)
             } else if (time_unit == "week") {
-                case_weeks <- format(case_dates, "%Y-%W")
+                # base::format, NOT a bare `format` -- NAMESPACE does a blanket
+                # import(jmvcore) and jmvcore exports its own format(), a {}-placeholder
+                # string templater that IGNORES the strftime string and just stringifies
+                # its argument. Unqualified, "%Y-%W" was dropped and each date became its
+                # own bin ("2024-03-15"), so week/month binning silently degraded to daily.
+                case_weeks <- base::format(case_dates, "%Y-%W")
                 case_counts <- table(case_weeks)
                 time_periods <- names(case_counts)
             } else if (time_unit == "month") {
-                case_months <- format(case_dates, "%Y-%m")
+                case_months <- base::format(case_dates, "%Y-%m")
                 case_counts <- table(case_months)
                 time_periods <- names(case_counts)
             }

@@ -1054,7 +1054,13 @@ datevalidatorClass <- if (requireNamespace("jmvcore")) {
 
                 today <- Sys.Date()
                 upper <- today + 365
-                years <- suppressWarnings(as.integer(format(corrected_date, "%Y")))
+                # base::format is qualified on purpose. NAMESPACE does a blanket
+                # `import(jmvcore)`, and jmvcore exports its own format() -- a
+                # {}-placeholder templater that IGNORES a strftime string and returned
+                # `corrected_date` unchanged. as.integer() then yielded days-since-epoch
+                # instead of a year, so `years < 1900` flagged every date before
+                # 1975-03-16 as "Out of plausible range". Keep the base:: qualifier.
+                years <- suppressWarnings(as.integer(base::format(corrected_date, "%Y")))
 
                 out_of_range <- !is.na(corrected_date) & (years < 1900 | corrected_date > upper)
                 if (any(out_of_range, na.rm = TRUE)) {

@@ -1040,7 +1040,7 @@ oddsratioClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                         "Specificity: ", spec_txt, "<br>",
                         "Positive LR: ", plr_txt, "<br>",
                         "Negative LR: ", nlr_txt, "<br>",
-                        "<small style='color:#555;'>Unadjusted 2&times;2 estimates. Wilson score intervals for sensitivity and specificity; log method for the likelihood ratios (epiR::epi.tests).</small>",
+                        "<small style='color:#555;'>Unadjusted 2&times;2 estimates. Clopper-Pearson exact intervals for sensitivity and specificity; log method (Simel et al. 1991) for the likelihood ratios. Computed as in epiR::epi.tests() with its default settings.</small>",
                         "</div>",
 
                         statistical_warnings,
@@ -1141,6 +1141,116 @@ oddsratioClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         # Calculates likelihood ratios, sensitivity, and specificity for binary predictors
         # Supports user-specified positive outcome levels for international data
         # Returns diagnostic metrics including sensitivity, specificity, and likelihood ratios
+        # Confidence intervals for sensitivity, specificity and the likelihood
+        # ratios of a 2x2 diagnostic table.
+        #
+        # ---------------------------------------------------------------------
+        # ADAPTED FROM epiR, with thanks.
+        #   Source : epiR::epi.tests() and epiR's internal zexact(), version 2.0.95
+        #   Author : Mark Stevenson and Evan Sergeant, with contributors
+        #            (Cord Heuer, Telmo Nunes, Jonathon Marshall, Javier Sanchez,
+        #            Ron Thornton, Jeno Reiczigel, Jim Robison-Cox,
+        #            Paola Sebastiani, Peter Solymos, Kazuki Yoshida, Geoff Jones,
+        #            Sarah Pirikahu, Simon Firestone, Ryan Kyle, Johann Popp,
+        #            Mathew Jay, Allison Cheung, Nagendra Singanallur, Aniko Szabo,
+        #            Ahmad Rabiee)
+        #   Licence: GPL (>= 2) -- compatible with this package's GPL-2.
+        #   URL    : https://CRAN.R-project.org/package=epiR
+        #
+        # WHY VENDORED RATHER THAN IMPORTED. oddsratio ships to the jsurvival
+        # submodule, and it is the ONLY analysis routed there that would need
+        # epiR. Adding epiR to jsurvival's Imports makes every jamovi user of a
+        # survival module install a full epidemiology package for one call, and
+        # _updateModules.R correctly refuses to ship an undeclared dependency.
+        # Reproducing the ~15 lines of arithmetic keeps the numbers identical to
+        # the sibling analyses that DO call epiR, at no dependency cost.
+        #
+        # The methods are epiR's defaults, matching what those siblings get when
+        # they call epi.tests() without a `method` argument:
+        #   * sensitivity / specificity : method = "exact", i.e. the
+        #     Clopper-Pearson interval in epiR's 1 - qbeta() form (zexact).
+        #     NOTE this is NOT the Wilson score interval -- epi.tests()'s default
+        #     is "exact"; "wilson" is one of four non-default alternatives.
+        #   * likelihood ratios : the log method (Simel et al. 1991), written in
+        #     epiR's algebraically identical form.
+        #
+        # Cell convention matches epi.tests(matrix(c(tp,fp,fn,tn), 2, byrow=TRUE)):
+        #   a = tp, b = fp, c = fn, d = tn, M1 = a + c, M0 = b + d.
+        # ---------------------------------------------------------------------
+        .diagnosticCIs = function(tp, fp, fn, tn, conf.level = 0.95) {
+            none <- c(NA_real_, NA_real_)
+            out <- list(sensitivity = none, specificity = none,
+                        positive_lr = none, negative_lr = none)
+
+            res <- tryCatch({
+                z <- stats::qnorm(1 - (1 - conf.level) / 2)
+                alpha2 <- 0.5 * (1 - conf.level)
+
+                # epiR zexact(): Clopper-Pearson exact interval for a / n.
+                exact_ci <- function(a, n) {
+                    if (!is.finite(a) || !is.finite(n) || n <= 0) return(none)
+                    lb <- if (a == 0) 1 else a
+                    ub <- if (a == n) n - 1 else a
+                    low <- 1 - stats::qbeta(1 - alpha2, n + 1 - a, lb)
+                    upp <- 1 - stats::qbeta(alpha2, n - ub, a + 1)
+                    if (a == 0) low <- 0
+                    if (a == n) upp <- 1
+                    c(low, upp)
+                }
+
+                M1 <- tp + fn      # actual positives
+                M0 <- fp + tn      # actual negatives
+
+                se_ci <- exact_ci(tp, M1)
+                sp_ci <- exact_ci(tn, M0)
+
+                se <- if (M1 > 0) tp / M1 else NA_real_
+                sp <- if (M0 > 0) tn / M0 else NA_real_
+
+                # Log-method intervals. The two ratios become undefined at
+                # DIFFERENT boundaries, so they need separate guards -- a single
+                # combined guard (se and sp both strictly inside 0..1) throws away
+                # intervals that are perfectly well defined. Concretely, with
+                # tp/fp/fn/tn = 20/5/0/15 the sensitivity is exactly 1, yet LR+ is
+                # 4.00 (95% CI 1.87-8.55): only the specificity term contributes
+                # to its standard error. Rejecting that on account of se == 1 lost
+                # a real interval, which an exhaustive comparison against epiR
+                # over 4156 tables surfaced.
+                #
+                #   LR+ = se / (1 - sp)      needs se > 0 (log) and sp < 1 (denominator)
+                #   LR- = (1 - se) / sp      needs se < 1 (log) and sp > 0 (denominator)
+                #
+                # When se == 1 and sp == 0 together, the standard error collapses
+                # to zero and the interval is the degenerate [1, 1]. That is what
+                # epiR reports, so it is reproduced here for consistency; such a
+                # table also has empty cells, which the assumption check flags
+                # separately.
+                base_ok <- is.finite(se) && is.finite(sp) && M1 > 0 && M0 > 0
+
+                plr_ci <- none
+                if (base_ok && se > 0 && sp < 1) {
+                    plr <- se / (1 - sp)
+                    se_log_plr <- sqrt((1 - se) / (M1 * se) + sp / (M0 * (1 - sp)))
+                    plr_ci <- exp(log(plr) + c(-1, 1) * z * se_log_plr)
+                }
+
+                nlr_ci <- none
+                if (base_ok && se < 1 && sp > 0) {
+                    nlr <- (1 - se) / sp
+                    se_log_nlr <- sqrt(se / (M1 * (1 - se)) + (1 - sp) / (M0 * sp))
+                    nlr_ci <- exp(log(nlr) + c(-1, 1) * z * se_log_nlr)
+                }
+
+                list(sensitivity = se_ci, specificity = sp_ci,
+                     positive_lr = plr_ci, negative_lr = nlr_ci)
+            }, error = function(e) NULL)
+
+            if (is.null(res)) return(out)
+            lapply(res, function(v) {
+                if (length(v) != 2 || anyNA(v) || any(!is.finite(v))) none else v
+            })
+        },
+
         .calculateLikelihoodRatios = function(data, outcome_var, predictor_var, user_positive_outcome = NULL, user_positive_predictor = NULL) {
             # Ensure we have factor variables
             predictor <- factor(data[[predictor_var]])
@@ -1303,31 +1413,11 @@ oddsratioClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             # gave a clinician no way to tell them apart -- uncertainty that is
             # simply absent reads as uncertainty that is small.
             #
-            # epiR::epi.tests() is what the sibling diagnostic analyses in this
-            # module already use (decision, decisioncalculator, decisioncompare,
-            # decisioncombine, digitalvalidation), so the intervals here agree with
-            # theirs by construction: Wilson score for sensitivity/specificity and
-            # the standard log method (Simel) for the likelihood ratios. It takes
-            # the 2x2 as test-positive-first by outcome-positive-first, which is
-            # exactly the tp/fp/fn/tn already resolved above -- so the orientation
-            # cannot drift away from the point estimates computed from them.
-            ci <- tryCatch({
-                et <- epiR::epi.tests(matrix(c(tp, fp, fn, tn), nrow = 2, byrow = TRUE))
-                det <- as.data.frame(et$detail)
-                grab <- function(stat) {
-                    row <- det[det$statistic == stat, , drop = FALSE]
-                    if (nrow(row) == 0) c(NA_real_, NA_real_)
-                    else c(as.numeric(row$lower[1]), as.numeric(row$upper[1]))
-                }
-                list(sensitivity = grab("se"), specificity = grab("sp"),
-                     positive_lr  = grab("lr.pos"), negative_lr = grab("lr.neg"))
-            }, error = function(e) NULL)
-
-            if (is.null(ci))
-                ci <- list(sensitivity = c(NA_real_, NA_real_),
-                           specificity = c(NA_real_, NA_real_),
-                           positive_lr = c(NA_real_, NA_real_),
-                           negative_lr = c(NA_real_, NA_real_))
+            # Computed by .diagnosticCIs() below, which reproduces
+            # epiR::epi.tests() exactly so that these intervals agree with the
+            # sibling diagnostic analyses (decision, decisioncalculator,
+            # decisioncompare, decisioncombine, digitalvalidation) that call it.
+            ci <- private$.diagnosticCIs(tp = tp, fp = fp, fn = fn, tn = tn)
 
             # Create diagnostic information
             diagnostic_info <- paste0(

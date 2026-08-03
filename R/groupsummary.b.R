@@ -275,17 +275,22 @@ groupsummaryClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 row_values <- as.list(summary_data[i, ])
                 for (var in groupVars) {
                     if (!is.null(dateVar) && startsWith(var, paste0(dateVar, "_"))) {
-                        # Format date based on aggregation level
+                        # Format date based on aggregation level.
+                        # base:: is required: NAMESPACE has import(jmvcore), and
+                        # jmvcore exports its own format() -- a {}-placeholder string
+                        # templater that IGNORES strftime formats and base::format
+                        # args (scientific=, big.mark=), returning its first argument
+                        # untouched. Keep the base:: qualifier on any format() added here.
                         if (self$options$timeAggregation == "hour") {
-                            row_values[[var]] <- format(row_values[[var]], "%Y-%m-%d %H:00")
+                            row_values[[var]] <- base::format(row_values[[var]], "%Y-%m-%d %H:00")
                         } else if (self$options$timeAggregation == "day") {
-                            row_values[[var]] <- format(row_values[[var]], "%Y-%m-%d")
+                            row_values[[var]] <- base::format(row_values[[var]], "%Y-%m-%d")
                         } else if (self$options$timeAggregation == "week") {
-                            row_values[[var]] <- format(row_values[[var]], "Week of %Y-%m-%d")
+                            row_values[[var]] <- base::format(row_values[[var]], "Week of %Y-%m-%d")
                         } else if (self$options$timeAggregation == "month") {
-                            row_values[[var]] <- format(row_values[[var]], "%Y-%m")
+                            row_values[[var]] <- base::format(row_values[[var]], "%Y-%m")
                         } else if (self$options$timeAggregation == "year") {
-                            row_values[[var]] <- format(row_values[[var]], "%Y")
+                            row_values[[var]] <- base::format(row_values[[var]], "%Y")
                         }
                     } else {
                         # Coerce non-date group values to character so factor
@@ -428,9 +433,14 @@ groupsummaryClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 # Add value labels
                 plot <- plot +
                     ggplot2::geom_text(
-                        ggplot2::aes(label = format(.data[[plot_col]],
-                                                    big.mark = ",",
-                                                    scientific = FALSE)),
+                        # trim = TRUE: base::format pads a VECTOR to a common
+                        # width, which would put leading spaces inside each bar
+                        # label. jmvcore's format never padded, so without this
+                        # the qualifier alone would visibly shift the labels.
+                        ggplot2::aes(label = base::format(.data[[plot_col]],
+                                                          big.mark = ",",
+                                                          scientific = FALSE,
+                                                          trim = TRUE)),
                         vjust = -1,
                         size = 3
                     )
@@ -459,9 +469,14 @@ groupsummaryClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 # Add value labels on bars
                 plot <- plot +
                     ggplot2::geom_text(
-                        ggplot2::aes(label = format(.data[[plot_col]],
-                                                    big.mark = ",",
-                                                    scientific = FALSE)),
+                        # trim = TRUE: base::format pads a VECTOR to a common
+                        # width, which would put leading spaces inside each bar
+                        # label. jmvcore's format never padded, so without this
+                        # the qualifier alone would visibly shift the labels.
+                        ggplot2::aes(label = base::format(.data[[plot_col]],
+                                                          big.mark = ",",
+                                                          scientific = FALSE,
+                                                          trim = TRUE)),
                         hjust = -0.1,
                         size = 3
                     )

@@ -174,7 +174,7 @@ test_that("different analysis types handle missing multievent selections", {
         awd = NULL,
         awod = NULL
       )
-    }, info = paste("Analysis type:", atype))
+    })
   }
 })
 
@@ -321,7 +321,6 @@ test_that("analysis proceeds after all selections are filled", {
     awd = "AWD",
     awod = "AWOD",
     outputTable = TRUE,
-    addOutcome = TRUE,
     outcomeLevel = NULL,
     recurrenceLevel = NULL
   )
@@ -409,7 +408,7 @@ test_that("guidance adapts to different numbers of unique outcome values", {
 # =============================================================================
 
 cat("\nOutcome Organizer Guidance Notices Tests Completed\n")
-cat("="*60, "\n")
+cat("==========================================================\n")
 cat("Tests verify:\n")
 cat("✓ Helpful guidance shown instead of hard errors\n")
 cat("✓ Available outcome values displayed to user\n")

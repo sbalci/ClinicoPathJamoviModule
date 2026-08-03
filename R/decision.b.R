@@ -1776,7 +1776,7 @@ decisionClass <- if (requireNamespace("jmvcore"))
                                 add_ratio_note(2, "statsnames", .("Proportion of healthy patients correctly identified (TN rate). Higher is better for ruling IN disease when positive."))
                                 add_ratio_note(3, "statsnames", .("Probability of disease given positive test. Depends on prevalence and specificity."))
                                 add_ratio_note(4, "statsnames", .("Probability of being healthy given negative test. Depends on prevalence and sensitivity."))
-                                add_ratio_note(1, "est", .("Confidence intervals for sensitivity, specificity, and predictive values are calculated using the Wilson score method."))
+                                add_ratio_note(1, "est", .("Confidence intervals for sensitivity, specificity, and predictive values are Clopper-Pearson exact intervals, computed as in epiR::epi.tests() with its default settings (method = \"exact\")."))
                             }
                         }
 

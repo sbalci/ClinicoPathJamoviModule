@@ -17,6 +17,7 @@
 # run  /Applications/jamovi.app/Contents/MacOS/jamovi
 
 
+Sys.unsetenv("ELECTRON_RUN_AS_NODE")
 
 # Command line argument handling
 args <- commandArgs(trailingOnly = TRUE)

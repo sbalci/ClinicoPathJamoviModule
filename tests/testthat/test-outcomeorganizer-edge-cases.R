@@ -10,15 +10,14 @@ test_that("outcomeorganizer handles small datasets", {
   result <- outcomeorganizer(
     data = outcomeorganizer_small,
     outcome = "outcome",
-    time = "time",
-    outcomeLevel = NULL,
+    outcomeLevel = "Event",
     recurrenceLevel = NULL,
     dod = NULL,
     dooc = NULL,
     awd = NULL,
     awod = NULL
   )
-  expect_s3_class(result, "outcomeorganizerClass")
+  expect_s3_class(result, "outcomeorganizerResults")
   expect_true(nrow(outcomeorganizer_small) == 15)
 })
 
@@ -26,17 +25,14 @@ test_that("outcomeorganizer handles all censored data", {
   result <- outcomeorganizer(
     data = outcomeorganizer_censored,
     outcome = "status",
-    time = "time",
-    alive = "Alive",
-    outcomeLevel = NULL,
+    outcomeLevel = "Dead",
     recurrenceLevel = NULL,
     dod = NULL,
     dooc = NULL,
     awd = NULL,
     awod = NULL
   )
-  expect_s3_class(result, "outcomeorganizerClass")
-  # All observations should be censored
+  expect_s3_class(result, "outcomeorganizerResults")
   expect_true(all(outcomeorganizer_censored$status == "Alive"))
 })
 
@@ -44,17 +40,14 @@ test_that("outcomeorganizer handles all events data", {
   result <- outcomeorganizer(
     data = outcomeorganizer_allevents,
     outcome = "status",
-    time = "time",
-    dead = "Dead",
-    outcomeLevel = NULL,
+    outcomeLevel = "Dead",
     recurrenceLevel = NULL,
     dod = NULL,
     dooc = NULL,
     awd = NULL,
     awod = NULL
   )
-  expect_s3_class(result, "outcomeorganizerClass")
-  # All observations should be events
+  expect_s3_class(result, "outcomeorganizerResults")
   expect_true(all(outcomeorganizer_allevents$status == "Dead"))
 })
 
@@ -64,15 +57,14 @@ test_that("outcomeorganizer handles missing outcome values", {
   result <- outcomeorganizer(
     data = test_data,
     outcome = "outcome",
-    time = "time",
-    outcomeLevel = NULL,
+    outcomeLevel = "Event",
     recurrenceLevel = NULL,
     dod = NULL,
     dooc = NULL,
     awd = NULL,
     awod = NULL
   )
-  expect_s3_class(result, "outcomeorganizerClass")
+  expect_s3_class(result, "outcomeorganizerResults")
 })
 
 test_that("outcomeorganizer handles missing time values", {
@@ -81,15 +73,15 @@ test_that("outcomeorganizer handles missing time values", {
   result <- outcomeorganizer(
     data = test_data,
     outcome = "outcome",
-    time = "time",
-    outcomeLevel = NULL,
+    outcomeLevel = "Event",
+    followupTime = "time",
     recurrenceLevel = NULL,
     dod = NULL,
     dooc = NULL,
     awd = NULL,
     awod = NULL
   )
-  expect_s3_class(result, "outcomeorganizerClass")
+  expect_s3_class(result, "outcomeorganizerResults")
 })
 
 test_that("outcomeorganizer handles zero time values", {
@@ -98,15 +90,15 @@ test_that("outcomeorganizer handles zero time values", {
   result <- outcomeorganizer(
     data = test_data,
     outcome = "outcome",
-    time = "time",
-    outcomeLevel = NULL,
+    outcomeLevel = "Event",
+    followupTime = "time",
     recurrenceLevel = NULL,
     dod = NULL,
     dooc = NULL,
     awd = NULL,
     awod = NULL
   )
-  expect_s3_class(result, "outcomeorganizerClass")
+  expect_s3_class(result, "outcomeorganizerResults")
 })
 
 test_that("outcomeorganizer handles negative time values", {
@@ -115,16 +107,15 @@ test_that("outcomeorganizer handles negative time values", {
   result <- outcomeorganizer(
     data = test_data,
     outcome = "outcome",
-    time = "time",
-    outcomeLevel = NULL,
+    outcomeLevel = "Event",
+    followupTime = "time",
     recurrenceLevel = NULL,
     dod = NULL,
     dooc = NULL,
     awd = NULL,
     awod = NULL
   )
-  # Should handle or warn about negative times
-  expect_s3_class(result, "outcomeorganizerClass")
+  expect_s3_class(result, "outcomeorganizerResults")
 })
 
 test_that("outcomeorganizer handles single observation", {
@@ -132,13 +123,12 @@ test_that("outcomeorganizer handles single observation", {
   result <- outcomeorganizer(
     data = test_data,
     outcome = "outcome",
-    time = "time",
-    outcomeLevel = NULL,
+    outcomeLevel = "Event",
     recurrenceLevel = NULL,
     dod = NULL,
     dooc = NULL,
     awd = NULL,
     awod = NULL
   )
-  expect_s3_class(result, "outcomeorganizerClass")
+  expect_s3_class(result, "outcomeorganizerResults")
 })

@@ -806,9 +806,13 @@ lassocoxClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                 value = paste0(round(100 * length(results$selected_vars) / ncol(results$data$X), 1), "%")
             ))
 
+            # NAMESPACE has a blanket import(jmvcore), and jmvcore exports its own
+            # format() -- a {}-placeholder string templater, not base::format. A bare
+            # format(x, scientific = TRUE, digits = 3) therefore resolved to jmvcore's,
+            # which stringifies x and silently ignores both arguments. Keep base:: here.
             table$addRow(rowKey = 4, values = list(
                 statistic = .("Optimal Lambda"),
-                value = format(results$lambda_optimal, scientific = TRUE, digits = 3)
+                value = base::format(results$lambda_optimal, scientific = TRUE, digits = 3)
             ))
 
             table$addRow(rowKey = 5, values = list(

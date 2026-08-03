@@ -252,9 +252,22 @@ datetimeconverterClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
             quality_vector <- vector
 
+            # Every format() call in this file is qualified base::format on purpose.
+            #
+            # NAMESPACE does a blanket `import(jmvcore)`, and jmvcore exports its own
+            # format() -- a {}-placeholder string templater. Inside this package a bare
+            # `format(x, "%Y")` therefore resolves to jmvcore's, which IGNORES the
+            # format string and just stringifies its argument, and ignores
+            # scientific = FALSE as well. That silently produced:
+            #   * a false "Implausible Dates Detected" warning on every conversion, and
+            #   * "1.7e+09" where the original value 1700000000 should appear -- in the
+            #     numeric fallback branch below that string is also what gets PARSED,
+            #     so a mangled number becomes an unparseable date rather than a
+            #     visible error.
+            # Keep the base:: qualifier on any format() added here.
             if (inherits(vector, c('POSIXct', 'POSIXt'))) {
                 parsed_dates <- lubridate::as_datetime(vector)
-                original_display <- format(vector, usetz = TRUE)
+                original_display <- base::format(vector, usetz = TRUE)
                 notes <- c(notes, 'Detected POSIXct/POSIXt input; using supplied datetimes directly.')
                 format_hint <- 'posixct'
                 return(list(
@@ -270,7 +283,7 @@ datetimeconverterClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
             if (inherits(vector, 'Date')) {
                 parsed_dates <- as.POSIXct(vector)
-                original_display <- format(vector)
+                original_display <- base::format(vector)
                 notes <- c(notes, 'Detected Date input; converted to POSIXct at midnight.')
                 format_hint <- 'date'
                 return(list(
@@ -364,7 +377,7 @@ datetimeconverterClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         .processNumericVector = function(numeric_vector, notes, quality_vector, original_display = NULL, force_format = NULL) {
             quality_vector <- quality_vector %||% numeric_vector
             if (is.null(original_display)) {
-                original_display <- format(numeric_vector, trim = TRUE, scientific = FALSE)
+                original_display <- base::format(numeric_vector, trim = TRUE, scientific = FALSE)
                 original_display[is.na(numeric_vector)] <- NA_character_
             }
 
@@ -480,7 +493,7 @@ datetimeconverterClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             }
 
             char_vals <- if (!is.null(original_display)) original_display else {
-                tmp <- format(numeric_vector, trim = TRUE, scientific = FALSE)
+                tmp <- base::format(numeric_vector, trim = TRUE, scientific = FALSE)
                 tmp[is.na(numeric_vector)] <- NA_character_
                 tmp
             }
@@ -541,8 +554,18 @@ datetimeconverterClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     # Apply timezone if parser supports it
                     parsed_dates <- parser(datetime_vector, tz = tz)
                     # Plausibility check: flag years out of range
-                    yrs <- suppressWarnings(as.integer(format(parsed_dates, "%Y")))
-                    if (any(!is.na(yrs) & (yrs < 1900 | yrs > as.integer(format(Sys.Date() + 365, "%Y"))))) {
+                    # base::format, NOT the bare `format` -- see the note in
+                    # .prepareDatetimeInput(). Unqualified, `format(parsed_dates, "%Y")`
+                    # returned the whole datetime string, as.integer() then produced the
+                    # epoch seconds (1710498030 for 2024-03-15), and the upper bound
+                    # as.integer(format(Sys.Date()+365, "%Y")) came out as 21033 -- so
+                    # every ordinary date compared "> 21033" and this warning fired on
+                    # 100%-successful conversions of perfectly valid 2022-2024 dates.
+                    # A warning that cries wolf on every run is worse than no warning:
+                    # it teaches the user to ignore the one signal that a wrong format
+                    # has silently mis-parsed their dates.
+                    yrs <- suppressWarnings(as.integer(base::format(parsed_dates, "%Y")))
+                    if (any(!is.na(yrs) & (yrs < 1900 | yrs > as.integer(base::format(Sys.Date() + 365, "%Y"))))) {
                         private$.addNotice(
                             type = "WARNING",
                             title = "Implausible Dates Detected",
@@ -1130,7 +1153,14 @@ datetimeconverterClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     represents seconds since 1970-01-01 00:00:00 UTC. This value is:
                         <ul>
                             <li> OS-independent (same on Windows, Mac, Linux)</li>
-                            <li> Timezone-independent (same datetime = same number)</li>
+                            <li><strong>Dependent on the Timezone setting above.</strong> A date without a
+                            time is midnight <em>in the selected timezone</em>, so the same input yields a
+                            different number under different settings: <code>2024-01-15</code> becomes
+                            1705276800 under UTC but 1705266000 under Europe/Istanbul (3 hours earlier).
+                            The default is your machine's timezone, so two collaborators on different
+                            machines will not get identical numbers. <strong>Set Timezone to UTC if the
+                            numeric value must be reproducible across machines</strong> or is going to be
+                            compared against an external source.</li>
                             <li> Suitable for calculations and comparisons</li>
                             <li> Very large numbers (billions) - use scientific notation if needed</li>
                         </ul>
@@ -1138,8 +1168,13 @@ datetimeconverterClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
                     <li><strong>Excel serial dates:</strong> Different epochs exist:
                         <ul>
-                            <li>Windows Excel: 1900-01-01</li>
-                            <li>Mac Excel: 1904-01-01</li>
+                            <li>Windows Excel (1900 system): serial 1 is nominally 1900-01-01, but Excel
+                            wrongly treats 1900 as a leap year, so conversion uses the origin 1899-12-30.
+                            Dates from 1900-03-01 (serial 61) onward are exact; serials 1-59 land one day
+                            earlier than Excel shows and serial 60 is Excel's non-existent 1900-02-29.
+                            This matches how readxl and openxlsx convert, and does not affect any
+                            realistic clinical date.</li>
+                            <li>Mac Excel (1904 system): origin 1904-01-01.</li>
                         </ul>
                     </li>
 
@@ -1171,16 +1206,21 @@ datetimeconverterClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 <h4 style='margin-top: 0;'> Key Terms & Concepts</h4>
                 <dl style='line-height: 1.6;'>
                     <dt style='font-weight: bold; margin-top: 10px;'>Excel Serial Date</dt>
-                    <dd style='margin-left: 20px;'>Number of days since January 1, 1900 (Windows) or
-                    January 1, 1904 (Mac). Example: 45000 represents May 18, 2023.
-                    Commonly used when exporting data from Excel to text files.</dd>
+                    <dd style='margin-left: 20px;'>Number of days counted from Excel's origin: the 1900
+                    system (Windows) or the 1904 system (Mac). Example: serial 45000 is
+                    <strong>15 March 2023</strong>. Because Excel's 1900 system wrongly counts
+                    1900-02-29, conversion uses the origin 1899-12-30; that is exact for every date
+                    from 1900-03-01 onward. Commonly used when exporting data from Excel to text files.</dd>
 
                     <dt style='font-weight: bold; margin-top: 10px;'>Unix Epoch</dt>
                     <dd style='margin-left: 20px;'>Seconds since January 1, 1970 00:00:00 UTC.
-                    Example: 1609459200 represents January 1, 2021 00:00:00 UTC. This numeric representation
-                    is <strong>OS-independent and timezone-independent</strong> - the same datetime always produces
-                    the same number regardless of computer settings. Used in databases, programming systems,
-                    and recommended for datetime calculations.</dd>
+                    Example: 1609459200 represents January 1, 2021 00:00:00 UTC. The number identifies an
+                    <strong>instant</strong>, so it is OS-independent - but converting a date to that
+                    instant requires a timezone, and this module uses the Timezone option (your machine's
+                    zone by default). The same written date therefore produces different numbers under
+                    different Timezone settings; choose UTC when the value must be reproducible across
+                    machines. Used in databases, programming systems, and recommended for datetime
+                    calculations.</dd>
 
                     <dt style='font-weight: bold; margin-top: 10px;'>ISO 8601</dt>
                     <dd style='margin-left: 20px;'>International standard date format: YYYY-MM-DD or

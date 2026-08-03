@@ -817,7 +817,12 @@ relativesurvivalClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
             tryCatch({
                 cohort_str <- self$options$cohort_year
-                year_num <- as.numeric(format(data$diagdate, "%Y"))
+                # base:: is required: NAMESPACE has a blanket import(jmvcore), and jmvcore
+                # exports its own format() -- a {}-placeholder templater that IGNORES the
+                # strftime string. Bare format(<Date>, "%Y") returned days-since-epoch
+                # (10408 for 1998-07-01), so cohort filtering dropped every row and the
+                # 5-year period bins became ~1000 nonsense "[10405,10410)" groups.
+                year_num <- as.numeric(base::format(data$diagdate, "%Y"))
 
                 # Filter by cohort year range if specified
                 if (!is.null(cohort_str) && nchar(trimws(cohort_str)) > 0) {
@@ -827,7 +832,7 @@ relativesurvivalClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                         yr_min <- min(parts)
                         yr_max <- max(parts)
                         data <- data[year_num >= yr_min & year_num <= yr_max, ]
-                        year_num <- as.numeric(format(data$diagdate, "%Y"))
+                        year_num <- as.numeric(base::format(data$diagdate, "%Y"))
                     }
                 }
 

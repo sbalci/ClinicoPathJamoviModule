@@ -640,8 +640,13 @@ highdimcoxClass <- if (requireNamespace('jmvcore', quietly=TRUE))
           "<h4>High-Dimensional Cox Regression Results</h4>",
           "<p><strong>Regularization:</strong> ", self$options$regularization_method, 
           " (\u{03B1} = ", round(model_results$alpha, 3), ")</p>",
-          "<p><strong>Selected Lambda:</strong> ", 
-          format(model_results$selected_lambda, scientific = TRUE, digits = 3), "</p>",
+          "<p><strong>Selected Lambda:</strong> ",
+          # base::format, NOT the bare `format`. NAMESPACE does a blanket
+          # `import(jmvcore)` and jmvcore exports its own format() -- a
+          # {}-placeholder string templater that IGNORES scientific= and digits=.
+          # Unqualified, a lambda of 0.0234567 printed at full precision instead
+          # of "2.35e-02". Every format() call in this file is qualified for that reason.
+          base::format(model_results$selected_lambda, scientific = TRUE, digits = 3), "</p>",
           "<p><strong>Variables:</strong> ", 
           length(self$options$predictors), " candidate variables \u{2192} ",
           model_results$n_selected, " selected</p>",
@@ -710,9 +715,9 @@ highdimcoxClass <- if (requireNamespace('jmvcore', quietly=TRUE))
             "Regularization Method"
           ),
           value = c(
-            format(model_results$selected_lambda, scientific = TRUE, digits = 3),
-            format(cv_fit$lambda.min, scientific = TRUE, digits = 3),
-            format(cv_fit$lambda.1se, scientific = TRUE, digits = 3),
+            base::format(model_results$selected_lambda, scientific = TRUE, digits = 3),
+            base::format(cv_fit$lambda.min, scientific = TRUE, digits = 3),
+            base::format(cv_fit$lambda.1se, scientific = TRUE, digits = 3),
             round(cv_fit$cvm[which.min(abs(cv_fit$lambda - model_results$selected_lambda))], 3),
             as.character(conc_val),
             model_results$n_selected,
@@ -937,7 +942,7 @@ highdimcoxClass <- if (requireNamespace('jmvcore', quietly=TRUE))
           "<p><strong>Model Selection:</strong> ",
           "Cross-validation with ", self$options$cv_folds, " folds identified ",
           "an optimal regularization parameter (\u{03BB} = ",
-          format(model_results$selected_lambda, scientific = TRUE, digits = 3), ") ",
+          base::format(model_results$selected_lambda, scientific = TRUE, digits = 3), ") ",
           "that selected ", model_results$n_selected, " variables from the candidate set.</p>",
           if (!is.na(model_results$concordance)) {
             paste0("<p><strong>Training C-index (optimistic):</strong> ",

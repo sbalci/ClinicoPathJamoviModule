@@ -74,6 +74,10 @@ timeintervalClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         # ambiguous (two or more formats parse the data equally well).
         .formatDetectionNote = NULL,
 
+        # Holds a human-readable note when extreme-value filtering was requested
+        # but the "multiplier x 99th percentile" rule is not usable (q99 <= 0).
+        .extremeSkipReason = NULL,
+
         .validateInputData = function(data, dx_date, fu_date) {
             # Comprehensive input validation - returns status instead of throwing errors
             if (!is.data.frame(data)) {
@@ -365,7 +369,13 @@ timeintervalClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
             # Filter and adjust times
             adjusted_time <- calculated_time - landmark_time
-            filtered_data <- data[valid_cases, ]
+            # drop = FALSE: `self$data` holds only the columns this analysis asked
+            # for, so it has ONE column whenever the same variable is chosen as
+            # both the start and the end date. Without drop = FALSE the subset
+            # silently returns a bare vector, rownames() on it is NULL, and
+            # .run()'s setRowNums(rownames(filtered_data)) then writes the
+            # calculated-time column back to the spreadsheet with no row mapping.
+            filtered_data <- data[valid_cases, , drop = FALSE]
             final_time <- adjusted_time[valid_cases]
 
             return(list(
@@ -399,8 +409,11 @@ timeintervalClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 q99 <- stats::quantile(calculated_time, 0.99, na.rm = TRUE, names = FALSE)
             })
             # Use the same multiplier as the removal filter so the flagged
-            # "Extreme Values" count matches what remove_extreme would drop.
-            extreme_threshold <- if (is.na(q99)) Inf else q99 * extreme_multiplier
+            # "Extreme Values" count matches what remove_extreme would drop --
+            # including the q99 <= 0 guard, so the panel does not report a count
+            # of "extreme" intervals that the filter itself declines to act on.
+            extreme_threshold <- if (is.na(q99) || !is.finite(q99) || q99 <= 0) Inf
+                                 else q99 * extreme_multiplier
 
             quality_metrics <- list(
                 total_observations = total_obs,
@@ -535,18 +548,35 @@ timeintervalClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 suppressWarnings({
                     q99 <- stats::quantile(calculated_time_raw, 0.99, na.rm = TRUE, names = FALSE)
                 })
-                if (!is.na(q99) && is.finite(q99)) {
+                # The rule is "more than `multiplier` times the 99th percentile",
+                # which only orders correctly for a POSITIVE q99. At q99 == 0 the
+                # threshold is 0, so every non-zero interval counts as extreme --
+                # in a cohort where 99% of patients enter and exit on the same day
+                # that silently DELETES the handful of genuine follow-ups. At a
+                # negative q99 multiplying moves the threshold the wrong way and
+                # flags the entire column. Neither is a meaningful outlier rule, so
+                # skip the filter and say why rather than dropping real rows.
+                if (!is.na(q99) && is.finite(q99) && q99 > 0) {
                     extreme_threshold <- q99 * self$options$extreme_multiplier
                     removed_extreme <- sum(calculated_time_raw > extreme_threshold, na.rm = TRUE)
                     valid_idx <- valid_idx & (calculated_time_raw <= extreme_threshold | is.na(calculated_time_raw))
                     filter_applied <- TRUE
+                } else if (!is.na(q99) && is.finite(q99)) {
+                    private$.extremeSkipReason <- sprintf(
+                        paste0("Extreme-value filtering was skipped: the 99th percentile of the intervals is %.4g, ",
+                               "so a '%.4g x 99th percentile' threshold cannot separate long follow-up from typical ",
+                               "follow-up. Review the interval distribution directly."),
+                        q99, self$options$extreme_multiplier)
                 }
             }
 
             # Apply combined filter in single operation
             if (filter_applied && !all(valid_idx)) {
                 calculated_time <- calculated_time_raw[valid_idx]
-                data <- data[valid_idx, ]
+                # drop = FALSE for the same reason as in .applyLandmarkAnalysis():
+                # a single-column `data` would otherwise collapse to a vector and
+                # lose the rownames that the write-back to the dataset relies on.
+                data <- data[valid_idx, , drop = FALSE]
                 start_dates <- start_dates[valid_idx]
                 end_dates <- end_dates[valid_idx]
             } else {
@@ -577,6 +607,9 @@ timeintervalClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
         # Run analysis ----
         .run = function() {
+            # Per-run state reset so a note from a previous run cannot persist.
+            private$.extremeSkipReason <- NULL
+
             # Initialize messages list (backed by an environment so the nested
             # add_message() helper can append without `<<-`).
             msg_env <- new.env(parent = emptyenv())
@@ -773,6 +806,9 @@ timeintervalClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             filter_lines <- c()
             if (self$options$remove_negative && filter_info$removed_negative > 0) {
                 filter_lines <- c(filter_lines, glue::glue("{filter_info$removed_negative} negative interval(s) removed"))
+            }
+            if (self$options$remove_extreme && !is.null(private$.extremeSkipReason)) {
+                filter_lines <- c(filter_lines, private$.extremeSkipReason)
             }
             if (self$options$remove_extreme && filter_info$removed_extreme > 0) {
                 threshold_txt <- if (!is.na(filter_info$extreme_threshold)) round(filter_info$extreme_threshold, 2) else "threshold"

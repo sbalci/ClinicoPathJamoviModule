@@ -158,5 +158,5 @@ test_that("timeinterval compare output units", {
     )
   })
   
-  expect_true(all(sapply(results, function(r) inherits(r, "timeintervalClass"))))
+  expect_true(all(sapply(results, function(r) inherits(r, "timeintervalResults"))))
 })

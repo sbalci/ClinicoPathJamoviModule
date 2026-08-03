@@ -1275,7 +1275,32 @@ outcomeorganizerClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     .lbl <- c("Censored", "Event", "Competing")
                     .idx <- suppressWarnings(as.integer(df_outcome$myoutcome)) + 1L
                     .idx[is.na(.idx) | .idx < 1L | .idx > length(.lbl)] <- NA_integer_
-                    self$results$addOutcome$setValues(.lbl[.idx])
+                    # Export a FACTOR that DECLARES all three levels, not a bare
+                    # character vector.
+                    #
+                    # jmvcore's Output$asProtoBuf() does `if (!is.factor(column))
+                    # column <- as.factor(column)` and then serialises
+                    # `levels(column)`. A character vector therefore reaches jamovi
+                    # with only the levels that happen to OCCUR, so a competing-risks
+                    # run on a cohort with no other-cause deaths shipped a column
+                    # declaring just Censored/Event.
+                    #
+                    # That silently broke the hand-off. survival_utils.R identifies
+                    # this interchange format with
+                    #     setequal(levels(outcome), c("Censored","Event","Competing"))
+                    # and its comment states the intent explicitly: the outcome
+                    # "remains a competing-risk outcome when its Competing level is
+                    # declared but unused in this particular cohort". Only a declared
+                    # factor can carry that. Without it the downstream analysis fell
+                    # through to the ordinary single-event branch and stopped with
+                    # "Event Level is not selected", or -- if the user then picked
+                    # "Event" -- ran plain Kaplan-Meier with the competing-risk flag
+                    # lost.
+                    #
+                    # Declaring the levels also fixes their ORDER: as.factor() sorts
+                    # alphabetically (Censored, Competing, Event), which no longer
+                    # matches the 0/1/2 status codes these labels stand for.
+                    self$results$addOutcome$setValues(factor(.lbl[.idx], levels = .lbl))
                 } else {
                     self$results$addOutcome$setValues(df_outcome$myoutcome)
                 }

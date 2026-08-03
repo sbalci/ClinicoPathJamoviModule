@@ -2108,7 +2108,14 @@ decisioncompareClass <- if (requireNamespace("jmvcore")) {
                     "<li><strong>Prevalence Dependency:</strong> PPV and NPV vary with disease prevalence</li>",
                     "<li><strong>McNemar Test:</strong> Requires paired/matched data for statistical comparisons</li>",
                     "<li><strong>Missing Data:</strong> Cases with incomplete data are excluded from analysis</li>",
-                    "<li><strong>Confidence Intervals:</strong> Calculated using Wilson method for better accuracy</li>",
+                    # Describe only the intervals this analysis actually renders.
+                    # The per-test table is filtered to `ratiorows` above, which
+                    # excludes lr.pos/lr.neg, and the LRP/LRN columns in
+                    # decisioncompare.r.yaml carry no lower/upper -- so no
+                    # likelihood-ratio interval is displayed anywhere here. An
+                    # earlier version of this sentence advertised Simel (1991) LR
+                    # intervals that the analysis never computes or shows.
+                    "<li><strong>Confidence Intervals:</strong> The per-test CI tables report Clopper-Pearson exact intervals for the proportions (sensitivity, specificity, PPV, NPV, accuracy and prevalence), as computed by epiR::epi.tests() with its default settings. Likelihood ratios are reported as point estimates only, without confidence intervals. The Overall Percent Agreement (OPA) table uses the method you select under \"CI Method for Agreement\" (Wilson score by default). Paired differences between tests use normal-approximation (Wald) intervals.</li>",
                     "</ul>",
                     "</div>",
                     "</div>"

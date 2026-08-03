@@ -288,13 +288,20 @@ jggheatmapClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
         .format_values = function(values) {
             format_type <- self$options$value_format
             
+            # base::format is qualified on purpose: NAMESPACE does a blanket
+            # `import(jmvcore)` and jmvcore exports its own format() -- a
+            # {}-placeholder string templater that ignores digits= and
+            # scientific= and just stringifies its argument. Bare format() here
+            # resolved to jmvcore's, so "auto"/"scientific" printed raw values.
+            # trim = TRUE keeps base::format from padding the vector to a
+            # common width, which would add leading spaces to every cell label.
             formatted <- switch(format_type,
-                "auto" = format(values, digits = 2),
+                "auto" = base::format(values, digits = 2, trim = TRUE),
                 "integer" = as.character(round(values)),
                 "decimal1" = sprintf("%.1f", values),
                 "decimal2" = sprintf("%.2f", values),
-                "scientific" = format(values, scientific = TRUE, digits = 2),
-                format(values, digits = 2)
+                "scientific" = base::format(values, scientific = TRUE, digits = 2, trim = TRUE),
+                base::format(values, digits = 2, trim = TRUE)
             )
             
             return(formatted)

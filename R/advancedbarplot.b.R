@@ -1517,13 +1517,19 @@ advancedbarplotClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                                 return(paste0(round(values * 100, 1), "%"))
                             }
                         } else if (format_type == "scientific") {
-                            return(format(values, scientific = TRUE, digits = 3))
+                            # base::format, NOT the bare `format`. NAMESPACE does a blanket
+                            # `import(jmvcore)` and jmvcore exports its own format(str, ...,
+                            # context) -- a {}-placeholder string templater that IGNORES
+                            # scientific= and digits= and hands the numeric vector straight
+                            # back, so the bar labels rendered as raw numbers (1234567) instead
+                            # of scientific notation (1.23e+06). Same for the auto branch below.
+                            return(base::format(values, scientific = TRUE, digits = 3))
                         } else {
                             # Auto format with better logic
                             if (all(values == round(values), na.rm = TRUE)) {
                                 return(as.character(round(values)))
                             } else if (all(abs(values) < 0.01, na.rm = TRUE)) {
-                                return(format(values, scientific = TRUE, digits = 2))
+                                return(base::format(values, scientific = TRUE, digits = 2))
                             } else {
                                 return(sprintf("%.2f", values))
                             }

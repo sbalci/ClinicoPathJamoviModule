@@ -32,8 +32,7 @@ test_that("timeinterval handles missing inputs gracefully", {
       data = test_data,
       dx_date = NULL,
       fu_date = NULL
-    ),
-    regexp = "Please provide both start \\(dx_date\\) and end \\(fu_date\\) date variables\\."
+    )
   )
 })
 

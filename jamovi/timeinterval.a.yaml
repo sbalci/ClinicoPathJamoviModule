@@ -50,7 +50,7 @@ options:
     - name: dx_date
       title: Start Date Variable
       type: Variable
-      default: NULL
+      default: null
       suggested:
         - continuous
         - nominal
@@ -65,7 +65,7 @@ options:
     - name: fu_date
       title: End Date Variable  
       type: Variable
-      default: NULL
+      default: null
       suggested:
         - continuous
         - nominal

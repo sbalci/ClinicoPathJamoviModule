@@ -96,8 +96,11 @@ options:
       default: auto
       description:
           R: >
-            DateTime format specification. 'Auto-detect' attempts to identify the format automatically.
-            Manual selection ensures accurate parsing for specific datetime formats.
+            DateTime format specification. 'Auto-detect' attempts to identify the format automatically
+            and warns when day-first and month-first parsing both succeed but disagree; manual selection
+            ensures accurate parsing for specific datetime formats. Excel serial numbers use the 1899-12-30
+            origin, which is exact for dates from 1900-03-01 onward (Excel's 1900 system wrongly counts a
+            29 February 1900).
 
     - name: timezone
       title: Timezone
@@ -192,7 +195,10 @@ options:
       default: false
       description:
           R: >
-            Extract and display week number in preview table.
+            Extract and display week number in preview table. This is lubridate::week()
+            (day-of-year divided into 7-day blocks starting 1 January), NOT the ISO-8601
+            week. The two differ around the new year: 2021-01-01 is week 1 here and
+            ISO week 53 of 2020.
 
     - name: extract_quarter
       title: Extract quarter
@@ -261,9 +267,13 @@ options:
       description:
           R: >
             Appends the corrected datetime as a numeric variable (Unix epoch seconds since 1970-01-01 00:00:00 UTC).
-            This numeric representation is OS-independent and timezone-independent, making it suitable for
-            calculations, comparisons, and plotting. The same datetime will always produce the same numeric value
-            regardless of your computer's timezone or operating system.
+            The number identifies an instant, so it is OS-independent and well suited to calculations,
+            comparisons, and plotting. It is NOT independent of the Timezone option: a date without a time is
+            midnight in the selected timezone, so "2024-01-15" becomes 1705276800 under UTC but 1705266000 under
+            Europe/Istanbul. The default timezone is the local machine's, so the same file converted on two
+            machines can yield different numbers. Set Timezone to UTC when the value must be reproducible across
+            machines or compared against an external source. Differences between two dates converted in the same
+            session are unaffected, except across a daylight-saving transition (up to one hour).
 
     # === COMPONENT EXTRACTION ===
     - name: year_out
@@ -327,7 +337,11 @@ options:
       type: Output
       description:
           R: >
-            Extract week number of the year (1-53).
+            Extract week number of the year (1-53), computed with lubridate::week():
+            the day of year divided into 7-day blocks counting from 1 January. This is
+            NOT the ISO-8601 week and not the MMWR/epidemiological week; those differ
+            around the turn of the year (2021-01-01 is week 1 here, ISO week 53 of 2020).
+            Use ISO or epi weeks if your reporting standard requires them.
 
     - name: quarter_out
       title: Extract quarter

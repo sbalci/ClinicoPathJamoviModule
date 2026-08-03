@@ -268,7 +268,9 @@ decisioncalculatorClass <- if (requireNamespace("jmvcore")) {
                     private$.addNotice("WARNING", "Non-Integer Counts", "Non-integer counts detected. \u{2022} Diagnostic test counts are typically whole numbers. \u{2022} Proceeding with calculations, but verify your inputs.")
                 }
 
-                # Continuity correction for zero-cell issues (stabilizes LR/DOR and CIs)
+                # Continuity correction for zero-cell issues (stabilizes the LR/DOR point
+                # estimates only; epi.tests() below is fed the raw table3, so the CIs are
+                # uncorrected)
                 zero_cell <- any(c(TP, FP, TN, FN) == 0)
                 TP_cc <- TP
                 FP_cc <- FP
@@ -281,7 +283,7 @@ decisioncalculatorClass <- if (requireNamespace("jmvcore")) {
                     TN_cc <- TN + 0.5
                     FN_cc <- FN + 0.5
 
-                    private$.addNotice("WARNING", "Continuity Correction Applied", "Zero cells detected. Applied Haldane-Anscombe 0.5 continuity correction for likelihood ratios, diagnostic odds ratio, and confidence intervals to avoid infinite or undefined estimates.")
+                    private$.addNotice("WARNING", "Continuity Correction Applied", "Zero cells detected. Applied Haldane-Anscombe 0.5 continuity correction to the likelihood ratio and diagnostic odds ratio point estimates to avoid infinite or undefined values. \u{2022} The 95% confidence intervals come from epiR::epi.tests() on the raw (uncorrected) counts, so they are not continuity-corrected and may be undefined for these statistics.")
                 }
 
                 # Calculate metrics with safe division
