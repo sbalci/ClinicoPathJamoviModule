@@ -136,7 +136,7 @@ datetimeconverterClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         .evaluateFormat = function(sample_dates, fmt) {
             parser <- private$.getParser(fmt)
             tryCatch({
-                parsed_dates <- parser(sample_dates)
+                parsed_dates <- suppressWarnings(parser(sample_dates))
                 list(
                     success_rate = sum(!is.na(parsed_dates)) / length(sample_dates),
                     parsed = parsed_dates

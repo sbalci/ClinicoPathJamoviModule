@@ -781,6 +781,29 @@ oddsratioClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     tOdds[[1]] <- private$.restoreOriginalNamesInTable(tOdds[[1]], all_labels)
                 }
 
+                # Replace odds ratios that the fit could not actually identify.
+                # See .markNonEstimableOR(): under separation glm returns an
+                # arbitrary large coefficient with an unbounded interval, and
+                # printing exp() of it states an odds ratio of ~1e23 as fact.
+                nonest <- private$.markNonEstimableOR(tOdds[[1]])
+                tOdds[[1]] <- nonest$table
+                if (length(nonest$flagged) > 0) {
+                    private$.addNotice(
+                        jmvcore::NoticeType$STRONG_WARNING,
+                        paste0(
+                            "The odds ratio could not be estimated for: ",
+                            paste(nonest$flagged, collapse = ", "),
+                            ". The confidence interval is unbounded, which means the data separate the outcome ",
+                            "perfectly (or nearly so) for that variable and the maximum-likelihood estimate does ",
+                            "not exist. The cell is shown as 'not estimable' rather than as the arbitrary large ",
+                            "number the fitting algorithm stopped at. Enable Firth penalized logistic regression ",
+                            "to obtain a finite estimate, or combine sparse categories. Note that the forest plot ",
+                            "below is drawn by finalfit from the same unpenalized fit and will still show the ",
+                            "unbounded estimate."
+                        )
+                    )
+                }
+
 
 
 
@@ -977,18 +1000,34 @@ oddsratioClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     # Format diagnostic metrics, rendering undefined (NA) values
                     # explicitly rather than as a misleading 0% or numeric. LRs
                     # derived from an undefined metric are also shown as undefined.
-                    sens_txt <- if (is.na(lr_results$sensitivity)) "undefined (no positive cases)" else paste0(round(lr_results$sensitivity * 100, 1), "%")
-                    spec_txt <- if (is.na(lr_results$specificity)) "undefined (no negative cases)" else paste0(round(lr_results$specificity * 100, 1), "%")
+                    # A point estimate on its own overstates what a small 2x2
+                    # supports, so each metric carries its interval; when the
+                    # interval is not computable the text says so rather than
+                    # leaving a blank that reads as certainty.
+                    lr_ci <- lr_results$ci
+                    ci_pct <- function(key) {
+                        v <- if (is.null(lr_ci)) NULL else lr_ci[[key]]
+                        if (is.null(v) || length(v) != 2 || anyNA(v)) return("")
+                        sprintf(" (95%% CI %.1f-%.1f%%)", v[1] * 100, v[2] * 100)
+                    }
+                    ci_num <- function(key) {
+                        v <- if (is.null(lr_ci)) NULL else lr_ci[[key]]
+                        if (is.null(v) || length(v) != 2 || anyNA(v) || any(!is.finite(v))) return("")
+                        sprintf(" (95%% CI %.2f-%.2f)", v[1], v[2])
+                    }
+
+                    sens_txt <- if (is.na(lr_results$sensitivity)) "undefined (no positive cases)" else paste0(sprintf("%.1f%%", lr_results$sensitivity * 100), ci_pct("sensitivity"))
+                    spec_txt <- if (is.na(lr_results$specificity)) "undefined (no negative cases)" else paste0(sprintf("%.1f%%", lr_results$specificity * 100), ci_pct("specificity"))
                     # Inf is a real (diverging) value, not a missing one, so it
                     # needs its own wording -- previously only is.na was caught
                     # and "Inf" was printed verbatim.
                     fmt_lr <- function(v) {
                         if (is.null(v) || length(v) == 0 || is.na(v)) "undefined (no informative cells)"
                         else if (is.infinite(v)) "infinite (zero false results in this cell)"
-                        else as.character(round(v, 2))
+                        else sprintf("%.2f", v)
                     }
-                    plr_txt  <- fmt_lr(lr_results$positive_lr)
-                    nlr_txt  <- fmt_lr(lr_results$negative_lr)
+                    plr_txt  <- paste0(fmt_lr(lr_results$positive_lr), ci_num("positive_lr"))
+                    nlr_txt  <- paste0(fmt_lr(lr_results$negative_lr), ci_num("negative_lr"))
 
                     # Build full metrics text with all features
                     metrics_text <- paste0(
@@ -1001,6 +1040,7 @@ oddsratioClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                         "Specificity: ", spec_txt, "<br>",
                         "Positive LR: ", plr_txt, "<br>",
                         "Negative LR: ", nlr_txt, "<br>",
+                        "<small style='color:#555;'>Unadjusted 2&times;2 estimates. Wilson score intervals for sensitivity and specificity; log method for the likelihood ratios (epiR::epi.tests).</small>",
                         "</div>",
 
                         statistical_warnings,
@@ -1256,6 +1296,39 @@ oddsratioClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 } else (1 - sensitivity) / specificity
             }
             
+            # Confidence intervals for the diagnostic metrics.
+            #
+            # These were reported as bare point estimates. A sensitivity of 63.8%
+            # from 20 patients and from 2000 are not the same claim, and the panel
+            # gave a clinician no way to tell them apart -- uncertainty that is
+            # simply absent reads as uncertainty that is small.
+            #
+            # epiR::epi.tests() is what the sibling diagnostic analyses in this
+            # module already use (decision, decisioncalculator, decisioncompare,
+            # decisioncombine, digitalvalidation), so the intervals here agree with
+            # theirs by construction: Wilson score for sensitivity/specificity and
+            # the standard log method (Simel) for the likelihood ratios. It takes
+            # the 2x2 as test-positive-first by outcome-positive-first, which is
+            # exactly the tp/fp/fn/tn already resolved above -- so the orientation
+            # cannot drift away from the point estimates computed from them.
+            ci <- tryCatch({
+                et <- epiR::epi.tests(matrix(c(tp, fp, fn, tn), nrow = 2, byrow = TRUE))
+                det <- as.data.frame(et$detail)
+                grab <- function(stat) {
+                    row <- det[det$statistic == stat, , drop = FALSE]
+                    if (nrow(row) == 0) c(NA_real_, NA_real_)
+                    else c(as.numeric(row$lower[1]), as.numeric(row$upper[1]))
+                }
+                list(sensitivity = grab("se"), specificity = grab("sp"),
+                     positive_lr  = grab("lr.pos"), negative_lr = grab("lr.neg"))
+            }, error = function(e) NULL)
+
+            if (is.null(ci))
+                ci <- list(sensitivity = c(NA_real_, NA_real_),
+                           specificity = c(NA_real_, NA_real_),
+                           positive_lr = c(NA_real_, NA_real_),
+                           negative_lr = c(NA_real_, NA_real_))
+
             # Create diagnostic information
             diagnostic_info <- paste0(
                 "Positive outcome level: '", positive_outcome_level, "' (", outcome_determination_method, ")\n",
@@ -1278,6 +1351,7 @@ oddsratioClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 predictor_level_warning = predictor_level_warning,  # Add warning to return value
                 statistical_warnings = diagnostic_warnings,  # Add statistical warnings
                 statistical_recommendations = recommendation_text,  # Add recommendations
+                ci = ci,
                 positive_outcome_used = positive_outcome_level,
                 positive_predictor_used = positive_predictor_level,
                 outcome_determination_method = outcome_determination_method,
@@ -1285,6 +1359,54 @@ oddsratioClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 contingency_table = cont_table,
                 tp = tp, fp = fp, fn = fn, tn = tn
             ))
+        },
+
+        # Odds ratios from a non-converged fit are numerical noise, not estimates.
+        #
+        # Under (quasi-)separation glm's IRLS stops wherever the iteration limit
+        # leaves it, and finalfit renders exp() of that coefficient to two
+        # decimals. A perfectly separated 2x2 printed
+        #     "118848049086800030859264.00 (0.00-Inf, p=1.000)"
+        # i.e. an odds ratio of 1.19e23 shown to a clinician as though it were an
+        # estimate, when the parameter is simply not identified.
+        #
+        # The reliable tell is the CONFIDENCE INTERVAL, not the point estimate: a
+        # finite odds ratio cannot have an infinite upper confidence limit unless
+        # the likelihood is flat at the boundary. Large but genuinely estimable
+        # odds ratios keep a finite upper bound -- the Firth fit on that same
+        # separated table gives 3721.00 (181.52-1160619.10) -- so this rule leaves
+        # them untouched and cannot fire on an ordinary analysis.
+        .markNonEstimableOR = function(tbl) {
+            empty <- list(table = tbl, flagged = character(0))
+            if (is.null(tbl) || !is.data.frame(tbl) || nrow(tbl) == 0) return(empty)
+
+            or_cols <- which(grepl("^OR", names(tbl)))
+            if (length(or_cols) == 0) return(empty)
+
+            # finalfit prints the variable name only on the first row of each
+            # block, so forward-fill it to name the offending term in the notice.
+            var_col <- as.character(tbl[[1]])
+            var_col[is.na(var_col) | !nzchar(trimws(var_col))] <- NA_character_
+            for (k in seq_along(var_col))
+                if (is.na(var_col[k]) && k > 1) var_col[k] <- var_col[k - 1]
+
+            flagged <- character(0)
+            for (j in or_cols) {
+                cells <- as.character(tbl[[j]])
+                for (i in seq_along(cells)) {
+                    cell <- cells[i]
+                    if (is.na(cell) || !nzchar(cell) || identical(trimws(cell), "-")) next
+                    # "<OR> (<lo>-<hi>, p=<p>)"
+                    m <- regmatches(cell, regexec("^([^ ]+) \\(([^-]+)-([^,]+),", cell))[[1]]
+                    if (length(m) != 4) next
+                    hi <- suppressWarnings(as.numeric(m[4]))
+                    if (!is.na(hi) && is.finite(hi)) next
+                    cells[i] <- "not estimable"
+                    if (!is.na(var_col[i])) flagged <- unique(c(flagged, var_col[i]))
+                }
+                tbl[[j]] <- cells
+            }
+            list(table = tbl, flagged = flagged)
         },
 
         # Prepares data and fits logistic regression model for nomogram creation

@@ -21,8 +21,8 @@ test_that("datetimeconverter runs with minimal required arguments", {
     datetime_var = "date_ymd"
   )
   
-  expect_s3_class(result, "datetimeconverterClass")
-  expect_true("results" %in% names(result))
+  expect_s3_class(result, "datetimeconverterResults")
+  expect_true(!is.null(result$previewTable))
 })
 
 test_that("datetimeconverter handles YMD format", {
@@ -32,7 +32,7 @@ test_that("datetimeconverter handles YMD format", {
     datetime_format = "ymd"
   )
   
-  expect_s3_class(result, "datetimeconverterClass")
+  expect_s3_class(result, "datetimeconverterResults")
 })
 
 test_that("datetimeconverter handles DMY format", {
@@ -42,7 +42,7 @@ test_that("datetimeconverter handles DMY format", {
     datetime_format = "dmy"
   )
   
-  expect_s3_class(result, "datetimeconverterClass")
+  expect_s3_class(result, "datetimeconverterResults")
 })
 
 test_that("datetimeconverter handles MDY format", {
@@ -52,7 +52,7 @@ test_that("datetimeconverter handles MDY format", {
     datetime_format = "mdy"
   )
   
-  expect_s3_class(result, "datetimeconverterClass")
+  expect_s3_class(result, "datetimeconverterResults")
 })
 
 test_that("datetimeconverter handles datetime with HMS", {
@@ -62,7 +62,7 @@ test_that("datetimeconverter handles datetime with HMS", {
     datetime_format = "ymdhms"
   )
   
-  expect_s3_class(result, "datetimeconverterClass")
+  expect_s3_class(result, "datetimeconverterResults")
 })
 
 test_that("datetimeconverter handles auto-detection", {
@@ -72,7 +72,7 @@ test_that("datetimeconverter handles auto-detection", {
     datetime_format = "auto"
   )
   
-  expect_s3_class(result, "datetimeconverterClass")
+  expect_s3_class(result, "datetimeconverterResults")
 })
 
 test_that("datetimeconverter handles Excel serial dates", {
@@ -84,7 +84,7 @@ test_that("datetimeconverter handles Excel serial dates", {
     datetime_format = "excel_serial"
   )
   
-  expect_s3_class(result, "datetimeconverterClass")
+  expect_s3_class(result, "datetimeconverterResults")
 })
 
 test_that("datetimeconverter handles Unix epoch timestamps", {
@@ -96,7 +96,7 @@ test_that("datetimeconverter handles Unix epoch timestamps", {
     datetime_format = "unix_epoch"
   )
   
-  expect_s3_class(result, "datetimeconverter")
+  expect_s3_class(result, "datetimeconverterResults")
 })
 
 test_that("datetimeconverter extracts year component", {
@@ -106,7 +106,7 @@ test_that("datetimeconverter extracts year component", {
     extract_year = TRUE
   )
   
-  expect_s3_class(result, "datetimeconverterClass")
+  expect_s3_class(result, "datetimeconverterResults")
 })
 
 test_that("datetimeconverter extracts month component", {
@@ -116,7 +116,7 @@ test_that("datetimeconverter extracts month component", {
     extract_month = TRUE
   )
   
-  expect_s3_class(result, "datetimeconverterClass")
+  expect_s3_class(result, "datetimeconverterResults")
 })
 
 test_that("datetimeconverter extracts day name", {
@@ -126,7 +126,7 @@ test_that("datetimeconverter extracts day name", {
     extract_dayname = TRUE
   )
   
-  expect_s3_class(result, "datetimeconverterClass")
+  expect_s3_class(result, "datetimeconverterResults")
 })
 
 test_that("datetimeconverter extracts multiple components", {
@@ -141,7 +141,7 @@ test_that("datetimeconverter extracts multiple components", {
     extract_quarter = TRUE
   )
   
-  expect_s3_class(result, "datetimeconverterClass")
+  expect_s3_class(result, "datetimeconverterResults")
 })
 
 test_that("datetimeconverter handles timezone specification", {
@@ -152,7 +152,7 @@ test_that("datetimeconverter handles timezone specification", {
     timezone = "UTC"
   )
   
-  expect_s3_class(result, "datetimeconverterClass")
+  expect_s3_class(result, "datetimeconverterResults")
 })
 
 test_that("datetimeconverter shows quality metrics", {
@@ -162,7 +162,7 @@ test_that("datetimeconverter shows quality metrics", {
     show_quality_metrics = TRUE
   )
   
-  expect_s3_class(result, "datetimeconverterClass")
+  expect_s3_class(result, "datetimeconverterResults")
 })
 
 test_that("datetimeconverter runs with small dataset", {
@@ -173,5 +173,5 @@ test_that("datetimeconverter runs with small dataset", {
     datetime_var = "datetime_ymd"
   )
   
-  expect_s3_class(result, "datetimeconverterClass")
+  expect_s3_class(result, "datetimeconverterResults")
 })
