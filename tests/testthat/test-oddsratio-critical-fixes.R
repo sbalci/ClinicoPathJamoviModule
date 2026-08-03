@@ -150,7 +150,7 @@ test_that("Outcome releveling: Event vs No Event (standard epidemiology)", {
   # Test with typical epidemiological coding
   test_data <- data.frame(
     patient_id = 1:200,
-    exposure = factor(rep(c("Unexposed", "Exposed"), each = 100)),
+    exposure = factor(rep(c("Unexposed", "Exposed"), each = 100), levels = c("Unexposed", "Exposed")),
     disease = factor(
       c(rep("No Event", 80), rep("Event", 20), rep("No Event", 60), rep("Event", 40)),
       levels = c("No Event", "Event")

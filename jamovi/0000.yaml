@@ -1114,7 +1114,7 @@ analyses:
   - title: Odds Ratio Table and Plot
     name: oddsratio
     ns: ClinicoPath
-    menuGroup: SurvivalT
+    menuGroup: Survival
     menuSubgroup: General Statistics
     menuTitle: Odds Ratio Table and Plot
     menuSubtitle: Odds Ratio for Binary Outcomes

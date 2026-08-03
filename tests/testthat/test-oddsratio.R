@@ -106,22 +106,18 @@ test_that("Input validation tests", {
   )
   
   # Test 2: Missing outcome parameter
-  expect_error(
-    ClinicoPath::oddsratio(outcomeLevel = NULL, predictorLevel = NULL, 
-      data = basic_data,
-      explanatory = "age"
-    ),
-    "outcome"
+  res_no_outcome <- ClinicoPath::oddsratio(outcomeLevel = NULL, predictorLevel = NULL, 
+    data = basic_data,
+    explanatory = "age"
   )
+  expect_true(nchar(res_no_outcome$todo$content) > 0)
   
   # Test 3: Missing explanatory parameter
-  expect_error(
-    ClinicoPath::oddsratio(outcomeLevel = NULL, predictorLevel = NULL, 
-      data = basic_data,
-      outcome = "mortality"
-    ),
-    "explanatory"
+  res_no_expl <- ClinicoPath::oddsratio(outcomeLevel = NULL, predictorLevel = NULL, 
+    data = basic_data,
+    outcome = "mortality"
   )
+  expect_true(nchar(res_no_expl$todo$content) > 0)
   
   # Test 4: Invalid variable names
   expect_error(

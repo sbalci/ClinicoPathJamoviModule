@@ -1,7 +1,7 @@
 ---
 name:  oddsratio
 title: Odds Ratio Table and Plot
-menuGroup: SurvivalT
+menuGroup: Survival
 menuSubgroup: General Statistics
 menuSubtitle: 'Odds Ratio for Binary Outcomes'
 version: '1.0.2'
@@ -43,7 +43,7 @@ options:
     - name: explanatory
       title: Explanatory Variables
       type: Variables
-      default: NULL
+      default: null
       suggested: [ nominal, continuous ]
       permitted: [ factor, numeric ]
       description:
@@ -55,7 +55,7 @@ options:
     - name: outcome
       title: Binary Outcome
       type: Variable
-      default: NULL
+      default: null
       suggested: [ ordinal, nominal ]
       permitted: [ factor ]
       description:

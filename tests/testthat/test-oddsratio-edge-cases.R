@@ -15,7 +15,7 @@ test_that("oddsratio handles small datasets", {
     outcomeLevel = NULL,
     predictorLevel = NULL
   )
-  expect_s3_class(result, "oddsratioClass")
+  expect_s3_class(result, "oddsratioResults")
 })
 
 test_that("oddsratio handles large datasets", {
@@ -38,7 +38,7 @@ test_that("oddsratio handles perfect separation", {
     predictorLevel = NULL
   )
   # May warn about perfect separation
-  expect_s3_class(result, "oddsratioClass")
+  expect_s3_class(result, "oddsratioResults")
 })
 
 test_that("oddsratio handles zero cells", {
@@ -50,5 +50,5 @@ test_that("oddsratio handles zero cells", {
     predictorLevel = NULL
   )
   # May warn about zero cells
-  expect_s3_class(result, "oddsratioClass")
+  expect_s3_class(result, "oddsratioResults")
 })

@@ -17,7 +17,7 @@ test_that("oddsratio runs with minimal arguments", {
     outcomeLevel = "Dead",
     predictorLevel = NULL
   )
-  expect_s3_class(result, "oddsratioClass")
+  expect_s3_class(result, "oddsratioResults")
 })
 
 test_that("oddsratio handles multiple predictors", {
@@ -53,9 +53,11 @@ test_that("oddsratio handles mixed predictors", {
   expect_no_error(result)
 })
 
-test_that("oddsratio errors on missing required arguments", {
-  expect_error(oddsratio(data = oddsratio_test, outcome = "outcome", outcomeLevel = NULL, predictorLevel = NULL))
-  expect_error(oddsratio(data = oddsratio_test, explanatory = "stage", outcomeLevel = NULL, predictorLevel = NULL))
+test_that("oddsratio sets todo notice on missing required arguments", {
+  res1 <- oddsratio(data = oddsratio_test, outcome = "outcome", outcomeLevel = NULL, predictorLevel = NULL)
+  expect_true(nchar(res1$todo$content) > 0)
+  res2 <- oddsratio(data = oddsratio_test, explanatory = "stage", outcomeLevel = NULL, predictorLevel = NULL)
+  expect_true(nchar(res2$todo$content) > 0)
 })
 
 test_that("oddsratio handles nomogram option", {

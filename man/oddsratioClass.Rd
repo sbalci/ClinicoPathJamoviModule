@@ -24,8 +24,8 @@ The function performs the following analyses:
 }
 
 The function automatically cleans variable names using janitor::clean_names()
-and preserves original variable labels for display. It handles missing data
-through complete case analysis.
+and preserves original variable labels for display. The regression uses
+complete cases for the selected outcome and explanatory variables only.
 }
 \section{International Usage}{
 
@@ -38,7 +38,7 @@ important for correct interpretation of likelihood ratios and diagnostic metrics
 
 When showNomogram is enabled, the function generates:
 \itemize{
-\item Interactive nomogram for risk prediction
+\item Prediction nomogram based on the fitted logistic model
 \item Diagnostic metrics (sensitivity, specificity, likelihood ratios)
 \item Contingency table analysis
 \item User guidance for interpretation
