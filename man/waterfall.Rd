@@ -2,7 +2,7 @@
 % Please edit documentation in R/waterfall.h.R
 \name{waterfall}
 \alias{waterfall}
-\title{Treatment Response Analysis}
+\title{Treatment Response: Patient-Level Burden}
 \usage{
 waterfall(
   data,
@@ -186,11 +186,20 @@ Tables can be converted to data frames with \code{asDF} or \code{\link{as.data.f
 \code{as.data.frame(results$summaryTable)}
 }
 \description{
-Creates waterfall and spider plots to analyze tumor response data following
-RECIST criteria.
-}
-\details{
-Supports both raw tumor measurements and pre-calculated percentage changes.
-Provides comprehensive response analysis including ORR, DCR, and
-person-time metrics.
+Use this when you have one tumour burden number per patient: either a
+percent change from baseline you have already calculated (one row per
+patient), or a single measurement recorded at each visit (one row per
+patient per visit). It draws waterfall and spider plots, assigns each
+patient a best response from their largest shrinkage from baseline, and
+reports ORR and DCR with exact binomial confidence intervals, group
+comparison, time to response and duration of response. When a time variable
+is supplied, progression is measured against the patient's smallest
+recorded burden (nadir), not against baseline. Categories are named CR, PR,
+SD and PD and the thresholds are adapted from RECIST v1.1, but this is NOT
+a RECIST v1.1 implementation: because it never sees individual lesions it
+cannot sum target lesions, detect a new lesion, or judge non-target
+progression, and it cannot apply the 4-week confirmation rule itself (you
+may supply your own confirmation column). If your data list each lesion
+separately, the lesion-level analysis applies the RECIST v1.1 algorithm to
+them.
 }

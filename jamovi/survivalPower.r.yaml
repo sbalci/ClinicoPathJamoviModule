@@ -55,6 +55,7 @@ items:
           - icc
           - sensitivity_analysis
           - simulation_runs
+          - simulation_seed
 
     - name: power_summary
       title: 'Power Analysis Summary'
@@ -97,6 +98,7 @@ items:
           - icc
           - sensitivity_analysis
           - simulation_runs
+          - simulation_seed
       columns:
           - name: analysis_type
             title: 'Analysis Type'
@@ -141,6 +143,7 @@ items:
           - dropout_rate
           - allocation_ratio
           - simulation_runs
+          - simulation_seed
           - run_simulation_validation
       columns:
           - name: metric
@@ -203,6 +206,7 @@ items:
           - icc
           - sensitivity_analysis
           - simulation_runs
+          - simulation_seed
       columns:
           - name: parameter
             title: 'Parameter'
@@ -255,6 +259,7 @@ items:
           - icc
           - sensitivity_analysis
           - simulation_runs
+          - simulation_seed
       columns:
           - name: parameter
             title: 'Parameter'
@@ -307,6 +312,7 @@ items:
           - icc
           - sensitivity_analysis
           - simulation_runs
+          - simulation_seed
       columns:
           - name: parameter
             title: 'Parameter'
@@ -359,6 +365,7 @@ items:
           - icc
           - sensitivity_analysis
           - simulation_runs
+          - simulation_seed
       columns:
           - name: parameter
             title: 'Parameter'
@@ -411,6 +418,7 @@ items:
           - icc
           - sensitivity_analysis
           - simulation_runs
+          - simulation_seed
       columns:
           - name: assumption
             title: 'Assumption'

@@ -34,7 +34,7 @@ test_that("waterfall complete Phase II trial analysis workflow", {
   )
 
   expect_no_error(result)
-  expect_s3_class(result, "waterfallClass")
+  expect_s3_class(result, "waterfallResults")
 })
 
 test_that("waterfall biomarker correlation study workflow", {
@@ -201,7 +201,7 @@ test_that("waterfall workflow: subset by response category", {
     groupVar = "treatment"
   )
 
-  expect_s3_class(result, "waterfallClass")
+  expect_s3_class(result, "waterfallResults")
 })
 
 test_that("waterfall workflow: subset by treatment group", {
@@ -214,7 +214,7 @@ test_that("waterfall workflow: subset by treatment group", {
     responseVar = "best_response"
   )
 
-  expect_s3_class(result, "waterfallClass")
+  expect_s3_class(result, "waterfallResults")
 })
 
 # ═══════════════════════════════════════════════════════════
@@ -237,7 +237,7 @@ test_that("waterfall workflow: compare color schemes", {
   })
 
   # All should complete successfully
-  expect_true(all(sapply(results, function(r) inherits(r, "waterfallClass"))))
+  expect_true(all(sapply(results, function(r) inherits(r, "waterfallResults"))))
 })
 
 test_that("waterfall workflow: RECIST vs group-based coloring", {
@@ -382,7 +382,7 @@ test_that("waterfall workflow: handle incomplete follow-up", {
     showSpiderPlot = TRUE
   )
 
-  expect_s3_class(result, "waterfallClass")
+  expect_s3_class(result, "waterfallResults")
 })
 
 test_that("waterfall workflow: mixed measurement schedules", {
@@ -441,5 +441,5 @@ test_that("waterfall workflow: recover from data issues", {
     groupVar = "treatment"
   )
 
-  expect_s3_class(result, "waterfallClass")
+  expect_s3_class(result, "waterfallResults")
 })

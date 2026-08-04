@@ -13,6 +13,7 @@ waterfallrecistOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
             location = NULL,
             diameter = NULL,
             isNewLesion = NULL,
+            nonTargetResponseVar = NULL,
             baselineTimepoint = 0,
             confirmationInterval = 4,
             maxTargetLesions = 5,
@@ -39,7 +40,8 @@ waterfallrecistOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
                 permitted=list(
                     "numeric",
                     "factor",
-                    "id"))
+                    "id"),
+                default=NULL)
             private$..lesionID <- jmvcore::OptionVariable$new(
                 "lesionID",
                 lesionID,
@@ -48,14 +50,16 @@ waterfallrecistOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
                 permitted=list(
                     "numeric",
                     "factor",
-                    "id"))
+                    "id"),
+                default=NULL)
             private$..visitTime <- jmvcore::OptionVariable$new(
                 "visitTime",
                 visitTime,
                 suggested=list(
                     "continuous"),
                 permitted=list(
-                    "numeric"))
+                    "numeric"),
+                default=NULL)
             private$..lesionType <- jmvcore::OptionVariable$new(
                 "lesionType",
                 lesionType,
@@ -78,7 +82,8 @@ waterfallrecistOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
                 suggested=list(
                     "continuous"),
                 permitted=list(
-                    "numeric"))
+                    "numeric"),
+                default=NULL)
             private$..isNewLesion <- jmvcore::OptionVariable$new(
                 "isNewLesion",
                 isNewLesion,
@@ -87,6 +92,15 @@ waterfallrecistOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
                 permitted=list(
                     "numeric",
                     "factor"),
+                default=NULL)
+            private$..nonTargetResponseVar <- jmvcore::OptionVariable$new(
+                "nonTargetResponseVar",
+                nonTargetResponseVar,
+                suggested=list(
+                    "nominal"),
+                permitted=list(
+                    "factor",
+                    "id"),
                 default=NULL)
             private$..baselineTimepoint <- jmvcore::OptionNumber$new(
                 "baselineTimepoint",
@@ -152,6 +166,7 @@ waterfallrecistOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
             self$.addOption(private$..location)
             self$.addOption(private$..diameter)
             self$.addOption(private$..isNewLesion)
+            self$.addOption(private$..nonTargetResponseVar)
             self$.addOption(private$..baselineTimepoint)
             self$.addOption(private$..confirmationInterval)
             self$.addOption(private$..maxTargetLesions)
@@ -173,6 +188,7 @@ waterfallrecistOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
         location = function() private$..location$value,
         diameter = function() private$..diameter$value,
         isNewLesion = function() private$..isNewLesion$value,
+        nonTargetResponseVar = function() private$..nonTargetResponseVar$value,
         baselineTimepoint = function() private$..baselineTimepoint$value,
         confirmationInterval = function() private$..confirmationInterval$value,
         maxTargetLesions = function() private$..maxTargetLesions$value,
@@ -193,6 +209,7 @@ waterfallrecistOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
         ..location = NA,
         ..diameter = NA,
         ..isNewLesion = NA,
+        ..nonTargetResponseVar = NA,
         ..baselineTimepoint = NA,
         ..confirmationInterval = NA,
         ..maxTargetLesions = NA,
@@ -211,6 +228,7 @@ waterfallrecistResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
     "waterfallrecistResults",
     inherit = jmvcore::Group,
     active = list(
+        instructions = function() private$.items[["instructions"]],
         notices = function() private$.items[["notices"]],
         lesionTable = function() private$.items[["lesionTable"]],
         targetSumTable = function() private$.items[["targetSumTable"]],
@@ -226,6 +244,17 @@ waterfallrecistResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
                 options=options,
                 name="",
                 title="RECIST v1.1 Response Analysis")
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="instructions",
+                title="Getting Started",
+                clearWith=list(
+                    "patientID",
+                    "lesionID",
+                    "visitTime",
+                    "diameter",
+                    "lesionType",
+                    "baselineTimepoint")))
             self$add(jmvcore::Preformatted$new(
                 options=options,
                 name="notices",
@@ -281,18 +310,15 @@ waterfallrecistResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
                     list(
                         `name`="diameter", 
                         `title`="Diameter (mm)", 
-                        `type`="number", 
-                        `format`="zto,pvalue"),
+                        `type`="number"),
                     list(
                         `name`="changeFromBaseline", 
                         `title`="Change from Baseline (mm)", 
-                        `type`="number", 
-                        `format`="zto,pvalue"),
+                        `type`="number"),
                     list(
                         `name`="percentChange", 
                         `title`="% Change", 
-                        `type`="number", 
-                        `format`="zto,pvalue"))))
+                        `type`="number"))))
             self$add(jmvcore::Table$new(
                 options=options,
                 name="targetSumTable",
@@ -322,23 +348,27 @@ waterfallrecistResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
                     list(
                         `name`="baselineSum", 
                         `title`="Baseline Sum (mm)", 
-                        `type`="number", 
-                        `format`="zto,pvalue"),
+                        `type`="number"),
                     list(
                         `name`="currentSum", 
                         `title`="Current Sum (mm)", 
-                        `type`="number", 
-                        `format`="zto,pvalue"),
+                        `type`="number"),
                     list(
                         `name`="absoluteChange", 
                         `title`="Absolute \\u0394 (mm)", 
-                        `type`="number", 
-                        `format`="zto,pvalue"),
+                        `type`="number"),
                     list(
                         `name`="percentChange", 
                         `title`="% Change", 
-                        `type`="number", 
-                        `format`="zto,pvalue"),
+                        `type`="number"),
+                    list(
+                        `name`="nadirSum", 
+                        `title`="Nadir Sum (mm)", 
+                        `type`="number"),
+                    list(
+                        `name`="percentChangeFromNadir", 
+                        `title`="% Change from Nadir", 
+                        `type`="number"),
                     list(
                         `name`="targetResponse", 
                         `title`="Target Response", 
@@ -377,13 +407,11 @@ waterfallrecistResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
                     list(
                         `name`="timeToResponse", 
                         `title`="Time to Response", 
-                        `type`="number", 
-                        `format`="zto,pvalue"),
+                        `type`="number"),
                     list(
                         `name`="durationOfResponse", 
                         `title`="Duration of Response", 
-                        `type`="number", 
-                        `format`="zto,pvalue"),
+                        `type`="number"),
                     list(
                         `name`="progressionOccurred", 
                         `title`="Progression", 
@@ -468,8 +496,7 @@ waterfallrecistResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
                                 list(
                                     `name`="confirmedPercent", 
                                     `title`="Confirmed (%)", 
-                                    `type`="number", 
-                                    `format`="zto,pvalue"),
+                                    `type`="number"),
                                 list(
                                     `name`="unconfirmed", 
                                     `title`="Unconfirmed (n)", 
@@ -477,12 +504,11 @@ waterfallrecistResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
                                 list(
                                     `name`="unconfirmedPercent", 
                                     `title`="Unconfirmed (%)", 
-                                    `type`="number", 
-                                    `format`="zto,pvalue"))))}))$new(options=options))
+                                    `type`="number"))))}))$new(options=options))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="complianceReport",
-                title="RECIST v1.1 Compliance Audit",
+                title="RECIST v1.1 Criteria Applied",
                 visible="(showRecistComplianceReport)",
                 clearWith=list(
                     "patientID",
@@ -544,13 +570,25 @@ waterfallrecistBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
                 weightsSupport = 'none')
         }))
 
-#' RECIST v1.1 Compliant Response Analysis
+#' Treatment Response: Lesion-Level RECIST v1.1 Algorithm
 #'
-#' Creates RECIST v1.1 compliant waterfall and spider plots for tumor response 
-#' analysis. Implements full RECIST v1.1 protocol including target lesion 
-#' summation, new lesion detection, non-target progression assessment, and 
-#' response confirmation requirements. REGULATORY-READY: Suitable for clinical 
-#' trial endpoints and regulatory submissions.
+#' Use this when your data are lesion-level: one row per lesion per visit, 
+#' giving patient, lesion, visit time and diameter. Adding a lesion type 
+#' column (Target / Non-Target / New) and a new-lesion flag enables new-lesion 
+#' and non-target assessment; an organ column enforces the limit of two target 
+#' lesions per organ. It applies the RECIST v1.1 algorithm: it sums target 
+#' lesion diameters, measures progression against the smallest sum recorded so 
+#' far (nadir) including the 5 mm absolute-increase rule, treats any new 
+#' lesion as progression, applies confirmation of CR and PR at 4 weeks or 
+#' more, and reports best overall response truncated at progression. This is a 
+#' new implementation (version 0.0.1) that has not been checked against a 
+#' reference RECIST tool or a regulatory dataset, so it is a research tool and 
+#' not a validated or submission-ready result. Non-target progression is 
+#' decided here by lesion count rather than the radiologist's judgement of 
+#' unequivocal progression that RECIST intends. Check response assignments 
+#' against the source imaging before they are recorded or reported. For 
+#' response rates with confidence intervals, group comparison and a copy-ready 
+#' summary, the patient-level analysis has the fuller reporting.
 #' 
 #' @param data The data as a data frame with LESION-LEVEL observations (one
 #'   row per lesion per timepoint).
@@ -572,6 +610,18 @@ waterfallrecistBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
 #' @param isNewLesion Binary indicator (0 = baseline/existing, 1 = new lesion
 #'   appearing after baseline). ANY new lesion automatically triggers
 #'   Progressive Disease (PD) per RECIST v1.1.
+#' @param nonTargetResponseVar Optional per-visit non-target lesion assessment
+#'   recorded by the reporting radiologist. Accepted values are CR,
+#'   Non-CR/Non-PD, PD and NE (case and punctuation are ignored, so
+#'   "non-cr/non-pd", "NonCR NonPD" and "Non CR Non PD" all match). When
+#'   supplied it OVERRIDES the computed non-target status for that patient and
+#'   visit. RECIST v1.1 defines non-target progression as "unequivocal
+#'   progression" of existing non-target disease, which is a qualitative
+#'   radiological judgement that cannot be derived from measurements. Without
+#'   this variable the analysis falls back to a lesion-count heuristic (an
+#'   increase of two or more non-target lesions is called progression), which is
+#'   NOT the RECIST criterion and may both miss and over-call progression.
+#'   Supplying this variable is the RECIST-correct route.
 #' @param baselineTimepoint Value of visitTime representing baseline (default
 #'   = 0). All lesions at this timepoint establish the baseline sum.
 #' @param confirmationInterval Minimum time interval (weeks) for response
@@ -596,6 +646,7 @@ waterfallrecistBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
 #' @param colorScheme Color scheme for plots.
 #' @return A results object containing:
 #' \tabular{llllll}{
+#'   \code{results$instructions} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$notices} \tab \tab \tab \tab \tab a preformatted \cr
 #'   \code{results$lesionTable} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$targetSumTable} \tab \tab \tab \tab \tab a table \cr
@@ -617,13 +668,14 @@ waterfallrecistBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
 #' @export
 waterfallrecist <- function(
     data,
-    patientID,
-    lesionID,
-    visitTime,
+    patientID = NULL,
+    lesionID = NULL,
+    visitTime = NULL,
     lesionType = NULL,
     location = NULL,
-    diameter,
+    diameter = NULL,
     isNewLesion = NULL,
+    nonTargetResponseVar = NULL,
     baselineTimepoint = 0,
     confirmationInterval = 4,
     maxTargetLesions = 5,
@@ -646,6 +698,7 @@ waterfallrecist <- function(
     if ( ! missing(location)) location <- jmvcore::resolveQuo(jmvcore::enquo(location))
     if ( ! missing(diameter)) diameter <- jmvcore::resolveQuo(jmvcore::enquo(diameter))
     if ( ! missing(isNewLesion)) isNewLesion <- jmvcore::resolveQuo(jmvcore::enquo(isNewLesion))
+    if ( ! missing(nonTargetResponseVar)) nonTargetResponseVar <- jmvcore::resolveQuo(jmvcore::enquo(nonTargetResponseVar))
     if (missing(data))
         data <- jmvcore::marshalData(
             parent.frame(),
@@ -655,7 +708,8 @@ waterfallrecist <- function(
             `if`( ! missing(lesionType), lesionType, NULL),
             `if`( ! missing(location), location, NULL),
             `if`( ! missing(diameter), diameter, NULL),
-            `if`( ! missing(isNewLesion), isNewLesion, NULL))
+            `if`( ! missing(isNewLesion), isNewLesion, NULL),
+            `if`( ! missing(nonTargetResponseVar), nonTargetResponseVar, NULL))
 
     for (v in lesionType) if (v %in% names(data)) data[[v]] <- as.factor(data[[v]])
     for (v in location) if (v %in% names(data)) data[[v]] <- as.factor(data[[v]])
@@ -668,6 +722,7 @@ waterfallrecist <- function(
         location = location,
         diameter = diameter,
         isNewLesion = isNewLesion,
+        nonTargetResponseVar = nonTargetResponseVar,
         baselineTimepoint = baselineTimepoint,
         confirmationInterval = confirmationInterval,
         maxTargetLesions = maxTargetLesions,

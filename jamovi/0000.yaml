@@ -1,12 +1,12 @@
 ---
 title: Common Analysis for Clinicopathological Research
 name: ClinicoPath
-version: 1.0.2
+version: 1.0.3
 jms: '1.0'
 authors:
   - Serdar Balci
 maintainer: Serdar Balci <serdarbalci@serdarbalci.com>
-date: '2026-08-03'
+date: '2026-08-04'
 type: R
 description: >-
   ClinicoPath help researchers to generate natural language summaries of their
@@ -127,16 +127,30 @@ analyses:
     description: Function for making Cross Tables with multiple table styles.
     ribbon: analyses
     category: analyses
-  - title: Treatment Response Analysis
+  - title: 'Treatment Response: Patient-Level Burden'
     name: waterfall
     ns: ClinicoPath
-    menuGroup: OncoPath
+    menuGroup: OncoPathT
     menuSubgroup: Patient Follow-Up Plots
-    menuTitle: Treatment Response Analysis
-    description: >-
-      Creates waterfall and spider plots to analyze tumor response data
-      following RECIST criteria.
-    menuSubtitle: Waterfall Plot, Spider Plot
+    menuTitle: 'Treatment Response: Patient-Level Burden'
+    description: >
+      Use this when you have one tumour burden number per patient: either a
+      percent change from baseline you have already calculated (one row per
+      patient), or a single measurement recorded at each visit (one row per
+      patient per visit). It draws waterfall and spider plots, assigns each
+      patient a best response from their largest shrinkage from baseline, and
+      reports ORR and DCR with exact binomial confidence intervals, group
+      comparison, time to response and duration of response. When a time
+      variable is supplied, progression is measured against the patient's
+      smallest recorded burden (nadir), not against baseline. Categories are
+      named CR, PR, SD and PD and the thresholds are adapted from RECIST v1.1,
+      but this is NOT a RECIST v1.1 implementation: because it never sees
+      individual lesions it cannot sum target lesions, detect a new lesion, or
+      judge non-target progression, and it cannot apply the 4-week confirmation
+      rule itself (you may supply your own confirmation column). If your data
+      list each lesion separately, the lesion-level analysis applies the RECIST
+      v1.1 algorithm to them.
+    menuSubtitle: One burden value per patient or visit
     ribbon: analyses
     category: analyses
   - title: Adverse Events Butterfly Plot
@@ -1244,7 +1258,7 @@ analyses:
   - title: Outcome Organizer for Survival Analysis
     name: outcomeorganizer
     ns: ClinicoPath
-    menuGroup: SurvivalT
+    menuGroup: Survival
     menuTitle: Outcome Organizer for Survival Analysis
     menuSubgroup: Data Preparation
     menuSubtitle: Comprehensive Outcome Preparation for Survival Analysis
@@ -5746,20 +5760,33 @@ analyses:
     menuGroup: ExplorationD
     menuSubgroup: Data Preparation
     menuTitle: Recoding
-  - title: RECIST v1.1 Compliant Response Analysis
+  - title: 'Treatment Response: Lesion-Level RECIST v1.1 Algorithm'
     name: waterfallrecist
     ns: ClinicoPath
     category: analyses
     menuGroup: OncoPathT
     menuSubgroup: Patient Follow-Up Plots
-    menuTitle: RECIST v1.1 Compliant Response Analysis
-    menuSubtitle: Full RECIST v1.1 Waterfall Plot
+    menuTitle: 'Treatment Response: Lesion-Level RECIST v1.1 Algorithm'
+    menuSubtitle: One row per lesion per visit
     description: >
-      Creates RECIST v1.1 compliant waterfall and spider plots for tumor
-      response analysis. Implements full RECIST v1.1 protocol including target
-      lesion summation, new lesion detection, non-target progression assessment,
-      and response confirmation requirements. REGULATORY-READY: Suitable for
-      clinical trial endpoints and regulatory submissions.
+      Use this when your data are lesion-level: one row per lesion per visit,
+      giving patient, lesion, visit time and diameter. Adding a lesion type
+      column (Target / Non-Target / New) and a new-lesion flag enables
+      new-lesion and non-target assessment; an organ column enforces the limit
+      of two target lesions per organ. It applies the RECIST v1.1 algorithm: it
+      sums target lesion diameters, measures progression against the smallest
+      sum recorded so far (nadir) including the 5 mm absolute-increase rule,
+      treats any new lesion as progression, applies confirmation of CR and PR at
+      4 weeks or more, and reports best overall response truncated at
+      progression. This is a new implementation (version 0.0.1) that has not
+      been checked against a reference RECIST tool or a regulatory dataset, so
+      it is a research tool and not a validated or submission-ready result.
+      Non-target progression is decided here by lesion count rather than the
+      radiologist's judgement of unequivocal progression that RECIST intends.
+      Check response assignments against the source imaging before they are
+      recorded or reported. For response rates with confidence intervals, group
+      comparison and a copy-ready summary, the patient-level analysis has the
+      fuller reporting.
   - title: Date/DateTime Validator
     name: datevalidator
     ns: ClinicoPath

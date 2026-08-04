@@ -181,6 +181,11 @@ children:
           - type: TextBox
             name: simulation_runs
             format: number
+            enable: (run_simulation_validation)
+          - type: TextBox
+            name: simulation_seed
+            format: number
+            enable: (run_simulation_validation)
 
   - type: CollapseBox
     label: Clinical-Friendly Output Options

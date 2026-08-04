@@ -259,8 +259,11 @@ test_that("Different distributions produce different sample sizes", {
 # =============================================================================
 
 cat("\nsurvivalPower distribution tests completed.\n")
-cat("\nTest Coverage:\n")
-cat("- Weibull distribution (6 tests): Shape validation, decreasing/increasing hazards\n")
-cat("- Log-normal distribution (3 tests): Sample size, power, variability\n")
-cat("- Distribution comparison (1 test): Verify different distributions produce different results\n")
-cat("\nTotal: 10 comprehensive distribution tests\n")
+cat("\nTest Coverage (smoke tests only):\n")
+cat("- These 10 tests assert that a result object is returned; they do NOT check\n")
+cat("  any computed value. Non-exponential distributions are blocked by\n")
+cat("  .validate_inputs() in this release, so the Weibull and log-normal cases\n")
+cat("  below exercise the refusal path, not a sample-size calculation.\n")
+cat("- Numeric correctness of the distribution parameters is covered in\n")
+cat("  test-survivalPower-release-review.R (checked against stats::qweibull).\n")
+cat("- The exponential/gate behaviour is covered in test-survivalPower-simulation.R.\n")

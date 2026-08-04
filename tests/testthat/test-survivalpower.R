@@ -27,7 +27,6 @@ test_that("survivalPower function exists and basic functionality works", {
   # Test with minimal valid parameters for log-rank test
   expect_no_error({
     result <- survivalPower(
-      data = data.frame(),
       analysis_type = "sample_size",
       test_type = "log_rank",
       control_median_survival = 12,
@@ -46,7 +45,6 @@ test_that("Log-rank test: Sample size calculation works", {
 
   # Test sample size calculation with log-rank test
   result <- survivalPower(
-    data = data.frame(),
     analysis_type = "sample_size",
     test_type = "log_rank",
     control_median_survival = 12,  # 12 months control median
@@ -68,7 +66,6 @@ test_that("Log-rank test: Power calculation works", {
 
   # Test power calculation with given sample size
   result <- survivalPower(
-    data = data.frame(),
     analysis_type = "power",
     test_type = "log_rank",
     control_median_survival = 12,
@@ -89,7 +86,6 @@ test_that("Log-rank test: Effect size calculation works", {
 
   # Test detectable effect size calculation
   result <- survivalPower(
-    data = data.frame(),
     analysis_type = "effect_size",
     test_type = "log_rank",
     control_median_survival = 12,
@@ -110,7 +106,6 @@ test_that("Log-rank test: Duration calculation works", {
 
   # Test study duration calculation
   result <- survivalPower(
-    data = data.frame(),
     analysis_type = "duration",
     test_type = "log_rank",
     control_median_survival = 12,
@@ -134,7 +129,6 @@ test_that("Cox regression: Sample size calculation works", {
 
   # Test sample size for Cox regression
   result <- survivalPower(
-    data = data.frame(),
     analysis_type = "sample_size",
     test_type = "cox_regression",
     control_median_survival = 12,
@@ -155,7 +149,6 @@ test_that("Cox regression: Power calculation works", {
 
   # Test power for Cox regression
   result <- survivalPower(
-    data = data.frame(),
     analysis_type = "power",
     test_type = "cox_regression",
     control_median_survival = 12,
@@ -180,7 +173,6 @@ test_that("Non-inferiority: Sample size calculation works", {
 
   # Test non-inferiority sample size
   result <- survivalPower(
-    data = data.frame(),
     analysis_type = "sample_size",
     test_type = "non_inferiority",
     control_median_survival = 12,
@@ -202,7 +194,6 @@ test_that("Non-inferiority: Power calculation works", {
 
   # Test non-inferiority power
   result <- survivalPower(
-    data = data.frame(),
     analysis_type = "power",
     test_type = "non_inferiority",
     control_median_survival = 12,
@@ -227,9 +218,7 @@ test_that("Parameter validation: Exponential distribution requirement", {
 
   # Current version only supports exponential distribution
   # Using other distributions should trigger validation error
-  expect_error({
-    result <- survivalPower(
-      data = data.frame(),
+  result <- survivalPower(
       analysis_type = "sample_size",
       test_type = "log_rank",
       control_median_survival = 12,
@@ -238,7 +227,12 @@ test_that("Parameter validation: Exponential distribution requirement", {
       alpha_level = 0.05,
       power_level = 0.80
     )
-  })
+
+  # jamovi analyses surface an unsupported configuration as an ERROR
+  # notice with no computed result; throwing would break the GUI.
+  expect_match(as.character(result$notices$content), "Distribution Not Supported")
+  expect_true(is.na(result$power_summary$asDF$calculated_value[1]))
+
 })
 
 test_that("Parameter validation: Effect size bounds", {
@@ -247,7 +241,6 @@ test_that("Parameter validation: Effect size bounds", {
   # Effect size must be > 0
   expect_error({
     result <- survivalPower(
-      data = data.frame(),
       analysis_type = "sample_size",
       test_type = "log_rank",
       control_median_survival = 12,
@@ -257,18 +250,31 @@ test_that("Parameter validation: Effect size bounds", {
     )
   })
 
-  # Extremely large effect size should be flagged
-  expect_warning({
-    result <- survivalPower(
-      data = data.frame(),
+  # Out of the declared 0.1-5.0 range: jmvcore rejects it before the analysis runs
+  expect_error(
+    survivalPower(
       analysis_type = "sample_size",
       test_type = "log_rank",
       control_median_survival = 12,
-      effect_size = 10,  # Unrealistic
+      effect_size = 10,
+      alpha_level = 0.05,
+      power_level = 0.80
+    ),
+    regexp = "between 0.1 and 5"
+  )
+
+  # In range but clinically implausible: flagged via notice, still computed
+  {
+    result <- survivalPower(
+      analysis_type = "sample_size",
+      test_type = "log_rank",
+      control_median_survival = 12,
+      effect_size = 4,
       alpha_level = 0.05,
       power_level = 0.80
     )
-  })
+    expect_match(as.character(result$notices$content), "Extreme Hazard Ratio")
+  }
 })
 
 test_that("Parameter validation: Alpha level bounds", {
@@ -277,7 +283,6 @@ test_that("Parameter validation: Alpha level bounds", {
   # Alpha must be between 0 and 1
   expect_error({
     result <- survivalPower(
-      data = data.frame(),
       analysis_type = "sample_size",
       test_type = "log_rank",
       control_median_survival = 12,
@@ -294,7 +299,6 @@ test_that("Parameter validation: Power level bounds", {
   # Power must be between 0 and 1
   expect_error({
     result <- survivalPower(
-      data = data.frame(),
       analysis_type = "sample_size",
       test_type = "log_rank",
       control_median_survival = 12,
@@ -315,7 +319,6 @@ test_that("Allocation ratio: Unequal allocation (2:1) works", {
 
   # Test with 2:1 allocation ratio
   result <- survivalPower(
-    data = data.frame(),
     analysis_type = "sample_size",
     test_type = "log_rank",
     control_median_survival = 12,
@@ -337,7 +340,6 @@ test_that("Allocation ratio: Unequal allocation (1:2) works", {
 
   # Test with 1:2 allocation ratio (more in experimental)
   result <- survivalPower(
-    data = data.frame(),
     analysis_type = "sample_size",
     test_type = "log_rank",
     control_median_survival = 12,
@@ -363,7 +365,6 @@ test_that("Dropout handling: Annual dropout rate accounted for", {
 
   # Test with dropout rate
   result <- survivalPower(
-    data = data.frame(),
     analysis_type = "sample_size",
     test_type = "log_rank",
     control_median_survival = 12,
@@ -387,9 +388,7 @@ test_that("KNOWN LIMITATION: Competing risks test not implemented", {
   skip_if_not_available()
 
   # This test is explicitly marked as non-functional in validation
-  expect_error({
-    result <- survivalPower(
-      data = data.frame(),
+  result <- survivalPower(
       analysis_type = "sample_size",
       test_type = "competing_risks",  # Not implemented
       control_median_survival = 12,
@@ -397,16 +396,19 @@ test_that("KNOWN LIMITATION: Competing risks test not implemented", {
       alpha_level = 0.05,
       power_level = 0.80
     )
-  }, regexp = "temporarily unavailable")
+
+  # jamovi analyses surface an unsupported configuration as an ERROR
+  # notice with no computed result; throwing would break the GUI.
+  expect_match(as.character(result$notices$content), "temporarily unavailable")
+  expect_true(is.na(result$power_summary$asDF$calculated_value[1]))
+
 })
 
 test_that("KNOWN LIMITATION: RMST test not implemented", {
   skip_if_not_available()
 
   # This test is explicitly marked as non-functional
-  expect_error({
-    result <- survivalPower(
-      data = data.frame(),
+  result <- survivalPower(
       analysis_type = "sample_size",
       test_type = "rmst_test",  # Not implemented
       control_median_survival = 12,
@@ -414,16 +416,19 @@ test_that("KNOWN LIMITATION: RMST test not implemented", {
       alpha_level = 0.05,
       power_level = 0.80
     )
-  }, regexp = "temporarily unavailable")
+
+  # jamovi analyses surface an unsupported configuration as an ERROR
+  # notice with no computed result; throwing would break the GUI.
+  expect_match(as.character(result$notices$content), "temporarily unavailable")
+  expect_true(is.na(result$power_summary$asDF$calculated_value[1]))
+
 })
 
 test_that("KNOWN LIMITATION: SNP survival test not implemented", {
   skip_if_not_available()
 
   # This test is explicitly marked as non-functional
-  expect_error({
-    result <- survivalPower(
-      data = data.frame(),
+  result <- survivalPower(
       analysis_type = "sample_size",
       test_type = "snp_survival",  # Not implemented
       control_median_survival = 12,
@@ -431,16 +436,19 @@ test_that("KNOWN LIMITATION: SNP survival test not implemented", {
       alpha_level = 0.05,
       power_level = 0.80
     )
-  }, regexp = "temporarily unavailable")
+
+  # jamovi analyses surface an unsupported configuration as an ERROR
+  # notice with no computed result; throwing would break the GUI.
+  expect_match(as.character(result$notices$content), "temporarily unavailable")
+  expect_true(is.na(result$power_summary$asDF$calculated_value[1]))
+
 })
 
 test_that("KNOWN LIMITATION: Weighted log-rank test not implemented", {
   skip_if_not_available()
 
   # This test is explicitly marked as non-functional
-  expect_error({
-    result <- survivalPower(
-      data = data.frame(),
+  result <- survivalPower(
       analysis_type = "sample_size",
       test_type = "weighted_log_rank",  # Not implemented
       control_median_survival = 12,
@@ -448,7 +456,12 @@ test_that("KNOWN LIMITATION: Weighted log-rank test not implemented", {
       alpha_level = 0.05,
       power_level = 0.80
     )
-  }, regexp = "temporarily unavailable")
+
+  # jamovi analyses surface an unsupported configuration as an ERROR
+  # notice with no computed result; throwing would break the GUI.
+  expect_match(as.character(result$notices$content), "temporarily unavailable")
+  expect_true(is.na(result$power_summary$asDF$calculated_value[1]))
+
 })
 
 # =============================================================================
@@ -461,7 +474,6 @@ test_that("Edge case: Very high power (0.95) works", {
 
   # Test with 95% power
   result <- survivalPower(
-    data = data.frame(),
     analysis_type = "sample_size",
     test_type = "log_rank",
     control_median_survival = 12,
@@ -482,7 +494,6 @@ test_that("Edge case: Small effect size (HR=0.90) requires large sample", {
 
   # Small effect size
   result <- survivalPower(
-    data = data.frame(),
     analysis_type = "sample_size",
     test_type = "log_rank",
     control_median_survival = 12,
@@ -503,7 +514,6 @@ test_that("Edge case: Large effect size (HR=0.50) requires small sample", {
 
   # Large effect size
   result <- survivalPower(
-    data = data.frame(),
     analysis_type = "sample_size",
     test_type = "log_rank",
     control_median_survival = 12,

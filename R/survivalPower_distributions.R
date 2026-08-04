@@ -246,16 +246,21 @@
     event_time_treatment <- rexp(n_treatment, rate = lambda_treatment)
     
   } else if (distribution == "weibull") {
-    lambda_control <- params$lambda
+    # S(t) = exp(-lambda * t^shape); under PH the shape is shared and only the
+    # scale moves, so lambda_treatment = lambda_control * hr. Name the elements
+    # in full: `params$lambda` would be an ambiguous partial match against
+    # lambda_control/lambda_treatment and silently resolve to NULL.
+    lambda_control <- params$lambda_control
     shape <- params$shape
-    lambda_treatment <- lambda_control * hr^(1 / shape)
-    
+    lambda_treatment <- if (!is.null(params$lambda_treatment))
+      params$lambda_treatment else lambda_control * hr
+
     # Weibull random generation
     event_time_control <- (-log(runif(n_control)) / lambda_control)^(1 / shape)
     event_time_treatment <- (-log(runif(n_treatment)) / lambda_treatment)^(1 / shape)
-    
-  } else if (distribution == "lognormal") {
-    mu_control <- params$mu
+
+  } else if (distribution %in% c("lognormal", "log_normal")) {
+    mu_control <- params$mu_control
     sigma <- params$sigma
     # Approximate HR effect on log-normal (not exact under PH)
     mu_treatment <- mu_control - log(hr)

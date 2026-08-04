@@ -31,28 +31,56 @@ test_that("Simulation validation integrates correctly with sample size calculati
   expect_true(nchar(sim_row$agreement) > 0)
 })
 
-test_that("Simulation validation works with Weibull distribution", {
+test_that("Non-exponential distributions are refused, not silently mis-computed", {
   skip_if_not_installed("gsDesign")
   skip_if_not_installed("survival")
-  
+
+  # The event-probability and sample-size formulas assume a constant hazard, so
+  # this release blocks every other distribution (.validate_inputs). A blocked
+  # run must produce no number at all AND say why -- returning an exponential
+  # answer under a Weibull label would be the dangerous failure mode.
+  for (dist in c("weibull", "log_normal", "piecewise_exponential")) {
+    result <- survivalPower(
+      analysis_type = "sample_size",
+      test_type = "log_rank",
+      survival_distribution = dist,
+      weibull_shape = 1.5,
+      control_median_survival = 12,
+      effect_size = 0.75,
+      alpha_level = 0.05,
+      power_level = 0.80,
+      accrual_period = 24,
+      follow_up_period = 12,
+      run_simulation_validation = TRUE,
+      simulation_runs = 1000
+    )
+
+    expect_true(is.na(result$power_summary$asDF$calculated_value[1]),
+                info = paste(dist, "must not report a sample size"))
+    expect_equal(result$simulation_validation_table$rowCount, 0)
+    expect_match(as.character(result$notices$content), "Distribution Not Supported",
+                 info = paste(dist, "must explain why it was blocked"))
+  }
+})
+
+test_that("Exponential remains selectable and unaffected by the distribution gate", {
+  skip_if_not_installed("gsDesign")
+
   result <- survivalPower(
     analysis_type = "sample_size",
     test_type = "log_rank",
-    survival_distribution = "weibull",
-    weibull_shape = 1.5,
+    survival_distribution = "exponential",
     control_median_survival = 12,
     effect_size = 0.75,
     alpha_level = 0.05,
     power_level = 0.80,
     accrual_period = 24,
-    follow_up_period = 12,
-    run_simulation_validation = TRUE,
-    simulation_runs = 1000
+    follow_up_period = 12
   )
-  
-  expect_true(result$simulation_validation_table$rowCount > 0)
-  sim_row <- result$simulation_validation_table$asDF[1, ]
-  expect_equal(sim_row$metric, "Statistical Power")
+
+  expect_match(result$power_summary$asDF$calculated_value[1], "Total Sample Size")
+  expect_false(grepl("Distribution Not Supported",
+                     as.character(result$notices$content)))
 })
 
 test_that("Simulation validation works with power calculation", {

@@ -27,7 +27,7 @@ items:
          - timeVar
          - inputType
          - enableGuidedMode
-      visible: (!enableGuidedMode)
+      visible: (enableGuidedMode:FALSE)
 
     - name: todo2
       title: Validation Messages
@@ -38,7 +38,7 @@ items:
          - timeVar
          - inputType
          - enableGuidedMode
-      visible: (!enableGuidedMode)
+      visible: (enableGuidedMode:FALSE)
 
     - name: clinicalSummary
       title: Clinical Summary
@@ -61,10 +61,10 @@ items:
          - timeVar
          - inputType
          - enableGuidedMode
-      visible: (!enableGuidedMode)
+      visible: (enableGuidedMode:FALSE)
 
     - name: summaryTable
-      title: Response Categories Based on RECIST v1.1 Criteria
+      title: Response Categories (threshold-based, not full RECIST v1.1)
       type: Table
       rows: 0
       columns:
@@ -171,8 +171,16 @@ items:
         - confirmationVar
         - ongoingVar
         - responseCategoryVar
+        # .waterfallplot reads these too; without them the rendered image does
+        # not refresh when the user changes them.
+        - barAlpha
+        - barWidth
+        - minResponseForLabel
+        - seed
         - groupVar
         - inputType
+        # timeVar changes how percent change is derived, so it changes the bars
+        - timeVar
 
     - name: copyReadyReport
       title: Copy-Ready Report Sentences

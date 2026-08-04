@@ -2,17 +2,18 @@
 % Please edit documentation in R/waterfallrecist.h.R
 \name{waterfallrecist}
 \alias{waterfallrecist}
-\title{RECIST v1.1 Compliant Response Analysis}
+\title{Treatment Response: Lesion-Level RECIST v1.1 Algorithm}
 \usage{
 waterfallrecist(
   data,
-  patientID,
-  lesionID,
-  visitTime,
+  patientID = NULL,
+  lesionID = NULL,
+  visitTime = NULL,
   lesionType = NULL,
   location = NULL,
-  diameter,
+  diameter = NULL,
   isNewLesion = NULL,
+  nonTargetResponseVar = NULL,
   baselineTimepoint = 0,
   confirmationInterval = 4,
   maxTargetLesions = 5,
@@ -55,6 +56,19 @@ be NA (qualitative assessment only).}
 appearing after baseline). ANY new lesion automatically triggers
 Progressive Disease (PD) per RECIST v1.1.}
 
+\item{nonTargetResponseVar}{Optional per-visit non-target lesion assessment
+recorded by the reporting radiologist. Accepted values are CR,
+Non-CR/Non-PD, PD and NE (case and punctuation are ignored, so
+"non-cr/non-pd", "NonCR NonPD" and "Non CR Non PD" all match). When
+supplied it OVERRIDES the computed non-target status for that patient and
+visit. RECIST v1.1 defines non-target progression as "unequivocal
+progression" of existing non-target disease, which is a qualitative
+radiological judgement that cannot be derived from measurements. Without
+this variable the analysis falls back to a lesion-count heuristic (an
+increase of two or more non-target lesions is called progression), which is
+NOT the RECIST criterion and may both miss and over-call progression.
+Supplying this variable is the RECIST-correct route.}
+
 \item{baselineTimepoint}{Value of visitTime representing baseline (default
 = 0). All lesions at this timepoint establish the baseline sum.}
 
@@ -91,6 +105,7 @@ v1.1 compliance (target lesion limits, confirmation, new lesions).}
 \value{
 A results object containing:
 \tabular{llllll}{
+\code{results$instructions} \tab \tab \tab \tab \tab a html \cr
 \code{results$notices} \tab \tab \tab \tab \tab a preformatted \cr
 \code{results$lesionTable} \tab \tab \tab \tab \tab a table \cr
 \code{results$targetSumTable} \tab \tab \tab \tab \tab a table \cr
@@ -110,9 +125,21 @@ Tables can be converted to data frames with \code{asDF} or \code{\link{as.data.f
 \code{as.data.frame(results$lesionTable)}
 }
 \description{
-Creates RECIST v1.1 compliant waterfall and spider plots for tumor response
-analysis. Implements full RECIST v1.1 protocol including target lesion
-summation, new lesion detection, non-target progression assessment, and
-response confirmation requirements. REGULATORY-READY: Suitable for clinical
-trial endpoints and regulatory submissions.
+Use this when your data are lesion-level: one row per lesion per visit,
+giving patient, lesion, visit time and diameter. Adding a lesion type
+column (Target / Non-Target / New) and a new-lesion flag enables new-lesion
+and non-target assessment; an organ column enforces the limit of two target
+lesions per organ. It applies the RECIST v1.1 algorithm: it sums target
+lesion diameters, measures progression against the smallest sum recorded so
+far (nadir) including the 5 mm absolute-increase rule, treats any new
+lesion as progression, applies confirmation of CR and PR at 4 weeks or
+more, and reports best overall response truncated at progression. This is a
+new implementation (version 0.0.1) that has not been checked against a
+reference RECIST tool or a regulatory dataset, so it is a research tool and
+not a validated or submission-ready result. Non-target progression is
+decided here by lesion count rather than the radiologist's judgement of
+unequivocal progression that RECIST intends. Check response assignments
+against the source imaging before they are recorded or reported. For
+response rates with confidence intervals, group comparison and a copy-ready
+summary, the patient-level analysis has the fuller reporting.
 }

@@ -37,14 +37,14 @@
 # ==============================================
 
 
-new_version: "1.0.2"
-new_date: "2026-08-03"
+new_version: "1.0.3"
+new_date: "2026-08-04"
 quick: false
 TEST: false
 jjstatsplot: false
-jsurvival: true
+jsurvival: false
 ClinicoPathDescriptives: false
-OncoPath: false
+OncoPath: true
 meddecide: false
 
 
@@ -191,6 +191,9 @@ modules:
     directory: "/Users/serdarbalci/Documents/GitHub/OncoPath"
     r_files:
       - "utils.R"
+      # Shared RECIST v1.1 assessment engine used by the lesion-level response
+      # analyses. Must ship wherever waterfallrecist ships.
+      - "recist_engine.R"
       # ihc_utilities.R intentionally NOT shipped to production OncoPath: its
       # consumers (ihcimmune/ihcbasic/ihcadvanced/ihcdiagnostic) are dev-routed to
       # menuGroup OncoPathD/T, and the one production analysis here
@@ -235,6 +238,7 @@ modules:
       - "stagemigration-validation.R"
       - "stagemigration-discrimination.R"
       - "stagemigration-competing-risks.R"
+      - "recist_engine.R"
     vignette_files: []
     test_files: []
     required_directories:

@@ -24,7 +24,7 @@ test_that("waterfall handles groupVar option", {
   )
 
   expect_no_error(result)
-  expect_s3_class(result, "waterfallClass")
+  expect_s3_class(result, "waterfallResults")
 })
 
 test_that("waterfall handles factor vs character groupVar", {
@@ -71,7 +71,7 @@ test_that("waterfall handles many groups", {
   )
 
   # Should work but may warn about too many groups
-  expect_s3_class(result, "waterfallClass")
+  expect_s3_class(result, "waterfallResults")
 })
 
 # ═══════════════════════════════════════════════════════════
@@ -336,10 +336,8 @@ test_that("waterfall generates both waterfall and spider plots", {
   expect_no_error(result)
 
   # Both plots should be present
-  expect_true("waterfallPlot" %in% names(result$results) ||
-              "plot" %in% names(result$results))
-  expect_true("spiderPlot" %in% names(result$results) ||
-              "spider" %in% names(result$results))
+  expect_true(!is.null(result$waterfallplot))
+  expect_true(!is.null(result$spiderplot))
 })
 
 # ═══════════════════════════════════════════════════════════

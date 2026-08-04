@@ -41,6 +41,7 @@ survivalPower(
   sensitivity_analysis = FALSE,
   run_simulation_validation = FALSE,
   simulation_runs = 10000,
+  simulation_seed = 42,
   show_summary = FALSE,
   show_explanations = FALSE,
   show_glossary = FALSE,
@@ -75,7 +76,11 @@ effect size, or duration}
 
 \item{control_median_survival}{Expected median survival in control group}
 
-\item{survival_distribution}{Assumed survival distribution}
+\item{survival_distribution}{Assumed survival distribution. Only the
+exponential distribution is supported in this release; the
+event-probability and sample-size formulas assume a constant hazard.
+Selecting any other option stops the analysis with an explanatory message
+rather than returning a number the formulas cannot justify.}
 
 \item{weibull_shape}{Shape parameter for Weibull distribution}
 
@@ -125,6 +130,10 @@ using Monte Carlo simulation. Currently validated for exponential log-rank
 settings only. May take 10-60 seconds depending on simulation_runs setting.}
 
 \item{simulation_runs}{Number of simulation runs for complex calculations}
+
+\item{simulation_seed}{Random seed for the Monte Carlo validation, so the
+simulated power is reproducible across runs. Change it to inspect Monte
+Carlo variability.}
 
 \item{show_summary}{Display plain-language summary of results}
 

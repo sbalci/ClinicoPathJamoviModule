@@ -47,8 +47,81 @@ waterfallrecistClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                 self$results$notices$setContent(paste(blocks, collapse = "\n\n"))
             },
 
+            # Show the required data shape. This analysis needs lesion-level data,
+            # a layout most users will not have met, and four variables assigned
+            # before anything at all appears -- previously it opened to a blank
+            # screen with no guidance.
+            .renderInstructions = function() {
+                configured <- !is.null(self$options$patientID) &&
+                    !is.null(self$options$lesionID) &&
+                    !is.null(self$options$visitTime) &&
+                    !is.null(self$options$diameter)
+
+                if (configured) {
+                    self$results$instructions$setContent("")
+                    self$results$instructions$setVisible(FALSE)
+                    return()
+                }
+
+                html <- paste0(
+                    "<div style='padding:12px; background-color:#f8fafc; ",
+                    "border-left:4px solid #0369a1; border-radius:4px;'>",
+                    "<h3 style='margin-top:0; color:#0369a1;'>",
+                    .("RECIST v1.1 response analysis from lesion-level data"), "</h3>",
+
+                    "<p>", .("This analysis needs ONE ROW PER LESION PER VISIT. Assign these four variables to begin:"), "</p>",
+                    "<ul>",
+                    "<li><b>", .("Patient ID"), "</b></li>",
+                    "<li><b>", .("Lesion ID"), "</b> &ndash; ",
+                    .("identifies each lesion so it can be followed across visits"), "</li>",
+                    "<li><b>", .("Visit Time"), "</b> &ndash; ",
+                    .("the baseline visit must be present (default: time = 0)"), "</li>",
+                    "<li><b>", .("Diameter"), "</b> &ndash; ",
+                    .("longest diameter in mm; short axis for lymph nodes"), "</li>",
+                    "</ul>",
+
+                    "<p>", .("Optional, and each unlocks a RECIST rule:"), "</p>",
+                    "<ul>",
+                    "<li><b>", .("Lesion Type"), "</b> (Target / Non-Target / New) &ndash; ",
+                    .("enables non-target assessment; without it every lesion is treated as a target lesion"), "</li>",
+                    "<li><b>", .("New Lesion Indicator"), "</b> (Yes/No, 1/0 or TRUE/FALSE) &ndash; ",
+                    .("any new lesion is automatic progression"), "</li>",
+                    "<li><b>", .("Location"), "</b> &ndash; ",
+                    .("organ, used to apply the limit of two target lesions per organ"), "</li>",
+                    "</ul>",
+
+                    "<p><b>", .("Example layout"), "</b></p>",
+                    "<pre style='background:#ffffff; padding:8px; border:1px solid #cbd5e1;'>",
+                    "PatientID  LesionID  VisitTime  LesionType  Location  Diameter  IsNew\n",
+                    "PT1        L1        0          Target      Liver     60        No\n",
+                    "PT1        L2        0          Target      Lung      40        No\n",
+                    "PT1        L1        8          Target      Liver     36        No\n",
+                    "PT1        L2        8          Target      Lung      24        No\n",
+                    "PT1        N1        8          Non-Target  Bone       9        Yes",
+                    "</pre>",
+
+                    "<p style='color:#7c2d12;'><b>", .("Please note:"), "</b> ",
+                    .("this implementation has not been checked against a reference RECIST tool or a regulatory dataset. Treat it as a research tool and confirm response assignments against the source imaging."),
+                    "</p>",
+
+                    "<p>",
+                    .("If you have only one tumour burden value per patient (a percent change, or a single measurement per visit), use the patient-level Treatment Response analysis instead."),
+                    "</p>",
+                    "</div>"
+                )
+
+                self$results$instructions$setContent(html)
+                self$results$instructions$setVisible(TRUE)
+            },
+
             # Initialization ====
             .init = function() {
+                # Render from .init as well as .run: .init runs before jmvcore
+                # prepares the data, so the guidance still appears when no
+                # variables have been assigned yet (which is exactly when it is
+                # needed, and when data preparation cannot succeed).
+                private$.renderInstructions()
+
                 # Initialize output elements
                 if (self$options$showLesionTable) {
                     private$.initLesionTable()
@@ -77,6 +150,12 @@ waterfallrecistClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
 
             # Main Execution ====
             .run = function() {
+                # Show the required data shape until the analysis is configured.
+                # Without this the analysis opened to a completely blank screen,
+                # which is unhelpful for a lesion-level format most users have not
+                # met before and which needs four variables assigned.
+                private$.renderInstructions()
+
                 # Reset notice collection and post the methodology notice
                 private$.noticeList <- list()
                 private$.addNotice("INFO", "RECIST v1.1 Methodology", paste0("RECIST v1.1 protocol per Eisenhauer et al. (2009) Eur J Cancer 45:228-247. Target lesion limits: <=", self$options$maxTargetLesions, " total, <=", self$options$maxLesionsPerOrgan, " per organ. CR/PR confirmation: >=", self$options$confirmationInterval, " weeks. Any new lesion = PD."))
@@ -145,6 +224,11 @@ waterfallrecistClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
 
                 # Step 11 - Analysis completion notice
                 n_patients <- length(unique(best_responses$patientID))
+                if (n_patients == 0) {
+                    private$.addNotice("ERROR", "No Evaluable Patients",
+                        "No patient could be assessed for response. See the messages above.")
+                    return()
+                }
                 n_cr <- sum(best_responses$bestOverallResponse == "CR")
                 n_pr <- sum(best_responses$bestOverallResponse == "PR")
                 orr_pct <- round((n_cr + n_pr) / n_patients * 100, 1)
@@ -265,12 +349,32 @@ waterfallrecistClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                 if (!is.null(self$options$lesionType) && length(self$options$lesionType) > 0) {
                     lesionTypeVar <- private$.resolveVar(self$options$lesionType)
                     if (lesionTypeVar %in% colnames(data_df)) {
-                        lesion_data$lesionType <- as.character(data_df[[lesionTypeVar]])
-                        # Standardize case
-                        lesion_data$lesionType <- tolower(lesion_data$lesionType)
-                        lesion_data$lesionType[lesion_data$lesionType == "target"] <- "Target"
-                        lesion_data$lesionType[lesion_data$lesionType == "nontarget"] <- "NonTarget"
-                        lesion_data$lesionType[lesion_data$lesionType == "new"] <- "New"
+                        raw_type <- as.character(data_df[[lesionTypeVar]])
+                        # Normalise by stripping case, whitespace and separators, so
+                        # "Non-Target", "non target" and "NONTARGET" all resolve.
+                        # Previously only the three exact strings "target",
+                        # "nontarget" and "new" matched after tolower(), so the
+                        # hyphenated spelling used in most datasets fell through
+                        # unchanged and every non-target lesion was silently ignored
+                        # by .assessNonTargetProgression (which filters "NonTarget").
+                        key <- gsub("[^a-z]", "", tolower(trimws(raw_type)))
+                        lesion_data$lesionType <- raw_type
+                        lesion_data$lesionType[key == "target"] <- "Target"
+                        lesion_data$lesionType[key == "nontarget"] <- "NonTarget"
+                        lesion_data$lesionType[key == "new"] <- "New"
+
+                        unknown <- unique(raw_type[!(key %in% c("target", "nontarget", "new")) &
+                                                       !is.na(raw_type) & nzchar(raw_type)])
+                        if (length(unknown) > 0) {
+                            private$.addNotice(
+                                "WARNING", "Unrecognised Lesion Type",
+                                sprintf(paste0("These Lesion Type values were not recognised and ",
+                                               "their lesions are excluded from both the target ",
+                                               "sum and the non-target assessment: %s. Use Target, ",
+                                               "Non-Target or New."),
+                                        paste(utils::head(unknown, 10), collapse = ", "))
+                            )
+                        }
                     } else {
                         lesion_data$lesionType <- "Target" # Default to Target if not specified
                     }
@@ -292,7 +396,34 @@ waterfallrecistClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                 if (!is.null(self$options$isNewLesion) && length(self$options$isNewLesion) > 0) {
                     isNewLesionVar <- private$.resolveVar(self$options$isNewLesion)
                     if (isNewLesionVar %in% colnames(data_df)) {
-                        lesion_data$isNewLesion <- jmvcore::toNumeric(data_df[[isNewLesionVar]])
+                        # jmvcore::toNumeric() on a factor of "Yes"/"No" returns the
+                        # LABELS, not numbers, so `== 1` was never TRUE and a new
+                        # lesion coded that way was never detected -- silently losing
+                        # an automatic PD. Accept the codings people actually use.
+                        raw_new <- data_df[[isNewLesionVar]]
+                        if (is.logical(raw_new)) {
+                            flag <- raw_new
+                        } else {
+                            k <- gsub("[^a-z0-9]", "", tolower(trimws(as.character(raw_new))))
+                            flag <- k %in% c("1", "true", "t", "yes", "y", "new")
+                            unknown <- unique(as.character(raw_new)[
+                                !(k %in% c("0", "1", "true", "false", "t", "f",
+                                           "yes", "no", "y", "n", "new", "")) &
+                                    !is.na(raw_new)])
+                            if (length(unknown) > 0) {
+                                private$.addNotice(
+                                    "WARNING", "Unrecognised New-Lesion Values",
+                                    sprintf(paste0("These New Lesion Indicator values were not ",
+                                                   "recognised and are treated as NOT new: %s. ",
+                                                   "Use 1/0, TRUE/FALSE or Yes/No. Any new lesion ",
+                                                   "is an automatic Progressive Disease, so an ",
+                                                   "unrecognised value can hide a progression."),
+                                            paste(utils::head(unknown, 10), collapse = ", "))
+                                )
+                            }
+                        }
+                        flag[is.na(flag)] <- FALSE
+                        lesion_data$isNewLesion <- as.numeric(flag)
                         # Mark new lesions
                         lesion_data$lesionType[lesion_data$isNewLesion == 1] <- "New"
                     } else {
@@ -300,6 +431,21 @@ waterfallrecistClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                     }
                 } else {
                     lesion_data$isNewLesion <- 0
+                }
+
+                # Optional per-visit non-target assessment supplied by the reporting
+                # radiologist. Carried through as-is; normalised and applied in
+                # .assessNonTargetProgression.
+                ntOpt <- private$.optionOrNull("nonTargetResponseVar")
+                if (!is.null(ntOpt) && length(ntOpt) > 0) {
+                    ntVar <- private$.resolveVar(ntOpt)
+                    if (ntVar %in% colnames(data_df)) {
+                        lesion_data$nonTargetResponse <- as.character(data_df[[ntVar]])
+                    } else {
+                        lesion_data$nonTargetResponse <- NA_character_
+                    }
+                } else {
+                    lesion_data$nonTargetResponse <- NA_character_
                 }
 
                 # Remove rows with missing key values
@@ -323,470 +469,64 @@ waterfallrecistClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                 return(lesion_data)
             },
             .validateTargetLesionSelection = function(lesion_data) {
-                # Filter to baseline target lesions only
-                baseline_targets <- lesion_data[lesion_data$isBaseline == TRUE &
-                    lesion_data$lesionType == "Target", ]
-
-                violations <- character(0)
-                warnings_list <- list()
-
-                # Check each patient
-                patients <- unique(baseline_targets$patientID)
-
-                for (pt in patients) {
-                    pt_targets <- baseline_targets[baseline_targets$patientID == pt, ]
-
-                    # Check 1: Max 5 target lesions per patient
-                    n_targets <- nrow(pt_targets)
-                    if (n_targets > self$options$maxTargetLesions) {
-                        violation_msg <- paste0(
-                            "Patient ", pt, " has ", n_targets, " target lesions ",
-                            "(exceeds RECIST v1.1 limit of ", self$options$maxTargetLesions, ")"
-                        )
-                        violations <- c(violations, violation_msg)
-                    }
-
-                    # Check 2: Max 2 target lesions per organ
-                    if ("location" %in% colnames(pt_targets)) {
-                        location_counts <- table(pt_targets$location)
-                        over_limit <- location_counts > self$options$maxLesionsPerOrgan
-
-                        if (any(over_limit)) {
-                            for (loc in names(location_counts[over_limit])) {
-                                violation_msg <- paste0(
-                                    "Patient ", pt, " has ", location_counts[loc],
-                                    " target lesions in ", loc,
-                                    " (exceeds RECIST v1.1 limit of ", self$options$maxLesionsPerOrgan, " per organ)"
-                                )
-                                violations <- c(violations, violation_msg)
-                            }
-                        }
-                    }
-
-                    # Check 3: Minimum size requirements (10mm non-lymph, 15mm lymph)
-                    # NOTE: This is a simplified check - in practice, lymph node detection would require
-                    # additional metadata. Here we just check for 10mm minimum.
-                    small_lesions <- pt_targets[!is.na(pt_targets$diameter) &
-                        pt_targets$diameter < private$MIN_TARGET_DIAMETER_NONLYMPH, ]
-
-                    if (nrow(small_lesions) > 0) {
-                        for (i in seq_len(nrow(small_lesions))) {
-                            violation_msg <- paste0(
-                                "Patient ", pt, " lesion ", small_lesions$lesionID[i],
-                                " has diameter ", round(small_lesions$diameter[i], 1), "mm ",
-                                "(below RECIST v1.1 minimum of ", private$MIN_TARGET_DIAMETER_NONLYMPH, "mm)"
-                            )
-                            violations <- c(violations, violation_msg)
-                        }
-                    }
-                }
-
-                # Post violations as STRONG_WARNING
-                if (length(violations) > 0) {
-                    private$.addNotice("STRONG_WARNING", "RECIST v1.1 Compliance Violations", paste0("RECIST v1.1 COMPLIANCE VIOLATIONS: ", paste(violations, collapse = " \u{2022} "), " \u{2022} Results may not be suitable for regulatory submissions."))
-                }
-
-                return(list(
-                    valid = length(violations) == 0,
-                    violations = violations,
-                    target_lesions = baseline_targets$lesionID
-                ))
+                recist_validate_target_selection(lesion_data, private$.recistContext())
             },
             .calculateTargetLesionSums = function(lesion_data) {
-                # Filter to target lesions only
-                target_lesions <- lesion_data[lesion_data$lesionType == "Target", ]
-
-                if (nrow(target_lesions) == 0) {
-                    return(data.frame(
-                        patientID = character(0),
-                        visitTime = numeric(0),
-                        visitNumber = integer(0),
-                        nTargetLesions = integer(0),
-                        baseline_sum = numeric(0),
-                        current_sum = numeric(0),
-                        absolute_change = numeric(0),
-                        percent_change = numeric(0),
-                        target_response = character(0),
-                        stringsAsFactors = FALSE
-                    ))
-                }
-
-                # Calculate baseline sums per patient
-                baseline_sums <- aggregate(
-                    diameter ~ patientID,
-                    data = target_lesions[target_lesions$isBaseline == TRUE, ],
-                    FUN = function(x) sum(x, na.rm = TRUE)
-                )
-                names(baseline_sums)[2] <- "baseline_sum"
-
-                # Calculate sums for each visit
-                visit_sums <- aggregate(
-                    diameter ~ patientID + visitTime,
-                    data = target_lesions,
-                    FUN = function(x) sum(x, na.rm = TRUE)
-                )
-                names(visit_sums)[3] <- "current_sum"
-
-                # Count lesions per visit
-                lesion_counts <- aggregate(
-                    diameter ~ patientID + visitTime,
-                    data = target_lesions,
-                    FUN = length
-                )
-                names(lesion_counts)[3] <- "nTargetLesions"
-
-                # Merge baseline sums with visit sums
-                target_sums <- merge(visit_sums, baseline_sums, by = "patientID")
-                target_sums <- merge(target_sums, lesion_counts, by = c("patientID", "visitTime"))
-
-                # Calculate changes
-                target_sums$absolute_change <- target_sums$current_sum - target_sums$baseline_sum
-
-                # Percent change calculation (handle zero baseline)
-                target_sums$percent_change <- ifelse(
-                    target_sums$baseline_sum > 0,
-                    (target_sums$current_sum - target_sums$baseline_sum) / target_sums$baseline_sum * 100,
-                    NA
-                )
-
-                # Determine target lesion response per RECIST v1.1
-                target_sums$target_response <- "SD" # Default: Stable Disease
-
-                # Complete Response: All lesions disappeared (sum = 0)
-                target_sums$target_response[target_sums$current_sum == 0] <- "CR"
-
-                # Partial Response: >=30% decrease from baseline
-                target_sums$target_response[!is.na(target_sums$percent_change) &
-                    target_sums$percent_change <= private$RECIST_PR_THRESHOLD] <- "PR"
-
-                # Progressive Disease: >=20% increase from baseline AND >=5mm absolute increase
-                is_pd <- !is.na(target_sums$percent_change) &
-                    target_sums$percent_change >= private$RECIST_PD_THRESHOLD &
-                    target_sums$absolute_change >= private$RECIST_PD_ABSOLUTE_MM
-                target_sums$target_response[is_pd] <- "PD"
-
-                # Add visit number (sequential visits per patient)
-                target_sums <- target_sums[order(target_sums$patientID, target_sums$visitTime), ]
-                target_sums$visitNumber <- ave(
-                    target_sums$visitTime,
-                    target_sums$patientID,
-                    FUN = seq_along
-                )
-
-                # Reorder columns
-                target_sums <- target_sums[, c(
-                    "patientID", "visitTime", "visitNumber", "nTargetLesions",
-                    "baseline_sum", "current_sum", "absolute_change",
-                    "percent_change", "target_response"
-                )]
-
-                return(target_sums)
+                recist_target_sums(lesion_data, private$.recistContext())
             },
             .detectNewLesions = function(lesion_data) {
-                # Filter to new lesions
-                new_lesions <- lesion_data[lesion_data$lesionType == "New" |
-                    (lesion_data$isNewLesion == 1 & !lesion_data$isBaseline), ]
-
-                if (nrow(new_lesions) == 0) {
-                    return(data.frame(
-                        patientID = character(0),
-                        first_new_lesion_visit = numeric(0),
-                        new_lesion_location = character(0),
-                        new_lesion_ID = character(0),
-                        stringsAsFactors = FALSE
-                    ))
-                }
-
-                # For each patient, find first visit with new lesion
-                new_lesion_summary <- aggregate(
-                    visitTime ~ patientID,
-                    data = new_lesions,
-                    FUN = min
-                )
-                names(new_lesion_summary)[2] <- "first_new_lesion_visit"
-
-                # Add lesion details
-                first_new <- merge(new_lesion_summary, new_lesions,
-                    by.x = c("patientID", "first_new_lesion_visit"),
-                    by.y = c("patientID", "visitTime")
-                )
-
-                # Keep first lesion per patient (if multiple new lesions at same visit)
-                first_new <- first_new[!duplicated(first_new$patientID), ]
-
-                first_new <- first_new[, c(
-                    "patientID", "first_new_lesion_visit",
-                    "location", "lesionID"
-                )]
-                names(first_new)[3:4] <- c("new_lesion_location", "new_lesion_ID")
-
-                return(first_new)
+                recist_detect_new_lesions(lesion_data)
             },
             .assessNonTargetProgression = function(lesion_data) {
-                # Filter to non-target lesions
-                nontarget_lesions <- lesion_data[lesion_data$lesionType == "NonTarget", ]
+                recist_assess_nontarget(lesion_data, private$.recistContext())
+            },
 
-                if (nrow(nontarget_lesions) == 0) {
-                    # No non-target lesions - return empty data frame
-                    # In RECIST, absence of non-target lesions = non-applicable (treated as Non-CR/Non-PD)
-                    return(data.frame(
-                        patientID = character(0),
-                        visitTime = numeric(0),
-                        nontarget_status = character(0),
-                        stringsAsFactors = FALSE
-                    ))
-                }
+            # Map free-text non-target assessments onto the RECIST categories.
+            # Case, spacing and punctuation are ignored, so "Non-CR/Non-PD",
+            # "non cr non pd" and "NonCRNonPD" are one assessment. Anything
+            # unrecognised returns NA so the caller can report it and fall back.
+            # Pure function of its input: kept separate so it is testable without a
+            # configured analysis.
+            .normaliseNonTargetStatus = function(x) {
+                recist_normalise_nontarget(x)
+            },
 
-                # Count non-target lesions per patient-visit
-                nontarget_counts <- aggregate(
-                    lesionID ~ patientID + visitTime,
-                    data = nontarget_lesions,
-                    FUN = length
+            # Assemble what the shared RECIST engine needs from this analysis:
+            # the options it reads and a way to raise notices. The engine itself
+            # knows nothing about R6, jmvcore or how notices are rendered.
+            .recistContext = function() {
+                recist_context(
+                    baselineTimepoint    = self$options$baselineTimepoint,
+                    confirmationInterval = self$options$confirmationInterval,
+                    maxTargetLesions     = self$options$maxTargetLesions,
+                    maxLesionsPerOrgan   = self$options$maxLesionsPerOrgan,
+                    nonTargetResponseVar = private$.optionOrNull("nonTargetResponseVar"),
+                    notify = function(type, title, content)
+                        private$.addNotice(type, title, content)
                 )
-                names(nontarget_counts)[3] <- "n_nontarget"
+            },
 
-                # Get baseline counts
-                baseline_counts <- aggregate(
-                    lesionID ~ patientID,
-                    data = nontarget_lesions[nontarget_lesions$isBaseline, ],
-                    FUN = length
-                )
-                names(baseline_counts)[2] <- "baseline_n_nontarget"
+            # Reading an option that the compiled .h.R does not yet carry raises an
+            # error rather than returning NULL, so every access to a newly added
+            # option goes through this until the header is regenerated.
+            .optionOrNull = function(name) {
+                tryCatch(self$options[[name]], error = function(e) NULL)
+            },
 
-                # Merge
-                nontarget_assessment <- merge(nontarget_counts, baseline_counts, by = "patientID")
-
-                # Determine status
-                # CR: All non-target lesions disappeared (count = 0)
-                # Non-CR/Non-PD: Some lesions persist but no clear progression
-                # PD: Unequivocal progression (e.g., increase in number - simplified here)
-
-                nontarget_assessment$nontarget_status <- "Non-CR/Non-PD" # Default
-
-                # CR: All disappeared
-                nontarget_assessment$nontarget_status[nontarget_assessment$n_nontarget == 0] <- "CR"
-
-                # PD: Significant increase (simplified: >=2 new non-target lesions)
-                # NOTE: In clinical practice, this is a QUALITATIVE assessment by radiologist
-                increase <- nontarget_assessment$n_nontarget - nontarget_assessment$baseline_n_nontarget
-                nontarget_assessment$nontarget_status[increase >= 2] <- "PD"
-
-                nontarget_assessment <- nontarget_assessment[, c("patientID", "visitTime", "nontarget_status")]
-
-                return(nontarget_assessment)
+            # Normalise and collapse the optional radiologist non-target assessment to
+            # one row per patient per visit. Returns NULL when the variable is unused.
+            .nonTargetOverride = function(lesion_data) {
+                recist_nontarget_override(lesion_data, private$.recistContext())
             },
             .determineOverallResponse = function(target_sums, new_lesions, nontarget_assessment) {
-                # Start with target sums as base
-                responses <- target_sums[, c("patientID", "visitTime", "visitNumber", "target_response")]
-
-                # Add new lesion status
-                if (nrow(new_lesions) > 0) {
-                    responses$new_lesion_present <- FALSE
-                    for (i in seq_len(nrow(responses))) {
-                        pt <- responses$patientID[i]
-                        vt <- responses$visitTime[i]
-
-                        # Check if new lesion appeared at or before this visit
-                        pt_new <- new_lesions[new_lesions$patientID == pt, ]
-                        if (nrow(pt_new) > 0 && pt_new$first_new_lesion_visit[1] <= vt) {
-                            responses$new_lesion_present[i] <- TRUE
-                        }
-                    }
-                } else {
-                    responses$new_lesion_present <- FALSE
-                }
-
-                # Add non-target status
-                if (nrow(nontarget_assessment) > 0) {
-                    responses <- merge(responses, nontarget_assessment,
-                        by = c("patientID", "visitTime"),
-                        all.x = TRUE
-                    )
-                    # If no non-target data for a visit, assume Non-CR/Non-PD
-                    responses$nontarget_status[is.na(responses$nontarget_status)] <- "Non-CR/Non-PD"
-                } else {
-                    responses$nontarget_status <- "Non-CR/Non-PD"
-                }
-
-                # Apply RECIST v1.1 OVERALL RESPONSE TABLE
-                responses$overall_response_unconfirmed <- "SD" # Default
-
-                # PRIORITY 1: ANY new lesion → PD
-                responses$overall_response_unconfirmed[responses$new_lesion_present] <- "PD"
-
-                # PRIORITY 2: Non-target PD → PD
-                responses$overall_response_unconfirmed[responses$nontarget_status == "PD"] <- "PD"
-
-                # PRIORITY 3: Target PD → PD
-                responses$overall_response_unconfirmed[responses$target_response == "PD"] <- "PD"
-
-                # Now handle non-PD cases
-                is_not_pd <- responses$overall_response_unconfirmed != "PD"
-
-                # CR: Target CR + Non-target CR + No new lesions
-                is_cr <- is_not_pd &
-                    responses$target_response == "CR" &
-                    responses$nontarget_status == "CR" &
-                    !responses$new_lesion_present
-                responses$overall_response_unconfirmed[is_cr] <- "CR"
-
-                # PR: Target CR with Non-CR/Non-PD non-target, OR Target PR with Non-PD non-target
-                is_pr <- is_not_pd &
-                    ((responses$target_response == "CR" & responses$nontarget_status != "CR") |
-                        (responses$target_response == "PR")) &
-                    !responses$new_lesion_present
-                responses$overall_response_unconfirmed[is_pr] <- "PR"
-
-                # SD: Everything else (target SD with non-PD non-target, no new lesions)
-                # Already set as default
-
-                # Sort by patient and visit
-                responses <- responses[order(responses$patientID, responses$visitTime), ]
-
-                return(responses)
+                recist_overall_response(target_sums, new_lesions, nontarget_assessment,
+                                        private$.recistContext())
             },
             .confirmResponses = function(visit_responses) {
-                # Add confirmation status column
-                visit_responses$response_confirmed <- FALSE
-
-                # SD and PD do not require confirmation
-                visit_responses$response_confirmed[visit_responses$overall_response_unconfirmed %in% c("SD", "PD")] <- TRUE
-
-                # For CR and PR, check confirmation
-                patients <- unique(visit_responses$patientID)
-
-                for (pt in patients) {
-                    pt_data <- visit_responses[visit_responses$patientID == pt, ]
-                    pt_data <- pt_data[order(pt_data$visitTime), ]
-
-                    for (i in seq_len(nrow(pt_data))) {
-                        current_response <- pt_data$overall_response_unconfirmed[i]
-
-                        # Only check CR and PR
-                        if (current_response %in% c("CR", "PR")) {
-                            current_time <- pt_data$visitTime[i]
-
-                            # Check if there's a subsequent visit with same response >= confirmation_interval later
-                            later_visits <- pt_data[pt_data$visitTime > current_time, ]
-
-                            if (nrow(later_visits) > 0) {
-                                # Find visits with sufficient time gap
-                                confirmed_visits <- later_visits[
-                                    (later_visits$visitTime - current_time) >= self$options$confirmationInterval &
-                                        later_visits$overall_response_unconfirmed == current_response,
-                                ]
-
-                                if (nrow(confirmed_visits) > 0) {
-                                    # Response is confirmed
-                                    row_idx <- which(visit_responses$patientID == pt &
-                                        visit_responses$visitTime == current_time)
-                                    visit_responses$response_confirmed[row_idx] <- TRUE
-                                }
-                            }
-                        }
-                    }
-                }
-
-                return(visit_responses)
+                recist_confirm_responses(visit_responses, private$.recistContext())
             },
             .calculateBestOverallResponse = function(confirmed_responses) {
-                patients <- unique(confirmed_responses$patientID)
-
-                bor_results <- data.frame(
-                    patientID = patients,
-                    bestOverallResponse = character(length(patients)),
-                    borConfirmed = character(length(patients)),
-                    borFirstVisit = character(length(patients)),
-                    timeToResponse = numeric(length(patients)),
-                    durationOfResponse = numeric(length(patients)),
-                    progressionOccurred = character(length(patients)),
-                    progressionVisit = character(length(patients)),
-                    stringsAsFactors = FALSE
-                )
-
-                for (i in seq_along(patients)) {
-                    pt <- patients[i]
-                    pt_data <- confirmed_responses[confirmed_responses$patientID == pt, ]
-                    pt_data <- pt_data[order(pt_data$visitTime), ]
-
-                    # Filter to confirmed responses only for BOR determination
-                    confirmed_only <- pt_data[pt_data$response_confirmed, ]
-
-                    # Determine BOR using hierarchy: CR > PR > SD > PD
-                    # Only CONFIRMED CR/PR count for BOR
-                    has_confirmed_cr <- any(confirmed_only$overall_response_unconfirmed == "CR")
-                    has_confirmed_pr <- any(confirmed_only$overall_response_unconfirmed == "PR")
-                    has_sd <- any(confirmed_only$overall_response_unconfirmed == "SD")
-                    has_pd <- any(confirmed_only$overall_response_unconfirmed == "PD")
-
-                    if (has_confirmed_cr) {
-                        bor_results$bestOverallResponse[i] <- "CR"
-                        bor_results$borConfirmed[i] <- "Yes"
-                        first_cr_visit <- min(confirmed_only$visitTime[confirmed_only$overall_response_unconfirmed == "CR"])
-                        bor_results$borFirstVisit[i] <- paste0("Visit ", first_cr_visit)
-                        bor_results$timeToResponse[i] <- first_cr_visit - min(pt_data$visitTime)
-                    } else if (has_confirmed_pr) {
-                        bor_results$bestOverallResponse[i] <- "PR"
-                        bor_results$borConfirmed[i] <- "Yes"
-                        first_pr_visit <- min(confirmed_only$visitTime[confirmed_only$overall_response_unconfirmed == "PR"])
-                        bor_results$borFirstVisit[i] <- paste0("Visit ", first_pr_visit)
-                        bor_results$timeToResponse[i] <- first_pr_visit - min(pt_data$visitTime)
-                    } else if (has_sd) {
-                        bor_results$bestOverallResponse[i] <- "SD"
-                        bor_results$borConfirmed[i] <- "Yes"
-                        first_sd_visit <- min(confirmed_only$visitTime[confirmed_only$overall_response_unconfirmed == "SD"])
-                        bor_results$borFirstVisit[i] <- paste0("Visit ", first_sd_visit)
-                        bor_results$timeToResponse[i] <- NA
-                    } else if (has_pd) {
-                        bor_results$bestOverallResponse[i] <- "PD"
-                        bor_results$borConfirmed[i] <- "Yes"
-                        first_pd_visit <- min(confirmed_only$visitTime[confirmed_only$overall_response_unconfirmed == "PD"])
-                        bor_results$borFirstVisit[i] <- paste0("Visit ", first_pd_visit)
-                        bor_results$timeToResponse[i] <- NA
-                    } else {
-                        # No confirmed response
-                        bor_results$bestOverallResponse[i] <- "Not Evaluable"
-                        bor_results$borConfirmed[i] <- "No"
-                        bor_results$borFirstVisit[i] <- "N/A"
-                        bor_results$timeToResponse[i] <- NA
-                    }
-
-                    # Check for progression
-                    if (has_pd) {
-                        bor_results$progressionOccurred[i] <- "Yes"
-                        first_pd_visit <- min(confirmed_only$visitTime[confirmed_only$overall_response_unconfirmed == "PD"])
-                        bor_results$progressionVisit[i] <- paste0("Visit ", first_pd_visit)
-
-                        # Duration of response (if had CR/PR before PD)
-                        if (has_confirmed_cr || has_confirmed_pr) {
-                            response_visit <- if (has_confirmed_cr) {
-                                min(confirmed_only$visitTime[confirmed_only$overall_response_unconfirmed == "CR"])
-                            } else {
-                                min(confirmed_only$visitTime[confirmed_only$overall_response_unconfirmed == "PR"])
-                            }
-                            bor_results$durationOfResponse[i] <- first_pd_visit - response_visit
-                        } else {
-                            bor_results$durationOfResponse[i] <- NA
-                        }
-                    } else {
-                        bor_results$progressionOccurred[i] <- "No"
-                        bor_results$progressionVisit[i] <- "N/A"
-
-                        # Duration = last visit - first response (censored)
-                        if (has_confirmed_cr || has_confirmed_pr) {
-                            response_visit <- if (has_confirmed_cr) {
-                                min(confirmed_only$visitTime[confirmed_only$overall_response_unconfirmed == "CR"])
-                            } else {
-                                min(confirmed_only$visitTime[confirmed_only$overall_response_unconfirmed == "PR"])
-                            }
-                            bor_results$durationOfResponse[i] <- max(pt_data$visitTime) - response_visit
-                        } else {
-                            bor_results$durationOfResponse[i] <- NA
-                        }
-                    }
-                }
-
-                return(bor_results)
+                recist_best_overall_response(confirmed_responses)
             },
 
             # Output Population ====
@@ -868,6 +608,8 @@ waterfallrecistClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                         currentSum = target_sums_full$current_sum[i],
                         absoluteChange = target_sums_full$absolute_change[i],
                         percentChange = target_sums_full$percent_change[i],
+                        nadirSum = target_sums_full$nadir_sum[i],
+                        percentChangeFromNadir = target_sums_full$percent_change_from_nadir[i],
                         targetResponse = target_sums_full$target_response[i],
                         responseConfirmed = ifelse(target_sums_full$response_confirmed[i], "Yes", "No")
                     )
@@ -1082,10 +824,26 @@ waterfallrecistClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
             .prepareWaterfallPlot = function(best_responses, target_sums) {
                 image <- self$results$waterfallPlot
 
+                # Score post-baseline assessments only. Including the baseline row
+                # (whose percent change is 0 by construction) means a patient whose
+                # tumour only ever grew would plot a 0% bar instead of their smallest
+                # recorded increase.
+                plot_source <- target_sums
+                if ("is_baseline_visit" %in% names(plot_source)) {
+                    plot_source <- plot_source[!plot_source$is_baseline_visit, , drop = FALSE]
+                }
+                plot_source <- plot_source[!is.na(plot_source$percent_change), , drop = FALSE]
+
+                # aggregate() on a zero-row frame raises "no rows to aggregate".
+                if (nrow(plot_source) == 0 || nrow(best_responses) == 0) {
+                    image$setState(NULL)
+                    return()
+                }
+
                 # Calculate best percent change for each patient (nadir)
                 nadir_data <- aggregate(
                     percent_change ~ patientID,
-                    data = target_sums,
+                    data = plot_source,
                     FUN = function(x) x[which.min(x)[1]] # Nadir: most negative (best) % change
                 )
                 names(nadir_data)[2] <- "best_change"

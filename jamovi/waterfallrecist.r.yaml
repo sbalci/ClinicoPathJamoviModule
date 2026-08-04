@@ -4,6 +4,17 @@ title: RECIST v1.1 Response Analysis
 jrs: '1.1'
 
 items:
+    - name: instructions
+      title: Getting Started
+      type: Html
+      clearWith:
+        - patientID
+        - lesionID
+        - visitTime
+        - diameter
+        - lesionType
+        - baselineTimepoint
+
     - name: notices
       title: Important Information
       type: Preformatted
@@ -52,15 +63,12 @@ items:
         - name: diameter
           title: Diameter (mm)
           type: number
-          format: zto,pvalue
         - name: changeFromBaseline
           title: Change from Baseline (mm)
           type: number
-          format: zto,pvalue
         - name: percentChange
           title: '% Change'
           type: number
-          format: zto,pvalue
 
     - name: targetSumTable
       title: Target Lesion Sum by Visit
@@ -86,19 +94,24 @@ items:
         - name: baselineSum
           title: Baseline Sum (mm)
           type: number
-          format: zto,pvalue
         - name: currentSum
           title: Current Sum (mm)
           type: number
-          format: zto,pvalue
         - name: absoluteChange
           title: Absolute \u0394 (mm)
           type: number
-          format: zto,pvalue
         - name: percentChange
           title: '% Change'
           type: number
-          format: zto,pvalue
+        # PD is referenced to the nadir, not to baseline, so the nadir and the
+        # change from it are shown -- otherwise a PD row looks unexplained when
+        # the sum is still below baseline.
+        - name: nadirSum
+          title: Nadir Sum (mm)
+          type: number
+        - name: percentChangeFromNadir
+          title: '% Change from Nadir'
+          type: number
         - name: targetResponse
           title: Target Response
           type: text
@@ -131,11 +144,9 @@ items:
         - name: timeToResponse
           title: Time to Response
           type: number
-          format: zto,pvalue
         - name: durationOfResponse
           title: Duration of Response
           type: number
-          format: zto,pvalue
         - name: progressionOccurred
           title: Progression
           type: text
@@ -200,17 +211,15 @@ items:
             - name: confirmedPercent
               title: Confirmed (%)
               type: number
-              format: zto,pvalue
             - name: unconfirmed
               title: Unconfirmed (n)
               type: integer
             - name: unconfirmedPercent
               title: Unconfirmed (%)
               type: number
-              format: zto,pvalue
 
     - name: complianceReport
-      title: RECIST v1.1 Compliance Audit
+      title: RECIST v1.1 Criteria Applied
       type: Html
       visible: (showRecistComplianceReport)
       clearWith:

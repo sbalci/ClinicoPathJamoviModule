@@ -42,6 +42,7 @@ survivalPowerOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
             sensitivity_analysis = FALSE,
             run_simulation_validation = FALSE,
             simulation_runs = 10000,
+            simulation_seed = 42,
             show_summary = FALSE,
             show_explanations = FALSE,
             show_glossary = FALSE,
@@ -305,6 +306,10 @@ survivalPowerOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                 default=10000,
                 min=1000,
                 max=100000)
+            private$..simulation_seed <- jmvcore::OptionInteger$new(
+                "simulation_seed",
+                simulation_seed,
+                default=42)
             private$..show_summary <- jmvcore::OptionBool$new(
                 "show_summary",
                 show_summary,
@@ -358,6 +363,7 @@ survivalPowerOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
             self$.addOption(private$..sensitivity_analysis)
             self$.addOption(private$..run_simulation_validation)
             self$.addOption(private$..simulation_runs)
+            self$.addOption(private$..simulation_seed)
             self$.addOption(private$..show_summary)
             self$.addOption(private$..show_explanations)
             self$.addOption(private$..show_glossary)
@@ -400,6 +406,7 @@ survivalPowerOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
         sensitivity_analysis = function() private$..sensitivity_analysis$value,
         run_simulation_validation = function() private$..run_simulation_validation$value,
         simulation_runs = function() private$..simulation_runs$value,
+        simulation_seed = function() private$..simulation_seed$value,
         show_summary = function() private$..show_summary$value,
         show_explanations = function() private$..show_explanations$value,
         show_glossary = function() private$..show_glossary$value,
@@ -441,6 +448,7 @@ survivalPowerOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
         ..sensitivity_analysis = NA,
         ..run_simulation_validation = NA,
         ..simulation_runs = NA,
+        ..simulation_seed = NA,
         ..show_summary = NA,
         ..show_explanations = NA,
         ..show_glossary = NA,
@@ -543,7 +551,8 @@ survivalPowerResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                     "cluster_size",
                     "icc",
                     "sensitivity_analysis",
-                    "simulation_runs")))
+                    "simulation_runs",
+                    "simulation_seed")))
             self$add(jmvcore::Table$new(
                 options=options,
                 name="power_summary",
@@ -585,7 +594,8 @@ survivalPowerResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                     "cluster_size",
                     "icc",
                     "sensitivity_analysis",
-                    "simulation_runs"),
+                    "simulation_runs",
+                    "simulation_seed"),
                 columns=list(
                     list(
                         `name`="analysis_type", 
@@ -637,6 +647,7 @@ survivalPowerResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                     "dropout_rate",
                     "allocation_ratio",
                     "simulation_runs",
+                    "simulation_seed",
                     "run_simulation_validation"),
                 columns=list(
                     list(
@@ -704,7 +715,8 @@ survivalPowerResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                     "cluster_size",
                     "icc",
                     "sensitivity_analysis",
-                    "simulation_runs"),
+                    "simulation_runs",
+                    "simulation_seed"),
                 columns=list(
                     list(
                         `name`="parameter", 
@@ -759,7 +771,8 @@ survivalPowerResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                     "cluster_size",
                     "icc",
                     "sensitivity_analysis",
-                    "simulation_runs"),
+                    "simulation_runs",
+                    "simulation_seed"),
                 columns=list(
                     list(
                         `name`="parameter", 
@@ -814,7 +827,8 @@ survivalPowerResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                     "cluster_size",
                     "icc",
                     "sensitivity_analysis",
-                    "simulation_runs"),
+                    "simulation_runs",
+                    "simulation_seed"),
                 columns=list(
                     list(
                         `name`="parameter", 
@@ -869,7 +883,8 @@ survivalPowerResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                     "cluster_size",
                     "icc",
                     "sensitivity_analysis",
-                    "simulation_runs"),
+                    "simulation_runs",
+                    "simulation_seed"),
                 columns=list(
                     list(
                         `name`="parameter", 
@@ -924,7 +939,8 @@ survivalPowerResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                     "cluster_size",
                     "icc",
                     "sensitivity_analysis",
-                    "simulation_runs"),
+                    "simulation_runs",
+                    "simulation_seed"),
                 columns=list(
                     list(
                         `name`="assumption", 
@@ -1419,7 +1435,11 @@ survivalPowerBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' @param sample_size_input Total sample size to use when calculating power,
 #'   effect size, or duration
 #' @param control_median_survival Expected median survival in control group
-#' @param survival_distribution Assumed survival distribution
+#' @param survival_distribution Assumed survival distribution. Only the
+#'   exponential distribution is supported in this release; the
+#'   event-probability and sample-size formulas assume a constant hazard.
+#'   Selecting any other option stops the analysis with an explanatory message
+#'   rather than returning a number the formulas cannot justify.
 #' @param weibull_shape Shape parameter for Weibull distribution
 #' @param accrual_period Patient recruitment period
 #' @param follow_up_period Additional follow-up after recruitment ends
@@ -1446,6 +1466,9 @@ survivalPowerBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   using Monte Carlo simulation. Currently validated for exponential log-rank
 #'   settings only. May take 10-60 seconds depending on simulation_runs setting.
 #' @param simulation_runs Number of simulation runs for complex calculations
+#' @param simulation_seed Random seed for the Monte Carlo validation, so the
+#'   simulated power is reproducible across runs. Change it to inspect Monte
+#'   Carlo variability.
 #' @param show_summary Display plain-language summary of results
 #' @param show_explanations Display educational notes and guidance
 #' @param show_glossary Display glossary of statistical terms
@@ -1525,6 +1548,7 @@ survivalPower <- function(
     sensitivity_analysis = FALSE,
     run_simulation_validation = FALSE,
     simulation_runs = 10000,
+    simulation_seed = 42,
     show_summary = FALSE,
     show_explanations = FALSE,
     show_glossary = FALSE,
@@ -1571,6 +1595,7 @@ survivalPower <- function(
         sensitivity_analysis = sensitivity_analysis,
         run_simulation_validation = run_simulation_validation,
         simulation_runs = simulation_runs,
+        simulation_seed = simulation_seed,
         show_summary = show_summary,
         show_explanations = show_explanations,
         show_glossary = show_glossary,

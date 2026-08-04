@@ -1,4 +1,4 @@
-title: RECIST v1.1 Compliant Response Analysis
+title: 'Treatment Response: Lesion-Level RECIST v1.1 Algorithm'
 name: waterfallrecist
 jus: '3.0'
 stage: 0
@@ -55,6 +55,13 @@ children:
         children:
           - type: VariablesListBox
             name: isNewLesion
+            maxItemCount: 1
+            isTarget: true
+      - type: TargetLayoutBox
+        label: Non-Target Response (radiologist assessment)
+        children:
+          - type: VariablesListBox
+            name: nonTargetResponseVar
             maxItemCount: 1
             isTarget: true
   - type: LayoutBox

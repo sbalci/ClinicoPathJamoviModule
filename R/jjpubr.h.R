@@ -544,7 +544,7 @@ jjpubrBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             super$initialize(
                 package = "ClinicoPath",
                 name = "jjpubr",
-                version = c(0,0,51),
+                version = c(1,0,2),
                 options = options,
                 results = jjpubrResults$new(options=options),
                 data = data,

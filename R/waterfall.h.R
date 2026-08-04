@@ -408,7 +408,7 @@ waterfallResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "timeVar",
                     "inputType",
                     "enableGuidedMode"),
-                visible="(!enableGuidedMode)"))
+                visible="(enableGuidedMode:FALSE)"))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="todo2",
@@ -419,7 +419,7 @@ waterfallResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "timeVar",
                     "inputType",
                     "enableGuidedMode"),
-                visible="(!enableGuidedMode)"))
+                visible="(enableGuidedMode:FALSE)"))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="clinicalSummary",
@@ -442,11 +442,11 @@ waterfallResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "timeVar",
                     "inputType",
                     "enableGuidedMode"),
-                visible="(!enableGuidedMode)"))
+                visible="(enableGuidedMode:FALSE)"))
             self$add(jmvcore::Table$new(
                 options=options,
                 name="summaryTable",
-                title="Response Categories Based on RECIST v1.1 Criteria",
+                title="Response Categories (threshold-based, not full RECIST v1.1)",
                 rows=0,
                 columns=list(
                     list(
@@ -551,8 +551,13 @@ waterfallResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "confirmationVar",
                     "ongoingVar",
                     "responseCategoryVar",
+                    "barAlpha",
+                    "barWidth",
+                    "minResponseForLabel",
+                    "seed",
                     "groupVar",
-                    "inputType")))
+                    "inputType",
+                    "timeVar")))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="copyReadyReport",
@@ -796,14 +801,24 @@ waterfallBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 weightsSupport = 'none')
         }))
 
-#' Treatment Response Analysis
+#' Treatment Response: Patient-Level Burden
 #'
-#' Creates waterfall and spider plots to analyze tumor response data following 
-#' RECIST criteria.
-#' 
-#' Supports both raw tumor measurements and pre-calculated percentage changes.
-#' Provides comprehensive response analysis including ORR, DCR, and 
-#' person-time metrics.
+#' Use this when you have one tumour burden number per patient: either a 
+#' percent change from baseline you have already calculated (one row per 
+#' patient), or a single measurement recorded at each visit (one row per 
+#' patient per visit). It draws waterfall and spider plots, assigns each 
+#' patient a best response from their largest shrinkage from baseline, and 
+#' reports ORR and DCR with exact binomial confidence intervals, group 
+#' comparison, time to response and duration of response. When a time variable 
+#' is supplied, progression is measured against the patient's smallest 
+#' recorded burden (nadir), not against baseline. Categories are named CR, PR, 
+#' SD and PD and the thresholds are adapted from RECIST v1.1, but this is NOT 
+#' a RECIST v1.1 implementation: because it never sees individual lesions it 
+#' cannot sum target lesions, detect a new lesion, or judge non-target 
+#' progression, and it cannot apply the 4-week confirmation rule itself (you 
+#' may supply your own confirmation column). If your data list each lesion 
+#' separately, the lesion-level analysis applies the RECIST v1.1 algorithm to 
+#' them.
 #' 
 #' @param data The data as a data frame.
 #' @param patientID Variable containing patient identifiers (e.g., PT001,

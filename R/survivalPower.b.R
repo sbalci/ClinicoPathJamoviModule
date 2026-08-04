@@ -1279,7 +1279,17 @@ survivalPowerClass <- R6::R6Class(
                 alpha = self$options$alpha_level
             )
 
+            # Seed the Monte Carlo run so the reported simulated power is
+            # reproducible; without this, repeated runs of an unchanged design
+            # disagree by several points and the agreement verdict can flip.
+            # tryCatch guards the window before jmvtools::prepare() regenerates
+            # the header: jmvcore errors on an option the compiled .h.R lacks.
+            sim_seed <- tryCatch(self$options$simulation_seed, error = function(e) NULL)
+            if (is.null(sim_seed) || !is.finite(sim_seed)) sim_seed <- 42
+            set.seed(as.integer(sim_seed))
+
             # Run simulation
+            sim_error <- NULL
             sim_results <- tryCatch(
                 {
                     .validate_power_by_simulation(
@@ -1288,11 +1298,21 @@ survivalPowerClass <- R6::R6Class(
                     )
                 },
                 error = function(e) {
+                    sim_error <<- conditionMessage(e)
                     return(NULL)
                 }
             )
 
             if (is.null(sim_results)) {
+                # Say why rather than rendering an empty table with no explanation
+                self$results$simulation_validation_table$setNote(
+                    "sim_failed",
+                    paste0(
+                        "Simulation validation could not be completed",
+                        if (!is.null(sim_error)) paste0(": ", sim_error) else ".",
+                        " The analytical results above are unaffected."
+                    )
+                )
                 return()
             }
 
@@ -1347,7 +1367,7 @@ survivalPowerClass <- R6::R6Class(
                     return("Acceptable (within CI)")
                 }
             } else {
-                return(" Outside CI - Review assumptions")
+                return("Outside CI - Review assumptions")
             }
         },
         .populate_simulation_comparison = function() {
@@ -3689,19 +3709,21 @@ survivalPowerClass <- R6::R6Class(
                 ))
             } else if (distribution == "weibull") {
                 # Weibull distribution support
-                # S(t) = exp(-(lambda*t)^shape)
-                # Median: m = (log(2)/lambda)^(1/shape)
-                # Under PH: lambda_treatment = lambda_control * hr^(1/shape)
+                # S(t) = exp(-lambda * t^shape), so H(t) = lambda * t^shape
+                # Median: m = (log(2)/lambda)^(1/shape)  ->  lambda = log(2)/m^shape
+                # Hazard h(t) = lambda*shape*t^(shape-1), so under PH the shape is
+                # shared and only the scale moves: lambda_treatment = lambda_control * hr
+                # (These reduce to the exponential case at shape = 1.)
 
                 if (is.null(weibull_shape) || weibull_shape <= 0) {
                     stop("Weibull shape parameter must be positive (default: 1.0 for exponential)")
                 }
 
                 # Calculate scale parameter from median
-                lambda_control <- (log(2) / median_control)^(1 / weibull_shape)
+                lambda_control <- log(2) / median_control^weibull_shape
 
                 # Treatment group scale under proportional hazards
-                lambda_treatment <- lambda_control * hr^(1 / weibull_shape)
+                lambda_treatment <- lambda_control * hr
 
                 # Calculate treatment median
                 median_treatment <- (log(2) / lambda_treatment)^(1 / weibull_shape)

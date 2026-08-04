@@ -209,14 +209,19 @@ options:
           - name: "exponential"
             title: "Exponential"
           - name: "weibull"
-            title: "Weibull"
+            title: "Weibull (not available yet)"
           - name: "log_normal"
-            title: "Log-normal"
+            title: "Log-normal (not available yet)"
           - name: "piecewise_exponential"
-            title: "Piecewise Exponential"
+            title: "Piecewise Exponential (not available yet)"
       default: "exponential"
       description:
-          R: Assumed survival distribution
+          R: >
+            Assumed survival distribution. Only the exponential distribution is
+            supported in this release; the event-probability and sample-size
+            formulas assume a constant hazard. Selecting any other option stops
+            the analysis with an explanatory message rather than returning a
+            number the formulas cannot justify.
 
     - name: weibull_shape
       title: Weibull Shape Parameter
@@ -460,6 +465,16 @@ options:
       max: 100000
       description:
           R: Number of simulation runs for complex calculations
+
+    - name: simulation_seed
+      title: Simulation Seed
+      type: Integer
+      default: 42
+      description:
+          R: >
+            Random seed for the Monte Carlo validation, so the simulated power
+            is reproducible across runs. Change it to inspect Monte Carlo
+            variability.
 
     # Clinical-Friendly Output Options
     - name: show_summary
