@@ -34,9 +34,9 @@ options:
             The data as a data frame.
 
     - name: patientID
-      title: Patient ID
+      title: Patient ID Variable
       type: Variable
-      default: NULL
+      default: null
       suggested: [nominal]
       permitted: [numeric, factor, id]
       description:
@@ -50,7 +50,7 @@ options:
     - name: responseVar
       title: Response Value (Raw or Percentage)
       type: Variable
-      default: NULL
+      default: null
       suggested: [continuous]
       permitted: [numeric]
       description:
@@ -72,7 +72,7 @@ options:
       type: Variable
       suggested: [continuous]
       permitted: [numeric]
-      default: NULL
+      default: null
       description:
           R: >
             Time point of measurement (e.g., months from baseline, days from treatment start).
@@ -89,7 +89,7 @@ options:
       type: Variable
       suggested: [nominal, ordinal]
       permitted: [factor, numeric]
-      default: NULL
+      default: null
       description:
           R: >
             Optional grouping variable for coloring bars by patient groups (e.g., treatment arms, disease subtypes).

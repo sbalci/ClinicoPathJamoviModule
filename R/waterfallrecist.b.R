@@ -174,6 +174,10 @@ waterfallrecistClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                     return()
                 }
 
+                # Step 1b - Apply the RECIST target-lesion limits. Must run before
+                # any sum is taken: it decides which lesions the sum is over.
+                lesion_data <- private$.selectTargetLesions(lesion_data)
+
                 # Step 2 - Validate target lesion selection (max 5, max 2 per organ)
                 target_validation <- private$.validateTargetLesionSelection(lesion_data)
 
@@ -448,6 +452,19 @@ waterfallrecistClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                     lesion_data$nonTargetResponse <- NA_character_
                 }
 
+                # Optional per-lesion target selection recorded by the reader.
+                tsOpt <- private$.optionOrNull("targetSelectionVar")
+                if (!is.null(tsOpt) && length(tsOpt) > 0) {
+                    tsVar <- private$.resolveVar(tsOpt)
+                    if (tsVar %in% colnames(data_df)) {
+                        lesion_data$targetSelection <- as.character(data_df[[tsVar]])
+                    } else {
+                        lesion_data$targetSelection <- NA_character_
+                    }
+                } else {
+                    lesion_data$targetSelection <- NA_character_
+                }
+
                 # Remove rows with missing key values
                 lesion_data <- lesion_data[!is.na(lesion_data$patientID) &
                     !is.na(lesion_data$lesionID) &
@@ -468,6 +485,10 @@ waterfallrecistClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
 
                 return(lesion_data)
             },
+            .selectTargetLesions = function(lesion_data) {
+                recist_select_target_lesions(lesion_data, private$.recistContext())
+            },
+
             .validateTargetLesionSelection = function(lesion_data) {
                 recist_validate_target_selection(lesion_data, private$.recistContext())
             },
@@ -501,6 +522,7 @@ waterfallrecistClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                     maxTargetLesions     = self$options$maxTargetLesions,
                     maxLesionsPerOrgan   = self$options$maxLesionsPerOrgan,
                     nonTargetResponseVar = private$.optionOrNull("nonTargetResponseVar"),
+                    targetSelectionVar   = private$.optionOrNull("targetSelectionVar"),
                     notify = function(type, title, content)
                         private$.addNotice(type, title, content)
                 )

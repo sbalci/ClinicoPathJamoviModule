@@ -64,6 +64,7 @@ recist_context <- function(baselineTimepoint = 0,
                            maxTargetLesions = 5,
                            maxLesionsPerOrgan = 2,
                            nonTargetResponseVar = NULL,
+                           targetSelectionVar = NULL,
                            notify = NULL) {
     list(
         baselineTimepoint    = baselineTimepoint,
@@ -71,10 +72,13 @@ recist_context <- function(baselineTimepoint = 0,
         maxTargetLesions     = maxTargetLesions,
         maxLesionsPerOrgan   = maxLesionsPerOrgan,
         nonTargetResponseVar = nonTargetResponseVar,
+        targetSelectionVar   = targetSelectionVar,
         notify               = notify
     )
 }
 
+
+`%||%` <- function(a, b) if (is.null(a)) b else a
 
 # Raise a notice if the caller supplied a way to. Keeps the engine independent of
 # how any particular analysis renders messages.
@@ -151,6 +155,124 @@ recist_notify(ctx,
 out
 
 }
+
+#' Select the target lesions RECIST v1.1 would follow
+#'
+#' RECIST v1.1 limits the target lesions to at most five in total and two per
+#' organ, chosen as the largest that are reproducibly measurable. Everything else
+#' measurable at baseline is followed as NON-target disease. Applying no limit and
+#' summing every lesion overstates tumour burden; picking the wrong ones understates
+#' it. Both mistakes were live in this module before this function existed.
+#'
+#' Selection happens ONCE, at baseline, and the chosen lesion IDs are then followed
+#' at every later visit -- a lesion cannot become a target lesion halfway through.
+#'
+#' \strong{Size is not the whole criterion.} RECIST also requires the lesion to be
+#' reproducibly measurable, which is a radiologist's judgement no algorithm can make.
+#' Supply \code{targetSelection} in the data (via the caller's override variable) to
+#' record the reader's own choice; when present it is used verbatim and only checked
+#' against the limits.
+#'
+#' @param lesion_data Lesion-level frame from the caller's data preparation. Must
+#'   carry patientID, lesionID, lesionType, diameter, isBaseline and (optionally)
+#'   location and targetSelection.
+#' @param ctx Context from \code{recist_context()}.
+#' @return \code{lesion_data} with a logical \code{targetSelected} column. Baseline
+#'   target lesions that were not selected are reclassified to \code{"NonTarget"} at
+#'   every visit, which is what RECIST does with them.
+#' @keywords internal
+recist_select_target_lesions <- function(lesion_data, ctx) {
+    if (is.null(lesion_data) || !is.data.frame(lesion_data) || nrow(lesion_data) == 0) {
+        return(lesion_data)
+    }
+    if (!all(c("patientID", "lesionID", "lesionType", "isBaseline") %in% names(lesion_data))) {
+        return(lesion_data)
+    }
+
+    max_total <- if (is.null(ctx$maxTargetLesions)) 5 else ctx$maxTargetLesions
+    max_organ <- if (is.null(ctx$maxLesionsPerOrgan)) 2 else ctx$maxLesionsPerOrgan
+    has_organ <- "location" %in% names(lesion_data)
+
+    # An explicit reader selection wins outright.
+    user_choice <- NULL
+    if ("targetSelection" %in% names(lesion_data)) {
+        key <- gsub("[^a-z0-9]", "", tolower(trimws(as.character(lesion_data$targetSelection))))
+        picked <- key %in% c("1", "true", "t", "yes", "y", "target", "selected")
+        if (any(picked)) {
+            user_choice <- unique(lesion_data$lesionID[picked])
+        }
+    }
+
+    baseline_targets <- lesion_data[lesion_data$isBaseline %in% TRUE &
+                                        lesion_data$lesionType == "Target", , drop = FALSE]
+    if (nrow(baseline_targets) == 0) {
+        lesion_data$targetSelected <- lesion_data$lesionType == "Target"
+        return(lesion_data)
+    }
+
+    selected_ids <- character(0)
+    dropped <- list()
+
+    for (pt in unique(baseline_targets$patientID)) {
+        pt_rows <- baseline_targets[baseline_targets$patientID == pt, , drop = FALSE]
+
+        if (!is.null(user_choice)) {
+            keep <- pt_rows$lesionID[pt_rows$lesionID %in% user_choice]
+            selected_ids <- c(selected_ids, keep)
+            next
+        }
+
+        # Largest first; ties broken by lesion ID so the choice is reproducible.
+        ord <- order(-pt_rows$diameter,
+                     as.character(pt_rows$lesionID),
+                     na.last = TRUE)
+        pt_rows <- pt_rows[ord, , drop = FALSE]
+
+        keep <- character(0)
+        per_organ <- list()
+        for (i in seq_len(nrow(pt_rows))) {
+            if (length(keep) >= max_total) break
+            if (is.na(pt_rows$diameter[i])) next
+            organ <- if (has_organ) as.character(pt_rows$location[i]) else "__all__"
+            used <- per_organ[[organ]] %||% 0
+            if (used >= max_organ) next
+            keep <- c(keep, pt_rows$lesionID[i])
+            per_organ[[organ]] <- used + 1
+        }
+        selected_ids <- c(selected_ids, keep)
+        excluded <- setdiff(pt_rows$lesionID, keep)
+        if (length(excluded) > 0) dropped[[pt]] <- excluded
+    }
+
+    lesion_data$targetSelected <- lesion_data$lesionID %in% selected_ids
+
+    # Baseline target lesions that were not selected are followed as non-target
+    # disease, exactly as RECIST specifies -- not silently discarded.
+    demote <- lesion_data$lesionType == "Target" & !lesion_data$targetSelected
+    lesion_data$lesionType[demote] <- "NonTarget"
+
+    if (!is.null(user_choice)) {
+        recist_notify(ctx, "INFO", "Target Lesions Chosen by the Reader",
+            sprintf(paste0("%d lesion(s) were used as target lesions because they were marked ",
+                           "in the data. Automatic selection by size was not applied."),
+                    length(unique(selected_ids))))
+    } else if (length(dropped) > 0) {
+        n_pt <- length(dropped)
+        n_les <- sum(vapply(dropped, length, integer(1)))
+        recist_notify(ctx, "WARNING", "Target Lesions Selected Automatically",
+            sprintf(paste0("RECIST v1.1 follows at most %d target lesions in total and %d per ",
+                           "organ. The largest were selected for %d patient(s); %d lesion(s) ",
+                           "were moved to non-target disease and are no longer in the sum of ",
+                           "diameters (e.g. %s). Size alone does not establish that a lesion is ",
+                           "reproducibly measurable -- supply your own target selection to ",
+                           "override this."),
+                    max_total, max_organ, n_pt, n_les,
+                    paste(utils::head(unlist(dropped), 6), collapse = ", ")))
+    }
+
+    lesion_data
+}
+
 
 recist_validate_target_selection <- function(lesion_data, ctx) {
 # Filter to baseline target lesions only

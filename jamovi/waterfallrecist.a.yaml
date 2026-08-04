@@ -76,7 +76,7 @@ options:
       type: Variable
       suggested: [nominal]
       permitted: [numeric, factor, id]
-      default: NULL
+      default: null
       description:
           R: >
             Variable containing patient identifiers.
@@ -90,7 +90,7 @@ options:
       type: Variable
       suggested: [nominal]
       permitted: [numeric, factor, id]
-      default: NULL
+      default: null
       description:
           R: >
             Unique lesion identifier within each patient (e.g., L1, L2, Liver_1, Lung_2).
@@ -104,7 +104,7 @@ options:
       type: Variable
       suggested: [continuous]
       permitted: [numeric]
-      default: NULL
+      default: null
       description:
           R: >
             Time point of measurement (e.g., weeks from baseline, days from treatment start).
@@ -118,7 +118,7 @@ options:
       type: Variable
       suggested: [nominal]
       permitted: [factor]
-      default: NULL
+      default: null
       description:
           R: >
             Lesion classification: Target, NonTarget, or New.
@@ -135,7 +135,7 @@ options:
       type: Variable
       suggested: [nominal]
       permitted: [factor]
-      default: NULL
+      default: null
       description:
           R: >
             Anatomic site of lesion (e.g., Liver, Lung, Lymph_Node).
@@ -149,7 +149,7 @@ options:
       type: Variable
       suggested: [continuous]
       permitted: [numeric]
-      default: NULL
+      default: null
       description:
           R: >
             Longest diameter of target lesions in millimeters (>=10mm for non-lymph nodes, >=15mm for lymph nodes).
@@ -164,7 +164,7 @@ options:
       type: Variable
       suggested: [nominal]
       permitted: [numeric, factor]
-      default: NULL
+      default: null
       description:
           R: >
             Binary indicator (0 = baseline/existing, 1 = new lesion appearing after baseline).
@@ -197,6 +197,27 @@ options:
             Optional. The radiologist's non-target assessment for each visit
             (CR, Non-CR/Non-PD, PD, NE). Overrides the computed value.
             Without it a lesion-count heuristic is used, which is NOT the RECIST criterion.
+
+    - name: targetSelectionVar
+      title: Target Lesion Selection (optional override)
+      type: Variable
+      suggested: [nominal]
+      permitted: [factor, numeric, id]
+      default: NULL
+      description:
+          R: >
+            Optional per-lesion flag marking the lesions the reporting radiologist
+            chose as target lesions (Yes/No, 1/0, TRUE/FALSE or "Target"). When
+            supplied it is used verbatim and automatic selection is not applied.
+            By default the analysis follows RECIST v1.1 and selects the LARGEST
+            lesions within the limits (at most 5 in total, at most 2 per organ);
+            the remainder are followed as non-target disease. RECIST also requires
+            a target lesion to be reproducibly measurable, which is a radiological
+            judgement size alone cannot establish, so use this variable whenever
+            the reader's own choice differs from the largest-first default.
+          jamovi: >
+            Optional. Mark the lesions you selected as target lesions
+            (Yes/No or 1/0). Overrides the automatic largest-first selection.
 
     - name: baselineTimepoint
       title: Baseline Timepoint Value

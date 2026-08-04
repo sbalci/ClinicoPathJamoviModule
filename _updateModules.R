@@ -1205,7 +1205,10 @@ document_module_omv <- function(module_dir, module_name, other_module_dirs = cha
 }
 
 # Enhanced configuration-based asset copying ----
-if (!WIP && !TEST) {
+# TEST no longer gates this loop. The per-module flags below already decide what
+# runs, so gating on TEST as well made enabling a module while TEST was on a
+# silent no-op: the flag said OncoPath: true and nothing was copied.
+if (!WIP) {
   cat("\n📁 Copying assets with configuration-based logic...\n")
 
   for (module_name in names(modules_config)) {
@@ -1216,7 +1219,10 @@ if (!WIP && !TEST) {
     if (module_name == "jsurvival" && jsurvival_module) module_enabled <- TRUE
     if (module_name == "ClinicoPathDescriptives" && ClinicoPathDescriptives_module) module_enabled <- TRUE
     if (module_name == "OncoPath" && OncoPath_module) module_enabled <- TRUE
-    if (module_name == "JamoviTest" && TEST) module_enabled <- TRUE
+    # JamoviTest is built by its own dedicated pipeline further down (search
+    # "JamoviTest_modules"). Excluding it here stops it being processed twice
+    # now that this loop also runs while TEST is on.
+    if (module_name == "JamoviTest") module_enabled <- FALSE
     
     if (!module_enabled) next
 
@@ -1743,7 +1749,11 @@ update_yaml_a_files(paths = yaml_a_paths, version = new_version)
 
 # Copy module files with enhanced error handling ----
 # Skip regular module copying in TEST mode - only JamoviTest is processed
-if (!TEST) {
+# Runs whenever any production module is enabled, independently of TEST. This
+# block only ever touches the five production modules; JamoviTest is handled by
+# its own pipeline below, so the two can now be driven at the same time.
+if (any(c(jjstatsplot_module, meddecide_module, jsurvival_module,
+          ClinicoPathDescriptives_module, OncoPath_module))) {
   cat("\n🔄 Copying jamovi module files to target repositories...\n")
 
   # jjstatsplot_modules
@@ -1971,7 +1981,7 @@ if (OncoPath_module && length(OncoPath_modules) > 0) {
 
 
 } else {
-  cat("\n🧪 TEST mode: Skipping regular module processing - only JamoviTest will be processed\n")
+  cat("\n⏭️ No production module enabled - skipping production module processing\n")
 }
 
 # JamoviTest_modules (TEST mode only) - Process outside of the regular module block

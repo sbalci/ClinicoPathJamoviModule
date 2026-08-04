@@ -473,7 +473,7 @@ jjcoefstatsBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             super$initialize(
                 package = "ClinicoPath",
                 name = "jjcoefstats",
-                version = c(1,0,2),
+                version = c(1,0,3),
                 options = options,
                 results = jjcoefstatsResults$new(options=options),
                 data = data,

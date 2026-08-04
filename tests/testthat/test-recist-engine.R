@@ -176,3 +176,106 @@ test_that("engine results match the analysis that delegates to it", {
   expect_equal(via_analysis$percent_change_from_nadir, via_engine$percent_change_from_nadir)
   expect_equal(via_analysis$nadir_sum, via_engine$nadir_sum)
 })
+
+# ---------------------------------------------------------------------------
+# Target lesion selection
+# ---------------------------------------------------------------------------
+
+sel_data <- function(diams, organs = "Liver", ids = NULL) {
+  n <- length(diams)
+  data.frame(
+    patientID = "P1",
+    lesionID = ids %||% paste0("L", seq_len(n)),
+    visitTime = 0, lesionType = "Target",
+    location = rep(organs, length.out = n),
+    diameter = diams, isBaseline = TRUE, stringsAsFactors = FALSE)
+}
+
+test_that("target lesions are the LARGEST, capped per organ", {
+  # Six liver lesions, RECIST allows two per organ -> the two largest.
+  # Before this function existed the module gave 10 (smallest, capped at one)
+  # in one analysis and 210 (all six) in another.
+  out <- recist_select_target_lesions(sel_data(c(10, 20, 30, 40, 50, 60)),
+                                      recist_context(maxLesionsPerOrgan = 2))
+  expect_equal(sort(out$lesionID[out$targetSelected]), c("L5", "L6"))
+  expect_equal(sum(out$diameter[out$targetSelected]), 110)
+})
+
+test_that("selection respects both the per-organ and the overall cap", {
+  out <- recist_select_target_lesions(
+    sel_data(c(60, 50, 40, 35, 30, 25, 20),
+             organs = c("Liver", "Liver", "Liver", "Lung", "Lung", "Lung", "Node")),
+    recist_context(maxTargetLesions = 5, maxLesionsPerOrgan = 2))
+  sel <- out[out$targetSelected, ]
+
+  expect_equal(nrow(sel), 5)                       # overall cap
+  expect_true(all(table(sel$location) <= 2))       # per-organ cap
+  expect_equal(sort(sel$lesionID), c("L1", "L2", "L4", "L5", "L7"))
+})
+
+test_that("unselected baseline targets become non-target, not discarded", {
+  # RECIST follows them as non-target disease; dropping them silently would lose
+  # information that feeds the non-target assessment.
+  out <- recist_select_target_lesions(sel_data(c(10, 20, 30, 40, 50, 60)),
+                                      recist_context(maxLesionsPerOrgan = 2))
+  expect_equal(sum(out$lesionType == "Target"), 2)
+  expect_equal(sum(out$lesionType == "NonTarget"), 4)
+  expect_equal(nrow(out), 6)                       # nothing dropped
+})
+
+test_that("a reader's own selection overrides the largest-first default", {
+  # Size does not establish reproducible measurability; the radiologist's call wins.
+  d <- sel_data(c(10, 20, 30, 40, 50, 60))
+  d$targetSelection <- c("Yes", "Yes", "No", "No", "No", "No")
+
+  out <- recist_select_target_lesions(
+    d, recist_context(maxLesionsPerOrgan = 2, targetSelectionVar = "sel"))
+  expect_equal(sort(out$lesionID[out$targetSelected]), c("L1", "L2"))
+  expect_equal(sum(out$diameter[out$targetSelected]), 30)
+})
+
+test_that("the override accepts the usual codings", {
+  for (yes in c("Yes", "yes", "1", "TRUE", "Y", "Target", "selected")) {
+    d <- sel_data(c(10, 60))
+    d$targetSelection <- c(yes, "No")
+    out <- recist_select_target_lesions(
+      d, recist_context(targetSelectionVar = "sel"))
+    expect_equal(out$lesionID[out$targetSelected], "L1", info = yes)
+  }
+})
+
+test_that("selection is announced, and says which lesions moved", {
+  seen <- list()
+  ctx <- recist_context(maxLesionsPerOrgan = 2,
+                        notify = function(type, title, content)
+                          seen[[length(seen) + 1]] <<- list(title = title, content = content))
+  recist_select_target_lesions(sel_data(c(10, 20, 30, 40, 50, 60)), ctx)
+
+  titles <- vapply(seen, function(x) x$title, character(1))
+  expect_true("Target Lesions Selected Automatically" %in% titles)
+  expect_match(seen[[1]]$content, "moved to non-target")
+  expect_match(seen[[1]]$content, "reproducibly measurable")
+})
+
+test_that("a cohort already within the limits is left alone and stays quiet", {
+  seen <- 0
+  ctx <- recist_context(maxLesionsPerOrgan = 2,
+                        notify = function(...) seen <<- seen + 1)
+  out <- recist_select_target_lesions(sel_data(c(30, 20)), ctx)
+
+  expect_true(all(out$targetSelected))
+  expect_true(all(out$lesionType == "Target"))
+  expect_equal(seen, 0)
+})
+
+test_that("selection is made once at baseline and followed at later visits", {
+  # A lesion cannot join the target set halfway through the study.
+  d <- do.call(rbind, lapply(c(0, 8), function(v) {
+    x <- sel_data(c(10, 20, 30, 40, 50, 60)); x$visitTime <- v; x$isBaseline <- v == 0; x }))
+  out <- recist_select_target_lesions(d, recist_context(maxLesionsPerOrgan = 2))
+
+  for (v in c(0, 8)) {
+    sel <- out$lesionID[out$targetSelected & out$visitTime == v]
+    expect_equal(sort(sel), c("L5", "L6"), info = paste("visit", v))
+  }
+})

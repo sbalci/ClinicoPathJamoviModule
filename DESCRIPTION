@@ -735,6 +735,7 @@ Collate:
     'raincloud.h.R'
     'recist.b.R'
     'recist.h.R'
+    'recist_engine.R'
     'reclassmetrics.b.R'
     'reclassmetrics.h.R'
     'recurrentsurvival.b.R'

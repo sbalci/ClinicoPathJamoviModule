@@ -40,11 +40,11 @@
 new_version: "1.0.3"
 new_date: "2026-08-04"
 quick: false
-TEST: false
+TEST: true
 jjstatsplot: false
 jsurvival: false
 ClinicoPathDescriptives: false
-OncoPath: true
+OncoPath: false
 meddecide: false
 
 
