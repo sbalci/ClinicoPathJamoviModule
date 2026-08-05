@@ -21,11 +21,11 @@ test_that("swimmerplot handles missing data in milestones", {
     patientID = "PatientID",
     startTime = "StartTime",
     endTime = "EndTime",
-    milestone1 = "FirstAssessment",
-    milestone1_name = "Assessment"
+    milestone1Date = "FirstAssessment",
+    milestone1Name = "Assessment"
   )
 
-  expect_s3_class(result, "swimmerplotClass")
+  expect_s3_class(result, "swimmerplotResults")
 })
 
 test_that("swimmerplot handles missing data in event times", {
@@ -42,7 +42,7 @@ test_that("swimmerplot handles missing data in event times", {
     eventTimeVar = "EventTime"
   )
 
-  expect_s3_class(result, "swimmerplotClass")
+  expect_s3_class(result, "swimmerplotResults")
 })
 
 test_that("swimmerplot handles very short follow-up times", {
@@ -57,7 +57,7 @@ test_that("swimmerplot handles very short follow-up times", {
     endTime = "EndTime"
   )
 
-  expect_s3_class(result, "swimmerplotClass")
+  expect_s3_class(result, "swimmerplotResults")
 })
 
 test_that("swimmerplot handles very long follow-up times", {
@@ -73,7 +73,7 @@ test_that("swimmerplot handles very long follow-up times", {
     timeUnit = "months"
   )
 
-  expect_s3_class(result, "swimmerplotClass")
+  expect_s3_class(result, "swimmerplotResults")
 })
 
 test_that("swimmerplot handles single patient", {
@@ -87,7 +87,7 @@ test_that("swimmerplot handles single patient", {
     responseVar = "Response"
   )
 
-  expect_s3_class(result, "swimmerplotClass")
+  expect_s3_class(result, "swimmerplotResults")
 })
 
 test_that("swimmerplot handles identical duration for all patients", {
@@ -102,7 +102,7 @@ test_that("swimmerplot handles identical duration for all patients", {
     endTime = "EndTime"
   )
 
-  expect_s3_class(result, "swimmerplotClass")
+  expect_s3_class(result, "swimmerplotResults")
 })
 
 test_that("swimmerplot handles all patients censored", {
@@ -118,7 +118,7 @@ test_that("swimmerplot handles all patients censored", {
     censorVar = "Censored"
   )
 
-  expect_s3_class(result, "swimmerplotClass")
+  expect_s3_class(result, "swimmerplotResults")
 })
 
 test_that("swimmerplot handles all patients with events", {
@@ -134,7 +134,7 @@ test_that("swimmerplot handles all patients with events", {
     censorVar = "Censored"
   )
 
-  expect_s3_class(result, "swimmerplotClass")
+  expect_s3_class(result, "swimmerplotResults")
 })
 
 test_that("swimmerplot handles uniform response (all same)", {
@@ -150,7 +150,7 @@ test_that("swimmerplot handles uniform response (all same)", {
     responseVar = "Response"
   )
 
-  expect_s3_class(result, "swimmerplotClass")
+  expect_s3_class(result, "swimmerplotResults")
 })
 
 test_that("swimmerplot handles milestone times beyond end time", {
@@ -163,14 +163,14 @@ test_that("swimmerplot handles milestone times beyond end time", {
     patientID = "PatientID",
     startTime = "StartTime",
     endTime = "EndTime",
-    milestone1 = "Milestone1",
-    milestone1_name = "M1",
-    milestone3 = "Milestone3",
-    milestone3_name = "M3"
+    milestone1Date = "Milestone1",
+    milestone1Name = "M1",
+    milestone3Date = "Milestone3",
+    milestone3Name = "M3"
   )
 
   # Should handle gracefully (warn or adjust)
-  expect_s3_class(result, "swimmerplotClass")
+  expect_s3_class(result, "swimmerplotResults")
 })
 
 test_that("swimmerplot handles event times beyond end time", {
@@ -187,7 +187,7 @@ test_that("swimmerplot handles event times beyond end time", {
     eventTimeVar = "EventTime"
   )
 
-  expect_s3_class(result, "swimmerplotClass")
+  expect_s3_class(result, "swimmerplotResults")
 })
 
 test_that("swimmerplot handles special characters in patient IDs", {
@@ -202,7 +202,7 @@ test_that("swimmerplot handles special characters in patient IDs", {
     endTime = "EndTime"
   )
 
-  expect_s3_class(result, "swimmerplotClass")
+  expect_s3_class(result, "swimmerplotResults")
 })
 
 test_that("swimmerplot handles very long patient IDs", {
@@ -218,7 +218,7 @@ test_that("swimmerplot handles very long patient IDs", {
     endTime = "EndTime"
   )
 
-  expect_s3_class(result, "swimmerplotClass")
+  expect_s3_class(result, "swimmerplotResults")
 })
 
 test_that("swimmerplot handles duplicate patient IDs (should warn)", {
@@ -242,7 +242,7 @@ test_that("swimmerplot handles duplicate patient IDs (should warn)", {
 
   # Either completes with warning or errors
   if (!is.null(result)) {
-    expect_s3_class(result, "swimmerplotClass")
+    expect_s3_class(result, "swimmerplotResults")
   }
 })
 
@@ -259,7 +259,7 @@ test_that("swimmerplot handles negative start times", {
     endTime = "EndTime"
   )
 
-  expect_s3_class(result, "swimmerplotClass")
+  expect_s3_class(result, "swimmerplotResults")
 })
 
 test_that("swimmerplot handles all missing event variables", {
@@ -276,7 +276,7 @@ test_that("swimmerplot handles all missing event variables", {
     eventTimeVar = "EventTime"
   )
 
-  expect_s3_class(result, "swimmerplotClass")
+  expect_s3_class(result, "swimmerplotResults")
 })
 
 test_that("swimmerplot handles all missing milestones", {
@@ -289,11 +289,11 @@ test_that("swimmerplot handles all missing milestones", {
     patientID = "PatientID",
     startTime = "StartTime",
     endTime = "EndTime",
-    milestone1 = "Progression",
-    milestone1_name = "Progression"
+    milestone1Date = "Progression",
+    milestone1Name = "Progression"
   )
 
-  expect_s3_class(result, "swimmerplotClass")
+  expect_s3_class(result, "swimmerplotResults")
 })
 
 test_that("swimmerplot handles mixed response types (factor vs character)", {
@@ -309,7 +309,7 @@ test_that("swimmerplot handles mixed response types (factor vs character)", {
     responseVar = "Response"
   )
 
-  expect_s3_class(result, "swimmerplotClass")
+  expect_s3_class(result, "swimmerplotResults")
 })
 
 test_that("swimmerplot handles very large datasets", {
@@ -331,7 +331,7 @@ test_that("swimmerplot handles very large datasets", {
     responseVar = "Response"
   )
 
-  expect_s3_class(result, "swimmerplotClass")
+  expect_s3_class(result, "swimmerplotResults")
 })
 
 test_that("swimmerplot handles zero duration (start equals end)", {
@@ -347,5 +347,5 @@ test_that("swimmerplot handles zero duration (start equals end)", {
   )
 
   # Should handle gracefully
-  expect_s3_class(result, "swimmerplotClass")
+  expect_s3_class(result, "swimmerplotResults")
 })

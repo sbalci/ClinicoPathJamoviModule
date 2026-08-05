@@ -30,8 +30,8 @@ test_that("swimmerplot produces consistent results across runs", {
   )
 
   # Results should be identical (no randomness)
-  expect_s3_class(result1, "swimmerplotClass")
-  expect_s3_class(result2, "swimmerplotClass")
+  expect_s3_class(result1, "swimmerplotResults")
+  expect_s3_class(result2, "swimmerplotResults")
 })
 
 test_that("swimmerplot workflow: basic → comprehensive visualization", {
@@ -43,7 +43,7 @@ test_that("swimmerplot workflow: basic → comprehensive visualization", {
     endTime = "EndTime"
   )
 
-  expect_s3_class(basic_result, "swimmerplotClass")
+  expect_s3_class(basic_result, "swimmerplotResults")
 
   # Step 2: Add response
   response_result <- swimmerplot(
@@ -54,7 +54,7 @@ test_that("swimmerplot workflow: basic → comprehensive visualization", {
     responseVar = "Response"
   )
 
-  expect_s3_class(response_result, "swimmerplotClass")
+  expect_s3_class(response_result, "swimmerplotResults")
 
   # Step 3: Add milestones
   milestone_result <- swimmerplot(
@@ -63,13 +63,13 @@ test_that("swimmerplot workflow: basic → comprehensive visualization", {
     startTime = "StartTime",
     endTime = "EndTime",
     responseVar = "Response",
-    milestone1 = "TreatmentStart",
-    milestone1_name = "Treatment",
-    milestone2 = "FirstAssessment",
-    milestone2_name = "Assessment"
+    milestone1Date = "TreatmentStart",
+    milestone1Name = "Treatment",
+    milestone2Date = "FirstAssessment",
+    milestone2Name = "Assessment"
   )
 
-  expect_s3_class(milestone_result, "swimmerplotClass")
+  expect_s3_class(milestone_result, "swimmerplotResults")
 
   # Step 4: Comprehensive
   comprehensive_result <- swimmerplot(
@@ -78,20 +78,20 @@ test_that("swimmerplot workflow: basic → comprehensive visualization", {
     startTime = "StartTime",
     endTime = "EndTime",
     responseVar = "Response",
-    milestone1 = "TreatmentStart",
-    milestone1_name = "Treatment",
-    milestone2 = "FirstAssessment",
-    milestone2_name = "Assessment",
-    milestone3 = "Progression",
-    milestone3_name = "Progression",
+    milestone1Date = "TreatmentStart",
+    milestone1Name = "Treatment",
+    milestone2Date = "FirstAssessment",
+    milestone2Name = "Assessment",
+    milestone3Date = "Progression",
+    milestone3Name = "Progression",
     eventVar = "AdverseEvent",
     eventTimeVar = "EventTime",
     groupVar = "TreatmentArm",
     censorVar = "Censored",
-    sortBy = "duration"
+    sortOrder = "duration_desc"
   )
 
-  expect_s3_class(comprehensive_result, "swimmerplotClass")
+  expect_s3_class(comprehensive_result, "swimmerplotResults")
 })
 
 test_that("swimmerplot handles data from CSV import", {
@@ -110,7 +110,7 @@ test_that("swimmerplot handles data from CSV import", {
     responseVar = "Response"
   )
 
-  expect_s3_class(result, "swimmerplotClass")
+  expect_s3_class(result, "swimmerplotResults")
 
   # Clean up
   unlink(temp_csv)
@@ -132,7 +132,7 @@ test_that("swimmerplot handles data from Excel import", {
     responseVar = "Response"
   )
 
-  expect_s3_class(result, "swimmerplotClass")
+  expect_s3_class(result, "swimmerplotResults")
 
   # Clean up
   unlink(temp_xlsx)
@@ -151,7 +151,7 @@ test_that("swimmerplot handles different data structures consistently", {
     responseVar = "Response"
   )
 
-  expect_s3_class(result_tibble, "swimmerplotClass")
+  expect_s3_class(result_tibble, "swimmerplotResults")
 
   # Test with data.frame
   df_data <- as.data.frame(swimmerplot_test)
@@ -164,7 +164,7 @@ test_that("swimmerplot handles different data structures consistently", {
     responseVar = "Response"
   )
 
-  expect_s3_class(result_df, "swimmerplotClass")
+  expect_s3_class(result_df, "swimmerplotResults")
 })
 
 test_that("swimmerplot workflow: immunotherapy trial visualization", {
@@ -179,7 +179,7 @@ test_that("swimmerplot workflow: immunotherapy trial visualization", {
     responseVar = "Response"
   )
 
-  expect_s3_class(initial, "swimmerplotClass")
+  expect_s3_class(initial, "swimmerplotResults")
 
   # Step 2: Add immune-related adverse events
   with_events <- swimmerplot(
@@ -192,7 +192,7 @@ test_that("swimmerplot workflow: immunotherapy trial visualization", {
     eventTimeVar = "irAE_Time"
   )
 
-  expect_s3_class(with_events, "swimmerplotClass")
+  expect_s3_class(with_events, "swimmerplotResults")
 
   # Step 3: Complete analysis with PD-L1 grouping
   complete <- swimmerplot(
@@ -201,20 +201,20 @@ test_that("swimmerplot workflow: immunotherapy trial visualization", {
     startTime = "StartTime",
     endTime = "EndTime",
     responseVar = "Response",
-    milestone1 = "ImmunotherapyStart",
-    milestone1_name = "IO Start",
-    milestone2 = "FirstResponse",
-    milestone2_name = "First Response",
-    milestone3 = "ConfirmedResponse",
-    milestone3_name = "Confirmed",
+    milestone1Date = "ImmunotherapyStart",
+    milestone1Name = "IO Start",
+    milestone2Date = "FirstResponse",
+    milestone2Name = "First Response",
+    milestone3Date = "ConfirmedResponse",
+    milestone3Name = "Confirmed",
     eventVar = "irAE",
     eventTimeVar = "irAE_Time",
     groupVar = "PDL1_Status",
     censorVar = "Censored",
-    sortBy = "duration"
+    sortOrder = "duration_desc"
   )
 
-  expect_s3_class(complete, "swimmerplotClass")
+  expect_s3_class(complete, "swimmerplotResults")
 })
 
 test_that("swimmerplot workflow: surgical outcomes tracking", {
@@ -230,7 +230,7 @@ test_that("swimmerplot workflow: surgical outcomes tracking", {
     responseVar = "Outcome"
   )
 
-  expect_s3_class(basic, "swimmerplotClass")
+  expect_s3_class(basic, "swimmerplotResults")
 
   # Step 2: Add key milestones
   with_milestones <- swimmerplot(
@@ -239,15 +239,15 @@ test_that("swimmerplot workflow: surgical outcomes tracking", {
     startTime = "StartTime",
     endTime = "EndTime",
     responseVar = "Outcome",
-    milestone1 = "SurgeryDate",
-    milestone1_name = "Surgery",
-    milestone2 = "Discharge",
-    milestone2_name = "Discharge",
-    milestone3 = "FirstVisit",
-    milestone3_name = "Follow-up"
+    milestone1Date = "SurgeryDate",
+    milestone1Name = "Surgery",
+    milestone2Date = "Discharge",
+    milestone2Name = "Discharge",
+    milestone3Date = "FirstVisit",
+    milestone3Name = "Follow-up"
   )
 
-  expect_s3_class(with_milestones, "swimmerplotClass")
+  expect_s3_class(with_milestones, "swimmerplotResults")
 
   # Step 3: Complete with complications and grouping
   complete <- swimmerplot(
@@ -256,20 +256,20 @@ test_that("swimmerplot workflow: surgical outcomes tracking", {
     startTime = "StartTime",
     endTime = "EndTime",
     responseVar = "Outcome",
-    milestone1 = "SurgeryDate",
-    milestone1_name = "Surgery",
-    milestone2 = "Discharge",
-    milestone2_name = "Discharge",
-    milestone3 = "FirstVisit",
-    milestone3_name = "Follow-up",
-    milestone4 = "ComplicationDate",
-    milestone4_name = "Complication",
+    milestone1Date = "SurgeryDate",
+    milestone1Name = "Surgery",
+    milestone2Date = "Discharge",
+    milestone2Name = "Discharge",
+    milestone3Date = "FirstVisit",
+    milestone3Name = "Follow-up",
+    milestone4Date = "ComplicationDate",
+    milestone4Name = "Complication",
     eventVar = "ComplicationType",
     eventTimeVar = "ComplicationDate",
     groupVar = "SurgeryType"
   )
 
-  expect_s3_class(complete, "swimmerplotClass")
+  expect_s3_class(complete, "swimmerplotResults")
 })
 
 test_that("swimmerplot workflow: comparative trial arms", {
@@ -285,7 +285,7 @@ test_that("swimmerplot workflow: comparative trial arms", {
     responseVar = "Response"
   )
 
-  expect_s3_class(overall, "swimmerplotClass")
+  expect_s3_class(overall, "swimmerplotResults")
 
   # Step 2: Group-stratified view
   grouped <- swimmerplot(
@@ -295,10 +295,10 @@ test_that("swimmerplot workflow: comparative trial arms", {
     endTime = "EndTime",
     responseVar = "Response",
     groupVar = "Group",
-    sortBy = "duration"
+    sortOrder = "duration_desc"
   )
 
-  expect_s3_class(grouped, "swimmerplotClass")
+  expect_s3_class(grouped, "swimmerplotResults")
 
   # Step 3: Complete with all features
   complete <- swimmerplot(
@@ -307,24 +307,23 @@ test_that("swimmerplot workflow: comparative trial arms", {
     startTime = "StartTime",
     endTime = "EndTime",
     responseVar = "Response",
-    milestone1 = "TreatmentStart",
-    milestone1_name = "Start",
-    milestone2 = "FirstAssessment",
-    milestone2_name = "Assessment",
-    milestone3 = "BestResponse",
-    milestone3_name = "Best Response",
-    milestone4 = "Progression",
-    milestone4_name = "Progression",
+    milestone1Date = "TreatmentStart",
+    milestone1Name = "Start",
+    milestone2Date = "FirstAssessment",
+    milestone2Name = "Assessment",
+    milestone3Date = "BestResponse",
+    milestone3Name = "Best Response",
+    milestone4Date = "Progression",
+    milestone4Name = "Progression",
     eventVar = "AdverseEvent",
     eventTimeVar = "EventTime",
     groupVar = "Group",
     censorVar = "Censored",
-    sortBy = "duration",
-    showReferenceLine = TRUE,
-    referenceLineValue = 180
+    sortOrder = "duration_desc",
+    referenceLines = "median"
   )
 
-  expect_s3_class(complete, "swimmerplotClass")
+  expect_s3_class(complete, "swimmerplotResults")
 })
 
 test_that("swimmerplot handles clinical scenarios: long-term responders", {
@@ -341,7 +340,7 @@ test_that("swimmerplot handles clinical scenarios: long-term responders", {
       timeUnit = "months"
     )
 
-    expect_s3_class(result, "swimmerplotClass")
+    expect_s3_class(result, "swimmerplotResults")
   }
 })
 
@@ -359,7 +358,7 @@ test_that("swimmerplot handles clinical scenarios: early progressors", {
       responseVar = "Response"
     )
 
-    expect_s3_class(result, "swimmerplotClass")
+    expect_s3_class(result, "swimmerplotResults")
   }
 })
 
@@ -383,25 +382,21 @@ test_that("swimmerplot handles publication-ready formatting", {
     startTime = "StartTime",
     endTime = "EndTime",
     responseVar = "Response",
-    milestone1 = "TreatmentStart",
-    milestone1_name = "Treatment Initiation",
-    milestone2 = "FirstAssessment",
-    milestone2_name = "First Response Assessment",
-    milestone3 = "BestResponse",
-    milestone3_name = "Best Response",
+    milestone1Date = "TreatmentStart",
+    milestone1Name = "Treatment Initiation",
+    milestone2Date = "FirstAssessment",
+    milestone2Name = "First Response Assessment",
+    milestone3Date = "BestResponse",
+    milestone3Name = "Best Response",
     eventVar = "AdverseEvent",
     eventTimeVar = "EventTime",
     groupVar = "TreatmentArm",
     censorVar = "Censored",
-    sortBy = "duration",
-    colorPalette = "Set2",
-    plotTitle = "Clinical Trial: Patient Follow-up Timeline",
-    xAxisTitle = "Time Since Enrollment (Days)",
-    yAxisTitle = "Patient Identifier",
+    sortOrder = "duration_desc",
+    colorPalette = "viridis",
     showLegend = TRUE,
-    showReferenceLine = TRUE,
-    referenceLineValue = 180
+    referenceLines = "median"
   )
 
-  expect_s3_class(result, "swimmerplotClass")
+  expect_s3_class(result, "swimmerplotResults")
 })

@@ -44,6 +44,16 @@ children:
       - type: LayoutBox
         margin: large
         children:
+          - type: ComboBox
+            name: hazards
+          - type: TextBox
+            name: delayMonths
+            format: number
+            enable: (hazards:nonproportional)
+          - type: TextBox
+            name: hrDelayed
+            format: number
+            enable: (hazards:nonproportional)
           - type: TextBox
             name: hr
             format: number

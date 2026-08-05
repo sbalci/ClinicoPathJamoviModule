@@ -181,6 +181,8 @@ items:
         - inputType
         # timeVar changes how percent change is derived, so it changes the bars
         - timeVar
+        - annotationVars
+        - showCategoryLabels
 
     - name: copyReadyReport
       title: Copy-Ready Report Sentences

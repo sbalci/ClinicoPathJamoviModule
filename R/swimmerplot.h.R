@@ -532,6 +532,7 @@ swimmerplotResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
                 renderFun=".plot",
                 requiresData=TRUE,
                 clearWith=list(
+                    "maxMilestones",
                     "patientID",
                     "startTime",
                     "endTime",
@@ -542,10 +543,15 @@ swimmerplotResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
                     "timeUnit",
                     "timeDisplay",
                     "milestone1Date",
+                    "milestone1Name",
                     "milestone2Date",
+                    "milestone2Name",
                     "milestone3Date",
+                    "milestone3Name",
                     "milestone4Date",
+                    "milestone4Name",
                     "milestone5Date",
+                    "milestone5Name",
                     "showEventMarkers",
                     "eventVar",
                     "eventTimeVar",
@@ -658,6 +664,7 @@ swimmerplotResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
                         `title`="Time Range", 
                         `type`="text")),
                 clearWith=list(
+                    "maxMilestones",
                     "milestone1Date",
                     "milestone2Date",
                     "milestone3Date",
@@ -698,12 +705,33 @@ swimmerplotResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
                     "eventVar",
                     "eventTimeVar",
                     "timeUnit")))
-            self$add(jmvcore::Output$new(
+            self$add(jmvcore::Table$new(
                 options=options,
                 name="timelineData",
                 title="Export Timeline Data",
-                varTitle="Timeline Data",
-                varDescription="Processed timeline data for external analysis",
+                visible="(exportTimeline)",
+                rows=0,
+                columns=list(
+                    list(
+                        `name`="patient_id", 
+                        `title`="Patient ID", 
+                        `type`="text"),
+                    list(
+                        `name`="start_time", 
+                        `title`="Start", 
+                        `type`="number"),
+                    list(
+                        `name`="end_time", 
+                        `title`="End", 
+                        `type`="number"),
+                    list(
+                        `name`="duration", 
+                        `title`="Duration", 
+                        `type`="number"),
+                    list(
+                        `name`="response", 
+                        `title`="Best Response", 
+                        `type`="text")),
                 clearWith=list(
                     "exportTimeline",
                     "patientID",
@@ -711,19 +739,30 @@ swimmerplotResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
                     "endTime",
                     "responseVar",
                     "timeType",
-                    "timeUnit")))
-            self$add(jmvcore::Output$new(
+                    "timeUnit",
+                    "timeDisplay")))
+            self$add(jmvcore::Table$new(
                 options=options,
                 name="summaryData",
                 title="Export Summary Statistics",
-                varTitle="Summary Statistics",
-                varDescription="Comprehensive summary statistics and clinical metrics",
+                visible="(exportSummary)",
+                rows=0,
+                columns=list(
+                    list(
+                        `name`="metric", 
+                        `title`="Metric", 
+                        `type`="text"),
+                    list(
+                        `name`="value", 
+                        `title`="Value", 
+                        `type`="number")),
                 clearWith=list(
                     "exportSummary",
                     "patientID",
                     "startTime",
                     "endTime",
                     "responseVar",
+                    "timeUnit",
                     "personTimeAnalysis",
                     "responseAnalysis")))
             self$add(jmvcore::Html$new(
@@ -939,8 +978,8 @@ swimmerplotBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   \code{results$personTimeTable} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$milestoneTable} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$eventMarkerTable} \tab \tab \tab \tab \tab a table \cr
-#'   \code{results$timelineData} \tab \tab \tab \tab \tab an output \cr
-#'   \code{results$summaryData} \tab \tab \tab \tab \tab an output \cr
+#'   \code{results$timelineData} \tab \tab \tab \tab \tab a table \cr
+#'   \code{results$summaryData} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$exportInfo} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$validationReport} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$advancedMetrics} \tab \tab \tab \tab \tab a table \cr

@@ -58,17 +58,17 @@ children:
             maxItemCount: 1
             isTarget: true
       - type: TargetLayoutBox
-        label: Target Lesion Selection (optional)
-        children:
-          - type: VariablesListBox
-            name: targetSelectionVar
-            maxItemCount: 1
-            isTarget: true
-      - type: TargetLayoutBox
         label: Non-Target Response (radiologist assessment)
         children:
           - type: VariablesListBox
             name: nonTargetResponseVar
+            maxItemCount: 1
+            isTarget: true
+      - type: TargetLayoutBox
+        label: Target Lesion Selection (optional override)
+        children:
+          - type: VariablesListBox
+            name: targetSelectionVar
             maxItemCount: 1
             isTarget: true
   - type: LayoutBox

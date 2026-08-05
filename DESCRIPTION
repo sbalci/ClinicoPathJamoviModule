@@ -2,7 +2,7 @@ Type: Package
 Package: ClinicoPath
 Title: Comprehensive Analysis for Clinicopathological Research
 Version: 1.0.3
-Date: 2026-08-04
+Date: 2026-08-05
 Authors@R: person(given = "Serdar", family = "Balci", role = c("aut", "cre", "cph"), email = "serdarbalci@serdarbalci.com", comment = c(ORCID = "0000-0002-7852-3851"))
 Maintainer: Serdar Balci <serdarbalci@serdarbalci.com>
 Description: Provides a comprehensive jamovi module designed specifically
@@ -50,7 +50,7 @@ Imports: aftgee, arsenal, assertions, BART, base64enc, BayesFactor, bayesplot,
         ggsci, ggsegmentedtotalbar, ggside, ggsignif, ggstats, ggstatsplot,
         ggstream, ggswim, ggvenn, ggVennDiagram, giscoR, glmmTMB, glmnet, glue,
         GPArotation, grafify, graphics, grDevices, grid, gridExtra, grpreg,
-        gsDesign, gt, gtExtras, gtsummary, haven, hdmax2, Hmisc, hrbrthemes,
+        gsDesign, gsDesign2, gt, gtExtras, gtsummary, haven, hdmax2, Hmisc, hrbrthemes,
         htmlTable, htmltools, htmlwidgets, httr, huge, icenReg, Icens, igraph,
         insight, interval, irr, irrCAC, janitor, JMbayes2, jmvcore, joineR,
         jsonlite, jtools, kableExtra, kappaSize, Kendall, KernSmooth, kknn,
@@ -685,6 +685,8 @@ Collate:
     'pathsampling.h.R'
     'patientdashboard.b.R'
     'patientdashboard.h.R'
+    'patientfollowupintro.b.R'
+    'patientfollowupintro.h.R'
     'patientreported.b.R'
     'patientreported.h.R'
     'patientsimilarity.b.R'

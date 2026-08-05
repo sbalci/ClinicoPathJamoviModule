@@ -15,6 +15,9 @@ gsdesignOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             sfupar = -4,
             timing = "",
             testType = "efficacy",
+            hazards = "proportional",
+            delayMonths = 3,
+            hrDelayed = 1,
             hr = 0.7,
             medianControl = 12,
             accrualDuration = 12,
@@ -89,6 +92,25 @@ gsdesignOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "efficacy",
                     "efffut"),
                 default="efficacy")
+            private$..hazards <- jmvcore::OptionList$new(
+                "hazards",
+                hazards,
+                options=list(
+                    "proportional",
+                    "nonproportional"),
+                default="proportional")
+            private$..delayMonths <- jmvcore::OptionNumber$new(
+                "delayMonths",
+                delayMonths,
+                default=3,
+                min=0,
+                max=60)
+            private$..hrDelayed <- jmvcore::OptionNumber$new(
+                "hrDelayed",
+                hrDelayed,
+                default=1,
+                min=0.1,
+                max=3)
             private$..hr <- jmvcore::OptionNumber$new(
                 "hr",
                 hr,
@@ -153,6 +175,9 @@ gsdesignOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             self$.addOption(private$..sfupar)
             self$.addOption(private$..timing)
             self$.addOption(private$..testType)
+            self$.addOption(private$..hazards)
+            self$.addOption(private$..delayMonths)
+            self$.addOption(private$..hrDelayed)
             self$.addOption(private$..hr)
             self$.addOption(private$..medianControl)
             self$.addOption(private$..accrualDuration)
@@ -174,6 +199,9 @@ gsdesignOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         sfupar = function() private$..sfupar$value,
         timing = function() private$..timing$value,
         testType = function() private$..testType$value,
+        hazards = function() private$..hazards$value,
+        delayMonths = function() private$..delayMonths$value,
+        hrDelayed = function() private$..hrDelayed$value,
         hr = function() private$..hr$value,
         medianControl = function() private$..medianControl$value,
         accrualDuration = function() private$..accrualDuration$value,
@@ -194,6 +222,9 @@ gsdesignOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         ..sfupar = NA,
         ..timing = NA,
         ..testType = NA,
+        ..hazards = NA,
+        ..delayMonths = NA,
+        ..hrDelayed = NA,
         ..hr = NA,
         ..medianControl = NA,
         ..accrualDuration = NA,
@@ -275,6 +306,9 @@ gsdesignResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "timing",
                     "testType",
                     "hr",
+                    "hazards",
+                    "delayMonths",
+                    "hrDelayed",
                     "medianControl",
                     "accrualDuration",
                     "followupDuration",
@@ -303,6 +337,9 @@ gsdesignResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "timing",
                     "testType",
                     "hr",
+                    "hazards",
+                    "delayMonths",
+                    "hrDelayed",
                     "medianControl",
                     "accrualDuration",
                     "followupDuration",
@@ -353,6 +390,19 @@ gsdesignBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' @param sfupar .
 #' @param timing .
 #' @param testType .
+#' @param hazards Whether the hazard ratio is assumed constant over time.
+#'   Under "proportional" the design uses gsDesign::gsSurv with the single
+#'   hazard ratio below. Under "non-proportional" it uses
+#'   gsDesign2::gs_design_ahr with an average hazard ratio, for the
+#'   delayed-separation pattern typical of immunotherapy: no treatment effect
+#'   for an initial period, then the hazard ratio below. Assuming proportional
+#'   hazards when the curves separate late understates the events required.
+#' @param delayMonths Non-proportional hazards only. Months from randomisation
+#'   during which the treatment has no effect (hazard ratio held at the value
+#'   below), before the full hazard ratio applies.
+#' @param hrDelayed Non-proportional hazards only. The hazard ratio during the
+#'   delay period. 1 means no treatment effect at all until the delay has
+#'   elapsed.
 #' @param hr .
 #' @param medianControl .
 #' @param accrualDuration .
@@ -388,6 +438,9 @@ gsdesign <- function(
     sfupar = -4,
     timing = "",
     testType = "efficacy",
+    hazards = "proportional",
+    delayMonths = 3,
+    hrDelayed = 1,
     hr = 0.7,
     medianControl = 12,
     accrualDuration = 12,
@@ -417,6 +470,9 @@ gsdesign <- function(
         sfupar = sfupar,
         timing = timing,
         testType = testType,
+        hazards = hazards,
+        delayMonths = delayMonths,
+        hrDelayed = hrDelayed,
         hr = hr,
         medianControl = medianControl,
         accrualDuration = accrualDuration,

@@ -14,6 +14,7 @@ waterfallrecist(
   diameter = NULL,
   isNewLesion = NULL,
   nonTargetResponseVar = NULL,
+  targetSelectionVar = NULL,
   baselineTimepoint = 0,
   confirmationInterval = 4,
   maxTargetLesions = 5,
@@ -68,6 +69,16 @@ this variable the analysis falls back to a lesion-count heuristic (an
 increase of two or more non-target lesions is called progression), which is
 NOT the RECIST criterion and may both miss and over-call progression.
 Supplying this variable is the RECIST-correct route.}
+
+\item{targetSelectionVar}{Optional per-lesion flag marking the lesions the
+reporting radiologist chose as target lesions (Yes/No, 1/0, TRUE/FALSE or
+"Target"). When supplied it is used verbatim and automatic selection is not
+applied. By default the analysis follows RECIST v1.1 and selects the
+LARGEST lesions within the limits (at most 5 in total, at most 2 per
+organ); the remainder are followed as non-target disease. RECIST also
+requires a target lesion to be reproducibly measurable, which is a
+radiological judgement size alone cannot establish, so use this variable
+whenever the reader's own choice differs from the largest-first default.}
 
 \item{baselineTimepoint}{Value of visitTime representing baseline (default
 = 0). All lesions at this timepoint establish the baseline sum.}

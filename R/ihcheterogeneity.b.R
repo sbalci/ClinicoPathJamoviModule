@@ -13,7 +13,12 @@ ihcheterogeneityClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cl
             CORRELATION_MODERATE = 0.70,    # Moderate correlation threshold
             CORRELATION_POOR = 0.60,        # Poor correlation threshold
             MIN_CASES_ICC = 3,              # Minimum cases for ICC calculation
-            MIN_CASES_ANALYSIS = 5          # Minimum cases for analysis
+            MIN_CASES_ANALYSIS = 5,         # Minimum cases for analysis
+            # A statistically significant offset is not automatically a clinically
+            # important one; require it to exceed this share of the reference mean
+            # before it vetoes the adequacy verdict. 5% matches the "Minimal (<5%)"
+            # band the sampling-bias table already uses for clinical impact.
+            RELATIVE_BIAS_MATERIAL = 5
         ),
 
         .repro_stats = NULL,
@@ -23,6 +28,58 @@ ihcheterogeneityClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cl
         # clobbered (Html $state is always NULL and cannot be read back).
         .warnings_html = NULL,
         .strategy_notes = NULL,
+
+        .icc_consistency = NULL,
+
+        # Per-case coefficient of variation - ONE definition, used everywhere.
+        #
+        # The reproducibility table computed this from the regional columns only
+        # while .calculateInterpretationMetrics() folded the reference measurement
+        # into each case. The two numbers then disagreed on the same screen: the
+        # table read "Mean CV = 23.19 / High variability" while the copy-ready
+        # sentence read "moderate (mean CV = 20%)" and the assessment box read
+        # "ADEQUATE SAMPLING". When a reference exists it MUST be included - the
+        # question is whether a region reproduces the whole section, so excluding
+        # the whole section makes a systematic under-read invisible (a 30%
+        # under-read showed as 1.2% variability).
+        # Systematic difference as a percentage of the reference mean.
+        # Paired t-test that cannot abort the analysis.
+        #
+        # t.test(paired=TRUE) errors with "data are essentially constant" when the
+        # difference vector has zero variance - routine when scores are binned to
+        # whole percentages and every case shows the same offset. The error was
+        # unguarded in four places and took the WHOLE analysis down.
+        .safePairedT = function(x, y) {
+            d <- x - y
+            d <- d[!is.na(d)]
+            if (length(d) < 2)
+                return(list(estimate = if (length(d)) d[1] else NA_real_, p.value = NA_real_))
+            if (stats::sd(d) < .Machine$double.eps * max(1, abs(mean(d))))
+                return(list(estimate = mean(d),
+                            p.value = if (abs(mean(d)) > 0) 0 else NA_real_))
+            tryCatch(stats::t.test(x, y, paired = TRUE),
+                     error = function(e) list(estimate = mean(d), p.value = NA_real_))
+        },
+
+        .relativeBias = function(metrics) {
+            if (is.null(metrics$mean_bias) || is.na(metrics$mean_bias) ||
+                is.null(metrics$ref_mean) || is.na(metrics$ref_mean) ||
+                abs(metrics$ref_mean) < 1e-6) return(NA_real_)
+            abs(metrics$mean_bias) / abs(metrics$ref_mean) * 100
+        },
+
+        .perCaseCV = function(whole_section, biopsy_data, has_reference) {
+            if (nrow(biopsy_data) == 0) return(numeric(0))
+            rows <- split(as.data.frame(biopsy_data), seq_len(nrow(biopsy_data)))
+            if (has_reference && !is.null(whole_section)) {
+                as.numeric(mapply(function(w, r)
+                    private$.calculateRobustCV(c(w, as.numeric(r))),
+                    whole_section, rows))
+            } else {
+                as.numeric(vapply(rows, function(r)
+                    private$.calculateRobustCV(as.numeric(r)), numeric(1)))
+            }
+        },
 
         .calculateRobustCV = function(values) {
             # Robust CV calculation with safeguards against division by near-zero means
@@ -456,13 +513,40 @@ ihcheterogeneityClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cl
             }
 
             if (!is.na(icc_value)) {
+                # Label the row for what was ACTUALLY computed. Five fallback
+                # paths in .calculateICC return the mean Spearman correlation
+                # rather than an ICC; that value used to be printed under the
+                # "ICC(3,1)" heading and graded on ICC reliability cut-offs, so a
+                # mean rank correlation was presented to the pathologist as a
+                # reliability coefficient.
+                is_icc <- identical(icc_result$method, "icc")
                 repro_table$addRow(rowKey = 2, values = list(
-                    metric = "ICC(3,1) - All Methods",
+                    metric = if (is_icc) "ICC(2,1) - absolute agreement"
+                             else "Mean correlation (ICC not estimable)",
                     value = icc_value,
                     ci_lower = icc_lower,
                     ci_upper = icc_upper,
-                    interpretation = ifelse(icc_value >= 0.75, "Good reliability", 
-                                           ifelse(icc_value >= 0.50, "Moderate reliability", "Poor reliability"))
+                    interpretation = if (!is_icc) {
+                        "Not an ICC - see note"
+                    } else ifelse(icc_value >= 0.75, "Good reliability",
+                                 ifelse(icc_value >= 0.50, "Moderate reliability", "Poor reliability"))
+                ))
+                if (!is_icc) {
+                    repro_table$setNote("icc_fallback", .("The intraclass correlation could not be estimated (too few complete cases or measurements, zero variance, or the 'psych' package is unavailable). The value shown is the mean Spearman correlation, which is NOT an ICC: it is blind to systematic differences between measurements. Do not interpret it as a reliability coefficient."))
+                }
+            }
+
+            # Report the consistency form alongside absolute agreement. They
+            # differ exactly when there is a systematic offset between the region
+            # and the reference, which is the finding that matters clinically.
+            if (!is.null(private$.icc_consistency) &&
+                !is.na(private$.icc_consistency$value)) {
+                repro_table$addRow(rowKey = 21, values = list(
+                    metric = "ICC(3,1) - consistency (bias-blind)",
+                    value = private$.icc_consistency$value,
+                    ci_lower = private$.icc_consistency$lower,
+                    ci_upper = private$.icc_consistency$upper,
+                    interpretation = .("Ignores systematic offset; compare with absolute agreement above")
                 ))
             }
             
@@ -477,20 +561,26 @@ ihcheterogeneityClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cl
                 ))
             }
             
-            # Coefficient of variation (robust calculation)
-            cv_values <- apply(biopsy_data, 1, private$.calculateRobustCV)
+            # Coefficient of variation (robust calculation) - shared helper so the
+            # table and the narrative can never report different CVs.
+            cv_values <- private$.perCaseCV(whole_section, biopsy_data, has_reference)
             mean_cv <- mean(cv_values, na.rm = TRUE)
             if (is.nan(mean_cv) || is.infinite(mean_cv)) mean_cv <- NA
             
             repro_table$addRow(rowKey = 4, values = list(
-                metric = "Mean Coefficient of Variation (%)",
+                metric = if (has_reference) "Mean Coefficient of Variation (%) - region vs reference"
+                         else "Mean Coefficient of Variation (%) - between regions",
                 value = mean_cv,
                 ci_lower = NA,
                 ci_upper = NA,
                 interpretation = ifelse(mean_cv <= cv_threshold/2, "Low variability", 
                                        ifelse(mean_cv <= cv_threshold, "Moderate variability", "High variability"))
             ))
-            return(list(icc_value = icc_value, correlations = correlations, mean_inter_biopsy = mean_inter_biopsy))
+            # icc_method lets downstream prose say "ICC" only when an ICC was
+            # actually estimated; mean_cv is exported so nothing recomputes it.
+            return(list(icc_value = icc_value, correlations = correlations,
+                        mean_inter_biopsy = mean_inter_biopsy,
+                        icc_method = icc_result$method, mean_cv = mean_cv))
         },
         
         .analyzeSamplingBias = function(whole_section, biopsy_data) {
@@ -510,7 +600,7 @@ ihcheterogeneityClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cl
                         biopsy_complete <- biopsy_vals[complete_pairs]
                         
                         # Paired t-test for systematic bias
-                        bias_test <- t.test(biopsy_complete, ws_complete, paired = TRUE)
+                        bias_test <- private$.safePairedT(biopsy_complete, ws_complete)
                         mean_diff <- bias_test$estimate
                         p_value <- bias_test$p.value
                         
@@ -557,7 +647,7 @@ ihcheterogeneityClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cl
                     complete_pairs <- complete.cases(whole_section, biopsy_means)
                     
                     if (sum(complete_pairs) >= 3) {
-                        overall_test <- t.test(biopsy_means[complete_pairs], whole_section[complete_pairs], paired = TRUE)
+                        overall_test <- private$.safePairedT(biopsy_means[complete_pairs], whole_section[complete_pairs])
                         overall_diff <- overall_test$estimate
                         overall_p <- overall_test$p.value
                         
@@ -595,6 +685,14 @@ ihcheterogeneityClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cl
                         ))
                     }
                 }
+                # Up to five paired t-tests are reported here (one per region plus
+                # the pooled comparison) with unadjusted p-values. Say so, rather
+                # than letting a reader treat each p < 0.05 as independent evidence.
+                if (row_key > 2) {
+                    bias_table$setNote("multiplicity", sprintf(
+                        .("%d paired comparisons are reported; p-values are unadjusted. With several regions the chance of at least one p < 0.05 under no true bias exceeds 5%% - interpret individual p-values accordingly, and prefer the mean difference and its clinical impact over statistical significance alone."),
+                        row_key - 1))
+                }
             } else {
                 # If no reference section, bias analysis is not applicable in this context
                 bias_table$addRow(rowKey = 1, values = list(
@@ -608,79 +706,136 @@ ihcheterogeneityClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cl
         },
         
         .analyzeVarianceComponents = function(whole_section, biopsy_data) {
-            # Variance component analysis to understand sources of variability
+            # Variance components from a TWO-WAY random-effects decomposition.
+            #
+            #     value_ij = mu + case_i + method_j + e_ij
+            #
+            # The previous implementation reported three quantities that were not
+            # components of a common total: "between-case" was var(whole_section),
+            # "within-case" the mean of per-row variances, "method" the variance of
+            # column means - each divided by the variance of ALL values POOLED.
+            # Those are not orthogonal, so they did not sum to the total: on a
+            # 20-case example the between-case row read 102.3% of total and the
+            # three percentages summed to 107.5%, under a row explicitly labelled
+            # "Sum of all variance components". A variance component larger than
+            # the total variance is not interpretable.
+            #
+            # Expected mean squares for the balanced two-way random model give
+            #     sigma^2_case   = (MS_case   - MS_error) / k
+            #     sigma^2_method = (MS_method - MS_error) / n
+            #     sigma^2_error  =  MS_error
+            # which do sum to the total variance, so the percentages sum to 100.
             has_reference <- !is.null(whole_section)
-
-            biopsy_matrix <- as.matrix(biopsy_data)
-            all_values <- as.numeric(biopsy_matrix)
-            if (has_reference) {
-                all_values <- c(whole_section, all_values)
-            }
-            all_values <- all_values[!is.na(all_values)]
-
-            total_variance <- if (length(all_values) >= 2) var(all_values, na.rm = TRUE) else NA
-
-            if (has_reference) {
-                between_case_var <- if (length(whole_section) >= 2) var(whole_section, na.rm = TRUE) else NA
-            } else {
-                case_means <- rowMeans(biopsy_matrix, na.rm = TRUE)
-                case_means <- case_means[!is.na(case_means)]
-                between_case_var <- if (length(case_means) >= 2) var(case_means, na.rm = TRUE) else NA
-            }
-
-            within_case_vars <- c()
-            for (i in seq_len(nrow(biopsy_matrix))) {
-                row_values <- as.numeric(biopsy_matrix[i, ])
-                if (has_reference && i <= length(whole_section)) {
-                    row_values <- c(whole_section[i], row_values)
-                }
-                row_values <- row_values[!is.na(row_values)]
-                if (length(row_values) >= 2) {
-                    within_case_vars <- c(within_case_vars, var(row_values))
-                }
-            }
-            mean_within_case_var <- if (length(within_case_vars) > 0) mean(within_case_vars, na.rm = TRUE) else NA
-
-            method_means <- if (has_reference) {
-                c(mean(whole_section, na.rm = TRUE), apply(biopsy_matrix, 2, mean, na.rm = TRUE))
-            } else {
-                apply(biopsy_matrix, 2, mean, na.rm = TRUE)
-            }
-            method_means <- method_means[!is.na(method_means)]
-            method_variance <- if (length(method_means) >= 2) var(method_means, na.rm = TRUE) else NA
-
-            safe_pct <- function(x) {
-                if (is.na(x) || is.na(total_variance) || total_variance <= 0) {
-                    return(NA_real_)
-                }
-                x / total_variance * 100
-            }
-
-            between_case_pct <- safe_pct(between_case_var)
-            within_case_pct <- safe_pct(mean_within_case_var)
-            method_pct <- safe_pct(method_variance)
-
             variance_table <- self$results$variancetable
+
+            # Wide matrix of measurements: reference (if any) + each region.
+            meas <- as.matrix(biopsy_data)
+            method_names <- colnames(biopsy_data)
+            if (is.null(method_names)) method_names <- paste0("Region", seq_len(ncol(meas)))
+            if (has_reference) {
+                meas <- cbind(as.numeric(whole_section), meas)
+                method_names <- c("Reference", method_names)
+            }
+            colnames(meas) <- method_names
+
+            # The mean-square formulas above assume a balanced design, so use only
+            # cases measured by every method, and say how many were used.
+            keep <- stats::complete.cases(meas)
+            meas <- meas[keep, , drop = FALSE]
+            n <- nrow(meas)   # cases
+            k <- ncol(meas)   # methods
+
+            insufficient <- function(msg) {
+                variance_table$setNote("vc", msg)
+                for (r in 1:4) {
+                    variance_table$addRow(rowKey = r, values = list(
+                        component = c("Between-Case Variance",
+                                      "Within-Case Variance (Sampling)",
+                                      "Method Variance", "Total Variance")[r],
+                        variance = NA_real_, percentage = NA_real_,
+                        contribution = .("Not estimable")
+                    ))
+                }
+            }
+
+            if (n < 2 || k < 2) {
+                insufficient(.("Variance components require at least 2 complete cases measured by at least 2 methods."))
+                return()
+            }
+
+            long <- data.frame(
+                case   = factor(rep(seq_len(n), times = k)),
+                method = factor(rep(method_names, each = n), levels = method_names),
+                value  = as.numeric(meas)
+            )
+
+            fit <- tryCatch(stats::aov(value ~ case + method, data = long),
+                            error = function(e) NULL)
+            if (is.null(fit)) {
+                insufficient(.("Variance component model could not be fitted to these data."))
+                return()
+            }
+
+            tab <- summary(fit)[[1]]
+            ms  <- tab[["Mean Sq"]]
+            rn  <- trimws(rownames(tab))
+            ms_case   <- ms[match("case",      rn)]
+            ms_method <- ms[match("method",    rn)]
+            ms_error  <- ms[match("Residuals", rn)]
+
+            if (any(is.na(c(ms_case, ms_method, ms_error)))) {
+                insufficient(.("Variance component model could not be fitted to these data."))
+                return()
+            }
+
+            var_case   <- (ms_case   - ms_error) / k
+            var_method <- (ms_method - ms_error) / n
+            var_error  <- ms_error
+
+            # A negative estimate means the model attributes no variance to that
+            # source; the conventional fix is to truncate at zero and disclose it.
+            truncated <- c("case", "method")[c(var_case < 0, var_method < 0)]
+            var_case   <- max(var_case, 0)
+            var_method <- max(var_method, 0)
+
+            total_variance <- var_case + var_method + var_error
+
+            notes <- sprintf(
+                .("Two-way random-effects decomposition (value = case + method + error) on %d cases measured by %d methods; components sum to the total variance."),
+                n, k)
+            if (sum(!keep) > 0)
+                notes <- paste0(notes, " ", sprintf(
+                    .("%d case(s) with an incomplete set of measurements were excluded."), sum(!keep)))
+            if (length(truncated) > 0)
+                notes <- paste0(notes, " ", sprintf(
+                    .("The %s variance estimate was negative and has been truncated to zero."),
+                    paste(truncated, collapse = " and ")))
+            variance_table$setNote("vc", notes)
+
+            pct <- function(x) if (total_variance > 0) x / total_variance * 100 else NA_real_
+            case_pct   <- pct(var_case)
+            error_pct  <- pct(var_error)
+            method_pct <- pct(var_method)
 
             variance_table$addRow(rowKey = 1, values = list(
                 component = if (has_reference) "Between-Case Variance" else "Between-Case Variance (Regional Means)",
-                variance = between_case_var,
-                percentage = between_case_pct,
-                contribution = ifelse(!is.na(between_case_pct) && between_case_pct >= 60, "Major contributor",
-                                     ifelse(!is.na(between_case_pct) && between_case_pct >= 30, "Moderate contributor", "Minor contributor"))
+                variance = var_case,
+                percentage = case_pct,
+                contribution = ifelse(!is.na(case_pct) && case_pct >= 60, "Major contributor",
+                                     ifelse(!is.na(case_pct) && case_pct >= 30, "Moderate contributor", "Minor contributor"))
             ))
 
             variance_table$addRow(rowKey = 2, values = list(
                 component = "Within-Case Variance (Sampling)",
-                variance = mean_within_case_var,
-                percentage = within_case_pct,
-                contribution = ifelse(!is.na(within_case_pct) && within_case_pct >= 30, "High sampling variability",
-                                     ifelse(!is.na(within_case_pct) && within_case_pct >= 15, "Moderate sampling variability", "Low sampling variability"))
+                variance = var_error,
+                percentage = error_pct,
+                contribution = ifelse(!is.na(error_pct) && error_pct >= 30, "High sampling variability",
+                                     ifelse(!is.na(error_pct) && error_pct >= 15, "Moderate sampling variability", "Low sampling variability"))
             ))
 
             variance_table$addRow(rowKey = 3, values = list(
                 component = if (has_reference) "Method Variance" else "Regional Method Variance",
-                variance = method_variance,
+                variance = var_method,
                 percentage = method_pct,
                 contribution = ifelse(!is.na(method_pct) && method_pct >= 20, "Significant method differences",
                                      ifelse(!is.na(method_pct) && method_pct >= 10, "Minor method differences", "Negligible method differences"))
@@ -698,14 +853,18 @@ ihcheterogeneityClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cl
             if (is.null(whole_section))
                 return()
 
-            # Perform power analysis for different scenarios
-            n_cases <- length(whole_section)
-            
             # Calculate observed effect sizes
             biopsy_means <- rowMeans(biopsy_data, na.rm = TRUE)
             complete_pairs <- complete.cases(whole_section, biopsy_means)
-            
-            if (sum(complete_pairs) >= 3) {
+
+            # n for the power calculation is the number of PAIRS the correlation
+            # is actually estimated from. This used to be length(whole_section),
+            # which still counts rows whose reference measurement is missing, so
+            # se_z = 1/sqrt(n-3) was computed from too large an n and every
+            # reported power was inflated (and required_n understated).
+            n_cases <- sum(complete_pairs)
+
+            if (n_cases >= 3) {
                 # Observed correlation effect size
                 obs_correlation <- cor(whole_section[complete_pairs], biopsy_means[complete_pairs], method = "spearman")
                 
@@ -723,12 +882,15 @@ ihcheterogeneityClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cl
                         next
                     }
 
-                    # CORRECTED Power calculation for correlation (Fisher's z transformation)
-                    # Fisher's z transformation for alternative hypothesis
+                    # Power for a correlation via Fisher's z transformation.
                     z_observed <- 0.5 * log((1 + effect_size) / (1 - effect_size))
 
-                    # Standard error under H0: rho = 0
-                    se_z <- 1 / sqrt(n_cases - 3)
+                    # Standard error under H0. Fisher's z with se = 1/sqrt(n-3) is
+                    # the PEARSON result; the observed effect above is Spearman,
+                    # whose z-variance is inflated by about 1.06 (Fieller, Hartley
+                    # & Pearson 1957). Using the Pearson SE for a Spearman r
+                    # overstates power, so apply the correction to that row.
+                    se_z <- if (idx == 4) sqrt(1.06 / (n_cases - 3)) else 1 / sqrt(n_cases - 3)
 
                     # Non-centrality parameter
                     ncp <- z_observed / se_z
@@ -765,7 +927,15 @@ ihcheterogeneityClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cl
                         "Large Effect (r=0.5)"
                     }
 
-                    recommendation <- if (power >= 0.80) {
+                    # The observed-effect row is post-hoc power: a deterministic
+                    # function of the observed correlation and n, so "adequate
+                    # power" for the effect you just observed is circular
+                    # (Hoenig & Heisey 2001). Report it, but do not let it certify
+                    # the study - only the pre-specified effect sizes get a
+                    # power verdict.
+                    recommendation <- if (idx == 4) {
+                        "Post-hoc (observed) power - not evidence of adequacy"
+                    } else if (power >= 0.80) {
                         "Adequate power achieved"
                     } else if (required_n <= n_cases * 1.5) {
                         "Consider moderate sample increase"
@@ -803,10 +973,25 @@ ihcheterogeneityClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cl
                         region_whole_section <- if (has_reference) whole_section[region_mask] else numeric(0)
                         region_biopsy_data <- biopsy_data[region_mask, , drop = FALSE]
                         
-                        # Calculate regional statistics
+                        # Calculate regional statistics.
+                        #
+                        # The CV must be computed PER CASE and then averaged, the
+                        # same way the reproducibility and compartment tables do it.
+                        # Pooling every measurement of every case into one vector
+                        # and taking a single CV measures BETWEEN-PATIENT
+                        # biological spread, not spatial heterogeneity within a
+                        # case - so a compartment whose cases were internally
+                        # consistent but spanned a wide range of expression was
+                        # ranked "High heterogeneity", inverting the true ranking
+                        # under a column headed "Heterogeneity Level".
                         region_values <- c(region_whole_section, as.matrix(region_biopsy_data))
                         region_mean <- mean(region_values, na.rm = TRUE)
-                        region_cv <- private$.calculateRobustCV(region_values)
+                        region_case_cvs <- private$.perCaseCV(
+                            if (has_reference) region_whole_section else NULL,
+                            region_biopsy_data, has_reference)
+                        region_cv <- if (length(region_case_cvs) > 0)
+                            mean(region_case_cvs, na.rm = TRUE) else NA_real_
+                        if (is.nan(region_cv)) region_cv <- NA_real_
 
                         # Categorize heterogeneity level
                         heterogeneity_level <- ifelse(region_cv <= 15, "Low",
@@ -1045,38 +1230,34 @@ ihcheterogeneityClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cl
             if (has_reference && length(biopsy_means) > 0) {
                 complete_pairs <- complete.cases(whole_section, biopsy_means)
                 if (sum(complete_pairs) >= private$.CLINICAL_CONSTANTS$MIN_CASES_ICC) {
-                    overall_corr <- cor(whole_section[complete_pairs], biopsy_means[complete_pairs], method = "spearman")
-                    bias_test <- t.test(biopsy_means[complete_pairs], whole_section[complete_pairs], paired = TRUE)
+                    # Mean of the per-region correlations, matching the
+                    # "Mean Regional-Reference Correlation" table row. Correlating
+                    # the reference against the AVERAGE of the regions averages
+                    # away sampling noise, so it ran systematically higher than the
+                    # table (0.952 in prose vs a lower table value) - two different
+                    # numbers described to the reader as the same thing.
+                    overall_corr <- if (!is.null(repro_stats$correlations) &&
+                                        any(!is.na(repro_stats$correlations))) {
+                        mean(repro_stats$correlations, na.rm = TRUE)
+                    } else {
+                        cor(whole_section[complete_pairs], biopsy_means[complete_pairs], method = "spearman")
+                    }
+                    bias_test <- private$.safePairedT(biopsy_means[complete_pairs], whole_section[complete_pairs])
                     mean_bias <- bias_test$estimate
                     bias_p <- bias_test$p.value
+                    ref_mean <- mean(whole_section[complete_pairs], na.rm = TRUE)
                 } else {
-                    overall_corr <- mean_bias <- bias_p <- NA
+                    overall_corr <- mean_bias <- bias_p <- ref_mean <- NA
                 }
             } else {
                 overall_corr <- if (!is.null(repro_stats$mean_inter_biopsy)) repro_stats$mean_inter_biopsy else NA
                 mean_bias <- NA
                 bias_p <- NA
+                ref_mean <- NA
             }
 
-            # Calculate CV using robust method
-            if (has_reference && nrow(biopsy_data) > 0) {
-                calculate_case_cv_with_ref <- function(whole_val, biopsy_row) {
-                    values <- c(whole_val, as.numeric(biopsy_row))
-                    private$.calculateRobustCV(values)
-                }
-
-                cv_values <- mapply(
-                    calculate_case_cv_with_ref,
-                    whole_section,
-                    split(biopsy_data, seq_len(nrow(biopsy_data)))
-                )
-            } else if (nrow(biopsy_data) > 0) {
-                cv_values <- apply(biopsy_data, 1, function(row) {
-                    private$.calculateRobustCV(as.numeric(row))
-                })
-            } else {
-                cv_values <- numeric(0)
-            }
+            # Same helper the reproducibility table uses.
+            cv_values <- private$.perCaseCV(whole_section, biopsy_data, has_reference)
 
             mean_cv <- if (length(cv_values) > 0) mean(as.numeric(cv_values), na.rm = TRUE) else NA
             if (is.nan(mean_cv) || is.infinite(mean_cv)) mean_cv <- NA
@@ -1091,6 +1272,7 @@ ihcheterogeneityClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cl
                 overall_corr = overall_corr,
                 mean_bias = mean_bias,
                 bias_p = bias_p,
+                ref_mean = ref_mean,
                 mean_cv = mean_cv,
                 icc = icc_value,
                 correlations = correlations,
@@ -1132,8 +1314,39 @@ ihcheterogeneityClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cl
                 ""
             }
 
+            # Systematic bias is a THIRD axis and must be able to veto the verdict.
+            #
+            # Correlation (Spearman) is rank agreement across cases and is blind to
+            # any additive or proportional offset; the CV of a case is likewise
+            # small when every region is offset the same way. So a marker where
+            # every biopsy under-reads the whole section by 30% - a Ki67 of 60%
+            # reported as 42% - passed both thresholds and was declared "ADEQUATE
+            # SAMPLING ... suitable for clinical use" while the module's own bias
+            # table reported p < 1e-13 and "Large (>15%)" impact on the same screen.
+            bias_is_material <- !is.na(metrics$bias_p) && metrics$bias_p < 0.05 &&
+                !is.na(metrics$mean_bias) && !is.na(metrics$mean_cv) &&
+                is.finite(private$.relativeBias(metrics)) &&
+                private$.relativeBias(metrics) > private$.CLINICAL_CONSTANTS$RELATIVE_BIAS_MATERIAL
+
+            bias_veto <- if (bias_is_material) {
+                paste0("<p><strong> SYSTEMATIC BIAS:</strong> Regional measurements differ from the ",
+                       comparison_target, " by ", round(metrics$mean_bias, 2),
+                       " on average (", round(private$.relativeBias(metrics), 1), "% of the reference mean, p ",
+                       ifelse(metrics$bias_p < 0.001, "< 0.001", paste0("= ", round(metrics$bias_p, 3))), "). ",
+                       "<span style='color: red;'>Correlation and CV cannot detect a constant offset, so the ",
+                       "agreement thresholds below do not by themselves establish that regional ",
+                       "measurements may substitute for the ", comparison_target, ".</span></p>")
+            } else ""
+
             status_text <- if (is.na(metrics$overall_corr) || is.na(metrics$mean_cv)) {
                 "<p><strong> INSUFFICIENT DATA:</strong> Unable to evaluate sampling quality because correlation or variability estimates could not be computed.</p>"
+            } else if (bias_is_material) {
+                paste0(bias_veto,
+                       "<p><strong> NOT ADEQUATE FOR SUBSTITUTION:</strong> Agreement thresholds ",
+                       "(correlation \u{2265} ", correlation_threshold, ", CV \u{2264} ", cv_threshold,
+                       "%) may be met, but a clinically material systematic difference is present. ",
+                       "<span style='color: red;'>Calibrate the regional measurement before using it in place of the ",
+                       comparison_target, ".</span></p>")
             } else if (metrics$overall_corr >= correlation_threshold && metrics$mean_cv <= cv_threshold) {
                 paste0("<p><strong> ADEQUATE SAMPLING:</strong> Regional measurements provide good representation of ",
                        comparison_target, " (correlation \u{2265} ", correlation_threshold, ", CV \u{2264} ", cv_threshold, "%). ",
@@ -1212,9 +1425,13 @@ ihcheterogeneityClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cl
             correlation_sentence <- if (!is.na(metrics$overall_corr)) {
                 paste0(
                     "Regional measurements showed ",
-                    ifelse(metrics$overall_corr >= 0.80, "excellent",
-                           ifelse(metrics$overall_corr >= 0.70, "good",
-                                  ifelse(metrics$overall_corr >= 0.60, "moderate", "poor"))),
+                    # Graded against the user's correlation_threshold, not fixed
+                    # cut-offs: with a threshold of 0.95 an r of 0.80 was still
+                    # called "excellent" here while the verdict below called the
+                    # same run inadequate.
+                    ifelse(metrics$overall_corr >= correlation_threshold, "excellent",
+                           ifelse(metrics$overall_corr >= correlation_threshold - 0.10, "good",
+                                  ifelse(metrics$overall_corr >= correlation_threshold - 0.20, "moderate", "poor"))),
                     " correlation ", correlation_phrase, " (r = ", round(metrics$overall_corr, 3), "). "
                 )
             } else {
@@ -1224,7 +1441,9 @@ ihcheterogeneityClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cl
             variability_sentence <- if (!is.na(metrics$mean_cv)) {
                 paste0(
                     "Sampling variability was ",
-                    ifelse(metrics$mean_cv <= 15, "low", ifelse(metrics$mean_cv <= 30, "moderate", "high")),
+                    # Graded against the user's cv_threshold - see above.
+                    ifelse(metrics$mean_cv <= cv_threshold / 2, "low",
+                           ifelse(metrics$mean_cv <= cv_threshold, "moderate", "high")),
                     " (mean CV = ", round(metrics$mean_cv, 1), "%). "
                 )
             } else {
@@ -1285,10 +1504,22 @@ ihcheterogeneityClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cl
 
                 "<h4>Methods Section:</h4>",
                 "<p style='font-family: monospace; background: white; padding: 10px; border-left: 4px solid #007bff;'>",
+                # Describe only what was actually done. This used to assert that
+                # the measurements were "simulated core biopsy measurements ...
+                # following the methodology of Zilenaite-Petrulaitiene et al."
+                # unconditionally - a factual misstatement of the reader's study
+                # design, and a citation they may never have followed, dropped
+                # straight into a Methods section. Likewise it claimed an ICC was
+                # computed even when .calculateICC had fallen back to a mean
+                # correlation.
                 "IHC heterogeneity analysis was performed on ", metrics$n_cases, " cases with ", metrics$n_biopsies,
-                " simulated core biopsy measurements each, following the methodology of Zilenaite-Petrulaitiene et al. ",
-                "Reproducibility was assessed using Spearman correlation and intraclass correlation coefficient (ICC). ",
-                "Sampling variability was quantified using coefficient of variation (CV). ",
+                " regional measurements each. ",
+                if (identical(private$.repro_stats$icc_method, "icc"))
+                    "Agreement was assessed using the intraclass correlation coefficient (ICC(2,1), absolute agreement) and Spearman rank correlation. "
+                else
+                    "Agreement was assessed using Spearman rank correlation; an intraclass correlation coefficient could not be estimated from these data. ",
+                "Systematic difference from the reference measurement was tested with a paired t-test. ",
+                "Sampling variability was quantified using the coefficient of variation (CV). ",
                 "Quality thresholds were set at correlation \u{2265}", correlation_threshold, " and CV \u{2264}", cv_threshold, "%.",
                 "</p>",
 
@@ -1302,9 +1533,13 @@ ihcheterogeneityClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cl
 
                 "<h4>Clinical Interpretation:</h4>",
                 "<p style='font-family: monospace; background: white; padding: 10px; border-left: 4px solid #ffc107;'>",
-                "These findings suggest that ", clinical_sentence,
-                ". The results support the use of biopsy simulation methodology for quality assurance ",
-                "in digital pathology workflows and biomarker assessment protocols.",
+                # No blanket endorsement. This used to close EVERY report with
+                # "The results support the use of biopsy simulation methodology
+                # for quality assurance in digital pathology workflows and
+                # biomarker assessment protocols" - including reports whose own
+                # preceding sentence said the sampling was inadequate and required
+                # protocol revision.
+                "These findings suggest that ", clinical_sentence, ".",
                 "</p>",
 
                 "</div>",
@@ -1635,6 +1870,7 @@ ihcheterogeneityClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cl
             icc_value <- NA
             icc_lower <- NA
             icc_upper <- NA
+            icc_method <- "icc"   # downgraded to "correlation" on every fallback
 
             # Check if psych package is available
             if (!requireNamespace('psych', quietly = TRUE)) {
@@ -1690,7 +1926,8 @@ ihcheterogeneityClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cl
                 return(list(
                     value = mean_r,
                     lower = ci_lower,
-                    upper = ci_upper
+                    upper = ci_upper,
+                    method = "correlation"
                 ))
             }
 
@@ -1699,7 +1936,8 @@ ihcheterogeneityClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cl
                 return(list(
                     value = mean(correlations, na.rm = TRUE),
                     lower = NA,
-                    upper = NA
+                    upper = NA,
+                    method = "correlation"
                 ))
             }
 
@@ -1719,7 +1957,8 @@ ihcheterogeneityClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cl
                 return(list(
                     value = mean(correlations, na.rm = TRUE),
                     lower = NA,
-                    upper = NA
+                    upper = NA,
+                    method = "correlation"
                 ))
             }
 
@@ -1729,26 +1968,50 @@ ihcheterogeneityClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cl
                 return(list(
                     value = mean(correlations, na.rm = TRUE),
                     lower = NA,
-                    upper = NA
+                    upper = NA,
+                    method = "correlation"
                 ))
             }
 
             # Attempt ICC calculation
             icc_err <- tryCatch({
-                icc_result <- psych::ICC(icc_data)
-                # Use ICC(3,1) - single fixed raters. psych::ICC()$results rows
-                # are ordered ICC1, ICC2, ICC3, ICC1k, ICC2k, ICC3k; index [3] is
-                # ICC3 = ICC(3,1) single measures. Index [6] (ICC3k = ICC(3,k),
-                # average measures) was previously extracted, inflating every
-                # single-measurement reliability verdict.
-                icc_value <- icc_result$results$ICC[3]
-                icc_lower <- icc_result$results$`lower bound`[3]
-                icc_upper <- icc_result$results$`upper bound`[3]
+                # complete.cases() above already removed every incomplete row, so
+                # psych's lmer path (its default) buys nothing here: it only adds
+                # cost and emits "boundary (singular) fit" warnings.
+                icc_result <- psych::ICC(icc_data, lmer = FALSE)
+
+                # ICC(2,1) - ABSOLUTE AGREEMENT, single measures (McGraw & Wong
+                # ICC(A,1); psych row 2, `Single_random_raters`).
+                #
+                # psych::ICC()$results rows are ICC1, ICC2, ICC3, ICC1k, ICC2k,
+                # ICC3k. This previously took row 3 = ICC(3,1), the two-way MIXED
+                # CONSISTENCY form, which removes the region main effect from the
+                # denominator and is therefore mathematically BLIND to a constant
+                # additive or proportional offset between biopsy and whole section.
+                # That is precisely the failure this analysis exists to detect: on
+                # data where every region under-reads the whole section by 30% (a
+                # true Ki67 of 60% scored as 42%) the consistency form returns 0.955
+                # "Good reliability" while absolute agreement returns 0.669, and the
+                # module's own bias table simultaneously reports p = 5e-14 and
+                # "Large (>15%)" impact. Interchangeability is an absolute-agreement
+                # question - see Koo & Li (2016), which this module already cites.
+                icc_value <- icc_result$results$ICC[2]
+                icc_lower <- icc_result$results$`lower bound`[2]
+                icc_upper <- icc_result$results$`upper bound`[2]
+
+                # Keep the consistency form for reference; it is reported as a
+                # separate row so the two can never be confused again.
+                private$.icc_consistency <- list(
+                    value = icc_result$results$ICC[3],
+                    lower = icc_result$results$`lower bound`[3],
+                    upper = icc_result$results$`upper bound`[3]
+                )
 
                 # Validate ICC result
                 if (is.na(icc_value) || icc_value < -1 || icc_value > 1) {
                     icc_value <- mean(correlations, na.rm = TRUE)
                     icc_lower <- icc_upper <- NA
+                    icc_method <- "correlation"
                 }
                 NULL
             }, error = function(e) e)
@@ -1757,12 +2020,14 @@ ihcheterogeneityClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cl
                 # of `<<-` from inside the error handler).
                 icc_value <- mean(correlations, na.rm = TRUE)
                 icc_lower <- icc_upper <- NA
+                icc_method <- "correlation" 
             }
 
             return(list(
                 value = icc_value,
                 lower = icc_lower,
-                upper = icc_upper
+                upper = icc_upper,
+                method = icc_method
             ))
         },
 
@@ -1917,9 +2182,9 @@ ihcheterogeneityClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cl
                     region_biopsy_means <- rowMeans(region_biopsy_data, na.rm = TRUE)
                     complete_pairs <- complete.cases(region_whole_section, region_biopsy_means)
                     if (sum(complete_pairs) >= 3) {
-                        bias_test <- t.test(region_biopsy_means[complete_pairs],
-                                          region_whole_section[complete_pairs],
-                                          paired = TRUE)
+                        bias_test <- private$.safePairedT(
+                            region_biopsy_means[complete_pairs],
+                            region_whole_section[complete_pairs])
                         region_mean_bias <- bias_test$estimate
                     } else {
                         region_mean_bias <- NA
@@ -2115,12 +2380,23 @@ ihcheterogeneityClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cl
                         # Calculate absolute deviations from group medians
                         abs_dev <- abs(cv_values - group_medians[cv_groups])
 
-                        # Perform one-way ANOVA on absolute deviations
-                        levene_result <- oneway.test(abs_dev ~ cv_groups, var.equal = TRUE)
+                        # One-way ANOVA on the absolute deviations. Computed with
+                        # aov(), not oneway.test(): oneway.test() rejects a
+                        # perfectly valid two-sided formula with "a two-sided
+                        # formula is required" when called from inside an R6
+                        # method in this package's namespace (reproduced with
+                        # stats::oneway.test and with data= supplied; a plain R6
+                        # class in a bare session is fine). The error was swallowed
+                        # by the surrounding tryCatch, so this row ALWAYS rendered
+                        # "Could not compute" and Levene's test never once reported
+                        # a result. aov(var.equal) gives the identical F, df and p.
+                        lev_df_frame <- data.frame(abs_dev = as.numeric(abs_dev),
+                                                   grp = factor(cv_groups))
+                        lev_tab <- summary(stats::aov(abs_dev ~ grp, data = lev_df_frame))[[1]]
 
-                        levene_statistic <- levene_result$statistic
-                        levene_df <- levene_result$parameter
-                        levene_p <- levene_result$p.value
+                        levene_statistic <- lev_tab[["F value"]][1]
+                        levene_df <- lev_tab[["Df"]][1]
+                        levene_p <- lev_tab[["Pr(>F)"]][1]
 
                         interpretation <- if (levene_p < 0.05) {
                             "Significant difference in variability heterogeneity across compartments"
@@ -2131,18 +2407,27 @@ ihcheterogeneityClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cl
                         test_table$addRow(rowKey = row_key, values = list(
                             test_type = "Levene's Test (CV Variance)",
                             statistic = levene_statistic,
-                            df = as.integer(levene_df),
+                            # oneway.test()$parameter is c(num df, denom df).
+                            # Passing the length-2 vector made addRow() throw
+                            # "value is not atomic" inside the surrounding
+                            # tryCatch, so this row ALWAYS rendered as
+                            # "Could not compute" and Levene's test never once
+                            # reported a result.
+                            df = as.integer(levene_df[1]),
                             p_value = levene_p,
                             interpretation = interpretation
                         ))
                     }, error = function(e) {
-                        # Failed to compute Levene's test
+                        # Report WHY. The old text blamed "insufficient data or
+                        # computational error" for what was in fact a coding bug
+                        # in this very block, so the failure looked like a
+                        # property of the user's data for as long as it existed.
                         test_table$addRow(rowKey = row_key, values = list(
                             test_type = "Levene's Test (CV Variance)",
                             statistic = NA,
                             df = NA,
                             p_value = NA,
-                            interpretation = "Could not compute: insufficient data or computational error"
+                            interpretation = paste("Could not compute:", conditionMessage(e))
                         ))
                     })
                     # Increment once after either branch (avoids `<<-` in the handler).

@@ -14,6 +14,7 @@ waterfallrecistOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
             diameter = NULL,
             isNewLesion = NULL,
             nonTargetResponseVar = NULL,
+            targetSelectionVar = NULL,
             baselineTimepoint = 0,
             confirmationInterval = 4,
             maxTargetLesions = 5,
@@ -102,6 +103,16 @@ waterfallrecistOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
                     "factor",
                     "id"),
                 default=NULL)
+            private$..targetSelectionVar <- jmvcore::OptionVariable$new(
+                "targetSelectionVar",
+                targetSelectionVar,
+                suggested=list(
+                    "nominal"),
+                permitted=list(
+                    "factor",
+                    "numeric",
+                    "id"),
+                default=NULL)
             private$..baselineTimepoint <- jmvcore::OptionNumber$new(
                 "baselineTimepoint",
                 baselineTimepoint,
@@ -167,6 +178,7 @@ waterfallrecistOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
             self$.addOption(private$..diameter)
             self$.addOption(private$..isNewLesion)
             self$.addOption(private$..nonTargetResponseVar)
+            self$.addOption(private$..targetSelectionVar)
             self$.addOption(private$..baselineTimepoint)
             self$.addOption(private$..confirmationInterval)
             self$.addOption(private$..maxTargetLesions)
@@ -189,6 +201,7 @@ waterfallrecistOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
         diameter = function() private$..diameter$value,
         isNewLesion = function() private$..isNewLesion$value,
         nonTargetResponseVar = function() private$..nonTargetResponseVar$value,
+        targetSelectionVar = function() private$..targetSelectionVar$value,
         baselineTimepoint = function() private$..baselineTimepoint$value,
         confirmationInterval = function() private$..confirmationInterval$value,
         maxTargetLesions = function() private$..maxTargetLesions$value,
@@ -210,6 +223,7 @@ waterfallrecistOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
         ..diameter = NA,
         ..isNewLesion = NA,
         ..nonTargetResponseVar = NA,
+        ..targetSelectionVar = NA,
         ..baselineTimepoint = NA,
         ..confirmationInterval = NA,
         ..maxTargetLesions = NA,
@@ -622,6 +636,15 @@ waterfallrecistBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
 #'   increase of two or more non-target lesions is called progression), which is
 #'   NOT the RECIST criterion and may both miss and over-call progression.
 #'   Supplying this variable is the RECIST-correct route.
+#' @param targetSelectionVar Optional per-lesion flag marking the lesions the
+#'   reporting radiologist chose as target lesions (Yes/No, 1/0, TRUE/FALSE or
+#'   "Target"). When supplied it is used verbatim and automatic selection is not
+#'   applied. By default the analysis follows RECIST v1.1 and selects the
+#'   LARGEST lesions within the limits (at most 5 in total, at most 2 per
+#'   organ); the remainder are followed as non-target disease. RECIST also
+#'   requires a target lesion to be reproducibly measurable, which is a
+#'   radiological judgement size alone cannot establish, so use this variable
+#'   whenever the reader's own choice differs from the largest-first default.
 #' @param baselineTimepoint Value of visitTime representing baseline (default
 #'   = 0). All lesions at this timepoint establish the baseline sum.
 #' @param confirmationInterval Minimum time interval (weeks) for response
@@ -676,6 +699,7 @@ waterfallrecist <- function(
     diameter = NULL,
     isNewLesion = NULL,
     nonTargetResponseVar = NULL,
+    targetSelectionVar = NULL,
     baselineTimepoint = 0,
     confirmationInterval = 4,
     maxTargetLesions = 5,
@@ -699,6 +723,7 @@ waterfallrecist <- function(
     if ( ! missing(diameter)) diameter <- jmvcore::resolveQuo(jmvcore::enquo(diameter))
     if ( ! missing(isNewLesion)) isNewLesion <- jmvcore::resolveQuo(jmvcore::enquo(isNewLesion))
     if ( ! missing(nonTargetResponseVar)) nonTargetResponseVar <- jmvcore::resolveQuo(jmvcore::enquo(nonTargetResponseVar))
+    if ( ! missing(targetSelectionVar)) targetSelectionVar <- jmvcore::resolveQuo(jmvcore::enquo(targetSelectionVar))
     if (missing(data))
         data <- jmvcore::marshalData(
             parent.frame(),
@@ -709,7 +734,8 @@ waterfallrecist <- function(
             `if`( ! missing(location), location, NULL),
             `if`( ! missing(diameter), diameter, NULL),
             `if`( ! missing(isNewLesion), isNewLesion, NULL),
-            `if`( ! missing(nonTargetResponseVar), nonTargetResponseVar, NULL))
+            `if`( ! missing(nonTargetResponseVar), nonTargetResponseVar, NULL),
+            `if`( ! missing(targetSelectionVar), targetSelectionVar, NULL))
 
     for (v in lesionType) if (v %in% names(data)) data[[v]] <- as.factor(data[[v]])
     for (v in location) if (v %in% names(data)) data[[v]] <- as.factor(data[[v]])
@@ -723,6 +749,7 @@ waterfallrecist <- function(
         diameter = diameter,
         isNewLesion = isNewLesion,
         nonTargetResponseVar = nonTargetResponseVar,
+        targetSelectionVar = targetSelectionVar,
         baselineTimepoint = baselineTimepoint,
         confirmationInterval = confirmationInterval,
         maxTargetLesions = maxTargetLesions,

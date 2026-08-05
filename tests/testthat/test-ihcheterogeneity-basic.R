@@ -26,7 +26,7 @@ test_that("ihcheterogeneity runs with minimal required arguments", {
   )
 
   # Should return a result object
-  expect_s3_class(result, "ihcheterogeneityClass")
+  expect_s3_class(result, "ihcheterogeneityResults")
 
   # Should have a results component
   expect_true("results" %in% names(result))
@@ -40,7 +40,7 @@ test_that("ihcheterogeneity runs with reference and two biopsies", {
     biopsy2 = "biopsy2"
   )
 
-  expect_s3_class(result, "ihcheterogeneityClass")
+  expect_s3_class(result, "ihcheterogeneityResults")
 })
 
 test_that("ihcheterogeneity runs with multiple regional measurements", {
@@ -53,7 +53,7 @@ test_that("ihcheterogeneity runs with multiple regional measurements", {
     biopsy4 = "biopsy4"
   )
 
-  expect_s3_class(result, "ihcheterogeneityClass")
+  expect_s3_class(result, "ihcheterogeneityResults")
 })
 
 test_that("ihcheterogeneity handles reference-based analysis", {
@@ -65,7 +65,7 @@ test_that("ihcheterogeneity handles reference-based analysis", {
     biopsy2 = "biopsy2"
   )
 
-  expect_s3_class(result_ref, "ihcheterogeneityClass")
+  expect_s3_class(result_ref, "ihcheterogeneityResults")
 })
 
 test_that("ihcheterogeneity handles inter-regional analysis without reference", {
@@ -80,7 +80,7 @@ test_that("ihcheterogeneity handles inter-regional analysis without reference", 
     biopsy3 = "biopsy3"
   )
 
-  expect_s3_class(result_no_ref, "ihcheterogeneityClass")
+  expect_s3_class(result_no_ref, "ihcheterogeneityResults")
 })
 
 test_that("ihcheterogeneity handles spatial compartment identification", {
@@ -92,7 +92,7 @@ test_that("ihcheterogeneity handles spatial compartment identification", {
     spatial_id = "spatial_id"
   )
 
-  expect_s3_class(result, "ihcheterogeneityClass")
+  expect_s3_class(result, "ihcheterogeneityResults")
 })
 
 test_that("ihcheterogeneity handles compartment comparison", {
@@ -107,7 +107,7 @@ test_that("ihcheterogeneity handles compartment comparison", {
     compareCompartments = TRUE
   )
 
-  expect_s3_class(result, "ihcheterogeneityClass")
+  expect_s3_class(result, "ihcheterogeneityResults")
 })
 
 test_that("ihcheterogeneity handles compartment tests", {
@@ -124,7 +124,7 @@ test_that("ihcheterogeneity handles compartment tests", {
     compartmentTests = TRUE
   )
 
-  expect_s3_class(result, "ihcheterogeneityClass")
+  expect_s3_class(result, "ihcheterogeneityResults")
 })
 
 test_that("ihcheterogeneity handles different analysis types", {
@@ -139,7 +139,7 @@ test_that("ihcheterogeneity handles different analysis types", {
       analysis_type = type
     )
 
-    expect_s3_class(result, "ihcheterogeneityClass")
+    expect_s3_class(result, "ihcheterogeneityResults")
   }
 })
 
@@ -155,7 +155,7 @@ test_that("ihcheterogeneity handles different sampling strategies", {
       sampling_strategy = strategy
     )
 
-    expect_s3_class(result, "ihcheterogeneityClass")
+    expect_s3_class(result, "ihcheterogeneityResults")
   }
 })
 
@@ -169,7 +169,7 @@ test_that("ihcheterogeneity handles custom thresholds", {
     correlation_threshold = 0.85
   )
 
-  expect_s3_class(result, "ihcheterogeneityClass")
+  expect_s3_class(result, "ihcheterogeneityResults")
 })
 
 test_that("ihcheterogeneity produces plots when requested", {
@@ -181,7 +181,7 @@ test_that("ihcheterogeneity produces plots when requested", {
     show_variability_plots = TRUE
   )
 
-  expect_s3_class(result, "ihcheterogeneityClass")
+  expect_s3_class(result, "ihcheterogeneityResults")
 })
 
 test_that("ihcheterogeneity handles variance component analysis", {
@@ -193,7 +193,7 @@ test_that("ihcheterogeneity handles variance component analysis", {
     variance_components = TRUE
   )
 
-  expect_s3_class(result, "ihcheterogeneityClass")
+  expect_s3_class(result, "ihcheterogeneityResults")
 })
 
 test_that("ihcheterogeneity handles power analysis", {
@@ -205,7 +205,7 @@ test_that("ihcheterogeneity handles power analysis", {
     power_analysis = TRUE
   )
 
-  expect_s3_class(result, "ihcheterogeneityClass")
+  expect_s3_class(result, "ihcheterogeneityResults")
 })
 
 test_that("ihcheterogeneity generates recommendations", {
@@ -217,7 +217,7 @@ test_that("ihcheterogeneity generates recommendations", {
     generate_recommendations = TRUE
   )
 
-  expect_s3_class(result, "ihcheterogeneityClass")
+  expect_s3_class(result, "ihcheterogeneityResults")
 })
 
 test_that("ihcheterogeneity shows plain-language summary", {
@@ -229,7 +229,7 @@ test_that("ihcheterogeneity shows plain-language summary", {
     showSummary = TRUE
   )
 
-  expect_s3_class(result, "ihcheterogeneityClass")
+  expect_s3_class(result, "ihcheterogeneityResults")
 })
 
 test_that("ihcheterogeneity shows statistical glossary", {
@@ -241,7 +241,7 @@ test_that("ihcheterogeneity shows statistical glossary", {
     showGlossary = TRUE
   )
 
-  expect_s3_class(result, "ihcheterogeneityClass")
+  expect_s3_class(result, "ihcheterogeneityResults")
 })
 
 test_that("ihcheterogeneity runs with small dataset", {
@@ -256,5 +256,5 @@ test_that("ihcheterogeneity runs with small dataset", {
   )
 
   # Should complete
-  expect_s3_class(result, "ihcheterogeneityClass")
+  expect_s3_class(result, "ihcheterogeneityResults")
 })

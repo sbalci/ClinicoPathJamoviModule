@@ -32,6 +32,7 @@ items:
       renderFun: .plot
       requiresData: true
       clearWith:
+          - maxMilestones
           - patientID
           - startTime
           - endTime
@@ -42,10 +43,15 @@ items:
           - timeUnit
           - timeDisplay
           - milestone1Date
+          - milestone1Name
           - milestone2Date
+          - milestone2Name
           - milestone3Date
+          - milestone3Name
           - milestone4Date
+          - milestone4Name
           - milestone5Date
+          - milestone5Name
           - showEventMarkers
           - eventVar
           - eventTimeVar
@@ -147,6 +153,7 @@ items:
             title: "Time Range"
             type: text
       clearWith:
+          - maxMilestones
           - milestone1Date
           - milestone2Date
           - milestone3Date
@@ -184,11 +191,33 @@ items:
           - eventTimeVar
           - timeUnit
 
+    # These were declared as `type: Output`, but an Output result item writes a
+    # single computed COLUMN back into the dataset and must be bound to a
+    # matching `type: Output` OPTION in the .a.yaml - there was none, and the
+    # backend called setState() rather than setRowNums()/setValues(). Neither
+    # payload is a per-row column in any case (one is a multi-column frame, the
+    # other is one row per metric), so both are tables.
     - name: timelineData
       title: "Export Timeline Data"
-      type: Output
-      varTitle: "Timeline Data"
-      varDescription: "Processed timeline data for external analysis"
+      type: Table
+      visible: (exportTimeline)
+      rows: 0
+      columns:
+          - name: patient_id
+            title: "Patient ID"
+            type: text
+          - name: start_time
+            title: "Start"
+            type: number
+          - name: end_time
+            title: "End"
+            type: number
+          - name: duration
+            title: "Duration"
+            type: number
+          - name: response
+            title: "Best Response"
+            type: text
       clearWith:
           - exportTimeline
           - patientID
@@ -197,18 +226,27 @@ items:
           - responseVar
           - timeType
           - timeUnit
+          - timeDisplay
 
     - name: summaryData
       title: "Export Summary Statistics"
-      type: Output
-      varTitle: "Summary Statistics"
-      varDescription: "Comprehensive summary statistics and clinical metrics"
+      type: Table
+      visible: (exportSummary)
+      rows: 0
+      columns:
+          - name: metric
+            title: "Metric"
+            type: text
+          - name: value
+            title: "Value"
+            type: number
       clearWith:
           - exportSummary
           - patientID
           - startTime
           - endTime
           - responseVar
+          - timeUnit
           - personTimeAnalysis
           - responseAnalysis
 

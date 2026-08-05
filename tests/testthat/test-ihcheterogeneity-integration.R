@@ -28,8 +28,8 @@ test_that("ihcheterogeneity produces consistent results across runs", {
   )
 
   # Results should be identical (no randomness)
-  expect_s3_class(result1, "ihcheterogeneityClass")
-  expect_s3_class(result2, "ihcheterogeneityClass")
+  expect_s3_class(result1, "ihcheterogeneityResults")
+  expect_s3_class(result2, "ihcheterogeneityResults")
 })
 
 test_that("ihcheterogeneity workflow: basic → comprehensive analysis", {
@@ -41,7 +41,7 @@ test_that("ihcheterogeneity workflow: basic → comprehensive analysis", {
     biopsy2 = "biopsy2"
   )
 
-  expect_s3_class(basic_result, "ihcheterogeneityClass")
+  expect_s3_class(basic_result, "ihcheterogeneityResults")
 
   # Step 2: Add more measurements
   extended_result <- ihcheterogeneity(
@@ -53,7 +53,7 @@ test_that("ihcheterogeneity workflow: basic → comprehensive analysis", {
     biopsy4 = "biopsy4"
   )
 
-  expect_s3_class(extended_result, "ihcheterogeneityClass")
+  expect_s3_class(extended_result, "ihcheterogeneityResults")
 
   # Step 3: Comprehensive analysis
   comprehensive_result <- ihcheterogeneity(
@@ -70,7 +70,7 @@ test_that("ihcheterogeneity workflow: basic → comprehensive analysis", {
     generate_recommendations = TRUE
   )
 
-  expect_s3_class(comprehensive_result, "ihcheterogeneityClass")
+  expect_s3_class(comprehensive_result, "ihcheterogeneityResults")
 })
 
 test_that("ihcheterogeneity handles data from CSV import", {
@@ -88,7 +88,7 @@ test_that("ihcheterogeneity handles data from CSV import", {
     biopsy2 = "biopsy2"
   )
 
-  expect_s3_class(result, "ihcheterogeneityClass")
+  expect_s3_class(result, "ihcheterogeneityResults")
 
   # Clean up
   unlink(temp_csv)
@@ -109,7 +109,7 @@ test_that("ihcheterogeneity handles data from Excel import", {
     biopsy2 = "biopsy2"
   )
 
-  expect_s3_class(result, "ihcheterogeneityClass")
+  expect_s3_class(result, "ihcheterogeneityResults")
 
   # Clean up
   unlink(temp_xlsx)
@@ -127,7 +127,7 @@ test_that("ihcheterogeneity handles different data structures consistently", {
     biopsy2 = "biopsy2"
   )
 
-  expect_s3_class(result_tibble, "ihcheterogeneityClass")
+  expect_s3_class(result_tibble, "ihcheterogeneityResults")
 
   # Test with data.frame
   df_data <- as.data.frame(ihcheterogeneity_test)
@@ -139,7 +139,7 @@ test_that("ihcheterogeneity handles different data structures consistently", {
     biopsy2 = "biopsy2"
   )
 
-  expect_s3_class(result_df, "ihcheterogeneityClass")
+  expect_s3_class(result_df, "ihcheterogeneityResults")
 })
 
 test_that("ihcheterogeneity workflow: Ki67 quality assessment", {
@@ -153,7 +153,7 @@ test_that("ihcheterogeneity workflow: Ki67 quality assessment", {
     analysis_type = "reproducibility"
   )
 
-  expect_s3_class(initial, "ihcheterogeneityClass")
+  expect_s3_class(initial, "ihcheterogeneityResults")
 
   # Step 2: Identify high-variability cases
   variability_check <- ihcheterogeneity(
@@ -167,7 +167,7 @@ test_that("ihcheterogeneity workflow: Ki67 quality assessment", {
     variance_components = TRUE
   )
 
-  expect_s3_class(variability_check, "ihcheterogeneityClass")
+  expect_s3_class(variability_check, "ihcheterogeneityResults")
 
   # Step 3: Comprehensive QA with recommendations
   qa_complete <- ihcheterogeneity(
@@ -188,7 +188,7 @@ test_that("ihcheterogeneity workflow: Ki67 quality assessment", {
     showSummary = TRUE
   )
 
-  expect_s3_class(qa_complete, "ihcheterogeneityClass")
+  expect_s3_class(qa_complete, "ihcheterogeneityResults")
 })
 
 test_that("ihcheterogeneity workflow: spatial compartment comparison", {
@@ -204,7 +204,7 @@ test_that("ihcheterogeneity workflow: spatial compartment comparison", {
     spatial_id = "spatial_id"
   )
 
-  expect_s3_class(spatial_basic, "ihcheterogeneityClass")
+  expect_s3_class(spatial_basic, "ihcheterogeneityResults")
 
   # Step 2: Compartment comparison
   spatial_compare <- ihcheterogeneity(
@@ -218,7 +218,7 @@ test_that("ihcheterogeneity workflow: spatial compartment comparison", {
     show_variability_plots = TRUE
   )
 
-  expect_s3_class(spatial_compare, "ihcheterogeneityClass")
+  expect_s3_class(spatial_compare, "ihcheterogeneityResults")
 
   # Step 3: Statistical testing of compartments
   spatial_test <- ihcheterogeneity(
@@ -235,7 +235,7 @@ test_that("ihcheterogeneity workflow: spatial compartment comparison", {
     showSummary = TRUE
   )
 
-  expect_s3_class(spatial_test, "ihcheterogeneityClass")
+  expect_s3_class(spatial_test, "ihcheterogeneityResults")
 })
 
 test_that("ihcheterogeneity handles biomarker-specific analyses", {
@@ -248,7 +248,7 @@ test_that("ihcheterogeneity handles biomarker-specific analyses", {
     cv_threshold = 25.0
   )
 
-  expect_s3_class(ki67_result, "ihcheterogeneityClass")
+  expect_s3_class(ki67_result, "ihcheterogeneityResults")
 
   # ER (typical CV ~15-20%)
   data(ihcheterogeneity_er_hscore, package = "ClinicoPath")
@@ -262,5 +262,5 @@ test_that("ihcheterogeneity handles biomarker-specific analyses", {
     correlation_threshold = 0.85
   )
 
-  expect_s3_class(er_result, "ihcheterogeneityClass")
+  expect_s3_class(er_result, "ihcheterogeneityResults")
 })

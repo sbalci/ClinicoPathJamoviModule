@@ -15,6 +15,9 @@ gsdesign(
   sfupar = -4,
   timing = "",
   testType = "efficacy",
+  hazards = "proportional",
+  delayMonths = 3,
+  hrDelayed = 1,
   hr = 0.7,
   medianControl = 12,
   accrualDuration = 12,
@@ -47,6 +50,22 @@ gsdesign(
 \item{timing}{.}
 
 \item{testType}{.}
+
+\item{hazards}{Whether the hazard ratio is assumed constant over time.
+Under "proportional" the design uses gsDesign::gsSurv with the single
+hazard ratio below. Under "non-proportional" it uses
+gsDesign2::gs_design_ahr with an average hazard ratio, for the
+delayed-separation pattern typical of immunotherapy: no treatment effect
+for an initial period, then the hazard ratio below. Assuming proportional
+hazards when the curves separate late understates the events required.}
+
+\item{delayMonths}{Non-proportional hazards only. Months from randomisation
+during which the treatment has no effect (hazard ratio held at the value
+below), before the full hazard ratio applies.}
+
+\item{hrDelayed}{Non-proportional hazards only. The hazard ratio during the
+delay period. 1 means no treatment effect at all until the delay has
+elapsed.}
 
 \item{hr}{.}
 

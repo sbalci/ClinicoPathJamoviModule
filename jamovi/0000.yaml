@@ -6,7 +6,7 @@ jms: '1.0'
 authors:
   - Serdar Balci
 maintainer: Serdar Balci <serdarbalci@serdarbalci.com>
-date: '2026-08-04'
+date: '2026-08-05'
 type: R
 description: >-
   ClinicoPath help researchers to generate natural language summaries of their
@@ -130,7 +130,7 @@ analyses:
   - title: 'Treatment Response: Patient-Level Burden'
     name: waterfall
     ns: ClinicoPath
-    menuGroup: OncoPathT
+    menuGroup: OncoPath
     menuSubgroup: Patient Follow-Up Plots
     menuTitle: 'Treatment Response: Patient-Level Burden'
     description: >
@@ -148,8 +148,8 @@ analyses:
       individual lesions it cannot sum target lesions, detect a new lesion, or
       judge non-target progression, and it cannot apply the 4-week confirmation
       rule itself (you may supply your own confirmation column). If your data
-      list each lesion separately, the lesion-level analysis applies the RECIST
-      v1.1 algorithm to them.
+      list each lesion separately, use the lesion-level RECIST v1.1 analysis. It
+      will be available in upcoming releases.
     menuSubtitle: One burden value per patient or visit
     ribbon: analyses
     category: analyses
@@ -178,7 +178,7 @@ analyses:
   - title: Swimmer Plot
     name: swimmerplot
     ns: ClinicoPath
-    menuGroup: OncoPath
+    menuGroup: OncoPathT
     menuSubgroup: Patient Follow-Up Plots
     menuTitle: Swimmer Plot
     description: >
@@ -6224,6 +6224,21 @@ analyses:
       of buds counted in a hotspot. Supports a single hotspot count, multiple
       candidate fields (hotspot = the densest field), and area normalization to
       the standard 0.785 mm2 field.
+  - title: Patient Follow-Up & Response Guide
+    name: patientfollowupintro
+    ns: ClinicoPath
+    category: analyses
+    menuGroup: OncoPathT
+    menuSubgroup: Patient Follow-Up Plots
+    menuTitle: Which Analysis Should I Use?
+    menuSubtitle: Waterfall, RECIST, swimmer plot - and what your data must look like
+    description: >
+      An interactive guide to the patient follow-up and tumour response analyses
+      in ClinicoPath. The choice between them is decided almost entirely by the
+      SHAPE of your data - one value per patient, one per visit, or one per
+      lesion per visit - so this guide starts there, shows a worked layout for
+      each, and states plainly what each analysis can and cannot do. No data or
+      variables required.
 usesNative: true
 minApp: 2.7.27
 

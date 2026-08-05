@@ -894,16 +894,34 @@ for (i in seq_len(nrow(results))) {
 ### Table State Management
 
 #### Clearing and Resetting Tables
+
+**You normally do not need to clear a table at all.** Tables are built from their
+`.r.yaml` definition and populated from scratch on each run, and `clearWith` handles
+invalidation when an option changes. Calling `deleteRows()` at the top of every
+populate method is redundant — keep the populate method to the code that fills it.
+
 ```r
-# Clear all existing rows before repopulating
+# There is exactly ONE delete method, and it removes ALL rows:
 analysisTable$deleteRows()
 
-# Clear specific row
-analysisTable$deleteRow(rowKey = "old_result")
+# There is NO single-row delete. `deleteRow()` (singular) does not exist -
+# calling it fails at runtime with "attempt to apply non-function", the same
+# way any undefined method does. Only these exist:
+#   jmvcore::Table  ->  deleteRows()
+```
 
+Use `deleteRows()` only where a table really is written more than once in a single
+run — for example a populate method that can be re-entered, or a path that replaces
+already-written rows with an error row.
+
+```r
 # Reset table state
 analysisTable$setState(NULL)
 ```
+
+> **Empty tables and `$asDF`:** reading `$asDF` on a table with zero rows throws
+> `invalid 'row.names' length`. Use `$rowCount` to test for emptiness in tests and
+> in code — `nrow(tbl$asDF)` is not safe on an empty table.
 
 #### Preserving Table State
 ```r

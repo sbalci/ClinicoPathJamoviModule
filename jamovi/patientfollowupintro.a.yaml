@@ -1,0 +1,54 @@
+---
+name: patientfollowupintro
+title: Patient Follow-Up & Response Guide
+menuGroup: OncoPathT
+menuSubgroup: 'Patient Follow-Up Plots'
+menuTitle: Which Analysis Should I Use?
+menuSubtitle: Waterfall, RECIST, swimmer plot - and what your data must look like
+version: '0.0.1'
+jas: '1.2'
+
+description:
+    main: >
+        An interactive guide to the patient follow-up and tumour response analyses in
+        ClinicoPath. The choice between them is decided almost entirely by the SHAPE of
+        your data - one value per patient, one per visit, or one per lesion per visit -
+        so this guide starts there, shows a worked layout for each, and states plainly
+        what each analysis can and cannot do. No data or variables required.
+
+options:
+    - name: showOverview
+      title: Which analysis fits my data?
+      type: Bool
+      default: true
+      description:
+          R: Show the decision table mapping data shape to analysis
+
+    - name: showDataStructures
+      title: Data layouts (worked examples)
+      type: Bool
+      default: true
+      description:
+          R: Show an example table for each accepted data layout
+
+    - name: showLimitations
+      title: What each analysis cannot do
+      type: Bool
+      default: true
+      description:
+          R: Show the limitations and known gaps of each analysis
+
+    - name: showRecistRules
+      title: RECIST v1.1 rules in plain language
+      type: Bool
+      default: false
+      description:
+          R: Show the response criteria the RECIST analyses apply
+
+    - name: showGlossary
+      title: Glossary
+      type: Bool
+      default: false
+      description:
+          R: Show a glossary of response-assessment terms
+...

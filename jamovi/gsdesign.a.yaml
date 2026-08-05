@@ -90,6 +90,48 @@ options:
       default: efficacy
 
     # survival
+    - name: hazards
+      title: Hazards Assumption
+      type: List
+      options:
+        - name: proportional
+          title: "Proportional hazards (constant HR)"
+        - name: nonproportional
+          title: "Non-proportional (delayed treatment effect)"
+      default: proportional
+      description:
+          R: >
+            Whether the hazard ratio is assumed constant over time. Under
+            "proportional" the design uses gsDesign::gsSurv with the single hazard
+            ratio below. Under "non-proportional" it uses gsDesign2::gs_design_ahr
+            with an average hazard ratio, for the delayed-separation pattern typical
+            of immunotherapy: no treatment effect for an initial period, then the
+            hazard ratio below. Assuming proportional hazards when the curves
+            separate late understates the events required.
+
+    - name: delayMonths
+      title: Delay Before Effect (months)
+      type: Number
+      default: 3
+      min: 0
+      max: 60
+      description:
+          R: >
+            Non-proportional hazards only. Months from randomisation during which the
+            treatment has no effect (hazard ratio held at the value below), before the
+            full hazard ratio applies.
+
+    - name: hrDelayed
+      title: Hazard Ratio During Delay
+      type: Number
+      default: 1
+      min: 0.1
+      max: 3
+      description:
+          R: >
+            Non-proportional hazards only. The hazard ratio during the delay period.
+            1 means no treatment effect at all until the delay has elapsed.
+
     - name: hr
       title: Hazard Ratio (alternative)
       type: Number

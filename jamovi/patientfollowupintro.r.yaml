@@ -1,0 +1,34 @@
+---
+name: patientfollowupintro
+title: Patient Follow-Up & Response Guide
+jrs: '1.1'
+
+items:
+    - name: overview
+      title: Which analysis fits my data?
+      type: Html
+      visible: (showOverview)
+
+    - name: dataStructures
+      title: Data Layouts
+      type: Html
+      visible: (showDataStructures)
+
+    - name: limitations
+      title: What Each Analysis Cannot Do
+      type: Html
+      visible: (showLimitations)
+
+    - name: recistRules
+      title: RECIST v1.1 in Plain Language
+      type: Html
+      visible: (showRecistRules)
+
+    - name: glossary
+      title: Glossary
+      type: Html
+      visible: (showGlossary)
+
+refs:
+    - ClinicoPathJamoviModule
+...

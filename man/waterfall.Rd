@@ -17,6 +17,9 @@ waterfall(
   confirmationVar = NULL,
   ongoingVar = NULL,
   responseCategoryVar = NULL,
+  showCategoryLabels = FALSE,
+  showSpiderLabels = FALSE,
+  annotationVars = NULL,
   showThresholds = TRUE,
   labelOutliers = FALSE,
   showMedian = FALSE,
@@ -89,6 +92,20 @@ yes/y/true/on/ongoing/1) draw an upward arrow at the bar tip.}
 percentage value, so a patient with target-lesion shrinkage can still be
 classified PD (e.g., a new lesion). Affects both bar coloring and response
 metrics (ORR/DCR).}
+
+\item{showCategoryLabels}{Print the response category (CR, PR, SD, PD)
+above each waterfall bar, so the category can be read directly instead of
+being mapped back from the bar colour.}
+
+\item{showSpiderLabels}{Label the end of every spider trajectory with its
+patient ID, so an outlying line can be traced to a patient without reading
+a large legend.}
+
+\item{annotationVars}{Optional patient-level variables drawn as coloured
+tracks beneath the waterfall bars, aligned to the same patient ordering.
+One row of tiles per variable. Use for biomarker status, mutation, prior
+therapy, treatment arm or any covariate you want read off against each
+patient's response.}
 
 \item{showThresholds}{Show +20 percent and -30 percent RECIST v1.1
 thresholds as dashed lines. Helps identify Progressive Disease (PD) and
@@ -200,6 +217,6 @@ a RECIST v1.1 implementation: because it never sees individual lesions it
 cannot sum target lesions, detect a new lesion, or judge non-target
 progression, and it cannot apply the 4-week confirmation rule itself (you
 may supply your own confirmation column). If your data list each lesion
-separately, the lesion-level analysis applies the RECIST v1.1 algorithm to
-them.
+separately, use the lesion-level RECIST v1.1 analysis. It will be available
+in upcoming releases.
 }

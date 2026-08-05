@@ -91,7 +91,7 @@ test_that("ihcheterogeneity misuse detection works", {
     )
     # Expect a warning in the interpretation (may be in notices or interpretation)
     # Just check that analysis completes
-    expect_s3_class(results, "ihcheterogeneityClass")
+    expect_s3_class(results, "ihcheterogeneityResults")
 
     # Test with constant values
     constant_data <- sample_data
@@ -102,7 +102,7 @@ test_that("ihcheterogeneity misuse detection works", {
         biopsy1 = "ki67_region1"
     )
     # Should complete even with no variability
-    expect_s3_class(results, "ihcheterogeneityClass")
+    expect_s3_class(results, "ihcheterogeneityResults")
 })
 
 test_that("ihcheterogeneity plain language summary works", {

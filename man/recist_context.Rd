@@ -10,6 +10,7 @@ recist_context(
   maxTargetLesions = 5,
   maxLesionsPerOrgan = 2,
   nonTargetResponseVar = NULL,
+  targetSelectionVar = NULL,
   notify = NULL
 )
 }

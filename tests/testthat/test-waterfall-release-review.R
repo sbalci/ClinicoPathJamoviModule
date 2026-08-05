@@ -328,3 +328,64 @@ test_that("the analysis does not claim RECIST v1.1 compliance", {
   al <- yaml::read_yaml("../../jamovi/waterfall.a.yaml")
   expect_match(al$description$main, "NOT a RECIST v1.1 implementation")
 })
+
+
+test_that("annotation tracks align tile-for-bar with the waterfall", {
+  # Covariate tracks drawn under the bars. Design credit: Jamovi-TrialPlots by
+  # highwindmx (LGPL), https://github.com/highwindmx/Jamovi-TrialPlots
+  # Alignment is the whole point: a tile must sit under its own patient's bar
+  # whatever order the bars were sorted into.
+  d <- data.frame(id = paste0("P", 1:8),
+                  r = c(-100, -45, -30, -29, 0, 19, 25, 60),
+                  Biomarker = c("Pos", "Pos", "Neg", "Pos", "Neg", "Neg", "Pos", "Neg"),
+                  Arm = rep(c("A", "B"), 4), stringsAsFactors = FALSE)
+  p <- wf_private(d, patientID = "id", responseVar = "r", inputType = "percentage")
+
+  df <- data.frame(id = d$id, response = d$r, stringsAsFactors = FALSE)
+  df <- df[order(df$response), ]                       # bar order
+  pd <- list(options = list(patientID = "id",
+                            annotationVars = c("Biomarker", "Arm")))
+
+  track <- p$.annotationTrack(df, pd)
+  expect_s3_class(track, "ggplot")
+
+  # one tile per patient per track
+  expect_equal(nrow(ggplot2::ggplot_build(track)$data[[1]]), nrow(df) * 2)
+
+  # first listed variable renders on top, so levels run bottom-up
+  expect_equal(levels(track$data$track), c("Arm", "Biomarker"))
+
+  # every tile carries its own patient's value, in bar order
+  for (i in seq_len(nrow(df))) {
+    expect_equal(track$data$value[track$data$bar == i & track$data$track == "Biomarker"],
+                 d$Biomarker[d$id == df$id[i]], info = paste("bar", i))
+  }
+})
+
+test_that("annotation tracks are absent unless asked for", {
+  d <- data.frame(id = paste0("P", 1:4), r = c(-40, -10, 5, 30), Arm = "A",
+                  stringsAsFactors = FALSE)
+  p <- wf_private(d, patientID = "id", responseVar = "r", inputType = "percentage")
+  df <- data.frame(id = d$id, response = d$r, stringsAsFactors = FALSE)
+
+  expect_null(p$.annotationTrack(df, list(options = list(patientID = "id",
+                                                         annotationVars = NULL))))
+  expect_null(p$.annotationTrack(df, list(options = list(patientID = "id",
+                                                         annotationVars = character(0)))))
+  # a variable that is not in the data must not error
+  expect_null(p$.annotationTrack(df, list(options = list(patientID = "id",
+                                                         annotationVars = "NoSuchColumn"))))
+})
+
+test_that("the waterfall still renders when no annotation track is requested", {
+  d <- data.frame(id = paste0("P", 1:8), r = c(-100, -45, -30, -29, 0, 19, 25, 60),
+                  stringsAsFactors = FALSE)
+  result <- waterfall(data = d, patientID = "id", responseVar = "r",
+                      inputType = "percentage")
+  expect_true(!is.null(result$waterfallplot$state))
+
+  f <- tempfile(fileext = ".png")
+  grDevices::png(f, width = 800, height = 500)
+  on.exit({ grDevices::dev.off(); unlink(f) }, add = TRUE)
+  expect_error(print(result$waterfallplot), NA)
+})

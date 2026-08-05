@@ -1,0 +1,20 @@
+title: Patient Follow-Up & Response Guide
+name: patientfollowupintro
+jus: '3.0'
+stage: 0
+compilerMode: tame
+children:
+  - type: Label
+    label: The right analysis is decided by the shape of your data. This guide shows which layout fits which analysis, and what each one cannot do. No data required.
+    margin: large
+    children:
+      - type: CheckBox
+        name: showOverview
+      - type: CheckBox
+        name: showDataStructures
+      - type: CheckBox
+        name: showLimitations
+      - type: CheckBox
+        name: showRecistRules
+      - type: CheckBox
+        name: showGlossary

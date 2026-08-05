@@ -91,12 +91,25 @@ test_that("waterfall handles complete response (<= -100%)", {
 })
 
 test_that("waterfall handles impossible shrinkage values (< -100%)", {
-  skip("KNOWN GAP: values below -100% are neither capped nor flagged. The
-  responseVar option text promises 'Values will be automatically capped at -100%
-  for analysis', but -110/-150/-200 are carried through unchanged; they are
-  categorised CR (correct) while the plotted bar and any reported minimum still
-  show the impossible value. Fix by capping at -100 in .processData and emitting
-  a notice naming the affected patients.")
+  # A tumour cannot shrink by more than 100%: -100% already means complete
+  # disappearance. .validateData caps such values and reports the capping in the
+  # validation panel; .enforceMeasurementLimits repeats the cap at the point of
+  # use so the invariant also holds for any path that bypasses validation.
+  impossible_data <- waterfall_test
+  impossible_data$best_response[1:3] <- c(-110, -150, -200)
+
+  result <- waterfall(
+    data = impossible_data,
+    patientID = "patientID",
+    responseVar = "best_response"
+  )
+
+  # nothing below -100 survives into the analysis
+  cats <- as.data.frame(result$summaryTable$asDF)
+  expect_true(sum(cats$n) > 0)
+  # The validation panel that records the capping is cleared whenever validation
+  # otherwise passes, so the disclosure has to be in the always-visible notices.
+  expect_match(wf_text(result), "IMPOSSIBLE SHRINKAGE CAPPED")
 })
 
 test_that("waterfall handles extreme progressive disease (> 200%)", {
@@ -193,11 +206,25 @@ test_that("waterfall handles zero tumor size", {
   expect_s3_class(result, "waterfallResults")
 })
 
-test_that("waterfall handles negative raw measurements", {
-  skip("KNOWN GAP: negative raw tumour measurements are accepted silently. A
-  negative baseline yields a percent change with an inverted sign, so the patient
-  is categorised as responding when the tumour grew. Fix by rejecting non-positive
-  raw measurements with a notice naming the affected patients.")
+test_that("negative raw measurements are refused, not sign-inverted", {
+  # A negative baseline flips the sign of ((current - baseline) / baseline), so a
+  # GROWING tumour was reported as a response: baseline -10 rising to 5 computes
+  # -150%, was capped to -100%, and scored a Complete Response.
+  d <- data.frame(
+    patientID = rep(c("A", "B", "C"), each = 2),
+    tm        = rep(c(0, 1), 3),
+    size      = c(-10, 5,   100, 50,   80, 90),
+    stringsAsFactors = FALSE
+  )
+
+  result <- waterfall(data = d, patientID = "patientID", responseVar = "size",
+                      timeVar = "tm", inputType = "raw")
+
+  expect_match(wf_text(result), "NEGATIVE TUMOUR MEASUREMENTS")
+  # the affected patient is unevaluable, not a complete responder
+  cats <- as.data.frame(result$summaryTable$asDF)
+  expect_equal(cats$n[cats$category == "CR"], 0)
+  expect_equal(sum(cats$n), 2)          # only B and C are scored
 })
 
 # ═══════════════════════════════════════════════════════════

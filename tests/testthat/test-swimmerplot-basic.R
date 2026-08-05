@@ -28,10 +28,11 @@ test_that("swimmerplot runs with minimal required arguments", {
   )
 
   # Should return a result object
-  expect_s3_class(result, "swimmerplotClass")
+  expect_s3_class(result, "swimmerplotResults")
 
-  # Should have a results component
-  expect_true("results" %in% names(result))
+  # swimmerplot() returns the results object itself, not a wrapper with a
+  # $results slot; assert on a real element declared in swimmerplot.r.yaml.
+  expect_true(!is.null(result$summary))
 })
 
 test_that("swimmerplot runs with response variable", {
@@ -43,7 +44,7 @@ test_that("swimmerplot runs with response variable", {
     responseVar = "Response"
   )
 
-  expect_s3_class(result, "swimmerplotClass")
+  expect_s3_class(result, "swimmerplotResults")
 })
 
 test_that("swimmerplot handles single milestone", {
@@ -52,11 +53,11 @@ test_that("swimmerplot handles single milestone", {
     patientID = "PatientID",
     startTime = "StartTime",
     endTime = "EndTime",
-    milestone1 = "FirstAssessment",
-    milestone1_name = "First Assessment"
+    milestone1Date = "FirstAssessment",
+    milestone1Name = "First Assessment"
   )
 
-  expect_s3_class(result, "swimmerplotClass")
+  expect_s3_class(result, "swimmerplotResults")
 })
 
 test_that("swimmerplot handles multiple milestones", {
@@ -65,15 +66,15 @@ test_that("swimmerplot handles multiple milestones", {
     patientID = "PatientID",
     startTime = "StartTime",
     endTime = "EndTime",
-    milestone1 = "TreatmentStart",
-    milestone1_name = "Treatment Start",
-    milestone2 = "FirstAssessment",
-    milestone2_name = "First Assessment",
-    milestone3 = "BestResponse",
-    milestone3_name = "Best Response"
+    milestone1Date = "TreatmentStart",
+    milestone1Name = "Treatment Start",
+    milestone2Date = "FirstAssessment",
+    milestone2Name = "First Assessment",
+    milestone3Date = "BestResponse",
+    milestone3Name = "Best Response"
   )
 
-  expect_s3_class(result, "swimmerplotClass")
+  expect_s3_class(result, "swimmerplotResults")
 })
 
 test_that("swimmerplot handles all five milestones", {
@@ -84,19 +85,19 @@ test_that("swimmerplot handles all five milestones", {
     patientID = "PatientID",
     startTime = "StartTime",
     endTime = "EndTime",
-    milestone1 = "Diagnosis",
-    milestone1_name = "Diagnosis",
-    milestone2 = "Surgery",
-    milestone2_name = "Surgery",
-    milestone3 = "ChemoStart",
-    milestone3_name = "Chemo Start",
-    milestone4 = "Recurrence",
-    milestone4_name = "Recurrence",
-    milestone5 = "Death",
-    milestone5_name = "Death"
+    milestone1Date = "Diagnosis",
+    milestone1Name = "Diagnosis",
+    milestone2Date = "Surgery",
+    milestone2Name = "Surgery",
+    milestone3Date = "ChemoStart",
+    milestone3Name = "Chemo Start",
+    milestone4Date = "Recurrence",
+    milestone4Name = "Recurrence",
+    milestone5Date = "Death",
+    milestone5Name = "Death"
   )
 
-  expect_s3_class(result, "swimmerplotClass")
+  expect_s3_class(result, "swimmerplotResults")
 })
 
 test_that("swimmerplot handles event markers", {
@@ -109,7 +110,7 @@ test_that("swimmerplot handles event markers", {
     eventTimeVar = "EventTime"
   )
 
-  expect_s3_class(result, "swimmerplotClass")
+  expect_s3_class(result, "swimmerplotResults")
 })
 
 test_that("swimmerplot handles censoring variable", {
@@ -121,7 +122,7 @@ test_that("swimmerplot handles censoring variable", {
     censorVar = "Censored"
   )
 
-  expect_s3_class(result, "swimmerplotClass")
+  expect_s3_class(result, "swimmerplotResults")
 })
 
 test_that("swimmerplot handles grouping variable", {
@@ -133,7 +134,7 @@ test_that("swimmerplot handles grouping variable", {
     groupVar = "TreatmentArm"
   )
 
-  expect_s3_class(result, "swimmerplotClass")
+  expect_s3_class(result, "swimmerplotResults")
 })
 
 test_that("swimmerplot handles different time types", {
@@ -148,7 +149,7 @@ test_that("swimmerplot handles different time types", {
       timeType = time_type
     )
 
-    expect_s3_class(result, "swimmerplotClass")
+    expect_s3_class(result, "swimmerplotResults")
   }
 })
 
@@ -164,14 +165,14 @@ test_that("swimmerplot handles different time units", {
       timeUnit = unit
     )
 
-    expect_s3_class(result, "swimmerplotClass")
+    expect_s3_class(result, "swimmerplotResults")
   }
 })
 
 test_that("swimmerplot handles different date formats", {
   data(swimmerplot_dates, package = "ClinicoPath")
 
-  date_formats <- c("YYYY-MM-DD", "MM/DD/YYYY", "DD-MM-YYYY")
+  date_formats <- c("ymd", "mdy", "dmy")
 
   for (fmt in date_formats) {
     result <- swimmerplot(
@@ -183,12 +184,12 @@ test_that("swimmerplot handles different date formats", {
       dateFormat = fmt
     )
 
-    expect_s3_class(result, "swimmerplotClass")
+    expect_s3_class(result, "swimmerplotResults")
   }
 })
 
 test_that("swimmerplot handles different sorting options", {
-  sort_options <- c("none", "duration", "response")
+  sort_options <- c("duration_desc", "duration_asc", "patient_id", "response")
 
   for (sort_opt in sort_options) {
     result <- swimmerplot(
@@ -197,15 +198,15 @@ test_that("swimmerplot handles different sorting options", {
       startTime = "StartTime",
       endTime = "EndTime",
       responseVar = "Response",
-      sortBy = sort_opt
+      sortOrder = sort_opt
     )
 
-    expect_s3_class(result, "swimmerplotClass")
+    expect_s3_class(result, "swimmerplotResults")
   }
 })
 
 test_that("swimmerplot handles color palettes", {
-  palettes <- c("default", "Set1", "Set2", "Dark2", "viridis")
+  palettes <- c("default", "viridis", "contrast", "monochrome")
 
   for (palette in palettes) {
     result <- swimmerplot(
@@ -217,7 +218,7 @@ test_that("swimmerplot handles color palettes", {
       colorPalette = palette
     )
 
-    expect_s3_class(result, "swimmerplotClass")
+    expect_s3_class(result, "swimmerplotResults")
   }
 })
 
@@ -227,11 +228,10 @@ test_that("swimmerplot handles reference lines", {
     patientID = "PatientID",
     startTime = "StartTime",
     endTime = "EndTime",
-    showReferenceLine = TRUE,
-    referenceLineValue = 180
+    referenceLines = "median"
   )
 
-  expect_s3_class(result, "swimmerplotClass")
+  expect_s3_class(result, "swimmerplotResults")
 })
 
 test_that("swimmerplot runs with small dataset", {
@@ -245,7 +245,7 @@ test_that("swimmerplot runs with small dataset", {
     responseVar = "Response"
   )
 
-  expect_s3_class(result, "swimmerplotClass")
+  expect_s3_class(result, "swimmerplotResults")
 })
 
 test_that("swimmerplot handles comprehensive visualization", {
@@ -255,20 +255,19 @@ test_that("swimmerplot handles comprehensive visualization", {
     startTime = "StartTime",
     endTime = "EndTime",
     responseVar = "Response",
-    milestone1 = "TreatmentStart",
-    milestone1_name = "Treatment",
-    milestone2 = "FirstAssessment",
-    milestone2_name = "Assessment",
-    milestone3 = "Progression",
-    milestone3_name = "Progression",
+    milestone1Date = "TreatmentStart",
+    milestone1Name = "Treatment",
+    milestone2Date = "FirstAssessment",
+    milestone2Name = "Assessment",
+    milestone3Date = "Progression",
+    milestone3Name = "Progression",
     eventVar = "AdverseEvent",
     eventTimeVar = "EventTime",
     censorVar = "Censored",
     groupVar = "TreatmentArm",
-    sortBy = "duration",
-    showReferenceLine = TRUE,
-    referenceLineValue = 180
+    sortOrder = "duration_desc",
+    referenceLines = "median"
   )
 
-  expect_s3_class(result, "swimmerplotClass")
+  expect_s3_class(result, "swimmerplotResults")
 })

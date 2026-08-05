@@ -135,74 +135,6 @@ waterfallClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         },
 
         # Calculate statistical power for response rates
-        .calculateStatisticalPower = function(n, observed_rate, null_rate = 0.15) {
-          # Post-hoc power calculation for response rate
-          # null_rate: typical null hypothesis for phase II trials (15%)
-          tryCatch({
-            if (n < 5 || is.na(observed_rate) || observed_rate < 0 || observed_rate > 1) {
-              return(list(
-                power = NA,
-                interpretation = .("Insufficient data for power calculation"),
-                adequate = FALSE
-              ))
-            }
-
-            # Convert percentages to proportions if needed
-            if (observed_rate > 1) observed_rate <- observed_rate / 100
-            if (null_rate > 1) null_rate <- null_rate / 100
-
-            # Calculate effect size (Cohen's h)
-            h <- 2 * (asin(sqrt(observed_rate)) - asin(sqrt(null_rate)))
-
-            # Simple power calculation using normal approximation
-            # This avoids dependency on external packages
-            z_alpha <- qnorm(0.975)  # two-sided alpha = 0.05
-            se <- sqrt((observed_rate * (1 - observed_rate)) / n)
-            z_beta <- (abs(observed_rate - null_rate) - z_alpha * se) / se
-            power <- pnorm(z_beta)
-
-            # Interpretation
-            interpretation <- if (power >= 0.80) {
-              .("Adequate statistical power (\u{2265}80%)")
-            } else if (power >= 0.60) {
-              .("Moderate statistical power (60-80%)")
-            } else if (power >= 0.40) {
-              .("Low statistical power (40-60%)")
-            } else {
-              .("Very low statistical power (<40%)")
-            }
-
-            list(
-              power = power,
-              interpretation = interpretation,
-              adequate = power >= 0.80,
-              effect_size = abs(h)
-            )
-          }, error = function(e) {
-            list(
-              power = NA,
-              interpretation = .("Power calculation failed"),
-              adequate = FALSE
-            )
-          })
-        },
-
-        # Visit times at which a patient has progressed, per RECIST v1.1: a
-        # >=20% increase in tumour burden relative to the NADIR (the smallest
-        # value recorded up to that visit, baseline included), restricted to
-        # visits after `after_time`.
-        #
-        # `values` are percent changes from baseline, so an increase of 20% of
-        # the nadir BURDEN is not the same as a 20-point rise in percent change.
-        # Converting back to relative burden: burden is proportional to
-        # (100 + percent_change), so the ratio to the nadir burden is
-        # (100 + value) / (100 + nadir).
-        #
-        # The >=5mm absolute-increase rule cannot be applied here: percent
-        # changes carry no millimetres. Progression is therefore detected on the
-        # relative criterion alone and may be called slightly early for very
-        # small lesions. Use the RECIST v1.1 analysis when absolute diameters
-        # matter.
         .progressionTimes = function(times, values, after_time) {
           ok <- !is.na(times) & !is.na(values)
           times <- times[ok]
@@ -405,6 +337,62 @@ waterfallClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             wdf$recist_category[ok] <- valid[match(user_cat[ok], recognised)]
           }
           wdf
+        },
+
+        # Annotation tracks drawn beneath the waterfall bars.
+        #
+        # Design credit: the idea of pairing the waterfall with aligned covariate
+        # tiles underneath, combined via patchwork with a collected x axis, is taken
+        # from the Jamovi-TrialPlots module by highwindmx (LGPL):
+        #   https://github.com/highwindmx/Jamovi-TrialPlots
+        # This is an independent implementation against our own data pipeline; only
+        # the figure design is borrowed. LGPL is compatible with this package's GPL-2.
+        #
+        # `df` must already be in final bar order: the tiles use the same
+        # factor(seq_len(nrow(df))) x positions, which is what keeps the two panels
+        # aligned no matter how the user sorted the bars.
+        .annotationTrack = function(df, plotData) {
+            vars <- plotData$options$annotationVars
+            if (is.null(vars) || length(vars) == 0) return(NULL)
+            if (!requireNamespace("patchwork", quietly = TRUE)) return(NULL)
+
+            pid <- plotData$options$patientID
+            if (is.null(pid) || !pid %in% names(df)) return(NULL)
+
+            src <- self$data
+            vars <- vars[vars %in% names(src)]
+            if (length(vars) == 0) return(NULL)
+
+            # One row per patient, taken from the source data by ID.
+            idx <- match(as.character(df[[pid]]), as.character(src[[pid]]))
+
+            long <- do.call(rbind, lapply(vars, function(v) {
+                data.frame(
+                    bar   = seq_len(nrow(df)),
+                    track = v,
+                    value = as.character(src[[v]])[idx],
+                    stringsAsFactors = FALSE
+                )
+            }))
+            if (nrow(long) == 0 || all(is.na(long$value))) return(NULL)
+
+            # Keep the user's variable order, top to bottom.
+            long$track <- factor(long$track, levels = rev(vars))
+            long$bar <- factor(long$bar, levels = seq_len(nrow(df)))
+
+            ggplot2::ggplot(long, ggplot2::aes(x = .data$bar, y = .data$track,
+                                               fill = .data$value)) +
+                ggplot2::geom_tile(width = 0.9, height = 0.9, colour = "white",
+                                   linewidth = 0.2) +
+                ggplot2::scale_x_discrete(drop = FALSE) +
+                ggplot2::labs(x = NULL, y = NULL, fill = NULL) +
+                ggplot2::theme_minimal() +
+                ggplot2::theme(
+                    axis.text.x     = ggplot2::element_blank(),
+                    axis.ticks.x    = ggplot2::element_blank(),
+                    panel.grid      = ggplot2::element_blank(),
+                    legend.position = "bottom"
+                )
         },
 
         # Add a Y = 0 baseline reference line
@@ -729,6 +717,100 @@ waterfallClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         # method previously caused "attempt to apply non-function" for any
         # dataset large enough to enter the optimized path (>100 rows or
         # >50 unique patients), e.g. the bundled histopathology example.
+            # Enforce the two physical limits on tumour measurements, at the single
+            # point where every processing path converges.
+            #
+            # 1. A tumour cannot shrink by more than 100%: -100% IS complete
+            #    disappearance. The Response Value option text has always promised
+            #    "values will be automatically capped at -100% for analysis" and the
+            #    code never did it, so a data-entry slip of -150% flowed into the
+            #    plot and the median unchanged.
+            # 2. A raw measurement cannot be negative. A negative baseline flips the
+            #    sign of ((current - baseline) / baseline), so a GROWING tumour is
+            #    reported as a response. That is silent and inverted, so those
+            #    patients are made unevaluable rather than guessed at.
+            .enforceMeasurementLimits = function(waterfall_data, source_df, patientID,
+                                                 responseVar, inputType) {
+                if (is.null(waterfall_data) || !is.data.frame(waterfall_data) ||
+                    nrow(waterfall_data) == 0 || !"response" %in% names(waterfall_data)) {
+                    return(waterfall_data)
+                }
+
+                # --- negative raw measurements ------------------------------------
+                if (identical(inputType, "raw") && !is.null(source_df) &&
+                    !is.null(responseVar) && responseVar %in% names(source_df) &&
+                    !is.null(patientID) && patientID %in% names(source_df) &&
+                    patientID %in% names(waterfall_data)) {
+
+                    vals <- jmvcore::toNumeric(source_df[[responseVar]])
+                    bad <- !is.na(vals) & vals < 0
+                    if (any(bad)) {
+                        bad_ids <- unique(as.character(source_df[[patientID]][bad]))
+                        idx <- which(as.character(waterfall_data[[patientID]]) %in% bad_ids)
+                        if (length(idx) > 0) {
+                            waterfall_data$response[idx] <- NA_real_
+                            waterfall_data$recist_category <-
+                                private$.categorizeRECIST(waterfall_data$response)
+                        }
+                        private$.addNotice(
+                            "ERROR", "NEGATIVE TUMOUR MEASUREMENTS",
+                            sprintf(paste0("%d patient(s) have a negative raw measurement, which ",
+                                           "is not a possible tumour size: %s. A negative baseline ",
+                                           "inverts the sign of the percent change, so a growing ",
+                                           "tumour would be reported as a response. These patients ",
+                                           "are reported as \"Unknown\" rather than guessed at. ",
+                                           "Check the measurement column for data-entry errors."),
+                                    length(bad_ids),
+                                    paste(utils::head(bad_ids, 10), collapse = ", "))
+                        )
+                    }
+                }
+
+                # --- shrinkage beyond -100% ---------------------------------------
+                # Read the SOURCE values, not the processed ones: .validateData
+                # already caps at -100, so by this point there is nothing left to
+                # detect. It records the capping in the validation panel, but that
+                # panel is cleared and hidden whenever validation otherwise passes
+                # (see "Clear todo messages for successful validation"), so the user
+                # was never actually told. Reporting it here puts it in the
+                # always-visible notices panel, which is what the option text
+                # promising the cap implies.
+                # self$data is the untouched dataset; source_df has already been
+                # through .validateData, which caps at -100 before we ever see it.
+                raw_df <- self$data
+                src_vals <- if (!is.null(raw_df) && !is.null(responseVar) &&
+                                identical(inputType, "percentage") &&
+                                responseVar %in% names(raw_df))
+                    jmvcore::toNumeric(raw_df[[responseVar]]) else numeric(0)
+                src_bad <- !is.na(src_vals) & src_vals < -100
+
+                too_small <- !is.na(waterfall_data$response) & waterfall_data$response < -100
+                if (any(too_small) || any(src_bad)) {
+                    ids <- if (any(src_bad) && !is.null(patientID) &&
+                               patientID %in% names(raw_df))
+                        unique(as.character(raw_df[[patientID]][src_bad])) else
+                        as.character(waterfall_data[[patientID]][too_small])
+                    worst <- min(c(src_vals[src_bad], waterfall_data$response[too_small]),
+                                 na.rm = TRUE)
+                    waterfall_data$response[too_small] <- -100
+                    waterfall_data$recist_category <-
+                        private$.categorizeRECIST(waterfall_data$response)
+                    private$.addNotice(
+                        "WARNING", "IMPOSSIBLE SHRINKAGE CAPPED",
+                        sprintf(paste0("%d patient(s) had a change below -100%%, which is not ",
+                                       "physically possible: -100%% already means the tumour has ",
+                                       "disappeared completely. The most extreme was %.1f%%. These ",
+                                       "values were capped at -100%% (complete response) for the ",
+                                       "analysis and the plot: %s. Check the response column for ",
+                                       "data-entry errors."),
+                                length(ids), worst,
+                                paste(utils::head(ids, 10), collapse = ", "))
+                    )
+                }
+
+                waterfall_data
+            },
+
         # Reconcile the patients that entered the analysis against those that made
         # it into the waterfall, and mark response-unevaluable patients as such.
         #
@@ -1524,7 +1606,7 @@ waterfallClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         todo <- paste0(
           "<br>", .("Welcome to ClinicoPath Treatment Response Analysis"),
           "<br><br>",
-          .("This tool creates waterfall and spider plots from ONE tumour burden value per patient (or per visit). Response categories use percent-change thresholds adapted from RECIST v1.1, but this is not a RECIST v1.1 implementation: it never sees individual lesions, so it cannot sum target lesions, detect new lesions, or judge non-target progression. If your data list each lesion separately, use the lesion-level RECIST v1.1 analysis."),
+          .("This tool creates waterfall and spider plots from ONE tumour burden value per patient (or per visit). Response categories use percent-change thresholds adapted from RECIST v1.1, but this is not a RECIST v1.1 implementation: it never sees individual lesions, so it cannot sum target lesions, detect new lesions, or judge non-target progression. If your data list each lesion separately, use the lesion-level RECIST v1.1 analysis. It will be available in upcoming releases."),
           "<br><br>",
           "<b> ", .("Visualization Types:"), "</b>",
           "<br><br>",
@@ -1705,6 +1787,10 @@ waterfallClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         # (.processData, .processDataStandard, .processLargeDataset) converge on
         # this one return value.
         if (!is.null(processed_data) && !is.null(processed_data$waterfall)) {
+          processed_data$waterfall <- private$.enforceMeasurementLimits(
+            processed_data$waterfall, validated_data, safe_patientID,
+            safe_responseVar, self$options$inputType)
+
           processed_data$waterfall <- private$.accountForUnevaluablePatients(
             processed_data$waterfall, validated_data, safe_patientID, safe_timeVar)
         }
@@ -1966,17 +2052,14 @@ waterfallClass <- if (requireNamespace('jmvcore')) R6::R6Class(
           ))
         }
 
-        # Add statistical power calculation
-        total_patients <- sum(metrics$summary$n)
-        orr_proportion <- if (!is.na(metrics$ORR)) metrics$ORR / 100 else NA_real_
-        power_analysis <- private$.calculateStatisticalPower(total_patients, orr_proportion)
-
-        if (!is.na(power_analysis$power)) {
-          add_metric_row(list(
-            metric = .("Statistical Power (ORR vs 15% null)"),
-            value = sprintf("%.1f%% (%s)", power_analysis$power * 100, power_analysis$interpretation)
-          ))
-        }
+        # No post-hoc ("observed") power row here, deliberately. Power computed from
+        # the OBSERVED response rate is a deterministic function of the p-value
+        # (Hoenig & Heisey 2001, The Abuse of Power): it restates the test result
+        # instead of informing it, and reporting it as an adequacy verdict is
+        # circular - a trial that happens to succeed gets called well powered and
+        # one that fails gets called underpowered, at identical sample size.
+        # Power belongs in a DESIGN calculation before the trial; see the
+        # Group-Sequential Design & Sample Size analysis.
 
 
         # Control visibility of personTimeTable based on conditions
@@ -2206,7 +2289,15 @@ waterfallClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             "minResponseForLabel" = self$options$minResponseForLabel,
             "spiderColorBy" = self$options$spiderColorBy,
             "spiderColorScheme" = self$options$spiderColorScheme,
-            "timeUnitLabel" = self$options$timeUnitLabel
+            "timeUnitLabel" = self$options$timeUnitLabel,
+            # tryCatch guards the window before jmvtools::prepare() regenerates the
+            # header: jmvcore errors on an option the compiled .h.R does not carry.
+            "annotationVars" = tryCatch(self$options$annotationVars,
+                                       error = function(e) NULL),
+            "showCategoryLabels" = tryCatch(self$options$showCategoryLabels,
+                                            error = function(e) FALSE),
+            "showSpiderLabels" = tryCatch(self$options$showSpiderLabels,
+                                          error = function(e) FALSE)
           ),
           "metrics" = metrics
         )
@@ -2571,6 +2662,32 @@ waterfallClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             )
         }
 
+        # Response category above each bar (PD / SD / PR / CR), the convention
+        # in published waterfall figures: the reader gets the category without
+        # having to map bar colour back to a legend.
+        # Design credit: Jamovi-TrialPlots by highwindmx (LGPL),
+        # https://github.com/highwindmx/Jamovi-TrialPlots
+        if (isTRUE(plotData$options$showCategoryLabels) &&
+            "recist_category" %in% names(df)) {
+          cats <- as.character(df$recist_category)
+          keep <- !is.na(cats) & cats != "Unknown"
+          if (any(keep)) {
+            p <- p +
+              ggplot2::geom_text(
+                data = data.frame(
+                  .x = factor(which(keep), levels = levels(factor(seq_len(nrow(df))))),
+                  .y = df$response[keep],
+                  .lab = cats[keep],
+                  stringsAsFactors = FALSE
+                ),
+                mapping = ggplot2::aes(x = .data$.x, y = .data$.y, label = .data$.lab),
+                vjust = ifelse(df$response[keep] >= 0, -0.6, 1.4),
+                size = 2.8,
+                inherit.aes = FALSE
+              )
+          }
+        }
+
         # Add labels for large changes
         if (plotData$options$labelOutliers) {
           threshold <- plotData$options$minResponseForLabel
@@ -2688,6 +2805,19 @@ waterfallClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         # Issue #1: baseline reference line + confirmation/ongoing markers
         p <- private$.addBaseline(p, isTRUE(plotData$options$showBaseline))
         p <- private$.addAnnotationMarkers(p, df, plotData)
+
+        # Stack the annotation tracks under the bars, sharing the x axis. `df` is
+        # already in bar order here, so the two panels line up patient for patient.
+        track <- private$.annotationTrack(df, plotData)
+        if (!is.null(track)) {
+            p <- p + ggplot2::theme(axis.title.x = ggplot2::element_blank())
+            n_tracks <- length(plotData$options$annotationVars)
+            p <- patchwork::wrap_plots(
+                p, track,
+                ncol = 1,
+                heights = c(1, min(0.5, 0.09 * n_tracks))
+            )
+        }
 
         print(p)
         TRUE
@@ -2951,6 +3081,27 @@ waterfallClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             y = .("Change in Tumor Size (%)"),
             title = .("Spider Plot of Tumor Response")
           )
+
+        # Label each trajectory at its last point, so an outlier line can be
+        # traced back to a patient without reading a legend of 40 colours.
+        # Design credit: Jamovi-TrialPlots by highwindmx (LGPL),
+        # https://github.com/highwindmx/Jamovi-TrialPlots
+        if (isTRUE(options$showSpiderLabels) && options$patientID %in% names(df)) {
+          ends <- df[!is.na(df$time) & !is.na(df$response), , drop = FALSE]
+          if (nrow(ends) > 0) {
+            ends <- ends[order(ends[[options$patientID]], ends$time), ]
+            last <- !duplicated(ends[[options$patientID]], fromLast = TRUE)
+            ends <- ends[last, , drop = FALSE]
+            lab_fn <- if (requireNamespace("ggrepel", quietly = TRUE))
+              ggrepel::geom_text_repel else ggplot2::geom_text
+            p <- p + lab_fn(
+              data = ends,
+              mapping = ggplot2::aes(x = .data$time, y = .data$response,
+                                     label = .data[[options$patientID]]),
+              size = 2.8, show.legend = FALSE, inherit.aes = FALSE
+            )
+          }
+        }
 
         # Add theme
         p <- p + ggtheme +

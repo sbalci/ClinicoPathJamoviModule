@@ -22,7 +22,7 @@ test_that("ihcheterogeneity handles Ki67 data appropriately", {
     biopsy4 = "biopsy4"
   )
 
-  expect_s3_class(result, "ihcheterogeneityClass")
+  expect_s3_class(result, "ihcheterogeneityResults")
 })
 
 test_that("ihcheterogeneity handles ER H-score data", {
@@ -36,7 +36,7 @@ test_that("ihcheterogeneity handles ER H-score data", {
     biopsy3 = "biopsy3"
   )
 
-  expect_s3_class(result, "ihcheterogeneityClass")
+  expect_s3_class(result, "ihcheterogeneityResults")
 })
 
 test_that("ihcheterogeneity handles all analysis options combined", {
@@ -62,7 +62,7 @@ test_that("ihcheterogeneity handles all analysis options combined", {
     showGlossary = TRUE
   )
 
-  expect_s3_class(result, "ihcheterogeneityClass")
+  expect_s3_class(result, "ihcheterogeneityResults")
 })
 
 test_that("ihcheterogeneity handles reproducibility-focused analysis", {
@@ -75,7 +75,7 @@ test_that("ihcheterogeneity handles reproducibility-focused analysis", {
     correlation_threshold = 0.90
   )
 
-  expect_s3_class(result, "ihcheterogeneityClass")
+  expect_s3_class(result, "ihcheterogeneityResults")
 })
 
 test_that("ihcheterogeneity handles bias-focused analysis", {
@@ -88,7 +88,7 @@ test_that("ihcheterogeneity handles bias-focused analysis", {
     analysis_type = "bias"
   )
 
-  expect_s3_class(result, "ihcheterogeneityClass")
+  expect_s3_class(result, "ihcheterogeneityResults")
 })
 
 test_that("ihcheterogeneity handles variability-focused analysis", {
@@ -102,7 +102,7 @@ test_that("ihcheterogeneity handles variability-focused analysis", {
     variance_components = TRUE
   )
 
-  expect_s3_class(result, "ihcheterogeneityClass")
+  expect_s3_class(result, "ihcheterogeneityResults")
 })
 
 test_that("ihcheterogeneity handles compartment comparison with tests", {
@@ -119,7 +119,7 @@ test_that("ihcheterogeneity handles compartment comparison with tests", {
     show_variability_plots = TRUE
   )
 
-  expect_s3_class(result, "ihcheterogeneityClass")
+  expect_s3_class(result, "ihcheterogeneityResults")
 })
 
 test_that("ihcheterogeneity handles high heterogeneity data", {
@@ -136,7 +136,7 @@ test_that("ihcheterogeneity handles high heterogeneity data", {
     generate_recommendations = TRUE
   )
 
-  expect_s3_class(result, "ihcheterogeneityClass")
+  expect_s3_class(result, "ihcheterogeneityResults")
 })
 
 test_that("ihcheterogeneity handles different CV thresholds", {
@@ -151,7 +151,7 @@ test_that("ihcheterogeneity handles different CV thresholds", {
       cv_threshold = cv_thresh
     )
 
-    expect_s3_class(result, "ihcheterogeneityClass")
+    expect_s3_class(result, "ihcheterogeneityResults")
   }
 })
 
@@ -167,7 +167,7 @@ test_that("ihcheterogeneity handles different correlation thresholds", {
       correlation_threshold = corr_thresh
     )
 
-    expect_s3_class(result, "ihcheterogeneityClass")
+    expect_s3_class(result, "ihcheterogeneityResults")
   }
 })
 
@@ -183,7 +183,7 @@ test_that("ihcheterogeneity handles all display options", {
     generate_recommendations = TRUE
   )
 
-  expect_s3_class(result, "ihcheterogeneityClass")
+  expect_s3_class(result, "ihcheterogeneityResults")
 })
 
 test_that("ihcheterogeneity handles inter-regional comparison without reference", {
@@ -200,7 +200,7 @@ test_that("ihcheterogeneity handles inter-regional comparison without reference"
     variance_components = TRUE
   )
 
-  expect_s3_class(result, "ihcheterogeneityClass")
+  expect_s3_class(result, "ihcheterogeneityResults")
 })
 
 test_that("ihcheterogeneity handles systematic sampling strategy", {
@@ -214,7 +214,7 @@ test_that("ihcheterogeneity handles systematic sampling strategy", {
     analysis_type = "variability"
   )
 
-  expect_s3_class(result, "ihcheterogeneityClass")
+  expect_s3_class(result, "ihcheterogeneityResults")
 })
 
 test_that("ihcheterogeneity handles stratified sampling strategy", {
@@ -228,5 +228,5 @@ test_that("ihcheterogeneity handles stratified sampling strategy", {
     compareCompartments = TRUE
   )
 
-  expect_s3_class(result, "ihcheterogeneityClass")
+  expect_s3_class(result, "ihcheterogeneityResults")
 })

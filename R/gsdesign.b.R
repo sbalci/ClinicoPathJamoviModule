@@ -48,15 +48,23 @@ gsdesignClass <- if (requireNamespace("jmvcore", quietly = TRUE)) R6::R6Class(
             if (opt$sfu %in% c("HSD", "WT")) common$sfupar <- opt$sfupar
 
             if (opt$endpoint == "survival") {
-                args <- c(common, list(
-                    lambdaC = log(2) / opt$medianControl,
-                    hr = opt$hr,
-                    eta = -log(1 - opt$dropoutRate) / 12,
-                    T = opt$accrualDuration + opt$followupDuration,
-                    minfup = opt$followupDuration,
-                    ratio = opt$ratio))
-                x <- do.call(gsDesign::gsSurv, args)
-                x$.effectScale <- "HR"
+                nonprop <- identical(
+                    tryCatch(opt$hazards, error = function(e) "proportional"),
+                    "nonproportional")
+
+                if (nonprop) {
+                    x <- private$.buildNonProportional(alpha1, beta, timing)
+                } else {
+                    args <- c(common, list(
+                        lambdaC = log(2) / opt$medianControl,
+                        hr = opt$hr,
+                        eta = -log(1 - opt$dropoutRate) / 12,
+                        T = opt$accrualDuration + opt$followupDuration,
+                        minfup = opt$followupDuration,
+                        ratio = opt$ratio))
+                    x <- do.call(gsDesign::gsSurv, args)
+                    x$.effectScale <- "HR"
+                }
             } else if (opt$endpoint == "binary") {
                 nfix <- gsDesign::nBinomial(p1 = opt$p1, p2 = opt$p2,
                           alpha = alpha1, beta = beta, ratio = opt$ratio)
@@ -74,6 +82,83 @@ gsdesignClass <- if (requireNamespace("jmvcore", quietly = TRUE)) R6::R6Class(
             }
             x$.endpoint <- opt$endpoint
             x$.ratio <- opt$ratio
+            x
+        },
+
+
+        # Non-proportional hazards via the average hazard ratio.
+        #
+        # gsDesign::gsSurv assumes one hazard ratio for the whole trial. When the
+        # curves separate late - the usual immunotherapy pattern - that overstates
+        # the early treatment effect and so understates the events required.
+        # gsDesign2::gs_design_ahr instead integrates the hazard ratio over a
+        # piecewise failure model and designs on the resulting average HR.
+        #
+        # The design is returned in the same shape gsSurv produces (k, timing, n.I,
+        # upper$bound, upper$spend, eNE, eNC) so every downstream table and plot
+        # reads it without knowing which engine produced it.
+        .buildNonProportional = function(alpha1, beta, timing) {
+            if (!requireNamespace("gsDesign2", quietly = TRUE)) {
+                stop("Non-proportional hazards needs the gsDesign2 package, which is not installed. Install gsDesign2, or set the Hazards Assumption back to proportional.")
+            }
+            opt <- self$options
+            delay <- max(0, opt$delayMonths)
+            if (delay <= 0) {
+                stop("A delay of 0 months is the proportional-hazards case. Either set a positive delay or select proportional hazards.")
+            }
+
+            total <- opt$accrualDuration + opt$followupDuration
+            # Pass the interim schedule as INFORMATION fractions, matching what
+            # `timing` means to gsDesign::gsSurv. Passing them as fractions of
+            # calendar time instead would silently move the interims: information
+            # accrues faster than time late in a survival trial, so 50% of the
+            # duration is roughly 54% of the information, and the two engines would
+            # answer different questions from the same input.
+            frac <- if (length(timing) == 1 && timing == 1)
+                seq_len(opt$kMax) / opt$kMax else timing
+            frac <- sort(unique(pmin(pmax(frac, 1e-6), 1)))
+            if (frac[length(frac)] < 1) frac <- c(frac, 1)
+
+            enroll <- gsDesign2::define_enroll_rate(
+                duration = opt$accrualDuration, rate = 1)
+            fail <- gsDesign2::define_fail_rate(
+                duration     = c(delay, Inf),
+                fail_rate    = log(2) / opt$medianControl,
+                hr           = c(opt$hrDelayed, opt$hr),
+                dropout_rate = -log(1 - opt$dropoutRate) / 12)
+
+            d <- gsDesign2::gs_design_ahr(
+                enroll_rate   = enroll,
+                fail_rate     = fail,
+                alpha         = alpha1,
+                beta          = beta,
+                ratio         = opt$ratio,
+                info_frac     = frac,
+                analysis_time = total)
+
+            an  <- as.data.frame(d$analysis)
+            bd  <- as.data.frame(d$bound)
+            up  <- bd[bd$bound == "upper", , drop = FALSE]
+            up  <- up[order(up$analysis), , drop = FALSE]
+
+            # probability0 on an upper bound is the cumulative type I error spent.
+            cum_spend <- up$probability0
+            spend <- c(cum_spend[1], diff(cum_spend))
+
+            r <- opt$ratio
+            n_total <- max(an$n, na.rm = TRUE)
+
+            x <- list(
+                k       = nrow(an),
+                timing  = an$info_frac,
+                n.I     = an$event,          # information is events, as in gsSurv
+                upper   = list(bound = up$z, spend = spend),
+                eNE     = n_total * r / (1 + r),
+                eNC     = n_total / (1 + r),
+                .ahr    = an$ahr,
+                .times  = an$time
+            )
+            x$.effectScale <- "average HR"
             x
         },
 

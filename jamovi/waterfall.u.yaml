@@ -100,6 +100,16 @@ children:
             label: Annotations
             children:
               - type: CheckBox
+                name: showCategoryLabels
+              - type: CheckBox
+                name: showSpiderLabels
+              - type: TargetLayoutBox
+                label: Annotation Tracks
+                children:
+                  - type: VariablesListBox
+                    name: annotationVars
+                    isTarget: true
+              - type: CheckBox
                 name: showThresholds
                 enable: (showWaterfallPlot)
               - type: CheckBox

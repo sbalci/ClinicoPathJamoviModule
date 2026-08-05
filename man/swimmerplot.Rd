@@ -179,8 +179,8 @@ A results object containing:
 \code{results$personTimeTable} \tab \tab \tab \tab \tab a table \cr
 \code{results$milestoneTable} \tab \tab \tab \tab \tab a table \cr
 \code{results$eventMarkerTable} \tab \tab \tab \tab \tab a table \cr
-\code{results$timelineData} \tab \tab \tab \tab \tab an output \cr
-\code{results$summaryData} \tab \tab \tab \tab \tab an output \cr
+\code{results$timelineData} \tab \tab \tab \tab \tab a table \cr
+\code{results$summaryData} \tab \tab \tab \tab \tab a table \cr
 \code{results$exportInfo} \tab \tab \tab \tab \tab a html \cr
 \code{results$validationReport} \tab \tab \tab \tab \tab a html \cr
 \code{results$advancedMetrics} \tab \tab \tab \tab \tab a table \cr

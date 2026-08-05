@@ -10,11 +10,17 @@ context("IHC Heterogeneity Analysis - Comprehensive Tests")
 
 # Helper function to load test data
 load_test_data <- function(filename) {
-  data_path <- file.path(
-    "/Users/serdarbalci/Documents/GitHub/ClinicoPathJamoviModule/data",
-    filename
+  # These CSVs live in data-raw/non-rda/, not data/, and the path must not be
+  # absolute: it previously pointed at one developer's home directory, so all 33
+  # tests in this file silently skipped with "Test data not found" on every
+  # machine including that one, giving the file the appearance of passing.
+  candidates <- c(
+    file.path("..", "..", "data-raw", "non-rda", filename),
+    file.path("data-raw", "non-rda", filename),
+    testthat::test_path("..", "..", "data-raw", "non-rda", filename)
   )
-  if (!file.exists(data_path)) {
+  data_path <- candidates[file.exists(candidates)][1]
+  if (is.na(data_path)) {
     skip(paste("Test data not found:", filename))
   }
   read.csv(data_path, stringsAsFactors = TRUE)
@@ -26,7 +32,7 @@ load_test_data <- function(filename) {
 
 test_that("ihcheterogeneity module loads correctly", {
   skip_if_not_installed('jmvReadWrite')
-  expect_true(exists("ihcheterogeneityClass"))
+  expect_true(exists("ihcheterogeneityResults"))
   expect_true(is.function(ihcheterogeneity))
 })
 
@@ -42,7 +48,7 @@ test_that("ihcheterogeneity works with standard Ki67 data", {
     biopsy4 = "ki67_region4"
   )
 
-  expect_s3_class(result, "ihcheterogeneityClass")
+  expect_s3_class(result, "ihcheterogeneityResults")
   expect_true(!is.null(result$reproducibilitytable))
   expect_true(!is.null(result$samplingbiastable))
 })
@@ -109,7 +115,7 @@ test_that("ihcheterogeneity detects low heterogeneity (ER H-score)", {
     correlation_threshold = 0.90
   )
 
-  expect_s3_class(result, "ihcheterogeneityClass")
+  expect_s3_class(result, "ihcheterogeneityResults")
 })
 
 test_that("ihcheterogeneity detects high heterogeneity (PDL1)", {
@@ -125,7 +131,7 @@ test_that("ihcheterogeneity detects high heterogeneity (PDL1)", {
     correlation_threshold = 0.70
   )
 
-  expect_s3_class(result, "ihcheterogeneityClass")
+  expect_s3_class(result, "ihcheterogeneityResults")
 })
 
 # ============================================================================
@@ -208,7 +214,7 @@ test_that("ihcheterogeneity handles spatial region analysis", {
     spatial_id = "spatial_region"
   )
 
-  expect_s3_class(result, "ihcheterogeneityClass")
+  expect_s3_class(result, "ihcheterogeneityResults")
   expect_true(!is.null(result$spatialanalysistable))
 })
 
@@ -293,7 +299,7 @@ test_that("ihcheterogeneity detects small sample size", {
     biopsy2 = "p53_region2"
   )
 
-  expect_s3_class(result, "ihcheterogeneityClass")
+  expect_s3_class(result, "ihcheterogeneityResults")
 })
 
 test_that("ihcheterogeneity detects outliers", {
@@ -306,7 +312,7 @@ test_that("ihcheterogeneity detects outliers", {
     biopsy2 = "ki67_region2"
   )
 
-  expect_s3_class(result, "ihcheterogeneityClass")
+  expect_s3_class(result, "ihcheterogeneityResults")
 })
 
 test_that("ihcheterogeneity handles constant values", {
@@ -498,7 +504,7 @@ test_that("ihcheterogeneity handles additional biopsies parameter", {
     biopsies = c("ki67_region5", "ki67_region6")
   )
 
-  expect_s3_class(result, "ihcheterogeneityClass")
+  expect_s3_class(result, "ihcheterogeneityResults")
 })
 
 # ============================================================================
@@ -553,14 +559,19 @@ test_that("ihcheterogeneity validates missing required parameters", {
 test_that("ihcheterogeneity handles invalid variable names", {
   data <- load_test_data("ihc_heterogeneity.csv")
 
-  # Non-existent variable name
-  expect_error({
-    result <- ihcheterogeneity(
+  # A variable that is not in the dataset must be REJECTED, with a message that
+  # names it. This previously asserted the opposite (expect_error(..., NA),
+  # "jamovi should handle this gracefully") - silently accepting a non-existent
+  # variable would be the defect, not the fix. The assertion was never exercised
+  # because the whole file skipped on a bad data path.
+  expect_error(
+    ihcheterogeneity(
       data = data,
       wholesection = "nonexistent_variable",
       biopsy1 = "ki67_region1"
-    )
-  }, NA)  # jamovi should handle this gracefully
+    ),
+    "nonexistent_variable"
+  )
 })
 
 # ============================================================================

@@ -140,8 +140,12 @@ test_that("swimmerplot handles export options", {
     )
     
     # Check if the exported data is available
-    timeline_df <- results$timelineData$state
-    summary_df <- results$summaryData$state
+    # timelineData/summaryData moved from `type: Output` (never actually wrote
+    # anything: no bound Output option, and setState on an Output) to `type: Table`.
+    skip_if_not(inherits(results$timelineData, "Table"),
+                "requires jmvtools::prepare() after the .r.yaml Output->Table change")
+    timeline_df <- results$timelineData$asDF
+    summary_df <- results$summaryData$asDF
     
     expect_true(is.data.frame(timeline_df))
     expect_true(is.data.frame(summary_df))
@@ -204,7 +208,11 @@ test_that("person-time calculation merges overlapping intervals correctly", {
     )
 
     # Get timeline data (patient-level)
-    timeline_df <- results$timelineData$state
+    # timelineData/summaryData moved from `type: Output` (never actually wrote
+    # anything: no bound Output option, and setState on an Output) to `type: Table`.
+    skip_if_not(inherits(results$timelineData, "Table"),
+                "requires jmvtools::prepare() after the .r.yaml Output->Table change")
+    timeline_df <- results$timelineData$asDF
 
     # Check that we have 2 unique patients
     n_unique_patients <- length(unique(timeline_df$patient_id))
@@ -236,7 +244,11 @@ test_that("adjacent intervals are merged in person-time calculation", {
         exportTimeline = TRUE
     )
 
-    timeline_df <- results$timelineData$state
+    # timelineData/summaryData moved from `type: Output` (never actually wrote
+    # anything: no bound Output option, and setState on an Output) to `type: Table`.
+    skip_if_not(inherits(results$timelineData, "Table"),
+                "requires jmvtools::prepare() after the .r.yaml Output->Table change")
+    timeline_df <- results$timelineData$asDF
 
     # Check that we have 1 unique patient
     expect_equal(length(unique(timeline_df$patient_id)), 1,
@@ -267,7 +279,11 @@ test_that("best response selection uses oncology hierarchy", {
         exportTimeline = TRUE
     )
 
-    timeline_df <- results$timelineData$state
+    # timelineData/summaryData moved from `type: Output` (never actually wrote
+    # anything: no bound Output option, and setState on an Output) to `type: Table`.
+    skip_if_not(inherits(results$timelineData, "Table"),
+                "requires jmvtools::prepare() after the .r.yaml Output->Table change")
+    timeline_df <- results$timelineData$asDF
 
     # Get unique patients (timeline may have multiple rows per patient)
     unique_patients <- unique(timeline_df$patient_id)
@@ -377,7 +393,11 @@ test_that("response hierarchy handles different case formats", {
         exportTimeline = TRUE
     )
 
-    timeline_df <- results$timelineData$state
+    # timelineData/summaryData moved from `type: Output` (never actually wrote
+    # anything: no bound Output option, and setState on an Output) to `type: Table`.
+    skip_if_not(inherits(results$timelineData, "Table"),
+                "requires jmvtools::prepare() after the .r.yaml Output->Table change")
+    timeline_df <- results$timelineData$asDF
 
     # Get data for each patient (may have multiple rows)
     p1_data <- timeline_df[timeline_df$patient_id == "P1", ]
@@ -386,8 +406,13 @@ test_that("response hierarchy handles different case formats", {
     # Check that the expected response is present
     expect_true("CR" %in% toupper(as.character(p1_data$response)),
                  info = "Case-insensitive: CR should be present (better than sd)")
-    expect_true(any(grepl("partial", tolower(as.character(p2_data$response)))),
-                info = "Case-insensitive: Partial Response should be present")
+    # The per-patient best response is now normalised to the RECIST abbreviation
+    # at the source (.summarizeByPatient), so every consumer sees one label.
+    # Previously .updatePersonTimeTable grouped on the raw string and split one
+    # clinical category across several rows. "Partial Response" therefore now
+    # arrives as "PR" - that is the fix, not a regression.
+    expect_true("PR" %in% toupper(as.character(p2_data$response)),
+                info = "Case-insensitive: partial response should normalise to PR")
 })
 
 test_that("single segment patient has correct person-time", {
@@ -408,7 +433,11 @@ test_that("single segment patient has correct person-time", {
         exportTimeline = TRUE
     )
 
-    timeline_df <- results$timelineData$state
+    # timelineData/summaryData moved from `type: Output` (never actually wrote
+    # anything: no bound Output option, and setState on an Output) to `type: Table`.
+    skip_if_not(inherits(results$timelineData, "Table"),
+                "requires jmvtools::prepare() after the .r.yaml Output->Table change")
+    timeline_df <- results$timelineData$asDF
 
     # Check that duration is correct
     duration <- timeline_df$end_time[1] - timeline_df$start_time[1]
@@ -437,7 +466,11 @@ test_that("completely overlapping segments are handled correctly", {
         exportTimeline = TRUE
     )
 
-    timeline_df <- results$timelineData$state
+    # timelineData/summaryData moved from `type: Output` (never actually wrote
+    # anything: no bound Output option, and setState on an Output) to `type: Table`.
+    skip_if_not(inherits(results$timelineData, "Table"),
+                "requires jmvtools::prepare() after the .r.yaml Output->Table change")
+    timeline_df <- results$timelineData$asDF
 
     # Check that we have 1 unique patient
     expect_equal(length(unique(timeline_df$patient_id)), 1,

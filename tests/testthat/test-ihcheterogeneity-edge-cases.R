@@ -24,7 +24,7 @@ test_that("ihcheterogeneity handles missing data appropriately", {
     biopsy2 = "biopsy2"
   )
 
-  expect_s3_class(result, "ihcheterogeneityClass")
+  expect_s3_class(result, "ihcheterogeneityResults")
 })
 
 test_that("ihcheterogeneity handles very small sample sizes", {
@@ -39,7 +39,7 @@ test_that("ihcheterogeneity handles very small sample sizes", {
   )
 
   # Should complete but may have warnings
-  expect_s3_class(result, "ihcheterogeneityClass")
+  expect_s3_class(result, "ihcheterogeneityResults")
 })
 
 test_that("ihcheterogeneity handles negative values", {
@@ -63,7 +63,7 @@ test_that("ihcheterogeneity handles negative values", {
 
   # Either completes or gives informative error
   if (!is.null(result)) {
-    expect_s3_class(result, "ihcheterogeneityClass")
+    expect_s3_class(result, "ihcheterogeneityResults")
   }
 })
 
@@ -80,7 +80,7 @@ test_that("ihcheterogeneity handles out-of-range values", {
     biopsy2 = "biopsy2"
   )
 
-  expect_s3_class(result, "ihcheterogeneityClass")
+  expect_s3_class(result, "ihcheterogeneityResults")
 })
 
 test_that("ihcheterogeneity handles perfect agreement (no heterogeneity)", {
@@ -96,7 +96,7 @@ test_that("ihcheterogeneity handles perfect agreement (no heterogeneity)", {
     biopsy2 = "biopsy2"
   )
 
-  expect_s3_class(result, "ihcheterogeneityClass")
+  expect_s3_class(result, "ihcheterogeneityResults")
 })
 
 test_that("ihcheterogeneity handles extreme heterogeneity", {
@@ -110,7 +110,7 @@ test_that("ihcheterogeneity handles extreme heterogeneity", {
     biopsy3 = "biopsy3"
   )
 
-  expect_s3_class(result, "ihcheterogeneityClass")
+  expect_s3_class(result, "ihcheterogeneityResults")
 })
 
 test_that("ihcheterogeneity handles constant values", {
@@ -128,7 +128,7 @@ test_that("ihcheterogeneity handles constant values", {
     biopsy2 = "biopsy2"
   )
 
-  expect_s3_class(result, "ihcheterogeneityClass")
+  expect_s3_class(result, "ihcheterogeneityResults")
 })
 
 test_that("ihcheterogeneity handles single case (should warn or error)", {
@@ -164,7 +164,7 @@ test_that("ihcheterogeneity handles missing spatial_id with compartment tests", 
 
   # Should either skip compartment analysis or warn
   if (!is.null(result)) {
-    expect_s3_class(result, "ihcheterogeneityClass")
+    expect_s3_class(result, "ihcheterogeneityResults")
   }
 })
 
@@ -180,7 +180,7 @@ test_that("ihcheterogeneity handles all NA in one biopsy", {
     biopsy3 = "biopsy3"
   )
 
-  expect_s3_class(result, "ihcheterogeneityClass")
+  expect_s3_class(result, "ihcheterogeneityResults")
 })
 
 test_that("ihcheterogeneity handles variable names with special characters", {
@@ -196,7 +196,7 @@ test_that("ihcheterogeneity handles variable names with special characters", {
     biopsy2 = "biopsy2"
   )
 
-  expect_s3_class(result, "ihcheterogeneityClass")
+  expect_s3_class(result, "ihcheterogeneityResults")
 })
 
 test_that("ihcheterogeneity handles extreme CV thresholds", {
@@ -209,7 +209,7 @@ test_that("ihcheterogeneity handles extreme CV thresholds", {
     cv_threshold = 5.0
   )
 
-  expect_s3_class(result_low, "ihcheterogeneityClass")
+  expect_s3_class(result_low, "ihcheterogeneityResults")
 
   # Very high threshold (50%)
   result_high <- ihcheterogeneity(
@@ -220,7 +220,7 @@ test_that("ihcheterogeneity handles extreme CV thresholds", {
     cv_threshold = 50.0
   )
 
-  expect_s3_class(result_high, "ihcheterogeneityClass")
+  expect_s3_class(result_high, "ihcheterogeneityResults")
 })
 
 test_that("ihcheterogeneity handles only one spatial compartment", {
@@ -237,5 +237,5 @@ test_that("ihcheterogeneity handles only one spatial compartment", {
     compareCompartments = TRUE
   )
 
-  expect_s3_class(result, "ihcheterogeneityClass")
+  expect_s3_class(result, "ihcheterogeneityResults")
 })

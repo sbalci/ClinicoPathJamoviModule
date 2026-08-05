@@ -251,87 +251,69 @@ recistClass <- R6::R6Class(
             private$.summaryStatus$n_patients <- length(unique(data$patientId))
             private$.summaryStatus$n_lesions_total <- length(unique(data$lesionId[data$lesionType == "target"]))
 
-            # Mark target lesions for inclusion
             data$includedInSum <- FALSE
             data$exclusionReason <- NA_character_
 
-            # Get baseline (first assessment per patient)
-            baseline <- data %>%
-                group_by(patientId) %>%
-                arrange(assessmentTime) %>%
-                filter(row_number() == 1) %>%
-                ungroup()
+            # Delegate the RECIST target-lesion limits to the shared engine
+            # (R/recist_engine.R) rather than reimplementing them here. The previous
+            # local version selected the FIRST ROW per patient rather than every
+            # lesion at the baseline visit, so it followed a single lesion -- and
+            # whichever one happened to sort first, not the largest. That understated
+            # every multi-lesion target sum and is what made the basic PR, the
+            # missing-lesion NE and the max-per-organ cases all fail.
+            baseline_time <- stats::ave(data$assessmentTime, data$patientId, FUN = min)
 
-            # For each patient, select largest valid target lesions at baseline
-            tracked_lesions_list <- list()
+            eng <- data.frame(
+                patientID  = as.character(data$patientId),
+                lesionID   = as.character(data$lesionId),
+                visitTime  = data$assessmentTime,
+                diameter   = data$diameter,
+                location   = if ("organ" %in% names(data)) as.character(data$organ) else "unknown",
+                isBaseline = data$assessmentTime == baseline_time,
+                stringsAsFactors = FALSE
+            )
+            lt <- gsub("[^a-z]", "", tolower(as.character(data$lesionType)))
+            eng$lesionType <- ifelse(lt == "target", "Target",
+                              ifelse(lt == "new", "New", "NonTarget"))
+            # recist does not (yet) expose a reader-selection override; when it
+            # does, populate eng$targetSelection here and the engine will honour it.
 
-            for (pid in unique(baseline$patientId)) {
-                # Get target lesions at baseline
-                patient_baseline <- baseline %>%
-                    filter(patientId == pid, lesionType == "target") %>%
-                    arrange(desc(diameter))
+            selected <- recist_select_target_lesions(
+                eng,
+                recist_context(
+                    maxTargetLesions   = self$options$maxTargetLesions,
+                    maxLesionsPerOrgan = self$options$maxPerOrgan,
+                    notify = function(type, title, content)
+                        private$.addWarning(paste0(title, ": ", content))
+                )
+            )
 
-                # Check if patient has NO target lesions at baseline
-                if (nrow(patient_baseline) == 0) {
+            # Map the engine's decision back onto this analysis's own columns. Row
+            # order is preserved by the engine, so positional assignment is safe.
+            data$includedInSum <- selected$targetSelected
+            was_target <- lt == "target"
+            demoted <- was_target & !selected$targetSelected
+            data$exclusionReason[demoted] <- "Exceeds RECIST target lesion limits"
+            # RECIST follows unselected baseline targets as non-target disease.
+            data$lesionType[demoted] <- "non-target"
+
+            for (pid in unique(data$patientId)) {
+                keep <- data$lesionId[data$patientId == pid & data$includedInSum]
+                if (length(keep) == 0) {
                     private$.addWarning(paste0("Patient ", pid, ": No target lesions found at baseline."))
                     next
                 }
-
-                selected <- character(0)
-                organs_count <- table(character(0))
-
-                # Select up to max
-                for (i in seq_len(nrow(patient_baseline))) {
-                    lesion <- patient_baseline$lesionId[i]
-                    organ <- patient_baseline$organ[i]
-
-                    # CAPS: Max Total
-                    if (length(selected) >= self$options$maxTargetLesions) {
-                        data$exclusionReason[data$patientId == pid & data$lesionId == lesion] <- "Exceeds max total lesions"
-                        next
-                    }
-
-                    # CAPS: Max Per Organ
-                    current_count <- organs_count[organ]
-                    if (is.na(current_count)) current_count <- 0
-
-                    if (current_count >= self$options$maxPerOrgan) {
-                        data$exclusionReason[data$patientId == pid & data$lesionId == lesion] <- "Exceeds max per organ"
-                        next
-                    }
-
-                    selected <- c(selected, lesion)
-                    organs_count[organ] <- current_count + 1
-
-                    # Track this lesion ID for this patient FOREVER
-                    # (RECIST: "Target lesions should be selected at baseline and followed...")
-                }
-
-                tracked_lesions_list[[pid]] <- selected
-
-                # Mark selected matches in the FULL dataset
-                # Only mark if it MATCHES the ID selected at baseline
-                data$includedInSum[data$patientId == pid & data$lesionId %in% selected] <- TRUE
-
-                # Identify non-selected target lesions (orphans or late appearances)
-                # Any target lesion for this patient NOT in 'selected' is excluded
-                # Note: This handles "new" lesions appearing as 'target' type incorrectly by user - they should be 'new' type.
-                # If they appear later with type='target', they are ignored from sum.
-
-                # Log exclusions for baseline items
-                excluded_at_baseline <- patient_baseline$lesionId[!patient_baseline$lesionId %in% selected]
-                if (length(excluded_at_baseline) > 0) {
-                    msg <- paste0("Patient ", pid, ": Lesions excluded at baseline (max limits): ", paste(excluded_at_baseline, collapse = ", "))
-                    private$.summaryStatus$exclusions <- c(private$.summaryStatus$exclusions, msg)
+                dropped <- unique(data$lesionId[data$patientId == pid & demoted])
+                if (length(dropped) > 0) {
+                    private$.summaryStatus$exclusions <- c(
+                        private$.summaryStatus$exclusions,
+                        paste0("Patient ", pid, ": Lesions excluded at baseline (max limits): ",
+                               paste(unique(dropped), collapse = ", ")))
                 }
             }
 
-            # Global check for target lesions appearing mid-stream that were NOT at baseline
-            # (Valid targets must be present at baseline)
-            # We already set includedInSum=TRUE only for those matching baseline IDs.
-            # So any target lesion with includedInSum=FALSE is effectively excluded.
-
-            private$.summaryStatus$n_lesions_tracked <- sum(data$includedInSum & data$assessmentTime == min(data$assessmentTime))
+            private$.summaryStatus$n_lesions_tracked <-
+                sum(data$includedInSum & data$assessmentTime == min(data$assessmentTime))
             private$.lesionData <- data
         },
 
