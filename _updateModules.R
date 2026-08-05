@@ -102,11 +102,24 @@ jsurvival_module <- config$jsurvival %||% modes$jsurvival %||% FALSE
 ClinicoPathDescriptives_module <- config$ClinicoPathDescriptives %||% modes$ClinicoPathDescriptives %||% FALSE
 OncoPath_module <- config$OncoPath %||% modes$OncoPath %||% FALSE
 
+# menuGroup suffix convention - patterns MUST be anchored.
+#
+#   <Group>       production: shipped to the submodule
+#   <Group>Extra  production overflow menu: also shipped
+#   <Group>D      dev-routed:  kept out of every shipped module
+#   <Group>T      test-routed: JamoviTest only (see the TEST branches below)
+#
+# `pattern_wip` used to be the bare, UNANCHORED group name, so in WIP mode it
+# matched the D and T suffixes too and copied dev/test functions into the
+# production submodules - e.g. "menuGroup: Survival" pulled in Survival (8) plus
+# SurvivalD (57), SurvivalT (19) and SurvivalExtraD (1), 85 instead of 8. The
+# (Extra)?$ form keeps the intended widening to the Extra menus while excluding
+# the dev/test suffixes.
 # Hardcoded module configurations (simplified for maintainability)
 module_patterns <- list(
   meddecide = list(
     pattern = "menuGroup: meddecide$",
-    pattern_wip = "menuGroup: meddecide",
+    pattern_wip = "menuGroup: meddecide(Extra)?[[:space:]]*$",
     data_files = c("histopathology.rda", "roc_analysis_test_data.RData", "cancer_biomarker_data.csv", 
                    "cardiac_troponin_data.csv", "sepsis_biomarker_data.csv", "thyroid_function_data.csv",
                    "bayesdca_test_data.rda", "breast_cancer_data.rda", "breast_diagnostic_styles.rda",
@@ -114,7 +127,7 @@ module_patterns <- list(
   ),
   jjstatsplot = list(
     pattern = "menuGroup: JJStatsPlot$",
-    pattern_wip = "menuGroup: JJStatsPlot", 
+    pattern_wip = "menuGroup: JJStatsPlot(Extra)?[[:space:]]*$",
     data_files = c("histopathology.rda", "groupsummary_financial_data.rda", "groupsummary_simple.rda",
                    "categorical_quality_data.rda", paste0("hullplot_", c("clinical", "customer", "experimental", "quality", "survey"), "_data.rda"),
                    paste0("jggstats_", c("clinical", "educational", "experimental", "financial", "marketing", 
@@ -122,19 +135,19 @@ module_patterns <- list(
   ),
   jsurvival = list(
     pattern = "menuGroup: Survival$",
-    pattern_wip = "menuGroup: Survival",
+    pattern_wip = "menuGroup: Survival(Extra)?[[:space:]]*$",
     data_files = c("histopathology.rda", "melanoma.rda", "data_longitudinal.rda",
                    paste0("stagemigration_", c("lung_cancer", "breast_cancer", "colorectal_cancer", "small_sample",
                          "large_performance", "problematic", "combined", "summary_stats"), ".rda"))
   ),
   ClinicoPathDescriptives = list(
     pattern = "menuGroup: Exploration$",
-    pattern_wip = "menuGroup: Exploration",
+    pattern_wip = "menuGroup: Exploration(Extra)?[[:space:]]*$",
     data_files = c("histopathology.rda")
   ),
   OncoPath = list(
     pattern = "menuGroup: OncoPath$",
-    pattern_wip = "menuGroup: OncoPath",
+    pattern_wip = "menuGroup: OncoPath(Extra)?[[:space:]]*$",
     data_files = c("histopathology.rda")
   )
 )
@@ -1462,8 +1475,8 @@ jjstatsplot_modules <- jjstatsplot_a_yaml_files
 if (WIP) {
   jjstatsplot_a_yaml_files <- purrr::keep(a_yaml_files, function(f) {
     lines <- readLines(f, warn = FALSE)
-    any(grepl("menuGroup: JJStatsPlot", lines)) ||
-    any(grepl("menuGroup: Power #jjstatsplot", lines))
+    any(grepl("menuGroup: JJStatsPlot(Extra)?[[:space:]]*$", lines)) ||
+    any(grepl("menuGroup: Power #jjstatsplot[[:space:]]*$", lines))
   })
 
   jjstatsplot_a_yaml_files <- gsub(pattern = "./jamovi/",
@@ -1512,8 +1525,8 @@ meddecide_modules <- meddecide_a_yaml_files
 if (WIP) {
   meddecide_a_yaml_files <- purrr::keep(a_yaml_files, function(f) {
     lines <- readLines(f, warn = FALSE)
-    any(grepl("menuGroup: meddecide", lines)) ||
-    any(grepl("menuGroup: Power #meddecide", lines))
+    any(grepl("menuGroup: meddecide(Extra)?[[:space:]]*$", lines)) ||
+    any(grepl("menuGroup: Power #meddecide[[:space:]]*$", lines))
   })
 
   meddecide_a_yaml_files <- gsub(pattern = "./jamovi/",
@@ -1563,8 +1576,8 @@ jsurvival_modules <- jsurvival_a_yaml_files
 if (WIP) {
   jsurvival_a_yaml_files <- purrr::keep(a_yaml_files, function(f) {
     lines <- readLines(f, warn = FALSE)
-    any(grepl("menuGroup: Survival", lines)) ||
-    any(grepl("menuGroup: Power #jsurvival", lines))
+    any(grepl("menuGroup: Survival(Extra)?[[:space:]]*$", lines)) ||
+    any(grepl("menuGroup: Power #jsurvival[[:space:]]*$", lines))
   })
 
   jsurvival_a_yaml_files <- gsub(pattern = "./jamovi/",
@@ -1585,7 +1598,7 @@ if (WIP) {
 
 # Get the menuGroup pattern from config for ClinicoPathDescriptives
 clinicopath_pattern <- if (WIP) {
-  modules_config$ClinicoPathDescriptives$menuGroup_pattern_wip %||% "menuGroup: Exploration"
+  modules_config$ClinicoPathDescriptives$menuGroup_pattern_wip %||% "menuGroup: Exploration(Extra)?[[:space:]]*$"
 } else {
   modules_config$ClinicoPathDescriptives$menuGroup_pattern %||% "menuGroup: Exploration$|menuGroup: OncoPathology$"
 }
@@ -1609,7 +1622,7 @@ ClinicoPathDescriptives_modules <- ClinicoPathDescriptives_a_yaml_files
 
 # Get the menuGroup pattern from config for OncoPath
 oncopath_pattern <- if (WIP) {
-  modules_config$OncoPath$menuGroup_pattern_wip %||% "menuGroup: OncoPath"
+  modules_config$OncoPath$menuGroup_pattern_wip %||% "menuGroup: OncoPath(Extra)?[[:space:]]*$"
 } else {
   modules_config$OncoPath$menuGroup_pattern %||% "menuGroup: OncoPath$"
 }

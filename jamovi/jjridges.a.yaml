@@ -4,7 +4,7 @@ title: Ridge Plot
 menuGroup: JJStatsPlot
 menuSubgroup: Distribution
 # menuSubtitle: 'Ridge Visualization'
-version: '1.0.3'
+version: '1.0.4'
 jas: '1.2'
 
 description:

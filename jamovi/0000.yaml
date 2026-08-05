@@ -1,7 +1,7 @@
 ---
 title: Common Analysis for Clinicopathological Research
 name: ClinicoPath
-version: 1.0.3
+version: 1.0.4
 jms: '1.0'
 authors:
   - Serdar Balci
