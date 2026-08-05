@@ -30,77 +30,37 @@ test_that("diagnosticmeta runs with minimal required arguments", {
   )
 
   # Should return a result object
-  expect_s3_class(result, "diagnosticmetaClass")
+  expect_s3_class(result, "diagnosticmetaResults")
 
   # Should have a results component
-  expect_true("results" %in% names(result))
+  # The public wrapper returns the results object itself (class
+  # diagnosticmetaResults); there is no nested `results` element.
+  expect_true(!is.null(result$bivariateresults))
 })
 
-test_that("diagnosticmeta errors on missing required arguments", {
-  # Missing study identifier
-  expect_error(
-    diagnosticmeta(
-      data = diagnosticmeta_test,
-      true_positives = "true_positives",
-      false_positives = "false_positives",
-      false_negatives = "false_negatives",
-      true_negatives = "true_negatives"
-    ),
-    regexp = "study|identifier|required",
-    ignore.case = TRUE
+test_that("omitting a required variable shows guidance instead of throwing", {
+  # A jamovi analysis must not error when the user has not yet chosen variables -
+  # the GUI calls .run() on every keystroke. These assertions previously demanded
+  # an error, i.e. they asserted the opposite of the correct behaviour, and were
+  # red because the analysis handles it properly.
+  partials <- list(
+    list(true_positives = "true_positives", false_positives = "false_positives",
+         false_negatives = "false_negatives", true_negatives = "true_negatives"),
+    list(study = "study", false_positives = "false_positives",
+         false_negatives = "false_negatives", true_negatives = "true_negatives"),
+    list(study = "study", true_positives = "true_positives",
+         false_negatives = "false_negatives", true_negatives = "true_negatives"),
+    list(study = "study", true_positives = "true_positives",
+         false_positives = "false_positives", true_negatives = "true_negatives"),
+    list(study = "study", true_positives = "true_positives",
+         false_positives = "false_positives", false_negatives = "false_negatives")
   )
-
-  # Missing true_positives
-  expect_error(
-    diagnosticmeta(
-      data = diagnosticmeta_test,
-      study = "study",
-      false_positives = "false_positives",
-      false_negatives = "false_negatives",
-      true_negatives = "true_negatives"
-    ),
-    regexp = "true.positive|TP|required",
-    ignore.case = TRUE
-  )
-
-  # Missing false_positives
-  expect_error(
-    diagnosticmeta(
-      data = diagnosticmeta_test,
-      study = "study",
-      true_positives = "true_positives",
-      false_negatives = "false_negatives",
-      true_negatives = "true_negatives"
-    ),
-    regexp = "false.positive|FP|required",
-    ignore.case = TRUE
-  )
-
-  # Missing false_negatives
-  expect_error(
-    diagnosticmeta(
-      data = diagnosticmeta_test,
-      study = "study",
-      true_positives = "true_positives",
-      false_positives = "false_positives",
-      true_negatives = "true_negatives"
-    ),
-    regexp = "false.negative|FN|required",
-    ignore.case = TRUE
-  )
-
-  # Missing true_negatives
-  expect_error(
-    diagnosticmeta(
-      data = diagnosticmeta_test,
-      study = "study",
-      true_positives = "true_positives",
-      false_positives = "false_positives",
-      false_negatives = "false_negatives"
-    ),
-    regexp = "true.negative|TN|required",
-    ignore.case = TRUE
-  )
+  for (args in partials) {
+    res <- do.call(diagnosticmeta, c(list(data = diagnosticmeta_test), args))
+    expect_s3_class(res, "diagnosticmetaResults")
+    # guidance is shown rather than an exception raised
+    expect_true(nzchar(res$instructions$content))
+  }
 })
 
 test_that("diagnosticmeta produces expected outputs with default settings", {
@@ -114,10 +74,10 @@ test_that("diagnosticmeta produces expected outputs with default settings", {
   )
 
   # Check that main summary table exists
-  expect_true(!is.null(result$results$summary))
+  expect_true(!is.null(result$summary))
 
   # Check that instructions are provided
-  expect_true(!is.null(result$results$instructions))
+  expect_true(!is.null(result$instructions))
 })
 
 test_that("diagnosticmeta handles bivariate analysis option", {
@@ -132,7 +92,7 @@ test_that("diagnosticmeta handles bivariate analysis option", {
     bivariate_analysis = TRUE
   )
 
-  expect_s3_class(result_biv, "diagnosticmetaClass")
+  expect_s3_class(result_biv, "diagnosticmetaResults")
 
   # Without bivariate analysis
   result_no_biv <- diagnosticmeta(
@@ -145,7 +105,7 @@ test_that("diagnosticmeta handles bivariate analysis option", {
     bivariate_analysis = FALSE
   )
 
-  expect_s3_class(result_no_biv, "diagnosticmetaClass")
+  expect_s3_class(result_no_biv, "diagnosticmetaResults")
 })
 
 test_that("diagnosticmeta handles confidence level option", {
@@ -160,7 +120,7 @@ test_that("diagnosticmeta handles confidence level option", {
     confidence_level = 95
   )
 
-  expect_s3_class(result_95, "diagnosticmetaClass")
+  expect_s3_class(result_95, "diagnosticmetaResults")
 
   result_99 <- diagnosticmeta(
     data = diagnosticmeta_test,
@@ -172,7 +132,7 @@ test_that("diagnosticmeta handles confidence level option", {
     confidence_level = 99
   )
 
-  expect_s3_class(result_99, "diagnosticmetaClass")
+  expect_s3_class(result_99, "diagnosticmetaResults")
 })
 
 test_that("diagnosticmeta handles different estimation methods", {
@@ -189,7 +149,7 @@ test_that("diagnosticmeta handles different estimation methods", {
       method = method
     )
 
-    expect_s3_class(result, "diagnosticmetaClass")
+    expect_s3_class(result, "diagnosticmetaResults")
   }
 })
 
@@ -207,7 +167,7 @@ test_that("diagnosticmeta runs with small dataset", {
   )
 
   # Should complete but may have warnings
-  expect_s3_class(result, "diagnosticmetaClass")
+  expect_s3_class(result, "diagnosticmetaResults")
 })
 
 test_that("diagnosticmeta produces plots when requested", {
@@ -223,7 +183,7 @@ test_that("diagnosticmeta produces plots when requested", {
     funnel_plot = TRUE
   )
 
-  expect_s3_class(result, "diagnosticmetaClass")
+  expect_s3_class(result, "diagnosticmetaResults")
 
   # Check that plot objects exist (if implemented)
   # expect_true(!is.null(result$results$forestplot))

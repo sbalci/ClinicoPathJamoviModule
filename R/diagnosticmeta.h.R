@@ -522,14 +522,14 @@ diagnosticmetaResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
                         `type`="text"),
                     list(
                         `name`="sensitivity", 
-                        `title`="Sensitivity", 
+                        `title`="Sensitivity (%)", 
                         `type`="number", 
-                        `format`="zto"),
+                        `format`="dp:1"),
                     list(
                         `name`="specificity", 
-                        `title`="Specificity", 
+                        `title`="Specificity (%)", 
                         `type`="number", 
-                        `format`="zto"),
+                        `format`="dp:1"),
                     list(
                         `name`="tp", 
                         `title`="TP", 
@@ -567,7 +567,9 @@ diagnosticmetaResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
                     "true_negatives",
                     "zero_cell_correction",
                     "confidence_level",
-                    "color_palette")))
+                    "color_palette",
+                    "method",
+                    "bivariate_analysis")))
             self$add(jmvcore::Image$new(
                 options=options,
                 name="srocplot",
@@ -584,7 +586,9 @@ diagnosticmetaResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
                     "false_negatives",
                     "true_negatives",
                     "zero_cell_correction",
-                    "color_palette")))
+                    "color_palette",
+                    "confidence_level",
+                    "method")))
             self$add(jmvcore::Image$new(
                 options=options,
                 name="funnelplot",

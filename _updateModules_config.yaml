@@ -4,6 +4,7 @@
 # Usage: Rscript _updateModules.R [config_file]
 
 # run  /Applications/jamovi.app/Contents/MacOS/jamovi
+# install.packages('jmvtools', repos=c('https://repo.jamovi.org', 'https://cran.r-project.org'))
 
 # Rscript -e "jmvtools::prepare()"
 # Rscript -e "jmvtools::prepare(home = '/Applications/jamovi.app')"
@@ -41,11 +42,11 @@ new_version: "1.0.3"
 new_date: "2026-08-05"
 quick: false
 TEST: true
-jjstatsplot: false
-jsurvival: false
-ClinicoPathDescriptives: false
-OncoPath: false
-meddecide: false
+jjstatsplot: true
+jsurvival: true
+ClinicoPathDescriptives: true
+OncoPath: true
+meddecide: true
 
 
 

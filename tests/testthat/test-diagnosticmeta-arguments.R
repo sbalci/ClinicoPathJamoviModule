@@ -23,7 +23,7 @@ test_that("diagnosticmeta handles meta-regression with continuous covariate", {
     meta_regression = TRUE
   )
 
-  expect_s3_class(result, "diagnosticmetaClass")
+  expect_s3_class(result, "diagnosticmetaResults")
 })
 
 test_that("diagnosticmeta handles meta-regression with categorical covariate", {
@@ -38,7 +38,7 @@ test_that("diagnosticmeta handles meta-regression with categorical covariate", {
     meta_regression = TRUE
   )
 
-  expect_s3_class(result, "diagnosticmetaClass")
+  expect_s3_class(result, "diagnosticmetaResults")
 })
 
 test_that("diagnosticmeta handles zero-cell correction methods", {
@@ -58,7 +58,7 @@ test_that("diagnosticmeta handles zero-cell correction methods", {
       zero_cell_correction = method
     )
 
-    expect_s3_class(result, "diagnosticmetaClass")
+    expect_s3_class(result, "diagnosticmetaResults")
   }
 })
 
@@ -80,7 +80,7 @@ test_that("diagnosticmeta handles all analysis options combined", {
     method = "reml"
   )
 
-  expect_s3_class(result, "diagnosticmetaClass")
+  expect_s3_class(result, "diagnosticmetaResults")
 })
 
 test_that("diagnosticmeta handles all plot options combined", {
@@ -98,7 +98,7 @@ test_that("diagnosticmeta handles all plot options combined", {
     color_palette = "colorblind_safe"
   )
 
-  expect_s3_class(result, "diagnosticmetaClass")
+  expect_s3_class(result, "diagnosticmetaResults")
 })
 
 test_that("diagnosticmeta handles all color palettes", {
@@ -117,7 +117,7 @@ test_that("diagnosticmeta handles all color palettes", {
       color_palette = palette
     )
 
-    expect_s3_class(result, "diagnosticmetaClass")
+    expect_s3_class(result, "diagnosticmetaResults")
   }
 })
 
@@ -136,7 +136,7 @@ test_that("diagnosticmeta handles all display options", {
     show_plot_explanations = TRUE
   )
 
-  expect_s3_class(result, "diagnosticmetaClass")
+  expect_s3_class(result, "diagnosticmetaResults")
 })
 
 test_that("diagnosticmeta handles HSROC analysis separately", {
@@ -152,7 +152,7 @@ test_that("diagnosticmeta handles HSROC analysis separately", {
     hsroc_analysis = TRUE
   )
 
-  expect_s3_class(result_hsroc, "diagnosticmetaClass")
+  expect_s3_class(result_hsroc, "diagnosticmetaResults")
 
   # Both HSROC and bivariate
   result_both <- diagnosticmeta(
@@ -166,7 +166,7 @@ test_that("diagnosticmeta handles HSROC analysis separately", {
     hsroc_analysis = TRUE
   )
 
-  expect_s3_class(result_both, "diagnosticmetaClass")
+  expect_s3_class(result_both, "diagnosticmetaResults")
 })
 
 test_that("diagnosticmeta handles heterogeneity analysis option", {
@@ -180,7 +180,7 @@ test_that("diagnosticmeta handles heterogeneity analysis option", {
     heterogeneity_analysis = TRUE
   )
 
-  expect_s3_class(result, "diagnosticmetaClass")
+  expect_s3_class(result, "diagnosticmetaResults")
 
   # Check that heterogeneity results exist (if implemented)
   # expect_true(!is.null(result$results$heterogeneity))
@@ -198,7 +198,7 @@ test_that("diagnosticmeta handles publication bias assessment", {
     funnel_plot = TRUE
   )
 
-  expect_s3_class(result, "diagnosticmetaClass")
+  expect_s3_class(result, "diagnosticmetaResults")
 })
 
 test_that("diagnosticmeta handles large dataset efficiently", {
@@ -221,7 +221,7 @@ test_that("diagnosticmeta handles large dataset efficiently", {
   end_time <- Sys.time()
   time_taken <- as.numeric(difftime(end_time, start_time, units = "secs"))
 
-  expect_s3_class(result, "diagnosticmetaClass")
+  expect_s3_class(result, "diagnosticmetaResults")
 
   # Should complete in reasonable time (< 30 seconds)
   expect_lt(time_taken, 30)
@@ -244,7 +244,7 @@ test_that("diagnosticmeta handles different combinations of estimation method an
         zero_cell_correction = correction
       )
 
-      expect_s3_class(result, "diagnosticmetaClass")
+      expect_s3_class(result, "diagnosticmetaResults")
     }
   }
 })
@@ -261,5 +261,5 @@ test_that("diagnosticmeta handles quality score as covariate", {
     meta_regression = TRUE
   )
 
-  expect_s3_class(result, "diagnosticmetaClass")
+  expect_s3_class(result, "diagnosticmetaResults")
 })

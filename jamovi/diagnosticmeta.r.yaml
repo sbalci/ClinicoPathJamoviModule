@@ -225,13 +225,13 @@ items:
           title: Study
           type: text
         - name: sensitivity
-          title: Sensitivity
+          title: "Sensitivity (%)"
           type: number
-          format: zto
+          format: dp:1
         - name: specificity
-          title: Specificity
+          title: "Specificity (%)"
           type: number
-          format: zto
+          format: dp:1
         - name: tp
           title: TP
           type: integer
@@ -265,6 +265,8 @@ items:
           - zero_cell_correction
           - confidence_level
           - color_palette
+          - method
+          - bivariate_analysis
 
     - name: srocplot
       title: Summary ROC Plot
@@ -282,6 +284,8 @@ items:
           - true_negatives
           - zero_cell_correction
           - color_palette
+          - confidence_level
+          - method
 
     - name: funnelplot
       title: Funnel Plot for Publication Bias

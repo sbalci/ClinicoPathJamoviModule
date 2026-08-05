@@ -25,7 +25,7 @@ test_that("diagnosticmeta integrates with mada package correctly", {
     bivariate_analysis = TRUE
   )
 
-  expect_s3_class(result, "diagnosticmetaClass")
+  expect_s3_class(result, "diagnosticmetaResults")
 
   # If the function stores the mada model, check it
   # expect_s3_class(result$model, "madad") # or similar
@@ -44,7 +44,7 @@ test_that("diagnosticmeta integrates with metafor package correctly", {
     covariate = "year"
   )
 
-  expect_s3_class(result, "diagnosticmetaClass")
+  expect_s3_class(result, "diagnosticmetaResults")
 })
 
 test_that("diagnosticmeta produces consistent results across runs", {
@@ -72,8 +72,8 @@ test_that("diagnosticmeta produces consistent results across runs", {
   )
 
   # Results should be identical (no randomness involved)
-  expect_s3_class(result1, "diagnosticmetaClass")
-  expect_s3_class(result2, "diagnosticmetaClass")
+  expect_s3_class(result1, "diagnosticmetaResults")
+  expect_s3_class(result2, "diagnosticmetaResults")
 
   # If results contain numeric values, they should be equal
   # expect_equal(result1$results$summary, result2$results$summary)
@@ -92,7 +92,7 @@ test_that("diagnosticmeta workflow: basic meta-analysis → meta-regression", {
     bivariate_analysis = TRUE
   )
 
-  expect_s3_class(basic_result, "diagnosticmetaClass")
+  expect_s3_class(basic_result, "diagnosticmetaResults")
 
   # Step 2: Add meta-regression to explore heterogeneity
   metareg_result <- diagnosticmeta(
@@ -108,7 +108,7 @@ test_that("diagnosticmeta workflow: basic meta-analysis → meta-regression", {
     heterogeneity_analysis = TRUE
   )
 
-  expect_s3_class(metareg_result, "diagnosticmetaClass")
+  expect_s3_class(metareg_result, "diagnosticmetaResults")
 })
 
 test_that("diagnosticmeta workflow: assess publication bias", {
@@ -124,7 +124,7 @@ test_that("diagnosticmeta workflow: assess publication bias", {
     funnel_plot = TRUE
   )
 
-  expect_s3_class(result, "diagnosticmetaClass")
+  expect_s3_class(result, "diagnosticmetaResults")
 })
 
 test_that("diagnosticmeta workflow: compare different models", {
@@ -143,7 +143,7 @@ test_that("diagnosticmeta workflow: compare different models", {
       method = method
     )
 
-    expect_s3_class(results[[method]], "diagnosticmetaClass")
+    expect_s3_class(results[[method]], "diagnosticmetaResults")
   }
 
   # All methods should complete successfully
@@ -168,7 +168,7 @@ test_that("diagnosticmeta handles data from CSV import", {
     true_negatives = "true_negatives"
   )
 
-  expect_s3_class(result, "diagnosticmetaClass")
+  expect_s3_class(result, "diagnosticmetaResults")
 
   # Clean up
   unlink(temp_csv)
@@ -192,7 +192,7 @@ test_that("diagnosticmeta handles data from Excel import", {
     true_negatives = "true_negatives"
   )
 
-  expect_s3_class(result, "diagnosticmetaClass")
+  expect_s3_class(result, "diagnosticmetaResults")
 
   # Clean up
   unlink(temp_xlsx)
@@ -222,8 +222,8 @@ test_that("diagnosticmeta produces reproducible plots", {
     sroc_plot = TRUE
   )
 
-  expect_s3_class(result1, "diagnosticmetaClass")
-  expect_s3_class(result2, "diagnosticmetaClass")
+  expect_s3_class(result1, "diagnosticmetaResults")
+  expect_s3_class(result2, "diagnosticmetaResults")
 })
 
 test_that("diagnosticmeta comprehensive analysis workflow", {
@@ -238,7 +238,7 @@ test_that("diagnosticmeta comprehensive analysis workflow", {
     true_negatives = "true_negatives"
   )
 
-  expect_s3_class(initial, "diagnosticmetaClass")
+  expect_s3_class(initial, "diagnosticmetaResults")
 
   # Step 2: Add heterogeneity analysis
   heterogeneity <- diagnosticmeta(
@@ -251,7 +251,7 @@ test_that("diagnosticmeta comprehensive analysis workflow", {
     heterogeneity_analysis = TRUE
   )
 
-  expect_s3_class(heterogeneity, "diagnosticmetaClass")
+  expect_s3_class(heterogeneity, "diagnosticmetaResults")
 
   # Step 3: Explore with meta-regression
   metareg <- diagnosticmeta(
@@ -265,7 +265,7 @@ test_that("diagnosticmeta comprehensive analysis workflow", {
     covariate = "year"
   )
 
-  expect_s3_class(metareg, "diagnosticmetaClass")
+  expect_s3_class(metareg, "diagnosticmetaResults")
 
   # Step 4: Full analysis with all options
   full_analysis <- diagnosticmeta(
@@ -288,7 +288,7 @@ test_that("diagnosticmeta comprehensive analysis workflow", {
     show_interpretation = TRUE
   )
 
-  expect_s3_class(full_analysis, "diagnosticmetaClass")
+  expect_s3_class(full_analysis, "diagnosticmetaResults")
 })
 
 test_that("diagnosticmeta handles different data structures consistently", {
@@ -305,7 +305,7 @@ test_that("diagnosticmeta handles different data structures consistently", {
     true_negatives = "true_negatives"
   )
 
-  expect_s3_class(result_tibble, "diagnosticmetaClass")
+  expect_s3_class(result_tibble, "diagnosticmetaResults")
 
   # Test with data.frame
   df_data <- as.data.frame(diagnosticmeta_test)
@@ -319,7 +319,7 @@ test_that("diagnosticmeta handles different data structures consistently", {
     true_negatives = "true_negatives"
   )
 
-  expect_s3_class(result_df, "diagnosticmetaClass")
+  expect_s3_class(result_df, "diagnosticmetaResults")
 
   # Both should produce consistent results
   # expect_equal(result_tibble$results, result_df$results)
@@ -344,7 +344,7 @@ test_that("diagnosticmeta sensitivity analysis with different corrections", {
       zero_cell_correction = correction
     )
 
-    expect_s3_class(results[[correction]], "diagnosticmetaClass")
+    expect_s3_class(results[[correction]], "diagnosticmetaResults")
   }
 
   # All corrections should complete

@@ -3,7 +3,16 @@ testthat::test_that("diagnosticmeta pooled estimates align with mada", {
   testthat::skip_if_not_installed("mada")
   testthat::skip_if_not_installed("metafor")
 
-  data_path <- testthat::test_path("..", "..", "data", "diagnostic_meta_test.csv")
+  # The fixture lives in data-raw/non-rda/, not data/. With the wrong path this
+  # file errored on read.csv and the ONLY assertions in the whole 7-file suite
+  # that numerically cross-check pooled estimates against mada never ran.
+  candidates <- c(
+    testthat::test_path("..", "..", "data-raw", "non-rda", "diagnostic_meta_test.csv"),
+    file.path("..", "..", "data-raw", "non-rda", "diagnostic_meta_test.csv"),
+    file.path("data-raw", "non-rda", "diagnostic_meta_test.csv")
+  )
+  data_path <- candidates[file.exists(candidates)][1]
+  testthat::skip_if(is.na(data_path), "diagnostic_meta_test.csv fixture not found")
   diag_data <- utils::read.csv(data_path, stringsAsFactors = FALSE)
 
   results <- diagnosticmeta(
@@ -106,7 +115,16 @@ testthat::test_that("diagnosticmeta respects optional analysis flags", {
   testthat::skip_if_not_installed("mada")
   testthat::skip_if_not_installed("metafor")
 
-  data_path <- testthat::test_path("..", "..", "data", "diagnostic_meta_test.csv")
+  # The fixture lives in data-raw/non-rda/, not data/. With the wrong path this
+  # file errored on read.csv and the ONLY assertions in the whole 7-file suite
+  # that numerically cross-check pooled estimates against mada never ran.
+  candidates <- c(
+    testthat::test_path("..", "..", "data-raw", "non-rda", "diagnostic_meta_test.csv"),
+    file.path("..", "..", "data-raw", "non-rda", "diagnostic_meta_test.csv"),
+    file.path("data-raw", "non-rda", "diagnostic_meta_test.csv")
+  )
+  data_path <- candidates[file.exists(candidates)][1]
+  testthat::skip_if(is.na(data_path), "diagnostic_meta_test.csv fixture not found")
   diag_data <- utils::read.csv(data_path, stringsAsFactors = FALSE)
 
   disabled_results <- diagnosticmeta(

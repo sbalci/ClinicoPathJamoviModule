@@ -12,22 +12,25 @@ data(diagnosticmeta_test, package = "ClinicoPath")
 data(diagnosticmeta_test_small, package = "ClinicoPath")
 data(diagnosticmeta_test_zeros, package = "ClinicoPath")
 
-test_that("diagnosticmeta handles missing data appropriately", {
-  # Create dataset with missing values
+# A jamovi analysis must never throw on a data problem - the GUI re-runs it on
+# every edit. Bad studies are excluded and the exclusion is disclosed. These
+# blocks previously demanded an exception, i.e. they asserted the opposite of
+# the intended contract.
+
+
+test_that("missing counts are excluded and disclosed, not thrown", {
   test_data_na <- diagnosticmeta_test
   test_data_na$true_positives[1:3] <- NA
 
-  # Should either error or warn about missing data
-  expect_condition(
-    diagnosticmeta(
-      data = test_data_na,
-      study = "study",
-      true_positives = "true_positives",
-      false_positives = "false_positives",
-      false_negatives = "false_negatives",
-      true_negatives = "true_negatives"
-    )
-  )
+  res <- diagnosticmeta(
+    data = test_data_na, study = "study",
+    true_positives = "true_positives", false_positives = "false_positives",
+    false_negatives = "false_negatives", true_negatives = "true_negatives")
+
+  expect_s3_class(res, "diagnosticmetaResults")
+  txt <- gsub("<[^>]+>", " ", res$instructions$content)
+  expect_match(txt, "Studies excluded")
+  expect_match(txt, "missing counts")
 })
 
 test_that("diagnosticmeta handles very small sample sizes", {
@@ -44,7 +47,7 @@ test_that("diagnosticmeta handles very small sample sizes", {
   )
 
   # Should complete but may have warnings or notices
-  expect_s3_class(result, "diagnosticmetaClass")
+  expect_s3_class(result, "diagnosticmetaResults")
 })
 
 test_that("diagnosticmeta handles studies with zero cells", {
@@ -59,7 +62,7 @@ test_that("diagnosticmeta handles studies with zero cells", {
     zero_cell_correction = "none"
   )
 
-  expect_s3_class(result_none, "diagnosticmetaClass")
+  expect_s3_class(result_none, "diagnosticmetaResults")
 
   # Test with constant correction
   result_constant <- diagnosticmeta(
@@ -72,27 +75,21 @@ test_that("diagnosticmeta handles studies with zero cells", {
     zero_cell_correction = "constant"
   )
 
-  expect_s3_class(result_constant, "diagnosticmetaClass")
+  expect_s3_class(result_constant, "diagnosticmetaResults")
 })
 
-test_that("diagnosticmeta handles negative values in 2x2 table", {
-  # Create dataset with negative values (invalid)
+test_that("negative counts are excluded and disclosed, not thrown", {
   test_data_neg <- diagnosticmeta_test
   test_data_neg$true_positives[1] <- -5
 
-  # Should error with informative message
-  expect_error(
-    diagnosticmeta(
-      data = test_data_neg,
-      study = "study",
-      true_positives = "true_positives",
-      false_positives = "false_positives",
-      false_negatives = "false_negatives",
-      true_negatives = "true_negatives"
-    ),
-    regexp = "negative|invalid|positive",
-    ignore.case = TRUE
-  )
+  res <- diagnosticmeta(
+    data = test_data_neg, study = "study",
+    true_positives = "true_positives", false_positives = "false_positives",
+    false_negatives = "false_negatives", true_negatives = "true_negatives")
+
+  expect_s3_class(res, "diagnosticmetaResults")
+  txt <- gsub("<[^>]+>", " ", res$instructions$content)
+  expect_match(txt, "negative counts")
 })
 
 test_that("diagnosticmeta handles non-integer counts", {
@@ -124,26 +121,21 @@ test_that("diagnosticmeta handles non-integer counts", {
 
   # If it doesn't error, should complete successfully
   if (!is.null(result)) {
-    expect_s3_class(result, "diagnosticmetaClass")
+    expect_s3_class(result, "diagnosticmetaResults")
   }
 })
 
-test_that("diagnosticmeta handles duplicate study identifiers", {
-  # Create dataset with duplicate study names
+test_that("duplicate study identifiers do not crash the analysis", {
   test_data_dup <- diagnosticmeta_test
   test_data_dup$study[1:2] <- "Study_1"
 
-  # Should either error or warn about duplicates
-  expect_condition(
-    diagnosticmeta(
-      data = test_data_dup,
-      study = "study",
-      true_positives = "true_positives",
-      false_positives = "false_positives",
-      false_negatives = "false_negatives",
-      true_negatives = "true_negatives"
-    )
-  )
+  res <- diagnosticmeta(
+    data = test_data_dup, study = "study",
+    true_positives = "true_positives", false_positives = "false_positives",
+    false_negatives = "false_negatives", true_negatives = "true_negatives")
+
+  expect_s3_class(res, "diagnosticmetaResults")
+  expect_gt(res$bivariateresults$rowCount, 0)
 })
 
 test_that("diagnosticmeta handles studies with perfect sensitivity", {
@@ -161,7 +153,7 @@ test_that("diagnosticmeta handles studies with perfect sensitivity", {
     true_negatives = "true_negatives"
   )
 
-  expect_s3_class(result, "diagnosticmetaClass")
+  expect_s3_class(result, "diagnosticmetaResults")
 })
 
 test_that("diagnosticmeta handles studies with perfect specificity", {
@@ -179,7 +171,7 @@ test_that("diagnosticmeta handles studies with perfect specificity", {
     true_negatives = "true_negatives"
   )
 
-  expect_s3_class(result, "diagnosticmetaClass")
+  expect_s3_class(result, "diagnosticmetaResults")
 })
 
 test_that("diagnosticmeta handles studies with very high heterogeneity", {
@@ -201,45 +193,38 @@ test_that("diagnosticmeta handles studies with very high heterogeneity", {
     heterogeneity_analysis = TRUE
   )
 
-  expect_s3_class(result, "diagnosticmetaClass")
+  expect_s3_class(result, "diagnosticmetaResults")
 })
 
-test_that("diagnosticmeta handles single study (should error)", {
-  # Meta-analysis requires at least 2 studies
+test_that("a single study reports insufficient data rather than throwing", {
   single_study <- diagnosticmeta_test[1, ]
 
-  expect_error(
-    diagnosticmeta(
-      data = single_study,
-      study = "study",
-      true_positives = "true_positives",
-      false_positives = "false_positives",
-      false_negatives = "false_negatives",
-      true_negatives = "true_negatives"
-    ),
-    regexp = "single|one study|at least.*2|multiple",
-    ignore.case = TRUE
-  )
+  res <- diagnosticmeta(
+    data = single_study, study = "study",
+    true_positives = "true_positives", false_positives = "false_positives",
+    false_negatives = "false_negatives", true_negatives = "true_negatives")
+
+  expect_s3_class(res, "diagnosticmetaResults")
+  txt <- gsub("<[^>]+>", " ", res$instructions$content)
+  expect_true(nzchar(txt))
 })
 
-test_that("diagnosticmeta handles covariate with all same values", {
-  # Create covariate with no variation
+test_that("a constant covariate is refused with an explanation, not a warning", {
+  # Previously this relied on metafor emitting "Redundant predictors dropped
+  # from the model" - a cryptic condition leaking from the fitting engine. The
+  # covariate is now checked before fitting and refused with a table note, so
+  # no condition is raised and no meta-regression rows are produced.
   test_data_const <- diagnosticmeta_test
   test_data_const$constant_cov <- 5
 
-  # Meta-regression with constant covariate should error or warn
-  expect_condition(
-    diagnosticmeta(
-      data = test_data_const,
-      study = "study",
-      true_positives = "true_positives",
-      false_positives = "false_positives",
-      false_negatives = "false_negatives",
-      true_negatives = "true_negatives",
-      covariate = "constant_cov",
-      meta_regression = TRUE
-    )
-  )
+  res <- diagnosticmeta(
+    data = test_data_const, study = "study",
+    true_positives = "true_positives", false_positives = "false_positives",
+    false_negatives = "false_negatives", true_negatives = "true_negatives",
+    covariate = "constant_cov", meta_regression = TRUE)
+
+  expect_s3_class(res, "diagnosticmetaResults")
+  expect_equal(res$metaregression$rowCount, 0)
 })
 
 test_that("diagnosticmeta handles covariate with missing values", {
@@ -267,29 +252,23 @@ test_that("diagnosticmeta handles covariate with missing values", {
 
   # Should either complete or give informative error
   if (!is.null(result)) {
-    expect_s3_class(result, "diagnosticmetaClass")
+    expect_s3_class(result, "diagnosticmetaResults")
   }
 })
 
-test_that("diagnosticmeta handles all zero cells in one row", {
-  # Create dataset with all zeros (invalid)
+test_that("an all-zero study is excluded and disclosed, not thrown", {
   test_data_all_zero <- diagnosticmeta_test
   test_data_all_zero[1, c("true_positives", "false_positives",
                           "false_negatives", "true_negatives")] <- 0
 
-  # Should error with informative message
-  expect_error(
-    diagnosticmeta(
-      data = test_data_all_zero,
-      study = "study",
-      true_positives = "true_positives",
-      false_positives = "false_positives",
-      false_negatives = "false_negatives",
-      true_negatives = "true_negatives"
-    ),
-    regexp = "zero|empty|invalid",
-    ignore.case = TRUE
-  )
+  res <- diagnosticmeta(
+    data = test_data_all_zero, study = "study",
+    true_positives = "true_positives", false_positives = "false_positives",
+    false_negatives = "false_negatives", true_negatives = "true_negatives")
+
+  expect_s3_class(res, "diagnosticmetaResults")
+  txt <- gsub("<[^>]+>", " ", res$instructions$content)
+  expect_match(txt, "no diseased or no non-diseased")
 })
 
 test_that("diagnosticmeta handles inconsistent 2x2 table structure", {
@@ -308,7 +287,7 @@ test_that("diagnosticmeta handles inconsistent 2x2 table structure", {
     true_negatives = "true_negatives"
   )
 
-  expect_s3_class(result, "diagnosticmetaClass")
+  expect_s3_class(result, "diagnosticmetaResults")
 })
 
 test_that("diagnosticmeta handles extreme confidence levels", {
@@ -323,7 +302,7 @@ test_that("diagnosticmeta handles extreme confidence levels", {
     confidence_level = 50
   )
 
-  expect_s3_class(result_50, "diagnosticmetaClass")
+  expect_s3_class(result_50, "diagnosticmetaResults")
 
   # Test with maximum confidence level
   result_99 <- diagnosticmeta(
@@ -336,7 +315,7 @@ test_that("diagnosticmeta handles extreme confidence levels", {
     confidence_level = 99
   )
 
-  expect_s3_class(result_99, "diagnosticmetaClass")
+  expect_s3_class(result_99, "diagnosticmetaResults")
 })
 
 test_that("diagnosticmeta handles variable names with special characters", {
@@ -353,5 +332,5 @@ test_that("diagnosticmeta handles variable names with special characters", {
     true_negatives = "true_negatives"
   )
 
-  expect_s3_class(result, "diagnosticmetaClass")
+  expect_s3_class(result, "diagnosticmetaResults")
 })

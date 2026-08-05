@@ -22,6 +22,12 @@ diagnosticmetaClass <- R6::R6Class(
         .corrected_study_names = character(0),
         .pooled_sensitivity = NULL,
         .pooled_specificity = NULL,
+        # Confidence intervals for the pooled estimates, so the interpretation
+        # text can qualify a claim the interval does not support.
+        .pooled_sens_ci = NULL,
+        .pooled_spec_ci = NULL,
+        .pooled_sens_pi = NULL,
+        .pooled_spec_pi = NULL,
         .n_studies = 0,
         .biv_model = NULL,
 
@@ -187,18 +193,6 @@ diagnosticmetaClass <- R6::R6Class(
             # Extract data
             data <- self$data
             
-            # Validate data completeness
-            missing_data <- any(is.na(data[[tp_var]]) | is.na(data[[fp_var]]) | 
-                              is.na(data[[fn_var]]) | is.na(data[[tn_var]]))
-            
-            if (missing_data) {
-                self$results$instructions$setContent(
-                    "<p><strong>Data Warning:</strong> Missing values detected in diagnostic test data.</p>
-                     <p>Please ensure all true positives, false positives, false negatives, and true negatives are complete.</p>"
-                )
-                return()
-            }
-            
             # Create diagnostic test data structure
             meta_data <- data.frame(
                 row_id = seq_len(nrow(data)),
@@ -209,13 +203,45 @@ diagnosticmetaClass <- R6::R6Class(
                 tn = as.numeric(data[[tn_var]]),
                 stringsAsFactors = FALSE
             )
-            
+
             # Store original row count for validation
             original_n <- nrow(meta_data)
 
-            # Remove any rows with zero or negative counts
-            meta_data <- meta_data[meta_data$tp >= 0 & meta_data$fp >= 0 &
-                                  meta_data$fn >= 0 & meta_data$tn >= 0, , drop = FALSE]
+            # Exclude unusable studies and SAY SO.
+            #
+            # A single missing cell anywhere previously aborted the entire
+            # analysis, and negative counts were dropped silently while the
+            # original_n passed to .validateStudyData was never used - so the
+            # reported number of studies was the post-exclusion count with no
+            # indication that anything had been removed.
+            incomplete <- is.na(meta_data$tp) | is.na(meta_data$fp) |
+                          is.na(meta_data$fn) | is.na(meta_data$tn)
+            negative   <- !incomplete &
+                          (meta_data$tp < 0 | meta_data$fp < 0 |
+                           meta_data$fn < 0 | meta_data$tn < 0)
+            # A study with no diseased or no non-diseased participants yields no
+            # sensitivity or no specificity and cannot enter a bivariate model.
+            empty_arm  <- !incomplete & !negative &
+                          ((meta_data$tp + meta_data$fn) == 0 |
+                           (meta_data$fp + meta_data$tn) == 0)
+
+            drop <- incomplete | negative | empty_arm
+            meta_data <- meta_data[!drop, , drop = FALSE]
+
+            if (any(drop)) {
+                reasons <- character(0)
+                if (sum(incomplete) > 0)
+                    reasons <- c(reasons, sprintf("%d with missing counts", sum(incomplete)))
+                if (sum(negative) > 0)
+                    reasons <- c(reasons, sprintf("%d with negative counts", sum(negative)))
+                if (sum(empty_arm) > 0)
+                    reasons <- c(reasons, sprintf("%d with no diseased or no non-diseased participants", sum(empty_arm)))
+                private$.appendInstructionMessage(sprintf(
+                    paste0("<div class='alert alert-warning'><h4>Studies excluded</h4><p>",
+                           "%d of %d studies were excluded before analysis (%s). ",
+                           "All results below are based on the remaining %d studies.</p></div>"),
+                    sum(drop), original_n, paste(reasons, collapse = "; "), nrow(meta_data)))
+            }
 
             # Enhanced validation with user-friendly warnings
             validation_result <- private$.validateStudyData(meta_data, original_n)
@@ -398,7 +424,36 @@ diagnosticmetaClass <- R6::R6Class(
             conf_level <- (self$options$confidence_level %||% 95) / 100
             conf_level <- max(min(conf_level, 0.999), 0.5)
 
-            biv_model <- mada::reitsma(mada_data, method = method_used)
+            # Be explicit about the continuity correction rather than inheriting
+            # mada's defaults (correction = 0.5, correction.control = "all").
+            #
+            # Under "all", a single zero cell anywhere causes mada to add 0.5 to
+            # ALL FOUR cells of EVERY study. The option offering that is labelled
+            # "None (Model-Based)" and is the default, so the setting a user picks
+            # to AVOID a correction applied a heavier one than either option that
+            # advertises a correction - and the disclosure block was gated on
+            # correction_method != "none", making it the only setting that said
+            # nothing. "single" corrects only the affected studies.
+            correction_method <- self$options$zero_cell_correction %||% "none"
+            zero_present <- any(mada_data[, c("TP", "FP", "FN", "TN")] == 0, na.rm = TRUE)
+
+            biv_model <- mada::reitsma(
+                mada_data, method = method_used,
+                correction = 0.5,
+                correction.control = if (identical(correction_method, "none")) "single" else "all"
+            )
+
+            if (zero_present) {
+                n_zero_studies <- sum(rowSums(mada_data[, c("TP", "FP", "FN", "TN")] == 0) > 0)
+                bivariate_table_early <- self$results$bivariateresults
+                bivariate_table_early$setNote("zero_cell", sprintf(
+                    paste("%d study/studies contain a zero cell. A continuity correction of 0.5 was applied to",
+                          "%s so the model could be fitted. Continuity corrections shift the pooled estimate;",
+                          "compare the alternatives under Zero Cell Correction to see how sensitive your result is."),
+                    n_zero_studies,
+                    if (identical(correction_method, "none")) "those studies only"
+                    else "all studies"))
+            }
             private$.biv_model <- biv_model
             summary_results <- tryCatch(
                 summary(biv_model, level = conf_level),
@@ -554,8 +609,77 @@ diagnosticmetaClass <- R6::R6Class(
 
             # SERIALIZATION FIX: Use table note instead of inserting Notice
             self$results$bivariateresults$setNote("heterogeneity_info",
-                "I\u{00b2} values are not included in the bivariate table as univariate I\u{00b2} calculations ignore within-study correlation and bivariate model structure. Please refer to the Heterogeneity Assessment table for proper evaluation using Q-statistics and tau-squared."
+                "I\u{00b2} is not reported here: a univariate I\u{00b2} ignores the within-study correlation between sensitivity and specificity and does not describe the bivariate model (Zwinderman & Bossuyt 2008). The Heterogeneity Assessment table reports Q, tau-squared and a univariate I\u{00b2} computed SEPARATELY for sensitivity and for specificity - read those as descriptive summaries of each margin, not as the heterogeneity of the bivariate model. For a model-consistent statement of how much studies differ, use the prediction interval above and the prediction region on the SROC plot."
             )
+
+            # The p-values on the sensitivity/specificity rows are the Wald tests
+            # of the logit intercepts, i.e. H0: sensitivity = 50% and
+            # H0: false-positive rate = 50%. That is almost never the hypothesis a
+            # reader assumes from an unlabelled "p" column, and it is trivially
+            # significant for any usable test, so name it.
+            bivariate_table$setNote("pvalue_meaning", paste(
+                "P-values on the sensitivity and specificity rows test the null hypothesis that the",
+                "parameter equals 50% (no better than chance), not that the test meets any clinical",
+                "threshold. They are significant for essentially any usable assay and should not be",
+                "read as evidence of adequate accuracy - use the confidence and prediction intervals",
+                "for that. Sensitivity and specificity rows are percentages; likelihood ratios and the",
+                "diagnostic odds ratio are ratios."))
+
+            private$.pooled_sens_ci <- sens_ci * 100
+            private$.pooled_spec_ci <- spec_ci * 100
+
+            # Prediction interval for a FUTURE study, and a heterogeneity warning.
+            #
+            # The pooled point plus its confidence interval describes how well the
+            # AVERAGE is known; it says nothing about whether the assay performs
+            # consistently. With substantial between-study variance the analysis
+            # would previously report a tight pooled estimate with no indication
+            # that a new laboratory could see something quite different. Built
+            # from vcov + Psi, the same quantity mada uses for its prediction
+            # region, so the note and the SROC plot agree.
+            tryCatch({
+                Sig_m <- stats::vcov(biv_model)
+                Psi_m <- biv_model$Psi
+                if (is.matrix(Sig_m) && is.matrix(Psi_m) &&
+                    all(dim(Sig_m) >= 2) && all(dim(Psi_m) >= 2)) {
+                    tot <- Sig_m[1:2, 1:2] + Psi_m[1:2, 1:2]
+                    mu_l <- as.numeric(stats::coef(biv_model))
+                    if (all(is.finite(diag(tot))) && all(diag(tot) >= 0) &&
+                        length(mu_l) >= 2 && all(is.finite(mu_l[1:2]))) {
+                        z <- z_crit
+                        sens_pi <- stats::plogis(mu_l[1] + c(-1, 1) * z * sqrt(tot[1, 1])) * 100
+                        # tfpr -> specificity: spec = 1 - plogis(tfpr)
+                        spec_pi <- sort((1 - stats::plogis(mu_l[2] + c(-1, 1) * z * sqrt(tot[2, 2]))) * 100)
+
+                        pct <- self$options$confidence_level %||% 95
+                        private$.pooled_sens_pi <- sens_pi
+                        private$.pooled_spec_pi <- spec_pi
+
+                        bivariate_table$setNote("prediction", sprintf(
+                            paste("Prediction interval for a future study (%d%%): sensitivity %.1f%%-%.1f%%,",
+                                  "specificity %.1f%%-%.1f%%. This is where a NEW study or laboratory is expected",
+                                  "to fall and includes between-study heterogeneity; the confidence intervals",
+                                  "above describe only how precisely the pooled average is estimated."),
+                            pct, sens_pi[1], sens_pi[2], spec_pi[1], spec_pi[2]))
+
+                        # Flag when heterogeneity, not sampling error, dominates.
+                        if (is.finite(sens_pi[2] - sens_pi[1]) &&
+                            ((sens_pi[2] - sens_pi[1]) > 30 || (spec_pi[2] - spec_pi[1]) > 30)) {
+                            private$.appendInstructionMessage(paste0(
+                                "<div class='alert alert-warning'><h4>Substantial between-study heterogeneity</h4>",
+                                "<p>The prediction interval spans a wide range of accuracy (sensitivity ",
+                                sprintf("%.0f%%-%.0f%%", sens_pi[1], sens_pi[2]), ", specificity ",
+                                sprintf("%.0f%%-%.0f%%", spec_pi[1], spec_pi[2]), "). ",
+                                "A single pooled sensitivity and specificity may not usefully describe this ",
+                                "body of evidence: studies differ more than sampling error explains, commonly ",
+                                "because of differing positivity thresholds, patient spectrum or reference ",
+                                "standards. Prefer the SROC curve and the prediction region over the pooled ",
+                                "point, and investigate the source of heterogeneity before applying these ",
+                                "figures to your own practice.</p></div>"))
+                        }
+                    }
+                }
+            }, error = function(e) NULL)
 
             bivariate_table$addRow(rowKey = "sensitivity", values = list(
                 parameter = "Pooled Sensitivity",
@@ -982,6 +1106,22 @@ diagnosticmetaClass <- R6::R6Class(
                         i_squared = i_squared,
                         tau_squared = model$tau2
                     ))
+
+                    # Name the estimator. Each row is a SEPARATE univariate
+                    # random-effects model on logit sensitivity or logit
+                    # specificity; the bivariate table's note used to send readers
+                    # here for "proper evaluation", which was contradictory since
+                    # this is exactly the univariate I-squared that note disowns.
+                    het_table$setNote("i2_meaning", paste(
+                        "Each row is a separate univariate random-effects model on the logit of that",
+                        "measure. The I-squared is therefore the proportion of variance in THAT margin",
+                        "alone that is not attributable to sampling error; it does not describe the",
+                        "bivariate model and should not be read as an overall heterogeneity figure",
+                        "(Zwinderman & Bossuyt 2008). In diagnostic accuracy meta-analysis a high",
+                        "I-squared is expected whenever studies used different positivity thresholds -",
+                        "it signals a threshold effect to be modelled by the SROC curve, not",
+                        "necessarily a defect. Use the prediction interval and the SROC prediction",
+                        "region for a model-consistent statement of between-study variability."))
                 }
 
                 add_heterogeneity_row("sensitivity", "Sensitivity", sens_meta)
@@ -1030,13 +1170,46 @@ diagnosticmetaClass <- R6::R6Class(
                 return()
             }
 
+            # Guard on residual DEGREES OF FREEDOM, not just the study count.
+            #
+            # A categorical covariate contributes (levels - 1) parameters, so a
+            # 4-level covariate on 5 studies leaves no residual df: the model is
+            # saturated, fits perfectly, and reports confidence intervals that
+            # mean nothing. metafor silently drops redundant predictors in that
+            # situation ("Redundant predictors dropped from the model"), so the
+            # table would appear normal while describing a different model from
+            # the one requested.
+            cov_vals <- analysis_data$covariate
+            n_param <- if (is.factor(cov_vals) || is.character(cov_vals)) {
+                max(length(unique(stats::na.omit(as.character(cov_vals)))) - 1, 1)
+            } else 1
+            n_studies_mr <- nrow(analysis_data)
+            resid_df <- n_studies_mr - n_param - 1
+
+            if (n_param >= 1 && length(unique(stats::na.omit(as.character(cov_vals)))) < 2) {
+                self$results$metaregression$setNote("constant_covariate",
+                    'Meta-regression not run: the covariate takes the same value in every study, so it cannot explain any between-study variation.')
+                return()
+            }
+
+            if (resid_df < 1) {
+                self$results$metaregression$setNote("overparameterised", sprintf(
+                    paste('Meta-regression not run: %d studies cannot support a covariate contributing %d',
+                          'model parameter(s) - no residual degrees of freedom remain, so the model would fit',
+                          'perfectly and its confidence intervals would be meaningless. At least %d studies',
+                          'are needed for this covariate, and 10 per covariate is the usual recommendation.'),
+                    n_studies_mr, n_param, n_param + 2))
+                return()
+            }
+
             # Stability warning for small sample sizes
-            if (nrow(analysis_data) < 10) {
-                # SERIALIZATION FIX: Use table note instead of inserting Notice
+            if (n_studies_mr < 10 * n_param) {
                 self$results$metaregression$setNote("small_sample_warning", sprintf(
-                    'Meta-regression with only %d studies may produce unstable estimates. Results should be interpreted with extreme caution. Confidence intervals may be unreliable and parameter estimates may be biased. Consider reporting as exploratory analysis only.',
-                    nrow(analysis_data)
-                ))
+                    paste('Meta-regression on %d studies with a covariate contributing %d model parameter(s)',
+                          '(%d residual degrees of freedom). The usual recommendation is at least 10 studies',
+                          'per covariate, so estimates may be unstable and confidence intervals unreliable.',
+                          'Report this as exploratory only.'),
+                    n_studies_mr, n_param, resid_df))
             }
 
             if (requireNamespace("metafor", quietly = TRUE)) {
@@ -1169,14 +1342,21 @@ diagnosticmetaClass <- R6::R6Class(
 
                     beta_names <- rownames(model$beta)
                     for (j in 2:n_coef) {
+                        # Show the user's variable name. The model is fitted on an
+                        # internal column literally named `covariate`, so
+                        # rownames(model$beta) are "covariate", "covariateB", ...
+                        # and the table said "covariate" instead of the variable
+                        # the user actually chose.
                         coef_label <- if (!is.null(beta_names) &&
                             length(beta_names) >= j &&
                             !is.na(beta_names[j]) &&
                             nzchar(beta_names[j])) {
-                            htmltools::htmlEscape(beta_names[j])
+                            htmltools::htmlEscape(
+                                sub("^covariate", paste0(covariate_var, " "), beta_names[j]))
                         } else {
                             safe_covariate_label
                         }
+                        coef_label <- trimws(coef_label)
                         metareg_table$addRow(
                             rowKey = paste0(key_prefix, "_covariate_", j),
                             values = list(
@@ -1210,32 +1390,99 @@ diagnosticmetaClass <- R6::R6Class(
                     )
                 }
 
-                # CRITICAL FIX: Use effective sample size (ESS) for Deeks' test
-                # Deeks' method requires ESS = 4/(1/TP + 1/FN + 1/FP + 1/TN) - the harmonic mean
-                # Using arithmetic total (TP+FP+FN+TN) overweights large but imbalanced studies
-                analysis_data$ess <- 4 / (1 / analysis_data$tp + 1 / analysis_data$fn +
-                                          1 / analysis_data$fp + 1 / analysis_data$tn)
+                # Effective sample size for Deeks' test (Deeks, Macaskill & Irwig
+                # 2005, J Clin Epidemiol 58:882-93):
+                #
+                #     ESS = 4 * n1 * n0 / (n1 + n0)
+                #
+                # where n1 = TP + FN (diseased) and n0 = FP + TN (non-diseased) -
+                # i.e. twice the harmonic mean of the two GROUP sizes.
+                #
+                # This previously used 4 / (1/TP + 1/FN + 1/FP + 1/TN), the
+                # harmonic mean of the four CELL counts, which is a different and
+                # non-monotone function of the table: two studies with identical
+                # ESS under Deeks' definition can get different values here, and
+                # the ranking of studies by ESS changes (Spearman ~0.3 on a
+                # realistic set). Since 1/sqrt(ESS) is the regression predictor,
+                # the asymmetry test statistic is materially wrong - on a 10-study
+                # example the correct test gives z = -8.25, p < 0.0001 while this
+                # gave z = +1.58, p = 0.11, i.e. "No significant asymmetry"
+                # reported for strongly asymmetric data, with the sign reversed.
+                n_diseased <- analysis_data$tp + analysis_data$fn
+                n_healthy  <- analysis_data$fp + analysis_data$tn
+                analysis_data$ess <- 4 * n_diseased * n_healthy / (n_diseased + n_healthy)
+
+                # Deeks' test needs finite log DOR, so a zero cell must be handled
+                # here regardless of the user's model-level choice. With the
+                # default ("none") a single zero made log_dor and se_log_dor
+                # infinite and the whole test returned NaN with no explanation.
+                cells <- c("tp", "fp", "fn", "tn")
+                zero_rows <- rowSums(analysis_data[, cells] == 0) > 0
+                n_zero <- sum(zero_rows)
+                if (n_zero > 0) {
+                    analysis_data[zero_rows, cells] <- analysis_data[zero_rows, cells] + 0.5
+                }
 
                 analysis_data$log_dor <- log((analysis_data$tp * analysis_data$tn) /
                                               (analysis_data$fp * analysis_data$fn))
-                analysis_data$se_log_dor <- sqrt(1 / analysis_data$tp + 1 / analysis_data$fp +
-                                                  1 / analysis_data$fn + 1 / analysis_data$tn)
+                analysis_data$inv_root_ess <- 1 / sqrt(analysis_data$ess)
 
-                # Use 1/sqrt(ESS) as the predictor (correct Deeks' specification)
-                deeks_test <- metafor::rma(yi = log_dor, vi = se_log_dor^2,
-                                           mods = ~ I(1 / sqrt(ess)), data = analysis_data, method = "FE")
+                # Deeks, Macaskill & Irwig (2005, J Clin Epidemiol 58:882-93):
+                # regress log DOR on 1/sqrt(ESS), WEIGHTED BY ESS, and refer the
+                # slope to a t distribution on k - 2 df.
+                #
+                # This previously used metafor::rma(vi = se_log_dor^2, method =
+                # "FE") and reported a z. Inverse-variance weighting on
+                # var(log DOR) = 1/TP+1/FP+1/FN+1/TN reintroduces exactly the
+                # log-DOR/SE correlation Deeks' method exists to avoid - the same
+                # defect as using Egger's, moved from the predictor into the
+                # weights - and a normal reference is anticonservative at the
+                # small k typical of DTA meta-analyses. On a 4-study example the
+                # old form reported p = 0.0014 "Significant asymmetry" where
+                # Deeks' own specification gives p = 0.26.
+                ok_rows <- is.finite(analysis_data$log_dor) &
+                           is.finite(analysis_data$inv_root_ess) &
+                           is.finite(analysis_data$ess) & analysis_data$ess > 0
+                fit_data <- analysis_data[ok_rows, , drop = FALSE]
 
                 bias_table <- self$results$publicationbias
                 bias_table$deleteRows()
 
-                bias_table$addRow(rowKey = "deeks_test", values = list(
-                    test = "Deeks' Funnel Plot Asymmetry Test",
-                    statistic = deeks_test$zval[2],
-                    p_value = deeks_test$pval[2],
-                    interpretation = ifelse(deeks_test$pval[2] < 0.05,
-                                          "Significant asymmetry detected",
-                                          "No significant asymmetry")
-                ))
+                if (nrow(fit_data) < 3) {
+                    bias_table$addRow(rowKey = "deeks_test", values = list(
+                        test = "Deeks' Funnel Plot Asymmetry Test",
+                        statistic = NA_real_, p_value = NA_real_,
+                        interpretation = "Not estimable: at least 3 studies with finite odds ratios are required"
+                    ))
+                } else {
+                    deeks_fit <- stats::lm(log_dor ~ inv_root_ess,
+                                           data = fit_data, weights = fit_data$ess)
+                    cf <- summary(deeks_fit)$coefficients
+                    deeks_t <- cf[2, 3]
+                    deeks_p <- cf[2, 4]
+                    deeks_df <- stats::df.residual(deeks_fit)
+
+                    bias_table$addRow(rowKey = "deeks_test", values = list(
+                        test = "Deeks' Funnel Plot Asymmetry Test",
+                        statistic = deeks_t,
+                        p_value = deeks_p,
+                        interpretation = ifelse(deeks_p < 0.05,
+                                              "Significant asymmetry detected",
+                                              "No significant asymmetry")
+                    ))
+
+                    note <- sprintf(paste(
+                        "Deeks' test: log diagnostic odds ratio regressed on 1/sqrt(effective sample size),",
+                        "weighted by effective sample size; slope referred to t on %d df (Deeks, Macaskill &",
+                        "Irwig 2005). Asymmetry is not by itself evidence of publication bias - it can also",
+                        "arise from between-study heterogeneity or a threshold effect."), deeks_df)
+                    if (n_zero > 0) {
+                        note <- paste(note, sprintf(
+                            "A continuity correction of 0.5 was applied to %d study/studies with a zero cell so the odds ratio was finite.",
+                            n_zero))
+                    }
+                    bias_table$setNote("deeks_method", note)
+                }
             }
         },
         
@@ -1463,27 +1710,23 @@ diagnosticmetaClass <- R6::R6Class(
                 # Add pooled estimate diamond (standard meta-analysis convention)
                 if (!is.null(pooled_data)) {
                     # Create diamond shape data for each metric
-                    diamond_data <- do.call(rbind, lapply(seq_len(nrow(pooled_data)), function(i) {
-                        row <- pooled_data[i, ]
-                        y_pos <- "POOLED ESTIMATE"
-                        y_offset <- 0.3  # Half-height of diamond
-
-                        data.frame(
-                            x = c(row$ci_lower, row$estimate, row$ci_upper, row$estimate),
-                            y = c(y_pos, y_pos, y_pos, y_pos),
-                            y_numeric = c(0, y_offset, 0, -y_offset),  # For proper diamond shape
-                            metric = rep(row$metric, 4),
-                            group = rep(i, 4),
-                            stringsAsFactors = FALSE
-                        )
-                    }))
-
+                    # Draw the pooled confidence interval as a horizontal bar,
+                    # matching how the individual studies are drawn.
+                    #
+                    # This was a geom_polygon "diamond" whose four vertices were
+                    # all given the SAME discrete y ("POOLED ESTIMATE"); the
+                    # y_numeric half-height column was computed but never mapped
+                    # in aes(). The polygon therefore had zero area and the pooled
+                    # estimate appeared with no visible confidence interval at all
+                    # - the one value on the plot a reader most needs the
+                    # uncertainty for.
                     p <- p +
-                        ggplot2::geom_polygon(
-                            data = diamond_data,
-                            ggplot2::aes(x = x, y = y, group = interaction(metric, group)),
-                            fill = colors$secondary,
-                            alpha = 0.6,
+                        ggplot2::geom_errorbarh(
+                            data = pooled_data,
+                            ggplot2::aes(xmin = ci_lower, xmax = ci_upper, y = "POOLED ESTIMATE"),
+                            height = 0.35,
+                            linewidth = 1.1,
+                            color = colors$secondary,
                             inherit.aes = FALSE
                         ) +
                         ggplot2::geom_point(
@@ -1559,7 +1802,7 @@ diagnosticmetaClass <- R6::R6Class(
                 attributes(meta_data) <- attributes(meta_data)[c("names", "row.names", "class")]
             }
 
-            # Pre-compute the SROC regression curve and the 95% confidence region
+            # Pre-compute the SROC regression curve and the confidence region
             # (ellipse) here, where the Reitsma model object is available, and
             # store only the resulting (fpr, sens) coordinates so the plot state
             # stays serializable. The ellipse is the confidence region for the
@@ -1567,6 +1810,7 @@ diagnosticmetaClass <- R6::R6Class(
             # vcov, back-transformed to ROC space.
             sroc_curve <- NULL
             conf_ellipse <- NULL
+            pred_ellipse <- NULL
             tryCatch({
                 crv <- as.data.frame(mada::sroc(biv_model))
                 if (ncol(crv) >= 2) {
@@ -1581,12 +1825,40 @@ diagnosticmetaClass <- R6::R6Class(
                     is.matrix(Sig) && all(dim(Sig) >= 2) && all(is.finite(Sig[1:2, 1:2]))) {
                     theta <- seq(0, 2 * pi, length.out = 200)
                     L     <- t(chol(Sig[1:2, 1:2]))
-                    rad   <- sqrt(stats::qchisq(0.95, df = 2))
+                    # Follow the user's confidence_level. This was hard-coded at
+                    # 0.95, so setting 99% gave 99% CIs in every table beside a
+                    # 95% ellipse on the SROC plot, with nothing saying so.
+                    ell_level <- (self$options$confidence_level %||% 95) / 100
+                    ell_level <- max(min(ell_level, 0.999), 0.5)
+                    rad   <- sqrt(stats::qchisq(ell_level, df = 2))
                     pts   <- L %*% (rad * rbind(cos(theta), sin(theta))) + mu[1:2]
                     conf_ellipse <- data.frame(
                         fpr  = stats::plogis(pts[2, ]),
                         sens = stats::plogis(pts[1, ])
                     )
+
+                    # PREDICTION region: where the accuracy of a FUTURE study is
+                    # expected to lie. Built from vcov + Psi (uncertainty in the
+                    # pooled mean PLUS between-study heterogeneity), which is
+                    # exactly what mada's own plot.reitsma(predict = TRUE) does:
+                    #   Sigma <- x$Psi + vcov(x)
+                    # The confidence region above describes only the precision of
+                    # the summary point and is always the smaller of the two; with
+                    # substantial heterogeneity they differ enormously, and showing
+                    # only the confidence region invites reading a tight ellipse as
+                    # "this assay performs consistently".
+                    Psi <- biv_model$Psi
+                    if (is.matrix(Psi) && all(dim(Psi) >= 2) && all(is.finite(Psi[1:2, 1:2]))) {
+                        Sig_pred <- Sig[1:2, 1:2] + Psi[1:2, 1:2]
+                        Lp <- tryCatch(t(chol(Sig_pred)), error = function(e) NULL)
+                        if (!is.null(Lp)) {
+                            pts_p <- Lp %*% (rad * rbind(cos(theta), sin(theta))) + mu[1:2]
+                            pred_ellipse <- data.frame(
+                                fpr  = stats::plogis(pts_p[2, ]),
+                                sens = stats::plogis(pts_p[1, ])
+                            )
+                        }
+                    }
                 }
             }, error = function(e) NULL)
 
@@ -1595,7 +1867,8 @@ diagnosticmetaClass <- R6::R6Class(
                 pooled_sens = as.numeric(sum_sens),
                 pooled_fpr = as.numeric(sum_fpr),
                 sroc_curve = sroc_curve,
-                conf_ellipse = conf_ellipse
+                conf_ellipse = conf_ellipse,
+                pred_ellipse = pred_ellipse
             )
 
             image$setState(plot_state)
@@ -1604,7 +1877,7 @@ diagnosticmetaClass <- R6::R6Class(
         .srocplot = function(image, ggtheme, theme, ...) {
 
             # The SROC plot shows individual study points, the pooled summary
-            # point, the SROC regression curve, and the 95% confidence region
+            # point, the SROC regression curve, and the confidence region
             # (ellipse). The curve and ellipse coordinates are pre-computed in
             # .populateSROCPlot from the Reitsma bivariate model and carried in
             # the (serializable) plot state.
@@ -1671,13 +1944,24 @@ diagnosticmetaClass <- R6::R6Class(
                     )
                 }
 
-                # 95% confidence region (ellipse) around the pooled estimate
+                # Confidence region (ellipse) around the pooled estimate
                 if (!is.null(state$conf_ellipse) && is.data.frame(state$conf_ellipse) &&
                     nrow(state$conf_ellipse) > 2) {
                     p <- p + ggplot2::geom_path(
                         data = state$conf_ellipse,
                         ggplot2::aes(x = fpr, y = sens),
                         color = colors$primary, linewidth = 0.6, linetype = "dashed",
+                        inherit.aes = FALSE
+                    )
+                }
+
+                # Prediction region (dotted) - drawn before the summary point
+                if (!is.null(state$pred_ellipse) && is.data.frame(state$pred_ellipse) &&
+                    nrow(state$pred_ellipse) > 2) {
+                    p <- p + ggplot2::geom_path(
+                        data = state$pred_ellipse,
+                        ggplot2::aes(x = fpr, y = sens),
+                        color = colors$primary, linewidth = 0.5, linetype = "dotted",
                         inherit.aes = FALSE
                     )
                 }
@@ -1693,10 +1977,17 @@ diagnosticmetaClass <- R6::R6Class(
 
                 have_curve   <- !is.null(state$sroc_curve)
                 have_ellipse <- !is.null(state$conf_ellipse)
+                have_pred    <- !is.null(state$pred_ellipse)
+                # Name the actual level - this said "95%" unconditionally, which
+                # became wrong as soon as the ellipse started honouring
+                # confidence_level. It is a CONFIDENCE region for the summary
+                # point, not a prediction region for a future study; say which.
+                ell_pct <- self$options$confidence_level %||% 95
                 subtitle_txt <- paste0(
                     "Studies (circles), pooled estimate (triangle)",
                     if (have_curve) ", SROC curve" else "",
-                    if (have_ellipse) ", 95% confidence region" else ""
+                    if (have_ellipse) paste0(", ", ell_pct, "% confidence region (dashed)") else "",
+                    if (have_pred) paste0(", ", ell_pct, "% prediction region (dotted)") else ""
                 )
 
                 p <- p +
@@ -1747,20 +2038,34 @@ diagnosticmetaClass <- R6::R6Class(
                 # Ensure meta_data is a proper data frame
                 meta_data <- as.data.frame(meta_data)
 
-                # Calculate diagnostic odds ratio and standard error
+                # Deeks' funnel plot: log DOR against 1/sqrt(ESS).
+                #
+                # This previously plotted precision = 1/SE(log DOR) on the y axis,
+                # the conventional Egger-style funnel. Deeks, Macaskill & Irwig
+                # (2005) showed that is misleading for diagnostic accuracy data
+                # precisely because log DOR and its standard error are
+                # intrinsically correlated, which induces asymmetry even with no
+                # publication bias - that is why the accompanying test regresses
+                # on 1/sqrt(ESS). Plot and test must use the same x/y, otherwise a
+                # visibly symmetric funnel sits beside a significant asymmetry
+                # p-value (or the reverse).
                 meta_data$log_dor <- log((meta_data$tp * meta_data$tn) / (meta_data$fp * meta_data$fn))
-                meta_data$se_log_dor <- sqrt(1/meta_data$tp + 1/meta_data$fp + 1/meta_data$fn + 1/meta_data$tn)
+                n_diseased <- meta_data$tp + meta_data$fn
+                n_healthy  <- meta_data$fp + meta_data$tn
+                meta_data$ess <- 4 * n_diseased * n_healthy / (n_diseased + n_healthy)
+                meta_data$inv_root_ess <- 1 / sqrt(meta_data$ess)
 
                 # Get color palette for accessibility
                 colors <- private$.getColorPalette()
 
                 # Create funnel plot
-                p <- ggplot2::ggplot(meta_data, ggplot2::aes(x = log_dor, y = 1/se_log_dor)) +
+                p <- ggplot2::ggplot(meta_data, ggplot2::aes(x = log_dor, y = inv_root_ess)) +
                     ggplot2::geom_point(size = 3, alpha = 0.7, color = colors$secondary) +
+                    ggplot2::scale_y_reverse() +
                     ggplot2::labs(
-                        title = "Funnel Plot: Publication Bias Assessment",
+                        title = "Deeks' Funnel Plot: Publication Bias Assessment",
                         x = "Log Diagnostic Odds Ratio",
-                        y = "Precision (1/SE)"
+                        y = expression(1/sqrt("effective sample size"))
                     ) +
                     ggtheme +
                     ggplot2::theme(
@@ -1900,8 +2205,11 @@ diagnosticmetaClass <- R6::R6Class(
             for (i in seq_len(nrow(meta_data))) {
                 table$addRow(rowKey = i, values = list(
                     study = as.character(meta_data$study[i]),
-                    sensitivity = meta_data$sens[i],
-                    specificity = meta_data$spec[i],
+                    # Percent, matching the pooled table. These were proportions
+                    # (0.82) while the bivariate table held percentages (81.59),
+                    # so the same quantity appeared on two scales on one screen.
+                    sensitivity = meta_data$sens[i] * 100,
+                    specificity = meta_data$spec[i] * 100,
                     tp = meta_data$tp[i],
                     fp = meta_data$fp[i],
                     fn = meta_data$fn[i],
@@ -1922,16 +2230,18 @@ diagnosticmetaClass <- R6::R6Class(
             <ul>
                 <li><strong>Pooled Sensitivity:</strong> Proportion of diseased cases correctly identified
                     <ul>
-                        <li>High sensitivity (>90%): Excellent for screening - few diseased cases missed</li>
-                        <li>Moderate sensitivity (80-90%): Good for screening with acceptable miss rate</li>
-                        <li>Low sensitivity (<80%): Limited screening utility - many cases missed</li>
+                        <li>Excellent sensitivity (&#x2265;90%): few diseased cases missed</li>
+                        <li>Good sensitivity (80-89%): acceptable miss rate for screening</li>
+                        <li>Moderate sensitivity (70-79%): appreciable number of cases missed</li>
+                        <li>Limited sensitivity (&lt;70%): many cases missed</li>
                     </ul>
                 </li>
                 <li><strong>Pooled Specificity:</strong> Proportion of non-diseased cases correctly identified
                     <ul>
-                        <li>High specificity (>90%): Excellent for confirmation - few false alarms</li>
-                        <li>Moderate specificity (80-90%): Good confirmatory value with some false positives</li>
-                        <li>Low specificity (<80%): Limited confirmatory utility - many false alarms</li>
+                        <li>Excellent specificity (&#x2265;90%): few false alarms</li>
+                        <li>Good specificity (80-89%): some false positives</li>
+                        <li>Moderate specificity (70-79%): appreciable false-positive rate</li>
+                        <li>Limited specificity (&lt;70%): many false alarms</li>
                     </ul>
                 </li>
             </ul>
@@ -1987,11 +2297,16 @@ diagnosticmetaClass <- R6::R6Class(
             
             <div style='background-color: #fff3cd; padding: 15px; border-left: 4px solid #ffc107; margin: 10px 0;'>
                 <h4>I[[SUP2]] Statistic Interpretation:</h4>
+                <p><em>The bands below are Higgins' conventional cut-points from intervention
+                meta-analysis. They are not established thresholds for diagnostic accuracy, where a
+                high I[[SUP2]] commonly reflects studies using different positivity thresholds - the
+                situation the SROC curve exists to model - rather than a reason to abandon the
+                analysis. Treat them as rough orientation, and prefer the prediction region.</em></p>
                 <ul>
                     <li><strong>I[[SUP2]] < 25%:</strong> Low heterogeneity - results can be reliably pooled</li>
                     <li><strong>I[[SUP2]] 25-50%:</strong> Moderate heterogeneity - investigate potential sources</li>
                     <li><strong>I[[SUP2]] 50-75%:</strong> Substantial heterogeneity - pooling questionable</li>
-                    <li><strong>I[[SUP2]] > 75%:</strong> Considerable heterogeneity - avoid pooling, use subgroup analysis</li>
+                    <li><strong>I[[SUP2]] &gt; 75%:</strong> Considerable heterogeneity - a single pooled point is unlikely to describe the evidence; investigate thresholds, spectrum and reference standards, and report the SROC curve and prediction region</li>
                 </ul>
             </div>
             
@@ -2096,6 +2411,12 @@ diagnosticmetaClass <- R6::R6Class(
             } else {
                 self$results$instructions$setContent(message)
             }
+            # .run() hides this element as soon as all five variables are chosen,
+            # and every warning in the analysis is routed here. Without this the
+            # messages were written into a hidden panel and never seen - and a
+            # missing cell produced a completely blank analysis with no
+            # explanation anywhere.
+            self$results$instructions$setVisible(TRUE)
         },
 
         # Enhanced data validation with user-friendly warnings
@@ -2272,7 +2593,8 @@ diagnosticmetaClass <- R6::R6Class(
             correction_disclosure,
             plr_text,
             nlr_text,
-            private$.getInterpretationText(sens_pct, spec_pct, lr_pos, lr_neg),
+            private$.getInterpretationText(sens_pct, spec_pct, lr_pos, lr_neg,
+                                          private$.pooled_sens_ci, private$.pooled_spec_ci),
             copy_text
             )
 
@@ -2350,27 +2672,32 @@ diagnosticmetaClass <- R6::R6Class(
         },
 
         # Helper function for dynamic interpretation text with actual values
-        .getInterpretationText = function(sens, spec, lr_pos, lr_neg) {
-            # Classify sensitivity performance
-            sens_class <- if (sens >= 90) {
-                "excellent"
-            } else if (sens >= 80) {
-                "good"
-            } else if (sens >= 70) {
-                "moderate"
-            } else {
-                "limited"
-            }
+        .getInterpretationText = function(sens, spec, lr_pos, lr_neg,
+                                         sens_ci = NULL, spec_ci = NULL) {
+            # Classify against the standard bands, then check whether the
+            # confidence interval actually supports the label. Every claim below
+            # was previously made from the point estimate alone, so a pooled
+            # sensitivity of 90.4% with a 95% CI of 71-97% was reported as
+            # "excellent ... will detect 90 out of 100 patients", which the
+            # interval does not support.
+            band <- function(x) if (x >= 90) "excellent" else if (x >= 80) "good"
+                                else if (x >= 70) "moderate" else "limited"
 
-            # Classify specificity performance
-            spec_class <- if (spec >= 90) {
-                "excellent"
-            } else if (spec >= 80) {
-                "good"
-            } else if (spec >= 70) {
-                "moderate"
-            } else {
-                "limited"
+            sens_class <- band(sens)
+            spec_class <- band(spec)
+
+            # TRUE when the interval spans more than one performance band, i.e.
+            # the data cannot distinguish "excellent" from something worse.
+            ci_spans_bands <- function(ci) {
+                if (is.null(ci) || length(ci) < 2 || any(!is.finite(ci))) return(FALSE)
+                band(min(ci)) != band(max(ci))
+            }
+            sens_uncertain <- ci_spans_bands(sens_ci)
+            spec_uncertain <- ci_spans_bands(spec_ci)
+
+            ci_txt <- function(ci) {
+                if (is.null(ci) || length(ci) < 2 || any(!is.finite(ci))) return("")
+                sprintf(" (%.1f%%-%.1f%%)", min(ci), max(ci))
             }
 
             # Classify positive LR
@@ -2395,15 +2722,25 @@ diagnosticmetaClass <- R6::R6Class(
 
             # Build dynamic interpretation with actual values
             interpretation <- sprintf(
-                "<strong>Your pooled sensitivity of %.1f%%</strong> is classified as <em>%s</em> for screening purposes. ",
-                sens, sens_class
+                "<strong>Your pooled sensitivity of %.1f%%%s</strong> is classified as <em>%s</em> for screening purposes. ",
+                sens, ci_txt(sens_ci), sens_class
             )
+            if (sens_uncertain) {
+                interpretation <- paste0(interpretation,
+                    "<strong>Note:</strong> the confidence interval spans more than one performance category, ",
+                    "so this classification is not firmly established by the pooled data. ")
+            }
 
             # Add sensitivity-specific guidance
             if (sens >= 90) {
                 interpretation <- paste0(interpretation,
-                    sprintf("With %.1f%% sensitivity, this test will detect %.0f out of 100 patients with disease, missing only %.0f. ",
-                            sens, sens, 100 - sens),
+                    if (sens_uncertain) {
+                        sprintf("On the pooled estimate this test would detect about %.0f of 100 patients with disease, but the interval%s admits materially worse performance. ",
+                                sens, ci_txt(sens_ci))
+                    } else {
+                        sprintf("With %.1f%% sensitivity, this test will detect %.0f out of 100 patients with disease, missing only %.0f. ",
+                                sens, sens, 100 - sens)
+                    },
                     "<strong>Clinical implication:</strong> Excellent for ruling OUT disease when test is negative (SnNout principle). "
                 )
             } else if (sens >= 80) {
@@ -2751,7 +3088,21 @@ diagnosticmetaClass <- R6::R6Class(
                         <li><strong>Y-axis:</strong> True Positive Rate (Sensitivity) - higher is better</li>
                         <li><strong>Individual Studies:</strong> Circles sized by sample size</li>
                         <li><strong>Pooled Estimate:</strong> Large triangle showing meta-analytic summary</li>
+                        <li><strong>Confidence region (dashed):</strong> how precisely the POOLED point is estimated. It shrinks as more studies are added.</li>
+                        <li><strong>Prediction region (dotted):</strong> where the accuracy of a FUTURE study in a new setting is expected to fall. It includes between-study heterogeneity and does NOT shrink with more studies.</li>
                     </ul>
+                </div>
+
+                <div style='background-color: #fff3cd; padding: 15px; border-radius: 5px; margin: 10px 0;'>
+                    <h5>Confidence region vs prediction region</h5>
+                    <p>These answer different questions and are routinely confused. A tight
+                    <strong>confidence</strong> region means the pooled estimate is well determined; it says
+                    nothing about whether the assay will perform consistently. A wide
+                    <strong>prediction</strong> region means that even though the average is known precisely,
+                    the next study - or your laboratory - could see materially different sensitivity and
+                    specificity. <strong>For deciding whether to adopt an assay, the prediction region is the
+                    relevant one.</strong> When the two differ greatly, between-study heterogeneity dominates
+                    and the pooled point alone should not drive the decision.</p>
                 </div>
 
                 <div style='background-color: #e8f5e8; padding: 15px; border-radius: 5px; margin: 10px 0;'>

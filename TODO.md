@@ -3008,6 +3008,56 @@ out-of-scope findings from the same audit, deferred for separate work.
 
 # release-review-function prompt
 
+
+/release-review-function agreement
+/release-review-function decision
+/release-review-function decisioncompare
+/release-review-function decisioncombine	
+/release-review-function nogoldstandard
+/release-review-function decisioncalculator
+/release-review-function cotest
+/release-review-function sequentialtests
+/release-review-function enhancedROC
+/release-review-function psychopdaROC
+/release-review-function lassologistic
+/release-review-function kappaSizePower
+/release-review-function kappaSizeCI
+/release-review-function kappaSizeFixedN
+/release-review-function jjhistostats
+/release-review-function jjridges
+/release-review-function jwaffle
+/release-review-function jjscatterstats
+/release-review-function jjcorrmat
+/release-review-function hullplot
+/release-review-function jjbetweenstats
+/release-review-function jjwithinstats
+/release-review-function jjdotplotstats
+/release-review-function raincloud
+/release-review-function advancedraincloud
+/release-review-function lollipop
+/release-review-function jjbarstats
+/release-review-function jjsegmentedtotalbar
+/release-review-function jjpiestats
+/release-review-function jjarcdiagram
+/release-review-function linechart
+/release-review-function statsplot2
+/release-review-function tableone
+/release-review-function summarydata
+/release-review-function reportcat
+/release-review-function benford
+/release-review-function checkdata
+/release-review-function dataquality
+/release-review-function outlierdetection
+/release-review-function agepyramid
+/release-review-function venn
+/release-review-function vartree
+/release-review-function alluvial
+/release-review-function crosstable
+/release-review-function chisqposttest
+/release-review-function categorize	
+
+
+
 You are an expert R package and jamovi module developer with advanced expertise in biostatistics, clinical research, pathology, and clinician-facing software.
 
 Your task is to perform a rigorous end-to-end review and improvement of the jamovi analysis `FUNC_NAME`.
