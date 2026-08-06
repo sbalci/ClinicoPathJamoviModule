@@ -426,3 +426,170 @@ test_that("Model summary shows display labels, not raw option codes", {
   expect_false(any(ms$value == "lasso"))
   expect_false(any(ms$value == "lambda.1se"))
 })
+
+# ═══════════════════════════════════════════════════════════
+# Release-review regression tests
+# ═══════════════════════════════════════════════════════════
+
+lasso_fixture <- function(n = 400, seed = 7) {
+  set.seed(seed)
+  d <- data.frame(
+    p53  = factor(sample(c("wt", "mut"), n, TRUE), levels = c("wt", "mut")),
+    Rb1  = factor(sample(c("intact", "lost"), n, TRUE), levels = c("intact", "lost")),
+    ki67 = rnorm(n, 30, 15), age = rnorm(n, 60, 10))
+  lp <- -2 + 1.6 * (d$p53 == "mut") + 1.1 * (d$Rb1 == "lost") + 0.03 * (d$ki67 - 30)
+  d$dx <- factor(ifelse(rbinom(n, 1, plogis(lp)) == 1, "NEC", "NET"),
+                 levels = c("NET", "NEC"))
+  d
+}
+run_lasso <- function(d = lasso_fixture(), ...) ClinicoPath::lassologistic(
+  data = d, outcome = "dx", outcomeLevel = "NEC",
+  explanatory = c("p53", "Rb1", "ki67", "age"), ...)
+
+test_that("odds ratios are on the original measurement scale", {
+  skip_if_not_installed("glmnet")
+  cf <- run_lasso(lambda = "lambda.min")$coefficients$asDF
+
+  # The design matrix is standardised and glmnet is called with standardize=FALSE,
+  # so raw coefficients are per-SD. For a balanced 0/1 dummy sd is about 0.5, so
+  # the per-SD OR is roughly the SQUARE ROOT of the model's actual
+  # present-vs-absent OR (1.8 printed where the model implied 3.2).
+  or_p53 <- cf$oddsRatio[cf$variable == "p53mut"]
+  expect_gt(or_p53, 3)
+
+  # a continuous predictor's OR must be per 1 unit, not per 1 SD (~15 points)
+  or_ki67 <- cf$oddsRatio[cf$variable == "ki67"]
+  expect_lt(abs(or_ki67 - 1), 0.1)
+
+  # importance keeps the per-SD magnitude, which is the comparable quantity
+  expect_equal(max(cf$importance), 1)
+})
+
+test_that("complete-case exclusions are disclosed", {
+  skip_if_not_installed("glmnet")
+  d <- lasso_fixture(); d$ki67[1:80] <- NA
+  res <- run_lasso(d)
+
+  ms <- res$modelSummary$asDF
+  expect_true(any(grepl("Excluded", ms[[1]])))
+  expect_true(any(grepl("80 of 400", ms[[2]])))
+  # "Total observations" used to hold the complete-case count, reading as the
+  # full cohort while listwise deletion had silently removed rows
+  expect_false(any(grepl("^Total observations$", ms[[1]])))
+  expect_match(gsub("<[^>]+>", " ", res$notices$content), "excluded because")
+})
+
+test_that("a single predictor gives guidance instead of a blank result", {
+  skip_if_not_installed("glmnet")
+  # .run() returned silently below 2 predictors while .init() only showed the
+  # To Do panel at 0, so exactly one predictor produced an entirely blank output
+  res <- ClinicoPath::lassologistic(
+    data = lasso_fixture(), outcome = "dx", outcomeLevel = "NEC",
+    explanatory = c("p53"))
+  expect_match(gsub("<[^>]+>", " ", res$notices$content), "At least two predictors")
+})
+
+test_that("Brier score is graded against outcome prevalence", {
+  skip_if_not_installed("glmnet")
+  d <- lasso_fixture(); set.seed(3)
+  d$dx <- factor(ifelse(rbinom(nrow(d), 1, 0.06) == 1, "NEC", "NET"),
+                 levels = c("NET", "NEC"))
+  pf <- run_lasso(d)$performance$asDF
+  br <- pf$interpretation[pf$metric == "Brier Score"]
+
+  # a no-information model at 6% prevalence scores ~0.056, which the old fixed
+  # cut-offs (<0.1) graded "Excellent calibration"
+  expect_false(grepl("Excellent calibration", br))
+})
+
+test_that("score performance is labelled apparent", {
+  skip_if_not_installed("glmnet")
+  sp <- run_lasso(scoringSystem = TRUE)$scoringPerformance$asDF
+  # doubly optimistic: points from a model fitted here, cutoff Youden-optimised here
+  expect_true(any(grepl("apparent", sp$metric)))
+  expect_true(any(grepl("chosen on this data", sp$metric)))
+})
+
+test_that("the scoring system publishes its cut points", {
+  skip_if_not_installed("glmnet")
+  res <- run_lasso(scoringSystem = TRUE, lambda = "lambda.min")
+  df <- res$scoringTable$asDF
+  # Continuous predictors are scored above their in-sample median, which was
+  # never published - so the score could not be applied to a new patient.
+  skip_if_not("criterion" %in% names(df),
+              "requires jmvtools::prepare() after the .r.yaml criterion column")
+  expect_true(all(nzchar(df$criterion)))
+  expect_true(any(grepl("^>", df$criterion)))   # a numeric cut for ki67
+})
+
+test_that("scoring points and odds ratios use the criterion contrast", {
+  skip_if_not_installed("glmnet")
+  res <- run_lasso(scoringSystem = TRUE, lambda = "lambda.min")
+  sc <- res$scoringTable$asDF
+  cf <- res$coefficients$asDF
+  skip_if_not("criterion" %in% names(sc), "requires jmvtools::prepare()")
+
+  # Points used to come from the raw per-SD coefficients while the score awards
+  # them on a MEDIAN SPLIT, so a 0/1 dummy (per-SD coef ~ half its real effect)
+  # was weighted against a continuous predictor spanning ~1.6 SD. The two tables
+  # also disagreed for the same predictor (2.11 vs 4.46 for p53).
+  for (v in c("p53mut", "Rb1lost")) {
+    # for a binary predictor the criterion contrast IS present-vs-absent, so the
+    # scoring OR must equal the per-category OR exactly
+    expect_equal(sc$oddsRatio[sc$variable == v],
+                 cf$oddsRatio[cf$variable == v], tolerance = 1e-6)
+  }
+
+  # for a continuous predictor the criterion spans many units, so the
+  # above-vs-below-median OR must exceed the per-unit OR
+  expect_gt(sc$oddsRatio[sc$variable == "ki67"],
+            cf$oddsRatio[cf$variable == "ki67"])
+
+  # and the strongest factor must earn the most points
+  expect_equal(sc$variable[which.max(sc$points)], "p53mut")
+  expect_gt(max(sc$points), min(sc$points))
+})
+
+test_that("manual cut-point strings are parsed safely", {
+  skip_if_not_installed("glmnet")
+  a <- ClinicoPath:::lassologisticClass$new(
+    options = ClinicoPath:::lassologisticOptions$new(
+      outcome = "dx", outcomeLevel = "NEC",
+      explanatory = c("p53", "Rb1", "ki67", "age")),
+    data = lasso_fixture())
+  parse <- a$.__enclos_env__$private$.parseCutPoints
+
+  expect_equal(parse("ki67=20, age=65"), c(ki67 = 20, age = 65))
+  expect_equal(parse("ki67=20; age=65"), c(ki67 = 20, age = 65))
+  # malformed entries are dropped, not guessed
+  expect_equal(parse("ki67=20, bogus, x=abc"), c(ki67 = 20))
+  expect_length(parse(""), 0)
+  expect_length(parse(NULL), 0)
+})
+
+test_that("the cut point method changes the criterion and the score", {
+  skip_if_not_installed("glmnet")
+  d <- lasso_fixture()
+  probe <- tryCatch({
+    ClinicoPath::lassologistic(data = d, outcome = "dx", outcomeLevel = "NEC",
+      explanatory = c("p53", "Rb1", "ki67", "age"),
+      scoringSystem = TRUE, scoreCutMethod = "median"); TRUE
+  }, error = function(e) FALSE)
+  skip_if_not(probe, "requires jmvtools::prepare() after the .a.yaml cut-point options")
+
+  crit <- function(m, cp = "") {
+    r <- ClinicoPath::lassologistic(data = d, outcome = "dx", outcomeLevel = "NEC",
+      explanatory = c("p53", "Rb1", "ki67", "age"), lambda = "lambda.min",
+      scoringSystem = TRUE, scoreCutMethod = m, scoreCutPoints = cp)
+    sc <- r$scoringTable$asDF
+    sc$criterion[sc$variable == "ki67"]
+  }
+
+  med <- crit("median"); qrt <- crit("quartile"); man <- crit("manual", "ki67=20")
+  # the upper quartile must sit above the median
+  expect_gt(as.numeric(sub("^> ", "", qrt)), as.numeric(sub("^> ", "", med)))
+  # a manual cut is used verbatim, on the ORIGINAL measurement scale
+  expect_equal(as.numeric(sub("^> ", "", man)), 20, tolerance = 1e-6)
+  # binary predictors are unaffected by the method
+  expect_equal(crit("median"), med)
+})

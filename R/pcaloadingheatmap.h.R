@@ -289,7 +289,7 @@ pcaloadingheatmapBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
             super$initialize(
                 package = "ClinicoPath",
                 name = "pcaloadingheatmap",
-                version = c(1,0,3),
+                version = c(1,0,4),
                 options = options,
                 results = pcaloadingheatmapResults$new(options=options),
                 data = data,

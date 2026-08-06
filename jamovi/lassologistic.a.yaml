@@ -212,6 +212,42 @@ options:
           scaling and ignores this value; the Schneeweiss method scales by the
           smallest coefficient and also ignores it.
 
+    - name: scoreCutMethod
+      title: Cut Point for Continuous Predictors
+      type: List
+      options:
+        - title: "Median of this dataset"
+          name: median
+        - title: "Mean of this dataset"
+          name: mean
+        - title: "Upper tertile (top third scores)"
+          name: tertile
+        - title: "Upper quartile (top quarter scores)"
+          name: quartile
+        - title: "Manual cut points"
+          name: manual
+      default: median
+      description:
+        R: >
+          How continuous predictors are dichotomized when awarding points. A
+          predictor earns its points when the patient's value exceeds this cut.
+          'median' (the default) splits at the sample median, which is
+          data-derived and will differ in another cohort. 'manual' lets you enter
+          established clinical thresholds, which is what makes a score portable.
+
+    - name: scoreCutPoints
+      title: Manual Cut Points
+      type: String
+      default: ''
+      description:
+        R: >
+          Cut points on the ORIGINAL measurement scale, as
+          'variable=value' pairs separated by commas or semicolons, e.g.
+          'ki67=20, age=65'. Used when Cut Point method is 'manual'. Any
+          continuous predictor not listed falls back to the sample median, and
+          that fallback is reported. Binary predictors ignore this - they score
+          when present.
+
     - name: scoreLookupTable
       title: Score-to-probability lookup table
       type: Bool

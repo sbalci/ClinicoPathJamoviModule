@@ -89,6 +89,14 @@ children:
         name: scoringMaxPoints
         format: number
         enable: (scoringSystem)
+      - type: ComboBox
+        name: scoreCutMethod
+        enable: (scoringSystem)
+      - type: TextBox
+        name: scoreCutPoints
+        format: string
+        width: large
+        enable: (scoringSystem && scoreCutMethod:manual)
       - type: CheckBox
         name: scoreLookupTable
         enable: (scoringSystem)

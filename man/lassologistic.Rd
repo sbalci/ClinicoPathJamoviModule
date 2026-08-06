@@ -24,6 +24,8 @@ lassologistic(
   scoringSystem = FALSE,
   scoringMethod = "schneeweiss",
   scoringMaxPoints = 10,
+  scoreCutMethod = "median",
+  scoreCutPoints = "",
   scoreLookupTable = TRUE,
   showSummary = FALSE,
   showExplanations = FALSE,
@@ -93,6 +95,18 @@ method). Compare: generate all three and show performance comparison.}
 reference-scaled Sullivan method. The Beta10 method uses a fixed x10
 coefficient scaling and ignores this value; the Schneeweiss method scales
 by the smallest coefficient and also ignores it.}
+
+\item{scoreCutMethod}{How continuous predictors are dichotomized when
+awarding points. A predictor earns its points when the patient's value
+exceeds this cut. 'median' (the default) splits at the sample median, which
+is data-derived and will differ in another cohort. 'manual' lets you enter
+established clinical thresholds, which is what makes a score portable.}
+
+\item{scoreCutPoints}{Cut points on the ORIGINAL measurement scale, as
+'variable=value' pairs separated by commas or semicolons, e.g. 'ki67=20,
+age=65'. Used when Cut Point method is 'manual'. Any continuous predictor
+not listed falls back to the sample median, and that fallback is reported.
+Binary predictors ignore this - they score when present.}
 
 \item{scoreLookupTable}{Generate a lookup table mapping each possible total
 score to predicted probability of the positive class.}

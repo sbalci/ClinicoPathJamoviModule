@@ -385,7 +385,7 @@ raincloudBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             super$initialize(
                 package = "ClinicoPath",
                 name = "raincloud",
-                version = c(1,0,3),
+                version = c(1,0,4),
                 options = options,
                 results = raincloudResults$new(options=options),
                 data = data,

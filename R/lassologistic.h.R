@@ -24,6 +24,8 @@ lassologisticOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
             scoringSystem = FALSE,
             scoringMethod = "schneeweiss",
             scoringMaxPoints = 10,
+            scoreCutMethod = "median",
+            scoreCutPoints = "",
             scoreLookupTable = TRUE,
             showSummary = FALSE,
             showExplanations = FALSE,
@@ -142,6 +144,20 @@ lassologisticOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                 default=10,
                 min=3,
                 max=20)
+            private$..scoreCutMethod <- jmvcore::OptionList$new(
+                "scoreCutMethod",
+                scoreCutMethod,
+                options=list(
+                    "median",
+                    "mean",
+                    "tertile",
+                    "quartile",
+                    "manual"),
+                default="median")
+            private$..scoreCutPoints <- jmvcore::OptionString$new(
+                "scoreCutPoints",
+                scoreCutPoints,
+                default="")
             private$..scoreLookupTable <- jmvcore::OptionBool$new(
                 "scoreLookupTable",
                 scoreLookupTable,
@@ -191,6 +207,8 @@ lassologisticOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
             self$.addOption(private$..scoringSystem)
             self$.addOption(private$..scoringMethod)
             self$.addOption(private$..scoringMaxPoints)
+            self$.addOption(private$..scoreCutMethod)
+            self$.addOption(private$..scoreCutPoints)
             self$.addOption(private$..scoreLookupTable)
             self$.addOption(private$..predictions)
             self$.addOption(private$..showSummary)
@@ -219,6 +237,8 @@ lassologisticOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
         scoringSystem = function() private$..scoringSystem$value,
         scoringMethod = function() private$..scoringMethod$value,
         scoringMaxPoints = function() private$..scoringMaxPoints$value,
+        scoreCutMethod = function() private$..scoreCutMethod$value,
+        scoreCutPoints = function() private$..scoreCutPoints$value,
         scoreLookupTable = function() private$..scoreLookupTable$value,
         predictions = function() private$..predictions$value,
         showSummary = function() private$..showSummary$value,
@@ -246,6 +266,8 @@ lassologisticOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
         ..scoringSystem = NA,
         ..scoringMethod = NA,
         ..scoringMaxPoints = NA,
+        ..scoreCutMethod = NA,
+        ..scoreCutPoints = NA,
         ..scoreLookupTable = NA,
         ..predictions = NA,
         ..showSummary = NA,
@@ -429,6 +451,10 @@ lassologisticResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                         `title`="Odds Ratio", 
                         `type`="number", 
                         `format`="zto"),
+                    list(
+                        `name`="criterion", 
+                        `title`="Award points when", 
+                        `type`="text"),
                     list(
                         `name`="direction", 
                         `title`="Direction", 
@@ -810,7 +836,7 @@ lassologisticBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             super$initialize(
                 package = "ClinicoPath",
                 name = "lassologistic",
-                version = c(1,0,3),
+                version = c(1,0,4),
                 options = options,
                 results = lassologisticResults$new(options=options),
                 data = data,
@@ -871,6 +897,16 @@ lassologisticBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   reference-scaled Sullivan method. The Beta10 method uses a fixed x10
 #'   coefficient scaling and ignores this value; the Schneeweiss method scales
 #'   by the smallest coefficient and also ignores it.
+#' @param scoreCutMethod How continuous predictors are dichotomized when
+#'   awarding points. A predictor earns its points when the patient's value
+#'   exceeds this cut. 'median' (the default) splits at the sample median, which
+#'   is data-derived and will differ in another cohort. 'manual' lets you enter
+#'   established clinical thresholds, which is what makes a score portable.
+#' @param scoreCutPoints Cut points on the ORIGINAL measurement scale, as
+#'   'variable=value' pairs separated by commas or semicolons, e.g. 'ki67=20,
+#'   age=65'. Used when Cut Point method is 'manual'. Any continuous predictor
+#'   not listed falls back to the sample median, and that fallback is reported.
+#'   Binary predictors ignore this - they score when present.
 #' @param scoreLookupTable Generate a lookup table mapping each possible total
 #'   score to predicted probability of the positive class.
 #' @param showSummary Display a natural-language summary of the main results.
@@ -936,6 +972,8 @@ lassologistic <- function(
     scoringSystem = FALSE,
     scoringMethod = "schneeweiss",
     scoringMaxPoints = 10,
+    scoreCutMethod = "median",
+    scoreCutPoints = "",
     scoreLookupTable = TRUE,
     showSummary = FALSE,
     showExplanations = FALSE,
@@ -975,6 +1013,8 @@ lassologistic <- function(
         scoringSystem = scoringSystem,
         scoringMethod = scoringMethod,
         scoringMaxPoints = scoringMaxPoints,
+        scoreCutMethod = scoreCutMethod,
+        scoreCutPoints = scoreCutPoints,
         scoreLookupTable = scoreLookupTable,
         showSummary = showSummary,
         showExplanations = showExplanations,

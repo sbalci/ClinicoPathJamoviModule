@@ -1489,22 +1489,21 @@ if (WIP) {
   jjstatsplot_modules <- jjstatsplot_a_yaml_files
 }
 
-if (TEST) {
-  jjstatsplot_a_yaml_files <- purrr::keep(a_yaml_files, function(f) {
-    lines <- readLines(f, warn = FALSE)
-    any(grepl("menuGroup: JJStatsPlotT$", lines)) ||
-    any(grepl("menuGroup: PowerT #jjstatsplot$", lines))
-  })
+# NOTE: there is deliberately NO `if (TEST)` block here reassigning
+# <module>_modules to the T-suffixed functions.
+#
+# Such a block used to exist for jjstatsplot and meddecide. It overwrote the
+# submodule's own list with the *T functions, so with TEST: true the
+# test-routed analyses were copied straight into the production jjstatsplot and
+# meddecide repos. It was harmless only while `!TEST` gates skipped submodule
+# processing in TEST mode; once those gates were removed (so test and the other
+# modules could be driven independently) the overwrite became a live leak.
+#
+# The JamoviTest module builds its own list further down - search
+# "JamoviTest_modules" - from modules_config$JamoviTest$test_patterns, which
+# already covers every "<Group>T$" and "PowerT". Nothing else needs to collect
+# the T functions.
 
-  jjstatsplot_a_yaml_files <- gsub(pattern = "./jamovi/",
-                                   replacement = "",
-                                   x = jjstatsplot_a_yaml_files)
-  jjstatsplot_a_yaml_files <- gsub(pattern = ".a.yaml",
-                                   replacement = "",
-                                   x = jjstatsplot_a_yaml_files)
-
-  jjstatsplot_modules <- jjstatsplot_a_yaml_files
-}
 
 
 ## meddecide module functions ----
@@ -1539,22 +1538,21 @@ if (WIP) {
   meddecide_modules <- meddecide_a_yaml_files
 }
 
-if (TEST) {
-  meddecide_a_yaml_files <- purrr::keep(a_yaml_files, function(f) {
-    lines <- readLines(f, warn = FALSE)
-    any(grepl("menuGroup: meddecideT$", lines)) ||
-    any(grepl("menuGroup: PowerT #meddecide$", lines))
-  })
+# NOTE: there is deliberately NO `if (TEST)` block here reassigning
+# <module>_modules to the T-suffixed functions.
+#
+# Such a block used to exist for jjstatsplot and meddecide. It overwrote the
+# submodule's own list with the *T functions, so with TEST: true the
+# test-routed analyses were copied straight into the production jjstatsplot and
+# meddecide repos. It was harmless only while `!TEST` gates skipped submodule
+# processing in TEST mode; once those gates were removed (so test and the other
+# modules could be driven independently) the overwrite became a live leak.
+#
+# The JamoviTest module builds its own list further down - search
+# "JamoviTest_modules" - from modules_config$JamoviTest$test_patterns, which
+# already covers every "<Group>T$" and "PowerT". Nothing else needs to collect
+# the T functions.
 
-  meddecide_a_yaml_files <- gsub(pattern = "./jamovi/",
-                                 replacement = "",
-                                 x = meddecide_a_yaml_files)
-  meddecide_a_yaml_files <- gsub(pattern = ".a.yaml",
-                                 replacement = "",
-                                 x = meddecide_a_yaml_files)
-
-  meddecide_modules <- meddecide_a_yaml_files
-}
 
 
 

@@ -3009,7 +3009,6 @@ out-of-scope findings from the same audit, deferred for separate work.
 # release-review-function prompt
 
 
-/release-review-function agreement
 /release-review-function decision
 /release-review-function decisioncompare
 /release-review-function decisioncombine	
@@ -3019,7 +3018,6 @@ out-of-scope findings from the same audit, deferred for separate work.
 /release-review-function sequentialtests
 /release-review-function enhancedROC
 /release-review-function psychopdaROC
-/release-review-function lassologistic
 /release-review-function kappaSizePower
 /release-review-function kappaSizeCI
 /release-review-function kappaSizeFixedN

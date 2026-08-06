@@ -106,6 +106,20 @@ lassologisticClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                 if (is.null(self$options$outcome) ||
                     is.null(self$options$explanatory) ||
                     length(self$options$explanatory) < 2) {
+                    # .init() shows the welcome/To Do panel only when explanatory is
+                    # NULL or empty, so with EXACTLY ONE predictor selected both
+                    # guards stayed silent and the user got a completely blank
+                    # result - no panel, no notice, no error.
+                    if (!is.null(self$options$outcome) &&
+                        !is.null(self$options$explanatory) &&
+                        length(self$options$explanatory) == 1) {
+                        private$.addNotice(
+                            "WARNING",
+                            .("At least two predictors are required"),
+                            .("LASSO performs variable SELECTION, so it needs a set of candidate predictors to choose among; with a single predictor there is nothing to select and a penalized fit is not informative. Add at least one more predictor, or use ordinary logistic regression for a single-predictor model.")
+                        )
+                        private$.renderNotices()
+                    }
                     return()
                 }
 
@@ -162,11 +176,25 @@ lassologisticClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                     )
                 }
 
+                # Listwise deletion is dominated by the single worst-populated
+                # predictor, so a biomarker panel with one sparsely-stained marker
+                # silently becomes a different-cohort analysis.
+                if (!is.null(data$n_excluded) && data$n_excluded > 0) {
+                    private$.addNotice(
+                        "WARNING",
+                        .("Cases excluded for missing data"),
+                        sprintf(
+                            .("%d of %d cases (%.1f%%) were excluded because at least one selected variable was missing; the analysis uses the remaining %d complete cases. LASSO uses listwise deletion, so a single sparsely-measured predictor can remove a large share of the cohort. Check which predictor is driving the exclusions before interpreting these results."),
+                            data$n_excluded, data$n_total,
+                            100 * data$n_excluded / data$n_total, data$n)
+                    )
+                }
+
                 private$.checkpoint()
 
                 # ── 4. Populate results ────────────────────────────────────────
                 private$.populateModelSummary(data, fit_result)
-                private$.populateCoefficients(fit_result)
+                private$.populateCoefficients(fit_result, data)
                 private$.populatePerformance(data, fit_result)
 
                 # ── 5. Scoring system ──────────────────────────────────────────
@@ -363,15 +391,36 @@ lassologisticClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                 if (sum(good_cols) < 2) jmvcore::reject(.("Too few non-degenerate predictor columns."))
                 X <- X[, good_cols, drop = FALSE]
 
-                # Optional standardization
+                # Optional standardization.
+                #
+                # Keep the centre/scale so downstream output can be expressed on the
+                # ORIGINAL measurement scale. glmnet's own standardize=TRUE returns
+                # coefficients back-transformed to the original scale; because this
+                # code scales the matrix itself and then passes standardize=FALSE,
+                # no back-transformation happens and every coefficient stays on the
+                # z-scale. beta_original = beta_z / sd reproduces exactly what
+                # glmnet(standardize=TRUE) would have returned.
+                X_center <- rep(0, ncol(X))
+                X_sd <- rep(1, ncol(X))
+                names(X_center) <- names(X_sd) <- colnames(X)
                 if (self$options$standardize) {
                     X <- scale(X)
+                    ctr <- attr(X, "scaled:center")
+                    scl <- attr(X, "scaled:scale")
+                    if (!is.null(ctr)) X_center[names(ctr)] <- ctr
+                    if (!is.null(scl)) X_sd[names(scl)] <- scl
+                    # a zero sd would make the back-transform infinite
+                    X_sd[!is.finite(X_sd) | X_sd == 0] <- 1
                 }
 
                 list(
                     X = X,
+                    X_center = X_center,
+                    X_sd = X_sd,
                     y = status_cc,
                     n = n_complete,
+                    n_total = nrow(self$data),
+                    n_excluded = nrow(self$data) - n_complete,
                     n_events = n_events,
                     n_nonevents = n_nonevents,
                     p = ncol(X),
@@ -670,7 +719,16 @@ lassologisticClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                     self$options$lambda
                 )
                 rows <- list(
-                    list(.("Total observations"), as.character(data$n)),
+                    # "Total observations" used to hold the COMPLETE-CASE count, so
+                    # it read as the full cohort while listwise deletion had silently
+                    # removed rows - and .suitabilityAssessment then green-lit the
+                    # reduced N. Report both.
+                    list(.("Complete cases analysed"), as.character(data$n)),
+                    list(.("Excluded (incomplete data)"),
+                         if (!is.null(data$n_excluded) && data$n_excluded > 0)
+                             sprintf("%d of %d (%.1f%%)", data$n_excluded, data$n_total,
+                                     100 * data$n_excluded / data$n_total)
+                         else .("None")),
                     list(.("Event class (positive)"), paste0(data$event_level, " (n=", data$n_events, ")")),
                     list(.("Reference class"), paste0(data$ref_level, " (n=", data$n_nonevents, ")")),
                     list(.("Candidate predictors"), as.character(data$p)),
@@ -685,7 +743,7 @@ lassologisticClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                     table$addRow(rowKey = i, values = list(statistic = rows[[i]][[1]], value = rows[[i]][[2]]))
                 }
             },
-            .populateCoefficients = function(fit) {
+            .populateCoefficients = function(fit, data = NULL) {
                 table <- self$results$coefficients
                 if (length(fit$selected) == 0) {
                     table$addRow(rowKey = 1, values = list(
@@ -695,11 +753,28 @@ lassologisticClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                     return()
                 }
 
+                # Report on the ORIGINAL measurement scale.
+                #
+                # The design matrix was standardised here and glmnet was called with
+                # standardize=FALSE, so selected_coefs are per 1 SD. Dividing by the
+                # column SD recovers exactly what glmnet(standardize=TRUE) returns -
+                # the per-unit coefficient. This matters most for a 0/1 dummy from a
+                # factor: with a balanced marker sd is about 0.5, so the per-SD odds
+                # ratio is roughly the SQUARE ROOT of the model's actual
+                # present-vs-absent odds ratio (1.81 printed where the model implies
+                # 3.25). "Per 1 SD of p53 status" is not a quantity a pathologist can
+                # act on. Importance keeps the per-SD magnitude, which is the
+                # comparable-across-predictors quantity.
+                sds <- if (!is.null(data) && !is.null(data$X_sd)) data$X_sd else NULL
                 max_abs <- max(abs(fit$selected_coefs))
                 for (i in seq_along(fit$selected)) {
-                    coef_val <- fit$selected_coefs[i]
+                    coef_sd <- fit$selected_coefs[i]
+                    sd_i <- if (!is.null(sds) && fit$selected[i] %in% names(sds))
+                        sds[[fit$selected[i]]] else 1
+                    if (!is.finite(sd_i) || sd_i == 0) sd_i <- 1
+                    coef_val <- coef_sd / sd_i
                     or_val <- exp(coef_val)
-                    importance <- abs(coef_val) / max_abs
+                    importance <- abs(coef_sd) / max_abs
 
                     table$addRow(rowKey = i, values = list(
                         variable = fit$selected[i],
@@ -716,7 +791,7 @@ lassologisticClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                 # selected variables (Model Comparison) for classical inference.
                 table$setNote("ci_note", .("LASSO coefficients are penalized (shrunken) and have no valid standard confidence intervals; they are omitted rather than shown as blanks. Use bootstrap validation for performance inference, or the Model Comparison table for unpenalized estimates on the selected variables."))
                 if (isTRUE(self$options$standardize)) {
-                    table$setNote("scale_note", .("Predictors were standardized before fitting, so coefficients and odds ratios are expressed per 1 standard deviation of each predictor, not per raw measurement unit. This keeps them comparable across variables but not interpretable on the original scale. Disable 'Standardize Variables' for raw-scale coefficients."))
+                    table$setNote("scale_note", .("Predictors were standardized before fitting so that the penalty treats them comparably, but the Coefficient and Odds Ratio columns are reported on the ORIGINAL measurement scale (per 1 unit of a continuous predictor, or present vs absent for a binary one). The Importance column is the per-standard-deviation magnitude, which is what can be compared across predictors with different units. Odds ratios remain penalized (shrunk toward 1)."))
                 }
             },
             .populatePerformance = function(data, fit) {
@@ -746,7 +821,14 @@ lassologisticClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                     {
                         if (!is.null(roc_obj)) {
                             coords_best <- pROC::coords(roc_obj, "best", ret = c("threshold", "sensitivity", "specificity"))
-                            optimal_threshold <- coords_best$threshold[1]
+                            cand <- coords_best$threshold[1]
+                            # With zero selected variables every predicted probability
+                            # is identical, the ROC is degenerate and pROC returns
+                            # -Inf - which was printed as "Optimal threshold: -Inf"
+                            # alongside Sensitivity 1.000 / Specificity 0.000, i.e. a
+                            # model that calls everyone positive presented as perfectly
+                            # sensitive. Fall back to 0.5 and say so.
+                            optimal_threshold <- if (is.finite(cand)) cand else 0.5
                         }
                     },
                     error = function(e) {}
@@ -782,7 +864,25 @@ lassologisticClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                     list(.("F1 Score"), sprintf("%.3f", f1), ""),
                     list(
                         .("Brier Score"), sprintf("%.4f", brier),
-                        if (brier < 0.1) .("Excellent calibration") else if (brier < 0.2) .("Good") else .("Poor")
+                        {
+                            # The Brier score is an OVERALL accuracy score, not a
+                            # calibration measure, and its scale is driven by outcome
+                            # prevalence: a no-information model that always predicts
+                            # the base rate scores p(1-p), which is already 0.09 at
+                            # 10% prevalence and would have been graded "Excellent
+                            # calibration". Grade against that null model instead of
+                            # fixed cut-offs.
+                            prev <- mean(data$y, na.rm = TRUE)
+                            null_brier <- prev * (1 - prev)
+                            if (!is.finite(null_brier) || null_brier <= 0) {
+                                .("Not interpretable")
+                            } else {
+                                bss <- 1 - brier / null_brier   # Brier skill score
+                                if (bss >= 0.25) sprintf(.("Good (%.0f%% better than predicting the base rate)"), 100 * bss)
+                                else if (bss > 0) sprintf(.("Marginal (%.0f%% better than base rate)"), 100 * bss)
+                                else .("No better than predicting the base rate")
+                            }
+                        }
                     )
                 )
 
@@ -827,6 +927,43 @@ lassologisticClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
             # ══════════════════════════════════════════════════════════════════
 
             # ── Core: compute integer points by each method ────────────────
+            # ── Log-odds contribution of MEETING each scoring criterion ─────
+            #
+            # A points system represents each factor's contribution to the linear
+            # predictor for the contrast the score actually applies. The points were
+            # derived from the raw per-SD coefficients while .computeTotalScores
+            # awards them on a MEDIAN SPLIT, so binary and continuous predictors were
+            # weighted on two different contrasts: a 0/1 dummy's per-SD coefficient
+            # is beta_original * sd (about half the real effect for a balanced
+            # marker) while a continuous predictor's median split spans roughly 1.6
+            # SD. That mis-ranked them against each other, and the Scoring System
+            # table's "Odds Ratio" column disagreed with the Selected Variables table
+            # for the same predictor (2.11 vs 4.46 for p53).
+            #
+            # Contribution on the z-scale equals the contribution on the original
+            # scale, since beta_z * delta_z = (beta_orig * sd) * (delta_orig / sd).
+            #   binary     : beta_z * (z_present - z_absent)   = beta_original
+            #   continuous : beta_z * (mean_z above - mean_z below the median)
+            .scoreContributions = function(data, variables, coefs, cuts = NULL) {
+                if (is.null(cuts)) cuts <- private$.scoreCuts(data, variables)
+                out <- numeric(length(variables))
+                for (i in seq_along(variables)) {
+                    var_col <- variables[i]
+                    if (!(var_col %in% colnames(data$X))) { out[i] <- coefs[i]; next }
+                    v <- data$X[, var_col]; v <- v[!is.na(v)]
+                    ci <- cuts[[i]]
+                    delta <- if (isTRUE(ci$binary)) {
+                        uv <- unique(v); max(uv) - min(uv)
+                    } else {
+                        hi <- mean(v[v > ci$cut]); lo <- mean(v[v <= ci$cut])
+                        if (is.finite(hi) && is.finite(lo)) hi - lo else 1
+                    }
+                    if (!is.finite(delta) || delta == 0) delta <- 1
+                    out[i] <- coefs[i] * delta
+                }
+                out
+            },
+
             .computePoints = function(coefs, method, max_points = 10) {
                 abs_coefs <- abs(coefs)
                 signs <- sign(coefs)
@@ -868,27 +1005,123 @@ lassologisticClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
             },
 
             # ── Compute total scores for a dataset given point assignments ──
-            .computeTotalScores = function(data, variables, points) {
+            # jmvcore ERRORS (it does not return NULL) when asked for an option the
+            # compiled .h.R does not carry, so any newly-added option breaks the
+            # whole analysis until jmvtools::prepare() has been re-run. Read new
+            # options through this so the pre-regeneration window degrades to the
+            # documented default instead of failing.
+            .opt = function(name, default = NULL) {
+                v <- tryCatch(self$options[[name]], error = function(e) NULL)
+                if (is.null(v)) default else v
+            },
+
+            # ── Cut point for each predictor, on the STANDARDISED scale ─────
+            #
+            # Single source of truth for the dichotomisation. .scoreCriteria (what
+            # is printed), .scoreContributions (what the points are derived from)
+            # and .computeTotalScores (what is actually awarded) must all use the
+            # SAME cut, or the published rule stops matching the computed score.
+            #
+            # Returns a named list: cut (on the z-scale of data$X), binary flag, and
+            # the cut expressed on the original measurement scale for display.
+            # Manual cuts are entered on the ORIGINAL scale and converted here.
+            .scoreCuts = function(data, variables) {
+                method <- private$.opt("scoreCutMethod", "median")
+                manual <- private$.parseCutPoints(private$.opt("scoreCutPoints", ""))
+                fellback <- character(0)
+
+                out <- lapply(variables, function(var_col) {
+                    if (!(var_col %in% colnames(data$X)))
+                        return(list(binary = FALSE, cut = NA_real_, cut_raw = NA_real_))
+                    v <- data$X[, var_col]
+                    v <- v[!is.na(v)]
+                    if (length(unique(v)) == 2)
+                        return(list(binary = TRUE, cut = NA_real_, cut_raw = NA_real_))
+
+                    ctr <- if (!is.null(data$X_center) && var_col %in% names(data$X_center))
+                        data$X_center[[var_col]] else 0
+                    sdv <- if (!is.null(data$X_sd) && var_col %in% names(data$X_sd))
+                        data$X_sd[[var_col]] else 1
+                    if (!is.finite(sdv) || sdv == 0) sdv <- 1
+
+                    cut_z <- NA_real_
+                    if (identical(method, "manual") && var_col %in% names(manual)) {
+                        # entered on the original scale -> convert to the z-scale
+                        cut_z <- (manual[[var_col]] - ctr) / sdv
+                    } else {
+                        if (identical(method, "manual")) fellback <<- c(fellback, var_col)
+                        cut_z <- switch(
+                            method,
+                            mean     = mean(v),
+                            tertile  = stats::quantile(v, 2 / 3, names = FALSE),
+                            quartile = stats::quantile(v, 0.75, names = FALSE),
+                            stats::median(v)   # median, and the manual fallback
+                        )
+                    }
+                    if (!is.finite(cut_z)) cut_z <- stats::median(v)
+                    list(binary = FALSE, cut = cut_z, cut_raw = cut_z * sdv + ctr)
+                })
+                names(out) <- variables
+                attr(out, "fellback") <- fellback
+                out
+            },
+
+            # Parse "ki67=20, age=65" (also accepts ';' and newlines) into a named
+            # numeric vector. Unparseable entries are dropped rather than guessed.
+            .parseCutPoints = function(txt) {
+                if (is.null(txt) || !nzchar(trimws(txt))) return(stats::setNames(numeric(0), character(0)))
+                parts <- unlist(strsplit(txt, "[,;\n]+"))
+                parts <- trimws(parts[nzchar(trimws(parts))])
+                nm <- character(0); vals <- numeric(0)
+                for (pt in parts) {
+                    kv <- strsplit(pt, "=", fixed = TRUE)[[1]]
+                    if (length(kv) != 2) next
+                    key <- trimws(kv[1])
+                    val <- suppressWarnings(as.numeric(trimws(kv[2])))
+                    if (!nzchar(key) || !is.finite(val)) next
+                    nm <- c(nm, key); vals <- c(vals, val)
+                }
+                stats::setNames(vals, nm)
+            },
+
+            # ── Human-readable scoring criterion, on the ORIGINAL scale ─────
+            #
+            # .computeTotalScores awards a predictor's points when a continuous
+            # value exceeds its IN-SAMPLE MEDIAN, but that median never reached the
+            # output: the Scoring System table published variable / OR / points and
+            # nothing else, so a clinician could not apply the score to a new
+            # patient - they had no idea what "high ki67" meant. Reconstruct the cut
+            # on the original measurement scale (the matrix is standardised, so
+            # raw = z * sd + centre) and publish it.
+            .scoreCriteria = function(data, variables, cuts = NULL) {
+                if (is.null(cuts)) cuts <- private$.scoreCuts(data, variables)
+                vapply(seq_along(variables), function(i) {
+                    ci <- cuts[[i]]
+                    if (is.null(ci) || is.na(ci$binary)) return(NA_character_)
+                    if (isTRUE(ci$binary)) return(.("present"))
+                    sprintf(.("> %s"), format(round(ci$cut_raw, 3), trim = TRUE))
+                }, character(1), USE.NAMES = FALSE)
+            },
+
+            .computeTotalScores = function(data, variables, points, cuts = NULL) {
+                if (is.null(cuts)) cuts <- private$.scoreCuts(data, variables)
                 total <- rep(0, data$n)
                 for (i in seq_along(variables)) {
                     var_col <- variables[i]
-                    if (var_col %in% colnames(data$X)) {
-                        col_vals <- data$X[, var_col]
-                        uniq_vals <- unique(col_vals[!is.na(col_vals)])
-                        # Detect binary by distinct-value count (robust to
-                        # standardization, which rescales 0/1 dummies to two
-                        # z-values). Score the "present" (higher) level; because
-                        # scaling is monotonic, max() corresponds to the original
-                        # "1"/present level regardless of class balance.
-                        if (length(uniq_vals) == 2) {
-                            present_val <- max(uniq_vals)
-                            total <- total + ifelse(!is.na(col_vals) & col_vals == present_val, points[i], 0)
-                        } else {
-                            # Continuous predictor: score above the median.
-                            # Monotonic under scaling, so this matches the raw-scale median cut.
-                            med <- median(col_vals, na.rm = TRUE)
-                            total <- total + ifelse(!is.na(col_vals) & col_vals > med, points[i], 0)
-                        }
+                    if (!(var_col %in% colnames(data$X))) next
+                    col_vals <- data$X[, var_col]
+                    ci <- cuts[[i]]
+                    if (isTRUE(ci$binary)) {
+                        # Score the "present" (higher) level; scaling is monotonic,
+                        # so max() is the original 1/present level.
+                        present_val <- max(unique(col_vals[!is.na(col_vals)]))
+                        total <- total + ifelse(!is.na(col_vals) & col_vals == present_val, points[i], 0)
+                    } else {
+                        # Continuous: award above the resolved cut (median by
+                        # default; mean/tertile/quartile or a manual clinical
+                        # threshold when selected). This is the SAME cut printed in
+                        # the criterion column and used to derive the points.
+                        total <- total + ifelse(!is.na(col_vals) & col_vals > ci$cut, points[i], 0)
                     }
                 }
                 total
@@ -955,8 +1188,17 @@ lassologisticClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                 if (is.null(method)) method <- "schneeweiss"
                 max_points <- self$options$scoringMaxPoints
 
-                coefs <- fit$selected_coefs
                 vars <- fit$selected
+                # Resolve the cut points ONCE and pass them to every consumer, so the
+                # rule printed in the criterion column, the contrast the points are
+                # derived from, and the cut actually applied when scoring cannot
+                # drift apart.
+                cuts <- private$.scoreCuts(data, vars)
+
+                # Points are derived from the log-odds contribution of MEETING each
+                # criterion, so they are on the same contrast the score applies and
+                # are comparable between binary and continuous predictors.
+                coefs <- private$.scoreContributions(data, vars, fit$selected_coefs, cuts)
 
                 # Compute points by all three methods
                 pts_beta10 <- private$.computePoints(coefs, "beta10", max_points)
@@ -977,6 +1219,7 @@ lassologisticClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                     variable = vars,
                     coefficient = coefs,
                     oddsRatio = exp(coefs),
+                    criterion = private$.scoreCriteria(data, vars, cuts),
                     direction = ifelse(coefs > 0, .("Positive (+)"), .("Negative (-)")),
                     points_beta10 = pts_beta10,
                     points_schneeweiss = pts_schneeweiss,
@@ -992,6 +1235,7 @@ lassologisticClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                     table$addRow(rowKey = i, values = list(
                         variable = score_data$variable[i],
                         oddsRatio = score_data$oddsRatio[i],
+                        criterion = score_data$criterion[i],
                         direction = score_data$direction[i],
                         points_beta10 = score_data$points_beta10[i],
                         points_schneeweiss = score_data$points_schneeweiss[i],
@@ -1008,9 +1252,21 @@ lassologisticClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                     compare = .("All three methods shown for comparison")
                 )
                 table$setNote("method", method_refs[[method]])
+                fellback <- attr(cuts, "fellback")
+                if (identical(private$.opt("scoreCutMethod", "median"), "manual") &&
+                    !is.null(fellback) && length(fellback) > 0) {
+                    table$setNote("manual_fallback", sprintf(
+                        .("No manual cut point was supplied for: %s. These fell back to the sample median. Enter them as 'variable=value' pairs (for example 'ki67=20, age=65') to use established clinical thresholds."),
+                        paste(fellback, collapse = ", ")))
+                }
+                cut_label <- switch(private$.opt("scoreCutMethod", "median"),
+                    mean = .("the sample mean"), tertile = .("the upper tertile"),
+                    quartile = .("the upper quartile"), manual = .("the cut points you supplied"),
+                    .("the sample median"))
+                table$setNote("criterion_note", sprintf(.("Award a factor's points when the patient meets its criterion. Continuous predictors are cut at %s. The Odds Ratio column is the penalized odds ratio for MEETING that criterion (present vs absent, or above vs below the cut), which is the contrast the points represent - so points and odds ratios are on the same footing here. A cut derived from this dataset (median, mean, tertile or quartile) is not an externally established clinical threshold and will differ in another cohort; supplying manual cut points from the literature is what makes a score portable. The score has not been validated outside these data."), cut_label))
 
                 # Evaluate primary scoring system
-                total_scores <- private$.computeTotalScores(data, vars, pts_primary)
+                total_scores <- private$.computeTotalScores(data, vars, pts_primary, cuts)
                 perf <- private$.evaluateScore(data$y, total_scores)
 
                 perf_rows <- list(
@@ -1020,8 +1276,8 @@ lassologisticClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                         "sullivan" = "Sullivan/D'Agostino",
                         "compare" = .("Schneeweiss (primary)")
                     )),
-                    list(.("Score AUC"), sprintf("%.3f", perf$auc)),
-                    list(.("Optimal score cutoff"), as.character(perf$cutoff)),
+                    list(.("Score AUC (apparent)"), sprintf("%.3f", perf$auc)),
+                    list(.("Optimal score cutoff (chosen on this data)"), as.character(perf$cutoff)),
                     list(.("Accuracy"), sprintf("%.3f", perf$accuracy)),
                     list(.("Sensitivity"), sprintf("%.3f", perf$sensitivity)),
                     list(.("Specificity"), sprintf("%.3f", perf$specificity)),
@@ -1042,6 +1298,14 @@ lassologisticClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                     "dichotomization",
                     .("Continuous predictors are scored by dichotomizing at their median (1 point block above the median, 0 below). The performance shown here reflects this simplified integer point system and may differ from the continuous LASSO model in the Classification Performance table.")
                 )
+                # The model's own table is labelled "AUC (apparent)" and carries an
+                # optimism caveat; the SCORE's table said only "Score AUC" while
+                # being doubly optimistic - the points come from a model fitted on
+                # these data AND the cutoff is Youden-optimised on the same data.
+                perf_table$setNote(
+                    "apparent",
+                    .("These figures are APPARENT (in-sample) and optimistic twice over: the points were derived from a model fitted to this dataset, and the score cutoff was chosen to maximise the Youden index on the same rows. They are not an estimate of how the score would perform on new patients. Enable bootstrap validation for an optimism-corrected estimate of the model, and validate any score externally before clinical use.")
+                )
 
                 # ── Method comparison (when compare mode selected) ──────────
                 if (method == "compare") {
@@ -1058,7 +1322,7 @@ lassologisticClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
 
                     for (j in seq_along(methods_list)) {
                         m <- methods_list[[j]]
-                        scores_j <- private$.computeTotalScores(data, vars, m[[2]])
+                        scores_j <- private$.computeTotalScores(data, vars, m[[2]], cuts)
                         perf_j <- private$.evaluateScore(data$y, scores_j)
 
                         info_loss <- if (!is.na(full_auc) && !is.na(perf_j$auc) && full_auc > 0) {
@@ -1225,6 +1489,20 @@ lassologisticClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                 corrected_auc <- apparent_auc - mean_optimism_auc
                 corrected_brier <- apparent_brier - mean_optimism_brier
                 corrected_slope <- apparent_slope - mean_optimism_slope
+
+                # Say how many replicates the correction actually rests on. Failed
+                # replicates are swallowed by the tryCatch and left as NA, and
+                # safe_mean() drops them with na.rm = TRUE, so a correction computed
+                # from 50 survivors of 200 looked identical to one from all 200.
+                n_ok <- sum(!is.na(optimism_auc))
+                if (n_ok < B) {
+                    table$setNote("boot_n", sprintf(
+                        .("%d of %d bootstrap replicates completed; %d failed (typically a resample with too few events to fit) and were excluded. The optimism correction is based on the %d successful replicates."),
+                        n_ok, B, B - n_ok, n_ok))
+                }
+                if (n_ok < 20) {
+                    table$setNote("boot_few", .("Fewer than 20 bootstrap replicates succeeded. The optimism correction is unreliable at this number - increase the sample size or reduce the number of candidate predictors."))
+                }
 
                 rows <- list(
                     list(.("AUC"), apparent_auc, mean_optimism_auc, corrected_auc),

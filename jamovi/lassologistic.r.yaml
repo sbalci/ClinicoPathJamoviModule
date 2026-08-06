@@ -129,6 +129,9 @@ items:
           title: "Odds Ratio"
           type: number
           format: zto
+        - name: criterion
+          title: "Award points when"
+          type: text
         - name: direction
           title: "Direction"
           type: text
