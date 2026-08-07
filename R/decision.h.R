@@ -220,7 +220,7 @@ decisionResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 options=options,
                 name="welcome",
                 title="Getting Started",
-                visible="(!(gold && newtest && goldPositive && testPositive))",
+                visible="(length(gold) == 0 || length(newtest) == 0 || length(goldPositive) == 0 || length(testPositive) == 0)",
                 clearWith=list(
                     "gold",
                     "newtest",

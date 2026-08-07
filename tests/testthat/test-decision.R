@@ -255,7 +255,8 @@ test_that("decision function output structure is complete", {
   )
   
   # Check all expected output components exist
-  expected_components <- c("text1", "text2", "cTable", "nTable", "ratioTable", 
+  # text1/text2 are commented out in jamovi/decision.r.yaml and are not produced.
+  expected_components <- c("cTable", "nTable", "ratioTable",
                           "epirTable_ratio", "epirTable_number", "plot1")
   
   for (component in expected_components) {
@@ -353,7 +354,8 @@ test_that("natural language summary reports NPV correctly", {
     newtest = "assay",
     testPositive = "pos",
     goldNegative = NULL,
-    testNegative = NULL
+    testNegative = NULL,
+    showNaturalLanguage = TRUE
   )
 
   ratio <- result$ratioTable$asDF

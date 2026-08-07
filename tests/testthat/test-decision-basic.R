@@ -17,7 +17,7 @@ test_that("decision returns proper class", {
     goldNegative = NULL,
     testNegative = NULL
   )
-  expect_s3_class(result, "decisionClass")
+  expect_s3_class(result, "decisionResults")
 })
 
 test_that("decision handles basic two-level test", {

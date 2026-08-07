@@ -8,7 +8,11 @@ items:
     - name: welcome
       title: 'Getting Started'
       type: Html
-      visible: (!(gold && newtest && goldPositive && testPositive))
+      # Must not start with '!': jmvcore routes to the R evaluator only on
+      # ^\([\$A-Za-z].*\)$, so a leading '!' returns the raw (truthy) string and
+      # the panel is permanently visible. Bare option names are also unusable
+      # here -- a Variable's value is a list, which R's && rejects.
+      visible: (length(gold) == 0 || length(newtest) == 0 || length(goldPositive) == 0 || length(testPositive) == 0)
       clearWith:
         - gold
         - newtest

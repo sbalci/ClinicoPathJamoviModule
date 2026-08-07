@@ -21,7 +21,7 @@ test_that("decision handles small datasets", {
     goldNegative = NULL,
     testNegative = NULL
   )
-  expect_s3_class(result, "decisionClass")
+  expect_s3_class(result, "decisionResults")
   expect_true(nrow(decision_small) == 30)
 })
 
@@ -35,7 +35,7 @@ test_that("decision handles large datasets efficiently", {
     goldNegative = NULL,
     testNegative = NULL
   )
-  expect_s3_class(result, "decisionClass")
+  expect_s3_class(result, "decisionResults")
   expect_true(nrow(decision_large) == 500)
 })
 
@@ -49,7 +49,7 @@ test_that("decision handles perfect test performance", {
     goldNegative = NULL,
     testNegative = NULL
   )
-  expect_s3_class(result, "decisionClass")
+  expect_s3_class(result, "decisionResults")
 })
 
 test_that("decision handles poor test performance", {
@@ -62,7 +62,7 @@ test_that("decision handles poor test performance", {
     goldNegative = NULL,
     testNegative = NULL
   )
-  expect_s3_class(result, "decisionClass")
+  expect_s3_class(result, "decisionResults")
 })
 
 test_that("decision handles rare disease prevalence", {
@@ -75,7 +75,7 @@ test_that("decision handles rare disease prevalence", {
     goldNegative = NULL,
     testNegative = NULL
   )
-  expect_s3_class(result, "decisionClass")
+  expect_s3_class(result, "decisionResults")
   # Check prevalence is low
   prevalence <- mean(decision_rare$GoldStandard == "Positive")
   expect_lt(prevalence, 0.05)
@@ -91,7 +91,7 @@ test_that("decision handles common disease prevalence", {
     goldNegative = NULL,
     testNegative = NULL
   )
-  expect_s3_class(result, "decisionClass")
+  expect_s3_class(result, "decisionResults")
   # Check prevalence is high
   prevalence <- mean(decision_common$GoldStandard == "Positive")
   expect_gt(prevalence, 0.60)
@@ -107,7 +107,7 @@ test_that("decision handles missing data", {
     goldNegative = NULL,
     testNegative = NULL
   )
-  expect_s3_class(result, "decisionClass")
+  expect_s3_class(result, "decisionResults")
   expect_true(any(is.na(decision_missing$GoldStandard)) ||
               any(is.na(decision_missing$NewTest)))
 })
@@ -123,37 +123,32 @@ test_that("decision handles multilevel variables", {
     goldNegative = NULL,
     testNegative = NULL
   )
-  expect_s3_class(result, "decisionClass")
+  expect_s3_class(result, "decisionResults")
 })
 
-test_that("decision validates required arguments", {
-  # Missing newtest
-  expect_error(
-    decision(
-      data = decision_small,
-      gold = "GoldStandard",
-      goldPositive = "Positive",
-      testPositive = NULL,
-      goldNegative = NULL,
-      testNegative = NULL
-    ),
-    regexp = "newtest|required|missing",
-    ignore.case = TRUE
-  )
+test_that("omitting a required variable shows the welcome panel, not an error", {
+  # A jamovi analysis must not throw when the user has not finished choosing
+  # variables - the GUI re-runs it on every edit. These blocks demanded an
+  # exception, i.e. the opposite of the intended contract. Verified behaviour:
+  # the analysis returns cleanly and the "Getting Started" panel stays visible.
+  r1 <- decision(
+    data = decision_small, gold = "GoldStandard", goldPositive = "Positive",
+    newtest = NULL, testPositive = NULL, goldNegative = NULL, testNegative = NULL)
+  expect_s3_class(r1, "decisionResults")
+  expect_true(r1$welcome$visible)
 
-  # Missing gold standard
-  expect_error(
-    decision(
-      data = decision_small,
-      newtest = "NewTest",
-      testPositive = "Positive",
-      goldPositive = NULL,
-      goldNegative = NULL,
-      testNegative = NULL
-    ),
-    regexp = "gold|required|missing",
-    ignore.case = TRUE
-  )
+  r2 <- decision(
+    data = decision_small, newtest = "NewTest", testPositive = "Positive",
+    gold = NULL, goldPositive = NULL, goldNegative = NULL, testNegative = NULL)
+  expect_s3_class(r2, "decisionResults")
+  expect_true(r2$welcome$visible)
+
+  # and with everything supplied the panel steps out of the way
+  r3 <- decision(
+    data = decision_small, gold = "GoldStandard", goldPositive = "Positive",
+    newtest = "NewTest", testPositive = "Positive",
+    goldNegative = NULL, testNegative = NULL)
+  expect_false(r3$welcome$visible)
 })
 
 test_that("decision validates prevalence bounds", {
@@ -269,5 +264,5 @@ test_that("decision handles all output options with small sample", {
     goldNegative = NULL,
     testNegative = NULL
   )
-  expect_s3_class(result, "decisionClass")
+  expect_s3_class(result, "decisionResults")
 })

@@ -30,6 +30,8 @@ decisionClass <- if (requireNamespace("jmvcore"))
         "decisionClass",
         inherit = decisionBase,
         private = list(
+            .n_complete_cases = NA_integer_,
+            .n_level_excluded = 0L,
             # Constants for maintainability
             NOMOGRAM_LABEL_SIZE = 14/5,
 
@@ -405,6 +407,10 @@ decisionClass <- if (requireNamespace("jmvcore"))
                 subset_data$original_row_index <- seq_len(nrow(subset_data))
 
                 mydata <- jmvcore::naOmit(subset_data)
+                # Rows are dropped twice: here for missingness, and again below for
+                # levels that are neither the positive nor the negative level. The
+                # summary used to attribute both to "missing values".
+                private$.n_complete_cases <- nrow(mydata)
 
                 if (nrow(mydata) < nrow(self$data)) {
                     removed <- nrow(self$data) - nrow(mydata)
@@ -508,6 +514,7 @@ decisionClass <- if (requireNamespace("jmvcore"))
 
                 # Remove rows with NA in recoded variables (excluded levels when explicit negative specified)
                 mydata <- mydata %>% dplyr::filter(!is.na(testVariable2), !is.na(goldVariable2))
+                private$.n_level_excluded <- max(0, private$.n_complete_cases - nrow(mydata))
                 
                 # Validate contingency table structure after data preparation
                 test_table <- table(mydata$testVariable2, mydata$goldVariable2)
@@ -543,6 +550,7 @@ decisionClass <- if (requireNamespace("jmvcore"))
                     lr_pos >= 5 ~ "Moderate increase in probability of disease",
                     lr_pos >= 2 ~ "Small but potentially important increase in probability",
                     lr_pos > 1 ~ "Minimal increase in probability of disease",
+                    lr_pos == 1 ~ "Uninformative: a positive result leaves the probability of disease unchanged",
                     TRUE ~ "Decreases probability of disease (test may be flawed)"
                 )
                 
@@ -552,6 +560,7 @@ decisionClass <- if (requireNamespace("jmvcore"))
                     lr_neg <= 0.2 ~ "Moderate decrease in probability of disease",
                     lr_neg <= 0.5 ~ "Small but potentially important decrease in probability",
                     lr_neg < 1 ~ "Minimal decrease in probability of disease",
+                    lr_neg == 1 ~ "Uninformative: a negative result leaves the probability of disease unchanged",
                     TRUE ~ "Increases probability of disease (test may be flawed)"
                 )
                 
@@ -575,16 +584,29 @@ decisionClass <- if (requireNamespace("jmvcore"))
             
             # Basic missing data summary
             .analyzeMissingData = function(original_data, processed_data) {
-                if (nrow(original_data) == nrow(processed_data)) {
-                    return(.("No missing data detected."))
+                n_orig <- nrow(original_data)
+                dropped <- n_orig - nrow(processed_data)
+                if (dropped <= 0) {
+                    return(.("No cases excluded."))
                 }
-                
-                missing_count <- nrow(original_data) - nrow(processed_data)
-                missing_percent <- round((missing_count / nrow(original_data)) * 100, 1)
-                
-                analysis <- paste0("Missing data summary: ", missing_count, " cases (", missing_percent, "%) with missing values removed. Complete case analysis performed.")
-                
-                return(analysis)
+
+                level_excluded <- private$.n_level_excluded
+                if (!is.numeric(level_excluded) || length(level_excluded) != 1 || is.na(level_excluded))
+                    level_excluded <- 0
+                level_excluded <- min(max(level_excluded, 0), dropped)
+                missing_count <- dropped - level_excluded
+
+                pct <- function(k) round((k / n_orig) * 100, 1)
+                parts <- character(0)
+                if (missing_count > 0)
+                    parts <- c(parts, sprintf(.("%d case(s) (%s%%) removed for missing values on the test or gold-standard variable"),
+                                              missing_count, format(pct(missing_count))))
+                if (level_excluded > 0)
+                    parts <- c(parts, sprintf(.("%d case(s) (%s%%) removed because their level was neither the positive nor the negative level you selected (these are NOT missing values)"),
+                                              level_excluded, format(pct(level_excluded))))
+
+                paste0(.("Case exclusion summary: "), paste(parts, collapse = "; "),
+                       sprintf(.(". %d of %d cases analysed."), nrow(processed_data), n_orig))
             },
             
             # Generate natural language summary for clinical use
@@ -626,7 +648,7 @@ decisionClass <- if (requireNamespace("jmvcore"))
 
                 sample_text <- if (!is.na(total_pop)) sprintf("%d cases analyzed", total_pop) else "Sample size not available"
 
-                summary_template <- .("<div style='margin: 15px; padding: 15px; border-left: 5px solid #4CAF50; background: #f1f8e9;'><h3 style='color: #2E7D32; margin-top: 0;'>Clinical Summary</h3><p style='font-size: 16px;'><strong>Analysis:</strong> Diagnostic test performance evaluation comparing %s against gold standard %s.</p><p><strong>Sample:</strong> %s with %s disease prevalence.</p><p><strong>Test Performance:</strong> The test shows <strong>%s</strong> discriminatory ability with sensitivity of <strong>%s</strong> (<em>%s</em>) and specificity of <strong>%s</strong> (<em>%s</em>).</p><p><strong>Clinical Utility:</strong> This test is most useful for <strong>%s</strong> in the clinical setting.</p><p><strong>Likelihood Ratios:</strong> Positive LR: %.2f (<em>%s</em>), Negative LR: %.2f (<em>%s</em>)</p><p><strong>Key Findings:</strong> When positive, the post-test disease probability is <strong>%s</strong> (PPV %s). When negative, the disease probability falls to <strong>%s</strong> and the probability of being disease-free is <strong>%s</strong> (NPV %s).</p></div>")
+                summary_template <- .("<div style='margin: 15px; padding: 15px; border-left: 5px solid #4CAF50; background: #f1f8e9;'><h3 style='color: #2E7D32; margin-top: 0;'>Clinical Summary</h3><p style='font-size: 16px;'><strong>Analysis:</strong> Diagnostic test performance evaluation comparing %s against gold standard %s.</p><p><strong>Sample:</strong> %s. Predictive values below are computed at a disease prevalence of %s.</p><p><strong>Test Performance:</strong> The test shows <strong>%s</strong> discriminatory ability with sensitivity of <strong>%s</strong> (<em>%s</em>) and specificity of <strong>%s</strong> (<em>%s</em>).</p><p><strong>Clinical Utility:</strong> This test is most useful for <strong>%s</strong> in the clinical setting.</p><p><strong>Likelihood Ratios:</strong> Positive LR: %.2f (<em>%s</em>), Negative LR: %.2f (<em>%s</em>)</p><p><strong>Key Findings:</strong> When positive, the post-test disease probability is <strong>%s</strong> (PPV %s). When negative, the disease probability falls to <strong>%s</strong> and the probability of being disease-free is <strong>%s</strong> (NPV %s).</p></div>")
 
                 lr_pos_safe <- if (is.na(lr_pos) || !is.finite(lr_pos)) 0 else lr_pos
                 lr_neg_safe <- if (is.na(lr_neg) || !is.finite(lr_neg)) 0 else lr_neg
@@ -650,8 +672,9 @@ decisionClass <- if (requireNamespace("jmvcore"))
             },
             
             # Generate copy-ready report template
-            .generateReportTemplate = function(sens, spec, ppv, npv, lr_pos, lr_neg, 
-                                             sens_ci = NULL, spec_ci = NULL, test_name, gold_name) {
+            .generateReportTemplate = function(sens, spec, ppv, npv, lr_pos, lr_neg,
+                                             sens_ci = NULL, spec_ci = NULL, test_name, gold_name,
+                                             prevalence = NA_real_) {
                 # Create confidence interval text if available
                 ci_text <- if (!is.null(sens_ci) && !is.null(spec_ci)) {
                     sprintf(.("(95%% CI: sensitivity %.1f-%.1f%%, specificity %.1f-%.1f%%)"), 
@@ -670,7 +693,7 @@ decisionClass <- if (requireNamespace("jmvcore"))
                 )
                 
                 # Generate template
-                template_string <- .("<div style='margin: 15px; padding: 15px; border: 2px dashed #2196F3; background: #e3f2fd;'><h3 style='color: #1976D2; margin-top: 0;'>Copy-Ready Clinical Report</h3><div style='background: white; padding: 10px; border-radius: 5px; font-family: Arial, sans-serif;'><p><strong>DIAGNOSTIC TEST EVALUATION</strong></p><p>We evaluated the diagnostic performance of %s compared to the gold standard %s. The test demonstrated a sensitivity of %.1f%% and specificity of %.1f%% %s. The positive predictive value was %.1f%% and negative predictive value was %.1f%%. The positive likelihood ratio of %.1f provides %s. These results suggest the test may be clinically useful for diagnostic evaluation.</p></div><p style='font-size: 12px; color: #666;'><em>Copy the text above for your clinical report. Modify as needed for your specific context.</em></p></div>")
+                template_string <- .("<div style='margin: 15px; padding: 15px; border: 2px dashed #2196F3; background: #e3f2fd;'><h3 style='color: #1976D2; margin-top: 0;'>Copy-Ready Clinical Report</h3><div style='background: white; padding: 10px; border-radius: 5px; font-family: Arial, sans-serif;'><p><strong>DIAGNOSTIC TEST EVALUATION</strong></p><p>We evaluated the diagnostic performance of %s compared to the gold standard %s. The test demonstrated a sensitivity of %.1f%% and specificity of %.1f%% %s. At a disease prevalence of %.1f%%, the positive predictive value was %.1f%% and the negative predictive value was %.1f%%. The positive likelihood ratio of %.1f provides %s.</p></div><p style='font-size: 12px; color: #666;'><em>Copy the text above for your clinical report. Modify as needed for your specific context.</em></p></div>")
 
                 # Escape user-derived variable names before HTML interpolation
                 test_name_safe <- private$.safeHtmlOutput(test_name)
@@ -680,6 +703,9 @@ decisionClass <- if (requireNamespace("jmvcore"))
                     template_string,
                     test_name_safe, gold_name_safe,
                     sens * 100, spec * 100, ci_text,
+                    # Predictive values are meaningless without the prevalence they
+                    # were computed at; the sentence quoted them bare.
+                    if (is.finite(prevalence)) prevalence * 100 else NA_real_,
                     ppv * 100, npv * 100,
                     lr_pos, interpretation
                 )
@@ -903,7 +929,11 @@ decisionClass <- if (requireNamespace("jmvcore"))
                     Spec = .("Specificity: Proportion of healthy patients correctly identified (TN rate). Higher is better for ruling IN disease when positive."),
                     AccurT = .("Accuracy: Overall proportion of correct test results. Consider prevalence dependency."),
                     PrevalenceD = if (isTRUE(self$options$pp)) {
-                        .("Prevalence: Shows the user-supplied population prior probability (Prior Probability option), NOT the observed sample prevalence. Predictive values and post-test probabilities are computed from this prior.")
+                        # This previously claimed the predictive values were computed
+                        # from the prior while the code left them at study prevalence.
+                        # They now are, so the statement is true - but say plainly
+                        # that this cell is not the sample's own prevalence.
+                        .("Prevalence: the user-supplied population prior probability (Prior Probability option), NOT this sample's observed prevalence. Predictive values and post-test probabilities are computed from this prior; sensitivity and specificity are not affected by it.")
                     } else {
                         .("Disease Prevalence: Observed proportion with disease in this sample. Affects predictive values.")
                     },
@@ -925,7 +955,8 @@ decisionClass <- if (requireNamespace("jmvcore"))
             # Consolidated content generation for improved performance
             .generateAllContent = function(sens, spec, ppv, npv, lr_pos, lr_neg,
                                          prior_prob, post_test_prob_disease, post_test_prob_healthy,
-                                         total_pop, test_name, gold_name) {
+                                         total_pop, test_name, gold_name,
+                                         sens_ci = NULL, spec_ci = NULL) {
 
                 results <- list(
                     clinical_summary = "",
@@ -1011,8 +1042,10 @@ decisionClass <- if (requireNamespace("jmvcore"))
                 results$report_template <- tryCatch({
                     private$.generateReportTemplate(
                         sens, spec, ppv, npv, lr_pos, lr_neg,
+                        sens_ci = sens_ci, spec_ci = spec_ci,
                         test_name = test_name,
-                        gold_name = gold_name
+                        gold_name = gold_name,
+                        prevalence = prior_prob
                     )
                 }, error = function(e) {
                     fallback_template <- .("<div style='margin: 15px; padding: 15px; border: 2px dashed #2196F3; background: #e3f2fd;'><h3 style='color: #1976D2; margin-top: 0;'>Copy-Ready Clinical Report</h3><p>Diagnostic test evaluation shows sensitivity of %.1f%% and specificity of %.1f%%.</p></div>")
@@ -1560,6 +1593,31 @@ decisionClass <- if (requireNamespace("jmvcore"))
 
 
                 ratioTable <- self$results$ratioTable
+                # PPV/NPV must belong to the prevalence the table reports.
+                #
+                # PPV *is* the post-test probability of disease given a positive
+                # test. With pp=TRUE the Prevalence cell was switched to the user's
+                # prior while PPV/NPV stayed at the raw 2x2 values computed at the
+                # STUDY prevalence, so the row read "Prevalence 5.0%" beside
+                # "PPV 88.9%" - arithmetically impossible for a test with sens 0.80
+                # / spec 0.90, where Bayes gives 29.6%. The footnote made it worse
+                # by asserting the predictive values had been prior-adjusted. Report
+                # the values that actually correspond to the stated prevalence, and
+                # keep the observed study prevalence visible either way.
+                PPV_report <- PPV
+                NPV_report <- NPV
+                if (isTRUE(pp)) {
+                    if (is.finite(PostTestProbDisease)) PPV_report <- PostTestProbDisease
+                    if (is.finite(PostTestProbHealthy)) NPV_report <- PostTestProbHealthy
+                    ratioTable$setNote("prior_ppv", sprintf(
+                        .("Predictive values are computed by Bayes' theorem at the population prior of %.1f%% that you supplied, NOT at this sample's observed prevalence of %.1f%%. Sensitivity and specificity are unaffected by prevalence; PPV and NPV are not."),
+                        100 * PriorProb, 100 * PrevalenceD))
+                } else {
+                    ratioTable$setNote("study_ppv", sprintf(
+                        .("Predictive values are computed at this sample's observed prevalence of %.1f%%. If the sample was enriched or case-control, that prevalence is not the clinical one and these predictive values do not transfer - supply a population prior under Prior Probability to obtain values for your setting."),
+                        100 * PrevalenceD))
+                }
+
                 ratioTable$setRow(
                     rowNo = 1,
                     values = list(
@@ -1568,8 +1626,8 @@ decisionClass <- if (requireNamespace("jmvcore"))
                         Spec = Spec,
                         AccurT = AccurT,
                         PrevalenceD = PriorProb,
-                        PPV = PPV,
-                        NPV = NPV,
+                        PPV = PPV_report,
+                        NPV = NPV_report,
                         PostTestProbDisease = PostTestProbDisease,
                         PostTestProbHealthy = PostTestProbHealthy,
                         LRP = LRP,
@@ -1598,9 +1656,23 @@ decisionClass <- if (requireNamespace("jmvcore"))
                 content_results <- NULL
                 if (self$options$showNaturalLanguage || self$options$showClinicalInterpretation ||
                     self$options$showReportTemplate || self$options$showAboutAnalysis) {
-                    content_results <- private$.generateAllContent(Sens, Spec, PPV, NPV, LRP, LRN,
+                    # PPV_report/NPV_report, not PPV/NPV: with pp=TRUE the narrative
+                    # must quote the predictive values at the prior it also prints.
+                    # A copy-ready sentence without an interval invites a clinician to
+                    # quote a point estimate as if it were exact. Clopper-Pearson, to
+                    # match epiR::epi.tests()'s default.
+                    exact_ci <- function(x, n) {
+                        if (!is.finite(x) || !is.finite(n) || n <= 0 || x < 0 || x > n) return(NULL)
+                        tryCatch(as.numeric(stats::binom.test(round(x), round(n))$conf.int),
+                                 error = function(e) NULL)
+                    }
+                    sens_ci <- exact_ci(TP, TP + FN)
+                    spec_ci <- exact_ci(TN, TN + FP)
+
+                    content_results <- private$.generateAllContent(Sens, Spec, PPV_report, NPV_report, LRP, LRN,
                                                                   PriorProb, PostTestProbDisease, PostTestProbHealthy,
-                                                                  TotalPop, test_label, gold_label)
+                                                                  TotalPop, test_label, gold_label,
+                                                                  sens_ci = sens_ci, spec_ci = spec_ci)
                 }
 
                 # Populate content outputs based on user selections
@@ -1691,6 +1763,15 @@ decisionClass <- if (requireNamespace("jmvcore"))
 
                     tryCatch({
                         epirresult <- epiR::epi.tests(dat = conf_table)
+                        # LR+/LR-/DOR in the main tables are computed from Haldane-Anscombe
+                        # corrected counts when a cell is zero. epi.tests on the raw table
+                        # returns Inf with a NaN lower bound, so the CI pane disagreed with
+                        # the estimate it sat next to. Sens/spec/PPV/NPV stay on raw counts.
+                        epir_detail_cc <- if (continuity_used) {
+                            tryCatch(as.data.frame(epiR::epi.tests(dat = conf_table_cc)$detail,
+                                                   stringsAsFactors = FALSE),
+                                     error = function(e) NULL)
+                        } else NULL
 
                         # Check if epiR returned valid results
                         if (!is.null(epirresult)) {
@@ -1724,6 +1805,18 @@ decisionClass <- if (requireNamespace("jmvcore"))
 
                                     epir_ratio <- epir_detail[epir_detail$statistic %in% ratio_stats, , drop = FALSE]
                                     epir_number <- epir_detail[epir_detail$statistic %in% number_stats, , drop = FALSE]
+
+                                    if (!is.null(epir_detail_cc) && nrow(epir_number) > 0) {
+                                        m <- match(epir_number$statistic, epir_detail_cc$statistic)
+                                        keep <- !is.na(m)
+                                        if (any(keep))
+                                            epir_number[keep, c("est", "lower", "upper")] <-
+                                                epir_detail_cc[m[keep], c("est", "lower", "upper")]
+                                    }
+
+                                    # Footnotes below are attached per statistic, so the row order
+                                    # has to travel with the data.
+                                    epirresult_number_stats <- epir_number$statistic
 
                                     epir_ratio <- epir_ratio[, c("statsnames", "est", "lower", "upper"), drop = FALSE]
                                     epir_number <- epir_number[, c("statsnames", "est", "lower", "upper"), drop = FALSE]
@@ -1777,6 +1870,13 @@ decisionClass <- if (requireNamespace("jmvcore"))
                                 add_ratio_note(3, "statsnames", .("Probability of disease given positive test. Depends on prevalence and specificity."))
                                 add_ratio_note(4, "statsnames", .("Probability of being healthy given negative test. Depends on prevalence and sensitivity."))
                                 add_ratio_note(1, "est", .("Confidence intervals for sensitivity, specificity, and predictive values are Clopper-Pearson exact intervals, computed as in epiR::epi.tests() with its default settings (method = \"exact\")."))
+                                if (isTRUE(self$options$pp)) {
+                                    # The main table reports PPV/NPV at the user's prior; these
+                                    # rows are exact binomial quantities from the observed table
+                                    # and cannot be moved to a different prevalence.
+                                    add_ratio_note(3, "est", .("This predictive value is computed at the observed sample prevalence, so it differs from the prior-adjusted value in the main table above."))
+                                    add_ratio_note(4, "est", .("This predictive value is computed at the observed sample prevalence, so it differs from the prior-adjusted value in the main table above."))
+                                }
                             }
                         }
 
@@ -1791,15 +1891,25 @@ decisionClass <- if (requireNamespace("jmvcore"))
                             }
 
                             if (self$options$fnote) {
-                                add_number_note <- function(row_no, col, text) {
-                                    if (nrow(data_frame) >= row_no) {
-                                        epirTable_number$addFootnote(rowNo = row_no, col = col, text)
-                                    }
-                                }
+                                # These rows are ordered LR+, LR-, DOR, Youden, NNDx. Attaching by
+                                # row number described LR+ as the diagnostic odds ratio.
+                                number_notes <- c(
+                                    `lr.pos` = .("How much more likely a positive result is in a diseased than in a healthy patient. >10 is strong evidence FOR disease, 5-10 moderate, 2-5 weak."),
+                                    `lr.neg` = .("How much more likely a negative result is in a diseased than in a healthy patient. <0.1 is strong evidence AGAINST disease, 0.1-0.2 moderate, 0.2-0.5 weak."),
+                                    `diag.or` = .("How much more likely will the test make a correct diagnosis than an incorrect diagnosis in patients with the disease."),
+                                    `nndx` = .("Number of patients that need to be tested to give one correct positive test."),
+                                    `youden` = .("Youden's index is the difference between the true positive rate and the false positive rate. Youden's index ranges from -1 to +1 with values closer to 1 if both sensitivity and specificity are high (i.e. close to 1).")
+                                )
 
-                                add_number_note(1, "statsnames", .("How much more likely will the test make a correct diagnosis than an incorrect diagnosis in patients with the disease."))
-                                add_number_note(2, "statsnames", .("Number of patients that need to be tested to give one correct positive test."))
-                                add_number_note(3, "statsnames", .("Youden's index is the difference between the true positive rate and the false positive rate. Youden's index ranges from -1 to +1 with values closer to 1 if both sensitivity and specificity are high (i.e. close to 1)."))
+                                stat_keys <- if (exists("epirresult_number_stats", inherits = FALSE))
+                                    epirresult_number_stats else character(0)
+
+                                for (i in seq_len(nrow(data_frame))) {
+                                    key <- if (i <= length(stat_keys)) stat_keys[i] else NA_character_
+                                    if (!is.na(key) && key %in% names(number_notes))
+                                        epirTable_number$addFootnote(rowNo = i, col = "statsnames",
+                                                                     number_notes[[key]])
+                                }
                             }
                         }
                     }
@@ -1811,10 +1921,19 @@ decisionClass <- if (requireNamespace("jmvcore"))
 
                 # Prepare Fagan Nomogram Data ----
                 if (self$options$fagan) {
+                    # A zero cell makes Sens or Spec exactly 1, and nomogrammer rejects
+                    # the closed bounds outright ("must be between 0 and 1 (exclusive)"),
+                    # so the whole nomogram silently failed to render. The LRs handed to
+                    # it are already Haldane-Anscombe corrected; pass the proportions
+                    # from the same corrected table so the plot is self-consistent
+                    # rather than clamping to an arbitrary epsilon.
+                    sens_plot <- if (isTRUE(continuity_used)) TPc / (TPc + FNc) else Sens
+                    spec_plot <- if (isTRUE(continuity_used)) TNc / (TNc + FPc) else Spec
+
                     plotData1 <- list(
                         "Prevalence" = PriorProb,
-                        "Sens" = Sens,
-                        "Spec" = Spec,
+                        "Sens" = sens_plot,
+                        "Spec" = spec_plot,
                         "Plr" = LRP,
                         "Nlr" = LRN
                     )
@@ -1930,8 +2049,9 @@ decisionClass <- if (requireNamespace("jmvcore"))
                     Prevalence = plotData1$Prevalence,
                     Sens = plotData1$Sens,
                     Spec = plotData1$Spec,
-                    Plr = plotData1$Plr,
-                    Nlr = plotData1$Nlr,
+                    # Plr/Nlr are deliberately omitted: nomogrammer ignores them when
+                    # Sens/Spec are supplied and warns on every render. It derives the
+                    # same ratios from the (continuity-consistent) proportions above.
                     Detail = TRUE,
                     NullLine = TRUE,
                     LabelSize = private$NOMOGRAM_LABEL_SIZE,

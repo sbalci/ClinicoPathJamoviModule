@@ -3009,8 +3009,6 @@ out-of-scope findings from the same audit, deferred for separate work.
 # release-review-function prompt
 
 
-/release-review-function decision
-/release-review-function decisioncompare
 /release-review-function decisioncombine	
 /release-review-function nogoldstandard
 /release-review-function decisioncalculator
@@ -3229,3 +3227,66 @@ Complete the implementation, then report:
    - Not ready for release
 
 Begin by locating the relevant development guides and all files associated with `FUNC_NAME`. Then inspect the implementation, establish expected behavior, make targeted corrections, and verify the final result.
+
+## [jamovi/yaml] Leading-`!` in `.r.yaml` visible/enable is silently always-true
+
+Found during the `decision` release review (2026-08). jmvcore routes a `visible:`/`enable:`
+expression to the R evaluator only when it matches `^\([\$A-Za-z].*\)$`
+(`jmvcore:::Options$public_methods$eval`). An expression starting with `!` fails that regex,
+so `eval` returns the **raw string** — which is truthy. The item is permanently visible and
+nothing errors.
+
+Empirically reproduced: `benfordOptions$new(var="x")$eval("(!var)")` returns the string
+`"(!var)"`, not `FALSE`. Same for `agepyramid` `(!age || !gender)` and `consortdiagram`
+`(!participant_id)`. In practice this means "Getting Started" welcome panels sit permanently
+above every completed analysis.
+
+Expressions using jamovi's `option:level` syntax (`(!rotation:none)`) fail identically — `:`
+is not valid R.
+
+**`.u.yaml` is NOT affected** — those are evaluated by the frontend JavaScript, which handles
+`!` and `option:level` correctly. The 36 `.u.yaml` instances are fine; leave them alone.
+
+Fix idiom — restate without the leading `!`, and use `length(x) == 0` for Variable/Variables
+options (their value is a list, which R's `&&` rejects):
+
+```yaml
+# before (always visible)
+visible: (!(gold && newtest && goldPositive && testPositive))
+# after
+visible: (length(gold) == 0 || length(newtest) == 0 || length(goldPositive) == 0 || length(testPositive) == 0)
+```
+
+Each change needs `jmvtools::prepare()` to reach `.h.R`.
+
+- [x] `decision.r.yaml:11` — fixed
+- [ ] 25 remaining across 16 files; full list in the grep below
+
+```
+advancedtrials.r.yaml:131:      visible: (!biomarker_strategy:all_comers)
+agepyramid.r.yaml:11:      visible: (!age || !gender)
+aivalidation.r.yaml:95:      visible: (!crossValidation:none)
+benford.r.yaml:11:      visible: (!var)
+consortdiagram.r.yaml:10:      visible: (!participant_id)
+cotest.r.yaml:61:      visible: (!indep)
+decisioncompare.r.yaml:21:      visible: (!is.null(test1) && test1 != "")
+decisioncompare.r.yaml:65:      visible: (!is.null(test2) && test2 != "")
+decisioncompare.r.yaml:109:      visible: (!is.null(test3) && test3 != "")
+decisioncompare.r.yaml:256:      visible: (!is.null(stratify) && stratify != "")
+epidemiosurvival.r.yaml:140:      visible: (!age_standardization:none)
+factoranalysis.r.yaml:69:                  visible: (!rotation:none)
+factoranalysis.r.yaml:74:                  visible: (!rotation:none)
+factoranalysis.r.yaml:172:            visible: (!scores:none)
+explainableai.r.yaml:315:          visible: (!clustering_method:none)
+explainableai.r.yaml:342:          visible: (!clustering_method:none)
+haralicktexture.r.yaml:116:      visible: (!biomarker_context:general)
+haralicktexture.r.yaml:123:      visible: (!biomarker_context:general)
+ihcheterogeneity.r.yaml:10:      visible: (!biopsy1)
+jjpubr.r.yaml:21:      visible: (!xvar)
+jjscatterstats.r.yaml:86:      visible: (!is.null(colorvar) || !is.null(sizevar) || !is.null(shapevar) || !is.null(alphavar) || !is.null(labelvar))
+partialcorrelation.r.yaml:41:        visible: (!multipleComparison:none)
+partialcorrelation.r.yaml:111:        visible: (!multipleComparison:none)
+relativesurvival.r.yaml:133:      visible: (!regression_model:none)
+relativesurvival.r.yaml:268:      visible: (!regression_model:none)
+tidyplots.r.yaml:10:      visible: (!xvar || !yvar)
+```
