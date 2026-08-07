@@ -35,8 +35,8 @@ test_that("decisioncombine produces consistent results across runs", {
   )
 
   # Results should be identical (deterministic)
-  expect_s3_class(result1, "decisioncombineClass")
-  expect_s3_class(result2, "decisioncombineClass")
+  expect_s3_class(result1, "decisioncombineResults")
+  expect_s3_class(result2, "decisioncombineResults")
 })
 
 test_that("decisioncombine workflow: basic → individual → visualization", {
@@ -51,7 +51,7 @@ test_that("decisioncombine workflow: basic → individual → visualization", {
     test2Positive = "Positive",
     test3Positive = NULL
   )
-  expect_s3_class(basic, "decisioncombineClass")
+  expect_s3_class(basic, "decisioncombineResults")
 
   # Step 2: Add individual test statistics
   with_individual <- decisioncombine(
@@ -65,7 +65,7 @@ test_that("decisioncombine workflow: basic → individual → visualization", {
     showIndividual = TRUE,
     test3Positive = NULL
   )
-  expect_s3_class(with_individual, "decisioncombineClass")
+  expect_s3_class(with_individual, "decisioncombineResults")
 
   # Step 3: Add visualizations
   with_viz <- decisioncombine(
@@ -81,7 +81,7 @@ test_that("decisioncombine workflow: basic → individual → visualization", {
     showHeatmap = TRUE,
     test3Positive = NULL
   )
-  expect_s3_class(with_viz, "decisioncombineClass")
+  expect_s3_class(with_viz, "decisioncombineResults")
 })
 
 test_that("decisioncombine workflow: pathology rater agreement study", {
@@ -101,7 +101,7 @@ test_that("decisioncombine workflow: pathology rater agreement study", {
     test3Positive = NULL
   )
 
-  expect_s3_class(result, "decisioncombineClass")
+  expect_s3_class(result, "decisioncombineResults")
 })
 
 test_that("decisioncombine workflow: screening + confirmatory strategy", {
@@ -123,7 +123,7 @@ test_that("decisioncombine workflow: screening + confirmatory strategy", {
     test3Positive = NULL
   )
 
-  expect_s3_class(result, "decisioncombineClass")
+  expect_s3_class(result, "decisioncombineResults")
 })
 
 test_that("decisioncombine workflow: parallel vs serial comparison", {
@@ -141,7 +141,7 @@ test_that("decisioncombine workflow: parallel vs serial comparison", {
     filterPattern = "parallel",
     test3Positive = NULL
   )
-  expect_s3_class(parallel, "decisioncombineClass")
+  expect_s3_class(parallel, "decisioncombineResults")
 
   # Serial strategy (both tests positive)
   serial <- decisioncombine(
@@ -155,7 +155,7 @@ test_that("decisioncombine workflow: parallel vs serial comparison", {
     filterPattern = "serial",
     test3Positive = NULL
   )
-  expect_s3_class(serial, "decisioncombineClass")
+  expect_s3_class(serial, "decisioncombineResults")
 })
 
 test_that("decisioncombine workflow: multi-modal imaging comparison", {
@@ -177,7 +177,7 @@ test_that("decisioncombine workflow: multi-modal imaging comparison", {
     test3Positive = NULL
   )
 
-  expect_s3_class(result, "decisioncombineClass")
+  expect_s3_class(result, "decisioncombineResults")
 })
 
 test_that("decisioncombine workflow: three-test comprehensive analysis", {
@@ -202,7 +202,7 @@ test_that("decisioncombine workflow: three-test comprehensive analysis", {
     showRecommendation = TRUE
   )
 
-  expect_s3_class(result, "decisioncombineClass")
+  expect_s3_class(result, "decisioncombineResults")
 })
 
 test_that("decisioncombine workflow: majority rule for three tests", {
@@ -223,7 +223,7 @@ test_that("decisioncombine workflow: majority rule for three tests", {
     showRecommendation = TRUE
   )
 
-  expect_s3_class(result, "decisioncombineClass")
+  expect_s3_class(result, "decisioncombineResults")
 })
 
 test_that("decisioncombine workflow: serial testing with temporal component", {
@@ -245,7 +245,7 @@ test_that("decisioncombine workflow: serial testing with temporal component", {
     test3Positive = NULL
   )
 
-  expect_s3_class(result, "decisioncombineClass")
+  expect_s3_class(result, "decisioncombineResults")
 })
 
 test_that("decisioncombine handles data from CSV import", {
@@ -272,7 +272,7 @@ test_that("decisioncombine handles data from CSV import", {
     test3Positive = NULL
   )
 
-  expect_s3_class(result, "decisioncombineClass")
+  expect_s3_class(result, "decisioncombineResults")
 
   # Clean up
   unlink(temp_csv)
@@ -303,7 +303,7 @@ test_that("decisioncombine handles data from Excel import", {
     test3Positive = NULL
   )
 
-  expect_s3_class(result, "decisioncombineClass")
+  expect_s3_class(result, "decisioncombineResults")
 
   # Clean up
   unlink(temp_xlsx)
@@ -325,7 +325,7 @@ test_that("decisioncombine handles different data structures consistently", {
     test3Positive = NULL
   )
 
-  expect_s3_class(result_tibble, "decisioncombineClass")
+  expect_s3_class(result_tibble, "decisioncombineResults")
 
   # Test with data.frame
   df_data <- as.data.frame(decisioncombine_pathology)
@@ -341,7 +341,7 @@ test_that("decisioncombine handles different data structures consistently", {
     test3Positive = NULL
   )
 
-  expect_s3_class(result_df, "decisioncombineClass")
+  expect_s3_class(result_df, "decisioncombineResults")
 })
 
 test_that("decisioncombine workflow: complete publication-ready analysis", {
@@ -364,7 +364,7 @@ test_that("decisioncombine workflow: complete publication-ready analysis", {
     test3Positive = NULL
   )
 
-  expect_s3_class(result, "decisioncombineClass")
+  expect_s3_class(result, "decisioncombineResults")
 })
 
 test_that("decisioncombine workflow: sensitivity analysis by filtering", {
@@ -383,7 +383,7 @@ test_that("decisioncombine workflow: sensitivity analysis by filtering", {
       filterStatistic = stat,
       test3Positive = NULL
     )
-    expect_s3_class(result, "decisioncombineClass")
+    expect_s3_class(result, "decisioncombineResults")
   }
 })
 
@@ -403,7 +403,7 @@ test_that("decisioncombine workflow: pattern-specific analysis", {
       filterPattern = pattern,
       test3Positive = NULL
     )
-    expect_s3_class(result, "decisioncombineClass")
+    expect_s3_class(result, "decisioncombineResults")
   }
 })
 
@@ -423,7 +423,7 @@ test_that("decisioncombine workflow: concordance vs discordance comparison", {
     showRecommendation = TRUE,
     test3Positive = NULL
   )
-  expect_s3_class(result_concordant, "decisioncombineClass")
+  expect_s3_class(result_concordant, "decisioncombineResults")
 
   # Discordant tests scenario
   result_discordant <- decisioncombine(
@@ -437,7 +437,7 @@ test_that("decisioncombine workflow: concordance vs discordance comparison", {
     showRecommendation = TRUE,
     test3Positive = NULL
   )
-  expect_s3_class(result_discordant, "decisioncombineClass")
+  expect_s3_class(result_discordant, "decisioncombineResults")
 })
 
 test_that("decisioncombine workflow: add pattern to data and downstream analysis", {
@@ -454,7 +454,7 @@ test_that("decisioncombine workflow: add pattern to data and downstream analysis
     test3Positive = NULL
   )
 
-  expect_s3_class(result, "decisioncombineClass")
+  expect_s3_class(result, "decisioncombineResults")
   # Pattern column should be added to dataset
   # (This would be verified in actual implementation)
 })
@@ -475,7 +475,7 @@ test_that("decisioncombine integrates with small dataset workflow", {
     test3Positive = NULL
   )
 
-  expect_s3_class(result, "decisioncombineClass")
+  expect_s3_class(result, "decisioncombineResults")
 })
 
 test_that("decisioncombine workflow: visual comparison across all plot types", {
@@ -495,5 +495,5 @@ test_that("decisioncombine workflow: visual comparison across all plot types", {
     test3Positive = NULL
   )
 
-  expect_s3_class(result, "decisioncombineClass")
+  expect_s3_class(result, "decisioncombineResults")
 })

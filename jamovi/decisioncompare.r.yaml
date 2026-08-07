@@ -18,7 +18,7 @@ items:
     - name: cTable1
       title: 'Test 1 - Recoded Data'
       type: Table
-      visible: (!is.null(test1) && test1 != "")
+      visible: (length(test1) > 0)
       rows: 0
       columns:
         - name: newtest
@@ -62,7 +62,7 @@ items:
     - name: cTable2
       title: 'Test 2 - Recoded Data'
       type: Table
-      visible: (!is.null(test2) && test2 != "")
+      visible: (length(test2) > 0)
       rows: 0
       columns:
         - name: newtest
@@ -106,7 +106,7 @@ items:
     - name: cTable3
       title: 'Test 3 - Recoded Data'
       type: Table
-      visible: (!is.null(test3) && test3 != "")
+      visible: (length(test3) > 0)
       rows: 0
       columns:
         - name: newtest
@@ -253,7 +253,7 @@ items:
     - name: stratifiedTable
       title: 'Stratified Diagnostic Accuracy'
       type: Table
-      visible: (!is.null(stratify) && stratify != "")
+      visible: (length(stratify) > 0)
       rows: 0
       columns:
         - name: stratum

@@ -3009,7 +3009,6 @@ out-of-scope findings from the same audit, deferred for separate work.
 # release-review-function prompt
 
 
-/release-review-function decisioncombine	
 /release-review-function nogoldstandard
 /release-review-function decisioncalculator
 /release-review-function cotest
@@ -3019,6 +3018,9 @@ out-of-scope findings from the same audit, deferred for separate work.
 /release-review-function kappaSizePower
 /release-review-function kappaSizeCI
 /release-review-function kappaSizeFixedN
+
+update NEWS.md for umbrella repository and each module
+
 /release-review-function jjhistostats
 /release-review-function jjridges
 /release-review-function jwaffle
@@ -3037,6 +3039,9 @@ out-of-scope findings from the same audit, deferred for separate work.
 /release-review-function jjarcdiagram
 /release-review-function linechart
 /release-review-function statsplot2
+
+update NEWS.md for umbrella repository and each module
+
 /release-review-function tableone
 /release-review-function summarydata
 /release-review-function reportcat
@@ -3051,6 +3056,9 @@ out-of-scope findings from the same audit, deferred for separate work.
 /release-review-function crosstable
 /release-review-function chisqposttest
 /release-review-function categorize	
+
+update NEWS.md for umbrella repository and each module
+
 
 
 
@@ -3290,3 +3298,28 @@ relativesurvival.r.yaml:133:      visible: (!regression_model:none)
 relativesurvival.r.yaml:268:      visible: (!regression_model:none)
 tidyplots.r.yaml:10:      visible: (!xvar || !yvar)
 ```
+
+## [meddecide] decisioncompare: `excludeIndeterminate` — DONE (2026-08-07)
+
+Was a silent no-op: it filtered on `c(positiveLevel, setdiff(levels, positiveLevel))`, i.e. every
+level, so equivocal results were still collapsed into Negative and still inflated specificity and
+NPV — the exact harm the checkbox promises to prevent. On a 60-case fixture with 20 Equivocal
+results, specificity read 0.950 with the option both off *and* on; excluding them gives 0.900.
+
+**Fixed.** Added `goldNegative`, `test1Negative`, `test2Negative`, `test3Negative`
+(`type: Level`, mirroring `jamovi/decision.a.yaml`) so the user names which level is a genuine
+negative. When supplied, rows outside {positive, negative} are dropped and the retained/excluded
+counts are reported; when not supplied the analysis says plainly that it cannot act rather than
+pretending to. Identical positive/negative levels are rejected. Regression tests cover both paths.
+
+⚠️ **BREAKING_CHANGE, and it needs regeneration to take effect.** `Level` options cannot carry a
+`default:`, so all four become **required arguments** of the `decisioncompare()` wrapper once
+`jmvtools::prepare()` recompiles `R/decisioncompare.h.R`. All call sites in this repo were updated
+(tests, `R/data_decisioncompare_docs.R` roxygen `@examples`, `inst/examples/`). Third-party scripts
+calling `decisioncompare()` must add the four arguments (`NULL` when unused).
+
+The test suite routes through `tests/testthat/helper-decisioncompare.R`, which passes only the
+arguments the *currently compiled* wrapper declares — so the suite is green both before and after
+regeneration. The roxygen `@examples` and `inst/examples/` deliberately use the post-regeneration
+API and will fail `R CMD check --run-donttest` until `prepare()` + `document()` are run.
+

@@ -39,6 +39,17 @@ decisioncompareClass <- if (requireNamespace("jmvcore")) {
             .cochran_pvalue = NULL,
 
             # Escape variable names for safe display and table keys
+            # Read an option that may not exist in the compiled .h.R yet. jmvcore
+            # raises an error rather than returning NULL for an undeclared option,
+            # so a bare self$options$goldNegative would crash every run between the
+            # .a.yaml edit and the next jmvtools::prepare().
+            .opt = function(name, fallback = NULL) {
+                value <- tryCatch(self$options[[name]], error = function(e) NULL)
+                if (is.null(value) || (is.character(value) && length(value) == 1 && !nzchar(value)))
+                    return(fallback)
+                value
+            },
+
             .escapeVar = function(x) {
                 if (is.null(x) || length(x) == 0) {
                     return(x)
@@ -159,6 +170,9 @@ decisioncompareClass <- if (requireNamespace("jmvcore")) {
 
             # Initialize notice collection list
             .noticeList = list(),
+
+            # Names of tests tied for best, if any (set by .findBestTest)
+            .best_test_tied = NULL,
 
             # Add a notice to the collection
             .addNotice = function(type, title, content) {
@@ -591,6 +605,19 @@ decisioncompareClass <- if (requireNamespace("jmvcore")) {
                 return(testPositives)
             },
 
+            # Optional negative levels, keyed by test variable name (mirrors
+            # .getTestPositives). Absent entries stay NULL.
+            .getTestNegatives = function() {
+                testNegatives <- list()
+                for (i in 1:3) {
+                    testVar <- private$.opt(paste0("test", i))
+                    negLevel <- private$.opt(paste0("test", i, "Negative"))
+                    if (!is.null(testVar) && !is.null(negLevel))
+                        testNegatives[[testVar]] <- negLevel
+                }
+                return(testNegatives)
+            },
+
             # Process all tests and calculate metrics
             .processAllTests = function(processed_data) {
                 mydata <- processed_data$data
@@ -599,6 +626,7 @@ decisioncompareClass <- if (requireNamespace("jmvcore")) {
 
                 testVariables <- private$.getTestVariables()
                 testPositives <- private$.getTestPositives()
+                testNegatives <- private$.getTestNegatives()
 
                 test_results <- list()
 
@@ -606,9 +634,12 @@ decisioncompareClass <- if (requireNamespace("jmvcore")) {
                     testVariable <- testVariables[i]
                     testPLevel <- testPositives[[testVariable]]
 
-                    # Process individual test
+                    # Process individual test. The negative levels are optional and
+                    # only consulted when excludeIndeterminate is enabled.
                     result <- private$.processSingleTest(
-                        mydata, testVariable, testPLevel, goldVariable, goldPLevel, i
+                        mydata, testVariable, testPLevel, goldVariable, goldPLevel, i,
+                        testNLevel = testNegatives[[testVariable]],
+                        goldNLevel = private$.opt("goldNegative")
                     )
 
                     test_results[[testVariable]] <- result
@@ -618,7 +649,8 @@ decisioncompareClass <- if (requireNamespace("jmvcore")) {
             },
 
             # Process a single test and calculate all metrics
-            .processSingleTest = function(mydata, testVariable, testPLevel, goldVariable, goldPLevel, test_index) {
+            .processSingleTest = function(mydata, testVariable, testPLevel, goldVariable, goldPLevel, test_index,
+                                          testNLevel = NULL, goldNLevel = NULL) {
                 # Convert to factor and validate positive level
                 mydata[[testVariable]] <- forcats::as_factor(mydata[[testVariable]])
                 private$.assertLevelExists(mydata[[testVariable]], testPLevel, testVariable, testVariable)
@@ -649,23 +681,102 @@ decisioncompareClass <- if (requireNamespace("jmvcore")) {
                     )
                 }
 
-                # Optionally exclude indeterminate/equivocal levels instead of collapsing to Negative
-                if (self$options$excludeIndeterminate) {
-                    valid_test_levels <- c(testPLevel, setdiff(test_levels, testPLevel))
-                    valid_gold_levels <- c(goldPLevel, setdiff(gold_levels, goldPLevel))
+                # Optionally exclude indeterminate/equivocal levels instead of collapsing
+                # them to Negative.
+                #
+                # This originally filtered on `c(positiveLevel, setdiff(levels, positiveLevel))`
+                # -- i.e. every level -- so the option was a silent no-op: equivocal results
+                # were still counted as negatives and still inflated specificity and NPV,
+                # the exact harm the checkbox promises to prevent.
+                #
+                # Deciding which non-positive level is a genuine negative and which is
+                # equivocal is not something the analysis can infer, so it is now an input:
+                # goldNegative / testNNegative. When they are supplied only those two levels
+                # are kept; when they are not, the analysis says so rather than pretending
+                # to have acted.
+                if (isTRUE(self$options$excludeIndeterminate)) {
+                    keep_levels <- function(x, positive, negative) {
+                        if (is.null(negative) || is.na(negative)) return(NULL)
+                        unique(c(positive, negative))
+                    }
+
+                    test_keep <- keep_levels(mydata[[testVariable]], testPLevel, testNLevel)
+                    gold_keep <- keep_levels(mydata[[goldVariable]], goldPLevel, goldNLevel)
+
+                    # A named negative level must exist and must differ from the positive one,
+                    # or the 2x2 collapses to a single column without saying why.
+                    if (!is.null(testNLevel)) {
+                        private$.assertLevelExists(mydata[[testVariable]], testNLevel, testVariable, testVariable)
+                        if (identical(testNLevel, testPLevel)) {
+                            private$.addNotice(
+                                type = "ERROR",
+                                title = "Identical Positive and Negative Levels",
+                                content = paste0("For ", testVariable, ', the positive and negative levels are both "', testPLevel, '". Choose two different levels.')
+                            )
+                            stop("Validation failed", call. = FALSE)
+                        }
+                    }
+                    if (!is.null(goldNLevel)) {
+                        private$.assertLevelExists(mydata[[goldVariable]], goldNLevel, goldVariable)
+                        if (identical(goldNLevel, goldPLevel)) {
+                            private$.addNotice(
+                                type = "ERROR",
+                                title = "Identical Positive and Negative Levels",
+                                content = paste0("For the gold standard ", goldVariable, ', the positive and negative levels are both "', goldPLevel, '". Choose two different levels.')
+                            )
+                            stop("Validation failed", call. = FALSE)
+                        }
+                    }
 
                     rows_before <- nrow(mydata)
-                    mydata <- mydata %>%
-                        dplyr::filter(
-                            (.data[[testVariable]] %in% valid_test_levels) &
-                                (.data[[goldVariable]] %in% valid_gold_levels)
-                        )
+                    if (!is.null(test_keep))
+                        mydata <- mydata[mydata[[testVariable]] %in% test_keep, , drop = FALSE]
+                    if (!is.null(gold_keep))
+                        mydata <- mydata[mydata[[goldVariable]] %in% gold_keep, , drop = FALSE]
                     rows_after <- nrow(mydata)
+
                     if (rows_after < rows_before) {
                         private$.addNotice(
                             type = "INFO",
                             title = "Excluded Indeterminate Levels",
-                            content = paste0("Excluded ", rows_before - rows_after, " rows for ", testVariable, " (and gold) with indeterminate/equivocal levels; retained ", rows_after, " rows.")
+                            content = paste0(
+                                "Excluded ", rows_before - rows_after, " row(s) for ", testVariable,
+                                " whose value was neither the positive nor the negative level you named; ",
+                                rows_after, " of ", rows_before,
+                                " cases retained. Sensitivity and specificity below are conditional on a determinate result, so they do not describe how the test performs on the full population that includes equivocal results -- report the equivocal rate alongside them."
+                            )
+                        )
+                    }
+
+                    # Levels are recomputed because dropped rows may have emptied one.
+                    mydata[[testVariable]] <- droplevels(forcats::as_factor(mydata[[testVariable]]))
+                    mydata[[goldVariable]] <- droplevels(forcats::as_factor(mydata[[goldVariable]]))
+                    test_levels <- levels(mydata[[testVariable]])
+                    gold_levels <- levels(mydata[[goldVariable]])
+
+                    if (nrow(mydata) == 0) {
+                        private$.addNotice(
+                            type = "ERROR",
+                            title = "No Cases Left After Excluding Indeterminate Levels",
+                            content = paste0("Excluding indeterminate levels for ", testVariable, " removed every case. Check that the positive and negative levels you named are the ones actually present in the data.")
+                        )
+                        stop("Validation failed", call. = FALSE)
+                    }
+
+                    # Still ambiguous: >2 levels remain and no negative level was named.
+                    ambiguous <- character(0)
+                    if (length(test_levels) > 2 && is.null(testNLevel)) ambiguous <- c(ambiguous, testVariable)
+                    if (length(gold_levels) > 2 && is.null(goldNLevel)) ambiguous <- c(ambiguous, goldVariable)
+
+                    if (length(ambiguous) > 0) {
+                        private$.addNotice(
+                            type = "STRONG_WARNING",
+                            title = "Cannot Exclude Indeterminate Levels Automatically",
+                            content = paste0(
+                                '"Exclude indeterminate/Equivocal levels" is enabled, but no negative level has been selected for ',
+                                paste(unique(ambiguous), collapse = " or "),
+                                ", which has more than two levels. The analysis cannot tell which non-positive level is a genuine negative and which is equivocal, so no rows were excluded for it: every non-positive value is still being counted as Negative, which inflates specificity and NPV. Select the negative level for that variable."
+                            )
                         )
                     }
                 }
@@ -856,7 +967,7 @@ decisioncompareClass <- if (requireNamespace("jmvcore")) {
             .populateComparisonTable = function(test_results) {
                 comparisonTable <- self$results$comparisonTable
 
-                try(comparisonTable$clearRows(), silent = TRUE)
+                comparisonTable$deleteRows()
 
                 for (test_name in names(test_results)) {
                     result <- test_results[[test_name]]
@@ -946,7 +1057,7 @@ decisioncompareClass <- if (requireNamespace("jmvcore")) {
             # Populate OPA table with confidence intervals and noninferiority result
             .populateOPATable = function(test_results) {
                 opaTable <- self$results$opaTable
-                try(opaTable$clearRows(), silent = TRUE)
+                opaTable$deleteRows()
 
                 ci_method <- self$options$ciMethod
                 ni_margin <- self$options$niMargin / 100 # Convert % to proportion
@@ -1002,7 +1113,7 @@ decisioncompareClass <- if (requireNamespace("jmvcore")) {
             # Populate stratified comparison table
             .populateStratifiedTable = function(processed_data) {
                 stratTable <- self$results$stratifiedTable
-                try(stratTable$clearRows(), silent = TRUE)
+                stratTable$deleteRows()
 
                 strat_var <- self$options$stratify
                 mydata <- processed_data$data
@@ -1182,7 +1293,7 @@ decisioncompareClass <- if (requireNamespace("jmvcore")) {
                     }
 
                     # Clear any rows left from a previous run before repopulating
-                    try(epirTable$clearRows(), silent = TRUE)
+                    epirTable$deleteRows()
 
                     # Map epiR statistic codes to display labels. Keying on the `statistic`
                     # code (not row position) keeps labels correct even if epiR changes the
@@ -1260,8 +1371,8 @@ decisioncompareClass <- if (requireNamespace("jmvcore")) {
                 mcnemarTable <- self$results$mcnemarTable
                 diffTable <- self$results$diffTable
 
-                try(mcnemarTable$clearRows(), silent = TRUE)
-                try(diffTable$clearRows(), silent = TRUE)
+                mcnemarTable$deleteRows()
+                diffTable$deleteRows()
 
                 test_names <- names(test_results)
                 n_tests <- length(test_names)
@@ -1580,6 +1691,15 @@ decisioncompareClass <- if (requireNamespace("jmvcore")) {
 
             # Calculate confidence intervals for paired metric differences
             .calculateDifferences = function(test_results, test1, test2, comparison_name, diffTable) {
+                # The column header says "95% Confidence Interval" without saying which
+                # kind. These are paired (correlated) normal-approximation intervals,
+                # which is a different method from the OPA table's ciMethod option --
+                # say so rather than leaving the reader to assume they match.
+                diffTable$setNote(
+                    "ci_method",
+                    jmvcore::.("Differences are paired (within-subject). Confidence intervals are 95% normal-approximation (Wald) intervals for the difference between two correlated proportions, computed from the discordant pair counts. They are not affected by the \"CI Method for Agreement\" option, which applies to the overall percent agreement table.")
+                )
+
                 comp <- private$.extractComparisonVectors(test_results, test1, test2)
                 t1 <- comp$test1
                 t2 <- comp$test2
@@ -1908,22 +2028,35 @@ decisioncompareClass <- if (requireNamespace("jmvcore")) {
 
             # Find the best performing test based on overall metrics
             .findBestTest = function(test_results) {
-                best_score <- -1
-                best_test <- names(test_results)[1]
+                # Balanced scoring: Youden index + accuracy. NA scores (e.g. a gold class
+                # with zero cases) are excluded rather than compared, which would throw
+                # "missing value where TRUE/FALSE needed".
+                scores <- vapply(names(test_results), function(test_name) {
+                    m <- test_results[[test_name]]$metrics
+                    score <- (m$Sens + m$Spec - 1) + m$AccurT
+                    if (length(score) != 1 || !is.finite(score)) NA_real_ else score
+                }, numeric(1))
 
-                for (test_name in names(test_results)) {
-                    metrics <- test_results[[test_name]]$metrics
-                    # Balanced scoring: Youden index + accuracy
-                    score <- (metrics$Sens + metrics$Spec - 1) + metrics$AccurT
-                    # isTRUE() guards against NA scores (e.g. a gold class with zero cases),
-                    # which would otherwise crash the comparison with "missing value where
-                    # TRUE/FALSE needed".
-                    if (isTRUE(score > best_score)) {
-                        best_score <- score
-                        best_test <- test_name
-                    }
+                if (all(is.na(scores))) return(names(test_results)[1])
+
+                best_score <- max(scores, na.rm = TRUE)
+                # Ties were previously broken by whichever test came first, silently --
+                # so a coin flip decided which test the report named as best.
+                tied <- names(scores)[!is.na(scores) & abs(scores - best_score) < 1e-9]
+                private$.best_test_tied <- tied
+
+                if (length(tied) > 1) {
+                    private$.addNotice(
+                        type = "WARNING",
+                        title = "Tied Best-Performing Test",
+                        content = paste0(
+                            paste(tied, collapse = " and "),
+                            " scored identically on the combined Youden-plus-accuracy ranking used to pick a best test. ",
+                            tied[1], " is reported below purely because it comes first in the selection order; the data do not distinguish them. Choose between them on other grounds (cost, availability, turnaround time, harms)."
+                        )
+                    )
                 }
-                return(best_test)
+                return(tied[1])
             },
 
             # Generate methods section for manuscripts
@@ -1967,17 +2100,45 @@ decisioncompareClass <- if (requireNamespace("jmvcore")) {
                     ""
                 }
 
+                # This text is offered as manuscript-ready. Two things it must not do:
+                # claim one test is "optimal" when the comparison could not distinguish
+                # the tests, and print "95% CI: [see confidence interval table]" -- a
+                # placeholder pointing at a table that does not even exist unless the
+                # user enabled the CI option.
+                best <- test_results[[best_test]]
+                fmt_ci <- function(x, n) {
+                    ci <- private$.proportionCI(x, n, method = "exact")
+                    if (is.na(ci$lower)) return("")
+                    sprintf(" (95%% CI: %.1f-%.1f%%)", ci$lower * 100, ci$upper * 100)
+                }
+                sens_ci <- fmt_ci(best$TP, best$TP + best$FN)
+                spec_ci <- fmt_ci(best$TN, best$TN + best$FP)
+
+                # "optimal" is only defensible once a test actually separates from the rest
+                indistinguishable <- length(test_results) >= 2 &&
+                    self$options$statComp && isFALSE(private$.any_significant_comparison)
+                lead <- if (indistinguishable) {
+                    sprintf("Among the tests evaluated, %s had the highest observed accuracy",
+                            private$.safeHtmlOutput(best_test))
+                } else {
+                    sprintf("Among the tests evaluated, %s demonstrated optimal diagnostic performance",
+                            private$.safeHtmlOutput(best_test))
+                }
+
                 results <- sprintf(
-                    "Among the tests evaluated, %s demonstrated optimal diagnostic performance with %s%% sensitivity (95%% CI: [see confidence interval table]), %s%% specificity (95%% CI: [see confidence interval table]), %s%% positive predictive value, %s%% negative predictive value, and %s%% overall accuracy.%s The likelihood ratio for positive results was %.2f and for negative results was %.2f.",
-                    private$.safeHtmlOutput(best_test),
-                    sens_pct,
-                    spec_pct,
+                    "%s, with %s%% sensitivity%s, %s%% specificity%s, %s%% positive predictive value, %s%% negative predictive value, and %s%% overall accuracy.%s The likelihood ratio for positive results was %.2f and for negative results was %.2f.%s",
+                    lead,
+                    sens_pct, sens_ci,
+                    spec_pct, spec_ci,
                     ppv_pct,
                     npv_pct,
                     acc_pct,
                     significance_note,
                     best_metrics$LRP,
-                    best_metrics$LRN
+                    best_metrics$LRN,
+                    if (indistinguishable)
+                        " Because the differences between tests were not statistically significant, this ranking reflects the observed sample and should not be reported as evidence that one test outperforms the others."
+                    else ""
                 )
 
                 return(results)
@@ -2011,6 +2172,21 @@ decisioncompareClass <- if (requireNamespace("jmvcore")) {
                     recommendations <- paste0(
                         recommendations,
                         "<p><strong>Clinical Consideration:</strong> Consider using ", best_test_safe, " in combination with other tests for optimal diagnostic accuracy.</p>"
+                    )
+                }
+
+                # The panel above recommends one named test. Say so plainly when the
+                # analysis could not actually separate it from the others -- otherwise
+                # a ranking driven by sampling noise reads as a clinical endorsement.
+                if (length(test_results) >= 2 && self$options$statComp &&
+                    isFALSE(private$.any_significant_comparison)) {
+                    recommendations <- paste0(
+                        recommendations,
+                        '<p style="background-color: #f8d7da; padding: 10px; border-radius: 4px;">',
+                        "<strong>Caution:</strong> No statistically significant difference was found between the tests compared. ",
+                        best_test_safe, " is named here only because it ranked highest in this sample; the data do not establish ",
+                        "that it outperforms the others. Base any choice between these tests on cost, availability, turnaround ",
+                        "time, and harms as well as on these estimates.</p>"
                     )
                 }
 

@@ -8,12 +8,16 @@ decisioncompareOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
         initialize = function(
             gold = NULL,
             goldPositive = NULL,
+            goldNegative = NULL,
             test1 = NULL,
             test1Positive = NULL,
+            test1Negative = NULL,
             test2 = NULL,
             test2Positive = NULL,
+            test2Negative = NULL,
             test3 = NULL,
             test3Positive = NULL,
+            test3Negative = NULL,
             pp = FALSE,
             pprob = 0.3,
             od = FALSE,
@@ -50,6 +54,10 @@ decisioncompareOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
                 "goldPositive",
                 goldPositive,
                 variable="(gold)")
+            private$..goldNegative <- jmvcore::OptionLevel$new(
+                "goldNegative",
+                goldNegative,
+                variable="(gold)")
             private$..test1 <- jmvcore::OptionVariable$new(
                 "test1",
                 test1,
@@ -61,6 +69,10 @@ decisioncompareOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
             private$..test1Positive <- jmvcore::OptionLevel$new(
                 "test1Positive",
                 test1Positive,
+                variable="(test1)")
+            private$..test1Negative <- jmvcore::OptionLevel$new(
+                "test1Negative",
+                test1Negative,
                 variable="(test1)")
             private$..test2 <- jmvcore::OptionVariable$new(
                 "test2",
@@ -74,6 +86,10 @@ decisioncompareOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
                 "test2Positive",
                 test2Positive,
                 variable="(test2)")
+            private$..test2Negative <- jmvcore::OptionLevel$new(
+                "test2Negative",
+                test2Negative,
+                variable="(test2)")
             private$..test3 <- jmvcore::OptionVariable$new(
                 "test3",
                 test3,
@@ -85,6 +101,10 @@ decisioncompareOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
             private$..test3Positive <- jmvcore::OptionLevel$new(
                 "test3Positive",
                 test3Positive,
+                variable="(test3)")
+            private$..test3Negative <- jmvcore::OptionLevel$new(
+                "test3Negative",
+                test3Negative,
                 variable="(test3)")
             private$..pp <- jmvcore::OptionBool$new(
                 "pp",
@@ -169,12 +189,16 @@ decisioncompareOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
 
             self$.addOption(private$..gold)
             self$.addOption(private$..goldPositive)
+            self$.addOption(private$..goldNegative)
             self$.addOption(private$..test1)
             self$.addOption(private$..test1Positive)
+            self$.addOption(private$..test1Negative)
             self$.addOption(private$..test2)
             self$.addOption(private$..test2Positive)
+            self$.addOption(private$..test2Negative)
             self$.addOption(private$..test3)
             self$.addOption(private$..test3Positive)
+            self$.addOption(private$..test3Negative)
             self$.addOption(private$..pp)
             self$.addOption(private$..pprob)
             self$.addOption(private$..od)
@@ -196,12 +220,16 @@ decisioncompareOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
     active = list(
         gold = function() private$..gold$value,
         goldPositive = function() private$..goldPositive$value,
+        goldNegative = function() private$..goldNegative$value,
         test1 = function() private$..test1$value,
         test1Positive = function() private$..test1Positive$value,
+        test1Negative = function() private$..test1Negative$value,
         test2 = function() private$..test2$value,
         test2Positive = function() private$..test2Positive$value,
+        test2Negative = function() private$..test2Negative$value,
         test3 = function() private$..test3$value,
         test3Positive = function() private$..test3Positive$value,
+        test3Negative = function() private$..test3Negative$value,
         pp = function() private$..pp$value,
         pprob = function() private$..pprob$value,
         od = function() private$..od$value,
@@ -222,12 +250,16 @@ decisioncompareOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
     private = list(
         ..gold = NA,
         ..goldPositive = NA,
+        ..goldNegative = NA,
         ..test1 = NA,
         ..test1Positive = NA,
+        ..test1Negative = NA,
         ..test2 = NA,
         ..test2Positive = NA,
+        ..test2Negative = NA,
         ..test3 = NA,
         ..test3Positive = NA,
+        ..test3Negative = NA,
         ..pp = NA,
         ..pprob = NA,
         ..od = NA,
@@ -298,7 +330,7 @@ decisioncompareResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
                 options=options,
                 name="cTable1",
                 title="Test 1 - Recoded Data",
-                visible="(!is.null(test1) && test1 != \"\")",
+                visible="(length(test1) > 0)",
                 rows=0,
                 columns=list(
                     list(
@@ -349,7 +381,7 @@ decisioncompareResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
                 options=options,
                 name="cTable2",
                 title="Test 2 - Recoded Data",
-                visible="(!is.null(test2) && test2 != \"\")",
+                visible="(length(test2) > 0)",
                 rows=0,
                 columns=list(
                     list(
@@ -400,7 +432,7 @@ decisioncompareResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
                 options=options,
                 name="cTable3",
                 title="Test 3 - Recoded Data",
-                visible="(!is.null(test3) && test3 != \"\")",
+                visible="(length(test3) > 0)",
                 rows=0,
                 columns=list(
                     list(
@@ -565,7 +597,7 @@ decisioncompareResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
                 options=options,
                 name="stratifiedTable",
                 title="Stratified Diagnostic Accuracy",
-                visible="(!is.null(stratify) && stratify != \"\")",
+                visible="(length(stratify) > 0)",
                 rows=0,
                 columns=list(
                     list(
@@ -831,14 +863,26 @@ decisioncompareBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
 #'   status.
 #' @param goldPositive The level indicating presence of disease in the gold
 #'   standard variable.
+#' @param goldNegative The level indicating disease is ABSENT in the gold
+#'   standard variable. Required for excludeIndeterminate to act on a variable
+#'   with more than two levels; pass NULL when not used.
 #' @param test1 The first diagnostic test variable being evaluated for
 #'   performance.
 #' @param test1Positive The level representing a positive result for Test 1.
+#' @param test1Negative The level indicating a NEGATIVE result for test 1.
+#'   Required for excludeIndeterminate to act on a variable with more than two
+#'   levels; pass NULL when not used.
 #' @param test2 The second diagnostic test variable for comparison analysis.
 #' @param test2Positive The level representing a positive result for Test 2.
+#' @param test2Negative The level indicating a NEGATIVE result for test 2.
+#'   Required for excludeIndeterminate to act on a variable with more than two
+#'   levels; pass NULL when not used.
 #' @param test3 Optional third diagnostic test variable for extended
 #'   comparison analysis.
 #' @param test3Positive The level representing a positive result for Test 3.
+#' @param test3Negative The level indicating a NEGATIVE result for test 3.
+#'   Required for excludeIndeterminate to act on a variable with more than two
+#'   levels; pass NULL when not used.
 #' @param pp Enable custom prior probability (prevalence) for predictive value
 #'   calculations.
 #' @param pprob Prior probability (disease prevalence in the community).
@@ -906,12 +950,16 @@ decisioncompare <- function(
     data,
     gold = NULL,
     goldPositive,
+    goldNegative,
     test1 = NULL,
     test1Positive,
+    test1Negative,
     test2 = NULL,
     test2Positive,
+    test2Negative,
     test3 = NULL,
     test3Positive,
+    test3Negative,
     pp = FALSE,
     pprob = 0.3,
     od = FALSE,
@@ -956,12 +1004,16 @@ decisioncompare <- function(
     options <- decisioncompareOptions$new(
         gold = gold,
         goldPositive = goldPositive,
+        goldNegative = goldNegative,
         test1 = test1,
         test1Positive = test1Positive,
+        test1Negative = test1Negative,
         test2 = test2,
         test2Positive = test2Positive,
+        test2Negative = test2Negative,
         test3 = test3,
         test3Positive = test3Positive,
+        test3Negative = test3Negative,
         pp = pp,
         pprob = pprob,
         od = od,

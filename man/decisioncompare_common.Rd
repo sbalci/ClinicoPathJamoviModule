@@ -31,9 +31,10 @@ with rare disease for prevalence impact on predictive values.
 \examples{
 data(decisioncompare_common)
 decisioncompare(data = decisioncompare_common, gold = "GoldStandard",
-                goldPositive = "Positive", test1 = "Test1",
-                test1Positive = "Positive", test2 = "Test2",
-                test2Positive = "Positive", test3Positive = "",
+                goldPositive = "Positive", goldNegative = NULL, test1 = "Test1",
+                test1Positive = "Positive", test1Negative = NULL, test2 = "Test2",
+                test2Positive = "Positive", test2Negative = NULL,
+                test3Positive = "", test3Negative = NULL,
                 ci = TRUE)
 
 }

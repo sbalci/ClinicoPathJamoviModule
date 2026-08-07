@@ -27,17 +27,21 @@ diagnostic_sample <- local({
 basic_args <- list(
   gold = "gold",
   goldPositive = "Positive",
+  goldNegative = NULL,
   test1 = "testA",
   test1Positive = "Positive",
+  test1Negative = NULL,
   test2 = "testB",
   test2Positive = "Positive",
+  test2Negative = NULL,
   test3 = NULL,
-  test3Positive = NULL
+  test3Positive = NULL,
+  test3Negative = NULL
 )
 
 test_that("decisioncompare works with basic 2 test comparison", {
   skip_if_not_installed('jmvReadWrite')
-  result <- do.call(decisioncompare, c(list(data = diagnostic_sample), basic_args))
+  result <- do.call(call_decisioncompare, c(list(data = diagnostic_sample), basic_args))
 
   expect_true(!is.null(result))
   expect_true(result$comparisonTable$rowCount > 0)
@@ -46,30 +50,34 @@ test_that("decisioncompare works with basic 2 test comparison", {
 })
 
 test_that("decisioncompare works with confidence intervals", {
-  result <- do.call(decisioncompare, c(list(data = diagnostic_sample, ci = TRUE), basic_args))
+  result <- do.call(call_decisioncompare, c(list(data = diagnostic_sample, ci = TRUE), basic_args))
 
   expect_true(result$epirTable1$visible)
   expect_true(result$epirTable2$visible)
 })
 
 test_that("decisioncompare works with statistical comparison", {
-  result <- do.call(decisioncompare, c(list(data = diagnostic_sample, statComp = TRUE), basic_args))
+  result <- do.call(call_decisioncompare, c(list(data = diagnostic_sample, statComp = TRUE), basic_args))
 
   expect_true(result$mcnemarTable$rowCount > 0)
   expect_true(result$diffTable$rowCount > 0)
 })
 
 test_that("decisioncompare works with 3 tests", {
-  result <- decisioncompare(
+  result <- call_decisioncompare(
     data = diagnostic_sample,
     gold = "gold",
     goldPositive = "Positive",
+    goldNegative = NULL,
     test1 = "testA",
     test1Positive = "Positive",
+    test1Negative = NULL,
     test2 = "testB",
     test2Positive = "Positive",
+    test2Negative = NULL,
     test3 = "testC",
     test3Positive = "Positive",
+    test3Negative = NULL,
     statComp = TRUE
   )
 
@@ -81,7 +89,7 @@ test_that("decisioncompare works with 3 tests", {
 })
 
 test_that("decisioncompare works with footnotes and original data", {
-  result <- do.call(decisioncompare, c(list(data = diagnostic_sample, fnote = TRUE, od = TRUE), basic_args))
+  result <- do.call(call_decisioncompare, c(list(data = diagnostic_sample, fnote = TRUE, od = TRUE), basic_args))
 
   expect_true(!is.null(result$text1$content))
   expect_true(!is.null(result$text2$content))
@@ -91,18 +99,18 @@ test_that("decisioncompare handles missing data gracefully", {
   test_data <- diagnostic_sample
   test_data$testA[seq_len(5)] <- NA
 
-  result <- do.call(decisioncompare, c(list(data = test_data), basic_args))
+  result <- do.call(call_decisioncompare, c(list(data = test_data), basic_args))
 
   expect_true(!is.null(result))
   expect_true(result$comparisonTable$rowCount > 0)
 })
 
 test_that("decisioncompare fails gracefully with invalid input", {
-  expect_error(decisioncompare(data = diagnostic_sample, goldPositive = NULL, test1Positive = NULL, test2Positive = NULL, test3Positive = NULL))
+  expect_error(call_decisioncompare(data = diagnostic_sample, goldPositive = NULL, test1Positive = NULL, test2Positive = NULL, test3Positive = NULL, goldNegative = NULL, test1Negative = NULL, test2Negative = NULL, test3Negative = NULL))
 })
 
 test_that("decisioncompare plotting functionality works", {
-  result <- do.call(decisioncompare, c(list(data = diagnostic_sample, plot = TRUE), basic_args))
+  result <- do.call(call_decisioncompare, c(list(data = diagnostic_sample, plot = TRUE), basic_args))
 
   expect_true(!is.null(result$plot1))
   expect_true(result$plot1$visible)
@@ -118,16 +126,20 @@ test_that("paired difference estimates use paired variance", {
                    levels = c("Positive", "Negative"))
   )
 
-  result <- decisioncompare(
+  result <- call_decisioncompare(
     data = synthetic,
     gold = "gold",
     goldPositive = "Positive",
+    goldNegative = NULL,
     test1 = "testA",
     test1Positive = "Positive",
+    test1Negative = NULL,
     test2 = "testB",
     test2Positive = "Positive",
+    test2Negative = NULL,
     test3 = NULL,
     test3Positive = NULL,
+    test3Negative = NULL,
     statComp = TRUE
   )
 

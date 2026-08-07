@@ -12,6 +12,9 @@ items:
         - name: pattern
           title: 'Pattern'
           type: text
+        - name: rowType
+          title: 'Row'
+          type: text
         - name: tp
           title: 'TP'
           type: integer
@@ -55,23 +58,20 @@ items:
         - name: youden
           title: "Youden's J"
           type: number
-          format: number
+          format: zto
         - name: lrPos
           title: 'LR+'
           type: number
-          format: number
         - name: lrNeg
           title: 'LR-'
           type: number
-          format: number
         - name: dor
           title: 'Diagnostic OR'
           type: number
-          format: number
       description: "Counts and diagnostic performance metrics for each test combination pattern and clinical strategy, including prevalence, balanced accuracy, Youden's J, likelihood ratios, and diagnostic odds ratios"
 
     - name: combinationTableCI
-      title: 'Combination Statistics with 95% Confidence Intervals'
+      title: 'Proportions with 95% Confidence Intervals'
       type: Table
       rows: 0
       columns:
@@ -84,18 +84,42 @@ items:
         - name: estimate
           title: 'Estimate'
           type: number
-          format: number
+          format: pc
         - name: lower
           title: 'Lower'
           superTitle: '95% CI'
           type: number
-          format: number
+          format: pc
         - name: upper
           title: 'Upper'
           superTitle: '95% CI'
           type: number
-          format: number
-      description: '95 percent confidence intervals for diagnostic metrics. Wilson intervals are used for proportions, and log-scale intervals for likelihood ratios and diagnostic odds ratios.'
+          format: pc
+      description: 'Wilson score 95 percent confidence intervals for sensitivity, specificity, PPV, NPV and accuracy, shown as percentages to match the combination table above. Likelihood ratios and the diagnostic odds ratio are unbounded ratios rather than proportions, so they appear in their own table below.'
+
+    - name: combinationTableCIRatios
+      title: 'Likelihood Ratios with 95% Confidence Intervals'
+      type: Table
+      rows: 0
+      columns:
+        - name: pattern
+          title: 'Pattern'
+          type: text
+        - name: statistic
+          title: 'Statistic'
+          type: text
+        - name: estimate
+          title: 'Estimate'
+          type: number
+        - name: lower
+          title: 'Lower'
+          superTitle: '95% CI'
+          type: number
+        - name: upper
+          title: 'Upper'
+          superTitle: '95% CI'
+          type: number
+      description: 'Log-scale 95 percent confidence intervals for LR+, LR- and the diagnostic odds ratio. These are ratios on an unbounded scale, so they are reported separately from the proportions above rather than sharing a column with them.'
 
     - name: goldFreqTable
       title: 'Gold Standard Frequency Distribution'
@@ -335,7 +359,7 @@ items:
         - name: youden
           title: "Youden's J"
           type: number
-          format: number
+          format: zto
         - name: sens
           title: 'Sensitivity'
           type: number

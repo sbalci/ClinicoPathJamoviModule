@@ -34,10 +34,10 @@ and narrow confidence intervals.
 \examples{
 data(decisioncompare_large)
 decisioncompare(data = decisioncompare_large, gold = "GoldStandard",
-                goldPositive = "Positive", test1 = "Test1",
-                test1Positive = "Positive", test2 = "Test2",
-                test2Positive = "Positive", test3 = "Test3",
-                test3Positive = "Positive", ci = TRUE, radarplot = TRUE)
+                goldPositive = "Positive", goldNegative = NULL, test1 = "Test1",
+                test1Positive = "Positive", test1Negative = NULL, test2 = "Test2",
+                test2Positive = "Positive", test2Negative = NULL, test3 = "Test3",
+                test3Positive = "Positive", test3Negative = NULL, ci = TRUE, radarplot = TRUE)
 
 }
 \keyword{datasets}

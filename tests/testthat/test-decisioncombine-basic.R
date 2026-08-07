@@ -27,8 +27,8 @@ test_that("decisioncombine runs with minimal required arguments", {
     test3Positive = NULL
   )
 
-  expect_s3_class(result, "decisioncombineClass")
-  expect_true("results" %in% names(result))
+  expect_s3_class(result, "decisioncombineResults")
+  expect_true("combinationTable" %in% names(result))
 })
 
 test_that("decisioncombine handles two-test combination", {
@@ -43,55 +43,52 @@ test_that("decisioncombine handles two-test combination", {
     test3Positive = NULL
   )
 
-  expect_s3_class(result, "decisioncombineClass")
+  expect_s3_class(result, "decisioncombineResults")
 })
 
-test_that("decisioncombine errors on missing gold standard", {
-  expect_error(
-    decisioncombine(
+test_that("decisioncombine waits silently when a gold standard is not selected", {
+  # A jamovi analysis does not error on an incomplete variable selection: it returns and
+  # leaves the results empty until the user finishes choosing. These tests previously
+  # asserted expect_error(), which no jamovi analysis satisfies, so they checked nothing.
+  expect_no_error(
+    res <- decisioncombine(
       data = decisioncombine_pathology,
-      test1 = "rater1",
-      test1Positive = "Positive",
-      test2 = "rater2",
-      test2Positive = "Positive",
-      goldPositive = NULL,
-      test3Positive = NULL
-    ),
-    regexp = "gold.*required|missing.*gold",
-    ignore.case = TRUE
+      test1 = "rater1", test1Positive = "Positive",
+      test2 = "rater2", test2Positive = "Positive",
+      goldPositive = NULL, test3Positive = NULL
+    )
   )
+  expect_equal(res$combinationTable$rowCount, 0L)
 })
 
-test_that("decisioncombine errors on missing test1", {
-  expect_error(
-    decisioncombine(
+test_that("decisioncombine waits silently when test 1 is not selected", {
+  # A jamovi analysis does not error on an incomplete variable selection: it returns and
+  # leaves the results empty until the user finishes choosing. These tests previously
+  # asserted expect_error(), which no jamovi analysis satisfies, so they checked nothing.
+  expect_no_error(
+    res <- decisioncombine(
       data = decisioncombine_pathology,
-      gold = "gold_standard",
-      goldPositive = "Malignant",
-      test2 = "rater2",
-      test2Positive = "Positive",
-      test1Positive = NULL,
-      test3Positive = NULL
-    ),
-    regexp = "test.*required|missing.*test",
-    ignore.case = TRUE
+      gold = "gold_standard", goldPositive = "Malignant",
+      test2 = "rater2", test2Positive = "Positive",
+      test1Positive = NULL, test3Positive = NULL
+    )
   )
+  expect_equal(res$combinationTable$rowCount, 0L)
 })
 
-test_that("decisioncombine errors on missing test2", {
-  expect_error(
-    decisioncombine(
+test_that("decisioncombine reports the single test when only test 1 is selected", {
+  # Gold + one test is enough to run: there is nothing to combine, so the analysis
+  # reports that test on its own rather than erroring or waiting.
+  expect_no_error(
+    res <- decisioncombine(
       data = decisioncombine_pathology,
-      gold = "gold_standard",
-      goldPositive = "Malignant",
-      test1 = "rater1",
-      test1Positive = "Positive",
-      test2Positive = NULL,
-      test3Positive = NULL
-    ),
-    regexp = "test2.*required|missing.*test",
-    ignore.case = TRUE
+      gold = "gold_standard", goldPositive = "Malignant",
+      test1 = "rater1", test1Positive = "Positive",
+      test2Positive = NULL, test3Positive = NULL
+    )
   )
+  expect_equal(res$combinationTable$rowCount, 1L)
+  expect_equal(as.character(res$combinationTable$asDF$pattern[1]), "Test 1")
 })
 
 test_that("decisioncombine handles binary gold standard correctly", {
@@ -106,7 +103,7 @@ test_that("decisioncombine handles binary gold standard correctly", {
     test3Positive = NULL
   )
 
-  expect_s3_class(result, "decisioncombineClass")
+  expect_s3_class(result, "decisioncombineResults")
 })
 
 test_that("decisioncombine handles binary test results", {
@@ -121,7 +118,7 @@ test_that("decisioncombine handles binary test results", {
     test3Positive = NULL
   )
 
-  expect_s3_class(result, "decisioncombineClass")
+  expect_s3_class(result, "decisioncombineResults")
 })
 
 test_that("decisioncombine produces expected output structure", {
@@ -137,10 +134,10 @@ test_that("decisioncombine produces expected output structure", {
   )
 
   # Check that result has results component
-  expect_true("results" %in% names(result))
+  expect_true("combinationTable" %in% names(result))
 
   # Results should be a list
-  expect_type(result$results, "list")
+  expect_true("combinationTableCI" %in% names(result))
 })
 
 test_that("decisioncombine handles different positive class labels", {
@@ -155,7 +152,7 @@ test_that("decisioncombine handles different positive class labels", {
     test3Positive = NULL
   )
 
-  expect_s3_class(result, "decisioncombineClass")
+  expect_s3_class(result, "decisioncombineResults")
 })
 
 test_that("decisioncombine handles small dataset", {
@@ -172,7 +169,7 @@ test_that("decisioncombine handles small dataset", {
     test3Positive = NULL
   )
 
-  expect_s3_class(result, "decisioncombineClass")
+  expect_s3_class(result, "decisioncombineResults")
 })
 
 test_that("decisioncombine accepts default options", {
@@ -188,7 +185,7 @@ test_that("decisioncombine accepts default options", {
     test3Positive = NULL
   )
 
-  expect_s3_class(result, "decisioncombineClass")
+  expect_s3_class(result, "decisioncombineResults")
   expect_no_error(result)
 })
 
@@ -206,7 +203,7 @@ test_that("decisioncombine handles concordant tests", {
     test3Positive = NULL
   )
 
-  expect_s3_class(result, "decisioncombineClass")
+  expect_s3_class(result, "decisioncombineResults")
 })
 
 test_that("decisioncombine handles discordant tests", {
@@ -223,5 +220,5 @@ test_that("decisioncombine handles discordant tests", {
     test3Positive = NULL
   )
 
-  expect_s3_class(result, "decisioncombineClass")
+  expect_s3_class(result, "decisioncombineResults")
 })

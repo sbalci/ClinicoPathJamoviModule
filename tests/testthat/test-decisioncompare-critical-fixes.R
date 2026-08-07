@@ -6,55 +6,40 @@
 # 4. Sample size reporting
 
 test_that("McNemar compares diagnostic CORRECTNESS, not raw positivity rates", {
-  skip_if_not_installed('jmvReadWrite')
     skip_if_not_installed("ClinicoPath")
 
-    # Create test data where Test1 has higher positivity but LOWER accuracy
-    # Gold: 10 truly positive, 10 truly negative
-    # Test1: Calls everything positive (100% sensitivity, 0% specificity, 50% accuracy)
-    # Test2: Perfectly accurate (100% sensitivity, 100% specificity, 100% accuracy)
+    # Discriminating fixture: both tests call exactly 10 of 20 cases positive, so a
+    # McNemar run on RAW POSITIVITY gives p = 1.000. They differ sharply in whether
+    # those calls are right (accuracy 16/20 vs 4/20), so a McNemar run on
+    # CORRECTNESS gives p = 0.0015. The module must report the latter.
+    gold  <- c(rep("Pos", 10), rep("Neg", 10))
+    test1 <- c(rep("Pos", 8), rep("Neg", 2), rep("Pos", 2), rep("Neg", 8))
+    test2 <- c(rep("Pos", 2), rep("Neg", 8), rep("Pos", 8), rep("Neg", 2))
+    dat   <- data.frame(gold = gold, test1 = test1, test2 = test2,
+                        stringsAsFactors = FALSE)
 
-    test_data <- data.frame(
-        gold = factor(c(rep("Pos", 10), rep("Neg", 10))),
-        test1 = factor(rep("Pos", 20)),  # Always positive (high positivity)
-        test2 = factor(c(rep("Pos", 10), rep("Neg", 10)))  # Perfect (lower positivity than test1)
-    )
+    expect_equal(sum(test1 == "Pos"), sum(test2 == "Pos"))   # identical positivity
 
-    # If McNemar correctly compares CORRECTNESS:
-    # Test2 should be significantly better (all 10 diseased + all 10 healthy correct)
-    # Test1 should be significantly worse (only 10 diseased correct, 0 healthy correct)
+    res <- call_decisioncompare(
+        data = dat, gold = "gold", goldPositive = "Pos", goldNegative = NULL,
+        test1 = "test1", test1Positive = "Pos", test1Negative = NULL,
+        test2 = "test2", test2Positive = "Pos", test2Negative = NULL,
+        test3 = NULL, test3Positive = NULL, test3Negative = NULL, stratify = NULL,
+        statComp = TRUE)
 
-    # Note: This test validates the LOGIC. Actual jamovi test would require full module load.
-    # For unit testing, we verify the core logic is comparing correctness vectors.
+    mc <- res$mcnemarTable$asDF
+    expect_equal(nrow(mc), 1L)
 
-    gold <- test_data$gold
-    test1_results <- test_data$test1
-    test2_results <- test_data$test2
+    p_correctness <- stats::mcnemar.test(table(
+        factor(test1 == gold, c(TRUE, FALSE)),
+        factor(test2 == gold, c(TRUE, FALSE))))$p.value
+    p_positivity <- stats::mcnemar.test(table(
+        factor(test1, c("Pos", "Neg")), factor(test2, c("Pos", "Neg"))))$p.value
 
-    # Simulate the FIXED logic: compare correctness
-    test1_correct <- (test1_results == gold)
-    test2_correct <- (test2_results == gold)
-
-    # Build McNemar table of CORRECTNESS
-    mcnemar_table <- table(
-        factor(test1_correct, levels = c(TRUE, FALSE)),
-        factor(test2_correct, levels = c(TRUE, FALSE))
-    )
-
-    # McNemar structure should show:
-    # - Both correct: 10 (test1 correct on diseased, test2 correct on diseased)
-    # - Test1 correct, Test2 wrong: 0
-    # - Test1 wrong, Test2 correct: 10 (test1 wrong on healthy, test2 correct on healthy)
-    # - Both wrong: 0
-
-    expect_equal(mcnemar_table[1,1], 10)  # Both correct
-    expect_equal(mcnemar_table[1,2], 0)   # Test1 correct, Test2 wrong
-    expect_equal(mcnemar_table[2,1], 10)  # Test1 wrong, Test2 correct (KEY DISCORDANCE)
-    expect_equal(mcnemar_table[2,2], 0)   # Both wrong
-
-    # This validates Test2 is significantly better (10 vs 0 discordant pairs)
-    mcnemar_result <- stats::mcnemar.test(mcnemar_table)
-    expect_true(mcnemar_result$p.value < 0.001)  # Highly significant
+    # single comparison -> Holm leaves the p-value unchanged
+    expect_equal(mc$p[1], p_correctness, tolerance = 1e-9)
+    expect_false(isTRUE(all.equal(mc$p[1], p_positivity)))
+    expect_lt(mc$p[1], 0.05)
 })
 
 
@@ -117,72 +102,62 @@ test_that("Multi-level variables generate warnings", {
 })
 
 
-test_that("Sample size reporting extracts from processed_data$data", {
+test_that("the completion notice reports the analysed sample size", {
     skip_if_not_installed("ClinicoPath")
 
-    # Simulate the processed_data structure (it's a list, not a dataframe)
-    processed_data <- list(
-        data = data.frame(
-            gold = factor(c("Pos", "Neg", "Pos")),
-            test1 = factor(c("Pos", "Neg", "Pos")),
-            test2 = factor(c("Pos", "Neg", "Neg"))
-        ),
-        goldVariable = "gold",
-        goldPLevel = "Pos"
-    )
+    # 3 complete cases + 2 that are incomplete on a SELECTED variable.
+    dat <- data.frame(
+        gold  = c("Pos", "Neg", "Pos", "Neg", "Pos"),
+        test1 = c("Pos", "Neg", "Pos", NA,    "Pos"),
+        test2 = c("Pos", "Neg", "Neg", "Neg", NA),
+        stringsAsFactors = FALSE)
 
-    # CORRECT: Extract n_cases from processed_data$data
-    n_cases_correct <- nrow(processed_data$data)
-    expect_equal(n_cases_correct, 3)
+    res <- call_decisioncompare(
+        data = dat, gold = "gold", goldPositive = "Pos", goldNegative = NULL,
+        test1 = "test1", test1Positive = "Pos", test1Negative = NULL,
+        test2 = "test2", test2Positive = "Pos", test2Negative = NULL,
+        test3 = NULL, test3Positive = NULL, test3Negative = NULL, stratify = NULL)
 
-    # BROKEN (old code): nrow(processed_data) on a list
-    # This would return character(0) or error
-    expect_error(nrow(processed_data))
+    notices <- gsub("<[^>]+>", " ", paste(res$notices$content, collapse = " "))
+    # 3 complete cases, of which 2 are gold-positive and 1 gold-negative
+    expect_match(notices, "3 complete cases")
+    expect_match(notices, "2 diseased and 1 healthy")
 })
 
 
-test_that("Cochran Q compares CORRECTNESS across 3 tests", {
+test_that("Cochran Q across 3 tests matches an independent implementation", {
     skip_if_not_installed("ClinicoPath")
+    skip_if_not_installed("DescTools")
 
-    # Create test data: 3 tests with different accuracy levels
-    # Gold: 20 truly positive, 20 truly negative
-    test_data <- data.frame(
-        gold = factor(c(rep("Pos", 20), rep("Neg", 20))),
-        test1 = factor(c(rep("Pos", 18), rep("Neg", 2), rep("Neg", 20))),  # 95% sens, 100% spec
-        test2 = factor(c(rep("Pos", 20), rep("Pos", 5), rep("Neg", 15))),  # 100% sens, 75% spec
-        test3 = factor(c(rep("Pos", 15), rep("Neg", 5), rep("Neg", 18), rep("Pos", 2)))  # 75% sens, 90% spec
-    )
+    set.seed(11)
+    n <- 120
+    gold <- sample(c("Pos", "Neg"), n, TRUE)
+    mk <- function(acc) ifelse(runif(n) < acc, gold,
+                               ifelse(gold == "Pos", "Neg", "Pos"))
+    dat <- data.frame(gold = gold, test1 = mk(0.90), test2 = mk(0.85),
+                      test3 = mk(0.65), stringsAsFactors = FALSE)
 
-    # Simulate FIXED Cochran Q logic: compare CORRECTNESS
-    gold <- test_data$gold
-    test_names <- c("test1", "test2", "test3")
+    res <- call_decisioncompare(
+        data = dat, gold = "gold", goldPositive = "Pos", goldNegative = NULL,
+        test1 = "test1", test1Positive = "Pos", test1Negative = NULL,
+        test2 = "test2", test2Positive = "Pos", test2Negative = NULL,
+        test3 = "test3", test3Positive = "Pos", test3Negative = NULL,
+        stratify = NULL, statComp = TRUE)
 
-    # Build correctness matrix
-    all_tests_matrix <- sapply(test_names, function(tn) {
-        test_result <- test_data[[tn]]
-        ifelse(test_result == gold, 1, 0)  # 1 if correct, 0 if wrong
-    })
+    mc <- res$mcnemarTable$asDF
+    global <- mc[grepl("^Overall", mc$comparison), , drop = FALSE]
+    expect_equal(nrow(global), 1L)
 
-    # Verify different accuracy levels
-    accuracy_test1 <- mean(all_tests_matrix[, "test1"])
-    accuracy_test2 <- mean(all_tests_matrix[, "test2"])
-    accuracy_test3 <- mean(all_tests_matrix[, "test3"])
+    # Reference: Cochran's Q on the CORRECTNESS matrix
+    corr <- data.frame(test1 = as.integer(dat$test1 == gold),
+                       test2 = as.integer(dat$test2 == gold),
+                       test3 = as.integer(dat$test3 == gold))
+    long <- data.frame(y = unlist(corr),
+                       test = factor(rep(names(corr), each = n)),
+                       subj = factor(rep(seq_len(n), times = 3)))
+    ref <- DescTools::CochranQTest(y ~ test | subj, data = long)
 
-    expect_true(accuracy_test1 > accuracy_test3)  # Test1 more accurate
-    expect_true(accuracy_test2 > accuracy_test3)  # Test2 more accurate
-
-    # Cochran Q should detect these differences
-    k <- length(test_names)
-    Ci <- colSums(all_tests_matrix)
-    Ri <- rowSums(all_tests_matrix)
-
-    numerator <- k * sum(Ci^2) - (sum(Ci))^2
-    denominator <- k * sum(Ri) - sum(Ri^2)
-
-    Q <- (k - 1) * numerator / denominator
-    df <- k - 1
-    p_value <- stats::pchisq(Q, df, lower.tail = FALSE)
-
-    # Should detect significant difference
-    expect_true(p_value < 0.05)
+    expect_equal(global$stat[1], unname(ref$statistic), tolerance = 1e-8)
+    expect_equal(global$df[1],   unname(ref$parameter))
+    expect_equal(global$p[1],    unname(ref$p.value),   tolerance = 1e-10)
 })

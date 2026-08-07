@@ -31,9 +31,10 @@ standard) compared to realistic imperfect test.
 \examples{
 data(decisioncompare_perfect)
 decisioncompare(data = decisioncompare_perfect, gold = "GoldStandard",
-                goldPositive = "Positive", test1 = "PerfectTest",
-                test1Positive = "Positive", test2 = "ImperfectTest",
-                test2Positive = "Positive", test3Positive = "",
+                goldPositive = "Positive", goldNegative = NULL, test1 = "PerfectTest",
+                test1Positive = "Positive", test1Negative = NULL, test2 = "ImperfectTest",
+                test2Positive = "Positive", test2Negative = NULL,
+                test3Positive = "", test3Negative = NULL,
                 statComp = TRUE)
 
 }

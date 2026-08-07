@@ -205,6 +205,7 @@ decisioncombineResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
     active = list(
         combinationTable = function() private$.items[["combinationTable"]],
         combinationTableCI = function() private$.items[["combinationTableCI"]],
+        combinationTableCIRatios = function() private$.items[["combinationTableCIRatios"]],
         goldFreqTable = function() private$.items[["goldFreqTable"]],
         crossTabTable = function() private$.items[["crossTabTable"]],
         individualTest1 = function() private$.items[["individualTest1"]],
@@ -236,6 +237,10 @@ decisioncombineResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
                     list(
                         `name`="pattern", 
                         `title`="Pattern", 
+                        `type`="text"),
+                    list(
+                        `name`="rowType", 
+                        `title`="Row", 
                         `type`="text"),
                     list(
                         `name`="tp", 
@@ -292,26 +297,23 @@ decisioncombineResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
                         `name`="youden", 
                         `title`="Youden's J", 
                         `type`="number", 
-                        `format`="number"),
+                        `format`="zto"),
                     list(
                         `name`="lrPos", 
                         `title`="LR+", 
-                        `type`="number", 
-                        `format`="number"),
+                        `type`="number"),
                     list(
                         `name`="lrNeg", 
                         `title`="LR-", 
-                        `type`="number", 
-                        `format`="number"),
+                        `type`="number"),
                     list(
                         `name`="dor", 
                         `title`="Diagnostic OR", 
-                        `type`="number", 
-                        `format`="number"))))
+                        `type`="number"))))
             self$add(jmvcore::Table$new(
                 options=options,
                 name="combinationTableCI",
-                title="Combination Statistics with 95% Confidence Intervals",
+                title="Proportions with 95% Confidence Intervals",
                 rows=0,
                 columns=list(
                     list(
@@ -326,19 +328,47 @@ decisioncombineResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
                         `name`="estimate", 
                         `title`="Estimate", 
                         `type`="number", 
-                        `format`="number"),
+                        `format`="pc"),
                     list(
                         `name`="lower", 
                         `title`="Lower", 
                         `superTitle`="95% CI", 
                         `type`="number", 
-                        `format`="number"),
+                        `format`="pc"),
                     list(
                         `name`="upper", 
                         `title`="Upper", 
                         `superTitle`="95% CI", 
                         `type`="number", 
-                        `format`="number"))))
+                        `format`="pc"))))
+            self$add(jmvcore::Table$new(
+                options=options,
+                name="combinationTableCIRatios",
+                title="Likelihood Ratios with 95% Confidence Intervals",
+                rows=0,
+                columns=list(
+                    list(
+                        `name`="pattern", 
+                        `title`="Pattern", 
+                        `type`="text"),
+                    list(
+                        `name`="statistic", 
+                        `title`="Statistic", 
+                        `type`="text"),
+                    list(
+                        `name`="estimate", 
+                        `title`="Estimate", 
+                        `type`="number"),
+                    list(
+                        `name`="lower", 
+                        `title`="Lower", 
+                        `superTitle`="95% CI", 
+                        `type`="number"),
+                    list(
+                        `name`="upper", 
+                        `title`="Upper", 
+                        `superTitle`="95% CI", 
+                        `type`="number"))))
             self$add(jmvcore::Table$new(
                 options=options,
                 name="goldFreqTable",
@@ -624,7 +654,7 @@ decisioncombineResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
                         `name`="youden", 
                         `title`="Youden's J", 
                         `type`="number", 
-                        `format`="number"),
+                        `format`="zto"),
                     list(
                         `name`="sens", 
                         `title`="Sensitivity", 
@@ -725,7 +755,8 @@ decisioncombineBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
 #' @return A results object containing:
 #' \tabular{llllll}{
 #'   \code{results$combinationTable} \tab \tab \tab \tab \tab Counts and diagnostic performance metrics for each test combination pattern and clinical strategy, including prevalence, balanced accuracy, Youden's J, likelihood ratios, and diagnostic odds ratios \cr
-#'   \code{results$combinationTableCI} \tab \tab \tab \tab \tab 95 percent confidence intervals for diagnostic metrics. Wilson intervals are used for proportions, and log-scale intervals for likelihood ratios and diagnostic odds ratios. \cr
+#'   \code{results$combinationTableCI} \tab \tab \tab \tab \tab Wilson score 95 percent confidence intervals for sensitivity, specificity, PPV, NPV and accuracy, shown as percentages to match the combination table above. Likelihood ratios and the diagnostic odds ratio are unbounded ratios rather than proportions, so they appear in their own table below. \cr
+#'   \code{results$combinationTableCIRatios} \tab \tab \tab \tab \tab Log-scale 95 percent confidence intervals for LR+, LR- and the diagnostic odds ratio. These are ratios on an unbounded scale, so they are reported separately from the proportions above rather than sharing a column with them. \cr
 #'   \code{results$goldFreqTable} \tab \tab \tab \tab \tab Frequency distribution of the gold standard (reference) test showing counts and percentages for each level \cr
 #'   \code{results$crossTabTable} \tab \tab \tab \tab \tab Cross-tabulation showing how test combination patterns align with gold standard results \cr
 #'   \code{results$individualTest1$test1Contingency} \tab \tab \tab \tab \tab a table \cr

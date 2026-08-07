@@ -31,9 +31,10 @@ on PPV/NPV. High specificity crucial to minimize false positives.
 \examples{
 data(decisioncompare_rare)
 decisioncompare(data = decisioncompare_rare, gold = "GoldStandard",
-                goldPositive = "Positive", test1 = "Test1",
-                test1Positive = "Positive", test2 = "Test2",
-                test2Positive = "Positive", test3Positive = "",
+                goldPositive = "Positive", goldNegative = NULL, test1 = "Test1",
+                test1Positive = "Positive", test1Negative = NULL, test2 = "Test2",
+                test2Positive = "Positive", test2Negative = NULL,
+                test3Positive = "", test3Negative = NULL,
                 pp = TRUE, pprob = 0.05)
 
 }

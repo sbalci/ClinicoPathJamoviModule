@@ -33,10 +33,10 @@ Ideal for radar plot visualization and comprehensive test evaluation.
 \examples{
 data(decisioncompare_threetest)
 decisioncompare(data = decisioncompare_threetest, gold = "GoldStandard",
-                goldPositive = "Positive", test1 = "Test1",
-                test1Positive = "Positive", test2 = "Test2",
-                test2Positive = "Positive", test3 = "Test3",
-                test3Positive = "Positive", radarplot = TRUE)
+                goldPositive = "Positive", goldNegative = NULL, test1 = "Test1",
+                test1Positive = "Positive", test1Negative = NULL, test2 = "Test2",
+                test2Positive = "Positive", test2Negative = NULL, test3 = "Test3",
+                test3Positive = "Positive", test3Negative = NULL, radarplot = TRUE)
 
 }
 \keyword{datasets}

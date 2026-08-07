@@ -31,9 +31,10 @@ of poorly performing diagnostic tests.
 \examples{
 data(decisioncompare_poor)
 decisioncompare(data = decisioncompare_poor, gold = "GoldStandard",
-                goldPositive = "Positive", test1 = "PoorTest1",
-                test1Positive = "Positive", test2 = "PoorTest2",
-                test2Positive = "Positive", test3Positive = "",
+                goldPositive = "Positive", goldNegative = NULL, test1 = "PoorTest1",
+                test1Positive = "Positive", test1Negative = NULL, test2 = "PoorTest2",
+                test2Positive = "Positive", test2Negative = NULL,
+                test3Positive = "", test3Negative = NULL,
                 ci = TRUE)
 
 }

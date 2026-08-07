@@ -13,12 +13,14 @@ description:
         negative predictive value, and other metrics between different tests against the same golden standard.
         Includes statistical comparison using McNemar's test and confidence intervals for differences.
         
+
     # R:
     #     dontrun: true
     #     usage: |
     #         # Basic comparison of two diagnostic tests
     #         data('histopathology')
             
+
     #         # Example 1: Compare imaging vs blood test performance
     #         result1 <- decisioncompare(
     #             data = histopathology,
@@ -32,6 +34,7 @@ description:
     #             plot = TRUE
     #         )
             
+
     #         # Example 2: Three-test comparison with statistical analysis
     #         result2 <- decisioncompare(
     #             data = histopathology,
@@ -47,6 +50,7 @@ description:
     #             radarplot = TRUE
     #         )
             
+
     #         # Example 3: Using custom prevalence for clinical setting
     #         result3 <- decisioncompare(
     #             data = histopathology,
@@ -62,6 +66,7 @@ description:
     #         )
 
 options:
+
     - name: data
       type: Data
       description:
@@ -92,7 +97,22 @@ options:
           R: >
             The level indicating presence of disease in the gold standard variable.
 
+    - name: goldNegative
+      title: Disease Absent Level
+      type: Level
+      variable: (gold)
+      description:
+          ui: >
+            Optional. Select the level that indicates disease is ABSENT in the gold standard variable. Only needed when the
+            variable has more than two levels and you want "Exclude
+            indeterminate/Equivocal levels" to drop the remaining (equivocal)
+            rows instead of counting them as negative.
+          R: >
+            The level indicating disease is ABSENT in the gold standard variable. Required for excludeIndeterminate to act on a
+            variable with more than two levels; pass NULL when not used.
+
     # For the first test
+
     - name: test1
       title: Test 1 (Required)
       type: Variable
@@ -117,7 +137,22 @@ options:
           R: >
             The level representing a positive result for Test 1.
 
+    - name: test1Negative
+      title: Test 1 Negative Level
+      type: Level
+      variable: (test1)
+      description:
+          ui: >
+            Optional. Select the level that indicates a NEGATIVE result for test 1. Only needed when the
+            variable has more than two levels and you want "Exclude
+            indeterminate/Equivocal levels" to drop the remaining (equivocal)
+            rows instead of counting them as negative.
+          R: >
+            The level indicating a NEGATIVE result for test 1. Required for excludeIndeterminate to act on a
+            variable with more than two levels; pass NULL when not used.
+
     # For the second test
+
     - name: test2
       title: Test 2 (Required for Comparison)
       type: Variable
@@ -141,7 +176,22 @@ options:
           R: >
             The level representing a positive result for Test 2.
 
+    - name: test2Negative
+      title: Test 2 Negative Level
+      type: Level
+      variable: (test2)
+      description:
+          ui: >
+            Optional. Select the level that indicates a NEGATIVE result for test 2. Only needed when the
+            variable has more than two levels and you want "Exclude
+            indeterminate/Equivocal levels" to drop the remaining (equivocal)
+            rows instead of counting them as negative.
+          R: >
+            The level indicating a NEGATIVE result for test 2. Required for excludeIndeterminate to act on a
+            variable with more than two levels; pass NULL when not used.
+
     # For the third test
+
     - name: test3
       title: Test 3 (Optional)
       type: Variable
@@ -166,6 +216,21 @@ options:
             The level representing a positive result for Test 3.
 
     # Options
+
+    - name: test3Negative
+      title: Test 3 Negative Level
+      type: Level
+      variable: (test3)
+      description:
+          ui: >
+            Optional. Select the level that indicates a NEGATIVE result for test 3. Only needed when the
+            variable has more than two levels and you want "Exclude
+            indeterminate/Equivocal levels" to drop the remaining (equivocal)
+            rows instead of counting them as negative.
+          R: >
+            The level indicating a NEGATIVE result for test 3. Required for excludeIndeterminate to act on a
+            variable with more than two levels; pass NULL when not used.
+
     - name: pp
       title: Prior probability (prevalence)
       type: Bool

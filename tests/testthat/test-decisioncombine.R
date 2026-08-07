@@ -125,11 +125,24 @@ test_that("clinical strategies are summarised for two-test combinations", {
   expect_equal(parallel_row$lrPos, 1.91, tolerance = 0.01)
   expect_equal(parallel_row$lrNeg, 0.091, tolerance = 0.001)
 
-  ci_tbl <- as.data.frame(result$combinationTableCI)
-  lr_ci <- ci_tbl[ci_tbl$pattern == "Parallel (>=1 pos)" & ci_tbl$statistic == "LR+", ]
+  # LR+, LR- and DOR are unbounded ratios and moved out of combinationTableCI (which is
+  # now proportions only, formatted as percentages) into combinationTableCIRatios, so one
+  # column no longer has to carry two different units. The ratios table only exists once
+  # jmvtools::prepare() has compiled the .r.yaml, so tolerate its absence.
+  ratios <- tryCatch(as.data.frame(result$combinationTableCIRatios), error = function(e) NULL)
+  skip_if(is.null(ratios) || nrow(ratios) == 0,
+          "combinationTableCIRatios not compiled yet - run jmvtools::prepare()")
+
+  lr_ci <- ratios[ratios$pattern == "Parallel (>=1 pos)" & ratios$statistic == "LR+", ]
   expect_equal(nrow(lr_ci), 1L)
   expect_true(all(!is.na(lr_ci$estimate)))
   expect_true(all(lr_ci$lower > 0))
+
+  # and the proportions table must no longer carry it
+  props <- as.data.frame(result$combinationTableCI)
+  expect_equal(nrow(props[props$statistic == "LR+", ]), 0L)
+  expect_setequal(unique(as.character(props$statistic)),
+                  c("Sensitivity", "Specificity", "PPV", "NPV", "Accuracy"))
 })
 
 

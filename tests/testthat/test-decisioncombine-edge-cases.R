@@ -10,143 +10,118 @@ library(testthat)
 # Load test data
 data(decisioncombine_pathology, package = "ClinicoPath")
 
-test_that("decisioncombine handles missing values in gold standard", {
+# decisioncombine reports problems as jamovi notices rendered into an Html output, not
+# as R conditions -- the convention across the whole meddecide family. Several tests below
+# were written against expect_warning()/expect_error(), which no analysis in this module
+# ever satisfies, so they asserted nothing. They now check the notice a user actually sees.
+dc_notices <- function(result) {
+  gsub("[[:space:]]+", " ", gsub("<[^>]+>", " ", paste(result$notices$content, collapse = " ")))
+}
+
+
+test_that("decisioncombine discloses cases dropped for a missing gold standard", {
   test_data_na <- decisioncombine_pathology
   test_data_na$gold_standard[1:10] <- NA
 
-  # Should warn about missing data or handle gracefully
-  expect_warning(
-    decisioncombine(
-      data = test_data_na,
-      gold = "gold_standard",
-      goldPositive = "Malignant",
-      test1 = "rater1",
-      test1Positive = "Positive",
-      test2 = "rater2",
-      test2Positive = "Positive",
-      test3Positive = NULL
-    ),
-    regexp = "missing|NA|removed",
-    ignore.case = TRUE
-  )
+  res <- decisioncombine(
+    data = test_data_na, gold = "gold_standard", goldPositive = "Malignant",
+    test1 = "rater1", test1Positive = "Positive",
+    test2 = "rater2", test2Positive = "Positive", test3Positive = NULL)
+
+  # Cases used to be dropped with no disclosure at all.
+  expect_match(dc_notices(res), "Removed 10 case\\(s\\) with missing values")
+  expect_match(dc_notices(res), "Complete-case analysis uses")
+
+  n_used <- with(res$combinationTable$asDF[1, ], tp + fp + fn + tn)
+  expect_equal(n_used, nrow(test_data_na) - 10)
 })
 
-test_that("decisioncombine handles missing values in test1", {
+test_that("decisioncombine discloses cases dropped for a missing test1", {
   test_data_na <- decisioncombine_pathology
-  test_data_na$rater1[1:10] <- NA
+  test_data_na$rater1[1:5] <- NA
 
-  expect_warning(
-    decisioncombine(
-      data = test_data_na,
-      gold = "gold_standard",
-      goldPositive = "Malignant",
-      test1 = "rater1",
-      test1Positive = "Positive",
-      test2 = "rater2",
-      test2Positive = "Positive",
-      test3Positive = NULL
-    ),
-    regexp = "missing|NA|removed",
-    ignore.case = TRUE
-  )
+  res <- decisioncombine(
+    data = test_data_na, gold = "gold_standard", goldPositive = "Malignant",
+    test1 = "rater1", test1Positive = "Positive",
+    test2 = "rater2", test2Positive = "Positive", test3Positive = NULL)
+
+  expect_match(dc_notices(res), "Removed 5 case\\(s\\) with missing values")
+  expect_equal(with(res$combinationTable$asDF[1, ], tp + fp + fn + tn),
+               nrow(test_data_na) - 5)
 })
 
-test_that("decisioncombine handles missing values in test2", {
+test_that("decisioncombine discloses cases dropped for a missing test2", {
   test_data_na <- decisioncombine_pathology
-  test_data_na$rater2[1:10] <- NA
+  test_data_na$rater2[1:8] <- NA
 
-  expect_warning(
-    decisioncombine(
-      data = test_data_na,
-      gold = "gold_standard",
-      goldPositive = "Malignant",
-      test1 = "rater1",
-      test1Positive = "Positive",
-      test2 = "rater2",
-      test2Positive = "Positive",
-      test3Positive = NULL
-    ),
-    regexp = "missing|NA|removed",
-    ignore.case = TRUE
-  )
+  res <- decisioncombine(
+    data = test_data_na, gold = "gold_standard", goldPositive = "Malignant",
+    test1 = "rater1", test1Positive = "Positive",
+    test2 = "rater2", test2Positive = "Positive", test3Positive = NULL)
+
+  expect_match(dc_notices(res), "Removed 8 case\\(s\\) with missing values")
 })
 
-test_that("decisioncombine handles all positive gold standard", {
-  test_data_all_pos <- decisioncombine_pathology
-  test_data_all_pos$gold_standard <- factor(rep("Malignant", nrow(decisioncombine_pathology)))
+test_that("decisioncombine flags a gold standard with only one outcome (all positive)", {
+  d <- decisioncombine_pathology
+  d$gold_standard <- factor("Malignant", levels = levels(factor(d$gold_standard)))
 
-  # Should error about no variation in gold standard
-  expect_error(
-    decisioncombine(
-      data = test_data_all_pos,
-      gold = "gold_standard",
-      goldPositive = "Malignant",
-      test1 = "rater1",
-      test1Positive = "Positive",
-      test2 = "rater2",
-      test2Positive = "Positive",
-      test3Positive = NULL
-    ),
-    regexp = "variation|constant|all.*same|binary",
-    ignore.case = TRUE
-  )
+  res <- decisioncombine(
+    data = d, gold = "gold_standard", goldPositive = "Malignant",
+    test1 = "rater1", test1Positive = "Positive",
+    test2 = "rater2", test2Positive = "Positive", test3Positive = NULL)
+
+  # Specificity and NPV are undefined without disease-absent cases; that used to come
+  # back as a bare NA with nothing to explain it.
+  expect_match(dc_notices(res), "Gold Standard Has Only One Outcome")
+  expect_match(dc_notices(res), "no disease-absent cases")
+  expect_true(all(is.na(res$combinationTable$asDF$spec)))
 })
 
-test_that("decisioncombine handles all negative gold standard", {
-  test_data_all_neg <- decisioncombine_pathology
-  test_data_all_neg$gold_standard <- factor(rep("Benign", nrow(decisioncombine_pathology)))
+test_that("decisioncombine flags a gold standard with only one outcome (all negative)", {
+  d <- decisioncombine_pathology
+  d$gold_standard <- factor("Benign", levels = levels(factor(d$gold_standard)))
 
-  expect_error(
-    decisioncombine(
-      data = test_data_all_neg,
-      gold = "gold_standard",
-      goldPositive = "Malignant",
-      test1 = "rater1",
-      test1Positive = "Positive",
-      test2 = "rater2",
-      test2Positive = "Positive",
-      test3Positive = NULL
-    ),
-    regexp = "variation|constant|all.*same|binary",
-    ignore.case = TRUE
-  )
+  res <- decisioncombine(
+    data = d, gold = "gold_standard", goldPositive = "Malignant",
+    test1 = "rater1", test1Positive = "Positive",
+    test2 = "rater2", test2Positive = "Positive", test3Positive = NULL)
+
+  expect_match(dc_notices(res), "Gold Standard Has Only One Outcome")
+  expect_true(all(is.na(res$combinationTable$asDF$sens)))
 })
 
-test_that("decisioncombine handles constant test1 results", {
+test_that("a constant test1 still yields valid combinations, with zero cells flagged", {
   test_data_const <- decisioncombine_pathology
   test_data_const$rater1 <- factor(rep("Positive", nrow(decisioncombine_pathology)))
 
-  # Should error or warn about no variation
-  expect_condition(
-    decisioncombine(
-      data = test_data_const,
-      gold = "gold_standard",
-      goldPositive = "Malignant",
-      test1 = "rater1",
-      test1Positive = "Positive",
-      test2 = "rater2",
-      test2Positive = "Positive",
-      test3Positive = NULL
-    )
-  )
+  res <- decisioncombine(
+    data = test_data_const, gold = "gold_standard", goldPositive = "Malignant",
+    test1 = "rater1", test1Positive = "Positive",
+    test2 = "rater2", test2Positive = "Positive", test3Positive = NULL)
+
+  # Every patient is test1-positive, so no "-/x" pattern has any members. The analysis
+  # still runs; the empty cells are disclosed as continuity corrections.
+  expect_gt(res$combinationTable$rowCount, 0L)
+  expect_match(dc_notices(res), "Continuity Correction")
+
+  ct <- res$combinationTable$asDF
+  # test1 alone can never be negative, so "-/+" and "-/-" hold nobody
+  expect_equal(sum(ct$tp[ct$pattern == "-/+"], ct$fp[ct$pattern == "-/+"]), 0)
 })
 
-test_that("decisioncombine handles constant test2 results", {
+test_that("a positive level absent from test2 halts with an explanatory notice", {
   test_data_const <- decisioncombine_pathology
   test_data_const$rater2 <- factor(rep("Negative", nrow(decisioncombine_pathology)))
 
-  expect_condition(
-    decisioncombine(
-      data = test_data_const,
-      gold = "gold_standard",
-      goldPositive = "Malignant",
-      test1 = "rater1",
-      test1Positive = "Positive",
-      test2 = "rater2",
-      test2Positive = "Positive",
-      test3Positive = NULL
-    )
-  )
+  res <- decisioncombine(
+    data = test_data_const, gold = "gold_standard", goldPositive = "Malignant",
+    test1 = "rater1", test1Positive = "Positive",
+    test2 = "rater2", test2Positive = "Positive", test3Positive = NULL)
+
+  expect_match(dc_notices(res), "Missing Level")
+  expect_match(dc_notices(res), "rater2")
+  expect_equal(res$combinationTable$rowCount, 0L)
 })
 
 test_that("decisioncombine handles very small sample size", {
@@ -164,7 +139,7 @@ test_that("decisioncombine handles very small sample size", {
     test3Positive = NULL
   )
 
-  expect_s3_class(result, "decisioncombineClass")
+  expect_s3_class(result, "decisioncombineResults")
 })
 
 test_that("decisioncombine handles perfect concordance", {
@@ -184,7 +159,7 @@ test_that("decisioncombine handles perfect concordance", {
   )
 
   # Should complete (may have special interpretation)
-  expect_s3_class(result, "decisioncombineClass")
+  expect_s3_class(result, "decisioncombineResults")
 })
 
 test_that("decisioncombine handles perfect test performance (AUC=1)", {
@@ -204,7 +179,7 @@ test_that("decisioncombine handles perfect test performance (AUC=1)", {
     test3Positive = NULL
   )
 
-  expect_s3_class(result, "decisioncombineClass")
+  expect_s3_class(result, "decisioncombineResults")
 })
 
 test_that("decisioncombine handles completely random test (AUC=0.5)", {
@@ -226,25 +201,21 @@ test_that("decisioncombine handles completely random test (AUC=0.5)", {
     test3Positive = NULL
   )
 
-  expect_s3_class(result, "decisioncombineClass")
+  expect_s3_class(result, "decisioncombineResults")
 })
 
-test_that("decisioncombine handles wrong positive class specification", {
-  # Specify non-existent level
-  expect_error(
-    decisioncombine(
-      data = decisioncombine_pathology,
-      gold = "gold_standard",
-      goldPositive = "InvalidLevel",
-      test1 = "rater1",
-      test1Positive = "Positive",
-      test2 = "rater2",
-      test2Positive = "Positive",
-      test3Positive = NULL
-    ),
-    regexp = "level.*not found|invalid.*class",
-    ignore.case = TRUE
-  )
+test_that("decisioncombine explains a positive level that is not in the data", {
+  res <- decisioncombine(
+    data = decisioncombine_pathology,
+    gold = "gold_standard", goldPositive = "InvalidLevel",
+    test1 = "rater1", test1Positive = "Positive",
+    test2 = "rater2", test2Positive = "Positive", test3Positive = NULL)
+
+  # The analysis halts. The notice explaining WHY used to be collected and then
+  # discarded, because .renderNotices() sat after the early return.
+  expect_match(dc_notices(res), "Missing Level")
+  expect_match(dc_notices(res), "InvalidLevel")
+  expect_equal(res$combinationTable$rowCount, 0L)
 })
 
 test_that("decisioncombine handles duplicate observations", {
@@ -262,7 +233,7 @@ test_that("decisioncombine handles duplicate observations", {
     test3Positive = NULL
   )
 
-  expect_s3_class(result, "decisioncombineClass")
+  expect_s3_class(result, "decisioncombineResults")
 })
 
 test_that("decisioncombine handles extreme prevalence", {
@@ -282,7 +253,7 @@ test_that("decisioncombine handles extreme prevalence", {
   )
 
   # Should complete but may have wide confidence intervals
-  expect_s3_class(result, "decisioncombineClass")
+  expect_s3_class(result, "decisioncombineResults")
 })
 
 test_that("decisioncombine handles high prevalence", {
@@ -301,7 +272,7 @@ test_that("decisioncombine handles high prevalence", {
     test3Positive = NULL
   )
 
-  expect_s3_class(result, "decisioncombineClass")
+  expect_s3_class(result, "decisioncombineResults")
 })
 
 test_that("decisioncombine handles all four test patterns present", {
@@ -318,7 +289,7 @@ test_that("decisioncombine handles all four test patterns present", {
     test3Positive = NULL
   )
 
-  expect_s3_class(result, "decisioncombineClass")
+  expect_s3_class(result, "decisioncombineResults")
 })
 
 test_that("decisioncombine handles missing pattern (no +/+ cases)", {
@@ -342,7 +313,7 @@ test_that("decisioncombine handles missing pattern (no +/+ cases)", {
   )
 
   # Should handle gracefully (zero counts for that pattern)
-  expect_s3_class(result, "decisioncombineClass")
+  expect_s3_class(result, "decisioncombineResults")
 })
 
 test_that("decisioncombine handles three-test with missing patterns", {
@@ -363,7 +334,7 @@ test_that("decisioncombine handles three-test with missing patterns", {
     test3Positive = "Positive"
   )
 
-  expect_s3_class(result, "decisioncombineClass")
+  expect_s3_class(result, "decisioncombineResults")
 })
 
 test_that("decisioncombine handles non-factor variables", {
@@ -385,7 +356,7 @@ test_that("decisioncombine handles non-factor variables", {
   )
 
   # Should handle by converting to factors
-  expect_s3_class(result, "decisioncombineClass")
+  expect_s3_class(result, "decisioncombineResults")
 })
 
 test_that("decisioncombine handles variables with unusual level names", {
@@ -406,31 +377,26 @@ test_that("decisioncombine handles variables with unusual level names", {
     test3Positive = NULL
   )
 
-  expect_s3_class(result, "decisioncombineClass")
+  expect_s3_class(result, "decisioncombineResults")
 })
 
-test_that("decisioncombine handles gold standard with more than 2 levels initially", {
-  # Create multi-level gold standard
+test_that("a gold standard with more than two levels is flagged, not silently dichotomised", {
+  set.seed(1)
   test_data_multi <- decisioncombine_pathology
   test_data_multi$multi_gold <- factor(
-    sample(c("Benign", "Borderline", "Malignant"), nrow(decisioncombine_pathology), replace = TRUE)
-  )
+    sample(c("Benign", "Borderline", "Malignant"), nrow(decisioncombine_pathology), replace = TRUE))
 
-  # Should error or require binary gold standard
-  expect_error(
-    decisioncombine(
-      data = test_data_multi,
-      gold = "multi_gold",
-      goldPositive = "Malignant",
-      test1 = "rater1",
-      test1Positive = "Positive",
-      test2 = "rater2",
-      test2Positive = "Positive",
-      test3Positive = NULL
-    ),
-    regexp = "binary|2 levels|exactly 2",
-    ignore.case = TRUE
-  )
+  res <- decisioncombine(
+    data = test_data_multi, gold = "multi_gold", goldPositive = "Malignant",
+    test1 = "rater1", test1Positive = "Positive",
+    test2 = "rater2", test2Positive = "Positive", test3Positive = NULL)
+
+  # It runs -- one-vs-rest is a legitimate choice -- but folding "Borderline" into the
+  # negative arm inflates specificity and NPV, and that used to happen silently.
+  expect_gt(res$combinationTable$rowCount, 0L)
+  expect_match(dc_notices(res), "has 3 levels")
+  expect_match(dc_notices(res), "counted as NEGATIVE")
+  expect_match(dc_notices(res), "inflates specificity and NPV")
 })
 
 test_that("decisioncombine handles single observation per pattern cell", {
@@ -449,5 +415,5 @@ test_that("decisioncombine handles single observation per pattern cell", {
   )
 
   # Should complete but with wide/undefined confidence intervals
-  expect_s3_class(result, "decisioncombineClass")
+  expect_s3_class(result, "decisioncombineResults")
 })

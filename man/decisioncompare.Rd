@@ -8,12 +8,16 @@ decisioncompare(
   data,
   gold = NULL,
   goldPositive,
+  goldNegative,
   test1 = NULL,
   test1Positive,
+  test1Negative,
   test2 = NULL,
   test2Positive,
+  test2Negative,
   test3 = NULL,
   test3Positive,
+  test3Negative,
   pp = FALSE,
   pprob = 0.3,
   od = FALSE,
@@ -42,19 +46,35 @@ status.}
 \item{goldPositive}{The level indicating presence of disease in the gold
 standard variable.}
 
+\item{goldNegative}{The level indicating disease is ABSENT in the gold
+standard variable. Required for excludeIndeterminate to act on a variable
+with more than two levels; pass NULL when not used.}
+
 \item{test1}{The first diagnostic test variable being evaluated for
 performance.}
 
 \item{test1Positive}{The level representing a positive result for Test 1.}
 
+\item{test1Negative}{The level indicating a NEGATIVE result for test 1.
+Required for excludeIndeterminate to act on a variable with more than two
+levels; pass NULL when not used.}
+
 \item{test2}{The second diagnostic test variable for comparison analysis.}
 
 \item{test2Positive}{The level representing a positive result for Test 2.}
+
+\item{test2Negative}{The level indicating a NEGATIVE result for test 2.
+Required for excludeIndeterminate to act on a variable with more than two
+levels; pass NULL when not used.}
 
 \item{test3}{Optional third diagnostic test variable for extended
 comparison analysis.}
 
 \item{test3Positive}{The level representing a positive result for Test 3.}
+
+\item{test3Negative}{The level indicating a NEGATIVE result for test 3.
+Required for excludeIndeterminate to act on a variable with more than two
+levels; pass NULL when not used.}
 
 \item{pp}{Enable custom prior probability (prevalence) for predictive value
 calculations.}

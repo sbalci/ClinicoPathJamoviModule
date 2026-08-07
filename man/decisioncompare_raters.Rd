@@ -32,10 +32,10 @@ performance comparison across different experience levels.
 \examples{
 data(decisioncompare_raters)
 decisioncompare(data = decisioncompare_raters, gold = "ConsensusPanel",
-                goldPositive = "Disease", test1 = "Rater1",
-                test1Positive = "Disease", test2 = "Rater2",
-                test2Positive = "Disease", test3 = "Rater3",
-                test3Positive = "Disease", statComp = TRUE)
+                goldPositive = "Disease", goldNegative = NULL, test1 = "Rater1",
+                test1Positive = "Disease", test1Negative = NULL, test2 = "Rater2",
+                test2Positive = "Disease", test2Negative = NULL, test3 = "Rater3",
+                test3Positive = "Disease", test3Negative = NULL, statComp = TRUE)
 
 }
 \keyword{datasets}

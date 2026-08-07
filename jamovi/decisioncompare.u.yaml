@@ -18,6 +18,9 @@ children:
           - type: LevelSelector
             name: goldPositive
             enable: (gold)
+          - type: LevelSelector
+            name: goldNegative
+            enable: (gold && excludeIndeterminate)
       - type: TargetLayoutBox
         label: Test 1
         children:
@@ -28,6 +31,9 @@ children:
           - type: LevelSelector
             name: test1Positive
             enable: (test1)
+          - type: LevelSelector
+            name: test1Negative
+            enable: (test1 && excludeIndeterminate)
       - type: TargetLayoutBox
         label: Test 2
         children:
@@ -38,6 +44,9 @@ children:
           - type: LevelSelector
             name: test2Positive
             enable: (test2)
+          - type: LevelSelector
+            name: test2Negative
+            enable: (test2 && excludeIndeterminate)
       - type: TargetLayoutBox
         label: Test 3
         children:
@@ -48,6 +57,9 @@ children:
           - type: LevelSelector
             name: test3Positive
             enable: (test3)
+          - type: LevelSelector
+            name: test3Negative
+            enable: (test3 && excludeIndeterminate)
       - type: TargetLayoutBox
         label: Stratification (Optional)
         children:
