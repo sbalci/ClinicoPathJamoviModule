@@ -83,6 +83,14 @@ items:
         - name: kappa
           title: 'Kappa'
           type: number
+        - name: ci_lower
+          title: 'Lower'
+          superTitle: 'Confidence Interval'
+          type: number
+        - name: ci_upper
+          title: 'Upper'
+          superTitle: 'Confidence Interval'
+          type: number
         - name: z
           title: 'z'
           type: number
@@ -94,6 +102,7 @@ items:
           - vars
           - wght
           - exct
+          - confLevel
 
 
     - name:  contingencyTableHeading
@@ -149,6 +158,10 @@ items:
       clearWith:
           - vars
           - baConfidenceLevel
+          # .blandAltman() adds a geom_smooth regression line whenever
+          # proportionalBias is on, so without this the plot kept the old image
+          # when the option was toggled.
+          - proportionalBias
 
     - name: agreementHeatmapPlot
       title: 'Agreement Heatmap (Confusion Matrix)'

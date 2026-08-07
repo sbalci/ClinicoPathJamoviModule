@@ -1548,6 +1548,16 @@ agreementResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                         `title`="Kappa", 
                         `type`="number"),
                     list(
+                        `name`="ci_lower", 
+                        `title`="Lower", 
+                        `superTitle`="Confidence Interval", 
+                        `type`="number"),
+                    list(
+                        `name`="ci_upper", 
+                        `title`="Upper", 
+                        `superTitle`="Confidence Interval", 
+                        `type`="number"),
+                    list(
                         `name`="z", 
                         `title`="z", 
                         `type`="number"),
@@ -1559,7 +1569,8 @@ agreementResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 clearWith=list(
                     "vars",
                     "wght",
-                    "exct")))
+                    "exct",
+                    "confLevel")))
             self$add(jmvcore::Preformatted$new(
                 options=options,
                 name="contingencyTableHeading",
@@ -1613,7 +1624,8 @@ agreementResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 requiresData=TRUE,
                 clearWith=list(
                     "vars",
-                    "baConfidenceLevel")))
+                    "baConfidenceLevel",
+                    "proportionalBias")))
             self$add(jmvcore::Image$new(
                 options=options,
                 name="agreementHeatmapPlot",
