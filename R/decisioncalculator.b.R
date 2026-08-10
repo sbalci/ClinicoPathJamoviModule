@@ -28,6 +28,11 @@ decisioncalculatorClass <- if (requireNamespace("jmvcore")) {
             # self$results$insert(999, Notice) AND any HTML in notices (project convention:
             # notice content must be plain text). ====
             .noticeList = list(),
+            # A results item that may not exist in the compiled .h.R yet. jmvcore raises
+            # rather than returning NULL, so a bare self$results$x would crash every run
+            # between the .r.yaml edit and the next jmvtools::prepare().
+            .resultsItem = function(name) tryCatch(self$results[[name]], error = function(e) NULL),
+
             .addNotice = function(type, title, content) {
                 private$.noticeList[[length(private$.noticeList) + 1]] <- list(
                     type = type,
@@ -649,6 +654,7 @@ decisioncalculatorClass <- if (requireNamespace("jmvcore")) {
                     # epirTable_ratio -----
 
                     epirTable_ratio <- self$results$epirTable_ratio
+                    epirTable_ratio$deleteRows()
 
                     data_frame <- epirresult_ratio
                     for (i in seq_along(data_frame[, 1, drop = T])) {
@@ -660,6 +666,7 @@ decisioncalculatorClass <- if (requireNamespace("jmvcore")) {
 
 
                     epirTable_number <- self$results$epirTable_number
+                    epirTable_number$deleteRows()
 
                     data_frame <- epirresult_number
                     for (i in seq_along(data_frame[, 1, drop = T])) {
@@ -670,6 +677,7 @@ decisioncalculatorClass <- if (requireNamespace("jmvcore")) {
                 # Multiple cut-off evaluation (DiagROC inspired)
                 if (self$options$multiplecuts) {
                     multipleCutoffTable <- self$results$multipleCutoffTable
+                    multipleCutoffTable$deleteRows()
 
                     # Helper function to calculate metrics for a cut-off
                     calculate_cutoff_metrics <- function(tp, fp, tn, fn, cutoff_name) {
@@ -764,20 +772,104 @@ decisioncalculatorClass <- if (requireNamespace("jmvcore")) {
                         values = cutoff2_metrics
                     )
 
-                    # Add optimal cut-off recommendation based on current data
+                    # Optimal cut-off recommendation.
+                    #
+                    # Three defects were fixed here:
+                    #  1. The chain was `if (cutoff1 beats current) ... else if (cutoff2 ...)`,
+                    #     so when BOTH alternatives beat the current one only cutoff1 was ever
+                    #     named -- even when cutoff2 was far better. Now the best of the three
+                    #     is chosen on Youden's J.
+                    #  2. The verdict was a bare point-estimate comparison with no uncertainty:
+                    #     an advantage of 0.001 in both Youden and accuracy printed
+                    #     "performs better than current". It now says how large the margin is
+                    #     and warns when it is slight.
+                    #  3. A cut-off comparison only means anything if the scenarios are
+                    #     thresholds on the SAME cohort, so their totals must match. Nothing
+                    #     checked that; a 220-case study could be compared with a 300-case one
+                    #     as though they were two thresholds.
                     current_youden <- YoudenIndex
                     current_accuracy <- AccurT
 
-                    # Safe comparison (handle NA values)
-                    optimal_msg <- "Current cut-off appears optimal"
-
-                    if (!is.na(cutoff1_metrics$youden) && !is.na(cutoff1_metrics$accuracy) &&
-                        cutoff1_metrics$youden > current_youden && cutoff1_metrics$accuracy > current_accuracy) {
-                        optimal_msg <- paste0(cutoff1_metrics$cutoffName, " cut-off performs better than current")
-                    } else if (!is.na(cutoff2_metrics$youden) && !is.na(cutoff2_metrics$accuracy) &&
-                        cutoff2_metrics$youden > current_youden && cutoff2_metrics$accuracy > current_accuracy) {
-                        optimal_msg <- paste0(cutoff2_metrics$cutoffName, " cut-off performs better than current")
+                    n_current <- TP + FP + TN + FN
+                    n1 <- self$options$tp1 + self$options$fp1 + self$options$tn1 + self$options$fn1
+                    n2 <- self$options$tp2 + self$options$fp2 + self$options$tn2 + self$options$fn2
+                    if (length(unique(c(n_current, n1, n2))) > 1) {
+                        private$.addNotice(
+                            "WARNING",
+                            "Cut-offs describe different numbers of patients",
+                            sprintf("The three scenarios total %g, %g and %g cases. Moving a cut-off on one cohort cannot change how many patients there are, so these are different studies rather than different thresholds, and comparing them here treats between-study variation as if it were a threshold effect. Check the counts, or interpret each row on its own.",
+                                    n_current, n1, n2)
+                        )
                     }
+
+                    cand <- list(
+                        list(name = "Current", youden = current_youden, accuracy = current_accuracy),
+                        list(name = cutoff1_metrics$cutoffName, youden = cutoff1_metrics$youden,
+                             accuracy = cutoff1_metrics$accuracy),
+                        list(name = cutoff2_metrics$cutoffName, youden = cutoff2_metrics$youden,
+                             accuracy = cutoff2_metrics$accuracy)
+                    )
+                    ys <- vapply(cand, function(x)
+                        if (is.null(x$youden) || !is.finite(x$youden)) NA_real_ else x$youden,
+                        numeric(1))
+
+                    # Uncertainty. A formal test of two cut-offs would need the paired
+                    # discordance between them, which four marginal counts per scenario
+                    # cannot supply. What IS computable is a Wilson interval on each
+                    # scenario's ACCURACY, so the reader can see whether the intervals
+                    # overlap -- overlapping intervals mean the counts do not separate the
+                    # cut-offs, whatever the point estimates suggest.
+                    wilson <- function(x, n, conf = 0.95) {
+                        if (!is.finite(x) || !is.finite(n) || n <= 0)
+                            return(c(NA_real_, NA_real_))
+                        z <- stats::qnorm(1 - (1 - conf) / 2)
+                        ph <- x / n
+                        den <- 1 + z^2 / n
+                        ctr <- (ph + z^2 / (2 * n)) / den
+                        hw <- z * sqrt((ph * (1 - ph) + z^2 / (4 * n)) / n) / den
+                        c(max(0, ctr - hw), min(1, ctr + hw))
+                    }
+                    acc_ci <- list(
+                        wilson(TP + TN, n_current),
+                        wilson(self$options$tp1 + self$options$tn1, n1),
+                        wilson(self$options$tp2 + self$options$tn2, n2)
+                    )
+
+                    optimal_msg <- "Current cut-off appears optimal"
+                    if (any(is.finite(ys))) {
+                        best <- which.max(replace(ys, !is.finite(ys), -Inf))
+                        margin <- ys[best] - ys[1]                      # vs the current cut-off
+                        runner <- sort(ys[is.finite(ys)], decreasing = TRUE)
+                        gap <- if (length(runner) > 1) runner[1] - runner[2] else NA_real_
+
+                        # do the best and current accuracy intervals overlap?
+                        ov <- NA
+                        if (best != 1L && all(is.finite(c(acc_ci[[best]], acc_ci[[1]]))))
+                            ov <- acc_ci[[best]][1] <= acc_ci[[1]][2] &&
+                                  acc_ci[[1]][1] <= acc_ci[[best]][2]
+
+                        if (best == 1L || !is.finite(margin) || margin <= 0) {
+                            optimal_msg <- sprintf("Current cut-off has the highest Youden's J (%.3f) of the three", ys[1])
+                        } else if (margin < 0.05) {
+                            optimal_msg <- sprintf("%s is higher by only %.3f Youden's J - too small to distinguish these cut-offs on these counts alone",
+                                                   cand[[best]]$name, margin)
+                        } else {
+                            optimal_msg <- sprintf("%s has the highest Youden's J, %.3f above current%s%s",
+                                                   cand[[best]]$name, margin,
+                                                   if (is.finite(gap) && gap < 0.02)
+                                                       " (but barely ahead of the next cut-off)" else "",
+                                                   if (isTRUE(ov))
+                                                       "; its accuracy interval still overlaps the current cut-off's, so the difference is not established"
+                                                   else if (isFALSE(ov))
+                                                       "; their accuracy intervals do not overlap"
+                                                   else "")
+                        }
+                    }
+
+                    multipleCutoffTable$setNote(
+                        "uncertainty",
+                        jmvcore::.("Cut-offs are compared on point estimates only. A formal test would need to know, for each patient, how the two thresholds classified them; four summary counts per scenario cannot supply that. The accuracy intervals referred to above are Wilson 95% intervals computed separately per scenario, so overlap is a conservative signal that the counts do not separate the cut-offs.")
+                    )
 
                     multipleCutoffTable$addRow(
                         rowKey = 3,
@@ -823,16 +915,79 @@ decisioncalculatorClass <- if (requireNamespace("jmvcore")) {
                 # Send Data to Plot ----
 
 
+                # A zero cell puts sensitivity or specificity at exactly 0 or 1, and
+                # nomogrammer rejects the closed bounds outright ("must be between 0 and 1
+                # (exclusive)"), so the whole nomogram silently failed to draw for precisely
+                # the sparse tables that most need one. Confirmed for FP=0, FN=0 and TP=0.
+                # The likelihood ratios handed to it are already Haldane-Anscombe corrected
+                # (TP_cc..FN_cc above), so pass the proportions from that same corrected
+                # table -- the plot is then self-consistent rather than clamped to an
+                # arbitrary epsilon. The tables keep the uncorrected values.
+                sens_plot <- TP_cc / (TP_cc + FN_cc)
+                spec_plot <- TN_cc / (TN_cc + FP_cc)
+
+                # nomogrammer also refuses LR+ < 1 ("should be >= 1 for an informative
+                # test"), which is a fair objection -- a positive result that argues AGAINST
+                # disease inverts the nomogram's meaning -- but it arrived as an unexplained
+                # crash. Detect it here, where a notice can still be rendered, and tell the
+                # plot to decline instead.
+                fagan_ok <- is.finite(LRP) && is.finite(LRN) && LRP >= 1
+                if (isTRUE(self$options$fagan) && !fagan_ok) {
+                    private$.addNotice(
+                        "WARNING",
+                        "Fagan nomogram not drawn",
+                        sprintf("The positive likelihood ratio is %.3f. A nomogram assumes a positive result raises the probability of disease (LR+ >= 1); here a positive result lowers it, so the plot would be misleading and has been omitted. This usually means the test's coding is inverted -- check that TP and FP are not swapped -- or that the test genuinely performs worse than chance.",
+                                LRP)
+                    )
+                }
+
                 plotData1 <- list(
                     "Prevalence" = PriorProb,
-                    "Sens" = Sens,
-                    "Spec" = Spec,
+                    "Sens" = sens_plot,
+                    "Spec" = spec_plot,
                     "Plr" = LRP,
-                    "Nlr" = LRN
+                    "Nlr" = LRN,
+                    "drawable" = fagan_ok
                 )
 
                 image1 <- self$results$plot1
                 image1$setState(plotData1)
+
+                # nomogrammer prints a summary block to the R console when Verbose = TRUE --
+                # prevalence, the two likelihood ratios, and the post-test probabilities.
+                # jamovi never shows stdout, so that reading was invisible to every user. It
+                # is the most clinically useful part of the figure, so render it beside the
+                # plot instead, at the tables' precision rather than nomogrammer's whole
+                # percents.
+                fagan_item <- private$.resultsItem("faganSummary")
+                if (!is.null(fagan_item) && isTRUE(self$options$fagan)) {
+                    if (!fagan_ok) {
+                        fagan_item$setContent(paste0(
+                            "<div style='padding:12px;border-left:4px solid #c00;background:#fff5f5;'>",
+                            "<p>", .("No nomogram is drawn for this table."), " ",
+                            sprintf(.("The positive likelihood ratio is %.3f, so a positive result lowers the probability of disease rather than raising it."), LRP),
+                            "</p></div>"))
+                    } else {
+                        pre <- PriorProb
+                        post_pos <- PostTestProbDisease
+                        post_neg <- 1 - PostTestProbHealthy
+                        src <- if (isTRUE(self$options$pp))
+                            .("the population prevalence you supplied") else .("this study's own prevalence")
+                        fagan_item$setContent(paste0(
+                            "<div style='padding:12px;border-left:4px solid #1565c0;background:#f5f9ff;'>",
+                            "<p><b>", .("Pre-test probability"), ":</b> ",
+                            sprintf("%.1f%%", 100 * pre), " &mdash; ", src, ".</p>",
+                            "<p><b>", .("If the test is POSITIVE"), ":</b> ",
+                            sprintf(.("likelihood ratio %.2f raises the probability from %.1f%% to <b>%.1f%%</b>."),
+                                    LRP, 100 * pre, 100 * post_pos), "</p>",
+                            "<p><b>", .("If the test is NEGATIVE"), ":</b> ",
+                            sprintf(.("likelihood ratio %.3f lowers the probability from %.1f%% to <b>%.1f%%</b>."),
+                                    LRN, 100 * pre, 100 * post_neg), "</p>",
+                            "<p style='font-size:90%;color:#555;'>",
+                            .("Read the nomogram by drawing a line from the pre-test probability on the left, through the likelihood ratio in the middle, to the post-test probability on the right. Sensitivity and specificity are properties of the test; the pre-test probability is not, so the same test moves a patient to a different endpoint in a different population."),
+                            "</p></div>"))
+                    }
+                }
 
                 # plotData2 <- plotData1
                 #
@@ -847,6 +1002,10 @@ decisioncalculatorClass <- if (requireNamespace("jmvcore")) {
             },
             .plot1 = function(image1, ggtheme, ...) {
                 plotData1 <- image1$state
+                if (is.null(plotData1)) return(FALSE)
+                # Set in .run() when LR+ < 1; the explanatory notice is raised there, because
+                # notices are rendered before any plot function runs.
+                if (identical(plotData1$drawable, FALSE)) return(FALSE)
 
                 plot1 <- nomogrammer(
                     Prevalence = plotData1$Prevalence,

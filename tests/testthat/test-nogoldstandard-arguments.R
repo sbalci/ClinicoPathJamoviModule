@@ -7,22 +7,20 @@ data(nogoldstandard_pathology, package = "ClinicoPath")
 data(nogoldstandard_validation, package = "ClinicoPath")
 
 test_that("nogoldstandard respects all analysis methods", {
-  methods <- c("latent_class", "composite", "all_positive", "any_positive", "bayesian")
+  # nogoldstandard_test has only Test1/Test2. A two-class latent model over two binary tests
+  # has 5 parameters against 3 degrees of freedom, so latent_class is not identified and
+  # refuses rather than returning starting-value-dependent numbers (1.0.4).
+  run <- function(method) nogoldstandard(
+    data = nogoldstandard_test,
+    test1 = "Test1", test1Positive = "Positive",
+    test2 = "Test2", test2Positive = "Positive",
+    method = method,
+    test3Positive = NULL, test4Positive = NULL, test5Positive = NULL)
 
-  for (method in methods) {
-    result <- nogoldstandard(
-      data = nogoldstandard_test,
-      test1 = "Test1",
-      test1Positive = "Positive",
-      test2 = "Test2",
-      test2Positive = "Positive",
-      method = method,
-      test3Positive = NULL,
-      test4Positive = NULL,
-      test5Positive = NULL
-    )
-    expect_s3_class(result, "nogoldstandardClass")
-  }
+  for (method in c("composite", "all_positive", "any_positive", "bayesian"))
+    expect_s3_class(run(method), "nogoldstandardResults")
+
+  expect_error(run("latent_class"), "at least 3 tests")
 })
 
 test_that("nogoldstandard respects bootstrap parameter", {
@@ -33,13 +31,14 @@ test_that("nogoldstandard respects bootstrap parameter", {
     test1Positive = "Positive",
     test2 = "Test2",
     test2Positive = "Positive",
-    method = "latent_class",
+    # 2 tests: latent_class (the default since 1.0.4) requires 3+
+    method = "composite",
     bootstrap = FALSE,
     test3Positive = NULL,
     test4Positive = NULL,
     test5Positive = NULL
   )
-  expect_s3_class(result_no_boot, "nogoldstandardClass")
+  expect_s3_class(result_no_boot, "nogoldstandardResults")
 
   # With bootstrap (small nboot for testing)
   result_boot <- nogoldstandard(
@@ -48,14 +47,15 @@ test_that("nogoldstandard respects bootstrap parameter", {
     test1Positive = "Positive",
     test2 = "Test2",
     test2Positive = "Positive",
-    method = "latent_class",
+    # 2 tests: latent_class (the default since 1.0.4) requires 3+
+    method = "composite",
     bootstrap = TRUE,
     nboot = 100,
     test3Positive = NULL,
     test4Positive = NULL,
     test5Positive = NULL
   )
-  expect_s3_class(result_boot, "nogoldstandardClass")
+  expect_s3_class(result_boot, "nogoldstandardResults")
 })
 
 test_that("nogoldstandard respects nboot parameter", {
@@ -66,7 +66,8 @@ test_that("nogoldstandard respects nboot parameter", {
     test1Positive = "Positive",
     test2 = "Test2",
     test2Positive = "Positive",
-    method = "latent_class",
+    # 2 tests: latent_class (the default since 1.0.4) requires 3+
+    method = "composite",
     bootstrap = TRUE,
     nboot = 100,
     test3Positive = NULL,
@@ -82,7 +83,8 @@ test_that("nogoldstandard respects nboot parameter", {
     test1Positive = "Positive",
     test2 = "Test2",
     test2Positive = "Positive",
-    method = "latent_class",
+    # 2 tests: latent_class (the default since 1.0.4) requires 3+
+    method = "composite",
     bootstrap = TRUE,
     nboot = 500,
     test3Positive = NULL,
@@ -103,8 +105,10 @@ test_that("nogoldstandard respects alpha parameter", {
     alpha = 0.05,
     test3Positive = NULL,
     test4Positive = NULL,
-    test5Positive = NULL
-  )
+    test5Positive = NULL,
+      # 2 tests: latent_class (the default since 1.0.4) requires 3+
+      method = "composite"
+    )
   expect_no_error(result_95)
 
   # 99% CI (alpha = 0.01)
@@ -117,8 +121,10 @@ test_that("nogoldstandard respects alpha parameter", {
     alpha = 0.01,
     test3Positive = NULL,
     test4Positive = NULL,
-    test5Positive = NULL
-  )
+    test5Positive = NULL,
+      # 2 tests: latent_class (the default since 1.0.4) requires 3+
+      method = "composite"
+    )
   expect_no_error(result_99)
 })
 
@@ -133,8 +139,10 @@ test_that("nogoldstandard respects verbose parameter", {
     verbose = FALSE,
     test3Positive = NULL,
     test4Positive = NULL,
-    test5Positive = NULL
-  )
+    test5Positive = NULL,
+      # 2 tests: latent_class (the default since 1.0.4) requires 3+
+      method = "composite"
+    )
   expect_no_error(result_quiet)
 
   # Verbose on
@@ -147,8 +155,10 @@ test_that("nogoldstandard respects verbose parameter", {
     verbose = TRUE,
     test3Positive = NULL,
     test4Positive = NULL,
-    test5Positive = NULL
-  )
+    test5Positive = NULL,
+      # 2 tests: latent_class (the default since 1.0.4) requires 3+
+      method = "composite"
+    )
   expect_no_error(result_verbose)
 })
 
@@ -166,9 +176,11 @@ test_that("nogoldstandard respects clinical presets", {
       clinicalPreset = preset,
       test3Positive = NULL,
       test4Positive = NULL,
-      test5Positive = NULL
+      test5Positive = NULL,
+      # 2 tests: latent_class (the default since 1.0.4) requires 3+
+      method = "composite"
     )
-    expect_s3_class(result, "nogoldstandardClass")
+    expect_s3_class(result, "nogoldstandardResults")
   }
 })
 
@@ -214,8 +226,10 @@ test_that("nogoldstandard handles different numbers of tests", {
     test2Positive = "Positive",
     test3Positive = NULL,
     test4Positive = NULL,
-    test5Positive = NULL
-  )
+    test5Positive = NULL,
+      # 2 tests: latent_class (the default since 1.0.4) requires 3+
+      method = "composite"
+    )
   expect_no_error(result_2)
 
   # Three tests

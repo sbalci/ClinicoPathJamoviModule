@@ -6,7 +6,7 @@ jms: '1.0'
 authors:
   - Serdar Balci
 maintainer: Serdar Balci <serdarbalci@serdarbalci.com>
-date: '2026-08-07'
+date: '2026-08-10'
 type: R
 description: >-
   ClinicoPath help researchers to generate natural language summaries of their
@@ -1584,8 +1584,8 @@ analyses:
 
       serial negative (exclusion), and parallel testing. Provides comprehensive
 
-      analysis including population flow, cost implications, and Fagan
-      nomograms.
+      analysis including population flow, cost implications, and diagnostic
+      plots.
     ribbon: analyses
     category: analyses
   - title: Decision Curve Analysis

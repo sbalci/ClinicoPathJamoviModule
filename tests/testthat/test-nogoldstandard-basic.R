@@ -16,9 +16,11 @@ test_that("nogoldstandard creates proper class", {
     test2Positive = "Positive",
     test3Positive = NULL,
     test4Positive = NULL,
-    test5Positive = NULL
-  )
-  expect_s3_class(result, "nogoldstandardClass")
+    test5Positive = NULL,
+      # 2 tests: latent_class (the default since 1.0.4) requires 3+
+      method = "composite"
+    )
+  expect_s3_class(result, "nogoldstandardResults")
 })
 
 test_that("nogoldstandard handles basic two-test analysis", {
@@ -33,12 +35,14 @@ test_that("nogoldstandard handles basic two-test analysis", {
     test4Positive = NULL,
     test5Positive = NULL
   )
-  expect_s3_class(result, "nogoldstandardClass")
-  expect_true(length(result$results) > 0)
+  expect_s3_class(result, "nogoldstandardResults")
+  # `result$results` is not an item on a jamovi Results object -- this used to error.
+  expect_gt(result$test_metrics$rowCount, 0)
 })
 
-test_that("nogoldstandard handles latent class analysis", {
-  result <- nogoldstandard(
+test_that("nogoldstandard refuses latent class analysis on only two tests", {
+  # 5 parameters against 3 degrees of freedom: not identified (1.0.4).
+  expect_error(nogoldstandard(
     data = nogoldstandard_test,
     test1 = "Test1",
     test1Positive = "Positive",
@@ -48,8 +52,7 @@ test_that("nogoldstandard handles latent class analysis", {
     test3Positive = NULL,
     test4Positive = NULL,
     test5Positive = NULL
-  )
-  expect_s3_class(result, "nogoldstandardClass")
+  ), "at least 3 tests")
 })
 
 test_that("nogoldstandard handles three-test pathology data", {
@@ -65,7 +68,7 @@ test_that("nogoldstandard handles three-test pathology data", {
     test4Positive = NULL,
     test5Positive = NULL
   )
-  expect_s3_class(result, "nogoldstandardClass")
+  expect_s3_class(result, "nogoldstandardResults")
 })
 
 test_that("nogoldstandard handles four-test tumor marker data", {
@@ -82,7 +85,7 @@ test_that("nogoldstandard handles four-test tumor marker data", {
     method = "composite",
     test5Positive = NULL
   )
-  expect_s3_class(result, "nogoldstandardClass")
+  expect_s3_class(result, "nogoldstandardResults")
 })
 
 test_that("nogoldstandard handles five-test screening data", {
@@ -100,7 +103,7 @@ test_that("nogoldstandard handles five-test screening data", {
     test5Positive = "Positive",
     method = "all_positive"
   )
-  expect_s3_class(result, "nogoldstandardClass")
+  expect_s3_class(result, "nogoldstandardResults")
 })
 
 test_that("nogoldstandard handles composite reference method", {
@@ -115,7 +118,7 @@ test_that("nogoldstandard handles composite reference method", {
     test4Positive = NULL,
     test5Positive = NULL
   )
-  expect_s3_class(result, "nogoldstandardClass")
+  expect_s3_class(result, "nogoldstandardResults")
 })
 
 test_that("nogoldstandard handles all positive method", {
@@ -162,5 +165,5 @@ test_that("nogoldstandard handles Bayesian analysis method", {
     test4Positive = NULL,
     test5Positive = NULL
   )
-  expect_s3_class(result, "nogoldstandardClass")
+  expect_s3_class(result, "nogoldstandardResults")
 })

@@ -2,16 +2,21 @@
 
 # ClinicoPath 1.0.4 — pre-release review of the diagnostic-decision and agreement analyses (2026-08-07)
 
-Four `meddecide` analyses were reviewed end to end for this release, and the three `OncoPath`
-analyses reviewed in 1.0.3 were carried further. The two most serious findings are both things a
-clinician reads straight off the screen: `decisioncompare` silently duplicated every row of every
-table on each re-run, so a three-test comparison became a nine-row table after two option changes;
-and `decision`, given a population prevalence, printed that prevalence beside predictive values
-computed at the study prevalence — arithmetically impossible numbers, in the direction that
-overstates a positive result. `agreement` was applying its ordinal weight matrix over an
+Ten `meddecide` analyses were reviewed end to end for this release — `decisioncompare`,
+`decision`, `agreement`, `lassologistic`, `decisioncombine`, `decisioncalculator`,
+`nogoldstandard`, `cotest`, `sequentialtests` and `enhancedROC` — and the three `OncoPath`
+analyses reviewed in 1.0.3 were carried further. The most serious findings are all things a clinician reads straight off the screen:
+`decisioncompare` silently duplicated every row of every table on each re-run, so a three-test
+comparison became a nine-row table after two option changes; `decision`, given a population
+prevalence, printed that prevalence beside predictive values computed at the study prevalence —
+arithmetically impossible numbers, in the direction that overstates a positive result;
+`nogoldstandard` reported sensitivity and specificity swapped in about half of all latent-class
+runs, and its default method reported 100% sensitivity by construction on every dataset; and
+`cotest` announced a 0% post-test probability for a combination of results its own dependence
+model had made impossible. `agreement` was applying its ordinal weight matrix over an
 alphabetically sorted scale. Every statistic was re-checked against an independent package
-(`epiR`, `DescTools`, `psych`, `binom`, `stats`) and no estimator that was already correct was
-altered. One breaking change, below.
+(`epiR`, `DescTools`, `psych`, `binom`, `poLCA`, `pROC`, `stats`) and no estimator that was already
+correct was altered. Three breaking changes, below.
 
 ## Breaking changes
 
@@ -22,6 +27,23 @@ altered. One breaking change, below.
   generated R wrapper, and **existing scripts calling `decisioncompare()` will fail with
   `argument "goldNegative" is missing, with no default` until they are updated**; pass `NULL` for
   any test you are not using. The jamovi GUI is unaffected.
+- **`decisioncombine()`'s `filterPattern` lost the levels `serial`, `parallel` and `majority`.**
+  That option selects rows of the *observed pattern* table, but those three names describe
+  decision *rules*, which is what the strategy table reports — "serial" as a filter selected the
+  `+/+/+` pattern while the Serial (AND) rule is a different row of a different table. The
+  remaining levels are `all`, `allPositive`, `allNegative` and `mixed`. **A script passing one of
+  the removed values now fails** with `Argument 'filterPattern' must be one of ...`; use
+  `allPositive` for the old `serial` and `all` for the old `parallel`. The jamovi GUI shows only
+  the current levels.
+- **`nogoldstandard()`'s default `method` changed from `all_positive` to `latent_class`.** The old
+  default defines the reference standard as "every test positive", which makes sensitivity and NPV
+  identically 1 for every test on every dataset — it cannot estimate accuracy, which is the whole
+  point of the analysis. `latent_class` is the only method here that estimates sensitivity and
+  specificity without building the reference standard out of the tests themselves. **A new
+  analysis will therefore produce different numbers than it did in 1.0.3**, and because
+  `latent_class` requires three or more tests, a two-test analysis that previously returned
+  (meaningless) results now refuses and says why. Saved `.omv` files keep the method they were
+  saved with. Pass `method = "all_positive"` explicitly to restore the old behaviour.
 
 ## Fixed
 
@@ -179,6 +201,197 @@ altered. One breaking change, below.
   prevalence — was graded against fixed cut-offs, so a model that always predicts the base rate
   scores p(1−p), already 0.09 at 10% prevalence, landing in the "Excellent calibration" band. It is
   now graded as a Brier *skill* score against that null model.
+- **Five of `decisioncombine`'s seven optional outputs were completely non-functional.** `asDF` is
+  an R6 *active binding* on `jmvcore::Table`, so `tbl$asDF` already returns the data frame; the
+  code wrote `tbl$asDF()`, which invoked that data frame as a function and died with "attempt to
+  apply non-function". The recommendation and all four plots were affected.
+- **`decisioncombine` grew its own tables on every re-run**, and then broke. Nothing in the file
+  called `deleteRows()`, and jamovi re-runs `.run()` on the same object whenever an option
+  changes, so rows went 5 → 10 → 15; the duplicated row keys then made `$asDF` fail outright with
+  `duplicate 'row.names' are not allowed`, taking down the second run entirely.
+- **`decisioncombine` explained nothing when it stopped.** `.renderNotices()` sat after three
+  early returns in `.run()`, so the notice saying *why* the analysis had stopped was collected and
+  then discarded — the user saw a blank analysis with no message at all.
+- **`decisioncombine`'s "optimal" rule was an uncorrected argmax.** It ranks 5 candidate rules with
+  two tests, or 10 with three, using no interval and no test, so on pure noise it still names a
+  winner — and called it optimal. It now discloses how many rules were compared and that the
+  winner is not an established finding. The Serial (AND) rule and the all-positive pattern are the
+  same 2×2 under two labels; counting both manufactured a tie and inflated that count.
+- **`decisioncombine` reported proportions and odds ratios in one `estimate` column** — sensitivity
+  appeared as a percentage in one table and as 0.813 in another. Split into separate tables.
+  Serial (AND) also gained its own named row: it was numerically identical to the "+/+/+" pattern
+  and so had been omitted, leaving a reader to know that the pattern *was* the serial rule.
+- **`decisioncombine`'s "mixed" pattern filter dropped genuinely mixed patterns.** It excluded
+  anything *starting with* `+/+` or `-/-`, which removed `+/+/-` and `-/-/+`; and when no pattern
+  matched it fell back to the entire unfiltered table rather than to nothing. A multi-level
+  variable is now flagged instead of silently dichotomised, and a gold standard with a single
+  outcome yields `NA` with a notice rather than a silent number.
+- **`decisioncalculator` grew its own tables on every re-run** — the same defect, verified at the
+  jmvcore level: `addRow()` with an existing `rowKey` *duplicates* rather than replaces (rowCount
+  2 → 4 → 6 over three passes, after which `$asDF` fails). Fixed on the three tables that populate
+  via `addRow`.
+- **`decisioncalculator`'s Fagan nomogram silently failed on any table with a zero cell** —
+  precisely the sparse tables that most need one — because `nomogrammer` rejects a sensitivity or
+  specificity of exactly 0 or 1. The proportions now come from the same Haldane-Anscombe corrected
+  table the likelihood ratios already used, and a test whose positive result argues *against*
+  disease declines with an explanation instead of crashing.
+- **The most clinically useful part of `decisioncalculator`'s nomogram was invisible.**
+  `nomogrammer` prints its reading — prevalence, likelihood ratios, post-test probabilities — to
+  stdout under `Verbose = TRUE`, and jamovi never shows stdout. It is now rendered beside the
+  figure, at the tables' precision rather than `nomogrammer`'s whole percents.
+- **`decisioncalculator`'s cut-off comparison named the wrong alternative.** The verdict was an
+  if/else-if chain, so when both alternatives beat the current cut-off only the first was ever
+  named, however much better the second was. It now picks the best of the three, declines to call
+  a trivial advantage better performance, flags cut-offs whose totals differ (moving a threshold
+  cannot change how many patients there are, so differing totals mean separate studies), and
+  reports whether the Wilson intervals on the accuracies overlap — a formal paired test is not
+  possible from four marginal counts per scenario, and the table now says so.
+- **`nogoldstandard`'s latent-class analysis reported sensitivity and specificity swapped.** The
+  diseased class was identified with `probs[[i]][class, outcome]` but read back as
+  `probs[[i]][2, disease_class]` — the transpose. `[2,2]` and `[1,1]` coincide, so the error only
+  surfaced when poLCA happened to label the diseased group as class 1, which is about half of all
+  runs. Verified against `poLCA` on identical data and against the known truth of simulated data.
+- **`nogoldstandard`'s default method could not estimate accuracy at all, and now does not hide
+  it.** Under `all_positive` the reference standard is "every test positive", so a diseased case
+  can never be test-negative: FN is identically 0 and sensitivity and NPV are 1 for every test on
+  every dataset. It printed "100% (95% CI 100–100%)". `any_positive` is the mirror image (FP ≡ 0,
+  specificity and PPV fixed at 1), and `composite` with two tests *is* `any_positive`, because a
+  1-of-2 tie passes a `rowMeans >= 0.5` majority. Those quantities are now left blank with an
+  explanation rather than reported. See Breaking changes for the default.
+- **`nogoldstandard`'s confidence intervals were too narrow — by about 1.8× for sensitivity at 30%
+  prevalence.** The standard error used the total n for both metrics; the denominators are
+  n × prevalence for sensitivity and n × (1 − prevalence) for specificity.
+- **`nogoldstandard` claimed its latent-class model handles the assumption it actually makes.** The
+  always-visible method guide advertised "Handles conditional dependence" and "No identifiability
+  issues", while `poLCA(nclass = 2, ~ 1)` assumes the tests err *independently* given true status.
+  The guide now says so, a new **Conditional Independence Check** table reports bivariate residuals
+  per test pair (above 3.84 is evidence of a shared error source that inflates estimated accuracy),
+  and it explains that four or more tests are needed for the check to be informative — with three
+  the model is just-identified and reproduces every table exactly. Two tests cannot identify a
+  two-class model at all (5 parameters against 3 degrees of freedom) and are now refused rather
+  than answered with numbers determined by the starting values.
+- **`nogoldstandard`'s Bayesian method disclosed neither its priors nor its nature.** Beta(2, 1) on
+  both sensitivity and specificity has mean 2/3 and increases toward 1, so it pulls estimates
+  upward; nothing in the output mentioned any prior, or that the results are not draws from a
+  posterior. Both are now stated.
+- **A `nogoldstandard` analysis could be killed by one undefined cell.** `if (ppv_denominator > 0)`
+  with an `NA` sensitivity threw "missing value where TRUE/FALSE needed", ending the whole
+  analysis instead of blanking one number. An invalid positive level also produced
+  `Level 'test1_result' not found in variable 'negative, positive'. Available levels: {}` —
+  `jmvcore::reject(formats, code = NULL, ...)` takes `code` as its second *positional* argument,
+  so the substitution values were swallowed and shifted. Bootstrapping is now a single seeded pass
+  with warm-started latent-class fits, and a **Analysis Diagnostics** panel (under Verbose output)
+  reports sample size, method, convergence, random starts and bootstrap failures.
+- **`cotest` reported a 0% post-test probability for a test combination it had made impossible.**
+  When the two tests are modelled as conditionally dependent, the joint probability
+  P(Test1+, Test2+) is bounded above by min of the two marginals — a Fréchet bound. Past that
+  bound the requested dependence is unattainable, and `cotest` truncated it to the bound. The
+  truncation is correct, but it forces one of the four test combinations to have probability
+  exactly zero in one disease group, and the likelihood-ratio helper turned that into a printed
+  post-test probability of `0.000000` — read off the screen as "this combination rules out
+  disease". With the standard cervical co-testing pair (HPV 95%/85%, cytology 55%/97%) that
+  happens from a dependence of 0.25 upward, so the analysis announced that an HPV-negative,
+  cytology-positive woman has no chance of disease. Worse, when *both* groups hit their bounds the
+  ratio was 0/0 and the same `0.000000` was printed for a combination that cannot occur at all and
+  has no post-test probability. The three degenerate cases are now separated: 0/0 is undefined and
+  the row is left blank, a combination impossible only in non-diseased subjects gives exactly 1
+  (it used to print a fake-precision `0.999991` from an internal ratio cap of 1e6), and one
+  impossible only in diseased subjects still gives 0. All three, and the truncation that caused
+  them, now raise a **warning** that says the number follows from the model rather than the data —
+  the truncation was previously reported at "info" severity with no statement of its consequence.
+- **`cotest`'s Fagan nomogram put a raw R error in the results pane.** `nomogrammer()` refuses a
+  positive likelihood ratio below 1, which the permitted specificity range (down to 0.01) can
+  produce; the call was unguarded. The nomogram is now suppressed with an explanation of which
+  ratio was out of range.
+- **`cotest`'s "Understanding Test Dependence" panel was shown even under conditional
+  independence**, where it describes a model that is not being fitted — the `visible: (!indep)`
+  instance of the package-wide leading-`!` defect above. Rewritten as `(indep == FALSE)`.
+- `cotest`'s post-test probabilities under conditional independence were confirmed against Bayes'
+  theorem to nine decimal places, and the dependent model was confirmed to reduce to them exactly
+  at zero dependence. The analysis's own regression tests had asserted four *different* values,
+  implying joint likelihood ratios of 120/2.105/3.333/0.0585 where the correct ones are
+  112/2.526/3.111/0.0702; the module was right and the expected values were fabricated. Eight
+  further assertions passed a message containing parentheses as a regular expression, so they
+  never matched and — because testthat re-raises a non-matching error — masked each other.
+- **`cotest`'s joint-probability validation could never fail.** It compared the sum of the four
+  cells against 1, but the caller *defines* the fourth cell as one minus the other three, so the
+  sum was 1 by construction and the check passed on any input, including a set whose cells no
+  longer matched the sensitivities they were built from. It now also verifies that each cell is a
+  probability and that P(both) + P(one only) still reproduces the marginal it was derived from —
+  the invariant that clamping could actually break.
+- **`cotest` now accepts negative conditional dependence.** The parameter was bounded at 0, so
+  tests that partly compensate for each other's errors — a real situation, and the case where
+  co-testing does better than the independence assumption predicts — could not be expressed at
+  all. The permitted range is now −1 to 1 in the option, the UI clamp and the backend validation.
+  The existing Fréchet clamping already handled negative values correctly; verified that the
+  resulting joint distributions are valid and reproduce their marginals across the full range.
+  Note the feasible negative range is narrow for tests with high specificity, and values beyond
+  it are truncated with the warning described above.
+- **`cotest`'s post-test probabilities carry no uncertainty, and now say so where they are read.**
+  Sensitivity, specificity and prevalence are all typed in by the user and treated as exact, so
+  none of the reported probabilities has a confidence interval. That was stated only in the
+  collapsible "Getting Started" panel; it is now a note on the results table itself.
+
+- **`enhancedROC` doubled every results table on each re-run, and then broke.** Twenty-one
+  `addRow()` calls and not one `deleteRows()`. jamovi re-runs an analysis on the same object
+  whenever any option changes, so the AUC summary went 2 → 4 → 6 rows and the cut-off table
+  32 → 64 → 96; from the second run onward the tables could not be read at all, failing with
+  `duplicate 'row.names' are not allowed`. Anyone who ticked a checkbox mid-session was reading
+  each predictor two or three times over. Fixed on all 18 tables that populate by `addRow`.
+- **`enhancedROC` had no random seed anywhere in 4,500 lines**, while resampling in four places:
+  bootstrap AUC intervals, bootstrap ROC comparisons, internal-validation resamples, and
+  cross-validation fold assignment. Two identical runs returned 95% intervals of 0.775–0.862 and
+  0.771–0.862. A new **Random Seed** option (default 0) now seeds every one of them, so a run is
+  reproducible; the caller's own random number stream is restored afterwards.
+- **`enhancedROC`'s automatic direction detection biases the AUC upward, and now says by how
+  much.** `pROC`'s auto-detection reads the direction from the data by comparing the two groups'
+  medians, and it is the default. Because the direction is then fitted from the same data that
+  supply the AUC, the AUC is inflated: simulating a marker carrying no information at all gives a
+  mean reported AUC of 0.593 at n = 20 and 0.565 at n = 40, against 0.502 when the direction is
+  fixed in advance, and exceeds 0.60 in 43% of runs at n = 20. That is enough to turn a null pilot
+  study into an apparently promising biomarker. The existing notice named the direction chosen but
+  not this consequence, and was filed as an informational message. It is now a warning that states
+  the expected AUC for an uninformative marker at the study's own sample size and recommends
+  setting Direction explicitly.
+- **Three of `enhancedROC`'s comparison options did nothing without explanation.** Pairwise
+  comparisons, metric differences and statistical comparison all require Analysis Type to be
+  "Comparative ROC Analysis", but the interface offers them as plain checkboxes with no such
+  dependency, so ticking one under the default Analysis Type produced no output and no message.
+  They now say what to change.
+- **Nineteen `enhancedROC` options were documented as working features but do nothing.** They
+  reach the public R wrapper and `?enhancedROC` described them in the present tense — "Calculate
+  Harrell's concordance index for time-to-event outcomes" — while the backend merely lists them
+  in a "planned features" notice at run time. None has an interface control, so this affected R
+  callers and the help page rather than the jamovi menus. All twenty such options (including
+  `splineKnots`, which configures one of them) are now prefixed "NOT YET IMPLEMENTED - selecting
+  this produces no output" in their documentation. AUC itself was confirmed against `pROC` to
+  nine decimal places under every direction setting.
+- **`sequentialtests` ignored its clinical presets whenever it was called from R.** The eight
+  presets are applied by the analysis's JavaScript, which only runs inside jamovi, so
+  `sequentialtests(preset = "hiv_screening_confirmation")` silently analysed the panel defaults
+  instead of ELISA and Western Blot at 2% prevalence. The presets are now applied in the backend
+  as well, and a test compares the R table against the JavaScript one field by field so the two
+  cannot drift apart.
+- **`sequentialtests` presented illustrative teaching numbers as evidence.** The preset control
+  was documented as loading "evidence-based test parameters and optimal strategies from medical
+  literature". The values are rounded approximations with no citation, no interval and no
+  population behind them, chosen to make each strategy's behaviour easy to see. Selecting a preset
+  now raises a warning that the values are for demonstration only and must not be used to design a
+  protocol or advise on a patient, and the same caveat appears in the interface and in the option
+  documentation. The eleven bundled `sequentialtests_*` example datasets, which previously had no
+  documentation at all, are now documented and lead with the same warning.
+- **`sequentialtests` advertised a Fagan nomogram it does not have.** The word appeared in the
+  analysis description and nowhere else in the module — no option, no result, no code — while
+  every sibling analysis in the same menu does have one.
+- **Two of `sequentialtests`' three strategies are the same rule, and nothing said so.** Serial
+  testing of negatives and parallel testing both call a subject positive if either test is
+  positive, so they give identical sensitivity, specificity, PPV and NPV; they differ only in how
+  many second tests are performed. Users comparing them saw two identical rows with no
+  explanation. Also fixed: the conditional-independence caveat was attached only to parallel
+  testing and, because the summary table declares no `clearWith`, it stayed on screen after
+  switching to a serial strategy — a note about parallel testing sitting under a row labelled
+  "Serial Testing". The assumption applies to all three strategies and is now stated for all
+  three, alongside a note that the inputs are treated as exact and carry no confidence interval.
 
 ### Tumour response and heterogeneity (also released in `OncoPath`)
 

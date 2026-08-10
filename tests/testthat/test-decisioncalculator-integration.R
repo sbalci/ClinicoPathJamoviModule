@@ -32,8 +32,8 @@ test_that("produces consistent results across multiple runs", {
     ci = TRUE
   )
 
-  expect_s3_class(result1, "decisioncalculatorClass")
-  expect_s3_class(result2, "decisioncalculatorClass")
+  expect_s3_class(result1, "decisioncalculatorResults")
+  expect_s3_class(result2, "decisioncalculatorResults")
 })
 
 # ═══════════════════════════════════════════════════════════
@@ -48,7 +48,7 @@ test_that("workflow: screening test evaluation", {
     FP = decisioncalculator_screening$FP,
     FN = decisioncalculator_screening$FN
   )
-  expect_s3_class(basic, "decisioncalculatorClass")
+  expect_s3_class(basic, "decisioncalculatorResults")
 
   # Step 2: Add confidence intervals
   with_ci <- decisioncalculator(
@@ -58,7 +58,7 @@ test_that("workflow: screening test evaluation", {
     FN = decisioncalculator_screening$FN,
     ci = TRUE
   )
-  expect_s3_class(with_ci, "decisioncalculatorClass")
+  expect_s3_class(with_ci, "decisioncalculatorResults")
 
   # Step 3: Add population prevalence and Fagan nomogram
   complete <- decisioncalculator(
@@ -71,7 +71,7 @@ test_that("workflow: screening test evaluation", {
     pprob = 0.005,  # Population prevalence
     fagan = TRUE
   )
-  expect_s3_class(complete, "decisioncalculatorClass")
+  expect_s3_class(complete, "decisioncalculatorResults")
 })
 
 # ═══════════════════════════════════════════════════════════
@@ -86,7 +86,7 @@ test_that("workflow: sequential screening then confirmatory testing", {
     pprob = 0.005,
     ci = TRUE
   )
-  expect_s3_class(screening, "decisioncalculatorClass")
+  expect_s3_class(screening, "decisioncalculatorResults")
 
   # Second: Confirmatory test on screen-positives
   confirmatory <- decisioncalculator(
@@ -99,7 +99,7 @@ test_that("workflow: sequential screening then confirmatory testing", {
     ci = TRUE,
     fagan = TRUE
   )
-  expect_s3_class(confirmatory, "decisioncalculatorClass")
+  expect_s3_class(confirmatory, "decisioncalculatorResults")
 })
 
 # ═══════════════════════════════════════════════════════════
@@ -122,7 +122,7 @@ test_that("workflow: biomarker validation with full documentation", {
     showGlossary = TRUE
   )
 
-  expect_s3_class(result, "decisioncalculatorClass")
+  expect_s3_class(result, "decisioncalculatorResults")
 })
 
 # ═══════════════════════════════════════════════════════════
@@ -155,7 +155,7 @@ test_that("workflow: compare multiple diagnostic thresholds", {
     ci = TRUE
   )
 
-  expect_s3_class(result, "decisioncalculatorClass")
+  expect_s3_class(result, "decisioncalculatorResults")
 })
 
 # ═══════════════════════════════════════════════════════════
@@ -171,7 +171,7 @@ test_that("workflow: demonstrate prevalence effect on PPV/NPV", {
     ci = TRUE,
     fagan = TRUE
   )
-  expect_s3_class(low_prev, "decisioncalculatorClass")
+  expect_s3_class(low_prev, "decisioncalculatorResults")
 
   # Same test characteristics, high prevalence
   high_prev <- decisioncalculator(
@@ -181,7 +181,7 @@ test_that("workflow: demonstrate prevalence effect on PPV/NPV", {
     ci = TRUE,
     fagan = TRUE
   )
-  expect_s3_class(high_prev, "decisioncalculatorClass")
+  expect_s3_class(high_prev, "decisioncalculatorResults")
 })
 
 # ═══════════════════════════════════════════════════════════
@@ -201,7 +201,7 @@ test_that("workflow: rapid point-of-care test assessment", {
     showSummary = TRUE
   )
 
-  expect_s3_class(result, "decisioncalculatorClass")
+  expect_s3_class(result, "decisioncalculatorResults")
 })
 
 # ═══════════════════════════════════════════════════════════
@@ -222,7 +222,7 @@ test_that("workflow: imaging study performance assessment", {
     showGlossary = TRUE
   )
 
-  expect_s3_class(result, "decisioncalculatorClass")
+  expect_s3_class(result, "decisioncalculatorResults")
 })
 
 # ═══════════════════════════════════════════════════════════
@@ -244,7 +244,7 @@ test_that("workflow: complete publication-ready analysis", {
     showAbout = TRUE
   )
 
-  expect_s3_class(result, "decisioncalculatorClass")
+  expect_s3_class(result, "decisioncalculatorResults")
 })
 
 # ═══════════════════════════════════════════════════════════
@@ -256,14 +256,14 @@ test_that("workflow: iterative analysis from simple to comprehensive", {
   step1 <- decisioncalculator(
     TP = 90, TN = 80, FP = 20, FN = 10
   )
-  expect_s3_class(step1, "decisioncalculatorClass")
+  expect_s3_class(step1, "decisioncalculatorResults")
 
   # Add CI
   step2 <- decisioncalculator(
     TP = 90, TN = 80, FP = 20, FN = 10,
     ci = TRUE
   )
-  expect_s3_class(step2, "decisioncalculatorClass")
+  expect_s3_class(step2, "decisioncalculatorResults")
 
   # Add prevalence
   step3 <- decisioncalculator(
@@ -272,7 +272,7 @@ test_that("workflow: iterative analysis from simple to comprehensive", {
     pp = TRUE,
     pprob = 0.15
   )
-  expect_s3_class(step3, "decisioncalculatorClass")
+  expect_s3_class(step3, "decisioncalculatorResults")
 
   # Add visualization
   step4 <- decisioncalculator(
@@ -282,7 +282,7 @@ test_that("workflow: iterative analysis from simple to comprehensive", {
     pprob = 0.15,
     fagan = TRUE
   )
-  expect_s3_class(step4, "decisioncalculatorClass")
+  expect_s3_class(step4, "decisioncalculatorResults")
 
   # Complete analysis
   step5 <- decisioncalculator(
@@ -294,7 +294,7 @@ test_that("workflow: iterative analysis from simple to comprehensive", {
     fnote = TRUE,
     showSummary = TRUE
   )
-  expect_s3_class(step5, "decisioncalculatorClass")
+  expect_s3_class(step5, "decisioncalculatorResults")
 })
 
 # ═══════════════════════════════════════════════════════════
@@ -307,14 +307,14 @@ test_that("workflow: compare screening vs confirmatory tests", {
     TP = 95, TN = 150, FP = 50, FN = 5,
     ci = TRUE
   )
-  expect_s3_class(screening, "decisioncalculatorClass")
+  expect_s3_class(screening, "decisioncalculatorResults")
 
   # High specificity confirmatory
   confirmatory <- decisioncalculator(
     TP = 85, TN = 195, FP = 5, FN = 15,
     ci = TRUE
   )
-  expect_s3_class(confirmatory, "decisioncalculatorClass")
+  expect_s3_class(confirmatory, "decisioncalculatorResults")
 })
 
 test_that("workflow: evaluate all scenarios from dataset", {
@@ -330,7 +330,7 @@ test_that("workflow: evaluate all scenarios from dataset", {
       ci = TRUE
     )
 
-    expect_s3_class(result, "decisioncalculatorClass")
+    expect_s3_class(result, "decisioncalculatorResults")
   }
 })
 
@@ -355,7 +355,7 @@ test_that("workflow: demonstrate all documentation features for teaching", {
     showGlossary = TRUE
   )
 
-  expect_s3_class(result, "decisioncalculatorClass")
+  expect_s3_class(result, "decisioncalculatorResults")
 })
 
 # ═══════════════════════════════════════════════════════════
@@ -373,7 +373,7 @@ test_that("workflow: sensitivity analysis across prevalence values", {
       ci = TRUE
     )
 
-    expect_s3_class(result, "decisioncalculatorClass")
+    expect_s3_class(result, "decisioncalculatorResults")
   }
 })
 
@@ -391,7 +391,7 @@ test_that("workflow: extracting counts from dataset and using in calculator", {
     ci = TRUE
   )
 
-  expect_s3_class(result, "decisioncalculatorClass")
+  expect_s3_class(result, "decisioncalculatorResults")
 })
 
 test_that("workflow: handles integer inputs", {
@@ -402,7 +402,7 @@ test_that("workflow: handles integer inputs", {
     FN = as.integer(10)
   )
 
-  expect_s3_class(result, "decisioncalculatorClass")
+  expect_s3_class(result, "decisioncalculatorResults")
 })
 
 # ═══════════════════════════════════════════════════════════
@@ -418,7 +418,7 @@ test_that("workflow: evaluate test for rule-in vs rule-out", {
     fagan = TRUE,
     showSummary = TRUE
   )
-  expect_s3_class(rule_in, "decisioncalculatorClass")
+  expect_s3_class(rule_in, "decisioncalculatorResults")
 
   # High sensitivity for rule-out (exclude diagnosis)
   rule_out <- decisioncalculator(
@@ -428,7 +428,7 @@ test_that("workflow: evaluate test for rule-in vs rule-out", {
     fagan = TRUE,
     showSummary = TRUE
   )
-  expect_s3_class(rule_out, "decisioncalculatorClass")
+  expect_s3_class(rule_out, "decisioncalculatorResults")
 })
 
 # ═══════════════════════════════════════════════════════════
@@ -441,21 +441,21 @@ test_that("workflow: evaluate multiple studies for meta-analysis", {
     TP = 90, TN = 180, FP = 20, FN = 10,
     ci = TRUE
   )
-  expect_s3_class(study1, "decisioncalculatorClass")
+  expect_s3_class(study1, "decisioncalculatorResults")
 
   # Study 2
   study2 <- decisioncalculator(
     TP = 85, TN = 170, FP = 30, FN = 15,
     ci = TRUE
   )
-  expect_s3_class(study2, "decisioncalculatorClass")
+  expect_s3_class(study2, "decisioncalculatorResults")
 
   # Study 3
   study3 <- decisioncalculator(
     TP = 95, TN = 190, FP = 10, FN = 5,
     ci = TRUE
   )
-  expect_s3_class(study3, "decisioncalculatorClass")
+  expect_s3_class(study3, "decisioncalculatorResults")
 })
 
 # ═══════════════════════════════════════════════════════════
@@ -468,19 +468,19 @@ test_that("workflow: monitor test performance over time", {
     TP = 88, TN = 175, FP = 25, FN = 12,
     ci = TRUE
   )
-  expect_s3_class(q1, "decisioncalculatorClass")
+  expect_s3_class(q1, "decisioncalculatorResults")
 
   # Quarter 2 (improved)
   q2 <- decisioncalculator(
     TP = 92, TN = 182, FP = 18, FN = 8,
     ci = TRUE
   )
-  expect_s3_class(q2, "decisioncalculatorClass")
+  expect_s3_class(q2, "decisioncalculatorResults")
 
   # Quarter 3 (further improved)
   q3 <- decisioncalculator(
     TP = 95, TN = 188, FP = 12, FN = 5,
     ci = TRUE
   )
-  expect_s3_class(q3, "decisioncalculatorClass")
+  expect_s3_class(q3, "decisioncalculatorResults")
 })

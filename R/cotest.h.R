@@ -56,13 +56,13 @@ cotestOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 "cond_dep_pos",
                 cond_dep_pos,
                 default=0.05,
-                min=0,
+                min=-1,
                 max=1)
             private$..cond_dep_neg <- jmvcore::OptionNumber$new(
                 "cond_dep_neg",
                 cond_dep_neg,
                 default=0.05,
-                min=0,
+                min=-1,
                 max=1)
             private$..prevalence <- jmvcore::OptionNumber$new(
                 "prevalence",
@@ -215,7 +215,7 @@ cotestResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 options=options,
                 name="dependenceInfo",
                 title="Test Dependence Information",
-                visible="(!indep)"))
+                visible="(indep == FALSE)"))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="dependenceExplanation",
@@ -278,11 +278,18 @@ cotestBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' @param test2_spec Specificity (true negative rate) of Test 2.
 #' @param indep Assume tests are conditionally independent (default is false
 #'   for safety). Use true only if tests measure completely different phenomena.
-#' @param cond_dep_pos Conditional dependence between tests for subjects with
-#'   disease. Value between 0 (independence) and 1 (complete dependence).
-#' @param cond_dep_neg Conditional dependence between tests for subjects
-#'   without disease. Value between 0 (independence) and 1 (complete
-#'   dependence).
+#' @param cond_dep_pos Correlation between the two test results among subjects
+#'   with disease, where 0 is conditional independence and 1 is the strongest
+#'   dependence the marginals allow. Negative values describe tests that
+#'   compensate for each other's errors; they are permitted, but the feasible
+#'   negative range is narrow for tests with high specificity and values beyond
+#'   it are truncated with a warning.
+#' @param cond_dep_neg Correlation between the two test results among subjects
+#'   without disease, where 0 is conditional independence and 1 is the strongest
+#'   dependence the marginals allow. Negative values describe tests that
+#'   compensate for each other's errors; they are permitted, but the feasible
+#'   negative range is narrow for tests with high specificity and values beyond
+#'   it are truncated with a warning.
 #' @param prevalence Prior probability (disease prevalence in the population).
 #'   Requires a value between 0.001 and 0.999.
 #' @param fnote .

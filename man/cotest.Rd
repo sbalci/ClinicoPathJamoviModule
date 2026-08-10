@@ -30,12 +30,19 @@ cotest(
 \item{indep}{Assume tests are conditionally independent (default is false
 for safety). Use true only if tests measure completely different phenomena.}
 
-\item{cond_dep_pos}{Conditional dependence between tests for subjects with
-disease. Value between 0 (independence) and 1 (complete dependence).}
+\item{cond_dep_pos}{Correlation between the two test results among subjects
+with disease, where 0 is conditional independence and 1 is the strongest
+dependence the marginals allow. Negative values describe tests that
+compensate for each other's errors; they are permitted, but the feasible
+negative range is narrow for tests with high specificity and values beyond
+it are truncated with a warning.}
 
-\item{cond_dep_neg}{Conditional dependence between tests for subjects
-without disease. Value between 0 (independence) and 1 (complete
-dependence).}
+\item{cond_dep_neg}{Correlation between the two test results among subjects
+without disease, where 0 is conditional independence and 1 is the strongest
+dependence the marginals allow. Negative values describe tests that
+compensate for each other's errors; they are permitted, but the feasible
+negative range is narrow for tests with high specificity and values beyond
+it are truncated with a warning.}
 
 \item{prevalence}{Prior probability (disease prevalence in the population).
 Requires a value between 0.001 and 0.999.}

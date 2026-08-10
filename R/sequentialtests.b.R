@@ -62,6 +62,43 @@ sequentialtestsClass <- if (requireNamespace('jmvcore'))
                 strategy <- self$options$strategy
                 prevalence <- self$options$prevalence
 
+                # Apply the clinical preset. In the jamovi GUI the preset is applied by
+                # jamovi/js/sequentialtests.events.js, which writes the values into the controls;
+                # nothing runs that JavaScript when the analysis is called from R, so without
+                # this the preset was silently ignored and the defaults were analysed instead.
+                # Values must stay in step with SEQUENTIAL_PRESET_CONFIGS in that file --
+                # test-sequentialtests-release-review.R compares the two tables.
+                preset <- self$options$preset
+                if (!is.null(preset) && preset != "custom") {
+                    preset_values <- private$.getPresetValues(preset)
+                    if (is.null(preset_values)) {
+                        private$.addNotice('WARNING', 'Unknown Preset', sprintf(
+                            'Preset "%s" is not recognised; the values shown in the panel were used instead.', preset))
+                    } else {
+                        test1_name <- preset_values$test1_name
+                        test1_sens <- preset_values$test1_sens
+                        test1_spec <- preset_values$test1_spec
+                        test2_name <- preset_values$test2_name
+                        test2_sens <- preset_values$test2_sens
+                        test2_spec <- preset_values$test2_spec
+                        prevalence <- preset_values$prevalence
+                        strategy   <- preset_values$strategy
+
+                        private$.addNotice(
+                            'STRONG_WARNING',
+                            'Preset Values Are For Demonstration Only',
+                            sprintf(paste0(
+                                'The "%s" preset supplies round, illustrative numbers chosen to demonstrate ',
+                                'how sequential testing behaves. They are NOT validated clinical parameters, ',
+                                'they are not taken from any specific published study, and the prevalence is ',
+                                'not your population\'s. Do not use these results to design a real testing ',
+                                'protocol or to advise on a real patient. Replace every value with ',
+                                'sensitivity, specificity and prevalence estimates from your own setting ',
+                                'or from a source you have checked.'),
+                                preset))
+                    }
+                }
+
                 format_percent <- function(value) {
                     if (is.na(value))
                         return("not defined")
@@ -576,12 +613,54 @@ sequentialtestsClass <- if (requireNamespace('jmvcore'))
                 # Update summary table
                 summaryTable <- self$results$summary_table
                 
-                # Add independence warning if parallel strategy is used
-                if (strategy == "parallel") {
-                    summaryTable$setNote(
-                        key = "independence_warning",
-                        note = "Note: Parallel testing calculations assume conditional independence between tests. If tests are correlated, combined sensitivity/specificity may be overestimated."
+                # The independence assumption applies to ALL THREE strategies, not just parallel:
+                # every combined figure multiplies the two tests' conditional probabilities. This
+                # note used to be set only for `parallel`, and summary_table has no clearWith, so
+                # switching to a serial strategy left the parallel wording sitting under a row
+                # labelled "Serial Testing". Setting it every run keeps the note and the row in
+                # step whichever strategy is chosen.
+                # Every input is a point estimate typed in by the user, so nothing here has a
+                # confidence interval. That belongs beside the numbers, not only in the guides.
+                summaryTable$setNote(
+                    key = "fixed_inputs",
+                    note = paste0(
+                        "Sensitivity, specificity and prevalence are treated as exact. These combined ",
+                        "figures therefore carry <i>no</i> confidence interval and do not reflect ",
+                        "sampling uncertainty in the values entered \u{2014} published test performance ",
+                        "and local prevalence both vary."
                     )
+                )
+
+                summaryTable$setNote(
+                    key = "independence_warning",
+                    note = paste0(
+                        "Combined figures assume the two tests are <i>conditionally independent</i> ",
+                        "\u{2014} that, among people with the same disease status, one test's result ",
+                        "says nothing about the other's. Tests measuring related biology usually ",
+                        "violate this, and the combined sensitivity and specificity above are then ",
+                        "too optimistic."
+                    )
+                )
+
+                # Serial-negative and parallel testing apply the same rule (positive if either test
+                # is positive), so they are algebraically identical in accuracy: sens1 + (1 - sens1)
+                # * sens2 is the same number as sens1 + sens2 - sens1 * sens2. They differ only in
+                # how many second tests get performed. Without saying so, a user comparing the two
+                # sees byte-identical rows and reasonably suspects a bug.
+                if (strategy %in% c("serial_negative", "parallel")) {
+                    other <- if (strategy == "parallel") "serial testing of negatives" else "parallel testing"
+                    summaryTable$setNote(
+                        key = "equivalence_note",
+                        note = paste0(
+                            "This strategy gives exactly the same sensitivity, specificity, PPV and NPV as ",
+                            other, ": both call a subject positive if <i>either</i> test is positive. They ",
+                            "differ only in how many second tests are performed, which the cost analysis shows."
+                        )
+                    )
+                } else {
+                    # Not applicable to serial-positive; clear it so it cannot persist from an
+                    # earlier run with a different strategy.
+                    summaryTable$setNote(key = "equivalence_note", note = NULL)
                 }
                 
                 # Generate explanation HTML
@@ -1389,7 +1468,7 @@ sequentialtestsClass <- if (requireNamespace('jmvcore'))
                 }
 
                 prob_plot <- ggplot2::ggplot(prob_data, ggplot2::aes(x = x, y = Probability, color = Path, group = Path)) +
-                    ggplot2::geom_line(size = 2, alpha = 0.7) +
+                    ggplot2::geom_line(linewidth = 2, alpha = 0.7) +
                     ggplot2::geom_point(size = 4) +
                     ggplot2::geom_text(ggplot2::aes(label = sprintf("%.1f%%", Probability)),
                                       vjust = -1.5, hjust = 0.5, size = 3) +
@@ -1548,7 +1627,7 @@ sequentialtestsClass <- if (requireNamespace('jmvcore'))
 
                 # Create sensitivity analysis plot
                 sens_plot <- ggplot2::ggplot(df, ggplot2::aes(x = Prevalence, y = Value, color = Metric)) +
-                    ggplot2::geom_line(size = 1.5, alpha = 0.8) +
+                    ggplot2::geom_line(linewidth = 1.5, alpha = 0.8) +
                     ggplot2::geom_vline(xintercept = plotData$Prevalence, linetype = "dashed",
                                        color = "gray40", size = 0.8, alpha = 0.7) +
                     ggplot2::annotate("text", x = plotData$Prevalence, y = 0.95,
@@ -1583,6 +1662,45 @@ sequentialtestsClass <- if (requireNamespace('jmvcore'))
             # avoids BOTH the jmvcore::Notice serialization error from
             # self$results$insert(999, Notice) AND any HTML in notices (project convention:
             # notice content must be plain text). ====
+            # Clinical presets. This table MUST match SEQUENTIAL_PRESET_CONFIGS in
+            # jamovi/js/sequentialtests.events.js -- the JavaScript applies presets in the GUI,
+            # this applies them for callers from R, and a regression test compares the two.
+            .getPresetValues = function(preset) {
+                presets <- list(
+                    covid_screening_confirmation = list(
+                        test1_name = 'Rapid Antigen Test', test1_sens = 0.75, test1_spec = 0.95,
+                        test2_name = 'RT-PCR',             test2_sens = 0.95, test2_spec = 0.99,
+                        prevalence = 0.08, strategy = 'serial_positive'),
+                    breast_cancer_screening = list(
+                        test1_name = 'Mammography',        test1_sens = 0.85, test1_spec = 0.90,
+                        test2_name = 'Tissue Biopsy',      test2_sens = 0.98, test2_spec = 0.99,
+                        prevalence = 0.06, strategy = 'serial_positive'),
+                    mi_emergency_parallel = list(
+                        test1_name = 'Troponin',           test1_sens = 0.90, test1_spec = 0.95,
+                        test2_name = 'ECG',                test2_sens = 0.70, test2_spec = 0.90,
+                        prevalence = 0.20, strategy = 'parallel'),
+                    tb_screening_confirmation = list(
+                        test1_name = 'Chest X-ray',        test1_sens = 0.75, test1_spec = 0.80,
+                        test2_name = 'Sputum Culture',     test2_sens = 0.85, test2_spec = 0.98,
+                        prevalence = 0.12, strategy = 'serial_positive'),
+                    prostate_screening_exclusion = list(
+                        test1_name = 'PSA Test',           test1_sens = 0.80, test1_spec = 0.70,
+                        test2_name = 'MRI',                test2_sens = 0.90, test2_spec = 0.85,
+                        prevalence = 0.15, strategy = 'serial_negative'),
+                    hiv_screening_confirmation = list(
+                        test1_name = 'ELISA',              test1_sens = 0.98, test1_spec = 0.95,
+                        test2_name = 'Western Blot',       test2_sens = 0.99, test2_spec = 0.99,
+                        prevalence = 0.02, strategy = 'serial_positive'),
+                    stroke_emergency_parallel = list(
+                        test1_name = 'Clinical Assessment', test1_sens = 0.85, test1_spec = 0.75,
+                        test2_name = 'CT Scan',             test2_sens = 0.95, test2_spec = 0.98,
+                        prevalence = 0.25, strategy = 'parallel')
+                )
+                if (!preset %in% names(presets))
+                    return(NULL)
+                presets[[preset]]
+            },
+
             .noticeList = list(),
 
             .addNotice = function(type, title, content) {

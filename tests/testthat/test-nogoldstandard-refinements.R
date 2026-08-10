@@ -51,8 +51,10 @@ test_that("nogoldstandard enforces constraints and handles warnings", {
         method = "bayesian"
     )
     
-    expect_true(results_tiny$warnings$visible)
-    expect_match(results_tiny$warnings$content, "Bayesian analysis may be unstable with N < 50")
+    # There is no `warnings` item on this analysis -- reading it errored. Notices render into
+    # the `notices` Html item.
+    expect_true(results_tiny$notices$visible)
+    expect_match(results_tiny$notices$content, "Bayesian analysis may be unstable with N &lt; 50|Bayesian analysis may be unstable with N < 50")
     
     # Test 3: Bootstrap Execution and CIs
     # -----------------------------------

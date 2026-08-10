@@ -74,7 +74,7 @@ PATCHES/
 .claude/PLAYBOOKS.md
 .agents/
 docs/SECURITY/
-*.bak.*
+*.bak*
 
 # subagent-driven-development scratch
 .superpowers/

@@ -17,7 +17,7 @@ nogoldstandard(
   test4Positive,
   test5 = NULL,
   test5Positive,
-  method = "all_positive",
+  method = "latent_class",
   bootstrap = FALSE,
   nboot = 1000,
   alpha = 0.05,
@@ -77,6 +77,8 @@ A results object containing:
 \code{results$prevalence} \tab \tab \tab \tab \tab a table \cr
 \code{results$test_metrics} \tab \tab \tab \tab \tab a table \cr
 \code{results$model_fit} \tab \tab \tab \tab \tab a table \cr
+\code{results$conditional_dependence} \tab \tab \tab \tab \tab Latent class analysis assumes the tests err independently given true disease status. For each pair this compares the observed two-way table with the one the fitted model implies; a residual above 3.84 (the 5 percent point of chi-squared on 1 degree of freedom) is evidence that the pair shares a source of error, which inflates the estimated accuracy. Requires four or more tests: with three the model is just-identified and reproduces every table exactly, so no residual can reveal dependence. \cr
+\code{results$diagnostics} \tab \tab \tab \tab \tab Detail of how the estimates were produced: sample size, method, convergence, number of random starts used, and bootstrap failures. Shown only when Verbose output is enabled. \cr
 \code{results$crosstab} \tab \tab \tab \tab \tab a table \cr
 \code{results$agreement_plot} \tab \tab \tab \tab \tab an image \cr
 \code{results$agreement_plot2} \tab \tab \tab \tab \tab an image \cr

@@ -2101,10 +2101,13 @@ if (!WIP & webpage) {
 # check below) plus a tests/testthat.R runner. By DEFAULT this is done only for
 # submodules that have no pre-existing functional tests. The shipped guard is a
 # strict dependency-policy test and will fail on undeclared package usage. The
-# umbrella's per-analysis functional tests are also distributable (name-keyed and
-# namespace-translated by copy_module_tests), but the umbrella suite currently has
-# failing tests, so full distribution is gated behind `copy_test_files` -- enable it
-# once that suite is green so a submodule's R CMD check does not go red.
+# umbrella's per-analysis functional tests are also distributable: copy_module_tests keys
+# off each submodule's function list (^test-<fn>... AND ^helper-<fn>..., so a suite's shared
+# setup travels with it) and translates ClinicoPath:: -> <module>::. Distribution stays
+# gated behind `copy_test_files` because the umbrella suite is not green across every
+# analysis yet -- enable it once it is, so a submodule's R CMD check does not go red.
+# Datasets are the other prerequisite: a copied test calling data(<x>, package = "<module>")
+# needs <x> in that module's data_files manifest.
 if (!TEST) {
   guard_template <- file.path(main_repo_dir, "_updateModules_test_dependency_guard.R")
   umbrella_tests <- file.path(main_repo_dir, "tests", "testthat")

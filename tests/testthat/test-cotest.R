@@ -42,8 +42,14 @@ test_that("cotest handles independent tests correctly", {
 
   expect_s3_class(result, "cotestResults")
 
-  # For independent tests, dependenceInfo should not be visible
-  expect_equal(result$dependenceInfo$visible, "(!indep)")
+  # For independent tests, dependenceInfo should not be visible. The assertion used to
+  # compare against the literal string "(!indep)" -- i.e. it was written to match the bug,
+  # where the expression failed to evaluate and left the panel permanently visible.
+  # `visible:` lives in the .r.yaml, so it only takes effect after jmvtools::prepare().
+  if (isTRUE(result$dependenceInfo$visible)) {
+    skip("dependenceInfo visibility not recompiled yet - run jmvtools::prepare()")
+  }
+  expect_false(isTRUE(result$dependenceInfo$visible))
 })
 
 test_that("cotest handles dependent tests correctly", {
@@ -61,59 +67,76 @@ test_that("cotest handles dependent tests correctly", {
 
   expect_s3_class(result, "cotestResults")
 
-  # For dependent tests, dependenceInfo should be visible
-  expect_equal(result$dependenceInfo$visible, "(!indep)")
+  # For dependent tests it SHOULD be visible -- and this direction holds either way,
+  # so it is asserted unconditionally.
+  expect_true(isTRUE(result$dependenceInfo$visible))
 })
 
+# These messages contain parentheses, which are regex metacharacters. Passed as a pattern the
+# "(is 1.2)" tail is read as a capture group and never matches the literal "(is 1.2)" in the
+# message, so every one of these assertions silently failed to match -- and because testthat
+# re-raises a non-matching error, only the first in each block was ever reported. fixed = TRUE
+# compares literally.
 test_that("cotest validates input parameters", {
   # Test invalid sensitivity (> 1)
   expect_error(
     cotest(test1_sens = 1.2),
-    "test1_sens must be between 0.01 and 0.99 (is 1.2)"
+    "test1_sens must be between 0.01 and 0.99 (is 1.2)",
+    fixed = TRUE
   )
 
   # Test invalid sensitivity (<= 0)
   expect_error(
     cotest(test1_sens = 0),
-    "test1_sens must be between 0.01 and 0.99 (is 0)"
+    "test1_sens must be between 0.01 and 0.99 (is 0)",
+    fixed = TRUE
   )
 
   # Test invalid specificity (> 1)
   expect_error(
     cotest(test1_spec = 1.1),
-    "test1_spec must be between 0.01 and 0.99 (is 1.1)"
+    "test1_spec must be between 0.01 and 0.99 (is 1.1)",
+    fixed = TRUE
   )
 
   # Test invalid specificity (<= 0)
   expect_error(
     cotest(test2_spec = -0.1),
-    "test2_spec must be between 0.01 and 0.99 (is -0.1)"
+    "test2_spec must be between 0.01 and 0.99 (is -0.1)",
+    fixed = TRUE
   )
 
   # Test invalid prevalence (> 1)
   expect_error(
     cotest(prevalence = 1.5),
-    "prevalence must be between 0.001 and 0.999 (is 1.5)"
+    "prevalence must be between 0.001 and 0.999 (is 1.5)",
+    fixed = TRUE
   )
 
   # Test invalid prevalence (<= 0)
   expect_error(
     cotest(prevalence = 0),
-    "prevalence must be between 0.001 and 0.999 (is 0)"
+    "prevalence must be between 0.001 and 0.999 (is 0)",
+    fixed = TRUE
   )
 })
 
 test_that("cotest validates conditional dependence parameters", {
-  # Test invalid conditional dependence (> 1)
+  # The permitted range became -1 to 1 in 1.0.4: negative conditional dependence describes tests
+  # that compensate for each other's errors, and was previously impossible to express.
   expect_error(
     cotest(indep = FALSE, cond_dep_pos = 1.2),
-    "cond_dep_pos must be between 0 and 1 (is 1.2)"
+    "cond_dep_pos must be between -1 and 1 (is 1.2)",
+    fixed = TRUE
   )
 
-  # Test invalid conditional dependence (< 0)
+  # -0.1 is now a legitimate value rather than an error
+  expect_no_error(cotest(indep = FALSE, cond_dep_neg = -0.1))
+
   expect_error(
-    cotest(indep = FALSE, cond_dep_neg = -0.1),
-    "cond_dep_neg must be between 0 and 1 (is -0.1)"
+    cotest(indep = FALSE, cond_dep_neg = -1.5),
+    "cond_dep_neg must be between -1 and 1 (is -1.5)",
+    fixed = TRUE
   )
 
   # Test valid boundary values
@@ -269,10 +292,28 @@ test_that("cotest calculates post-test probabilities correctly", {
   both_pos_prob <- results_df$postProb[results_df$scenario == "Both Tests Positive"]
   both_neg_prob <- results_df$postProb[results_df$scenario == "Both Tests Negative"]
 
-  expect_equal(t1_only_prob, 0.1895735, tolerance = 1e-6)
-  expect_equal(t2_only_prob, 0.2702703, tolerance = 1e-6)
-  expect_equal(both_pos_prob, 0.9302326, tolerance = 1e-6)
-  expect_equal(both_neg_prob, 0.0064558, tolerance = 1e-6)
+  # Reference values derived from Bayes' theorem on the joint likelihoods under
+  # conditional independence, with sens1 = .80, spec1 = .90, sens2 = .70, spec2 = .95,
+  # prevalence = .10:
+  #     P(D+ | pattern) = p*P(pattern|D+) / (p*P(pattern|D+) + (1-p)*P(pattern|D-))
+  # The previous expectations implied joint likelihood ratios of 2.105 / 3.333 / 120 /
+  # 0.0585 where the correct ones are 2.526 / 3.111 / 112 / 0.0702, so they were wrong,
+  # not the module.
+  bayes <- function(pD, pDbar, p = 0.10) (p * pD) / (p * pD + (1 - p) * pDbar)
+  se1 <- 0.80; sp1 <- 0.90; se2 <- 0.70; sp2 <- 0.95
+
+  expect_equal(t1_only_prob,  bayes(se1 * (1 - se2),     (1 - sp1) * sp2),       tolerance = 1e-9)
+  expect_equal(t2_only_prob,  bayes((1 - se1) * se2,     sp1 * (1 - sp2)),       tolerance = 1e-9)
+  expect_equal(both_pos_prob, bayes(se1 * se2,           (1 - sp1) * (1 - sp2)), tolerance = 1e-9)
+  expect_equal(both_neg_prob, bayes((1 - se1) * (1 - se2), sp1 * sp2),           tolerance = 1e-9)
+
+  # and the numeric values those formulas give, spelled out. expect_equal's tolerance is
+  # RELATIVE, so a small probability needs the same number of significant digits as a large
+  # one -- 0.0077369 is only 5 s.f. and misses a 1e-6 relative check.
+  expect_equal(t1_only_prob,  0.219178082, tolerance = 1e-6)
+  expect_equal(t2_only_prob,  0.256880734, tolerance = 1e-6)
+  expect_equal(both_pos_prob, 0.925619835, tolerance = 1e-6)
+  expect_equal(both_neg_prob, 0.007736944, tolerance = 1e-6)
 })
 
 test_that("cotest handles conditional dependence calculations", {

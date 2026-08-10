@@ -111,7 +111,7 @@ test_that("nogoldstandard bootstrap CI works", {
     test2Positive = "positive",
     method = "composite",
     bootstrap = TRUE,
-    nboot = 50,  # Small number for testing
+    nboot = 100,  # Small number for testing
     alpha = 0.05,
     test3Positive = NULL,
     test4Positive = NULL,
@@ -130,8 +130,10 @@ test_that("nogoldstandard bootstrap CI works", {
 
 test_that("nogoldstandard validates inputs correctly", {
   # Test missing required variables
-  expect_error(
-    nogoldstandard(
+  # An incomplete selection is not an error in jamovi: the analysis returns and leaves
+  # the results empty until the user finishes choosing.
+  expect_no_error(
+    res <- nogoldstandard(
       data = nogoldstandard_test_data_small,
       test1 = "test1_result",
       test1Positive = "positive",
@@ -139,10 +141,12 @@ test_that("nogoldstandard validates inputs correctly", {
       test2Positive = NULL,
       test3Positive = NULL,
       test4Positive = NULL,
-      test5Positive = NULL
-    ),
-    "At least two tests must be specified"
+      test5Positive = NULL,
+      # 2 tests: latent_class (the default since 1.0.4) requires 3+
+      method = "composite"
+    )
   )
+  expect_equal(res$test_metrics$rowCount, 0L)
   
   # Test invalid positive level
   expect_error(
@@ -154,7 +158,9 @@ test_that("nogoldstandard validates inputs correctly", {
       test2Positive = "positive",
       test3Positive = NULL,
       test4Positive = NULL,
-      test5Positive = NULL
+      test5Positive = NULL,
+      # 2 tests: latent_class (the default since 1.0.4) requires 3+
+      method = "composite"
     ),
     "Level 'invalid_level' not found"
   )
@@ -172,9 +178,13 @@ test_that("nogoldstandard validates inputs correctly", {
       test2Positive = "positive",
       test3Positive = NULL,
       test4Positive = NULL,
-      test5Positive = NULL
+      test5Positive = NULL,
+      # 2 tests: latent_class (the default since 1.0.4) requires 3+
+      method = "composite"
     ),
-    "must be a factor"
+    # There is no "must be a factor" check: a continuous column is rejected because the named
+    # positive level is not among its values.
+    "Level 'positive' not found in variable 'numeric_col'"
   )
 })
 
@@ -241,7 +251,9 @@ test_that("nogoldstandard handles empty data appropriately", {
       test2Positive = "positive",
       test3Positive = NULL,
       test4Positive = NULL,
-      test5Positive = NULL
+      test5Positive = NULL,
+      # 2 tests: latent_class (the default since 1.0.4) requires 3+
+      method = "composite"
     ),
     "Data contains no rows"
   )

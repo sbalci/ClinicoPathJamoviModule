@@ -20,10 +20,10 @@ test_that("COVID-19 workflow: screening to confirmation strategy", {
     prevalence = 0.05,
     population_size = 10000,
     show_cost_analysis = TRUE,
-    show_nomogram = TRUE
+    show_plots = TRUE
   )
 
-  expect_s3_class(result, "sequentialtestsClass")
+  expect_s3_class(result, "sequentialtestsResults")
 })
 
 test_that("COVID-19 workflow: using clinical preset", {
@@ -34,7 +34,7 @@ test_that("COVID-19 workflow: using clinical preset", {
     show_cost_analysis = TRUE
   )
 
-  expect_s3_class(result, "sequentialtestsClass")
+  expect_s3_class(result, "sequentialtestsResults")
 })
 
 # Cancer Screening Workflows ----
@@ -55,7 +55,7 @@ test_that("breast cancer workflow: mammography to biopsy", {
     show_cost_analysis = TRUE
   )
 
-  expect_s3_class(result, "sequentialtestsClass")
+  expect_s3_class(result, "sequentialtestsResults")
 })
 
 test_that("breast cancer workflow: using clinical preset", {
@@ -66,7 +66,7 @@ test_that("breast cancer workflow: using clinical preset", {
     show_formulas = TRUE
   )
 
-  expect_s3_class(result, "sequentialtestsClass")
+  expect_s3_class(result, "sequentialtestsResults")
 })
 
 # Emergency Medicine Workflows ----
@@ -88,17 +88,17 @@ test_that("MI rule-out workflow: parallel testing strategy", {
     show_cost_analysis = TRUE
   )
 
-  expect_s3_class(result, "sequentialtestsClass")
+  expect_s3_class(result, "sequentialtestsResults")
 })
 
 test_that("MI rule-out workflow: using clinical preset", {
   result <- sequentialtests(
     preset = "mi_emergency_parallel",
     population_size = 2000,
-    show_nomogram = TRUE
+    show_plots = TRUE
   )
 
-  expect_s3_class(result, "sequentialtestsClass")
+  expect_s3_class(result, "sequentialtestsResults")
 })
 
 test_that("stroke workflow: clinical assessment to imaging", {
@@ -109,7 +109,7 @@ test_that("stroke workflow: clinical assessment to imaging", {
     show_cost_analysis = TRUE
   )
 
-  expect_s3_class(result, "sequentialtestsClass")
+  expect_s3_class(result, "sequentialtestsResults")
 })
 
 # Infectious Disease Workflows ----
@@ -120,7 +120,7 @@ test_that("TB workflow: chest X-ray to sputum culture", {
     show_cost_analysis = TRUE
   )
 
-  expect_s3_class(result, "sequentialtestsClass")
+  expect_s3_class(result, "sequentialtestsResults")
 })
 
 test_that("HIV workflow: ELISA to Western blot", {
@@ -128,10 +128,10 @@ test_that("HIV workflow: ELISA to Western blot", {
     preset = "hiv_screening_confirmation",
     population_size = 10000,
     show_explanation = TRUE,
-    show_nomogram = TRUE
+    show_plots = TRUE
   )
 
-  expect_s3_class(result, "sequentialtestsClass")
+  expect_s3_class(result, "sequentialtestsResults")
 })
 
 # Prostate Cancer Screening ----
@@ -144,7 +144,7 @@ test_that("prostate cancer workflow: PSA exclusion strategy", {
     show_formulas = TRUE
   )
 
-  expect_s3_class(result, "sequentialtestsClass")
+  expect_s3_class(result, "sequentialtestsResults")
 })
 
 # Strategy Comparison Workflows ----
@@ -164,11 +164,11 @@ test_that("strategy comparison: serial_positive vs serial_negative", {
 
   # Serial positive (confirmation)
   result_sp <- do.call(sequentialtests, c(test_params, strategy = "serial_positive"))
-  expect_s3_class(result_sp, "sequentialtestsClass")
+  expect_s3_class(result_sp, "sequentialtestsResults")
 
   # Serial negative (exclusion)
   result_sn <- do.call(sequentialtests, c(test_params, strategy = "serial_negative"))
-  expect_s3_class(result_sn, "sequentialtestsClass")
+  expect_s3_class(result_sn, "sequentialtestsResults")
 })
 
 test_that("strategy comparison: all three strategies", {
@@ -190,7 +190,7 @@ test_that("strategy comparison: all three strategies", {
       population_size = 5000,
       show_cost_analysis = TRUE
     )
-    expect_s3_class(result, "sequentialtestsClass")
+    expect_s3_class(result, "sequentialtestsResults")
   }
 })
 
@@ -211,7 +211,7 @@ test_that("cost-effectiveness: low-cost screening vs high-cost confirmation", {
     show_cost_analysis = TRUE
   )
 
-  expect_s3_class(result, "sequentialtestsClass")
+  expect_s3_class(result, "sequentialtestsResults")
 })
 
 test_that("cost-effectiveness: expensive screening inappropriate", {
@@ -231,7 +231,7 @@ test_that("cost-effectiveness: expensive screening inappropriate", {
     show_cost_analysis = TRUE
   )
 
-  expect_s3_class(result, "sequentialtestsClass")
+  expect_s3_class(result, "sequentialtestsResults")
 })
 
 # Prevalence Sensitivity Analysis ----
@@ -244,10 +244,10 @@ test_that("prevalence sensitivity: rare disease (0.1%)", {
     strategy = "serial_positive",
     prevalence = 0.001,
     population_size = 100000,
-    show_nomogram = TRUE
+    show_plots = TRUE
   )
 
-  expect_s3_class(result, "sequentialtestsClass")
+  expect_s3_class(result, "sequentialtestsResults")
 })
 
 test_that("prevalence sensitivity: common disease (50%)", {
@@ -261,7 +261,7 @@ test_that("prevalence sensitivity: common disease (50%)", {
     population_size = 5000
   )
 
-  expect_s3_class(result, "sequentialtestsClass")
+  expect_s3_class(result, "sequentialtestsResults")
 })
 
 # Teaching and Educational Workflows ----
@@ -280,7 +280,7 @@ test_that("teaching scenario: perfect tests in sequence", {
     show_formulas = TRUE
   )
 
-  expect_s3_class(result, "sequentialtestsClass")
+  expect_s3_class(result, "sequentialtestsResults")
 })
 
 test_that("teaching scenario: poor tests demonstrate strategy impact", {
@@ -297,7 +297,7 @@ test_that("teaching scenario: poor tests demonstrate strategy impact", {
     show_explanation = TRUE
   )
 
-  expect_s3_class(result, "sequentialtestsClass")
+  expect_s3_class(result, "sequentialtestsResults")
 })
 
 # Comprehensive Analysis Workflows ----
@@ -317,10 +317,10 @@ test_that("comprehensive workflow: all options enabled", {
     show_explanation = TRUE,
     show_formulas = TRUE,
     show_cost_analysis = TRUE,
-    show_nomogram = TRUE
+    show_plots = TRUE
   )
 
-  expect_s3_class(result, "sequentialtestsClass")
+  expect_s3_class(result, "sequentialtestsResults")
 })
 
 test_that("publication-ready workflow: detailed reporting", {
@@ -340,10 +340,10 @@ test_that("publication-ready workflow: detailed reporting", {
     show_explanation = TRUE,
     show_formulas = TRUE,
     show_cost_analysis = TRUE,
-    show_nomogram = TRUE
+    show_plots = TRUE
   )
 
-  expect_s3_class(result, "sequentialtestsClass")
+  expect_s3_class(result, "sequentialtestsResults")
 })
 
 # Clinical Preset Comprehensive Testing ----
@@ -364,7 +364,7 @@ test_that("all clinical presets execute without error", {
       population_size = 10000,
       show_cost_analysis = TRUE
     )
-    expect_s3_class(result, "sequentialtestsClass")
+    expect_s3_class(result, "sequentialtestsResults")
   }
 })
 
@@ -384,7 +384,7 @@ test_that("multi-step workflow: triage → screening → confirmation", {
     prevalence = 0.15,
     population_size = 10000
   )
-  expect_s3_class(triage, "sequentialtestsClass")
+  expect_s3_class(triage, "sequentialtestsResults")
 
   # Step 2: Rapid test → PCR confirmation (specific)
   confirmation <- sequentialtests(
@@ -400,7 +400,7 @@ test_that("multi-step workflow: triage → screening → confirmation", {
     prevalence = 0.40,  # Higher after triage
     population_size = 1000
   )
-  expect_s3_class(confirmation, "sequentialtestsClass")
+  expect_s3_class(confirmation, "sequentialtestsResults")
 })
 
 # Real-World Decision Making ----
@@ -422,7 +422,7 @@ test_that("clinical decision: when to use serial_positive", {
     show_cost_analysis = TRUE
   )
 
-  expect_s3_class(result, "sequentialtestsClass")
+  expect_s3_class(result, "sequentialtestsResults")
 })
 
 test_that("clinical decision: when to use serial_negative", {
@@ -443,7 +443,7 @@ test_that("clinical decision: when to use serial_negative", {
     show_cost_analysis = TRUE
   )
 
-  expect_s3_class(result, "sequentialtestsClass")
+  expect_s3_class(result, "sequentialtestsResults")
 })
 
 test_that("clinical decision: when to use parallel", {
@@ -464,7 +464,7 @@ test_that("clinical decision: when to use parallel", {
     show_cost_analysis = TRUE
   )
 
-  expect_s3_class(result, "sequentialtestsClass")
+  expect_s3_class(result, "sequentialtestsResults")
 })
 
 # Population Size Impact ----
@@ -480,7 +480,7 @@ test_that("population size impact: small clinic", {
     show_cost_analysis = TRUE
   )
 
-  expect_s3_class(result, "sequentialtestsClass")
+  expect_s3_class(result, "sequentialtestsResults")
 })
 
 test_that("population size impact: large screening program", {
@@ -495,5 +495,5 @@ test_that("population size impact: large screening program", {
     show_cost_analysis = TRUE
   )
 
-  expect_s3_class(result, "sequentialtestsClass")
+  expect_s3_class(result, "sequentialtestsResults")
 })

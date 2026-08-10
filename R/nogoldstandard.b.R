@@ -16,6 +16,37 @@ nogoldstandardClass <- if (requireNamespace("jmvcore")) {
             # self$results$insert(999, Notice) AND any HTML in notices (project convention:
             # notice content must be plain text). ====
             .noticeList = list(),
+            # One bootstrap pass per run, shared by prevalence and every test metric.
+            .boot_cache = NULL,
+
+            # Lines collected for the Analysis Diagnostics panel. `verbose` previously did
+            # almost nothing a jamovi user could see: 17 of its 18 effects were message()
+            # calls, which go to the R console that jamovi never shows.
+            .diagLines = character(0),
+
+            # Set while bootstrap replicates run: they call the same estimators as the main
+            # fit, and one diagnostic line per replicate would bury the useful ones.
+            .diagSuppressed = FALSE,
+
+            # A results item that may not exist in the compiled .h.R yet: jmvcore raises
+            # rather than returning NULL, so a bare self$results$x would crash every run
+            # between the .r.yaml edit and the next jmvtools::prepare().
+            .resultsItem = function(name) tryCatch(self$results[[name]], error = function(e) NULL),
+
+            .diag = function(...) {
+                if (!isTRUE(self$options$verbose) || isTRUE(private$.diagSuppressed))
+                    return(invisible(NULL))
+                private$.diagLines <- c(private$.diagLines, paste0(...))
+                invisible(NULL)
+            },
+
+            .renderDiagnostics = function() {
+                item <- private$.resultsItem("diagnostics")
+                if (is.null(item) || !isTRUE(self$options$verbose)) return()
+                if (length(private$.diagLines) == 0) return()
+                item$setContent(paste(private$.diagLines, collapse = "\n"))
+            },
+
             .addNotice = function(type, title, content) {
                 private$.noticeList[[length(private$.noticeList) + 1]] <- list(
                     type = type,
@@ -64,8 +95,10 @@ nogoldstandardClass <- if (requireNamespace("jmvcore")) {
                 # Reset notices for new analysis
                 private$.noticeList <- list()
 
-                # Apply clinical preset if selected
-                private$.applyPreset()
+                # NOTE: .applyPreset() is called from .run(), not here. .run() resets
+                # private$.noticeList at its top, so a notice added during .init() is wiped
+                # before anything is rendered -- which is why the preset advisory never
+                # reached the user.
 
                 # Show method selection guide
                 private$.showMethodGuide()
@@ -209,7 +242,8 @@ nogoldstandardClass <- if (requireNamespace("jmvcore")) {
                         "<ul>",
                         "<li>", "<strong>Latent Class Analysis (LCA)</strong> assumes a latent (unobserved) disease status and estimates test parameters", "</li>",
                         "<li>", "<strong>Mixture model approach</strong> that identifies two classes: diseased and non-diseased", "</li>",
-                        "<li>", "<strong>No identifiability issues</strong> when using 3+ tests or conditional independence assumptions", "</li>",
+                        "<li>", "<strong>Requires 3 or more tests.</strong> With 2 tests the model has more parameters than degrees of freedom and is not identified; with exactly 3 it is just-identified, so the fit statistics cannot test it", "</li>",
+                        "<li>", "<strong>Assumes conditional independence:</strong> that the tests make errors independently within the diseased and non-diseased groups. This model does NOT relax that assumption. Tests measuring the same biology (two stains for one antigen, two readers of one slide) violate it, which inflates the estimated accuracy", "</li>",
                         "<li>", "<strong>Most robust method</strong> for estimating sensitivity, specificity, PPV, NPV, and disease prevalence", "</li>",
                         "<li>", "<strong>Handles missing data</strong> and provides model fit statistics (AIC, BIC)", "</li>",
                         "</ul>"
@@ -328,6 +362,11 @@ nogoldstandardClass <- if (requireNamespace("jmvcore")) {
                 # Reset notices for new analysis run
                 private$.noticeList <- list()
 
+                private$.diagLines <- character(0)
+
+                # Preset advisory: after the reset above, so it survives to be rendered.
+                private$.applyPreset()
+
                 # Show welcome message if needed and return early if instructions are displayed
                 if (private$.showWelcomeMessage()) {
                     return()
@@ -357,13 +396,15 @@ nogoldstandardClass <- if (requireNamespace("jmvcore")) {
                         if (!is.null(pos_level)) {
                             # Validate that the variable is a factor
                             if (!is.factor(self$data[[test_var]])) {
-                                jmvcore::reject(.("Variable '{}' must be a factor"), test_var)
+                                jmvcore::reject(.("Variable '{}' must be a factor"),
+                                                code = NULL, test_var)
                             }
 
                             # Validate that the positive level exists in the data
                             if (!pos_level %in% levels(self$data[[test_var]])) {
                                 jmvcore::reject(
                                     .("Level '{}' not found in variable '{}'. Available levels: {}"),
+                                    code = NULL,
                                     pos_level, test_var,
                                     paste(levels(self$data[[test_var]]), collapse = ", ")
                                 )
@@ -388,7 +429,35 @@ nogoldstandardClass <- if (requireNamespace("jmvcore")) {
                 # Data preparation
                 data <- self$data
                 test_data <- data[unlist(tests)]
+                n_before <- nrow(test_data)
                 test_data <- jmvcore::naOmit(test_data)
+                n_after <- nrow(test_data)
+
+                # Neither the analysed N nor the number excluded appeared anywhere in the
+                # output: every estimate below was computed on the complete cases while the
+                # user still saw the dataset's full size.
+                if (n_after < n_before) {
+                    private$.addNotice(
+                        "WARNING",
+                        sprintf("Excluded %d case(s) with missing test results", n_before - n_after),
+                        sprintf("This analysis uses the %d of %d cases (%.1f%%) with a result recorded for every selected test. Latent class and composite estimates assume the excluded cases are missing at random; if a test is more often missing when it would have been positive, the estimates below are biased.",
+                                n_after, n_before, 100 * n_after / n_before)
+                    )
+                } else {
+                    private$.addNotice(
+                        "INFO",
+                        sprintf("Analysing %d cases", n_after),
+                        sprintf("All %d cases have a result for every selected test.", n_after)
+                    )
+                }
+
+                private$.diag("Analysis method : ", self$options$method)
+                private$.diag("Tests           : ", paste(unlist(tests), collapse = ", "))
+                private$.diag("Cases supplied  : ", n_before)
+                private$.diag("Cases analysed  : ", n_after,
+                              if (n_after < n_before)
+                                  sprintf("  (%d excluded for missing test results)", n_before - n_after)
+                              else "  (no exclusions)")
 
                 if (nrow(test_data) == 0) {
                     jmvcore::reject(.("No complete cases available"))
@@ -427,6 +496,33 @@ nogoldstandardClass <- if (requireNamespace("jmvcore")) {
                     results <- private$.runAnyPositive(binary_data)
                 }
 
+                # .runBayesian returns a `converged` flag and .runLCA warns only via
+                # warning() behind the `verbose` option -- neither reached a jamovi user, who
+                # never sees the R console. A non-converged fit is exactly the case where the
+                # numbers should not be trusted, so say so where they will read it.
+                if (isFALSE(results$converged)) {
+                    private$.addNotice(
+                        "STRONG_WARNING",
+                        "The estimation did not converge",
+                        sprintf("The EM algorithm reached its iteration limit (%s) without the parameter estimates settling. The sensitivities and specificities below are wherever the algorithm happened to stop, not a fitted solution, and should not be reported. Try a different method, or check whether the tests are nearly perfectly agreeing or nearly independent of one another.",
+                                if (is.null(results$iterations)) "100" else as.character(results$iterations))
+                    )
+                }
+
+
+                # One bootstrap pass, reused by every table below.
+                private$.boot_cache <- NULL
+                if (isTRUE(self$options$bootstrap) && !is.null(results)) {
+                    private$.boot_cache <- private$.bootstrapAll(
+                        data = results$data,
+                        method = self$options$method,
+                        nboot = self$options$nboot,
+                        verbose = self$options$verbose,
+                        warm_start = if (identical(self$options$method, "latent_class"))
+                            results$model$probs else NULL
+                    )
+                }
+
                 private$.checkpoint() # Before result population
 
                 # Update results
@@ -435,6 +531,7 @@ nogoldstandardClass <- if (requireNamespace("jmvcore")) {
                     private$.populateTestMetrics(results)
                     if (self$options$method == "latent_class") {
                         private$.populateModelFit(results$model)
+                        private$.populateConditionalDependence(results$model, tests)
                     }
                     # Add cross-tabulation if requested
                     private$.populateCrossTab(test_data, tests, test_levels)
@@ -477,6 +574,7 @@ nogoldstandardClass <- if (requireNamespace("jmvcore")) {
                 private$.populateAgreementStats(test_data, tests, test_levels)
 
                 # Render collected notices (plain-text Preformatted output)
+                private$.renderDiagnostics()
                 private$.renderNotices()
             },
             .populatePrevalence = function(results) {
@@ -488,14 +586,7 @@ nogoldstandardClass <- if (requireNamespace("jmvcore")) {
 
                 # Calculate confidence intervals if bootstrap is enabled
                 if (self$options$bootstrap) {
-                    ci <- private$.calculateBootstrapCI(
-                        data = results$data,
-                        method = self$options$method,
-                        nboot = self$options$nboot,
-                        alpha = self$options$alpha,
-                        type = "prevalence",
-                        verbose = self$options$verbose
-                    )
+                    ci <- private$.bootCI(private$.boot_cache$prevalence, self$options$alpha)
                     ci_lower <- ci$lower
                     ci_upper <- ci$upper
                 } else {
@@ -531,51 +622,104 @@ nogoldstandardClass <- if (requireNamespace("jmvcore")) {
                 table <- self$results$test_metrics
                 table$deleteRows()
 
+                # The columns are headed "Lower CI"/"Upper CI" whatever produced them and at
+                # whatever level, so an 80% Wald interval was indistinguishable from a 95%
+                # bootstrap percentile interval. State both.
+                conf_pct <- 100 * (1 - self$options$alpha)
+                table$setNote(
+                    "ci_provenance",
+                    if (isTRUE(self$options$bootstrap))
+                        sprintf(jmvcore::.("%.0f%% intervals are bootstrap percentile intervals from %d resamples of the cases, refitting the model on each. Seed: %s."),
+                                conf_pct, self$options$nboot,
+                                if (is.null(self$options$seed)) "0" else as.character(self$options$seed))
+                    else
+                        sprintf(jmvcore::.("%.0f%% intervals are normal-approximation (Wald) intervals, using the estimated number of diseased cases as the denominator for sensitivity and non-diseased for specificity. They treat the estimates as observed proportions and so understate the uncertainty of a latent-variable model; enable Bootstrap for intervals that account for the estimation itself."),
+                                conf_pct)
+                )
+
+                # These two "methods" build the reference standard out of the very tests
+                # being evaluated, so each test is scored against a standard that contains
+                # its own result. That is incorporation bias, and for one metric it is total.
+                meth <- self$options$method
+                if (identical(meth, "composite") && length(tests) == 2) meth <- "any_positive"
+                if (identical(meth, "all_positive") || identical(meth, "any_positive")) {
+                    fixed_at_one <- if (identical(meth, "all_positive"))
+                        "sensitivity and NPV" else "specificity and PPV"
+                    rule <- if (identical(meth, "all_positive"))
+                        "every test is positive" else "at least one test is positive"
+                    private$.addNotice(
+                        "STRONG_WARNING",
+                        "This method cannot estimate accuracy",
+                        sprintf("The reference standard is defined as \"%s\", so each test is being compared against a rule built from its own result. %s are therefore fixed at 100%% by construction on every dataset, whatever the tests actually do, and are left blank below rather than reported as findings. The remaining figures are inflated by the same circularity and describe agreement with the composite rule, not diagnostic accuracy. To estimate accuracy without a gold standard, use the latent class method with three or more conditionally independent tests.",
+                                rule,
+                                if (identical(meth, "all_positive")) "Sensitivity and NPV" else "Specificity and PPV")
+                    )
+                    table$setNote(
+                        "incorporation",
+                        jmvcore::.("Each test is scored against a reference standard built from the tests themselves, so these are measures of agreement with that rule, not estimates of diagnostic accuracy. The blank column is fixed at 100% by construction and carries no information.")
+                    )
+                }
+
                 for (i in seq_along(tests)) {
                     sensitivity <- results$sensitivities[i]
                     specificity <- results$specificities[i]
 
                     # Calculate confidence intervals
                     if (self$options$bootstrap) {
-                        sens_ci <- private$.calculateBootstrapCI(
-                            data = results$data,
-                            method = self$options$method,
-                            nboot = self$options$nboot,
-                            alpha = self$options$alpha,
-                            type = "sensitivity",
-                            test_index = i,
-                            verbose = self$options$verbose
-                        )
-                        spec_ci <- private$.calculateBootstrapCI(
-                            data = results$data,
-                            method = self$options$method,
-                            nboot = self$options$nboot,
-                            alpha = self$options$alpha,
-                            type = "specificity",
-                            test_index = i,
-                            verbose = self$options$verbose
-                        )
+                        sens_ci <- private$.bootCI(private$.boot_cache$sensitivities[, i], self$options$alpha)
+                        spec_ci <- private$.bootCI(private$.boot_cache$specificities[, i], self$options$alpha)
                     } else {
-                        # Simple normal approximation
-                        n <- nrow(results$data)
+                        # Normal approximation. The denominator for sensitivity is the number
+                        # of DISEASED cases and for specificity the number of NON-diseased --
+                        # not the total n. Using the total understated both standard errors
+                        # (by a factor of about sqrt(1/prevalence) for sensitivity), so every
+                        # interval was too narrow; at 30% prevalence the sensitivity SE was
+                        # ~1.8x too small.
+                        n_total <- nrow(results$data)
+                        prev_for_se <- results$prevalence
+                        if (!is.numeric(prev_for_se) || length(prev_for_se) != 1 ||
+                            !is.finite(prev_for_se)) prev_for_se <- NA_real_
+
+                        n_dis <- if (is.na(prev_for_se)) NA_real_ else n_total * prev_for_se
+                        n_nondis <- if (is.na(prev_for_se)) NA_real_ else n_total * (1 - prev_for_se)
                         z <- qnorm(1 - self$options$alpha / 2)
 
-                        se_sens <- sqrt(sensitivity * (1 - sensitivity) / n)
-                        sens_ci <- list(
-                            lower = max(0, sensitivity - z * se_sens),
-                            upper = min(1, sensitivity + z * se_sens)
-                        )
-
-                        se_spec <- sqrt(specificity * (1 - specificity) / n)
-                        spec_ci <- list(
-                            lower = max(0, specificity - z * se_spec),
-                            upper = min(1, specificity + z * se_spec)
-                        )
+                        wald <- function(p, n_eff) {
+                            if (!is.finite(p) || !is.finite(n_eff) || n_eff < 1)
+                                return(list(lower = NA_real_, upper = NA_real_))
+                            se <- sqrt(p * (1 - p) / n_eff)
+                            list(lower = max(0, p - z * se), upper = min(1, p + z * se))
+                        }
+                        sens_ci <- wald(sensitivity, n_dis)
+                        spec_ci <- wald(specificity, n_nondis)
                     }
 
                     # Calculate PPV and NPV
                     prevalence <- results$prevalence
                     ppv_npv <- private$.calculatePPVNPV(sensitivity, specificity, prevalence)
+
+                    # Some metrics are fixed at 1 by the CONSTRUCTION of the reference, not
+                    # estimated from the data, and reporting them as results is misleading:
+                    #   all_positive: the reference is TRUE only when every test is positive,
+                    #     so a diseased case can never be test-negative -> FN = 0 ->
+                    #     sensitivity == 1 and NPV == 1 for EVERY test, on EVERY dataset.
+                    #   any_positive: the reference is FALSE only when every test is negative,
+                    #     so FP = 0 -> specificity == 1 and PPV == 1 likewise.
+                    # Confirmed on 25/25 random datasets. They are blanked rather than shown
+                    # as "100% (95% CI 100-100%)", which reads as a perfect test.
+                    degenerate_spec <- identical(self$options$method, "any_positive") ||
+                        # composite with 2 tests IS any_positive (a 1-of-2 tie passes >= 0.5)
+                        (identical(self$options$method, "composite") && length(tests) == 2)
+
+                    if (identical(self$options$method, "all_positive")) {
+                        sensitivity <- NA_real_
+                        sens_ci <- list(lower = NA_real_, upper = NA_real_)
+                        ppv_npv$npv <- NA_real_
+                    } else if (degenerate_spec) {
+                        specificity <- NA_real_
+                        spec_ci <- list(lower = NA_real_, upper = NA_real_)
+                        ppv_npv$ppv <- NA_real_
+                    }
 
                     # Add row to cleared table
                     table$addRow(rowKey = tests[i], values = list(
@@ -591,6 +735,79 @@ nogoldstandardClass <- if (requireNamespace("jmvcore")) {
                     ))
                 }
             },
+            # Bivariate residuals: for each test pair, compare the observed two-way table
+            # with the one the fitted latent class model implies. Latent class analysis
+            # assumes the tests err INDEPENDENTLY given true status, and that assumption is
+            # what makes the estimates identifiable -- when it fails (two stains for one
+            # antigen, two readers of one slide) the estimated accuracy is inflated. The
+            # analysis previously only stated the assumption; this measures it.
+            #
+            # Only meaningful when resid.df > 0. With three tests the model is
+            # just-identified and reproduces every observed table exactly, so every residual
+            # is structurally 0 and can reveal nothing. Verified: on data where two tests
+            # share an artefact, 3 tests give all-zero residuals while 4 tests flag five of
+            # six pairs (up to 436 against a 3.84 threshold).
+            .populateConditionalDependence = function(model, tests) {
+                # The table may not exist until jmvtools::prepare() compiles the .r.yaml,
+                # but the dependence WARNING is clinically important either way -- so
+                # compute regardless and guard only the table writes.
+                table <- private$.resultsItem("conditional_dependence")
+                if (is.null(model)) return()
+                if (!is.null(table)) table$deleteRows()
+
+                resid_df <- model$resid.df
+                just_identified <- !is.numeric(resid_df) || length(resid_df) != 1 ||
+                    !is.finite(resid_df) || resid_df <= 0
+
+                if (just_identified) {
+                    if (!is.null(table)) table$setNote("df0", jmvcore::.("Not computable with three tests: the model has no residual degrees of freedom, so it reproduces every observed table exactly and no residual can detect conditional dependence. Add a fourth test if you need to check this assumption."))
+                    return()
+                }
+
+                pc <- model$predcell
+                if (is.null(pc) || nrow(pc) == 0) return()
+                var_cols <- intersect(names(pc), unlist(tests))
+                if (length(var_cols) < 2) return()
+
+                THRESHOLD <- stats::qchisq(0.95, df = 1)   # 3.841
+                flagged <- character(0)
+
+                for (i in seq_len(length(var_cols) - 1)) {
+                    for (j in seq(i + 1, length(var_cols))) {
+                        a <- var_cols[i]; b <- var_cols[j]
+                        agg <- tryCatch(
+                            stats::aggregate(cbind(observed, expected) ~ pc[[a]] + pc[[b]],
+                                             data = pc, FUN = sum),
+                            error = function(e) NULL)
+                        if (is.null(agg) || nrow(agg) == 0) next
+                        bvr <- sum((agg$observed - agg$expected)^2 /
+                                       pmax(agg$expected, 1e-9))
+                        pair <- paste(a, "vs", b)
+                        if (bvr > THRESHOLD) flagged <- c(flagged, pair)
+                        if (!is.null(table)) table$addRow(rowKey = pair, values = list(
+                            pair = pair,
+                            bvr = bvr,
+                            verdict = if (bvr > THRESHOLD)
+                                jmvcore::.("Evidence of shared error - estimates inflated")
+                            else jmvcore::.("Consistent with independence")
+                        ))
+                    }
+                }
+
+                if (!is.null(table)) table$setNote("threshold", sprintf(
+                    jmvcore::.("A residual above %.2f (the 5%% point of chi-squared on 1 degree of freedom) is evidence that the pair does not err independently. This is a descriptive check, not a formal test: the residuals are correlated with one another and no multiplicity adjustment is applied."),
+                    THRESHOLD))
+
+                if (length(flagged) > 0) {
+                    private$.addNotice(
+                        "STRONG_WARNING",
+                        "Tests do not appear to err independently",
+                        sprintf("%s show more agreement than the latent class model can explain. That model assumes the tests make mistakes independently given true disease status; when they do not -- because they measure the same biology, or share a reader, sample or platform -- the shared error is absorbed into the latent class and sensitivity and specificity come out too high. Treat the estimates above as an upper bound, and prefer tests that fail in genuinely different ways.",
+                                paste(flagged, collapse = ", "))
+                    )
+                }
+            },
+
             .populateModelFit = function(model) {
                 if (is.null(model)) {
                     return()
@@ -599,15 +816,31 @@ nogoldstandardClass <- if (requireNamespace("jmvcore")) {
                 table <- self$results$model_fit
                 table$deleteRows() # Clear existing rows to prevent duplicates on re-run
 
-                # Add basic fit statistics
+                # A 2-class model over k binary tests has 2k+1 parameters and 2^k - 1
+                # degrees of freedom, so k = 3 leaves resid.df = 0: the model is
+                # just-identified and reproduces the observed table exactly. G-squared and
+                # Chi-squared are then structurally ~0 with no df to test them against, and
+                # printing them invites the reader to conclude the model "fits well". AIC and
+                # BIC remain meaningful for comparing models.
+                resid_df <- model$resid.df
+                just_identified <- is.numeric(resid_df) && length(resid_df) == 1 &&
+                    is.finite(resid_df) && resid_df <= 0
+
                 fit_stats <- list(
                     BIC = model$bic,
                     AIC = model$aic,
                     "Log-Likelihood" = model$llik,
-                    "G-squared" = model$Gsq,
-                    "Chi-squared" = model$Chisq,
-                    "Degrees of Freedom" = model$resid.df
+                    "G-squared" = if (just_identified) NULL else model$Gsq,
+                    "Chi-squared" = if (just_identified) NULL else model$Chisq,
+                    "Degrees of Freedom" = resid_df
                 )
+
+                if (just_identified) {
+                    table$setNote(
+                        "just_identified",
+                        jmvcore::.("With three tests this model has as many parameters as the data can support (0 residual degrees of freedom), so it reproduces the observed table exactly. Goodness-of-fit statistics are therefore omitted: they cannot tell you whether the conditional-independence assumption holds. Use four or more tests if you need to test the model's fit.")
+                    )
+                }
 
                 # Add each available statistic to table
                 for (name in names(fit_stats)) {
@@ -619,7 +852,7 @@ nogoldstandardClass <- if (requireNamespace("jmvcore")) {
                     }
                 }
             },
-            .runLCA = function(binary_data, tests, test_levels) {
+            .runLCA = function(binary_data, tests, test_levels, n_starts = 30L, probs_start = NULL) {
                 if (!requireNamespace("poLCA", quietly = TRUE)) {
                     jmvcore::reject(.("Package 'poLCA' is required for latent class analysis"))
                 }
@@ -647,11 +880,12 @@ nogoldstandardClass <- if (requireNamespace("jmvcore")) {
                 # Run LCA with more starts to ensure global optimum
                 best_model <- NULL
                 best_llik <- -Inf
-                n_starts <- 30 # Increased from 10 for better convergence
+                # n_starts is a parameter: the main fit uses many random starts to find the
+                # global optimum, bootstrap replicates use few because the cost is multiplied
+                # by nboot.
+                stalled_starts <- 0L # consecutive starts with no improvement
+                prev_best <- -Inf
 
-                if (self$options$verbose) {
-                    message(sprintf(.("Running Latent Class Analysis with %d random starts..."), n_starts))
-                }
 
                 for (start in 1:n_starts) {
                     # Checkpoint periodically during LCA iterations
@@ -659,15 +893,12 @@ nogoldstandardClass <- if (requireNamespace("jmvcore")) {
                         private$.checkpoint(flush = FALSE) # Poll for changes only
                     }
 
-                    # Early termination for convergence
-                    if (start > 10 && best_llik > -Inf) {
-                        # Check if we've had multiple recent starts with no improvement
-                        if (start > 20 && (best_llik - (-Inf)) > 0.001) {
-                            if (self$options$verbose) {
-                                message(sprintf(.("Early termination: convergence achieved after %d starts"), start - 1))
-                            }
-                            break
-                        }
+                    # Stop once extra random starts stop finding a better optimum. The
+                    # previous condition was `(best_llik - (-Inf)) > 0.001`, which is Inf >
+                    # 0.001 -- always TRUE -- so it broke unconditionally at start 21 and
+                    # never examined convergence at all, despite n_starts being 30.
+                    if (start > 10 && stalled_starts >= 10) {
+                        break
                     }
 
                     seed_val <- self$options$seed
@@ -684,7 +915,13 @@ nogoldstandardClass <- if (requireNamespace("jmvcore")) {
                                 maxiter = 1000,
                                 graphs = FALSE,
                                 verbose = FALSE,
-                                nrep = 1
+                                nrep = 1,
+                                # Bootstrap replicates start from the main fit's solution
+                                # rather than at random: a resample's optimum sits very close
+                                # to the full-sample one, so EM converges in a few iterations
+                                # and one start suffices. Random restarts per replicate were
+                                # the whole cost of the latent-class bootstrap.
+                                probs.start = if (start == 1L) probs_start else NULL
                             )
 
                             if (!is.null(model) && model$llik > best_llik) {
@@ -692,17 +929,18 @@ nogoldstandardClass <- if (requireNamespace("jmvcore")) {
                                 best_model <- model
                                 best_llik <- model$llik
 
-                                # Report significant improvement
-                                if (improvement > 0.1 && self$options$verbose) {
-                                    message(sprintf(.("Start %d: Improvement found (LL = %.3f)"), start, best_llik))
-                                }
                             }
                         },
                         error = function(e) {
                             # Continue to next start
                         }
                     )
+                    if (best_llik > prev_best) stalled_starts <- 0L else stalled_starts <- stalled_starts + 1L
+                    prev_best <- best_llik
                 }
+
+                private$.diag(sprintf("LCA             : %d random start(s) used of %d allowed; best log-likelihood %.4f",
+                                      min(start, n_starts), n_starts, best_llik))
 
                 if (is.null(best_model)) {
                     jmvcore::reject(.("LCA model fitting failed after all attempts. Try a different method or check your data."))
@@ -724,8 +962,14 @@ nogoldstandardClass <- if (requireNamespace("jmvcore")) {
                 # positive | class c). The previous code reshaped a single class's per-test
                 # vector via matrix(..., ncol = 2), which produced an arbitrary disease class
                 # and could invert sensitivity/specificity.
-                # NEEDS-RUNTIME-CHECK: confirm against poLCA output that the sensitivity/
-                # specificity extraction below indexes the same rows=class/cols=outcome layout.
+                # RUNTIME-CHECKED 2026-08-07 against poLCA: probs[[i]] is
+                # [rows = latent class, cols = outcome], cols being c("no", "yes"). The
+                # extraction below previously used [2, disease_class] / [1, healthy_class] --
+                # i.e. [outcome, class] -- which is the TRANSPOSE of the layout the
+                # identification code above correctly assumes. On simulated data with known
+                # truth (sens .90/.80/.70, spec .95/.85/.75) the module returned
+                # sens .936/.840/.737 and spec .903/.777/.720: sensitivity and specificity
+                # exactly SWAPPED. poLCA itself recovers the truth.
                 mean_pos_class1 <- mean(sapply(best_model$probs, function(x) x[1, 2]))
                 mean_pos_class2 <- mean(sapply(best_model$probs, function(x) x[2, 2]))
                 disease_class <- which.max(c(mean_pos_class1, mean_pos_class2))
@@ -739,10 +983,11 @@ nogoldstandardClass <- if (requireNamespace("jmvcore")) {
                 specificities <- numeric(length(tests))
 
                 for (i in seq_along(tests)) {
+                    # probs[[i]][class, outcome]; outcome 1 = "no", 2 = "yes"
                     # Sensitivity: P(test positive | disease class)
-                    sensitivities[i] <- best_model$probs[[i]][2, disease_class]
+                    sensitivities[i] <- best_model$probs[[i]][disease_class, 2]
                     # Specificity: P(test negative | healthy class)
-                    specificities[i] <- best_model$probs[[i]][1, healthy_class]
+                    specificities[i] <- best_model$probs[[i]][healthy_class, 1]
                 }
 
                 return(list(
@@ -755,7 +1000,32 @@ nogoldstandardClass <- if (requireNamespace("jmvcore")) {
                 ))
             },
             .runComposite = function(binary_data) {
-                # Create composite reference from majority vote
+                # "Majority vote", implemented as mean >= 0.5 -- so a TIE counts as diseased.
+                # With exactly 2 tests the only attainable means are 0, 0.5 and 1, and 0.5
+                # passes, which makes this rule literally identical to any_positive: the
+                # composite is TRUE whenever either test is positive. FP is then identically
+                # 0 and specificity/PPV come out 1.000 for every test, on every dataset.
+                # Verified: at k=2 composite and any_positive agree on 100% of rows; at
+                # k=3/4/5 they agree on 56%/66%/41%, so this is a k=2 degeneracy, not a
+                # broken rule.
+                if (ncol(binary_data) >= 3) {
+                    # Even with a genuine majority, each test votes on the standard it is
+                    # then scored against. Simulation puts the inflation at roughly +0.08 to
+                    # +0.12 on sensitivity in the common regime; that was never disclosed.
+                    private$.addNotice(
+                        "WARNING",
+                        "Composite reference inflates the estimates",
+                        "The reference standard here is a majority vote of the same tests being evaluated, so each test helps decide the answer it is graded against. This inflates every figure below -- in simulation, sensitivity by roughly 8 to 12 percentage points -- and the inflation is largest for the test that agrees most often with the others. Treat these as agreement with the majority, not as diagnostic accuracy. The latent class method estimates accuracy without building the standard from the tests."
+                    )
+                }
+
+                if (ncol(binary_data) == 2) {
+                    private$.addNotice(
+                        "STRONG_WARNING",
+                        "Composite reference cannot be used with only two tests",
+                        "With two tests a majority vote has no majority: one positive out of two is a tie, which this rule counts as diseased, making the composite reference identical to \"any test positive\". Every test then agrees perfectly with the reference whenever it is positive, so specificity and PPV are fixed at 100% by construction and are left blank below. Add a third test, or interpret only the sensitivity column -- and note that it too is inflated because each test helped build the standard it is being judged against."
+                    )
+                }
                 composite <- rowMeans(binary_data, na.rm = TRUE) >= 0.5
 
                 # Calculate prevalence
@@ -792,16 +1062,42 @@ nogoldstandardClass <- if (requireNamespace("jmvcore")) {
                 num_tests <- ncol(binary_data)
                 num_patients <- nrow(binary_data)
 
+                # A two-class model over k binary tests has 2k + 1 free parameters and
+                # 2^k - 1 degrees of freedom, so k = 2 gives 5 parameters for 3 df: the
+                # model is NOT identified and the estimates are determined by the starting
+                # values and the prior rather than by the data. latent_class already refuses
+                # this case; the EM here accepted it silently and returned numbers.
+                if (num_tests < 3) {
+                    private$.addNotice(
+                        "STRONG_WARNING",
+                        "Two tests cannot identify this model",
+                        "A two-class model over two binary tests has five unknown parameters but only three degrees of freedom, so sensitivity, specificity and prevalence are not separately estimable from the data. The values below reflect the starting values and the prior, not evidence from your sample, and must not be reported as accuracy estimates. Add a third conditionally independent test."
+                    )
+                }
+
                 # Prior parameters
                 # Prior for prevalence (Beta distribution)
                 alpha_prev <- 1 # uniform prior
                 beta_prev <- 1 # uniform prior
 
-                # Prior for sensitivity and specificity (Beta distribution)
-                alpha_sens <- 2 # slightly informative prior favoring higher sensitivity
+                # Prior for sensitivity and specificity (Beta distribution).
+                # Beta(2,1) has density 2x on [0,1]: mean 2/3, monotonically increasing, so
+                # it pulls BOTH estimates upward. In MAP terms it adds one pseudo-success and
+                # no pseudo-failure to every test. That is a deliberate thumb on the scale
+                # toward better-looking tests, and it was invisible to the user -- neither
+                # the output nor the option description mentioned any prior at all.
+                alpha_sens <- 2
                 beta_sens <- 1
-                alpha_spec <- 2 # slightly informative prior favoring higher specificity
+                alpha_spec <- 2
                 beta_spec <- 1
+
+                private$.addNotice(
+                    "WARNING",
+                    "Priors used by the Bayesian method",
+                    sprintf("Prevalence uses a uniform Beta(%g, %g) prior. Sensitivity and specificity each use a Beta(%g, %g) prior, which has mean %.2f and increases toward 1, so it pulls both estimates upward -- in MAP terms it adds one pseudo-positive result to every test. With a small sample this prior, not your data, may be driving the numbers below. These are penalised-likelihood (MAP) point estimates from an EM algorithm, not draws from a posterior, so the intervals shown are not credible intervals.",
+                            alpha_prev, beta_prev, alpha_sens, beta_sens,
+                            alpha_sens / (alpha_sens + beta_sens))
+                )
 
                 # Initialize parameters
                 # Start with prevalence = 0.3 as initial guess
@@ -934,6 +1230,38 @@ nogoldstandardClass <- if (requireNamespace("jmvcore")) {
                     specificities <- new_specificities
                 }
 
+                # When the estimated prevalence collapses toward 0 the sensitivity
+                # denominator sum(prob_disease) collapses with it, the Beta(2,1) numerator
+                # offset dominates, and the clamp below pins the answer at 0.999. A cohort in
+                # which no test is ever positive was reported as 99.9% sensitive. A clamped
+                # boundary value is not an estimate; blank it and say why.
+                eff_diseased <- prevalence * num_patients
+                eff_healthy <- (1 - prevalence) * num_patients
+                unstable <- character(0)
+                if (!is.finite(eff_diseased) || eff_diseased < 1) {
+                    sensitivities <- rep(NA_real_, num_tests)
+                    unstable <- c(unstable, "sensitivity")
+                }
+                if (!is.finite(eff_healthy) || eff_healthy < 1) {
+                    specificities <- rep(NA_real_, num_tests)
+                    unstable <- c(unstable, "specificity")
+                }
+                if (length(unstable) > 0) {
+                    private$.addNotice(
+                        "STRONG_WARNING",
+                        "Parameters not estimable",
+                        sprintf("The fitted prevalence is %.4f, so the model implies fewer than one %s case in this sample. %s cannot be estimated from it and %s left blank -- the algorithm would otherwise return a value pinned at its boundary by the prior rather than by your data.",
+                                prevalence,
+                                if ("sensitivity" %in% unstable) "diseased" else "non-diseased",
+                                paste(tools::toTitleCase(unstable), collapse = " and "),
+                                if (length(unstable) > 1) "have been" else "has been")
+                    )
+                }
+
+                private$.diag(sprintf("Bayesian EM     : %s after %d iteration(s) (limit %d)",
+                                      if (converged) "converged" else "DID NOT CONVERGE",
+                                      iter, max_iter))
+
                 return(list(
                     prevalence = prevalence,
                     sensitivities = sensitivities,
@@ -947,7 +1275,11 @@ nogoldstandardClass <- if (requireNamespace("jmvcore")) {
             # Analysis using "All Tests Positive" as reference
             .runAllPositive = function(binary_data) {
                 # Create reference where disease is present only if ALL tests are positive
-                reference <- apply(binary_data, 1, function(x) all(x == 1, na.rm = TRUE))
+                # all(logical(0)) is TRUE, so a row whose every test is missing would be
+                # counted as reference-POSITIVE. Complete-case filtering upstream makes this
+                # unreachable today, but it is a live trap if that ever changes.
+                reference <- apply(binary_data, 1, function(x)
+                    any(!is.na(x)) && all(x == 1, na.rm = TRUE))
 
                 # Calculate prevalence
                 prevalence <- mean(reference, na.rm = TRUE)
@@ -1005,156 +1337,116 @@ nogoldstandardClass <- if (requireNamespace("jmvcore")) {
                     data = binary_data
                 ))
             },
-            .calculateBootstrapCI = function(data, method, nboot, alpha, type, test_index = NULL, verbose = FALSE) {
-                # Simple bootstrap implementation with progress indicators
+            # Run the bootstrap ONCE and cache every statistic from each replicate.
+            #
+            # Previously .calculateBootstrapCI was called separately for prevalence and for
+            # the sensitivity AND specificity of every test -- 1 + 2*ntests independent
+            # loops, each re-running the estimator from scratch. With method="latent_class"
+            # each replicate also refits poLCA up to 21 times, so nboot=1000 with 3 tests
+            # meant on the order of 10^5 model fits and the analysis never finished.
+            # Resampling once per replicate and reading all the statistics off that single
+            # fit is both far cheaper and statistically better: the intervals now come from
+            # one coherent set of resamples rather than several unrelated ones.
+            .bootstrapAll = function(data, method, nboot, verbose = FALSE, warm_start = NULL) {
                 n <- nrow(data)
-                boot_results <- numeric(nboot)
+                n_tests <- ncol(data)
 
-                # Show starting message only if verbose
-                if (verbose) {
-                    message(.("\n=== Bootstrap Analysis ==="))
-                    message(sprintf(.("Starting bootstrap with %d iterations for %s method"), nboot, method))
-                    message(sprintf(.("Estimating confidence intervals for %s"), type))
-                    if (!is.null(test_index)) {
-                        message(sprintf(.("Test index: %d"), test_index))
+                # Seed ONCE, from the user's option, so a run is reproducible. Previously
+                # the only set.seed() was inside .runLCA, which reset the stream on every
+                # replicate and made the resamples cycle through a handful of distinct
+                # bootstrap samples instead of nboot independent ones.
+                seed_val <- self$options$seed
+                if (is.null(seed_val) || !is.finite(seed_val)) seed_val <- 0
+                set.seed(seed_val)
+                # Draw every resample up front so nothing downstream can disturb the stream.
+                idx <- matrix(sample.int(n, n * nboot, replace = TRUE), nrow = nboot, byrow = TRUE)
+
+                # Replicates reuse the main estimators; keep their diagnostics out of the panel.
+                private$.diagSuppressed <- TRUE
+                on.exit(private$.diagSuppressed <- FALSE, add = TRUE)
+
+                prevalence <- rep(NA_real_, nboot)
+                sens <- matrix(NA_real_, nrow = nboot, ncol = n_tests)
+                spec <- matrix(NA_real_, nrow = nboot, ncol = n_tests)
+                error_count <- 0L
+
+                for (b in seq_len(nboot)) {
+                    if (b %% 25 == 1) private$.checkpoint(flush = FALSE)
+                    boot_data <- data[idx[b, ], , drop = FALSE]
+
+                    boot_result <- tryCatch({
+                        if (method == "latent_class") {
+                            private$.runLCA(boot_data, names(data), NULL,
+                                            n_starts = if (is.null(warm_start)) 3L else 1L,
+                                            probs_start = warm_start)
+                        } else if (method == "composite") {
+                            private$.runComposite(boot_data)
+                        } else if (method == "all_positive") {
+                            private$.runAllPositive(boot_data)
+                        } else if (method == "any_positive") {
+                            private$.runAnyPositive(boot_data)
+                        } else if (method == "bayesian") {
+                            private$.runBayesian(boot_data)
+                        } else NULL
+                    }, error = function(e) NULL)
+
+                    if (is.null(boot_result)) {
+                        error_count <- error_count + 1L
+                        next
                     }
-                }
-
-                # Progress tracking variables
-                start_time <- Sys.time()
-                last_update <- start_time
-                update_interval <- max(1, floor(nboot / 20)) # Update ~20 times during process
-                success_count <- 0
-                error_count <- 0
-
-                for (b in 1:nboot) {
-                    # Resample data
-                    boot_indices <- sample(n, n, replace = TRUE)
-                    boot_data <- data[boot_indices, ]
-
-                    # Run analysis on bootstrap sample
-                    boot_result <- NULL
-                    tryCatch(
-                        {
-                            if (method == "latent_class") {
-                                boot_result <- private$.runLCA(boot_data, names(data), NULL)
-                            } else if (method == "composite") {
-                                boot_result <- private$.runComposite(boot_data)
-                            } else if (method == "all_positive") {
-                                boot_result <- private$.runAllPositive(boot_data)
-                            } else if (method == "any_positive") {
-                                boot_result <- private$.runAnyPositive(boot_data)
-                            } else if (method == "bayesian") {
-                                boot_result <- private$.runBayesian(boot_data)
-                            }
-                            success_count <- success_count + 1
-                        },
-                        error = function(e) {
-                            # Count errors but continue bootstrap. Use <<- so the outer counter
-                            # (defined in .calculateBootstrapCI) is updated; a plain <- would
-                            # only create a local binding, leaving error_count at 0 and the
-                            # convergence warning below permanently dead.
-                            error_count <<- error_count + 1
-                        }
-                    )
-
-                    # Extract relevant statistic
-                    if (!is.null(boot_result)) {
-                        if (type == "prevalence") {
-                            boot_results[b] <- boot_result$prevalence
-                        } else if (type == "sensitivity" && !is.null(test_index)) {
-                            boot_results[b] <- boot_result$sensitivities[test_index]
-                        } else if (type == "specificity" && !is.null(test_index)) {
-                            boot_results[b] <- boot_result$specificities[test_index]
-                        }
-                    } else {
-                        boot_results[b] <- NA
+                    prevalence[b] <- boot_result$prevalence
+                    k <- min(n_tests, length(boot_result$sensitivities))
+                    if (k > 0) {
+                        sens[b, seq_len(k)] <- boot_result$sensitivities[seq_len(k)]
+                        spec[b, seq_len(k)] <- boot_result$specificities[seq_len(k)]
                     }
-
-                    # Checkpoint periodically during bootstrap
-                    if (b %% 50 == 1) {
-                        private$.checkpoint(flush = FALSE) # Periodic bootstrap checkpoint
-                    }
-
-                    # Show progress updates only if verbose
-                    if (verbose) {
-                        current_time <- Sys.time()
-                        if (b %% update_interval == 0 || b == nboot ||
-                            as.numeric(difftime(current_time, last_update, units = "secs")) > 10) {
-                            elapsed <- as.numeric(difftime(current_time, start_time, units = "secs"))
-                            percent_done <- b / nboot * 100
-                            est_total <- elapsed / percent_done * 100
-                            est_remaining <- est_total - elapsed
-
-                            message(sprintf(
-                                .("  %d/%d (%.1f%%) - %d successful, %d errors - %.1f sec elapsed, ~%.1f sec remaining"),
-                                b, nboot, percent_done, success_count, error_count,
-                                elapsed, est_remaining
-                            ))
-
-                            last_update <- current_time
-                        }
-                    }
-                }
-
-                # Show final statistics only if verbose
-                if (verbose) {
-                    total_time <- as.numeric(difftime(Sys.time(), start_time, units = "secs"))
-                    message(.("\n=== Bootstrap Complete ==="))
-                    message(sprintf(
-                        .("Total time: %.1f seconds (%.2f iterations/sec)"),
-                        total_time, nboot / total_time
-                    ))
-                    message(sprintf(
-                        .("Successful iterations: %d (%.1f%%)"),
-                        success_count, success_count / nboot * 100
-                    ))
-                    message(sprintf(
-                        .("Failed iterations: %d (%.1f%%)"),
-                        error_count, error_count / nboot * 100
-                    ))
                 }
 
                 if (error_count > 0) {
                     private$.addNotice(
                         "WARNING",
-                        "Bootstrap Convergence",
-                        sprintf(.("Bootstrap: %d sample(s) failed to converge or produced errors (%d%%). CIs may be affected."), error_count, round(error_count / nboot * 100))
+                        "Some bootstrap replicates failed",
+                        sprintf("%d of %d bootstrap resamples (%.0f%%) could not be fitted and were discarded. The intervals below are based on the remaining %d. A high failure rate usually means the resamples are too small or too sparse to support the model.",
+                                error_count, nboot, 100 * error_count / nboot, nboot - error_count)
                     )
                 }
 
-                # Calculate percentile CI
-                boot_results <- boot_results[!is.na(boot_results)]
+                private$.diagSuppressed <- FALSE
+                private$.diag(sprintf("Bootstrap       : %d resamples, seed %s, %d failed (%.1f%%)",
+                                      nboot, format(seed_val), error_count,
+                                      100 * error_count / nboot))
+                if (!is.null(warm_start))
+                    private$.diag("                  latent class replicates warm-started from the full-sample fit")
 
-                if (length(boot_results) > 0) {
-                    ci <- quantile(boot_results, c(alpha / 2, 1 - alpha / 2), na.rm = TRUE)
-                    if (verbose) {
-                        message(sprintf(
-                            .("Confidence interval (%.1f%%): [%.4f, %.4f]"),
-                            (1 - alpha) * 100, ci[1], ci[2]
-                        ))
-                    }
-                    return(list(lower = ci[1], upper = ci[2]))
-                } else {
-                    if (verbose) {
-                        message(.("WARNING: No valid bootstrap results obtained. Returning NA."))
-                    }
-                    return(list(lower = NA, upper = NA))
-                }
+                list(prevalence = prevalence, sensitivities = sens, specificities = spec,
+                     n_failed = error_count, nboot = nboot)
             },
+
+            # Percentile interval from a cached bootstrap distribution.
+            .bootCI = function(values, alpha) {
+                values <- values[is.finite(values)]
+                if (length(values) < 20) return(list(lower = NA_real_, upper = NA_real_))
+                q <- stats::quantile(values, c(alpha / 2, 1 - alpha / 2), names = FALSE, na.rm = TRUE)
+                list(lower = q[1], upper = q[2])
+            },
+
             .calculatePPVNPV = function(sensitivity, specificity, prevalence) {
                 # Calculate Positive Predictive Value (PPV) and Negative Predictive Value (NPV)
                 # Using Bayes' theorem
 
                 # PPV = (sensitivity * prevalence) / ((sensitivity * prevalence) + ((1 - specificity) * (1 - prevalence)))
+                # A test with no diseased (or no healthy) cases yields NA sensitivity or
+                # specificity upstream. `if (NA > 0)` then throws "missing value where
+                # TRUE/FALSE needed" and aborts the ENTIRE analysis rather than leaving one
+                # cell blank. isTRUE() makes the guard NA-safe.
                 ppv_numerator <- sensitivity * prevalence
                 ppv_denominator <- ppv_numerator + ((1 - specificity) * (1 - prevalence))
-                ppv <- if (ppv_denominator > 0) ppv_numerator / ppv_denominator else NA
+                ppv <- if (isTRUE(ppv_denominator > 0)) ppv_numerator / ppv_denominator else NA_real_
 
                 # NPV = (specificity * (1 - prevalence)) / (((1 - sensitivity) * prevalence) + (specificity * (1 - prevalence)))
                 npv_numerator <- specificity * (1 - prevalence)
                 npv_denominator <- ((1 - sensitivity) * prevalence) + npv_numerator
-                npv <- if (npv_denominator > 0) npv_numerator / npv_denominator else NA
+                npv <- if (isTRUE(npv_denominator > 0)) npv_numerator / npv_denominator else NA_real_
 
                 return(list(ppv = ppv, npv = npv))
             },
@@ -1465,7 +1757,7 @@ nogoldstandardClass <- if (requireNamespace("jmvcore")) {
                     "<h4 style='color: #2e7d32; margin-top: 0;'> ", .("Latent Class Analysis (Recommended)"), "</h4>",
                     "<p><strong>", .("Description"), ":</strong> ", .("Most robust method using mixture models. Estimates disease prevalence and test parameters simultaneously."), "</p>",
                     "<p><strong>", .("Best for"), ":</strong> ", .("Diagnostic validation studies with 3+ tests and N>=100"), "</p>",
-                    "<p><strong>", .("Strengths"), ":</strong> ", .("Handles conditional dependence, provides model fit statistics, most statistically rigorous"), "</p>",
+                    "<p><strong>", .("Strengths"), ":</strong> ", .("The only method here that estimates accuracy rather than agreement with a self-built reference; provides model fit statistics. Assumes the tests are conditionally independent given true status -- it does NOT model conditional dependence"), "</p>",
                     "</div>",
                     "<div style='margin: 15px 0; padding: 15px; background: #e3f2fd; border-radius: 5px;'>",
                     "<h4 style='color: #1565c0; margin-top: 0;'> ", .("Bayesian Analysis"), "</h4>",
@@ -1477,19 +1769,19 @@ nogoldstandardClass <- if (requireNamespace("jmvcore")) {
                     "<h4 style='color: #ef6c00; margin-top: 0;'> ", .("Composite Reference"), "</h4>",
                     "<p><strong>", .("Description"), ":</strong> ", .("Uses majority vote of available tests as pseudo-gold standard."), "</p>",
                     "<p><strong>", .("Best for"), ":</strong> ", .("Inter-rater agreement studies with 3+ tests, exploratory analysis"), "</p>",
-                    "<p><strong>", .("Strengths"), ":</strong> ", .("Simple and intuitive, requires minimal assumptions, good starting point"), "</p>",
+                    "<p><strong>", .("Strengths"), ":</strong> ", .("Simple and intuitive. Not an accuracy estimate: each test helps build the standard it is judged against, which inflates its apparent performance. Needs 3+ tests -- with 2 a tie counts as diseased, making it identical to Any Test Positive"), "</p>",
                     "</div>",
                     "<div style='margin: 15px 0; padding: 15px; background: #fce4ec; border-radius: 5px;'>",
                     "<h4 style='color: #c2185b; margin-top: 0;'> ", .("All Tests Positive"), "</h4>",
                     "<p><strong>", .("Description"), ":</strong> ", .("Conservative approach - disease present only if ALL tests are positive."), "</p>",
                     "<p><strong>", .("Best for"), ":</strong> ", .("Highly specific diagnoses where false positives are very costly"), "</p>",
-                    "<p><strong>", .("Strengths"), ":</strong> ", .("High specificity reference, minimizes false positives"), "</p>",
+                    "<p><strong>", .("Strengths"), ":</strong> ", .("A deliberately strict reference. Sensitivity and NPV cannot be estimated under this rule -- they are fixed at 100% by construction -- so only specificity and PPV are shown, and both are inflated by the same circularity"), "</p>",
                     "</div>",
                     "<div style='margin: 15px 0; padding: 15px; background: #e8f5e8; border-radius: 5px;'>",
                     "<h4 style='color: #388e3c; margin-top: 0;'> ", .("Any Test Positive"), "</h4>",
                     "<p><strong>", .("Description"), ":</strong> ", .("Liberal approach - disease present if ANY test is positive."), "</p>",
                     "<p><strong>", .("Best for"), ":</strong> ", .("Population screening scenarios where missing cases is costly"), "</p>",
-                    "<p><strong>", .("Strengths"), ":</strong> ", .("High sensitivity reference, minimizes false negatives"), "</p>",
+                    "<p><strong>", .("Strengths"), ":</strong> ", .("A deliberately permissive reference. Specificity and PPV cannot be estimated under this rule -- they are fixed at 100% by construction -- so only sensitivity and NPV are shown, and both are inflated by the same circularity"), "</p>",
                     "</div>",
                     "<div style='margin: 15px 0; padding: 10px; background: #fff8e1; border-radius: 5px; border-left: 3px solid #ffb300;'>",
                     "<h4 style='color: #e65100; margin-top: 0;'> ", .("Selection Tips"), "</h4>",
@@ -1553,18 +1845,44 @@ nogoldstandardClass <- if (requireNamespace("jmvcore")) {
                     )
                 )
 
-                # Store preset info for welcome message integration
+                # A jamovi backend cannot write self$options -- the GUI owns them -- so a
+                # preset can only ADVISE. Previously it stored the config and printed it via
+                # message(), which no jamovi user ever sees, so all five presets produced
+                # byte-identical analyses: same method, same bootstrap, same nboot, same
+                # numbers. The control looked like it did something and did not.
+                # It now reports what it recommends and how that compares with the current
+                # settings, so the user can act on it.
                 if (preset %in% names(presets)) {
                     preset_config <- presets[[preset]]
-
-                    # Store for use in welcome message
                     private$.preset_info <- preset_config
 
-                    if (self$options$verbose) {
-                        message(sprintf(.("Applied clinical preset: %s"), preset))
-                        message(sprintf(.("Recommended method: %s"), preset_config$method))
-                        message(preset_config$guidance)
-                    }
+                    cur <- list(method = self$options$method,
+                                bootstrap = isTRUE(self$options$bootstrap),
+                                nboot = self$options$nboot,
+                                alpha = self$options$alpha)
+                    diffs <- character(0)
+                    if (!identical(cur$method, preset_config$method))
+                        diffs <- c(diffs, sprintf("Analysis method: currently \"%s\", recommended \"%s\"",
+                                                  cur$method, preset_config$method))
+                    if (!identical(cur$bootstrap, isTRUE(preset_config$bootstrap)))
+                        diffs <- c(diffs, sprintf("Bootstrap confidence intervals: currently %s, recommended %s",
+                                                  if (cur$bootstrap) "on" else "off",
+                                                  if (isTRUE(preset_config$bootstrap)) "on" else "off"))
+                    if (!isTRUE(all.equal(cur$nboot, preset_config$nboot)))
+                        diffs <- c(diffs, sprintf("Bootstrap samples: currently %g, recommended %g",
+                                                  cur$nboot, preset_config$nboot))
+
+                    private$.addNotice(
+                        if (length(diffs) > 0) "WARNING" else "INFO",
+                        sprintf("Clinical preset: %s", gsub("_", " ", preset)),
+                        if (length(diffs) > 0)
+                            sprintf("%s %s This preset does NOT change your settings automatically -- set them yourself in the options panel: %s.",
+                                    preset_config$description, preset_config$guidance,
+                                    paste(diffs, collapse = "; "))
+                        else
+                            sprintf("%s %s Your current settings already match this preset.",
+                                    preset_config$description, preset_config$guidance)
+                    )
                 }
             },
             .generateClinicalSummary = function(results, method, tests) {
@@ -1574,6 +1892,18 @@ nogoldstandardClass <- if (requireNamespace("jmvcore")) {
 
                 n_tests <- length(tests)
                 prev_pct <- sprintf("%.1f%%", results$prevalence * 100)
+
+                # For the reference-rule methods, `prevalence` is the proportion of cases
+                # satisfying the rule (all tests agree positive / any test positive), NOT an
+                # estimate of disease prevalence, and one of sensitivity/specificity is fixed
+                # at 1 by construction. This panel read results$sensitivities directly and so
+                # still announced "Range from 100.0% to 100.0%" after the table stopped doing
+                # so.
+                rule_based <- method %in% c("all_positive", "any_positive") ||
+                    (identical(method, "composite") && n_tests == 2)
+                prev_label <- if (rule_based)
+                    .("Cases meeting the reference rule") else .("Disease prevalence:")
+                degenerate_sens <- identical(method, "all_positive")
 
                 # Generate interpretation based on prevalence
                 prev_interp <- if (results$prevalence < 0.10) {
@@ -1593,9 +1923,19 @@ nogoldstandardClass <- if (requireNamespace("jmvcore")) {
                     "<h4 style='color: #1565c0; margin-top: 0;'> ", .("Clinical Summary"), "</h4>",
                     "<p><strong>", .("Analysis:"), "</strong> ", sprintf(.("No gold standard analysis using %s method"), method), "</p>",
                     "<p><strong>", .("Tests analyzed:"), "</strong> ", paste(htmltools::htmlEscape(unlist(tests)), collapse = ", "), " (N=", n_tests, ")</p>",
-                    "<p><strong>", .("Disease prevalence:"), "</strong> ", prev_pct, "</p>",
-                    "<p><strong>", .("Test sensitivities:"), "</strong> ", .("Range from"), " ", sens_min, " ", .("to"), " ", sens_max, "</p>",
-                    "<p><strong>", .("Clinical interpretation:"), "</strong> ", prev_interp, "</p>",
+                    "<p><strong>", prev_label, "</strong> ", prev_pct,
+                    if (rule_based) paste0(" <em>", .("(this is the share of cases satisfying the rule, not an estimate of disease prevalence)"), "</em>") else "",
+                    "</p>",
+                    if (degenerate_sens)
+                        paste0("<p><strong>", .("Test sensitivities:"), "</strong> <em>",
+                               .("not estimable - fixed at 100% by the construction of this reference rule"), "</em></p>")
+                    else
+                        paste0("<p><strong>", .("Test sensitivities:"), "</strong> ", .("Range from"), " ", sens_min, " ", .("to"), " ", sens_max, "</p>"),
+                    if (rule_based) "" else paste0("<p><strong>", .("Clinical interpretation:"), "</strong> ", prev_interp, "</p>"),
+                    if (rule_based)
+                        paste0("<p><strong>", .("Caution:"), "</strong> ",
+                               .("this method scores each test against a reference built from the tests themselves, so the figures describe agreement with that rule rather than diagnostic accuracy."), "</p>")
+                    else "",
                     "</div>"
                 )
 

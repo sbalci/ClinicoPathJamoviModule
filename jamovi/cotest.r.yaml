@@ -58,7 +58,12 @@ items:
     - name:  dependenceInfo
       title: 'Test Dependence Information'
       type: Html
-      visible: (!indep)
+      # Must not start with '!': jmvcore routes to its R evaluator only on
+      # ^\([\$A-Za-z].*\)$, so a leading '!' returns the raw (truthy) string and the panel
+      # is permanently visible. Verified: $visible was TRUE for indep = TRUE *and* FALSE,
+      # so the conditional-dependence explanation showed even when the user had chosen
+      # independence, where it does not apply.
+      visible: (indep == FALSE)
       
     - name:  dependenceExplanation
       title: 'Understanding Test Dependence'

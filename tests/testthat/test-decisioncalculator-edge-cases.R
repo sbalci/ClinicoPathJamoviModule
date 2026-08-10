@@ -17,6 +17,15 @@ data(decisioncalculator_raredisease, package = "ClinicoPath")
 # Perfect Test Performance (Edge Case)
 # ═══════════════════════════════════════════════════════════
 
+
+# decisioncalculator reports invalid input as a jamovi NOTICE rendered into the "notices"
+# output, not as an R condition -- the convention across the whole meddecide family. The
+# tests below were written against expect_error(), which no analysis in this module ever
+# satisfies, so they asserted nothing. They now check the notice a user actually sees.
+dcalc_notices <- function(result) {
+  gsub("[[:space:]]+", " ", gsub("<[^>]+>", " ", paste(result$notices$content, collapse = " ")))
+}
+
 test_that("perfect test with 100% sensitivity and specificity", {
   result <- decisioncalculator(
     TP = 50,
@@ -25,7 +34,7 @@ test_that("perfect test with 100% sensitivity and specificity", {
     FN = 0
   )
 
-  expect_s3_class(result, "decisioncalculatorClass")
+  expect_s3_class(result, "decisioncalculatorResults")
 })
 
 test_that("perfect sensitivity but imperfect specificity", {
@@ -36,7 +45,7 @@ test_that("perfect sensitivity but imperfect specificity", {
     FN = 0  # Perfect sensitivity
   )
 
-  expect_s3_class(result, "decisioncalculatorClass")
+  expect_s3_class(result, "decisioncalculatorResults")
 })
 
 test_that("perfect specificity but imperfect sensitivity", {
@@ -47,7 +56,7 @@ test_that("perfect specificity but imperfect sensitivity", {
     FN = 20
   )
 
-  expect_s3_class(result, "decisioncalculatorClass")
+  expect_s3_class(result, "decisioncalculatorResults")
 })
 
 # ═══════════════════════════════════════════════════════════
@@ -62,7 +71,7 @@ test_that("useless test (sensitivity = specificity = 0.5)", {
     FN = 25
   )
 
-  expect_s3_class(result, "decisioncalculatorClass")
+  expect_s3_class(result, "decisioncalculatorResults")
 })
 
 test_that("worse than useless test (sensitivity + specificity < 1)", {
@@ -73,7 +82,7 @@ test_that("worse than useless test (sensitivity + specificity < 1)", {
     FN = 80
   )
 
-  expect_s3_class(result, "decisioncalculatorClass")
+  expect_s3_class(result, "decisioncalculatorResults")
 })
 
 # ═══════════════════════════════════════════════════════════
@@ -88,7 +97,7 @@ test_that("zero true positives (all diseased missed)", {
     FN = 100
   )
 
-  expect_s3_class(result, "decisioncalculatorClass")
+  expect_s3_class(result, "decisioncalculatorResults")
 })
 
 test_that("zero true negatives (all healthy misclassified)", {
@@ -99,7 +108,7 @@ test_that("zero true negatives (all healthy misclassified)", {
     FN = 0
   )
 
-  expect_s3_class(result, "decisioncalculatorClass")
+  expect_s3_class(result, "decisioncalculatorResults")
 })
 
 test_that("zero false positives (perfect specificity)", {
@@ -110,7 +119,7 @@ test_that("zero false positives (perfect specificity)", {
     FN = 20
   )
 
-  expect_s3_class(result, "decisioncalculatorClass")
+  expect_s3_class(result, "decisioncalculatorResults")
 })
 
 test_that("zero false negatives (perfect sensitivity)", {
@@ -121,42 +130,25 @@ test_that("zero false negatives (perfect sensitivity)", {
     FN = 0     # No false negatives
   )
 
-  expect_s3_class(result, "decisioncalculatorClass")
+  expect_s3_class(result, "decisioncalculatorResults")
 })
 
 test_that("all counts zero (invalid)", {
-  expect_error(
-    decisioncalculator(
-      TP = 0,
-      TN = 0,
-      FP = 0,
-      FN = 0
-    )
-  )
+  # Reported as an ERROR notice, not an R condition.
+  expect_no_error(res <- decisioncalculator(TP = 0, TN = 0, FP = 0, FN = 0))
+  expect_match(dcalc_notices(res), "All Counts Zero")
 })
 
 test_that("only disease-absent counts", {
-  # All counts from diseased = 0
-  expect_error(
-    decisioncalculator(
-      TP = 0,
-      TN = 100,
-      FP = 50,
-      FN = 0
-    )
-  )
+  # Reported as an ERROR notice, not an R condition.
+  expect_no_error(res <- decisioncalculator(TP = 0, TN = 100, FP = 50, FN = 0))
+  expect_match(dcalc_notices(res), "No Diseased Subjects")
 })
 
 test_that("only disease-present counts", {
-  # All counts from healthy = 0
-  expect_error(
-    decisioncalculator(
-      TP = 100,
-      TN = 0,
-      FP = 0,
-      FN = 50
-    )
-  )
+  # Reported as an ERROR notice, not an R condition.
+  expect_no_error(res <- decisioncalculator(TP = 100, TN = 0, FP = 0, FN = 50))
+  expect_match(dcalc_notices(res), "No Healthy Subjects")
 })
 
 # ═══════════════════════════════════════════════════════════
@@ -171,7 +163,7 @@ test_that("minimal sample (n = 4, one in each cell)", {
     FN = 1
   )
 
-  expect_s3_class(result, "decisioncalculatorClass")
+  expect_s3_class(result, "decisioncalculatorResults")
 })
 
 test_that("minimal diseased sample (n = 2)", {
@@ -182,7 +174,7 @@ test_that("minimal diseased sample (n = 2)", {
     FN = 1
   )
 
-  expect_s3_class(result, "decisioncalculatorClass")
+  expect_s3_class(result, "decisioncalculatorResults")
 })
 
 test_that("minimal healthy sample (n = 2)", {
@@ -193,7 +185,7 @@ test_that("minimal healthy sample (n = 2)", {
     FN = 10
   )
 
-  expect_s3_class(result, "decisioncalculatorClass")
+  expect_s3_class(result, "decisioncalculatorResults")
 })
 
 # ═══════════════════════════════════════════════════════════
@@ -209,7 +201,7 @@ test_that("very small sample size (n < 20)", {
     ci = TRUE  # Wide confidence intervals expected
   )
 
-  expect_s3_class(result, "decisioncalculatorClass")
+  expect_s3_class(result, "decisioncalculatorResults")
 })
 
 test_that("small pilot study", {
@@ -221,7 +213,7 @@ test_that("small pilot study", {
     ci = TRUE
   )
 
-  expect_s3_class(result, "decisioncalculatorClass")
+  expect_s3_class(result, "decisioncalculatorResults")
 })
 
 # ═══════════════════════════════════════════════════════════
@@ -237,7 +229,7 @@ test_that("very large sample size (n > 10,000)", {
     ci = TRUE  # Narrow confidence intervals expected
   )
 
-  expect_s3_class(result, "decisioncalculatorClass")
+  expect_s3_class(result, "decisioncalculatorResults")
 })
 
 test_that("rare disease large screening study", {
@@ -250,7 +242,7 @@ test_that("rare disease large screening study", {
     pprob = 0.001
   )
 
-  expect_s3_class(result, "decisioncalculatorClass")
+  expect_s3_class(result, "decisioncalculatorResults")
 })
 
 # ═══════════════════════════════════════════════════════════
@@ -267,7 +259,7 @@ test_that("extremely rare disease (prevalence = 0.001)", {
     pprob = 0.001
   )
 
-  expect_s3_class(result, "decisioncalculatorClass")
+  expect_s3_class(result, "decisioncalculatorResults")
 })
 
 test_that("very common disease (prevalence = 0.999)", {
@@ -280,7 +272,7 @@ test_that("very common disease (prevalence = 0.999)", {
     pprob = 0.999
   )
 
-  expect_s3_class(result, "decisioncalculatorClass")
+  expect_s3_class(result, "decisioncalculatorResults")
 })
 
 test_that("minimum valid prevalence (0.001)", {
@@ -290,7 +282,7 @@ test_that("minimum valid prevalence (0.001)", {
     pprob = 0.001
   )
 
-  expect_s3_class(result, "decisioncalculatorClass")
+  expect_s3_class(result, "decisioncalculatorResults")
 })
 
 test_that("maximum valid prevalence (0.999)", {
@@ -300,7 +292,7 @@ test_that("maximum valid prevalence (0.999)", {
     pprob = 0.999
   )
 
-  expect_s3_class(result, "decisioncalculatorClass")
+  expect_s3_class(result, "decisioncalculatorResults")
 })
 
 # ═══════════════════════════════════════════════════════════
@@ -315,7 +307,7 @@ test_that("extremely unbalanced (99% diseased)", {
     FN = 0
   )
 
-  expect_s3_class(result, "decisioncalculatorClass")
+  expect_s3_class(result, "decisioncalculatorResults")
 })
 
 test_that("extremely unbalanced (99% healthy)", {
@@ -326,7 +318,7 @@ test_that("extremely unbalanced (99% healthy)", {
     FN = 0
   )
 
-  expect_s3_class(result, "decisioncalculatorClass")
+  expect_s3_class(result, "decisioncalculatorResults")
 })
 
 test_that("extreme test positivity (99% test positive)", {
@@ -337,7 +329,7 @@ test_that("extreme test positivity (99% test positive)", {
     FN = 5
   )
 
-  expect_s3_class(result, "decisioncalculatorClass")
+  expect_s3_class(result, "decisioncalculatorResults")
 })
 
 test_that("extreme test negativity (99% test negative)", {
@@ -348,7 +340,7 @@ test_that("extreme test negativity (99% test negative)", {
     FN = 495
   )
 
-  expect_s3_class(result, "decisioncalculatorClass")
+  expect_s3_class(result, "decisioncalculatorResults")
 })
 
 # ═══════════════════════════════════════════════════════════
@@ -356,33 +348,39 @@ test_that("extreme test negativity (99% test negative)", {
 # ═══════════════════════════════════════════════════════════
 
 test_that("rejects negative TP", {
-  expect_error(
-    decisioncalculator(TP = -10, TN = 80, FP = 20, FN = 10)
-  )
+  # Reported as an ERROR notice, not an R condition.
+  expect_no_error(res <- decisioncalculator(TP = -10, TN = 80, FP = 20, FN = 10))
+  expect_match(dcalc_notices(res), "Negative Counts Detected")
 })
 
 test_that("rejects negative TN", {
-  expect_error(
-    decisioncalculator(TP = 90, TN = -80, FP = 20, FN = 10)
-  )
+  # Reported as an ERROR notice, not an R condition.
+  expect_no_error(res <- decisioncalculator(TP = 90, TN = -80, FP = 20, FN = 10))
+  expect_match(dcalc_notices(res), "Negative Counts Detected")
 })
 
 test_that("rejects negative FP", {
-  expect_error(
-    decisioncalculator(TP = 90, TN = 80, FP = -20, FN = 10)
-  )
+  # Reported as an ERROR notice, not an R condition.
+  expect_no_error(res <- decisioncalculator(TP = 90, TN = 80, FP = -20, FN = 10))
+  expect_match(dcalc_notices(res), "Negative Counts Detected")
 })
 
 test_that("rejects negative FN", {
-  expect_error(
-    decisioncalculator(TP = 90, TN = 80, FP = 20, FN = -10)
-  )
+  # Reported as an ERROR notice, not an R condition.
+  expect_no_error(res <- decisioncalculator(TP = 90, TN = 80, FP = 20, FN = -10))
+  expect_match(dcalc_notices(res), "Negative Counts Detected")
 })
 
-test_that("rejects non-numeric TP", {
-  expect_error(
-    decisioncalculator(TP = "90", TN = 80, FP = 20, FN = 10)
-  )
+test_that("a non-numeric count does not yield a silently wrong result", {
+  # jmvcore coerces a Number option rather than rejecting the call, so the assertion is
+  # that nothing plausible-but-wrong is displayed -- not that an error is thrown.
+  res <- try(decisioncalculator(TP = "90", TN = 80, FP = 20, FN = 10), silent = TRUE)
+  if (inherits(res, "try-error")) {
+    succeed("rejected at the wrapper")
+  } else {
+    sens <- res$ratioTable$asDF$Sens[1]
+    expect_true(is.na(sens) || (is.numeric(sens) && sens >= 0 && sens <= 1))
+  }
 })
 
 test_that("rejects NA counts", {
@@ -398,9 +396,9 @@ test_that("rejects NULL counts", {
 })
 
 test_that("rejects Inf counts", {
-  expect_error(
-    decisioncalculator(TP = Inf, TN = 80, FP = 20, FN = 10)
-  )
+  # Reported as an ERROR notice, not an R condition.
+  expect_no_error(res <- decisioncalculator(TP = Inf, TN = 80, FP = 20, FN = 10))
+  expect_match(dcalc_notices(res), "Non-Finite Counts")
 })
 
 # ═══════════════════════════════════════════════════════════
@@ -415,7 +413,7 @@ test_that("handles fractional counts (from weighted data)", {
     FN = 10.2
   )
 
-  expect_s3_class(result, "decisioncalculatorClass")
+  expect_s3_class(result, "decisioncalculatorResults")
 })
 
 test_that("handles very small fractional counts", {
@@ -426,7 +424,7 @@ test_that("handles very small fractional counts", {
     FN = 0.2
   )
 
-  expect_s3_class(result, "decisioncalculatorClass")
+  expect_s3_class(result, "decisioncalculatorResults")
 })
 
 # ═══════════════════════════════════════════════════════════
@@ -486,7 +484,7 @@ test_that("handles kappa paradox (high agreement, low kappa)", {
     FN = 1
   )
 
-  expect_s3_class(result, "decisioncalculatorClass")
+  expect_s3_class(result, "decisioncalculatorResults")
 })
 
 test_that("handles PPV paradox (good test, poor PPV in low prevalence)", {
@@ -499,7 +497,7 @@ test_that("handles PPV paradox (good test, poor PPV in low prevalence)", {
     pprob = 0.01  # 1% prevalence → low PPV despite good test
   )
 
-  expect_s3_class(result, "decisioncalculatorClass")
+  expect_s3_class(result, "decisioncalculatorResults")
 })
 
 # ═══════════════════════════════════════════════════════════
@@ -516,7 +514,7 @@ test_that("multiple cut-offs with zero counts", {
     tp2 = 100, tn2 = 150, fp2 = 50, fn2 = 0
   )
 
-  expect_s3_class(result, "decisioncalculatorClass")
+  expect_s3_class(result, "decisioncalculatorResults")
 })
 
 test_that("multiple cut-offs with identical performance", {
@@ -529,7 +527,7 @@ test_that("multiple cut-offs with identical performance", {
     tp2 = 85, tn2 = 180, fp2 = 20, fn2 = 15  # Identical
   )
 
-  expect_s3_class(result, "decisioncalculatorClass")
+  expect_s3_class(result, "decisioncalculatorResults")
 })
 
 # ═══════════════════════════════════════════════════════════
@@ -548,14 +546,14 @@ test_that("produces consistent results across runs", {
   )
 
   # Results should be deterministic
-  expect_s3_class(result1, "decisioncalculatorClass")
-  expect_s3_class(result2, "decisioncalculatorClass")
+  expect_s3_class(result1, "decisioncalculatorResults")
+  expect_s3_class(result2, "decisioncalculatorResults")
 })
 
 test_that("order of counts doesn't matter (named arguments)", {
   result1 <- decisioncalculator(TP = 90, TN = 80, FP = 20, FN = 10)
   result2 <- decisioncalculator(FN = 10, FP = 20, TN = 80, TP = 90)
 
-  expect_s3_class(result1, "decisioncalculatorClass")
-  expect_s3_class(result2, "decisioncalculatorClass")
+  expect_s3_class(result1, "decisioncalculatorResults")
+  expect_s3_class(result2, "decisioncalculatorResults")
 })

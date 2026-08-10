@@ -54,6 +54,16 @@ const updateClinicalGuidance = (ui) => {
                 <p>${config.guidance}</p>
             </div>`;
         }
+        // The preset numbers are teaching values, not validated clinical parameters. Say so
+        // wherever a preset is in use -- the backend posts the same warning in the results.
+        guidanceHtml += `<div class="alert alert-warning">
+            <h5><span class="glyphicon glyphicon-warning-sign"></span> Demonstration values only</h5>
+            <p>These sensitivity, specificity and prevalence figures are rounded illustrative
+            values chosen to show how the strategies behave. They are <strong>not</strong>
+            validated clinical parameters, are not taken from any specific published study, and
+            the prevalence is not your population's. Replace them with estimates from your own
+            setting before drawing any clinical conclusion.</p>
+        </div>`;
     }
 
     // Test performance guidance

@@ -2,7 +2,7 @@ Type: Package
 Package: ClinicoPath
 Title: Comprehensive Analysis for Clinicopathological Research
 Version: 1.0.4
-Date: 2026-08-07
+Date: 2026-08-10
 Authors@R: person(given = "Serdar", family = "Balci", role = c("aut", "cre", "cph"), email = "serdarbalci@serdarbalci.com", comment = c(ORCID = "0000-0002-7852-3851"))
 Maintainer: Serdar Balci <serdarbalci@serdarbalci.com>
 Description: Provides a comprehensive jamovi module designed specifically
@@ -782,6 +782,7 @@ Collate:
     'semimarkov.h.R'
     'sequentialtests.b.R'
     'sequentialtests.h.R'
+    'sequentialtests_data.R'
     'sigmaMetrics.b.R'
     'sigmaMetrics.h.R'
     'simonmakuch.b.R'

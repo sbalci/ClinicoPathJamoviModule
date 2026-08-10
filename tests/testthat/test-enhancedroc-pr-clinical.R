@@ -1,196 +1,82 @@
-library(testthat)
+# Precision-recall and clinical-metric behaviour for enhancedROC.
+#
+# This file used to build a hand-rolled jmvcore (MockTable/MockHtml/MockImage), assign a fake
+# `enhancedROCBase` into the global environment and source() the backend. That harness drifted
+# from the real backend -- MockTable implemented only addRow/setRow/asDF -- and the whole file
+# died with "attempt to apply non-function" the moment the backend called anything else. It
+# tested the mock, not the analysis. The three assertions it was making are worth keeping, so
+# they are made here against the real function.
 
-test_that("enhancedROC precision-recall and clinical metrics honor prevalence and impact options", {
-  skip_if_not_installed('jmvReadWrite')
-    library(R6)
-    library(pROC)
-    library(caret)
+run_er <- function(...) {
+    args <- utils::modifyList(
+        list(outcome = "outcome", positiveClass = "Case", analysisType = "single"),
+        list(...))
+    do.call(ClinicoPath::enhancedROC, args)
+}
 
-    # Minimal jmvcore mocks
-    MockTable <- R6::R6Class("MockTable",
-        public = list(
-            rows = list(),
-            addRow = function(rowKey, values) {
-                self$rows[[length(self$rows) + 1]] <- list(rowKey = rowKey, values = values)
-            },
-            setRow = function(rowNo = NULL, rowKey = NULL, values) {
-                if (!is.null(rowNo) && rowNo <= length(self$rows)) {
-                    self$rows[[rowNo]]$values <- values
-                } else {
-                    self$addRow(rowKey, values)
-                }
-            },
-            asDF = function() {
-                if (length(self$rows) == 0) return(data.frame())
-                cols <- unique(unlist(lapply(self$rows, function(r) names(r$values))))
-                df <- as.data.frame(do.call(rbind, lapply(self$rows, function(r) {
-                    vals <- r$values
-                    missing <- setdiff(cols, names(vals))
-                    vals[missing] <- NA
-                    vals[cols]
-                })), stringsAsFactors = FALSE)
-                colnames(df) <- cols
-                df
-            }
-        )
-    )
-    MockHtml <- R6::R6Class("MockHtml", public = list(content = NULL, setContent = function(x) self$content <- x))
-    MockImage <- R6::R6Class("MockImage", public = list(setState = function(...) {}))
+imbalanced_data <- function(seed = 123) {
+    set.seed(seed)
+    data.frame(
+        outcome = factor(c(rep("Case", 20), rep("Control", 80)), levels = c("Control", "Case")),
+        pred    = c(rnorm(20, 2), rnorm(80, 0)))
+}
 
-    mock_jmvcore <- new.env()
-    mock_jmvcore$Table <- MockTable
-    mock_jmvcore$Html <- MockHtml
-    mock_jmvcore$Image <- MockImage
-    mock_jmvcore$`%||%` <- function(a, b) if (!is.null(a)) a else b
-    mock_jmvcore$. <- function(text) text
-    mock_jmvcore$format <- function(fmt, ...) sprintf(fmt, ...)
-    attach(mock_jmvcore, name = "jmvcore", warn.conflicts = FALSE)
-    on.exit(detach("jmvcore", character.only = TRUE), add = TRUE)
+balanced_data <- function(seed = 123) {
+    set.seed(seed)
+    data.frame(
+        outcome = factor(c(rep("Case", 30), rep("Control", 20)), levels = c("Control", "Case")),
+        marker  = c(rnorm(30, 2), rnorm(20, 0)))
+}
 
-    # Analysis stub
-    Analysis <- R6::R6Class("Analysis",
-        public = list(
-            options = NULL,
-            data = NULL,
-            results = NULL,
-            initialize = function(options, data) {
-                self$options <- options
-                self$data <- data
-                self$results <- list(
-                    results = list(
-                        instructions = MockHtml$new(),
-                        aucSummary = MockTable$new(),
-                        optimalCutoffSummary = MockTable$new(),
-                        cutoffAnalysis = MockTable$new(),
-                        diagnosticPerformance = MockTable$new(),
-                        clinicalApplicationMetrics = MockTable$new(),
-                        rocComparisons = MockTable$new(),
-                        detailedComparison = MockTable$new(),
-                        statisticalSummary = MockTable$new(),
-                        partialAucAnalysis = MockTable$new(),
-                        crocAnalysisTable = MockTable$new(),
-                        convexHullTable = MockTable$new(),
-                        comprehensiveAnalysisSummary = MockTable$new(),
-                        clinicalInterpretationGuide = MockHtml$new(),
-                        imbalanceMetrics = MockTable$new(),
-                        imbalanceWarning = MockHtml$new(),
-                        analysisSummary = MockHtml$new(),
-                        clinicalReport = MockHtml$new(),
-                        precisionRecallTable = MockTable$new(),
-                        clinicalImpactTable = MockTable$new(),
-                        decisionImpactSummary = MockTable$new()
-                    )
-                )
-            },
-            run = function() private$.run()
-        ),
-        private = list(.run = function() {}, .checkpoint = function(...) {})
-    )
 
-    enhancedROCBase <- R6::R6Class("enhancedROCBase",
-        inherit = Analysis,
-        public = list(
-            initialize = function(options, data) {
-                super$initialize(options, data)
-                private$.init()
-            }
-        )
-    )
-    assign("enhancedROCBase", enhancedROCBase, envir = .GlobalEnv)
+test_that("precision-recall metrics are produced for imbalanced data", {
+    d <- imbalanced_data()
+    pr <- run_er(data = d, predictors = "pred", detectImbalance = TRUE)$results$precisionRecallTable$asDF
 
-    # Load backend
-    backend_path <- testthat::test_path("..", "..", "R", "enhancedroc.b.R")
-    source(backend_path)
+    expect_equal(nrow(pr), 1L)
+    expect_gte(pr$auc_pr[1], 0)
+    expect_lte(pr$auc_pr[1], 1)
+    # a genuinely discriminating marker on 20% prevalence should beat the PR baseline,
+    # which is the positive-class proportion
+    expect_gt(pr$auc_pr[1], 0.20)
+    for (col in c("f1_score", "precision", "recall", "average_precision")) {
+        expect_gte(pr[[col]][1], 0, label = col)
+        expect_lte(pr[[col]][1], 1, label = col)
+    }
+})
 
-    # Imbalanced data for PR metrics
-    set.seed(123)
-    outcome <- factor(c(rep("Case", 20), rep("Control", 80)), levels = c("Control", "Case"))
-    predictor <- c(rnorm(20, 2), rnorm(80, 0))
-    data_pr <- data.frame(outcome = outcome, pred = predictor)
 
-    pr_opts <- list(
-        outcome = "outcome",
-        predictors = c("pred"),
-        positiveClass = "Case",
-        analysisType = "single",
-        direction = "auto",
-        youdenOptimization = TRUE,
-        confidenceLevel = 95,
-        useBootstrap = FALSE,
-        stratifiedBootstrap = TRUE,
-        bootstrapMethod = "bca",
-        bootstrapSamples = 200,
-        partialAuc = FALSE,
-        aucTable = TRUE,
-        optimalCutoffs = TRUE,
-        cutoffTable = TRUE,
-        diagnosticMetrics = TRUE,
-        clinicalMetrics = TRUE,
-        detectImbalance = TRUE,
-        pairwiseComparisons = FALSE,
-        statisticalComparison = FALSE,
-        recommendPRC = TRUE,
-        showImbalanceWarning = TRUE,
-        crocAnalysis = FALSE,
-        convexHull = FALSE,
-        comprehensive_output = FALSE,
-        clinical_interpretation = FALSE,
-        clinicalImpact = FALSE,
-        calibrationAnalysis = FALSE,
-        multiClassROC = FALSE,
-        timeDependentROC = FALSE,
-        survivalROC = FALSE,
-        internalValidation = FALSE,
-        useObservedPrevalence = TRUE,
-        smoothMethod = "none",
-        customCutoffs = "",
-        clinicalPresets = "custom",
-        clinicalContext = "general",
-        showMetricsDiff = FALSE
-    )
-    pr_analysis <- enhancedROCClass$new(pr_opts, data_pr)
-    pr_analysis$run()
-    pr_df <- pr_analysis$results$results$precisionRecallTable$asDF()
-    expect_true(nrow(pr_df) == 1)
-    expect_true(pr_df$auc_pr >= 0 && pr_df$auc_pr <= 1)
+test_that("clinical metrics use the observed prevalence, or the supplied one", {
+    d <- balanced_data()
+    observed <- mean(d$outcome == "Case")
 
-    # Clinical metrics prevalence toggle
-    outcome2 <- factor(c(rep("Case", 30), rep("Control", 20)), levels = c("Control", "Case"))
-    data_prev <- data.frame(outcome = outcome2, marker = c(rnorm(30, 2), rnorm(20, 0)))
-    observed_prev <- mean(outcome2 == "Case")
+    obs <- run_er(data = d, predictors = "marker", clinicalMetrics = TRUE,
+                  useObservedPrevalence = TRUE)$results$clinicalApplicationMetrics$asDF
+    expect_equal(as.numeric(obs$prevalence[1]), observed, tolerance = 1e-8)
 
-    opts_obs <- pr_opts
-    opts_obs$predictors <- c("marker")
-    opts_obs$useObservedPrevalence <- TRUE
-    opts_obs$clinicalMetrics <- TRUE
-    opts_obs$detectImbalance <- FALSE
-    opts_obs$pairwiseComparisons <- FALSE
-    opts_obs$statisticalComparison <- FALSE
-    opts_obs$partialAuc <- FALSE
-    prev_analysis <- enhancedROCClass$new(opts_obs, data_prev)
-    prev_analysis$run()
-    clin_df <- prev_analysis$results$results$clinicalApplicationMetrics$asDF()
-    expect_true(abs(as.numeric(clin_df$prevalence) - observed_prev) < 1e-6)
+    override <- run_er(data = d, predictors = "marker", clinicalMetrics = TRUE,
+                       useObservedPrevalence = FALSE,
+                       prevalence = 0.2)$results$clinicalApplicationMetrics$asDF
+    expect_equal(as.numeric(override$prevalence[1]), 0.2, tolerance = 1e-8)
 
-    opts_override <- opts_obs
-    opts_override$useObservedPrevalence <- FALSE
-    opts_override$prevalence <- 0.2
-    prev_analysis2 <- enhancedROCClass$new(opts_override, data_prev)
-    prev_analysis2$run()
-    clin_df2 <- prev_analysis2$results$results$clinicalApplicationMetrics$asDF()
-    expect_equal(as.numeric(clin_df2$prevalence), 0.2)
+    # PPV must move with prevalence -- that is the whole point of the option. The observed
+    # prevalence here is 0.6, so forcing 0.2 must lower PPV.
+    expect_lt(as.numeric(override$ppv[1]), as.numeric(obs$ppv[1]))
 
-    # Clinical impact tables populate
-    impact_opts <- opts_obs
-    impact_opts$clinicalImpact <- TRUE
-    impact_opts$decisionImpactTable <- TRUE
-    impact_opts$predictors <- c("marker")
-    impact_opts$pairwiseComparisons <- FALSE
-    impact_opts$statisticalComparison <- FALSE
-    impact_opts$partialAuc <- FALSE
-    impact_analysis <- enhancedROCClass$new(impact_opts, data_prev)
-    impact_analysis$run()
-    impact_df <- impact_analysis$results$results$clinicalImpactTable$asDF()
-    expect_true(nrow(impact_df) >= 1)
-    expect_true("net_benefit_per_100" %in% colnames(impact_df))
+    # ...and PPV must equal Bayes at the stated prevalence, given the table's own LR+
+    lr_pos <- as.numeric(override$lr_positive[1])
+    p <- 0.2
+    expect_equal(as.numeric(override$ppv[1]),
+                 (p * lr_pos) / (p * lr_pos + (1 - p)), tolerance = 1e-6)
+})
+
+
+test_that("the clinical impact table populates with net benefit", {
+    d <- balanced_data()
+    impact <- run_er(data = d, predictors = "marker", clinicalImpact = TRUE,
+                     decisionImpactTable = TRUE)$results$clinicalImpactTable$asDF
+
+    expect_gte(nrow(impact), 1L)
+    expect_true("net_benefit_per_100" %in% colnames(impact))
+    expect_true(all(is.finite(impact$net_benefit_per_100)))
 })

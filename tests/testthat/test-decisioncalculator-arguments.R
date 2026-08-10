@@ -17,6 +17,12 @@ data(decisioncalculator_multiplecuts, package = "ClinicoPath")
 # Confidence Interval Options
 # ═══════════════════════════════════════════════════════════
 
+
+# Invalid input is reported as a jamovi NOTICE, not an R condition.
+dcalc_notices <- function(result) {
+  gsub("[[:space:]]+", " ", gsub("<[^>]+>", " ", paste(result$notices$content, collapse = " ")))
+}
+
 test_that("ci option works", {
   result <- decisioncalculator(
     TP = 90,
@@ -26,7 +32,7 @@ test_that("ci option works", {
     ci = TRUE
   )
 
-  expect_s3_class(result, "decisioncalculator Class")
+  expect_s3_class(result, "decisioncalculatorResults")
 })
 
 test_that("ci option disabled by default", {
@@ -38,7 +44,7 @@ test_that("ci option disabled by default", {
     ci = FALSE
   )
 
-  expect_s3_class(result, "decisioncalculatorClass")
+  expect_s3_class(result, "decisioncalculatorResults")
 })
 
 # ═══════════════════════════════════════════════════════════
@@ -55,7 +61,7 @@ test_that("pp option enables population prevalence", {
     pprob = 0.15
   )
 
-  expect_s3_class(result, "decisioncalculatorClass")
+  expect_s3_class(result, "decisioncalculatorResults")
 })
 
 test_that("pprob option accepts valid prevalence values", {
@@ -64,47 +70,38 @@ test_that("pprob option accepts valid prevalence values", {
     TP = 90, TN = 80, FP = 20, FN = 10,
     pp = TRUE, pprob = 0.001
   )
-  expect_s3_class(result1, "decisioncalculatorClass")
+  expect_s3_class(result1, "decisioncalculatorResults")
 
   # Moderate prevalence
   result2 <- decisioncalculator(
     TP = 90, TN = 80, FP = 20, FN = 10,
     pp = TRUE, pprob = 0.300
   )
-  expect_s3_class(result2, "decisioncalculatorClass")
+  expect_s3_class(result2, "decisioncalculatorResults")
 
   # High prevalence
   result3 <- decisioncalculator(
     TP = 90, TN = 80, FP = 20, FN = 10,
     pp = TRUE, pprob = 0.999
   )
-  expect_s3_class(result3, "decisioncalculatorClass")
+  expect_s3_class(result3, "decisioncalculatorResults")
 })
 
-test_that("pprob option rejects invalid values", {
-  # Too low (<= 0)
-  expect_error(
-    decisioncalculator(
-      TP = 90, TN = 80, FP = 20, FN = 10,
-      pp = TRUE, pprob = 0
+test_that("pprob out of range is rejected by the wrapper", {
+  # jamovi/decisioncalculator.a.yaml declares min: 0.001 / max: 0.999 on pprob, so jmvcore
+  # enforces the bounds in the generated wrapper before .run() is ever reached. The
+  # backend's own "Invalid Prior Probability" notice is therefore unreachable.
+  for (bad in c(0, 1.0, -0.1)) {
+    expect_error(
+      decisioncalculator(TP = 90, TN = 80, FP = 20, FN = 10, pp = TRUE, pprob = bad),
+      "pprob must be between",
+      info = paste("pprob =", bad)
     )
-  )
+  }
 
-  # Too high (>= 1)
-  expect_error(
-    decisioncalculator(
-      TP = 90, TN = 80, FP = 20, FN = 10,
-      pp = TRUE, pprob = 1.0
-    )
-  )
-
-  # Negative
-  expect_error(
-    decisioncalculator(
-      TP = 90, TN = 80, FP = 20, FN = 10,
-      pp = TRUE, pprob = -0.1
-    )
-  )
+  # a value inside the bounds runs and is used
+  ok <- decisioncalculator(TP = 90, TN = 80, FP = 20, FN = 10, pp = TRUE, pprob = 0.05)
+  expect_equal(ok$ratioTable$asDF$PrevalenceD[1], 0.05, tolerance = 1e-12)
 })
 
 # ═══════════════════════════════════════════════════════════
@@ -120,7 +117,7 @@ test_that("fagan option generates Fagan nomogram", {
     fagan = TRUE
   )
 
-  expect_s3_class(result, "decisioncalculatorClass")
+  expect_s3_class(result, "decisioncalculatorResults")
 })
 
 test_that("fagan option requires population prevalence", {
@@ -134,7 +131,7 @@ test_that("fagan option requires population prevalence", {
     fagan = TRUE
   )
 
-  expect_s3_class(result, "decisioncalculatorClass")
+  expect_s3_class(result, "decisioncalculatorResults")
 })
 
 # ═══════════════════════════════════════════════════════════
@@ -150,7 +147,7 @@ test_that("fnote option shows explanatory footnotes", {
     fnote = TRUE
   )
 
-  expect_s3_class(result, "decisioncalculatorClass")
+  expect_s3_class(result, "decisioncalculatorResults")
 })
 
 test_that("showWelcome option controls welcome message", {
@@ -158,13 +155,13 @@ test_that("showWelcome option controls welcome message", {
     TP = 90, TN = 80, FP = 20, FN = 10,
     showWelcome = TRUE
   )
-  expect_s3_class(result1, "decisioncalculatorClass")
+  expect_s3_class(result1, "decisioncalculatorResults")
 
   result2 <- decisioncalculator(
     TP = 90, TN = 80, FP = 20, FN = 10,
     showWelcome = FALSE
   )
-  expect_s3_class(result2, "decisioncalculatorClass")
+  expect_s3_class(result2, "decisioncalculatorResults")
 })
 
 test_that("showSummary option shows plain-language summary", {
@@ -176,7 +173,7 @@ test_that("showSummary option shows plain-language summary", {
     showSummary = TRUE
   )
 
-  expect_s3_class(result, "decisioncalculatorClass")
+  expect_s3_class(result, "decisioncalculatorResults")
 })
 
 test_that("showAbout option shows methodology information", {
@@ -188,7 +185,7 @@ test_that("showAbout option shows methodology information", {
     showAbout = TRUE
   )
 
-  expect_s3_class(result, "decisioncalculatorClass")
+  expect_s3_class(result, "decisioncalculatorResults")
 })
 
 test_that("showGlossary option shows clinical terms glossary", {
@@ -200,7 +197,7 @@ test_that("showGlossary option shows clinical terms glossary", {
     showGlossary = TRUE
   )
 
-  expect_s3_class(result, "decisioncalculatorClass")
+  expect_s3_class(result, "decisioncalculatorResults")
 })
 
 # ═══════════════════════════════════════════════════════════
@@ -217,7 +214,7 @@ test_that("multiplecuts option enables cut-off comparison", {
     tp2 = 95, tn2 = 175, fp2 = 25, fn2 = 5
   )
 
-  expect_s3_class(result, "decisioncalculatorClass")
+  expect_s3_class(result, "decisioncalculatorResults")
 })
 
 test_that("cutoff1 option accepts custom scenario name", {
@@ -228,7 +225,7 @@ test_that("cutoff1 option accepts custom scenario name", {
     tp1 = 95, tn1 = 170, fp1 = 30, fn1 = 5
   )
 
-  expect_s3_class(result, "decisioncalculatorClass")
+  expect_s3_class(result, "decisioncalculatorResults")
 })
 
 test_that("cutoff2 option accepts custom scenario name", {
@@ -239,7 +236,7 @@ test_that("cutoff2 option accepts custom scenario name", {
     tp2 = 75, tn2 = 195, fp2 = 5, fn2 = 25
   )
 
-  expect_s3_class(result, "decisioncalculatorClass")
+  expect_s3_class(result, "decisioncalculatorResults")
 })
 
 test_that("multiple cut-offs with all counts specified", {
@@ -252,7 +249,7 @@ test_that("multiple cut-offs with all counts specified", {
     tp2 = 95, tn2 = 175, fp2 = 25, fn2 = 5
   )
 
-  expect_s3_class(result, "decisioncalculatorClass")
+  expect_s3_class(result, "decisioncalculatorResults")
 })
 
 # ═══════════════════════════════════════════════════════════
@@ -275,7 +272,7 @@ test_that("comprehensive analysis with all options", {
     showGlossary = TRUE
   )
 
-  expect_s3_class(result, "decisioncalculatorClass")
+  expect_s3_class(result, "decisioncalculatorResults")
 })
 
 test_that("multiple cut-offs with full analysis", {
@@ -292,7 +289,7 @@ test_that("multiple cut-offs with full analysis", {
     tp2 = 95, tn2 = 175, fp2 = 25, fn2 = 5
   )
 
-  expect_s3_class(result, "decisioncalculatorClass")
+  expect_s3_class(result, "decisioncalculatorResults")
 })
 
 test_that("minimal options (defaults only)", {
@@ -303,7 +300,7 @@ test_that("minimal options (defaults only)", {
     FN = 10
   )
 
-  expect_s3_class(result, "decisioncalculatorClass")
+  expect_s3_class(result, "decisioncalculatorResults")
 })
 
 # ═══════════════════════════════════════════════════════════
@@ -318,7 +315,7 @@ test_that("high sensitivity scenario", {
     FN = 5
   )
 
-  expect_s3_class(result, "decisioncalculatorClass")
+  expect_s3_class(result, "decisioncalculatorResults")
 })
 
 test_that("high specificity scenario", {
@@ -329,7 +326,7 @@ test_that("high specificity scenario", {
     FN = 30
   )
 
-  expect_s3_class(result, "decisioncalculatorClass")
+  expect_s3_class(result, "decisioncalculatorResults")
 })
 
 test_that("balanced moderate performance", {
@@ -340,7 +337,7 @@ test_that("balanced moderate performance", {
     FN = 30
   )
 
-  expect_s3_class(result, "decisioncalculatorClass")
+  expect_s3_class(result, "decisioncalculatorResults")
 })
 
 test_that("excellent test performance", {
@@ -351,7 +348,7 @@ test_that("excellent test performance", {
     FN = 2
   )
 
-  expect_s3_class(result, "decisioncalculatorClass")
+  expect_s3_class(result, "decisioncalculatorResults")
 })
 
 # ═══════════════════════════════════════════════════════════
@@ -368,7 +365,7 @@ test_that("rare disease prevalence", {
     pprob = 0.001 # 0.1% prevalence
   )
 
-  expect_s3_class(result, "decisioncalculatorClass")
+  expect_s3_class(result, "decisioncalculatorResults")
 })
 
 test_that("common disease prevalence", {
@@ -381,7 +378,7 @@ test_that("common disease prevalence", {
     pprob = 0.30 # 30% prevalence
   )
 
-  expect_s3_class(result, "decisioncalculatorClass")
+  expect_s3_class(result, "decisioncalculatorResults")
 })
 
 test_that("high prevalence setting (ICU)", {
@@ -394,7 +391,7 @@ test_that("high prevalence setting (ICU)", {
     pprob = 0.50 # 50% prevalence
   )
 
-  expect_s3_class(result, "decisioncalculatorClass")
+  expect_s3_class(result, "decisioncalculatorResults")
 })
 
 # ═══════════════════════════════════════════════════════════
@@ -410,7 +407,7 @@ test_that("large sample size", {
     ci = TRUE
   )
 
-  expect_s3_class(result, "decisioncalculatorClass")
+  expect_s3_class(result, "decisioncalculatorResults")
 })
 
 test_that("very small sample size", {
@@ -422,7 +419,7 @@ test_that("very small sample size", {
     ci = TRUE
   )
 
-  expect_s3_class(result, "decisioncalculatorClass")
+  expect_s3_class(result, "decisioncalculatorResults")
 })
 
 # ═══════════════════════════════════════════════════════════
@@ -437,14 +434,14 @@ test_that("Fagan plot requires population prevalence", {
     pprob = 0.15,
     fagan = TRUE
   )
-  expect_s3_class(result1, "decisioncalculatorClass")
+  expect_s3_class(result1, "decisioncalculatorResults")
 
   # Fagan without pp should handle gracefully
   result2 <- decisioncalculator(
     TP = 90, TN = 80, FP = 20, FN = 10,
     fagan = TRUE
   )
-  expect_s3_class(result2, "decisioncalculatorClass")
+  expect_s3_class(result2, "decisioncalculatorResults")
 })
 
 test_that("all documentation options together", {
@@ -457,7 +454,7 @@ test_that("all documentation options together", {
     showGlossary = TRUE
   )
 
-  expect_s3_class(result, "decisioncalculatorClass")
+  expect_s3_class(result, "decisioncalculatorResults")
 })
 
 test_that("minimum documentation (all disabled)", {
@@ -470,5 +467,5 @@ test_that("minimum documentation (all disabled)", {
     showGlossary = FALSE
   )
 
-  expect_s3_class(result, "decisioncalculatorClass")
+  expect_s3_class(result, "decisioncalculatorResults")
 })

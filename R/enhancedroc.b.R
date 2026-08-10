@@ -135,6 +135,22 @@ enhancedROCClass <- R6::R6Class(
             private$.presetConfig <- NULL
             private$.analysisSummaryHtml <- ""
 
+            # Seed every resampling path once, so a run is reproducible. Bootstrap AUC
+            # intervals, bootstrap ROC comparisons, internal-validation resamples and
+            # cross-validation folds all draw from this stream; none of them was seeded, so
+            # re-running the same analysis produced a different confidence interval each time.
+            # The caller's RNG state is restored on exit so we do not disturb their session.
+            # jmvcore raises an error (rather than returning NULL) for an option the compiled
+            # .h.R does not yet carry, so read it defensively: this keeps working both before
+            # and after jmvtools::prepare() picks up the new `seed` option.
+            seed_val <- tryCatch(self$options$seed, error = function(e) NULL)
+            if (is.null(seed_val) || !is.finite(seed_val)) seed_val <- 0
+            if (exists(".Random.seed", envir = globalenv())) {
+                .saved_seed <- get(".Random.seed", envir = globalenv())
+                on.exit(assign(".Random.seed", .saved_seed, envir = globalenv()), add = TRUE)
+            }
+            set.seed(seed_val)
+
             # Check if we have required data
             if (is.null(private$.outcome) || is.null(private$.predictors) || length(private$.predictors) == 0) {
                 private$.addNotice(
@@ -200,6 +216,26 @@ enhancedROCClass <- R6::R6Class(
             if (self$options$clinicalMetrics) {
                 private$.checkpoint()
                 private$.populateClinicalMetrics()
+            }
+
+            # All three comparison outputs require analysisType == "comparative". The UI offers
+            # them as plain checkboxes with no dependency on Analysis Type, so ticking one while
+            # Analysis Type is left at its default produced no output and no explanation.
+            comparison_opts <- c(
+                "Pairwise comparisons"   = isTRUE(self$options$pairwiseComparisons),
+                "Metric differences"     = isTRUE(self$options$showMetricsDiff),
+                "Statistical comparison" = isTRUE(self$options$statisticalComparison))
+            if (any(comparison_opts) && self$options$analysisType != "comparative") {
+                private$.addNotice(
+                    type = "WARNING",
+                    title = "Comparison Options Need Comparative Analysis",
+                    content = paste0(
+                        paste(names(comparison_opts)[comparison_opts], collapse = ", "),
+                        " produced no output because Analysis Type is set to \"",
+                        self$options$analysisType,
+                        "\". Set Analysis Type to \"Comparative ROC Analysis\" to compare predictors."
+                    )
+                )
             }
 
             if (self$options$pairwiseComparisons && self$options$analysisType == "comparative") {
@@ -761,10 +797,55 @@ enhancedROCClass <- R6::R6Class(
                         # Surface the auto-detected direction for clinical safety
                         if (direction_param == "auto") {
                             dir_label <- if (roc_obj$direction == "<") "higher predictor values classify as positive (disease)" else "lower predictor values classify as positive (disease)"
+                            # Auto-detection picks whichever direction MAXIMISES the AUC, so the
+                            # reported AUC can never fall below 0.5 no matter how uninformative
+                            # -- or how inverted -- the predictor is. A marker whose true
+                            # discrimination is 0.20 is reported as 0.80. That consequence, not
+                            # just the chosen direction, is what the reader needs.
+                            # Quantify the upward bias at THIS sample size.
+                            #
+                            # pROC's direction = "auto" compares the two groups' MEDIANS; it does
+                            # not maximise the AUC, and the reported AUC is therefore not floored
+                            # at 0.5 (verified: on 1000 pure-noise observations auto chose "<" and
+                            # reported 0.4838 where ">" would have given 0.5162). But because the
+                            # direction is read from the same data used to compute the AUC, the
+                            # result is still biased upward, and badly so in small samples --
+                            # simulating a marker with no information at all gives a mean reported
+                            # AUC of 0.593 at n = 20 and 0.565 at n = 40, against 0.502 with the
+                            # direction fixed in advance, exceeding 0.60 in 43% of runs at n = 20.
+                            # 0.5 + se * sqrt(2/pi) with the Hanley-McNeil null standard error is
+                            # a close approximation to that mean (0.606 at n = 20, 0.515 at
+                            # n = 1000) and is what is quoted below. This bias is what turns a null
+                            # pilot study into an apparently promising biomarker.
+                            n_case <- length(roc_obj$cases)
+                            n_ctrl <- length(roc_obj$controls)
+                            null_auc <- if (n_case > 0 && n_ctrl > 0) {
+                                se_null <- sqrt((n_case + n_ctrl + 1) / (12 * n_case * n_ctrl))
+                                0.5 + se_null * sqrt(2 / pi)
+                            } else {
+                                NA_real_
+                            }
+                            size_note <- if (!is.na(null_auc) && null_auc > 0.52) {
+                                sprintf(paste0(
+                                    " With %d positive and %d negative cases, a marker carrying no information at all ",
+                                    "would still be reported at an AUC of about %.2f under automatic detection, so treat ",
+                                    "a modest AUC here with caution."), n_case, n_ctrl, null_auc)
+                            } else {
+                                ""
+                            }
                             private$.addNotice(
-                                type = "INFO",
+                                type = "WARNING",
                                 title = paste0("Direction Auto-Detected: ", predictor),
-                                content = paste0("ROC direction for ", predictor, ": ", dir_label, ". Verify this matches your biomarker's expected behavior.")
+                                content = paste0(
+                                    "ROC direction for ", predictor, " was chosen automatically: ", dir_label,
+                                    ". The direction was read from these data \u{2014} by comparing the two groups' ",
+                                    "median values \u{2014} rather than assumed in advance. Because the same data then ",
+                                    "supply the AUC, the AUC is biased upward, and a marker pointing the wrong way is ",
+                                    "reported as though it pointed the right way.",
+                                    size_note,
+                                    " If you know which way the marker should point, set Direction explicitly; a low ",
+                                    "AUC is then a real finding rather than an artefact of the direction being fitted."
+                                )
                             )
                         }
 
@@ -1097,6 +1178,7 @@ enhancedROCClass <- R6::R6Class(
         },
         .populateAUCSummary = function() {
             aucTable <- self$results$results$aucSummary
+            aucTable$deleteRows()   # jamovi re-runs .run() on the same object; addRow() would stack duplicates
 
             for (predictor in names(private$.rocResults)) {
                 result <- private$.rocResults[[predictor]]
@@ -1131,6 +1213,7 @@ enhancedROCClass <- R6::R6Class(
         },
         .populateOptimalCutoffs = function() {
             cutoffTable <- self$results$results$optimalCutoffSummary
+            cutoffTable$deleteRows()   # jamovi re-runs .run() on the same object; addRow() would stack duplicates
 
             for (predictor in names(private$.rocResults)) {
                 result <- private$.rocResults[[predictor]]
@@ -1198,6 +1281,7 @@ enhancedROCClass <- R6::R6Class(
         },
         .populateCutoffAnalysis = function() {
             cutoffTable <- self$results$results$cutoffAnalysis
+            cutoffTable$deleteRows()   # jamovi re-runs .run() on the same object; addRow() would stack duplicates
 
             for (predictor in names(private$.rocResults)) {
                 result <- private$.rocResults[[predictor]]
@@ -1287,6 +1371,7 @@ enhancedROCClass <- R6::R6Class(
         },
         .populateDiagnosticPerformance = function() {
             diagTable <- self$results$results$diagnosticPerformance
+            diagTable$deleteRows()   # jamovi re-runs .run() on the same object; addRow() would stack duplicates
 
             for (predictor in names(private$.rocResults)) {
                 result <- private$.rocResults[[predictor]]
@@ -1322,6 +1407,7 @@ enhancedROCClass <- R6::R6Class(
         },
         .populateClinicalMetrics = function() {
             clinTable <- self$results$results$clinicalApplicationMetrics
+            clinTable$deleteRows()   # jamovi re-runs .run() on the same object; addRow() would stack duplicates
 
             observed_prevalence <- mean(private$.binaryData == levels(private$.binaryData)[2])
             prevalence <- if (isTRUE(self$options$useObservedPrevalence)) {
@@ -1430,6 +1516,7 @@ enhancedROCClass <- R6::R6Class(
             }
 
             compTable <- self$results$results$rocComparisons
+            compTable$deleteRows()   # jamovi re-runs .run() on the same object; addRow() would stack duplicates
             predictors <- names(private$.rocResults)
 
             for (i in 1:(length(predictors) - 1)) {
@@ -1480,6 +1567,7 @@ enhancedROCClass <- R6::R6Class(
             }
 
             detailTable <- self$results$results$detailedComparison
+            detailTable$deleteRows()   # jamovi re-runs .run() on the same object; addRow() would stack duplicates
 
             # Get all predictor pairs
             predictors <- names(private$.rocResults)
@@ -1559,6 +1647,7 @@ enhancedROCClass <- R6::R6Class(
             }
 
             statSummaryTable <- self$results$results$statisticalSummary
+            statSummaryTable$deleteRows()   # jamovi re-runs .run() on the same object; addRow() would stack duplicates
 
             # Get all predictor pairs
             predictors <- names(private$.rocResults)
@@ -1647,6 +1736,7 @@ enhancedROCClass <- R6::R6Class(
             }
 
             paTable <- self$results$results$partialAucAnalysis
+            paTable$deleteRows()   # jamovi re-runs .run() on the same object; addRow() would stack duplicates
 
             # Parse partial range
             range_parts <- strsplit(self$options$partialRange, ",")[[1]]
@@ -1719,6 +1809,7 @@ enhancedROCClass <- R6::R6Class(
         },
         .populateCROCAnalysis = function() {
             crocTable <- self$results$results$crocAnalysisTable
+            crocTable$deleteRows()   # jamovi re-runs .run() on the same object; addRow() would stack duplicates
             alpha <- self$options$crocAlpha
 
             for (predictor in names(private$.rocResults)) {
@@ -1759,6 +1850,7 @@ enhancedROCClass <- R6::R6Class(
         },
         .populateConvexHull = function() {
             hullTable <- self$results$results$convexHullTable
+            hullTable$deleteRows()   # jamovi re-runs .run() on the same object; addRow() would stack duplicates
 
             for (predictor in names(private$.rocResults)) {
                 tryCatch(
@@ -2021,6 +2113,7 @@ enhancedROCClass <- R6::R6Class(
         },
         .populateComprehensiveAnalysis = function() {
             compTable <- self$results$results$comprehensiveAnalysisSummary
+            compTable$deleteRows()   # jamovi re-runs .run() on the same object; addRow() would stack duplicates
 
             # Summary statistics
             n_predictors <- length(private$.rocResults)
@@ -2335,6 +2428,7 @@ enhancedROCClass <- R6::R6Class(
             }
 
             prTable <- self$results$results$precisionRecallTable
+            prTable$deleteRows()   # jamovi re-runs .run() on the same object; addRow() would stack duplicates
             outcome <- analysisData[[private$.outcome]]
 
             for (predictor in private$.predictors) {
@@ -3662,7 +3756,9 @@ enhancedROCClass <- R6::R6Class(
             }
 
             calTable <- self$results$results$calibrationSummary
+            calTable$deleteRows()   # jamovi re-runs .run() on the same object; addRow() would stack duplicates
             hlTable <- self$results$results$hosmerLemeshowTable
+            hlTable$deleteRows()   # jamovi re-runs .run() on the same object; addRow() would stack duplicates
 
             for (predictor in names(private$.rocResults)) {
                 tryCatch(
@@ -3901,6 +3997,7 @@ enhancedROCClass <- R6::R6Class(
             }
 
             aucTable <- self$results$results$multiClassAUC
+            aucTable$deleteRows()   # jamovi re-runs .run() on the same object; addRow() would stack duplicates
             avgTable <- self$results$results$multiClassAverage
 
             # Check if outcome has > 2 levels
@@ -4124,7 +4221,9 @@ enhancedROCClass <- R6::R6Class(
             }
 
             impactTable <- self$results$results$clinicalImpactTable
+            impactTable$deleteRows()   # jamovi re-runs .run() on the same object; addRow() would stack duplicates
             decisionTable <- self$results$results$decisionImpactSummary
+            decisionTable$deleteRows()   # jamovi re-runs .run() on the same object; addRow() would stack duplicates
 
             for (predictor in names(private$.rocResults)) {
                 tryCatch(

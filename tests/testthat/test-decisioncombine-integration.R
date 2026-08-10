@@ -117,7 +117,7 @@ test_that("decisioncombine workflow: screening + confirmatory strategy", {
     test2 = "confirmatory_test",
     test2Positive = "Positive",
     showIndividual = TRUE,
-    filterPattern = "serial",  # Serial strategy (both must be positive)
+    filterPattern = "allPositive",
     showBarPlot = TRUE,
     showRecommendation = TRUE,
     test3Positive = NULL
@@ -138,7 +138,7 @@ test_that("decisioncombine workflow: parallel vs serial comparison", {
     test1Positive = "Positive",
     test2 = "specific_test",
     test2Positive = "Positive",
-    filterPattern = "parallel",
+    filterPattern = "all",
     test3Positive = NULL
   )
   expect_s3_class(parallel, "decisioncombineResults")
@@ -152,7 +152,7 @@ test_that("decisioncombine workflow: parallel vs serial comparison", {
     test1Positive = "Positive",
     test2 = "specific_test",
     test2Positive = "Positive",
-    filterPattern = "serial",
+    filterPattern = "allPositive",
     test3Positive = NULL
   )
   expect_s3_class(serial, "decisioncombineResults")
@@ -219,7 +219,7 @@ test_that("decisioncombine workflow: majority rule for three tests", {
     test2Positive = "Positive",
     test3 = "imaging",
     test3Positive = "Positive",
-    filterPattern = "majority",
+    filterPattern = "mixed",
     showRecommendation = TRUE
   )
 
@@ -240,7 +240,7 @@ test_that("decisioncombine workflow: serial testing with temporal component", {
     test2Positive = "Positive",
     showIndividual = TRUE,
     showBarPlot = TRUE,
-    filterPattern = "serial",
+    filterPattern = "allNegative",
     showRecommendation = TRUE,
     test3Positive = NULL
   )
@@ -388,8 +388,10 @@ test_that("decisioncombine workflow: sensitivity analysis by filtering", {
 })
 
 test_that("decisioncombine workflow: pattern-specific analysis", {
-  # Analyze different pattern types
-  patterns <- c("allPositive", "allNegative", "mixed", "parallel", "serial")
+  # Analyze different pattern types. filterPattern names observed PATTERNS; "parallel" and
+  # "serial" were removed in 1.0.4 because they named decision RULES, which is what the
+  # strategy table reports -- this filter selects rows of the pattern table.
+  patterns <- c("all", "allPositive", "allNegative", "mixed")
 
   for (pattern in patterns) {
     result <- decisioncombine(

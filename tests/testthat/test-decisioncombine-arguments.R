@@ -244,7 +244,7 @@ test_that("decisioncombine filters by pattern: parallel strategy", {
     test1Positive = "Positive",
     test2 = "rater2",
     test2Positive = "Positive",
-    filterPattern = "parallel",
+    filterPattern = "all",
     test3Positive = NULL
   )
 
@@ -260,7 +260,7 @@ test_that("decisioncombine filters by pattern: serial strategy", {
     test1Positive = "Positive",
     test2 = "rater2",
     test2Positive = "Positive",
-    filterPattern = "serial",
+    filterPattern = "allPositive",
     test3Positive = NULL
   )
 
@@ -294,7 +294,7 @@ test_that("decisioncombine three-test with majority rule filter", {
     test2Positive = "Positive",
     test3 = "imaging",
     test3Positive = "Positive",
-    filterPattern = "majority"
+    filterPattern = "mixed"
   )
 
   expect_s3_class(result, "decisioncombineResults")
@@ -383,7 +383,7 @@ test_that("decisioncombine handles serial testing scenario", {
     test1Positive = "Positive",
     test2 = "repeat_test",
     test2Positive = "Positive",
-    filterPattern = "serial",
+    filterPattern = "allNegative",
     test3Positive = NULL
   )
 

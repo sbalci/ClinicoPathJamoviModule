@@ -479,7 +479,8 @@ sequentialtestsBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
 #' comparing three different testing strategies: serial positive 
 #' (confirmation),
 #' serial negative (exclusion), and parallel testing. Provides comprehensive
-#' analysis including population flow, cost implications, and Fagan nomograms.
+#' analysis including population flow, cost implications, and diagnostic 
+#' plots.
 #' 
 #' This analysis is particularly useful for:
 #' • Designing diagnostic protocols and clinical pathways
@@ -489,8 +490,12 @@ sequentialtestsBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
 #' • Teaching sequential testing concepts and Bayesian probability
 #' 
 #' @param preset Select a clinical preset or use custom values. Presets load
-#'   evidence-based test parameters and optimal strategies from medical
-#'   literature.
+#'   illustrative test parameters for demonstration and teaching only. They are
+#'   rounded, approximate figures chosen to show how each strategy behaves; they
+#'   are NOT validated clinical parameters, are not drawn from any specific
+#'   published study, and the prevalence will not match your population. Replace
+#'   them with values from your own setting before drawing any clinical
+#'   conclusion.
 #' @param test1_name .
 #' @param test1_sens .
 #' @param test1_spec .

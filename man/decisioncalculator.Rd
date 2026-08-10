@@ -101,6 +101,7 @@ A results object containing:
 \code{results$advancedMetricsTable} \tab \tab \tab \tab \tab a table \cr
 \code{results$epirTable_ratio} \tab \tab \tab \tab \tab a table \cr
 \code{results$epirTable_number} \tab \tab \tab \tab \tab a table \cr
+\code{results$faganSummary} \tab \tab \tab \tab \tab Plain-language reading of the Fagan nomogram: the pre-test probability, the likelihood ratios, and where a positive or a negative result moves the probability of disease. \cr
 \code{results$plot1} \tab \tab \tab \tab \tab an image \cr
 \code{results$multipleCutoffTable} \tab \tab \tab \tab \tab a table \cr
 }

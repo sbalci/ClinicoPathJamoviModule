@@ -1449,10 +1449,15 @@ copy_module_tests <- function(module_names, source_test_dir, dest_test_dir,
     return(character(0))
   if (!dir.exists(dest_test_dir)) dir.create(dest_test_dir, recursive = TRUE)
 
-  all_tests <- list.files(source_test_dir, pattern = "^test-.*\\.R$")
+  # testthat auto-loads helper-*.R from tests/testthat before running any test, so a
+  # helper is part of its analysis's suite, not an optional extra. Globbing only
+  # "^test-" shipped tests whose shared setup was left behind -- e.g.
+  # helper-decisioncompare.R defines call_decisioncompare(), without which every
+  # copied test-decisioncompare*.R fails with "could not find function".
+  all_tests <- list.files(source_test_dir, pattern = "^(test|helper)-.*\\.R$")
   copied <- character(0)
   for (nm in module_names) {
-    pat <- paste0("^test-", nm, "(\\.R$|[.-])")
+    pat <- paste0("^(test|helper)-", nm, "(\\.R$|[.-])")
     hits <- all_tests[grepl(pat, all_tests, ignore.case = FALSE)]
     for (h in hits) {
       dest <- file.path(dest_test_dir, h)

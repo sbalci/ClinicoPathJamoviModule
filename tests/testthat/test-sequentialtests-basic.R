@@ -12,7 +12,7 @@ test_that("sequentialtests returns proper class", {
     prevalence = 0.10,
     strategy = "serial_positive"
   )
-  expect_s3_class(result, "sequentialtestsClass")
+  expect_s3_class(result, "sequentialtestsResults")
 })
 
 test_that("sequentialtests handles serial positive strategy", {
@@ -82,7 +82,7 @@ test_that("sequentialtests includes cost analysis", {
   expect_no_error(result)
 })
 
-test_that("sequentialtests shows nomogram", {
+test_that("sequentialtests shows diagnostic plots", {
   result <- sequentialtests(
     test1_sens = 0.90,
     test1_spec = 0.85,
@@ -90,7 +90,7 @@ test_that("sequentialtests shows nomogram", {
     test2_spec = 0.95,
     prevalence = 0.10,
     strategy = "serial_positive",
-    show_nomogram = TRUE
+    show_plots = TRUE
   )
   expect_no_error(result)
 })

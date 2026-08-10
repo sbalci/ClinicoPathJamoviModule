@@ -94,14 +94,14 @@ test_that("sequentialtests respects show_cost_analysis parameter", {
   expect_no_error(result_without)
 })
 
-test_that("sequentialtests respects show_nomogram parameter", {
+test_that("sequentialtests respects show_plots parameter", {
   result_with <- sequentialtests(
     test1_sens = 0.90,
     test1_spec = 0.85,
     test2_sens = 0.85,
     test2_spec = 0.95,
     prevalence = 0.10,
-    show_nomogram = TRUE
+    show_plots = TRUE
   )
   expect_no_error(result_with)
 
@@ -111,7 +111,7 @@ test_that("sequentialtests respects show_nomogram parameter", {
     test2_sens = 0.85,
     test2_spec = 0.95,
     prevalence = 0.10,
-    show_nomogram = FALSE
+    show_plots = FALSE
   )
   expect_no_error(result_without)
 })
@@ -177,7 +177,7 @@ test_that("sequentialtests handles all options combined", {
     show_explanation = TRUE,
     show_formulas = TRUE,
     show_cost_analysis = TRUE,
-    show_nomogram = TRUE
+    show_plots = TRUE
   )
   expect_no_error(result)
 })

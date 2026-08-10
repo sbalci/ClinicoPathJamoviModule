@@ -22,6 +22,7 @@ enhancedROCOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
             bootstrapCutoffCI = FALSE,
             bootstrapPartialAUC = FALSE,
             stratifiedBootstrap = FALSE,
+            seed = 0,
             pairwiseComparisons = FALSE,
             comparisonMethod = "delong",
             rocCurve = TRUE,
@@ -187,6 +188,10 @@ enhancedROCOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
                 "stratifiedBootstrap",
                 stratifiedBootstrap,
                 default=FALSE)
+            private$..seed <- jmvcore::OptionInteger$new(
+                "seed",
+                seed,
+                default=0)
             private$..pairwiseComparisons <- jmvcore::OptionBool$new(
                 "pairwiseComparisons",
                 pairwiseComparisons,
@@ -523,6 +528,7 @@ enhancedROCOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
             self$.addOption(private$..bootstrapCutoffCI)
             self$.addOption(private$..bootstrapPartialAUC)
             self$.addOption(private$..stratifiedBootstrap)
+            self$.addOption(private$..seed)
             self$.addOption(private$..pairwiseComparisons)
             self$.addOption(private$..comparisonMethod)
             self$.addOption(private$..rocCurve)
@@ -607,6 +613,7 @@ enhancedROCOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
         bootstrapCutoffCI = function() private$..bootstrapCutoffCI$value,
         bootstrapPartialAUC = function() private$..bootstrapPartialAUC$value,
         stratifiedBootstrap = function() private$..stratifiedBootstrap$value,
+        seed = function() private$..seed$value,
         pairwiseComparisons = function() private$..pairwiseComparisons$value,
         comparisonMethod = function() private$..comparisonMethod$value,
         rocCurve = function() private$..rocCurve$value,
@@ -690,6 +697,7 @@ enhancedROCOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
         ..bootstrapCutoffCI = NA,
         ..bootstrapPartialAUC = NA,
         ..stratifiedBootstrap = NA,
+        ..seed = NA,
         ..pairwiseComparisons = NA,
         ..comparisonMethod = NA,
         ..rocCurve = NA,
@@ -1949,12 +1957,18 @@ enhancedROCBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' @param useBootstrap Use bootstrap methods for confidence intervals
 #' @param bootstrapMethod Method for calculating bootstrap confidence
 #'   intervals. BCa provides better coverage but requires more computation.
-#' @param bootstrapCutoffCI Calculate bootstrap confidence intervals for
-#'   sensitivity and specificity at optimal cutoff
-#' @param bootstrapPartialAUC Calculate bootstrap confidence intervals for
-#'   partial AUC estimates
+#' @param bootstrapCutoffCI NOT YET IMPLEMENTED - selecting this produces no
+#'   output. Calculate bootstrap confidence intervals for sensitivity and
+#'   specificity at optimal cutoff
+#' @param bootstrapPartialAUC NOT YET IMPLEMENTED - selecting this produces no
+#'   output. Calculate bootstrap confidence intervals for partial AUC estimates
 #' @param stratifiedBootstrap Maintain outcome class proportions in bootstrap
 #'   samples (recommended for imbalanced data)
+#' @param seed Random seed used for every resampling step - bootstrap
+#'   confidence intervals, bootstrap ROC comparisons, and internal validation
+#'   resamples or cross-validation folds. Fixing it makes a run reproducible:
+#'   the same data and options give the same intervals every time. Change it to
+#'   check how sensitive a result is to the particular resamples drawn.
 #' @param pairwiseComparisons Perform pairwise comparisons between ROC curves
 #' @param comparisonMethod Method for comparing ROC curves
 #' @param rocCurve Display ROC curve plot
@@ -2012,20 +2026,21 @@ enhancedROCBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' @param brierScore Calculate Brier score and scaled Brier score
 #' @param calibrationMetrics Calculate calibration slope, intercept, and
 #'   calibration-in-the-large
-#' @param splineCalibration Use restricted cubic splines for flexible
-#'   calibration curves
-#' @param splineKnots Number of knots for restricted cubic splines (3-7
-#'   recommended)
-#' @param eoRatio Calculate Expected/Observed ratio for overall calibration
-#'   assessment
-#' @param namDagostino Perform Nam-D'Agostino calibration test (more powerful
-#'   than H-L)
-#' @param greenwoodNam Greenwood-Nam-D'Agostino test for survival model
-#'   calibration
-#' @param calibrationBelt Display calibration belt showing uncertainty around
-#'   calibration curve
-#' @param calibrationDensity Show distribution of predicted probabilities as
-#'   density overlay
+#' @param splineCalibration NOT YET IMPLEMENTED - selecting this produces no
+#'   output. Use restricted cubic splines for flexible calibration curves
+#' @param splineKnots NOT YET IMPLEMENTED - selecting this produces no output.
+#'   Number of knots for restricted cubic splines (3-7 recommended)
+#' @param eoRatio NOT YET IMPLEMENTED - selecting this produces no output.
+#'   Calculate Expected/Observed ratio for overall calibration assessment
+#' @param namDagostino NOT YET IMPLEMENTED - selecting this produces no
+#'   output. Perform Nam-D'Agostino calibration test (more powerful than H-L)
+#' @param greenwoodNam NOT YET IMPLEMENTED - selecting this produces no
+#'   output. Greenwood-Nam-D'Agostino test for survival model calibration
+#' @param calibrationBelt NOT YET IMPLEMENTED - selecting this produces no
+#'   output. Display calibration belt showing uncertainty around calibration
+#'   curve
+#' @param calibrationDensity NOT YET IMPLEMENTED - selecting this produces no
+#'   output. Show distribution of predicted probabilities as density overlay
 #' @param multiClassROC Enable multi-class ROC analysis for outcomes with >2
 #'   levels
 #' @param multiClassStrategy Strategy for multi-class ROC analysis
@@ -2037,26 +2052,34 @@ enhancedROCBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' @param clinicalUtilityCurve Display clinical utility curve showing test
 #'   consequences
 #' @param decisionImpactTable Show decision impact at various thresholds
-#' @param harrellCIndex Calculate Harrell's concordance index for
-#'   time-to-event outcomes
-#' @param unoCStatistic Calculate Uno's C-statistic (more robust to censoring)
-#' @param incidentDynamic Calculate incident/dynamic AUC (sensitivity for
-#'   events at specific time)
-#' @param cumulativeDynamic Calculate cumulative/dynamic AUC (sensitivity for
-#'   events by specific time)
-#' @param competingRisksConcordance Calculate cause-specific concordance for
-#'   competing risks
+#' @param harrellCIndex NOT YET IMPLEMENTED - selecting this produces no
+#'   output. Calculate Harrell's concordance index for time-to-event outcomes
+#' @param unoCStatistic NOT YET IMPLEMENTED - selecting this produces no
+#'   output. Calculate Uno's C-statistic (more robust to censoring)
+#' @param incidentDynamic NOT YET IMPLEMENTED - selecting this produces no
+#'   output. Calculate incident/dynamic AUC (sensitivity for events at specific
+#'   time)
+#' @param cumulativeDynamic NOT YET IMPLEMENTED - selecting this produces no
+#'   output. Calculate cumulative/dynamic AUC (sensitivity for events by
+#'   specific time)
+#' @param competingRisksConcordance NOT YET IMPLEMENTED - selecting this
+#'   produces no output. Calculate cause-specific concordance for competing
+#'   risks
 #' @param internalValidation Perform internal validation using
 #'   cross-validation or bootstrap
 #' @param validationMethod Method for internal validation
-#' @param optimismCorrection Apply optimism correction to performance metrics
-#' @param externalValidation Enable external validation reporting framework
-#' @param decisionImpactCurves Plot decision impact curves showing clinical
-#'   consequences
-#' @param netBenefitRegression Model net benefit as function of threshold
-#'   probabilities
-#' @param modelUpdating Analyze need for model recalibration or updating
-#' @param transportability Assess model transportability across populations
+#' @param optimismCorrection NOT YET IMPLEMENTED - selecting this produces no
+#'   output. Apply optimism correction to performance metrics
+#' @param externalValidation NOT YET IMPLEMENTED - selecting this produces no
+#'   output. Enable external validation reporting framework
+#' @param decisionImpactCurves NOT YET IMPLEMENTED - selecting this produces
+#'   no output. Plot decision impact curves showing clinical consequences
+#' @param netBenefitRegression NOT YET IMPLEMENTED - selecting this produces
+#'   no output. Model net benefit as function of threshold probabilities
+#' @param modelUpdating NOT YET IMPLEMENTED - selecting this produces no
+#'   output. Analyze need for model recalibration or updating
+#' @param transportability NOT YET IMPLEMENTED - selecting this produces no
+#'   output. Assess model transportability across populations
 #' @return A results object containing:
 #' \tabular{llllll}{
 #'   \code{results$results$notices} \tab \tab \tab \tab \tab a html \cr
@@ -2117,6 +2140,7 @@ enhancedROC <- function(
     bootstrapCutoffCI = FALSE,
     bootstrapPartialAUC = FALSE,
     stratifiedBootstrap = FALSE,
+    seed = 0,
     pairwiseComparisons = FALSE,
     comparisonMethod = "delong",
     rocCurve = TRUE,
@@ -2213,6 +2237,7 @@ enhancedROC <- function(
         bootstrapCutoffCI = bootstrapCutoffCI,
         bootstrapPartialAUC = bootstrapPartialAUC,
         stratifiedBootstrap = stratifiedBootstrap,
+        seed = seed,
         pairwiseComparisons = pairwiseComparisons,
         comparisonMethod = comparisonMethod,
         rocCurve = rocCurve,

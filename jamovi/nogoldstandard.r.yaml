@@ -202,6 +202,35 @@ items:
           title: Value
           type: number
 
+    - name: conditional_dependence
+      title: 'Conditional Independence Check (Bivariate Residuals)'
+      type: Table
+      rows: 0
+      visible: (method=="latent_class")
+      columns:
+        - name: pair
+          title: 'Test Pair'
+          type: text
+        - name: bvr
+          title: 'Bivariate Residual'
+          type: number
+        - name: verdict
+          title: 'Interpretation'
+          type: text
+      description: 'Latent class analysis assumes the tests err independently given true disease status. For each pair this compares the observed two-way table with the one the fitted model implies; a residual above 3.84 (the 5 percent point of chi-squared on 1 degree of freedom) is evidence that the pair shares a source of error, which inflates the estimated accuracy. Requires four or more tests: with three the model is just-identified and reproduces every table exactly, so no residual can reveal dependence.'
+
+    - name: diagnostics
+      title: 'Analysis Diagnostics'
+      type: Preformatted
+      visible: (verbose)
+      description: 'Detail of how the estimates were produced: sample size, method, convergence, number of random starts used, and bootstrap failures. Shown only when Verbose output is enabled.'
+      clearWith:
+        - verbose
+        - method
+        - bootstrap
+        - nboot
+        - seed
+
     - name: crosstab
       title: Test Cross-Tabulation
       type: Table

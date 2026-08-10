@@ -248,6 +248,7 @@ psychopdaROCClass <- if (requireNamespace("jmvcore")) {
       .prevalenceList = list(), # Store prevalence values
       .aucList = list(), # Store AUC values for clinical interpretation
       .forestPlotData = NULL, # Store forest plot data for meta-analysis
+      .assumedPositiveClass = NULL, # Set when no positive class was chosen and one was guessed
       .CONFIDENCE_LEVEL = 0.95, # Default confidence level for tests
 
       # ============================================================================
@@ -1158,8 +1159,16 @@ psychopdaROCClass <- if (requireNamespace("jmvcore")) {
           )
         }
 
-        # Determine default positive class if not specified
-        actualPositiveClass <- if (self$options$positiveClass == "") as.character(unique_levels)[1] else self$options$positiveClass
+        # Determine default positive class if not specified.
+        #
+        # BEHAVIOUR CHANGE (1.0.4): this used to fall back to the FIRST level. For the ordinary
+        # ways a class variable is coded -- Healthy/Disease, Negative/Positive, Control/Case,
+        # Absent/Present, No/Yes, 0/1 -- the first level is the NEGATIVE one, so the fallback
+        # silently ran the whole analysis backwards: on the bundled example data it reported
+        # AUC 0.1001 where naming the positive class gives 0.8999, with no error and no warning.
+        # The last level is the near-universal convention for the event, and is what pROC and
+        # cutpointr expect to be told. It is still only a guess, so it is disclosed below.
+        actualPositiveClass <- private$.resolvePositiveClass(classVar)
 
 
         # Dichotomize: Convert to binary by treating selected level as positive, all others as negative
@@ -1379,6 +1388,8 @@ psychopdaROCClass <- if (requireNamespace("jmvcore")) {
 
         # Populate results table
         resultsTable <- self$results$resultsTable$get(key = var)
+        private$.notePositiveClassGuess(resultsTable)
+        private$.noteMetricTolerance(resultsTable)
 
         # Clear existing rows
         resultsTable$deleteRows()
@@ -1874,6 +1885,72 @@ psychopdaROCClass <- if (requireNamespace("jmvcore")) {
         private$.updateMetaAnalysisVisibility()
       },
 
+      # Empty every results table before .run() repopulates them. jmvcore's addRow() appends
+      # unconditionally, so a table filled that way grows on every re-run; tables filled with
+      # setRow() are unaffected but clearing them is harmless because .run() rewrites them.
+      # Discovering the tables from self$results rather than hard-coding a list means a table
+      # added later is covered without anyone having to remember this method.
+      # Single source of truth for which level counts as positive. Three places worked this
+      # out independently -- .prepareVarData, .run() and the procedure notes -- and nothing kept
+      # them in step, so changing one produced a class variable dichotomised one way and an
+      # analysis scored the other way (a reported AUC of exactly 0).
+      .resolvePositiveClass = function(classVar) {
+        lv <- levels(factor(classVar))
+        chosen <- self$options$positiveClass
+        if (!is.null(chosen) && nzchar(chosen) && chosen %in% lv) {
+          return(chosen)
+        }
+        assumed <- lv[length(lv)]
+        private$.assumedPositiveClass <- assumed
+        assumed
+      },
+
+      # A non-trivial metric tolerance makes cutpointr treat every cutpoint within that
+      # distance of the best metric value as equivalent and average them, so the reported
+      # cutpoint is no longer the one that maximises the metric. Say so next to it.
+      .noteMetricTolerance = function(table) {
+        tol <- tryCatch(self$options$tol_metric, error = function(e) NULL)
+        if (is.null(tol) || !is.finite(tol) || tol <= 1e-05) return(invisible(NULL))
+        tryCatch(
+          table$setNote(
+            "metric_tolerance",
+            sprintf(paste0(
+              "Metric tolerance is %s: every cutpoint scoring within %s of the best %s was ",
+              "treated as equivalent and the reported cutpoint is their %s. It is therefore ",
+              "<i>not</i> necessarily the cutpoint that maximises the metric, and its ",
+              "sensitivity and specificity can differ appreciably from the maximum. Set the ",
+              "tolerance to 0 to report the maximising cutpoint itself."),
+              format(tol), format(tol),
+              tryCatch(self$options$metric, error = function(e) "metric"),
+              tryCatch(self$options$break_ties, error = function(e) "average"))),
+          error = function(e) NULL)
+      },
+
+      # If no positive class was chosen, say which level was assumed. Getting this wrong
+      # inverts every sensitivity, specificity, cutpoint and AUC in the output, so it belongs
+      # beside the numbers rather than only in a console warning.
+      .notePositiveClassGuess = function(table) {
+        if (is.null(private$.assumedPositiveClass)) return(invisible(NULL))
+        tryCatch(
+          table$setNote(
+            "assumed_positive_class",
+            sprintf(paste0(
+              "No positive class was selected, so \"%s\" was assumed \u{2014} the last level of the ",
+              "class variable. If that is the <i>negative</i> group, every sensitivity, ",
+              "specificity, cutpoint and AUC below is reversed. Set Positive Class explicitly."),
+              private$.assumedPositiveClass)),
+          error = function(e) NULL)
+      },
+
+      .clearTables = function() {
+        for (nm in names(self$results)) {
+          item <- tryCatch(self$results[[nm]], error = function(e) NULL)
+          if (!is.null(item) && inherits(item, "Table")) {
+            tryCatch(item$deleteRows(), error = function(e) NULL)
+          }
+        }
+      },
+
       # ============================================================================
       # MAIN ANALYSIS METHOD
       # ============================================================================
@@ -1897,6 +1974,23 @@ psychopdaROCClass <- if (requireNamespace("jmvcore")) {
           )
           return()
         }
+
+        # -----------------------------------------------------------------------
+        # 0b. CLEAR TABLES BEFORE REPOPULATING
+        # -----------------------------------------------------------------------
+        # jamovi re-runs .run() on the SAME analysis object whenever any option changes, and
+        # almost every table here is filled with addRow(). Without clearing first they stack
+        # duplicates on each re-run: measured 1 -> 2 -> 3 rows per predictor, and the decision
+        # curve going 40 -> 80 -> 120. Only thresholdTable and the results table cleared
+        # themselves. Doing it once here covers every table and cannot land inside one of the
+        # population loops.
+        #
+        # This MUST sit after the manual-run gate: in manual mode jamovi still calls .run() on
+        # every option change, so clearing before the gate would wipe the user's computed tables
+        # and then return without recomputing them, which is the opposite of what manual mode is
+        # for.
+        private$.assumedPositiveClass <- NULL
+        private$.clearTables()
 
         # -----------------------------------------------------------------------
         # 1. INSTRUCTIONS AND PRELIMINARY CHECKS
@@ -1983,8 +2077,10 @@ psychopdaROCClass <- if (requireNamespace("jmvcore")) {
           if (self$options$positiveClass == "") {
             procedureNotes <- paste0(
               procedureNotes,
-              "<p> Positive Class: ", htmltools::htmlEscape(as.character(unique(self$data[[private$.escapeVar(self$options$classVar)]])[1])),
-              " (first level)</p>"
+              "<p> Positive Class: ",
+              htmltools::htmlEscape(as.character(private$.resolvePositiveClass(
+                self$data[[private$.escapeVar(self$options$classVar)]]))),
+              " (assumed \u{2014} last level; none was selected)</p>"
             )
           } else {
             procedureNotes <- paste0(
@@ -2060,24 +2156,15 @@ psychopdaROCClass <- if (requireNamespace("jmvcore")) {
         # Escape class variable name for safe data access
         classVarEscaped <- private$.escapeVar(self$options$classVar)
 
-        if (!is.null(self$options$positiveClass) && self$options$positiveClass != "") {
-          # Use the level selector value
-          positiveClass <- self$options$positiveClass
-
-          # Verify the selected level exists in the data
-          classVar <- data[[classVarEscaped]]
-          if (!positiveClass %in% levels(factor(classVar))) {
-            warning(paste(
-              "Selected positive class", positiveClass,
-              "not found in data. Using first level instead."
-            ))
-            positiveClass <- levels(factor(classVar))[1]
-          }
-        } else {
-          # Default to first level if not specified
-          classVar <- data[[classVarEscaped]]
-          positiveClass <- levels(factor(classVar))[1]
+        classVar <- data[[classVarEscaped]]
+        if (!is.null(self$options$positiveClass) && nzchar(self$options$positiveClass) &&
+            !self$options$positiveClass %in% levels(factor(classVar))) {
+          warning(paste(
+            "Selected positive class", self$options$positiveClass,
+            "not found in data. Using the last level instead."
+          ))
         }
+        positiveClass <- private$.resolvePositiveClass(classVar)
 
         # -----------------------------------------------------------------------
         # 2.5. VALIDATION AND SAFEGUARDS
@@ -2709,6 +2796,8 @@ psychopdaROCClass <- if (requireNamespace("jmvcore")) {
 
         # Create simplified summary table
         simpleTable <- self$results$simpleResultsTable
+        private$.notePositiveClassGuess(simpleTable)
+        private$.noteMetricTolerance(simpleTable)
 
         # Track CI method per variable for user transparency
         ci_methods_used <- list()
@@ -2805,6 +2894,7 @@ psychopdaROCClass <- if (requireNamespace("jmvcore")) {
 
         # Populate the AUC summary table
         aucSummaryTable <- self$results$aucSummaryTable
+        private$.notePositiveClassGuess(aucSummaryTable)
 
         for (var in names(aucList)) {
           # Get AUC value directly from the list

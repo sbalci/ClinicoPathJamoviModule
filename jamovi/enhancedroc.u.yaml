@@ -168,6 +168,9 @@ children:
               - type: CheckBox
                 name: stratifiedBootstrap
                 enable: (useBootstrap)
+              - type: TextBox
+                name: seed
+                format: number
               - type: CheckBox
                 name: bootstrapCutoffCI
               - type: CheckBox

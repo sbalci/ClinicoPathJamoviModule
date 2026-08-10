@@ -3009,12 +3009,6 @@ out-of-scope findings from the same audit, deferred for separate work.
 # release-review-function prompt
 
 
-/release-review-function nogoldstandard
-/release-review-function decisioncalculator
-/release-review-function cotest
-/release-review-function sequentialtests
-/release-review-function enhancedROC
-/release-review-function psychopdaROC
 /release-review-function kappaSizePower
 /release-review-function kappaSizeCI
 /release-review-function kappaSizeFixedN

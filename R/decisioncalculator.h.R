@@ -229,6 +229,7 @@ decisioncalculatorResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::
         advancedMetricsTable = function() private$.items[["advancedMetricsTable"]],
         epirTable_ratio = function() private$.items[["epirTable_ratio"]],
         epirTable_number = function() private$.items[["epirTable_number"]],
+        faganSummary = function() private$.items[["faganSummary"]],
         plot1 = function() private$.items[["plot1"]],
         multipleCutoffTable = function() private$.items[["multipleCutoffTable"]]),
     private = list(),
@@ -537,6 +538,18 @@ decisioncalculatorResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::
                 refs=list(
                     "epiR",
                     "sensspecwiki")))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="faganSummary",
+                title="Reading the Nomogram",
+                visible="(fagan)",
+                clearWith=list(
+                    "TP",
+                    "TN",
+                    "FP",
+                    "FN",
+                    "pp",
+                    "pprob")))
             self$add(jmvcore::Image$new(
                 options=options,
                 name="plot1",
@@ -690,6 +703,7 @@ decisioncalculatorBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
 #'   \code{results$advancedMetricsTable} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$epirTable_ratio} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$epirTable_number} \tab \tab \tab \tab \tab a table \cr
+#'   \code{results$faganSummary} \tab \tab \tab \tab \tab Plain-language reading of the Fagan nomogram: the pre-test probability, the likelihood ratios, and where a positive or a negative result moves the probability of disease. \cr
 #'   \code{results$plot1} \tab \tab \tab \tab \tab an image \cr
 #'   \code{results$multipleCutoffTable} \tab \tab \tab \tab \tab a table \cr
 #' }

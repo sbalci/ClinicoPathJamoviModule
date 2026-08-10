@@ -143,19 +143,31 @@ options:
       title: "Bootstrap CI for optimal cutoff"
       type: Bool
       default: false
-      description: 'Calculate bootstrap confidence intervals for sensitivity and specificity at optimal cutoff'
+      description: 'NOT YET IMPLEMENTED - selecting this produces no output. Calculate bootstrap confidence intervals for sensitivity and specificity at optimal cutoff'
 
     - name: bootstrapPartialAUC
       title: "Bootstrap CI for partial AUC"
       type: Bool
       default: false
-      description: 'Calculate bootstrap confidence intervals for partial AUC estimates'
+      description: 'NOT YET IMPLEMENTED - selecting this produces no output. Calculate bootstrap confidence intervals for partial AUC estimates'
 
     - name: stratifiedBootstrap
       title: "Stratified bootstrap"
       type: Bool
       default: false
       description: 'Maintain outcome class proportions in bootstrap samples (recommended for imbalanced data)'
+
+    - name: seed
+      title: "Random Seed"
+      type: Integer
+      default: 0
+      description:
+          R: >
+            Random seed used for every resampling step - bootstrap confidence intervals,
+            bootstrap ROC comparisons, and internal validation resamples or cross-validation
+            folds. Fixing it makes a run reproducible: the same data and options give the
+            same intervals every time. Change it to check how sensitive a result is to the
+            particular resamples drawn.
 
     # Comparison Options
     - name: pairwiseComparisons
@@ -473,7 +485,7 @@ options:
       title: "Spline calibration curves"
       type: Bool
       default: false
-      description: 'Use restricted cubic splines for flexible calibration curves'
+      description: 'NOT YET IMPLEMENTED - selecting this produces no output. Use restricted cubic splines for flexible calibration curves'
 
     - name: splineKnots
       title: 'Number of Knots'
@@ -481,37 +493,37 @@ options:
       default: 4
       min: 3
       max: 7
-      description: 'Number of knots for restricted cubic splines (3-7 recommended)'
+      description: 'NOT YET IMPLEMENTED - selecting this produces no output. Number of knots for restricted cubic splines (3-7 recommended)'
 
     - name: eoRatio
       title: "E/O ratio"
       type: Bool
       default: false
-      description: 'Calculate Expected/Observed ratio for overall calibration assessment'
+      description: 'NOT YET IMPLEMENTED - selecting this produces no output. Calculate Expected/Observed ratio for overall calibration assessment'
 
     - name: namDagostino
       title: "Nam-D'Agostino test"
       type: Bool
       default: false
-      description: "Perform Nam-D'Agostino calibration test (more powerful than H-L)"
+      description: "NOT YET IMPLEMENTED - selecting this produces no output. Perform Nam-D'Agostino calibration test (more powerful than H-L)"
 
     - name: greenwoodNam
       title: "Greenwood-Nam-D'Agostino test"
       type: Bool
       default: false
-      description: "Greenwood-Nam-D'Agostino test for survival model calibration"
+      description: "NOT YET IMPLEMENTED - selecting this produces no output. Greenwood-Nam-D'Agostino test for survival model calibration"
 
     - name: calibrationBelt
       title: "Calibration belt"
       type: Bool
       default: false
-      description: 'Display calibration belt showing uncertainty around calibration curve'
+      description: 'NOT YET IMPLEMENTED - selecting this produces no output. Display calibration belt showing uncertainty around calibration curve'
 
     - name: calibrationDensity
       title: "Calibration density plot"
       type: Bool
       default: false
-      description: 'Show distribution of predicted probabilities as density overlay'
+      description: 'NOT YET IMPLEMENTED - selecting this produces no output. Show distribution of predicted probabilities as density overlay'
 
     # Multi-Class ROC Options
     - name: multiClassROC
@@ -604,31 +616,31 @@ options:
       title: "Harrell's C-index"
       type: Bool
       default: false
-      description: "Calculate Harrell's concordance index for time-to-event outcomes"
+      description: "NOT YET IMPLEMENTED - selecting this produces no output. Calculate Harrell's concordance index for time-to-event outcomes"
 
     - name: unoCStatistic
       title: "Uno's C-statistic"
       type: Bool
       default: false
-      description: "Calculate Uno's C-statistic (more robust to censoring)"
+      description: "NOT YET IMPLEMENTED - selecting this produces no output. Calculate Uno's C-statistic (more robust to censoring)"
 
     - name: incidentDynamic
       title: 'Incident/Dynamic AUC'
       type: Bool
       default: false
-      description: 'Calculate incident/dynamic AUC (sensitivity for events at specific time)'
+      description: 'NOT YET IMPLEMENTED - selecting this produces no output. Calculate incident/dynamic AUC (sensitivity for events at specific time)'
 
     - name: cumulativeDynamic
       title: 'Cumulative/Dynamic AUC'
       type: Bool
       default: false
-      description: 'Calculate cumulative/dynamic AUC (sensitivity for events by specific time)'
+      description: 'NOT YET IMPLEMENTED - selecting this produces no output. Calculate cumulative/dynamic AUC (sensitivity for events by specific time)'
 
     - name: competingRisksConcordance
       title: "Competing risks concordance"
       type: Bool
       default: false
-      description: 'Calculate cause-specific concordance for competing risks'
+      description: 'NOT YET IMPLEMENTED - selecting this produces no output. Calculate cause-specific concordance for competing risks'
 
     # Clinical Prediction Model Validation
     - name: internalValidation
@@ -654,37 +666,37 @@ options:
       title: "Optimism correction"
       type: Bool
       default: false
-      description: 'Apply optimism correction to performance metrics'
+      description: 'NOT YET IMPLEMENTED - selecting this produces no output. Apply optimism correction to performance metrics'
 
     - name: externalValidation
       title: "External validation framework"
       type: Bool
       default: false
-      description: 'Enable external validation reporting framework'
+      description: 'NOT YET IMPLEMENTED - selecting this produces no output. Enable external validation reporting framework'
 
     - name: decisionImpactCurves
       title: "Decision impact curves"
       type: Bool
       default: false
-      description: 'Plot decision impact curves showing clinical consequences'
+      description: 'NOT YET IMPLEMENTED - selecting this produces no output. Plot decision impact curves showing clinical consequences'
 
     - name: netBenefitRegression
       title: "Net benefit regression"
       type: Bool
       default: false
-      description: 'Model net benefit as function of threshold probabilities'
+      description: 'NOT YET IMPLEMENTED - selecting this produces no output. Model net benefit as function of threshold probabilities'
 
     - name: modelUpdating
       title: "Model updating analysis"
       type: Bool
       default: false
-      description: 'Analyze need for model recalibration or updating'
+      description: 'NOT YET IMPLEMENTED - selecting this produces no output. Analyze need for model recalibration or updating'
 
     - name: transportability
       title: "Transportability analysis"
       type: Bool
       default: false
-      description: 'Assess model transportability across populations'
+      description: 'NOT YET IMPLEMENTED - selecting this produces no output. Assess model transportability across populations'
 
 # Advanced analyses removed - can be added in future versions if needed
     # - name: effectSizeAnalysis

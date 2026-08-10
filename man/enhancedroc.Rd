@@ -22,6 +22,7 @@ enhancedROC(
   bootstrapCutoffCI = FALSE,
   bootstrapPartialAUC = FALSE,
   stratifiedBootstrap = FALSE,
+  seed = 0,
   pairwiseComparisons = FALSE,
   comparisonMethod = "delong",
   rocCurve = TRUE,
@@ -126,14 +127,21 @@ intervals}
 \item{bootstrapMethod}{Method for calculating bootstrap confidence
 intervals. BCa provides better coverage but requires more computation.}
 
-\item{bootstrapCutoffCI}{Calculate bootstrap confidence intervals for
-sensitivity and specificity at optimal cutoff}
+\item{bootstrapCutoffCI}{NOT YET IMPLEMENTED - selecting this produces no
+output. Calculate bootstrap confidence intervals for sensitivity and
+specificity at optimal cutoff}
 
-\item{bootstrapPartialAUC}{Calculate bootstrap confidence intervals for
-partial AUC estimates}
+\item{bootstrapPartialAUC}{NOT YET IMPLEMENTED - selecting this produces no
+output. Calculate bootstrap confidence intervals for partial AUC estimates}
 
 \item{stratifiedBootstrap}{Maintain outcome class proportions in bootstrap
 samples (recommended for imbalanced data)}
+
+\item{seed}{Random seed used for every resampling step - bootstrap
+confidence intervals, bootstrap ROC comparisons, and internal validation
+resamples or cross-validation folds. Fixing it makes a run reproducible:
+the same data and options give the same intervals every time. Change it to
+check how sensitive a result is to the particular resamples drawn.}
 
 \item{pairwiseComparisons}{Perform pairwise comparisons between ROC curves}
 
@@ -231,26 +239,27 @@ and predicted probabilities)}
 \item{calibrationMetrics}{Calculate calibration slope, intercept, and
 calibration-in-the-large}
 
-\item{splineCalibration}{Use restricted cubic splines for flexible
-calibration curves}
+\item{splineCalibration}{NOT YET IMPLEMENTED - selecting this produces no
+output. Use restricted cubic splines for flexible calibration curves}
 
-\item{splineKnots}{Number of knots for restricted cubic splines (3-7
-recommended)}
+\item{splineKnots}{NOT YET IMPLEMENTED - selecting this produces no output.
+Number of knots for restricted cubic splines (3-7 recommended)}
 
-\item{eoRatio}{Calculate Expected/Observed ratio for overall calibration
-assessment}
+\item{eoRatio}{NOT YET IMPLEMENTED - selecting this produces no output.
+Calculate Expected/Observed ratio for overall calibration assessment}
 
-\item{namDagostino}{Perform Nam-D'Agostino calibration test (more powerful
-than H-L)}
+\item{namDagostino}{NOT YET IMPLEMENTED - selecting this produces no
+output. Perform Nam-D'Agostino calibration test (more powerful than H-L)}
 
-\item{greenwoodNam}{Greenwood-Nam-D'Agostino test for survival model
-calibration}
+\item{greenwoodNam}{NOT YET IMPLEMENTED - selecting this produces no
+output. Greenwood-Nam-D'Agostino test for survival model calibration}
 
-\item{calibrationBelt}{Display calibration belt showing uncertainty around
-calibration curve}
+\item{calibrationBelt}{NOT YET IMPLEMENTED - selecting this produces no
+output. Display calibration belt showing uncertainty around calibration
+curve}
 
-\item{calibrationDensity}{Show distribution of predicted probabilities as
-density overlay}
+\item{calibrationDensity}{NOT YET IMPLEMENTED - selecting this produces no
+output. Show distribution of predicted probabilities as density overlay}
 
 \item{multiClassROC}{Enable multi-class ROC analysis for outcomes with >2
 levels}
@@ -270,38 +279,46 @@ consequences}
 
 \item{decisionImpactTable}{Show decision impact at various thresholds}
 
-\item{harrellCIndex}{Calculate Harrell's concordance index for
-time-to-event outcomes}
+\item{harrellCIndex}{NOT YET IMPLEMENTED - selecting this produces no
+output. Calculate Harrell's concordance index for time-to-event outcomes}
 
-\item{unoCStatistic}{Calculate Uno's C-statistic (more robust to censoring)}
+\item{unoCStatistic}{NOT YET IMPLEMENTED - selecting this produces no
+output. Calculate Uno's C-statistic (more robust to censoring)}
 
-\item{incidentDynamic}{Calculate incident/dynamic AUC (sensitivity for
-events at specific time)}
+\item{incidentDynamic}{NOT YET IMPLEMENTED - selecting this produces no
+output. Calculate incident/dynamic AUC (sensitivity for events at specific
+time)}
 
-\item{cumulativeDynamic}{Calculate cumulative/dynamic AUC (sensitivity for
-events by specific time)}
+\item{cumulativeDynamic}{NOT YET IMPLEMENTED - selecting this produces no
+output. Calculate cumulative/dynamic AUC (sensitivity for events by
+specific time)}
 
-\item{competingRisksConcordance}{Calculate cause-specific concordance for
-competing risks}
+\item{competingRisksConcordance}{NOT YET IMPLEMENTED - selecting this
+produces no output. Calculate cause-specific concordance for competing
+risks}
 
 \item{internalValidation}{Perform internal validation using
 cross-validation or bootstrap}
 
 \item{validationMethod}{Method for internal validation}
 
-\item{optimismCorrection}{Apply optimism correction to performance metrics}
+\item{optimismCorrection}{NOT YET IMPLEMENTED - selecting this produces no
+output. Apply optimism correction to performance metrics}
 
-\item{externalValidation}{Enable external validation reporting framework}
+\item{externalValidation}{NOT YET IMPLEMENTED - selecting this produces no
+output. Enable external validation reporting framework}
 
-\item{decisionImpactCurves}{Plot decision impact curves showing clinical
-consequences}
+\item{decisionImpactCurves}{NOT YET IMPLEMENTED - selecting this produces
+no output. Plot decision impact curves showing clinical consequences}
 
-\item{netBenefitRegression}{Model net benefit as function of threshold
-probabilities}
+\item{netBenefitRegression}{NOT YET IMPLEMENTED - selecting this produces
+no output. Model net benefit as function of threshold probabilities}
 
-\item{modelUpdating}{Analyze need for model recalibration or updating}
+\item{modelUpdating}{NOT YET IMPLEMENTED - selecting this produces no
+output. Analyze need for model recalibration or updating}
 
-\item{transportability}{Assess model transportability across populations}
+\item{transportability}{NOT YET IMPLEMENTED - selecting this produces no
+output. Assess model transportability across populations}
 }
 \value{
 A results object containing:

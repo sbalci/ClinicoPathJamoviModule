@@ -193,7 +193,13 @@ options:
           name: any_positive
         - title: Bayesian Analysis
           name: bayesian
-      default: all_positive
+      # BEHAVIOUR CHANGE (1.0.4): the default was `all_positive`, which defines the
+      # reference standard as "every test positive" and therefore fixes sensitivity and NPV
+      # at 100% for every test on every dataset -- it cannot estimate accuracy at all.
+      # `latent_class` is the only method here that estimates sensitivity and specificity
+      # without building the reference out of the tests themselves. It requires 3+ tests and
+      # says so; with 2 tests no method in this analysis can estimate accuracy.
+      default: latent_class
       description:
           R: >
             Method for analyzing tests without gold standard.

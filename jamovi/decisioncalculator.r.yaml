@@ -296,6 +296,19 @@ items:
     #   title: 'Table 1'
     #   type:  Html
 
+    - name: faganSummary
+      title: 'Reading the Nomogram'
+      type: Html
+      visible: (fagan)
+      clearWith:
+        - TP
+        - TN
+        - FP
+        - FN
+        - pp
+        - pprob
+      description: 'Plain-language reading of the Fagan nomogram: the pre-test probability, the likelihood ratios, and where a positive or a negative result moves the probability of disease.'
+
     - name: plot1
       title: 'Fagan nomogram'
       type: Image

@@ -10,10 +10,10 @@ library(testthat)
 library(jmvcore)
 if (!exists(".")) . <- function(x, ...) x
 
-source("../../R/utils.R")
-source("../../R/psychopdaROC_utilities.R")
-source("../../R/psychopdaROC.h.R")
-source("../../R/psychopdaROC.b.R")
+# These used to source("../../R/psychopdaROC.h.R") and ".b.R" -- capitalised paths that do not
+# exist (the files are psychopdaroc.*), so the file only loaded on a case-insensitive
+# filesystem. The package under test already provides the function.
+psychopdaROC <- ClinicoPath::psychopdaROC
 
 # Helper function to create test data
 create_roc_test_data <- function(n = 200, seed = 123) {
@@ -73,6 +73,8 @@ test_that("basic ROC analysis works with default parameters", {
       dependentVars = "test1",
       classVar = "outcome",
       positiveClass = "Disease"
+    ,
+      refVar = NULL
     )
   })
   
@@ -82,7 +84,9 @@ test_that("basic ROC analysis works with default parameters", {
     dependentVars = "test1", 
     classVar = "outcome",
     positiveClass = "Disease"
-  )
+  ,
+      refVar = NULL
+    )
   
   expect_s3_class(result, "psychopdaROCResults")
   expect_true("resultsTable" %in% names(result))
@@ -99,6 +103,8 @@ test_that("multiple test variables work correctly", {
       classVar = "outcome", 
       positiveClass = "Disease",
       combinePlots = TRUE
+    ,
+      refVar = NULL
     )
   })
 })
@@ -123,7 +129,9 @@ test_that("different cutpoint methods work correctly", {
           positiveClass = "Disease",
           method = method,
           specifyCutScore = "2.0"
-        )
+        ,
+      refVar = NULL
+    )
       })
     } else {
       expect_no_error({
@@ -133,7 +141,9 @@ test_that("different cutpoint methods work correctly", {
           classVar = "outcome",
           positiveClass = "Disease",
           method = method
-        )
+        ,
+      refVar = NULL
+    )
       })
     }
   }
@@ -153,7 +163,9 @@ test_that("custom cutpoint methods work correctly", {
         classVar = "outcome", 
         positiveClass = "Disease",
         method = method
-      )
+      ,
+      refVar = NULL
+    )
     })
   }
 })
@@ -172,7 +184,9 @@ test_that("different optimization metrics work correctly", {
         classVar = "outcome",
         positiveClass = "Disease", 
         metric = metric
-      )
+      ,
+      refVar = NULL
+    )
     })
   }
 })
@@ -191,6 +205,8 @@ test_that("DeLong test works for comparing multiple AUCs", {
       classVar = "outcome",
       positiveClass = "Disease",
       delongTest = TRUE
+    ,
+      refVar = NULL
     )
   })
   
@@ -201,7 +217,9 @@ test_that("DeLong test works for comparing multiple AUCs", {
     classVar = "outcome", 
     positiveClass = "Disease",
     delongTest = TRUE
-  )
+  ,
+      refVar = NULL
+    )
   
   expect_true(result$delongTest$visible)
 })
@@ -251,6 +269,8 @@ test_that("partial AUC calculation works", {
       partialAUC = TRUE,
       partialAUCfrom = 0.8,
       partialAUCto = 1.0
+    ,
+      refVar = NULL
     )
   })
 })
@@ -266,6 +286,8 @@ test_that("bootstrap confidence intervals work", {
       positiveClass = "Disease",
       bootstrapCI = TRUE,
       bootstrapReps = 100  # Reduced for faster testing
+    ,
+      refVar = NULL
     )
   })
 })
@@ -284,6 +306,8 @@ test_that("subgroup analysis works correctly", {
       classVar = "outcome",
       positiveClass = "Disease",
       subGroup = "subgroup"
+    ,
+      refVar = NULL
     )
   })
 })
@@ -299,6 +323,8 @@ test_that("subgroup analysis with DeLong test throws appropriate error", {
       positiveClass = "Disease",
       subGroup = "subgroup",
       delongTest = TRUE
+    ,
+      refVar = NULL
     )
   }, "DeLong's test does not currently support the group variable")
 })
@@ -317,6 +343,8 @@ test_that("basic ROC plotting works", {
       classVar = "outcome",
       positiveClass = "Disease",
       plotROC = TRUE
+    ,
+      refVar = NULL
     )
   })
 })
@@ -332,6 +360,8 @@ test_that("combined plotting works with multiple variables", {
       positiveClass = "Disease",
       plotROC = TRUE,
       combinePlots = TRUE
+    ,
+      refVar = NULL
     )
   })
 })
@@ -349,6 +379,8 @@ test_that("additional plot types work", {
       showCriterionPlot = TRUE,
       showPrevalencePlot = TRUE,
       showDotPlot = TRUE
+    ,
+      refVar = NULL
     )
   })
 })
@@ -363,6 +395,8 @@ test_that("precision-recall curves work", {
       classVar = "outcome",
       positiveClass = "Disease", 
       precisionRecallCurve = TRUE
+    ,
+      refVar = NULL
     )
   })
 })
@@ -381,6 +415,8 @@ test_that("sensitivity/specificity table works", {
       classVar = "outcome",
       positiveClass = "Disease",
       sensSpecTable = TRUE
+    ,
+      refVar = NULL
     )
   })
 })
@@ -396,6 +432,8 @@ test_that("threshold table works", {
       positiveClass = "Disease",
       showThresholdTable = TRUE,
       maxThresholds = 10
+    ,
+      refVar = NULL
     )
   })
 })
@@ -410,6 +448,8 @@ test_that("classifier comparison table works", {
       classVar = "outcome", 
       positiveClass = "Disease",
       compareClassifiers = TRUE
+    ,
+      refVar = NULL
     )
   })
 })
@@ -427,6 +467,8 @@ test_that("function handles missing inputs appropriately", {
       data = data,
       classVar = "outcome",
       positiveClass = "Disease"
+    ,
+      refVar = NULL
     )
   })
   
@@ -436,6 +478,8 @@ test_that("function handles missing inputs appropriately", {
       data = data,
       dependentVars = "test1",
       positiveClass = "Disease"
+    ,
+      refVar = NULL
     )
   })
 })
@@ -451,8 +495,10 @@ test_that("function handles insufficient variables for advanced tests", {
       classVar = "outcome",
       positiveClass = "Disease", 
       delongTest = TRUE
+    ,
+      refVar = NULL
     )
-  }, "DeLong's test requires at least 2 test variables")
+  }, "Please specify at least two dependent variables to use DeLong's test.", fixed = TRUE)
   
   # Test IDI with only one variable
   expect_error({
@@ -462,6 +508,8 @@ test_that("function handles insufficient variables for advanced tests", {
       classVar = "outcome",
       positiveClass = "Disease",
       calculateIDI = TRUE
+    ,
+      refVar = NULL
     )
   }, "Please specify at least two dependent variables")
 })
@@ -477,8 +525,10 @@ test_that("function handles manual cutpoint without score", {
       positiveClass = "Disease",
       method = "oc_manual",
       specifyCutScore = ""
+    ,
+      refVar = NULL
     )
-  }, "Suggestion: Enter a numeric value in the 'Manual Cut Score' field")
+  }, "Please specify a cut score for using the manual cutpoint method.", fixed = TRUE)
 })
 
 # =============================================================================
@@ -494,6 +544,8 @@ test_that("function handles small sample sizes", {
       dependentVars = "test1",
       classVar = "outcome",
       positiveClass = "Disease"
+    ,
+      refVar = NULL
     )
   })
 })
@@ -514,6 +566,8 @@ test_that("function handles imbalanced classes", {
       dependentVars = "test_vals",
       classVar = "outcome",
       positiveClass = "Disease"
+    ,
+      refVar = NULL
     )
   })
 })
@@ -534,6 +588,8 @@ test_that("function handles perfect separation", {
       dependentVars = "test_vals", 
       classVar = "outcome",
       positiveClass = "Disease"
+    ,
+      refVar = NULL
     )
   })
 })
@@ -626,6 +682,8 @@ test_that("function performs reasonably with larger datasets", {
       dependentVars = c("test1", "test2"),
       classVar = "outcome",
       positiveClass = "Disease"
+    ,
+      refVar = NULL
     )
   })
   end_time <- Sys.time()
@@ -674,7 +732,9 @@ test_that("results contain expected components", {
     positiveClass = "Disease",
     sensSpecTable = TRUE,
     showThresholdTable = TRUE
-  )
+  ,
+      refVar = NULL
+    )
   
   # Check that all expected result components exist
   expected_components <- c("resultsTable", "sensSpecTable", "plotROC", 

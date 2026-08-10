@@ -157,7 +157,7 @@ cotestClass <- if (requireNamespace("jmvcore"))
 
                 lr_either_pos <- private$.calculateLikelihoodRatio(p_either_pos_D, p_either_pos_nD, "Either Positive LR")
                 postest_odds_either <- pretest_odds * lr_either_pos
-                postest_prob_either <- postest_odds_either / (1 + postest_odds_either)
+                postest_prob_either <- private$.oddsToProbability(postest_odds_either)
                 rel_prob_either <- postest_prob_either / prevalence
 
                 # Calculate relative probabilities compared to prevalence
@@ -213,18 +213,23 @@ cotestClass <- if (requireNamespace("jmvcore"))
                 # Create dependency explanation
                 self$results$dependenceExplanation$setContent(private$.buildDependenceExplanation())
 
-                # Display validation notices if any were collected
-                private$.displayNotices()
-
-                # Store data for Fagan nomogram if requested
+                # Store data for Fagan nomogram if requested. This runs BEFORE .displayNotices()
+                # because it can decide the nomogram is not drawable and add a notice saying so.
                 if (self$options$fagan) {
                     private$.prepareFaganPlotData(prevalence, test1_sens, test1_spec, test2_sens, test2_spec,
                                                  indep, lr_either_pos, if (indep) test1_nlr * test2_nlr else results$lr_both_neg)
                 }
+
+                # Display validation notices if any were collected
+                private$.displayNotices()
             },
 
             .plot1 = function(image1, ggtheme, ...) {
                 plotData <- image1$state
+
+                # .prepareFaganPlotData() already explained the reason in a notice.
+                if (is.null(plotData) || !isTRUE(plotData$drawable))
+                    return(FALSE)
 
                 # Check cache to avoid expensive recalculations
                 params_key <- paste(plotData$Prevalence, plotData$Plr_PositiveRule, plotData$Nlr_NegativeRule, sep="_")
@@ -263,35 +268,60 @@ cotestClass <- if (requireNamespace("jmvcore"))
                 if (prevalence <= 0 || prevalence >= 1) {
                     jmvcore::reject("Disease prevalence must be between 0 and 1. Consider realistic clinical prevalences: rare diseases (0.001-0.01), common conditions (0.05-0.20).")
                 }
-                if (!indep && (cond_dep_pos < 0 || cond_dep_pos > 1)) {
-                    jmvcore::reject("Conditional dependence for positive cases must be between 0 and 1. Typical values: 0.05 (weak), 0.15 (moderate), 0.30 (strong dependence).")
+                if (!indep && (cond_dep_pos < -1 || cond_dep_pos > 1)) {
+                    jmvcore::reject("Conditional dependence for subjects with disease must be between -1 and 1. Typical positive values: 0.05 (weak), 0.15 (moderate), 0.30 (strong). Negative values describe tests that compensate for each other's errors.")
                 }
-                if (!indep && (cond_dep_neg < 0 || cond_dep_neg > 1)) {
-                    jmvcore::reject("Conditional dependence for negative cases must be between 0 and 1. Typical values: 0.05 (weak), 0.15 (moderate), 0.30 (strong dependence).")
+                if (!indep && (cond_dep_neg < -1 || cond_dep_neg > 1)) {
+                    jmvcore::reject("Conditional dependence for subjects without disease must be between -1 and 1. Typical positive values: 0.05 (weak), 0.15 (moderate), 0.30 (strong). Negative values describe tests that compensate for each other's errors.")
                 }
                 
                 # Additional clinical validity checks
                 if (test1_sens + test1_spec < 1.1) {
-                    private$.addNotice("Test 1 has low discriminatory power (sensitivity + specificity < 1.1). Consider if this test adds clinical value.", "warning")
+                    private$.addNotice("Test 1 has low discriminatory power (sensitivity plus specificity below 1.1). Consider if this test adds clinical value.", "warning")
                 }
                 if (test2_sens + test2_spec < 1.1) {
-                    private$.addNotice("Test 2 has low discriminatory power (sensitivity + specificity < 1.1). Consider if this test adds clinical value.", "warning")
+                    private$.addNotice("Test 2 has low discriminatory power (sensitivity plus specificity below 1.1). Consider if this test adds clinical value.", "warning")
                 }
 
                 # Check for extreme prevalence that might cause numerical issues
                 if (prevalence < 0.001) {
-                    private$.addNotice("Very low prevalence (< 0.1%) may lead to unstable results. Consider if co-testing is appropriate for such rare conditions.", "warning")
+                    private$.addNotice("Very low prevalence (below 0.1%) may lead to unstable results. Consider if co-testing is appropriate for such rare conditions.", "warning")
                 }
                 if (prevalence > 0.5) {
-                    private$.addNotice("High prevalence (>50%) detected. Ensure this reflects your actual clinical population.", "info")
+                    private$.addNotice("High prevalence (above 50%) detected. Ensure this reflects your actual clinical population.", "info")
                 }
             },
 
             # Calculate likelihood ratios with numerical stability checks
             .calculateLikelihoodRatio = function(numerator, denominator, scenario_name) {
-                if (abs(denominator) < private$NUMERICAL_TOLERANCE) {
-                    private$.addNotice(paste("Very small denominator in", scenario_name, "- results may be unstable. Consider adjusting test parameters."), "warning")
-                    return(if (numerator > 0) 1e6 else 0)  # Large but finite value
+                tol <- private$NUMERICAL_TOLERANCE
+                num_zero <- abs(numerator) < tol
+                den_zero <- abs(denominator) < tol
+
+                # A zero cell here is not a rounding accident. The dependence parameters can push
+                # a joint probability onto its Frechet bound, which forces one of the four test
+                # combinations to have probability exactly zero in one group. The likelihood ratio
+                # is then degenerate, and printing it as an ordinary number hides the fact that the
+                # value is a structural consequence of the assumed model rather than an estimate.
+                if (num_zero && den_zero) {
+                    private$.addNotice(sprintf(
+                        "%s is undefined: with the current parameters this combination of test results has probability zero in both the diseased and the non-diseased group, so it cannot occur at all and no post-test probability exists for it. That row is left blank.",
+                        scenario_name), "warning")
+                    return(NA_real_)
+                }
+
+                if (den_zero) {
+                    private$.addNotice(sprintf(
+                        "%s is infinite: with the current parameters this combination of test results cannot occur in a subject without disease, so its post-test probability is 1 by construction rather than estimated. Lower the conditional dependence if that is not intended.",
+                        scenario_name), "warning")
+                    return(Inf)
+                }
+
+                if (num_zero) {
+                    private$.addNotice(sprintf(
+                        "%s is zero: with the current parameters this combination of test results cannot occur in a subject with disease, so its post-test probability is 0 by construction rather than estimated. Lower the conditional dependence if that is not intended.",
+                        scenario_name), "warning")
+                    return(0)
                 }
 
                 result <- numerator / denominator
@@ -302,6 +332,16 @@ cotestClass <- if (requireNamespace("jmvcore"))
                 }
 
                 return(result)
+            },
+
+            # Convert post-test odds to a probability. Odds of Inf are a certainty, not NaN, and an
+            # undefined likelihood ratio must stay undefined rather than collapsing to 0.
+            .oddsToProbability = function(odds) {
+                if (length(odds) != 1L || !is.numeric(odds) || is.na(odds))
+                    return(NA_real_)
+                if (is.infinite(odds))
+                    return(if (odds > 0) 1 else NA_real_)
+                odds / (1 + odds)
             },
 
             # Clamp probabilities to valid ranges while providing informative notices
@@ -332,15 +372,45 @@ cotestClass <- if (requireNamespace("jmvcore"))
                 return(adjusted)
             },
 
-            # Confirm that joint probability cells sum to unity
-            .validateJointDistribution = function(probabilities, label) {
-                total <- Reduce(`+`, probabilities)
-                if (abs(total - 1) > 1e-6) {
+            # Confirm the four joint probability cells really are a distribution, and that they
+            # reproduce the marginals they were built from.
+            #
+            # Checking only that the cells sum to 1 is vacuous: the fourth cell is DEFINED as
+            # 1 minus the other three, so that sum is 1 by construction and the test can never
+            # fail. The invariants worth checking are that no cell has left [0, 1] and that
+            # P(both) + P(first only) still equals the sensitivity (or false-positive rate) the
+            # cells were derived from -- clamping one cell without adjusting the rest would
+            # silently change the test parameters the user entered.
+            .validateJointDistribution = function(p_both, p_first_only, p_second_only, p_neither,
+                                                  marginal1, marginal2, label) {
+                cells <- c(p_both, p_first_only, p_second_only, p_neither)
+
+                if (any(!is.finite(cells)) || any(cells < -1e-9) || any(cells > 1 + 1e-9)) {
                     private$.addNotice(sprintf(
-                        "Joint probabilities for %s sum to %.6f (expected 1). Results may require review of dependence parameters.",
-                        label, total
-                    ), "warning")
+                        "The joint probabilities for %s are not all valid probabilities (%s). Review the dependence parameters.",
+                        label, paste(sprintf("%.4f", cells), collapse = ", ")), "warning")
+                    return(invisible(FALSE))
                 }
+
+                # Kept for completeness even though the caller derives the fourth cell by
+                # subtraction, which makes this true by construction today.
+                if (abs(sum(cells) - 1) > 1e-6) {
+                    private$.addNotice(sprintf(
+                        "The joint probabilities for %s sum to %.6f rather than 1. Review the dependence parameters.",
+                        label, sum(cells)), "warning")
+                    return(invisible(FALSE))
+                }
+
+                implied1 <- p_both + p_first_only
+                implied2 <- p_both + p_second_only
+                if (abs(implied1 - marginal1) > 1e-6 || abs(implied2 - marginal2) > 1e-6) {
+                    private$.addNotice(sprintf(
+                        "The joint probabilities for %s do not add back up to the test parameters entered (they imply %.4f and %.4f, against %.4f and %.4f). Review the dependence parameters.",
+                        label, implied1, implied2, marginal1, marginal2), "warning")
+                    return(invisible(FALSE))
+                }
+
+                invisible(TRUE)
             },
 
             # Update test parameters table
@@ -385,16 +455,16 @@ cotestClass <- if (requireNamespace("jmvcore"))
                     lr_both_neg <- test1_nlr * test2_nlr
 
                     postest_odds_t1 <- pretest_odds * lr_t1_only
-                    postest_prob_t1 <- postest_odds_t1 / (1 + postest_odds_t1)
+                    postest_prob_t1 <- private$.oddsToProbability(postest_odds_t1)
 
                     postest_odds_t2 <- pretest_odds * lr_t2_only
-                    postest_prob_t2 <- postest_odds_t2 / (1 + postest_odds_t2)
+                    postest_prob_t2 <- private$.oddsToProbability(postest_odds_t2)
 
                     postest_odds_both <- pretest_odds * lr_both_pos
-                    postest_prob_both <- postest_odds_both / (1 + postest_odds_both)
+                    postest_prob_both <- private$.oddsToProbability(postest_odds_both)
 
                     postest_odds_both_neg <- pretest_odds * lr_both_neg
-                    postest_prob_both_neg <- postest_odds_both_neg / (1 + postest_odds_both_neg)
+                    postest_prob_both_neg <- private$.oddsToProbability(postest_odds_both_neg)
 
                     dependence_info <- "<p>Tests are assumed to be conditionally independent.</p>"
                 } else {
@@ -459,7 +529,9 @@ cotestClass <- if (requireNamespace("jmvcore"))
                 p_both_pos_D <- private$.clampProbability(p_both_pos_D_raw, lower_pos_D, upper_pos_D,
                                                           "P(Test1+, Test2+ | Disease+)")
                 if (abs(p_both_pos_D_raw - p_both_pos_D) > private$NUMERICAL_TOLERANCE) {
-                    private$.addNotice("Dependence parameter for diseased group exceeded feasible bounds; joint positive probability truncated.", "info")
+                    private$.addNotice(sprintf(
+                        "The dependence parameter for the diseased group (%.2f) is not attainable with these sensitivities, so the joint positive probability was truncated to its bound. The analysis therefore describes a more strongly dependent model than you specified, which can force some test combinations to be impossible. Lower the value until this note disappears if you want the model you asked for.",
+                        cond_dep_pos), "warning")
                 }
 
                 p_t1_only_D <- private$.clampProbability(test1_sens - p_both_pos_D, 0, test1_sens,
@@ -477,7 +549,9 @@ cotestClass <- if (requireNamespace("jmvcore"))
                 p_both_pos_nD <- private$.clampProbability(p_both_pos_nD_raw, lower_pos_nD, upper_pos_nD,
                                                           "P(Test1+, Test2+ | Disease-)")
                 if (abs(p_both_pos_nD_raw - p_both_pos_nD) > private$NUMERICAL_TOLERANCE) {
-                    private$.addNotice("Dependence parameter for non-diseased group exceeded feasible bounds; joint false-positive probability truncated.", "info")
+                    private$.addNotice(sprintf(
+                        "The dependence parameter for the non-diseased group (%.2f) is not attainable with these specificities, so the joint false-positive probability was truncated to its bound. The analysis therefore describes a more strongly dependent model than you specified, which can force some test combinations to be impossible. Lower the value until this note disappears if you want the model you asked for.",
+                        cond_dep_neg), "warning")
                 }
 
                 p_t1_only_nD <- private$.clampProbability(fp_test1 - p_both_pos_nD, 0, fp_test1,
@@ -486,14 +560,14 @@ cotestClass <- if (requireNamespace("jmvcore"))
                                                           "P(Test1-, Test2+ | Disease-)")
                 p_both_neg_nD <- 1 - (p_both_pos_nD + p_t1_only_nD + p_t2_only_nD)
 
-                # Ensure probability sets sum to 1 within tolerance
+                # Ensure each set is a valid distribution that still reproduces its marginals
                 private$.validateJointDistribution(
-                    list(p_both_pos_D, p_t1_only_D, p_t2_only_D, p_both_neg_D),
-                    "Disease+"
+                    p_both_pos_D, p_t1_only_D, p_t2_only_D, p_both_neg_D,
+                    test1_sens, test2_sens, "subjects with disease"
                 )
                 private$.validateJointDistribution(
-                    list(p_both_pos_nD, p_t1_only_nD, p_t2_only_nD, p_both_neg_nD),
-                    "Disease-"
+                    p_both_pos_nD, p_t1_only_nD, p_t2_only_nD, p_both_neg_nD,
+                    fp_test1, fp_test2, "subjects without disease"
                 )
 
                 # Calculate likelihood ratios with stability checks
@@ -504,16 +578,16 @@ cotestClass <- if (requireNamespace("jmvcore"))
 
                 # Calculate post-test odds and probabilities
                 postest_odds_t1 <- pretest_odds * lr_t1_only
-                postest_prob_t1 <- postest_odds_t1 / (1 + postest_odds_t1)
+                postest_prob_t1 <- private$.oddsToProbability(postest_odds_t1)
 
                 postest_odds_t2 <- pretest_odds * lr_t2_only
-                postest_prob_t2 <- postest_odds_t2 / (1 + postest_odds_t2)
+                postest_prob_t2 <- private$.oddsToProbability(postest_odds_t2)
 
                 postest_odds_both <- pretest_odds * lr_both_pos
-                postest_prob_both <- postest_odds_both / (1 + postest_odds_both)
+                postest_prob_both <- private$.oddsToProbability(postest_odds_both)
 
                 postest_odds_both_neg <- pretest_odds * lr_both_neg
-                postest_prob_both_neg <- postest_odds_both_neg / (1 + postest_odds_both_neg)
+                postest_prob_both_neg <- private$.oddsToProbability(postest_odds_both_neg)
 
                 # Compute realized phi coefficients
                 phi_calc <- function(p11, p10, p01, p00) {
@@ -582,6 +656,15 @@ cotestClass <- if (requireNamespace("jmvcore"))
                     list(key = "both_neg", scenario = "Both Tests Negative", postProb = postest_prob_both_neg,
                          relativeProbability = rel_prob_both_neg, orValue = postest_odds_both_neg)
                 )
+
+                # Every input is a point estimate the user typed in, so every number in this table
+                # is conditional on those values being exact. That limitation belongs next to the
+                # numbers, not only in the welcome panel, which a user can collapse.
+                cotestResultsTable$setNote("fixed_inputs", paste0(
+                    "Sensitivity, specificity and prevalence are treated as exact. These post-test ",
+                    "probabilities therefore carry <i>no</i> confidence interval and do not reflect ",
+                    "sampling uncertainty in the values entered \u{2014} published test performance ",
+                    "estimates and local prevalence both vary."))
 
                 # Update all rows using loop to reduce duplication
                 for (scenario in scenarios) {
@@ -655,6 +738,28 @@ cotestClass <- if (requireNamespace("jmvcore"))
                 # Checkpoint before potentially expensive nomogram calculation
                 private$.checkpoint()
                 
+                # nomogrammer() refuses a positive likelihood ratio below 1, and cannot place a
+                # non-finite ratio on the axis at all. Decide here whether the nomogram can be
+                # drawn, so the user gets an explanation instead of a raw R error in the results.
+                finite1 <- function(x) length(x) == 1L && is.numeric(x) && is.finite(x)
+                reason <- NULL
+                if (!finite1(lr_positive_rule) || !finite1(lr_negative_rule)) {
+                    reason <- "one of the combined likelihood ratios is not a finite number with these parameters"
+                } else if (lr_positive_rule < 1) {
+                    reason <- sprintf(paste0(
+                        "the positive-rule likelihood ratio is %.2f, which is below 1. A Fagan nomogram ",
+                        "assumes a positive result raises the probability of disease; here it lowers it, ",
+                        "which means the tests as specified perform worse than chance"), lr_positive_rule)
+                } else if (lr_negative_rule <= 0) {
+                    reason <- "the negative-rule likelihood ratio is zero, which cannot be placed on the nomogram's logarithmic axis"
+                }
+
+                if (!is.null(reason)) {
+                    private$.addNotice(sprintf(
+                        "The Fagan nomogram was not drawn because %s. Check the sensitivity and specificity values you entered.",
+                        reason), "warning")
+                }
+
                 plotData <- list(
                     "Prevalence" = prevalence,
                     "Test1Sens" = test1_sens,
@@ -662,7 +767,8 @@ cotestClass <- if (requireNamespace("jmvcore"))
                     "Test2Sens" = test2_sens,
                     "Test2Spec" = test2_spec,
                     "Plr_PositiveRule" = lr_positive_rule,
-                    "Nlr_NegativeRule" = lr_negative_rule
+                    "Nlr_NegativeRule" = lr_negative_rule,
+                    "drawable" = is.null(reason)
                 )
 
                 image1 <- self$results$plot1
@@ -671,6 +777,7 @@ cotestClass <- if (requireNamespace("jmvcore"))
 
             # Clinical interpretation helpers
             .interpretPLR = function(plr) {
+                if (length(plr) != 1L || is.na(plr)) return("not estimable")
                 if (plr > 10) return("strong evidence for disease")
                 if (plr > 5) return("moderate evidence for disease")
                 if (plr > 2) return("weak evidence for disease")
@@ -679,6 +786,11 @@ cotestClass <- if (requireNamespace("jmvcore"))
             },
 
             .getClinicalSignificance = function(post_prob, prevalence) {
+                # post_prob is NA when the dependence parameters make a test combination impossible
+                # in both groups, so there is no change from prevalence to describe.
+                if (length(post_prob) != 1L || is.na(post_prob) ||
+                    length(prevalence) != 1L || is.na(prevalence) || prevalence <= 0)
+                    return("(not estimable)")
                 change_factor <- post_prob / prevalence
                 if (change_factor > 3) return("(major increase)")
                 if (change_factor > 1.5) return("(moderate increase)")

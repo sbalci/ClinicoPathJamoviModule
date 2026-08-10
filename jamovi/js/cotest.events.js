@@ -177,11 +177,11 @@ const events = {
     },
 
     onChange_cond_dep_pos(ui) {
-        clampControl(ui, 'cond_dep_pos', 0, 1);
+        clampControl(ui, 'cond_dep_pos', -1, 1);
     },
 
     onChange_cond_dep_neg(ui) {
-        clampControl(ui, 'cond_dep_neg', 0, 1);
+        clampControl(ui, 'cond_dep_neg', -1, 1);
     }
 };
 

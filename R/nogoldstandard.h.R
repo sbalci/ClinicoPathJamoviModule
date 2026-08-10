@@ -17,7 +17,7 @@ nogoldstandardOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
             test4Positive = NULL,
             test5 = NULL,
             test5Positive = NULL,
-            method = "all_positive",
+            method = "latent_class",
             bootstrap = FALSE,
             nboot = 1000,
             alpha = 0.05,
@@ -108,7 +108,7 @@ nogoldstandardOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
                     "all_positive",
                     "any_positive",
                     "bayesian"),
-                default="all_positive")
+                default="latent_class")
             private$..bootstrap <- jmvcore::OptionBool$new(
                 "bootstrap",
                 bootstrap,
@@ -202,6 +202,8 @@ nogoldstandardResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
         prevalence = function() private$.items[["prevalence"]],
         test_metrics = function() private$.items[["test_metrics"]],
         model_fit = function() private$.items[["model_fit"]],
+        conditional_dependence = function() private$.items[["conditional_dependence"]],
+        diagnostics = function() private$.items[["diagnostics"]],
         crosstab = function() private$.items[["crosstab"]],
         agreement_plot = function() private$.items[["agreement_plot"]],
         agreement_plot2 = function() private$.items[["agreement_plot2"]]),
@@ -433,6 +435,36 @@ nogoldstandardResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
                         `type`="number"))))
             self$add(jmvcore::Table$new(
                 options=options,
+                name="conditional_dependence",
+                title="Conditional Independence Check (Bivariate Residuals)",
+                rows=0,
+                visible="(method==\"latent_class\")",
+                columns=list(
+                    list(
+                        `name`="pair", 
+                        `title`="Test Pair", 
+                        `type`="text"),
+                    list(
+                        `name`="bvr", 
+                        `title`="Bivariate Residual", 
+                        `type`="number"),
+                    list(
+                        `name`="verdict", 
+                        `title`="Interpretation", 
+                        `type`="text"))))
+            self$add(jmvcore::Preformatted$new(
+                options=options,
+                name="diagnostics",
+                title="Analysis Diagnostics",
+                visible="(verbose)",
+                clearWith=list(
+                    "verbose",
+                    "method",
+                    "bootstrap",
+                    "nboot",
+                    "seed")))
+            self$add(jmvcore::Table$new(
+                options=options,
                 name="crosstab",
                 title="Test Cross-Tabulation",
                 visible=TRUE,
@@ -577,6 +609,8 @@ nogoldstandardBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
 #'   \code{results$prevalence} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$test_metrics} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$model_fit} \tab \tab \tab \tab \tab a table \cr
+#'   \code{results$conditional_dependence} \tab \tab \tab \tab \tab Latent class analysis assumes the tests err independently given true disease status. For each pair this compares the observed two-way table with the one the fitted model implies; a residual above 3.84 (the 5 percent point of chi-squared on 1 degree of freedom) is evidence that the pair shares a source of error, which inflates the estimated accuracy. Requires four or more tests: with three the model is just-identified and reproduces every table exactly, so no residual can reveal dependence. \cr
+#'   \code{results$diagnostics} \tab \tab \tab \tab \tab Detail of how the estimates were produced: sample size, method, convergence, number of random starts used, and bootstrap failures. Shown only when Verbose output is enabled. \cr
 #'   \code{results$crosstab} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$agreement_plot} \tab \tab \tab \tab \tab an image \cr
 #'   \code{results$agreement_plot2} \tab \tab \tab \tab \tab an image \cr
@@ -602,7 +636,7 @@ nogoldstandard <- function(
     test4Positive,
     test5 = NULL,
     test5Positive,
-    method = "all_positive",
+    method = "latent_class",
     bootstrap = FALSE,
     nboot = 1000,
     alpha = 0.05,
