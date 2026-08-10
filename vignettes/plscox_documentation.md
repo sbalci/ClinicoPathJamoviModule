@@ -1,5 +1,12 @@
 # PLS-Cox Regression Feature Mapping
 
+> **Not yet released.** The `plscox` analysis is on a development menu route, so it does
+> not appear in the jamovi menus of ClinicoPath or of any of its submodules. It is
+> documented here ahead of a future release, and its options, defaults and output may
+> still change. The R function is exported, so the examples below run from an R
+> console; what is not yet available is the jamovi analysis itself.
+
+
 This document provides a comprehensive feature-to-implementation mapping for the PLS-Cox Regression module (`plscox`), covering every option, UI element, results item, and backend function.
 
 ## Feature Summary

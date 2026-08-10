@@ -71,7 +71,7 @@ items:
         - name: category
           title: "Category"
           type: text
-        - name: n
+        - name: 'n'
           title: "Number of Patients"
           type: integer
         - name: percent

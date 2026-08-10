@@ -35,7 +35,7 @@ items:
         - name: level
           title: 'Concentration Level'
           type: text
-        - name: n
+        - name: 'n'
           title: 'N'
           type: integer
         - name: mean

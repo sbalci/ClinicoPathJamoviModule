@@ -18,7 +18,7 @@ items:
         - outcome
         - probability_vars
       columns:
-        - name: n
+        - name: 'n'
           title: "N"
           type: integer
         - name: mean_entropy
@@ -50,7 +50,7 @@ items:
         - name: class
           title: "True Class"
           type: text
-        - name: n
+        - name: 'n'
           title: "N"
           type: integer
         - name: mean_entropy

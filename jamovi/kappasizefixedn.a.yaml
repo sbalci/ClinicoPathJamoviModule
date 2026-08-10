@@ -40,9 +40,12 @@ options:
       max: 0.99
       description:
           ui: >
-              Expected value of kappa.
+              The preliminary (anticipated) value of kappa - the agreement you expect to
+              observe. It is not a null hypothesis value.
           R: >
-              Expected value of kappa.
+              The preliminary (anticipated) value of kappa - the agreement you expect to
+              observe. kappaSize documents this argument as "the preliminary value of
+              kappa". Contrast kappaSizePower, where kappa0 IS the null being tested.
 
     - name: props
       title: Proportions of outcome level
@@ -76,7 +79,7 @@ options:
       title: alpha
       type: Number
       default: 0.05
-      min: 0.01
+      min: 0.001
       max: 0.20
       description:
           ui: >
@@ -84,11 +87,12 @@ options:
           R: >
               Significance level.
 
-    - name: n
+    - name: 'n'
       title: N
       type: Number
       default: 100
-      min: 2
+      min: 11
+      max: 1000000
       description:
           ui: >
               Sample size.

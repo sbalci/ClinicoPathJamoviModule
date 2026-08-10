@@ -35,7 +35,7 @@ items:
           - name: Pattern
             title: "Exposure Pattern"
             type: text
-          - name: N
+          - name: 'N'
             title: "N"
             type: integer
           - name: Percentage

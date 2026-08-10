@@ -20,7 +20,7 @@ items:
         - name: nvars
           title: N Vars
           type: integer
-        - name: n
+        - name: 'n'
           title: N
           type: integer
         - name: aic

@@ -1478,3 +1478,62 @@ copy_module_tests <- function(module_names, source_test_dir, dest_test_dir,
 }
 
 message("✅ Module utilities loaded successfully")
+
+# ---------------------------------------------------------------------------
+# Prune orphaned analyses from a submodule's jamovi/0000.yaml
+# ---------------------------------------------------------------------------
+# jmvtools::prepare() MERGES into 0000.yaml rather than rebuilding it, so an
+# analysis stays listed forever once written -- including after it is re-routed
+# out of the submodule (menuGroup gets a T/D suffix and its files stop being
+# copied). The jamovi compiler then emits exports for classes that no longer
+# exist and the install dies with:
+#     undefined exports: clinicalscoreClass, clinicalscoreOptions, ...
+# That is exactly what happened to meddecide with 7 T-routed analyses.
+#
+# Called before prepare(), this drops any analyses: entry that has neither a
+# jamovi/<name>.a.yaml nor an R/<name>.b.R in the target module.
+prune_orphan_analyses <- function(module_dir) {
+  zero <- file.path(module_dir, "jamovi", "0000.yaml")
+  if (!file.exists(zero)) return(invisible(0L))
+
+  lines <- readLines(zero, warn = FALSE)
+  start <- which(trimws(lines) == "analyses:")
+  if (length(start) != 1L) return(invisible(0L))
+  after <- which(grepl("^[A-Za-z]", lines))
+  end <- after[after > start]
+  end <- if (length(end)) end[1] else (length(lines) + 1L)
+
+  avail_yaml <- tolower(list.files(file.path(module_dir, "jamovi"), pattern = "\\.a\\.yaml$"))
+  avail_r    <- tolower(list.files(file.path(module_dir, "R"), pattern = "\\.b\\.R$"))
+
+  starts <- which(grepl("^  - ", lines))
+  starts <- starts[starts > start & starts < end]
+  if (!length(starts)) return(invisible(0L))
+  bounds <- c(starts, end)
+
+  keep <- lines[seq_len(start)]
+  dropped <- character(0)
+  for (i in seq_along(starts)) {
+    block <- lines[bounds[i]:(bounds[i + 1L] - 1L)]
+    nm <- sub("^\\s*name:\\s*", "", grep("^\\s*name:\\s*\\S+\\s*$", block, value = TRUE)[1])
+    nm <- trimws(nm %||% "")
+    # Match case-INSENSITIVELY. 0000.yaml carries the analysis name as declared
+    # (kappaSizePower, enhancedROC, psychopdaROC) while the files on disk are lower
+    # case (kappasizepower.a.yaml). file.exists() happens to succeed on macOS because
+    # HFS+/APFS is case-insensitive, but on Linux it would return FALSE and this
+    # function would delete perfectly good analyses from the module.
+    has_src <- nzchar(nm) &&
+      (tolower(paste0(nm, ".a.yaml")) %in% avail_yaml ||
+       tolower(paste0(nm, ".b.R")) %in% avail_r)
+    if (isTRUE(has_src)) keep <- c(keep, block) else dropped <- c(dropped, nm)
+  }
+  keep <- c(keep, lines[end:length(lines)])
+
+  if (length(dropped)) {
+    writeLines(keep, zero)
+    cat(sprintf("  \U0001F9F9 Pruned %d orphaned analysis %s from 0000.yaml: %s\n",
+                length(dropped), if (length(dropped) == 1) "entry" else "entries",
+                paste(dropped, collapse = ", ")))
+  }
+  invisible(length(dropped))
+}

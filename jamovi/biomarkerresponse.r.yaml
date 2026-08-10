@@ -127,7 +127,7 @@ items:
         - name: response_group
           title: "Response Group"
           type: text
-        - name: n
+        - name: 'n'
           title: "N"
           type: integer
         - name: mean
@@ -209,7 +209,7 @@ items:
         - name: group
           title: "Group"
           type: text
-        - name: n
+        - name: 'n'
           title: "N"
           type: integer
         - name: auc

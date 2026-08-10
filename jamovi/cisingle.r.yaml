@@ -16,7 +16,7 @@ items:
         - name: var
           title: "Variable"
           type: text
-        - name: n
+        - name: 'n'
           title: "N"
           type: integer
         - name: mean

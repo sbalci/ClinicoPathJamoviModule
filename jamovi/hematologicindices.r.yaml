@@ -32,7 +32,7 @@ items:
           - name: index
             title: Index
             type: text
-          - name: n
+          - name: 'n'
             title: 'N'
             type: integer
           - name: mean
@@ -61,7 +61,7 @@ items:
           - name: score
             title: Score
             type: text
-          - name: n
+          - name: 'n'
             title: 'N'
             type: integer
           - name: pct
@@ -83,7 +83,7 @@ items:
           - name: group
             title: Group
             type: text
-          - name: n
+          - name: 'n'
             title: 'N'
             type: integer
           - name: events

@@ -40,7 +40,7 @@ items:
         - name: equation
           title: "Equation"
           type: text
-        - name: n
+        - name: 'n'
           title: "N"
           type: integer
         - name: mean_rs

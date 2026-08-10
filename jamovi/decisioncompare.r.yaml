@@ -259,7 +259,7 @@ items:
         - name: stratum
           title: 'Subgroup'
           type: text
-        - name: n
+        - name: 'n'
           title: 'N'
           type: integer
         - name: test

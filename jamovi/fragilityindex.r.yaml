@@ -36,7 +36,7 @@ items:
           - name: nonevents
             title: Non-events
             type: integer
-          - name: n
+          - name: 'n'
             title: Total
             type: integer
           - name: prop

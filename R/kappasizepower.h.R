@@ -59,8 +59,8 @@ kappaSizePowerOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
                 "alpha",
                 alpha,
                 default=0.05,
-                min=0.01,
-                max=0.99)
+                min=0.001,
+                max=0.2)
             private$..power <- jmvcore::OptionNumber$new(
                 "power",
                 power,
@@ -174,7 +174,11 @@ kappaSizePowerBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
 #' Power Analysis for Interobserver Agreement Analysis.
 #' 
 #' @param outcome Number of outcome level.
-#' @param kappa0 Expected value of kappa.
+#' @param kappa0 The null hypothesis value of kappa - the level of agreement
+#'   the study tests against, versus the alternative kappa1. kappaSize documents
+#'   this argument as "the null hypothesis for the kappa hypothesis test". It is
+#'   NOT the anticipated value; kappaSizeCI and kappaSizeFixedN use kappa0 for
+#'   the anticipated value, which is a different quantity.
 #' @param kappa1 Expected value of kappa.
 #' @param props Proportions of outcome level.
 #' @param raters Number of raters.

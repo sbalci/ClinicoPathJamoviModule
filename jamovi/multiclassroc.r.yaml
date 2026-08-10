@@ -73,7 +73,7 @@ items:
           title: "Class"
           type: text
           combineBelow: true
-        - name: n
+        - name: 'n'
           title: "N"
           type: integer
         - name: prevalence

@@ -1,5 +1,12 @@
 # highdimcox - High-Dimensional Cox Regression: Developer Documentation
 
+> **Not yet released.** The `highdimcox` analysis is on a development menu route, so it does
+> not appear in the jamovi menus of ClinicoPath or of any of its submodules. It is
+> documented here ahead of a future release, and its options, defaults and output may
+> still change. The R function is exported, so the examples below run from an R
+> console; what is not yet available is the jamovi analysis itself.
+
+
 ## 1. Overview
 
 - **Function**: `highdimcox`

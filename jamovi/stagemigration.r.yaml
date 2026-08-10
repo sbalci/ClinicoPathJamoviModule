@@ -575,7 +575,7 @@ items:
           - name: Stratum
             title: "Stratum"
             type: text
-          - name: N
+          - name: 'N'
             title: "N"
             type: integer
           - name: C_Index_Old
@@ -2223,7 +2223,7 @@ items:
           - name: Stage
             title: "Stage"
             type: text
-          - name: N
+          - name: 'N'
             title: "N"
             type: integer
           - name: Events
@@ -2430,7 +2430,7 @@ items:
           - name: Stage
             title: "Stage"
             type: text
-          - name: N
+          - name: 'N'
             title: "N"
             type: integer
           - name: Events

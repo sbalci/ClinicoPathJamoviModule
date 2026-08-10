@@ -1,5 +1,12 @@
 # Testing Guide: ncvregcox (SCAD/MCP Cox Regression)
 
+> **Not yet released.** The `ncvregcox` analysis is on a development menu route, so it does
+> not appear in the jamovi menus of ClinicoPath or of any of its submodules. It is
+> documented here ahead of a future release, and its options, defaults and output may
+> still change. The R function is exported, so the examples below run from an R
+> console; what is not yet available is the jamovi analysis itself.
+
+
 ## Overview
 
 This guide covers systematic testing of the `ncvregcox` function, which performs penalized Cox regression using **SCAD or MCP** penalties for variable selection in survival data. Every option from `ncvregcox.a.yaml` is covered with specific test scenarios.

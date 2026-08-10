@@ -178,7 +178,7 @@ items:
         - name: risk_group
           title: Risk Group
           type: text
-        - name: n
+        - name: 'n'
           title: N
           type: integer
         - name: n_events
@@ -204,7 +204,7 @@ items:
         - name: stratum
           title: Stratum
           type: text
-        - name: n
+        - name: 'n'
           title: N
           type: integer
         - name: n_events

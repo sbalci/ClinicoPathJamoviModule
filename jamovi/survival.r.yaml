@@ -277,7 +277,7 @@ items:
         - name: levels
           title: "Levels"
           type: text
-        - name: n
+        - name: 'n'
           title: "N"
           type: text
         - name: hr_unadjusted
@@ -1240,7 +1240,7 @@ items:
         - name: group
           title: 'Risk Group'
           type: text
-        - name: n
+        - name: 'n'
           title: 'N'
           type: integer
         - name: events

@@ -16,7 +16,10 @@ kappaSizeFixedN(
 \arguments{
 \item{outcome}{Number of outcome level.}
 
-\item{kappa0}{Expected value of kappa.}
+\item{kappa0}{The preliminary (anticipated) value of kappa - the agreement
+you expect to observe. kappaSize documents this argument as "the
+preliminary value of kappa". Contrast kappaSizePower, where kappa0 IS the
+null being tested.}
 
 \item{props}{Proportions of outcome level.}
 
@@ -29,6 +32,7 @@ kappaSizeFixedN(
 \value{
 A results object containing:
 \tabular{llllll}{
+\code{results$notices} \tab \tab \tab \tab \tab a html \cr
 \code{results$text1} \tab \tab \tab \tab \tab a preformatted \cr
 \code{results$text_summary} \tab \tab \tab \tab \tab a preformatted \cr
 \code{results$text2} \tab \tab \tab \tab \tab a preformatted \cr

@@ -1,5 +1,12 @@
 # `conditionalsurvival` Developer Documentation
 
+> **Not yet released.** The `conditionalsurvival` analysis is on a development menu route, so it does
+> not appear in the jamovi menus of ClinicoPath or of any of its submodules. It is
+> documented here ahead of a future release, and its options, defaults and output may
+> still change. The R function is exported, so the examples below run from an R
+> console; what is not yet available is the jamovi analysis itself.
+
+
 > **Menu path:** SurvivalD > ClinicoPath Survival > "Conditional Survival, Landmark Analysis, Advanced Methods"
 > **Version:** 0.0.1 | **JAS:** 1.2 | **JRS:** 1.1 | **JUS:** 3.0
 

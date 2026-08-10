@@ -61,7 +61,7 @@ items:
         - name: node
           title: Node
           type: integer
-        - name: n
+        - name: 'n'
           title: Sample Size
           type: integer
         - name: events

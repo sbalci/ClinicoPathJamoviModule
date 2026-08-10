@@ -1,5 +1,12 @@
 # Enhanced ROC Analysis (timeroc) - Feature Mapping Table
 
+> **Not yet released.** The `timeroc` analysis is on a development menu route, so it does
+> not appear in the jamovi menus of ClinicoPath or of any of its submodules. It is
+> documented here ahead of a future release, and its options, defaults and output may
+> still change. The R function is exported, so the examples below run from an R
+> console; what is not yet available is the jamovi analysis itself.
+
+
 Complete feature-to-code mapping for the `timeroc` jamovi function. Every feature is traced from YAML option through UI label, result item, and backend method.
 
 **Module:** jsurvival (menuGroup: SurvivalT, menuSubgroup: ClinicoPath Survival)

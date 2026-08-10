@@ -22,6 +22,13 @@ knitr::opts_chunk$set(
 devtools::load_all(".")
 ```
 
+> **Not yet released.** The `lassocox` analysis is on a development menu route, so it does
+> not appear in the jamovi menus of ClinicoPath or of any of its submodules. It is
+> documented here ahead of a future release, and its options, defaults and output may
+> still change. The R function is exported, so the examples below run from an R
+> console; what is not yet available is the jamovi analysis itself.
+
+
 > **Note:** The `lassocox()` function is designed for use within **jamovi's GUI**.
 > The code examples below show the R syntax for reference. To run interactively,
 > use `devtools::load_all()` and call the R6 class directly:

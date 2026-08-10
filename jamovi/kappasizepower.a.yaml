@@ -40,9 +40,15 @@ options:
       max: 0.99
       description:
           ui: >
-            Expected value of kappa.
+            The null hypothesis value of kappa - the level of agreement the study tests
+            against. kappaSize documents this as "the null hypothesis for the kappa
+            hypothesis test"; it is NOT the value you expect to observe.
           R: >
-            Expected value of kappa.
+            The null hypothesis value of kappa - the level of agreement the study tests
+            against, versus the alternative kappa1. kappaSize documents this argument as
+            "the null hypothesis for the kappa hypothesis test". It is NOT the anticipated
+            value; kappaSizeCI and kappaSizeFixedN use kappa0 for the anticipated value,
+            which is a different quantity.
 
     - name: kappa1
       title: kappa1
@@ -86,8 +92,8 @@ options:
       title: alpha
       type: Number
       default: 0.05
-      min: 0.01
-      max: 0.99
+      min: 0.001
+      max: 0.20
       description:
           ui: >
             Significance level.

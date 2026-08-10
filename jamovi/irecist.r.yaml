@@ -128,7 +128,7 @@ items:
       - name: category
         title: Response Category
         type: text
-      - name: n
+      - name: 'n'
         title: N
         type: integer
       - name: percent
@@ -161,7 +161,7 @@ items:
         title: Value
         type: number
         format: dp:1
-      - name: n
+      - name: 'n'
         title: N
         type: integer
       - name: total
@@ -279,7 +279,7 @@ items:
       - name: group
         title: Group
         type: text
-      - name: n
+      - name: 'n'
         title: N
         type: integer
       - name: iCR

@@ -54,12 +54,12 @@ options:
           title: Mean
         - name: median
           title: Median
-        - name: n
+        - name: 'n'
           title: Count (n)
       default:
         - sum
         - mean
-        - n
+        - 'n'
 
     - name: dateVar
       title: Date Variable (if grouping by date)

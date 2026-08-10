@@ -1,5 +1,12 @@
 # Testing Adaptive LASSO for Cox Models
 
+> **Not yet released.** The `adaptivelasso` analysis is on a development menu route, so it does
+> not appear in the jamovi menus of ClinicoPath or of any of its submodules. It is
+> documented here ahead of a future release, and its options, defaults and output may
+> still change. The R function is exported, so the examples below run from an R
+> console; what is not yet available is the jamovi analysis itself.
+
+
 All test datasets are in `data/` (RDA) or `data-raw/` (CSV/scripts). Synthetic data can be generated via `data-raw/create_adaptivelasso_test_data.R`.
 
 **Changelog (2026-03-10):** Removed non-existent `intercept` option and `brier`/`auc` cv_measure values. Added `suitabilityCheck`, `event_level`, `lambda_custom_max`, `lambda_custom_min`, `lambda_single` coverage. Added `adaptivelasso_highdim_data` dataset. Expanded to 65 test scenarios covering all 42 options.

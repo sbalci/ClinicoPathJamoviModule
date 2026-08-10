@@ -1,5 +1,12 @@
 # Firth's Penalized Likelihood Regression - Feature Mapping
 
+> **Not yet released.** The `firthregression` analysis is on a development menu route, so it does
+> not appear in the jamovi menus of ClinicoPath or of any of its submodules. It is
+> documented here ahead of a future release, and its options, defaults and output may
+> still change. The R function is exported, so the examples below run from an R
+> console; what is not yet available is the jamovi analysis itself.
+
+
 ## Feature Summary
 
 The Firth Regression module (`firthregression`) performs penalized likelihood regression using Firth's Jeffreys-prior bias correction for both logistic (binary outcome) and Cox proportional hazards (survival) models. Unlike LASSO/Elastic Net (which perform variable selection), Firth regression keeps all variables but produces finite, bias-corrected estimates even when standard maximum likelihood fails due to separation or rare events.

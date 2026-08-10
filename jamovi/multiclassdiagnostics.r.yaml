@@ -23,7 +23,7 @@ items:
         - name: class
           title: Class
           type: text
-        - name: n
+        - name: 'n'
           title: N
           type: integer
         - name: sensitivity

@@ -92,8 +92,11 @@ kappaSizeCIClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                     return(list(error = "Proportions cannot be empty"))
                 }
 
-                # Parse proportions with flexible delimiters
-                props_clean <- gsub("[,;|\\t]+", ",", props_str)
+                # Parse proportions with flexible delimiters. The old class "[,;|\\t]+" was the
+                # SET {, ; | \ t}: it matched a literal backslash and the letter "t" but NOT an
+                # actual tab, and not a space -- so "0.2, 0.3 0.5" was rejected while
+                # "0.2, 0.3; 0.5" was accepted. [[:space:]] covers tab and space properly.
+                props_clean <- gsub("[,;|[:space:]]+", ",", props_str)
                 props_split <- strsplit(props_clean, ",")[[1]]
                 # suppressWarnings: the space-separated fallback below is the intended
                 # path when this comma parse yields NAs, so do not surface a coercion warning.
@@ -102,7 +105,7 @@ kappaSizeCIClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                 # Handle space-separated format
                 if (length(props_numeric) == 1 && grepl("\\s+", props_str)) {
                     props_split <- trimws(strsplit(props_str, "\\s+")[[1]])
-                    props_numeric <- as.numeric(props_split)
+                    props_numeric <- suppressWarnings(as.numeric(props_split))
                 }
 
                 if (any(is.na(props_numeric))) {
@@ -110,6 +113,18 @@ kappaSizeCIClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                 }
 
                 if (any(props_numeric <= 0) || any(props_numeric >= 1)) {
+                    # "0,20 0,80" splits into 0, 20, 0, 80 and lands here, telling the user the
+                    # proportions are out of range when the real problem is the decimal
+                    # separator. Re-read it with the comma as a decimal point; if that yields
+                    # valid proportions, say so instead.
+                    as_decimal <- suppressWarnings(as.numeric(trimws(unlist(strsplit(
+                        gsub("([0-9]),([0-9])", "\\1.\\2", props_str), "[;|[:space:]]+")))))
+                    as_decimal <- as_decimal[!is.na(as_decimal)]
+                    if (length(as_decimal) > 0 && all(as_decimal > 0 & as_decimal < 1)) {
+                        return(list(error = paste0(
+                            "Proportions must use a decimal point, not a decimal comma: write ",
+                            "0.20, 0.80 rather than 0,20 0,80")))
+                    }
                     return(list(error = "All proportions must be between 0 and 1"))
                 }
 
@@ -207,8 +222,22 @@ kappaSizeCIClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                 stop("Unsupported number of outcome categories")
             )
 
-            tryCatch({
-                result <- kappa_function(
+            # kappaSize searches for n by brute force -- `n <- 10; while (...) n <- n + 1` in
+            # interpreted R, with no cap. The required n grows as roughly 1 / half-width^2, so a
+            # narrow requested interval turns into an enormous number of iterations: measured on
+            # the binary engine at kappa0 = 0.60 with props 0.20/0.80 and 2 raters, half-widths of
+            # 0.20 / 0.05 / 0.01 / 0.005 give n = 118 / 1,625 / 38,203 / 151,533 taking 0.00 to
+            # 1.38 s, and 0.0005 had not finished after 8 seconds. Every one of those values is
+            # typable in the interface, and jamovi offers no way to abort a running analysis, so
+            # the user is simply stuck. setTimeLimit does interrupt the loop (verified: it raised
+            # "reached elapsed time limit" after 8.0 s and normal calls still worked afterwards),
+            # so bound the wall clock and explain what to change.
+            time_budget <- 20
+
+            result <- tryCatch({
+                setTimeLimit(elapsed = time_budget, transient = TRUE)
+                on.exit(setTimeLimit(elapsed = Inf, transient = TRUE), add = TRUE)
+                kappa_function(
                     kappa0 = params$kappa0,
                     kappaL = params$kappaL,
                     kappaU = params$kappaU,
@@ -216,12 +245,29 @@ kappaSizeCIClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                     alpha = params$alpha,
                     raters = params$raters
                 )
-
-                return(result)
-
             }, error = function(e) {
-                jmvcore::reject("Error in sample size calculation: {}", code=NULL, e$message)
+                msg <- conditionMessage(e)
+                if (grepl("elapsed time limit|reached elapsed", msg)) {
+                    half_width <- if (isTRUE(is.finite(params$kappaU)))
+                        min(params$kappa0 - params$kappaL, params$kappaU - params$kappa0)
+                    else
+                        params$kappa0 - params$kappaL
+                    jmvcore::reject(
+                        paste0(
+                            "The requested confidence interval is too narrow to size in reasonable ",
+                            "time. The limit nearest kappa0 is ", signif(half_width, 3),
+                            " away from it, and the required sample size grows roughly as one over ",
+                            "the square of that distance \u{2014} the search was still running after ",
+                            time_budget, " seconds. Widen the interval (a distance of 0.05 needs ",
+                            "about 1,600 subjects, 0.01 about 38,000) or accept a lower confidence ",
+                            "level."),
+                        code = NULL)
+                }
+                jmvcore::reject("Error in sample size calculation: {}", code = NULL, msg)
             })
+
+            setTimeLimit(elapsed = Inf, transient = TRUE)
+            return(result)
         },
 
         .generateExplanation = function(params) {
@@ -245,7 +291,9 @@ kappaSizeCIClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             } else {
                 ci_text <- paste0(
                     "\u{2022} Confidence interval: [", params$kappaL, ", ", params$kappaU, "]\n",
-                    "\u{2022} Precision width: ", round(params$kappaU - params$kappaL, 3)
+                    "\u{2022} Distance from \u03ba\u2080 to the nearer limit: ",
+                    round(min(params$kappa0 - params$kappaL, params$kappaU - params$kappa0), 3),
+                    " (this is what drives the sample size, not the full width)"
                 )
                 ci_type_text <- "Two-sided"
                 objective_text <- paste0(
@@ -257,13 +305,18 @@ kappaSizeCIClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
 
             explanation <- paste0(
                 "Sample Size Calculation for Interobserver Agreement Study\n\n",
+                "This is a CONFIDENCE-INTERVAL calculation: it returns the number of subjects\n",
+                "needed for the interval around kappa to reach the requested width. It answers a\n",
+                "different question from the power approach (kappaSizePower), which sizes a study\n",
+                "to reject a null value, so the two will not agree on a sample size for the same\n",
+                "study - choose the one that matches how the result will be reported.\n\n",
                 "Study Design:\n",
                 "\u{2022} Number of outcome categories: ", params$outcome, "\n",
                 "\u{2022} Number of raters: ", params$raters, "\n",
                 "\u{2022} Significance level (\u03b1): ", params$alpha, "\n",
                 "\u{2022} CI type: ", ci_type_text, "\n\n",
                 "Kappa Parameters:\n",
-                "\u{2022} Null hypothesis kappa (\u03ba\u2080): ", params$kappa0, "\n",
+                "\u{2022} Anticipated kappa (\u03ba\u2080): ", params$kappa0, "\n",
                 ci_text, "\n\n",
                 "Population Characteristics:\n",
                 "\u{2022} Expected category ", props_text, "\n\n",
@@ -358,7 +411,7 @@ kappaSizeCIClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
         # Build methodology (INFO) and large-sample (WARNING) notices as HTML.
         # Rendered via a dedicated Html output rather than jmvcore::Notice objects
         # to avoid the notice serialization / no-newline limitations in jamovi.
-        .buildNotices = function(required_n) {
+        .buildNotices = function(required_n, sparse_cells = FALSE) {
             info <- paste0(
                 "<div style='margin:6px 0; padding:8px 10px; border-left:3px solid #3c8dbc; background:#f4f8fb;'>",
                 "<b>Methodology.</b> The required sample size is computed with the confidence-interval ",
@@ -370,6 +423,21 @@ kappaSizeCIClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             )
 
             warn <- ""
+
+            # kappaSize emits "At least one expected cell count is less than five" into its own
+            # summary text when a category is rare at the computed n. That is a real caveat about
+            # the asymptotics the method relies on, and it was reaching only the Summary pane.
+            if (!is.null(sparse_cells) && isTRUE(sparse_cells)) {
+                warn <- paste0(warn,
+                    "<div style='margin:6px 0; padding:8px 10px; border-left:3px solid #ec971f; background:#fdf7ef;'>",
+                    "<b>Sparse categories.</b> At the computed sample size at least one category is ",
+                    "expected to contain fewer than five subjects. The kappaSize calculation is based ",
+                    "on a large-sample approximation, so the required n is less dependable here. ",
+                    "Consider collapsing rare categories or recruiting more subjects than the figure shown.",
+                    "</div>"
+                )
+            }
+
             if (!is.na(required_n) && required_n > 1000) {
                 warn <- paste0(
                     "<div style='margin:6px 0; padding:8px 10px; border-left:3px solid #d9534f; background:#fdf3f3;'>",
@@ -386,7 +454,6 @@ kappaSizeCIClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
 
         # TODO [meddecide audit 2026-05-14] - see docs/audit/MODULE_AUDIT_REPORT_20260514-1847.md
         #   [i18n] 0 .() wraps; bootstrap jamovi/i18n/ then /prepare-translation kappasizeci
-        #   [testing] no tests/testthat/test-kappasizeci.R - verify against kappaSize::CIBinary/3Cats/4Cats/5Cats
 
         .run = function() {
             # Input validation
@@ -425,9 +492,12 @@ kappaSizeCIClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                 # Generate explanation
                 explanation <- private$.generateExplanation(params)
 
-                # Methodology / large-sample notices
+                # Methodology / large-sample notices. kappaSize reports sparse expected cells
+                # only inside its own summary text, so detect it there and surface it properly.
                 required_n <- private$.extractRequiredN(raw_result)
-                notices_html <- private$.buildNotices(required_n)
+                sparse_cells <- any(grepl("expected cell count is less than five",
+                                          summary_text, ignore.case = TRUE))
+                notices_html <- private$.buildNotices(required_n, sparse_cells)
 
                 # Cache results
                 private$.cached_result <- formatted_result

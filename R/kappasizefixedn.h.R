@@ -52,13 +52,14 @@ kappaSizeFixedNOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
                 "alpha",
                 alpha,
                 default=0.05,
-                min=0.01,
+                min=0.001,
                 max=0.2)
             private$..n <- jmvcore::OptionNumber$new(
                 "n",
                 n,
                 default=100,
-                min=2)
+                min=11,
+                max=1000000)
 
             self$.addOption(private$..outcome)
             self$.addOption(private$..kappa0)
@@ -87,6 +88,7 @@ kappaSizeFixedNResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
     "kappaSizeFixedNResults",
     inherit = jmvcore::Group,
     active = list(
+        notices = function() private$.items[["notices"]],
         text1 = function() private$.items[["text1"]],
         text_summary = function() private$.items[["text_summary"]],
         text2 = function() private$.items[["text2"]]),
@@ -100,18 +102,50 @@ kappaSizeFixedNResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
                 refs=list(
                     "ClinicoPathJamoviModule",
                     "kappaSize"))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="notices",
+                title="Notes",
+                clearWith=list(
+                    "outcome",
+                    "kappa0",
+                    "props",
+                    "raters",
+                    "alpha",
+                    "n")))
             self$add(jmvcore::Preformatted$new(
                 options=options,
                 name="text1",
-                title="Analysis result"))
+                title="Analysis result",
+                clearWith=list(
+                    "outcome",
+                    "kappa0",
+                    "props",
+                    "raters",
+                    "alpha",
+                    "n")))
             self$add(jmvcore::Preformatted$new(
                 options=options,
                 name="text_summary",
-                title="Summary"))
+                title="Summary",
+                clearWith=list(
+                    "outcome",
+                    "kappa0",
+                    "props",
+                    "raters",
+                    "alpha",
+                    "n")))
             self$add(jmvcore::Preformatted$new(
                 options=options,
                 name="text2",
-                title="Study Explanation"))}))
+                title="Study Explanation",
+                clearWith=list(
+                    "outcome",
+                    "kappa0",
+                    "props",
+                    "raters",
+                    "alpha",
+                    "n")))}))
 
 kappaSizeFixedNBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
     "kappaSizeFixedNBase",
@@ -139,13 +173,17 @@ kappaSizeFixedNBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
 #' Lowest Expected Value for a fixed sample size.
 #' 
 #' @param outcome Number of outcome level.
-#' @param kappa0 Expected value of kappa.
+#' @param kappa0 The preliminary (anticipated) value of kappa - the agreement
+#'   you expect to observe. kappaSize documents this argument as "the
+#'   preliminary value of kappa". Contrast kappaSizePower, where kappa0 IS the
+#'   null being tested.
 #' @param props Proportions of outcome level.
 #' @param raters Number of raters.
 #' @param alpha Significance level.
 #' @param n Sample size.
 #' @return A results object containing:
 #' \tabular{llllll}{
+#'   \code{results$notices} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$text1} \tab \tab \tab \tab \tab a preformatted \cr
 #'   \code{results$text_summary} \tab \tab \tab \tab \tab a preformatted \cr
 #'   \code{results$text2} \tab \tab \tab \tab \tab a preformatted \cr

@@ -118,7 +118,7 @@ items:
       - name: endpoint
         title: Endpoint
         type: text
-      - name: n
+      - name: 'n'
         title: N
         type: integer
       - name: events

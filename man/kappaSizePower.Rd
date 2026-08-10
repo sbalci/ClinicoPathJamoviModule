@@ -17,7 +17,11 @@ kappaSizePower(
 \arguments{
 \item{outcome}{Number of outcome level.}
 
-\item{kappa0}{Expected value of kappa.}
+\item{kappa0}{The null hypothesis value of kappa - the level of agreement
+the study tests against, versus the alternative kappa1. kappaSize documents
+this argument as "the null hypothesis for the kappa hypothesis test". It is
+NOT the anticipated value; kappaSizeCI and kappaSizeFixedN use kappa0 for
+the anticipated value, which is a different quantity.}
 
 \item{kappa1}{Expected value of kappa.}
 

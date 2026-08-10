@@ -42,7 +42,7 @@ items:
           - name: Treatment
             title: "Treatment"
             type: text
-          - name: N
+          - name: 'N'
             title: "N"
             type: integer
           - name: Median_OS
@@ -124,7 +124,7 @@ items:
           - name: Treatment
             title: "Treatment"
             type: text
-          - name: N
+          - name: 'N'
             title: "N"
             type: integer
           - name: E_TOX

@@ -20,7 +20,11 @@ kappaSizeCI(
 
 \item{citype}{Type of confidence interval: 'two_sided' or 'one_sided'.}
 
-\item{kappa0}{The null hypothesis value of kappa.}
+\item{kappa0}{The preliminary (anticipated) value of kappa - the agreement
+you expect to observe, around which the confidence interval is planned.
+kappaSize documents this argument as "the preliminary value of kappa". It
+is NOT a null hypothesis value; contrast kappaSizePower, where kappa0 IS
+the null being tested.}
 
 \item{kappaL}{The lower limit of the kappa.}
 

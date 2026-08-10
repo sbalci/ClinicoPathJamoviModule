@@ -58,7 +58,7 @@ items:
       - name: outcome
         title: Outcome
         type: text
-      - name: n
+      - name: 'n'
         title: N
         type: integer
       - name: mean

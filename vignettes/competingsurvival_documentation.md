@@ -1,5 +1,12 @@
 # Overall, Cause Specific, and Competing Survival Documentation
 
+> **Not yet released.** The `competingsurvival` analysis is on a development menu route, so it does
+> not appear in the jamovi menus of ClinicoPath or of any of its submodules. It is
+> documented here ahead of a future release, and its options, defaults and output may
+> still change. The R function is exported, so the examples below run from an R
+> console; what is not yet available is the jamovi analysis itself.
+
+
 ## Feature Summary
 
 The `competingsurvival` function provides clinicians and pathologists with a single interface for three distinct survival analysis strategies that handle multi-outcome follow-up data. In clinical datasets, patients may experience death from the disease under study, death from unrelated causes, or remain alive (with or without disease). The choice of how to handle these different outcomes profoundly affects survival estimates and clinical conclusions.

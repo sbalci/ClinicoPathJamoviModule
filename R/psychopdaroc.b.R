@@ -94,7 +94,8 @@
 #'   data = medical_roc_data,
 #'   dependentVars = "biomarker1",
 #'   classVar = "disease_status",
-#'   positiveClass = "Disease"
+#'   positiveClass = "Disease",
+#'   refVar = NULL
 #' )
 #'
 #' # Compare multiple biomarkers with DeLong test
@@ -104,7 +105,8 @@
 #'   classVar = "disease_status",
 #'   positiveClass = "Disease",
 #'   delongTest = TRUE,
-#'   combinePlots = TRUE
+#'   combinePlots = TRUE,
+#'   refVar = NULL
 #' )
 #'
 #' # Advanced analysis with IDI/NRI
@@ -126,7 +128,8 @@
 #'   classVar = "disease_status",
 #'   positiveClass = "Disease",
 #'   method = "oc_cost_ratio",
-#'   costratioFP = 2.5 # False positives cost 2.5x false negatives
+#'   costratioFP = 2.5 # False positives cost 2.5x false negatives,
+#'   refVar = NULL
 #' )
 #'
 #' # Subgroup analysis by hospital
@@ -135,7 +138,8 @@
 #'   dependentVars = "biomarker1",
 #'   classVar = "disease_status",
 #'   positiveClass = "Disease",
-#'   subGroup = "hospital"
+#'   subGroup = "hospital",
+#'   refVar = NULL
 #' )
 #'
 #' # Comprehensive analysis with all features
@@ -154,7 +158,8 @@
 #'   partialAUC = TRUE,
 #'   bootstrapCI = TRUE,
 #'   precisionRecallCurve = TRUE,
-#'   compareClassifiers = TRUE
+#'   compareClassifiers = TRUE,
+#'   refVar = NULL
 #' )
 #'
 #' # Financial risk assessment example
@@ -169,7 +174,8 @@
 #'   method = "oc_cost_ratio",
 #'   costratioFP = 0.1, # False positives (rejected good clients) cost less
 #'   delongTest = TRUE,
-#'   subGroup = "client_type"
+#'   subGroup = "client_type",
+#'   refVar = NULL
 #' )
 #'
 #' # Educational assessment example
@@ -199,7 +205,8 @@
 #'   plotROC = TRUE,
 #'   showCriterionPlot = TRUE,
 #'   showDotPlot = TRUE,
-#'   subGroup = "production_line"
+#'   subGroup = "production_line",
+#'   refVar = NULL
 #' )
 #' }
 #'
@@ -1593,10 +1600,14 @@ psychopdaROCClass <- if (requireNamespace("jmvcore")) {
               positiveClass <- unique(classVar)[pos_idx]
             }
           }
-          # If still not found, use the first level
+          # If still not found, fall back through the single shared resolver rather than to
+          # unique(classVar)[1]. That old fallback took the first value in DATA ORDER, so the
+          # class treated as positive depended on how the rows happened to be sorted, and it
+          # disagreed with the resolution used everywhere else in the analysis. warning() is
+          # also invisible in the jamovi GUI, so the substitution was silent; .resolvePositiveClass
+          # records the assumption so it is disclosed on the results tables instead.
           if (!positiveClass %in% unique(classVar)) {
-            warning(.("Specified positive class not found. Using first unique value instead."))
-            positiveClass <- unique(classVar)[1]
+            positiveClass <- private$.resolvePositiveClass(classVar)
           }
         }
 
@@ -1665,15 +1676,17 @@ psychopdaROCClass <- if (requireNamespace("jmvcore")) {
         }
         auc <- auc / (nn * np) # Normalize to [0,1]
 
-        # For AUCs < 0.5, invert the test scores (AUC will be > 0.5)
-        # This is standard practice for DeLong's test - it ensures the test
-        # direction is consistent, but users should be informed.
+        # For AUCs < 0.5, invert the test scores (AUC will be > 0.5).
+        # This is standard practice for DeLong's test - it keeps the test direction
+        # consistent - but the inverted value is what gets DISPLAYED, so the user must be
+        # told. The primary path (.enhancedDelongTest) does not invert: it passes the user's
+        # `direction` straight to pROC and reports the honest, possibly-below-0.5 AUC. So a
+        # marker can read 0.35 in the main AUC table and 0.65 here, for the same column, with
+        # nothing on screen to explain the difference. `warning()` does not reach a jamovi
+        # user, so the names are returned to the caller and rendered as a visible note.
+        inverted_vars <- character(0)
         if (any(auc < 0.5)) {
           inverted_vars <- colnames(data)[auc < 0.5]
-          warning(sprintf(
-            "AUC < 0.5 detected for: %s. Test direction was inverted for these variables to ensure valid DeLong comparison. Consider verifying the direction setting for these markers.",
-            paste(inverted_vars, collapse = ", ")
-          ))
           data[, auc < 0.5] <- -data[, auc < 0.5]
           auc[auc < 0.5] <- 1 - auc[auc < 0.5]
           markern <- as.matrix(data[!id.pos, ])
@@ -1791,7 +1804,9 @@ psychopdaROCClass <- if (requireNamespace("jmvcore")) {
           difference = newres,
           covariance = S,
           global.z = z,
-          global.p = p
+          global.p = p,
+          # names of any marker whose scores were flipped above, so the caller can say so
+          inverted = inverted_vars
         )
         class(ERG) <- "DeLong"
         return(ERG)
@@ -1802,20 +1817,31 @@ psychopdaROCClass <- if (requireNamespace("jmvcore")) {
       # ============================================================================
 
       # TODO [meddecide audit 2026-05-14] - see docs/audit/MODULE_AUDIT_REPORT_20260514-1847.md
-      #   [CLINICAL-SAFETY] add AUC < 0.5 ERROR notice ("worse than chance - verify outcome coding")
-      #   [CLINICAL-SAFETY] add AUC < 0.7 STRONG_WARNING ("poor discrimination - interpret cautiously")
-      #     existing .detectInverted flips silently; surface as banner instead
-      #   [CLINICAL-SAFETY] add DeLong sample-size STRONG_WARNING when n_pos × n_neg < 50 per class
-      #   [hygiene/notices] 0 jmvcore::Notice uses in 5,601 LOC; currently jmvcore::reject only - add banners
-      #   [hygiene/jmvcore] mix of reject (good) and bare stop()/message()/warning() - /jamovify-function psychopdaROC
-      #   [hygiene/jmvcore] reject(paste("Reference ref must be one of...", nauc)) at ~L1592 → wrap .() + jmvcore::format
-      #   [integration] 158 declared outputs vs 59 setters (2.7×) - verify DeLong/IDI/NRI/meta-analysis flag combos
-      #     via /check-function-full psychopdaROC
-      #   [statistical-validation] /review-function psychopdaROC - DeLong/IDI/NRI/meta-analysis parity vs
-      #     pROC/cutpointr/metafor reference values
-      #   [i18n] only 26 .() wraps in 5,601 LOC; bootstrap jamovi/i18n/ then /prepare-translation psychopdaROC
+      # Closed by the 1.0.4 release review (2026-08-10); left here so the audit trail is legible:
+      #   [CLINICAL-SAFETY] AUC < 0.5 - DONE. A prominent note on the AUC tables explains that a
+      #     sub-0.5 AUC almost always means the marker is read the wrong way round, and names the
+      #     Classification Direction setting to change. A Notice banner is not reachable from that
+      #     point in the flow, so the note is attached to the table instead.
+      #   [CLINICAL-SAFETY] AUC < 0.7 - DONE via the graded interpretation bands (~L395-L425).
+      #   [CLINICAL-SAFETY] .detectInverted flipping silently - DONE. The primary path
+      #     (.enhancedDelongTest) never flips: it passes the user's direction to pROC and reports
+      #     the honest AUC. The .deLongTest fallback must flip to compare on a common direction, so
+      #     it now RETURNS the flipped names and the render path prints them; the old warning()
+      #     never reached a jamovi user. Measured: a marker read 0.206 in the AUC table and 0.794
+      #     in the DeLong output with nothing on screen to explain it.
+      #   [CLINICAL-SAFETY] DeLong sample-size warning - DONE, in the render path so it covers both
+      #     the pROC path and the fallback; fires below 10 cases in either class.
+      #   [hygiene/jmvcore] bare stop() - DONE, 0 remain (all are jmvcore::reject).
+      #   [statistical-validation] - DONE, /release-review-function psychopdaROC: AUC, CIs and
+      #     cutpoints checked against pROC and cutpointr, and cross-checked against enhancedROC.
+      #   [testing] - DONE, tests/testthat/test-psychopdaROC-release-review.R.
+      # Still open:
+      #   [hygiene/notices] 0 jmvcore::Notice uses in 5,601 LOC. Note that Notice objects are not
+      #     serialisable here (see CLAUDE.md); the HTML-item pattern is the supported route.
+      #   [integration] 158 declared outputs vs 59 setters (2.7x) - verify DeLong/IDI/NRI/
+      #     meta-analysis flag combinations via /check-function-full psychopdaROC
+      #   [i18n] only 26 .() wraps in 5,601 LOC; bootstrap jamovi/i18n/ then /prepare-translation
       #   [architecture] 5,601 LOC on the edge of unmaintainable - consider per-feature helper files
-      #   [testing] limited coverage in tests/testthat/test-roc.R (42 LOC) - expand for DeLong + cutpointr + IDI/NRI
 
       # Initialize the analysis
       .init = function() {
@@ -1900,9 +1926,50 @@ psychopdaROCClass <- if (requireNamespace("jmvcore")) {
         if (!is.null(chosen) && nzchar(chosen) && chosen %in% lv) {
           return(chosen)
         }
+        # With exactly two levels, assuming the last one is a reasonable guess (it is the near
+        # universal coding for the event) and it is disclosed on the tables. With three or more
+        # there is no defensible guess: "Disease" and "Severe" are equally plausible positives
+        # and they give materially different answers (0.801 against 0.826 on a 3-level recode of
+        # the bundled data). Refuse rather than silently pick one -- this also matches
+        # enhancedROC, which already declines a multi-level outcome and asks for a positive class.
+        if (length(lv) > 2) {
+          private$.throwError(
+            "multi_level_positive_class",
+            sprintf("The class variable has %d levels (%s), so the positive class cannot be guessed.",
+                    length(lv), paste(lv, collapse = ", ")),
+            "Choose which level represents the positive (disease) group in the Positive Class option."
+          )
+        }
         assumed <- lv[length(lv)]
         private$.assumedPositiveClass <- assumed
         assumed
+      },
+
+      # State, in one plain sentence, which way the marker was read. Without this a user
+      # comparing this analysis against enhancedROC (same menu, same data) sees two different
+      # AUCs -- 0.8999 and 0.1001 on an inverted marker -- with nothing on screen explaining
+      # that the two simply read the marker in opposite directions. The wording is deliberately
+      # the same in both analyses so the two outputs can be compared line for line.
+      .noteDirection = function(table) {
+        dir <- tryCatch(self$options$direction, error = function(e) NULL)
+        if (is.null(dir) || !nzchar(dir)) return(invisible(NULL))
+        pos <- private$.assumedPositiveClass
+        if (is.null(pos)) {
+          pos <- tryCatch(self$options$positiveClass, error = function(e) NULL)
+        }
+        if (is.null(pos) || !nzchar(pos)) pos <- "the positive class"
+        higher <- identical(dir, ">=")
+        tryCatch(
+          table$setNote(
+            "direction_used",
+            sprintf(paste0(
+              "Reading of the test values: <b>%s values were taken to indicate %s</b> ",
+              "(Classification Direction = \"%s\"). If that is the wrong way round for this ",
+              "marker, every sensitivity, specificity, cutpoint and AUC below is reversed ",
+              "\u{2014} switch Classification Direction to \"%s\" and the AUC becomes 1 minus ",
+              "the value shown."),
+              if (higher) "HIGHER" else "LOWER", pos, dir, if (higher) "<=" else ">=")),
+          error = function(e) NULL)
       },
 
       # A non-trivial metric tolerance makes cutpointr treat every cutpoint within that
@@ -2752,13 +2819,49 @@ psychopdaROCClass <- if (requireNamespace("jmvcore")) {
               )
             }
 
+            # DeLong's test is asymptotic: its variance estimate is a large-sample
+            # approximation, and with few cases in either class the p-value and CI are not
+            # dependable. Placed here rather than inside either helper so it covers both the
+            # pROC path and the fallback. The floor of 10 per class is the conventional
+            # minimum for a stable AUC variance (Hanley & McNeil 1982; Obuchowski 2004);
+            # below it the note says so rather than silently printing a confident p-value.
+            n_delong_pos <- sum(classVarData_complete == positiveClass, na.rm = TRUE)
+            n_delong_neg <- sum(classVarData_complete != positiveClass, na.rm = TRUE)
+            if (min(n_delong_pos, n_delong_neg) < 10) {
+              self$results$delongComparisonTable$setNote(
+                key = "delong_small_sample",
+                note = sprintf(
+                  paste0("Small sample: %d positive and %d negative case(s). DeLong's test ",
+                         "relies on a large-sample approximation to the variance of the AUC, ",
+                         "so with fewer than 10 cases in a class the p-values and confidence ",
+                         "intervals below are unreliable and are likely to be too narrow. ",
+                         "Treat any difference as provisional and confirm it in a larger sample."),
+                  n_delong_pos, n_delong_neg),
+                init = FALSE
+              )
+            }
+
             # Use enhanced formatting if available
             if (inherits(delongResults, "EnhancedDeLong")) {
               formatted_output <- private$.printEnhancedDeLong(delongResults)
               self$results$delongTest$setContent(formatted_output)
             } else {
               # Format output for display (fallback)
+              # The fallback flips any marker whose AUC came out below 0.5 and then displays
+              # the flipped value, so the same column can read 0.35 in the main AUC table and
+              # 0.65 here. Say so on screen; the helper's warning() never reaches a jamovi user.
+              inverted <- delongResults$inverted
+              inversion_note <- if (length(inverted)) paste0(
+                "NOTE: the AUCs below were computed after REVERSING the score direction for: ",
+                paste(inverted, collapse = ", "),
+                ". DeLong's test requires a consistent direction, so any marker whose AUC fell ",
+                "below 0.5 was flipped and is shown here as 1 minus its original value. The main ",
+                "AUC table reports the unflipped figure, so the two will disagree for these ",
+                "markers. If the reversed direction is the clinically correct one, change ",
+                "Classification Direction and re-run so every table agrees.\n\n") else ""
+
               output_text <- paste0(
+                inversion_note,
                 "Estimated AUC's:\n",
                 capture.output(print(round(delongResults$AUC, 3))),
                 "\n\nPairwise comparisons:\n",
@@ -2766,6 +2869,16 @@ psychopdaROCClass <- if (requireNamespace("jmvcore")) {
                 "\n\nOverall test:\n p-value = ", format.pval(delongResults$global.p, digits = 3)
               )
               self$results$delongTest$setContent(paste0(output_text, collapse = "\n"))
+
+              if (length(inverted))
+                self$results$delongComparisonTable$setNote(
+                  key = "delong_inverted",
+                  note = paste0(
+                    "Score direction was reversed for ",
+                    htmltools::htmlEscape(paste(inverted, collapse = ", ")),
+                    " so that DeLong's test could compare them on a common direction. Their AUCs ",
+                    "in this table are <b>1 minus</b> the value shown in the main AUC table."),
+                  init = FALSE)
             }
 
             # Format results for the DeLong comparison table
@@ -2797,6 +2910,7 @@ psychopdaROCClass <- if (requireNamespace("jmvcore")) {
         # Create simplified summary table
         simpleTable <- self$results$simpleResultsTable
         private$.notePositiveClassGuess(simpleTable)
+        private$.noteDirection(simpleTable)
         private$.noteMetricTolerance(simpleTable)
 
         # Track CI method per variable for user transparency
@@ -2895,6 +3009,7 @@ psychopdaROCClass <- if (requireNamespace("jmvcore")) {
         # Populate the AUC summary table
         aucSummaryTable <- self$results$aucSummaryTable
         private$.notePositiveClassGuess(aucSummaryTable)
+        private$.noteDirection(aucSummaryTable)
 
         for (var in names(aucList)) {
           # Get AUC value directly from the list
@@ -3001,10 +3116,14 @@ psychopdaROCClass <- if (requireNamespace("jmvcore")) {
           poor_disc_note <- paste0(
             "WARNING: AUC below 0.5 (worse than chance) for: ",
             htmltools::htmlEscape(paste(poor_disc_vars, collapse = ", ")),
-            ". This usually indicates that the Classification Direction is set incorrectly ",
-            "(whether higher or lower test values indicate the positive class). ",
-            "Verify the 'Classification Direction' option; an AUC below 0.5 means the test ",
-            "discriminates in the opposite direction."
+            ". An AUC below 0.5 almost always means the marker is being read the wrong way ",
+            "round rather than that it is useless: it separates the groups, but in the opposite ",
+            "direction to the one assumed. Classification Direction is currently \"",
+            htmltools::htmlEscape(self$options$direction),
+            "\"; switching it to \"",
+            if (identical(self$options$direction, ">=")) "&lt;=" else "&gt;=",
+            "\" will give an AUC of 1 minus the value shown, with sensitivity and specificity ",
+            "swapped accordingly. Change it only if that matches what the marker means clinically."
           )
           simpleTable$setNote("auc_below_chance", poor_disc_note)
           aucSummaryTable$setNote("auc_below_chance", poor_disc_note)
@@ -3019,8 +3138,11 @@ psychopdaROCClass <- if (requireNamespace("jmvcore")) {
             "Note: DeLong method for AUC confidence intervals could not be computed for ",
             paste(fallback_vars, collapse = ", "),
             ". Hanley-McNeil normal approximation was used as a fallback. ",
-            "This approximation may produce narrower confidence intervals than appropriate, ",
-            "especially with small sample sizes (n < 100). Interpret these CIs with caution."
+            "It assumes the scores are exponentially distributed within each group, which is ",
+            "rarely exactly true, so the interval is approximate. In practice it usually comes ",
+            "out <i>wider</i> than DeLong's rather than narrower \u{2014} on the bundled example ",
+            "data 22.6% wider (SE 0.0259 against 0.0211) \u{2014} so it errs conservatively here, ",
+            "but the direction is not guaranteed. Interpret these CIs with caution."
           )
           simpleTable$setNote("ci_method_fallback", fallback_note)
           aucSummaryTable$setNote("ci_method_fallback", fallback_note)

@@ -1,5 +1,12 @@
 # PCA Cox Regression - Feature Mapping
 
+> **Not yet released.** The `pcacox` analysis is on a development menu route, so it does
+> not appear in the jamovi menus of ClinicoPath or of any of its submodules. It is
+> documented here ahead of a future release, and its options, defaults and output may
+> still change. The R function is exported, so the examples below run from an R
+> console; what is not yet available is the jamovi analysis itself.
+
+
 This document provides a comprehensive overview of the PCA Cox module, detailing its features, user interface elements, and the underlying R functions.
 
 ## Feature Summary

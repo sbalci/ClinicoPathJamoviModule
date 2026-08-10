@@ -42,7 +42,7 @@ items:
       - name: df
         title: df
         type: integer
-      - name: n
+      - name: 'n'
         title: N
         type: integer
       - name: effect_size
@@ -73,7 +73,7 @@ items:
         title: p
         type: number
         format: zto,pvalue
-      - name: n
+      - name: 'n'
         title: N
         type: integer
 
@@ -112,7 +112,7 @@ items:
       - name: df
         title: df
         type: integer
-      - name: n
+      - name: 'n'
         title: N
         type: integer
       - name: effect_size

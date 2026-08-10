@@ -44,7 +44,7 @@ items:
           - name: stratum
             title: LNR Stratum
             type: text
-          - name: n
+          - name: 'n'
             title: 'N'
             type: integer
           - name: meanLNR

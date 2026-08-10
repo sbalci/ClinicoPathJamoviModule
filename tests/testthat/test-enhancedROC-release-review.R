@@ -21,6 +21,12 @@ run_er <- function(...) {
 notices_of <- function(res)
     gsub("[[:space:]]+", " ", gsub("<[^>]+>", " ", paste(res$results$notices$content, collapse = " ")))
 
+tnote_er <- function(res, key = "direction_used") {
+    n <- res$results$aucSummary$.__enclos_env__$private$.notes
+    if (!(key %in% names(n))) return("(none)")
+    gsub("<[^>]+>", "", get("note", envir = n[[key]]))
+}
+
 er_private <- function(...) {
     o <- do.call(ClinicoPath:::enhancedROCOptions$new, list(...))
     a <- ClinicoPath:::enhancedROCClass$new(options = o, data = er_data())
@@ -179,9 +185,37 @@ test_that("unimplemented options are labelled as such in the documentation", {
         expect_true(nzchar(blk), label = paste("found block for", o))
         expect_match(blk, "NOT YET IMPLEMENTED", info = o)
     }
-    # and the backend still says so at run time
-    expect_match(notices_of(run_er(data = er_data(), predictors = "m1", harrellCIndex = TRUE)),
-                 "planned but not yet implemented")
+    # All 20 have LIVE checkboxes in jamovi/enhancedroc.u.yaml, so a GUI user can tick one and
+    # receive nothing. That makes it a warning, not the INFO it used to be filed as.
+    u_yaml <- paste(readLines("../../jamovi/enhancedroc.u.yaml", warn = FALSE), collapse = "\n")
+    for (o in unimplemented)
+        expect_match(u_yaml, sprintf("(?m)^\\s*name:\\s*%s\\s*$", o), info = o,
+                     all = FALSE, perl = TRUE)
+
+    res <- run_er(data = er_data(), predictors = "m1", harrellCIndex = TRUE)
+    n <- notices_of(res)
+    expect_match(n, "not yet implemented")
+    expect_match(n, "Selected Features Produced No Output")
+    # .renderNotices signals severity by colour rather than a text label, so assert on the
+    # WARNING palette (#ca8a04 on #fefce8) -- it used to be filed at INFO.
+    raw <- paste(res$results$notices$content, collapse = " ")
+    block <- sub(".*(<div[^>]*>(?:(?!<div).)*Selected Features Produced No Output).*", "\\1",
+                 raw, perl = TRUE)
+    expect_match(block, "#ca8a04", fixed = TRUE)
+})
+
+
+test_that("the output states which way each marker was read", {
+    # Same wording as psychopdaROC's note, so the two analyses can be compared line for line.
+    d <- er_data()
+    n <- tnote_er(run_er(data = d, predictors = "bad", direction = "auto"))
+    expect_match(n, "values of bad were taken to indicate")
+    expect_match(n, "read from the data, not specified in advance")
+    expect_match(n, "reversed")
+
+    n2 <- tnote_er(run_er(data = d, predictors = "m1", direction = "higher"))
+    expect_match(n2, "HIGHER values of m1 were taken to indicate")
+    expect_match(n2, "what you specified")
 })
 
 

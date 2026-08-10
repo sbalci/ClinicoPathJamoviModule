@@ -278,7 +278,7 @@ items:
           - name: category
             title: Category
             type: text
-          - name: n
+          - name: 'n'
             title: N Cases
             type: integer
           - name: percent
@@ -870,7 +870,7 @@ items:
           - name: cluster
             title: Cluster
             type: text
-          - name: n
+          - name: 'n'
             title: N
             type: integer
           - name: percent

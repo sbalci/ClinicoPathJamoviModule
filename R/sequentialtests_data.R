@@ -33,10 +33,7 @@
 #' demonstration values.
 #'
 #' @name sequentialtests_datasets
-#' @aliases sequentialtests_cancer sequentialtests_cost_comparison sequentialtests_covid
-#'   sequentialtests_emergency sequentialtests_extreme sequentialtests_infectious
-#'   sequentialtests_preset_examples sequentialtests_prevalence_sensitivity
-#'   sequentialtests_reference sequentialtests_strategy_comparison sequentialtests_teaching
+#' @aliases sequentialtests_cancer sequentialtests_cost_comparison sequentialtests_covid sequentialtests_emergency sequentialtests_extreme sequentialtests_infectious sequentialtests_preset_examples sequentialtests_prevalence_sensitivity sequentialtests_reference sequentialtests_strategy_comparison sequentialtests_teaching
 #'
 #' @format
 #' \describe{

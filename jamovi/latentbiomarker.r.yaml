@@ -27,7 +27,7 @@ items:
         - indicators
         - indicator_types
       columns:
-        - name: n
+        - name: 'n'
           title: "N"
           type: integer
         - name: n_events

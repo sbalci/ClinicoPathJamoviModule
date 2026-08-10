@@ -170,7 +170,7 @@ options:
         - title: Effect Size (ascending)
           name: effect
         - title: Sample Size (descending)
-          name: n
+          name: 'n'
         - title: Alphabetical
           name: alpha
       default: effect

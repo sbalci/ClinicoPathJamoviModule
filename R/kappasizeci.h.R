@@ -73,8 +73,8 @@ kappaSizeCIOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
                 "alpha",
                 alpha,
                 default=0.05,
-                min=0.01,
-                max=0.99)
+                min=0.001,
+                max=0.2)
 
             self$.addOption(private$..outcome)
             self$.addOption(private$..citype)
@@ -203,7 +203,11 @@ kappaSizeCIBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' 
 #' @param outcome Number of outcome level.
 #' @param citype Type of confidence interval: 'two_sided' or 'one_sided'.
-#' @param kappa0 The null hypothesis value of kappa.
+#' @param kappa0 The preliminary (anticipated) value of kappa - the agreement
+#'   you expect to observe, around which the confidence interval is planned.
+#'   kappaSize documents this argument as "the preliminary value of kappa". It
+#'   is NOT a null hypothesis value; contrast kappaSizePower, where kappa0 IS
+#'   the null being tested.
 #' @param kappaL The lower limit of the kappa.
 #' @param kappaU The upper limit of the kappa.
 #' @param props Proportions of outcome level.

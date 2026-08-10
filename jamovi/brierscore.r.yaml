@@ -139,7 +139,7 @@ items:
         - name: group
           title: Risk Group
           type: integer
-        - name: n
+        - name: 'n'
           title: N
           type: integer
         - name: mean_predicted
@@ -166,7 +166,7 @@ items:
         - name: stratum
           title: Stratum
           type: text
-        - name: n
+        - name: 'n'
           title: N
           type: integer
         - name: brier_score

@@ -57,7 +57,7 @@ items:
           - name: rcbclass
             title: RCB Class
             type: text
-          - name: n
+          - name: 'n'
             title: 'N'
             type: integer
           - name: pct
@@ -81,7 +81,7 @@ items:
           - name: rcbclass
             title: RCB Class
             type: text
-          - name: n
+          - name: 'n'
             title: 'N'
             type: integer
           - name: events

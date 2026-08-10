@@ -12,6 +12,7 @@
 # Rscript -e "devtools::load_all()"
 
 # Rscript -e "jmvtools::prepare();devtools::document();jmvtools::prepare();devtools::document()"
+# Rscript -e "jmvtools::prepare();devtools::document();jmvtools::prepare();devtools::document();source('_updateModules.R')"
 
 # Rscript -e "devtools::check()"
 # Rscript -e "devtools::check(cran = TRUE)"
@@ -41,13 +42,13 @@
 
 
 new_version: "1.0.4"
-new_date: "2026-08-10"
+new_date: "2026-08-11"
 quick: false
 TEST: false
 jjstatsplot: false
-jsurvival: false
+jsurvival: true
 ClinicoPathDescriptives: false
-OncoPath: false
+OncoPath: true
 meddecide: true
 
 

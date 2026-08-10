@@ -186,7 +186,7 @@ options:
       title: Bar order
       type: List
       options:
-        - name: no
+        - name: 'no'
           title: No sorting
         - name: ascending
           title: Ascending

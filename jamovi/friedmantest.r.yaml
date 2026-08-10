@@ -39,7 +39,7 @@ items:
         - name: condition
           title: 'Condition'
           type: text
-        - name: n
+        - name: 'n'
           title: 'N'
           type: integer
         - name: median

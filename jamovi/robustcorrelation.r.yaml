@@ -68,7 +68,7 @@ items:
           type: number
           format: zto,pvalue
           visible: (show_pvalues && p_adjust_method:none != true)
-        - name: n
+        - name: 'n'
           title: N
           type: integer
 

@@ -61,7 +61,7 @@ items:
           - name: grp
             title: "Group"
             type: text
-          - name: n
+          - name: 'n'
             title: "Reports"
             type: integer
           - name: meanComp

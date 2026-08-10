@@ -1,5 +1,12 @@
 # Testing Checklist: Conditional Survival Estimation (`conditionalsurvival`)
 
+> **Not yet released.** The `conditionalsurvival` analysis is on a development menu route, so it does
+> not appear in the jamovi menus of ClinicoPath or of any of its submodules. It is
+> documented here ahead of a future release, and its options, defaults and output may
+> still change. The R function is exported, so the examples below run from an R
+> console; what is not yet available is the jamovi analysis itself.
+
+
 This document provides a comprehensive testing plan for the `conditionalsurvival` jamovi function. Each scenario specifies the dataset, variable assignments, option values, and expected behavior.
 
 ## Datasets

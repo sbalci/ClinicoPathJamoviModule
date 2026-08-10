@@ -39,7 +39,7 @@ items:
         type: number
         format: zto,pvalue
         visible: (sig)
-      - name: n
+      - name: 'n'
         title: N
         type: integer
 

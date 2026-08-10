@@ -16,7 +16,7 @@ items:
       visible: true
       rows: 1
       columns:
-        - name: n
+        - name: 'n'
           title: N
           type: integer
         - name: n_positive

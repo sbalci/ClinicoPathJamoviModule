@@ -109,7 +109,7 @@ items:
         - name: cluster
           title: Cluster
           type: text
-        - name: n
+        - name: 'n'
           title: N
           type: integer
         - name: percentage
@@ -168,7 +168,7 @@ items:
         - name: cluster
           title: Cluster
           type: text
-        - name: n
+        - name: 'n'
           title: N
           type: integer
         - name: events

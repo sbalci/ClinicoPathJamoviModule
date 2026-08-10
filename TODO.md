@@ -3009,11 +3009,13 @@ out-of-scope findings from the same audit, deferred for separate work.
 # release-review-function prompt
 
 
-/release-review-function kappaSizePower
-/release-review-function kappaSizeCI
-/release-review-function kappaSizeFixedN
 
-update NEWS.md for umbrella repository and each module
+
+
+
+
+
+
 
 /release-review-function jjhistostats
 /release-review-function jjridges
@@ -3034,7 +3036,10 @@ update NEWS.md for umbrella repository and each module
 /release-review-function linechart
 /release-review-function statsplot2
 
-update NEWS.md for umbrella repository and each module
+- I will release jjstatsplot module. update NEWS.md for umbrella repository and each module
+- review vignettes in jjstatsplot repository. check if their content are up to date. if not, update them. pay attention to the new options added in recent releases. If there are mentions of not yet release functions and features, note that they will be released in the future.
+
+
 
 /release-review-function tableone
 /release-review-function summarydata
@@ -3049,10 +3054,14 @@ update NEWS.md for umbrella repository and each module
 /release-review-function alluvial
 /release-review-function crosstable
 /release-review-function chisqposttest
-/release-review-function categorize	
+/release-review-function categorize
 
-update NEWS.md for umbrella repository and each module
+- I will release ClinicoPathDescriptives module. update NEWS.md for umbrella repository and each module
+- review vignettes in ClinicoPathDescriptives repository. check if their content are up to date. if not, update them. pay attention to the new options added in recent releases. If there are mentions of not yet release functions and features, note that they will be released in the future.
 
+
+for all: 
+Rscript scripts/build_site.R
 
 
 
@@ -3317,3 +3326,10 @@ arguments the *currently compiled* wrapper declares — so the suite is green bo
 regeneration. The roxygen `@examples` and `inst/examples/` deliberately use the post-regeneration
 API and will fail `R CMD check --run-donttest` until `prepare()` + `document()` are run.
 
+- [x] [tooling] YAML 1.1 boolean tokens in analysis yamls - DONE 2026-08-10.
+      117 tokens across 84 `jamovi/*.a.yaml` / `*.r.yaml` files were quoted (`- name: n` ->
+      `- name: 'n'`). Proven inert for the jamovi compiler: `jmvtools::prepare()` before and
+      after produced byte-identical output for all 389 `.h.R` files (the only 0000.yaml delta
+      was an unrelated menuGroup change). R's `yaml` package now reads every option `name` as a
+      string; previously 84 files handed back `FALSE`, silently breaking `tests/generate_tests.R`
+      and the audit tests. Found during the kappaSizeFixedN release review.

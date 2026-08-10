@@ -4,17 +4,49 @@ title: Lowest Expected Value for a fixed sample size
 jrs:   '1.1'
 
 items:
+    - name:  notices
+      title: Notes
+      type:  Html
+      clearWith:
+          - outcome
+          - kappa0
+          - props
+          - raters
+          - alpha
+          - 'n'
+
     - name:  text1
       title: Analysis result
       type:  Preformatted
+      clearWith:
+          - outcome
+          - kappa0
+          - props
+          - raters
+          - alpha
+          - 'n'
 
     - name:  text_summary
       title: Summary
       type:  Preformatted
+      clearWith:
+          - outcome
+          - kappa0
+          - props
+          - raters
+          - alpha
+          - 'n'
 
     - name:  text2
       title: Study Explanation
       type:  Preformatted
+      clearWith:
+          - outcome
+          - kappa0
+          - props
+          - raters
+          - alpha
+          - 'n'
 
 refs:
     - ClinicoPathJamoviModule

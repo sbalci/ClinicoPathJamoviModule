@@ -49,7 +49,7 @@ items:
         - name: range
           title: Range
           type: text
-        - name: n
+        - name: 'n'
           title: Count
           type: integer
         - name: percent

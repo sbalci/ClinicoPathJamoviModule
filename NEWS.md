@@ -2,9 +2,12 @@
 
 # ClinicoPath 1.0.4 — pre-release review of the diagnostic-decision and agreement analyses (2026-08-07)
 
-Ten `meddecide` analyses were reviewed end to end for this release — `decisioncompare`,
+Fourteen `meddecide` analyses were reviewed end to end for this release — `decisioncompare`,
 `decision`, `agreement`, `lassologistic`, `decisioncombine`, `decisioncalculator`,
-`nogoldstandard`, `cotest`, `sequentialtests` and `enhancedROC` — and the three `OncoPath`
+`nogoldstandard`, `cotest`, `sequentialtests`, `enhancedROC`, `psychopdaROC`, `kappaSizePower`,
+`kappaSizeCI` and `kappaSizeFixedN` — and two families were additionally cross-checked
+internally: the two ROC analyses against each other, and the three kappaSize sample-size
+analyses. The three `OncoPath`
 analyses reviewed in 1.0.3 were carried further. The most serious findings are all things a clinician reads straight off the screen:
 `decisioncompare` silently duplicated every row of every table on each re-run, so a three-test
 comparison became a nine-row table after two option changes; `decision`, given a population
@@ -15,7 +18,7 @@ runs, and its default method reported 100% sensitivity by construction on every 
 `cotest` announced a 0% post-test probability for a combination of results its own dependence
 model had made impossible. `agreement` was applying its ordinal weight matrix over an
 alphabetically sorted scale. Every statistic was re-checked against an independent package
-(`epiR`, `DescTools`, `psych`, `binom`, `poLCA`, `pROC`, `stats`) and no estimator that was already
+(`epiR`, `DescTools`, `psych`, `binom`, `poLCA`, `pROC`, `cutpointr`, `kappaSize`, `stats`) and no estimator that was already
 correct was altered. Three breaking changes, below.
 
 ## Breaking changes
@@ -393,6 +396,175 @@ correct was altered. Three breaking changes, below.
   "Serial Testing". The assumption applies to all three strategies and is now stated for all
   three, alongside a note that the inputs are treated as exact and carry no confidence interval.
 
+- **`psychopdaROC` doubled fourteen of its sixteen results tables on every re-run** — 21
+  `addRow()` calls against two `deleteRows()`, so rows went 1 to 2 to 3 per predictor and the
+  decision curve 40 to 80 to 120. Cleared once per run now, after the manual-run gate so that
+  manual mode keeps its results when an option is edited.
+- **`psychopdaROC` ran the whole analysis backwards when the positive class was left unset.** The
+  fallback took the FIRST factor level, which for Healthy/Disease, Negative/Positive, Control/Case
+  or 0/1 is the NEGATIVE group: AUC 0.1001 on the bundled data where naming the positive class
+  gives 0.8999, silently. The positive class was being worked out in four places that could
+  disagree, one of them falling back to the first value in DATA ORDER so the answer depended on
+  row sorting. All four now use one resolver, which takes the last level and discloses the
+  assumption on the tables, and refuses outright when the class variable has three or more levels
+  rather than guessing between them.
+- **`psychopdaROC`'s "optimal cutpoint" was usually not the optimum.** Its metric tolerance
+  defaulted to 0.05 against the 1e-06 used by the `cutpointr` package it wraps, so 39 of 200
+  candidate thresholds spanning 52.1 to 67.7 were averaged, yielding 84.5% sensitivity where the
+  true optimum offers 94.4%. The default now matches `cutpointr` and any tolerance in force is
+  disclosed. Its Hanley-McNeil fallback footnote also pointed the wrong way — it warned of
+  intervals that are "narrower than appropriate" when the approximation is in fact 22.6% wider
+  than DeLong's on the shipped data.
+- **`psychopdaROC`'s DeLong test could report 0.794 for a marker its own AUC table reported as
+  0.206.** DeLong's test requires every marker read in the same direction, so when a marker's AUC
+  came out below 0.5 the fallback implementation flipped its scores and displayed `1 - AUC`. The
+  primary implementation does not flip — it passes the user's Classification Direction to `pROC`
+  and reports the honest figure — so the two tables disagreed for precisely the markers where the
+  direction is in doubt, and the only signal was an R `warning()`, which jamovi never shows. The
+  flip is still necessary, but the affected markers are now named on screen with the instruction to
+  change Classification Direction and re-run if the reversed reading is the correct one. Separately,
+  DeLong's asymptotic variance is not dependable on small samples, so a note now appears whenever
+  either class holds fewer than ten cases.
+- **Both ROC analyses now say, in one sentence, which way they read the test values.** This is
+  the fix for a genuine source of confusion. `enhancedROC` and `psychopdaROC` sit in the same
+  menu, and they were cross-checked against each other on eight datasets: **the arithmetic agrees
+  to machine precision** — maximum absolute AUC difference 3.2e-15 and confidence-interval
+  difference exactly zero, both matching `pROC` and a hand-computed Mann-Whitney AUC. What differs
+  is a default. `enhancedROC` works out the direction from the data; `psychopdaROC` assumes higher
+  values mean disease unless told otherwise. So for a marker where *lower* values indicate disease
+  — a falling haemoglobin, a falling ejection fraction — the same column produced AUC 0.8999 in
+  one analysis and 0.1001 in the other, with nothing on screen explaining the difference. Both are
+  correct: 0.1001 is what you get if you insist higher means disease, and 0.8999 is the same
+  marker read the right way round. Each analysis now prints the same plain statement next to its
+  AUC — *"Reading of the test values: HIGHER values of X were taken to indicate Disease"* — with
+  what to change if that is wrong, and `psychopdaROC`'s below-0.5 warning now names the current
+  setting and says switching it gives 1 minus the value shown. A reader comparing the two outputs
+  can see at a glance why they differ. Smaller divergences, documented rather than changed:
+  `psychopdaROC` has no confidence-level option and always reports 95%; `enhancedROC` declines any
+  dataset below n = 20 while `psychopdaROC` computes and matches `pROC`; and their optimal
+  cutpoints differ in the last decimal because `pROC` reports the midpoint between two adjacent
+  observed values while `cutpointr` reports an observed value (sensitivity and specificity are
+  identical either way).
+- **`enhancedROC`'s twenty unimplemented options are reachable from the interface after all.** The
+  1.0.4 note above said they had no interface controls and so affected only R callers; that was
+  wrong — all twenty have live checkboxes. A user can therefore tick "Harrell's C-index" and
+  receive nothing, so the notice that explains this was raised from informational to a warning.
+
+- **`kappaSizePower` could freeze permanently on values its own interface allowed.** `kappaSize`'s
+  root finder never converges when the significance level is at or above the target power: a
+  direct call at alpha 0.90 and power 0.20 was still running when killed after 60 seconds and
+  could not be interrupted, while alpha 0.05 with power 0.80 returns instantly. The option bounds
+  admitted alpha up to 0.99 and power down to 0.01, so a user could reach it and jamovi had no way
+  to recover. Refused now in 0.07 seconds, which also removes two related absurdities — power 0.01
+  reported "A minimum of 1 subjects", and alpha just below power gave a sample size of zero shown
+  as one subject.
+- **`kappa0` was documented backwards in two of the three kappaSize analyses.** The package
+  defines it as the *null hypothesis* for the power approach but as the *anticipated* value for
+  the confidence-interval and fixed-n approaches — two different quantities sharing a name.
+  `kappaSizePower` called its null the "Expected value of kappa" and `kappaSizeCI` called its
+  anticipated value "the null hypothesis value of kappa": each carried the other's meaning, so
+  anyone following the help would enter the wrong quantity and get a different answer with no
+  indication. Corrected in all three, each now stating what it is not.
+- **The three kappaSize analyses now agree on their shared options.** Significance level bounds
+  were 0.01–0.99 in two and 0.01–0.20 in the third; all are now 0.001–0.20, which makes a
+  Bonferroni-adjusted alpha expressible and stops admitting values that are not significance
+  levels. Proportions parse identically everywhere, a binary outcome may be given as one
+  prevalence or two proportions in all three, and a European decimal comma now names the decimal
+  separator instead of reporting that the proportions are out of range. The power and
+  confidence-interval approaches can differ by nearly threefold on the same study, so each output
+  now states which question it is sizing for and names the other. An alternative kappa below the
+  null is still computed — it is a legitimate question — but the output now says which way round
+  it read the two values, because it is more often a transposition and gives a different answer.
+  Sample sizes were confirmed against `kappaSize` across 540 combinations with zero divergences.
+
+- **Two of the three kappaSize analyses could be made to hang with no way out.** `kappaSizeCI`
+  searches for its sample size by counting upwards one subject at a time in interpreted R with no
+  cap, and the answer grows as roughly one over the square of the distance from the anticipated
+  kappa to the nearer confidence limit: an interval of 0.55–0.65 needs 1,625 subjects and returns
+  at once, 0.59–0.61 needs 38,203 and takes a second, and 0.5995–0.6005 had not finished after
+  eight seconds. `kappaSizeFixedN` behaved the same way when the sample size was entered as
+  infinity, which its own bounds permitted. Both are now stopped — the confidence-interval search
+  after a bounded wall-clock budget, with a message naming the distance that drives the cost, and
+  the fixed-n analysis before the engine is entered. Genuinely demanding but finite designs are
+  unaffected and still return their (large) answers.
+- **`kappaSizeFixedN` could print a lower bound of −23.78 for Cohen's kappa.** Kappa cannot fall
+  below −1. The package's search walks downwards in steps of 0.001 with no floor, so a small study
+  with a rare category — 11 subjects, a 2% prevalence, alpha 0.001 — walks straight past the limit
+  and the number was displayed as an ordinary result. It is now refused with an explanation that
+  the large-sample approximation has broken down and what to change. A bound that is negative but
+  still valid is reported as before, now with a note that this many subjects cannot rule out
+  agreement no better than chance.
+- **`kappaSizeCI` showed the wrong quantity as the driver of its sample size.** Its explanation
+  reported the "precision width" of the confidence interval, but the calculation sizes on
+  whichever limit lies nearer the anticipated kappa: with a lower limit of 0.55 the answer is
+  1,625 subjects for every upper limit from 0.65 to 0.99. In one-sided mode the upper limit is
+  ignored entirely. Both are now stated. The analysis also accepted proportions on a separator set
+  that, read literally, matched a backslash and the letter "t" but neither a tab nor a space.
+- **`kappaSizeFixedN` gained a Notes panel and lost several rough edges.** It now states its
+  method, warns when a category is expected to hold fewer than five subjects, and warns in red
+  when the achievable bound is at or below zero — the case where the planned study cannot
+  demonstrate agreement at all, whatever it observes. Its explanation used to read "determine the
+  expected lower bound for kappa0=0.6", which invites reading the bound as belonging to kappa0
+  rather than being the worst case still compatible with it. A rejected re-run used to leave the
+  previous run's numbers on screen beneath the error. Sample sizes below 11 were passed through to
+  the package only to return its own message, which is itself off by one.
+- Results were confirmed against `kappaSize` across a further 4,560 combinations with zero
+  divergences — 2,560 for the confidence-interval approach including its one-sided path, and 2,000
+  for the fixed-n approach, whose two monotonicity properties (more subjects raise the bound, a
+  higher significance level raises it) held in 400 of 400 checks each.
+
+### Documentation (umbrella articles)
+
+All 105 files under this repository's `vignettes/` were audited against `jamovi/0000.yaml` and the
+generated wrapper signatures. Unlike the submodule articles these are real vignettes —
+`VignetteBuilder: knitr`, and all 32 `.Rmd` carry a `VignetteIndexEntry` — so they are built by
+`R CMD check`.
+
+- **Sixty-eight articles document an analysis that is on a development or test menu route.** Of the
+  module's 419 analyses only about 60 sit on a production menu; the rest are routed to `…D`/`…T`
+  groups and do not appear in jamovi. That includes the whole penalised-Cox family
+  (`lassocox`, `grouplasso`, `sparsegrouplasso`, `adaptivelasso`, `ncvregcox`, `pcacox`, `plscox`,
+  `highdimcox`), `firthregression`, `competingsurvival`, `conditionalsurvival`,
+  `relativesurvival`, `timeroc`, `curemodels`, `stagemigration`, `leaveonecenterout`,
+  `misclassificationbias`, `clinicalscore` and `nonparametric`. Each article now says so at the
+  top, and says the R function is still exported so the examples run from a console — what is not
+  yet released is the jamovi analysis. Thirteen of these are named `jsurvival-*`, although
+  `jsurvival` ships eight analyses and none of them are these. Nothing was deleted.
+- **`function-reference.Rmd` claimed to catalog "all 420+ analysis functions"; it documents 18.**
+  The header and the introduction now state the real figure and distinguish it from the module
+  total. Its Stable / To be Tested / Drafts taxonomy describes testing maturity, which is a
+  different question from whether an analysis is reachable from a menu; that distinction is now
+  spelled out. All 18 documented analyses were confirmed to be both Stable and production-routed.
+- **`test-data-complete-catalog.Rmd`** lists test data for 295 analyses, 28 of which are
+  development-routed; it now says so rather than implying every listed analysis is available.
+- **`survival()`'s `export_survival_data` was shown as an R argument.** It is a `type: Output`
+  option, and jamovi's compiler does not turn Output options into arguments of the generated R
+  function, so the example raised `unused argument`. The article now explains that Output options
+  are reachable from the jamovi interface only, names the other two on this analysis
+  (`calculatedtime`, `outcomeredefined`), and shows a verified R alternative —
+  `result$survTable$asDF`, not `survTableSummary`, which is Preformatted text and has no `$asDF`.
+- All 567 calls to module analyses across the 105 files were checked against the generated wrapper
+  signatures; 460 parsed, and apart from the one above every argument name was valid. Four
+  apparent failures were `timeROC::timeROC()`, the upstream package, not this module's `timeroc()`.
+
+### Documentation (`meddecide` articles)
+
+- **All 92 `meddecide` articles were audited against the shipped analyses.** Twenty-eight of them
+  document an analysis that does not ship — `decisionpanel`, `decisiongraph`, `decisioncurve`,
+  `modelbuilder`, `screeningcalculator`, `bayesdca`, `icccoeff`, `latentbiomarker`, `advancedtree`,
+  `decision2` and `ppv` are all still on development or test menu routes here and in `meddecide`
+  alike — and each now says so at the top, or at the point of use where the article is otherwise
+  about a shipped analysis. Nothing was deleted.
+- Three factual corrections: the confidence-interval article described `kappa0` as a null
+  hypothesis value (it is the anticipated kappa there; only the power approach treats it as a
+  null), claimed the interval *width* drives the sample size (it is the nearer limit), and listed
+  2–5 raters where 2–6 are accepted. The `nogoldstandard` reference still gave the old
+  `all_positive` default.
+- Four articles illustrate `agreement()` with an argument list that has not existed for some time;
+  all their chunks are `eval = FALSE` so nothing broke, but the code was uncopyable. Each now
+  carries a notice and a verified working call. All 345 calls to shipped analyses across the 92
+  files were checked against the generated wrapper signatures.
+
 ### Tumour response and heterogeneity (also released in `OncoPath`)
 
 - **`ihcheterogeneity`'s intraclass correlation was computed by a route that did not match the
@@ -410,6 +582,18 @@ correct was altered. Three breaking changes, below.
   ignored the analysis's confidence-level option, which now reaches the ellipse. 211 tests pass.
 
 ### Release tooling
+
+- **Submodule builds failed with `undefined exports` once an analysis was re-routed out of the
+  module.** `jmvtools::prepare()` merges into a module's `jamovi/0000.yaml` rather than rebuilding
+  it, so an analysis stays listed there permanently — including after its `menuGroup` gains a test
+  suffix and `_updateModules` correctly stops copying its files. The jamovi compiler then emits
+  exports for classes that no longer exist and installation aborts. `meddecide` was carrying seven
+  such orphans (`clinicalscore`, `decisioncurve`, `latentbiomarker`, `leaveonecenterout`,
+  `mageeequation`, `misclassificationbias`, `timedependentdca`) against fourteen real analyses.
+  `_updateModules` now prunes any `analyses:` entry with no `.a.yaml` or `.b.R` in the target
+  module, before `prepare()` runs. The match is case-insensitive on purpose: `0000.yaml` records
+  `kappaSizePower` while the file is `kappasizepower.a.yaml`, and a case-sensitive check would
+  have deleted every real analysis on Linux while appearing to work on macOS.
 
 - **The release script copied dev- and test-routed analyses into the production submodules.** In
   WIP mode the `menuGroup` patterns were the bare, unanchored group names, so `menuGroup: Survival`

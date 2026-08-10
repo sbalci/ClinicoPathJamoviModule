@@ -20,7 +20,7 @@ items:
         - name: infoFrac
           title: "Info Fraction"
           type: number
-        - name: n
+        - name: 'n'
           title: "Sample Size / Events"
           type: number
         - name: zBound

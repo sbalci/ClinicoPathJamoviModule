@@ -2318,6 +2318,7 @@ if (extended) {
     tryCatch({
       setwd(jjstatsplot_dir)
       cat("  📄 Preparing package...\n")
+      prune_orphan_analyses(getwd())   # drop analyses whose files are no longer shipped
       jmvtools::prepare()
       cat("  📝 Documenting...\n")
       devtools::document()
@@ -2372,6 +2373,7 @@ if (extended) {
     tryCatch({
       setwd(meddecide_dir)
       cat("  📄 Preparing package...\n")
+      prune_orphan_analyses(getwd())   # drop analyses whose files are no longer shipped
       jmvtools::prepare()
       cat("  📝 Documenting...\n")
       devtools::document()
@@ -2426,6 +2428,7 @@ if (extended) {
     tryCatch({
       setwd(jsurvival_dir)
       cat("  📄 Preparing package...\n")
+      prune_orphan_analyses(getwd())   # drop analyses whose files are no longer shipped
       jmvtools::prepare()
       cat("  📝 Documenting...\n")
       devtools::document()
@@ -2480,6 +2483,7 @@ if (extended) {
     tryCatch({
       setwd(ClinicoPathDescriptives_dir)
       cat("  📄 Preparing package...\n")
+      prune_orphan_analyses(getwd())   # drop analyses whose files are no longer shipped
       jmvtools::prepare()
       cat("  📝 Documenting...\n")
       devtools::document()
@@ -2534,6 +2538,7 @@ if (extended) {
     tryCatch({
       setwd(OncoPath_dir)
       cat("  📄 Preparing package...\n")
+      prune_orphan_analyses(getwd())   # drop analyses whose files are no longer shipped
       jmvtools::prepare()
       cat("  📝 Documenting...\n")
       devtools::document()
@@ -2590,6 +2595,7 @@ if (extended) {
     tryCatch({
       setwd(test_dir)
       cat("  📄 Preparing package...\n")
+      prune_orphan_analyses(getwd())   # drop analyses whose files are no longer shipped
       jmvtools::prepare()
       cat("  📝 Documenting...\n")
       devtools::document()

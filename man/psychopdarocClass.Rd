@@ -77,7 +77,8 @@ result1 <- psychopdaROC(
   data = medical_roc_data,
   dependentVars = "biomarker1",
   classVar = "disease_status",
-  positiveClass = "Disease"
+  positiveClass = "Disease",
+  refVar = NULL
 )
 
 # Compare multiple biomarkers with DeLong test
@@ -87,7 +88,8 @@ result2 <- psychopdaROC(
   classVar = "disease_status",
   positiveClass = "Disease",
   delongTest = TRUE,
-  combinePlots = TRUE
+  combinePlots = TRUE,
+  refVar = NULL
 )
 
 # Advanced analysis with IDI/NRI
@@ -109,7 +111,8 @@ result4 <- psychopdaROC(
   classVar = "disease_status",
   positiveClass = "Disease",
   method = "oc_cost_ratio",
-  costratioFP = 2.5 # False positives cost 2.5x false negatives
+  costratioFP = 2.5 # False positives cost 2.5x false negatives,
+  refVar = NULL
 )
 
 # Subgroup analysis by hospital
@@ -118,7 +121,8 @@ result5 <- psychopdaROC(
   dependentVars = "biomarker1",
   classVar = "disease_status",
   positiveClass = "Disease",
-  subGroup = "hospital"
+  subGroup = "hospital",
+  refVar = NULL
 )
 
 # Comprehensive analysis with all features
@@ -137,7 +141,8 @@ result6 <- psychopdaROC(
   partialAUC = TRUE,
   bootstrapCI = TRUE,
   precisionRecallCurve = TRUE,
-  compareClassifiers = TRUE
+  compareClassifiers = TRUE,
+  refVar = NULL
 )
 
 # Financial risk assessment example
@@ -152,7 +157,8 @@ financial_result <- psychopdaROC(
   method = "oc_cost_ratio",
   costratioFP = 0.1, # False positives (rejected good clients) cost less
   delongTest = TRUE,
-  subGroup = "client_type"
+  subGroup = "client_type",
+  refVar = NULL
 )
 
 # Educational assessment example
@@ -182,7 +188,8 @@ quality_result <- psychopdaROC(
   plotROC = TRUE,
   showCriterionPlot = TRUE,
   showDotPlot = TRUE,
-  subGroup = "production_line"
+  subGroup = "production_line",
+  refVar = NULL
 )
 }
 

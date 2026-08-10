@@ -82,7 +82,7 @@ items:
           - name: group
             title: Group
             type: text
-          - name: n
+          - name: 'n'
             title: N
             type: integer
           - name: ps_mean
@@ -135,7 +135,7 @@ items:
           - name: group
             title: Group
             type: text
-          - name: n
+          - name: 'n'
             title: N
             type: integer
           - name: weight_mean
@@ -210,7 +210,7 @@ items:
           - name: subgroup
             title: Subgroup
             type: text
-          - name: n
+          - name: 'n'
             title: N
             type: integer
           - name: effect_estimate

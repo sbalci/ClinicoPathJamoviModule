@@ -21,7 +21,7 @@ items:
           type: text
           content: ($key)
           visible: (groups)
-        - name: n
+        - name: 'n'
           title: 'Number of Subjects'
           type: integer
         - name: obs

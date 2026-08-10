@@ -16,7 +16,7 @@ items:
         - status
       rows: 1
       columns:
-        - name: n
+        - name: 'n'
           title: 'Number of Subjects'
           type: integer
         - name: nevents

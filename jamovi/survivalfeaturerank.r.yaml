@@ -38,7 +38,7 @@ items:
         - name: type
           title: 'Type'
           type: text
-        - name: n
+        - name: 'n'
           title: 'N'
           type: integer
         - name: events

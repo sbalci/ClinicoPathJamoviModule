@@ -22,7 +22,7 @@ items:
           - name: method
             title: Method
             type: text
-          - name: n
+          - name: 'n'
             title: N
             type: integer
           - name: mean

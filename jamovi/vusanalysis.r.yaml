@@ -80,7 +80,7 @@ items:
         - name: class_order
           title: Order
           type: integer
-        - name: n
+        - name: 'n'
           title: N
           type: integer
         - name: mean_predictor
@@ -153,7 +153,7 @@ items:
         - name: stratum
           title: Stratum
           type: text
-        - name: n
+        - name: 'n'
           title: N
           type: integer
         - name: n_classes

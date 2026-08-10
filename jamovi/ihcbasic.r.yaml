@@ -33,7 +33,7 @@ items:
         - name: cluster
           title: Cluster
           type: integer
-        - name: n
+        - name: 'n'
           title: N
           type: integer
         - name: percentage

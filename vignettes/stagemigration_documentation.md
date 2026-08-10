@@ -1,5 +1,12 @@
 # Advanced TNM Stage Migration Analysis Documentation
 
+> **Not yet released.** The `stagemigration` analysis is on a development menu route, so it does
+> not appear in the jamovi menus of ClinicoPath or of any of its submodules. It is
+> documented here ahead of a future release, and its options, defaults and output may
+> still change. The R function is exported, so the examples below run from an R
+> console; what is not yet available is the jamovi analysis itself.
+
+
 ## Feature Summary
 
 The Advanced TNM Stage Migration Analysis (`stagemigration`) is a comprehensive jamovi function designed for validating whether a new TNM staging system provides superior prognostic discrimination compared to an existing system. It implements state-of-the-art statistical methods drawn from the staging validation literature, including concordance analysis, reclassification metrics (NRI/IDI), decision curve analysis, bootstrap validation, and Will Rogers phenomenon detection, all within a clinician-friendly interface.

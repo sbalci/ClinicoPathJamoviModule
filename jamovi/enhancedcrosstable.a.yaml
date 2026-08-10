@@ -183,7 +183,7 @@ options:
     type: List
     options:
       - title: "No"
-        name: no
+        name: 'no'
       - title: "If any"
         name: ifany
       - title: "Always"

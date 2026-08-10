@@ -99,7 +99,7 @@ items:
           type: text
           combineBelow: false
 
-        - name: n
+        - name: 'n'
           title: N
           type: integer
 

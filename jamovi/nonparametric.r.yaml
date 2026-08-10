@@ -41,7 +41,7 @@ items:
           - name: group
             title: Group
             type: text
-          - name: n
+          - name: 'n'
             title: N
             type: integer
           - name: missing

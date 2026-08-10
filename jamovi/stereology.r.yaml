@@ -10,7 +10,7 @@ items:
       visible: (showDescriptives)
       rows: 1
       columns:
-        - name: n
+        - name: 'n'
           title: N
           type: integer
         - name: mean_intersections
@@ -59,7 +59,7 @@ items:
         - name: group
           title: Group
           type: text
-        - name: n
+        - name: 'n'
           title: N
           type: integer
         - name: aa_mean

@@ -1,5 +1,12 @@
 # Testing Relative Survival Analysis
 
+> **Not yet released.** The `relativesurvival` analysis is on a development menu route, so it does
+> not appear in the jamovi menus of ClinicoPath or of any of its submodules. It is
+> documented here ahead of a future release, and its options, defaults and output may
+> still change. The R function is exported, so the examples below run from an R
+> console; what is not yet available is the jamovi analysis itself.
+
+
 All test datasets: `data/relativesurvival_test.rda` (200 obs, ~116 events)
 Generation script: `data-raw/create_relativesurvival_test_data.R`
 Existing test file: `tests/testthat/test-relativesurvival.R`
