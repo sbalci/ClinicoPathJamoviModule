@@ -513,6 +513,31 @@ correct was altered. Three breaking changes, below.
   for the fixed-n approach, whose two monotonicity properties (more subjects raise the bound, a
   higher significance level raises it) held in 400 of 400 checks each.
 
+### Documentation (`jsurvival` and `OncoPath` articles)
+
+- **`jsurvival`: option coverage went from 78% to 95%.** Of 304 options across its eight shipped
+  analyses, 67 were undocumented. `survival()` alone had 28, including features added between
+  February and July 2026 — weighted log-rank tests, the seven age-correction options, parametric
+  survival models, calibration curves, restricted cubic splines and bootstrap internal validation.
+  `datetimeconverter` was shipping with no documentation at all (30 of 32 options unmentioned).
+- **A `jsurvival` article documents a feature that does not exist.** The time-dependent covariates
+  article uses 17 options that are commented out in `jamovi/multisurvival.a.yaml` under headings
+  reading *"EXPERIMENTAL - will be implemented later"* — 60 options are commented out there in
+  total. It is kept as the design specification and now says the code is not yet runnable.
+  `survivalcont` was also shown with a `padjustmethod` argument that has never existed.
+- **`OncoPath`: option coverage went from 56% to 100%.** `ihcheterogeneity` had no documentation
+  whatsoever and now has an article; the 447-line `diagnosticmeta` article never once called
+  `diagnosticmeta()`; and the waterfall article loaded the wrong package, pulled its data from
+  `ClinicoPathDescriptives`, and printed placeholder strings instead of calling `waterfall()`. All
+  three were rewritten around the bundled datasets with output that was executed, not imagined.
+- **`OncoPath` was missing two runtime dependencies.** `R/waterfall.b.R` uses
+  `patchwork::wrap_plots` and `ggrepel::geom_text_repel`, neither of which was declared. jamovi
+  installs `Imports` on first use and cannot fetch a missing package on demand, so this would have
+  failed at plot time for users without them. Both are now in `Imports`.
+- Across the two modules, 55 articles that document analyses their module does not ship now say so,
+  distinguishing analyses that are unreleased everywhere from those that simply live in a different
+  module (which is named, so the reader knows what to install).
+
 ### Documentation (umbrella articles)
 
 All 105 files under this repository's `vignettes/` were audited against `jamovi/0000.yaml` and the

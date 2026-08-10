@@ -3010,14 +3010,6 @@ out-of-scope findings from the same audit, deferred for separate work.
 
 
 
-
-
-
-
-
-
-
-/release-review-function jjhistostats
 /release-review-function jjridges
 /release-review-function jwaffle
 /release-review-function jjscatterstats
@@ -3036,9 +3028,9 @@ out-of-scope findings from the same audit, deferred for separate work.
 /release-review-function linechart
 /release-review-function statsplot2
 
-- I will release jjstatsplot module. update NEWS.md for umbrella repository and each module
+- I will release jjstatsplot module.
 - review vignettes in jjstatsplot repository. check if their content are up to date. if not, update them. pay attention to the new options added in recent releases. If there are mentions of not yet release functions and features, note that they will be released in the future.
-
+-  update NEWS.md 
 
 
 /release-review-function tableone
@@ -3056,8 +3048,9 @@ out-of-scope findings from the same audit, deferred for separate work.
 /release-review-function chisqposttest
 /release-review-function categorize
 
-- I will release ClinicoPathDescriptives module. update NEWS.md for umbrella repository and each module
+- I will release ClinicoPathDescriptives module.
 - review vignettes in ClinicoPathDescriptives repository. check if their content are up to date. if not, update them. pay attention to the new options added in recent releases. If there are mentions of not yet release functions and features, note that they will be released in the future.
+-  update NEWS.md 
 
 
 for all: 
