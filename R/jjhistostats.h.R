@@ -115,8 +115,8 @@ jjhistostatsOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
                 "conf.level",
                 conf.level,
                 default=0.95,
-                min=0,
-                max=1)
+                min=0.5,
+                max=0.999)
             private$..bf.message <- jmvcore::OptionBool$new(
                 "bf.message",
                 bf.message,
@@ -520,10 +520,13 @@ jjhistostatsBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   will be created. Multiple variables will be displayed in separate panels.
 #' @param grvar Optional grouping variable to create separate histograms for
 #'   each level of this variable (grouped analysis).
-#' @param typestatistics Type of statistical test for normality assessment.
-#'   'parametric' uses Shapiro-Wilk test, 'nonparametric' uses Anderson-Darling
-#'   test, 'robust' uses robust normality tests, 'bayes' provides Bayesian
-#'   analysis.
+#' @param typestatistics Which ONE-SAMPLE LOCATION TEST is reported in the
+#'   plot subtitle, comparing the variable against the Test Value. 'parametric'
+#'   is a one-sample t-test, 'nonparametric' a Wilcoxon signed-rank test,
+#'   'robust' a bootstrap-t test on a trimmed mean, and 'bayes' a Bayesian
+#'   one-sample t-test. This option does NOT perform a normality test - no
+#'   Shapiro-Wilk, Anderson-Darling or similar statistic is computed or
+#'   displayed anywhere in this analysis.
 #' @param centralityline Whether to display a vertical line indicating the
 #'   measure of central tendency (mean for parametric, median for
 #'   nonparametric).
@@ -544,16 +547,22 @@ jjhistostatsBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' @param clinicalPreset Predefined configurations optimized for common
 #'   clinical data types. Automatically sets appropriate statistical methods and
 #'   visualization options.
-#' @param enableOneSampleTest Whether to enable and display one-sample
-#'   hypothesis test against a specified test value. When disabled, only
-#'   descriptive statistics and distribution visualization are shown.
+#' @param enableOneSampleTest Whether the Test Value below is used as the null
+#'   value of the one-sample test. IMPORTANT: this does not control whether a
+#'   test is run. The test appears whenever 'Statistical Results'
+#'   (resultssubtitle) is enabled; leaving this option off simply means the test
+#'   uses ggstatsplot's own default null of 0, which is rarely a meaningful
+#'   comparison for clinical data. To suppress the test entirely, turn off
+#'   'Statistical Results'.
 #' @param test.value Value to compare the sample against in one-sample test.
 #'   Only used when enableOneSampleTest is TRUE. Note: Testing against 0 is
 #'   rarely clinically meaningful for most biomedical data. Consider using a
 #'   clinically relevant threshold (e.g., reference range limit, treatment
 #'   cutoff, or population norm) for meaningful hypothesis testing.
-#' @param conf.level Confidence level for confidence intervals (between 0 and
-#'   1).
+#' @param conf.level Confidence level for the interval reported in the plot
+#'   subtitle, between 0.5 and 0.999. The old bounds allowed 1, at which the
+#'   entire statistical subtitle disappeared with no message, and 0, which
+#'   printed a zero-width "0\% CI".
 #' @param bf.message Whether to display Bayes Factor in the subtitle when
 #'   using Bayesian analysis.
 #' @param digits Number of decimal places for displaying statistics in the

@@ -1709,7 +1709,17 @@ jjridgesClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                             group = factor(rep(c("g1", "g2"), c(n1, n2)))
                         )
                         model <- aov(value ~ group, data = df)
-                        result <- effectsize::eta_squared(model, ci = 0.95)
+                        # alternative = "two.sided" is essential here. effectsize defaults to
+                        # "greater" for variance-explained measures, which returns a ONE-SIDED
+                        # interval whose upper bound is always exactly 1. The table prints that
+                        # under columns headed "Effect CI Lower/Upper" alongside Cohen's d,
+                        # Hedges' g, Cliff's delta and Hodges-Lehmann, all of which ARE
+                        # two-sided -- so the same two columns silently mixed conventions.
+                        # Measured: eta2 = 0.137 was reported as [0.038, 1.000]; the two-sided
+                        # interval is [0.025, 0.288], which is a reportable result rather than
+                        # an apparently useless one.
+                        result <- effectsize::eta_squared(model, ci = 0.95,
+                                                          alternative = "two.sided")
                         effect_size <- as.numeric(result$Eta2)
                         ci_lower <- result$CI_low
                         ci_upper <- result$CI_high
@@ -1725,7 +1735,10 @@ jjridgesClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                             group = factor(rep(c("g1", "g2"), c(n1, n2)))
                         )
                         model <- aov(value ~ group, data = df)
-                        result <- effectsize::omega_squared(model, ci = 0.95)
+                        # See the eta-squared branch above: two.sided, so this column means the
+                        # same thing whichever effect size the user picked.
+                        result <- effectsize::omega_squared(model, ci = 0.95,
+                                                            alternative = "two.sided")
                         effect_size <- as.numeric(result$Omega2)
                         ci_lower <- result$CI_low
                         ci_upper <- result$CI_high

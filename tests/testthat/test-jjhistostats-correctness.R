@@ -106,7 +106,7 @@ test_that("jjhistostats detects and rejects single factor variable", {
       data = data_with_factor,
       dep = "tumor_grade"
     )
-  }, regexp = "categorical")
+  }, regexp = "requires a numeric variable")
 })
 
 test_that("jjhistostats rejects multiple factor variables", {
@@ -124,7 +124,7 @@ test_that("jjhistostats rejects multiple factor variables", {
       data = data_multi_factor,
       dep = c("stage", "grade")
     )
-  }, regexp = "categorical")
+  }, regexp = "requires a numeric variable")
 })
 
 test_that("jjhistostats works with all numeric variables", {
@@ -164,7 +164,7 @@ test_that("jjhistostats rejects ordinal factors (prevents spurious analysis)", {
       data = data_ordinal,
       dep = "tumor_grade"
     )
-  }, regexp = "categorical")
+  }, regexp = "requires a numeric variable")
 })
 
 # ============================================================================

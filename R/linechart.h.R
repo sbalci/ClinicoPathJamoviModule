@@ -273,7 +273,7 @@ linechartBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             super$initialize(
                 package = "ClinicoPath",
                 name = "linechart",
-                version = c(1,0,4),
+                version = c(1,0,5),
                 options = options,
                 results = linechartResults$new(options=options),
                 data = data,

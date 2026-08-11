@@ -26,7 +26,7 @@ test_that("jjhistostats integrates with all test datasets", {
       dep = dataset_info$dep
     )
 
-    expect_s3_class(result, "jjhistostatsResults",
+    expect_true(inherits(result, "jjhistostatsResults"),
                    info = paste("Failed for dataset:", dataset_info$name))
   }
 })

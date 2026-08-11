@@ -3010,7 +3010,6 @@ out-of-scope findings from the same audit, deferred for separate work.
 
 
 
-/release-review-function jjridges
 /release-review-function jwaffle
 /release-review-function jjscatterstats
 /release-review-function jjcorrmat
@@ -3055,6 +3054,8 @@ out-of-scope findings from the same audit, deferred for separate work.
 
 for all: 
 Rscript scripts/build_site.R
+devtools check
+chector
 
 
 

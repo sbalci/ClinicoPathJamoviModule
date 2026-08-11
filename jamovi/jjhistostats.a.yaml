@@ -4,7 +4,7 @@ title: Histogram
 menuGroup: JJStatsPlot
 menuSubgroup: Distribution
 # menuSubtitle: Histogram
-version: '1.0.4'
+version: '1.0.5'
 jas: '1.2'
 
 
@@ -88,24 +88,29 @@ options:
       title: 'Type of Statistic'
       type: List
       options:
-        - title: Parametric (t-test, normal distribution)
+        - title: Parametric (one-sample t-test)
           name: parametric
-        - title: Nonparametric (Mann-Whitney, no distribution assumption)
+        - title: Nonparametric (Wilcoxon signed-rank)
           name: nonparametric
-        - title: Robust (trimmed mean, outlier-resistant)
+        - title: Robust (bootstrap-t, trimmed mean)
           name: robust
-        - title: Bayes (Bayesian inference)
+        - title: Bayes (Bayesian one-sample t-test)
           name: bayes
       default: parametric
       description:
           R: >
-            Type of statistical test for normality assessment. 'parametric' uses
-            Shapiro-Wilk test, 'nonparametric' uses Anderson-Darling test,
-            'robust' uses robust normality tests, 'bayes' provides Bayesian analysis.
+            Which ONE-SAMPLE LOCATION TEST is reported in the plot subtitle, comparing the
+            variable against the Test Value. 'parametric' is a one-sample t-test,
+            'nonparametric' a Wilcoxon signed-rank test, 'robust' a bootstrap-t test on a
+            trimmed mean, and 'bayes' a Bayesian one-sample t-test. This option does NOT
+            perform a normality test - no Shapiro-Wilk, Anderson-Darling or similar statistic
+            is computed or displayed anywhere in this analysis.
           ui: >
-            Choose statistical approach: Parametric (best for normally distributed lab values like cholesterol), 
-            Nonparametric (for skewed data or ordinal scales like tumor grades), 
-            Robust (when outliers are present), Bayes (for uncertainty quantification).
+            Which one-sample test compares your variable against the Test Value: Parametric
+            (t-test, assumes approximate normality), Nonparametric (Wilcoxon signed-rank, for
+            skewed data or ordinal scales), Robust (trimmed mean, resists outliers), or Bayes
+            (gives a Bayes factor alongside the estimate). This chooses the TEST, not a
+            normality check.
 
 
 
@@ -205,11 +210,17 @@ options:
       default: false
       description:
           R: >
-            Whether to enable and display one-sample hypothesis test against a specified test value.
-            When disabled, only descriptive statistics and distribution visualization are shown.
+            Whether the Test Value below is used as the null value of the one-sample test.
+            IMPORTANT: this does not control whether a test is run. The test appears whenever
+            'Statistical Results' (resultssubtitle) is enabled; leaving this option off simply
+            means the test uses ggstatsplot's own default null of 0, which is rarely a
+            meaningful comparison for clinical data. To suppress the test entirely, turn off
+            'Statistical Results'.
           ui: >
-            Enable to test whether your data differs significantly from a specific reference value
-            (e.g., population norm, clinical threshold). Leave disabled for purely descriptive analysis.
+            Use the Test Value below as the comparison value (e.g. a reference-range limit or
+            population norm). Note that turning this OFF does not remove the test - if
+            'Statistical Results' is on, the test still runs against a null of 0. Turn off
+            'Statistical Results' for a purely descriptive histogram.
 
     - name: test.value
       title: Test Value
@@ -230,11 +241,13 @@ options:
       title: Confidence Level
       type: Number
       default: 0.95
-      min: 0
-      max: 1
+      min: 0.5
+      max: 0.999
       description:
           R: >
-            Confidence level for confidence intervals (between 0 and 1).
+            Confidence level for the interval reported in the plot subtitle, between 0.5 and
+            0.999. The old bounds allowed 1, at which the entire statistical subtitle
+            disappeared with no message, and 0, which printed a zero-width "0% CI".
 
     - name: bf.message
       title: Bayes factor message

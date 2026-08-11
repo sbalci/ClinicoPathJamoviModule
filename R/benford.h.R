@@ -153,7 +153,7 @@ benfordBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             super$initialize(
                 package = "ClinicoPath",
                 name = "benford",
-                version = c(1,0,4),
+                version = c(1,0,5),
                 options = options,
                 results = benfordResults$new(options=options),
                 data = data,

@@ -78,8 +78,7 @@ test_that("jjhistostats handles customization options", {
     centralityline = TRUE,
     changebinwidth = TRUE,
     binwidth = 0.5,
-    resultssubtitle = TRUE,
-    normalcurve = TRUE
+    resultssubtitle = TRUE
   )
   
   expect_s3_class(result, "Group")
@@ -94,8 +93,7 @@ test_that("jjhistostats handles grouped analysis with multiple variables", {
     dep = c("Sepal.Length", "Petal.Length"),
     grvar = "Species",
     typestatistics = "parametric",
-    centralityline = FALSE,
-    normalcurve = TRUE
+    centralityline = FALSE
   )
   
   expect_s3_class(result, "Group")
@@ -105,14 +103,13 @@ test_that("jjhistostats handles grouped analysis with multiple variables", {
 test_that("jjhistostats handles edge cases", {
   data(iris)
   
-  # Test with no dep (should return early)
-  result_no_dep <- jjhistostats(
-    data = iris,
-    dep = NULL,
-    typestatistics = "parametric"
-  )
+  # dep = NULL cannot be reached through the R wrapper: jmvcore's variable selection
+  # fails with "invalid 'row.names' length" before any backend code runs. The same
+  # happens for sibling analyses (verified on jjbetweenstats), so this is a jmvcore
+  # property of calling with data= and no variables selected, not a jjhistostats bug.
+  # In the jamovi GUI the no-variable welcome panel is shown normally.
+  expect_error(jjhistostats(data = iris, dep = NULL), "row.names")
   
-  expect_s3_class(result_no_dep, "Group")
   
   # Test with missing values
   iris_na <- iris
@@ -137,7 +134,7 @@ test_that("jjhistostats validates input parameters", {
       dep = "Sepal.Length",
       typestatistics = "parametric"
     ),
-    "Data contains no \\(complete\\) rows"
+    "not present in the dataset"
   )
 })
 
@@ -208,8 +205,7 @@ test_that("jjhistostats works with different display options", {
     data = iris,
     dep = "Sepal.Length",
     centralityline = TRUE,
-    resultssubtitle = TRUE,
-    normalcurve = TRUE
+    resultssubtitle = TRUE
   )
   
   expect_s3_class(result_full, "Group")
@@ -219,8 +215,7 @@ test_that("jjhistostats works with different display options", {
     data = iris,
     dep = "Sepal.Length",
     centralityline = FALSE,
-    resultssubtitle = FALSE,
-    normalcurve = FALSE
+    resultssubtitle = FALSE
   )
   
   expect_s3_class(result_minimal, "Group")

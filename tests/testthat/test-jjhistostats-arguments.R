@@ -18,7 +18,7 @@ test_that("jjhistostats respects all statistical type options", {
       typestatistics = stat_type
     )
 
-    expect_s3_class(result, "jjhistostatsResults",
+    expect_true(inherits(result, "jjhistostatsResults"),
                    info = paste("Failed for typestatistics:", stat_type))
   }
 })
@@ -35,7 +35,7 @@ test_that("jjhistostats respects all centrality type options", {
       centralitytype = cent_type
     )
 
-    expect_s3_class(result, "jjhistostatsResults",
+    expect_true(inherits(result, "jjhistostatsResults"),
                    info = paste("Failed for centralitytype:", cent_type))
   }
 })
@@ -51,7 +51,7 @@ test_that("jjhistostats respects all clinical preset options", {
       clinicalPreset = preset
     )
 
-    expect_s3_class(result, "jjhistostatsResults",
+    expect_true(inherits(result, "jjhistostatsResults"),
                    info = paste("Failed for preset:", preset))
   }
 })
@@ -156,7 +156,7 @@ test_that("jjhistostats respects bin width customization", {
       binwidth = bw
     )
 
-    expect_s3_class(result, "jjhistostatsResults",
+    expect_true(inherits(result, "jjhistostatsResults"),
                    info = paste("Failed for binwidth =", bw))
   }
 })
@@ -172,7 +172,7 @@ test_that("jjhistostats respects confidence level parameter", {
       conf.level = conf
     )
 
-    expect_s3_class(result, "jjhistostatsResults",
+    expect_true(inherits(result, "jjhistostatsResults"),
                    info = paste("Failed for conf.level:", conf))
   }
 })
@@ -189,7 +189,7 @@ test_that("jjhistostats respects decimal places parameter", {
       digits = d
     )
 
-    expect_s3_class(result, "jjhistostatsResults",
+    expect_true(inherits(result, "jjhistostatsResults"),
                    info = paste("Failed for digits =", d))
   }
 })
@@ -225,7 +225,7 @@ test_that("jjhistostats respects plot dimension parameters", {
       plotheight = dim$height
     )
 
-    expect_s3_class(result, "jjhistostatsResults",
+    expect_true(inherits(result, "jjhistostatsResults"),
                    info = paste("Failed for width =", dim$width, "height =", dim$height))
   }
 })
@@ -257,7 +257,7 @@ test_that("jjhistostats respects centrality line aesthetic parameters", {
       centralitylinetype = lt
     )
 
-    expect_s3_class(result, "jjhistostatsResults",
+    expect_true(inherits(result, "jjhistostatsResults"),
                    info = paste("Failed for linetype:", lt))
   }
 })
@@ -303,7 +303,7 @@ test_that("jjhistostats handles combinations of statistical type and centrality"
       centralitytype = combinations$centralitytype[i]
     )
 
-    expect_s3_class(result, "jjhistostatsResults",
+    expect_true(inherits(result, "jjhistostatsResults"),
                    info = paste("Failed for typestatistics =", combinations$typestatistics[i],
                                "centralitytype =", combinations$centralitytype[i]))
   }
@@ -352,7 +352,7 @@ test_that("jjhistostats handles grouped analysis with different statistical type
       typestatistics = stat_type
     )
 
-    expect_s3_class(result, "jjhistostatsResults",
+    expect_true(inherits(result, "jjhistostatsResults"),
                    info = paste("Failed for grouped analysis with typestatistics:", stat_type))
   }
 })
@@ -385,7 +385,7 @@ test_that("jjhistostats handles one-sample test with different statistical types
       test.value = 200
     )
 
-    expect_s3_class(result, "jjhistostatsResults",
+    expect_true(inherits(result, "jjhistostatsResults"),
                    info = paste("Failed for one-sample test with typestatistics:", stat_type))
   }
 })

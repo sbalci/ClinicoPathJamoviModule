@@ -4,7 +4,7 @@ title: 'Treatment Response: Patient-Level Burden'
 menuGroup: OncoPath
 menuSubgroup: 'Patient Follow-Up Plots'
 menuSubtitle: 'One burden value per patient or visit'
-version: '1.0.4'
+version: '1.0.5'
 jas: '1.2'
 
 description:

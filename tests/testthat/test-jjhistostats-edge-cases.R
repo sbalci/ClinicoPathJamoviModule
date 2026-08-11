@@ -85,13 +85,16 @@ test_that("jjhistostats handles constant variables", {
   const_data <- jjhistostats_test
   const_data$constant_var <- 50
 
-  # Should error or warn about zero variance
-  expect_condition(
+  # A jamovi analysis reports problems in its results panel, not by signalling an R
+  # condition -- an R warning goes to stderr, which the jamovi GUI never shows. So the
+  # contract is: complete without error, and say so on screen.
+  res <- expect_no_error(
     jjhistostats(
       data = const_data,
       dep = "constant_var"
     )
   )
+  expect_match(res$todo$content, "constant|zero variability|no variability", ignore.case = TRUE)
 })
 
 test_that("jjhistostats handles near-constant variables", {
@@ -358,13 +361,20 @@ test_that("jjhistostats handles NaN values", {
   nan_data <- jjhistostats_test
   nan_data$age_years[1:3] <- NaN
 
-  # Should handle like NA
-  expect_condition(
+  # NaN must be treated exactly like NA: is.na() is TRUE for NaN, so the rows are dropped
+  # and the reported n falls by the number of NaNs. No condition is signalled, and none
+  # should be -- silently-correct handling is the desired behaviour here.
+  res <- expect_no_error(
     jjhistostats(
       data = nan_data,
-      dep = "age_years"
+      dep = "age_years",
+      showInterpretation = TRUE
     )
   )
+  n_valid <- sum(!is.na(nan_data$age_years))
+  expect_lt(n_valid, nrow(nan_data))                      # the NaNs really are there
+  expect_match(res$interpretation$content,
+               paste0("Sample size:</strong> ", n_valid), fixed = TRUE)
 })
 
 test_that("jjhistostats handles test value at extreme of data range", {
