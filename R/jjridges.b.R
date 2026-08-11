@@ -416,10 +416,35 @@ jjridgesClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     "statistical test"
                 )
 
-                # Get first row as example (multiple comparisons handled in full table)
+                # Report the tests that were actually RUN, not the one that was requested.
+                # When parametric assumptions fail, .performSingleTest silently switches that
+                # comparison to Wilcoxon, so the table can hold a mix. This block used to print
+                # the requested test_type regardless: on five groups drawn from one N(10, 2),
+                # a single chance Shapiro result (p = 0.031) switched 4 of 10 comparisons to
+                # Wilcoxon while this text still read "Method: Parametric". That paragraph is
+                # explicitly offered as copy-ready text for manuscripts, so it must not
+                # misdescribe the analysis.
                 if (self$results$tests$rowCount > 0) {
+                    methods_used <- tryCatch(self$results$tests$asDF$method,
+                                             error = function(e) character(0))
+                    methods_used <- methods_used[!is.na(methods_used) & nzchar(methods_used)]
+                    method_line <- if (length(methods_used) == 0) {
+                        tools::toTitleCase(gsub("_", " ", test_type))
+                    } else {
+                        tab <- sort(table(methods_used), decreasing = TRUE)
+                        if (length(tab) == 1) names(tab)[1]
+                        else paste0("mixed - ",
+                                    paste0(names(tab), " (", as.integer(tab), ")", collapse = ", "),
+                                    "; requested ", tools::toTitleCase(gsub("_", " ", test_type)))
+                    }
                     text_summary <- paste0(text_summary,
-                        "<p>Method: ", tools::toTitleCase(gsub("_", " ", test_type)), "</p>",
+                        "<p>Method: ", method_line, "</p>",
+                        if (length(unique(methods_used)) > 1)
+                            paste0("<p>Note: not every comparison used the same test. Comparisons ",
+                                   "whose normality or equal-variance check failed were switched ",
+                                   "to a rank-based test; the Method column of the statistical ",
+                                   "table records what each row used.</p>")
+                        else "",
                         "<p>See full statistical table for p-values, effect sizes, and confidence intervals.</p>"
                     )
                 }
@@ -897,7 +922,18 @@ jjridgesClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 "Ridge plot analysis completed successfully \u2022 ",
                 n_obs, " observations across ", n_groups, " groups \u2022 ",
                 "Plot type: ", private$.option("plot_type"),
-                if(private$.option("show_stats")) paste0(" \u2022 Statistical tests: ", private$.option("test_type")) else ""
+                # Name the requested test, and flag when the analysis did not actually use it
+                # throughout -- .performSingleTest switches a comparison to Wilcoxon whenever
+                # its normality/variance check fails, so "parametric" alone can be untrue.
+                if (private$.option("show_stats"))
+                    paste0(" \u2022 Statistical tests: ", private$.option("test_type"),
+                           if (length(private$.assumptionSwitches) > 0)
+                               paste0(" (", length(private$.assumptionSwitches),
+                                      " comparison",
+                                      if (length(private$.assumptionSwitches) == 1) "" else "s",
+                                      " switched to Wilcoxon - see the table's Method column)")
+                           else "")
+                else ""
             )
             private$.addNotice(
                 type = "INFO",
@@ -2021,6 +2057,31 @@ jjridgesClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                         " auto-switched from t-test to Wilcoxon due to assumption",
                         " violations (normality/variance): ",
                         paste(private$.assumptionSwitches, collapse = " | ")
+                    )
+                )
+            }
+
+            # Multiplicity. With k groups the table holds k(k-1)/2 pairwise tests, and
+            # p_adjust_method defaults to "none". The only existing mention of correction sits
+            # in the Statistical Assumptions panel, which is `showAssumptions: false` by
+            # default -- so a user comparing five stages saw ten unadjusted p-values with
+            # nothing on screen about it. Say it where it cannot be missed, and only when it
+            # actually applies.
+            n_comparisons <- self$results$tests$rowCount
+            if (n_comparisons > 1 &&
+                identical(private$.option("p_adjust_method"), "none")) {
+                private$.addNotice(
+                    'WARNING',
+                    'Unadjusted p-values',
+                    paste0(
+                        n_comparisons, " pairwise comparisons are reported and no correction ",
+                        "for multiple testing has been applied, so the P-adj column repeats the ",
+                        "unadjusted p-value. Across ", n_comparisons,
+                        " independent tests at the 0.05 level the chance of at least one false ",
+                        "positive is about ",
+                        round(100 * (1 - 0.95^n_comparisons)), "% when every null is true. ",
+                        "Choose Bonferroni, Holm or FDR under 'P-value adjustment' if these ",
+                        "comparisons are being screened rather than pre-specified."
                     )
                 )
             }
