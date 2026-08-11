@@ -30,9 +30,8 @@ test_that("hullplot integrates with all test datasets", {
       hull_alpha = 0.3
     )
 
-    expect_s3_class(result, "hullplotResults",
-                   info = paste("Integration failed for dataset:", ds$name))
-    expect_true(!is.null(result$plot1),
+    expect_s3_class(result, "hullplotResults")
+    expect_true(!is.null(result$plot),
                info = paste("Plot missing for dataset:", ds$name))
   }
 })
@@ -333,8 +332,7 @@ test_that("hullplot handles all color palettes consistently", {
       hull_alpha = 0.3
     )
 
-    expect_s3_class(result, "hullplotResults",
-                   info = paste("Integration failed for palette:", pal))
+    expect_s3_class(result, "hullplotResults")
   }
 })
 
@@ -355,8 +353,7 @@ test_that("hullplot handles all plot themes consistently", {
       hull_alpha = 0.3
     )
 
-    expect_s3_class(result, "hullplotResults",
-                   info = paste("Integration failed for theme:", theme))
+    expect_s3_class(result, "hullplotResults")
   }
 })
 
@@ -371,7 +368,7 @@ test_that("hullplot handles combinations of all visual features", {
     y_var = "ki67_index",
     group_var = "treatment_arm",
     color_var = "response_status",
-    size_var = "age",
+    size_var = "tumor_volume",
     show_labels = TRUE,
     show_statistics = TRUE,
     confidence_ellipses = TRUE,
@@ -386,9 +383,7 @@ test_that("hullplot handles combinations of all visual features", {
     y_label = "Ki-67 Index (%)",
     plot_title = "Complete Integration Test",
     show_summary = TRUE,
-    show_assumptions = TRUE,
-    plotwidth = 800,
-    plotheight = 600
+    show_assumptions = TRUE
   )
 
   expect_s3_class(result, "hullplotResults")
@@ -491,8 +486,7 @@ test_that("hullplot handles different concavity settings across datasets", {
       show_labels = TRUE
     )
 
-    expect_s3_class(result, "hullplotResults",
-                   info = paste("Integration failed for concavity:", conc))
+    expect_s3_class(result, "hullplotResults")
   }
 })
 
@@ -506,9 +500,9 @@ test_that("hullplot handles progressive feature addition", {
     list(show_labels = TRUE, show_statistics = TRUE),
     list(show_labels = TRUE, show_statistics = TRUE, confidence_ellipses = TRUE),
     list(show_labels = TRUE, show_statistics = TRUE, confidence_ellipses = TRUE,
-         size_var = "age"),
+         size_var = "tumor_volume"),
     list(show_labels = TRUE, show_statistics = TRUE, confidence_ellipses = TRUE,
-         size_var = "age", color_var = "response_status")
+         size_var = "tumor_volume", color_var = "response_status")
   )
 
   for (i in seq_along(features_list)) {
@@ -524,8 +518,7 @@ test_that("hullplot handles progressive feature addition", {
 
     result <- do.call(hullplot, args)
 
-    expect_s3_class(result, "hullplotResults",
-                   info = paste("Failed for feature set", i))
+    expect_s3_class(result, "hullplotResults")
   }
 })
 
@@ -560,8 +553,7 @@ test_that("hullplot handles all datasets with consistent parameters", {
       color_palette = "viridis"
     )
 
-    expect_s3_class(result, "hullplotResults",
-                   info = paste("Consistent parameters failed for:", ds$name))
+    expect_s3_class(result, "hullplotResults")
   }
 })
 
@@ -590,7 +582,7 @@ test_that("hullplot output structure is consistent across all datasets", {
 
     # Check consistent output structure
     expect_s3_class(result, "hullplotResults")
-    expect_true(!is.null(result$plot1),
+    expect_true(!is.null(result$plot),
                info = paste("Plot missing for:", dataset_name))
   }
 })
@@ -609,7 +601,6 @@ test_that("hullplot handles repeated analyses with same data", {
       show_labels = TRUE
     )
 
-    expect_s3_class(result, "hullplotResults",
-                   info = paste("Failed on iteration", i))
+    expect_s3_class(result, "hullplotResults")
   }
 })

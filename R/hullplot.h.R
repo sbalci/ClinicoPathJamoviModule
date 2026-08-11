@@ -351,8 +351,10 @@ hullplotBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' @param size_var Optional continuous variable for sizing points based on
 #'   values.
 #' @param hull_concavity Controls the concavity of hull polygons. Lower values
-#'   create more concave hulls, higher values create more convex hulls. Range:
-#'   0-2, default: 2.
+#'   follow the point cloud more closely; higher values approach the convex
+#'   hull. The permitted range is 0-2 and the default of 2 matches ggforce; a
+#'   true convex hull needs a much larger value than this range allows. Ignored
+#'   when V8/concaveman are unavailable.
 #' @param hull_alpha Transparency level for hull polygons. 0 = completely
 #'   transparent, 1 = opaque.
 #' @param show_labels If TRUE, displays group labels inside hull regions.
@@ -364,12 +366,15 @@ hullplotBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' @param plot_title Custom title for the hull plot.
 #' @param x_label Custom label for X-axis. If empty, uses variable name.
 #' @param y_label Custom label for Y-axis. If empty, uses variable name.
-#' @param hull_expand Amount to expand hull boundaries beyond data points.
-#'   Higher values create larger hulls.
+#' @param hull_expand Padding added around each hull, as a fraction of the
+#'   plot area (0 = hull touches the outermost points, 1 = the whole panel).
+#'   Ignored when V8/concaveman are unavailable and convex hulls are drawn.
 #' @param show_statistics If TRUE, displays summary statistics for each group
 #'   in the output.
-#' @param outlier_detection If TRUE, identifies and highlights potential
-#'   outliers within groups.
+#' @param outlier_detection If TRUE, reports the number of potential outliers
+#'   in each group using the 1.5 x IQR rule applied separately to the X and Y
+#'   variables. Groups with fewer than 5 observations are reported as too small
+#'   rather than given a count. Outliers are counted, not marked on the plot.
 #' @param confidence_ellipses If TRUE, adds confidence ellipses in addition to
 #'   hull polygons.
 #' @param show_summary If TRUE, displays a plain-language summary of the

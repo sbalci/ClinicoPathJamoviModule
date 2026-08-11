@@ -145,9 +145,17 @@ test_that("jjscatterstats performance optimization works", {
     data = iris
   )
   
-  # Test that optimization methods exist
-  expect_true(exists(".prepareData", envir = analysis$.__enclos_env__$private))
-  expect_true(exists(".prepareOptions", envir = analysis$.__enclos_env__$private))
+  # jjscatterstats has NO caching layer: there is no .prepareData, no .prepareOptions and no
+  # options hash anywhere in R/jjscatterstats.b.R (grep count 0). Those methods belong to
+  # sibling analyses (jjhistostats, jjridges); this test asserted a feature that was never
+  # implemented here, so it could only ever fail. Assert the structure that does exist.
+  priv <- analysis$.__enclos_env__$private
+  for (m in c(".run", ".plot", ".plot2", ".plot3", ".applyClinicalPreset", ".resolveLabels"))
+    expect_true(is.function(priv[[m]]), info = m)
+
+  # Each render path derives its own data. That is correct but not free -- if profiling ever
+  # shows it matters on a large cohort, a shared .prepareData() is the change to make.
+  expect_false(exists(".prepareData", envir = priv))
 })
 
 test_that("jjscatterstats works with grouped analysis", {

@@ -82,13 +82,25 @@ test_that("jjcorrmat handles edge cases", {
 test_that("jjcorrmat validates input parameters", {
   data(iris)
   
-  # Test with empty data
+  # An empty data frame has no such columns, so option validation rejects the
+  # variables before the analysis body is reached.
   expect_error(
     jjcorrmat(
       data = data.frame(),
       dep = c("Sepal.Length", "Sepal.Width"),
       typestatistics = "parametric"
     ),
-    "Data contains no \\(complete\\) rows"
+    "not present in the dataset"
   )
+
+  # A data frame that has the columns but no rows reaches the backend's own
+  # guard, which reports through the HTML notices panel rather than throwing
+  # (jmvcore::Notice objects are not serialisable).
+  res <- jjcorrmat(
+    data = iris[0, ],
+    dep = c("Sepal.Length", "Sepal.Width"),
+    typestatistics = "parametric"
+  )
+  expect_match(res$warnings$content, "no complete rows")
+  expect_equal(nrow(as.data.frame(res$table)), 0L)
 })

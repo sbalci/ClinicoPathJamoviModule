@@ -327,21 +327,40 @@ jjcorrmatResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                         `title`="Variable 2", 
                         `type`="text"),
                     list(
-                        `name`="r", 
-                        `title`="r / rho", 
-                        `type`="number"),
+                        `name`="n", 
+                        `title`="N", 
+                        `type`="integer"),
                     list(
-                        `name`="p", 
-                        `title`="p-value", 
+                        `name`="r", 
+                        `title`="Coefficient", 
                         `type`="number"),
                     list(
                         `name`="conf_low", 
-                        `title`="CI Lower", 
-                        `type`="number"),
+                        `title`="Lower", 
+                        `type`="number", 
+                        `superTitle`="Confidence interval"),
                     list(
                         `name`="conf_high", 
-                        `title`="CI Upper", 
-                        `type`="number"),
+                        `title`="Upper", 
+                        `type`="number", 
+                        `superTitle`="Confidence interval"),
+                    list(
+                        `name`="p", 
+                        `title`="p", 
+                        `type`="number", 
+                        `format`="zto,pvalue", 
+                        `visible`="(typestatistics:parametric || typestatistics:nonparametric || typestatistics:robust)"),
+                    list(
+                        `name`="p_adj", 
+                        `title`="p (adjusted)", 
+                        `type`="number", 
+                        `format`="zto,pvalue", 
+                        `visible`="(typestatistics:parametric || typestatistics:nonparametric || typestatistics:robust)"),
+                    list(
+                        `name`="bf", 
+                        `title`="BF10", 
+                        `type`="number", 
+                        `visible`="(typestatistics:bayes)"),
                     list(
                         `name`="method", 
                         `title`="Method", 
@@ -349,7 +368,8 @@ jjcorrmatResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     list(
                         `name`="group", 
                         `title`="Group", 
-                        `type`="text"))))}))
+                        `type`="text", 
+                        `visible`="(grvar)"))))}))
 
 jjcorrmatBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
     "jjcorrmatBase",
@@ -385,7 +405,9 @@ jjcorrmatBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   matrices for each level of the grouping variable.
 #' @param typestatistics Type of correlation analysis to perform. 'parametric'
 #'   uses Pearson correlation, 'nonparametric' uses Spearman's rho, 'robust'
-#'   uses percentage bend correlation, 'bayes' computes Bayes factors.
+#'   uses Winsorized Pearson correlation (the most extreme 20 percent of
+#'   observations in each tail are pulled in rather than removed), 'bayes'
+#'   reports the median posterior estimate and BF10.
 #' @param matrixtype Display upper triangular, lower triangular or full
 #'   matrix.
 #' @param matrixmethod The visualization method of correlation matrix to be
@@ -394,7 +416,9 @@ jjcorrmatBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   insignificant.
 #' @param conflevel Confidence level for confidence intervals.
 #' @param padjustmethod Adjustment method for multiple comparisons.
-#' @param k Number of decimal places for displaying correlation coefficients.
+#' @param k Number of decimal places for the correlation coefficients printed
+#'   inside the plot. The correlation table is formatted by jamovi and is not
+#'   affected.
 #' @param partial Compute partial correlations instead of zero-order
 #'   correlations. Partial correlations control for all other variables in the
 #'   analysis.

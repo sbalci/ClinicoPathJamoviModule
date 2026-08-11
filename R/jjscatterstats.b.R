@@ -101,6 +101,56 @@ jjscatterstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
             private$.applyClinicalPreset()
             private$.generateExplanations()
+
+            # grouped_ggscatterstats() has no p-adjustment argument: each facet's correlation
+            # is tested at the nominal level and the raw p is printed on that panel. With k
+            # groups that is k tests. Reproduced on histopathology (Age x OverallTime by
+            # Grade): raw 0.3015 / 0.0281 / 0.2069, Holm-adjusted 0.4138 / 0.0842 / 0.4138.
+            # No displayed number is wrong; the omission is the family it belongs to.
+            if (!is.null(self$options$grvar) && isTRUE(private$.option("resultssubtitle"))) {
+                n_groups <- length(unique(stats::na.omit(self$data[[self$options$grvar]])))
+                if (n_groups > 1)
+                    private$.appendWarning(paste0(
+                        " <b>One test per group, unadjusted.</b> Each of the ", n_groups,
+                        " panels shows its own correlation tested at the nominal level, with ",
+                        "no correction for the fact that ", n_groups, " tests are being read ",
+                        "together. If you are screening groups rather than testing one ",
+                        "pre-specified comparison, adjust the p-values yourself (Holm or FDR ",
+                        "over the ", n_groups, " values) before drawing conclusions."))
+            }
+
+            # Degenerate-data check. The same test already existed in .plot3, but .plot3 only
+            # renders when an aesthetic mapping is set (its visible: expression), so the
+            # MAIN plot -- the default output everyone sees -- had no guard at all. Verified:
+            # a constant dep variable rendered a scatter plot with no warning, while the same
+            # data through .plot3 correctly reported "Correlation not computed". Running the
+            # check in .run() means it fires whichever plots are on screen.
+            x_vals <- self$data[[self$options$dep]]
+            y_vals <- self$data[[self$options$group]]
+            if (!is.null(x_vals) && !is.null(y_vals)) {
+                complete <- stats::complete.cases(x_vals, y_vals)
+                n_complete <- sum(complete)
+                degenerate <- n_complete < 3 ||
+                    length(unique(x_vals[complete])) < 2 ||
+                    length(unique(y_vals[complete])) < 2
+                if (degenerate && ("warnings" %in% self$results$itemNames)) {
+                    reason <- if (n_complete < 3)
+                        paste0("only ", n_complete, " complete pair",
+                               if (n_complete == 1) "" else "s", " of values")
+                    else if (length(unique(x_vals[complete])) < 2)
+                        paste0("'", self$options$dep, "' takes the same value in every row")
+                    else
+                        paste0("'", self$options$group, "' takes the same value in every row")
+                    current <- self$results$warnings$content
+                    if (is.null(current)) current <- ""
+                    self$results$warnings$setContent(paste0(current,
+                        "<p style='color:#856404;'> <b>Correlation not computed:</b> ", reason,
+                        ". A correlation needs at least 3 complete pairs and variation in both ",
+                        "variables; the plot below shows the points but no coefficient is ",
+                        "meaningful.</p>"))
+                    self$results$warnings$setVisible(TRUE)
+                }
+            }
         },
 
         # Assemble the near-identical preset-notification HTML from a single
@@ -137,20 +187,24 @@ jjscatterstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 preset_message <- private$.presetMessage(
                     "Biomarker Correlation",
                     c(
-                        "<li>Statistical test: <strong>Nonparametric (Spearman correlation)</strong></li>",
-                        "<li>Additional plot: <strong>ggpubr scatter plot enabled</strong></li>",
-                        "<li>Color palette: <strong>JCO (Journal of Clinical Oncology)</strong></li>"
+                        "<li>Statistical test: <strong>Nonparametric (Spearman correlation)</strong></li>"
                     )
                 )
                 private$overrides[["typestatistics"]] <- "nonparametric"
-                private$overrides[["addGGPubrPlot"]] <- TRUE
-                private$overrides[["ggpubrPalette"]] <- "jco"
+                # The ggpubr panel and its palette are NOT set here, and the banner no longer
+                # claims them. `overrides` is runtime R6 state, whereas the panel's
+                # visibility -- `visible: (addGGPubrPlot)` in the .r.yaml -- is evaluated by
+                # jamovi against the OPTIONS object, which the override never touches.
+                # Verified: with this preset selected, results$ggpubrPlot$visible was FALSE
+                # while the banner announced "ggpubr scatter plot enabled". The palette
+                # override was independently inert (see .plotGGPubr). Tick 'Publication-ready
+                # plot (ggpubr)' in the UI to get that panel.
 
             } else if (preset == "treatment_response_analysis") {
                 preset_message <- private$.presetMessage(
                     "Treatment Response Analysis",
                     c(
-                        "<li>Statistical test: <strong>Robust (trimmed mean correlation)</strong></li>",
+                        "<li>Statistical test: <strong>Robust (Winsorized Pearson correlation)</strong></li>",
                         "<li>Marginal distributions: <strong>Enabled</strong></li>"
                     )
                 )
@@ -184,7 +238,7 @@ jjscatterstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     test_type,
                     "parametric" = "The Pearson correlation coefficient (r) measures the strength and direction of the <strong>linear</strong> relationship between the two variables. The p-value indicates the statistical significance of the correlation.",
                     "nonparametric" = "Spearman's rho measures the strength and direction of the <strong>monotonic (rank-based)</strong> relationship between the two variables, and does not assume a linear relationship or normally distributed data. The p-value indicates the statistical significance of the association.",
-                    "robust" = "The robust (percentage-bend) correlation coefficient measures the association between the two variables while <strong>down-weighting the influence of outliers</strong>. The p-value indicates the statistical significance of the association.",
+                    "robust" = "The robust (Winsorized Pearson) correlation coefficient measures the association between the two variables while <strong>down-weighting the influence of outliers</strong>. The p-value indicates the statistical significance of the association.",
                     "bayes" = "The Bayesian analysis reports a Bayes factor quantifying the <strong>strength of evidence</strong> for or against an association between the two variables, alongside the estimated correlation.",
                     "The correlation coefficient measures the strength and direction of the relationship between the two variables. The p-value indicates the statistical significance of the correlation."
                 )
@@ -270,24 +324,33 @@ jjscatterstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 results.subtitle = private$.option("resultssubtitle"),
                 conf.level = self$options$conflevel,
                 bf.message = self$options$bfmessage,
-                k = self$options$k,
+                # ggscatterstats 1.0.0 has NO `method`, `formula`, `k`, `marginal.type`,
+                # `xfill` or `yfill` formals -- those names land in `...` and are silently
+                # discarded. Worse, overwriting `smooth.line.args` with a two-element list
+                # DELETED the package default, which is
+                #   list(linewidth = 1.5, color = "blue", method = "lm", formula = y ~ x)
+                # so geom_smooth() was left with method = NULL and fell back to LOESS. Net
+                # effect: the default "Linear Model (lm)" drew a loess curve, and all three
+                # smoothMethod values behaved identically. Verified against the installed
+                # ggstatsplot. The correct homes are smooth.line.args / digits /
+                # xsidehistogram.args / ysidehistogram.args.
+                digits = self$options$k,
                 marginal = private$.option("marginal"),
-                marginal.type = self$options$marginalType,
                 point.args = list(
                     size = self$options$pointsize,
                     alpha = self$options$pointalpha
                 ),
-                method = self$options$smoothMethod,  # Wire smoothMethod
-                formula = smooth_formula,            # GAM needs an explicit spline formula
                 smooth.line.args = list(
                     linewidth = self$options$smoothlinesize,
-                    color = self$options$smoothlinecolor
+                    color = self$options$smoothlinecolor,
+                    method = self$options$smoothMethod,
+                    formula = smooth_formula
                 )
             )
 
             if (private$.option("marginal")) {
-                .args$xfill <- self$options$xsidefill
-                .args$yfill <- self$options$ysidefill
+                .args$xsidehistogram.args <- list(fill = self$options$xsidefill)
+                .args$ysidehistogram.args <- list(fill = self$options$ysidefill)
             }
 
             plot <- do.call(ggstatsplot::ggscatterstats, .args)
@@ -346,18 +409,19 @@ jjscatterstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     results.subtitle = !!private$.option("resultssubtitle"),
                     conf.level = !!self$options$conflevel,
                     bf.message = !!self$options$bfmessage,
-                    k = !!self$options$k,
+                    digits = !!self$options$k,
                     marginal = !!private$.option("marginal"),
-                    marginal.type = !!self$options$marginalType,  # CRITICAL FIX: Use actual option value
                     point.args = !!list(
                         size = self$options$pointsize,
                         alpha = self$options$pointalpha
                     ),
-                    method = !!self$options$smoothMethod, # Wire smoothMethod
-                    formula = !!smooth_formula,           # GAM needs an explicit spline formula
+                    # See the note in .plot: method/formula belong INSIDE smooth.line.args,
+                    # and overwriting that list without them silently reverts to loess.
                     smooth.line.args = !!list(
                         linewidth = self$options$smoothlinesize,
-                        color = self$options$smoothlinecolor
+                        color = self$options$smoothlinecolor,
+                        method = self$options$smoothMethod,
+                        formula = smooth_formula
                     )
                 )
             )
@@ -377,18 +441,17 @@ jjscatterstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                         results.subtitle = !!private$.option("resultssubtitle"),
                         conf.level = !!self$options$conflevel,
                         bf.message = !!self$options$bfmessage,
-                        k = !!self$options$k,
+                        digits = !!self$options$k,
                         marginal = !!private$.option("marginal"),
-                        marginal.type = !!self$options$marginalType, # Correctly use option
-                        xfill = !!self$options$xsidefill,
-                        yfill = !!self$options$ysidefill,
+                        xsidehistogram.args = !!list(fill = self$options$xsidefill),
+                        ysidehistogram.args = !!list(fill = self$options$ysidefill),
                         point.args = !!list(
                             size = self$options$pointsize,
                             alpha = self$options$pointalpha
                         ),
-                        method = !!self$options$smoothMethod,
-                        formula = !!smooth_formula,       # GAM needs an explicit spline formula
                         smooth.line.args = !!list(
+                            method = self$options$smoothMethod,
+                            formula = smooth_formula,
                             linewidth = self$options$smoothlinesize,
                             color = self$options$smoothlinecolor
                         )
@@ -408,13 +471,16 @@ jjscatterstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             plot <- eval(plot_call)
 
             if (self$options$showRugPlot) {
-                plot <- plot + ggplot2::geom_rug(alpha = 0.5)
+                # `&`, not `+`: grouped_ggscatterstats returns a patchwork, and `+` adds the
+                # layer to the LAST panel only. Measured on a 4-level grouping variable:
+                # `+` gave layer counts 4,4,4,5 while `&` gave 5,5,5,5.
+                plot <- plot & ggplot2::geom_rug(alpha = 0.5)
             }
 
             if (!private$.option("originaltheme")) {
-                plot <- plot + ggplot2::theme_bw()
+                plot <- plot & ggplot2::theme_bw()
             } else {
-                plot <- plot + ggstatsplot::theme_ggstatsplot()
+                plot <- plot & ggstatsplot::theme_ggstatsplot()
             }
 
             print(plot)
@@ -471,7 +537,26 @@ jjscatterstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             }
 
             if (!is.null(self$options$shapevar) && self$options$shapevar != "") {
-                point_aes$shape <- rlang::sym(self$options$shapevar)
+                # ggplot2's discrete shape palette carries only 6 values. Beyond that it
+                # emits a console warning -- which jamovi never shows -- and DROPS every
+                # point in the surplus levels. Measured: 7 levels drew 103 of 120 points,
+                # 12 levels drew 60 of 120, while the correlation printed below the plot
+                # was computed on all 120. A figure that silently omits half the cohort is
+                # worse than one without shapes, so map shape only when it can be honoured.
+                n_shape_levels <- length(unique(stats::na.omit(
+                    plotData[[self$options$shapevar]])))
+                if (n_shape_levels > 6) {
+                    private$.appendWarning(paste0(
+                        " <b>Shape mapping skipped:</b> '",
+                        htmltools::htmlEscape(self$options$shapevar), "' has ",
+                        n_shape_levels, " levels and ggplot2 provides only 6 distinct ",
+                        "shapes. Mapping it would have drawn no point at all for the ",
+                        "surplus levels while the correlation still used every case. ",
+                        "Use colour for a variable with this many levels, or group the ",
+                        "rare categories."))
+                } else {
+                    point_aes$shape <- rlang::sym(self$options$shapevar)
+                }
             }
 
             if (!is.null(self$options$alphavar) && self$options$alphavar != "") {
@@ -590,7 +675,10 @@ jjscatterstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 # probe is retained as a defensive guard (jmvcore throws rather than
                 # returning NULL on access to an undefined results item).
                 if (!is.null(warning_msg) && ("warnings" %in% self$results$itemNames)) {
-                    current_warnings <- self$results$warnings$state
+                    # $content, not $state: setContent() writes $content and never
+                    # populates $state, so reading $state always yielded "" and each
+                    # warning silently replaced the one before it.
+                    current_warnings <- self$results$warnings$content
                     if (is.null(current_warnings)) {
                         current_warnings <- ""
                     }
@@ -630,12 +718,25 @@ jjscatterstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                         method = cor_method
                     )
 
+                    # Symbol per method: the coefficient was printed as "r" whatever ran,
+                    # so a Spearman result was labelled with Pearson's symbol. Honour the
+                    # user's decimal-places option here too (it was hard-coded to 3), and
+                    # report n -- the panel gave a coefficient and a p-value with no
+                    # denominator anywhere in the analysis.
+                    cor_symbol <- switch(cor_method,
+                                         pearson  = "r",
+                                         spearman = "rho",
+                                         kendall  = "tau",
+                                         "r")
+                    dp <- max(0L, min(5L, as.integer(self$options$k)))
                     cor_text <- sprintf(
-                        "%s: r = %.3f, p %s %.3f",
+                        paste0("%s: %s = %.", dp, "f, p %s %.", max(dp, 3L), "f, n = %d"),
                         method_label,
+                        cor_symbol,
                         cor_result$estimate,
                         ifelse(cor_result$p.value < 0.001, "<", "="),
-                        ifelse(cor_result$p.value < 0.001, 0.001, cor_result$p.value)
+                        ifelse(cor_result$p.value < 0.001, 0.001, cor_result$p.value),
+                        n_complete
                     )
 
                     p <- p + ggplot2::labs(subtitle = cor_text)
@@ -680,6 +781,54 @@ jjscatterstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         }
 
         ,
+        # The ggpubr panels take their correlation from `ggpubrCorrMethod`, which is a
+        # SEPARATE option from `typestatistics` that drives the main ggstatsplot panels. A
+        # user who switches the analysis to Spearman but leaves ggpubrCorrMethod at its
+        # default therefore gets two different coefficients for the same two variables in the
+        # same output, with nothing saying why. Measured on 80 points: main panel rho =
+        # 0.6275, ggpubr panel r = 0.6683. Both are correct; the silence is the problem.
+        # Append to the Messages output. Kept in one place because the previous inline
+        # copies read $state while writing setContent(), which are different slots on an
+        # Html item, so each warning silently replaced the one before it.
+        .appendWarning = function(html) {
+            if (!("warnings" %in% self$results$itemNames)) return(invisible(NULL))
+            current <- self$results$warnings$content
+            if (is.null(current)) current <- ""
+            if (grepl(substr(html, 1, 40), current, fixed = TRUE)) return(invisible(NULL))
+            self$results$warnings$setContent(
+                paste0(current, "<p style='color:#856404;'>", html, "</p>"))
+            self$results$warnings$setVisible(TRUE)
+            invisible(NULL)
+        },
+
+        .warnCorrMethodMismatch = function() {
+            if (!isTRUE(self$options$ggpubrAddCorr)) return(invisible(NULL))
+            implied <- switch(as.character(private$.option("typestatistics")),
+                              parametric = "pearson", nonparametric = "spearman", NULL)
+            if (is.null(implied)) return(invisible(NULL))          # robust/bayes: no analogue
+            chosen <- self$options$ggpubrCorrMethod
+            if (identical(implied, chosen)) return(invisible(NULL))
+
+            msg <- paste0(
+                " The publication-ready panel is reporting a <b>", chosen,
+                "</b> correlation while the main plot reports <b>", implied,
+                "</b>, because 'Correlation method (ggpubr)' is set independently of ",
+                "'Statistical Test Type'. Both coefficients are correct for this data, but ",
+                "they are different statistics - set the two to match unless you intend to ",
+                "show both."
+            )
+            if ("warnings" %in% self$results$itemNames) {
+                current <- self$results$warnings$content
+                if (is.null(current)) current <- ""
+                if (!grepl("Correlation method (ggpubr)", current, fixed = TRUE)) {
+                    self$results$warnings$setContent(
+                        paste0(current, "<p style='color:#856404;'>", msg, "</p>"))
+                    self$results$warnings$setVisible(TRUE)
+                }
+            }
+            invisible(NULL)
+        },
+
         .plotGGPubr = function(image, ...) {
             # Validate inputs
             if (is.null(self$options$dep) || is.null(self$options$group))
@@ -702,6 +851,20 @@ jjscatterstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 palette = private$.option("ggpubrPalette")
             )
 
+            # A journal palette needs something to colour. This panel plots one ungrouped
+            # cloud, so there is no discrete scale and the palette cannot show: jco, npg and
+            # lancet rendered byte-identical output. Say so rather than leave a control that
+            # visibly does nothing. The grouped panel below (which colours by the Split By
+            # variable) does honour it.
+            if (is.null(self$options$grvar) &&
+                !identical(private$.option("ggpubrPalette"), "jco")) {
+                private$.appendWarning(paste0(
+                    " <b>Colour palette not applied:</b> the publication-ready panel draws a ",
+                    "single ungrouped set of points, so there is no grouping for a journal ",
+                    "palette to colour. Set a 'Split By' variable to see the palette take ",
+                    "effect."))
+            }
+
             # CRITICAL FIX: Implement ggpubrAddSmooth option
             # Build the 'add' parameter based on user selections
             # ggpubr::ggscatter 'add' argument only accepts a single string in some versions
@@ -713,6 +876,7 @@ jjscatterstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 args$conf.int <- TRUE
                 args$cor.coef <- TRUE
                 args$cor.method <- self$options$ggpubrCorrMethod
+                private$.warnCorrMethodMismatch()
             } else if (self$options$ggpubrAddSmooth) {
                 # Only set loess here if reg.line is NOT set
                 add_element <- "loess"
@@ -760,6 +924,11 @@ jjscatterstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 data = mydata,
                 x = dep,
                 y = group,
+                # `color = grvar` is what makes `palette` mean anything: ggpubr applies a
+                # discrete palette to a colour/fill scale, and without a mapping there is no
+                # scale to apply it to. Verified before this change: the jco, npg and lancet
+                # palettes produced BYTE-IDENTICAL png output.
+                color = grvar,
                 palette = private$.option("ggpubrPalette"),
                 facet.by = grvar
             )
@@ -775,6 +944,7 @@ jjscatterstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 args$conf.int <- TRUE
                 args$cor.coef <- TRUE
                 args$cor.method <- self$options$ggpubrCorrMethod
+                private$.warnCorrMethodMismatch()
             } else if (self$options$ggpubrAddSmooth) {
                 # Only set loess here if reg.line is NOT set
                 add_element <- "loess"

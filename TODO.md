@@ -3010,10 +3010,6 @@ out-of-scope findings from the same audit, deferred for separate work.
 
 
 
-/release-review-function jwaffle
-/release-review-function jjscatterstats
-/release-review-function jjcorrmat
-/release-review-function hullplot
 /release-review-function jjbetweenstats
 /release-review-function jjwithinstats
 /release-review-function jjdotplotstats
@@ -3029,7 +3025,7 @@ out-of-scope findings from the same audit, deferred for separate work.
 
 - I will release jjstatsplot module.
 - review vignettes in jjstatsplot repository. check if their content are up to date. if not, update them. pay attention to the new options added in recent releases. If there are mentions of not yet release functions and features, note that they will be released in the future.
--  update NEWS.md 
+- update NEWS.md 
 
 
 /release-review-function tableone
@@ -3049,7 +3045,7 @@ out-of-scope findings from the same audit, deferred for separate work.
 
 - I will release ClinicoPathDescriptives module.
 - review vignettes in ClinicoPathDescriptives repository. check if their content are up to date. if not, update them. pay attention to the new options added in recent releases. If there are mentions of not yet release functions and features, note that they will be released in the future.
--  update NEWS.md 
+- update NEWS.md 
 
 
 for all: 
@@ -3266,6 +3262,13 @@ Each change needs `jmvtools::prepare()` to reach `.h.R`.
 
 - [x] `decision.r.yaml:11` — fixed
 - [ ] 25 remaining across 16 files; full list in the grep below
+- **CAUTION (verified 2026-08-11):** the list below is over-broad - not every leading-`!` form is
+  broken. `jjscatterstats.r.yaml:86`, `visible: (!is.null(colorvar) || !is.null(sizevar) || ...)`,
+  was tested directly against the installed jmvcore and resolves **correctly**: FALSE with no
+  aesthetic variable set, TRUE with `colorvar`, TRUE with `sizevar`. The
+  `(!is.null(x) && x != "")` entries for `decisioncompare` are the same shape. Test each form
+  before "fixing" it - rewriting a working expression is a regression, and the whole
+  jjscatterstats analysis (7 visible expressions, all forms) was verified sound.
 
 ```
 advancedtrials.r.yaml:131:      visible: (!biomarker_strategy:all_comers)
@@ -3327,3 +3330,34 @@ API and will fail `R CMD check --run-donttest` until `prepare()` + `document()` 
       was an unrelated menuGroup change). R's `yaml` package now reads every option `name` as a
       string; previously 84 files handed back `FALSE`, silently breaking `tests/generate_tests.R`
       and the audit tests. Found during the kappaSizeFixedN release review.
+
+- [ ] [tests] Rewrite `tests/testthat/test-jjridges.R` against the real `jjridgesClass`.
+      The file had never executed: it opened with `library(ClinicoPathJamoviModule)`, which is
+      the repository name, not the package (`ClinicoPath`), so testthat reported a single
+      file-level error and all twelve tests inside were invisible. Fixing that plus 19
+      `ClinicoPathJamoviModule:::` references, a `jmvcore::Output$new(type='html')` call using
+      a non-existent argument, and the mock's method environments (re-parented from `baseenv()`
+      onto the package namespace so `.()` resolves) got 3 of 12 passing. The rest are defeated
+      by the approach: the file builds a fake `self` as a plain list and rebinds extracted
+      private methods onto it, which the current R6 class does not support. They now skip with
+      a reason. Use `jjridgesClass$new(options = ..., data = ...)` and
+      `a$.__enclos_env__$private$...` instead - see `test-jjridges-release-review.R`.
+      Found during the jjridges release review, 2026-08-11.
+
+- [ ] [tests] Pre-existing flake: `invalid 'row.names' length` from `jmvcore::select()`.
+      Three jjcorrmat tests error inside `jmvcore`'s `Analysis$init()` at
+      `select(private$.data, self$options$varsRequired)` - `test-jjcorrmat-basic.R`
+      ("handles different datasets") and two in `test-jjcorrmat-integration.R`. No jjcorrmat
+      code appears on the stack, `varsRequired` is correct and non-empty at the point of
+      failure, and the counts are byte-identical on unmodified code (verified by reverting
+      `R/jjcorrmat.b.R` and both yamls and re-running: 236 pass / 5 fail / 6 error either way).
+      It is order-dependent inside a single `devtools::load_all()` + testthat session: once it
+      trips, every later `jjcorrmat()` call in that session fails, including calls on a fresh
+      20-row `data.frame`. It does NOT reproduce when `jmvcore::select` is replaced via
+      `assignInNamespace` with a functionally identical wrapper, which points at the compiled
+      binding rather than at the data. Not root-caused - reproduce with
+      `testthat::test_dir("tests/testthat", filter = "jjcorrmat")`.
+      Also hits `test-hullplot-integration.R` ("output structure is consistent across all
+      datasets") identically, before and after that review's fixes - so it is not specific
+      to one analysis.
+      Found during the jjcorrmat release review, 2026-08-11.

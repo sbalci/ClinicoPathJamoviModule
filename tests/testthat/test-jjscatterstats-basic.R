@@ -67,7 +67,7 @@ test_that("jjscatterstats handles weak negative correlation", {
     group = "lymph_nodes"
   )
 
-  expect_s3_class(result, "jjscatterstats_Results")
+  expect_s3_class(result, "jjscatterstatsResults")
 })
 
 test_that("jjscatterstats handles zero correlation", {

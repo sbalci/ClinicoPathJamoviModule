@@ -8,11 +8,11 @@
 library(testthat)
 
 # Load all test datasets
-data(jjridges_test, package = "ClinicoPath", envir = environment())
-data(jjridges_clinical, package = "ClinicoPath", envir = environment())
-data(jjridges_treatment, package = "ClinicoPath", envir = environment())
-data(jjridges_biomarker, package = "ClinicoPath", envir = environment())
-data(jjridges_survival, package = "ClinicoPath", envir = environment())
+jjridges_test <- getExportedValue("ClinicoPath", "jjridges_test")
+jjridges_clinical <- getExportedValue("ClinicoPath", "jjridges_clinical")
+jjridges_treatment <- getExportedValue("ClinicoPath", "jjridges_treatment")
+jjridges_biomarker <- getExportedValue("ClinicoPath", "jjridges_biomarker")
+jjridges_survival <- getExportedValue("ClinicoPath", "jjridges_survival")
 
 # ═══════════════════════════════════════════════════════════
 # 1. Complete Biomarker Analysis Workflow
@@ -404,7 +404,7 @@ test_that("jjridges integrates clinical presets with appropriate data", {
   # Treatment response preset
   result_treat <- jjridges(
     data = jjridges_treatment,
-    x_var = "response_score",
+    x_var = "pain_score",  # jjridges_treatment has no response_score
     y_var = "treatment_group",
     clinicalPreset = "treatment_response"
   )
@@ -442,7 +442,10 @@ test_that("jjridges handles multiple analyses from same dataset", {
   for (var in variables) {
     results[[var]] <- jjridges(
       data = jjridges_test,
-      x_var = var,
+      # The wrapper resolves x_var with jmvcore::enquo()/resolveQuo() (jjridges.h.R:936), so
+      # a bare `x_var = var` captures the symbol and is deparsed to the string "var".
+      # Unquote to pass the loop variable's value.
+      x_var = !!var,
       y_var = "tumor_stage",
       plot_type = "density_ridges"
     )

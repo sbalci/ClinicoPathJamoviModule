@@ -86,24 +86,41 @@ items:
           - name: var2
             title: Variable 2
             type: text
+          - name: n
+            title: N
+            type: integer
           - name: r
-            title: r / rho
-            type: number
-          - name: p
-            title: p-value
+            title: Coefficient
             type: number
           - name: conf_low
-            title: CI Lower
+            title: Lower
             type: number
+            superTitle: Confidence interval
           - name: conf_high
-            title: CI Upper
+            title: Upper
             type: number
+            superTitle: Confidence interval
+          - name: p
+            title: p
+            type: number
+            format: zto,pvalue
+            visible: (typestatistics:parametric || typestatistics:nonparametric || typestatistics:robust)
+          - name: p_adj
+            title: p (adjusted)
+            type: number
+            format: zto,pvalue
+            visible: (typestatistics:parametric || typestatistics:nonparametric || typestatistics:robust)
+          - name: bf
+            title: BF10
+            type: number
+            visible: (typestatistics:bayes)
           - name: method
             title: Method
             type: text
           - name: group
             title: Group
             type: text
+            visible: (grvar)
 
 
 

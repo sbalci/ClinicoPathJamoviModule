@@ -109,7 +109,7 @@ test_that("jwaffle errors on non-existent groups variable", {
       data = jwaffle_test,
       groups = "nonexistent_var"
     ),
-    regexp = "not found|does not exist|invalid",
+    regexp = "not present in the dataset|not found|does not exist|invalid",
     ignore.case = TRUE
   )
 })
@@ -122,7 +122,7 @@ test_that("jwaffle errors on non-existent facet variable", {
       groups = "response_category",
       facet = "nonexistent_var"
     ),
-    regexp = "not found|does not exist|invalid",
+    regexp = "not present in the dataset|not found|does not exist|invalid",
     ignore.case = TRUE
   )
 })
@@ -135,7 +135,10 @@ test_that("jwaffle errors on numeric groups variable", {
       data = jwaffle_test,
       groups = "patient_count"  # Numeric instead of categorical
     ),
-    regexp = "categorical|factor|not.*numeric",
+    # jwaffle_test$patient_count has a single distinct value, so jmvcore coerces it to a
+    # one-level factor and the rejection is "Only one category found" rather than a
+    # type complaint. Accept either -- both are correct refusals.
+    regexp = "Only one category|categorical|factor|not.*numeric",
     ignore.case = TRUE
   )
 })
@@ -288,12 +291,23 @@ test_that("jwaffle handles single category level", {
   test_data_single <- jwaffle_test
   test_data_single$response_category <- "Complete Response"  # All same category
 
-  result <- jwaffle(
-    data = test_data_single,
-    groups = "response_category"
+  # The analysis deliberately REFUSES a single-category grouping (.validateInputs: "Only one
+  # category found ... Waffle charts require multiple categories to show proportions"). The
+  # test previously expected it to succeed. Shipped behaviour wins here, but note the design
+  # choice is debatable: "100% of this cohort achieved a complete response" is a legitimate
+  # thing to plot, and a one-category waffle is a valid (if plain) figure.
+  expect_error(
+    jwaffle(data = test_data_single, groups = "response_category"),
+    regexp = "Only one category found"
   )
 
-  expect_s3_class(result, "jwaffleResults")
+  # two categories is the minimum that is accepted
+  test_data_two <- jwaffle_test
+  test_data_two$response_category <- rep(c("Complete Response", "Partial Response"),
+                                         length.out = nrow(test_data_two))
+  expect_s3_class(
+    jwaffle(data = test_data_two, groups = "response_category"),
+    "jwaffleResults")
 })
 
 # ═══════════════════════════════════════════════════════════

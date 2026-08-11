@@ -899,23 +899,34 @@ commit_repo_enhanced <- function(repo_dir, commit_message, validate_repo = TRUE,
       return(TRUE)
     }
 
-    # Add all changes
-    add_result <- system("git add -A", intern = TRUE, ignore.stderr = TRUE)
-    if (add_result != 0) {
-      warning("⚠️ Git add failed for ", repo_name)
+    # Add all changes.
+    # NOTE: system(intern = TRUE) returns the command's OUTPUT LINES, not its
+    # exit status. `git add` prints nothing, so this used to be character(0),
+    # and `character(0) != 0` is logical(0) -> "argument is of length zero".
+    # Without intern, system() returns the exit status, which is what we want.
+    add_status <- system("git add -A", ignore.stdout = TRUE, ignore.stderr = TRUE)
+    if (add_status != 0) {
+      warning("⚠️ Git add failed for ", repo_name, " (exit status ", add_status, ")")
       return(FALSE)
     }
 
-    # Commit with message
-    escaped_message <- gsub('"', '\\"', commit_message)
-    commit_cmd <- sprintf('git commit -m "%s"', escaped_message)
-    commit_result <- system(commit_cmd, intern = TRUE, ignore.stderr = TRUE)
+    # Commit with message. shQuote handles embedded quotes; the previous
+    # gsub('"', '\\"', ...) was a no-op because "\\\"" is just a literal quote
+    # once gsub has processed the replacement string.
+    commit_cmd <- paste("git commit -m", shQuote(commit_message))
+    commit_output <- suppressWarnings(
+      system(commit_cmd, intern = TRUE, ignore.stderr = TRUE))
+    # With intern = TRUE the exit status arrives as an attribute, and only on
+    # failure - its absence means the command succeeded.
+    commit_status <- attr(commit_output, "status")
+    if (is.null(commit_status)) commit_status <- 0L
 
-    if (commit_result == 0 || any(grepl("nothing to commit", commit_result))) {
+    if (commit_status == 0 || any(grepl("nothing to commit", commit_output))) {
       cat("  ✅ Committed changes in:", repo_name, "\n")
       return(TRUE)
     } else {
-      warning("⚠️ Git commit returned non-zero status for ", repo_name)
+      warning("⚠️ Git commit returned exit status ", commit_status, " for ", repo_name,
+              if (length(commit_output)) paste0(": ", paste(commit_output, collapse = " | ")))
       return(FALSE)
     }
 

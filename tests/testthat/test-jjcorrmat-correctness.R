@@ -104,13 +104,15 @@ test_that("jjcorrmat detects and rejects factor variables", {
     stringsAsFactors = FALSE
   )
 
-  # Should error with clear message about categorical variables
+  # jamovi's own option validation (`permitted: [ numeric ]` in the .a.yaml)
+  # rejects the factor before the analysis body runs, so the error names the
+  # offending variable and the required type rather than saying "categorical".
   expect_error({
     jjcorrmat(
       data = data_with_factor,
       dep = c("var1", "var2", "var3")
     )
-  }, regexp = "categorical")
+  }, regexp = "numeric variable.*var3")
 })
 
 test_that("jjcorrmat works with all numeric variables", {
@@ -146,13 +148,13 @@ test_that("jjcorrmat rejects multiple factor variables", {
     stringsAsFactors = FALSE
   )
 
-  # Should error listing all categorical variables
+  # As above: option validation rejects the first non-numeric variable.
   expect_error({
     jjcorrmat(
       data = data_multi_factor,
       dep = c("var1", "var2", "var3")
     )
-  }, regexp = "categorical")
+  }, regexp = "numeric variable.*var1")
 })
 
 # ============================================================================
@@ -271,14 +273,14 @@ test_that("jjcorrmat partial correlations require 3+ variables", {
     stringsAsFactors = FALSE
   )
 
-  # Partial correlations with <3 variables should warn
-  expect_warning({
-    jjcorrmat(
-      data = test_data,
-      dep = c("var1", "var2"),
-      partial = TRUE
-    )
-  })
+  # Notices are rendered into the `warnings` HTML output rather than raised as
+  # R conditions, because jmvcore::Notice objects cannot be serialised.
+  res <- jjcorrmat(
+    data = test_data,
+    dep = c("var1", "var2"),
+    partial = TRUE
+  )
+  expect_match(res$warnings$content, "Partial correlations require at least 3 variables")
 })
 
 test_that("jjcorrmat partial correlations work with 3+ variables", {
@@ -508,12 +510,11 @@ test_that("jjcorrmat validates minimum sample size", {
     stringsAsFactors = FALSE
   )
 
-  expect_warning({
-    jjcorrmat(
-      data = small_data,
-      dep = c("var1", "var2", "var3")
-    )
-  }, regexp = "Sample size")
+  res <- jjcorrmat(
+    data = small_data,
+    dep = c("var1", "var2", "var3")
+  )
+  expect_match(res$warnings$content, "Small sample size")
 })
 
 test_that("jjcorrmat warns about too many variables", {
@@ -523,12 +524,11 @@ test_that("jjcorrmat warns about too many variables", {
   test_data <- as.data.frame(matrix(rnorm(50 * many_vars), ncol = many_vars))
   names(test_data) <- paste0("var", 1:many_vars)
 
-  expect_warning({
-    jjcorrmat(
-      data = test_data,
-      dep = names(test_data)
-    )
-  }, regexp = ">10 variables")
+  res <- jjcorrmat(
+    data = test_data,
+    dep = names(test_data)
+  )
+  expect_match(res$warnings$content, "may be complex to interpret")
 })
 
 test_that("jjcorrmat handles constant variables", {

@@ -126,8 +126,11 @@ test_that("jjscatterstats handles constant dep variable", {
   test_data_const <- jjscatterstats_test
   test_data_const$ki67_index <- 50  # All values the same
 
-  # Should warn or error about zero variance
-  expect_condition(
+  # A jamovi analysis reports a problem in its results panel, not by signalling an R
+  # condition. Zero variance is now caught in .run() and stated in the Messages output
+  # (it used to be checked only in the optional aesthetics plot, so the main plot was
+  # silent). The contract is: complete without error, and say so on screen.
+  expect_no_condition(
     jjscatterstats(
       data = test_data_const,
       dep = "ki67_index",
@@ -141,8 +144,11 @@ test_that("jjscatterstats handles constant group variable", {
   test_data_const <- jjscatterstats_test
   test_data_const$tumor_size <- 50  # All values the same
 
-  # Should warn or error about zero variance
-  expect_condition(
+  # A jamovi analysis reports a problem in its results panel, not by signalling an R
+  # condition. Zero variance is now caught in .run() and stated in the Messages output
+  # (it used to be checked only in the optional aesthetics plot, so the main plot was
+  # silent). The contract is: complete without error, and say so on screen.
+  expect_no_condition(
     jjscatterstats(
       data = test_data_const,
       dep = "ki67_index",
@@ -163,7 +169,7 @@ test_that("jjscatterstats errors on non-existent dep variable", {
       dep = "nonexistent_var",
       group = "tumor_size"
     ),
-    regexp = "not found|does not exist|invalid",
+    regexp = "not present in the dataset|not found|does not exist|invalid",
     ignore.case = TRUE
   )
 })
@@ -176,7 +182,7 @@ test_that("jjscatterstats errors on non-existent group variable", {
       dep = "ki67_index",
       group = "nonexistent_var"
     ),
-    regexp = "not found|does not exist|invalid",
+    regexp = "not present in the dataset|not found|does not exist|invalid",
     ignore.case = TRUE
   )
 })
@@ -234,7 +240,7 @@ test_that("jjscatterstats handles minimum confidence level", {
     data = jjscatterstats_test,
     dep = "ki67_index",
     group = "tumor_size",
-    conflevel = 0.01
+    conflevel = 0.5   # the declared minimum
   )
 
   expect_s3_class(result, "jjscatterstatsResults")

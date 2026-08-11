@@ -302,7 +302,7 @@ test_that("jjscatterstats handles complete survival biomarker workflow", {
     typestatistics = "nonparametric",
     resultssubtitle = TRUE
   )
-  expect_s3_class(result3, "jjscatterstats_Results")
+  expect_s3_class(result3, "jjscatterstatsResults")
 
   # Step 4: Stratify by treatment
   result4 <- jjscatterstats(

@@ -315,15 +315,15 @@ test_that("hullplot error handling works correctly", {
   # Load test dataset
   data(hullplot_customer_data, package = "ClinicoPath")
   
-  # Test error handling for missing required variables
-  expect_error({
-    result <- ClinicoPath::hullplot(
-      data = hullplot_customer_data,
-      x_var = NULL,
-      y_var = "purchase_frequency",
-      group_var = "segment"
-    )
-  })
+  # An unselected variable is not an error: the analysis shows its
+  # getting-started panel and waits for the rest of the selection.
+  result <- ClinicoPath::hullplot(
+    data = hullplot_customer_data,
+    x_var = NULL,
+    y_var = "purchase_frequency",
+    group_var = "segment"
+  )
+  expect_match(result$todo$content, "Welcome to Hull Plot")
   
   # Test error handling for non-existent variables
   expect_error({

@@ -163,8 +163,7 @@ test_that("jjcorrmat handles p-value adjustment methods", {
       padjustmethod = method
     )
 
-    expect_s3_class(result, "jjcorrmatResults",
-                   info = paste("Failed for padjustmethod:", method))
+    expect_s3_class(result, "jjcorrmatResults")
   }
 })
 
@@ -246,8 +245,7 @@ test_that("jjcorrmat handles different significance levels", {
       siglevel = sig
     )
 
-    expect_s3_class(result, "jjcorrmatResults",
-                   info = paste("Failed for siglevel:", sig))
+    expect_s3_class(result, "jjcorrmatResults")
   }
 })
 
@@ -264,8 +262,7 @@ test_that("jjcorrmat handles different confidence levels", {
       conflevel = conf
     )
 
-    expect_s3_class(result, "jjcorrmatResults",
-                   info = paste("Failed for conflevel:", conf))
+    expect_s3_class(result, "jjcorrmatResults")
   }
 })
 
@@ -282,8 +279,7 @@ test_that("jjcorrmat handles different decimal places", {
       k = k
     )
 
-    expect_s3_class(result, "jjcorrmatResults",
-                   info = paste("Failed for k =", k))
+    expect_s3_class(result, "jjcorrmatResults")
   }
 })
 
@@ -308,8 +304,7 @@ test_that("jjcorrmat handles different datasets", {
       dep = vars
     )
 
-    expect_s3_class(result, "jjcorrmatResults",
-                   info = paste("Failed for dataset:", dataset_name))
+    expect_s3_class(result, "jjcorrmatResults")
   }
 })
 

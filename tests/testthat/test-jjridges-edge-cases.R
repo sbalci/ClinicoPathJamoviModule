@@ -8,8 +8,8 @@
 library(testthat)
 
 # Load test data
-data(jjridges_test, package = "ClinicoPath", envir = environment())
-data(jjridges_small, package = "ClinicoPath", envir = environment())
+jjridges_test <- getExportedValue("ClinicoPath", "jjridges_test")
+jjridges_small <- getExportedValue("ClinicoPath", "jjridges_small")
 
 # ═══════════════════════════════════════════════════════════
 # 1. Small Sample Sizes
@@ -131,7 +131,7 @@ test_that("jjridges errors on non-existent x variable", {
       x_var = "nonexistent_var",
       y_var = "tumor_stage"
     ),
-    regexp = "not found|does not exist|invalid",
+    regexp = "not present in the dataset|not found|does not exist|invalid",
     ignore.case = TRUE
   )
 })
@@ -153,15 +153,19 @@ test_that("jjridges errors on empty dataset", {
 
   empty_data <- jjridges_small[0, ]
 
-  expect_error(
+  # A jamovi analysis reports a problem in its results panel rather than by throwing an R
+  # condition -- an R error would blank the whole analysis, and stderr is invisible in the
+  # GUI. Verified behaviour: it completes and writes
+  #   "ERROR: Input Validation Error  No data available for analysis"
+  # into the notices output. That is the contract worth pinning.
+  res <- expect_no_error(
     jjridges(
       data = empty_data,
       x_var = "measurement",
       y_var = "group"
-    ),
-    regexp = "empty|no.*data|zero.*rows",
-    ignore.case = TRUE
+    )
   )
+  expect_match(res$notices$content, "No data available", fixed = TRUE)
 })
 
 # ═══════════════════════════════════════════════════════════

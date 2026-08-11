@@ -280,12 +280,12 @@ test_that("jjscatterstats ggpubr plot basic visual regression", {
     data = test_data,
     dep = "biomarker_a",
     group = "biomarker_b",
-    addggpubr = TRUE,
+    addGGPubrPlot = TRUE,
     ggpubrPalette = "jco",
     typestatistics = "parametric"
   )
 
-  plot <- extract_plot(result, "plot4")
+  plot <- extract_plot(result, "ggpubrPlot")
 
   if (!is.null(plot)) {
     vdiffr::expect_doppelganger(
@@ -306,14 +306,14 @@ test_that("jjscatterstats ggpubr plot with correlation visual regression", {
     data = test_data,
     dep = "biomarker_a",
     group = "biomarker_b",
-    addggpubr = TRUE,
+    addGGPubrPlot = TRUE,
     ggpubrAddCorr = TRUE,
     ggpubrCorrMethod = "pearson",
     ggpubrPalette = "npg",
     typestatistics = "parametric"
   )
 
-  plot <- extract_plot(result, "plot4")
+  plot <- extract_plot(result, "ggpubrPlot")
 
   if (!is.null(plot)) {
     vdiffr::expect_doppelganger(
@@ -334,13 +334,13 @@ test_that("jjscatterstats ggpubr plot with smooth line visual regression", {
     data = test_data,
     dep = "biomarker_a",
     group = "biomarker_b",
-    addggpubr = TRUE,
+    addGGPubrPlot = TRUE,
     ggpubrAddSmooth = TRUE,
     ggpubrPalette = "lancet",
     typestatistics = "parametric"
   )
 
-  plot <- extract_plot(result, "plot4")
+  plot <- extract_plot(result, "ggpubrPlot")
 
   if (!is.null(plot)) {
     vdiffr::expect_doppelganger(
@@ -362,14 +362,14 @@ test_that("jjscatterstats ggpubr plot grouped visual regression", {
     dep = "biomarker_a",
     group = "biomarker_b",
     grvar = "treatment",
-    addggpubr = TRUE,
+    addGGPubrPlot = TRUE,
     ggpubrAddCorr = TRUE,
     ggpubrCorrMethod = "spearman",
     ggpubrPalette = "aaas",
     typestatistics = "nonparametric"
   )
 
-  plot <- extract_plot(result, "plot4")
+  plot <- extract_plot(result, "ggpubrPlot")
 
   if (!is.null(plot)) {
     vdiffr::expect_doppelganger(
@@ -395,7 +395,7 @@ test_that("jjscatterstats with marginal histograms visual regression", {
     dep = "biomarker_a",
     group = "biomarker_b",
     marginal = TRUE,
-    marginaltype = "histogram",
+    marginalType = "histogram",
     typestatistics = "parametric",
     mytitle = "Scatter with Marginal Histograms"
   )
@@ -422,7 +422,7 @@ test_that("jjscatterstats with marginal density visual regression", {
     dep = "biomarker_a",
     group = "biomarker_b",
     marginal = TRUE,
-    marginaltype = "density",
+    marginalType = "density",
     typestatistics = "parametric",
     mytitle = "Scatter with Marginal Densities"
   )
@@ -449,7 +449,7 @@ test_that("jjscatterstats with marginal boxplots visual regression", {
     dep = "biomarker_a",
     group = "biomarker_b",
     marginal = TRUE,
-    marginaltype = "boxplot",
+    marginalType = "boxplot",
     typestatistics = "parametric",
     mytitle = "Scatter with Marginal Boxplots"
   )

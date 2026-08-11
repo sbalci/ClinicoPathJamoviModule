@@ -579,8 +579,12 @@ jjscatterstatsBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
 #' @param typestatistics Choose based on your data distribution. Pearson
 #'   assumes normality (common for lab values after transformation).  Spearman
 #'   works for any monotonic relationship (tumor grades, symptom scores).
-#'   Robust methods handle outlying patients. Bayesian analysis quantifies
-#'   evidence strength for clinical decision-making.
+#'   Robust uses a WINSORIZED PEARSON correlation, which pulls extreme values in
+#'   to a fixed quantile before computing Pearson's r; report it by that name,
+#'   not as a percentage-bend correlation, which is a different estimator
+#'   (verified: on the same 80 points statsExpressions returns 0.5894, matching
+#'   WRS2::wincor exactly, while WRS2::pbcor returns 0.6152). Bayesian analysis
+#'   quantifies evidence strength for clinical decision-making.
 #' @param mytitle .
 #' @param xtitle .
 #' @param ytitle .

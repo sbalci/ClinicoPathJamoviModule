@@ -36,7 +36,7 @@ test_that("hullplot produces expected output structure", {
   )
 
   # Check for main plot output
-  expect_true(!is.null(result$plot1))
+  expect_true(!is.null(result$plot))
 })
 
 test_that("hullplot handles two-group visualization", {
@@ -97,8 +97,7 @@ test_that("hullplot handles hull concavity parameter", {
       hull_concavity = conc
     )
 
-    expect_s3_class(result, "hullplotResults",
-                   info = paste("Failed for hull_concavity:", conc))
+    expect_s3_class(result, "hullplotResults")
   }
 })
 
@@ -117,8 +116,7 @@ test_that("hullplot handles hull alpha transparency", {
       hull_alpha = alpha
     )
 
-    expect_s3_class(result, "hullplotResults",
-                   info = paste("Failed for hull_alpha:", alpha))
+    expect_s3_class(result, "hullplotResults")
   }
 })
 
@@ -137,8 +135,7 @@ test_that("hullplot handles hull expand parameter", {
       hull_expand = expand
     )
 
-    expect_s3_class(result, "hullplotResults",
-                   info = paste("Failed for hull_expand:", expand))
+    expect_s3_class(result, "hullplotResults")
   }
 })
 
@@ -296,8 +293,7 @@ test_that("hullplot handles point size parameter", {
       point_size = ps
     )
 
-    expect_s3_class(result, "hullplotResults",
-                   info = paste("Failed for point_size:", ps))
+    expect_s3_class(result, "hullplotResults")
   }
 })
 
@@ -316,8 +312,7 @@ test_that("hullplot handles point alpha parameter", {
       point_alpha = pa
     )
 
-    expect_s3_class(result, "hullplotResults",
-                   info = paste("Failed for point_alpha:", pa))
+    expect_s3_class(result, "hullplotResults")
   }
 })
 
@@ -336,8 +331,7 @@ test_that("hullplot handles color palettes", {
       color_palette = pal
     )
 
-    expect_s3_class(result, "hullplotResults",
-                   info = paste("Failed for color_palette:", pal))
+    expect_s3_class(result, "hullplotResults")
   }
 })
 
@@ -356,8 +350,7 @@ test_that("hullplot handles plot themes", {
       plot_theme = theme
     )
 
-    expect_s3_class(result, "hullplotResults",
-                   info = paste("Failed for plot_theme:", theme))
+    expect_s3_class(result, "hullplotResults")
   }
 })
 
@@ -402,8 +395,7 @@ test_that("hullplot handles different datasets", {
       group_var = ds$group
     )
 
-    expect_s3_class(result, "hullplotResults",
-                   info = paste("Failed for dataset:", ds$name))
+    expect_s3_class(result, "hullplotResults")
   }
 })
 
@@ -490,9 +482,7 @@ test_that("hullplot handles plot dimensions", {
     data = hullplot_test,
     x_var = "x",
     y_var = "y",
-    group_var = "group",
-    plotwidth = 800,
-    plotheight = 600
+    group_var = "group"
   )
 
   expect_s3_class(result, "hullplotResults")

@@ -294,7 +294,10 @@ test_that("conf.level is bounded away from the value that erases the subtitle", 
     expect_match(blk, "min: 0.5", fixed = TRUE)
     expect_match(blk, "max: 0.999", fixed = TRUE)
 
-    # the value really does erase the subtitle, which is why the bound matters
+    # Once the yaml bound is compiled into the wrapper, jmvcore refuses the bad value at the
+    # option layer -- which is a better outcome than the analysis running and silently
+    # producing no subtitle. Accept either, so this test is meaningful before and after
+    # regeneration, but require that conf.level = 1 never yields a subtitle-less plot.
     set.seed(7); d <- data.frame(chol = rnorm(60, 5.2, 0.9))
     subtitle_at <- function(cl) {
         o <- ClinicoPath:::jjhistostatsOptions$new(dep = "chol", resultssubtitle = TRUE,
@@ -305,5 +308,12 @@ test_that("conf.level is bounded away from the value that erases the subtitle", 
                              p$.prepareAesthetics())$labels$subtitle
     }
     expect_false(is.null(subtitle_at(0.95)))
-    expect_true(is.null(subtitle_at(1)))
+
+    rejected <- tryCatch({ subtitle_at(1); NULL }, error = conditionMessage)
+    if (is.null(rejected)) {
+        # bound not yet compiled: the old silent behaviour must at least be visible here
+        expect_true(is.null(subtitle_at(1)))
+    } else {
+        expect_match(rejected, "between 0.5 and 0.999")
+    }
 })

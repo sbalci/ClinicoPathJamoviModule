@@ -113,11 +113,18 @@ hullplotClass <- if (requireNamespace("jmvcore")) R6::R6Class("hullplotClass",
                 jmvcore::reject("Variables not found in dataset: {missing}", missing = paste(missing_vars, collapse = ", "))
             }
 
-            # Guard against the same variable chosen for both axes, which would
-            # create duplicate column names in plot_data (downstream [[x_var]]
-            # would silently return only the first match).
+            # Guard against the same variable appearing twice among x/y/group,
+            # which creates duplicate column names in plot_data. `[[<-` then
+            # writes to the FIRST matching column, so selecting the X variable
+            # as the grouping variable silently converted the X axis to a
+            # factor and plotted the wrong data with no error.
             if (x_var == y_var) {
                 jmvcore::reject("X-Axis and Y-Axis variables must be different (both are set to '{var}').", var = x_var)
+            }
+            if (group_var == x_var || group_var == y_var) {
+                jmvcore::reject(
+                    "The Grouping Variable must differ from the X and Y variables ('{var}' is used for both). Grouping by an axis variable would place every distinct value in its own hull.",
+                    var = group_var)
             }
 
             # Prepare data - create subset with required variables
@@ -151,18 +158,42 @@ hullplotClass <- if (requireNamespace("jmvcore")) R6::R6Class("hullplotClass",
             if (!is.null(size_col) && size_col %in% names(plot_data)) {
                 required_cols <- c(required_cols, size_col)
             }
-            plot_data <- plot_data[complete.cases(plot_data[required_cols]), ]
+
+            # complete.cases() treats only NA as missing, so Inf/-Inf survived
+            # into the hull, the axis scales and - worse - the group statistics
+            # ("Inf +/- NaN") and the copy-ready summary, where an infinite
+            # centroid distance made every comparison read "well-separated".
+            # is.finite() rules out NA, NaN, Inf and -Inf for numeric columns in
+            # one step; factors keep the plain NA test.
+            n_before <- nrow(plot_data)
+            keep <- rep(TRUE, n_before)
+            n_nonfinite <- 0L
+            for (cc in required_cols) {
+                v <- plot_data[[cc]]
+                if (is.numeric(v)) {
+                    n_nonfinite <- n_nonfinite + sum(!is.na(v) & !is.finite(v))
+                    keep <- keep & is.finite(v)
+                } else {
+                    keep <- keep & !is.na(v)
+                }
+            }
+            plot_data <- plot_data[keep, , drop = FALSE]
+            n_excluded <- n_before - nrow(plot_data)
 
             if (nrow(plot_data) == 0) {
                 jmvcore::reject("No complete cases found for the selected variables.")
             }
 
-            # Convert group variable to factor
-            plot_data[[group_var]] <- as.factor(plot_data[[group_var]])
+            # Convert group variable to factor. droplevels() matters: a level
+            # whose every row was excluded above survives as an empty level, and
+            # downstream code counts levels() - producing "3 groups" for a
+            # two-group plot, an unused palette colour, and an outlier-panel row
+            # for a group that is not in the data.
+            plot_data[[group_var]] <- droplevels(as.factor(plot_data[[group_var]]))
 
             # Convert color mapping variable to factor if it's not the group variable
             if (color_mapping != group_var && color_mapping %in% names(plot_data)) {
-                plot_data[[color_mapping]] <- as.factor(plot_data[[color_mapping]])
+                plot_data[[color_mapping]] <- droplevels(as.factor(plot_data[[color_mapping]]))
             }
 
             # Validate group sizes and add warnings
@@ -172,6 +203,20 @@ hullplotClass <- if (requireNamespace("jmvcore")) R6::R6Class("hullplotClass",
 
             # Store validation warnings for later display
             validation_warnings <- list()
+
+            # Rows dropped above were previously invisible: the interpretation
+            # panel reported the surviving N with no indication that anything
+            # had been removed.
+            if (n_excluded > 0) {
+                validation_warnings$excluded <- sprintf(
+                    "%d of %d rows (%s%%) were excluded because a selected variable was missing%s. %d rows were plotted.",
+                    n_excluded, n_before,
+                    format(round(100 * n_excluded / n_before, 1)),
+                    if (n_nonfinite > 0)
+                        sprintf(" or not a finite number (%d infinite/undefined value(s) found)", n_nonfinite)
+                    else "",
+                    nrow(plot_data))
+            }
 
             if (length(small_groups) > 0) {
                 validation_warnings$small_groups <- sprintf(
@@ -267,7 +312,17 @@ hullplotClass <- if (requireNamespace("jmvcore")) R6::R6Class("hullplotClass",
             # Prepare data using cached method
             prepared <- private$.prepare_data()
             if (is.null(prepared)) {
-                return()  # Variables not selected or data preparation failed
+                # All three variables are selected (checked above), so reaching
+                # here means the dataset is empty or absent. Previously every
+                # panel was simply left blank with no explanation.
+                self$results$todo$setContent(paste0(
+                    "<div style='background-color: #fff3cd; border-left: 4px solid #ffc107; ",
+                    "padding: 15px; border-radius: 4px;'>",
+                    "<h4 style='color: #856404; margin-top: 0;'>No data to plot</h4>",
+                    "<p style='color: #856404; margin: 5px 0;'>The dataset contains no rows. ",
+                    "Check any row filters that are active, and confirm the data has been loaded.</p>",
+                    "</div>"))
+                return()
             }
 
             plot_data <- prepared$data
@@ -356,6 +411,15 @@ hullplotClass <- if (requireNamespace("jmvcore")) R6::R6Class("hullplotClass",
             # is needed here (it is unused on the convex-fallback path).
             hull_concavity <- self$options$hull_concavity
 
+            # Hull padding as a FRACTION OF THE PANEL ("npc"), not millimetres.
+            # The option is declared 0-1 with a 0.05 default, and ggforce's own
+            # default is unit(5, "mm"); handing 0-1 to "mm" made the control
+            # inert - sweeping the entire range grew the inked hull area by 68
+            # pixels out of 374,400 (0.018%) on an 800x600 render. In "npc" the
+            # same range spans a visible 0-100% of the panel, which is what the
+            # label "Higher values create larger hulls" promises.
+            hull_expand <- grid::unit(self$options$hull_expand, "npc")
+
             # Create base plot
             p <- ggplot2::ggplot(plot_data, ggplot2::aes(.data[[x_var]], .data[[y_var]]))
 
@@ -397,7 +461,7 @@ hullplotClass <- if (requireNamespace("jmvcore")) R6::R6Class("hullplotClass",
                     p <- p + ggforce::geom_mark_hull(
                         ggplot2::aes(fill = .data[[group_var]], label = .data[[group_var]]),
                         concavity = hull_concavity,
-                        expand = grid::unit(self$options$hull_expand, "mm"),
+                        expand = hull_expand,
                         alpha = self$options$hull_alpha,
                         show.legend = TRUE
                     )
@@ -405,7 +469,7 @@ hullplotClass <- if (requireNamespace("jmvcore")) R6::R6Class("hullplotClass",
                     p <- p + ggforce::geom_mark_hull(
                         ggplot2::aes(fill = .data[[group_var]]),
                         concavity = hull_concavity,
-                        expand = grid::unit(self$options$hull_expand, "mm"),
+                        expand = hull_expand,
                         alpha = self$options$hull_alpha,
                         show.legend = TRUE
                     )
@@ -696,7 +760,7 @@ hullplotClass <- if (requireNamespace("jmvcore")) R6::R6Class("hullplotClass",
                 "<h4 style='color: #0c5460;'>Plot Summary:</h4>",
                 "<ul>",
                 "<li><strong>Variables:</strong> ", htmltools::htmlEscape(x_var), " (X-axis) vs ", htmltools::htmlEscape(y_var), " (Y-axis)</li>",
-                "<li><strong>Groups:</strong> ", n_groups, " groups defined by ", htmltools::htmlEscape(group_var), "</li>",
+                "<li><strong>Groups:</strong> ", n_groups, if (n_groups == 1) " group" else " groups", " defined by ", htmltools::htmlEscape(group_var), "</li>",
                 "<li><strong>Observations:</strong> ", n_total, " data points</li>",
                 "</ul>",
 
@@ -801,10 +865,25 @@ hullplotClass <- if (requireNamespace("jmvcore")) R6::R6Class("hullplotClass",
                 "<div style='background-color: #ffffff; padding: 15px; border-radius: 6px; margin: 15px 0; border: 1px solid #c3e6cb;'>",
                 "<h4 style='color: #155724; margin-top: 0;'>Copy-Ready Text:</h4>",
                 "<p style='font-family: \"Times New Roman\", serif; line-height: 1.6; margin: 0;'>",
-                "<strong>Hull plot analysis revealed ", n_groups, " distinct groups based on ", htmltools::htmlEscape(group_var), " classifications. ",
-                "The visualization shows the relationship between ", htmltools::htmlEscape(x_var), " and ", htmltools::htmlEscape(y_var), " across ", n_total, " observations. ",
-                "Groups appear ", separation_quality, " in the two-dimensional space, ",
-                "with hull boundaries clearly delineating the extent of each group's distribution.</strong>",
+                # With a single group the comparative wording is not merely
+                # ungrammatical ("revealed 1 distinct groups"), it asserts a
+                # comparison that does not exist - and this text is offered for
+                # use in manuscripts. Give that case its own sentence.
+                if (n_groups < 2) paste0(
+                    "<strong>Hull plot analysis described a single group defined by ",
+                    htmltools::htmlEscape(group_var), ". ",
+                    "The visualization shows the relationship between ", htmltools::htmlEscape(x_var),
+                    " and ", htmltools::htmlEscape(y_var), " across ", n_total, " observations, ",
+                    "with a hull boundary delineating the extent of that group's distribution. ",
+                    "No between-group comparison is possible from a single group.</strong>"
+                ) else paste0(
+                    "<strong>Hull plot analysis revealed ", n_groups, " distinct groups based on ",
+                    htmltools::htmlEscape(group_var), " classifications. ",
+                    "The visualization shows the relationship between ", htmltools::htmlEscape(x_var),
+                    " and ", htmltools::htmlEscape(y_var), " across ", n_total, " observations. ",
+                    "Groups appear ", separation_quality, " in the two-dimensional space, ",
+                    "with hull boundaries clearly delineating the extent of each group's distribution.</strong>"
+                ),
                 "</p>",
                 "</div>",
 
@@ -828,10 +907,18 @@ hullplotClass <- if (requireNamespace("jmvcore")) R6::R6Class("hullplotClass",
                 "<h4 style='color: #155724;'>Clinical Interpretation:</h4>",
                 "<p style='color: #155724;'>",
                 "Hull plots are particularly valuable for identifying patient subgroups, treatment response patterns, ",
-                "and biomarker relationships. The ", separation_quality, " nature of these groups suggests ",
-                if (separation_quality == "well-separated") "clear distinctions between categories that may indicate meaningful biological or clinical differences."
-                else if (separation_quality == "moderately separated") "some overlap between categories, suggesting possible transitional states or shared characteristics."
-                else "substantial overlap between categories, indicating either similar underlying characteristics or the need for additional discriminating variables.",
+                "and biomarker relationships. ",
+                # The trailing `else` used to catch the single-group case and
+                # claim "substantial overlap between categories" when there was
+                # only one category.
+                if (n_groups < 2)
+                    "With only one group present there are no categories to compare; add a grouping variable with at least two levels, or check whether missing data removed every observation from the other groups."
+                else paste0(
+                    "The ", separation_quality, " nature of these groups suggests ",
+                    if (separation_quality == "well-separated") "clear distinctions between categories that may indicate meaningful biological or clinical differences."
+                    else if (separation_quality == "moderately separated") "some overlap between categories, suggesting possible transitional states or shared characteristics."
+                    else "substantial overlap between categories, indicating either similar underlying characteristics or the need for additional discriminating variables."
+                ),
                 "</p>",
 
                 "<p style='font-size: 11px; color: #6c757d; margin-top: 20px; font-style: italic;'>",

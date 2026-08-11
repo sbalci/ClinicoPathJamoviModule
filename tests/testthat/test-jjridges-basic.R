@@ -8,12 +8,12 @@
 library(testthat)
 
 # Load test datasets
-data(jjridges_test, package = "ClinicoPath", envir = environment())
-data(jjridges_clinical, package = "ClinicoPath", envir = environment())
-data(jjridges_treatment, package = "ClinicoPath", envir = environment())
-data(jjridges_biomarker, package = "ClinicoPath", envir = environment())
-data(jjridges_survival, package = "ClinicoPath", envir = environment())
-data(jjridges_small, package = "ClinicoPath", envir = environment())
+jjridges_test <- getExportedValue("ClinicoPath", "jjridges_test")
+jjridges_clinical <- getExportedValue("ClinicoPath", "jjridges_clinical")
+jjridges_treatment <- getExportedValue("ClinicoPath", "jjridges_treatment")
+jjridges_biomarker <- getExportedValue("ClinicoPath", "jjridges_biomarker")
+jjridges_survival <- getExportedValue("ClinicoPath", "jjridges_survival")
+jjridges_small <- getExportedValue("ClinicoPath", "jjridges_small")
 
 # ═══════════════════════════════════════════════════════════
 # 1. Function Existence and Basic Execution
@@ -703,7 +703,7 @@ test_that("jjridges handles treatment response preset", {
 
   result <- jjridges(
     data = jjridges_treatment,
-    x_var = "response_score",
+    x_var = "pain_score",  # jjridges_treatment has no response_score
     y_var = "treatment_group",
     clinicalPreset = "treatment_response"
   )

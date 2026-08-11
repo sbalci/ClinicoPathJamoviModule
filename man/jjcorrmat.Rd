@@ -39,7 +39,9 @@ matrices for each level of the grouping variable.}
 
 \item{typestatistics}{Type of correlation analysis to perform. 'parametric'
 uses Pearson correlation, 'nonparametric' uses Spearman's rho, 'robust'
-uses percentage bend correlation, 'bayes' computes Bayes factors.}
+uses Winsorized Pearson correlation (the most extreme 20 percent of
+observations in each tail are pulled in rather than removed), 'bayes'
+reports the median posterior estimate and BF10.}
 
 \item{matrixtype}{Display upper triangular, lower triangular or full
 matrix.}
@@ -54,7 +56,9 @@ insignificant.}
 
 \item{padjustmethod}{Adjustment method for multiple comparisons.}
 
-\item{k}{Number of decimal places for displaying correlation coefficients.}
+\item{k}{Number of decimal places for the correlation coefficients printed
+inside the plot. The correlation table is formatted by jamovi and is not
+affected.}
 
 \item{partial}{Compute partial correlations instead of zero-order
 correlations. Partial correlations control for all other variables in the

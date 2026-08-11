@@ -35,16 +35,15 @@ test_that("jjcorrmat handles data with high proportion of missing values", {
   n_missing <- round(nrow(test_data_missing) * 0.5)
   test_data_missing$ki67_index[1:n_missing] <- NA
 
-  # Should complete with warning for listwise
-  expect_warning(
-    jjcorrmat(
-      data = test_data_missing,
-      dep = c("tumor_size", "ki67_index", "mitotic_count"),
-      naHandling = "listwise"
-    ),
-    regexp = "missing|NA|removed|incomplete",
-    ignore.case = TRUE
+  # The listwise exclusion count is reported in the `warnings` HTML panel, not
+  # as an R warning (jmvcore::Notice objects are not serialisable, so this
+  # module renders every notice as HTML).
+  res_listwise <- jjcorrmat(
+    data = test_data_missing,
+    dep = c("tumor_size", "ki67_index", "mitotic_count"),
+    naHandling = "listwise"
   )
+  expect_match(res_listwise$warnings$content, "were excluded because they had a missing value")
 
   # Pairwise should handle better
   result <- jjcorrmat(
@@ -401,13 +400,16 @@ test_that("jjcorrmat handles NaN values", {
   nan_data <- jjcorrmat_test
   nan_data$tumor_size[1:3] <- NaN
 
-  # Should handle like NA
-  expect_condition(
-    jjcorrmat(
-      data = nan_data,
-      dep = c("tumor_size", "ki67_index", "mitotic_count")
-    )
+  # NaN is treated as missing: the rows are dropped and reported, and the
+  # remaining correlations are computed on the complete cases.
+  res <- jjcorrmat(
+    data = nan_data,
+    dep = c("tumor_size", "ki67_index", "mitotic_count")
   )
+  expect_match(res$warnings$content, "were excluded because they had a missing value")
+  tab <- as.data.frame(res$table)
+  expect_equal(nrow(tab), 3L)
+  expect_false(any(is.na(tab$r)))
 })
 
 test_that("jjcorrmat handles very strict significance level", {

@@ -27,8 +27,7 @@ test_that("hullplot respects all hull aesthetic parameters", {
       hull_expand = combinations$hull_expand[i]
     )
 
-    expect_s3_class(result, "hullplotResults",
-                   info = paste("Failed for combination", i))
+    expect_s3_class(result, "hullplotResults")
   }
 })
 
@@ -50,8 +49,7 @@ test_that("hullplot respects all point aesthetic parameters", {
       point_alpha = combinations$point_alpha[i]
     )
 
-    expect_s3_class(result, "hullplotResults",
-                   info = paste("Failed for combination", i))
+    expect_s3_class(result, "hullplotResults")
   }
 })
 
@@ -69,8 +67,7 @@ test_that("hullplot respects all color palette options", {
       show_labels = TRUE
     )
 
-    expect_s3_class(result, "hullplotResults",
-                   info = paste("Failed for palette:", pal))
+    expect_s3_class(result, "hullplotResults")
   }
 })
 
@@ -88,8 +85,7 @@ test_that("hullplot respects all plot theme options", {
       show_labels = TRUE
     )
 
-    expect_s3_class(result, "hullplotResults",
-                   info = paste("Failed for theme:", theme))
+    expect_s3_class(result, "hullplotResults")
   }
 })
 
@@ -111,9 +107,7 @@ test_that("hullplot handles combinations of theme and palette", {
       color_palette = combinations$color_palette[i]
     )
 
-    expect_s3_class(result, "hullplotResults",
-                   info = paste("Failed for theme:", combinations$plot_theme[i],
-                               "palette:", combinations$color_palette[i]))
+    expect_s3_class(result, "hullplotResults")
   }
 })
 
@@ -135,9 +129,7 @@ test_that("hullplot handles all display option combinations", {
       show_statistics = combinations$show_statistics[i]
     )
 
-    expect_s3_class(result, "hullplotResults",
-                   info = paste("Failed for labels:", combinations$show_labels[i],
-                               "stats:", combinations$show_statistics[i]))
+    expect_s3_class(result, "hullplotResults")
   }
 })
 
@@ -295,13 +287,10 @@ test_that("hullplot handles plot dimension parameters", {
       data = hullplot_test,
       x_var = "x",
       y_var = "y",
-      group_var = "group",
-      plotwidth = dim$width,
-      plotheight = dim$height
+      group_var = "group"
     )
 
-    expect_s3_class(result, "hullplotResults",
-                   info = paste("Failed for width =", dim$width, "height =", dim$height))
+    expect_s3_class(result, "hullplotResults")
   }
 })
 
@@ -324,9 +313,7 @@ test_that("hullplot handles comprehensive argument combinations", {
     plot_theme = "minimal",
     x_label = "Tumor Volume (cm³)",
     y_label = "Ki-67 Index (%)",
-    plot_title = "Treatment Response",
-    plotwidth = 800,
-    plotheight = 600
+    plot_title = "Treatment Response"
   )
 
   expect_s3_class(result, "hullplotResults")
@@ -375,7 +362,7 @@ test_that("hullplot handles publication-ready configuration", {
     x_var = "tumor_volume",
     y_var = "ki67_index",
     group_var = "treatment_arm",
-    size_var = "age",
+    size_var = "tumor_volume",
     show_labels = TRUE,
     show_statistics = TRUE,
     confidence_ellipses = TRUE,
@@ -388,8 +375,6 @@ test_that("hullplot handles publication-ready configuration", {
     x_label = "Tumor Volume (cm³)",
     y_label = "Ki-67 Proliferation Index (%)",
     plot_title = "Treatment Response: Tumor Characteristics",
-    plotwidth = 800,
-    plotheight = 600,
     show_summary = TRUE
   )
 
@@ -531,7 +516,7 @@ test_that("hullplot handles all clinical configuration options", {
     y_var = "ki67_index",
     group_var = "treatment_arm",
     color_var = "response_status",
-    size_var = "age",
+    size_var = "tumor_volume",
     show_labels = TRUE,
     show_statistics = TRUE,
     confidence_ellipses = TRUE,
@@ -559,8 +544,7 @@ test_that("hullplot handles different expansion values", {
       show_labels = TRUE
     )
 
-    expect_s3_class(result, "hullplotResults",
-                   info = paste("Failed for hull_expand:", expand))
+    expect_s3_class(result, "hullplotResults")
   }
 })
 

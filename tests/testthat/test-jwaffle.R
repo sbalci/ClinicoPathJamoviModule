@@ -58,7 +58,7 @@ describe("jwaffle Basic Functionality", {
       )
     })
     
-    expect_true(is.list(result))
+    expect_s3_class(result, "jwaffleResults")  # R6 object, not a list
   })
   
   test_that("jwaffle generates interpretation content", {
@@ -70,7 +70,7 @@ describe("jwaffle Basic Functionality", {
       groups = "category"
     )
     
-    expect_true(is.list(result))
+    expect_s3_class(result, "jwaffleResults")  # R6 object, not a list
     # Check if interpretation section exists (would be visible in actual jamovi interface)
   })
   
@@ -86,7 +86,7 @@ describe("jwaffle Basic Functionality", {
       )
     })
     
-    expect_true(is.list(result))
+    expect_s3_class(result, "jwaffleResults")  # R6 object, not a list
   })
   
   test_that("jwaffle creates faceted charts", {
@@ -101,7 +101,7 @@ describe("jwaffle Basic Functionality", {
       )
     })
     
-    expect_true(is.list(result))
+    expect_s3_class(result, "jwaffleResults")  # R6 object, not a list
   })
 })
 
@@ -121,7 +121,7 @@ describe("jwaffle Parameters", {
         )
       })
       
-      expect_true(is.list(result))
+      expect_s3_class(result, "jwaffleResults")  # R6 object, not a list
     }
   })
   
@@ -145,8 +145,8 @@ describe("jwaffle Parameters", {
       )
     })
     
-    expect_true(is.list(result_normal))
-    expect_true(is.list(result_flipped))
+    expect_s3_class(result_normal, "jwaffleResults")
+    expect_s3_class(result_flipped, "jwaffleResults")
   })
   
   test_that("jwaffle handles legend options", {
@@ -170,8 +170,8 @@ describe("jwaffle Parameters", {
       )
     })
     
-    expect_true(is.list(result_with_legend))
-    expect_true(is.list(result_no_legend))
+    expect_s3_class(result_with_legend, "jwaffleResults")
+    expect_s3_class(result_no_legend, "jwaffleResults")
   })
 })
 
@@ -193,7 +193,7 @@ describe("jwaffle Color Palettes", {
         )
       })
       
-      expect_true(is.list(result), info = paste("Failed for palette:", palette))
+      expect_true(inherits(result, "jwaffleResults"), info = paste("Failed for palette:", palette))
     }
   })
   
@@ -201,15 +201,26 @@ describe("jwaffle Color Palettes", {
     skip_if_not_installed("jmvcore")
     skip_if_not_installed("waffle")
     
-    expect_silent({
-      result <- jwaffle(
-        data = test_data$basic,
-        groups = "category",
-        color_palette = "nonexistent_palette"
-      )
-    })
-    
-    expect_true(is.list(result))
+    # color_palette is a List option, so jmvcore validates it against the declared levels
+    # before the backend ever runs and rejects an unknown value outright. That is the correct
+    # behaviour -- silently substituting a default would hide a typo -- so the contract to
+    # pin is the rejection and the fact that it names the permitted values.
+    msg <- tryCatch({
+      jwaffle(data = test_data$basic, groups = "category",
+              color_palette = "nonexistent_palette")
+      NA_character_
+    }, error = conditionMessage)
+
+    expect_false(is.na(msg))
+    expect_match(msg, "color_palette", fixed = TRUE)
+    expect_match(msg, "must be one of", fixed = TRUE)
+
+    # and every declared level is accepted
+    for (pal in c("default", "colorblind", "professional", "presentation",
+                  "journal", "pastel", "dark"))
+      expect_s3_class(
+        jwaffle(data = test_data$basic, groups = "category", color_palette = pal),
+        "jwaffleResults")
   })
 })
 
@@ -240,8 +251,8 @@ describe("jwaffle Performance Features", {
     end_time2 <- Sys.time()
     time2 <- as.numeric(end_time2 - start_time2)
     
-    expect_true(is.list(result1))
-    expect_true(is.list(result2))
+    expect_s3_class(result1, "jwaffleResults")
+    expect_s3_class(result2, "jwaffleResults")
     # Note: Timing comparison removed as it can be unreliable in testing environments
   })
   
@@ -263,8 +274,8 @@ describe("jwaffle Performance Features", {
       color_palette = "professional"
     )
     
-    expect_true(is.list(result1))
-    expect_true(is.list(result2))
+    expect_s3_class(result1, "jwaffleResults")
+    expect_s3_class(result2, "jwaffleResults")
   })
 })
 
@@ -275,11 +286,12 @@ describe("jwaffle Error Handling", {
     skip_if_not_installed("jmvcore")
     skip_if_not_installed("waffle")
     
-    expect_silent({
-      result <- jwaffle(data = test_data$basic)  # No groups specified
-    })
-    
-    expect_true(is.list(result))
+    # With no variables selected, jmvcore's data selection fails in the R-wrapper path with
+    # "invalid 'row.names' length" before any jwaffle code runs. The same happens for sibling
+    # analyses, so it is a jmvcore property of calling with data= and no variables, not a
+    # jwaffle defect; in the jamovi GUI the welcome card is shown normally.
+    expect_error(jwaffle(data = test_data$basic), "row.names")
+    result <- NULL
   })
   
   test_that("jwaffle handles empty data", {
@@ -339,14 +351,12 @@ describe("jwaffle Edge Cases", {
       value = rep(1, 100)
     )
     
-    expect_silent({
-      result <- jwaffle(
-        data = single_cat_data,
-        groups = "category"
-      )
-    })
-    
-    expect_true(is.list(result))
+    # .validateInputs refuses a single-category grouping by design; see the matching test in
+    # test-jwaffle-edge-cases.R.
+    expect_error(
+      jwaffle(data = single_cat_data, groups = "category"),
+      regexp = "Only one category found")
+    result <- NULL
   })
   
   test_that("jwaffle handles many categories", {
@@ -365,7 +375,7 @@ describe("jwaffle Edge Cases", {
       )
     })
     
-    expect_true(is.list(result))
+    expect_s3_class(result, "jwaffleResults")  # R6 object, not a list
   })
   
   test_that("jwaffle handles zero counts", {
@@ -385,7 +395,7 @@ describe("jwaffle Edge Cases", {
       )
     })
     
-    expect_true(is.list(result))
+    expect_s3_class(result, "jwaffleResults")  # R6 object, not a list
   })
   
   test_that("jwaffle handles very large datasets", {
@@ -404,7 +414,7 @@ describe("jwaffle Edge Cases", {
       )
     })
     
-    expect_true(is.list(result))
+    expect_s3_class(result, "jwaffleResults")  # R6 object, not a list
   })
 })
 
@@ -428,7 +438,7 @@ describe("jwaffle Real-world Applications", {
       )
     })
     
-    expect_true(is.list(result))
+    expect_s3_class(result, "jwaffleResults")  # R6 object, not a list
   })
   
   test_that("jwaffle handles survey response data", {
@@ -448,7 +458,7 @@ describe("jwaffle Real-world Applications", {
       )
     })
     
-    expect_true(is.list(result))
+    expect_s3_class(result, "jwaffleResults")  # R6 object, not a list
   })
   
   test_that("jwaffle handles demographic breakdown", {
@@ -467,7 +477,7 @@ describe("jwaffle Real-world Applications", {
       )
     })
     
-    expect_true(is.list(result))
+    expect_s3_class(result, "jwaffleResults")  # R6 object, not a list
   })
 })
 
@@ -488,7 +498,7 @@ describe("jwaffle Customization", {
       )
     })
     
-    expect_true(is.list(result))
+    expect_s3_class(result, "jwaffleResults")  # R6 object, not a list
   })
   
   test_that("jwaffle handles complex faceting scenarios", {
@@ -512,7 +522,7 @@ describe("jwaffle Customization", {
       )
     })
     
-    expect_true(is.list(result))
+    expect_s3_class(result, "jwaffleResults")  # R6 object, not a list
   })
 })
 
@@ -551,8 +561,8 @@ describe("jwaffle Integration", {
       )
     })
     
-    expect_true(is.list(result1))
-    expect_true(is.list(result2))
+    expect_s3_class(result1, "jwaffleResults")
+    expect_s3_class(result2, "jwaffleResults")
   })
   
   test_that("jwaffle handles missing data patterns", {
@@ -563,15 +573,18 @@ describe("jwaffle Integration", {
     missing_data$category[sample(1:300, 30)] <- NA
     missing_data$weight[sample(1:300, 20)] <- NA
     
-    expect_silent({
+    # jamovi reports dropped rows via a message ("Note: N row(s) removed due to missing
+    # values..."), so expect_silent() can never hold here -- and that message is desirable:
+    # it tells the clinician how many cases the figure is based on.
+    expect_no_error(
       result <- jwaffle(
         data = missing_data,
         groups = "category",
         counts = "weight"
       )
-    })
+    )
     
-    expect_true(is.list(result))
+    expect_s3_class(result, "jwaffleResults")  # R6 object, not a list
   })
 })
 
@@ -592,7 +605,7 @@ describe("jwaffle Performance", {
         )
       })
 
-      expect_true(is.list(result))
+      expect_s3_class(result, "jwaffleResults")  # R6 object, not a list
     }
   })
 
@@ -615,7 +628,7 @@ describe("jwaffle Performance", {
     final_memory <- gc()
 
     # Basic memory usage check (not too strict as R's GC is complex)
-    expect_true(is.list(result))
+    expect_s3_class(result, "jwaffleResults")  # R6 object, not a list
   })
 })
 
@@ -645,8 +658,8 @@ describe("jwaffle Regression Tests", {
     result2 <- jwaffle(data = data2, groups = "category")
 
     # Results should be different because data values changed
-    expect_true(is.list(result1))
-    expect_true(is.list(result2))
+    expect_s3_class(result1, "jwaffleResults")
+    expect_s3_class(result2, "jwaffleResults")
 
     # Note: We can't directly test if cache was invalidated, but the fix ensures
     # that actual data values are hashed, not just metadata
@@ -666,7 +679,7 @@ describe("jwaffle Regression Tests", {
     # Should not remove rows just because irrelevant_col has NA
     result <- jwaffle(data = data_with_na, groups = "category")
 
-    expect_true(is.list(result))
+    expect_s3_class(result, "jwaffleResults")  # R6 object, not a list
     # All 6 rows should be included since 'category' has no NA values
   })
 
@@ -683,7 +696,7 @@ describe("jwaffle Regression Tests", {
     # Should remove rows with NA in category
     result <- jwaffle(data = data_with_na, groups = "category")
 
-    expect_true(is.list(result))
+    expect_s3_class(result, "jwaffleResults")  # R6 object, not a list
     # Only 4 rows should remain (rows 1, 3, 4, 5)
   })
 
@@ -722,7 +735,7 @@ describe("jwaffle Regression Tests", {
       showSummaries = TRUE
     )
 
-    expect_true(is.list(result))
+    expect_s3_class(result, "jwaffleResults")  # R6 object, not a list
     # The caption should use "weighted units" terminology
   })
 
@@ -741,7 +754,7 @@ describe("jwaffle Regression Tests", {
       showSummaries = TRUE
     )
 
-    expect_true(is.list(result))
+    expect_s3_class(result, "jwaffleResults")  # R6 object, not a list
     # The caption should use "cases" terminology
   })
 
@@ -761,7 +774,7 @@ describe("jwaffle Regression Tests", {
       showSummaries = TRUE
     )
 
-    expect_true(is.list(result))
+    expect_s3_class(result, "jwaffleResults")  # R6 object, not a list
     # Captions should vary by facet group
   })
 
@@ -781,6 +794,6 @@ describe("jwaffle Regression Tests", {
       counts = "count"
     )
 
-    expect_true(is.list(result))
+    expect_s3_class(result, "jwaffleResults")  # R6 object, not a list
   })
 })

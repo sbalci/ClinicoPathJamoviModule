@@ -133,7 +133,7 @@ test_that("jjscatterstats enhanced mode respects smoothing options", {
       dep = "x_var",
       group = "y_var",
       colorvar = "color_cat",
-      smoothmethod = method,
+      smoothMethod = method,
       typestatistics = "parametric"
     )
 
@@ -152,18 +152,18 @@ test_that("jjscatterstats ggpubr mode creates additional plot", {
     data = test_data,
     dep = "x_var",
     group = "y_var",
-    addggpubr = TRUE,
+    addGGPubrPlot = TRUE,
     typestatistics = "parametric"
   )
 
   expect_s3_class(result, "Group")
-  expect_true("plot4" %in% names(result))
+  expect_true("ggpubrPlot" %in% names(result))
 })
 
 test_that("jjscatterstats ggpubr mode respects color palette", {
   test_data <- setup_test_data()
 
-  palettes <- c("npg", "aaas", "nejm", "lancet", "jco", "ucscgb", "d3", "locuszoom")
+  palettes <- c("jco", "npg", "aaas", "lancet", "jama", "nejm")  # the declared levels
 
   for (palette in palettes) {
     result <- jjscatterstats(
@@ -171,13 +171,13 @@ test_that("jjscatterstats ggpubr mode respects color palette", {
       dep = "x_var",
       group = "y_var",
       grvar = "color_cat",
-      addggpubr = TRUE,
+      addGGPubrPlot = TRUE,
       ggpubrPalette = palette,
       typestatistics = "parametric"
     )
 
     expect_s3_class(result, "Group")
-    expect_true("plot4" %in% names(result))
+    expect_true("ggpubrPlot" %in% names(result))
   }
 })
 
@@ -188,27 +188,27 @@ test_that("jjscatterstats ggpubr mode adds correlation statistics", {
     data = test_data,
     dep = "x_var",
     group = "y_var",
-    addggpubr = TRUE,
+    addGGPubrPlot = TRUE,
     ggpubrAddCorr = TRUE,
     ggpubrCorrMethod = "pearson",
     typestatistics = "parametric"
   )
 
   expect_s3_class(result, "Group")
-  expect_true("plot4" %in% names(result))
+  expect_true("ggpubrPlot" %in% names(result))
 })
 
 test_that("jjscatterstats ggpubr mode respects correlation methods", {
   test_data <- setup_test_data()
 
-  corr_methods <- c("pearson", "kendall", "spearman")
+  corr_methods <- c("pearson", "spearman")  # the declared levels; kendall is not offered
 
   for (method in corr_methods) {
     result <- jjscatterstats(
       data = test_data,
       dep = "x_var",
       group = "y_var",
-      addggpubr = TRUE,
+      addGGPubrPlot = TRUE,
       ggpubrAddCorr = TRUE,
       ggpubrCorrMethod = method,
       typestatistics = "parametric"
@@ -225,13 +225,13 @@ test_that("jjscatterstats ggpubr mode adds smooth line", {
     data = test_data,
     dep = "x_var",
     group = "y_var",
-    addggpubr = TRUE,
+    addGGPubrPlot = TRUE,
     ggpubrAddSmooth = TRUE,
     typestatistics = "parametric"
   )
 
   expect_s3_class(result, "Group")
-  expect_true("plot4" %in% names(result))
+  expect_true("ggpubrPlot" %in% names(result))
 })
 
 # ============================================================================
@@ -371,7 +371,7 @@ test_that("jjscatterstats statistical tests work for all types", {
       typestatistics = stat_type
     )
 
-    expect_s3_class(result, "Group",
+    expect_true(inherits(result, "Group"),
                    info = paste("Failed for stat_type:", stat_type))
 
     # Verify plot exists
@@ -387,8 +387,8 @@ test_that("jjscatterstats statistical tests work for all types", {
 test_that("jjscatterstats clinical presets work correctly", {
   test_data <- setup_test_data()
 
-  presets <- c("custom", "biomarker_correlation", "gene_expression",
-               "survival_biomarker", "dose_response")
+  presets <- c("custom", "biomarker_correlation",
+               "treatment_response_analysis", "publication_ready")  # the declared levels
 
   for (preset in presets) {
     result <- jjscatterstats(
@@ -399,7 +399,7 @@ test_that("jjscatterstats clinical presets work correctly", {
       typestatistics = "parametric"
     )
 
-    expect_s3_class(result, "Group",
+    expect_true(inherits(result, "Group"),
                    info = paste("Failed for preset:", preset))
   }
 })
@@ -416,7 +416,7 @@ test_that("jjscatterstats adds marginal distributions", {
     dep = "x_var",
     group = "y_var",
     marginal = TRUE,
-    marginaltype = "histogram",
+    marginalType = "histogram",
     typestatistics = "parametric"
   )
 
@@ -426,7 +426,7 @@ test_that("jjscatterstats adds marginal distributions", {
 test_that("jjscatterstats respects marginal distribution types", {
   test_data <- setup_test_data()
 
-  marginal_types <- c("histogram", "boxplot", "density", "violin", "densigram")
+  marginal_types <- c("histogram", "boxplot", "density")  # declared levels (plus "none")
 
   for (mtype in marginal_types) {
     result <- jjscatterstats(
@@ -434,11 +434,11 @@ test_that("jjscatterstats respects marginal distribution types", {
       dep = "x_var",
       group = "y_var",
       marginal = TRUE,
-      marginaltype = mtype,
+      marginalType = mtype,
       typestatistics = "parametric"
     )
 
-    expect_s3_class(result, "Group",
+    expect_true(inherits(result, "Group"),
                    info = paste("Failed for marginal type:", mtype))
   }
 })
@@ -459,8 +459,8 @@ test_that("jjscatterstats combined features work together", {
     colorvar = "shape_cat",
     sizevar = "size_cont",
     marginal = TRUE,
-    marginaltype = "histogram",
-    addggpubr = TRUE,
+    marginalType = "histogram",
+    addGGPubrPlot = TRUE,
     ggpubrAddCorr = TRUE,
     typestatistics = "parametric",
     resultssubtitle = TRUE
@@ -470,7 +470,7 @@ test_that("jjscatterstats combined features work together", {
   expect_true("plot" %in% names(result))   # Main ggstatsplot plot
   expect_true("plot2" %in% names(result))  # Grouped plot
   expect_true("plot3" %in% names(result))  # Enhanced plot
-  expect_true("plot4" %in% names(result))  # ggpubr plot
+  expect_true("ggpubrPlot" %in% names(result))  # ggpubr plot
 })
 
 # ============================================================================

@@ -46,8 +46,10 @@ uses the grouping variable.}
 values.}
 
 \item{hull_concavity}{Controls the concavity of hull polygons. Lower values
-create more concave hulls, higher values create more convex hulls. Range:
-0-2, default: 2.}
+follow the point cloud more closely; higher values approach the convex
+hull. The permitted range is 0-2 and the default of 2 matches ggforce; a
+true convex hull needs a much larger value than this range allows. Ignored
+when V8/concaveman are unavailable.}
 
 \item{hull_alpha}{Transparency level for hull polygons. 0 = completely
 transparent, 1 = opaque.}
@@ -69,14 +71,17 @@ is selected, because point size is then mapped to that variable's values.}
 
 \item{y_label}{Custom label for Y-axis. If empty, uses variable name.}
 
-\item{hull_expand}{Amount to expand hull boundaries beyond data points.
-Higher values create larger hulls.}
+\item{hull_expand}{Padding added around each hull, as a fraction of the
+plot area (0 = hull touches the outermost points, 1 = the whole panel).
+Ignored when V8/concaveman are unavailable and convex hulls are drawn.}
 
 \item{show_statistics}{If TRUE, displays summary statistics for each group
 in the output.}
 
-\item{outlier_detection}{If TRUE, identifies and highlights potential
-outliers within groups.}
+\item{outlier_detection}{If TRUE, reports the number of potential outliers
+in each group using the 1.5 x IQR rule applied separately to the X and Y
+variables. Groups with fewer than 5 observations are reported as too small
+rather than given a count. Outliers are counted, not marked on the plot.}
 
 \item{confidence_ellipses}{If TRUE, adds confidence ellipses in addition to
 hull polygons.}

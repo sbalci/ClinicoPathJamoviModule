@@ -11,17 +11,16 @@ test_that("hullplot handles missing data in x variable", {
   test_data_na <- hullplot_test
   test_data_na$x[1:5] <- NA
 
-  # Should either error or warn about missing data
-  expect_warning(
-    hullplot(
-      data = test_data_na,
-      x_var = "x",
-      y_var = "y",
-      group_var = "group"
-    ),
-    regexp = "missing|NA|removed",
-    ignore.case = TRUE
+  # This module reports data-quality problems in the `interpretation` HTML panel
+  # rather than raising R conditions (jmvcore::Notice objects are not
+  # serialisable, so notices are rendered as HTML throughout this package).
+  res <- hullplot(
+    data = test_data_na,
+    x_var = "x",
+    y_var = "y",
+    group_var = "group"
   )
+  expect_match(res$interpretation$content, "were excluded because a selected variable was missing")
 })
 
 test_that("hullplot handles missing data in y variable", {
@@ -31,17 +30,16 @@ test_that("hullplot handles missing data in y variable", {
   test_data_na <- hullplot_test
   test_data_na$y[1:5] <- NA
 
-  # Should either error or warn about missing data
-  expect_warning(
-    hullplot(
-      data = test_data_na,
-      x_var = "x",
-      y_var = "y",
-      group_var = "group"
-    ),
-    regexp = "missing|NA|removed",
-    ignore.case = TRUE
+  # This module reports data-quality problems in the `interpretation` HTML panel
+  # rather than raising R conditions (jmvcore::Notice objects are not
+  # serialisable, so notices are rendered as HTML throughout this package).
+  res <- hullplot(
+    data = test_data_na,
+    x_var = "x",
+    y_var = "y",
+    group_var = "group"
   )
+  expect_match(res$interpretation$content, "were excluded because a selected variable was missing")
 })
 
 test_that("hullplot handles missing data in group variable", {
@@ -51,17 +49,16 @@ test_that("hullplot handles missing data in group variable", {
   test_data_na <- hullplot_test
   test_data_na$group[1:5] <- NA
 
-  # Should either error or warn about missing data
-  expect_warning(
-    hullplot(
-      data = test_data_na,
-      x_var = "x",
-      y_var = "y",
-      group_var = "group"
-    ),
-    regexp = "missing|NA|removed",
-    ignore.case = TRUE
+  # This module reports data-quality problems in the `interpretation` HTML panel
+  # rather than raising R conditions (jmvcore::Notice objects are not
+  # serialisable, so notices are rendered as HTML throughout this package).
+  res <- hullplot(
+    data = test_data_na,
+    x_var = "x",
+    y_var = "y",
+    group_var = "group"
   )
+  expect_match(res$interpretation$content, "were excluded because a selected variable was missing")
 })
 
 test_that("hullplot handles missing data in size variable", {
@@ -92,15 +89,19 @@ test_that("hullplot handles single point per group", {
     group = c("A", "B", "C")
   )
 
-  # Should either complete or error with informative message
-  expect_condition(
-    hullplot(
-      data = minimal_data,
-      x_var = "x",
-      y_var = "y",
-      group_var = "group"
-    )
+  # This module reports data-quality problems in the `interpretation` HTML panel
+  # rather than raising R conditions (jmvcore::Notice objects are not
+  # serialisable, so notices are rendered as HTML throughout this package).
+  # One point per group cannot form a meaningful hull; the analysis says so rather
+  # than failing.
+  res <- hullplot(
+    data = minimal_data,
+    x_var = "x",
+    y_var = "y",
+    group_var = "group"
   )
+  expect_s3_class(res, "hullplotResults")
+  expect_match(res$interpretation$content, "Hull boundaries may not be meaningful")
 })
 
 test_that("hullplot handles two points per group", {
@@ -132,17 +133,18 @@ test_that("hullplot handles all points at same location", {
     group = sample(c("A", "B"), 20, replace = TRUE)
   )
 
-  # Should error with informative message
-  expect_error(
-    hullplot(
-      data = identical_data,
-      x_var = "x",
-      y_var = "y",
-      group_var = "group"
-    ),
-    regexp = "variance|constant|identical|variation",
-    ignore.case = TRUE
+  # This module reports data-quality problems in the `interpretation` HTML panel
+  # rather than raising R conditions (jmvcore::Notice objects are not
+  # serialisable, so notices are rendered as HTML throughout this package).
+  # A zero-variance axis is degenerate but not an error: the hull collapses to a
+  # line or a point and the plot still renders.
+  res <- hullplot(
+    data = identical_data,
+    x_var = "x",
+    y_var = "y",
+    group_var = "group"
   )
+  expect_s3_class(res, "hullplotResults")
 })
 
 test_that("hullplot handles collinear points", {
@@ -191,15 +193,18 @@ test_that("hullplot handles Inf values in x", {
   inf_data <- hullplot_test
   inf_data$x[1] <- Inf
 
-  # Should either error or warn
-  expect_condition(
-    hullplot(
-      data = inf_data,
-      x_var = "x",
-      y_var = "y",
-      group_var = "group"
-    )
+  # This module reports data-quality problems in the `interpretation` HTML panel
+  # rather than raising R conditions (jmvcore::Notice objects are not
+  # serialisable, so notices are rendered as HTML throughout this package).
+  # Inf is not caught by complete.cases(); the analysis filters non-finite values
+  # explicitly and reports how many it found.
+  res <- hullplot(
+    data = inf_data,
+    x_var = "x",
+    y_var = "y",
+    group_var = "group"
   )
+  expect_match(res$interpretation$content, "infinite/undefined value")
 })
 
 test_that("hullplot handles Inf values in y", {
@@ -209,15 +214,18 @@ test_that("hullplot handles Inf values in y", {
   inf_data <- hullplot_test
   inf_data$y[1] <- Inf
 
-  # Should either error or warn
-  expect_condition(
-    hullplot(
-      data = inf_data,
-      x_var = "x",
-      y_var = "y",
-      group_var = "group"
-    )
+  # This module reports data-quality problems in the `interpretation` HTML panel
+  # rather than raising R conditions (jmvcore::Notice objects are not
+  # serialisable, so notices are rendered as HTML throughout this package).
+  # Inf is not caught by complete.cases(); the analysis filters non-finite values
+  # explicitly and reports how many it found.
+  res <- hullplot(
+    data = inf_data,
+    x_var = "x",
+    y_var = "y",
+    group_var = "group"
   )
+  expect_match(res$interpretation$content, "infinite/undefined value")
 })
 
 test_that("hullplot handles -Inf values", {
@@ -228,15 +236,18 @@ test_that("hullplot handles -Inf values", {
   inf_data$x[1] <- -Inf
   inf_data$y[2] <- -Inf
 
-  # Should either error or warn
-  expect_condition(
-    hullplot(
-      data = inf_data,
-      x_var = "x",
-      y_var = "y",
-      group_var = "group"
-    )
+  # This module reports data-quality problems in the `interpretation` HTML panel
+  # rather than raising R conditions (jmvcore::Notice objects are not
+  # serialisable, so notices are rendered as HTML throughout this package).
+  # Inf is not caught by complete.cases(); the analysis filters non-finite values
+  # explicitly and reports how many it found.
+  res <- hullplot(
+    data = inf_data,
+    x_var = "x",
+    y_var = "y",
+    group_var = "group"
   )
+  expect_match(res$interpretation$content, "infinite/undefined value")
 })
 
 test_that("hullplot handles NaN values", {
@@ -246,15 +257,16 @@ test_that("hullplot handles NaN values", {
   nan_data <- hullplot_test
   nan_data$x[1] <- NaN
 
-  # Should either error or warn
-  expect_condition(
-    hullplot(
-      data = nan_data,
-      x_var = "x",
-      y_var = "y",
-      group_var = "group"
-    )
+  # This module reports data-quality problems in the `interpretation` HTML panel
+  # rather than raising R conditions (jmvcore::Notice objects are not
+  # serialisable, so notices are rendered as HTML throughout this package).
+  res <- hullplot(
+    data = nan_data,
+    x_var = "x",
+    y_var = "y",
+    group_var = "group"
   )
+  expect_match(res$interpretation$content, "were excluded because a selected variable was missing")
 })
 
 test_that("hullplot handles very small sample size", {
@@ -282,17 +294,18 @@ test_that("hullplot handles single group", {
 
   single_group_data <- hullplot_test[hullplot_test$group == "Group A", ]
 
-  # Should error with informative message
-  expect_error(
-    hullplot(
-      data = single_group_data,
-      x_var = "x",
-      y_var = "y",
-      group_var = "group"
-    ),
-    regexp = "one group|single group|multiple groups",
-    ignore.case = TRUE
+  # A single group is a legitimate, if uninformative, hull plot. It is not an
+  # error - but the narrative must not manufacture a between-group comparison.
+  res <- hullplot(
+    data = single_group_data,
+    x_var = "x",
+    y_var = "y",
+    group_var = "group",
+    show_summary = TRUE
   )
+  expect_s3_class(res, "hullplotResults")
+  expect_match(res$summary$content, "described a single group")
+  expect_match(res$summary$content, "No between-group comparison is possible")
 })
 
 test_that("hullplot handles many groups", {
@@ -494,17 +507,18 @@ test_that("hullplot handles constant x variable", {
   const_x_data <- hullplot_test
   const_x_data$x <- 5
 
-  # Should error with informative message
-  expect_error(
-    hullplot(
-      data = const_x_data,
-      x_var = "x",
-      y_var = "y",
-      group_var = "group"
-    ),
-    regexp = "constant|variance|variation",
-    ignore.case = TRUE
+  # This module reports data-quality problems in the `interpretation` HTML panel
+  # rather than raising R conditions (jmvcore::Notice objects are not
+  # serialisable, so notices are rendered as HTML throughout this package).
+  # A zero-variance axis is degenerate but not an error: the hull collapses to a
+  # line or a point and the plot still renders.
+  res <- hullplot(
+    data = const_x_data,
+    x_var = "x",
+    y_var = "y",
+    group_var = "group"
   )
+  expect_s3_class(res, "hullplotResults")
 })
 
 test_that("hullplot handles constant y variable", {
@@ -514,17 +528,18 @@ test_that("hullplot handles constant y variable", {
   const_y_data <- hullplot_test
   const_y_data$y <- 5
 
-  # Should error with informative message
-  expect_error(
-    hullplot(
-      data = const_y_data,
-      x_var = "x",
-      y_var = "y",
-      group_var = "group"
-    ),
-    regexp = "constant|variance|variation",
-    ignore.case = TRUE
+  # This module reports data-quality problems in the `interpretation` HTML panel
+  # rather than raising R conditions (jmvcore::Notice objects are not
+  # serialisable, so notices are rendered as HTML throughout this package).
+  # A zero-variance axis is degenerate but not an error: the hull collapses to a
+  # line or a point and the plot still renders.
+  res <- hullplot(
+    data = const_y_data,
+    x_var = "x",
+    y_var = "y",
+    group_var = "group"
   )
+  expect_s3_class(res, "hullplotResults")
 })
 
 test_that("hullplot handles constant size variable", {
@@ -555,15 +570,16 @@ test_that("hullplot handles zero variance within groups", {
     group = c(rep("A", 10), rep("B", 10))
   )
 
-  # Should error or warn
-  expect_condition(
-    hullplot(
-      data = zero_var_data,
-      x_var = "x",
-      y_var = "y",
-      group_var = "group"
-    )
+  # This module reports data-quality problems in the `interpretation` HTML panel
+  # rather than raising R conditions (jmvcore::Notice objects are not
+  # serialisable, so notices are rendered as HTML throughout this package).
+  res <- hullplot(
+    data = zero_var_data,
+    x_var = "x",
+    y_var = "y",
+    group_var = "group"
   )
+  expect_s3_class(res, "hullplotResults")
 })
 
 test_that("hullplot handles empty groups after removing missing data", {
@@ -574,15 +590,20 @@ test_that("hullplot handles empty groups after removing missing data", {
   empty_group_data <- hullplot_test
   empty_group_data$x[empty_group_data$group == "Group A"] <- NA
 
-  # Should either error or warn
-  expect_condition(
-    hullplot(
-      data = empty_group_data,
-      x_var = "x",
-      y_var = "y",
-      group_var = "group"
-    )
+  # This module reports data-quality problems in the `interpretation` HTML panel
+  # rather than raising R conditions (jmvcore::Notice objects are not
+  # serialisable, so notices are rendered as HTML throughout this package).
+  # The emptied level is dropped, so it is neither counted as a group nor listed
+  # in the outlier panel.
+  res <- hullplot(
+    data = empty_group_data,
+    x_var = "x",
+    y_var = "y",
+    group_var = "group"
   )
+  expect_match(res$interpretation$content, "were excluded because a selected variable was missing")
+  kept <- nlevels(droplevels(empty_group_data$group[!is.na(empty_group_data$x)]))
+  expect_match(res$interpretation$content, paste0("Groups:</strong> ", kept, " group"))
 })
 
 test_that("hullplot handles tibble vs data.frame", {
@@ -704,7 +725,7 @@ test_that("hullplot handles non-existent variables", {
       y_var = "y",
       group_var = "group"
     ),
-    regexp = "variable|column|not found|does not exist",
+    regexp = "not present in the dataset|not found|does not exist",
     ignore.case = TRUE
   )
 
@@ -716,7 +737,7 @@ test_that("hullplot handles non-existent variables", {
       y_var = "y",
       group_var = "nonexistent_group"
     ),
-    regexp = "variable|column|not found|does not exist",
+    regexp = "not present in the dataset|not found|does not exist",
     ignore.case = TRUE
   )
 })
@@ -729,17 +750,15 @@ test_that("hullplot handles empty dataset", {
     group = character(0)
   )
 
-  # Should error with informative message
-  expect_error(
-    hullplot(
-      data = empty_data,
-      x_var = "x",
-      y_var = "y",
-      group_var = "group"
-    ),
-    regexp = "empty|no data|no observations",
-    ignore.case = TRUE
+  # An empty dataset is explained in the instructions panel rather than thrown,
+  # so an active row filter that removes everything is diagnosable.
+  res <- hullplot(
+    data = empty_data,
+    x_var = "x",
+    y_var = "y",
+    group_var = "group"
   )
+  expect_match(res$todo$content, "No data to plot")
 })
 
 test_that("hullplot handles numeric group variable", {
@@ -765,10 +784,12 @@ test_that("hullplot handles all missing data after filtering", {
   data(hullplot_test)
 
   all_na_data <- hullplot_test
-  all_na_data$x <- NA
-  all_na_data$y <- NA
+  # NA_real_ rather than NA: a bare NA makes the column logical, and jamovi's
+  # own `permitted: [numeric]` check then rejects it before the analysis runs,
+  # which is a different code path from "numeric column, no usable rows".
+  all_na_data$x <- NA_real_
+  all_na_data$y <- NA_real_
 
-  # Should error with informative message
   expect_error(
     hullplot(
       data = all_na_data,
@@ -776,7 +797,7 @@ test_that("hullplot handles all missing data after filtering", {
       y_var = "y",
       group_var = "group"
     ),
-    regexp = "missing|NA|no valid|insufficient data",
+    regexp = "No complete cases found",
     ignore.case = TRUE
   )
 })

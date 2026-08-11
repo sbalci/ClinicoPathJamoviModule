@@ -19,8 +19,7 @@ test_that("jjcorrmat respects all statistical type options", {
       typestatistics = stat_type
     )
 
-    expect_s3_class(result, "jjcorrmatResults",
-                   info = paste("Failed for typestatistics:", stat_type))
+    expect_s3_class(result, "jjcorrmatResults")
   }
 })
 
@@ -35,8 +34,7 @@ test_that("jjcorrmat respects all matrix type options", {
       matrixtype = mat_type
     )
 
-    expect_s3_class(result, "jjcorrmatResults",
-                   info = paste("Failed for matrixtype:", mat_type))
+    expect_s3_class(result, "jjcorrmatResults")
   }
 })
 
@@ -51,8 +49,7 @@ test_that("jjcorrmat respects all matrix method options", {
       matrixmethod = method
     )
 
-    expect_s3_class(result, "jjcorrmatResults",
-                   info = paste("Failed for matrixmethod:", method))
+    expect_s3_class(result, "jjcorrmatResults")
   }
 })
 
@@ -67,8 +64,7 @@ test_that("jjcorrmat respects all p-value adjustment methods", {
       padjustmethod = method
     )
 
-    expect_s3_class(result, "jjcorrmatResults",
-                   info = paste("Failed for padjustmethod:", method))
+    expect_s3_class(result, "jjcorrmatResults")
   }
 })
 
@@ -83,8 +79,7 @@ test_that("jjcorrmat respects missing data handling options", {
       naHandling = method
     )
 
-    expect_s3_class(result, "jjcorrmatResults",
-                   info = paste("Failed for naHandling:", method))
+    expect_s3_class(result, "jjcorrmatResults")
   }
 })
 
@@ -118,8 +113,7 @@ test_that("jjcorrmat respects significance level parameter", {
       siglevel = sig
     )
 
-    expect_s3_class(result, "jjcorrmatResults",
-                   info = paste("Failed for siglevel:", sig))
+    expect_s3_class(result, "jjcorrmatResults")
   }
 })
 
@@ -134,8 +128,7 @@ test_that("jjcorrmat respects confidence level parameter", {
       conflevel = conf
     )
 
-    expect_s3_class(result, "jjcorrmatResults",
-                   info = paste("Failed for conflevel:", conf))
+    expect_s3_class(result, "jjcorrmatResults")
   }
 })
 
@@ -150,8 +143,7 @@ test_that("jjcorrmat respects decimal places parameter", {
       k = k
     )
 
-    expect_s3_class(result, "jjcorrmatResults",
-                   info = paste("Failed for k =", k))
+    expect_s3_class(result, "jjcorrmatResults")
   }
 })
 
@@ -173,8 +165,7 @@ test_that("jjcorrmat respects custom color parameters", {
       highcolor = scheme$high
     )
 
-    expect_s3_class(result, "jjcorrmatResults",
-                   info = paste("Failed for color scheme", i))
+    expect_s3_class(result, "jjcorrmatResults")
   }
 })
 
@@ -207,8 +198,7 @@ test_that("jjcorrmat respects plot dimension parameters", {
       plotheight = dim$height
     )
 
-    expect_s3_class(result, "jjcorrmatResults",
-                   info = paste("Failed for width =", dim$width, "height =", dim$height))
+    expect_s3_class(result, "jjcorrmatResults")
   }
 })
 
@@ -280,9 +270,7 @@ test_that("jjcorrmat handles combinations of matrix type and method", {
       matrixmethod = combinations$matrixmethod[i]
     )
 
-    expect_s3_class(result, "jjcorrmatResults",
-                   info = paste("Failed for matrixtype =", combinations$matrixtype[i],
-                               "matrixmethod =", combinations$matrixmethod[i]))
+    expect_s3_class(result, "jjcorrmatResults")
   }
 })
 
@@ -302,9 +290,7 @@ test_that("jjcorrmat handles combinations of statistical type and adjustment", {
       padjustmethod = combinations$padjustmethod[i]
     )
 
-    expect_s3_class(result, "jjcorrmatResults",
-                   info = paste("Failed for typestatistics =", combinations$typestatistics[i],
-                               "padjustmethod =", combinations$padjustmethod[i]))
+    expect_s3_class(result, "jjcorrmatResults")
   }
 })
 
@@ -348,8 +334,7 @@ test_that("jjcorrmat handles grouped analysis with different statistical types",
       typestatistics = stat_type
     )
 
-    expect_s3_class(result, "jjcorrmatResults",
-                   info = paste("Failed for grouped analysis with typestatistics:", stat_type))
+    expect_s3_class(result, "jjcorrmatResults")
   }
 })
 
@@ -365,8 +350,7 @@ test_that("jjcorrmat handles grouped analysis with different matrix types", {
       matrixtype = mat_type
     )
 
-    expect_s3_class(result, "jjcorrmatResults",
-                   info = paste("Failed for grouped analysis with matrixtype:", mat_type))
+    expect_s3_class(result, "jjcorrmatResults")
   }
 })
 
@@ -382,8 +366,7 @@ test_that("jjcorrmat handles partial correlations with different statistical typ
       typestatistics = stat_type
     )
 
-    expect_s3_class(result, "jjcorrmatResults",
-                   info = paste("Failed for partial correlation with typestatistics:", stat_type))
+    expect_s3_class(result, "jjcorrmatResults")
   }
 })
 
@@ -403,8 +386,6 @@ test_that("jjcorrmat handles missing data with different adjustment methods", {
       padjustmethod = combinations$padjustmethod[i]
     )
 
-    expect_s3_class(result, "jjcorrmatResults",
-                   info = paste("Failed for naHandling =", combinations$naHandling[i],
-                               "padjustmethod =", combinations$padjustmethod[i]))
+    expect_s3_class(result, "jjcorrmatResults")
   }
 })

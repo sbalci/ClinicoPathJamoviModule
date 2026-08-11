@@ -519,6 +519,7 @@ jwaffleClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
             if (!self$options$groups %in% names(self$data)) {
                 jmvcore::reject(
+                    code = NULL,
                     "Grouping variable '{}' not found in data. Available variables: {}",
                     self$options$groups, paste(names(self$data), collapse = ", "))
             }
@@ -527,6 +528,7 @@ jwaffleClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             if (!is.null(self$options$counts) && self$options$counts != "" &&
                 !self$options$counts %in% names(self$data)) {
                 jmvcore::reject(
+                    code = NULL,
                     "Counts variable '{}' not found in data. Available variables: {}",
                     self$options$counts, paste(names(self$data), collapse = ", "))
             }
@@ -535,6 +537,7 @@ jwaffleClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             if (!is.null(self$options$facet) && self$options$facet != "" &&
                 !self$options$facet %in% names(self$data)) {
                 jmvcore::reject(
+                    code = NULL,
                     "Facet variable '{}' not found in data. Available variables: {}",
                     self$options$facet, paste(names(self$data), collapse = ", "))
             }
@@ -554,6 +557,7 @@ jwaffleClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
             if (!is.factor(groups_data)) {
                 jmvcore::reject(
+                    code = NULL,
                     "Grouping variable '{}' must be categorical (factor, character, or logical), not {}",
                     self$options$groups, class(groups_data)[1])
             }
@@ -564,6 +568,7 @@ jwaffleClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             
             if (n_categories == 1) {
                 jmvcore::reject(
+                    code = NULL,
                     "Only one category found in '{}'. Waffle charts require multiple categories to show proportions. Consider using a different visualization for single-category data.",
                     self$options$groups)
             }
@@ -600,17 +605,80 @@ jwaffleClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 ))
             }
             
+            # CATEGORIES THAT ROUND TO ZERO SQUARES DISAPPEAR FROM THE CHART.
+            #
+            # .plot() draws with waffle::geom_waffle(make_proportional = TRUE), which converts
+            # counts to a 100-square grid: a category receives round(100 * share) squares, so
+            # anything under 0.5% of the total gets none and is simply absent from the figure.
+            # Measured: 700/297/3 -> only two fill colours drawn; 70000/29700/300 (300 cases,
+            # 0.3%) -> likewise two, with no warning of any kind, while the Analysis Summary
+            # went on reporting "Rare: 0.3% (n=300)". Figure and text disagreed and nothing
+            # said so.
+            #
+            # The existing "<5 cases" notice below is a different criterion and does not cover
+            # this: a category can hold hundreds of cases and still vanish (0.3% of 100,000),
+            # or hold 4 cases and be perfectly visible (4 of 20). This check is on the SHARE,
+            # computed the same way the chart computes it, and honours the counts variable.
+            weights_for_share <- if (!is.null(self$options$counts) && self$options$counts != "" &&
+                                     is.numeric(self$data[[self$options$counts]])) {
+                self$data[[self$options$counts]]
+            } else NULL
+            share_tab <- if (is.null(weights_for_share)) {
+                table(groups_data, useNA = "no")
+            } else {
+                # tapply(..., na.rm = TRUE), NOT xtabs: xtabs propagates an NA weight into the
+                # cell total, so a single missing weight made sum() NA and the `if` below
+                # became `if (NA)` -- "missing value where TRUE/FALSE needed", which aborted
+                # the whole analysis. Missing weights are ordinary in clinical data.
+                tapply(weights_for_share, groups_data, sum, na.rm = TRUE)
+            }
+            share_tab <- share_tab[!is.na(share_tab)]
+            share_total <- sum(share_tab, na.rm = TRUE)
+            if (length(share_tab) > 0 && is.finite(share_total) && share_total > 0) {
+                # Threshold on the SHARE rather than on round(100 * share): R's round() uses
+                # banker's rounding, so round(0.5) is 0, but waffle keeps a category at
+                # exactly 0.5% (verified: 0.4% is dropped, 0.5% is drawn). A strict
+                # "share < 0.005" reproduces the observed boundary exactly.
+                shares <- as.numeric(share_tab) / share_total
+                vanished <- names(share_tab)[shares < 0.005]
+                if (length(vanished) > 0) {
+                    # Cap the list: a continuous variable coerced to a factor can produce a
+                    # hundred vanishing levels, and a notice naming all of them is unreadable.
+                    n_vanished <- length(vanished)
+                    show_n <- min(n_vanished, 8L)
+                    vanished_safe <- paste0(
+                        paste(htmltools::htmlEscape(vanished[seq_len(show_n)]), collapse = ", "),
+                        if (n_vanished > show_n)
+                            paste0(" and ", n_vanished - show_n, " more") else "")
+                    pct <- paste0(
+                        formatC(100 * shares[shares < 0.005][seq_len(show_n)],
+                                format = "f", digits = 2), "%")
+                    private$.accumulateMessage(glue::glue(
+                        "<br> <strong>Categories missing from the chart:</strong> ",
+                        "{vanished_safe} ({paste(pct, collapse = ', ')}",
+                        "{if (n_vanished > show_n) ', ...' else ''}). ",
+                        "The waffle grid holds 100 squares, one per percentage point, so any ",
+                        "category below 0.5% of the total rounds to zero squares and is not ",
+                        "drawn at all - even though it still appears in the summary text and ",
+                        "in your data. Report those categories in the text, or combine them ",
+                        "into an 'Other' group so the figure and the numbers agree.<br>"
+                    ), notice_type = "STRONG_WARNING")
+                }
+            }
+
             # Validate counts variable if specified
             if (!is.null(self$options$counts) && self$options$counts != "") {
                 counts_data <- self$data[[self$options$counts]]
                 if (!is.numeric(counts_data)) {
                     jmvcore::reject(
+                        code = NULL,
                         "Counts variable '{}' must be numeric, not {}",
                         self$options$counts, class(counts_data)[1])
                 }
                 if (any(counts_data < 0, na.rm = TRUE)) {
                     n_negative <- sum(counts_data < 0, na.rm = TRUE)
                     jmvcore::reject(
+                        code = NULL,
                         "Counts variable '{}' contains {} negative value(s). All counts must be non-negative for waffle charts. Please check your data.",
                         self$options$counts, n_negative)
                 }
@@ -655,6 +723,7 @@ jwaffleClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 return(result)
             }, error = function(e) {
                 jmvcore::reject(
+                    code = NULL,
                     "Error aggregating data: {}. Please check that your variables are properly formatted.",
                     e$message)
             })

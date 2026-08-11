@@ -54,6 +54,7 @@ children:
                 format: number
               - type: CheckBox
                 name: partial
+                label: Partial correlations (controls for other vars)
               - type: ComboBox
                 name: naHandling
                 label: Missing data handling

@@ -735,12 +735,6 @@ multisurvivalClass <- if (requireNamespace('jmvcore'))
       DEFAULT_CHANGE_TIMES = "6, 12, 18",
       DEFAULT_TD_SUFFIX = "_t{time}",
 
-      .nom_object = NULL,
-      .perf_timers = NULL,
-      .validation_warnings = NULL,
-      .validation_time = NULL,
-      .analysis_times = NULL,
-
       # Validation Helper Functions ----
 
       # Comprehensive Survival Analysis Input Validation
@@ -1105,6 +1099,13 @@ multisurvivalClass <- if (requireNamespace('jmvcore'))
 
       # init ----
       .init = function() {
+        # Initialize mutable private fields
+        private$.nom_object <- NULL
+        private$.perf_timers <- NULL
+        private$.validation_warnings <- NULL
+        private$.validation_time <- NULL
+        private$.analysis_times <- NULL
+
         # Validate inputs using helper functions
         validation <- private$.validateSurvivalInputs()
 
