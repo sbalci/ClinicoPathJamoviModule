@@ -607,29 +607,22 @@ test_that("jjdotplotstats handles outliers in data", {
   expect_true(!is.null(result))
 })
 
-test_that("jjdotplotstats handles clinical presets", {
-  # Create test data
+test_that("clinical presets are not an available option", {
+  # `clinicalpreset` is commented out in jamovi/jjdotplotstats.a.yaml, so it is
+  # not a wrapper argument at all. The previous version of this test passed
+  # clinicalPreset = <x> inside tryCatch(error = NULL) and then asserted the
+  # result was non-NULL, so it could only ever fail. Pin the real contract: an
+  # undeclared option is rejected rather than silently ignored.
   test_data <- data.frame(
     outcome = rnorm(60, 50, 10),
-    group = factor(rep(c("A", "B"), each = 30)),
-    stringsAsFactors = FALSE
+    group = factor(rep(c("A", "B"), each = 30))
   )
-
-  presets <- c("basic", "publication", "clinical", "custom")
-
-  for (preset in presets) {
-    result <- tryCatch({
-      jjdotplotstats(
-        data = test_data,
-        dep = "outcome",
-        group = "group",
-        clinicalPreset = preset
-      )
-    }, error = function(e) {
-      NULL
-    })
-
-    # Each should work
-    expect_true(!is.null(result), info = paste("Failed for preset:", preset))
-  }
+  expect_error(
+    jjdotplotstats(data = test_data, dep = "outcome", group = "group",
+                   clinicalPreset = "basic"),
+    "unused argument"
+  )
+  expect_true(inherits(
+    jjdotplotstats(data = test_data, dep = "outcome", group = "group"),
+    "jjdotplotstatsResults"))
 })

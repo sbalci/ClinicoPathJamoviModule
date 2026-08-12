@@ -23,6 +23,21 @@ jjdotplotstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         # Cached result of .validateInputs(); computed once per .run() so the
         # render paths (.plot / .plot2) gate silently instead of re-validating.
         .inputsValid = FALSE,
+        # Set by .subtitleExpr() when the statsExpressions takeover could not be
+        # used, so .run() can say that the effect-size selection was ignored.
+        .subtitleFallback = NULL,
+        # Subtitle expression computed in .run() (see .subtitleExpr) and read by
+        # .plot(). Computing it during rendering was useless for reporting: any
+        # notice raised there is discarded, because jamovi has already composed
+        # the results panel by the time a figure is drawn.
+        .subtitleCache = NULL,
+        # Rows dropped by .prepareData() for holding Inf/-Inf, reported separately
+        # from ordinary missingness because a non-finite measurement signals a
+        # data-entry or divide-by-zero problem rather than an absent observation.
+        .nonFiniteDropped = 0L,
+        # Messages produced by .prepareData(), kept so a cache hit can re-emit
+        # them (see .prepareData).
+        .data_messages = NULL,
 
         # Notice accumulation system (HTML-based, avoids serialization issues)
         .addNotice = function(message, type = "INFO") {
@@ -109,10 +124,16 @@ jjdotplotstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 grvar <-  self$options$grvar
 
                 num_levels <- nlevels(
-                    as.factor(mydata[[grvar]])
+                    droplevels(as.factor(mydata[[grvar]]))
                 )
 
-                self$results$plot2$setSize(num_levels * plotwidth, plotheight)
+                # num_levels * plotwidth is unbounded: a Split By variable with
+                # 10 levels asked for a 6500-pixel canvas. Cap the total and let
+                # the panels narrow instead, and use droplevels() so empty
+                # levels of a filtered factor do not reserve space for panels
+                # that are never drawn.
+                self$results$plot2$setSize(
+                    min(max(num_levels, 1L) * plotwidth, 3000L), plotheight)
 
             }
 
@@ -178,6 +199,21 @@ jjdotplotstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 private$.addNotice(sprintf('Very small group sizes detected (minimum n = %d in group "%s"). Groups with n < 10 may produce unreliable test results. Consider combining groups or collecting more data.', min_group_n, htmltools::htmlEscape(min_group_name)), "STRONG_WARNING")
             }
 
+            # A dependent variable with no spread makes ggstatsplot die inside its
+            # own layout code ("arguments imply differing number of rows: 0, 1")
+            # and hand back an EMPTY plot box. Catching it here, in .run(), is the
+            # difference between an actionable message and a blank figure - the
+            # error raised at render time cannot reach the results panel, which
+            # jamovi has already composed by then.
+            dep_vals <- jmvcore::toNumeric(self$data[[self$options$dep]][complete_rows])
+            dep_vals <- dep_vals[is.finite(dep_vals)]
+            if (length(dep_vals) > 0 && length(unique(dep_vals)) < 2) {
+                private$.addNotice(sprintf('"%s" takes the same value (%s) in every row, so there is no variation to compare between groups. Check that the correct variable is selected.',
+                                           htmltools::htmlEscape(self$options$dep),
+                                           format(dep_vals[1])), "ERROR")
+                return(FALSE)
+            }
+
             # Validate centrality parameter consistency
             private$.validateCentralityOptions()
 
@@ -186,8 +222,14 @@ jjdotplotstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         
         # Centrality parameter validation helper
         .validateCentralityOptions = function() {
-            if (self$options$centralityparameter == "none" && self$options$centralityk != 2) {
-                private$.addNotice('Centrality decimal places specified but centrality parameter is "none". The precision setting will have no effect.', "INFO")
+            # centralityk was a ggdotplotstats argument (centrality.k) that no
+            # longer exists anywhere in ggstatsplot 1.0.0. Verified by rendering:
+            # centralityk = 0 and centralityk = 5 both label the means 9.92 /
+            # 13.16 / 11.10, while the "Statistical Precision" box (k) does move
+            # them (k = 0 gives 10 / 13 / 11). The control is removed from the
+            # UI; R-API callers who still pass it get told where the real knob is.
+            if (self$options$centralityk != 2) {
+                private$.addNotice('"Central Tendency Precision" no longer has any effect - the statistics package dropped that setting. Use "Statistical Precision (Decimal Places)" instead; it controls the centrality labels too.', "INFO")
             }
 
             if (self$options$centralityplotting && self$options$centralityparameter == "none") {
@@ -199,6 +241,127 @@ jjdotplotstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             }
         },
         
+        # Restore base R's as.character() for formulas while `expr` runs.
+        #
+        # This is not defensive programming, it is a live bug. `logistf` - a
+        # runtime dependency of the odds-ratio analysis, and therefore in this
+        # package's Imports - pulls in `formula.tools`, whose
+        # as.character.formula returns ONE deparsed string ("v ~ g") where base R
+        # returns c("~", "v", "g"). stats::oneway.test does
+        #     dp <- as.character(formula)
+        # and rejects anything of length != 3 with "a two-sided formula is
+        # required", so merely loading ClinicoPath breaks Welch's ANOVA for the
+        # whole R session.
+        #
+        # Measured consequence: with ClinicoPath loaded,
+        # ggstatsplot::ggbetweenstats() on three groups returns subtitle = NULL.
+        # The user ticks "Statistical results in plot" and gets a figure with no
+        # statistics on it and no warning that anything failed.
+        #
+        # The S3 methods table is an ordinary unlocked environment, so swap the
+        # method for the duration of the call and put it back on exit.
+        .withBaseFormulaChar = function(expr) {
+            tbl <- tryCatch(get(".__S3MethodsTable__.", envir = asNamespace("base")),
+                            error = function(e) NULL)
+            shield <- !is.null(tbl) &&
+                exists("as.character.formula", envir = tbl, inherits = FALSE) &&
+                !environmentIsLocked(tbl) &&
+                !isTRUE(tryCatch(bindingIsLocked("as.character.formula", tbl),
+                                 error = function(e) TRUE))
+            if (shield) {
+                old <- get("as.character.formula", envir = tbl, inherits = FALSE)
+                assign("as.character.formula",
+                       function(x, ...) as.character(unclass(x)), envir = tbl)
+                on.exit(assign("as.character.formula", old, envir = tbl), add = TRUE)
+            }
+            force(expr)
+        },
+
+        # How many group levels actually carry data.
+        .nGroupLevels = function(data, group_var) {
+            if (is.null(group_var) || !group_var %in% names(data)) return(NA_integer_)
+            nlevels(droplevels(as.factor(data[[group_var]])))
+        },
+
+        # Build the plot subtitle ourselves.
+        #
+        # ggstatsplot 1.0.0 dropped `effsize.type` from ggbetweenstats: it is
+        # swallowed by `...`, so the four-way "Effect Size Measure" selector was
+        # completely inert. Measured on three groups of 40 - Cohen's d, Hedge's
+        # g, eta-squared and omega-squared all returned the identical subtitle
+        # reporting omega-squared (0.37). statsExpressions, which ggstatsplot
+        # calls internally, still honours the argument, so compute the
+        # expression here and hand it to the plot with results.subtitle = FALSE.
+        #
+        # Returns NULL when the takeover cannot be used, in which case
+        # ggstatsplot produces its own subtitle:
+        #   - subtitles switched off
+        #   - Bayesian type (statsExpressions errors on this combination)
+        #   - fewer than two groups with data
+        .subtitleExpr = function(data, group_var, dep_var, opts) {
+            if (!isTRUE(opts$resultssubtitle)) return(NULL)
+            if (identical(opts$typestatistics, "bayes")) return(NULL)
+
+            n_lev <- private$.nGroupLevels(data, group_var)
+            if (is.na(n_lev) || n_lev < 2) return(NULL)
+
+            # two_sample_test rejects "eta"/"omega" (they are ANOVA-only); map
+            # them onto the equivalent two-group family so the selector still
+            # means something when there are exactly two groups.
+            eff <- opts$effsizetype
+            if (n_lev == 2 && identical(eff, "eta"))   eff <- "biased"
+            if (n_lev == 2 && identical(eff, "omega")) eff <- "unbiased"
+
+            fn <- if (n_lev == 2) statsExpressions::two_sample_test
+                  else            statsExpressions::oneway_anova
+
+            res <- tryCatch(
+                private$.withBaseFormulaChar(rlang::inject(fn(
+                    data         = data,
+                    x            = !!rlang::sym(group_var),
+                    y            = !!rlang::sym(dep_var),
+                    type         = opts$typestatistics,
+                    effsize.type = eff,
+                    digits       = opts$digits,
+                    conf.level   = opts$conflevel))),
+                error = function(e) e)
+
+            # Not hypothetical: `formula.tools` registers an
+            # `as.character.formula` returning one deparsed string where base R
+            # returns c("~", "y", "g"), which makes stats::oneway.test reject
+            # every valid formula with "a two-sided formula is required". It
+            # arrives transitively via logistf, so any session that has run a
+            # Firth regression loses the three-or-more-group takeover. Falling
+            # back to ggstatsplot's subtitle is safe but silently ignores the
+            # effect-size choice, so record it and say so in .run().
+            if (inherits(res, "condition")) {
+                private$.subtitleFallback <- conditionMessage(res)
+                return(NULL)
+            }
+            if (is.null(res$expression) || length(res$expression) == 0) {
+                private$.subtitleFallback <- "the statistics engine returned no expression"
+                return(NULL)
+            }
+            res$expression[[1]]
+        },
+
+        # Draw a failure message INTO the plot panel.
+        #
+        # private$.addNotice() cannot help here: jamovi composes and sends the
+        # results panel when .run() returns, so anything a render callback writes
+        # to an Html item is discarded. Painting the reason where the figure
+        # should have been is the only way the user learns why the box is empty.
+        .plotFailure = function(msg) {
+            print(
+                ggplot2::ggplot() +
+                    ggplot2::annotate("text", x = 0, y = 0, hjust = 0.5, vjust = 0.5,
+                                      size = 4, colour = "#721c24",
+                                      label = paste(strwrap(msg, width = 60), collapse = "\n")) +
+                    ggplot2::theme_void()
+            )
+            TRUE
+        },
+
         # Message accumulation helper
         .accumulateMessage = function(message) {
             if (is.null(private$.messages)) {
@@ -206,6 +369,18 @@ jjdotplotstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             }
             private$.messages <- append(private$.messages, message)
             self$results$todo$setContent(paste(private$.messages, collapse = ""))
+        },
+
+        # Same, but also records the message so .prepareData() can replay it on a
+        # cache hit. Without this the exclusion disclosures vanish: .run() clears
+        # private$.messages on every run, while .prepareData() is keyed on the
+        # variables and data dimensions only - so changing any OPTION (test type,
+        # confidence level, a title) is a cache hit that skips re-emission, and
+        # "N rows excluded due to missing values" silently disappears from a
+        # panel whose analysis still excludes them.
+        .accumulateDataMessage = function(message) {
+            private$.data_messages <- c(private$.data_messages, message)
+            private$.accumulateMessage(message)
         },
         
         
@@ -291,12 +466,15 @@ jjdotplotstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             if (!is.null(private$.processedData) && 
                 private$.data_hash == current_hash && 
                 !force_refresh) {
+                for (msg in private$.data_messages)
+                    private$.accumulateMessage(msg)
                 return(private$.processedData)
             }
 
             # Clear previous messages and add processing feedback
             private$.messages <- NULL
-            private$.accumulateMessage(
+            private$.data_messages <- NULL
+            private$.accumulateDataMessage(
                 glue::glue("<br>Processing data for dot plot analysis...<br><hr>")
             )
             
@@ -328,10 +506,45 @@ jjdotplotstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 mydata <- mydata[complete.cases(mydata[relevant_cols]), ]
                 n_after <- nrow(mydata)
 
+                # complete.cases() follows is.na(), which is TRUE for NaN but
+                # FALSE for Inf, so an infinite measurement survived into
+                # ggstatsplot and killed the whole figure with "'from' must be a
+                # finite number" - an EMPTY plot box sitting under this module's
+                # own "Analysis completed successfully" notice. Measured on 120
+                # rows with a single Inf: zero text elements in the rendered SVG.
+                private$.nonFiniteDropped <- 0L
+                finite_rows <- is.finite(jmvcore::toNumeric(mydata[[dep_var]]))
+                if (any(!finite_rows)) {
+                    private$.nonFiniteDropped <- sum(!finite_rows)
+                    mydata <- mydata[finite_rows, , drop = FALSE]
+                    private$.accumulateDataMessage(
+                        glue::glue("<br> Info: {n_inf} row(s) excluded because {dep_safe} held an infinite value (Inf or -Inf). Infinite values usually indicate a division by zero or an out-of-range entry - check the source data.<br>",
+                                   n_inf = private$.nonFiniteDropped,
+                                   dep_safe = htmltools::htmlEscape(dep_var))
+                    )
+                    n_after <- nrow(mydata)
+                }
+
+                # A group whose measurements are ALL missing disappears from the
+                # comparison entirely. The row count alone does not reveal that:
+                # a clinician who selected Control/DrugA/DrugB and lost Control
+                # to missingness would otherwise read a two-group result as
+                # though that is what they asked for. Name what went.
+                before_lv <- levels(droplevels(as.factor(self$data[[self$options$group]])))
+                after_lv  <- levels(droplevels(as.factor(mydata[[self$options$group]])))
+                gone <- setdiff(before_lv, after_lv)
+                if (length(gone) > 0) {
+                    private$.accumulateDataMessage(
+                        glue::glue("<br> <strong>Group(s) dropped:</strong> {lost} had no usable measurements and {verb} excluded from the comparison entirely.<br>",
+                                   lost = htmltools::htmlEscape(paste(gone, collapse = ", ")),
+                                   verb = if (length(gone) == 1) "was" else "were")
+                    )
+                }
+
                 # Report NA removal if any occurred
                 if (n_before > n_after) {
                     n_dropped <- n_before - n_after
-                    private$.accumulateMessage(
+                    private$.accumulateDataMessage(
                         glue::glue("<br> Info: {n_dropped} rows excluded due to missing values in analysis variables.<br>",
                                   "Rows with data: {n_after} of {n_before} ({round(100 * n_after / n_before, 1)}%)<br>")
                     )
@@ -408,13 +621,41 @@ jjdotplotstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             dep <- self$options$dep
             group <- self$options$group
 
-            # Centrality settings mapped to ggstatsplot arguments
+            # Centrality settings mapped to ggstatsplot arguments.
+            #
+            # There are two controls for one thing, in two different collapse
+            # boxes: "Central Tendency Display" (centralityparameter:
+            # mean/median/none) and "Central Tendency Measure" (centralitytype:
+            # mean/median/trimmed/Bayesian). They used to contradict each other
+            # silently - measured with centralityparameter = "mean" and
+            # centralitytype = "nonparametric", the plot drew and labelled the
+            # MEDIANS (9.80, 13.56, 11.05) while the user's Display control read
+            # "Mean". centralitytype is the richer control and is the one the UI
+            # enables alongside the plotting checkbox, so it decides; the
+            # Display control keeps only its unique power, which is switching
+            # centrality off. A disagreement is now stated rather than resolved
+            # in silence.
             centrality_plotting <- isTRUE(self$options$centralityplotting) && self$options$centralityparameter != "none"
             centrality_type <- self$options$centralitytype
-            if (self$options$centralityparameter == "median")
-                centrality_type <- "nonparametric"
             if (is.null(centrality_type) || centrality_type == "")
                 centrality_type <- typestatistics
+
+            if (centrality_plotting) {
+                implied <- switch(self$options$centralityparameter,
+                                  mean = "parametric", median = "nonparametric", NULL)
+                if (!is.null(implied) && !identical(implied, centrality_type)) {
+                    shown <- switch(centrality_type,
+                                    parametric = "mean", nonparametric = "median",
+                                    robust = "trimmed mean", bayes = "Bayesian (MAP) estimate",
+                                    centrality_type)
+                    private$.addNotice(sprintf('Your two central-tendency settings disagree: "Central Tendency Display" is set to %s while "Central Tendency Measure" is set to %s. The plot shows the %s, which is what "Central Tendency Measure" selects.',
+                                               self$options$centralityparameter,
+                                               switch(centrality_type, parametric = "Mean",
+                                                      nonparametric = "Median", robust = "Trimmed Mean",
+                                                      bayes = "Bayesian Estimate", centrality_type),
+                                               shown), "WARNING")
+                }
+            }
 
             # Compute axis labels respecting orientation flip (values on x-axis)
             xlab <- self$options$ytitle
@@ -426,12 +667,6 @@ jjdotplotstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             mytitle <- self$options$mytitle
             if (mytitle == '') mytitle <- NULL
             
-            xtitle <- self$options$xtitle
-            if (xtitle == '') xtitle <- NULL
-            
-            ytitle <- self$options$ytitle
-            if (ytitle == '') ytitle <- NULL
-            
             # Cache the processed options with all parameters
             options_list <- list(
                 typestatistics = typestatistics,
@@ -440,8 +675,6 @@ jjdotplotstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 mytitle = mytitle,
                 xlab = xlab,
                 ylab = ylab,
-                xtitle = xtitle,
-                ytitle = ytitle,
                 effsizetype = self$options$effsizetype,
                 centralityplotting = self$options$centralityplotting,
                 centralitytype = self$options$centralitytype,
@@ -482,6 +715,8 @@ jjdotplotstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             private$.messages <- NULL
             private$.clearNotices()
             private$.inputsValid <- FALSE
+            private$.subtitleFallback <- NULL
+            private$.subtitleCache <- NULL
 
             # Initial Message ----
             if ( is.null(self$options$dep) || is.null(self$options$group)) {
@@ -491,7 +726,8 @@ jjdotplotstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 todo <- glue::glue(
                 "<br>Welcome to ClinicoPath
                 <br><br>
-                This tool will help you generate Dot Charts.
+                This tool compares a continuous variable across groups and draws
+                the comparison as a box-violin figure with the individual points shown.
                 <br><br>
                 This function uses ggplot2 and ggstatsplot packages. See documentations for <a href = 'https://www.indrapatil.com/ggstatsplot/reference/ggbetweenstats.html' target='_blank'>ggbetweenstats</a> and <a href = 'https://www.indrapatil.com/ggstatsplot/reference/grouped_ggbetweenstats.html' target='_blank'>grouped_ggbetweenstats</a>.
                 <br>
@@ -528,7 +764,13 @@ jjdotplotstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     # nor accumulate on plot-only re-renders such as resizing.
                     private$.inputsValid <- private$.validateInputs()
 
-                    # Emit a single success notice when inputs are valid
+                    # Describe the analysis; do NOT claim it succeeded. .run()
+                    # finishes before a single pixel is drawn, so the old
+                    # "Analysis completed successfully" notice was published
+                    # while the figure could still fail - and it regularly did,
+                    # leaving a confident success message above an empty plot
+                    # box (measured with one Inf value, and with a constant
+                    # dependent variable).
                     if (isTRUE(private$.inputsValid)) {
                         n_obs <- nrow(mydata)
                         n_groups <- length(unique(mydata[[options_data$group]]))
@@ -539,7 +781,19 @@ jjdotplotstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                             "bayes" = "Bayesian",
                             "selected"
                         )
-                        private$.addNotice(sprintf('Analysis completed successfully using %s test. Compared %d groups with N = %d total observations.', test_name, n_groups, n_obs), "INFO")
+                        private$.addNotice(sprintf('Comparing %d groups with N = %d observations using a %s test.', n_groups, n_obs, test_name), "INFO")
+
+                        # Computed HERE, not in .plot(): a notice raised during
+                        # rendering is thrown away, so this is the only place the
+                        # user can be told the effect-size choice was dropped.
+                        private$.subtitleCache <- private$.subtitleExpr(
+                            mydata, options_data$group, options_data$dep, options_data)
+
+                        # The statsExpressions takeover is what makes the effect
+                        # size selector work; say so when it could not be used.
+                        if (!is.null(private$.subtitleFallback) && isTRUE(self$options$resultssubtitle))
+                            private$.addNotice(sprintf('The effect size measure you selected could not be applied (%s), so the plot shows the statistics package default instead.',
+                                                       htmltools::htmlEscape(private$.subtitleFallback)), "WARNING")
                     }
                 }, error = function(e) {
                     private$.addNotice(sprintf('Data processing failed: %s. Please check your variable selections and try again.', htmltools::htmlEscape(e$message)), "ERROR")
@@ -568,8 +822,13 @@ jjdotplotstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             # Checkpoint before expensive ggstatsplot computation
             private$.checkpoint()
 
+            # effsize.type is inert in ggstatsplot 1.0.0, so the subtitle is
+            # computed through statsExpressions in .run() and switched off here
+            # when the takeover succeeded.
+            sub_expr <- private$.subtitleCache
+
             plot <- tryCatch({
-                ggstatsplot::ggbetweenstats(
+                p <- private$.withBaseFormulaChar(ggstatsplot::ggbetweenstats(
                     data = mydata,
                     x = !!rlang::sym(options_data$group),
                     y = !!rlang::sym(options_data$dep),
@@ -577,21 +836,26 @@ jjdotplotstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     xlab = options_data$xlab,
                     ylab = options_data$ylab,
                     type = options_data$typestatistics,
-                    effsize.type = options_data$effsizetype,
                     conf.level = options_data$conflevel,
                     digits = options_data$digits,
                     bf.message = options_data$bfmessage,
                     centrality.plotting = options_data$centrality.plotting,
                     centrality.type = options_data$centrality.type,
-                    results.subtitle = options_data$resultssubtitle,
+                    results.subtitle = if (is.null(sub_expr)) options_data$resultssubtitle else FALSE,
                     ggplot.component = options_data$ggplot.component,
                     ggtheme = if (options_data$originaltheme) ggstatsplot::theme_ggstatsplot() else ggtheme
-                )
-            }, error = function(e) {
-                private$.addNotice(sprintf('Plot generation failed: %s. Please check your data for issues (constant variables, insufficient variation, or extreme outliers) or try a different statistical test.', htmltools::htmlEscape(e$message)), "ERROR")
-                return(NULL)
-            })
+                ))
+                # Attach after construction: do.call()/quote-based routes either
+                # evaluate the plotmath language object ("could not find function
+                # 'italic'") or break the rlang::sym() arguments.
+                if (!is.null(sub_expr)) p <- p + ggplot2::labs(subtitle = sub_expr)
+                p
+            }, error = function(e) e)
 
+            if (inherits(plot, "condition"))
+                return(private$.plotFailure(sprintf(
+                    "The plot could not be drawn: %s. Check the dependent variable for constant values, extreme outliers or too few observations per group, or try a different statistical test.",
+                    conditionMessage(plot))))
             if (is.null(plot)) return()
 
             # Print Plot ----
@@ -627,13 +891,16 @@ jjdotplotstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 private$.checkpoint()
 
                 plot2 <- tryCatch({
-                    ggstatsplot::grouped_ggbetweenstats(
+                    # No takeover here: grouped_ggbetweenstats computes one
+                    # subtitle per panel internally and there is no supported way
+                    # to hand it a list of expressions. effsize.type is therefore
+                    # still inert on this figure - .run() says so.
+                    private$.withBaseFormulaChar(ggstatsplot::grouped_ggbetweenstats(
                         data = mydata,
                         x = !!rlang::sym(options_data$group),
                         y = !!rlang::sym(options_data$dep),
                         grouping.var = !!rlang::sym(grvar),
                         type = options_data$typestatistics,
-                        effsize.type = options_data$effsizetype,
                         conf.level = options_data$conflevel,
                         digits = options_data$digits,
                         bf.message = options_data$bfmessage,
@@ -644,13 +911,23 @@ jjdotplotstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                         ggtheme = if (options_data$originaltheme) ggstatsplot::theme_ggstatsplot() else ggtheme,
                         xlab = options_data$xlab,
                         ylab = options_data$ylab,
-                        title = options_data$mytitle
-                    )
-                }, error = function(e) {
-                    private$.addNotice(sprintf('Grouped plot generation failed: %s. Please check your grouping variable and data.', htmltools::htmlEscape(e$message)), "ERROR")
-                    return(NULL)
-                })
+                        # NOT `title =`. grouped_ggbetweenstats sets the title of
+                        # each panel to that panel's level name, so passing one
+                        # through `...` collided with its own argument and threw
+                        # "formal argument \"title\" matched by multiple actual
+                        # arguments" for EVERY Split By analysis - the whole
+                        # feature had never produced a figure. The error went to a
+                        # notice raised at render time, which jamovi discards, so
+                        # the user saw an empty panel under a success message.
+                        # The overall title belongs to the patchwork annotation.
+                        annotation.args = list(title = options_data$mytitle)
+                    ))
+                }, error = function(e) e)
 
+                if (inherits(plot2, "condition"))
+                    return(private$.plotFailure(sprintf(
+                        "The split figure could not be drawn: %s. Check that every level of the Split By variable has enough data in at least two groups.",
+                        conditionMessage(plot2))))
                 if (is.null(plot2)) return()
             }
 

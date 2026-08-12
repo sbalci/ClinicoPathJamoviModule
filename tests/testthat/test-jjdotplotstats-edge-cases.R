@@ -97,14 +97,12 @@ test_that("jjdotplotstats handles constant variables", {
   const_data <- jjdotplotstats_test
   const_data$constant_var <- 50  # All same value
 
-  # Should error or warn about zero variance
-  expect_condition(
-    jjdotplotstats(
-      data = const_data,
-      dep = "constant_var",
-      group = "treatment"
-    )
-  )
+  # This analysis reports fatal input problems through an ERROR notice rather
+  # than by throwing, so expect_condition() saw nothing. Assert what the user
+  # actually sees instead - a stronger check than "some condition was raised".
+  notices <- function(r) gsub("<[^>]*>", "", r$notices$content)
+  res <- jjdotplotstats(data = const_data, dep = "constant_var", group = "treatment")
+  expect_match(notices(res), "no variation to compare")
 })
 
 test_that("jjdotplotstats handles near-constant variables", {
@@ -259,14 +257,15 @@ test_that("jjdotplotstats handles all missing in one group", {
   one_group_missing <- jjdotplotstats_test
   one_group_missing$tumor_reduction[1:40] <- NA  # All Control group
 
-  # Should error or handle gracefully
-  expect_condition(
-    jjdotplotstats(
-      data = one_group_missing,
-      dep = "tumor_reduction",
-      group = "treatment"
-    )
-  )
+  # This analysis reports fatal input problems through an ERROR notice rather
+  # than by throwing, so expect_condition() saw nothing. Assert what the user
+  # actually sees instead - a stronger check than "some condition was raised".
+  notices <- function(r) gsub("<[^>]*>", "", r$notices$content)
+  res <- jjdotplotstats(data = one_group_missing, dep = "tumor_reduction", group = "treatment")
+  # The emptied group must be NAMED, not just absorbed into a smaller row count.
+  expect_match(res$todo$content, "Group\\(s\\) dropped")
+  expect_match(res$todo$content, "Control")
+  expect_match(notices(res), "Comparing 2 groups")
 })
 
 test_that("jjdotplotstats handles very wide range of values", {
@@ -366,14 +365,14 @@ test_that("jjdotplotstats handles Inf and -Inf values", {
   inf_data$tumor_reduction[1] <- Inf
   inf_data$tumor_reduction[2] <- -Inf
 
-  # Should error or handle gracefully
-  expect_condition(
-    jjdotplotstats(
-      data = inf_data,
-      dep = "tumor_reduction",
-      group = "treatment"
-    )
-  )
+  # This analysis reports fatal input problems through an ERROR notice rather
+  # than by throwing, so expect_condition() saw nothing. Assert what the user
+  # actually sees instead - a stronger check than "some condition was raised".
+  notices <- function(r) gsub("<[^>]*>", "", r$notices$content)
+  res <- jjdotplotstats(data = inf_data, dep = "tumor_reduction", group = "treatment")
+  # complete.cases() keeps Inf, which used to blank the whole figure.
+  expect_match(res$todo$content, "infinite value")
+  expect_match(notices(res), "Comparing 3 groups")
 })
 
 test_that("jjdotplotstats handles NaN values", {
@@ -384,14 +383,13 @@ test_that("jjdotplotstats handles NaN values", {
   nan_data <- jjdotplotstats_test
   nan_data$tumor_reduction[1:3] <- NaN
 
-  # Should handle like NA
-  expect_condition(
-    jjdotplotstats(
-      data = nan_data,
-      dep = "tumor_reduction",
-      group = "treatment"
-    )
-  )
+  # This analysis reports fatal input problems through an ERROR notice rather
+  # than by throwing, so expect_condition() saw nothing. Assert what the user
+  # actually sees instead - a stronger check than "some condition was raised".
+  notices <- function(r) gsub("<[^>]*>", "", r$notices$content)
+  res <- jjdotplotstats(data = nan_data, dep = "tumor_reduction", group = "treatment")
+  expect_match(res$todo$content, "rows excluded")   # NaN is dropped like NA
+  expect_match(notices(res), "Comparing 3 groups")
 })
 
 test_that("jjdotplotstats handles test value at extreme of data range", {
@@ -474,14 +472,18 @@ test_that("jjdotplotstats handles single observation per group", {
   # One observation per group (3 total)
   single_obs <- jjdotplotstats_test[c(1, 41, 81), ]
 
-  # Should error (cannot compute statistics)
-  expect_condition(
-    jjdotplotstats(
-      data = single_obs,
-      dep = "tumor_reduction",
-      group = "treatment"
-    )
-  )
+  # This analysis reports fatal input problems through an ERROR notice rather
+  # than by throwing, so expect_condition() saw nothing. Assert what the user
+  # actually sees instead - a stronger check than "some condition was raised".
+  notices <- function(r) gsub("<[^>]*>", "", r$notices$content)
+  res <- jjdotplotstats(data = single_obs, dep = "tumor_reduction", group = "treatment")
+  expect_match(notices(res), "Small total sample size")
+  expect_match(notices(res), "Very small group sizes")
+  # A figure that cannot be computed must say so in the panel, not sit blank.
+  f <- tempfile(fileext = ".svg"); svglite::svglite(f, 8, 5)
+  invisible(try(print(res$plot), silent = TRUE)); grDevices::dev.off()
+  x <- readLines(f, warn = FALSE); unlink(f)
+  expect_match(paste(x, collapse = ""), "could not be drawn")
 })
 
 test_that("jjdotplotstats handles perfect separation between groups", {

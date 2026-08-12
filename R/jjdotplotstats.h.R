@@ -360,9 +360,11 @@ jjdotplotstatsBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
 #' @param resultssubtitle Display statistical test results (p-value, effect
 #'   size, confidence interval) as a subtitle below the plot. Recommended for
 #'   most analyses.
-#' @param testvalue Reference value for hypothesis testing (usually 0 for
-#'   group comparisons). Can be changed to test against a specific clinically
-#'   meaningful value.
+#' @param testvalue Position of the optional reference line, in the units of
+#'   the dependent variable. Use it to mark a clinically meaningful threshold
+#'   such as an upper limit of normal. No hypothesis test is performed against
+#'   this value; it only draws a line, and only when 'Reference value line' is
+#'   ticked.
 #' @param bfmessage Display Bayes Factor interpretation (evidence strength)
 #'   when using Bayesian analysis. BF > 3 indicates moderate evidence, BF > 10
 #'   strong evidence.
@@ -373,14 +375,16 @@ jjdotplotstatsBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
 #' @param k Number of decimal places for statistical results (p-values, effect
 #'   sizes). More decimal places show greater precision but may not be
 #'   clinically meaningful.
-#' @param testvalueline Display a vertical reference line at the test value.
-#'   Useful for showing clinically significant thresholds or normal reference
-#'   ranges.
+#' @param testvalueline Draw a dashed vertical line at 'Reference Line Value'.
+#'   Useful for marking a clinical threshold or a normal reference limit. This
+#'   is a visual annotation only.
 #' @param centralityparameter Which central tendency measure to show as a
 #'   vertical line on the plot. Mean is sensitive to outliers; median is more
 #'   robust for skewed data.
-#' @param centralityk Decimal places for central tendency values displayed on
-#'   the plot. Should match the precision meaningful for your measurement scale.
+#' @param centralityk Deprecated and ignored. The statistics package no longer
+#'   accepts a separate precision for the centrality labels; they follow
+#'   'Statistical Precision (Decimal Places)'. Retained so existing scripts keep
+#'   running, and removed from the user interface.
 #' @param plotwidth Width of the plot in pixels. Larger values provide more
 #'   detail but may not fit well in reports. Default: 650 pixels.
 #' @param plotheight Height of the plot in pixels. Adjust based on number of

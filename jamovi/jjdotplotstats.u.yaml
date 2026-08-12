@@ -77,12 +77,6 @@ children:
                 name: testvalueline
               - type: ComboBox
                 name: centralityparameter
-              - type: TextBox
-                name: centralityk
-                format: number
-                enable: >-
-                  ((centralityparameter:mean || centralityparameter:median) &&
-                  centralityplotting)
   - type: CollapseBox
     label: Centrality Options
     collapsed: true
@@ -99,6 +93,12 @@ children:
               - type: ComboBox
                 name: centralitytype
                 enable: (centralityplotting)
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: TextBox
+        name: centralityk
+        format: number
   - type: CollapseBox
     label: Plot Appearance
     collapsed: true

@@ -173,8 +173,7 @@ test_that("jjdotplotstats handles different centrality types", {
       centralitytype = cent_type
     )
 
-    expect_s3_class(result, "jjdotplotstatsResults",
-                   info = paste("Failed for centralitytype:", cent_type))
+    expect_true(inherits(result, "jjdotplotstatsResults"), info = paste("Failed for centralitytype:", cent_type))
   }
 })
 
@@ -193,8 +192,7 @@ test_that("jjdotplotstats handles different effect size types", {
       effsizetype = eff_type
     )
 
-    expect_s3_class(result, "jjdotplotstatsResults",
-                   info = paste("Failed for effsizetype:", eff_type))
+    expect_true(inherits(result, "jjdotplotstatsResults"), info = paste("Failed for effsizetype:", eff_type))
   }
 })
 
@@ -355,8 +353,7 @@ test_that("jjdotplotstats handles different datasets", {
       group = vars$group
     )
 
-    expect_s3_class(result, "jjdotplotstatsResults",
-                   info = paste("Failed for dataset:", dataset_name))
+    expect_true(inherits(result, "jjdotplotstatsResults"), info = paste("Failed for dataset:", dataset_name))
   }
 })
 
@@ -374,8 +371,7 @@ test_that("jjdotplotstats handles different confidence levels", {
       conflevel = conf
     )
 
-    expect_s3_class(result, "jjdotplotstatsResults",
-                   info = paste("Failed for conflevel:", conf))
+    expect_true(inherits(result, "jjdotplotstatsResults"), info = paste("Failed for conflevel:", conf))
   }
 })
 
@@ -393,8 +389,7 @@ test_that("jjdotplotstats handles different decimal places", {
       k = k
     )
 
-    expect_s3_class(result, "jjdotplotstatsResults",
-                   info = paste("Failed for k =", k))
+    expect_true(inherits(result, "jjdotplotstatsResults"), info = paste("Failed for k =", k))
   }
 })
 

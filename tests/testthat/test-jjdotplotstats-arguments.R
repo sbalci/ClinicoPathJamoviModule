@@ -20,8 +20,7 @@ test_that("jjdotplotstats respects all statistical type options", {
       typestatistics = stat_type
     )
 
-    expect_s3_class(result, "jjdotplotstatsResults",
-                   info = paste("Failed for typestatistics:", stat_type))
+    expect_true(inherits(result, "jjdotplotstatsResults"), info = paste("Failed for typestatistics:", stat_type))
   }
 })
 
@@ -38,8 +37,7 @@ test_that("jjdotplotstats respects all effect size type options", {
       effsizetype = eff_type
     )
 
-    expect_s3_class(result, "jjdotplotstatsResults",
-                   info = paste("Failed for effsizetype:", eff_type))
+    expect_true(inherits(result, "jjdotplotstatsResults"), info = paste("Failed for effsizetype:", eff_type))
   }
 })
 
@@ -56,8 +54,7 @@ test_that("jjdotplotstats respects all centrality type options", {
       centralitytype = cent_type
     )
 
-    expect_s3_class(result, "jjdotplotstatsResults",
-                   info = paste("Failed for centralitytype:", cent_type))
+    expect_true(inherits(result, "jjdotplotstatsResults"), info = paste("Failed for centralitytype:", cent_type))
   }
 })
 
@@ -74,8 +71,7 @@ test_that("jjdotplotstats respects centrality parameter options", {
       centralityparameter = param
     )
 
-    expect_s3_class(result, "jjdotplotstatsResults",
-                   info = paste("Failed for centralityparameter:", param))
+    expect_true(inherits(result, "jjdotplotstatsResults"), info = paste("Failed for centralityparameter:", param))
   }
 })
 
@@ -179,8 +175,7 @@ test_that("jjdotplotstats respects confidence level parameter", {
       conflevel = conf
     )
 
-    expect_s3_class(result, "jjdotplotstatsResults",
-                   info = paste("Failed for conflevel:", conf))
+    expect_true(inherits(result, "jjdotplotstatsResults"), info = paste("Failed for conflevel:", conf))
   }
 })
 
@@ -196,8 +191,7 @@ test_that("jjdotplotstats respects decimal places parameter", {
       k = k
     )
 
-    expect_s3_class(result, "jjdotplotstatsResults",
-                   info = paste("Failed for k =", k))
+    expect_true(inherits(result, "jjdotplotstatsResults"), info = paste("Failed for k =", k))
   }
 })
 
@@ -214,8 +208,7 @@ test_that("jjdotplotstats respects centrality k parameter", {
       centralityk = cent_k
     )
 
-    expect_s3_class(result, "jjdotplotstatsResults",
-                   info = paste("Failed for centralityk =", cent_k))
+    expect_true(inherits(result, "jjdotplotstatsResults"), info = paste("Failed for centralityk =", cent_k))
   }
 })
 
@@ -251,8 +244,7 @@ test_that("jjdotplotstats respects plot dimension parameters", {
       plotheight = dim$height
     )
 
-    expect_s3_class(result, "jjdotplotstatsResults",
-                   info = paste("Failed for width =", dim$width, "height =", dim$height))
+    expect_true(inherits(result, "jjdotplotstatsResults"), info = paste("Failed for width =", dim$width, "height =", dim$height))
   }
 })
 
@@ -300,8 +292,7 @@ test_that("jjdotplotstats handles combinations of statistical type and effect si
       effsizetype = combinations$effsizetype[i]
     )
 
-    expect_s3_class(result, "jjdotplotstatsResults",
-                   info = paste("Failed for typestatistics =", combinations$typestatistics[i],
+    expect_true(inherits(result, "jjdotplotstatsResults"), info = paste("Failed for typestatistics =", combinations$typestatistics[i],
                                "effsizetype =", combinations$effsizetype[i]))
   }
 })
@@ -324,8 +315,7 @@ test_that("jjdotplotstats handles combinations of centrality options", {
       centralityparameter = combinations$centralityparameter[i]
     )
 
-    expect_s3_class(result, "jjdotplotstatsResults",
-                   info = paste("Failed for centralitytype =", combinations$centralitytype[i],
+    expect_true(inherits(result, "jjdotplotstatsResults"), info = paste("Failed for centralitytype =", combinations$centralitytype[i],
                                "centralityparameter =", combinations$centralityparameter[i]))
   }
 })
@@ -368,8 +358,7 @@ test_that("jjdotplotstats handles grouped analysis with different statistical ty
       typestatistics = stat_type
     )
 
-    expect_s3_class(result, "jjdotplotstatsResults",
-                   info = paste("Failed for grouped analysis with typestatistics:", stat_type))
+    expect_true(inherits(result, "jjdotplotstatsResults"), info = paste("Failed for grouped analysis with typestatistics:", stat_type))
   }
 })
 
@@ -386,8 +375,7 @@ test_that("jjdotplotstats handles test value with different statistical types", 
       typestatistics = stat_type
     )
 
-    expect_s3_class(result, "jjdotplotstatsResults",
-                   info = paste("Failed for test value with typestatistics:", stat_type))
+    expect_true(inherits(result, "jjdotplotstatsResults"), info = paste("Failed for test value with typestatistics:", stat_type))
   }
 })
 

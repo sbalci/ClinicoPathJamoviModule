@@ -26,9 +26,7 @@ test_that("jjdotplotstats integrates with all test datasets", {
       group = dataset_info$group
     )
 
-    expect_s3_class(result, "jjdotplotstatsResults",
-      info = paste("Failed for dataset:", dataset_info$name)
-    )
+    expect_true(inherits(result, "jjdotplotstatsResults"), info = paste("Failed for dataset:", dataset_info$name))
   }
 })
 

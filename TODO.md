@@ -3010,7 +3010,6 @@ out-of-scope findings from the same audit, deferred for separate work.
 
 
 
-/release-review-function jjdotplotstats
 /release-review-function raincloud
 /release-review-function advancedraincloud
 /release-review-function lollipop
@@ -3466,3 +3465,47 @@ API and will fail `R CMD check --run-donttest` until `prepare()` + `document()` 
       `num <- jmvcore::toNumeric(col); if (!is.numeric(num)) num <- suppressWarnings(as.numeric(as.character(num)))`.
       Fixed in `R/jjwithinstats.b.R` only; worth one sweep across the rest.
       Found 2026-08-12 during the post-review audit pass.
+
+- [ ] **[CRITICAL/module-wide] 3+-group parametric ggstatsplot subtitles render as NOTHING.**
+      `logistf` (Imports, needed by the odds-ratio analysis) pulls in `formula.tools`, whose
+      `as.character.formula` returns one deparsed string where base R returns
+      `c("~","y","g")`. `stats::oneway.test` does `dp <- as.character(formula)` and rejects
+      anything of length != 3 with "a two-sided formula is required", so **loading ClinicoPath
+      breaks Welch's ANOVA for the whole R session**. ggstatsplot swallows the failure and
+      returns `subtitle = NULL`: the user ticks "Statistical results in plot" and gets a figure
+      with no statistics and no warning. Measured: `ggbetweenstats` 3 groups -> NULL subtitle;
+      2 groups and `ggwithinstats` are unaffected.
+      Fixed in `R/jjdotplotstats.b.R` via `.withBaseFormulaChar()` (swaps the S3 method for the
+      duration of the call, restores on exit including on error; covered by
+      `test-jjdotplotstats-release-review.R`).
+      **Still affected: `jjbetweenstats` (its effect-size takeover is inert for 3+ groups for
+      exactly this reason), `statsplot2`, `jextractggstats`, `crosstable`.** Apply the same
+      helper. `ihcheterogeneity` already routes around it with `aov()` and needs nothing.
+      Found 2026-08-12 during the jjdotplotstats release review.
+
+- [ ] **[DESIGN/jjdotplotstats] "Dot Chart" draws a box-violin plot, duplicating jjbetweenstats.**
+      `R/jjdotplotstats.b.R` calls `ggstatsplot::ggbetweenstats`, whose layers are measured as
+      GeomPoint + GeomBoxplot + GeomViolin - not a dot chart. `jjbetweenstats` is titled
+      "Box-Violin Plots to Compare Between Groups" and sits in the SAME `menuGroup` and
+      `menuSubgroup`, so the module ships the same figure twice, one of them mislabelled.
+      The `testvalue` / `testvalueline` / `centralityparameter` / `centralityk` options are
+      leftovers from `ggstatsplot::ggdotplotstats`, which is what the name and title imply.
+      Not swapped in this pass because it is a genuine product decision, not a defect:
+      `ggdotplotstats` aggregates to ONE point per group and runs a one-sample t-test of those
+      k means against `test.value` (verified: 120 raw rows -> 3 points), which for a 3-group
+      biomarker comparison is a one-sample t-test on n = 3 - a statistical downgrade from the
+      Welch ANOVA the analysis performs today. Decide: rename the analysis, or re-engine it and
+      accept the different question it answers.
+      Raised 2026-08-12 during the jjdotplotstats release review.
+
+- [ ] **[MODERATE/jjdotplotstats] Pairwise comparisons are computed and drawn with no control.**
+      The figure renders "Pairwise test: Games-Howell, Bars shown: significant, alpha = 0.05"
+      with Holm adjustment, but unlike `jjbetweenstats` the analysis exposes no
+      `pairwisecomparisons`, `pairwisedisplay` or `padjustmethod` option. The user cannot turn
+      the multiple testing off or change the adjustment. Holm is a safe default, so this is a
+      gap rather than a wrong number.
+
+- [ ] **[MINOR/jjdotplotstats] Dead configuration.** `jamovi/jjdotplotstats.a.yaml` carries a
+      large commented-out `clinicalpreset` option block, and `tests/testthat/test-jjdotplotstats-correctness.R`
+      used to test it via `tryCatch(error = NULL)` so the test could only ever fail. Test now
+      pins the real contract; the commented block should be deleted or finished.

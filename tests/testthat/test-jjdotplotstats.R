@@ -134,8 +134,23 @@ test_that("jjdotplotstats validates input parameters", {
       group = "Species",
       typestatistics = "parametric"
     ),
-    "Data contains no \\(complete\\) rows"
+    # An empty data.frame has no COLUMNS either, so jmvcore rejects the missing
+    # variable first. That message names the offending option, which is more
+    # useful than the module's own "no complete rows" - assert what is raised.
+    "not present in the dataset"
   )
+
+  # A frame that HAS the columns but no rows is the case the module itself
+  # guards. It reports through an ERROR notice rather than by throwing, so the
+  # rest of the output survives - assert the message the user is shown.
+  res <- jjdotplotstats(
+    data = iris[0, ],
+    dep = "Sepal.Length",
+    group = "Species",
+    typestatistics = "parametric"
+  )
+  expect_match(gsub("<[^>]*>", "", res$notices$content),
+               "Data contains no complete rows")
 })
 
 test_that("jjdotplotstats performance optimization works", {
