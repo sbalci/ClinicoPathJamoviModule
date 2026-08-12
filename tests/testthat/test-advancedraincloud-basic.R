@@ -93,7 +93,7 @@ test_that("advancedraincloud handles different rain_side options", {
       rain_side = side
     )
 
-    expect_s3_class(result, "advancedraincloudResults",
+    expect_true(inherits(result, "advancedraincloudResults"),
                    info = paste("Failed for rain_side:", side))
   }
 })
@@ -149,7 +149,7 @@ test_that("advancedraincloud handles color palettes", {
       color_palette = pal
     )
 
-    expect_s3_class(result, "advancedraincloudResults",
+    expect_true(inherits(result, "advancedraincloudResults"),
                    info = paste("Failed for palette:", pal))
   }
 })

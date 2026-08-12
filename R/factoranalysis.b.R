@@ -4,9 +4,7 @@
 #' with enhanced features for clinical and pathological research.
 #'
 #' @import jmvcore
-#' @import stats
-#' @import psych
-#' @import GPArotation
+#' @importFrom stats cor sd
 #' @importFrom grDevices rainbow
 #' @importFrom graphics abline legend lines plot points text
 #' @export

@@ -1042,12 +1042,16 @@ statsplot2Class <- if (requireNamespace('jmvcore'))
                 # Checkpoint before expensive plot generation
                 private$.checkpoint()
 
-                plot <- ggstatsplot::ggbetweenstats(
+                # formula.tools (pulled in by logistf) overrides as.character.formula,
+                # which breaks stats::oneway.test. ggstatsplot swallows that and returns
+                # a plot with no subtitle at all, so a three-or-more-group comparison
+                # rendered a figure with no statistics on it and no warning.
+                plot <- withBaseFormulaChar(ggstatsplot::ggbetweenstats(
                     data = prepared_data$data,
                     x = !!rlang::sym(prepared_data$group),
                     y = !!rlang::sym(prepared_data$dep),
                     type = prepared_data$distribution
-                )
+                ))
                 return(plot)
             },
             
@@ -1226,14 +1230,14 @@ statsplot2Class <- if (requireNamespace('jmvcore'))
                     # the tryCatch return value so a failure falls through to the manual
                     # multi-panel fallback instead of propagating uncaught through .generatePlot.
                     grouped_func_available <- tryCatch({
-                        plot <- ggstatsplot::grouped_ggbetweenstats(
+                        plot <- withBaseFormulaChar(ggstatsplot::grouped_ggbetweenstats(
                             data = prepared_data$data,
                             x = !!rlang::sym(prepared_data$group),
                             y = !!rlang::sym(prepared_data$dep),
                             grouping.var = !!rlang::sym(prepared_data$grvar),
                             pairwise.comparisons = TRUE,
                             p.adjust.method = "bonferroni"
-                        )
+                        ))
                         TRUE
                     }, error = function(e) {
                         message("grouped_ggbetweenstats failed: ", conditionMessage(e))

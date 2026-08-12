@@ -1,12 +1,12 @@
 ---
 title: Common Analysis for Clinicopathological Research
 name: ClinicoPath
-version: 1.0.5
+version: 1.0.51
 jms: '1.0'
 authors:
   - Serdar Balci
 maintainer: Serdar Balci <serdarbalci@serdarbalci.com>
-date: '2026-08-11'
+date: '2026-08-12'
 type: R
 description: >-
   ClinicoPath help researchers to generate natural language summaries of their
@@ -801,7 +801,7 @@ analyses:
   - title: Raincloud Plot
     name: raincloud
     ns: ClinicoPath
-    menuGroup: JJStatsPlot
+    menuGroup: JJStatsPlotT
     menuSubgroup: Categorical vs Continuous
     menuTitle: Raincloud Plot
     menuSubtitle: Distribution Visualization with ggdist
@@ -1232,7 +1232,7 @@ analyses:
   - title: Advanced Raincloud Plot
     name: advancedraincloud
     ns: ClinicoPath
-    menuGroup: JJStatsPlot
+    menuGroup: JJStatsPlotT
     menuSubgroup: Categorical vs Continuous
     menuTitle: Advanced Raincloud Plot
     menuSubtitle: Longitudinal & Likert Support with ggrain
@@ -1754,19 +1754,21 @@ analyses:
       Wrapper Function for ggstatsplot::ggcorrmat and
       ggstatsplot::grouped_ggcorrmat to generate correlation matrix
       visualizations with significance testing.
-  - title: Dot Chart
+  - title: Horizontal Box-Violin Comparison
     name: jjdotplotstats
     ns: ClinicoPath
     menuGroup: JJStatsPlot
     menuSubgroup: Categorical vs Continuous
-    menuTitle: Dot Chart
+    menuTitle: Horizontal Box-Violin Comparison
     ribbon: analyses
     category: analyses
-    description: |
-      Wrapper Function for ggstatsplot::ggbetweenstats and
-      ggstatsplot::grouped_ggbetweenstats to generate dot-style
-      comparisons of continuous variables between groups with
-      statistical annotations and significance testing.
+    description: |-
+      Compares a continuous variable across groups and draws the comparison
+      horizontally - values on the x axis, group labels down the y axis - with
+      an optional vertical reference line. Wraps ggstatsplot::ggbetweenstats
+      and ggstatsplot::grouped_ggbetweenstats, so the figure is a box-violin
+      plot with the individual observations shown, and the test is a
+      between-groups comparison using every observation.
   - title: Box-Violin Plots to Compare Between Groups
     name: jjbetweenstats
     ns: ClinicoPath
@@ -6239,6 +6241,17 @@ analyses:
       lesion per visit - so this guide starts there, shows a worked layout for
       each, and states plainly what each analysis can and cannot do. No data or
       variables required.
+  - title: Dot Chart (Summary vs Reference Value)
+    name: jjdotchart
+    ns: ClinicoPath
+    category: analyses
+    menuGroup: JJStatsPlotT
+    menuSubgroup: Categorical vs Continuous
+    menuTitle: Dot Chart (Summary vs Reference Value)
+    description: |-
+      Cleveland dot chart: one summary point per group, ordered by value, with
+      a confidence interval and a reference line. Wraps
+      ggstatsplot::ggdotplotstats and ggstatsplot::grouped_ggdotplotstats.
 usesNative: true
 minApp: 2.7.27
 

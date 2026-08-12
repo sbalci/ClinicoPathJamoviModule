@@ -5,7 +5,6 @@
 #' @import jmvcore
 #' @importFrom magrittr %>%
 #' @importFrom DataExplorer introduce plot_intro plot_missing profile_missing
-#' @importFrom DataExplorer plot_histogram plot_bar plot_correlation plot_prcomp
 #' @importFrom DataExplorer plot_scatterplot plot_boxplot create_report
 #' @importFrom DataExplorer set_missing group_category dummify drop_columns
 #' @importFrom htmltools HTML

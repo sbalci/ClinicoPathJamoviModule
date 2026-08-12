@@ -498,3 +498,37 @@ test_that("jextractggstats performance with different data sizes", {
     )
   }, NA)
 })
+
+test_that("jextractggstats actually populates the extracted components", {
+  # Regression guard: ggstatsplot::extract_stats() takes ONLY the plot object.
+  # Passing type = "subtitle" etc. raised "unused argument", which the backend's
+  # tryCatch swallowed, so the analysis rendered an empty result.
+  skip_if_not_installed("ggstatsplot")
+  expect_identical(names(formals(ggstatsplot::extract_stats)), "p")
+
+  set.seed(42)
+  df <- data.frame(
+    y = c(stats::rnorm(25, 10, 2), stats::rnorm(25, 12, 2), stats::rnorm(25, 15, 2)),
+    x = factor(rep(c("GroupA", "GroupB", "GroupC"), each = 25))
+  )
+
+  result <- jextractggstats(
+    data = df,
+    dep_var = "y",
+    group_var = "x",
+    analysis_type = "between_stats",
+    statistical_test = "parametric",
+    extract_components = "all",
+    pairwise_comparisons = TRUE
+  )
+
+  html <- result$extracted_data$content
+
+  # A genuine extraction failure must be reported, not silently swallowed
+  expect_false(grepl("Could not extract", html, fixed = TRUE))
+
+  # Components must actually be present
+  expect_true(grepl("Main Statistical Results", html, fixed = TRUE))
+  expect_true(grepl("Pairwise Comparisons", html, fixed = TRUE))
+  expect_gt(length(gregexpr("<table", html, fixed = TRUE)[[1]]), 1)
+})

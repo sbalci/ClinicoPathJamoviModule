@@ -1,7 +1,7 @@
 #' @title Arc Diagram
 #' @importFrom R6 R6Class
 #' @import jmvcore
-#' @rawNamespace import(igraph, except = c(compose, crossing, is_named, simplify))
+#' @importFrom igraph betweenness blocks closeness is_connected max_degree
 #' @import grDevices
 #' @import RColorBrewer
 #' @importFrom graphics par title legend

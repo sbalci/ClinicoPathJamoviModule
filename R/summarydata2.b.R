@@ -108,7 +108,6 @@
 #' @importFrom summarytools dfSummary descr freq ctable view st_options
 #' @importFrom lubridate ymd ymd_hms dmy dmy_hms mdy mdy_hms ydm parse_date_time is.Date
 #' @importFrom purrr map
-#' @importFrom rlang `%||%`
 #' @importFrom stats shapiro.test quantile sd median na.omit
 #'
 

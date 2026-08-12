@@ -214,7 +214,7 @@ test_that("raincloud handles clinical theme", {
     data = raincloud_clinical,
     dep_var = "glucose",
     group_var = "diagnosis",
-    theme = "clinical"
+    plot_theme = "clinical"
   )
 
   expect_s3_class(result, "raincloudResults")
@@ -226,7 +226,7 @@ test_that("raincloud handles minimal theme", {
     data = raincloud_test,
     dep_var = "symptom_score",
     group_var = "treatment_group",
-    theme = "minimal"
+    plot_theme = "minimal"
   )
 
   expect_s3_class(result, "raincloudResults")
@@ -238,7 +238,7 @@ test_that("raincloud handles classic theme", {
     data = raincloud_test,
     dep_var = "quality_of_life",
     group_var = "disease_severity",
-    theme = "classic"
+    plot_theme = "classic"
   )
 
   expect_s3_class(result, "raincloudResults")
@@ -250,7 +250,7 @@ test_that("raincloud handles publication theme", {
     data = raincloud_test,
     dep_var = "symptom_score",
     group_var = "treatment_group",
-    theme = "publication"
+    plot_theme = "publication"
   )
 
   expect_s3_class(result, "raincloudResults")
@@ -263,7 +263,7 @@ test_that("raincloud handles Prism themes", {
     data = raincloud_clinical,
     dep_var = "systolic_bp",
     group_var = "diagnosis",
-    theme = "prism"
+    plot_theme = "prism_default"
   )
   expect_s3_class(result_prism, "raincloudResults")
 
@@ -272,7 +272,7 @@ test_that("raincloud handles Prism themes", {
     data = raincloud_clinical,
     dep_var = "cholesterol",
     group_var = "bmi_category",
-    theme = "prism_whitespace"
+    plot_theme = "prism_white"
   )
   expect_s3_class(result_white, "raincloudResults")
 
@@ -281,7 +281,7 @@ test_that("raincloud handles Prism themes", {
     data = raincloud_clinical,
     dep_var = "hemoglobin_a1c",
     group_var = "diagnosis",
-    theme = "prism_light"
+    plot_theme = "prism_white"
   )
   expect_s3_class(result_light, "raincloudResults")
 })
@@ -296,7 +296,7 @@ test_that("raincloud handles default palette", {
     data = raincloud_test,
     dep_var = "symptom_score",
     group_var = "treatment_group",
-    palette = "default"
+    color_palette = "default"
   )
 
   expect_s3_class(result, "raincloudResults")
@@ -308,7 +308,7 @@ test_that("raincloud handles viridis palette", {
     data = raincloud_test,
     dep_var = "quality_of_life",
     group_var = "disease_severity",
-    palette = "viridis"
+    color_palette = "viridis"
   )
 
   expect_s3_class(result, "raincloudResults")
@@ -321,7 +321,7 @@ test_that("raincloud handles GraphPad Prism palettes", {
     data = raincloud_biomarker,
     dep_var = "ki67_index",
     group_var = "grade",
-    palette = "floral"
+    color_palette = "prism_floral"
   )
   expect_s3_class(result_floral, "raincloudResults")
 
@@ -330,7 +330,7 @@ test_that("raincloud handles GraphPad Prism palettes", {
     data = raincloud_biomarker,
     dep_var = "protein_expression",
     group_var = "receptor_status",
-    palette = "candy_bright"
+    color_palette = "prism_candy_bright"
   )
   expect_s3_class(result_candy, "raincloudResults")
 
@@ -339,7 +339,7 @@ test_that("raincloud handles GraphPad Prism palettes", {
     data = raincloud_biomarker,
     dep_var = "immune_score",
     group_var = "stage",
-    palette = "colorblind_safe"
+    color_palette = "prism_colorblind_safe"
   )
   expect_s3_class(result_cb, "raincloudResults")
 })
@@ -384,28 +384,34 @@ test_that("raincloud handles outlier detection", {
   expect_s3_class(result, "raincloudResults")
 })
 
-test_that("raincloud handles mean display", {
+# There is no `show_mean` / `show_median` option: the mean and the median are
+# reported together by `show_statistics`, which renders the per-group summary
+# table. These two tests used to pass show_mean/show_median and so tested
+# nothing; they now assert the table really carries both statistics.
+test_that("raincloud shows the mean in the summary statistics table", {
 
   result <- raincloud(
     data = raincloud_test,
     dep_var = "quality_of_life",
     group_var = "disease_severity",
-    show_mean = TRUE
+    show_statistics = TRUE
   )
 
-  expect_s3_class(result, "raincloudResults")
+  expect_true(inherits(result, "raincloudResults"))
+  expect_true(grepl("Mean", result$statistics$content, fixed = TRUE))
 })
 
-test_that("raincloud handles median display", {
+test_that("raincloud shows the median in the summary statistics table", {
 
   result <- raincloud(
     data = raincloud_test,
     dep_var = "symptom_score",
     group_var = "treatment_group",
-    show_median = TRUE
+    show_statistics = TRUE
   )
 
-  expect_s3_class(result, "raincloudResults")
+  expect_true(inherits(result, "raincloudResults"))
+  expect_true(grepl("Median", result$statistics$content, fixed = TRUE))
 })
 
 # ═══════════════════════════════════════════════════════════

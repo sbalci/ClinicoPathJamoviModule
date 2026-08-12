@@ -4,27 +4,28 @@
 
 library(testthat)
 
-test_that("advancedraincloud errors on missing required arguments", {
+test_that("advancedraincloud waits for the required variables instead of erroring", {
 
   data(advancedraincloud_test)
 
-  # Missing y_var
-  expect_error(
-    advancedraincloud(
-      data = advancedraincloud_test,
-      x_var = "treatment"
-    )
+  # A half-filled variable picker is the NORMAL state of a jamovi analysis while
+  # the user is still setting it up, so y_var/x_var missing must NOT raise - the
+  # contract is the "Welcome to Advanced Raincloud Plots!" instruction panel in
+  # the todo output and empty results everywhere else.
+  res_no_y <- advancedraincloud(
+    data = advancedraincloud_test,
+    x_var = "treatment"
   )
+  expect_match(res_no_y$todo$content, "Required Variables")
+  expect_equal(res_no_y$statistics$content, "")
 
-  # Missing x_var
-  expect_error(
-    advancedraincloud(
-      data = advancedraincloud_test,
-      y_var = "pain_score"
-    )
+  res_no_x <- advancedraincloud(
+    data = advancedraincloud_test,
+    y_var = "pain_score"
   )
+  expect_match(res_no_x$todo$content, "Required Variables")
 
-  # Missing data
+  # Missing data, however, is a caller error and must still raise.
   expect_error(
     advancedraincloud(
       y_var = "pain_score",
@@ -297,21 +298,37 @@ test_that("advancedraincloud handles invalid clinical cutoff values", {
   expect_s3_class(result, "advancedraincloudResults")
 })
 
-test_that("advancedraincloud handles invalid MCID values", {
+test_that("advancedraincloud rejects an invalid MCID instead of drawing it", {
 
   data(advancedraincloud_test)
 
-  # Negative MCID
-  result <- advancedraincloud(
-    data = advancedraincloud_test,
-    y_var = "pain_score",
-    x_var = "treatment",
-    show_mcid = TRUE,
-    mcid_value = -10
+  # A minimal clinically important DIFFERENCE is a magnitude; a negative value
+  # would draw an inverted band around each group mean and imply a threshold
+  # that cannot exist. The option validators used to run inside .init(), whose
+  # error handler swallowed jmvcore::reject(), so this silently produced a plot;
+  # they now run in .run() and the rejection reaches the user.
+  expect_error(
+    advancedraincloud(
+      data = advancedraincloud_test,
+      y_var = "pain_score",
+      x_var = "treatment",
+      show_mcid = TRUE,
+      mcid_value = -10
+    ),
+    "MCID value must be a positive"
   )
 
-  # Should handle gracefully
-  expect_s3_class(result, "advancedraincloudResults")
+  # ... and it is only enforced when the band is actually requested.
+  expect_true(inherits(
+    advancedraincloud(
+      data = advancedraincloud_test,
+      y_var = "pain_score",
+      x_var = "treatment",
+      show_mcid = FALSE,
+      mcid_value = -10
+    ),
+    "advancedraincloudResults"
+  ))
 })
 
 test_that("advancedraincloud handles baseline_group not in data", {
@@ -356,9 +373,12 @@ test_that("advancedraincloud handles very long variable names", {
 
   names(long_name_data)[names(long_name_data) == "pain_score"] <- long_var_name
 
+  # y_var is captured with jmvcore::enquo(), so a BARE symbol resolves to its own
+  # name: passing `y_var = long_var_name` asks for a column literally called
+  # "long_var_name". Unquote so the string value is what reaches the option.
   result <- advancedraincloud(
     data = long_name_data,
-    y_var = long_var_name,
+    y_var = !!long_var_name,
     x_var = "treatment"
   )
 

@@ -6,7 +6,6 @@
 #' @importFrom magrittr %>%
 #' @import ggplot2
 #' @import tidyr
-#' @import scales
 #' @import patchwork
 #' @param data Data frame containing mutation and clinical data
 #' @param sampleVar Column name for sample identifiers

@@ -135,7 +135,12 @@ raincloudClass <- if (requireNamespace("jmvcore")) R6::R6Class("raincloudClass",
             if (!is.null(color_var) && color_var != "") {
                 required_vars <- c(required_vars, color_var)
             }
-            
+            # A variable used in two roles (e.g. facet_var == group_var) must not
+            # be selected twice: dataset[c("g","g")] silently yields a duplicate
+            # column renamed "g.1", and the missing-value listing below then
+            # reports the same variable twice.
+            required_vars <- unique(required_vars)
+
             analysis_data <- dataset[required_vars]
             analysis_data <- analysis_data[complete.cases(analysis_data), ]
             
@@ -143,9 +148,30 @@ raincloudClass <- if (requireNamespace("jmvcore")) R6::R6Class("raincloudClass",
                 jmvcore::reject(.("Error: No complete cases found for the selected variables."))
             }
 
-            # Convert variables to appropriate types
-            analysis_data[[dep_var]] <- as.numeric(analysis_data[[dep_var]])
-            analysis_data[[group_var]] <- as.factor(analysis_data[[group_var]])
+            # Convert variables to appropriate types.
+            #
+            # as.numeric() on a FACTOR returns the level INDICES (1, 2, 3 ...),
+            # not the numbers the labels spell - a factor of "10","20","30"
+            # silently becomes 1,2,3 and every statistic below is computed on
+            # rank codes. The GUI's `permitted: numeric` keeps factors out of the
+            # picker, but an R-API caller reaches here. as.character() first is
+            # exact for both factors and numerics.
+            dep_raw <- analysis_data[[dep_var]]
+            analysis_data[[dep_var]] <- if (is.factor(dep_raw))
+                suppressWarnings(as.numeric(as.character(dep_raw)))
+            else suppressWarnings(as.numeric(dep_raw))
+
+            # complete.cases() follows is.na(), which is TRUE for NaN but FALSE
+            # for Inf, so an infinite value survives the filter above and then
+            # destroys every mean, SD and axis range downstream. The coercion may
+            # also have just produced fresh NAs from unparseable text.
+            n_before_finite <- nrow(analysis_data)
+            analysis_data <- analysis_data[is.finite(analysis_data[[dep_var]]), , drop = FALSE]
+            n_nonfinite <- n_before_finite - nrow(analysis_data)
+            if (nrow(analysis_data) == 0)
+                jmvcore::reject(.("No usable numeric values remain in the dependent variable after removing missing and non-finite entries."))
+
+            analysis_data[[group_var]] <- droplevels(as.factor(analysis_data[[group_var]]))
             
             if (!is.null(facet_var) && facet_var != "") {
                 analysis_data[[facet_var]] <- as.factor(analysis_data[[facet_var]])
@@ -174,13 +200,25 @@ raincloudClass <- if (requireNamespace("jmvcore")) R6::R6Class("raincloudClass",
                        " levels; a near-continuous grouping variable yields an unreadable plot and unreliable tests - consider a categorical grouping variable)</span>")
             else ""
 
+            # Faceting by the grouping variable puts exactly one group in each
+            # panel, which destroys the side-by-side comparison the plot exists
+            # to make. It is accepted, but the user is told why the plot looks
+            # degenerate instead of being left to guess.
+            redundant_role_note <- if (!is.null(facet_var) && facet_var != "" && facet_var == group_var)
+                .(" <span style='color:#d9534f'>(the faceting variable is the same as the grouping variable, so each panel contains a single group and the groups can no longer be compared side by side)</span>")
+            else ""
+
             summary_msg <- paste0(
                 "<div style='background-color:#f8f9fa;padding:12px;border-radius:8px;margin-bottom:12px;'>",
                 "<strong>Data summary:</strong> ", nrow(analysis_data), " complete rows (removed ",
                 nrow(dataset) - nrow(analysis_data), " with missing values). ",
                 length(group_counts), " groups: ",
                 paste(paste0(htmltools::htmlEscape(names(group_counts)), " (n=", group_counts, ")"), collapse = ", "),
-                ".", imbalance_note, high_cardinality_note,
+                ".", imbalance_note, high_cardinality_note, redundant_role_note,
+                if (n_nonfinite > 0) paste0(
+                    " <span style='color:#d9534f'>(", n_nonfinite,
+                    " further row(s) removed for non-finite or non-numeric values in ",
+                    htmltools::htmlEscape(dep_var), ")</span>") else "",
                 "<br><strong>Missing by variable:</strong>", missing_msg,
                 if (min_group < 10) " <span style='color:#d9534f'>(some groups have n < 10; avoid inferential tests)</span>" else "",
                 "</div>"
@@ -355,6 +393,10 @@ raincloudClass <- if (requireNamespace("jmvcore")) R6::R6Class("raincloudClass",
 
         .get_color_palette = function(n_colors) {
             palette_name <- self$options$color_palette
+            # `separator_prism` is the "--- GraphPad Prism Palettes ---" divider,
+            # which the List makes selectable. It is not a palette; name it as the
+            # default rather than letting it fall through the else branch unnamed.
+            if (identical(palette_name, "separator_prism")) palette_name <- "default"
             
             if (palette_name == "viridis") {
                 if (requireNamespace("viridis", quietly = TRUE)) {
@@ -428,6 +470,8 @@ raincloudClass <- if (requireNamespace("jmvcore")) R6::R6Class("raincloudClass",
 
         .get_plot_theme = function() {
             theme_name <- self$options$plot_theme
+            # As above: the "--- GraphPad Prism Themes ---" divider is selectable.
+            if (identical(theme_name, "separator_theme")) theme_name <- "clinical"
             
             base_theme <- switch(theme_name,
                 "clinical" = ggplot2::theme_minimal() + 
@@ -612,11 +656,23 @@ raincloudClass <- if (requireNamespace("jmvcore")) R6::R6Class("raincloudClass",
                     iqr <- q3 - q1
                     outliers <- which(group_data < (q1 - 1.5 * iqr) | group_data > (q3 + 1.5 * iqr))
                 } else if (outlier_method == "zscore") {
-                    z_scores <- abs((group_data - mean(group_data, na.rm = TRUE)) / sd(group_data, na.rm = TRUE))
+                    # A zero SD makes every z NaN, and which(NaN > 3) is empty, so
+                    # a constant group silently reported "0 outliers detected" as
+                    # though it had been checked. Mark it untestable instead.
+                    s_dev <- sd(group_data, na.rm = TRUE)
+                    if (!is.finite(s_dev) || s_dev == 0) {
+                        outliers_list[[group]] <- NA_integer_; next
+                    }
+                    z_scores <- abs((group_data - mean(group_data, na.rm = TRUE)) / s_dev)
                     outliers <- which(z_scores > 3)
                 } else if (outlier_method == "modified_zscore") {
                     median_val <- median(group_data, na.rm = TRUE)
                     mad_val <- mad(group_data, na.rm = TRUE)
+                    # Same trap: MAD is 0 whenever more than half the values are
+                    # identical, which is common for rounded lab data.
+                    if (!is.finite(mad_val) || mad_val == 0) {
+                        outliers_list[[group]] <- NA_integer_; next
+                    }
                     modified_z <- 0.6745 * (group_data - median_val) / mad_val
                     outliers <- which(abs(modified_z) > 3.5)
                 }
@@ -633,6 +689,13 @@ raincloudClass <- if (requireNamespace("jmvcore")) R6::R6Class("raincloudClass",
             total_outliers <- 0
             for (group in names(outliers_list)) {
                 count <- outliers_list[[group]]
+                if (is.na(count)) {
+                    outlier_html <- paste0(outlier_html,
+                        "<li><strong>", htmltools::htmlEscape(group), ":</strong> ",
+                        .("not testable - the spread used by this method is zero (too many identical values); try the IQR method"),
+                        "</li>")
+                    next
+                }
                 total_outliers <- total_outliers + count
                 outlier_html <- paste0(outlier_html,
                     "<li><strong>", htmltools::htmlEscape(group), ":</strong> ", count, " outliers detected</li>"
@@ -680,7 +743,11 @@ raincloudClass <- if (requireNamespace("jmvcore")) R6::R6Class("raincloudClass",
                     if (!is.null(sw_test)) {
                         w_stat <- round(sw_test$statistic, 4)
                         p_val <- round(sw_test$p.value, 4)
-                        interpretation <- if (p_val > 0.05) .("Normal") else .("Non-normal")
+                        # "Normal" from p > 0.05 accepts the null. Shapiro-Wilk
+                        # can only fail to reject, and it is underpowered at small
+                        # n - exactly where the claim matters most.
+                        interpretation <- if (p_val > 0.05)
+                            .("No evidence against normality") else .("Departs from normality")
                     } else {
                         # Constant / zero-variance group: shapiro.test errors out
                         w_stat <- "N/A"
@@ -707,11 +774,25 @@ raincloudClass <- if (requireNamespace("jmvcore")) R6::R6Class("raincloudClass",
             normality_html <- paste0(normality_html,
                 "</table>",
                 "<p style='font-size: 12px; color: #0c5460; margin-top: 15px;'>",
-                "<em>Shapiro-Wilk test: p > 0.05 suggests normal distribution. Valid for sample sizes 3-5000.</em>",
+                "<em>", .("Shapiro-Wilk test, valid for sample sizes 3-5000. A p above 0.05 means the test did not detect a departure from normality - it does not establish that the data ARE normal, and the test has little power at small n. One test is run per group, with no adjustment for the number of groups."), "</em>",
                 "</p></div>"
             )
             
             return(normality_html)
+        },
+
+        # A p-value is never "0.0000". The old code did round(p, 4) and then
+        # sprintf("%.4f", .), so a p of 1e-16 was displayed as 0.0000 - a number
+        # that cannot appear in a paper - and the copy-ready sentence printed
+        # "p = 0.000".
+        # Every consumer of this writes into an Html result item, so the "less
+        # than" must be an ENTITY. A bare "< 0.001" starts what a parser reads as
+        # a tag: `< 0.001</td>` is consumed as one bogus element and the p-value
+        # disappears from the rendered cell entirely.
+        .fmtP = function(p) {
+            if (is.null(p) || length(p) == 0 || is.na(p) || !is.finite(p)) return(.("not estimable"))
+            if (p < 0.001) return("&lt; 0.001")
+            formatC(p, format = "f", digits = 3)
         },
 
         .safe_shapiro_p = function(x) {
@@ -740,6 +821,37 @@ raincloudClass <- if (requireNamespace("jmvcore")) R6::R6Class("raincloudClass",
             # locale-independent (a .()-translated label no longer equals the
             # English literal under a non-English locale, which previously left
             # p_value unassigned and crashed the analysis).
+            # Group sizes decide what can be run at all. t.test() throws
+            # "not enough 'x' observations" on a group of 1 and the error was
+            # uncaught, taking the whole analysis down with it.
+            group_ns <- as.integer(table(data[[group_var]]))
+            names(group_ns) <- levels(data[[group_var]])
+            if (any(group_ns < 2)) {
+                return(paste0(
+                    "<div style='background-color:#f8d7da;color:#721c24;padding:12px;border-radius:8px;'>",
+                    .("A group comparison needs at least two observations in every group. These have fewer: "),
+                    htmltools::htmlEscape(paste(sprintf("%s (n=%d)", names(group_ns)[group_ns < 2],
+                                                       group_ns[group_ns < 2]), collapse = ", ")),
+                    ".</div>"))
+            }
+
+            # Variance homogeneity. Classic one-way ANOVA (aov) assumes equal
+            # variances, and with unequal variances AND unequal group sizes it is
+            # badly anti-conservative: on null data (all three group means equal)
+            # with n = 6/6/60 and sd = 8/8/1, aov reported p = 0.0005 -
+            # "Highly significant" - where Welch's ANOVA reported p = 0.16. Three
+            # of the first four seeds tried flipped that way. So test the
+            # assumption instead of hoping.
+            var_p <- NA_real_
+            if (n_groups >= 2) {
+                var_p <- tryCatch(
+                    stats::bartlett.test(
+                        stats::setNames(data[[dep_var]], NULL),
+                        data[[group_var]])$p.value,
+                    error = function(e) NA_real_)
+            }
+            unequal_var <- !is.na(var_p) && var_p < 0.05
+
             if (comparison_method == "auto") {
                 if (n_groups == 2) {
                     # Check normality for automatic test selection
@@ -752,19 +864,27 @@ raincloudClass <- if (requireNamespace("jmvcore")) R6::R6Class("raincloudClass",
 
                     test_key <- if (use_parametric) "ttest" else "wilcoxon"
                 } else {
-                    # Multiple groups - use ANOVA or Kruskal-Wallis
-                    # Simple heuristic: check overall normality
+                    # Multiple groups. `overall_normal` starts TRUE, so if EVERY
+                    # group is untestable (n < 3) it must not silently license a
+                    # parametric test - require at least one group to have been
+                    # testable and none to have failed.
                     overall_normal <- TRUE
+                    any_testable <- FALSE
                     for (group in levels(data[[group_var]])) {
-                        private$.checkpoint(flush = FALSE)  # Poll for changes without re-pushing results
+                        private$.checkpoint(flush = FALSE)
                         group_data <- data[data[[group_var]] == group, dep_var]
                         sw_p <- private$.safe_shapiro_p(group_data)
-                        if (!is.na(sw_p) && sw_p <= 0.05) {
-                            overall_normal <- FALSE
-                            break
+                        if (!is.na(sw_p)) {
+                            any_testable <- TRUE
+                            if (sw_p <= 0.05) { overall_normal <- FALSE; break }
                         }
                     }
-                    test_key <- if (overall_normal) "anova" else "kruskal"
+                    # Welch's ANOVA when the variances differ - it is the correct
+                    # parametric test there, and reduces to ordinary ANOVA when
+                    # they do not.
+                    test_key <- if (overall_normal && any_testable) {
+                        if (unequal_var) "welch" else "anova"
+                    } else "kruskal"
                 }
             } else {
                 test_key <- comparison_method  # ttest / wilcoxon / anova / kruskal
@@ -785,16 +905,22 @@ raincloudClass <- if (requireNamespace("jmvcore")) R6::R6Class("raincloudClass",
 
             # Human-readable (possibly translated) label, for DISPLAY only.
             test_method <- switch(test_key,
-                "ttest" = .("t-test"),
-                "wilcoxon" = .("Wilcoxon"),
-                "anova" = .("ANOVA"),
-                "kruskal" = .("Kruskal-Wallis"),
+                "ttest" = .("Welch's t-test"),
+                "wilcoxon" = .("Wilcoxon rank-sum test"),
+                "anova" = .("one-way ANOVA"),
+                "welch" = .("Welch's ANOVA"),
+                "kruskal" = .("Kruskal-Wallis test"),
                 test_key
             )
 
             p_value <- NULL
             test_details <- NULL
             effect_size_html <- ""
+            assumption_note <- ""
+
+            # Every test is wrapped: a statistical routine that throws must not
+            # take the rest of the output with it.
+            run <- function(expr) tryCatch(expr, error = function(e) e)
 
             # Perform the selected test (dispatch on the untranslated key)
             if (test_key == "ttest") {
@@ -802,15 +928,27 @@ raincloudClass <- if (requireNamespace("jmvcore")) R6::R6Class("raincloudClass",
                 group1_data <- data[data[[group_var]] == group_levels[1], dep_var]
                 group2_data <- data[data[[group_var]] == group_levels[2], dep_var]
 
-                test_result <- t.test(group1_data, group2_data)
-                test_stat <- round(test_result$statistic, 4)
-                p_value <- round(test_result$p.value, 4)
-                test_details <- paste0("t = ", test_stat, ", df = ", round(test_result$parameter, 1))
-                if (effect_size_flag) {
-                    pooled_sd <- sqrt(((length(group1_data) - 1) * var(group1_data) + (length(group2_data) - 1) * var(group2_data)) /
-                                      (length(group1_data) + length(group2_data) - 2))
-                    d <- (mean(group1_data) - mean(group2_data)) / pooled_sd
-                    effect_size_html <- paste0("<tr><td style='padding: 8px; border: 1px solid #ddd;'><strong>Cohen's d:</strong></td><td style='padding: 8px; border: 1px solid #ddd;'>", sprintf('%.3f', d), "</td></tr>")
+                test_result <- run(t.test(group1_data, group2_data))
+                if (!inherits(test_result, "condition")) {
+                    test_stat <- round(test_result$statistic, 4)
+                    p_value <- test_result$p.value
+                    test_details <- paste0("t = ", test_stat, ", df = ", round(test_result$parameter, 1))
+                    if (effect_size_flag) {
+                        # t.test() defaults to var.equal = FALSE, so the reported t
+                        # is WELCH's. Pair it with the unpooled (Welch-consistent)
+                        # standardiser rather than the pooled SD, which belongs to
+                        # Student's t and would be a different estimator.
+                        n1 <- length(group1_data); n2 <- length(group2_data)
+                        sd_unpooled <- sqrt((stats::var(group1_data) + stats::var(group2_data)) / 2)
+                        d <- if (is.finite(sd_unpooled) && sd_unpooled > 0)
+                            (mean(group1_data) - mean(group2_data)) / sd_unpooled else NA_real_
+                        effect_size_html <- paste0(
+                            "<tr><td style='padding: 8px; border: 1px solid #ddd;'><strong>",
+                            .("Cohen's d (unpooled SD, matching Welch's t):"),
+                            "</strong></td><td style='padding: 8px; border: 1px solid #ddd;'>",
+                            if (is.na(d)) .("not estimable (zero variance)") else sprintf('%.3f', d),
+                            "</td></tr>")
+                    }
                 }
 
             } else if (test_key == "wilcoxon") {
@@ -818,51 +956,124 @@ raincloudClass <- if (requireNamespace("jmvcore")) R6::R6Class("raincloudClass",
                 group1_data <- data[data[[group_var]] == group_levels[1], dep_var]
                 group2_data <- data[data[[group_var]] == group_levels[2], dep_var]
 
-                test_result <- wilcox.test(group1_data, group2_data)
-                test_stat <- round(test_result$statistic, 4)
-                p_value <- round(test_result$p.value, 4)
-                test_details <- paste0("W = ", test_stat)
-                if (effect_size_flag) {
-                    # Cohen's d assumes normality; it is undefined for the rank-based
-                    # Wilcoxon test. State this rather than silently dropping the request.
-                    effect_size_html <- paste0("<tr><td style='padding: 8px; border: 1px solid #ddd;'><strong>Effect size:</strong></td><td style='padding: 8px; border: 1px solid #ddd;'>", .("Cohen's d is only reported for the parametric t-test; it is not defined for the Wilcoxon rank-sum test."), "</td></tr>")
+                test_result <- run(wilcox.test(group1_data, group2_data))
+                if (!inherits(test_result, "condition")) {
+                    test_stat <- round(test_result$statistic, 4)
+                    p_value <- test_result$p.value
+                    test_details <- paste0("W = ", test_stat)
+                    if (effect_size_flag) {
+                        # Cohen's d assumes normality; it is undefined for the rank-based
+                        # Wilcoxon test. State this rather than silently dropping the request.
+                        effect_size_html <- paste0("<tr><td style='padding: 8px; border: 1px solid #ddd;'><strong>Effect size:</strong></td><td style='padding: 8px; border: 1px solid #ddd;'>", .("Cohen's d is only reported for the parametric t-test; it is not defined for the Wilcoxon rank-sum test."), "</td></tr>")
+                    }
                 }
 
-            } else if (test_key == "anova") {
+            } else if (test_key %in% c("anova", "welch")) {
                 dep_safe <- private$.escapeVar(dep_var)
                 group_safe <- private$.escapeVar(group_var)
-                formula_str <- paste(dep_safe, "~", group_safe)
-                aov_result <- aov(jmvcore::asFormula(formula_str), data = data)
-                summary_aov <- summary(aov_result)
+                fml <- jmvcore::asFormula(paste(dep_safe, "~", group_safe))
 
-                f_stat <- round(summary_aov[[1]]$`F value`[1], 4)
-                p_value <- round(summary_aov[[1]]$`Pr(>F)`[1], 4)
-                df1 <- summary_aov[[1]]$Df[1]
-                df2 <- summary_aov[[1]]$Df[2]
-                test_details <- paste0("F(", df1, ",", df2, ") = ", f_stat)
+                if (test_key == "welch") {
+                    # withBaseFormulaChar(): logistf pulls in formula.tools, whose
+                    # as.character.formula returns one string where base R returns
+                    # three, and stats::oneway.test rejects every formula with
+                    # "a two-sided formula is required". Loading this package is
+                    # enough to trigger it, so Welch's ANOVA fails for every user
+                    # unless the call is shielded. See R/ggstatsplot_utils.R.
+                    ow <- run(withBaseFormulaChar(
+                        stats::oneway.test(fml, data = data, var.equal = FALSE)))
+                    if (!inherits(ow, "condition")) {
+                        p_value <- ow$p.value
+                        test_details <- paste0("F(", round(ow$parameter[1], 0), ",",
+                                               round(ow$parameter[2], 2), ") = ",
+                                               round(ow$statistic, 4))
+                    }
+                } else {
+                    aov_result <- run(aov(fml, data = data))
+                    if (!inherits(aov_result, "condition")) {
+                        summary_aov <- summary(aov_result)
+                        p_value <- summary_aov[[1]]$`Pr(>F)`[1]
+                        test_details <- paste0("F(", summary_aov[[1]]$Df[1], ",",
+                                               summary_aov[[1]]$Df[2], ") = ",
+                                               round(summary_aov[[1]]$`F value`[1], 4))
+                    }
+                    if (unequal_var)
+                        assumption_note <- paste0(
+                            "<div style='background-color:#f8d7da;color:#721c24;padding:10px;border-radius:6px;margin-top:10px;'>",
+                            sprintf(.("Equal variances are doubtful (Bartlett p = %s), and ordinary ANOVA assumes them. With unequal variances and unequal group sizes it can report a significant difference where none exists. Use Welch's ANOVA (choose Automatic) or Kruskal-Wallis."),
+                                    private$.fmtP(var_p)),
+                            "</div>")
+                }
 
             } else if (test_key == "kruskal") {
                 dep_safe <- private$.escapeVar(dep_var)
                 group_safe <- private$.escapeVar(group_var)
-                formula_str <- paste(dep_safe, "~", group_safe)
-                kw_result <- kruskal.test(jmvcore::asFormula(formula_str), data = data)
-
-                test_stat <- round(kw_result$statistic, 4)
-                p_value <- round(kw_result$p.value, 4)
-                test_details <- paste0("\u03c7\u00b2 = ", test_stat, ", df = ", kw_result$parameter)
+                kw_result <- run(kruskal.test(jmvcore::asFormula(paste(dep_safe, "~", group_safe)), data = data))
+                if (!inherits(kw_result, "condition")) {
+                    test_stat <- round(kw_result$statistic, 4)
+                    p_value <- kw_result$p.value
+                    test_details <- paste0("\u03c7\u00b2 = ", test_stat, ", df = ", kw_result$parameter)
+                }
             }
 
             # Safety net: if no branch produced a result, fail soft (never crash).
-            if (is.null(p_value)) {
-                return("<div style='background-color:#fff3cd;padding:12px;border-radius:8px;'>Unable to compute a group comparison for the selected settings.</div>")
+            if (is.null(p_value) || !is.finite(p_value)) {
+                return(paste0(
+                    "<div style='background-color:#fff3cd;padding:12px;border-radius:8px;'>",
+                    .("The group comparison could not be computed for this data. Check that every group has at least two distinct values."),
+                    "</div>"))
             }
 
-            p_adj <- if (adjust_method != "none") p.adjust(p_value, method = adjust_method) else p_value
+            # Post-hoc pairwise comparisons.
+            #
+            # This is what the P-value Adjustment option is FOR. Previously it
+            # called p.adjust() on the single omnibus p-value, which is a no-op by
+            # construction - p.adjust(0.03, "bonferroni") is 0.03 - so the row
+            # labelled "Adjusted (bonferroni)" always showed the unadjusted number
+            # and told the user a correction had been applied when none had.
+            pairwise_html <- ""
+            if (n_groups > 2 && adjust_method != "none") {
+                pw <- run(if (test_key == "kruskal")
+                              stats::pairwise.wilcox.test(data[[dep_var]], data[[group_var]],
+                                                          p.adjust.method = adjust_method, exact = FALSE)
+                          else
+                              stats::pairwise.t.test(data[[dep_var]], data[[group_var]],
+                                                     p.adjust.method = adjust_method,
+                                                     pool.sd = (test_key == "anova")))
+                if (!inherits(pw, "condition") && !is.null(pw$p.value)) {
+                    m <- pw$p.value
+                    rows <- ""
+                    for (i in seq_len(nrow(m))) for (j in seq_len(ncol(m))) {
+                        if (is.na(m[i, j])) next
+                        rows <- paste0(rows, "<tr><td style='padding:6px;border:1px solid #ddd;'>",
+                            htmltools::htmlEscape(rownames(m)[i]), " vs ",
+                            htmltools::htmlEscape(colnames(m)[j]),
+                            "</td><td style='padding:6px;border:1px solid #ddd;'>",
+                            private$.fmtP(m[i, j]), "</td></tr>")
+                    }
+                    pairwise_html <- paste0(
+                        "<h4 style='color:#7b1fa2;margin-bottom:6px;'>",
+                        sprintf(.("Pairwise comparisons (%s-adjusted)"), adjust_method), "</h4>",
+                        "<table style='width:100%; border-collapse:collapse;'>",
+                        "<tr style='background-color:#e0e0e0;'><th style='padding:6px;border:1px solid #ddd;'>",
+                        .("Comparison"), "</th><th style='padding:6px;border:1px solid #ddd;'>",
+                        .("Adjusted p"), "</th></tr>", rows, "</table>")
+                }
+            } else if (adjust_method != "none") {
+                pairwise_html <- paste0(
+                    "<p style='font-size:12px;color:#7b1fa2;'><em>",
+                    .("A p-value adjustment was requested, but only one comparison is being made, so there is nothing to adjust for. Adjustment applies to the pairwise comparisons shown when there are three or more groups."),
+                    "</em></p>")
+            }
 
-            # Create results HTML
-            significance <- if (p_value < 0.001) .("Highly significant (***)") else
-                          if (p_value < 0.01) .("Very significant (**)") else
-                          if (p_value < 0.05) .("Significant (*)") else .("Not significant")
+            # Create results HTML.
+            # The "less than" MUST be the entity, for the same reason .fmtP()
+            # documents above: this string is pasted straight into a <td> of an
+            # Html result item, and a bare "p < 0.001</td>" is parsed as one
+            # bogus "< 0.001</td>" element, so the Result cell renders EMPTY.
+            significance <- if (p_value < 0.001) .("p &lt; 0.001") else
+                          if (p_value < 0.01) .("p &lt; 0.01") else
+                          if (p_value < 0.05) .("p &lt; 0.05") else .("not significant at the 0.05 level")
 
             comparison_html <- paste0(
                 "<div style='background-color: #f3e5f5; padding: 20px; border-radius: 8px; margin-bottom: 20px;'>",
@@ -870,14 +1081,17 @@ raincloudClass <- if (requireNamespace("jmvcore")) R6::R6Class("raincloudClass",
                 "<table style='width: 100%; border-collapse: collapse;'>",
                 "<tr><td style='padding: 8px; border: 1px solid #ddd;'><strong>Test Method:</strong></td><td style='padding: 8px; border: 1px solid #ddd;'>", test_method, "</td></tr>",
                 "<tr><td style='padding: 8px; border: 1px solid #ddd;'><strong>Test Statistic:</strong></td><td style='padding: 8px; border: 1px solid #ddd;'>", test_details, "</td></tr>",
-                "<tr><td style='padding: 8px; border: 1px solid #ddd;'><strong>P-value:</strong></td><td style='padding: 8px; border: 1px solid #ddd;'>", sprintf('%.4f', p_value), "</td></tr>",
-                if (adjust_method != "none") paste0("<tr><td style='padding: 8px; border: 1px solid #ddd;'><strong>Adjusted (", adjust_method, "):</strong></td><td style='padding: 8px; border: 1px solid #ddd;'>", sprintf('%.4f', p_adj), "</td></tr>") else "",
+                "<tr><td style='padding: 8px; border: 1px solid #ddd;'><strong>P-value:</strong></td><td style='padding: 8px; border: 1px solid #ddd;'>", private$.fmtP(p_value), "</td></tr>",
                 effect_size_html,
                 "<tr><td style='padding: 8px; border: 1px solid #ddd;'><strong>Result:</strong></td><td style='padding: 8px; border: 1px solid #ddd;'>", significance, "</td></tr>",
                 "</table>",
+                assumption_note,
+                pairwise_html,
                 "<p style='font-size: 12px; color: #7b1fa2; margin-top: 15px;'>",
-                "<em>* p < 0.05, ** p < 0.01, *** p < 0.001. ",
-                if (comparison_method == "auto") paste0(.("Automatically selected {test_method} based on data characteristics"), ".") else "",
+                "<em>",
+                if (comparison_method == "auto")
+                    sprintf(.("%s was selected automatically from the normality and equal-variance checks."), test_method)
+                else "",
                 "</em></p></div>"
             )
 
@@ -945,23 +1159,35 @@ raincloudClass <- if (requireNamespace("jmvcore")) R6::R6Class("raincloudClass",
         },
         
         .generate_report_sentence = function(test_method, p_value, groups) {
-            significance <- if (p_value < 0.001) "highly significant" else
-                           if (p_value < 0.01) "very significant" else
-                           if (p_value < 0.05) "significant" else "not significant"
+            # This block is explicitly offered as "ready to copy into your research
+            # report", so every word in it is a claim that ends up in a paper. The
+            # previous wording made three that the data cannot support:
+            #   "The t-test test comparing ..."      - test_method already says "test"
+            #   "showed not significant differences" - accepts the null; absence of
+            #                                          evidence is not evidence of absence
+            #   "differ ... in their distributions"  - a t-test compares MEANS, and
+            #                                          only Kruskal-Wallis/Wilcoxon
+            #                                          speak to distributions
+            # and printed "p = 0.000" for any small p.
 
             # `groups` is `levels(data[[group_var]])` (user factor labels) at the
             # caller - escape once here since they reach HTML <p> via report_text
             # below, then concatenated into comparison_html \u2192 setContent.
             groups <- htmltools::htmlEscape(groups)
 
-            report_text <- sprintf(
-                "The %s test comparing %s showed %s differences (p = %.3f). %s",
-                test_method,
-                paste(groups, collapse = " vs "),
-                significance,
-                p_value,
-                if (p_value < 0.05) "Groups differ significantly in their distributions." else "No significant differences detected between groups."
-            )
+            # What the test is actually about, so the sentence claims no more.
+            quantity <- if (grepl("Wilcoxon|Kruskal", test_method))
+                .("distributions") else .("means")
+
+            p_txt <- private$.fmtP(p_value)
+            p_txt <- if (startsWith(p_txt, "&lt;")) paste0("p ", p_txt) else paste0("p = ", p_txt)
+
+            report_text <- if (p_value < 0.05)
+                sprintf(.("A %s comparing %s found a statistically significant difference in %s (%s)."),
+                        test_method, paste(groups, collapse = " vs "), quantity, p_txt)
+            else
+                sprintf(.("A %s comparing %s did not find a statistically significant difference in %s (%s). This does not establish that the groups are equivalent; the study may simply lack the power to detect a difference of clinical interest."),
+                        test_method, paste(groups, collapse = " vs "), quantity, p_txt)
             
             return(paste0(
                 "<div style='background-color: #e3f2fd; padding: 15px; border-radius: 5px; margin: 10px 0;'>",

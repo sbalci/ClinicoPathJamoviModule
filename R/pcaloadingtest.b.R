@@ -5,8 +5,7 @@
 #' @import ggplot2
 #' @rawNamespace import(dplyr, except = c(as_data_frame, groups, select, union))
 #' @import tidyr
-#' @import pracma
-#' @import scales
+#' @importFrom scales pvalue
 #'
 #' @return An \code{R6} class generator object for the \code{pcaloadingtestClass} backend; used internally by the jamovi analysis wrapper and not called directly.
 

@@ -1,8 +1,8 @@
 Type: Package
 Package: ClinicoPath
 Title: Comprehensive Analysis for Clinicopathological Research
-Version: 1.0.5
-Date: 2026-08-11
+Version: 1.0.51
+Date: 2026-08-12
 Authors@R: person(given = "Serdar", family = "Balci", role = c("aut", "cre", "cph"), email = "serdarbalci@serdarbalci.com", comment = c(ORCID = "0000-0002-7852-3851"))
 Maintainer: Serdar Balci <serdarbalci@serdarbalci.com>
 Description: Provides a comprehensive jamovi module designed specifically
@@ -695,6 +695,7 @@ Collate:
     'generalpseudo.h.R'
     'ggprism.b.R'
     'ggprism.h.R'
+    'ggstatsplot_utils.R'
     'gradientboosting.b.R'
     'gradientboosting.h.R'
     'grafify.b.R'
@@ -791,6 +792,8 @@ Collate:
     'jjcoefstats.h.R'
     'jjcorrmat.b.R'
     'jjcorrmat.h.R'
+    'jjdotchart.b.R'
+    'jjdotchart.h.R'
     'jjdotplotstats.b.R'
     'jjdotplotstats.h.R'
     'jjhistostats.b.R'

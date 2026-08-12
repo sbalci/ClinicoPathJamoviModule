@@ -242,7 +242,7 @@ jjdotplotstatsResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
             super$initialize(
                 options=options,
                 name="",
-                title="Dot Chart",
+                title="Horizontal Box-Violin Comparison",
                 refs=list(
                     "ggplot2",
                     "ggstatsplot",
@@ -306,7 +306,7 @@ jjdotplotstatsBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
             super$initialize(
                 package = "ClinicoPath",
                 name = "jjdotplotstats",
-                version = c(1,0,5),
+                version = c(1,0,51),
                 options = options,
                 results = jjdotplotstatsResults$new(options=options),
                 data = data,
@@ -319,12 +319,25 @@ jjdotplotstatsBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
                 weightsSupport = 'auto')
         }))
 
-#' Dot Chart
+#' Horizontal Box-Violin Comparison
 #'
-#' Wrapper Function for ggstatsplot::ggbetweenstats and
-#' ggstatsplot::grouped_ggbetweenstats to generate dot-style
-#' comparisons of continuous variables between groups with
-#' statistical annotations and significance testing.
+#' Compares a continuous variable across groups and draws the comparison
+#' horizontally - values on the x axis, group labels down the y axis - with
+#' an optional vertical reference line. Wraps ggstatsplot::ggbetweenstats
+#' and ggstatsplot::grouped_ggbetweenstats, so the figure is a box-violin
+#' plot with the individual observations shown, and the test is a
+#' between-groups comparison using every observation.
+#' 
+#' This analysis was previously titled "Dot Chart", which described neither
+#' the figure nor the statistic: it draws violins and boxplots, not a dot
+#' chart, and it is a between-groups test rather than a one-sample one. For
+#' a genuine Cleveland dot chart - one summary point per label, tested
+#' against a reference value - use "Dot Chart (Summary vs Reference Value)",
+#' which wraps ggstatsplot::ggdotplotstats.
+#' 
+#' Prefer this over "Box-Violin Plots to Compare Between Groups" when the
+#' group labels are long or numerous, since the horizontal layout gives them
+#' room, or when a clinical threshold line is useful.
 #' 
 #' @param data The data as a data frame.
 #' @param dep A continuous numeric variable for which the distribution will be

@@ -477,7 +477,7 @@ jjbetweenstatsBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
             super$initialize(
                 package = "ClinicoPath",
                 name = "jjbetweenstats",
-                version = c(1,0,5),
+                version = c(1,0,51),
                 options = options,
                 results = jjbetweenstatsResults$new(options=options),
                 data = data,

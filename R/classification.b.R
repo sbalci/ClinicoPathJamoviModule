@@ -2,13 +2,10 @@
 #' @importFrom R6 R6Class
 #' @import jmvcore
 #' @import mlr3
-#' @import mlr3measures
 #' @import mlr3learners
 #' @import mlr3pipelines
 # @import mlr3extralearners
 #' @import mlr3viz
-#' @importFrom caret sensitivity specificity posPredValue negPredValue
-#' @importFrom pROC roc auc ci.auc
 #' @importFrom boot boot boot.ci
 #' @importFrom kknn kknn
 #' @importFrom naivebayes naive_bayes

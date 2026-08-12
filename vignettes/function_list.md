@@ -251,7 +251,7 @@ This list is automatically generated. Functions marked as **Draft** or **Templat
 | `jjbarstats` | Bar Charts | **Coded** | JJStatsPlot |
 | `jjbetweenstats` | Box-Violin Plots to Compare Between Groups | **Coded** | JJStatsPlot |
 | `jjcorrmat` | Correlation Matrix | **Coded** | JJStatsPlot |
-| `jjdotplotstats` | Dot Chart | **Coded** | JJStatsPlot |
+| `jjdotplotstats` | Horizontal Box-Violin Comparison | **Coded** | JJStatsPlot |
 | `jjhistostats` | Histogram | **Coded** | JJStatsPlot |
 | `jjpiestats` | Pie Charts | **Coded** | JJStatsPlot |
 | `jjridges` | Ridge Plot | **Coded** | JJStatsPlot |

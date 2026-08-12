@@ -3,7 +3,6 @@
 #' @import jmvcore
 #' @rawNamespace import(dplyr, except = c(as_data_frame, groups, select, union))
 #' @import ggplot2
-#' @import lubridate
 #'
 #' @return An \code{R6} class generator object for the \code{groupsummaryClass} backend; used internally by the jamovi analysis wrapper and not called directly.
 

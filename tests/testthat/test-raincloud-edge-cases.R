@@ -6,6 +6,10 @@
 # Generated: 2026-01-06
 
 library(testthat)
+# Several blocks below use filter()/mutate()/group_by()/slice_head()/ungroup().
+# Without this, `filter` resolved to stats::filter and the tests errored with
+# "object '<column>' not found" before reaching a single assertion.
+library(dplyr)
 
 # Load test data
 data(raincloud_test, package = "ClinicoPath", envir = environment())
@@ -270,7 +274,9 @@ test_that("raincloud errors on non-existent dependent variable", {
       dep_var = "nonexistent_var",
       group_var = "treatment_group"
     ),
-    regexp = "not found|does not exist|invalid",
+    # jmvcore's own wording: "Argument 'x' contains 'y' which is not present in
+    # the dataset".
+    regexp = "not found|does not exist|not present|invalid",
     ignore.case = TRUE
   )
 })
@@ -283,7 +289,9 @@ test_that("raincloud errors on non-existent group variable", {
       dep_var = "symptom_score",
       group_var = "nonexistent_group"
     ),
-    regexp = "not found|does not exist|invalid",
+    # jmvcore's own wording: "Argument 'x' contains 'y' which is not present in
+    # the dataset".
+    regexp = "not found|does not exist|not present|invalid",
     ignore.case = TRUE
   )
 })
@@ -301,17 +309,23 @@ test_that("raincloud errors on categorical dependent variable", {
   )
 })
 
-test_that("raincloud errors on numeric grouping variable", {
+# A numeric grouping variable is deliberately PERMITTED (jamovi/raincloud.a.yaml
+# lists `permitted: [factor, numeric]`, so an integer-coded group such as 0/1
+# still works) and is coerced to a factor. The release review chose to warn
+# rather than reject: a near-continuous grouping variable produces one level per
+# observation, so the plot and the group tests are meaningless, and the data
+# summary now says so instead of the analysis silently emitting nonsense.
+test_that("raincloud warns instead of erroring on a near-continuous grouping variable", {
 
-  expect_error(
-    raincloud(
-      data = raincloud_test,
-      dep_var = "quality_of_life",
-      group_var = "symptom_score"
-    ),
-    regexp = "factor|categorical|not.*factor",
-    ignore.case = TRUE
+  result <- raincloud(
+    data = raincloud_test,
+    dep_var = "quality_of_life",
+    group_var = "symptom_score"
   )
+
+  expect_true(inherits(result, "raincloudResults"))
+  expect_true(grepl("near-continuous grouping variable",
+                    result$todo$content, fixed = TRUE))
 })
 
 # ═══════════════════════════════════════════════════════════
@@ -423,16 +437,27 @@ test_that("raincloud handles many categorical levels", {
 # 13. Same Variable for Multiple Roles
 # ═══════════════════════════════════════════════════════════
 
-test_that("raincloud handles same variable for group and facet", {
+test_that("raincloud warns when the facet variable is also the group variable", {
 
-  # Using same variable for group and facet (should error or warn)
-  expect_condition(
-    raincloud(
-      data = raincloud_test,
-      dep_var = "symptom_score",
-      group_var = "treatment_group",
-      facet_var = "treatment_group"
-    )
+  # Faceting by the grouping variable puts exactly one group in each panel, so
+  # the groups can no longer be compared side by side. jamovi analyses report
+  # this in an Html result item, not as an R condition, so this used to be
+  # tested with expect_condition() and could never pass.
+  result <- raincloud(
+    data = raincloud_test,
+    dep_var = "symptom_score",
+    group_var = "treatment_group",
+    facet_var = "treatment_group"
+  )
+
+  expect_true(inherits(result, "raincloudResults"))
+  expect_true(grepl("faceting variable is the same as the grouping variable",
+                    result$todo$content, fixed = TRUE))
+  # The variable must be listed once, not once per role.
+  expect_equal(
+    lengths(regmatches(result$todo$content,
+                       gregexpr("treatment_group: 0 missing", result$todo$content))),
+    1L
   )
 })
 

@@ -16,6 +16,8 @@ advancedraincloudClass <- if (requireNamespace("jmvcore")) {
     R6::R6Class("advancedraincloudClass",
         inherit = advancedraincloudBase,
         private = list(
+            # Rows dropped for Inf/-Inf in the dependent variable (see .run).
+            .n_nonfinite = 0L,
             .analysis_data = NULL,
             .comparison_results = NULL,
             .change_summary = NULL,
@@ -294,9 +296,34 @@ advancedraincloudClass <- if (requireNamespace("jmvcore")) {
                     jmvcore::reject(.("Error: No complete cases found for the selected variables."))
                 }
 
-                # Convert variables to appropriate types
-                analysis_data[[y_var]] <- as.numeric(analysis_data[[y_var]])
-                analysis_data[[x_var]] <- as.factor(analysis_data[[x_var]])
+                # Convert variables to appropriate types.
+                #
+                # as.numeric() on a FACTOR yields the level INDICES (1, 2, 3 ...),
+                # not the numbers the labels spell, so a factor of "10","20","30"
+                # would silently become 1,2,3 and every statistic below - means,
+                # SDs, effect sizes, change scores - would be computed on rank
+                # codes. The GUI's `permitted` list keeps factors out of the
+                # picker, but an R-API caller reaches here.
+                y_raw <- analysis_data[[y_var]]
+                analysis_data[[y_var]] <- if (is.factor(y_raw))
+                    suppressWarnings(as.numeric(as.character(y_raw)))
+                else suppressWarnings(as.numeric(y_raw))
+
+                # complete.cases() above follows is.na(), which is TRUE for NaN
+                # but FALSE for Inf, so an infinite value survives into every
+                # mean, SD and axis range. Drop non-finite values and record how
+                # many, so the count can be disclosed rather than vanish.
+                n_before_finite <- nrow(analysis_data)
+                analysis_data <- analysis_data[is.finite(analysis_data[[y_var]]), , drop = FALSE]
+                private$.n_nonfinite <- n_before_finite - nrow(analysis_data)
+                if (nrow(analysis_data) == 0)
+                    jmvcore::reject(.("No usable numeric values remain in the dependent variable after removing missing and non-finite entries."))
+                if (private$.n_nonfinite > 0)
+                    private$.addAnalysisNote(sprintf(
+                        .("%d row(s) were excluded because '%s' held a non-finite value (Inf or -Inf), which usually means a division by zero or an out-of-range entry."),
+                        private$.n_nonfinite, y_var))
+
+                analysis_data[[x_var]] <- droplevels(as.factor(analysis_data[[x_var]]))
 
                 if (!is.null(fill_var) && fill_var != "" && fill_var %in% names(analysis_data)) {
                     analysis_data[[fill_var]] <- as.factor(analysis_data[[fill_var]])
@@ -986,7 +1013,11 @@ advancedraincloudClass <- if (requireNamespace("jmvcore")) {
 
                 # Add log scale label if transformed
                 if (self$options$log_transform) {
-                    y_label <- paste0("log(", y_label, ")")
+                    # log(y + 0.01), not log(y): a 0.01 offset is added in .run()
+                    # so exact zeros survive. Naming the offset matters when the
+                    # measurement itself is small - for a proportion or a
+                    # biomarker near 0.05 the shift is not negligible.
+                    y_label <- paste0("log(", y_label, " + 0.01)")
                 }
 
                 plot_title <- self$options$plot_title
@@ -1077,8 +1108,23 @@ advancedraincloudClass <- if (requireNamespace("jmvcore")) {
                     .groups = "drop"
                 )
 
-                # Use optimized HTML table generation
-                headers <- c(.("Group"), .("N"), .("Mean"), .("Median"), .("SD"), .("Range"))
+                # The log transform is applied in .run() BEFORE any statistic is
+                # computed, so every number below is on the log scale. The plot's
+                # y-axis says so but this table did not, and the Methods panel
+                # that mentions it is OFF by default - leaving a clinician reading
+                # "Mean 2.31" for a biomarker that is actually about 10 ng/mL.
+                # Put the scale in the column headings, where it cannot be missed.
+                # Punctuation and spacing OUTSIDE the translation call: a key
+                # with a leading space (" [log scale]") makes jmvcore's translator
+                # throw 'key must be not be "" or NA', which crashed the whole
+                # analysis for anyone with the log transform on.
+                unit_suffix <- if (isTRUE(self$options$log_transform))
+                    paste0(" [", .("log scale"), "]") else ""
+                headers <- c(.("Group"), .("N"),
+                             paste0(.("Mean"), unit_suffix),
+                             paste0(.("Median"), unit_suffix),
+                             paste0(.("SD"), unit_suffix),
+                             paste0(.("Range"), unit_suffix))
 
                 # Prepare data for table generation
                 table_data <- data.frame(
@@ -1444,10 +1490,19 @@ advancedraincloudClass <- if (requireNamespace("jmvcore")) {
                     }
 
                     effect_size <- (mean1 - mean2) / sd2
-                    # CORRECTED: Glass's delta uses different variance formula
-                    # SE for Glass's delta: sqrt(n1/(n1*n2) + delta^2/(2*n2))
-                    # Only uses control group (n2) for the second term
-                    se <- sqrt(n1 / (n1 * n2) + effect_size^2 / (2 * n2))
+                    # Glass's delta standardises by the CONTROL SD only, but both
+                    # group means still carry sampling error, so the first term is
+                    # (n1+n2)/(n1*n2) = 1/n1 + 1/n2 - not 1/n2 alone. The previous
+                    # `n1/(n1*n2)` simplifies to 1/n2 and dropped the treatment
+                    # group's contribution entirely, and the second denominator
+                    # used 2*n2 rather than 2*(n2-1). Measured at n1=n2=20,
+                    # delta=0.8: SE 0.2569 against the correct 0.3418, i.e. a
+                    # confidence interval only 75% as wide as it should be, so the
+                    # estimate looked far more precise than it is.
+                    # Hedges & Olkin (1985), Statistical Methods for Meta-Analysis.
+                    se <- if (n2 > 1)
+                        sqrt((n1 + n2) / (n1 * n2) + effect_size^2 / (2 * (n2 - 1)))
+                    else NA_real_
                 }
 
                 # Calculate confidence intervals using constants
@@ -1472,11 +1527,21 @@ advancedraincloudClass <- if (requireNamespace("jmvcore")) {
                 ))
             },
             .interpret_effect_size = function(es) {
-                if (es < 0.2) {
+                # Cohen's bands describe MAGNITUDE, so take the absolute value
+                # here rather than relying on every caller to do it. Comparing a
+                # SIGNED effect size against 0.2 / 0.5 / 0.8 classifies d = -1.5
+                # and d = -0.9 as "Negligible" while +0.9 is "Large" - the sign is
+                # only which group was named first. Today the single caller
+                # already passes abs(), so this was latent rather than live; the
+                # guard is here so a second caller cannot reintroduce it.
+                if (is.null(es) || length(es) == 0 || is.na(es) || !is.finite(es))
+                    return("Not estimable")
+                a <- abs(es)
+                if (a < 0.2) {
                     return("Negligible")
-                } else if (es < 0.5) {
+                } else if (a < 0.5) {
                     return("Small")
-                } else if (es < 0.8) {
+                } else if (a < 0.8) {
                     return("Medium")
                 } else {
                     return("Large")
@@ -1507,9 +1572,13 @@ advancedraincloudClass <- if (requireNamespace("jmvcore")) {
                     cleaning_report <- paste0(
                         "<div style='background-color: #e3f2fd; padding: 15px; border-radius: 5px; margin-bottom: 15px;'>",
                         "<h4 style='color: #1976d2; margin-top: 0;'> ", .("Data Cleaning Summary"), "</h4>",
-                        "<p><strong>", .("Original dataset:"), "</strong> ", original_n, .(") observations"), "</p>",
-                        "<p><strong>", .("Complete cases:"), "</strong> ", nrow(complete_data), .(") observations"), "</p>",
-                        "<p><strong>", .("Excluded (missing data):"), "</strong> ", excluded_n, .(") observations ("),
+                        # The translation keys used to be ") observations", which
+                        # rendered as "900) observations" - an unopened bracket in
+                        # every change-score report. Punctuation stays outside the
+                        # key; only the word is translated.
+                        "<p><strong>", .("Original dataset:"), "</strong> ", original_n, " ", .("observations"), "</p>",
+                        "<p><strong>", .("Complete cases:"), "</strong> ", nrow(complete_data), " ", .("observations"), "</p>",
+                        "<p><strong>", .("Excluded (missing data):"), "</strong> ", excluded_n, " ", .("observations"), " (",
                         round((excluded_n / original_n) * 100, 1), "%)</p>",
                         "<p style='font-size: 12px; color: #1976d2;'><em>",
                         .("Complete case analysis performed - observations with missing ID, group, or outcome values were excluded."),
@@ -1611,15 +1680,23 @@ advancedraincloudClass <- if (requireNamespace("jmvcore")) {
                             threshold >= 0 ~ .data$percent_change >= threshold_value,
                             TRUE ~ .data$percent_change <= -threshold_value
                         ),
-                        improver = .data$change_score > 0,
-                        decliner = .data$change_score < 0,
+                        # Named by DIRECTION, not by benefit. These were
+                        # "improver"/"decliner", which assumes higher = better -
+                        # false for tumour size, pain scores, LDL, turnaround
+                        # time and most biomarkers, where an increase is the
+                        # patient getting worse. The counts are identical; only
+                        # the claim attached to them changes. The Responders row
+                        # above IS direction-aware, because its threshold is
+                        # signed.
+                        increased = .data$change_score > 0,
+                        decreased = .data$change_score < 0,
                         stable = .data$change_score == 0
                     )
 
                 n_total <- nrow(responders)
                 n_responders <- sum(responders$responder, na.rm = TRUE)
-                n_improvers <- sum(responders$improver, na.rm = TRUE)
-                n_decliners <- sum(responders$decliner, na.rm = TRUE)
+                n_improvers <- sum(responders$increased, na.rm = TRUE)
+                n_decliners <- sum(responders$decreased, na.rm = TRUE)
                 n_stable <- sum(responders$stable, na.rm = TRUE)
                 pct_fmt <- function(count) {
                     if (n_total > 0) round((count / n_total) * 100, 1) else 0
@@ -1655,9 +1732,9 @@ advancedraincloudClass <- if (requireNamespace("jmvcore")) {
                     "<table style='width: 100%; border-collapse: collapse;'>",
                     "<tr><td style='padding: 8px; border: 1px solid #ddd;'><strong>", .("Responders ("), threshold_label, "% change):</strong></td>",
                     "<td style='padding: 8px; border: 1px solid #ddd;'>", n_responders, " (", pct_fmt(n_responders), "%)</td></tr>",
-                    "<tr><td style='padding: 8px; border: 1px solid #ddd;'><strong>", .("Improved:"), "</strong></td>",
+                    "<tr><td style='padding: 8px; border: 1px solid #ddd;'><strong>", .("Increased from baseline:"), "</strong></td>",
                     "<td style='padding: 8px; border: 1px solid #ddd;'>", n_improvers, " (", pct_fmt(n_improvers), "%)</td></tr>",
-                    "<tr><td style='padding: 8px; border: 1px solid #ddd;'><strong>", .("Declined:"), "</strong></td>",
+                    "<tr><td style='padding: 8px; border: 1px solid #ddd;'><strong>", .("Decreased from baseline:"), "</strong></td>",
                     "<td style='padding: 8px; border: 1px solid #ddd;'>", n_decliners, " (", pct_fmt(n_decliners), "%)</td></tr>",
                     "<tr><td style='padding: 8px; border: 1px solid #ddd;'><strong>", .("Stable:"), "</strong></td>",
                     "<td style='padding: 8px; border: 1px solid #ddd;'>", n_stable, " (", pct_fmt(n_stable), "%)</td></tr>",
@@ -1691,11 +1768,43 @@ advancedraincloudClass <- if (requireNamespace("jmvcore")) {
                     "at" = "As-Treated"
                 )
 
+                # The Analysis Population option selects a LABEL. It performs no
+                # filtering and no reclassification - the analysis is whatever
+                # rows were supplied, minus every row dropped for missing values
+                # (and minus outliers if that option is on).
+                #
+                # That matters most for the ITT label, because a complete-case
+                # analysis is by definition NOT intention-to-treat: ITT keeps all
+                # randomised participants, including those with missing outcomes.
+                # Stamping "Intention-to-Treat" on a figure whose incomplete rows
+                # were silently discarded is a claim the analysis cannot support,
+                # so state what was actually analysed and flag the contradiction.
+                n_supplied <- tryCatch(nrow(self$data), error = function(e) NA_integer_)
+                n_analysed <- nrow(data)
+                n_dropped <- if (is.na(n_supplied)) NA_integer_ else n_supplied - n_analysed
+
+                pop_caveat <- paste0(
+                    "<p style='font-size:12px;color:#1565c0;margin-top:4px;'><em>",
+                    .("This label is your declaration about the dataset you supplied; the analysis does not construct or verify the population. No rows are added, removed or reassigned by this setting."),
+                    "</em></p>")
+
+                itt_warning <- if (identical(pop_type, "itt") && !is.na(n_dropped) && n_dropped > 0)
+                    paste0(
+                        "<div style='background-color:#f8d7da;color:#721c24;padding:12px;border-radius:6px;margin:10px 0;'>",
+                        sprintf(.("%d of %d supplied rows (%.1f%%) were excluded before analysis because of missing values in the selected variables. An intention-to-treat analysis retains all randomised participants, so these results are a COMPLETE-CASE analysis and should not be reported as ITT without imputation or another accounting for the missing outcomes."),
+                                n_dropped, n_supplied, 100 * n_dropped / n_supplied),
+                        "</div>")
+                else ""
+
                 html <- paste0(
                     "<div style='background-color: #e3f2fd; padding: 20px; border-radius: 8px; margin-bottom: 20px;'>",
                     "<h3 style='color: #1565c0; margin-top: 0;'> Clinical Analysis Report</h3>",
                     "<h4>Study Population</h4>",
-                    "<p>Analysis population: <strong>", pop_label, "</strong></p>",
+                    "<p>Analysis population as declared: <strong>", pop_label, "</strong>",
+                    if (!is.na(n_dropped)) sprintf(.(" - %d of %d supplied rows analysed"), n_analysed, n_supplied) else "",
+                    "</p>",
+                    pop_caveat,
+                    itt_warning,
                     "<p>Total N: <strong>", nrow(data), "</strong></p>",
                     "<h4>Primary Outcome</h4>",
                     "<p>Variable: <strong>", htmltools::htmlEscape(y_var), "</strong></p>",

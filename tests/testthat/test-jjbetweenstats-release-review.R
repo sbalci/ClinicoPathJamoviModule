@@ -56,9 +56,25 @@ jb_text <- function(html) gsub("\\s+", " ", gsub("<[^>]+>", " ", html))
 # TRUE when the attached ClinicoPath has shadowed the stats ANOVA machinery.
 # An attached ClinicoPath masks aov, oneway.test, terms, model.frame, formula
 # and t.test, so probe the capability itself rather than one symbol.
+# TRUE when the RAW stats::oneway.test path is broken by formula.tools. This is
+# now expected to be TRUE in any ClinicoPath session and is NO LONGER a reason to
+# skip: the analysis wraps its calls in withBaseFormulaChar(), so it works anyway.
+# Kept only to document the environment the tests run in.
 jb_anova_broken <- function() {
     d <- data.frame(y = c(1, 2, 3, 4, 5, 6, 7, 8, 9), g = factor(rep(1:3, 3)))
     inherits(try(stats::oneway.test(y ~ g, data = d), silent = TRUE), "try-error")
+}
+
+# Reference values must be computed with base behaviour restored, or they hit the
+# very bug the module now shields against. Same mechanism as R/ggstatsplot_utils.R.
+jb_base_formula <- function(expr) {
+    tbl <- get(".__S3MethodsTable__.", envir = asNamespace("base"))
+    if (exists("as.character.formula", envir = tbl, inherits = FALSE)) {
+        old <- get("as.character.formula", envir = tbl, inherits = FALSE)
+        assign("as.character.formula", function(x, ...) as.character(unclass(x)), envir = tbl)
+        on.exit(assign("as.character.formula", old, envir = tbl), add = TRUE)
+    }
+    force(expr)
 }
 
 
@@ -270,16 +286,18 @@ test_that("the subtitle falls back gracefully when statsExpressions cannot run",
 
 
 test_that("three or more groups get the same honoured options", {
-    skip_if(jb_anova_broken(),
-            "an attached ClinicoPath shadows stats::aov/oneway.test, so statsExpressions' ANOVA path cannot run here; verified working with the namespace unattached (Fisher F(2,72)=9.34 p=2.48e-04, Welch F(2,41.71)=7.47 p=1.69e-03)")
+    # No longer skipped. This used to be gated on jb_anova_broken() with a reason
+    # blaming namespace shadowing - the real cause was formula.tools breaking
+    # stats::oneway.test, and the analysis now shields against it, so the
+    # three-or-more-group path is expected to work in every session.
     d <- jb_3group()
     s_fisher <- jb_subtitle(jb_run(d, varequal = TRUE,  resultssubtitle = TRUE))
     s_welch  <- jb_subtitle(jb_run(d, varequal = FALSE, resultssubtitle = TRUE))
     expect_match(s_fisher, "Fisher", fixed = TRUE)
     expect_match(s_welch,  "Welch",  fixed = TRUE)
 
-    ref_f <- stats::oneway.test(y ~ g, data = d, var.equal = TRUE)
-    ref_w <- stats::oneway.test(y ~ g, data = d, var.equal = FALSE)
+    ref_f <- jb_base_formula(stats::oneway.test(y ~ g, data = d, var.equal = TRUE))
+    ref_w <- jb_base_formula(stats::oneway.test(y ~ g, data = d, var.equal = FALSE))
     expect_match(s_fisher, sprintf("%.2f", unname(ref_f$statistic)), fixed = TRUE)
     expect_match(s_welch,  sprintf("%.2f", unname(ref_w$statistic)), fixed = TRUE)
 })
@@ -300,31 +318,48 @@ test_that("the dead ggstatsplot arguments are gone from the call sites", {
 })
 
 
-test_that("a silent fallback to the package default is disclosed", {
-    # `formula.tools` registers an as.character.formula method returning one
-    # deparsed string where base R returns c("~","y","g"), so
-    # stats::oneway.test - the engine behind Welch's ANOVA - rejects every valid
-    # formula once that package is loaded. It arrives transitively via logistf,
-    # which firthregression loads on demand, so a jamovi session in which Firth
-    # regression has been run loses the 3+ group takeover for the rest of its
-    # life. The result is safe (ggstatsplot's own subtitle) but it silently
-    # ignores three of the user's choices, so it must be stated.
-    skip_if(!jb_anova_broken(), "statsExpressions' ANOVA path is healthy here, so there is no fallback to disclose")
-
+test_that("the shield removes the fallback instead of merely disclosing it", {
+    # This test used to assert the OPPOSITE: that when statsExpressions' ANOVA
+    # path died, a notice fired saying the Equal variances / Effect size type /
+    # Decimal places choices had been ignored. The cause was formula.tools
+    # breaking stats::oneway.test, and R/ggstatsplot_utils.R now shields every
+    # call, so there is no fallback left to disclose - the options are simply
+    # honoured. Assert the better contract.
     fired <- function(...) grepl("fell back to the package default",
                                  jb_text(jb_run(...)$results$diagnostics$content), fixed = TRUE)
 
-    expect_true(fired(jb_3group(), resultssubtitle = TRUE, varequal = TRUE))
-    # nothing to disclose when the takeover succeeds, is not attempted, or the
-    # subtitle is not shown at all
+    expect_false(fired(jb_3group(), resultssubtitle = TRUE, varequal = TRUE))
     expect_false(fired(jb_2group(), resultssubtitle = TRUE, varequal = TRUE))
     expect_false(fired(jb_3group(), resultssubtitle = FALSE))
     expect_false(fired(jb_3group(), resultssubtitle = TRUE, typestatistics = "bayes"))
 
-    # and the message names the three options that did not apply
-    msg <- jb_text(jb_run(jb_3group(), resultssubtitle = TRUE)$results$diagnostics$content)
-    for (opt in c("Equal variances", "Effect size type", "Decimal places"))
-        expect_match(msg, opt, fixed = TRUE)
+    # ...and the three options it used to apologise for now actually take effect
+    # on three groups, which is what the apology was standing in for.
+    d <- jb_3group()
+    expect_match(jb_subtitle(jb_run(d, resultssubtitle = TRUE, varequal = TRUE)),  "Fisher", fixed = TRUE)
+    expect_match(jb_subtitle(jb_run(d, resultssubtitle = TRUE, varequal = FALSE)), "Welch",  fixed = TRUE)
+    expect_false(identical(
+        jb_subtitle(jb_run(d, resultssubtitle = TRUE, effsizetype = "eta")),
+        jb_subtitle(jb_run(d, resultssubtitle = TRUE, effsizetype = "omega"))))
+    expect_false(identical(
+        jb_subtitle(jb_run(d, resultssubtitle = TRUE, k = 0)),
+        jb_subtitle(jb_run(d, resultssubtitle = TRUE, k = 4))))
+})
+
+test_that("a stale fallback marker cannot leak into a later run", {
+    # The fallback path is now unreachable via formula.tools, but the disclosure
+    # machinery remains for any other engine failure - and it must not carry a
+    # stale message into the next run. jb_run() calls private$.run() directly, so
+    # drive that same entry point twice with a marker planted in between.
+    a <- jb_run(jb_3group(), resultssubtitle = TRUE)
+    pr <- a$.__enclos_env__$private
+    expect_null(pr$.subtitleFallback)          # healthy run leaves nothing behind
+
+    pr$.subtitleFallback <- "a simulated engine failure"
+    pr$.run()
+    expect_null(pr$.subtitleFallback)          # .run() resets it at the top
+    expect_false(grepl("fell back to the package default",
+                       jb_text(a$results$diagnostics$content), fixed = TRUE))
 })
 
 

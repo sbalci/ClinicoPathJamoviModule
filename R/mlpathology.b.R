@@ -1,8 +1,6 @@
 #' @title Classification Performance Metrics for Digital Pathology
 #' @importFrom R6 R6Class
 #' @import jmvcore
-#' @import pROC
-#' @import caret
 #' @importFrom stats pnorm qnorm binom.test prop.test mcnemar.test
 #' @export
 #' @return An \code{R6} class generator object for the \code{mlpathologyClass} backend; used internally by the jamovi analysis wrapper and not called directly.

@@ -1,13 +1,16 @@
+# The R6 generator and the options class are INTERNAL, so they are not on the
+# search path when the package is loaded with export_all = FALSE (which is how
+# R CMD check and devtools::test() load it). Reach them through `:::`.
 run_advancedraincloud_analysis <- function(data, ...) {
-  opts <- advancedraincloudOptions$new(...)
-  analysis <- advancedraincloudClass$new(options = opts, data = data)
+  opts <- ClinicoPath:::advancedraincloudOptions$new(...)
+  analysis <- ClinicoPath:::advancedraincloudClass$new(options = opts, data = data)
   analysis$run()
   analysis
 }
 
 test_that("advancedraincloud module loads correctly", {
   skip_if_not_installed('jmvReadWrite')
-  expect_true(exists("advancedraincloudClass"))
+  expect_true(inherits(ClinicoPath:::advancedraincloudClass, "R6ClassGenerator"))
   expect_true(is.function(advancedraincloud))
 })
 

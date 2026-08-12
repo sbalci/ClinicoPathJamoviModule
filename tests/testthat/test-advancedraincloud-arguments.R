@@ -39,7 +39,7 @@ test_that("advancedraincloud handles effect size calculations", {
       effect_size_type = etype
     )
 
-    expect_s3_class(result, "advancedraincloudResults",
+    expect_true(inherits(result, "advancedraincloudResults"),
                    info = paste("Failed for effect size type:", etype))
   }
 })
@@ -93,7 +93,7 @@ test_that("advancedraincloud handles clinical trial features", {
       population_type = pop
     )
 
-    expect_s3_class(result, "advancedraincloudResults",
+    expect_true(inherits(result, "advancedraincloudResults"),
                    info = paste("Failed for population type:", pop))
   }
 })
@@ -131,7 +131,7 @@ test_that("advancedraincloud handles outlier methods", {
       outlier_method = method
     )
 
-    expect_s3_class(result, "advancedraincloudResults",
+    expect_true(inherits(result, "advancedraincloudResults"),
                    info = paste("Failed for outlier method:", method))
   }
 })
@@ -152,7 +152,7 @@ test_that("advancedraincloud handles p-value positions", {
       p_value_position = pos
     )
 
-    expect_s3_class(result, "advancedraincloudResults",
+    expect_true(inherits(result, "advancedraincloudResults"),
                    info = paste("Failed for p-value position:", pos))
   }
 })
@@ -172,7 +172,7 @@ test_that("advancedraincloud handles journal styles", {
       journal_style = style
     )
 
-    expect_s3_class(result, "advancedraincloudResults",
+    expect_true(inherits(result, "advancedraincloudResults"),
                    info = paste("Failed for journal style:", style))
   }
 })

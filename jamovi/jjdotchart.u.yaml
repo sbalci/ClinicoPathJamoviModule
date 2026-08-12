@@ -1,0 +1,105 @@
+title: Dot Chart (Summary vs Reference Value)
+name: jjdotchart
+jus: '3.0'
+stage: 0
+compilerMode: tame
+children:
+  - type: VariableSupplier
+    persistentItems: false
+    stretchFactor: 1
+    children:
+      - type: TargetLayoutBox
+        label: Measurement
+        children:
+          - type: VariablesListBox
+            name: dep
+            maxItemCount: 1
+            isTarget: true
+      - type: TargetLayoutBox
+        label: Groups (one point each)
+        children:
+          - type: VariablesListBox
+            name: group
+            maxItemCount: 1
+            isTarget: true
+      - type: TargetLayoutBox
+        label: Split By (Optional)
+        children:
+          - type: VariablesListBox
+            name: grvar
+            maxItemCount: 1
+            isTarget: true
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: Label
+        label: Reference Value to test against
+        fitToGrid: true
+        children:
+          - type: LayoutBox
+            margin: large
+            children:
+              - type: TextBox
+                name: testvalue
+                format: number
+              - type: ComboBox
+                name: typestatistics
+  - type: CollapseBox
+    label: Statistical Options
+    collapsed: true
+    children:
+      - type: LayoutBox
+        margin: large
+        children:
+          - type: TextBox
+            name: conflevel
+            format: number
+          - type: TextBox
+            name: k
+            format: number
+          - type: CheckBox
+            name: bfmessage
+            enable: (typestatistics:bayes)
+  - type: CollapseBox
+    label: Output
+    collapsed: true
+    children:
+      - type: LayoutBox
+        margin: large
+        children:
+          - type: CheckBox
+            name: showSummaryTable
+          - type: CheckBox
+            name: resultssubtitle
+          - type: CheckBox
+            name: centralityplotting
+          - type: ComboBox
+            name: centralitytype
+            enable: (centralityplotting)
+  - type: CollapseBox
+    label: Plot Appearance
+    collapsed: true
+    children:
+      - type: LayoutBox
+        margin: large
+        children:
+          - type: CheckBox
+            name: originaltheme
+          - type: TextBox
+            name: mytitle
+            format: string
+            width: large
+          - type: TextBox
+            name: xtitle
+            format: string
+            width: large
+          - type: TextBox
+            name: ytitle
+            format: string
+            width: large
+          - type: TextBox
+            name: plotwidth
+            format: number
+          - type: TextBox
+            name: plotheight
+            format: number

@@ -41,10 +41,10 @@
 # ==============================================
 
 
-new_version: "1.0.5"
-new_date: "2026-08-11"
+new_version: "1.0.51"
+new_date: "2026-08-12"
 quick: false
-TEST: false
+TEST: true
 jjstatsplot: true
 jsurvival: true
 ClinicoPathDescriptives: true
@@ -103,6 +103,10 @@ modules:
     r_files:
       - "utils.R"
       - "arcdiagram_vendored.R"
+      # REQUIRED, not optional: jjbetweenstats, jjdotplotstats and statsplot2 all
+      # call withBaseFormulaChar() from this file. Without it the shipped module
+      # dies with "could not find function" on every ggbetweenstats figure.
+      - "ggstatsplot_utils.R"
     # Example datasets shipped to jjstatsplot (copied from main data/, auto-documented).
     data_files:
       - "histopathology.rda"
@@ -243,6 +247,9 @@ modules:
       - "stagemigration-discrimination.R"
       - "stagemigration-competing-risks.R"
       - "recist_engine.R"
+      # Needed whenever a ggstatsplot analysis is dev-routed here with a
+      # T-suffixed menuGroup (jjbetweenstats / jjdotplotstats / statsplot2).
+      - "ggstatsplot_utils.R"
     vignette_files: []
     test_files: []
     required_directories:

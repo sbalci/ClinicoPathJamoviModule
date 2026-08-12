@@ -10,7 +10,6 @@
 #' @importFrom grafify plot_3d_scatterbar
 #' @importFrom grafify plot_4d_scatterbar
 #' @importFrom grafify plot_density
-#' @importFrom grafify plot_histogram
 #' @importFrom grafify plot_xy_CatGroup
 #' @importFrom grafify plot_xy_NumGroup
 #' @importFrom grafify graf_palettes

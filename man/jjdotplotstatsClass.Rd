@@ -2,12 +2,12 @@
 % Please edit documentation in R/jjdotplotstats.b.R
 \name{jjdotplotstatsClass}
 \alias{jjdotplotstatsClass}
-\title{Dot Chart}
+\title{Horizontal Box-Violin Comparison}
 \value{
 An \code{R6} class generator object for the \code{jjdotplotstatsClass} backend; used internally by the jamovi analysis wrapper and not called directly.
 }
 \description{
-Dot Chart
+Horizontal Box-Violin Comparison
 }
 \section{Super classes}{
 \code{\link[jmvcore:Analysis]{jmvcore::Analysis}} -> \code{jjdotplotstatsBase} -> \code{jjdotplotstatsClass}

@@ -21,7 +21,6 @@
 #'
 #' @importFrom R6 R6Class
 #' @import jmvcore
-#' @import timeROC
 #' @import ggplot2
 #' @import glue
 #' @importFrom pROC roc auc ci.auc roc.test

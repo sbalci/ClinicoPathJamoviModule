@@ -3,7 +3,6 @@
 #' @import jmvcore
 #' @import ggplot2
 #' @import rlang
-#' @rawNamespace import(purrr, except = c(discard, flatten, flatten_chr, flatten_dbl, flatten_int, flatten_lgl, flatten_raw, invoke, splice))
 #' @import glue
 #' @import ggstatsplot
 #' @importFrom digest digest

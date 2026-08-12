@@ -66,16 +66,15 @@ test_that("raincloud handles complete clinical lab analysis workflow", {
     group_var = "diagnosis",
     facet_var = "age_category",
     color_var = "bmi_category",
-    theme = "publication",
-    palette = "colorblind_safe",
+    plot_theme = "publication",
+    color_palette = "prism_colorblind_safe",
     show_violin = TRUE,
     show_boxplot = TRUE,
     show_dots = TRUE,
     normality_test = TRUE,
     comparison_test = TRUE,
     show_outliers = TRUE,
-    show_mean = TRUE,
-    show_median = TRUE
+    show_statistics = TRUE
   )
   expect_s3_class(result5, "raincloudResults")
 })
@@ -120,7 +119,7 @@ test_that("raincloud handles complete treatment effect workflow", {
     group_var = "treatment",
     facet_var = "timepoint",
     comparison_test = TRUE,
-    show_mean = TRUE
+    show_statistics = TRUE
   )
   expect_s3_class(result4, "raincloudResults")
 
@@ -131,14 +130,13 @@ test_that("raincloud handles complete treatment effect workflow", {
     group_var = "treatment",
     facet_var = "timepoint",
     color_var = "response_category",
-    theme = "clinical",
-    palette = "viridis",
+    plot_theme = "clinical",
+    color_palette = "viridis",
     show_violin = TRUE,
     show_boxplot = TRUE,
     show_dots = FALSE,
     comparison_test = TRUE,
-    show_mean = TRUE,
-    show_median = TRUE
+    show_statistics = TRUE
   )
   expect_s3_class(result5, "raincloudResults")
 })
@@ -192,15 +190,15 @@ test_that("raincloud handles complete biomarker expression workflow", {
     dep_var = "ki67_index",
     group_var = "grade",
     facet_var = "cancer_type",
-    theme = "prism",
-    palette = "floral",
+    plot_theme = "prism_default",
+    color_palette = "prism_floral",
     show_violin = TRUE,
     show_boxplot = TRUE,
     show_dots = TRUE,
     normality_test = TRUE,
     comparison_test = TRUE,
     show_outliers = TRUE,
-    show_median = TRUE
+    show_statistics = TRUE
   )
   expect_s3_class(result5, "raincloudResults")
 })
@@ -216,7 +214,7 @@ test_that("raincloud handles all datasets with consistent parameters", {
     data = raincloud_test,
     dep_var = "symptom_score",
     group_var = "treatment_group",
-    theme = "publication",
+    plot_theme = "publication",
     show_violin = TRUE,
     show_boxplot = TRUE
   )
@@ -227,7 +225,7 @@ test_that("raincloud handles all datasets with consistent parameters", {
     data = raincloud_clinical,
     dep_var = "glucose",
     group_var = "diagnosis",
-    theme = "publication",
+    plot_theme = "publication",
     show_violin = TRUE,
     show_boxplot = TRUE
   )
@@ -238,7 +236,7 @@ test_that("raincloud handles all datasets with consistent parameters", {
     data = raincloud_treatment,
     dep_var = "tumor_size",
     group_var = "treatment",
-    theme = "publication",
+    plot_theme = "publication",
     show_violin = TRUE,
     show_boxplot = TRUE
   )
@@ -249,7 +247,7 @@ test_that("raincloud handles all datasets with consistent parameters", {
     data = raincloud_biomarker,
     dep_var = "ki67_index",
     group_var = "grade",
-    theme = "publication",
+    plot_theme = "publication",
     show_violin = TRUE,
     show_boxplot = TRUE
   )
@@ -260,7 +258,7 @@ test_that("raincloud handles all datasets with consistent parameters", {
     data = raincloud_small,
     dep_var = "measurement",
     group_var = "group",
-    theme = "publication",
+    plot_theme = "publication",
     show_violin = TRUE,
     show_boxplot = TRUE
   )
@@ -271,7 +269,7 @@ test_that("raincloud handles all datasets with consistent parameters", {
     data = raincloud_skewed,
     dep_var = "normal",
     group_var = "condition",
-    theme = "publication",
+    plot_theme = "publication",
     show_violin = TRUE,
     show_boxplot = TRUE
   )
@@ -284,8 +282,12 @@ test_that("raincloud handles all datasets with consistent parameters", {
 
 test_that("raincloud produces consistent results across themes", {
 
+  # The plot_theme levels jamovi/raincloud.a.yaml actually defines. The old
+  # vector listed "prism", "prism_whitespace" and "prism_light", none of which
+  # are levels of the option. The "separator_theme" divider is exercised
+  # separately in test-raincloud-release-review.R.
   themes <- c("clinical", "minimal", "classic", "publication", "tidyquant",
-              "prism", "prism_whitespace", "prism_light")
+              "prism_default", "prism_white", "prism_publication")
 
   results <- list()
 
@@ -294,7 +296,7 @@ test_that("raincloud produces consistent results across themes", {
       data = raincloud_test,
       dep_var = "symptom_score",
       group_var = "treatment_group",
-      theme = theme_name,
+      plot_theme = theme_name,
       show_violin = TRUE,
       show_boxplot = TRUE
     )
@@ -312,9 +314,13 @@ test_that("raincloud produces consistent results across themes", {
 
 test_that("raincloud produces consistent results across palettes", {
 
-  palettes <- c("default", "viridis", "magma", "plasma", "floral",
-                "candy_bright", "office", "pastels", "colorblind_safe",
-                "ocean", "spring")
+  # The color_palette levels jamovi/raincloud.a.yaml actually defines. The old
+  # vector listed "magma"/"plasma" (never offered) and the bare ggprism names
+  # without the "prism_" prefix the option uses.
+  palettes <- c("default", "viridis", "set1", "set2", "dark2", "clinical",
+                "pastel", "prism_floral", "prism_candy_bright", "prism_office",
+                "prism_pastels", "prism_colorblind_safe", "prism_ocean",
+                "prism_spring")
 
   results <- list()
 
@@ -323,7 +329,7 @@ test_that("raincloud produces consistent results across palettes", {
       data = raincloud_biomarker,
       dep_var = "ki67_index",
       group_var = "grade",
-      palette = palette_name,
+      color_palette = palette_name,
       show_violin = TRUE
     )
 
@@ -396,7 +402,7 @@ test_that("raincloud handles progressive feature addition", {
     dep_var = "symptom_score",
     group_var = "treatment_group",
     facet_var = "disease_severity",
-    theme = "publication",
+    plot_theme = "publication",
     show_violin = TRUE,
     show_boxplot = TRUE,
     show_dots = TRUE
@@ -409,7 +415,7 @@ test_that("raincloud handles progressive feature addition", {
     dep_var = "symptom_score",
     group_var = "treatment_group",
     facet_var = "disease_severity",
-    theme = "publication",
+    plot_theme = "publication",
     show_violin = TRUE,
     show_boxplot = TRUE,
     show_dots = TRUE,
@@ -424,14 +430,13 @@ test_that("raincloud handles progressive feature addition", {
     dep_var = "symptom_score",
     group_var = "treatment_group",
     facet_var = "disease_severity",
-    theme = "publication",
+    plot_theme = "publication",
     show_violin = TRUE,
     show_boxplot = TRUE,
     show_dots = TRUE,
     normality_test = TRUE,
     comparison_test = TRUE,
-    show_mean = TRUE,
-    show_median = TRUE,
+    show_statistics = TRUE,
     show_outliers = TRUE
   )
   expect_s3_class(result8, "raincloudResults")
@@ -452,7 +457,7 @@ test_that("raincloud handles multiple analyses from same dataset", {
       data = raincloud_test,
       dep_var = var,
       group_var = "treatment_group",
-      theme = "clinical",
+      plot_theme = "clinical",
       show_violin = TRUE,
       show_boxplot = TRUE
     )
@@ -474,7 +479,7 @@ test_that("raincloud produces consistent results on repeated calls", {
     data = raincloud_test,
     dep_var = "symptom_score",
     group_var = "treatment_group",
-    theme = "publication",
+    plot_theme = "publication",
     show_violin = TRUE,
     show_boxplot = TRUE
   )
@@ -483,7 +488,7 @@ test_that("raincloud produces consistent results on repeated calls", {
     data = raincloud_test,
     dep_var = "symptom_score",
     group_var = "treatment_group",
-    theme = "publication",
+    plot_theme = "publication",
     show_violin = TRUE,
     show_boxplot = TRUE
   )
@@ -492,7 +497,7 @@ test_that("raincloud produces consistent results on repeated calls", {
     data = raincloud_test,
     dep_var = "symptom_score",
     group_var = "treatment_group",
-    theme = "publication",
+    plot_theme = "publication",
     show_violin = TRUE,
     show_boxplot = TRUE
   )
@@ -541,7 +546,7 @@ test_that("raincloud handles multi-panel comparative analysis workflow", {
     group_var = "diagnosis",
     facet_var = "age_category",
     color_var = "bmi_category",
-    theme = "publication",
+    plot_theme = "publication",
     comparison_test = TRUE
   )
   expect_s3_class(result_complete, "raincloudResults")
@@ -562,14 +567,13 @@ test_that("raincloud handles different distribution types in systematic comparis
       data = raincloud_skewed,
       dep_var = dist_type,
       group_var = "condition",
-      theme = "publication",
-      palette = "colorblind_safe",
+      plot_theme = "publication",
+      color_palette = "prism_colorblind_safe",
       show_violin = TRUE,
       show_boxplot = TRUE,
       show_dots = TRUE,
       normality_test = TRUE,
-      show_mean = TRUE,
-      show_median = TRUE
+      show_statistics = TRUE
     )
 
     expect_s3_class(results[[dist_type]], "raincloudResults")
@@ -590,14 +594,13 @@ test_that("raincloud handles complete clinical trial reporting workflow", {
     data = raincloud_treatment,
     dep_var = "tumor_size",
     group_var = "treatment",
-    theme = "publication",
-    palette = "colorblind_safe",
+    plot_theme = "publication",
+    color_palette = "prism_colorblind_safe",
     show_violin = TRUE,
     show_boxplot = TRUE,
     show_dots = FALSE,
     comparison_test = TRUE,
-    show_mean = TRUE,
-    show_median = TRUE
+    show_statistics = TRUE
   )
   expect_s3_class(result_primary, "raincloudResults")
 
@@ -607,8 +610,8 @@ test_that("raincloud handles complete clinical trial reporting workflow", {
     dep_var = "tumor_size",
     group_var = "treatment",
     facet_var = "response_category",
-    theme = "publication",
-    palette = "colorblind_safe",
+    plot_theme = "publication",
+    color_palette = "prism_colorblind_safe",
     show_violin = TRUE,
     show_boxplot = TRUE,
     comparison_test = TRUE
@@ -621,11 +624,11 @@ test_that("raincloud handles complete clinical trial reporting workflow", {
     dep_var = "tumor_size",
     group_var = "timepoint",
     facet_var = "treatment",
-    theme = "publication",
+    plot_theme = "publication",
     show_violin = TRUE,
     show_boxplot = TRUE,
     comparison_test = TRUE,
-    show_mean = TRUE
+    show_statistics = TRUE
   )
   expect_s3_class(result_time, "raincloudResults")
 })

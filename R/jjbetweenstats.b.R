@@ -43,6 +43,56 @@ jjbetweenstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             private$.accumulated_messages <- c(private$.accumulated_messages, message)
         },
 
+        # Option-dependent subtitle diagnostics.
+        #
+        # These used to live at the end of .prepareData(), which is MEMOIZED and
+        # returns early on a cache hit. The cache is keyed on the data, so every
+        # option-only change - switching Statistical approach to Bayesian,
+        # ticking Equal variances, turning the subtitle off - was a cache hit
+        # that skipped this block entirely, leaving whatever note the previous
+        # data-change had produced. The notes below depend on `resultssubtitle`,
+        # `typestatistics`, `varequal`, `effsizetype` and `grvar`, so they must be
+        # recomputed on EVERY run. Returns HTML; appends nothing.
+        .subtitleDiagnosticsHtml = function(mydata) {
+            private$.subtitleFallback <- NULL
+            private$.bayesNoStatistic <- FALSE
+            out <- character()
+
+            if (isTRUE(self$options$resultssubtitle)) {
+                if (identical(self$options$typestatistics, "bayes")) {
+                    # .subtitleExpr deliberately leaves the Bayesian subtitle to
+                    # ggstatsplot - but ggstatsplot may produce none at all, and
+                    # said nothing about it. Probe and say so.
+                    private$.bayesNoStatistic <- private$.bayesProbeFails(
+                        mydata, self$options$group, self$options$dep[1])
+                    if (isTRUE(private$.bayesNoStatistic))
+                        out <- c(out, paste0("<br>", .("Note: the Bayesian test could not be computed for this data, so the plot carries no subtitle and NO test statistic, Bayes factor or effect size is shown. Choose a different Statistical approach (parametric, non-parametric or robust) to obtain a result."), "<br>"))
+                } else {
+                    invisible(private$.subtitleExpr(
+                        mydata, self$options$group, self$options$dep[1],
+                        private$.prepareOptions()))
+                }
+            }
+            if (!is.null(private$.subtitleFallback) && isTRUE(self$options$resultssubtitle)) {
+                out <- c(out, paste0("<br>", sprintf(
+                    .("Note: the plot subtitle fell back to the package default (%s), so 'Equal variances', 'Effect size type' and 'Decimal places' did not affect the reported statistic. Welch's variant and the default effect size were used."),
+                    htmltools::htmlEscape(private$.subtitleFallback)), "<br>"))
+            }
+
+            # The Split By figure is drawn by grouped_ggbetweenstats, which
+            # computes its own per-panel subtitle. The subtitle we build in
+            # .subtitleExpr() - the one that honours Equal variances and Effect
+            # size type - cannot be applied per panel, so say so rather than let
+            # the two figures disagree silently.
+            if (!is.null(self$options$grvar) &&
+                (isTRUE(self$options$varequal) ||
+                 !identical(self$options$effsizetype, "biased"))) {
+                out <- c(out, paste0(
+                    "<br>", .("Note: on the Split By figure each panel is computed by ggstatsplot, which always uses the Welch variant and its own default effect size. 'Equal variances' and 'Effect size type' apply to the main figure only."), "<br>"))
+            }
+            paste(out, collapse = "")
+        },
+
         # Combine accumulated interim-diagnostic messages into one HTML block and
         # PERSIST it in a private field. Deliberately writes to NO results element:
         # this runs inside .prepareData(), which is called from the plot render
@@ -290,8 +340,11 @@ jjbetweenstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             fn <- if (n_lev == 2) statsExpressions::two_sample_test
                   else            statsExpressions::oneway_anova
 
+            # withBaseFormulaChar(): formula.tools (pulled in via logistf)
+            # overrides as.character.formula and breaks stats::oneway.test, so
+            # unwrapped this silently rendered a figure with no statistics.
             res <- tryCatch(
-                rlang::inject(fn(
+                withBaseFormulaChar(rlang::inject(fn(
                     data         = data,
                     x            = !!rlang::sym(group_var),
                     y            = !!rlang::sym(dep_var),
@@ -299,19 +352,19 @@ jjbetweenstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     var.equal    = isTRUE(opts$varequal),
                     effsize.type = eff,
                     digits       = opts$k,
-                    conf.level   = opts$conflevel)),
+                    conf.level   = opts$conflevel))),
                 error = function(e) e)
 
-            # A failure here is not hypothetical. `formula.tools` registers an
-            # `as.character.formula` method returning one deparsed string where
-            # base R returns c("~", "y", "g"), which makes stats::oneway.test -
-            # the engine behind Welch's ANOVA - reject every valid formula with
-            # "a two-sided formula is required". It arrives transitively via
-            # logistf, so any session in which Firth regression has been run
-            # loses the three-or-more-group takeover. Falling back to
-            # ggstatsplot's own subtitle is safe, but it silently ignores the
-            # user's Equal variances / Effect size type / Decimal places
-            # choices, so record it and say so in .run().
+            # The dominant cause of failure here USED to be `formula.tools`
+            # (pulled in via logistf) overriding as.character.formula and
+            # breaking stats::oneway.test, which cost every three-or-more-group
+            # analysis its takeover AND its ggstatsplot subtitle. That is now
+            # handled by the withBaseFormulaChar() shield around the call above,
+            # so this branch covers the residual cases only (degenerate data, an
+            # upstream change). Falling back to ggstatsplot's own subtitle is
+            # safe, but it silently ignores the user's Equal variances / Effect
+            # size type / Decimal places choices, so record it and say so in
+            # .run().
             if (inherits(res, "condition")) {
                 private$.subtitleFallback <- conditionMessage(res)
                 return(NULL)
@@ -339,11 +392,11 @@ jjbetweenstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             fn <- if (n_lev == 2) statsExpressions::two_sample_test
                   else            statsExpressions::oneway_anova
             res <- tryCatch(
-                rlang::inject(fn(
+                withBaseFormulaChar(rlang::inject(fn(
                     data = data,
                     x    = !!rlang::sym(group_var),
                     y    = !!rlang::sym(dep_var),
-                    type = "bayes")),
+                    type = "bayes"))),
                 error = function(e) e)
             inherits(res, "condition") ||
                 is.null(res$expression) || length(res$expression) == 0
@@ -689,41 +742,6 @@ jjbetweenstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             # completion notice in jjcorrmat). One extra statsExpressions call on
             # the first dependent variable is cheap and only runs when subtitles
             # are switched on.
-            private$.subtitleFallback <- NULL
-            private$.bayesNoStatistic <- FALSE
-            if (isTRUE(self$options$resultssubtitle)) {
-                if (identical(self$options$typestatistics, "bayes")) {
-                    # .subtitleExpr deliberately leaves the Bayesian subtitle to
-                    # ggstatsplot - but ggstatsplot may produce none at all, and
-                    # said nothing about it. Probe and say so.
-                    private$.bayesNoStatistic <- private$.bayesProbeFails(
-                        mydata, self$options$group, self$options$dep[1])
-                    if (isTRUE(private$.bayesNoStatistic))
-                        private$.appendMessage(paste0("<br>", .("Note: the Bayesian test could not be computed for this data, so the plot carries no subtitle and NO test statistic, Bayes factor or effect size is shown. Choose a different Statistical approach (parametric, non-parametric or robust) to obtain a result."), "<br>"))
-                } else {
-                    invisible(private$.subtitleExpr(
-                        mydata, self$options$group, self$options$dep[1],
-                        private$.prepareOptions()))
-                }
-            }
-            if (!is.null(private$.subtitleFallback) && isTRUE(self$options$resultssubtitle)) {
-                private$.appendMessage(paste0("<br>", sprintf(
-                    .("Note: the plot subtitle fell back to the package default (%s), so 'Equal variances', 'Effect size type' and 'Decimal places' did not affect the reported statistic. Welch's variant and the default effect size were used."),
-                    htmltools::htmlEscape(private$.subtitleFallback)), "<br>"))
-            }
-
-            # The Split By figure is drawn by grouped_ggbetweenstats, which
-            # computes its own per-panel subtitle. The subtitle we build in
-            # .subtitleExpr() - the one that honours Equal variances and Effect
-            # size type - cannot be applied per panel, so say so rather than let
-            # the two figures disagree silently.
-            if (!is.null(self$options$grvar) &&
-                (isTRUE(self$options$varequal) ||
-                 !identical(self$options$effsizetype, "biased"))) {
-                private$.appendMessage(paste0(
-                    "<br>", .("Note: on the Split By figure each panel is computed by ggstatsplot, which always uses the Welch variant and its own default effect size. 'Equal variances' and 'Effect size type' apply to the main figure only."), "<br>"))
-            }
-            
             # Detect outliers if large dataset - checkpoint before expensive outlier detection
             if (nrow(mydata) > 30) {
                 private$.checkpoint(flush = FALSE)
@@ -904,14 +922,27 @@ jjbetweenstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         # functions (where .prepareData() is also called) is discarded by jamovi
         # and made these panels vanish once plots were visible. .prepareData() is
         # memoized, so the plot render functions reuse this without recomputing.
-        private$.prepareData()
+        mydata <- private$.prepareData()
 
         # Separate, always-set panels (never written to during render):
         #   mecGuidance -> multiple-endpoint correction recommendation ("" hides it)
         #   diagnostics -> interim data-quality / assumption calculations ("" hides it)
         self$results$mecGuidance$setContent(private$.endpointGuidanceHtml())
-        self$results$diagnostics$setContent(
-            if (is.null(private$.diagnosticsHtml)) "" else private$.diagnosticsHtml)
+
+        # The data-derived half is memoized with the data; the subtitle half
+        # depends only on options and is recomputed here every run (see
+        # .subtitleDiagnosticsHtml for why it cannot live in .prepareData).
+        diag_html <- if (is.null(private$.diagnosticsHtml)) "" else private$.diagnosticsHtml
+        sub_html <- if (is.null(mydata)) "" else private$.subtitleDiagnosticsHtml(mydata)
+        if (nzchar(sub_html)) {
+            diag_html <- if (nzchar(diag_html))
+                sub("</div>$", paste0(sub_html, "</div>"), diag_html)
+            else paste0(
+                "<div style='padding: 12px 15px; background-color: #eef2f7; ",
+                "border-left: 4px solid #6c757d; margin: 10px 0;'>",
+                "<strong>Data Diagnostics &amp; Assumptions</strong>", sub_html, "</div>")
+        }
+        self$results$diagnostics$setContent(diag_html)
 
         # Clinical results summary, computed in the run context so it survives
         # option-only re-renders (setting it during .plot render is discarded).
@@ -1194,7 +1225,7 @@ jjbetweenstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 if (!is.null(sub_expr))
                     args_list$results.subtitle <- FALSE
 
-                plot <- private$.tryPlot(do.call(ggstatsplot::ggbetweenstats, args_list))
+                plot <- private$.tryPlot(withBaseFormulaChar(do.call(ggstatsplot::ggbetweenstats, args_list)))
 
                 # Attach the subtitle to the FINISHED plot rather than passing it
                 # through do.call(). The subtitle is a plotmath language object:
@@ -1262,7 +1293,7 @@ jjbetweenstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                         if (!is.null(sub_expr))
                             plot_args$results.subtitle <- FALSE
 
-                        pp <- private$.tryPlot(do.call(ggstatsplot::ggbetweenstats, plot_args))
+                        pp <- private$.tryPlot(withBaseFormulaChar(do.call(ggstatsplot::ggbetweenstats, plot_args)))
                         if (!is.null(sub_expr) && !is.null(pp))
                             pp <- pp + ggplot2::labs(subtitle = sub_expr)
                         pp
@@ -1364,7 +1395,7 @@ jjbetweenstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     grouped_args$boxplot.args <- opts$boxplotargs
                 }
                 
-                plot2 <- private$.tryPlot(do.call(ggstatsplot::grouped_ggbetweenstats, grouped_args))
+                plot2 <- private$.tryPlot(withBaseFormulaChar(do.call(ggstatsplot::grouped_ggbetweenstats, grouped_args)))
             }
 
             # Multiple dependent variables grouped analysis ----
@@ -1429,7 +1460,7 @@ jjbetweenstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                             grouped_multi_args$boxplot.args <- opts$boxplotargs
                         }
                         
-                        private$.tryPlot(do.call(ggstatsplot::grouped_ggbetweenstats, grouped_multi_args))
+                        private$.tryPlot(withBaseFormulaChar(do.call(ggstatsplot::grouped_ggbetweenstats, grouped_multi_args)))
                     }
                 )
 

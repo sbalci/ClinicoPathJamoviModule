@@ -2,9 +2,7 @@
 
 #' @import jmvcore
 #' @import R6
-#' @import lme4
-#' @import nlme
-#' @import performance
+#' @importFrom performance icc
 #' @importFrom glmmTMB glmmTMB nbinom2
 #' @importFrom stats formula terms model.matrix model.frame na.omit
 #' @importFrom utils capture.output
@@ -331,7 +329,7 @@ hierarchicalpathologyClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6:
 
                 if (model_type == "linear") {
                     # For linear mixed models
-                    var_comp <- as.data.frame(VarCorr(model))
+                    var_comp <- as.data.frame(lme4::VarCorr(model))
 
                     # Calculate ICCs
                     total_var <- sum(var_comp$vcov, na.rm = TRUE)
@@ -523,7 +521,7 @@ hierarchicalpathologyClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6:
             table <- self$results$randomeffects
 
             # Random effects summary
-            random_summary <- VarCorr(model)
+            random_summary <- lme4::VarCorr(model)
 
             if (inherits(model, "lmerMod")) {
                 # Linear mixed model random effects

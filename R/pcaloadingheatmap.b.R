@@ -5,7 +5,7 @@
 #' @import ggplot2
 #' @rawNamespace import(dplyr, except = c(as_data_frame, groups, select, union))
 #' @import tidyr
-#' @import stats
+#' @importFrom stats prcomp setNames
 #'
 #' @return An \code{R6} class generator object for the \code{pcaloadingheatmapClass} backend; used internally by the jamovi analysis wrapper and not called directly.
 
@@ -382,7 +382,7 @@ pcaloadingheatmapClass <- if (requireNamespace("jmvcore")) {
 
                 # Create heatmap
                 h_plot <- load_df_long %>%
-                    filter(.data$component %in% paste("PC", ndim, sep = "")) %>%
+                    dplyr::filter(.data$component %in% paste("PC", ndim, sep = "")) %>%
                     ggplot(aes(.data$component, .data$Variables, fill = .data$loading)) +
                     geom_raster() +
                     scale_fill_gradient2(
@@ -443,7 +443,7 @@ pcaloadingheatmapClass <- if (requireNamespace("jmvcore")) {
 
                 cutoff_df <- load_df %>%
                     pivot_longer(-Variables, names_to = "component", values_to = "loading") %>%
-                    filter(.data$component %in% paste("PC", ndim, sep = "")) %>%
+                    dplyr::filter(.data$component %in% paste("PC", ndim, sep = "")) %>%
                     group_by(.data$component) %>%
                     summarise(count = n()) %>%
                     mutate(
@@ -453,7 +453,7 @@ pcaloadingheatmapClass <- if (requireNamespace("jmvcore")) {
 
                 load_df_long <- load_df %>%
                     pivot_longer(-Variables, names_to = "component", values_to = "loading") %>%
-                    filter(.data$component %in% paste("PC", ndim, sep = "")) %>%
+                    dplyr::filter(.data$component %in% paste("PC", ndim, sep = "")) %>%
                     left_join(cutoff_df, by = "component") %>%
                     group_by(.data$component) %>%
                     mutate(

@@ -3009,9 +3009,6 @@ out-of-scope findings from the same audit, deferred for separate work.
 # release-review-function prompt
 
 
-
-/release-review-function raincloud
-/release-review-function advancedraincloud
 /release-review-function lollipop
 /release-review-function jjbarstats
 /release-review-function jjsegmentedtotalbar
@@ -3022,8 +3019,7 @@ out-of-scope findings from the same audit, deferred for separate work.
 
 - I will release jjstatsplot module.
 - review vignettes in jjstatsplot repository. check if their content are up to date. if not, update them. pay attention to the new options added in recent releases. If there are mentions of not yet release functions and features, note that they will be released in the future.
-- update NEWS.md 
-
+- update NEWS.md
 
 /release-review-function tableone
 /release-review-function summarydata
@@ -3042,15 +3038,12 @@ out-of-scope findings from the same audit, deferred for separate work.
 
 - I will release ClinicoPathDescriptives module.
 - review vignettes in ClinicoPathDescriptives repository. check if their content are up to date. if not, update them. pay attention to the new options added in recent releases. If there are mentions of not yet release functions and features, note that they will be released in the future.
-- update NEWS.md 
+- update NEWS.md
 
-
-for all: 
+for all:
 Rscript scripts/build_site.R
 devtools check
 chector
-
-
 
 You are an expert R package and jamovi module developer with advanced expertise in biostatistics, clinical research, pathology, and clinician-facing software.
 
@@ -3406,21 +3399,21 @@ API and will fail `R CMD check --run-donttest` until `prepare()` + `document()` 
 - [ ] [jjbetweenstats] Findings verified but NOT fixed in the release-review pass.
       A 63-agent adversarial review confirmed 50 findings; the critical one and all 14 majors
       are fixed. These survived verification and remain open, roughly in priority order:
-        * padjustmethod defaults to "holm", which double-corrects the Games-Howell pairwise
+        *padjustmethod defaults to "holm", which double-corrects the Games-Howell pairwise
           p-values ggstatsplot produces (they are already family-wise adjusted).
         * The ggpubr companion panel calls `ggpubr::stat_compare_means()` bare, so it always
           runs a nonparametric test regardless of Type of Statistic, and ignores equal
           variances, the p-adjustment and the confidence level. It also dies on variable names
           containing a space or parenthesis (bare strings where the main path uses rlang::sym).
-        * The grouped (Split By) plot drops Title / X-Title / Y-Title and never calls
+        *The grouped (Split By) plot drops Title / X-Title / Y-Title and never calls
           .applyTheme, so the colourblind-safe palette is not applied there.
         * plotwidth / plotheight are not applied to either ggpubr panel; plot2's canvas is
           sized from factor levels that no longer carry data; with 2+ dependent variables the
           Split By height ignores the number of split levels.
-        * `clearWith` for ggpubrPlot omits grvar even though grvar changes the rows analysed.
+        *`clearWith` for ggpubrPlot omits grvar even though grvar changes the rows analysed.
         * Listwise deletion across endpoints silently shrinks the sample for complete
           endpoints; the exclusion note does not say the deletion was joint.
-        * Degenerate groups (n = 1, or all values identical) render a stats-free plot with no
+        *Degenerate groups (n = 1, or all values identical) render a stats-free plot with no
           message; `dep = character(0)` errors unactionably on the programmatic path.
         * Assumption checking is skipped entirely for the bayes and robust types.
         * asSource() emits a stray blank line; a dead `messages = FALSE` is threaded through
@@ -3433,7 +3426,7 @@ API and will fail `R CMD check --run-donttest` until `prepare()` + `document()` 
       Three release reviews on 2026-08-11/12 found the same root cause producing three different
       user-visible failures, because `is.na()` is TRUE for NaN but FALSE for Inf and
       `complete.cases()`/`jmvcore::naOmit()` follow `is.na()`:
-        * hullplot   - Inf SURVIVED into the group statistics ("Inf +/- NaN") and made the
+        *hullplot   - Inf SURVIVED into the group statistics ("Inf +/- NaN") and made the
                        centroid distance infinite, flipping the copy-ready manuscript verdict to
                        "well-separated" for groups that completely overlap. FIXED (is.finite filter
                        + separate disclosure).
@@ -3441,7 +3434,7 @@ API and will fail `R CMD check --run-donttest` until `prepare()` + `document()` 
                        "missing value where TRUE/FALSE needed", no message), and once unblocked
                        reached the paired test and rendered "t(77) = NA, p = NA" beneath a panel
                        reassuring the user that all 78 subjects had been retained. FIXED.
-        * jjbetweenstats - not reached in that review; unverified either way.
+        *jjbetweenstats - not reached in that review; unverified either way.
       The pattern to grep for is any filter written as `!is.na(x)` / `complete.cases()` on a
       numeric column that then feeds sd(), mean(), a test, or an `if (...)` comparison:
         grep -rn "complete.cases\|naOmit\|!is\.na(" R/*.b.R | wc -l   # ~200 call sites
@@ -3475,13 +3468,21 @@ API and will fail `R CMD check --run-donttest` until `prepare()` + `document()` 
       returns `subtitle = NULL`: the user ticks "Statistical results in plot" and gets a figure
       with no statistics and no warning. Measured: `ggbetweenstats` 3 groups -> NULL subtitle;
       2 groups and `ggwithinstats` are unaffected.
-      Fixed in `R/jjdotplotstats.b.R` via `.withBaseFormulaChar()` (swaps the S3 method for the
-      duration of the call, restores on exit including on error; covered by
-      `test-jjdotplotstats-release-review.R`).
-      **Still affected: `jjbetweenstats` (its effect-size takeover is inert for 3+ groups for
-      exactly this reason), `statsplot2`, `jextractggstats`, `crosstable`.** Apply the same
-      helper. `ihcheterogeneity` already routes around it with `aov()` and needs nothing.
-      Found 2026-08-12 during the jjdotplotstats release review.
+      RESOLVED 2026-08-12. One shared internal helper, `withBaseFormulaChar()` in
+      `R/ggstatsplot_utils.R` (`@noRd`, so no prepare()/document() needed), applied to
+      `jjbetweenstats` (6 call sites), `jjdotplotstats` (4), `statsplot2` (2) and
+      `jextractggstats` (1). Measured restorations: jjbetweenstats 3-group effect size now
+      moves (eta2p 0.39 vs omega2p 0.37) and `varequal` now switches Welch F(2,77)=24.99 ->
+      Fisher F(2,117)=24.65 - both were previously inert. `crosstable` has no such call site
+      and `ihcheterogeneity` already routes around it with `aov()`; neither needed changing.
+      The helper is registered in `_updateModules_config.yaml` for jjstatsplot and JamoviTest,
+      and `check_shared_helper_distribution()` now fails the build if a shipped .b.R calls a
+      helper whose file is not distributed.
+
+      NOTE for whoever hits this next: the blast radius is NOT limited to ggstatsplot. Any
+      loaded function calling `stats::oneway.test` inherits it - `tableone::CreateTableOne`
+      with a `strata` argument returns p = NA instead of p < 0.001. `R/tableone.b.R` is safe
+      only because it never passes `strata`.
 
 - [ ] **[DESIGN/jjdotplotstats] "Dot Chart" draws a box-violin plot, duplicating jjbetweenstats.**
       `R/jjdotplotstats.b.R` calls `ggstatsplot::ggbetweenstats`, whose layers are measured as
@@ -3509,3 +3510,46 @@ API and will fail `R CMD check --run-donttest` until `prepare()` + `document()` 
       large commented-out `clinicalpreset` option block, and `tests/testthat/test-jjdotplotstats-correctness.R`
       used to test it via `tryCatch(error = NULL)` so the test could only ever fail. Test now
       pins the real contract; the commented block should be deleted or finished.
+
+- [ ] **[MODERATE/statsplot2] 45 pre-existing test failures, none from the shield.**
+      Measured identical before and after the withBaseFormulaChar change (118 pass / 14 fail /
+      31 err both ways), so they are untouched pre-existing debt: tests pass options the
+      analysis does not have (`plotTitle`, `xlab`, `ylab`), reference a missing
+      `statsplot2_repeated` fixture, and hit the `expect_s3_class(..., info=)` misuse that
+      aborts a whole test_that block (the same bug that hid 94 assertions in jjdotplotstats).
+      statsplot2 has never had a release review; worth one.
+      Found 2026-08-12.
+
+- [ ] **[MAJOR/jextractggstats] 35 of 43 assertions fail: the suite is red, not crashing.**
+      Measured 2026-08-12 in a batch run: `pass=8 fail=31 err=4`. (An earlier note here claimed
+      the suite segfaulted R - that was WRONG. Standalone runs produced 52 bytes of output and
+      no tally because of how they were backgrounded, not because the interpreter died; the
+      same file completes normally when run in-process with the other suites, and a direct
+      call to the analysis runs fine.)
+      The failures are almost certainly downstream of the `extract_stats(type = ...)` defect
+      below - the analysis returns no extracted components, so nearly everything asserted
+      about them fails. Fix that first, then re-measure before triaging what remains.
+      jextractggstats is `menuGroup: JJStatsPlotD` (umbrella/dev only, absent from every
+      submodule), so nothing ships on it today.
+
+- [ ] **[CRITICAL/jextractggstats] The analysis extracts NOTHING: `extract_stats()` has no `type` argument.**
+      `R/jextractggstats.b.R` calls it four times as
+      `ggstatsplot::extract_stats(ggstats_result, type = "subtitle" | "caption" |
+      "pairwise_comparisons" | "descriptive")` (lines 243, 251, 259, 267). In ggstatsplot
+      1.0.0 the signature is `extract_stats(p)` - a single argument - so every call raises
+      `unused argument (type = "subtitle")`. The surrounding tryCatch swallows it into
+      `warning("Error extracting components: ...")`, so the analysis whose entire purpose is
+      extracting ggstatsplot components silently produces none. Measured 2026-08-12:
+      `names(formals(ggstatsplot::extract_stats))` is exactly `p`, and running the analysis
+      emits `Error extracting components: unused argument (type = "subtitle")`.
+
+      Fix: call it ONCE and index the returned named list, which already carries every piece -
+      `s <- ggstatsplot::extract_stats(ggstats_result)` then `s$subtitle_data`,
+      `s$caption_data`, `s$pairwise_comparisons_data`, `s$descriptive_data`
+      (also available: `one_sample_data`, `tidy_data`, `glance_data`).
+      Same family as the ggstatsplot 1.0.0 removals that made `effsize.type`/`var.equal`
+      inert elsewhere - arguments absorbed by `...` or rejected outright after the API change.
+      NOTE: the suite is currently 8 pass / 31 fail / 4 err (see the entry above), most of it
+      plausibly caused by this very defect - so fixing this should be measurable as a large
+      swing in that tally.
+      PRE-EXISTING - unrelated to the withBaseFormulaChar shield added the same day.

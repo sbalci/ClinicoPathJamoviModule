@@ -2185,6 +2185,24 @@ if (!TEST && (modes$check_module_dependencies %||% TRUE)) {
   }
 }
 
+# Shared helper distribution check ----
+# Sibling of the dependency check above, for the umbrella's OWN helpers rather than
+# external packages. A shipped .b.R that calls a helper whose defining file is not in
+# that module's `r_files` fails only in the SHIPPED module, at runtime, with
+# "could not find function" - the umbrella keeps working, so nothing here notices.
+if (!TEST && (modes$check_module_dependencies %||% TRUE)) {
+  helper_specs <- list()
+  if (jjstatsplot_module) helper_specs$jjstatsplot <- list(directory = jjstatsplot_dir)
+  if (meddecide_module) helper_specs$meddecide <- list(directory = meddecide_dir)
+  if (jsurvival_module) helper_specs$jsurvival <- list(directory = jsurvival_dir)
+  if (ClinicoPathDescriptives_module) helper_specs$ClinicoPathDescriptives <- list(directory = ClinicoPathDescriptives_dir)
+  if (OncoPath_module) helper_specs$OncoPath <- list(directory = OncoPath_dir)
+  if (length(helper_specs) > 0) {
+    check_shared_helper_distribution(helper_specs, main_repo_dir = main_repo_dir,
+                                     fail_on_error = modes$deps_fail_on_error %||% TRUE)
+  }
+}
+
 # --- Prepare, document, and install modules ----
 if (!extended) {
   jmvtools::prepare(main_repo_dir)

@@ -141,7 +141,6 @@
 #' @rawNamespace import(dplyr, except = c(as_data_frame, groups, select, union))
 #' @importFrom magrittr %>%
 #' @importFrom glue glue
-#' @import scales
 #' @importFrom rlang sym
 #' @importFrom digest digest
 jwaffleClass <- if (requireNamespace('jmvcore')) R6::R6Class(

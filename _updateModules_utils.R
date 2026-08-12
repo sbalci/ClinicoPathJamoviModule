@@ -1477,6 +1477,80 @@ copy_module_tests <- function(module_names, source_test_dir, dest_test_dir,
   unique(copied)
 }
 
+
+# ---------------------------------------------------------------------------
+# Shared-helper distribution check
+#
+# A submodule's .b.R files are copied from the umbrella, but the SHARED helper
+# files they call are copied only if they are listed in that module's `r_files`.
+# Miss one and nothing fails here: the umbrella keeps working (the helper is in
+# its namespace), the copy succeeds, and the breakage appears only in the
+# SHIPPED module, at runtime, as "could not find function <helper>" on every
+# analysis that touches it.
+#
+# Real instance: R/ggstatsplot_utils.R defines withBaseFormulaChar(), called by
+# jjbetweenstats, jjdotplotstats and statsplot2 - all three ship to jjstatsplot,
+# whose r_files listed only utils.R and arcdiagram_vendored.R.
+#
+# Candidates are restricted to functions DEFINED in the umbrella's own non-.b.R
+# R files, so package functions and base R can never be flagged.
+check_shared_helper_distribution <- function(module_specs, main_repo_dir = ".",
+                                             fail_on_error = TRUE) {
+  cat("\U0001F517 Checking shared helper distribution...\n")
+
+  # Anchored at column 0 on purpose. Allowing leading whitespace picks up every
+  # nested closure - `fn = function()` inside a list(), `warning = function(w)` as
+  # a tryCatch handler - and then flags calls to `fn()` or `warning()` as missing
+  # package helpers. Top-level definitions are the only ones that land in a
+  # namespace, which is exactly what this check is about.
+  defs_of <- function(path) {
+    txt <- tryCatch(readLines(path, warn = FALSE), error = function(e) character(0))
+    m <- regmatches(txt, regexpr("^([A-Za-z.][A-Za-z0-9._]*)\\s*(<-|=)\\s*function", txt))
+    sub("\\s*(<-|=)\\s*function.*$", "", trimws(m))
+  }
+
+  umbrella_r <- list.files(file.path(main_repo_dir, "R"), pattern = "\\.[Rr]$")
+  umbrella_r <- umbrella_r[!grepl("\\.(b|h)\\.R$", umbrella_r)]
+  helper_file <- list()          # function name -> defining file
+  for (f in umbrella_r)
+    for (d in defs_of(file.path(main_repo_dir, "R", f)))
+      if (nzchar(d)) helper_file[[d]] <- f
+
+  problems <- list()
+  for (nm in names(module_specs)) {
+    spec <- module_specs[[nm]]
+    mod_dir <- spec$directory
+    if (is.null(mod_dir) || !dir.exists(file.path(mod_dir, "R"))) next
+
+    shipped_r <- list.files(file.path(mod_dir, "R"), pattern = "\\.[Rr]$")
+    # Everything the shipped module can actually resolve.
+    available <- unlist(lapply(shipped_r, function(f) defs_of(file.path(mod_dir, "R", f))))
+
+    for (b in shipped_r[grepl("\\.b\\.R$", shipped_r)]) {
+      txt <- paste(readLines(file.path(mod_dir, "R", b), warn = FALSE), collapse = "\n")
+      for (h in names(helper_file)) {
+        if (h %in% available) next
+        # bare call `helper(` but not `pkg::helper(` and not `$helper(`
+        if (grepl(paste0("(^|[^A-Za-z0-9._$:])", h, "\\s*\\("), txt))
+          problems[[length(problems) + 1]] <- list(
+            module = nm, caller = b, fn = h, file = helper_file[[h]])
+      }
+    }
+  }
+
+  if (length(problems) == 0) {
+    cat("  ✅ Every shared helper called by a shipped .b.R is distributed\n")
+    return(invisible(TRUE))
+  }
+  for (p in problems)
+    cat("  ❌ ", p$module, ": ", p$caller, " calls ", p$fn, "() but ",
+        p$file, " is not in its r_files\n", sep = "")
+  if (fail_on_error)
+    stop("❌ Shared helper distribution failed: add the listed file(s) to the ",
+         "module's r_files in _updateModules_config.yaml")
+  invisible(FALSE)
+}
+
 message("✅ Module utilities loaded successfully")
 
 # ---------------------------------------------------------------------------

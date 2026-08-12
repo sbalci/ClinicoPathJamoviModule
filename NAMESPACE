@@ -277,6 +277,7 @@ export(jjbarstats)
 export(jjbetweenstats)
 export(jjcoefstats)
 export(jjcorrmat)
+export(jjdotchart)
 export(jjdotplotstats)
 export(jjhistostats)
 export(jjoncoplot)
@@ -532,16 +533,13 @@ export(waterfallrecist)
 export(weightedlogrank)
 export(winratio)
 export(winratioClass)
-import(GPArotation)
 import(R6)
 import(RColorBrewer)
-import(caret)
 import(dplyr, except = c(as_data_frame, groups, select, union))
 import(dplyr, except = c(as_data_frame, groups, select, union))
 
 import(eurostat)
 import(flexsurv)
-import(frailtypack)
 import(geepack)
 import(ggfortify)
 import(ggplot2)
@@ -551,38 +549,23 @@ import(ggstatsplot)
 import(giscoR)
 import(glue)
 import(grDevices)
-import(igraph, except = c(compose, crossing, is_named, simplify))
 import(jmvcore)
-import(lme4)
-import(lubridate)
 import(magrittr, except = c(extract, set_names))
 import(magrittr, except = c(extract, set_names))
 
 import(mlr3)
 import(mlr3learners)
-import(mlr3measures)
 import(mlr3pipelines)
 import(mlr3viz)
 import(moments)
-import(nlme)
-import(pROC)
 import(patchwork)
-import(performance)
 import(pivottabler)
-import(pracma)
-import(psych)
-import(purrr, except = c(discard, flatten, flatten_chr, flatten_dbl, flatten_int, flatten_lgl, flatten_raw, invoke, splice))
-import(reReg)
-import(riskRegression)
 import(rlang)
-import(scales)
 import(sf)
-import(stats)
 import(survival)
 import(survminer)
 import(tidyplots)
 import(tidyr)
-import(timeROC)
 import(timereg)
 import(waffle)
 importFrom(ComplexUpset,intersection_size)
@@ -592,13 +575,9 @@ importFrom(DataExplorer,
   dummify,
   group_category,
   introduce,
-  plot_bar,
   plot_boxplot,
-  plot_correlation,
-  plot_histogram,
   plot_intro,
   plot_missing,
-  plot_prcomp,
   plot_scatterplot,
   profile_missing,
   set_missing
@@ -672,10 +651,6 @@ importFrom(caret,
   confusionMatrix,
   createDataPartition,
   createFolds,
-  negPredValue,
-  posPredValue,
-  sensitivity,
-  specificity,
   train,
   trainControl,
   varImp
@@ -770,7 +745,11 @@ importFrom(forcats,
   as_factor,
   fct_relevel
 )
-importFrom(frailtypack,frailtyPenal)
+importFrom(frailtypack,
+  frailtyPenal,
+  hazard,
+  terminal
+)
 importFrom(geepack,geeglm)
 importFrom(ggVennDiagram,
   Venn,
@@ -935,7 +914,6 @@ importFrom(grafify,
   plot_density,
   plot_dotbox,
   plot_dotviolin,
-  plot_histogram,
   plot_scatterbox,
   plot_scatterviolin,
   plot_xy_CatGroup,
@@ -1046,6 +1024,13 @@ importFrom(icenReg,
   ic_par,
   ic_sp
 )
+importFrom(igraph,
+  betweenness,
+  blocks,
+  closeness,
+  is_connected,
+  max_degree
+)
 importFrom(interval,icfit)
 importFrom(irr,
   agree,
@@ -1136,7 +1121,10 @@ importFrom(pec,
   calPlot,
   pec
 )
-importFrom(performance,check_outliers)
+importFrom(performance,
+  check_outliers,
+  icc
+)
 importFrom(plotly,
   as_widget,
   ggplotly,
@@ -1185,9 +1173,7 @@ importFrom(riskRegression,Score)
 importFrom(rlang,
   "!!!",
   "!!",
-  "%||%",
   .data,
-  `%||%`,
   sym,
   syms
 )
@@ -1214,7 +1200,8 @@ importFrom(scales,
   hue_pal,
   label_number,
   percent,
-  percent_format
+  percent_format,
+  pvalue
 )
 importFrom(splines,ns)
 importFrom(stats,
@@ -1291,6 +1278,7 @@ importFrom(stats,
   rnorm,
   runif,
   sd,
+  setNames,
   shapiro.test,
   smooth.spline,
   spline,

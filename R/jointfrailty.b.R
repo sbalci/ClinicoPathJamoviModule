@@ -1,7 +1,7 @@
 #' @title Joint Frailty Models for Recurrent Events
 #' @importFrom R6 R6Class
 #' @import jmvcore
-#' @import frailtypack
+#' @importFrom frailtypack hazard terminal
 #' @import survival
 #' @importFrom ggplot2 ggplot aes geom_line geom_step geom_point geom_histogram geom_density labs theme_minimal facet_wrap
 #' @export

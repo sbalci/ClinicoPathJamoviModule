@@ -1,4 +1,4 @@
-#' @title Dot Chart
+#' @title Horizontal Box-Violin Comparison
 #' @importFrom R6 R6Class
 #' @import jmvcore
 #' @import glue
@@ -260,21 +260,9 @@ jjdotplotstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         #
         # The S3 methods table is an ordinary unlocked environment, so swap the
         # method for the duration of the call and put it back on exit.
+        # Single implementation lives in R/ggstatsplot_utils.R.
         .withBaseFormulaChar = function(expr) {
-            tbl <- tryCatch(get(".__S3MethodsTable__.", envir = asNamespace("base")),
-                            error = function(e) NULL)
-            shield <- !is.null(tbl) &&
-                exists("as.character.formula", envir = tbl, inherits = FALSE) &&
-                !environmentIsLocked(tbl) &&
-                !isTRUE(tryCatch(bindingIsLocked("as.character.formula", tbl),
-                                 error = function(e) TRUE))
-            if (shield) {
-                old <- get("as.character.formula", envir = tbl, inherits = FALSE)
-                assign("as.character.formula",
-                       function(x, ...) as.character(unclass(x)), envir = tbl)
-                on.exit(assign("as.character.formula", old, envir = tbl), add = TRUE)
-            }
-            force(expr)
+            withBaseFormulaChar(expr)
         },
 
         # How many group levels actually carry data.
@@ -727,7 +715,13 @@ jjdotplotstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 "<br>Welcome to ClinicoPath
                 <br><br>
                 This tool compares a continuous variable across groups and draws
-                the comparison as a box-violin figure with the individual points shown.
+                the comparison horizontally as a box-violin figure with the individual
+                points shown.
+                <br><br>
+                Looking for a Cleveland dot chart - one summary point per group, tested
+                against a reference value? Use <b>Dot Chart (Summary vs Reference Value)</b>
+                instead. This analysis uses every observation and compares the groups
+                with each other.
                 <br><br>
                 This function uses ggplot2 and ggstatsplot packages. See documentations for <a href = 'https://www.indrapatil.com/ggstatsplot/reference/ggbetweenstats.html' target='_blank'>ggbetweenstats</a> and <a href = 'https://www.indrapatil.com/ggstatsplot/reference/grouped_ggbetweenstats.html' target='_blank'>grouped_ggbetweenstats</a>.
                 <br>

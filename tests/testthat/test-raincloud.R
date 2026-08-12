@@ -3,30 +3,19 @@
 
 library(testthat)
 
-# Helper function to get a clean analysis object for testing private methods
+# Helper function to get a clean analysis object for testing private methods.
+#
+# This used to build a bare jmvcore::Options$new() and poke `..<name>` private
+# fields into it. Those fields do not exist on a generic Options object, so NO
+# option was ever actually set - every test below silently ran on whatever
+# self$options fell back to - and `raincloudClass` was referenced unqualified,
+# which is not visible under devtools::load_all(export_all = FALSE), so the whole
+# file errored out before reaching a single assertion. Use the generated
+# raincloudOptions constructor, which validates and applies the options for real.
 get_raincloud_analysis <- function(data, dep, group, options = list()) {
-  # Set default options and merge with provided ones
-  all_options <- c(
-    options,
-    list(
-      dep_var = dep,
-      group_var = group
-    )
-  )
-  
-  # Create jmvcore options object
-  opts <- jmvcore::Options$new()
-  for (name in names(all_options)) {
-    # This is a bit of a hack to set private fields in the Options object
-    private_field_name <- paste0("..", name)
-    if (exists(private_field_name, envir = opts$.__enclos_env__$private)) {
-        opts$.__enclos_env__$private[[private_field_name]] <- all_options[[name]]
-    }
-  }
-
-  # Instantiate the class
-  analysis <- raincloudClass$new(options = opts, data = data)
-  return(analysis)
+  opts <- do.call(ClinicoPath:::raincloudOptions$new,
+                  utils::modifyList(list(dep_var = dep, group_var = group), options))
+  ClinicoPath:::raincloudClass$new(options = opts, data = data)
 }
 
 
@@ -98,8 +87,10 @@ describe("Raincloud Normality Testing", {
     analysis <- get_raincloud_analysis(test_data, "value", "category")
     normality_html <- analysis$.__enclos_env__$private$.generate_normality_tests(test_data, "value", "category")
     
-    # Expect p > 0.05 for normal data
-    expect_true(grepl("<td>Normal</td>", normality_html))
+    # Release review: p > 0.05 no longer reads "Normal" - Shapiro-Wilk can only
+    # fail to reject, so the verdict is now an absence of evidence.
+    expect_true(grepl("<td>No evidence against normality</td>", normality_html))
+    expect_false(grepl("<td>Normal</td>", normality_html))
   })
 
   test_that(".generate_normality_tests works for non-normal data", {
@@ -112,8 +103,8 @@ describe("Raincloud Normality Testing", {
     analysis <- get_raincloud_analysis(test_data, "value", "category")
     normality_html <- analysis$.__enclos_env__$private$.generate_normality_tests(test_data, "value", "category")
     
-    # Expect p < 0.05 for non-normal data
-    expect_true(grepl("<td>Non-normal</td>", normality_html))
+    # Release review: "Non-normal" is now "Departs from normality".
+    expect_true(grepl("<td>Departs from normality</td>", normality_html))
   })
 })
 
@@ -134,9 +125,12 @@ describe("Raincloud Group Comparison", {
     
     comparison_html <- analysis$.__enclos_env__$private$.generate_group_comparisons(test_data, "value", "category")
     
-    # Check that "t-test" was chosen and the result is significant
-    expect_true(grepl("<strong>Test Method:</strong></td><td.+>t-test</td>", comparison_html))
-    expect_true(grepl("<strong>Result:</strong></td><td.+>Highly significant", comparison_html))
+    # Release review: t.test() is Welch's by default, so the label now says so,
+    # and the Result row reports the p-value threshold instead of the
+    # editorialising "Highly significant (***)".
+    expect_true(grepl("<strong>Test Method:</strong></td><td.+>Welch's t-test</td>", comparison_html))
+    expect_true(grepl("<strong>Result:</strong></td><td.+>p &lt; 0.001", comparison_html))
+    expect_false(grepl("Highly significant", comparison_html))
   })
 
   test_that("auto method chooses Wilcoxon for two non-normal groups", {
@@ -152,8 +146,8 @@ describe("Raincloud Group Comparison", {
     
     comparison_html <- analysis$.__enclos_env__$private$.generate_group_comparisons(test_data, "value", "category")
     
-    # Check that "Wilcoxon" was chosen
-    expect_true(grepl("<strong>Test Method:</strong></td><td.+>Wilcoxon</td>", comparison_html))
+    # Release review: label is now the full test name.
+    expect_true(grepl("<strong>Test Method:</strong></td><td.+>Wilcoxon rank-sum test</td>", comparison_html))
   })
 
   test_that("auto method chooses ANOVA for three normal groups", {
@@ -169,8 +163,11 @@ describe("Raincloud Group Comparison", {
     
     comparison_html <- analysis$.__enclos_env__$private$.generate_group_comparisons(test_data, "value", "category")
     
-    # Check that "ANOVA" was chosen
-    expect_true(grepl("<strong>Test Method:</strong></td><td.+>ANOVA</td>", comparison_html))
+    # Release review: AUTO now checks equal variances too, so it picks ordinary
+    # one-way ANOVA only when Bartlett does not reject; here the three groups
+    # share sd = 2, so ordinary ANOVA is still the right answer.
+    expect_true(grepl("<strong>Test Method:</strong></td><td.+>one-way ANOVA</td>", comparison_html))
+    expect_gt(bartlett.test(test_data$value, test_data$category)$p.value, 0.05)
   })
 
   test_that("auto method chooses Kruskal-Wallis for three non-normal groups", {
@@ -186,8 +183,8 @@ describe("Raincloud Group Comparison", {
     
     comparison_html <- analysis$.__enclos_env__$private$.generate_group_comparisons(test_data, "value", "category")
     
-    # Check that "Kruskal-Wallis" was chosen
-    expect_true(grepl("<strong>Test Method:</strong></td><td.+>Kruskal-Wallis</td>", comparison_html))
+    # Release review: label is now the full test name.
+    expect_true(grepl("<strong>Test Method:</strong></td><td.+>Kruskal-Wallis test</td>", comparison_html))
   })
 
   test_that("t-test calculation is correct", {
@@ -207,11 +204,41 @@ describe("Raincloud Group Comparison", {
     
     comparison_html <- analysis$.__enclos_env__$private$.generate_group_comparisons(test_data, "value", "category")
     
-    # Extract p-value from HTML and compare
-    p_value_from_html_str <- regmatches(comparison_html, regexpr('P-value:</strong></td><td[^>]*>([0-9.]+)', comparison_html))
-    p_value_from_html <- as.numeric(sub('<[^>]+>', '', sub('P-value:</strong></td><td[^>]*>', '', p_value_from_html_str)))
-
-    expect_equal(p_value_from_html, round(manual_test$p.value, 4))
+    # Release review: p-values now print to 3 decimals (and as the entity
+    # "&lt; 0.001" below 0.001) instead of sprintf("%.4f"), which rendered a
+    # vanishing p as the impossible "0.0000".
+    #
+    # This data gives p ~ 0.0004, i.e. BELOW the 3-decimal floor, so there is no
+    # number to parse out of the cell - asserting numeric equality against
+    # formatC(p, digits = 3) == "0.000" contradicted the very contract the
+    # release review introduced. Assert the contract instead.
+    expect_lt(manual_test$p.value, 0.001)
+    p_cell <- regmatches(comparison_html,
+                         regexpr("P-value:</strong></td><td[^>]*>[^<]*", comparison_html))
+    expect_true(grepl("&lt; 0.001", p_cell, fixed = TRUE))
+    expect_false(grepl("0.000", p_cell, fixed = TRUE))
     expect_true(grepl(paste0("t = ", round(manual_test$statistic, 4)), comparison_html))
+  })
+
+  test_that("a p-value above 0.001 is printed as the t-test's own value to 3 decimals", {
+    skip_if_not_installed("jmvcore")
+
+    set.seed(6)
+    test_data <- data.frame(
+      value = c(rnorm(20, 0), rnorm(20, 0.7)),
+      category = factor(rep(c("A", "B"), each = 20))
+    )
+    manual_test <- t.test(value ~ category, data = test_data)
+    expect_gt(manual_test$p.value, 0.001)
+
+    analysis <- get_raincloud_analysis(test_data, "value", "category",
+                                     options = list(comparison_method = "ttest"))
+    comparison_html <- analysis$.__enclos_env__$private$.generate_group_comparisons(test_data, "value", "category")
+
+    p_cell <- regmatches(comparison_html,
+                         regexpr("P-value:</strong></td><td[^>]*>[^<]*", comparison_html))
+    p_value_from_html <- as.numeric(sub("P-value:</strong></td><td[^>]*>", "", p_cell))
+    expect_equal(p_value_from_html,
+                 as.numeric(formatC(manual_test$p.value, format = "f", digits = 3)))
   })
 })

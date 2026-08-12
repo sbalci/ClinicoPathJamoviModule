@@ -1,0 +1,87 @@
+---
+name:  jjdotchart
+title: Dot Chart (Summary vs Reference Value)
+jrs:   '1.1'
+
+clearWith:
+    - dep
+    - group
+    - grvar
+    - testvalue
+    - typestatistics
+    - conflevel
+    - k
+    - resultssubtitle
+    - showSummaryTable
+    - centralityplotting
+    - centralitytype
+    - bfmessage
+    - originaltheme
+    - mytitle
+    - xtitle
+    - ytitle
+    - plotwidth
+    - plotheight
+
+items:
+
+    - name: todo
+      title: To Do
+      type: Html
+
+    - name: notices
+      title: Notices
+      type: Html
+
+    - name: summary
+      title: Group Summaries (one row per plotted point)
+      type: Table
+      visible: (showSummaryTable)
+      rows: 0
+      columns:
+          - name: grp
+            title: Group
+            type: text
+          - name: n
+            title: 'N obs'
+            type: integer
+          - name: value
+            title: Summary
+            type: number
+          - name: sd
+            title: SD
+            type: number
+          - name: ci_low
+            title: Lower
+            type: number
+          - name: ci_high
+            title: Upper
+            type: number
+          - name: vsref
+            title: 'vs Reference'
+            type: number
+
+    - name: plot2
+      title: '`${dep} by {group}, split by {grvar}`'
+      type: Image
+      width:  800
+      height: 450
+      renderFun: .plot2
+      requiresData: true
+      visible: (grvar)
+
+    - name: plot
+      title: '`${dep} by {group}`'
+      type: Image
+      width:  650
+      height: 450
+      renderFun: .plot
+      requiresData: true
+
+refs:
+    - ggplot2
+    - ggstatsplot
+    - statsExpressions
+    - ClinicoPathJamoviModule
+
+...

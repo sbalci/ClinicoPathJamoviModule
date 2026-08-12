@@ -15,9 +15,32 @@
 #'
 #' @param data Raw input data frame
 #' @param options Analysis options list containing variable names and settings
+#' @param additional_vars Optional character vector of further columns the
+#'   analysis needs (multifactorial covariates, the institution variable). They
+#'   are checked for existence and included in the complete-case filter, so a
+#'   covariate with missing values cannot silently drop rows later, inside the
+#'   model fit, where the loss would go unreported.
+#' @param checkpoint_callback Optional zero-argument function called between the
+#'   expensive validation stages so jamovi can stay responsive.
 #' @return List with validated data, warnings, errors, and metadata
 #' @keywords internal
-stagemigration_validateData <- function(data, options) {
+# NOTE: `additional_vars` and `checkpoint_callback` are not new. R/stagemigration.b.R
+# has always passed them, while this signature accepted only (data, options), so
+# every call raised "unused arguments (additional_vars = ..., checkpoint_callback
+# = ...)" and the analysis could not run at all. Implementing them is what the
+# caller intended; dropping them from the call would have discarded the covariate
+# and institution checks the caller carefully assembles.
+#
+# Plain `#` comments, not `#'`: roxygen consumes `#'` lines following a tag as
+# that tag's VALUE, which is what produced "@keywords must be only 1 line long".
+stagemigration_validateData <- function(data, options,
+                                        additional_vars = NULL,
+                                        checkpoint_callback = NULL) {
+    # Tolerate any of NULL / "" / NA in the supplied extras.
+    additional_vars <- unique(additional_vars[
+        !is.null(additional_vars) & !is.na(additional_vars) & nzchar(additional_vars)])
+    .cp <- function() if (is.function(checkpoint_callback))
+        try(checkpoint_callback(), silent = TRUE) else invisible(NULL)
     validation_result <- list(
         data = data,
         valid = FALSE,
@@ -57,7 +80,7 @@ stagemigration_validateData <- function(data, options) {
     }
 
     # Check variables exist in data
-    required_vars <- c(old_stage, new_stage, time_var, event_var)
+    required_vars <- c(old_stage, new_stage, time_var, event_var, additional_vars)
     missing_vars <- required_vars[!required_vars %in% names(data)]
 
     if (length(missing_vars) > 0) {
@@ -156,7 +179,11 @@ stagemigration_validateData <- function(data, options) {
     # =========================================================================
 
     # Check missing data before removal
-    required_for_complete <- c(old_stage, new_stage, time_var, "event_binary")
+    .cp()
+    # Covariates join the complete-case filter here rather than being dropped
+    # later inside coxph(), where the row loss is invisible to the user.
+    required_for_complete <- c(old_stage, new_stage, time_var, "event_binary",
+                               additional_vars)
 
     missing_summary <- list()
     for (var in required_for_complete) {
@@ -185,6 +212,8 @@ stagemigration_validateData <- function(data, options) {
     }
 
     validation_result$metadata$n_after_missing <- nrow(data)
+    validation_result$metadata$additional_vars <- additional_vars
+    .cp()
 
     # Check if enough data remains
     if (nrow(data) < 10) {

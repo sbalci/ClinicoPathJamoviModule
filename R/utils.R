@@ -45,8 +45,16 @@ utils::globalVariables(c(
 #' @return `x` if it is not `NULL`, otherwise `y`.
 #' @keywords internal
 #' @export
-#' @importFrom rlang %||%
-`%||%` <- rlang::`%||%`
+# Defined locally rather than re-exported from rlang. rlang's %||% was deprecated
+# once base R 4.4 gained its own, and taking it from rlang made loading this
+# package depend on that one symbol still being exported: devtools::document()
+# failed here with "object '%||%' is not exported by 'namespace:rlang'", which
+# blocks EVERY regeneration in the module, not just this file. The operator is
+# one line; owning it removes the coupling.
+#
+# Plain `#` comments on purpose - roxygen consumes any `#'` lines after @export
+# as that tag's VALUE, which is the "@export must be only 1 line long" warning.
+`%||%` <- function(x, y) if (is.null(x)) y else x
 
 #' Pipe operator
 #' @name %>%

@@ -112,7 +112,10 @@ jextractggstatsClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cla
             # Create analysis based on type
             result <- tryCatch({
                 if (analysis_type == "between_stats" && "x" %in% names(data)) {
-                    ggstatsplot::ggbetweenstats(
+                    # formula.tools (via logistf) overrides as.character.formula, which breaks
+                    # stats::oneway.test -> Welch's ANOVA. ggstatsplot swallows the error and
+                    # returns a plot with no statistics, so shield the call.
+                    withBaseFormulaChar(ggstatsplot::ggbetweenstats(
                         data = data,
                         x = "x",
                         y = "y",
@@ -126,7 +129,7 @@ jextractggstatsClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cla
                         outlier.tagging = self$options$outlier_tagging,
                         plotgrid.args = list(title = "Statistical Analysis"),
                         return.type = "plot"
-                    )
+                    ))
                 } else if (analysis_type == "within_stats" && "x" %in% names(data)) {
                     # For within-subjects analysis, assume paired data
                     ggstatsplot::ggwithinstats(
@@ -235,47 +238,54 @@ jextractggstatsClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cla
             extracted <- list()
             
             tryCatch({
+                # ggstatsplot::extract_stats() takes only the plot object and returns a named
+                # list of every component at once (it has no `type` argument). Call it once
+                # and index the result.
+                stats_list <- ggstatsplot::extract_stats(ggstats_result)
+
                 # Extract subtitle data (main statistical results)
                 if (extract_components %in% c("all", "subtitle_data")) {
-                    subtitle_data <- ggstatsplot::extract_stats(ggstats_result, type = "subtitle")
+                    subtitle_data <- stats_list$subtitle_data
                     if (!is.null(subtitle_data)) {
                         extracted$subtitle <- subtitle_data
                     }
                 }
-                
+
                 # Extract caption data (additional info)
                 if (extract_components %in% c("all", "caption_data")) {
-                    caption_data <- ggstatsplot::extract_stats(ggstats_result, type = "caption")
+                    caption_data <- stats_list$caption_data
                     if (!is.null(caption_data)) {
                         extracted$caption <- caption_data
                     }
                 }
-                
+
                 # Extract pairwise comparisons
                 if (extract_components %in% c("all", "pairwise_data") && self$options$pairwise_comparisons) {
-                    pairwise_data <- ggstatsplot::extract_stats(ggstats_result, type = "pairwise_comparisons")
+                    pairwise_data <- stats_list$pairwise_comparisons_data
                     if (!is.null(pairwise_data)) {
                         extracted$pairwise <- pairwise_data
                     }
                 }
-                
+
                 # Extract descriptive statistics
                 if (extract_components %in% c("all", "descriptive_data")) {
-                    descriptive_data <- ggstatsplot::extract_stats(ggstats_result, type = "descriptive")
+                    descriptive_data <- stats_list$descriptive_data
                     if (!is.null(descriptive_data)) {
                         extracted$descriptive <- descriptive_data
                     }
                 }
-                
+
                 # Include plot data if requested
                 if (self$options$include_plot_data) {
                     extracted$plot_data <- data
                 }
-                
+
             }, error = function(e) {
-                warning(paste("Error extracting components:", e$message))
+                # Surface genuine failures in the output instead of swallowing them:
+                # warning() is not shown to jamovi users.
+                extracted$extraction_error <<- e$message
             })
-            
+
             return(extracted)
         },
         
@@ -295,7 +305,18 @@ jextractggstatsClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cla
         
         .createHtmlOutput = function(extracted_data) {
             html <- "<h3>Extracted Statistical Data from ggstatsplot</h3>"
-            
+
+            # Report a genuine extraction failure rather than showing an empty result
+            if (!is.null(extracted_data$extraction_error)) {
+                html <- paste0(
+                    html,
+                    "<div style='padding: 12px; border-left: 4px solid #c0392b; background-color: #fdecea;'>",
+                    "<strong>Could not extract statistical components.</strong><br>",
+                    htmltools::htmlEscape(extracted_data$extraction_error),
+                    "</div>"
+                )
+            }
+
             # Display subtitle data (main results)
             if (!is.null(extracted_data$subtitle)) {
                 html <- paste0(html, "<h4>Main Statistical Results</h4>")

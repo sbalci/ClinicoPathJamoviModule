@@ -1,4 +1,4 @@
-title: Dot Chart
+title: Horizontal Box-Violin Comparison
 name: jjdotplotstats
 jus: '3.0'
 stage: 0
@@ -93,12 +93,22 @@ children:
               - type: ComboBox
                 name: centralitytype
                 enable: (centralityplotting)
-  - type: LayoutBox
-    margin: large
-    children:
-      - type: TextBox
-        name: centralityk
-        format: number
+              # Retained only so existing scripts keep running; the statistics
+              # package dropped its centrality-digits setting, so this does
+              # nothing. Kept in the UI rather than deleted, because
+              # jmvtools::prepare() re-adds any .a.yaml option missing from the
+              # UI - as a stray top-level box, which is how it came back the
+              # first time it was removed here.
+              #
+              # No `enable:` guard: that property is a STRING expression over
+              # option names, e.g. (centralityplotting). A boolean fails to
+              # compile with "centralityk.enable is not of a type(s) string",
+              # and there is no always-false option to reference. The title says
+              # "(no longer used)" and .validateCentralityOptions() raises a
+              # notice if anyone changes it, so the control cannot mislead.
+              - type: TextBox
+                name: centralityk
+                format: number
   - type: CollapseBox
     label: Plot Appearance
     collapsed: true
