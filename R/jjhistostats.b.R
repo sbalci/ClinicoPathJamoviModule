@@ -191,11 +191,10 @@ jjhistostatsClass <- if (requireNamespace('jmvcore'))
                     return(private$.processedData)
                 }
 
-                # Prepare data with progress feedback
-                self$results$todo$setContent(
-                    glue::glue("<br>Processing data for histogram analysis...<br><hr>")
-                )
-
+                # NOTE: no progress text is written to results$todo here. This helper is
+                # called from .run() AFTER the To Do panel has been composed, and from the
+                # render paths, so any setContent() here overwrites the user-facing content
+                # with an internal progress string that then never gets rewritten.
                 # Checkpoint before expensive data processing
                 private$.checkpoint()
 
@@ -336,12 +335,49 @@ jjhistostatsClass <- if (requireNamespace('jmvcore'))
                 if (!is.null(self$options$grvar) && !self$options$grvar %in% names(self$data)) {
                     return(list(valid = FALSE, message = paste("Grouping variable '", self$options$grvar, "' not found in data", sep = "")))
                 }
-                
+
+                # The same column in both boxes: jmvcore coerces grvar to a factor (its
+                # `permitted` is factor), so the histogram's own x aesthetic becomes discrete
+                # and stat_bin() dies with "requires a continuous x aesthetic".
+                if (!is.null(self$options$grvar) && self$options$grvar %in% self$options$dep) {
+                    return(list(valid = FALSE, message = paste0(
+                        "'", self$options$grvar, "' is used both as a histogram variable and as ",
+                        "Split By. Choose a different grouping variable.")))
+                }
+
                 # Check if binwidth is positive when manually specified
                 if (self$options$changebinwidth && (!is.null(self$options$binwidth) && self$options$binwidth <= 0)) {
                     return(list(valid = FALSE, message = "Bin width must be a positive number"))
                 }
-                
+
+                # A positive but tiny bin width is fully enterable in the GUI (the JS handler
+                # only clamps values <= 0) and produces an EMPTY panel: ggplot2 refuses more
+                # than 1,000,000 bins, and that error goes to stderr where jamovi never shows
+                # it. Reject well below that ceiling with a message that names the data range
+                # and a workable width.
+                if (self$options$changebinwidth && !is.null(self$options$binwidth) &&
+                    self$options$binwidth > 0) {
+                    max_bins <- 5000
+                    for (v in self$options$dep) {
+                        if (!v %in% names(self$data)) next
+                        x <- self$data[[v]]
+                        if (!is.numeric(x)) x <- suppressWarnings(as.numeric(as.character(x)))
+                        x <- x[is.finite(x)]
+                        if (length(x) < 2) next
+                        rng <- diff(range(x))
+                        if (rng <= 0) next
+                        n_bins <- rng / self$options$binwidth
+                        if (n_bins > max_bins)
+                            return(list(valid = FALSE, message = paste0(
+                                "Bin width ", format(self$options$binwidth), " would split '", v,
+                                "' into ", format(round(n_bins), big.mark = ","),
+                                " bins, so the histogram would be unreadable (or blank). '", v,
+                                "' ranges over ", format(signif(rng, 4)),
+                                "; a bin width of about ", format(signif(rng / 30, 3)),
+                                " gives roughly 30 bins.")))
+                    }
+                }
+
                 return(list(valid = TRUE, message = NULL))
             },
             
@@ -464,10 +500,14 @@ jjhistostatsClass <- if (requireNamespace('jmvcore'))
                         }
                     }
                     
-                    # Constant data warning
+                    # Constant data warning. The histogram panel comes out BLANK in this case
+                    # (stat_bin() cannot build breaks over a zero range and its error only
+                    # reaches stderr), so say so rather than leaving the user to guess.
                     if (length(unique(var_data)) == 1) {
                         warnings <- c(warnings, paste0(
-                            " Variable '", htmltools::htmlEscape(var), "' has constant values. Histogram analysis may not be meaningful."
+                            " <strong>Variable '", htmltools::htmlEscape(var), "' has constant values</strong> (every row is ",
+                            htmltools::htmlEscape(format(var_data[1])), "). There is no range to bin, so the histogram ",
+                            "panel for this variable will be empty. Check the variable selection and any active row filters."
                         ))
                     }
 
@@ -493,10 +533,39 @@ jjhistostatsClass <- if (requireNamespace('jmvcore'))
                         ))
                     }
                 }
-                
+
+                # LABELS THAT ARE SILENTLY DISCARDED.
+                # Three text boxes are conditionally inert (verified byte-identical renders):
+                # ggstatsplot overwrites `subtitle` with the statistics expression whenever
+                # Statistical Results is on, and .generateHistogram() drops `title` for the
+                # grouped/multi-variable panels and replaces `xlab` with the variable name when
+                # more than one variable is selected. Say so instead of dropping them silently.
+                if (nzchar(self$options$subtitle) && isTRUE(private$.option("resultssubtitle"))) {
+                    warnings <- c(warnings, paste0(
+                        " <strong>Your Subtitle was not used.</strong> With <strong>Statistical Results</strong> ",
+                        "switched on, the subtitle area is written by the statistical test. Switch off ",
+                        "Statistical Results to show your own subtitle."))
+                }
+                if (nzchar(self$options$title) &&
+                    (length(self$options$dep) > 1 || !is.null(self$options$grvar))) {
+                    warnings <- c(warnings, paste0(
+                        " <strong>Your Title was not used.</strong> ",
+                        if (length(self$options$dep) > 1)
+                            "With more than one variable selected, each panel is titled by its own variable, "
+                        else
+                            "With a Split By variable, each panel is titled by its own group, ",
+                        "so a single title would be stamped on all of them. Select one variable with no ",
+                        "Split By to use your own title."))
+                }
+                if (nzchar(self$options$xlab) && length(self$options$dep) > 1) {
+                    warnings <- c(warnings, paste0(
+                        " <strong>Your X-axis label was not used.</strong> With more than one variable ",
+                        "selected, each panel is labelled with its own variable name."))
+                }
+
                 return(warnings)
             },
-            
+
             # Generate performance warnings
             .generatePerformanceWarnings = function(data, options) {
                 warnings <- c()
@@ -607,12 +676,26 @@ jjhistostatsClass <- if (requireNamespace('jmvcore'))
                         ", Median = ", round(median_val, 2), "</li>",
                         "<li><strong>Variability:</strong> SD = ", round(sd_val, 2), "</li>",
                         "<li><strong>Distribution shape:</strong> ",
-                        if (abs(skewness_val) < 0.5) {
-                            "Approximately symmetric (suitable for parametric tests)"
-                        } else if (skewness_val > 0.5) {
-                            "Right-skewed (consider nonparametric tests or log transformation)"
+                        # Drive this bullet from the same evidence as `is_normal` below, so the
+                        # three bullets cannot contradict each other. Skewness alone called a
+                        # bimodal mixture (Shapiro-Wilk p = 7e-14) and a constant column
+                        # "Approximately symmetric (suitable for parametric tests)" while the
+                        # next two bullets said the opposite.
+                        if (sd_val == 0) {
+                            "Constant - every observation has the same value, so there is no shape to describe"
+                        } else if (abs(skewness_val) >= 0.5) {
+                            paste0(
+                                if (skewness_val > 0) "Right-skewed" else "Left-skewed",
+                                if (is_normal)
+                                    " (mild - the normality check below is not rejected, so parametric tests remain reasonable)"
+                                else if (skewness_val > 0)
+                                    " (consider nonparametric tests or log transformation)"
+                                else
+                                    " (consider nonparametric tests)")
+                        } else if (!is.na(shapiro_p) && shapiro_p <= 0.05) {
+                            "Symmetric but not normal - e.g. bimodal, or heavier/lighter tails than a normal curve; inspect the histogram before using parametric tests"
                         } else {
-                            "Left-skewed (consider nonparametric tests)"
+                            "Approximately symmetric (suitable for parametric tests)"
                         }, "</li>",
                         if (!is.na(shapiro_p))
                             paste0("<li><strong>Normality (Shapiro-Wilk):</strong> W-test p = ",
@@ -630,7 +713,7 @@ jjhistostatsClass <- if (requireNamespace('jmvcore'))
                         } else if (is_normal) {
                             "Normal distribution allows use of parametric statistics (t-tests, ANOVA). Mean and SD are appropriate summary measures."
                         } else {
-                            "Skewed distribution: prefer rank-based methods. Within this analysis that is the Wilcoxon signed-rank option; if you go on to compare groups, the rank-based equivalents are Mann-Whitney (two groups) and Kruskal-Wallis (three or more). Median and IQR are the more appropriate summary measures here."
+                            "Non-normal distribution: prefer rank-based methods. Within this analysis that is the Wilcoxon signed-rank option; if you go on to compare groups, the rank-based equivalents are Mann-Whitney (two groups) and Kruskal-Wallis (three or more). Median and IQR are the more appropriate summary measures here."
                         }, "</li>",
                         "</ul>"
                     )
@@ -643,10 +726,12 @@ jjhistostatsClass <- if (requireNamespace('jmvcore'))
                         "<div style='background-color: #f8f9fa; border: 1px solid #dee2e6; padding: 15px; margin: 10px 0;'>",
                         "<h3>Clinical Interpretation</h3>",
                         "<div style='background-color: #fff3cd; border-left: 3px solid #ffc107; padding: 10px; margin: 10px 0;'>",
-                        "<strong> Note:</strong> This interpretation uses simplified heuristics (skewness &lt; 0.5 and n \u2265 30) ",
-                        "as initial screening guidance. These are <strong>rule-of-thumb approximations</strong>, not formal ",
-                        "diagnostic criteria. Always supplement with formal normality tests (Shapiro-Wilk, Anderson-Darling) ",
-                        "and expert clinical judgment before making analysis decisions.",
+                        "<strong> Note:</strong> Normality is judged by the <strong>Shapiro-Wilk test</strong> (p &gt; 0.05 and ",
+                        "|skewness| &lt; 1) whenever it is applicable (3 \u2264 n \u2264 5000); outside that range the skewness ",
+                        "<strong>rule-of-thumb</strong> (|skewness| &lt; 0.5 and n \u2265 30) is used instead and the bullet says so. ",
+                        "A significant Shapiro-Wilk test on a large sample can flag departures too small to matter ",
+                        "clinically, so read it alongside the histogram and your expert judgment rather than as a ",
+                        "formal decision rule.",
                         "</div>",
                         paste(interpretation_parts, collapse = ""),
                         "<hr>",
@@ -712,11 +797,7 @@ jjhistostatsClass <- if (requireNamespace('jmvcore'))
                     return(private$.processedOptions)
                 }
 
-                # Prepare options with progress feedback
-                self$results$todo$setContent(
-                    glue::glue("<br>Preparing histogram analysis options...<br><hr>")
-                )
-
+                # NOTE: no progress text is written to results$todo here (see .prepareData).
                 # Process core analysis options
                 typestatistics <- private$.option("typestatistics")
                 dep <- self$options$dep

@@ -175,7 +175,7 @@ children:
                 enable: (addGGPubrPlot)
               - type: ComboBox
                 name: ggpubrPalette
-                enable: (addGGPubrPlot)
+                enable: (addGGPubrPlot && !colorblindSafe)
               - type: CheckBox
                 name: ggpubrAddStats
                 enable: (addGGPubrPlot)

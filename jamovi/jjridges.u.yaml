@@ -53,11 +53,12 @@ children:
           - type: ComboBox
             name: bandwidth
             label: Bandwidth method
+            enable: (plot_type != 'histogram_ridges')
           - type: TextBox
             name: bandwidth_value
             label: Custom Bandwidth
             format: number
-            enable: (bandwidth == 'custom')
+            enable: (bandwidth == 'custom' && plot_type != 'histogram_ridges')
           - type: TextBox
             name: binwidth
             label: Histogram Bin Width
@@ -128,6 +129,7 @@ children:
             name: alpha
             label: Ridge Transparency
             format: number
+            enable: (fill_ridges || plot_type == 'violin_ridges')
           - type: CheckBox
             name: fill_ridges
             label: Fill ridges

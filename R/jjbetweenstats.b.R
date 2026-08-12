@@ -22,6 +22,10 @@ jjbetweenstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         # and failed; rendered as a notice from .run().
         .subtitleFallback = NULL,
 
+        # TRUE when the Bayesian test cannot be computed for this data, so the
+        # figure carries NO subtitle at all (see .bayesProbeFails).
+        .bayesNoStatistic = FALSE,
+
         # Cache for processed data and options to avoid redundant computation
         .processedData = NULL,
         .processedOptions = NULL,
@@ -319,11 +323,55 @@ jjbetweenstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             res$expression[[1]]
         },
 
+        # Does the Bayesian test silently produce nothing for this data?
+        #
+        # ggstatsplot 1.0.0 swallows the upstream statsExpressions/performance
+        # failure and hands back a plot whose subtitle is NULL - a figure with no
+        # statistics at all - while the narrative panels still announce
+        # "Bayesian ANOVA" and point the reader at that empty subtitle. It is
+        # data dependent (the two-group Bayesian t-test and some three-group
+        # data sets compute fine), so probe the same engine ggstatsplot calls
+        # instead of guessing from the number of groups. Measured to track
+        # ggbetweenstats exactly: engine errors <=> subtitle NULL.
+        .bayesProbeFails = function(data, group_var, dep_var) {
+            n_lev <- private$.nGroupLevels(data, group_var)
+            if (is.na(n_lev) || n_lev < 2) return(FALSE)
+            fn <- if (n_lev == 2) statsExpressions::two_sample_test
+                  else            statsExpressions::oneway_anova
+            res <- tryCatch(
+                rlang::inject(fn(
+                    data = data,
+                    x    = !!rlang::sym(group_var),
+                    y    = !!rlang::sym(dep_var),
+                    type = "bayes")),
+                error = function(e) e)
+            inherits(res, "condition") ||
+                is.null(res$expression) || length(res$expression) == 0
+        },
+
         # `pairwise.comparisons` was removed in ggstatsplot 1.0.0, so unticking
         # the box left the significance brackets on the plot. The surviving
         # control is pairwise.display, which accepts "none".
         .pairwiseDisplay = function(opts) {
             if (isTRUE(opts$pairwisecomparisons)) opts$pairwisedisplay else "none"
+        },
+
+        # Palette for the ggpubr companion panels.
+        #
+        # `colorblindSafe` is honoured on the main figure by .applyTheme(), which
+        # appends viridis scales - but ggpubr builds its own colour scale from
+        # the `palette=` argument, so .applyTheme() is never involved and the
+        # accessibility option did nothing at all on this panel. Hand the same
+        # viridis colours in through `palette=` instead. grDevices::hcl.colors()
+        # is base R, so this adds no dependency.
+        .ggpubrPaletteFor = function(data) {
+            if (isTRUE(self$options$colorblindSafe)) {
+                n <- private$.nGroupLevels(data, self$options$group)
+                if (is.na(n) || n < 1) n <- 1L
+                return(grDevices::hcl.colors(n, palette = "viridis"))
+            }
+            if (identical(self$options$ggpubrPalette, "default")) NULL
+            else self$options$ggpubrPalette
         },
 
         # Theme application helper
@@ -367,10 +415,12 @@ jjbetweenstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             vars <- htmltools::htmlEscape(paste(self$options$dep, collapse = ", "))
             # The statistics live in the plot subtitle, which is OFF by default -
             # so the old unconditional "See the plot subtitle" pointed at nothing.
-            where <- if (isTRUE(self$options$resultssubtitle))
-                .("See the plot subtitle for the test statistic, p-value, and effect size.")
-            else
+            where <- if (!isTRUE(self$options$resultssubtitle))
                 .("No test statistic is displayed: switch on 'Statistical results' to show it in the plot subtitle.")
+            else if (isTRUE(private$.bayesNoStatistic))
+                .("No test statistic is displayed: the Bayesian test could not be computed for this data, so the plot subtitle is empty (see Data Diagnostics).")
+            else
+                .("See the plot subtitle for the test statistic, p-value, and effect size.")
             clinical_text <- sprintf(
                 .("<div style='padding: 12px 15px; background-color: #eef7ee; border-left: 4px solid #28a745; margin: 10px 0;'><h4 style='margin-top:0;'>Results Summary</h4><p>%s comparing %s across %d group(s) (n = %d). %s</p></div>"),
                 test_name,
@@ -556,7 +606,11 @@ jjbetweenstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 # equal-variance flag, so include them: changing the test must
                 # recompute the interim calculations rather than reuse stale ones.
                 typestatistics = self$options$typestatistics,
-                varequal = self$options$varequal
+                varequal = self$options$varequal,
+                # The subtitle probes (statsExpressions takeover / Bayesian
+                # no-statistic) only run when subtitles are on, so toggling this
+                # must recompute the diagnostics rather than reuse a stale flag.
+                resultssubtitle = self$options$resultssubtitle
             ), algo = "md5")
             
             # Only reprocess if data has changed or forced refresh
@@ -636,11 +690,21 @@ jjbetweenstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             # the first dependent variable is cheap and only runs when subtitles
             # are switched on.
             private$.subtitleFallback <- NULL
-            if (isTRUE(self$options$resultssubtitle) &&
-                !identical(self$options$typestatistics, "bayes")) {
-                invisible(private$.subtitleExpr(
-                    mydata, self$options$group, self$options$dep[1],
-                    private$.prepareOptions()))
+            private$.bayesNoStatistic <- FALSE
+            if (isTRUE(self$options$resultssubtitle)) {
+                if (identical(self$options$typestatistics, "bayes")) {
+                    # .subtitleExpr deliberately leaves the Bayesian subtitle to
+                    # ggstatsplot - but ggstatsplot may produce none at all, and
+                    # said nothing about it. Probe and say so.
+                    private$.bayesNoStatistic <- private$.bayesProbeFails(
+                        mydata, self$options$group, self$options$dep[1])
+                    if (isTRUE(private$.bayesNoStatistic))
+                        private$.appendMessage(paste0("<br>", .("Note: the Bayesian test could not be computed for this data, so the plot carries no subtitle and NO test statistic, Bayes factor or effect size is shown. Choose a different Statistical approach (parametric, non-parametric or robust) to obtain a result."), "<br>"))
+                } else {
+                    invisible(private$.subtitleExpr(
+                        mydata, self$options$group, self$options$dep[1],
+                        private$.prepareOptions()))
+                }
             }
             if (!is.null(private$.subtitleFallback) && isTRUE(self$options$resultssubtitle)) {
                 private$.appendMessage(paste0("<br>", sprintf(
@@ -1404,7 +1468,7 @@ jjbetweenstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             group <- self$options$group
 
             # Get palette
-            palette <- if (self$options$ggpubrPalette == "default") NULL else self$options$ggpubrPalette
+            palette <- private$.ggpubrPaletteFor(mydata)
 
             # Single dependent variable
             if (length(dep) == 1) {
@@ -1505,7 +1569,7 @@ jjbetweenstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             grvar <- self$options$grvar
 
             # Get palette
-            palette <- if (self$options$ggpubrPalette == "default") NULL else self$options$ggpubrPalette
+            palette <- private$.ggpubrPaletteFor(mydata)
 
             # Single dependent variable with faceting
             if (length(dep) == 1) {

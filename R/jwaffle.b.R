@@ -225,7 +225,11 @@ jwaffleClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 # Clean messages for notice display
                 combined_msg <- paste(private$.messages, collapse = "\n")
                 clean_msg <- gsub("<br>|<br/>|<hr>", "\n", combined_msg)
-                clean_msg <- gsub("<[^>]*>", "", clean_msg)
+                # Only strip real tags: a bare "<[^>]*>" starts matching at the "<" of
+                # literal text like "<5 cases" (or a factor level named "<5 cm") and runs
+                # to the next ">" - the one closing a later <br> - deleting the whole
+                # sentence in between.
+                clean_msg <- gsub("</?[A-Za-z][^>]*>", "", clean_msg)
                 clean_msg <- gsub("\u{2022}", "\u2022", clean_msg)
                 clean_msg <- gsub("&nbsp;", " ", clean_msg)
                 clean_msg <- trimws(clean_msg)
@@ -571,9 +575,20 @@ jwaffleClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             }
             
             # Enhanced clinical validation checks
-            n_categories <- length(unique(groups_data))
+            # unique() counts NA as a level, so one real category plus any missing
+            # value scored 2 and sailed past this guard - then drew a 100%
+            # single-colour waffle under "Waffle chart created successfully".
+            # Count what actually reaches the plot: the non-missing categories.
+            n_categories <- length(unique(groups_data[!is.na(groups_data)]))
             n_total <- nrow(self$data)
-            
+
+            if (n_categories == 0) {
+                jmvcore::reject(
+                    code = NULL,
+                    "Grouping variable '{}' has no non-missing values, so there is nothing to chart.",
+                    self$options$groups)
+            }
+
             if (n_categories == 1) {
                 jmvcore::reject(
                     code = NULL,
@@ -606,7 +621,14 @@ jwaffleClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             min_count <- min(category_counts)
             if (min_count < 5 && n_total >= 30) {
                 small_cats <- names(category_counts)[category_counts < 5]
-                small_cats_safe <- paste(htmltools::htmlEscape(small_cats), collapse = ', ')
+                # Cap the list like the vanishing-category notice below: a continuous
+                # variable coerced to a factor produces a hundred rare levels, and a
+                # notice naming all of them is unreadable.
+                n_small <- length(small_cats)
+                show_small <- min(n_small, 8L)
+                small_cats_safe <- paste0(
+                    paste(htmltools::htmlEscape(small_cats[seq_len(show_small)]), collapse = ', '),
+                    if (n_small > show_small) paste0(" and ", n_small - show_small, " more") else "")
                 private$.accumulateMessage(glue::glue(
                     "<br> <strong>Rare Categories:</strong> Some categories have <5 cases: {small_cats_safe}. ",
                     "Consider combining rare categories for more reliable clinical interpretation.<br>"
@@ -689,6 +711,28 @@ jwaffleClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                         code = NULL,
                         "Counts variable '{}' contains {} negative value(s). All counts must be non-negative for waffle charts. Please check your data.",
                         self$options$counts, n_negative)
+                }
+                # Inf passes both checks above (it is numeric and it is not < 0) and then
+                # poisons everything downstream: share_total becomes Inf so the
+                # vanishing-category guard silently disables itself, the Analysis Summary
+                # prints "NaN%" and crowns a 0%-category as the largest, and geom_waffle
+                # dies inside tail.default() with an unreadable "invalid 'n'" error.
+                # NA/NaN are fine (complete.cases drops those rows) - only Inf is a problem.
+                n_nonfinite <- sum(!is.finite(counts_data) & !is.na(counts_data))
+                if (n_nonfinite > 0) {
+                    jmvcore::reject(
+                        code = NULL,
+                        "Counts variable '{}' contains {} non-finite value(s) (Inf or -Inf). All counts must be finite numbers. Please check your data.",
+                        self$options$counts, n_nonfinite)
+                }
+                # A counts variable that sums to zero (all zeros, or all missing) has
+                # nothing to draw; waffle's round_preserve_sum() then fails with the same
+                # cryptic tail.default() error and no figure appears at all.
+                if (sum(counts_data, na.rm = TRUE) <= 0) {
+                    jmvcore::reject(
+                        code = NULL,
+                        "Counts variable '{}' sums to zero, so there is nothing to draw. Please check your data.",
+                        self$options$counts)
                 }
             }
         },
@@ -1049,18 +1093,10 @@ jwaffleClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
             # Add labels in specific order
             if (!is.null(facet_var)) {
-                facet_title <- facet_var  # Store the facet variable name
-                # Combine title and caption with appropriate spacing
-                combined_caption <- if (self$options$mytitle != '' && nchar(self$options$mytitle) > 0) {
-                    paste0(self$options$mytitle, "\n", caption_text)
-                } else {
-                    caption_text
-                }
-                
                 p <- p +
                     ggplot2::labs(
-                        tag = facet_title,  # Facet variable name
-                        caption = combined_caption
+                        tag = facet_var,  # Facet variable name
+                        caption = caption_text
                     ) +
                     ggplot2::facet_wrap(
                         jmvcore::asFormula(paste0("~", jmvcore::composeTerm(facet_var))),
@@ -1068,15 +1104,15 @@ jwaffleClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                         strip.position = "bottom"
                     )
             } else {
-                # Combine title and caption with appropriate spacing
-                combined_caption <- if (self$options$mytitle != '' && nchar(self$options$mytitle) > 0) {
-                    paste0(self$options$mytitle, "\n", caption_text)
-                } else {
-                    caption_text
-                }
-                
-                p <- p + ggplot2::labs(caption = combined_caption)
+                p <- p + ggplot2::labs(caption = caption_text)
             }
+
+            # "Chart Title" goes where the UI label and the roxygen say it goes: the top.
+            # It used to be pasted onto the front of the caption, so it rendered at the
+            # BOTTOM in bold caption styling, glued to the statistics line, while the
+            # plot.title theme block below was dead code.
+            if (!is.null(self$options$mytitle) && nzchar(self$options$mytitle))
+                p <- p + ggplot2::labs(title = self$options$mytitle)
 
             # Handle legend
             if (!self$options$show_legend) {
@@ -1169,9 +1205,13 @@ jwaffleClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             for (option in private$.options$options) {
                 if (option$name == 'data')
                     next
-                if (inherits(option, 'OptionVariable') || inherits(option, 'OptionVariables')) {
+                # Free-text String options (mytitle, legendtitle) get the same treatment:
+                # jmvcore's sourcify quotes but does not ESCAPE, so a title containing a
+                # quote or a backslash produced unparseable R.
+                if (inherits(option, 'OptionVariable') || inherits(option, 'OptionVariables') ||
+                    inherits(option, 'OptionString')) {
                     val <- option$value
-                    if (!is.null(val) && length(val) > 0)
+                    if (!is.null(val) && length(val) > 0 && !identical(val, ''))
                         args <- c(args, paste0(option$name, ' = ',
                                                paste0(deparse(val), collapse = '')))
                 } else {

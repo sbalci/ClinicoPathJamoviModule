@@ -628,6 +628,7 @@ jjwithinstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             private$.checkpoint()
 
             # Convert variables to numeric with labelled awareness
+            non_numeric <- character()
             for (var in vars) {
                 col <- mydata[[var]]
 
@@ -636,9 +637,27 @@ jjwithinstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 # Do NOT route haven_labelled through haven::as_factor(levels =
                 # "both") first: that replaces the real measurement values with
                 # factor position codes (e.g. 10, 20, 30 -> 1, 2, 3), silently
-                # corrupting the within-subjects analysis. This matches the
-                # direct toNumeric() pattern used by jjbetweenstats/jjdotplotstats.
-                mydata[[var]] <- jmvcore::toNumeric(col)
+                # corrupting the within-subjects analysis.
+                num <- jmvcore::toNumeric(col)
+
+                # toNumeric() is a NO-OP on a plain character or factor column:
+                # it only unwraps a jamovi `values` attribute and otherwise
+                # returns its argument untouched. So a text measurement passed
+                # straight through this loop and died two calls later inside
+                # quantile() with "non-numeric argument to binary operator".
+                # jamovi's `permitted: [ numeric ]` keeps text out of the GUI
+                # picker, but an R-API caller reaches here.
+                if (!is.numeric(num))
+                    num <- suppressWarnings(as.numeric(as.character(num)))
+                if (all(is.na(num)) && !all(is.na(col)))
+                    non_numeric <- c(non_numeric, var)
+
+                mydata[[var]] <- num
+            }
+            if (length(non_numeric)) {
+                jmvcore::reject(
+                    .("Each measurement must be a numeric variable ('{var}' contains no usable numbers)."),
+                    var = paste(non_numeric, collapse = ", "))
             }
             
             # Enhanced validation for optional parameters

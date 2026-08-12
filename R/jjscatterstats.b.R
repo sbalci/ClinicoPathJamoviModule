@@ -106,6 +106,7 @@ jjscatterstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             }
 
             private$.applyClinicalPreset()
+            private$.warnCorrMethodMismatch()
             private$.generateExplanations()
 
             # grouped_ggscatterstats() has no p-adjustment argument: each facet's correlation
@@ -131,10 +132,13 @@ jjscatterstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             # a constant dep variable rendered a scatter plot with no warning, while the same
             # data through .plot3 correctly reported "Correlation not computed". Running the
             # check in .run() means it fires whichever plots are on screen.
-            x_vals <- self$data[[self$options$dep]]
-            y_vals <- self$data[[self$options$group]]
+            checkData <- private$.prepData()
+            x_vals <- checkData[[self$options$dep]]
+            y_vals <- checkData[[self$options$group]]
             if (!is.null(x_vals) && !is.null(y_vals)) {
-                complete <- stats::complete.cases(x_vals, y_vals)
+                # is.finite(), not complete.cases(): complete.cases() counts an Inf as a
+                # present value, so an all-Inf column looked like perfectly good data.
+                complete <- is.finite(x_vals) & is.finite(y_vals)
                 n_complete <- sum(complete)
                 degenerate <- n_complete < 3 ||
                     length(unique(x_vals[complete])) < 2 ||
@@ -291,6 +295,45 @@ jjscatterstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             list(title = title, xtitle = xtitle, ytitle = ytitle)
         },
 
+        # Shared data preparation for EVERY render path and for the .run() guards.
+        #
+        # (1) jamovi's `permitted: [numeric]` also accepts ORDINAL columns, which arrive
+        #     as factors carrying an integer `values` attribute; jmvcore::toNumeric is
+        #     what turns them back into numbers. .plot/.plot2/.plot3 did this but the two
+        #     ggpubr panels did not, so an ordinal x rendered with a discrete axis, a
+        #     regression line drawn across categories and a correlation label of "NA".
+        # (2) Inf/-Inf pass BOTH is.na() and stats::complete.cases(), so a single Inf
+        #     poisoned every downstream statistic while every guard reported healthy data:
+        #     the main panel printed r = NA, p = NA next to "n = 79", the enhanced panel
+        #     printed the literal "r = NaN", and type = "bayes" hard-errored. Non-finite
+        #     values are dropped here, once, and reported.
+        .prepData = function() {
+            d <- self$data
+            dep <- self$options$dep
+            group <- self$options$group
+            if (is.null(dep) || is.null(group)) return(d)
+
+            d[[dep]] <- jmvcore::toNumeric(d[[dep]])
+            d[[group]] <- jmvcore::toNumeric(d[[group]])
+
+            nonfinite <- (!is.na(d[[dep]]) & !is.finite(d[[dep]])) |
+                         (!is.na(d[[group]]) & !is.finite(d[[group]]))
+            n_dropped <- sum(nonfinite)
+            if (n_dropped > 0) {
+                d <- d[!nonfinite, , drop = FALSE]
+                private$.appendWarning(paste0(
+                    " <b>Non-finite values removed:</b> ", n_dropped, " row",
+                    if (n_dropped == 1) "" else "s",
+                    " contained an infinite value (Inf or -Inf) in '",
+                    htmltools::htmlEscape(dep), "' or '", htmltools::htmlEscape(group),
+                    "'. Infinite values are not missing values, so they pass the usual ",
+                    "completeness checks while making every correlation undefined; they ",
+                    "have been excluded and all statistics below are computed on the ",
+                    nrow(d), " remaining rows."))
+            }
+            d
+        },
+
         # plot ----
 
         .plot = function(image, ggtheme, theme, ...) {
@@ -302,10 +345,7 @@ jjscatterstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             if (is.null(self$options$dep) || is.null(self$options$group))
                 return()
 
-            plotData <- self$data
-
-            plotData[[self$options$dep]] <- jmvcore::toNumeric(plotData[[self$options$dep]])
-            plotData[[self$options$group]] <- jmvcore::toNumeric(plotData[[self$options$group]])
+            plotData <- private$.prepData()
 
             # Prepare arguments for ggscatterstats
             labels <- private$.resolveLabels(includeGrvar = FALSE)
@@ -390,10 +430,7 @@ jjscatterstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             if (is.null(self$options$dep) || is.null(self$options$group) || is.null(self$options$grvar))
                 return()
 
-            plotData <- self$data
-
-            plotData[[self$options$dep]] <- jmvcore::toNumeric(plotData[[self$options$dep]])
-            plotData[[self$options$group]] <- jmvcore::toNumeric(plotData[[self$options$group]])
+            plotData <- private$.prepData()
 
             # Prepare arguments for grouped_ggscatterstats
             labels <- private$.resolveLabels(includeGrvar = TRUE)
@@ -417,7 +454,6 @@ jjscatterstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     y = !!rlang::sym(self$options$group),
                     grouping.var = !!rlang::sym(self$options$grvar),
                     type = !!private$.option("typestatistics"),
-                    title.prefix = !!title,
                     xlab = !!xtitle,
                     ylab = !!ytitle,
                     results.subtitle = !!private$.option("resultssubtitle"),
@@ -449,7 +485,6 @@ jjscatterstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                         y = !!rlang::sym(self$options$group),
                         grouping.var = !!rlang::sym(self$options$grvar),
                         type = !!private$.option("typestatistics"),
-                        title.prefix = !!title,
                         xlab = !!xtitle,
                         ylab = !!ytitle,
                         results.subtitle = !!private$.option("resultssubtitle"),
@@ -483,6 +518,13 @@ jjscatterstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             # as character literals. No user string lands in a
             # function-name position.
             plot <- eval(plot_call)
+
+            # `title.prefix` is NOT a formal of grouped_ggscatterstats (nor of
+            # ggscatterstats): names(formals()) is data/.../grouping.var/plotgrid.args/
+            # annotation.args, so the title landed in `...` and was discarded -- the Title
+            # option was completely inert on this plot (byte-identical png with and without
+            # it) and the grouped figure carried no title at all. patchwork titles it.
+            plot <- plot + patchwork::plot_annotation(title = title)
 
             if (self$options$showRugPlot) {
                 # `&`, not `+`: grouped_ggscatterstats returns a patchwork, and `+` adds the
@@ -522,11 +564,7 @@ jjscatterstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             if (!hasEnhanced)
                 return()
 
-            plotData <- self$data
-
-            # Convert variables to numeric
-            plotData[[self$options$dep]] <- jmvcore::toNumeric(plotData[[self$options$dep]])
-            plotData[[self$options$group]] <- jmvcore::toNumeric(plotData[[self$options$group]])
+            plotData <- private$.prepData()
 
             # Prepare title and labels
             labels <- private$.resolveLabels(includeGrvar = FALSE)
@@ -692,42 +730,27 @@ jjscatterstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 # The `warnings` Html output is declared in .r.yaml; the itemNames
                 # probe is retained as a defensive guard (jmvcore throws rather than
                 # returning NULL on access to an undefined results item).
-                if (!is.null(warning_msg) && ("warnings" %in% self$results$itemNames)) {
-                    # $content, not $state: setContent() writes $content and never
-                    # populates $state, so reading $state always yielded "" and each
-                    # warning silently replaced the one before it.
-                    current_warnings <- self$results$warnings$content
-                    if (is.null(current_warnings)) {
-                        current_warnings <- ""
-                    }
-                    new_warning <- paste0(
-                        current_warnings,
-                        "<p style='color:#856404;'>", warning_msg, "</p>"
-                    )
-                    self$results$warnings$setContent(new_warning)
-                    self$results$warnings$setVisible(TRUE)
+                if (!is.null(warning_msg)) {
+                    private$.appendWarning(warning_msg)
                 }
 
                 # Guard against degenerate input: correlation is undefined with
                 # fewer than 3 complete pairs or a constant (zero-variance) axis.
+                # is.finite(), not complete.cases(), which counts Inf as present.
                 x_vals <- plotData[[self$options$dep]]
                 y_vals <- plotData[[self$options$group]]
-                complete <- stats::complete.cases(x_vals, y_vals)
+                complete <- is.finite(x_vals) & is.finite(y_vals)
                 n_complete <- sum(complete)
                 degenerate <- n_complete < 3 ||
                     length(unique(x_vals[complete])) < 2 ||
                     length(unique(y_vals[complete])) < 2
 
                 if (degenerate) {
-                    if ("warnings" %in% self$results$itemNames) {
-                        insufficient_msg <- paste0(
-                            "<p style='color:#856404;'>Correlation not computed: ",
-                            "insufficient or degenerate data (need at least 3 complete ",
-                            "pairs and non-constant x and y).</p>"
-                        )
-                        self$results$warnings$setContent(insufficient_msg)
-                        self$results$warnings$setVisible(TRUE)
-                    }
+                    # No panel message here: .run() already emits a strictly better one for
+                    # exactly this condition (it names the offending variable). This branch
+                    # used to setContent() the whole Warnings output, DELETING the
+                    # multiplicity note and the run-level degenerate note and replacing them
+                    # with a vaguer sentence.
                     p <- p + ggplot2::labs(subtitle = "Correlation not computed (insufficient data)")
                 } else {
                     cor_result <- stats::cor.test(
@@ -760,13 +783,11 @@ jjscatterstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     p <- p + ggplot2::labs(subtitle = cor_text)
                 }
             }, error = function(e) {
-                # If correlation fails, continue without it
+                # If correlation fails, continue without it. Appended, not setContent():
+                # a bare setContent() here wiped every other notice off the panel.
                 # htmlEscape e$message since cor.test errors may include column-name fragments
-                if ("warnings" %in% self$results$itemNames) {
-                    warning_msg <- paste0(" Correlation calculation failed: ", htmltools::htmlEscape(e$message))
-                    self$results$warnings$setContent(warning_msg)
-                    self$results$warnings$setVisible(TRUE)
-                }
+                private$.appendWarning(paste0(
+                    " Correlation calculation failed: ", htmltools::htmlEscape(e$message)))
             })
 
             # Add labels
@@ -819,12 +840,31 @@ jjscatterstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             invisible(NULL)
         },
 
+        # Called from .run(), NOT from .plot*(). An Html item written during a plot
+        # callback is never rendered: jamovi has already composed and sent the results
+        # panel by the time the image is drawn, so the notice silently went nowhere.
         .warnCorrMethodMismatch = function() {
+            if (!isTRUE(private$.option("addGGPubrPlot"))) return(invisible(NULL))
             if (!isTRUE(self$options$ggpubrAddCorr)) return(invisible(NULL))
-            implied <- switch(as.character(private$.option("typestatistics")),
-                              parametric = "pearson", nonparametric = "spearman", NULL)
-            if (is.null(implied)) return(invisible(NULL))          # robust/bayes: no analogue
+            ty <- as.character(private$.option("typestatistics"))
+            implied <- switch(ty, parametric = "pearson", nonparametric = "spearman", NULL)
             chosen <- self$options$ggpubrCorrMethod
+
+            # robust/bayes have no ggpubr analogue, so the panel quietly fell back to an
+            # ordinary Pearson/Spearman coefficient that appears nowhere in the analysis
+            # the user asked for. Measured: main plot Winsorized r = 0.06 (p = 0.31) beside
+            # a ggpubr panel reporting r = 0.0739 (p = 0.2475), with nothing said.
+            if (is.null(implied)) {
+                ty_label <- switch(ty, robust = "robust (Winsorized Pearson)",
+                                   bayes = "Bayesian", ty)
+                private$.appendWarning(paste0(
+                    " <b>The panel below is not showing your analysis type.</b> The main plot ",
+                    "runs a ", ty_label, " correlation, which the publication-ready panel ",
+                    "cannot draw; that panel instead reports an ordinary <b>", chosen,
+                    "</b> coefficient computed on the same two variables. Quote the main ",
+                    "plot's subtitle for the ", ty_label, " result."))
+                return(invisible(NULL))
+            }
             if (identical(implied, chosen)) return(invisible(NULL))
 
             msg <- paste0(
@@ -856,8 +896,10 @@ jjscatterstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             if (!private$.option("addGGPubrPlot"))
                 return()
 
-            # Prepare data
-            mydata <- self$data
+            # Prepare data. Same conversion/finite-filter as every other panel: this path
+            # used to pass self$data straight through, so an ordinal column reached
+            # ggscatter as a factor and the correlation label evaluated to NA.
+            mydata <- private$.prepData()
             dep <- self$options$dep
             group <- self$options$group
 
@@ -894,7 +936,15 @@ jjscatterstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 args$conf.int <- TRUE
                 args$cor.coef <- TRUE
                 args$cor.method <- self$options$ggpubrCorrMethod
-                private$.warnCorrMethodMismatch()
+                # ggpubr's stat_cor prints the FIRST element of its cor.coef.name default
+                # ("R") whatever method ran, so a Spearman panel was labelled with Pearson's
+                # symbol. The override reaches stat_cor through `cor.coeff.args`, NOT as a
+                # top-level ggscatter argument: passing cor.coef.name = "rho" directly still
+                # rendered italic(R) (measured), because ggscatter's `...` never reaches
+                # stat_cor.
+                args$cor.coeff.args <- list(
+                    cor.coef.name = switch(self$options$ggpubrCorrMethod,
+                                           pearson = "R", spearman = "rho", "R"))
             } else if (self$options$ggpubrAddSmooth) {
                 # Only set loess here if reg.line is NOT set
                 add_element <- "loess"
@@ -931,8 +981,8 @@ jjscatterstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             if (!private$.option("addGGPubrPlot"))
                 return()
 
-            # Prepare data
-            mydata <- self$data
+            # Prepare data (see .plotGGPubr: ordinal columns need toNumeric here too)
+            mydata <- private$.prepData()
             dep <- self$options$dep
             group <- self$options$group
             grvar <- self$options$grvar
@@ -962,7 +1012,15 @@ jjscatterstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 args$conf.int <- TRUE
                 args$cor.coef <- TRUE
                 args$cor.method <- self$options$ggpubrCorrMethod
-                private$.warnCorrMethodMismatch()
+                # ggpubr's stat_cor prints the FIRST element of its cor.coef.name default
+                # ("R") whatever method ran, so a Spearman panel was labelled with Pearson's
+                # symbol. The override reaches stat_cor through `cor.coeff.args`, NOT as a
+                # top-level ggscatter argument: passing cor.coef.name = "rho" directly still
+                # rendered italic(R) (measured), because ggscatter's `...` never reaches
+                # stat_cor.
+                args$cor.coeff.args <- list(
+                    cor.coef.name = switch(self$options$ggpubrCorrMethod,
+                                           pearson = "R", spearman = "rho", "R"))
             } else if (self$options$ggpubrAddSmooth) {
                 # Only set loess here if reg.line is NOT set
                 add_element <- "loess"

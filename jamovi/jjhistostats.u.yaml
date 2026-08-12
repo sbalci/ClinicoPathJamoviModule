@@ -87,6 +87,7 @@ children:
                 name: subtitle
                 format: string
                 width: largest
+                enable: (!resultssubtitle)
               - type: TextBox
                 name: caption
                 format: string

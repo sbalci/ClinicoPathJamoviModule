@@ -29,6 +29,12 @@ jjcorrmatClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         # message whenever only an option changed.
         .n_before = NA_integer_,
         .n_after = NA_integer_,
+        # Per-pair N and the number of non-NA coefficients actually produced,
+        # filled in by .populateTable and reused by the summary panel and the
+        # completion notice. Under pairwise deletion nrow(data) is NOT the
+        # sample size of any correlation in the table.
+        .pair_n = integer(0),
+        .n_valid_pairs = 0L,
         .data_hash = NULL,
         .options_hash = NULL,
         # .preset_recommendations = NULL,  # Commented out - clinical preset feature disabled
@@ -237,8 +243,9 @@ jjcorrmatClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             # VALIDATE NUMERIC VARIABLES - check for categorical
             numeric_vars <- 0
             factor_warnings <- character()
+            constant_vars <- character()
 
-            for (var in self$options$dep) {
+            for (var in unique(self$options$dep)) {
                 private$.checkpoint()  # Before numeric conversion operations
 
                 # Check if variable is a factor BEFORE conversion
@@ -254,9 +261,19 @@ jjcorrmatClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 if (length(num_vals) >= 3) {  # Minimum observations for correlation
                     if (length(unique(num_vals)) >= 2) {  # Must have variation
                         numeric_vars <- numeric_vars + 1
+                    } else {
+                        constant_vars <- c(constant_vars, var)
                     }
                 }
             }
+
+            # A constant column is undefined for correlation: it produces a row
+            # of NAs in the table and is silently dropped from the figure, so
+            # say so instead of leaving the user to guess.
+            if (length(constant_vars) > 0)
+                private$.addWarning("WARNING", sprintf(
+                    .('%s has no variation (a single value), so its correlations are undefined: those rows are blank in the table and the variable is omitted from the plot.'),
+                    htmltools::htmlEscape(paste(constant_vars, collapse = ', '))))
 
             # Stop if correlating category codes
             if (length(factor_warnings) > 0) {
@@ -296,8 +313,12 @@ jjcorrmatClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             # Process type of statistics
             typestatistics <- self$options$typestatistics
 
-            # Process variables - dep is already a list of variables
-            myvars <- self$options$dep
+            # Process variables - dep is already a list of variables.
+            # De-duplicate: ggcorrmat's tidyselect drops repeats, so a variable
+            # selected twice produced a structural r = 1.000 row in the table
+            # (and an extra test in the multiplicity correction) that the figure
+            # never showed.
+            myvars <- unique(self$options$dep)
 
             # Adjust partial flag if insufficient variables
             partial_flag <- self$options$partial
@@ -314,9 +335,15 @@ jjcorrmatClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             colors <- c(self$options$lowcolor, self$options$midcolor, self$options$highcolor)
 
             # Process ggcorrplot.args
+            # pch.cex must be carried over from ggstatsplot's own default
+            # (list(method = "square", outline.color = "black", pch.cex = 14)):
+            # passing this list REPLACES that default, and ggcorrplot's own
+            # formal is 5, which draws the non-significance cross small enough
+            # to sit on top of the printed coefficient ("0.02" renders "0X2").
             ggcorrplot.args <- list(
                 method = self$options$matrixmethod,
-                outline.color = "black"
+                outline.color = "black",
+                pch.cex = 14
             )
 
             # Cache the processed options
@@ -471,13 +498,37 @@ jjcorrmatClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         # correlation(winsorize = 0.2), identical to WRS2::wincor(tr = 0.2)) -
         # NOT the percentage-bend coefficient that older ggstatsplot used and
         # that this module's documentation still described.
-        .methodLabel = function(typestatistics) {
+        .methodName = function(typestatistics) {
             switch(typestatistics,
-                "parametric"    = .("Pearson correlations"),
-                "nonparametric" = .("Spearman correlations"),
-                "robust"        = .("Winsorized Pearson correlations"),
-                "bayes"         = .("Bayesian Pearson correlations"),
+                "parametric"    = .("Pearson"),
+                "nonparametric" = .("Spearman"),
+                "robust"        = .("Winsorized Pearson"),
+                "bayes"         = .("Bayesian Pearson"),
                 typestatistics)
+        },
+
+        .methodLabel = function(typestatistics) {
+            sprintf(.("%s correlations"), private$.methodName(typestatistics))
+        },
+
+        # Sample-size phrase built from the per-pair N recorded by
+        # .populateTable, so it matches the table's N column under both
+        # listwise and pairwise deletion.
+        .pairNLabel = function() {
+            if (length(private$.pair_n) == 0)
+                return(sprintf(.("%d observations"), nrow(private$.prepareData())))
+            lo <- min(private$.pair_n); hi <- max(private$.pair_n)
+            if (lo == hi) return(sprintf(.("%d observations"), hi))
+            # .pair_n pools the per-GROUP Ns when a Split By variable is set, so a
+            # spread there means unequal group sizes, NOT pairwise deletion. Saying
+            # "pairwise deletion" for a complete, grouped dataset misattributes the
+            # split to missing data - and it fired under the listwise DEFAULT.
+            if (!is.null(self$options$grvar))
+                sprintf(.("%d to %d observations per group"), lo, hi)
+            else if (identical(self$options$naHandling, "pairwise"))
+                sprintf(.("%d to %d observations per pair (pairwise deletion)"), lo, hi)
+            else
+                sprintf(.("%d to %d observations per pair"), lo, hi)
         },
 
         # Coefficient symbol for the method actually run. Printing "r" for a
@@ -590,7 +641,9 @@ jjcorrmatClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                         private$.padjustLabel(options_data$padjustmethod), format(alpha))
 
             n_label <- if (n_min == n_obs) sprintf(.("%d observations"), n_obs)
-                       else sprintf(.("%d to %d observations per pair (pairwise deletion)"), n_min, n_obs)
+                       else if (identical(options_data$naHandling, "pairwise"))
+                           sprintf(.("%d to %d observations per pair (pairwise deletion)"), n_min, n_obs)
+                       else sprintf(.("%d to %d observations per pair"), n_min, n_obs)
 
             correlation_type_info <- ""
             if (partial_on) {
@@ -740,19 +793,30 @@ jjcorrmatClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 n_dropped, private$.n_before,
                 format(round(100 * n_dropped / private$.n_before, 1)),
                 private$.n_after))
+        } else if (identical(self$options$naHandling, "pairwise") &&
+                   length(private$.pair_n) > 0 &&
+                   min(private$.pair_n) < private$.n_before) {
+            # Under pairwise deletion no row is dropped from the frame, so the
+            # branch above can never fire - but each correlation is still
+            # computed on fewer rows than the data set holds.
+            private$.addWarning("WARNING", sprintf(
+                .('Pairwise deletion: each correlation uses only the rows complete for that pair, so the per-pair sample size ranges from %d to %d of %d rows.'),
+                min(private$.pair_n), max(private$.pair_n), private$.n_before))
         }
 
         # Completion notice. This lives here rather than in .plot() because
         # .run() is the only place that renders private$.warnings.
-        n_rows <- nrow(as.data.frame(self$results$table))
-        if (n_rows > 0) {
-            corr_type <- if (isTRUE(self$options$partial) && length(self$options$dep) >= 3)
+        # Count the coefficients actually produced, not the table rows: a
+        # constant variable yields a row of NAs that was being counted as a
+        # computed correlation.
+        if (private$.n_valid_pairs > 0) {
+            corr_type <- if (isTRUE(options_data$partial))
                 .("partial") else .("zero-order")
             private$.addWarning("INFO", sprintf(
                 .('Computed %d %s %s of %d variables.'),
-                n_rows, corr_type,
+                private$.n_valid_pairs, corr_type,
                 private$.methodLabel(self$options$typestatistics),
-                length(self$options$dep)))
+                length(options_data$myvars)))
         }
 
         # Display all collected warnings at the end
@@ -797,19 +861,21 @@ jjcorrmatClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         .generateSummary = function(options_data) {
     
     n_vars <- length(options_data$myvars)
-    n_obs <- nrow(private$.prepareData())
+    # Report the N the correlations were actually computed on. Under pairwise
+    # deletion nrow() of the (unfiltered) frame is larger than every pair's N.
+    n_label <- private$.pairNLabel()
     # Say whether that N is pooled or per group: with a Split By variable the
     # figure and table are per group, so a bare pooled count misdescribes them.
-    n_label <- if (!is.null(self$options$grvar))
-        sprintf(.("%d observations in total, analysed separately within each level of %s"),
-                n_obs, htmltools::htmlEscape(self$options$grvar))
-    else sprintf(.("%d observations"), n_obs)
+    if (!is.null(self$options$grvar))
+        n_label <- sprintf(.("%s, analysed separately within each level of %s"),
+                           n_label, htmltools::htmlEscape(self$options$grvar))
+    method_name <- private$.methodName(options_data$typestatistics)
 
     summary_text <- glue::glue("
     <h4>Analysis Summary</h4>
     <p><b>Variables analyzed:</b> {n_vars}</p>
     <p><b>Sample size:</b> {n_label}</p>
-    <p><b>Method:</b> {options_data$typestatistics} correlation</p>
+    <p><b>Method:</b> {method_name} correlation</p>
     <p><b>Correlation type:</b> {if(options_data$partial && n_vars >= 3) 'Partial' else 'Zero-order'}</p>
     ")
     
@@ -888,6 +954,8 @@ jjcorrmatClass <- if (requireNamespace('jmvcore')) R6::R6Class(
     table <- self$results$table
     # Clear existing rows - jamovi tables use deleteRows(), not clear()
     table$deleteRows()
+    private$.pair_n <- integer(0)
+    private$.n_valid_pairs <- 0L
 
     # Missing data: correlation::correlation performs pairwise complete-case
     # deletion, and when naHandling == "listwise" the incoming data has already
@@ -896,6 +964,8 @@ jjcorrmatClass <- if (requireNamespace('jmvcore')) R6::R6Class(
     add_rows_for_subset <- function(df, grp_label = "All") {
         res <- private$.computeCorrelations(df, options_data)
         if (is.null(res)) return(invisible(NULL))
+        private$.pair_n <- c(private$.pair_n, res$n[!is.na(res$n)])
+        private$.n_valid_pairs <- private$.n_valid_pairs + sum(!is.na(res$r))
         for (i in seq_len(nrow(res))) {
             table$addRow(
                 rowKey = paste0(res$var1[i], "_", res$var2[i], "_", grp_label),
@@ -977,22 +1047,30 @@ jjcorrmatClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
 .checkAssumptions = function(options_data) {
     
+    # Name the method that actually ran, and show only its assumptions: the
+    # panel used to print the raw option token ("robust correlation") and then
+    # all four bullets regardless of the selection.
+    method_name <- private$.methodName(options_data$typestatistics)
+    method_bullet <- switch(options_data$typestatistics,
+        "parametric" = "<li><b>Pearson:</b> Assumes that the variables are approximately
+        normally distributed and that their relationship is linear.</li>",
+        "nonparametric" = "<li><b>Spearman:</b> Does not assume a specific distribution.
+        It is based on the ranks of the data and can detect monotonic (but not
+        necessarily linear) relationships.</li>",
+        "robust" = "<li><b>Winsorized Pearson:</b> Pearson's r computed after
+        winsorizing the most extreme 20% of observations in each tail, so
+        outliers are pulled in rather than removed. Less sensitive to outliers
+        than Pearson, but it still measures a linear association.</li>",
+        "bayes" = "<li><b>Bayesian Pearson:</b> Provides a measure of evidence for the
+        presence of a correlation, but the interpretation depends on the chosen prior.</li>",
+        "")
+
     assumptions_content <- glue::glue("
     <h3>Statistical Assumptions & Warnings</h3>
     <hr>
-    <p><b>For {options_data$typestatistics} correlation:</b></p>
+    <p><b>For {method_name} correlation:</b></p>
     <ul>
-        <li><b>Parametric (Pearson):</b> Assumes that the variables are approximately
-        normally distributed and that their relationship is linear.</li>
-        <li><b>Nonparametric (Spearman):</b> Does not assume a specific distribution.
-        It is based on the ranks of the data and can detect monotonic (but not
-        necessarily linear) relationships.</li>
-        <li><b>Robust (Winsorized Pearson):</b> Pearson's r computed after
-        winsorizing the most extreme 20% of observations in each tail, so
-        outliers are pulled in rather than removed. Less sensitive to outliers
-        than Pearson, but it still measures a linear association.</li>
-        <li><b>Bayesian:</b> Provides a measure of evidence for the presence of a
-        correlation, but the interpretation depends on the chosen prior.</li>
+        {method_bullet}
     </ul>
     <p><b>General Warnings:</b></p>
     <ul>

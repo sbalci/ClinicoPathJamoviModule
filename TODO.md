@@ -3450,3 +3450,19 @@ API and will fail `R CMD check --run-donttest` until `prepare()` + `document()` 
       `is.finite(x)`, with the non-finite count reported separately from ordinary missingness
       because it signals a data-entry or divide-by-zero problem rather than an absent observation.
       Found during the hullplot and jjwithinstats release reviews, 2026-08-12.
+
+- [ ] **[CORRECTNESS/module-wide] `jmvcore::toNumeric()` is not a coercion function.**
+      It only unwraps a jamovi/haven `values` attribute; a plain character or factor column
+      falls straight through unchanged. So every `mydata[[v]] <- jmvcore::toNumeric(col)`
+      "conversion" loop is a no-op for text columns, and every guard shaped like
+      `all(is.na(jmvcore::toNumeric(col)))` is dead code that can never fire. Confirmed by
+      reading the jmvcore source and by reproduction: `jjwithinstats` on character
+      measurements died in `quantile()` with `non-numeric argument to binary operator`, a
+      message naming neither the option nor the variable, raised from `.init()`.
+      131 `R/*.b.R` files call `toNumeric`. In the jamovi GUI `permitted: [ numeric ]` keeps
+      text columns out of the picker, so the exposure is limited to callers of the exported R
+      wrappers (tests, `@examples`, `R CMD check --run-donttest`) — low severity, but it
+      presents as a jmvcore bug and costs an afternoon each time. Correct idiom:
+      `num <- jmvcore::toNumeric(col); if (!is.numeric(num)) num <- suppressWarnings(as.numeric(as.character(num)))`.
+      Fixed in `R/jjwithinstats.b.R` only; worth one sweep across the rest.
+      Found 2026-08-12 during the post-review audit pass.

@@ -45,6 +45,11 @@ jjridgesClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         # Variance-heterogeneity notes: reported, but they do NOT trigger a test switch
         # (Welch already covers unequal variances - see .performSingleTest).
         .assumptionNotes = character(0),
+        # Per-comparison "this row could not be computed" explanations. .performSingleTest
+        # used to build these strings and return them in a `warning` element that nothing
+        # ever read, so a blank NA row appeared with no reason given. Collected here and
+        # emitted as one summarized notice in .generateTests. Reset in .generateTests.
+        .testWarnings = character(0),
 
         .addNotice = function(type, title, content) {
             private$.noticeList[[length(private$.noticeList) + 1]] <- list(
@@ -293,7 +298,9 @@ jjridgesClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                         skewness <- 0
                     }
                 }
-                if (abs(skewness) > 2) {
+                # is.finite(): a NaN/NA skewness (constant or non-finite x) would make the
+                # `if` throw "missing value where TRUE/FALSE needed" and kill the analysis.
+                if (is.finite(skewness) && abs(skewness) > 2) {
                     warnings <- c(warnings, .("Data shows high skewness. Consider log transformation if appropriate for your clinical context."))
                 }
             }
@@ -994,7 +1001,24 @@ jjridgesClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             
             # Remove missing values (jmvcore::naOmit preserves jamovi column attributes)
             plot_data <- jmvcore::naOmit(plot_data)
-            
+
+            # naOmit keeps Inf/-Inf (is.na(Inf) is FALSE). A single Inf then poisons every
+            # downstream number: mean/sd become Inf/NaN in the statistics table and in the
+            # copy-ready report, and the skewness guard in .validateData evaluates NA, which
+            # aborts the whole analysis with "missing value where TRUE/FALSE needed".
+            n_nonfinite <- sum(!is.finite(plot_data$x))
+            if (n_nonfinite > 0) {
+                plot_data <- plot_data[is.finite(plot_data$x), , drop = FALSE]
+                private$.addNotice(
+                    'WARNING', 'Non-finite values removed',
+                    paste0(n_nonfinite, " row", if (n_nonfinite == 1) "" else "s",
+                           " with an infinite value in '", x_var,
+                           "' ", if (n_nonfinite == 1) "was" else "were",
+                           " excluded. ", nrow(plot_data),
+                           " observations remain.")
+                )
+            }
+
             # Reverse order if requested
             if (self$options$reverse_order) {
                 plot_data$y <- factor(plot_data$y, levels = rev(levels(plot_data$y)))
@@ -1041,11 +1065,19 @@ jjridgesClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 )
             }
             
-            if (private$.option("add_quantiles")) {
-                quantiles <- private$.validateQuantiles(private$.option("quantiles"))
-                p <- p + ggridges::stat_density_ridges(
-                    quantile_lines = TRUE,
-                    quantiles = quantiles
+            # Quantile lines are NOT added as a second layer here. Doing so appended an
+            # unstyled ggridges::stat_density_ridges() on top of the real one - default
+            # grey70 fill, default scale - which painted over the palette and hid the
+            # boxplots entirely. The quantile arguments are handed to the layer that
+            # already exists instead (see .createDensityPlot/.createGradientPlot/
+            # .createViolinPlot). stat = "binline" has no quantile support, so histogram
+            # ridges say so rather than silently ignoring the option.
+            if (private$.option("add_quantiles") && plot_type == "histogram_ridges") {
+                private$.addNotice(
+                    'WARNING', 'Quantile lines not available',
+                    paste0("Quantile lines are not drawn on histogram ridges (the binned ",
+                           "histogram statistic does not compute quantiles). Choose a ",
+                           "density-based plot type to show them.")
                 )
             }
             
@@ -1202,30 +1234,52 @@ jjridgesClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             return(p)
         },
         
+        # Quantile probabilities for the primary ridge layer. Always safe to pass:
+        # stat_density_ridges only draws them when quantile_lines is TRUE.
+        .quantileValues = function() {
+            private$.validateQuantiles(private$.option("quantiles"))
+        },
+
         .createDensityPlot = function(data) {
             p <- ggplot(data, aes(x = x, y = y))
-            
+
+            # "Basic Ridgeline" and "Density Ridges" used to render byte-identical figures
+            # because both routed here. geom_density_ridges2 draws a CLOSED ridgeline
+            # (outline carried along the baseline), which is the classic ridgeline look and
+            # is visibly distinct from the open-topped geom_density_ridges.
+            ridge_geom <- if (identical(private$.option("plot_type"), "ridgeline"))
+                ggridges::geom_density_ridges2
+            else
+                ggridges::geom_density_ridges
+
+            draw_quantiles <- isTRUE(private$.option("add_quantiles"))
+            quantile_probs <- private$.quantileValues()
+
             # Handle fill_ridges option
             if (self$options$fill_ridges) {
                 if (!is.null(self$options$fill_var)) {
                     # Show legend based on user preference when fill variable is used
                     show_fill_legend <- self$options$show_fill_legend %||% TRUE
-                    p <- p + ggridges::geom_density_ridges(
+                    p <- p + ridge_geom(
                         aes(fill = fill),
                         scale = self$options$scale,
                         alpha = self$options$alpha,
                         bandwidth = private$.calculateBandwidth(data$x),
+                        quantile_lines = draw_quantiles,
+                        quantiles = quantile_probs,
                         color = "black",
                         linewidth = 0.5,
                         show.legend = show_fill_legend
                     )
                 } else {
                     # Hide legend for y-variable coloring (redundant with y-axis)
-                    p <- p + ggridges::geom_density_ridges(
+                    p <- p + ridge_geom(
                         aes(fill = y),
                         scale = self$options$scale,
                         alpha = self$options$alpha,
                         bandwidth = private$.calculateBandwidth(data$x),
+                        quantile_lines = draw_quantiles,
+                        quantiles = quantile_probs,
                         color = "black",
                         linewidth = 0.5,
                         show.legend = FALSE
@@ -1235,26 +1289,30 @@ jjridgesClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 p <- private$.applyColorPalette(p)
             } else {
                 # Outline only - no fill
-                p <- p + ggridges::geom_density_ridges(
+                p <- p + ridge_geom(
                     scale = self$options$scale,
                     fill = NA,
                     color = "black",
                     linewidth = 0.75,
-                    bandwidth = private$.calculateBandwidth(data$x)
+                    bandwidth = private$.calculateBandwidth(data$x),
+                    quantile_lines = draw_quantiles,
+                    quantiles = quantile_probs
                 )
             }
-            
+
             return(p)
         },
-        
+
         .createGradientPlot = function(data) {
             p <- ggplot(data, aes(x = x, y = y))
-            
+
             p <- p + ggridges::geom_density_ridges_gradient(
                 aes(fill = after_stat(x)),
                 scale = self$options$scale,
                 gradient_lwd = 1.0,
-                bandwidth = private$.calculateBandwidth(data$x)
+                bandwidth = private$.calculateBandwidth(data$x),
+                quantile_lines = isTRUE(private$.option("add_quantiles")),
+                quantiles = private$.quantileValues()
             )
             
             # Apply gradient colors
@@ -1314,31 +1372,46 @@ jjridgesClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         },
         
         .createViolinPlot = function(data) {
-            p <- ggplot(data, aes(x = x, y = y))
-            
-            if (!is.null(self$options$fill_var)) {
-                # Show legend based on user preference when fill variable is used
-                show_fill_legend <- self$options$show_fill_legend %||% TRUE
-                p <- p + ggridges::geom_density_ridges(
-                    aes(fill = fill, height = stat(density)),
-                    scale = self$options$scale,
-                    alpha = self$options$alpha,
-                    show.legend = show_fill_legend,
-                    bandwidth = private$.calculateBandwidth(data$x)
-                )
-            } else {
-                p <- p + ggridges::geom_density_ridges(
-                    aes(fill = y, height = stat(density)),
-                    scale = self$options$scale,
-                    alpha = self$options$alpha,
-                    show.legend = FALSE,
-                    bandwidth = private$.calculateBandwidth(data$x)
-                )
+            # This used to be geom_density_ridges(aes(height = stat(density))), which is
+            # exactly what StatDensityRidges already maps - a no-op that made "Violin
+            # Ridges" render byte-identically to "Density Ridges" (and emitted the ggplot2
+            # stat() deprecation warning). A violin is a MIRRORED density, so draw a real
+            # one: geom_violin(orientation = "y") along the same discrete y axis.
+            has_fill <- !is.null(self$options$fill_var)
+
+            args <- list(
+                mapping = if (has_fill) aes(fill = fill) else aes(fill = y),
+                orientation = "y",
+                # `scale` is the Ridge Height Scale control. geom_density_ridges
+                # consumed it; geom_violin takes the equivalent as `width`, and
+                # omitting it made the option inert for this plot type.
+                width = self$options$scale,
+                alpha = self$options$alpha,
+                colour = "black",
+                linewidth = 0.5,
+                show.legend = if (has_fill) (self$options$show_fill_legend %||% TRUE) else FALSE
+            )
+
+            # .calculateBandwidth returns NULL for "nrd0" (meaning: use the geom default);
+            # geom_violin has no NULL default, so only pass bw when we have a number.
+            bw <- private$.calculateBandwidth(data$x)
+            if (!is.null(bw))
+                args$bw <- bw
+
+            if (isTRUE(private$.option("add_quantiles"))) {
+                args$quantiles <- private$.quantileValues()
+                # geom_violin defaults quantile.linetype to 0 ("do not draw"), so passing
+                # `quantiles` alone computes them and shows nothing. Measured: identical
+                # PNG md5 with and without `quantiles` until linetype is set.
+                args$quantile.linetype <- 1
             }
-            
+
+            p <- ggplot(data, aes(x = x, y = y)) +
+                do.call(ggplot2::geom_violin, args)
+
             # Apply color palette
             p <- private$.applyColorPalette(p)
-            
+
             return(p)
         },
         
@@ -1561,6 +1634,7 @@ jjridgesClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     if (stratum_label != "") paste0(" (", stratum_label, ")") else "",
                     ". Need at least 2 observations per group."
                 )
+                private$.testWarnings <- c(private$.testWarnings, warning_msg)
                 return(list(
                     comparison = paste(group1, "vs", group2),
                     statistic = NA,
@@ -1570,7 +1644,9 @@ jjridgesClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     effect_size = NA,
                     effect_ci_lower = NA,
                     effect_ci_upper = NA,
-                    test_method = test_type,
+                    # NOT test_type: that is the option VALUE ("parametric"), which read as a
+                    # test name in the Method column of a row where no test was run.
+                    test_method = "not testable (n < 2)",
                     warning = warning_msg
                 ))
             }
@@ -1582,6 +1658,11 @@ jjridgesClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             # before the plot is built, so the exception cost the ridge plot as well as the
             # table. Return an explicit NA row instead.
             if (stats::var(data1) == 0 && stats::var(data2) == 0) {
+                private$.testWarnings <- c(private$.testWarnings, paste0(
+                    "Comparison ", group1, " vs ", group2,
+                    if (stratum_label != "") paste0(" (", stratum_label, ")") else "",
+                    ": every value is identical within both groups, so there is ",
+                    "no variability to test."))
                 return(list(
                     comparison = paste(group1, "vs", group2),
                     statistic = NA, p_value = NA, ci_lower = NA, ci_upper = NA,
@@ -1748,6 +1829,12 @@ jjridgesClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
             # Calculate effect size with proper CIs
             effect_result <- private$.calculateEffectSizeWithCI(data1, data2)
+            if (!is.null(effect_result$warning)) {
+                private$.testWarnings <- c(private$.testWarnings, paste0(
+                    group1, " vs ", group2,
+                    if (stratum_label != "") paste0(" (", stratum_label, ")") else "",
+                    ": ", effect_result$warning))
+            }
 
             # Build comparison label
             comparison_label <- paste(group1, "vs", group2)
@@ -2031,14 +2118,40 @@ jjridgesClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             # Reset the assumption-switch accumulator for this run
             private$.assumptionSwitches <- character(0)
             private$.assumptionNotes <- character(0)
+            private$.testWarnings <- character(0)
 
-            # Build stratification variables (facet and fill if present)
+            # Build stratification variables (facet and fill if present).
+            #
+            # A stratifier that IS the Y variable makes every stratum contain exactly one
+            # Y group, so `length(groups) > 1` is never TRUE and the visible Statistical
+            # Tests table stays empty while the completion notice still claims tests ran.
+            # Ignore such a stratifier (the unstratified pairwise comparison is what the
+            # user meant) and say so.
+            y_var <- self$options$y_var
             strata_vars <- c()
+            redundant_strata <- character(0)
             if (!is.null(self$options$facet_var) && "facet" %in% names(data)) {
-                strata_vars <- c(strata_vars, "facet")
+                if (identical(self$options$facet_var, y_var))
+                    redundant_strata <- c(redundant_strata, "Facet")
+                else
+                    strata_vars <- c(strata_vars, "facet")
             }
             if (!is.null(self$options$fill_var) && "fill" %in% names(data)) {
-                strata_vars <- c(strata_vars, "fill")
+                if (identical(self$options$fill_var, y_var))
+                    redundant_strata <- c(redundant_strata, "Fill")
+                else
+                    strata_vars <- c(strata_vars, "fill")
+            }
+            if (length(redundant_strata) > 0) {
+                private$.addNotice(
+                    'WARNING', 'Grouping variable reused',
+                    paste0(
+                        paste(redundant_strata, collapse = " and "),
+                        " is the same variable as the Y (grouping) variable '", y_var,
+                        "', so there is no within-stratum comparison to make. The pairwise ",
+                        "comparisons below ignore it and compare the Y groups directly."
+                    )
+                )
             }
 
             # If there are strata, perform comparisons within each stratum
@@ -2126,6 +2239,25 @@ jjridgesClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                         private$.addTestRow(tests_table, test_results[[i]], adjusted_p[i], i)
                     }
                 }
+            }
+
+            # Explain every row that came back blank. These messages were previously built
+            # and thrown away, leaving NA statistic/p-value cells with no reason given.
+            if (length(private$.testWarnings) > 0) {
+                private$.addNotice(
+                    'WARNING', 'Some comparisons could not be computed',
+                    paste(unique(private$.testWarnings), collapse = " | ")
+                )
+            }
+
+            # A visible but empty Statistical Tests table with a cheerful completion notice
+            # is worse than no table. Say why it is empty.
+            if (self$results$tests$rowCount == 0) {
+                private$.addNotice(
+                    'WARNING', 'No comparisons available',
+                    paste0("No pairwise comparison could be made: at least two groups of '",
+                           self$options$y_var, "' are needed within each stratum.")
+                )
             }
 
             # Emit a SINGLE summarized notice for all assumption-based auto-switches
