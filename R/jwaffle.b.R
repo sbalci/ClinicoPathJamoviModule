@@ -466,7 +466,15 @@ jwaffleClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             # Calculate waffle chart statistics for caption
             n_squares <- 100  # Total number of squares in waffle chart
             units_per_square <- total_cases / n_squares
-            squares_per_unit <- 100 / total_cases  # Each square represents this percentage
+            # Percentage of the total that ONE SQUARE represents. The chart is
+            # always drawn with n_squares squares, so this is 100/n_squares = 1%
+            # by construction, whatever n is.
+            #
+            # This used to be `100 / total_cases`, which is the percentage per
+            # CASE, not per square - so every caption reported the reciprocal:
+            # "approximately 2.0%" at n = 50, "0.5%" at n = 200, "0.2%" at
+            # n = 437. It happened to be right only at n = 100.
+            pct_per_square <- 100 / n_squares
 
             # Choose appropriate terminology
             unit_label <- if (is_weighted) "weighted units" else "cases"
@@ -476,7 +484,7 @@ jwaffleClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 # Facet-specific caption
                 caption_text <- sprintf(
                     "%s = %s: Each square ~ %.1f %s (%.1f%%) (total = %.0f)",
-                    facet_var, facet_level, units_per_square, unit_label, squares_per_unit, total_cases
+                    facet_var, facet_level, units_per_square, unit_label, pct_per_square, total_cases
                 )
             } else if (!is.null(facet_var)) {
                 # General faceted caption (when not specific to a level).
@@ -492,7 +500,7 @@ jwaffleClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 # Simple caption
                 caption_text <- sprintf(
                     "Each square represents %.1f %s (approximately %.1f%%) (total n=%.0f)",
-                    units_per_square, unit_label, squares_per_unit, total_cases
+                    units_per_square, unit_label, pct_per_square, total_cases
                 )
             }
             

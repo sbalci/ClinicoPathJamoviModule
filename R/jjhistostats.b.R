@@ -15,6 +15,12 @@ jjhistostatsClass <- if (requireNamespace('jmvcore'))
         "jjhistostatsClass",
         inherit = jjhistostatsBase,
         private = list(
+        # Fixed seed for the sampling-based paths. Bayesian output uses
+        # BayesFactor's MCMC and robust/effect-size CIs use bootstrapping, so
+        # without this the SAME analysis reported different numbers on every
+        # re-render - a credible interval that moves when nothing changed.
+        .STOCHASTIC_SEED = 20250101L,
+
 
         # Option overrides for clinical presets (jamovi options are read-only at runtime;
         # presets record overrides here and reads go through private$.option()).
@@ -847,6 +853,10 @@ jjhistostatsClass <- if (requireNamespace('jmvcore'))
 
             ,
             .plot = function(image, ggtheme, theme, ...) {
+                # Seed the sampling-based paths (Bayesian MCMC, bootstrap CIs) so a
+                # re-render of an unchanged analysis reports the same numbers.
+                withr::local_seed(private$.STOCHASTIC_SEED)
+
                 # Main plot generation function
                 # Defensive: repopulate clinical-preset overrides in case this render
                 # path runs without a prior .init() (idempotent).
@@ -930,6 +940,10 @@ jjhistostatsClass <- if (requireNamespace('jmvcore'))
 
             ,
             .plot2 = function(image, ggtheme, theme, ...) {
+                # Seed the sampling-based paths (Bayesian MCMC, bootstrap CIs) so a
+                # re-render of an unchanged analysis reports the same numbers.
+                withr::local_seed(private$.STOCHASTIC_SEED)
+
                 # Grouped plot generation function
                 # Defensive: repopulate clinical-preset overrides in case this render
                 # path runs without a prior .init() (idempotent).

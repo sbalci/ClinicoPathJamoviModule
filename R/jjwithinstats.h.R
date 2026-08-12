@@ -582,7 +582,9 @@ jjwithinstatsBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   within-subjects/paired data.
 #' @param ggpubrPlotType Type of ggpubr plot for within-subjects data. Paired
 #'   plot shows individual trajectories.
-#' @param ggpubrPalette Color palette for ggpubr plot.
+#' @param ggpubrPalette Color palette for the ggpubr plot. Applies to the
+#'   boxplot, violin and paired plot types; the line plot draws a single mean
+#'   trajectory, so a categorical palette has nothing to colour there.
 #' @param ggpubrAddStats Add statistical comparison p-values to ggpubr plot.
 #' @param ggpubrShowLines Show individual subject trajectories for paired
 #'   plot.

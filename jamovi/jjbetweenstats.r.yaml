@@ -117,7 +117,7 @@ items:
       height: 450
       renderFun: .plotGGPubr2
       requiresData: true
-      visible: (addGGPubrPlot && grvar)
+      visible: (length(grvar) > 0 && addGGPubrPlot)
       clearWith:
         - dep
         - group

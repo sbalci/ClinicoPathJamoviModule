@@ -16,6 +16,12 @@ jjridgesClass <- if (requireNamespace('jmvcore')) R6::R6Class(
     
     # Constants for validation and defaults
     private = list(
+        # Fixed seed for the sampling-based paths. Bayesian output uses
+        # BayesFactor's MCMC and robust/effect-size CIs use bootstrapping, so
+        # without this the SAME analysis reported different numbers on every
+        # re-render - a credible interval that moves when nothing changed.
+        .STOCHASTIC_SEED = 20250101L,
+
         # Clinical constants
         .MIN_SAMPLE_SIZE = 10,
         .MIN_GROUP_SIZE = 3,
@@ -576,7 +582,7 @@ jjridgesClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     "<li><strong>Homogeneity of Variance:</strong> Groups should have similar spread (variance). ",
                     "Ridge widths should be comparable across groups.</li>",
                     "</ul>",
-                    "<p><strong>Tests Used:</strong> Independent t-test (2 groups) or one-way ANOVA (3+ groups)</p>",
+                    "<p><strong>Tests Used:</strong> Independent t-test on every pair of groups. With 3 or more groups this analysis reports PAIRWISE comparisons, not an omnibus one-way ANOVA; the p-values are adjusted for multiplicity by the selected method.</p>",
                     "<p><strong>When Violated:</strong> Consider nonparametric tests if distributions are skewed, or robust tests if variances differ.</p>"
                 )
             } else if (test_type == "nonparametric") {
@@ -588,7 +594,7 @@ jjridgesClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     "<li><strong>Similar Distributions:</strong> For Mann-Whitney/Kruskal-Wallis, groups should have similar distribution shapes ",
                     "(ridges with similar shapes but different positions). If shapes differ, tests compare distributions rather than medians.</li>",
                     "</ul>",
-                    "<p><strong>Tests Used:</strong> Mann-Whitney U test (2 groups) or Kruskal-Wallis test (3+ groups)</p>",
+                    "<p><strong>Tests Used:</strong> Mann-Whitney U (Wilcoxon rank-sum) test on every pair of groups. With 3 or more groups this analysis reports PAIRWISE comparisons, not an omnibus Kruskal-Wallis test; the p-values are adjusted for multiplicity by the selected method.</p>",
                     "<p><strong>Advantages:</strong> Robust to outliers and skewed distributions common in pathology data (e.g., mitotic counts, lymph node involvement).</p>",
                     "<p><strong>Effect Sizes:</strong> Cliff's Delta shows probability one group has higher values; Hodges-Lehmann estimates typical difference.</p>"
                 )
@@ -600,7 +606,7 @@ jjridgesClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     "<li><strong>Outlier Resistance:</strong> Robust tests use trimmed means (default 20% trimming), reducing outlier influence.</li>",
                     "<li><strong>Heterogeneity Tolerance:</strong> Does not assume equal variances across groups.</li>",
                     "</ul>",
-                    "<p><strong>Tests Used:</strong> Yuen's trimmed means test (Welch-type robust alternative to t-test/ANOVA)</p>",
+                    "<p><strong>Tests Used:</strong> Yuen's trimmed-means test (a Welch-type robust alternative to the t-test) on every pair of groups; no omnibus test is computed.</p>",
                     "<p><strong>Best For:</strong> Data with unequal variances, mild outliers, or slight departures from normality.</p>",
                     "<p><strong>Clinical Scenarios:</strong> Laboratory values with occasional extreme results, tumor measurements with outliers.</p>"
                 )
@@ -1869,6 +1875,9 @@ jjridgesClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                         # sizes stay fixed at (n1, n2). Without it boot draws a random
                         # group split (possibly empty -> NA), giving an invalid CI.
                         boot_result <- tryCatch({
+                            # Seeded: an unseeded bootstrap moved the Cliff's
+                            # delta confidence interval between identical runs.
+                            withr::local_seed(private$.STOCHASTIC_SEED)
                             boot::boot(c(data1, data2), boot_fn, R = 1000,
                                        strata = factor(rep(1:2, c(n1, n2))))
                         }, error = function(e) NULL)

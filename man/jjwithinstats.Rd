@@ -116,7 +116,9 @@ within-subjects/paired data.}
 \item{ggpubrPlotType}{Type of ggpubr plot for within-subjects data. Paired
 plot shows individual trajectories.}
 
-\item{ggpubrPalette}{Color palette for ggpubr plot.}
+\item{ggpubrPalette}{Color palette for the ggpubr plot. Applies to the
+boxplot, violin and paired plot types; the line plot draws a single mean
+trajectory, so a categorical palette has nothing to colour there.}
 
 \item{ggpubrAddStats}{Add statistical comparison p-values to ggpubr plot.}
 

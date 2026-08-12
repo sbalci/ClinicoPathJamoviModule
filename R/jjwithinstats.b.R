@@ -156,6 +156,14 @@ jjwithinstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
     "jjwithinstatsClass",
     inherit = jjwithinstatsBase,
     private = list(
+        # Set by .subtitleExpr when the takeover was attempted and failed.
+        .subtitleFallback = NULL,
+
+        # Fixed seed for the sampling-based paths (Bayesian MCMC, robust
+        # bootstrap), so the same analysis reports the same numbers on every
+        # render rather than drifting between refreshes.
+        .STOCHASTIC_SEED = 20250101L,
+
         .prepared_data = NULL,
         .prepared_options = NULL,
         .data_hash = NULL,
@@ -268,6 +276,90 @@ jjwithinstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             private$.accumulateMessage(message)
         },
         
+        # Name of the test that is ACTUALLY run. With TWO measurements the
+        # analysis is a paired t-test / Wilcoxon signed-rank, not an ANOVA; the
+        # summary panel called every configuration a "Repeated measures ANOVA",
+        # so a two-timepoint comparison was described as an ANOVA in text offered
+        # for a methods section.
+        .testLabel = function(typestatistics, num_measurements) {
+            two <- !is.na(num_measurements) && num_measurements <= 2
+            switch(typestatistics,
+                "parametric"    = if (two) .("Paired samples t-test") else .("Repeated measures ANOVA"),
+                "nonparametric" = if (two) .("Wilcoxon signed-rank test") else .("Friedman test"),
+                "robust"        = if (two) .("Robust paired test (Yuen's trimmed means)") else .("Robust repeated measures test"),
+                "bayes"         = if (two) .("Bayesian paired samples t-test") else .("Bayesian repeated measures analysis"),
+                .("Within-subjects comparison"))
+        },
+
+        # ggstatsplot 1.0.0 removed `pairwise.comparisons`; "none" is how the
+        # significance brackets are switched off now. Without this, unticking the
+        # box left the brackets on the plot.
+        .pairwiseDisplay = function(opts) {
+            if (isTRUE(opts$pairwisecomparisons)) opts$pairwisedisplay else "none"
+        },
+
+        # Build the plot subtitle ourselves.
+        #
+        # ggstatsplot 1.0.0 also removed `effsize.type` from ggwithinstats, so
+        # the effect-size selector had no effect: all four choices produced
+        # Hedges' g. statsExpressions - which ggstatsplot calls internally - still
+        # honours it, and crucially still applies the Greenhouse-Geisser
+        # sphericity correction for 3+ measurements (verified: the takeover
+        # reproduces F_Fisher(1.79, 69.71) = 94.54, p = 1.54e-19 exactly, the
+        # same fractional degrees of freedom the untouched plot shows).
+        #
+        # Returns NULL when we should not take over, in which case the caller
+        # leaves ggstatsplot to build its own subtitle.
+        .subtitleExpr = function(long_data, opts, num_measurements) {
+            if (!isTRUE(opts$resultssubtitle)) return(NULL)
+            if (is.na(num_measurements) || num_measurements < 2) return(NULL)
+            # Leave the Bayesian path to ggstatsplot: taking the subtitle over
+            # sets results.subtitle = FALSE, which also suppresses the
+            # bf.message caption, silently disabling the 'Bayes factor message'
+            # checkbox.
+            if (identical(opts$typestatistics, "bayes")) return(NULL)
+            # Taking the subtitle over sets results.subtitle = FALSE, which also
+            # removes ggstatsplot's Bayes-factor caption. If the user asked for
+            # that caption, leave the whole subtitle to ggstatsplot rather than
+            # silently dropping it.
+            if (isTRUE(opts$bfmessage)) {
+                private$.subtitleFallback <-
+                    .("the Bayes factor message is switched on, which ggstatsplot renders alongside its own subtitle")
+                return(NULL)
+            }
+
+            # two_sample_test accepts only g/d/unbiased/biased; the ANOVA-only
+            # names error, so map them onto the equivalent two-group family.
+            eff <- opts$effsizetype
+            if (num_measurements <= 2) {
+                if (identical(eff, "eta"))   eff <- "biased"
+                if (identical(eff, "omega")) eff <- "unbiased"
+            }
+
+            fn <- if (num_measurements <= 2) statsExpressions::two_sample_test
+                  else                       statsExpressions::oneway_anova
+
+            res <- tryCatch(
+                rlang::inject(fn(
+                    data         = long_data,
+                    x            = !!rlang::sym("measurement"),
+                    y            = !!rlang::sym("value"),
+                    subject.id   = !!rlang::sym("rowid"),
+                    paired       = TRUE,
+                    type         = opts$typestatistics,
+                    effsize.type = eff,
+                    digits       = opts$digits,
+                    conf.level   = opts$conflevel)),
+                error = function(e) e)
+
+            if (inherits(res, "condition")) {
+                private$.subtitleFallback <- conditionMessage(res)
+                return(NULL)
+            }
+            if (is.null(res$expression) || length(res$expression) == 0) return(NULL)
+            res$expression[[1]]
+        },
+
         # Apply clinical presets for common scenarios
         .applyClinicalPresets = function() {
             if (is.null(self$options$clinicalpreset) || self$options$clinicalpreset == "custom") {
@@ -413,8 +505,13 @@ jjwithinstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             if (self$options$typestatistics == "parametric") {
                 for (var in vars) {
                     num_vals <- jmvcore::toNumeric(mydata[[var]])
-                    num_vals <- num_vals[!is.na(num_vals)]
-                    
+                    # is.finite(), not !is.na(): is.na() is TRUE for NaN but
+                    # FALSE for Inf, so an infinite value survived into sd(),
+                    # which returned NaN. `NaN > 0` is NA, and the `if (NA)`
+                    # below aborted the entire analysis with the unactionable
+                    # "missing value where TRUE/FALSE needed".
+                    num_vals <- num_vals[is.finite(num_vals)]
+
                     if (length(num_vals) > 5) {
                         # Moment coefficient of skewness (g1). |skewness| > 1
                         # flags a substantially skewed distribution, a far more
@@ -422,12 +519,12 @@ jjwithinstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                         n_v <- length(num_vals)
                         mean_val <- mean(num_vals)
                         sd_val <- sd(num_vals)
-                        skewness <- if (sd_val > 0)
+                        skewness <- if (is.finite(sd_val) && sd_val > 0)
                             (sum((num_vals - mean_val)^3) / n_v) / (sd_val^3)
                         else
                             0
 
-                        if (abs(skewness) > 1) {  # Substantially skewed
+                        if (is.finite(skewness) && abs(skewness) > 1) {  # Substantially skewed
                             private$.accumulateDataMessage(
                                 .("<br> <strong>Skewed Data Detected:</strong> Consider Nonparametric test for skewed biomarker or clinical data<br>")
                             )
@@ -504,6 +601,17 @@ jjwithinstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 return(NULL)
             }
             
+            # Two slots holding the same variable produce duplicate column names
+            # and a raw "factor level [2] is duplicated" crash out of
+            # pivot_longer(), reached uncaught from .init(). Reject it with a
+            # message that says what to do about it.
+            if (anyDuplicated(vars)) {
+                dup <- unique(vars[duplicated(vars)])
+                jmvcore::reject(
+                    .("Each measurement must be a different variable ('{var}' is selected more than once)."),
+                    var = paste(dup, collapse = ", "))
+            }
+
             mydata$rowid <- seq.int(nrow(mydata))
 
             # Check if required variables exist in dataset (raw names)
@@ -576,12 +684,11 @@ jjwithinstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     "<p>Consider investigating why so much data is missing.</p>",
                     "</div>"
                 )
-                if (!is.null(self$results$warnings)) {
-                    self$results$warnings$setContent(warning_msg)
-                    self$results$warnings$setVisible(TRUE)
-                } else {
-                    private$.accumulateDataMessage(warning_msg)
-                }
+                # Route it through the accumulator like every other message.
+                # The direct setContent() here was overwritten moments later by
+                # .accumulateMessage(), which rebuilds the panel from
+                # private$.messages - so this warning never reached the user.
+                private$.accumulateDataMessage(warning_msg)
             }
 
             # Validate data quality before processing
@@ -590,17 +697,35 @@ jjwithinstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             # Ideally .validateDataQuality should use .accumulateDataMessage logic if passed.
             private$.validateDataQuality(mydata, vars)
             
-            # Remove NA values once
+            # Remove NA values once. naOmit() drops NA and NaN but NOT Inf, so
+            # an infinite measurement used to survive into the test: the plot
+            # rendered "t(77) = NA, p = NA" while the panel reassured the user
+            # that all 78 subjects had been retained. Count non-finite values
+            # separately - they signal a data-entry or divide-by-zero problem
+            # rather than an ordinary missing observation.
+            n_nonfinite <- sum(vapply(vars, function(v) {
+                x <- jmvcore::toNumeric(mydata[[v]])
+                sum(!is.na(x) & !is.finite(x))
+            }, numeric(1)))
+            finite_rows <- Reduce(`&`, lapply(vars, function(v) {
+                x <- jmvcore::toNumeric(mydata[[v]])
+                is.finite(x)
+            }))
+            mydata <- mydata[finite_rows, , drop = FALSE]
             mydata <- jmvcore::naOmit(mydata)
-            
+
             # Report N retained
             final_n <- nrow(mydata)
             dropped_n <- n_rows - final_n
-            
+
             if (dropped_n > 0) {
                  private$.accumulateDataMessage(
                     glue::glue(.("<br> <strong>Data Processing:</strong> {final_n} subjects retained. {dropped_n} incomplete cases removed.<br>"))
                 )
+                 if (n_nonfinite > 0)
+                     private$.accumulateDataMessage(
+                        glue::glue(.("<br> <strong>Non-finite values:</strong> {n_nonfinite} infinite or undefined measurement(s) were treated as missing. Check the source data for division by zero or out-of-range entries.<br>"))
+                    )
             } else {
                  private$.accumulateDataMessage(
                     glue::glue(.("<br> <strong>Data Processing:</strong> All {final_n} subjects retained (complete data).<br>"))
@@ -787,13 +912,7 @@ jjwithinstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             summary_parts <- list()
             
             # Analysis overview
-            analysis_type <- switch(opts$typestatistics,
-                "parametric" = .("Repeated measures ANOVA"),
-                "nonparametric" = .("Friedman test"),
-                "robust" = .("Robust repeated measures test"),
-                "bayes" = .("Bayesian repeated measures analysis"),
-                .("Within-subjects comparison")
-            )
+            analysis_type <- private$.testLabel(opts$typestatistics, num_measurements)
             
             summary_header <- sprintf(
                 .("<strong>Analysis:</strong> %s with %d measurements per subject"),
@@ -891,6 +1010,26 @@ jjwithinstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 private$.applyClinicalPresets()
                 # Ensure data is prepared (and N messages generated)
                 private$.prepareData()
+
+                # Probe the subtitle takeover HERE, not in .plot(): .run() is the
+                # only place that composes the warnings HTML, so a flag set later
+                # by .plot() would never be rendered. When the takeover stands
+                # down, 'Effect size type' and 'Decimal places' do not reach the
+                # reported statistic, which the user should be told rather than
+                # left to discover.
+                private$.subtitleFallback <- NULL
+                local({
+                    ld <- private$.prepareData(emit_messages = FALSE)
+                    if (!is.null(ld)) {
+                        opts_now <- private$.prepareOptions()
+                        invisible(private$.subtitleExpr(
+                            ld, opts_now, length(unique(ld$measurement))))
+                    }
+                })
+                if (!is.null(private$.subtitleFallback))
+                    private$.accumulateMessage(sprintf(
+                        .("<br> <strong>Note:</strong> the plot subtitle uses the package default (%s), so 'Effect size type' and 'Decimal places' do not affect the reported statistic.<br>"),
+                        private$.safeHtmlOutput(private$.subtitleFallback)))
                 
                 # Make all outputs visible when variables are selected
                 self$results$todo$setVisible(visible = TRUE)
@@ -972,6 +1111,17 @@ jjwithinstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             private$.checkpoint()
 
             # Create plot using optimized data and options ----
+            # Honour the effect-size selector (see .subtitleExpr): ggstatsplot
+            # 1.0.0 no longer accepts effsize.type, so compute the subtitle here.
+            # The Bayesian (BayesFactor MCMC) and robust (bootstrap) paths in
+            # ggstatsplot sample, so the same analysis rendered twice reported
+            # different numbers. Seed them; withr restores the caller's stream.
+            if (opts$typestatistics %in% c("bayes", "robust"))
+                withr::local_seed(private$.STOCHASTIC_SEED)
+
+            n_meas <- length(unique(long_data$measurement))
+            sub_expr <- private$.subtitleExpr(long_data, opts, n_meas)
+
             tryCatch({
                 plot <- ggstatsplot::ggwithinstats(
                     data = long_data,
@@ -987,10 +1137,13 @@ jjwithinstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     xlab = opts$xtitle,
                     ylab = opts$ytitle,
                     type = opts$typestatistics,
-                    pairwise.comparisons = opts$pairwisecomparisons,
-                    pairwise.display = opts$pairwisedisplay,
+                    # `pairwise.comparisons` was removed in ggstatsplot 1.0.0
+                    # and silently swallowed by `...`, so unticking the box left
+                    # the brackets on the plot. "none" is the surviving control.
+                    pairwise.display = private$.pairwiseDisplay(opts),
                     p.adjust.method = opts$padjustmethod,
-                    effsize.type = opts$effsizetype,
+                    # effsize.type was likewise removed; the selector is
+                    # honoured through the subtitle we attach below instead.
                     centrality.plotting = opts$centralityplotting,
                     centrality.type = opts$centralitytype,
                     point.path = opts$pointpath,
@@ -1001,12 +1154,29 @@ jjwithinstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     point.path.args = opts$pointpathargs,
                     centrality.point.args = opts$centralitypointargs,
                     centrality.path.args = opts$centralitypathargs,
-                    results.subtitle = opts$resultssubtitle,
+                    # When we supply our own subtitle (below) ggstatsplot must
+                    # not also compute one.
+                    results.subtitle = if (is.null(sub_expr)) opts$resultssubtitle else FALSE,
                     # Updated parameter names for current API
                     bf.message = opts$bfmessage,
                     conf.level = opts$conflevel,
                     digits = opts$digits
                 )
+
+                # Attach the subtitle to the FINISHED plot. It is a plotmath
+                # language object: passing it through the call would make R try
+                # to evaluate italic()/widehat() as ordinary functions.
+                if (!is.null(sub_expr))
+                    plot <- plot + ggplot2::labs(subtitle = sub_expr)
+
+                # ggwithinstats draws point.path only for two measurements, so
+                # the "Show individual trajectories" checkbox silently did
+                # nothing with 3 or 4 - exactly the case where following a
+                # subject across time matters most. Draw the paths ourselves.
+                if (isTRUE(opts$pointpath) && n_meas > 2)
+                    plot <- plot + ggplot2::geom_path(
+                        ggplot2::aes(group = .data[["rowid"]]),
+                        alpha = 0.4, linewidth = 0.3, colour = "grey40")
 
                 # Checkpoint before theme application
                 private$.checkpoint()
@@ -1060,8 +1230,15 @@ jjwithinstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 # names break data.frame column access for names with spaces).
                 mydata <- self$data
                 mydata <- mydata[, deps, drop = FALSE]
+                # is.finite(), matching .prepareData(): naOmit() drops NA and NaN
+                # but NOT Inf. Without this the companion panel kept infinite
+                # rows the primary analysis had already excluded, so the two
+                # figures were drawn from different subjects.
+                finite_rows <- Reduce(`&`, lapply(deps, function(v)
+                    is.finite(jmvcore::toNumeric(mydata[[v]]))))
+                mydata <- mydata[finite_rows, , drop = FALSE]
                 mydata <- jmvcore::naOmit(mydata)
-                
+
                 # Check for empty data after filtering
                 if (nrow(mydata) == 0) {
                      return() # Should be handled by main validation
@@ -1087,11 +1264,15 @@ jjwithinstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 # Create plot based on type
                 if (self$options$ggpubrPlotType == "paired") {
                     # Paired plot with connecting lines
+                    # `fill` (or `color` for the line plot) has to be mapped for
+                    # the palette to have anything to colour. Without it every
+                    # ggpubrPalette choice rendered a byte-identical figure.
                     args <- list(
                         data = long_data,
                         x = "Measurement",
                         y = "Value",
                         id = "Subject_ID",
+                        fill = "Measurement",
                         palette = palette,
                         line.color = "gray",
                         line.size = 0.4,
@@ -1109,6 +1290,7 @@ jjwithinstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                         data = long_data,
                         x = "Measurement",
                         y = "Value",
+                        fill = "Measurement",
                         palette = palette,
                         add = if (self$options$ggpubrAddPoints) "jitter" else NULL
                     )
@@ -1119,20 +1301,45 @@ jjwithinstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                         data = long_data,
                         x = "Measurement",
                         y = "Value",
+                        fill = "Measurement",
                         palette = palette,
                         add = if (self$options$ggpubrAddPoints) "jitter" else NULL
                     )
                     plot <- do.call(ggpubr::ggviolin, args)
 
                 } else if (self$options$ggpubrPlotType == "line") {
-                    args <- list(
-                        data = long_data,
-                        x = "Measurement",
-                        y = "Value",
-                        palette = palette,
-                        add = "mean_se"
-                    )
-                    plot <- do.call(ggpubr::ggline, args)
+                    # ggpubr's `add = "mean_se"` builds
+                    # stat_summary(fun.data = "mean_se_") and resolves that name
+                    # from the SEARCH PATH at draw time. It therefore works in a
+                    # session that has done library(ggpubr) and fails here and in
+                    # jamovi, where ggpubr is only namespace-loaded:
+                    #   Error in stat_summary(): object 'mean_se_' of mode
+                    #   'function' was not found
+                    # The failure surfaces in ggplot_build(), not at construction,
+                    # so a "did print() error?" check reports success while the
+                    # panel renders nothing. Summarise here instead, so the layer
+                    # carries a real function rather than a name to look up.
+                    #
+                    # No colour aesthetic is mapped on purpose: this plot type
+                    # draws a SINGLE mean trajectory, so a categorical palette
+                    # has nothing to colour. The option description says so.
+                    agg <- stats::aggregate(
+                        Value ~ Measurement, data = long_data,
+                        FUN = function(v) c(mean = mean(v),
+                                            se = stats::sd(v) / sqrt(length(v))))
+                    agg <- data.frame(
+                        Measurement = agg$Measurement,
+                        Value = agg$Value[, "mean"],
+                        se    = agg$Value[, "se"])
+                    agg$Measurement <- factor(agg$Measurement, levels = deps)
+
+                    plot <- ggpubr::ggline(
+                        agg, x = "Measurement", y = "Value",
+                        group = 1, palette = palette) +
+                        ggplot2::geom_errorbar(
+                            ggplot2::aes(ymin = .data[["Value"]] - .data[["se"]],
+                                         ymax = .data[["Value"]] + .data[["se"]]),
+                            width = 0.1)
                 }
 
                 # Add statistical comparisons
@@ -1141,19 +1348,43 @@ jjwithinstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                         # Pairwise t.test/wilcox.test cannot compare >2 groups and
                         # would error (previously swallowed by the empty handler).
                         # Use an omnibus test for a single global p-value.
-                        omnibus_method <- switch(
-                            self$options$typestatistics,
-                            "parametric" = "anova",
-                            "nonparametric" = "kruskal.test",
-                            "robust" = "anova",        # Fallback
-                            "bayes" = NULL,
-                            "anova"                     # Default
-                        )
+                        # ggpubr::stat_compare_means has NO paired omnibus test.
+                        # method = "anova" / "kruskal.test" run BETWEEN-subjects
+                        # tests, which throw away the subject effect this whole
+                        # analysis exists to control for. On a 40-subject example
+                        # that printed "Anova, p = 0.13" (exactly
+                        # stats::aov(y ~ time), pairing discarded) directly
+                        # beneath a main panel reporting the correct
+                        # F_Fisher(1.76, 68.5) = 14.26, p = 1.61e-05 - two
+                        # p-values ~8000x apart in one output window.
+                        #
+                        # Annotate the CORRECT repeated-measures p-value instead,
+                        # computed by the same engine the main figure uses.
+                        rm_res <- tryCatch(
+                            rlang::inject(statsExpressions::oneway_anova(
+                                data       = transform(long_data,
+                                                       .m = factor(Measurement, levels = deps),
+                                                       .s = factor(Subject_ID)),
+                                x          = !!rlang::sym(".m"),
+                                y          = !!rlang::sym("Value"),
+                                subject.id = !!rlang::sym(".s"),
+                                paired     = TRUE,
+                                type       = self$options$typestatistics,
+                                digits     = self$options$k,
+                                conf.level = self$options$conflevel)),
+                            error = function(e) NULL)
 
-                        if (!is.null(omnibus_method)) {
-                            plot <- plot + ggpubr::stat_compare_means(
-                                method = omnibus_method
-                            )
+                        if (!is.null(rm_res) && !is.null(rm_res$p.value) &&
+                            is.finite(rm_res$p.value)) {
+                            plot <- plot + ggplot2::labs(subtitle = sprintf(
+                                .("%s: p = %s (n = %d subjects)"),
+                                private$.testLabel(self$options$typestatistics, length(deps)),
+                                format.pval(rm_res$p.value, digits = 3, eps = 1e-4),
+                                length(unique(long_data$Subject_ID))))
+                        } else {
+                            plot <- plot + ggplot2::labs(subtitle = sprintf(
+                                .("%s - see the main figure for the test statistic"),
+                                private$.testLabel(self$options$typestatistics, length(deps))))
                         }
                     } else {
                         # Two measurements: paired two-sample comparison
@@ -1176,9 +1407,13 @@ jjwithinstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     }
                 }
 
-                # Apply theme
-                plot <- plot + ggpubr::theme_pubr() +
-                    ggplot2::labs(subtitle = "Descriptive Plot (ggpubr)")
+                # Apply theme. The subtitle is set here only if nothing more
+                # informative was attached above - this labs() call used to be
+                # unconditional and silently discarded the repeated-measures
+                # statistic written into the subtitle a few lines earlier.
+                plot <- plot + ggpubr::theme_pubr()
+                if (is.null(plot$labels$subtitle))
+                    plot <- plot + ggplot2::labs(subtitle = .("Descriptive Plot (ggpubr)"))
 
                 print(plot)
                 TRUE

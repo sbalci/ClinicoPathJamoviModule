@@ -21,8 +21,7 @@ test_that("jjwithinstats respects all statistical type options", {
       typestatistics = stat_type
     )
 
-    expect_s3_class(result, "jjwithinstatsResults",
-                   info = paste("Failed for typestatistics:", stat_type))
+    expect_s3_class(result, "jjwithinstatsResults")
   }
 })
 
@@ -40,8 +39,7 @@ test_that("jjwithinstats respects all pairwise adjustment methods", {
       padjustmethod = method
     )
 
-    expect_s3_class(result, "jjwithinstatsResults",
-                   info = paste("Failed for padjustmethod:", method))
+    expect_s3_class(result, "jjwithinstatsResults")
   }
 })
 
@@ -59,8 +57,7 @@ test_that("jjwithinstats respects all centrality types", {
       centralitytype = cent_type
     )
 
-    expect_s3_class(result, "jjwithinstatsResults",
-                   info = paste("Failed for centralitytype:", cent_type))
+    expect_s3_class(result, "jjwithinstatsResults")
   }
 })
 
@@ -77,8 +74,7 @@ test_that("jjwithinstats respects all clinical presets", {
       clinicalpreset = preset
     )
 
-    expect_s3_class(result, "jjwithinstatsResults",
-                   info = paste("Failed for clinicalpreset:", preset))
+    expect_s3_class(result, "jjwithinstatsResults")
   }
 })
 
@@ -96,14 +92,15 @@ test_that("jjwithinstats respects all ggpubr plot types", {
       ggpubrPlotType = plot_type
     )
 
-    expect_s3_class(result, "jjwithinstatsResults",
-                   info = paste("Failed for ggpubrPlotType:", plot_type))
+    expect_s3_class(result, "jjwithinstatsResults")
   }
 })
 
 test_that("jjwithinstats respects all ggpubr palettes", {
 
-  palettes <- c("jco", "npg", "aaas", "lancet", "jama", "nejm", "grey", "default")
+  # The permitted values are exactly these six (jamovi/jjwithinstats.a.yaml);
+  # "grey" and "default" are rejected by jamovi's own option validation.
+  palettes <- c("jco", "npg", "aaas", "lancet", "jama", "nejm")
 
   for (palette in palettes) {
     result <- jjwithinstats(
@@ -115,8 +112,7 @@ test_that("jjwithinstats respects all ggpubr palettes", {
       ggpubrPalette = palette
     )
 
-    expect_s3_class(result, "jjwithinstatsResults",
-                   info = paste("Failed for ggpubrPalette:", palette))
+    expect_s3_class(result, "jjwithinstatsResults")
   }
 })
 
@@ -192,9 +188,7 @@ test_that("jjwithinstats respects plot element toggles", {
       point = combo$point
     )
 
-    expect_s3_class(result, "jjwithinstatsResults",
-                   info = paste("Failed for combination: violin =", combo$violin,
-                               "boxplot =", combo$boxplot, "point =", combo$point))
+    expect_s3_class(result, "jjwithinstatsResults")
   }
 })
 
@@ -271,27 +265,22 @@ test_that("jjwithinstats respects ggpubr line display options", {
   expect_s3_class(result2, "jjwithinstatsResults")
 })
 
-test_that("jjwithinstats respects colorblind-safe palette option", {
+test_that("jjwithinstats respects the theme option", {
+  # NOTE: jjwithinstats has no `colorblindSafe` option (that belongs to the
+  # between-subjects sibling) and its explanations flag is `showExplanations`
+  # with a capital E. Both spellings above reached the wrapper as unused
+  # arguments and aborted the whole test_that block.
 
-  # Colorblind-safe
-  result1 <- jjwithinstats(
-    data = jjwithinstats_test,
-    dep1 = "baseline",
-    dep2 = "week4",
-    dep3 = "week12",
-    colorblindSafe = TRUE
-  )
-  expect_s3_class(result1, "jjwithinstatsResults")
-
-  # Standard palette
-  result2 <- jjwithinstats(
-    data = jjwithinstats_test,
-    dep1 = "baseline",
-    dep2 = "week4",
-    dep3 = "week12",
-    colorblindSafe = FALSE
-  )
-  expect_s3_class(result2, "jjwithinstatsResults")
+  for (orig in c(TRUE, FALSE)) {
+    result <- jjwithinstats(
+      data = jjwithinstats_test,
+      dep1 = "baseline",
+      dep2 = "week4",
+      dep3 = "week12",
+      originaltheme = orig
+    )
+    expect_s3_class(result, "jjwithinstatsResults")
+  }
 })
 
 test_that("jjwithinstats respects Bayes Factor message option", {
@@ -355,8 +344,7 @@ test_that("jjwithinstats respects decimal places parameter", {
       k = k
     )
 
-    expect_s3_class(result, "jjwithinstatsResults",
-                   info = paste("Failed for k =", k))
+    expect_s3_class(result, "jjwithinstatsResults")
   }
 })
 
@@ -373,8 +361,7 @@ test_that("jjwithinstats respects confidence level parameter", {
       conflevel = conf
     )
 
-    expect_s3_class(result, "jjwithinstatsResults",
-                   info = paste("Failed for conflevel =", conf))
+    expect_s3_class(result, "jjwithinstatsResults")
   }
 })
 
@@ -396,8 +383,7 @@ test_that("jjwithinstats respects plot dimension parameters", {
       plotheight = dim$height
     )
 
-    expect_s3_class(result, "jjwithinstatsResults",
-                   info = paste("Failed for width =", dim$width, "height =", dim$height))
+    expect_s3_class(result, "jjwithinstatsResults")
   }
 })
 
@@ -424,7 +410,7 @@ test_that("jjwithinstats respects show explanations option", {
     dep1 = "baseline",
     dep2 = "week4",
     dep3 = "week12",
-    showexplanations = TRUE
+    showExplanations = TRUE
   )
   expect_s3_class(result1, "jjwithinstatsResults")
 
@@ -434,7 +420,7 @@ test_that("jjwithinstats respects show explanations option", {
     dep1 = "baseline",
     dep2 = "week4",
     dep3 = "week12",
-    showexplanations = FALSE
+    showExplanations = FALSE
   )
   expect_s3_class(result2, "jjwithinstatsResults")
 })
@@ -461,9 +447,8 @@ test_that("jjwithinstats handles comprehensive argument combinations", {
     ggpubrPalette = "jco",
     ggpubrAddStats = TRUE,
     ggpubrShowLines = TRUE,
-    colorblindSafe = FALSE,
     resultssubtitle = TRUE,
-    showexplanations = TRUE,
+    showExplanations = TRUE,
     mytitle = "Comprehensive Test",
     xtitle = "Time",
     ytitle = "Value",

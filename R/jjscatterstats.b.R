@@ -9,6 +9,12 @@ jjscatterstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
     "jjscatterstatsClass",
     inherit = jjscatterstatsBase,
     private = list(
+        # Fixed seed for the sampling-based paths. Bayesian output uses
+        # BayesFactor's MCMC and robust/effect-size CIs use bootstrapping, so
+        # without this the SAME analysis reported different numbers on every
+        # re-render - a credible interval that moves when nothing changed.
+        .STOCHASTIC_SEED = 20250101L,
+
 
         # Option overrides for clinical presets (jamovi options are read-only at runtime;
         # presets record overrides here and reads go through private$.option()).
@@ -288,6 +294,10 @@ jjscatterstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         # plot ----
 
         .plot = function(image, ggtheme, theme, ...) {
+            # Seed the sampling-based paths (Bayesian MCMC, bootstrap CIs) so a
+            # re-render of an unchanged analysis reports the same numbers.
+            withr::local_seed(private$.STOCHASTIC_SEED)
+
 
             if (is.null(self$options$dep) || is.null(self$options$group))
                 return()
@@ -372,6 +382,10 @@ jjscatterstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         # plot2 ----
 
         .plot2 = function(image, ggtheme, theme, ...) {
+            # Seed the sampling-based paths (Bayesian MCMC, bootstrap CIs) so a
+            # re-render of an unchanged analysis reports the same numbers.
+            withr::local_seed(private$.STOCHASTIC_SEED)
+
 
             if (is.null(self$options$dep) || is.null(self$options$group) || is.null(self$options$grvar))
                 return()
@@ -490,6 +504,10 @@ jjscatterstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         # plot3 - Enhanced scatter with multiple aesthetics ----
 
         .plot3 = function(image, ggtheme, theme, ...) {
+            # Seed the sampling-based paths (Bayesian MCMC, bootstrap CIs) so a
+            # re-render of an unchanged analysis reports the same numbers.
+            withr::local_seed(private$.STOCHASTIC_SEED)
+
 
             if (is.null(self$options$dep) || is.null(self$options$group))
                 return()

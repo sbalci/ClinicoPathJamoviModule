@@ -12,6 +12,16 @@ jjbetweenstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
     "jjbetweenstatsClass",
     inherit = jjbetweenstatsBase,
     private = list(
+        # Fixed seed for the sampling-based paths. Bayesian output uses
+        # BayesFactor's MCMC and robust/effect-size CIs use bootstrapping, so
+        # without this the SAME analysis reported different numbers on every
+        # re-render - a credible interval that moves when nothing changed.
+        .STOCHASTIC_SEED = 20250101L,
+
+        # Set by .subtitleExpr when the statsExpressions takeover was attempted
+        # and failed; rendered as a notice from .run().
+        .subtitleFallback = NULL,
+
         # Cache for processed data and options to avoid redundant computation
         .processedData = NULL,
         .processedOptions = NULL,
@@ -182,6 +192,140 @@ jjbetweenstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             return(outliers)
         },
         
+        # Number of grouping levels that actually carry data. droplevels()
+        # matters: as.factor() keeps unused levels, so a level emptied by
+        # missing data or a row filter otherwise still counts as a group.
+        .nGroupLevels = function(data, group_var) {
+            if (is.null(group_var) || !group_var %in% names(data)) return(NA_integer_)
+            nlevels(droplevels(as.factor(data[[group_var]])))
+        },
+
+        # Name of the test that is ACTUALLY run, for the narrative panels.
+        # `varequal` is honoured only on the ungrouped figure (see .subtitleExpr);
+        # grouped_ggbetweenstats computes its own per-panel subtitle and always
+        # uses the Welch variant, so pass honour_varequal = FALSE for that path.
+        # ggpubr::stat_compare_means() defaults to wilcox.test (kruskal.test for
+        # 3+ groups) and the companion renderer read NONE of the statistics
+        # options, so all four `typestatistics` values produced a byte-identical
+        # panel. On skewed data that put "Wilcoxon, p = 0.23" beneath a main
+        # figure reporting t_Welch = 2.30, p = 0.03 - each correct for its own
+        # test, contradictory side by side, and neither figure named its test.
+        #
+        # ggpubr has no robust or Bayesian equivalent, so those fall back to the
+        # nonparametric test and the caption says so, rather than implying the
+        # user's choice was honoured.
+        .ggpubrStatLayer = function(n_groups) {
+            ts <- self$options$typestatistics
+            two <- !is.na(n_groups) && n_groups <= 2
+            method <- switch(ts,
+                "parametric"    = if (two) "t.test" else "anova",
+                "nonparametric" = if (two) "wilcox.test" else "kruskal.test",
+                if (two) "wilcox.test" else "kruskal.test")
+            args <- list(method = method)
+            if (identical(ts, "parametric") && two)
+                args$method.args <- list(var.equal = isTRUE(self$options$varequal))
+            list(
+                layer = do.call(ggpubr::stat_compare_means, args),
+                note  = if (ts %in% c("robust", "bayes"))
+                            sprintf(.("Companion panel test: %s (ggpubr provides no %s equivalent; the main figure carries the %s result)"),
+                                    method, ts, ts)
+                        else
+                            sprintf(.("Companion panel test: %s"), method)
+            )
+        },
+
+        .testLabel = function(n_groups, honour_varequal = TRUE) {
+            type <- self$options$typestatistics
+            student <- honour_varequal && isTRUE(self$options$varequal)
+            if (!is.na(n_groups) && n_groups <= 2) {
+                switch(type,
+                    "parametric"    = if (student) .("Student's t-test") else .("Welch's t-test"),
+                    "nonparametric" = .("Mann-Whitney U test"),
+                    "robust"        = .("robust test (Yuen's trimmed means)"),
+                    "bayes"         = .("Bayesian t-test"),
+                    .("two-group comparison"))
+            } else {
+                switch(type,
+                    "parametric"    = if (student) .("one-way ANOVA (Fisher)") else .("Welch's ANOVA"),
+                    "nonparametric" = .("Kruskal-Wallis test"),
+                    "robust"        = .("robust ANOVA (trimmed means)"),
+                    "bayes"         = .("Bayesian ANOVA"),
+                    .("one-way ANOVA"))
+            }
+        },
+
+        # Build the plot subtitle ourselves.
+        #
+        # ggstatsplot 1.0.0 removed `var.equal`, `effsize.type` and `k` from
+        # ggbetweenstats: they are silently swallowed by `...`, so the equal-
+        # variances checkbox, the effect-size selector and the decimal-places
+        # box all had no effect while the module's own prose still switched the
+        # reported test name on them. statsExpressions - which ggstatsplot calls
+        # internally - still honours all three, so compute the expression here
+        # and hand it over with results.subtitle = FALSE.
+        #
+        # Returns NULL when we cannot or should not take over, in which case the
+        # caller leaves ggstatsplot to produce its own subtitle:
+        #   - subtitles switched off
+        #   - Bayesian type (statsExpressions errors on this combination)
+        #   - fewer than two groups with data
+        .subtitleExpr = function(data, group_var, dep_var, opts) {
+            if (!isTRUE(opts$resultssubtitle)) return(NULL)
+            if (identical(opts$typestatistics, "bayes")) return(NULL)
+
+            n_lev <- private$.nGroupLevels(data, group_var)
+            if (is.na(n_lev) || n_lev < 2) return(NULL)
+
+            # two_sample_test rejects "eta"/"omega" (they are ANOVA-only); map
+            # them onto the equivalent two-group family so the selector still
+            # means something with two groups.
+            eff <- opts$effsizetype
+            if (n_lev == 2 && identical(eff, "eta"))   eff <- "biased"
+            if (n_lev == 2 && identical(eff, "omega")) eff <- "unbiased"
+
+            fn <- if (n_lev == 2) statsExpressions::two_sample_test
+                  else            statsExpressions::oneway_anova
+
+            res <- tryCatch(
+                rlang::inject(fn(
+                    data         = data,
+                    x            = !!rlang::sym(group_var),
+                    y            = !!rlang::sym(dep_var),
+                    type         = opts$typestatistics,
+                    var.equal    = isTRUE(opts$varequal),
+                    effsize.type = eff,
+                    digits       = opts$k,
+                    conf.level   = opts$conflevel)),
+                error = function(e) e)
+
+            # A failure here is not hypothetical. `formula.tools` registers an
+            # `as.character.formula` method returning one deparsed string where
+            # base R returns c("~", "y", "g"), which makes stats::oneway.test -
+            # the engine behind Welch's ANOVA - reject every valid formula with
+            # "a two-sided formula is required". It arrives transitively via
+            # logistf, so any session in which Firth regression has been run
+            # loses the three-or-more-group takeover. Falling back to
+            # ggstatsplot's own subtitle is safe, but it silently ignores the
+            # user's Equal variances / Effect size type / Decimal places
+            # choices, so record it and say so in .run().
+            if (inherits(res, "condition")) {
+                private$.subtitleFallback <- conditionMessage(res)
+                return(NULL)
+            }
+            if (is.null(res$expression) || length(res$expression) == 0) {
+                private$.subtitleFallback <- .("the statistics engine returned no expression")
+                return(NULL)
+            }
+            res$expression[[1]]
+        },
+
+        # `pairwise.comparisons` was removed in ggstatsplot 1.0.0, so unticking
+        # the box left the significance brackets on the plot. The surviving
+        # control is pairwise.display, which accepts "none".
+        .pairwiseDisplay = function(opts) {
+            if (isTRUE(opts$pairwisecomparisons)) opts$pairwisedisplay else "none"
+        },
+
         # Theme application helper
         .applyTheme = function(plot, opts, ggtheme) {
             if (!opts$originaltheme) {
@@ -218,32 +362,22 @@ jjbetweenstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             grp_levels <- unique(grp[!is.na(grp)])
             n_groups <- length(grp_levels)
 
-            type <- self$options$typestatistics
-            if (n_groups <= 2) {
-                test_name <- switch(type,
-                    "parametric"    = if (self$options$varequal) .("Student's t-test") else .("Welch's t-test"),
-                    "nonparametric" = .("Mann-Whitney U test"),
-                    "robust"        = .("robust test (Yuen's trimmed means)"),
-                    "bayes"         = .("Bayesian t-test"),
-                    .("two-group comparison")
-                )
-            } else {
-                test_name <- switch(type,
-                    "parametric"    = if (self$options$varequal) .("one-way ANOVA") else .("Welch's ANOVA"),
-                    "nonparametric" = .("Kruskal-Wallis test"),
-                    "robust"        = .("robust ANOVA"),
-                    "bayes"         = .("Bayesian ANOVA"),
-                    .("ANOVA")
-                )
-            }
+            test_name <- private$.testLabel(n_groups)
 
             vars <- htmltools::htmlEscape(paste(self$options$dep, collapse = ", "))
+            # The statistics live in the plot subtitle, which is OFF by default -
+            # so the old unconditional "See the plot subtitle" pointed at nothing.
+            where <- if (isTRUE(self$options$resultssubtitle))
+                .("See the plot subtitle for the test statistic, p-value, and effect size.")
+            else
+                .("No test statistic is displayed: switch on 'Statistical results' to show it in the plot subtitle.")
             clinical_text <- sprintf(
-                .("<div style='padding: 12px 15px; background-color: #eef7ee; border-left: 4px solid #28a745; margin: 10px 0;'><h4 style='margin-top:0;'>Results Summary</h4><p>%s comparing %s across %d group(s) (n = %d). See the plot subtitle for the test statistic, p-value, and effect size.</p></div>"),
+                .("<div style='padding: 12px 15px; background-color: #eef7ee; border-left: 4px solid #28a745; margin: 10px 0;'><h4 style='margin-top:0;'>Results Summary</h4><p>%s comparing %s across %d group(s) (n = %d). %s</p></div>"),
                 test_name,
                 vars,
                 n_groups,
-                n_total
+                n_total,
+                where
             )
             self$results$clinicalSummary$setContent(clinical_text)
         },
@@ -331,8 +465,12 @@ jjbetweenstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 group_data <- data[[group_var]]
 
                 # Check sample sizes
-                group_counts <- table(group_data, useNA = "no")
-                min_group_size <- min(group_counts)
+                # droplevels(): as.factor keeps levels with no rows, so a group
+                # emptied by missing data or a row filter gave min_group_size = 0
+                # and silently switched OFF every parametric assumption check
+                # below - precisely when the data most needed checking.
+                group_counts <- table(droplevels(as.factor(group_data)), useNA = "no")
+                min_group_size <- if (length(group_counts)) min(group_counts) else 0L
 
                 if (min_group_size < 3) {
                     warnings <- c(warnings, sprintf(.(" %s: Minimum group size is %d (recommend \u22653)"),
@@ -347,11 +485,19 @@ jjbetweenstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                             levene_result <- car::leveneTest(var_data ~ group_data, center = median)
                             levene_p <- levene_result$`Pr(>F)`[1]
 
-                            if (levene_p < 0.05 && !self$options$varequal) {
+                            # The guard used to be `levene_p < 0.05 && !varequal`,
+                            # which hid the warning from the one user who needed
+                            # it: the person who had ticked 'Equal variances' and
+                            # was therefore about to run Student's test on
+                            # heteroscedastic data.
+                            if (!is.na(levene_p) && levene_p < 0.05) {
                                 warnings <- c(warnings, sprintf(
-                                    .(" %s: Variances differ significantly between groups (Levene's test p = %.3f). Consider enabling 'Equal Variances = FALSE' or using non-parametric test."),
-                                    htmltools::htmlEscape(var), levene_p
-                                ))
+                                    .(" %s: Variances differ significantly between groups (Levene's test p = %.3f)."),
+                                    htmltools::htmlEscape(var), levene_p))
+                                if (isTRUE(self$options$varequal))
+                                    warnings <- c(warnings, sprintf(
+                                        .(" %s: 'Equal variances' is ticked, so Student's test is being reported despite that. Untick it to use Welch's test, which does not assume equal variances."),
+                                        htmltools::htmlEscape(var)))
                             }
                         }
                     }, error = function(e) {
@@ -478,6 +624,41 @@ jjbetweenstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 # ACCUMULATE instead of overwrite
                 private$.appendMessage(glue::glue("<br>{warning_text}<br>"))
             }
+
+            # A failed statsExpressions takeover means Equal variances, Effect
+            # size type and Decimal places did not reach the reported statistic.
+            # Say so rather than let the plot quietly show ggstatsplot's default.
+            #
+            # The probe has to happen HERE, not in .plot(): .run() is the only
+            # place that composes the diagnostics HTML, so a flag set later by
+            # .plot() would never be rendered (the same trap that hid the
+            # completion notice in jjcorrmat). One extra statsExpressions call on
+            # the first dependent variable is cheap and only runs when subtitles
+            # are switched on.
+            private$.subtitleFallback <- NULL
+            if (isTRUE(self$options$resultssubtitle) &&
+                !identical(self$options$typestatistics, "bayes")) {
+                invisible(private$.subtitleExpr(
+                    mydata, self$options$group, self$options$dep[1],
+                    private$.prepareOptions()))
+            }
+            if (!is.null(private$.subtitleFallback) && isTRUE(self$options$resultssubtitle)) {
+                private$.appendMessage(paste0("<br>", sprintf(
+                    .("Note: the plot subtitle fell back to the package default (%s), so 'Equal variances', 'Effect size type' and 'Decimal places' did not affect the reported statistic. Welch's variant and the default effect size were used."),
+                    htmltools::htmlEscape(private$.subtitleFallback)), "<br>"))
+            }
+
+            # The Split By figure is drawn by grouped_ggbetweenstats, which
+            # computes its own per-panel subtitle. The subtitle we build in
+            # .subtitleExpr() - the one that honours Equal variances and Effect
+            # size type - cannot be applied per panel, so say so rather than let
+            # the two figures disagree silently.
+            if (!is.null(self$options$grvar) &&
+                (isTRUE(self$options$varequal) ||
+                 !identical(self$options$effsizetype, "biased"))) {
+                private$.appendMessage(paste0(
+                    "<br>", .("Note: on the Split By figure each panel is computed by ggstatsplot, which always uses the Welch variant and its own default effect size. 'Equal variances' and 'Effect size type' apply to the main figure only."), "<br>"))
+            }
             
             # Detect outliers if large dataset - checkpoint before expensive outlier detection
             if (nrow(mydata) > 30) {
@@ -485,14 +666,15 @@ jjbetweenstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 outliers <- private$.detectOutliers(mydata, vars)
                 if (length(outliers) > 0) {
                     for (var in names(outliers)) {
-                        # Handle both count (for large datasets) and indices (for smaller datasets)
-                        if (is.numeric(outliers[[var]]) && length(outliers[[var]]) == 1) {
-                            # For large datasets, we only have the count
-                            n_outliers <- outliers[[var]]
-                        } else {
-                            # For smaller datasets, we have the actual indices
-                            n_outliers <- length(outliers[[var]])
-                        }
+                        # .detectOutliers returns a COUNT for datasets over 5000
+                        # rows and a vector of ROW INDICES otherwise. A single
+                        # index is a length-1 numeric and so was indistinguishable
+                        # from a count: with exactly one outlier at row 30 the
+                        # panel reported "30 potential outlier(s)". Decide from
+                        # the dataset size, which is what actually selects the
+                        # representation, not from the vector's length.
+                        n_outliers <- if (nrow(mydata) > 5000)
+                            as.integer(outliers[[var]]) else length(outliers[[var]])
                         # ACCUMULATE instead of overwrite
                         private$.appendMessage(
                             glue::glue(.("<br> {var} has {n_outliers} potential outlier(s) detected<br>"),
@@ -702,16 +884,12 @@ jjbetweenstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
     
     mydata <- private$.prepareData()
     n_total <- nrow(mydata)
-    n_groups <- length(unique(mydata[[self$options$group]]))
+    n_groups <- private$.nGroupLevels(mydata, self$options$group)
     dep_vars <- htmltools::htmlEscape(paste(self$options$dep, collapse = ", "))
 
-    test_method <- switch(self$options$typestatistics,
-        "parametric" = if (self$options$varequal) "ANOVA" else "Welch's ANOVA",
-        "nonparametric" = "Kruskal-Wallis test",
-        "robust" = "Robust ANOVA",
-        "bayes" = "Bayesian ANOVA",
-        "ANOVA"
-    )
+    # Was hard-coded to the ANOVA family, so a two-group comparison was
+    # described as an ANOVA in both the summary and the copy-ready Methods text.
+    test_method <- private$.testLabel(n_groups)
     
     # MULTI-ENDPOINT CLARITY: Distinguish single vs multiple variables
     if (length(self$options$dep) == 1) {
@@ -830,7 +1008,7 @@ jjbetweenstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
     mydata <- private$.prepareData()
     n_total <- nrow(mydata)
-    n_groups <- length(unique(mydata[[self$options$group]]))
+    n_groups <- private$.nGroupLevels(mydata, self$options$group)
 
     # MULTI-ENDPOINT CLARITY: Distinguish single vs multiple variables
     if (length(self$options$dep) == 1) {
@@ -845,13 +1023,7 @@ jjbetweenstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         )
     }
     
-    test_method <- switch(self$options$typestatistics,
-        "parametric" = if (self$options$varequal) "ANOVA" else "Welch's ANOVA",
-        "nonparametric" = "Kruskal-Wallis test", 
-        "robust" = "Robust ANOVA",
-        "bayes" = "Bayesian ANOVA",
-        "ANOVA"
-    )
+    test_method <- private$.testLabel(n_groups)
     
     report_template <- paste0(
         "<div style='padding: 15px; background-color: #f8f9fa; border: 1px solid #dee2e6; margin: 10px 0;'>",
@@ -868,14 +1040,19 @@ jjbetweenstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                   self$options$padjustmethod, " correction for multiple testing. ")
         } else "",
         
-        "Statistical significance was assessed at the \u03b1 = ", (1 - self$options$conflevel), " level.",
+        "Effect sizes are reported with ", round(100 * self$options$conflevel), "% confidence intervals; ",
+        "significance was assessed at the conventional \u03b1 = 0.05.",
         "</p>",
         
         "<h5>Results:</h5>",
-        "<p>[Insert specific results here: test statistic, p-value, effect size with 95% CI]</p>",
-        "<p>Example: \"The analysis revealed a statistically significant difference in [dependent variable] between the groups (",
-        "F(", n_groups - 1, ", ", n_total - n_groups, ") = [value], p = [value], \u03b7\u00b2 = [value], 95% CI [lower, upper]). ",
-        "Post-hoc tests showed that Group A had significantly higher levels than Group B (p = [value]).\"</p>",
+        "<p>[Insert the statistics shown in the plot subtitle: test statistic, p-value, effect size with CI]</p>",
+        # The example used to assert a significant difference, an F statistic and
+        # post-hoc tests unconditionally - wrong whenever the result was null,
+        # the test was not an F test, or pairwise comparisons were not requested.
+        "<p>Template (fill in from the plot subtitle; state the direction only if the test was significant): ",
+        "\"", htmltools::htmlEscape(test_method), " showed [a / no] statistically significant difference in [dependent variable] ",
+        "between the ", n_groups, " groups ([statistic] = [value], p = [value], [effect size] = [value], ",
+        round(100 * self$options$conflevel), "% CI [lower, upper]).\"</p>",
         
         "<h5>Conclusion:</h5>",
         "<p>[Interpret findings in clinical context, considering both statistical significance and clinical relevance]</p>",
@@ -890,6 +1067,10 @@ jjbetweenstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
     self$results$report$setContent(report_template)
 },
 .plot = function(image, ggtheme, theme, ...) {
+    # Seed the sampling-based paths (Bayesian MCMC, bootstrap CIs) so a
+    # re-render of an unchanged analysis reports the same numbers.
+    withr::local_seed(private$.STOCHASTIC_SEED)
+
             # Use shared validation helper ----
             if (!private$.validateInputs())
                 return()
@@ -917,12 +1098,14 @@ jjbetweenstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     xlab = opts$xtitle,
                     ylab = opts$ytitle,
                     type = opts$typestatistics,
-                    pairwise.comparisons = opts$pairwisecomparisons,
-                    pairwise.display = opts$pairwisedisplay,
+                    # ggstatsplot 1.0.0 dropped `pairwise.comparisons`; "none"
+                    # is how the brackets are turned off now.
+                    pairwise.display = private$.pairwiseDisplay(opts),
                     p.adjust.method = opts$padjustmethod,
                     effsize.type = opts$effsizetype,
                     bf.message = opts$bfmessage,
-                    k = opts$k,
+                    k = opts$k,          # older ggstatsplot
+                    digits = opts$k,     # ggstatsplot >= 1.0.0
                     conf.level = opts$conflevel,
                     var.equal = opts$varequal,
                     point.args = opts$pointargs,
@@ -939,7 +1122,25 @@ jjbetweenstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     args_list$boxplot.args <- opts$boxplotargs
                 }
                 
+                # Take over the subtitle so that Equal variances, Effect size
+                # type and Decimal places are honoured; ggstatsplot 1.0.0 no
+                # longer accepts them. Returns NULL (leave it to ggstatsplot)
+                # for the Bayesian type and when subtitles are switched off.
+                sub_expr <- private$.subtitleExpr(mydata, group, dep, opts)
+                if (!is.null(sub_expr))
+                    args_list$results.subtitle <- FALSE
+
                 plot <- private$.tryPlot(do.call(ggstatsplot::ggbetweenstats, args_list))
+
+                # Attach the subtitle to the FINISHED plot rather than passing it
+                # through do.call(). The subtitle is a plotmath language object:
+                # do.call() would evaluate it ("could not find function
+                # 'italic'"), and do.call(quote = TRUE) would additionally stop
+                # the rlang::sym() arguments being evaluated, so ggbetweenstats's
+                # {{ x }} would capture `quote(g)` instead of the symbol `g`
+                # ("Can't convert to a symbol").
+                if (!is.null(sub_expr) && !is.null(plot))
+                    plot <- plot + ggplot2::labs(subtitle = sub_expr)
 
                 # Apply theme using helper
                 plot <- private$.applyTheme(plot, opts, ggtheme)
@@ -969,12 +1170,12 @@ jjbetweenstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                             xlab = opts$xtitle,
                             ylab = opts$ytitle,
                             type = opts$typestatistics,
-                            pairwise.comparisons = opts$pairwisecomparisons,
-                            pairwise.display = opts$pairwisedisplay,
+                            pairwise.display = private$.pairwiseDisplay(opts),
                             p.adjust.method = opts$padjustmethod,
                             effsize.type = opts$effsizetype,
                             bf.message = opts$bfmessage,
-                            k = opts$k,
+                            k = opts$k,          # older ggstatsplot
+                            digits = opts$k,     # ggstatsplot >= 1.0.0
                             conf.level = opts$conflevel,
                             var.equal = opts$varequal,
                             point.args = opts$pointargs,
@@ -991,7 +1192,16 @@ jjbetweenstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                             plot_args$boxplot.args <- opts$boxplotargs
                         }
                         
-                        private$.tryPlot(do.call(ggstatsplot::ggbetweenstats, plot_args))
+                        # See the note in the single-variable branch above.
+                        sub_expr <- private$.subtitleExpr(
+                            mydata, group, rlang::as_string(y), opts)
+                        if (!is.null(sub_expr))
+                            plot_args$results.subtitle <- FALSE
+
+                        pp <- private$.tryPlot(do.call(ggstatsplot::ggbetweenstats, plot_args))
+                        if (!is.null(sub_expr) && !is.null(pp))
+                            pp <- pp + ggplot2::labs(subtitle = sub_expr)
+                        pp
                     }
                 )
 
@@ -1019,6 +1229,10 @@ jjbetweenstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 TRUE
         },
         .plot2 = function(image, ggtheme, theme, ...) {
+            # Seed the sampling-based paths (Bayesian MCMC, bootstrap CIs) so a
+            # re-render of an unchanged analysis reports the same numbers.
+            withr::local_seed(private$.STOCHASTIC_SEED)
+
             # Use shared validation helper with additional grouping check ----
             if (!private$.validateInputs() || is.null(self$options$grvar))
                 return()
@@ -1055,12 +1269,14 @@ jjbetweenstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     y = rlang::sym(dep),
                     grouping.var = rlang::sym(grvar),
                     type = opts$typestatistics,
-                    pairwise.comparisons = opts$pairwisecomparisons,
-                    pairwise.display = opts$pairwisedisplay,
+                    # ggstatsplot 1.0.0 dropped `pairwise.comparisons`; "none"
+                    # is how the brackets are turned off now.
+                    pairwise.display = private$.pairwiseDisplay(opts),
                     p.adjust.method = opts$padjustmethod,
                     effsize.type = opts$effsizetype,
                     bf.message = opts$bfmessage,
-                    k = opts$k,
+                    k = opts$k,          # older ggstatsplot
+                    digits = opts$k,     # ggstatsplot >= 1.0.0
                     conf.level = opts$conflevel,
                     var.equal = opts$varequal,
                     point.args = opts$pointargs,
@@ -1120,12 +1336,12 @@ jjbetweenstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                             grouping.var = rlang::sym(grvar),
                             messages = messages,
                                     type = opts$typestatistics,
-                            pairwise.comparisons = opts$pairwisecomparisons,
-                            pairwise.display = opts$pairwisedisplay,
+                            pairwise.display = private$.pairwiseDisplay(opts),
                             p.adjust.method = opts$padjustmethod,
                             effsize.type = opts$effsizetype,
                             bf.message = opts$bfmessage,
-                            k = opts$k,
+                            k = opts$k,          # older ggstatsplot
+                            digits = opts$k,     # ggstatsplot >= 1.0.0
                             conf.level = opts$conflevel,
                             var.equal = opts$varequal,
                             point.args = opts$pointargs,
@@ -1218,7 +1434,9 @@ jjbetweenstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
                 # Add statistical comparisons
                 if (self$options$ggpubrAddStats) {
-                    plot <- plot + ggpubr::stat_compare_means()
+                    sl <- private$.ggpubrStatLayer(
+                        private$.nGroupLevels(self$data, self$options$group))
+                    plot <- plot + sl$layer + ggplot2::labs(caption = sl$note)
                 }
 
                 # Apply theme
@@ -1254,7 +1472,9 @@ jjbetweenstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     }
 
                     if (self$options$ggpubrAddStats) {
-                        p <- p + ggpubr::stat_compare_means()
+                        sl <- private$.ggpubrStatLayer(
+                            private$.nGroupLevels(self$data, self$options$group))
+                        p <- p + sl$layer + ggplot2::labs(caption = sl$note)
                     }
 
                     p <- p + ggpubr::theme_pubr()
@@ -1312,7 +1532,9 @@ jjbetweenstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 }
 
                 if (self$options$ggpubrAddStats) {
-                    plot <- plot + ggpubr::stat_compare_means()
+                    sl <- private$.ggpubrStatLayer(
+                        private$.nGroupLevels(self$data, self$options$group))
+                    plot <- plot + sl$layer + ggplot2::labs(caption = sl$note)
                 }
 
                 plot <- plot + ggpubr::theme_pubr()
@@ -1347,7 +1569,9 @@ jjbetweenstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     }
 
                     if (self$options$ggpubrAddStats) {
-                        p <- p + ggpubr::stat_compare_means()
+                        sl <- private$.ggpubrStatLayer(
+                            private$.nGroupLevels(self$data, self$options$group))
+                        p <- p + sl$layer + ggplot2::labs(caption = sl$note)
                     }
 
                     p <- p + ggpubr::theme_pubr()

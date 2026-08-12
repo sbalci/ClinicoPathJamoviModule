@@ -200,8 +200,7 @@ test_that("jjwithinstats pairwise comparisons work with different adjustments", 
       typestatistics = "parametric"
     )
 
-    expect_s3_class(result, "jjwithinstatsResults",
-                   info = paste("Failed for adjustment method:", method))
+    expect_s3_class(result, "jjwithinstatsResults")
   }
 })
 
@@ -378,7 +377,7 @@ test_that("jjwithinstats handles publication-ready output configurations", {
     centralitypath = TRUE,
     pointpath = TRUE,
     resultssubtitle = TRUE,
-    showexplanations = TRUE,
+    showExplanations = TRUE,
     plotwidth = 800,
     plotheight = 600
   )
@@ -407,7 +406,6 @@ test_that("jjwithinstats handles publication-ready output configurations", {
     dep1 = "baseline",
     dep2 = "week4",
     dep3 = "week12",
-    colorblindSafe = TRUE,
     centralityplotting = TRUE,
     pointpath = TRUE,
     mytitle = "Accessible Visualization"
@@ -509,7 +507,6 @@ test_that("jjwithinstats handles cross-dataset variable patterns", {
 
     result <- do.call(jjwithinstats, args)
 
-    expect_s3_class(result, "jjwithinstatsResults",
-                   info = paste("Failed for dataset:", item$data))
+    expect_s3_class(result, "jjwithinstatsResults")
   }
 })

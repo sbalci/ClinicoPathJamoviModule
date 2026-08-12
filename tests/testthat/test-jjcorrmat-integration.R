@@ -450,6 +450,13 @@ test_that("jjcorrmat handles cross-dataset analysis patterns", {
 })
 
 test_that("jjcorrmat statistical method comparisons on same data", {
+  # NOTE: jmvcore's generated wrappers use non-standard evaluation. A BARE SYMBOL
+  # resolves to its own NAME (`dep = variables` asks for a column called
+  # "variables"), which is the intended idiom for naming a column directly but is
+  # a trap when the symbol holds column names. The requested columns are then all
+  # absent, jmvcore::select() builds a 0-column frame, and assigning the original
+  # row names to it fails with the opaque "invalid 'row.names' length". Force
+  # evaluation with !! to pass the value.
 
   data(jjcorrmat_test)
   variables <- c("tumor_size", "ki67_index", "mitotic_count", "necrosis_percent")
@@ -457,7 +464,7 @@ test_that("jjcorrmat statistical method comparisons on same data", {
   # Parametric (Pearson)
   result1 <- jjcorrmat(
     data = jjcorrmat_test,
-    dep = variables,
+    dep = !!variables,
     typestatistics = "parametric"
   )
   expect_s3_class(result1, "jjcorrmatResults")
@@ -465,7 +472,7 @@ test_that("jjcorrmat statistical method comparisons on same data", {
   # Nonparametric (Spearman)
   result2 <- jjcorrmat(
     data = jjcorrmat_test,
-    dep = variables,
+    dep = !!variables,
     typestatistics = "nonparametric"
   )
   expect_s3_class(result2, "jjcorrmatResults")
@@ -473,7 +480,7 @@ test_that("jjcorrmat statistical method comparisons on same data", {
   # Robust (percentage bend)
   result3 <- jjcorrmat(
     data = jjcorrmat_test,
-    dep = variables,
+    dep = !!variables,
     typestatistics = "robust"
   )
   expect_s3_class(result3, "jjcorrmatResults")
@@ -481,7 +488,7 @@ test_that("jjcorrmat statistical method comparisons on same data", {
   # Bayesian (Bayes Factor)
   result4 <- jjcorrmat(
     data = jjcorrmat_test,
-    dep = variables,
+    dep = !!variables,
     typestatistics = "bayes"
   )
   expect_s3_class(result4, "jjcorrmatResults")
@@ -495,7 +502,7 @@ test_that("jjcorrmat matrix visualization comparisons", {
   # Upper triangle, square
   result1 <- jjcorrmat(
     data = jjcorrmat_test,
-    dep = variables,
+    dep = !!variables,
     matrixtype = "upper",
     matrixmethod = "square"
   )
@@ -504,7 +511,7 @@ test_that("jjcorrmat matrix visualization comparisons", {
   # Upper triangle, circle
   result2 <- jjcorrmat(
     data = jjcorrmat_test,
-    dep = variables,
+    dep = !!variables,
     matrixtype = "upper",
     matrixmethod = "circle"
   )
@@ -513,7 +520,7 @@ test_that("jjcorrmat matrix visualization comparisons", {
   # Lower triangle, square
   result3 <- jjcorrmat(
     data = jjcorrmat_test,
-    dep = variables,
+    dep = !!variables,
     matrixtype = "lower",
     matrixmethod = "square"
   )
@@ -522,7 +529,7 @@ test_that("jjcorrmat matrix visualization comparisons", {
   # Full matrix, circle
   result4 <- jjcorrmat(
     data = jjcorrmat_test,
-    dep = variables,
+    dep = !!variables,
     matrixtype = "full",
     matrixmethod = "circle"
   )

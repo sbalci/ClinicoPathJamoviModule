@@ -456,7 +456,7 @@ jjbetweenstatsResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
                 height=450,
                 renderFun=".plotGGPubr2",
                 requiresData=TRUE,
-                visible="(addGGPubrPlot && grvar)",
+                visible="(length(grvar) > 0 && addGGPubrPlot)",
                 clearWith=list(
                     "dep",
                     "group",

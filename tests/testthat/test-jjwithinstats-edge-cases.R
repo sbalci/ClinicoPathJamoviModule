@@ -29,17 +29,22 @@ test_that("jjwithinstats handles data with high proportion of missing values", {
   n_missing <- round(nrow(test_data_missing) * 0.5)
   test_data_missing$week4[1:n_missing] <- NA
 
-  # Should warn but complete
-  expect_warning(
-    jjwithinstats(
-      data = test_data_missing,
-      dep1 = "baseline",
-      dep2 = "week4",
-      dep3 = "week12"
-    ),
-    regexp = "missing|NA|removed|incomplete",
-    ignore.case = TRUE
+  # This module reports data problems in the `warnings` HTML panel rather than
+  # raising R conditions (jmvcore::Notice objects are not serialisable, so every
+  # notice in this package is rendered as HTML).
+  res <- jjwithinstats(
+    data = test_data_missing,
+    dep1 = "baseline",
+    dep2 = "week4",
+    dep3 = "week12"
   )
+  expect_match(res$warnings$content, "incomplete cases removed")
+  # the retained count must be the number of COMPLETE subjects, since a paired
+  # analysis can only use subjects with every measurement present
+  expect_match(res$warnings$content,
+               paste0(sum(complete.cases(
+                   test_data_missing[, c("baseline", "week4", "week12")])),
+                   " subjects retained"))
 })
 
 test_that("jjwithinstats handles small sample sizes", {
@@ -67,15 +72,17 @@ test_that("jjwithinstats handles minimal sample size (n=3)", {
   # Minimal dataset (n=3)
   minimal_data <- jjwithinstats_test[1:3, ]
 
-  # May error or warn with very small n
-  expect_condition(
-    jjwithinstats(
-      data = minimal_data,
-      dep1 = "baseline",
-      dep2 = "week4",
-      dep3 = "week12"
-    )
+  # This module reports data problems in the `warnings` HTML panel rather than
+  # raising R conditions (jmvcore::Notice objects are not serialisable, so every
+  # notice in this package is rendered as HTML).
+  res <- jjwithinstats(
+    data = minimal_data,
+    dep1 = "baseline",
+    dep2 = "week4",
+    dep3 = "week12"
   )
+  expect_s3_class(res, "jjwithinstatsResults")
+  expect_match(res$warnings$content, "Small Sample Size")
 })
 
 test_that("jjwithinstats handles no variance in a timepoint", {
@@ -86,15 +93,17 @@ test_that("jjwithinstats handles no variance in a timepoint", {
   const_data <- jjwithinstats_test
   const_data$week12 <- 50  # All same value
 
-  # Should error or warn about zero variance
-  expect_condition(
-    jjwithinstats(
-      data = const_data,
-      dep1 = "baseline",
-      dep2 = "week4",
-      dep3 = "week12"
-    )
+  # This module reports data problems in the `warnings` HTML panel rather than
+  # raising R conditions (jmvcore::Notice objects are not serialisable, so every
+  # notice in this package is rendered as HTML).
+  res <- jjwithinstats(
+    data = const_data,
+    dep1 = "baseline",
+    dep2 = "week4",
+    dep3 = "week12"
   )
+  expect_s3_class(res, "jjwithinstatsResults")
+  expect_match(res$warnings$content, "no variation")
 })
 
 test_that("jjwithinstats handles extreme outliers", {
@@ -227,15 +236,18 @@ test_that("jjwithinstats handles all NA in optional third timepoint", {
   all_na_data <- jjwithinstats_test
   all_na_data$week12 <- NA_real_
 
-  # Should fall back to two-timepoint analysis or error
-  expect_condition(
-    jjwithinstats(
-      data = all_na_data,
-      dep1 = "baseline",
-      dep2 = "week4",
-      dep3 = "week12"
-    )
+  # This module reports data problems in the `warnings` HTML panel rather than
+  # raising R conditions (jmvcore::Notice objects are not serialisable, so every
+  # notice in this package is rendered as HTML).
+  # Listwise deletion across all three measurements leaves nobody, which the
+  # analysis states rather than rendering an empty figure.
+  res <- jjwithinstats(
+    data = all_na_data,
+    dep1 = "baseline",
+    dep2 = "week4",
+    dep3 = "week12"
   )
+  expect_match(res$warnings$content, "Insufficient Complete Cases")
 })
 
 test_that("jjwithinstats handles reversed pattern (values increasing)", {
@@ -402,15 +414,20 @@ test_that("jjwithinstats handles Inf and -Inf values", {
   inf_data$week12[1] <- Inf
   inf_data$week12[2] <- -Inf
 
-  # Should error or handle gracefully
-  expect_condition(
-    jjwithinstats(
-      data = inf_data,
-      dep1 = "baseline",
-      dep2 = "week4",
-      dep3 = "week12"
-    )
+  # Infinite measurements used to abort the analysis outright ("missing value
+  # where TRUE/FALSE needed", from `if (NaN > 0)` in the skewness check) and,
+  # once past that, reached the paired test and rendered "t = NA, p = NA". They
+  # are now excluded like any other unusable value, counted, and reported as a
+  # data problem distinct from ordinary missingness.
+  res <- jjwithinstats(
+    data = inf_data,
+    dep1 = "baseline",
+    dep2 = "week4",
+    dep3 = "week12"
   )
+  expect_s3_class(res, "jjwithinstatsResults")
+  expect_match(res$warnings$content, "infinite or undefined measurement")
+  expect_match(res$warnings$content, "incomplete cases removed")
 })
 
 test_that("jjwithinstats handles NaN values", {
@@ -421,13 +438,15 @@ test_that("jjwithinstats handles NaN values", {
   nan_data <- jjwithinstats_test
   nan_data$week12[1:3] <- NaN
 
-  # Should handle like NA
-  expect_condition(
-    jjwithinstats(
-      data = nan_data,
-      dep1 = "baseline",
-      dep2 = "week4",
-      dep3 = "week12"
-    )
+  # This module reports data problems in the `warnings` HTML panel rather than
+  # raising R conditions (jmvcore::Notice objects are not serialisable, so every
+  # notice in this package is rendered as HTML).
+  # NaN is treated as missing; the affected subjects are dropped and counted.
+  res <- jjwithinstats(
+    data = nan_data,
+    dep1 = "baseline",
+    dep2 = "week4",
+    dep3 = "week12"
   )
+  expect_match(res$warnings$content, "incomplete cases removed")
 })

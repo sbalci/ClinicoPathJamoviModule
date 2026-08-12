@@ -287,12 +287,11 @@ test_that("jjbetweenstats handles different continuous outcomes", {
   for (outcome in outcomes) {
     result <- jjbetweenstats(
       data = jjbetweenstats_test,
-      dep = outcome,
+      dep = !!outcome,
       group = "treatment"
     )
 
-    expect_s3_class(result, "jjbetweenstatsResults",
-                   info = paste("Failed for outcome:", outcome))
+    expect_s3_class(result, "jjbetweenstatsResults")
   }
 })
 
@@ -306,10 +305,9 @@ test_that("jjbetweenstats handles different grouping variables", {
     result <- jjbetweenstats(
       data = jjbetweenstats_test,
       dep = "tumor_reduction",
-      group = grp
+      group = !!grp
     )
 
-    expect_s3_class(result, "jjbetweenstatsResults",
-                   info = paste("Failed for group:", grp))
+    expect_s3_class(result, "jjbetweenstatsResults")
   }
 })

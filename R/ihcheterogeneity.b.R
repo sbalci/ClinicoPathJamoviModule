@@ -2381,15 +2381,24 @@ ihcheterogeneityClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cl
                         abs_dev <- abs(cv_values - group_medians[cv_groups])
 
                         # One-way ANOVA on the absolute deviations. Computed with
-                        # aov(), not oneway.test(): oneway.test() rejects a
-                        # perfectly valid two-sided formula with "a two-sided
-                        # formula is required" when called from inside an R6
-                        # method in this package's namespace (reproduced with
-                        # stats::oneway.test and with data= supplied; a plain R6
-                        # class in a bare session is fine). The error was swallowed
-                        # by the surrounding tryCatch, so this row ALWAYS rendered
+                        # aov(), not oneway.test().
+                        #
+                        # ROOT CAUSE (corrected 2026-08-11; the earlier note here
+                        # blamed R6 and this package's namespace, which was wrong):
+                        # `formula.tools` registers an `as.character.formula` S3
+                        # method that returns ONE deparsed string ("y ~ g") where
+                        # base R returns c("~", "y", "g"). stats::oneway.test's
+                        # second guard is `length(as.character(formula)) != 3L`,
+                        # so it rejects every valid formula once that package is
+                        # loaded - for the whole R session, not just this module.
+                        # formula.tools arrives transitively through logistf
+                        # (Imports), which firthregression loads on demand, and
+                        # eagerly under devtools::load_all. Only oneway.test is
+                        # affected; t.test, kruskal.test and bartlett.test formula
+                        # methods are unharmed. The error was swallowed by the
+                        # surrounding tryCatch, so this row ALWAYS rendered
                         # "Could not compute" and Levene's test never once reported
-                        # a result. aov(var.equal) gives the identical F, df and p.
+                        # a result. aov() gives the identical F, df and p.
                         lev_df_frame <- data.frame(abs_dev = as.numeric(abs_dev),
                                                    grp = factor(cv_groups))
                         lev_tab <- summary(stats::aov(abs_dev ~ grp, data = lev_df_frame))[[1]]

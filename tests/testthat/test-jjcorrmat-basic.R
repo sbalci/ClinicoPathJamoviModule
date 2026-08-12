@@ -299,9 +299,13 @@ test_that("jjcorrmat handles different datasets", {
     dataset <- get(dataset_name)
     vars <- datasets[[dataset_name]]
 
+    # !! forces evaluation. `dep = vars` would be resolved by jmvcore's
+    # non-standard evaluation to the literal column name "vars", which no
+    # dataset has, and the call dies inside jmvcore::select() with
+    # "invalid 'row.names' length".
     result <- jjcorrmat(
       data = dataset,
-      dep = vars
+      dep = !!vars
     )
 
     expect_s3_class(result, "jjcorrmatResults")

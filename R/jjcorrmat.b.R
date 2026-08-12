@@ -504,6 +504,51 @@ jjcorrmatClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         .generateInterpretation = function(mydata, options_data) {
             if (length(options_data$myvars) < 2) return()
 
+            # With a Split By variable the plot and the table are computed PER
+            # GROUP, but this panel pooled every row. Groups that correlate in
+            # opposite directions cancel: +0.99 and -0.99 pool to +0.38, so the
+            # narrative could report a weak, non-significant association over a
+            # figure showing two near-perfect ones. Summarise each group.
+            if (!is.null(self$options$grvar)) {
+                grp_var  <- private$.resolveName(self$options$grvar, mydata)
+                grp_vals <- mydata[[grp_var]]
+                lvls <- unique(grp_vals[!is.na(grp_vals)])
+                if (is.factor(grp_vals)) lvls <- lvls[order(as.integer(lvls))]
+
+                parts <- character()
+                for (lvl in lvls) {
+                    keep <- !is.na(grp_vals) & grp_vals == lvl
+                    sub_res <- private$.computeCorrelations(
+                        mydata[keep, , drop = FALSE], options_data)
+                    if (is.null(sub_res) || nrow(sub_res) == 0) next
+                    sig <- if (identical(options_data$typestatistics, "bayes"))
+                               (!is.na(sub_res$bf) & sub_res$bf >= 3)
+                           else (!is.na(sub_res$p_adj) & sub_res$p_adj < options_data$siglevel)
+                    strong <- !is.na(sub_res$r) & abs(sub_res$r) >= 0.5
+                    parts <- c(parts, sprintf(
+                        .("<li><strong>%s</strong> (n = %s): %d of %d pairs strong (|%s| \u2265 0.5), %d meeting the significance threshold. Strongest: %s = %s (%s vs %s).</li>"),
+                        htmltools::htmlEscape(as.character(lvl)),
+                        format(max(sub_res$n, na.rm = TRUE)),
+                        sum(strong), nrow(sub_res),
+                        private$.coefSymbol(options_data$typestatistics),
+                        sum(sig),
+                        private$.coefSymbol(options_data$typestatistics),
+                        sprintf("%.3f", sub_res$r[which.max(abs(sub_res$r))]),
+                        htmltools::htmlEscape(sub_res$var1[which.max(abs(sub_res$r))]),
+                        htmltools::htmlEscape(sub_res$var2[which.max(abs(sub_res$r))])))
+                }
+
+                self$results$interpretation$setContent(paste0(
+                    "<h4>", .("Correlation Analysis Summary"), "</h4>",
+                    "<p>", sprintf(.("Correlations are computed separately within each level of <strong>%s</strong>, matching the figure and the table. Pooling the groups would be misleading whenever they differ in direction."),
+                                   htmltools::htmlEscape(self$options$grvar)), "</p>",
+                    "<ul>", paste(parts, collapse = ""), "</ul>",
+                    "<p><strong>", .("Clinical Recommendations:"), "</strong><br>",
+                    "\u2022 ", .("Compare the groups deliberately: a correlation present in one group and absent (or reversed) in another is a finding in itself, not noise."),
+                    "<br>\u2022 ", .("Remember that correlation does not imply causation."), "</p>"))
+                return()
+            }
+
             res <- private$.computeCorrelations(mydata, options_data)
             if (is.null(res) || nrow(res) == 0) {
                 self$results$interpretation$setContent(
@@ -753,11 +798,17 @@ jjcorrmatClass <- if (requireNamespace('jmvcore')) R6::R6Class(
     
     n_vars <- length(options_data$myvars)
     n_obs <- nrow(private$.prepareData())
-    
+    # Say whether that N is pooled or per group: with a Split By variable the
+    # figure and table are per group, so a bare pooled count misdescribes them.
+    n_label <- if (!is.null(self$options$grvar))
+        sprintf(.("%d observations in total, analysed separately within each level of %s"),
+                n_obs, htmltools::htmlEscape(self$options$grvar))
+    else sprintf(.("%d observations"), n_obs)
+
     summary_text <- glue::glue("
     <h4>Analysis Summary</h4>
     <p><b>Variables analyzed:</b> {n_vars}</p>
-    <p><b>Sample size:</b> {n_obs} observations</p>
+    <p><b>Sample size:</b> {n_label}</p>
     <p><b>Method:</b> {options_data$typestatistics} correlation</p>
     <p><b>Correlation type:</b> {if(options_data$partial && n_vars >= 3) 'Partial' else 'Zero-order'}</p>
     ")

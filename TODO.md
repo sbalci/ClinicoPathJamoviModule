@@ -3010,8 +3010,6 @@ out-of-scope findings from the same audit, deferred for separate work.
 
 
 
-/release-review-function jjbetweenstats
-/release-review-function jjwithinstats
 /release-review-function jjdotplotstats
 /release-review-function raincloud
 /release-review-function advancedraincloud
@@ -3344,20 +3342,111 @@ API and will fail `R CMD check --run-donttest` until `prepare()` + `document()` 
       `a$.__enclos_env__$private$...` instead - see `test-jjridges-release-review.R`.
       Found during the jjridges release review, 2026-08-11.
 
-- [ ] [tests] Pre-existing flake: `invalid 'row.names' length` from `jmvcore::select()`.
-      Three jjcorrmat tests error inside `jmvcore`'s `Analysis$init()` at
-      `select(private$.data, self$options$varsRequired)` - `test-jjcorrmat-basic.R`
-      ("handles different datasets") and two in `test-jjcorrmat-integration.R`. No jjcorrmat
-      code appears on the stack, `varsRequired` is correct and non-empty at the point of
-      failure, and the counts are byte-identical on unmodified code (verified by reverting
-      `R/jjcorrmat.b.R` and both yamls and re-running: 236 pass / 5 fail / 6 error either way).
-      It is order-dependent inside a single `devtools::load_all()` + testthat session: once it
-      trips, every later `jjcorrmat()` call in that session fails, including calls on a fresh
-      20-row `data.frame`. It does NOT reproduce when `jmvcore::select` is replaced via
-      `assignInNamespace` with a functionally identical wrapper, which points at the compiled
-      binding rather than at the data. Not root-caused - reproduce with
-      `testthat::test_dir("tests/testthat", filter = "jjcorrmat")`.
-      Also hits `test-hullplot-integration.R` ("output structure is consistent across all
-      datasets") identically, before and after that review's fixes - so it is not specific
-      to one analysis.
-      Found during the jjcorrmat release review, 2026-08-11.
+- [x] [tests] ROOT-CAUSED: `invalid 'row.names' length` from `jmvcore::select()` - DONE 2026-08-11.
+      Not a flake and not a jmvcore bug: it is jmvcore's non-standard evaluation. The generated
+      wrappers run every variable argument through `jmvcore::resolveQuo(jmvcore::enquo(x))`, and
+      `resolveQuo` returns a BARE SYMBOL's own NAME (that is the idiom that lets you write
+      `dep = age` to mean the column `age`). So `x_var = x_var`, or `dep = vars` where `vars`
+      holds a character vector of column names, asks for a column literally called "x_var" /
+      "vars". Every requested column is absent, `select()` builds a 0-column data frame, and
+      copying the original row names onto it fails with an error that names neither the option
+      nor the column. Diagnosed by dumping the `select()` frame with `withCallingHandlers` +
+      `sys.frames()`: `columnNames = c("x_var","y_var","group_var")`, `length(out) = 0`,
+      `nrow(df) = 120`. Fix in the CALLER: `!!x_var`, or a literal, or `do.call` with a value
+      list - all three verified. Fixed the 4 affected call sites (test-hullplot-integration.R,
+      test-jjcorrmat-integration.R x8, test-jjcorrmat-basic.R); both suites are now green
+      (hullplot 366/0/0, jjcorrmat 347/0/0), and both release-review files carry a regression
+      test that pins the contract.
+
+- [ ] [tests] Audit the other bare-symbol variable arguments in the test suite.
+      An AST scan of `tests/testthat/test-*.R` against the `resolveQuo` arguments of all 368
+      generated wrappers finds 289 bare-symbol variable arguments across 34 files (heaviest:
+      test-diagnosticmeta-notices-wilsonci.R 77, test-diagnosticmeta-critical-fixes.R 56,
+      test-jggheatmap.R 26, test-finegray-competing-risks.R 21). MOST ARE CORRECT - passing a
+      bare symbol is the intended way to name a column. The trap is only the subset where the
+      symbol holds a column name rather than being one; those currently pass only because the
+      test asserts something weak, or fail with the opaque row.names error. 57 of the 289 have
+      `argument name == symbol name`, which is the highest-risk pattern. Scanner:
+      /tmp/hp/scan.R (walks each parsed expression, so comments and strings are ignored).
+      Found during the hullplot release review, 2026-08-11.
+
+- [ ] [package] `formula.tools` breaks `stats::oneway.test` for the whole R session.
+      ROOT CAUSE (this supersedes an earlier, wrong entry that blamed `library(ClinicoPath)`
+      masking base functions - see the correction note below).
+      `formula.tools` registers an `as.character.formula` S3 method returning ONE deparsed
+      string ("y ~ g") where base R returns `c("~", "y", "g")`. `stats::oneway.test`'s second
+      guard is `length(as.character(formula)) != 3L`, so it rejects every valid formula with
+      "a two-sided formula is required" - for every package in the session, fully-qualified
+      calls included.
+      CHAIN: firthregression uses `logistf` (requireNamespace-guarded), `logistf` Imports
+      `formula.tools`. So the breakage arms itself the first time a user runs Firth regression
+      in a jamovi session, and is always armed under `devtools::load_all`, which loads
+      DESCRIPTION Imports eagerly.
+      BLAST RADIUS is narrow and was measured: ONLY `oneway.test`. `t.test`, `kruskal.test`
+      and `bartlett.test` formula methods are unaffected. Downstream, `statsExpressions::
+      oneway_anova` (Welch ANOVA) fails, which is why jjbetweenstats' 3+ group subtitle
+      takeover falls back - now disclosed to the user rather than silent.
+      Already worked around once in `R/ihcheterogeneity.b.R` (Levene's test switched to
+      `aov()`); that comment misdiagnosed it as an R6/namespace effect and has been corrected.
+      OPTIONS: (a) accept it - the two module call sites are defended and the jjbetweenstats
+      fallback is disclosed; (b) drop `logistf` in favour of a Firth implementation that does
+      not pull formula.tools (`brglm2::brglmFit`, NOT currently installed); (c) report upstream
+      to formula.tools. Reproduce:
+        Rscript -e 'd <- data.frame(y=rnorm(9), g=factor(rep(1:3,3)));
+                    print(stats::oneway.test(y~g, d)$p.value);
+                    loadNamespace("formula.tools");
+                    print(try(stats::oneway.test(y~g, d)))'
+      CORRECTION: `library(ClinicoPath)` does NOT mask base/stats functions - NAMESPACE
+      exports none of them. The masking observed earlier (format() returning a number,
+      terms/aov/t.test/setdiff shadowed) is caused by `devtools::load_all()`, whose
+      `export_all` argument defaults to TRUE and dumps the whole namespace onto the search
+      path. Dev and test scripts should use `devtools::load_all(".", export_all = FALSE)`,
+      which is also closer to how jamovi loads the module.
+      Found during the jjbetweenstats release review, 2026-08-11.
+
+- [ ] [jjbetweenstats] Findings verified but NOT fixed in the release-review pass.
+      A 63-agent adversarial review confirmed 50 findings; the critical one and all 14 majors
+      are fixed. These survived verification and remain open, roughly in priority order:
+        * padjustmethod defaults to "holm", which double-corrects the Games-Howell pairwise
+          p-values ggstatsplot produces (they are already family-wise adjusted).
+        * The ggpubr companion panel calls `ggpubr::stat_compare_means()` bare, so it always
+          runs a nonparametric test regardless of Type of Statistic, and ignores equal
+          variances, the p-adjustment and the confidence level. It also dies on variable names
+          containing a space or parenthesis (bare strings where the main path uses rlang::sym).
+        * The grouped (Split By) plot drops Title / X-Title / Y-Title and never calls
+          .applyTheme, so the colourblind-safe palette is not applied there.
+        * plotwidth / plotheight are not applied to either ggpubr panel; plot2's canvas is
+          sized from factor levels that no longer carry data; with 2+ dependent variables the
+          Split By height ignores the number of split levels.
+        * `clearWith` for ggpubrPlot omits grvar even though grvar changes the rows analysed.
+        * Listwise deletion across endpoints silently shrinks the sample for complete
+          endpoints; the exclusion note does not say the deletion was joint.
+        * Degenerate groups (n = 1, or all values identical) render a stats-free plot with no
+          message; `dep = character(0)` errors unactionably on the programmatic path.
+        * Assumption checking is skipped entirely for the bayes and robust types.
+        * asSource() emits a stray blank line; a dead `messages = FALSE` is threaded through
+          the multi-dependent-variable pmap.
+      Full evidence, including each verifier's refutation attempt, is in the workflow journal:
+      .../subagents/workflows/wf_573e7ee4-000/journal.jsonl
+      Found during the jjbetweenstats release review, 2026-08-11.
+
+- [ ] [module-wide] Non-finite values (Inf/-Inf) are mishandled differently in every analysis that meets them.
+      Three release reviews on 2026-08-11/12 found the same root cause producing three different
+      user-visible failures, because `is.na()` is TRUE for NaN but FALSE for Inf and
+      `complete.cases()`/`jmvcore::naOmit()` follow `is.na()`:
+        * hullplot   - Inf SURVIVED into the group statistics ("Inf +/- NaN") and made the
+                       centroid distance infinite, flipping the copy-ready manuscript verdict to
+                       "well-separated" for groups that completely overlap. FIXED (is.finite filter
+                       + separate disclosure).
+        * jjwithinstats - Inf first CRASHED the analysis (`if (NaN > 0)` in the skewness check ->
+                       "missing value where TRUE/FALSE needed", no message), and once unblocked
+                       reached the paired test and rendered "t(77) = NA, p = NA" beneath a panel
+                       reassuring the user that all 78 subjects had been retained. FIXED.
+        * jjbetweenstats - not reached in that review; unverified either way.
+      The pattern to grep for is any filter written as `!is.na(x)` / `complete.cases()` on a
+      numeric column that then feeds sd(), mean(), a test, or an `if (...)` comparison:
+        grep -rn "complete.cases\|naOmit\|!is\.na(" R/*.b.R | wc -l   # ~200 call sites
+      Worth one sweep rather than N local fixes. The correct idiom for a numeric column is
+      `is.finite(x)`, with the non-finite count reported separately from ordinary missingness
+      because it signals a data-entry or divide-by-zero problem rather than an absent observation.
+      Found during the hullplot and jjwithinstats release reviews, 2026-08-12.

@@ -358,7 +358,6 @@ test_that("jjwithinstats handles different datasets", {
       dep3 = vars$dep3
     )
 
-    expect_s3_class(result, "jjwithinstatsResults",
-                   info = paste("Failed for dataset:", dataset_name))
+    expect_s3_class(result, "jjwithinstatsResults")
   }
 })

@@ -336,3 +336,18 @@ test_that("the missing-data exclusion count survives to the user", {
     expect_false(grepl("were excluded because they had a missing value",
                        b$results$warnings$content, fixed = TRUE))
 })
+
+
+test_that("a Variables option must be passed by value, not as a bare symbol", {
+    # jmvcore resolves a bare symbol to its own NAME, so `dep = variables` asks
+    # for a column called "variables". jmvcore::select() then returns a
+    # 0-column frame and fails with "invalid 'row.names' length" before any
+    # analysis code runs. This was the cause of the three long-standing errors
+    # in test-jjcorrmat-integration.R.
+    d <- cm_data()
+    v <- cm_vars
+
+    expect_error(jjcorrmat(data = d, dep = v), "invalid 'row.names' length")
+    expect_s3_class(jjcorrmat(data = d, dep = !!v), "jjcorrmatResults")
+    expect_s3_class(jjcorrmat(data = d, dep = c("a", "b")), "jjcorrmatResults")
+})

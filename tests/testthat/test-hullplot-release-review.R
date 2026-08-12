@@ -236,3 +236,72 @@ test_that("outlier counts match the 1.5 x IQR rule", {
     expect_match(hp_text(hp_run(small)$results$outliers$content),
                  "A: n too small for reliable outlier detection")
 })
+
+
+test_that("the convex-hull fallback renders when concaveman is unavailable", {
+    # ggforce::geom_mark_hull needs V8 + concaveman. Both are installed here, so
+    # the fallback branch never ran in any test: it is only reachable on a
+    # machine without them, which is exactly where a break would go unnoticed.
+    # Mock the availability check to force it.
+    real_rn <- base::requireNamespace
+    fake_rn <- function(package, ..., quietly = FALSE)
+        if (package %in% c("V8", "concaveman")) FALSE
+        else real_rn(package, ..., quietly = quietly)
+
+    render <- function(a) {
+        f <- tempfile(fileext = ".png")
+        grDevices::png(f, 700, 550)
+        on.exit(try(grDevices::dev.off(), silent = TRUE), add = TRUE)
+        a$.__enclos_env__$private$.plot(a$results$plot,
+                                        ggtheme = ggplot2::theme_bw(), theme = NULL)
+        grDevices::dev.off(); on.exit()
+        ggplot2::last_plot()
+    }
+    geoms <- function(p) vapply(p$layers, function(l) class(l$geom)[1], character(1))
+
+    # concave path: one ggforce layer, no caption
+    p_concave <- render(hp_run())
+    expect_true("GeomMarkHull" %in% geoms(p_concave))
+    expect_null(p_concave$labels$caption)
+
+    # convex fallback: chull polygons plus centroid labels, and the substitution
+    # is disclosed in the caption rather than made silently
+    p_convex <- testthat::with_mocked_bindings(
+        render(hp_run()), requireNamespace = fake_rn, .package = "base")
+    expect_false("GeomMarkHull" %in% geoms(p_convex))
+    expect_true(all(c("GeomPolygon", "GeomText", "GeomPoint") %in% geoms(p_convex)))
+    expect_match(p_convex$labels$caption, "showing convex hulls")
+
+    # the label layer follows show_labels on this path too
+    p_nolab <- testthat::with_mocked_bindings(
+        render(hp_run(show_labels = FALSE)), requireNamespace = fake_rn, .package = "base")
+    expect_false("GeomText" %in% geoms(p_nolab))
+
+    # a group with fewer than 3 points has no hull; it must not break the render
+    d <- hp_data()
+    d <- rbind(d[d$group == "A", ][1:2, ], d[d$group == "B", ])
+    d$group <- droplevels(d$group)
+    expect_no_error(testthat::with_mocked_bindings(
+        render(hp_run(d)), requireNamespace = fake_rn, .package = "base"))
+})
+
+
+test_that("variable arguments must be passed by value, not as bare symbols", {
+    # jmvcore's generated wrappers use non-standard evaluation: a bare symbol
+    # resolves to its own NAME, so `x_var = x_var` asks for a column literally
+    # called "x_var". Every requested column is then absent, jmvcore::select()
+    # builds a 0-column data frame, and copying the original row names onto it
+    # dies with "invalid 'row.names' length" - an error that names neither the
+    # option nor the column. This was the cause of the long-standing "flaky"
+    # errors in test-hullplot-integration.R and test-jjcorrmat-integration.R.
+    d <- hp_data()
+    xv <- "x"; yv <- "y"; gv <- "group"
+
+    expect_error(hullplot(data = d, x_var = xv, y_var = yv, group_var = gv),
+                 "invalid 'row.names' length")
+    # forcing evaluation is the fix
+    expect_s3_class(hullplot(data = d, x_var = !!xv, y_var = !!yv, group_var = !!gv),
+                    "hullplotResults")
+    expect_s3_class(hullplot(data = d, x_var = "x", y_var = "y", group_var = "group"),
+                    "hullplotResults")
+})

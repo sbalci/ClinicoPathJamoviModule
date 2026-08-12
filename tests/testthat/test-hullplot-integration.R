@@ -572,11 +572,15 @@ test_that("hullplot output structure is consistent across all datasets", {
                        "hullplot_clusters" = "cluster",
                        "hullplot_clinical" = "treatment_arm")
 
+    # !! forces evaluation: a bare symbol would resolve to its own name under
+    # jmvcore's non-standard evaluation, so `x_var = x_var` would ask for a
+    # column literally called "x_var" and fail inside jmvcore::select() with
+    # "invalid 'row.names' length".
     result <- hullplot(
       data = dataset,
-      x_var = x_var,
-      y_var = y_var,
-      group_var = group_var,
+      x_var = !!x_var,
+      y_var = !!y_var,
+      group_var = !!group_var,
       show_labels = TRUE
     )
 
