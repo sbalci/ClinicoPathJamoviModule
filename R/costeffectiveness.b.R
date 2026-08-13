@@ -279,9 +279,9 @@ costeffectivenessClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6C
                             # Check against WTP threshold
                             wtp <- self$options$wtp_threshold
                             if (icer < wtp) {
-                                icer_interpretation <- sprintf("Cost-effective at WTP $%s", format(wtp, big.mark=","))
+                                icer_interpretation <- sprintf("Cost-effective at WTP $%s", base::format(wtp, big.mark=","))
                             } else {
-                                icer_interpretation <- sprintf("NOT cost-effective at WTP $%s", format(wtp, big.mark=","))
+                                icer_interpretation <- sprintf("NOT cost-effective at WTP $%s", base::format(wtp, big.mark=","))
                             }
                             dominance <- "Trade-off"
                         } else {
@@ -1030,7 +1030,7 @@ costeffectivenessClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6C
             <h5>Key Decision Rules:</h5>",
             perspective_label, time_horizon, cost_year,
             htmltools::htmlEscape(currency), missing_label, discount_msg,
-            htmltools::htmlEscape(currency), format(wtp, big.mark = ","),
+            htmltools::htmlEscape(currency), base::format(wtp, big.mark = ","),
             htmltools::htmlEscape(eff_label))
 
             html <- paste0(html, "
@@ -1163,7 +1163,7 @@ costeffectivenessClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6C
             # Add WTP threshold line (slope = WTP)
             if (wtp > 0) {
                 abline(a = 0, b = wtp, lty = 1, col = "blue", lwd = 2)
-                legend_text <- sprintf("WTP Threshold (%s %s)", currency, format(wtp, big.mark = ","))
+                legend_text <- sprintf("WTP Threshold (%s %s)", currency, base::format(wtp, big.mark = ","))
                 legend("topleft", legend = legend_text, col = "blue", lty = 1, lwd = 2, bty = "n")
             }
 
@@ -1325,7 +1325,7 @@ costeffectivenessClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6C
             text(self$options$wtp_threshold, 0.95,
                  sprintf("Current WTP:\n%s %s",
                         self$options$currency,
-                        format(self$options$wtp_threshold, big.mark = ",")),
+                        base::format(self$options$wtp_threshold, big.mark = ",")),
                  pos = 4,
                  cex = 0.7,
                  col = "blue")
@@ -1403,7 +1403,7 @@ costeffectivenessClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6C
                     col = bar_colors,
                     border = "black",
                     main = sprintf("Net Monetary Benefit at WTP %s %s",
-                                 currency, format(wtp, big.mark = ",")),
+                                 currency, base::format(wtp, big.mark = ",")),
                     ylab = sprintf("Net Monetary Benefit (%s)", currency),
                     xlab = "Strategy",
                     las = 2,  # Rotate labels
@@ -1616,7 +1616,7 @@ costeffectivenessClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6C
             if (wtp > xlim[1] && wtp < xlim[2]) {
                 abline(v = wtp, lty = 3, col = "green", lwd = 1.5)
                 text(wtp, length(params) + 0.3,
-                     sprintf("WTP: %s", format(wtp, big.mark = ",")),
+                     sprintf("WTP: %s", base::format(wtp, big.mark = ",")),
                      pos = 4,
                      cex = 0.7,
                      col = "green")

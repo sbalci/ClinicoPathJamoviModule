@@ -13,6 +13,7 @@ linechartOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             trendline = FALSE,
             points = TRUE,
             smooth = FALSE,
+            showRefline = FALSE,
             refline = 0,
             reflineLabel = "Reference",
             colorPalette = "default",
@@ -32,6 +33,7 @@ linechartOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             private$..xvar <- jmvcore::OptionVariable$new(
                 "xvar",
                 xvar,
+                default=NULL,
                 suggested=list(
                     "continuous",
                     "ordinal"),
@@ -41,6 +43,7 @@ linechartOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             private$..yvar <- jmvcore::OptionVariable$new(
                 "yvar",
                 yvar,
+                default=NULL,
                 suggested=list(
                     "continuous"),
                 permitted=list(
@@ -69,6 +72,10 @@ linechartOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             private$..smooth <- jmvcore::OptionBool$new(
                 "smooth",
                 smooth,
+                default=FALSE)
+            private$..showRefline <- jmvcore::OptionBool$new(
+                "showRefline",
+                showRefline,
                 default=FALSE)
             private$..refline <- jmvcore::OptionNumber$new(
                 "refline",
@@ -130,6 +137,7 @@ linechartOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             self$.addOption(private$..trendline)
             self$.addOption(private$..points)
             self$.addOption(private$..smooth)
+            self$.addOption(private$..showRefline)
             self$.addOption(private$..refline)
             self$.addOption(private$..reflineLabel)
             self$.addOption(private$..colorPalette)
@@ -148,6 +156,7 @@ linechartOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         trendline = function() private$..trendline$value,
         points = function() private$..points$value,
         smooth = function() private$..smooth$value,
+        showRefline = function() private$..showRefline$value,
         refline = function() private$..refline$value,
         reflineLabel = function() private$..reflineLabel$value,
         colorPalette = function() private$..colorPalette$value,
@@ -165,6 +174,7 @@ linechartOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         ..trendline = NA,
         ..points = NA,
         ..smooth = NA,
+        ..showRefline = NA,
         ..refline = NA,
         ..reflineLabel = NA,
         ..colorPalette = NA,
@@ -273,7 +283,7 @@ linechartBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             super$initialize(
                 package = "ClinicoPath",
                 name = "linechart",
-                version = c(1,0,51),
+                version = c(1,0,52),
                 options = options,
                 results = linechartResults$new(options=options),
                 data = data,
@@ -304,8 +314,11 @@ linechartBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   plot.
 #' @param points Whether to show individual data points on the line(s).
 #' @param smooth Whether to apply smoothing (loess) to the line(s).
-#' @param refline Optional reference line value (e.g., normal range,
-#'   threshold). Set to 0 for no reference line.
+#' @param showRefline Whether to draw a horizontal reference line at the value
+#'   below. Enable this to draw the line at any value, including zero.
+#' @param refline Value at which to draw the reference line (e.g., a
+#'   normal-range limit, a clinical threshold, or zero for no change from
+#'   baseline). Only drawn when Reference line is enabled.
 #' @param reflineLabel Label for the reference line.
 #' @param colorPalette Color palette for multiple groups.
 #' @param theme Overall theme/appearance of the plot.
@@ -333,13 +346,14 @@ linechartBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' @export
 linechart <- function(
     data,
-    xvar,
-    yvar,
+    xvar = NULL,
+    yvar = NULL,
     groupby = NULL,
     confidence = FALSE,
     trendline = FALSE,
     points = TRUE,
     smooth = FALSE,
+    showRefline = FALSE,
     refline = 0,
     reflineLabel = "Reference",
     colorPalette = "default",
@@ -373,6 +387,7 @@ linechart <- function(
         trendline = trendline,
         points = points,
         smooth = smooth,
+        showRefline = showRefline,
         refline = refline,
         reflineLabel = reflineLabel,
         colorPalette = colorPalette,

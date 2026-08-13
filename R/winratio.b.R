@@ -324,9 +324,9 @@ winratioClass <- R6::R6Class(
                                   100 * r$conf, r$ci_low, r$ci_high)
             dir <- if (is.infinite(r$win_ratio) || r$win_ratio > 1) r$idxLbl else r$refLbl
             html <- glue::glue(
-                "<p>Across {format(r$Ttot, big.mark=',')} index\u{2013}reference pairs,
-                the <b>{r$idxLbl}</b> group won {format(r$W, big.mark=',')} pairs and
-                lost {format(r$L, big.mark=',')} ({format(r$Ttie, big.mark=',')} ties).
+                "<p>Across {base::format(r$Ttot, big.mark=',')} index\u{2013}reference pairs,
+                the <b>{r$idxLbl}</b> group won {base::format(r$W, big.mark=',')} pairs and
+                lost {base::format(r$L, big.mark=',')} ({base::format(r$Ttie, big.mark=',')} ties).
                 The <b>win ratio was {wrTxt}</b>{ciTxt}, favouring <b>{dir}</b>. The net
                 benefit was {sprintf('%.3f', r$net_benefit)}.</p>")
             self$results$summary$setContent(html)

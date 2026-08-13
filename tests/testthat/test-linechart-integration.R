@@ -36,9 +36,8 @@ test_that("linechart integrates with all test datasets", {
       )
     }
 
-    expect_s3_class(result, "linechartResults",
-                   info = paste("Integration failed for dataset:", ds$name))
-    expect_true(!is.null(result$plot1),
+    expect_s3_class(result, "linechartResults")
+    expect_true(!is.null(result$plot),
                info = paste("Plot missing for dataset:", ds$name))
   }
 })
@@ -316,8 +315,7 @@ test_that("linechart handles all color palettes consistently", {
       colorPalette = pal
     )
 
-    expect_s3_class(result, "linechartResults",
-                   info = paste("Integration failed for palette:", pal))
+    expect_s3_class(result, "linechartResults")
   }
 })
 
@@ -337,8 +335,7 @@ test_that("linechart handles all plot themes consistently", {
       theme = theme
     )
 
-    expect_s3_class(result, "linechartResults",
-                   info = paste("Integration failed for theme:", theme))
+    expect_s3_class(result, "linechartResults")
   }
 })
 
@@ -450,8 +447,7 @@ test_that("linechart handles progressive feature addition", {
 
     result <- do.call(linechart, args)
 
-    expect_s3_class(result, "linechartResults",
-                   info = paste("Failed for feature set", i))
+    expect_s3_class(result, "linechartResults")
   }
 })
 
@@ -480,8 +476,7 @@ test_that("linechart handles all datasets with consistent parameters", {
       colorPalette = "colorblind"
     )
 
-    expect_s3_class(result, "linechartResults",
-                   info = paste("Consistent parameters failed for:", ds$name))
+    expect_s3_class(result, "linechartResults")
   }
 })
 
@@ -511,21 +506,21 @@ test_that("linechart output structure is consistent across all datasets", {
     if (is.null(groupby)) {
       result <- linechart(
         data = dataset,
-        xvar = xvar,
-        yvar = yvar
+        xvar = !!xvar,
+        yvar = !!yvar
       )
     } else {
       result <- linechart(
         data = dataset,
-        xvar = xvar,
-        yvar = yvar,
-        groupby = groupby
+        xvar = !!xvar,
+        yvar = !!yvar,
+        groupby = !!groupby
       )
     }
 
     # Check consistent output structure
     expect_s3_class(result, "linechartResults")
-    expect_true(!is.null(result$plot1),
+    expect_true(!is.null(result$plot),
                info = paste("Plot missing for:", dataset_name))
   }
 })
@@ -543,8 +538,7 @@ test_that("linechart handles repeated analyses with same data", {
       confidence = TRUE
     )
 
-    expect_s3_class(result, "linechartResults",
-                   info = paste("Failed on iteration", i))
+    expect_s3_class(result, "linechartResults")
   }
 })
 

@@ -2647,8 +2647,8 @@ riverplotClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                     
                     "<div style='background-color: white; padding: 15px; border-radius: 5px; margin: 15px 0; border-left: 4px solid ", quality_level$color, ";'>",
                     "<h5 style='color: ", quality_level$color, "; margin: 0 0 10px 0;'>", quality_level$icon, " ", .("Overall Data Quality:"), " ", quality_level$level, " (", sprintf("%.0f%%", data_quality_score), ")</h5>",
-                    "<p style='margin: 5px 0;'><strong>", .("Total observations:"), "</strong> ", format(total_rows, big.mark = ","), "</p>",
-                    "<p style='margin: 5px 0;'><strong>", .("Complete cases:"), "</strong> ", format(complete_rows, big.mark = ","), " (", sprintf("%.1f%%", completeness_rate), ")</p>",
+                    "<p style='margin: 5px 0;'><strong>", .("Total observations:"), "</strong> ", base::format(total_rows, big.mark = ","), "</p>",
+                    "<p style='margin: 5px 0;'><strong>", .("Complete cases:"), "</strong> ", base::format(complete_rows, big.mark = ","), " (", sprintf("%.1f%%", completeness_rate), ")</p>",
                     "</div>",
                     
                     if (length(validation_issues) > 0) {

@@ -1090,7 +1090,7 @@ bayesdcaClass <- if (requireNamespace("jmvcore"))
                         subtitle = "EVPI: Value of Reducing Uncertainty"
                     ) +
                     ggplot2::scale_x_continuous(labels = scales::percent) +
-                    ggplot2::scale_y_continuous(labels = function(x) format(x, digits = 4))
+                    ggplot2::scale_y_continuous(labels = function(x) base::format(x, digits = 4))
 
                 # Add horizontal line at zero for reference
                 plot <- plot + ggplot2::geom_hline(yintercept = 0, linetype = "dashed", alpha = 0.5)

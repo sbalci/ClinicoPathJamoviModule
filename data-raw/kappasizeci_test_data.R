@@ -151,7 +151,8 @@ kappa_ci_scenarios_comprehensive <- tribble(
 )
 
 # Save Dataset 1 in multiple formats
-save(kappa_ci_scenarios_comprehensive, file = here("data", "kappasizeci_scenarios_comprehensive.rda"))
+kappasizeci_scenarios_comprehensive <- kappa_ci_scenarios_comprehensive  # object name must match the file name
+save(kappasizeci_scenarios_comprehensive, file = here("data", "kappasizeci_scenarios_comprehensive.rda"))
 write.csv(kappa_ci_scenarios_comprehensive, file = here("data", "kappasizeci_scenarios_comprehensive.csv"), row.names = FALSE)
 write_xlsx(kappa_ci_scenarios_comprehensive, path = here("data", "kappasizeci_scenarios_comprehensive.xlsx"))
 write_omv(kappa_ci_scenarios_comprehensive, here("data", "kappasizeci_scenarios_comprehensive.omv"), frcWrt = TRUE)
@@ -250,7 +251,8 @@ kappa_ci_relationship_cases <- tribble(
 )
 
 # Save Dataset 2 in multiple formats
-save(kappa_ci_relationship_cases, file = here("data", "kappasizeci_relationship_cases.rda"))
+kappasizeci_relationship_cases <- kappa_ci_relationship_cases  # object name must match the file name
+save(kappasizeci_relationship_cases, file = here("data", "kappasizeci_relationship_cases.rda"))
 write.csv(kappa_ci_relationship_cases, file = here("data", "kappasizeci_relationship_cases.csv"), row.names = FALSE)
 write_xlsx(kappa_ci_relationship_cases, path = here("data", "kappasizeci_relationship_cases.xlsx"))
 write_omv(kappa_ci_relationship_cases, here("data", "kappasizeci_relationship_cases.omv"), frcWrt = TRUE)
@@ -371,7 +373,8 @@ kappa_ci_validation_cases <- tribble(
 )
 
 # Save Dataset 3 in multiple formats
-save(kappa_ci_validation_cases, file = here("data", "kappasizeci_validation_cases.rda"))
+kappasizeci_validation_cases <- kappa_ci_validation_cases  # object name must match the file name
+save(kappasizeci_validation_cases, file = here("data", "kappasizeci_validation_cases.rda"))
 write.csv(kappa_ci_validation_cases, file = here("data", "kappasizeci_validation_cases.csv"), row.names = FALSE)
 write_xlsx(kappa_ci_validation_cases, path = here("data", "kappasizeci_validation_cases.xlsx"))
 write_omv(kappa_ci_validation_cases, here("data", "kappasizeci_validation_cases.omv"), frcWrt = TRUE)

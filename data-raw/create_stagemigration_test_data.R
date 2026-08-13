@@ -422,7 +422,8 @@ if (requireNamespace("jmvReadWrite", quietly = TRUE)) {
   jmvReadWrite::write_omv(colorectal_cancer_data, "data/stagemigration_colorectal_cancer.omv")
   message("✓ Created stagemigration_colorectal_cancer.omv")
 }
-save(small_sample_data, file = "data/stagemigration_small_sample.rda")
+stagemigration_small_sample <- small_sample_data  # object name must match the file name
+save(stagemigration_small_sample, file = "data/stagemigration_small_sample.rda")
 
 # Also save as .omv for jamovi
 if (requireNamespace("jmvReadWrite", quietly = TRUE)) {
@@ -435,7 +436,8 @@ if (requireNamespace("jmvReadWrite", quietly = TRUE)) {
   jmvReadWrite::write_omv(small_sample_data, "data/stagemigration_small_sample.omv")
   message("✓ Created stagemigration_small_sample.omv")
 }
-save(large_performance_data, file = "data/stagemigration_large_performance.rda")
+stagemigration_large_performance <- large_performance_data  # object name must match the file name
+save(stagemigration_large_performance, file = "data/stagemigration_large_performance.rda")
 
 # Also save as .omv for jamovi
 if (requireNamespace("jmvReadWrite", quietly = TRUE)) {
@@ -448,7 +450,8 @@ if (requireNamespace("jmvReadWrite", quietly = TRUE)) {
   jmvReadWrite::write_omv(large_performance_data, "data/stagemigration_large_performance.omv")
   message("✓ Created stagemigration_large_performance.omv")
 }
-save(problematic_data, file = "data/stagemigration_problematic.rda")
+stagemigration_problematic <- problematic_data  # object name must match the file name
+save(stagemigration_problematic, file = "data/stagemigration_problematic.rda")
 
 # Also save as .omv for jamovi
 if (requireNamespace("jmvReadWrite", quietly = TRUE)) {

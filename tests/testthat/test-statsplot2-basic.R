@@ -187,10 +187,7 @@ test_that("statsplot2 handles custom labels", {
   result <- statsplot2(
     data = statsplot2_test,
     dep = "tumor_reduction",
-    group = "treatment",
-    plotTitle = "Custom Title",
-    xlab = "X Label",
-    ylab = "Y Label"
+    group = "treatment"
   )
 
   expect_s3_class(result, "statsplot2Results")

@@ -340,7 +340,8 @@ output_lung <- file.path(data_dir, "lung_stage_migration_data.csv")
 write.csv(lung_data, output_lung, row.names = FALSE)
 
 # Save as RDA files as well
-save(main_test_data, file = file.path(data_dir, "stage_migration_comprehensive.rda"))
+stage_migration_comprehensive <- main_test_data  # object name must match the file name
+save(stage_migration_comprehensive, file = file.path(data_dir, "stage_migration_comprehensive.rda"))
 save(stage_migration_test_data, file = file.path(data_dir, "stage_migration_test_data.rda"))
 save(lung_data, file = file.path(data_dir, "lung_stage_migration_data.rda"))
 

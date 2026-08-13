@@ -187,7 +187,8 @@ if (requireNamespace("jmvReadWrite", quietly = TRUE)) {
   jmvReadWrite::write_omv(edge_cases, "data/nomogrammer_edge_cases_test_data.omv")
   message("✓ Created nomogrammer_edge_cases_test_data.omv")
 }
-save(lr_scenarios, file = "data/nomogrammer_lr_test_data.rda")
+nomogrammer_lr_test_data <- lr_scenarios  # object name must match the file name
+save(nomogrammer_lr_test_data, file = "data/nomogrammer_lr_test_data.rda")
 
 # Also save as .omv for jamovi
 if (requireNamespace("jmvReadWrite", quietly = TRUE)) {
@@ -213,7 +214,8 @@ if (requireNamespace("jmvReadWrite", quietly = TRUE)) {
   jmvReadWrite::write_omv(math_validation, "data/nomogrammer_math_validation_data.omv")
   message("✓ Created nomogrammer_math_validation_data.omv")
 }
-save(error_test_cases, file = "data/nomogrammer_error_test_cases.rda")
+nomogrammer_error_test_cases <- error_test_cases  # object name must match the file name
+save(nomogrammer_error_test_cases, file = "data/nomogrammer_error_test_cases.rda")
 
 # Also save as .omv for jamovi
 if (requireNamespace("jmvReadWrite", quietly = TRUE)) {

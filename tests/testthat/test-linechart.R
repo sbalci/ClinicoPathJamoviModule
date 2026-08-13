@@ -2,6 +2,9 @@
 # Tests cover functionality, data validation, plotting, and edge cases
 
 library(testthat)
+
+lc_todo <- function(res) gsub("[[:space:]]+", " ", gsub("<[^>]*>", " ", as.character(res$todo$content)))
+
 library(ggplot2)
 library(dplyr)
 
@@ -743,7 +746,7 @@ describe("linechart Integration", {
         yvar = "value",
         trendline = TRUE
       ),
-      regexp = "repeated"
+      message = "repeated"     # expect_no_warning() takes `message`, not `regexp`
     )
   })
 
@@ -779,14 +782,10 @@ describe("linechart Integration", {
       value = c(10, 15)
     )
 
-    expect_error(
-      linechart(
-        data = data,
-        xvar = "time",
-        yvar = "value"
-      ),
-      regexp = "At least 3"
-    )
+    # jmvcore::reject() is caught by .run() and written into the `todo` panel;
+    # it does not propagate as an R error, so expect_error() passed only on a crash.
+    expect_match(lc_todo(linechart(data = data, xvar = "time", yvar = "value")),
+                 "At least 3")
   })
 
   test_that("linechart rejects zero variance data", {
@@ -800,14 +799,8 @@ describe("linechart Integration", {
       value = rep(50, 10)
     )
 
-    expect_error(
-      linechart(
-        data = data,
-        xvar = "time",
-        yvar = "value"
-      ),
-      regexp = "no variation"
-    )
+    expect_match(lc_todo(linechart(data = data, xvar = "time", yvar = "value")),
+                 "no variation")
   })
 })
 

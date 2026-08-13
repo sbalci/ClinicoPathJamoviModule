@@ -330,7 +330,8 @@ sarcoma_data <- ihc_comprehensive_data %>%
          Overall_Survival_Months, Death_Event) %>%
   filter(Tumor_Type %in% tumor_types)
 
-save(sarcoma_data, file = "data/sarcoma_ihc_data.rda")
+sarcoma_ihc_data <- sarcoma_data  # object name must match the file name
+save(sarcoma_ihc_data, file = "data/sarcoma_ihc_data.rda")
 
 # Also save as .omv for jamovi
 if (requireNamespace("jmvReadWrite", quietly = TRUE)) {
@@ -377,7 +378,8 @@ colorectal_data <- ihc_comprehensive_data %>%
          Overall_Survival_Months, Death_Event, DFS_Months, DFS_Event) %>%
   slice_head(n = 150)  # Smaller focused dataset
 
-save(colorectal_data, file = "data/colorectal_ihc_data.rda")
+colorectal_ihc_data <- colorectal_data  # object name must match the file name
+save(colorectal_ihc_data, file = "data/colorectal_ihc_data.rda")
 
 # Also save as .omv for jamovi
 if (requireNamespace("jmvReadWrite", quietly = TRUE)) {
@@ -399,7 +401,8 @@ renal_data <- ihc_comprehensive_data %>%
          Overall_Survival_Months, Death_Event) %>%
   slice_head(n = 100)  # Smaller focused dataset for iterative selection
 
-save(renal_data, file = "data/renal_ihc_data.rda")
+renal_ihc_data <- renal_data  # object name must match the file name
+save(renal_ihc_data, file = "data/renal_ihc_data.rda")
 
 # Also save as .omv for jamovi
 if (requireNamespace("jmvReadWrite", quietly = TRUE)) {

@@ -353,7 +353,8 @@ breast_data <- generate_breast_diagnostic_data()
 lymphoma_data <- generate_lymphoma_diagnostic_data()
 
 # Save datasets
-save(endometrial_data, file = "data/endometrial_diagnostic_styles.rda")
+endometrial_diagnostic_styles <- endometrial_data  # object name must match the file name
+save(endometrial_diagnostic_styles, file = "data/endometrial_diagnostic_styles.rda")
 
 # Also save as .omv for jamovi
 if (requireNamespace("jmvReadWrite", quietly = TRUE)) {
@@ -379,7 +380,8 @@ if (requireNamespace("jmvReadWrite", quietly = TRUE)) {
   jmvReadWrite::write_omv(breast_data, "data/breast_diagnostic_styles.omv")
   message("✓ Created breast_diagnostic_styles.omv")
 }
-save(lymphoma_data, file = "data/lymphoma_diagnostic_styles.rda")
+lymphoma_diagnostic_styles <- lymphoma_data  # object name must match the file name
+save(lymphoma_diagnostic_styles, file = "data/lymphoma_diagnostic_styles.rda")
 
 # Also save as .omv for jamovi
 if (requireNamespace("jmvReadWrite", quietly = TRUE)) {

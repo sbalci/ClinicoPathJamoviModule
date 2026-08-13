@@ -77,7 +77,7 @@ test_that("jjarcdiagram scenario: Gene regulatory network analysis", {
 
   expect_s3_class(result, "jjarcdiagramResults")
   expect_true(!is.null(result$plot))
-  expect_true(!is.null(result$stats))
+  expect_true(!is.null(result$networkStats))   # the item is networkStats; `stats` never existed
 })
 
 test_that("jjarcdiagram scenario: Patient similarity clustering", {
@@ -375,8 +375,8 @@ test_that("jjarcdiagram generates complete outputs", {
 
   # Check all output elements exist
   expect_true(!is.null(result$plot))
-  expect_true(!is.null(result$stats))
-  expect_true(!is.null(result$summary))
+  expect_true(!is.null(result$networkStats))   # the item is networkStats; `stats` never existed
+  expect_true(!is.null(result$reportSentence))   # the item is reportSentence; `summary` never existed
 })
 
 test_that("jjarcdiagram handles real-world network sizes", {

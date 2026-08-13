@@ -3009,13 +3009,8 @@ out-of-scope findings from the same audit, deferred for separate work.
 # release-review-function prompt
 
 
-/release-review-function jjarcdiagram
-/release-review-function linechart
-/release-review-function statsplot2
 
-- I will release jjstatsplot module.
-- review vignettes in jjstatsplot repository. check if their content are up to date. if not, update them. pay attention to the new options added in recent releases. If there are mentions of not yet release functions and features, note that they will be released in the future.
-- update NEWS.md
+
 
 /release-review-function tableone
 /release-review-function summarydata
@@ -3033,7 +3028,7 @@ out-of-scope findings from the same audit, deferred for separate work.
 /release-review-function categorize
 
 - I will release ClinicoPathDescriptives module.
-- review vignettes in ClinicoPathDescriptives repository. check if their content are up to date. if not, update them. pay attention to the new options added in recent releases. If there are mentions of not yet release functions and features, note that they will be released in the future.
+- review vignettes in ClinicoPathDescriptives repository. check if their content are up to date. if not, update them. pay attention to the new options added in recent releases. If there are mentions of not yet released functions and features, note that they will be released in the future.
 - update NEWS.md
 
 for all:
@@ -3589,3 +3584,62 @@ API and will fail `R CMD check --run-donttest` until `prepare()` + `document()` 
       patchwork whose per-panel subtitles cannot be replaced, so that path keeps the disclosure
       route. The decision is per dependent variable, so a sparse and a well-powered variable can
       carry different subtitles in the same figure. No yaml change; no regeneration needed.
+
+- [x] **[MAJOR/module-wide] `@import jmvcore` masked `base::format`.** DONE 2026-08-13.
+      jmvcore exports its own `format(str, ..., context)` — a string-template interpolator that
+      substitutes `{}` placeholders and returns its input untouched otherwise. `@import jmvcore`
+      puts it ahead of `base::format` for the WHOLE package (not just the importing file), so
+      every unqualified `format(x, digits = 3)` / `big.mark` / `nsmall` silently dropped its
+      formatting argument.
+
+      Symptoms: "Y Mean 19.8349757678086" in a clinical summary table; "Cost Analysis (Per 10000
+      Patients)" instead of "10,000"; "0.829075514952931 unit increase" in copy-ready text.
+
+      Fixed by qualifying the call sites — **97 sites across 20 files** — with `base::format()`,
+      plus a local `.fmtNum()` helper in `linechart.b.R`. `@import jmvcore` was deliberately left
+      alone: it is central to the module and the narrower fix is at the call site.
+      Regression-guarded by "no source file calls a bare format() with base-format arguments" in
+      `tests/testthat/test-linechart-release-review.R`, which scans `R/` on every run.
+      Verified no behaviour regression: decisiongraph tests were 48/45/4/2 both before and after.
+
+- [ ] **[MODERATE/module-wide] Statistics in `type: text` columns bypass jamovi's GUI number formatting.**
+      Raised 2026-08-13. jamovi lets users set decimal places and p-value format in the results
+      GUI, and it applies those to table columns declared `type: number` (with `format: zto,pvalue`
+      for p-values). A statistic written into a `type: text` column is a plain string, so the
+      user's GUI preference does not reach it and the backend must hard-code the rounding.
+
+      This is *correct* for mixed parameter/value tables — e.g. the kappa power table in
+      `agreement.b.R` puts "Cohen's kappa" and 0.412 in the same `value` column, so it cannot be
+      `type: number`. But where a column holds only a statistic, converting it to `type: number`
+      in the `.r.yaml` would hand formatting back to the GUI and let the hard-coded rounding go.
+
+      Worth a pass per analysis; needs `prepare()` after each `.r.yaml` change. Start by finding
+      text columns whose every value is numeric.
+
+- [~] **[MAJOR/module-wide] `.rda` object names that differ from the file name — 31 of 70 fixed.**
+      `data(<name>)` loads `data/<name>.rda` and creates whatever objects are inside it. When
+      those differ, `data(foo)` succeeds and `foo` still does not exist, so every example,
+      vignette or test that follows `data(foo)` with `foo` fails with "object 'foo' not found".
+
+      **Fixed 2026-08-13: 31 files** — statsplot2's two, plus 29 more where the inner name was
+      referenced NOWHERE in `R/`, `tests/` or `vignettes/` (so renaming could not break anything).
+      28 of those 29 had their FILE name referenced, i.e. they were broken in use. The object was
+      renamed in place — data untouched, no regeneration of RNG-based generators — and the
+      `save()` calls in `data-raw/` were corrected (32 call sites, 13 files) so the next
+      regeneration keeps the fix. Verified: no test regression. jiwillsurvive was 12/39 and
+      nomogrammer 85/11/1 both before and after.
+
+      **39 remain, and they must NOT be mass-renamed:**
+        - 4 are legitimate multi-object bundles (`onesurvival_test_data` holds 6 datasets,
+          `outcomeorganizer_test_data` 9, `outlierdetection_test_data` 9,
+          `simon_makuch_examples` 4). Renaming does not apply; only worth changing if something
+          references the FILE name as an object.
+        - 35 have their INNER name in live use, so renaming breaks working code unless every
+          reference is updated at the same time. Automated replacement is unsafe here because
+          several inner names are extremely generic — `lung`, `breast`, `colorectal`,
+          `summary_stats`, `edge_cases`, `minimal_data`, `histopathology` — and a blind
+          text substitution across 1785 source files would corrupt unrelated code.
+          These need per-dataset review: rename the object AND update its references together.
+
+      Detection: load each `data/*.rda` into a fresh env and compare `load()`'s return value
+      against the file stem.

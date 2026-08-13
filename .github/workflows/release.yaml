@@ -3,6 +3,16 @@
 # Trigger: a push to the default branch that touches DESCRIPTION or jamovi/0000.yaml.
 # Guard:   DESCRIPTION `Version:` and jamovi/0000.yaml `version:` must agree — a mismatch
 #          fails the run loudly rather than shipping an inconsistent module.
+# Shape:   what gets published depends on the version string. A leading "v" is
+#          accepted anywhere below and is not part of the version.
+#            1.0.2, 10.0.2, 1.10.2  -> RELEASE      three parts, single-digit last part
+#            1.0.12, 1.0.52         -> PRE-RELEASE  multi-digit last part
+#            1.0.2-beta, 0.0.3test  -> PRE-RELEASE  alpha / beta / test marker
+#            0.0.37.07, 0.0.2.0006  -> skipped      four or more parts = dev build
+#            banana, 1.0.2-rc1      -> FAILS        malformed, fix DESCRIPTION
+#          A pre-release is published but flagged, so it never becomes "Latest".
+#          Development versions are skipped rather than failed - failing would mark
+#          every ordinary push to DESCRIPTION as a red run.
 # Idempotent: the release is created only if the tag v<version> does not already exist,
 #          so re-pushing, editing DESCRIPTION again, or a manual dispatch is harmless.
 on:
@@ -31,22 +41,66 @@ jobs:
         id: version
         run: |
           set -euo pipefail
-          desc=$(sed -n 's/^Version:[[:space:]]*//p' DESCRIPTION | head -n1 | tr -d '\r')
-          yml=$(sed -n 's/^version:[[:space:]]*//p' jamovi/0000.yaml | head -n1 | tr -d "\r\"'")
-          printf 'DESCRIPTION: %s\n0000.yaml:   %s\n' "$desc" "$yml"
+          desc_raw=$(sed -n 's/^Version:[[:space:]]*//p' DESCRIPTION | head -n1 | tr -d '\r')
+          yml_raw=$(sed -n 's/^version:[[:space:]]*//p' jamovi/0000.yaml | head -n1 | tr -d "\r\"'")
+          printf 'DESCRIPTION: %s\n0000.yaml:   %s\n' "$desc_raw" "$yml_raw"
+
+          # A leading "v" is accepted in either file and is not part of the version.
+          # Strip it before comparing, so `v1.0.2` and `1.0.2` are the same version
+          # rather than a spurious mismatch, and before building the tag, so we tag
+          # v1.0.2 and never vv1.0.2.
+          desc=${desc_raw#v}
+          yml=${yml_raw#v}
+
           if [ "$desc" != "$yml" ]; then
-            echo "::error::Version mismatch - DESCRIPTION is '$desc' but jamovi/0000.yaml is '$yml'. Bump both together."
+            echo "::error::Version mismatch - DESCRIPTION is '$desc_raw' but jamovi/0000.yaml is '$yml_raw'. Bump both together."
             exit 1
           fi
-          # Anything that is not a plain dotted version is a malformed file, not a release.
-          case "$desc" in
-            ''|*[!0-9.]*) echo "::error::Unusable version string '$desc'"; exit 1 ;;
-          esac
+          # Decision cascade. The marker is checked first, so 1.0.2-alpha is a
+          # pre-release even though its numeric part would otherwise qualify.
+          #
+          #   1. alpha / beta / test marker        -> PRE-RELEASE   e.g. 1.0.2-beta
+          #   2. X.X.X, single-digit last part     -> RELEASE       e.g. 1.0.2, 10.0.2
+          #   3. X.X.XX, multi-digit last part     -> PRE-RELEASE   e.g. 1.0.12, 1.0.52
+          #   4. four or more parts                -> skip          e.g. 0.0.37.07
+          #   5. anything else                     -> fail loudly   e.g. banana, 1.0.2-rc1
+          #
+          # A pre-release is published but flagged, so it never becomes "Latest".
+          if printf '%s' "$desc" | grep -Eiq '(alpha|beta|test)'; then
+            echo "::notice::Version '$desc_raw' carries an alpha/beta/test marker - publishing as a PRE-RELEASE."
+            echo "release=true"    >> "$GITHUB_OUTPUT"
+            echo "prerelease=true" >> "$GITHUB_OUTPUT"
+
+          elif printf '%s' "$desc" | grep -Eq '^[0-9]+\.[0-9]+\.[0-9]$'; then
+            echo "Version '$desc' is a release version."
+            echo "release=true"     >> "$GITHUB_OUTPUT"
+            echo "prerelease=false" >> "$GITHUB_OUTPUT"
+
+          elif printf '%s' "$desc" | grep -Eq '^[0-9]+\.[0-9]+\.[0-9]{2,}$'; then
+            echo "::notice::Version '$desc_raw' has a multi-digit last part - publishing as a PRE-RELEASE."
+            echo "release=true"    >> "$GITHUB_OUTPUT"
+            echo "prerelease=true" >> "$GITHUB_OUTPUT"
+
+          else
+            # Not publishable. Distinguish an ordinary dev version from a broken
+            # file: the first is routine and must not fail the run, the second
+            # means DESCRIPTION needs fixing.
+            case "$desc" in
+              ''|*[!0-9.]*)
+                echo "::error::Unusable version string '$desc_raw'. Expected digits and dots, optionally prefixed with 'v' and/or carrying an alpha, beta or test marker."
+                exit 1 ;;
+            esac
+            echo "::notice::Version '$desc_raw' has four or more parts - treated as a development build. No release."
+            echo "release=false"    >> "$GITHUB_OUTPUT"
+            echo "prerelease=false" >> "$GITHUB_OUTPUT"
+          fi
+
           echo "version=$desc" >> "$GITHUB_OUTPUT"
           echo "tag=v$desc" >> "$GITHUB_OUTPUT"
 
       - name: Skip if the tag already exists
         id: tag
+        if: steps.version.outputs.release == 'true'
         env:
           TAG: ${{ steps.version.outputs.tag }}
         run: |
@@ -59,7 +113,7 @@ jobs:
           fi
 
       - name: Extract release notes from NEWS.md
-        if: steps.tag.outputs.exists == 'false'
+        if: steps.version.outputs.release == 'true' && steps.tag.outputs.exists == 'false'
         env:
           VERSION: ${{ steps.version.outputs.version }}
         run: |
@@ -84,12 +138,19 @@ jobs:
           cat RELEASE_NOTES.md
 
       - name: Create tag and release
-        if: steps.tag.outputs.exists == 'false'
+        if: steps.version.outputs.release == 'true' && steps.tag.outputs.exists == 'false'
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           TAG: ${{ steps.version.outputs.tag }}
+          PRERELEASE: ${{ steps.version.outputs.prerelease }}
         run: |
           set -euo pipefail
           git tag "$TAG"
           git push origin "$TAG"
-          gh release create "$TAG" --title "$TAG" --notes-file RELEASE_NOTES.md
+          # --prerelease keeps it off the "Latest release" badge and out of the
+          # feed people install from.
+          if [ "$PRERELEASE" = "true" ]; then
+            gh release create "$TAG" --title "$TAG" --notes-file RELEASE_NOTES.md --prerelease
+          else
+            gh release create "$TAG" --title "$TAG" --notes-file RELEASE_NOTES.md
+          fi

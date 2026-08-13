@@ -377,6 +377,18 @@ jjarcdiagramClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 return(NULL)
             }
 
+            # Dropped rows are dropped EDGES, and every number this analysis reports
+            # - density, degree, betweenness, the "most central" node - is computed
+            # on what survives. Previously only the all-rows-dropped case said
+            # anything, so losing half a network to NA weights was silent.
+            n_dropped <- nrow(mydata) - nrow(mydata_clean)
+            if (n_dropped > 0) {
+                private$.addNotice('WARNING', 'Rows Excluded',
+                    sprintf(.('%d of %d rows (%.1f%%) were excluded because of missing values in %s. The network below, and every statistic computed from it, describes the remaining %d edges only.'),
+                            n_dropped, nrow(mydata), 100 * n_dropped / nrow(mydata),
+                            paste(required_cols, collapse = ", "), nrow(mydata_clean)))
+            }
+
             # Build a SINGLE escape mapping across BOTH source and target columns so
             # that the same node value always maps to the same safe name and distinct
             # values never collide. make.names(unique = TRUE) must be applied to the
@@ -578,6 +590,33 @@ jjarcdiagramClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
             # INJECT EDGE WEIGHTS into igraph object for centrality calculations
             igraph::E(g)$weight <- weights
+
+            # Shortest-path centrality is undefined on negative edge lengths, and
+            # igraph enforces that at the C level: it aborts the whole analysis with
+            # "Weight vector must be positive. Invalid value / centrality/
+            # betweenness.c:437" and no usable explanation. Negative weights are not
+            # exotic here - this option is documented for correlations and
+            # fold-changes, both routinely negative - so catch them with a message
+            # that says what to do instead.
+            if (!is.null(weight_var) && weight_var %in% names(mydata_clean)) {
+                w_vals <- igraph::E(g)$weight
+                if (any(w_vals < 0, na.rm = TRUE)) {
+                    private$.addNotice('ERROR', 'Negative Edge Weights',
+                        sprintf(.('%d of %d edge weights in \'%s\' are negative, and network centrality is undefined on negative edge lengths. If these are correlations, use their absolute value, or rescale to a non-negative strength such as (1 + r) / 2. If they are log fold-changes, use the absolute value.'),
+                                sum(w_vals < 0, na.rm = TRUE), length(w_vals), weight_var))
+                    return(NULL)
+                }
+                # A zero DISTANCE means two nodes occupy the same point, which
+                # igraph also rejects. A zero STRENGTH is meaningful (no connection)
+                # and is handled below by mapping it to an infinite distance.
+                if (identical(self$options$weightMode, "distance") &&
+                    any(w_vals == 0, na.rm = TRUE)) {
+                    private$.addNotice('ERROR', 'Zero Edge Distances',
+                        sprintf(.('%d of %d edge weights in \'%s\' are zero. In Distance mode a weight is a path length, and a zero-length edge is undefined. Remove those edges, or switch Edge Weight Interpretation to Strength.'),
+                                sum(w_vals == 0, na.rm = TRUE), length(w_vals), weight_var))
+                    return(NULL)
+                }
+            }
 
             # INJECT NODE GROUPS into igraph object as vertex attribute
             if (!is.null(node_groups)) {
@@ -860,9 +899,15 @@ jjarcdiagramClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             clinical_summary <- paste(
                 .("<h4> Clinical Interpretation:</h4>"),
                 "<div style='background-color: #f0f8ff; padding: 10px; margin: 10px 0; border-left: 4px solid #4CAF50;'>",
-                sprintf(.("<p><strong>Network Overview:</strong> This network contains %d entities with %d relationships, showing %s connectivity (density = %.3f).</p>"), 
+                # density_interp is an ADVERB ("moderately connected"); it cannot also
+                # modify a noun, which produced "showing moderately connectivity".
+                sprintf(.("<p><strong>Network Overview:</strong> This network contains %d entities with %d relationships, and is %s connected (density = %.3f).</p>"),
                         network_data$n_nodes, network_data$n_edges, density_interp, network_data$density),
-                ifelse(network_data$density < 0.1, 
+                # Must use the SAME cut-points as density_interp above. They used to
+                # differ (0.1/0.5 here against 0.2/0.5 there), so a density of 0.19
+                # printed "is sparsely connected" and then "Moderate connectivity
+                # suggests a balanced network" in the very next sentence.
+                ifelse(network_data$density <= 0.2,
                        .("<p><strong> Insight:</strong> Sparse networks may indicate specialized or selective relationships between entities.</p>"),
                        ifelse(network_data$density > 0.5,
                               .("<p><strong> Insight:</strong> Dense networks suggest strong interconnectedness, possibly indicating shared pathways or common mechanisms.</p>"),
@@ -887,13 +932,29 @@ jjarcdiagramClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 if (has_weights) {
                     # Determine weight interpretation
                     if (self$options$weightMode == "strength") {
-                        # STRENGTH MODE: Higher weights = stronger connections
-                        # Invert weights for centrality calculations (igraph treats weights as distances)
-                        max_weight <- max(igraph::E(g)$weight, na.rm = TRUE)
-                        min_weight <- min(igraph::E(g)$weight, na.rm = TRUE)
-
-                        # Invert: strong connections (high weight) become short distances (low weight)
-                        inv_weights <- max_weight - igraph::E(g)$weight + min_weight
+                        # STRENGTH MODE: higher weight = stronger tie. igraph reads
+                        # weights as DISTANCES, so a strength has to be converted.
+                        #
+                        # The conversion is the RECIPROCAL, 1/w - the standard for
+                        # weighted betweenness and closeness (Opsahl, Agneessens &
+                        # Skvoretz 2010; igraph's own documentation), and the only
+                        # one under which a path's length is the sum of the inverse
+                        # tie strengths along it.
+                        #
+                        # This previously used a linear reflection,
+                        # max(w) - w + min(w), which is not an inversion and gives
+                        # different answers. It charges a fixed toll per edge, so it
+                        # favours short hop counts over strong ties. Measured on
+                        # weights (10, 10, 7, 1): the reflection routes S->T through
+                        # M and calls M the most central node; the reciprocal routes
+                        # S->T directly and calls T the most central. It also broke
+                        # outright whenever min(w) was 0, because the strongest edge
+                        # then mapped to distance 0 and igraph rejects that.
+                        #
+                        # w = 0 means no connection, so 1/0 = Inf, which igraph
+                        # correctly treats as unreachable. Negative weights are
+                        # rejected earlier, before the graph is analysed.
+                        inv_weights <- 1 / igraph::E(g)$weight
 
                         betweenness <- igraph::betweenness(g, weights = inv_weights)
                         closeness <- igraph::closeness(g, weights = inv_weights)

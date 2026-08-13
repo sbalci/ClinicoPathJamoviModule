@@ -4,25 +4,24 @@
 
 library(testthat)
 
-test_that("jjarcdiagram errors on missing required arguments", {
+# A jamovi analysis does not throw when a variable is missing - it writes the
+# welcome/instructions panel and returns. expect_error() therefore asserted the
+# OPPOSITE of the desired behaviour: it passed only if the analysis crashed.
+arc_todo <- function(res) gsub("[[:space:]]+", " ", gsub("<[^>]*>", " ", as.character(res$todo$content)))
+arc_notices <- function(res)
+  gsub("[[:space:]]+", " ", gsub("<[^>]*>", " ", paste(as.character(res$notices$content), collapse = " ")))
+
+test_that("jjarcdiagram prompts for the variables it still needs", {
 
   data(jjarcdiagram_test)
 
   # Missing source
-  expect_error(
-    jjarcdiagram(
-      data = jjarcdiagram_test,
-      target = "target"
-    )
-  )
+  expect_match(arc_todo(jjarcdiagram(data = jjarcdiagram_test, target = "target")),
+               "Arc Diagram")
 
   # Missing target
-  expect_error(
-    jjarcdiagram(
-      data = jjarcdiagram_test,
-      source = "source"
-    )
-  )
+  expect_match(arc_todo(jjarcdiagram(data = jjarcdiagram_test, source = "source")),
+               "Arc Diagram")
 
   # Missing data
   expect_error(
@@ -79,15 +78,11 @@ test_that("jjarcdiagram handles self-loops", {
     weight = c(1.0, 0.5, 0.8)
   )
 
-  # Should handle or warn about self-loops
-  expect_condition(
-    jjarcdiagram(
-      data = selfloop_net,
-      source = "from",
-      target = "to",
-      weight = "weight"
-    )
-  )
+  # Self-loops are removed and the removal is disclosed in the notices panel;
+  # nothing is signalled as an R condition.
+  expect_match(arc_notices(jjarcdiagram(data = selfloop_net, source = "from",
+                                        target = "to", weight = "weight")),
+               "self-loop")
 })
 
 test_that("jjarcdiagram handles duplicate edges", {
@@ -117,15 +112,12 @@ test_that("jjarcdiagram handles missing weight values", {
   test_data_na <- jjarcdiagram_test
   test_data_na$weight[1:5] <- NA
 
-  # Should handle NA weights (drop or warn)
-  expect_condition(
-    jjarcdiagram(
-      data = test_data_na,
-      source = "source",
-      target = "target",
-      weight = "weight"
-    )
-  )
+  # Rows with a missing weight are dropped, and that exclusion must be stated -
+  # every statistic below it is computed on the surviving edges only.
+  n <- arc_notices(jjarcdiagram(data = test_data_na, source = "source",
+                                target = "target", weight = "weight"))
+  expect_match(n, "Rows Excluded")
+  expect_match(n, "5 of")
 })
 
 test_that("jjarcdiagram handles all NA weights", {
@@ -134,15 +126,10 @@ test_that("jjarcdiagram handles all NA weights", {
   test_data_all_na <- jjarcdiagram_test
   test_data_all_na$weight <- NA_real_
 
-  # Should error or fall back to unweighted
-  expect_condition(
-    jjarcdiagram(
-      data = test_data_all_na,
-      source = "source",
-      target = "target",
-      weight = "weight"
-    )
-  )
+  # Every row is incomplete, so there is no network left to draw.
+  expect_match(arc_notices(jjarcdiagram(data = test_data_all_na, source = "source",
+                                        target = "target", weight = "weight")),
+               "No complete rows")
 })
 
 test_that("jjarcdiagram handles missing node labels", {
@@ -152,14 +139,10 @@ test_that("jjarcdiagram handles missing node labels", {
   test_data_na_nodes$source[1] <- NA_character_
   test_data_na_nodes$target[2] <- NA_character_
 
-  # Should error or drop edges with missing nodes
-  expect_condition(
-    jjarcdiagram(
-      data = test_data_na_nodes,
-      source = "source",
-      target = "target"
-    )
-  )
+  # Edges with a missing endpoint are dropped, and the exclusion is disclosed.
+  expect_match(arc_notices(jjarcdiagram(data = test_data_na_nodes, source = "source",
+                                        target = "target")),
+               "Rows Excluded")
 })
 
 test_that("jjarcdiagram handles factor vs character variables", {
@@ -254,8 +237,10 @@ test_that("jjarcdiagram handles negative weights", {
     weight = c(-0.5, 0.8, -0.3)
   )
 
-  # Should handle or warn about negative weights
-  expect_condition(
+  # This block used to pass by catching the igraph C-level abort ("Weight vector
+  # must be positive") - i.e. it was pinning a crash. Negative weights are now
+  # rejected with an explanation instead.
+  expect_no_error(
     jjarcdiagram(
       data = negative_weight_net,
       source = "from",
@@ -263,6 +248,9 @@ test_that("jjarcdiagram handles negative weights", {
       weight = "weight"
     )
   )
+  expect_match(arc_notices(jjarcdiagram(data = negative_weight_net, source = "from",
+                                        target = "to", weight = "weight")),
+               "Negative Edge Weights")
 })
 
 test_that("jjarcdiagram handles extremely large weights", {

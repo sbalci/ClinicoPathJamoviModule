@@ -21,8 +21,7 @@ test_that("jjarcdiagram handles analysis presets", {
       analysisPreset = preset
     )
 
-    expect_s3_class(result, "jjarcdiagramResults",
-                   info = paste("Failed for preset:", preset))
+    expect_s3_class(result, "jjarcdiagramResults")
   }
 })
 
@@ -42,8 +41,7 @@ test_that("jjarcdiagram handles arc coloring modes", {
       arcColorMode = mode
     )
 
-    expect_s3_class(result, "jjarcdiagramResults",
-                   info = paste("Failed for arc color mode:", mode))
+    expect_s3_class(result, "jjarcdiagramResults")
   }
 })
 
@@ -62,8 +60,7 @@ test_that("jjarcdiagram handles weight mode options", {
       weightMode = mode
     )
 
-    expect_s3_class(result, "jjarcdiagramResults",
-                   info = paste("Failed for weight mode:", mode))
+    expect_s3_class(result, "jjarcdiagramResults")
   }
 })
 
@@ -131,8 +128,7 @@ test_that("jjarcdiagram handles arc transparency levels", {
       arcTransparency = alpha
     )
 
-    expect_s3_class(result, "jjarcdiagramResults",
-                   info = paste("Failed for transparency:", alpha))
+    expect_s3_class(result, "jjarcdiagramResults")
   }
 })
 
@@ -150,8 +146,7 @@ test_that("jjarcdiagram handles label size variations", {
       labelSize = size
     )
 
-    expect_s3_class(result, "jjarcdiagramResults",
-                   info = paste("Failed for label size:", size))
+    expect_s3_class(result, "jjarcdiagramResults")
   }
 })
 

@@ -489,7 +489,8 @@ if (requireNamespace("jmvReadWrite", quietly = TRUE)) {
   jmvReadWrite::write_omv(hemoglobin_data, "data/linechart_hemoglobin.omv")
   message("✓ Created linechart_hemoglobin.omv")
 }
-save(blood_pressure_data, file = "data/linechart_blood_pressure.rda")
+linechart_blood_pressure <- blood_pressure_data  # object name must match the file name
+save(linechart_blood_pressure, file = "data/linechart_blood_pressure.rda")
 
 # Also save as .omv for jamovi
 if (requireNamespace("jmvReadWrite", quietly = TRUE)) {
@@ -515,7 +516,8 @@ if (requireNamespace("jmvReadWrite", quietly = TRUE)) {
   jmvReadWrite::write_omv(biomarker_data, "data/linechart_biomarker.omv")
   message("✓ Created linechart_biomarker.omv")
 }
-save(quality_life_data, file = "data/linechart_quality_life.rda")
+linechart_quality_life <- quality_life_data  # object name must match the file name
+save(linechart_quality_life, file = "data/linechart_quality_life.rda")
 
 # Also save as .omv for jamovi
 if (requireNamespace("jmvReadWrite", quietly = TRUE)) {

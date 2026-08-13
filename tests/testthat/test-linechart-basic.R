@@ -34,7 +34,7 @@ test_that("linechart produces expected output structure", {
   )
 
   # Check for main plot output
-  expect_true(!is.null(result$plot1))
+  expect_true(!is.null(result$plot))
 })
 
 test_that("linechart handles single line visualization", {
@@ -228,8 +228,7 @@ test_that("linechart handles color palettes", {
       colorPalette = pal
     )
 
-    expect_s3_class(result, "linechartResults",
-                   info = paste("Failed for palette:", pal))
+    expect_s3_class(result, "linechartResults")
   }
 })
 
@@ -248,8 +247,7 @@ test_that("linechart handles plot themes", {
       theme = theme
     )
 
-    expect_s3_class(result, "linechartResults",
-                   info = paste("Failed for theme:", theme))
+    expect_s3_class(result, "linechartResults")
   }
 })
 
@@ -316,8 +314,7 @@ test_that("linechart handles all test datasets", {
       )
     }
 
-    expect_s3_class(result, "linechartResults",
-                   info = paste("Failed for dataset:", ds$name))
+    expect_s3_class(result, "linechartResults")
   }
 })
 

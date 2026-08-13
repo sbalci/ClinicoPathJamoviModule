@@ -141,7 +141,8 @@ if (requireNamespace("jmvReadWrite", quietly = TRUE)) {
   jmvReadWrite::write_omv(jiwillsurvive_test_data, "../data/jiwillsurvive_test_data.omv")
   message("✓ Created jiwillsurvive_test_data.omv")
 }
-save(short_followup_data, file = "../data/jiwillsurvive_short_followup.rda")
+jiwillsurvive_short_followup <- short_followup_data  # object name must match the file name
+save(jiwillsurvive_short_followup, file = "../data/jiwillsurvive_short_followup.rda")
 
 # Also save as .omv for jamovi
 if (requireNamespace("jmvReadWrite", quietly = TRUE)) {
@@ -154,7 +155,8 @@ if (requireNamespace("jmvReadWrite", quietly = TRUE)) {
   jmvReadWrite::write_omv(short_followup_data, "../data/jiwillsurvive_short_followup.omv")
   message("✓ Created jiwillsurvive_short_followup.omv")
 }
-save(long_followup_data, file = "../data/jiwillsurvive_long_followup.rda") 
+jiwillsurvive_long_followup <- long_followup_data  # object name must match the file name
+save(jiwillsurvive_long_followup, file = "../data/jiwillsurvive_long_followup.rda") 
 
 # Also save as .omv for jamovi
 if (requireNamespace("jmvReadWrite", quietly = TRUE)) {

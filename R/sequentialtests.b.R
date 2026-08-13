@@ -583,7 +583,7 @@ sequentialtestsClass <- if (requireNamespace('jmvcore'))
                     total_combined <- total_cost1 + total_cost2
                     
                     costTable <- self$results$cost_analysis_table
-                    costTable$setTitle(sprintf('Cost Analysis (Per %s Patients)', format(pop_size, big.mark = ',')))
+                    costTable$setTitle(sprintf('Cost Analysis (Per %s Patients)', base::format(pop_size, big.mark = ',')))
 
                     # Clear rows from any previous run before repopulating to avoid duplicates
                     costTable$deleteRows()
@@ -850,7 +850,7 @@ sequentialtestsClass <- if (requireNamespace('jmvcore'))
                 explanation <- paste0(
                     explanation,
                     "<p>In a population of ",
-                    format(pop_size, big.mark = ","),
+                    base::format(pop_size, big.mark = ","),
                     " people:</p>"
                 )
                     explanation <- paste0(explanation, "<ul>")
@@ -972,9 +972,9 @@ sequentialtestsClass <- if (requireNamespace('jmvcore'))
                         formulas <- paste0(formulas, "<p>Se<sub>combined</sub> = Se<sub>1</sub> \u{00D7} Se<sub>2</sub></p>")
                         formulas <- paste0(formulas, "<p>Probability calculation:</p>")
                         formulas <- paste0(formulas, "<ul>")
-                        formulas <- paste0(formulas, "<li>Probability of testing positive on Test 1: ", format(test1_sens, digits=4), "</li>")
-                        formulas <- paste0(formulas, "<li>Given positive on Test 1, probability of testing positive on Test 2: ", format(test2_sens, digits=4), "</li>")
-                        formulas <- paste0(formulas, "<li>Combined probability = ", format(test1_sens, digits=4), " \u{00D7} ", format(test2_sens, digits=4), " = ", format(combined_sens, digits=4), "</li>")
+                        formulas <- paste0(formulas, "<li>Probability of testing positive on Test 1: ", base::format(test1_sens, digits=4), "</li>")
+                        formulas <- paste0(formulas, "<li>Given positive on Test 1, probability of testing positive on Test 2: ", base::format(test2_sens, digits=4), "</li>")
+                        formulas <- paste0(formulas, "<li>Combined probability = ", base::format(test1_sens, digits=4), " \u{00D7} ", base::format(test2_sens, digits=4), " = ", base::format(combined_sens, digits=4), "</li>")
                         formulas <- paste0(formulas, "</ul>")
 
                         # Specificity calculation
@@ -987,9 +987,9 @@ sequentialtestsClass <- if (requireNamespace('jmvcore'))
                         formulas <- paste0(formulas, "<p>Sp<sub>combined</sub> = Sp<sub>1</sub> + (1-Sp<sub>1</sub>) \u{00D7} Sp<sub>2</sub></p>")
                         formulas <- paste0(formulas, "<p>Probability calculation:</p>")
                         formulas <- paste0(formulas, "<ul>")
-                        formulas <- paste0(formulas, "<li>Probability of testing negative on Test 1: ", format(test1_spec, digits=4), "</li>")
-                        formulas <- paste0(formulas, "<li>Probability of testing positive on Test 1 but negative on Test 2: (1-", format(test1_spec, digits=4), ") \u{00D7} ", format(test2_spec, digits=4), " = ", format((1-test1_spec)*test2_spec, digits=4), "</li>")
-                        formulas <- paste0(formulas, "<li>Combined probability = ", format(test1_spec, digits=4), " + ", format((1-test1_spec)*test2_spec, digits=4), " = ", format(combined_spec, digits=4), "</li>")
+                        formulas <- paste0(formulas, "<li>Probability of testing negative on Test 1: ", base::format(test1_spec, digits=4), "</li>")
+                        formulas <- paste0(formulas, "<li>Probability of testing positive on Test 1 but negative on Test 2: (1-", base::format(test1_spec, digits=4), ") \u{00D7} ", base::format(test2_spec, digits=4), " = ", base::format((1-test1_spec)*test2_spec, digits=4), "</li>")
+                        formulas <- paste0(formulas, "<li>Combined probability = ", base::format(test1_spec, digits=4), " + ", base::format((1-test1_spec)*test2_spec, digits=4), " = ", base::format(combined_spec, digits=4), "</li>")
                         formulas <- paste0(formulas, "</ul>")
 
                     } else if (strategy == "serial_negative") {
@@ -1008,9 +1008,9 @@ sequentialtestsClass <- if (requireNamespace('jmvcore'))
                         formulas <- paste0(formulas, "<p>Se<sub>combined</sub> = Se<sub>1</sub> + (1-Se<sub>1</sub>) \u{00D7} Se<sub>2</sub></p>")
                         formulas <- paste0(formulas, "<p>Probability calculation:</p>")
                         formulas <- paste0(formulas, "<ul>")
-                        formulas <- paste0(formulas, "<li>Probability of testing positive on Test 1: ", format(test1_sens, digits=4), "</li>")
-                        formulas <- paste0(formulas, "<li>Probability of testing negative on Test 1 but positive on Test 2: (1-", format(test1_sens, digits=4), ") \u{00D7} ", format(test2_sens, digits=4), " = ", format((1-test1_sens)*test2_sens, digits=4), "</li>")
-                        formulas <- paste0(formulas, "<li>Combined probability = ", format(test1_sens, digits=4), " + ", format((1-test1_sens)*test2_sens, digits=4), " = ", format(combined_sens, digits=4), "</li>")
+                        formulas <- paste0(formulas, "<li>Probability of testing positive on Test 1: ", base::format(test1_sens, digits=4), "</li>")
+                        formulas <- paste0(formulas, "<li>Probability of testing negative on Test 1 but positive on Test 2: (1-", base::format(test1_sens, digits=4), ") \u{00D7} ", base::format(test2_sens, digits=4), " = ", base::format((1-test1_sens)*test2_sens, digits=4), "</li>")
+                        formulas <- paste0(formulas, "<li>Combined probability = ", base::format(test1_sens, digits=4), " + ", base::format((1-test1_sens)*test2_sens, digits=4), " = ", base::format(combined_sens, digits=4), "</li>")
                         formulas <- paste0(formulas, "</ul>")
 
                         # Specificity calculation
@@ -1019,9 +1019,9 @@ sequentialtestsClass <- if (requireNamespace('jmvcore'))
                         formulas <- paste0(formulas, "<p>Sp<sub>combined</sub> = Sp<sub>1</sub> \u{00D7} Sp<sub>2</sub></p>")
                         formulas <- paste0(formulas, "<p>Probability calculation:</p>")
                         formulas <- paste0(formulas, "<ul>")
-                        formulas <- paste0(formulas, "<li>Probability of testing negative on Test 1: ", format(test1_spec, digits=4), "</li>")
-                        formulas <- paste0(formulas, "<li>Given negative on Test 1, probability of testing negative on Test 2: ", format(test2_spec, digits=4), "</li>")
-                        formulas <- paste0(formulas, "<li>Combined probability = ", format(test1_spec, digits=4), " \u{00D7} ", format(test2_spec, digits=4), " = ", format(combined_spec, digits=4), "</li>")
+                        formulas <- paste0(formulas, "<li>Probability of testing negative on Test 1: ", base::format(test1_spec, digits=4), "</li>")
+                        formulas <- paste0(formulas, "<li>Given negative on Test 1, probability of testing negative on Test 2: ", base::format(test2_spec, digits=4), "</li>")
+                        formulas <- paste0(formulas, "<li>Combined probability = ", base::format(test1_spec, digits=4), " \u{00D7} ", base::format(test2_spec, digits=4), " = ", base::format(combined_spec, digits=4), "</li>")
                         formulas <- paste0(formulas, "</ul>")
 
                     } else if (strategy == "parallel") {
@@ -1038,10 +1038,10 @@ sequentialtestsClass <- if (requireNamespace('jmvcore'))
                         formulas <- paste0(formulas, "<p>Se<sub>combined</sub> = Se<sub>1</sub> + Se<sub>2</sub> - (Se<sub>1</sub> \u{00D7} Se<sub>2</sub>)</p>")
                         formulas <- paste0(formulas, "<p>Probability calculation:</p>")
                         formulas <- paste0(formulas, "<ul>")
-                        formulas <- paste0(formulas, "<li>Probability of testing positive on Test 1: ", format(test1_sens, digits=4), "</li>")
-                        formulas <- paste0(formulas, "<li>Probability of testing positive on Test 2: ", format(test2_sens, digits=4), "</li>")
-                        formulas <- paste0(formulas, "<li>Probability of testing positive on both: ", format(test1_sens, digits=4), " \u{00D7} ", format(test2_sens, digits=4), " = ", format(test1_sens*test2_sens, digits=4), "</li>")
-                        formulas <- paste0(formulas, "<li>Combined probability = ", format(test1_sens, digits=4), " + ", format(test2_sens, digits=4), " - ", format(test1_sens*test2_sens, digits=4), " = ", format(combined_sens, digits=4), "</li>")
+                        formulas <- paste0(formulas, "<li>Probability of testing positive on Test 1: ", base::format(test1_sens, digits=4), "</li>")
+                        formulas <- paste0(formulas, "<li>Probability of testing positive on Test 2: ", base::format(test2_sens, digits=4), "</li>")
+                        formulas <- paste0(formulas, "<li>Probability of testing positive on both: ", base::format(test1_sens, digits=4), " \u{00D7} ", base::format(test2_sens, digits=4), " = ", base::format(test1_sens*test2_sens, digits=4), "</li>")
+                        formulas <- paste0(formulas, "<li>Combined probability = ", base::format(test1_sens, digits=4), " + ", base::format(test2_sens, digits=4), " - ", base::format(test1_sens*test2_sens, digits=4), " = ", base::format(combined_sens, digits=4), "</li>")
                         formulas <- paste0(formulas, "</ul>")
 
                         # Specificity calculation
@@ -1050,9 +1050,9 @@ sequentialtestsClass <- if (requireNamespace('jmvcore'))
                         formulas <- paste0(formulas, "<p>Sp<sub>combined</sub> = Sp<sub>1</sub> \u{00D7} Sp<sub>2</sub></p>")
                         formulas <- paste0(formulas, "<p>Probability calculation:</p>")
                         formulas <- paste0(formulas, "<ul>")
-                        formulas <- paste0(formulas, "<li>Probability of testing negative on Test 1: ", format(test1_spec, digits=4), "</li>")
-                        formulas <- paste0(formulas, "<li>Probability of testing negative on Test 2: ", format(test2_spec, digits=4), "</li>")
-                        formulas <- paste0(formulas, "<li>Combined probability = ", format(test1_spec, digits=4), " \u{00D7} ", format(test2_spec, digits=4), " = ", format(combined_spec, digits=4), "</li>")
+                        formulas <- paste0(formulas, "<li>Probability of testing negative on Test 1: ", base::format(test1_spec, digits=4), "</li>")
+                        formulas <- paste0(formulas, "<li>Probability of testing negative on Test 2: ", base::format(test2_spec, digits=4), "</li>")
+                        formulas <- paste0(formulas, "<li>Combined probability = ", base::format(test1_spec, digits=4), " \u{00D7} ", base::format(test2_spec, digits=4), " = ", base::format(combined_spec, digits=4), "</li>")
                         formulas <- paste0(formulas, "</ul>")
                     }
 
@@ -1070,12 +1070,12 @@ sequentialtestsClass <- if (requireNamespace('jmvcore'))
 
                     formulas <- paste0(formulas, "<p>Calculation steps:</p>")
                     formulas <- paste0(formulas, "<ul>")
-                    formulas <- paste0(formulas, "<li>Prevalence (P) = ", format(prevalence, digits=4), "</li>")
-                    formulas <- paste0(formulas, "<li>Combined Sensitivity (Se) = ", format(combined_sens, digits=4), "</li>")
-                    formulas <- paste0(formulas, "<li>Combined Specificity (Sp) = ", format(combined_spec, digits=4), "</li>")
-                    formulas <- paste0(formulas, "<li>Numerator = P \u{00D7} Se = ", format(prevalence, digits=4), " \u{00D7} ", format(combined_sens, digits=4), " = ", format(ppv_numerator, digits=4), "</li>")
-                    formulas <- paste0(formulas, "<li>Denominator = P \u{00D7} Se + (1-P) \u{00D7} (1-Sp) = ", format(ppv_numerator, digits=4), " + ", format((1-prevalence), digits=4), " \u{00D7} ", format((1-combined_spec), digits=4), " = ", format(ppv_denominator, digits=4), "</li>")
-                    formulas <- paste0(formulas, "<li>PPV = Numerator/Denominator = ", format(ppv_numerator, digits=4), "/", format(ppv_denominator, digits=4), " = ", format(combined_ppv, digits=4), "</li>")
+                    formulas <- paste0(formulas, "<li>Prevalence (P) = ", base::format(prevalence, digits=4), "</li>")
+                    formulas <- paste0(formulas, "<li>Combined Sensitivity (Se) = ", base::format(combined_sens, digits=4), "</li>")
+                    formulas <- paste0(formulas, "<li>Combined Specificity (Sp) = ", base::format(combined_spec, digits=4), "</li>")
+                    formulas <- paste0(formulas, "<li>Numerator = P \u{00D7} Se = ", base::format(prevalence, digits=4), " \u{00D7} ", base::format(combined_sens, digits=4), " = ", base::format(ppv_numerator, digits=4), "</li>")
+                    formulas <- paste0(formulas, "<li>Denominator = P \u{00D7} Se + (1-P) \u{00D7} (1-Sp) = ", base::format(ppv_numerator, digits=4), " + ", base::format((1-prevalence), digits=4), " \u{00D7} ", base::format((1-combined_spec), digits=4), " = ", base::format(ppv_denominator, digits=4), "</li>")
+                    formulas <- paste0(formulas, "<li>PPV = Numerator/Denominator = ", base::format(ppv_numerator, digits=4), "/", base::format(ppv_denominator, digits=4), " = ", base::format(combined_ppv, digits=4), "</li>")
                     formulas <- paste0(formulas, "</ul>")
 
                     # Negative Predictive Value
@@ -1089,12 +1089,12 @@ sequentialtestsClass <- if (requireNamespace('jmvcore'))
 
                     formulas <- paste0(formulas, "<p>Calculation steps:</p>")
                     formulas <- paste0(formulas, "<ul>")
-                    formulas <- paste0(formulas, "<li>Prevalence (P) = ", format(prevalence, digits=4), "</li>")
-                    formulas <- paste0(formulas, "<li>Combined Sensitivity (Se) = ", format(combined_sens, digits=4), "</li>")
-                    formulas <- paste0(formulas, "<li>Combined Specificity (Sp) = ", format(combined_spec, digits=4), "</li>")
-                    formulas <- paste0(formulas, "<li>Numerator = (1-P) \u{00D7} Sp = ", format((1-prevalence), digits=4), " \u{00D7} ", format(combined_spec, digits=4), " = ", format(npv_numerator, digits=4), "</li>")
-                    formulas <- paste0(formulas, "<li>Denominator = (1-P) \u{00D7} Sp + P \u{00D7} (1-Se) = ", format(npv_numerator, digits=4), " + ", format(prevalence, digits=4), " \u{00D7} ", format((1-combined_sens), digits=4), " = ", format(npv_denominator, digits=4), "</li>")
-                    formulas <- paste0(formulas, "<li>NPV = Numerator/Denominator = ", format(npv_numerator, digits=4), "/", format(npv_denominator, digits=4), " = ", format(combined_npv, digits=4), "</li>")
+                    formulas <- paste0(formulas, "<li>Prevalence (P) = ", base::format(prevalence, digits=4), "</li>")
+                    formulas <- paste0(formulas, "<li>Combined Sensitivity (Se) = ", base::format(combined_sens, digits=4), "</li>")
+                    formulas <- paste0(formulas, "<li>Combined Specificity (Sp) = ", base::format(combined_spec, digits=4), "</li>")
+                    formulas <- paste0(formulas, "<li>Numerator = (1-P) \u{00D7} Sp = ", base::format((1-prevalence), digits=4), " \u{00D7} ", base::format(combined_spec, digits=4), " = ", base::format(npv_numerator, digits=4), "</li>")
+                    formulas <- paste0(formulas, "<li>Denominator = (1-P) \u{00D7} Sp + P \u{00D7} (1-Se) = ", base::format(npv_numerator, digits=4), " + ", base::format(prevalence, digits=4), " \u{00D7} ", base::format((1-combined_sens), digits=4), " = ", base::format(npv_denominator, digits=4), "</li>")
+                    formulas <- paste0(formulas, "<li>NPV = Numerator/Denominator = ", base::format(npv_numerator, digits=4), "/", base::format(npv_denominator, digits=4), " = ", base::format(combined_npv, digits=4), "</li>")
                     formulas <- paste0(formulas, "</ul>")
 
                     # Likelihood ratios
@@ -1104,13 +1104,13 @@ sequentialtestsClass <- if (requireNamespace('jmvcore'))
                     formulas <- paste0(formulas, "<h5>Positive Likelihood Ratio (LR+)</h5>")
                     formulas <- paste0(formulas, "<p>How much more likely a positive test result is to occur in patients with disease compared to those without:</p>")
                     formulas <- paste0(formulas, "<p>LR+ = Sensitivity / (1 - Specificity)</p>")
-                    formulas <- paste0(formulas, "<p>LR+ = ", format(combined_sens, digits=4), " / (1 - ", format(combined_spec, digits=4), ") = ", format(combined_sens/(1-combined_spec), digits=4), "</p>")
+                    formulas <- paste0(formulas, "<p>LR+ = ", base::format(combined_sens, digits=4), " / (1 - ", base::format(combined_spec, digits=4), ") = ", base::format(combined_sens/(1-combined_spec), digits=4), "</p>")
 
                     # Negative likelihood ratio
                     formulas <- paste0(formulas, "<h5>Negative Likelihood Ratio (LR-)</h5>")
                     formulas <- paste0(formulas, "<p>How much more likely a negative test result is to occur in patients with disease compared to those without:</p>")
                     formulas <- paste0(formulas, "<p>LR- = (1 - Sensitivity) / Specificity</p>")
-                    formulas <- paste0(formulas, "<p>LR- = (1 - ", format(combined_sens, digits=4), ") / ", format(combined_spec, digits=4), " = ", format((1-combined_sens)/combined_spec, digits=4), "</p>")
+                    formulas <- paste0(formulas, "<p>LR- = (1 - ", base::format(combined_sens, digits=4), ") / ", base::format(combined_spec, digits=4), " = ", base::format((1-combined_sens)/combined_spec, digits=4), "</p>")
 
                     self$results$formulas_text$setContent(formulas)
                 }

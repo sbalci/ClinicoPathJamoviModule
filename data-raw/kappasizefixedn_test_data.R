@@ -147,7 +147,8 @@ kappa_fixedn_scenarios_comprehensive <- tribble(
 )
 
 # Save Dataset 1 in multiple formats
-save(kappa_fixedn_scenarios_comprehensive, file = here("data", "kappasizefixedn_scenarios_comprehensive.rda"))
+kappasizefixedn_scenarios_comprehensive <- kappa_fixedn_scenarios_comprehensive  # object name must match the file name
+save(kappasizefixedn_scenarios_comprehensive, file = here("data", "kappasizefixedn_scenarios_comprehensive.rda"))
 write.csv(kappa_fixedn_scenarios_comprehensive, file = here("data", "kappasizefixedn_scenarios_comprehensive.csv"), row.names = FALSE)
 write_xlsx(kappa_fixedn_scenarios_comprehensive, path = here("data", "kappasizefixedn_scenarios_comprehensive.xlsx"))
 write_omv(kappa_fixedn_scenarios_comprehensive, here("data", "kappasizefixedn_scenarios_comprehensive.omv"), frcWrt = TRUE)
@@ -258,7 +259,8 @@ kappa_fixedn_power_cases <- tribble(
 )
 
 # Save Dataset 2 in multiple formats
-save(kappa_fixedn_power_cases, file = here("data", "kappasizefixedn_power_cases.rda"))
+kappasizefixedn_power_cases <- kappa_fixedn_power_cases  # object name must match the file name
+save(kappasizefixedn_power_cases, file = here("data", "kappasizefixedn_power_cases.rda"))
 write.csv(kappa_fixedn_power_cases, file = here("data", "kappasizefixedn_power_cases.csv"), row.names = FALSE)
 write_xlsx(kappa_fixedn_power_cases, path = here("data", "kappasizefixedn_power_cases.xlsx"))
 write_omv(kappa_fixedn_power_cases, here("data", "kappasizefixedn_power_cases.omv"), frcWrt = TRUE)
@@ -384,7 +386,8 @@ kappa_fixedn_validation_cases <- tribble(
 )
 
 # Save Dataset 3 in multiple formats
-save(kappa_fixedn_validation_cases, file = here("data", "kappasizefixedn_validation_cases.rda"))
+kappasizefixedn_validation_cases <- kappa_fixedn_validation_cases  # object name must match the file name
+save(kappasizefixedn_validation_cases, file = here("data", "kappasizefixedn_validation_cases.rda"))
 write.csv(kappa_fixedn_validation_cases, file = here("data", "kappasizefixedn_validation_cases.csv"), row.names = FALSE)
 write_xlsx(kappa_fixedn_validation_cases, path = here("data", "kappasizefixedn_validation_cases.xlsx"))
 write_omv(kappa_fixedn_validation_cases, here("data", "kappasizefixedn_validation_cases.omv"), frcWrt = TRUE)

@@ -1204,7 +1204,7 @@ clinicalnomogramsClass <- R6::R6Class(
                     
                     pred_summary <- paste(sapply(names(s_data), function(vn) {
                         paste0(htmltools::htmlEscape(vn), ": ",
-                               htmltools::htmlEscape(format(s_data[[vn]], digits=2)))
+                               htmltools::htmlEscape(base::format(s_data[[vn]], digits=2)))
                     }), collapse=", ")
                     
                     html <- paste0(html, "<tr>")

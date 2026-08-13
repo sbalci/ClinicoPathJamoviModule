@@ -155,7 +155,7 @@ kappaSizeFixedNBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
             super$initialize(
                 package = "ClinicoPath",
                 name = "kappaSizeFixedN",
-                version = c(1,0,51),
+                version = c(1,0,52),
                 options = options,
                 results = kappaSizeFixedNResults$new(options=options),
                 data = data,

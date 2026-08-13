@@ -27,8 +27,7 @@ test_that("linechart respects all feature combinations", {
       points = combinations$points[i]
     )
 
-    expect_s3_class(result, "linechartResults",
-                   info = paste("Failed for combination", i))
+    expect_s3_class(result, "linechartResults")
   }
 })
 
@@ -45,8 +44,7 @@ test_that("linechart handles all color palette options", {
       colorPalette = pal
     )
 
-    expect_s3_class(result, "linechartResults",
-                   info = paste("Failed for palette:", pal))
+    expect_s3_class(result, "linechartResults")
   }
 })
 
@@ -63,8 +61,7 @@ test_that("linechart handles all theme options", {
       theme = theme
     )
 
-    expect_s3_class(result, "linechartResults",
-                   info = paste("Failed for theme:", theme))
+    expect_s3_class(result, "linechartResults")
   }
 })
 
@@ -86,9 +83,7 @@ test_that("linechart handles theme and palette combinations", {
       colorPalette = combinations$colorPalette[i]
     )
 
-    expect_s3_class(result, "linechartResults",
-                   info = paste("Failed for theme:", combinations$theme[i],
-                               "palette:", combinations$colorPalette[i]))
+    expect_s3_class(result, "linechartResults")
   }
 })
 
@@ -283,8 +278,7 @@ test_that("linechart handles plot dimension parameters", {
       height = dim$height
     )
 
-    expect_s3_class(result, "linechartResults",
-                   info = paste("Failed for width =", dim$width, "height =", dim$height))
+    expect_s3_class(result, "linechartResults")
   }
 })
 
@@ -523,8 +517,7 @@ test_that("linechart handles all palettes with grouped data", {
       colorPalette = pal
     )
 
-    expect_s3_class(result, "linechartResults",
-                   info = paste("Failed for palette:", pal))
+    expect_s3_class(result, "linechartResults")
   }
 })
 
@@ -542,7 +535,6 @@ test_that("linechart handles all themes with grouped data", {
       theme = theme
     )
 
-    expect_s3_class(result, "linechartResults",
-                   info = paste("Failed for theme:", theme))
+    expect_s3_class(result, "linechartResults")
   }
 })

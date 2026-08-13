@@ -432,12 +432,12 @@ survivalfeaturerankClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6:
                 Univariate Survival Analysis Summary
 
                 Total features tested: {n_features}
-                Significant features (p < {format(alpha, nsmall=3)}): {n_significant} ({format(pct_significant, digits=1, nsmall=1)}%)
+                Significant features (p < {base::format(alpha, nsmall=3)}): {n_significant} ({base::format(pct_significant, digits=1, nsmall=1)}%)
 
                 Top-ranked feature: {top_feature}
-                  Hazard Ratio: {format(top_hr, digits=2, nsmall=2)} (95% CI: {format(ci_lower, digits=2, nsmall=2)} - {format(ci_upper, digits=2, nsmall=2)})
-                  P-value: {format(top_p, digits=4, nsmall=4)}
-                  C-index: {format(top_cindex, digits=3, nsmall=3)}
+                  Hazard Ratio: {base::format(top_hr, digits=2, nsmall=2)} (95% CI: {base::format(ci_lower, digits=2, nsmall=2)} - {base::format(ci_upper, digits=2, nsmall=2)})
+                  P-value: {base::format(top_p, digits=4, nsmall=4)}
+                  C-index: {base::format(top_cindex, digits=3, nsmall=3)}
             ")
 
             if (self$options$adjustPValues) {
@@ -480,8 +480,8 @@ survivalfeaturerankClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6:
                     direction <- if (feat$hr > 1) "increased" else "decreased"
 
                     feat_name <- htmltools::htmlEscape(feat$feature)
-                    feat_hr <- format(feat$hr, digits = 2, nsmall = 2)
-                    feat_p <- format(feat[[p_col]], digits = 4, nsmall = 4)
+                    feat_hr <- base::format(feat$hr, digits = 2, nsmall = 2)
+                    feat_p <- base::format(feat[[p_col]], digits = 4, nsmall = 4)
 
                     html <- paste0(html,
                         glue::glue("<li><b>{feat_name}</b> (HR: {feat_hr}, p = {feat_p}): Associated with {direction} hazard</li>"))

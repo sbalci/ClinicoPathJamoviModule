@@ -58,10 +58,7 @@ test_that("statsplot2 scenario: Clinical trial primary outcome", {
     dep = "tumor_reduction",
     group = "treatment",
     direction = "independent",
-    distribution = "p",
-    plotTitle = "Primary Outcome: Tumor Response by Treatment Arm",
-    xlab = "Treatment Group",
-    ylab = "Tumor Size Reduction (mm)"
+    distribution = "p"
   )
 
   expect_s3_class(result, "statsplot2Results")
@@ -77,8 +74,7 @@ test_that("statsplot2 scenario: Secondary outcomes analysis", {
     data = statsplot2_test,
     dep = "pain_score",
     group = "treatment",
-    distribution = "np",
-    plotTitle = "Secondary Outcome: Pain Reduction"
+    distribution = "np"
   )
   expect_s3_class(result1, "statsplot2Results")
 
@@ -87,8 +83,7 @@ test_that("statsplot2 scenario: Secondary outcomes analysis", {
     data = statsplot2_test,
     dep = "qol_score",
     group = "treatment",
-    distribution = "p",
-    plotTitle = "Secondary Outcome: Quality of Life"
+    distribution = "p"
   )
   expect_s3_class(result2, "statsplot2Results")
 })
@@ -104,8 +99,7 @@ test_that("statsplot2 scenario: Subgroup analysis by disease severity", {
     group = "treatment",
     grvar = "tumor_stage",
     direction = "independent",
-    distribution = "p",
-    plotTitle = "Treatment Effect by Disease Severity"
+    distribution = "p"
   )
 
   expect_s3_class(result, "statsplot2Results")
@@ -120,8 +114,7 @@ test_that("statsplot2 scenario: Demographic subgroup analysis", {
     data = statsplot2_test,
     dep = "tumor_reduction",
     group = "treatment",
-    grvar = "sex",
-    plotTitle = "Treatment Effect by Sex"
+    grvar = "sex"
   )
   expect_s3_class(result1, "statsplot2Results")
 
@@ -130,8 +123,7 @@ test_that("statsplot2 scenario: Demographic subgroup analysis", {
     data = statsplot2_test,
     dep = "tumor_reduction",
     group = "treatment",
-    grvar = "age_group",
-    plotTitle = "Treatment Effect by Age Group"
+    grvar = "age_group"
   )
   expect_s3_class(result2, "statsplot2Results")
 })
@@ -146,10 +138,7 @@ test_that("statsplot2 scenario: Longitudinal symptom tracking", {
     dep = "symptom_severity",
     group = "timepoint",
     direction = "repeated",
-    distribution = "p",
-    plotTitle = "Symptom Trajectory Over 12 Weeks",
-    xlab = "Assessment Timepoint",
-    ylab = "Symptom Severity Score"
+    distribution = "p"
   )
 
   expect_s3_class(result, "statsplot2Results")
@@ -166,8 +155,7 @@ test_that("statsplot2 scenario: Treatment comparison over time", {
     group = "timepoint",
     grvar = "treatment_arm",
     direction = "repeated",
-    distribution = "p",
-    plotTitle = "Treatment Arm Comparison: Symptom Change"
+    distribution = "p"
   )
 
   expect_s3_class(result, "statsplot2Results")
@@ -182,10 +170,7 @@ test_that("statsplot2 scenario: Biomarker correlation analysis", {
     data = statsplot2_test,
     dep = "tumor_reduction",
     group = "biomarker_level",
-    direction = "independent",
-    plotTitle = "Biomarker-Response Correlation",
-    xlab = "Biomarker Level",
-    ylab = "Tumor Size Reduction (mm)"
+    direction = "independent"
   )
 
   expect_s3_class(result, "statsplot2Results")
@@ -200,8 +185,7 @@ test_that("statsplot2 scenario: Response rate comparison", {
     data = statsplot2_test,
     dep = "response_status",
     group = "treatment",
-    direction = "independent",
-    plotTitle = "Response Rates by Treatment Arm"
+    direction = "independent"
   )
 
   expect_s3_class(result, "statsplot2Results")
@@ -216,8 +200,7 @@ test_that("statsplot2 scenario: Robust analysis with outliers", {
     data = statsplot2_outliers,
     dep = "tumor_reduction",
     group = "treatment",
-    distribution = "r",
-    plotTitle = "Robust Analysis: Treatment Effect with Outliers"
+    distribution = "r"
   )
 
   expect_s3_class(result, "statsplot2Results")
@@ -232,8 +215,7 @@ test_that("statsplot2 scenario: Nonparametric analysis for skewed data", {
     data = statsplot2_skewed,
     dep = "tumor_reduction",
     group = "treatment",
-    distribution = "np",
-    plotTitle = "Nonparametric Analysis: Skewed Outcome Distribution"
+    distribution = "np"
   )
 
   expect_s3_class(result, "statsplot2Results")
@@ -248,8 +230,7 @@ test_that("statsplot2 scenario: Bayesian evidence assessment", {
     data = statsplot2_test,
     dep = "qol_score",
     group = "treatment",
-    distribution = "bf",
-    plotTitle = "Bayesian Analysis: Treatment Effect Evidence"
+    distribution = "bf"
   )
 
   expect_s3_class(result, "statsplot2Results")
@@ -265,8 +246,7 @@ test_that("statsplot2 works with filtered data", {
   result <- statsplot2(
     data = high_stage,
     dep = "tumor_reduction",
-    group = "treatment",
-    plotTitle = "Treatment Effect in Advanced Disease"
+    group = "treatment"
   )
 
   expect_s3_class(result, "statsplot2Results")
@@ -381,8 +361,7 @@ test_that("statsplot2 handles comprehensive multi-outcome report", {
     dep = "tumor_reduction",
     group = "treatment",
     grvar = "tumor_stage",
-    distribution = "p",
-    plotTitle = "Primary Outcome"
+    distribution = "p"
   )
   expect_s3_class(primary, "statsplot2Results")
 
@@ -391,8 +370,7 @@ test_that("statsplot2 handles comprehensive multi-outcome report", {
     data = statsplot2_test,
     dep = "pain_score",
     group = "treatment",
-    distribution = "np",
-    plotTitle = "Pain Scores"
+    distribution = "np"
   )
   expect_s3_class(pain, "statsplot2Results")
 
@@ -400,8 +378,7 @@ test_that("statsplot2 handles comprehensive multi-outcome report", {
     data = statsplot2_test,
     dep = "qol_score",
     group = "treatment",
-    distribution = "p",
-    plotTitle = "Quality of Life"
+    distribution = "p"
   )
   expect_s3_class(qol, "statsplot2Results")
 
@@ -409,8 +386,7 @@ test_that("statsplot2 handles comprehensive multi-outcome report", {
   response <- statsplot2(
     data = statsplot2_test,
     dep = "response_status",
-    group = "treatment",
-    plotTitle = "Response Rates"
+    group = "treatment"
   )
   expect_s3_class(response, "statsplot2Results")
 })

@@ -10178,10 +10178,10 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                         if (metric != "icc") {
                             table$addRow(rowKey = "n_cat", values = list(parameter = "Number of Categories", value = as.character(n_cat)))
                         }
-                        table$addRow(rowKey = "kappa_null", values = list(parameter = paste0(metric_label, " under H0"), value = format(k0, digits = 3)))
-                        table$addRow(rowKey = "kappa_alt", values = list(parameter = paste0(metric_label, " under H1"), value = format(k1, digits = 3)))
-                        table$addRow(rowKey = "alpha", values = list(parameter = "Significance Level (alpha)", value = format(alpha, digits = 3)))
-                        table$addRow(rowKey = "power", values = list(parameter = "Target Power (1 - beta)", value = format(power, digits = 3)))
+                        table$addRow(rowKey = "kappa_null", values = list(parameter = paste0(metric_label, " under H0"), value = base::format(k0, digits = 3)))
+                        table$addRow(rowKey = "kappa_alt", values = list(parameter = paste0(metric_label, " under H1"), value = base::format(k1, digits = 3)))
+                        table$addRow(rowKey = "alpha", values = list(parameter = "Significance Level (alpha)", value = base::format(alpha, digits = 3)))
+                        table$addRow(rowKey = "power", values = list(parameter = "Target Power (1 - beta)", value = base::format(power, digits = 3)))
                         table$addRow(rowKey = "total_reads", values = list(parameter = "Total Reads Required", value = as.character(n_required * n_raters)))
 
                         table$setNote("info", paste0(

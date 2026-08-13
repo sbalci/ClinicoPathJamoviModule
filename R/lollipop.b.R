@@ -639,26 +639,26 @@ lollipopClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             # Dependent variable statistics
             table$addRow(rowKey = row_num, values = list(
                 statistic = .("Mean Value"),
-                value = format(summary_stats$dep_mean, digits = 3)
+                value = base::format(summary_stats$dep_mean, digits = 3)
             ))
             row_num <- row_num + 1
             
             table$addRow(rowKey = row_num, values = list(
                 statistic = .("Median Value"),
-                value = format(summary_stats$dep_median, digits = 3)
+                value = base::format(summary_stats$dep_median, digits = 3)
             ))
             row_num <- row_num + 1
             
             table$addRow(rowKey = row_num, values = list(
                 statistic = .("Standard Deviation"),
-                value = format(summary_stats$dep_sd, digits = 3)
+                value = base::format(summary_stats$dep_sd, digits = 3)
             ))
             row_num <- row_num + 1
             
             table$addRow(rowKey = row_num, values = list(
                 statistic = .("Value Range"),
-                value = paste(format(summary_stats$dep_min, digits = 3), "-", 
-                             format(summary_stats$dep_max, digits = 3))
+                value = paste(base::format(summary_stats$dep_min, digits = 3), "-", 
+                             base::format(summary_stats$dep_max, digits = 3))
             ))
             row_num <- row_num + 1
             

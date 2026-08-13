@@ -281,8 +281,13 @@ statsplot2_skewed <- statsplot2_test %>%
 
 # 1. RDA format (native R)
 save(statsplot2_test, file = here::here("data", "statsplot2_test.rda"))
-save(clinical_trial_data, file = here::here("data", "statsplot2_clinical.rda"))
-save(repeated_measures_data, file = here::here("data", "statsplot2_repeated.rda"))
+# The object name inside an .rda must match the file name, or data(<name>)
+# loads the file and then <name> does not exist - which is exactly what
+# `data(statsplot2_repeated)` did before this was fixed.
+statsplot2_clinical <- clinical_trial_data
+statsplot2_repeated <- repeated_measures_data
+save(statsplot2_clinical, file = here::here("data", "statsplot2_clinical.rda"))
+save(statsplot2_repeated, file = here::here("data", "statsplot2_repeated.rda"))
 save(statsplot2_outliers, file = here::here("data", "statsplot2_outliers.rda"))
 save(statsplot2_skewed, file = here::here("data", "statsplot2_skewed.rda"))
 

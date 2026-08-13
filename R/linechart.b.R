@@ -65,6 +65,31 @@ linechartClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
     inherit = linechartBase,
     private = list(
 
+        # base::format() is MASKED in this file. `@import jmvcore` brings jmvcore's
+        # own format() into scope, and that one is a string-template helper which
+        # ignores `digits` and stringifies at full precision - so every
+        # format(x, digits = 3) here silently produced 15-16 significant digits,
+        # e.g. "Each unit increase in X corresponds to 0.829075514952931 unit
+        # increase in Y". Round explicitly instead of relying on a masked generic.
+        .fmtNum = function(x, digits = 3) {
+            if (length(x) != 1 || !is.finite(x)) return("NA")
+            formatC(signif(x, digits), format = "fg", flag = "#", digits = digits)
+        },
+
+        # Read an option that may not exist in the compiled R/linechart.h.R yet.
+        # jmvcore's `$` ERRORS on an undeclared option rather than returning NULL,
+        # so an .a.yaml addition that has not been through jmvtools::prepare()
+        # would otherwise take the whole analysis down.
+        .optionOr = function(name, default) {
+            tryCatch(self$options[[name]], error = function(e) default)
+        },
+
+        # Rows dropped during preparation, recorded so .checkDataQuality() can
+        # report them in the results panel. warning() only reaches the R console.
+        .n_excluded_missing   = 0L,
+        .n_excluded_nonfinite = 0L,
+        .n_rows_analysed      = 0L,
+
         # Initialize results and validate dependencies
         .init = function() {
             # Validate parameters at initialization. Dependency checking is
@@ -90,8 +115,21 @@ linechartClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
         },
 
         .run = function() {
-            # Early exits for missing data or variables
+            # Early exits for missing data or variables.
+            #
+            # A bare return() here left the panel completely blank - no welcome
+            # text (variables ARE selected, so .init() did not write one) and no
+            # explanation - while the plot still rendered as an empty frame.
             if (is.null(self$data) || nrow(self$data) == 0) {
+                if (!is.null(self$options$xvar) && !is.null(self$options$yvar)) {
+                    self$results$todo$setContent(paste0(
+                        "<div class='alert alert-warning'><h6>",
+                        .("No rows to plot"), "</h6><p>",
+                        .("The dataset has no rows, so there is nothing to chart. If a row filter is active, it may be excluding every case."),
+                        "</p></div>"))
+                    self$results$todo$setVisible(TRUE)
+                    self$results$plot$setVisible(FALSE)
+                }
                 return()
             }
 
@@ -233,18 +271,41 @@ linechartClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                 }
             }
 
-            # Remove rows with missing values
+            # Remove rows with missing values.
+            #
+            # complete.cases() follows is.na(), which is TRUE for NaN but FALSE for
+            # Inf, so infinite values used to survive this filter. They then reached
+            # `var(y) == 0` below, where var() returns NaN and `NaN == 0` is NA, so
+            # `if (NA)` aborted the run with "missing value where TRUE/FALSE needed"
+            # - a message that tells a clinician nothing, under a heading that then
+            # advised removing MISSING values, which is not what went wrong.
             complete_before <- nrow(data)
-            data <- data[complete.cases(data), ]
+            data <- data[complete.cases(data), , drop = FALSE]
+
+            n_nonfinite <- 0L
+            num_cols <- names(data)[vapply(data, is.numeric, logical(1))]
+            if (length(num_cols) > 0 && nrow(data) > 0) {
+                finite_rows <- Reduce(`&`, lapply(data[num_cols], is.finite))
+                n_nonfinite <- sum(!finite_rows)
+                if (n_nonfinite > 0)
+                    data <- data[finite_rows, , drop = FALSE]
+            }
             complete_after <- nrow(data)
 
             if (complete_after == 0) {
-                jmvcore::reject(.("No complete cases found. Please check for missing values in selected variables."))
+                jmvcore::reject(.("No usable rows remain after removing missing and infinite values. Please check the selected variables."))
             }
 
+            # Record exclusions so they can be shown in the results panel.
+            # warning() alone goes to the R console, which the jamovi user never
+            # sees, so dropped rows were invisible in the GUI.
+            private$.n_excluded_missing  <- complete_before - complete_after - n_nonfinite
+            private$.n_excluded_nonfinite <- n_nonfinite
+            private$.n_rows_analysed      <- complete_after
+
             if (complete_after < complete_before) {
-                n_removed <- complete_before - complete_after
-                warning(paste(n_removed, .("rows with missing values were removed from analysis.")))
+                warning(paste(complete_before - complete_after,
+                              .("rows with missing or infinite values were removed from analysis.")))
             }
 
             # Enhanced minimum data requirements with suggestions
@@ -447,26 +508,26 @@ linechartClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             # Y variable statistics
             table$addRow(rowKey = row_num, values = list(
                 statistic = .("Y Mean"),
-                value = format(summary_stats$y_mean, digits = 3)
+                value = private$.fmtNum(summary_stats$y_mean)
             ))
             row_num <- row_num + 1
 
             table$addRow(rowKey = row_num, values = list(
                 statistic = .("Y Median"),
-                value = format(summary_stats$y_median, digits = 3)
+                value = private$.fmtNum(summary_stats$y_median)
             ))
             row_num <- row_num + 1
 
             table$addRow(rowKey = row_num, values = list(
                 statistic = .("Y Standard Deviation"),
-                value = format(summary_stats$y_sd, digits = 3)
+                value = private$.fmtNum(summary_stats$y_sd)
             ))
             row_num <- row_num + 1
 
             table$addRow(rowKey = row_num, values = list(
                 statistic = .("Y Range"),
-                value = paste(format(summary_stats$y_min, digits = 3), "-",
-                             format(summary_stats$y_max, digits = 3))
+                value = paste(private$.fmtNum(summary_stats$y_min), "-",
+                             private$.fmtNum(summary_stats$y_max))
             ))
         },
 
@@ -509,7 +570,7 @@ linechartClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                 slope_interpretation <- paste0(
                     if (correlation_stats$slope > 0) .("Positive trend: ") else .("Negative trend: "),
                     .("Each unit increase in X corresponds to "),
-                    format(abs(correlation_stats$slope), digits = 3),
+                    private$.fmtNum(abs(correlation_stats$slope)),
                     if (correlation_stats$slope > 0) .(" unit increase") else .(" unit decrease"),
                     .(" in Y on average.")
                 )
@@ -1014,6 +1075,41 @@ linechartClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
 
             warnings <- c()
 
+            # Exclusions first: every statistic below is computed on the rows that
+            # survived, so the reader needs to know how many did not.
+            if (private$.n_excluded_missing > 0)
+                warnings <- c(warnings, sprintf(
+                    .("%d row(s) were excluded because of missing values; %d rows were analysed."),
+                    private$.n_excluded_missing, private$.n_rows_analysed))
+
+            if (private$.n_excluded_nonfinite > 0)
+                warnings <- c(warnings, sprintf(
+                    .("%d row(s) held infinite values (Inf or -Inf) and were excluded; %d rows were analysed. Infinite values are usually a division by zero or a log of zero upstream - check the source variable."),
+                    private$.n_excluded_nonfinite, private$.n_rows_analysed))
+
+            # A line needs at least two distinct x positions. With one, the chart is
+            # a vertical strip of points, and the trend/correlation statistics
+            # describe nothing - but it rendered silently.
+            n_x <- length(unique(data[[xvar]]))
+            if (n_x < 2)
+                warnings <- c(warnings, sprintf(
+                    .("All observations share a single X value (%s). A line chart needs at least two distinct X positions; no trend can be shown or estimated from one."),
+                    base::format(unique(data[[xvar]])[1])))
+
+            # Say what the confidence band actually is. geom_smooth() fits its own
+            # model: a straight line by default, loess when Smooth is on. The
+            # visible line is geom_line(), which connects the observed points. So
+            # the ribbon is NOT the uncertainty around the line being drawn, and a
+            # reader will assume it is. Verified against predict(lm, interval =
+            # "confidence"): the band matches to 0 difference, i.e. it is exactly a
+            # linear-fit CI.
+            if (isTRUE(self$options$confidence)) {
+                warnings <- c(warnings, if (isTRUE(self$options$smooth))
+                    .("The shaded band is the 95% confidence interval of a LOESS fit, not the uncertainty of the plotted points themselves.")
+                else
+                    .("The shaded band is the 95% confidence interval of a straight-line (linear regression) fit, while the plotted line connects the observed values. The band therefore describes a linear trend, not the line you see; enable Smooth line if you want the band and the line to match."))
+            }
+
             # Check minimum data requirements for different analyses
             if (self$options$trendline && nrow(data) < 5) {
                 warnings <- c(warnings, .("Warning: Less than 5 data points available for trend analysis. Results may be unreliable."))
@@ -1093,8 +1189,8 @@ linechartClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             # Add Y variable summary (yvar is a user column name -> escape for HTML)
             summary_text <- paste0(summary_text,
                 "<p><strong>", jmvcore::htmlEscape(yvar), "</strong> ", .("ranges from"), " ",
-                format(summary_stats$y_min, digits = 3), " ", .("to"), " ", format(summary_stats$y_max, digits = 3),
-                " (mean: ", format(summary_stats$y_mean, digits = 3), ", SD: ", format(summary_stats$y_sd, digits = 3), ")</p>"
+                private$.fmtNum(summary_stats$y_min), " ", .("to"), " ", private$.fmtNum(summary_stats$y_max),
+                " (mean: ", private$.fmtNum(summary_stats$y_mean), ", SD: ", private$.fmtNum(summary_stats$y_sd), ")</p>"
             )
 
             # Add trend information if available
@@ -1263,10 +1359,27 @@ linechartClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
 
         # Add reference lines
         .addReferenceLines = function(p, plot_data) {
-            if (is.null(self$options$refline) || is.na(self$options$refline) || self$options$refline == 0) return(p)
+            # Gated by its own switch rather than by "value != 0". Treating 0 as
+            # the off-sentinel made the most common clinical reference line -
+            # change from baseline, a difference, a log fold-change - impossible
+            # to draw.
+            #
+            # The sentinel `NULL` below distinguishes "showRefline is not compiled
+            # yet" from "the user switched it off". Before jmvtools::prepare() runs
+            # the option does not exist, and defaulting it to FALSE would silently
+            # withdraw a feature that currently works; fall back to the legacy
+            # rule (draw when the value is non-zero) until the header catches up.
+            show <- private$.optionOr("showRefline", NULL)
 
+            if (is.null(self$options$refline) || is.na(self$options$refline)) return(p)
             refline_value <- as.numeric(self$options$refline)
-            if (is.na(refline_value) || refline_value == 0) return(p)
+            if (is.na(refline_value)) return(p)
+
+            if (is.null(show)) {
+                if (refline_value == 0) return(p)     # legacy behaviour
+            } else if (!isTRUE(show)) {
+                return(p)
+            }
 
             refline_label <- if (!is.null(self$options$reflineLabel) &&
                                 nchar(self$options$reflineLabel) > 0) {

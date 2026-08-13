@@ -35,9 +35,17 @@ options:
       description:
           R: The data as a data frame.
 
+    # default: NULL is required on both. The analysis is written to run without
+    # them - .init() shows a welcome panel when either is unset - but without a
+    # default the compiler makes them REQUIRED arguments of the generated R
+    # wrapper, so linechart(data = df) throws "argument \"xvar\" is missing, with
+    # no default". The GUI never hits this (it passes nothing positionally); any
+    # programmatic caller does, including R CMD check --run-donttest on the
+    # examples. Same trap that previously broke agreement() and diagnosticmeta().
     - name: xvar
       title: 'X-axis Variable'
       type: Variable
+      default: NULL
       suggested: [ continuous, ordinal ]
       permitted: [ numeric, factor ]
       description:
@@ -47,6 +55,7 @@ options:
     - name: yvar
       title: 'Y-axis Variable'
       type: Variable
+      default: NULL
       suggested: [ continuous ]
       permitted: [ numeric ]
       description:
@@ -95,6 +104,19 @@ options:
           R: >
             Whether to apply smoothing (loess) to the line(s).
 
+    # The reference line needs its own on/off switch. Using 0 as the "no line"
+    # sentinel made the single most common clinical reference impossible to draw:
+    # zero is where change-from-baseline, a difference, and a log fold-change all
+    # sit. Verified - refline = 0 drew nothing while 1 and -1 drew correctly.
+    - name: showRefline
+      title: "Reference line"
+      type: Bool
+      default: false
+      description:
+          R: >
+            Whether to draw a horizontal reference line at the value below. Enable
+            this to draw the line at any value, including zero.
+
     - name: refline
       title: 'Reference Line Value'
       type: Number
@@ -103,7 +125,9 @@ options:
       max: 999999
       description:
           R: >
-            Optional reference line value (e.g., normal range, threshold). Set to 0 for no reference line.
+            Value at which to draw the reference line (e.g., a normal-range limit,
+            a clinical threshold, or zero for no change from baseline). Only drawn
+            when Reference line is enabled.
 
     - name: reflineLabel
       title: 'Reference Line Label'

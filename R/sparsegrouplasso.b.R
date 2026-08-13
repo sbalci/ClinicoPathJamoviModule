@@ -1341,7 +1341,7 @@ sparsegrouplassoClass <- R6::R6Class(
 
             rows <- list(
                 list(metric = "Optimal Lambda", 
-                     value = format(optimal_lambda, digits = 4),
+                     value = base::format(optimal_lambda, digits = 4),
                      description = "Regularization parameter selected by cross-validation"),
                 list(metric = "Variables Selected", 
                      value = as.character(n_selected),
@@ -1350,7 +1350,7 @@ sparsegrouplassoClass <- R6::R6Class(
                      value = as.character(n_groups_selected),
                      description = paste("Out of", max(results$groups), "total groups")),
                 list(metric = "Alpha Parameter", 
-                     value = format(self$options$alpha_sgl, digits = 3),
+                     value = base::format(self$options$alpha_sgl, digits = 3),
                      description = "Mixing parameter (0=group LASSO, 1=LASSO)"),
                 list(metric = "CV Folds", 
                      value = as.character(self$options$cv_folds),
@@ -1848,7 +1848,7 @@ sparsegrouplassoClass <- R6::R6Class(
                 ggplot2::labs(
                     title = "Cross-Validation Error",
                     subtitle = paste("Blue dashed: optimal lambda =",
-                                     format(optimal_lambda, digits = 4)),
+                                     base::format(optimal_lambda, digits = 4)),
                     x = "Log(Lambda)",
                     y = "Cox Partial Likelihood Deviance"
                 ) +
@@ -2086,7 +2086,7 @@ sparsegrouplassoClass <- R6::R6Class(
                         <p><strong>Sparse Group LASSO (Approximation)</strong> uses glmnet Cox regression with ",
                         "penalty.factor weighting to approximate group-wise variable selection with individual ",
                         "sparsity within groups. ",
-                        "With alpha=", format(alpha_sgl, digits = 3), ", the method emphasizes ",
+                        "With alpha=", base::format(alpha_sgl, digits = 3), ", the method emphasizes ",
                         ifelse(alpha_sgl > 0.5, "individual variable sparsity", "group-wise selection"), ".</p>
                         <p><strong>Engine:</strong> glmnet::cv.glmnet(family='cox') with Cox partial likelihood.</p>
                     </div>
@@ -2102,10 +2102,10 @@ sparsegrouplassoClass <- R6::R6Class(
                     <div class='result-section'>
                         <h4>Model Configuration</h4>
                         <ul>
-                            <li><strong>Alpha Parameter:</strong> ", format(alpha_sgl, digits = 3), " (",
+                            <li><strong>Alpha Parameter:</strong> ", base::format(alpha_sgl, digits = 3), " (",
                             ifelse(alpha_sgl > 0.8, "High individual sparsity",
                                    ifelse(alpha_sgl > 0.5, "Balanced sparsity", "Group-focused selection")), ")</li>
-                            <li><strong>Optimal Lambda:</strong> ", format(results$cv_results$optimal_lambda, digits = 4), "</li>
+                            <li><strong>Optimal Lambda:</strong> ", base::format(results$cv_results$optimal_lambda, digits = 4), "</li>
                             <li><strong>Cross-Validation:</strong> ", self$options$cv_folds, "-fold CV</li>
                             <li><strong>Selection Criterion:</strong> ", self$options$selection_criterion, "</li>
                         </ul>

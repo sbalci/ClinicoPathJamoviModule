@@ -4836,12 +4836,12 @@ psychopdaROCClass <- if (requireNamespace("jmvcore")) {
 
         # Format AUC table
         output <- c(output, "Estimated AUC's:")
-        auc_formatted <- format(round(x$AUC, digits = digits, ...), nsmall = digits, ...)
+        auc_formatted <- base::format(round(x$AUC, digits = digits, ...), nsmall = digits, ...)
         output <- c(output, capture.output(print(auc_formatted, quote = FALSE)))
 
         # Format pairwise comparisons
         output <- c(output, "", "Pairwise comparisons:")
-        diff_formatted <- format(round(x$difference, digits = digits, ...), nsmall = digits, ...)
+        diff_formatted <- base::format(round(x$difference, digits = digits, ...), nsmall = digits, ...)
         output <- c(output, capture.output(print(diff_formatted, quote = FALSE)))
 
         # Format overall test

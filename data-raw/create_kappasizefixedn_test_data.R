@@ -566,7 +566,8 @@ kappa_fixedn_power_cases <- create_power_analysis_cases()
 
 # Save datasets to package data directory (if it exists)
 if (dir.exists("data")) {
-  save(kappa_fixedn_scenarios_comprehensive, file = "data/kappasizefixedn_scenarios_comprehensive.rda")
+kappasizefixedn_scenarios_comprehensive <- kappa_fixedn_scenarios_comprehensive  # object name must match the file name
+  save(kappasizefixedn_scenarios_comprehensive, file = "data/kappasizefixedn_scenarios_comprehensive.rda")
 
 # Also save as .omv for jamovi
 if (requireNamespace("jmvReadWrite", quietly = TRUE)) {
@@ -579,7 +580,8 @@ if (requireNamespace("jmvReadWrite", quietly = TRUE)) {
   jmvReadWrite::write_omv(kappa_fixedn_scenarios_comprehensive, "data/kappasizefixedn_scenarios_comprehensive.omv")
   message("✓ Created kappasizefixedn_scenarios_comprehensive.omv")
 }
-  save(kappa_fixedn_validation_cases, file = "data/kappasizefixedn_validation_cases.rda")
+kappasizefixedn_validation_cases <- kappa_fixedn_validation_cases  # object name must match the file name
+  save(kappasizefixedn_validation_cases, file = "data/kappasizefixedn_validation_cases.rda")
 
 # Also save as .omv for jamovi
 if (requireNamespace("jmvReadWrite", quietly = TRUE)) {
@@ -592,7 +594,8 @@ if (requireNamespace("jmvReadWrite", quietly = TRUE)) {
   jmvReadWrite::write_omv(kappa_fixedn_validation_cases, "data/kappasizefixedn_validation_cases.omv")
   message("✓ Created kappasizefixedn_validation_cases.omv")
 }
-  save(kappa_fixedn_power_cases, file = "data/kappasizefixedn_power_cases.rda")
+kappasizefixedn_power_cases <- kappa_fixedn_power_cases  # object name must match the file name
+  save(kappasizefixedn_power_cases, file = "data/kappasizefixedn_power_cases.rda")
 
 # Also save as .omv for jamovi
 if (requireNamespace("jmvReadWrite", quietly = TRUE)) {

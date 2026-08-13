@@ -5398,7 +5398,7 @@ multisurvivalClass <- if (requireNamespace('jmvcore'))
         # Create dynamic group summary text
         group_summary <- character()
         for(i in seq_len(nrow(risk_summary))) {
-          group_summary[i] <- glue::glue("{risk_summary$group[i]}: {risk_summary$n_patients[i]} ({format(risk_summary$percent[i], digits=1, nsmall=1)}%)")
+          group_summary[i] <- glue::glue("{risk_summary$group[i]}: {risk_summary$n_patients[i]} ({base::format(risk_summary$percent[i], digits=1, nsmall=1)}%)")
 
         }
         group_text <- paste(group_summary, collapse = "<br>")

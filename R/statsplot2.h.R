@@ -14,6 +14,8 @@ statsplot2Options <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             alluvsty = "t1",
             excl = FALSE,
             sampleLarge = FALSE,
+            sampleThreshold = 10000,
+            sampleSize = 5000,
             seed = 42, ...) {
 
             super$initialize(
@@ -65,6 +67,18 @@ statsplot2Options <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 "sampleLarge",
                 sampleLarge,
                 default=FALSE)
+            private$..sampleThreshold <- jmvcore::OptionInteger$new(
+                "sampleThreshold",
+                sampleThreshold,
+                default=10000,
+                min=1000,
+                max=1000000)
+            private$..sampleSize <- jmvcore::OptionInteger$new(
+                "sampleSize",
+                sampleSize,
+                default=5000,
+                min=100,
+                max=1000000)
             private$..seed <- jmvcore::OptionInteger$new(
                 "seed",
                 seed,
@@ -78,6 +92,8 @@ statsplot2Options <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             self$.addOption(private$..alluvsty)
             self$.addOption(private$..excl)
             self$.addOption(private$..sampleLarge)
+            self$.addOption(private$..sampleThreshold)
+            self$.addOption(private$..sampleSize)
             self$.addOption(private$..seed)
         }),
     active = list(
@@ -89,6 +105,8 @@ statsplot2Options <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         alluvsty = function() private$..alluvsty$value,
         excl = function() private$..excl$value,
         sampleLarge = function() private$..sampleLarge$value,
+        sampleThreshold = function() private$..sampleThreshold$value,
+        sampleSize = function() private$..sampleSize$value,
         seed = function() private$..seed$value),
     private = list(
         ..dep = NA,
@@ -99,6 +117,8 @@ statsplot2Options <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         ..alluvsty = NA,
         ..excl = NA,
         ..sampleLarge = NA,
+        ..sampleThreshold = NA,
+        ..sampleSize = NA,
         ..seed = NA)
 )
 
@@ -189,7 +209,7 @@ statsplot2Base <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             super$initialize(
                 package = "ClinicoPath",
                 name = "statsplot2",
-                version = c(1,0,51),
+                version = c(1,0,52),
                 options = options,
                 results = statsplot2Results$new(options=options),
                 data = data,
@@ -227,6 +247,12 @@ statsplot2Base <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' @param excl If TRUE, excludes rows with missing values before analysis.
 #' @param sampleLarge If TRUE, automatically samples large datasets (>10,000
 #'   rows) to 5,000 rows for improved performance.
+#' @param sampleThreshold Row count above which sampling is applied, when
+#'   'Sample large datasets' is enabled. Datasets at or below this size are
+#'   always analysed in full.
+#' @param sampleSize Number of rows to retain when sampling. Larger values
+#'   keep more statistical power at the cost of plotting speed. Statistics are
+#'   computed on the retained rows only.
 #' @param seed Random seed for the reproducible sampling of large datasets
 #'   (used when 'Sample Large Datasets' is enabled). Change it to draw a
 #'   different sample; the default (42) reproduces the previous fixed behaviour.
@@ -249,6 +275,8 @@ statsplot2 <- function(
     alluvsty = "t1",
     excl = FALSE,
     sampleLarge = FALSE,
+    sampleThreshold = 10000,
+    sampleSize = 5000,
     seed = 42) {
 
     if ( ! requireNamespace("jmvcore", quietly=TRUE))
@@ -274,6 +302,8 @@ statsplot2 <- function(
         alluvsty = alluvsty,
         excl = excl,
         sampleLarge = sampleLarge,
+        sampleThreshold = sampleThreshold,
+        sampleSize = sampleSize,
         seed = seed)
 
     analysis <- statsplot2Class$new(

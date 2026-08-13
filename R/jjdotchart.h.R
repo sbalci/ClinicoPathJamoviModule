@@ -304,7 +304,7 @@ jjdotchartBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             super$initialize(
                 package = "ClinicoPath",
                 name = "jjdotchart",
-                version = c(1,0,5),
+                version = c(1,0,52),
                 options = options,
                 results = jjdotchartResults$new(options=options),
                 data = data,

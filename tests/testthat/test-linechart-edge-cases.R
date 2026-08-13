@@ -4,6 +4,12 @@
 
 library(testthat)
 
+# A jamovi analysis reports bad input in a results panel rather than throwing, so
+# expect_error()/expect_condition() here asserted the OPPOSITE of the desired
+# behaviour - they passed only when the analysis crashed.
+lc_todo <- function(res) gsub("[[:space:]]+", " ", gsub("<[^>]*>", " ", as.character(res$todo$content)))
+
+
 test_that("linechart handles missing data in x variable", {
 
   data(linechart_simple)
@@ -87,16 +93,10 @@ test_that("linechart handles single time point", {
     value = 10
   )
 
-  # Should error with informative message
-  expect_error(
-    linechart(
-      data = single_point,
-      xvar = "time",
-      yvar = "value"
-    ),
-    regexp = "time points|observations|insufficient",
-    ignore.case = TRUE
-  )
+  # One row is below the 3-observation minimum. The analysis reports that in the
+  # panel rather than throwing, so expect_error() asserted the opposite.
+  expect_match(lc_todo(linechart(data = single_point, xvar = "time", yvar = "value")),
+               "At least 3 complete observations")
 })
 
 test_that("linechart handles constant y values", {
@@ -484,7 +484,9 @@ test_that("linechart handles non-existent variables", {
       xvar = "nonexistent_x",
       yvar = "value"
     ),
-    regexp = "variable|column|not found|does not exist",
+    # jmvcore's wording is "is not present in the dataset"; the old pattern
+    # matched none of it, so testthat re-raised the very error being asserted.
+    regexp = "not present in the dataset",
     ignore.case = TRUE
   )
 
@@ -495,7 +497,7 @@ test_that("linechart handles non-existent variables", {
       xvar = "time_point",
       yvar = "nonexistent_y"
     ),
-    regexp = "variable|column|not found|does not exist",
+    regexp = "not present in the dataset",
     ignore.case = TRUE
   )
 
@@ -507,7 +509,7 @@ test_that("linechart handles non-existent variables", {
       yvar = "value",
       groupby = "nonexistent_group"
     ),
-    regexp = "variable|column|not found|does not exist",
+    regexp = "not present in the dataset",
     ignore.case = TRUE
   )
 })
@@ -519,16 +521,10 @@ test_that("linechart handles empty dataset", {
     value = numeric(0)
   )
 
-  # Should error with informative message
-  expect_error(
-    linechart(
-      data = empty_data,
-      xvar = "time",
-      yvar = "value"
-    ),
-    regexp = "empty|no data|no observations",
-    ignore.case = TRUE
-  )
+  # A zero-row dataset used to return() silently, leaving a blank panel and an
+  # empty plot frame with no explanation at all.
+  expect_match(lc_todo(linechart(data = empty_data, xvar = "time", yvar = "value")),
+               "No rows to plot")
 })
 
 test_that("linechart handles all missing data after filtering", {
@@ -538,14 +534,16 @@ test_that("linechart handles all missing data after filtering", {
   all_na_data <- linechart_simple
   all_na_data$value <- NA
 
-  # Should error with informative message
+  # `$value <- NA` replaces the numeric column with a logical one, so jmvcore's
+  # permitted-type check rejects it before any module code runs - that is the
+  # error actually raised, not a missing-data message.
   expect_error(
     linechart(
       data = all_na_data,
       xvar = "time_point",
       yvar = "value"
     ),
-    regexp = "missing|NA|no valid|insufficient data",
+    regexp = "requires a numeric variable",
     ignore.case = TRUE
   )
 })

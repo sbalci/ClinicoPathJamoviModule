@@ -448,7 +448,7 @@ singlearmClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
         if (any(invalid)) {
           private$.addWarning(sprintf(
             '%s must be finite and zero or positive: %s ignored. Time is measured forward from the start of follow-up, so a negative or infinite time point is not valid.',
-            what, paste(format(nums[invalid], trim = TRUE), collapse = ", ")))
+            what, paste(base::format(nums[invalid], trim = TRUE), collapse = ", ")))
           nums <- nums[!invalid]
         }
         # Drop a redundant zero SILENTLY for callers that supply their own
@@ -2885,7 +2885,7 @@ singlearmClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
           if (length(.dropped) > 0)
             private$.addInfo(sprintf(
               .("Person-time interval boundaries %s are at or beyond the longest observed follow-up (%s %s), so no person-time can accrue past them. They were omitted rather than producing an empty or negative interval."),
-              paste(format(.dropped, trim = TRUE), collapse = ", "),
+              paste(base::format(.dropped, trim = TRUE), collapse = ", "),
               format(round(.max_fu, 1), trim = TRUE),
               self$options$timetypeoutput))
         }
@@ -2966,9 +2966,9 @@ singlearmClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
 
               # Add to personTimeTable
               interval_label <- if (i == length(breaks) - 1L)
-                paste0(format(start_time, trim = TRUE), "+") else
-                paste0(format(start_time, trim = TRUE), "-",
-                       format(end_time, trim = TRUE))
+                paste0(base::format(start_time, trim = TRUE), "+") else
+                paste0(base::format(start_time, trim = TRUE), "-",
+                       base::format(end_time, trim = TRUE))
               person_table$addRow(rowKey=i+1, values=list(
                 interval=interval_label,
                 events=events_in_interval,

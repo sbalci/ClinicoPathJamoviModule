@@ -422,7 +422,7 @@ vartreeBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             super$initialize(
                 package = "ClinicoPath",
                 name = "vartree",
-                version = c(1,0,51),
+                version = c(1,0,52),
                 options = options,
                 results = vartreeResults$new(options=options),
                 data = data,

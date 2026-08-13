@@ -248,7 +248,7 @@ kappaSizeFixedNClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cla
             # observing, and the bound is the worst case still compatible with it at this n.
             text2 <- paste0(
                 "Researchers anticipate an agreement of kappa = ", kappa0,
-                " and have access to ", format(n, scientific = FALSE),
+                " and have access to ", base::format(n, scientific = FALSE),
                 " subjects rated by ", raters, " raters.\n",
                 prev_txt,
                 "\nThey would like to know the lowest value of kappa that the study can expect to\n",

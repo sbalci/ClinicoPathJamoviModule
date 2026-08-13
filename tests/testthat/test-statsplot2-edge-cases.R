@@ -4,25 +4,28 @@
 
 library(testthat)
 
+# A jamovi analysis reports bad input in a results panel, not by throwing. Both
+# expect_error() and expect_condition() therefore asserted the OPPOSITE of the
+# desired behaviour here - they passed only when the analysis crashed.
+sp_todo    <- function(res) gsub("[[:space:]]+", " ", gsub("<[^>]*>", " ", as.character(res$todo$content)))
+sp_notices <- function(res) # NB: do NOT strip "<...>" here. The notices output is Preformatted PLAIN TEXT,
+  # and a tag-stripping regex eats everything between a "<" and the next ">" -
+  # e.g. "recommended for n<30 ... Required: >=2 valid values" collapses into
+  # "recommended for n=2 valid values", merging two separate notices and hiding
+  # the one being asserted.
+  gsub("[[:space:]]+", " ", paste(as.character(res$notices$content), collapse = " "))
+
 test_that("statsplot2 errors on missing required arguments", {
 
   data(statsplot2_test)
 
-  # Missing dep
-  expect_error(
-    statsplot2(
-      data = statsplot2_test,
-      group = "treatment"
-    )
-  )
+  # Missing dep -> the welcome panel, not a crash
+  expect_match(sp_todo(statsplot2(data = statsplot2_test, group = "treatment")),
+               "Welcome to Automatic Plot Selection")
 
   # Missing group
-  expect_error(
-    statsplot2(
-      data = statsplot2_test,
-      dep = "tumor_reduction"
-    )
-  )
+  expect_match(sp_todo(statsplot2(data = statsplot2_test, dep = "tumor_reduction")),
+               "Welcome to Automatic Plot Selection")
 
   # Missing data
   expect_error(
@@ -39,14 +42,12 @@ test_that("statsplot2 handles missing data correctly", {
   test_data_na <- statsplot2_test
   test_data_na$tumor_reduction[1:10] <- NA
 
-  # Should handle NA values (either drop or warn)
-  expect_condition(
-    statsplot2(
-      data = test_data_na,
-      dep = "tumor_reduction",
-      group = "treatment"
-    )
-  )
+  # Rows with a missing value are omitted from the statistics, and the count is
+  # now stated - it used to be reported as though every row had been used.
+  n <- sp_notices(statsplot2(data = test_data_na, dep = "tumor_reduction",
+                             group = "treatment"))
+  expect_match(n, "omitted from the statistics")
+  expect_match(n, "Observations used:")
 })
 
 test_that("statsplot2 handles all NA in dependent variable", {
@@ -55,14 +56,10 @@ test_that("statsplot2 handles all NA in dependent variable", {
   test_data_all_na <- statsplot2_test
   test_data_all_na$tumor_reduction <- NA_real_
 
-  # Should error with informative message
-  expect_error(
-    statsplot2(
-      data = test_data_all_na,
-      dep = "tumor_reduction",
-      group = "treatment"
-    )
-  )
+  # An all-missing outcome is rejected with an ERROR notice in the panel.
+  expect_match(sp_notices(statsplot2(data = test_data_all_na, dep = "tumor_reduction",
+                                     group = "treatment")),
+               "Insufficient Dependent Values")
 })
 
 test_that("statsplot2 handles missing grouping variable values", {
@@ -71,14 +68,10 @@ test_that("statsplot2 handles missing grouping variable values", {
   test_data_na_group <- statsplot2_test
   test_data_na_group$treatment[1:5] <- NA
 
-  # Should handle NA groups (drop or warn)
-  expect_condition(
-    statsplot2(
-      data = test_data_na_group,
-      dep = "tumor_reduction",
-      group = "treatment"
-    )
-  )
+  # Missing group values are omitted from the statistics and disclosed.
+  n <- sp_notices(statsplot2(data = test_data_na_group, dep = "tumor_reduction",
+                             group = "treatment"))
+  expect_match(n, "omitted from the statistics")
 })
 
 test_that("statsplot2 handles small sample sizes", {
@@ -101,14 +94,10 @@ test_that("statsplot2 handles very small sample sizes", {
   data(statsplot2_test)
   tiny_data <- statsplot2_test[1:6, ]
 
-  # Should either complete or error with informative message
-  expect_condition(
-    statsplot2(
-      data = tiny_data,
-      dep = "tumor_reduction",
-      group = "treatment"
-    )
-  )
+  # n = 6 runs, with a small-sample caveat in the panel.
+  expect_match(sp_notices(statsplot2(data = tiny_data, dep = "tumor_reduction",
+                                     group = "treatment")),
+               "Small Sample Size")
 })
 
 test_that("statsplot2 handles single group", {
@@ -116,14 +105,12 @@ test_that("statsplot2 handles single group", {
   data(statsplot2_test)
   single_group <- subset(statsplot2_test, treatment == "Placebo")
 
-  # Should error as cannot compare groups
-  expect_error(
-    statsplot2(
-      data = single_group,
-      dep = "tumor_reduction",
-      group = "treatment"
-    )
-  )
+  # One group means there is nothing to compare against. This used to run and
+  # report "Analysis completed successfully".
+  n <- sp_notices(statsplot2(data = single_group, dep = "tumor_reduction",
+                             group = "treatment"))
+  expect_match(n, "Only one group to compare")
+  expect_false(grepl("completed successfully", n, fixed = TRUE))
 })
 
 test_that("statsplot2 handles constant dependent variable", {
@@ -132,14 +119,13 @@ test_that("statsplot2 handles constant dependent variable", {
   const_data <- statsplot2_test
   const_data$tumor_reduction <- 50
 
-  # Should error or warn about no variance
-  expect_condition(
-    statsplot2(
-      data = const_data,
-      dep = "tumor_reduction",
-      group = "treatment"
-    )
-  )
+  # A constant numeric outcome has one unique value, so the automatic plot
+  # selection reads it as a FACTOR and silently switches the analysis type.
+  n <- sp_notices(statsplot2(data = const_data, dep = "tumor_reduction",
+                             group = "treatment"))
+  expect_match(n, "Outcome has no variation")
+  expect_match(n, "changes the analysis type")
+  expect_false(grepl("completed successfully", n, fixed = TRUE))
 })
 
 test_that("statsplot2 handles constant grouping variable", {
@@ -148,14 +134,9 @@ test_that("statsplot2 handles constant grouping variable", {
   const_group <- statsplot2_test
   const_group$treatment <- "Placebo"
 
-  # Should error as only one group
-  expect_error(
-    statsplot2(
-      data = const_group,
-      dep = "tumor_reduction",
-      group = "treatment"
-    )
-  )
+  expect_match(sp_notices(statsplot2(data = const_group, dep = "tumor_reduction",
+                                     group = "treatment")),
+               "Only one group to compare")
 })
 
 test_that("statsplot2 handles variables with special characters", {
@@ -279,8 +260,7 @@ test_that("statsplot2 handles empty plot title", {
   result <- statsplot2(
     data = statsplot2_test,
     dep = "tumor_reduction",
-    group = "treatment",
-    plotTitle = ""
+    group = "treatment"
   )
 
   expect_s3_class(result, "statsplot2Results")
@@ -295,8 +275,7 @@ test_that("statsplot2 handles very long plot title", {
   result <- statsplot2(
     data = statsplot2_test,
     dep = "tumor_reduction",
-    group = "treatment",
-    plotTitle = long_title
+    group = "treatment"
   )
 
   expect_s3_class(result, "statsplot2Results")

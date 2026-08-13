@@ -60,14 +60,19 @@ children:
       - type: LayoutBox
         margin: large
         children:
+          - type: CheckBox
+            name: showRefline
+            label: "Reference line"
           - type: TextBox
             name: refline
             format: number
             label: "Reference Value"
+            enable: (showRefline)
           - type: TextBox
             name: reflineLabel
             format: string
             label: "Reference Label"
+            enable: (showRefline)
 
   - type: CollapseBox
     label: "Visual Appearance"

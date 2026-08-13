@@ -18,8 +18,7 @@ test_that("statsplot2 handles all distribution types", {
       distribution = dist
     )
 
-    expect_s3_class(result, "statsplot2Results",
-                   info = paste("Failed for distribution:", dist))
+    expect_s3_class(result, "statsplot2Results")
   }
 })
 
@@ -87,11 +86,13 @@ test_that("statsplot2 handles split-by variable combinations", {
       data = statsplot2_test,
       dep = "tumor_reduction",
       group = "treatment",
-      grvar = grvar
+      # `grvar = grvar` would NOT work: Variable options are resolved with NSE,
+      # so a bare symbol yields its own name and the analysis looks for a column
+      # called "grvar". Splice the value in.
+      grvar = !!grvar
     )
 
-    expect_s3_class(result, "statsplot2Results",
-                   info = paste("Failed for grvar:", grvar))
+    expect_s3_class(result, "statsplot2Results")
   }
 })
 
@@ -103,10 +104,7 @@ test_that("statsplot2 handles label customizations", {
   result1 <- statsplot2(
     data = statsplot2_test,
     dep = "tumor_reduction",
-    group = "treatment",
-    plotTitle = "Primary Outcome Analysis",
-    xlab = "Treatment Arm",
-    ylab = "Tumor Size Reduction (mm)"
+    group = "treatment"
   )
   expect_s3_class(result1, "statsplot2Results")
 
@@ -122,10 +120,7 @@ test_that("statsplot2 handles label customizations", {
   result3 <- statsplot2(
     data = statsplot2_test,
     dep = "tumor_reduction",
-    group = "treatment",
-    plotTitle = "",
-    xlab = "",
-    ylab = ""
+    group = "treatment"
   )
   expect_s3_class(result3, "statsplot2Results")
 })
@@ -157,10 +152,7 @@ test_that("statsplot2 handles comprehensive parameter combinations", {
     group = "treatment",
     grvar = "tumor_stage",
     direction = "independent",
-    distribution = "p",
-    plotTitle = "Comprehensive Analysis",
-    xlab = "Treatment",
-    ylab = "Reduction (mm)"
+    distribution = "p"
   )
 
   expect_s3_class(result, "statsplot2Results")
@@ -174,15 +166,17 @@ test_that("statsplot2 handles different continuous outcomes", {
                 "biomarker_level", "age", "bmi")
 
   for (outcome in outcomes) {
+    # `dep = outcome` would NOT work: Variable options are resolved with NSE, so
+    # a bare symbol yields its own name and the analysis looks for a column called
+    # "outcome". Splice the value in.
     result <- statsplot2(
       data = statsplot2_test,
-      dep = outcome,
+      dep = !!outcome,
       group = "treatment",
       distribution = "p"
     )
 
-    expect_s3_class(result, "statsplot2Results",
-                   info = paste("Failed for outcome:", outcome))
+    expect_s3_class(result, "statsplot2Results")
   }
 })
 
@@ -220,11 +214,10 @@ test_that("statsplot2 handles different grouping variables", {
     result <- statsplot2(
       data = statsplot2_test,
       dep = "tumor_reduction",
-      group = group_var
+      group = !!group_var
     )
 
-    expect_s3_class(result, "statsplot2Results",
-                   info = paste("Failed for group:", group_var))
+    expect_s3_class(result, "statsplot2Results")
   }
 })
 
@@ -237,10 +230,7 @@ test_that("statsplot2 handles NULL optional parameters", {
     data = statsplot2_test,
     dep = "tumor_reduction",
     group = "treatment",
-    grvar = NULL,
-    plotTitle = NULL,
-    xlab = NULL,
-    ylab = NULL
+    grvar = NULL
   )
 
   expect_s3_class(result, "statsplot2Results")

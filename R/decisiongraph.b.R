@@ -101,7 +101,7 @@ decisiongraphClass <- if (requireNamespace("jmvcore")) {
                     numSims <- self$options$numSimulations
                     maxSims <- private$DECISIONGRAPH_DEFAULTS$max_simulations
                     if (is.null(numSims) || numSims < 100 || numSims > maxSims) {
-                        jmvcore::reject(paste(.("PSA requires number of simulations between 100 and"), format(maxSims, big.mark = ",")))
+                        jmvcore::reject(paste(.("PSA requires number of simulations between 100 and"), base::format(maxSims, big.mark = ",")))
                     }
 
                     # Check for PSA-specific requirements
@@ -1213,7 +1213,7 @@ decisiongraphClass <- if (requireNamespace("jmvcore")) {
                 # Add detailed NMB calculation components
                 results$nmb_components <- paste0(
                     "NMB = (", round(results$expectedUtility, 3),
-                    " * $", format(wtp, big.mark = ","),
+                    " * $", base::format(wtp, big.mark = ","),
                     ") - $", format(round(results$expectedCost, 2), big.mark = ","),
                     " = $", format(round(results$netBenefit, 2), big.mark = ",")
                 )
@@ -1321,11 +1321,11 @@ decisiongraphClass <- if (requireNamespace("jmvcore")) {
                     nmb_advantage <- max_nmb - second_best_nmb
 
                     range_label <- if (i == 1) {
-                        paste("Below $", format(threshold, big.mark = ","))
+                        paste("Below $", base::format(threshold, big.mark = ","))
                     } else if (i == length(unique_thresholds)) {
-                        paste("Above $", format(threshold, big.mark = ","))
+                        paste("Above $", base::format(threshold, big.mark = ","))
                     } else {
-                        paste("$", format(unique_thresholds[i - 1], big.mark = ","), "- $", format(threshold, big.mark = ","))
+                        paste("$", base::format(unique_thresholds[i - 1], big.mark = ","), "- $", base::format(threshold, big.mark = ","))
                     }
 
                     switching_points <- rbind(switching_points, data.frame(
@@ -2150,7 +2150,7 @@ decisiongraphClass <- if (requireNamespace("jmvcore")) {
 
                 # Use utility function for safe HTML content generation
                 content <- list(
-                    paste("Number of Simulations:", format(numSims, big.mark = ",")),
+                    paste("Number of Simulations:", base::format(numSims, big.mark = ",")),
                     paste("Processing Method:", processingMethod),
                     paste("Mean Cost: $", round(summaryStats$meanCost, 2), " (SD: $", round(summaryStats$sdCost, 2), ")", sep = ""),
                     paste("Mean Utility:", round(summaryStats$meanUtility, 3), "(SD:", round(summaryStats$sdUtility, 3), ")"),
@@ -2189,7 +2189,7 @@ decisiongraphClass <- if (requireNamespace("jmvcore")) {
                 # Create comprehensive NMB analysis content
                 html_content <- paste0(
                     "<h3>Enhanced Net Monetary Benefit Analysis</h3>",
-                    "<p><strong>Primary Willingness-to-Pay Threshold:</strong> $", format(wtp, big.mark = ","), " per QALY</p>",
+                    "<p><strong>Primary Willingness-to-Pay Threshold:</strong> $", base::format(wtp, big.mark = ","), " per QALY</p>",
                     "<p><strong>Analysis Method:</strong> NMB = (Utility \u{00D7} WTP) - Cost</p>",
                     "<div style='background-color: #f8f9fa; padding: 10px; margin: 10px 0; border-left: 4px solid #007bff;'>",
                     "<h4 style='margin-top: 0;'>Key Findings</h4>",
@@ -2346,7 +2346,7 @@ decisiongraphClass <- if (requireNamespace("jmvcore")) {
 
                     html_content <- paste0(
                         "<h3>Budget Impact Analysis</h3>",
-                        "<p><strong>Target Population:</strong> ", format(targetPop, big.mark = ","), " patients</p>",
+                        "<p><strong>Target Population:</strong> ", base::format(targetPop, big.mark = ","), " patients</p>",
                         "<p><strong>Market Penetration:</strong> ", round(marketPen * 100, 1), "%</p>",
                         "<p><strong>Annual Budget Impact:</strong> $", format(round(budgetImpact, 0), big.mark = ","), "</p>",
                         "<p><strong>Cost per Patient (New Intervention):</strong> $", round(results$expectedCost[1], 2), "</p>",
@@ -2444,7 +2444,7 @@ decisiongraphClass <- if (requireNamespace("jmvcore")) {
                     "<h3>Value of Information Analysis</h3>",
                     "<p><strong>Expected Value of Perfect Information (EVPI):</strong> $", round(evpiResults$evpi, 2), " per patient</p>",
                     "<p><strong>Population EVPI:</strong> $", format(round(evpiResults$populationEVPI, 0), big.mark = ","), "</p>",
-                    "<p><strong>Cohort Size:</strong> ", format(self$options$cohortSize, big.mark = ","), " patients</p>",
+                    "<p><strong>Cohort Size:</strong> ", base::format(self$options$cohortSize, big.mark = ","), " patients</p>",
                     "<h4>Interpretation</h4>",
                     "<p>The EVPI represents the maximum value that perfect information about all uncertain parameters would have for decision making.</p>",
                     "<p>If the EVPI exceeds the cost of additional research, further studies may be worthwhile.</p>"

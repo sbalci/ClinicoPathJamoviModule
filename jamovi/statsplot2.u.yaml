@@ -53,6 +53,16 @@ children:
           - type: CheckBox
             name: sampleLarge
           - type: TextBox
+            name: sampleThreshold
+            format: number
+            label: "Sample above (rows)"
+            enable: (sampleLarge)
+          - type: TextBox
+            name: sampleSize
+            format: number
+            label: "Rows to keep"
+            enable: (sampleLarge)
+          - type: TextBox
             name: seed
             format: number
             label: Random Seed

@@ -570,7 +570,7 @@ permutationsurvivalClass <- R6::R6Class(
                 <b>Test Configuration:</b>
                 <br>\u{2022} Method: {private$.getMethodName(self$options$permutation_method)}
                 <br>\u{2022} Test Statistic: {results$test_statistic_name}
-                <br>\u{2022} Number of Permutations: {format(results$n_permutations, big.mark = ',')}
+                <br>\u{2022} Number of Permutations: {base::format(results$n_permutations, big.mark = ',')}
                 <br>\u{2022} Multiple Comparison: {private$.getMultipleComparisonName(self$options$multiple_comparison)}
                 <br><br>
                 <b>Data Summary:</b>
@@ -580,8 +580,8 @@ permutationsurvivalClass <- R6::R6Class(
                 <br><br>
                 <b>Test Results:</b>
                 <br>\u{2022} Observed Statistic: {round(results$observed_statistic, 4)}
-                <br>\u{2022} P-value: {format(results$p_value, digits = 4)}
-                <br>\u{2022} Adjusted P-value: {format(results$p_adjusted, digits = 4)}
+                <br>\u{2022} P-value: {base::format(results$p_value, digits = 4)}
+                <br>\u{2022} Adjusted P-value: {base::format(results$p_adjusted, digits = 4)}
                 <br>\u{2022} Result: {ifelse(results$p_value < 0.05, 'Significant difference detected', 'No significant difference')}
                 "
             )

@@ -164,7 +164,7 @@ populationhealthClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cl
                     htmltools::div(
                         style = "background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 20px; border-radius: 8px; text-align: center;",
                         htmltools::h4("Total Population", style = "margin: 0; font-size: 14px; opacity: 0.9;"),
-                        htmltools::div(style = "font-size: 32px; font-weight: bold; margin: 10px 0;", format(total_patients, big.mark = ",")),
+                        htmltools::div(style = "font-size: 32px; font-weight: bold; margin: 10px 0;", base::format(total_patients, big.mark = ",")),
                         htmltools::div(style = "font-size: 12px; opacity: 0.8;", "Active Patients")
                     ),
                     
@@ -632,7 +632,7 @@ populationhealthClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cl
                     style = "background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 30px; border-radius: 12px; margin: 20px 0;",
                     htmltools::h3("Executive Summary", style = "margin-top: 0; font-weight: 300;"),
                     htmltools::p(style = "font-size: 16px; margin: 15px 0;",
-                        "This comprehensive population health analysis examines ", format(total_patients, big.mark = ","),
+                        "This comprehensive population health analysis examines ", base::format(total_patients, big.mark = ","),
                         " individuals across ", length(healthOutcomes), " key health indicators. The analysis reveals ",
                         "significant opportunities for targeted interventions and improved population health outcomes."
                     )

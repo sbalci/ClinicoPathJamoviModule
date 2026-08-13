@@ -38,7 +38,7 @@ test_that("jjarcdiagram produces expected output structure", {
   expect_true(!is.null(result$plot))
 
   # Check for statistics when requested
-  expect_true(!is.null(result$stats))
+  expect_true(!is.null(result$networkStats))   # the item is networkStats; `stats` never existed
 })
 
 test_that("jjarcdiagram handles gene regulatory network", {
@@ -223,8 +223,7 @@ test_that("jjarcdiagram handles node sorting options", {
       sortNodes = method
     )
 
-    expect_s3_class(result, "jjarcdiagramResults",
-                   info = paste("Failed for sort method:", method))
+    expect_s3_class(result, "jjarcdiagramResults")
   }
 })
 
@@ -303,5 +302,5 @@ test_that("jjarcdiagram handles statistics display", {
   )
 
   expect_s3_class(result, "jjarcdiagramResults")
-  expect_true(!is.null(result$stats))
+  expect_true(!is.null(result$networkStats))   # the item is networkStats; `stats` never existed
 })

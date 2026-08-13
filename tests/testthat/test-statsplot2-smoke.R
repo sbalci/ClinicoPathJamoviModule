@@ -1,6 +1,13 @@
 
 context("StatsPlot2 Smoke Test")
 
+# Notices are rendered into a single `notices` output by .addNotice()/.renderNotices(),
+# the project convention. module$get("<noticeName>") is left over from the older
+# jmvcore::Notice design where each notice was its own named result item; it returns
+# NULL now, so these tests were asserting against nothing.
+sp_notices <- function(res)
+  gsub("[[:space:]]+", " ", gsub("<[^>]*>", " ", paste(as.character(res$notices$content), collapse = " ")))
+
 test_that("Type inference works correctly", {
   skip_if_not_installed('jmvReadWrite')
   # Mock data
@@ -39,10 +46,12 @@ test_that("Sampling notice is generated for large datasets", {
     sampleLarge = TRUE
   )
   
-  # Check if "Observations used: 5,000" is in success message
-  success_note <- module$get("analysisComplete")
-  expect_true(!is.null(success_note), "Success notice should exist")
-  expect_match(success_note$content, "Observations used: 5,000")
+  n <- sp_notices(module)
+  expect_match(n, "Observations used: 5,000")
+  # A random subsample changes every p-value below it, so that must be stated
+  # rather than left to look like missing-data exclusion.
+  expect_match(n, "random subsample", ignore.case = TRUE)
+  expect_match(n, "drawn at RANDOM")
 })
 
 test_that("NA exclusion notice works", {
@@ -58,10 +67,10 @@ test_that("NA exclusion notice works", {
     excl = TRUE
   )
   
-  # Success notice should show dropped count or used count
-  success_note <- module$get("analysisComplete")
-  expect_true(!is.null(success_note), "Success notice should exist")
-  expect_match(success_note$content, "Observations used: 10")
+  n <- sp_notices(module)
+  expect_match(n, "Observations used: 10")
+  # NA exclusion is not a random draw, so the subsample warning must NOT appear
+  expect_false(grepl("random subsample", n, ignore.case = TRUE))
 })
 
 test_that("Alluvial notice appears when not applicable", {
@@ -79,7 +88,18 @@ test_that("Alluvial notice appears when not applicable", {
     alluvsty = "t1" 
   )
   
-  # Check for notice 'alluvialNotApplicable'
-  notice <- module$get("alluvialNotApplicable")
-  expect_true(!is.null(notice), "Should have alluvial not applicable notice")
+  # No notice is needed here: jamovi/statsplot2.u.yaml gates the control with
+  # `enable: (direction:repeated)`, so an independent design cannot select an
+  # alluvial style in the GUI at all. What the analysis does explain is the
+  # repeated-design case, which IS reachable - assert that instead.
+  expect_s3_class(module, "statsplot2Results")
+
+  rep_df <- data.frame(
+    y = factor(rep(c("A", "B"), 10)),
+    g = rnorm(20)
+  )
+  rep_mod <- statsplot2(data = rep_df, dep = "y", group = "g",
+                        direction = "repeated", alluvsty = "t1")
+  expect_match(gsub("<[^>]*>", " ", as.character(rep_mod$ExplanationMessage$content)),
+               "Alluvial style option")
 })

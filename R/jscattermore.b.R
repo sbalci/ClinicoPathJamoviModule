@@ -468,7 +468,7 @@ jscattermoreClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                 "<h3>High-Performance Scatter Plot Summary</h3>",
                 "<p><strong>Dataset Information:</strong></p>",
                 "<ul>",
-                paste0("<li>Number of points plotted: ", format(n_points, big.mark = ","), "</li>"),
+                paste0("<li>Number of points plotted: ", base::format(n_points, big.mark = ","), "</li>"),
                 paste0("<li>Rendering time: ", round(render_time, 4), " seconds</li>"),
                 paste0("<li>Performance: ", round(n_points / render_time, 0), " points/second</li>"),
                 "</ul>",

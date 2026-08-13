@@ -239,10 +239,10 @@ test_that("jjarcdiagram works with layout options", {
   # Test horizontal layout
   expect_error(
     jjarcdiagram(
-      data = gene_network_data,
-      source = "regulator",
+      data = jjarcdiagram_gene_network,
+      source = "source",
       target = "target",
-      weight = "regulation_score",
+      weight = "weight",
       group = "pathway",
       horizontal = TRUE
     ),
@@ -252,10 +252,10 @@ test_that("jjarcdiagram works with layout options", {
   # Test vertical layout
   expect_error(
     jjarcdiagram(
-      data = gene_network_data,
-      source = "regulator",
+      data = jjarcdiagram_gene_network,
+      source = "source",
       target = "target",
-      weight = "regulation_score",
+      weight = "weight",
       group = "pathway",
       horizontal = FALSE
     ),
@@ -481,10 +481,10 @@ test_that("jjarcdiagram works with different variable combinations", {
     test_that("jjarcdiagram works with pathway as grouping variable", {
       expect_error(
         jjarcdiagram(
-          data = gene_network_data,
-          source = "regulator",
+          data = jjarcdiagram_gene_network,
+          source = "source",
           target = "target",
-          weight = "regulation_score",
+          weight = "weight",
           group = "pathway",
           colorByGroup = TRUE
         ),
@@ -495,11 +495,11 @@ test_that("jjarcdiagram works with different variable combinations", {
     test_that("jjarcdiagram works with effect_type as grouping variable", {
       expect_error(
         jjarcdiagram(
-          data = gene_network_data,
-          source = "regulator",
+          data = jjarcdiagram_gene_network,
+          source = "source",
           target = "target",
-          weight = "regulation_score",
-          group = "effect_type",
+          weight = "weight",
+          group = "edge_type",
           colorByGroup = TRUE
         ),
         NA

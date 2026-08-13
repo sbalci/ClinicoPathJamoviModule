@@ -242,11 +242,13 @@ save(person_time_data, file = file.path(data_dir, "person_time_test_data.rda"))
 
 # Save competing risks dataset
 write.csv(competing_risks_data, file.path(data_dir, "competing_risks_person_time.csv"), row.names = FALSE)
-save(competing_risks_data, file = file.path(data_dir, "competing_risks_person_time.rda"))
+competing_risks_person_time <- competing_risks_data  # object name must match the file name
+save(competing_risks_person_time, file = file.path(data_dir, "competing_risks_person_time.rda"))
 
 # Save time intervals dataset
 write.csv(intervals_data, file.path(data_dir, "time_intervals_test_data.csv"), row.names = FALSE)
-save(intervals_data, file = file.path(data_dir, "time_intervals_test_data.rda"))
+time_intervals_test_data <- intervals_data  # object name must match the file name
+save(time_intervals_test_data, file = file.path(data_dir, "time_intervals_test_data.rda"))
 
 # =============================================================================
 # Calculate and Display Person-Time Metrics

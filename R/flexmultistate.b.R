@@ -533,7 +533,7 @@ flexmultistateClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 
                 microsim_html <- paste0(
                     "<h4>Microsimulation Analysis Results</h4>",
-                    "<p>Simulated ", format(n_sim, big.mark = ","), " individual patient trajectories</p>",
+                    "<p>Simulated ", base::format(n_sim, big.mark = ","), " individual patient trajectories</p>",
                     "<p><b>Applications:</b></p>",
                     "<ul>",
                     "<li>Complex state probability calculations</li>",
