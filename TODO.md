@@ -3009,10 +3009,6 @@ out-of-scope findings from the same audit, deferred for separate work.
 # release-review-function prompt
 
 
-
-
-
-/release-review-function tableone
 /release-review-function summarydata
 /release-review-function reportcat
 /release-review-function benford

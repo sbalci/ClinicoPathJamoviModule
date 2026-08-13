@@ -83,7 +83,11 @@ items:
       height: 450
       renderFun: .plot3
       requiresData: true
-      visible: (!is.null(colorvar) || !is.null(sizevar) || !is.null(shapevar) || !is.null(alphavar) || !is.null(labelvar))
+      # A leading "!" fails jmvcore's expression routing: the expression is not
+      # evaluated but handed back as a raw string, which is truthy, so this panel
+      # was ALWAYS visible - an empty aesthetics plot sat under every analysis.
+      # A bare option name is the idiom used elsewhere in this file (see grvar).
+      visible: (colorvar || sizevar || shapevar || alphavar || labelvar)
 
     - name: ggpubrPlot
       title: 'Publication-Ready Scatter Plot (ggpubr)'

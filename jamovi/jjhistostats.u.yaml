@@ -87,7 +87,10 @@ children:
                 name: subtitle
                 format: string
                 width: largest
-                enable: (!resultssubtitle)
+                # A leading "!" fails jmvcore's expression routing (the expression is
+                # returned as a raw truthy string), so this box was always enabled.
+                # `== false` is the idiom used elsewhere in the module.
+                enable: (resultssubtitle == false)
               - type: TextBox
                 name: caption
                 format: string
