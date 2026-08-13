@@ -137,7 +137,10 @@ test_that("jjsegmentedtotalbar errors on non-existent x_var", {
       y_var = "tumor_response_score",
       fill_var = "response_category"
     ),
-    regexp = "not found|does not exist|invalid",
+    # jmvcore's wording is "is not present in the dataset" - the old pattern
+    # ("not found|does not exist|invalid") matched none of it, so testthat
+    # re-raised the very error the test was asserting and the block errored.
+    regexp = "not present in the dataset",
     ignore.case = TRUE
   )
 })
@@ -151,7 +154,10 @@ test_that("jjsegmentedtotalbar errors on non-existent y_var", {
       y_var = "nonexistent_var",
       fill_var = "response_category"
     ),
-    regexp = "not found|does not exist|invalid",
+    # jmvcore's wording is "is not present in the dataset" - the old pattern
+    # ("not found|does not exist|invalid") matched none of it, so testthat
+    # re-raised the very error the test was asserting and the block errored.
+    regexp = "not present in the dataset",
     ignore.case = TRUE
   )
 })
@@ -165,55 +171,61 @@ test_that("jjsegmentedtotalbar errors on non-existent fill_var", {
       y_var = "tumor_response_score",
       fill_var = "nonexistent_var"
     ),
-    regexp = "not found|does not exist|invalid",
+    # jmvcore's wording is "is not present in the dataset" - the old pattern
+    # ("not found|does not exist|invalid") matched none of it, so testthat
+    # re-raised the very error the test was asserting and the block errored.
+    regexp = "not present in the dataset",
     ignore.case = TRUE
   )
 })
 
-test_that("jjsegmentedtotalbar errors on numeric x_var", {
-
-  # x_var should be categorical
-  expect_error(
-    jjsegmentedtotalbar(
-      data = jjsegmentedtotalbar_test,
-      x_var = "tumor_response_score",  # Numeric instead of categorical
-      y_var = "tumor_response_score",
-      fill_var = "response_category"
-    ),
-    regexp = "categorical|factor|not.*numeric",
-    ignore.case = TRUE
+# These two passed the SAME numeric column as both x_var and y_var. x_var is
+# `permitted: [factor]`, so jmvcore coerced that column to a factor and y_var's
+# numeric check then failed on it - the raised error named y_var, not x_var,
+# which is not what the block claims to test. Use a frame with two numeric
+# columns so the role under test is the only thing that is wrong.
+num_frame <- function() {
+  set.seed(8)
+  data.frame(
+    grp   = factor(rep(c("A", "B"), each = 20)),
+    seg   = factor(rep(c("X", "Y"), 20)),
+    num1  = as.numeric(sample(1:20, 40, TRUE)),
+    num2  = as.numeric(sample(1:20, 40, TRUE))
   )
+}
+
+# Both slots are `permitted: [factor]`, so the jamovi GUI will not accept a
+# continuous variable there at all. Called from R, jmvcore coerces it to a factor
+# instead of erroring - one level per distinct value - so the guard that matters
+# is the "too many categories" warning, not an exception.
+stb_warn_text <- function(res) gsub("[[:space:]]+", " ", gsub("<[^>]*>", " ", as.character(res$warnings$content)))
+
+test_that("a numeric x_var becomes one bar per distinct value, and is flagged", {
+  res <- jjsegmentedtotalbar(data = num_frame(), x_var = "num1", y_var = "num2", fill_var = "seg")
+  expect_gt(res$summary$asDF$categories, 10)
+  expect_match(stb_warn_text(res), "Large number of categories")
 })
 
-test_that("jjsegmentedtotalbar errors on numeric fill_var", {
-
-  # fill_var should be categorical
-  expect_error(
-    jjsegmentedtotalbar(
-      data = jjsegmentedtotalbar_test,
-      x_var = "timepoint",
-      y_var = "tumor_response_score",
-      fill_var = "tumor_response_score"  # Numeric instead of categorical
-    ),
-    regexp = "categorical|factor|not.*numeric",
-    ignore.case = TRUE
-  )
+test_that("a numeric fill_var becomes one segment per distinct value", {
+  res <- jjsegmentedtotalbar(data = num_frame(), x_var = "grp", y_var = "num2", fill_var = "num1")
+  expect_gt(res$summary$asDF$segments, 10)
 })
 
-test_that("jjsegmentedtotalbar errors on empty dataset", {
+test_that("jjsegmentedtotalbar reports an empty dataset instead of crashing", {
 
   empty_data <- jjsegmentedtotalbar_test[0, ]
 
-  expect_error(
-    jjsegmentedtotalbar(
-      data = empty_data,
-      x_var = "timepoint",
-      y_var = "tumor_response_score",
-      fill_var = "response_category"
-    ),
-    regexp = "empty|no.*rows|insufficient",
-    ignore.case = TRUE
+  # A jamovi analysis does not throw on empty input - it writes an explanation
+  # into a results panel. expect_error() therefore asserted the opposite of the
+  # desired behaviour and passed only on a crash.
+  res <- jjsegmentedtotalbar(
+    data = empty_data,
+    x_var = "timepoint",
+    y_var = "tumor_response_score",
+    fill_var = "response_category"
   )
+  expect_match(as.character(res$instructions$content), "No data available")
+  expect_equal(nrow(res$composition_table$asDF), 0L)
 })
 
 # ═══════════════════════════════════════════════════════════

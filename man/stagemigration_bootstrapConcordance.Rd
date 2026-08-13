@@ -9,7 +9,8 @@ stagemigration_bootstrapConcordance(
   old_formula,
   new_formula,
   n_boot = 1000,
-  checkpoint_callback = NULL
+  checkpoint_callback = NULL,
+  seed = 20250101L
 )
 }
 \value{

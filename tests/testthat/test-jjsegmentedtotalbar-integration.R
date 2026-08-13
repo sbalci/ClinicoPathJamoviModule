@@ -194,7 +194,7 @@ test_that("jjsegmentedtotalbar handles complete quality metrics workflow", {
     flerlage_label_size = 6,
     flerlage_label_color = "white",
     flerlage_alpha = 0.85,
-    flerlage_box_color = "gray30",
+    flerlage_box_color = "lightblue",
     orientation = "horizontal",
     sort_categories = "total"
   )

@@ -605,7 +605,7 @@ test_that("jjsegmentedtotalbar handles flerlage box color", {
     y_var = "tumor_response_score",
     fill_var = "response_category",
     plot_type = "flerlage",
-    flerlage_box_color = "gray30"
+    flerlage_box_color = "lightblue"
   )
 
   expect_s3_class(result, "jjsegmentedtotalbarResults")

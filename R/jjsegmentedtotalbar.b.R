@@ -41,9 +41,77 @@ jjsegmentedtotalbarClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R
         .processed_data = NULL,
         .composition_data = NULL,
         .preset_config = NULL,
+        # Rows actually analysed, after missing-value handling. This is the only
+        # defensible "N" - the summed Value Variable is a quantity, not a count of
+        # cases, unless the input happens to be pre-aggregated frequencies.
+        .n_rows_analysed = NULL,
 
         # Initialize notice collection list
         .noticeList = list(),
+
+        # The Value Variable is `permitted: [numeric]` and `suggested: [continuous]`,
+        # so a category total is very often NOT a whole number. Formatting one with
+        # sprintf("%d") is a hard R error ("invalid format '%d'"), which took down
+        # the whole analysis for every continuous input; as.integer() instead
+        # silently truncated 1547.8 to "1547". Print whole totals as integers and
+        # fractional totals to one decimal.
+        .fmtTotal = function(x) {
+            if (length(x) != 1 || !is.finite(x))
+                return("NA")
+            if (abs(x - round(x)) < 1e-9)
+                formatC(round(x), format = "d", big.mark = "")
+            else
+                formatC(x, format = "f", digits = 1, big.mark = "")
+        },
+
+        # TRUE when every category total is a non-negative whole number, i.e. the
+        # Value Variable behaves like a frequency. Chi-square is only defined on
+        # counts, and the wording of the summaries depends on this too.
+        .isCountData = function() {
+            d <- private$.processed_data
+            if (is.null(d) || !nrow(d))
+                return(FALSE)
+            all(is.finite(d$count)) &&
+                all(abs(d$count - round(d$count)) < 1e-9) &&
+                all(d$count >= 0)
+        },
+
+        # Read an option that may not exist in the compiled R/<fn>.h.R yet.
+        # jmvcore's `$` ERRORS on an undeclared option ("options$x does not
+        # exist") rather than returning NULL, so a .a.yaml addition that has not
+        # been through jmvtools::prepare() takes down the whole analysis. Falling
+        # back here means a stale header degrades to "the test did not run" - the
+        # safe direction - instead of a crash.
+        .optionOr = function(name, default) {
+            tryCatch(self$options[[name]], error = function(e) default)
+        },
+
+        # Declared defaults, mirrored from jamovi/jjsegmentedtotalbar.a.yaml. Used
+        # only to tell "the user left this alone" from "the user chose this".
+        .presetDefaults = list(
+            color_palette = "clinical", chart_style = "clinical",
+            show_percentages = FALSE,   percentage_format = "integer"
+        ),
+
+        # Resolve a display option, honouring the selected Clinical Analysis Preset.
+        #
+        # The preset used to be stored in .preset_config and then read by nothing
+        # except the guidance panel, so every preset produced a byte-identical
+        # plot while its description promised a "predefined configuration".
+        # self$options is read-only in jamovi, so the preset cannot be written
+        # back into the options - it has to be applied where the value is read.
+        # An explicit user choice always wins; the preset only fills in a control
+        # the user has left at its default. These four options are purely
+        # cosmetic, so this cannot change any reported number.
+        .displayOpt = function(name) {
+            user_value <- self$options[[name]]
+            cfg <- private$.preset_config
+            if (is.null(cfg) || is.null(cfg[[name]]))
+                return(user_value)
+            if (identical(user_value, private$.presetDefaults[[name]]))
+                return(cfg[[name]])
+            user_value
+        },
 
         # Add a notice to the collection
         .addNotice = function(type, title, content) {
@@ -217,14 +285,25 @@ jjsegmentedtotalbarClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R
             # Create clinical summary
             private$.createClinicalSummary()
 
-            # Perform statistical tests if requested
+            # Perform statistical tests if requested.
+            #
+            # Two gates, because they catch different things. The data check
+            # rejects what is demonstrably not a frequency (fractional or negative
+            # totals). The user affirmation covers what no check can see: a
+            # whole-number MEASUREMENT is indistinguishable from a count in the
+            # data, and running chi-square on one manufactures significance
+            # (chi2 = 277.5 on random costs in dollars, 27750.5 on the same money
+            # in cents). The GUI disables the test until y_is_count is ticked;
+            # this branch also covers callers coming in through the R wrapper.
             if (self$options$show_statistical_tests) {
-                # Validate that data implies counts (integers)
-                is_count_data <- all(private$.processed_data$count %% 1 == 0) && all(private$.processed_data$count >= 0)
-
-                if (!is_count_data) {
-                    private$.addNotice("STRONG_WARNING", "Non-Count Data Warning",
-                        .("Statistical tests skipped. Value Variable contains non-integer or negative values suggesting continuous data rather than counts. Chi-square tests are only valid for count/frequency data."))
+                if (!isTRUE(private$.optionOr("y_is_count", FALSE))) {
+                    private$.addNotice("STRONG_WARNING", "Chi-square not run",
+                        sprintf(.("The chi-square test needs the summed values to be frequencies. Tick 'Value Variable counts cases' to confirm that '%s' counts cases, not a measurement such as cost, size or score. The test manufactures significance on a measurement because its value depends on the unit you measured in."),
+                                self$options$y_var))
+                } else if (!private$.isCountData()) {
+                    private$.addNotice("STRONG_WARNING", "Chi-square not run",
+                        sprintf(.("'%s' was declared to be a count, but its category totals are fractional or negative, so they cannot be frequencies. The chi-square test was skipped."),
+                                self$options$y_var))
                 } else {
                     private$.performStatisticalTests()
                 }
@@ -241,9 +320,16 @@ jjsegmentedtotalbarClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R
                 n_categories <- length(unique(private$.processed_data[[self$options$x_var]]))
                 n_segments <- length(unique(private$.processed_data[[self$options$fill_var]]))
 
+                # Report the two facts separately instead of guessing which one the
+                # total is. Rows analysed is always the sample size; the bar total is
+                # a summed quantity that only coincides with N when the Value
+                # Variable is a frequency. Calling sum(y) "observations" reported
+                # 26678 "observations" for 90 patients when y was a cost in dollars.
                 private$.addNotice("INFO", "Analysis Info",
-                    sprintf(.("Analysis completed successfully using %d observations across %d categories and %d segments."),
-                        n_total, n_categories, n_segments))
+                    sprintf(.("Analysed %s rows across %s categories and %s segments. The bars total %s of '%s' - a summed quantity, which is the sample size only if that variable counts cases."),
+                            private$.fmtTotal(private$.n_rows_analysed %||% NA_real_),
+                            n_categories, n_segments,
+                            private$.fmtTotal(n_total), self$options$y_var))
             }
 
             # Render all collected notices as HTML (errors, warnings, info).
@@ -314,7 +400,15 @@ jjsegmentedtotalbarClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R
                 return()
             }
 
-            # Convert variables to factors if needed
+            # Convert variables to factors if needed.
+            #
+            # NOTE: a "numeric variable used as a category" warning cannot live
+            # here. Both slots are `permitted: [factor]`, so the value is already
+            # a factor by the time .processData runs - jamovi refuses a continuous
+            # variable in the GUI outright, and the R wrapper coerces it upstream.
+            # Verified 2026-08-13: is.numeric() on either column is FALSE for
+            # every path a user can actually take. The many-levels consequence is
+            # still caught downstream by the "Too Many Categories" notice.
             data[[x_var]] <- as.factor(data[[x_var]])
             data[[fill_var]] <- as.factor(data[[fill_var]])
 
@@ -339,6 +433,8 @@ jjsegmentedtotalbarClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R
                 }
                 data[[facet_var]] <- as.factor(data[[facet_var]])
             }
+
+            private$.n_rows_analysed <- nrow(data)
 
             # CRITICAL FIX: Group and summarise data
             # For aggregated data (one row per category), n() returns 1, which is wrong
@@ -576,7 +672,7 @@ jjsegmentedtotalbarClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R
 
         .applyColorPalette = function(p, data, fill_var) {
 
-            palette <- self$options$color_palette
+            palette <- private$.displayOpt("color_palette")
             n_colors <- length(unique(data[[fill_var]]))
 
             if (palette == "viridis") {
@@ -604,7 +700,7 @@ jjsegmentedtotalbarClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R
         .applyTheme = function(p) {
             # Delegate to the single theme factory (.getChartTheme) to avoid
             # duplicated theme definitions.
-            return(p + private$.getChartTheme(self$options$chart_style))
+            return(p + private$.getChartTheme(private$.displayOpt("chart_style")))
         },
 
         .getChartTheme = function(style) {
@@ -697,14 +793,22 @@ jjsegmentedtotalbarClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R
             n_segments <- length(unique(data[[self$options$fill_var]]))
             total_obs <- sum(data$count, na.rm = TRUE)
 
+            # The column formerly titled "Total Observations" held sum(y_var), which
+            # is a summed quantity - 26678 "observations" for 90 patients when y was
+            # a cost. Report the row count separately and title the sum honestly.
             summary_row <- list(
                 categories = n_categories,
                 segments = n_segments,
+                rows_analysed = private$.n_rows_analysed %||% NA_integer_,
                 total_observations = total_obs,
                 chart_type = .("Segmented Total Bar (100% Stacked)")
             )
 
             self$results$summary$setRow(rowNo = 1, values = summary_row)
+            self$results$summary$setNote(
+                "summed_value",
+                sprintf(.("Summed Value is the total of '%s' across all bars. It equals the number of cases only when that variable counts cases."),
+                        self$options$y_var))
         },
 
         .updateComposition = function() {
@@ -897,7 +1001,7 @@ jjsegmentedtotalbarClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R
             }
 
             # Percentage labels (simple, inline)
-            if (isTRUE(self$options$show_percentages)) {
+            if (isTRUE(private$.displayOpt("show_percentages"))) {
                 label_data <- df
                 if (!"percentage" %in% names(label_data)) {
                     label_data <- label_data %>%
@@ -910,7 +1014,7 @@ jjsegmentedtotalbarClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R
 
                 # Format
                 fmt <- switch(
-                    self$options$percentage_format,
+                    private$.displayOpt("percentage_format"),
                     "decimal1" = function(z) paste0(format(round(z, 1), nsmall = 1), "%"),
                     "decimal2" = function(z) paste0(format(round(z, 2), nsmall = 2), "%"),
                     function(z) paste0(round(z), "%")
@@ -1067,7 +1171,7 @@ jjsegmentedtotalbarClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R
             )
 
             # Apply chart style
-            chart_theme <- private$.getChartTheme(self$options$chart_style)
+            chart_theme <- private$.getChartTheme(private$.displayOpt("chart_style"))
             if (!is.null(chart_theme)) {
                 p <- p + chart_theme
             }
@@ -1139,25 +1243,37 @@ jjsegmentedtotalbarClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R
             largest_category_safe <- htmltools::htmlEscape(as.character(largest_segment$category[1]))
             balanced_category_safe <- htmltools::htmlEscape(as.character(category_balance$category[1]))
 
+            # as.integer(1547.8) silently reported "1547 observations". Use the
+            # shared formatter, and only call the total an observation count when
+            # the Value Variable actually is one.
+            n_rows_safe   <- private$.fmtTotal(private$.n_rows_analysed %||% NA_real_)
+            total_obs_safe <- private$.fmtTotal(total_obs)
+
             summary_text <- sprintf(
-                .("This analysis examined %d observations across %d categories of %s, with data segmented by %s into %d distinct groups. The most prominent finding was '%s' in the '%s' category, representing %.1f%% of that group. The '%s' category showed the most balanced distribution across all segments, indicating relatively equal representation of different outcomes within that group."),
-                as.integer(total_obs),
-                as.integer(n_categories),
+                .("This analysis examined %s rows across %s categories of %s, with data segmented by %s into %s distinct groups, summing %s of %s. The most prominent finding was '%s' in the '%s' category, representing %.1f%% of that group's total. The '%s' category showed the most balanced distribution across all segments, indicating relatively equal representation of different outcomes within that group."),
+                n_rows_safe,
+                n_categories,
                 x_var_safe,
                 fill_var_safe,
-                as.integer(n_segments),
+                n_segments,
+                total_obs_safe,
+                y_var_safe,
                 largest_segment_safe,
                 largest_category_safe,
                 largest_segment$percentage[1],
                 balanced_category_safe
             )
 
-            # Create copy-ready report sentence
+            # Copy-ready sentence: this is the line most likely to be pasted into a
+            # manuscript, so "N=" must name the rows analysed and never the summed
+            # Value Variable, which is a quantity rather than a sample size.
             report_sentence <- sprintf(
-                .("Segmented total bar chart analysis of %s by %s (N=%d): %s was the predominant segment in %s (%.1f%%). Distribution patterns varied across categories, with %s showing the most balanced composition."),
+                .("Segmented total bar chart analysis of %s by %s (N=%s rows; total %s = %s): %s was the predominant segment in %s (%.1f%%). Distribution patterns varied across categories, with %s showing the most balanced composition."),
                 y_var_safe,
                 x_var_safe,
-                as.integer(total_obs),
+                n_rows_safe,
+                y_var_safe,
+                total_obs_safe,
                 largest_segment_safe,
                 largest_category_safe,
                 largest_segment$percentage[1],
@@ -1273,13 +1389,31 @@ jjsegmentedtotalbarClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R
                 paste0("<li><strong>Segments:</strong> ", config$suggested_fill_label, "</li>"),
                 "</ul>",
                 "</div>",
+                # Spell out exactly which controls the template touches and how it
+                # loses to an explicit choice. The old text claimed it optimised
+                # "chart settings, color palettes, and statistical options", which
+                # was doubly wrong: nothing was applied at all, and the template has
+                # never had any bearing on the statistical options.
                 "<div style='background-color: #f8f9fa; padding: 10px; border-radius: 4px; margin: 10px 0;'>",
-                "<h5 style='color: #495057; margin-top: 0;'>Clinical Template Details:</h5>",
-                "<p style='font-size: 13px; line-height: 1.4; margin: 5px 0;'>This template optimizes chart settings, color palettes, and statistical options for your specific analysis type. All settings can be further customized as needed.</p>",
+                "<h5 style='color: #495057; margin-top: 0;'>What this template changes:</h5>",
+                "<ul style='font-size: 13px; line-height: 1.4; margin: 5px 0; padding-left: 20px;'>",
+                paste0("<li>Chart style &rarr; <strong>", htmltools::htmlEscape(config$chart_style), "</strong></li>"),
+                paste0("<li>Color palette &rarr; <strong>", htmltools::htmlEscape(config$color_palette), "</strong></li>"),
+                paste0("<li>Percentage labels &rarr; <strong>",
+                       if (isTRUE(config$show_percentages)) "on" else "off",
+                       "</strong>, formatted as <strong>",
+                       htmltools::htmlEscape(config$percentage_format), "</strong></li>"),
+                "</ul>",
+                "<p style='font-size: 13px; line-height: 1.4; margin: 5px 0;'>",
+                "Each of these applies only while you leave that control at its default &ndash; ",
+                "change one yourself and your choice is kept. The template does not change ",
+                "your variables, the axis titles above (those are suggestions to type in), ",
+                "or anything under Statistical Tests.",
+                "</p>",
                 "</div>",
                 "</div>"
             )
-            
+
             self$results$preset_guidance$setContent(guidance_html)
         },
         
@@ -1307,7 +1441,23 @@ jjsegmentedtotalbarClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R
                 contingency_matrix <- xtabs(count ~ ., data = contingency_data)
 
                 # Perform chi-square test
-                chi_test <- chisq.test(contingency_matrix)
+                chi_test <- suppressWarnings(chisq.test(contingency_matrix))
+
+                # Reaching here means the user ticked y_is_count, so the per-run
+                # warning would be nagging. The assumption still travels with the
+                # numbers as a permanent footnote, because the table gets copied out
+                # of jamovi and the p-value is meaningless without it.
+                self$results$statistical_tests$setNote(
+                    "count_assumption",
+                    .("Cells are the summed Value Variable, treated as frequencies. Valid only if that variable counts cases; on a measurement the statistic scales with the unit of measurement and <b>overstates</b> significance."))
+
+                # Expected-count check - chi-square is unreliable on sparse tables and
+                # chisq.test() raises only a console warning the GUI never shows.
+                low <- sum(chi_test$expected < 5)
+                if (low > 0)
+                    private$.addNotice("WARNING", "Low expected counts",
+                        sprintf(.("%d of %d cells have expected counts below 5, so the chi-square approximation is unreliable here."),
+                                low, length(chi_test$expected)))
 
                 # Determine significance
                 alpha <- 1 - self$options$confidence_level

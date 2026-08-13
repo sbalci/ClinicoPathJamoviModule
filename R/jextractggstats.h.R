@@ -37,7 +37,8 @@ jextractggstatsOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
                 suggested=list(
                     "continuous"),
                 permitted=list(
-                    "numeric"))
+                    "numeric",
+                    "factor"))
             private$..group_var <- jmvcore::OptionVariable$new(
                 "group_var",
                 group_var,
@@ -46,7 +47,8 @@ jextractggstatsOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
                     "ordinal",
                     "nominal"),
                 permitted=list(
-                    "factor"))
+                    "factor",
+                    "numeric"))
             private$..test_value <- jmvcore::OptionNumber$new(
                 "test_value",
                 test_value,
@@ -340,7 +342,6 @@ jextractggstats <- function(
             `if`( ! missing(dep_var), dep_var, NULL),
             `if`( ! missing(group_var), group_var, NULL))
 
-    for (v in group_var) if (v %in% names(data)) data[[v]] <- as.factor(data[[v]])
 
     options <- jextractggstatsOptions$new(
         dep_var = dep_var,

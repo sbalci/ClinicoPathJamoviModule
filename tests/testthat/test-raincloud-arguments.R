@@ -451,7 +451,7 @@ test_that("raincloud handles different distribution types with consistent parame
   for (dist in distributions) {
     result <- raincloud(
       data = raincloud_skewed,
-      dep_var = dist,
+      dep_var = !!dist,
       group_var = "condition",
       plot_theme = "publication",
       show_violin = TRUE,

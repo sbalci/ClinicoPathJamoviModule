@@ -64,11 +64,13 @@ test_that("jjbarstats correctly handles weighted data in sample size reporting",
 test_that("jjbarstats weighted contingency table matches manual calculation", {
   weighted_data <- create_weighted_data()
 
-  # Manual contingency table
-  # Treatment A: Success=50, Failure=30
-  # Treatment B: Success=20, Failure=40
-  expected_table <- matrix(c(50, 20, 30, 40), nrow = 2,
-                           dimnames = list(c("Success", "Failure"),
+  # Manual contingency table. create_weighted_data() interleaves treatment
+  # (A,B,A,B) against outcome (Success,Success,Failure,Failure), so the counts
+  # 50,30,20,40 mean Success/A=50, Success/B=30, Failure/A=20, Failure/B=40 -
+  # NOT the A: Success=50/Failure=30 the old comment claimed. Rows come back in
+  # factor-level order (Failure before Success).
+  expected_table <- matrix(c(20, 50, 40, 30), nrow = 2,
+                           dimnames = list(c("Failure", "Success"),
                                           c("A", "B")))
 
   # Build weighted table using xtabs
@@ -199,15 +201,18 @@ test_that("jjbarstats properly filters NAs before analysis", {
 test_that("jjbarstats weighted group sizes are calculated correctly", {
   weighted_data <- create_weighted_data()
 
-  # Manual group sizes
-  # Treatment A: 50 + 30 = 80
-  # Treatment B: 20 + 40 = 60
-
+  # Treatment A: Success 50 + Failure 20 = 70
+  # Treatment B: Success 30 + Failure 40 = 70
   group_a_count <- sum(weighted_data$count[weighted_data$treatment == "A"])
   group_b_count <- sum(weighted_data$count[weighted_data$treatment == "B"])
 
-  expect_equal(group_a_count, 80)
-  expect_equal(group_b_count, 60)
+  expect_equal(group_a_count, 70)
+  expect_equal(group_b_count, 70)
+
+  # and the analysis counts the weights, not the four fixture rows
+  res <- jjbarstats(data = weighted_data, dep = "outcome",
+                    group = "treatment", counts = "count")
+  expect_match(as.character(res$summary$content), "140 observations")
 })
 
 test_that("jjbarstats handles both weighted and unweighted data in same session", {
@@ -274,15 +279,12 @@ test_that("jjbarstats handles negative counts correctly", {
     stringsAsFactors = FALSE
   )
 
-  # Should error with negative counts
-  expect_error({
-    jjbarstats(
-      data = negative_counts_data,
-      dep = "outcome",
-      group = "group",
-      counts = "count"
-    )
-  })
+  # Rejected, but as a message in the results panel - a jamovi analysis does not
+  # throw, so expect_error() here would pass only on a crash.
+  res <- jjbarstats(data = negative_counts_data, dep = "outcome",
+                    group = "group", counts = "count")
+  expect_match(gsub("<[^>]*>", " ", as.character(res$todo$content)),
+               "contains negative values")
 })
 
 test_that("jjbarstats joint distribution check detects sparse cells", {
@@ -526,18 +528,20 @@ test_that("jjbarstats cache invalidation works when data values change", {
     stringsAsFactors = FALSE
   )
 
-  # Statistical results should be different
-  table1 <- xtabs(count ~ outcome + group, data = data1)
-  table2 <- xtabs(count ~ outcome + group, data = data2)
-
-  chisq1 <- chisq.test(table1)
-  chisq2 <- chisq.test(table2)
-
-  # P-values should differ (data is intentionally reversed)
-  expect_false(isTRUE(all.equal(chisq1$p.value, chisq2$p.value, tolerance = 0.01)))
-
-  # The cache fix ensures data content hash is included, so different data
-  # will produce different cache keys and therefore different results
+  # This block used to compare two hand-built chisq.test() calls and never
+  # touched jjbarstats, so it asserted nothing about the cache - and the two
+  # tables it chose happen to give the SAME p-value, so it failed on its own
+  # terms. Run the analysis twice instead and compare what is rendered.
+  render <- function(d) {
+    res <- jjbarstats(data = d, dep = "outcome", group = "group", counts = "count")
+    f <- tempfile(fileext = ".svg"); svglite::svglite(f, 9, 6)
+    on.exit({ grDevices::dev.off(); unlink(f) }, add = TRUE)
+    print(res$plot)
+    paste(readLines(f, warn = FALSE), collapse = "")
+  }
+  expect_false(identical(render(data1), render(data2)))
+  # same input twice must still be stable
+  expect_identical(render(data1), render(data1))
 })
 
 test_that("jjbarstats effect sizes are within valid ranges", {

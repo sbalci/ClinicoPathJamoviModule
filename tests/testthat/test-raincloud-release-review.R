@@ -7,12 +7,14 @@
 # (`git show HEAD:R/raincloud.b.R`) before it was written.
 #
 # HTML-STRIPPING NOTE: the content deliberately carries the entity "&lt;" (a bare
-# "<" would be eaten by an HTML parser), and the "Result:" row carries a literal
-# "p < 0.05". A naive gsub("<[^>]*>", "", x) swallows "< 0.001</td>" whole and the
-# p-value silently vanishes from the stripped text. rc_text() therefore strips only
-# things that actually look like tags (`<` followed by a letter, `/` or `!`) and
-# decodes entities afterwards. Assertions that are specifically ABOUT the entity
-# are made against the RAW html instead.
+# "<" would be eaten by an HTML parser). The "Result:" row used to be the one
+# place that still emitted a literal "p < 0.05" - that was a defect (a browser
+# parses "< 0.05</td>" as a single bogus element and the Result cell renders
+# EMPTY) and it now uses the entity as well. rc_text() still strips only things
+# that actually look like tags (`<` followed by a letter, `/` or `!`) and decodes
+# entities afterwards, so assertions written against the stripped text keep
+# seeing "p < 0.05". Assertions specifically ABOUT the entity are made against
+# the RAW html instead.
 
 library(testthat)
 
@@ -152,10 +154,13 @@ test_that("2a. >2 groups: adjustment produces a pairwise table matching pairwise
     ref <- stats::pairwise.t.test(d$y, d$g, p.adjust.method = "bonferroni",
                                   pool.sd = TRUE)$p.value
     expect_true(all(ref[!is.na(ref)] < 0.001))    # all three are "&lt; 0.001" here
-    # 3 pairwise cells + the omnibus P-value cell + the copy-ready sentence.
+    # 3 pairwise cells + the omnibus P-value cell + the "Result:" row + the
+    # copy-ready sentence. This was 5 while the "Result:" row still emitted a
+    # BARE "p < 0.001"; that row now uses the entity like every other p in the
+    # block, so it is counted here too.
     expect_equal(lengths(regmatches(a$results$comparison$content,
                                     gregexpr("&lt; 0\\.001", a$results$comparison$content)))[[1]],
-                 5L)
+                 6L)
 })
 
 test_that("2b. adjusted pairwise p really differs from the unadjusted one", {

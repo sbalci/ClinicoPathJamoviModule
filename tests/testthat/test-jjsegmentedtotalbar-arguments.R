@@ -294,7 +294,7 @@ test_that("jjsegmentedtotalbar handles flerlage with all options", {
     flerlage_label_size = 7,
     flerlage_label_color = "white",
     flerlage_alpha = 0.8,
-    flerlage_box_color = "gray20"
+    flerlage_box_color = "beige"
   )
 
   expect_s3_class(result, "jjsegmentedtotalbarResults")

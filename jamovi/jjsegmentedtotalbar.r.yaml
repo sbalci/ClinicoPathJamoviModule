@@ -17,6 +17,9 @@ items:
       requiresData: true
       renderFun: .plot
       clearWith:
+        # analysis_preset now fills in palette/style/percentage controls the user
+        # has left at their defaults, so the plot must be redrawn when it changes.
+        - analysis_preset
         - x_var
         - y_var
         - fill_var
@@ -62,8 +65,11 @@ items:
         - name: segments
           title: 'Segments'
           type: integer
+        - name: rows_analysed
+          title: 'Rows Analysed'
+          type: integer
         - name: total_observations
-          title: 'Total Observations'
+          title: 'Summed Value'
           type: number
         - name: chart_type
           title: 'Chart Type'
@@ -142,6 +148,11 @@ items:
         - y_var
         - fill_var
         - show_statistical_tests
+        # the affirmation gates whether the test runs at all
+        - y_is_count
+        # the significance verdict is written against 1 - confidence_level, so the
+        # table has to be rebuilt when that changes
+        - confidence_level
         - exclude_missing
       columns:
         - name: test_name

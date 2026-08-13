@@ -297,12 +297,36 @@ lollipopClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             # Checkpoint before expensive data validation and conversion
             private$.checkpoint(flush = FALSE)  # Only poll for changes, don't push results yet
             
-            # Validate dependent variable (must be numeric)
-            dep_data <- jmvcore::toNumeric(data[[dep_var]])
+            # Validate dependent variable (must be numeric).
+            #
+            # jmvcore::toNumeric() is NOT a coercion function: it unwraps a jamovi
+            # `values` attribute and otherwise returns its argument untouched. On a
+            # plain character or factor column it is a no-op, so is.na() was all
+            # FALSE and this guard could never fire - the text column simply flowed
+            # on into aggregate()/mean() and failed somewhere far less obvious.
+            # Coerce for real, then judge.
+            dep_raw <- data[[dep_var]]
+            dep_data <- jmvcore::toNumeric(dep_raw)
+            if (!is.numeric(dep_data))
+                dep_data <- suppressWarnings(as.numeric(as.character(dep_data)))
             if (all(is.na(dep_data))) {
                 jmvcore::reject(.("Dependent variable must be numeric (continuous variable)."))
             }
             data[[dep_var]] <- dep_data
+
+            # complete.cases() below follows is.na(), which is TRUE for NaN but
+            # FALSE for Inf, so an infinite value would survive into the axis
+            # range, the mean and the "highest group" claim.
+            n_before_finite <- nrow(data)
+            data <- data[is.finite(data[[dep_var]]) | is.na(data[[dep_var]]), , drop = FALSE]
+            n_nonfinite <- n_before_finite - nrow(data)
+            if (n_nonfinite > 0) {
+                private$.addNotice(
+                    'WARNING',
+                    'Non-finite Values Removed',
+                    sprintf("%d row(s) held an infinite value (Inf or -Inf) for the dependent variable and were removed. Infinite values usually indicate a division by zero or an out-of-range entry.", n_nonfinite)
+                )
+            }
             
             # Validate grouping variable
             group_data <- data[[group_var]]
@@ -312,8 +336,13 @@ lollipopClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                 data[[group_var]] <- factor(group_data)
             }
             
-            # Check number of groups
-            n_groups <- length(unique(data[[group_var]]))
+            # Check number of groups.
+            #
+            # Count only levels that actually carry data: unique() treats NA as a
+            # value, so one real category plus any missing value scored 2 and
+            # sailed past this guard, leaving a single-lollipop "comparison" after
+            # the complete-case filter below.
+            n_groups <- length(unique(data[[group_var]][!is.na(data[[group_var]])]))
             if (n_groups < 2) {
                 jmvcore::reject(.("Grouping variable must have at least 2 different categories."))
             }

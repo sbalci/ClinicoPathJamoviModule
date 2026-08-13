@@ -4,7 +4,7 @@ title: "Segmented Total Bar Charts"
 menuGroup: JJStatsPlot
 menuSubgroup: 'Categorical vs Categorical'
 # menuSubtitle: "100 percent Stacked Bar Charts for Proportional Data"
-version: '1.0.51'
+version: '1.0.52'
 jas: '1.2'
 
 description:
@@ -404,6 +404,26 @@ options:
       description:
         R: Color of background boxes in Flerlage plots.
         jamovi: Choose background box color for Flerlage plot type.
+
+    # The chi-square is computed on cells that are sum(y_var). That is a
+    # contingency table only when y_var counts cases. Integrality cannot
+    # establish it - a whole-number measurement passes - and the statistic then
+    # scales with the measurement unit: the same money in cents instead of
+    # dollars moved chi2 from 277.5 to 27750.5 on data with no association at
+    # all. Nothing in the data can settle this, so the user has to state it.
+    - name: y_is_count
+      title: "Value Variable counts cases"
+      type: Bool
+      default: false
+      description:
+        R: >
+          Affirm that the Value Variable is a frequency (a number of cases), not a
+          measurement. Required before a chi-square test can be run, because the
+          test treats the summed values as cell counts.
+        jamovi: >
+          Tick only if the Value Variable holds counts of cases. If it is a
+          measurement (cost, size, score, duration), the chi-square is not
+          interpretable - its value depends on the unit you measured in.
 
     - name: show_statistical_tests
       title: "Statistical tests"

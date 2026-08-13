@@ -3009,10 +3009,6 @@ out-of-scope findings from the same audit, deferred for separate work.
 # release-review-function prompt
 
 
-/release-review-function lollipop
-/release-review-function jjbarstats
-/release-review-function jjsegmentedtotalbar
-/release-review-function jjpiestats
 /release-review-function jjarcdiagram
 /release-review-function linechart
 /release-review-function statsplot2
@@ -3553,3 +3549,43 @@ API and will fail `R CMD check --run-donttest` until `prepare()` + `document()` 
       plausibly caused by this very defect - so fixing this should be measurable as a large
       swing in that tally.
       PRE-EXISTING - unrelated to the withBaseFormulaChar shield added the same day.
+
+- [ ] **[MAJOR/tests] Three test files are silently dead: they `library()` a package that does not exist.**
+      The package is `ClinicoPath`; `ClinicoPathJamoviModule` is only the repository name.
+      testthat treats an un-installed package at file scope as a SKIP, so the whole file
+      reports as neither passed nor failed and looks green in any tally that counts
+      failures. Found 2026-08-13 while release-reviewing jjbarstats, whose
+      `tests/testthat/test-jjbarstats.R` had 15 test blocks that had never once executed;
+      pointing it at `library(ClinicoPath)` turned it into 40 real passing assertions and
+      exposed 4 blocks asserting that a `list()` constructor throws.
+
+      Remaining files with the same line:
+        - `tests/test-swimmerplot.R`
+        - `tests/testthat/test-swimmerplot.R`
+        - `tests/testthat/test-jjridges.R`
+
+      Fix: change to `library(ClinicoPath)` and then TRIAGE what it exposes - expect the
+      newly-live assertions to fail, since they have never run. Do not simply delete the
+      failures. Detection: `grep -rn "ClinicoPathJamoviModule" tests/` should return nothing.
+
+- [x] **[MODERATE/jjsegmentedtotalbar] Explicit "Value Variable counts cases" control.** DONE 2026-08-13.
+      `show_statistical_tests` ran a chi-square on cells that are `sum(y_var)`, which is a
+      contingency table only when `y_var` is a frequency. Integrality does NOT separate a count
+      from a whole-number measurement — measured on random, association-free costs: chi2 = 277.5
+      / p = 7.7e-59 in dollars, chi2 = 27750.5 / p = 0 for the SAME money in cents.
+
+      Implemented as `y_is_count` (Bool, `default: false`) in `jjsegmentedtotalbar.a.yaml`,
+      gating both the `.u.yaml` control (`enable: (y_is_count)` on `show_statistical_tests`) and
+      `.performStatisticalTests()` in the backend. The permanent table footnote naming the
+      unit-scaling failure mode was kept; the per-run nag was dropped now that the user affirms.
+      NEEDS `jmvtools::prepare()` + `devtools::document()` — until then the option is absent from
+      the compiled header and the analysis falls back to "test not run" via `.optionOr()`.
+
+- [x] **[MAJOR/jjbarstats] jjpiestats subtitle swap ported.** DONE 2026-08-13.
+      On a sparse 2x2 the plot subtitle reported an uncorrected Pearson chi-squared and the
+      assumptions panel had to tell the reader to disregard it. `.exactSubtitle()` (ported from
+      `R/jjpiestats.b.R`) now replaces it with Fisher's exact p, the odds ratio and its CI, and
+      the panel text is conditional on whether the swap happened. Grouped (`grvar`) charts are a
+      patchwork whose per-panel subtitles cannot be replaced, so that path keeps the disclosure
+      route. The decision is per dependent variable, so a sparse and a well-powered variable can
+      carry different subtitles in the same figure. No yaml change; no regeneration needed.

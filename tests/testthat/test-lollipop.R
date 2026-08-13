@@ -173,20 +173,16 @@ test_that("lollipop handles no aggregation with unique groups", {
 })
 
 test_that("lollipop detects over-plotting scenario", {
-  # Data with multiple observations per group
-  test_data <- setup_aggregation_test_data()
+  # This analysis reports through jamovi's notice system, not R conditions:
+  # .run() catches jmvcore::reject() into the `todo` panel and emits warnings as
+  # notices. expect_error/expect_warning therefore see nothing. Assert what the
+  # user is actually shown.
+  .lol_txt <- function(x) gsub("[[:space:]]+", " ", gsub("<[^>]*>", " ", as.character(x)))
 
-  # When aggregation is "none", function should warn about over-plotting
-  expect_warning(
-    lollipop(
-      data = test_data,
-      dep = "value",
-      group = "group",
-      aggregation = "none",
-      highlight = NULL
-    ),
-    regexp = "Multiple observations per group"
-  )
+  test_data <- setup_aggregation_test_data()
+  res <- lollipop(data = test_data, dep = "value", group = "group",
+                  aggregation = "none", highlight = NULL)
+  expect_match(.lol_txt(res$notices$content), "Multiple observations per group")
 })
 
 # ==============================================================================
@@ -329,20 +325,18 @@ test_that("lollipop applies highlighting to specific group", {
 })
 
 test_that("lollipop handles invalid highlight level gracefully", {
-  test_data <- setup_treatment_response_data()
+  # This analysis reports through jamovi's notice system, not R conditions:
+  # .run() catches jmvcore::reject() into the `todo` panel and emits warnings as
+  # notices. expect_error/expect_warning therefore see nothing. Assert what the
+  # user is actually shown.
+  .lol_txt <- function(x) gsub("[[:space:]]+", " ", gsub("<[^>]*>", " ", as.character(x)))
 
-  # Highlighting a level that doesn't exist should warn but not crash
-  expect_warning(
-    lollipop(
-      data = test_data,
-      dep = "response_score",
-      group = "treatment",
-      aggregation = "mean",
-      useHighlight = TRUE,
-      highlight = "NonExistent_Drug"
-    ),
-    regexp = "not found in grouping variable"
-  )
+  test_data <- setup_treatment_response_data()
+  res <- lollipop(data = test_data, dep = "response_score", group = "treatment",
+                  aggregation = "mean", useHighlight = TRUE, highlight = "NonExistentLevel")
+  expect_match(.lol_txt(res$notices$content), "not found in grouping variable")
+  # and it must still produce a chart rather than failing
+  expect_gt(nrow(res$summary$asDF), 0)
 })
 
 # ==============================================================================

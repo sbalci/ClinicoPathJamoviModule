@@ -164,15 +164,22 @@ children:
         margin: large
         children:
           - type: Label
-            label: ' Requirements: Value Variable must be integer counts for valid Chi-square tests.'
+            label: >-
+              Chi-square treats the summed Value Variable as cell frequencies. On
+              a measurement (cost, size, score) the result depends on the unit you
+              measured in, so confirm the variable counts cases before testing.
             margin: small
             style: list-inline
           - type: CheckBox
+            name: y_is_count
+            label: Value Variable counts cases
+          - type: CheckBox
             name: show_statistical_tests
             label: Perform chi-square test
+            enable: (y_is_count)
           - type: TextBox
             name: confidence_level
-            enable: (show_statistical_tests)
+            enable: (y_is_count && show_statistical_tests)
             format: number
             label: Confidence Level
   - type: CollapseBox

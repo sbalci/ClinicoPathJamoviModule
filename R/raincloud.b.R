@@ -785,10 +785,16 @@ raincloudClass <- if (requireNamespace("jmvcore")) R6::R6Class("raincloudClass",
         # sprintf("%.4f", .), so a p of 1e-16 was displayed as 0.0000 - a number
         # that cannot appear in a paper - and the copy-ready sentence printed
         # "p = 0.000".
-        # Every consumer of this writes into an Html result item, so the "less
-        # than" must be an ENTITY. A bare "< 0.001" starts what a parser reads as
-        # a tag: `< 0.001</td>` is consumed as one bogus element and the p-value
-        # disappears from the rendered cell entirely.
+        # Every consumer writes into an Html result item, so emit the "less than"
+        # as an ENTITY. Note the honest reason: an HTML5 browser does NOT break on
+        # a bare "< 0.001" - "<" followed by a space is not a tag-open, so it is
+        # tokenised as literal text and renders fine. The entity is still the
+        # correct output because the string is not valid HTML/XHTML without it,
+        # anything parsing the panel as XML will choke, and any downstream
+        # tag-stripper treats `< 0.001</td>` as one element and swallows the
+        # value (which is exactly what happened to this review's own test
+        # harness). Do not repeat the earlier claim that browsers render it
+        # empty - that was measured in a regex stripper, not a browser.
         .fmtP = function(p) {
             if (is.null(p) || length(p) == 0 || is.na(p) || !is.finite(p)) return(.("not estimable"))
             if (p < 0.001) return("&lt; 0.001")
@@ -1067,10 +1073,10 @@ raincloudClass <- if (requireNamespace("jmvcore")) R6::R6Class("raincloudClass",
             }
 
             # Create results HTML.
-            # The "less than" MUST be the entity, for the same reason .fmtP()
-            # documents above: this string is pasted straight into a <td> of an
-            # Html result item, and a bare "p < 0.001</td>" is parsed as one
-            # bogus "< 0.001</td>" element, so the Result cell renders EMPTY.
+            # The "less than" is an entity here for the same reason .fmtP()
+            # documents above: valid HTML/XHTML and safe for anything that
+            # strips tags. A browser would render the bare form correctly, so
+            # this is correctness-of-output, not a rendering bug.
             significance <- if (p_value < 0.001) .("p &lt; 0.001") else
                           if (p_value < 0.01) .("p &lt; 0.01") else
                           if (p_value < 0.05) .("p &lt; 0.05") else .("not significant at the 0.05 level")

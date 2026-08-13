@@ -351,9 +351,13 @@ test_that("jjpiestats handles multiple analyses from same dataset", {
   results <- list()
 
   for (var in variables) {
+    # `dep = var` would NOT work: Variable options are resolved with NSE, so a
+    # bare symbol yields its own name and the analysis looks for a column called
+    # "var". jmvcore::select() then builds a zero-column frame and dies in
+    # `row.names<-` with "invalid 'row.names' length" before any module code runs.
     results[[var]] <- jjpiestats(
       data = jjpiestats_test,
-      dep = var,
+      dep = !!var,
       typestatistics = "parametric",
       label = "percentage"
     )

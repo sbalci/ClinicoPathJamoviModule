@@ -37,6 +37,7 @@ jjsegmentedtotalbarOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6:
             flerlage_label_color = "black",
             flerlage_alpha = 0.3,
             flerlage_box_color = "lightgrey",
+            y_is_count = FALSE,
             show_statistical_tests = FALSE,
             confidence_level = 0.95,
             exclude_missing = TRUE,
@@ -264,6 +265,10 @@ jjsegmentedtotalbarOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6:
                     "lightblue",
                     "beige"),
                 default="lightgrey")
+            private$..y_is_count <- jmvcore::OptionBool$new(
+                "y_is_count",
+                y_is_count,
+                default=FALSE)
             private$..show_statistical_tests <- jmvcore::OptionBool$new(
                 "show_statistical_tests",
                 show_statistical_tests,
@@ -314,6 +319,7 @@ jjsegmentedtotalbarOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6:
             self$.addOption(private$..flerlage_label_color)
             self$.addOption(private$..flerlage_alpha)
             self$.addOption(private$..flerlage_box_color)
+            self$.addOption(private$..y_is_count)
             self$.addOption(private$..show_statistical_tests)
             self$.addOption(private$..confidence_level)
             self$.addOption(private$..exclude_missing)
@@ -351,6 +357,7 @@ jjsegmentedtotalbarOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6:
         flerlage_label_color = function() private$..flerlage_label_color$value,
         flerlage_alpha = function() private$..flerlage_alpha$value,
         flerlage_box_color = function() private$..flerlage_box_color$value,
+        y_is_count = function() private$..y_is_count$value,
         show_statistical_tests = function() private$..show_statistical_tests$value,
         confidence_level = function() private$..confidence_level$value,
         exclude_missing = function() private$..exclude_missing$value,
@@ -387,6 +394,7 @@ jjsegmentedtotalbarOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6:
         ..flerlage_label_color = NA,
         ..flerlage_alpha = NA,
         ..flerlage_box_color = NA,
+        ..y_is_count = NA,
         ..show_statistical_tests = NA,
         ..confidence_level = NA,
         ..exclude_missing = NA,
@@ -432,6 +440,7 @@ jjsegmentedtotalbarResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6:
                 requiresData=TRUE,
                 renderFun=".plot",
                 clearWith=list(
+                    "analysis_preset",
                     "x_var",
                     "y_var",
                     "fill_var",
@@ -480,8 +489,12 @@ jjsegmentedtotalbarResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6:
                         `title`="Segments", 
                         `type`="integer"),
                     list(
+                        `name`="rows_analysed", 
+                        `title`="Rows Analysed", 
+                        `type`="integer"),
+                    list(
                         `name`="total_observations", 
-                        `title`="Total Observations", 
+                        `title`="Summed Value", 
                         `type`="number"),
                     list(
                         `name`="chart_type", 
@@ -569,6 +582,8 @@ jjsegmentedtotalbarResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6:
                     "y_var",
                     "fill_var",
                     "show_statistical_tests",
+                    "y_is_count",
+                    "confidence_level",
                     "exclude_missing"),
                 columns=list(
                     list(
@@ -681,6 +696,9 @@ jjsegmentedtotalbarBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6
 #' @param flerlage_alpha Transparency of background boxes (0=transparent,
 #'   1=opaque).
 #' @param flerlage_box_color Color of background boxes in Flerlage plots.
+#' @param y_is_count Affirm that the Value Variable is a frequency (a number
+#'   of cases), not a measurement. Required before a chi-square test can be run,
+#'   because the test treats the summed values as cell counts.
 #' @param show_statistical_tests Whether to perform chi-square tests for
 #'   proportion differences.
 #' @param confidence_level Confidence level for statistical tests (0.80-0.99).
@@ -742,6 +760,7 @@ jjsegmentedtotalbar <- function(
     flerlage_label_color = "black",
     flerlage_alpha = 0.3,
     flerlage_box_color = "lightgrey",
+    y_is_count = FALSE,
     show_statistical_tests = FALSE,
     confidence_level = 0.95,
     exclude_missing = TRUE,
@@ -798,6 +817,7 @@ jjsegmentedtotalbar <- function(
         flerlage_label_color = flerlage_label_color,
         flerlage_alpha = flerlage_alpha,
         flerlage_box_color = flerlage_box_color,
+        y_is_count = y_is_count,
         show_statistical_tests = show_statistical_tests,
         confidence_level = confidence_level,
         exclude_missing = exclude_missing,

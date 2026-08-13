@@ -613,7 +613,10 @@ test_that("jjpiestats CRITICAL FIX #2: Rejects non-numeric counts variable", {
       counts = "n",
       typestatistics = "parametric"
     ),
-    regexp = "must be numeric"
+    # jmvcore's wording is "requires a numeric variable"; the old pattern
+    # ("must be numeric") matched none of it, so testthat re-raised the very
+    # error the test was asserting and the block errored.
+    regexp = "requires a numeric variable"
   )
 })
 
@@ -827,15 +830,16 @@ test_that("jjpiestats BUG FIX: Handles empty string dep variable gracefully", {
     category = factor(rep(c("A", "B"), 30))
   )
 
-  # Create result object with empty dep (simulating jamovi behavior)
-  # Should not error with "argument is of length zero"
-  result <- jjpiestats(data = test_data)
+  # NOTE: `jjpiestats(data = test_data)` with no `dep` cannot be called from R at
+  # all - jmvcore::select(data, character(0)) builds a zero-column frame and dies
+  # in `row.names<-` with "invalid 'row.names' length" BEFORE any module code
+  # runs. That is jmvcore-wide (identical for jjdotchart and jjbetweenstats), not
+  # a defect here; the jamovi GUI reaches .run() by another route. Omit `data =`
+  # to exercise the same no-variables path the GUI shows.
+  result <- jjpiestats(dep = NULL)
 
-  # Should create valid results object
   expect_true(inherits(result, "jjpiestatsResults"))
-
-  # No plot should be generated (dep is empty)
-  # This is validated by the early return in .plot1()
+  expect_match(as.character(result$todo$content), "Welcome to ClinicoPath")
 })
 
 # Test 45: Single-column dataset retains data frame structure ----

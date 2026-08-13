@@ -172,6 +172,14 @@ jjbarstatsClass <- if (requireNamespace('jmvcore'))
                         jmvcore::reject(.("Counts variable '{var}' contains negative values."),
                                         var = counts_var)
                     }
+                    # A zero total is not a small sample, it is no sample. Without
+                    # this the summary panel announced "Sample Size: 0 observations"
+                    # next to "Statistical Method: Chi-square test of independence"
+                    # and still drew a chart.
+                    if (sum(self$data[[counts_var]], na.rm = TRUE) <= 0) {
+                        jmvcore::reject(.("Counts variable '{var}' sums to zero - there are no observations to analyse."),
+                                        var = counts_var)
+                    }
                 }
                 
                 # Enhanced validation for statistical tests
@@ -395,6 +403,112 @@ jjbarstatsClass <- if (requireNamespace('jmvcore'))
                 self$results$summary$setContent(summary_content)
             },
 
+            # Pure decision helper for the "Expected proportions" box. Returns the
+            # vector actually handed to the plot plus the notice explaining any
+            # departure from what the user typed, so .run() can render it.
+            #
+            # A malformed entry used to be swallowed: the notice was raised inside
+            # .createBarPlot (i.e. during .plot(), where notices are discarded), and
+            # a length mismatch was never checked at all - "0.5,0.5" against a
+            # three-level outcome ran a proportion test on proportions the user
+            # never specified, with nothing on screen to say so.
+            .computeRatioDecision = function(data, dep_var) {
+                none <- list(ratio = NULL, notice = NULL)
+                raw <- self$options$ratio
+                if (is.null(raw) || !nzchar(trimws(raw)))
+                    return(none)
+
+                warn <- function(msg)
+                    list(ratio = NULL,
+                         notice = list('WARNING', 'Expected proportions ignored',
+                                       paste0(msg, " Equal proportions were used instead.")))
+
+                vals <- suppressWarnings(as.numeric(trimws(strsplit(raw, ",")[[1]])))
+
+                if (anyNA(vals))
+                    return(warn(sprintf(
+                        "'%s' is not a list of numbers; expected comma-separated values such as '0.5,0.5'.",
+                        raw)))
+                if (any(vals <= 0))
+                    return(warn(sprintf("'%s' contains a zero or negative proportion.", raw)))
+
+                # Must line up with the outcome's categories, not the groups.
+                n_lvl <- if (!is.null(dep_var) && dep_var %in% names(data))
+                    length(unique(stats::na.omit(data[[dep_var]]))) else NA_integer_
+                if (!is.na(n_lvl) && length(vals) != n_lvl)
+                    return(warn(sprintf(
+                        "%d proportion%s given for '%s', which has %d categories.",
+                        length(vals), if (length(vals) == 1) "" else "s", dep_var, n_lvl)))
+
+                if (abs(sum(vals) - 1) > 0.001) {
+                    norm <- vals / sum(vals)
+                    return(list(ratio = norm,
+                                notice = list('INFO', 'Expected proportions rescaled',
+                                    sprintf("'%s' sums to %.3f, so it was rescaled to sum to 1: %s.",
+                                            raw, sum(vals), paste(round(norm, 3), collapse = ", ")))))
+                }
+                list(ratio = vals, notice = NULL)
+            },
+
+            # "p = < 0.001" reads badly - the operator belongs to the number.
+            .fmtP = function(p, html = TRUE) {
+                if (!is.finite(p)) return("p = NA")
+                if (p < 0.001) paste0("p ", if (html) "&lt;" else "<", " 0.001")
+                else paste0("p = ", formatC(p, format = "f", digits = 3))
+            },
+
+            # Build a replacement subtitle carrying Fisher's exact test.
+            #
+            # ggbarstats has no exact-test option, so on a sparse 2x2 the subtitle
+            # showed an uncorrected Pearson chi-squared that is not valid at those
+            # expected counts - and the assumptions panel had to tell the reader to
+            # disregard the number printed on the figure. A chart that contradicts
+            # its own caption travels badly: it gets pasted into a slide deck
+            # without the panel. So compute the exact test and put it ON the plot.
+            # (Ported from R/jjpiestats.b.R, where this was first done.)
+            #
+            # Returns a plotmath expression in ggstatsplot's own idiom, or NULL when
+            # the exact test does not apply - not 2x2, adequate expected counts,
+            # paired data (McNemar is already correct) or a Bayesian analysis.
+            .exactSubtitle = function(data, dep_var) {
+                group_var <- self$options$group
+                if (is.null(group_var) || !nzchar(group_var) || is.null(dep_var))
+                    return(NULL)
+                if (isTRUE(private$.option("paired")) ||
+                    identical(private$.option("typestatistics"), "bayes"))
+                    return(NULL)
+
+                tryCatch({
+                    tb <- private$.getWeightedTable(data, dep_var, group_var)
+                    if (!identical(dim(tb), c(2L, 2L)))
+                        return(NULL)
+                    if (!any(suppressWarnings(chisq.test(tb)$expected) < 5))
+                        return(NULL)
+
+                    conf_level <- self$options$conflevel %||% 0.95
+                    ft <- stats::fisher.test(tb, conf.level = conf_level)
+                    d  <- max(0L, as.integer(self$options$digits %||% 2L))
+                    fmt <- function(x) formatC(x, format = "f", digits = d)
+                    p_txt <- if (ft$p.value < 0.001) "< 0.001"
+                             else formatC(ft$p.value, format = "f", digits = max(3L, d))
+
+                    # A zero cell sends the odds ratio to 0 or Inf; omit it rather
+                    # than print an uninterpretable bound.
+                    or <- unname(ft$estimate)
+                    has_or <- is.finite(or) && all(is.finite(ft$conf.int))
+
+                    txt <- if (has_or)
+                        sprintf('list(italic("p")["Fisher"] == "%s", widehat(italic("OR")) == "%s", CI["%g%%"] ~ "[" * "%s", "%s" * "]", italic("n")["obs"] == "%d")',
+                                p_txt, fmt(or), conf_level * 100,
+                                fmt(ft$conf.int[1]), fmt(ft$conf.int[2]), sum(tb))
+                    else
+                        sprintf('list(italic("p")["Fisher"] == "%s", italic("n")["obs"] == "%d")',
+                                p_txt, sum(tb))
+
+                    parse(text = txt)[[1]]
+                }, error = function(e) NULL)
+            },
+
             # Pure decision helper: determines whether the Fisher's exact correction
             # applies for a single dependent variable's 2\u00d72 table. NO rendering
             # side-effects, so it can be called per-variable from .createBarPlot without
@@ -412,7 +526,7 @@ jjbarstatsClass <- if (requireNamespace('jmvcore'))
 
                 cross_table <- private$.getWeightedTable(data, dep_var, self$options$group)
                 expected_counts <- tryCatch({
-                    chisq.test(cross_table)$expected
+                    suppressWarnings(chisq.test(cross_table)$expected)
                 }, error = function(e) {
                     # Default to safe values if chi-square test fails
                     default_counts <- cross_table
@@ -427,10 +541,13 @@ jjbarstatsClass <- if (requireNamespace('jmvcore'))
                     result$pct_low <- round(100 * result$low_count_cells / result$total_cells, 1)
                     result$is_2x2 <- (result$total_cells == 4 && all(dim(cross_table) == c(2, 2)))
                     if (result$is_2x2) {
-                        # CRITICAL FIX: Auto-switch to Fisher for 2\u00d72 tables
+                        # Flags a 2x2 whose chi-squared is unreliable. It does NOT
+                        # switch the test - ggbarstats has no exact-test option, so
+                        # the caller reports the Fisher p-value alongside the plot
+                        # instead of claiming a substitution that never happened.
                         result$use_fisher <- TRUE
                         result$fisher_reason <- sprintf(
-                            "Automatically switched to Fisher's Exact Test: %d of 4 cells (%.1f%%) have expected counts < 5 in this 2\u00d72 table.",
+                            "Chi-squared is unreliable on this 2\u00d72 table: %d of 4 cells (%.1f%%) have expected counts < 5.",
                             result$low_count_cells, result$pct_low
                         )
                     }
@@ -465,9 +582,43 @@ jjbarstatsClass <- if (requireNamespace('jmvcore'))
                                 "%) have expected counts < 5."
                             ))
                             if (isTRUE(fc$is_2x2)) {
-                                recommendations <- c(recommendations,
-                                    " <strong>Automatic Correction:</strong> Using Fisher's Exact Test for 2\u00d72 table with low expected counts."
-                                )
+                                # NOT "using Fisher's exact test". ggbarstats has no
+                                # exact-test option: measured on a 2x2 with minimum
+                                # expected count 1.5, type="parametric" and
+                                # type="nonparametric" both return the SAME uncorrected
+                                # Pearson chi2(1)=3.20, p=0.07, while fisher.test() on
+                                # that table gives p=0.118. The old text told the
+                                # clinician an exact test had been substituted when the
+                                # subtitle still showed an invalid chi-squared - and one
+                                # that falls on the other side of 0.05. Give them the
+                                # real number instead of a false reassurance.
+                                fisher_p <- tryCatch(
+                                    stats::fisher.test(
+                                        private$.getWeightedTable(analysis_data,
+                                                                  dep_var_check,
+                                                                  self$options$group)
+                                    )$p.value,
+                                    error = function(e) NA_real_)
+                                recommendations <- c(recommendations, paste0(
+                                    # Keep this in step with the figure. When the
+                                    # subtitle was replaced with the exact test,
+                                    # telling the reader to disregard it would
+                                    # recreate the contradiction being fixed.
+                                    if (!is.null(private$.exactSubtitle(analysis_data, dep_var_check)))
+                                        paste0(
+                                            " <strong>Exact test used:</strong> ",
+                                            "a chi-squared is unreliable at these expected counts, ",
+                                            "so the chart subtitle reports Fisher's exact test instead.")
+                                    else paste0(
+                                        " <strong>Use the exact test, not the plot subtitle:</strong> ",
+                                        "the chart reports an uncorrected Pearson chi-squared, which is ",
+                                        "unreliable at these expected counts, and the plotting package ",
+                                        "offers no exact-test option for this chart. ",
+                                        if (is.finite(fisher_p))
+                                            sprintf("Fisher's exact test on this table gives <strong>%s</strong>; quote that value.",
+                                                    private$.fmtP(fisher_p))
+                                        else
+                                            "Fisher's exact test could not be computed for this table.")))
                             } else {
                                 # For non-2\u00d72 tables, warn but don't auto-switch
                                 recommendations <- c(recommendations,
@@ -697,7 +848,7 @@ jjbarstatsClass <- if (requireNamespace('jmvcore'))
                             dep_var, group_var
                         ))
                     }
-                    expected_counts <- tryCatch(chisq.test(cross_table)$expected,
+                    expected_counts <- tryCatch(suppressWarnings(chisq.test(cross_table)$expected),
                                                 error = function(e) NULL)
                     if (!is.null(expected_counts) && any(expected_counts < 5)) {
                         private$.addNotice('WARNING', 'Low Expected Counts', sprintf(
@@ -844,12 +995,52 @@ jjbarstatsClass <- if (requireNamespace('jmvcore'))
                 override_type <- private$.option("typestatistics")  # Start with user's choice
 
                 if (fisher_check$use_fisher && !private$.option("paired")) {
-                    # Auto-switch to Fisher for 2\u00d72 tables with low expected counts
-                    # Note: "nonparametric" type in ggbarstats uses Fisher's exact test for 2\u00d72 tables
-                    override_type <- "nonparametric"
+                    # The switch to "nonparametric" does NOT buy a Fisher test.
+                    #
+                    # Measured on a 2x2 with minimum expected count 1.5 - exactly
+                    # the case this branch targets - ggbarstats returns the SAME
+                    # uncorrected Pearson chi-squared for every non-Bayesian type:
+                    #   type = "parametric"    -> chi2(1) = 3.20, p = 0.07
+                    #   type = "nonparametric" -> chi2(1) = 3.20, p = 0.07
+                    # while fisher.test() on that table gives p = 0.118 and a
+                    # Yates-corrected chi-squared gives p = 0.233. So the old code
+                    # announced "Fisher Exact Test Auto-Selected" and then showed a
+                    # chi-squared that is not valid at those counts - and one that
+                    # crosses 0.05 differently from the test it claimed to run.
+                    #
+                    # ggbarstats offers no Fisher option, so do not pretend. Leave
+                    # the user's chosen type alone and report the real Fisher
+                    # p-value next to the plot, saying which number to quote.
+                    fisher_p <- tryCatch(
+                        stats::fisher.test(
+                            private$.getWeightedTable(data, dep_var, self$options$group)
+                        )$p.value,
+                        error = function(e) NA_real_)
 
-                    # Notify user about automatic switch
-                    private$.addNotice('INFO', 'Fisher Exact Test Auto-Selected', fisher_check$fisher_reason)
+                    # Whether the subtitle was replaced with the exact test
+                    # depends on the same conditions .exactSubtitle() checks
+                    # (2x2 only, and the grouped chart is a patchwork whose
+                    # per-panel subtitles cannot be swapped). Keep this text in
+                    # step with what is actually on the figure - a notice that
+                    # contradicts the chart is the defect being fixed here.
+                    swapped <- !grouped && !is.null(private$.exactSubtitle(data, dep_var))
+
+                    private$.addNotice(
+                        'STRONG_WARNING', 'Chi-squared assumption violated',
+                        paste0(
+                            fisher_check$fisher_reason, " ",
+                            if (swapped)
+                                "The plot subtitle therefore reports Fisher's exact test instead of the chi-squared."
+                            else paste0(
+                                "The plot subtitle reports an uncorrected Pearson chi-squared, which is ",
+                                "unreliable at these expected counts; the statistics package used here ",
+                                "provides no exact-test option for this chart, so the subtitle cannot be ",
+                                "replaced. ",
+                                if (is.finite(fisher_p))
+                                    sprintf("Fisher's exact test on this table gives %s. Quote that value, not the subtitle.",
+                                            private$.fmtP(fisher_p, html = FALSE))
+                                else
+                                    "Fisher's exact test could not be computed for this table.")))
 
                     message(paste("INFO:", fisher_check$fisher_reason))
                 }
@@ -884,53 +1075,32 @@ jjbarstatsClass <- if (requireNamespace('jmvcore'))
                     use_pairwise <- FALSE
                 }
 
-                # ENHANCEMENT 4: Parse ratio with enhanced notice-based feedback
-                ratio_vec <- NULL
-                if (!is.null(self$options$ratio) && nchar(trimws(self$options$ratio)) > 0) {
-                    tryCatch({
-                        ratio_parts <- strsplit(self$options$ratio, ",")[[1]]
-                        ratio_vec <- as.numeric(trimws(ratio_parts))
+                # Expected proportions. The decision is computed by a pure helper so
+                # .run() can render the accompanying notice - a notice raised here
+                # would be written during .plot() and silently discarded.
+                ratio_vec <- private$.computeRatioDecision(data, dep_var)$ratio
 
-                        if (any(is.na(ratio_vec))) {
-                            # Invalid non-numeric values
-                            private$.addNotice('WARNING', 'Invalid Ratio Values', sprintf(
-                                "Invalid ratio values in '%s'. Expected comma-separated numbers (e.g., '0.5,0.5'). Using equal proportions instead.",
-                                self$options$ratio
-                            ))
-                            ratio_vec <- NULL
+                # Swap in Fisher's exact test when the chi-squared on the subtitle
+                # would be invalid. Only for the ungrouped chart: grouped_ggbarstats
+                # returns a combined patchwork whose per-panel subtitles cannot be
+                # replaced this way, so that path keeps the notice instead.
+                want_subtitle <- if (!is.null(private$.option("resultssubtitle")))
+                    private$.option("resultssubtitle") else TRUE
+                exact_sub <- if (!grouped && isTRUE(want_subtitle))
+                    private$.exactSubtitle(data, dep_var) else NULL
 
-                        } else if (abs(sum(ratio_vec) - 1.0) > 0.001) {
-                            # Ratio doesn't sum to 1.0 - normalize
-                            normalized <- ratio_vec / sum(ratio_vec)
-                            private$.addNotice('INFO', 'Ratio Normalized', sprintf(
-                                "Ratio values normalized to sum to 1.0 (original sum: %.3f). Using: %s",
-                                sum(ratio_vec),
-                                paste(round(normalized, 3), collapse = ", ")
-                            ))
-                            ratio_vec <- normalized
-                        }
-                    }, error = function(e) {
-                        # Parsing error
-                        private$.addNotice('WARNING', 'Ratio Parse Error', sprintf(
-                            "Error parsing ratio '%s': %s. Using equal proportions.",
-                            self$options$ratio, e$message
-                        ))
-                        ratio_vec <- NULL
-                    })
-                }
-                
                 # Base arguments for ggstatsplot functions with performance optimizations
                 base_args <- list(
                     data = data,
                     x = rlang::sym(dep_var),
                     y = rlang::sym(self$options$group),
                     counts = if (!is.null(self$options$counts)) rlang::sym(self$options$counts) else NULL,
-                    type = override_type,  #  CRITICAL FIX: Use override_type (may auto-switch to Fisher)
+                    type = override_type,  # the user's choice, never silently overridden
                     paired = if (!is.null(private$.option("paired"))) private$.option("paired") else FALSE,
                     pairwise.comparisons = use_pairwise,
                     pairwise.display = self$options$pairwisedisplay,
                     p.adjust.method = private$.option("padjustmethod"),
-                    results.subtitle = if (!is.null(private$.option("resultssubtitle"))) private$.option("resultssubtitle") else TRUE,
+                    results.subtitle = want_subtitle && is.null(exact_sub),
                     label = if (!is.null(self$options$label)) self$options$label else "percentage",
                     digits = if (!is.null(self$options$digits)) self$options$digits else 2L,
                     digits.perc = if (!is.null(self$options$digitsperc)) self$options$digitsperc else 0L,
@@ -958,6 +1128,8 @@ jjbarstatsClass <- if (requireNamespace('jmvcore'))
                         # Checkpoint before expensive ggbarstats call
                         private$.checkpoint()
                         plot <- do.call(ggstatsplot::ggbarstats, base_args)
+                        if (!is.null(exact_sub))
+                            plot <- plot + ggplot2::labs(subtitle = exact_sub)
                         return(plot + private$.selectTheme(ggtheme))
                     }
                 }, error = function(e) {
@@ -1118,6 +1290,18 @@ jjbarstatsClass <- if (requireNamespace('jmvcore'))
                         # reported test matches what the plot will actually run.
                         private$.emitDataQualityNotices(prepared_data)
                         private$.resolvePairedOverride(prepared_data)
+
+                        # Say so when the typed proportions were rescaled or dropped.
+                        # Deduplicated: the same entry is checked once per dependent
+                        # variable but the message is usually identical.
+                        seen_ratio_msgs <- character()
+                        for (dv in self$options$dep) {
+                            n <- private$.computeRatioDecision(prepared_data, dv)$notice
+                            if (!is.null(n) && !(n[[3]] %in% seen_ratio_msgs)) {
+                                seen_ratio_msgs <- c(seen_ratio_msgs, n[[3]])
+                                private$.addNotice(n[[1]], n[[2]], n[[3]])
+                            }
+                        }
 
                         # Generate clinical interpretation panels.
                         # Each panel's visibility is governed by its own toggle in .r.yaml

@@ -71,11 +71,23 @@ jextractggstatsClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cla
             }
         },
         
+        # Correlation and scatterplot need a CONTINUOUS second variable, not a
+        # grouping factor.
+        .xIsContinuous = function() {
+            self$options$analysis_type %in% c("correlation", "scatterplot")
+        },
+
+        # Contingency/bar analyses cross-tabulate TWO categorical variables, so
+        # the dependent variable is categorical there, not numeric.
+        .depIsCategorical = function() {
+            self$options$analysis_type %in% c("contingency_stats", "bar_chart")
+        },
+
         .prepareData = function() {
             data <- as.data.frame(self$data)  # Convert tibble/spec_tbl_df to data.frame
             dep_var <- self$options$dep_var
             group_var <- self$options$group_var
-            
+
             # Create working data frame
             if (!is.null(group_var)) {
                 plot_data <- data[, c(dep_var, group_var), drop = FALSE]
@@ -84,15 +96,35 @@ jextractggstatsClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cla
                 # Ensure we get a data frame even for single column
                 plot_data <- data.frame(y = data[[dep_var]])
             }
-            
+
+            # Type the columns BEFORE dropping incomplete rows, so values that
+            # cannot be converted are dropped as missing rather than silently
+            # surviving as NA into the statistics.
+            if (!is.null(group_var)) {
+                if (private$.xIsContinuous()) {
+                    # The generated wrapper coerces every group_var to a factor.
+                    # Left as a factor, correlation::correlation() one-hot encodes
+                    # it and correlates the dummies with each other: measured
+                    # 30,381 rows of nonsense for a 246-level column, none of them
+                    # the requested correlation, and the analysis never returns.
+                    # setTimeLimit cannot interrupt it because the loop is in
+                    # compiled code, so in jamovi this is a frozen module.
+                    x_num <- suppressWarnings(as.numeric(as.character(plot_data$x)))
+                    if (all(is.na(x_num)))
+                        jmvcore::reject(
+                            "Correlation and scatterplot analyses require a continuous second variable; '{var}' is categorical. Choose Between Groups or Bar Chart instead.",
+                            var = group_var)
+                    plot_data$x <- x_num
+                } else if (!is.factor(plot_data$x)) {
+                    plot_data$x <- as.factor(plot_data$x)
+                }
+            }
+            if (private$.depIsCategorical() && !is.factor(plot_data$y))
+                plot_data$y <- as.factor(plot_data$y)
+
             # Remove missing values
             plot_data <- plot_data[complete.cases(plot_data), , drop = FALSE]
-            
-            # Convert grouping variable to factor if needed
-            if (!is.null(group_var) && !is.factor(plot_data$x)) {
-                plot_data$x <- as.factor(plot_data$x)
-            }
-            
+
             return(plot_data)
         },
         
@@ -478,8 +510,13 @@ jextractggstatsClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cla
             
             if (!is.null(dep_var)) {
                 dep_data <- self$data[[dep_var]]
-                if (!is.numeric(dep_data)) {
-                    jmvcore::reject("Dependent variable must be numeric for statistical analysis")
+                # Contingency and bar-chart analyses cross-tabulate two
+                # categorical variables. Demanding a numeric dependent variable
+                # for those made both of them unusable: every attempt was
+                # rejected before it ran, so two offered analysis types could
+                # never produce a result.
+                if (!private$.depIsCategorical() && !is.numeric(dep_data)) {
+                    jmvcore::reject("Dependent variable must be numeric for this analysis type")
                 }
 
                 if (all(is.na(dep_data))) {

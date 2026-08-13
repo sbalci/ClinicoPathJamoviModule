@@ -455,7 +455,7 @@ test_that("raincloud handles multiple analyses from same dataset", {
   for (var in variables) {
     results[[var]] <- raincloud(
       data = raincloud_test,
-      dep_var = var,
+      dep_var = !!var,
       group_var = "treatment_group",
       plot_theme = "clinical",
       show_violin = TRUE,
@@ -565,7 +565,7 @@ test_that("raincloud handles different distribution types in systematic comparis
   for (dist_type in distribution_types) {
     results[[dist_type]] <- raincloud(
       data = raincloud_skewed,
-      dep_var = dist_type,
+      dep_var = !!dist_type,
       group_var = "condition",
       plot_theme = "publication",
       color_palette = "prism_colorblind_safe",

@@ -96,14 +96,19 @@ test_that("jjpiestats handles customization options", {
 test_that("jjpiestats handles edge cases", {
   data(iris)
   
-  # Test with no dep (should return early)
+  # Test with no dep (should return early).
+  # NOTE: `data =` must be omitted. jmvcore::select(data, character(0)) builds a
+  # zero-column frame and dies in `row.names<-` with "invalid 'row.names' length"
+  # BEFORE any module code runs, so passing both `data` and a NULL `dep` cannot
+  # work from R. This is jmvcore-wide, not a defect here; the GUI reaches .run()
+  # by another route and shows the welcome panel asserted below.
   result_no_dep <- jjpiestats(
-    data = iris,
     dep = NULL,
     typestatistics = "parametric"
   )
-  
+
   expect_s3_class(result_no_dep, "Group")
+  expect_match(as.character(result_no_dep$todo$content), "Welcome to ClinicoPath")
   
   # Test with missing values
   iris_na <- iris
@@ -121,14 +126,16 @@ test_that("jjpiestats handles edge cases", {
 test_that("jjpiestats validates input parameters", {
   data(iris)
   
-  # Test with empty data
+  # Test with empty data. jmvcore checks the variable exists before it ever
+  # reaches the row count, so the message is about the missing column - the old
+  # "Data contains no" pattern matched nothing and testthat re-raised.
   expect_error(
     jjpiestats(
       data = data.frame(),
       dep = "Species",
       typestatistics = "parametric"
     ),
-    "Data contains no"
+    "not present in the dataset"
   )
 })
 

@@ -1,6 +1,14 @@
 # Load required libraries and data
 data(histopathology, package = "ClinicoPath")
 
+# NOTE: the two contingency_stats blocks need R/jextractggstats.h.R regenerated
+# from the current jamovi/jextractggstats.a.yaml, which now permits a factor
+# dependent variable (Contingency Table and Bar Chart cross-tabulate two
+# categorical variables, so they could never run while dep_var was
+# `permitted: [numeric]`). Until then jmvcore rejects them at the option layer
+# with "Argument 'dep_var' requires a numeric variable". Run:
+#   Rscript -e 'Sys.unsetenv("ELECTRON_RUN_AS_NODE"); jmvtools::prepare()'
+
 test_that("jextractggstats module loads correctly", {
   skip_if_not_installed('jmvReadWrite')
   expect_true(exists("jextractggstatsClass"))
@@ -8,17 +16,16 @@ test_that("jextractggstats module loads correctly", {
 })
 
 test_that("jextractggstats handles basic input validation", {
-  # Test with insufficient variables
-  expect_error(
-    jextractggstats(data = histopathology, dep_var = NULL),
-    NA  # Should not error during initialization, only during run
-  )
-  
-  # Test with no data
-  expect_error(
-    jextractggstats(data = NULL, dep_var = "Age"),
-    NA  # Should not error during initialization
-  )
+  # `jextractggstats(data = d, dep_var = NULL)` cannot be called from R at all:
+  # jmvcore::select(data, character(0)) builds a zero-column frame and dies in
+  # `row.names<-` with "invalid 'row.names' length" BEFORE any module code runs.
+  # Likewise `data = NULL` dies inside jmvcore with "attempt to apply
+  # non-function". Both are jmvcore-wide, not defects here; the jamovi GUI
+  # reaches .init()/.run() by another route and shows the instructions panel.
+  # What the module owns is that route, so that is what is asserted.
+  res <- jextractggstats(dep_var = NULL)
+  expect_s3_class(res, "jextractggstatsResults")
+  expect_match(res$instructions$content, "Statistical Data Extraction")
 })
 
 test_that("jextractggstats works with basic numeric variables", {
@@ -29,7 +36,7 @@ test_that("jextractggstats works with basic numeric variables", {
     analysis_type = "histogram"
   )
   
-  expect_s3_class(result, "jextractggstatsClass")
+  expect_s3_class(result, "jextractggstatsResults")
   expect_true("Age" %in% names(histopathology))
 })
 
@@ -42,13 +49,15 @@ test_that("jextractggstats handles between groups analysis", {
     analysis_type = "between_stats"
   )
   
-  expect_s3_class(result, "jextractggstatsClass")
-  
-  # Check that results contain expected components
-  expect_true("instructions" %in% names(result$results))
-  expect_true("extracted_data" %in% names(result$results))
-  expect_true("statistical_summary" %in% names(result$results))
-  expect_true("interpretation" %in% names(result$results))
+  expect_s3_class(result, "jextractggstatsResults")
+
+  # The wrapper returns the results Group itself, so the items are reached
+  # directly (result$results does not exist and raises "'results' does not
+  # exist in this results element").
+  expect_false(is.null(result$instructions))
+  expect_false(is.null(result$extracted_data))
+  expect_false(is.null(result$statistical_summary))
+  expect_false(is.null(result$interpretation))
 })
 
 test_that("jextractggstats handles different statistical tests", {
@@ -61,7 +70,7 @@ test_that("jextractggstats handles different statistical tests", {
     statistical_test = "parametric"
   )
   
-  expect_s3_class(result_parametric, "jextractggstatsClass")
+  expect_s3_class(result_parametric, "jextractggstatsResults")
   
   # Test non-parametric analysis
   result_nonparametric <- jextractggstats(
@@ -72,7 +81,7 @@ test_that("jextractggstats handles different statistical tests", {
     statistical_test = "nonparametric"
   )
   
-  expect_s3_class(result_nonparametric, "jextractggstatsClass")
+  expect_s3_class(result_nonparametric, "jextractggstatsResults")
   
   # Test robust analysis
   result_robust <- jextractggstats(
@@ -83,7 +92,7 @@ test_that("jextractggstats handles different statistical tests", {
     statistical_test = "robust"
   )
   
-  expect_s3_class(result_robust, "jextractggstatsClass")
+  expect_s3_class(result_robust, "jextractggstatsResults")
 })
 
 test_that("jextractggstats handles different analysis types", {
@@ -94,7 +103,7 @@ test_that("jextractggstats handles different analysis types", {
     analysis_type = "histogram"
   )
   
-  expect_s3_class(result_histogram, "jextractggstatsClass")
+  expect_s3_class(result_histogram, "jextractggstatsResults")
   
   # Test correlation analysis
   result_correlation <- jextractggstats(
@@ -104,7 +113,7 @@ test_that("jextractggstats handles different analysis types", {
     analysis_type = "correlation"
   )
   
-  expect_s3_class(result_correlation, "jextractggstatsClass")
+  expect_s3_class(result_correlation, "jextractggstatsResults")
   
   # Test contingency table analysis
   result_contingency <- jextractggstats(
@@ -114,7 +123,7 @@ test_that("jextractggstats handles different analysis types", {
     analysis_type = "contingency_stats"
   )
   
-  expect_s3_class(result_contingency, "jextractggstatsClass")
+  expect_s3_class(result_contingency, "jextractggstatsResults")
   
   # Test one-sample analysis
   result_one_sample <- jextractggstats(
@@ -124,7 +133,7 @@ test_that("jextractggstats handles different analysis types", {
     test_value = 50
   )
   
-  expect_s3_class(result_one_sample, "jextractggstatsClass")
+  expect_s3_class(result_one_sample, "jextractggstatsResults")
 })
 
 test_that("jextractggstats handles different extraction components", {
@@ -137,7 +146,7 @@ test_that("jextractggstats handles different extraction components", {
     extract_components = "all"
   )
   
-  expect_s3_class(result_all, "jextractggstatsClass")
+  expect_s3_class(result_all, "jextractggstatsResults")
   
   # Test subtitle data only
   result_subtitle <- jextractggstats(
@@ -148,7 +157,7 @@ test_that("jextractggstats handles different extraction components", {
     extract_components = "subtitle_data"
   )
   
-  expect_s3_class(result_subtitle, "jextractggstatsClass")
+  expect_s3_class(result_subtitle, "jextractggstatsResults")
   
   # Test descriptive data only
   result_descriptive <- jextractggstats(
@@ -159,7 +168,7 @@ test_that("jextractggstats handles different extraction components", {
     extract_components = "descriptive_data"
   )
   
-  expect_s3_class(result_descriptive, "jextractggstatsClass")
+  expect_s3_class(result_descriptive, "jextractggstatsResults")
 })
 
 test_that("jextractggstats handles different effect size types", {
@@ -172,7 +181,7 @@ test_that("jextractggstats handles different effect size types", {
     effect_size_type = "eta"
   )
   
-  expect_s3_class(result_eta, "jextractggstatsClass")
+  expect_s3_class(result_eta, "jextractggstatsResults")
   
   # Test Cohen's d
   result_d <- jextractggstats(
@@ -183,7 +192,7 @@ test_that("jextractggstats handles different effect size types", {
     effect_size_type = "cohens_d"
   )
   
-  expect_s3_class(result_d, "jextractggstatsClass")
+  expect_s3_class(result_d, "jextractggstatsResults")
 })
 
 test_that("jextractggstats handles pairwise comparisons", {
@@ -197,7 +206,7 @@ test_that("jextractggstats handles pairwise comparisons", {
     pairwise_correction = "holm"
   )
   
-  expect_s3_class(result, "jextractggstatsClass")
+  expect_s3_class(result, "jextractggstatsResults")
   
   # Test different correction methods
   result_bonferroni <- jextractggstats(
@@ -209,7 +218,7 @@ test_that("jextractggstats handles pairwise comparisons", {
     pairwise_correction = "bonferroni"
   )
   
-  expect_s3_class(result_bonferroni, "jextractggstatsClass")
+  expect_s3_class(result_bonferroni, "jextractggstatsResults")
 })
 
 test_that("jextractggstats handles confidence levels", {
@@ -222,7 +231,7 @@ test_that("jextractggstats handles confidence levels", {
     conf_level = 0.95
   )
   
-  expect_s3_class(result_95, "jextractggstatsClass")
+  expect_s3_class(result_95, "jextractggstatsResults")
   
   # Test with 99% confidence level
   result_99 <- jextractggstats(
@@ -233,7 +242,7 @@ test_that("jextractggstats handles confidence levels", {
     conf_level = 0.99
   )
   
-  expect_s3_class(result_99, "jextractggstatsClass")
+  expect_s3_class(result_99, "jextractggstatsResults")
 })
 
 test_that("jextractggstats handles display options", {
@@ -247,7 +256,7 @@ test_that("jextractggstats handles display options", {
     show_interpretation = TRUE
   )
   
-  expect_s3_class(result, "jextractggstatsClass")
+  expect_s3_class(result, "jextractggstatsResults")
   
   # Test with minimal output
   result_minimal <- jextractggstats(
@@ -259,7 +268,7 @@ test_that("jextractggstats handles display options", {
     show_interpretation = FALSE
   )
   
-  expect_s3_class(result_minimal, "jextractggstatsClass")
+  expect_s3_class(result_minimal, "jextractggstatsResults")
 })
 
 test_that("jextractggstats handles plotting options", {
@@ -273,8 +282,8 @@ test_that("jextractggstats handles plotting options", {
     outlier_tagging = FALSE
   )
   
-  expect_s3_class(result, "jextractggstats")
-  
+  expect_s3_class(result, "jextractggstatsResults")
+
   # Test with outlier tagging
   result_outliers <- jextractggstats(
     data = histopathology,
@@ -285,7 +294,7 @@ test_that("jextractggstats handles plotting options", {
     outlier_tagging = TRUE
   )
   
-  expect_s3_class(result_outliers, "jextractggstatsClass")
+  expect_s3_class(result_outliers, "jextractggstatsResults")
 })
 
 test_that("jextractggstats handles data inclusion options", {
@@ -299,7 +308,7 @@ test_that("jextractggstats handles data inclusion options", {
     include_model_data = TRUE
   )
   
-  expect_s3_class(result, "jextractggstatsClass")
+  expect_s3_class(result, "jextractggstatsResults")
   
   # Test without additional data
   result_minimal <- jextractggstats(
@@ -311,7 +320,7 @@ test_that("jextractggstats handles data inclusion options", {
     include_model_data = FALSE
   )
   
-  expect_s3_class(result_minimal, "jextractggstatsClass")
+  expect_s3_class(result_minimal, "jextractggstatsResults")
 })
 
 test_that("jextractggstats handles edge cases", {
@@ -327,17 +336,21 @@ test_that("jextractggstats handles edge cases", {
     )
   }, NA)  # Should not error during initialization
   
-  # Test with single group variable level (should handle gracefully)
+  # A grouping variable with a single level cannot support a between-groups
+  # comparison, so the analysis must SAY so rather than accept it. jmvcore's
+  # reject() is that message: in jamovi it is shown to the user as the reason
+  # the analysis produced nothing.
   single_group_data <- histopathology[histopathology$Sex == "Male", ]
-  
-  expect_error({
-    result <- jextractggstats(
+
+  expect_error(
+    jextractggstats(
       data = single_group_data,
       dep_var = "Age",
       group_var = "Sex",
       analysis_type = "between_stats"
-    )
-  }, NA)  # Should not error during initialization
+    ),
+    "at least 2 levels"
+  )
 })
 
 test_that("jextractggstats handles missing data appropriately", {
@@ -368,7 +381,7 @@ test_that("jextractggstats validates input types", {
     analysis_type = "between_stats"
   )
   
-  expect_s3_class(result, "jextractggstatsClass")
+  expect_s3_class(result, "jextractggstatsResults")
 })
 
 test_that("jextractggstats comprehensive test with all options", {
@@ -394,13 +407,13 @@ test_that("jextractggstats comprehensive test with all options", {
     show_interpretation = TRUE
   )
   
-  expect_s3_class(result, "jextractggstatsClass")
-  
+  expect_s3_class(result, "jextractggstatsResults")
+
   # Verify the structure of results
-  expect_true("instructions" %in% names(result$results))
-  expect_true("extracted_data" %in% names(result$results))
-  expect_true("statistical_summary" %in% names(result$results))
-  expect_true("interpretation" %in% names(result$results))
+  expect_false(is.null(result$instructions))
+  expect_false(is.null(result$extracted_data))
+  expect_false(is.null(result$statistical_summary))
+  expect_false(is.null(result$interpretation))
 })
 
 test_that("jextractggstats handles different output formats", {
@@ -413,7 +426,7 @@ test_that("jextractggstats handles different output formats", {
     output_format = "table"
   )
   
-  expect_s3_class(result_table, "jextractggstatsClass")
+  expect_s3_class(result_table, "jextractggstatsResults")
   
   # Test other output formats
   result_dataframe <- jextractggstats(
@@ -424,7 +437,7 @@ test_that("jextractggstats handles different output formats", {
     output_format = "dataframe"
   )
   
-  expect_s3_class(result_dataframe, "jextractggstatsClass")
+  expect_s3_class(result_dataframe, "jextractggstatsResults")
 })
 
 test_that("jextractggstats handles new analysis types with appropriate parameters", {
@@ -436,7 +449,7 @@ test_that("jextractggstats handles new analysis types with appropriate parameter
     test_value = 0
   )
   
-  expect_s3_class(result_one_sample_zero, "jextractggstatsClass")
+  expect_s3_class(result_one_sample_zero, "jextractggstatsResults")
   
   # Test one-sample stats with custom test value
   result_one_sample_custom <- jextractggstats(
@@ -447,7 +460,7 @@ test_that("jextractggstats handles new analysis types with appropriate parameter
     statistical_test = "parametric"
   )
   
-  expect_s3_class(result_one_sample_custom, "jextractggstatsClass")
+  expect_s3_class(result_one_sample_custom, "jextractggstatsResults")
   
   # Test contingency stats with categorical variables
   result_contingency_detailed <- jextractggstats(
@@ -459,7 +472,7 @@ test_that("jextractggstats handles new analysis types with appropriate parameter
     detailed_results = TRUE
   )
   
-  expect_s3_class(result_contingency_detailed, "jextractggstatsClass")
+  expect_s3_class(result_contingency_detailed, "jextractggstatsResults")
 })
 
 test_that("jextractggstats performance with different data sizes", {

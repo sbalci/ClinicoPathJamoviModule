@@ -18,8 +18,7 @@ test_that("jjbarstats handles all statistical types", {
       typestatistics = stat_type
     )
 
-    expect_s3_class(result, "jjbarstatsResults",
-                   info = paste("Failed for typestatistics:", stat_type))
+    expect_s3_class(result, "jjbarstatsResults")
   }
 })
 
@@ -92,8 +91,7 @@ test_that("jjbarstats handles all p-value adjustment methods", {
       padjustmethod = method
     )
 
-    expect_s3_class(result, "jjbarstatsResults",
-                   info = paste("Failed for padjustmethod:", method))
+    expect_s3_class(result, "jjbarstatsResults")
   }
 })
 
@@ -112,8 +110,7 @@ test_that("jjbarstats handles all pairwise display modes", {
       pairwisedisplay = mode
     )
 
-    expect_s3_class(result, "jjbarstatsResults",
-                   info = paste("Failed for pairwisedisplay:", mode))
+    expect_s3_class(result, "jjbarstatsResults")
   }
 })
 
@@ -123,16 +120,18 @@ test_that("jjbarstats handles split-by variable combinations", {
 
   split_vars <- c("sex", "age_group", "tumor_stage")
 
-  for (grvar in split_vars) {
+  for (gv in split_vars) {
+    # `grvar = gv` would NOT work: Variable options are resolved with NSE, so a
+    # bare symbol yields its own name and the analysis looks for a column called
+    # "gv". Splice the value in.
     result <- jjbarstats(
       data = jjbarstats_test,
       dep = "response",
       group = "treatment",
-      grvar = grvar
+      grvar = !!gv
     )
 
-    expect_s3_class(result, "jjbarstatsResults",
-                   info = paste("Failed for grvar:", grvar))
+    expect_s3_class(result, "jjbarstatsResults")
   }
 })
 
@@ -185,8 +184,7 @@ test_that("jjbarstats handles confidence level variations", {
       conflevel = conf
     )
 
-    expect_s3_class(result, "jjbarstatsResults",
-                   info = paste("Failed for conflevel:", conf))
+    expect_s3_class(result, "jjbarstatsResults")
   }
 })
 
@@ -306,8 +304,7 @@ test_that("jjbarstats handles balloon plot options", {
       ggpubrBalloonPalette = palette
     )
 
-    expect_s3_class(result, "jjbarstatsResults",
-                   info = paste("Failed for balloon palette:", palette))
+    expect_s3_class(result, "jjbarstatsResults")
   }
 })
 

@@ -4,25 +4,23 @@
 
 library(testthat)
 
-test_that("jjbarstats errors on missing required arguments", {
+# A jamovi analysis does not throw on bad input - .run() catches the rejection
+# and writes it into the `todo` panel. `expect_error()` therefore asserts the
+# OPPOSITE of the desired behaviour: it passes only when the analysis crashes.
+# Read the panel instead.
+jbs_todo <- function(res) gsub("[[:space:]]+", " ", gsub("<[^>]*>", " ", as.character(res$todo$content)))
+
+test_that("jjbarstats prompts for the variables it still needs", {
 
   data(jjbarstats_test)
 
-  # Missing dep
-  expect_error(
-    jjbarstats(
-      data = jjbarstats_test,
-      group = "treatment"
-    )
-  )
+  # Missing dep -> the getting-started panel, not a crash
+  expect_match(jbs_todo(jjbarstats(data = jjbarstats_test, group = "treatment")),
+               "Select your Outcome Variable")
 
   # Missing group
-  expect_error(
-    jjbarstats(
-      data = jjbarstats_test,
-      dep = "response"
-    )
-  )
+  expect_match(jbs_todo(jjbarstats(data = jjbarstats_test, dep = "response")),
+               "Choose a Group Variable")
 
   # Missing data
   expect_error(
@@ -56,14 +54,18 @@ test_that("jjbarstats handles all NA in dependent variable", {
   test_data_all_na <- jjbarstats_test
   test_data_all_na$response <- NA
 
-  # Should error with informative message
-  expect_error(
-    jjbarstats(
-      data = test_data_all_na,
-      dep = "response",
-      group = "treatment"
-    )
-  )
+  # `$response <- NA` replaces the factor with a logical column, so this lands on
+  # the variation guard (0 levels) rather than the complete-cases guard.
+  expect_match(jbs_todo(jjbarstats(data = test_data_all_na, dep = "response",
+                                   group = "treatment")),
+               "insufficient variation")
+
+  # Keeping the factor - all values missing, levels intact - takes the other path
+  keep_levels <- jjbarstats_test
+  keep_levels$response <- factor(NA, levels = levels(jjbarstats_test$response))
+  expect_match(jbs_todo(jjbarstats(data = keep_levels, dep = "response",
+                                   group = "treatment")),
+               "No complete data rows available")
 })
 
 test_that("jjbarstats handles missing grouping variable values", {
@@ -103,14 +105,15 @@ test_that("jjbarstats handles very small sample sizes", {
   data(jjbarstats_test)
   tiny_data <- jjbarstats_test[1:10, ]
 
-  # Should complete or warn about small sample
-  expect_condition(
-    jjbarstats(
-      data = tiny_data,
-      dep = "response",
-      group = "treatment"
-    )
-  )
+  # This used to pass by catching an incidental "Chi-squared approximation may be
+  # incorrect" console warning from chisq.test(). That warning is now suppressed
+  # where the backend computes expected counts, because it fires on exactly the
+  # sparse tables those helpers exist to DETECT and report properly. Assert the
+  # analysis's own signal, which is more specific and actually reaches the user.
+  res <- jjbarstats(data = tiny_data, dep = "response", group = "treatment")
+  n <- gsub("[[:space:]]+", " ", paste(as.character(res$notices$content), collapse = " "))
+  expect_match(n, "Small Group Sizes")
+  expect_match(n, "minimum of ~5 observations per group")
 })
 
 test_that("jjbarstats handles single level in dependent variable", {
@@ -119,14 +122,9 @@ test_that("jjbarstats handles single level in dependent variable", {
   single_dep <- jjbarstats_test
   single_dep$response <- "No Response"
 
-  # Should error as no variation
-  expect_error(
-    jjbarstats(
-      data = single_dep,
-      dep = "response",
-      group = "treatment"
-    )
-  )
+  expect_match(jbs_todo(jjbarstats(data = single_dep, dep = "response",
+                                   group = "treatment")),
+               "insufficient variation")
 })
 
 test_that("jjbarstats handles single level in grouping variable", {
@@ -135,14 +133,9 @@ test_that("jjbarstats handles single level in grouping variable", {
   single_group <- jjbarstats_test
   single_group$treatment <- "Placebo"
 
-  # Should error as cannot compare groups
-  expect_error(
-    jjbarstats(
-      data = single_group,
-      dep = "response",
-      group = "treatment"
-    )
-  )
+  expect_match(jbs_todo(jjbarstats(data = single_group, dep = "response",
+                                   group = "treatment")),
+               "at least 2 categories")
 })
 
 test_that("jjbarstats handles variables with special characters", {
@@ -290,32 +283,27 @@ test_that("jjbarstats handles invalid expected proportions", {
 
   data(jjbarstats_test)
 
-  # Proportions don't sum to 1
-  expect_condition(
-    jjbarstats(
-      data = jjbarstats_test,
-      dep = "response",
-      group = "treatment",
-      proportiontest = TRUE,
-      ratio = "0.5,0.5,0.5"  # Sums to 1.5
-    )
-  )
+  # Proportions don't sum to 1 -> rescaled, and the user is told what was used.
+  # The rescaling always happened; the notice explaining it was raised inside
+  # .createBarPlot, i.e. during .plot(), where notices are discarded.
+  res <- jjbarstats(data = jjbarstats_test, dep = "response", group = "treatment",
+                    proportiontest = TRUE, ratio = "0.5,0.5,0.5")
+  n <- gsub("[[:space:]]+", " ", paste(as.character(res$notices$content), collapse = " "))
+  expect_match(n, "rescaled")
+  expect_match(n, "0.333, 0.333, 0.333", fixed = TRUE)
 })
 
 test_that("jjbarstats handles wrong number of expected proportions", {
 
   data(jjbarstats_test)
 
-  # 2 proportions for 3 groups
-  expect_condition(
-    jjbarstats(
-      data = jjbarstats_test,
-      dep = "response",
-      group = "treatment",
-      proportiontest = TRUE,
-      ratio = "0.5,0.5"
-    )
-  )
+  # 2 proportions for a 3-category outcome. The length was never checked at all,
+  # so the test ran against proportions the user did not specify, silently.
+  res <- jjbarstats(data = jjbarstats_test, dep = "response", group = "treatment",
+                    proportiontest = TRUE, ratio = "0.5,0.5")
+  n <- gsub("[[:space:]]+", " ", paste(as.character(res$notices$content), collapse = " "))
+  expect_match(n, "Expected proportions ignored")
+  expect_match(n, "2 proportions given for 'response', which has 3 categories", fixed = TRUE)
 })
 
 test_that("jjbarstats handles aggregated data with zero counts", {
@@ -345,15 +333,12 @@ test_that("jjbarstats handles aggregated data with all zero counts", {
     count = c(0, 0, 0, 0)
   )
 
-  # Should error as no data
-  expect_error(
-    jjbarstats(
-      data = zero_all_data,
-      dep = "response",
-      group = "treatment",
-      counts = "count"
-    )
-  )
+  # n = 0 is not a small sample, it is no sample. This used to run: the summary
+  # panel announced "Sample Size: 0 observations" beside "Statistical Method:
+  # Chi-square test of independence" and a chart was drawn.
+  expect_match(jbs_todo(jjbarstats(data = zero_all_data, dep = "response",
+                                   group = "treatment", counts = "count")),
+               "sums to zero")
 })
 
 test_that("jjbarstats handles perfect association", {

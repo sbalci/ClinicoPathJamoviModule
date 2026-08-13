@@ -320,9 +320,43 @@ jjpiestatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     expected_counts <- suppressWarnings(chisq.test(contingency_table)$expected)
                     
                     if (any(expected_counts < 5)) {
-                        warnings_list <- c(warnings_list, 
-                            paste("", .('Expected cell counts < 5 detected. Consider using Fisher\'s exact test (nonparametric option) for more reliable results.'))
-                        )
+                        # Do NOT tell the user to pick "nonparametric" to obtain a
+                        # Fisher test - that option returns the identical Pearson
+                        # chi-square (measured: chi2(1) = 4.47, p = 0.03 for
+                        # parametric, nonparametric and robust alike, while
+                        # fisher.test() on that table gives p = 0.0511, i.e. the
+                        # other side of 0.05). Compute the exact test here and hand
+                        # over the real number.
+                        n_low <- sum(expected_counts < 5)
+
+                        # Whether the chart subtitle was replaced with the exact
+                        # test depends on the same conditions .exactSubtitle()
+                        # checks. Keep this text in step with what is actually on
+                        # the figure - a panel that contradicts the chart is the
+                        # defect this whole fix is about.
+                        swapped <- !is.null(private$.exactSubtitle(
+                            self$data, self$options$dep, self$options$group,
+                            self$options$counts, self$options$conflevel, self$options$digits))
+
+                        # fisher.test() enumerates tables and can hang on a large
+                        # sparse one; cap it and say so rather than freeze jamovi.
+                        fisher_p <- if (prod(dim(contingency_table)) <= 30)
+                            tryCatch(stats::fisher.test(contingency_table)$p.value,
+                                     error = function(e) NA_real_)
+                        else NA_real_
+
+                        warnings_list <- c(warnings_list, paste0(
+                            "",
+                            sprintf(.('Chi-square is unreliable here: %d of %d expected cell counts are below 5.'),
+                                    n_low, length(expected_counts)),
+                            " ",
+                            if (swapped)
+                                .('The chart subtitle therefore reports Fisher\'s exact test instead of the chi-square.')
+                            else if (is.finite(fisher_p))
+                                sprintf(.('The chart subtitle still reports an uncorrected Pearson chi-square - no statistic option changes that, as the plotting package offers no exact test. Fisher\'s exact test on this table gives <b>%s</b>; quote that value, not the subtitle.'),
+                                        private$.fmtP(fisher_p))
+                            else
+                                .('The chart subtitle still reports an uncorrected Pearson chi-square. An exact test was not computed for a table of this size; consider collapsing sparse categories.')))
                     }
                     
                     if (any(contingency_table < 2)) {
@@ -366,8 +400,12 @@ jjpiestatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         .generateInterpretationContent = function() {
             method_guidance <- switch(self$options$typestatistics,
                 "parametric" = .('Chi-square test results show whether group differences are statistically significant. Look for p-values < 0.05 for significant associations. Example: \u03c7\u00b2(1) = 5.2, p = 0.023 indicates significant difference between groups.'),
-                "nonparametric" = .('Fisher\'s exact test provides precise p-values for small samples. Recommended when expected cell counts are < 5. Example: p = 0.031 (two-sided) indicates significant association, with odds ratio quantifying effect strength.'),
-                "robust" = .('Robust methods provide reliable results even with outliers or non-normal distributions. Example: Robust estimate = 0.45 [0.32, 0.58] shows effect with 95% confidence interval.'),
+                # For a contingency table, ggstatsplot computes the SAME Pearson
+                # chi-square for parametric, nonparametric and robust - it offers no
+                # exact test. Telling the user these buttons change the method sent
+                # them to a "Fisher's exact test" that never ran.
+                "nonparametric" = .('For contingency tables this option computes the same Pearson chi-square as Parametric - the plotting package provides no exact test. If expected cell counts are below 5, use the exact p-value reported in the Assumptions panel instead of the chart subtitle.'),
+                "robust" = .('For contingency tables this option computes the same Pearson chi-square as Parametric. Robust estimation applies to continuous outcomes, not to counts.'),
                 "bayes" = .('Bayesian analysis provides evidence for or against group differences. Bayes factors > 3 suggest evidence for differences. Example: BF\u2081\u2080 = 5.2 indicates data are 5.2 times more likely under alternative hypothesis than null.'),
                 .('Statistical analysis will be performed based on your data characteristics.')
             )
@@ -379,14 +417,23 @@ jjpiestatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 .('Interpret results in the context of your specific research question and clinical setting. Focus on effect sizes (Cram\u00e9r\'s V, odds ratios) alongside p-values for clinical significance assessment.')
             )
 
-            # Effect size interpretation guide
+            # Effect size interpretation guide.
+            #
+            # The chart subtitle reports the BIAS-CORRECTED Cramer's V (Bergsma
+            # 2013), which is what ggstatsplot/effectsize compute, while Cohen's
+            # 0.10/0.30/0.50 landmarks were derived for the uncorrected statistic.
+            # The correction shrinks V, so reading one against the other
+            # under-calls the effect: measured on a 4x2 table with n = 200,
+            # uncorrected V = 0.15 ("small") but corrected V = 0.08, which these
+            # thresholds would dismiss as negligible. Say which one is on screen.
             effect_size_guide <- paste0(
                 "<p><strong>", .('Effect Size Interpretation (Cram\u00e9r\'s V):'), "</strong></p>",
                 "<ul>",
                 "<li>", .('Small effect: V = 0.10 (subtle association, may require large samples to detect)'), "</li>",
                 "<li>", .('Medium effect: V = 0.30 (noticeable association, clinically relevant in many contexts)'), "</li>",
                 "<li>", .('Large effect: V = 0.50 (strong association, typically clinically important)'), "</li>",
-                "</ul>"
+                "</ul>",
+                "<p><em>", .('Note: the chart subtitle reports the bias-corrected Cram\u00e9r\'s V (Bergsma 2013), which is smaller than the classical statistic these landmarks describe - especially in small samples and larger tables. Treat the thresholds as approximate, and read the confidence interval next to V rather than the point estimate alone.'), "</em></p>"
             )
 
             glue::glue(
@@ -405,12 +452,18 @@ jjpiestatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         },
         
         .generateReportContent = function() {
+            # This sentence is offered as Methods text to paste into a manuscript,
+            # so it must name the test that actually ran. It did not: measured on a
+            # 2x2 with a low expected count, ggpiestats returns the SAME
+            # uncorrected Pearson chi2(1) = 4.47, p = 0.03 for type = "parametric",
+            # "nonparametric" AND "robust" - only "bayes" differs. Naming
+            # "Fisher's exact test" therefore published a test that was never run,
+            # and on that table Fisher gives p = 0.0511 - the other side of 0.05
+            # from the number shown. statsExpressions::contingency_table() routes
+            # every frequentist type to chi-square; there is no exact-test option.
             method_name <- switch(self$options$typestatistics,
-                "parametric" = .('chi-square test'),
-                "nonparametric" = .('Fisher\'s exact test'), 
-                "robust" = .('robust statistical analysis'),
-                "bayes" = .('Bayesian analysis'),
-                .('statistical analysis')
+                "bayes" = .('a Bayesian contingency table analysis'),
+                .('Pearson\'s chi-squared test')
             )
             
             # Interpolate the {outcome}/{groups}/{method} placeholders with glue.
@@ -682,6 +735,74 @@ jjpiestatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             })
         },
 
+        # "p = < 0.001" reads badly; the operator belongs to the number. Returns a
+        # ready-to-embed string, e.g. "p = 0.051" or "p < 0.001". `html` picks the
+        # entity form for the HTML panels (a bare "<" is fine in HTML5 text when
+        # followed by a space, but the entity is unambiguous).
+        .fmtP = function(p, html = TRUE) {
+            if (!is.finite(p)) return("p = NA")
+            if (p < 0.001) paste0("p ", if (html) "&lt;" else "<", " 0.001")
+            else paste0("p = ", formatC(p, format = "f", digits = 3))
+        },
+
+        # Build a replacement subtitle carrying Fisher's exact test.
+        #
+        # ggstatsplot has no exact-test option, so on a sparse 2x2 the chart
+        # subtitle showed an uncorrected Pearson chi-square that is not valid at
+        # those expected counts - and the Assumptions panel had to tell the reader
+        # to ignore the number printed on the figure. A figure that contradicts its
+        # own caption travels badly: the chart gets pasted into a slide deck without
+        # the panel. So compute the exact test here and put it ON the plot.
+        #
+        # Returns a plotmath expression in ggstatsplot's own idiom, or NULL when
+        # the exact test does not apply (not 2x2, adequate expected counts, paired
+        # data - where McNemar is already correct - or a Bayesian analysis).
+        .exactSubtitle = function(data, dep_var, group_var, counts_var = NULL,
+                                  conf_level = 0.95, digits = 2L) {
+            if (is.null(group_var) || !nzchar(group_var))
+                return(NULL)
+            if (isTRUE(self$options$paired) || identical(self$options$typestatistics, "bayes"))
+                return(NULL)
+
+            tryCatch({
+                if (!is.null(counts_var) && nzchar(counts_var) && counts_var %in% names(data)) {
+                    formula_str <- paste0(jmvcore::composeTerm(counts_var), " ~ ",
+                                          jmvcore::composeTerm(dep_var), " + ",
+                                          jmvcore::composeTerm(group_var))
+                    tb <- xtabs(jmvcore::asFormula(formula_str), data = data)
+                } else {
+                    tb <- table(data[[dep_var]], data[[group_var]])
+                }
+                if (!identical(dim(tb), c(2L, 2L)))
+                    return(NULL)
+
+                expected <- suppressWarnings(chisq.test(tb)$expected)
+                if (!any(expected < 5))
+                    return(NULL)
+
+                ft <- stats::fisher.test(tb, conf.level = conf_level)
+                d  <- max(0L, as.integer(digits))
+                fmt <- function(x) formatC(x, format = "f", digits = d)
+                p_txt <- if (ft$p.value < 0.001) "< 0.001"
+                         else formatC(ft$p.value, format = "f", digits = max(3L, d))
+
+                # Odds ratio can be 0 or Inf on a zero cell; omit it rather than
+                # print an uninterpretable bound.
+                or <- unname(ft$estimate)
+                has_or <- is.finite(or) && all(is.finite(ft$conf.int))
+
+                txt <- if (has_or)
+                    sprintf('list(italic("p")["Fisher"] == "%s", widehat(italic("OR")) == "%s", CI["%g%%"] ~ "[" * "%s", "%s" * "]", italic("n")["obs"] == "%d")',
+                            p_txt, fmt(or), conf_level * 100,
+                            fmt(ft$conf.int[1]), fmt(ft$conf.int[2]), sum(tb))
+                else
+                    sprintf('list(italic("p")["Fisher"] == "%s", italic("n")["obs"] == "%d")',
+                            p_txt, sum(tb))
+
+                parse(text = txt)[[1]]
+            }, error = function(e) NULL)
+        },
+
         .validatePairedData = function(data, dep_var, group_var) {
             # CRITICAL FIX #3: Validate paired data for McNemar test
             # McNemar test requires exactly 2x2 contingency table
@@ -724,8 +845,13 @@ jjpiestatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             if (total_n < 10) {
                 return(list(
                     valid = FALSE,
+                    # Do NOT point at "the nonparametric option" for an exact
+                    # test - that option returns the same chi-square. And Fisher's
+                    # exact test is the wrong suggestion for PAIRED data anyway:
+                    # it assumes independent samples. The exact counterpart of
+                    # McNemar is a binomial test on the discordant pairs.
                     message = sprintf(
-                        .('McNemar test requires at least 10 paired observations for reliable results. Your data has %d paired observations. Consider collecting more data or using Fisher exact test (nonparametric option) instead.'),
+                        .('McNemar test requires at least 10 paired observations for reliable results. Your data has %d paired observations. Collect more data, or run an exact binomial test on the discordant pairs - the exact counterpart of McNemar. Note that Fisher\'s exact test is not an alternative here: it assumes independent samples, not paired ones.'),
                         total_n
                     )
                 ))
@@ -994,11 +1120,106 @@ jjpiestatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
         # run ----
         ,
+        # Every user-facing notice that depends on the data is raised from here,
+        # called near the end of .run(). The plot functions cannot do it: notices
+        # written during .plot() are discarded because jamovi has already composed
+        # the results panel by then. That is why malformed "Expected proportions"
+        # produced no message at all - the guard ran, in the wrong lifecycle phase.
+        .emitRunNotices = function(prepared_data) {
+            dep   <- self$options$dep
+            group <- self$options$group
+
+            # Expected proportions. .parseRatio silently returns NULL on bad
+            # input (its four error messages were commented out during an
+            # abandoned Notice-to-HTML migration), so re-derive the reason here.
+            raw <- self$options$ratio
+            if (!is.null(raw) && nzchar(trimws(raw))) {
+                vals <- suppressWarnings(as.numeric(trimws(strsplit(raw, ",")[[1]])))
+                ignored <- function(why)
+                    private$.addNotice("WARNING", .('Expected proportions ignored'),
+                        paste0(why, " ", .('Equal theoretical proportions were used instead.')))
+
+                if (anyNA(vals))
+                    ignored(sprintf(.('\'%s\' is not a list of numbers; expected comma-separated values such as "0.5,0.5".'), raw))
+                else if (any(vals <= 0))
+                    ignored(sprintf(.('\'%s\' contains a zero or negative proportion.'), raw))
+                else if (abs(sum(vals) - 1) > 0.001)
+                    ignored(sprintf(.('\'%s\' sums to %s, but expected proportions must sum to 1.'),
+                                    raw, formatC(sum(vals), format = "f", digits = 3)))
+                else
+                    # Valid numbers: the remaining failure is a length mismatch,
+                    # which .applyRatioLengthGuard reports.
+                    invisible(private$.applyRatioLengthGuard(vals, prepared_data, dep))
+            }
+
+            # A pie chart encodes proportion as angle, which readers compare poorly
+            # once the slices get thin; the existing guard only rejects a SINGLE
+            # level, so a 90-level variable rendered 90 unreadable slivers without
+            # comment. Warn rather than block - the numbers are still correct, and
+            # the composition table remains usable.
+            if (!is.null(dep) && dep %in% names(prepared_data)) {
+                n_slices <- nlevels(droplevels(as.factor(prepared_data[[dep]])))
+                if (n_slices > 7)
+                    private$.addNotice("WARNING", .('Too many slices to read'),
+                        sprintf(.('\'%s\' has %d categories, so the chart has %d slices. Pie charts become hard to read beyond about seven; consider collapsing rare categories, or use a bar chart, which compares lengths rather than angles.'),
+                                dep, n_slices, n_slices))
+            }
+
+            # Split By draws one panel per level via grouped_ggpiestats, which
+            # returns a combined patchwork - its per-panel subtitles cannot be
+            # swapped the way plot2's single subtitle is. Where a panel's own 2x2
+            # is too sparse for chi-square, give the exact p-value for that panel
+            # here so the figure is not the only source.
+            grvar <- self$options$grvar
+            if (!is.null(grvar) && !is.null(group) && nzchar(grvar) &&
+                grvar %in% names(prepared_data) && !isTRUE(self$options$paired) &&
+                !identical(self$options$typestatistics, "bayes")) {
+
+                lines <- character()
+                for (lv in levels(droplevels(as.factor(prepared_data[[grvar]])))) {
+                    sub_df <- prepared_data[!is.na(prepared_data[[grvar]]) &
+                                            prepared_data[[grvar]] == lv, , drop = FALSE]
+                    r <- tryCatch({
+                        tb <- table(sub_df[[dep]], sub_df[[group]])
+                        if (!identical(dim(tb), c(2L, 2L))) NULL
+                        else if (!any(suppressWarnings(chisq.test(tb)$expected) < 5)) NULL
+                        else {
+                            fp <- stats::fisher.test(tb)$p.value
+                            sprintf("%s: %s", lv, private$.fmtP(fp, html = FALSE))
+                        }
+                    }, error = function(e) NULL)
+                    if (!is.null(r)) lines <- c(lines, r)
+                }
+
+                if (length(lines))
+                    private$.addNotice("WARNING", .('Split By panels: use these exact p-values'),
+                        paste0(sprintf(.('In %d of the Split By panels the expected cell counts are too small for the chi-square shown on that panel. Fisher\'s exact test gives:'),
+                                       length(lines)),
+                               " ", paste(lines, collapse = "; "), "."))
+            }
+
+            # paired disables the single-variable chart; say so where it is seen.
+            if (isTRUE(self$options$paired))
+                private$.addNotice("WARNING", .('Single-variable pie chart not shown'),
+                    .('The paired/repeated-measures option requires a two-way (grouped) comparison, so the single-variable pie chart cannot be drawn. Disable the "Paired" option to display this chart, or read the paired result from the grouped charts.'))
+
+            # A variable crossed with itself yields a perfectly diagonal table, so
+            # the association test is a tautology: every off-diagonal cell is 0 and
+            # the p-value is ~0 by construction, not by any finding in the data.
+            if (!is.null(group) && !is.null(dep) && identical(dep, group))
+                private$.addNotice("STRONG_WARNING", .('Variable compared with itself'),
+                    sprintf(.('\'%s\' is used as both the outcome and the grouping variable. The contingency table is then diagonal by construction, so the association test reports a near-zero p-value that reflects the setup rather than the data. Choose a different grouping variable.'),
+                            dep))
+
+            private$.renderNotices()
+        },
+
         .run = function() {
 
             # Reset notices at the top of every run so stale messages from a
             # previous state (e.g. a paired-validation failure the user has since
-            # fixed) are cleared; render functions re-populate as needed.
+            # fixed) are cleared; .emitRunNotices() re-populates and re-renders
+            # near the end of the run.
             private$.noticeList <- list()
             private$.renderNotices()
 
@@ -1086,18 +1307,11 @@ jjpiestatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     
                     self$results$todo$setContent(todo)
 
-                    # Add analysis completion Notice
-                    # notice <- jmvcore::Notice$new(
-                    #     options = self$options,
-                    #     name = 'analysisComplete',
-                    #     type = jmvcore::NoticeType$INFO
-                    # )
-                    # notice$setContent(sprintf(
-                    #     'Pie chart analysis completed successfully using %d observations with %s statistical method.',
-                    #     nrow(prepared_data),
-                    #     tools::toTitleCase(self$options$typestatistics)
-                    # ))
-                    # self$results$insert(999, notice)
+                    # Emit the data-dependent notices HERE, in .run(). They were
+                    # previously raised from .plot1/.plot2/.plot4, i.e. during
+                    # .plot(), where jamovi has already composed the results panel
+                    # and discards them - so every ratio complaint was invisible.
+                    private$.emitRunNotices(prepared_data)
 
                 }, error = function(e) {
                     # Reset cache on error
@@ -1294,26 +1508,15 @@ jjpiestatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 }
             }
 
-            # CRITICAL FIX #5: Auto-switch to Fisher's exact if chi-square assumptions violated
+            # The old "auto-switch to Fisher's exact" rewrote the user's chosen type
+            # to "nonparametric" on a sparse 2x2. It bought nothing: measured,
+            # ggpiestats returns the identical uncorrected Pearson chi2(1) = 4.47,
+            # p = 0.03 for parametric, nonparametric and robust alike, because
+            # statsExpressions routes every frequentist type to chi-square. So the
+            # switch silently changed what the user asked for, returned the same
+            # number, and led the report to label it "Fisher's exact test" - a test
+            # that never ran. The exact p-value is now given in the Assumptions panel.
             override_type <- options_data$typestatistics
-            if (options_data$typestatistics == "parametric" && !options_data$paired) {
-                fisher_check <- private$.checkFisherNeeded(mydata, dep, group, counts_var)
-                if (fisher_check$use_fisher) {
-                    override_type <- "nonparametric"  # Fisher's exact for 2x2
-                    # notice <- jmvcore::Notice$new(
-                    #     options = self$options,
-                    #     name = 'fisherAutoSwitch',
-                    #     type = jmvcore::NoticeType$INFO
-                    # )
-                    # notice$setContent(sprintf(
-                    #     .('Automatically switched to Fisher\'s Exact Test: %d of %d cells (%.1f%%) have expected counts < 5 (chi-square assumption violated). For 2\u00d72 tables, Fisher\'s exact test provides more reliable p-values when expected counts are low.'),
-                    #     fisher_check$low_count_cells,
-                    #     fisher_check$total_cells,
-                    #     fisher_check$pct_low
-                    # ))
-                    # self$results$insert(999, notice)
-                }
-            }
 
             # Checkpoint before expensive statistical computation
             private$.checkpoint()
@@ -1325,6 +1528,13 @@ jjpiestatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 )
                 private$.checkpoint(flush = TRUE)
             }
+
+            # If the chi-square on the subtitle would be invalid, swap in Fisher's
+            # exact test rather than printing a number the Assumptions panel then
+            # has to disown.
+            exact_sub <- if (isTRUE(options_data$resultssubtitle))
+                private$.exactSubtitle(mydata, dep, group, counts_var,
+                                       options_data$conflevel, options_data$digits) else NULL
 
             plot2 <-
                 ggstatsplot::ggpiestats(
@@ -1352,9 +1562,11 @@ jjpiestatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     palette = "Dark2",
                     ggplot.component = NULL,
                     output = "plot",
-                    results.subtitle = options_data$resultssubtitle
+                    results.subtitle = options_data$resultssubtitle && is.null(exact_sub)
                 )
 
+            if (!is.null(exact_sub))
+                plot2 <- plot2 + ggplot2::labs(subtitle = exact_sub)
 
             originaltheme <- options_data$originaltheme
 
@@ -1440,26 +1652,15 @@ jjpiestatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     }
                 }
 
-                # CRITICAL FIX #5: Auto-switch to Fisher's exact if chi-square assumptions violated
+                # The old "auto-switch to Fisher's exact" rewrote the user's chosen type
+                # to "nonparametric" on a sparse 2x2. It bought nothing: measured,
+                # ggpiestats returns the identical uncorrected Pearson chi2(1) = 4.47,
+                # p = 0.03 for parametric, nonparametric and robust alike, because
+                # statsExpressions routes every frequentist type to chi-square. So the
+                # switch silently changed what the user asked for, returned the same
+                # number, and led the report to label it "Fisher's exact test" - a test
+                # that never ran. The exact p-value is now given in the Assumptions panel.
                 override_type <- options_data$typestatistics
-                if (options_data$typestatistics == "parametric" && !options_data$paired) {
-                    fisher_check <- private$.checkFisherNeeded(mydata, dep, group, counts_var)
-                    if (fisher_check$use_fisher) {
-                        override_type <- "nonparametric"  # Fisher's exact for 2x2
-                        # notice <- jmvcore::Notice$new(
-                        #     options = self$options,
-                        #     name = 'fisherAutoSwitch',
-                        #     type = jmvcore::NoticeType$INFO
-                        # )
-                        # notice$setContent(sprintf(
-                        #     .('Automatically switched to Fisher\'s Exact Test: %d of %d cells (%.1f%%) have expected counts < 5 (chi-square assumption violated). For 2\u00d72 tables, Fisher\'s exact test provides more reliable p-values when expected counts are low.'),
-                        #     fisher_check$low_count_cells,
-                        #     fisher_check$total_cells,
-                        #     fisher_check$pct_low
-                        # ))
-                        # self$results$insert(999, notice)
-                    }
-                }
 
                 # Checkpoint before expensive grouped statistical computation
                 private$.checkpoint()
@@ -1574,17 +1775,43 @@ jjpiestatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         #' Generate R source code for Pie Chart Statistics analysis
         #' @return Character string with R syntax for reproducible analysis
         asSource = function() {
-            # Get arguments
-            args <- private$.asArgs(incData = FALSE)
-            if (args != '')
-                args <- paste0(',\n    ', args)
+            # Build the argument list in option-declaration order.
+            #
+            # private$.asArgs() emitted variable names as BARE symbols, so a column
+            # called `Tumor Grade ("high")` produced
+            #     dep = Tumor Grade ("high")
+            # which is not valid R - copying the syntax pane into a script raised
+            # "unexpected symbol". Emit every variable-name option as a deparse()'d
+            # string literal instead; deparse() escapes quotes and backslashes
+            # correctly. Detecting the option by CLASS rather than by name means a
+            # variable option added later is escaped automatically. Non-variable
+            # options keep jmvcore's per-option sourcify so formatting matches the
+            # rest of jamovi. Do NOT also call .asArgs() - emitting both duplicates
+            # every variable in the generated call.
+            args <- character(0)
+            for (option in private$.options$options) {
+                if (option$name == 'data')
+                    next
+                if (inherits(option, 'OptionVariable') || inherits(option, 'OptionVariables')) {
+                    val <- option$value
+                    if (!is.null(val) && length(val) > 0)
+                        args <- c(args, paste0(option$name, ' = ',
+                                               paste0(deparse(val), collapse = '')))
+                } else {
+                    as <- private$.sourcifyOption(option)
+                    if (!identical(as, ''))
+                        args <- c(args, as)
+                }
+            }
 
             # Get package name dynamically
             pkg_name <- utils::packageName()
             if (is.null(pkg_name)) pkg_name <- "ClinicoPath"  # fallback
 
             # Build complete function call
-            paste0(pkg_name, '::jjpiestats(\n    data = data', args, ')')
+            paste0(pkg_name, '::jjpiestats(\n    data = data',
+                   if (length(args)) paste0(',\n    ', paste(args, collapse = ',\n    ')) else '',
+                   ')')
         }
     ) # End of public list
 )

@@ -37,6 +37,7 @@ jjsegmentedtotalbar(
   flerlage_label_color = "black",
   flerlage_alpha = 0.3,
   flerlage_box_color = "lightgrey",
+  y_is_count = FALSE,
   show_statistical_tests = FALSE,
   confidence_level = 0.95,
   exclude_missing = TRUE,
@@ -111,6 +112,10 @@ percent).}
 1=opaque).}
 
 \item{flerlage_box_color}{Color of background boxes in Flerlage plots.}
+
+\item{y_is_count}{Affirm that the Value Variable is a frequency (a number
+of cases), not a measurement. Required before a chi-square test can be run,
+because the test treats the summed values as cell counts.}
 
 \item{show_statistical_tests}{Whether to perform chi-square tests for
 proportion differences.}

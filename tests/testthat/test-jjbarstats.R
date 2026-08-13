@@ -3,7 +3,10 @@
 
 # Load required libraries and test data
 library(testthat)
-library(ClinicoPathJamoviModule)
+# The package is ClinicoPath; ClinicoPathJamoviModule is only the repository
+# name. Requiring the wrong one silently skipped this ENTIRE file - all 15
+# blocks below reported as neither passed nor failed.
+library(ClinicoPath)
 
 # Load test datasets
 data("medical_study_data")
@@ -198,34 +201,25 @@ test_that("jjbarstats respects theme options", {
 # Test 7: Data validation and error handling
 test_that("jjbarstats handles edge cases and errors appropriately", {
   
-  # Test with empty dataframe
-  empty_data <- data.frame()
-  expect_error({
-    analysis <- create_jjbarstats_analysis(
-      data = empty_data,
-      dep = "nonexistent",
-      group = "also_nonexistent"
-    )
-  })
-  
-  # Test with single row dataframe
-  single_row_data <- medical_study_data[1, ]
-  expect_no_error({
-    analysis <- create_jjbarstats_analysis(
-      data = single_row_data,
-      dep = "response",
-      group = "treatment_group"
-    )
-  })
-  
-  # Test with missing variables
-  expect_error({
-    analysis <- create_jjbarstats_analysis(
-      data = medical_study_data,
-      dep = "nonexistent_variable",
-      group = "treatment_group"
-    )
-  })
+  # These called create_jjbarstats_analysis(), the mock defined at the top of
+  # this file, which only builds a list() - a list constructor cannot throw, so
+  # the assertions could never pass and nothing about jjbarstats was exercised.
+  # Call the real analysis.
+
+  # Empty dataframe
+  expect_error(jjbarstats(data = data.frame(), dep = "nonexistent",
+                          group = "also_nonexistent"),
+               "not present in the dataset")
+
+  # Single row: too little data to compare, but a rejection in the panel rather
+  # than a crash
+  expect_no_error(jjbarstats(data = medical_study_data[1, ], dep = "response",
+                             group = "treatment_group"))
+
+  # Missing variable
+  expect_error(jjbarstats(data = medical_study_data, dep = "nonexistent_variable",
+                          group = "treatment_group"),
+               "not present in the dataset")
 })
 
 # Test 8: Data types and factor handling
@@ -366,25 +360,17 @@ test_that("jjbarstats handles realistic clinical research scenarios", {
 # Test 13: Parameter validation
 test_that("jjbarstats validates parameters correctly", {
   
-  # Test invalid statistical method
-  expect_error({
-    analysis <- create_jjbarstats_analysis(
-      data = medical_study_data,
-      dep = "response",
-      group = "treatment_group",
-      typestatistics = "invalid_method"
-    )
-  })
-  
-  # Test invalid adjustment method
-  expect_error({
-    analysis <- create_jjbarstats_analysis(
-      data = medical_study_data,
-      dep = "response",
-      group = "treatment_group",
-      padjustmethod = "invalid_adjustment"
-    )
-  })
+  # As above: these went through the mock and asserted that building a list
+  # throws. Point them at the real wrapper, which does validate its List options.
+  expect_error(jjbarstats(data = medical_study_data, dep = "response",
+                          group = "treatment_group",
+                          typestatistics = "invalid_method"),
+               "must be one of")
+
+  expect_error(jjbarstats(data = medical_study_data, dep = "response",
+                          group = "treatment_group",
+                          padjustmethod = "invalid_adjustment"),
+               "must be one of")
 })
 
 # Test 14: Integration with ggstatsplot parameters

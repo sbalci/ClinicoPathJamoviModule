@@ -325,20 +325,18 @@ test_that("lollipop handles non-existent highlight level", {
 # 10. Empty Dataset
 # ═══════════════════════════════════════════════════════════
 
-test_that("lollipop errors on empty dataset", {
+test_that("lollipop returns quietly on an empty dataset", {
+  # This analysis reports through jamovi's notice system, not R conditions:
+  # .run() catches jmvcore::reject() into the `todo` panel and emits warnings as
+  # notices. expect_error/expect_warning therefore see nothing. Assert what the
+  # user is actually shown.
+  .lol_txt <- function(x) gsub("[[:space:]]+", " ", gsub("<[^>]*>", " ", as.character(x)))
 
   empty_data <- lollipop_small[0, ]
-
-  expect_error(
-    lollipop(
-      data = empty_data,
-      dep = "measurement",
-      group = "category",
-      highlight = NULL
-    ),
-    regexp = "empty|no.*data|zero.*rows",
-    ignore.case = TRUE
-  )
+  res <- lollipop(data = empty_data, dep = "measurement", group = "category",
+                  highlight = NULL)
+  # .run() exits early on zero rows, so nothing is computed and nothing crashes.
+  expect_equal(nrow(res$summary$asDF), 0L)
 })
 
 # ═══════════════════════════════════════════════════════════

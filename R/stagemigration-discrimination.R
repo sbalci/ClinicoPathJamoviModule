@@ -240,8 +240,18 @@ stagemigration_calculateConcordance <- function(data, old_stage, new_stage,
 #' @keywords internal
 stagemigration_bootstrapConcordance <- function(data, old_formula, new_formula,
                                                 n_boot = 1000,
-                                                checkpoint_callback = NULL) {
-    tryCatch({
+                                                checkpoint_callback = NULL,
+                                                seed = 20250101L) {
+    # Seeded, and seeded LOCALLY. This bootstrap was unseeded, so the reported
+    # C-index difference, its confidence interval and its p-value changed on
+    # every run - and jamovi re-runs the analysis on every option change, so a
+    # clinician toggling an unrelated checkbox watched the p-value move. The
+    # set.seed() calls elsewhere in this analysis guard a different bootstrap
+    # (model selection) and never reached here.
+    #
+    # with_seed() restores the caller's RNG state afterwards, so seeding this
+    # does not silently make the rest of the session deterministic.
+    run <- function() tryCatch({
         n <- nrow(data)
         c_diffs <- numeric(n_boot)
 
@@ -286,8 +296,18 @@ stagemigration_bootstrapConcordance <- function(data, old_formula, new_formula,
             return(list(p_value = NA, se = NA, ci_lower = NA, ci_upper = NA))
         }
 
-        # P-value: two-sided test
-        p_value <- 2 * min(mean(c_diffs <= 0), mean(c_diffs >= 0))
+        # Two-sided bootstrap p-value, with the (1 + r) / (B + 1) convention.
+        #
+        # The previous form, 2 * min(mean(c_diffs <= 0), mean(c_diffs >= 0)),
+        # returns EXACTLY 0 whenever every resample falls on one side - which is
+        # what happens when the new staging is uniformly better, i.e. precisely
+        # the strongest result. A p-value of 0 is impossible: a bootstrap with B
+        # resamples cannot resolve below 1/(B+1). Adding the 1 keeps it a
+        # reportable "< 0.001" instead of an indefensible "0".
+        B <- length(c_diffs)
+        p_lower <- (1 + sum(c_diffs <= 0)) / (B + 1)
+        p_upper <- (1 + sum(c_diffs >= 0)) / (B + 1)
+        p_value <- min(1, 2 * min(p_lower, p_upper))
 
         # Confidence interval: percentile method
         ci_lower <- quantile(c_diffs, 0.025, na.rm = TRUE)
@@ -304,6 +324,21 @@ stagemigration_bootstrapConcordance <- function(data, old_formula, new_formula,
     }, error = function(e) {
         list(p_value = NA, se = NA, ci_lower = NA, ci_upper = NA)
     })
+
+    # withr keeps the seed local: the caller's RNG stream is restored on exit,
+    # so making this bootstrap reproducible does not quietly fix the seed for
+    # everything else the analysis does afterwards.
+    if (requireNamespace("withr", quietly = TRUE))
+        withr::with_seed(seed, run())
+    else {
+        old_seed <- if (exists(".Random.seed", envir = .GlobalEnv))
+            get(".Random.seed", envir = .GlobalEnv) else NULL
+        set.seed(seed)
+        on.exit({
+            if (!is.null(old_seed)) assign(".Random.seed", old_seed, envir = .GlobalEnv)
+        }, add = TRUE)
+        run()
+    }
 }
 
 # NOTE: NRI and IDI functions are available in stagemigration_helpers.R

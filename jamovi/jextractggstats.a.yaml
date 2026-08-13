@@ -11,19 +11,24 @@ options:
       type: Data
       description: R object to use
     
+    # Contingency Table / Bar Chart cross-tabulate two categorical variables,
+    # so `factor` has to be permitted here or those two analysis types can
+    # never be run from the GUI at all.
     - name: dep_var
       title: Dependent Variable
       type: Variable
       suggested: [continuous]
-      permitted: [numeric]
+      permitted: [numeric, factor]
       description: Dependent variable for analysis
-    
+
+    # Correlation / Scatterplot use this as the SECOND continuous variable, so
+    # `numeric` has to be permitted too.
     - name: group_var
       title: Grouping Variable
       type: Variable
       default: NULL
       suggested: [ordinal, nominal]
-      permitted: [factor]
+      permitted: [factor, numeric]
       description: Grouping variable for comparisons
     
     - name: test_value

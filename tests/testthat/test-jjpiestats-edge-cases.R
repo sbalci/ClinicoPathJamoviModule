@@ -189,19 +189,17 @@ test_that("jjpiestats errors on non-existent variables", {
   )
 })
 
-test_that("jjpiestats errors on numeric dependent variable", {
-
+test_that("a continuous dependent variable is coerced, and the slice count is flagged", {
+  # `dep` is `permitted: [factor]`, so jamovi refuses a continuous variable in the
+  # GUI and the R wrapper COERCES rather than erroring - one slice per distinct
+  # value. expect_error() therefore asserted a throw that cannot happen. What
+  # matters clinically is that an unreadable chart is not presented silently.
   test_data_numeric <- jjpiestats_test
   test_data_numeric$numeric_var <- rnorm(nrow(test_data_numeric))
 
-  expect_error(
-    jjpiestats(
-      data = test_data_numeric,
-      dep = "numeric_var"
-    ),
-    regexp = "factor|categorical|not.*factor",
-    ignore.case = TRUE
-  )
+  res <- jjpiestats(data = test_data_numeric, dep = "numeric_var")
+  n <- gsub("[[:space:]]+", " ", paste(as.character(res$notices$content), collapse = " "))
+  expect_match(n, "Too many slices to read")
 })
 
 # ═══════════════════════════════════════════════════════════
@@ -228,25 +226,32 @@ test_that("jjpiestats errors on empty dataset", {
 
 test_that("jjpiestats handles invalid ratio specifications", {
 
+  # The ratio guards ran inside .plot1/.plot2/.plot4 - during .plot(), where
+  # jamovi discards notices - so nothing was signalled and nothing was displayed:
+  # the proportion test silently used equal proportions. They now report in the
+  # notices panel, which is what these two cases must assert.
+  notices <- function(res)
+    gsub("[[:space:]]+", " ", paste(as.character(res$notices$content), collapse = " "))
+
   # Wrong number of ratios
-  expect_condition(
-    jjpiestats(
-      data = jjpiestats_test,
-      dep = "treatment_response",  # 4 levels
-      proportiontest = TRUE,
-      ratio = "0.5,0.5"  # Only 2 ratios
-    )
-  )
+  n1 <- notices(jjpiestats(
+    data = jjpiestats_test,
+    dep = "treatment_response",  # 4 levels
+    proportiontest = TRUE,
+    ratio = "0.5,0.5"            # Only 2 ratios
+  ))
+  expect_match(n1, "Expected proportions ignored")
+  expect_match(n1, "level")
 
   # Ratios that don't sum to 1
-  expect_condition(
-    jjpiestats(
-      data = jjpiestats_test,
-      dep = "disease_severity",  # 3 levels
-      proportiontest = TRUE,
-      ratio = "0.4,0.4,0.4"  # Sum = 1.2
-    )
-  )
+  n2 <- notices(jjpiestats(
+    data = jjpiestats_test,
+    dep = "disease_severity",    # 3 levels
+    proportiontest = TRUE,
+    ratio = "0.4,0.4,0.4"        # Sum = 1.2
+  ))
+  expect_match(n2, "Expected proportions ignored")
+  expect_match(n2, "sums to")
 })
 
 # ═══════════════════════════════════════════════════════════
@@ -364,16 +369,15 @@ test_that("jjpiestats handles many categorical levels", {
 # 14. Same Variable for dep and group
 # ═══════════════════════════════════════════════════════════
 
-test_that("jjpiestats handles same variable for dep and group", {
-
-  # Using same variable for dep and group (should error or warn)
-  expect_condition(
-    jjpiestats(
-      data = jjpiestats_test,
-      dep = "treatment_response",
-      group = "treatment_response"
-    )
-  )
+test_that("jjpiestats warns when dep and group are the same variable", {
+  # A jamovi analysis reports this in a panel rather than signalling a condition,
+  # so expect_condition() passed only if something was thrown. The table is
+  # diagonal by construction and the p-value is ~0 from the setup, not the data.
+  res <- jjpiestats(data = jjpiestats_test,
+                    dep = "treatment_response", group = "treatment_response")
+  n <- gsub("[[:space:]]+", " ", paste(as.character(res$notices$content), collapse = " "))
+  expect_match(n, "Variable compared with itself")
+  expect_match(n, "diagonal by construction")
 })
 
 # ═══════════════════════════════════════════════════════════
@@ -428,13 +432,13 @@ test_that("jjpiestats handles constant categorical variable", {
   test_constant <- jjpiestats_small
   test_constant$constant_cat <- factor("Same Value")
 
-  result <- jjpiestats(
-    data = test_constant,
-    dep = "constant_cat"
+  # A single-level variable cannot make a pie chart, and the analysis says so by
+  # raising an error rather than returning a Results object - so assert the
+  # rejection and its message.
+  expect_error(
+    jjpiestats(data = test_constant, dep = "constant_cat"),
+    regexp = "insufficient variation"
   )
-
-  # Should handle or warn appropriately
-  expect_s3_class(result, "jjpiestatsResults")
 })
 
 # ═══════════════════════════════════════════════════════════
