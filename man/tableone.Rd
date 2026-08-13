@@ -6,7 +6,7 @@
 \usage{
 tableone(
   data,
-  vars,
+  vars = NULL,
   sty = "t1",
   excl = FALSE,
   showSummary = FALSE,

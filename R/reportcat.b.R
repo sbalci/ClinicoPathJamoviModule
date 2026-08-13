@@ -129,16 +129,29 @@ reportcatClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     # misuse detection and the fallback summary table.
                     num_levels <- length(unique(mydata[[myvar]][!is.na(mydata[[myvar]])]))
 
-                    # Create a summary table for the variable. maxsum = Inf
-                    # prevents summary.factor() from lumping >100 levels into
-                    # a single "(Other)" row for high-cardinality variables.
-                    tbl <- summary(as.factor(mydata[[myvar]]), maxsum = Inf)
+                    # Count levels with table(useNA = "no"), which structurally
+                    # cannot produce a missing-value row.
+                    #
+                    # This replaces summary(as.factor(x), maxsum = Inf) followed by
+                    # dplyr::filter(level != "NA's"). summary.factor() names that
+                    # row "NAs" - no apostrophe - so the filter never matched and
+                    # the missing count was rendered as if it were a category:
+                    #
+                    #   g has 6 rows and 2 levels.
+                    #   NAs: n = 3, 100% of valid cases.   <- missing, not a level
+                    #   B:   n = 2, 67% of valid cases.
+                    #   A:   n = 1, 33% of valid cases.
+                    #
+                    # The percentage is missing/valid, so it exceeds 100% whenever
+                    # missing outnumbers observed. table() also keeps declared but
+                    # unobserved levels, which summary() did, so a level with no
+                    # cases is still shown.
+                    tbl <- table(as.factor(mydata[[myvar]]), useNA = "no")
                     summar <- data.frame(
                         level = names(tbl),
                         n = as.numeric(tbl),
                         stringsAsFactors = FALSE
                     ) %>%
-                        dplyr::filter(level != "NA's") %>%
                         dplyr::arrange(dplyr::desc(n))
                     summar$validtotal <- valid_obs
 
@@ -156,10 +169,24 @@ reportcatClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                         dplyr::pull(level_description)
 
                     # Create overall summary sentences with HTML tags for styling.
+                    #
+                    # The headline used to report only the OBSERVED level count while
+                    # the list below it showed every declared level, so a factor with
+                    # an unused level read "has 4 rows and 2 levels" and then listed
+                    # three. Report the number listed, and say how many of them have
+                    # no cases - a declared category with zero observations is
+                    # clinically meaningful (no G3 tumours in this cohort), so it is
+                    # worth naming rather than hiding.
+                    n_listed <- nrow(summar)
+                    n_empty <- sum(summar$n == 0)
                     sentence1 <- glue::glue(.("<strong>{var}</strong> has {rows} rows and {levels} levels."),
                         var = htmltools::htmlEscape(myvar),
                         rows = total_obs,
-                        levels = num_levels)
+                        levels = n_listed)
+                    if (n_empty > 0)
+                        sentence1 <- paste0(sentence1, " ", glue::glue(
+                            .("{count} of these levels has no observations."),
+                            count = n_empty))
                     sentence2 <- glue::glue(
                         .("Missing values: {count}."),
                         count = missing_obs
@@ -494,9 +521,16 @@ reportcatClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 
                 # Check for sparse categories
                 if (n_levels > 1) {
+                    # Count only categories that were actually OBSERVED but rare.
+                    # table() keeps declared-but-unused levels at 0, and 0 < 5, so a
+                    # factor with five declared levels of which only two occur (30
+                    # cases each - nothing rare at all) produced "3 categories with
+                    # <5 cases. Consider combining rare categories." Empty categories
+                    # cannot be combined, so the advice was unactionable.
                     freq_table <- table(var_data, useNA = "no")
-                    sparse_categories <- sum(freq_table < 5)
-                    if (sparse_categories > 0 && sparse_categories / length(freq_table) > 0.3) {
+                    observed <- freq_table[freq_table > 0]
+                    sparse_categories <- sum(observed < 5)
+                    if (sparse_categories > 0 && sparse_categories / length(observed) > 0.3) {
                         warnings <- c(warnings, glue::glue(
                             .("Variable '{var}' has {n} categories with <5 cases. Consider combining rare categories."),
                             var = htmltools::htmlEscape(var), n = sparse_categories

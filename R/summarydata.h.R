@@ -24,7 +24,8 @@ summarydataOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
                 suggested=list(
                     "continuous"),
                 permitted=list(
-                    "numeric"))
+                    "numeric"),
+                default=NULL)
             private$..distr <- jmvcore::OptionBool$new(
                 "distr",
                 distr,
@@ -179,7 +180,7 @@ summarydataBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' @export
 summarydata <- function(
     data,
-    vars,
+    vars = NULL,
     distr = FALSE,
     decimal_places = 2,
     outliers = FALSE,

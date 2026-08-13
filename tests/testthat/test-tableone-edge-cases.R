@@ -15,6 +15,16 @@
 
 library(testthat)
 
+# NOTE ON ASSERTION SHAPE
+# A jamovi analysis reports most problems in a results panel instead of throwing,
+# so expect_condition() here asserted the OPPOSITE of the wanted behaviour: it
+# passed only when the analysis broke. Where the analysis legitimately refuses to
+# compute it calls jmvcore::reject(), which raises an ERROR - and testthat's
+# expect_condition() does not capture errors, so those assertions never held
+# either. Both shapes are corrected below.
+t1_txt <- function(res) gsub("[[:space:]]+", " ", gsub("<[^>]*>", " ",
+  as.character(res$tablestyle1$content)))
+
 # Load test data
 data(tableone_test, package = "ClinicoPath")
 
@@ -79,14 +89,14 @@ test_that("tableone handles all-missing variable", {
   test_data <- tableone_test
   test_data$AllNA <- NA
 
-  # Should handle gracefully (error or warning)
-  expect_condition(
-    tableone(
-      data = test_data,
-      vars = c("Age", "AllNA"),
-      excl = FALSE
-    )
-  )
+  # An all-NA variable cannot be summarised and is dropped before the table is
+  # built. It used to vanish with no user-visible trace (the warning went to the R
+  # console, which a jamovi user never sees) - a Table One with a silently missing
+  # row is transcribed into manuscripts. It is now named in the panel.
+  res <- tableone(data = test_data, vars = c("Age", "AllNA"), excl = FALSE)
+  notice <- as.character(res$todo$content)
+  expect_match(notice, "Not included")
+  expect_match(notice, "AllNA")
 })
 
 # ═══════════════════════════════════════════════════════════
@@ -120,13 +130,9 @@ test_that("tableone handles minimal dataset (n=5)", {
 test_that("tableone handles single row dataset", {
   single_row <- tableone_test[1, ]
 
-  # May error or handle gracefully
-  expect_condition(
-    tableone(
-      data = single_row,
-      vars = c("Age", "Sex", "TumorStage")
-    )
-  )
+  # n = 1 summarises without error; the SD is NA, which is what one row gives.
+  expect_match(t1_txt(tableone(data = single_row,
+                               vars = c("Age", "Sex", "TumorStage"))), "n 1")
 })
 
 test_that("tableone handles empty dataset after exclusions", {
@@ -134,13 +140,12 @@ test_that("tableone handles empty dataset after exclusions", {
   test_data <- tableone_test[1:10, ]
   test_data$Hemoglobin <- NA  # All missing
 
-  # With excl=TRUE, all rows will be removed
-  expect_condition(
-    tableone(
-      data = test_data,
-      vars = c("Age", "Hemoglobin"),
-      excl = TRUE
-    )
+  # Every row is dropped, so the analysis refuses via jmvcore::reject(). That is
+  # an ERROR (expect_condition does not capture errors), and its message has to
+  # tell the user what to do rather than just failing.
+  expect_error(
+    tableone(data = test_data, vars = c("Age", "Hemoglobin"), excl = TRUE),
+    "valid data"
   )
 })
 
@@ -279,13 +284,12 @@ test_that("tableone handles character that should be numeric", {
   test_data <- tableone_test
   test_data$Age <- as.character(test_data$Age)
 
-  # May auto-convert or error
-  expect_condition(
-    tableone(
-      data = test_data,
-      vars = c("Age", "Sex")
-    )
-  )
+  # A character column is summarised as CATEGORICAL - one row per distinct value -
+  # not as a continuous variable. That follows the column type, but assert it so a
+  # future silent coercion is caught. (The old block also called expect_no_error()
+  # on an object named `result` that was never assigned.)
+  expect_match(t1_txt(tableone(data = test_data, vars = c("Age", "Sex"))),
+               "Age \\(%\\)")
 })
 
 test_that("tableone handles factor vs character differences", {
@@ -402,26 +406,23 @@ test_that("tableone handles Inf values", {
   test_data$CA199[1] <- Inf
   test_data$CA199[2] <- -Inf
 
-  # May error or handle gracefully
-  expect_condition(
-    tableone(
-      data = test_data,
-      vars = c("CA199", "Ki67")
-    )
-  )
+  # Inf survives complete.cases(), so it reaches mean()/sd() rather than being
+  # treated as missing. Assert what is actually printed so the behaviour is
+  # documented rather than assumed.
+  # jmvcore refuses infinite values at the variable-selection layer, before any
+  # analysis code runs, with a message that names the offending column. That is
+  # the right outcome - an Inf would otherwise reach mean()/sd() and print as Inf.
+  expect_error(tableone(data = test_data, vars = c("CA199", "Ki67")),
+               "infinite values")
 })
 
 test_that("tableone handles NaN values", {
   test_data <- tableone_test
   test_data$Hemoglobin[1:3] <- NaN
 
-  # Should treat like NA or error
-  expect_condition(
-    tableone(
-      data = test_data,
-      vars = c("Hemoglobin", "WBC")
-    )
-  )
+  # NaN is counted as missing and shown in the Missing column.
+  expect_match(t1_txt(tableone(data = test_data, vars = c("Hemoglobin", "WBC"))),
+               "Missing")
 })
 
 # ═══════════════════════════════════════════════════════════
@@ -485,15 +486,19 @@ test_that("tableone handles missing data in all variables", {
 # Test 11: Style-Specific Edge Cases
 # ═══════════════════════════════════════════════════════════
 
-test_that("janitor style handles continuous variables gracefully", {
-  # janitor (t4) is designed for categorical but may receive continuous
-  expect_condition(
-    tableone(
-      data = tableone_test,
-      vars = c("Age", "TumorSize"),  # Continuous vars
-      sty = "t4"  # Janitor style
-    )
+test_that("janitor style explains why continuous variables are not tabulated", {
+  # janitor (t4) tabulates one row per distinct value, so on a continuous
+  # variable it produced a row per patient labelled "41.9504137110896". It now
+  # skips variables with more than 20 distinct values and says which, rather
+  # than emitting an unreadable table (or, previously, signalling a condition).
+  res <- tableone(
+    data = tableone_test,
+    vars = c("Age", "TumorSize"),  # Continuous vars
+    sty = "t4"                     # Janitor style
   )
+  txt <- gsub("<[^>]*>", " ", as.character(res$tablestyle4$content))
+  expect_match(txt, "Not tabulated")
+  expect_match(txt, "distinct values")
 })
 
 test_that("all styles handle single variable", {
@@ -513,13 +518,11 @@ test_that("all styles handle data with no complete cases", {
   test_data$Sex[6:10] <- NA  # No complete cases
 
   for (style in c("t1", "t2", "t3")) {
-    expect_condition(
-      tableone(
-        data = test_data,
-        vars = c("Age", "Sex"),
-        sty = style,
-        excl = TRUE  # Will exclude all rows
-      )
+    expect_error(
+      tableone(data = test_data, vars = c("Age", "Sex"), sty = style,
+               excl = TRUE),  # Will exclude all rows
+      "valid data|non-missing",
+      info = style
     )
   }
 })

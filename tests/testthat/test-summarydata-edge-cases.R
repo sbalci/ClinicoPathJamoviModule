@@ -27,13 +27,13 @@ test_that("summarydata handles variables with missing data", {
 
   # Should complete without error
   expect_no_error(result)
-  expect_true(inherits(result, "summarydataClass"))
+  expect_true(inherits(result, "summarydataResults"))
 })
 
 test_that("summarydata handles variables with high missing data", {
   # Create test data with high missingness
   test_data_high_na <- summarydata_test
-  test_data_high_na$test_var <- summarydata_test$age
+  test_data_high_na$test_var <- summarydata_test$age_normal
   test_data_high_na$test_var[1:100] <- NA  # 67% missing
 
   result <- summarydata(
@@ -47,8 +47,11 @@ test_that("summarydata handles variables with high missing data", {
 
 test_that("summarydata handles all missing values", {
   # Create variable with all NA
+  # `$all_na_var <- NA` creates a LOGICAL column, which jmvcore rejects as
+  # non-numeric before .run() is reached - so this never tested the backend's
+  # all-missing branch. summarydata_test already ships a numeric all-NA column.
   test_data_all_na <- summarydata_test
-  test_data_all_na$all_na_var <- NA
+  test_data_all_na$all_na_var <- as.numeric(summarydata_test$all_missing)
 
   result <- summarydata(
     data = test_data_all_na,
@@ -56,7 +59,7 @@ test_that("summarydata handles all missing values", {
   )
 
   # Should handle gracefully (likely skip the variable)
-  expect_true(inherits(result, "summarydataClass"))
+  expect_true(inherits(result, "summarydataResults"))
 })
 
 # ═══════════════════════════════════════════════════════════
@@ -73,7 +76,7 @@ test_that("summarydata handles very small datasets", {
   )
 
   # Should complete but may not run all diagnostics
-  expect_true(inherits(result, "summarydataClass"))
+  expect_true(inherits(result, "summarydataResults"))
 })
 
 test_that("summarydata handles n=3 (minimum for Shapiro-Wilk)", {
@@ -101,7 +104,7 @@ test_that("summarydata handles n=2 (below Shapiro-Wilk minimum)", {
   )
 
   # Should complete but skip normality test
-  expect_true(inherits(result, "summarydataClass"))
+  expect_true(inherits(result, "summarydataResults"))
 })
 
 test_that("summarydata handles outlier detection with small n", {
@@ -154,7 +157,7 @@ test_that("summarydata handles constant variables", {
   )
 
   # Should complete (SD = 0, may show warnings)
-  expect_true(inherits(result, "summarydataClass"))
+  expect_true(inherits(result, "summarydataResults"))
 })
 
 test_that("summarydata handles near-constant variables", {
@@ -192,30 +195,24 @@ test_that("summarydata handles extreme outliers", {
 test_that("summarydata handles infinite values", {
   # Create data with Inf
   test_data_inf <- summarydata_test
-  test_data_inf$test_var <- summarydata_test$age
+  test_data_inf$test_var <- summarydata_test$age_normal
   test_data_inf$test_var[1] <- Inf
   test_data_inf$test_var[2] <- -Inf
 
-  # Should handle or warn about infinite values
-  expect_message(
-    result <- summarydata(
-      data = test_data_inf,
-      vars = "test_var"
-    ),
-    regexp = ".*",
-    all = FALSE
-  ) || expect_no_error(
-    result <- summarydata(
-      data = test_data_inf,
-      vars = "test_var"
-    )
+  # jmvcore refuses infinite values at the variable-selection layer, before any
+  # analysis code runs, naming the offending column. The old block was a no-op:
+  # expect_message(...) || expect_no_error(...) evaluates the || on expectation
+  # objects, and the analysis errors rather than messaging in any case.
+  expect_error(
+    summarydata(data = test_data_inf, vars = "test_var"),
+    "infinite values"
   )
 })
 
 test_that("summarydata handles very large values", {
   # Extreme but finite values
   test_data_large <- summarydata_test
-  test_data_large$large_var <- summarydata_test$age * 1e6
+  test_data_large$large_var <- summarydata_test$age_normal * 1e6
 
   result <- summarydata(
     data = test_data_large,
@@ -228,7 +225,7 @@ test_that("summarydata handles very large values", {
 test_that("summarydata handles very small values", {
   # Very small but non-zero values
   test_data_small <- summarydata_test
-  test_data_small$small_var <- summarydata_test$age * 1e-6
+  test_data_small$small_var <- summarydata_test$age_normal * 1e-6
 
   result <- summarydata(
     data = test_data_small,
@@ -243,46 +240,49 @@ test_that("summarydata handles very small values", {
 # Test 6: Non-Numeric Variables
 # ═══════════════════════════════════════════════════════════
 
-test_that("summarydata handles character variables gracefully", {
+test_that("summarydata refuses a character variable", {
   # Add character variable
   test_data_char <- summarydata_test
   test_data_char$char_var <- "constant_text"
 
-  result <- summarydata(
-    data = test_data_char,
-    vars = c("age_normal", "char_var")
+  # `permitted: [numeric]` is enforced by jmvcore before .run(), so the analysis
+  # never sees a non-numeric column. (The backend keeps its own guard as defence
+  # in depth; it is unreachable through this path.) The old block ran the
+  # analysis and asserted nothing at all.
+  expect_error(
+    summarydata(data = test_data_char, vars = c("age_normal", "char_var")),
+    "numeric variable"
   )
-
-  # Should skip non-numeric or show warning
-  expect_true(inherits(result, "summarydataClass"))
 })
 
-test_that("summarydata handles factor variables", {
+test_that("summarydata refuses a factor variable", {
   # Add factor variable
   test_data_factor <- summarydata_test
   test_data_factor$factor_var <- factor(sample(c("A", "B", "C"), nrow(summarydata_test), replace = TRUE))
 
-  result <- summarydata(
-    data = test_data_factor,
-    vars = c("age_normal", "factor_var")
+  # `permitted: [numeric]` is enforced by jmvcore before .run(), so the analysis
+  # never sees a non-numeric column. (The backend keeps its own guard as defence
+  # in depth; it is unreachable through this path.) The old block ran the
+  # analysis and asserted nothing at all.
+  expect_error(
+    summarydata(data = test_data_factor, vars = c("age_normal", "factor_var")),
+    "numeric variable"
   )
-
-  # Should skip factor or show warning
-  expect_true(inherits(result, "summarydataClass"))
 })
 
-test_that("summarydata handles logical variables", {
+test_that("summarydata refuses a logical variable", {
   # Add logical variable
   test_data_logical <- summarydata_test
   test_data_logical$logical_var <- sample(c(TRUE, FALSE), nrow(summarydata_test), replace = TRUE)
 
-  result <- summarydata(
-    data = test_data_logical,
-    vars = c("age_normal", "logical_var")
+  # `permitted: [numeric]` is enforced by jmvcore before .run(), so the analysis
+  # never sees a non-numeric column. (The backend keeps its own guard as defence
+  # in depth; it is unreachable through this path.) The old block ran the
+  # analysis and asserted nothing at all.
+  expect_error(
+    summarydata(data = test_data_logical, vars = c("age_normal", "logical_var")),
+    "numeric variable"
   )
-
-  # Logical might be converted to 0/1 or skipped
-  expect_true(inherits(result, "summarydataClass"))
 })
 
 # ═══════════════════════════════════════════════════════════
@@ -324,19 +324,12 @@ test_that("summarydata handles empty data frame", {
   # Empty data frame with correct column structure
   empty_data <- summarydata_test[0, ]
 
-  # Should error or handle gracefully
+  # `expect_error(...) || expect_true(...)` is not a valid assertion - the || is
+  # applied to expectation objects, so whichever branch ran first decided the
+  # result. The analysis rejects an empty frame with a message naming the cause.
   expect_error(
-    summarydata(
-      data = empty_data,
-      vars = "age_normal"
-    ),
-    regexp = ".*no complete rows.*|.*empty.*|.*Error.*",
-    ignore.case = TRUE
-  ) || expect_true(
-    inherits(
-      summarydata(data = empty_data, vars = "age_normal"),
-      "summarydataClass"
-    )
+    summarydata(data = empty_data, vars = "age_normal"),
+    "no complete rows"
   )
 })
 
@@ -437,7 +430,7 @@ test_that("summarydata handles decimal_places boundary maximum", {
 test_that("summarydata handles missing data + small sample", {
   # Small sample with missing data
   small_missing_data <- summarydata_test[1:10, ]
-  small_missing_data$psa[1:5] <- NA
+  small_missing_data$psa_mild_skew[1:5] <- NA  # column is psa_mild_skew, not psa
 
   result <- summarydata(
     data = small_missing_data,
@@ -469,15 +462,19 @@ test_that("summarydata handles outliers + constant variable", {
 # ═══════════════════════════════════════════════════════════
 
 test_that("summarydata handles many variables simultaneously", {
-  # Test with all available continuous variables
-  all_vars <- c("age_normal", "bmi", "temperature_normal", "systolic_bp", "diastolic_bp",
-                "hemoglobin_lab", "wbc_count", "platelet_count", "creatinine_lab", "albumin_no_outliers",
-                "total_protein", "psa_mild_skew", "crp_moderate_skew", "ferritin", "weight_kg",
-                "mitotic_count", "pain_score", "qol_score", "fatigue_score")
+  # Test with a wide selection of the continuous variables that summarydata_test
+  # actually ships. Seven of the names used here (bmi, systolic_bp, total_protein,
+  # mitotic_count, pain_score, qol_score, fatigue_score) are not columns of that
+  # dataset, so jmvcore rejected the call and the block never ran.
+  all_vars <- c("age_normal", "bmi_complete", "temperature_normal",
+                "systolic_bp_low_missing", "diastolic_bp",
+                "hemoglobin_lab", "wbc_count", "platelet_count", "creatinine_lab",
+                "albumin_no_outliers", "hba1c", "psa_mild_skew", "crp_moderate_skew",
+                "ferritin", "weight_kg", "heart_rate", "tsh", "troponin", "height_cm")
 
   result <- summarydata(
     data = summarydata_test,
-    vars = all_vars,
+    vars = !!all_vars,
     distr = TRUE,
     outliers = TRUE
   )

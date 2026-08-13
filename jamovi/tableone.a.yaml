@@ -34,6 +34,13 @@ options:
   - name: vars
     title: "Variables"
     type: Variables
+    # The backend has a dedicated "no variables selected" branch that shows the
+    # welcome panel, so NULL is a supported state. Without an explicit
+    # `default: NULL` the compiler makes `vars` a REQUIRED argument of the public
+    # wrapper, and an R caller writing tableone(data = df) gets
+    # `argument "vars" is missing, with no default` instead of that panel. The
+    # GUI is unaffected either way (it never calls the wrapper positionally).
+    default: NULL
     description:
       R: >
         A set of variable names from `data` to include in the Table One. Supports numeric, ordinal, and categorical variables.

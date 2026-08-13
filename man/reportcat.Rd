@@ -4,7 +4,7 @@
 \alias{reportcat}
 \title{Summary of Categorical Variables}
 \usage{
-reportcat(data, vars)
+reportcat(data, vars = NULL)
 }
 \arguments{
 \item{data}{The data as a data frame.}

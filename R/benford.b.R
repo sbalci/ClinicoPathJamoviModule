@@ -138,6 +138,60 @@ benfordClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             gsub("[^A-Za-z0-9_]+", "_", make.names(x))
         },
 
+        # Expected MAD when the data ARE Benford, i.e. the deviation produced by
+        # sampling noise alone. Each digit bin count is Binomial(n, p_i), and for
+        # a binomial proportion E|p_hat - p| ~= sqrt(2 p (1 - p) / (pi n)), so the
+        # mean absolute deviation across bins has a closed form. Checked against
+        # simulation on exactly-Benford data (10^U): analytic vs simulated MAD
+        # agree to ~1% for n >= 1000 at 1, 2 and 3 digits.
+        .expectedMadUnderNull = function(n, digits) {
+            if (!is.finite(n) || n <= 0) return(NA_real_)
+            lo <- 10^(digits - 1)
+            hi <- 10^digits - 1
+            p <- log10(1 + 1 / (lo:hi))
+            mean(sqrt(2 * p * (1 - p) / (pi * n)))
+        },
+
+        # Nigrini's MAD cut-offs, as applied by benford.analysis::MAD.conformity.
+        .madNonconformityCutoff = function(digits) {
+            switch(as.character(digits), "1" = 0.015, "2" = 0.0022, "3" = 0.0005,
+                   NA_real_)
+        },
+
+        # Smallest n at which the nonconformity cut-off clears the noise floor.
+        # Solving mean(sqrt(2 p (1-p) / (pi n))) = cutoff for n gives a closed
+        # form, since the only n-dependence is the 1/sqrt(n) factor.
+        .minNForMadLabel = function(digits) {
+            cutoff <- private$.madNonconformityCutoff(digits)
+            if (is.na(cutoff)) return(NA_real_)
+            # .expectedMadUnderNull(1, digits) is the constant multiplying 1/sqrt(n)
+            k <- private$.expectedMadUnderNull(1, digits)
+            (k / cutoff)^2
+        },
+
+        # Is the MAD conformity LABEL meaningful at this sample size?
+        #
+        # Nigrini's cut-offs were derived for large accounting populations, and MAD
+        # is strongly biased upward at small n: across 90 first-two-digit bins the
+        # noise floor alone is 0.0079 at n = 100 and 0.0025 at n = 1000, against a
+        # "Nonconformity" cut-off of 0.0022. So with the default 2-digit setting,
+        # data that is EXACTLY Benford is labelled "Nonconformity" in 20/20
+        # simulated runs at n = 100, 300 and 1000 - and the analysis then told the
+        # user their data showed "potential manipulation" and required "IMMEDIATE
+        # REVIEW". The label only becomes informative once the cut-off clears the
+        # noise floor: n > 246 (1 digit), n > 1301 (2 digits), n > 2550 (3 digits).
+        #
+        # The chi-square test does not have this problem - it is calibrated at every
+        # n (measured false-positive rate 3.5%, 5.5%, 2.5% at n = 300, 1000, 5000
+        # against a nominal 5%) - so below the threshold the verdict is based on it
+        # instead of on the MAD label.
+        .madLabelIsReliable = function(n, digits) {
+            cutoff <- private$.madNonconformityCutoff(digits)
+            floor_mad <- private$.expectedMadUnderNull(n, digits)
+            if (is.na(cutoff) || is.na(floor_mad)) return(FALSE)
+            cutoff > floor_mad
+        },
+
         .interpretResults = function(benford_obj, suspects_obj, var_data) {
             # Count only finite, positive observations so the reported N matches
             # the analyzed set (var_cleaned uses the same is.finite & > 0 filter);
@@ -163,10 +217,59 @@ benfordClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
             # CRITICAL: Add guardrails for small samples
             # Benford's Law requires adequate sample size for statistical validity
+            n_digits <- benford_obj$info$number.of.digits
+            mad_floor <- private$.expectedMadUnderNull(n_total, n_digits)
+            mad_label_reliable <- private$.madLabelIsReliable(n_total, n_digits)
+
             if (n_total < 100) {
                 clinical_interpretation <- .("CAUTION: Sample size too small for reliable Benford's Law analysis. With fewer than 100 observations, statistical tests lack power and results should NOT be used for clinical decision-making or data quality assessment.")
                 recommendation <- .("Increase sample size to at least 100-1000 observations before drawing conclusions. Consider alternative data quality checks for small datasets.")
                 concern_level <- .("Unreliable (N<100)")
+
+            } else if (!is.na(mad_conformity) && !mad_label_reliable) {
+                # The MAD cut-offs cannot separate signal from sampling noise at
+                # this n and digit setting, so the conformity label is reported but
+                # NOT converted into a data-integrity verdict. The chi-square test
+                # is calibrated at any n, so the verdict comes from it instead.
+                if (!is.na(chisq_pvalue) && chisq_pvalue < 0.05) {
+                    # Significance alone must not set the severity: at large n a
+                    # trivial departure is still significant. The chi-square test
+                    # establishes THAT there is a departure; the size of the MAD
+                    # relative to the noise floor establishes whether it is large
+                    # enough to be worth acting on. A MAD of twice the noise floor
+                    # is the point at which the deviation is unambiguously beyond
+                    # what sampling explains, and that ratio is reported so the
+                    # basis for the verdict is visible rather than implied.
+                    mad_ratio <- mad_value / mad_floor
+                    clinical_interpretation <- sprintf(
+                        .("Chi-square goodness-of-fit test indicates a departure from Benford's Law (p=%.4f). MAD = %.4f, which is %.1f times the deviation expected from sampling noise alone at N=%d with %d-digit analysis (%.4f). The '%s' label is not informative at this sample size, so this conclusion rests on the chi-square test and the size of the deviation relative to that noise level."),
+                        chisq_pvalue, mad_value, mad_ratio, n_total, n_digits, mad_floor, mad_conformity
+                    )
+                    if (mad_ratio >= 2) {
+                        recommendation <- sprintf(
+                            .("Investigate data sources, collection methods, and validation procedures. Check for systematic rounding, preferred values, or data entry errors, and verify %d flagged observations against source records."),
+                            n_suspects
+                        )
+                        concern_level <- .("High")
+                    } else {
+                        recommendation <- sprintf(
+                            .("Review data collection and entry procedures, and check for systematic rounding or preferred values. Collect at least %d observations before relying on the MAD conformity classification. Verify %d flagged observations against source records."),
+                            ceiling(private$.minNForMadLabel(n_digits)), n_suspects
+                        )
+                        concern_level <- .("Moderate")
+                    }
+                } else {
+                    clinical_interpretation <- sprintf(
+                        .("No evidence of departure from Benford's Law (chi-square p=%.4f). MAD = %.4f, which is within the range expected from sampling noise alone at N=%d with %d-digit analysis (about %.4f), so the '%s' label is not informative at this sample size."),
+                        chisq_pvalue, mad_value, n_total, n_digits, mad_floor, mad_conformity
+                    )
+                    recommendation <- sprintf(
+                        .("No action indicated by this analysis. To use the MAD conformity classification, collect at least %d observations for %d-digit analysis, or switch to 1-digit analysis, which needs far fewer."),
+                        ceiling(private$.minNForMadLabel(n_digits)), n_digits
+                    )
+                    concern_level <- .("Low")
+                }
+
             } else if (is.na(mad_conformity)) {
                 # benford.analysis returns MAD.conformity = NA when
                 # number.of.digits > 3. digits is capped at 3 in benford.a.yaml,
@@ -327,7 +430,7 @@ benfordClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 ",
                 getting_started = .("Getting Started:"),
                 step1 = .("Select a numeric variable containing naturally occurring numbers"),
-                step2 = .("Choose number of digits to analyze (1-4, default: 2)"),
+                step2 = .("Choose number of digits to analyze (1-3, default: 2)"),
                 step3 = .("Review statistical evidence and fraud detection indicators"),
                 best_suited = .("Best suited for:"),
                 use1 = .("Financial data (invoices, expenses, revenues)"),
@@ -337,8 +440,10 @@ benfordClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 note_text = .("Requires 100+ observations for reliable results. Data should span at least one order of magnitude.")
                 )
                 self$results$welcome$setContent(welcome_html)
+                self$results$welcome$setVisible(TRUE)
                 return()
             }
+            self$results$welcome$setVisible(FALSE)
 
             # Set clinical explanation
             explanation <- private$.generateClinicalExplanation()
@@ -429,10 +534,22 @@ benfordClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 # Extract only the selected variable column - do NOT expose other columns
                 # This prevents PHI leakage from unselected variables
                 if (!is.null(suspects_full) && nrow(suspects_full) > 0) {
-                    # Get indices of suspects from the full dataset
-                    suspect_indices <- as.numeric(rownames(suspects_full))
-                    # Extract only the suspicious VALUES from the selected variable
-                    suspect_values <- var[suspect_indices]
+                    # Take the values straight from the returned rows.
+                    #
+                    # This used to read as.numeric(rownames(suspects_full)) and use
+                    # that to index back into `var`. getSuspects() returns a
+                    # data.table whose rownames are RESET to 1..nrow, so the
+                    # "indices" were always 1, 2, 3, ... and the panel listed the
+                    # FIRST n rows of the dataset rather than the flagged ones -
+                    # under the heading "Suspicious Data Points", next to a
+                    # recommendation to verify them against source records.
+                    #
+                    # We passed data.frame(value = var) into getSuspects precisely
+                    # so the returned frame carries the values and nothing else, so
+                    # no index round-trip is needed. Recover the original row
+                    # numbers by matching the values back to `var`.
+                    suspect_values <- as.numeric(suspects_full$value)
+                    suspect_indices <- match(suspect_values, var)
 
                     # Create safe output with only the selected variable values
                     suspects_safe <- data.frame(

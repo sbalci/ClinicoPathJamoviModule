@@ -29,6 +29,12 @@ summarydataClass <- if (requireNamespace("jmvcore")) R6::R6Class("summarydataCla
           Please select one or more continuous variables from the options panel.</p>
           <p>If you want to inspect distribution characteristics, enable the 'Distribution Diagnostics' option.</p>"
             self$results$todo$setContent(intro_msg)
+            # Both of these are `visible: true` in the .r.yaml, so before any
+            # variable is chosen the user saw two empty boxes titled "About This
+            # Analysis" and "Statistical Glossary". Their content is static, and
+            # the welcome state is exactly when it is most useful.
+            self$results$aboutAnalysis$setContent(private$.generateAboutContent())
+            self$results$glossary$setContent(private$.generateGlossary())
             return()
         } else {
             # Clear any introductory message if variables are selected.
@@ -80,19 +86,11 @@ summarydataClass <- if (requireNamespace("jmvcore")) R6::R6Class("summarydataCla
                 # Calculate all statistics at once with specified decimal places
                 decimal_places <- self$options$decimal_places
                 
-                stats <- round(c(
-                    mean = mean(numeric_data, na.rm = TRUE),
-                    sd = sd(numeric_data, na.rm = TRUE),
-                    median = median(numeric_data, na.rm = TRUE),
-                    min = min(numeric_data, na.rm = TRUE),
-                    max = max(numeric_data, na.rm = TRUE)
-                ), digits = decimal_places)
-                
-                mean_x <- stats["mean"]
-                sd_x <- stats["sd"]
-                median_x <- stats["median"]
-                min_x <- stats["min"]
-                max_x <- stats["max"]
+                mean_x <- private$.fmtNum(mean(numeric_data, na.rm = TRUE), decimal_places)
+                sd_x <- private$.fmtNum(sd(numeric_data, na.rm = TRUE), decimal_places)
+                median_x <- private$.fmtNum(median(numeric_data, na.rm = TRUE), decimal_places)
+                min_x <- private$.fmtNum(min(numeric_data, na.rm = TRUE), decimal_places)
+                max_x <- private$.fmtNum(max(numeric_data, na.rm = TRUE), decimal_places)
                 dist_text <- ""
                 # If the distribution diagnostics option is enabled, add additional tests.
                 if (self$options$distr) {
@@ -115,14 +113,10 @@ summarydataClass <- if (requireNamespace("jmvcore")) R6::R6Class("summarydataCla
                         # Returns NULL when n is outside the valid 3-5000 range.
                         sw_test <- private$.shapiroResult(valid_data, key = myvar)
                         if (!is.null(sw_test)) {
-                            p_val <- round(sw_test$p.value, 3)
-
-                            # Interpret normality result
-                            distribution_assessment <- if (p_val > 0.05) {
-                                .("The data are consistent with a normal distribution.")
-                            } else {
-                                .("The data are not consistent with a normal distribution; inspect the distribution visually and use appropriate tests.")
-                            }
+                            # Keep the exact p for the verdict; round only to display.
+                            p_val <- sw_test$p.value
+                            verdict <- private$.normalityVerdict(p_val)
+                            distribution_assessment <- verdict$long
                         }
                     }
 
@@ -146,7 +140,7 @@ summarydataClass <- if (requireNamespace("jmvcore")) R6::R6Class("summarydataCla
                         dist_text <- jmvcore::format(
                             .("<br><em>Distribution diagnostics for {variable}:</em> Shapiro-Wilk p-value = {p}; skewness = {skewness}; kurtosis = {kurtosis}. {assessment}"),
                             variable = htmltools::htmlEscape(myvar),
-                            p = p_val,
+                            p = private$.fmtP(p_val),
                             skewness = skew_val,
                             kurtosis = kurt_val,
                             assessment = distribution_assessment
@@ -156,6 +150,17 @@ summarydataClass <- if (requireNamespace("jmvcore")) R6::R6Class("summarydataCla
                 # Per-variable sample size and missingness for a self-describing headline.
                 n_x <- sum(!is.na(numeric_data))
                 missing_x <- sum(is.na(numeric_data))
+                # A single observation has no standard deviation; printing
+                # "Mean 5.00 \u{00B1} NA" reads as a broken calculation rather than
+                # as an undefined quantity.
+                if (is.na(sd_x)) {
+                    summary_text <- jmvcore::format(
+                        .("<strong>{variable}</strong> (N = {n}, missing = {missing}): Mean {mean} (SD not defined for a single observation). Median: {median} (minimum: {minimum}; maximum: {maximum})."),
+                        variable = htmltools::htmlEscape(myvar),
+                        n = n_x, missing = missing_x, mean = mean_x,
+                        median = median_x, minimum = min_x, maximum = max_x)
+                    return(paste0(summary_text, dist_text, "<br><br>"))
+                }
                 summary_text <- jmvcore::format(
                     .("<strong>{variable}</strong> (N = {n}, missing = {missing}): Mean {mean} \u{00B1} {sd}. Median: {median} (minimum: {minimum}; maximum: {maximum})."),
                     variable = htmltools::htmlEscape(myvar),
@@ -260,6 +265,54 @@ summarydataClass <- if (requireNamespace("jmvcore")) R6::R6Class("summarydataCla
         # Returns the htest object, or NULL when the test is not applicable
         # (n outside 3-5000, constant data, or an error). Shared by the diagnostics
         # text and the report sentences so the test runs at most once per variable.
+        # Format a statistic at the user's chosen precision. round() alone is not
+        # enough for display: round(2.1460, 4) prints as "2.146", so a line could
+        # read "Mean 0.2574 +/- 2.146" with two different precisions in it. Fixed
+        # notation keeps every number on a line comparable.
+        .fmtNum = function(x, dp = NULL) {
+            if (is.null(dp)) dp <- self$options$decimal_places
+            if (length(x) == 0) return(character(0))
+            out <- formatC(as.numeric(x), format = "f", digits = dp)
+            out[!is.finite(as.numeric(x))] <- NA_character_
+            trimws(out)
+        },
+
+        # A p-value is never zero. round(2.8e-12, 3) is 0, which printed as
+        # "Shapiro-Wilk p-value = 0" - and that went into a copy-ready manuscript
+        # sentence. Report the conventional bound instead.
+        # Both call sites write into Html result items, so the "<" is emitted as an
+        # entity. (A literal "< 0.001" does in fact render: an HTML tokenizer only
+        # opens a tag when "<" is followed by a letter, "!", "/" or "?", so "< " is
+        # kept as text - verified with an HTML parser. The entity is still the
+        # correct thing to write, but it is robustness, not a rendering fix.)
+        .fmtP = function(p) {
+            if (length(p) != 1 || is.na(p)) return(NA_character_)
+            if (p < 0.001) return("&lt; 0.001")
+            formatC(p, format = "f", digits = 3)
+        },
+
+        # Single source of truth for the normality verdict.
+        #
+        # The diagnostics text used to test the ROUNDED p (round(p, 3) > 0.05) and
+        # the copy-ready sentence the UNROUNDED one, so a variable with p = 0.0501
+        # was declared "not consistent with a normal distribution" in one panel and
+        # "showed normal distribution" in the other, both printing "p = 0.05".
+        # Comparison is on the exact p; only the display is rounded.
+        #
+        # The wording is deliberately asymmetric: failing to reject H0 is not
+        # evidence of normality, so the non-significant branch does not claim it.
+        .normalityVerdict = function(p) {
+            if (length(p) != 1 || is.na(p)) return(NULL)
+            if (p > 0.05)
+                list(normal = TRUE,
+                     long = .("The data are consistent with a normal distribution (the test did not detect a departure, which is not the same as establishing normality)."),
+                     short = .("no evidence of departure from normality"))
+            else
+                list(normal = FALSE,
+                     long = .("The data are not consistent with a normal distribution; inspect the distribution visually and use appropriate tests."),
+                     short = .("evidence of departure from normality"))
+        },
+
         .shapiroResult = function(x, key = NULL) {
             if (is.null(private$.shapiroCache))
                 private$.shapiroCache <- list()
@@ -477,11 +530,14 @@ summarydataClass <- if (requireNamespace("jmvcore")) R6::R6Class("summarydataCla
                 outlier_indices <- which(var_data < lower_bound | var_data > upper_bound)
                 outlier_values <- var_data[outlier_indices]
                 
+                # Bounds and values are formatted at the user's chosen precision;
+                # they were fixed at 3 and 2 decimals respectively, which read as
+                # more (or less) precision than the rest of the output.
                 outlier_results[[var]] <- list(
                     outliers = outlier_indices,
                     values = outlier_values,
-                    lower_bound = round(lower_bound, 3),
-                    upper_bound = round(upper_bound, 3),
+                    lower_bound = private$.fmtNum(lower_bound),
+                    upper_bound = private$.fmtNum(upper_bound),
                     method = "iqr"
                 )
             }
@@ -515,7 +571,7 @@ summarydataClass <- if (requireNamespace("jmvcore")) R6::R6Class("summarydataCla
                 } else {
                     report_html <- paste0(report_html,
                         "<p><strong>", safe_var, ":</strong> ", length(result$outliers), " ", .("outliers detected"), 
-                        " (", .("Values"), ": ", paste(round(result$values, 2), collapse = ", "), ") ",
+                        " (", .("Values"), ": ", paste(private$.fmtNum(result$values), collapse = ", "), ") ",
                         "<br><span style='color: #856404; font-size: 0.9em;'>",
                         .("Expected range"), ": ", result$lower_bound, " - ", result$upper_bound, "</span></p>")
                 }
@@ -543,36 +599,51 @@ summarydataClass <- if (requireNamespace("jmvcore")) R6::R6Class("summarydataCla
 
                 if (length(var_clean) == 0) next
 
-                # Calculate statistics
+                # Calculate statistics. These were hard-coded to 2 decimals, so a
+                # user who set "Decimal places" to 4 got 4 in the summary and 2 in
+                # the sentence they were told to paste into a manuscript.
                 n <- length(var_clean)
-                mean_val <- round(mean(var_clean), 2)
-                sd_val <- round(sd(var_clean), 2)
-                median_val <- round(median(var_clean), 2)
-                min_val <- round(min(var_clean), 2)
-                max_val <- round(max(var_clean), 2)
+                mean_val <- private$.fmtNum(mean(var_clean))
+                sd_val <- private$.fmtNum(sd(var_clean))
+                median_val <- private$.fmtNum(median(var_clean))
+                min_val <- private$.fmtNum(min(var_clean))
+                max_val <- private$.fmtNum(max(var_clean))
 
                 # Basic descriptive sentence (escape var name; output is rendered as HTML)
-                sentence <- paste0(
-                    "For ", htmltools::htmlEscape(var), ", analysis of ", n, " observations showed mean ",
-                    mean_val, " \u{B1} ", sd_val, " (median ", median_val, 
-                    ", range ", min_val, "-", max_val, ")"
-                )
+                sentence <- if (is.na(sd_val)) {
+                    paste0("For ", htmltools::htmlEscape(var), ", the single available observation was ",
+                           mean_val)
+                } else {
+                    paste0(
+                        "For ", htmltools::htmlEscape(var), ", analysis of ", n,
+                        if (n == 1) " observation" else " observations", " showed mean ",
+                        mean_val, " \u{B1} ", sd_val, " (median ", median_val,
+                        ", range ", min_val, "-", max_val, ")"
+                    )
+                }
                 
                 # Add distribution information if enabled
                 if (self$options$distr && n >= 3 && n <= 5000) {
                     # Reuse the cached Shapiro-Wilk result from the diagnostics text
                     sw_test <- private$.shapiroResult(var_clean, key = var)
 
-                    if (!is.null(sw_test)) {
-                        if (sw_test$p.value > 0.05) {
-                            sentence <- paste0(sentence, ". ", 
-                                "Data showed normal distribution (Shapiro-Wilk p = ", 
-                                round(sw_test$p.value, 3), ")")
-                        } else {
-                            sentence <- paste0(sentence, ". ", 
-                                "Data showed non-normal distribution (Shapiro-Wilk p = ", 
-                                round(sw_test$p.value, 3), ")")
-                        }
+                    # Same verdict function as the diagnostics panel, so the two
+                    # cannot disagree - previously this compared the exact p while
+                    # the diagnostics compared the rounded one, and a variable with
+                    # p = 0.0501 was reported as normal here and non-normal there,
+                    # both printing "p = 0.05".
+                    #
+                    # "Data showed normal distribution" is also not a claim a
+                    # non-significant test supports, and this is the text the user
+                    # is invited to paste into a manuscript.
+                    verdict <- private$.normalityVerdict(
+                        if (is.null(sw_test)) NA_real_ else sw_test$p.value)
+
+                    if (!is.null(verdict)) {
+                        sentence <- paste0(
+                            sentence, ". ",
+                            .("Shapiro-Wilk test showed"), " ", verdict$short,
+                            " (p = ", private$.fmtP(sw_test$p.value), ")")
                     }
                 }
                 

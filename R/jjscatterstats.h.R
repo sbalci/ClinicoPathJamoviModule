@@ -487,7 +487,7 @@ jjscatterstatsResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
                 height=450,
                 renderFun=".plot3",
                 requiresData=TRUE,
-                visible="(!is.null(colorvar) || !is.null(sizevar) || !is.null(shapevar) || !is.null(alphavar) || !is.null(labelvar))"))
+                visible="(colorvar || sizevar || shapevar || alphavar || labelvar)"))
             self$add(jmvcore::Image$new(
                 options=options,
                 name="ggpubrPlot",

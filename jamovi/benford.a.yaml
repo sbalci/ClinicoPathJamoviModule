@@ -1,7 +1,7 @@
 ---
 name:  benford
 title: Benford Analysis
-menuGroup: Exploration
+menuGroup: ExplorationT
 menuSubgroup: ClinicoPath Data Quality
 version: '1.0.52'
 jas: '1.2'
@@ -20,6 +20,10 @@ options:
       type: Variable
       suggested: [ continuous ]
       permitted: [ numeric ]
+      # .run() has an `is.null(self$options$var)` branch showing the welcome
+      # panel, so NULL is a supported state. Without an explicit default the
+      # compiler makes `var` a REQUIRED argument of the public wrapper.
+      default: NULL
       description:
           R: >
             a string naming the variable from `data` that contains the

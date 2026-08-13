@@ -21,7 +21,8 @@ reportcatOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "ordinal",
                     "nominal"),
                 permitted=list(
-                    "factor"))
+                    "factor"),
+                default=NULL)
 
             self$.addOption(private$..vars)
         }),
@@ -153,7 +154,7 @@ reportcatBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' @export
 reportcat <- function(
     data,
-    vars) {
+    vars = NULL) {
 
     if ( ! requireNamespace("jmvcore", quietly=TRUE))
         stop("reportcat requires jmvcore to be installed (restart may be required)")

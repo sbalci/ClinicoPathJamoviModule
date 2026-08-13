@@ -95,6 +95,13 @@ reportcat2Class <- if (requireNamespace('jmvcore')) R6::R6Class(
                     return(paste0("<strong>", htmltools::htmlEscape(myvar), "</strong>: Only one category ('", htmltools::htmlEscape(unique_val), "') with ", valid_obs, " observations. Missing: ", missing_obs, "."))
                 }
 
+                # TODO (correctness, out of scope for the reportcat review):
+                # the `.[[1]] != "NA's"` filter below has the same defect fixed in
+                # R/reportcat.b.R - summary.factor() names its missing row "NAs"
+                # (no apostrophe), so the filter never matches and the missing
+                # count is rendered as if it were a category, at a percentage of
+                # missing/valid that can exceed 100%. Replace the summary() call
+                # with table(x, useNA = "no"), which cannot emit that row at all.
                 # Create a summary table for the variable with safer filtering.
                 summar <- tryCatch({
                     summary(as.factor(mydata[[myvar]])) %>%

@@ -98,6 +98,30 @@ tableoneClass <- if (requireNamespace("jmvcore", quietly = TRUE)) R6::R6Class(
             # Checkpoint before data preparation (potentially expensive for large datasets)
             private$.checkpoint()
 
+            # A variable that is entirely NA is dropped before it ever reaches the
+            # table, and the only trace was an R console warning that a jamovi user
+            # never sees: they selected 8 variables, got 7 rows, and nothing said
+            # why. Table One row counts get transcribed into manuscripts, so an
+            # absent row has to be accounted for. Check the source column directly
+            # rather than diffing names against the post-select frame, because
+            # jmvcore::select may also rename columns.
+            all_na_vars <- Filter(function(v) {
+                col <- self$data[[v]]
+                !is.null(col) && length(col) > 0L && all(is.na(col))
+            }, selected_vars)
+
+            if (length(all_na_vars) > 0) {
+                self$results$todo$setContent(paste0(
+                    "<div style='background:#fff3cd;border-left:4px solid #ffc107;",
+                    "padding:10px;margin:10px 0;'><b>",
+                    .("Not included"), ":</b> ",
+                    paste(vapply(all_na_vars, htmltools::htmlEscape, character(1)),
+                          collapse = "; "),
+                    ". ",
+                    .("Every value of this variable is missing, so it cannot be summarised and does not appear in the table below."),
+                    "</div>"))
+            }
+
             data <- jmvcore::select(self$data, selected_vars)
 
             # CRITICAL FIX: Get actual column names after jmvcore::select
@@ -156,13 +180,27 @@ tableoneClass <- if (requireNamespace("jmvcore", quietly = TRUE)) R6::R6Class(
                     if (grepl("insufficient", tolower(e$message))) {
                         jmvcore::reject("Insufficient data for Table One analysis. Ensure you have at least 2 complete cases and check for missing values. Try selecting different variables or disabling 'Exclude Missing Values'.")
                     } else {
-                        jmvcore::reject(paste0("Error creating Table One: ", e$message, ". Check that variables have valid data and appropriate types. Categorical variables should be factors. Numeric variables should contain valid numbers."))
+                        jmvcore::reject(paste0("Error creating Table One: ", sub("\\.+$", "", e$message), ". Check that variables have valid data and appropriate types. Categorical variables should be factors. Numeric variables should contain valid numbers."))
                     }
                 })
 
                 # Checkpoint after expensive operation to allow UI update
                 private$.checkpoint()
-                self$results$tablestyle1$setContent(mytable)
+
+                # Render with missing = TRUE rather than handing the object over for
+                # jamovi to print with defaults. Without it the table showed
+                # "n 120" beside a mean computed on 112 values, with nothing to say
+                # 8 were missing - the reader has no way to tell the denominator of
+                # each row apart from the overall n. The gtsummary and arsenal
+                # styles already disclose this ("Unknown", "N-Miss"); the DEFAULT
+                # style was the one that did not.
+                rendered <- tryCatch(
+                    paste(utils::capture.output(
+                        print(mytable, printToggle = TRUE, quote = FALSE,
+                              noSpaces = TRUE, missing = TRUE)
+                    ), collapse = "\n"),
+                    error = function(e) mytable)
+                self$results$tablestyle1$setContent(rendered)
 
             } else if (table_style == "t2") {
                 # --- Using gtsummary package ---
@@ -223,6 +261,9 @@ tableoneClass <- if (requireNamespace("jmvcore", quietly = TRUE)) R6::R6Class(
 
                 # Wrap entire janitor operation in tryCatch for error handling
                 result <- tryCatch({
+                    # Variables too granular to tabulate; reported after the loop.
+                    skipped_vars <- list()
+
                     # CRITICAL FIX: Use actual column names (after jmvcore::select renaming)
                     # for data access; selected_vars[i] drives the user-facing labels.
                     table_list <- lapply(seq_along(actual_vars), function(i) {
@@ -238,11 +279,32 @@ tableoneClass <- if (requireNamespace("jmvcore", quietly = TRUE)) R6::R6Class(
                             jmvcore::reject(paste0("Variable '", htmltools::htmlEscape(display_var), "' not found in data"))
                         }
 
-                        # Remove missing values for this variable to avoid issues
-                        var_data <- data[!is.na(data[[var]]), ]
+                        # Remove missing values for this variable to avoid issues.
+                        # drop = FALSE is essential: with a SINGLE selected variable
+                        # `data` has one column, and `data[rows, ]` then collapses to
+                        # a vector. nrow() becomes NULL and janitor::tabyl() dies with
+                        # "argument is of length zero", so the janitor style crashed
+                        # for every one-variable analysis.
+                        var_data <- data[!is.na(data[[var]]), , drop = FALSE]
 
                         if (nrow(var_data) == 0) {
                             jmvcore::reject(paste0("Variable '", htmltools::htmlEscape(display_var), "' has no non-missing values"))
+                        }
+
+                        # A frequency table needs a manageable number of distinct
+                        # values. On a continuous variable janitor tabulates EVERY
+                        # observed value: 50 patients produced 50 rows labelled
+                        # "41.9504137110896", which is unreadable and tells the
+                        # reader nothing. The option's own description says this
+                        # style is for categorical variables. Judge by distinct-value
+                        # count rather than by type, so a numeric score with a few
+                        # levels (a 1-5 grade) is still tabulated.
+                        n_distinct <- length(unique(var_data[[var]]))
+                        if (n_distinct > 20) {
+                            skipped_vars[[length(skipped_vars) + 1]] <<-
+                                sprintf("%s (%d distinct values)",
+                                        htmltools::htmlEscape(display_var), n_distinct)
+                            return(NULL)
                         }
 
                         # Create tabyl table using actual column name
@@ -308,8 +370,28 @@ tableoneClass <- if (requireNamespace("jmvcore", quietly = TRUE)) R6::R6Class(
                         paste0(header, styled_table, "<br><hr style='margin:20px 0;'>")
                     })
 
-                    # Join all the tables together
-                    paste(table_list, collapse = "")
+                    # Join all the tables together. lapply() returns NULL for a
+                    # skipped variable, so drop those before pasting, and say which
+                    # were skipped - a silently absent variable reads as a bug.
+                    body <- paste(Filter(Negate(is.null), table_list), collapse = "")
+
+                    if (length(skipped_vars) > 0) {
+                        body <- paste0(
+                            body,
+                            "<div style='background:#fff3cd;border-left:4px solid #ffc107;",
+                            "padding:10px;margin:10px 0;'><b>",
+                            .("Not tabulated"), ":</b> ",
+                            paste(unlist(skipped_vars), collapse = "; "),
+                            ". ", .("A frequency table lists one row per distinct value, so it is only readable for variables with a limited number of categories. Use the tableone, gtsummary or arsenal style for continuous variables."),
+                            "</div>")
+                    }
+                    if (!nzchar(trimws(gsub("<[^>]*>", "", body))))
+                        body <- paste0(
+                            "<div style='background:#fff3cd;border-left:4px solid #ffc107;",
+                            "padding:10px;margin:10px 0;'>",
+                            .("None of the selected variables has few enough distinct values for a frequency table. Choose the tableone, gtsummary or arsenal style instead."),
+                            "</div>")
+                    body
                 }, error = function(e) {
                     jmvcore::reject(paste0("Error creating frequency tables with janitor: ", e$message, ". Check that variables have valid data. Janitor works best with categorical or discrete variables."))
                 })

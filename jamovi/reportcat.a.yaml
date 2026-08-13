@@ -32,6 +32,13 @@ options:
     type: Variables
     suggested: [ ordinal, nominal ]
     permitted: [ factor ]
+    # .run() has a `length(self$options$vars) == 0` branch that shows the welcome
+    # panel, so NULL is a supported state. Without an explicit default the compiler
+    # makes `vars` a REQUIRED argument of the public wrapper. (This does not make
+    # reportcat(data = df) work - jmvcore's select() fails on an empty variable
+    # list either way - but it matches the 88 other Variables options in the
+    # module and removes the "argument is missing" failure mode.)
+    default: NULL
     description:
       R: >
         Select the variables from your data frame that you wish to summarize.

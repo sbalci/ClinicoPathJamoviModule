@@ -25,7 +25,7 @@ test_that("summarydata with distribution diagnostics enabled", {
   )
 
   expect_no_error(result)
-  expect_true(inherits(result, "summarydataClass"))
+  expect_true(inherits(result, "summarydataResults"))
 })
 
 test_that("summarydata distribution diagnostics with normal data", {
@@ -107,7 +107,7 @@ test_that("summarydata with outlier detection enabled", {
   )
 
   expect_no_error(result)
-  expect_true(inherits(result, "summarydataClass"))
+  expect_true(inherits(result, "summarydataResults"))
 })
 
 test_that("summarydata outlier detection with known outliers", {
@@ -144,7 +144,7 @@ test_that("summarydata with report sentences enabled", {
   )
 
   expect_no_error(result)
-  expect_true(inherits(result, "summarydataClass"))
+  expect_true(inherits(result, "summarydataResults"))
 })
 
 test_that("summarydata report sentences with multiple variables", {
@@ -283,7 +283,7 @@ test_that("summarydata with all options enabled", {
   )
 
   expect_no_error(result)
-  expect_true(inherits(result, "summarydataClass"))
+  expect_true(inherits(result, "summarydataResults"))
 })
 
 test_that("summarydata all options with single variable", {

@@ -272,7 +272,7 @@ test_that("all styles handle continuous variables", {
   for (style in c("t1", "t2", "t3")) {
     result <- tableone(
       data = tableone_test,
-      vars = vars_continuous,
+      vars = !!vars_continuous,
       sty = style
     )
     expect_no_error(result)
@@ -286,7 +286,7 @@ test_that("all styles handle categorical variables", {
   for (style in c("t1", "t2", "t3", "t4")) {
     result <- tableone(
       data = tableone_test,
-      vars = vars_categorical,
+      vars = !!vars_categorical,
       sty = style
     )
     expect_no_error(result)
@@ -300,7 +300,7 @@ test_that("all styles handle ordinal factors", {
   for (style in c("t1", "t2", "t3", "t4")) {
     result <- tableone(
       data = tableone_test,
-      vars = vars_ordinal,
+      vars = !!vars_ordinal,
       sty = style
     )
     expect_no_error(result)
@@ -314,7 +314,7 @@ test_that("all styles handle mixed variable types", {
   for (style in c("t1", "t2", "t3")) {  # Skip t4 as it's categorical-focused
     result <- tableone(
       data = tableone_test,
-      vars = vars_mixed,
+      vars = !!vars_mixed,
       sty = style
     )
     expect_no_error(result)
@@ -336,7 +336,7 @@ test_that("tableone handles many variables simultaneously", {
 
   result <- tableone(
     data = tableone_test,
-    vars = many_vars,
+    vars = !!many_vars,
     sty = "t1"
   )
 
@@ -356,7 +356,7 @@ test_that("tableone handles comprehensive clinical variable set", {
   for (style in c("t1", "t2", "t3")) {
     result <- tableone(
       data = tableone_test,
-      vars = clinical_vars,
+      vars = !!clinical_vars,
       sty = style,
       excl = TRUE
     )

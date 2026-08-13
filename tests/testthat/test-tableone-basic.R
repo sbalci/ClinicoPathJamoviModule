@@ -79,12 +79,11 @@ test_that("tableone produces expected output structure", {
 
   # Check that main output exists (text, table, or html)
   # The exact output name depends on the .r.yaml definition
-  expect_true(
-    !is.null(result$text) ||
-    !is.null(result$table) ||
-    !is.null(result$html) ||
-    !is.null(result$todo)
-  )
+  # NB: `result$<name>` ERRORS on a jamovi Results object when <name> does not
+  # exist - it does not return NULL - so the old `!is.null(result$text) || ...`
+  # chain died on its first term. Check the declared item names instead.
+  expect_true(any(c("tablestyle1", "tablestyle2", "tablestyle3", "tablestyle4", "todo")
+                  %in% names(result)))
 })
 
 # ═══════════════════════════════════════════════════════════
@@ -315,6 +314,6 @@ test_that("tableone produces consistent results", {
   )
 
   # Results should be identical (or very similar)
-  expect_s3_class(result1, "tableoneClass")
-  expect_s3_class(result2, "tableoneClass")
+  expect_s3_class(result1, "tableoneResults")
+  expect_s3_class(result2, "tableoneResults")
 })

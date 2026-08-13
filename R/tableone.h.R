@@ -21,7 +21,8 @@ tableoneOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 
             private$..vars <- jmvcore::OptionVariables$new(
                 "vars",
-                vars)
+                vars,
+                default=NULL)
             private$..sty <- jmvcore::OptionList$new(
                 "sty",
                 sty,
@@ -229,7 +230,7 @@ tableoneBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' @export
 tableone <- function(
     data,
-    vars,
+    vars = NULL,
     sty = "t1",
     excl = FALSE,
     showSummary = FALSE,

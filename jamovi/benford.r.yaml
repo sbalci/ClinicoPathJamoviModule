@@ -8,7 +8,13 @@ items:
     - name: welcome
       title: 'Getting Started'
       type: Html
-      visible: (!var)
+      # NOT `visible: (!var)`. jmvcore's routing regex requires the expression to
+      # start with "(" followed by a letter, so a leading "!" is never recognised
+      # as an expression - the string is returned as-is and read as truthy, which
+      # left an empty "Getting Started" box on screen for every run once a
+      # variable had been selected (verified: welcome$visible was TRUE with var
+      # set). Visibility is driven from .run() instead.
+      visible: false
       clearWith: []
 
     - name:  explanation

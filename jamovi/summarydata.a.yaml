@@ -34,6 +34,11 @@ options:
       type: Variables
       suggested: [ continuous ]
       permitted: [ numeric ]
+      # .run() has a dedicated `length(self$options$vars) == 0` branch that shows
+      # the welcome panel, so NULL is a supported state. Without an explicit
+      # default the compiler makes `vars` a REQUIRED argument of the public
+      # wrapper, and summarydata(data = df) errors instead of showing that panel.
+      default: NULL
       description:
           R: >
             a string naming the variables from `data` that contains the
