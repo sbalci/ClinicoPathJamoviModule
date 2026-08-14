@@ -23,8 +23,6 @@ knitr::opts_chunk$set(
 
 
 
-# ClinicoPath Module Development Guide
-
 This comprehensive guide provides instructions for developing and maintaining the ClinicoPath jamovi module for clinicopathological research analysis.
 
 > **📝 Development Focus**: This guide focuses specifically on ClinicoPath module development. Generic jamovi tutorial content and examples using non-ClinicoPath datasets have been preserved in commented sections for reference.

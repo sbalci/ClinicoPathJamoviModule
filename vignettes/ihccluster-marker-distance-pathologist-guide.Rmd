@@ -7,8 +7,6 @@ vignette: >
   %\VignetteEncoding{UTF-8}
 ---
 
-# IHC Marker Clustering for Pathologists: Distance Metrics Guide
-
 **A Practical Guide to Understanding How Markers Cluster Together**
 
 ---

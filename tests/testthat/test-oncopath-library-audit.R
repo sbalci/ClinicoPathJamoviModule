@@ -39,9 +39,12 @@ test_that("OncoPath analyses and manifest use library-ready versions", {
   # The invariant is that every manifest agrees with DESCRIPTION -- not that the
   # version is any particular literal. Pinning "1.0.0" here broke on every release.
   pkg_version <- unname(read.dcf(oncopath_file("DESCRIPTION"), fields = "Version")[[1]])
+  # jamovi requires the analysis version to be x.y.z, so _updateModules.R writes the
+  # first THREE components of the package version (1.0.53.01 -> 1.0.53) into .a.yaml.
+  analysis_version <- paste(strsplit(pkg_version, ".", fixed = TRUE)[[1]][1:3], collapse = ".")
   for (analysis_file in analysis_files) {
     schema <- paste(readLines(analysis_file, warn = FALSE), collapse = "\n")
-    expect_match(schema, paste0("version: '", pkg_version, "'"), fixed = TRUE)
+    expect_match(schema, paste0("version: '", analysis_version, "'"), fixed = TRUE)
   }
   expect_match(read_oncopath("jamovi", "0000.yaml"),
                paste0("version: ", pkg_version), fixed = TRUE)
@@ -164,7 +167,8 @@ test_that("standalone OncoPath metadata is internally consistent", {
   citation <- read_oncopath("CITATION.cff")
 
   pkg_version <- unname(description[1, "Version"])
-  expect_match(pkg_version, "^[0-9]+[.][0-9]+[.][0-9]+$")
+  # any version R itself accepts -- the repo ships 4-component dev versions (1.0.53.01)
+  expect_false(is.na(numeric_version(pkg_version, strict = FALSE)))
   expect_match(citation, 'title: "OncoPath:', fixed = TRUE)
   expect_match(citation, paste0('version: "', pkg_version, '"'), fixed = TRUE)
   expect_match(citation, "https://github.com/sbalci/OncoPath/", fixed = TRUE)

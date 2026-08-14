@@ -19,3 +19,4 @@ Vector of predicted probabilities
 \description{
 Maps raw test values to probabilities based on their position in the ROC curve
 }
+\keyword{internal}

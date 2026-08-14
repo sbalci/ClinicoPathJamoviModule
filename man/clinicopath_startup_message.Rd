@@ -15,3 +15,4 @@ Returns the package author / website banner. Called by \code{.onAttach()} (see
 and respects \code{suppressPackageStartupMessages()}. Available as an exported
 function so users can print the banner explicitly.
 }
+\keyword{internal}

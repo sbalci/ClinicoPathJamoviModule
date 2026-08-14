@@ -32,3 +32,4 @@ List with IDI, confidence intervals, and p-value
 \description{
 Calculates Integrated Discrimination Improvement with bootstrap confidence intervals
 }
+\keyword{internal}

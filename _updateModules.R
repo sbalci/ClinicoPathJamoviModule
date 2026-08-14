@@ -1781,7 +1781,10 @@ yaml_a_paths <- c(
     ClinicoPathDescriptives_dir,
     "jamovi",
     paste0(ClinicoPathDescriptives_modules, ".a.yaml")
-  )
+  ),
+  # OncoPath was missing from this list, so its analysis .a.yaml versions never got
+  # bumped -- they sat at 1.0.52 while its DESCRIPTION/0000.yaml moved to 1.0.53.01.
+  file.path(OncoPath_dir, "jamovi", paste0(OncoPath_modules, ".a.yaml"))
 )
 
 yaml_0000_paths <- yaml_0000_paths[file.exists(yaml_0000_paths)]

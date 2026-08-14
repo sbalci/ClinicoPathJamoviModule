@@ -77,6 +77,7 @@ NULL
 #' @param values Raw test values
 #' @param actual Binary outcomes (0/1)
 #' @param direction Direction of test (">=" or "<=")
+#' @keywords internal
 #' @return Vector of predicted probabilities
 #' @export
 raw_to_prob <- function(values, actual, direction = ">=") {
@@ -163,6 +164,7 @@ raw_to_prob <- function(values, actual, direction = ">=") {
 #' @param direction Classification direction (">=" or "<=")
 #' @param n_boot Number of bootstrap iterations
 #' @param conf_level Confidence level (default 0.95)
+#' @keywords internal
 #' @return List with IDI, confidence intervals, and p-value
 #' @export
 bootstrapIDI <- function(new_values, ref_values, actual,
@@ -303,6 +305,7 @@ bootstrapIDI <- function(new_values, ref_values, actual,
 #' and respects `suppressPackageStartupMessages()`. Available as an exported
 #' function so users can print the banner explicitly.
 #'
+#' @keywords internal
 #' @return Invisible NULL (called for side effects).
 #' @export
 clinicopath_startup_message <- function() {
