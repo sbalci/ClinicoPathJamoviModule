@@ -165,6 +165,7 @@ vennClass <- if (requireNamespace('jmvcore'))
         inherit = vennBase,
         private = list(
             .name_mapping = list(),
+            .safe_lookup = character(0),
             .errors = character(0),
             .warnings = character(0),
             .info = character(0),
@@ -413,6 +414,24 @@ vennClass <- if (requireNamespace('jmvcore'))
                         row_numbers <- seq_len(nrow(full_data))
                     }
 
+                    # Two variables whose names sanitise to the SAME syntactic name
+                    # ("Tumor Grade" and "Tumor.Grade" both become "Tumor.Grade")
+                    # used to collide: each block called make.names() on its own
+                    # variable, so the second set silently overwrote the first in
+                    # `mydata` while the summary table still showed both original
+                    # names. Two genuinely different sets - 30 positive and 5
+                    # positive - were both reported as 5, and the diagram drew
+                    # them identically. Build ONE lookup with unique = TRUE.
+                    if (anyDuplicated(selected_vars)) {
+                        dupes <- unique(selected_vars[duplicated(selected_vars)])
+                        jmvcore::reject(
+                            "The same variable is selected more than once ({}). Each set in a Venn diagram must be a different variable.",
+                            code = NULL, paste(dupes, collapse = ", "))
+                    }
+                    safe_lookup <- make.names(selected_vars, unique = TRUE)
+                    names(safe_lookup) <- selected_vars
+                    private$.safe_lookup <- safe_lookup
+
                     # Collect only selected variables and convert to logical values
                     mydata <- data.frame(row.names = seq_len(nrow(full_data)))
 
@@ -421,7 +440,7 @@ vennClass <- if (requireNamespace('jmvcore'))
 
                     # Process each variable with robust error handling for problematic names
                     if (!is.null(self$options$var1)) {
-                        safe_name1 <- make.names(var1)
+                        safe_name1 <- safe_lookup[[var1]]
                         tryCatch({
                             mydata[[safe_name1]] <- ifelse(full_data[[var1]] == var1true, TRUE, FALSE)
                             name_mapping[[safe_name1]] <- var1
@@ -433,7 +452,7 @@ vennClass <- if (requireNamespace('jmvcore'))
                         })
                     }
                     if (!is.null(self$options$var2)) {
-                        safe_name2 <- make.names(var2)
+                        safe_name2 <- safe_lookup[[var2]]
                         tryCatch({
                             mydata[[safe_name2]] <- ifelse(full_data[[var2]] == var2true, TRUE, FALSE)
                             name_mapping[[safe_name2]] <- var2
@@ -444,7 +463,7 @@ vennClass <- if (requireNamespace('jmvcore'))
                         })
                     }
                     if (!is.null(self$options$var3)) {
-                        safe_name3 <- make.names(var3)
+                        safe_name3 <- safe_lookup[[var3]]
                         tryCatch({
                             mydata[[safe_name3]] <- ifelse(full_data[[var3]] == var3true, TRUE, FALSE)
                             name_mapping[[safe_name3]] <- var3
@@ -455,7 +474,7 @@ vennClass <- if (requireNamespace('jmvcore'))
                         })
                     }
                     if (!is.null(self$options$var4)) {
-                        safe_name4 <- make.names(var4)
+                        safe_name4 <- safe_lookup[[var4]]
                         tryCatch({
                             mydata[[safe_name4]] <- ifelse(full_data[[var4]] == var4true, TRUE, FALSE)
                             name_mapping[[safe_name4]] <- var4
@@ -466,7 +485,7 @@ vennClass <- if (requireNamespace('jmvcore'))
                         })
                     }
                     if (!is.null(self$options$var5)) {
-                        safe_name5 <- make.names(var5)
+                        safe_name5 <- safe_lookup[[var5]]
                         tryCatch({
                             mydata[[safe_name5]] <- ifelse(full_data[[var5]] == var5true, TRUE, FALSE)
                             name_mapping[[safe_name5]] <- var5
@@ -477,7 +496,7 @@ vennClass <- if (requireNamespace('jmvcore'))
                         })
                     }
                     if (!is.null(self$options$var6)) {
-                        safe_name6 <- make.names(var6)
+                        safe_name6 <- safe_lookup[[var6]]
                         tryCatch({
                             mydata[[safe_name6]] <- ifelse(full_data[[var6]] == var6true, TRUE, FALSE)
                             name_mapping[[safe_name6]] <- var6
@@ -488,7 +507,7 @@ vennClass <- if (requireNamespace('jmvcore'))
                         })
                     }
                     if (!is.null(self$options$var7)) {
-                        safe_name7 <- make.names(var7)
+                        safe_name7 <- safe_lookup[[var7]]
                         tryCatch({
                             mydata[[safe_name7]] <- ifelse(full_data[[var7]] == var7true, TRUE, FALSE)
                             name_mapping[[safe_name7]] <- var7
@@ -546,7 +565,7 @@ vennClass <- if (requireNamespace('jmvcore'))
                     for (var in variables) {
                         if (!is.null(var)) {
                             # Find the safe column name that corresponds to this variable
-                            safe_name <- make.names(var)
+                            safe_name <- safe_lookup[[var]]
                             if (safe_name %in% names(mydata)) {
                                 varStats <- private$.calculateSummaryStats(mydata, safe_name, var)
                                 if (!is.null(varStats)) {
@@ -905,8 +924,13 @@ vennClass <- if (requireNamespace('jmvcore'))
                 # Calculate 2-way intersection if we have 2+ variables
                 intersection_analysis <- ""
                 if (length(var_names) >= 2) {
-                    var1_data <- as.logical(data[[make.names(var_names[1])]])
-                    var2_data <- as.logical(data[[make.names(var_names[2])]])
+                    # Resolve through the same unique lookup the columns were built
+                    # with; make.names() here would reintroduce the collision.
+                    lk <- private$.safe_lookup
+                    col1 <- if (var_names[1] %in% names(lk)) lk[[var_names[1]]] else make.names(var_names[1])
+                    col2 <- if (var_names[2] %in% names(lk)) lk[[var_names[2]]] else make.names(var_names[2])
+                    var1_data <- as.logical(data[[col1]])
+                    var2_data <- as.logical(data[[col2]])
                     both_true <- sum(var1_data & var2_data, na.rm = TRUE)
                     both_pct <- round((both_true / total_n) * 100, 1)
                     
@@ -957,8 +981,13 @@ vennClass <- if (requireNamespace('jmvcore'))
                 intersection_sentences <- ""
                 if (length(var_names) >= 2) {
                     # Calculate 2-way intersection
-                    var1_data <- as.logical(data[[make.names(var_names[1])]])
-                    var2_data <- as.logical(data[[make.names(var_names[2])]])
+                    # Resolve through the same unique lookup the columns were built
+                    # with; make.names() here would reintroduce the collision.
+                    lk <- private$.safe_lookup
+                    col1 <- if (var_names[1] %in% names(lk)) lk[[var_names[1]]] else make.names(var_names[1])
+                    col2 <- if (var_names[2] %in% names(lk)) lk[[var_names[2]]] else make.names(var_names[2])
+                    var1_data <- as.logical(data[[col1]])
+                    var2_data <- as.logical(data[[col2]])
                     both_positive <- sum(var1_data & var2_data, na.rm = TRUE)
                     both_pct <- round((both_positive / total_n) * 100, 1)
 
@@ -1611,15 +1640,15 @@ vennClass <- if (requireNamespace('jmvcore'))
 
                     set_columns <- names(membership_data)[names(membership_data) != "Row"]
                     if (length(set_columns) > 0) {
-                        group_labels <- vapply(seq_len(nrow(membership_data)), function(i) {
-                            row_values <- membership_data[i, set_columns, drop = FALSE]
-                            positives <- set_columns[unlist(row_values, use.names = FALSE) == "Yes"]
-                            if (length(positives) == 0) {
-                                "None"
-                            } else {
-                                paste(positives, collapse = " & ")
-                            }
-                        }, FUN.VALUE = character(1))
+                        # Build the labels from a logical MATRIX. The previous
+                        # version indexed the data frame row by row
+                        # (membership_data[i, cols]), which is the expensive half
+                        # of a table that took 34s at n = 800.
+                        member_mat <- as.matrix(
+                            membership_data[, set_columns, drop = FALSE]) == "Yes"
+                        group_labels <- apply(member_mat, 1L, function(z) {
+                            if (!any(z)) "None" else paste(set_columns[z], collapse = " & ")
+                        })
 
                         membership_data$Group <- group_labels
                         membership_data <- membership_data[, c("Row", "Group", set_columns), drop = FALSE]
@@ -1665,8 +1694,30 @@ vennClass <- if (requireNamespace('jmvcore'))
                     table$setState(state_data)
                     table$deleteRows()
 
+                    # Cap the rendered rows. jmvcore's addRow is called once per
+                    # patient and the cost grows quadratically: measured 3.2s at
+                    # n = 200, 8.3s at n = 400, 34.0s at n = 800, and a 20000-row
+                    # dataset did not finish in ten minutes. A per-patient listing
+                    # is also not what this table is for - the group counts are -
+                    # and the full per-row assignment is available by enabling
+                    # "Add membership groups to data", which writes it back as a
+                    # dataset column rather than rendering it.
+                    max_rows <- 500L
+                    n_all <- nrow(membership_data)
+                    if (n_all > max_rows) {
+                        membership_data <- membership_data[seq_len(max_rows), , drop = FALSE]
+                    }
+
                     column_mapping <- stats::setNames(safe_col_names, safe_col_names)
                     private$.populateTableSafely(table, membership_data, column_mapping)
+
+                    if (n_all > max_rows) {
+                        try({ table$setNote("truncated", jmvcore::format(
+                            "Showing the first {shown} of {total} cases. Enable <b>Add membership groups to data</b> to get the group for every case as a dataset column; rendering one table row per case is slow and is capped here.",
+                            shown = max_rows, total = n_all)) }, silent = TRUE)
+                    } else {
+                        try({ table$setNote("truncated", NULL) }, silent = TRUE)
+                    }
 
                     try({ table$setNote(key = "error", note = NULL) }, silent = TRUE)
 

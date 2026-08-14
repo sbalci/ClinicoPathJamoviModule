@@ -9,6 +9,8 @@ items:
       title: Important Information
       type:  Preformatted
       clearWith:
+        - useprunesmaller
+        - prunesmaller
         - vars
         - percvar
         - percvarLevel

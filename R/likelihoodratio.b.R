@@ -144,7 +144,38 @@ likelihoodratioClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cla
             
             # Determine optimal cutpoint
             cutpoint <- private$.findOptimalCutpoint(testVar, refStd)
-            
+
+            # Stop here if no usable cutpoint was obtained. `manualCutpoint` is a
+            # Number with no default, so it arrives as NULL whenever the user picks
+            # the manual method and leaves the box empty. Carrying that NULL forward
+            # makes `testVar >= NULL` return logical(0), the 2x2 table come back
+            # empty, and contingency[1,1] throw "subscript out of bounds" - an opaque
+            # crash where the user needed an instruction. Guarding here rather than
+            # inside the "manual" branch covers every cutpoint method at the single
+            # point where they all converge.
+            cut_value <- cutpoint$value
+            if (is.null(cut_value) || length(cut_value) != 1 ||
+                !is.numeric(cut_value) || !is.finite(cut_value)) {
+                self$results$instructions$setContent(
+                    if (identical(self$options$cutpointMethod %||% "youden", "manual"))
+                        paste0(
+                            "<p><b>Enter a cutpoint value to run this analysis.</b></p>",
+                            "<p>The cutpoint method is set to <i>User-specified cutpoint</i>, ",
+                            "but no value has been entered, so there is nothing to split the ",
+                            "test variable on.</p>",
+                            "<p>Either type the cutpoint into the <i>Manual cutpoint</i> box, ",
+                            "or choose one of the estimated methods (Youden index, ",
+                            "cost-weighted, ROC01, concordance) to have a cutpoint derived ",
+                            "from the data.</p>")
+                    else
+                        paste0(
+                            "<p><b>Error:</b> No usable cutpoint could be determined from ",
+                            "these data. Check that the test variable is numeric and has ",
+                            "more than one distinct value.</p>")
+                )
+                return()
+            }
+
             # Convert to binary using cutpoint
             testDirection <- self$options$testDirection %||% "higher"
             if (testDirection == "higher") {

@@ -518,6 +518,23 @@ alluvialClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             vars_name <- self$options$vars
             max_vars <- self$options$maxvars
             plot_vars <- utils::head(vars_name, max_vars)
+
+            # head() silently discards everything past `maxvars`. A user who
+            # selects twelve time points and sees a diagram of eight has no way to
+            # tell which stages are missing - the only hint was the flow-count
+            # notice, whose arithmetic (3^8 = 6561) quietly reflects eight. Name
+            # the dropped variables and the setting that dropped them.
+            if (length(vars_name) > length(plot_vars)) {
+                dropped <- setdiff(vars_name, plot_vars)
+                private$.addNotice(
+                    "WARNING",
+                    "Variables not shown",
+                    paste0(
+                        sprintf("Only the first %d of %d selected variables are plotted, because 'Maximum variables' is set to %d.",
+                                length(plot_vars), length(vars_name), max_vars),
+                        "\nNot shown: ", paste(dropped, collapse = ", "),
+                        "\nRaise 'Maximum variables' to include them, or deselect the ones you do not need."))
+            }
             engine <- self$options$engine
             weight_var <- self$options$weight
 

@@ -26,7 +26,8 @@ dataqualityOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
 
             private$..vars <- jmvcore::OptionVariables$new(
                 "vars",
-                vars)
+                vars,
+                default=NULL)
             private$..check_duplicates <- jmvcore::OptionBool$new(
                 "check_duplicates",
                 check_duplicates,
@@ -220,8 +221,8 @@ dataqualityBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' dup() function).
 #' 
 #' @param data The data as a data frame.
-#' @param vars Variables to assess for data quality. If none selected,  entire
-#'   dataset will be analyzed.
+#' @param vars Variables to assess for data quality. At least one variable
+#'   must be selected; the analysis does not fall back to the whole dataset.
 #' @param check_duplicates If TRUE, analyzes duplicate values within each
 #'   variable or across the entire dataset.
 #' @param check_missing If TRUE, provides detailed missing value statistics
@@ -257,7 +258,7 @@ dataqualityBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' @export
 dataquality <- function(
     data,
-    vars,
+    vars = NULL,
     check_duplicates = FALSE,
     check_missing = FALSE,
     complete_cases_only = FALSE,

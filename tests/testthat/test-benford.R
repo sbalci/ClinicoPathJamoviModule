@@ -552,8 +552,10 @@ test_that("benfordClass correctly handles variable names with special characters
     expect_true(nrow(assessment_rows) > 0,
                 info = "Should produce assessment even with special char variable names")
 
-    # If suspects are generated, check that output doesn't break
-    text2_content <- result$text2$asString
+    # If suspects are generated, check that output doesn't break.
+    # (A Preformatted result item exposes $content; $asString is not an accessor
+    # on it and returned a non-character, so this assertion always failed.)
+    text2_content <- as.character(result$text2$content)
     expect_true(is.character(text2_content),
                 info = "Suspect output should be generated without errors")
 })

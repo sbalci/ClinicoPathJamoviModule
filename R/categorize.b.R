@@ -22,6 +22,14 @@ categorizeClass <- if (requireNamespace('jmvcore')) R6::R6Class(
     private = list(
 
         # Validate breaks for strict monotonicity and uniqueness
+        # Read an option that may not be present in the compiled .h.R yet.
+        # jmvcore's `$` ERRORS on an undeclared option rather than returning NULL,
+        # so a newly added option would crash every run until prepare() is run.
+        .optionOr = function(name, fallback) {
+            val <- tryCatch(self$options[[name]], error = function(e) NULL)
+            if (is.null(val) || (length(val) == 1 && is.na(val))) fallback else val
+        },
+
         .validateBreaks = function(breaks, method) {
             if (is.null(breaks) || length(breaks) < 2) {
                 return(list(valid = FALSE, message = "Insufficient break points generated."))
@@ -53,7 +61,8 @@ categorizeClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         },
 
         # Calculate break points based on method
-        .calculateBreaks = function(x, method, nbins, manual_breaks, sdmult) {
+        .calculateBreaks = function(x, method, nbins, manual_breaks, sdmult,
+                                    extend_to_data = TRUE) {
             x <- x[!is.na(x)]
 
             if (length(x) == 0) {
@@ -116,10 +125,30 @@ categorizeClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 }
             )
 
-            # Ensure breaks span the data range
-            if (!is.null(breaks) && length(breaks) > 1) {
-                if (min(breaks) > min(x)) breaks[1] <- min(x)
-                if (max(breaks) < max(x)) breaks[length(breaks)] <- max(x)
+            # Ensure breaks span the data range by EXTENDING it, not by moving the
+            # outermost cut-points.
+            #
+            # This used to assign breaks[1] <- min(x) and breaks[length] <- max(x),
+            # which overwrote the user's own outer thresholds. For every computed
+            # method the endpoints already are min(x)/max(x), so it was a no-op
+            # there - it only ever affected MANUAL breaks, and it deleted them.
+            #
+            # Measured: eGFR data spanning 12.3-109.2 with the standard CKD
+            # cut-points "30,60,90" produced breaks 12.26, 60, 109.21. The 30 and
+            # 90 thresholds were gone, four CKD stages collapsed into two bins, and
+            # the 30 patients below 30 (stage 4/5) were merged with stage 3 -
+            # silently. Prepending and appending keeps every threshold the user
+            # asked for while still covering the data.
+            # extend_to_data = FALSE keeps manual break points exactly as entered,
+            # so values outside them fall outside every bin and are excluded. The
+            # count is reported to the user in .run(); silently losing cases would
+            # be the same class of defect as silently moving the break points.
+            if (!is.null(breaks) && length(breaks) > 1 && isTRUE(extend_to_data)) {
+                if (min(breaks) > min(x, na.rm = TRUE))
+                    breaks <- c(min(x, na.rm = TRUE), breaks)
+                if (max(breaks) < max(x, na.rm = TRUE))
+                    breaks <- c(breaks, max(x, na.rm = TRUE))
+                breaks <- unique(sort(breaks))
             }
 
             return(breaks)
@@ -420,12 +449,19 @@ categorizeClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             sdmult <- self$options$sdmult
 
             private$.checkpoint()
+            # Only the manual method can have break points that do not span the
+            # data; the computed methods build theirs from min(x)/max(x), so the
+            # switch is deliberately ignored for them.
+            exclude_oor <- isTRUE(private$.optionOr("excludeoutofrange", FALSE)) &&
+                identical(method, "manual")
+
             breaks <- private$.calculateBreaks(
                 x_clean,
                 method,
                 nbins,
                 manual_breaks,
-                sdmult
+                sdmult,
+                extend_to_data = !exclude_oor
             )
 
             # Enforce sorted unique breaks to avoid cut() failures
@@ -527,6 +563,23 @@ categorizeClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 right = self$options$rightclosed,
                 ordered_result = self$options$ordered
             )
+
+            # Report cases dropped for falling outside the break points. Only
+            # reachable when "Exclude values outside the break points" is on with
+            # manual breaks - otherwise the range is extended and nothing is lost.
+            if (exclude_oor) {
+                n_dropped <- sum(!is.na(x) & is.na(x_cat))
+                if (n_dropped > 0) {
+                    below <- sum(!is.na(x) & x < min(breaks))
+                    above <- sum(!is.na(x) & x > max(breaks))
+                    notice_html$outOfRange <- .noticeBox("WARNING", jmvcore::format(
+                        "Excluded {} observation(s) ({}%) that fall outside the break points [{}, {}]: {} below and {} above. These are not counted in any category. Turn off 'Exclude values outside the break points' to extend the outer breaks and keep every case.",
+                        n_dropped,
+                        round(100 * n_dropped / sum(!is.na(x)), 1),
+                        format(min(breaks)), format(max(breaks)),
+                        below, above))
+                }
+            }
 
             # Clinical suitability checks ----
             # Check bin balance and minimum counts

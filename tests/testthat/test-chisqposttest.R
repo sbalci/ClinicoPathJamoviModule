@@ -183,14 +183,17 @@ test_that("chisqposttest handles errors appropriately", {
         results <- ClinicoPath::chisqposttest()
     })
     
-    # Test 2: Invalid variable names should not crash
-    testthat::expect_silent({
-        results <- ClinicoPath::chisqposttest(
+    # Test 2: Invalid variable names are refused by jmvcore at the wrapper,
+    # before .run() is entered, so the analysis never sees them. The message
+    # must name the offending variable rather than failing obscurely.
+    testthat::expect_error(
+        ClinicoPath::chisqposttest(
             data = histopathology,
             rows = "NonexistentVar",
             cols = "Group"
-        )
-    })
+        ),
+        "NonexistentVar"
+    )
     
     # Test 3: Same variable for rows and cols
     testthat::expect_silent({

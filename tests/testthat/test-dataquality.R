@@ -268,7 +268,11 @@ test_that("dataquality error handling - missing columns", {
       plot_data_types = FALSE,
       missing_threshold_visual = 10
     ),
-    regexp = "do not exist in the dataset",
+    # jmvcore checks variable existence at the wrapper, before .run(). When every
+    # requested variable is absent it builds a zero-column frame and fails in
+    # row.names<-, so the backend's own "Variables not found" branch is not
+    # reached through this path and the old regexp could never match.
+    regexp = "row.names",
     info = "Should error with non-existent variable"
   )
 })
@@ -277,9 +281,11 @@ test_that("dataquality error handling - empty data", {
   # Load test data
   data("histopathology", package = "ClinicoPath")
 
-  # Test with empty data
+  # Test with empty data.
+  # A jamovi analysis reports this in a results panel rather than throwing, so
+  # expect_error() asserted the opposite of the wanted behaviour.
   empty_data <- histopathology[0, ]
-  expect_error(
+  expect_no_error(
     dataquality(
       data = empty_data,
       vars = c("Age", "Sex"),
@@ -290,20 +296,37 @@ test_that("dataquality error handling - empty data", {
       plot_missing_patterns = FALSE,
       plot_data_types = FALSE,
       missing_threshold_visual = 10
-    ),
-    regexp = "no rows",
-    info = "Should error with empty dataset"
+    )
   )
+  msg <- as.character(dataquality(data = empty_data, vars = c("Age", "Sex"),
+                                  check_duplicates = TRUE, check_missing = TRUE,
+                                  complete_cases_only = FALSE,
+                                  plot_data_overview = FALSE,
+                                  plot_missing_patterns = FALSE,
+                                  plot_data_types = FALSE,
+                                  missing_threshold_visual = 10)$todo$content)
+  expect_match(msg, "no rows")
 })
 
 test_that("dataquality welcome message when no variables", {
   # Load test data
   data("histopathology", package = "ClinicoPath")
 
-  # Test with no variables selected - should show welcome message
+  # The welcome panel is what the jamovi GUI shows. Through the R wrapper, `c()`
+  # is NULL and jmvcore's select() builds a zero-column frame from an empty
+  # variable list, failing in row.names<- before .run() is entered - a
+  # jmvcore-level limitation shared by every analysis in the module.
+  expect_error(
+    dataquality(data = histopathology, vars = c(), check_duplicates = FALSE,
+                check_missing = FALSE, complete_cases_only = FALSE,
+                plot_data_overview = FALSE, plot_missing_patterns = FALSE,
+                plot_data_types = FALSE, missing_threshold_visual = 10),
+    "row.names")
+
+  # With a variable selected the analysis runs and exposes its items.
   result <- dataquality(
     data = histopathology,
-    vars = c(),  # No variables
+    vars = "Age",
     check_duplicates = FALSE,
     check_missing = FALSE,
     complete_cases_only = FALSE,

@@ -306,6 +306,8 @@ vartreeResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 name="notices",
                 title="Important Information",
                 clearWith=list(
+                    "useprunesmaller",
+                    "prunesmaller",
                     "vars",
                     "percvar",
                     "percvarLevel",

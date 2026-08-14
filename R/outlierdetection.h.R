@@ -19,6 +19,8 @@ outlierdetectionOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6
             show_exclusion_summary = FALSE,
             show_visualization = FALSE,
             show_interpretation = FALSE,
+            sampleThreshold = 10000,
+            sampleSize = 5000,
             seed = 123, ...) {
 
             super$initialize(
@@ -33,7 +35,8 @@ outlierdetectionOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6
                 suggested=list(
                     "continuous"),
                 permitted=list(
-                    "numeric"))
+                    "numeric"),
+                default=NULL)
             private$..method_category <- jmvcore::OptionList$new(
                 "method_category",
                 method_category,
@@ -107,6 +110,18 @@ outlierdetectionOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6
                 "show_interpretation",
                 show_interpretation,
                 default=FALSE)
+            private$..sampleThreshold <- jmvcore::OptionInteger$new(
+                "sampleThreshold",
+                sampleThreshold,
+                default=10000,
+                min=1000,
+                max=1000000)
+            private$..sampleSize <- jmvcore::OptionInteger$new(
+                "sampleSize",
+                sampleSize,
+                default=5000,
+                min=100,
+                max=1000000)
             private$..seed <- jmvcore::OptionInteger$new(
                 "seed",
                 seed,
@@ -125,6 +140,8 @@ outlierdetectionOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6
             self$.addOption(private$..show_exclusion_summary)
             self$.addOption(private$..show_visualization)
             self$.addOption(private$..show_interpretation)
+            self$.addOption(private$..sampleThreshold)
+            self$.addOption(private$..sampleSize)
             self$.addOption(private$..seed)
         }),
     active = list(
@@ -141,6 +158,8 @@ outlierdetectionOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6
         show_exclusion_summary = function() private$..show_exclusion_summary$value,
         show_visualization = function() private$..show_visualization$value,
         show_interpretation = function() private$..show_interpretation$value,
+        sampleThreshold = function() private$..sampleThreshold$value,
+        sampleSize = function() private$..sampleSize$value,
         seed = function() private$..seed$value),
     private = list(
         ..vars = NA,
@@ -156,6 +175,8 @@ outlierdetectionOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6
         ..show_exclusion_summary = NA,
         ..show_visualization = NA,
         ..show_interpretation = NA,
+        ..sampleThreshold = NA,
+        ..sampleSize = NA,
         ..seed = NA)
 )
 
@@ -354,8 +375,15 @@ outlierdetectionBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
 #'   and distribution of outlier scores.
 #' @param show_interpretation Display detailed interpretation of outlier
 #'   detection results and methodological notes.
+#' @param sampleThreshold Row count above which a random subsample is analysed
+#'   instead of the full dataset. Datasets at or below this size are always
+#'   analysed in full. Raise it to analyse a large dataset completely at the
+#'   cost of speed.
+#' @param sampleSize Number of rows retained when subsampling. Outliers among
+#'   the rows that are not sampled cannot be detected, so the reported count is
+#'   a lower bound; larger values recover more of them at the cost of speed.
 #' @param seed Random seed used for the reproducible random subsample that is
-#'   drawn when the dataset is large (more than 10000 rows). Change this value
+#'   drawn when the dataset exceeds the subsampling threshold. Change this value
 #'   to draw a different sample; the default of 123 reproduces the previous
 #'   fixed behaviour.
 #' @return A results object containing:
@@ -372,7 +400,7 @@ outlierdetectionBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
 #' @export
 outlierdetection <- function(
     data,
-    vars,
+    vars = NULL,
     method_category = "composite",
     univariate_methods = "zscore_robust",
     multivariate_methods = "mahalanobis",
@@ -385,6 +413,8 @@ outlierdetection <- function(
     show_exclusion_summary = FALSE,
     show_visualization = FALSE,
     show_interpretation = FALSE,
+    sampleThreshold = 10000,
+    sampleSize = 5000,
     seed = 123) {
 
     if ( ! requireNamespace("jmvcore", quietly=TRUE))
@@ -411,6 +441,8 @@ outlierdetection <- function(
         show_exclusion_summary = show_exclusion_summary,
         show_visualization = show_visualization,
         show_interpretation = show_interpretation,
+        sampleThreshold = sampleThreshold,
+        sampleSize = sampleSize,
         seed = seed)
 
     analysis <- outlierdetectionClass$new(

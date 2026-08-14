@@ -13,6 +13,10 @@ options:
     - name: var
       title: Variable to check
       type: Variable
+      # .run() handles an unselected variable with the instructions panel, so NULL
+      # is a supported state; without an explicit default the compiler makes `var`
+      # a REQUIRED argument of the public wrapper.
+      default: NULL
 
     - name: showOutliers
       title: Outlier analysis
@@ -20,7 +24,10 @@ options:
       default: true
       description:
           R: >
-            Detect and display potential outliers using z-score method (|z| > 3).
+            Detect potential outliers using three methods - z-score (|z| > 3), the IQR
+            fence (1.5 x IQR), and the modified Z-score (|M| > 3.5, MAD-based) - and report
+            points flagged by at least two of them. Below n = 10 single-method flags are
+            shown and labelled informative-only.
 
     - name: showDistribution
       title: Distribution analysis
@@ -95,12 +102,16 @@ options:
             Apply transformation before outlier detection to handle skewed distributions (especially right-skewed lab values).
 
     - name: mcarTest
-      title: MCAR statistical test
+      title: Explain MCAR testability
       type: Bool
       default: false
       description:
           R: >
-            Perform Little's MCAR test if available (requires naniar package). Provides formal test vs. heuristic assessment.
+            Explain whether the missingness mechanism can be tested formally for this
+            variable. Little's MCAR test is multivariate and cannot be computed from a
+            single variable, so this analysis reports heuristics about where the missing
+            values sit rather than a test of the mechanism; enable this to state that
+            limitation explicitly in the output.
 
     - name: cvMinMean
       title: Minimum mean for CV calculation

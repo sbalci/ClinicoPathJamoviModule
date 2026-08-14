@@ -73,6 +73,10 @@ options:
       options:
         - name: custom
           title: Custom (use bin width)
+        - name: who
+          title: "WHO/UN standard (0-4, 5-9, ... 85+)"
+        - name: who_infant
+          title: "WHO abridged (<1, 1-4, 5-9, ... 85+)"
         - name: pediatric
           title: Pediatric (<18)
         - name: reproductive
@@ -84,14 +88,44 @@ options:
       default: custom
       description:
           R: >
-            Predefined age group categories. Choose 'custom' to use bin_width, or select a preset.
+            Predefined age group categories. Choose 'custom' to use bin_width, or select a
+            preset. 'who' gives the WHO/UN standard five-year groups (0-4, 5-9, ... 85+) used
+            by the WHO World Standard Population and UN population pyramids; 'who_infant' is
+            the WHO abridged life-table grouping, which reports infants (<1) separately from
+            children aged 1-4. All bands are left-closed, so an age on a boundary starts the
+            band named for it.
           jamovi: >
             Predefined age group categories.
+
+    - name: age_interval
+      title: Age band boundaries
+      type: List
+      options:
+        - name: left
+          title: "Left-closed [0,5) - age 5 starts the next band (WHO/UN standard)"
+        - name: right
+          title: "Right-closed (0,5] - age 5 closes the band"
+      default: left
+      description:
+          R: >
+            Which end of an age band is closed. 'left' gives [lower, upper) bands, the
+            WHO/UN and demographic convention: a person aged exactly 65 starts the 65-69
+            band, and equal-width bands hold equal numbers of single years. 'right' gives
+            (lower, upper] bands, where age 65 closes the band below it; this reproduces
+            the behaviour of releases before 1.0.52 and makes the lowest band one year
+            wider than the others, which inflates the youngest bar of the pyramid.
+          jamovi: >
+            Which end of each age band is closed. Left-closed is the WHO/UN standard.
 
     - name: bin_width
       title: Bin width (years)
       type: Number
       default: 5
+      # Only non-positive widths are actually invalid (the backend rejects those
+      # with a clear message). Fractional widths are legitimate - 0.25 gives
+      # three-month bands for neonatal work - so no upper bound is imposed and
+      # the lower bound only keeps obviously-broken entry out of the GUI.
+      min: 0.01
       description:
           R: >
             The width of the age bins in years. Adjust this to change the granularity of the age groups.
@@ -192,7 +226,7 @@ options:
           title: Ascending
         - name: descending
           title: Descending
-      default: no
+      default: 'no'
       description:
           R: >
             Sort bars by population count. Options: 'no' (default order),

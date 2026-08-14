@@ -53,7 +53,12 @@ low_variability_data <- data.frame(
 poor_quality_data <- data.frame(
   patient_id = paste0("PQ", sprintf("%03d", 1:40)),
   high_missing = c(rnorm(15, 20, 4), rep(NA, 25)),  # 62.5% missing
-  outlier_heavy = c(rnorm(30, 10, 2), rep(c(100, -100, 200, -150), 2.5)),  # Multiple outliers
+  # rep(x, 2.5) truncates the count to 2, yielding 8 values and a 38-row column
+  # against 40 elsewhere. data.frame() then threw "arguments imply differing
+  # number of rows", which is a FILE-level error: the whole file aborted before a
+  # single test ran, and the suite reported 0 passed / 0 failed - indistinguishable
+  # from green in a summary.
+  outlier_heavy = c(rnorm(30, 10, 2), rep(c(100, -100, 200, -150), length.out = 10)),
   all_same = rep(5, 40),  # No variability
   mostly_missing = c(rnorm(5, 0, 1), rep(NA, 35))  # 87.5% missing
 )
@@ -95,13 +100,19 @@ test_that("Data Quality Assessment - Basic functionality and structure", {
   # Test basic function exists and can be called
   expect_true(exists("checkdataClass"))
   
-  # Test that basic structure works with valid data
+  # checkdataClass$new() takes `options` (and `data`); calling it bare threw
+  # "argument \"options\" is missing, with no default", so this asserted the
+  # opposite of what it claims. Instantiate it properly instead.
+  ns <- asNamespace("ClinicoPath")
   expect_error(
     {
-      checkdata_instance <- checkdataClass$new()
+      checkdata_instance <- get("checkdataClass", ns)$new(
+        options = get("checkdataOptions", ns)$new(var = "measurement"),
+        data = high_quality_data)
     },
     NA
   )
+  expect_s3_class(checkdata_instance, "checkdataClass")
 })
 
 test_that("Data Quality Assessment - Data validation and input checking", {

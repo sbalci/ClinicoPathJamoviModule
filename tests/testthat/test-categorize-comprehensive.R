@@ -552,16 +552,19 @@ test_that("Missing values are handled correctly", {
 test_that("All identical values trigger expected error", {
   data <- data.frame(value = rep(50, 10))
 
-  # When all values are identical, breaks are not unique - this should error
-  expect_error(
-    categorize(
-      data = data,
-      var = "value",
-      method = "equal",
-      nbins = 3
-    ),
-    "breaks.*not unique"
+  # The analysis catches zero variability itself and reports a clear message in
+  # its panel rather than letting cut()'s cryptic "breaks are not unique" reach
+  # the user. expect_error() here asserted the WORSE behaviour.
+  res <- categorize(
+    data = data,
+    var = "value",
+    method = "equal",
+    nbins = 3
   )
+  msg <- gsub("<[^>]*>", " ", as.character(res$todo$content))
+  expect_match(msg, "zero variability")
+  expect_match(msg, "constant")
+  expect_equal(nrow(res$freqTable$asDF), 0L)
 })
 
 test_that("Very small sample sizes work", {

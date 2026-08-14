@@ -4,7 +4,7 @@
 \alias{benford}
 \title{Benford Analysis}
 \usage{
-benford(data, var, digits = 2)
+benford(data, var = NULL, digits = 2)
 }
 \arguments{
 \item{data}{The data as a data frame.}

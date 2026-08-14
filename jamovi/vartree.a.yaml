@@ -53,6 +53,7 @@ options:
     - name: percvar
       title: Variable for percentage
       type: Variable
+      default: NULL
       suggested: [ ordinal, nominal ]
       permitted: [ factor ]
       description:
@@ -70,6 +71,7 @@ options:
     - name: summaryvar
       title: Continuous variable for summaries
       type: Variable
+      default: NULL
       suggested: [ continuous ]
       permitted: [ numeric ]
       description:
@@ -108,6 +110,7 @@ options:
     - name: prunebelow
       title: Prune below
       type: Variable
+      default: NULL
       suggested: [ ordinal, nominal ]
       permitted: [ factor ]
       description:
@@ -135,6 +138,7 @@ options:
     - name: follow
       title: Follow below
       type: Variable
+      default: NULL
       suggested: [ ordinal, nominal ]
       permitted: [ factor ]
       description:

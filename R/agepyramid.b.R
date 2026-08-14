@@ -35,11 +35,11 @@ agepyramidClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     </ol>
                     <h4 style='color: #1976d2; margin-bottom: 8px;'>Features:</h4>
                     <ul style='font-size: 14px; line-height: 1.6;'>
-                        <li><strong>Age group presets:</strong> Pediatric (<18), Reproductive (15-50), Geriatric (65+), Life Course, or Custom</li>
+                        <li><strong>Age group presets:</strong> WHO/UN standard five-year groups (0-4, 5-9, ... 85+), WHO abridged with infants separated (&lt;1, 1-4, 5-9, ...), Pediatric (&lt;18), Reproductive (15-50), Geriatric (65+), Life Course, or Custom</li>
                         <li><strong>Custom age breaks:</strong> Define your own age boundaries (e.g., 0,18,25,50,65,100)</li>
                         <li><strong>Customizable bin width</strong> for automatic age grouping</li>
                         <li><strong>Color palettes:</strong> Standard, Colorblind-friendly, Grayscale, or Custom colors</li>
-                        <li><strong>Readable age group labels</strong> (e.g., 1-5, 6-10, 86+)</li>
+                        <li><strong>Readable age group labels</strong> using the demographic convention of left-closed bands (e.g., 0-4, 5-9, 85+), so an age on a boundary falls in the band that starts there</li>
                         <li><strong>Table with counts and percentages</strong></li>
                         <li><strong>Gender level selection</strong> for flexible data structures</li>
                     </ul>
@@ -48,8 +48,13 @@ agepyramidClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     </p>
                     </div>"
                 )
+                # `visible: (!age || !gender)` in the .r.yaml never worked - a
+                # leading "!" is not recognised as an expression, so the box stayed
+                # on screen (empty) once both variables were chosen. Drive it here.
+                self$results$welcome$setVisible(TRUE)
                 return()
             }
+            self$results$welcome$setVisible(FALSE)
 
             if (nrow(self$data) == 0)
                 jmvcore::reject("Data contains no (complete) rows")
@@ -165,7 +170,20 @@ agepyramidClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             max_age <- max(mydata[["Age"]], na.rm = TRUE)
 
             # Select breaks based on age_groups option
-            if (age_groups == 'pediatric') {
+            if (age_groups == 'who') {
+                # WHO/UN standard five-year age groups: 0-4, 5-9, ... 80-84, 85+.
+                # These are the groups of the WHO World Standard Population
+                # (Ahmad OB et al., "Age standardization of rates: a new WHO
+                # standard", GPE Discussion Paper 31, WHO 2001) and the UN
+                # convention for population pyramids. Left-closed bands make them
+                # exact: [0,5) is "0-4", not "1-5".
+                breaks_seq <- c(seq(0, 85, by = 5), Inf)
+            } else if (age_groups == 'who_infant') {
+                # WHO abridged life-table groups, which separate infants from
+                # young children: <1, 1-4, 5-9, ... 85+. Used wherever infant
+                # mortality is reported separately from early childhood.
+                breaks_seq <- c(0, 1, seq(5, 85, by = 5), Inf)
+            } else if (age_groups == 'pediatric') {
                 # Pediatric: Birth to 18 years with developmental milestones
                 breaks_seq <- c(0, 1, 2, 5, 10, 15, 18, Inf)
             } else if (age_groups == 'reproductive') {
@@ -225,12 +243,19 @@ agepyramidClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 breaks_seq <- c(0, max_age + 1)
             }
 
-            # Create readable age group labels
-            labels <- private$.create_age_labels(breaks_seq)
+            # Which end of each band is closed is now the user's choice; the
+            # default follows the WHO/UN convention. `.optionOr` is used because
+            # the option does not exist in the compiled .h.R until
+            # jmvtools::prepare() runs, and jmvcore's `$` ERRORS on an undeclared
+            # option rather than returning NULL.
+            use_right <- identical(private$.optionOr("age_interval", "left"), "right")
+
+            labels <- private$.create_age_labels(breaks_seq, right = use_right,
+                                                 include_lowest = TRUE)
 
             mydata[["Pop"]] <- cut(mydata[["Age"]],
                                    include.lowest = TRUE,
-                                   right = TRUE,
+                                   right = use_right,
                                    breaks = breaks_seq,
                                    labels = labels,
                                    ordered_result = FALSE)
@@ -293,11 +318,26 @@ agepyramidClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             total_female <- sum(plotData2$Female, na.rm = TRUE)
             total_male <- sum(plotData2$Male, na.rm = TRUE)
 
-            # Add percentage columns (safe division)
-            plotData2$Female_Pct <- ifelse(total_female > 0,
-                round(plotData2$Female / total_female * 100, 1), 0)
-            plotData2$Male_Pct <- ifelse(total_male > 0,
-                round(plotData2$Male / total_male * 100, 1), 0)
+            # Add percentage columns (safe division).
+            #
+            # NOT ifelse(): it is vectorised over its CONDITION, and
+            # `total_female > 0` is length 1, so ifelse() returned only the FIRST
+            # element of the percentage vector and recycled it down every row.
+            # Every band was shown the first band's percentage - e.g. "0% female"
+            # printed against bands containing 3 women, and "50% male" against a
+            # band containing none - while the table's own note promised column
+            # percentages summing to 100. Counts were unaffected, so the error was
+            # visible only by checking the two columns against each other.
+            plotData2$Female_Pct <- if (total_female > 0) {
+                round(plotData2$Female / total_female * 100, 1)
+            } else {
+                rep(0, nrow(plotData2))
+            }
+            plotData2$Male_Pct <- if (total_male > 0) {
+                round(plotData2$Male / total_male * 100, 1)
+            } else {
+                rep(0, nrow(plotData2))
+            }
 
             # Add summary row
             summary_row <- data.frame(
@@ -604,22 +644,68 @@ agepyramidClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             }, error = function(e) FALSE)
         },
 
-        .create_age_labels = function(breaks) {
-            # Create readable labels from age breaks
-            # With right=TRUE in cut(), intervals are (lower, upper]
-            # So we label as "lower+1 to upper" for clinical interpretation
+        # Read an option that may not be present in the compiled .h.R yet.
+        # jmvcore's `$` ERRORS on an undeclared option rather than returning NULL,
+        # so a newly added option would crash every run until prepare() is run.
+        .optionOr = function(name, fallback) {
+            val <- tryCatch(self$options[[name]], error = function(e) NULL)
+            if (is.null(val) || (length(val) == 1 && is.na(val))) fallback else val
+        },
+
+        .create_age_labels = function(breaks, right = FALSE, include_lowest = TRUE) {
+            # Labels that describe exactly the ages their band contains, under
+            # EITHER closure convention.
+            #
+            # right = FALSE (default, WHO/UN): bands are [lower, upper). Equal-width
+            #   bands hold equal numbers of single years, and a boundary age starts
+            #   the band named for it - 65 is geriatric, 18 is not paediatric.
+            #   include_lowest closes the TOP of the final band, so the oldest
+            #   observation is kept when the last break is finite.
+            #
+            # right = TRUE (pre-1.0.52 behaviour, offered for continuity): bands are
+            #   (lower, upper]. include_lowest closes the BOTTOM of the FIRST band,
+            #   making it [b1, b2] - one single year wider than the rest. That is why
+            #   this convention inflates the youngest bar; the label says so honestly
+            #   by naming the lower bound, which the original implementation did not
+            #   (it labelled [0,5] as "1-5", hiding every age-0 infant).
             if (length(breaks) < 2) return(c())
 
-            labels <- c()
-            for (i in seq_len(length(breaks) - 1)) {
+            whole <- function(z) is.finite(z) && abs(z - round(z)) < .Machine$double.eps^0.5
+            n_bands <- length(breaks) - 1
+
+            labels <- character(n_bands)
+            for (i in seq_len(n_bands)) {
                 lower <- breaks[i]
                 upper <- breaks[i + 1]
-                if (is.infinite(upper)) {
-                    # Open-ended final category: "86+" for (85, Inf]
-                    labels[i] <- paste0(lower + 1, "+")
+                is_first <- i == 1
+                is_last <- i == n_bands
+
+                if (right) {
+                    # (lower, upper], except the first band which include_lowest
+                    # widens to [lower, upper].
+                    lo_named <- if (is_first && include_lowest) lower else lower + 1
+                    if (is.infinite(upper)) {
+                        labels[i] <- paste0(lo_named, "+")
+                    } else if (whole(lower) && whole(upper)) {
+                        labels[i] <- paste(lo_named, upper, sep = "-")
+                    } else {
+                        labels[i] <- paste0(">", lower, "-", upper)
+                    }
                 } else {
-                    # Closed intervals: "1-5" for (0,5], "6-10" for (5,10]
-                    labels[i] <- paste(lower + 1, upper, sep = "-")
+                    # [lower, upper), except the last band which include_lowest
+                    # closes at the top when `upper` is finite.
+                    if (is.infinite(upper)) {
+                        labels[i] <- paste0(lower, "+")
+                    } else if (is_last && include_lowest) {
+                        labels[i] <- paste(lower, upper, sep = "-")
+                    } else if (whole(lower) && whole(upper) && (upper - lower) == 1 && lower == 0) {
+                        # WHO writes the infant band as "<1" rather than "0-0"
+                        labels[i] <- "<1"
+                    } else if (whole(lower) && whole(upper) && (upper - lower) >= 1) {
+                        labels[i] <- paste(lower, upper - 1, sep = "-")
+                    } else {
+                        labels[i] <- paste0(lower, "-<", upper)
+                    }
                 }
             }
             return(labels)

@@ -352,6 +352,7 @@ Imports:
     vegan,
     viridis,
     viridisLite,
+    naniar,
     visdat,
     visNetwork,
     visR,
@@ -378,7 +379,7 @@ Roxygen: list(markdown = TRUE)
 Suggests: rmarkdown, condSURV, plsRcox, randomForestSRC, OncoDataSets, coxphw,
         flexsurvcure, cuRe, npcure, vdiffr, concaveman, VGAM, effsize, testthat
         (>= 3.0.0), jmvReadWrite, anytime, datefixR, covr, BoomSpikeSlab,
-        rstanarm, coxphf, doParallel, foreach, naniar, parttree, tiff, quarto,
+        rstanarm, coxphf, doParallel, foreach, parttree, tiff, quarto,
         grpreg, sparsepca, kernlab, superpc, ncvreg, relsurv, rstpm2, semPlot,
         yaml
 Config/testthat/edition: 3

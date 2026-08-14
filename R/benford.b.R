@@ -331,6 +331,9 @@ benfordClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 # Statistical evidence
                 mad_value = mad_value,
                 mad_conformity = mad_conformity,
+                mad_floor = mad_floor,
+                mad_label_reliable = mad_label_reliable,
+                n_digits = n_digits,
                 chisq_statistic = chisq_stat,
                 chisq_df = chisq_df,
                 chisq_pvalue = chisq_pvalue,
@@ -584,10 +587,24 @@ benfordClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 ))
 
                 # Second, show PRIMARY statistical evidence (MAD)
+                # The bare conformity label sat here unqualified, so the table could
+                # read "Conformity: Nonconformity" on one row and "Assessment: Low"
+                # on the next. Where the label is below its usable sample size, say
+                # so on the row that shows it.
+                mad_note <- if (isTRUE(interpretation$mad_label_reliable) ||
+                                is.na(interpretation$mad_conformity)) {
+                    sprintf(.("Conformity: %s"), interpretation$mad_conformity)
+                } else {
+                    sprintf(
+                        .("Conformity: %s - not reliable at N=%d for %d-digit analysis (sampling noise alone gives MAD ~ %.4f; needs N > %d)"),
+                        interpretation$mad_conformity, interpretation$total_observations,
+                        interpretation$n_digits, interpretation$mad_floor,
+                        ceiling(private$.minNForMadLabel(interpretation$n_digits)))
+                }
                 self$results$summary$addRow(rowKey=2, values=list(
                     statistic=.("MAD (Mean Absolute Deviation)"),
                     value=sprintf("%.4f", interpretation$mad_value),
-                    interpretation=sprintf(.("Conformity: %s"), interpretation$mad_conformity)
+                    interpretation=mad_note
                 ))
 
                 # Third, show Chi-square goodness-of-fit test

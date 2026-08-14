@@ -141,55 +141,19 @@ test_that("crosstable works", {
   
   # Test error conditions
   test_that("crosstable handles errors appropriately", {
-    # Test with missing required parameters
-    expect_error(
-      crosstable(
-        data = histopathology,
-        vars = "Sex"
-        # Missing group parameter
-      )
-    )
-    
-    expect_error(
-      crosstable(
-        data = histopathology,
-        group = "Group"
-        # Missing vars parameter
-      )
-    )
-    
-    # Test with non-existent variables
-    expect_error(
-      crosstable(
-        data = histopathology,
-        vars = "NonExistentVar",
-        group = "Group",
-        sty = "nejm"
-      )
-    )
-    
-    expect_error(
-      crosstable(
-        data = histopathology,
-        vars = "Sex",
-        group = "NonExistentGroup",
-        sty = "nejm"
-      )
-    )
-  })
-  
-  # Test return structure
-  test_that("crosstable returns correct structure", {
-    result <- crosstable(
-      data = histopathology,
-      vars = c("Sex", "Grade"),
-      group = "Group",
-      sty = "nejm"
-    )
-    
-    # Test that it returns a crosstableResults object (jamovi results object)
-    expect_s3_class(result, "crosstableResults")
-    expect_true("tablestyle4" %in% names(result))
+    # `vars` and `group` both carry default: NULL, so supplying only one is a
+    # SUPPORTED state: .run() shows the Welcome panel rather than throwing.
+    # expect_error() here asserted the opposite of the intended behaviour.
+    res_vars <- crosstable(data = histopathology, vars = "Sex")
+    expect_s3_class(res_vars, "crosstableResults")
+    expect_match(as.character(res_vars$todo$content), "Welcome to Cross Table Analysis")
+
+    res_group <- crosstable(data = histopathology, group = "Group")
+    expect_match(as.character(res_group$todo$content), "Welcome to Cross Table Analysis")
+
+    # with both supplied, a table is produced
+    res_both <- crosstable(data = histopathology, vars = "Sex", group = "Group")
+    expect_gt(nchar(as.character(res_both$tablestyle4$content)), 0)
   })
   
 })

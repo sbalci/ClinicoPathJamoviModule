@@ -444,24 +444,20 @@ test_that("validation fails when selected true level not present", {
         b = factor(c("No", "No"))
     )
 
-    expect_error(
-        venn(
-            data = data,
-            var1 = "a",
-            var1true = "Maybe",  # not present
-            var2 = "b",
-            var2true = "No"
-        ,
-                 var3 = NULL,
-                 var3true = NULL,
-                 var4 = NULL,
-                 var4true = NULL,
-                 var5 = NULL,
-                 var5true = NULL,
-                 var6 = NULL,
-                 var6true = NULL,
-                 var7 = NULL,
-                 var7true = NULL),
-        "does not exist"
-    )
+    # A jamovi analysis reports a bad level in its validationErrors panel rather
+    # than throwing, so expect_error() asserted the opposite of the wanted
+    # behaviour. The message must name the level and list what is available.
+    res <- venn(
+        data = data,
+        var1 = "a", var1true = "Maybe",   # not present
+        var2 = "b", var2true = "No",
+        var3 = NULL, var3true = NULL, var4 = NULL, var4true = NULL,
+        var5 = NULL, var5true = NULL, var6 = NULL, var6true = NULL,
+        var7 = NULL, var7true = NULL)
+
+    expect_true(res$validationErrors$visible)
+    msg <- as.character(res$validationErrors$content)
+    expect_match(msg, "Maybe")
+    expect_match(msg, "Available levels")
+    expect_equal(nrow(res$summary$asDF), 0L)
 })

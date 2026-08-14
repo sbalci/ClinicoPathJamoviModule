@@ -6,7 +6,7 @@
 \usage{
 dataquality(
   data,
-  vars,
+  vars = NULL,
   check_duplicates = FALSE,
   check_missing = FALSE,
   complete_cases_only = FALSE,
@@ -22,8 +22,8 @@ dataquality(
 \arguments{
 \item{data}{The data as a data frame.}
 
-\item{vars}{Variables to assess for data quality. If none selected,  entire
-dataset will be analyzed.}
+\item{vars}{Variables to assess for data quality. At least one variable
+must be selected; the analysis does not fall back to the whole dataset.}
 
 \item{check_duplicates}{If TRUE, analyzes duplicate values within each
 variable or across the entire dataset.}

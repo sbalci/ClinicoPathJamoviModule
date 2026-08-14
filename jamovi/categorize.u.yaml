@@ -84,6 +84,9 @@ children:
         stretchFactor: 1
         children:
           - type: CheckBox
+            name: excludeoutofrange
+            enable: (method:manual)
+          - type: CheckBox
             name: includelowest
           - type: CheckBox
             name: rightclosed

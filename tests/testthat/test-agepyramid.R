@@ -457,79 +457,114 @@ test_that("agepyramid output is correct and stable", {
   )
   
   table_df <- result_geriatric$pyramidTable$asDF
-  # Check for a bin that we know exists in histopathology (1-65 contains ages <= 65)
-  expect_true("1-65" %in% as.character(table_df$Pop))
+  # The geriatric preset's first band is now [0, 65) - left-closed, so a
+  # 65-year-old starts the "65-69" band instead of falling into the band below.
+  expect_true("0-64" %in% as.character(table_df$Pop))
+  expect_false("1-65" %in% as.character(table_df$Pop))
 })
 
 # REGRESSION TESTS for critical fixes (2025-01-18)
 # These tests prevent the reintroduction of two serious bugs that undermined
 # statistical accuracy and user trust
 
-test_that("REGRESSION: age bin labels accurately reflect bin boundaries (right=TRUE)", {
-  # Issue: Labels showed "0-4" but actual bins were (0,5] which includes age 5
-  # Fix: Labels now show "1-5" to correctly represent interval (0,5]
+test_that("REGRESSION: age bands are left-closed and labels match them", {
+  # HISTORY - this assertion was REVERSED during the release review.
+  #
+  # The original bug was a label/interval mismatch: bins were (lower, upper]
+  # while labels read "0-4", "5-9". The earlier fix kept the right-closed bins
+  # and moved the LABELS to match them ("1-5", "6-10"). This review moved the
+  # BINS to match the labels instead, i.e. cut(right = FALSE). Both resolve the
+  # mismatch; the bins were changed because the right-closed version is wrong
+  # in ways relabelling cannot repair:
+  #
+  #   1. It distorts the pyramid. cut(0:19, c(0,5,10,15,20), include.lowest =
+  #      TRUE, right = TRUE) puts 6, 5, 5, 4 single-year ages into the four
+  #      bands. On a uniform population the bottom bar is 20% too tall and the
+  #      top bar 20% too short - and the bottom bar of an age pyramid is the
+  #      birth cohort. right = FALSE gives 5, 5, 5, 5.
+  #   2. It contradicts the module's own presets. "Geriatric (65+)" put a
+  #      65-year-old in the band labelled "1-65" (not geriatric at all);
+  #      "Reproductive (15-50)" put a 15-year-old in "1-15"; "Pediatric (<18)"
+  #      counted an 18-year-old as paediatric.
+  #   3. WHO/UN standard age groups (0-4, 5-9, ...) are left-closed, so this is
+  #      what a demographer reading the pyramid expects.
+  #
+  # The invariant the original test protected - labels must describe the bins
+  # they name - is preserved below and now checked directly.
 
-  # Create test data with exact age values at bin boundaries
+  # a uniform population must produce equal bars
+  uniform <- data.frame(
+    age = rep(0:19, each = 2),
+    gender = rep(c("Female", "Male"), 20)
+  )
+  res_uniform <- agepyramid(data = uniform, age = "age", gender = "gender",
+                            female = "Female", male = "Male", bin_width = 5)
+  df_u <- res_uniform$pyramidTable$asDF
+  df_u <- df_u[df_u$Pop != "Total", ]
+  expect_equal(unique(df_u$Female), 5)
+  expect_equal(unique(df_u$Male), 5)
+
   test_data <- data.frame(
-    age = c(5, 10, 15, 20, 25, 30),  # All at upper bin boundaries
+    age = c(5, 10, 15, 20, 25, 30),   # all on bin boundaries
     gender = rep(c("Female", "Male"), 3)
   )
+  result <- agepyramid(data = test_data, age = "age", gender = "gender",
+                       female = "Female", male = "Male", bin_width = 5)
+  age_groups <- as.character(result$pyramidTable$asDF$Pop)
+  age_groups <- age_groups[age_groups != "Total"]
 
-  result <- agepyramid(
-    data = test_data,
-    age = "age",
-    gender = "gender",
-    female = "Female",
-    male = "Male",
-    bin_width = 5
+  # [0,5) covers ages 0-4; [5,10) covers 5-9; a boundary age starts a new band.
+  # (No observation falls in [0,5) for this data, so that band is absent.)
+  expect_true(any(grepl("^5-9$", age_groups)))
+  expect_true(any(grepl("^10-14$", age_groups)))
+  # the right-closed labels must NOT come back
+  expect_false(any(grepl("^1-5$", age_groups)))
+  expect_false(any(grepl("^6-10$", age_groups)))
+
+  # LABEL/BIN AGREEMENT: every labelled band must contain exactly the ages it names
+  labelled <- agepyramid(
+    data = data.frame(age = rep(0:24, each = 2),
+                      gender = rep(c("Female", "Male"), 25)),
+    age = "age", gender = "gender", female = "Female", male = "Male",
+    bin_width = 5)$pyramidTable$asDF
+  labelled <- labelled[labelled$Pop != "Total", ]
+  for (i in seq_len(nrow(labelled))) {
+    lab <- as.character(labelled$Pop[i])
+    if (!grepl("^[0-9]+-[0-9]+$", lab)) next
+    bounds <- as.numeric(strsplit(lab, "-")[[1]])
+    n_ages <- bounds[2] - bounds[1] + 1
+    expect_equal(labelled$Female[i], n_ages, info = lab)
+  }
+
+  # Preset boundary ages must fall in the band the preset is named for
+  presets <- list(
+    list(preset = "geriatric",    boundary = 65, must_match = "^65-"),
+    list(preset = "reproductive", boundary = 15, must_match = "^15-"),
+    list(preset = "pediatric",    boundary = 18, must_match = "^18\\+$")
   )
+  for (p in presets) {
+    d <- data.frame(age = c(p$boundary, p$boundary),
+                    gender = c("Female", "Male"))
+    tb <- agepyramid(data = d, age = "age", gender = "gender",
+                     female = "Female", male = "Male",
+                     age_groups = p$preset)$pyramidTable$asDF
+    occupied <- as.character(tb$Pop[tb$Pop != "Total" & (tb$Female + tb$Male) > 0])
+    expect_true(any(grepl(p$must_match, occupied)),
+                info = sprintf("%s: age %d landed in %s", p$preset, p$boundary,
+                               paste(occupied, collapse = ", ")))
+  }
 
-  table_df <- result$pyramidTable$asDF
-
-  # With right=TRUE, cut() creates bins (0,5], (5,10], (10,15], etc.
-  # Age 5 should be in bin (0,5] labeled "1-5"
-  # Age 10 should be in bin (5,10] labeled "6-10"
-  # Age 15 should be in bin (10,15] labeled "11-15"
-
-  # Check that labels reflect inclusive upper bounds
-  age_groups <- as.character(table_df$Pop[table_df$Pop != "Total"])
-
-  # Expected labels for bin_width=5 starting at 0
-  # (0,5] -> "1-5", (5,10] -> "6-10", (10,15] -> "11-15", etc.
-  expect_true(any(grepl("1-5", age_groups)),
-              info = "Label should show '1-5' for interval (0,5]")
-  expect_true(any(grepl("6-10", age_groups)),
-              info = "Label should show '6-10' for interval (5,10]")
-  expect_true(any(grepl("11-15", age_groups)),
-              info = "Label should show '11-15' for interval (10,15]")
-
-  # Verify that old incorrect pattern "0-4", "5-9" is NOT present
-  expect_false(any(grepl("^0-4$", age_groups)),
-               info = "Old incorrect label '0-4' should not appear")
-  expect_false(any(grepl("^5-9$", age_groups)),
-               info = "Old incorrect label '5-9' should not appear")
-
-  # Test open-ended category for preset groups
+  # Open-ended final band: [95, Inf) is "95+", not "96+"
   result_geriatric <- agepyramid(
-    data = data.frame(
-      age = c(65, 70, 75, 80, 85, 90, 95, 100),
-      gender = rep(c("Female", "Male"), 4)
-    ),
-    age = "age",
-    gender = "gender",
-    female = "Female",
-    male = "Male",
-    age_groups = "geriatric"  # Has breaks: c(0, 65, 70, 75, 80, 85, 90, 95, Inf)
-  )
-
-  table_df_geriatric <- result_geriatric$pyramidTable$asDF
-  age_groups_geriatric <- as.character(table_df_geriatric$Pop[table_df_geriatric$Pop != "Total"])
-
-  # Last bin (95, Inf] should be labeled "96+" not "95+"
-  expect_true(any(grepl("96\\+", age_groups_geriatric)),
-              info = "Open-ended interval (95,Inf] should be labeled '96+'")
-  expect_false(any(grepl("95\\+", age_groups_geriatric)),
-               info = "Old incorrect label '95+' should not appear (should be '96+')")
+    data = data.frame(age = c(65, 70, 75, 80, 85, 90, 95, 100),
+                      gender = rep(c("Female", "Male"), 4)),
+    age = "age", gender = "gender", female = "Female", male = "Male",
+    age_groups = "geriatric")
+  gg <- as.character(result_geriatric$pyramidTable$asDF$Pop)
+  expect_true(any(grepl("^95\\+$", gg)),
+              info = "[95, Inf) should be labelled '95+'")
+  expect_false(any(grepl("^96\\+$", gg)),
+               info = "'96+' belonged to the right-closed convention")
 })
 
 test_that("REGRESSION: reported sample size matches aggregated table data", {
@@ -664,16 +699,32 @@ test_that("REGRESSION: ggcharts gender mapping is deterministic", {
     enableGGCharts = TRUE
   )
 
-  ggcharts_state <- result$plotGGCharts$state
+  # The state deliberately holds the RAW grid - .plotGGCharts calls
+  # .prepare_ggcharts_data() at render time so the work is not done twice - so
+  # asserting on the state tested something ggcharts never sees. Prepare it the
+  # same way the renderer does and assert on that.
+  ns <- asNamespace("ClinicoPath")
+  helper <- get("agepyramidClass", ns)$new(
+    options = get("agepyramidOptions", ns)$new(
+      age = "age", gender = "gender", female = "Female", male = "Male"),
+    data = test_data)
+  ggcharts_state <- helper$.__enclos_env__$private$.prepare_ggcharts_data(
+    result$plotGGCharts$state)
 
+  # every Gender x Pop cell must be present, zero-filled, so ggcharts's
+  # unique(Gender) is deterministic and Female always takes the first side
+  expect_equal(nrow(ggcharts_state), 4L)
   expect_equal(unique(ggcharts_state$Gender), c("Female", "Male"))
-  expect_equal(as.character(ggcharts_state$Pop), rep(c("1-5", "6-6"), 2))
+  # bin_width 5 over ages 1..6 gives breaks 0, 5, 6; left-closed bands are
+  # [0,5) -> "0-4" and the final [5,6] -> "5-6" (closed at the top by
+  # include.lowest so the oldest observation is kept).
+  expect_equal(as.character(ggcharts_state$Pop), rep(c("0-4", "5-6"), 2))
 
   female_young <- ggcharts_state$n[
-    ggcharts_state$Gender == "Female" & as.character(ggcharts_state$Pop) == "1-5"
+    ggcharts_state$Gender == "Female" & as.character(ggcharts_state$Pop) == "0-4"
   ]
   male_older <- ggcharts_state$n[
-    ggcharts_state$Gender == "Male" & as.character(ggcharts_state$Pop) == "6-6"
+    ggcharts_state$Gender == "Male" & as.character(ggcharts_state$Pop) == "5-6"
   ]
 
   expect_equal(female_young, 0L)

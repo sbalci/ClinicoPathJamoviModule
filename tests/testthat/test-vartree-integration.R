@@ -517,21 +517,19 @@ test_that("percvar level must exist in data", {
         outcome = factor(c("Yes", "No"))
     )
 
-    expect_error(
-        vartree(
-            data = testData,
-            vars = c("group"),
-            percvar = "outcome",
-            percvarLevel = "Maybe", # not present
-            summaryvar = NULL,
-            prunebelow = NULL,
-            pruneLevel1 = NULL,
-            pruneLevel2 = NULL,
-            follow = NULL,
-            followLevel1 = NULL,
-            followLevel2 = NULL,
-            pct = TRUE
-        ),
-        "level is not present"
-    )
+    # The analysis reports an invalid percentage level in its notices panel
+    # rather than throwing, so expect_error() asserted the opposite of the
+    # intended behaviour.
+    res <- vartree(
+        data = testData,
+        vars = c("group"),
+        percvar = "outcome",
+        percvarLevel = "Maybe",   # not present
+        summaryvar = NULL,
+        prunebelow = NULL, pruneLevel1 = NULL, pruneLevel2 = NULL,
+        follow = NULL, followLevel1 = NULL, followLevel2 = NULL,
+        pct = TRUE)
+
+    notices <- as.character(res$notices$content)
+    expect_match(notices, "Invalid Percentage Level")
 })

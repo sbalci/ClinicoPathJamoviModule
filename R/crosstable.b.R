@@ -739,11 +739,26 @@ crosstableClass <- if (requireNamespace('jmvcore'))
                 # Map user options to gtsummary syntax
                 stats_cont <- if (self$options$cont == "mean") "{mean} ({sd})" else "{median} ({p25}, {p75})"
 
-                # Note: gtsummary has excellent default test selection:
-                # - Categorical: chi-square (automatically switches to Fisher when expected counts < 5)
-                # - Continuous 2 groups: Welch t-test (robust to unequal variances)
-                # - Continuous 3+ groups: ANOVA (oneway.test)
-                # User preferences for cont/pcat are still respected in arsenal and finalfit styles
+                # gtsummary's default test selection is good: categorical uses
+                # chi-square and switches to Fisher automatically when an expected
+                # count drops below 5; continuous uses Welch t-test for 2 groups and
+                # ANOVA for 3+.
+                #
+                # But an EXPLICIT request for Fisher was previously ignored here, so
+                # a user who chose "Fisher's exact test" silently got chi-square.
+                # On a sparse 2x2 that is not cosmetic: 0.028 (chi-square) against
+                # 0.065 (Fisher) lands on opposite sides of 0.05.
+                #
+                # "chisq" is left as gtsummary's default rather than forced, because
+                # the automatic switch to Fisher on sparse tables is a safety feature
+                # and the user asking for chi-square is asking for the usual
+                # behaviour, not for the safeguard to be removed. The analysis note
+                # states which of the two applies.
+                gts_test <- if (identical(self$options$pcat, "fisher")) {
+                    list(gtsummary::all_categorical() ~ "fisher.test")
+                } else {
+                    NULL
+                }
 
                 tablegtsummary <- tryCatch(
                   mydata_subset %>%
@@ -762,7 +777,8 @@ crosstableClass <- if (requireNamespace('jmvcore'))
                   ) %>%
                   add_n() %>%
                   add_overall() %>%
-                  add_p(pvalue_fun = ~ gtsummary::style_pvalue(.x, digits = 3)),
+                  add_p(test = gts_test,
+                        pvalue_fun = ~ gtsummary::style_pvalue(.x, digits = 3)),
                   error = function(e) { private$.reportTableError(e); NULL })
                 if (is.null(tablegtsummary)) return()
 
@@ -975,6 +991,61 @@ crosstableClass <- if (requireNamespace('jmvcore'))
                     'Cross table analysis completed successfully. Analyzed %d variable(s) across %s groups using %s style.',
                     n_vars, group_display, style_display
                 )
+
+                # Not every style honours every statistical option, and until now
+                # nothing said so: the tangram styles (NEJM/Lancet/Hmisc, of which
+                # NEJM is the default) apply none of them, and p-value adjustment
+                # only exists in gtsummary. A user could set "Fisher's exact test"
+                # and "Benjamini-Hochberg", see a table, and reasonably believe both
+                # had been applied. Verified per style by comparing rendered output.
+                sty_now <- self$options$sty
+                honours <- list(
+                    arsenal   = c("pcat", "cont"),
+                    finalfit  = c("pcat", "cont"),
+                    gtsummary = c("pcat", "cont", "p_adjust"),
+                    nejm      = character(0),
+                    lancet    = character(0),
+                    hmisc     = character(0)
+                )
+                supported <- honours[[sty_now]]
+                if (is.null(supported)) supported <- character(0)
+
+                requested <- character(0)
+                if (!identical(self$options$pcat, "chisq"))
+                    requested <- c(requested, pcat = "Test for categorical variables")
+                if (!identical(self$options$cont, "mean"))
+                    requested <- c(requested, cont = "Statistic for continuous variables")
+                if (!identical(self$options$p_adjust, "none"))
+                    requested <- c(requested, p_adjust = "P-value adjustment")
+
+                ignored <- requested[!(names(requested) %in% supported)]
+                if (length(ignored) > 0) {
+                    ignored_html <- .createNoticeHTML(
+                        sprintf(
+                            "The %s style does not apply the following setting(s), so the table below is unchanged by them: %s. %s",
+                            style_display,
+                            paste(unname(ignored), collapse = "; "),
+                            if (sty_now %in% c("nejm", "lancet", "hmisc"))
+                                "These styles use their own built-in tests. Choose arsenal, finalfit or gtsummary to control the test; p-value adjustment is available in gtsummary only."
+                            else if (identical(sty_now, "gtsummary"))
+                                "Choose arsenal or finalfit to control the categorical test."
+                            else
+                                "P-value adjustment is available in the gtsummary style only."),
+                        type = "WARNING")
+                    # Compose onto the data-quality warnings already written to this
+                    # same output element earlier in .run() (lines ~602 and ~799)
+                    # rather than replacing them. setContent() overwrites, and the
+                    # earlier block escalates to STRONG_WARNING for cells with n < 10 -
+                    # exactly the small-sample warning a pathologist most needs - so
+                    # replacing it silently dropped that warning whenever the user also
+                    # picked a style that ignores one of their statistical settings.
+                    data_quality_html <- paste(
+                        Filter(nzchar, c(data_quality_html, ignored_html)),
+                        collapse = "\n"
+                    )
+                    self$results$dataQualityNotice$setContent(data_quality_html)
+                    self$results$dataQualityNotice$setVisible(TRUE)
+                }
 
                 info_html <- .createNoticeHTML(info_message, type = "INFO")
                 self$results$analysisInfo$setContent(info_html)

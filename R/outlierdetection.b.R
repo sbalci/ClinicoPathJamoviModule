@@ -151,6 +151,15 @@ outlierdetectionClass <- if (requireNamespace("jmvcore")) R6::R6Class("outlierde
         .messages = NULL,
         .warningsBlocks = NULL,
 
+        # Read an option that may not be present in the compiled .h.R yet.
+        # jmvcore's `$` ERRORS on an undeclared option rather than returning NULL,
+        # so a newly added option would crash every run until jmvtools::prepare()
+        # regenerates the header. Fall back to the documented default instead.
+        .optionOr = function(name, fallback) {
+            val <- tryCatch(self$options[[name]], error = function(e) NULL)
+            if (is.null(val) || (length(val) == 1 && is.na(val))) fallback else val
+        },
+
         .accumulateMessage = function(msg) {
             private$.messages <- c(private$.messages, msg)
         },
@@ -285,7 +294,7 @@ outlierdetectionClass <- if (requireNamespace("jmvcore")) R6::R6Class("outlierde
             if (!requireNamespace("performance", quietly = TRUE)) {
                 error_msg <- private$.createHTMLSection(
                     "Missing Package",
-                    'The performance package is required for outlier detection. Install via: <code>install.packages("performance")</code>',
+                    'The performance package, which this analysis depends on, is not available in this session. It ships with the module, so this usually means a broken or partial installation - reinstall the module. No outlier results can be produced until it loads.',
                     style = "error",
                     icon = ""
                 )
@@ -298,11 +307,29 @@ outlierdetectionClass <- if (requireNamespace("jmvcore")) R6::R6Class("outlierde
             if (method_category %in% c("multivariate", "composite", "all")) {
                 multivariate_method <- self$options$multivariate_methods
                 
+                # LOF's neighbourhood size is not a free parameter here: the
+                # performance package hard-codes minPts = ncol(x), the number of
+                # VARIABLES, which is far smaller than the 10-20 neighbours the LOF
+                # literature normally assumes. Measured on 303 bivariate rows with
+                # 3 planted joint outliers: minPts = 2 flags 11 points, minPts = 10
+                # or 20 flag 4 - all settings catch the 3 real ones, so the extra
+                # 7 are false positives. The user choosing LOF has no control over
+                # this, so tell them what it means for their result.
+                if (multivariate_method == "lof") {
+                    private$.accumulateMessage(paste0(
+                        "<strong>About Local Outlier Factor:</strong> the neighbourhood size is fixed ",
+                        "at the number of selected variables by the underlying package, which is small ",
+                        "by the standards of the LOF literature. LOF therefore tends to flag more points ",
+                        "than the other multivariate methods on the same data, and the extra flags are ",
+                        "usually borderline rather than erroneous. Cross-check anything it flags against ",
+                        "Mahalanobis distance or MCD before excluding it."))
+                }
+
                 # Check for dbscan package for clustering methods
                 if (multivariate_method %in% c("optics", "lof") &&
                     !requireNamespace("dbscan", quietly = TRUE)) {
                     private$.accumulateMessage(sprintf(
-                        '<strong>Missing Package:</strong> Method %s requires dbscan package. Install via: <code>install.packages("dbscan")</code> or select a different method.',
+                        '<strong>Missing Package:</strong> The %s method needs the dbscan package, which is not available in this session. It ships with the module, so this usually means a broken installation; meanwhile, choose Mahalanobis distance or MCD instead.',
                         multivariate_method
                     ))
                 }
@@ -311,7 +338,7 @@ outlierdetectionClass <- if (requireNamespace("jmvcore")) R6::R6Class("outlierde
                 if (multivariate_method == "mcd" &&
                     !requireNamespace("robustbase", quietly = TRUE)) {
                     private$.accumulateMessage(
-                        '<strong>Missing Package:</strong> MCD method requires robustbase package. Install via: <code>install.packages("robustbase")</code> or select a different method.'
+                        '<strong>Missing Package:</strong> The MCD method needs the robustbase package, which is not available in this session. It ships with the module, so this usually means a broken installation; meanwhile, choose Mahalanobis distance or a univariate method instead.'
                     )
                 }
             }
@@ -386,13 +413,26 @@ outlierdetectionClass <- if (requireNamespace("jmvcore")) R6::R6Class("outlierde
                  }
             }
 
-            # Performance optimization for large datasets
-            if (nrow(analysis_data) > 5000) {
+            # Performance optimization for large datasets.
+            # Threshold and retained size are user-configurable; the defaults
+            # (10000 / 5000) reproduce the previously hard-coded behaviour.
+            sample_threshold <- private$.optionOr("sampleThreshold", 10000)
+            sample_size_opt <- private$.optionOr("sampleSize", 5000)
+            # Only a sane lower bound here. Do NOT clamp to sample_threshold: the two
+            # options are independent - the threshold decides WHEN to subsample, the
+            # size decides HOW MANY rows to keep. Clamping silently overrode an
+            # explicit user choice (threshold 1000 + size 5000 analysed 1000 rows,
+            # not 5000), contradicting the option's own help text "larger values
+            # recover more of them at the cost of speed". The data-size cap that
+            # actually matters is applied at the point of use below.
+            sample_size_opt <- max(100, sample_size_opt)
+
+            if (nrow(analysis_data) > min(5000, sample_threshold)) {
                 performance_msg <- NULL
 
-                # For very large datasets, offer sampling
-                if (nrow(analysis_data) > 10000) {
-                    sample_size <- 5000
+                # For very large datasets, subsample
+                if (nrow(analysis_data) > sample_threshold) {
+                    sample_size <- min(sample_size_opt, nrow(analysis_data))
                     # User-configurable seed for reproducible subsampling;
                     # falls back to 123 (previous fixed value) when unset.
                     seed_val <- self$options$seed
@@ -418,12 +458,17 @@ outlierdetectionClass <- if (requireNamespace("jmvcore")) R6::R6Class("outlierde
                         "Performance Optimization",
                         paste0(
                             "<p><strong>Large dataset detected:</strong> ",
-                            "Your dataset contains ", original_n, " observations. ",
+                            "Your dataset contains ", original_n, " observations, which is above the ",
+                            "subsampling threshold of ", sample_threshold, ". ",
                             "For faster analysis, we've sampled ", sample_size, " observations.</p>",
-                            "<p><strong>Clinical note:</strong> ",
-                            "Outlier detection on a representative sample is often sufficient for data quality assessment. ",
-                            "The sampled results should identify systematic issues effectively.</p>",
-                            "<p><em>Tip: For full dataset analysis, consider processing variables in smaller batches.</em></p>"
+                            "<p><strong>What this costs you:</strong> ",
+                            "A random subsample shows systematic problems well, but it can only find the outliers it ",
+                            "happens to contain - roughly ", round(100 * sample_size / original_n), "% of them here. ",
+                            "If you are screening for individual erroneous values to verify against source records, ",
+                            "analyse the full dataset instead.</p>",
+                            "<p><em>To analyse every row, raise <strong>Subsample above (rows)</strong> under ",
+                            "Threshold Settings past ", original_n, "; to keep more of them, raise ",
+                            "<strong>Rows to analyse when subsampling</strong>. Both are slower.</em></p>"
                         ),
                         style = "info",
                         icon = ""
@@ -508,7 +553,7 @@ outlierdetectionClass <- if (requireNamespace("jmvcore")) R6::R6Class("outlierde
             }
 
             # Generate plain-language summary
-            plain_summary <- private$.generate_plain_summary(outlier_results, analysis_data)
+            plain_summary <- private$.generate_plain_summary(outlier_results, analysis_data, original_n)
 
             # Generate outputs with original dataset size
             if (self$options$show_outlier_table) {
@@ -653,7 +698,11 @@ outlierdetectionClass <- if (requireNamespace("jmvcore")) R6::R6Class("outlierde
             # Check for completely missing variables
             all_na_vars <- sapply(data, function(x) all(is.na(x)))
             if (any(all_na_vars)) {
-                jmvcore::reject("Variables with all missing values: {}", paste(names(data)[all_na_vars], collapse = ", "))
+                # `code = NULL` is required: reject()'s second POSITIONAL argument is
+                # `code`, so passing the value positionally left "{}" unsubstituted
+                # and the user saw a literal "{}" instead of the variable names.
+                jmvcore::reject("Variables with all missing values: {}", code = NULL,
+                                paste(names(data)[all_na_vars], collapse = ", "))
             }
             
             # Check for constant variables  
@@ -662,7 +711,8 @@ outlierdetectionClass <- if (requireNamespace("jmvcore")) R6::R6Class("outlierde
                 length(unique(non_na_x)) <= 1
             })
             if (any(constant_vars)) {
-                jmvcore::reject("Variables with constant values (no variation): {}", paste(names(data)[constant_vars], collapse = ", "))
+                jmvcore::reject("Variables with constant values (no variation): {}", code = NULL,
+                                paste(names(data)[constant_vars], collapse = ", "))
             }
             
             # Set up method and threshold based on category
@@ -682,13 +732,15 @@ outlierdetectionClass <- if (requireNamespace("jmvcore")) R6::R6Class("outlierde
                 # Special checks for specific multivariate methods
                 if (method %in% c("optics", "lof")) {
                     if (!requireNamespace("dbscan", quietly = TRUE)) {
-                        jmvcore::reject("Method {} requires the 'dbscan' package. Please install it using: install.packages('dbscan')", method)
+                        jmvcore::reject(
+                            "The {} method needs the dbscan package, which is not available in this session. Choose Mahalanobis distance or MCD instead, or reinstall the module.",
+                            code = NULL, method)
                     }
                 }
                 
                 if (method == "mcd") {
                     if (!requireNamespace("robustbase", quietly = TRUE)) {
-                        jmvcore::reject("MCD method requires the 'robustbase' package. Please install it using: install.packages('robustbase')")
+                        jmvcore::reject("The MCD method needs the robustbase package, which is not available in this session. Choose Mahalanobis distance or a univariate method instead, or reinstall the module.")
                     }
                 }
                 
@@ -814,11 +866,35 @@ outlierdetectionClass <- if (requireNamespace("jmvcore")) R6::R6Class("outlierde
             return(as.numeric(as.logical(outlier_results)))
         },
 
-        .generate_plain_summary = function(outlier_results, data) {
+        .generate_plain_summary = function(outlier_results, data, original_n = NULL) {
             # Generate plain-language summary for clinical users
 
             n_total <- nrow(data)
             n_vars <- ncol(data)
+
+            # When the dataset was subsampled, this panel described the SUBSAMPLE
+            # as "your dataset" ("In your dataset of 5000 observations" for a
+            # 12000-row file) and the copy-ready sentence repeated the wrong N.
+            # Sampling matters more here than for most statistics: a random subset
+            # can only reveal the outliers it happens to contain, so a count from
+            # the subsample is a lower bound on the outliers in the data. Verified
+            # on 12000 rows with 4 planted gross outliers - only the 1 that was
+            # sampled could be found.
+            subsampled <- !is.null(original_n) && original_n != n_total
+            scope_text <- if (subsampled) {
+                sprintf("a random subsample of %d observations drawn from your %d-observation dataset",
+                        n_total, original_n)
+            } else {
+                sprintf("your dataset of %d observations", n_total)
+            }
+            sampling_caveat <- if (subsampled) {
+                sprintf(paste0(
+                    " <strong>Because only %d of %d observations were analysed, this count is a lower ",
+                    "bound:</strong> outliers among the %d rows that were not sampled cannot be ",
+                    "detected. Analyse the full dataset, or fewer variables at a time, if you need a ",
+                    "complete list."),
+                    n_total, original_n, original_n - n_total)
+            } else ""
 
             # Composite outlier score via shared helper (per-method proportion)
             proportion_outlier <- private$.compute_outlier_proportion(outlier_results)
@@ -890,9 +966,9 @@ outlierdetectionClass <- if (requireNamespace("jmvcore")) R6::R6Class("outlierde
                 "Plain Language Summary",
                 paste0(
                     "<p><strong>What we found:</strong> ",
-                    "In your dataset of ", n_total, " observations across ", n_vars, " variable(s), ",
+                    "In ", scope_text, " across ", n_vars, " variable(s), ",
                     "we identified ", n_outliers, " potential outlier(s) (", outlier_pct, "%) using ",
-                    method_desc, ".</p>",
+                    method_desc, ".", sampling_caveat, "</p>",
                     "<p><strong>Clinical interpretation:</strong> ", clinical_context, "</p>",
                     "<p><strong>Recommended action:</strong> ", action_text, "</p>"
                 ),
@@ -902,9 +978,16 @@ outlierdetectionClass <- if (requireNamespace("jmvcore")) R6::R6Class("outlierde
 
             # Add copy-ready report sentence
             report_sentence <- sprintf(
-                "Outlier detection analysis was performed on %d observations across %d variable(s) using %s. A total of %d outlier(s) were identified (%.1f%% of observations). %s",
-                n_total, n_vars, method_desc,
+                "Outlier detection analysis was performed on %s across %d variable(s) using %s. A total of %d outlier(s) were identified (%.1f%% of the observations analysed). %s%s",
+                if (subsampled)
+                    sprintf("a random subsample of %d observations from a dataset of %d",
+                            n_total, original_n)
+                else sprintf("%d observations", n_total),
+                n_vars, method_desc,
                 n_outliers, outlier_pct,
+                if (subsampled)
+                    "Because a subsample was analysed, this count is a lower bound on the outliers present in the full dataset. "
+                else "",
                 if(n_outliers == 0) "No data quality issues were detected."
                 else if(outlier_pct < 5) "The low outlier rate suggests acceptable data quality."
                 else "Further data review is recommended."
@@ -1013,13 +1096,50 @@ outlierdetectionClass <- if (requireNamespace("jmvcore")) R6::R6Class("outlierde
                 "</div>"
             )
 
-            # Add detailed table if available
-            if (nrow(outlier_df) <= 100) {  # Only show table for reasonable size
+            # Per-observation listing.
+            #
+            # This used to be wrapped in `if (nrow(outlier_df) <= 100)`, so the
+            # table vanished entirely for any dataset with more than 100 rows -
+            # that is, essentially every clinical dataset - even though
+            # `show_outlier_table` defaults to TRUE, its description promises
+            # "classification for each observation", and the plain-language
+            # summary directly above tells the user to "review the N flagged
+            # observation(s) below". There was nothing below.
+            # .format_outlier_table() already caps the display at 100 rows, so
+            # the outer guard only suppressed output that was safe to render.
+            #
+            # Flagged rows are listed first: they are what the user has to check
+            # against source records, and a listing of the first 100 rows in file
+            # order is of no use for that.
+            flagged <- which(!is.na(outlier_df$Proportion_Outlier) &
+                             outlier_df$Proportion_Outlier >= threshold)
+            n_flagged <- length(flagged)
+
+            if (n_flagged > 0) {
+                ordered <- flagged[order(outlier_df$Proportion_Outlier[flagged], decreasing = TRUE)]
+                shown <- head(ordered, 100)
+                heading <- if (n_flagged > length(shown)) {
+                    sprintf("Flagged Observations (showing %d of %d, strongest first)",
+                            length(shown), n_flagged)
+                } else {
+                    sprintf("Flagged Observations (all %d)", n_flagged)
+                }
                 table_html <- paste0(table_html,
                     "<div style='background-color: #ffffff; padding: 15px; border-radius: 8px; margin-top: 20px;'>",
-                    "<h4>Detailed Results (First 100 observations)</h4>",
-                    private$.format_outlier_table(outlier_df),
+                    "<h4>", heading, "</h4>",
+                    "<p style='font-size: 12px; color: #666; margin-top: 0;'>",
+                    "Row numbers refer to the original dataset",
+                    if (!is.null(original_n) && original_n != nrow(outlier_df))
+                        ", including when a subsample was analysed" else "",
+                    ". Verify each flagged value against source records before excluding it.</p>",
+                    private$.format_outlier_table(outlier_df[shown, , drop = FALSE]),
                     "</div>"
+                )
+            } else {
+                table_html <- paste0(table_html,
+                    "<div style='background-color: #ffffff; padding: 15px; border-radius: 8px; margin-top: 20px;'>",
+                    "<p style='margin: 0;'>No observation reached the outlier threshold, ",
+                    "so there is nothing to list here.</p></div>"
                 )
             }
 

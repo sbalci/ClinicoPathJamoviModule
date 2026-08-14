@@ -8,7 +8,13 @@ items:
     - name: welcome
       title: 'Getting Started'
       type: Html
-      visible: (!age || !gender)
+      # NOT `visible: (!age || !gender)`. jmvcore only treats a visible string as
+      # an expression when it starts with "(" followed by a letter, so a leading
+      # "!" is never recognised - the string is read as truthy and the (empty)
+      # "Getting Started" box stayed on screen for every run once both variables
+      # were chosen (verified: welcome$visible was TRUE with both set).
+      # Visibility is driven from .run() instead.
+      visible: false
 
     - name: dataInfo
       title: 'Data Summary'
@@ -40,6 +46,7 @@ items:
           - female
           - male
           - age_groups
+          - age_interval
           - bin_width
           - custom_breaks
 
@@ -58,6 +65,7 @@ items:
           - female
           - male
           - age_groups
+          - age_interval
           - bin_width
           - custom_breaks
           - plot_title
@@ -80,6 +88,7 @@ items:
           - female
           - male
           - age_groups
+          - age_interval
           - bin_width
           - custom_breaks
           - ggcharts_sort

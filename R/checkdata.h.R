@@ -29,7 +29,8 @@ checkdataOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 
             private$..var <- jmvcore::OptionVariable$new(
                 "var",
-                var)
+                var,
+                default=NULL)
             private$..showOutliers <- jmvcore::OptionBool$new(
                 "showOutliers",
                 showOutliers,
@@ -412,8 +413,10 @@ checkdataBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' 
 #' @param data .
 #' @param var .
-#' @param showOutliers Detect and display potential outliers using z-score
-#'   method (|z| > 3).
+#' @param showOutliers Detect potential outliers using three methods - z-score
+#'   (|z| > 3), the IQR fence (1.5 x IQR), and the modified Z-score (|M| > 3.5,
+#'   MAD-based) - and report points flagged by at least two of them. Below n =
+#'   10 single-method flags are shown and labelled informative-only.
 #' @param showDistribution Display descriptive statistics and distribution
 #'   characteristics.
 #' @param showDuplicates Identify and count duplicate values in the dataset.
@@ -427,8 +430,11 @@ checkdataBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   attempts to infer from data ranges.
 #' @param outlierTransform Apply transformation before outlier detection to
 #'   handle skewed distributions (especially right-skewed lab values).
-#' @param mcarTest Perform Little's MCAR test if available (requires naniar
-#'   package). Provides formal test vs. heuristic assessment.
+#' @param mcarTest Explain whether the missingness mechanism can be tested
+#'   formally for this variable. Little's MCAR test is multivariate and cannot
+#'   be computed from a single variable, so this analysis reports heuristics
+#'   about where the missing values sit rather than a test of the mechanism;
+#'   enable this to state that limitation explicitly in the output.
 #' @param cvMinMean Suppress coefficient of variation when absolute mean is
 #'   below this threshold (avoids instability).
 #' @param showSummary Display a plain-language summary of data quality
@@ -463,7 +469,7 @@ checkdataBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' @export
 checkdata <- function(
     data,
-    var,
+    var = NULL,
     showOutliers = TRUE,
     showDistribution = FALSE,
     showDuplicates = FALSE,

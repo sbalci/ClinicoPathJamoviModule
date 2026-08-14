@@ -241,9 +241,24 @@ checkdataClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
             # Method 3: Modified Z-score (MAD-based, most robust)
             if (length(clean_var) > 3) {
-                mad_val <- mad(clean_var, constant = 1.4826)  # Consistency factor for normal distribution
+                # Iglewicz & Hoaglin (1993) modified Z-score, as in the NIST
+                # e-Handbook 1.3.5.17:  M_i = 0.6745 (x_i - median) / MAD_raw,
+                # where MAD_raw = median(|x_i - median|).
+                #
+                # The scale correction must be applied ONCE. R's mad() already
+                # multiplies by constant = 1.4826 to make MAD a consistent
+                # estimator of sigma, and 0.6745 = 1/1.4826, so the previous
+                # `0.6745 * (x - median) / mad(x, constant = 1.4826)` divided by
+                # the factor twice. Every modified Z came out 1.4826x too small,
+                # which turned the >3.5 cut-off into an effective >5.19 and made
+                # the method labelled "most robust" the least sensitive of the
+                # three. Measured on 100 lab values plus 3 contaminants sitting
+                # 3.5 SD out, over 300 replicates: the correct formula flags
+                # 325/900 contaminants, the old one flagged 0/900, and 88 were
+                # lost from the consensus outlier table entirely.
+                mad_val <- mad(clean_var, constant = 1.4826)  # consistent estimate of sigma
                 if (mad_val > 0) {
-                    modified_z <- 0.6745 * (clean_var - median(clean_var)) / mad_val
+                    modified_z <- (clean_var - median(clean_var)) / mad_val
                     mad_outliers <- which(abs(modified_z) > 3.5)
                     outlier_results$mad <- list(
                         indices = mad_outliers,
@@ -316,19 +331,25 @@ checkdataClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
             patterns <- list()
 
-            # Optional: Little's MCAR test (requires naniar package and full dataset context)
-            if (self$options$mcarTest && !is.null(data_context)) {
-                if (requireNamespace("naniar", quietly = TRUE)) {
-                    tryCatch({
-                        # Note: Little's test requires multivariate data
-                        # For single variable, we can't perform it; note this limitation
-                        patterns$mcar_note <- "MCAR test requires multivariate context (not available for single variable)"
-                    }, error = function(e) {
-                        patterns$mcar_error <- paste("MCAR test failed:", e$message)
-                    })
-                } else {
-                    patterns$mcar_unavailable <- "MCAR test unavailable (naniar package not installed)"
-                }
+            # Little's MCAR test is inherently MULTIVARIATE: it compares the
+            # observed-data means across missingness patterns using the other
+            # variables. With a single variable there is nothing to compare, so
+            # the test is undefined here - not merely unimplemented.
+            #
+            # This block used to be unreachable: it was guarded on
+            # `!is.null(data_context)`, and both call sites pass only `variable`,
+            # so data_context was always NULL. Ticking "MCAR statistical test"
+            # therefore did nothing at all, while the option's own description
+            # promised "a formal test vs. heuristic assessment". Say plainly what
+            # is and is not available instead of silently ignoring the request.
+            if (isTRUE(self$options$mcarTest)) {
+                patterns$mcar_not_applicable <- paste(
+                    "Little's MCAR test is a multivariate test and cannot be computed for a",
+                    "single variable - it compares means across missingness patterns using the",
+                    "other variables in the dataset. The runs and dropout results below are",
+                    "heuristics about WHERE the missing values sit, not a test of the missingness",
+                    "mechanism. To test MCAR formally, run naniar::mcar_test() on the full dataset."
+                )
             }
 
             # Pattern 1: HEURISTIC runs test for randomness
@@ -926,14 +947,23 @@ checkdataClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                                               " (", confidence_level, "/", outlier_analysis$n_methods, " methods",
                                               scale_note, ")")
 
-                        # Per-method flags
+                        # Per-method flags.
+                        #
+                        # These were inverted: ifelse(flagged, "", " - ") printed an
+                        # EMPTY cell for a method that DID detect the point and a
+                        # dash for one that did not, so a row whose severity read
+                        # "3/3 methods" showed three blank method columns. (The
+                        # empty string looks like a tick character that was lost in
+                        # a non-ASCII sweep.) Use plain words - unambiguous, and no
+                        # encoding to lose.
                         method_flags <- outlier_analysis$detection_matrix[i, ]
-                        zscore_flag <- ifelse(method_flags["zscore"], "", " - ")
-                        iqr_flag <- ifelse(method_flags["iqr"], "", " - ")
+                        flag_text <- function(detected) if (isTRUE(unname(detected))) "Yes" else "-"
+                        zscore_flag <- flag_text(method_flags["zscore"])
+                        iqr_flag <- flag_text(method_flags["iqr"])
                         mad_flag <- if (is.null(outlier_analysis$all_methods$mad)) {
                             "N/A"
                         } else {
-                            ifelse(method_flags["mad"], "", " - ")
+                            flag_text(method_flags["mad"])
                         }
 
                         self$results$outliers$addRow(rowKey=i, values=list(
@@ -1229,6 +1259,18 @@ checkdataClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                         ))
                         pattern_count <- pattern_count + 1
                     }
+                    # Attach the caveat to the findings themselves: a row reading
+                    # "Clinical Validation: Implausible Age" is a heuristic verdict,
+                    # and the panel that explains that is off by default.
+                    self$results$patterns$setNote(
+                        "clinicalHeuristic",
+                        paste(
+                            .("<b>Clinical Validation rows are heuristic screening flags, not clinical judgements.</b>"),
+                            .("Plausibility bounds come from general-population rules of thumb rather than validated reference ranges, and may not suit paediatric, ICU, oncology or athlete populations, or differing measurement methods and demographics."),
+                            .("Which checks run is decided by pattern-matching the variable NAME (for example 'age', 'glucose', 'systolic'), so non-standard naming can silently skip a check or apply the wrong one."),
+                            .("The unit system is auto-detected from the data range unless you set it explicitly; a misread unit (inches against centimetres, mg/dL against mmol/L) will flag correct values as implausible."),
+                            .("Confirm every flag against your own study protocol before excluding or correcting a value."),
+                            sep = " "))
                 }
                 
                 # Data validation warnings integration
@@ -1565,9 +1607,35 @@ checkdataClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                                                         component_scores$sample_size$penalty,
                                                         component_scores$sample_size$max_penalty,
                                                         component_scores$sample_size$description))
+
             quality_text <- paste0(quality_text, sprintf("                     \u{2500}\u{2500}\u{2500}\u{2500}\u{2500}\u{2500}\u{2500}\u{2500}\u{2500}\u{2500}\u{2500}\u{2500}\u{2500}\u{2500}\u{2500}\u{2500}\n"))
             quality_text <- paste0(quality_text, sprintf("  HEURISTIC GRADE:   %s (%s)\n\n",
                                                         quality_grade, score_band))
+
+            # The clinical component can remove up to 20 points from the headline
+            # grade on the strength of hard-coded reference ranges, a unit system
+            # that may have been guessed, and pattern-matching on the variable NAME.
+            # "Caveats & assumptions" spells this out but is off by default, while
+            # clinical checks are on by default - so a user can be handed a lowered
+            # grade with nothing to tell them what produced it. Placed after the
+            # grade so it does not break up the component breakdown above.
+            if (isTRUE(self$options$clinicalValidation) &&
+                component_scores$clinical$penalty > 0) {
+                unit_note <- if (identical(self$options$unitSystem, "auto")) {
+                    .("auto-detected from the data range")
+                } else {
+                    sprintf(.("set to '%s'"), self$options$unitSystem)
+                }
+                quality_text <- paste0(quality_text,
+                    .("  NOTE ON THE CLINICAL PENALTY\n"),
+                    sprintf(.("  This component cost %d points. Plausibility bounds are general-population\n"),
+                            component_scores$clinical$penalty),
+                    .("  rules of thumb, not validated reference ranges, so they may not suit\n"),
+                    .("  paediatric, ICU, oncology or athlete populations. Which checks run is\n"),
+                    .("  decided by matching the variable NAME, so non-standard naming can skip a\n"),
+                    sprintf(.("  check or apply the wrong one, and units were %s.\n"), unit_note),
+                    .("  Confirm each flag against your study protocol before acting on it.\n\n"))
+            }
             
             # Variable type and basic characteristics
             var_type_desc <- ifelse(is_numeric, "Numeric/Continuous", 
@@ -1934,6 +2002,7 @@ checkdataClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 caveats_html <- paste0(caveats_html, "<ul>")
                 caveats_html <- paste0(caveats_html, "<li><strong>Assumes approximate normality:</strong> Z-score and MAD methods work best for symmetric distributions; severely skewed data may produce false positives</li>")
                 caveats_html <- paste0(caveats_html, "<li><strong>Transformation trade-offs:</strong> Log/sqrt transforms reduce false positives in skewed data but complicate interpretation of flagged values on original scale</li>")
+                caveats_html <- paste0(caveats_html, "<li><strong>Mixed scales when a transform is applied:</strong> With a log or square-root transform, flagged <em>values</em> are shown on the original scale while the z-scores and the IQR fence are computed and reported on the transformed scale. Do not compare a reported bound directly against a reported value; the severity label states which scale it used</li>")
                 caveats_html <- paste0(caveats_html, "<li><strong>Small sample sensitivity:</strong> With n<30, outlier flags are informative only; consensus requirement is relaxed to single-method for very small samples (n<10)</li>")
                 caveats_html <- paste0(caveats_html, "<li><strong>True outliers vs errors:</strong> Statistical outliers may represent valid extreme values (e.g., elite athletes, rare diseases); clinical judgment required</li>")
                 caveats_html <- paste0(caveats_html, "</ul>")

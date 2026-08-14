@@ -2992,6 +2992,112 @@ out-of-scope findings from the same audit, deferred for separate work.
 - Reference: `test-decision.R` already provides utility-function unit tests +
   integration tests against the `histopathology` example dataset.
 
+### [correctness] likelihoodratio: `manualCutpoint` is a defaultless Number
+
+Found 2026-08-14 by the post-regeneration sweep; structurally verified.
+
+- `jamovi/likelihoodratio.a.yaml` declares `manualCutpoint` as `type: Number`
+  with NO `default:`. Per the option-type contract a Number must carry a real
+  numeric default - it is one of the types that can never be NULL.
+- Two consequences, both real:
+  1. R API: it compiles to a BARE required wrapper argument
+     (`R/likelihoodratio.h.R:9`), so every programmatic call must pass it even
+     though `cutpointMethod` defaults to `youden` and never reads it.
+  2. Runtime: it arrives as NULL. `R/likelihoodratio.b.R:278` returns
+     `list(value = self$options$manualCutpoint, ...)` with no `%||%` or
+     is.null guard, so selecting `cutpointMethod = "manual"` with an empty box
+     yields `value = NULL`; the downstream `testVar >= NULL` gives `logical(0)`,
+     the 2x2 table comes back empty and indexing it throws
+     "subscript out of bounds".
+- NOT fixed here because the right default is a clinical decision, not a
+  mechanical one - there is no universal likelihood-ratio cutpoint. Options:
+  give it a neutral numeric default plus a backend guard that rejects an unset
+  manual cutpoint with an actionable message, or make the manual branch fall
+  back to the Youden cutpoint and say so in a notice.
+
+### [jamovi/yaml] 220 further defaultless Variable/Variables options (module-wide)
+
+Found 2026-08-14 by the post-regeneration sweep. Same defect class already
+fixed here for `vartree` (percvar/summaryvar/prunebelow/follow) and
+`categorize` (var), and previously for `agreement()` and `diagnosticmeta()`.
+
+- 220 Variable/Variables options across 89 analyses have no `default:` yet are
+  NULL-guarded as optional by their own `.b.R`. Each compiles to a BARE
+  REQUIRED wrapper argument, so programmatic R callers - and
+  `R CMD check --run-donttest` over any `@examples` - fail with
+  `argument "X" is missing, with no default`. The jamovi GUI hides this
+  entirely because it never omits an option.
+- Worst offenders: `qualityoflife` (13), `qtwist` (9), `epidemiosurvival` (7),
+  `decisiongraph` (7), `progressionsurvival` (5), `outbreakanalysis` (5),
+  `jvisr` (5), `ihcimmune` (5), `biomarkerdiscovery` (5).
+- IMPORTANT - do not fix mechanically. A bare required argument is CORRECT for
+  an analysis's mandatory primary input; 314 of 390 wrappers have one by
+  design. `alluvial`'s `vars` was checked and is correctly bare (the backend
+  hard-rejects fewer than 2 variables, so a NULL default would convert a clear
+  error into a silent empty result). The test is whether the backend
+  NULL-guards the option as optional - only then does it want `default: NULL`.
+
+### [jamovi/generated] `0000.yaml` accumulates stale and duplicate analysis entries
+
+Found 2026-08-14. `jmvtools::prepare()` adds manifest entries but never prunes
+them, so the generated `jamovi/0000.yaml` has drifted from the source tree.
+
+- 20 entries have NO backing source at all - no `jamovi/<name>.a.yaml`, no
+  `R/<name>.h.R`, no `R/<name>.b.R` - and ship as menu items with no analysis
+  behind them: chisqposttestaddon, datecorrection, decisioncombine1,
+  enhancednonparametric, flexiblebaseline, flexparametricadv,
+  flexparametricadvanced, ggflowchart, ggoncoplot, jconsort, jflowchart,
+  jjriverplot, jjsankeyfier, jjstreamgraph, powercomprisk, powersurvival,
+  principalcox, stagemigration1, survivalPowerComprehensive, survivalpower.
+  Several look like rename leftovers whose live counterpart exists under a
+  different name (`jjriverplot` vs `R/riverplot.b.R`; `ggoncoplot` vs
+  `R/jjoncoplot.b.R`; `survivalpower`/`survivalPowerComprehensive` vs
+  `R/survivalPower.b.R` and `R/comprehensiveSurvivalPower.b.R`).
+- 10 names appear TWICE (420 entries, 410 distinct): samplingerror,
+  classification, psychopdaROC, statsplot2, jjridges, patientdashboard,
+  populationhealth, precisionrecall, ordinalmixedmodel, enhancedROC.
+  `samplingerror` is a byte-for-byte duplicate; the others differ only in
+  menuGroup/title, so one copy is a stale pre-rename or pre-dev-route entry
+  (e.g. `precisionrecall` under both `meddecideExtraD` and `meddecide`).
+  Duplicate manifest entries produce duplicate/contradictory menu items.
+- None of the 14 release-reviewed analyses are affected (each appears exactly
+  once, under `Exploration`).
+- `0000.yaml` is GENERATED - do not hand-edit. Establish which names are dead,
+  delete or rename the corresponding sources, then regenerate. Deleting a stale
+  entry by hand would be undone by the next `prepare()`.
+
+### [correctness] dev-routed `*2` analyses fail their own tests (pre-existing)
+
+Found 2026-08-14 while verifying the post-`prepare()` regeneration. These are
+`menuGroup: ExplorationD` (dev-routed, NOT in the production menu), so they do
+not block the ClinicoPathDescriptives release - but they are real failures and
+their test files currently only pass by accident of never being run.
+
+| Test file | Result | Failure |
+| --- | --- | --- |
+| `test-crosstable2.R` | 0 pass / 1 fail / 1 err | `object 'NAgroup' not found` |
+| `test-reportcat2.R` | 1 pass / 4 fail | analysis returns non-list; `write_omv` rejects it |
+| `test-summarydata2.R` | 1 pass / 4 fail | same as above |
+
+- `NAgroup` appears nowhere in `R/`, `jamovi/`, or `tests/` - it is built
+  dynamically, almost certainly `paste0(NA, "group")` from an option that is
+  unset on the `sty = 'nejm'` path (`crosstable2.r.yaml` only declares
+  `visible:` for `arsenal`/`finalfit`/`gtsummary`, so `nejm` is under-covered).
+- `reportcat2`/`summarydata2`: `expect_true(is.list(model))` and
+  `inherits(model, 'jmvcoreClass')` both FALSE, then
+  `jmvReadWrite::write_omv()` errors with "Input data are either not a data
+  frame or have incorrect ... dimensions". Check what the analysis actually
+  returns before assuming the test is wrong.
+- Confirmed NOT caused by the 2026-08-13/14 release-review work: the
+  `.b.R`/`.a.yaml`/`.h.R` for all three are untouched by both the review and
+  the module-wide `jmvtools::prepare()` regeneration (`git status` clean for
+  those paths). The only session change was a comment-only TODO added to
+  `R/reportcat2.b.R` in `2a1410a64`.
+- Decide first whether these three dev analyses are still wanted. If they are
+  being retired, delete the analyses and their test files rather than fixing
+  them; `reportcat2` also still carries the `summary.factor()` `"NAs"` defect
+  already fixed in `R/reportcat.b.R`.
+
 ### [architecture] split agreement.b.R (10,559 LOC monolith)
 
 - Single `.b.R` with 146 options, 396 declared outputs, 970-line `.run()`
@@ -3009,25 +3115,15 @@ out-of-scope findings from the same audit, deferred for separate work.
 # release-review-function prompt
 
 
-/release-review-function checkdata
-/release-review-function dataquality
-/release-review-function outlierdetection
-/release-review-function agepyramid
-/release-review-function venn
-/release-review-function vartree
-/release-review-function alluvial
-/release-review-function crosstable
-/release-review-function chisqposttest
-/release-review-function categorize
-
-- I will release ClinicoPathDescriptives module.
-- review vignettes in ClinicoPathDescriptives repository. check if their content are up to date. if not, update them. pay attention to the new options added in recent releases. If there are mentions of not yet released functions and features, note that they will be released in the future.
-- update NEWS.md
-
 for all:
 Rscript scripts/build_site.R
 devtools check
 chector
+bump version and date
+Rscript scripts/build_site.R
+release
+
+
 
 You are an expert R package and jamovi module developer with advanced expertise in biostatistics, clinical research, pathology, and clinician-facing software.
 
@@ -3636,3 +3732,40 @@ API and will fail `R CMD check --run-donttest` until `prepare()` + `document()` 
 
       Detection: load each `data/*.rda` into a fresh env and compare `load()`'s return value
       against the file stem.
+
+## Module-wide: `visible: (!option)` in .r.yaml never works
+
+jmvcore only treats a `visible:` string as an expression when it starts with `(`
+followed by a letter. A leading `!` fails that routing check, so the string is
+returned as-is and read as truthy - the result item is ALWAYS visible. Confirmed
+on `jamovi/benford.r.yaml` (welcome panel stayed on screen, empty, once a
+variable was selected) and fixed there by moving visibility into `.run()` via
+`setVisible()` with `visible: false` in the yaml.
+
+There is no working negation idiom in .r.yaml; every functioning `visible:` in
+this module is a plain `(option)`. The remaining occurrences are silent - they
+show an item that should be hidden, so nothing errors:
+
+
+- jamovi/advancedtrials.r.yaml:131
+- jamovi/agepyramid.r.yaml:11
+- jamovi/aivalidation.r.yaml:95
+- jamovi/consortdiagram.r.yaml:10
+- jamovi/epidemiosurvival.r.yaml:140
+- jamovi/explainableai.r.yaml:315
+- jamovi/explainableai.r.yaml:342
+- jamovi/factoranalysis.r.yaml:69
+- jamovi/factoranalysis.r.yaml:74
+- jamovi/factoranalysis.r.yaml:172
+- jamovi/haralicktexture.r.yaml:116
+- jamovi/haralicktexture.r.yaml:123
+- jamovi/ihcheterogeneity.r.yaml:10
+- jamovi/jjpubr.r.yaml:21
+- jamovi/partialcorrelation.r.yaml:41
+- jamovi/partialcorrelation.r.yaml:111
+- jamovi/relativesurvival.r.yaml:133
+- jamovi/relativesurvival.r.yaml:268
+- jamovi/tidyplots.r.yaml:10
+
+Fix pattern: set `visible: false` in the .r.yaml and drive it from the backend
+with `self$results$<item>$setVisible(TRUE/FALSE)`.

@@ -14,6 +14,7 @@ categorizeOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             labels = "auto",
             customlabels = "",
             newvarname = "",
+            excludeoutofrange = FALSE,
             includelowest = TRUE,
             rightclosed = TRUE,
             ordered = TRUE,
@@ -81,6 +82,10 @@ categorizeOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 default="")
             private$..addtodata <- jmvcore::OptionOutput$new(
                 "addtodata")
+            private$..excludeoutofrange <- jmvcore::OptionBool$new(
+                "excludeoutofrange",
+                excludeoutofrange,
+                default=FALSE)
             private$..includelowest <- jmvcore::OptionBool$new(
                 "includelowest",
                 includelowest,
@@ -115,6 +120,7 @@ categorizeOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             self$.addOption(private$..customlabels)
             self$.addOption(private$..newvarname)
             self$.addOption(private$..addtodata)
+            self$.addOption(private$..excludeoutofrange)
             self$.addOption(private$..includelowest)
             self$.addOption(private$..rightclosed)
             self$.addOption(private$..ordered)
@@ -132,6 +138,7 @@ categorizeOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         customlabels = function() private$..customlabels$value,
         newvarname = function() private$..newvarname$value,
         addtodata = function() private$..addtodata$value,
+        excludeoutofrange = function() private$..excludeoutofrange$value,
         includelowest = function() private$..includelowest$value,
         rightclosed = function() private$..rightclosed$value,
         ordered = function() private$..ordered$value,
@@ -148,6 +155,7 @@ categorizeOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         ..customlabels = NA,
         ..newvarname = NA,
         ..addtodata = NA,
+        ..excludeoutofrange = NA,
         ..includelowest = NA,
         ..rightclosed = NA,
         ..ordered = NA,
@@ -354,6 +362,12 @@ categorizeBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   High"). Must match the number of categories.
 #' @param newvarname Name for the new categorized variable. Leave empty for
 #'   automatic naming.
+#' @param excludeoutofrange Applies to the 'manual' method only. By default
+#'   the break points are extended to the data minimum and maximum, so every
+#'   observation falls in a category and no case is lost. Set this to TRUE to
+#'   keep the break points exactly as entered and drop observations that fall
+#'   outside them; the number excluded is reported. Has no effect on the
+#'   computed methods, whose break points already span the data.
 #' @param includelowest If TRUE, the first interval will be left-closed
 #'   (include.lowest in cut).
 #' @param rightclosed If TRUE, intervals are right-closed (left-open). If
@@ -392,6 +406,7 @@ categorize <- function(
     labels = "auto",
     customlabels = "",
     newvarname = "",
+    excludeoutofrange = FALSE,
     includelowest = TRUE,
     rightclosed = TRUE,
     ordered = TRUE,
@@ -418,6 +433,7 @@ categorize <- function(
         labels = labels,
         customlabels = customlabels,
         newvarname = newvarname,
+        excludeoutofrange = excludeoutofrange,
         includelowest = includelowest,
         rightclosed = rightclosed,
         ordered = ordered,

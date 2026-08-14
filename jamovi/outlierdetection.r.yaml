@@ -23,6 +23,8 @@ items:
         - iqr_multiplier
         - confidence_level
         - seed
+        - sampleThreshold
+        - sampleSize
 
     - name: plot
       title: Outlier Detection Plot
@@ -42,6 +44,8 @@ items:
         - iqr_multiplier
         - confidence_level
         - seed
+        - sampleThreshold
+        - sampleSize
 
     - name: outlier_table
       title: Outlier Detection Results
@@ -57,6 +61,8 @@ items:
         - iqr_multiplier
         - confidence_level
         - seed
+        - sampleThreshold
+        - sampleSize
 
     - name: method_comparison
       title: Method Comparison
@@ -70,6 +76,8 @@ items:
         - iqr_multiplier
         - confidence_level
         - seed
+        - sampleThreshold
+        - sampleSize
 
     - name: exclusion_summary
       title: Exclusion Recommendations
@@ -85,6 +93,8 @@ items:
         - iqr_multiplier
         - confidence_level
         - seed
+        - sampleThreshold
+        - sampleSize
 
     - name: interpretation
       title: Analysis Interpretation
@@ -100,6 +110,8 @@ items:
         - iqr_multiplier
         - confidence_level
         - seed
+        - sampleThreshold
+        - sampleSize
 
 refs:
     - ClinicoPathJamoviModule

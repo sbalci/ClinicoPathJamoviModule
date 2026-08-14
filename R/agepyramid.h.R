@@ -11,6 +11,7 @@ agepyramidOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             female = NULL,
             male = NULL,
             age_groups = "custom",
+            age_interval = "left",
             bin_width = 5,
             custom_breaks = "",
             plot_title = "Age Pyramid",
@@ -63,15 +64,25 @@ agepyramidOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 age_groups,
                 options=list(
                     "custom",
+                    "who",
+                    "who_infant",
                     "pediatric",
                     "reproductive",
                     "geriatric",
                     "lifecourse"),
                 default="custom")
+            private$..age_interval <- jmvcore::OptionList$new(
+                "age_interval",
+                age_interval,
+                options=list(
+                    "left",
+                    "right"),
+                default="left")
             private$..bin_width <- jmvcore::OptionNumber$new(
                 "bin_width",
                 bin_width,
-                default=5)
+                default=5,
+                min=0.01)
             private$..custom_breaks <- jmvcore::OptionString$new(
                 "custom_breaks",
                 custom_breaks,
@@ -145,6 +156,7 @@ agepyramidOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             self$.addOption(private$..female)
             self$.addOption(private$..male)
             self$.addOption(private$..age_groups)
+            self$.addOption(private$..age_interval)
             self$.addOption(private$..bin_width)
             self$.addOption(private$..custom_breaks)
             self$.addOption(private$..plot_title)
@@ -166,6 +178,7 @@ agepyramidOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         female = function() private$..female$value,
         male = function() private$..male$value,
         age_groups = function() private$..age_groups$value,
+        age_interval = function() private$..age_interval$value,
         bin_width = function() private$..bin_width$value,
         custom_breaks = function() private$..custom_breaks$value,
         plot_title = function() private$..plot_title$value,
@@ -186,6 +199,7 @@ agepyramidOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         ..female = NA,
         ..male = NA,
         ..age_groups = NA,
+        ..age_interval = NA,
         ..bin_width = NA,
         ..custom_breaks = NA,
         ..plot_title = NA,
@@ -224,7 +238,7 @@ agepyramidResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 options=options,
                 name="welcome",
                 title="Getting Started",
-                visible="(!age || !gender)"))
+                visible=FALSE))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="dataInfo",
@@ -342,7 +356,18 @@ agepyramidBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' @param male a string naming the level from \code{gender} that contains the
 #'   level male
 #' @param age_groups Predefined age group categories. Choose 'custom' to use
-#'   bin_width, or select a preset.
+#'   bin_width, or select a preset. 'who' gives the WHO/UN standard five-year
+#'   groups (0-4, 5-9, ... 85+) used by the WHO World Standard Population and UN
+#'   population pyramids; 'who_infant' is the WHO abridged life-table grouping,
+#'   which reports infants (<1) separately from children aged 1-4. All bands are
+#'   left-closed, so an age on a boundary starts the band named for it.
+#' @param age_interval Which end of an age band is closed. 'left' gives
+#'   [lower, upper) bands, the WHO/UN and demographic convention: a person aged
+#'   exactly 65 starts the 65-69 band, and equal-width bands hold equal numbers
+#'   of single years. 'right' gives (lower, upper] bands, where age 65 closes
+#'   the band below it; this reproduces the behaviour of releases before 1.0.52
+#'   and makes the lowest band one year wider than the others, which inflates
+#'   the youngest bar of the pyramid.
 #' @param bin_width The width of the age bins in years. Adjust this to change
 #'   the granularity of the age groups.
 #' @param custom_breaks Comma-separated age break points (e.g.,
@@ -394,6 +419,7 @@ agepyramid <- function(
     female,
     male,
     age_groups = "custom",
+    age_interval = "left",
     bin_width = 5,
     custom_breaks = "",
     plot_title = "Age Pyramid",
@@ -428,6 +454,7 @@ agepyramid <- function(
         female = female,
         male = male,
         age_groups = age_groups,
+        age_interval = age_interval,
         bin_width = bin_width,
         custom_breaks = custom_breaks,
         plot_title = plot_title,

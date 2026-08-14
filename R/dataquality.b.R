@@ -147,6 +147,14 @@ dataqualityClass <- if (requireNamespace("jmvcore")) R6::R6Class("dataqualityCla
             high_card <- FALSE
             outlier_n <- NA
             if (is.numeric(data_vec)) {
+                # This detects EXACTLY constant variables, not "near-zero
+                # variance" in the caret::nearZeroVar sense: .Machine$double.eps
+                # is ~2.2e-16, so a variable with sd = 1e-9 - genuinely degenerate
+                # and quite capable of breaking a model - is not flagged. An
+                # absolute SD cut-off is also scale-dependent (the same
+                # measurement in metres and millimetres gives SDs 1000x apart), so
+                # the label is what changed rather than the threshold. A proper
+                # frequency-ratio / percent-unique screen would be a new feature.
                 sdv <- stats::sd(data_vec, na.rm = TRUE)
                 near_zero_var <- !is.na(sdv) && sdv < .Machine$double.eps
                 # High cardinality is expected/normal for continuous numeric
@@ -218,7 +226,7 @@ dataqualityClass <- if (requireNamespace("jmvcore")) R6::R6Class("dataqualityCla
         }
         if (length(near_zero_vars) > 0) {
             critical_warnings <- c(critical_warnings, sprintf(
-                "<strong>Near-zero variance:</strong> %s",
+                "<strong>Constant (zero variance):</strong> %s",
                 paste(htmltools::htmlEscape(near_zero_vars), collapse = ", ")))
         }
         if (n_total < 20) {
@@ -307,6 +315,22 @@ dataqualityClass <- if (requireNamespace("jmvcore")) R6::R6Class("dataqualityCla
                     if (!is.na(dup_keys)) dup_keys else ""
                 )
             } else {
+                # Ticking "Duplicate rows" with only ONE variable selected used to
+                # fall through to value-level analysis silently, under a heading
+                # ("Duplicate Value Analysis") that contradicted the box the user
+                # had ticked. With a single variable a duplicate row and a
+                # duplicate value are the same thing, so the numbers are right -
+                # but say so rather than appearing to ignore the setting.
+                if (isTRUE(self$options$complete_cases_only) && length(var_list) <= 1) {
+                    quality_results$duplicate_mode_note <- paste0(
+                        "<div style='background-color: #e7f3fe; padding: 10px; ",
+                        "border-left: 4px solid #2196f3; border-radius: 4px; margin-bottom: 10px;'>",
+                        "Row-level duplicate analysis needs at least two variables to define a row ",
+                        "signature. With one variable selected, a duplicate row and a duplicate value ",
+                        "are the same thing, so the value-level result below answers the same question. ",
+                        "Select more variables to compare full row signatures.",
+                        "</div>")
+                }
                 # Check for duplicates within each variable
                 # Accumulate the total number of duplicate values across all
                 # selected variables so the plain-language summary and
@@ -373,10 +397,11 @@ dataqualityClass <- if (requireNamespace("jmvcore")) R6::R6Class("dataqualityCla
                 apply(df, 1, function(r) paste0("<tr>", paste0("<td>", htmltools::htmlEscape(r), "</td>", collapse = ""), "</tr>")),
                 collapse = "\n"
             )
-            header <- paste0("<tr><th>Variable</th><th>Type</th><th>N</th><th>Missing</th><th>%Missing</th><th>Unique</th><th>%Duplicates</th><th>Near-zero var</th><th>High card</th><th>Outliers</th></tr>")
+            header <- paste0("<tr><th>Variable</th><th>Type</th><th>N</th><th>Missing</th><th>%Missing</th><th>Unique</th><th>%Duplicates</th><th>Constant</th><th>High card</th><th>Outliers</th></tr>")
             quality_results$summary_table <- paste0(
                 "<h4>Variable Quality Summary</h4>",
-                "<p><em>Flags:</em> near-zero variance, high cardinality (many unique values), and IQR-based outlier counts for numeric variables.</p>",
+                "<p><em>Flags:</em> constant (zero-variance) numeric variables, high cardinality (many unique values), and IQR-based outlier counts for numeric variables. ",
+                "The constant flag identifies variables with no variation at all; it does not screen for the broader <em>near-zero variance</em> case (very low but non-zero variation), for which caret::nearZeroVar() is the appropriate tool.</p>",
                 "<table border='1' cellspacing='0' cellpadding='4'>",
                 header,
                 summary_table,
@@ -751,7 +776,7 @@ dataqualityClass <- if (requireNamespace("jmvcore")) R6::R6Class("dataqualityCla
 
             # Data quality flags
             if (length(near_zero_vars) > 0) {
-                sprintf("<li><strong>Near-Zero Variance:</strong> %d variable%s show%s minimal variation (<em>%s</em>)</li>",
+                sprintf("<li><strong>Constant Variables:</strong> %d variable%s ha%s no variation at all (<em>%s</em>)</li>",
                         length(near_zero_vars),
                         if (length(near_zero_vars) == 1) "" else "s",
                         if (length(near_zero_vars) == 1) "s" else "",
@@ -897,14 +922,14 @@ dataqualityClass <- if (requireNamespace("jmvcore")) R6::R6Class("dataqualityCla
             has_recommendations <- TRUE
             recs_html <- paste0(recs_html,
                 "<div style='background-color: white; padding: 15px; border-radius: 5px; margin-bottom: 15px;'>",
-                "<h4 style='color: #ff8f00; margin-top: 0;'> Near-Zero Variance Variables</h4>",
+                "<h4 style='color: #ff8f00; margin-top: 0;'> Constant (Zero-Variance) Variables</h4>",
                 "<p><strong>Variables affected:</strong> ", paste(htmltools::htmlEscape(near_zero_vars), collapse = ", "), "</p>",
                 "<p><strong>Actions:</strong></p>",
                 "<ul style='line-height: 1.8;'>",
                 "<li><strong>Exclude from models:</strong> Variables with no variation cannot predict outcomes</li>",
                 "<li><strong>Investigate:</strong> Is lack of variation a data quality issue or a true population characteristic?</li>",
                 "<li><strong>Consider:</strong> May still be useful for descriptive statistics or subgroup identification</li>",
-                "<li><strong>Remove before modeling:</strong> Use <code>caret::nearZeroVar()</code> for automated detection</li>",
+                "<li><strong>Wider screen:</strong> This flag catches only variables with <em>no</em> variation. For the broader near-zero-variance case (very low but non-zero variation, which can destabilise models just as badly), use <code>caret::nearZeroVar()</code></li>",
                 "</ul>",
                 "</div>"
             )
@@ -1045,11 +1070,13 @@ dataqualityClass <- if (requireNamespace("jmvcore")) R6::R6Class("dataqualityCla
             "</ul>",
             "</div>",
 
-            # Near-Zero Variance section
+            # Constant / zero-variance section
             "<div style='background-color: white; padding: 15px; border-radius: 5px; margin-bottom: 15px;'>",
-            "<h4 style='color: #1976d2; margin-top: 0;'>Near-Zero Variance</h4>",
+            "<h4 style='color: #1976d2; margin-top: 0;'>Constant (Zero-Variance) Variables</h4>",
 
-            "<p><strong>What it means:</strong> Variable shows almost no variation across observations (standard deviation near zero).</p>",
+            "<p><strong>What it means:</strong> Every observation of the variable has the same value, so its standard deviation is zero.</p>",
+
+            "<p><strong>What this check does NOT cover:</strong> variables with very low but non-zero variation (\"near-zero variance\"). Those can destabilise a model just as badly but are not flagged here, because any absolute cut-off on the standard deviation depends on the measurement scale - the same quantity in metres and millimetres differs by a factor of 1000. Use caret::nearZeroVar(), which screens on the frequency ratio and percent-unique instead, if you need that wider check.</p>",
 
             "<p><strong>Why it matters:</strong></p>",
             "<ul style='line-height: 1.8;'>",

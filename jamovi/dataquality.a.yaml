@@ -30,10 +30,14 @@ options:
     - name: vars
       title: Variables
       type: Variables
+      # .run() shows the welcome panel when nothing is selected, so NULL is a
+      # supported state; without an explicit default the compiler makes `vars` a
+      # REQUIRED argument of the public wrapper.
+      default: NULL
       description:
           R: >
-            Variables to assess for data quality. If none selected, 
-            entire dataset will be analyzed.
+            Variables to assess for data quality. At least one variable must be
+            selected; the analysis does not fall back to the whole dataset.
 
     - name: check_duplicates
       title: "Duplicate values"

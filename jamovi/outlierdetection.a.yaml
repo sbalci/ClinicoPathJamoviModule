@@ -37,6 +37,10 @@ options:
         - continuous
       permitted:
         - numeric
+      # .run() shows the instructions panel when nothing is selected, so NULL is a
+      # supported state; without an explicit default the compiler makes `vars` a
+      # REQUIRED argument of the public wrapper.
+      default: NULL
       description:
           R: >
             Continuous variables to analyze for outliers. The module will detect outliers
@@ -191,6 +195,35 @@ options:
           R: >
             Display detailed interpretation of outlier detection results and methodological notes.
 
+    # The subsample threshold and size were hard-coded at 10000 and 5000, so a
+    # user who needed a complete outlier list on a large file had no way to get
+    # one. Both are exposed now; the defaults reproduce the previous behaviour.
+    # Sampling costs more here than for most statistics: a random subset can only
+    # reveal the outliers it happens to contain.
+    - name: sampleThreshold
+      title: 'Subsample above (rows)'
+      type: Integer
+      default: 10000
+      min: 1000
+      max: 1000000
+      description:
+          R: >
+            Row count above which a random subsample is analysed instead of the full
+            dataset. Datasets at or below this size are always analysed in full. Raise
+            it to analyse a large dataset completely at the cost of speed.
+
+    - name: sampleSize
+      title: 'Rows to analyse when subsampling'
+      type: Integer
+      default: 5000
+      min: 100
+      max: 1000000
+      description:
+          R: >
+            Number of rows retained when subsampling. Outliers among the rows that are
+            not sampled cannot be detected, so the reported count is a lower bound;
+            larger values recover more of them at the cost of speed.
+
     - name: seed
       title: Random seed
       type: Integer
@@ -198,5 +231,5 @@ options:
       description:
           R: >
             Random seed used for the reproducible random subsample that is drawn when
-            the dataset is large (more than 10000 rows). Change this value to draw a
+            the dataset exceeds the subsampling threshold. Change this value to draw a
             different sample; the default of 123 reproduces the previous fixed behaviour.

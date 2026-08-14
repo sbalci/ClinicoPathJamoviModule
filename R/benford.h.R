@@ -21,7 +21,8 @@ benfordOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 suggested=list(
                     "continuous"),
                 permitted=list(
-                    "numeric"))
+                    "numeric"),
+                default=NULL)
             private$..digits <- jmvcore::OptionInteger$new(
                 "digits",
                 digits,
@@ -67,7 +68,7 @@ benfordResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 options=options,
                 name="welcome",
                 title="Getting Started",
-                visible="(!var)",
+                visible=FALSE,
                 clearWith=list()))
             self$add(jmvcore::Html$new(
                 options=options,
@@ -197,7 +198,7 @@ benfordBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' @export
 benford <- function(
     data,
-    var,
+    var = NULL,
     digits = 2) {
 
     if ( ! requireNamespace("jmvcore", quietly=TRUE))

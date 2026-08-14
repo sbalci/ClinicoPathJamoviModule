@@ -17,6 +17,7 @@ options:
     - name: var
       title: Variable to categorize
       type: Variable
+      default: NULL
       suggested:
         - continuous
       permitted:
@@ -138,6 +139,23 @@ options:
             Add the new categorized variable directly to the dataset.
           jamovi: >
             Add the new categorized variable directly to the dataset.
+
+    - name: excludeoutofrange
+      title: Exclude values outside the break points
+      type: Bool
+      default: false
+      description:
+          R: >
+            Applies to the 'manual' method only. By default the break points are
+            extended to the data minimum and maximum, so every observation falls in
+            a category and no case is lost. Set this to TRUE to keep the break
+            points exactly as entered and drop observations that fall outside them;
+            the number excluded is reported. Has no effect on the computed methods,
+            whose break points already span the data.
+          jamovi: >
+            Manual breaks only. Keep the break points exactly as entered and drop
+            values outside them, instead of extending the outer breaks to cover the
+            data.
 
     - name: includelowest
       title: Lowest value in first bin

@@ -450,6 +450,27 @@ vartreeClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 "The variable tree could not be generated: ", conditionMessage(e),
                 ". Try selecting fewer variables, or adjusting the pruning / follow options.")))
 
+            # Pruning removes nodes from the tree without saying so, which leaves
+            # branch counts not summing to their parent. Report exactly what went.
+            if (isTRUE(useprunesmaller) && !is.null(xprunesmaller)) {
+                pruned <- private$.prunedByThreshold(mydata, myvars1, xprunesmaller)
+                if (pruned$nodes > 0) {
+                    shown <- pruned$labels
+                    if (length(shown) > 8)
+                        shown <- c(shown[seq_len(8)],
+                                   sprintf("... and %d more", length(shown) - 8))
+                    private$.addNotice(
+                        "WARNING",
+                        "Branches hidden by the minimum-size setting",
+                        paste0(
+                            sprintf("%d node(s) holding %d case(s) are not shown, because 'Prune nodes smaller than' is set to %d.",
+                                    pruned$nodes, pruned$cases, xprunesmaller),
+                            "\nCounts within a branch will therefore not add up to the count above it.",
+                            "\nHidden: ", paste(shown, collapse = "; "),
+                            "\nTurn the setting off to see every branch."))
+                }
+            }
+
             # export as svg ----
             results1 <- tryCatch(
                 DiagrammeRsvg::export_svg(gv = results),
@@ -572,6 +593,59 @@ vartreeClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         # round-tripped it through a runtime evaluator; that made attacker-supplied
         # factor labels (level1/level2) a path to arbitrary R code execution. Build
         # the list as a native R object instead.
+        # Which nodes does vtree's `prunesmaller` remove, and how many cases go
+        # with them?
+        #
+        # vtree drops any node whose count is below the threshold, and a dropped
+        # node takes its descendants with it. A node at depth d is a combination
+        # of the first d variables, so walking depths 1..k and skipping anything
+        # already inside a pruned ancestor reproduces the rule exactly.
+        #
+        # This is needed because pruning is otherwise invisible: with a threshold
+        # of 5 a tree showed root 60 and branches 40 + 17, the 3 remaining cases
+        # having disappeared with no indication. vtree does say "No nodes were
+        # smaller than N" - but to the R console, which a jamovi user never sees.
+        .prunedByThreshold = function(data, vars, threshold) {
+            empty <- list(nodes = 0L, cases = 0L, labels = character(0))
+            if (is.null(threshold) || !is.finite(threshold) || threshold <= 0)
+                return(empty)
+            vars <- vars[vars %in% names(data)]
+            if (length(vars) == 0) return(empty)
+
+            pruned_prefixes <- list()   # ancestors already removed
+            n_nodes <- 0L
+            n_cases <- 0L
+            labels <- character(0)
+
+            for (d in seq_along(vars)) {
+                tab <- table(data[, vars[seq_len(d)], drop = FALSE], useNA = "ifany")
+                idx <- which(tab > 0, arr.ind = TRUE)
+                if (length(idx) == 0) next
+                if (is.null(dim(idx))) idx <- matrix(idx, ncol = 1)
+
+                dn <- dimnames(tab)
+                for (r in seq_len(nrow(idx))) {
+                    combo <- vapply(seq_len(d), function(j) dn[[j]][idx[r, j]], character(1))
+                    key <- paste(combo, collapse = "\r")
+                    count <- tab[matrix(idx[r, ], nrow = 1)]
+
+                    # inside an already-pruned ancestor? then it is not counted again
+                    inside <- any(vapply(pruned_prefixes, function(pp)
+                        length(pp) <= d && identical(pp, combo[seq_along(pp)]), logical(1)))
+                    if (inside) next
+
+                    if (count < threshold) {
+                        pruned_prefixes[[length(pruned_prefixes) + 1]] <- combo
+                        n_nodes <- n_nodes + 1L
+                        n_cases <- n_cases + as.integer(count)
+                        labels <- c(labels, sprintf("%s (n=%d)",
+                                                    paste(combo, collapse = " > "), count))
+                    }
+                }
+            }
+            list(nodes = n_nodes, cases = n_cases, labels = labels)
+        },
+
         .buildConditionalOption = function(variable, level1, level2) {
             if (is.null(variable)) {
                 return(NULL)

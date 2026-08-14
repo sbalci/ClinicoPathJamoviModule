@@ -70,6 +70,18 @@ children:
         margin: large
         children:
           - type: TextBox
+            name: sampleThreshold
+            format: number
+      - type: LayoutBox
+        margin: large
+        children:
+          - type: TextBox
+            name: sampleSize
+            format: number
+      - type: LayoutBox
+        margin: large
+        children:
+          - type: TextBox
             name: seed
             format: number
 

@@ -55,7 +55,9 @@ test_that("skewness warning triggers for standard methods on skewed data", {
     
     warnings_html <- analysis$results$warnings$content
     expect_true(grepl("highly skewed", warnings_html))
-    expect_true(grepl("Consider using Robust Z-score", warnings_html))
+    # the backend's wording is "Consider Robust Z-score." - assert on the part
+    # that carries the meaning rather than on an exact phrasing
+    expect_true(grepl("Robust Z-score", warnings_html))
 })
 
 test_that("composite method comparison table generates", {

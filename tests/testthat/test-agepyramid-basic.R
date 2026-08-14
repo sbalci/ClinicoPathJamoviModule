@@ -34,28 +34,37 @@ test_that("agepyramid handles required arguments", {
   expect_no_error(result)
 })
 
-test_that("agepyramid errors on missing required arguments", {
-  # Missing age variable
-  expect_error(
-    agepyramid(
-      data = agepyramid_test,
-      gender = "gender",
-      female = "Female",
-      male = "Male"
-    ),
-    regexp = "age.*missing",
-    ignore.case = TRUE
+test_that("agepyramid handles omitted variables and required Level arguments", {
+  # `age` carries default: NULL, so omitting it is a SUPPORTED state: .run()
+  # shows the Getting Started panel rather than throwing. expect_error() here
+  # asserted the opposite of the intended behaviour.
+  res <- agepyramid(
+    data = agepyramid_test,
+    gender = "gender",
+    female = "Female",
+    male = "Male"
   )
+  expect_s3_class(res, "agepyramidResults")
+  expect_true(res$welcome$visible)
+  expect_match(as.character(res$welcome$content), "Age Pyramid Analysis")
+  # and nothing was tabulated
+  expect_equal(nrow(res$pyramidTable$asDF), 0L)
 
-  # Missing gender variable
+  # Same for gender: default: NULL, so the welcome panel is the intended result.
+  res2 <- agepyramid(
+    data = agepyramid_test,
+    age = "age",
+    female = "Female",
+    male = "Male"
+  )
+  expect_true(res2$welcome$visible)
+  expect_equal(nrow(res2$pyramidTable$asDF), 0L)
+
+  # `female` and `male` are type: Level, which the compiler forbids a default on,
+  # so they ARE required arguments of the wrapper - that is what genuinely errors.
   expect_error(
-    agepyramid(
-      data = agepyramid_test,
-      age = "age",
-      female = "Female",
-      male = "Male"
-    ),
-    regexp = "gender.*missing",
+    agepyramid(data = agepyramid_test, age = "age", gender = "gender", male = "Male"),
+    "female",
     ignore.case = TRUE
   )
 })

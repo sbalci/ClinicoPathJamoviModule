@@ -6,7 +6,7 @@
 \usage{
 checkdata(
   data,
-  var,
+  var = NULL,
   showOutliers = TRUE,
   showDistribution = FALSE,
   showDuplicates = FALSE,
@@ -27,8 +27,10 @@ checkdata(
 
 \item{var}{.}
 
-\item{showOutliers}{Detect and display potential outliers using z-score
-method (|z| > 3).}
+\item{showOutliers}{Detect potential outliers using three methods - z-score
+(|z| > 3), the IQR fence (1.5 x IQR), and the modified Z-score (|M| > 3.5,
+MAD-based) - and report points flagged by at least two of them. Below n =
+10 single-method flags are shown and labelled informative-only.}
 
 \item{showDistribution}{Display descriptive statistics and distribution
 characteristics.}
@@ -50,8 +52,11 @@ attempts to infer from data ranges.}
 \item{outlierTransform}{Apply transformation before outlier detection to
 handle skewed distributions (especially right-skewed lab values).}
 
-\item{mcarTest}{Perform Little's MCAR test if available (requires naniar
-package). Provides formal test vs. heuristic assessment.}
+\item{mcarTest}{Explain whether the missingness mechanism can be tested
+formally for this variable. Little's MCAR test is multivariate and cannot
+be computed from a single variable, so this analysis reports heuristics
+about where the missing values sit rather than a test of the mechanism;
+enable this to state that limitation explicitly in the output.}
 
 \item{cvMinMean}{Suppress coefficient of variation when absolute mean is
 below this threshold (avoids instability).}

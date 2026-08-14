@@ -62,47 +62,31 @@ test_that("venn works", {
   expect_true(inherits(result4, "vennResults"))
 })
 
-test_that("venn requires minimum variables", {
-  
-  # Test error handling when insufficient variables provided
-  expect_error(venn(data = mtcars,
-                 var3 = NULL,
-                 var3true = NULL,
-                 var4 = NULL,
-                 var4true = NULL,
-                 var5 = NULL,
-                 var5true = NULL,
-                 var6 = NULL,
-                 var6true = NULL,
-                 var7 = NULL,
-                 var7true = NULL,
-                 var1true = NULL,
-                 var2true = NULL))
-  expect_error(venn(data = mtcars, var1 = "vs",
-                 var3 = NULL,
-                 var3true = NULL,
-                 var4 = NULL,
-                 var4true = NULL,
-                 var5 = NULL,
-                 var5true = NULL,
-                 var6 = NULL,
-                 var6true = NULL,
-                 var7 = NULL,
-                 var7true = NULL,
-                 var1true = NULL,
-                 var2true = NULL))
-  expect_error(venn(data = mtcars, var1 = "vs", var1true = "1",
-                 var3 = NULL,
-                 var3true = NULL,
-                 var4 = NULL,
-                 var4true = NULL,
-                 var5 = NULL,
-                 var5true = NULL,
-                 var6 = NULL,
-                 var6true = NULL,
-                 var7 = NULL,
-                 var7true = NULL,
-                 var2true = NULL))
+test_that("venn requires two variables before it analyses anything", {
+  nullargs <- list(var3 = NULL, var3true = NULL, var4 = NULL, var4true = NULL,
+                   var5 = NULL, var5true = NULL, var6 = NULL, var6true = NULL,
+                   var7 = NULL, var7true = NULL)
+
+  # No variables at all: jmvcore's select() builds a zero-column frame from an
+  # empty variable list and fails in row.names<- before .run() is entered - a
+  # jmvcore-level limitation shared by every analysis in the module.
+  expect_error(
+    do.call(venn, c(list(data = mtcars, var1true = NULL, var2true = NULL), nullargs)),
+    "row.names")
+
+  # One variable only: a Venn diagram needs at least two sets, so the analysis
+  # shows its Getting Started panel rather than throwing. expect_error() here
+  # asserted the opposite of the intended behaviour.
+  d <- data.frame(vs = factor(mtcars$vs), am = factor(mtcars$am))
+  res1 <- do.call(venn, c(list(data = d, var1 = "vs", var1true = "1",
+                               var2true = NULL), nullargs))
+  expect_s3_class(res1, "vennResults")
+  expect_equal(nrow(res1$summary$asDF), 0L)
+
+  # Two variables: now it analyses.
+  res2 <- do.call(venn, c(list(data = d, var1 = "vs", var1true = "1",
+                               var2 = "am", var2true = "1"), nullargs))
+  expect_equal(nrow(res2$summary$asDF), 2L)
 })
 
 test_that("venn handles factor conversion", {

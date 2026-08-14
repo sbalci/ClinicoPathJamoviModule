@@ -152,6 +152,24 @@ chisqposttestClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             return(interpretation_matrix)
         },
 
+        # chisq.test() emits "Chi-squared approximation may be incorrect" whenever
+        # an expected count is small. The analysis already reports that condition
+        # properly in its Assumptions panel - with the exact number of cells below
+        # 5 and below 1, and the recommendation to use Fisher's exact test - so the
+        # raw warning is redundant: a jamovi GUI user never sees it, and an R-API
+        # caller just gets noise on stderr.
+        #
+        # Only THAT message is muffled; any other warning still propagates, so a
+        # genuinely unexpected condition is not hidden.
+        .chisqQuiet = function(...) {
+            withCallingHandlers(
+                stats::chisq.test(...),
+                warning = function(w) {
+                    if (grepl("Chi-squared approximation", conditionMessage(w), fixed = TRUE))
+                        invokeRestart("muffleWarning")
+                })
+        },
+
         .pairwiseComparisonCount = function(contingency_table) {
             dimensions <- dim(contingency_table)
             sum(vapply(dimensions, function(n) {
@@ -190,7 +208,7 @@ chisqposttestClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                         # Perform statistical tests based on user selection
                         test_result <- try({
                             # Always compute chi-square for effect size
-                            chi_test <- stats::chisq.test(subtable, correct = FALSE)
+                            chi_test <- private$.chisqQuiet(subtable, correct = FALSE)
                             expected_counts <- chi_test$expected
                             
                             # Determine which tests to run based on test_selection
@@ -252,7 +270,7 @@ chisqposttestClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                         # Perform statistical tests based on user selection
                         test_result <- try({
                             # Always compute chi-square for effect size
-                            chi_test <- stats::chisq.test(subtable, correct = FALSE)
+                            chi_test <- private$.chisqQuiet(subtable, correct = FALSE)
                             expected_counts <- chi_test$expected
                             
                             # Determine which tests to run based on test_selection
@@ -399,7 +417,7 @@ chisqposttestClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     # Perform statistical tests
                     test_result <- try({
                         # Always compute chi-square for effect size
-                        chi_test <- stats::chisq.test(subtable, correct = FALSE)
+                        chi_test <- private$.chisqQuiet(subtable, correct = FALSE)
                         expected_counts <- chi_test$expected
                         
                         # Determine which tests to run based on test_selection
@@ -1142,7 +1160,7 @@ chisqposttestClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 if (any(dim(tab) < 2)) return(0)
                 
                 # Chi-square with no correction for Phi calculation
-                chi <- try(stats::chisq.test(tab, correct = FALSE), silent = TRUE)
+                chi <- try(private$.chisqQuiet(tab, correct = FALSE), silent = TRUE)
                 if (inherits(chi, "try-error")) return(0)
                 
                 return(sqrt(chi$statistic / sum(tab)))
@@ -1155,6 +1173,29 @@ chisqposttestClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             counts <- as.vector(subtable)
             df <- cases[rep(seq_len(nrow(cases)), counts), ]
             
+            # Seed the bootstrap.
+            #
+            # Without this the interval moved on every run of the SAME analysis on
+            # the SAME data - measured [0.251, 0.573], [0.261, 0.578],
+            # [0.260, 0.580] across three consecutive runs. In jamovi any option
+            # toggle re-runs the analysis, so a clinician could copy an interval
+            # into a manuscript and find it had changed by the time they looked
+            # again. A resampling-based interval has to be reproducible to be
+            # reportable.
+            #
+            # The global RNG state is saved and restored so seeding here does not
+            # perturb anything else in the user's session.
+            if (exists(".Random.seed", envir = .GlobalEnv)) {
+                .old_seed <- get(".Random.seed", envir = .GlobalEnv)
+                on.exit(assign(".Random.seed", .old_seed, envir = .GlobalEnv), add = TRUE)
+            } else {
+                on.exit(
+                    if (exists(".Random.seed", envir = .GlobalEnv))
+                        rm(".Random.seed", envir = .GlobalEnv),
+                    add = TRUE)
+            }
+            set.seed(42)
+
             # Run bootstrap
             boot_res <- try(boot::boot(data = df, statistic = phi_fun, R = n_boot), silent = TRUE)
             if (inherits(boot_res, "try-error")) return(NA)
@@ -1331,7 +1372,7 @@ chisqposttestClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
             # Perform Chi-Square Test (wrapped: pathological but non-empty tables can still error) ----
             chiSqTest <- tryCatch(
-                stats::chisq.test(contTable, correct = FALSE),
+                private$.chisqQuiet(contTable, correct = FALSE),
                 error = function(e) jmvcore::reject(paste0("The chi-square test could not be computed: ", conditionMessage(e), ". Check that both variables are categorical with valid, nonnegative counts.")))
 
             # Add chi-square results to the table ----
@@ -1483,6 +1524,13 @@ chisqposttestClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         .handlePostHocTesting = function(chiSqTest, contTable, rows = NULL, cols = NULL, pairwise_results = NULL) {
             # CRITICAL FIX: Check if user wants to disable post-hoc tests entirely
             # When posthoc = "none", skip all pairwise testing
+            #
+            # NOTE (release review): "None" here means "run no pairwise tests",
+            # not "run them without adjustment". That is a deliberate, documented
+            # choice - the message below states it - and it produces no wrong
+            # numbers, so it was left as is. Enabling unadjusted comparisons would
+            # be a one-line change (p.adjust(p, "none") returns p unchanged) but is
+            # a design decision, not a defect fix.
             if (self$options$posthoc == "none") {
                 # Use HTML message only (no Notice object to avoid serialization errors)
                 message_text <- paste0(
@@ -1999,7 +2047,7 @@ chisqposttestClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 return(FALSE)
 
             # Chi-square -> residuals
-            chiSqTest <- try(stats::chisq.test(contTable, correct = FALSE), silent = TRUE)
+            chiSqTest <- try(private$.chisqQuiet(contTable, correct = FALSE), silent = TRUE)
             if (inherits(chiSqTest, "try-error"))
                 return(FALSE)
             resids <- chiSqTest$residuals
