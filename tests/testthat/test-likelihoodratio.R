@@ -119,3 +119,47 @@ test_that("likelihoodratio returns results object", {
   
   expect_true(inherits(results, "likelihoodratioResults"))
 })
+
+# --- An unusable manual cutpoint must stop the analysis with guidance ---------
+# `manualCutpoint` is a Number. Before the fix it carried no `default:`, so it
+# arrived as NULL and jamovi threw "missing value where TRUE/FALSE needed" while
+# comparing it for clearWith - BEFORE any backend code ran, and for EVERY
+# cutpoint method including the default Youden, which never reads it. With a
+# numeric default in place the remaining failure mode is a cutpoint that cannot
+# split the data: every case lands on one side, the 2x2 table collapses and
+# contingency[2,1] threw "subscript out of bounds".
+lr_txt <- function(x) gsub("[[:space:]]+", " ", gsub("<[^>]*>", " ", as.character(x)))
+
+lr_fit <- function(cutpointMethod, manualCutpoint) {
+    set.seed(3)
+    d <- data.frame(
+        marker = c(stats::rnorm(30, 5), stats::rnorm(30, 8)),
+        gold   = factor(rep(c("neg", "pos"), each = 30))
+    )
+    likelihoodratio(data = d, testVariable = "marker", referenceStandard = "gold",
+                    groupVariable = NULL, compareVariable = NULL,
+                    analysisType = "continuous",
+                    cutpointMethod = cutpointMethod, manualCutpoint = manualCutpoint)
+}
+
+test_that("a manual cutpoint outside the data range is refused, not crashed on", {
+    # marker spans roughly 3.3 to 9.7; 0 and 99 both put every case on one side.
+    for (bad in c(0, 99)) {
+        res <- expect_no_error(lr_fit("manual", bad))
+        msg <- lr_txt(res$instructions$content)
+        expect_match(msg, "Enter a cutpoint inside the range")
+        expect_match(msg, "puts every case on one side")
+        # the message must name the usable range so the user can act on it
+        expect_match(msg, "ranges from")
+    }
+})
+
+test_that("a usable manual cutpoint still analyses normally", {
+    res <- lr_fit("manual", 6.5)
+    expect_no_match(lr_txt(res$instructions$content), "Enter a cutpoint inside the range")
+})
+
+test_that("estimated cutpoint methods are unaffected by manualCutpoint", {
+    res <- lr_fit("youden", 0)
+    expect_no_match(lr_txt(res$instructions$content), "Enter a cutpoint inside the range")
+})

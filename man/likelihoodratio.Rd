@@ -12,7 +12,7 @@ likelihoodratio(
   analysisType = "binary",
   testDirection = "higher",
   cutpointMethod = "youden",
-  manualCutpoint,
+  manualCutpoint = 0,
   costRatio = 1,
   confidenceLevel = 0.95,
   ciMethod = "log",

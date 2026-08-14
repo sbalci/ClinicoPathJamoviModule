@@ -275,6 +275,7 @@ agepyramidResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "female",
                     "male",
                     "age_groups",
+                    "age_interval",
                     "bin_width",
                     "custom_breaks")))
             self$add(jmvcore::Image$new(
@@ -291,6 +292,7 @@ agepyramidResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "female",
                     "male",
                     "age_groups",
+                    "age_interval",
                     "bin_width",
                     "custom_breaks",
                     "plot_title",
@@ -313,6 +315,7 @@ agepyramidResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "female",
                     "male",
                     "age_groups",
+                    "age_interval",
                     "bin_width",
                     "custom_breaks",
                     "ggcharts_sort",

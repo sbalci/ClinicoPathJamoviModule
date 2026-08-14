@@ -31,6 +31,7 @@ categorizeOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             private$..var <- jmvcore::OptionVariable$new(
                 "var",
                 var,
+                default=NULL,
                 suggested=list(
                     "continuous"),
                 permitted=list(
@@ -398,7 +399,7 @@ categorizeBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' @export
 categorize <- function(
     data,
-    var,
+    var = NULL,
     method = "quantile",
     nbins = 4,
     breaks = "",

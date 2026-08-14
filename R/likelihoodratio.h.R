@@ -12,7 +12,7 @@ likelihoodratioOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
             analysisType = "binary",
             testDirection = "higher",
             cutpointMethod = "youden",
-            manualCutpoint = NULL,
+            manualCutpoint = 0,
             costRatio = 1,
             confidenceLevel = 0.95,
             ciMethod = "log",
@@ -103,7 +103,8 @@ likelihoodratioOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
                 default="youden")
             private$..manualCutpoint <- jmvcore::OptionNumber$new(
                 "manualCutpoint",
-                manualCutpoint)
+                manualCutpoint,
+                default=0)
             private$..costRatio <- jmvcore::OptionNumber$new(
                 "costRatio",
                 costRatio,
@@ -867,7 +868,7 @@ likelihoodratio <- function(
     analysisType = "binary",
     testDirection = "higher",
     cutpointMethod = "youden",
-    manualCutpoint,
+    manualCutpoint = 0,
     costRatio = 1,
     confidenceLevel = 0.95,
     ciMethod = "log",

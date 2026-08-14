@@ -2992,28 +2992,35 @@ out-of-scope findings from the same audit, deferred for separate work.
 - Reference: `test-decision.R` already provides utility-function unit tests +
   integration tests against the `histopathology` example dataset.
 
-### [correctness] likelihoodratio: `manualCutpoint` is a defaultless Number
+### [correctness] likelihoodratio: `manualCutpoint` unusable value - DONE (2026-08-14)
 
-Found 2026-08-14 by the post-regeneration sweep; structurally verified.
+Fixed. Root cause was worse than the sweep predicted: it crashed for EVERY
+cutpoint method, not just `manual`.
 
-- `jamovi/likelihoodratio.a.yaml` declares `manualCutpoint` as `type: Number`
-  with NO `default:`. Per the option-type contract a Number must carry a real
-  numeric default - it is one of the types that can never be NULL.
-- Two consequences, both real:
-  1. R API: it compiles to a BARE required wrapper argument
-     (`R/likelihoodratio.h.R:9`), so every programmatic call must pass it even
-     though `cutpointMethod` defaults to `youden` and never reads it.
-  2. Runtime: it arrives as NULL. `R/likelihoodratio.b.R:278` returns
-     `list(value = self$options$manualCutpoint, ...)` with no `%||%` or
-     is.null guard, so selecting `cutpointMethod = "manual"` with an empty box
-     yields `value = NULL`; the downstream `testVar >= NULL` gives `logical(0)`,
-     the 2x2 table comes back empty and indexing it throws
-     "subscript out of bounds".
-- NOT fixed here because the right default is a clinical decision, not a
-  mechanical one - there is no universal likelihood-ratio cutpoint. Options:
-  give it a neutral numeric default plus a backend guard that rejects an unset
-  manual cutpoint with an actionable message, or make the manual branch fall
-  back to the Youden cutpoint and say so in a notice.
+- `manualCutpoint` was `type: Number` with NO `default:`, so it arrived as NULL.
+  jamovi then threw `missing value where TRUE/FALSE needed` while comparing it
+  for `clearWith` (it is listed in `likelihoodratio.r.yaml:20`) - **before any
+  backend code ran**, and including under the default `youden` method, which
+  never reads the value. Verified: `manualCutpoint = NULL` and `= NA_real_` both
+  crash under `manual` AND `youden`; any real number works.
+  Note `jmvcore::OptionNumber$new("x", NULL, default = 0)` still yields NULL, so
+  a declared default fixes the GUI and omitted-argument paths but not a caller
+  who passes NULL explicitly.
+- Fix 1 - `jamovi/likelihoodratio.a.yaml`: `default: 0` on `manualCutpoint`, as
+  the Number contract requires.
+- Fix 2 - `R/likelihoodratio.b.R`: a default of 0 would then crash differently,
+  because a cutpoint outside the data range puts every case on one side, the
+  2x2 table collapses and `contingency[2,1]` threw `subscript out of bounds`
+  (reproduced). The backend now builds the table over fixed `factor(levels =
+  c(0,1))`, and when the split is degenerate it refuses to run and tells the
+  user to enter a cutpoint inside the observed range - naming that range - or to
+  pick an estimated method. A second guard rejects a non-finite cutpoint from
+  any method.
+- Regression cover in `tests/testthat/test-likelihoodratio.R` (12 pass). Proven
+  to fail against the pre-fix code with `subscript out of bounds`.
+- Still open, deliberately: the `.a.yaml` change needs `jmvtools::prepare()` +
+  `devtools::document()` to reach the wrapper. Until then `manualCutpoint`
+  remains a bare required argument.
 
 ### [jamovi/yaml] 220 further defaultless Variable/Variables options (module-wide)
 

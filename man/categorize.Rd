@@ -6,7 +6,7 @@
 \usage{
 categorize(
   data,
-  var,
+  var = NULL,
   method = "quantile",
   nbins = 4,
   breaks = "",

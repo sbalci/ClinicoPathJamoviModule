@@ -53,6 +53,7 @@ vartreeOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             private$..percvar <- jmvcore::OptionVariable$new(
                 "percvar",
                 percvar,
+                default=NULL,
                 suggested=list(
                     "ordinal",
                     "nominal"),
@@ -65,6 +66,7 @@ vartreeOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             private$..summaryvar <- jmvcore::OptionVariable$new(
                 "summaryvar",
                 summaryvar,
+                default=NULL,
                 suggested=list(
                     "continuous"),
                 permitted=list(
@@ -87,6 +89,7 @@ vartreeOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             private$..prunebelow <- jmvcore::OptionVariable$new(
                 "prunebelow",
                 prunebelow,
+                default=NULL,
                 suggested=list(
                     "ordinal",
                     "nominal"),
@@ -105,6 +108,7 @@ vartreeOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             private$..follow <- jmvcore::OptionVariable$new(
                 "follow",
                 follow,
+                default=NULL,
                 suggested=list(
                     "ordinal",
                     "nominal"),
@@ -491,15 +495,15 @@ vartreeBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 vartree <- function(
     data,
     vars,
-    percvar,
+    percvar = NULL,
     percvarLevel,
-    summaryvar,
+    summaryvar = NULL,
     summarylocation = "leafonly",
     style = "default",
-    prunebelow,
+    prunebelow = NULL,
     pruneLevel1,
     pruneLevel2,
-    follow,
+    follow = NULL,
     followLevel1,
     followLevel2,
     excl = FALSE,

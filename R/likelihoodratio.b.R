@@ -184,8 +184,29 @@ likelihoodratioClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cla
                 testVar_binary <- ifelse(testVar <= cutpoint$value, 1, 0)
             }
             
-            # Create 2x2 table and calculate measures
-            contingency <- table(testVar_binary, refStd)
+            # A cutpoint outside the observed range of the test variable puts every
+            # case on one side, so the 2x2 table collapses to a single row or column
+            # and contingency[2,1] throws "subscript out of bounds". Stop and say what
+            # to do instead of crashing - this is the state a user lands in whenever
+            # the manual cutpoint is still at its default and has not been set for
+            # this particular marker.
+            contingency <- table(factor(testVar_binary, levels = c(0, 1)),
+                                 factor(refStd, levels = c(0, 1)))
+            if (length(unique(testVar_binary)) < 2) {
+                rng <- range(testVar, na.rm = TRUE)
+                self$results$instructions$setContent(paste0(
+                    "<p><b>Enter a cutpoint inside the range of your test variable.</b></p>",
+                    "<p>The cutpoint <b>", format(cut_value), "</b> puts every case on ",
+                    "one side of the split, so sensitivity and specificity cannot both ",
+                    "be estimated.</p>",
+                    "<p><i>", htmltools::htmlEscape(self$options$testVariable), "</i> ",
+                    "ranges from <b>", format(rng[1], digits = 4), "</b> to <b>",
+                    format(rng[2], digits = 4), "</b> - choose a cutpoint between those ",
+                    "values, or pick an estimated cutpoint method (Youden index, ",
+                    "cost-weighted, ROC01, concordance) to have one derived from the ",
+                    "data.</p>"))
+                return()
+            }
             tn <- contingency[1,1]
             fp <- contingency[1,2]
             fn <- contingency[2,1]
