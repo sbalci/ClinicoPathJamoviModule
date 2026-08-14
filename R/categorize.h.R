@@ -330,7 +330,7 @@ categorizeBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             super$initialize(
                 package = "ClinicoPath",
                 name = "categorize",
-                version = c(1,0,52),
+                version = c(1,0,53),
                 options = options,
                 results = categorizeResults$new(options=options),
                 data = data,

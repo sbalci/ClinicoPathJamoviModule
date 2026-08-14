@@ -41,15 +41,15 @@
 # ==============================================
 
 
-new_version: "1.0.53.01"
-new_date: "2026-08-13"
+new_version: "1.0.6"
+new_date: "2026-08-15"
 quick: false
-TEST: false
+TEST: true
 jjstatsplot: true
-jsurvival: false
-ClinicoPathDescriptives: false
-OncoPath: false
-meddecide: false
+jsurvival: true
+ClinicoPathDescriptives: true
+OncoPath: true
+meddecide: true
 
 
 

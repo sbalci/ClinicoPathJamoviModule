@@ -837,7 +837,7 @@ decisioncompareBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
             super$initialize(
                 package = "ClinicoPath",
                 name = "decisioncompare",
-                version = c(1,0,52),
+                version = c(1,0,53),
                 options = options,
                 results = decisioncompareResults$new(options=options),
                 data = data,
