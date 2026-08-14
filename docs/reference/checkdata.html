@@ -7,7 +7,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">ClinicoPath</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.0.47</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.0.52</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -48,7 +48,7 @@
     <h2 id="ref-usage">Usage<a class="anchor" aria-label="anchor" href="#ref-usage"></a></h2>
     <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">checkdata</span><span class="op">(</span></span>
 <span>  <span class="va">data</span>,</span>
-<span>  <span class="va">var</span>,</span>
+<span>  var <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  showOutliers <span class="op">=</span> <span class="cn">TRUE</span>,</span>
 <span>  showDistribution <span class="op">=</span> <span class="cn">FALSE</span>,</span>
 <span>  showDuplicates <span class="op">=</span> <span class="cn">FALSE</span>,</span>
@@ -78,8 +78,10 @@
 
 
 <dt id="arg-showoutliers">showOutliers<a class="anchor" aria-label="anchor" href="#arg-showoutliers"></a></dt>
-<dd><p>Detect and display potential outliers using z-score
-method (|z| &gt; 3).</p></dd>
+<dd><p>Detect potential outliers using three methods - z-score
+(|z| &gt; 3), the IQR fence (1.5 x IQR), and the modified Z-score (|M| &gt; 3.5,
+MAD-based) - and report points flagged by at least two of them. Below n =
+10 single-method flags are shown and labelled informative-only.</p></dd>
 
 
 <dt id="arg-showdistribution">showDistribution<a class="anchor" aria-label="anchor" href="#arg-showdistribution"></a></dt>
@@ -117,8 +119,11 @@ handle skewed distributions (especially right-skewed lab values).</p></dd>
 
 
 <dt id="arg-mcartest">mcarTest<a class="anchor" aria-label="anchor" href="#arg-mcartest"></a></dt>
-<dd><p>Perform Little's MCAR test if available (requires naniar
-package). Provides formal test vs. heuristic assessment.</p></dd>
+<dd><p>Explain whether the missingness mechanism can be tested
+formally for this variable. Little's MCAR test is multivariate and cannot
+be computed from a single variable, so this analysis reports heuristics
+about where the missing values sit rather than a test of the mechanism;
+enable this to state that limitation explicitly in the output.</p></dd>
 
 
 <dt id="arg-cvminmean">cvMinMean<a class="anchor" aria-label="anchor" href="#arg-cvminmean"></a></dt>
@@ -143,7 +148,7 @@ quality assessment.</p></dd>
 </dl></div>
     <div class="section level2">
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
-    <p>A results object containing:</p><table class="table table"><tr><td><code>results$notices</code></td><td></td><td></td><td></td><td></td><td>a preformatted</td></tr><tr><td><code>results$todo</code></td><td></td><td></td><td></td><td></td><td>a html</td></tr><tr><td><code>results$qualityText</code></td><td></td><td></td><td></td><td></td><td>a preformatted</td></tr><tr><td><code>results$missingVals</code></td><td></td><td></td><td></td><td></td><td>a table</td></tr><tr><td><code>results$noOutliers</code></td><td></td><td></td><td></td><td></td><td>a html</td></tr><tr><td><code>results$outliers</code></td><td></td><td></td><td></td><td></td><td>Shows outliers detected by at least 2 of 3 methods: Z-score (|z|&gt;3), IQR (1.5×IQR rule), Modified Z-score (MAD-based |z|&gt;3.5). Points flagged by only 1 method are NOT shown.</td></tr><tr><td><code>results$outlierMethodSummary</code></td><td></td><td></td><td></td><td></td><td>Summary of each outlier detection method. These are heuristic approaches; consider skewness and sample size when interpreting.</td></tr><tr><td><code>results$distribution</code></td><td></td><td></td><td></td><td></td><td>a table</td></tr><tr><td><code>results$duplicates</code></td><td></td><td></td><td></td><td></td><td>a table</td></tr><tr><td><code>results$patterns</code></td><td></td><td></td><td></td><td></td><td>a table</td></tr><tr><td><code>results$naturalSummary</code></td><td></td><td></td><td></td><td></td><td>a html</td></tr><tr><td><code>results$aboutAnalysis</code></td><td></td><td></td><td></td><td></td><td>a html</td></tr><tr><td><code>results$caveatsAssumptions</code></td><td></td><td></td><td></td><td></td><td>a html</td></tr></table><p>Tables can be converted to data frames with <code>asDF</code> or <code><a href="https://rdrr.io/r/base/as.data.frame.html" class="external-link">as.data.frame</a></code>. For example:</p>
+    <p>A results object containing:</p><table class="table table"><tr><td><code>results$notices</code></td><td></td><td></td><td></td><td></td><td>a html</td></tr><tr><td><code>results$todo</code></td><td></td><td></td><td></td><td></td><td>a html</td></tr><tr><td><code>results$qualityText</code></td><td></td><td></td><td></td><td></td><td>a preformatted</td></tr><tr><td><code>results$missingVals</code></td><td></td><td></td><td></td><td></td><td>a table</td></tr><tr><td><code>results$noOutliers</code></td><td></td><td></td><td></td><td></td><td>a html</td></tr><tr><td><code>results$outliers</code></td><td></td><td></td><td></td><td></td><td>Shows outliers detected by at least 2 of 3 methods: Z-score (|z|&gt;3), IQR (1.5×IQR rule), Modified Z-score (MAD-based |z|&gt;3.5). Points flagged by only 1 method are NOT shown.</td></tr><tr><td><code>results$outlierMethodSummary</code></td><td></td><td></td><td></td><td></td><td>Summary of each outlier detection method. These are heuristic approaches; consider skewness and sample size when interpreting.</td></tr><tr><td><code>results$distribution</code></td><td></td><td></td><td></td><td></td><td>a table</td></tr><tr><td><code>results$duplicates</code></td><td></td><td></td><td></td><td></td><td>a table</td></tr><tr><td><code>results$patterns</code></td><td></td><td></td><td></td><td></td><td>a table</td></tr><tr><td><code>results$naturalSummary</code></td><td></td><td></td><td></td><td></td><td>a html</td></tr><tr><td><code>results$aboutAnalysis</code></td><td></td><td></td><td></td><td></td><td>a html</td></tr><tr><td><code>results$caveatsAssumptions</code></td><td></td><td></td><td></td><td></td><td>a html</td></tr></table><p>Tables can be converted to data frames with <code>asDF</code> or <code><a href="https://rdrr.io/r/base/as.data.frame.html" class="external-link">as.data.frame</a></code>. For example:</p>
 <p><code>results$missingVals$asDF</code></p>
 <p><code>as.data.frame(results$missingVals)</code></p>
     </div>
@@ -157,7 +162,7 @@ quality assessment.</p></dd>
 </div>
 
 <div class="pkgdown-footer-right">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.2.0.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.2.1.</p>
 </div>
 
     </footer></div>

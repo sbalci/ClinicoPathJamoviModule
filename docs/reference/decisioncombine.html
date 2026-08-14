@@ -17,7 +17,7 @@ specificity, PPV, NPV, and accuracy for each pattern combination."></head><body>
 
     <a class="navbar-brand me-2" href="../index.html">ClinicoPath</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.0.47</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.0.52</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -63,11 +63,11 @@ specificity, PPV, NPV, and accuracy for each pattern combination.</p>
     <h2 id="ref-usage">Usage<a class="anchor" aria-label="anchor" href="#ref-usage"></a></h2>
     <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">decisioncombine</span><span class="op">(</span></span>
 <span>  <span class="va">data</span>,</span>
-<span>  <span class="va">gold</span>,</span>
+<span>  gold <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  <span class="va">goldPositive</span>,</span>
-<span>  <span class="va">test1</span>,</span>
+<span>  test1 <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  <span class="va">test1Positive</span>,</span>
-<span>  <span class="va">test2</span>,</span>
+<span>  test2 <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  <span class="va">test2Positive</span>,</span>
 <span>  test3 <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  <span class="va">test3Positive</span>,</span>
@@ -148,7 +148,8 @@ analysis.</p></dd>
 
 
 <dt id="arg-showdecisiontree">showDecisionTree<a class="anchor" aria-label="anchor" href="#arg-showdecisiontree"></a></dt>
-<dd><p>Boolean to display decision tree visualization.</p></dd>
+<dd><p>Boolean to display the decision-space (sensitivity
+vs specificity) scatter plot.</p></dd>
 
 
 <dt id="arg-showrecommendation">showRecommendation<a class="anchor" aria-label="anchor" href="#arg-showrecommendation"></a></dt>
@@ -161,18 +162,18 @@ table.</p></dd>
 
 
 <dt id="arg-filterstatistic">filterStatistic<a class="anchor" aria-label="anchor" href="#arg-filterstatistic"></a></dt>
-<dd><p>Character indicating which statistic to display
-(default: all).</p></dd>
+<dd><p>Character indicating which statistic to display in
+the plots (default: all).</p></dd>
 
 
 <dt id="arg-filterpattern">filterPattern<a class="anchor" aria-label="anchor" href="#arg-filterpattern"></a></dt>
-<dd><p>Character indicating which pattern type to display
-(default: all).</p></dd>
+<dd><p>Character indicating which pattern type to display in
+the plots (default: all).</p></dd>
 
 </dl></div>
     <div class="section level2">
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
-    <p>A results object containing:</p><table class="table table"><tr><td><code>results$combinationTable</code></td><td></td><td></td><td></td><td></td><td>Counts and diagnostic performance metrics for each test combination pattern and clinical strategy, including prevalence, balanced accuracy, Youden's J, likelihood ratios, and diagnostic odds ratios</td></tr><tr><td><code>results$combinationTableCI</code></td><td></td><td></td><td></td><td></td><td>95 percent confidence intervals for diagnostic metrics. Wilson intervals are used for proportions, and log-scale intervals for likelihood ratios and diagnostic odds ratios.</td></tr><tr><td><code>results$goldFreqTable</code></td><td></td><td></td><td></td><td></td><td>Frequency distribution of the gold standard (reference) test showing counts and percentages for each level</td></tr><tr><td><code>results$crossTabTable</code></td><td></td><td></td><td></td><td></td><td>Cross-tabulation showing how test combination patterns align with gold standard results</td></tr><tr><td><code>results$individualTest1$test1Contingency</code></td><td></td><td></td><td></td><td></td><td>a table</td></tr><tr><td><code>results$individualTest1$test1Stats</code></td><td></td><td></td><td></td><td></td><td>a table</td></tr><tr><td><code>results$individualTest2$test2Contingency</code></td><td></td><td></td><td></td><td></td><td>a table</td></tr><tr><td><code>results$individualTest2$test2Stats</code></td><td></td><td></td><td></td><td></td><td>a table</td></tr><tr><td><code>results$individualTest3$test3Contingency</code></td><td></td><td></td><td></td><td></td><td>a table</td></tr><tr><td><code>results$individualTest3$test3Stats</code></td><td></td><td></td><td></td><td></td><td>a table</td></tr><tr><td><code>results$barPlot</code></td><td></td><td></td><td></td><td></td><td>Grouped bar chart comparing sensitivity, specificity, PPV, NPV, and accuracy across test combinations</td></tr><tr><td><code>results$heatmapPlot</code></td><td></td><td></td><td></td><td></td><td>Color-coded heatmap showing all diagnostic metrics for each test pattern</td></tr><tr><td><code>results$forestPlot</code></td><td></td><td></td><td></td><td></td><td>Forest plot displaying 95 percent confidence intervals for key diagnostic metrics</td></tr><tr><td><code>results$decisionTreePlot</code></td><td></td><td></td><td></td><td></td><td>Hierarchical decision tree showing test patterns with performance-based recommendations</td></tr><tr><td><code>results$recommendationTable</code></td><td></td><td></td><td></td><td></td><td>Recommended optimal test combination pattern based on Youden index and clinical performance metrics</td></tr><tr><td><code>results$notices</code></td><td></td><td></td><td></td><td></td><td>a html</td></tr></table><p>Tables can be converted to data frames with <code>asDF</code> or <code><a href="https://rdrr.io/r/base/as.data.frame.html" class="external-link">as.data.frame</a></code>. For example:</p>
+    <p>A results object containing:</p><table class="table table"><tr><td><code>results$combinationTable</code></td><td></td><td></td><td></td><td></td><td>Counts and diagnostic performance metrics for each test combination pattern and clinical strategy, including prevalence, balanced accuracy, Youden's J, likelihood ratios, and diagnostic odds ratios</td></tr><tr><td><code>results$combinationTableCI</code></td><td></td><td></td><td></td><td></td><td>Wilson score 95 percent confidence intervals for sensitivity, specificity, PPV, NPV and accuracy, shown as percentages to match the combination table above. Likelihood ratios and the diagnostic odds ratio are unbounded ratios rather than proportions, so they appear in their own table below.</td></tr><tr><td><code>results$combinationTableCIRatios</code></td><td></td><td></td><td></td><td></td><td>Log-scale 95 percent confidence intervals for LR+, LR- and the diagnostic odds ratio. These are ratios on an unbounded scale, so they are reported separately from the proportions above rather than sharing a column with them.</td></tr><tr><td><code>results$goldFreqTable</code></td><td></td><td></td><td></td><td></td><td>Frequency distribution of the gold standard (reference) test showing counts and percentages for each level</td></tr><tr><td><code>results$crossTabTable</code></td><td></td><td></td><td></td><td></td><td>Cross-tabulation showing how test combination patterns align with gold standard results</td></tr><tr><td><code>results$individualTest1$test1Contingency</code></td><td></td><td></td><td></td><td></td><td>a table</td></tr><tr><td><code>results$individualTest1$test1Stats</code></td><td></td><td></td><td></td><td></td><td>a table</td></tr><tr><td><code>results$individualTest2$test2Contingency</code></td><td></td><td></td><td></td><td></td><td>a table</td></tr><tr><td><code>results$individualTest2$test2Stats</code></td><td></td><td></td><td></td><td></td><td>a table</td></tr><tr><td><code>results$individualTest3$test3Contingency</code></td><td></td><td></td><td></td><td></td><td>a table</td></tr><tr><td><code>results$individualTest3$test3Stats</code></td><td></td><td></td><td></td><td></td><td>a table</td></tr><tr><td><code>results$barPlot</code></td><td></td><td></td><td></td><td></td><td>Grouped bar chart comparing sensitivity, specificity, PPV, NPV, and accuracy across test combinations</td></tr><tr><td><code>results$heatmapPlot</code></td><td></td><td></td><td></td><td></td><td>Color-coded heatmap showing all diagnostic metrics for each test pattern</td></tr><tr><td><code>results$forestPlot</code></td><td></td><td></td><td></td><td></td><td>Forest plot displaying 95 percent confidence intervals for key diagnostic metrics</td></tr><tr><td><code>results$decisionTreePlot</code></td><td></td><td></td><td></td><td></td><td>Decision-space scatter plot positioning each test pattern by its sensitivity and specificity, with point size scaled by Youden's J</td></tr><tr><td><code>results$recommendationTable</code></td><td></td><td></td><td></td><td></td><td>Recommended optimal test combination pattern based on Youden index and clinical performance metrics</td></tr><tr><td><code>results$addedPattern</code></td><td></td><td></td><td></td><td></td><td>an output</td></tr><tr><td><code>results$notices</code></td><td></td><td></td><td></td><td></td><td>a html</td></tr></table><p>Tables can be converted to data frames with <code>asDF</code> or <code><a href="https://rdrr.io/r/base/as.data.frame.html" class="external-link">as.data.frame</a></code>. For example:</p>
 <p><code>results$combinationTable$asDF</code></p>
 <p><code>as.data.frame(results$combinationTable)</code></p>
     </div>
@@ -186,7 +187,7 @@ table.</p></dd>
 </div>
 
 <div class="pkgdown-footer-right">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.2.0.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.2.1.</p>
 </div>
 
     </footer></div>

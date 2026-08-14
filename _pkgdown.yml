@@ -81,6 +81,7 @@ articles:
   - jsurvival-survival-comprehensive
   - jsurvival-timeroc-comprehensive
   - jsurvival-03-multisurvival-interactions
+  - jsurvival-04-multisurvival-interaction-interpretation
 
 - title: "meddecide Module"
   desc: "Guides for medical decision analysis"

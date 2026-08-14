@@ -9,7 +9,7 @@ Tests handling of perfect agreement between tests."></head><body>
 
     <a class="navbar-brand me-2" href="../index.html">ClinicoPath</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.0.47</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.0.52</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -85,14 +85,13 @@ difference (p=1.0).</p>
     <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>
     <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/utils/data.html" class="external-link">data</a></span><span class="op">(</span><span class="va">decisioncompare_identical</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="fu"><a href="decisioncompare.html">decisioncompare</a></span><span class="op">(</span>data <span class="op">=</span> <span class="va">decisioncompare_identical</span>, gold <span class="op">=</span> <span class="st">"GoldStandard"</span>,</span></span>
-<span class="r-in"><span>                goldPositive <span class="op">=</span> <span class="st">"Positive"</span>, test1 <span class="op">=</span> <span class="st">"Test1"</span>,</span></span>
-<span class="r-in"><span>                test1Positive <span class="op">=</span> <span class="st">"Positive"</span>, test2 <span class="op">=</span> <span class="st">"Test2"</span>,</span></span>
-<span class="r-in"><span>                test2Positive <span class="op">=</span> <span class="st">"Positive"</span>, test3Positive <span class="op">=</span> <span class="st">""</span>,</span></span>
+<span class="r-in"><span>                goldPositive <span class="op">=</span> <span class="st">"Positive"</span>, goldNegative <span class="op">=</span> <span class="cn">NULL</span>, test1 <span class="op">=</span> <span class="st">"Test1"</span>,</span></span>
+<span class="r-in"><span>                test1Positive <span class="op">=</span> <span class="st">"Positive"</span>, test1Negative <span class="op">=</span> <span class="cn">NULL</span>, test2 <span class="op">=</span> <span class="st">"Test2"</span>,</span></span>
+<span class="r-in"><span>                test2Positive <span class="op">=</span> <span class="st">"Positive"</span>, test2Negative <span class="op">=</span> <span class="cn">NULL</span>,</span></span>
+<span class="r-in"><span>                test3Positive <span class="op">=</span> <span class="st">""</span>, test3Negative <span class="op">=</span> <span class="cn">NULL</span>,</span></span>
 <span class="r-in"><span>                statComp <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  COMPARE MEDICAL DECISION TESTS</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> character(0)</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  Test 1 - Recoded Data                                            </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  ──────────────────────────────────────────────────────────────── </span>
@@ -114,16 +113,6 @@ difference (p=1.0).</p>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  ──────────────────────────────────────────────────────────────── </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  Test 3 - Recoded Data                                        </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  ──────────────────────────────────────────────────────────── </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>                     Gold Positive    Gold Negative    Total   </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  ──────────────────────────────────────────────────────────── </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>    Test Positive    .                .                .       </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>    Test Negative    .                .                .       </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>    Total            .                .                .       </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  ──────────────────────────────────────────────────────────── </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  Decision Test Comparison                                                                                                                                                                                                                                 </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  ──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────── </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>    Test                                                                                     Sensitivity    Specificity    Accuracy     Positive Predictive Value    Negative Predictive Value    Positive Likelihood Ratio    Negative Likelihood Ratio   </span>
@@ -133,13 +122,6 @@ difference (p=1.0).</p>
 <span class="r-out co"><span class="r-pr">#&gt;</span>    Test2                                                                                       88.00000       85.33333     86.00000                     66.66667                     95.52239                     6.000000                    0.1406250   </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>      → Good balanced performance; Moderate positive evidence; Moderate negative evidence                                                                                                                                                                  </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  ──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────── </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  Stratified Diagnostic Accuracy                                                                              </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  ─────────────────────────────────────────────────────────────────────────────────────────────────────────── </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>    Subgroup    N    Test    Sensitivity    Specificity    Accuracy     PPV          NPV          OPA         </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  ─────────────────────────────────────────────────────────────────────────────────────────────────────────── </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  ─────────────────────────────────────────────────────────────────────────────────────────────────────────── </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  Statistical Comparison of Test Accuracy                                                                                  </span>
@@ -164,6 +146,11 @@ difference (p=1.0).</p>
 <span class="r-out co"><span class="r-pr">#&gt;</span>    Test1 vs Test2    Specificity      0.00000 ᵇ      0.00000      0.00000   </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>    Test1 vs Test2    Accuracy         0.00000 ᵈ      0.00000      0.00000   </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  ────────────────────────────────────────────────────────────────────────── </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    Note. Differences are paired (within-subject). Confidence intervals</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    are 95% normal-approximation (Wald) intervals for the difference</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    between two correlated proportions, computed from the discordant</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    pair counts. They are not affected by the "CI Method for Agreement"</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    option, which applies to the overall percent agreement table.</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>    ᵃ Small paired sample/discordant counts; CI may be unstable (n=25,</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>    discordant counts: 22, 0, 0, 3).</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>    ᵇ Small paired sample/discordant counts; CI may be unstable (n=75,</span>
@@ -176,15 +163,18 @@ difference (p=1.0).</p>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  0 auto; padding: 20px;"&gt;&lt;h2 style="color: #2c3e50; border-bottom: 2px</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  solid #3498db;"&gt; Clinical Summary</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  Among the tests evaluated, Test1 demonstrated optimal diagnostic</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  performance with 88% sensitivity (95% CI: [see confidence interval</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  table]), 85.3% specificity (95% CI: [see confidence interval table]),</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  66.7% positive predictive value, 95.5% negative predictive value, and</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  86% overall accuracy. Statistical comparisons using McNemar's test</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  revealed significant differences in test performance (detailed results</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  in comparison tables). The likelihood ratio for positive results was</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  6.00 and for negative results was 0.14.&lt;h3 style="color: #27ae60;</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  margin-top: 30px;"&gt; Report Sentences</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  Among the tests evaluated, Test1 had the highest observed accuracy,</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  with 88% sensitivity (95% CI: 68.8-97.5%), 85.3% specificity (95% CI:</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  75.3-92.4%), 66.7% positive predictive value, 95.5% negative</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  predictive value, and 86% overall accuracy. Statistical comparison</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  (McNemar's/Cochran's test) did not reveal a statistically significant</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  difference in test performance (detailed results in the comparison</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  tables). The likelihood ratio for positive results was 6.00 and for</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  negative results was 0.14. Because the differences between tests were</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  not statistically significant, this ranking reflects the observed</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  sample and should not be reported as evidence that one test</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  outperforms the others.&lt;h3 style="color: #27ae60; margin-top: 30px;"&gt;</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  Report Sentences</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  &lt;div style="background-color: #f8f9fa; padding: 15px; border-left: 4px</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  solid #28a745; margin: 15px 0;"&gt;&lt;h4 style="margin-top: 0;"&gt;Methods</span>
@@ -204,14 +194,17 @@ difference (p=1.0).</p>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  Section:</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  &lt;p style="font-style: italic; line-height: 1.6;"&gt;Among the tests</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  evaluated, Test1 demonstrated optimal diagnostic performance with 88%</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  sensitivity (95% CI: [see confidence interval table]), 85.3%</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  specificity (95% CI: [see confidence interval table]), 66.7% positive</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  predictive value, 95.5% negative predictive value, and 86% overall</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  accuracy. Statistical comparisons using McNemar's test revealed</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  significant differences in test performance (detailed results in</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  comparison tables). The likelihood ratio for positive results was 6.00</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  and for negative results was 0.14.</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  evaluated, Test1 had the highest observed accuracy, with 88%</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  sensitivity (95% CI: 68.8-97.5%), 85.3% specificity (95% CI:</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  75.3-92.4%), 66.7% positive predictive value, 95.5% negative</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  predictive value, and 86% overall accuracy. Statistical comparison</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  (McNemar's/Cochran's test) did not reveal a statistically significant</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  difference in test performance (detailed results in the comparison</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  tables). The likelihood ratio for positive results was 6.00 and for</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  negative results was 0.14. Because the differences between tests were</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  not statistically significant, this ranking reflects the observed</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  sample and should not be reported as evidence that one test</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  outperforms the others.</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  &lt;h3 style="color: #8e44ad; margin-top: 30px;"&gt; Clinical</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  Recommendations</span>
@@ -221,6 +214,13 @@ difference (p=1.0).</p>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  Clinical Consideration: Consider using Test1 in combination with other</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  tests for optimal diagnostic accuracy.</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  &lt;p style="background-color: #f8d7da; padding: 10px; border-radius:</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  4px;"&gt;Caution: No statistically significant difference was found</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  between the tests compared. Test1 is named here only because it ranked</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  highest in this sample; the data do not establish that it outperforms</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  the others. Base any choice between these tests on cost, availability,</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  turnaround time, and harms as well as on these estimates.</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  Implementation Note: Results should be interpreted in the context of</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  disease prevalence in your clinical population. Consider local</span>
@@ -317,12 +317,27 @@ difference (p=1.0).</p>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  and NPV vary with disease prevalenceMcNemar Test: Requires</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  paired/matched data for statistical comparisonsMissing Data: Cases</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  with incomplete data are excluded from analysisConfidence Intervals:</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  Calculated using Wilson method for better accuracy</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  The per-test CI tables report Clopper-Pearson exact intervals for the</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  proportions (sensitivity, specificity, PPV, NPV, accuracy and</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  prevalence), as computed by epiR::epi.tests() with its default</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  settings. Likelihood ratios are reported as point estimates only,</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  without confidence intervals. The Overall Percent Agreement (OPA)</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  table uses the method you select under "CI Method for Agreement"</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  (Wilson score by default). Paired differences between tests use</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  normal-approximation (Wald) intervals.</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  &lt;div style='margin: 10px 0;'&gt;&lt;div style='background-color: #eff6ff;</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  border-left: 4px solid #93c5fd; padding: 12px; margin: 8px 0;</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  border-radius: 4px;'&gt;&lt;strong style='color: #2563eb;'&gt; Analysis</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  Completed Successfully</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  &lt;div style='margin: 10px 0;'&gt;&lt;div style='background-color: #fefce8;</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  border-left: 4px solid #fde047; padding: 12px; margin: 8px 0;</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  border-radius: 4px;'&gt;&lt;strong style='color: #ca8a04;'&gt; Tied</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  Best-Performing Test</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  &lt;span style='color: #374151;'&gt;Test1 and Test2 scored identically on</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  the combined Youden-plus-accuracy ranking used to pick a best test.</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  Test1 is reported below purely because it comes first in the selection</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  order; the data do not distinguish them. Choose between them on other</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  grounds (cost, availability, turnaround time, harms).&lt;div</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  style='background-color: #eff6ff; border-left: 4px solid #93c5fd;</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  padding: 12px; margin: 8px 0; border-radius: 4px;'&gt;&lt;strong</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  style='color: #2563eb;'&gt; Analysis Completed Successfully</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  &lt;span style='color: #374151;'&gt;2 diagnostic tests compared using 100</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  complete cases. Gold standard identified 25 diseased and 75 healthy</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  cases. Review comparison tables and statistical tests below.</span>
@@ -338,7 +353,7 @@ difference (p=1.0).</p>
 </div>
 
 <div class="pkgdown-footer-right">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.2.0.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.2.1.</p>
 </div>
 
     </footer></div>

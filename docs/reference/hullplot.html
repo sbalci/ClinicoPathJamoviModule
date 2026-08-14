@@ -19,7 +19,7 @@ Based on the geom_mark_hull() function from ggforce package."></head><body>
 
     <a class="navbar-brand me-2" href="../index.html">ClinicoPath</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.0.47</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.0.52</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -123,8 +123,10 @@ values.</p></dd>
 
 <dt id="arg-hull-concavity">hull_concavity<a class="anchor" aria-label="anchor" href="#arg-hull-concavity"></a></dt>
 <dd><p>Controls the concavity of hull polygons. Lower values
-create more concave hulls, higher values create more convex hulls. Range:
-0-2, default: 2.</p></dd>
+follow the point cloud more closely; higher values approach the convex
+hull. The permitted range is 0-2 and the default of 2 matches ggforce; a
+true convex hull needs a much larger value than this range allows. Ignored
+when V8/concaveman are unavailable.</p></dd>
 
 
 <dt id="arg-hull-alpha">hull_alpha<a class="anchor" aria-label="anchor" href="#arg-hull-alpha"></a></dt>
@@ -137,7 +139,8 @@ transparent, 1 = opaque.</p></dd>
 
 
 <dt id="arg-point-size">point_size<a class="anchor" aria-label="anchor" href="#arg-point-size"></a></dt>
-<dd><p>Size of scatter plot points.</p></dd>
+<dd><p>Size of scatter plot points. Ignored when a Size Variable
+is selected, because point size is then mapped to that variable's values.</p></dd>
 
 
 <dt id="arg-point-alpha">point_alpha<a class="anchor" aria-label="anchor" href="#arg-point-alpha"></a></dt>
@@ -165,8 +168,9 @@ transparent, 1 = opaque.</p></dd>
 
 
 <dt id="arg-hull-expand">hull_expand<a class="anchor" aria-label="anchor" href="#arg-hull-expand"></a></dt>
-<dd><p>Amount to expand hull boundaries beyond data points.
-Higher values create larger hulls.</p></dd>
+<dd><p>Padding added around each hull, as a fraction of the
+plot area (0 = hull touches the outermost points, 1 = the whole panel).
+Ignored when V8/concaveman are unavailable and convex hulls are drawn.</p></dd>
 
 
 <dt id="arg-show-statistics">show_statistics<a class="anchor" aria-label="anchor" href="#arg-show-statistics"></a></dt>
@@ -175,8 +179,10 @@ in the output.</p></dd>
 
 
 <dt id="arg-outlier-detection">outlier_detection<a class="anchor" aria-label="anchor" href="#arg-outlier-detection"></a></dt>
-<dd><p>If TRUE, identifies and highlights potential
-outliers within groups.</p></dd>
+<dd><p>If TRUE, reports the number of potential outliers
+in each group using the 1.5 x IQR rule applied separately to the X and Y
+variables. Groups with fewer than 5 observations are reported as too small
+rather than given a count. Outliers are counted, not marked on the plot.</p></dd>
 
 
 <dt id="arg-confidence-ellipses">confidence_ellipses<a class="anchor" aria-label="anchor" href="#arg-confidence-ellipses"></a></dt>
@@ -207,7 +213,7 @@ and usage guidelines.</p></dd>
 </div>
 
 <div class="pkgdown-footer-right">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.2.0.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.2.1.</p>
 </div>
 
     </footer></div>

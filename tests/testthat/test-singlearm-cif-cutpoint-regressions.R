@@ -233,10 +233,20 @@ test_that("M2: months unit passes the default through silently", {
   expect_length(s$log$msgs, 0)
 })
 
-test_that("M2: an unparseable string still falls back to the unit-aware default", {
+test_that("M2: an unparseable string falls back to the unit-aware default and says so", {
   s <- .singlearm_stub("years")
+  # Unit-aware: 1/3/5 YEARS, not the months literal 12, 36, 60.
   expect_equal(s$private$.resolveCutpoints(""), c(1, 3, 5))
-  expect_gt(length(s$log$msgs), 0)
+
+  # Substituting numbers the user cannot see in the box is the very silent
+  # guess M2 was about, so the fallback announces itself -- exactly once --
+  # naming the values used and the unit they are read in.
+  msg <- s$log$msgs
+  expect_length(msg, 1)
+  expect_match(msg, "^WARNING")
+  expect_match(msg, "1, 3, 5 years", fixed = TRUE)
+  # ...and must not claim an absent input was honoured.
+  expect_false(grepl("exactly as entered", msg))
 })
 
 test_that("M2: values other than the default are never commented on", {

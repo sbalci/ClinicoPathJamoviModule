@@ -20,7 +20,7 @@ test_that("event-level mappings are required wrapper arguments, and NULL is acce
     # compiler rejects it. Lock the real behaviour down in both directions so
     # nobody re-litigates it.
     for (lvl in c("outcomeLevel", "dod", "dooc", "awd", "awod"))
-        expect_true(rlang::is_missing(formals(singlearm)[[lvl]]),
+        expect_true(identical(formals(singlearm)[[lvl]], quote(expr = )),
                     info = paste(lvl, "must stay a no-default argument"))
 
     # ...and passing NULL explicitly is what makes the call work.
@@ -328,6 +328,11 @@ test_that("the copy-ready clinical summary makes no prognosis claim", {
     summary_text <- strip_html(res$clinicalSummary$content)
     expect_false(grepl("favorable|concerning|moderate prognosis", summary_text))
     expect_false(grepl("prognosis for this patient population", summary_text))
+    # The outcome here is a plain binary factor with no declared estimand, so
+    # .defineEventIndicator() codes it as "Kaplan-Meier survival for the
+    # selected event" and .estimandMeta() uses the generic label. Refusing to
+    # call an undeclared event "survival" is deliberate; the assertion still
+    # pins the "not reached" verdict this test exists to prove.
     expect_match(summary_text, "Median event-free time was not reached")
     expect_match(summary_text, "do not establish prognosis")
 })

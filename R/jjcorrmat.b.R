@@ -12,6 +12,12 @@ jjcorrmatClass <- if (requireNamespace('jmvcore')) R6::R6Class(
     inherit = jjcorrmatBase,
     private = list(
 
+
+      # R6 locks the private environment, so a field must be DECLARED here before
+      # anything may assign to it. These were only ever assigned (in .init() and
+      # friends), which threw "cannot add bindings to a locked environment" and
+      # aborted the analysis during init - before any result was produced.
+      .preset_recommendations = NULL,
         # Seed for the Bayesian sampler. Shared by the table and both plot
         # methods so a Bayesian correlation matrix is reproducible and the two
         # outputs report the same draw.

@@ -12,6 +12,14 @@ batcheffectClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
         "batcheffectClass",
         inherit = batcheffectBase,
         private = list(
+
+      # R6 locks the private environment, so a field must be DECLARED here before
+      # anything may assign to it. These were only ever assigned (in .init() and
+      # friends), which threw "cannot add bindings to a locked environment" and
+      # aborted the analysis during init - before any result was produced.
+      .pca_result = NULL,
+      .batch_vector = NULL,
+      .corrected_data = NULL,
             .init = function() {
                 if (is.null(self$data) || is.null(self$options$features) ||
                     length(self$options$features) == 0) {

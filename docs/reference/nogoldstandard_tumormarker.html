@@ -11,7 +11,7 @@ varying sensitivity (0.75-0.68) and specificity (0.88-0.85)."></head><body>
 
     <a class="navbar-brand me-2" href="../index.html">ClinicoPath</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.0.47</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.0.52</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -102,7 +102,11 @@ enable composite reference and latent class analysis comparisons.</p>
 <span class="r-in"><span>               clinicalPreset <span class="op">=</span> <span class="st">"tumor_markers"</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  ANALYSIS WITHOUT GOLD STANDARD</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> WARNING: Clinical preset: tumor markers</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Specialized for tumor marker validation studies Use when validating cancer biomarkers or prognostic tests This preset does NOT change your settings automatically -- set them yourself in the options panel: Bootstrap confidence intervals: currently off, recommended on.</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Analysing 220 cases</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> All 220 cases have a result for every selected test.</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  Agreement Statistics (Cohen's Kappa)                    </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  ─────────────────────────────────────────────────────── </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>    Test Pair       Kappa        p-value      Agreement   </span>
@@ -114,22 +118,26 @@ enable composite reference and latent class analysis comparisons.</p>
 <span class="r-out co"><span class="r-pr">#&gt;</span>    HE4 vs AFP      0.2364230    0.0021283     69.09091   </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>    CEA vs AFP      0.3221419    0.0000247     73.63636   </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  ─────────────────────────────────────────────────────── </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    Note. Kappa standard errors and p-values use a</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    large-sample normal approximation rather than the</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    exact asymptotic SE (e.g. vcd::Kappa); interpret</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    p-values cautiously, especially in small samples.</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  &lt;div class='clinical-summary' style='background: #f0f8ff; padding:</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  15px; border-radius: 8px; margin: 10px 0;'&gt;&lt;h4 style='color: #1565c0;</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  margin-top: 0;'&gt; Clinical Summary</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  Analysis: No gold standard analysis using all_positive method</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  Analysis: No gold standard analysis using latent_class method</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  Tests analyzed: CA125, HE4, CEA, AFP (N=4)</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  Disease prevalence: 5.5%</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  Disease prevalence: 22.4%</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  Test sensitivities: Range from 100.0% to 100.0%</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  Test sensitivities: Range from 63.1% to 78.3%</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  Clinical interpretation: Low prevalence setting - high NPV expected,</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  focus on ruling out disease</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  Clinical interpretation: Moderate prevalence setting - balanced</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  diagnostic performance</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  &lt;div style='background: #f8f9fa; padding: 20px; border-radius: 8px;</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  margin: 15px 0; border-left: 4px solid #007bff;'&gt;&lt;h3 style='color:</span>
@@ -144,8 +152,10 @@ enable composite reference and latent class analysis comparisons.</p>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  Best for: Diagnostic validation studies with 3+ tests and N&gt;=100</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  Strengths: Handles conditional dependence, provides model fit</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  statistics, most statistically rigorous</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  Strengths: The only method here that estimates accuracy rather than</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  agreement with a self-built reference; provides model fit statistics.</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  Assumes the tests are conditionally independent given true status --</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  it does NOT model conditional dependence</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  &lt;div style='margin: 15px 0; padding: 15px; background: #e3f2fd;</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  border-radius: 5px;'&gt;&lt;h4 style='color: #1565c0; margin-top: 0;'&gt;</span>
@@ -170,8 +180,10 @@ enable composite reference and latent class analysis comparisons.</p>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  Best for: Inter-rater agreement studies with 3+ tests, exploratory</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  analysis</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  Strengths: Simple and intuitive, requires minimal assumptions, good</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  starting point</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  Strengths: Simple and intuitive. Not an accuracy estimate: each test</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  helps build the standard it is judged against, which inflates its</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  apparent performance. Needs 3+ tests -- with 2 a tie counts as</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  diseased, making it identical to Any Test Positive</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  &lt;div style='margin: 15px 0; padding: 15px; background: #fce4ec;</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  border-radius: 5px;'&gt;&lt;h4 style='color: #c2185b; margin-top: 0;'&gt; All</span>
@@ -183,7 +195,10 @@ enable composite reference and latent class analysis comparisons.</p>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  Best for: Highly specific diagnoses where false positives are very</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  costly</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  Strengths: High specificity reference, minimizes false positives</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  Strengths: A deliberately strict reference. Sensitivity and NPV cannot</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  be estimated under this rule -- they are fixed at 100% by construction</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  -- so only specificity and PPV are shown, and both are inflated by the</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  same circularity</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  &lt;div style='margin: 15px 0; padding: 15px; background: #e8f5e8;</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  border-radius: 5px;'&gt;&lt;h4 style='color: #388e3c; margin-top: 0;'&gt; Any</span>
@@ -194,7 +209,10 @@ enable composite reference and latent class analysis comparisons.</p>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  Best for: Population screening scenarios where missing cases is costly</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  Strengths: High sensitivity reference, minimizes false negatives</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  Strengths: A deliberately permissive reference. Specificity and PPV</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  cannot be estimated under this rule -- they are fixed at 100% by</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  construction -- so only sensitivity and NPV are shown, and both are</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  inflated by the same circularity</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  &lt;div style='margin: 15px 0; padding: 10px; background: #fff8e1;</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  border-radius: 5px; border-left: 3px solid #ffb300;'&gt;&lt;h4 style='color:</span>
@@ -209,7 +227,7 @@ enable composite reference and latent class analysis comparisons.</p>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  ─────────────────────────────────────── </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>    Estimate     Lower CI     Upper CI    </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  ─────────────────────────────────────── </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>      5.45455      2.45375      8.45534   </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>     22.42637     16.91482     27.93791   </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  ─────────────────────────────────────── </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
@@ -217,11 +235,46 @@ enable composite reference and latent class analysis comparisons.</p>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  ───────────────────────────────────────────────────────────────────────────────────────────────────────────────────── </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>    Test     Sensitivity    Lower CI     Upper CI     Specificity    Lower CI     Upper CI     PPV          NPV         </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  ───────────────────────────────────────────────────────────────────────────────────────────────────────────────────── </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>    CA125      100.00000    100.00000    100.00000       75.48077     69.79606     81.16548     19.04762    100.00000   </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>    HE4        100.00000    100.00000    100.00000       75.96154     70.31494     81.60814     19.35484    100.00000   </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>    CEA        100.00000    100.00000    100.00000       79.80769     74.50310     85.11229     22.22222    100.00000   </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>    AFP        100.00000    100.00000    100.00000       75.96154     70.31494     81.60814     19.35484    100.00000   </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    CA125       78.30606     66.80537     89.80676       85.72304     80.47440     90.97167     61.32484     93.18258   </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    HE4         63.06144     49.59418     76.52870       81.90180     76.12558     87.67803     50.18267     88.46535   </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    CEA         68.67277     55.73050     81.61504       88.21165     83.37362     93.04969     62.74403     90.68902   </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    AFP         77.50376     65.85248     89.15504       86.07704     80.88320     91.27089     61.67549     92.97519   </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  ───────────────────────────────────────────────────────────────────────────────────────────────────────────────────── </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    Note. 95% intervals are normal-approximation (Wald) intervals, using the estimated number of diseased cases as</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    the denominator for sensitivity and non-diseased for specificity. They treat the estimates as observed</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    proportions and so understate the uncertainty of a latent-variable model; enable Bootstrap for intervals that</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    account for the estimation itself.</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  Model Fit Statistics                  </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  ───────────────────────────────────── </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    Statistic             Value         </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  ───────────────────────────────────── </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    BIC                   1000.145895   </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    AIC                    969.603247   </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    Log-Likelihood        -475.801624   </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    G-squared                2.860211   </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    Chi-squared              2.685605   </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    Degrees of Freedom       6.000000   </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  ───────────────────────────────────── </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  Conditional Independence Check (Bivariate Residuals)                   </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  ────────────────────────────────────────────────────────────────────── </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    Test Pair       Bivariate Residual    Interpretation                 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  ────────────────────────────────────────────────────────────────────── </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    CA125 vs HE4           0.005259860    Consistent with independence   </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    CA125 vs CEA           0.018283695    Consistent with independence   </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    CA125 vs AFP           0.011987178    Consistent with independence   </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    HE4 vs CEA             0.110814148    Consistent with independence   </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    HE4 vs AFP             0.017676569    Consistent with independence   </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    CEA vs AFP             4.144993e-4    Consistent with independence   </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  ────────────────────────────────────────────────────────────────────── </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    Note. A residual above 3.84 (the 5% point of chi-squared on 1</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    degree of freedom) is evidence that the pair does not err</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    independently. This is a descriptive check, not a formal test:</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    the residuals are correlated with one another and no</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    multiplicity adjustment is applied.</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  Test Cross-Tabulation                               </span>
@@ -260,7 +313,7 @@ enable composite reference and latent class analysis comparisons.</p>
 </div>
 
 <div class="pkgdown-footer-right">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.2.0.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.2.1.</p>
 </div>
 
     </footer></div>

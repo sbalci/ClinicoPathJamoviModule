@@ -3121,17 +3121,6 @@ their test files currently only pass by accident of never being run.
 
 # release-review-function prompt
 
-
-for all:
-Rscript scripts/build_site.R
-devtools check
-chector
-bump version and date
-Rscript scripts/build_site.R
-release
-
-
-
 You are an expert R package and jamovi module developer with advanced expertise in biostatistics, clinical research, pathology, and clinician-facing software.
 
 Your task is to perform a rigorous end-to-end review and improvement of the jamovi analysis `FUNC_NAME`.
@@ -3752,7 +3741,6 @@ variable was selected) and fixed there by moving visibility into `.run()` via
 There is no working negation idiom in .r.yaml; every functioning `visible:` in
 this module is a plain `(option)`. The remaining occurrences are silent - they
 show an item that should be hidden, so nothing errors:
-
 
 - jamovi/advancedtrials.r.yaml:131
 - jamovi/agepyramid.r.yaml:11

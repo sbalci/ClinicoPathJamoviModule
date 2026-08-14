@@ -9,7 +9,7 @@ Severe) collapsed into binary classification for ROC analysis."></head><body>
 
     <a class="navbar-brand me-2" href="../index.html">ClinicoPath</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.0.47</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.0.52</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -85,7 +85,6 @@ treats Mild as Negative, Moderate/Severe as Positive.</p>
 <span class="r-in"><span><span class="fu"><a href="psychopdaROC.html">psychopdaROC</a></span><span class="op">(</span>data <span class="op">=</span> <span class="va">psychopdaROC_spectrum</span>, dependentVars <span class="op">=</span> <span class="st">"continuous_marker"</span>,</span></span>
 <span class="r-in"><span>             classVar <span class="op">=</span> <span class="st">"binary_status"</span>, positiveClass <span class="op">=</span> <span class="st">"Positive"</span>,</span></span>
 <span class="r-in"><span>             refVar <span class="op">=</span> <span class="st">"continuous_marker"</span><span class="op">)</span></span></span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> Multiple optimal cutpoints found, applying break_ties.</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  ADVANCED ROC ANALYSIS</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
@@ -99,7 +98,7 @@ treats Mild as Negative, Moderate/Severe as Positive.</p>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  The ROC analysis has been completed using the following</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  specifications:</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  &amp;nbsp;</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  Measure Variable(s): continuous_marker</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
@@ -107,7 +106,7 @@ treats Mild as Negative, Moderate/Severe as Positive.</p>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  Positive Class: Positive</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  &amp;nbsp;</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  Method: maximize_metric</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
@@ -119,9 +118,9 @@ treats Mild as Negative, Moderate/Severe as Positive.</p>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  Tie Breakers: mean</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  Metric Tolerance: 0.05</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  Metric Tolerance: 1e-06</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  &amp;nbsp;</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  &lt;hr /&gt;</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
@@ -139,6 +138,11 @@ treats Mild as Negative, Moderate/Severe as Positive.</p>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  ──────────────────────────────────────────────────────────────────────────────── </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>    continuous_marker    0.9549407       0.9258927       0.9839887    &lt; .0000001   </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  ──────────────────────────────────────────────────────────────────────────────── </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    Note. Reading of the test values: &lt;b&gt;HIGHER values were taken to indicate</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    Positive&lt;/b&gt; (Classification Direction = "&gt;="). If that is the wrong way</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    round for this marker, every sensitivity, specificity, cutpoint and AUC</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    below is reversed — switch Classification Direction to "&lt;=" and the AUC</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    becomes 1 minus the value shown.</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>    Note. AUC 95% confidence intervals computed using the DeLong method.</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
@@ -156,7 +160,7 @@ treats Mild as Negative, Moderate/Severe as Positive.</p>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  ───────────────────────────────────────────────────────────────────────────────────────────────────────────────── </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>    Cutpoint      Sensitivity    Specificity    PPV          NPV          Youden's J    AUC          Metric Score   </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  ───────────────────────────────────────────────────────────────────────────────────────────────────────────────── </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>    53.7661964       86.95652       94.54545     97.08738     77.61194     0.8150198    0.9549407       0.8150198   </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    52.7643388       87.82609       94.54545     97.11538     78.78788     0.8237154    0.9549407       0.8237154   </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  ───────────────────────────────────────────────────────────────────────────────────────────────────────────────── </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
@@ -166,6 +170,11 @@ treats Mild as Negative, Moderate/Severe as Positive.</p>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  ──────────────────────────────────────────────────────────────────────────────── </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>    continuous_marker    0.9549407       0.9258927       0.9839887    &lt; .0000001   </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  ──────────────────────────────────────────────────────────────────────────────── </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    Note. Reading of the test values: &lt;b&gt;HIGHER values were taken to indicate</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    Positive&lt;/b&gt; (Classification Direction = "&gt;="). If that is the wrong way</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    round for this marker, every sensitivity, specificity, cutpoint and AUC</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    below is reversed — switch Classification Direction to "&lt;=" and the AUC</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    becomes 1 minus the value shown.</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>    Note. AUC 95% confidence intervals computed using the DeLong method.</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-plt img"><img src="psychopdaROC_spectrum-1.png" alt="" width="700" height="433"></span>
@@ -181,7 +190,7 @@ treats Mild as Negative, Moderate/Severe as Positive.</p>
 </div>
 
 <div class="pkgdown-footer-right">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.2.0.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.2.1.</p>
 </div>
 
     </footer></div>

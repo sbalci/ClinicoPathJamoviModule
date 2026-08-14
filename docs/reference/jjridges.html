@@ -19,7 +19,7 @@ gradients.'"></head><body>
 
     <a class="navbar-brand me-2" href="../index.html">ClinicoPath</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.0.47</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.0.52</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -347,7 +347,7 @@ methodological notes for the selected test type.</p></dd>
 </dl></div>
     <div class="section level2">
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
-    <p>A results object containing:</p><table class="table table"><tr><td><code>results$notices</code></td><td></td><td></td><td></td><td></td><td>a preformatted</td></tr><tr><td><code>results$instructions</code></td><td></td><td></td><td></td><td></td><td>a html</td></tr><tr><td><code>results$clinicalSummary</code></td><td></td><td></td><td></td><td></td><td>a html</td></tr><tr><td><code>results$reportSummary</code></td><td></td><td></td><td></td><td></td><td>a html</td></tr><tr><td><code>results$aboutPanel</code></td><td></td><td></td><td></td><td></td><td>a html</td></tr><tr><td><code>results$assumptionsPanel</code></td><td></td><td></td><td></td><td></td><td>a html</td></tr><tr><td><code>results$plot</code></td><td></td><td></td><td></td><td></td><td>an image</td></tr><tr><td><code>results$statistics</code></td><td></td><td></td><td></td><td></td><td>a table</td></tr><tr><td><code>results$tests</code></td><td></td><td></td><td></td><td></td><td>a table</td></tr><tr><td><code>results$interpretation</code></td><td></td><td></td><td></td><td></td><td>a html</td></tr></table><p>Tables can be converted to data frames with <code>asDF</code> or <code><a href="https://rdrr.io/r/base/as.data.frame.html" class="external-link">as.data.frame</a></code>. For example:</p>
+    <p>A results object containing:</p><table class="table table"><tr><td><code>results$notices</code></td><td></td><td></td><td></td><td></td><td>a preformatted</td></tr><tr><td><code>results$warnings</code></td><td></td><td></td><td></td><td></td><td>a html</td></tr><tr><td><code>results$instructions</code></td><td></td><td></td><td></td><td></td><td>a html</td></tr><tr><td><code>results$clinicalSummary</code></td><td></td><td></td><td></td><td></td><td>a html</td></tr><tr><td><code>results$reportSummary</code></td><td></td><td></td><td></td><td></td><td>a html</td></tr><tr><td><code>results$aboutPanel</code></td><td></td><td></td><td></td><td></td><td>a html</td></tr><tr><td><code>results$assumptionsPanel</code></td><td></td><td></td><td></td><td></td><td>a html</td></tr><tr><td><code>results$plot</code></td><td></td><td></td><td></td><td></td><td>an image</td></tr><tr><td><code>results$statistics</code></td><td></td><td></td><td></td><td></td><td>a table</td></tr><tr><td><code>results$tests</code></td><td></td><td></td><td></td><td></td><td>a table</td></tr><tr><td><code>results$interpretation</code></td><td></td><td></td><td></td><td></td><td>a html</td></tr></table><p>Tables can be converted to data frames with <code>asDF</code> or <code><a href="https://rdrr.io/r/base/as.data.frame.html" class="external-link">as.data.frame</a></code>. For example:</p>
 <p><code>results$statistics$asDF</code></p>
 <p><code>as.data.frame(results$statistics)</code></p>
     </div>
@@ -361,7 +361,7 @@ methodological notes for the selected test type.</p></dd>
 </div>
 
 <div class="pkgdown-footer-right">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.2.0.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.2.1.</p>
 </div>
 
     </footer></div>

@@ -13,7 +13,7 @@ continuous explanatory variables and includes diagnostic metrics for binary pred
 
     <a class="navbar-brand me-2" href="../index.html">ClinicoPath</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.0.47</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.0.52</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -55,6 +55,10 @@ continuous explanatory variables and includes diagnostic metrics for binary pred
 
 
     <div class="section level2">
+    <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
+    <p>An <code>R6</code> class generator object for the <code>oddsratioClass</code> backend; used internally by the jamovi analysis wrapper and not called directly.</p>
+    </div>
+    <div class="section level2">
     <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
     <p>The function performs the following analyses:</p><ul><li><p>Logistic regression using finalfit package</p></li>
 <li><p>Odds ratio calculation with 95% confidence intervals</p></li>
@@ -63,8 +67,8 @@ continuous explanatory variables and includes diagnostic metrics for binary pred
 <li><p>Likelihood ratio calculations for diagnostic metrics</p></li>
 <li><p>Sensitivity and specificity analysis for binary predictors</p></li>
 </ul><p>The function automatically cleans variable names using janitor::clean_names()
-and preserves original variable labels for display. It handles missing data
-through complete case analysis.</p>
+and preserves original variable labels for display. The regression uses
+complete cases for the selected outcome and explanatory variables only.</p>
     </div>
     <div class="section level2">
     <h2 id="international-usage">International Usage<a class="anchor" aria-label="anchor" href="#international-usage"></a></h2>
@@ -78,7 +82,7 @@ important for correct interpretation of likelihood ratios and diagnostic metrics
     <h2 id="nomogram-features">Nomogram Features<a class="anchor" aria-label="anchor" href="#nomogram-features"></a></h2>
 
 
-<p>When showNomogram is enabled, the function generates:</p><ul><li><p>Interactive nomogram for risk prediction</p></li>
+<p>When showNomogram is enabled, the function generates:</p><ul><li><p>Prediction nomogram based on the fitted logistic model</p></li>
 <li><p>Diagnostic metrics (sensitivity, specificity, likelihood ratios)</p></li>
 <li><p>Contingency table analysis</p></li>
 <li><p>User guidance for interpretation</p></li>
@@ -185,7 +189,7 @@ regression results tables and plots when modelling. R package version 0.9.7.</p>
 </div>
 
 <div class="pkgdown-footer-right">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.2.0.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.2.1.</p>
 </div>
 
     </footer></div>

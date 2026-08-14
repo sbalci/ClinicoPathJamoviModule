@@ -7,7 +7,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">ClinicoPath</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.0.47</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.0.52</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -48,7 +48,7 @@
     <h2 id="ref-usage">Usage<a class="anchor" aria-label="anchor" href="#ref-usage"></a></h2>
     <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">categorize</span><span class="op">(</span></span>
 <span>  <span class="va">data</span>,</span>
-<span>  <span class="va">var</span>,</span>
+<span>  var <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  method <span class="op">=</span> <span class="st">"quantile"</span>,</span>
 <span>  nbins <span class="op">=</span> <span class="fl">4</span>,</span>
 <span>  breaks <span class="op">=</span> <span class="st">""</span>,</span>
@@ -56,6 +56,7 @@
 <span>  labels <span class="op">=</span> <span class="st">"auto"</span>,</span>
 <span>  customlabels <span class="op">=</span> <span class="st">""</span>,</span>
 <span>  newvarname <span class="op">=</span> <span class="st">""</span>,</span>
+<span>  excludeoutofrange <span class="op">=</span> <span class="cn">FALSE</span>,</span>
 <span>  includelowest <span class="op">=</span> <span class="cn">TRUE</span>,</span>
 <span>  rightclosed <span class="op">=</span> <span class="cn">TRUE</span>,</span>
 <span>  ordered <span class="op">=</span> <span class="cn">TRUE</span>,</span>
@@ -113,6 +114,15 @@ High"). Must match the number of categories.</p></dd>
 automatic naming.</p></dd>
 
 
+<dt id="arg-excludeoutofrange">excludeoutofrange<a class="anchor" aria-label="anchor" href="#arg-excludeoutofrange"></a></dt>
+<dd><p>Applies to the 'manual' method only. By default
+the break points are extended to the data minimum and maximum, so every
+observation falls in a category and no case is lost. Set this to TRUE to
+keep the break points exactly as entered and drop observations that fall
+outside them; the number excluded is reported. Has no effect on the
+computed methods, whose break points already span the data.</p></dd>
+
+
 <dt id="arg-includelowest">includelowest<a class="anchor" aria-label="anchor" href="#arg-includelowest"></a></dt>
 <dd><p>If TRUE, the first interval will be left-closed
 (include.lowest in cut).</p></dd>
@@ -157,7 +167,7 @@ distribution and cut points.</p></dd>
 </div>
 
 <div class="pkgdown-footer-right">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.2.0.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.2.1.</p>
 </div>
 
     </footer></div>

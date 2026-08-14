@@ -9,7 +9,7 @@ test results (~5-8% missingness)."></head><body>
 
     <a class="navbar-brand me-2" href="../index.html">ClinicoPath</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.0.47</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.0.52</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -88,13 +88,12 @@ data handling warnings.</p>
     <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>
     <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/utils/data.html" class="external-link">data</a></span><span class="op">(</span><span class="va">decisioncompare_missing</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="fu"><a href="decisioncompare.html">decisioncompare</a></span><span class="op">(</span>data <span class="op">=</span> <span class="va">decisioncompare_missing</span>, gold <span class="op">=</span> <span class="st">"GoldStandard"</span>,</span></span>
-<span class="r-in"><span>                goldPositive <span class="op">=</span> <span class="st">"Positive"</span>, test1 <span class="op">=</span> <span class="st">"Test1"</span>,</span></span>
-<span class="r-in"><span>                test1Positive <span class="op">=</span> <span class="st">"Positive"</span>, test2 <span class="op">=</span> <span class="st">"Test2"</span>,</span></span>
-<span class="r-in"><span>                test2Positive <span class="op">=</span> <span class="st">"Positive"</span>, test3Positive <span class="op">=</span> <span class="st">""</span><span class="op">)</span></span></span>
+<span class="r-in"><span>                goldPositive <span class="op">=</span> <span class="st">"Positive"</span>, goldNegative <span class="op">=</span> <span class="cn">NULL</span>, test1 <span class="op">=</span> <span class="st">"Test1"</span>,</span></span>
+<span class="r-in"><span>                test1Positive <span class="op">=</span> <span class="st">"Positive"</span>, test1Negative <span class="op">=</span> <span class="cn">NULL</span>, test2 <span class="op">=</span> <span class="st">"Test2"</span>,</span></span>
+<span class="r-in"><span>                test2Positive <span class="op">=</span> <span class="st">"Positive"</span>, test2Negative <span class="op">=</span> <span class="cn">NULL</span>,</span></span>
+<span class="r-in"><span>                test3Positive <span class="op">=</span> <span class="st">""</span>, test3Negative <span class="op">=</span> <span class="cn">NULL</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  COMPARE MEDICAL DECISION TESTS</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> character(0)</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  Test 1 - Recoded Data                                            </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  ──────────────────────────────────────────────────────────────── </span>
@@ -116,16 +115,6 @@ data handling warnings.</p>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  ──────────────────────────────────────────────────────────────── </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  Test 3 - Recoded Data                                        </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  ──────────────────────────────────────────────────────────── </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>                     Gold Positive    Gold Negative    Total   </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  ──────────────────────────────────────────────────────────── </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>    Test Positive    .                .                .       </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>    Test Negative    .                .                .       </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>    Total            .                .                .       </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  ──────────────────────────────────────────────────────────── </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  Decision Test Comparison                                                                                                                                                                                                                                    </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  ─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────── </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>    Test                                                                                        Sensitivity    Specificity    Accuracy     Positive Predictive Value    Negative Predictive Value    Positive Likelihood Ratio    Negative Likelihood Ratio   </span>
@@ -137,24 +126,17 @@ data handling warnings.</p>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  ─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────── </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  Stratified Diagnostic Accuracy                                                                              </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  ─────────────────────────────────────────────────────────────────────────────────────────────────────────── </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>    Subgroup    N    Test    Sensitivity    Specificity    Accuracy     PPV          NPV          OPA         </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  ─────────────────────────────────────────────────────────────────────────────────────────────────────────── </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  ─────────────────────────────────────────────────────────────────────────────────────────────────────────── </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  &lt;div style="font-family: Arial, sans-serif; max-width: 800px; margin:</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  0 auto; padding: 20px;"&gt;&lt;h2 style="color: #2c3e50; border-bottom: 2px</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  solid #3498db;"&gt; Clinical Summary</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  Among the tests evaluated, Test1 demonstrated optimal diagnostic</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  performance with 94.1% sensitivity (95% CI: [see confidence interval</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  table]), 83.7% specificity (95% CI: [see confidence interval table]),</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  68.1% positive predictive value, 97.5% negative predictive value, and</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  86.5% overall accuracy. The likelihood ratio for positive results was</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  5.77 and for negative results was 0.07.&lt;h3 style="color: #27ae60;</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  margin-top: 30px;"&gt; Report Sentences</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  performance, with 94.1% sensitivity (95% CI: 80.3-99.3%), 83.7%</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  specificity (95% CI: 74.5-90.6%), 68.1% positive predictive value,</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  97.5% negative predictive value, and 86.5% overall accuracy. The</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  likelihood ratio for positive results was 5.77 and for negative</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  results was 0.07.&lt;h3 style="color: #27ae60; margin-top: 30px;"&gt; Report</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  Sentences</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  &lt;div style="background-color: #f8f9fa; padding: 15px; border-left: 4px</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  solid #28a745; margin: 15px 0;"&gt;&lt;h4 style="margin-top: 0;"&gt;Methods</span>
@@ -172,12 +154,11 @@ data handling warnings.</p>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  Section:</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  &lt;p style="font-style: italic; line-height: 1.6;"&gt;Among the tests</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  evaluated, Test1 demonstrated optimal diagnostic performance with</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  94.1% sensitivity (95% CI: [see confidence interval table]), 83.7%</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  specificity (95% CI: [see confidence interval table]), 68.1% positive</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  predictive value, 97.5% negative predictive value, and 86.5% overall</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  accuracy. The likelihood ratio for positive results was 5.77 and for</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  negative results was 0.07.</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  evaluated, Test1 demonstrated optimal diagnostic performance, with</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  94.1% sensitivity (95% CI: 80.3-99.3%), 83.7% specificity (95% CI:</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  74.5-90.6%), 68.1% positive predictive value, 97.5% negative</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  predictive value, and 86.5% overall accuracy. The likelihood ratio for</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  positive results was 5.77 and for negative results was 0.07.</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  &lt;h3 style="color: #8e44ad; margin-top: 30px;"&gt; Clinical</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  Recommendations</span>
@@ -283,7 +264,14 @@ data handling warnings.</p>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  and NPV vary with disease prevalenceMcNemar Test: Requires</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  paired/matched data for statistical comparisonsMissing Data: Cases</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  with incomplete data are excluded from analysisConfidence Intervals:</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  Calculated using Wilson method for better accuracy</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  The per-test CI tables report Clopper-Pearson exact intervals for the</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  proportions (sensitivity, specificity, PPV, NPV, accuracy and</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  prevalence), as computed by epiR::epi.tests() with its default</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  settings. Likelihood ratios are reported as point estimates only,</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  without confidence intervals. The Overall Percent Agreement (OPA)</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  table uses the method you select under "CI Method for Agreement"</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  (Wilson score by default). Paired differences between tests use</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  normal-approximation (Wald) intervals.</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  &lt;div style='margin: 10px 0;'&gt;&lt;div style='background-color: #fefce8;</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  border-left: 4px solid #fde047; padding: 12px; margin: 8px 0;</span>
@@ -311,7 +299,7 @@ data handling warnings.</p>
 </div>
 
 <div class="pkgdown-footer-right">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.2.0.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.2.1.</p>
 </div>
 
     </footer></div>

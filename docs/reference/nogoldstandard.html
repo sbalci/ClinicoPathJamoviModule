@@ -15,7 +15,7 @@ reference test exists."></head><body>
 
     <a class="navbar-brand me-2" href="../index.html">ClinicoPath</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.0.47</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.0.52</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -63,7 +63,7 @@ reference test exists.</p>
 <span>  clinicalPreset <span class="op">=</span> <span class="st">"none"</span>,</span>
 <span>  <span class="va">test1</span>,</span>
 <span>  <span class="va">test1Positive</span>,</span>
-<span>  <span class="va">test2</span>,</span>
+<span>  test2 <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  <span class="va">test2Positive</span>,</span>
 <span>  test3 <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  <span class="va">test3Positive</span>,</span>
@@ -71,11 +71,12 @@ reference test exists.</p>
 <span>  <span class="va">test4Positive</span>,</span>
 <span>  test5 <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  <span class="va">test5Positive</span>,</span>
-<span>  method <span class="op">=</span> <span class="st">"all_positive"</span>,</span>
+<span>  method <span class="op">=</span> <span class="st">"latent_class"</span>,</span>
 <span>  bootstrap <span class="op">=</span> <span class="cn">FALSE</span>,</span>
 <span>  nboot <span class="op">=</span> <span class="fl">1000</span>,</span>
 <span>  alpha <span class="op">=</span> <span class="fl">0.05</span>,</span>
-<span>  verbose <span class="op">=</span> <span class="cn">FALSE</span></span>
+<span>  verbose <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  seed <span class="op">=</span> <span class="fl">0</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
 
@@ -151,10 +152,17 @@ and method recommendations.</p></dd>
 <dt id="arg-verbose">verbose<a class="anchor" aria-label="anchor" href="#arg-verbose"></a></dt>
 <dd><p>Show detailed progress messages during bootstrap analysis.</p></dd>
 
+
+<dt id="arg-seed">seed<a class="anchor" aria-label="anchor" href="#arg-seed"></a></dt>
+<dd><p>Base random seed for the reproducible latent-class multi-start
+search. Each start is offset from this base, so changing it shifts the
+whole reproducible sequence; the default (0) reproduces the previous
+behaviour.</p></dd>
+
 </dl></div>
     <div class="section level2">
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
-    <p>A results object containing:</p><table class="table table"><tr><td><code>results$notices</code></td><td></td><td></td><td></td><td></td><td>a preformatted</td></tr><tr><td><code>results$instructions</code></td><td></td><td></td><td></td><td></td><td>a html</td></tr><tr><td><code>results$agreement_stats</code></td><td></td><td></td><td></td><td></td><td>a table</td></tr><tr><td><code>results$clinical_summary</code></td><td></td><td></td><td></td><td></td><td>a html</td></tr><tr><td><code>results$method_guide</code></td><td></td><td></td><td></td><td></td><td>a html</td></tr><tr><td><code>results$prevalence</code></td><td></td><td></td><td></td><td></td><td>a table</td></tr><tr><td><code>results$test_metrics</code></td><td></td><td></td><td></td><td></td><td>a table</td></tr><tr><td><code>results$model_fit</code></td><td></td><td></td><td></td><td></td><td>a table</td></tr><tr><td><code>results$crosstab</code></td><td></td><td></td><td></td><td></td><td>a table</td></tr><tr><td><code>results$agreement_plot</code></td><td></td><td></td><td></td><td></td><td>an image</td></tr><tr><td><code>results$agreement_plot2</code></td><td></td><td></td><td></td><td></td><td>an image</td></tr></table><p>Tables can be converted to data frames with <code>asDF</code> or <code><a href="https://rdrr.io/r/base/as.data.frame.html" class="external-link">as.data.frame</a></code>. For example:</p>
+    <p>A results object containing:</p><table class="table table"><tr><td><code>results$notices</code></td><td></td><td></td><td></td><td></td><td>a preformatted</td></tr><tr><td><code>results$instructions</code></td><td></td><td></td><td></td><td></td><td>a html</td></tr><tr><td><code>results$agreement_stats</code></td><td></td><td></td><td></td><td></td><td>a table</td></tr><tr><td><code>results$clinical_summary</code></td><td></td><td></td><td></td><td></td><td>a html</td></tr><tr><td><code>results$method_guide</code></td><td></td><td></td><td></td><td></td><td>a html</td></tr><tr><td><code>results$prevalence</code></td><td></td><td></td><td></td><td></td><td>a table</td></tr><tr><td><code>results$test_metrics</code></td><td></td><td></td><td></td><td></td><td>a table</td></tr><tr><td><code>results$model_fit</code></td><td></td><td></td><td></td><td></td><td>a table</td></tr><tr><td><code>results$conditional_dependence</code></td><td></td><td></td><td></td><td></td><td>Latent class analysis assumes the tests err independently given true disease status. For each pair this compares the observed two-way table with the one the fitted model implies; a residual above 3.84 (the 5 percent point of chi-squared on 1 degree of freedom) is evidence that the pair shares a source of error, which inflates the estimated accuracy. Requires four or more tests: with three the model is just-identified and reproduces every table exactly, so no residual can reveal dependence.</td></tr><tr><td><code>results$diagnostics</code></td><td></td><td></td><td></td><td></td><td>Detail of how the estimates were produced: sample size, method, convergence, number of random starts used, and bootstrap failures. Shown only when Verbose output is enabled.</td></tr><tr><td><code>results$crosstab</code></td><td></td><td></td><td></td><td></td><td>a table</td></tr><tr><td><code>results$agreement_plot</code></td><td></td><td></td><td></td><td></td><td>an image</td></tr><tr><td><code>results$agreement_plot2</code></td><td></td><td></td><td></td><td></td><td>an image</td></tr></table><p>Tables can be converted to data frames with <code>asDF</code> or <code><a href="https://rdrr.io/r/base/as.data.frame.html" class="external-link">as.data.frame</a></code>. For example:</p>
 <p><code>results$agreement_stats$asDF</code></p>
 <p><code>as.data.frame(results$agreement_stats)</code></p>
     </div>
@@ -168,7 +176,7 @@ and method recommendations.</p></dd>
 </div>
 
 <div class="pkgdown-footer-right">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.2.0.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.2.1.</p>
 </div>
 
     </footer></div>

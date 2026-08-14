@@ -954,7 +954,7 @@ oddsratioClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                             private$.addNotice(jmvcore::NoticeType$WARNING,
                                 glue::glue("Diagnostic metrics for '{diagnostic_predictor_original_name}' require paired complete observations with exactly two observed predictor levels and two observed outcome levels. The prediction nomogram is unaffected."))
                             self$results$diagnosticMetrics$setContent(
-                                "<p>Diagnostic metrics were not calculated because a valid paired 2×2 table could not be formed.</p>"
+                                "<p>Diagnostic metrics were not calculated because a valid paired 2\u{00D7}2 table could not be formed.</p>"
                             )
                             diagnostics_ok <- FALSE
                         }
@@ -1040,7 +1040,7 @@ oddsratioClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                         "Specificity: ", spec_txt, "<br>",
                         "Positive LR: ", plr_txt, "<br>",
                         "Negative LR: ", nlr_txt, "<br>",
-                        "<small style='color:#555;'>Unadjusted 2&times;2 estimates. Clopper-Pearson exact intervals for sensitivity and specificity; log method (Simel et al. 1991) for the likelihood ratios. Computed as in epiR::epi.tests() with its default settings.</small>",
+                        "<small style='color:#555;'>Unadjusted 2\u{00D7}2 estimates. Clopper-Pearson exact intervals for sensitivity and specificity; log method (Simel et al. 1991) for the likelihood ratios. Computed as in epiR::epi.tests() with its default settings.</small>",
                         "</div>",
 
                         statistical_warnings,
@@ -1878,7 +1878,7 @@ oddsratioClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 <p><strong>Selection Guidelines:</strong></p>
                 <ul>
                     <li><strong>Not specified:</strong> Uses first explanatory variable automatically</li>
-                    <li><strong>In your regression model:</strong> Diagnostic metrics are still unadjusted and use only its paired 2×2 table</li>
+                    <li><strong>In your regression model:</strong> Diagnostic metrics are still unadjusted and use only its paired 2\u{00D7}2 table</li>
                     <li><strong>Not in your model:</strong> Evaluates it independently using paired complete outcome/test observations</li>
                 </ul>
 

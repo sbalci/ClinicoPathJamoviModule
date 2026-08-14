@@ -449,6 +449,17 @@ multisurvivalClass <- if (requireNamespace('jmvcore'))
       .coxCache = NULL,
       .coxComputed = FALSE,
 
+      # R6 locks the private environment, so a field must be DECLARED here before
+      # anything may assign to it. These were only ever assigned (in .init() and
+      # friends), which threw "cannot add bindings to a locked environment" and
+      # aborted the analysis during init - before any result was produced.
+      .perf_timers = NULL,
+      .nom_object = NULL,
+      .validation_warnings = NULL,
+      .validation_time = NULL,
+      .analysis_times = NULL,
+
+
       # HTML notice helper (replaces self$results$insert(N, jmvcore::Notice))
       # See R/survivalcont.b.R:700-743 for canonical pattern.
       # The protobuf serialization of Notice objects can fail with

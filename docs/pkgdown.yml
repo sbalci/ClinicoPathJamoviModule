@@ -1,5 +1,5 @@
-pandoc: 3.8.2.1
-pkgdown: 2.2.0
+pandoc: '3.10'
+pkgdown: 2.2.1
 pkgdown_sha: ~
 articles:
   clinicopath-descriptives-checkdata-guide: clinicopath-descriptives-checkdata-guide.html
@@ -9,6 +9,7 @@ articles:
   ihccluster-marker-distance-pathologist-guide: ihccluster-marker-distance-pathologist-guide.html
   ihccluster-quick-reference-card: ihccluster-quick-reference-card.html
   jsurvival-03-multisurvival-interactions: jsurvival-03-multisurvival-interactions.html
+  jsurvival-04-multisurvival-interaction-interpretation: jsurvival-04-multisurvival-interaction-interpretation.html
   jsurvival-adaptivelasso-comprehensive: jsurvival-adaptivelasso-comprehensive.html
   jsurvival-competingsurvival-comprehensive: jsurvival-competingsurvival-comprehensive.html
   jsurvival-conditionalsurvival-comprehensive: jsurvival-conditionalsurvival-comprehensive.html
@@ -33,7 +34,7 @@ articles:
   test-data-catalog: test-data-catalog.html
   test-data-complete-catalog: test-data-complete-catalog.html
   users-of-ClinicoPath: users-of-ClinicoPath.html
-last_built: 2026-07-06T17:08Z
+last_built: 2026-08-14T13:26Z
 urls:
   reference: https://www.serdarbalci.com/ClinicoPathJamoviModule/reference
   article: https://www.serdarbalci.com/ClinicoPathJamoviModule/articles

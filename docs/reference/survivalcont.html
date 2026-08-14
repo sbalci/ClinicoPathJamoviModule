@@ -7,7 +7,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">ClinicoPath</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.0.47</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.0.52</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -48,12 +48,12 @@
     <h2 id="ref-usage">Usage<a class="anchor" aria-label="anchor" href="#ref-usage"></a></h2>
     <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">survivalcont</span><span class="op">(</span></span>
 <span>  <span class="va">data</span>,</span>
-<span>  <span class="va">elapsedtime</span>,</span>
+<span>  elapsedtime <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  tint <span class="op">=</span> <span class="cn">FALSE</span>,</span>
-<span>  <span class="va">dxdate</span>,</span>
-<span>  <span class="va">fudate</span>,</span>
-<span>  <span class="va">contexpl</span>,</span>
-<span>  <span class="va">outcome</span>,</span>
+<span>  dxdate <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  fudate <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  contexpl <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  outcome <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  <span class="va">outcomeLevel</span>,</span>
 <span>  <span class="va">dod</span>,</span>
 <span>  <span class="va">dooc</span>,</span>
@@ -90,10 +90,11 @@
 <span>  rmst_tau <span class="op">=</span> <span class="fl">0</span>,</span>
 <span>  residual_diagnostics <span class="op">=</span> <span class="cn">FALSE</span>,</span>
 <span>  stratified_cox <span class="op">=</span> <span class="cn">FALSE</span>,</span>
-<span>  <span class="va">strata_variable</span>,</span>
+<span>  strata_variable <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  loglog <span class="op">=</span> <span class="cn">FALSE</span>,</span>
 <span>  showExplanations <span class="op">=</span> <span class="cn">FALSE</span>,</span>
-<span>  showSummaries <span class="op">=</span> <span class="cn">FALSE</span></span>
+<span>  showSummaries <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  seed <span class="op">=</span> <span class="fl">12345</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
 
@@ -168,19 +169,20 @@ of cancer patients.</p></dd>
 
 
 <dt id="arg-analysistype">analysistype<a class="anchor" aria-label="anchor" href="#arg-analysistype"></a></dt>
-<dd><p>Select the type of survival analysis to perform.
-"Overall" survival analysis considers all events as equivalent, while
-"Cause Specific" analysis distinguishes between different event types.
-"Competing Risk" analysis accounts for competing risks that may prevent the
-event of interest from occurring.</p></dd>
+<dd><p>Select the survival estimand. Overall counts both death
+categories as events; Cause Specific treats other-cause death as censored;
+Disease-Free counts disease, recurrence, and death categories as events
+according to the selected mapping. Competing-risk coding is retained for
+compatibility but is not analysed by this continuous cut-off function;
+select it to receive guidance to a competing-risk analysis.</p></dd>
 
 
 <dt id="arg-cutp">cutp<a class="anchor" aria-label="anchor" href="#arg-cutp"></a></dt>
-<dd><p>Specify the time points for survival probability calculations.
-The default "12, 36, 60"  represents 1, 3, and 5 years (compatible with
-literature standards). You can customize  these values by entering your own
-comma-separated time points (e.g., "6, 18, 30" for  6 months, 18 months, 30
-months). Use "default" to restore standard 1,3,5-year analysis.</p></dd>
+<dd><p>Specify time points for survival-probability estimates. The
+historical factory value "12, 36, 60" and the word "default" both select
+unit-aware 1-, 3-, and 5-year points (for example 365, 1095, and 1825 for
+days, or 1, 3, and 5 for years). Enter any other comma- or space-separated
+positive values to request custom points in the selected output time scale.</p></dd>
 
 
 <dt id="arg-timetypedata">timetypedata<a class="anchor" aria-label="anchor" href="#arg-timetypedata"></a></dt>
@@ -203,8 +205,8 @@ enable the "Use Landmark Time" option.</p></dd>
 
 
 <dt id="arg-sc">sc<a class="anchor" aria-label="anchor" href="#arg-sc"></a></dt>
-<dd><p>Enable this option to create a Kaplan-Meier survival plot for the
-continuous explanatory variable.</p></dd>
+<dd><p>Create Kaplan-Meier curves after the continuous explanatory
+variable has been divided by a selected single or multiple cut-off method.</p></dd>
 
 
 <dt id="arg-kmunicate">kmunicate<a class="anchor" aria-label="anchor" href="#arg-kmunicate"></a></dt>
@@ -223,8 +225,11 @@ time for the continuous explanatory variable.</p></dd>
 
 
 <dt id="arg-endplot">endplot<a class="anchor" aria-label="anchor" href="#arg-endplot"></a></dt>
-<dd><p>Specify the end time for the survival plots. This option
-determines the maximum time point to include in the plots.</p></dd>
+<dd><p>Specify the end time for the survival plots; this is the
+maximum time point shown on the x-axis. The factory value 60 is interpreted
+as five years in the selected output time scale (1825 for days, 260 for
+weeks, 60 for months, 5 for years). Enter any other value to set the axis
+limit explicitly in that scale.</p></dd>
 
 
 <dt id="arg-ybegin-plot">ybegin_plot<a class="anchor" aria-label="anchor" href="#arg-ybegin-plot"></a></dt>
@@ -239,30 +244,32 @@ plots. This option allows you to customize the range of the y-axis.</p></dd>
 
 
 <dt id="arg-byplot">byplot<a class="anchor" aria-label="anchor" href="#arg-byplot"></a></dt>
-<dd><p>Specify the time interval for the survival plots. This option
-determines the spacing of tick marks on the x-axis.</p></dd>
+<dd><p>Specify the spacing of x-axis tick marks on the survival
+plots. The factory value 12 is interpreted as one year in the selected
+output time scale (365 for days, 52 for weeks, 12 for months, 1 for years).
+Enter any other value to set the spacing explicitly in that scale.</p></dd>
 
 
 <dt id="arg-findcut">findcut<a class="anchor" aria-label="anchor" href="#arg-findcut"></a></dt>
-<dd><p>Enable this option to automatically find the optimal cut-off
-point for the continuous explanatory variable using the maximally selected
-rank statistic. This option is only available if you enable the "Survival
-Plot" option. The optimal cut-off point will be displayed on the survival
-plot as a vertical dashed line.</p></dd>
+<dd><p>Derive a single data-dependent cut-off for the continuous
+explanatory variable using a maximally selected rank statistic. Treat the
+continuous Cox model as the primary analysis and validate the selected
+cut-off in independent data.</p></dd>
 
 
 <dt id="arg-multiple-cutoffs">multiple_cutoffs<a class="anchor" aria-label="anchor" href="#arg-multiple-cutoffs"></a></dt>
-<dd><p>Enable this option to find multiple optimal cut-off
-points for the continuous explanatory variable. This extends the single
-cutoff analysis to identify 2-4 optimal cut-off points that maximize
-survival group separation. Creates stratified groups for enhanced survival
-analysis.</p></dd>
+<dd><p>Enable this option to derive multiple candidate
+cut-off points for the continuous explanatory variable. Depending on the
+selected method, these may be quantile-based, tree-derived, recursively
+optimized, or minimum-p-value cut-offs. All data-derived cut-offs are
+exploratory and require external validation.</p></dd>
 
 
 <dt id="arg-num-cutoffs">num_cutoffs<a class="anchor" aria-label="anchor" href="#arg-num-cutoffs"></a></dt>
 <dd><p>Select the number of cut-off points to identify. This
-will create multiple risk groups for stratified survival analysis (e.g., 2
-cut-offs create Low, Medium, High risk groups).</p></dd>
+creates ordered marker-value groups (for example, 2 cut-offs create 3
+groups); the observed survival ordering must be read from the results and
+is not assumed in advance.</p></dd>
 
 
 <dt id="arg-cutoff-method">cutoff_method<a class="anchor" aria-label="anchor" href="#arg-cutoff-method"></a></dt>
@@ -318,14 +325,16 @@ For example,  "12, 36, 60" will create intervals 0-12, 12-36, 36-60, and
 
 
 <dt id="arg-rate-multiplier">rate_multiplier<a class="anchor" aria-label="anchor" href="#arg-rate-multiplier"></a></dt>
-<dd><p>Specify the multiplier for incidence rates (e.g.,
-100 for rates per 100 person-years, 1000 for rates per 1000 person-years).</p></dd>
+<dd><p>Specify the multiplier for incidence rates (for
+example, 100 reports events per 100 units of the selected output time
+scale).</p></dd>
 
 
 <dt id="arg-rmst-analysis">rmst_analysis<a class="anchor" aria-label="anchor" href="#arg-rmst-analysis"></a></dt>
-<dd><p>Enable Restricted Mean Survival Time (RMST) analysis.
-RMST provides the average  survival time up to a specified time horizon,
-useful when median survival is undefined.</p></dd>
+<dd><p>Report Restricted Mean Survival Time (RMST) up to a
+specified horizon. Without a cut-off this is an overall cohort summary;
+with a single cut-off, the displayed groups are compared descriptively at a
+common observed horizon.</p></dd>
 
 
 <dt id="arg-rmst-tau">rmst_tau<a class="anchor" aria-label="anchor" href="#arg-rmst-tau"></a></dt>
@@ -336,8 +345,9 @@ the maximum follow-up time for RMST calculation.</p></dd>
 
 <dt id="arg-residual-diagnostics">residual_diagnostics<a class="anchor" aria-label="anchor" href="#arg-residual-diagnostics"></a></dt>
 <dd><p>Enable Cox model residual diagnostics including
-Martingale, Deviance, Score, and  Schoenfeld residuals. Useful for checking
-model assumptions and identifying outliers.</p></dd>
+case-level Martingale, Deviance, and Score residuals plus event-time
+Schoenfeld residuals. These are diagnostic aids; Schoenfeld residuals alone
+are not a formal proportional-hazards test.</p></dd>
 
 
 <dt id="arg-stratified-cox">stratified_cox<a class="anchor" aria-label="anchor" href="#arg-stratified-cox"></a></dt>
@@ -347,9 +357,11 @@ proportional hazards within strata.</p></dd>
 
 
 <dt id="arg-strata-variable">strata_variable<a class="anchor" aria-label="anchor" href="#arg-strata-variable"></a></dt>
-<dd><p>Variable to use for stratification in Cox
-regression. Should be a categorical variable  that defines different risk
-groups or populations.</p></dd>
+<dd><p>Categorical variable used for stratification in Cox
+regression, allowing a different baseline hazard in each stratum. Must be a
+factor with a small number of reasonably sized groups (for example treating
+centre or stage). A near-continuous variable would give one stratum per
+patient and no estimable hazard ratio.</p></dd>
 
 
 <dt id="arg-loglog">loglog<a class="anchor" aria-label="anchor" href="#arg-loglog"></a></dt>
@@ -369,10 +381,15 @@ and plots. These summaries provide plain-language interpretations of the
 statistical results. Turn off to reduce visual clutter when summaries are
 not needed.</p></dd>
 
+
+<dt id="arg-seed">seed<a class="anchor" aria-label="anchor" href="#arg-seed"></a></dt>
+<dd><p>Random seed for Monte Carlo components of minimum-p-value and
+selection-adjusted cut-point calculations.</p></dd>
+
 </dl></div>
     <div class="section level2">
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
-    <p>A results object containing:</p><table class="table table"><tr><td><code>results$todo</code></td><td></td><td></td><td></td><td></td><td>a html</td></tr><tr><td><code>results$clinicalWarnings</code></td><td></td><td></td><td></td><td></td><td>a html</td></tr><tr><td><code>results$errors</code></td><td></td><td></td><td></td><td></td><td>a html</td></tr><tr><td><code>results$strongWarnings</code></td><td></td><td></td><td></td><td></td><td>a html</td></tr><tr><td><code>results$warnings</code></td><td></td><td></td><td></td><td></td><td>a html</td></tr><tr><td><code>results$infoMessages</code></td><td></td><td></td><td></td><td></td><td>a html</td></tr><tr><td><code>results$coxRegressionHeading</code></td><td></td><td></td><td></td><td></td><td>a preformatted</td></tr><tr><td><code>results$coxSummary</code></td><td></td><td></td><td></td><td></td><td>a preformatted</td></tr><tr><td><code>results$coxTable</code></td><td></td><td></td><td></td><td></td><td>a table</td></tr><tr><td><code>results$tCoxtext2</code></td><td></td><td></td><td></td><td></td><td>a html</td></tr><tr><td><code>results$coxRegressionHeading3</code></td><td></td><td></td><td></td><td></td><td>a preformatted</td></tr><tr><td><code>results$coxRegressionExplanation</code></td><td></td><td></td><td></td><td></td><td>a html</td></tr><tr><td><code>results$personTimeHeading</code></td><td></td><td></td><td></td><td></td><td>a preformatted</td></tr><tr><td><code>results$personTimeTable</code></td><td></td><td></td><td></td><td></td><td>a table</td></tr><tr><td><code>results$personTimeSummary</code></td><td></td><td></td><td></td><td></td><td>a html</td></tr><tr><td><code>results$personTimeExplanation</code></td><td></td><td></td><td></td><td></td><td>a html</td></tr><tr><td><code>results$rmstHeading</code></td><td></td><td></td><td></td><td></td><td>a preformatted</td></tr><tr><td><code>results$rmstTable</code></td><td></td><td></td><td></td><td></td><td>a table</td></tr><tr><td><code>results$rmstSummary</code></td><td></td><td></td><td></td><td></td><td>a preformatted</td></tr><tr><td><code>results$rmstExplanation</code></td><td></td><td></td><td></td><td></td><td>a html</td></tr><tr><td><code>results$residualsTable</code></td><td></td><td></td><td></td><td></td><td>a table</td></tr><tr><td><code>results$residualDiagnosticsExplanation</code></td><td></td><td></td><td></td><td></td><td>a html</td></tr><tr><td><code>results$cutoffAnalysisHeading</code></td><td></td><td></td><td></td><td></td><td>a preformatted</td></tr><tr><td><code>results$rescutTable</code></td><td></td><td></td><td></td><td></td><td>a table</td></tr><tr><td><code>results$cutoffAnalysisHeading3</code></td><td></td><td></td><td></td><td></td><td>a preformatted</td></tr><tr><td><code>results$cutoffAnalysisExplanation</code></td><td></td><td></td><td></td><td></td><td>a html</td></tr><tr><td><code>results$plot4</code></td><td></td><td></td><td></td><td></td><td>an image</td></tr><tr><td><code>results$plot5</code></td><td></td><td></td><td></td><td></td><td>an image</td></tr><tr><td><code>results$medianSummary</code></td><td></td><td></td><td></td><td></td><td>a preformatted</td></tr><tr><td><code>results$medianTable</code></td><td></td><td></td><td></td><td></td><td>a table</td></tr><tr><td><code>results$survTableSummary</code></td><td></td><td></td><td></td><td></td><td>a preformatted</td></tr><tr><td><code>results$survTable</code></td><td></td><td></td><td></td><td></td><td>a table</td></tr><tr><td><code>results$plot2</code></td><td></td><td></td><td></td><td></td><td>an image</td></tr><tr><td><code>results$plot3</code></td><td></td><td></td><td></td><td></td><td>an image</td></tr><tr><td><code>results$plot6</code></td><td></td><td></td><td></td><td></td><td>an image</td></tr><tr><td><code>results$survivalPlotsHeading3</code></td><td></td><td></td><td></td><td></td><td>a preformatted</td></tr><tr><td><code>results$survivalPlotsExplanation</code></td><td></td><td></td><td></td><td></td><td>a html</td></tr><tr><td><code>results$plot7</code></td><td></td><td></td><td></td><td></td><td>an image</td></tr><tr><td><code>results$loglogPlotExplanation</code></td><td></td><td></td><td></td><td></td><td>a html</td></tr><tr><td><code>results$residualsPlot</code></td><td></td><td></td><td></td><td></td><td>an image</td></tr><tr><td><code>results$calculatedtime</code></td><td></td><td></td><td></td><td></td><td>an output</td></tr><tr><td><code>results$outcomeredefined</code></td><td></td><td></td><td></td><td></td><td>an output</td></tr><tr><td><code>results$calculatedcutoff</code></td><td></td><td></td><td></td><td></td><td>an output</td></tr><tr><td><code>results$multipleCutTable</code></td><td></td><td></td><td></td><td></td><td>a table</td></tr><tr><td><code>results$multipleMedianTable</code></td><td></td><td></td><td></td><td></td><td>a table</td></tr><tr><td><code>results$multipleCutoffsExplanation</code></td><td></td><td></td><td></td><td></td><td>a html</td></tr><tr><td><code>results$multipleSurvTable</code></td><td></td><td></td><td></td><td></td><td>a table</td></tr><tr><td><code>results$plotMultipleCutoffs</code></td><td></td><td></td><td></td><td></td><td>an image</td></tr><tr><td><code>results$plotMultipleSurvival</code></td><td></td><td></td><td></td><td></td><td>an image</td></tr><tr><td><code>results$calculatedmulticut</code></td><td></td><td></td><td></td><td></td><td>an output</td></tr></table><p>Tables can be converted to data frames with <code>asDF</code> or <code><a href="https://rdrr.io/r/base/as.data.frame.html" class="external-link">as.data.frame</a></code>. For example:</p>
+    <p>A results object containing:</p><table class="table table"><tr><td><code>results$eventRecodeInfo</code></td><td></td><td></td><td></td><td></td><td>a html</td></tr><tr><td><code>results$todo</code></td><td></td><td></td><td></td><td></td><td>a html</td></tr><tr><td><code>results$clinicalWarnings</code></td><td></td><td></td><td></td><td></td><td>a html</td></tr><tr><td><code>results$errors</code></td><td></td><td></td><td></td><td></td><td>a html</td></tr><tr><td><code>results$strongWarnings</code></td><td></td><td></td><td></td><td></td><td>a html</td></tr><tr><td><code>results$warnings</code></td><td></td><td></td><td></td><td></td><td>a html</td></tr><tr><td><code>results$infoMessages</code></td><td></td><td></td><td></td><td></td><td>a html</td></tr><tr><td><code>results$coxRegressionHeading</code></td><td></td><td></td><td></td><td></td><td>a preformatted</td></tr><tr><td><code>results$coxSummary</code></td><td></td><td></td><td></td><td></td><td>a preformatted</td></tr><tr><td><code>results$coxTable</code></td><td></td><td></td><td></td><td></td><td>a table</td></tr><tr><td><code>results$stratifiedCoxTable</code></td><td></td><td></td><td></td><td></td><td>a table</td></tr><tr><td><code>results$tCoxtext2</code></td><td></td><td></td><td></td><td></td><td>a html</td></tr><tr><td><code>results$coxRegressionHeading3</code></td><td></td><td></td><td></td><td></td><td>a preformatted</td></tr><tr><td><code>results$coxRegressionExplanation</code></td><td></td><td></td><td></td><td></td><td>a html</td></tr><tr><td><code>results$personTimeHeading</code></td><td></td><td></td><td></td><td></td><td>a preformatted</td></tr><tr><td><code>results$personTimeTable</code></td><td></td><td></td><td></td><td></td><td>a table</td></tr><tr><td><code>results$personTimeSummary</code></td><td></td><td></td><td></td><td></td><td>a html</td></tr><tr><td><code>results$personTimeExplanation</code></td><td></td><td></td><td></td><td></td><td>a html</td></tr><tr><td><code>results$rmstHeading</code></td><td></td><td></td><td></td><td></td><td>a preformatted</td></tr><tr><td><code>results$rmstTable</code></td><td></td><td></td><td></td><td></td><td>a table</td></tr><tr><td><code>results$rmstSummary</code></td><td></td><td></td><td></td><td></td><td>a preformatted</td></tr><tr><td><code>results$rmstExplanation</code></td><td></td><td></td><td></td><td></td><td>a html</td></tr><tr><td><code>results$residualsTable</code></td><td></td><td></td><td></td><td></td><td>a table</td></tr><tr><td><code>results$schoenfeldResidualsTable</code></td><td></td><td></td><td></td><td></td><td>a table</td></tr><tr><td><code>results$residualDiagnosticsExplanation</code></td><td></td><td></td><td></td><td></td><td>a html</td></tr><tr><td><code>results$cutoffAnalysisHeading</code></td><td></td><td></td><td></td><td></td><td>a preformatted</td></tr><tr><td><code>results$rescutTable</code></td><td></td><td></td><td></td><td></td><td>a table</td></tr><tr><td><code>results$cutoffAnalysisHeading3</code></td><td></td><td></td><td></td><td></td><td>a preformatted</td></tr><tr><td><code>results$cutoffAnalysisExplanation</code></td><td></td><td></td><td></td><td></td><td>a html</td></tr><tr><td><code>results$plot4</code></td><td></td><td></td><td></td><td></td><td>an image</td></tr><tr><td><code>results$plot5</code></td><td></td><td></td><td></td><td></td><td>an image</td></tr><tr><td><code>results$medianSummary</code></td><td></td><td></td><td></td><td></td><td>a preformatted</td></tr><tr><td><code>results$medianTable</code></td><td></td><td></td><td></td><td></td><td>a table</td></tr><tr><td><code>results$survTableSummary</code></td><td></td><td></td><td></td><td></td><td>a preformatted</td></tr><tr><td><code>results$survTable</code></td><td></td><td></td><td></td><td></td><td>a table</td></tr><tr><td><code>results$plot2</code></td><td></td><td></td><td></td><td></td><td>an image</td></tr><tr><td><code>results$plot3</code></td><td></td><td></td><td></td><td></td><td>an image</td></tr><tr><td><code>results$plot6</code></td><td></td><td></td><td></td><td></td><td>an image</td></tr><tr><td><code>results$survivalPlotsHeading3</code></td><td></td><td></td><td></td><td></td><td>a preformatted</td></tr><tr><td><code>results$survivalPlotsExplanation</code></td><td></td><td></td><td></td><td></td><td>a html</td></tr><tr><td><code>results$plot7</code></td><td></td><td></td><td></td><td></td><td>an image</td></tr><tr><td><code>results$loglogPlotExplanation</code></td><td></td><td></td><td></td><td></td><td>a html</td></tr><tr><td><code>results$residualsPlot</code></td><td></td><td></td><td></td><td></td><td>an image</td></tr><tr><td><code>results$calculatedtime</code></td><td></td><td></td><td></td><td></td><td>an output</td></tr><tr><td><code>results$outcomeredefined</code></td><td></td><td></td><td></td><td></td><td>an output</td></tr><tr><td><code>results$calculatedcutoff</code></td><td></td><td></td><td></td><td></td><td>an output</td></tr><tr><td><code>results$multipleCutTable</code></td><td></td><td></td><td></td><td></td><td>a table</td></tr><tr><td><code>results$multipleMedianTable</code></td><td></td><td></td><td></td><td></td><td>a table</td></tr><tr><td><code>results$multipleCutoffsExplanation</code></td><td></td><td></td><td></td><td></td><td>a html</td></tr><tr><td><code>results$multipleSurvTable</code></td><td></td><td></td><td></td><td></td><td>a table</td></tr><tr><td><code>results$plotMultipleCutoffs</code></td><td></td><td></td><td></td><td></td><td>an image</td></tr><tr><td><code>results$plotMultipleSurvival</code></td><td></td><td></td><td></td><td></td><td>an image</td></tr><tr><td><code>results$calculatedmulticut</code></td><td></td><td></td><td></td><td></td><td>an output</td></tr></table><p>Tables can be converted to data frames with <code>asDF</code> or <code><a href="https://rdrr.io/r/base/as.data.frame.html" class="external-link">as.data.frame</a></code>. For example:</p>
 <p><code>results$coxTable$asDF</code></p>
 <p><code>as.data.frame(results$coxTable)</code></p>
     </div>
@@ -386,7 +403,7 @@ not needed.</p></dd>
 </div>
 
 <div class="pkgdown-footer-right">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.2.0.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.2.1.</p>
 </div>
 
     </footer></div>

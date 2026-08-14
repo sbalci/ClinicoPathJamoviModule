@@ -11,7 +11,7 @@ visualizations with significance testing."></head><body>
 
     <a class="navbar-brand me-2" href="../index.html">ClinicoPath</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.0.47</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.0.52</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -55,7 +55,7 @@ visualizations with significance testing.</p>
     <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">jjcorrmat</span><span class="op">(</span></span>
 <span>  <span class="va">data</span>,</span>
 <span>  <span class="va">dep</span>,</span>
-<span>  <span class="va">grvar</span>,</span>
+<span>  grvar <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  typestatistics <span class="op">=</span> <span class="st">"parametric"</span>,</span>
 <span>  matrixtype <span class="op">=</span> <span class="st">"upper"</span>,</span>
 <span>  matrixmethod <span class="op">=</span> <span class="st">"square"</span>,</span>
@@ -98,7 +98,9 @@ matrices for each level of the grouping variable.</p></dd>
 <dt id="arg-typestatistics">typestatistics<a class="anchor" aria-label="anchor" href="#arg-typestatistics"></a></dt>
 <dd><p>Type of correlation analysis to perform. 'parametric'
 uses Pearson correlation, 'nonparametric' uses Spearman's rho, 'robust'
-uses percentage bend correlation, 'bayes' computes Bayes factors.</p></dd>
+uses Winsorized Pearson correlation (the most extreme 20 percent of
+observations in each tail are pulled in rather than removed), 'bayes'
+reports the median posterior estimate and BF10.</p></dd>
 
 
 <dt id="arg-matrixtype">matrixtype<a class="anchor" aria-label="anchor" href="#arg-matrixtype"></a></dt>
@@ -125,7 +127,9 @@ insignificant.</p></dd>
 
 
 <dt id="arg-k">k<a class="anchor" aria-label="anchor" href="#arg-k"></a></dt>
-<dd><p>Number of decimal places for displaying correlation coefficients.</p></dd>
+<dd><p>Number of decimal places for the correlation coefficients printed
+inside the plot. The correlation table is formatted by jamovi and is not
+affected.</p></dd>
 
 
 <dt id="arg-partial">partial<a class="anchor" aria-label="anchor" href="#arg-partial"></a></dt>
@@ -195,7 +199,7 @@ is 450.</p></dd>
 </div>
 
 <div class="pkgdown-footer-right">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.2.0.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.2.1.</p>
 </div>
 
     </footer></div>

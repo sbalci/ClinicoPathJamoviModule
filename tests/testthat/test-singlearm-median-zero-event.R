@@ -17,13 +17,14 @@ library(testthat)
 .msrc <- function(file) {
   for (p in c(file.path("../../R", file), file.path("../R", file), file.path("R", file)))
     if (file.exists(p)) return(p)
-  NULL
+  # R CMD check runs against the INSTALLED package, where R/*.b.R is gone.
+  testthat::skip(paste0("R/", file, " not available (installed-package check)"))
 }
 
 .median_run <- function(status, times = seq(2, 60, length.out = length(status)),
-                        competing = FALSE, timetypeoutput = "months") {
+                        competing = FALSE, timetypeoutput = "months",
+                        estimand = "overall survival") {
   src <- .msrc("singlearm.b.R")
-  if (is.null(src)) stop("R/singlearm.b.R not found")
 
   e <- new.env(parent = globalenv())
   suppressWarnings(suppressMessages(sys.source(src, envir = e)))
@@ -64,11 +65,10 @@ library(testthat)
     .checkpoint          = function(...) invisible(NULL),
     .displayMessages     = function() invisible(NULL),
     .isCompetingRisk     = function(...) competing,
-    .estimandMeta        = function(...) list(
-      probability = "Kaplan-Meier event-free probability",
-      median = "Median event-free time",
-      median_lower = "median event-free time",
-      curve = "Event-Free Probability for the Selected Event"),
+    # The declared endpoint. .medianSurv() names the estimand off this, via the
+    # real .estimandMeta(), so the labels asserted below are the shipped ones.
+    .eventRecode         = list(estimand = estimand),
+    .estimandMeta        = bind(pm$.estimandMeta),
     .addInfo             = add("INFO"),
     .addWarning          = add("WARNING"),
     .addError            = add("ERROR"),
@@ -139,9 +139,9 @@ test_that("L1/L2: a competing-risk cohort WITH events is unchanged by the zero-e
 
 # the copy-ready clinical summary that used to come out blank ----------------
 
-.clinical_summary <- function(cells, competing, max_time = 48) {
+.clinical_summary <- function(cells, competing, max_time = 48,
+                              estimand = "overall survival") {
   src <- .msrc("singlearm.b.R")
-  if (is.null(src)) stop("R/singlearm.b.R not found")
   e <- new.env(parent = globalenv())
   suppressWarnings(suppressMessages(sys.source(src, envir = e)))
   f <- e$singlearmClass$private_methods$.generateClinicalSummary
@@ -159,11 +159,9 @@ test_that("L1/L2: a competing-risk cohort WITH events is unchanged by the zero-e
     ))
   stub$private <- list(
     .isCompetingRisk = function(...) competing,
-    .estimandMeta = function(...) list(
-      probability = "Kaplan-Meier event-free probability",
-      median = "Median event-free time",
-      median_lower = "median event-free time",
-      curve = "Event-Free Probability for the Selected Event"))
+    .eventRecode     = list(estimand = estimand))
+  stub$private$.estimandMeta <- e$singlearmClass$private_methods$.estimandMeta
+  environment(stub$private$.estimandMeta) <- stub
   environment(f) <- stub
   f(list(data_quality = list(max_time = max_time)))
   rec$html
@@ -191,13 +189,23 @@ test_that("L1: a competing-risk median is not called median survival in the clin
   expect_false(grepl("95% CI: NA", html, fixed = TRUE))
 })
 
-test_that("L1: a generic ordinary cohort uses event-free wording, with its CI", {
+test_that("L1: an ordinary cohort still says median survival, with its CI", {
   # The input the estimand relabelling could newly damage.
   html <- .clinical_summary(list(records = 40, events = 25, median = 18.4,
                                  x0_95lcl = 12.1, x0_95ucl = 26.9),
                             competing = FALSE)
-  expect_match(html, "Median event-free time was 18.4 months")
+  expect_match(html, "Median overall survival was 18.4 months")
   expect_match(html, "95% CI: 12.1-26.9 months")
+})
+
+test_that("L1: an UNDECLARED estimand is not called survival in the clinical summary", {
+  # The other half of the same distinction: when the endpoint has not been
+  # declared, the copy-ready paragraph must not assert a survival estimand.
+  html <- .clinical_summary(list(records = 40, events = 25, median = 18.4,
+                                 x0_95lcl = 12.1, x0_95ucl = 26.9),
+                            competing = FALSE, estimand = "")
+  expect_match(html, "Median event-free time was 18.4 months")
+  expect_false(grepl("survival was", html, fixed = TRUE))
 })
 
 
@@ -215,7 +223,9 @@ test_that("L2: a fully censored KM cohort reports 'not estimable', never 'NA'", 
   expect_false(grepl("is NA", txt, fixed = TRUE))
   expect_false(grepl("NA -", txt, fixed = TRUE))
   expect_match(txt, "The median was not reached")
-  expect_match(r$titles$medianTable, "Median event-free time Table")
+  # Titled after the declared estimand, and NOT after cumulative incidence.
+  expect_match(r$titles$medianTable, "Median overall survival Table", fixed = TRUE)
+  expect_false(grepl("Cumulative Incidence", r$titles$medianTable, fixed = TRUE))
 })
 
 test_that("L2: an ordinary KM cohort still reports its median and CI", {
@@ -225,8 +235,9 @@ test_that("L2: an ordinary KM cohort still reports its median and CI", {
                    times = c(sort(round(runif(30, 1, 40), 1)), rep(45, 5)))
   txt <- r$content$medianSummary
 
-  expect_match(txt, "^Median event-free time is [0-9.]+ months")
+  expect_match(txt, "^Median overall survival is [0-9.]+ months")
   expect_match(txt, "95% CI: [0-9.]+ - [0-9.]+")
   expect_false(grepl("not estimable|no events were observed", txt))
-  expect_match(txt, "first time at which estimated event-free probability is 50% or lower")
+  expect_match(txt, "first time at which estimated event-free probability is 50% or lower",
+               fixed = TRUE)
 })

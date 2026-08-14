@@ -7,7 +7,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">ClinicoPath</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.0.47</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.0.52</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -48,11 +48,12 @@
     <h2 id="ref-usage">Usage<a class="anchor" aria-label="anchor" href="#ref-usage"></a></h2>
     <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">agepyramid</span><span class="op">(</span></span>
 <span>  <span class="va">data</span>,</span>
-<span>  <span class="va">age</span>,</span>
-<span>  <span class="va">gender</span>,</span>
+<span>  age <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  gender <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  <span class="va">female</span>,</span>
 <span>  <span class="va">male</span>,</span>
 <span>  age_groups <span class="op">=</span> <span class="st">"custom"</span>,</span>
+<span>  age_interval <span class="op">=</span> <span class="st">"left"</span>,</span>
 <span>  bin_width <span class="op">=</span> <span class="fl">5</span>,</span>
 <span>  custom_breaks <span class="op">=</span> <span class="st">""</span>,</span>
 <span>  plot_title <span class="op">=</span> <span class="st">"Age Pyramid"</span>,</span>
@@ -100,7 +101,24 @@ level male</p></dd>
 
 <dt id="arg-age-groups">age_groups<a class="anchor" aria-label="anchor" href="#arg-age-groups"></a></dt>
 <dd><p>Predefined age group categories. Choose 'custom' to use
-bin_width, or select a preset.</p></dd>
+bin_width, or select a preset. 'who' gives the WHO/UN standard five-year
+groups (0-4, 5-9, ... 85+) used by the WHO World Standard Population and UN
+population pyramids; 'who_infant' is the WHO abridged life-table grouping,
+which reports infants (&lt;1) separately from children aged 1-4. All bands are
+left-closed, so an age on a boundary starts the band named for it.</p></dd>
+
+
+<dt id="arg-age-interval">age_interval<a class="anchor" aria-label="anchor" href="#arg-age-interval"></a></dt>
+<dd><p>Which end of an age band is closed. 'left' gives
+[lower, upper) bands, the WHO/UN and demographic convention: a person aged
+exactly 65 starts the 65-69 band, and equal-width bands hold equal numbers
+of single years. 'right' gives (lower, upper] bands, where age 65 closes
+the band below it; this reproduces the behaviour of releases before 1.0.52
+and makes the lowest band one year wider than the others, which inflates
+the youngest bar of the pyramid.</p>
+<p>[lower, upper) bands, the WHO/UN and demographic convention: a person aged
+exactly 65 starts the 65-69 band, and equal-width bands hold equal numbers
+of single years. 'right' gives (lower, upper]: R:lower,%20upper)%20bands,%20the%20WHO/UN%20and%20demographic%20convention:%20a%20person%20aged%0Aexactly%2065%20starts%20the%2065-69%20band,%20and%20equal-width%20bands%20hold%20equal%20numbers%0Aof%20single%20years.%20'right'%20gives%20(lower,%20upper</p></dd>
 
 
 <dt id="arg-bin-width">bin_width<a class="anchor" aria-label="anchor" href="#arg-bin-width"></a></dt>
@@ -189,7 +207,7 @@ ggcharts_colors is 'custom'.</p></dd>
 </div>
 
 <div class="pkgdown-footer-right">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.2.0.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.2.1.</p>
 </div>
 
     </footer></div>

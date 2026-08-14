@@ -11,7 +11,7 @@ realistic clinical distributions."></head><body>
 
     <a class="navbar-brand me-2" href="../index.html">ClinicoPath</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.0.47</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.0.52</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -93,9 +93,6 @@ provide complementary diagnostic information.</p>
 <span class="r-in"><span>             classVar <span class="op">=</span> <span class="st">"mi_status"</span>, positiveClass <span class="op">=</span> <span class="st">"MI"</span>,</span></span>
 <span class="r-in"><span>             refVar <span class="op">=</span> <span class="st">"troponin"</span>,</span></span>
 <span class="r-in"><span>             method <span class="op">=</span> <span class="st">"maximize_metric"</span>, metric <span class="op">=</span> <span class="st">"youden"</span><span class="op">)</span></span></span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> Multiple optimal cutpoints found, applying break_ties.</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> Multiple optimal cutpoints found, applying break_ties.</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> Multiple optimal cutpoints found, applying break_ties.</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  ADVANCED ROC ANALYSIS</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
@@ -109,7 +106,7 @@ provide complementary diagnostic information.</p>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  The ROC analysis has been completed using the following</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  specifications:</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  &amp;nbsp;</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  Measure Variable(s): troponin, creatinine, bnp</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
@@ -117,7 +114,7 @@ provide complementary diagnostic information.</p>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  Positive Class: MI</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  &amp;nbsp;</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  Method: maximize_metric</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
@@ -129,9 +126,9 @@ provide complementary diagnostic information.</p>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  Tie Breakers: mean</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  Metric Tolerance: 0.05</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  Metric Tolerance: 1e-06</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  &amp;nbsp;</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  &lt;hr /&gt;</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
@@ -150,6 +147,11 @@ provide complementary diagnostic information.</p>
 <span class="r-out co"><span class="r-pr">#&gt;</span>    creatinine    0.8808727       0.8291091       0.9326363    &lt; .0000001   </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>    bnp           0.9294545       0.8894481       0.9694609    &lt; .0000001   </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  ───────────────────────────────────────────────────────────────────────── </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    Note. Reading of the test values: &lt;b&gt;HIGHER values were taken to</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    indicate MI&lt;/b&gt; (Classification Direction = "&gt;="). If that is the</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    wrong way round for this marker, every sensitivity, specificity,</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    cutpoint and AUC below is reversed — switch Classification</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    Direction to "&lt;=" and the AUC becomes 1 minus the value shown.</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>    Note. AUC 95% confidence intervals computed using the DeLong</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>    method.</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
@@ -170,7 +172,7 @@ provide complementary diagnostic information.</p>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  ──────────────────────────────────────────────────────────────────────────────────────────────────────────────── </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>    Cutpoint     Sensitivity    Specificity    PPV          NPV          Youden's J    AUC          Metric Score   </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  ──────────────────────────────────────────────────────────────────────────────────────────────────────────────── </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>    1.7027586       76.36364       82.40000     65.62500     88.79310     0.5876364    0.8961455       0.5876364   </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    2.1400000       70.90909       91.20000     78.00000     87.69231     0.6210909    0.8961455       0.6210909   </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  ──────────────────────────────────────────────────────────────────────────────────────────────────────────────── </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
@@ -178,7 +180,7 @@ provide complementary diagnostic information.</p>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  ──────────────────────────────────────────────────────────────────────────────────────────────────────────────── </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>    Cutpoint     Sensitivity    Specificity    PPV          NPV          Youden's J    AUC          Metric Score   </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  ──────────────────────────────────────────────────────────────────────────────────────────────────────────────── </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>    1.1500000       80.00000       80.80000     64.70588     90.17857     0.6080000    0.8808727       0.6080000   </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    1.1200000       85.45455       79.20000     64.38356     92.52336     0.6465455    0.8808727       0.6465455   </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  ──────────────────────────────────────────────────────────────────────────────────────────────────────────────── </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
@@ -186,7 +188,7 @@ provide complementary diagnostic information.</p>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  ────────────────────────────────────────────────────────────────────────────────────────────────────────────────── </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>    Cutpoint       Sensitivity    Specificity    PPV          NPV          Youden's J    AUC          Metric Score   </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  ────────────────────────────────────────────────────────────────────────────────────────────────────────────────── </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>    565.0294118       76.36364       87.20000     72.41379     89.34426     0.6356364    0.9294545       0.6356364   </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    622.0000000       76.36364       93.60000     84.00000     90.00000     0.6996364    0.9294545       0.6996364   </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  ────────────────────────────────────────────────────────────────────────────────────────────────────────────────── </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
@@ -198,6 +200,11 @@ provide complementary diagnostic information.</p>
 <span class="r-out co"><span class="r-pr">#&gt;</span>    creatinine    0.8808727       0.8291091       0.9326363    &lt; .0000001   </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>    bnp           0.9294545       0.8894481       0.9694609    &lt; .0000001   </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  ───────────────────────────────────────────────────────────────────────── </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    Note. Reading of the test values: &lt;b&gt;HIGHER values were taken to</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    indicate MI&lt;/b&gt; (Classification Direction = "&gt;="). If that is the</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    wrong way round for this marker, every sensitivity, specificity,</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    cutpoint and AUC below is reversed — switch Classification</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    Direction to "&lt;=" and the AUC becomes 1 minus the value shown.</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>    Note. AUC 95% confidence intervals computed using the DeLong</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>    method.</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
@@ -214,7 +221,7 @@ provide complementary diagnostic information.</p>
 </div>
 
 <div class="pkgdown-footer-right">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.2.0.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.2.1.</p>
 </div>
 
     </footer></div>

@@ -501,7 +501,7 @@ children:
                 enable: (use_parametric)
               - type: CheckBox
                 name: parametric_covariates
-                label: Include the group variable as a covariate
+                label: Group variable as covariate
                 enable: (use_parametric)
               - type: TextBox
                 name: spline_knots

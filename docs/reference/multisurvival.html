@@ -21,7 +21,7 @@ influence event rates relative to the person-time at risk in each subgroup."></h
 
     <a class="navbar-brand me-2" href="../index.html">ClinicoPath</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.0.47</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.0.52</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -90,7 +90,7 @@ influence event rates relative to the person-time at risk in each subgroup.</p>
 <span>  multievent <span class="op">=</span> <span class="cn">FALSE</span>,</span>
 <span>  hr <span class="op">=</span> <span class="cn">FALSE</span>,</span>
 <span>  sty <span class="op">=</span> <span class="st">"t1"</span>,</span>
-<span>  ph_cox <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>  ph_cox <span class="op">=</span> <span class="cn">FALSE</span>,</span>
 <span>  km <span class="op">=</span> <span class="cn">FALSE</span>,</span>
 <span>  endplot <span class="op">=</span> <span class="fl">60</span>,</span>
 <span>  byplot <span class="op">=</span> <span class="fl">12</span>,</span>
@@ -103,20 +103,22 @@ influence event rates relative to the person-time at risk in each subgroup.</p>
 <span>  calculateRiskScore <span class="op">=</span> <span class="cn">FALSE</span>,</span>
 <span>  numRiskGroups <span class="op">=</span> <span class="st">"four"</span>,</span>
 <span>  plotRiskGroups <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  ci_optimism <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  ci_optimism_boot <span class="op">=</span> <span class="fl">150</span>,</span>
 <span>  ac <span class="op">=</span> <span class="cn">FALSE</span>,</span>
 <span>  adjexplanatory <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  ac_method <span class="op">=</span> <span class="st">"average"</span>,</span>
+<span>  ac_summary <span class="op">=</span> <span class="cn">FALSE</span>,</span>
 <span>  showNomogram <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  compare_models <span class="op">=</span> <span class="cn">FALSE</span>,</span>
 <span>  use_stratify <span class="op">=</span> <span class="cn">FALSE</span>,</span>
 <span>  stratvar <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  person_time <span class="op">=</span> <span class="cn">FALSE</span>,</span>
 <span>  time_intervals <span class="op">=</span> <span class="st">"12, 36, 60"</span>,</span>
 <span>  rate_multiplier <span class="op">=</span> <span class="fl">100</span>,</span>
-<span>  use_tree <span class="op">=</span> <span class="cn">FALSE</span>,</span>
-<span>  min_node <span class="op">=</span> <span class="fl">20</span>,</span>
-<span>  complexity <span class="op">=</span> <span class="fl">0.01</span>,</span>
-<span>  max_depth <span class="op">=</span> <span class="fl">5</span>,</span>
-<span>  show_terminal_nodes <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  show_survmetrics <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  survmetrics_timepoints <span class="op">=</span> <span class="st">"12, 24, 36, 60"</span>,</span>
+<span>  survmetrics_show_plots <span class="op">=</span> <span class="cn">FALSE</span>,</span>
 <span>  showExplanations <span class="op">=</span> <span class="cn">FALSE</span>,</span>
 <span>  showSummaries <span class="op">=</span> <span class="cn">TRUE</span></span>
 <span><span class="op">)</span></span></code></pre></div>
@@ -234,8 +236,10 @@ the Cox model.</p></dd>
 <dd><p>Interaction (crossed) terms added to the Cox model,
 built from variables already selected as explanatory or continuous
 explanatory variables. Each term tests effect modification - e.g. Treatment
-x Biomarker for predictive-biomarker analysis. For a 2-way term the first
-variable is the focal effect and the second is the moderator.</p></dd>
+x Biomarker. Calling a treatment interaction predictive requires an
+appropriate treatment-comparison design and pre-specified validation; an
+interaction alone does not establish clinical utility. For a 2-way term the
+first variable is the focal effect and the second is the moderator.</p></dd>
 
 
 <dt id="arg-multievent">multievent<a class="anchor" aria-label="anchor" href="#arg-multievent"></a></dt>
@@ -292,8 +296,8 @@ marks) on the survival plot.</p></dd>
 
 
 <dt id="arg-medianline">medianline<a class="anchor" aria-label="anchor" href="#arg-medianline"></a></dt>
-<dd><p>If true, displays a line indicating the median survival
-time on the survival plot.</p></dd>
+<dd><p>Selects whether horizontal, vertical, both, or no
+median-survival reference lines are displayed on survival plots.</p></dd>
 
 
 <dt id="arg-pplot">pplot<a class="anchor" aria-label="anchor" href="#arg-pplot"></a></dt>
@@ -302,12 +306,17 @@ test on the survival plot.</p></dd>
 
 
 <dt id="arg-cutp">cutp<a class="anchor" aria-label="anchor" href="#arg-cutp"></a></dt>
-<dd><p>.</p></dd>
+<dd><p>Positive, comma-separated prediction timepoints in the selected
+time unit. They are used by adjusted-probability tables and the nomogram;
+invalid values and nomogram timepoints beyond observed follow-up are
+omitted with a warning.</p></dd>
 
 
 <dt id="arg-calculateriskscore">calculateRiskScore<a class="anchor" aria-label="anchor" href="#arg-calculateriskscore"></a></dt>
-<dd><p>If true, calculates a risk score from the Cox
-model coefficients for each individual.</p></dd>
+<dd><p>If true, calculates the Cox relative-risk score,
+exp(centered linear predictor), for each individual. This ranks fitted
+hazard and is not an absolute event probability; clinical use requires
+external validation.</p></dd>
 
 
 <dt id="arg-numriskgroups">numRiskGroups<a class="anchor" aria-label="anchor" href="#arg-numriskgroups"></a></dt>
@@ -321,20 +330,57 @@ selection.</p></dd>
 based on their calculated risk scores and plots their survival curves.</p></dd>
 
 
+<dt id="arg-ci-optimism">ci_optimism<a class="anchor" aria-label="anchor" href="#arg-ci-optimism"></a></dt>
+<dd><p>If true, computes a bootstrap optimism-corrected
+Harrell's C-index (apparent, optimism, and corrected) to quantify
+overfitting of the Cox model's discrimination. Not available for
+competing-risks (Fine-Gray) models.</p></dd>
+
+
+<dt id="arg-ci-optimism-boot">ci_optimism_boot<a class="anchor" aria-label="anchor" href="#arg-ci-optimism-boot"></a></dt>
+<dd><p>Number of bootstrap resamples used for optimism
+correction of the C-index. Larger values give more stable estimates but
+take longer to compute.</p></dd>
+
+
 <dt id="arg-ac">ac<a class="anchor" aria-label="anchor" href="#arg-ac"></a></dt>
 <dd><p>.</p></dd>
 
 
 <dt id="arg-adjexplanatory">adjexplanatory<a class="anchor" aria-label="anchor" href="#arg-adjexplanatory"></a></dt>
-<dd><p>.</p></dd>
+<dd><p>Categorical model variable whose levels are
+contrasted in the adjusted curves. The variable must also be selected as an
+explanatory or stratification variable so it is part of the fitted model.</p></dd>
 
 
 <dt id="arg-ac-method">ac_method<a class="anchor" aria-label="anchor" href="#arg-ac-method"></a></dt>
-<dd><p>Method for computing adjusted survival curves</p></dd>
+<dd><p>Estimand for the adjusted survival curves. "Standardised
+over cohort" sets every observed patient to each level in turn and averages
+the model-predicted curves (g-computation), so the curves differ only by
+the adjustment variable. "At reference covariate profile" predicts a single
+curve per level at the mean/mode of the other covariates. "Whole-cohort
+expected survival" returns one curve for the cohort at its observed
+covariates and does not contrast the levels at all.</p></dd>
+
+
+<dt id="arg-ac-summary">ac_summary<a class="anchor" aria-label="anchor" href="#arg-ac-summary"></a></dt>
+<dd><p>Display numeric model-adjusted probability outputs at the
+cutpoint timepoints, adjusted median time to event, and adjusted model
+effects. In competing-risk mode, probabilities are cumulative incidence and
+effects are Fine-Gray subdistribution hazard ratios.</p></dd>
 
 
 <dt id="arg-shownomogram">showNomogram<a class="anchor" aria-label="anchor" href="#arg-shownomogram"></a></dt>
-<dd><p>.</p></dd>
+<dd><p>Display a Cox-model nomogram for the requested
+prediction timepoints. Predictions are apparent estimates from the fitted
+data and are not a point-of-care tool without calibration and external
+validation.</p></dd>
+
+
+<dt id="arg-compare-models">compare_models<a class="anchor" aria-label="anchor" href="#arg-compare-models"></a></dt>
+<dd><p>If true, reports a likelihood-ratio test and AIC for
+dropping each covariate from the full model (base R drop1). Shows which
+covariates significantly improve model fit.</p></dd>
 
 
 <dt id="arg-use-stratify">use_stratify<a class="anchor" aria-label="anchor" href="#arg-use-stratify"></a></dt>
@@ -363,36 +409,29 @@ For example,  "12, 36, 60" will create intervals 0-12, 12-36, 36-60, and
 
 
 <dt id="arg-rate-multiplier">rate_multiplier<a class="anchor" aria-label="anchor" href="#arg-rate-multiplier"></a></dt>
-<dd><p>Specify the multiplier for incidence rates (e.g.,
-100 for rates per 100 person-years, 1000 for rates per 1000 person-years).</p></dd>
+<dd><p>Specify the multiplier for incidence rates (for
+example, 100 for rates per 100 person-time units). The person-time unit is
+the unit selected in <code>timetypeoutput</code>; choose years there before
+interpreting a rate as events per person-year.</p></dd>
 
 
-<dt id="arg-use-tree">use_tree<a class="anchor" aria-label="anchor" href="#arg-use-tree"></a></dt>
-<dd><p>If true, fits a survival decision tree to identify
-subgroups with different survival outcomes. Decision trees provide an
-intuitive alternative to Cox regression for identifying risk factors.</p></dd>
+<dt id="arg-show-survmetrics">show_survmetrics<a class="anchor" aria-label="anchor" href="#arg-show-survmetrics"></a></dt>
+<dd><p>Report model performance metrics for the Cox model:
+Harrell's concordance (C-index), inverse-probability-of-censoring-weighted
+(IPCW) Brier score and time-dependent AUC at the chosen timepoints, and the
+Integrated Brier Score. Computed with the riskRegression package.</p></dd>
 
 
-<dt id="arg-min-node">min_node<a class="anchor" aria-label="anchor" href="#arg-min-node"></a></dt>
-<dd><p>The minimum number of observations required in a terminal
-node. Larger values create simpler trees that may be more generalizable but
-potentially miss important subgroups.</p></dd>
+<dt id="arg-survmetrics-timepoints">survmetrics_timepoints<a class="anchor" aria-label="anchor" href="#arg-survmetrics-timepoints"></a></dt>
+<dd><p>Comma-separated timepoints at which to report
+the Brier score and time-dependent AUC. Timepoints beyond the observed
+follow-up are ignored. Should correspond to clinically meaningful follow-up
+times.</p></dd>
 
 
-<dt id="arg-complexity">complexity<a class="anchor" aria-label="anchor" href="#arg-complexity"></a></dt>
-<dd><p>The complexity parameter for tree pruning. Higher values
-result in smaller trees. This parameter controls the trade-off between tree
-size and goodness of fit.</p></dd>
-
-
-<dt id="arg-max-depth">max_depth<a class="anchor" aria-label="anchor" href="#arg-max-depth"></a></dt>
-<dd><p>The maximum depth of the decision tree. Limits the
-complexity of the tree to avoid overfitting.</p></dd>
-
-
-<dt id="arg-show-terminal-nodes">show_terminal_nodes<a class="anchor" aria-label="anchor" href="#arg-show-terminal-nodes"></a></dt>
-<dd><p>If true, displays Kaplan-Meier survival curves
-for each terminal node of the decision tree.</p></dd>
+<dt id="arg-survmetrics-show-plots">survmetrics_show_plots<a class="anchor" aria-label="anchor" href="#arg-survmetrics-show-plots"></a></dt>
+<dd><p>Display a plot of the IPCW Brier score across
+follow-up time.</p></dd>
 
 
 <dt id="arg-showexplanations">showExplanations<a class="anchor" aria-label="anchor" href="#arg-showexplanations"></a></dt>
@@ -409,7 +448,7 @@ visual clutter when summaries are not needed.</p></dd>
 </dl></div>
     <div class="section level2">
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
-    <p>A results object containing:</p><table class="table table"><tr><td><code>results$notices</code></td><td></td><td></td><td></td><td></td><td>a preformatted</td></tr><tr><td><code>results$todo</code></td><td></td><td></td><td></td><td></td><td>a html</td></tr><tr><td><code>results$errors</code></td><td></td><td></td><td></td><td></td><td>a html</td></tr><tr><td><code>results$strongWarnings</code></td><td></td><td></td><td></td><td></td><td>a html</td></tr><tr><td><code>results$warnings</code></td><td></td><td></td><td></td><td></td><td>a html</td></tr><tr><td><code>results$infoMessages</code></td><td></td><td></td><td></td><td></td><td>a html</td></tr><tr><td><code>results$multivariableCoxHeading</code></td><td></td><td></td><td></td><td></td><td>a preformatted</td></tr><tr><td><code>results$text</code></td><td></td><td></td><td></td><td></td><td>a html</td></tr><tr><td><code>results$text2</code></td><td></td><td></td><td></td><td></td><td>a html</td></tr><tr><td><code>results$interactionTest</code></td><td></td><td></td><td></td><td></td><td>a table</td></tr><tr><td><code>results$subgroupHR</code></td><td></td><td></td><td></td><td></td><td>a table</td></tr><tr><td><code>results$multivariableCoxSummaryHeading</code></td><td></td><td></td><td></td><td></td><td>a preformatted</td></tr><tr><td><code>results$multivariableCoxSummary</code></td><td></td><td></td><td></td><td></td><td>a html</td></tr><tr><td><code>results$glossaryPanel</code></td><td></td><td></td><td></td><td></td><td>a html</td></tr><tr><td><code>results$assumptionsPanel</code></td><td></td><td></td><td></td><td></td><td>a html</td></tr><tr><td><code>results$personTimeHeading</code></td><td></td><td></td><td></td><td></td><td>a preformatted</td></tr><tr><td><code>results$personTimeTable</code></td><td></td><td></td><td></td><td></td><td>a table</td></tr><tr><td><code>results$personTimeSummaryHeading</code></td><td></td><td></td><td></td><td></td><td>a preformatted</td></tr><tr><td><code>results$personTimeSummary</code></td><td></td><td></td><td></td><td></td><td>a html</td></tr><tr><td><code>results$survivalPlotsHeading</code></td><td></td><td></td><td></td><td></td><td>a preformatted</td></tr><tr><td><code>results$plot</code></td><td></td><td></td><td></td><td></td><td>an image</td></tr><tr><td><code>results$plot3</code></td><td></td><td></td><td></td><td></td><td>an image</td></tr><tr><td><code>results$cox_ph</code></td><td></td><td></td><td></td><td></td><td>a preformatted</td></tr><tr><td><code>results$plot8</code></td><td></td><td></td><td></td><td></td><td>an image</td></tr><tr><td><code>results$plotKM</code></td><td></td><td></td><td></td><td></td><td>an image</td></tr><tr><td><code>results$risk_score_analysis</code></td><td></td><td></td><td></td><td></td><td>a preformatted</td></tr><tr><td><code>results$risk_score_analysis2</code></td><td></td><td></td><td></td><td></td><td>a html</td></tr><tr><td><code>results$riskScoreHeading</code></td><td></td><td></td><td></td><td></td><td>a preformatted</td></tr><tr><td><code>results$riskScoreSummaryHeading</code></td><td></td><td></td><td></td><td></td><td>a preformatted</td></tr><tr><td><code>results$riskScoreTable</code></td><td></td><td></td><td></td><td></td><td>a table</td></tr><tr><td><code>results$riskScoreSummary</code></td><td></td><td></td><td></td><td></td><td>a html</td></tr><tr><td><code>results$riskScoreMetrics</code></td><td></td><td></td><td></td><td></td><td>a html</td></tr><tr><td><code>results$riskGroupPlot</code></td><td></td><td></td><td></td><td></td><td>an image</td></tr><tr><td><code>results$stratificationExplanation</code></td><td></td><td></td><td></td><td></td><td>a html</td></tr><tr><td><code>results$calculatedtime</code></td><td></td><td></td><td></td><td></td><td>an output</td></tr><tr><td><code>results$outcomeredefined</code></td><td></td><td></td><td></td><td></td><td>an output</td></tr><tr><td><code>results$addRiskScore</code></td><td></td><td></td><td></td><td></td><td>an output</td></tr><tr><td><code>results$addRiskGroup</code></td><td></td><td></td><td></td><td></td><td>an output</td></tr><tr><td><code>results$adjustedSurvivalHeading</code></td><td></td><td></td><td></td><td></td><td>a preformatted</td></tr><tr><td><code>results$plot_adj</code></td><td></td><td></td><td></td><td></td><td>an image</td></tr><tr><td><code>results$adjustedSurvivalSummaryHeading</code></td><td></td><td></td><td></td><td></td><td>a preformatted</td></tr><tr><td><code>results$adjustedSurvivalSummary</code></td><td></td><td></td><td></td><td></td><td>a html</td></tr><tr><td><code>results$nomogramHeading</code></td><td></td><td></td><td></td><td></td><td>a preformatted</td></tr><tr><td><code>results$plot_nomogram</code></td><td></td><td></td><td></td><td></td><td>an image</td></tr><tr><td><code>results$nomogram_display</code></td><td></td><td></td><td></td><td></td><td>a html</td></tr><tr><td><code>results$nomogramSummaryHeading</code></td><td></td><td></td><td></td><td></td><td>a preformatted</td></tr><tr><td><code>results$nomogramSummary</code></td><td></td><td></td><td></td><td></td><td>a html</td></tr><tr><td><code>results$multivariableCoxExplanation</code></td><td></td><td></td><td></td><td></td><td>a html</td></tr><tr><td><code>results$multivariableCoxHeading3</code></td><td></td><td></td><td></td><td></td><td>a preformatted</td></tr><tr><td><code>results$adjustedSurvivalExplanation</code></td><td></td><td></td><td></td><td></td><td>a html</td></tr><tr><td><code>results$riskScoreExplanation</code></td><td></td><td></td><td></td><td></td><td>a html</td></tr><tr><td><code>results$nomogramExplanation</code></td><td></td><td></td><td></td><td></td><td>a html</td></tr><tr><td><code>results$personTimeExplanation</code></td><td></td><td></td><td></td><td></td><td>a html</td></tr><tr><td><code>results$stratifiedAnalysisExplanation</code></td><td></td><td></td><td></td><td></td><td>a html</td></tr><tr><td><code>results$survivalPlotsHeading3</code></td><td></td><td></td><td></td><td></td><td>a preformatted</td></tr><tr><td><code>results$survivalPlotsExplanation</code></td><td></td><td></td><td></td><td></td><td>a html</td></tr></table><p>Tables can be converted to data frames with <code>asDF</code> or <code><a href="https://rdrr.io/r/base/as.data.frame.html" class="external-link">as.data.frame</a></code>. For example:</p>
+    <p>A results object containing:</p><table class="table table"><tr><td><code>results$eventRecodeInfo</code></td><td></td><td></td><td></td><td></td><td>a html</td></tr><tr><td><code>results$todo</code></td><td></td><td></td><td></td><td></td><td>a html</td></tr><tr><td><code>results$errors</code></td><td></td><td></td><td></td><td></td><td>a html</td></tr><tr><td><code>results$strongWarnings</code></td><td></td><td></td><td></td><td></td><td>a html</td></tr><tr><td><code>results$warnings</code></td><td></td><td></td><td></td><td></td><td>a html</td></tr><tr><td><code>results$infoMessages</code></td><td></td><td></td><td></td><td></td><td>a html</td></tr><tr><td><code>results$multivariableCoxHeading</code></td><td></td><td></td><td></td><td></td><td>a preformatted</td></tr><tr><td><code>results$text</code></td><td></td><td></td><td></td><td></td><td>a html</td></tr><tr><td><code>results$text2</code></td><td></td><td></td><td></td><td></td><td>a html</td></tr><tr><td><code>results$interactionExplanation</code></td><td></td><td></td><td></td><td></td><td>a html</td></tr><tr><td><code>results$interactionTest</code></td><td></td><td></td><td></td><td></td><td>a table</td></tr><tr><td><code>results$subgroupHR</code></td><td></td><td></td><td></td><td></td><td>a table</td></tr><tr><td><code>results$multivariableCoxSummaryHeading</code></td><td></td><td></td><td></td><td></td><td>a preformatted</td></tr><tr><td><code>results$multivariableCoxSummary</code></td><td></td><td></td><td></td><td></td><td>a html</td></tr><tr><td><code>results$glossaryPanel</code></td><td></td><td></td><td></td><td></td><td>a html</td></tr><tr><td><code>results$assumptionsPanel</code></td><td></td><td></td><td></td><td></td><td>a html</td></tr><tr><td><code>results$survMetricsTable</code></td><td></td><td></td><td></td><td></td><td>a table</td></tr><tr><td><code>results$survMetricsSummary</code></td><td></td><td></td><td></td><td></td><td>a html</td></tr><tr><td><code>results$survMetricsPlot</code></td><td></td><td></td><td></td><td></td><td>an image</td></tr><tr><td><code>results$personTimeHeading</code></td><td></td><td></td><td></td><td></td><td>a preformatted</td></tr><tr><td><code>results$personTimeTable</code></td><td></td><td></td><td></td><td></td><td>a table</td></tr><tr><td><code>results$personTimeSummaryHeading</code></td><td></td><td></td><td></td><td></td><td>a preformatted</td></tr><tr><td><code>results$personTimeSummary</code></td><td></td><td></td><td></td><td></td><td>a html</td></tr><tr><td><code>results$survivalPlotsHeading</code></td><td></td><td></td><td></td><td></td><td>a preformatted</td></tr><tr><td><code>results$plot</code></td><td></td><td></td><td></td><td></td><td>an image</td></tr><tr><td><code>results$plot3</code></td><td></td><td></td><td></td><td></td><td>an image</td></tr><tr><td><code>results$cox_phTable</code></td><td></td><td></td><td></td><td></td><td>a table</td></tr><tr><td><code>results$cox_ph</code></td><td></td><td></td><td></td><td></td><td>a preformatted</td></tr><tr><td><code>results$plot8</code></td><td></td><td></td><td></td><td></td><td>an image</td></tr><tr><td><code>results$plotKM</code></td><td></td><td></td><td></td><td></td><td>an image</td></tr><tr><td><code>results$risk_score_analysis</code></td><td></td><td></td><td></td><td></td><td>a preformatted</td></tr><tr><td><code>results$risk_score_analysis2</code></td><td></td><td></td><td></td><td></td><td>a html</td></tr><tr><td><code>results$riskScoreHeading</code></td><td></td><td></td><td></td><td></td><td>a preformatted</td></tr><tr><td><code>results$riskScoreSummaryHeading</code></td><td></td><td></td><td></td><td></td><td>a preformatted</td></tr><tr><td><code>results$riskScoreTable</code></td><td></td><td></td><td></td><td></td><td>a table</td></tr><tr><td><code>results$riskScoreSummary</code></td><td></td><td></td><td></td><td></td><td>a html</td></tr><tr><td><code>results$riskScoreMetrics</code></td><td></td><td></td><td></td><td></td><td>a html</td></tr><tr><td><code>results$riskGroupPlot</code></td><td></td><td></td><td></td><td></td><td>an image</td></tr><tr><td><code>results$cindexValidation</code></td><td></td><td></td><td></td><td></td><td>a table</td></tr><tr><td><code>results$stratificationExplanation</code></td><td></td><td></td><td></td><td></td><td>a html</td></tr><tr><td><code>results$calculatedtime</code></td><td></td><td></td><td></td><td></td><td>an output</td></tr><tr><td><code>results$outcomeredefined</code></td><td></td><td></td><td></td><td></td><td>an output</td></tr><tr><td><code>results$addRiskScore</code></td><td></td><td></td><td></td><td></td><td>an output</td></tr><tr><td><code>results$addRiskGroup</code></td><td></td><td></td><td></td><td></td><td>an output</td></tr><tr><td><code>results$adjustedSurvivalHeading</code></td><td></td><td></td><td></td><td></td><td>a preformatted</td></tr><tr><td><code>results$adjustedEstimandPanel</code></td><td></td><td></td><td></td><td></td><td>a html</td></tr><tr><td><code>results$plot_adj</code></td><td></td><td></td><td></td><td></td><td>an image</td></tr><tr><td><code>results$adjustedSurvivalSummaryHeading</code></td><td></td><td></td><td></td><td></td><td>a preformatted</td></tr><tr><td><code>results$adjustedSurvivalSummary</code></td><td></td><td></td><td></td><td></td><td>a html</td></tr><tr><td><code>results$nomogramHeading</code></td><td></td><td></td><td></td><td></td><td>a preformatted</td></tr><tr><td><code>results$plot_nomogram</code></td><td></td><td></td><td></td><td></td><td>an image</td></tr><tr><td><code>results$nomogram_display</code></td><td></td><td></td><td></td><td></td><td>a html</td></tr><tr><td><code>results$nomogramSummaryHeading</code></td><td></td><td></td><td></td><td></td><td>a preformatted</td></tr><tr><td><code>results$nomogramSummary</code></td><td></td><td></td><td></td><td></td><td>a html</td></tr><tr><td><code>results$adjustedSurvTable</code></td><td></td><td></td><td></td><td></td><td>a table</td></tr><tr><td><code>results$adjustedSurvTableSummary</code></td><td></td><td></td><td></td><td></td><td>a html</td></tr><tr><td><code>results$adjustedMedianTable</code></td><td></td><td></td><td></td><td></td><td>a table</td></tr><tr><td><code>results$adjustedMedianSummary</code></td><td></td><td></td><td></td><td></td><td>a html</td></tr><tr><td><code>results$adjustedCoxTable</code></td><td></td><td></td><td></td><td></td><td>a table</td></tr><tr><td><code>results$adjustedCoxText</code></td><td></td><td></td><td></td><td></td><td>a html</td></tr><tr><td><code>results$adjustedCoxSummary</code></td><td></td><td></td><td></td><td></td><td>a html</td></tr><tr><td><code>results$adjustedCoxPH</code></td><td></td><td></td><td></td><td></td><td>a preformatted</td></tr><tr><td><code>results$modelContributionTable</code></td><td></td><td></td><td></td><td></td><td>a table</td></tr><tr><td><code>results$modelContributionSummary</code></td><td></td><td></td><td></td><td></td><td>a html</td></tr><tr><td><code>results$multivariableCoxExplanation</code></td><td></td><td></td><td></td><td></td><td>a html</td></tr><tr><td><code>results$multivariableCoxHeading3</code></td><td></td><td></td><td></td><td></td><td>a preformatted</td></tr><tr><td><code>results$adjustedSurvivalExplanation</code></td><td></td><td></td><td></td><td></td><td>a html</td></tr><tr><td><code>results$riskScoreExplanation</code></td><td></td><td></td><td></td><td></td><td>a html</td></tr><tr><td><code>results$nomogramExplanation</code></td><td></td><td></td><td></td><td></td><td>a html</td></tr><tr><td><code>results$personTimeExplanation</code></td><td></td><td></td><td></td><td></td><td>a html</td></tr><tr><td><code>results$stratifiedAnalysisExplanation</code></td><td></td><td></td><td></td><td></td><td>a html</td></tr><tr><td><code>results$survivalPlotsHeading3</code></td><td></td><td></td><td></td><td></td><td>a preformatted</td></tr><tr><td><code>results$survivalPlotsExplanation</code></td><td></td><td></td><td></td><td></td><td>a html</td></tr></table><p>Tables can be converted to data frames with <code>asDF</code> or <code><a href="https://rdrr.io/r/base/as.data.frame.html" class="external-link">as.data.frame</a></code>. For example:</p>
 <p><code>results$interactionTest$asDF</code></p>
 <p><code>as.data.frame(results$interactionTest)</code></p>
     </div>
@@ -423,7 +462,7 @@ visual clutter when summaries are not needed.</p></dd>
 </div>
 
 <div class="pkgdown-footer-right">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.2.0.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.2.1.</p>
 </div>
 
     </footer></div>

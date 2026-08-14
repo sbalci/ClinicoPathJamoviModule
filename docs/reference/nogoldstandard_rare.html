@@ -9,7 +9,7 @@ with good characteristics (Sens: 0.80-0.75, Spec: 0.90-0.88)."></head><body>
 
     <a class="navbar-brand me-2" href="../index.html">ClinicoPath</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.0.47</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.0.52</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -91,7 +91,8 @@ Tests stability of estimation with few positive cases.</p>
 <span class="r-in"><span>               test4Positive <span class="op">=</span> <span class="st">""</span>, test5Positive <span class="op">=</span> <span class="st">""</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  ANALYSIS WITHOUT GOLD STANDARD</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Analysing 300 cases</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> All 300 cases have a result for every selected test.</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  Agreement Statistics (Cohen's Kappa)                      </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  ───────────────────────────────────────────────────────── </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>    Test Pair         Kappa        p-value      Agreement   </span>
@@ -100,22 +101,26 @@ Tests stability of estimation with few positive cases.</p>
 <span class="r-out co"><span class="r-pr">#&gt;</span>    Test1 vs Test3    0.1067762    0.3107576     80.66667   </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>    Test2 vs Test3    0.2679128    0.0062952     84.33333   </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  ───────────────────────────────────────────────────────── </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    Note. Kappa standard errors and p-values use a</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    large-sample normal approximation rather than the</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    exact asymptotic SE (e.g. vcd::Kappa); interpret</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    p-values cautiously, especially in small samples.</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  &lt;div class='clinical-summary' style='background: #f0f8ff; padding:</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  15px; border-radius: 8px; margin: 10px 0;'&gt;&lt;h4 style='color: #1565c0;</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  margin-top: 0;'&gt; Clinical Summary</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  Analysis: No gold standard analysis using all_positive method</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  Analysis: No gold standard analysis using latent_class method</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  Tests analyzed: Test1, Test2, Test3 (N=3)</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  Disease prevalence: 1.3%</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  Disease prevalence: 14.7%</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  Test sensitivities: Range from 100.0% to 100.0%</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  Test sensitivities: Range from 31.6% to 61.3%</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  Clinical interpretation: Low prevalence setting - high NPV expected,</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  focus on ruling out disease</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  Clinical interpretation: Moderate prevalence setting - balanced</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  diagnostic performance</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  &lt;div style='background: #f8f9fa; padding: 20px; border-radius: 8px;</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  margin: 15px 0; border-left: 4px solid #007bff;'&gt;&lt;h3 style='color:</span>
@@ -130,8 +135,10 @@ Tests stability of estimation with few positive cases.</p>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  Best for: Diagnostic validation studies with 3+ tests and N&gt;=100</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  Strengths: Handles conditional dependence, provides model fit</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  statistics, most statistically rigorous</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  Strengths: The only method here that estimates accuracy rather than</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  agreement with a self-built reference; provides model fit statistics.</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  Assumes the tests are conditionally independent given true status --</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  it does NOT model conditional dependence</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  &lt;div style='margin: 15px 0; padding: 15px; background: #e3f2fd;</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  border-radius: 5px;'&gt;&lt;h4 style='color: #1565c0; margin-top: 0;'&gt;</span>
@@ -156,8 +163,10 @@ Tests stability of estimation with few positive cases.</p>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  Best for: Inter-rater agreement studies with 3+ tests, exploratory</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  analysis</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  Strengths: Simple and intuitive, requires minimal assumptions, good</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  starting point</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  Strengths: Simple and intuitive. Not an accuracy estimate: each test</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  helps build the standard it is judged against, which inflates its</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  apparent performance. Needs 3+ tests -- with 2 a tie counts as</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  diseased, making it identical to Any Test Positive</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  &lt;div style='margin: 15px 0; padding: 15px; background: #fce4ec;</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  border-radius: 5px;'&gt;&lt;h4 style='color: #c2185b; margin-top: 0;'&gt; All</span>
@@ -169,7 +178,10 @@ Tests stability of estimation with few positive cases.</p>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  Best for: Highly specific diagnoses where false positives are very</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  costly</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  Strengths: High specificity reference, minimizes false positives</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  Strengths: A deliberately strict reference. Sensitivity and NPV cannot</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  be estimated under this rule -- they are fixed at 100% by construction</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  -- so only specificity and PPV are shown, and both are inflated by the</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  same circularity</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  &lt;div style='margin: 15px 0; padding: 15px; background: #e8f5e8;</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  border-radius: 5px;'&gt;&lt;h4 style='color: #388e3c; margin-top: 0;'&gt; Any</span>
@@ -180,7 +192,10 @@ Tests stability of estimation with few positive cases.</p>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  Best for: Population screening scenarios where missing cases is costly</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  Strengths: High sensitivity reference, minimizes false negatives</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  Strengths: A deliberately permissive reference. Specificity and PPV</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  cannot be estimated under this rule -- they are fixed at 100% by</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  construction -- so only sensitivity and NPV are shown, and both are</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  inflated by the same circularity</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  &lt;div style='margin: 15px 0; padding: 10px; background: #fff8e1;</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  border-radius: 5px; border-left: 3px solid #ffb300;'&gt;&lt;h4 style='color:</span>
@@ -195,7 +210,7 @@ Tests stability of estimation with few positive cases.</p>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  ─────────────────────────────────────── </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>    Estimate     Lower CI     Upper CI    </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  ─────────────────────────────────────── </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>      1.33333    3.543086e-4      2.63124   </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>     14.67025     10.66659     18.67390   </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  ─────────────────────────────────────── </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
@@ -203,10 +218,51 @@ Tests stability of estimation with few positive cases.</p>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  ───────────────────────────────────────────────────────────────────────────────────────────────────────────────────── </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>    Test     Sensitivity    Lower CI     Upper CI     Specificity    Lower CI     Upper CI     PPV          NPV         </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  ───────────────────────────────────────────────────────────────────────────────────────────────────────────────────── </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>    Test1      100.00000    100.00000    100.00000       89.86486     86.44981     93.27992     11.76471    100.00000   </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>    Test2      100.00000    100.00000    100.00000       90.20270     86.83875     93.56666     12.12121    100.00000   </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>    Test3      100.00000    100.00000    100.00000       87.83784     84.13927     91.53641     10.00000    100.00000   </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    Test1       31.60863     17.87225     45.34501       92.15248     88.85823     95.44673     40.91527     88.68438   </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    Test2       61.29889     46.90902     75.68875       97.64759     95.79097     99.50422     81.75180     93.62073   </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    Test3       46.48314     31.74774     61.21853       92.36592     89.11301     95.61882     51.14393     90.94109   </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  ───────────────────────────────────────────────────────────────────────────────────────────────────────────────────── </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    Note. 95% intervals are normal-approximation (Wald) intervals, using the estimated number of diseased cases as</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    the denominator for sensitivity and non-diseased for specificity. They treat the estimates as observed</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    proportions and so understate the uncertainty of a latent-variable model; enable Bootstrap for intervals that</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    account for the estimation itself.</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  Model Fit Statistics                  </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  ───────────────────────────────────── </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    Statistic             Value         </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  ───────────────────────────────────── </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    BIC                    670.613231   </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    AIC                    644.686753   </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    Log-Likelihood        -315.343377   </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    Degrees of Freedom       0.000000   </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  ───────────────────────────────────── </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    Note. With three tests this</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    model has as many parameters as</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    the data can support (0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    residual degrees of freedom),</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    so it reproduces the observed</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    table exactly. Goodness-of-fit</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    statistics are therefore</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    omitted: they cannot tell you</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    whether the</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    conditional-independence</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    assumption holds. Use four or</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    more tests if you need to test</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    the model's fit.</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  Conditional Independence Check (Bivariate Residuals)  </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  ───────────────────────────────────────────────────── </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    Test Pair    Bivariate Residual    Interpretation   </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  ───────────────────────────────────────────────────── </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  ───────────────────────────────────────────────────── </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    Note. Not computable with three tests: the</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    model has no residual degrees of freedom, so it</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    reproduces every observed table exactly and no</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    residual can detect conditional dependence. Add</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    a fourth test if you need to check this</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    assumption.</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  Test Cross-Tabulation                             </span>
@@ -237,7 +293,7 @@ Tests stability of estimation with few positive cases.</p>
 </div>
 
 <div class="pkgdown-footer-right">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.2.0.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.2.1.</p>
 </div>
 
     </footer></div>

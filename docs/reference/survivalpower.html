@@ -11,7 +11,7 @@ statistical methods."></head><body>
 
     <a class="navbar-brand me-2" href="../index.html">ClinicoPath</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.0.47</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.0.52</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -89,6 +89,7 @@ statistical methods.</p>
 <span>  sensitivity_analysis <span class="op">=</span> <span class="cn">FALSE</span>,</span>
 <span>  run_simulation_validation <span class="op">=</span> <span class="cn">FALSE</span>,</span>
 <span>  simulation_runs <span class="op">=</span> <span class="fl">10000</span>,</span>
+<span>  simulation_seed <span class="op">=</span> <span class="fl">42</span>,</span>
 <span>  show_summary <span class="op">=</span> <span class="cn">FALSE</span>,</span>
 <span>  show_explanations <span class="op">=</span> <span class="cn">FALSE</span>,</span>
 <span>  show_glossary <span class="op">=</span> <span class="cn">FALSE</span>,</span>
@@ -152,7 +153,11 @@ effect size, or duration</p></dd>
 
 
 <dt id="arg-survival-distribution">survival_distribution<a class="anchor" aria-label="anchor" href="#arg-survival-distribution"></a></dt>
-<dd><p>Assumed survival distribution</p></dd>
+<dd><p>Assumed survival distribution. Only the
+exponential distribution is supported in this release; the
+event-probability and sample-size formulas assume a constant hazard.
+Selecting any other option stops the analysis with an explanatory message
+rather than returning a number the formulas cannot justify.</p></dd>
 
 
 <dt id="arg-weibull-shape">weibull_shape<a class="anchor" aria-label="anchor" href="#arg-weibull-shape"></a></dt>
@@ -250,6 +255,12 @@ settings only. May take 10-60 seconds depending on simulation_runs setting.</p><
 <dd><p>Number of simulation runs for complex calculations</p></dd>
 
 
+<dt id="arg-simulation-seed">simulation_seed<a class="anchor" aria-label="anchor" href="#arg-simulation-seed"></a></dt>
+<dd><p>Random seed for the Monte Carlo validation, so the
+simulated power is reproducible across runs. Change it to inspect Monte
+Carlo variability.</p></dd>
+
+
 <dt id="arg-show-summary">show_summary<a class="anchor" aria-label="anchor" href="#arg-show-summary"></a></dt>
 <dd><p>Display plain-language summary of results</p></dd>
 
@@ -289,7 +300,7 @@ Advanced, or Comprehensive.</p>
 </div>
 
 <div class="pkgdown-footer-right">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.2.0.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.2.1.</p>
 </div>
 
     </footer></div>

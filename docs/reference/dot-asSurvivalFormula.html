@@ -15,7 +15,7 @@ goes through jmvcore's allow-listed parser."></head><body>
 
     <a class="navbar-brand me-2" href="../index.html">ClinicoPath</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.0.47</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.0.52</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -44,7 +44,7 @@ goes through jmvcore's allow-listed parser."></head><body>
   <main id="main" class="col-md-9"><div class="page-header">
 
       <h1>Build a survival formula safely via jmvcore::asFormula</h1>
-      <small class="dont-index">Source: <a href="https://github.com/sbalci/ClinicoPathJamoviModule/blob/HEAD/R/utils.R" class="external-link"><code>R/utils.R</code></a></small>
+      <small class="dont-index">Source: <a href="https://github.com/sbalci/ClinicoPathJamoviModule/blob/HEAD/R/survival_utils.R" class="external-link"><code>R/survival_utils.R</code></a></small>
       <div class="d-none name"><code>dot-asSurvivalFormula.Rd</code></div>
     </div>
 
@@ -58,7 +58,7 @@ goes through jmvcore's allow-listed parser.</p>
 
     <div class="section level2">
     <h2 id="ref-usage">Usage<a class="anchor" aria-label="anchor" href="#ref-usage"></a></h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">.asSurvivalFormula</span><span class="op">(</span><span class="va">x</span><span class="op">)</span></span></code></pre></div>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">.asSurvivalFormula</span><span class="op">(</span><span class="va">x</span>, env <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/sys.parent.html" class="external-link">parent.frame</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div class="section level2">
@@ -68,10 +68,25 @@ goes through jmvcore's allow-listed parser.</p>
 <dl><dt id="arg-x">x<a class="anchor" aria-label="anchor" href="#arg-x"></a></dt>
 <dd><p>A character formula string (e.g. <code>"survival::Surv(t, d) ~ x"</code>).</p></dd>
 
+
+<dt id="arg-env">env<a class="anchor" aria-label="anchor" href="#arg-env"></a></dt>
+<dd><p>Environment to attach to the returned formula. Defaults to the
+calling frame, which is what downstream re-evaluation needs.</p></dd>
+
 </dl></div>
     <div class="section level2">
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
     <p>A parsed formula object.</p>
+    </div>
+    <div class="section level2">
+    <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
+    <p>The returned formula's environment is set to the CALLER's frame. <code>asFormula</code>
+otherwise leaves it pointing at its own evaluation frame, which does not hold
+the caller's <code>mydata</code>. Model fitting still works, because <code>coxph(fml, data=)</code>
+is handed the data directly — but any method that later re-evaluates the
+model call does not get it. <code>cox.zph()</code> is the visible casualty: ticking
+"Proportional hazards assumption" aborted the entire analysis with
+"object 'mydata' not found", taking every other result down with it.</p>
     </div>
 
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
@@ -83,7 +98,7 @@ goes through jmvcore's allow-listed parser.</p>
 </div>
 
 <div class="pkgdown-footer-right">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.2.0.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.2.1.</p>
 </div>
 
     </footer></div>

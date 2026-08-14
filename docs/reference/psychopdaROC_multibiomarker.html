@@ -9,7 +9,7 @@ individual markers and a combined score for ROC analysis and marker comparison."
 
     <a class="navbar-brand me-2" href="../index.html">ClinicoPath</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.0.47</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.0.52</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -93,10 +93,6 @@ discrimination compared to individual markers.</p>
 <span class="r-in"><span>             classVar <span class="op">=</span> <span class="st">"diagnosis"</span>, positiveClass <span class="op">=</span> <span class="st">"Positive"</span>,</span></span>
 <span class="r-in"><span>             refVar <span class="op">=</span> <span class="st">"marker1"</span>,</span></span>
 <span class="r-in"><span>             clinicalMode <span class="op">=</span> <span class="st">"comprehensive"</span><span class="op">)</span></span></span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> Multiple optimal cutpoints found, applying break_ties.</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> Multiple optimal cutpoints found, applying break_ties.</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> Multiple optimal cutpoints found, applying break_ties.</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> Multiple optimal cutpoints found, applying break_ties.</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  ADVANCED ROC ANALYSIS</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
@@ -110,7 +106,7 @@ discrimination compared to individual markers.</p>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  The ROC analysis has been completed using the following</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  specifications:</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  &amp;nbsp;</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  Measure Variable(s): marker1, marker2, marker3, combined_score</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
@@ -118,7 +114,7 @@ discrimination compared to individual markers.</p>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  Positive Class: Positive</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  &amp;nbsp;</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  Method: maximize_metric</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
@@ -130,9 +126,9 @@ discrimination compared to individual markers.</p>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  Tie Breakers: mean</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  Metric Tolerance: 0.05</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  Metric Tolerance: 1e-06</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  &amp;nbsp;</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  &lt;hr /&gt;</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
@@ -153,6 +149,11 @@ discrimination compared to individual markers.</p>
 <span class="r-out co"><span class="r-pr">#&gt;</span>    marker3           0.8276023       0.7722325       0.8829720    &lt; .0000001   </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>    combined_score    0.9729755       0.9516340       0.9943170    &lt; .0000001   </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  ───────────────────────────────────────────────────────────────────────────── </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    Note. Reading of the test values: &lt;b&gt;HIGHER values were taken to</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    indicate Positive&lt;/b&gt; (Classification Direction = "&gt;="). If that is the</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    wrong way round for this marker, every sensitivity, specificity,</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    cutpoint and AUC below is reversed — switch Classification Direction to</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    "&lt;=" and the AUC becomes 1 minus the value shown.</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>    Note. AUC 95% confidence intervals computed using the DeLong method.</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
@@ -173,7 +174,7 @@ discrimination compared to individual markers.</p>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  ───────────────────────────────────────────────────────────────────────────────────────────────────────────────── </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>    Cutpoint      Sensitivity    Specificity    PPV          NPV          Youden's J    AUC          Metric Score   </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  ───────────────────────────────────────────────────────────────────────────────────────────────────────────────── </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>    87.2496589       78.08219       77.55102     63.33333     87.69231     0.5563321    0.8214519       0.5563321   </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    87.2430392       78.08219       77.55102     63.33333     87.69231     0.5563321    0.8214519       0.5563321   </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  ───────────────────────────────────────────────────────────────────────────────────────────────────────────────── </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
@@ -181,7 +182,7 @@ discrimination compared to individual markers.</p>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  ───────────────────────────────────────────────────────────────────────────────────────────────────────────────── </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>    Cutpoint      Sensitivity    Specificity    PPV          NPV          Youden's J    AUC          Metric Score   </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  ───────────────────────────────────────────────────────────────────────────────────────────────────────────────── </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>    72.2080895       79.45205       82.31293     69.04762     88.97059     0.6176498    0.8895723       0.6176498   </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    70.1905619       84.93151       78.91156     66.66667     91.33858     0.6384307    0.8895723       0.6384307   </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  ───────────────────────────────────────────────────────────────────────────────────────────────────────────────── </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
@@ -189,7 +190,7 @@ discrimination compared to individual markers.</p>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  ───────────────────────────────────────────────────────────────────────────────────────────────────────────────── </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>    Cutpoint      Sensitivity    Specificity    PPV          NPV          Youden's J    AUC          Metric Score   </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  ───────────────────────────────────────────────────────────────────────────────────────────────────────────────── </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>    75.9021153       82.19178       75.51020     62.50000     89.51613     0.5770198    0.8276023       0.5770198   </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    76.2878694       82.19178       76.19048     63.15789     89.60000     0.5838226    0.8276023       0.5838226   </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  ───────────────────────────────────────────────────────────────────────────────────────────────────────────────── </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
@@ -197,7 +198,7 @@ discrimination compared to individual markers.</p>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  ───────────────────────────────────────────────────────────────────────────────────────────────────────────────── </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>    Cutpoint      Sensitivity    Specificity    PPV          NPV          Youden's J    AUC          Metric Score   </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  ───────────────────────────────────────────────────────────────────────────────────────────────────────────────── </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>    78.7908214       87.67123       93.19728     86.48649     93.83562     0.8086851    0.9729755       0.8086851   </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    76.7601567       91.78082       91.83673     84.81013     95.74468     0.8361756    0.9729755       0.8361756   </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  ───────────────────────────────────────────────────────────────────────────────────────────────────────────────── </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
@@ -210,6 +211,11 @@ discrimination compared to individual markers.</p>
 <span class="r-out co"><span class="r-pr">#&gt;</span>    marker3           0.8276023       0.7722325       0.8829720    &lt; .0000001   </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>    combined_score    0.9729755       0.9516340       0.9943170    &lt; .0000001   </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  ───────────────────────────────────────────────────────────────────────────── </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    Note. Reading of the test values: &lt;b&gt;HIGHER values were taken to</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    indicate Positive&lt;/b&gt; (Classification Direction = "&gt;="). If that is the</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    wrong way round for this marker, every sensitivity, specificity,</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    cutpoint and AUC below is reversed — switch Classification Direction to</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    "&lt;=" and the AUC becomes 1 minus the value shown.</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>    Note. AUC 95% confidence intervals computed using the DeLong method.</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-plt img"><img src="psychopdaROC_multibiomarker-1.png" alt="" width="700" height="433"></span>
@@ -225,7 +231,7 @@ discrimination compared to individual markers.</p>
 </div>
 
 <div class="pkgdown-footer-right">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.2.0.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.2.1.</p>
 </div>
 
     </footer></div>

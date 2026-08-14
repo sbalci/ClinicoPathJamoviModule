@@ -11,7 +11,7 @@ and advanced visualization options."></head><body>
 
     <a class="navbar-brand me-2" href="../index.html">ClinicoPath</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.0.47</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.0.52</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -51,6 +51,10 @@ and advanced visualization options.</p>
     </div>
 
 
+    <div class="section level2">
+    <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
+    <p>An <code>R6</code> class generator object for the <code>survivalcontClass</code> backend; used internally by the jamovi analysis wrapper and not called directly.</p>
+    </div>
     <div class="section level2">
     <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
     <p>This function provides advanced survival analysis specifically designed for continuous
@@ -163,6 +167,7 @@ and a survey of stakeholder views: KMunicate. BMJ Open, 9(9), e030874.</p>
 <span class="r-in"><span>  data <span class="op">=</span> <span class="va">lung</span>,</span></span>
 <span class="r-in"><span>  elapsedtime <span class="op">=</span> <span class="st">"time"</span>,</span></span>
 <span class="r-in"><span>  outcome <span class="op">=</span> <span class="st">"status_binary"</span>,</span></span>
+<span class="r-in"><span>  outcomeLevel <span class="op">=</span> <span class="cn">NULL</span>, dod <span class="op">=</span> <span class="cn">NULL</span>, dooc <span class="op">=</span> <span class="cn">NULL</span>, awd <span class="op">=</span> <span class="cn">NULL</span>, awod <span class="op">=</span> <span class="cn">NULL</span>,</span></span>
 <span class="r-in"><span>  contexpl <span class="op">=</span> <span class="st">"age"</span>,</span></span>
 <span class="r-in"><span>  findcut <span class="op">=</span> <span class="cn">TRUE</span>,</span></span>
 <span class="r-in"><span>  sc <span class="op">=</span> <span class="cn">TRUE</span></span></span>
@@ -173,6 +178,7 @@ and a survey of stakeholder views: KMunicate. BMJ Open, 9(9), e030874.</p>
 <span class="r-in"><span>  data <span class="op">=</span> <span class="va">lung</span>,</span></span>
 <span class="r-in"><span>  elapsedtime <span class="op">=</span> <span class="st">"time"</span>,</span></span>
 <span class="r-in"><span>  outcome <span class="op">=</span> <span class="st">"status_binary"</span>,</span></span>
+<span class="r-in"><span>  outcomeLevel <span class="op">=</span> <span class="cn">NULL</span>, dod <span class="op">=</span> <span class="cn">NULL</span>, dooc <span class="op">=</span> <span class="cn">NULL</span>, awd <span class="op">=</span> <span class="cn">NULL</span>, awod <span class="op">=</span> <span class="cn">NULL</span>,</span></span>
 <span class="r-in"><span>  contexpl <span class="op">=</span> <span class="st">"ph.karno"</span>,</span></span>
 <span class="r-in"><span>  multiple_cutoffs <span class="op">=</span> <span class="cn">TRUE</span>,</span></span>
 <span class="r-in"><span>  num_cutoffs <span class="op">=</span> <span class="st">"three"</span>,</span></span>
@@ -186,6 +192,7 @@ and a survey of stakeholder views: KMunicate. BMJ Open, 9(9), e030874.</p>
 <span class="r-in"><span>  data <span class="op">=</span> <span class="va">lung</span>,</span></span>
 <span class="r-in"><span>  elapsedtime <span class="op">=</span> <span class="st">"time"</span>,</span></span>
 <span class="r-in"><span>  outcome <span class="op">=</span> <span class="st">"status_binary"</span>,</span></span>
+<span class="r-in"><span>  outcomeLevel <span class="op">=</span> <span class="cn">NULL</span>, dod <span class="op">=</span> <span class="cn">NULL</span>, dooc <span class="op">=</span> <span class="cn">NULL</span>, awd <span class="op">=</span> <span class="cn">NULL</span>, awod <span class="op">=</span> <span class="cn">NULL</span>,</span></span>
 <span class="r-in"><span>  contexpl <span class="op">=</span> <span class="st">"wt.loss"</span>,</span></span>
 <span class="r-in"><span>  findcut <span class="op">=</span> <span class="cn">TRUE</span>,</span></span>
 <span class="r-in"><span>  rmst_analysis <span class="op">=</span> <span class="cn">TRUE</span>,</span></span>
@@ -213,6 +220,7 @@ and a survey of stakeholder views: KMunicate. BMJ Open, 9(9), e030874.</p>
 <span class="r-in"><span>  timetypedata <span class="op">=</span> <span class="st">"ymd"</span>,</span></span>
 <span class="r-in"><span>  timetypeoutput <span class="op">=</span> <span class="st">"months"</span>,</span></span>
 <span class="r-in"><span>  outcome <span class="op">=</span> <span class="st">"event"</span>,</span></span>
+<span class="r-in"><span>  outcomeLevel <span class="op">=</span> <span class="cn">NULL</span>, dod <span class="op">=</span> <span class="cn">NULL</span>, dooc <span class="op">=</span> <span class="cn">NULL</span>, awd <span class="op">=</span> <span class="cn">NULL</span>, awod <span class="op">=</span> <span class="cn">NULL</span>,</span></span>
 <span class="r-in"><span>  contexpl <span class="op">=</span> <span class="st">"biomarker"</span>,</span></span>
 <span class="r-in"><span>  person_time <span class="op">=</span> <span class="cn">TRUE</span>,</span></span>
 <span class="r-in"><span>  time_intervals <span class="op">=</span> <span class="st">"6, 12, 24"</span>,</span></span>
@@ -225,6 +233,7 @@ and a survey of stakeholder views: KMunicate. BMJ Open, 9(9), e030874.</p>
 <span class="r-in"><span>  data <span class="op">=</span> <span class="va">lung</span>,</span></span>
 <span class="r-in"><span>  elapsedtime <span class="op">=</span> <span class="st">"time"</span>,</span></span>
 <span class="r-in"><span>  outcome <span class="op">=</span> <span class="st">"status_binary"</span>,</span></span>
+<span class="r-in"><span>  outcomeLevel <span class="op">=</span> <span class="cn">NULL</span>, dod <span class="op">=</span> <span class="cn">NULL</span>, dooc <span class="op">=</span> <span class="cn">NULL</span>, awd <span class="op">=</span> <span class="cn">NULL</span>, awod <span class="op">=</span> <span class="cn">NULL</span>,</span></span>
 <span class="r-in"><span>  contexpl <span class="op">=</span> <span class="st">"meal.cal"</span>,</span></span>
 <span class="r-in"><span>  findcut <span class="op">=</span> <span class="cn">TRUE</span>,</span></span>
 <span class="r-in"><span>  multiple_cutoffs <span class="op">=</span> <span class="cn">TRUE</span>,</span></span>
@@ -258,7 +267,7 @@ and a survey of stakeholder views: KMunicate. BMJ Open, 9(9), e030874.</p>
 </div>
 
 <div class="pkgdown-footer-right">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.2.0.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.2.1.</p>
 </div>
 
     </footer></div>

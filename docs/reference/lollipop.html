@@ -13,7 +13,7 @@ geom_segment() and geom_point() for optimal visual presentation."></head><body>
 
     <a class="navbar-brand me-2" href="../index.html">ClinicoPath</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.0.47</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.0.52</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -131,7 +131,11 @@ Aggregation' will over-plot if multiple rows per group exist.</p></dd>
 
 
 <dt id="arg-colorscheme">colorScheme<a class="anchor" aria-label="anchor" href="#arg-colorscheme"></a></dt>
-<dd><p>Color scheme for the lollipops.</p></dd>
+<dd><p>Base color hue for the lollipops. The lollipop chart
+draws a single data series, so the scheme sets one base color (the first
+color of the chosen palette) rather than mapping a different color to each
+group. This option is ignored when Conditional coloring or Highlighting is
+active, since those modes use their own fixed colors.</p></dd>
 
 
 <dt id="arg-theme">theme<a class="anchor" aria-label="anchor" href="#arg-theme"></a></dt>
@@ -199,7 +203,7 @@ above/below get different colors).</p></dd>
 </div>
 
 <div class="pkgdown-footer-right">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.2.0.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.2.1.</p>
 </div>
 
     </footer></div>

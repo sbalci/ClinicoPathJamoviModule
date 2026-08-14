@@ -53,11 +53,14 @@ bind_method <- function(name, options, private_extra = list(), results = NULL) {
         .checkpoint  = function(...) invisible(NULL),
         .displayMessages = function() invisible(NULL),
         .isCompetingRisk = function(...) FALSE,
-        .estimandMeta = function(...) list(
-            probability = "Kaplan-Meier event-free probability",
-            median = "Median event-free time",
-            median_lower = "median event-free time",
-            curve = "Event-Free Probability for the Selected Event"),
+        # The REAL estimand label map, rebound into the stub environment: with
+        # no declared estimand it returns the endpoint-neutral fallback. Copying
+        # those strings into a hand-written stub instead would make the wording
+        # assertions below test the stub, not the product.
+        .estimandMeta = local({
+            g <- gen$private_methods$.estimandMeta
+            if (is.null(g)) NULL else `environment<-`(g, env)
+        }),
         .safeExecute = function(expr, context = NULL) expr,
         .yearInUnits = function() switch(options$timetypeoutput,
             days = 365.25, weeks = 52.18, months = 12, years = 1, 12)

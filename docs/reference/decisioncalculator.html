@@ -19,7 +19,7 @@ Fagan nomogram visualization for clinical decision making."></head><body>
 
     <a class="navbar-brand me-2" href="../index.html">ClinicoPath</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.0.47</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.0.52</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -200,7 +200,7 @@ scenarios.</p></dd>
 </dl></div>
     <div class="section level2">
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
-    <p>A results object containing:</p><table class="table table"><tr><td><code>results$notices</code></td><td></td><td></td><td></td><td></td><td>a preformatted</td></tr><tr><td><code>results$welcome</code></td><td></td><td></td><td></td><td></td><td>a html</td></tr><tr><td><code>results$summary</code></td><td></td><td></td><td></td><td></td><td>a html</td></tr><tr><td><code>results$about</code></td><td></td><td></td><td></td><td></td><td>a html</td></tr><tr><td><code>results$assumptions</code></td><td></td><td></td><td></td><td></td><td>a html</td></tr><tr><td><code>results$glossary</code></td><td></td><td></td><td></td><td></td><td>a html</td></tr><tr><td><code>results$cTable</code></td><td></td><td></td><td></td><td></td><td>a table</td></tr><tr><td><code>results$nTable</code></td><td></td><td></td><td></td><td></td><td>a table</td></tr><tr><td><code>results$ratioTable</code></td><td></td><td></td><td></td><td></td><td>a table</td></tr><tr><td><code>results$advancedMetricsTable</code></td><td></td><td></td><td></td><td></td><td>a table</td></tr><tr><td><code>results$epirTable_ratio</code></td><td></td><td></td><td></td><td></td><td>a table</td></tr><tr><td><code>results$epirTable_number</code></td><td></td><td></td><td></td><td></td><td>a table</td></tr><tr><td><code>results$plot1</code></td><td></td><td></td><td></td><td></td><td>an image</td></tr><tr><td><code>results$multipleCutoffTable</code></td><td></td><td></td><td></td><td></td><td>a table</td></tr></table><p>Tables can be converted to data frames with <code>asDF</code> or <code><a href="https://rdrr.io/r/base/as.data.frame.html" class="external-link">as.data.frame</a></code>. For example:</p>
+    <p>A results object containing:</p><table class="table table"><tr><td><code>results$notices</code></td><td></td><td></td><td></td><td></td><td>a preformatted</td></tr><tr><td><code>results$welcome</code></td><td></td><td></td><td></td><td></td><td>a html</td></tr><tr><td><code>results$summary</code></td><td></td><td></td><td></td><td></td><td>a html</td></tr><tr><td><code>results$about</code></td><td></td><td></td><td></td><td></td><td>a html</td></tr><tr><td><code>results$assumptions</code></td><td></td><td></td><td></td><td></td><td>a html</td></tr><tr><td><code>results$glossary</code></td><td></td><td></td><td></td><td></td><td>a html</td></tr><tr><td><code>results$cTable</code></td><td></td><td></td><td></td><td></td><td>a table</td></tr><tr><td><code>results$nTable</code></td><td></td><td></td><td></td><td></td><td>a table</td></tr><tr><td><code>results$ratioTable</code></td><td></td><td></td><td></td><td></td><td>a table</td></tr><tr><td><code>results$advancedMetricsTable</code></td><td></td><td></td><td></td><td></td><td>a table</td></tr><tr><td><code>results$epirTable_ratio</code></td><td></td><td></td><td></td><td></td><td>a table</td></tr><tr><td><code>results$epirTable_number</code></td><td></td><td></td><td></td><td></td><td>a table</td></tr><tr><td><code>results$faganSummary</code></td><td></td><td></td><td></td><td></td><td>Plain-language reading of the Fagan nomogram: the pre-test probability, the likelihood ratios, and where a positive or a negative result moves the probability of disease.</td></tr><tr><td><code>results$plot1</code></td><td></td><td></td><td></td><td></td><td>an image</td></tr><tr><td><code>results$multipleCutoffTable</code></td><td></td><td></td><td></td><td></td><td>a table</td></tr></table><p>Tables can be converted to data frames with <code>asDF</code> or <code><a href="https://rdrr.io/r/base/as.data.frame.html" class="external-link">as.data.frame</a></code>. For example:</p>
 <p><code>results$cTable$asDF</code></p>
 <p><code>as.data.frame(results$cTable)</code></p>
     </div>
@@ -214,7 +214,7 @@ scenarios.</p></dd>
 </div>
 
 <div class="pkgdown-footer-right">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.2.0.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.2.1.</p>
 </div>
 
     </footer></div>

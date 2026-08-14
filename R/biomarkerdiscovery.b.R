@@ -11,6 +11,12 @@ biomarkerdiscoveryClass <- R6::R6Class(
     "biomarkerdiscoveryClass",
     inherit = biomarkerdiscoveryBase,
     private = list(
+
+      # R6 locks the private environment, so a field must be DECLARED here before
+      # anything may assign to it. These were only ever assigned (in .init() and
+      # friends), which threw "cannot add bindings to a locked environment" and
+      # aborted the analysis during init - before any result was produced.
+      .outlier_indices = NULL,
         .model = NULL,
         .data_processed = NULL,
         .selected_biomarkers = NULL,

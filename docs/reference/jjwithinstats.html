@@ -13,7 +13,7 @@ statistical annotations and significance testing."></head><body>
 
     <a class="navbar-brand me-2" href="../index.html">ClinicoPath</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.0.47</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.0.52</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -232,7 +232,9 @@ plot shows individual trajectories.</p></dd>
 
 
 <dt id="arg-ggpubrpalette">ggpubrPalette<a class="anchor" aria-label="anchor" href="#arg-ggpubrpalette"></a></dt>
-<dd><p>Color palette for ggpubr plot.</p></dd>
+<dd><p>Color palette for the ggpubr plot. Applies to the
+boxplot, violin and paired plot types; the line plot draws a single mean
+trajectory, so a categorical palette has nothing to colour there.</p></dd>
 
 
 <dt id="arg-ggpubraddstats">ggpubrAddStats<a class="anchor" aria-label="anchor" href="#arg-ggpubraddstats"></a></dt>
@@ -254,7 +256,7 @@ plot.</p></dd>
 </dl></div>
     <div class="section level2">
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
-    <p>A results object containing:</p><table class="table table"><tr><td><code>results$todo</code></td><td></td><td></td><td></td><td></td><td>a html</td></tr><tr><td><code>results$warnings</code></td><td></td><td></td><td></td><td></td><td>a html</td></tr><tr><td><code>results$notices</code></td><td></td><td></td><td></td><td></td><td>a html</td></tr><tr><td><code>results$interpretation</code></td><td></td><td></td><td></td><td></td><td>a html</td></tr><tr><td><code>results$explanations</code></td><td></td><td></td><td></td><td></td><td>a html</td></tr><tr><td><code>results$plot</code></td><td></td><td></td><td></td><td></td><td>an image</td></tr><tr><td><code>results$summary</code></td><td></td><td></td><td></td><td></td><td>a html</td></tr><tr><td><code>results$ggpubrPlot</code></td><td></td><td></td><td></td><td></td><td>an image</td></tr></table></div>
+    <p>A results object containing:</p><table class="table table"><tr><td><code>results$todo</code></td><td></td><td></td><td></td><td></td><td>a html</td></tr><tr><td><code>results$warnings</code></td><td></td><td></td><td></td><td></td><td>a html</td></tr><tr><td><code>results$interpretation</code></td><td></td><td></td><td></td><td></td><td>a html</td></tr><tr><td><code>results$explanations</code></td><td></td><td></td><td></td><td></td><td>a html</td></tr><tr><td><code>results$plot</code></td><td></td><td></td><td></td><td></td><td>an image</td></tr><tr><td><code>results$summary</code></td><td></td><td></td><td></td><td></td><td>a html</td></tr><tr><td><code>results$ggpubrPlot</code></td><td></td><td></td><td></td><td></td><td>an image</td></tr></table></div>
 
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
     </nav></aside></div>
@@ -265,7 +267,7 @@ plot.</p></dd>
 </div>
 
 <div class="pkgdown-footer-right">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.2.0.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.2.1.</p>
 </div>
 
     </footer></div>

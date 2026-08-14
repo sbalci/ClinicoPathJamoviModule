@@ -52,7 +52,32 @@ test_that("the ordinary Kaplan-Meier summary still reports its confidence interv
         timetypeoutput = "months", showSummaries = TRUE))
     txt <- as.character(r$clinicalSummary$content)
 
+    # A bare Alive/Dead factor does not declare WHAT the event is, so the
+    # summary must not call it survival (survival_utils.R gives this path the
+    # estimand "Kaplan-Meier survival for the selected event", which
+    # .estimandMeta() labels "Median event-free time"). The point of this test
+    # is the interval, which must still be a real one.
     expect_true(grepl("Median event-free time was", txt, fixed = TRUE))
     expect_true(grepl("95% CI:", txt, fixed = TRUE))
+    expect_match(txt, "95% CI: [0-9.]+-[0-9.]+ months")
     expect_false(grepl("NA-NA", txt, fixed = TRUE))
+})
+
+test_that("declaring overall survival makes the summary say overall survival", {
+    set.seed(11)
+    n <- 150
+    tt <- rexp(n, 0.08); cc <- rexp(n, 0.02)
+    d <- data.frame(time = pmin(tt, cc),
+                    oc = factor(ifelse(tt <= cc, "DOD", "AWD"),
+                                levels = c("AWD", "AWOD", "DOD", "DOOC")))
+    r <- do.call(singlearm, list(
+        data = d, elapsedtime = "time", tint = FALSE,
+        outcome = "oc", outcomeLevel = NULL,
+        multievent = TRUE, analysistype = "overall",
+        dod = "DOD", dooc = "DOOC", awd = "AWD", awod = "AWOD",
+        timetypeoutput = "months", showSummaries = TRUE))
+    txt <- as.character(r$clinicalSummary$content)
+
+    expect_true(grepl("Median overall survival was", txt, fixed = TRUE))
+    expect_match(txt, "95% CI: [0-9.]+-[0-9.]+ months")
 })

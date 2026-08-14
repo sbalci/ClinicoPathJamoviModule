@@ -128,7 +128,7 @@
 #'   classVar = "disease_status",
 #'   positiveClass = "Disease",
 #'   method = "oc_cost_ratio",
-#'   costratioFP = 2.5 # False positives cost 2.5x false negatives,
+#'   costratioFP = 2.5,  # False positives cost 2.5x false negatives
 #'   refVar = NULL
 #' )
 #'

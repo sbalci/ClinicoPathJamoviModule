@@ -11,7 +11,7 @@ progression-free survival, and multistate models."></head><body>
 
     <a class="navbar-brand me-2" href="../index.html">ClinicoPath</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.0.47</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.0.52</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -54,11 +54,12 @@ progression-free survival, and multistate models.</p>
     <h2 id="ref-usage">Usage<a class="anchor" aria-label="anchor" href="#ref-usage"></a></h2>
     <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">outcomeorganizer</span><span class="op">(</span></span>
 <span>  <span class="va">data</span>,</span>
-<span>  <span class="va">outcome</span>,</span>
+<span>  outcome <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  <span class="va">outcomeLevel</span>,</span>
-<span>  <span class="va">recurrence</span>,</span>
+<span>  recurrence <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  <span class="va">recurrenceLevel</span>,</span>
-<span>  <span class="va">patientID</span>,</span>
+<span>  patientID <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  followupTime <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  analysistype <span class="op">=</span> <span class="st">"os"</span>,</span>
 <span>  multievent <span class="op">=</span> <span class="cn">FALSE</span>,</span>
 <span>  <span class="va">dod</span>,</span>
@@ -68,10 +69,10 @@ progression-free survival, and multistate models.</p>
 <span>  useHierarchy <span class="op">=</span> <span class="cn">FALSE</span>,</span>
 <span>  eventPriority <span class="op">=</span> <span class="fl">1</span>,</span>
 <span>  intervalCensoring <span class="op">=</span> <span class="cn">FALSE</span>,</span>
-<span>  <span class="va">intervalStart</span>,</span>
-<span>  <span class="va">intervalEnd</span>,</span>
+<span>  intervalStart <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  intervalEnd <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  adminCensoring <span class="op">=</span> <span class="cn">FALSE</span>,</span>
-<span>  <span class="va">adminDate</span>,</span>
+<span>  adminDate <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  outputTable <span class="op">=</span> <span class="cn">FALSE</span>,</span>
 <span>  diagnostics <span class="op">=</span> <span class="cn">FALSE</span>,</span>
 <span>  visualization <span class="op">=</span> <span class="cn">FALSE</span>,</span>
@@ -111,6 +112,14 @@ occurred.</p></dd>
 <dt id="arg-patientid">patientID<a class="anchor" aria-label="anchor" href="#arg-patientid"></a></dt>
 <dd><p>Patient identifier for handling multiple records or
 applying event hierarchies.</p></dd>
+
+
+<dt id="arg-followuptime">followupTime<a class="anchor" aria-label="anchor" href="#arg-followuptime"></a></dt>
+<dd><p>Optional follow-up time. Supplying it lets
+administrative censoring actually truncate follow-up and reset event
+status, and lets the event hierarchy keep the earliest priority event per
+patient instead of writing a later one back onto earlier records. Leave
+empty to keep the previous behaviour.</p></dd>
 
 
 <dt id="arg-analysistype">analysistype<a class="anchor" aria-label="anchor" href="#arg-analysistype"></a></dt>
@@ -201,7 +210,7 @@ suitable for copying to reports.</p></dd>
 </dl></div>
     <div class="section level2">
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
-    <p>A results object containing:</p><table class="table table"><tr><td><code>results$todo</code></td><td></td><td></td><td></td><td></td><td>a html</td></tr><tr><td><code>results$errors</code></td><td></td><td></td><td></td><td></td><td>a html</td></tr><tr><td><code>results$strongWarnings</code></td><td></td><td></td><td></td><td></td><td>a html</td></tr><tr><td><code>results$warnings</code></td><td></td><td></td><td></td><td></td><td>a html</td></tr><tr><td><code>results$infoMessages</code></td><td></td><td></td><td></td><td></td><td>a html</td></tr><tr><td><code>results$summary</code></td><td></td><td></td><td></td><td></td><td>a html</td></tr><tr><td><code>results$outputTable</code></td><td></td><td></td><td></td><td></td><td>a table</td></tr><tr><td><code>results$diagnosticsTable</code></td><td></td><td></td><td></td><td></td><td>a table</td></tr><tr><td><code>results$outcomeViz</code></td><td></td><td></td><td></td><td></td><td>an image</td></tr><tr><td><code>results$naturalSummary</code></td><td></td><td></td><td></td><td></td><td>a html</td></tr><tr><td><code>results$glossary</code></td><td></td><td></td><td></td><td></td><td>a html</td></tr><tr><td><code>results$addOutcome</code></td><td></td><td></td><td></td><td></td><td>an output</td></tr></table><p>Tables can be converted to data frames with <code>asDF</code> or <code><a href="https://rdrr.io/r/base/as.data.frame.html" class="external-link">as.data.frame</a></code>. For example:</p>
+    <p>A results object containing:</p><table class="table table"><tr><td><code>results$eventRecodeInfo</code></td><td></td><td></td><td></td><td></td><td>a html</td></tr><tr><td><code>results$todo</code></td><td></td><td></td><td></td><td></td><td>a html</td></tr><tr><td><code>results$errors</code></td><td></td><td></td><td></td><td></td><td>a html</td></tr><tr><td><code>results$strongWarnings</code></td><td></td><td></td><td></td><td></td><td>a html</td></tr><tr><td><code>results$warnings</code></td><td></td><td></td><td></td><td></td><td>a html</td></tr><tr><td><code>results$infoMessages</code></td><td></td><td></td><td></td><td></td><td>a html</td></tr><tr><td><code>results$summary</code></td><td></td><td></td><td></td><td></td><td>a html</td></tr><tr><td><code>results$outputTable</code></td><td></td><td></td><td></td><td></td><td>a table</td></tr><tr><td><code>results$diagnosticsTable</code></td><td></td><td></td><td></td><td></td><td>a table</td></tr><tr><td><code>results$outcomeViz</code></td><td></td><td></td><td></td><td></td><td>an image</td></tr><tr><td><code>results$naturalSummary</code></td><td></td><td></td><td></td><td></td><td>a html</td></tr><tr><td><code>results$glossary</code></td><td></td><td></td><td></td><td></td><td>a html</td></tr><tr><td><code>results$addOutcome</code></td><td></td><td></td><td></td><td></td><td>an output</td></tr></table><p>Tables can be converted to data frames with <code>asDF</code> or <code><a href="https://rdrr.io/r/base/as.data.frame.html" class="external-link">as.data.frame</a></code>. For example:</p>
 <p><code>results$outputTable$asDF</code></p>
 <p><code>as.data.frame(results$outputTable)</code></p>
     </div>
@@ -215,7 +224,7 @@ suitable for copying to reports.</p></dd>
 </div>
 
 <div class="pkgdown-footer-right">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.2.0.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.2.1.</p>
 </div>
 
     </footer></div>

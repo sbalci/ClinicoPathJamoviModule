@@ -11,7 +11,7 @@ positive, both positive, both negative)."></head><body>
 
     <a class="navbar-brand me-2" href="../index.html">ClinicoPath</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.0.47</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.0.52</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -93,14 +93,21 @@ for safety). Use true only if tests measure completely different phenomena.</p><
 
 
 <dt id="arg-cond-dep-pos">cond_dep_pos<a class="anchor" aria-label="anchor" href="#arg-cond-dep-pos"></a></dt>
-<dd><p>Conditional dependence between tests for subjects with
-disease. Value between 0 (independence) and 1 (complete dependence).</p></dd>
+<dd><p>Correlation between the two test results among subjects
+with disease, where 0 is conditional independence and 1 is the strongest
+dependence the marginals allow. Negative values describe tests that
+compensate for each other's errors; they are permitted, but the feasible
+negative range is narrow for tests with high specificity and values beyond
+it are truncated with a warning.</p></dd>
 
 
 <dt id="arg-cond-dep-neg">cond_dep_neg<a class="anchor" aria-label="anchor" href="#arg-cond-dep-neg"></a></dt>
-<dd><p>Conditional dependence between tests for subjects
-without disease. Value between 0 (independence) and 1 (complete
-dependence).</p></dd>
+<dd><p>Correlation between the two test results among subjects
+without disease, where 0 is conditional independence and 1 is the strongest
+dependence the marginals allow. Negative values describe tests that
+compensate for each other's errors; they are permitted, but the feasible
+negative range is narrow for tests with high specificity and values beyond
+it are truncated with a warning.</p></dd>
 
 
 <dt id="arg-prevalence">prevalence<a class="anchor" aria-label="anchor" href="#arg-prevalence"></a></dt>
@@ -138,7 +145,7 @@ with appropriate dependence parameters and prevalence estimates.</p></dd>
 </div>
 
 <div class="pkgdown-footer-right">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.2.0.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.2.1.</p>
 </div>
 
     </footer></div>

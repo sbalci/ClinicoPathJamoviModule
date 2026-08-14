@@ -87,7 +87,7 @@ items:
       # evaluated but handed back as a raw string, which is truthy, so this panel
       # was ALWAYS visible - an empty aesthetics plot sat under every analysis.
       # A bare option name is the idiom used elsewhere in this file (see grvar).
-      visible: (colorvar || sizevar || shapevar || alphavar || labelvar)
+      visible: (length(colorvar) > 0 || length(sizevar) > 0 || length(shapevar) > 0 || length(alphavar) > 0 || length(labelvar) > 0)
 
     - name: ggpubrPlot
       title: 'Publication-Ready Scatter Plot (ggpubr)'

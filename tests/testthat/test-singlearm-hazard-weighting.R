@@ -9,9 +9,11 @@
 # local events/person-time rate.
 #
 # This calls the SHIPPED private method, not a re-implementation: the method only
-# touches image$state, a handful of options and three private helpers, so it can
-# be rebound onto a stub environment. `print` is stubbed to capture the ggplot
-# instead of opening a device.
+# touches image$state and a handful of options, so it can be rebound onto a stub
+# environment. Every private helper is bound from cls$private_methods rather than
+# hand-written here, so a backend refactor that extracts a new helper (or retunes
+# an existing one) is exercised by this test instead of silently breaking it.
+# `print` is stubbed to capture the ggplot instead of opening a device.
 
 test_that("smoothed hazard curve recovers a constant hazard", {
     skip_if_not_installed("survival")
@@ -37,11 +39,15 @@ test_that("smoothed hazard curve recovers a constant hazard", {
         timetypeoutput   = "months",
         # jmvcore::.() resolves translations through self$options$translate
         translate        = function(text, n = 1) text))
-    env$private <- list(
-        .isCompetingRisk       = function(...) FALSE,
-        .safeExecute           = function(expr, context = NULL) force(expr),
-        .calculateAdaptiveSpan = function(n_points) 0.3,
-        .hazardIntervals       = cls$private_methods$.hazardIntervals)
+    # Bind the SHIPPED helpers (.hazardIntervals, .calculateAdaptiveSpan, ...);
+    # stub only the two that cannot run here. Fabricating a span was how this
+    # test drifted: .hazardIntervals caps at max_bins = 10, and the shipped
+    # .calculateAdaptiveSpan returns 0.8 for <= 10 points, so a stubbed 0.3 fits
+    # a curve the product never draws.
+    env$private <- utils::modifyList(
+        lapply(cls$private_methods, function(m) { environment(m) <- env; m }),
+        list(.isCompetingRisk = function(...) FALSE,
+             .safeExecute     = function(expr, context = NULL, ...) force(expr)))
     env$. <- function(text, ...) text
     env$print <- function(x, ...) { captured <<- x; invisible(x) }
     environment(f) <- env
@@ -53,8 +59,8 @@ test_that("smoothed hazard curve recovers a constant hazard", {
     haz <- captured$data$hazard
     expect_true(all(is.finite(haz)))
     # True hazard is 0.1 everywhere. The shipped-before-fix curve ranged
-    # 0.00-8.49 on this seed; the weighted fit gives 0.077-0.144.
-    expect_gt(median(haz), 0.05)
+    # 0.00-8.49 on this seed; the person-time weighted fit gives 0.101-0.125.
+    expect_gt(min(haz), 0.05)
     expect_lt(max(haz), 0.20)
 })
 

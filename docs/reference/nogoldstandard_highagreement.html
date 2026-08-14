@@ -11,7 +11,7 @@ concordance). Tests have good sensitivity (0.90, 0.88) and specificity
 
     <a class="navbar-brand me-2" href="../index.html">ClinicoPath</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.0.47</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.0.52</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -91,14 +91,27 @@ agreement) tests latent class model assumptions about conditional independence.<
 <span class="r-in"><span>               test5Positive <span class="op">=</span> <span class="st">""</span>, method <span class="op">=</span> <span class="st">"composite"</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  ANALYSIS WITHOUT GOLD STANDARD</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Analysing 150 cases</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> All 150 cases have a result for every selected test.</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> WARNING: Composite Ties</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Composite reference with even number of tests may result in ties. Consider using an odd number of tests or a different method.</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> WARNING: Composite reference cannot be used with only two tests</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> With two tests a majority vote has no majority: one positive out of two is a tie, which this rule counts as diseased, making the composite reference identical to "any test positive". Every test then agrees perfectly with the reference whenever it is positive, so specificity and PPV are fixed at 100% by construction and are left blank below. Add a third test, or interpret only the sensitivity column -- and note that it too is inflated because each test helped build the standard it is being judged against.</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> WARNING: This method cannot estimate accuracy</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> The reference standard is defined as "at least one test is positive", so each test is being compared against a rule built from its own result. Specificity and PPV are therefore fixed at 100% by construction on every dataset, whatever the tests actually do, and are left blank below rather than reported as findings. The remaining figures are inflated by the same circularity and describe agreement with the composite rule, not diagnostic accuracy. To estimate accuracy without a gold standard, use the latent class method with three or more conditionally independent tests.</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  Agreement Statistics (Cohen's Kappa)                      </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  ───────────────────────────────────────────────────────── </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>    Test Pair         Kappa       p-value       Agreement   </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  ───────────────────────────────────────────────────────── </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>    Test1 vs Test2    1.000000    &lt; .0000001    100.00000   </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  ───────────────────────────────────────────────────────── </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    Note. Kappa standard errors and p-values use a</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    large-sample normal approximation rather than the</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    exact asymptotic SE (e.g. vcd::Kappa); interpret</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    p-values cautiously, especially in small samples.</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  &lt;div class='clinical-summary' style='background: #f0f8ff; padding:</span>
@@ -109,12 +122,14 @@ agreement) tests latent class model assumptions about conditional independence.<
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  Tests analyzed: Test1, Test2 (N=2)</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  Disease prevalence: 37.3%</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  Cases meeting the reference rule 37.3% *(this is the share of cases</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  satisfying the rule, not an estimate of disease prevalence)*</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  Test sensitivities: Range from 100.0% to 100.0%</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  Clinical interpretation: High prevalence setting - high PPV expected,</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  focus on confirming disease</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  Caution: this method scores each test against a reference built from</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  the tests themselves, so the figures describe agreement with that rule</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  rather than diagnostic accuracy.</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  &lt;div style='background: #f8f9fa; padding: 20px; border-radius: 8px;</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  margin: 15px 0; border-left: 4px solid #007bff;'&gt;&lt;h3 style='color:</span>
@@ -129,8 +144,10 @@ agreement) tests latent class model assumptions about conditional independence.<
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  Best for: Diagnostic validation studies with 3+ tests and N&gt;=100</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  Strengths: Handles conditional dependence, provides model fit</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  statistics, most statistically rigorous</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  Strengths: The only method here that estimates accuracy rather than</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  agreement with a self-built reference; provides model fit statistics.</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  Assumes the tests are conditionally independent given true status --</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  it does NOT model conditional dependence</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  &lt;div style='margin: 15px 0; padding: 15px; background: #e3f2fd;</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  border-radius: 5px;'&gt;&lt;h4 style='color: #1565c0; margin-top: 0;'&gt;</span>
@@ -155,8 +172,10 @@ agreement) tests latent class model assumptions about conditional independence.<
 <span class="r-out co"><span class="r-pr">#&gt;</span>  Best for: Inter-rater agreement studies with 3+ tests, exploratory</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  analysis</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  Strengths: Simple and intuitive, requires minimal assumptions, good</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  starting point</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  Strengths: Simple and intuitive. Not an accuracy estimate: each test</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  helps build the standard it is judged against, which inflates its</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  apparent performance. Needs 3+ tests -- with 2 a tie counts as</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  diseased, making it identical to Any Test Positive</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  &lt;div style='margin: 15px 0; padding: 15px; background: #fce4ec;</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  border-radius: 5px;'&gt;&lt;h4 style='color: #c2185b; margin-top: 0;'&gt; All</span>
@@ -168,7 +187,10 @@ agreement) tests latent class model assumptions about conditional independence.<
 <span class="r-out co"><span class="r-pr">#&gt;</span>  Best for: Highly specific diagnoses where false positives are very</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  costly</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  Strengths: High specificity reference, minimizes false positives</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  Strengths: A deliberately strict reference. Sensitivity and NPV cannot</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  be estimated under this rule -- they are fixed at 100% by construction</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  -- so only specificity and PPV are shown, and both are inflated by the</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  same circularity</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  &lt;div style='margin: 15px 0; padding: 15px; background: #e8f5e8;</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  border-radius: 5px;'&gt;&lt;h4 style='color: #388e3c; margin-top: 0;'&gt; Any</span>
@@ -179,7 +201,10 @@ agreement) tests latent class model assumptions about conditional independence.<
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  Best for: Population screening scenarios where missing cases is costly</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  Strengths: High sensitivity reference, minimizes false negatives</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  Strengths: A deliberately permissive reference. Specificity and PPV</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  cannot be estimated under this rule -- they are fixed at 100% by</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  construction -- so only sensitivity and NPV are shown, and both are</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  inflated by the same circularity</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  &lt;div style='margin: 15px 0; padding: 10px; background: #fff8e1;</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  border-radius: 5px; border-left: 3px solid #ffb300;'&gt;&lt;h4 style='color:</span>
@@ -202,9 +227,16 @@ agreement) tests latent class model assumptions about conditional independence.<
 <span class="r-out co"><span class="r-pr">#&gt;</span>  ───────────────────────────────────────────────────────────────────────────────────────────────────────────────────── </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>    Test     Sensitivity    Lower CI     Upper CI     Specificity    Lower CI     Upper CI     PPV          NPV         </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  ───────────────────────────────────────────────────────────────────────────────────────────────────────────────────── </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>    Test1      100.00000    100.00000    100.00000      100.00000    100.00000    100.00000    100.00000    100.00000   </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>    Test2      100.00000    100.00000    100.00000      100.00000    100.00000    100.00000    100.00000    100.00000   </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    Test1      100.00000    100.00000    100.00000                                                          100.00000   </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    Test2      100.00000    100.00000    100.00000                                                          100.00000   </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  ───────────────────────────────────────────────────────────────────────────────────────────────────────────────────── </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    Note. 95% intervals are normal-approximation (Wald) intervals, using the estimated number of diseased cases as</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    the denominator for sensitivity and non-diseased for specificity. They treat the estimates as observed</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    proportions and so understate the uncertainty of a latent-variable model; enable Bootstrap for intervals that</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    account for the estimation itself.</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    Note. Each test is scored against a reference standard built from the tests themselves, so these are measures</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    of agreement with that rule, not estimates of diagnostic accuracy. The blank column is fixed at 100% by</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    construction and carries no information.</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  Test Cross-Tabulation                       </span>
@@ -231,7 +263,7 @@ agreement) tests latent class model assumptions about conditional independence.<
 </div>
 
 <div class="pkgdown-footer-right">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.2.0.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.2.1.</p>
 </div>
 
     </footer></div>

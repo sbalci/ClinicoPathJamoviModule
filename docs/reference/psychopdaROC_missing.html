@@ -9,7 +9,7 @@ class variable for testing handling of incomplete data."></head><body>
 
     <a class="navbar-brand me-2" href="../index.html">ClinicoPath</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.0.47</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.0.52</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -89,8 +89,6 @@ with appropriate warnings or exclusions.</p>
 <span class="r-in"><span>             dependentVars <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"test_a"</span>, <span class="st">"test_b"</span><span class="op">)</span>,</span></span>
 <span class="r-in"><span>             classVar <span class="op">=</span> <span class="st">"diagnosis"</span>, positiveClass <span class="op">=</span> <span class="st">"Disease"</span>,</span></span>
 <span class="r-in"><span>             refVar <span class="op">=</span> <span class="st">"test_a"</span><span class="op">)</span></span></span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> Multiple optimal cutpoints found, applying break_ties.</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> Multiple optimal cutpoints found, applying break_ties.</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  ADVANCED ROC ANALYSIS</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
@@ -104,7 +102,7 @@ with appropriate warnings or exclusions.</p>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  The ROC analysis has been completed using the following</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  specifications:</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  &amp;nbsp;</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  Measure Variable(s): test_a, test_b</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
@@ -112,7 +110,7 @@ with appropriate warnings or exclusions.</p>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  Positive Class: Disease</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  &amp;nbsp;</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  Method: maximize_metric</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
@@ -124,9 +122,9 @@ with appropriate warnings or exclusions.</p>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  Tie Breakers: mean</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  Metric Tolerance: 0.05</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  Metric Tolerance: 1e-06</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  &amp;nbsp;</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  &lt;hr /&gt;</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
@@ -145,6 +143,12 @@ with appropriate warnings or exclusions.</p>
 <span class="r-out co"><span class="r-pr">#&gt;</span>    test_a      0.8488510                                                </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>    test_b      0.7755656                                                </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  ────────────────────────────────────────────────────────────────────── </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    Note. Reading of the test values: &lt;b&gt;HIGHER values were taken to</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    indicate Disease&lt;/b&gt; (Classification Direction = "&gt;="). If that</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    is the wrong way round for this marker, every sensitivity,</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    specificity, cutpoint and AUC below is reversed — switch</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    Classification Direction to "&lt;=" and the AUC becomes 1 minus the</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    value shown.</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  Clinical Interpretation                                                                                                                                                                                                       </span>
@@ -162,7 +166,7 @@ with appropriate warnings or exclusions.</p>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  ───────────────────────────────────────────────────────────────────────────────────────────────────────────────── </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>    Cutpoint      Sensitivity    Specificity    PPV          NPV          Youden's J    AUC          Metric Score   </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  ───────────────────────────────────────────────────────────────────────────────────────────────────────────────── </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>    59.2521263       71.64179       85.71429     84.21053     73.97260     0.5735608    0.8488510       0.5735608   </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    59.8074173       71.64179       87.30159     85.71429     74.32432     0.5894338    0.8488510       0.5894338   </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  ───────────────────────────────────────────────────────────────────────────────────────────────────────────────── </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
@@ -170,7 +174,7 @@ with appropriate warnings or exclusions.</p>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  ───────────────────────────────────────────────────────────────────────────────────────────────────────────────── </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>    Cutpoint      Sensitivity    Specificity    PPV          NPV          Youden's J    AUC          Metric Score   </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  ───────────────────────────────────────────────────────────────────────────────────────────────────────────────── </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>    60.8374178       61.76471       86.15385     82.35294     68.29268     0.4791855    0.7755656       0.4791855   </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    61.9134099       61.76471       87.69231     84.00000     68.67470     0.4945701    0.7755656       0.4945701   </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  ───────────────────────────────────────────────────────────────────────────────────────────────────────────────── </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
@@ -181,6 +185,12 @@ with appropriate warnings or exclusions.</p>
 <span class="r-out co"><span class="r-pr">#&gt;</span>    test_a      0.8488510                                                </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>    test_b      0.7755656                                                </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  ────────────────────────────────────────────────────────────────────── </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    Note. Reading of the test values: &lt;b&gt;HIGHER values were taken to</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    indicate Disease&lt;/b&gt; (Classification Direction = "&gt;="). If that</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    is the wrong way round for this marker, every sensitivity,</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    specificity, cutpoint and AUC below is reversed — switch</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    Classification Direction to "&lt;=" and the AUC becomes 1 minus the</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    value shown.</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-plt img"><img src="psychopdaROC_missing-1.png" alt="" width="700" height="433"></span>
 <span class="r-in"><span></span></span>
@@ -195,7 +205,7 @@ with appropriate warnings or exclusions.</p>
 </div>
 
 <div class="pkgdown-footer-right">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.2.0.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.2.1.</p>
 </div>
 
     </footer></div>

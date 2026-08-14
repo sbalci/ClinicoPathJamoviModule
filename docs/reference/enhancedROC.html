@@ -15,7 +15,7 @@ test evaluation, and clinical decision support in medical research."></head><bod
 
     <a class="navbar-brand me-2" href="../index.html">ClinicoPath</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.0.47</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.0.52</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -76,6 +76,7 @@ test evaluation, and clinical decision support in medical research.</p>
 <span>  bootstrapCutoffCI <span class="op">=</span> <span class="cn">FALSE</span>,</span>
 <span>  bootstrapPartialAUC <span class="op">=</span> <span class="cn">FALSE</span>,</span>
 <span>  stratifiedBootstrap <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  seed <span class="op">=</span> <span class="fl">0</span>,</span>
 <span>  pairwiseComparisons <span class="op">=</span> <span class="cn">FALSE</span>,</span>
 <span>  comparisonMethod <span class="op">=</span> <span class="st">"delong"</span>,</span>
 <span>  rocCurve <span class="op">=</span> <span class="cn">TRUE</span>,</span>
@@ -213,18 +214,27 @@ intervals. BCa provides better coverage but requires more computation.</p></dd>
 
 
 <dt id="arg-bootstrapcutoffci">bootstrapCutoffCI<a class="anchor" aria-label="anchor" href="#arg-bootstrapcutoffci"></a></dt>
-<dd><p>Calculate bootstrap confidence intervals for
-sensitivity and specificity at optimal cutoff</p></dd>
+<dd><p>NOT YET IMPLEMENTED - selecting this produces no
+output. Calculate bootstrap confidence intervals for sensitivity and
+specificity at optimal cutoff</p></dd>
 
 
 <dt id="arg-bootstrappartialauc">bootstrapPartialAUC<a class="anchor" aria-label="anchor" href="#arg-bootstrappartialauc"></a></dt>
-<dd><p>Calculate bootstrap confidence intervals for
-partial AUC estimates</p></dd>
+<dd><p>NOT YET IMPLEMENTED - selecting this produces no
+output. Calculate bootstrap confidence intervals for partial AUC estimates</p></dd>
 
 
 <dt id="arg-stratifiedbootstrap">stratifiedBootstrap<a class="anchor" aria-label="anchor" href="#arg-stratifiedbootstrap"></a></dt>
 <dd><p>Maintain outcome class proportions in bootstrap
 samples (recommended for imbalanced data)</p></dd>
+
+
+<dt id="arg-seed">seed<a class="anchor" aria-label="anchor" href="#arg-seed"></a></dt>
+<dd><p>Random seed used for every resampling step - bootstrap
+confidence intervals, bootstrap ROC comparisons, and internal validation
+resamples or cross-validation folds. Fixing it makes a run reproducible:
+the same data and options give the same intervals every time. Change it to
+check how sensitive a result is to the particular resamples drawn.</p></dd>
 
 
 <dt id="arg-pairwisecomparisons">pairwiseComparisons<a class="anchor" aria-label="anchor" href="#arg-pairwisecomparisons"></a></dt>
@@ -402,38 +412,39 @@ calibration-in-the-large</p></dd>
 
 
 <dt id="arg-splinecalibration">splineCalibration<a class="anchor" aria-label="anchor" href="#arg-splinecalibration"></a></dt>
-<dd><p>Use restricted cubic splines for flexible
-calibration curves</p></dd>
+<dd><p>NOT YET IMPLEMENTED - selecting this produces no
+output. Use restricted cubic splines for flexible calibration curves</p></dd>
 
 
 <dt id="arg-splineknots">splineKnots<a class="anchor" aria-label="anchor" href="#arg-splineknots"></a></dt>
-<dd><p>Number of knots for restricted cubic splines (3-7
-recommended)</p></dd>
+<dd><p>NOT YET IMPLEMENTED - selecting this produces no output.
+Number of knots for restricted cubic splines (3-7 recommended)</p></dd>
 
 
 <dt id="arg-eoratio">eoRatio<a class="anchor" aria-label="anchor" href="#arg-eoratio"></a></dt>
-<dd><p>Calculate Expected/Observed ratio for overall calibration
-assessment</p></dd>
+<dd><p>NOT YET IMPLEMENTED - selecting this produces no output.
+Calculate Expected/Observed ratio for overall calibration assessment</p></dd>
 
 
 <dt id="arg-namdagostino">namDagostino<a class="anchor" aria-label="anchor" href="#arg-namdagostino"></a></dt>
-<dd><p>Perform Nam-D'Agostino calibration test (more powerful
-than H-L)</p></dd>
+<dd><p>NOT YET IMPLEMENTED - selecting this produces no
+output. Perform Nam-D'Agostino calibration test (more powerful than H-L)</p></dd>
 
 
 <dt id="arg-greenwoodnam">greenwoodNam<a class="anchor" aria-label="anchor" href="#arg-greenwoodnam"></a></dt>
-<dd><p>Greenwood-Nam-D'Agostino test for survival model
-calibration</p></dd>
+<dd><p>NOT YET IMPLEMENTED - selecting this produces no
+output. Greenwood-Nam-D'Agostino test for survival model calibration</p></dd>
 
 
 <dt id="arg-calibrationbelt">calibrationBelt<a class="anchor" aria-label="anchor" href="#arg-calibrationbelt"></a></dt>
-<dd><p>Display calibration belt showing uncertainty around
-calibration curve</p></dd>
+<dd><p>NOT YET IMPLEMENTED - selecting this produces no
+output. Display calibration belt showing uncertainty around calibration
+curve</p></dd>
 
 
 <dt id="arg-calibrationdensity">calibrationDensity<a class="anchor" aria-label="anchor" href="#arg-calibrationdensity"></a></dt>
-<dd><p>Show distribution of predicted probabilities as
-density overlay</p></dd>
+<dd><p>NOT YET IMPLEMENTED - selecting this produces no
+output. Show distribution of predicted probabilities as density overlay</p></dd>
 
 
 <dt id="arg-multiclassroc">multiClassROC<a class="anchor" aria-label="anchor" href="#arg-multiclassroc"></a></dt>
@@ -469,27 +480,31 @@ consequences</p></dd>
 
 
 <dt id="arg-harrellcindex">harrellCIndex<a class="anchor" aria-label="anchor" href="#arg-harrellcindex"></a></dt>
-<dd><p>Calculate Harrell's concordance index for
-time-to-event outcomes</p></dd>
+<dd><p>NOT YET IMPLEMENTED - selecting this produces no
+output. Calculate Harrell's concordance index for time-to-event outcomes</p></dd>
 
 
 <dt id="arg-unocstatistic">unoCStatistic<a class="anchor" aria-label="anchor" href="#arg-unocstatistic"></a></dt>
-<dd><p>Calculate Uno's C-statistic (more robust to censoring)</p></dd>
+<dd><p>NOT YET IMPLEMENTED - selecting this produces no
+output. Calculate Uno's C-statistic (more robust to censoring)</p></dd>
 
 
 <dt id="arg-incidentdynamic">incidentDynamic<a class="anchor" aria-label="anchor" href="#arg-incidentdynamic"></a></dt>
-<dd><p>Calculate incident/dynamic AUC (sensitivity for
-events at specific time)</p></dd>
+<dd><p>NOT YET IMPLEMENTED - selecting this produces no
+output. Calculate incident/dynamic AUC (sensitivity for events at specific
+time)</p></dd>
 
 
 <dt id="arg-cumulativedynamic">cumulativeDynamic<a class="anchor" aria-label="anchor" href="#arg-cumulativedynamic"></a></dt>
-<dd><p>Calculate cumulative/dynamic AUC (sensitivity for
-events by specific time)</p></dd>
+<dd><p>NOT YET IMPLEMENTED - selecting this produces no
+output. Calculate cumulative/dynamic AUC (sensitivity for events by
+specific time)</p></dd>
 
 
 <dt id="arg-competingrisksconcordance">competingRisksConcordance<a class="anchor" aria-label="anchor" href="#arg-competingrisksconcordance"></a></dt>
-<dd><p>Calculate cause-specific concordance for
-competing risks</p></dd>
+<dd><p>NOT YET IMPLEMENTED - selecting this
+produces no output. Calculate cause-specific concordance for competing
+risks</p></dd>
 
 
 <dt id="arg-internalvalidation">internalValidation<a class="anchor" aria-label="anchor" href="#arg-internalvalidation"></a></dt>
@@ -502,29 +517,33 @@ cross-validation or bootstrap</p></dd>
 
 
 <dt id="arg-optimismcorrection">optimismCorrection<a class="anchor" aria-label="anchor" href="#arg-optimismcorrection"></a></dt>
-<dd><p>Apply optimism correction to performance metrics</p></dd>
+<dd><p>NOT YET IMPLEMENTED - selecting this produces no
+output. Apply optimism correction to performance metrics</p></dd>
 
 
 <dt id="arg-externalvalidation">externalValidation<a class="anchor" aria-label="anchor" href="#arg-externalvalidation"></a></dt>
-<dd><p>Enable external validation reporting framework</p></dd>
+<dd><p>NOT YET IMPLEMENTED - selecting this produces no
+output. Enable external validation reporting framework</p></dd>
 
 
 <dt id="arg-decisionimpactcurves">decisionImpactCurves<a class="anchor" aria-label="anchor" href="#arg-decisionimpactcurves"></a></dt>
-<dd><p>Plot decision impact curves showing clinical
-consequences</p></dd>
+<dd><p>NOT YET IMPLEMENTED - selecting this produces
+no output. Plot decision impact curves showing clinical consequences</p></dd>
 
 
 <dt id="arg-netbenefitregression">netBenefitRegression<a class="anchor" aria-label="anchor" href="#arg-netbenefitregression"></a></dt>
-<dd><p>Model net benefit as function of threshold
-probabilities</p></dd>
+<dd><p>NOT YET IMPLEMENTED - selecting this produces
+no output. Model net benefit as function of threshold probabilities</p></dd>
 
 
 <dt id="arg-modelupdating">modelUpdating<a class="anchor" aria-label="anchor" href="#arg-modelupdating"></a></dt>
-<dd><p>Analyze need for model recalibration or updating</p></dd>
+<dd><p>NOT YET IMPLEMENTED - selecting this produces no
+output. Analyze need for model recalibration or updating</p></dd>
 
 
 <dt id="arg-transportability">transportability<a class="anchor" aria-label="anchor" href="#arg-transportability"></a></dt>
-<dd><p>Assess model transportability across populations</p></dd>
+<dd><p>NOT YET IMPLEMENTED - selecting this produces no
+output. Assess model transportability across populations</p></dd>
 
 </dl></div>
     <div class="section level2">
@@ -540,7 +559,7 @@ probabilities</p></dd>
 </div>
 
 <div class="pkgdown-footer-right">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.2.0.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.2.1.</p>
 </div>
 
     </footer></div>

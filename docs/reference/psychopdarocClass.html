@@ -13,7 +13,7 @@ comprehensive visualization options."></head><body>
 
     <a class="navbar-brand me-2" href="../index.html">ClinicoPath</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.0.47</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.0.52</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -183,125 +183,7 @@ ROC curve to reclassification and beyond. Statistics in Medicine, 27(2), 157-172
 
     <div class="section level2">
     <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="kw">if</span> <span class="op">(</span><span class="cn">FALSE</span><span class="op">)</span> <span class="op">{</span> <span class="co"># \dontrun{</span></span></span>
-<span class="r-in"><span><span class="co"># Load example medical data</span></span></span>
-<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/utils/data.html" class="external-link">data</a></span><span class="op">(</span><span class="va">medical_roc_data</span><span class="op">)</span></span></span>
-<span class="r-in"><span></span></span>
-<span class="r-in"><span><span class="co"># Basic ROC analysis</span></span></span>
-<span class="r-in"><span><span class="va">result1</span> <span class="op">&lt;-</span> <span class="fu"><a href="psychopdaROC.html">psychopdaROC</a></span><span class="op">(</span></span></span>
-<span class="r-in"><span>  data <span class="op">=</span> <span class="va">medical_roc_data</span>,</span></span>
-<span class="r-in"><span>  dependentVars <span class="op">=</span> <span class="st">"biomarker1"</span>,</span></span>
-<span class="r-in"><span>  classVar <span class="op">=</span> <span class="st">"disease_status"</span>,</span></span>
-<span class="r-in"><span>  positiveClass <span class="op">=</span> <span class="st">"Disease"</span></span></span>
-<span class="r-in"><span><span class="op">)</span></span></span>
-<span class="r-in"><span></span></span>
-<span class="r-in"><span><span class="co"># Compare multiple biomarkers with DeLong test</span></span></span>
-<span class="r-in"><span><span class="va">result2</span> <span class="op">&lt;-</span> <span class="fu"><a href="psychopdaROC.html">psychopdaROC</a></span><span class="op">(</span></span></span>
-<span class="r-in"><span>  data <span class="op">=</span> <span class="va">medical_roc_data</span>,</span></span>
-<span class="r-in"><span>  dependentVars <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"biomarker1"</span>, <span class="st">"biomarker2"</span>, <span class="st">"biomarker3"</span><span class="op">)</span>,</span></span>
-<span class="r-in"><span>  classVar <span class="op">=</span> <span class="st">"disease_status"</span>,</span></span>
-<span class="r-in"><span>  positiveClass <span class="op">=</span> <span class="st">"Disease"</span>,</span></span>
-<span class="r-in"><span>  delongTest <span class="op">=</span> <span class="cn">TRUE</span>,</span></span>
-<span class="r-in"><span>  combinePlots <span class="op">=</span> <span class="cn">TRUE</span></span></span>
-<span class="r-in"><span><span class="op">)</span></span></span>
-<span class="r-in"><span></span></span>
-<span class="r-in"><span><span class="co"># Advanced analysis with IDI/NRI</span></span></span>
-<span class="r-in"><span><span class="va">result3</span> <span class="op">&lt;-</span> <span class="fu"><a href="psychopdaROC.html">psychopdaROC</a></span><span class="op">(</span></span></span>
-<span class="r-in"><span>  data <span class="op">=</span> <span class="va">medical_roc_data</span>,</span></span>
-<span class="r-in"><span>  dependentVars <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"biomarker1"</span>, <span class="st">"biomarker2"</span><span class="op">)</span>,</span></span>
-<span class="r-in"><span>  classVar <span class="op">=</span> <span class="st">"disease_status"</span>,</span></span>
-<span class="r-in"><span>  positiveClass <span class="op">=</span> <span class="st">"Disease"</span>,</span></span>
-<span class="r-in"><span>  calculateIDI <span class="op">=</span> <span class="cn">TRUE</span>,</span></span>
-<span class="r-in"><span>  calculateNRI <span class="op">=</span> <span class="cn">TRUE</span>,</span></span>
-<span class="r-in"><span>  refVar <span class="op">=</span> <span class="st">"biomarker1"</span>,</span></span>
-<span class="r-in"><span>  nriThresholds <span class="op">=</span> <span class="st">"0.3,0.7"</span></span></span>
-<span class="r-in"><span><span class="op">)</span></span></span>
-<span class="r-in"><span></span></span>
-<span class="r-in"><span><span class="co"># Cost-benefit optimization</span></span></span>
-<span class="r-in"><span><span class="va">result4</span> <span class="op">&lt;-</span> <span class="fu"><a href="psychopdaROC.html">psychopdaROC</a></span><span class="op">(</span></span></span>
-<span class="r-in"><span>  data <span class="op">=</span> <span class="va">medical_roc_data</span>,</span></span>
-<span class="r-in"><span>  dependentVars <span class="op">=</span> <span class="st">"biomarker1"</span>,</span></span>
-<span class="r-in"><span>  classVar <span class="op">=</span> <span class="st">"disease_status"</span>,</span></span>
-<span class="r-in"><span>  positiveClass <span class="op">=</span> <span class="st">"Disease"</span>,</span></span>
-<span class="r-in"><span>  method <span class="op">=</span> <span class="st">"oc_cost_ratio"</span>,</span></span>
-<span class="r-in"><span>  costratioFP <span class="op">=</span> <span class="fl">2.5</span> <span class="co"># False positives cost 2.5x false negatives</span></span></span>
-<span class="r-in"><span><span class="op">)</span></span></span>
-<span class="r-in"><span></span></span>
-<span class="r-in"><span><span class="co"># Subgroup analysis by hospital</span></span></span>
-<span class="r-in"><span><span class="va">result5</span> <span class="op">&lt;-</span> <span class="fu"><a href="psychopdaROC.html">psychopdaROC</a></span><span class="op">(</span></span></span>
-<span class="r-in"><span>  data <span class="op">=</span> <span class="va">medical_roc_data</span>,</span></span>
-<span class="r-in"><span>  dependentVars <span class="op">=</span> <span class="st">"biomarker1"</span>,</span></span>
-<span class="r-in"><span>  classVar <span class="op">=</span> <span class="st">"disease_status"</span>,</span></span>
-<span class="r-in"><span>  positiveClass <span class="op">=</span> <span class="st">"Disease"</span>,</span></span>
-<span class="r-in"><span>  subGroup <span class="op">=</span> <span class="st">"hospital"</span></span></span>
-<span class="r-in"><span><span class="op">)</span></span></span>
-<span class="r-in"><span></span></span>
-<span class="r-in"><span><span class="co"># Comprehensive analysis with all features</span></span></span>
-<span class="r-in"><span><span class="va">result6</span> <span class="op">&lt;-</span> <span class="fu"><a href="psychopdaROC.html">psychopdaROC</a></span><span class="op">(</span></span></span>
-<span class="r-in"><span>  data <span class="op">=</span> <span class="va">medical_roc_data</span>,</span></span>
-<span class="r-in"><span>  dependentVars <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"biomarker1"</span>, <span class="st">"biomarker2"</span><span class="op">)</span>,</span></span>
-<span class="r-in"><span>  classVar <span class="op">=</span> <span class="st">"disease_status"</span>,</span></span>
-<span class="r-in"><span>  positiveClass <span class="op">=</span> <span class="st">"Disease"</span>,</span></span>
-<span class="r-in"><span>  method <span class="op">=</span> <span class="st">"maximize_metric"</span>,</span></span>
-<span class="r-in"><span>  metric <span class="op">=</span> <span class="st">"youden"</span>,</span></span>
-<span class="r-in"><span>  plotROC <span class="op">=</span> <span class="cn">TRUE</span>,</span></span>
-<span class="r-in"><span>  sensSpecTable <span class="op">=</span> <span class="cn">TRUE</span>,</span></span>
-<span class="r-in"><span>  showThresholdTable <span class="op">=</span> <span class="cn">TRUE</span>,</span></span>
-<span class="r-in"><span>  delongTest <span class="op">=</span> <span class="cn">TRUE</span>,</span></span>
-<span class="r-in"><span>  calculateIDI <span class="op">=</span> <span class="cn">TRUE</span>,</span></span>
-<span class="r-in"><span>  partialAUC <span class="op">=</span> <span class="cn">TRUE</span>,</span></span>
-<span class="r-in"><span>  bootstrapCI <span class="op">=</span> <span class="cn">TRUE</span>,</span></span>
-<span class="r-in"><span>  precisionRecallCurve <span class="op">=</span> <span class="cn">TRUE</span>,</span></span>
-<span class="r-in"><span>  compareClassifiers <span class="op">=</span> <span class="cn">TRUE</span></span></span>
-<span class="r-in"><span><span class="op">)</span></span></span>
-<span class="r-in"><span></span></span>
-<span class="r-in"><span><span class="co"># Financial risk assessment example</span></span></span>
-<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/utils/data.html" class="external-link">data</a></span><span class="op">(</span><span class="va">financial_roc_data</span><span class="op">)</span></span></span>
-<span class="r-in"><span></span></span>
-<span class="r-in"><span><span class="va">financial_result</span> <span class="op">&lt;-</span> <span class="fu"><a href="psychopdaROC.html">psychopdaROC</a></span><span class="op">(</span></span></span>
-<span class="r-in"><span>  data <span class="op">=</span> <span class="va">financial_roc_data</span>,</span></span>
-<span class="r-in"><span>  dependentVars <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"credit_score"</span>, <span class="st">"income_debt_ratio"</span>, <span class="st">"employment_score"</span><span class="op">)</span>,</span></span>
-<span class="r-in"><span>  classVar <span class="op">=</span> <span class="st">"default_status"</span>,</span></span>
-<span class="r-in"><span>  positiveClass <span class="op">=</span> <span class="st">"Default"</span>,</span></span>
-<span class="r-in"><span>  direction <span class="op">=</span> <span class="st">"&lt;="</span>, <span class="co"># Lower credit scores indicate higher risk</span></span></span>
-<span class="r-in"><span>  method <span class="op">=</span> <span class="st">"oc_cost_ratio"</span>,</span></span>
-<span class="r-in"><span>  costratioFP <span class="op">=</span> <span class="fl">0.1</span>, <span class="co"># False positives (rejected good clients) cost less</span></span></span>
-<span class="r-in"><span>  delongTest <span class="op">=</span> <span class="cn">TRUE</span>,</span></span>
-<span class="r-in"><span>  subGroup <span class="op">=</span> <span class="st">"client_type"</span></span></span>
-<span class="r-in"><span><span class="op">)</span></span></span>
-<span class="r-in"><span></span></span>
-<span class="r-in"><span><span class="co"># Educational assessment example</span></span></span>
-<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/utils/data.html" class="external-link">data</a></span><span class="op">(</span><span class="va">education_roc_data</span><span class="op">)</span></span></span>
-<span class="r-in"><span></span></span>
-<span class="r-in"><span><span class="va">education_result</span> <span class="op">&lt;-</span> <span class="fu"><a href="psychopdaROC.html">psychopdaROC</a></span><span class="op">(</span></span></span>
-<span class="r-in"><span>  data <span class="op">=</span> <span class="va">education_roc_data</span>,</span></span>
-<span class="r-in"><span>  dependentVars <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"exam_score"</span>, <span class="st">"project_score"</span>, <span class="st">"peer_score"</span><span class="op">)</span>,</span></span>
-<span class="r-in"><span>  classVar <span class="op">=</span> <span class="st">"pass_status"</span>,</span></span>
-<span class="r-in"><span>  positiveClass <span class="op">=</span> <span class="st">"Pass"</span>,</span></span>
-<span class="r-in"><span>  method <span class="op">=</span> <span class="st">"maximize_metric"</span>,</span></span>
-<span class="r-in"><span>  metric <span class="op">=</span> <span class="st">"accuracy"</span>,</span></span>
-<span class="r-in"><span>  calculateIDI <span class="op">=</span> <span class="cn">TRUE</span>,</span></span>
-<span class="r-in"><span>  refVar <span class="op">=</span> <span class="st">"exam_score"</span>,</span></span>
-<span class="r-in"><span>  subGroup <span class="op">=</span> <span class="st">"class_section"</span></span></span>
-<span class="r-in"><span><span class="op">)</span></span></span>
-<span class="r-in"><span></span></span>
-<span class="r-in"><span><span class="co"># Manufacturing quality control example</span></span></span>
-<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/utils/data.html" class="external-link">data</a></span><span class="op">(</span><span class="va">manufacturing_roc_data</span><span class="op">)</span></span></span>
-<span class="r-in"><span></span></span>
-<span class="r-in"><span><span class="va">quality_result</span> <span class="op">&lt;-</span> <span class="fu"><a href="psychopdaROC.html">psychopdaROC</a></span><span class="op">(</span></span></span>
-<span class="r-in"><span>  data <span class="op">=</span> <span class="va">manufacturing_roc_data</span>,</span></span>
-<span class="r-in"><span>  dependentVars <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"dimension_score"</span>, <span class="st">"surface_score"</span>, <span class="st">"strength_score"</span><span class="op">)</span>,</span></span>
-<span class="r-in"><span>  classVar <span class="op">=</span> <span class="st">"quality_status"</span>,</span></span>
-<span class="r-in"><span>  positiveClass <span class="op">=</span> <span class="st">"Defect"</span>,</span></span>
-<span class="r-in"><span>  method <span class="op">=</span> <span class="st">"oc_equal_sens_spec"</span>, <span class="co"># Balanced sensitivity/specificity</span></span></span>
-<span class="r-in"><span>  plotROC <span class="op">=</span> <span class="cn">TRUE</span>,</span></span>
-<span class="r-in"><span>  showCriterionPlot <span class="op">=</span> <span class="cn">TRUE</span>,</span></span>
-<span class="r-in"><span>  showDotPlot <span class="op">=</span> <span class="cn">TRUE</span>,</span></span>
-<span class="r-in"><span>  subGroup <span class="op">=</span> <span class="st">"production_line"</span></span></span>
-<span class="r-in"><span><span class="op">)</span></span></span>
-<span class="r-in"><span><span class="op">}</span> <span class="co"># }</span></span></span>
-<span class="r-in"><span></span></span>
-</code></pre></div>
+
     </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
     </nav></aside></div>
@@ -312,7 +194,7 @@ ROC curve to reclassification and beyond. Statistics in Medicine, 27(2), 157-172
 </div>
 
 <div class="pkgdown-footer-right">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.2.0.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.2.1.</p>
 </div>
 
     </footer></div>

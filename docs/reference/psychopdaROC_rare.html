@@ -9,7 +9,7 @@ rare disease screening scenarios where prevalence affects predictive values."></
 
     <a class="navbar-brand me-2" href="../index.html">ClinicoPath</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.0.47</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.0.52</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -82,7 +82,6 @@ sensitivity and specificity.</p>
 <span class="r-in"><span><span class="fu"><a href="psychopdaROC.html">psychopdaROC</a></span><span class="op">(</span>data <span class="op">=</span> <span class="va">psychopdaROC_rare</span>, dependentVars <span class="op">=</span> <span class="st">"biomarker"</span>,</span></span>
 <span class="r-in"><span>             classVar <span class="op">=</span> <span class="st">"rare_disease"</span>, positiveClass <span class="op">=</span> <span class="st">"Disease"</span>,</span></span>
 <span class="r-in"><span>             refVar <span class="op">=</span> <span class="st">"biomarker"</span><span class="op">)</span></span></span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> Multiple optimal cutpoints found, applying break_ties.</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  ADVANCED ROC ANALYSIS</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
@@ -96,7 +95,7 @@ sensitivity and specificity.</p>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  The ROC analysis has been completed using the following</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  specifications:</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  &amp;nbsp;</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  Measure Variable(s): biomarker</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
@@ -104,7 +103,7 @@ sensitivity and specificity.</p>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  Positive Class: Disease</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  &amp;nbsp;</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  Method: maximize_metric</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
@@ -116,9 +115,9 @@ sensitivity and specificity.</p>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  Tie Breakers: mean</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  Metric Tolerance: 0.05</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  Metric Tolerance: 1e-06</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  &amp;nbsp;</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  &lt;hr /&gt;</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
@@ -138,6 +137,12 @@ sensitivity and specificity.</p>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  ──────────────────────────────────────────────────────────────────────── </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>    biomarker    0.9790941       0.9506579       1.0000000    &lt; .0000001   </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  ──────────────────────────────────────────────────────────────────────── </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    Note. Reading of the test values: &lt;b&gt;HIGHER values were taken to</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    indicate Disease&lt;/b&gt; (Classification Direction = "&gt;="). If that is</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    the wrong way round for this marker, every sensitivity,</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    specificity, cutpoint and AUC below is reversed — switch</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    Classification Direction to "&lt;=" and the AUC becomes 1 minus the</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    value shown.</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>    Note. AUC 95% confidence intervals computed using the DeLong</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>    method.</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
@@ -156,7 +161,7 @@ sensitivity and specificity.</p>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  ───────────────────────────────────────────────────────────────────────────────────────────────────────────────── </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>    Cutpoint      Sensitivity    Specificity    PPV          NPV          Youden's J    AUC          Metric Score   </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  ───────────────────────────────────────────────────────────────────────────────────────────────────────────────── </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>    66.6279881       92.30769       93.03136     37.50000     99.62687     0.8533905    0.9790941       0.8533905   </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    68.1783903       92.30769       95.47038     48.00000     99.63636     0.8777808    0.9790941       0.8777808   </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  ───────────────────────────────────────────────────────────────────────────────────────────────────────────────── </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
@@ -166,6 +171,12 @@ sensitivity and specificity.</p>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  ──────────────────────────────────────────────────────────────────────── </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>    biomarker    0.9790941       0.9506579       1.0000000    &lt; .0000001   </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  ──────────────────────────────────────────────────────────────────────── </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    Note. Reading of the test values: &lt;b&gt;HIGHER values were taken to</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    indicate Disease&lt;/b&gt; (Classification Direction = "&gt;="). If that is</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    the wrong way round for this marker, every sensitivity,</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    specificity, cutpoint and AUC below is reversed — switch</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    Classification Direction to "&lt;=" and the AUC becomes 1 minus the</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    value shown.</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>    Note. AUC 95% confidence intervals computed using the DeLong</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>    method.</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
@@ -182,7 +193,7 @@ sensitivity and specificity.</p>
 </div>
 
 <div class="pkgdown-footer-right">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.2.0.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.2.1.</p>
 </div>
 
     </footer></div>
