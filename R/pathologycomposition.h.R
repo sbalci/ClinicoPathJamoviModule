@@ -236,7 +236,7 @@ pathologycompositionResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6
                 title="Composition Risk Visualization",
                 width=600,
                 height=500,
-                visible="(composition_plot && component1 && component2)",
+                visible="(composition_plot && length(component1) > 0 && length(component2) > 0)",
                 requiresData=TRUE,
                 clearWith=list(
                     "outcome_variable",

@@ -525,7 +525,7 @@ advancedraincloudResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R
                 options=options,
                 name="todo",
                 title="Instructions",
-                visible="(y_var:null || x_var:null)"))
+                visible="(length(y_var) == 0 || length(x_var) == 0)"))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="analysisNotes",

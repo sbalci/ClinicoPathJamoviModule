@@ -33,7 +33,7 @@ items:
     - name: rocanalysis
       title: ROC Analysis Results
       type: Table
-      visible: (analysis_type:classification && roc_analysis && predicted_probabilities)
+      visible: (analysis_type:classification && roc_analysis && length(predicted_probabilities) > 0)
       clearWith:
           - actual_labels
           - predicted_probabilities
@@ -62,7 +62,7 @@ items:
     - name: roccomparison
       title: ROC Curve Comparison
       type: Table
-      visible: (analysis_type:comparison && roc_comparison && model1_probabilities && model2_probabilities)
+      visible: (analysis_type:comparison && roc_comparison && length(model1_probabilities) > 0 && length(model2_probabilities) > 0)
       clearWith:
           - actual_labels
           - model1_probabilities
@@ -87,7 +87,7 @@ items:
       width: 600
       height: 500
       renderFun: .plotROCPlot
-      visible: (analysis_type:classification && roc_plot && predicted_probabilities)
+      visible: (analysis_type:classification && roc_plot && length(predicted_probabilities) > 0)
       requiresData: true
       clearWith:
           - actual_labels

@@ -125,7 +125,7 @@ items:
     - name: concordanceTable
       title: Concordance with Actual Oncotype DX RS
       type: Table
-      visible: (showConcordance && actualRS)
+      visible: (showConcordance && length(actualRS) > 0)
       rows: 0
       columns:
         - name: equation
@@ -230,7 +230,7 @@ items:
       width: 600
       height: 500
       requiresData: true
-      visible: (showConcordance && actualRS)
+      visible: (showConcordance && length(actualRS) > 0)
       clearWith:
           - nuclearGrade
           - mitosis

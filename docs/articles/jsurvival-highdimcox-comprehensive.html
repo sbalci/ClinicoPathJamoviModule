@@ -20,7 +20,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">ClinicoPath</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.0.47</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.0.52</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -67,6 +67,15 @@
 
     
     
+<blockquote>
+<p><strong>Not yet released.</strong> The <code>highdimcox</code>
+analysis is on a development menu route, so it does not appear in the
+jamovi menus of ClinicoPath or of any of its submodules. It is
+documented here ahead of a future release, and its options, defaults and
+output may still change. The R function is exported, so the examples
+below run from an R console; what is not yet available is the jamovi
+analysis itself.</p>
+</blockquote>
 <blockquote>
 <p><strong>Note:</strong> The <code><a href="../reference/highdimcox.html">highdimcox()</a></code> function is
 designed for use within <strong>jamovi’s GUI</strong>. The code examples
@@ -758,7 +767,7 @@ III”) in the output.</p>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt;  Regularization: elastic_net (α = 0.5)</span></span>
 <span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt;  Selected Lambda: 0.413130722301643</span></span>
+<span><span class="co">#&gt;  Selected Lambda: 4.13e-01</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt;  Variables: 20 candidate variables → 0 selected</span></span>
 <span><span class="co">#&gt; </span></span>
@@ -783,9 +792,9 @@ III”) in the output.</p>
 <span><span class="co">#&gt;  ────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────── </span></span>
 <span><span class="co">#&gt;    Metric                            Value                  Interpretation                                                                          </span></span>
 <span><span class="co">#&gt;  ────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────── </span></span>
-<span><span class="co">#&gt;    Selected Lambda                   0.413130722301643      Optimal regularization strength                                                         </span></span>
-<span><span class="co">#&gt;    Lambda Min                        0.162947269824199      Lambda minimizing CV error                                                              </span></span>
-<span><span class="co">#&gt;    Lambda 1SE                        0.413130722301643      Lambda within 1-SE of minimum                                                           </span></span>
+<span><span class="co">#&gt;    Selected Lambda                   4.13e-01               Optimal regularization strength                                                         </span></span>
+<span><span class="co">#&gt;    Lambda Min                        1.63e-01               Lambda minimizing CV error                                                              </span></span>
+<span><span class="co">#&gt;    Lambda 1SE                        4.13e-01               Lambda within 1-SE of minimum                                                           </span></span>
 <span><span class="co">#&gt;    CV Deviance at Selected Lambda    6.336                  Cross-validated model deviance                                                          </span></span>
 <span><span class="co">#&gt;    Training C-index (optimistic)     0.5                    Training-set estimate; likely overestimates true discrimination. Validate externally.   </span></span>
 <span><span class="co">#&gt;    Number of Selected Variables      0                      Variables with non-zero coefficients                                                    </span></span>
@@ -799,8 +808,8 @@ III”) in the output.</p>
 <span><span class="co">#&gt;  variables using elastic_net regularization.</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt;  Model Selection: Cross-validation with 10 folds identified an optimal</span></span>
-<span><span class="co">#&gt;  regularization parameter (&amp;lambda; = 0.413130722301643) that selected</span></span>
-<span><span class="co">#&gt;  0 variables from the candidate set.</span></span>
+<span><span class="co">#&gt;  regularization parameter (λ = 4.13e-01) that selected 0 variables from</span></span>
+<span><span class="co">#&gt;  the candidate set.</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt;  Training C-index (optimistic): 0.5</span></span>
 <span><span class="co">#&gt; </span></span>
@@ -985,7 +994,7 @@ III”) in the output.</p>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt;  Regularization: elastic_net (α = 0.5)</span></span>
 <span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt;  Selected Lambda: 0.505416837262111</span></span>
+<span><span class="co">#&gt;  Selected Lambda: 5.05e-01</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt;  Variables: 10 candidate variables → 0 selected</span></span>
 <span><span class="co">#&gt; </span></span>
@@ -1010,9 +1019,9 @@ III”) in the output.</p>
 <span><span class="co">#&gt;  ────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────── </span></span>
 <span><span class="co">#&gt;    Metric                            Value                  Interpretation                                                                          </span></span>
 <span><span class="co">#&gt;  ────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────── </span></span>
-<span><span class="co">#&gt;    Selected Lambda                   0.505416837262111      Optimal regularization strength                                                         </span></span>
-<span><span class="co">#&gt;    Lambda Min                        0.505416837262111      Lambda minimizing CV error                                                              </span></span>
-<span><span class="co">#&gt;    Lambda 1SE                        0.505416837262111      Lambda within 1-SE of minimum                                                           </span></span>
+<span><span class="co">#&gt;    Selected Lambda                   5.05e-01               Optimal regularization strength                                                         </span></span>
+<span><span class="co">#&gt;    Lambda Min                        5.05e-01               Lambda minimizing CV error                                                              </span></span>
+<span><span class="co">#&gt;    Lambda 1SE                        5.05e-01               Lambda within 1-SE of minimum                                                           </span></span>
 <span><span class="co">#&gt;    CV Deviance at Selected Lambda    5.159                  Cross-validated model deviance                                                          </span></span>
 <span><span class="co">#&gt;    Training C-index (optimistic)     0.5                    Training-set estimate; likely overestimates true discrimination. Validate externally.   </span></span>
 <span><span class="co">#&gt;    Number of Selected Variables      0                      Variables with non-zero coefficients                                                    </span></span>
@@ -1309,7 +1318,7 @@ Assoc</em>. 2006;101(476):1418-1429.</li>
 </div>
 
 <div class="pkgdown-footer-right">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.2.0.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.2.1.</p>
 </div>
 
     </footer>

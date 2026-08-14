@@ -20,7 +20,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">ClinicoPath</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.0.47</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.0.52</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -67,6 +67,15 @@
 
     
     
+<blockquote>
+<p><strong>Not yet released.</strong> The <code>relativesurvival</code>
+analysis is on a development menu route, so it does not appear in the
+jamovi menus of ClinicoPath or of any of its submodules. It is
+documented here ahead of a future release, and its options, defaults and
+output may still change. The R function is exported, so the examples
+below run from an R console; what is not yet available is the jamovi
+analysis itself.</p>
+</blockquote>
 <blockquote>
 <p><strong>Note:</strong> The <code><a href="../reference/relativesurvival.html">relativesurvival()</a></code> function
 is designed for use within <strong>jamovi’s GUI</strong>. The code
@@ -189,8 +198,8 @@ rates, crude probability of death, and all four plots.</p>
 <span>  sex <span class="op">=</span> <span class="st">"sex"</span>,</span>
 <span>  year <span class="op">=</span> <span class="st">"diagnosis_year"</span></span>
 <span><span class="op">)</span></span>
-<span><span class="co">#&gt; <span style="color: #BBBB00; font-weight: bold;">Error</span><span style="font-weight: bold;"> in `relativesurvival()`:</span></span></span>
-<span><span class="co">#&gt; <span style="color: #BBBB00;">!</span> argument "covariates" is missing, with no default</span></span></code></pre></div>
+<span><span class="co">#&gt; <span style="color: #BBBB00; font-weight: bold;">Error</span><span style="font-weight: bold;">:</span></span></span>
+<span><span class="co">#&gt; <span style="color: #BBBB00;">!</span> 'survexp.us' is not an exported object from 'namespace:relsurv'</span></span></code></pre></div>
 <div class="section level4">
 <h4 id="what-the-outputs-mean">What the outputs mean<a class="anchor" aria-label="anchor" href="#what-the-outputs-mean"></a>
 </h4>
@@ -242,8 +251,8 @@ standard.</p>
 <span>  year <span class="op">=</span> <span class="st">"diagnosis_year"</span>,</span>
 <span>  method <span class="op">=</span> <span class="st">"poharperme"</span></span>
 <span><span class="op">)</span></span>
-<span><span class="co">#&gt; <span style="color: #BBBB00; font-weight: bold;">Error</span><span style="font-weight: bold;"> in `relativesurvival()`:</span></span></span>
-<span><span class="co">#&gt; <span style="color: #BBBB00;">!</span> argument "covariates" is missing, with no default</span></span></code></pre></div>
+<span><span class="co">#&gt; <span style="color: #BBBB00; font-weight: bold;">Error</span><span style="font-weight: bold;">:</span></span></span>
+<span><span class="co">#&gt; <span style="color: #BBBB00;">!</span> 'survexp.us' is not an exported object from 'namespace:relsurv'</span></span></code></pre></div>
 </div>
 <div class="section level4">
 <h4 id="b--ederer-ii">2b. Ederer II<a class="anchor" aria-label="anchor" href="#b--ederer-ii"></a>
@@ -261,8 +270,8 @@ survival.</p>
 <span>  year <span class="op">=</span> <span class="st">"diagnosis_year"</span>,</span>
 <span>  method <span class="op">=</span> <span class="st">"ederer2"</span></span>
 <span><span class="op">)</span></span>
-<span><span class="co">#&gt; <span style="color: #BBBB00; font-weight: bold;">Error</span><span style="font-weight: bold;"> in `relativesurvival()`:</span></span></span>
-<span><span class="co">#&gt; <span style="color: #BBBB00;">!</span> argument "covariates" is missing, with no default</span></span></code></pre></div>
+<span><span class="co">#&gt; <span style="color: #BBBB00; font-weight: bold;">Error</span><span style="font-weight: bold;">:</span></span></span>
+<span><span class="co">#&gt; <span style="color: #BBBB00;">!</span> 'survexp.us' is not an exported object from 'namespace:relsurv'</span></span></code></pre></div>
 </div>
 <div class="section level4">
 <h4 id="c--ederer-i">2c. Ederer I<a class="anchor" aria-label="anchor" href="#c--ederer-i"></a>
@@ -280,8 +289,8 @@ expected survival at later times.</p>
 <span>  year <span class="op">=</span> <span class="st">"diagnosis_year"</span>,</span>
 <span>  method <span class="op">=</span> <span class="st">"ederer1"</span></span>
 <span><span class="op">)</span></span>
-<span><span class="co">#&gt; <span style="color: #BBBB00; font-weight: bold;">Error</span><span style="font-weight: bold;"> in `relativesurvival()`:</span></span></span>
-<span><span class="co">#&gt; <span style="color: #BBBB00;">!</span> argument "covariates" is missing, with no default</span></span></code></pre></div>
+<span><span class="co">#&gt; <span style="color: #BBBB00; font-weight: bold;">Error</span><span style="font-weight: bold;">:</span></span></span>
+<span><span class="co">#&gt; <span style="color: #BBBB00;">!</span> 'survexp.us' is not an exported object from 'namespace:relsurv'</span></span></code></pre></div>
 </div>
 <div class="section level4">
 <h4 id="d--hakulinen">2d. Hakulinen<a class="anchor" aria-label="anchor" href="#d--hakulinen"></a>
@@ -298,8 +307,8 @@ making it a compromise between Ederer I and Ederer II.</p>
 <span>  year <span class="op">=</span> <span class="st">"diagnosis_year"</span>,</span>
 <span>  method <span class="op">=</span> <span class="st">"hakulinen"</span></span>
 <span><span class="op">)</span></span>
-<span><span class="co">#&gt; <span style="color: #BBBB00; font-weight: bold;">Error</span><span style="font-weight: bold;"> in `relativesurvival()`:</span></span></span>
-<span><span class="co">#&gt; <span style="color: #BBBB00;">!</span> argument "covariates" is missing, with no default</span></span></code></pre></div>
+<span><span class="co">#&gt; <span style="color: #BBBB00; font-weight: bold;">Error</span><span style="font-weight: bold;">:</span></span></span>
+<span><span class="co">#&gt; <span style="color: #BBBB00;">!</span> 'survexp.us' is not an exported object from 'namespace:relsurv'</span></span></code></pre></div>
 <hr>
 </div>
 </div>
@@ -324,8 +333,8 @@ package, repackaged by <code>relsurv</code>.</p>
 <span>  year <span class="op">=</span> <span class="st">"diagnosis_year"</span>,</span>
 <span>  ratetable <span class="op">=</span> <span class="st">"us"</span></span>
 <span><span class="op">)</span></span>
-<span><span class="co">#&gt; <span style="color: #BBBB00; font-weight: bold;">Error</span><span style="font-weight: bold;"> in `relativesurvival()`:</span></span></span>
-<span><span class="co">#&gt; <span style="color: #BBBB00;">!</span> argument "covariates" is missing, with no default</span></span></code></pre></div>
+<span><span class="co">#&gt; <span style="color: #BBBB00; font-weight: bold;">Error</span><span style="font-weight: bold;">:</span></span></span>
+<span><span class="co">#&gt; <span style="color: #BBBB00;">!</span> 'survexp.us' is not an exported object from 'namespace:relsurv'</span></span></code></pre></div>
 </div>
 <div class="section level4">
 <h4 id="b--minnesota-population">3b. Minnesota Population<a class="anchor" aria-label="anchor" href="#b--minnesota-population"></a>
@@ -341,8 +350,8 @@ package, repackaged by <code>relsurv</code>.</p>
 <span>  year <span class="op">=</span> <span class="st">"diagnosis_year"</span>,</span>
 <span>  ratetable <span class="op">=</span> <span class="st">"mn"</span></span>
 <span><span class="op">)</span></span>
-<span><span class="co">#&gt; <span style="color: #BBBB00; font-weight: bold;">Error</span><span style="font-weight: bold;"> in `relativesurvival()`:</span></span></span>
-<span><span class="co">#&gt; <span style="color: #BBBB00;">!</span> argument "covariates" is missing, with no default</span></span></code></pre></div>
+<span><span class="co">#&gt; <span style="color: #BBBB00; font-weight: bold;">Error</span><span style="font-weight: bold;">:</span></span></span>
+<span><span class="co">#&gt; <span style="color: #BBBB00;">!</span> 'survexp.mn' is not an exported object from 'namespace:relsurv'</span></span></code></pre></div>
 </div>
 <div class="section level4">
 <h4 id="c--french-population">3c. French Population<a class="anchor" aria-label="anchor" href="#c--french-population"></a>
@@ -357,8 +366,8 @@ package, repackaged by <code>relsurv</code>.</p>
 <span>  year <span class="op">=</span> <span class="st">"diagnosis_year"</span>,</span>
 <span>  ratetable <span class="op">=</span> <span class="st">"fr"</span></span>
 <span><span class="op">)</span></span>
-<span><span class="co">#&gt; <span style="color: #BBBB00; font-weight: bold;">Error</span><span style="font-weight: bold;"> in `relativesurvival()`:</span></span></span>
-<span><span class="co">#&gt; <span style="color: #BBBB00;">!</span> argument "covariates" is missing, with no default</span></span></code></pre></div>
+<span><span class="co">#&gt; <span style="color: #BBBB00; font-weight: bold;">Error</span><span style="font-weight: bold;">:</span></span></span>
+<span><span class="co">#&gt; <span style="color: #BBBB00;">!</span> 'survexp.fr' is not an exported object from 'namespace:relsurv'</span></span></code></pre></div>
 </div>
 <div class="section level4">
 <h4 id="d--slovenian-population">3d. Slovenian Population<a class="anchor" aria-label="anchor" href="#d--slovenian-population"></a>
@@ -373,8 +382,124 @@ package, repackaged by <code>relsurv</code>.</p>
 <span>  year <span class="op">=</span> <span class="st">"diagnosis_year"</span>,</span>
 <span>  ratetable <span class="op">=</span> <span class="st">"slovenia"</span></span>
 <span><span class="op">)</span></span>
-<span><span class="co">#&gt; <span style="color: #BBBB00; font-weight: bold;">Error</span><span style="font-weight: bold;"> in `relativesurvival()`:</span></span></span>
-<span><span class="co">#&gt; <span style="color: #BBBB00;">!</span> argument "covariates" is missing, with no default</span></span></code></pre></div>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt;  RELATIVE SURVIVAL ANALYSIS</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; character(0)</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt;  &lt;div style='color:#1565c0;border-left:4px solid #1565c0;padding:4px</span></span>
+<span><span class="co">#&gt;  8px;margin:4px 0;background:#fafafa;'&gt;&amp;#8505; Analysis Complete:</span></span>
+<span><span class="co">#&gt;  Relative survival analysis completed: 200 patients, 116 events, method</span></span>
+<span><span class="co">#&gt;  = Pohar-Perme (Net Survival Estimator).</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt;  Relative Survival Analysis Results</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt;  Method: Pohar-Perme (Net Survival Estimator)</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt;  Number of Patients: 200</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt;  Number of Deaths: 116</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt;  Median Follow-up: 3.5 years</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt;  Population Rate Table: Slovenian Population (slopop)</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt;  Confidence Level: 95%</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt;  Survival Estimates by Time                                                                                 </span></span>
+<span><span class="co">#&gt;  ────────────────────────────────────────────────────────────────────────────────────────────────────────── </span></span>
+<span><span class="co">#&gt;    Time         Observed Survival    Expected Survival    Relative Survival    RS CI Lower    RS CI Upper   </span></span>
+<span><span class="co">#&gt;  ────────────────────────────────────────────────────────────────────────────────────────────────────────── </span></span>
+<span><span class="co">#&gt;     1.000000            0.8705000                                 0.8951000      0.8476000      0.9453000   </span></span>
+<span><span class="co">#&gt;     3.000000            0.6659000                                 0.7239000      0.6504000      0.8057000   </span></span>
+<span><span class="co">#&gt;     5.000000            0.5189000                                 0.6020000      0.5189000      0.6983000   </span></span>
+<span><span class="co">#&gt;    10.000000            0.3145000                                 0.5491000      0.4425000      0.6814000   </span></span>
+<span><span class="co">#&gt;  ────────────────────────────────────────────────────────────────────────────────────────────────────────── </span></span>
+<span><span class="co">#&gt;    Note. Method: Pohar-Perme (Net Survival). Time scale: years.</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt;  Net Survival Estimates                                                </span></span>
+<span><span class="co">#&gt;  ───────────────────────────────────────────────────────────────────── </span></span>
+<span><span class="co">#&gt;    Time         Net Survival    CI Lower     CI Upper     Std. Error   </span></span>
+<span><span class="co">#&gt;  ───────────────────────────────────────────────────────────────────── </span></span>
+<span><span class="co">#&gt;     1.000000       0.8951000    0.8476000    0.9453000    0.02780000   </span></span>
+<span><span class="co">#&gt;     3.000000       0.7239000    0.6504000    0.8057000    0.05470000   </span></span>
+<span><span class="co">#&gt;     5.000000       0.6020000    0.5189000    0.6983000    0.07570000   </span></span>
+<span><span class="co">#&gt;    10.000000       0.5491000    0.4425000    0.6814000    0.11010000   </span></span>
+<span><span class="co">#&gt;  ───────────────────────────────────────────────────────────────────── </span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt;  Excess Mortality Rates                                                       </span></span>
+<span><span class="co">#&gt;  ──────────────────────────────────────────────────────────────────────────── </span></span>
+<span><span class="co">#&gt;    Time Interval    Excess Hazard    CI Lower        CI Upper     p-value     </span></span>
+<span><span class="co">#&gt;  ──────────────────────────────────────────────────────────────────────────── </span></span>
+<span><span class="co">#&gt;    0-1 years          0.110800000     0.056200000    0.1653000    0.0000689   </span></span>
+<span><span class="co">#&gt;    1-2 years          0.102800000     0.005800000    0.1998000    0.0378348   </span></span>
+<span><span class="co">#&gt;    2-3 years          0.109500000    -0.024300000    0.2434000    0.1087238   </span></span>
+<span><span class="co">#&gt;    3-4 years          0.112300000    -0.056200000    0.2809000    0.1914712   </span></span>
+<span><span class="co">#&gt;    4-5 years          0.072100000    -0.125300000    0.2695000    0.4742141   </span></span>
+<span><span class="co">#&gt;    5-6 years          0.008400000    -0.207100000    0.2239000    0.9390479   </span></span>
+<span><span class="co">#&gt;    6-7 years          0.072300000    -0.164000000    0.3087000    0.5486542   </span></span>
+<span><span class="co">#&gt;    7-8 years          0.089200000    -0.178500000    0.3570000    0.5136013   </span></span>
+<span><span class="co">#&gt;    8-9 years          0.005700000    -0.285700000    0.2971000    0.9695443   </span></span>
+<span><span class="co">#&gt;    9-10 years        -0.083700000    -0.385900000    0.2185000    0.5872061   </span></span>
+<span><span class="co">#&gt;  ──────────────────────────────────────────────────────────────────────────── </span></span>
+<span><span class="co">#&gt;    Note. Excess hazard = -log(S_net(t) / S_net(t-1)). CIs via delta</span></span>
+<span><span class="co">#&gt;    method on log-survival SE; p-value tests H0: excess hazard = 0.</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt;  Crude Probability of Death                                                                   </span></span>
+<span><span class="co">#&gt;  ──────────────────────────────────────────────────────────────────────────────────────────── </span></span>
+<span><span class="co">#&gt;    Time         Disease Death    Other Causes Death    Disease CI Lower    Disease CI Upper   </span></span>
+<span><span class="co">#&gt;  ──────────────────────────────────────────────────────────────────────────────────────────── </span></span>
+<span><span class="co">#&gt;     1.000000        0.1034000            0.02610000          0.05540000           0.1513000   </span></span>
+<span><span class="co">#&gt;     3.000000        0.2644000            0.06970000          0.19270000           0.3360000   </span></span>
+<span><span class="co">#&gt;     5.000000        0.3795000            0.10160000          0.29950000           0.4596000   </span></span>
+<span><span class="co">#&gt;    10.000000        0.5104000            0.17520000          0.42330000           0.5974000   </span></span>
+<span><span class="co">#&gt;  ──────────────────────────────────────────────────────────────────────────────────────────── </span></span>
+<span><span class="co">#&gt;    Note. Crude probabilities decompose total mortality into disease-specific and</span></span>
+<span><span class="co">#&gt;    other-cause components.</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt;  Regression Model Results                                                                  </span></span>
+<span><span class="co">#&gt;  ───────────────────────────────────────────────────────────────────────────────────────── </span></span>
+<span><span class="co">#&gt;    Variable    Coefficient    Std. Error    z-value    p-value      CI Lower    CI Upper   </span></span>
+<span><span class="co">#&gt;  ───────────────────────────────────────────────────────────────────────────────────────── </span></span>
+<span><span class="co">#&gt;    .           .              .             .          .            .           .          </span></span>
+<span><span class="co">#&gt;  ───────────────────────────────────────────────────────────────────────────────────────── </span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt;  Model Fit Statistics                  </span></span>
+<span><span class="co">#&gt;  ───────────────────────────────────── </span></span>
+<span><span class="co">#&gt;    Metric    Value    Interpretation   </span></span>
+<span><span class="co">#&gt;  ───────────────────────────────────── </span></span>
+<span><span class="co">#&gt;    .         .        .                </span></span>
+<span><span class="co">#&gt;  ───────────────────────────────────── </span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt;  Clinical Interpretation</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt;  The estimated 5-year net survival is 60.2%. This means that, after</span></span>
+<span><span class="co">#&gt;  removing the effect of other-cause mortality, approximately 60.2% of</span></span>
+<span><span class="co">#&gt;  patients would survive 5 years if the disease under study were the</span></span>
+<span><span class="co">#&gt;  only possible cause of death.</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt;  Prognosis: Fair. Substantial excess mortality is present.</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt;  Key Concepts:</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt;  Relative/Net Survival: Ratio of observed to expected survival. Values</span></span>
+<span><span class="co">#&gt;  near 1.0 indicate that disease contributes little to mortality. Values</span></span>
+<span><span class="co">#&gt;  well below 1.0 indicate substantial disease-specific mortality.Excess</span></span>
+<span><span class="co">#&gt;  Mortality: The additional mortality attributable to the disease beyond</span></span>
+<span><span class="co">#&gt;  what would be expected in the general population.Crude Probability:</span></span>
+<span><span class="co">#&gt;  Decomposes total mortality into disease-related and other-cause</span></span>
+<span><span class="co">#&gt;  components, accounting for competing risks.</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt;  Note: Relative survival is particularly useful when cause of death</span></span>
+<span><span class="co">#&gt;  information is unreliable or unavailable, as it does not require</span></span>
+<span><span class="co">#&gt;  individual cause-of-death data.</span></span></code></pre></div>
+<p><img src="jsurvival-relativesurvival-comprehensive_files/figure-html/ratetable-slovenia-1.png" class="r-plt" alt="" width="672"><img src="jsurvival-relativesurvival-comprehensive_files/figure-html/ratetable-slovenia-2.png" class="r-plt" alt="" width="672"><img src="jsurvival-relativesurvival-comprehensive_files/figure-html/ratetable-slovenia-3.png" class="r-plt" alt="" width="672"></p>
 </div>
 <div class="section level4">
 <h4 id="e--who-based-tables-turkey-example">3e. WHO-Based Tables (Turkey example)<a class="anchor" aria-label="anchor" href="#e--who-based-tables-turkey-example"></a>
@@ -393,8 +518,124 @@ available, the module falls back to the US table with a notice.</p>
 <span>  year <span class="op">=</span> <span class="st">"diagnosis_year"</span>,</span>
 <span>  ratetable <span class="op">=</span> <span class="st">"turkey"</span></span>
 <span><span class="op">)</span></span>
-<span><span class="co">#&gt; <span style="color: #BBBB00; font-weight: bold;">Error</span><span style="font-weight: bold;"> in `relativesurvival()`:</span></span></span>
-<span><span class="co">#&gt; <span style="color: #BBBB00;">!</span> argument "covariates" is missing, with no default</span></span></code></pre></div>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt;  RELATIVE SURVIVAL ANALYSIS</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; character(0)</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt;  &lt;div style='color:#1565c0;border-left:4px solid #1565c0;padding:4px</span></span>
+<span><span class="co">#&gt;  8px;margin:4px 0;background:#fafafa;'&gt;&amp;#8505; Analysis Complete:</span></span>
+<span><span class="co">#&gt;  Relative survival analysis completed: 200 patients, 116 events, method</span></span>
+<span><span class="co">#&gt;  = Pohar-Perme (Net Survival Estimator).</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt;  Relative Survival Analysis Results</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt;  Method: Pohar-Perme (Net Survival Estimator)</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt;  Number of Patients: 200</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt;  Number of Deaths: 116</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt;  Median Follow-up: 3.5 years</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt;  Population Rate Table: Turkey Population (WHO)</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt;  Confidence Level: 95%</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt;  Survival Estimates by Time                                                                                 </span></span>
+<span><span class="co">#&gt;  ────────────────────────────────────────────────────────────────────────────────────────────────────────── </span></span>
+<span><span class="co">#&gt;    Time         Observed Survival    Expected Survival    Relative Survival    RS CI Lower    RS CI Upper   </span></span>
+<span><span class="co">#&gt;  ────────────────────────────────────────────────────────────────────────────────────────────────────────── </span></span>
+<span><span class="co">#&gt;     1.000000            0.8705000                                 0.8926000      0.8452000      0.9426000   </span></span>
+<span><span class="co">#&gt;     3.000000            0.6659000                                 0.7187000      0.6463000      0.7992000   </span></span>
+<span><span class="co">#&gt;     5.000000            0.5189000                                 0.5930000      0.5114000      0.6876000   </span></span>
+<span><span class="co">#&gt;    10.000000            0.3145000                                 0.5259000      0.4217000      0.6559000   </span></span>
+<span><span class="co">#&gt;  ────────────────────────────────────────────────────────────────────────────────────────────────────────── </span></span>
+<span><span class="co">#&gt;    Note. Method: Pohar-Perme (Net Survival). Time scale: years.</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt;  Net Survival Estimates                                                </span></span>
+<span><span class="co">#&gt;  ───────────────────────────────────────────────────────────────────── </span></span>
+<span><span class="co">#&gt;    Time         Net Survival    CI Lower     CI Upper     Std. Error   </span></span>
+<span><span class="co">#&gt;  ───────────────────────────────────────────────────────────────────── </span></span>
+<span><span class="co">#&gt;     1.000000       0.8926000    0.8452000    0.9426000    0.02780000   </span></span>
+<span><span class="co">#&gt;     3.000000       0.7187000    0.6463000    0.7992000    0.05420000   </span></span>
+<span><span class="co">#&gt;     5.000000       0.5930000    0.5114000    0.6876000    0.07550000   </span></span>
+<span><span class="co">#&gt;    10.000000       0.5259000    0.4217000    0.6559000    0.11270000   </span></span>
+<span><span class="co">#&gt;  ───────────────────────────────────────────────────────────────────── </span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt;  Excess Mortality Rates                                                       </span></span>
+<span><span class="co">#&gt;  ──────────────────────────────────────────────────────────────────────────── </span></span>
+<span><span class="co">#&gt;    Time Interval    Excess Hazard    CI Lower        CI Upper     p-value     </span></span>
+<span><span class="co">#&gt;  ──────────────────────────────────────────────────────────────────────────── </span></span>
+<span><span class="co">#&gt;    0-1 years          0.113600000     0.059100000    0.1681000    0.0000443   </span></span>
+<span><span class="co">#&gt;    1-2 years          0.107200000     0.009900000    0.2045000    0.0308793   </span></span>
+<span><span class="co">#&gt;    2-3 years          0.109500000    -0.023800000    0.2428000    0.1074842   </span></span>
+<span><span class="co">#&gt;    3-4 years          0.114900000    -0.052400000    0.2822000    0.1784436   </span></span>
+<span><span class="co">#&gt;    4-5 years          0.077500000    -0.119100000    0.2741000    0.4396597   </span></span>
+<span><span class="co">#&gt;    5-6 years          0.008700000    -0.206100000    0.2235000    0.9367353   </span></span>
+<span><span class="co">#&gt;    6-7 years          0.078400000    -0.158200000    0.3151000    0.5159450   </span></span>
+<span><span class="co">#&gt;    7-8 years          0.097400000    -0.173500000    0.3684000    0.4808664   </span></span>
+<span><span class="co">#&gt;    8-9 years          0.014200000    -0.282800000    0.3112000    0.9254333   </span></span>
+<span><span class="co">#&gt;    9-10 years        -0.078800000    -0.387500000    0.2300000    0.6171172   </span></span>
+<span><span class="co">#&gt;  ──────────────────────────────────────────────────────────────────────────── </span></span>
+<span><span class="co">#&gt;    Note. Excess hazard = -log(S_net(t) / S_net(t-1)). CIs via delta</span></span>
+<span><span class="co">#&gt;    method on log-survival SE; p-value tests H0: excess hazard = 0.</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt;  Crude Probability of Death                                                                   </span></span>
+<span><span class="co">#&gt;  ──────────────────────────────────────────────────────────────────────────────────────────── </span></span>
+<span><span class="co">#&gt;    Time         Disease Death    Other Causes Death    Disease CI Lower    Disease CI Upper   </span></span>
+<span><span class="co">#&gt;  ──────────────────────────────────────────────────────────────────────────────────────────── </span></span>
+<span><span class="co">#&gt;     1.000000        0.1058000            0.02370000          0.05790000           0.1537000   </span></span>
+<span><span class="co">#&gt;     3.000000        0.2692000            0.06490000          0.19770000           0.3407000   </span></span>
+<span><span class="co">#&gt;     5.000000        0.3847000            0.09650000          0.30470000           0.4646000   </span></span>
+<span><span class="co">#&gt;    10.000000        0.5085000            0.17700000          0.42040000           0.5966000   </span></span>
+<span><span class="co">#&gt;  ──────────────────────────────────────────────────────────────────────────────────────────── </span></span>
+<span><span class="co">#&gt;    Note. Crude probabilities decompose total mortality into disease-specific and</span></span>
+<span><span class="co">#&gt;    other-cause components.</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt;  Regression Model Results                                                                  </span></span>
+<span><span class="co">#&gt;  ───────────────────────────────────────────────────────────────────────────────────────── </span></span>
+<span><span class="co">#&gt;    Variable    Coefficient    Std. Error    z-value    p-value      CI Lower    CI Upper   </span></span>
+<span><span class="co">#&gt;  ───────────────────────────────────────────────────────────────────────────────────────── </span></span>
+<span><span class="co">#&gt;    .           .              .             .          .            .           .          </span></span>
+<span><span class="co">#&gt;  ───────────────────────────────────────────────────────────────────────────────────────── </span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt;  Model Fit Statistics                  </span></span>
+<span><span class="co">#&gt;  ───────────────────────────────────── </span></span>
+<span><span class="co">#&gt;    Metric    Value    Interpretation   </span></span>
+<span><span class="co">#&gt;  ───────────────────────────────────── </span></span>
+<span><span class="co">#&gt;    .         .        .                </span></span>
+<span><span class="co">#&gt;  ───────────────────────────────────── </span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt;  Clinical Interpretation</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt;  The estimated 5-year net survival is 59.3%. This means that, after</span></span>
+<span><span class="co">#&gt;  removing the effect of other-cause mortality, approximately 59.3% of</span></span>
+<span><span class="co">#&gt;  patients would survive 5 years if the disease under study were the</span></span>
+<span><span class="co">#&gt;  only possible cause of death.</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt;  Prognosis: Fair. Substantial excess mortality is present.</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt;  Key Concepts:</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt;  Relative/Net Survival: Ratio of observed to expected survival. Values</span></span>
+<span><span class="co">#&gt;  near 1.0 indicate that disease contributes little to mortality. Values</span></span>
+<span><span class="co">#&gt;  well below 1.0 indicate substantial disease-specific mortality.Excess</span></span>
+<span><span class="co">#&gt;  Mortality: The additional mortality attributable to the disease beyond</span></span>
+<span><span class="co">#&gt;  what would be expected in the general population.Crude Probability:</span></span>
+<span><span class="co">#&gt;  Decomposes total mortality into disease-related and other-cause</span></span>
+<span><span class="co">#&gt;  components, accounting for competing risks.</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt;  Note: Relative survival is particularly useful when cause of death</span></span>
+<span><span class="co">#&gt;  information is unreliable or unavailable, as it does not require</span></span>
+<span><span class="co">#&gt;  individual cause-of-death data.</span></span></code></pre></div>
+<p><img src="jsurvival-relativesurvival-comprehensive_files/figure-html/ratetable-turkey-1.png" class="r-plt" alt="" width="672"><img src="jsurvival-relativesurvival-comprehensive_files/figure-html/ratetable-turkey-2.png" class="r-plt" alt="" width="672"><img src="jsurvival-relativesurvival-comprehensive_files/figure-html/ratetable-turkey-3.png" class="r-plt" alt="" width="672"></p>
 <hr>
 </div>
 </div>
@@ -424,8 +665,8 @@ death.</p>
 <span>  crude_probability <span class="op">=</span> <span class="cn">FALSE</span>,</span>
 <span>  plot_excess <span class="op">=</span> <span class="cn">FALSE</span></span>
 <span><span class="op">)</span></span>
-<span><span class="co">#&gt; <span style="color: #BBBB00; font-weight: bold;">Error</span><span style="font-weight: bold;"> in `relativesurvival()`:</span></span></span>
-<span><span class="co">#&gt; <span style="color: #BBBB00;">!</span> argument "covariates" is missing, with no default</span></span></code></pre></div>
+<span><span class="co">#&gt; <span style="color: #BBBB00; font-weight: bold;">Error</span><span style="font-weight: bold;">:</span></span></span>
+<span><span class="co">#&gt; <span style="color: #BBBB00;">!</span> 'survexp.us' is not an exported object from 'namespace:relsurv'</span></span></code></pre></div>
 </div>
 <div class="section level4">
 <h4 id="b--excess-mortality-only">4b. Excess Mortality Only<a class="anchor" aria-label="anchor" href="#b--excess-mortality-only"></a>
@@ -445,8 +686,8 @@ interval.</p>
 <span>  excess_mortality <span class="op">=</span> <span class="cn">TRUE</span>,</span>
 <span>  crude_probability <span class="op">=</span> <span class="cn">FALSE</span></span>
 <span><span class="op">)</span></span>
-<span><span class="co">#&gt; <span style="color: #BBBB00; font-weight: bold;">Error</span><span style="font-weight: bold;"> in `relativesurvival()`:</span></span></span>
-<span><span class="co">#&gt; <span style="color: #BBBB00;">!</span> argument "covariates" is missing, with no default</span></span></code></pre></div>
+<span><span class="co">#&gt; <span style="color: #BBBB00; font-weight: bold;">Error</span><span style="font-weight: bold;">:</span></span></span>
+<span><span class="co">#&gt; <span style="color: #BBBB00;">!</span> 'survexp.us' is not an exported object from 'namespace:relsurv'</span></span></code></pre></div>
 <hr>
 </div>
 </div>
@@ -473,8 +714,8 @@ competing risks.</p>
 <span>  plot_relative <span class="op">=</span> <span class="cn">FALSE</span>,</span>
 <span>  plot_excess <span class="op">=</span> <span class="cn">FALSE</span></span>
 <span><span class="op">)</span></span>
-<span><span class="co">#&gt; <span style="color: #BBBB00; font-weight: bold;">Error</span><span style="font-weight: bold;"> in `relativesurvival()`:</span></span></span>
-<span><span class="co">#&gt; <span style="color: #BBBB00;">!</span> argument "covariates" is missing, with no default</span></span></code></pre></div>
+<span><span class="co">#&gt; <span style="color: #BBBB00; font-weight: bold;">Error</span><span style="font-weight: bold;">:</span></span></span>
+<span><span class="co">#&gt; <span style="color: #BBBB00;">!</span> 'survexp.us' is not an exported object from 'namespace:relsurv'</span></span></code></pre></div>
 <hr>
 </div>
 <div class="section level3">
@@ -504,8 +745,8 @@ then produces a weighted average.</p>
 <span>  plot_relative <span class="op">=</span> <span class="cn">FALSE</span>,</span>
 <span>  plot_excess <span class="op">=</span> <span class="cn">FALSE</span></span>
 <span><span class="op">)</span></span>
-<span><span class="co">#&gt; <span style="color: #BBBB00; font-weight: bold;">Error</span><span style="font-weight: bold;"> in `relativesurvival()`:</span></span></span>
-<span><span class="co">#&gt; <span style="color: #BBBB00;">!</span> argument "covariates" is missing, with no default</span></span></code></pre></div>
+<span><span class="co">#&gt; <span style="color: #BBBB00; font-weight: bold;">Error</span><span style="font-weight: bold;">:</span></span></span>
+<span><span class="co">#&gt; <span style="color: #BBBB00;">!</span> 'survexp.us' is not an exported object from 'namespace:relsurv'</span></span></code></pre></div>
 <hr>
 </div>
 <div class="section level3">
@@ -538,8 +779,8 @@ survival for each period.</p>
 <span>  plot_relative <span class="op">=</span> <span class="cn">FALSE</span>,</span>
 <span>  plot_excess <span class="op">=</span> <span class="cn">FALSE</span></span>
 <span><span class="op">)</span></span>
-<span><span class="co">#&gt; <span style="color: #BBBB00; font-weight: bold;">Error</span><span style="font-weight: bold;"> in `relativesurvival()`:</span></span></span>
-<span><span class="co">#&gt; <span style="color: #BBBB00;">!</span> argument "covariates" is missing, with no default</span></span></code></pre></div>
+<span><span class="co">#&gt; <span style="color: #BBBB00; font-weight: bold;">Error</span><span style="font-weight: bold;">:</span></span></span>
+<span><span class="co">#&gt; <span style="color: #BBBB00;">!</span> 'survexp.us' is not an exported object from 'namespace:relsurv'</span></span></code></pre></div>
 </div>
 <div class="section level4">
 <h4 id="b--with-cohort-definition">7b. With Cohort Definition<a class="anchor" aria-label="anchor" href="#b--with-cohort-definition"></a>
@@ -565,8 +806,8 @@ patients diagnosed within a specific year range. The format is
 <span>  plot_relative <span class="op">=</span> <span class="cn">FALSE</span>,</span>
 <span>  plot_excess <span class="op">=</span> <span class="cn">FALSE</span></span>
 <span><span class="op">)</span></span>
-<span><span class="co">#&gt; <span style="color: #BBBB00; font-weight: bold;">Error</span><span style="font-weight: bold;"> in `relativesurvival()`:</span></span></span>
-<span><span class="co">#&gt; <span style="color: #BBBB00;">!</span> argument "covariates" is missing, with no default</span></span></code></pre></div>
+<span><span class="co">#&gt; <span style="color: #BBBB00; font-weight: bold;">Error</span><span style="font-weight: bold;">:</span></span></span>
+<span><span class="co">#&gt; <span style="color: #BBBB00;">!</span> 'survexp.us' is not an exported object from 'namespace:relsurv'</span></span></code></pre></div>
 <hr>
 </div>
 </div>
@@ -718,8 +959,8 @@ then to days for the <code>relsurv</code> rate table).</p>
 <span>  plot_relative <span class="op">=</span> <span class="cn">FALSE</span>,</span>
 <span>  plot_excess <span class="op">=</span> <span class="cn">FALSE</span></span>
 <span><span class="op">)</span></span>
-<span><span class="co">#&gt; <span style="color: #BBBB00; font-weight: bold;">Error</span><span style="font-weight: bold;"> in `relativesurvival()`:</span></span></span>
-<span><span class="co">#&gt; <span style="color: #BBBB00;">!</span> argument "covariates" is missing, with no default</span></span></code></pre></div>
+<span><span class="co">#&gt; <span style="color: #BBBB00; font-weight: bold;">Error</span><span style="font-weight: bold;">:</span></span></span>
+<span><span class="co">#&gt; <span style="color: #BBBB00;">!</span> 'survexp.us' is not an exported object from 'namespace:relsurv'</span></span></code></pre></div>
 </div>
 <div class="section level4">
 <h4 id="b--time-in-days">9b. Time in Days<a class="anchor" aria-label="anchor" href="#b--time-in-days"></a>
@@ -745,8 +986,8 @@ then to days for the <code>relsurv</code> rate table).</p>
 <span>  plot_relative <span class="op">=</span> <span class="cn">FALSE</span>,</span>
 <span>  plot_excess <span class="op">=</span> <span class="cn">FALSE</span></span>
 <span><span class="op">)</span></span>
-<span><span class="co">#&gt; <span style="color: #BBBB00; font-weight: bold;">Error</span><span style="font-weight: bold;"> in `relativesurvival()`:</span></span></span>
-<span><span class="co">#&gt; <span style="color: #BBBB00;">!</span> argument "covariates" is missing, with no default</span></span></code></pre></div>
+<span><span class="co">#&gt; <span style="color: #BBBB00; font-weight: bold;">Error</span><span style="font-weight: bold;">:</span></span></span>
+<span><span class="co">#&gt; <span style="color: #BBBB00;">!</span> 'survexp.us' is not an exported object from 'namespace:relsurv'</span></span></code></pre></div>
 <hr>
 </div>
 </div>
@@ -776,8 +1017,8 @@ estimates are reported.</p>
 <span>  plot_relative <span class="op">=</span> <span class="cn">FALSE</span>,</span>
 <span>  plot_excess <span class="op">=</span> <span class="cn">FALSE</span></span>
 <span><span class="op">)</span></span>
-<span><span class="co">#&gt; <span style="color: #BBBB00; font-weight: bold;">Error</span><span style="font-weight: bold;"> in `relativesurvival()`:</span></span></span>
-<span><span class="co">#&gt; <span style="color: #BBBB00;">!</span> argument "covariates" is missing, with no default</span></span></code></pre></div>
+<span><span class="co">#&gt; <span style="color: #BBBB00; font-weight: bold;">Error</span><span style="font-weight: bold;">:</span></span></span>
+<span><span class="co">#&gt; <span style="color: #BBBB00;">!</span> 'survexp.us' is not an exported object from 'namespace:relsurv'</span></span></code></pre></div>
 </div>
 <div class="section level4">
 <h4 id="b--custom-confidence-level">10b. Custom Confidence Level<a class="anchor" aria-label="anchor" href="#b--custom-confidence-level"></a>
@@ -802,8 +1043,8 @@ confidence intervals in the analysis (default 0.95). Here we use
 <span>  plot_relative <span class="op">=</span> <span class="cn">FALSE</span>,</span>
 <span>  plot_excess <span class="op">=</span> <span class="cn">FALSE</span></span>
 <span><span class="op">)</span></span>
-<span><span class="co">#&gt; <span style="color: #BBBB00; font-weight: bold;">Error</span><span style="font-weight: bold;"> in `relativesurvival()`:</span></span></span>
-<span><span class="co">#&gt; <span style="color: #BBBB00;">!</span> argument "covariates" is missing, with no default</span></span></code></pre></div>
+<span><span class="co">#&gt; <span style="color: #BBBB00; font-weight: bold;">Error</span><span style="font-weight: bold;">:</span></span></span>
+<span><span class="co">#&gt; <span style="color: #BBBB00;">!</span> 'survexp.us' is not an exported object from 'namespace:relsurv'</span></span></code></pre></div>
 <hr>
 </div>
 </div>
@@ -833,8 +1074,8 @@ moderate warning.</p>
 <span>  plot_relative <span class="op">=</span> <span class="cn">FALSE</span>,</span>
 <span>  plot_excess <span class="op">=</span> <span class="cn">FALSE</span></span>
 <span><span class="op">)</span></span>
-<span><span class="co">#&gt; <span style="color: #BBBB00; font-weight: bold;">Error</span><span style="font-weight: bold;"> in `relativesurvival()`:</span></span></span>
-<span><span class="co">#&gt; <span style="color: #BBBB00;">!</span> argument "covariates" is missing, with no default</span></span></code></pre></div>
+<span><span class="co">#&gt; <span style="color: #BBBB00; font-weight: bold;">Error</span><span style="font-weight: bold;">:</span></span></span>
+<span><span class="co">#&gt; <span style="color: #BBBB00;">!</span> 'survexp.us' is not an exported object from 'namespace:relsurv'</span></span></code></pre></div>
 </div>
 <div class="section level4">
 <h4 id="b--full-analysis-with-all-options-enabled">11b. Full Analysis with All Options Enabled<a class="anchor" aria-label="anchor" href="#b--full-analysis-with-all-options-enabled"></a>
@@ -1114,7 +1355,7 @@ the ClinicoPath jamovi package.</em></p>
 </div>
 
 <div class="pkgdown-footer-right">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.2.0.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.2.1.</p>
 </div>
 
     </footer>

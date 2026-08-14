@@ -3,7 +3,7 @@ name:  jjdotchart
 title: Dot Chart (Summary vs Reference Value)
 menuGroup: JJStatsPlot
 menuSubgroup: Categorical vs Continuous
-version: '1.0.52'
+version: '1.0.53'
 jas: '1.2'
 
 description:

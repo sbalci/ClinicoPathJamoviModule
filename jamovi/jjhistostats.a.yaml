@@ -4,7 +4,7 @@ title: Histogram
 menuGroup: JJStatsPlot
 menuSubgroup: Distribution
 # menuSubtitle: Histogram
-version: '1.0.52'
+version: '1.0.53'
 jas: '1.2'
 
 
@@ -247,7 +247,7 @@ options:
           R: >
             Confidence level for the interval reported in the plot subtitle, between 0.5 and
             0.999. The old bounds allowed 1, at which the entire statistical subtitle
-            disappeared with no message, and 0, which printed a zero-width "0% CI".
+            disappeared with no message, and 0, which printed a zero-width "0 percent CI".
 
     - name: bf.message
       title: Bayes factor message

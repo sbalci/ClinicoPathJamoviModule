@@ -11,7 +11,7 @@ items:
   - name: partialCorr
     title: Partial Correlations
     type: Table
-    visible: (vars && controls && (correlationType:partial || correlationType:both))
+    visible: (length(vars) > 0 && length(controls) > 0 && (correlationType:partial || correlationType:both))
     columns:
       - name: var1
         title: Variable 1
@@ -57,7 +57,7 @@ items:
   - name: zeroOrder
     title: Zero-Order Correlations
     type: Table
-    visible: (vars && showZeroOrder)
+    visible: (length(vars) > 0 && showZeroOrder)
     columns:
       - name: var1
         title: Variable 1
@@ -81,7 +81,7 @@ items:
   - name: semipartialCorr
     title: Semi-partial Correlations
     type: Table
-    visible: (vars && controls && (correlationType:semipartial || correlationType:both))
+    visible: (length(vars) > 0 && length(controls) > 0 && (correlationType:semipartial || correlationType:both))
     columns:
       - name: var1
         title: Variable 1

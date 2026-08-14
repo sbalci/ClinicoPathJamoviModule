@@ -562,7 +562,7 @@ jjhistostatsBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' @param conf.level Confidence level for the interval reported in the plot
 #'   subtitle, between 0.5 and 0.999. The old bounds allowed 1, at which the
 #'   entire statistical subtitle disappeared with no message, and 0, which
-#'   printed a zero-width "0\% CI".
+#'   printed a zero-width "0 percent CI".
 #' @param bf.message Whether to display Bayes Factor in the subtitle when
 #'   using Bayesian analysis.
 #' @param digits Number of decimal places for displaying statistics in the

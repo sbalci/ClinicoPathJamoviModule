@@ -386,7 +386,7 @@ items:
     - name: markerPerformance
       title: Marker Diagnostic Performance
       type: Table
-      visible: (calculateDiagnosticMetrics && knownDiagnosis)
+      visible: (calculateDiagnosticMetrics && length(knownDiagnosis) > 0)
       description: Sensitivity, specificity, PPV, NPV for each marker by diagnosis
       columns:
           - name: marker
@@ -423,7 +423,7 @@ items:
     - name: optimalPanels
       title: Optimal Antibody Panel Recommendations
       type: Table
-      visible: (identifyOptimalPanel && knownDiagnosis)
+      visible: (identifyOptimalPanel && length(knownDiagnosis) > 0)
       description: Ranked marker combinations for differential diagnosis
       columns:
           - name: rank

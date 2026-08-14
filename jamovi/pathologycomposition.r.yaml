@@ -57,7 +57,7 @@ items:
       type: Image
       width: 600
       height: 500
-      visible: (composition_plot && component1 && component2)
+      visible: (composition_plot && length(component1) > 0 && length(component2) > 0)
       requiresData: true
       clearWith:
           - outcome_variable

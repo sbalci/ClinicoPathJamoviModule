@@ -20,7 +20,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">ClinicoPath</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.0.47</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.0.52</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -67,6 +67,15 @@
 
     
     
+<blockquote>
+<p><strong>Not yet released.</strong> The <code>timeroc</code> analysis
+is on a development menu route, so it does not appear in the jamovi
+menus of ClinicoPath or of any of its submodules. It is documented here
+ahead of a future release, and its options, defaults and output may
+still change. The R function is exported, so the examples below run from
+an R console; what is not yet available is the jamovi analysis
+itself.</p>
+</blockquote>
 <blockquote>
 <p><strong>Note:</strong> The <code><a href="../reference/timeroc.html">timeroc()</a></code> function is
 designed for use within <strong>jamovi’s GUI</strong>. The code examples
@@ -252,6 +261,9 @@ computes cumulative/dynamic AUC with IPCW correction for censoring.</p>
 <span><span class="co">#&gt;  ───────────────────────────────────────────────────────────────────────────── </span></span>
 <span><span class="co">#&gt;    Timepoint    Optimal Cutoff    Sensitivity    Specificity    Youden Index   </span></span>
 <span><span class="co">#&gt;  ───────────────────────────────────────────────────────────────────────────── </span></span>
+<span><span class="co">#&gt;           12          42.50000      0.6570000      0.8120000       0.4690000   </span></span>
+<span><span class="co">#&gt;           36          39.30000      0.5840000      0.8860000       0.4710000   </span></span>
+<span><span class="co">#&gt;           60          39.60000      0.4690000      0.9750000       0.4440000   </span></span>
 <span><span class="co">#&gt;  ───────────────────────────────────────────────────────────────────────────── </span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; </span></span>
@@ -389,6 +401,9 @@ Kaplan-Meier estimator for censoring distribution.</p>
 <span><span class="co">#&gt;  ───────────────────────────────────────────────────────────────────────────── </span></span>
 <span><span class="co">#&gt;    Timepoint    Optimal Cutoff    Sensitivity    Specificity    Youden Index   </span></span>
 <span><span class="co">#&gt;  ───────────────────────────────────────────────────────────────────────────── </span></span>
+<span><span class="co">#&gt;           12          42.50000      0.6570000      0.8120000       0.4690000   </span></span>
+<span><span class="co">#&gt;           36          39.30000      0.5840000      0.8860000       0.4710000   </span></span>
+<span><span class="co">#&gt;           60          39.60000      0.4690000      0.9750000       0.4440000   </span></span>
 <span><span class="co">#&gt;  ───────────────────────────────────────────────────────────────────────────── </span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; </span></span>
@@ -509,6 +524,9 @@ censoring may depend on covariates (informative censoring).</p>
 <span><span class="co">#&gt;  ───────────────────────────────────────────────────────────────────────────── </span></span>
 <span><span class="co">#&gt;    Timepoint    Optimal Cutoff    Sensitivity    Specificity    Youden Index   </span></span>
 <span><span class="co">#&gt;  ───────────────────────────────────────────────────────────────────────────── </span></span>
+<span><span class="co">#&gt;           12          42.50000      0.6570000      0.8120000       0.4690000   </span></span>
+<span><span class="co">#&gt;           36          37.70000      0.6050000      0.8700000       0.4760000   </span></span>
+<span><span class="co">#&gt;           60          39.60000      0.4650000      0.9790000       0.4440000   </span></span>
 <span><span class="co">#&gt;  ───────────────────────────────────────────────────────────────────────────── </span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; </span></span>
@@ -628,6 +646,9 @@ non-proportional adjustment for censoring.</p>
 <span><span class="co">#&gt;  ───────────────────────────────────────────────────────────────────────────── </span></span>
 <span><span class="co">#&gt;    Timepoint    Optimal Cutoff    Sensitivity    Specificity    Youden Index   </span></span>
 <span><span class="co">#&gt;  ───────────────────────────────────────────────────────────────────────────── </span></span>
+<span><span class="co">#&gt;           12          42.50000      0.6590000      0.8100000       0.4690000   </span></span>
+<span><span class="co">#&gt;           36          37.70000      0.6080000      0.8730000       0.4820000   </span></span>
+<span><span class="co">#&gt;           60          39.60000      0.4670000      0.9810000       0.4480000   </span></span>
 <span><span class="co">#&gt;  ───────────────────────────────────────────────────────────────────────────── </span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; </span></span>
@@ -755,6 +776,9 @@ CIs.</p>
 <span><span class="co">#&gt;  ───────────────────────────────────────────────────────────────────────────── </span></span>
 <span><span class="co">#&gt;    Timepoint    Optimal Cutoff    Sensitivity    Specificity    Youden Index   </span></span>
 <span><span class="co">#&gt;  ───────────────────────────────────────────────────────────────────────────── </span></span>
+<span><span class="co">#&gt;           12          42.50000      0.6570000      0.8120000       0.4690000   </span></span>
+<span><span class="co">#&gt;           36          39.30000      0.5840000      0.8860000       0.4710000   </span></span>
+<span><span class="co">#&gt;           60          39.60000      0.4690000      0.9750000       0.4440000   </span></span>
 <span><span class="co">#&gt;  ───────────────────────────────────────────────────────────────────────────── </span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; </span></span>
@@ -946,6 +970,9 @@ converts the factor to binary 0/1 internally.</p>
 <span><span class="co">#&gt;  ───────────────────────────────────────────────────────────────────────────── </span></span>
 <span><span class="co">#&gt;    Timepoint    Optimal Cutoff    Sensitivity    Specificity    Youden Index   </span></span>
 <span><span class="co">#&gt;  ───────────────────────────────────────────────────────────────────────────── </span></span>
+<span><span class="co">#&gt;           12          42.50000      0.6570000      0.8120000       0.4690000   </span></span>
+<span><span class="co">#&gt;           36          39.30000      0.5840000      0.8860000       0.4710000   </span></span>
+<span><span class="co">#&gt;           60          39.60000      0.4690000      0.9750000       0.4440000   </span></span>
 <span><span class="co">#&gt;  ───────────────────────────────────────────────────────────────────────────── </span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; </span></span>
@@ -1198,6 +1225,11 @@ curve.</p>
 <span><span class="co">#&gt;  ───────────────────────────────────────────────────────────────────────────── </span></span>
 <span><span class="co">#&gt;    Timepoint    Optimal Cutoff    Sensitivity    Specificity    Youden Index   </span></span>
 <span><span class="co">#&gt;  ───────────────────────────────────────────────────────────────────────────── </span></span>
+<span><span class="co">#&gt;           12          42.50000      0.6570000      0.8120000       0.4690000   </span></span>
+<span><span class="co">#&gt;           24          39.50000      0.6670000      0.8400000       0.5070000   </span></span>
+<span><span class="co">#&gt;           36          39.30000      0.5840000      0.8860000       0.4710000   </span></span>
+<span><span class="co">#&gt;           48          39.30000      0.5360000      0.9320000       0.4680000   </span></span>
+<span><span class="co">#&gt;           60          39.60000      0.4690000      0.9750000       0.4440000   </span></span>
 <span><span class="co">#&gt;  ───────────────────────────────────────────────────────────────────────────── </span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; </span></span>
@@ -1402,6 +1434,9 @@ mode).</p>
 <span><span class="co">#&gt;  ───────────────────────────────────────────────────────────────────────────── </span></span>
 <span><span class="co">#&gt;    Timepoint    Optimal Cutoff    Sensitivity    Specificity    Youden Index   </span></span>
 <span><span class="co">#&gt;  ───────────────────────────────────────────────────────────────────────────── </span></span>
+<span><span class="co">#&gt;           12          42.50000      0.6570000      0.8120000       0.4690000   </span></span>
+<span><span class="co">#&gt;           36          39.30000      0.5840000      0.8860000       0.4710000   </span></span>
+<span><span class="co">#&gt;           60          39.60000      0.4690000      0.9750000       0.4440000   </span></span>
 <span><span class="co">#&gt;  ───────────────────────────────────────────────────────────────────────────── </span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; </span></span>
@@ -1526,6 +1561,9 @@ confidence intervals to be enabled for p-value computation.</p>
 <span><span class="co">#&gt;  ───────────────────────────────────────────────────────────────────────────── </span></span>
 <span><span class="co">#&gt;    Timepoint    Optimal Cutoff    Sensitivity    Specificity    Youden Index   </span></span>
 <span><span class="co">#&gt;  ───────────────────────────────────────────────────────────────────────────── </span></span>
+<span><span class="co">#&gt;           12          42.50000      0.6570000      0.8120000       0.4690000   </span></span>
+<span><span class="co">#&gt;           36          39.30000      0.5840000      0.8860000       0.4710000   </span></span>
+<span><span class="co">#&gt;           60          39.60000      0.4690000      0.9750000       0.4440000   </span></span>
 <span><span class="co">#&gt;  ───────────────────────────────────────────────────────────────────────────── </span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; </span></span>
@@ -1701,6 +1739,13 @@ timepoints to function; otherwise falls back to a straight line.</p>
 <span><span class="co">#&gt;  ───────────────────────────────────────────────────────────────────────────── </span></span>
 <span><span class="co">#&gt;    Timepoint    Optimal Cutoff    Sensitivity    Specificity    Youden Index   </span></span>
 <span><span class="co">#&gt;  ───────────────────────────────────────────────────────────────────────────── </span></span>
+<span><span class="co">#&gt;            6          31.10000      0.8230000      0.5700000       0.3930000   </span></span>
+<span><span class="co">#&gt;           12          42.50000      0.6570000      0.8120000       0.4690000   </span></span>
+<span><span class="co">#&gt;           18          42.50000      0.6670000      0.8460000       0.5130000   </span></span>
+<span><span class="co">#&gt;           24          39.50000      0.6670000      0.8400000       0.5070000   </span></span>
+<span><span class="co">#&gt;           36          39.30000      0.5840000      0.8860000       0.4710000   </span></span>
+<span><span class="co">#&gt;           48          39.30000      0.5360000      0.9320000       0.4680000   </span></span>
+<span><span class="co">#&gt;           60          39.60000      0.4690000      0.9750000       0.4440000   </span></span>
 <span><span class="co">#&gt;  ───────────────────────────────────────────────────────────────────────────── </span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; </span></span>
@@ -1820,6 +1865,9 @@ Does not transform the numeric values.</p>
 <span><span class="co">#&gt;  ───────────────────────────────────────────────────────────────────────────── </span></span>
 <span><span class="co">#&gt;    Timepoint    Optimal Cutoff    Sensitivity    Specificity    Youden Index   </span></span>
 <span><span class="co">#&gt;  ───────────────────────────────────────────────────────────────────────────── </span></span>
+<span><span class="co">#&gt;           12          42.50000      0.6570000      0.8120000       0.4690000   </span></span>
+<span><span class="co">#&gt;           36          39.30000      0.5840000      0.8860000       0.4710000   </span></span>
+<span><span class="co">#&gt;           60          39.60000      0.4690000      0.9750000       0.4440000   </span></span>
 <span><span class="co">#&gt;  ───────────────────────────────────────────────────────────────────────────── </span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; </span></span>
@@ -1941,6 +1989,9 @@ output.</p>
 <span><span class="co">#&gt;  ───────────────────────────────────────────────────────────────────────────── </span></span>
 <span><span class="co">#&gt;    Timepoint    Optimal Cutoff    Sensitivity    Specificity    Youden Index   </span></span>
 <span><span class="co">#&gt;  ───────────────────────────────────────────────────────────────────────────── </span></span>
+<span><span class="co">#&gt;           12          42.50000      0.6570000      0.8120000       0.4690000   </span></span>
+<span><span class="co">#&gt;           36          39.30000      0.5840000      0.8860000       0.4710000   </span></span>
+<span><span class="co">#&gt;           60          39.60000      0.4690000      0.9750000       0.4440000   </span></span>
 <span><span class="co">#&gt;  ───────────────────────────────────────────────────────────────────────────── </span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; </span></span>
@@ -2066,6 +2117,9 @@ function automatically substitutes quartiles of observed follow-up.</p>
 <span><span class="co">#&gt;  ───────────────────────────────────────────────────────────────────────────── </span></span>
 <span><span class="co">#&gt;    Timepoint    Optimal Cutoff    Sensitivity    Specificity    Youden Index   </span></span>
 <span><span class="co">#&gt;  ───────────────────────────────────────────────────────────────────────────── </span></span>
+<span><span class="co">#&gt;           19          42.50000      0.6670000      0.8500000       0.5170000   </span></span>
+<span><span class="co">#&gt;           33          37.70000      0.6100000      0.8630000       0.4730000   </span></span>
+<span><span class="co">#&gt;           55          39.60000      0.5030000      0.9790000       0.4820000   </span></span>
 <span><span class="co">#&gt;  ───────────────────────────────────────────────────────────────────────────── </span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; </span></span>
@@ -2160,6 +2214,9 @@ function automatically substitutes quartiles of observed follow-up.</p>
 <span><span class="co">#&gt;  ───────────────────────────────────────────────────────────────────────────── </span></span>
 <span><span class="co">#&gt;    Timepoint    Optimal Cutoff    Sensitivity    Specificity    Youden Index   </span></span>
 <span><span class="co">#&gt;  ───────────────────────────────────────────────────────────────────────────── </span></span>
+<span><span class="co">#&gt;           12          42.50000      0.6570000      0.8120000       0.4690000   </span></span>
+<span><span class="co">#&gt;           36          39.30000      0.5840000      0.8860000       0.4710000   </span></span>
+<span><span class="co">#&gt;           60          39.60000      0.4690000      0.9750000       0.4440000   </span></span>
 <span><span class="co">#&gt;  ───────────────────────────────────────────────────────────────────────────── </span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; </span></span>
@@ -2325,6 +2382,7 @@ function automatically substitutes quartiles of observed follow-up.</p>
 <span><span class="co">#&gt;  ───────────────────────────────────────────────────────────────────────────── </span></span>
 <span><span class="co">#&gt;    Timepoint    Optimal Cutoff    Sensitivity    Specificity    Youden Index   </span></span>
 <span><span class="co">#&gt;  ───────────────────────────────────────────────────────────────────────────── </span></span>
+<span><span class="co">#&gt;           24          39.50000      0.6670000      0.8400000       0.5070000   </span></span>
 <span><span class="co">#&gt;  ───────────────────────────────────────────────────────────────────────────── </span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; </span></span>
@@ -2491,6 +2549,18 @@ trajectory.</p>
 <span><span class="co">#&gt;  ───────────────────────────────────────────────────────────────────────────── </span></span>
 <span><span class="co">#&gt;    Timepoint    Optimal Cutoff    Sensitivity    Specificity    Youden Index   </span></span>
 <span><span class="co">#&gt;  ───────────────────────────────────────────────────────────────────────────── </span></span>
+<span><span class="co">#&gt;            3          4.430000      1.0000000      0.4280000       0.4280000   </span></span>
+<span><span class="co">#&gt;            6          4.300000      0.9410000      0.4030000       0.3440000   </span></span>
+<span><span class="co">#&gt;            9          4.300000      0.9580000      0.4230000       0.3810000   </span></span>
+<span><span class="co">#&gt;           12          5.270000      0.7710000      0.6500000       0.4210000   </span></span>
+<span><span class="co">#&gt;           18          5.190000      0.7610000      0.6640000       0.4250000   </span></span>
+<span><span class="co">#&gt;           24          4.430000      0.8770000      0.5670000       0.4440000   </span></span>
+<span><span class="co">#&gt;           30          4.430000      0.8380000      0.6020000       0.4400000   </span></span>
+<span><span class="co">#&gt;           36          4.430000      0.8130000      0.5980000       0.4110000   </span></span>
+<span><span class="co">#&gt;           42          4.450000      0.8070000      0.6760000       0.4820000   </span></span>
+<span><span class="co">#&gt;           48          4.450000      0.7920000      0.7300000       0.5220000   </span></span>
+<span><span class="co">#&gt;           54          4.450000      0.7640000      0.7200000       0.4840000   </span></span>
+<span><span class="co">#&gt;           60          4.450000      0.7350000      0.6900000       0.4250000   </span></span>
 <span><span class="co">#&gt;  ───────────────────────────────────────────────────────────────────────────── </span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; </span></span>
@@ -2655,6 +2725,9 @@ sensitivity and specificity</li>
 <span><span class="co">#&gt;  ───────────────────────────────────────────────────────────────────────────── </span></span>
 <span><span class="co">#&gt;    Timepoint    Optimal Cutoff    Sensitivity    Specificity    Youden Index   </span></span>
 <span><span class="co">#&gt;  ───────────────────────────────────────────────────────────────────────────── </span></span>
+<span><span class="co">#&gt;           12          5.270000      0.7710000      0.6500000       0.4210000   </span></span>
+<span><span class="co">#&gt;           36          4.430000      0.8130000      0.5980000       0.4110000   </span></span>
+<span><span class="co">#&gt;           60          4.450000      0.7350000      0.6900000       0.4250000   </span></span>
 <span><span class="co">#&gt;  ───────────────────────────────────────────────────────────────────────────── </span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; </span></span>
@@ -2817,7 +2890,7 @@ markers</td>
 </div>
 
 <div class="pkgdown-footer-right">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.2.0.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.2.1.</p>
 </div>
 
     </footer>

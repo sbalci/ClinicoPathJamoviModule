@@ -796,7 +796,7 @@ screeningevaluationResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6:
                 options=options,
                 name="geographic_analysis",
                 title="Geographic Performance Analysis",
-                visible="(geographic_analysis && location_var)",
+                visible="(geographic_analysis && length(location_var) > 0)",
                 columns=list(
                     list(
                         `name`="location", 
@@ -981,7 +981,7 @@ screeningevaluationResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6:
                 options=options,
                 name="time_trend_plot",
                 title="Performance Trends Over Time",
-                visible="(trend_analysis_plots && screening_date)",
+                visible="(trend_analysis_plots && length(screening_date) > 0)",
                 width=600,
                 height=400,
                 requiresData=TRUE))

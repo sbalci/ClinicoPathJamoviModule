@@ -457,7 +457,7 @@ treatmentoptimResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
                 options=options,
                 name="predictionModel",
                 title="Prediction Model Performance",
-                visible="(treatment_selection && responseVar)",
+                visible="(treatment_selection && length(responseVar) > 0)",
                 columns=list(
                     list(
                         `name`="model_metric", 

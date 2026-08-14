@@ -2230,7 +2230,7 @@ diagnosticmetaClass <- R6::R6Class(
             <ul>
                 <li><strong>Pooled Sensitivity:</strong> Proportion of diseased cases correctly identified
                     <ul>
-                        <li>Excellent sensitivity (&#x2265;90%): few diseased cases missed</li>
+                        <li>Excellent sensitivity ([[GE]]90%): few diseased cases missed</li>
                         <li>Good sensitivity (80-89%): acceptable miss rate for screening</li>
                         <li>Moderate sensitivity (70-79%): appreciable number of cases missed</li>
                         <li>Limited sensitivity (&lt;70%): many cases missed</li>
@@ -2238,7 +2238,7 @@ diagnosticmetaClass <- R6::R6Class(
                 </li>
                 <li><strong>Pooled Specificity:</strong> Proportion of non-diseased cases correctly identified
                     <ul>
-                        <li>Excellent specificity (&#x2265;90%): few false alarms</li>
+                        <li>Excellent specificity ([[GE]]90%): few false alarms</li>
                         <li>Good specificity (80-89%): some false positives</li>
                         <li>Moderate specificity (70-79%): appreciable false-positive rate</li>
                         <li>Limited specificity (&lt;70%): many false alarms</li>

@@ -1187,7 +1187,7 @@ ihcclusterResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 options=options,
                 name="markerPerformance",
                 title="Marker Diagnostic Performance",
-                visible="(calculateDiagnosticMetrics && knownDiagnosis)",
+                visible="(calculateDiagnosticMetrics && length(knownDiagnosis) > 0)",
                 columns=list(
                     list(
                         `name`="marker", 
@@ -1230,7 +1230,7 @@ ihcclusterResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 options=options,
                 name="optimalPanels",
                 title="Optimal Antibody Panel Recommendations",
-                visible="(identifyOptimalPanel && knownDiagnosis)",
+                visible="(identifyOptimalPanel && length(knownDiagnosis) > 0)",
                 columns=list(
                     list(
                         `name`="rank", 

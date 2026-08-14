@@ -307,7 +307,7 @@ ihcimmuneResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 options=options,
                 name="checkpointAnalysis",
                 title="Checkpoint Inhibitor Analysis",
-                visible="(checkpoint_markers && checkpointScore)",
+                visible="(length(checkpoint_markers) > 0 && checkpointScore)",
                 clearWith=list(
                     "checkpoint_markers",
                     "pd1Cutoff",

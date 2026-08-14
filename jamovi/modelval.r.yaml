@@ -71,7 +71,7 @@ items:
     - name: subgroupPerformance
       title: Subgroup Performance
       type: Table
-      visible: (showSubgroupAnalysis && subgroup)
+      visible: (showSubgroupAnalysis && length(subgroup) > 0)
       columns:
         - name: subgroup
           title: Subgroup
@@ -124,7 +124,7 @@ items:
       width: 700
       height: 600
       renderFun: .subgroupCalibrationPlot
-      visible: (showSubgroupAnalysis && subgroup)
+      visible: (showSubgroupAnalysis && length(subgroup) > 0)
       requiresData: true
 
     - name: recommendations

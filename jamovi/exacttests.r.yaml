@@ -11,7 +11,7 @@ items:
   - name: contingency
     title: Contingency Table
     type: Table
-    visible: (rows && cols)
+    visible: (length(rows) > 0 && length(cols) > 0)
     columns:
       - name: .name
         title: ""

@@ -103,7 +103,7 @@ cutoff, or population norm) for meaningful hypothesis testing.}
 \item{conf.level}{Confidence level for the interval reported in the plot
 subtitle, between 0.5 and 0.999. The old bounds allowed 1, at which the
 entire statistical subtitle disappeared with no message, and 0, which
-printed a zero-width "0\\% CI".}
+printed a zero-width "0 percent CI".}
 
 \item{bf.message}{Whether to display Bayes Factor in the subtitle when
 using Bayesian analysis.}

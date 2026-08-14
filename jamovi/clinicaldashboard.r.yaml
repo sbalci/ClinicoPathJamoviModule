@@ -53,7 +53,7 @@ items:
   - name: outcomeStats
     title: Outcome Statistics
     type: Table
-    visible: (outcomeVars && showSummaryStats)
+    visible: (length(outcomeVars) > 0 && showSummaryStats)
     columns:
       - name: outcome
         title: Outcome
@@ -79,7 +79,7 @@ items:
 
   - name: trendPlot
     title: Trend Analysis
-    visible: (showTrends && timeVar)
+    visible: (showTrends && length(timeVar) > 0)
     type: Image
     width: 700
     height: 400
@@ -87,7 +87,7 @@ items:
 
   - name: distributionPlot
     title: Outcome Distributions
-    visible: (showDistributions && outcomeVars)
+    visible: (showDistributions && length(outcomeVars) > 0)
     type: Image
     width: 600
     height: 400

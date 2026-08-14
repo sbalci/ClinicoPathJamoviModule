@@ -364,7 +364,7 @@ spatialanalysisResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
                         `name`="interpretation", 
                         `title`="Interpretation", 
                         `type`="text")),
-                visible="(perform_interaction && cell_types)",
+                visible="(perform_interaction && length(cell_types) > 0)",
                 clearWith=list(
                     "coords_x",
                     "coords_y",

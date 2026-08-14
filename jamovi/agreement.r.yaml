@@ -1724,7 +1724,7 @@ items:
     - name: computedVariablesHeading
       title: Computed Variables
       type:  Preformatted
-      visible: (consensusVar || loaVariable)
+      visible: (length(consensusVar) > 0 || loaVariable)
       clearWith:
           - consensusVar
           - loaVariable
@@ -1814,7 +1814,7 @@ items:
     - name: computedVariablesInfo
       title: "Computed Variables Added to Dataset"
       type: Html
-      visible: (consensusVar || loaVariable)
+      visible: (length(consensusVar) > 0 || loaVariable)
       clearWith:
           - consensusVar
           - loaVariable

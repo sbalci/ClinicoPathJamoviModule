@@ -27,7 +27,7 @@ items:
     - name: statistical_results
       title: "Statistical Analysis Results"
       type: Html
-      visible: (add_statistics && y_var && x_var)
+      visible: (add_statistics && length(y_var) > 0 && length(x_var) > 0)
       clearWith:
         - y_var
         - x_var
@@ -38,7 +38,7 @@ items:
     - name: summary_statistics
       title: "Distribution Summary Statistics"
       type: Html
-      visible: (summary_statistics && y_var && x_var)
+      visible: (summary_statistics && length(y_var) > 0 && length(x_var) > 0)
       clearWith:
         - y_var
         - x_var
@@ -55,7 +55,7 @@ items:
     - name: comparison_results
       title: "Pairwise Comparisons"
       type: Html
-      visible: (comparison_annotations && add_statistics && y_var && x_var)
+      visible: (comparison_annotations && add_statistics && length(y_var) > 0 && length(x_var) > 0)
       clearWith:
         - y_var
         - x_var
@@ -68,7 +68,7 @@ items:
       width: 800
       height: 400
       renderFun: .plot_diagnostics
-      visible: (add_statistics && y_var && x_var)
+      visible: (add_statistics && length(y_var) > 0 && length(x_var) > 0)
       clearWith:
         - y_var
         - x_var

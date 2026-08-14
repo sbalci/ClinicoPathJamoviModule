@@ -263,7 +263,7 @@ items:
   - name: stratifiedTable
     title: Stratified Response Analysis
     type: Table
-    visible: (stratifiedAnalysis && groupVar)
+    visible: (stratifiedAnalysis && length(groupVar) > 0)
     clearWith:
       - groupVar
       - stratifiedAnalysis

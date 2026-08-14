@@ -401,7 +401,7 @@ if (nrow(baseline_rows) == 0) {
     return(target_sums_empty())
 }
 
-baseline_sums <- aggregate(
+baseline_sums <- stats::aggregate(
     diameter ~ patientID,
     data = baseline_rows,
     FUN = function(x) sum(x, na.rm = TRUE)
@@ -411,13 +411,13 @@ names(baseline_sums)[2] <- "baseline_sum"
 # How many target lesions each patient had measured AT BASELINE.
 # The per-visit sum is only comparable with the baseline sum when
 # the same lesions are measured again; see nTargetLesions below.
-baseline_counts <- aggregate(
+baseline_counts <- stats::aggregate(
     diameter ~ patientID, data = baseline_rows, FUN = length
 )
 names(baseline_counts)[2] <- "nBaselineLesions"
 
 # Calculate sums for each visit
-visit_sums <- aggregate(
+visit_sums <- stats::aggregate(
     diameter ~ patientID + visitTime,
     data = target_lesions,
     FUN = function(x) sum(x, na.rm = TRUE)
@@ -426,7 +426,7 @@ names(visit_sums)[3] <- "current_sum"
 
 # Count lesions per visit. The formula interface drops rows with a
 # missing diameter, so this counts lesions actually MEASURED.
-lesion_counts <- aggregate(
+lesion_counts <- stats::aggregate(
     diameter ~ patientID + visitTime,
     data = target_lesions,
     FUN = length
@@ -582,7 +582,7 @@ if (nrow(new_lesions) == 0) {
 }
 
 # For each patient, find first visit with new lesion
-new_lesion_summary <- aggregate(
+new_lesion_summary <- stats::aggregate(
     visitTime ~ patientID,
     data = new_lesions,
     FUN = min
@@ -632,7 +632,7 @@ if (nrow(nontarget_lesions) == 0) {
 }
 
 # Count non-target lesions per patient-visit
-nontarget_counts <- aggregate(
+nontarget_counts <- stats::aggregate(
     lesionID ~ patientID + visitTime,
     data = nontarget_lesions,
     FUN = length
@@ -645,7 +645,7 @@ names(nontarget_counts)[3] <- "n_nontarget"
 # the right reference: every lesion present later is an increase on it.
 baseline_rows <- nontarget_lesions[nontarget_lesions$isBaseline, , drop = FALSE]
 if (nrow(baseline_rows) > 0) {
-    baseline_counts <- aggregate(lesionID ~ patientID, data = baseline_rows, FUN = length)
+    baseline_counts <- stats::aggregate(lesionID ~ patientID, data = baseline_rows, FUN = length)
     names(baseline_counts)[2] <- "baseline_n_nontarget"
 } else {
     baseline_counts <- data.frame(

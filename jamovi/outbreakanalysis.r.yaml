@@ -149,7 +149,7 @@ items:
     - name: spatial_analysis_results
       title: Spatial Analysis Results
       type: Table
-      visible: (spatial_analysis && location_var)
+      visible: (spatial_analysis && length(location_var) > 0)
       columns:
           - name: location
             title: Location
@@ -247,7 +247,7 @@ items:
     - name: incubation_period_stats
       title: Incubation Period Analysis
       type: Table
-      visible: (incubation_period && exposure_date_var)
+      visible: (incubation_period && length(exposure_date_var) > 0)
       columns:
           - name: statistic
             title: Statistic
@@ -361,7 +361,7 @@ items:
     - name: epidemic_curve_plot
       title: Epidemic Curve
       type: Image
-      visible: (epidemic_curve_plot && date_onset)
+      visible: (epidemic_curve_plot && length(date_onset) > 0)
       width: 600
       height: 400
       requiresData: true
@@ -385,7 +385,7 @@ items:
     - name: spatial_distribution_plot
       title: Spatial Distribution Map
       type: Image
-      visible: (spatial_plot && spatial_analysis && location_var)
+      visible: (spatial_plot && spatial_analysis && length(location_var) > 0)
       width: 600
       height: 400
       requiresData: true

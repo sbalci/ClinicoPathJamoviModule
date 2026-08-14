@@ -68,7 +68,7 @@ items:
     - name: checkpointAnalysis
       title: Checkpoint Inhibitor Analysis
       type: Table
-      visible: (checkpoint_markers && checkpointScore)
+      visible: (length(checkpoint_markers) > 0 && checkpointScore)
       clearWith:
         - checkpoint_markers
         - pd1Cutoff

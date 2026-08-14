@@ -284,7 +284,7 @@ categoricaladvancedResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6:
                 options=options,
                 name="stratifiedanalysis",
                 title="Stratified Analysis Results",
-                visible="(test_type:stratified && stratify)",
+                visible="(test_type:stratified && length(stratify) > 0)",
                 clearWith=list(
                     "rows",
                     "cols",

@@ -87,7 +87,7 @@ items:
     - name: stratifiedanalysis
       title: Stratified Analysis Results
       type: Table
-      visible: (test_type:stratified && stratify)
+      visible: (test_type:stratified && length(stratify) > 0)
       clearWith:
           - rows
           - cols

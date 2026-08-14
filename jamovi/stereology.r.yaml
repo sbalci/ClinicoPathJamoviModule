@@ -53,7 +53,7 @@ items:
     - name: groupComparison
       title: Group Comparison
       type: Table
-      visible: (showGroupComparison && groupVar)
+      visible: (showGroupComparison && length(groupVar) > 0)
       rows: 0
       columns:
         - name: group
@@ -106,7 +106,7 @@ items:
     - name: groupTests
       title: Statistical Tests (Between Groups)
       type: Table
-      visible: (showGroupComparison && groupVar)
+      visible: (showGroupComparison && length(groupVar) > 0)
       rows: 0
       columns:
         - name: parameter

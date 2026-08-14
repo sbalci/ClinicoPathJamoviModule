@@ -7,7 +7,7 @@ items:
     - name: instructions
       title: Instructions
       type: Html
-      visible: (!xvar || !yvar)
+      visible: (length(xvar) == 0 || length(yvar) == 0)
 
     - name: howto
       title: "How to Use This Analysis"

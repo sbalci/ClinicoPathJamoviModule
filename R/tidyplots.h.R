@@ -1026,7 +1026,7 @@ tidyplotsResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 options=options,
                 name="instructions",
                 title="Instructions",
-                visible="(!xvar || !yvar)"))
+                visible="(length(xvar) == 0 || length(yvar) == 0)"))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="howto",

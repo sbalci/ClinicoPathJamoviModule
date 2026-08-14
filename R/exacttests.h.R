@@ -143,7 +143,7 @@ exacttestsResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 options=options,
                 name="contingency",
                 title="Contingency Table",
-                visible="(rows && cols)",
+                visible="(length(rows) > 0 && length(cols) > 0)",
                 columns=list(
                     list(
                         `name`=".name", 

@@ -378,7 +378,7 @@ economistplotsResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
                 options=options,
                 name="statistical_results",
                 title="Statistical Analysis Results",
-                visible="(add_statistics && y_var && x_var)",
+                visible="(add_statistics && length(y_var) > 0 && length(x_var) > 0)",
                 clearWith=list(
                     "y_var",
                     "x_var",
@@ -389,7 +389,7 @@ economistplotsResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
                 options=options,
                 name="summary_statistics",
                 title="Distribution Summary Statistics",
-                visible="(summary_statistics && y_var && x_var)",
+                visible="(summary_statistics && length(y_var) > 0 && length(x_var) > 0)",
                 clearWith=list(
                     "y_var",
                     "x_var",
@@ -406,7 +406,7 @@ economistplotsResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
                 options=options,
                 name="comparison_results",
                 title="Pairwise Comparisons",
-                visible="(comparison_annotations && add_statistics && y_var && x_var)",
+                visible="(comparison_annotations && add_statistics && length(y_var) > 0 && length(x_var) > 0)",
                 clearWith=list(
                     "y_var",
                     "x_var",
@@ -419,7 +419,7 @@ economistplotsResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
                 width=800,
                 height=400,
                 renderFun=".plot_diagnostics",
-                visible="(add_statistics && y_var && x_var)",
+                visible="(add_statistics && length(y_var) > 0 && length(x_var) > 0)",
                 clearWith=list(
                     "y_var",
                     "x_var",

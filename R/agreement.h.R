@@ -3423,7 +3423,7 @@ agreementResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 options=options,
                 name="computedVariablesHeading",
                 title="Computed Variables",
-                visible="(consensusVar || loaVariable)",
+                visible="(length(consensusVar) > 0 || loaVariable)",
                 clearWith=list(
                     "consensusVar",
                     "loaVariable")))
@@ -3526,7 +3526,7 @@ agreementResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 options=options,
                 name="computedVariablesInfo",
                 title="Computed Variables Added to Dataset",
-                visible="(consensusVar || loaVariable)",
+                visible="(length(consensusVar) > 0 || loaVariable)",
                 clearWith=list(
                     "consensusVar",
                     "loaVariable")))

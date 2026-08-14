@@ -53,7 +53,7 @@ items:
     - name: todo
       title: Instructions
       type: Html
-      visible: (y_var:null || x_var:null)
+      visible: (length(y_var) == 0 || length(x_var) == 0)
 
     # Always-visible notes/warnings item. Operationally important, data-driven
     # conditions and the ggrain hard-dependency error are surfaced here so they

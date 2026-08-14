@@ -247,7 +247,7 @@ mlpathologyResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
                 options=options,
                 name="rocanalysis",
                 title="ROC Analysis Results",
-                visible="(analysis_type:classification && roc_analysis && predicted_probabilities)",
+                visible="(analysis_type:classification && roc_analysis && length(predicted_probabilities) > 0)",
                 clearWith=list(
                     "actual_labels",
                     "predicted_probabilities",
@@ -276,7 +276,7 @@ mlpathologyResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
                 options=options,
                 name="roccomparison",
                 title="ROC Curve Comparison",
-                visible="(analysis_type:comparison && roc_comparison && model1_probabilities && model2_probabilities)",
+                visible="(analysis_type:comparison && roc_comparison && length(model1_probabilities) > 0 && length(model2_probabilities) > 0)",
                 clearWith=list(
                     "actual_labels",
                     "model1_probabilities",
@@ -301,7 +301,7 @@ mlpathologyResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
                 width=600,
                 height=500,
                 renderFun=".plotROCPlot",
-                visible="(analysis_type:classification && roc_plot && predicted_probabilities)",
+                visible="(analysis_type:classification && roc_plot && length(predicted_probabilities) > 0)",
                 requiresData=TRUE,
                 clearWith=list(
                     "actual_labels",

@@ -265,7 +265,7 @@ enhancedtwowayfrequencyResults <- if (requireNamespace("jmvcore", quietly=TRUE))
                 options=options,
                 name="observedFrequencies",
                 title="Observed Frequencies",
-                visible="(rowVar && colVar && showCounts)",
+                visible="(length(rowVar) > 0 && length(colVar) > 0 && showCounts)",
                 columns=list(
                     list(
                         `name`="rowVar_level", 
@@ -313,7 +313,7 @@ enhancedtwowayfrequencyResults <- if (requireNamespace("jmvcore", quietly=TRUE))
                 options=options,
                 name="crossTabMatrix",
                 title="Cross-Tabulation Matrix",
-                visible="(rowVar && colVar)",
+                visible="(length(rowVar) > 0 && length(colVar) > 0)",
                 columns=list(
                     list(
                         `name`="row_category", 
@@ -323,7 +323,7 @@ enhancedtwowayfrequencyResults <- if (requireNamespace("jmvcore", quietly=TRUE))
                 options=options,
                 name="cellPercentMatrix",
                 title="Cell Percentage Matrix",
-                visible="(rowVar && colVar && cellPercent)",
+                visible="(length(rowVar) > 0 && length(colVar) > 0 && cellPercent)",
                 columns=list(
                     list(
                         `name`="row_category", 
@@ -333,7 +333,7 @@ enhancedtwowayfrequencyResults <- if (requireNamespace("jmvcore", quietly=TRUE))
                 options=options,
                 name="rowPercentMatrix",
                 title="Row Percentage Matrix",
-                visible="(rowVar && colVar && rowPercent)",
+                visible="(length(rowVar) > 0 && length(colVar) > 0 && rowPercent)",
                 columns=list(
                     list(
                         `name`="row_category", 
@@ -343,7 +343,7 @@ enhancedtwowayfrequencyResults <- if (requireNamespace("jmvcore", quietly=TRUE))
                 options=options,
                 name="colPercentMatrix",
                 title="Column Percentage Matrix",
-                visible="(rowVar && colVar && colPercent)",
+                visible="(length(rowVar) > 0 && length(colVar) > 0 && colPercent)",
                 columns=list(
                     list(
                         `name`="row_category", 
@@ -353,7 +353,7 @@ enhancedtwowayfrequencyResults <- if (requireNamespace("jmvcore", quietly=TRUE))
                 options=options,
                 name="testResults",
                 title="Tests of Independence",
-                visible="(rowVar && colVar && (chiSquareTest || fisherTest))",
+                visible="(length(rowVar) > 0 && length(colVar) > 0 && (chiSquareTest || fisherTest))",
                 columns=list(
                     list(
                         `name`="test_name", 
@@ -386,7 +386,7 @@ enhancedtwowayfrequencyResults <- if (requireNamespace("jmvcore", quietly=TRUE))
                 options=options,
                 name="associationMeasuresTable",
                 title="Measures of Association",
-                visible="(rowVar && colVar && associationMeasures)",
+                visible="(length(rowVar) > 0 && length(colVar) > 0 && associationMeasures)",
                 columns=list(
                     list(
                         `name`="measure", 
@@ -413,7 +413,7 @@ enhancedtwowayfrequencyResults <- if (requireNamespace("jmvcore", quietly=TRUE))
                 options=options,
                 name="assumptionCheck",
                 title="Assumption Validation",
-                visible="(rowVar && colVar && (showDiagnostics || expectedFrequencies))",
+                visible="(length(rowVar) > 0 && length(colVar) > 0 && (showDiagnostics || expectedFrequencies))",
                 columns=list(
                     list(
                         `name`="assumption", 

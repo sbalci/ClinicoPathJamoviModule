@@ -179,7 +179,7 @@ items:
     - name: predictionModel
       title: Prediction Model Performance
       type: Table
-      visible: (treatment_selection && responseVar)
+      visible: (treatment_selection && length(responseVar) > 0)
       columns:
         - name: model_metric
           title: Performance Metric

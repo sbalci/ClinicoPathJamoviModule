@@ -600,7 +600,7 @@ recistResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 options=options,
                 name="stratifiedTable",
                 title="Stratified Response Analysis",
-                visible="(stratifiedAnalysis && groupVar)",
+                visible="(stratifiedAnalysis && length(groupVar) > 0)",
                 clearWith=list(
                     "groupVar",
                     "stratifiedAnalysis"),

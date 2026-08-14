@@ -44,7 +44,7 @@ items:
     - name: timeVaryingTable
       title: Time-Varying Effects
       type: Table
-      visible: (time_varying_covariates && show_coefficients_table)
+      visible: (length(time_varying_covariates) > 0 && show_coefficients_table)
       columns:
           - name: covariate
             title: Covariate
@@ -375,7 +375,7 @@ items:
     - name: timeVaryingPlots
       title: Time-Varying Effects
       type: Image
-      visible: (time_varying_covariates && show_time_varying_plots)
+      visible: (length(time_varying_covariates) > 0 && show_time_varying_plots)
 
     - name: modelDiagnostics
       title: Model Diagnostics

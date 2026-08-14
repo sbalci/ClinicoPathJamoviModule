@@ -12,7 +12,7 @@ items:
   - name: observedFrequencies
     title: Observed Frequencies
     type: Table
-    visible: (rowVar && colVar && showCounts)
+    visible: (length(rowVar) > 0 && length(colVar) > 0 && showCounts)
     columns:
       - name: rowVar_level
         title: Row Variable
@@ -53,7 +53,7 @@ items:
   - name: crossTabMatrix
     title: Cross-Tabulation Matrix
     type: Table
-    visible: (rowVar && colVar)
+    visible: (length(rowVar) > 0 && length(colVar) > 0)
     columns:
       - name: row_category
         title: ''
@@ -64,7 +64,7 @@ items:
   - name: cellPercentMatrix
     title: Cell Percentage Matrix
     type: Table
-    visible: (rowVar && colVar && cellPercent)
+    visible: (length(rowVar) > 0 && length(colVar) > 0 && cellPercent)
     columns:
       - name: row_category
         title: ''
@@ -75,7 +75,7 @@ items:
   - name: rowPercentMatrix
     title: Row Percentage Matrix
     type: Table
-    visible: (rowVar && colVar && rowPercent)
+    visible: (length(rowVar) > 0 && length(colVar) > 0 && rowPercent)
     columns:
       - name: row_category
         title: ''
@@ -86,7 +86,7 @@ items:
   - name: colPercentMatrix
     title: Column Percentage Matrix
     type: Table
-    visible: (rowVar && colVar && colPercent)
+    visible: (length(rowVar) > 0 && length(colVar) > 0 && colPercent)
     columns:
       - name: row_category
         title: ''
@@ -97,7 +97,7 @@ items:
   - name: testResults
     title: Tests of Independence
     type: Table
-    visible: (rowVar && colVar && (chiSquareTest || fisherTest))
+    visible: (length(rowVar) > 0 && length(colVar) > 0 && (chiSquareTest || fisherTest))
     columns:
       - name: test_name
         title: Test
@@ -125,7 +125,7 @@ items:
   - name: associationMeasuresTable
     title: Measures of Association
     type: Table
-    visible: (rowVar && colVar && associationMeasures)
+    visible: (length(rowVar) > 0 && length(colVar) > 0 && associationMeasures)
     columns:
       - name: measure
         title: Measure
@@ -148,7 +148,7 @@ items:
   - name: assumptionCheck
     title: Assumption Validation
     type: Table
-    visible: (rowVar && colVar && (showDiagnostics || expectedFrequencies))
+    visible: (length(rowVar) > 0 && length(colVar) > 0 && (showDiagnostics || expectedFrequencies))
     columns:
       - name: assumption
         title: Assumption

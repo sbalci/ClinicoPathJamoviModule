@@ -639,7 +639,7 @@ irecistResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 options=options,
                 name="stratifiedTable",
                 title="Stratified Analysis by Group",
-                visible="(stratifiedAnalysis && groupVar)",
+                visible="(stratifiedAnalysis && length(groupVar) > 0)",
                 clearWith=list(
                     "groupVar",
                     "stratifiedAnalysis"),

@@ -313,7 +313,7 @@ stereologyResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 options=options,
                 name="groupComparison",
                 title="Group Comparison",
-                visible="(showGroupComparison && groupVar)",
+                visible="(showGroupComparison && length(groupVar) > 0)",
                 rows=0,
                 columns=list(
                     list(
@@ -378,7 +378,7 @@ stereologyResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 options=options,
                 name="groupTests",
                 title="Statistical Tests (Between Groups)",
-                visible="(showGroupComparison && groupVar)",
+                visible="(showGroupComparison && length(groupVar) > 0)",
                 rows=0,
                 columns=list(
                     list(

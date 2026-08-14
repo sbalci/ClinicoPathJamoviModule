@@ -257,7 +257,7 @@ modelvalResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 options=options,
                 name="subgroupPerformance",
                 title="Subgroup Performance",
-                visible="(showSubgroupAnalysis && subgroup)",
+                visible="(showSubgroupAnalysis && length(subgroup) > 0)",
                 columns=list(
                     list(
                         `name`="subgroup", 
@@ -316,7 +316,7 @@ modelvalResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 width=700,
                 height=600,
                 renderFun=".subgroupCalibrationPlot",
-                visible="(showSubgroupAnalysis && subgroup)",
+                visible="(showSubgroupAnalysis && length(subgroup) > 0)",
                 requiresData=TRUE))
             self$add(jmvcore::Html$new(
                 options=options,

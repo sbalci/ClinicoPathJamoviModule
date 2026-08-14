@@ -450,6 +450,23 @@ update_description_files <- function(paths, version, date) {
   }
 }
 
+# Keep CITATION.cff in step with DESCRIPTION. Both fields are quoted scalars at the
+# start of a line; anything else in the file is left alone.
+update_citation_files <- function(paths, version, date) {
+  cat("\n📝 Updating CITATION.cff files...\n")
+  for (path in paths) {
+    if (!file.exists(path)) next
+    txt <- readLines(path, warn = FALSE)
+    orig <- txt
+    txt <- sub('^version:.*$', paste0('version: "', version, '"'), txt)
+    txt <- sub("^date-released:.*$", paste0("date-released: '", date, "'"), txt)
+    if (!identical(txt, orig)) {
+      writeLines(txt, path)
+      cat("  ✅ Updated:", basename(dirname(path)), "\n")
+    }
+  }
+}
+
 # Enhanced function to update YAML files with validation
 update_yaml_0000_files <- function(paths, version, date) {
   cat("\n📝 Updating 0000.yaml files...\n")
@@ -1066,15 +1083,19 @@ postprocess_module_examples <- function(module_dir, module_name) {
     "")
 }
 
-# Ensure a submodule's .Rbuildignore excludes .omv files (jamovi assets, not R data).
+# Ensure a submodule's .Rbuildignore excludes the non-R payload that lives in data/:
+# .omv (jamovi assets) and .csv (raw example data). R CMD check treats a data/*.csv as a
+# user-level dataset and demands documentation for it -- the main repo has ignored them
+# since forever (see its .Rbuildignore), the submodules were missing the csv rule and so
+# reported "Undocumented data sets" for every csv without an .rda twin.
 .ensure_rbuildignore_omv <- function(module_dir) {
   rbi <- file.path(module_dir, ".Rbuildignore")
-  want <- c("^data/.*\\.omv$", "^inst/extdata/.*\\.omv$")
+  want <- c("^data/.*\\.omv$", "^inst/extdata/.*\\.omv$", "^data/.*\\.csv$")
   cur <- if (file.exists(rbi)) readLines(rbi, warn = FALSE) else character(0)
   add <- setdiff(want, cur)
   if (length(add) > 0) {
     writeLines(c(cur, add), rbi)
-    cat("    📦 .Rbuildignore: added", length(add), "omv rule(s)\n")
+    cat("    📦 .Rbuildignore: added", length(add), "asset rule(s)\n")
   }
 }
 
@@ -1721,6 +1742,12 @@ description_paths <- c(
 update_description_files(paths = description_paths,
                          version = new_version,
                          date = new_date)
+
+# CITATION.cff carries its own version/date and nothing was syncing them, so four
+# submodules were still advertising 1.0.0 (or 0.0.31.69) long after DESCRIPTION moved on.
+update_citation_files(paths = sub("DESCRIPTION$", "CITATION.cff", description_paths),
+                      version = new_version,
+                      date = new_date)
 
 
 # Update YAML files ----

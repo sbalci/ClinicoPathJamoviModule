@@ -204,7 +204,7 @@ alluvialSurvivalResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6
                 width=800,
                 height=600,
                 renderFun=".plotSurvival",
-                visible="(survivalVar && showSurvival)",
+                visible="(length(survivalVar) > 0 && showSurvival)",
                 clearWith=list(
                     "survivalVar",
                     "showSurvival",

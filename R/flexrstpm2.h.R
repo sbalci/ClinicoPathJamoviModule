@@ -442,7 +442,7 @@ flexrstpm2Results <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 options=options,
                 name="timeVaryingTable",
                 title="Time-Varying Effects",
-                visible="(time_varying_covariates && show_coefficients_table)",
+                visible="(length(time_varying_covariates) > 0 && show_coefficients_table)",
                 columns=list(
                     list(
                         `name`="covariate", 
@@ -833,7 +833,7 @@ flexrstpm2Results <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 options=options,
                 name="timeVaryingPlots",
                 title="Time-Varying Effects",
-                visible="(time_varying_covariates && show_time_varying_plots)"))
+                visible="(length(time_varying_covariates) > 0 && show_time_varying_plots)"))
             self$add(jmvcore::Image$new(
                 options=options,
                 name="modelDiagnostics",

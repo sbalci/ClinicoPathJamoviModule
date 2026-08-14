@@ -155,7 +155,7 @@ items:
             title: Interpretation
             type: text
       description: Cross-type spatial relationships and interaction patterns
-      visible: (perform_interaction && cell_types)
+      visible: (perform_interaction && length(cell_types) > 0)
       clearWith:
           - coords_x
           - coords_y

@@ -373,7 +373,7 @@ mageeequationResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                 options=options,
                 name="concordanceTable",
                 title="Concordance with Actual Oncotype DX RS",
-                visible="(showConcordance && actualRS)",
+                visible="(showConcordance && length(actualRS) > 0)",
                 rows=0,
                 columns=list(
                     list(
@@ -490,7 +490,7 @@ mageeequationResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                 width=600,
                 height=500,
                 requiresData=TRUE,
-                visible="(showConcordance && actualRS)",
+                visible="(showConcordance && length(actualRS) > 0)",
                 clearWith=list(
                     "nuclearGrade",
                     "mitosis",

@@ -103,7 +103,7 @@ items:
     - name: annotations
       title: Annotation Summary
       type: Group
-      visible: (annotationCols || annotationRows)
+      visible: (length(annotationCols) > 0 || length(annotationRows) > 0)
       items:
         - name: columnAnnotations
           title: Column Annotations

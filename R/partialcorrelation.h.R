@@ -256,7 +256,7 @@ partialcorrelationResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::
                 options=options,
                 name="partialCorr",
                 title="Partial Correlations",
-                visible="(vars && controls && (correlationType:partial || correlationType:both))",
+                visible="(length(vars) > 0 && length(controls) > 0 && (correlationType:partial || correlationType:both))",
                 columns=list(
                     list(
                         `name`="var1", 
@@ -313,7 +313,7 @@ partialcorrelationResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::
                 options=options,
                 name="zeroOrder",
                 title="Zero-Order Correlations",
-                visible="(vars && showZeroOrder)",
+                visible="(length(vars) > 0 && showZeroOrder)",
                 columns=list(
                     list(
                         `name`="var1", 
@@ -341,7 +341,7 @@ partialcorrelationResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::
                 options=options,
                 name="semipartialCorr",
                 title="Semi-partial Correlations",
-                visible="(vars && controls && (correlationType:semipartial || correlationType:both))",
+                visible="(length(vars) > 0 && length(controls) > 0 && (correlationType:semipartial || correlationType:both))",
                 columns=list(
                     list(
                         `name`="var1", 

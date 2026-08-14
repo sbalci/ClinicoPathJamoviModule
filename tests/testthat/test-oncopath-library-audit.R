@@ -36,11 +36,15 @@ test_that("OncoPath analyses and manifest use library-ready versions", {
     )
   )
 
+  # The invariant is that every manifest agrees with DESCRIPTION -- not that the
+  # version is any particular literal. Pinning "1.0.0" here broke on every release.
+  pkg_version <- unname(read.dcf(oncopath_file("DESCRIPTION"), fields = "Version")[[1]])
   for (analysis_file in analysis_files) {
     schema <- paste(readLines(analysis_file, warn = FALSE), collapse = "\n")
-    expect_match(schema, "version: ['\"]1\\.0\\.0['\"]")
+    expect_match(schema, paste0("version: '", pkg_version, "'"), fixed = TRUE)
   }
-  expect_match(read_oncopath("jamovi", "0000.yaml"), "version: 1\\.0\\.0")
+  expect_match(read_oncopath("jamovi", "0000.yaml"),
+               paste0("version: ", pkg_version), fixed = TRUE)
 })
 
 test_that("disabled clinical presets and orphan stage migration files stay removed", {
@@ -128,8 +132,10 @@ test_that("diagnostic source remains ASCII-clean and renders real symbols", {
 
   expect_false(any(as.integer(bytes) > 127L))
   source <- rawToChar(bytes)
-  expect_false(grepl("&[A-Za-z]+;", source))
-  expect_false(grepl("&#[0-9]+;", source))
+  # &lt; &gt; &amp; are REQUIRED to keep the HTML well-formed; what must not appear is
+  # an entity standing in for a symbol, which is what [[GE]]/[[TIMES]] exist for.
+  expect_false(grepl("&(?!lt;|gt;|amp;)[A-Za-z]+;", source, perl = TRUE))
+  expect_false(grepl("&#[0-9A-Fa-fxX]+;", source))
   expect_match(source, '"[[GE]]" = intToUtf8(0x2265)', fixed = TRUE)
   expect_match(source, '"[[TIMES]]" = intToUtf8(0x00D7)', fixed = TRUE)
   expect_match(source, "private$.renderSymbols(html)", fixed = TRUE)
@@ -157,9 +163,10 @@ test_that("standalone OncoPath metadata is internally consistent", {
   description <- read.dcf(oncopath_file("DESCRIPTION"))
   citation <- read_oncopath("CITATION.cff")
 
-  expect_identical(unname(description[1, "Version"]), "1.0.0")
+  pkg_version <- unname(description[1, "Version"])
+  expect_match(pkg_version, "^[0-9]+[.][0-9]+[.][0-9]+$")
   expect_match(citation, 'title: "OncoPath:', fixed = TRUE)
-  expect_match(citation, 'version: "1.0.0"', fixed = TRUE)
+  expect_match(citation, paste0('version: "', pkg_version, '"'), fixed = TRUE)
   expect_match(citation, "https://github.com/sbalci/OncoPath/", fixed = TRUE)
 
   removed_imports <- c("boot", "cmprsk", "haven", "Hmisc", "maxstat", "survminer", "survRM2")
