@@ -134,7 +134,7 @@ summarydataBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             super$initialize(
                 package = "ClinicoPath",
                 name = "summarydata",
-                version = c(1,0,53),
+                version = c(1,0,6),
                 options = options,
                 results = summarydataResults$new(options=options),
                 data = data,

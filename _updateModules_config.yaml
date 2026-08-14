@@ -44,7 +44,7 @@
 new_version: "1.0.6"
 new_date: "2026-08-15"
 quick: false
-TEST: true
+TEST: false
 jjstatsplot: true
 jsurvival: true
 ClinicoPathDescriptives: true

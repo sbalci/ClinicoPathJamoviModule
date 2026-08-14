@@ -201,7 +201,7 @@ dataqualityBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             super$initialize(
                 package = "ClinicoPath",
                 name = "dataquality",
-                version = c(1,0,53),
+                version = c(1,0,6),
                 options = options,
                 results = dataqualityResults$new(options=options),
                 data = data,
