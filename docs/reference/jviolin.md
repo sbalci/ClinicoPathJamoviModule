@@ -168,7 +168,8 @@ jviolin(
 
 A results object containing:
 
-|                |     |     |     |     |          |
-|----------------|-----|-----|-----|-----|----------|
-| `results$todo` |     |     |     |     | a html   |
-| `results$plot` |     |     |     |     | an image |
+|                        |     |     |     |     |          |
+|------------------------|-----|-----|-----|-----|----------|
+| `results$todo`         |     |     |     |     | a html   |
+| `results$plot`         |     |     |     |     | an image |
+| `results$explanations` |     |     |     |     | a html   |

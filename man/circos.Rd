@@ -74,12 +74,3 @@ their relationship. Input may be an edge list (from / to / value) or the
 two categorical variables whose cross-tabulation defines the links. Built
 on the circlize package.
 }
-\examples{
-\donttest{
-circos(
-    data = mydata,
-    fromVar = "referring_site",
-    toVar = "treating_site",
-    valueVar = "n_patients")
-}
-}

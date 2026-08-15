@@ -4,6 +4,11 @@ Creates professional cross tables using pivottabler library for flexible
 clinical data analysis. Provides advanced formatting and statistics
 while maintaining compatibility with existing crosstable functionality.
 
+## Value
+
+An `R6` class generator object for the `crosstablepivotClass` backend;
+used internally by the jamovi analysis wrapper and not called directly.
+
 ## Super classes
 
 [`jmvcore::Analysis`](https://rdrr.io/pkg/jmvcore/man/Analysis.html) -\>

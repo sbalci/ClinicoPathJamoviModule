@@ -1,14 +1,15 @@
 # Odds Ratio Table and Plot
 
-Function for Odds Ratio Table and Plot.
+Logistic regression odds-ratio table, forest plot, prediction nomogram,
+and optional binary diagnostic metrics.
 
 ## Usage
 
 ``` r
 oddsratio(
   data,
-  explanatory,
-  outcome,
+  explanatory = NULL,
+  outcome = NULL,
   outcomeLevel,
   diagnosticPredictor = NULL,
   predictorLevel,
@@ -34,9 +35,10 @@ oddsratio(
 
 - outcomeLevel:
 
-  Specify which outcome level represents the positive case for
-  likelihood ratio calculations. If not specified, the function will use
-  the second level alphabetically.
+  Specify which outcome level is modeled as the event in logistic
+  regression and used as positive for diagnostic metrics. A positive
+  outcome level is required; the analysis stops with an error if it is
+  not specified.
 
 - diagnosticPredictor:
 
@@ -56,14 +58,17 @@ oddsratio(
 
 - showNomogram:
 
-  Display an interactive nomogram for converting pre-test to post-test
-  probabilities using likelihood ratios calculated from the data.
+  Display a prediction nomogram from the maximum-likelihood logistic
+  model and, when a binary diagnostic predictor is available, separate
+  unadjusted sensitivity, specificity, and likelihood-ratio estimates.
+  The prediction nomogram is not generated when Firth penalized
+  regression is selected.
 
 - showExplanations:
 
-  Display educational explanations for each analysis type to help
-  interpret odds ratios, risk ratios, diagnostic test performance, ROC
-  analysis, and likelihood ratios.
+  Display educational explanations for odds ratios, their distinction
+  from risk ratios, binary diagnostic-test performance, likelihood
+  ratios, and prediction nomograms.
 
 ## Value
 

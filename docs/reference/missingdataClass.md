@@ -7,6 +7,11 @@ chained equations (MICE), and evaluating imputation quality. Designed
 specifically for clinical research applications where missing data is
 common and proper handling is critical for valid statistical inference.
 
+## Value
+
+An `R6` class generator object for the `missingdataClass` backend; used
+internally by the jamovi analysis wrapper and not called directly.
+
 ## Details
 
 The missing data analysis function provides three main analysis types:

@@ -78,7 +78,7 @@ referenceintervals(
 
 - minimum_sample_size:
 
-  Minimum required sample size (CLSI recommends=120)
+  Minimum required sample size (CLSI recommends at least 120)
 
 - outlier_detection:
 

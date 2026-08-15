@@ -88,12 +88,3 @@ established prognostic factor across colorectal, gastric, breast, and
 head-and-neck cancers, and is more robust than absolute node counts when
 nodal yield varies between specimens.
 }
-\examples{
-\donttest{
-lymphnoderatio(
-    data = mydata,
-    positiveNodes = "n_positive",
-    examinedNodes = "n_examined",
-    survivalTime = "months", survivalStatus = "dead")
-}
-}

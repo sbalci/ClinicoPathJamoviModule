@@ -6,6 +6,11 @@ forest plots, and optional nomogram generation for clinical prediction.
 It supports both categorical and continuous explanatory variables and
 includes diagnostic metrics for binary predictors.
 
+## Value
+
+An `R6` class generator object for the `oddsratioClass` backend; used
+internally by the jamovi analysis wrapper and not called directly.
+
 ## Details
 
 The function performs the following analyses:
@@ -24,7 +29,8 @@ The function performs the following analyses:
 
 The function automatically cleans variable names using
 janitor::clean_names() and preserves original variable labels for
-display. It handles missing data through complete case analysis.
+display. The regression uses complete cases for the selected outcome and
+explanatory variables only.
 
 ## International Usage
 
@@ -37,7 +43,7 @@ diagnostic metrics.
 
 When showNomogram is enabled, the function generates:
 
-- Interactive nomogram for risk prediction
+- Prediction nomogram based on the fitted logistic model
 
 - Diagnostic metrics (sensitivity, specificity, likelihood ratios)
 

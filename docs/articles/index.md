@@ -78,6 +78,8 @@ Comprehensive guides for survival analysis functions
   Evaluation](https://www.serdarbalci.com/ClinicoPathJamoviModule/articles/jsurvival-timeroc-comprehensive.md):
 - [Interaction terms in Multivariable Survival
   Analysis](https://www.serdarbalci.com/ClinicoPathJamoviModule/articles/jsurvival-03-multisurvival-interactions.md):
+- [Interpreting the interaction output in Multivariable Survival
+  Analysis](https://www.serdarbalci.com/ClinicoPathJamoviModule/articles/jsurvival-04-multisurvival-interaction-interpretation.md):
 
 ### meddecide Module
 

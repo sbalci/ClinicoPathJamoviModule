@@ -15,8 +15,8 @@ subgroupforest(
   outcome,
   treatment,
   subgroups,
-  time,
-  event,
+  time = NULL,
+  event = NULL,
   outcomeType = "survival",
   effectMeasure = "hr",
   confidenceLevel = "0.95",
@@ -117,13 +117,14 @@ subgroupforest(
 
 A results object containing:
 
-|                        |     |     |     |     |          |
-|------------------------|-----|-----|-----|-----|----------|
-| `results$todo`         |     |     |     |     | a html   |
-| `results$plot`         |     |     |     |     | an image |
-| `results$summary`      |     |     |     |     | a table  |
-| `results$interactions` |     |     |     |     | a table  |
-| `results$overall`      |     |     |     |     | a table  |
+|                         |     |     |     |     |          |
+|-------------------------|-----|-----|-----|-----|----------|
+| `results$todo`          |     |     |     |     | a html   |
+| `results$plot`          |     |     |     |     | an image |
+| `results$summary`       |     |     |     |     | a table  |
+| `results$interactions`  |     |     |     |     | a table  |
+| `results$overall`       |     |     |     |     | a table  |
+| `results$heterogeneity` |     |     |     |     | a html   |
 
 Tables can be converted to data frames with `asDF` or
 [`as.data.frame`](https://rdrr.io/r/base/as.data.frame.html). For

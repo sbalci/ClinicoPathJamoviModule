@@ -5,6 +5,11 @@ analysis, pairwise comparisons, and multiple testing corrections.
 Integrates methods from jamovi forum recommendations and best practices
 from statistical literature.
 
+## Value
+
+An `R6` class generator object for the `chisqposttestClass` backend;
+used internally by the jamovi analysis wrapper and not called directly.
+
 ## Details
 
 This enhanced implementation provides three complementary approaches:

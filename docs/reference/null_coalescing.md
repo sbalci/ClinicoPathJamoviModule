@@ -17,3 +17,7 @@ x %||% y
 - y:
 
   Right-hand side default value
+
+## Value
+
+`x` if it is not `NULL`, otherwise `y`.

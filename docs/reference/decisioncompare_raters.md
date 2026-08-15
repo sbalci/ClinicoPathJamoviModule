@@ -53,16 +53,14 @@ Demonstrates performance comparison across different experience levels.
 ``` r
 data(decisioncompare_raters)
 decisioncompare(data = decisioncompare_raters, gold = "ConsensusPanel",
-                goldPositive = "Disease", test1 = "Rater1",
-                test1Positive = "Disease", test2 = "Rater2",
-                test2Positive = "Disease", test3 = "Rater3",
-                test3Positive = "Disease", statComp = TRUE)
+                goldPositive = "Disease", goldNegative = NULL, test1 = "Rater1",
+                test1Positive = "Disease", test1Negative = NULL, test2 = "Rater2",
+                test2Positive = "Disease", test2Negative = NULL, test3 = "Rater3",
+                test3Positive = "Disease", test3Negative = NULL, statComp = TRUE)
 #> Performing 3 pairwise comparisons with Holm-Bonferroni correction...
 #> Statistical comparisons completed (3 comparisons, Holm-Bonferroni corrected).
 #> 
 #>  COMPARE MEDICAL DECISION TESTS
-#> 
-#> character(0)
 #> 
 #>  Test 1 - Recoded Data                                            
 #>  ──────────────────────────────────────────────────────────────── 
@@ -107,13 +105,6 @@ decisioncompare(data = decisioncompare_raters, gold = "ConsensusPanel",
 #>  ────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────── 
 #> 
 #> 
-#>  Stratified Diagnostic Accuracy                                                                              
-#>  ─────────────────────────────────────────────────────────────────────────────────────────────────────────── 
-#>    Subgroup    N    Test    Sensitivity    Specificity    Accuracy     PPV          NPV          OPA         
-#>  ─────────────────────────────────────────────────────────────────────────────────────────────────────────── 
-#>  ─────────────────────────────────────────────────────────────────────────────────────────────────────────── 
-#> 
-#> 
 #>  Statistical Comparison of Test Accuracy                                                                                     
 #>  ─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────── 
 #>    Comparison           Chi-squared    df    p-value      Clinical Interpretation                                            
@@ -145,6 +136,11 @@ decisioncompare(data = decisioncompare_raters, gold = "ConsensusPanel",
 #>    Rater2 vs Rater3    Specificity      0.90090 ⁱ     -7.18897      8.99077   
 #>    Rater2 vs Rater3    Accuracy         0.66667 ʲ     -7.28061      8.61395   
 #>  ──────────────────────────────────────────────────────────────────────────── 
+#>    Note. Differences are paired (within-subject). Confidence intervals
+#>    are 95% normal-approximation (Wald) intervals for the difference
+#>    between two correlated proportions, computed from the discordant pair
+#>    counts. They are not affected by the "CI Method for Agreement" option,
+#>    which applies to the overall percent agreement table.
 #>    ᵃ Small paired sample/discordant counts; CI may be unstable (n=39,
 #>    discordant counts: 26, 9, 3, 1).
 #>    ᵇ Small paired sample/discordant counts; CI may be unstable (n=111,
@@ -169,15 +165,18 @@ decisioncompare(data = decisioncompare_raters, gold = "ConsensusPanel",
 #>  0 auto; padding: 20px;"><h2 style="color: #2c3e50; border-bottom: 2px
 #>  solid #3498db;"> Clinical Summary
 #> 
-#>  Among the tests evaluated, Rater1 demonstrated optimal diagnostic
-#>  performance with 89.7% sensitivity (95% CI: [see confidence interval
-#>  table]), 91.9% specificity (95% CI: [see confidence interval table]),
-#>  79.5% positive predictive value, 96.2% negative predictive value, and
-#>  91.3% overall accuracy. Statistical comparisons using McNemar's test
-#>  revealed significant differences in test performance (detailed results
-#>  in comparison tables). The likelihood ratio for positive results was
-#>  11.07 and for negative results was 0.11.<h3 style="color: #27ae60;
-#>  margin-top: 30px;"> Report Sentences
+#>  Among the tests evaluated, Rater1 had the highest observed accuracy,
+#>  with 89.7% sensitivity (95% CI: 75.8-97.1%), 91.9% specificity (95%
+#>  CI: 85.2-96.2%), 79.5% positive predictive value, 96.2% negative
+#>  predictive value, and 91.3% overall accuracy. Statistical comparison
+#>  (McNemar's/Cochran's test) did not reveal a statistically significant
+#>  difference in test performance (detailed results in the comparison
+#>  tables). The likelihood ratio for positive results was 11.07 and for
+#>  negative results was 0.11. Because the differences between tests were
+#>  not statistically significant, this ranking reflects the observed
+#>  sample and should not be reported as evidence that one test
+#>  outperforms the others.<h3 style="color: #27ae60; margin-top: 30px;">
+#>  Report Sentences
 #> 
 #>  <div style="background-color: #f8f9fa; padding: 15px; border-left: 4px
 #>  solid #28a745; margin: 15px 0;"><h4 style="margin-top: 0;">Methods
@@ -197,14 +196,17 @@ decisioncompare(data = decisioncompare_raters, gold = "ConsensusPanel",
 #>  Section:
 #> 
 #>  <p style="font-style: italic; line-height: 1.6;">Among the tests
-#>  evaluated, Rater1 demonstrated optimal diagnostic performance with
-#>  89.7% sensitivity (95% CI: [see confidence interval table]), 91.9%
-#>  specificity (95% CI: [see confidence interval table]), 79.5% positive
-#>  predictive value, 96.2% negative predictive value, and 91.3% overall
-#>  accuracy. Statistical comparisons using McNemar's test revealed
-#>  significant differences in test performance (detailed results in
-#>  comparison tables). The likelihood ratio for positive results was
-#>  11.07 and for negative results was 0.11.
+#>  evaluated, Rater1 had the highest observed accuracy, with 89.7%
+#>  sensitivity (95% CI: 75.8-97.1%), 91.9% specificity (95% CI:
+#>  85.2-96.2%), 79.5% positive predictive value, 96.2% negative
+#>  predictive value, and 91.3% overall accuracy. Statistical comparison
+#>  (McNemar's/Cochran's test) did not reveal a statistically significant
+#>  difference in test performance (detailed results in the comparison
+#>  tables). The likelihood ratio for positive results was 11.07 and for
+#>  negative results was 0.11. Because the differences between tests were
+#>  not statistically significant, this ranking reflects the observed
+#>  sample and should not be reported as evidence that one test
+#>  outperforms the others.
 #> 
 #>  <h3 style="color: #8e44ad; margin-top: 30px;"> Clinical
 #>  Recommendations
@@ -214,6 +216,14 @@ decisioncompare(data = decisioncompare_raters, gold = "ConsensusPanel",
 #> 
 #>  Clinical Consideration: Consider using Rater1 in combination with
 #>  other tests for optimal diagnostic accuracy.
+#> 
+#>  <p style="background-color: #f8d7da; padding: 10px; border-radius:
+#>  4px;">Caution: No statistically significant difference was found
+#>  between the tests compared. Rater1 is named here only because it
+#>  ranked highest in this sample; the data do not establish that it
+#>  outperforms the others. Base any choice between these tests on cost,
+#>  availability, turnaround time, and harms as well as on these
+#>  estimates.
 #> 
 #>  Implementation Note: Results should be interpreted in the context of
 #>  disease prevalence in your clinical population. Consider local
@@ -310,7 +320,14 @@ decisioncompare(data = decisioncompare_raters, gold = "ConsensusPanel",
 #>  and NPV vary with disease prevalenceMcNemar Test: Requires
 #>  paired/matched data for statistical comparisonsMissing Data: Cases
 #>  with incomplete data are excluded from analysisConfidence Intervals:
-#>  Calculated using Wilson method for better accuracy
+#>  The per-test CI tables report Clopper-Pearson exact intervals for the
+#>  proportions (sensitivity, specificity, PPV, NPV, accuracy and
+#>  prevalence), as computed by epiR::epi.tests() with its default
+#>  settings. Likelihood ratios are reported as point estimates only,
+#>  without confidence intervals. The Overall Percent Agreement (OPA)
+#>  table uses the method you select under "CI Method for Agreement"
+#>  (Wilson score by default). Paired differences between tests use
+#>  normal-approximation (Wald) intervals.
 #> 
 #>  <div style='margin: 10px 0;'><div style='background-color: #eff6ff;
 #>  border-left: 4px solid #93c5fd; padding: 12px; margin: 8px 0;

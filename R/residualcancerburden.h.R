@@ -451,15 +451,6 @@ residualcancerburdenBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R
 #' and 3.28). Works on a cohort (one row per patient) or as a single-case 
 #' calculator, and can optionally relate RCB class to a survival outcome.
 #' 
-#'
-#' @examples
-#' \donttest{
-#' residualcancerburden(
-#'     data = mydata,
-#'     d1 = "tumor_dim1", d2 = "tumor_dim2",
-#'     cellularity = "pct_cellularity", cis = "pct_insitu",
-#'     positiveNodes = "n_pos_nodes", metSize = "largest_met_mm")
-#'}
 #' @param data The data as a data frame (one row per patient in cohort mode).
 #' @param inputMode Compute RCB for every row using data variables, or for a
 #'   single entered case.

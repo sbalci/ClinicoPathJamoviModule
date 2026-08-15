@@ -1,11 +1,14 @@
-# Eurostat Map
+# Package-local cache environment
 
-Creates choropleth maps using Eurostat data. Supports both downloading
-data from Eurostat API and using local data. Maps can be static or
-interactive with customizable styling.
+Internal environment used to cache downloaded Eurostat data across runs,
+avoiding assignment to `.GlobalEnv`.
 
 ## Usage
 
 ``` r
 .eurostat_pkg_cache
 ```
+
+## Value
+
+An environment used internally to cache Eurostat data between runs.

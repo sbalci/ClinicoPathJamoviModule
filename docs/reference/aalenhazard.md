@@ -17,7 +17,7 @@ aalenhazard(
   covariates,
   outcomeLevel = "1",
   model_type = "additive",
-  constant_effects,
+  constant_effects = NULL,
   test_constant_effects = TRUE,
   bandwidth = 1,
   robust_se = TRUE,

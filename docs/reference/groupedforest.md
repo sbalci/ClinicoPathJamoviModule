@@ -16,7 +16,7 @@ groupedforest(
   event_var,
   treatment_var,
   grouping_var,
-  covariates,
+  covariates = NULL,
   reference_treatment = "",
   plot_title = "Grouped Hazard Forest Plot",
   show_overall = TRUE,

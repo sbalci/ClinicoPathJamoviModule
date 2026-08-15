@@ -1,12 +1,10 @@
 # Survival Analysis
 
-Performs univariate survival analysis comparing survival between groups.
-This analysis calculates person-time follow-up for each group and uses
-this to derive accurate survival estimates and incidence rates that
-account for varying follow-up durations across groups. The Cox
-proportional hazards model incorporates person-time by modeling the
-hazard function, which represents the instantaneous event rate per unit
-of person-time.
+Performs univariate time-to-event analysis comparing groups using
+Kaplan-Meier estimates, log-rank tests, and Cox proportional hazards
+regression. Optional outputs include restricted mean survival time and
+crude person-time incidence rates. These methods describe associations
+and do not establish causality.
 
 ## Usage
 
@@ -76,12 +74,8 @@ survival(
   parametric_covariates = TRUE,
   spline_knots = 3,
   spline_scale = "hazard",
-  parametric_extrapolation = FALSE,
-  extrapolation_time = 0,
-  parametric_diagnostics = TRUE,
   compare_distributions = FALSE,
   parametric_survival_plots = FALSE,
-  hazard_plots = FALSE,
   calibration_curves = FALSE,
   calibration_timepoint = 0,
   calibration_ngroups = 5,
@@ -89,7 +83,8 @@ survival(
   rcs_variable = NULL,
   rcs_knots = 4,
   bootstrapValidation = FALSE,
-  bootstrapValN = 200
+  bootstrapValN = 200,
+  seed = 42
 )
 ```
 
@@ -288,9 +283,10 @@ survival(
 
 - rmst_tau:
 
-  Time horizon for RMST calculation. If 0 or not specified, uses the
-  75th percentile of follow-up time. Should be specified in the same
-  units as the survival time.
+  Common time horizon for RMST calculation. If 0, uses the smaller of
+  the overall 75th percentile of follow-up and the maximum follow-up
+  supported in every group. A custom value must not exceed that common
+  support and must use the same units as the survival time.
 
 - stratified_cox:
 
@@ -416,23 +412,6 @@ survival(
   function, odds scale models log cumulative odds, normal scale models
   normal scores.
 
-- parametric_extrapolation:
-
-  Perform survival extrapolation beyond observed follow-up time using
-  fitted parametric models. Useful for health economic modeling and
-  long-term prognosis assessment.
-
-- extrapolation_time:
-
-  Maximum time for survival extrapolation (in same units as survival
-  time). If 0, uses 2x maximum observed time. Use with caution as
-  extrapolation relies on distributional assumptions.
-
-- parametric_diagnostics:
-
-  Display model diagnostics including AIC/BIC for model comparison,
-  residual plots, and goodness-of-fit statistics for parametric models.
-
 - compare_distributions:
 
   Fit and compare multiple parametric distributions using AIC/BIC
@@ -442,11 +421,6 @@ survival(
 
   Generate survival curves from fitted parametric models with confidence
   intervals. Compare with Kaplan-Meier estimates for model validation.
-
-- hazard_plots:
-
-  Plot estimated hazard functions from parametric models. Shows how
-  instantaneous risk changes over time for different distributions.
 
 - calibration_curves:
 
@@ -501,12 +475,19 @@ survival(
 
   .
 
+- seed:
+
+  Random seed for the reproducible bootstrap internal validation. Change
+  this value to obtain a different bootstrap draw; the default (42)
+  reproduces the previous fixed behaviour.
+
 ## Value
 
 A results object containing:
 
 |                                             |     |     |     |     |                |
 |---------------------------------------------|-----|-----|-----|-----|----------------|
+| `results$eventRecodeInfo`                   |     |     |     |     | a html         |
 | `results$subtitle`                          |     |     |     |     | a preformatted |
 | `results$todo`                              |     |     |     |     | a html         |
 | `results$errors`                            |     |     |     |     | a html         |
@@ -582,11 +563,7 @@ A results object containing:
 | `results$bootstrapValidationExplanation`    |     |     |     |     | a html         |
 | `results$parametricModelComparison`         |     |     |     |     | a table        |
 | `results$parametricModelSummary`            |     |     |     |     | a table        |
-| `results$parametricDiagnostics`             |     |     |     |     | a html         |
 | `results$parametricSurvivalPlot`            |     |     |     |     | an image       |
-| `results$hazardFunctionPlot`                |     |     |     |     | an image       |
-| `results$extrapolationPlot`                 |     |     |     |     | an image       |
-| `results$extrapolationTable`                |     |     |     |     | a table        |
 | `results$parametricModelsExplanation`       |     |     |     |     | a html         |
 | `results$clinicalGlossaryExplanation`       |     |     |     |     | a html         |
 | `results$clinicalInterpretationExplanation` |     |     |     |     | a html         |

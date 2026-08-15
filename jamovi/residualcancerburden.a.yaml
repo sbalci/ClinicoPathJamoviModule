@@ -17,14 +17,14 @@ description:
         (minimal), RCB-II (moderate), and RCB-III (extensive) residual disease using the
         established cut points (1.36 and 3.28). Works on a cohort (one row per patient) or as
         a single-case calculator, and can optionally relate RCB class to a survival outcome.
-    R:
-        dontrun: true
-        usage: |
-            residualcancerburden(
-                data = mydata,
-                d1 = "tumor_dim1", d2 = "tumor_dim2",
-                cellularity = "pct_cellularity", cis = "pct_insitu",
-                positiveNodes = "n_pos_nodes", metSize = "largest_met_mm")
+#     R:
+#         dontrun: true
+#         usage: |
+#             residualcancerburden(
+#                 data = mydata,
+#                 d1 = "tumor_dim1", d2 = "tumor_dim2",
+#                 cellularity = "pct_cellularity", cis = "pct_insitu",
+#                 positiveNodes = "n_pos_nodes", metSize = "largest_met_mm")
 
 options:
     - name: data

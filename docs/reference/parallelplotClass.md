@@ -5,6 +5,11 @@ Parallel coordinates plots are excellent for exploring relationships
 between multiple continuous variables and identifying patterns,
 clusters, and outliers in high-dimensional data.
 
+## Value
+
+An `R6` class generator object for the `parallelplotClass` backend; used
+internally by the jamovi analysis wrapper and not called directly.
+
 ## Super classes
 
 [`jmvcore::Analysis`](https://rdrr.io/pkg/jmvcore/man/Analysis.html) -\>

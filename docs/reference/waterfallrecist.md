@@ -1,23 +1,38 @@
-# RECIST v1.1 Compliant Response Analysis
+# Treatment Response: Lesion-Level RECIST v1.1 Algorithm
 
-Creates RECIST v1.1 compliant waterfall and spider plots for tumor
-response analysis. Implements full RECIST v1.1 protocol including target
-lesion summation, new lesion detection, non-target progression
-assessment, and response confirmation requirements. REGULATORY-READY:
-Suitable for clinical trial endpoints and regulatory submissions.
+Use this when your data are lesion-level: one row per lesion per visit,
+giving patient, lesion, visit time and diameter. Adding a lesion type
+column (Target / Non-Target / New) and a new-lesion flag enables
+new-lesion and non-target assessment; an organ column enforces the limit
+of two target lesions per organ. It applies the RECIST v1.1 algorithm:
+it sums target lesion diameters, measures progression against the
+smallest sum recorded so far (nadir) including the 5 mm
+absolute-increase rule, treats any new lesion as progression, applies
+confirmation of CR and PR at 4 weeks or more, and reports best overall
+response truncated at progression. This is a new implementation (version
+0.0.1) that has not been checked against a reference RECIST tool or a
+regulatory dataset, so it is a research tool and not a validated or
+submission-ready result. Non-target progression is decided here by
+lesion count rather than the radiologist's judgement of unequivocal
+progression that RECIST intends. Check response assignments against the
+source imaging before they are recorded or reported. For response rates
+with confidence intervals, group comparison and a copy-ready summary,
+the patient-level analysis has the fuller reporting.
 
 ## Usage
 
 ``` r
 waterfallrecist(
   data,
-  patientID,
-  lesionID,
-  visitTime,
+  patientID = NULL,
+  lesionID = NULL,
+  visitTime = NULL,
   lesionType = NULL,
   location = NULL,
-  diameter,
+  diameter = NULL,
   isNewLesion = NULL,
+  nonTargetResponseVar = NULL,
+  targetSelectionVar = NULL,
   baselineTimepoint = 0,
   confirmationInterval = 4,
   maxTargetLesions = 5,
@@ -78,6 +93,33 @@ waterfallrecist(
   after baseline). ANY new lesion automatically triggers Progressive
   Disease (PD) per RECIST v1.1.
 
+- nonTargetResponseVar:
+
+  Optional per-visit non-target lesion assessment recorded by the
+  reporting radiologist. Accepted values are CR, Non-CR/Non-PD, PD and
+  NE (case and punctuation are ignored, so "non-cr/non-pd", "NonCR
+  NonPD" and "Non CR Non PD" all match). When supplied it OVERRIDES the
+  computed non-target status for that patient and visit. RECIST v1.1
+  defines non-target progression as "unequivocal progression" of
+  existing non-target disease, which is a qualitative radiological
+  judgement that cannot be derived from measurements. Without this
+  variable the analysis falls back to a lesion-count heuristic (an
+  increase of two or more non-target lesions is called progression),
+  which is NOT the RECIST criterion and may both miss and over-call
+  progression. Supplying this variable is the RECIST-correct route.
+
+- targetSelectionVar:
+
+  Optional per-lesion flag marking the lesions the reporting radiologist
+  chose as target lesions (Yes/No, 1/0, TRUE/FALSE or "Target"). When
+  supplied it is used verbatim and automatic selection is not applied.
+  By default the analysis follows RECIST v1.1 and selects the LARGEST
+  lesions within the limits (at most 5 in total, at most 2 per organ);
+  the remainder are followed as non-target disease. RECIST also requires
+  a target lesion to be reproducibly measurable, which is a radiological
+  judgement size alone cannot establish, so use this variable whenever
+  the reader's own choice differs from the largest-first default.
+
 - baselineTimepoint:
 
   Value of visitTime representing baseline (default = 0). All lesions at
@@ -134,6 +176,7 @@ A results object containing:
 
 |                                              |     |     |     |     |                |
 |----------------------------------------------|-----|-----|-----|-----|----------------|
+| `results$instructions`                       |     |     |     |     | a html         |
 | `results$notices`                            |     |     |     |     | a preformatted |
 | `results$lesionTable`                        |     |     |     |     | a table        |
 | `results$targetSumTable`                     |     |     |     |     | a table        |

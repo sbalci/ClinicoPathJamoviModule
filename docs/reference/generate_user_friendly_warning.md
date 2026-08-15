@@ -13,3 +13,8 @@ generate_user_friendly_warning(warning_entry)
 - warning_entry:
 
   Detailed warning log entry
+
+## Value
+
+A character string containing a user-friendly, clinically oriented
+warning message.

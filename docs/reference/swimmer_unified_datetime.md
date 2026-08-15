@@ -71,7 +71,8 @@ swimmerplot(
 )
 #> 
 #>  SWIMMER PLOT
-#> 
+#> NOTE: Ongoing-treatment arrows not drawn
+#> Ongoing-status arrows require a censoring/event status variable. Without one, whether a patient was still on treatment at data cutoff cannot be determined from the timeline alone, so no arrows are drawn. Supply a censoring variable (0/FALSE/no/censored/alive for ongoing, 1/TRUE/yes/event/dead for completed) to show them.
 #>  <div style='color: #8a6d00; background-color: #fff8e1; padding: 15px;
 #>  border: 1px solid #ffc107; border-radius: 5px; margin: 10px;'>
 #> 
@@ -80,21 +81,21 @@ swimmerplot(
 #>  Some response categories have <3 patients. Consider grouping
 #>  categories for meaningful analysis.
 #> 
-#>  Timeline Summary Statistics         
-#>  ─────────────────────────────────── 
-#>    Metric                Value       
-#>  ─────────────────────────────────── 
-#>    Number of Patients     15.00000   
-#>    Total Observations     15.00000   
-#>    Median Duration        11.81000   
-#>    Mean Duration          12.60000   
-#>    Total Person-Time     188.93000   
-#>    Mean Follow-up         12.60000   
-#>    CR Rate (%)            33.30000   
-#>    PD Rate (%)            13.30000   
-#>    PR Rate (%)            33.30000   
-#>    SD Rate (%)            20.00000   
-#>  ─────────────────────────────────── 
+#>  Timeline Summary Statistics                 
+#>  ─────────────────────────────────────────── 
+#>    Metric                        Value       
+#>  ─────────────────────────────────────────── 
+#>    Number of Patients             15.00000   
+#>    Total Observations             15.00000   
+#>    Median Duration (observed)     11.81000   
+#>    Mean Duration                  12.60000   
+#>    Total Person-Time             188.93000   
+#>    Mean Follow-up                 12.60000   
+#>    CR Rate (%)                    33.30000   
+#>    PD Rate (%)                    13.30000   
+#>    PR Rate (%)                    33.30000   
+#>    SD Rate (%)                    20.00000   
+#>  ─────────────────────────────────────────── 
 #> 
 #> 
 #>  <div style='background-color: #e8f5e8; padding: 15px; border-radius:
@@ -106,7 +107,7 @@ swimmerplot(
 #>  Analysis:
 #> 
 #>  Study included 15 patients with 15 timeline observations. Median
-#>  follow-up was 11.8 months (range: 6.0 to 21.7 months).
+#>  observed duration was 11.8 months (range: 6.0 to 21.7 months).
 #> 
 #>  <div style='margin: 10px 0;'><h5 style='color: #2e7d32;'>Person-Time
 #>  Analysis:
@@ -117,8 +118,8 @@ swimmerplot(
 #>  <div style='margin: 10px 0;'><h5 style='color: #2e7d32;'>Response
 #>  Pattern Analysis:
 #> 
-#>  Most common response was CR (33.3% of observations). Response
-#>  distribution shows clinical patterns suitable for efficacy analysis.
+#>  Most common response was CR (33.3% of patients). Response distribution
+#>  shows clinical patterns suitable for efficacy analysis.
 #> 
 #>  Person-Time Analysis                                                          
 #>  ───────────────────────────────────────────────────────────────────────────── 
@@ -138,17 +139,17 @@ swimmerplot(
 #>  ──────────────────────────────────────────────────── 
 #> 
 #> 
-#>  Advanced Clinical Metrics                                                                                                                                        
-#>  ──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────── 
-#>    Metric                           Value         95% CI         Unit                 Clinical Interpretation                                                     
-#>  ──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────── 
-#>    Median Follow-up Time             11.810000                   months               Central tendency of patient follow-up duration                              
-#>    Interquartile Range                5.930000                   months               Middle 50% of follow-up duration range                                      
-#>    Total Study Person-Time          188.930000                   months cumulative    Total observation time across all patients                                  
-#>    Follow-up Density                  7.939000                   per 100 months       Number of patients per 100 units of observation time (descriptive metric)   
-#>    Objective Response Rate (ORR)     66.700000    38.4 - 88.2    percent              Proportion with complete or partial response                                
-#>    Disease Control Rate (DCR)        86.700000    59.5 - 98.3    percent              Proportion with response or stable disease                                  
-#>  ──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────── 
+#>  Advanced Clinical Metrics                                                                                                                                                                               
+#>  ─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────── 
+#>    Metric                                                                  Value         95% CI         Unit                 Clinical Interpretation                                                     
+#>  ─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────── 
+#>    Median Follow-up Time (observed durations; no censoring information)     11.810000                   months               Central tendency of patient follow-up duration                              
+#>    Interquartile Range (observed durations)                                  5.930000                   months               Middle 50% of follow-up duration range                                      
+#>    Total Study Person-Time                                                 188.930000                   months cumulative    Total observation time across all patients                                  
+#>    Follow-up Density                                                         7.939000                   per 100 months       Number of patients per 100 units of observation time (descriptive metric)   
+#>    Objective Response Rate (ORR)                                            66.700000    38.4 - 88.2    percent              Proportion with complete or partial response                                
+#>    Disease Control Rate (DCR)                                               86.700000    59.5 - 98.3    percent              Proportion with response or stable disease                                  
+#>  ─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────── 
 #> 
 
 ```

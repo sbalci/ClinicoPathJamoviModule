@@ -7,6 +7,12 @@ statistical significance, hazard ratio, or concordance index. Inspired
 by Orange Data Mining's Rank Survival Features widget, adapted for
 jamovi with comprehensive statistical reporting.
 
+## Value
+
+An `R6` class generator object for the `survivalfeaturerankClass`
+backend; used internally by the jamovi analysis wrapper and not called
+directly.
+
 ## Details
 
 The function performs the following analyses for each feature:

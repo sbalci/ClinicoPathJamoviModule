@@ -2,6 +2,11 @@
 
 Implements comprehensive medical decision analysis including:
 
+## Value
+
+An `R6` class generator object for the `decisionClass` backend; used
+internally by the jamovi analysis wrapper and not called directly.
+
 ## Details
 
 This module provides tools for analyzing diagnostic test performance

@@ -6,6 +6,11 @@ temporal flows, individual entity tracking, aggregate trends, and
 multi-stage pathways. Supports both longitudinal (long format) and
 cross-sectional (wide format) data.
 
+## Value
+
+An `R6` class generator object for the `riverplotClass` backend; used
+internally by the jamovi analysis wrapper and not called directly.
+
 ## Details
 
 This unified implementation supports multiple visualization types:

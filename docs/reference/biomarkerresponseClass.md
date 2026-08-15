@@ -3,6 +3,11 @@
 Analyzes and visualizes relationships between biomarker levels and
 treatment responses
 
+## Value
+
+An `R6` class generator object for the `biomarkerresponseClass` backend;
+used internally by the jamovi analysis wrapper and not called directly.
+
 ## Super classes
 
 [`jmvcore::Analysis`](https://rdrr.io/pkg/jmvcore/man/Analysis.html) -\>

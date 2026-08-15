@@ -16,14 +16,14 @@ description:
         categories with a width proportional to the strength of their relationship. Input
         may be an edge list (from / to / value) or the two categorical variables whose
         cross-tabulation defines the links. Built on the circlize package.
-    R:
-        dontrun: true
-        usage: |
-            circos(
-                data = mydata,
-                fromVar = "referring_site",
-                toVar = "treating_site",
-                valueVar = "n_patients")
+#     R:
+#         dontrun: true
+#         usage: |
+#             circos(
+#                 data = mydata,
+#                 fromVar = "referring_site",
+#                 toVar = "treating_site",
+#                 valueVar = "n_patients")
 
 options:
     - name: data

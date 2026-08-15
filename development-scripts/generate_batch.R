@@ -5,7 +5,7 @@ library(fs)
 library(stringr)
 
 # Source the generator function
-source("tests/generate_tests.R")
+source("development-scripts/generate_tests.R")
 
 # Read the coverage report
 if (file.exists("module_test_coverage_report.csv")) {

@@ -7,11 +7,12 @@ Age Pyramid
 ``` r
 agepyramid(
   data,
-  age,
-  gender,
+  age = NULL,
+  gender = NULL,
   female,
   male,
   age_groups = "custom",
+  age_interval = "left",
   bin_width = 5,
   custom_breaks = "",
   plot_title = "Age Pyramid",
@@ -56,7 +57,27 @@ agepyramid(
 - age_groups:
 
   Predefined age group categories. Choose 'custom' to use bin_width, or
-  select a preset.
+  select a preset. 'who' gives the WHO/UN standard five-year groups
+  (0-4, 5-9, ... 85+) used by the WHO World Standard Population and UN
+  population pyramids; 'who_infant' is the WHO abridged life-table
+  grouping, which reports infants (\<1) separately from children aged
+  1-4. All bands are left-closed, so an age on a boundary starts the
+  band named for it.
+
+- age_interval:
+
+  Which end of an age band is closed. 'left' gives \[lower, upper)
+  bands, the WHO/UN and demographic convention: a person aged exactly 65
+  starts the 65-69 band, and equal-width bands hold equal numbers of
+  single years. 'right' gives (lower, upper\] bands, where age 65 closes
+  the band below it; this reproduces the behaviour of releases before
+  1.0.52 and makes the lowest band one year wider than the others, which
+  inflates the youngest bar of the pyramid.
+
+  \[lower, upper) bands, the WHO/UN and demographic convention: a person
+  aged exactly 65 starts the 65-69 band, and equal-width bands hold
+  equal numbers of single years. 'right' gives (lower, upper\]:
+  R:lower,%20upper)%20bands,%20the%20WHO/UN%20and%20demographic%20convention:%20a%20person%20aged%0Aexactly%2065%20starts%20the%2065-69%20band,%20and%20equal-width%20bands%20hold%20equal%20numbers%0Aof%20single%20years.%20'right'%20gives%20(lower,%20upper
 
 - bin_width:
 

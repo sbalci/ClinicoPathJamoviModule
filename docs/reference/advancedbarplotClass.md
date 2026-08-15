@@ -5,6 +5,11 @@ approaches for creating professional bar charts. Inspired by "A Bar
 Chart 5 Ways" methodology, each approach is optimized for different use
 cases in clinical research.
 
+## Value
+
+An `R6` class generator object for the `advancedbarplotClass` backend;
+used internally by the jamovi analysis wrapper and not called directly.
+
 ## Details
 
 This module provides 5 distinct approaches to bar chart visualization:

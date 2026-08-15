@@ -5,7 +5,7 @@ Benford Analysis
 ## Usage
 
 ``` r
-benford(data, var, digits = 2)
+benford(data, var = NULL, digits = 2)
 ```
 
 ## Arguments
@@ -21,7 +21,9 @@ benford(data, var, digits = 2)
 
 - digits:
 
-  Number of first digits to analyze (default: 2)
+  Number of first digits to analyze (default: 2). Limited to 1-3 digits;
+  the benford.analysis package does not provide a MAD conformity
+  classification beyond 3 digits.
 
 ## Value
 

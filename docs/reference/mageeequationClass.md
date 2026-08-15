@@ -5,6 +5,11 @@ Implements the four Magee Equations from Klein et al. (2013, PMID:
 pathology variables. Supports H-score and percentage input formats with
 automatic conversion.
 
+## Value
+
+An `R6` class generator object for the `mageeequationClass` backend;
+used internally by the jamovi analysis wrapper and not called directly.
+
 ## Super classes
 
 [`jmvcore::Analysis`](https://rdrr.io/pkg/jmvcore/man/Analysis.html) -\>

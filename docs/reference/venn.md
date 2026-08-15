@@ -7,9 +7,9 @@ Venn Diagram
 ``` r
 venn(
   data,
-  var1,
+  var1 = NULL,
   var1true,
-  var2,
+  var2 = NULL,
   var2true,
   var3 = NULL,
   var3true,
@@ -141,11 +141,14 @@ venn(
 
 - sortBy:
 
-  How to sort the intersections in the UpSet plot.
+  How to sort the intersections in the UpSet plot. 'None' (unsorted)
+  applies to the ComplexUpset engine only; the UpSetR engine always
+  orders intersections by frequency.
 
 - minSize:
 
-  Minimum size of intersections to display.
+  Minimum size of intersections to display. Applies to the ComplexUpset
+  engine only; UpSetR does not filter intersections by minimum size.
 
 - showAnnotations:
 

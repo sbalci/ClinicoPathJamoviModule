@@ -23,7 +23,10 @@ kappaSizeFixedN(
 
 - kappa0:
 
-  Expected value of kappa.
+  The preliminary (anticipated) value of kappa - the agreement you
+  expect to observe. kappaSize documents this argument as "the
+  preliminary value of kappa". Contrast kappaSizePower, where kappa0 IS
+  the null being tested.
 
 - props:
 
@@ -47,6 +50,7 @@ A results object containing:
 
 |                        |     |     |     |     |                |
 |------------------------|-----|-----|-----|-----|----------------|
+| `results$notices`      |     |     |     |     | a html         |
 | `results$text1`        |     |     |     |     | a preformatted |
 | `results$text_summary` |     |     |     |     | a preformatted |
 | `results$text2`        |     |     |     |     | a preformatted |

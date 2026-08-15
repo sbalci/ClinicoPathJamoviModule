@@ -17,15 +17,15 @@ description:
         estimators, and a Durbin-Watson test reports residual autocorrelation. This is
         the standard quasi-experimental design for evaluating quality-improvement,
         policy, or laboratory-process interventions where randomization is not possible.
-    R:
-        dontrun: true
-        usage: |
-            interruptedtimeseries(
-                data = mydata,
-                time = "month",
-                outcome = "turnaround_time",
-                interventionTime = 25,
-                hac = TRUE)
+#     R:
+#         dontrun: true
+#         usage: |
+#             interruptedtimeseries(
+#                 data = mydata,
+#                 time = "month",
+#                 outcome = "turnaround_time",
+#                 interventionTime = 25,
+#                 hac = TRUE)
 
 options:
     - name: data

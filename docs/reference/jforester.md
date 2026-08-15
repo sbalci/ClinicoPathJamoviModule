@@ -11,9 +11,9 @@ publications.
 jforester(
   data,
   study_labels,
-  estimates,
-  ci_lower,
-  ci_upper,
+  estimates = NULL,
+  ci_lower = NULL,
+  ci_upper = NULL,
   sample_sizes = NULL,
   events = NULL,
   effect_type = "or",

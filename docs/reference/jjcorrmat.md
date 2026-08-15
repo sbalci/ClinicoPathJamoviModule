@@ -10,7 +10,7 @@ visualizations with significance testing.
 jjcorrmat(
   data,
   dep,
-  grvar,
+  grvar = NULL,
   typestatistics = "parametric",
   matrixtype = "upper",
   matrixmethod = "square",
@@ -52,7 +52,9 @@ jjcorrmat(
 
   Type of correlation analysis to perform. 'parametric' uses Pearson
   correlation, 'nonparametric' uses Spearman's rho, 'robust' uses
-  percentage bend correlation, 'bayes' computes Bayes factors.
+  Winsorized Pearson correlation (the most extreme 20 percent of
+  observations in each tail are pulled in rather than removed), 'bayes'
+  reports the median posterior estimate and BF10.
 
 - matrixtype:
 
@@ -76,7 +78,9 @@ jjcorrmat(
 
 - k:
 
-  Number of decimal places for displaying correlation coefficients.
+  Number of decimal places for the correlation coefficients printed
+  inside the plot. The correlation table is formatted by jamovi and is
+  not affected.
 
 - partial:
 

@@ -7,8 +7,6 @@ vignette: >
   %\VignetteEncoding{UTF-8}
 ---
 
-# Single Variable Quality Check (`checkdata`) - Comprehensive Guide
-
 ## Overview
 
 The **Single Variable Quality Check** module provides comprehensive data quality assessment for individual variables in clinical and pathological research datasets. This tool performs automated quality screening to identify potential data issues before statistical analysis.

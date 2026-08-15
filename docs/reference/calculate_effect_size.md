@@ -17,3 +17,8 @@ calculate_effect_size(ttest_result, clinical_context)
 - clinical_context:
 
   Clinical research context
+
+## Value
+
+A list with the calculated Cohen's d (`cohens_d`), a qualitative
+`magnitude` label, and a `clinical_relevance` assessment string.

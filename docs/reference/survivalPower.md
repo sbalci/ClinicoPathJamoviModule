@@ -44,6 +44,7 @@ survivalPower(
   sensitivity_analysis = FALSE,
   run_simulation_validation = FALSE,
   simulation_runs = 10000,
+  simulation_seed = 42,
   show_summary = FALSE,
   show_explanations = FALSE,
   show_glossary = FALSE,
@@ -105,7 +106,11 @@ survivalPower(
 
 - survival_distribution:
 
-  Assumed survival distribution
+  Assumed survival distribution. Only the exponential distribution is
+  supported in this release; the event-probability and sample-size
+  formulas assume a constant hazard. Selecting any other option stops
+  the analysis with an explanatory message rather than returning a
+  number the formulas cannot justify.
 
 - weibull_shape:
 
@@ -200,6 +205,12 @@ survivalPower(
 - simulation_runs:
 
   Number of simulation runs for complex calculations
+
+- simulation_seed:
+
+  Random seed for the Monte Carlo validation, so the simulated power is
+  reproducible across runs. Change it to inspect Monte Carlo
+  variability.
 
 - show_summary:
 

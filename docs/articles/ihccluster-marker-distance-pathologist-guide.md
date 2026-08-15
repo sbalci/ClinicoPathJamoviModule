@@ -1,12 +1,10 @@
 # IHC Marker Clustering for Pathologists: Distance Metrics Guide
 
-## IHC Marker Clustering for Pathologists: Distance Metrics Guide
-
 **A Practical Guide to Understanding How Markers Cluster Together**
 
 ------------------------------------------------------------------------
 
-### Why Cluster IHC Markers?
+## Why Cluster IHC Markers?
 
 As pathologists, we use IHC panels daily to make differential diagnoses.
 But have you ever wondered:
@@ -25,15 +23,15 @@ based on their expression patterns across your cases.
 
 ------------------------------------------------------------------------
 
-### The Basics: Patient Clustering vs. Marker Clustering
+## The Basics: Patient Clustering vs. Marker Clustering
 
-#### Patient Clustering (What You Already Know)
+### Patient Clustering (What You Already Know)
 
 - **Question:** “Which patients have similar IHC profiles?”
 - **Example:** Clustering breast cancer cases by ER/PR/HER2/Ki67
 - **Output:** Luminal A, Luminal B, HER2+, Triple-negative groups
 
-#### Marker Clustering (What’s New) ⭐
+### Marker Clustering (What’s New) ⭐
 
 - **Question:** “Which IHC markers behave similarly?”
 - **Example:** Do CK7 and TTF1 tend to be positive in the same cases?
@@ -41,9 +39,9 @@ based on their expression patterns across your cases.
 
 ------------------------------------------------------------------------
 
-### The 9 Distance Metrics: A Pathologist’s Guide
+## The 9 Distance Metrics: A Pathologist’s Guide
 
-#### Quick Selection Flowchart
+### Quick Selection Flowchart
 
     START HERE
     ↓
@@ -66,13 +64,13 @@ based on their expression patterns across your cases.
 
 ------------------------------------------------------------------------
 
-### Detailed Clinical Scenarios
+## Detailed Clinical Scenarios
 
-#### Scenario 1: Lung Adenocarcinoma vs. Squamous Cell Carcinoma
+### Scenario 1: Lung Adenocarcinoma vs. Squamous Cell Carcinoma
 
 **Your Panel:** TTF1, Napsin A, p40, CK5/6 (all binary: pos/neg)
 
-##### 👉 Recommended: **Chi-squared Distance**
+#### 👉 Recommended: **Chi-squared Distance**
 
 **Why this works:** - Chi-squared tests if two markers are statistically
 independent - Perfect for binary/categorical IHC data - Provides
@@ -101,12 +99,12 @@ antibody usage without losing diagnostic accuracy
 
 ------------------------------------------------------------------------
 
-#### Scenario 2: Breast Cancer Immunoprofile
+### Scenario 2: Breast Cancer Immunoprofile
 
 **Your Panel:** - Binary: ER (pos/neg), PR (pos/neg), HER2 (pos/neg) -
 Continuous: Ki67 (% positive, 0-100%)
 
-##### 👉 Recommended: **Mixed Distance**
+#### 👉 Recommended: **Mixed Distance**
 
 **Why this works:** - Automatically handles mixed data types - Uses
 chi-squared for ER-PR-HER2 pairs - Uses correlation for Ki67
@@ -146,12 +144,12 @@ independent prognostic information
 
 ------------------------------------------------------------------------
 
-#### Scenario 3: Gastrointestinal Tumor Panel
+### Scenario 3: Gastrointestinal Tumor Panel
 
 **Your Panel:** CK7, CK20, CDX2, SATB2 (all binary) **Question:** Is
 CDX2 necessary if I already have CK20 and SATB2?
 
-##### 👉 Recommended: **Jaccard Distance**
+#### 👉 Recommended: **Jaccard Distance**
 
 **Why this works:** - GI tumors often have many negative markers (sparse
 data) - Jaccard focuses on co-positivity, ignores double-negatives -
@@ -222,12 +220,12 @@ Simple interpretation for binary data
 
 ------------------------------------------------------------------------
 
-#### Scenario 4: Melanoma Marker Panel
+### Scenario 4: Melanoma Marker Panel
 
 **Your Panel:** S100, SOX10, Melan-A, HMB45 (all intensity: 0/1+/2+/3+)
 **Question:** Which markers provide similar information?
 
-##### 👉 Recommended: **Hamming Distance**
+#### 👉 Recommended: **Hamming Distance**
 
 **Why this works:** - Counts how often markers disagree in intensity -
 Intuitive for pathologists (we think in terms of concordance) - Simple
@@ -279,7 +277,7 @@ scoring
 
 ------------------------------------------------------------------------
 
-#### Scenario 5: Lymphoma Immunoprofile
+### Scenario 5: Lymphoma Immunoprofile
 
 **Your Panel:** - Binary: CD20, CD3, CD5, CD10, BCL6 - Continuous: Ki67
 (% positive)
@@ -287,7 +285,7 @@ scoring
 **Specific Question:** Do germinal center markers (CD10, BCL6) always
 co-express?
 
-##### 👉 Recommended: **Chi-squared Distance** + Statistical Testing
+#### 👉 Recommended: **Chi-squared Distance** + Statistical Testing
 
 **Example Results:**
 
@@ -369,7 +367,7 @@ co-express?
 
 ------------------------------------------------------------------------
 
-#### Scenario 6: Neuroendocrine Tumor Grading
+### Scenario 6: Neuroendocrine Tumor Grading
 
 **Your Panel:** - Binary: Chromogranin, Synaptophysin, CD56 -
 Continuous: Ki67 % (for grading G1/G2/G3) - Ordinal: p53 intensity
@@ -377,7 +375,7 @@ Continuous: Ki67 % (for grading G1/G2/G3) - Ordinal: p53 intensity
 
 **Question:** Can I predict Ki67 level from other markers?
 
-##### 👉 Recommended: **Mutual Information Distance**
+#### 👉 Recommended: **Mutual Information Distance**
 
 **Why this works:** - Captures non-linear relationships - Works with
 mixed data types - Detects patterns like “Ki67 high ONLY when p53 is
@@ -449,14 +447,14 @@ strong positive” - Information-theoretic approach (model-free)
 
 ------------------------------------------------------------------------
 
-#### Scenario 7: Prostate Cancer Markers
+### Scenario 7: Prostate Cancer Markers
 
 **Your Panel:** - PSA (H-score: 0-300) - NKX3.1 (H-score: 0-300) - ERG
 (H-score: 0-300) - PTEN (% loss: 0-100%)
 
 **Question:** Do ERG+ cases have different marker patterns?
 
-##### 👉 Recommended: **Euclidean Distance** (continuous data)
+#### 👉 Recommended: **Euclidean Distance** (continuous data)
 
 **Why this works:** - All markers are continuous (H-scores,
 percentages) - Euclidean distance is the standard for continuous data -
@@ -539,12 +537,12 @@ handle different ranges
 
 ------------------------------------------------------------------------
 
-#### Scenario 8: Renal Cell Carcinoma Panel
+### Scenario 8: Renal Cell Carcinoma Panel
 
 **Your Panel:** - PAX8, RCC, CD10, CK7, Vimentin - All binary
 (pos/neg) - **Many negative stains expected** (sparse data)
 
-##### 👉 Recommended: **Jaccard Distance** (focus on co-positivity)
+#### 👉 Recommended: **Jaccard Distance** (focus on co-positivity)
 
 **Why Jaccard over Chi-squared for RCC:**
 
@@ -642,9 +640,9 @@ handle different ranges
 
 ------------------------------------------------------------------------
 
-### Distance Metric Properties: Quick Reference for Pathologists
+## Distance Metric Properties: Quick Reference for Pathologists
 
-#### When You Have SPARSE Binary Data (Many Negatives)
+### When You Have SPARSE Binary Data (Many Negatives)
 
 **Problem:**
 
@@ -665,7 +663,7 @@ handle different ranges
 
 ------------------------------------------------------------------------
 
-#### When You Have OUTLIERS in Continuous Data
+### When You Have OUTLIERS in Continuous Data
 
 **Problem:**
 
@@ -687,7 +685,7 @@ handle different ranges
 
 ------------------------------------------------------------------------
 
-#### When Markers Have DIFFERENT SCALES
+### When Markers Have DIFFERENT SCALES
 
 **Problem:**
 
@@ -706,7 +704,7 @@ handle different ranges
 
 ------------------------------------------------------------------------
 
-#### When Relationship is NON-LINEAR
+### When Relationship is NON-LINEAR
 
 **Problem:**
 
@@ -729,9 +727,9 @@ handle different ranges
 
 ------------------------------------------------------------------------
 
-### Interpreting the Dendrogram: A Step-by-Step Guide
+## Interpreting the Dendrogram: A Step-by-Step Guide
 
-#### Anatomy of a Marker Dendrogram
+### Anatomy of a Marker Dendrogram
 
                                      ┌─ Marker A
                             ┌────────┤
@@ -747,7 +745,7 @@ handle different ranges
              0   0.2  0.4  0.6  0.8  1.0
                   Distance (Y-axis)
 
-#### Reading the Dendrogram (Left to Right)
+### Reading the Dendrogram (Left to Right)
 
 1.  **Marker Names (X-axis bottom)**
     - Individual IHC markers
@@ -761,7 +759,7 @@ handle different ranges
 4.  **Groupings**
     - Markers clustering together share expression patterns
 
-#### Clinical Example: GI Tumor Panel
+### Clinical Example: GI Tumor Panel
 
     Real Dendrogram from Your Data:
 
@@ -830,9 +828,9 @@ handle different ranges
 
 ------------------------------------------------------------------------
 
-#### Red Flags in Your Dendrogram
+### Red Flags in Your Dendrogram
 
-##### ⚠️ Red Flag 1: No Separation Between Groups
+#### ⚠️ Red Flag 1: No Separation Between Groups
 
     Bad Pattern:
     All markers cluster at distance 0.1-0.2
@@ -843,7 +841,7 @@ handle different ranges
     └─ Review marker selection
     └─ Add markers targeting different pathways/lineages
 
-##### ⚠️ Red Flag 2: Unexpected Groupings
+#### ⚠️ Red Flag 2: Unexpected Groupings
 
     Unexpected Pattern:
     TTF1 clusters with p40 (distance 0.15)
@@ -861,7 +859,7 @@ handle different ranges
     Action:
     └─ Review raw data before interpreting
 
-##### ⚠️ Red Flag 3: Single Marker Far from All Others
+#### ⚠️ Red Flag 3: Single Marker Far from All Others
 
     Isolated Pattern:
     Marker X at distance > 0.9 from everything
@@ -877,9 +875,9 @@ handle different ranges
 
 ------------------------------------------------------------------------
 
-### Statistical Tests: Understanding the P-values
+## Statistical Tests: Understanding the P-values
 
-#### Chi-squared Test Output
+### Chi-squared Test Output
 
     ═══════════════════════════════════════════════════════
     MARKER-MARKER ASSOCIATION: ER vs PR
@@ -914,7 +912,7 @@ handle different ranges
     ├─ Prognostic significance (PR loss = worse prognosis)
     └─ Recommendation: Keep both for breast cancer
 
-#### Cramér’s V Effect Size Guidelines
+### Cramér’s V Effect Size Guidelines
 
     For 2x2 Tables (binary markers):
 
@@ -931,7 +929,7 @@ handle different ranges
     ├─ ER vs PR:         V = 0.68 → Strong (related but keep both)
     └─ CK7 vs CK20:      V = 0.15 → Weak (independent, keep both)
 
-#### P-value Interpretation (Conservative for Pathology)
+### P-value Interpretation (Conservative for Pathology)
 
     P-value     Interpretation             Action
     ──────────────────────────────────────────────────────
@@ -963,9 +961,9 @@ handle different ranges
 
 ------------------------------------------------------------------------
 
-### Common Mistakes to Avoid
+## Common Mistakes to Avoid
 
-#### Mistake 1: Dropping Markers Based Only on Clustering
+### Mistake 1: Dropping Markers Based Only on Clustering
 
     ❌ WRONG Approach:
     "CK7 and CK20 cluster together, so I'll drop CK20"
@@ -992,7 +990,7 @@ handle different ranges
     Action:
     └─ Review the PATTERN, not just the distance!
 
-#### Mistake 2: Using Wrong Distance for Data Type
+### Mistake 2: Using Wrong Distance for Data Type
 
     ❌ Euclidean distance for binary markers:
     ├─ Treats 0/1 as continuous numbers
@@ -1006,7 +1004,7 @@ handle different ranges
 
     ✅ Use Euclidean or Manhattan for H-scores
 
-#### Mistake 3: Ignoring Sample Size
+### Mistake 3: Ignoring Sample Size
 
     Small Dataset (n=20 cases):
     ═══════════════════════════════════════════
@@ -1023,7 +1021,7 @@ handle different ranges
     ⚠️ n < 50: Consider increasing sample size
     ✅ n > 100: Clustering results more reliable
 
-#### Mistake 4: Not Considering Clinical Context
+### Mistake 4: Not Considering Clinical Context
 
     Clustering Result:
     "p53 and Ki67 are independent (distance 0.8)"
@@ -1042,9 +1040,9 @@ handle different ranges
 
 ------------------------------------------------------------------------
 
-### Step-by-Step Workflow for Panel Optimization
+## Step-by-Step Workflow for Panel Optimization
 
-#### Phase 1: Data Preparation
+### Phase 1: Data Preparation
 
     ✓ 1. Collect IHC data from your cases
          ├─ Minimum: 50-100 cases (more is better)
@@ -1059,7 +1057,7 @@ handle different ranges
          ├─ Acceptable: < 10% missing per marker
          └─ If > 20% missing: Consider excluding that marker
 
-#### Phase 2: Select Distance Metric
+### Phase 2: Select Distance Metric
 
     ✓ 4. Choose metric based on data type:
 
@@ -1070,7 +1068,7 @@ handle different ranges
          ├─ Mixed types? → Mixed ⭐ or Mutual Information
          └─ Ordinal (0/1+/2+/3+)? → Chi-squared or Hamming
 
-#### Phase 3: Run Analysis
+### Phase 3: Run Analysis
 
     ✓ 5. Perform marker clustering:
          ├─ Enable: "Perform Marker-Level Clustering"
@@ -1084,7 +1082,7 @@ handle different ranges
          ├─ Clustering tree: Merge sequence
          └─ Marker groups: Identified clusters
 
-#### Phase 4: Interpret Results
+### Phase 4: Interpret Results
 
     ✓ 7. Identify redundant markers:
 
@@ -1100,7 +1098,7 @@ handle different ranges
          ├─ P > 0.05: Independent (keep both)
          └─ Mutually exclusive patterns (keep both)
 
-#### Phase 5: Clinical Validation
+### Phase 5: Clinical Validation
 
     ✓ 9. Don't drop markers solely based on statistics!
 
@@ -1116,7 +1114,7 @@ handle different ranges
          ├─ Compare diagnoses: Full panel vs optimized
          └─ If concordance > 95%, consider adopting
 
-#### Phase 6: Implementation
+### Phase 6: Implementation
 
     ✓ 11. Document your findings:
          ├─ Create internal protocol
@@ -1130,9 +1128,9 @@ handle different ranges
 
 ------------------------------------------------------------------------
 
-### Real-World Panel Optimization Examples
+## Real-World Panel Optimization Examples
 
-#### Example 1: Lung Cancer Panel Reduction
+### Example 1: Lung Cancer Panel Reduction
 
 **Original Panel (6 markers):** - TTF1, Napsin A, p40, CK5/6, p63, CK7
 
@@ -1172,7 +1170,7 @@ handle different ranges
     ├─ 500 cases/year
     └─ Annual savings: $90,000
 
-#### Example 2: Breast Cancer Biomarker Rationalization
+### Example 2: Breast Cancer Biomarker Rationalization
 
 **Original Panel (5 markers):** - ER, PR, HER2, Ki67, p53
 
@@ -1209,7 +1207,7 @@ handle different ranges
     └─ No panel reduction, but clustering confirmed
         current guidelines are evidence-based
 
-#### Example 3: GI Panel Simplification
+### Example 3: GI Panel Simplification
 
 **Original Panel (8 markers):** - CK7, CK20, CDX2, SATB2, MUC2, MUC5AC,
 MUC6, CEA
@@ -1259,9 +1257,9 @@ MUC6, CEA
 
 ------------------------------------------------------------------------
 
-### Summary: Your Distance Metric Toolkit
+## Summary: Your Distance Metric Toolkit
 
-#### Quick Decision Matrix
+### Quick Decision Matrix
 
 | Your Data | First Choice | Alternative | When to Switch |
 |----|----|----|----|
@@ -1274,7 +1272,7 @@ MUC6, CEA
 | **Need Statistical Tests** | Chi-squared ⭐ | Cramér’s V | If different table sizes |
 | **Non-linear Relationships** | Mutual Info ⭐ | Mixed | If all same data type |
 
-#### Key Takeaways for Pathologists
+### Key Takeaways for Pathologists
 
 1.  **Clustering reveals co-expression**, not causation
     - ER and PR cluster because hormone-driven tumors express both
@@ -1293,7 +1291,7 @@ MUC6, CEA
 
 ------------------------------------------------------------------------
 
-### Glossary for Pathologists
+## Glossary for Pathologists
 
 **Distance**: How different two markers are (0 = identical, 1 =
 completely different)
@@ -1322,9 +1320,9 @@ levels not equal
 
 ------------------------------------------------------------------------
 
-### Further Reading for Pathologists
+## Further Reading for Pathologists
 
-#### Foundational Papers
+### Foundational Papers
 
 1.  Greenacre M (2017). *Correspondence Analysis in Practice*. 3rd
     ed. Chapman & Hall/CRC.
@@ -1336,14 +1334,14 @@ levels not equal
     *Virchows Arch* 474:687-696.
     - Clustering methodology in diagnostic pathology
 
-#### Statistical References
+### Statistical References
 
 4.  Agresti A (2013). *Categorical Data Analysis*. 3rd ed. Wiley.
     - Chapter 2: Describing contingency tables (Cramér’s V, etc.)
 5.  Deza MM, Deza E (2009). *Encyclopedia of Distances*. Springer.
     - Comprehensive reference for all distance metrics
 
-#### Online Resources
+### Online Resources
 
 6.  CAP Guidelines: [www.cap.org](https://www.cap.org)
     - Updated IHC interpretation guidelines

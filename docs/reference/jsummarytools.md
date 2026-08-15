@@ -11,7 +11,7 @@ research.
 jsummarytools(
   data,
   analysis_type = "dfsummary",
-  vars,
+  vars = NULL,
   group_var = NULL,
   weights_var = NULL,
   cross_var1 = NULL,

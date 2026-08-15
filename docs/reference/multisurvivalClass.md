@@ -6,6 +6,11 @@ multisurvival jamovi module, handling Cox proportional hazards
 regression, risk stratification, machine learning survival methods, and
 advanced survival modeling techniques.
 
+## Value
+
+An `R6` class generator object for the `multisurvivalClass` backend;
+used internally by the jamovi analysis wrapper and not called directly.
+
 ## Details
 
 The multisurvivalClass implements a modular architecture with the

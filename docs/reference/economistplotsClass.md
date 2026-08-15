@@ -6,6 +6,11 @@ diminutive distribution charts that effectively communicate statistical
 distribution characteristics with The Economist's distinctive visual
 style.
 
+## Value
+
+An `R6` class generator object for the `economistplotsClass` backend;
+used internally by the jamovi analysis wrapper and not called directly.
+
 ## Details
 
 This module integrates the ggeconodist R package functionality into

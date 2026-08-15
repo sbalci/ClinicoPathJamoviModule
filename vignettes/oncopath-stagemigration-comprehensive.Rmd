@@ -327,13 +327,13 @@ stagemigration(
   eventLevel = "1",
   analysisType = "comprehensive",
   performBootstrap = TRUE,
-  bootstrapReps = 200,
+  bootstrapReps = 100,
   useOptimismCorrection = TRUE,
   showStatisticalComparison = TRUE
 )
 ```
 
-With 200 bootstrap repetitions (use 1000 for publications), the output includes:
+With 100 bootstrap repetitions (use 1000 for publications), the output includes:
 
 - Apparent C-index difference (what you see in the data)
 - Optimism estimate (how much the apparent estimate is inflated)
@@ -737,7 +737,7 @@ stagemigration(
   calculateNRI = TRUE,
   calculateIDI = TRUE,
   performBootstrap = TRUE,
-  bootstrapReps = 200,
+  bootstrapReps = 100,
   generateExecutiveSummary = TRUE,
   generateCopyReadyReport = TRUE,
   showClinicalInterpretation = TRUE,

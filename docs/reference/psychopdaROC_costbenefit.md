@@ -65,7 +65,7 @@ psychopdaROC(data = psychopdaROC_costbenefit, dependentVars = "risk_score",
 #>  The ROC analysis has been completed using the following
 #>  specifications:
 #> 
-#>  &nbsp;
+#>   
 #> 
 #>  Measure Variable(s): risk_score
 #> 
@@ -73,7 +73,7 @@ psychopdaROC(data = psychopdaROC_costbenefit, dependentVars = "risk_score",
 #> 
 #>  Positive Class: Event
 #> 
-#>  &nbsp;
+#>   
 #> 
 #>  Method: oc_cost_ratio
 #> 
@@ -85,9 +85,9 @@ psychopdaROC(data = psychopdaROC_costbenefit, dependentVars = "risk_score",
 #> 
 #>  Tie Breakers: mean
 #> 
-#>  Metric Tolerance: 0.05
+#>  Metric Tolerance: 1e-06
 #> 
-#>  &nbsp;
+#>   
 #> 
 #>  <hr />
 #> 
@@ -104,6 +104,12 @@ psychopdaROC(data = psychopdaROC_costbenefit, dependentVars = "risk_score",
 #>  ───────────────────────────────────────────────────────────────────────── 
 #>    risk_score    0.7781477       0.6980973       0.8594088    < .0000001   
 #>  ───────────────────────────────────────────────────────────────────────── 
+#>    Note. Reading of the test values: <b>HIGHER values were taken to
+#>    indicate Event</b> (Classification Direction = ">="). If that is
+#>    the wrong way round for this marker, every sensitivity,
+#>    specificity, cutpoint and AUC below is reversed — switch
+#>    Classification Direction to "<=" and the AUC becomes 1 minus the
+#>    value shown.
 #>    Note. AUC 95% confidence intervals computed using the DeLong
 #>    method.
 #> 
@@ -132,6 +138,12 @@ psychopdaROC(data = psychopdaROC_costbenefit, dependentVars = "risk_score",
 #>  ───────────────────────────────────────────────────────────────────────── 
 #>    risk_score    0.7781477       0.6980973       0.8594088    < .0000001   
 #>  ───────────────────────────────────────────────────────────────────────── 
+#>    Note. Reading of the test values: <b>HIGHER values were taken to
+#>    indicate Event</b> (Classification Direction = ">="). If that is
+#>    the wrong way round for this marker, every sensitivity,
+#>    specificity, cutpoint and AUC below is reversed — switch
+#>    Classification Direction to "<=" and the AUC becomes 1 minus the
+#>    value shown.
 #>    Note. AUC 95% confidence intervals computed using the DeLong
 #>    method.
 #> 

@@ -55,14 +55,12 @@ test evaluation.
 ``` r
 data(decisioncompare_threetest)
 decisioncompare(data = decisioncompare_threetest, gold = "GoldStandard",
-                goldPositive = "Positive", test1 = "Test1",
-                test1Positive = "Positive", test2 = "Test2",
-                test2Positive = "Positive", test3 = "Test3",
-                test3Positive = "Positive", radarplot = TRUE)
+                goldPositive = "Positive", goldNegative = NULL, test1 = "Test1",
+                test1Positive = "Positive", test1Negative = NULL, test2 = "Test2",
+                test2Positive = "Positive", test2Negative = NULL, test3 = "Test3",
+                test3Positive = "Positive", test3Negative = NULL, radarplot = TRUE)
 #> 
 #>  COMPARE MEDICAL DECISION TESTS
-#> 
-#> character(0)
 #> 
 #>  Test 1 - Recoded Data                                            
 #>  ──────────────────────────────────────────────────────────────── 
@@ -107,24 +105,17 @@ decisioncompare(data = decisioncompare_threetest, gold = "GoldStandard",
 #>  ───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────── 
 #> 
 #> 
-#>  Stratified Diagnostic Accuracy                                                                              
-#>  ─────────────────────────────────────────────────────────────────────────────────────────────────────────── 
-#>    Subgroup    N    Test    Sensitivity    Specificity    Accuracy     PPV          NPV          OPA         
-#>  ─────────────────────────────────────────────────────────────────────────────────────────────────────────── 
-#>  ─────────────────────────────────────────────────────────────────────────────────────────────────────────── 
-#> 
-#> 
 #>  <div style="font-family: Arial, sans-serif; max-width: 800px; margin:
 #>  0 auto; padding: 20px;"><h2 style="color: #2c3e50; border-bottom: 2px
 #>  solid #3498db;"> Clinical Summary
 #> 
 #>  Among the tests evaluated, Test3 demonstrated optimal diagnostic
-#>  performance with 81% sensitivity (95% CI: [see confidence interval
-#>  table]), 95.7% specificity (95% CI: [see confidence interval table]),
-#>  91.1% positive predictive value, 90.3% negative predictive value, and
-#>  90.6% overall accuracy. The likelihood ratio for positive results was
-#>  18.94 and for negative results was 0.20.<h3 style="color: #27ae60;
-#>  margin-top: 30px;"> Report Sentences
+#>  performance, with 81% sensitivity (95% CI: 69.1-89.8%), 95.7%
+#>  specificity (95% CI: 90.3-98.6%), 91.1% positive predictive value,
+#>  90.3% negative predictive value, and 90.6% overall accuracy. The
+#>  likelihood ratio for positive results was 18.94 and for negative
+#>  results was 0.20.<h3 style="color: #27ae60; margin-top: 30px;"> Report
+#>  Sentences
 #> 
 #>  <div style="background-color: #f8f9fa; padding: 15px; border-left: 4px
 #>  solid #28a745; margin: 15px 0;"><h4 style="margin-top: 0;">Methods
@@ -142,12 +133,11 @@ decisioncompare(data = decisioncompare_threetest, gold = "GoldStandard",
 #>  Section:
 #> 
 #>  <p style="font-style: italic; line-height: 1.6;">Among the tests
-#>  evaluated, Test3 demonstrated optimal diagnostic performance with 81%
-#>  sensitivity (95% CI: [see confidence interval table]), 95.7%
-#>  specificity (95% CI: [see confidence interval table]), 91.1% positive
-#>  predictive value, 90.3% negative predictive value, and 90.6% overall
-#>  accuracy. The likelihood ratio for positive results was 18.94 and for
-#>  negative results was 0.20.
+#>  evaluated, Test3 demonstrated optimal diagnostic performance, with 81%
+#>  sensitivity (95% CI: 69.1-89.8%), 95.7% specificity (95% CI:
+#>  90.3-98.6%), 91.1% positive predictive value, 90.3% negative
+#>  predictive value, and 90.6% overall accuracy. The likelihood ratio for
+#>  positive results was 18.94 and for negative results was 0.20.
 #> 
 #>  <h3 style="color: #8e44ad; margin-top: 30px;"> Clinical
 #>  Recommendations
@@ -253,7 +243,14 @@ decisioncompare(data = decisioncompare_threetest, gold = "GoldStandard",
 #>  and NPV vary with disease prevalenceMcNemar Test: Requires
 #>  paired/matched data for statistical comparisonsMissing Data: Cases
 #>  with incomplete data are excluded from analysisConfidence Intervals:
-#>  Calculated using Wilson method for better accuracy
+#>  The per-test CI tables report Clopper-Pearson exact intervals for the
+#>  proportions (sensitivity, specificity, PPV, NPV, accuracy and
+#>  prevalence), as computed by epiR::epi.tests() with its default
+#>  settings. Likelihood ratios are reported as point estimates only,
+#>  without confidence intervals. The Overall Percent Agreement (OPA)
+#>  table uses the method you select under "CI Method for Agreement"
+#>  (Wilson score by default). Paired differences between tests use
+#>  normal-approximation (Wald) intervals.
 #> 
 #>  <div style='margin: 10px 0;'><div style='background-color: #eff6ff;
 #>  border-left: 4px solid #93c5fd; padding: 12px; margin: 8px 0;

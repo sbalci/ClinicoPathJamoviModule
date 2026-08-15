@@ -317,17 +317,6 @@ standardizedratioBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
 #' cohort, and occupational studies comparing an observed event count with 
 #' population expectation.
 #' 
-#'
-#' @examples
-#' \donttest{
-#' # Long data: one row per stratum with observed events, person-time,
-#' # and a reference rate (events per person-time unit).
-#' standardizedratio(
-#'     data = mydata,
-#'     observed = "obs_events",
-#'     personTime = "person_years",
-#'     refRate = "reference_rate")
-#'}
 #' @param data The data as a data frame (one row per stratum).
 #' @param inputMode Whether expected events are computed from a reference rate
 #'   times person-time, or supplied directly as a column of expected counts.

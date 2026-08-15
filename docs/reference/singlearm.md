@@ -1,24 +1,22 @@
 # Single Arm Survival
 
-Performs survival analysis for a single cohort of patients without group
-comparisons. The analysis calculates total person-time follow-up (the
-sum of all individual observation periods) and uses this to derive
-accurate survival estimates that account for varying follow-up
-durations. Use this when you want to analyze overall survival
-characteristics of your entire study population - for example, to
-determine median survival time or 1/3/5-year survival rates for all
-patients collectively.
+Performs survival analysis for a single cohort without group
+comparisons. Kaplan-Meier estimates use event times and risk sets; in
+competing-risk mode, cumulative incidence retains competing terminal
+events as separate states. Optional person-time rates use the sum of
+individual observation periods as their denominator. This is descriptive
+analysis of one cohort, not a treatment-effect estimate.
 
 ## Usage
 
 ``` r
 singlearm(
   data,
-  elapsedtime,
+  elapsedtime = NULL,
   tint = FALSE,
-  dxdate,
-  fudate,
-  outcome,
+  dxdate = NULL,
+  fudate = NULL,
+  outcome = NULL,
   outcomeLevel,
   dod,
   dooc,
@@ -62,11 +60,10 @@ singlearm(
 
 - elapsedtime:
 
-  The time-to-event or follow-up duration for each patient. The sum of
-  these values represents the total person-time follow-up in the study,
-  which serves as the denominator for calculating event rates and is
-  fundamental for Kaplan-Meier estimates. Should be numeric and
-  continuous, measured in consistent units (e.g., months or years).
+  The time-to-event or follow-up duration for each patient. The sum is
+  the denominator when person-time rates are requested; Kaplan-Meier
+  estimates instead use ordered event times and risk sets. Values must
+  be finite and zero or positive, in one consistent unit.
 
 - tint:
 
@@ -78,17 +75,23 @@ singlearm(
 - dxdate:
 
   The date of diagnosis or study entry. Accepts: (1) Date/datetime text
-  (e.g., "2024-01-15"), (2) Numeric Unix epoch seconds (from DateTime
-  Converter's corrected_datetime_numeric output), (3) Numeric datetime
-  values from R. Time intervals calculated as difference from follow-up
-  date.
+  (e.g., "2024-01-15"), (2) Numeric values. Each bare numeric date
+  column is classified by its overall magnitude: values below 100000
+  indicate DAYS since 1970-01-01 (the R Date encoding), whereas values
+  at or above 100000 indicate Unix epoch SECONDS (the DateTime
+  Converter's corrected_datetime_numeric output). Columns with
+  inconsistent scales or values on both sides of this boundary are
+  rejected. Time intervals are calculated as the difference from the
+  follow-up date.
 
 - fudate:
 
   The date of last follow-up or event. Accepts: (1) Date/datetime text
-  (e.g., "2024-01-15"), (2) Numeric Unix epoch seconds (from DateTime
-  Converter's corrected_datetime_numeric output), (3) Numeric datetime
-  values from R. Must be in same format as diagnosis date.
+  (e.g., "2024-01-15"), (2) Numeric values, classified by column
+  magnitude exactly as for the diagnosis date (below 100000 = days since
+  1970-01-01; at or above 100000 = Unix epoch seconds). Mixed values
+  within a column and inconsistent numeric encodings between columns are
+  rejected. Must be in the same format as the diagnosis date.
 
 - outcome:
 
@@ -128,18 +131,29 @@ singlearm(
 
 - analysistype:
 
-  Select the type of survival analysis to perform. "Overall" analyzes
-  the survival of all patients regardless of event type. "Cause
-  Specific" analyzes the survival for a specific event type (e.g., death
-  due to disease). "Competing Risk" analyzes the survival for multiple
-  event types simultaneously.
+  Defines how the four mapped categories are coded. Overall counts both
+  death categories as events. Cause Specific counts Dead of Disease as
+  the event and treats other categories as censored; its Kaplan-Meier
+  probability is net/cause-specific survival and can overstate
+  real-world absolute risk when other-cause death competes. Disease-Free
+  counts death and Alive with Disease as events; the supplied time for
+  Alive with Disease must be time to recurrence/progression, not last
+  follow-up. Competing Risk estimates cumulative incidence of Dead of
+  Disease while retaining Dead of Other Causes as a competing terminal
+  event.
 
 - cutp:
 
-  Specify the time points at which to calculate survival probabilities.
-  Enter a comma-separated list of time points in consistent units (e.g.,
-  months or years). For example, "12, 36, 60" calculates survival
-  probabilities at 1, 3, and 5 years.
+  Time points at which to report survival probabilities, as a
+  comma-separated list in the selected Time Unit. Values are always used
+  exactly as entered. The built-in text "12, 36, 60" is written in
+  months, so under a different unit it means 12, 36 and 60 of that unit;
+  an information notice explains how to enter 1, 3 and 5 years instead.
+  Points beyond follow-up are omitted unless every remaining subject has
+  had a terminal event, in which case the final KM/CIF state is carried
+  forward. Negative, non-finite, and non-numeric entries are ignored
+  with a warning. Time zero is accepted because events can occur at the
+  origin.
 
 - timetypedata:
 
@@ -147,77 +161,86 @@ singlearm(
 
 - timetypeoutput:
 
-  Select the time unit for displaying survival results. Months is most
-  common in clinical oncology studies. Choose the unit that best matches
-  your clinical practice and makes results most interpretable for your
-  audience.
+  The time unit used throughout the analysis. When survival time is
+  calculated from dates, dates are CONVERTED to this unit. When a
+  pre-calculated elapsed-time variable is supplied, no conversion is
+  possible (the column carries no unit), so this option DECLARES the
+  unit that variable is already recorded in. Either way it determines
+  how cutpoints and plausibility checks are interpreted, and how axes
+  are labelled - so selecting the wrong unit for pre-calculated time
+  changes the reported results, not just the labels.
 
 - uselandmark:
 
-  Enables landmark analysis, which addresses immortal time bias by
-  analyzing survival only for patients who survive to a specified
-  timepoint (the landmark). Use this when you want to eliminate the
-  effect of early deaths or when comparing treatments that can only be
-  given to patients who survive long enough to receive them.
+  Performs a conditional landmark description: only subjects still
+  event-free and under observation after the landmark are retained, and
+  their time scale is reset there. This changes the target population
+  and does not by itself remove immortal-time bias, estimate a treatment
+  effect, or justify excluding early events.
 
 - landmark:
 
-  Enables landmark analysis, which addresses immortal time bias by
-  analyzing survival only for patients who survive to a specified
-  timepoint (the landmark). Use this when you want to eliminate the
-  effect of early deaths or when comparing treatments that can only be
-  given to patients who survive long enough to receive them.
+  The landmark time point, in the selected Time Unit. Must be zero or
+  positive and must fall inside the observed follow-up range. Subjects
+  whose follow-up ended at or before the landmark are excluded, and time
+  is then measured from the landmark, so all estimates are conditional
+  on surviving to it.
 
 - sc:
 
-  Enable this option to generate a Kaplan-Meier survival plot with
-  confidence intervals. This plot shows the estimated survival
-  probability over time and is useful for visualizing survival trends in
-  your data.
+  Generate a Kaplan-Meier survival plot in standard analyses or an
+  Aalen-Johansen cumulative-incidence plot in competing-risk analyses.
+  Confidence intervals are shown only when the separate 95 percent CI
+  option is selected.
 
 - kmunicate:
 
   Enable this option to generate a publication-ready survival plot in
-  the style of KMunicate. This plot shows the estimated survival
-  probability over time with confidence intervals and is suitable for
-  publication or presentation.
+  the style of KMunicate. The 95 percent CI and Risk table options
+  control its pointwise interval ribbon and risk/censoring panel.
+  Individual censoring marks and median reference lines are not
+  supported on this plot.
 
 - ce:
 
-  Enable this option to calculate and plot the cumulative number of
-  events over time. This plot shows the total number of events (e.g.,
-  deaths) that have occurred at each time point and is useful for
-  visualizing event rates in your data.
+  Plot the cumulative probability of the event over time, 1 - S(t),
+  estimated by Kaplan-Meier. This is a probability on a 0-1 scale, not a
+  running count of events: a raw count ignores censoring and is not
+  comparable between cohorts of different size or follow-up. Read it as
+  "the estimated proportion of the cohort that had had the event by time
+  t".
 
 - ch:
 
-  Enable this option to calculate and plot the cumulative hazard
-  function over time. This plot shows the cumulative risk of
-  experiencing the event (e.g., death) at each time point and is useful
-  for visualizing the risk of the event over time.
+  Plot cumulative hazard over time. This is an accumulated rate-scale
+  quantity, not an event probability, and it is not bounded by 1. Use
+  cumulative event probability for the Kaplan-Meier estimate 1 - S(t).
 
 - endplot:
 
   The maximum time point to include in the survival plots. This is the
-  end time for the survival curves and cumulative event/hazard plots.
-  Enter a positive integer representing the time in consistent units
-  (e.g., months or years).
+  end time for the survival curves and cumulative event/hazard plots, in
+  the selected Time Unit. Must be greater than zero; zero or a negative
+  value is rejected rather than drawn.
 
 - ybegin_plot:
 
-  The minimum value for the y-axis in the survival plots. Enter a number
-  between 0 and 1 to set the lower limit of the y-axis.
+  The minimum value for the probability y-axis in the Kaplan-Meier,
+  cumulative-incidence, and cumulative-event plots. It must be between 0
+  and 1 and below the end value. Cumulative hazard is auto-scaled and
+  the KMunicate-style plot manages its own y-axis.
 
 - yend_plot:
 
-  The maximum value for the y-axis in the survival plots. Enter a number
-  between 0 and 1 to set the upper limit of the y-axis.
+  The maximum value for the probability y-axis in the Kaplan-Meier,
+  cumulative-incidence, and cumulative-event plots. It must be between 0
+  and 1 and above the start value. Cumulative hazard is auto-scaled and
+  the KMunicate-style plot manages its own y-axis.
 
 - byplot:
 
-  The interval for plotting survival probabilities. Enter a positive
-  integer representing the time interval in consistent units (e.g.,
-  months or years).
+  The spacing between tick marks on the time axis. Must be greater than
+  zero; zero or a negative value is rejected rather than drawn.
 
 - multievent:
 
@@ -228,57 +251,86 @@ singlearm(
 
 - ci95:
 
-  Enable this option to display 95 percent confidence intervals on the
-  survival plots. These intervals show the range of uncertainty around
-  the estimated survival probabilities and are useful for assessing the
-  precision of the estimates.
+  Display 95 percent confidence intervals for the plotted estimand:
+  survival in a standard analysis or cumulative incidence in a
+  competing-risk analysis.
 
 - risktable:
 
-  Enable this option to display a table of risk estimates at each time
-  point. This table shows the estimated survival probability, cumulative
-  event rate, and cumulative hazard at each time point and is useful for
-  summarizing the survival characteristics of your data.
+  Display the number of subjects still at risk below supported
+  Kaplan-Meier plots. This is a count, not a table of probabilities or
+  hazards. A combined risk panel is not available for the competing-risk
+  CIF plot; use the cumulative-incidence table for counts at selected
+  times.
 
 - censored:
 
   Enable this option to display censored observations on the survival
-  plots. Censored observations are patients who have not experienced the
-  event of interest by the end of follow-up and are indicated by
-  vertical ticks on the survival curves.
+  plots. Censored observations have not experienced the modeled event by
+  their last observed time; this may reflect administrative censoring,
+  withdrawal, or loss to follow-up. They are indicated by ticks on
+  supported Kaplan-Meier curves. This display option is not available on
+  the competing-risk CIF plot.
 
 - medianline:
 
-  If true, displays a line indicating the median survival time on the
-  survival plot.
+  Display a horizontal and/or vertical reference line at the
+  Kaplan-Meier median, when estimable. On the cumulative-hazard plot the
+  horizontal reference is log(2), corresponding to S(t) = 0.5. Median
+  reference lines are not drawn on the competing-risk CIF or
+  KMunicate-style plots.
 
 - person_time:
 
   Enable this option to calculate and display person-time metrics,
-  including total follow-up time and incidence rates. These metrics help
-  quantify the rate of events per unit of time in your study population.
+  including total follow-up time and crude occurrence/exposure rates. A
+  person-time rate is events divided by observed time at risk; it is not
+  an event probability. With competing risks it is a crude
+  cause-specific rate for the target event, not the cumulative incidence
+  or absolute risk.
 
 - time_intervals:
 
-  Specify time intervals for stratified person-time analysis. Enter a
-  comma-separated list of time points to create intervals. For example,
-  "12, 36, 60" will create intervals 0-12, 12-36, 36-60, and 60+.
+  Time intervals for stratified person-time analysis, as a
+  comma-separated list in the selected Time Unit. For example "12, 36,
+  60" creates the intervals 0-12, 12-36, 36-60 and 60+. Values are
+  always interpreted in the selected Time Unit; the built-in text is 12,
+  36 and 60 of that unit and is not silently rescaled. A zero boundary
+  is silently treated as the origin because the analysis already starts
+  at zero. Negative, non-finite, or non-numeric boundaries are ignored
+  with a warning. Boundaries at or beyond the longest observed follow-up
+  are also omitted because person-time cannot accrue before the start of
+  observation or after the last one.
 
 - rate_multiplier:
 
   Specify the multiplier for incidence rates (e.g., 100 for rates per
-  100 person-years, 1000 for rates per 1000 person-years).
+  100 units of person-time in the selected Time Unit, or 1000 for rates
+  per 1000). It is the scale the rates are expressed on, so it must be
+  greater than zero; a negative or zero value is rejected and the
+  person-time analysis is not performed.
 
 - baseline_hazard:
 
-  Estimate and plot the baseline hazard function to assess how the
-  instantaneous risk of events changes over time in your study
-  population.
+  Estimate exploratory interval event rates as events divided by exact
+  person-time in equal-width intervals. The number of intervals is
+  limited according to the total event count to reduce sparsity. These
+  are piecewise occurrence/exposure rates, not exact instantaneous
+  hazards or Cox-model coefficients, and should not be used alone to
+  choose treatment or surveillance timing. The rate output is not
+  estimated when an event occurs at time zero, because such an event is
+  a probability mass at the origin rather than a finite continuous
+  hazard.
 
 - hazard_smoothing:
 
-  Generate smoothed hazard rate estimates to better visualize patterns
-  in event risk over time and assess proportional hazards assumptions.
+  Smooth the equal-width interval rates with a person-time-weighted,
+  local-constant LOESS curve. This is an exploratory,
+  bandwidth-dependent trend, not an exact instantaneous hazard. At least
+  three usable automatic intervals are required; otherwise the plot
+  explains why no curve was estimated. There is no proportional-hazards
+  assumption to assess in a single-arm analysis. No curve is estimated
+  with zero observed events or an event at time zero.
 
 - showExplanations:
 
@@ -294,10 +346,11 @@ singlearm(
 
 - advancedDiagnostics:
 
-  Enable advanced diagnostic features including enhanced data quality
-  assessment, performance optimizations with caching, and improved error
-  reporting. This provides additional insights into data reliability and
-  analysis quality without affecting core results.
+  Report cohort size, event count, observed event proportion, follow-up
+  summaries, raw-variable completeness, and memory footprint. These are
+  descriptive checks, not a validated risk-of-bias assessment; they
+  cannot verify non-informative censoring, representativeness, or
+  adequacy for a particular clinical decision.
 
 ## Value
 
@@ -305,6 +358,7 @@ A results object containing:
 
 |                                          |     |     |     |     |                |
 |------------------------------------------|-----|-----|-----|-----|----------------|
+| `results$eventRecodeInfo`                |     |     |     |     | a html         |
 | `results$todo`                           |     |     |     |     | a html         |
 | `results$errors`                         |     |     |     |     | a html         |
 | `results$warnings`                       |     |     |     |     | a html         |
@@ -327,6 +381,7 @@ A results object containing:
 | `results$personTimeHeading3`             |     |     |     |     | a preformatted |
 | `results$personTimeExplanation`          |     |     |     |     | a html         |
 | `results$plot`                           |     |     |     |     | an image       |
+| `results$plot_cif`                       |     |     |     |     | an image       |
 | `results$plot6`                          |     |     |     |     | an image       |
 | `results$plot2`                          |     |     |     |     | an image       |
 | `results$plot3`                          |     |     |     |     | an image       |

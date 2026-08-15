@@ -5,6 +5,11 @@ components (year, month, day, hour, minute, day name, week number,
 quarter, etc.). Features automatic format detection, quality assessment,
 and preview of converted data.
 
+## Value
+
+An `R6` class generator object for the `datetimeconverterClass` backend;
+used internally by the jamovi analysis wrapper and not called directly.
+
 ## Details
 
 This function provides comprehensive datetime conversion capabilities

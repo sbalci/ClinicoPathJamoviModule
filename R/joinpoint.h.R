@@ -273,15 +273,6 @@ joinpointBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' summarizes the whole period. Use it to detect when a rate began rising or 
 #' falling and to quantify the rate of change in each period.
 #' 
-#'
-#' @examples
-#' \donttest{
-#' joinpoint(
-#'     data = mydata,
-#'     time = "year",
-#'     rate = "incidence_rate",
-#'     maxJoinpoints = 3)
-#'}
 #' @param data The data as a data frame (one row per time point).
 #' @param time Time variable (e.g. calendar year).
 #' @param rate The rate or count measured at each time point. Modelled on the

@@ -25,3 +25,8 @@ get_clinical_context(
 - effect_size:
 
   Expected effect size
+
+## Value
+
+A list with the clinical context `type`, `sample_size`, `effect_size`,
+and any context-specific `recommendations`.

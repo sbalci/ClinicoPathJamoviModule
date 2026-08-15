@@ -4,6 +4,11 @@ Backend implementation for IHC clustering analysis. Clusters cases based
 on immunohistochemistry (IHC) staining patterns using various clustering
 algorithms optimized for mixed categorical and continuous data.
 
+## Value
+
+An `R6` class generator object for the `ihcclusterClass` backend; used
+internally by the jamovi analysis wrapper and not called directly.
+
 ## Details
 
 This function supports multiple clustering approaches:

@@ -63,15 +63,17 @@
 #' @examples
 #' \donttest{
 #' # Basic continuous variable summary
-#' summarydata(
+#' summarydata2(
 #'   data = mtcars,
 #'   vars = c("mpg", "hp", "wt"),
 #'   summary_format = "standard",
 #'   distr = TRUE
 #' )
+#' }
 #'
+#' \dontrun{
 #' # Enhanced pivot table summary
-#' summarydata(
+#' summarydata2(
 #'   data = clinical_data,
 #'   vars = c("age", "weight", "height"),
 #'   summary_format = "pivot",
@@ -81,14 +83,14 @@
 #' )
 #'
 #' # Date variable analysis
-#' summarydata(
+#' summarydata2(
 #'   data = study_data,
 #'   date_vars = c("enrollment_date", "follow_up_date"),
 #'   summary_format = "sumvar"
 #' )
 #'
 #' # Grouped analysis with summarytools
-#' summarydata(
+#' summarydata2(
 #'   data = trial_data,
 #'   vars = c("baseline_score", "outcome_measure"),
 #'   grvar = "treatment_group",

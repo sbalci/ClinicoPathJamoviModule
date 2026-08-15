@@ -10,7 +10,7 @@ normality, skewness, and kurtosis.
 ``` r
 summarydata(
   data,
-  vars,
+  vars = NULL,
   distr = FALSE,
   decimal_places = 2,
   outliers = FALSE,

@@ -8,8 +8,8 @@ ggstatsplot::grouped_ggbarstats to generate Bar Charts.'
 ``` r
 jjbarstats(
   data,
-  dep,
-  group,
+  dep = NULL,
+  group = NULL,
   grvar = NULL,
   counts = NULL,
   excl = FALSE,

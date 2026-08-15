@@ -75,12 +75,3 @@ trials, avoids collapsing outcomes of differing severity into a single
 binary endpoint.
 }
 }
-\examples{
-\donttest{
-door(
-    data = mydata,
-    group = "arm",
-    refLevel = "Control",
-    doorRank = "door_category")
-}
-}

@@ -2,6 +2,11 @@
 
 Intraclass Correlation Coefficient
 
+## Value
+
+An `R6` class generator object for the `icccoeffClass` backend; used
+internally by the jamovi analysis wrapper and not called directly.
+
 ## Super classes
 
 [`jmvcore::Analysis`](https://rdrr.io/pkg/jmvcore/man/Analysis.html) -\>

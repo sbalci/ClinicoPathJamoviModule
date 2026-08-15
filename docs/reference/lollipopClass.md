@@ -6,6 +6,11 @@ effective for displaying categorical data with a focus on individual
 values, making them ideal for patient timelines, treatment outcomes,
 biomarker levels, and comparative clinical assessments.
 
+## Value
+
+An `R6` class generator object for the `lollipopClass` backend; used
+internally by the jamovi analysis wrapper and not called directly.
+
 ## Details
 
 The lollipop chart function is designed specifically for clinical

@@ -52,9 +52,6 @@ psychopdaROC(data = psychopdaROC_subgroup,
              dependentVars = "test_score", classVar = "disease",
              positiveClass = "Disease", refVar = "test_score",
              subGroup = "age_group")
-#> Multiple optimal cutpoints found, applying break_ties.
-#> Multiple optimal cutpoints found, applying break_ties.
-#> Multiple optimal cutpoints found, applying break_ties.
 #> 
 #>  ADVANCED ROC ANALYSIS
 #> 
@@ -68,7 +65,7 @@ psychopdaROC(data = psychopdaROC_subgroup,
 #>  The ROC analysis has been completed using the following
 #>  specifications:
 #> 
-#>  &nbsp;
+#>   
 #> 
 #>  Measure Variable(s): test_score
 #> 
@@ -78,7 +75,7 @@ psychopdaROC(data = psychopdaROC_subgroup,
 #> 
 #>  Subgroup Variable: age_group
 #> 
-#>  &nbsp;
+#>   
 #> 
 #>  Method: maximize_metric
 #> 
@@ -90,9 +87,9 @@ psychopdaROC(data = psychopdaROC_subgroup,
 #> 
 #>  Tie Breakers: mean
 #> 
-#>  Metric Tolerance: 0.05
+#>  Metric Tolerance: 1e-06
 #> 
-#>  &nbsp;
+#>   
 #> 
 #>  <hr />
 #> 
@@ -112,6 +109,11 @@ psychopdaROC(data = psychopdaROC_subgroup,
 #>    test_score ::: Young      0.9189542       0.8487080       0.9892005    < .0000001   
 #>    test_score ::: Middle     0.8869396       0.8113542       0.9625250    < .0000001   
 #>  ───────────────────────────────────────────────────────────────────────────────────── 
+#>    Note. Reading of the test values: <b>HIGHER values were taken to indicate
+#>    Disease</b> (Classification Direction = ">="). If that is the wrong way round
+#>    for this marker, every sensitivity, specificity, cutpoint and AUC below is
+#>    reversed — switch Classification Direction to "<=" and the AUC becomes 1 minus
+#>    the value shown.
 #>    Note. AUC 95% confidence intervals computed using the DeLong method.
 #> 
 #> 
@@ -128,7 +130,7 @@ psychopdaROC(data = psychopdaROC_subgroup,
 #>  ───────────────────────────────────────────────────────────────────────────────────────────────────────────────── 
 #>    Cutpoint      Sensitivity    Specificity    PPV          NPV          Youden's J    AUC          Metric Score   
 #>  ───────────────────────────────────────────────────────────────────────────────────────────────────────────────── 
-#>    51.2738048       85.71429       56.81818     48.64865     89.28571     0.4253247    0.7889610       0.4253247   
+#>    55.9136561       85.71429       61.36364     51.42857     90.00000     0.4707792    0.7889610       0.4707792   
 #>  ───────────────────────────────────────────────────────────────────────────────────────────────────────────────── 
 #> 
 #> 
@@ -136,7 +138,7 @@ psychopdaROC(data = psychopdaROC_subgroup,
 #>  ───────────────────────────────────────────────────────────────────────────────────────────────────────────────── 
 #>    Cutpoint      Sensitivity    Specificity    PPV          NPV          Youden's J    AUC          Metric Score   
 #>  ───────────────────────────────────────────────────────────────────────────────────────────────────────────────── 
-#>    61.0577406       88.23529       82.22222     65.21739     94.87179     0.7045752    0.9189542       0.7045752   
+#>    62.3896532       88.23529       84.44444     68.18182     95.00000     0.7267974    0.9189542       0.7267974   
 #>  ───────────────────────────────────────────────────────────────────────────────────────────────────────────────── 
 #> 
 #> 
@@ -144,7 +146,7 @@ psychopdaROC(data = psychopdaROC_subgroup,
 #>  ───────────────────────────────────────────────────────────────────────────────────────────────────────────────── 
 #>    Cutpoint      Sensitivity    Specificity    PPV          NPV          Youden's J    AUC          Metric Score   
 #>  ───────────────────────────────────────────────────────────────────────────────────────────────────────────────── 
-#>    50.2753644       94.73684       79.62963     62.06897     97.72727     0.7436647    0.8869396       0.7436647   
+#>    50.3821603       94.73684       79.62963     62.06897     97.72727     0.7436647    0.8869396       0.7436647   
 #>  ───────────────────────────────────────────────────────────────────────────────────────────────────────────────── 
 #> 
 #> 
@@ -156,6 +158,11 @@ psychopdaROC(data = psychopdaROC_subgroup,
 #>    test_score ::: Young      0.9189542       0.8487080       0.9892005    < .0000001   
 #>    test_score ::: Middle     0.8869396       0.8113542       0.9625250    < .0000001   
 #>  ───────────────────────────────────────────────────────────────────────────────────── 
+#>    Note. Reading of the test values: <b>HIGHER values were taken to indicate
+#>    Disease</b> (Classification Direction = ">="). If that is the wrong way round
+#>    for this marker, every sensitivity, specificity, cutpoint and AUC below is
+#>    reversed — switch Classification Direction to "<=" and the AUC becomes 1 minus
+#>    the value shown.
 #>    Note. AUC 95% confidence intervals computed using the DeLong method.
 #> 
 

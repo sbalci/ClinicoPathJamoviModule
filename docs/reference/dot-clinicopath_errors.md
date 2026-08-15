@@ -8,3 +8,8 @@ enhanced features for clinical and pathological research.
 ``` r
 .clinicopath_errors
 ```
+
+## Value
+
+An environment used internally to track error and warning counts and
+logs across ClinicoPath analyses.

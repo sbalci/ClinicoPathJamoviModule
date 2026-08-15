@@ -13,9 +13,11 @@ navbar:
     twitter:
       icon: "fab fa-twitter fa-lg"
       href: http://twitter.com/serdarbalci
+      aria-label: Twitter
     devversion:
       icon: "fa-cogs"
       href: dev/index.html
+      aria-label: Development version
     test-data:
       text: "Test Data"
       icon: "fa-database"

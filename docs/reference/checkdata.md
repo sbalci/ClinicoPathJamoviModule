@@ -7,7 +7,7 @@ Single Variable Quality Check
 ``` r
 checkdata(
   data,
-  var,
+  var = NULL,
   showOutliers = TRUE,
   showDistribution = FALSE,
   showDuplicates = FALSE,
@@ -36,8 +36,10 @@ checkdata(
 
 - showOutliers:
 
-  Detect and display potential outliers using z-score method (\|z\| \>
-  3).
+  Detect potential outliers using three methods - z-score (\|z\| \> 3),
+  the IQR fence (1.5 x IQR), and the modified Z-score (\|M\| \> 3.5,
+  MAD-based) - and report points flagged by at least two of them. Below
+  n = 10 single-method flags are shown and labelled informative-only.
 
 - showDistribution:
 
@@ -73,8 +75,12 @@ checkdata(
 
 - mcarTest:
 
-  Perform Little's MCAR test if available (requires naniar package).
-  Provides formal test vs. heuristic assessment.
+  Explain whether the missingness mechanism can be tested formally for
+  this variable. Little's MCAR test is multivariate and cannot be
+  computed from a single variable, so this analysis reports heuristics
+  about where the missing values sit rather than a test of the
+  mechanism; enable this to state that limitation explicitly in the
+  output.
 
 - cvMinMean:
 
@@ -101,7 +107,7 @@ A results object containing:
 
 |  |  |  |  |  |  |
 |----|----|----|----|----|----|
-| `results$notices` |  |  |  |  | a preformatted |
+| `results$notices` |  |  |  |  | a html |
 | `results$todo` |  |  |  |  | a html |
 | `results$qualityText` |  |  |  |  | a preformatted |
 | `results$missingVals` |  |  |  |  | a table |

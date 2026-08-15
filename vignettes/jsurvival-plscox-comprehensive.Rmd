@@ -509,7 +509,7 @@ plscox(
   component_selection = "cv_loglik",
   cross_validation = "k10",
   bootstrap_validation = TRUE,
-  n_bootstrap = 100,
+  n_bootstrap = 50,
   prediction_accuracy = TRUE
 )
 ```
@@ -732,7 +732,7 @@ plscox(
   cross_validation = "k5",
   scaling_method = "standardize",
   bootstrap_validation = TRUE,
-  n_bootstrap = 100,
+  n_bootstrap = 50,
   permutation_test = TRUE,
   n_permutations = 50,
   risk_groups = 4,

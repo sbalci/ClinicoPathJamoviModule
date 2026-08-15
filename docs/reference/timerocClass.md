@@ -5,6 +5,11 @@ time-dependent and general binary ROC analysis. Supports multiple ROC
 estimation methods, statistical comparisons, and provides clinical
 interpretation of results.
 
+## Value
+
+An `R6` class generator object for the `timerocClass` backend; used
+internally by the jamovi analysis wrapper and not called directly.
+
 ## Details
 
 This analysis provides both time-dependent and binary ROC curve analysis

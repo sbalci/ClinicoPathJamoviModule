@@ -1,5 +1,12 @@
 # High-Dimensional Cox Regression - Comprehensive Guide
 
+> **Not yet released.** The `highdimcox` analysis is on a development
+> menu route, so it does not appear in the jamovi menus of ClinicoPath
+> or of any of its submodules. It is documented here ahead of a future
+> release, and its options, defaults and output may still change. The R
+> function is exported, so the examples below run from an R console;
+> what is not yet available is the jamovi analysis itself.
+
 > **Note:** The
 > [`highdimcox()`](https://www.serdarbalci.com/ClinicoPathJamoviModule/reference/highdimcox.md)
 > function is designed for use within **jamovi’s GUI**. The code
@@ -634,7 +641,7 @@ highdimcox(
 #> 
 #>  Regularization: elastic_net (α = 0.5)
 #> 
-#>  Selected Lambda: 0.413130722301643
+#>  Selected Lambda: 4.13e-01
 #> 
 #>  Variables: 20 candidate variables → 0 selected
 #> 
@@ -659,9 +666,9 @@ highdimcox(
 #>  ────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────── 
 #>    Metric                            Value                  Interpretation                                                                          
 #>  ────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────── 
-#>    Selected Lambda                   0.413130722301643      Optimal regularization strength                                                         
-#>    Lambda Min                        0.162947269824199      Lambda minimizing CV error                                                              
-#>    Lambda 1SE                        0.413130722301643      Lambda within 1-SE of minimum                                                           
+#>    Selected Lambda                   4.13e-01               Optimal regularization strength                                                         
+#>    Lambda Min                        1.63e-01               Lambda minimizing CV error                                                              
+#>    Lambda 1SE                        4.13e-01               Lambda within 1-SE of minimum                                                           
 #>    CV Deviance at Selected Lambda    6.336                  Cross-validated model deviance                                                          
 #>    Training C-index (optimistic)     0.5                    Training-set estimate; likely overestimates true discrimination. Validate externally.   
 #>    Number of Selected Variables      0                      Variables with non-zero coefficients                                                    
@@ -675,8 +682,8 @@ highdimcox(
 #>  variables using elastic_net regularization.
 #> 
 #>  Model Selection: Cross-validation with 10 folds identified an optimal
-#>  regularization parameter (&lambda; = 0.413130722301643) that selected
-#>  0 variables from the candidate set.
+#>  regularization parameter (λ = 4.13e-01) that selected 0 variables from
+#>  the candidate set.
 #> 
 #>  Training C-index (optimistic): 0.5
 #> 
@@ -865,7 +872,7 @@ highdimcox(
 #> 
 #>  Regularization: elastic_net (α = 0.5)
 #> 
-#>  Selected Lambda: 0.505416837262111
+#>  Selected Lambda: 5.05e-01
 #> 
 #>  Variables: 10 candidate variables → 0 selected
 #> 
@@ -890,9 +897,9 @@ highdimcox(
 #>  ────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────── 
 #>    Metric                            Value                  Interpretation                                                                          
 #>  ────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────── 
-#>    Selected Lambda                   0.505416837262111      Optimal regularization strength                                                         
-#>    Lambda Min                        0.505416837262111      Lambda minimizing CV error                                                              
-#>    Lambda 1SE                        0.505416837262111      Lambda within 1-SE of minimum                                                           
+#>    Selected Lambda                   5.05e-01               Optimal regularization strength                                                         
+#>    Lambda Min                        5.05e-01               Lambda minimizing CV error                                                              
+#>    Lambda 1SE                        5.05e-01               Lambda within 1-SE of minimum                                                           
 #>    CV Deviance at Selected Lambda    5.159                  Cross-validated model deviance                                                          
 #>    Training C-index (optimistic)     0.5                    Training-set estimate; likely overestimates true discrimination. Validate externally.   
 #>    Number of Selected Variables      0                      Variables with non-zero coefficients                                                    

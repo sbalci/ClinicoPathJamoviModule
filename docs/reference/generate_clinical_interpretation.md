@@ -21,3 +21,8 @@ generate_clinical_interpretation(results, context, sample_size)
 - sample_size:
 
   Sample size
+
+## Value
+
+A list with a `statistical_summary`, `clinical_summary`, a character
+vector of `limitations`, and analysis `recommendations`.

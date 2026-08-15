@@ -29,7 +29,11 @@ kappaSizeCI(
 
 - kappa0:
 
-  The null hypothesis value of kappa.
+  The preliminary (anticipated) value of kappa - the agreement you
+  expect to observe, around which the confidence interval is planned.
+  kappaSize documents this argument as "the preliminary value of kappa".
+  It is NOT a null hypothesis value; contrast kappaSizePower, where
+  kappa0 IS the null being tested.
 
 - kappaL:
 
@@ -57,6 +61,7 @@ A results object containing:
 
 |                        |     |     |     |     |                |
 |------------------------|-----|-----|-----|-----|----------------|
+| `results$notices`      |     |     |     |     | a html         |
 | `results$text1`        |     |     |     |     | a preformatted |
 | `results$text_summary` |     |     |     |     | a preformatted |
 | `results$text2`        |     |     |     |     | a preformatted |

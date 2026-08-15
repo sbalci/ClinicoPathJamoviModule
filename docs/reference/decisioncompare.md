@@ -11,14 +11,18 @@ confidence intervals for differences.
 ``` r
 decisioncompare(
   data,
-  gold,
+  gold = NULL,
   goldPositive,
-  test1,
+  goldNegative,
+  test1 = NULL,
   test1Positive,
-  test2,
+  test1Negative,
+  test2 = NULL,
   test2Positive,
+  test2Negative,
   test3 = NULL,
   test3Positive,
+  test3Negative,
   pp = FALSE,
   pprob = 0.3,
   od = FALSE,
@@ -54,6 +58,12 @@ decisioncompare(
   The level indicating presence of disease in the gold standard
   variable.
 
+- goldNegative:
+
+  The level indicating disease is ABSENT in the gold standard variable.
+  Required for excludeIndeterminate to act on a variable with more than
+  two levels; pass NULL when not used.
+
 - test1:
 
   The first diagnostic test variable being evaluated for performance.
@@ -61,6 +71,12 @@ decisioncompare(
 - test1Positive:
 
   The level representing a positive result for Test 1.
+
+- test1Negative:
+
+  The level indicating a NEGATIVE result for test 1. Required for
+  excludeIndeterminate to act on a variable with more than two levels;
+  pass NULL when not used.
 
 - test2:
 
@@ -70,6 +86,12 @@ decisioncompare(
 
   The level representing a positive result for Test 2.
 
+- test2Negative:
+
+  The level indicating a NEGATIVE result for test 2. Required for
+  excludeIndeterminate to act on a variable with more than two levels;
+  pass NULL when not used.
+
 - test3:
 
   Optional third diagnostic test variable for extended comparison
@@ -78,6 +100,12 @@ decisioncompare(
 - test3Positive:
 
   The level representing a positive result for Test 3.
+
+- test3Negative:
+
+  The level indicating a NEGATIVE result for test 3. Required for
+  excludeIndeterminate to act on a variable with more than two levels;
+  pass NULL when not used.
 
 - pp:
 

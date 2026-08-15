@@ -6,6 +6,11 @@ estimates for studies with repeated measures, longitudinal data,
 multi-site studies, or clustered observations such as multiple samples
 per subject in pathology studies.
 
+## Value
+
+An `R6` class generator object for the `geemodelClass` backend; used
+internally by the jamovi analysis wrapper and not called directly.
+
 ## Details
 
 GEE is essential for pathology studies where observations are correlated

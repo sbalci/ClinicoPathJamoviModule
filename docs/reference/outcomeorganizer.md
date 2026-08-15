@@ -9,11 +9,12 @@ risks, progression-free survival, and multistate models.
 ``` r
 outcomeorganizer(
   data,
-  outcome,
+  outcome = NULL,
   outcomeLevel,
-  recurrence,
+  recurrence = NULL,
   recurrenceLevel,
-  patientID,
+  patientID = NULL,
+  followupTime = NULL,
   analysistype = "os",
   multievent = FALSE,
   dod,
@@ -23,10 +24,10 @@ outcomeorganizer(
   useHierarchy = FALSE,
   eventPriority = 1,
   intervalCensoring = FALSE,
-  intervalStart,
-  intervalEnd,
+  intervalStart = NULL,
+  intervalEnd = NULL,
   adminCensoring = FALSE,
-  adminDate,
+  adminDate = NULL,
   outputTable = FALSE,
   diagnostics = FALSE,
   visualization = FALSE,
@@ -64,6 +65,14 @@ outcomeorganizer(
 
   Patient identifier for handling multiple records or applying event
   hierarchies.
+
+- followupTime:
+
+  Optional follow-up time. Supplying it lets administrative censoring
+  actually truncate follow-up and reset event status, and lets the event
+  hierarchy keep the earliest priority event per patient instead of
+  writing a later one back onto earlier records. Leave empty to keep the
+  previous behaviour.
 
 - analysistype:
 
@@ -153,6 +162,7 @@ A results object containing:
 
 |                            |     |     |     |     |           |
 |----------------------------|-----|-----|-----|-----|-----------|
+| `results$eventRecodeInfo`  |     |     |     |     | a html    |
 | `results$todo`             |     |     |     |     | a html    |
 | `results$errors`           |     |     |     |     | a html    |
 | `results$strongWarnings`   |     |     |     |     | a html    |

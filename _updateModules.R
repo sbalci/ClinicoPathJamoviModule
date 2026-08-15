@@ -2413,7 +2413,7 @@ if (extended) {
               file.rename(file.path(.stash, .f), .f)
             unlink(.stash, recursive = TRUE)
           }, add = TRUE)
-          pkgdown::build_site()
+          pkgdown::build_site(lazy = TRUE)
         })()
       }
       cat("  ✅ jjstatsplot processing completed\n")
@@ -2468,7 +2468,7 @@ if (extended) {
               file.rename(file.path(.stash, .f), .f)
             unlink(.stash, recursive = TRUE)
           }, add = TRUE)
-          pkgdown::build_site()
+          pkgdown::build_site(lazy = TRUE)
         })()
       }
       cat("  ✅ meddecide processing completed\n")
@@ -2523,7 +2523,7 @@ if (extended) {
               file.rename(file.path(.stash, .f), .f)
             unlink(.stash, recursive = TRUE)
           }, add = TRUE)
-          pkgdown::build_site()
+          pkgdown::build_site(lazy = TRUE)
         })()
       }
       cat("  ✅ jsurvival processing completed\n")
@@ -2578,7 +2578,7 @@ if (extended) {
               file.rename(file.path(.stash, .f), .f)
             unlink(.stash, recursive = TRUE)
           }, add = TRUE)
-          pkgdown::build_site()
+          pkgdown::build_site(lazy = TRUE)
         })()
       }
       cat("  ✅ ClinicoPathDescriptives processing completed\n")
@@ -2632,7 +2632,7 @@ if (extended) {
               file.rename(file.path(.stash, .f), .f)
             unlink(.stash, recursive = TRUE)
           }, add = TRUE)
-          pkgdown::build_site()
+          pkgdown::build_site(lazy = TRUE)
         })()
       }
       cat("  ✅ OncoPath processing completed\n")

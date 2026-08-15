@@ -253,15 +253,6 @@ doorBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' trials, avoids collapsing outcomes of differing severity into a single 
 #' binary endpoint.
 #' 
-#'
-#' @examples
-#' \donttest{
-#' door(
-#'     data = mydata,
-#'     group = "arm",
-#'     refLevel = "Control",
-#'     doorRank = "door_category")
-#'}
 #' @param data The data as a data frame (one row per subject).
 #' @param group Two-level group variable.
 #' @param refLevel The level of the group variable to treat as the reference.

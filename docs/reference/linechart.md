@@ -9,13 +9,14 @@ overlays.
 ``` r
 linechart(
   data,
-  xvar,
-  yvar,
+  xvar = NULL,
+  yvar = NULL,
   groupby = NULL,
   confidence = FALSE,
   trendline = FALSE,
   points = TRUE,
   smooth = FALSE,
+  showRefline = FALSE,
   refline = 0,
   reflineLabel = "Reference",
   colorPalette = "default",
@@ -64,10 +65,16 @@ linechart(
 
   Whether to apply smoothing (loess) to the line(s).
 
+- showRefline:
+
+  Whether to draw a horizontal reference line at the value below. Enable
+  this to draw the line at any value, including zero.
+
 - refline:
 
-  Optional reference line value (e.g., normal range, threshold). Set to
-  0 for no reference line.
+  Value at which to draw the reference line (e.g., a normal-range limit,
+  a clinical threshold, or zero for no change from baseline). Only drawn
+  when Reference line is enabled.
 
 - reflineLabel:
 

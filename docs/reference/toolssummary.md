@@ -14,7 +14,7 @@ toolssummary(
   useSummarytools = TRUE,
   showDfSummary = TRUE,
   showDescr = TRUE,
-  groupVar,
+  groupVar = NULL,
   showCrosstabs = FALSE
 )
 ```

@@ -36,7 +36,7 @@ multisurvival(
   multievent = FALSE,
   hr = FALSE,
   sty = "t1",
-  ph_cox = TRUE,
+  ph_cox = FALSE,
   km = FALSE,
   endplot = 60,
   byplot = 12,
@@ -49,20 +49,22 @@ multisurvival(
   calculateRiskScore = FALSE,
   numRiskGroups = "four",
   plotRiskGroups = FALSE,
+  ci_optimism = FALSE,
+  ci_optimism_boot = 150,
   ac = FALSE,
   adjexplanatory = NULL,
   ac_method = "average",
+  ac_summary = FALSE,
   showNomogram = FALSE,
+  compare_models = FALSE,
   use_stratify = FALSE,
   stratvar = NULL,
   person_time = FALSE,
   time_intervals = "12, 36, 60",
   rate_multiplier = 100,
-  use_tree = FALSE,
-  min_node = 20,
-  complexity = 0.01,
-  max_depth = 5,
-  show_terminal_nodes = FALSE,
+  show_survmetrics = FALSE,
+  survmetrics_timepoints = "12, 24, 36, 60",
+  survmetrics_show_plots = FALSE,
   showExplanations = FALSE,
   showSummaries = TRUE
 )
@@ -177,8 +179,11 @@ multisurvival(
   Interaction (crossed) terms added to the Cox model, built from
   variables already selected as explanatory or continuous explanatory
   variables. Each term tests effect modification - e.g. Treatment x
-  Biomarker for predictive-biomarker analysis. For a 2-way term the
-  first variable is the focal effect and the second is the moderator.
+  Biomarker. Calling a treatment interaction predictive requires an
+  appropriate treatment-comparison design and pre-specified validation;
+  an interaction alone does not establish clinical utility. For a 2-way
+  term the first variable is the focal effect and the second is the
+  moderator.
 
 - multievent:
 
@@ -235,8 +240,8 @@ multisurvival(
 
 - medianline:
 
-  If true, displays a line indicating the median survival time on the
-  survival plot.
+  Selects whether horizontal, vertical, both, or no median-survival
+  reference lines are displayed on survival plots.
 
 - pplot:
 
@@ -245,12 +250,17 @@ multisurvival(
 
 - cutp:
 
-  .
+  Positive, comma-separated prediction timepoints in the selected time
+  unit. They are used by adjusted-probability tables and the nomogram;
+  invalid values and nomogram timepoints beyond observed follow-up are
+  omitted with a warning.
 
 - calculateRiskScore:
 
-  If true, calculates a risk score from the Cox model coefficients for
-  each individual.
+  If true, calculates the Cox relative-risk score, exp(centered linear
+  predictor), for each individual. This ranks fitted hazard and is not
+  an absolute event probability; clinical use requires external
+  validation.
 
 - numRiskGroups:
 
@@ -262,21 +272,57 @@ multisurvival(
   If true, stratifies individuals into risk groups based on their
   calculated risk scores and plots their survival curves.
 
+- ci_optimism:
+
+  If true, computes a bootstrap optimism-corrected Harrell's C-index
+  (apparent, optimism, and corrected) to quantify overfitting of the Cox
+  model's discrimination. Not available for competing-risks (Fine-Gray)
+  models.
+
+- ci_optimism_boot:
+
+  Number of bootstrap resamples used for optimism correction of the
+  C-index. Larger values give more stable estimates but take longer to
+  compute.
+
 - ac:
 
   .
 
 - adjexplanatory:
 
-  .
+  Categorical model variable whose levels are contrasted in the adjusted
+  curves. The variable must also be selected as an explanatory or
+  stratification variable so it is part of the fitted model.
 
 - ac_method:
 
-  Method for computing adjusted survival curves
+  Estimand for the adjusted survival curves. "Standardised over cohort"
+  sets every observed patient to each level in turn and averages the
+  model-predicted curves (g-computation), so the curves differ only by
+  the adjustment variable. "At reference covariate profile" predicts a
+  single curve per level at the mean/mode of the other covariates.
+  "Whole-cohort expected survival" returns one curve for the cohort at
+  its observed covariates and does not contrast the levels at all.
+
+- ac_summary:
+
+  Display numeric model-adjusted probability outputs at the cutpoint
+  timepoints, adjusted median time to event, and adjusted model effects.
+  In competing-risk mode, probabilities are cumulative incidence and
+  effects are Fine-Gray subdistribution hazard ratios.
 
 - showNomogram:
 
-  .
+  Display a Cox-model nomogram for the requested prediction timepoints.
+  Predictions are apparent estimates from the fitted data and are not a
+  point-of-care tool without calibration and external validation.
+
+- compare_models:
+
+  If true, reports a likelihood-ratio test and AIC for dropping each
+  covariate from the full model (base R drop1). Shows which covariates
+  significantly improve model fit.
 
 - use_stratify:
 
@@ -304,36 +350,28 @@ multisurvival(
 
 - rate_multiplier:
 
-  Specify the multiplier for incidence rates (e.g., 100 for rates per
-  100 person-years, 1000 for rates per 1000 person-years).
+  Specify the multiplier for incidence rates (for example, 100 for rates
+  per 100 person-time units). The person-time unit is the unit selected
+  in `timetypeoutput`; choose years there before interpreting a rate as
+  events per person-year.
 
-- use_tree:
+- show_survmetrics:
 
-  If true, fits a survival decision tree to identify subgroups with
-  different survival outcomes. Decision trees provide an intuitive
-  alternative to Cox regression for identifying risk factors.
+  Report model performance metrics for the Cox model: Harrell's
+  concordance (C-index), inverse-probability-of-censoring-weighted
+  (IPCW) Brier score and time-dependent AUC at the chosen timepoints,
+  and the Integrated Brier Score. Computed with the riskRegression
+  package.
 
-- min_node:
+- survmetrics_timepoints:
 
-  The minimum number of observations required in a terminal node. Larger
-  values create simpler trees that may be more generalizable but
-  potentially miss important subgroups.
+  Comma-separated timepoints at which to report the Brier score and
+  time-dependent AUC. Timepoints beyond the observed follow-up are
+  ignored. Should correspond to clinically meaningful follow-up times.
 
-- complexity:
+- survmetrics_show_plots:
 
-  The complexity parameter for tree pruning. Higher values result in
-  smaller trees. This parameter controls the trade-off between tree size
-  and goodness of fit.
-
-- max_depth:
-
-  The maximum depth of the decision tree. Limits the complexity of the
-  tree to avoid overfitting.
-
-- show_terminal_nodes:
-
-  If true, displays Kaplan-Meier survival curves for each terminal node
-  of the decision tree.
+  Display a plot of the IPCW Brier score across follow-up time.
 
 - showExplanations:
 
@@ -353,7 +391,7 @@ A results object containing:
 
 |                                          |     |     |     |     |                |
 |------------------------------------------|-----|-----|-----|-----|----------------|
-| `results$notices`                        |     |     |     |     | a preformatted |
+| `results$eventRecodeInfo`                |     |     |     |     | a html         |
 | `results$todo`                           |     |     |     |     | a html         |
 | `results$errors`                         |     |     |     |     | a html         |
 | `results$strongWarnings`                 |     |     |     |     | a html         |
@@ -362,12 +400,16 @@ A results object containing:
 | `results$multivariableCoxHeading`        |     |     |     |     | a preformatted |
 | `results$text`                           |     |     |     |     | a html         |
 | `results$text2`                          |     |     |     |     | a html         |
+| `results$interactionExplanation`         |     |     |     |     | a html         |
 | `results$interactionTest`                |     |     |     |     | a table        |
 | `results$subgroupHR`                     |     |     |     |     | a table        |
 | `results$multivariableCoxSummaryHeading` |     |     |     |     | a preformatted |
 | `results$multivariableCoxSummary`        |     |     |     |     | a html         |
 | `results$glossaryPanel`                  |     |     |     |     | a html         |
 | `results$assumptionsPanel`               |     |     |     |     | a html         |
+| `results$survMetricsTable`               |     |     |     |     | a table        |
+| `results$survMetricsSummary`             |     |     |     |     | a html         |
+| `results$survMetricsPlot`                |     |     |     |     | an image       |
 | `results$personTimeHeading`              |     |     |     |     | a preformatted |
 | `results$personTimeTable`                |     |     |     |     | a table        |
 | `results$personTimeSummaryHeading`       |     |     |     |     | a preformatted |
@@ -375,6 +417,7 @@ A results object containing:
 | `results$survivalPlotsHeading`           |     |     |     |     | a preformatted |
 | `results$plot`                           |     |     |     |     | an image       |
 | `results$plot3`                          |     |     |     |     | an image       |
+| `results$cox_phTable`                    |     |     |     |     | a table        |
 | `results$cox_ph`                         |     |     |     |     | a preformatted |
 | `results$plot8`                          |     |     |     |     | an image       |
 | `results$plotKM`                         |     |     |     |     | an image       |
@@ -386,12 +429,14 @@ A results object containing:
 | `results$riskScoreSummary`               |     |     |     |     | a html         |
 | `results$riskScoreMetrics`               |     |     |     |     | a html         |
 | `results$riskGroupPlot`                  |     |     |     |     | an image       |
+| `results$cindexValidation`               |     |     |     |     | a table        |
 | `results$stratificationExplanation`      |     |     |     |     | a html         |
 | `results$calculatedtime`                 |     |     |     |     | an output      |
 | `results$outcomeredefined`               |     |     |     |     | an output      |
 | `results$addRiskScore`                   |     |     |     |     | an output      |
 | `results$addRiskGroup`                   |     |     |     |     | an output      |
 | `results$adjustedSurvivalHeading`        |     |     |     |     | a preformatted |
+| `results$adjustedEstimandPanel`          |     |     |     |     | a html         |
 | `results$plot_adj`                       |     |     |     |     | an image       |
 | `results$adjustedSurvivalSummaryHeading` |     |     |     |     | a preformatted |
 | `results$adjustedSurvivalSummary`        |     |     |     |     | a html         |
@@ -400,6 +445,16 @@ A results object containing:
 | `results$nomogram_display`               |     |     |     |     | a html         |
 | `results$nomogramSummaryHeading`         |     |     |     |     | a preformatted |
 | `results$nomogramSummary`                |     |     |     |     | a html         |
+| `results$adjustedSurvTable`              |     |     |     |     | a table        |
+| `results$adjustedSurvTableSummary`       |     |     |     |     | a html         |
+| `results$adjustedMedianTable`            |     |     |     |     | a table        |
+| `results$adjustedMedianSummary`          |     |     |     |     | a html         |
+| `results$adjustedCoxTable`               |     |     |     |     | a table        |
+| `results$adjustedCoxText`                |     |     |     |     | a html         |
+| `results$adjustedCoxSummary`             |     |     |     |     | a html         |
+| `results$adjustedCoxPH`                  |     |     |     |     | a preformatted |
+| `results$modelContributionTable`         |     |     |     |     | a table        |
+| `results$modelContributionSummary`       |     |     |     |     | a html         |
 | `results$multivariableCoxExplanation`    |     |     |     |     | a html         |
 | `results$multivariableCoxHeading3`       |     |     |     |     | a preformatted |
 | `results$adjustedSurvivalExplanation`    |     |     |     |     | a html         |

@@ -817,6 +817,18 @@ analysis configuration and which require additional reporting.
 Survival estimates can be exported for use in external analyses or
 visualization tools.
 
+`export_survival_data` is an **Output** option: it writes the estimates
+back into the jamovi spreadsheet as a new column. jamovi’s compiler does
+not turn Output options into arguments of the generated R function, so
+this one is available from the jamovi interface only — passing
+`export_survival_data = TRUE` to
+[`survival()`](https://www.serdarbalci.com/ClinicoPathJamoviModule/reference/survival.md)
+from R raises `unused argument`. The same applies to this analysis’s
+other two Output options, `calculatedtime` and `outcomeredefined`.
+
+In jamovi, tick **Export Estimated Survival** in the options panel. From
+R, take the estimates off the results object instead:
+
 ``` r
 
 result_export <- survival(
@@ -828,9 +840,14 @@ result_export <- survival(
   dod = "",
   dooc = "",
   awd = "",
-  awod = "",
-  export_survival_data = TRUE
+  awod = ""
 )
+
+# the survival table as a plain data frame, ready to write out.
+# Use survTable (a Table); survTableSummary is Preformatted text and has no $asDF.
+survival_estimates <- result_export$survTable$asDF
+head(survival_estimates)
+#>   strata  time  n.risk  n.event  surv  lower  upper
 ```
 
 ## 21. Complete Analysis Example

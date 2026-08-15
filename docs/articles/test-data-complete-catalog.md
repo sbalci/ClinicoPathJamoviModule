@@ -1,5 +1,12 @@
 # Complete Test Data Catalog
 
+> **Not yet released.** This catalog lists the test datasets shipped
+> with the repository, including those for analyses that are still on
+> development or test menu routes and therefore do not appear in any
+> jamovi menu yet (28 of the 295 sections below). The files download and
+> open normally; what is not yet released is the analysis they were
+> built for.
+
 ## Complete Test Data Catalog - All .omv Files with Download Links
 
 **Total Files:** 945 **Last Generated:** 2026-01-08

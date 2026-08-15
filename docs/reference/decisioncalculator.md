@@ -143,22 +143,23 @@ decisioncalculator(
 
 A results object containing:
 
-|                                |     |     |     |     |                |
-|--------------------------------|-----|-----|-----|-----|----------------|
-| `results$notices`              |     |     |     |     | a preformatted |
-| `results$welcome`              |     |     |     |     | a html         |
-| `results$summary`              |     |     |     |     | a html         |
-| `results$about`                |     |     |     |     | a html         |
-| `results$assumptions`          |     |     |     |     | a html         |
-| `results$glossary`             |     |     |     |     | a html         |
-| `results$cTable`               |     |     |     |     | a table        |
-| `results$nTable`               |     |     |     |     | a table        |
-| `results$ratioTable`           |     |     |     |     | a table        |
-| `results$advancedMetricsTable` |     |     |     |     | a table        |
-| `results$epirTable_ratio`      |     |     |     |     | a table        |
-| `results$epirTable_number`     |     |     |     |     | a table        |
-| `results$plot1`                |     |     |     |     | an image       |
-| `results$multipleCutoffTable`  |     |     |     |     | a table        |
+|  |  |  |  |  |  |
+|----|----|----|----|----|----|
+| `results$notices` |  |  |  |  | a preformatted |
+| `results$welcome` |  |  |  |  | a html |
+| `results$summary` |  |  |  |  | a html |
+| `results$about` |  |  |  |  | a html |
+| `results$assumptions` |  |  |  |  | a html |
+| `results$glossary` |  |  |  |  | a html |
+| `results$cTable` |  |  |  |  | a table |
+| `results$nTable` |  |  |  |  | a table |
+| `results$ratioTable` |  |  |  |  | a table |
+| `results$advancedMetricsTable` |  |  |  |  | a table |
+| `results$epirTable_ratio` |  |  |  |  | a table |
+| `results$epirTable_number` |  |  |  |  | a table |
+| `results$faganSummary` |  |  |  |  | Plain-language reading of the Fagan nomogram: the pre-test probability, the likelihood ratios, and where a positive or a negative result moves the probability of disease. |
+| `results$plot1` |  |  |  |  | an image |
+| `results$multipleCutoffTable` |  |  |  |  | a table |
 
 Tables can be converted to data frames with `asDF` or
 [`as.data.frame`](https://rdrr.io/r/base/as.data.frame.html). For

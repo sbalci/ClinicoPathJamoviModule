@@ -281,16 +281,6 @@ gcomputationBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' This standardization removes confounding by the measured covariates without 
 #' requiring a propensity model.
 #' 
-#'
-#' @examples
-#' \donttest{
-#' gcomputation(
-#'     data = mydata,
-#'     outcome = "death",
-#'     treatment = "treated",
-#'     covariates = vars(age, stage, grade),
-#'     outcomeType = "binary")
-#'}
 #' @param data The data as a data frame (one row per subject).
 #' @param outcome The outcome. Continuous, or a two-level factor / 0-1 numeric
 #'   for binary.

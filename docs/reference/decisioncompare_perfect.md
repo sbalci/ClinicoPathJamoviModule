@@ -47,14 +47,13 @@ gold standard) compared to realistic imperfect test.
 ``` r
 data(decisioncompare_perfect)
 decisioncompare(data = decisioncompare_perfect, gold = "GoldStandard",
-                goldPositive = "Positive", test1 = "PerfectTest",
-                test1Positive = "Positive", test2 = "ImperfectTest",
-                test2Positive = "Positive", test3Positive = "",
+                goldPositive = "Positive", goldNegative = NULL, test1 = "PerfectTest",
+                test1Positive = "Positive", test1Negative = NULL, test2 = "ImperfectTest",
+                test2Positive = "Positive", test2Negative = NULL,
+                test3Positive = "", test3Negative = NULL,
                 statComp = TRUE)
 #> 
 #>  COMPARE MEDICAL DECISION TESTS
-#> 
-#> character(0)
 #> 
 #>  Test 1 - Recoded Data                                            
 #>  ──────────────────────────────────────────────────────────────── 
@@ -76,32 +75,15 @@ decisioncompare(data = decisioncompare_perfect, gold = "GoldStandard",
 #>  ──────────────────────────────────────────────────────────────── 
 #> 
 #> 
-#>  Test 3 - Recoded Data                                        
-#>  ──────────────────────────────────────────────────────────── 
-#>                     Gold Positive    Gold Negative    Total   
-#>  ──────────────────────────────────────────────────────────── 
-#>    Test Positive    .                .                .       
-#>    Test Negative    .                .                .       
-#>    Total            .                .                .       
-#>  ──────────────────────────────────────────────────────────── 
-#> 
-#> 
 #>  Decision Test Comparison                                                                                                                                                                                                                                                                 
 #>  ──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────── 
 #>    Test                                                                                                                     Sensitivity    Specificity    Accuracy     Positive Predictive Value    Negative Predictive Value    Positive Likelihood Ratio    Negative Likelihood Ratio   
 #>  ──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────── 
-#>    PerfectTest                                                                                                                100.00000      100.00000    100.00000                    100.00000                    100.00000                          Inf                   0.01227087   
+#>    PerfectTest                                                                                                                100.00000      100.00000    100.00000                    100.00000                    100.00000                   160.024390                   0.01227087   
 #>      → Excellent overall performance; Strong positive evidence; Strong negative evidence (zero cell; LR may be unstable)                                                                                                                                                                  
 #>    ImperfectTest                                                                                                               80.00000       90.00000     86.66667                     80.00000                     90.00000                     8.000000                   0.22222222   
 #>      → Good specificity for confirmation; Moderate positive evidence                                                                                                                                                                                                                      
 #>  ──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────── 
-#> 
-#> 
-#>  Stratified Diagnostic Accuracy                                                                              
-#>  ─────────────────────────────────────────────────────────────────────────────────────────────────────────── 
-#>    Subgroup    N    Test    Sensitivity    Specificity    Accuracy     PPV          NPV          OPA         
-#>  ─────────────────────────────────────────────────────────────────────────────────────────────────────────── 
-#>  ─────────────────────────────────────────────────────────────────────────────────────────────────────────── 
 #> 
 #> 
 #>  Statistical Comparison of Test Accuracy                                                                                                   
@@ -124,6 +106,11 @@ decisioncompare(data = decisioncompare_perfect, gold = "GoldStandard",
 #>    PerfectTest vs ImperfectTest    Specificity     10.00000 ᵇ      3.42608     16.57392   
 #>    PerfectTest vs ImperfectTest    Accuracy        13.33333 ᵈ      7.25124     19.41542   
 #>  ──────────────────────────────────────────────────────────────────────────────────────── 
+#>    Note. Differences are paired (within-subject). Confidence intervals are 95%
+#>    normal-approximation (Wald) intervals for the difference between two correlated
+#>    proportions, computed from the discordant pair counts. They are not affected by
+#>    the "CI Method for Agreement" option, which applies to the overall percent
+#>    agreement table.
 #>    ᵃ Small paired sample/discordant counts; CI may be unstable (n=40, discordant
 #>    counts: 32, 8, 0, 0).
 #>    ᵇ Small paired sample/discordant counts; CI may be unstable (n=80, discordant
@@ -137,13 +124,13 @@ decisioncompare(data = decisioncompare_perfect, gold = "GoldStandard",
 #>  solid #3498db;"> Clinical Summary
 #> 
 #>  Among the tests evaluated, PerfectTest demonstrated optimal diagnostic
-#>  performance with 100% sensitivity (95% CI: [see confidence interval
-#>  table]), 100% specificity (95% CI: [see confidence interval table]),
-#>  100% positive predictive value, 100% negative predictive value, and
-#>  100% overall accuracy. Statistical comparisons using McNemar's test
-#>  revealed significant differences in test performance (detailed results
-#>  in comparison tables). The likelihood ratio for positive results was
-#>  Inf and for negative results was 0.01.<h3 style="color: #27ae60;
+#>  performance, with 100% sensitivity (95% CI: 91.2-100.0%), 100%
+#>  specificity (95% CI: 95.5-100.0%), 100% positive predictive value,
+#>  100% negative predictive value, and 100% overall accuracy. Statistical
+#>  comparison (McNemar's/Cochran's test) revealed a statistically
+#>  significant difference in test performance (detailed results in the
+#>  comparison tables). The likelihood ratio for positive results was
+#>  160.02 and for negative results was 0.01.<h3 style="color: #27ae60;
 #>  margin-top: 30px;"> Report Sentences
 #> 
 #>  <div style="background-color: #f8f9fa; padding: 15px; border-left: 4px
@@ -164,14 +151,14 @@ decisioncompare(data = decisioncompare_perfect, gold = "GoldStandard",
 #>  Section:
 #> 
 #>  <p style="font-style: italic; line-height: 1.6;">Among the tests
-#>  evaluated, PerfectTest demonstrated optimal diagnostic performance
-#>  with 100% sensitivity (95% CI: [see confidence interval table]), 100%
-#>  specificity (95% CI: [see confidence interval table]), 100% positive
-#>  predictive value, 100% negative predictive value, and 100% overall
-#>  accuracy. Statistical comparisons using McNemar's test revealed
-#>  significant differences in test performance (detailed results in
-#>  comparison tables). The likelihood ratio for positive results was Inf
-#>  and for negative results was 0.01.
+#>  evaluated, PerfectTest demonstrated optimal diagnostic performance,
+#>  with 100% sensitivity (95% CI: 91.2-100.0%), 100% specificity (95% CI:
+#>  95.5-100.0%), 100% positive predictive value, 100% negative predictive
+#>  value, and 100% overall accuracy. Statistical comparison
+#>  (McNemar's/Cochran's test) revealed a statistically significant
+#>  difference in test performance (detailed results in the comparison
+#>  tables). The likelihood ratio for positive results was 160.02 and for
+#>  negative results was 0.01.
 #> 
 #>  <h3 style="color: #8e44ad; margin-top: 30px;"> Clinical
 #>  Recommendations
@@ -277,7 +264,14 @@ decisioncompare(data = decisioncompare_perfect, gold = "GoldStandard",
 #>  and NPV vary with disease prevalenceMcNemar Test: Requires
 #>  paired/matched data for statistical comparisonsMissing Data: Cases
 #>  with incomplete data are excluded from analysisConfidence Intervals:
-#>  Calculated using Wilson method for better accuracy
+#>  The per-test CI tables report Clopper-Pearson exact intervals for the
+#>  proportions (sensitivity, specificity, PPV, NPV, accuracy and
+#>  prevalence), as computed by epiR::epi.tests() with its default
+#>  settings. Likelihood ratios are reported as point estimates only,
+#>  without confidence intervals. The Overall Percent Agreement (OPA)
+#>  table uses the method you select under "CI Method for Agreement"
+#>  (Wilson score by default). Paired differences between tests use
+#>  normal-approximation (Wald) intervals.
 #> 
 #>  <div style='margin: 10px 0;'><div style='background-color: #eff6ff;
 #>  border-left: 4px solid #93c5fd; padding: 12px; margin: 8px 0;

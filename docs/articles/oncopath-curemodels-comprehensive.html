@@ -20,7 +20,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">ClinicoPath</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.0.52</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.0.6</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -29,7 +29,7 @@
 
     <div id="navbar" class="collapse navbar-collapse ms-3">
       <ul class="navbar-nav me-auto">
-<li class="nav-item"><a class="nav-link" href="../dev/index.html"><span class="fa fa-cogs"></span></a></li>
+<li class="nav-item"><a class="nav-link" href="../dev/index.html" aria-label="Development version"><span class="fa fa-cogs"></span></a></li>
 <li class="nav-item"><a class="nav-link" href="../reference/index.html">Reference</a></li>
 <li class="active nav-item"><a class="nav-link" href="../articles/index.html">Articles</a></li>
 <li class="nav-item dropdown">
@@ -43,7 +43,7 @@
 <li class="nav-item"><a class="nav-link" href="../news/index.html">Changelog</a></li>
       </ul>
 <ul class="navbar-nav">
-<li class="nav-item"><a class="external-link nav-link" href="http://twitter.com/serdarbalci"><span class="fa fab fa-twitter fa-lg"></span></a></li>
+<li class="nav-item"><a class="external-link nav-link" href="http://twitter.com/serdarbalci" aria-label="Twitter"><span class="fa fab fa-twitter fa-lg"></span></a></li>
 <li class="nav-item"><a class="external-link nav-link" href="https://github.com/sbalci/ClinicoPathJamoviModule/" aria-label="GitHub"><span class="fa fab fa-github fa-lg"></span></a></li>
       </ul>
 </div>
@@ -856,7 +856,7 @@ parameters.</p>
 <span>  predictors <span class="op">=</span> <span class="st">"Treatment"</span>,</span>
 <span>  model_type <span class="op">=</span> <span class="st">"mixture"</span>,</span>
 <span>  bootstrap_ci <span class="op">=</span> <span class="cn">TRUE</span>,</span>
-<span>  n_bootstrap <span class="op">=</span> <span class="fl">200</span></span>
+<span>  n_bootstrap <span class="op">=</span> <span class="fl">100</span></span>
 <span><span class="op">)</span></span>
 <span><span class="co">#&gt; Program is running..be patient... done.</span></span>
 <span><span class="co">#&gt; Call:</span></span>
@@ -866,13 +866,13 @@ parameters.</p>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; Cure probability model:</span></span>
 <span><span class="co">#&gt;               Estimate Std.Error   Z value     Pr(&gt;|Z|)</span></span>
-<span><span class="co">#&gt; (Intercept)  2.1969369 0.5649120  3.888990 0.0001006624</span></span>
-<span><span class="co">#&gt; Treatment   -0.7984087 0.3350484 -2.382966 0.0171737938</span></span>
+<span><span class="co">#&gt; (Intercept)  2.1969369 0.5496703  3.996826 6.419732e-05</span></span>
+<span><span class="co">#&gt; Treatment   -0.7984087 0.3325016 -2.401218 1.634060e-02</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; Failure time distribution model:</span></span>
 <span><span class="co">#&gt;                             Estimate Std.Error   Z value  Pr(&gt;|Z|)</span></span>
-<span><span class="co">#&gt; TreatmentSurgery+Adjuvant -0.1172043 0.1762495 -0.664991 0.5060563</span></span>
+<span><span class="co">#&gt; TreatmentSurgery+Adjuvant -0.1172043  0.170035 -0.689295 0.4906376</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt;  CURE MODELS FOR LONG-TERM SURVIVORS</span></span>
 <span><span class="co">#&gt; </span></span>
@@ -884,7 +884,7 @@ parameters.</p>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt;  Mixture Cure Model Results</span></span>
 <span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt;  Estimated Cure Fraction: 90% (95% CI: 74.8%-96.5%)</span></span>
+<span><span class="co">#&gt;  Estimated Cure Fraction: 90% (95% CI: 75.4%-96.4%)</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt;  Survival Model Type: Proportional Hazards</span></span>
 <span><span class="co">#&gt; </span></span>
@@ -906,9 +906,9 @@ parameters.</p>
 <span><span class="co">#&gt;  ──────────────────────────────────────────────────────────────────────────────────────────────────────── </span></span>
 <span><span class="co">#&gt;    Parameter            Estimate      Std. Error    z value       p-value      CI Lower      CI Upper     </span></span>
 <span><span class="co">#&gt;  ──────────────────────────────────────────────────────────────────────────────────────────────────────── </span></span>
-<span><span class="co">#&gt;    Cure: (Intercept)     2.1969369     0.5649120     3.8889896    0.0001007     1.0897094     3.3041644   </span></span>
-<span><span class="co">#&gt;    Cure: Z[, -1]        -0.7984087     0.3350484    -2.3829657    0.0171738    -1.4551035    -0.1417140   </span></span>
-<span><span class="co">#&gt;    Survival: X[, -1]    -0.1172043     0.1762495    -0.6649910    0.5060563    -0.4626532     0.2282446   </span></span>
+<span><span class="co">#&gt;    Cure: (Intercept)     2.1969369     0.5496703     3.9968265    0.0000642     1.1195831     3.2742907   </span></span>
+<span><span class="co">#&gt;    Cure: Z[, -1]        -0.7984087     0.3325016    -2.4012179    0.0163406    -1.4501118    -0.1467057   </span></span>
+<span><span class="co">#&gt;    Survival: X[, -1]    -0.1172043     0.1700350    -0.6892950    0.4906376    -0.4504729     0.2160643   </span></span>
 <span><span class="co">#&gt;  ──────────────────────────────────────────────────────────────────────────────────────────────────────── </span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; </span></span>
@@ -916,7 +916,7 @@ parameters.</p>
 <span><span class="co">#&gt;  ─────────────────────────────────────────────────────────────────────────────────── </span></span>
 <span><span class="co">#&gt;    Group      Cure Fraction    CI Lower     CI Upper     Median Survival (Uncured)   </span></span>
 <span><span class="co">#&gt;  ─────────────────────────────────────────────────────────────────────────────────── </span></span>
-<span><span class="co">#&gt;    Overall        0.8999741    0.7483270    0.9645714                                </span></span>
+<span><span class="co">#&gt;    Overall        0.8999741    0.7539114    0.9635362                                </span></span>
 <span><span class="co">#&gt;  ─────────────────────────────────────────────────────────────────────────────────── </span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; </span></span>
@@ -924,7 +924,7 @@ parameters.</p>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt;  Model Type: mixture cure model (smcure)</span></span>
 <span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt;  Estimated Cure Fraction: 90% (95% CI: 74.8%-96.5%; method: Bootstrap</span></span>
+<span><span class="co">#&gt;  Estimated Cure Fraction: 90% (95% CI: 75.4%-96.4%; method: Bootstrap</span></span>
 <span><span class="co">#&gt;  delta method (logit scale))</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt;  Clinical Implications:</span></span>
@@ -953,7 +953,7 @@ parameters.</p>
 <span><span class="co">#&gt;  &lt;div style='background-color:#f8f9fa; padding:10px; border-left:3px</span></span>
 <span><span class="co">#&gt;  solid #007bff; margin:8px 0; font-style:italic;'&gt;Using a mixture cure</span></span>
 <span><span class="co">#&gt;  model (smcure), the estimated cure fraction was 90.0% (95% CI:</span></span>
-<span><span class="co">#&gt;  74.8%-96.5%; method: Bootstrap delta method (logit scale)), based on</span></span>
+<span><span class="co">#&gt;  75.4%-96.4%; method: Bootstrap delta method (logit scale)), based on</span></span>
 <span><span class="co">#&gt;  250 patients with a median follow-up of 20.0 time units.&lt;p</span></span>
 <span><span class="co">#&gt;  style='font-size:0.85em; color:#666;'&gt;Tip: Copy the text above</span></span>
 <span><span class="co">#&gt;  directly into your manuscript results section.</span></span></code></pre></div>
@@ -1150,7 +1150,7 @@ the confidence interval for each group’s cure fraction.</p>
 <span>  model_type <span class="op">=</span> <span class="st">"mixture"</span>,</span>
 <span>  plot_cure_fraction <span class="op">=</span> <span class="cn">TRUE</span>,</span>
 <span>  bootstrap_ci <span class="op">=</span> <span class="cn">TRUE</span>,</span>
-<span>  n_bootstrap <span class="op">=</span> <span class="fl">200</span></span>
+<span>  n_bootstrap <span class="op">=</span> <span class="fl">100</span></span>
 <span><span class="op">)</span></span>
 <span><span class="co">#&gt; Program is running..be patient... done.</span></span>
 <span><span class="co">#&gt; Call:</span></span>
@@ -1160,13 +1160,13 @@ the confidence interval for each group’s cure fraction.</p>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; Cure probability model:</span></span>
 <span><span class="co">#&gt;               Estimate Std.Error   Z value     Pr(&gt;|Z|)</span></span>
-<span><span class="co">#&gt; (Intercept)  2.1969369 0.5571848  3.942923 8.049446e-05</span></span>
-<span><span class="co">#&gt; Treatment   -0.7984087 0.3306288 -2.414819 1.574301e-02</span></span>
+<span><span class="co">#&gt; (Intercept)  2.1969369 0.5695747  3.857153 0.0001147153</span></span>
+<span><span class="co">#&gt; Treatment   -0.7984087 0.3324805 -2.401370 0.0163338016</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; Failure time distribution model:</span></span>
 <span><span class="co">#&gt;                             Estimate Std.Error    Z value  Pr(&gt;|Z|)</span></span>
-<span><span class="co">#&gt; TreatmentSurgery+Adjuvant -0.1172043 0.1747096 -0.6708521 0.5023147</span></span>
+<span><span class="co">#&gt; TreatmentSurgery+Adjuvant -0.1172043 0.1817742 -0.6447795 0.5190701</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt;  CURE MODELS FOR LONG-TERM SURVIVORS</span></span>
 <span><span class="co">#&gt; </span></span>
@@ -1178,7 +1178,7 @@ the confidence interval for each group’s cure fraction.</p>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt;  Mixture Cure Model Results</span></span>
 <span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt;  Estimated Cure Fraction: 90% (95% CI: 75.1%-96.4%)</span></span>
+<span><span class="co">#&gt;  Estimated Cure Fraction: 90% (95% CI: 74.7%-96.5%)</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt;  Survival Model Type: Proportional Hazards</span></span>
 <span><span class="co">#&gt; </span></span>
@@ -1200,9 +1200,9 @@ the confidence interval for each group’s cure fraction.</p>
 <span><span class="co">#&gt;  ──────────────────────────────────────────────────────────────────────────────────────────────────────── </span></span>
 <span><span class="co">#&gt;    Parameter            Estimate      Std. Error    z value       p-value      CI Lower      CI Upper     </span></span>
 <span><span class="co">#&gt;  ──────────────────────────────────────────────────────────────────────────────────────────────────────── </span></span>
-<span><span class="co">#&gt;    Cure: (Intercept)     2.1969369     0.5571848     3.9429231    0.0000805     1.1048546     3.2890191   </span></span>
-<span><span class="co">#&gt;    Cure: Z[, -1]        -0.7984087     0.3306288    -2.4148194    0.0157430    -1.4464411    -0.1503764   </span></span>
-<span><span class="co">#&gt;    Survival: X[, -1]    -0.1172043     0.1747096    -0.6708521    0.5023147    -0.4596351     0.2252265   </span></span>
+<span><span class="co">#&gt;    Cure: (Intercept)     2.1969369     0.5695747     3.8571531    0.0001147     1.0805704     3.3133033   </span></span>
+<span><span class="co">#&gt;    Cure: Z[, -1]        -0.7984087     0.3324805    -2.4013702    0.0163338    -1.4500705    -0.1467470   </span></span>
+<span><span class="co">#&gt;    Survival: X[, -1]    -0.1172043     0.1817742    -0.6447795    0.5190701    -0.4734818     0.2390732   </span></span>
 <span><span class="co">#&gt;  ──────────────────────────────────────────────────────────────────────────────────────────────────────── </span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; </span></span>
@@ -1210,7 +1210,7 @@ the confidence interval for each group’s cure fraction.</p>
 <span><span class="co">#&gt;  ─────────────────────────────────────────────────────────────────────────────────── </span></span>
 <span><span class="co">#&gt;    Group      Cure Fraction    CI Lower     CI Upper     Median Survival (Uncured)   </span></span>
 <span><span class="co">#&gt;  ─────────────────────────────────────────────────────────────────────────────────── </span></span>
-<span><span class="co">#&gt;    Overall        0.8999741    0.7511686    0.9640502                                </span></span>
+<span><span class="co">#&gt;    Overall        0.8999741    0.7466019    0.9648824                                </span></span>
 <span><span class="co">#&gt;  ─────────────────────────────────────────────────────────────────────────────────── </span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; </span></span>
@@ -1218,7 +1218,7 @@ the confidence interval for each group’s cure fraction.</p>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt;  Model Type: mixture cure model (smcure)</span></span>
 <span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt;  Estimated Cure Fraction: 90% (95% CI: 75.1%-96.4%; method: Bootstrap</span></span>
+<span><span class="co">#&gt;  Estimated Cure Fraction: 90% (95% CI: 74.7%-96.5%; method: Bootstrap</span></span>
 <span><span class="co">#&gt;  delta method (logit scale))</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt;  Clinical Implications:</span></span>
@@ -1247,7 +1247,7 @@ the confidence interval for each group’s cure fraction.</p>
 <span><span class="co">#&gt;  &lt;div style='background-color:#f8f9fa; padding:10px; border-left:3px</span></span>
 <span><span class="co">#&gt;  solid #007bff; margin:8px 0; font-style:italic;'&gt;Using a mixture cure</span></span>
 <span><span class="co">#&gt;  model (smcure), the estimated cure fraction was 90.0% (95% CI:</span></span>
-<span><span class="co">#&gt;  75.1%-96.4%; method: Bootstrap delta method (logit scale)), based on</span></span>
+<span><span class="co">#&gt;  74.7%-96.5%; method: Bootstrap delta method (logit scale)), based on</span></span>
 <span><span class="co">#&gt;  250 patients with a median follow-up of 20.0 time units.&lt;p</span></span>
 <span><span class="co">#&gt;  style='font-size:0.85em; color:#666;'&gt;Tip: Copy the text above</span></span>
 <span><span class="co">#&gt;  directly into your manuscript results section.</span></span></code></pre></div>
@@ -1865,7 +1865,7 @@ generated clinical context for the cure model results. It includes:</p>
 <span>  cure_link <span class="op">=</span> <span class="st">"logit"</span>,</span>
 <span>  cure_threshold <span class="op">=</span> <span class="fl">60</span>,</span>
 <span>  bootstrap_ci <span class="op">=</span> <span class="cn">TRUE</span>,</span>
-<span>  n_bootstrap <span class="op">=</span> <span class="fl">200</span>,</span>
+<span>  n_bootstrap <span class="op">=</span> <span class="fl">100</span>,</span>
 <span>  plot_cure_fraction <span class="op">=</span> <span class="cn">TRUE</span>,</span>
 <span>  plot_survival <span class="op">=</span> <span class="cn">TRUE</span>,</span>
 <span>  goodness_of_fit <span class="op">=</span> <span class="cn">TRUE</span>,</span>

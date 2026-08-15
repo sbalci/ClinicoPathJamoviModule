@@ -21,8 +21,11 @@ restore_files <- function() {
   }
 }
 
-# Build, then always restore
+# Build, then always restore.
+# lazy = TRUE: skip re-rendering articles/reference pages whose source is older
+# than the built HTML (the stagemigration vignette alone takes many minutes).
+# To force a full rebuild of one article, delete its docs/articles/<name>.html.
 tryCatch(
-  pkgdown::build_site(),
+  pkgdown::build_site(lazy = TRUE),
   finally = restore_files()
 )

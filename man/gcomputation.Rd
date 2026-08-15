@@ -88,13 +88,3 @@ outcomes, a risk ratio), with percentile bootstrap confidence intervals.
 This standardization removes confounding by the measured covariates without
 requiring a propensity model.
 }
-\examples{
-\donttest{
-gcomputation(
-    data = mydata,
-    outcome = "death",
-    treatment = "treated",
-    covariates = vars(age, stage, grade),
-    outcomeType = "binary")
-}
-}

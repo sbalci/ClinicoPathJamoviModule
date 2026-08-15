@@ -43,7 +43,6 @@ data(psychopdaROC_rare)
 psychopdaROC(data = psychopdaROC_rare, dependentVars = "biomarker",
              classVar = "rare_disease", positiveClass = "Disease",
              refVar = "biomarker")
-#> Multiple optimal cutpoints found, applying break_ties.
 #> 
 #>  ADVANCED ROC ANALYSIS
 #> 
@@ -57,7 +56,7 @@ psychopdaROC(data = psychopdaROC_rare, dependentVars = "biomarker",
 #>  The ROC analysis has been completed using the following
 #>  specifications:
 #> 
-#>  &nbsp;
+#>   
 #> 
 #>  Measure Variable(s): biomarker
 #> 
@@ -65,7 +64,7 @@ psychopdaROC(data = psychopdaROC_rare, dependentVars = "biomarker",
 #> 
 #>  Positive Class: Disease
 #> 
-#>  &nbsp;
+#>   
 #> 
 #>  Method: maximize_metric
 #> 
@@ -77,9 +76,9 @@ psychopdaROC(data = psychopdaROC_rare, dependentVars = "biomarker",
 #> 
 #>  Tie Breakers: mean
 #> 
-#>  Metric Tolerance: 0.05
+#>  Metric Tolerance: 1e-06
 #> 
-#>  &nbsp;
+#>   
 #> 
 #>  <hr />
 #> 
@@ -99,6 +98,12 @@ psychopdaROC(data = psychopdaROC_rare, dependentVars = "biomarker",
 #>  ──────────────────────────────────────────────────────────────────────── 
 #>    biomarker    0.9790941       0.9506579       1.0000000    < .0000001   
 #>  ──────────────────────────────────────────────────────────────────────── 
+#>    Note. Reading of the test values: <b>HIGHER values were taken to
+#>    indicate Disease</b> (Classification Direction = ">="). If that is
+#>    the wrong way round for this marker, every sensitivity,
+#>    specificity, cutpoint and AUC below is reversed — switch
+#>    Classification Direction to "<=" and the AUC becomes 1 minus the
+#>    value shown.
 #>    Note. AUC 95% confidence intervals computed using the DeLong
 #>    method.
 #> 
@@ -117,7 +122,7 @@ psychopdaROC(data = psychopdaROC_rare, dependentVars = "biomarker",
 #>  ───────────────────────────────────────────────────────────────────────────────────────────────────────────────── 
 #>    Cutpoint      Sensitivity    Specificity    PPV          NPV          Youden's J    AUC          Metric Score   
 #>  ───────────────────────────────────────────────────────────────────────────────────────────────────────────────── 
-#>    66.6279881       92.30769       93.03136     37.50000     99.62687     0.8533905    0.9790941       0.8533905   
+#>    68.1783903       92.30769       95.47038     48.00000     99.63636     0.8777808    0.9790941       0.8777808   
 #>  ───────────────────────────────────────────────────────────────────────────────────────────────────────────────── 
 #> 
 #> 
@@ -127,6 +132,12 @@ psychopdaROC(data = psychopdaROC_rare, dependentVars = "biomarker",
 #>  ──────────────────────────────────────────────────────────────────────── 
 #>    biomarker    0.9790941       0.9506579       1.0000000    < .0000001   
 #>  ──────────────────────────────────────────────────────────────────────── 
+#>    Note. Reading of the test values: <b>HIGHER values were taken to
+#>    indicate Disease</b> (Classification Direction = ">="). If that is
+#>    the wrong way round for this marker, every sensitivity,
+#>    specificity, cutpoint and AUC below is reversed — switch
+#>    Classification Direction to "<=" and the AUC becomes 1 minus the
+#>    value shown.
 #>    Note. AUC 95% confidence intervals computed using the DeLong
 #>    method.
 #> 

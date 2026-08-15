@@ -17,3 +17,8 @@ assess_limitations(results, sample_size)
 - sample_size:
 
   Sample size
+
+## Value
+
+A character vector of identified analysis limitations (empty if none are
+detected).

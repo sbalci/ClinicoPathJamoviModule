@@ -6,6 +6,11 @@ described by Ioannidis (2005). It helps researchers understand the
 probability that their claimed findings are actually true given various
 study characteristics.
 
+## Value
+
+An `R6` class generator object for the `ppvClass` backend; used
+internally by the jamovi analysis wrapper and not called directly.
+
 ## Details
 
 The calculation is based on Bayes' theorem and considers:

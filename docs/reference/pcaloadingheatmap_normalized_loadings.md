@@ -24,3 +24,8 @@ pcaloadingheatmap_normalized_loadings(pca, pca_data, scaled)
 - scaled:
 
   Logical; whether the PCA was run with `scale.=TRUE`.
+
+## Value
+
+A numeric matrix of normalized loadings (variables in rows, components
+in columns) with values clipped to the (-1, 1) range.

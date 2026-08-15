@@ -8,9 +8,9 @@ Positive Predictive Value, Negative Predictive Value.
 ``` r
 decision(
   data,
-  gold,
+  gold = NULL,
   goldPositive,
-  newtest,
+  newtest = NULL,
   testPositive,
   goldNegative,
   testNegative,

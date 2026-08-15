@@ -6,6 +6,11 @@ non-proportional hazards modeling using additive covariate effects,
 allowing for time-varying coefficients and detailed analysis of
 cumulative regression functions over time.
 
+## Value
+
+An `R6` class generator object for the `aalenhazardClass` backend; used
+internally by the jamovi analysis wrapper and not called directly.
+
 ## Details
 
 The aalenhazardClass implements Aalen's additive hazard regression with:

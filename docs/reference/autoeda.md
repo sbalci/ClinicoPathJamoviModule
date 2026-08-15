@@ -13,7 +13,7 @@ autoeda(
   data,
   vars,
   analysis_type = "overview",
-  target_var,
+  target_var = NULL,
   include_plots = TRUE,
   missing_threshold = 5,
   correlation_method = "pearson",

@@ -52,14 +52,26 @@ nogoldstandard(data = nogoldstandard_imbalanced,
                test5Positive = "", method = "composite")
 #> 
 #>  ANALYSIS WITHOUT GOLD STANDARD
+#> Analysing 160 cases
+#> All 160 cases have a result for every selected test.
+#> 
 #> WARNING: Composite Ties
 #> Composite reference with even number of tests may result in ties. Consider using an odd number of tests or a different method.
+#> 
+#> WARNING: Composite reference cannot be used with only two tests
+#> With two tests a majority vote has no majority: one positive out of two is a tie, which this rule counts as diseased, making the composite reference identical to "any test positive". Every test then agrees perfectly with the reference whenever it is positive, so specificity and PPV are fixed at 100% by construction and are left blank below. Add a third test, or interpret only the sensitivity column -- and note that it too is inflated because each test helped build the standard it is being judged against.
+#> 
+#> WARNING: This method cannot estimate accuracy
+#> The reference standard is defined as "at least one test is positive", so each test is being compared against a rule built from its own result. Specificity and PPV are therefore fixed at 100% by construction on every dataset, whatever the tests actually do, and are left blank below rather than reported as findings. The remaining figures are inflated by the same circularity and describe agreement with the composite rule, not diagnostic accuracy. To estimate accuracy without a gold standard, use the latent class method with three or more conditionally independent tests.
 #>  Agreement Statistics (Cohen's Kappa)                                       
 #>  ────────────────────────────────────────────────────────────────────────── 
 #>    Test Pair                          Kappa        p-value      Agreement   
 #>  ────────────────────────────────────────────────────────────────────────── 
 #>    Sensitive_Test vs Specific_Test    0.3778354    0.0000005     70.00000   
 #>  ────────────────────────────────────────────────────────────────────────── 
+#>    Note. Kappa standard errors and p-values use a large-sample normal
+#>    approximation rather than the exact asymptotic SE (e.g. vcd::Kappa);
+#>    interpret p-values cautiously, especially in small samples.
 #> 
 #> 
 #>  <div class='clinical-summary' style='background: #f0f8ff; padding:
@@ -70,12 +82,14 @@ nogoldstandard(data = nogoldstandard_imbalanced,
 #> 
 #>  Tests analyzed: Sensitive_Test, Specific_Test (N=2)
 #> 
-#>  Disease prevalence: 51.2%
+#>  Cases meeting the reference rule 51.2% *(this is the share of cases
+#>  satisfying the rule, not an estimate of disease prevalence)*
 #> 
 #>  Test sensitivities: Range from 51.2% to 90.2%
 #> 
-#>  Clinical interpretation: High prevalence setting - high PPV expected,
-#>  focus on confirming disease
+#>  Caution: this method scores each test against a reference built from
+#>  the tests themselves, so the figures describe agreement with that rule
+#>  rather than diagnostic accuracy.
 #> 
 #>  <div style='background: #f8f9fa; padding: 20px; border-radius: 8px;
 #>  margin: 15px 0; border-left: 4px solid #007bff;'><h3 style='color:
@@ -90,8 +104,10 @@ nogoldstandard(data = nogoldstandard_imbalanced,
 #> 
 #>  Best for: Diagnostic validation studies with 3+ tests and N>=100
 #> 
-#>  Strengths: Handles conditional dependence, provides model fit
-#>  statistics, most statistically rigorous
+#>  Strengths: The only method here that estimates accuracy rather than
+#>  agreement with a self-built reference; provides model fit statistics.
+#>  Assumes the tests are conditionally independent given true status --
+#>  it does NOT model conditional dependence
 #> 
 #>  <div style='margin: 15px 0; padding: 15px; background: #e3f2fd;
 #>  border-radius: 5px;'><h4 style='color: #1565c0; margin-top: 0;'>
@@ -116,8 +132,10 @@ nogoldstandard(data = nogoldstandard_imbalanced,
 #>  Best for: Inter-rater agreement studies with 3+ tests, exploratory
 #>  analysis
 #> 
-#>  Strengths: Simple and intuitive, requires minimal assumptions, good
-#>  starting point
+#>  Strengths: Simple and intuitive. Not an accuracy estimate: each test
+#>  helps build the standard it is judged against, which inflates its
+#>  apparent performance. Needs 3+ tests -- with 2 a tie counts as
+#>  diseased, making it identical to Any Test Positive
 #> 
 #>  <div style='margin: 15px 0; padding: 15px; background: #fce4ec;
 #>  border-radius: 5px;'><h4 style='color: #c2185b; margin-top: 0;'> All
@@ -129,7 +147,10 @@ nogoldstandard(data = nogoldstandard_imbalanced,
 #>  Best for: Highly specific diagnoses where false positives are very
 #>  costly
 #> 
-#>  Strengths: High specificity reference, minimizes false positives
+#>  Strengths: A deliberately strict reference. Sensitivity and NPV cannot
+#>  be estimated under this rule -- they are fixed at 100% by construction
+#>  -- so only specificity and PPV are shown, and both are inflated by the
+#>  same circularity
 #> 
 #>  <div style='margin: 15px 0; padding: 15px; background: #e8f5e8;
 #>  border-radius: 5px;'><h4 style='color: #388e3c; margin-top: 0;'> Any
@@ -140,7 +161,10 @@ nogoldstandard(data = nogoldstandard_imbalanced,
 #> 
 #>  Best for: Population screening scenarios where missing cases is costly
 #> 
-#>  Strengths: High sensitivity reference, minimizes false negatives
+#>  Strengths: A deliberately permissive reference. Specificity and PPV
+#>  cannot be estimated under this rule -- they are fixed at 100% by
+#>  construction -- so only sensitivity and NPV are shown, and both are
+#>  inflated by the same circularity
 #> 
 #>  <div style='margin: 15px 0; padding: 10px; background: #fff8e1;
 #>  border-radius: 5px; border-left: 3px solid #ffb300;'><h4 style='color:
@@ -163,9 +187,16 @@ nogoldstandard(data = nogoldstandard_imbalanced,
 #>  ────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────── 
 #>    Test              Sensitivity    Lower CI     Upper CI     Specificity    Lower CI     Upper CI     PPV          NPV         
 #>  ────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────── 
-#>    Sensitive_Test       90.24390     85.64626     94.84154      100.00000    100.00000    100.00000    100.00000     90.69767   
-#>    Specific_Test        51.21951     43.47438     58.96465      100.00000    100.00000    100.00000    100.00000     66.10169   
+#>    Sensitive_Test       90.24390     83.82164     96.66617                                                           90.69767   
+#>    Specific_Test        51.21951     40.40064     62.03838                                                           66.10169   
 #>  ────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────── 
+#>    Note. 95% intervals are normal-approximation (Wald) intervals, using the estimated number of diseased cases as the
+#>    denominator for sensitivity and non-diseased for specificity. They treat the estimates as observed proportions and so
+#>    understate the uncertainty of a latent-variable model; enable Bootstrap for intervals that account for the estimation
+#>    itself.
+#>    Note. Each test is scored against a reference standard built from the tests themselves, so these are measures of
+#>    agreement with that rule, not estimates of diagnostic accuracy. The blank column is fixed at 100% by construction and
+#>    carries no information.
 #> 
 #> 
 #>  Test Cross-Tabulation                                      

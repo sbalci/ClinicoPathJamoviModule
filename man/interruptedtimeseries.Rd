@@ -87,13 +87,3 @@ autocorrelation. This is the standard quasi-experimental design for
 evaluating quality-improvement, policy, or laboratory-process interventions
 where randomization is not possible.
 }
-\examples{
-\donttest{
-interruptedtimeseries(
-    data = mydata,
-    time = "month",
-    outcome = "turnaround_time",
-    interventionTime = 25,
-    hac = TRUE)
-}
-}

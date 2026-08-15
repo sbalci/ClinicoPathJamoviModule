@@ -56,7 +56,13 @@ ihcscoring(
   language = "english",
   colorblind_safe = TRUE,
   high_contrast = FALSE,
-  font_size = "normal"
+  font_size = "normal",
+  optimal_cutpoint = FALSE,
+  optimize_score = "hscore",
+  outcome_type = "binary",
+  outcome_var = NULL,
+  outcome_positive,
+  cutpoint_time_var = NULL
 )
 ```
 
@@ -270,6 +276,33 @@ ihcscoring(
 
   base font size for improved readability
 
+- optimal_cutpoint:
+
+  Determine a data-driven optimal cutpoint for the chosen score against
+  a clinical outcome, instead of relying only on the fixed cutpoint.
+  Uses Youden's index for a binary outcome or the maximally-selected
+  log-rank statistic for a survival outcome.
+
+- optimize_score:
+
+  Which computed score to dichotomize at the optimal cutpoint.
+
+- outcome_type:
+
+  Type of outcome used to optimize the cutpoint.
+
+- outcome_var:
+
+  Binary outcome (for Youden) or the event indicator (for survival).
+
+- outcome_positive:
+
+  Level of the outcome variable representing the positive class / event.
+
+- cutpoint_time_var:
+
+  Follow-up time, required when the outcome type is survival.
+
 ## Value
 
 A results object containing:
@@ -288,6 +321,7 @@ A results object containing:
 | `results$distributionplot` |  |  |  |  | Visual distribution of H-scores and Allred scores |
 | `results$correlationplot` |  |  |  |  | Correlation between H-score and Allred score methods |
 | `results$agreementplot` |  |  |  |  | Bland-Altman style agreement analysis between methods |
+| `results$optimalCutpointTable` |  |  |  |  | a table |
 | `results$cutpointplot` |  |  |  |  | ROC analysis for optimal cutpoint determination |
 | `results$biomarkerspecific$biomarkerresults` |  |  |  |  | Analysis tailored to specific biomarker characteristics |
 | `results$biomarkerspecific$clinicalcutpoints` |  |  |  |  | Established clinical thresholds and their performance |

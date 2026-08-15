@@ -113,7 +113,8 @@ swimmerplot(
 
 - maxMilestones:
 
-  Maximum number of milestone events to support.
+  Maximum number of milestone events to support (milestone slots 1-5 are
+  defined).
 
 - milestone1Name:
 
@@ -260,9 +261,7 @@ A results object containing:
 |                               |     |     |     |     |                |
 |-------------------------------|-----|-----|-----|-----|----------------|
 | `results$notices`             |     |     |     |     | a preformatted |
-| `results$errorNotice`         |     |     |     |     | a html         |
 | `results$warningNotice`       |     |     |     |     | a html         |
-| `results$infoNotice`          |     |     |     |     | a html         |
 | `results$instructions`        |     |     |     |     | a html         |
 | `results$plot`                |     |     |     |     | an image       |
 | `results$summary`             |     |     |     |     | a table        |
@@ -270,8 +269,8 @@ A results object containing:
 | `results$personTimeTable`     |     |     |     |     | a table        |
 | `results$milestoneTable`      |     |     |     |     | a table        |
 | `results$eventMarkerTable`    |     |     |     |     | a table        |
-| `results$timelineData`        |     |     |     |     | an output      |
-| `results$summaryData`         |     |     |     |     | an output      |
+| `results$timelineData`        |     |     |     |     | a table        |
+| `results$summaryData`         |     |     |     |     | a table        |
 | `results$exportInfo`          |     |     |     |     | a html         |
 | `results$validationReport`    |     |     |     |     | a html         |
 | `results$advancedMetrics`     |     |     |     |     | a table        |

@@ -42,7 +42,6 @@ data(psychopdaROC_imbalanced)
 psychopdaROC(data = psychopdaROC_imbalanced, dependentVars = "predictor",
              classVar = "rare_outcome", positiveClass = "Event",
              refVar = "predictor")
-#> Multiple optimal cutpoints found, applying break_ties.
 #> 
 #>  ADVANCED ROC ANALYSIS
 #> 
@@ -56,7 +55,7 @@ psychopdaROC(data = psychopdaROC_imbalanced, dependentVars = "predictor",
 #>  The ROC analysis has been completed using the following
 #>  specifications:
 #> 
-#>  &nbsp;
+#>   
 #> 
 #>  Measure Variable(s): predictor
 #> 
@@ -64,7 +63,7 @@ psychopdaROC(data = psychopdaROC_imbalanced, dependentVars = "predictor",
 #> 
 #>  Positive Class: Event
 #> 
-#>  &nbsp;
+#>   
 #> 
 #>  Method: maximize_metric
 #> 
@@ -76,9 +75,9 @@ psychopdaROC(data = psychopdaROC_imbalanced, dependentVars = "predictor",
 #> 
 #>  Tie Breakers: mean
 #> 
-#>  Metric Tolerance: 0.05
+#>  Metric Tolerance: 1e-06
 #> 
-#>  &nbsp;
+#>   
 #> 
 #>  <hr />
 #> 
@@ -98,6 +97,12 @@ psychopdaROC(data = psychopdaROC_imbalanced, dependentVars = "predictor",
 #>  ──────────────────────────────────────────────────────────────────────── 
 #>    predictor    0.9553571       0.9235097       0.9872046    < .0000001   
 #>  ──────────────────────────────────────────────────────────────────────── 
+#>    Note. Reading of the test values: <b>HIGHER values were taken to
+#>    indicate Event</b> (Classification Direction = ">="). If that is
+#>    the wrong way round for this marker, every sensitivity,
+#>    specificity, cutpoint and AUC below is reversed — switch
+#>    Classification Direction to "<=" and the AUC becomes 1 minus the
+#>    value shown.
 #>    Note. AUC 95% confidence intervals computed using the DeLong
 #>    method.
 #> 
@@ -116,7 +121,7 @@ psychopdaROC(data = psychopdaROC_imbalanced, dependentVars = "predictor",
 #>  ───────────────────────────────────────────────────────────────────────────────────────────────────────────────── 
 #>    Cutpoint      Sensitivity    Specificity    PPV          NPV          Youden's J    AUC          Metric Score   
 #>  ───────────────────────────────────────────────────────────────────────────────────────────────────────────────── 
-#>    75.3373183      100.00000       91.32653     19.04762    100.00000     0.9132653    0.9553571       0.9132653   
+#>    76.9122686      100.00000       93.36735     23.52941    100.00000     0.9336735    0.9553571       0.9336735   
 #>  ───────────────────────────────────────────────────────────────────────────────────────────────────────────────── 
 #> 
 #> 
@@ -126,6 +131,12 @@ psychopdaROC(data = psychopdaROC_imbalanced, dependentVars = "predictor",
 #>  ──────────────────────────────────────────────────────────────────────── 
 #>    predictor    0.9553571       0.9235097       0.9872046    < .0000001   
 #>  ──────────────────────────────────────────────────────────────────────── 
+#>    Note. Reading of the test values: <b>HIGHER values were taken to
+#>    indicate Event</b> (Classification Direction = ">="). If that is
+#>    the wrong way round for this marker, every sensitivity,
+#>    specificity, cutpoint and AUC below is reversed — switch
+#>    Classification Direction to "<=" and the AUC becomes 1 minus the
+#>    value shown.
 #>    Note. AUC 95% confidence intervals computed using the DeLong
 #>    method.
 #> 

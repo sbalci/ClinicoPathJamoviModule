@@ -4,6 +4,11 @@ Comprehensive survival analysis for continuous explanatory variables
 with optimal cut-off determination, multiple cut-offs analysis, RMST
 analysis, residual diagnostics, and advanced visualization options.
 
+## Value
+
+An `R6` class generator object for the `survivalcontClass` backend; used
+internally by the jamovi analysis wrapper and not called directly.
+
 ## Details
 
 This function provides advanced survival analysis specifically designed
@@ -150,6 +155,7 @@ result1 <- survivalcont(
   data = lung,
   elapsedtime = "time",
   outcome = "status_binary",
+  outcomeLevel = NULL, dod = NULL, dooc = NULL, awd = NULL, awod = NULL,
   contexpl = "age",
   findcut = TRUE,
   sc = TRUE
@@ -160,6 +166,7 @@ result2 <- survivalcont(
   data = lung,
   elapsedtime = "time",
   outcome = "status_binary",
+  outcomeLevel = NULL, dod = NULL, dooc = NULL, awd = NULL, awod = NULL,
   contexpl = "ph.karno",
   multiple_cutoffs = TRUE,
   num_cutoffs = "three",
@@ -173,6 +180,7 @@ result3 <- survivalcont(
   data = lung,
   elapsedtime = "time",
   outcome = "status_binary",
+  outcomeLevel = NULL, dod = NULL, dooc = NULL, awd = NULL, awod = NULL,
   contexpl = "wt.loss",
   findcut = TRUE,
   rmst_analysis = TRUE,
@@ -200,6 +208,7 @@ result4 <- survivalcont(
   timetypedata = "ymd",
   timetypeoutput = "months",
   outcome = "event",
+  outcomeLevel = NULL, dod = NULL, dooc = NULL, awd = NULL, awod = NULL,
   contexpl = "biomarker",
   person_time = TRUE,
   time_intervals = "6, 12, 24",
@@ -212,6 +221,7 @@ result5 <- survivalcont(
   data = lung,
   elapsedtime = "time",
   outcome = "status_binary",
+  outcomeLevel = NULL, dod = NULL, dooc = NULL, awd = NULL, awod = NULL,
   contexpl = "meal.cal",
   findcut = TRUE,
   multiple_cutoffs = TRUE,

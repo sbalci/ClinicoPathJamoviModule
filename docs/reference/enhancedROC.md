@@ -27,6 +27,7 @@ enhancedROC(
   bootstrapCutoffCI = FALSE,
   bootstrapPartialAUC = FALSE,
   stratifiedBootstrap = FALSE,
+  seed = 0,
   pairwiseComparisons = FALSE,
   comparisonMethod = "delong",
   rocCurve = TRUE,
@@ -159,17 +160,28 @@ enhancedROC(
 
 - bootstrapCutoffCI:
 
-  Calculate bootstrap confidence intervals for sensitivity and
-  specificity at optimal cutoff
+  NOT YET IMPLEMENTED - selecting this produces no output. Calculate
+  bootstrap confidence intervals for sensitivity and specificity at
+  optimal cutoff
 
 - bootstrapPartialAUC:
 
-  Calculate bootstrap confidence intervals for partial AUC estimates
+  NOT YET IMPLEMENTED - selecting this produces no output. Calculate
+  bootstrap confidence intervals for partial AUC estimates
 
 - stratifiedBootstrap:
 
   Maintain outcome class proportions in bootstrap samples (recommended
   for imbalanced data)
+
+- seed:
+
+  Random seed used for every resampling step - bootstrap confidence
+  intervals, bootstrap ROC comparisons, and internal validation
+  resamples or cross-validation folds. Fixing it makes a run
+  reproducible: the same data and options give the same intervals every
+  time. Change it to check how sensitive a result is to the particular
+  resamples drawn.
 
 - pairwiseComparisons:
 
@@ -334,31 +346,38 @@ enhancedROC(
 
 - splineCalibration:
 
-  Use restricted cubic splines for flexible calibration curves
+  NOT YET IMPLEMENTED - selecting this produces no output. Use
+  restricted cubic splines for flexible calibration curves
 
 - splineKnots:
 
-  Number of knots for restricted cubic splines (3-7 recommended)
+  NOT YET IMPLEMENTED - selecting this produces no output. Number of
+  knots for restricted cubic splines (3-7 recommended)
 
 - eoRatio:
 
-  Calculate Expected/Observed ratio for overall calibration assessment
+  NOT YET IMPLEMENTED - selecting this produces no output. Calculate
+  Expected/Observed ratio for overall calibration assessment
 
 - namDagostino:
 
-  Perform Nam-D'Agostino calibration test (more powerful than H-L)
+  NOT YET IMPLEMENTED - selecting this produces no output. Perform
+  Nam-D'Agostino calibration test (more powerful than H-L)
 
 - greenwoodNam:
 
+  NOT YET IMPLEMENTED - selecting this produces no output.
   Greenwood-Nam-D'Agostino test for survival model calibration
 
 - calibrationBelt:
 
-  Display calibration belt showing uncertainty around calibration curve
+  NOT YET IMPLEMENTED - selecting this produces no output. Display
+  calibration belt showing uncertainty around calibration curve
 
 - calibrationDensity:
 
-  Show distribution of predicted probabilities as density overlay
+  NOT YET IMPLEMENTED - selecting this produces no output. Show
+  distribution of predicted probabilities as density overlay
 
 - multiClassROC:
 
@@ -390,25 +409,28 @@ enhancedROC(
 
 - harrellCIndex:
 
-  Calculate Harrell's concordance index for time-to-event outcomes
+  NOT YET IMPLEMENTED - selecting this produces no output. Calculate
+  Harrell's concordance index for time-to-event outcomes
 
 - unoCStatistic:
 
-  Calculate Uno's C-statistic (more robust to censoring)
+  NOT YET IMPLEMENTED - selecting this produces no output. Calculate
+  Uno's C-statistic (more robust to censoring)
 
 - incidentDynamic:
 
-  Calculate incident/dynamic AUC (sensitivity for events at specific
-  time)
+  NOT YET IMPLEMENTED - selecting this produces no output. Calculate
+  incident/dynamic AUC (sensitivity for events at specific time)
 
 - cumulativeDynamic:
 
-  Calculate cumulative/dynamic AUC (sensitivity for events by specific
-  time)
+  NOT YET IMPLEMENTED - selecting this produces no output. Calculate
+  cumulative/dynamic AUC (sensitivity for events by specific time)
 
 - competingRisksConcordance:
 
-  Calculate cause-specific concordance for competing risks
+  NOT YET IMPLEMENTED - selecting this produces no output. Calculate
+  cause-specific concordance for competing risks
 
 - internalValidation:
 
@@ -420,27 +442,33 @@ enhancedROC(
 
 - optimismCorrection:
 
-  Apply optimism correction to performance metrics
+  NOT YET IMPLEMENTED - selecting this produces no output. Apply
+  optimism correction to performance metrics
 
 - externalValidation:
 
-  Enable external validation reporting framework
+  NOT YET IMPLEMENTED - selecting this produces no output. Enable
+  external validation reporting framework
 
 - decisionImpactCurves:
 
-  Plot decision impact curves showing clinical consequences
+  NOT YET IMPLEMENTED - selecting this produces no output. Plot decision
+  impact curves showing clinical consequences
 
 - netBenefitRegression:
 
-  Model net benefit as function of threshold probabilities
+  NOT YET IMPLEMENTED - selecting this produces no output. Model net
+  benefit as function of threshold probabilities
 
 - modelUpdating:
 
-  Analyze need for model recalibration or updating
+  NOT YET IMPLEMENTED - selecting this produces no output. Analyze need
+  for model recalibration or updating
 
 - transportability:
 
-  Assess model transportability across populations
+  NOT YET IMPLEMENTED - selecting this produces no output. Assess model
+  transportability across populations
 
 ## Value
 

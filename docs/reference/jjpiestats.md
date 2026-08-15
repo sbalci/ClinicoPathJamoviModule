@@ -9,7 +9,7 @@ analysis.'
 ``` r
 jjpiestats(
   data,
-  dep,
+  dep = NULL,
   group = NULL,
   grvar = NULL,
   typestatistics = "parametric",

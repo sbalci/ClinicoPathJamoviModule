@@ -104,11 +104,3 @@ Prognostic Score (GPS / mGPS). Each index is computed per patient,
 summarized across the cohort, optionally dichotomized at a literature or
 data-driven cutpoint, and optionally related to a survival outcome.
 }
-\examples{
-\donttest{
-hematologicindices(
-    data = mydata,
-    neutrophils = "neut", lymphocytes = "lymph",
-    platelets = "plt", albumin = "alb", crp = "crp")
-}
-}

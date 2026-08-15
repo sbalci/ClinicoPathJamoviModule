@@ -228,15 +228,6 @@ circosBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' two categorical variables whose cross-tabulation defines the links. Built 
 #' on the circlize package.
 #' 
-#'
-#' @examples
-#' \donttest{
-#' circos(
-#'     data = mydata,
-#'     fromVar = "referring_site",
-#'     toVar = "treating_site",
-#'     valueVar = "n_patients")
-#'}
 #' @param data The data as a data frame.
 #' @param inputMode Whether links are given as an edge list with an optional
 #'   value column, or derived by cross-tabulating two categorical variables.

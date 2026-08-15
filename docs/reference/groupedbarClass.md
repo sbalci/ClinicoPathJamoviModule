@@ -5,6 +5,11 @@ groups, inspired by Pew Research Center and similar professional
 visualizations. Supports clinical lab values, survey responses, and any
 measurements that vary by group.
 
+## Value
+
+An `R6` class generator object for the `groupedbarClass` backend; used
+internally by the jamovi analysis wrapper and not called directly.
+
 ## Details
 
 This module provides flexible grouped bar chart visualization with:

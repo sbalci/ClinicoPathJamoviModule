@@ -211,7 +211,7 @@ https://www.sciencedirect.com/science/article/abs/pii/S0003497523002540
 <iframe width="560" height="315" src="https://www.youtube.com/embed/2b10k7je7A8?si=iRwJuu3sNj0wIJvI" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
 
 
-![](./images/jsurvival-course.jpg) https://stats-co.eu/analyse-de-survie_53/
+![jsurvival survival analysis course flyer from stats-co.eu](images/jsurvival-course.jpg) https://stats-co.eu/analyse-de-survie_53/
 
 
 # meddecide 

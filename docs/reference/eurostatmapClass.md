@@ -7,7 +7,7 @@ interactive with customizable styling.
 ## Super classes
 
 [`jmvcore::Analysis`](https://rdrr.io/pkg/jmvcore/man/Analysis.html) -\>
-`ClinicoPath::eurostatmapBase` -\> `eurostatmapClass`
+`eurostatmapBase` -\> `eurostatmapClass`
 
 ## Methods
 
@@ -20,6 +20,7 @@ Inherited methods
 - [`jmvcore::Analysis$.createImage()`](https://rdrr.io/pkg/jmvcore/man/Analysis.html#method-.createImage)
 - [`jmvcore::Analysis$.createImages()`](https://rdrr.io/pkg/jmvcore/man/Analysis.html#method-.createImages)
 - [`jmvcore::Analysis$.createPlotObject()`](https://rdrr.io/pkg/jmvcore/man/Analysis.html#method-.createPlotObject)
+- [`jmvcore::Analysis$.getSessionTemp()`](https://rdrr.io/pkg/jmvcore/man/Analysis.html#method-.getSessionTemp)
 - [`jmvcore::Analysis$.load()`](https://rdrr.io/pkg/jmvcore/man/Analysis.html#method-.load)
 - [`jmvcore::Analysis$.render()`](https://rdrr.io/pkg/jmvcore/man/Analysis.html#method-.render)
 - [`jmvcore::Analysis$.save()`](https://rdrr.io/pkg/jmvcore/man/Analysis.html#method-.save)
@@ -44,11 +45,11 @@ Inherited methods
 - [`jmvcore::Analysis$setError()`](https://rdrr.io/pkg/jmvcore/man/Analysis.html#method-setError)
 - [`jmvcore::Analysis$setStatus()`](https://rdrr.io/pkg/jmvcore/man/Analysis.html#method-setStatus)
 - [`jmvcore::Analysis$translate()`](https://rdrr.io/pkg/jmvcore/man/Analysis.html#method-translate)
-- [`ClinicoPath::eurostatmapBase$initialize()`](https://www.serdarbalci.com/ClinicoPathJamoviModule/reference/eurostatmapBase.html#method-initialize)
+- `eurostatmapBase$initialize()`
 
 ------------------------------------------------------------------------
 
-### Method `clone()`
+### `eurostatmapClass$clone()`
 
 The objects of this class are cloneable with this method.
 

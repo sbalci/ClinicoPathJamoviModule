@@ -14,7 +14,8 @@
 # Rscript -e "jmvtools::prepare();devtools::document();jmvtools::prepare();devtools::document()"
 # Rscript -e "jmvtools::prepare();devtools::document();jmvtools::prepare();devtools::document();source('_updateModules.R')"
 
-# Rscript -e "devtools::check()"
+# Rscript -e "devtools::check()
+# Rscript -e "devtools::check(vignettes = FALSE)"
 # Rscript -e "devtools::check(cran = TRUE)"
 
 # Rscript -e 'checktor::checktor(".")'

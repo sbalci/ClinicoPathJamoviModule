@@ -1,7 +1,7 @@
 # STAGEMIGRATION FUNCTION CHECKER REPORT
 
-**Analysis Date:** 2026-01-26  
-**Profile:** standard  
+**Analysis Date:** 2026-01-26\
+**Profile:** standard\
 **Working Directory:**
 /Users/serdarbalci/Documents/GitHub/ClinicoPathJamoviModule
 
@@ -9,8 +9,8 @@
 
 ## EXECUTIVE SUMMARY
 
-**Module:** stagemigration (Advanced TNM Stage Migration Analysis)  
-**Version:** 0.0.31  
+**Module:** stagemigration (Advanced TNM Stage Migration Analysis)\
+**Version:** 0.0.31\
 **Overall Status:** ⚠️ **NEEDS CRITICAL FIXES**
 
 ### Key Metrics
@@ -253,7 +253,7 @@ will cause errors: - `data[["Patient Name"]]` → ERROR -
 
 **Patch 1: Core Variable Access**
 
-**File:** R/stagemigration.b.R  
+**File:** R/stagemigration.b.R\
 **Search for:** `data[[self$options$`
 
 ``` diff
@@ -395,11 +395,11 @@ Single-stage scenarios 7. All analysis type presets
 #### 1. Implement Variable Escaping 🔴 CRITICAL
 
 **Why:** Function exists but unused - variables with spaces will cause
-errors  
+errors\
 **Action:** - Apply `private$.escapeVar()` to ALL data column access -
 Apply to dynamic column names in results - Apply to covariate loops
 
-**Estimated effort:** 2-4 hours  
+**Estimated effort:** 2-4 hours\
 **Files affected:** R/stagemigration.b.R (~50-100 locations)
 
 **Example locations to fix:** - Line ~2900+: Core variable extraction -
@@ -407,37 +407,37 @@ Line ~4000+: Covariate handling - Line ~5000+: Result table population
 
 #### 2. Populate Critical Results 🔴 HIGH
 
-**Why:** Core tables unpopulated - users get no output  
+**Why:** Core tables unpopulated - users get no output\
 **Action:** - Add setters for top 20 critical results - Priority
 order: 1. migrationMatrix (most important) 2. statisticalComparison
 (C-index) 3. migrationOverview 4. nriResults (if calculateNRI enabled)
 5. idiResults (if calculateIDI enabled) 6. bootstrapResults (if
 performBootstrap enabled)
 
-**Estimated effort:** 8-16 hours  
+**Estimated effort:** 8-16 hours\
 **Files affected:** R/stagemigration.b.R (multiple locations in .run())
 
 ### MEDIUM PRIORITY
 
 #### 3. Clean Up Unused Options 🟡 MEDIUM
 
-**Why:** 41 unused options confuse users and bloat configuration  
+**Why:** 41 unused options confuse users and bloat configuration\
 **Action:** - Document which options are placeholders - Remove truly
 unused options - Implement high-priority unused features (e.g.,
 performLikelihoodTests)
 
-**Estimated effort:** 4-8 hours  
+**Estimated effort:** 4-8 hours\
 **Files affected:** jamovi/stagemigration.a.yaml,
 jamovi/stagemigration.u.yaml
 
 #### 4. Code Refactoring 🟡 MEDIUM
 
-**Why:** 28K lines in single file is unmaintainable  
+**Why:** 28K lines in single file is unmaintainable\
 **Action:** - Extract helper functions to separate files - Create
 modules for: - Will Rogers detection - Bootstrap validation - Clinical
 interpretation - Plot generation
 
-**Estimated effort:** 16-40 hours  
+**Estimated effort:** 16-40 hours\
 **Files to create:** R/stagemigration_helpers.R,
 R/stagemigration_plots.R, etc.
 
@@ -445,21 +445,21 @@ R/stagemigration_plots.R, etc.
 
 #### 5. Documentation 🟢 LOW
 
-**Why:** Complex module needs user guidance  
+**Why:** Complex module needs user guidance\
 **Action:** - Create vignette: “TNM Stage Migration Analysis Workflow” -
 Add example data - Document clinical preset behavior
 
-**Estimated effort:** 4-8 hours  
+**Estimated effort:** 4-8 hours\
 **Files to create:** vignettes/stagemigration-workflow.Rmd,
 data/example_tnm.rda
 
 #### 6. Comprehensive Testing 🟢 LOW
 
-**Why:** Ensure all code paths work correctly  
+**Why:** Ensure all code paths work correctly\
 **Action:** - Create test suite with edge cases - Test all analysis type
 combinations - Test with various cancer types
 
-**Estimated effort:** 8-16 hours  
+**Estimated effort:** 8-16 hours\
 **Files to create:** tests/testthat/test-stagemigration.R
 
 ------------------------------------------------------------------------
@@ -468,7 +468,7 @@ combinations - Test with various cancer types
 
 ### Patch Set 1: Variable Escaping (CRITICAL)
 
-**File:** R/stagemigration.b.R  
+**File:** R/stagemigration.b.R\
 **Priority:** 🔴 CRITICAL
 
 #### Location 1: Core Variables (~line 2900)
@@ -534,7 +534,7 @@ combinations - Test with various cancer types
 
 ### Patch Set 2: Critical Result Population (HIGH PRIORITY)
 
-**File:** R/stagemigration.b.R  
+**File:** R/stagemigration.b.R\
 **Priority:** 🔴 HIGH
 
 #### Migration Matrix
@@ -730,6 +730,6 @@ Missing data: NA in stages, survival, event
 
 ------------------------------------------------------------------------
 
-**Report Generated:** 2026-01-26  
-**Checker Version:** function-checker v1.0  
+**Report Generated:** 2026-01-26\
+**Checker Version:** function-checker v1.0\
 **Contact:** See CLAUDE.md for development guidelines

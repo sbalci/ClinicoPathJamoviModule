@@ -11,9 +11,9 @@ relative proportions.
 jjsegmentedtotalbar(
   data,
   analysis_preset = "custom",
-  x_var,
-  y_var,
-  fill_var,
+  x_var = NULL,
+  y_var = NULL,
+  fill_var = NULL,
   facet_var = NULL,
   show_plot = FALSE,
   plot_type = "stacked",
@@ -41,6 +41,7 @@ jjsegmentedtotalbar(
   flerlage_label_color = "black",
   flerlage_alpha = 0.3,
   flerlage_box_color = "lightgrey",
+  y_is_count = FALSE,
   show_statistical_tests = FALSE,
   confidence_level = 0.95,
   exclude_missing = TRUE,
@@ -179,6 +180,12 @@ jjsegmentedtotalbar(
 
   Color of background boxes in Flerlage plots.
 
+- y_is_count:
+
+  Affirm that the Value Variable is a frequency (a number of cases), not
+  a measurement. Required before a chi-square test can be run, because
+  the test treats the summed values as cell counts.
+
 - show_statistical_tests:
 
   Whether to perform chi-square tests for proportion differences.
@@ -210,7 +217,6 @@ A results object containing:
 | `results$clinical_summary`  |     |     |     |     | a html   |
 | `results$statistical_tests` |     |     |     |     | a table  |
 | `results$preset_guidance`   |     |     |     |     | a html   |
-| `results$presetInfo`        |     |     |     |     | a html   |
 | `results$warnings`          |     |     |     |     | a html   |
 | `results$explanations`      |     |     |     |     | a html   |
 

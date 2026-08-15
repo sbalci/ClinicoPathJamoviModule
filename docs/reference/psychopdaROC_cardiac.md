@@ -53,9 +53,6 @@ psychopdaROC(data = psychopdaROC_cardiac,
              classVar = "mi_status", positiveClass = "MI",
              refVar = "troponin",
              method = "maximize_metric", metric = "youden")
-#> Multiple optimal cutpoints found, applying break_ties.
-#> Multiple optimal cutpoints found, applying break_ties.
-#> Multiple optimal cutpoints found, applying break_ties.
 #> 
 #>  ADVANCED ROC ANALYSIS
 #> 
@@ -69,7 +66,7 @@ psychopdaROC(data = psychopdaROC_cardiac,
 #>  The ROC analysis has been completed using the following
 #>  specifications:
 #> 
-#>  &nbsp;
+#>   
 #> 
 #>  Measure Variable(s): troponin, creatinine, bnp
 #> 
@@ -77,7 +74,7 @@ psychopdaROC(data = psychopdaROC_cardiac,
 #> 
 #>  Positive Class: MI
 #> 
-#>  &nbsp;
+#>   
 #> 
 #>  Method: maximize_metric
 #> 
@@ -89,9 +86,9 @@ psychopdaROC(data = psychopdaROC_cardiac,
 #> 
 #>  Tie Breakers: mean
 #> 
-#>  Metric Tolerance: 0.05
+#>  Metric Tolerance: 1e-06
 #> 
-#>  &nbsp;
+#>   
 #> 
 #>  <hr />
 #> 
@@ -110,6 +107,11 @@ psychopdaROC(data = psychopdaROC_cardiac,
 #>    creatinine    0.8808727       0.8291091       0.9326363    < .0000001   
 #>    bnp           0.9294545       0.8894481       0.9694609    < .0000001   
 #>  ───────────────────────────────────────────────────────────────────────── 
+#>    Note. Reading of the test values: <b>HIGHER values were taken to
+#>    indicate MI</b> (Classification Direction = ">="). If that is the
+#>    wrong way round for this marker, every sensitivity, specificity,
+#>    cutpoint and AUC below is reversed — switch Classification
+#>    Direction to "<=" and the AUC becomes 1 minus the value shown.
 #>    Note. AUC 95% confidence intervals computed using the DeLong
 #>    method.
 #> 
@@ -130,7 +132,7 @@ psychopdaROC(data = psychopdaROC_cardiac,
 #>  ──────────────────────────────────────────────────────────────────────────────────────────────────────────────── 
 #>    Cutpoint     Sensitivity    Specificity    PPV          NPV          Youden's J    AUC          Metric Score   
 #>  ──────────────────────────────────────────────────────────────────────────────────────────────────────────────── 
-#>    1.7027586       76.36364       82.40000     65.62500     88.79310     0.5876364    0.8961455       0.5876364   
+#>    2.1400000       70.90909       91.20000     78.00000     87.69231     0.6210909    0.8961455       0.6210909   
 #>  ──────────────────────────────────────────────────────────────────────────────────────────────────────────────── 
 #> 
 #> 
@@ -138,7 +140,7 @@ psychopdaROC(data = psychopdaROC_cardiac,
 #>  ──────────────────────────────────────────────────────────────────────────────────────────────────────────────── 
 #>    Cutpoint     Sensitivity    Specificity    PPV          NPV          Youden's J    AUC          Metric Score   
 #>  ──────────────────────────────────────────────────────────────────────────────────────────────────────────────── 
-#>    1.1500000       80.00000       80.80000     64.70588     90.17857     0.6080000    0.8808727       0.6080000   
+#>    1.1200000       85.45455       79.20000     64.38356     92.52336     0.6465455    0.8808727       0.6465455   
 #>  ──────────────────────────────────────────────────────────────────────────────────────────────────────────────── 
 #> 
 #> 
@@ -146,7 +148,7 @@ psychopdaROC(data = psychopdaROC_cardiac,
 #>  ────────────────────────────────────────────────────────────────────────────────────────────────────────────────── 
 #>    Cutpoint       Sensitivity    Specificity    PPV          NPV          Youden's J    AUC          Metric Score   
 #>  ────────────────────────────────────────────────────────────────────────────────────────────────────────────────── 
-#>    565.0294118       76.36364       87.20000     72.41379     89.34426     0.6356364    0.9294545       0.6356364   
+#>    622.0000000       76.36364       93.60000     84.00000     90.00000     0.6996364    0.9294545       0.6996364   
 #>  ────────────────────────────────────────────────────────────────────────────────────────────────────────────────── 
 #> 
 #> 
@@ -158,6 +160,11 @@ psychopdaROC(data = psychopdaROC_cardiac,
 #>    creatinine    0.8808727       0.8291091       0.9326363    < .0000001   
 #>    bnp           0.9294545       0.8894481       0.9694609    < .0000001   
 #>  ───────────────────────────────────────────────────────────────────────── 
+#>    Note. Reading of the test values: <b>HIGHER values were taken to
+#>    indicate MI</b> (Classification Direction = ">="). If that is the
+#>    wrong way round for this marker, every sensitivity, specificity,
+#>    cutpoint and AUC below is reversed — switch Classification
+#>    Direction to "<=" and the AUC becomes 1 minus the value shown.
 #>    Note. AUC 95% confidence intervals computed using the DeLong
 #>    method.
 #> 

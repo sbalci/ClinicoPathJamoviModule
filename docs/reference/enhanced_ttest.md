@@ -45,3 +45,9 @@ enhanced_ttest(
 - clinical_context:
 
   Clinical research context
+
+## Value
+
+An enhanced result object (as produced by `create_enhanced_result`)
+containing the analysis success flag, formatted t-test results, clinical
+interpretation, and any accumulated warnings or errors.

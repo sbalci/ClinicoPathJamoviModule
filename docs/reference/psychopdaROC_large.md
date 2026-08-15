@@ -64,8 +64,6 @@ psychopdaROC(data = psychopdaROC_large,
              dependentVars = c("biomarker1", "biomarker2"),
              classVar = "disease_status", positiveClass = "Disease",
              refVar = "biomarker1")
-#> Multiple optimal cutpoints found, applying break_ties.
-#> Multiple optimal cutpoints found, applying break_ties.
 #> 
 #>  ADVANCED ROC ANALYSIS
 #> 
@@ -79,7 +77,7 @@ psychopdaROC(data = psychopdaROC_large,
 #>  The ROC analysis has been completed using the following
 #>  specifications:
 #> 
-#>  &nbsp;
+#>   
 #> 
 #>  Measure Variable(s): biomarker1, biomarker2
 #> 
@@ -87,7 +85,7 @@ psychopdaROC(data = psychopdaROC_large,
 #> 
 #>  Positive Class: Disease
 #> 
-#>  &nbsp;
+#>   
 #> 
 #>  Method: maximize_metric
 #> 
@@ -99,9 +97,9 @@ psychopdaROC(data = psychopdaROC_large,
 #> 
 #>  Tie Breakers: mean
 #> 
-#>  Metric Tolerance: 0.05
+#>  Metric Tolerance: 1e-06
 #> 
-#>  &nbsp;
+#>   
 #> 
 #>  <hr />
 #> 
@@ -120,6 +118,12 @@ psychopdaROC(data = psychopdaROC_large,
 #>    biomarker1    0.8080539       0.7676279       0.8484798    < .0000001   
 #>    biomarker2    0.7915941       0.7512573       0.8319309    < .0000001   
 #>  ───────────────────────────────────────────────────────────────────────── 
+#>    Note. Reading of the test values: <b>HIGHER values were taken to
+#>    indicate Disease</b> (Classification Direction = ">="). If that is
+#>    the wrong way round for this marker, every sensitivity,
+#>    specificity, cutpoint and AUC below is reversed — switch
+#>    Classification Direction to "<=" and the AUC becomes 1 minus the
+#>    value shown.
 #>    Note. AUC 95% confidence intervals computed using the DeLong
 #>    method.
 #> 
@@ -139,7 +143,7 @@ psychopdaROC(data = psychopdaROC_large,
 #>  ───────────────────────────────────────────────────────────────────────────────────────────────────────────────── 
 #>    Cutpoint      Sensitivity    Specificity    PPV          NPV          Youden's J    AUC          Metric Score   
 #>  ───────────────────────────────────────────────────────────────────────────────────────────────────────────────── 
-#>    63.8980591       65.24390       80.65476     62.20930     82.62195     0.4589866    0.8080539       0.4589866   
+#>    65.0099686       64.02439       82.73810     64.41718     82.49258     0.4676249    0.8080539       0.4676249   
 #>  ───────────────────────────────────────────────────────────────────────────────────────────────────────────────── 
 #> 
 #> 
@@ -147,7 +151,7 @@ psychopdaROC(data = psychopdaROC_large,
 #>  ───────────────────────────────────────────────────────────────────────────────────────────────────────────────── 
 #>    Cutpoint      Sensitivity    Specificity    PPV          NPV          Youden's J    AUC          Metric Score   
 #>  ───────────────────────────────────────────────────────────────────────────────────────────────────────────────── 
-#>    55.1077643       69.51220       67.85714     51.35135     82.01439     0.3736934    0.7915941       0.3736934   
+#>    48.7346730       87.80488       55.35714     48.97959     90.29126     0.4316202    0.7915941       0.4316202   
 #>  ───────────────────────────────────────────────────────────────────────────────────────────────────────────────── 
 #> 
 #> 
@@ -158,6 +162,12 @@ psychopdaROC(data = psychopdaROC_large,
 #>    biomarker1    0.8080539       0.7676279       0.8484798    < .0000001   
 #>    biomarker2    0.7915941       0.7512573       0.8319309    < .0000001   
 #>  ───────────────────────────────────────────────────────────────────────── 
+#>    Note. Reading of the test values: <b>HIGHER values were taken to
+#>    indicate Disease</b> (Classification Direction = ">="). If that is
+#>    the wrong way round for this marker, every sensitivity,
+#>    specificity, cutpoint and AUC below is reversed — switch
+#>    Classification Direction to "<=" and the AUC becomes 1 minus the
+#>    value shown.
 #>    Note. AUC 95% confidence intervals computed using the DeLong
 #>    method.
 #> 

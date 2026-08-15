@@ -200,7 +200,6 @@ See `vignette("rpasurvival-examples")` for comprehensive examples.
 
 Basic usage:
 
-
     data(rpasurvival_test)
     library(ClinicoPath)
 

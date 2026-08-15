@@ -52,8 +52,6 @@ psychopdaROC(data = psychopdaROC_timedep,
              dependentVars = c("baseline_marker", "followup_marker"),
              classVar = "outcome", positiveClass = "Event",
              refVar = "baseline_marker")
-#> Multiple optimal cutpoints found, applying break_ties.
-#> Multiple optimal cutpoints found, applying break_ties.
 #> 
 #>  ADVANCED ROC ANALYSIS
 #> 
@@ -67,7 +65,7 @@ psychopdaROC(data = psychopdaROC_timedep,
 #>  The ROC analysis has been completed using the following
 #>  specifications:
 #> 
-#>  &nbsp;
+#>   
 #> 
 #>  Measure Variable(s): baseline_marker, followup_marker
 #> 
@@ -75,7 +73,7 @@ psychopdaROC(data = psychopdaROC_timedep,
 #> 
 #>  Positive Class: Event
 #> 
-#>  &nbsp;
+#>   
 #> 
 #>  Method: maximize_metric
 #> 
@@ -87,9 +85,9 @@ psychopdaROC(data = psychopdaROC_timedep,
 #> 
 #>  Tie Breakers: mean
 #> 
-#>  Metric Tolerance: 0.05
+#>  Metric Tolerance: 1e-06
 #> 
-#>  &nbsp;
+#>   
 #> 
 #>  <hr />
 #> 
@@ -107,6 +105,11 @@ psychopdaROC(data = psychopdaROC_timedep,
 #>    baseline_marker    0.8565626       0.7834935       0.9296316    < .0000001   
 #>    followup_marker    0.9548109       0.9158621       0.9937596    < .0000001   
 #>  ────────────────────────────────────────────────────────────────────────────── 
+#>    Note. Reading of the test values: <b>HIGHER values were taken to
+#>    indicate Event</b> (Classification Direction = ">="). If that is the
+#>    wrong way round for this marker, every sensitivity, specificity,
+#>    cutpoint and AUC below is reversed — switch Classification Direction to
+#>    "<=" and the AUC becomes 1 minus the value shown.
 #>    Note. AUC 95% confidence intervals computed using the DeLong method.
 #> 
 #> 
@@ -125,7 +128,7 @@ psychopdaROC(data = psychopdaROC_timedep,
 #>  ───────────────────────────────────────────────────────────────────────────────────────────────────────────────── 
 #>    Cutpoint      Sensitivity    Specificity    PPV          NPV          Youden's J    AUC          Metric Score   
 #>  ───────────────────────────────────────────────────────────────────────────────────────────────────────────────── 
-#>    64.6200867       76.92308       82.17822     62.50000     90.21739     0.5910129    0.8565626       0.5910129   
+#>    67.1808226       74.35897       88.11881     70.73171     89.89899     0.6247779    0.8565626       0.6247779   
 #>  ───────────────────────────────────────────────────────────────────────────────────────────────────────────────── 
 #> 
 #> 
@@ -133,7 +136,7 @@ psychopdaROC(data = psychopdaROC_timedep,
 #>  ───────────────────────────────────────────────────────────────────────────────────────────────────────────────── 
 #>    Cutpoint      Sensitivity    Specificity    PPV          NPV          Youden's J    AUC          Metric Score   
 #>  ───────────────────────────────────────────────────────────────────────────────────────────────────────────────── 
-#>    65.5593033       97.43590       84.15842     70.37037     98.83721     0.8159431    0.9548109       0.8159431   
+#>    66.7645316       97.43590       86.13861     73.07692     98.86364     0.8357451    0.9548109       0.8357451   
 #>  ───────────────────────────────────────────────────────────────────────────────────────────────────────────────── 
 #> 
 #> 
@@ -144,6 +147,11 @@ psychopdaROC(data = psychopdaROC_timedep,
 #>    baseline_marker    0.8565626       0.7834935       0.9296316    < .0000001   
 #>    followup_marker    0.9548109       0.9158621       0.9937596    < .0000001   
 #>  ────────────────────────────────────────────────────────────────────────────── 
+#>    Note. Reading of the test values: <b>HIGHER values were taken to
+#>    indicate Event</b> (Classification Direction = ">="). If that is the
+#>    wrong way round for this marker, every sensitivity, specificity,
+#>    cutpoint and AUC below is reversed — switch Classification Direction to
+#>    "<=" and the AUC becomes 1 minus the value shown.
 #>    Note. AUC 95% confidence intervals computed using the DeLong method.
 #> 
 

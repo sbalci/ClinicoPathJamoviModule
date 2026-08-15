@@ -153,10 +153,6 @@ chisqposttest(
   cols = "Response",
   posthoc = "bonferroni"
 )
-#> Warning: Chi-squared approximation may be incorrect
-#> Warning: Chi-squared approximation may be incorrect
-#> Warning: Chi-squared approximation may be incorrect
-#> Warning: Chi-squared approximation may be incorrect
 #> 
 #>  CHI-SQUARE POST-HOC TESTS
 #> 
@@ -252,20 +248,19 @@ chisqposttest(
 #> 
 #>  <div style="padding: 10px; background-color: #e3f2fd; border-left: 4px
 #>  solid #1976d2; margin: 8px 0;">
-#>  Method notice:
-#>  Pairwise comparisons with expected cell counts < 5 are automatically
-#>  analysed with Fisher's exact test; the reported p-values use that
-#>  exact method.
+#>  Method notice: Pairwise comparisons with expected cell counts below 5
+#>  are automatically analysed with Fisher's exact test; the reported
+#>  p-values use that exact method.
 #> 
-#>  Pairwise Comparison Results                                                                                                                    
-#>  ────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────── 
-#>    Comparison                  Test Method       Chi-Square    p-value       Adj. p-value    Effect Size (Phi)    95% CI (Phi)    Significant   
-#>  ────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────── 
-#>    Standard vs Experimental    Chi-square        66.5303419    < .0000001    < .0000001           0.47500000                    Yes           
-#>    Standard vs NA              Fisher's exact     3.2350414     0.1056590       0.4226362           0.16400000                    No            
-#>    Experimental vs NA          Fisher's exact     0.3870168     0.6181533       1.0000000           0.04600000                    No            
-#>    No Response vs Response     Fisher's exact    66.6331188    < .0000001    < .0000001           0.47100000                    Yes           
-#>  ────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────── 
+#>  Pairwise Comparison Results                                                                                                                      
+#>  ──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────── 
+#>    Comparison                  Test Method       Chi-Square    p-value       Adj. p-value    Effect Size (Phi/V)    95% CI (Phi)    Significant   
+#>  ──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────── 
+#>    Standard vs Experimental    Chi-square        66.5303419    < .0000001    < .0000001             0.47500000                    Yes           
+#>    Standard vs NA              Fisher's exact     3.2350414     0.1056590       0.4226362             0.16400000                    No            
+#>    Experimental vs NA          Fisher's exact     0.3870168     0.6181533       1.0000000             0.04600000                    No            
+#>    No Response vs Response     Fisher's exact    66.6331188    < .0000001    < .0000001             0.47100000                    Yes           
+#>  ──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────── 
 #> 
 
 # Example 2: Moderate association (should be significant with post-hoc differences)
@@ -275,13 +270,6 @@ chisqposttest(
   cols = "TumorStage",
   posthoc = "fdr"
 )
-#> Warning: Chi-squared approximation may be incorrect
-#> Warning: Chi-squared approximation may be incorrect
-#> Warning: Chi-squared approximation may be incorrect
-#> Warning: Chi-squared approximation may be incorrect
-#> Warning: Chi-squared approximation may be incorrect
-#> Warning: Chi-squared approximation may be incorrect
-#> Warning: Chi-squared approximation may be incorrect
 #> 
 #>  CHI-SQUARE POST-HOC TESTS
 #> 
@@ -407,25 +395,24 @@ chisqposttest(
 #> 
 #>  <div style="padding: 10px; background-color: #e3f2fd; border-left: 4px
 #>  solid #1976d2; margin: 8px 0;">
-#>  Method notice:
-#>  Pairwise comparisons with expected cell counts < 5 are automatically
-#>  analysed with Fisher's exact test; the reported p-values use that
-#>  exact method.
+#>  Method notice: Pairwise comparisons with expected cell counts below 5
+#>  are automatically analysed with Fisher's exact test; the reported
+#>  p-values use that exact method.
 #> 
-#>  Pairwise Comparison Results                                                                                                                 
-#>  ─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────── 
-#>    Comparison               Test Method       Chi-Square    p-value       Adj. p-value    Effect Size (Phi)    95% CI (Phi)    Significant   
-#>  ─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────── 
-#>    Grade 1 vs Grade 2       Chi-square         35.741905    < .0000001    < .0000001            0.4150000                    Yes           
-#>    Grade 1 vs Grade 3       Chi-square         72.965438    < .0000001    < .0000001            0.6480000                    Yes           
-#>    Grade 1 vs NA            Fisher's exact      9.846232     0.0045976       0.0059112            0.3270000                    Yes           
-#>    Grade 2 vs Grade 3       Chi-square         34.637706    < .0000001    < .0000001            0.4080000                    Yes           
-#>    Grade 2 vs NA            Fisher's exact      2.358454     0.2905058       0.3268190            0.1370000                    No            
-#>    Grade 3 vs NA            Fisher's exact      1.242070     0.5701787       0.5701787            0.1160000                    No            
-#>    Stage I vs Stage II      Fisher's exact     46.531754    < .0000001    < .0000001            0.4600000                    Yes           
-#>    Stage I vs Stage III     Fisher's exact     74.117520    < .0000001    < .0000001            0.6600000                    Yes           
-#>    Stage II vs Stage III    Fisher's exact     28.625696     0.0000014       0.0000021            0.3690000                    Yes           
-#>  ─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────── 
+#>  Pairwise Comparison Results                                                                                                                   
+#>  ───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────── 
+#>    Comparison               Test Method       Chi-Square    p-value       Adj. p-value    Effect Size (Phi/V)    95% CI (Phi)    Significant   
+#>  ───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────── 
+#>    Grade 1 vs Grade 2       Chi-square         35.741905    < .0000001    < .0000001              0.4150000                    Yes           
+#>    Grade 1 vs Grade 3       Chi-square         72.965438    < .0000001    < .0000001              0.6480000                    Yes           
+#>    Grade 1 vs NA            Fisher's exact      9.846232     0.0045976       0.0059112              0.3270000                    Yes           
+#>    Grade 2 vs Grade 3       Chi-square         34.637706    < .0000001    < .0000001              0.4080000                    Yes           
+#>    Grade 2 vs NA            Fisher's exact      2.358454     0.2905058       0.3268190              0.1370000                    No            
+#>    Grade 3 vs NA            Fisher's exact      1.242070     0.5701787       0.5701787              0.1160000                    No            
+#>    Stage I vs Stage II      Fisher's exact     46.531754    < .0000001    < .0000001              0.4600000                    Yes           
+#>    Stage I vs Stage III     Fisher's exact     74.117520    < .0000001    < .0000001              0.6600000                    Yes           
+#>    Stage II vs Stage III    Fisher's exact     28.625696     0.0000014       0.0000021              0.3690000                    Yes           
+#>  ───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────── 
 #> 
 
 # Example 3: No association (should be non-significant)
@@ -527,15 +514,15 @@ chisqposttest(
 #> 
 #> character(0)
 #> 
-#>  Pairwise Comparison Results                                                                                                          
-#>  ──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────── 
-#>    Comparison            Test Method    Chi-Square    p-value      Adj. p-value    Effect Size (Phi)    95% CI (Phi)    Significant   
-#>  ──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────── 
-#>    Group A vs Group B    Chi-square     0.06136889    0.8043453       1.0000000           0.01700000                    No            
-#>    Group A vs Group C    Chi-square     4.14814815    0.0416801       0.1667203           0.14700000                    No            
-#>    Group B vs Group C    Chi-square     5.46676048    0.0193815       0.0775261           0.16400000                    No            
-#>    Type X vs Type Y      Chi-square     6.35956109    0.0415948       0.1663791           0.14600000                    No            
-#>  ──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────── 
+#>  Pairwise Comparison Results                                                                                                            
+#>  ────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────── 
+#>    Comparison            Test Method    Chi-Square    p-value      Adj. p-value    Effect Size (Phi/V)    95% CI (Phi)    Significant   
+#>  ────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────── 
+#>    Group A vs Group B    Chi-square     0.06136889    0.8043453       1.0000000             0.01700000                    No            
+#>    Group A vs Group C    Chi-square     4.14814815    0.0416801       0.1667203             0.14700000                    No            
+#>    Group B vs Group C    Chi-square     5.46676048    0.0193815       0.0775261             0.16400000                    No            
+#>    Type X vs Type Y      Chi-square     6.35956109    0.0415948       0.1663791             0.14600000                    No            
+#>  ────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────── 
 #> 
 
 # Example 4: Edge case with rare categories
@@ -637,15 +624,15 @@ chisqposttest(
 #> 
 #> character(0)
 #> 
-#>  Pairwise Comparison Results                                                                                                            
-#>  ────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────── 
-#>    Comparison              Test Method    Chi-Square    p-value      Adj. p-value    Effect Size (Phi)    95% CI (Phi)    Significant   
-#>  ────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────── 
-#>    Common vs Uncommon      Chi-square       1.186668    0.2760028       0.2760028           0.06500000                    No            
-#>    Common vs Rare          Chi-square      24.843523    0.0000006       0.0000025           0.33700000                    Yes           
-#>    Uncommon vs Rare        Chi-square      15.392437    0.0000873       0.0001164           0.39200000                    Yes           
-#>    Negative vs Positive    Chi-square      24.747135    0.0000042       0.0000085           0.28700000                    Yes           
-#>  ────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────── 
+#>  Pairwise Comparison Results                                                                                                              
+#>  ──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────── 
+#>    Comparison              Test Method    Chi-Square    p-value      Adj. p-value    Effect Size (Phi/V)    95% CI (Phi)    Significant   
+#>  ──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────── 
+#>    Common vs Uncommon      Chi-square       1.186668    0.2760028       0.2760028             0.06500000                    No            
+#>    Common vs Rare          Chi-square      24.843523    0.0000006       0.0000025             0.33700000                    Yes           
+#>    Uncommon vs Rare        Chi-square      15.392437    0.0000873       0.0001164             0.39200000                    Yes           
+#>    Negative vs Positive    Chi-square      24.747135    0.0000042       0.0000085             0.28700000                    Yes           
+#>  ──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────── 
 #> 
 
 # Example 5: Missing data handling

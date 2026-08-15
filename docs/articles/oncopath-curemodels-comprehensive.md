@@ -1,5 +1,12 @@
 # Cure Models for Long-Term Survivors - Comprehensive Guide
 
+> **Not yet released.** The `curemodels` analysis is on a development
+> menu route, so it does not appear in the jamovi menus of ClinicoPath
+> or of any of its submodules. It is documented here ahead of a future
+> release, and its options, defaults and output may still change. The R
+> function is exported, so the examples below run from an R console;
+> what is not yet available is the jamovi analysis itself.
+
 > **Note:** The
 > [`curemodels()`](https://www.serdarbalci.com/ClinicoPathJamoviModule/reference/curemodels.md)
 > function is designed for use within **jamovi’s GUI**. The code
@@ -136,9 +143,9 @@ for (i in seq_along(required_pkgs)) {
               ifelse(available[i], "installed", "NOT FOUND")))
 }
 #>   smcure: installed
-#>   flexsurvcure: NOT FOUND
-#>   cuRe: NOT FOUND
-#>   npcure: NOT FOUND
+#>   flexsurvcure: installed
+#>   cuRe: installed
+#>   npcure: installed
 ```
 
 ------------------------------------------------------------------------
@@ -300,33 +307,83 @@ curemodels(
 #> 
 #> character(0)
 #> 
-#>  <div style='background-color: #fff7ed; border-left: 4px solid #fdba74;
-#>  padding: 12px; margin: 8px 0; border-radius: 4px;'><strong
-#>  style='color: #ea580c;'>Package Missing: flexsurvcure
-#>  <span style='color: #374151;'>The flexsurvcure package is required for
-#>  non-mixture cure models. Install using:
-#>  install.packages('flexsurvcure'). Alternatively, use the Mixture Cure
-#>  Model option.
-#> 
 #> character(0)
 #> 
 #> character(0)
 #> 
-#>  Cure Model Results                                                                      
-#>  ─────────────────────────────────────────────────────────────────────────────────────── 
-#>    Parameter    Estimate    Std. Error    z value    p-value      CI Lower    CI Upper   
-#>  ─────────────────────────────────────────────────────────────────────────────────────── 
-#>  ─────────────────────────────────────────────────────────────────────────────────────── 
+#>  Non-Mixture Cure Model Results
+#> 
+#>  Distribution: weibull
+#> 
+#>  Log-likelihood: -796.22
+#> 
+#>  AIC: 1600.44
+#> 
+#>  Estimated Cure Fraction (theta): -137.5%
+#> 
+#>  Model Description:
+#> 
+#>  Non-mixture (promotion time) cure models assume the entire population
+#>  follows the same survival distribution with cure as a limiting
+#>  probability as time approaches infinity. The theta parameter directly
+#>  represents the cure probability.
+#> 
+#>  Cure Model Results                                                                                                
+#>  ───────────────────────────────────────────────────────────────────────────────────────────────────────────────── 
+#>    Parameter                    Estimate      Std. Error    z value       p-value       CI Lower      CI Upper     
+#>  ───────────────────────────────────────────────────────────────────────────────────────────────────────────────── 
+#>    theta                        -1.3754229    0.23181654     -5.933239    < .0000001    -1.8297750    -0.9210709   
+#>    shape                         0.4037487    0.06175004      6.538436    < .0000001     0.2827208     0.5247765   
+#>    scale                        -4.8561356    0.29744460    -16.326185    < .0000001    -5.4391163    -4.2731549   
+#>    TreatmentSurgery+Adjuvant     0.7928080    0.27802552      2.851565     0.0043505     0.2478880     1.3377280   
+#>  ───────────────────────────────────────────────────────────────────────────────────────────────────────────────── 
 #> 
 #> 
-#>  Cure Fraction Summary                                                           
-#>  ─────────────────────────────────────────────────────────────────────────────── 
-#>    Group    Cure Fraction    CI Lower    CI Upper    Median Survival (Uncured)   
-#>  ─────────────────────────────────────────────────────────────────────────────── 
-#>  ─────────────────────────────────────────────────────────────────────────────── 
+#>  Cure Fraction Summary                                                                
+#>  ──────────────────────────────────────────────────────────────────────────────────── 
+#>    Group      Cure Fraction    CI Lower     CI Upper      Median Survival (Uncured)   
+#>  ──────────────────────────────────────────────────────────────────────────────────── 
+#>    Overall        -1.375423    -1.829775    -0.9210709                                
+#>  ──────────────────────────────────────────────────────────────────────────────────── 
 #> 
 #> 
-#> character(0)
+#>  Clinical Interpretation
+#> 
+#>  Model Type: non-mixture cure model (flexsurvcure)
+#> 
+#>  Estimated Cure Fraction: -137.5% (95% CI: -183%--92.1%; method:
+#>  Profile likelihood (flexsurvcure))
+#> 
+#>  Clinical Implications:
+#> 
+#>  Population Impact: The analysis suggests that a small proportion of
+#>  patients may achieve cureTreatment Strategy: Long-term follow-up
+#>  protocols should account for the cured fractionPrognosis: Patients
+#>  surviving beyond the cure threshold have substantially different risk
+#>  profiles
+#> 
+#>  Statistical Considerations:
+#> 
+#>  Model Assumptions: Cure models assume a plateau in survival
+#>  probabilityFollow-up Requirements: Adequate long-term follow-up is
+#>  essential for valid cure fraction estimationValidation: Consider
+#>  external validation in similar patient populations
+#> 
+#>  Recommendations:
+#> 
+#>  Monitor cure fraction estimates with longer follow-upConsider
+#>  patient-specific factors that may influence cure probabilityValidate
+#>  findings in independent datasets when possible
+#> 
+#>  Report Sentence (copy-ready):
+#> 
+#>  <div style='background-color:#f8f9fa; padding:10px; border-left:3px
+#>  solid #007bff; margin:8px 0; font-style:italic;'>Using a non-mixture
+#>  cure model (flexsurvcure), the estimated cure fraction was -137.5%
+#>  (95% CI: -183%--92.1%; method: Profile likelihood (flexsurvcure)),
+#>  based on 250 patients with a median follow-up of 20.0 time units.<p
+#>  style='font-size:0.85em; color:#666;'>Tip: Copy the text above
+#>  directly into your manuscript results section.
 ```
 
 #### 3.2 Distribution Comparison
@@ -350,33 +407,82 @@ curemodels(
 #> 
 #> character(0)
 #> 
-#>  <div style='background-color: #fff7ed; border-left: 4px solid #fdba74;
-#>  padding: 12px; margin: 8px 0; border-radius: 4px;'><strong
-#>  style='color: #ea580c;'>Package Missing: flexsurvcure
-#>  <span style='color: #374151;'>The flexsurvcure package is required for
-#>  non-mixture cure models. Install using:
-#>  install.packages('flexsurvcure'). Alternatively, use the Mixture Cure
-#>  Model option.
-#> 
 #> character(0)
 #> 
 #> character(0)
 #> 
-#>  Cure Model Results                                                                      
-#>  ─────────────────────────────────────────────────────────────────────────────────────── 
-#>    Parameter    Estimate    Std. Error    z value    p-value      CI Lower    CI Upper   
-#>  ─────────────────────────────────────────────────────────────────────────────────────── 
-#>  ─────────────────────────────────────────────────────────────────────────────────────── 
+#>  Non-Mixture Cure Model Results
+#> 
+#>  Distribution: exponential
+#> 
+#>  Log-likelihood: -811.21
+#> 
+#>  AIC: 1628.42
+#> 
+#>  Estimated Cure Fraction (theta): -164.4%
+#> 
+#>  Model Description:
+#> 
+#>  Non-mixture (promotion time) cure models assume the entire population
+#>  follows the same survival distribution with cure as a limiting
+#>  probability as time approaches infinity. The theta parameter directly
+#>  represents the cure probability.
+#> 
+#>  Cure Model Results                                                                                               
+#>  ──────────────────────────────────────────────────────────────────────────────────────────────────────────────── 
+#>    Parameter                    Estimate      Std. Error    z value       p-value       CI Lower      CI Upper    
+#>  ──────────────────────────────────────────────────────────────────────────────────────────────────────────────── 
+#>    theta                        -1.6444757     0.3153620     -5.214565     0.0000002    -2.2625739    -1.026378   
+#>    rate                         -3.6063773     0.1684401    -21.410439    < .0000001    -3.9365140    -3.276241   
+#>    TreatmentSurgery+Adjuvant     0.8302515     0.3050067      2.722076     0.0064873     0.2324494     1.428054   
+#>  ──────────────────────────────────────────────────────────────────────────────────────────────────────────────── 
 #> 
 #> 
-#>  Cure Fraction Summary                                                           
-#>  ─────────────────────────────────────────────────────────────────────────────── 
-#>    Group    Cure Fraction    CI Lower    CI Upper    Median Survival (Uncured)   
-#>  ─────────────────────────────────────────────────────────────────────────────── 
-#>  ─────────────────────────────────────────────────────────────────────────────── 
+#>  Cure Fraction Summary                                                               
+#>  ─────────────────────────────────────────────────────────────────────────────────── 
+#>    Group      Cure Fraction    CI Lower     CI Upper     Median Survival (Uncured)   
+#>  ─────────────────────────────────────────────────────────────────────────────────── 
+#>    Overall        -1.644476    -2.262574    -1.026378                                
+#>  ─────────────────────────────────────────────────────────────────────────────────── 
 #> 
 #> 
-#> character(0)
+#>  Clinical Interpretation
+#> 
+#>  Model Type: non-mixture cure model (flexsurvcure)
+#> 
+#>  Estimated Cure Fraction: -164.4% (95% CI: -226.3%--102.6%; method:
+#>  Profile likelihood (flexsurvcure))
+#> 
+#>  Clinical Implications:
+#> 
+#>  Population Impact: The analysis suggests that a small proportion of
+#>  patients may achieve cureTreatment Strategy: Long-term follow-up
+#>  protocols should account for the cured fractionPrognosis: Patients
+#>  surviving beyond the cure threshold have substantially different risk
+#>  profiles
+#> 
+#>  Statistical Considerations:
+#> 
+#>  Model Assumptions: Cure models assume a plateau in survival
+#>  probabilityFollow-up Requirements: Adequate long-term follow-up is
+#>  essential for valid cure fraction estimationValidation: Consider
+#>  external validation in similar patient populations
+#> 
+#>  Recommendations:
+#> 
+#>  Monitor cure fraction estimates with longer follow-upConsider
+#>  patient-specific factors that may influence cure probabilityValidate
+#>  findings in independent datasets when possible
+#> 
+#>  Report Sentence (copy-ready):
+#> 
+#>  <div style='background-color:#f8f9fa; padding:10px; border-left:3px
+#>  solid #007bff; margin:8px 0; font-style:italic;'>Using a non-mixture
+#>  cure model (flexsurvcure), the estimated cure fraction was -164.4%
+#>  (95% CI: -226.3%--102.6%; method: Profile likelihood (flexsurvcure)),
+#>  based on 250 patients with a median follow-up of 20.0 time units.<p
+#>  style='font-size:0.85em; color:#666;'>Tip: Copy the text above
+#>  directly into your manuscript results section.
 ```
 
 ``` r
@@ -394,33 +500,83 @@ curemodels(
 #> 
 #> character(0)
 #> 
-#>  <div style='background-color: #fff7ed; border-left: 4px solid #fdba74;
-#>  padding: 12px; margin: 8px 0; border-radius: 4px;'><strong
-#>  style='color: #ea580c;'>Package Missing: flexsurvcure
-#>  <span style='color: #374151;'>The flexsurvcure package is required for
-#>  non-mixture cure models. Install using:
-#>  install.packages('flexsurvcure'). Alternatively, use the Mixture Cure
-#>  Model option.
-#> 
 #> character(0)
 #> 
 #> character(0)
 #> 
-#>  Cure Model Results                                                                      
-#>  ─────────────────────────────────────────────────────────────────────────────────────── 
-#>    Parameter    Estimate    Std. Error    z value    p-value      CI Lower    CI Upper   
-#>  ─────────────────────────────────────────────────────────────────────────────────────── 
-#>  ─────────────────────────────────────────────────────────────────────────────────────── 
+#>  Non-Mixture Cure Model Results
+#> 
+#>  Distribution: lognormal
+#> 
+#>  Log-likelihood: -799.32
+#> 
+#>  AIC: 1606.64
+#> 
+#>  Estimated Cure Fraction (theta): -170.4%
+#> 
+#>  Model Description:
+#> 
+#>  Non-mixture (promotion time) cure models assume the entire population
+#>  follows the same survival distribution with cure as a limiting
+#>  probability as time approaches infinity. The theta parameter directly
+#>  represents the cure probability.
+#> 
+#>  Cure Model Results                                                                                                 
+#>  ────────────────────────────────────────────────────────────────────────────────────────────────────────────────── 
+#>    Parameter                    Estimate       Std. Error    z value       p-value       CI Lower      CI Upper     
+#>  ────────────────────────────────────────────────────────────────────────────────────────────────────────────────── 
+#>    theta                        -1.70398458    0.32147529    -5.3005149     0.0000001    -2.3340646    -1.0739046   
+#>    meanlog                       3.17336779    0.16547263    19.1775994    < .0000001     2.8490474     3.4976882   
+#>    sdlog                         0.06654360    0.08679523     0.7666736     0.4432756    -0.1035719     0.2366591   
+#>    TreatmentSurgery+Adjuvant     0.86617312    0.30858195     2.8069468     0.0050014     0.2613636     1.4709826   
+#>  ────────────────────────────────────────────────────────────────────────────────────────────────────────────────── 
 #> 
 #> 
-#>  Cure Fraction Summary                                                           
-#>  ─────────────────────────────────────────────────────────────────────────────── 
-#>    Group    Cure Fraction    CI Lower    CI Upper    Median Survival (Uncured)   
-#>  ─────────────────────────────────────────────────────────────────────────────── 
-#>  ─────────────────────────────────────────────────────────────────────────────── 
+#>  Cure Fraction Summary                                                               
+#>  ─────────────────────────────────────────────────────────────────────────────────── 
+#>    Group      Cure Fraction    CI Lower     CI Upper     Median Survival (Uncured)   
+#>  ─────────────────────────────────────────────────────────────────────────────────── 
+#>    Overall        -1.703985    -2.334065    -1.073905                                
+#>  ─────────────────────────────────────────────────────────────────────────────────── 
 #> 
 #> 
-#> character(0)
+#>  Clinical Interpretation
+#> 
+#>  Model Type: non-mixture cure model (flexsurvcure)
+#> 
+#>  Estimated Cure Fraction: -170.4% (95% CI: -233.4%--107.4%; method:
+#>  Profile likelihood (flexsurvcure))
+#> 
+#>  Clinical Implications:
+#> 
+#>  Population Impact: The analysis suggests that a small proportion of
+#>  patients may achieve cureTreatment Strategy: Long-term follow-up
+#>  protocols should account for the cured fractionPrognosis: Patients
+#>  surviving beyond the cure threshold have substantially different risk
+#>  profiles
+#> 
+#>  Statistical Considerations:
+#> 
+#>  Model Assumptions: Cure models assume a plateau in survival
+#>  probabilityFollow-up Requirements: Adequate long-term follow-up is
+#>  essential for valid cure fraction estimationValidation: Consider
+#>  external validation in similar patient populations
+#> 
+#>  Recommendations:
+#> 
+#>  Monitor cure fraction estimates with longer follow-upConsider
+#>  patient-specific factors that may influence cure probabilityValidate
+#>  findings in independent datasets when possible
+#> 
+#>  Report Sentence (copy-ready):
+#> 
+#>  <div style='background-color:#f8f9fa; padding:10px; border-left:3px
+#>  solid #007bff; margin:8px 0; font-style:italic;'>Using a non-mixture
+#>  cure model (flexsurvcure), the estimated cure fraction was -170.4%
+#>  (95% CI: -233.4%--107.4%; method: Profile likelihood (flexsurvcure)),
+#>  based on 250 patients with a median follow-up of 20.0 time units.<p
+#>  style='font-size:0.85em; color:#666;'>Tip: Copy the text above
+#>  directly into your manuscript results section.
 ```
 
 ``` r
@@ -438,33 +594,83 @@ curemodels(
 #> 
 #> character(0)
 #> 
-#>  <div style='background-color: #fff7ed; border-left: 4px solid #fdba74;
-#>  padding: 12px; margin: 8px 0; border-radius: 4px;'><strong
-#>  style='color: #ea580c;'>Package Missing: flexsurvcure
-#>  <span style='color: #374151;'>The flexsurvcure package is required for
-#>  non-mixture cure models. Install using:
-#>  install.packages('flexsurvcure'). Alternatively, use the Mixture Cure
-#>  Model option.
-#> 
 #> character(0)
 #> 
 #> character(0)
 #> 
-#>  Cure Model Results                                                                      
-#>  ─────────────────────────────────────────────────────────────────────────────────────── 
-#>    Parameter    Estimate    Std. Error    z value    p-value      CI Lower    CI Upper   
-#>  ─────────────────────────────────────────────────────────────────────────────────────── 
-#>  ─────────────────────────────────────────────────────────────────────────────────────── 
+#>  Non-Mixture Cure Model Results
+#> 
+#>  Distribution: loglogistic
+#> 
+#>  Log-likelihood: -795.78
+#> 
+#>  AIC: 1599.56
+#> 
+#>  Estimated Cure Fraction (theta): -156.3%
+#> 
+#>  Model Description:
+#> 
+#>  Non-mixture (promotion time) cure models assume the entire population
+#>  follows the same survival distribution with cure as a limiting
+#>  probability as time approaches infinity. The theta parameter directly
+#>  represents the cure probability.
+#> 
+#>  Cure Model Results                                                                                               
+#>  ──────────────────────────────────────────────────────────────────────────────────────────────────────────────── 
+#>    Parameter                    Estimate      Std. Error    z value      p-value       CI Lower      CI Upper     
+#>  ──────────────────────────────────────────────────────────────────────────────────────────────────────────────── 
+#>    theta                        -1.5634740    0.26447894    -5.911526    < .0000001    -2.0818432    -1.0451048   
+#>    shape                         0.5955898    0.07998848     7.445944    < .0000001     0.4388152     0.7523643   
+#>    scale                         3.0566761    0.10471502    29.190427    < .0000001     2.8514385     3.2619138   
+#>    TreatmentSurgery+Adjuvant     0.8356490    0.29353884     2.846809     0.0044160     0.2603234     1.4109745   
+#>  ──────────────────────────────────────────────────────────────────────────────────────────────────────────────── 
 #> 
 #> 
-#>  Cure Fraction Summary                                                           
-#>  ─────────────────────────────────────────────────────────────────────────────── 
-#>    Group    Cure Fraction    CI Lower    CI Upper    Median Survival (Uncured)   
-#>  ─────────────────────────────────────────────────────────────────────────────── 
-#>  ─────────────────────────────────────────────────────────────────────────────── 
+#>  Cure Fraction Summary                                                               
+#>  ─────────────────────────────────────────────────────────────────────────────────── 
+#>    Group      Cure Fraction    CI Lower     CI Upper     Median Survival (Uncured)   
+#>  ─────────────────────────────────────────────────────────────────────────────────── 
+#>    Overall        -1.563474    -2.081843    -1.045105                                
+#>  ─────────────────────────────────────────────────────────────────────────────────── 
 #> 
 #> 
-#> character(0)
+#>  Clinical Interpretation
+#> 
+#>  Model Type: non-mixture cure model (flexsurvcure)
+#> 
+#>  Estimated Cure Fraction: -156.3% (95% CI: -208.2%--104.5%; method:
+#>  Profile likelihood (flexsurvcure))
+#> 
+#>  Clinical Implications:
+#> 
+#>  Population Impact: The analysis suggests that a small proportion of
+#>  patients may achieve cureTreatment Strategy: Long-term follow-up
+#>  protocols should account for the cured fractionPrognosis: Patients
+#>  surviving beyond the cure threshold have substantially different risk
+#>  profiles
+#> 
+#>  Statistical Considerations:
+#> 
+#>  Model Assumptions: Cure models assume a plateau in survival
+#>  probabilityFollow-up Requirements: Adequate long-term follow-up is
+#>  essential for valid cure fraction estimationValidation: Consider
+#>  external validation in similar patient populations
+#> 
+#>  Recommendations:
+#> 
+#>  Monitor cure fraction estimates with longer follow-upConsider
+#>  patient-specific factors that may influence cure probabilityValidate
+#>  findings in independent datasets when possible
+#> 
+#>  Report Sentence (copy-ready):
+#> 
+#>  <div style='background-color:#f8f9fa; padding:10px; border-left:3px
+#>  solid #007bff; margin:8px 0; font-style:italic;'>Using a non-mixture
+#>  cure model (flexsurvcure), the estimated cure fraction was -156.3%
+#>  (95% CI: -208.2%--104.5%; method: Profile likelihood (flexsurvcure)),
+#>  based on 250 patients with a median follow-up of 20.0 time units.<p
+#>  style='font-size:0.85em; color:#666;'>Tip: Copy the text above
+#>  directly into your manuscript results section.
 ```
 
 | Distribution | Hazard Shape | When to Use |
@@ -491,7 +697,7 @@ curemodels(
   predictors = "Treatment",
   model_type = "mixture",
   bootstrap_ci = TRUE,
-  n_bootstrap = 200
+  n_bootstrap = 100
 )
 #> Program is running..be patient... done.
 #> Call:
@@ -501,13 +707,13 @@ curemodels(
 #> 
 #> Cure probability model:
 #>               Estimate Std.Error   Z value     Pr(>|Z|)
-#> (Intercept)  2.1969369 0.5649120  3.888990 0.0001006624
-#> Treatment   -0.7984087 0.3350484 -2.382966 0.0171737938
+#> (Intercept)  2.1969369 0.5496703  3.996826 6.419732e-05
+#> Treatment   -0.7984087 0.3325016 -2.401218 1.634060e-02
 #> 
 #> 
 #> Failure time distribution model:
 #>                             Estimate Std.Error   Z value  Pr(>|Z|)
-#> TreatmentSurgery+Adjuvant -0.1172043 0.1762495 -0.664991 0.5060563
+#> TreatmentSurgery+Adjuvant -0.1172043  0.170035 -0.689295 0.4906376
 #> 
 #>  CURE MODELS FOR LONG-TERM SURVIVORS
 #> 
@@ -519,7 +725,7 @@ curemodels(
 #> 
 #>  Mixture Cure Model Results
 #> 
-#>  Estimated Cure Fraction: 90% (95% CI: 74.8%-96.5%)
+#>  Estimated Cure Fraction: 90% (95% CI: 75.4%-96.4%)
 #> 
 #>  Survival Model Type: Proportional Hazards
 #> 
@@ -541,9 +747,9 @@ curemodels(
 #>  ──────────────────────────────────────────────────────────────────────────────────────────────────────── 
 #>    Parameter            Estimate      Std. Error    z value       p-value      CI Lower      CI Upper     
 #>  ──────────────────────────────────────────────────────────────────────────────────────────────────────── 
-#>    Cure: (Intercept)     2.1969369     0.5649120     3.8889896    0.0001007     1.0897094     3.3041644   
-#>    Cure: Z[, -1]        -0.7984087     0.3350484    -2.3829657    0.0171738    -1.4551035    -0.1417140   
-#>    Survival: X[, -1]    -0.1172043     0.1762495    -0.6649910    0.5060563    -0.4626532     0.2282446   
+#>    Cure: (Intercept)     2.1969369     0.5496703     3.9968265    0.0000642     1.1195831     3.2742907   
+#>    Cure: Z[, -1]        -0.7984087     0.3325016    -2.4012179    0.0163406    -1.4501118    -0.1467057   
+#>    Survival: X[, -1]    -0.1172043     0.1700350    -0.6892950    0.4906376    -0.4504729     0.2160643   
 #>  ──────────────────────────────────────────────────────────────────────────────────────────────────────── 
 #> 
 #> 
@@ -551,7 +757,7 @@ curemodels(
 #>  ─────────────────────────────────────────────────────────────────────────────────── 
 #>    Group      Cure Fraction    CI Lower     CI Upper     Median Survival (Uncured)   
 #>  ─────────────────────────────────────────────────────────────────────────────────── 
-#>    Overall        0.8999741    0.7483270    0.9645714                                
+#>    Overall        0.8999741    0.7539114    0.9635362                                
 #>  ─────────────────────────────────────────────────────────────────────────────────── 
 #> 
 #> 
@@ -559,7 +765,7 @@ curemodels(
 #> 
 #>  Model Type: mixture cure model (smcure)
 #> 
-#>  Estimated Cure Fraction: 90% (95% CI: 74.8%-96.5%; method: Bootstrap
+#>  Estimated Cure Fraction: 90% (95% CI: 75.4%-96.4%; method: Bootstrap
 #>  delta method (logit scale))
 #> 
 #>  Clinical Implications:
@@ -588,7 +794,7 @@ curemodels(
 #>  <div style='background-color:#f8f9fa; padding:10px; border-left:3px
 #>  solid #007bff; margin:8px 0; font-style:italic;'>Using a mixture cure
 #>  model (smcure), the estimated cure fraction was 90.0% (95% CI:
-#>  74.8%-96.5%; method: Bootstrap delta method (logit scale)), based on
+#>  75.4%-96.4%; method: Bootstrap delta method (logit scale)), based on
 #>  250 patients with a median follow-up of 20.0 time units.<p
 #>  style='font-size:0.85em; color:#666;'>Tip: Copy the text above
 #>  directly into your manuscript results section.
@@ -799,7 +1005,7 @@ curemodels(
   model_type = "mixture",
   plot_cure_fraction = TRUE,
   bootstrap_ci = TRUE,
-  n_bootstrap = 200
+  n_bootstrap = 100
 )
 #> Program is running..be patient... done.
 #> Call:
@@ -809,13 +1015,13 @@ curemodels(
 #> 
 #> Cure probability model:
 #>               Estimate Std.Error   Z value     Pr(>|Z|)
-#> (Intercept)  2.1969369 0.5571848  3.942923 8.049446e-05
-#> Treatment   -0.7984087 0.3306288 -2.414819 1.574301e-02
+#> (Intercept)  2.1969369 0.5695747  3.857153 0.0001147153
+#> Treatment   -0.7984087 0.3324805 -2.401370 0.0163338016
 #> 
 #> 
 #> Failure time distribution model:
 #>                             Estimate Std.Error    Z value  Pr(>|Z|)
-#> TreatmentSurgery+Adjuvant -0.1172043 0.1747096 -0.6708521 0.5023147
+#> TreatmentSurgery+Adjuvant -0.1172043 0.1817742 -0.6447795 0.5190701
 #> 
 #>  CURE MODELS FOR LONG-TERM SURVIVORS
 #> 
@@ -827,7 +1033,7 @@ curemodels(
 #> 
 #>  Mixture Cure Model Results
 #> 
-#>  Estimated Cure Fraction: 90% (95% CI: 75.1%-96.4%)
+#>  Estimated Cure Fraction: 90% (95% CI: 74.7%-96.5%)
 #> 
 #>  Survival Model Type: Proportional Hazards
 #> 
@@ -849,9 +1055,9 @@ curemodels(
 #>  ──────────────────────────────────────────────────────────────────────────────────────────────────────── 
 #>    Parameter            Estimate      Std. Error    z value       p-value      CI Lower      CI Upper     
 #>  ──────────────────────────────────────────────────────────────────────────────────────────────────────── 
-#>    Cure: (Intercept)     2.1969369     0.5571848     3.9429231    0.0000805     1.1048546     3.2890191   
-#>    Cure: Z[, -1]        -0.7984087     0.3306288    -2.4148194    0.0157430    -1.4464411    -0.1503764   
-#>    Survival: X[, -1]    -0.1172043     0.1747096    -0.6708521    0.5023147    -0.4596351     0.2252265   
+#>    Cure: (Intercept)     2.1969369     0.5695747     3.8571531    0.0001147     1.0805704     3.3133033   
+#>    Cure: Z[, -1]        -0.7984087     0.3324805    -2.4013702    0.0163338    -1.4500705    -0.1467470   
+#>    Survival: X[, -1]    -0.1172043     0.1817742    -0.6447795    0.5190701    -0.4734818     0.2390732   
 #>  ──────────────────────────────────────────────────────────────────────────────────────────────────────── 
 #> 
 #> 
@@ -859,7 +1065,7 @@ curemodels(
 #>  ─────────────────────────────────────────────────────────────────────────────────── 
 #>    Group      Cure Fraction    CI Lower     CI Upper     Median Survival (Uncured)   
 #>  ─────────────────────────────────────────────────────────────────────────────────── 
-#>    Overall        0.8999741    0.7511686    0.9640502                                
+#>    Overall        0.8999741    0.7466019    0.9648824                                
 #>  ─────────────────────────────────────────────────────────────────────────────────── 
 #> 
 #> 
@@ -867,7 +1073,7 @@ curemodels(
 #> 
 #>  Model Type: mixture cure model (smcure)
 #> 
-#>  Estimated Cure Fraction: 90% (95% CI: 75.1%-96.4%; method: Bootstrap
+#>  Estimated Cure Fraction: 90% (95% CI: 74.7%-96.5%; method: Bootstrap
 #>  delta method (logit scale))
 #> 
 #>  Clinical Implications:
@@ -896,7 +1102,7 @@ curemodels(
 #>  <div style='background-color:#f8f9fa; padding:10px; border-left:3px
 #>  solid #007bff; margin:8px 0; font-style:italic;'>Using a mixture cure
 #>  model (smcure), the estimated cure fraction was 90.0% (95% CI:
-#>  75.1%-96.4%; method: Bootstrap delta method (logit scale)), based on
+#>  74.7%-96.5%; method: Bootstrap delta method (logit scale)), based on
 #>  250 patients with a median follow-up of 20.0 time units.<p
 #>  style='font-size:0.85em; color:#666;'>Tip: Copy the text above
 #>  directly into your manuscript results section.
@@ -1216,60 +1422,59 @@ curemodels(
 #> 
 #>  <div style='background-color: #fff7ed; border-left: 4px solid #fdba74;
 #>  padding: 12px; margin: 8px 0; border-radius: 4px;'><strong
-#>  style='color: #ea580c;'>Package Missing: flexsurvcure
-#>  <span style='color: #374151;'>The flexsurvcure package is required for
-#>  non-mixture cure models. Install using:
-#>  install.packages('flexsurvcure'). Alternatively, use the Mixture Cure
-#>  Model option.
+#>  style='color: #ea580c;'>Nonparametric Cure Model Error
+#>  <span style='color: #374151;'>Fitting failed: 'from' must be a finite
+#>  number
 #> 
-#>  <div style='background-color: #fef2f2; border-left: 4px solid #fca5a5;
-#>  padding: 12px; margin: 8px 0; border-radius: 4px;'><strong
-#>  style='color: #dc2626;'>Package Missing: cuRe
-#>  <span style='color: #374151;'>The cuRe package is required. Install
-#>  using: install.packages('cuRe')<div style='background-color: #fef2f2;
-#>  border-left: 4px solid #fca5a5; padding: 12px; margin: 8px 0;
-#>  border-radius: 4px;'><strong style='color: #dc2626;'>Package Missing:
-#>  npcure
-#>  <span style='color: #374151;'>The npcure package is required. Install
-#>  using: install.packages('npcure')
+#> character(0)
 #> 
-#>  Mixture Cure Model Results
+#>  cuRe Model Results
 #> 
-#>  Estimated Cure Fraction: 90% (CI not available; enable bootstrap for
-#>  confidence intervals)
-#> 
-#>  Survival Model Type: Proportional Hazards
+#>  Distribution: weibull
 #> 
 #>  Link Function: logit
 #> 
-#>  Sample Size: 250
+#>  Background Mortality: Included (variable: BackgroundHazard)
 #> 
-#>  Events: 0
+#>  Estimated Cure Fraction: See model coefficients
 #> 
-#>  Censored: 33
+#>  Model Description:
 #> 
-#>  Interpretation:
+#>  The cuRe model allows incorporation of background mortality rates from
+#>  the general population. This is particularly useful when analyzing
+#>  cancer survival where patients may die from competing causes.
 #> 
-#>  Cure probability coefficients ($b) show factors associated with being
-#>  curedPositive cure coefficients increase cure probability (on logit
-#>  scale)Survival coefficients ($beta) apply only to the uncured fraction
+#>  Key Features:
 #> 
-#>  Cure Model Results                                                                                
-#>  ───────────────────────────────────────────────────────────────────────────────────────────────── 
-#>    Parameter            Estimate      Std. Error    z value    p-value      CI Lower    CI Upper   
-#>  ───────────────────────────────────────────────────────────────────────────────────────────────── 
-#>    Cure: (Intercept)     2.1969369                                                                 
-#>    Cure: Z[, -1]        -0.7984087                                                                 
-#>    Survival: X[, -1]    -0.1172043                                                                 
-#>  ───────────────────────────────────────────────────────────────────────────────────────────────── 
+#>  Accounts for background population mortalitySeparates excess hazard
+#>  due to disease from background riskProvides more accurate cure
+#>  fraction estimates in aging populations
+#> 
+#>  Cure Model Results                                                                                                   
+#>  ──────────────────────────────────────────────────────────────────────────────────────────────────────────────────── 
+#>    Parameter                       Estimate      Std. Error    z value       p-value       CI Lower      CI Upper     
+#>  ──────────────────────────────────────────────────────────────────────────────────────────────────────────────────── 
+#>    Cure: (Intercept)                2.1969369                                                                         
+#>    Cure: Z[, -1]                   -0.7984087                                                                         
+#>    Survival: X[, -1]               -0.1172043                                                                         
+#>    theta                           -1.3754229    0.23181654     -5.933239    < .0000001    -1.8297750    -0.9210709   
+#>    shape                            0.4037487    0.06175004      6.538436    < .0000001     0.2827208     0.5247765   
+#>    scale                           -4.8561356    0.29744460    -16.326185    < .0000001    -5.4391163    -4.2731549   
+#>    TreatmentSurgery+Adjuvant        0.7928080    0.27802552      2.851565     0.0043505     0.2478880     1.3377280   
+#>    pi.(Intercept)                  -1.3531875                                                                         
+#>    pi.TreatmentSurgery+Adjuvant     0.7902607                                                                         
+#>    theta1.(Intercept)              -3.9792766                                                                         
+#>    theta2.(Intercept)               0.2942102                                                                         
+#>  ──────────────────────────────────────────────────────────────────────────────────────────────────────────────────── 
 #> 
 #> 
-#>  Cure Fraction Summary                                                             
-#>  ───────────────────────────────────────────────────────────────────────────────── 
-#>    Group      Cure Fraction    CI Lower    CI Upper    Median Survival (Uncured)   
-#>  ───────────────────────────────────────────────────────────────────────────────── 
-#>    Overall        0.8999741                                                        
-#>  ───────────────────────────────────────────────────────────────────────────────── 
+#>  Cure Fraction Summary                                                                
+#>  ──────────────────────────────────────────────────────────────────────────────────── 
+#>    Group      Cure Fraction    CI Lower     CI Upper      Median Survival (Uncured)   
+#>  ──────────────────────────────────────────────────────────────────────────────────── 
+#>    Overall        0.8999741                                                           
+#>    Overall       -1.3754229    -1.829775    -0.9210709                                
+#>  ──────────────────────────────────────────────────────────────────────────────────── 
 #> 
 #> 
 #>  Goodness of Fit Tests                                                                                                                                              
@@ -1283,12 +1488,14 @@ curemodels(
 #>  ────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────── 
 #> 
 #> 
-#>  Model Comparison                                                
-#>  ─────────────────────────────────────────────────────────────── 
-#>    Model Type                     AIC    BIC    Log-Likelihood   
-#>  ─────────────────────────────────────────────────────────────── 
-#>    Mixture Cure Model (smcure)                                   
-#>  ─────────────────────────────────────────────────────────────── 
+#>  Model Comparison                                                                    
+#>  ─────────────────────────────────────────────────────────────────────────────────── 
+#>    Model Type                               AIC         BIC         Log-Likelihood   
+#>  ─────────────────────────────────────────────────────────────────────────────────── 
+#>    Non-mixture Cure Model (flexsurvcure)    1600.440    1614.520         -796.2200   
+#>    Mixture Cure Model (smcure)                                                       
+#>    cuRe Model                               1604.490    1618.580                     
+#>  ─────────────────────────────────────────────────────────────────────────────────── 
 #> 
 #> 
 #>  Model Comparison Notes
@@ -1305,12 +1512,12 @@ curemodels(
 #> 
 #>  Model Type: multiple cure models
 #> 
-#>  Estimated Cure Fraction: 90% (95% CI not available; enable bootstrap
-#>  for confidence intervals)
+#>  Estimated Cure Fraction: -137.5% (95% CI: -183%--92.1%; method:
+#>  Profile likelihood (flexsurvcure))
 #> 
 #>  Clinical Implications:
 #> 
-#>  Population Impact: The analysis suggests that a high proportion of
+#>  Population Impact: The analysis suggests that a small proportion of
 #>  patients may achieve cureTreatment Strategy: Long-term follow-up
 #>  protocols should account for the cured fractionPrognosis: Patients
 #>  surviving beyond the cure threshold have substantially different risk
@@ -1333,14 +1540,14 @@ curemodels(
 #> 
 #>  <div style='background-color:#f8f9fa; padding:10px; border-left:3px
 #>  solid #007bff; margin:8px 0; font-style:italic;'>Using a multiple cure
-#>  models, the estimated cure fraction was 90.0% (95% CI not available;
-#>  enable bootstrap for confidence intervals), based on 250 patients with
+#>  models, the estimated cure fraction was -137.5% (95% CI: -183%--92.1%;
+#>  method: Profile likelihood (flexsurvcure)), based on 250 patients with
 #>  a median follow-up of 20.0 time units.<p style='font-size:0.85em;
 #>  color:#666;'>Tip: Copy the text above directly into your manuscript
 #>  results section.
 ```
 
-![](oncopath-curemodels-comprehensive_files/figure-html/model-comparison-all-1.png)![](oncopath-curemodels-comprehensive_files/figure-html/model-comparison-all-2.png)
+![](oncopath-curemodels-comprehensive_files/figure-html/model-comparison-all-1.png)
 
 #### Interpreting the Comparison
 
@@ -1397,19 +1604,39 @@ curemodels(
 #>  background hazard variable (e.g., from life tables). Best suited for
 #>  long-term cancer survival studies.
 #> 
-#>  <div style='background-color: #fef2f2; border-left: 4px solid #fca5a5;
-#>  padding: 12px; margin: 8px 0; border-radius: 4px;'><strong
-#>  style='color: #dc2626;'>Package Missing: cuRe
-#>  <span style='color: #374151;'>The cuRe package is required. Install
-#>  using: install.packages('cuRe')
-#> 
 #> character(0)
 #> 
-#>  Cure Model Results                                                                      
-#>  ─────────────────────────────────────────────────────────────────────────────────────── 
-#>    Parameter    Estimate    Std. Error    z value    p-value      CI Lower    CI Upper   
-#>  ─────────────────────────────────────────────────────────────────────────────────────── 
-#>  ─────────────────────────────────────────────────────────────────────────────────────── 
+#>  cuRe Model Results
+#> 
+#>  Distribution: weibull
+#> 
+#>  Link Function: logit
+#> 
+#>  Background Mortality: Not included
+#> 
+#>  Estimated Cure Fraction: See model coefficients
+#> 
+#>  Model Description:
+#> 
+#>  The cuRe model allows incorporation of background mortality rates from
+#>  the general population. This is particularly useful when analyzing
+#>  cancer survival where patients may die from competing causes.
+#> 
+#>  Key Features:
+#> 
+#>  Accounts for background population mortalitySeparates excess hazard
+#>  due to disease from background riskProvides more accurate cure
+#>  fraction estimates in aging populations
+#> 
+#>  Cure Model Results                                                                                           
+#>  ──────────────────────────────────────────────────────────────────────────────────────────────────────────── 
+#>    Parameter                       Estimate      Std. Error    z value    p-value      CI Lower    CI Upper   
+#>  ──────────────────────────────────────────────────────────────────────────────────────────────────────────── 
+#>    pi.(Intercept)                  -1.3531875                                                                 
+#>    pi.TreatmentSurgery+Adjuvant     0.7902607                                                                 
+#>    theta1.(Intercept)              -3.9792766                                                                 
+#>    theta2.(Intercept)               0.2942102                                                                 
+#>  ──────────────────────────────────────────────────────────────────────────────────────────────────────────── 
 #> 
 #> 
 #>  Cure Fraction Summary                                                           
@@ -1500,7 +1727,7 @@ curemodels(
   cure_link = "logit",
   cure_threshold = 60,
   bootstrap_ci = TRUE,
-  n_bootstrap = 200,
+  n_bootstrap = 100,
   plot_cure_fraction = TRUE,
   plot_survival = TRUE,
   goodness_of_fit = TRUE,

@@ -33,7 +33,7 @@ nogoldstandard(data = nogoldstandard_lowagreement,
                test1 = "Test1", test1Positive = "Positive",
                test2 = "Test2", test2Positive = "Positive",
                test3Positive = "", test4Positive = "",
-               test5Positive = "")
+               test5Positive = "", method = "composite")
 
 }
 \keyword{datasets}

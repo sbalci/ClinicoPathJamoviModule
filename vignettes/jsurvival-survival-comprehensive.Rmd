@@ -7,7 +7,7 @@ output:
     toc: true
     toc_depth: 3
 vignette: >
-  %\VignetteIndexEntry{Comprehensive Survival Analysis}
+  %\VignetteIndexEntry{Comprehensive Survival Analysis with ClinicoPath}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---

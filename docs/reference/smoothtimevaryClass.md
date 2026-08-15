@@ -7,6 +7,11 @@ flexible spline-based methods, kernel smoothing, and LOESS approaches,
 offering alternatives to step-function approaches in standard
 time-varying Cox models.
 
+## Value
+
+An `R6` class generator object for the `smoothtimevaryClass` backend;
+used internally by the jamovi analysis wrapper and not called directly.
+
 ## Details
 
 The smoothtimevaryClass implements smooth time-varying effects with:

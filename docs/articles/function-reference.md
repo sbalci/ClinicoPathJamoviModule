@@ -2,9 +2,12 @@
 
 ## ClinicoPathJamoviModule Function Reference
 
-**Total Functions:** 420+ **Menu Groups:** 5 (ClinicoPathDescriptives,
-JJStatsPlot, OncoPath, jsurvival, meddecide) **Status Categories:**
-Stable, To be Tested, Drafts
+**Analyses documented here:** 18, selected as a starting point for each
+menu group **Analyses in the module:** 420+, of which about 60 are
+currently on a production menu; the rest are on development or test menu
+routes and do not appear in jamovi yet **Menu Groups:** 5
+(ClinicoPathDescriptives, JJStatsPlot, OncoPath, jsurvival, meddecide)
+**Status Categories:** Stable, To be Tested, Drafts
 
 **GitHub:**
 [ClinicoPathJamoviModule](https://github.com/sbalci/ClinicoPathJamoviModule)
@@ -15,8 +18,8 @@ Stable, To be Tested, Drafts
 
 ### How to Use This Reference
 
-This guide catalogs all 420+ analysis functions in
-ClinicoPathJamoviModule organized by:
+This guide introduces a representative analysis from each menu group -
+18 in all - organized by:
 
 - **Menu Group:** Where to find the function in jamovi’s menu
 - **Status:** Stability and testing status
@@ -29,6 +32,12 @@ ClinicoPathJamoviModule organized by:
 - **Stable:** Production-ready, thoroughly tested
 - **To be Tested:** Functional but needs more validation
 - **Drafts:** Work in progress, may have limitations
+
+These levels describe *testing maturity*, which is a separate question
+from whether an analysis appears in a jamovi menu. Most of the module’s
+420+ analyses are on development or test menu routes and are not yet
+reachable from the menus, whatever their testing status. Every analysis
+documented in this guide is both Stable and on a production menu.
 
 #### Quick Navigation
 

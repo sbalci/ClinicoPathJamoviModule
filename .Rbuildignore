@@ -85,7 +85,6 @@
 ^preparations-1\.R$
 ^quarto\.R$
 ^test_.*\.R$
-^tests/verify_timeinterval copy\.R$
 ^\.travis\.yml$
 ^codecov\.yml$
 ^\.gitlab-ci\.yml$

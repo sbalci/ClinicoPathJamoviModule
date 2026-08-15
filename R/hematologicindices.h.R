@@ -452,14 +452,6 @@ hematologicindicesBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
 #' summarized across the cohort, optionally dichotomized at a literature or 
 #' data-driven cutpoint, and optionally related to a survival outcome.
 #' 
-#'
-#' @examples
-#' \donttest{
-#' hematologicindices(
-#'     data = mydata,
-#'     neutrophils = "neut", lymphocytes = "lymph",
-#'     platelets = "plt", albumin = "alb", crp = "crp")
-#'}
 #' @param data The data as a data frame (one row per patient).
 #' @param neutrophils Absolute neutrophil count (10^9/L).
 #' @param lymphocytes Absolute lymphocyte count (10^9/L).

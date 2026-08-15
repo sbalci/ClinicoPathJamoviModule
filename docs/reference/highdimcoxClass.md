@@ -6,6 +6,11 @@ regularized survival analysis with many predictors, stability selection,
 and comprehensive variable screening methods specifically designed for
 genomic, proteomic, and high-throughput clinical data.
 
+## Value
+
+An `R6` class generator object for the `highdimcoxClass` backend; used
+internally by the jamovi analysis wrapper and not called directly.
+
 ## Details
 
 The highdimcoxClass implements advanced high-dimensional Cox regression

@@ -37,6 +37,7 @@
 <url><loc>https://www.serdarbalci.com/ClinicoPathJamoviModule/articles/ihccluster-quick-reference-card.html</loc></url>
 <url><loc>https://www.serdarbalci.com/ClinicoPathJamoviModule/articles/index.html</loc></url>
 <url><loc>https://www.serdarbalci.com/ClinicoPathJamoviModule/articles/jsurvival-03-multisurvival-interactions.html</loc></url>
+<url><loc>https://www.serdarbalci.com/ClinicoPathJamoviModule/articles/jsurvival-04-multisurvival-interaction-interpretation.html</loc></url>
 <url><loc>https://www.serdarbalci.com/ClinicoPathJamoviModule/articles/jsurvival-adaptivelasso-comprehensive.html</loc></url>
 <url><loc>https://www.serdarbalci.com/ClinicoPathJamoviModule/articles/jsurvival-competingsurvival-comprehensive.html</loc></url>
 <url><loc>https://www.serdarbalci.com/ClinicoPathJamoviModule/articles/jsurvival-conditionalsurvival-comprehensive.html</loc></url>
@@ -71,6 +72,8 @@
 <url><loc>https://www.serdarbalci.com/ClinicoPathJamoviModule/index.html</loc></url>
 <url><loc>https://www.serdarbalci.com/ClinicoPathJamoviModule/news/index.html</loc></url>
 <url><loc>https://www.serdarbalci.com/ClinicoPathJamoviModule/psychopdaROC_team_review.html</loc></url>
+<url><loc>https://www.serdarbalci.com/ClinicoPathJamoviModule/reference/%!in%.html</loc></url>
+<url><loc>https://www.serdarbalci.com/ClinicoPathJamoviModule/reference/%notin%.html</loc></url>
 <url><loc>https://www.serdarbalci.com/ClinicoPathJamoviModule/reference/ClinicoPath-package.html</loc></url>
 <url><loc>https://www.serdarbalci.com/ClinicoPathJamoviModule/reference/STAGEMIGRATION_CONSTANTS.html</loc></url>
 <url><loc>https://www.serdarbalci.com/ClinicoPathJamoviModule/reference/aalenhazard.html</loc></url>
@@ -88,6 +91,8 @@
 <url><loc>https://www.serdarbalci.com/ClinicoPathJamoviModule/reference/advancedraincloud_datasets.html</loc></url>
 <url><loc>https://www.serdarbalci.com/ClinicoPathJamoviModule/reference/advancedtrials.html</loc></url>
 <url><loc>https://www.serdarbalci.com/ClinicoPathJamoviModule/reference/advancedtrialsClass.html</loc></url>
+<url><loc>https://www.serdarbalci.com/ClinicoPathJamoviModule/reference/aeplot.html</loc></url>
+<url><loc>https://www.serdarbalci.com/ClinicoPathJamoviModule/reference/aeplotClass.html</loc></url>
 <url><loc>https://www.serdarbalci.com/ClinicoPathJamoviModule/reference/agepyramid.html</loc></url>
 <url><loc>https://www.serdarbalci.com/ClinicoPathJamoviModule/reference/agepyramidClass.html</loc></url>
 <url><loc>https://www.serdarbalci.com/ClinicoPathJamoviModule/reference/agreement.html</loc></url>
@@ -163,6 +168,8 @@
 <url><loc>https://www.serdarbalci.com/ClinicoPathJamoviModule/reference/chisqposttest_test_data.html</loc></url>
 <url><loc>https://www.serdarbalci.com/ClinicoPathJamoviModule/reference/ciSingle.html</loc></url>
 <url><loc>https://www.serdarbalci.com/ClinicoPathJamoviModule/reference/ciSingleClass.html</loc></url>
+<url><loc>https://www.serdarbalci.com/ClinicoPathJamoviModule/reference/circos.html</loc></url>
+<url><loc>https://www.serdarbalci.com/ClinicoPathJamoviModule/reference/circosClass.html</loc></url>
 <url><loc>https://www.serdarbalci.com/ClinicoPathJamoviModule/reference/classicalSurvivalPower.html</loc></url>
 <url><loc>https://www.serdarbalci.com/ClinicoPathJamoviModule/reference/classicalSurvivalPowerClass.html</loc></url>
 <url><loc>https://www.serdarbalci.com/ClinicoPathJamoviModule/reference/classification.html</loc></url>
@@ -247,6 +254,8 @@
 <url><loc>https://www.serdarbalci.com/ClinicoPathJamoviModule/reference/crosstableClass.html</loc></url>
 <url><loc>https://www.serdarbalci.com/ClinicoPathJamoviModule/reference/crosstablepivot.html</loc></url>
 <url><loc>https://www.serdarbalci.com/ClinicoPathJamoviModule/reference/crosstablepivotClass.html</loc></url>
+<url><loc>https://www.serdarbalci.com/ClinicoPathJamoviModule/reference/ctdnadynamics.html</loc></url>
+<url><loc>https://www.serdarbalci.com/ClinicoPathJamoviModule/reference/ctdnadynamicsClass.html</loc></url>
 <url><loc>https://www.serdarbalci.com/ClinicoPathJamoviModule/reference/curemodels.html</loc></url>
 <url><loc>https://www.serdarbalci.com/ClinicoPathJamoviModule/reference/curemodelsClass.html</loc></url>
 <url><loc>https://www.serdarbalci.com/ClinicoPathJamoviModule/reference/dataquality.html</loc></url>
@@ -298,6 +307,8 @@
 <url><loc>https://www.serdarbalci.com/ClinicoPathJamoviModule/reference/directbinomial.html</loc></url>
 <url><loc>https://www.serdarbalci.com/ClinicoPathJamoviModule/reference/directregression.html</loc></url>
 <url><loc>https://www.serdarbalci.com/ClinicoPathJamoviModule/reference/distributionfit.html</loc></url>
+<url><loc>https://www.serdarbalci.com/ClinicoPathJamoviModule/reference/door.html</loc></url>
+<url><loc>https://www.serdarbalci.com/ClinicoPathJamoviModule/reference/doorClass.html</loc></url>
 <url><loc>https://www.serdarbalci.com/ClinicoPathJamoviModule/reference/dot-asSurvivalFormula.html</loc></url>
 <url><loc>https://www.serdarbalci.com/ClinicoPathJamoviModule/reference/dot-buildSurvivalFormula.html</loc></url>
 <url><loc>https://www.serdarbalci.com/ClinicoPathJamoviModule/reference/dot-calculate2x2Metrics.html</loc></url>
@@ -314,10 +325,14 @@
 <url><loc>https://www.serdarbalci.com/ClinicoPathJamoviModule/reference/dot-calculateYouden.html</loc></url>
 <url><loc>https://www.serdarbalci.com/ClinicoPathJamoviModule/reference/dot-calculate_weibull_events.html</loc></url>
 <url><loc>https://www.serdarbalci.com/ClinicoPathJamoviModule/reference/dot-clinicopath_errors.html</loc></url>
+<url><loc>https://www.serdarbalci.com/ClinicoPathJamoviModule/reference/dot-competingRiskUnavailable.html</loc></url>
 <url><loc>https://www.serdarbalci.com/ClinicoPathJamoviModule/reference/dot-createNoticeHTML.html</loc></url>
+<url><loc>https://www.serdarbalci.com/ClinicoPathJamoviModule/reference/dot-defineEventIndicator.html</loc></url>
+<url><loc>https://www.serdarbalci.com/ClinicoPathJamoviModule/reference/dot-describeEventIndicator.html</loc></url>
 <url><loc>https://www.serdarbalci.com/ClinicoPathJamoviModule/reference/dot-escapeVar.html</loc></url>
 <url><loc>https://www.serdarbalci.com/ClinicoPathJamoviModule/reference/dot-escapeVariableNames.html</loc></url>
 <url><loc>https://www.serdarbalci.com/ClinicoPathJamoviModule/reference/dot-eurostat_pkg_cache.html</loc></url>
+<url><loc>https://www.serdarbalci.com/ClinicoPathJamoviModule/reference/dot-fmtTimeLabel.html</loc></url>
 <url><loc>https://www.serdarbalci.com/ClinicoPathJamoviModule/reference/dot-formatDiagnosticTable.html</loc></url>
 <url><loc>https://www.serdarbalci.com/ClinicoPathJamoviModule/reference/dot-get_lognormal_parameters.html</loc></url>
 <url><loc>https://www.serdarbalci.com/ClinicoPathJamoviModule/reference/dot-get_piecewise_exponential_parameters.html</loc></url>
@@ -367,6 +382,8 @@
 <url><loc>https://www.serdarbalci.com/ClinicoPathJamoviModule/reference/esquisseautoClass.html</loc></url>
 <url><loc>https://www.serdarbalci.com/ClinicoPathJamoviModule/reference/eurostatmap.html</loc></url>
 <url><loc>https://www.serdarbalci.com/ClinicoPathJamoviModule/reference/eurostatmapClass.html</loc></url>
+<url><loc>https://www.serdarbalci.com/ClinicoPathJamoviModule/reference/evalue.html</loc></url>
+<url><loc>https://www.serdarbalci.com/ClinicoPathJamoviModule/reference/evalueClass.html</loc></url>
 <url><loc>https://www.serdarbalci.com/ClinicoPathJamoviModule/reference/exacttests.html</loc></url>
 <url><loc>https://www.serdarbalci.com/ClinicoPathJamoviModule/reference/exacttestsClass.html</loc></url>
 <url><loc>https://www.serdarbalci.com/ClinicoPathJamoviModule/reference/excessmortality.html</loc></url>
@@ -392,11 +409,15 @@
 <url><loc>https://www.serdarbalci.com/ClinicoPathJamoviModule/reference/flexrstpm2.html</loc></url>
 <url><loc>https://www.serdarbalci.com/ClinicoPathJamoviModule/reference/flexrstpm2Class.html</loc></url>
 <url><loc>https://www.serdarbalci.com/ClinicoPathJamoviModule/reference/formatIHCPValue.html</loc></url>
+<url><loc>https://www.serdarbalci.com/ClinicoPathJamoviModule/reference/fragilityindex.html</loc></url>
+<url><loc>https://www.serdarbalci.com/ClinicoPathJamoviModule/reference/fragilityindexClass.html</loc></url>
 <url><loc>https://www.serdarbalci.com/ClinicoPathJamoviModule/reference/frailtysurvival.html</loc></url>
 <url><loc>https://www.serdarbalci.com/ClinicoPathJamoviModule/reference/frailtysurvivalClass.html</loc></url>
 <url><loc>https://www.serdarbalci.com/ClinicoPathJamoviModule/reference/friedmantest.html</loc></url>
 <url><loc>https://www.serdarbalci.com/ClinicoPathJamoviModule/reference/friedmantestClass.html</loc></url>
 <url><loc>https://www.serdarbalci.com/ClinicoPathJamoviModule/reference/functionalsampling.html</loc></url>
+<url><loc>https://www.serdarbalci.com/ClinicoPathJamoviModule/reference/gcomputation.html</loc></url>
+<url><loc>https://www.serdarbalci.com/ClinicoPathJamoviModule/reference/gcomputationClass.html</loc></url>
 <url><loc>https://www.serdarbalci.com/ClinicoPathJamoviModule/reference/gee_liver_data.html</loc></url>
 <url><loc>https://www.serdarbalci.com/ClinicoPathJamoviModule/reference/geemodel.html</loc></url>
 <url><loc>https://www.serdarbalci.com/ClinicoPathJamoviModule/reference/geemodelClass.html</loc></url>
@@ -433,9 +454,13 @@
 <url><loc>https://www.serdarbalci.com/ClinicoPathJamoviModule/reference/grouplasso.html</loc></url>
 <url><loc>https://www.serdarbalci.com/ClinicoPathJamoviModule/reference/groupsummary.html</loc></url>
 <url><loc>https://www.serdarbalci.com/ClinicoPathJamoviModule/reference/groupsummaryClass.html</loc></url>
+<url><loc>https://www.serdarbalci.com/ClinicoPathJamoviModule/reference/gsdesign.html</loc></url>
+<url><loc>https://www.serdarbalci.com/ClinicoPathJamoviModule/reference/gsdesignClass.html</loc></url>
 <url><loc>https://www.serdarbalci.com/ClinicoPathJamoviModule/reference/gtsummary.html</loc></url>
 <url><loc>https://www.serdarbalci.com/ClinicoPathJamoviModule/reference/gtsummaryClass.html</loc></url>
 <url><loc>https://www.serdarbalci.com/ClinicoPathJamoviModule/reference/haralicktexture.html</loc></url>
+<url><loc>https://www.serdarbalci.com/ClinicoPathJamoviModule/reference/hematologicindices.html</loc></url>
+<url><loc>https://www.serdarbalci.com/ClinicoPathJamoviModule/reference/hematologicindicesClass.html</loc></url>
 <url><loc>https://www.serdarbalci.com/ClinicoPathJamoviModule/reference/hiddenmarkov.html</loc></url>
 <url><loc>https://www.serdarbalci.com/ClinicoPathJamoviModule/reference/hierarchicalbayes.html</loc></url>
 <url><loc>https://www.serdarbalci.com/ClinicoPathJamoviModule/reference/hierarchicalpathology.html</loc></url>
@@ -462,6 +487,8 @@
 <url><loc>https://www.serdarbalci.com/ClinicoPathJamoviModule/reference/illnessdeath.html</loc></url>
 <url><loc>https://www.serdarbalci.com/ClinicoPathJamoviModule/reference/imagingcorrelation.html</loc></url>
 <url><loc>https://www.serdarbalci.com/ClinicoPathJamoviModule/reference/index.html</loc></url>
+<url><loc>https://www.serdarbalci.com/ClinicoPathJamoviModule/reference/interruptedtimeseries.html</loc></url>
+<url><loc>https://www.serdarbalci.com/ClinicoPathJamoviModule/reference/interruptedtimeseriesClass.html</loc></url>
 <url><loc>https://www.serdarbalci.com/ClinicoPathJamoviModule/reference/intervalcensorcure.html</loc></url>
 <url><loc>https://www.serdarbalci.com/ClinicoPathJamoviModule/reference/intervalsurvival.html</loc></url>
 <url><loc>https://www.serdarbalci.com/ClinicoPathJamoviModule/reference/intervalsurvivalClass.html</loc></url>
@@ -493,6 +520,8 @@
 <url><loc>https://www.serdarbalci.com/ClinicoPathJamoviModule/reference/jjcoefstatsClass.html</loc></url>
 <url><loc>https://www.serdarbalci.com/ClinicoPathJamoviModule/reference/jjcorrmat.html</loc></url>
 <url><loc>https://www.serdarbalci.com/ClinicoPathJamoviModule/reference/jjcorrmatClass.html</loc></url>
+<url><loc>https://www.serdarbalci.com/ClinicoPathJamoviModule/reference/jjdotchart.html</loc></url>
+<url><loc>https://www.serdarbalci.com/ClinicoPathJamoviModule/reference/jjdotchartClass.html</loc></url>
 <url><loc>https://www.serdarbalci.com/ClinicoPathJamoviModule/reference/jjdotplotstats.html</loc></url>
 <url><loc>https://www.serdarbalci.com/ClinicoPathJamoviModule/reference/jjdotplotstatsClass.html</loc></url>
 <url><loc>https://www.serdarbalci.com/ClinicoPathJamoviModule/reference/jjhistostats.html</loc></url>
@@ -518,6 +547,8 @@
 <url><loc>https://www.serdarbalci.com/ClinicoPathJamoviModule/reference/jjtreemapClass.html</loc></url>
 <url><loc>https://www.serdarbalci.com/ClinicoPathJamoviModule/reference/jjwithinstats.html</loc></url>
 <url><loc>https://www.serdarbalci.com/ClinicoPathJamoviModule/reference/jjwithinstatsClass.html</loc></url>
+<url><loc>https://www.serdarbalci.com/ClinicoPathJamoviModule/reference/joinpoint.html</loc></url>
+<url><loc>https://www.serdarbalci.com/ClinicoPathJamoviModule/reference/joinpointClass.html</loc></url>
 <url><loc>https://www.serdarbalci.com/ClinicoPathJamoviModule/reference/jointfrailty.html</loc></url>
 <url><loc>https://www.serdarbalci.com/ClinicoPathJamoviModule/reference/jointfrailtyClass.html</loc></url>
 <url><loc>https://www.serdarbalci.com/ClinicoPathJamoviModule/reference/jointmodeling.html</loc></url>
@@ -559,6 +590,8 @@
 <url><loc>https://www.serdarbalci.com/ClinicoPathJamoviModule/reference/load_required_package.html</loc></url>
 <url><loc>https://www.serdarbalci.com/ClinicoPathJamoviModule/reference/lollipop.html</loc></url>
 <url><loc>https://www.serdarbalci.com/ClinicoPathJamoviModule/reference/lollipopClass.html</loc></url>
+<url><loc>https://www.serdarbalci.com/ClinicoPathJamoviModule/reference/lymphnoderatio.html</loc></url>
+<url><loc>https://www.serdarbalci.com/ClinicoPathJamoviModule/reference/lymphnoderatioClass.html</loc></url>
 <url><loc>https://www.serdarbalci.com/ClinicoPathJamoviModule/reference/mageeequation.html</loc></url>
 <url><loc>https://www.serdarbalci.com/ClinicoPathJamoviModule/reference/mageeequationClass.html</loc></url>
 <url><loc>https://www.serdarbalci.com/ClinicoPathJamoviModule/reference/mantelhaenszel.html</loc></url>
@@ -597,6 +630,8 @@
 <url><loc>https://www.serdarbalci.com/ClinicoPathJamoviModule/reference/multiclassdiagnostics.html</loc></url>
 <url><loc>https://www.serdarbalci.com/ClinicoPathJamoviModule/reference/multiclassroc.html</loc></url>
 <url><loc>https://www.serdarbalci.com/ClinicoPathJamoviModule/reference/multiclassrocClass.html</loc></url>
+<url><loc>https://www.serdarbalci.com/ClinicoPathJamoviModule/reference/multifocalconcordance.html</loc></url>
+<url><loc>https://www.serdarbalci.com/ClinicoPathJamoviModule/reference/multifocalconcordanceClass.html</loc></url>
 <url><loc>https://www.serdarbalci.com/ClinicoPathJamoviModule/reference/multiplexanalysis.html</loc></url>
 <url><loc>https://www.serdarbalci.com/ClinicoPathJamoviModule/reference/multistatesurvival.html</loc></url>
 <url><loc>https://www.serdarbalci.com/ClinicoPathJamoviModule/reference/multistatesurvivalClass.html</loc></url>
@@ -665,6 +700,7 @@
 <url><loc>https://www.serdarbalci.com/ClinicoPathJamoviModule/reference/pathologycompositionClass.html</loc></url>
 <url><loc>https://www.serdarbalci.com/ClinicoPathJamoviModule/reference/pathsampling.html</loc></url>
 <url><loc>https://www.serdarbalci.com/ClinicoPathJamoviModule/reference/patientdashboard.html</loc></url>
+<url><loc>https://www.serdarbalci.com/ClinicoPathJamoviModule/reference/patientfollowupintro.html</loc></url>
 <url><loc>https://www.serdarbalci.com/ClinicoPathJamoviModule/reference/patientreported.html</loc></url>
 <url><loc>https://www.serdarbalci.com/ClinicoPathJamoviModule/reference/patientreportedClass.html</loc></url>
 <url><loc>https://www.serdarbalci.com/ClinicoPathJamoviModule/reference/patientsimilarity.html</loc></url>
@@ -738,6 +774,9 @@
 <url><loc>https://www.serdarbalci.com/ClinicoPathJamoviModule/reference/raw_to_prob.html</loc></url>
 <url><loc>https://www.serdarbalci.com/ClinicoPathJamoviModule/reference/recist.html</loc></url>
 <url><loc>https://www.serdarbalci.com/ClinicoPathJamoviModule/reference/recistClass.html</loc></url>
+<url><loc>https://www.serdarbalci.com/ClinicoPathJamoviModule/reference/recist_context.html</loc></url>
+<url><loc>https://www.serdarbalci.com/ClinicoPathJamoviModule/reference/recist_engine.html</loc></url>
+<url><loc>https://www.serdarbalci.com/ClinicoPathJamoviModule/reference/recist_select_target_lesions.html</loc></url>
 <url><loc>https://www.serdarbalci.com/ClinicoPathJamoviModule/reference/reclassmetrics.html</loc></url>
 <url><loc>https://www.serdarbalci.com/ClinicoPathJamoviModule/reference/reclassmetricsClass.html</loc></url>
 <url><loc>https://www.serdarbalci.com/ClinicoPathJamoviModule/reference/recurrentsurvival.html</loc></url>
@@ -749,6 +788,8 @@
 <url><loc>https://www.serdarbalci.com/ClinicoPathJamoviModule/reference/reportcat2.html</loc></url>
 <url><loc>https://www.serdarbalci.com/ClinicoPathJamoviModule/reference/reportcat2Class.html</loc></url>
 <url><loc>https://www.serdarbalci.com/ClinicoPathJamoviModule/reference/reportcatClass.html</loc></url>
+<url><loc>https://www.serdarbalci.com/ClinicoPathJamoviModule/reference/residualcancerburden.html</loc></url>
+<url><loc>https://www.serdarbalci.com/ClinicoPathJamoviModule/reference/residualcancerburdenClass.html</loc></url>
 <url><loc>https://www.serdarbalci.com/ClinicoPathJamoviModule/reference/retracted-helpers.html</loc></url>
 <url><loc>https://www.serdarbalci.com/ClinicoPathJamoviModule/reference/retracted.html</loc></url>
 <url><loc>https://www.serdarbalci.com/ClinicoPathJamoviModule/reference/retracted_imports.html</loc></url>
@@ -774,6 +815,7 @@
 <url><loc>https://www.serdarbalci.com/ClinicoPathJamoviModule/reference/semimarkov.html</loc></url>
 <url><loc>https://www.serdarbalci.com/ClinicoPathJamoviModule/reference/sequentialtests.html</loc></url>
 <url><loc>https://www.serdarbalci.com/ClinicoPathJamoviModule/reference/sequentialtestsClass.html</loc></url>
+<url><loc>https://www.serdarbalci.com/ClinicoPathJamoviModule/reference/sequentialtests_datasets.html</loc></url>
 <url><loc>https://www.serdarbalci.com/ClinicoPathJamoviModule/reference/showIHCDataRequirements.html</loc></url>
 <url><loc>https://www.serdarbalci.com/ClinicoPathJamoviModule/reference/sigmametrics.html</loc></url>
 <url><loc>https://www.serdarbalci.com/ClinicoPathJamoviModule/reference/simonmakuch.html</loc></url>
@@ -815,6 +857,8 @@
 <url><loc>https://www.serdarbalci.com/ClinicoPathJamoviModule/reference/stagemigration_validateCovariates.html</loc></url>
 <url><loc>https://www.serdarbalci.com/ClinicoPathJamoviModule/reference/stagemigration_validateData.html</loc></url>
 <url><loc>https://www.serdarbalci.com/ClinicoPathJamoviModule/reference/stagemigration_validateStagingVars.html</loc></url>
+<url><loc>https://www.serdarbalci.com/ClinicoPathJamoviModule/reference/standardizedratio.html</loc></url>
+<url><loc>https://www.serdarbalci.com/ClinicoPathJamoviModule/reference/standardizedratioClass.html</loc></url>
 <url><loc>https://www.serdarbalci.com/ClinicoPathJamoviModule/reference/statsplot2.html</loc></url>
 <url><loc>https://www.serdarbalci.com/ClinicoPathJamoviModule/reference/statsplot2Class.html</loc></url>
 <url><loc>https://www.serdarbalci.com/ClinicoPathJamoviModule/reference/stereology.html</loc></url>
@@ -854,6 +898,8 @@
 <url><loc>https://www.serdarbalci.com/ClinicoPathJamoviModule/reference/swimmer_unified_oncology.html</loc></url>
 <url><loc>https://www.serdarbalci.com/ClinicoPathJamoviModule/reference/swimmerplot.html</loc></url>
 <url><loc>https://www.serdarbalci.com/ClinicoPathJamoviModule/reference/swimmerplotClass.html</loc></url>
+<url><loc>https://www.serdarbalci.com/ClinicoPathJamoviModule/reference/synopticcompleteness.html</loc></url>
+<url><loc>https://www.serdarbalci.com/ClinicoPathJamoviModule/reference/synopticcompletenessClass.html</loc></url>
 <url><loc>https://www.serdarbalci.com/ClinicoPathJamoviModule/reference/tableone.html</loc></url>
 <url><loc>https://www.serdarbalci.com/ClinicoPathJamoviModule/reference/tableoneClass.html</loc></url>
 <url><loc>https://www.serdarbalci.com/ClinicoPathJamoviModule/reference/thresholdregression.html</loc></url>
@@ -938,6 +984,8 @@
 <url><loc>https://www.serdarbalci.com/ClinicoPathJamoviModule/reference/treemedical.html</loc></url>
 <url><loc>https://www.serdarbalci.com/ClinicoPathJamoviModule/reference/treemedicalClass.html</loc></url>
 <url><loc>https://www.serdarbalci.com/ClinicoPathJamoviModule/reference/trichotomousroc.html</loc></url>
+<url><loc>https://www.serdarbalci.com/ClinicoPathJamoviModule/reference/tumorbudding.html</loc></url>
+<url><loc>https://www.serdarbalci.com/ClinicoPathJamoviModule/reference/tumorbuddingClass.html</loc></url>
 <url><loc>https://www.serdarbalci.com/ClinicoPathJamoviModule/reference/tumorgrowth.html</loc></url>
 <url><loc>https://www.serdarbalci.com/ClinicoPathJamoviModule/reference/tumorgrowthClass.html</loc></url>
 <url><loc>https://www.serdarbalci.com/ClinicoPathJamoviModule/reference/validateDecisionAnalysisInputs.html</loc></url>
@@ -957,6 +1005,8 @@
 <url><loc>https://www.serdarbalci.com/ClinicoPathJamoviModule/reference/waterfall_test_datasets.html</loc></url>
 <url><loc>https://www.serdarbalci.com/ClinicoPathJamoviModule/reference/waterfallrecist.html</loc></url>
 <url><loc>https://www.serdarbalci.com/ClinicoPathJamoviModule/reference/weightedlogrank.html</loc></url>
+<url><loc>https://www.serdarbalci.com/ClinicoPathJamoviModule/reference/winratio.html</loc></url>
+<url><loc>https://www.serdarbalci.com/ClinicoPathJamoviModule/reference/winratioClass.html</loc></url>
 <url><loc>https://www.serdarbalci.com/ClinicoPathJamoviModule/stagemigration_function_check_report.html</loc></url>
 <url><loc>https://www.serdarbalci.com/ClinicoPathJamoviModule/testing_agreement.html</loc></url>
 <url><loc>https://www.serdarbalci.com/ClinicoPathJamoviModule/testing_enhancedROC.html</loc></url>

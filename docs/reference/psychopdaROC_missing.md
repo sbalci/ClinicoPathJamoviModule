@@ -51,8 +51,6 @@ psychopdaROC(data = psychopdaROC_missing,
              dependentVars = c("test_a", "test_b"),
              classVar = "diagnosis", positiveClass = "Disease",
              refVar = "test_a")
-#> Multiple optimal cutpoints found, applying break_ties.
-#> Multiple optimal cutpoints found, applying break_ties.
 #> 
 #>  ADVANCED ROC ANALYSIS
 #> 
@@ -66,7 +64,7 @@ psychopdaROC(data = psychopdaROC_missing,
 #>  The ROC analysis has been completed using the following
 #>  specifications:
 #> 
-#>  &nbsp;
+#>   
 #> 
 #>  Measure Variable(s): test_a, test_b
 #> 
@@ -74,7 +72,7 @@ psychopdaROC(data = psychopdaROC_missing,
 #> 
 #>  Positive Class: Disease
 #> 
-#>  &nbsp;
+#>   
 #> 
 #>  Method: maximize_metric
 #> 
@@ -86,9 +84,9 @@ psychopdaROC(data = psychopdaROC_missing,
 #> 
 #>  Tie Breakers: mean
 #> 
-#>  Metric Tolerance: 0.05
+#>  Metric Tolerance: 1e-06
 #> 
-#>  &nbsp;
+#>   
 #> 
 #>  <hr />
 #> 
@@ -107,6 +105,12 @@ psychopdaROC(data = psychopdaROC_missing,
 #>    test_a      0.8488510                                                
 #>    test_b      0.7755656                                                
 #>  ────────────────────────────────────────────────────────────────────── 
+#>    Note. Reading of the test values: <b>HIGHER values were taken to
+#>    indicate Disease</b> (Classification Direction = ">="). If that
+#>    is the wrong way round for this marker, every sensitivity,
+#>    specificity, cutpoint and AUC below is reversed — switch
+#>    Classification Direction to "<=" and the AUC becomes 1 minus the
+#>    value shown.
 #> 
 #> 
 #>  Clinical Interpretation                                                                                                                                                                                                       
@@ -124,7 +128,7 @@ psychopdaROC(data = psychopdaROC_missing,
 #>  ───────────────────────────────────────────────────────────────────────────────────────────────────────────────── 
 #>    Cutpoint      Sensitivity    Specificity    PPV          NPV          Youden's J    AUC          Metric Score   
 #>  ───────────────────────────────────────────────────────────────────────────────────────────────────────────────── 
-#>    59.2521263       71.64179       85.71429     84.21053     73.97260     0.5735608    0.8488510       0.5735608   
+#>    59.8074173       71.64179       87.30159     85.71429     74.32432     0.5894338    0.8488510       0.5894338   
 #>  ───────────────────────────────────────────────────────────────────────────────────────────────────────────────── 
 #> 
 #> 
@@ -132,7 +136,7 @@ psychopdaROC(data = psychopdaROC_missing,
 #>  ───────────────────────────────────────────────────────────────────────────────────────────────────────────────── 
 #>    Cutpoint      Sensitivity    Specificity    PPV          NPV          Youden's J    AUC          Metric Score   
 #>  ───────────────────────────────────────────────────────────────────────────────────────────────────────────────── 
-#>    60.8374178       61.76471       86.15385     82.35294     68.29268     0.4791855    0.7755656       0.4791855   
+#>    61.9134099       61.76471       87.69231     84.00000     68.67470     0.4945701    0.7755656       0.4945701   
 #>  ───────────────────────────────────────────────────────────────────────────────────────────────────────────────── 
 #> 
 #> 
@@ -143,6 +147,12 @@ psychopdaROC(data = psychopdaROC_missing,
 #>    test_a      0.8488510                                                
 #>    test_b      0.7755656                                                
 #>  ────────────────────────────────────────────────────────────────────── 
+#>    Note. Reading of the test values: <b>HIGHER values were taken to
+#>    indicate Disease</b> (Classification Direction = ">="). If that
+#>    is the wrong way round for this marker, every sensitivity,
+#>    specificity, cutpoint and AUC below is reversed — switch
+#>    Classification Direction to "<=" and the AUC becomes 1 minus the
+#>    value shown.
 #> 
 
 ```

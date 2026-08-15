@@ -9,7 +9,7 @@ ggstatsplot::grouped_gghistostats to generate Histogram.'
 jjhistostats(
   data,
   dep,
-  grvar,
+  grvar = NULL,
   typestatistics = "parametric",
   centralityline = FALSE,
   changebinwidth = FALSE,
@@ -64,10 +64,13 @@ jjhistostats(
 
 - typestatistics:
 
-  Type of statistical test for normality assessment. 'parametric' uses
-  Shapiro-Wilk test, 'nonparametric' uses Anderson-Darling test,
-  'robust' uses robust normality tests, 'bayes' provides Bayesian
-  analysis.
+  Which ONE-SAMPLE LOCATION TEST is reported in the plot subtitle,
+  comparing the variable against the Test Value. 'parametric' is a
+  one-sample t-test, 'nonparametric' a Wilcoxon signed-rank test,
+  'robust' a bootstrap-t test on a trimmed mean, and 'bayes' a Bayesian
+  one-sample t-test. This option does NOT perform a normality test - no
+  Shapiro-Wilk, Anderson-Darling or similar statistic is computed or
+  displayed anywhere in this analysis.
 
 - centralityline:
 
@@ -106,9 +109,13 @@ jjhistostats(
 
 - enableOneSampleTest:
 
-  Whether to enable and display one-sample hypothesis test against a
-  specified test value. When disabled, only descriptive statistics and
-  distribution visualization are shown.
+  Whether the Test Value below is used as the null value of the
+  one-sample test. IMPORTANT: this does not control whether a test is
+  run. The test appears whenever 'Statistical Results' (resultssubtitle)
+  is enabled; leaving this option off simply means the test uses
+  ggstatsplot's own default null of 0, which is rarely a meaningful
+  comparison for clinical data. To suppress the test entirely, turn off
+  'Statistical Results'.
 
 - test.value:
 
@@ -120,7 +127,10 @@ jjhistostats(
 
 - conf.level:
 
-  Confidence level for confidence intervals (between 0 and 1).
+  Confidence level for the interval reported in the plot subtitle,
+  between 0.5 and 0.999. The old bounds allowed 1, at which the entire
+  statistical subtitle disappeared with no message, and 0, which printed
+  a zero-width "0 percent CI".
 
 - bf.message:
 

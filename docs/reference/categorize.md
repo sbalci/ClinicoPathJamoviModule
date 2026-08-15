@@ -7,7 +7,7 @@ Categorize Continuous Variables
 ``` r
 categorize(
   data,
-  var,
+  var = NULL,
   method = "quantile",
   nbins = 4,
   breaks = "",
@@ -15,6 +15,7 @@ categorize(
   labels = "auto",
   customlabels = "",
   newvarname = "",
+  excludeoutofrange = FALSE,
   includelowest = TRUE,
   rightclosed = TRUE,
   ordered = TRUE,
@@ -69,6 +70,15 @@ categorize(
 
   Name for the new categorized variable. Leave empty for automatic
   naming.
+
+- excludeoutofrange:
+
+  Applies to the 'manual' method only. By default the break points are
+  extended to the data minimum and maximum, so every observation falls
+  in a category and no case is lost. Set this to TRUE to keep the break
+  points exactly as entered and drop observations that fall outside
+  them; the number excluded is reported. Has no effect on the computed
+  methods, whose break points already span the data.
 
 - includelowest:
 

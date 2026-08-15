@@ -14,7 +14,7 @@ nogoldstandard(
   clinicalPreset = "none",
   test1,
   test1Positive,
-  test2,
+  test2 = NULL,
   test2Positive,
   test3 = NULL,
   test3Positive,
@@ -22,11 +22,12 @@ nogoldstandard(
   test4Positive,
   test5 = NULL,
   test5Positive,
-  method = "all_positive",
+  method = "latent_class",
   bootstrap = FALSE,
   nboot = 1000,
   alpha = 0.05,
-  verbose = FALSE
+  verbose = FALSE,
+  seed = 0
 )
 ```
 
@@ -101,23 +102,32 @@ nogoldstandard(
 
   Show detailed progress messages during bootstrap analysis.
 
+- seed:
+
+  Base random seed for the reproducible latent-class multi-start search.
+  Each start is offset from this base, so changing it shifts the whole
+  reproducible sequence; the default (0) reproduces the previous
+  behaviour.
+
 ## Value
 
 A results object containing:
 
-|                            |     |     |     |     |                |
-|----------------------------|-----|-----|-----|-----|----------------|
-| `results$notices`          |     |     |     |     | a preformatted |
-| `results$instructions`     |     |     |     |     | a html         |
-| `results$agreement_stats`  |     |     |     |     | a table        |
-| `results$clinical_summary` |     |     |     |     | a html         |
-| `results$method_guide`     |     |     |     |     | a html         |
-| `results$prevalence`       |     |     |     |     | a table        |
-| `results$test_metrics`     |     |     |     |     | a table        |
-| `results$model_fit`        |     |     |     |     | a table        |
-| `results$crosstab`         |     |     |     |     | a table        |
-| `results$agreement_plot`   |     |     |     |     | an image       |
-| `results$agreement_plot2`  |     |     |     |     | an image       |
+|  |  |  |  |  |  |
+|----|----|----|----|----|----|
+| `results$notices` |  |  |  |  | a preformatted |
+| `results$instructions` |  |  |  |  | a html |
+| `results$agreement_stats` |  |  |  |  | a table |
+| `results$clinical_summary` |  |  |  |  | a html |
+| `results$method_guide` |  |  |  |  | a html |
+| `results$prevalence` |  |  |  |  | a table |
+| `results$test_metrics` |  |  |  |  | a table |
+| `results$model_fit` |  |  |  |  | a table |
+| `results$conditional_dependence` |  |  |  |  | Latent class analysis assumes the tests err independently given true disease status. For each pair this compares the observed two-way table with the one the fitted model implies; a residual above 3.84 (the 5 percent point of chi-squared on 1 degree of freedom) is evidence that the pair shares a source of error, which inflates the estimated accuracy. Requires four or more tests: with three the model is just-identified and reproduces every table exactly, so no residual can reveal dependence. |
+| `results$diagnostics` |  |  |  |  | Detail of how the estimates were produced: sample size, method, convergence, number of random starts used, and bootstrap failures. Shown only when Verbose output is enabled. |
+| `results$crosstab` |  |  |  |  | a table |
+| `results$agreement_plot` |  |  |  |  | an image |
+| `results$agreement_plot2` |  |  |  |  | an image |
 
 Tables can be converted to data frames with `asDF` or
 [`as.data.frame`](https://rdrr.io/r/base/as.data.frame.html). For

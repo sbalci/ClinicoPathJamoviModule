@@ -5,6 +5,12 @@ proportional breakdowns within categories. Perfect for displaying
 composition data where each bar represents 100% and segments show
 relative proportions.
 
+## Value
+
+An `R6` class generator object for the `jjsegmentedtotalbarClass`
+backend; used internally by the jamovi analysis wrapper and not called
+directly.
+
 ## Details
 
 This module creates segmented total bar charts using ggplot2, where:

@@ -263,7 +263,7 @@ curemodels(
   predictors = "Treatment",
   model_type = "mixture",
   bootstrap_ci = TRUE,
-  n_bootstrap = 200
+  n_bootstrap = 100
 )
 ```
 
@@ -357,7 +357,7 @@ curemodels(
   model_type = "mixture",
   plot_cure_fraction = TRUE,
   bootstrap_ci = TRUE,
-  n_bootstrap = 200
+  n_bootstrap = 100
 )
 ```
 
@@ -535,7 +535,7 @@ curemodels(
   cure_link = "logit",
   cure_threshold = 60,
   bootstrap_ci = TRUE,
-  n_bootstrap = 200,
+  n_bootstrap = 100,
   plot_cure_fraction = TRUE,
   plot_survival = TRUE,
   goodness_of_fit = TRUE,

@@ -6,6 +6,11 @@ flexible parametric modeling using restricted cubic splines to model the
 baseline log cumulative hazard function, allowing for non-monotonic
 hazard functions while maintaining parametric advantages.
 
+## Value
+
+An `R6` class generator object for the `flexrstpm2Class` backend; used
+internally by the jamovi analysis wrapper and not called directly.
+
 ## Details
 
 The flexrstpm2Class implements Royston-Parmar flexible parametric models

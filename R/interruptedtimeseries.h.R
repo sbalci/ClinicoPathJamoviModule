@@ -282,16 +282,6 @@ interruptedtimeseriesBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::
 #' evaluating quality-improvement, policy, or laboratory-process interventions 
 #' where randomization is not possible.
 #' 
-#'
-#' @examples
-#' \donttest{
-#' interruptedtimeseries(
-#'     data = mydata,
-#'     time = "month",
-#'     outcome = "turnaround_time",
-#'     interventionTime = 25,
-#'     hac = TRUE)
-#'}
 #' @param data The data as a data frame (one row per time point).
 #' @param time Sequential time index (e.g. month or week number), evenly
 #'   spaced.

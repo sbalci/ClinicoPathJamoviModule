@@ -5,6 +5,11 @@ kappa statistic. This function provides confidence interval-based sample
 size determination for studies evaluating agreement between raters
 across different numbers of outcome categories.
 
+## Value
+
+An `R6` class generator object for the `kappaSizeCIClass` backend; used
+internally by the jamovi analysis wrapper and not called directly.
+
 ## Details
 
 The function uses the kappaSize package to calculate required sample

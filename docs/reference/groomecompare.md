@@ -11,10 +11,10 @@ comparison, radar charts, and side-by-side Kaplan-Meier curves.
 ``` r
 groomecompare(
   data,
-  time,
-  event,
-  stage1,
-  stage2,
+  time = NULL,
+  event = NULL,
+  stage1 = NULL,
+  stage2 = NULL,
   eventValue = "1",
   stage1name = "Staging System 1",
   stage2name = "Staging System 2",

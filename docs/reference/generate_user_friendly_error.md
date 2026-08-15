@@ -13,3 +13,8 @@ generate_user_friendly_error(error_entry)
 - error_entry:
 
   Detailed error log entry
+
+## Value
+
+A character string containing a user-friendly, clinically oriented error
+message.

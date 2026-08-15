@@ -36,6 +36,10 @@
   : Advanced Clinical Trial Methods
 - [`advancedtrialsClass`](https://www.serdarbalci.com/ClinicoPathJamoviModule/reference/advancedtrialsClass.md)
   : Advanced Clinical Trial Methods
+- [`aeplot()`](https://www.serdarbalci.com/ClinicoPathJamoviModule/reference/aeplot.md)
+  : Adverse Events Butterfly Plot
+- [`aeplotClass`](https://www.serdarbalci.com/ClinicoPathJamoviModule/reference/aeplotClass.md)
+  : Adverse Events Butterfly Plot — backend
 - [`agepyramid()`](https://www.serdarbalci.com/ClinicoPathJamoviModule/reference/agepyramid.md)
   : Age Pyramid
 - [`agepyramidClass`](https://www.serdarbalci.com/ClinicoPathJamoviModule/reference/agepyramidClass.md)
@@ -60,12 +64,6 @@
   : Assay Optimization & Experimental Design
 - [`assayoptimizationClass`](https://www.serdarbalci.com/ClinicoPathJamoviModule/reference/assayoptimizationClass.md)
   : Assay Optimization & Experimental Design
-- [`assess_clinical_relevance()`](https://www.serdarbalci.com/ClinicoPathJamoviModule/reference/assess_clinical_relevance.md)
-  : Assess Clinical Relevance of Effect Size
-- [`assess_clinical_significance()`](https://www.serdarbalci.com/ClinicoPathJamoviModule/reference/assess_clinical_significance.md)
-  : Assess Clinical Significance
-- [`assess_limitations()`](https://www.serdarbalci.com/ClinicoPathJamoviModule/reference/assess_limitations.md)
-  : Assess Analysis Limitations
 - [`autoeda()`](https://www.serdarbalci.com/ClinicoPathJamoviModule/reference/autoeda.md)
   : Automated Exploratory Data Analysis
 - [`autoedaClass`](https://www.serdarbalci.com/ClinicoPathJamoviModule/reference/autoedaClass.md)
@@ -98,8 +96,6 @@
   : BBC-Style Data Visualization
 - [`benford()`](https://www.serdarbalci.com/ClinicoPathJamoviModule/reference/benford.md)
   : Benford Analysis
-- [`benfordClass`](https://www.serdarbalci.com/ClinicoPathJamoviModule/reference/benfordClass.md)
-  : Benford's Law Analysis
 - [`betabinomialdiagnostic()`](https://www.serdarbalci.com/ClinicoPathJamoviModule/reference/betabinomialdiagnostic.md)
   : Beta-Binomial Diagnostic Accuracy Models
 - [`biomarkerdiscovery()`](https://www.serdarbalci.com/ClinicoPathJamoviModule/reference/biomarkerdiscovery.md)
@@ -110,8 +106,6 @@
   : Biomarker Response Association
 - [`biomarkerresponseClass`](https://www.serdarbalci.com/ClinicoPathJamoviModule/reference/biomarkerresponseClass.md)
   : Biomarker Response Association
-- [`bootstrapIDI()`](https://www.serdarbalci.com/ClinicoPathJamoviModule/reference/bootstrapIDI.md)
-  : Bootstrap IDI calculation with confidence intervals
 - [`bootstrapNRI()`](https://www.serdarbalci.com/ClinicoPathJamoviModule/reference/bootstrapNRI.md)
   : Bootstrap NRI calculation with confidence intervals
 - [`brierscore()`](https://www.serdarbalci.com/ClinicoPathJamoviModule/reference/brierscore.md)
@@ -130,22 +124,6 @@
   : Calculate IHC Marker Summary Statistics
 - [`calculateIHCSilhouette()`](https://www.serdarbalci.com/ClinicoPathJamoviModule/reference/calculateIHCSilhouette.md)
   : Calculate Silhouette Analysis for Clustering Quality
-- [`calculate_auc()`](https://www.serdarbalci.com/ClinicoPathJamoviModule/reference/calculate_auc.md)
-  : Approximate AUC from sensitivity and specificity
-- [`calculate_effect_size()`](https://www.serdarbalci.com/ClinicoPathJamoviModule/reference/calculate_effect_size.md)
-  : Calculate Effect Size for T-Test
-- [`calculate_nlr()`](https://www.serdarbalci.com/ClinicoPathJamoviModule/reference/calculate_nlr.md)
-  : Calculate negative likelihood ratio
-- [`calculate_npv()`](https://www.serdarbalci.com/ClinicoPathJamoviModule/reference/calculate_npv.md)
-  : Calculate negative predictive value (NPV)
-- [`calculate_plr()`](https://www.serdarbalci.com/ClinicoPathJamoviModule/reference/calculate_plr.md)
-  : Calculate positive likelihood ratio
-- [`calculate_ppv()`](https://www.serdarbalci.com/ClinicoPathJamoviModule/reference/calculate_ppv.md)
-  : Calculate positive predictive value (PPV)
-- [`calculate_sensitivity()`](https://www.serdarbalci.com/ClinicoPathJamoviModule/reference/calculate_sensitivity.md)
-  : Calculate test sensitivity
-- [`calculate_specificity()`](https://www.serdarbalci.com/ClinicoPathJamoviModule/reference/calculate_specificity.md)
-  : Calculate test specificity
 - [`cancer_biomarkers`](https://www.serdarbalci.com/ClinicoPathJamoviModule/reference/cancer_biomarkers.md)
   : Cancer Biomarker Diagnosis Dataset
 - [`cardiac_joint_data`](https://www.serdarbalci.com/ClinicoPathJamoviModule/reference/cardiac_joint_data.md)
@@ -180,6 +158,10 @@
   : Confidence Intervals for Mean Values
 - [`ciSingleClass`](https://www.serdarbalci.com/ClinicoPathJamoviModule/reference/ciSingleClass.md)
   : Enhanced confidence intervals for mean values
+- [`circos()`](https://www.serdarbalci.com/ClinicoPathJamoviModule/reference/circos.md)
+  : Circos Chord Diagram
+- [`circosClass`](https://www.serdarbalci.com/ClinicoPathJamoviModule/reference/circosClass.md)
+  : Circos Chord Diagram
 - [`classicalSurvivalPower()`](https://www.serdarbalci.com/ClinicoPathJamoviModule/reference/classicalSurvivalPower.md)
   : Classical Survival Power Analysis (Intermediate)
 - [`classicalSurvivalPowerClass`](https://www.serdarbalci.com/ClinicoPathJamoviModule/reference/classicalSurvivalPowerClass.md)
@@ -208,8 +190,6 @@
   : Clinical Data Integration
 - [`clinicalheatmap()`](https://www.serdarbalci.com/ClinicoPathJamoviModule/reference/clinicalheatmap.md)
   : Clinical Heatmap
-- [`clinicalheatmapClass`](https://www.serdarbalci.com/ClinicoPathJamoviModule/reference/clinicalheatmapClass.md)
-  : Clinical Heatmap with tidyheatmaps
 - [`clinicalnomograms()`](https://www.serdarbalci.com/ClinicoPathJamoviModule/reference/clinicalnomograms.md)
   : Clinical Nomograms & Risk Calculators
 - [`clinicalnomogramsClass`](https://www.serdarbalci.com/ClinicoPathJamoviModule/reference/clinicalnomogramsClass.md)
@@ -234,8 +214,6 @@
   : ClinicoPath Error Handler
 - [`clinicopath_init()`](https://www.serdarbalci.com/ClinicoPathJamoviModule/reference/clinicopath_init.md)
   : Initialize ClinicoPath Error Handling System
-- [`clinicopath_startup_message()`](https://www.serdarbalci.com/ClinicoPathJamoviModule/reference/clinicopath_startup_message.md)
-  : Package startup message
 - [`clinicopath_warning_handler()`](https://www.serdarbalci.com/ClinicoPathJamoviModule/reference/clinicopath_warning_handler.md)
   : ClinicoPath Warning Handler
 - [`clinmon()`](https://www.serdarbalci.com/ClinicoPathJamoviModule/reference/clinmon.md)
@@ -344,6 +322,10 @@
   : Enhanced Cross Tables (Pivot)
 - [`crosstablepivotClass`](https://www.serdarbalci.com/ClinicoPathJamoviModule/reference/crosstablepivotClass.md)
   : Enhanced Cross Tables with Pivot Functionality
+- [`ctdnadynamics()`](https://www.serdarbalci.com/ClinicoPathJamoviModule/reference/ctdnadynamics.md)
+  : ctDNA / MRD Dynamics
+- [`ctdnadynamicsClass`](https://www.serdarbalci.com/ClinicoPathJamoviModule/reference/ctdnadynamicsClass.md)
+  : ctDNA / MRD Dynamics
 - [`curemodels()`](https://www.serdarbalci.com/ClinicoPathJamoviModule/reference/curemodels.md)
   : Cure Models for Long-term Survivors
 - [`curemodelsClass`](https://www.serdarbalci.com/ClinicoPathJamoviModule/reference/curemodelsClass.md)
@@ -463,58 +445,26 @@
   : Direct Regression on Survival Function
 - [`distributionfit()`](https://www.serdarbalci.com/ClinicoPathJamoviModule/reference/distributionfit.md)
   : Distribution Selection and Goodness-of-Fit
-- [`.calculate2x2Metrics()`](https://www.serdarbalci.com/ClinicoPathJamoviModule/reference/dot-calculate2x2Metrics.md)
-  : Comprehensive 2x2 Diagnostic Metrics Calculator
-- [`.calculateAccuracy()`](https://www.serdarbalci.com/ClinicoPathJamoviModule/reference/dot-calculateAccuracy.md)
-  : Calculate Accuracy
-- [`.calculateDOR()`](https://www.serdarbalci.com/ClinicoPathJamoviModule/reference/dot-calculateDOR.md)
-  : Calculate Diagnostic Odds Ratio
-- [`.calculateF1Score()`](https://www.serdarbalci.com/ClinicoPathJamoviModule/reference/dot-calculateF1Score.md)
-  : Calculate F1 Score (Harmonic Mean of Precision and Recall)
-- [`.calculateLRMinus()`](https://www.serdarbalci.com/ClinicoPathJamoviModule/reference/dot-calculateLRMinus.md)
-  : Calculate Negative Likelihood Ratio
-- [`.calculateLRPlus()`](https://www.serdarbalci.com/ClinicoPathJamoviModule/reference/dot-calculateLRPlus.md)
-  : Calculate Positive Likelihood Ratio
-- [`.calculateMCC()`](https://www.serdarbalci.com/ClinicoPathJamoviModule/reference/dot-calculateMCC.md)
-  : Calculate Matthews Correlation Coefficient
-- [`.calculateNPV()`](https://www.serdarbalci.com/ClinicoPathJamoviModule/reference/dot-calculateNPV.md)
-  : Calculate Negative Predictive Value
-- [`.calculatePPV()`](https://www.serdarbalci.com/ClinicoPathJamoviModule/reference/dot-calculatePPV.md)
-  : Calculate Positive Predictive Value (Precision)
-- [`.calculateSensitivity()`](https://www.serdarbalci.com/ClinicoPathJamoviModule/reference/dot-calculateSensitivity.md)
-  : Calculate Sensitivity (True Positive Rate)
-- [`.calculateSpecificity()`](https://www.serdarbalci.com/ClinicoPathJamoviModule/reference/dot-calculateSpecificity.md)
-  : Calculate Specificity (True Negative Rate)
-- [`.calculateYouden()`](https://www.serdarbalci.com/ClinicoPathJamoviModule/reference/dot-calculateYouden.md)
-  : Calculate Youden's J Index
+- [`door()`](https://www.serdarbalci.com/ClinicoPathJamoviModule/reference/door.md)
+  : Desirability of Outcome Ranking (DOOR)
+- [`doorClass`](https://www.serdarbalci.com/ClinicoPathJamoviModule/reference/doorClass.md)
+  : Desirability of Outcome Ranking (DOOR)
 - [`.calculate_weibull_events()`](https://www.serdarbalci.com/ClinicoPathJamoviModule/reference/dot-calculate_weibull_events.md)
   : Calculate expected number of events for Weibull distribution
 - [`.clinicopath_errors`](https://www.serdarbalci.com/ClinicoPathJamoviModule/reference/dot-clinicopath_errors.md)
   : ClinicoPath Enhanced Error Handling Framework
-- [`.eurostat_pkg_cache`](https://www.serdarbalci.com/ClinicoPathJamoviModule/reference/dot-eurostat_pkg_cache.md)
-  : Eurostat Map
-- [`.formatDiagnosticTable()`](https://www.serdarbalci.com/ClinicoPathJamoviModule/reference/dot-formatDiagnosticTable.md)
-  : Format Diagnostic Metrics Table for Display
 - [`.get_lognormal_parameters()`](https://www.serdarbalci.com/ClinicoPathJamoviModule/reference/dot-get_lognormal_parameters.md)
   : Calculate log-normal distribution parameters from median survival
 - [`.get_piecewise_exponential_parameters()`](https://www.serdarbalci.com/ClinicoPathJamoviModule/reference/dot-get_piecewise_exponential_parameters.md)
   : Calculate piecewise exponential parameters
 - [`.get_weibull_parameters()`](https://www.serdarbalci.com/ClinicoPathJamoviModule/reference/dot-get_weibull_parameters.md)
   : Survival Power Analysis - Distribution Support Module
-- [`.interpretDOR()`](https://www.serdarbalci.com/ClinicoPathJamoviModule/reference/dot-interpretDOR.md)
-  : Interpret Diagnostic Odds Ratio
-- [`.interpretLR()`](https://www.serdarbalci.com/ClinicoPathJamoviModule/reference/dot-interpretLR.md)
-  : Interpret Likelihood Ratio Values
 - [`.lognormal_survival()`](https://www.serdarbalci.com/ClinicoPathJamoviModule/reference/dot-lognormal_survival.md)
   : Calculate survival probability for log-normal distribution
 - [`.piecewise_exponential_survival()`](https://www.serdarbalci.com/ClinicoPathJamoviModule/reference/dot-piecewise_exponential_survival.md)
   : Calculate survival probability for piecewise exponential
-- [`.sensitivityCI()`](https://www.serdarbalci.com/ClinicoPathJamoviModule/reference/dot-sensitivityCI.md)
-  : Calculate Confidence Interval for Sensitivity
 - [`.simulate_survival_trial()`](https://www.serdarbalci.com/ClinicoPathJamoviModule/reference/dot-simulate_survival_trial.md)
   : Simulate a survival trial dataset
-- [`.specificityCI()`](https://www.serdarbalci.com/ClinicoPathJamoviModule/reference/dot-specificityCI.md)
-  : Calculate Confidence Interval for Specificity
 - [`.validate_power_by_simulation()`](https://www.serdarbalci.com/ClinicoPathJamoviModule/reference/dot-validate_power_by_simulation.md)
   : Validate power calculation using simulation
 - [`.weibull_hazard()`](https://www.serdarbalci.com/ClinicoPathJamoviModule/reference/dot-weibull_hazard.md)
@@ -547,8 +497,6 @@
   : Enhanced ROC Analysis Class
 - [`enhanced_ttest()`](https://www.serdarbalci.com/ClinicoPathJamoviModule/reference/enhanced_ttest.md)
   : Enhanced T-Test with Robust Error Handling
-- [`enhanced_wrapper_example`](https://www.serdarbalci.com/ClinicoPathJamoviModule/reference/enhanced_wrapper_example.md)
-  : Enhanced Wrapper Example for ClinicoPath Functions
 - [`enhancedcorrelation()`](https://www.serdarbalci.com/ClinicoPathJamoviModule/reference/enhancedcorrelation.md)
   : Enhanced Correlation Analysis
 - [`enhancedcorrelationClass`](https://www.serdarbalci.com/ClinicoPathJamoviModule/reference/enhancedcorrelationClass.md)
@@ -587,6 +535,12 @@
   : Auto-Plot using esquisse
 - [`eurostatmap()`](https://www.serdarbalci.com/ClinicoPathJamoviModule/reference/eurostatmap.md)
   : Eurostat Map
+- [`eurostatmapClass`](https://www.serdarbalci.com/ClinicoPathJamoviModule/reference/eurostatmapClass.md)
+  : Eurostat Map
+- [`evalue()`](https://www.serdarbalci.com/ClinicoPathJamoviModule/reference/evalue.md)
+  : E-value for Unmeasured Confounding
+- [`evalueClass`](https://www.serdarbalci.com/ClinicoPathJamoviModule/reference/evalueClass.md)
+  : E-value for Unmeasured Confounding
 - [`exacttests()`](https://www.serdarbalci.com/ClinicoPathJamoviModule/reference/exacttests.md)
   : Exact Tests for Small Samples
 - [`exacttestsClass`](https://www.serdarbalci.com/ClinicoPathJamoviModule/reference/exacttestsClass.md)
@@ -635,6 +589,10 @@
   : Comprehensive Flexible Parametric Survival Models
 - [`formatIHCPValue()`](https://www.serdarbalci.com/ClinicoPathJamoviModule/reference/formatIHCPValue.md)
   : Format P-values Consistently for IHC Reports
+- [`fragilityindex()`](https://www.serdarbalci.com/ClinicoPathJamoviModule/reference/fragilityindex.md)
+  : Fragility Index for Dichotomous Outcomes
+- [`fragilityindexClass`](https://www.serdarbalci.com/ClinicoPathJamoviModule/reference/fragilityindexClass.md)
+  : Fragility Index for Dichotomous Outcomes
 - [`frailtysurvival()`](https://www.serdarbalci.com/ClinicoPathJamoviModule/reference/frailtysurvival.md)
   : Frailty & Random Effects Survival Models
 - [`frailtysurvivalClass`](https://www.serdarbalci.com/ClinicoPathJamoviModule/reference/frailtysurvivalClass.md)
@@ -645,6 +603,10 @@
   : Friedman Test for Non-Parametric Repeated Measures
 - [`functionalsampling()`](https://www.serdarbalci.com/ClinicoPathJamoviModule/reference/functionalsampling.md)
   : Functional Sampling - Rare Event Analysis
+- [`gcomputation()`](https://www.serdarbalci.com/ClinicoPathJamoviModule/reference/gcomputation.md)
+  : G-computation (Parametric G-formula)
+- [`gcomputationClass`](https://www.serdarbalci.com/ClinicoPathJamoviModule/reference/gcomputationClass.md)
+  : G-computation (Parametric G-formula)
 - [`gee_liver_data`](https://www.serdarbalci.com/ClinicoPathJamoviModule/reference/gee_liver_data.md)
   : Example Liver Pathology Data for GEE Analysis
 - [`geemodel()`](https://www.serdarbalci.com/ClinicoPathJamoviModule/reference/geemodel.md)
@@ -657,12 +619,6 @@
   : Generalized ROC Analysis
 - [`generalpseudo()`](https://www.serdarbalci.com/ClinicoPathJamoviModule/reference/generalpseudo.md)
   : Generalized Pseudo-Observations
-- [`generate_clinical_interpretation()`](https://www.serdarbalci.com/ClinicoPathJamoviModule/reference/generate_clinical_interpretation.md)
-  : Generate Clinical Interpretation
-- [`generate_clinical_summary()`](https://www.serdarbalci.com/ClinicoPathJamoviModule/reference/generate_clinical_summary.md)
-  : Generate Clinical Summary
-- [`generate_statistical_summary()`](https://www.serdarbalci.com/ClinicoPathJamoviModule/reference/generate_statistical_summary.md)
-  : Generate Statistical Summary
 - [`generate_user_friendly_error()`](https://www.serdarbalci.com/ClinicoPathJamoviModule/reference/generate_user_friendly_error.md)
   : Generate User-Friendly Error Message
 - [`generate_user_friendly_warning()`](https://www.serdarbalci.com/ClinicoPathJamoviModule/reference/generate_user_friendly_warning.md)
@@ -675,12 +631,8 @@
   : Get Professional IHC Visualization Theme
 - [`getTreeAnalysisSteps()`](https://www.serdarbalci.com/ClinicoPathJamoviModule/reference/getTreeAnalysisSteps.md)
   : Create Tree Analysis Progress Steps
-- [`get_analysis_recommendations()`](https://www.serdarbalci.com/ClinicoPathJamoviModule/reference/get_analysis_recommendations.md)
-  : Get Analysis Recommendations
 - [`get_clinical_context()`](https://www.serdarbalci.com/ClinicoPathJamoviModule/reference/get_clinical_context.md)
   : Clinical Context Wrapper
-- [`get_clinical_recommendations()`](https://www.serdarbalci.com/ClinicoPathJamoviModule/reference/get_clinical_recommendations.md)
-  : Get Clinical Recommendations
 - [`get_error_summary()`](https://www.serdarbalci.com/ClinicoPathJamoviModule/reference/get_error_summary.md)
   : Get Error Summary
 - [`ggprism()`](https://www.serdarbalci.com/ClinicoPathJamoviModule/reference/ggprism.md)
@@ -724,12 +676,20 @@
   : Group and Summarize
 - [`groupsummaryClass`](https://www.serdarbalci.com/ClinicoPathJamoviModule/reference/groupsummaryClass.md)
   : Group and Summarize
+- [`gsdesign()`](https://www.serdarbalci.com/ClinicoPathJamoviModule/reference/gsdesign.md)
+  : Group-Sequential Design & Sample Size
+- [`gsdesignClass`](https://www.serdarbalci.com/ClinicoPathJamoviModule/reference/gsdesignClass.md)
+  : Group-Sequential Design & Sample Size — backend
 - [`gtsummary()`](https://www.serdarbalci.com/ClinicoPathJamoviModule/reference/gtsummary.md)
   : Publication-Ready Tables with gtsummary
 - [`gtsummaryClass`](https://www.serdarbalci.com/ClinicoPathJamoviModule/reference/gtsummaryClass.md)
   : Publication-Ready Tables with gtsummary
 - [`haralicktexture()`](https://www.serdarbalci.com/ClinicoPathJamoviModule/reference/haralicktexture.md)
   : Haralick Texture Analysis
+- [`hematologicindices()`](https://www.serdarbalci.com/ClinicoPathJamoviModule/reference/hematologicindices.md)
+  : Hematologic Prognostic Indices
+- [`hematologicindicesClass`](https://www.serdarbalci.com/ClinicoPathJamoviModule/reference/hematologicindicesClass.md)
+  : Hematologic Prognostic Indices
 - [`hiddenmarkov()`](https://www.serdarbalci.com/ClinicoPathJamoviModule/reference/hiddenmarkov.md)
   : Hidden Markov Models for Survival
 - [`hierarchicalbayes()`](https://www.serdarbalci.com/ClinicoPathJamoviModule/reference/hierarchicalbayes.md)
@@ -778,6 +738,10 @@
   : Illness-Death Multi-State Models
 - [`imagingcorrelation()`](https://www.serdarbalci.com/ClinicoPathJamoviModule/reference/imagingcorrelation.md)
   : Imaging Findings Correlation
+- [`interruptedtimeseries()`](https://www.serdarbalci.com/ClinicoPathJamoviModule/reference/interruptedtimeseries.md)
+  : Interrupted Time Series Analysis
+- [`interruptedtimeseriesClass`](https://www.serdarbalci.com/ClinicoPathJamoviModule/reference/interruptedtimeseriesClass.md)
+  : Interrupted Time Series Analysis
 - [`intervalsurvival()`](https://www.serdarbalci.com/ClinicoPathJamoviModule/reference/intervalsurvival.md)
   : Interval-Censored Survival Analysis
 - [`intervalsurvivalClass`](https://www.serdarbalci.com/ClinicoPathJamoviModule/reference/intervalsurvivalClass.md)
@@ -786,8 +750,6 @@
   : iRECIST Analysis
 - [`irecistClass`](https://www.serdarbalci.com/ClinicoPathJamoviModule/reference/irecistClass.md)
   : iRECIST Analysis
-- [`is_in_range()`](https://www.serdarbalci.com/ClinicoPathJamoviModule/reference/is_in_range.md)
-  : Check if value is within valid range
 - [`jamovi_tutorial_builder_static_app_html()`](https://www.serdarbalci.com/ClinicoPathJamoviModule/reference/jamovi_tutorial_builder_static_app_html.md)
   : Jamovi tutorial builder static HTML
 - [`jcomplexupset()`](https://www.serdarbalci.com/ClinicoPathJamoviModule/reference/jcomplexupset.md)
@@ -838,17 +800,19 @@
   : Correlation Matrix
 - [`jjcorrmatClass`](https://www.serdarbalci.com/ClinicoPathJamoviModule/reference/jjcorrmatClass.md)
   : Correlation Matrix
+- [`jjdotchart()`](https://www.serdarbalci.com/ClinicoPathJamoviModule/reference/jjdotchart.md)
+  : Dot Chart (Summary vs Reference Value)
+- [`jjdotchartClass`](https://www.serdarbalci.com/ClinicoPathJamoviModule/reference/jjdotchartClass.md)
+  : Dot Chart (Summary vs Reference Value)
 - [`jjdotplotstats()`](https://www.serdarbalci.com/ClinicoPathJamoviModule/reference/jjdotplotstats.md)
-  : Dot Chart
+  : Horizontal Box-Violin Comparison
 - [`jjdotplotstatsClass`](https://www.serdarbalci.com/ClinicoPathJamoviModule/reference/jjdotplotstatsClass.md)
-  : Dot Chart
+  : Horizontal Box-Violin Comparison
 - [`jjhistostats()`](https://www.serdarbalci.com/ClinicoPathJamoviModule/reference/jjhistostats.md)
   : Histogram
 - [`jjhistostatsClass`](https://www.serdarbalci.com/ClinicoPathJamoviModule/reference/jjhistostatsClass.md)
   : Histogram
 - [`jjoncoplot()`](https://www.serdarbalci.com/ClinicoPathJamoviModule/reference/jjoncoplot.md)
-  : Genomic Landscape Visualization
-- [`jjoncoplotClass`](https://www.serdarbalci.com/ClinicoPathJamoviModule/reference/jjoncoplotClass.md)
   : Genomic Landscape Visualization
 - [`jjpiestats()`](https://www.serdarbalci.com/ClinicoPathJamoviModule/reference/jjpiestats.md)
   : Pie Charts
@@ -886,6 +850,10 @@
   : Box-Violin Plots to Compare Within Groups
 - [`jjwithinstatsClass`](https://www.serdarbalci.com/ClinicoPathJamoviModule/reference/jjwithinstatsClass.md)
   : Violin Plots to Compare Within Group (Repeated Measures)
+- [`joinpoint()`](https://www.serdarbalci.com/ClinicoPathJamoviModule/reference/joinpoint.md)
+  : Joinpoint Trend Analysis
+- [`joinpointClass`](https://www.serdarbalci.com/ClinicoPathJamoviModule/reference/joinpointClass.md)
+  : Joinpoint Trend Analysis
 - [`jointfrailty()`](https://www.serdarbalci.com/ClinicoPathJamoviModule/reference/jointfrailty.md)
   : Joint Frailty Models for Recurrent Events
 - [`jointfrailtyClass`](https://www.serdarbalci.com/ClinicoPathJamoviModule/reference/jointfrailtyClass.md)
@@ -962,12 +930,14 @@
   : Line Chart
 - [`linechartClass`](https://www.serdarbalci.com/ClinicoPathJamoviModule/reference/linechartClass.md)
   : Line Chart for Time Series and Trend Analysis
-- [`load_required_package()`](https://www.serdarbalci.com/ClinicoPathJamoviModule/reference/load_required_package.md)
-  : Check whether a required package is available
 - [`lollipop()`](https://www.serdarbalci.com/ClinicoPathJamoviModule/reference/lollipop.md)
   : Lollipop Chart
 - [`lollipopClass`](https://www.serdarbalci.com/ClinicoPathJamoviModule/reference/lollipopClass.md)
   : Lollipop Charts for Categorical Data Visualization
+- [`lymphnoderatio()`](https://www.serdarbalci.com/ClinicoPathJamoviModule/reference/lymphnoderatio.md)
+  : Lymph Node Ratio
+- [`lymphnoderatioClass`](https://www.serdarbalci.com/ClinicoPathJamoviModule/reference/lymphnoderatioClass.md)
+  : Lymph Node Ratio
 - [`mageeequation()`](https://www.serdarbalci.com/ClinicoPathJamoviModule/reference/mageeequation.md)
   : Magee Equation - Oncotype DX Estimator
 - [`mageeequationClass`](https://www.serdarbalci.com/ClinicoPathJamoviModule/reference/mageeequationClass.md)
@@ -1042,6 +1012,10 @@
   : Multi-class ROC Analysis
 - [`multiclassrocClass`](https://www.serdarbalci.com/ClinicoPathJamoviModule/reference/multiclassrocClass.md)
   : Multi-class ROC Analysis
+- [`multifocalconcordance()`](https://www.serdarbalci.com/ClinicoPathJamoviModule/reference/multifocalconcordance.md)
+  : Multifocal / Primary-Metastasis Concordance
+- [`multifocalconcordanceClass`](https://www.serdarbalci.com/ClinicoPathJamoviModule/reference/multifocalconcordanceClass.md)
+  : Multifocal / Primary-Metastasis Concordance
 - [`multiplexanalysis()`](https://www.serdarbalci.com/ClinicoPathJamoviModule/reference/multiplexanalysis.md)
   : Multiplex Immunofluorescence Analysis
 - [`multistatesurvival()`](https://www.serdarbalci.com/ClinicoPathJamoviModule/reference/multistatesurvival.md)
@@ -1180,6 +1154,8 @@
   : Pathology Sampling Adequacy Analysis
 - [`patientdashboard()`](https://www.serdarbalci.com/ClinicoPathJamoviModule/reference/patientdashboard.md)
   : Patient Monitoring Dashboard
+- [`patientfollowupintro()`](https://www.serdarbalci.com/ClinicoPathJamoviModule/reference/patientfollowupintro.md)
+  : Patient Follow-Up & Response Guide
 - [`patientreported()`](https://www.serdarbalci.com/ClinicoPathJamoviModule/reference/patientreported.md)
   : Patient-Reported Outcomes & Quality of Life Analysis
 - [`patientreportedClass`](https://www.serdarbalci.com/ClinicoPathJamoviModule/reference/patientreportedClass.md)
@@ -1236,14 +1212,10 @@
   : Clinical Prediction Model
 - [`predmodelClass`](https://www.serdarbalci.com/ClinicoPathJamoviModule/reference/predmodelClass.md)
   : Clinical Prediction Model
-- [`print(`*`<sensSpecTable>`*`)`](https://www.serdarbalci.com/ClinicoPathJamoviModule/reference/print.sensSpecTable.md)
-  : Format HTML table for sensitivity/specificity results
 - [`progressionsurvival()`](https://www.serdarbalci.com/ClinicoPathJamoviModule/reference/progressionsurvival.md)
   : Progression-Free Survival Analysis
 - [`progressionsurvivalClass`](https://www.serdarbalci.com/ClinicoPathJamoviModule/reference/progressionsurvivalClass.md)
   : Progression-Free Survival Analysis
-- [`prop_to_percent()`](https://www.serdarbalci.com/ClinicoPathJamoviModule/reference/prop_to_percent.md)
-  : Convert proportion to percentage string
 - [`psa_joint_data`](https://www.serdarbalci.com/ClinicoPathJamoviModule/reference/psa_joint_data.md)
   : PSA Trajectory and Prostate Cancer Survival Data
 - [`pseudosurvival()`](https://www.serdarbalci.com/ClinicoPathJamoviModule/reference/pseudosurvival.md)
@@ -1306,8 +1278,6 @@
   : Raincloud Plot
 - [`raincloudClass`](https://www.serdarbalci.com/ClinicoPathJamoviModule/reference/raincloudClass.md)
   : Raincloud Plot for Distribution Visualization
-- [`raw_to_prob()`](https://www.serdarbalci.com/ClinicoPathJamoviModule/reference/raw_to_prob.md)
-  : Convert raw test values to predicted probabilities using ROC curve
 - [`recist()`](https://www.serdarbalci.com/ClinicoPathJamoviModule/reference/recist.md)
   : RECIST 1.1 Multi-Lesion Aggregation
 - [`recistClass`](https://www.serdarbalci.com/ClinicoPathJamoviModule/reference/recistClass.md)
@@ -1334,6 +1304,10 @@
   : Summary of Categorical Variables
 - [`reportcatClass`](https://www.serdarbalci.com/ClinicoPathJamoviModule/reference/reportcatClass.md)
   : Summary of Categorical Variables
+- [`residualcancerburden()`](https://www.serdarbalci.com/ClinicoPathJamoviModule/reference/residualcancerburden.md)
+  : Residual Cancer Burden (RCB)
+- [`residualcancerburdenClass`](https://www.serdarbalci.com/ClinicoPathJamoviModule/reference/residualcancerburdenClass.md)
+  : Residual Cancer Burden (RCB)
 - [`retracted-helpers`](https://www.serdarbalci.com/ClinicoPathJamoviModule/reference/retracted-helpers.md)
   : Find Retracted Papers from DOI
 - [`retracted()`](https://www.serdarbalci.com/ClinicoPathJamoviModule/reference/retracted.md)
@@ -1367,8 +1341,6 @@
   [`rpasurvival_edge_days`](https://www.serdarbalci.com/ClinicoPathJamoviModule/reference/rpasurvival_test_data.md)
   [`rpasurvival_edge_years`](https://www.serdarbalci.com/ClinicoPathJamoviModule/reference/rpasurvival_test_data.md)
   : Test Data for rpasurvival Function
-- [`safe_divide()`](https://www.serdarbalci.com/ClinicoPathJamoviModule/reference/safe_divide.md)
-  : Safe division function
 - [`safe_execute()`](https://www.serdarbalci.com/ClinicoPathJamoviModule/reference/safe_execute.md)
   : Safe Execution Wrapper
 - [`samplingerror()`](https://www.serdarbalci.com/ClinicoPathJamoviModule/reference/samplingerror.md)
@@ -1389,6 +1361,18 @@
   : Sequential Testing Analysis
 - [`sequentialtestsClass`](https://www.serdarbalci.com/ClinicoPathJamoviModule/reference/sequentialtestsClass.md)
   : Sequential Testing Analysis
+- [`sequentialtests_cancer`](https://www.serdarbalci.com/ClinicoPathJamoviModule/reference/sequentialtests_datasets.md)
+  [`sequentialtests_cost_comparison`](https://www.serdarbalci.com/ClinicoPathJamoviModule/reference/sequentialtests_datasets.md)
+  [`sequentialtests_covid`](https://www.serdarbalci.com/ClinicoPathJamoviModule/reference/sequentialtests_datasets.md)
+  [`sequentialtests_emergency`](https://www.serdarbalci.com/ClinicoPathJamoviModule/reference/sequentialtests_datasets.md)
+  [`sequentialtests_extreme`](https://www.serdarbalci.com/ClinicoPathJamoviModule/reference/sequentialtests_datasets.md)
+  [`sequentialtests_infectious`](https://www.serdarbalci.com/ClinicoPathJamoviModule/reference/sequentialtests_datasets.md)
+  [`sequentialtests_preset_examples`](https://www.serdarbalci.com/ClinicoPathJamoviModule/reference/sequentialtests_datasets.md)
+  [`sequentialtests_prevalence_sensitivity`](https://www.serdarbalci.com/ClinicoPathJamoviModule/reference/sequentialtests_datasets.md)
+  [`sequentialtests_reference`](https://www.serdarbalci.com/ClinicoPathJamoviModule/reference/sequentialtests_datasets.md)
+  [`sequentialtests_strategy_comparison`](https://www.serdarbalci.com/ClinicoPathJamoviModule/reference/sequentialtests_datasets.md)
+  [`sequentialtests_teaching`](https://www.serdarbalci.com/ClinicoPathJamoviModule/reference/sequentialtests_datasets.md)
+  : Demonstration Scenarios for Sequential Testing Analysis
 - [`showIHCDataRequirements()`](https://www.serdarbalci.com/ClinicoPathJamoviModule/reference/showIHCDataRequirements.md)
   : Generate IHC Data Requirements HTML
 - [`sigmametrics()`](https://www.serdarbalci.com/ClinicoPathJamoviModule/reference/sigmametrics.md)
@@ -1446,6 +1430,10 @@
   : Advanced TNM Stage Migration Analysis
 - [`stagemigrationClass`](https://www.serdarbalci.com/ClinicoPathJamoviModule/reference/stagemigrationClass.md)
   : Advanced TNM Stage Migration Analysis
+- [`standardizedratio()`](https://www.serdarbalci.com/ClinicoPathJamoviModule/reference/standardizedratio.md)
+  : Standardized Incidence / Mortality Ratio (SIR / SMR)
+- [`standardizedratioClass`](https://www.serdarbalci.com/ClinicoPathJamoviModule/reference/standardizedratioClass.md)
+  : Standardized Incidence / Mortality Ratio (SIR / SMR)
 - [`statsplot2()`](https://www.serdarbalci.com/ClinicoPathJamoviModule/reference/statsplot2.md)
   : Automatic Plot Selection
 - [`statsplot2Class`](https://www.serdarbalci.com/ClinicoPathJamoviModule/reference/statsplot2Class.md)
@@ -1536,6 +1524,10 @@
   : Swimmer Plot
 - [`swimmerplotClass`](https://www.serdarbalci.com/ClinicoPathJamoviModule/reference/swimmerplotClass.md)
   : Swimmer Plot
+- [`synopticcompleteness()`](https://www.serdarbalci.com/ClinicoPathJamoviModule/reference/synopticcompleteness.md)
+  : Synoptic Report Completeness
+- [`synopticcompletenessClass`](https://www.serdarbalci.com/ClinicoPathJamoviModule/reference/synopticcompletenessClass.md)
+  : Synoptic Report Completeness
 - [`tableone()`](https://www.serdarbalci.com/ClinicoPathJamoviModule/reference/tableone.md)
   : Table One
 - [`tableoneClass`](https://www.serdarbalci.com/ClinicoPathJamoviModule/reference/tableoneClass.md)
@@ -1746,6 +1738,10 @@
   : Medical Decision Trees
 - [`trichotomousroc()`](https://www.serdarbalci.com/ClinicoPathJamoviModule/reference/trichotomousroc.md)
   : Trichotomous (Three-way) ROC Analysis
+- [`tumorbudding()`](https://www.serdarbalci.com/ClinicoPathJamoviModule/reference/tumorbudding.md)
+  : Tumor Budding (ITBCC)
+- [`tumorbuddingClass`](https://www.serdarbalci.com/ClinicoPathJamoviModule/reference/tumorbuddingClass.md)
+  : Tumor Budding (ITBCC)
 - [`tumorgrowth()`](https://www.serdarbalci.com/ClinicoPathJamoviModule/reference/tumorgrowth.md)
   : Tumor Growth Models
 - [`tumorgrowthClass`](https://www.serdarbalci.com/ClinicoPathJamoviModule/reference/tumorgrowthClass.md)
@@ -1756,8 +1752,6 @@
   : Validate IHC Clustering Parameters
 - [`validateIHCData()`](https://www.serdarbalci.com/ClinicoPathJamoviModule/reference/validateIHCData.md)
   : Validate IHC Data Requirements
-- [`validateROCInputs()`](https://www.serdarbalci.com/ClinicoPathJamoviModule/reference/validateROCInputs.md)
-  : Validate inputs for ROC analysis
 - [`validate_clinical_data()`](https://www.serdarbalci.com/ClinicoPathJamoviModule/reference/validate_clinical_data.md)
   : Validate Data with Clinical Context
 - [`variablebiplot()`](https://www.serdarbalci.com/ClinicoPathJamoviModule/reference/variablebiplot.md)
@@ -1773,7 +1767,7 @@
 - [`vusanalysis()`](https://www.serdarbalci.com/ClinicoPathJamoviModule/reference/vusanalysis.md)
   : Volume Under ROC Surface (VUS) Analysis
 - [`waterfall()`](https://www.serdarbalci.com/ClinicoPathJamoviModule/reference/waterfall.md)
-  : Treatment Response Analysis
+  : Treatment Response: Patient-Level Burden
 - [`waterfallClass`](https://www.serdarbalci.com/ClinicoPathJamoviModule/reference/waterfallClass.md)
   : Treatment Response Analysis (Waterfall) Class
 - [`waterfall_test`](https://www.serdarbalci.com/ClinicoPathJamoviModule/reference/waterfall_test_datasets.md)
@@ -1787,6 +1781,10 @@
   [`waterfall_phase2`](https://www.serdarbalci.com/ClinicoPathJamoviModule/reference/waterfall_test_datasets.md)
   : Test Datasets for Waterfall Function
 - [`waterfallrecist()`](https://www.serdarbalci.com/ClinicoPathJamoviModule/reference/waterfallrecist.md)
-  : RECIST v1.1 Compliant Response Analysis
+  : Treatment Response: Lesion-Level RECIST v1.1 Algorithm
 - [`weightedlogrank()`](https://www.serdarbalci.com/ClinicoPathJamoviModule/reference/weightedlogrank.md)
   : Weighted Log-Rank Tests
+- [`winratio()`](https://www.serdarbalci.com/ClinicoPathJamoviModule/reference/winratio.md)
+  : Win Ratio for Hierarchical Composite Endpoints
+- [`winratioClass`](https://www.serdarbalci.com/ClinicoPathJamoviModule/reference/winratioClass.md)
+  : Win Ratio for Hierarchical Composite Endpoints

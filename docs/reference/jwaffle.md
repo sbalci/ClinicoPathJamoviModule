@@ -13,7 +13,7 @@ frequencies across categories.'
 jwaffle(
   data,
   counts = NULL,
-  groups,
+  groups = NULL,
   facet = NULL,
   rows = 5,
   flip = FALSE,

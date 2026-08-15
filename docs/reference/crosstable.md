@@ -7,13 +7,14 @@ Function for making Cross Tables with multiple table styles.
 ``` r
 crosstable(
   data,
-  vars,
-  group,
+  vars = NULL,
+  group = NULL,
   sty = "nejm",
   excl = FALSE,
   cont = "mean",
   pcat = "chisq",
-  p_adjust = "none"
+  p_adjust = "none",
+  showSMD = FALSE
 )
 ```
 
@@ -52,6 +53,13 @@ crosstable(
   Method for adjusting p-values for multiple comparisons across
   variables. Only available with gtsummary table style.
 
+- showSMD:
+
+  Add a standardized mean difference (SMD) column comparing the groups
+  for each variable — the standard balance diagnostic for matched,
+  weighted, or propensity cohorts. Requires exactly two groups. \|SMD\|
+  \< 0.1 conventionally indicates negligible imbalance.
+
 ## Value
 
 A results object containing:
@@ -64,12 +72,22 @@ A results object containing:
 | `results$subtitle`          |     |     |     |     | a preformatted |
 | `results$todo`              |     |     |     |     | a html         |
 | `results$todo2`             |     |     |     |     | a html         |
+| `results$varNameWarnings`   |     |     |     |     | a html         |
 | `results$tablestyle1`       |     |     |     |     | a html         |
 | `results$tablestyle2`       |     |     |     |     | a html         |
 | `results$tablestyle3`       |     |     |     |     | a html         |
 | `results$tablestyle4`       |     |     |     |     | a html         |
 | `results$qvalueExplanation` |     |     |     |     | a html         |
 | `results$testInformation`   |     |     |     |     | a html         |
+| `results$smdTable`          |     |     |     |     | a table        |
+
+Tables can be converted to data frames with `asDF` or
+[`as.data.frame`](https://rdrr.io/r/base/as.data.frame.html). For
+example:
+
+`results$smdTable$asDF`
+
+`as.data.frame(results$smdTable)`
 
 ## Details
 

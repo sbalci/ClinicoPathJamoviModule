@@ -17,3 +17,8 @@ clinicopath_init(function_name, context = "")
 - context:
 
   Additional context information
+
+## Value
+
+Invisibly returns `TRUE`; called for its side effect of resetting
+counters and pushing the function onto the tracking stack.

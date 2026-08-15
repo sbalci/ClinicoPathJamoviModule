@@ -12,8 +12,8 @@ and observation duration for accurate incidence rate calculations.
 ``` r
 timeinterval(
   data,
-  dx_date,
-  fu_date,
+  dx_date = NULL,
+  fu_date = NULL,
   time_format = "auto",
   output_unit = "months",
   time_basis = "standardized",
@@ -94,7 +94,7 @@ timeinterval(
 - extreme_multiplier:
 
   Multiplier for 99th percentile to define extreme values. Default 2.0
-  means values \>2× the 99th percentile are flagged. Higher values are
+  means values \>2x the 99th percentile are flagged. Higher values are
   more conservative (fewer flagged values).
 
 - add_times:

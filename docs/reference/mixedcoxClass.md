@@ -5,6 +5,11 @@ with random effects for clustered survival data. This R6 class provides
 comprehensive functionality for mixed-effects survival analysis
 accounting for correlation within clusters using the coxme package.
 
+## Value
+
+An `R6` class generator object for the `mixedcoxClass` backend; used
+internally by the jamovi analysis wrapper and not called directly.
+
 ## Details
 
 The mixedcoxClass implements mixed-effects Cox regression methods with:

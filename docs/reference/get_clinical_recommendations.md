@@ -17,3 +17,7 @@ get_clinical_recommendations(results, context)
 - context:
 
   Clinical context
+
+## Value
+
+A character vector of clinical recommendations (empty if none apply).

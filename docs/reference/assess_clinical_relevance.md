@@ -17,3 +17,8 @@ assess_clinical_relevance(effect_size, clinical_context)
 - clinical_context:
 
   Clinical research context
+
+## Value
+
+A single character string describing the clinical relevance of the
+effect size for the given clinical context.

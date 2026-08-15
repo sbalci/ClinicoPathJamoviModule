@@ -168,6 +168,7 @@ A results object containing:
 |                                  |     |     |     |     |          |
 |----------------------------------|-----|-----|-----|-----|----------|
 | `results$instructions`           |     |     |     |     | a html   |
+| `results$notices`                |     |     |     |     | a html   |
 | `results$dataInfo`               |     |     |     |     | a table  |
 | `results$priorSpecification`     |     |     |     |     | a table  |
 | `results$posteriorSummary`       |     |     |     |     | a table  |

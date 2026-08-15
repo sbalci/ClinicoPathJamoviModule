@@ -7,7 +7,7 @@ Advanced Heatmap Visualization
 ``` r
 jggheatmap(
   data,
-  matrix_vars,
+  matrix_vars = NULL,
   row_var = NULL,
   col_var = NULL,
   value_var = NULL,

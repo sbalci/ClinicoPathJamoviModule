@@ -58,8 +58,6 @@ psychopdaROC(data = psychopdaROC_screening,
              classVar = "cancer", positiveClass = "Cancer",
              refVar = "psa_level",
              clinicalPreset = "screening")
-#> Multiple optimal cutpoints found, applying break_ties.
-#> Multiple optimal cutpoints found, applying break_ties.
 #> 
 #>  ADVANCED ROC ANALYSIS
 #> 
@@ -73,7 +71,7 @@ psychopdaROC(data = psychopdaROC_screening,
 #>  The ROC analysis has been completed using the following
 #>  specifications:
 #> 
-#>  &nbsp;
+#>   
 #> 
 #>  Measure Variable(s): psa_level, ca125
 #> 
@@ -81,7 +79,7 @@ psychopdaROC(data = psychopdaROC_screening,
 #> 
 #>  Positive Class: Cancer
 #> 
-#>  &nbsp;
+#>   
 #> 
 #>  Method: maximize_metric
 #> 
@@ -93,9 +91,9 @@ psychopdaROC(data = psychopdaROC_screening,
 #> 
 #>  Tie Breakers: mean
 #> 
-#>  Metric Tolerance: 0.05
+#>  Metric Tolerance: 1e-06
 #> 
-#>  &nbsp;
+#>   
 #> 
 #>  <hr />
 #> 
@@ -114,6 +112,12 @@ psychopdaROC(data = psychopdaROC_screening,
 #>    psa_level    0.8762044       0.8174093       0.9349996    < .0000001   
 #>    ca125        0.8883536       0.8199794       0.9567277    < .0000001   
 #>  ──────────────────────────────────────────────────────────────────────── 
+#>    Note. Reading of the test values: <b>HIGHER values were taken to
+#>    indicate Cancer</b> (Classification Direction = ">="). If that is
+#>    the wrong way round for this marker, every sensitivity,
+#>    specificity, cutpoint and AUC below is reversed — switch
+#>    Classification Direction to "<=" and the AUC becomes 1 minus the
+#>    value shown.
 #>    Note. AUC 95% confidence intervals computed using the DeLong
 #>    method.
 #> 
@@ -133,7 +137,7 @@ psychopdaROC(data = psychopdaROC_screening,
 #>  ──────────────────────────────────────────────────────────────────────────────────────────────────────────────── 
 #>    Cutpoint     Sensitivity    Specificity    PPV          NPV          Youden's J    AUC          Metric Score   
 #>  ──────────────────────────────────────────────────────────────────────────────────────────────────────────────── 
-#>    8.2015789       78.78788       80.64516     38.23529     96.15385     0.5943304    0.8762044       0.5943304   
+#>    9.8500000       75.75758       87.55760     48.07692     95.95960     0.6331518    0.8762044       0.6331518   
 #>  ──────────────────────────────────────────────────────────────────────────────────────────────────────────────── 
 #> 
 #> 
@@ -141,7 +145,7 @@ psychopdaROC(data = psychopdaROC_screening,
 #>  ───────────────────────────────────────────────────────────────────────────────────────────────────────────────── 
 #>    Cutpoint      Sensitivity    Specificity    PPV          NPV          Youden's J    AUC          Metric Score   
 #>  ───────────────────────────────────────────────────────────────────────────────────────────────────────────────── 
-#>    43.0666667       78.78788       85.71429     45.61404     96.37306     0.6450216    0.8883536       0.6450216   
+#>    48.8000000       78.78788       90.32258     55.31915     96.55172     0.6911046    0.8883536       0.6911046   
 #>  ───────────────────────────────────────────────────────────────────────────────────────────────────────────────── 
 #> 
 #> 
@@ -152,6 +156,12 @@ psychopdaROC(data = psychopdaROC_screening,
 #>    psa_level    0.8762044       0.8174093       0.9349996    < .0000001   
 #>    ca125        0.8883536       0.8199794       0.9567277    < .0000001   
 #>  ──────────────────────────────────────────────────────────────────────── 
+#>    Note. Reading of the test values: <b>HIGHER values were taken to
+#>    indicate Cancer</b> (Classification Direction = ">="). If that is
+#>    the wrong way round for this marker, every sensitivity,
+#>    specificity, cutpoint and AUC below is reversed — switch
+#>    Classification Direction to "<=" and the AUC becomes 1 minus the
+#>    value shown.
 #>    Note. AUC 95% confidence intervals computed using the DeLong
 #>    method.
 #> 

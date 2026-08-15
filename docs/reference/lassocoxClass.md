@@ -7,6 +7,11 @@ overfitting, making it ideal for high-dimensional survival data where
 the number of potential predictors may approach or exceed the sample
 size.
 
+## Value
+
+An `R6` class generator object for the `lassocoxClass` backend; used
+internally by the jamovi analysis wrapper and not called directly.
+
 ## Details
 
 The Lasso-Cox regression combines the Cox proportional hazards model

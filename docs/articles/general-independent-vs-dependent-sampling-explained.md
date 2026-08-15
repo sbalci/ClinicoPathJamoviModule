@@ -739,14 +739,14 @@ data(duan2023_vi_blocks)
 sessionInfo()
 #> R version 4.6.0 (2026-04-24)
 #> Platform: aarch64-apple-darwin23
-#> Running under: macOS Tahoe 26.5.1
+#> Running under: macOS Tahoe 26.5.2
 #> 
 #> Matrix products: default
 #> BLAS:   /Library/Frameworks/R.framework/Versions/4.6/Resources/lib/libRblas.0.dylib 
 #> LAPACK: /Library/Frameworks/R.framework/Versions/4.6/Resources/lib/libRlapack.dylib;  LAPACK version 3.12.1
 #> 
 #> locale:
-#> [1] C.UTF-8/C.UTF-8/C.UTF-8/C/C.UTF-8/C.UTF-8
+#> [1] en_US.UTF-8/en_US.UTF-8/en_US.UTF-8/C/en_US.UTF-8/en_US.UTF-8
 #> 
 #> time zone: Europe/Istanbul
 #> tzcode source: internal
@@ -756,16 +756,16 @@ sessionInfo()
 #> 
 #> loaded via a namespace (and not attached):
 #>  [1] digest_0.6.39     desc_1.4.3        R6_2.6.1          fastmap_1.2.0    
-#>  [5] xfun_0.59         binom_1.1-1.1     cachem_1.1.0      knitr_1.51       
+#>  [5] xfun_0.60         binom_1.1-2       cachem_1.1.0      knitr_1.51       
 #>  [9] htmltools_0.5.9   rmarkdown_2.31    lifecycle_1.0.5   cli_3.6.6        
-#> [13] grid_4.6.0        sass_0.4.10       pkgdown_2.2.0     textshaping_1.0.5
+#> [13] grid_4.6.0        sass_0.4.10       pkgdown_2.2.1     textshaping_1.0.5
 #> [17] jquerylib_0.1.4   systemfonts_1.3.2 compiler_4.6.0    tools_4.6.0      
-#> [21] ragg_1.5.2        bslib_0.11.0      evaluate_1.0.5    yaml_2.3.12      
-#> [25] otel_0.2.0        jsonlite_2.0.0    rlang_1.2.0       fs_2.1.0         
+#> [21] ragg_1.5.2        bslib_0.12.0      evaluate_1.0.5    yaml_2.3.12      
+#> [25] otel_0.2.0        jsonlite_2.0.0    rlang_1.3.0       fs_2.1.0         
 #> [29] htmlwidgets_1.6.4
 ```
 
 ------------------------------------------------------------------------
 
-**Document generated**: 2026-07-06 **ClinicoPath module version**:
+**Document generated**: 2026-08-14 **ClinicoPath module version**:
 0.0.33 **Vignette author**: ClinicoPath Development Team

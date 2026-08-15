@@ -17,14 +17,14 @@ description:
         Mann-Whitney / AUC estimand. Values above 0.5 favour the index group. This
         approach, developed for antimicrobial and benefit-risk trials, avoids collapsing
         outcomes of differing severity into a single binary endpoint.
-    R:
-        dontrun: true
-        usage: |
-            door(
-                data = mydata,
-                group = "arm",
-                refLevel = "Control",
-                doorRank = "door_category")
+#     R:
+#         dontrun: true
+#         usage: |
+#             door(
+#                 data = mydata,
+#                 group = "arm",
+#                 refLevel = "Control",
+#                 doorRank = "door_category")
 
 options:
     - name: data

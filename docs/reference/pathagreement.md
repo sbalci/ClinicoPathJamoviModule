@@ -10,7 +10,7 @@ interpretation for categorical rating data.
 ``` r
 pathagreement(
   data,
-  vars,
+  vars = NULL,
   sft = FALSE,
   heatmap = FALSE,
   heatmapDetails = FALSE,

@@ -4,6 +4,11 @@ Comprehensive ROC analysis implementation inspired by BlueSky's
 createROCTable with enhanced features for clinical diagnostic
 performance evaluation.
 
+## Value
+
+An `R6` class generator object for the `enhancedROCClass` backend; used
+internally by the jamovi analysis wrapper and not called directly.
+
 ## Super classes
 
 [`jmvcore::Analysis`](https://rdrr.io/pkg/jmvcore/man/Analysis.html) -\>

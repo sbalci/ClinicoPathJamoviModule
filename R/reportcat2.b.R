@@ -11,10 +11,10 @@
 #'   treatment = factor(c("A", "B", "A", "C", "B", "A")),
 #'   grade = factor(c("High", "Low", "Medium", "High", "Low", "Medium"))
 #' )
-#' result <- reportcat(data = data, vars = c("treatment", "grade"))
-#' 
-#' # Example 2: Enhanced summary with cumulative percentages  
-#' result_enhanced <- reportcat(
+#' result <- reportcat2(data = data, vars = c("treatment", "grade"))
+#'
+#' # Example 2: Enhanced summary with cumulative percentages
+#' result_enhanced <- reportcat2(
 #'   data = data, 
 #'   vars = "treatment",
 #'   sumvar_style = TRUE,
@@ -22,7 +22,7 @@
 #' )
 #' 
 #' # Example 3: Sort categories by frequency
-#' result_sorted <- reportcat(
+#' result_sorted <- reportcat2(
 #'   data = data,
 #'   vars = "grade", 
 #'   sort_by_frequency = TRUE

@@ -1,5 +1,12 @@
 # Relative Survival Analysis - Comprehensive Guide
 
+> **Not yet released.** The `relativesurvival` analysis is on a
+> development menu route, so it does not appear in the jamovi menus of
+> ClinicoPath or of any of its submodules. It is documented here ahead
+> of a future release, and its options, defaults and output may still
+> change. The R function is exported, so the examples below run from an
+> R console; what is not yet available is the jamovi analysis itself.
+
 > **Note:** The
 > [`relativesurvival()`](https://www.serdarbalci.com/ClinicoPathJamoviModule/reference/relativesurvival.md)
 > function is designed for use within **jamovi’s GUI**. The code
@@ -100,8 +107,8 @@ relativesurvival(
   sex = "sex",
   year = "diagnosis_year"
 )
-#> Error in `relativesurvival()`:
-#> ! argument "covariates" is missing, with no default
+#> Error:
+#> ! 'survexp.us' is not an exported object from 'namespace:relsurv'
 ```
 
 #### What the outputs mean
@@ -146,8 +153,8 @@ relativesurvival(
   year = "diagnosis_year",
   method = "poharperme"
 )
-#> Error in `relativesurvival()`:
-#> ! argument "covariates" is missing, with no default
+#> Error:
+#> ! 'survexp.us' is not an exported object from 'namespace:relsurv'
 ```
 
 #### 2b. Ederer II
@@ -166,8 +173,8 @@ relativesurvival(
   year = "diagnosis_year",
   method = "ederer2"
 )
-#> Error in `relativesurvival()`:
-#> ! argument "covariates" is missing, with no default
+#> Error:
+#> ! 'survexp.us' is not an exported object from 'namespace:relsurv'
 ```
 
 #### 2c. Ederer I
@@ -187,8 +194,8 @@ relativesurvival(
   year = "diagnosis_year",
   method = "ederer1"
 )
-#> Error in `relativesurvival()`:
-#> ! argument "covariates" is missing, with no default
+#> Error:
+#> ! 'survexp.us' is not an exported object from 'namespace:relsurv'
 ```
 
 #### 2d. Hakulinen
@@ -207,8 +214,8 @@ relativesurvival(
   year = "diagnosis_year",
   method = "hakulinen"
 )
-#> Error in `relativesurvival()`:
-#> ! argument "covariates" is missing, with no default
+#> Error:
+#> ! 'survexp.us' is not an exported object from 'namespace:relsurv'
 ```
 
 ------------------------------------------------------------------------
@@ -235,8 +242,8 @@ relativesurvival(
   year = "diagnosis_year",
   ratetable = "us"
 )
-#> Error in `relativesurvival()`:
-#> ! argument "covariates" is missing, with no default
+#> Error:
+#> ! 'survexp.us' is not an exported object from 'namespace:relsurv'
 ```
 
 #### 3b. Minnesota Population
@@ -254,8 +261,8 @@ relativesurvival(
   year = "diagnosis_year",
   ratetable = "mn"
 )
-#> Error in `relativesurvival()`:
-#> ! argument "covariates" is missing, with no default
+#> Error:
+#> ! 'survexp.mn' is not an exported object from 'namespace:relsurv'
 ```
 
 #### 3c. French Population
@@ -271,8 +278,8 @@ relativesurvival(
   year = "diagnosis_year",
   ratetable = "fr"
 )
-#> Error in `relativesurvival()`:
-#> ! argument "covariates" is missing, with no default
+#> Error:
+#> ! 'survexp.fr' is not an exported object from 'namespace:relsurv'
 ```
 
 #### 3d. Slovenian Population
@@ -288,9 +295,126 @@ relativesurvival(
   year = "diagnosis_year",
   ratetable = "slovenia"
 )
-#> Error in `relativesurvival()`:
-#> ! argument "covariates" is missing, with no default
+#> 
+#>  RELATIVE SURVIVAL ANALYSIS
+#> 
+#> character(0)
+#> 
+#>  <div style='color:#1565c0;border-left:4px solid #1565c0;padding:4px
+#>  8px;margin:4px 0;background:#fafafa;'>&#8505; Analysis Complete:
+#>  Relative survival analysis completed: 200 patients, 116 events, method
+#>  = Pohar-Perme (Net Survival Estimator).
+#> 
+#>  Relative Survival Analysis Results
+#> 
+#>  Method: Pohar-Perme (Net Survival Estimator)
+#> 
+#>  Number of Patients: 200
+#> 
+#>  Number of Deaths: 116
+#> 
+#>  Median Follow-up: 3.5 years
+#> 
+#>  Population Rate Table: Slovenian Population (slopop)
+#> 
+#>  Confidence Level: 95%
+#> 
+#>  Survival Estimates by Time                                                                                 
+#>  ────────────────────────────────────────────────────────────────────────────────────────────────────────── 
+#>    Time         Observed Survival    Expected Survival    Relative Survival    RS CI Lower    RS CI Upper   
+#>  ────────────────────────────────────────────────────────────────────────────────────────────────────────── 
+#>     1.000000            0.8705000                                 0.8951000      0.8476000      0.9453000   
+#>     3.000000            0.6659000                                 0.7239000      0.6504000      0.8057000   
+#>     5.000000            0.5189000                                 0.6020000      0.5189000      0.6983000   
+#>    10.000000            0.3145000                                 0.5491000      0.4425000      0.6814000   
+#>  ────────────────────────────────────────────────────────────────────────────────────────────────────────── 
+#>    Note. Method: Pohar-Perme (Net Survival). Time scale: years.
+#> 
+#> 
+#>  Net Survival Estimates                                                
+#>  ───────────────────────────────────────────────────────────────────── 
+#>    Time         Net Survival    CI Lower     CI Upper     Std. Error   
+#>  ───────────────────────────────────────────────────────────────────── 
+#>     1.000000       0.8951000    0.8476000    0.9453000    0.02780000   
+#>     3.000000       0.7239000    0.6504000    0.8057000    0.05470000   
+#>     5.000000       0.6020000    0.5189000    0.6983000    0.07570000   
+#>    10.000000       0.5491000    0.4425000    0.6814000    0.11010000   
+#>  ───────────────────────────────────────────────────────────────────── 
+#> 
+#> 
+#>  Excess Mortality Rates                                                       
+#>  ──────────────────────────────────────────────────────────────────────────── 
+#>    Time Interval    Excess Hazard    CI Lower        CI Upper     p-value     
+#>  ──────────────────────────────────────────────────────────────────────────── 
+#>    0-1 years          0.110800000     0.056200000    0.1653000    0.0000689   
+#>    1-2 years          0.102800000     0.005800000    0.1998000    0.0378348   
+#>    2-3 years          0.109500000    -0.024300000    0.2434000    0.1087238   
+#>    3-4 years          0.112300000    -0.056200000    0.2809000    0.1914712   
+#>    4-5 years          0.072100000    -0.125300000    0.2695000    0.4742141   
+#>    5-6 years          0.008400000    -0.207100000    0.2239000    0.9390479   
+#>    6-7 years          0.072300000    -0.164000000    0.3087000    0.5486542   
+#>    7-8 years          0.089200000    -0.178500000    0.3570000    0.5136013   
+#>    8-9 years          0.005700000    -0.285700000    0.2971000    0.9695443   
+#>    9-10 years        -0.083700000    -0.385900000    0.2185000    0.5872061   
+#>  ──────────────────────────────────────────────────────────────────────────── 
+#>    Note. Excess hazard = -log(S_net(t) / S_net(t-1)). CIs via delta
+#>    method on log-survival SE; p-value tests H0: excess hazard = 0.
+#> 
+#> 
+#>  Crude Probability of Death                                                                   
+#>  ──────────────────────────────────────────────────────────────────────────────────────────── 
+#>    Time         Disease Death    Other Causes Death    Disease CI Lower    Disease CI Upper   
+#>  ──────────────────────────────────────────────────────────────────────────────────────────── 
+#>     1.000000        0.1034000            0.02610000          0.05540000           0.1513000   
+#>     3.000000        0.2644000            0.06970000          0.19270000           0.3360000   
+#>     5.000000        0.3795000            0.10160000          0.29950000           0.4596000   
+#>    10.000000        0.5104000            0.17520000          0.42330000           0.5974000   
+#>  ──────────────────────────────────────────────────────────────────────────────────────────── 
+#>    Note. Crude probabilities decompose total mortality into disease-specific and
+#>    other-cause components.
+#> 
+#> 
+#>  Regression Model Results                                                                  
+#>  ───────────────────────────────────────────────────────────────────────────────────────── 
+#>    Variable    Coefficient    Std. Error    z-value    p-value      CI Lower    CI Upper   
+#>  ───────────────────────────────────────────────────────────────────────────────────────── 
+#>    .           .              .             .          .            .           .          
+#>  ───────────────────────────────────────────────────────────────────────────────────────── 
+#> 
+#> 
+#>  Model Fit Statistics                  
+#>  ───────────────────────────────────── 
+#>    Metric    Value    Interpretation   
+#>  ───────────────────────────────────── 
+#>    .         .        .                
+#>  ───────────────────────────────────── 
+#> 
+#> 
+#>  Clinical Interpretation
+#> 
+#>  The estimated 5-year net survival is 60.2%. This means that, after
+#>  removing the effect of other-cause mortality, approximately 60.2% of
+#>  patients would survive 5 years if the disease under study were the
+#>  only possible cause of death.
+#> 
+#>  Prognosis: Fair. Substantial excess mortality is present.
+#> 
+#>  Key Concepts:
+#> 
+#>  Relative/Net Survival: Ratio of observed to expected survival. Values
+#>  near 1.0 indicate that disease contributes little to mortality. Values
+#>  well below 1.0 indicate substantial disease-specific mortality.Excess
+#>  Mortality: The additional mortality attributable to the disease beyond
+#>  what would be expected in the general population.Crude Probability:
+#>  Decomposes total mortality into disease-related and other-cause
+#>  components, accounting for competing risks.
+#> 
+#>  Note: Relative survival is particularly useful when cause of death
+#>  information is unreliable or unavailable, as it does not require
+#>  individual cause-of-death data.
 ```
+
+![](jsurvival-relativesurvival-comprehensive_files/figure-html/ratetable-slovenia-1.png)![](jsurvival-relativesurvival-comprehensive_files/figure-html/ratetable-slovenia-2.png)![](jsurvival-relativesurvival-comprehensive_files/figure-html/ratetable-slovenia-3.png)
 
 #### 3e. WHO-Based Tables (Turkey example)
 
@@ -310,9 +434,126 @@ relativesurvival(
   year = "diagnosis_year",
   ratetable = "turkey"
 )
-#> Error in `relativesurvival()`:
-#> ! argument "covariates" is missing, with no default
+#> 
+#>  RELATIVE SURVIVAL ANALYSIS
+#> 
+#> character(0)
+#> 
+#>  <div style='color:#1565c0;border-left:4px solid #1565c0;padding:4px
+#>  8px;margin:4px 0;background:#fafafa;'>&#8505; Analysis Complete:
+#>  Relative survival analysis completed: 200 patients, 116 events, method
+#>  = Pohar-Perme (Net Survival Estimator).
+#> 
+#>  Relative Survival Analysis Results
+#> 
+#>  Method: Pohar-Perme (Net Survival Estimator)
+#> 
+#>  Number of Patients: 200
+#> 
+#>  Number of Deaths: 116
+#> 
+#>  Median Follow-up: 3.5 years
+#> 
+#>  Population Rate Table: Turkey Population (WHO)
+#> 
+#>  Confidence Level: 95%
+#> 
+#>  Survival Estimates by Time                                                                                 
+#>  ────────────────────────────────────────────────────────────────────────────────────────────────────────── 
+#>    Time         Observed Survival    Expected Survival    Relative Survival    RS CI Lower    RS CI Upper   
+#>  ────────────────────────────────────────────────────────────────────────────────────────────────────────── 
+#>     1.000000            0.8705000                                 0.8926000      0.8452000      0.9426000   
+#>     3.000000            0.6659000                                 0.7187000      0.6463000      0.7992000   
+#>     5.000000            0.5189000                                 0.5930000      0.5114000      0.6876000   
+#>    10.000000            0.3145000                                 0.5259000      0.4217000      0.6559000   
+#>  ────────────────────────────────────────────────────────────────────────────────────────────────────────── 
+#>    Note. Method: Pohar-Perme (Net Survival). Time scale: years.
+#> 
+#> 
+#>  Net Survival Estimates                                                
+#>  ───────────────────────────────────────────────────────────────────── 
+#>    Time         Net Survival    CI Lower     CI Upper     Std. Error   
+#>  ───────────────────────────────────────────────────────────────────── 
+#>     1.000000       0.8926000    0.8452000    0.9426000    0.02780000   
+#>     3.000000       0.7187000    0.6463000    0.7992000    0.05420000   
+#>     5.000000       0.5930000    0.5114000    0.6876000    0.07550000   
+#>    10.000000       0.5259000    0.4217000    0.6559000    0.11270000   
+#>  ───────────────────────────────────────────────────────────────────── 
+#> 
+#> 
+#>  Excess Mortality Rates                                                       
+#>  ──────────────────────────────────────────────────────────────────────────── 
+#>    Time Interval    Excess Hazard    CI Lower        CI Upper     p-value     
+#>  ──────────────────────────────────────────────────────────────────────────── 
+#>    0-1 years          0.113600000     0.059100000    0.1681000    0.0000443   
+#>    1-2 years          0.107200000     0.009900000    0.2045000    0.0308793   
+#>    2-3 years          0.109500000    -0.023800000    0.2428000    0.1074842   
+#>    3-4 years          0.114900000    -0.052400000    0.2822000    0.1784436   
+#>    4-5 years          0.077500000    -0.119100000    0.2741000    0.4396597   
+#>    5-6 years          0.008700000    -0.206100000    0.2235000    0.9367353   
+#>    6-7 years          0.078400000    -0.158200000    0.3151000    0.5159450   
+#>    7-8 years          0.097400000    -0.173500000    0.3684000    0.4808664   
+#>    8-9 years          0.014200000    -0.282800000    0.3112000    0.9254333   
+#>    9-10 years        -0.078800000    -0.387500000    0.2300000    0.6171172   
+#>  ──────────────────────────────────────────────────────────────────────────── 
+#>    Note. Excess hazard = -log(S_net(t) / S_net(t-1)). CIs via delta
+#>    method on log-survival SE; p-value tests H0: excess hazard = 0.
+#> 
+#> 
+#>  Crude Probability of Death                                                                   
+#>  ──────────────────────────────────────────────────────────────────────────────────────────── 
+#>    Time         Disease Death    Other Causes Death    Disease CI Lower    Disease CI Upper   
+#>  ──────────────────────────────────────────────────────────────────────────────────────────── 
+#>     1.000000        0.1058000            0.02370000          0.05790000           0.1537000   
+#>     3.000000        0.2692000            0.06490000          0.19770000           0.3407000   
+#>     5.000000        0.3847000            0.09650000          0.30470000           0.4646000   
+#>    10.000000        0.5085000            0.17700000          0.42040000           0.5966000   
+#>  ──────────────────────────────────────────────────────────────────────────────────────────── 
+#>    Note. Crude probabilities decompose total mortality into disease-specific and
+#>    other-cause components.
+#> 
+#> 
+#>  Regression Model Results                                                                  
+#>  ───────────────────────────────────────────────────────────────────────────────────────── 
+#>    Variable    Coefficient    Std. Error    z-value    p-value      CI Lower    CI Upper   
+#>  ───────────────────────────────────────────────────────────────────────────────────────── 
+#>    .           .              .             .          .            .           .          
+#>  ───────────────────────────────────────────────────────────────────────────────────────── 
+#> 
+#> 
+#>  Model Fit Statistics                  
+#>  ───────────────────────────────────── 
+#>    Metric    Value    Interpretation   
+#>  ───────────────────────────────────── 
+#>    .         .        .                
+#>  ───────────────────────────────────── 
+#> 
+#> 
+#>  Clinical Interpretation
+#> 
+#>  The estimated 5-year net survival is 59.3%. This means that, after
+#>  removing the effect of other-cause mortality, approximately 59.3% of
+#>  patients would survive 5 years if the disease under study were the
+#>  only possible cause of death.
+#> 
+#>  Prognosis: Fair. Substantial excess mortality is present.
+#> 
+#>  Key Concepts:
+#> 
+#>  Relative/Net Survival: Ratio of observed to expected survival. Values
+#>  near 1.0 indicate that disease contributes little to mortality. Values
+#>  well below 1.0 indicate substantial disease-specific mortality.Excess
+#>  Mortality: The additional mortality attributable to the disease beyond
+#>  what would be expected in the general population.Crude Probability:
+#>  Decomposes total mortality into disease-related and other-cause
+#>  components, accounting for competing risks.
+#> 
+#>  Note: Relative survival is particularly useful when cause of death
+#>  information is unreliable or unavailable, as it does not require
+#>  individual cause-of-death data.
 ```
+
+![](jsurvival-relativesurvival-comprehensive_files/figure-html/ratetable-turkey-1.png)![](jsurvival-relativesurvival-comprehensive_files/figure-html/ratetable-turkey-2.png)![](jsurvival-relativesurvival-comprehensive_files/figure-html/ratetable-turkey-3.png)
 
 ------------------------------------------------------------------------
 
@@ -342,8 +583,8 @@ relativesurvival(
   crude_probability = FALSE,
   plot_excess = FALSE
 )
-#> Error in `relativesurvival()`:
-#> ! argument "covariates" is missing, with no default
+#> Error:
+#> ! 'survexp.us' is not an exported object from 'namespace:relsurv'
 ```
 
 #### 4b. Excess Mortality Only
@@ -364,8 +605,8 @@ relativesurvival(
   excess_mortality = TRUE,
   crude_probability = FALSE
 )
-#> Error in `relativesurvival()`:
-#> ! argument "covariates" is missing, with no default
+#> Error:
+#> ! 'survexp.us' is not an exported object from 'namespace:relsurv'
 ```
 
 ------------------------------------------------------------------------
@@ -395,8 +636,8 @@ relativesurvival(
   plot_relative = FALSE,
   plot_excess = FALSE
 )
-#> Error in `relativesurvival()`:
-#> ! argument "covariates" is missing, with no default
+#> Error:
+#> ! 'survexp.us' is not an exported object from 'namespace:relsurv'
 ```
 
 ------------------------------------------------------------------------
@@ -431,8 +672,8 @@ relativesurvival(
   plot_relative = FALSE,
   plot_excess = FALSE
 )
-#> Error in `relativesurvival()`:
-#> ! argument "covariates" is missing, with no default
+#> Error:
+#> ! 'survexp.us' is not an exported object from 'namespace:relsurv'
 ```
 
 ------------------------------------------------------------------------
@@ -468,8 +709,8 @@ relativesurvival(
   plot_relative = FALSE,
   plot_excess = FALSE
 )
-#> Error in `relativesurvival()`:
-#> ! argument "covariates" is missing, with no default
+#> Error:
+#> ! 'survexp.us' is not an exported object from 'namespace:relsurv'
 ```
 
 #### 7b. With Cohort Definition
@@ -497,8 +738,8 @@ relativesurvival(
   plot_relative = FALSE,
   plot_excess = FALSE
 )
-#> Error in `relativesurvival()`:
-#> ! argument "covariates" is missing, with no default
+#> Error:
+#> ! 'survexp.us' is not an exported object from 'namespace:relsurv'
 ```
 
 ------------------------------------------------------------------------
@@ -661,8 +902,8 @@ relativesurvival(
   plot_relative = FALSE,
   plot_excess = FALSE
 )
-#> Error in `relativesurvival()`:
-#> ! argument "covariates" is missing, with no default
+#> Error:
+#> ! 'survexp.us' is not an exported object from 'namespace:relsurv'
 ```
 
 #### 9b. Time in Days
@@ -689,8 +930,8 @@ relativesurvival(
   plot_relative = FALSE,
   plot_excess = FALSE
 )
-#> Error in `relativesurvival()`:
-#> ! argument "covariates" is missing, with no default
+#> Error:
+#> ! 'survexp.us' is not an exported object from 'namespace:relsurv'
 ```
 
 ------------------------------------------------------------------------
@@ -720,8 +961,8 @@ relativesurvival(
   plot_relative = FALSE,
   plot_excess = FALSE
 )
-#> Error in `relativesurvival()`:
-#> ! argument "covariates" is missing, with no default
+#> Error:
+#> ! 'survexp.us' is not an exported object from 'namespace:relsurv'
 ```
 
 #### 10b. Custom Confidence Level
@@ -747,8 +988,8 @@ relativesurvival(
   plot_relative = FALSE,
   plot_excess = FALSE
 )
-#> Error in `relativesurvival()`:
-#> ! argument "covariates" is missing, with no default
+#> Error:
+#> ! 'survexp.us' is not an exported object from 'namespace:relsurv'
 ```
 
 ------------------------------------------------------------------------
@@ -779,8 +1020,8 @@ relativesurvival(
   plot_relative = FALSE,
   plot_excess = FALSE
 )
-#> Error in `relativesurvival()`:
-#> ! argument "covariates" is missing, with no default
+#> Error:
+#> ! 'survexp.us' is not an exported object from 'namespace:relsurv'
 ```
 
 #### 11b. Full Analysis with All Options Enabled

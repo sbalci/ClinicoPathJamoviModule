@@ -2,19 +2,20 @@
 
 Comprehensive meta-analysis of diagnostic test accuracy studies designed
 for pathology research. Performs bivariate random-effects modeling,
-HSROC analysis, meta-regression, and publication bias assessment for AI
-algorithm validation and biomarker diagnostic accuracy synthesis.
+proportional-hazards SROC analysis, meta-regression, and publication
+bias assessment for AI algorithm validation and biomarker diagnostic
+accuracy synthesis.
 
 ## Usage
 
 ``` r
 diagnosticmeta(
   data,
-  study,
-  true_positives,
-  false_positives,
-  false_negatives,
-  true_negatives,
+  study = NULL,
+  true_positives = NULL,
+  false_positives = NULL,
+  false_negatives = NULL,
+  true_negatives = NULL,
   covariate = NULL,
   bivariate_analysis = TRUE,
   hsroc_analysis = FALSE,
@@ -72,7 +73,7 @@ diagnosticmeta(
 
 - hsroc_analysis:
 
-  Perform hierarchical summary ROC (HSROC) analysis
+  Perform Holling proportional-hazards summary ROC analysis
 
 - meta_regression:
 
@@ -146,7 +147,6 @@ A results object containing:
 
 |                                  |     |     |     |     |          |
 |----------------------------------|-----|-----|-----|-----|----------|
-| `results$welcome`                |     |     |     |     | a html   |
 | `results$instructions`           |     |     |     |     | a html   |
 | `results$summary`                |     |     |     |     | a html   |
 | `results$about`                  |     |     |     |     | a html   |

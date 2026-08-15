@@ -8,6 +8,11 @@ categories) regression. Includes automatic variable categorization,
 calibration/ discrimination assessment, nomogram generation,
 score-to-outcome lookup, bootstrap validation, and TRIPOD compliance.
 
+## Value
+
+An `R6` class generator object for the `clinicalscoreClass` backend;
+used internally by the jamovi analysis wrapper and not called directly.
+
 ## Super classes
 
 [`jmvcore::Analysis`](https://rdrr.io/pkg/jmvcore/man/Analysis.html) -\>

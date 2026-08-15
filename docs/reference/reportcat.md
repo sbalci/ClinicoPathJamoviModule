@@ -8,7 +8,7 @@ distribution of your data.
 ## Usage
 
 ``` r
-reportcat(data, vars)
+reportcat(data, vars = NULL)
 ```
 
 ## Arguments

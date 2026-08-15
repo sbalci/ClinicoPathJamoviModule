@@ -47,14 +47,13 @@ difference (p=1.0).
 ``` r
 data(decisioncompare_identical)
 decisioncompare(data = decisioncompare_identical, gold = "GoldStandard",
-                goldPositive = "Positive", test1 = "Test1",
-                test1Positive = "Positive", test2 = "Test2",
-                test2Positive = "Positive", test3Positive = "",
+                goldPositive = "Positive", goldNegative = NULL, test1 = "Test1",
+                test1Positive = "Positive", test1Negative = NULL, test2 = "Test2",
+                test2Positive = "Positive", test2Negative = NULL,
+                test3Positive = "", test3Negative = NULL,
                 statComp = TRUE)
 #> 
 #>  COMPARE MEDICAL DECISION TESTS
-#> 
-#> character(0)
 #> 
 #>  Test 1 - Recoded Data                                            
 #>  ──────────────────────────────────────────────────────────────── 
@@ -76,16 +75,6 @@ decisioncompare(data = decisioncompare_identical, gold = "GoldStandard",
 #>  ──────────────────────────────────────────────────────────────── 
 #> 
 #> 
-#>  Test 3 - Recoded Data                                        
-#>  ──────────────────────────────────────────────────────────── 
-#>                     Gold Positive    Gold Negative    Total   
-#>  ──────────────────────────────────────────────────────────── 
-#>    Test Positive    .                .                .       
-#>    Test Negative    .                .                .       
-#>    Total            .                .                .       
-#>  ──────────────────────────────────────────────────────────── 
-#> 
-#> 
 #>  Decision Test Comparison                                                                                                                                                                                                                                 
 #>  ──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────── 
 #>    Test                                                                                     Sensitivity    Specificity    Accuracy     Positive Predictive Value    Negative Predictive Value    Positive Likelihood Ratio    Negative Likelihood Ratio   
@@ -95,13 +84,6 @@ decisioncompare(data = decisioncompare_identical, gold = "GoldStandard",
 #>    Test2                                                                                       88.00000       85.33333     86.00000                     66.66667                     95.52239                     6.000000                    0.1406250   
 #>      → Good balanced performance; Moderate positive evidence; Moderate negative evidence                                                                                                                                                                  
 #>  ──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────── 
-#> 
-#> 
-#>  Stratified Diagnostic Accuracy                                                                              
-#>  ─────────────────────────────────────────────────────────────────────────────────────────────────────────── 
-#>    Subgroup    N    Test    Sensitivity    Specificity    Accuracy     PPV          NPV          OPA         
-#>  ─────────────────────────────────────────────────────────────────────────────────────────────────────────── 
-#>  ─────────────────────────────────────────────────────────────────────────────────────────────────────────── 
 #> 
 #> 
 #>  Statistical Comparison of Test Accuracy                                                                                  
@@ -126,6 +108,11 @@ decisioncompare(data = decisioncompare_identical, gold = "GoldStandard",
 #>    Test1 vs Test2    Specificity      0.00000 ᵇ      0.00000      0.00000   
 #>    Test1 vs Test2    Accuracy         0.00000 ᵈ      0.00000      0.00000   
 #>  ────────────────────────────────────────────────────────────────────────── 
+#>    Note. Differences are paired (within-subject). Confidence intervals
+#>    are 95% normal-approximation (Wald) intervals for the difference
+#>    between two correlated proportions, computed from the discordant
+#>    pair counts. They are not affected by the "CI Method for Agreement"
+#>    option, which applies to the overall percent agreement table.
 #>    ᵃ Small paired sample/discordant counts; CI may be unstable (n=25,
 #>    discordant counts: 22, 0, 0, 3).
 #>    ᵇ Small paired sample/discordant counts; CI may be unstable (n=75,
@@ -138,15 +125,18 @@ decisioncompare(data = decisioncompare_identical, gold = "GoldStandard",
 #>  0 auto; padding: 20px;"><h2 style="color: #2c3e50; border-bottom: 2px
 #>  solid #3498db;"> Clinical Summary
 #> 
-#>  Among the tests evaluated, Test1 demonstrated optimal diagnostic
-#>  performance with 88% sensitivity (95% CI: [see confidence interval
-#>  table]), 85.3% specificity (95% CI: [see confidence interval table]),
-#>  66.7% positive predictive value, 95.5% negative predictive value, and
-#>  86% overall accuracy. Statistical comparisons using McNemar's test
-#>  revealed significant differences in test performance (detailed results
-#>  in comparison tables). The likelihood ratio for positive results was
-#>  6.00 and for negative results was 0.14.<h3 style="color: #27ae60;
-#>  margin-top: 30px;"> Report Sentences
+#>  Among the tests evaluated, Test1 had the highest observed accuracy,
+#>  with 88% sensitivity (95% CI: 68.8-97.5%), 85.3% specificity (95% CI:
+#>  75.3-92.4%), 66.7% positive predictive value, 95.5% negative
+#>  predictive value, and 86% overall accuracy. Statistical comparison
+#>  (McNemar's/Cochran's test) did not reveal a statistically significant
+#>  difference in test performance (detailed results in the comparison
+#>  tables). The likelihood ratio for positive results was 6.00 and for
+#>  negative results was 0.14. Because the differences between tests were
+#>  not statistically significant, this ranking reflects the observed
+#>  sample and should not be reported as evidence that one test
+#>  outperforms the others.<h3 style="color: #27ae60; margin-top: 30px;">
+#>  Report Sentences
 #> 
 #>  <div style="background-color: #f8f9fa; padding: 15px; border-left: 4px
 #>  solid #28a745; margin: 15px 0;"><h4 style="margin-top: 0;">Methods
@@ -166,14 +156,17 @@ decisioncompare(data = decisioncompare_identical, gold = "GoldStandard",
 #>  Section:
 #> 
 #>  <p style="font-style: italic; line-height: 1.6;">Among the tests
-#>  evaluated, Test1 demonstrated optimal diagnostic performance with 88%
-#>  sensitivity (95% CI: [see confidence interval table]), 85.3%
-#>  specificity (95% CI: [see confidence interval table]), 66.7% positive
-#>  predictive value, 95.5% negative predictive value, and 86% overall
-#>  accuracy. Statistical comparisons using McNemar's test revealed
-#>  significant differences in test performance (detailed results in
-#>  comparison tables). The likelihood ratio for positive results was 6.00
-#>  and for negative results was 0.14.
+#>  evaluated, Test1 had the highest observed accuracy, with 88%
+#>  sensitivity (95% CI: 68.8-97.5%), 85.3% specificity (95% CI:
+#>  75.3-92.4%), 66.7% positive predictive value, 95.5% negative
+#>  predictive value, and 86% overall accuracy. Statistical comparison
+#>  (McNemar's/Cochran's test) did not reveal a statistically significant
+#>  difference in test performance (detailed results in the comparison
+#>  tables). The likelihood ratio for positive results was 6.00 and for
+#>  negative results was 0.14. Because the differences between tests were
+#>  not statistically significant, this ranking reflects the observed
+#>  sample and should not be reported as evidence that one test
+#>  outperforms the others.
 #> 
 #>  <h3 style="color: #8e44ad; margin-top: 30px;"> Clinical
 #>  Recommendations
@@ -183,6 +176,13 @@ decisioncompare(data = decisioncompare_identical, gold = "GoldStandard",
 #> 
 #>  Clinical Consideration: Consider using Test1 in combination with other
 #>  tests for optimal diagnostic accuracy.
+#> 
+#>  <p style="background-color: #f8d7da; padding: 10px; border-radius:
+#>  4px;">Caution: No statistically significant difference was found
+#>  between the tests compared. Test1 is named here only because it ranked
+#>  highest in this sample; the data do not establish that it outperforms
+#>  the others. Base any choice between these tests on cost, availability,
+#>  turnaround time, and harms as well as on these estimates.
 #> 
 #>  Implementation Note: Results should be interpreted in the context of
 #>  disease prevalence in your clinical population. Consider local
@@ -279,12 +279,27 @@ decisioncompare(data = decisioncompare_identical, gold = "GoldStandard",
 #>  and NPV vary with disease prevalenceMcNemar Test: Requires
 #>  paired/matched data for statistical comparisonsMissing Data: Cases
 #>  with incomplete data are excluded from analysisConfidence Intervals:
-#>  Calculated using Wilson method for better accuracy
+#>  The per-test CI tables report Clopper-Pearson exact intervals for the
+#>  proportions (sensitivity, specificity, PPV, NPV, accuracy and
+#>  prevalence), as computed by epiR::epi.tests() with its default
+#>  settings. Likelihood ratios are reported as point estimates only,
+#>  without confidence intervals. The Overall Percent Agreement (OPA)
+#>  table uses the method you select under "CI Method for Agreement"
+#>  (Wilson score by default). Paired differences between tests use
+#>  normal-approximation (Wald) intervals.
 #> 
-#>  <div style='margin: 10px 0;'><div style='background-color: #eff6ff;
-#>  border-left: 4px solid #93c5fd; padding: 12px; margin: 8px 0;
-#>  border-radius: 4px;'><strong style='color: #2563eb;'> Analysis
-#>  Completed Successfully
+#>  <div style='margin: 10px 0;'><div style='background-color: #fefce8;
+#>  border-left: 4px solid #fde047; padding: 12px; margin: 8px 0;
+#>  border-radius: 4px;'><strong style='color: #ca8a04;'> Tied
+#>  Best-Performing Test
+#>  <span style='color: #374151;'>Test1 and Test2 scored identically on
+#>  the combined Youden-plus-accuracy ranking used to pick a best test.
+#>  Test1 is reported below purely because it comes first in the selection
+#>  order; the data do not distinguish them. Choose between them on other
+#>  grounds (cost, availability, turnaround time, harms).<div
+#>  style='background-color: #eff6ff; border-left: 4px solid #93c5fd;
+#>  padding: 12px; margin: 8px 0; border-radius: 4px;'><strong
+#>  style='color: #2563eb;'> Analysis Completed Successfully
 #>  <span style='color: #374151;'>2 diagnostic tests compared using 100
 #>  complete cases. Gold standard identified 25 diseased and 75 healthy
 #>  cases. Review comparison tables and statistical tests below.

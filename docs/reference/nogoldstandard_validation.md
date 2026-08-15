@@ -58,7 +58,11 @@ nogoldstandard(data = nogoldstandard_validation,
                clinicalPreset = "diagnostic_validation")
 #> 
 #>  ANALYSIS WITHOUT GOLD STANDARD
+#> WARNING: Clinical preset: diagnostic validation
+#> Recommended for validating new diagnostic tests against existing standards Use when evaluating new biomarkers or diagnostic technologies This preset does NOT change your settings automatically -- set them yourself in the options panel: Bootstrap confidence intervals: currently off, recommended on.
 #> 
+#> Analysing 190 cases
+#> All 190 cases have a result for every selected test.
 #>  Agreement Statistics (Cohen's Kappa)                                 
 #>  ──────────────────────────────────────────────────────────────────── 
 #>    Test Pair                   Kappa        p-value       Agreement   
@@ -67,22 +71,26 @@ nogoldstandard(data = nogoldstandard_validation,
 #>    New_Test vs Reference2      0.6156675    < .0000001     82.63158   
 #>    Reference1 vs Reference2    0.5528360    < .0000001     78.94737   
 #>  ──────────────────────────────────────────────────────────────────── 
+#>    Note. Kappa standard errors and p-values use a large-sample
+#>    normal approximation rather than the exact asymptotic SE (e.g.
+#>    vcd::Kappa); interpret p-values cautiously, especially in
+#>    small samples.
 #> 
 #> 
 #>  <div class='clinical-summary' style='background: #f0f8ff; padding:
 #>  15px; border-radius: 8px; margin: 10px 0;'><h4 style='color: #1565c0;
 #>  margin-top: 0;'> Clinical Summary
 #> 
-#>  Analysis: No gold standard analysis using all_positive method
+#>  Analysis: No gold standard analysis using latent_class method
 #> 
 #>  Tests analyzed: New_Test, Reference1, Reference2 (N=3)
 #> 
-#>  Disease prevalence: 23.2%
+#>  Disease prevalence: 34.5%
 #> 
-#>  Test sensitivities: Range from 100.0% to 100.0%
+#>  Test sensitivities: Range from 83.4% to 90.9%
 #> 
-#>  Clinical interpretation: Moderate prevalence setting - balanced
-#>  diagnostic performance
+#>  Clinical interpretation: High prevalence setting - high PPV expected,
+#>  focus on confirming disease
 #> 
 #>  <div style='background: #f8f9fa; padding: 20px; border-radius: 8px;
 #>  margin: 15px 0; border-left: 4px solid #007bff;'><h3 style='color:
@@ -97,8 +105,10 @@ nogoldstandard(data = nogoldstandard_validation,
 #> 
 #>  Best for: Diagnostic validation studies with 3+ tests and N>=100
 #> 
-#>  Strengths: Handles conditional dependence, provides model fit
-#>  statistics, most statistically rigorous
+#>  Strengths: The only method here that estimates accuracy rather than
+#>  agreement with a self-built reference; provides model fit statistics.
+#>  Assumes the tests are conditionally independent given true status --
+#>  it does NOT model conditional dependence
 #> 
 #>  <div style='margin: 15px 0; padding: 15px; background: #e3f2fd;
 #>  border-radius: 5px;'><h4 style='color: #1565c0; margin-top: 0;'>
@@ -123,8 +133,10 @@ nogoldstandard(data = nogoldstandard_validation,
 #>  Best for: Inter-rater agreement studies with 3+ tests, exploratory
 #>  analysis
 #> 
-#>  Strengths: Simple and intuitive, requires minimal assumptions, good
-#>  starting point
+#>  Strengths: Simple and intuitive. Not an accuracy estimate: each test
+#>  helps build the standard it is judged against, which inflates its
+#>  apparent performance. Needs 3+ tests -- with 2 a tie counts as
+#>  diseased, making it identical to Any Test Positive
 #> 
 #>  <div style='margin: 15px 0; padding: 15px; background: #fce4ec;
 #>  border-radius: 5px;'><h4 style='color: #c2185b; margin-top: 0;'> All
@@ -136,7 +148,10 @@ nogoldstandard(data = nogoldstandard_validation,
 #>  Best for: Highly specific diagnoses where false positives are very
 #>  costly
 #> 
-#>  Strengths: High specificity reference, minimizes false positives
+#>  Strengths: A deliberately strict reference. Sensitivity and NPV cannot
+#>  be estimated under this rule -- they are fixed at 100% by construction
+#>  -- so only specificity and PPV are shown, and both are inflated by the
+#>  same circularity
 #> 
 #>  <div style='margin: 15px 0; padding: 15px; background: #e8f5e8;
 #>  border-radius: 5px;'><h4 style='color: #388e3c; margin-top: 0;'> Any
@@ -147,7 +162,10 @@ nogoldstandard(data = nogoldstandard_validation,
 #> 
 #>  Best for: Population screening scenarios where missing cases is costly
 #> 
-#>  Strengths: High sensitivity reference, minimizes false negatives
+#>  Strengths: A deliberately permissive reference. Specificity and PPV
+#>  cannot be estimated under this rule -- they are fixed at 100% by
+#>  construction -- so only sensitivity and NPV are shown, and both are
+#>  inflated by the same circularity
 #> 
 #>  <div style='margin: 15px 0; padding: 10px; background: #fff8e1;
 #>  border-radius: 5px; border-left: 3px solid #ffb300;'><h4 style='color:
@@ -162,7 +180,7 @@ nogoldstandard(data = nogoldstandard_validation,
 #>  ─────────────────────────────────────── 
 #>    Estimate     Lower CI     Upper CI    
 #>  ─────────────────────────────────────── 
-#>     23.15789     17.15970     29.15609   
+#>     34.46658     27.70884     41.22433   
 #>  ─────────────────────────────────────── 
 #> 
 #> 
@@ -170,10 +188,51 @@ nogoldstandard(data = nogoldstandard_validation,
 #>  ────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────── 
 #>    Test          Sensitivity    Lower CI     Upper CI     Specificity    Lower CI     Upper CI     PPV          NPV         
 #>  ────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────── 
-#>    New_Test        100.00000    100.00000    100.00000       84.24658     79.06651     89.42664     65.67164    100.00000   
-#>    Reference1      100.00000    100.00000    100.00000       76.71233     70.70243     82.72222     56.41026    100.00000   
-#>    Reference2      100.00000    100.00000    100.00000       86.30137     81.41238     91.19035     68.75000    100.00000   
+#>    New_Test         88.50060     80.77409     96.22710       92.73649     88.17781     97.29516     86.50141     93.87760   
+#>    Reference1       90.85540     83.87421     97.83660       85.14059     78.89305     91.38813     76.27952     94.65315   
+#>    Reference2       83.36826     74.34961     92.38691       92.44657     87.80508     97.08806     85.30462     91.35592   
 #>  ────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────── 
+#>    Note. 95% intervals are normal-approximation (Wald) intervals, using the estimated number of diseased cases as the
+#>    denominator for sensitivity and non-diseased for specificity. They treat the estimates as observed proportions and
+#>    so understate the uncertainty of a latent-variable model; enable Bootstrap for intervals that account for the
+#>    estimation itself.
+#> 
+#> 
+#>  Model Fit Statistics                  
+#>  ───────────────────────────────────── 
+#>    Statistic             Value         
+#>  ───────────────────────────────────── 
+#>    BIC                    624.352992   
+#>    AIC                    601.623823   
+#>    Log-Likelihood        -293.811912   
+#>    Degrees of Freedom       0.000000   
+#>  ───────────────────────────────────── 
+#>    Note. With three tests this
+#>    model has as many parameters as
+#>    the data can support (0
+#>    residual degrees of freedom),
+#>    so it reproduces the observed
+#>    table exactly. Goodness-of-fit
+#>    statistics are therefore
+#>    omitted: they cannot tell you
+#>    whether the
+#>    conditional-independence
+#>    assumption holds. Use four or
+#>    more tests if you need to test
+#>    the model's fit.
+#> 
+#> 
+#>  Conditional Independence Check (Bivariate Residuals)  
+#>  ───────────────────────────────────────────────────── 
+#>    Test Pair    Bivariate Residual    Interpretation   
+#>  ───────────────────────────────────────────────────── 
+#>  ───────────────────────────────────────────────────── 
+#>    Note. Not computable with three tests: the
+#>    model has no residual degrees of freedom, so it
+#>    reproduces every observed table exactly and no
+#>    residual can detect conditional dependence. Add
+#>    a fourth test if you need to check this
+#>    assumption.
 #> 
 #> 
 #>  Test Cross-Tabulation                                          

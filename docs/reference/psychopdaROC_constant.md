@@ -55,7 +55,7 @@ psychopdaROC(data = psychopdaROC_constant, dependentVars = "constant_marker",
 #>  The ROC analysis has been completed using the following
 #>  specifications:
 #> 
-#>  &nbsp;
+#>   
 #> 
 #>  Measure Variable(s): constant_marker
 #> 
@@ -63,7 +63,7 @@ psychopdaROC(data = psychopdaROC_constant, dependentVars = "constant_marker",
 #> 
 #>  Positive Class: Positive
 #> 
-#>  &nbsp;
+#>   
 #> 
 #>  Method: maximize_metric
 #> 
@@ -75,9 +75,9 @@ psychopdaROC(data = psychopdaROC_constant, dependentVars = "constant_marker",
 #> 
 #>  Tie Breakers: mean
 #> 
-#>  Metric Tolerance: 0.05
+#>  Metric Tolerance: 1e-06
 #> 
-#>  &nbsp;
+#>   
 #> 
 #>  <hr />
 #> 
@@ -95,6 +95,11 @@ psychopdaROC(data = psychopdaROC_constant, dependentVars = "constant_marker",
 #>  ───────────────────────────────────────────────────────────────────────────── 
 #>    constant_marker    0.5000000       0.5000000       0.5000000                
 #>  ───────────────────────────────────────────────────────────────────────────── 
+#>    Note. Reading of the test values: <b>HIGHER values were taken to
+#>    indicate Positive</b> (Classification Direction = ">="). If that is the
+#>    wrong way round for this marker, every sensitivity, specificity,
+#>    cutpoint and AUC below is reversed — switch Classification Direction to
+#>    "<=" and the AUC becomes 1 minus the value shown.
 #>    Note. AUC 95% confidence intervals computed using the DeLong method.
 #> 
 #> 
@@ -122,6 +127,11 @@ psychopdaROC(data = psychopdaROC_constant, dependentVars = "constant_marker",
 #>  ───────────────────────────────────────────────────────────────────────────── 
 #>    constant_marker    0.5000000       0.5000000       0.5000000                
 #>  ───────────────────────────────────────────────────────────────────────────── 
+#>    Note. Reading of the test values: <b>HIGHER values were taken to
+#>    indicate Positive</b> (Classification Direction = ">="). If that is the
+#>    wrong way round for this marker, every sensitivity, specificity,
+#>    cutpoint and AUC below is reversed — switch Classification Direction to
+#>    "<=" and the AUC becomes 1 minus the value shown.
 #>    Note. AUC 95% confidence intervals computed using the DeLong method.
 #> 
 

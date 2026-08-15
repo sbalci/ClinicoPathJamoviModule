@@ -14,7 +14,7 @@ control and preprocessing.
 ``` r
 outlierdetection(
   data,
-  vars,
+  vars = NULL,
   method_category = "composite",
   univariate_methods = "zscore_robust",
   multivariate_methods = "mahalanobis",
@@ -26,7 +26,10 @@ outlierdetection(
   show_method_comparison = FALSE,
   show_exclusion_summary = FALSE,
   show_visualization = FALSE,
-  show_interpretation = FALSE
+  show_interpretation = FALSE,
+  sampleThreshold = 10000,
+  sampleSize = 5000,
+  seed = 123
 )
 ```
 
@@ -113,6 +116,26 @@ outlierdetection(
 
   Display detailed interpretation of outlier detection results and
   methodological notes.
+
+- sampleThreshold:
+
+  Row count above which a random subsample is analysed instead of the
+  full dataset. Datasets at or below this size are always analysed in
+  full. Raise it to analyse a large dataset completely at the cost of
+  speed.
+
+- sampleSize:
+
+  Number of rows retained when subsampling. Outliers among the rows that
+  are not sampled cannot be detected, so the reported count is a lower
+  bound; larger values recover more of them at the cost of speed.
+
+- seed:
+
+  Random seed used for the reproducible random subsample that is drawn
+  when the dataset exceeds the subsampling threshold. Change this value
+  to draw a different sample; the default of 123 reproduces the previous
+  fixed behaviour.
 
 ## Value
 

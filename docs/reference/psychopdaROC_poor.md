@@ -43,7 +43,6 @@ data(psychopdaROC_poor)
 psychopdaROC(data = psychopdaROC_poor, dependentVars = "poor_marker",
              classVar = "status", positiveClass = "Case",
              refVar = "poor_marker")
-#> Multiple optimal cutpoints found, applying break_ties.
 #> 
 #>  ADVANCED ROC ANALYSIS
 #> 
@@ -57,7 +56,7 @@ psychopdaROC(data = psychopdaROC_poor, dependentVars = "poor_marker",
 #>  The ROC analysis has been completed using the following
 #>  specifications:
 #> 
-#>  &nbsp;
+#>   
 #> 
 #>  Measure Variable(s): poor_marker
 #> 
@@ -65,7 +64,7 @@ psychopdaROC(data = psychopdaROC_poor, dependentVars = "poor_marker",
 #> 
 #>  Positive Class: Case
 #> 
-#>  &nbsp;
+#>   
 #> 
 #>  Method: maximize_metric
 #> 
@@ -77,9 +76,9 @@ psychopdaROC(data = psychopdaROC_poor, dependentVars = "poor_marker",
 #> 
 #>  Tie Breakers: mean
 #> 
-#>  Metric Tolerance: 0.05
+#>  Metric Tolerance: 1e-06
 #> 
-#>  &nbsp;
+#>   
 #> 
 #>  <hr />
 #> 
@@ -96,6 +95,19 @@ psychopdaROC(data = psychopdaROC_poor, dependentVars = "poor_marker",
 #>  ───────────────────────────────────────────────────────────────────────── 
 #>    poor_marker    0.4761991       0.3826024       0.5697958    0.6181997   
 #>  ───────────────────────────────────────────────────────────────────────── 
+#>    Note. Reading of the test values: <b>HIGHER values were taken to
+#>    indicate Case</b> (Classification Direction = ">="). If that is the
+#>    wrong way round for this marker, every sensitivity, specificity,
+#>    cutpoint and AUC below is reversed — switch Classification
+#>    Direction to "<=" and the AUC becomes 1 minus the value shown.
+#>    Note. WARNING: AUC below 0.5 (worse than chance) for: poor_marker.
+#>    An AUC below 0.5 almost always means the marker is being read the
+#>    wrong way round rather than that it is useless: it separates the
+#>    groups, but in the opposite direction to the one assumed.
+#>    Classification Direction is currently "&gt;="; switching it to
+#>    "&lt;=" will give an AUC of 1 minus the value shown, with
+#>    sensitivity and specificity swapped accordingly. Change it only if
+#>    that matches what the marker means clinically.
 #>    Note. AUC 95% confidence intervals computed using the DeLong
 #>    method.
 #> 
@@ -114,7 +126,7 @@ psychopdaROC(data = psychopdaROC_poor, dependentVars = "poor_marker",
 #>  ───────────────────────────────────────────────────────────────────────────────────────────────────────────────── 
 #>    Cutpoint      Sensitivity    Specificity    PPV          NPV          Youden's J    AUC          Metric Score   
 #>  ───────────────────────────────────────────────────────────────────────────────────────────────────────────────── 
-#>    35.5500932       83.07692       16.47059     43.20000     56.00000    -0.0045249    0.4761991      -0.0045249   
+#>    22.9658885      100.00000        5.88235     44.82759    100.00000     0.0588235    0.4761991       0.0588235   
 #>  ───────────────────────────────────────────────────────────────────────────────────────────────────────────────── 
 #> 
 #> 
@@ -124,6 +136,19 @@ psychopdaROC(data = psychopdaROC_poor, dependentVars = "poor_marker",
 #>  ───────────────────────────────────────────────────────────────────────── 
 #>    poor_marker    0.4761991       0.3826024       0.5697958    0.6181997   
 #>  ───────────────────────────────────────────────────────────────────────── 
+#>    Note. Reading of the test values: <b>HIGHER values were taken to
+#>    indicate Case</b> (Classification Direction = ">="). If that is the
+#>    wrong way round for this marker, every sensitivity, specificity,
+#>    cutpoint and AUC below is reversed — switch Classification
+#>    Direction to "<=" and the AUC becomes 1 minus the value shown.
+#>    Note. WARNING: AUC below 0.5 (worse than chance) for: poor_marker.
+#>    An AUC below 0.5 almost always means the marker is being read the
+#>    wrong way round rather than that it is useless: it separates the
+#>    groups, but in the opposite direction to the one assumed.
+#>    Classification Direction is currently "&gt;="; switching it to
+#>    "&lt;=" will give an AUC of 1 minus the value shown, with
+#>    sensitivity and specificity swapped accordingly. Change it only if
+#>    that matches what the marker means clinically.
 #>    Note. AUC 95% confidence intervals computed using the DeLong
 #>    method.
 #> 

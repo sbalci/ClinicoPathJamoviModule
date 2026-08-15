@@ -65,7 +65,7 @@ likelihood ratio tests comparing models with and without interaction terms.
 }
 }
 \examples{
-\donttest{
+\dontrun{
 # Survival outcome subgroup analysis
 subgroupforest(
   data = clinical_trial,

@@ -5,6 +5,12 @@ misclassification of an exposure/classifier on observed effect estimates
 (OR, RR, RD). Uses matrix inversion correction and Monte Carlo
 simulation for CIs.
 
+## Value
+
+An `R6` class generator object for the `misclassificationbiasClass`
+backend; used internally by the jamovi analysis wrapper and not called
+directly.
+
 ## Super classes
 
 [`jmvcore::Analysis`](https://rdrr.io/pkg/jmvcore/man/Analysis.html) -\>

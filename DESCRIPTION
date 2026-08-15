@@ -381,7 +381,7 @@ Suggests: rmarkdown, condSURV, plsRcox, randomForestSRC, OncoDataSets, coxphw,
         (>= 3.0.0), jmvReadWrite, anytime, datefixR, covr, BoomSpikeSlab,
         rstanarm, coxphf, doParallel, foreach, parttree, tiff, quarto,
         grpreg, sparsepca, kernlab, superpc, ncvreg, relsurv, rstpm2, semPlot,
-        yaml
+        yaml, png, readxl, writexl, svglite, formula.tools
 Config/testthat/edition: 3
 Collate: 
     '00jmv.R'

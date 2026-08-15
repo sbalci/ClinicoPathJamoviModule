@@ -82,14 +82,3 @@ null value of 1 are provided. This is the standard analysis for registry,
 cohort, and occupational studies comparing an observed event count with
 population expectation.
 }
-\examples{
-\donttest{
-# Long data: one row per stratum with observed events, person-time,
-# and a reference rate (events per person-time unit).
-standardizedratio(
-    data = mydata,
-    observed = "obs_events",
-    personTime = "person_years",
-    refRate = "reference_rate")
-}
-}

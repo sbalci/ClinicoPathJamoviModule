@@ -65,9 +65,11 @@ hullplot(
 
 - hull_concavity:
 
-  Controls the concavity of hull polygons. Lower values create more
-  concave hulls, higher values create more convex hulls. Range: 0-2,
-  default: 2.
+  Controls the concavity of hull polygons. Lower values follow the point
+  cloud more closely; higher values approach the convex hull. The
+  permitted range is 0-2 and the default of 2 matches ggforce; a true
+  convex hull needs a much larger value than this range allows. Ignored
+  when V8/concaveman are unavailable.
 
 - hull_alpha:
 
@@ -80,7 +82,8 @@ hullplot(
 
 - point_size:
 
-  Size of scatter plot points.
+  Size of scatter plot points. Ignored when a Size Variable is selected,
+  because point size is then mapped to that variable's values.
 
 - point_alpha:
 
@@ -108,8 +111,9 @@ hullplot(
 
 - hull_expand:
 
-  Amount to expand hull boundaries beyond data points. Higher values
-  create larger hulls.
+  Padding added around each hull, as a fraction of the plot area (0 =
+  hull touches the outermost points, 1 = the whole panel). Ignored when
+  V8/concaveman are unavailable and convex hulls are drawn.
 
 - show_statistics:
 
@@ -117,7 +121,10 @@ hullplot(
 
 - outlier_detection:
 
-  If TRUE, identifies and highlights potential outliers within groups.
+  If TRUE, reports the number of potential outliers in each group using
+  the 1.5 x IQR rule applied separately to the X and Y variables. Groups
+  with fewer than 5 observations are reported as too small rather than
+  given a count. Outliers are counted, not marked on the plot.
 
 - confidence_ellipses:
 

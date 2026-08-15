@@ -20,7 +20,7 @@ psychopdaROC(
   metric = "youden",
   direction = ">=",
   specifyCutScore = "",
-  tol_metric = 0.05,
+  tol_metric = 1e-06,
   break_ties = "mean",
   allObserved = FALSE,
   boot_runs = 0,
@@ -162,9 +162,16 @@ psychopdaROC(
 
 - tol_metric:
 
-  Tolerance for the metric value when multiple cutpoints yield similar
-  performance. Cutpoints within this tolerance are considered
-  equivalent.
+  Cutpoints whose metric is within this tolerance of the best value are
+  treated as equivalent and averaged together. BEHAVIOUR CHANGE
+  (1.0.4) - the default was 0.05, which is 50000 times wider than the
+  1e-06 used by the underlying cutpointr package and meant the reported
+  "optimal" cutpoint was usually not the one maximising the metric. On
+  the bundled example data 39 of 200 candidate thresholds, spanning 52.1
+  to 67.7, fell within 0.05 Youden of the optimum and were averaged,
+  giving a cutpoint with 84.5 percent sensitivity in place of the 94.4
+  percent available at the true optimum. Raise it deliberately if you
+  want that averaging as a guard against over-fitting one threshold.
 
 - break_ties:
 

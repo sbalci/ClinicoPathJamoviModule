@@ -30,3 +30,8 @@ validate_clinical_data(
 - clinical_checks:
 
   Additional clinical validation checks
+
+## Value
+
+A list with `valid` (logical), character vectors `errors` and
+`warnings`, and integer counts `n_observations` and `n_variables`.

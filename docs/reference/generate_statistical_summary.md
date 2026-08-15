@@ -13,3 +13,8 @@ generate_statistical_summary(results)
 - results:
 
   Analysis results
+
+## Value
+
+A single character string summarising the t-statistic, degrees of
+freedom, significance level, and effect size.

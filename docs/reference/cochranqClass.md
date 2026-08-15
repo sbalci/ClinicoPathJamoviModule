@@ -2,6 +2,11 @@
 
 Cochran's Q Test for Paired Categorical Data
 
+## Value
+
+An `R6` class generator object for the `cochranqClass` backend; used
+internally by the jamovi analysis wrapper and not called directly.
+
 ## Super classes
 
 [`jmvcore::Analysis`](https://rdrr.io/pkg/jmvcore/man/Analysis.html) -\>

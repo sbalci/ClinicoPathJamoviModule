@@ -43,7 +43,6 @@ data(psychopdaROC_overlap)
 psychopdaROC(data = psychopdaROC_overlap, dependentVars = "test_value",
              classVar = "diagnosis", positiveClass = "Diseased",
              refVar = "test_value")
-#> Multiple optimal cutpoints found, applying break_ties.
 #> 
 #>  ADVANCED ROC ANALYSIS
 #> 
@@ -57,7 +56,7 @@ psychopdaROC(data = psychopdaROC_overlap, dependentVars = "test_value",
 #>  The ROC analysis has been completed using the following
 #>  specifications:
 #> 
-#>  &nbsp;
+#>   
 #> 
 #>  Measure Variable(s): test_value
 #> 
@@ -65,7 +64,7 @@ psychopdaROC(data = psychopdaROC_overlap, dependentVars = "test_value",
 #> 
 #>  Positive Class: Diseased
 #> 
-#>  &nbsp;
+#>   
 #> 
 #>  Method: maximize_metric
 #> 
@@ -77,9 +76,9 @@ psychopdaROC(data = psychopdaROC_overlap, dependentVars = "test_value",
 #> 
 #>  Tie Breakers: mean
 #> 
-#>  Metric Tolerance: 0.05
+#>  Metric Tolerance: 1e-06
 #> 
-#>  &nbsp;
+#>   
 #> 
 #>  <hr />
 #> 
@@ -97,6 +96,12 @@ psychopdaROC(data = psychopdaROC_overlap, dependentVars = "test_value",
 #>  ──────────────────────────────────────────────────────────────────────── 
 #>    test_value    0.5994874       0.5176626       0.6813122    0.0171704   
 #>  ──────────────────────────────────────────────────────────────────────── 
+#>    Note. Reading of the test values: <b>HIGHER values were taken to
+#>    indicate Diseased</b> (Classification Direction = ">="). If that
+#>    is the wrong way round for this marker, every sensitivity,
+#>    specificity, cutpoint and AUC below is reversed — switch
+#>    Classification Direction to "<=" and the AUC becomes 1 minus the
+#>    value shown.
 #>    Note. AUC 95% confidence intervals computed using the DeLong
 #>    method.
 #> 
@@ -115,7 +120,7 @@ psychopdaROC(data = psychopdaROC_overlap, dependentVars = "test_value",
 #>  ───────────────────────────────────────────────────────────────────────────────────────────────────────────────── 
 #>    Cutpoint      Sensitivity    Specificity    PPV          NPV          Youden's J    AUC          Metric Score   
 #>  ───────────────────────────────────────────────────────────────────────────────────────────────────────────────── 
-#>    55.4732866       64.86486       55.17241     48.00000     71.11111     0.2003728    0.5994874       0.2003728   
+#>    55.5622189       64.86486       55.17241     48.00000     71.11111     0.2003728    0.5994874       0.2003728   
 #>  ───────────────────────────────────────────────────────────────────────────────────────────────────────────────── 
 #> 
 #> 
@@ -125,6 +130,12 @@ psychopdaROC(data = psychopdaROC_overlap, dependentVars = "test_value",
 #>  ──────────────────────────────────────────────────────────────────────── 
 #>    test_value    0.5994874       0.5176626       0.6813122    0.0171704   
 #>  ──────────────────────────────────────────────────────────────────────── 
+#>    Note. Reading of the test values: <b>HIGHER values were taken to
+#>    indicate Diseased</b> (Classification Direction = ">="). If that
+#>    is the wrong way round for this marker, every sensitivity,
+#>    specificity, cutpoint and AUC below is reversed — switch
+#>    Classification Direction to "<=" and the AUC becomes 1 minus the
+#>    value shown.
 #>    Note. AUC 95% confidence intervals computed using the DeLong
 #>    method.
 #> 

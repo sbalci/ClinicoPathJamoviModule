@@ -20,7 +20,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">ClinicoPath</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.0.52</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.0.6</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -29,7 +29,7 @@
 
     <div id="navbar" class="collapse navbar-collapse ms-3">
       <ul class="navbar-nav me-auto">
-<li class="nav-item"><a class="nav-link" href="../dev/index.html"><span class="fa fa-cogs"></span></a></li>
+<li class="nav-item"><a class="nav-link" href="../dev/index.html" aria-label="Development version"><span class="fa fa-cogs"></span></a></li>
 <li class="nav-item"><a class="nav-link" href="../reference/index.html">Reference</a></li>
 <li class="active nav-item"><a class="nav-link" href="../articles/index.html">Articles</a></li>
 <li class="nav-item dropdown">
@@ -43,7 +43,7 @@
 <li class="nav-item"><a class="nav-link" href="../news/index.html">Changelog</a></li>
       </ul>
 <ul class="navbar-nav">
-<li class="nav-item"><a class="external-link nav-link" href="http://twitter.com/serdarbalci"><span class="fa fab fa-twitter fa-lg"></span></a></li>
+<li class="nav-item"><a class="external-link nav-link" href="http://twitter.com/serdarbalci" aria-label="Twitter"><span class="fa fab fa-twitter fa-lg"></span></a></li>
 <li class="nav-item"><a class="external-link nav-link" href="https://github.com/sbalci/ClinicoPathJamoviModule/" aria-label="GitHub"><span class="fa fab fa-github fa-lg"></span></a></li>
       </ul>
 </div>
@@ -67,15 +67,12 @@
 
     
     
-<div class="section level2">
-<h2 id="ihc-marker-clustering-for-pathologists-distance-metrics-guide">IHC Marker Clustering for Pathologists: Distance Metrics Guide<a class="anchor" aria-label="anchor" href="#ihc-marker-clustering-for-pathologists-distance-metrics-guide"></a>
-</h2>
 <p><strong>A Practical Guide to Understanding How Markers Cluster
 Together</strong></p>
 <hr>
-<div class="section level3">
-<h3 id="why-cluster-ihc-markers">Why Cluster IHC Markers?<a class="anchor" aria-label="anchor" href="#why-cluster-ihc-markers"></a>
-</h3>
+<div class="section level2">
+<h2 id="why-cluster-ihc-markers">Why Cluster IHC Markers?<a class="anchor" aria-label="anchor" href="#why-cluster-ihc-markers"></a>
+</h2>
 <p>As pathologists, we use IHC panels daily to make differential
 diagnoses. But have you ever wondered:</p>
 <ul>
@@ -97,12 +94,12 @@ grouping IHC markers based on their expression patterns across your
 cases.</p>
 <hr>
 </div>
+<div class="section level2">
+<h2 id="the-basics-patient-clustering-vs--marker-clustering">The Basics: Patient Clustering vs. Marker Clustering<a class="anchor" aria-label="anchor" href="#the-basics-patient-clustering-vs--marker-clustering"></a>
+</h2>
 <div class="section level3">
-<h3 id="the-basics-patient-clustering-vs--marker-clustering">The Basics: Patient Clustering vs. Marker Clustering<a class="anchor" aria-label="anchor" href="#the-basics-patient-clustering-vs--marker-clustering"></a>
+<h3 id="patient-clustering-what-you-already-know">Patient Clustering (What You Already Know)<a class="anchor" aria-label="anchor" href="#patient-clustering-what-you-already-know"></a>
 </h3>
-<div class="section level4">
-<h4 id="patient-clustering-what-you-already-know">Patient Clustering (What You Already Know)<a class="anchor" aria-label="anchor" href="#patient-clustering-what-you-already-know"></a>
-</h4>
 <ul>
 <li>
 <strong>Question:</strong> “Which patients have similar IHC
@@ -115,9 +112,9 @@ ER/PR/HER2/Ki67</li>
 Triple-negative groups</li>
 </ul>
 </div>
-<div class="section level4">
-<h4 id="marker-clustering-whats-new">Marker Clustering (What’s New) ⭐<a class="anchor" aria-label="anchor" href="#marker-clustering-whats-new"></a>
-</h4>
+<div class="section level3">
+<h3 id="marker-clustering-whats-new">Marker Clustering (What’s New) ⭐<a class="anchor" aria-label="anchor" href="#marker-clustering-whats-new"></a>
+</h3>
 <ul>
 <li>
 <strong>Question:</strong> “Which IHC markers behave
@@ -132,12 +129,12 @@ redundancy</li>
 <hr>
 </div>
 </div>
+<div class="section level2">
+<h2 id="the-9-distance-metrics-a-pathologists-guide">The 9 Distance Metrics: A Pathologist’s Guide<a class="anchor" aria-label="anchor" href="#the-9-distance-metrics-a-pathologists-guide"></a>
+</h2>
 <div class="section level3">
-<h3 id="the-9-distance-metrics-a-pathologists-guide">The 9 Distance Metrics: A Pathologist’s Guide<a class="anchor" aria-label="anchor" href="#the-9-distance-metrics-a-pathologists-guide"></a>
+<h3 id="quick-selection-flowchart">Quick Selection Flowchart<a class="anchor" aria-label="anchor" href="#quick-selection-flowchart"></a>
 </h3>
-<div class="section level4">
-<h4 id="quick-selection-flowchart">Quick Selection Flowchart<a class="anchor" aria-label="anchor" href="#quick-selection-flowchart"></a>
-</h4>
 <pre><code>START HERE
 ↓
 What type of IHC data do you have?
@@ -159,17 +156,17 @@ What type of IHC data do you have?
 <hr>
 </div>
 </div>
+<div class="section level2">
+<h2 id="detailed-clinical-scenarios">Detailed Clinical Scenarios<a class="anchor" aria-label="anchor" href="#detailed-clinical-scenarios"></a>
+</h2>
 <div class="section level3">
-<h3 id="detailed-clinical-scenarios">Detailed Clinical Scenarios<a class="anchor" aria-label="anchor" href="#detailed-clinical-scenarios"></a>
+<h3 id="scenario-1-lung-adenocarcinoma-vs--squamous-cell-carcinoma">Scenario 1: Lung Adenocarcinoma vs. Squamous Cell Carcinoma<a class="anchor" aria-label="anchor" href="#scenario-1-lung-adenocarcinoma-vs--squamous-cell-carcinoma"></a>
 </h3>
-<div class="section level4">
-<h4 id="scenario-1-lung-adenocarcinoma-vs--squamous-cell-carcinoma">Scenario 1: Lung Adenocarcinoma vs. Squamous Cell Carcinoma<a class="anchor" aria-label="anchor" href="#scenario-1-lung-adenocarcinoma-vs--squamous-cell-carcinoma"></a>
-</h4>
 <p><strong>Your Panel:</strong> TTF1, Napsin A, p40, CK5/6 (all binary:
 pos/neg)</p>
-<div class="section level5">
-<h5 id="recommended-chi-squared-distance">👉 Recommended: <strong>Chi-squared Distance</strong><a class="anchor" aria-label="anchor" href="#recommended-chi-squared-distance"></a>
-</h5>
+<div class="section level4">
+<h4 id="recommended-chi-squared-distance">👉 Recommended: <strong>Chi-squared Distance</strong><a class="anchor" aria-label="anchor" href="#recommended-chi-squared-distance"></a>
+</h4>
 <p><strong>Why this works:</strong> - Chi-squared tests if two markers
 are statistically independent - Perfect for binary/categorical IHC data
 - Provides statistical significance (p-values) - Well-established in
@@ -195,14 +192,14 @@ losing diagnostic accuracy</p>
 <hr>
 </div>
 </div>
-<div class="section level4">
-<h4 id="scenario-2-breast-cancer-immunoprofile">Scenario 2: Breast Cancer Immunoprofile<a class="anchor" aria-label="anchor" href="#scenario-2-breast-cancer-immunoprofile"></a>
-</h4>
+<div class="section level3">
+<h3 id="scenario-2-breast-cancer-immunoprofile">Scenario 2: Breast Cancer Immunoprofile<a class="anchor" aria-label="anchor" href="#scenario-2-breast-cancer-immunoprofile"></a>
+</h3>
 <p><strong>Your Panel:</strong> - Binary: ER (pos/neg), PR (pos/neg),
 HER2 (pos/neg) - Continuous: Ki67 (% positive, 0-100%)</p>
-<div class="section level5">
-<h5 id="recommended-mixed-distance">👉 Recommended: <strong>Mixed Distance</strong><a class="anchor" aria-label="anchor" href="#recommended-mixed-distance"></a>
-</h5>
+<div class="section level4">
+<h4 id="recommended-mixed-distance">👉 Recommended: <strong>Mixed Distance</strong><a class="anchor" aria-label="anchor" href="#recommended-mixed-distance"></a>
+</h4>
 <p><strong>Why this works:</strong> - Automatically handles mixed data
 types - Uses chi-squared for ER-PR-HER2 pairs - Uses correlation for
 Ki67 relationships - No manual method selection needed</p>
@@ -236,15 +233,15 @@ independent prognostic information</p>
 <hr>
 </div>
 </div>
-<div class="section level4">
-<h4 id="scenario-3-gastrointestinal-tumor-panel">Scenario 3: Gastrointestinal Tumor Panel<a class="anchor" aria-label="anchor" href="#scenario-3-gastrointestinal-tumor-panel"></a>
-</h4>
+<div class="section level3">
+<h3 id="scenario-3-gastrointestinal-tumor-panel">Scenario 3: Gastrointestinal Tumor Panel<a class="anchor" aria-label="anchor" href="#scenario-3-gastrointestinal-tumor-panel"></a>
+</h3>
 <p><strong>Your Panel:</strong> CK7, CK20, CDX2, SATB2 (all binary)
 <strong>Question:</strong> Is CDX2 necessary if I already have CK20 and
 SATB2?</p>
-<div class="section level5">
-<h5 id="recommended-jaccard-distance">👉 Recommended: <strong>Jaccard Distance</strong><a class="anchor" aria-label="anchor" href="#recommended-jaccard-distance"></a>
-</h5>
+<div class="section level4">
+<h4 id="recommended-jaccard-distance">👉 Recommended: <strong>Jaccard Distance</strong><a class="anchor" aria-label="anchor" href="#recommended-jaccard-distance"></a>
+</h4>
 <p><strong>Why this works:</strong> - GI tumors often have many negative
 markers (sparse data) - Jaccard focuses on co-positivity, ignores
 double-negatives - Clinically relevant: we care about co-expression of
@@ -304,15 +301,15 @@ CK7[+], CK20[+], CDX2[+], SATB2[-]
 <hr>
 </div>
 </div>
-<div class="section level4">
-<h4 id="scenario-4-melanoma-marker-panel">Scenario 4: Melanoma Marker Panel<a class="anchor" aria-label="anchor" href="#scenario-4-melanoma-marker-panel"></a>
-</h4>
+<div class="section level3">
+<h3 id="scenario-4-melanoma-marker-panel">Scenario 4: Melanoma Marker Panel<a class="anchor" aria-label="anchor" href="#scenario-4-melanoma-marker-panel"></a>
+</h3>
 <p><strong>Your Panel:</strong> S100, SOX10, Melan-A, HMB45 (all
 intensity: 0/1+/2+/3+) <strong>Question:</strong> Which markers provide
 similar information?</p>
-<div class="section level5">
-<h5 id="recommended-hamming-distance">👉 Recommended: <strong>Hamming Distance</strong><a class="anchor" aria-label="anchor" href="#recommended-hamming-distance"></a>
-</h5>
+<div class="section level4">
+<h4 id="recommended-hamming-distance">👉 Recommended: <strong>Hamming Distance</strong><a class="anchor" aria-label="anchor" href="#recommended-hamming-distance"></a>
+</h4>
 <p><strong>Why this works:</strong> - Counts how often markers disagree
 in intensity - Intuitive for pathologists (we think in terms of
 concordance) - Simple calculation: % of cases where markers differ -
@@ -406,17 +403,17 @@ Panel Rationalization:
 <hr>
 </div>
 </div>
-<div class="section level4">
-<h4 id="scenario-5-lymphoma-immunoprofile">Scenario 5: Lymphoma Immunoprofile<a class="anchor" aria-label="anchor" href="#scenario-5-lymphoma-immunoprofile"></a>
-</h4>
+<div class="section level3">
+<h3 id="scenario-5-lymphoma-immunoprofile">Scenario 5: Lymphoma Immunoprofile<a class="anchor" aria-label="anchor" href="#scenario-5-lymphoma-immunoprofile"></a>
+</h3>
 <p><strong>Your Panel:</strong> - Binary: CD20, CD3, CD5, CD10, BCL6 -
 Continuous: Ki67 (% positive)</p>
 <p><strong>Specific Question:</strong> Do germinal center markers (CD10,
 BCL6) always co-express?</p>
-<div class="section level5">
-<h5 id="recommended-chi-squared-distance-statistical-testing">👉 Recommended: <strong>Chi-squared Distance</strong> + Statistical
+<div class="section level4">
+<h4 id="recommended-chi-squared-distance-statistical-testing">👉 Recommended: <strong>Chi-squared Distance</strong> + Statistical
 Testing<a class="anchor" aria-label="anchor" href="#recommended-chi-squared-distance-statistical-testing"></a>
-</h5>
+</h4>
 <p><strong>Example Results:</strong></p>
 <pre><code>═══════════════════════════════════════════════════════
 MARKER-MARKER ASSOCIATION TESTS
@@ -492,17 +489,17 @@ Could eliminate: One of CD10/BCL6 (redundant in most cases)</code></pre>
 <hr>
 </div>
 </div>
-<div class="section level4">
-<h4 id="scenario-6-neuroendocrine-tumor-grading">Scenario 6: Neuroendocrine Tumor Grading<a class="anchor" aria-label="anchor" href="#scenario-6-neuroendocrine-tumor-grading"></a>
-</h4>
+<div class="section level3">
+<h3 id="scenario-6-neuroendocrine-tumor-grading">Scenario 6: Neuroendocrine Tumor Grading<a class="anchor" aria-label="anchor" href="#scenario-6-neuroendocrine-tumor-grading"></a>
+</h3>
 <p><strong>Your Panel:</strong> - Binary: Chromogranin, Synaptophysin,
 CD56 - Continuous: Ki67 % (for grading G1/G2/G3) - Ordinal: p53
 intensity (0/1+/2+/3+)</p>
 <p><strong>Question:</strong> Can I predict Ki67 level from other
 markers?</p>
-<div class="section level5">
-<h5 id="recommended-mutual-information-distance">👉 Recommended: <strong>Mutual Information Distance</strong><a class="anchor" aria-label="anchor" href="#recommended-mutual-information-distance"></a>
-</h5>
+<div class="section level4">
+<h4 id="recommended-mutual-information-distance">👉 Recommended: <strong>Mutual Information Distance</strong><a class="anchor" aria-label="anchor" href="#recommended-mutual-information-distance"></a>
+</h4>
 <p><strong>Why this works:</strong> - Captures non-linear relationships
 - Works with mixed data types - Detects patterns like “Ki67 high ONLY
 when p53 is strong positive” - Information-theoretic approach
@@ -568,17 +565,17 @@ Clinical Impact:
 <hr>
 </div>
 </div>
-<div class="section level4">
-<h4 id="scenario-7-prostate-cancer-markers">Scenario 7: Prostate Cancer Markers<a class="anchor" aria-label="anchor" href="#scenario-7-prostate-cancer-markers"></a>
-</h4>
+<div class="section level3">
+<h3 id="scenario-7-prostate-cancer-markers">Scenario 7: Prostate Cancer Markers<a class="anchor" aria-label="anchor" href="#scenario-7-prostate-cancer-markers"></a>
+</h3>
 <p><strong>Your Panel:</strong> - PSA (H-score: 0-300) - NKX3.1
 (H-score: 0-300) - ERG (H-score: 0-300) - PTEN (% loss: 0-100%)</p>
 <p><strong>Question:</strong> Do ERG+ cases have different marker
 patterns?</p>
-<div class="section level5">
-<h5 id="recommended-euclidean-distance-continuous-data">👉 Recommended: <strong>Euclidean Distance</strong> (continuous
+<div class="section level4">
+<h4 id="recommended-euclidean-distance-continuous-data">👉 Recommended: <strong>Euclidean Distance</strong> (continuous
 data)<a class="anchor" aria-label="anchor" href="#recommended-euclidean-distance-continuous-data"></a>
-</h5>
+</h4>
 <p><strong>Why this works:</strong> - All markers are continuous
 (H-scores, percentages) - Euclidean distance is the standard for
 continuous data - Captures magnitude differences (important for
@@ -652,16 +649,16 @@ Pattern 3: High-grade Prostate Cancer
 <hr>
 </div>
 </div>
-<div class="section level4">
-<h4 id="scenario-8-renal-cell-carcinoma-panel">Scenario 8: Renal Cell Carcinoma Panel<a class="anchor" aria-label="anchor" href="#scenario-8-renal-cell-carcinoma-panel"></a>
-</h4>
+<div class="section level3">
+<h3 id="scenario-8-renal-cell-carcinoma-panel">Scenario 8: Renal Cell Carcinoma Panel<a class="anchor" aria-label="anchor" href="#scenario-8-renal-cell-carcinoma-panel"></a>
+</h3>
 <p><strong>Your Panel:</strong> - PAX8, RCC, CD10, CK7, Vimentin - All
 binary (pos/neg) - <strong>Many negative stains expected</strong>
 (sparse data)</p>
-<div class="section level5">
-<h5 id="recommended-jaccard-distance-focus-on-co-positivity">👉 Recommended: <strong>Jaccard Distance</strong> (focus on
+<div class="section level4">
+<h4 id="recommended-jaccard-distance-focus-on-co-positivity">👉 Recommended: <strong>Jaccard Distance</strong> (focus on
 co-positivity)<a class="anchor" aria-label="anchor" href="#recommended-jaccard-distance-focus-on-co-positivity"></a>
-</h5>
+</h4>
 <p><strong>Why Jaccard over Chi-squared for RCC:</strong></p>
 <pre><code>Consider a 100-case dataset:
 
@@ -752,12 +749,12 @@ Potential Savings:
 </div>
 </div>
 </div>
+<div class="section level2">
+<h2 id="distance-metric-properties-quick-reference-for-pathologists">Distance Metric Properties: Quick Reference for Pathologists<a class="anchor" aria-label="anchor" href="#distance-metric-properties-quick-reference-for-pathologists"></a>
+</h2>
 <div class="section level3">
-<h3 id="distance-metric-properties-quick-reference-for-pathologists">Distance Metric Properties: Quick Reference for Pathologists<a class="anchor" aria-label="anchor" href="#distance-metric-properties-quick-reference-for-pathologists"></a>
+<h3 id="when-you-have-sparse-binary-data-many-negatives">When You Have SPARSE Binary Data (Many Negatives)<a class="anchor" aria-label="anchor" href="#when-you-have-sparse-binary-data-many-negatives"></a>
 </h3>
-<div class="section level4">
-<h4 id="when-you-have-sparse-binary-data-many-negatives">When You Have SPARSE Binary Data (Many Negatives)<a class="anchor" aria-label="anchor" href="#when-you-have-sparse-binary-data-many-negatives"></a>
-</h4>
 <p><strong>Problem:</strong></p>
 <pre><code>Example: Rare marker panel (BCL2, BCL6, MYC in lymphoma)
 
@@ -773,9 +770,9 @@ Chi-squared: "Strong association" (p &lt; 0.001)
 └─ Clinically meaningful: 47% co-positivity rate</code></pre>
 <hr>
 </div>
-<div class="section level4">
-<h4 id="when-you-have-outliers-in-continuous-data">When You Have OUTLIERS in Continuous Data<a class="anchor" aria-label="anchor" href="#when-you-have-outliers-in-continuous-data"></a>
-</h4>
+<div class="section level3">
+<h3 id="when-you-have-outliers-in-continuous-data">When You Have OUTLIERS in Continuous Data<a class="anchor" aria-label="anchor" href="#when-you-have-outliers-in-continuous-data"></a>
+</h3>
 <p><strong>Problem:</strong></p>
 <pre><code>Ki67 % Distribution:
 Cases 1-98: Range 0-30% (typical)
@@ -792,9 +789,9 @@ Euclidean Distance (Case 99 vs Case 100):
 └─ Better represents typical case relationships</code></pre>
 <hr>
 </div>
-<div class="section level4">
-<h4 id="when-markers-have-different-scales">When Markers Have DIFFERENT SCALES<a class="anchor" aria-label="anchor" href="#when-markers-have-different-scales"></a>
-</h4>
+<div class="section level3">
+<h3 id="when-markers-have-different-scales">When Markers Have DIFFERENT SCALES<a class="anchor" aria-label="anchor" href="#when-markers-have-different-scales"></a>
+</h3>
 <p><strong>Problem:</strong></p>
 <pre><code>Marker A: Ki67 % (range 0-100)
 Marker B: p53 H-score (range 0-300)
@@ -808,9 +805,9 @@ Without scaling:
 ✅ Fair comparison regardless of original scale</code></pre>
 <hr>
 </div>
-<div class="section level4">
-<h4 id="when-relationship-is-non-linear">When Relationship is NON-LINEAR<a class="anchor" aria-label="anchor" href="#when-relationship-is-non-linear"></a>
-</h4>
+<div class="section level3">
+<h3 id="when-relationship-is-non-linear">When Relationship is NON-LINEAR<a class="anchor" aria-label="anchor" href="#when-relationship-is-non-linear"></a>
+</h3>
 <p><strong>Problem:</strong></p>
 <pre><code>Linear Correlation Misses This Pattern:
 
@@ -829,12 +826,12 @@ Pearson Correlation = 0.35 (weak!)
 <hr>
 </div>
 </div>
+<div class="section level2">
+<h2 id="interpreting-the-dendrogram-a-step-by-step-guide">Interpreting the Dendrogram: A Step-by-Step Guide<a class="anchor" aria-label="anchor" href="#interpreting-the-dendrogram-a-step-by-step-guide"></a>
+</h2>
 <div class="section level3">
-<h3 id="interpreting-the-dendrogram-a-step-by-step-guide">Interpreting the Dendrogram: A Step-by-Step Guide<a class="anchor" aria-label="anchor" href="#interpreting-the-dendrogram-a-step-by-step-guide"></a>
+<h3 id="anatomy-of-a-marker-dendrogram">Anatomy of a Marker Dendrogram<a class="anchor" aria-label="anchor" href="#anatomy-of-a-marker-dendrogram"></a>
 </h3>
-<div class="section level4">
-<h4 id="anatomy-of-a-marker-dendrogram">Anatomy of a Marker Dendrogram<a class="anchor" aria-label="anchor" href="#anatomy-of-a-marker-dendrogram"></a>
-</h4>
 <pre><code>                                 ┌─ Marker A
                         ┌────────┤
                  ┌──────┤        └─ Marker B
@@ -849,9 +846,9 @@ Pearson Correlation = 0.35 (weak!)
          0   0.2  0.4  0.6  0.8  1.0
               Distance (Y-axis)</code></pre>
 </div>
-<div class="section level4">
-<h4 id="reading-the-dendrogram-left-to-right">Reading the Dendrogram (Left to Right)<a class="anchor" aria-label="anchor" href="#reading-the-dendrogram-left-to-right"></a>
-</h4>
+<div class="section level3">
+<h3 id="reading-the-dendrogram-left-to-right">Reading the Dendrogram (Left to Right)<a class="anchor" aria-label="anchor" href="#reading-the-dendrogram-left-to-right"></a>
+</h3>
 <ol style="list-style-type: decimal">
 <li>
 <strong>Marker Names (X-axis bottom)</strong>
@@ -882,9 +879,9 @@ Pearson Correlation = 0.35 (weak!)
 </li>
 </ol>
 </div>
-<div class="section level4">
-<h4 id="clinical-example-gi-tumor-panel">Clinical Example: GI Tumor Panel<a class="anchor" aria-label="anchor" href="#clinical-example-gi-tumor-panel"></a>
-</h4>
+<div class="section level3">
+<h3 id="clinical-example-gi-tumor-panel">Clinical Example: GI Tumor Panel<a class="anchor" aria-label="anchor" href="#clinical-example-gi-tumor-panel"></a>
+</h3>
 <pre><code>Real Dendrogram from Your Data:
 
 Height (Distance)
@@ -944,12 +941,12 @@ Recommendation:
 ✅ Clear separation between phenotypes</code></pre>
 <hr>
 </div>
+<div class="section level3">
+<h3 id="red-flags-in-your-dendrogram">Red Flags in Your Dendrogram<a class="anchor" aria-label="anchor" href="#red-flags-in-your-dendrogram"></a>
+</h3>
 <div class="section level4">
-<h4 id="red-flags-in-your-dendrogram">Red Flags in Your Dendrogram<a class="anchor" aria-label="anchor" href="#red-flags-in-your-dendrogram"></a>
+<h4 id="red-flag-1-no-separation-between-groups">⚠️ Red Flag 1: No Separation Between Groups<a class="anchor" aria-label="anchor" href="#red-flag-1-no-separation-between-groups"></a>
 </h4>
-<div class="section level5">
-<h5 id="red-flag-1-no-separation-between-groups">⚠️ Red Flag 1: No Separation Between Groups<a class="anchor" aria-label="anchor" href="#red-flag-1-no-separation-between-groups"></a>
-</h5>
 <pre><code>Bad Pattern:
 All markers cluster at distance 0.1-0.2
 └─ Everything is redundant!
@@ -959,9 +956,9 @@ Solution:
 └─ Review marker selection
 └─ Add markers targeting different pathways/lineages</code></pre>
 </div>
-<div class="section level5">
-<h5 id="red-flag-2-unexpected-groupings">⚠️ Red Flag 2: Unexpected Groupings<a class="anchor" aria-label="anchor" href="#red-flag-2-unexpected-groupings"></a>
-</h5>
+<div class="section level4">
+<h4 id="red-flag-2-unexpected-groupings">⚠️ Red Flag 2: Unexpected Groupings<a class="anchor" aria-label="anchor" href="#red-flag-2-unexpected-groupings"></a>
+</h4>
 <pre><code>Unexpected Pattern:
 TTF1 clusters with p40 (distance 0.15)
 
@@ -978,9 +975,9 @@ Possible Issues:
 Action:
 └─ Review raw data before interpreting</code></pre>
 </div>
-<div class="section level5">
-<h5 id="red-flag-3-single-marker-far-from-all-others">⚠️ Red Flag 3: Single Marker Far from All Others<a class="anchor" aria-label="anchor" href="#red-flag-3-single-marker-far-from-all-others"></a>
-</h5>
+<div class="section level4">
+<h4 id="red-flag-3-single-marker-far-from-all-others">⚠️ Red Flag 3: Single Marker Far from All Others<a class="anchor" aria-label="anchor" href="#red-flag-3-single-marker-far-from-all-others"></a>
+</h4>
 <pre><code>Isolated Pattern:
 Marker X at distance &gt; 0.9 from everything
 
@@ -996,12 +993,12 @@ Action:
 </div>
 </div>
 </div>
+<div class="section level2">
+<h2 id="statistical-tests-understanding-the-p-values">Statistical Tests: Understanding the P-values<a class="anchor" aria-label="anchor" href="#statistical-tests-understanding-the-p-values"></a>
+</h2>
 <div class="section level3">
-<h3 id="statistical-tests-understanding-the-p-values">Statistical Tests: Understanding the P-values<a class="anchor" aria-label="anchor" href="#statistical-tests-understanding-the-p-values"></a>
+<h3 id="chi-squared-test-output">Chi-squared Test Output<a class="anchor" aria-label="anchor" href="#chi-squared-test-output"></a>
 </h3>
-<div class="section level4">
-<h4 id="chi-squared-test-output">Chi-squared Test Output<a class="anchor" aria-label="anchor" href="#chi-squared-test-output"></a>
-</h4>
 <pre><code>═══════════════════════════════════════════════════════
 MARKER-MARKER ASSOCIATION: ER vs PR
 ═══════════════════════════════════════════════════════
@@ -1033,9 +1030,9 @@ When to keep both:
 ├─ Prognostic significance (PR loss = worse prognosis)
 └─ Recommendation: Keep both for breast cancer</code></pre>
 </div>
-<div class="section level4">
-<h4 id="cramérs-v-effect-size-guidelines">Cramér’s V Effect Size Guidelines<a class="anchor" aria-label="anchor" href="#cram%C3%A9rs-v-effect-size-guidelines"></a>
-</h4>
+<div class="section level3">
+<h3 id="cramérs-v-effect-size-guidelines">Cramér’s V Effect Size Guidelines<a class="anchor" aria-label="anchor" href="#cram%C3%A9rs-v-effect-size-guidelines"></a>
+</h3>
 <pre><code>For 2x2 Tables (binary markers):
 
 Cramér's V     Interpretation            Clinical Meaning
@@ -1051,9 +1048,9 @@ Example:
 ├─ ER vs PR:         V = 0.68 → Strong (related but keep both)
 └─ CK7 vs CK20:      V = 0.15 → Weak (independent, keep both)</code></pre>
 </div>
-<div class="section level4">
-<h4 id="p-value-interpretation-conservative-for-pathology">P-value Interpretation (Conservative for Pathology)<a class="anchor" aria-label="anchor" href="#p-value-interpretation-conservative-for-pathology"></a>
-</h4>
+<div class="section level3">
+<h3 id="p-value-interpretation-conservative-for-pathology">P-value Interpretation (Conservative for Pathology)<a class="anchor" aria-label="anchor" href="#p-value-interpretation-conservative-for-pathology"></a>
+</h3>
 <pre><code>P-value     Interpretation             Action
 ──────────────────────────────────────────────────────
 p &lt; 0.001   Very strong evidence       Confident association
@@ -1082,12 +1079,12 @@ Always check BOTH:
 <hr>
 </div>
 </div>
+<div class="section level2">
+<h2 id="common-mistakes-to-avoid">Common Mistakes to Avoid<a class="anchor" aria-label="anchor" href="#common-mistakes-to-avoid"></a>
+</h2>
 <div class="section level3">
-<h3 id="common-mistakes-to-avoid">Common Mistakes to Avoid<a class="anchor" aria-label="anchor" href="#common-mistakes-to-avoid"></a>
+<h3 id="mistake-1-dropping-markers-based-only-on-clustering">Mistake 1: Dropping Markers Based Only on Clustering<a class="anchor" aria-label="anchor" href="#mistake-1-dropping-markers-based-only-on-clustering"></a>
 </h3>
-<div class="section level4">
-<h4 id="mistake-1-dropping-markers-based-only-on-clustering">Mistake 1: Dropping Markers Based Only on Clustering<a class="anchor" aria-label="anchor" href="#mistake-1-dropping-markers-based-only-on-clustering"></a>
-</h4>
 <pre><code>❌ WRONG Approach:
 "CK7 and CK20 cluster together, so I'll drop CK20"
 
@@ -1111,9 +1108,9 @@ Reason for clustering:
 Action:
 └─ Review the PATTERN, not just the distance!</code></pre>
 </div>
-<div class="section level4">
-<h4 id="mistake-2-using-wrong-distance-for-data-type">Mistake 2: Using Wrong Distance for Data Type<a class="anchor" aria-label="anchor" href="#mistake-2-using-wrong-distance-for-data-type"></a>
-</h4>
+<div class="section level3">
+<h3 id="mistake-2-using-wrong-distance-for-data-type">Mistake 2: Using Wrong Distance for Data Type<a class="anchor" aria-label="anchor" href="#mistake-2-using-wrong-distance-for-data-type"></a>
+</h3>
 <pre><code>❌ Euclidean distance for binary markers:
 ├─ Treats 0/1 as continuous numbers
 └─ Inappropriate (violates assumptions)
@@ -1126,9 +1123,9 @@ Action:
 
 ✅ Use Euclidean or Manhattan for H-scores</code></pre>
 </div>
-<div class="section level4">
-<h4 id="mistake-3-ignoring-sample-size">Mistake 3: Ignoring Sample Size<a class="anchor" aria-label="anchor" href="#mistake-3-ignoring-sample-size"></a>
-</h4>
+<div class="section level3">
+<h3 id="mistake-3-ignoring-sample-size">Mistake 3: Ignoring Sample Size<a class="anchor" aria-label="anchor" href="#mistake-3-ignoring-sample-size"></a>
+</h3>
 <pre><code>Small Dataset (n=20 cases):
 ═══════════════════════════════════════════
 CD10 vs BCL6: χ² = 8.5, p = 0.004
@@ -1144,9 +1141,9 @@ Recommendation:
 ⚠️ n &lt; 50: Consider increasing sample size
 ✅ n &gt; 100: Clustering results more reliable</code></pre>
 </div>
-<div class="section level4">
-<h4 id="mistake-4-not-considering-clinical-context">Mistake 4: Not Considering Clinical Context<a class="anchor" aria-label="anchor" href="#mistake-4-not-considering-clinical-context"></a>
-</h4>
+<div class="section level3">
+<h3 id="mistake-4-not-considering-clinical-context">Mistake 4: Not Considering Clinical Context<a class="anchor" aria-label="anchor" href="#mistake-4-not-considering-clinical-context"></a>
+</h3>
 <pre><code>Clustering Result:
 "p53 and Ki67 are independent (distance 0.8)"
 
@@ -1164,12 +1161,12 @@ Action:
 <hr>
 </div>
 </div>
+<div class="section level2">
+<h2 id="step-by-step-workflow-for-panel-optimization">Step-by-Step Workflow for Panel Optimization<a class="anchor" aria-label="anchor" href="#step-by-step-workflow-for-panel-optimization"></a>
+</h2>
 <div class="section level3">
-<h3 id="step-by-step-workflow-for-panel-optimization">Step-by-Step Workflow for Panel Optimization<a class="anchor" aria-label="anchor" href="#step-by-step-workflow-for-panel-optimization"></a>
+<h3 id="phase-1-data-preparation">Phase 1: Data Preparation<a class="anchor" aria-label="anchor" href="#phase-1-data-preparation"></a>
 </h3>
-<div class="section level4">
-<h4 id="phase-1-data-preparation">Phase 1: Data Preparation<a class="anchor" aria-label="anchor" href="#phase-1-data-preparation"></a>
-</h4>
 <pre><code>✓ 1. Collect IHC data from your cases
      ├─ Minimum: 50-100 cases (more is better)
      └─ Include diverse diagnoses if differential panel
@@ -1183,9 +1180,9 @@ Action:
      ├─ Acceptable: &lt; 10% missing per marker
      └─ If &gt; 20% missing: Consider excluding that marker</code></pre>
 </div>
-<div class="section level4">
-<h4 id="phase-2-select-distance-metric">Phase 2: Select Distance Metric<a class="anchor" aria-label="anchor" href="#phase-2-select-distance-metric"></a>
-</h4>
+<div class="section level3">
+<h3 id="phase-2-select-distance-metric">Phase 2: Select Distance Metric<a class="anchor" aria-label="anchor" href="#phase-2-select-distance-metric"></a>
+</h3>
 <pre><code>✓ 4. Choose metric based on data type:
 
      My markers are:
@@ -1195,9 +1192,9 @@ Action:
      ├─ Mixed types? → Mixed ⭐ or Mutual Information
      └─ Ordinal (0/1+/2+/3+)? → Chi-squared or Hamming</code></pre>
 </div>
-<div class="section level4">
-<h4 id="phase-3-run-analysis">Phase 3: Run Analysis<a class="anchor" aria-label="anchor" href="#phase-3-run-analysis"></a>
-</h4>
+<div class="section level3">
+<h3 id="phase-3-run-analysis">Phase 3: Run Analysis<a class="anchor" aria-label="anchor" href="#phase-3-run-analysis"></a>
+</h3>
 <pre><code>✓ 5. Perform marker clustering:
      ├─ Enable: "Perform Marker-Level Clustering"
      ├─ Set: Distance metric (from step 4)
@@ -1210,9 +1207,9 @@ Action:
      ├─ Clustering tree: Merge sequence
      └─ Marker groups: Identified clusters</code></pre>
 </div>
-<div class="section level4">
-<h4 id="phase-4-interpret-results">Phase 4: Interpret Results<a class="anchor" aria-label="anchor" href="#phase-4-interpret-results"></a>
-</h4>
+<div class="section level3">
+<h3 id="phase-4-interpret-results">Phase 4: Interpret Results<a class="anchor" aria-label="anchor" href="#phase-4-interpret-results"></a>
+</h3>
 <pre><code>✓ 7. Identify redundant markers:
 
      Look for:
@@ -1227,9 +1224,9 @@ Action:
      ├─ P &gt; 0.05: Independent (keep both)
      └─ Mutually exclusive patterns (keep both)</code></pre>
 </div>
-<div class="section level4">
-<h4 id="phase-5-clinical-validation">Phase 5: Clinical Validation<a class="anchor" aria-label="anchor" href="#phase-5-clinical-validation"></a>
-</h4>
+<div class="section level3">
+<h3 id="phase-5-clinical-validation">Phase 5: Clinical Validation<a class="anchor" aria-label="anchor" href="#phase-5-clinical-validation"></a>
+</h3>
 <pre><code>✓ 9. Don't drop markers solely based on statistics!
 
      Clinical validation checklist:
@@ -1244,9 +1241,9 @@ Action:
      ├─ Compare diagnoses: Full panel vs optimized
      └─ If concordance &gt; 95%, consider adopting</code></pre>
 </div>
-<div class="section level4">
-<h4 id="phase-6-implementation">Phase 6: Implementation<a class="anchor" aria-label="anchor" href="#phase-6-implementation"></a>
-</h4>
+<div class="section level3">
+<h3 id="phase-6-implementation">Phase 6: Implementation<a class="anchor" aria-label="anchor" href="#phase-6-implementation"></a>
+</h3>
 <pre><code>✓ 11. Document your findings:
      ├─ Create internal protocol
      ├─ Share with pathology colleagues
@@ -1259,12 +1256,12 @@ Action:
 <hr>
 </div>
 </div>
+<div class="section level2">
+<h2 id="real-world-panel-optimization-examples">Real-World Panel Optimization Examples<a class="anchor" aria-label="anchor" href="#real-world-panel-optimization-examples"></a>
+</h2>
 <div class="section level3">
-<h3 id="real-world-panel-optimization-examples">Real-World Panel Optimization Examples<a class="anchor" aria-label="anchor" href="#real-world-panel-optimization-examples"></a>
+<h3 id="example-1-lung-cancer-panel-reduction">Example 1: Lung Cancer Panel Reduction<a class="anchor" aria-label="anchor" href="#example-1-lung-cancer-panel-reduction"></a>
 </h3>
-<div class="section level4">
-<h4 id="example-1-lung-cancer-panel-reduction">Example 1: Lung Cancer Panel Reduction<a class="anchor" aria-label="anchor" href="#example-1-lung-cancer-panel-reduction"></a>
-</h4>
 <p><strong>Original Panel (6 markers):</strong> - TTF1, Napsin A, p40,
 CK5/6, p63, CK7</p>
 <p><strong>Clustering Results:</strong></p>
@@ -1300,9 +1297,9 @@ Cost Savings:
 ├─ 500 cases/year
 └─ Annual savings: $90,000</code></pre>
 </div>
-<div class="section level4">
-<h4 id="example-2-breast-cancer-biomarker-rationalization">Example 2: Breast Cancer Biomarker Rationalization<a class="anchor" aria-label="anchor" href="#example-2-breast-cancer-biomarker-rationalization"></a>
-</h4>
+<div class="section level3">
+<h3 id="example-2-breast-cancer-biomarker-rationalization">Example 2: Breast Cancer Biomarker Rationalization<a class="anchor" aria-label="anchor" href="#example-2-breast-cancer-biomarker-rationalization"></a>
+</h3>
 <p><strong>Original Panel (5 markers):</strong> - ER, PR, HER2, Ki67,
 p53</p>
 <p><strong>Clustering Results:</strong></p>
@@ -1335,9 +1332,9 @@ Result:
 └─ No panel reduction, but clustering confirmed
     current guidelines are evidence-based</code></pre>
 </div>
-<div class="section level4">
-<h4 id="example-3-gi-panel-simplification">Example 3: GI Panel Simplification<a class="anchor" aria-label="anchor" href="#example-3-gi-panel-simplification"></a>
-</h4>
+<div class="section level3">
+<h3 id="example-3-gi-panel-simplification">Example 3: GI Panel Simplification<a class="anchor" aria-label="anchor" href="#example-3-gi-panel-simplification"></a>
+</h3>
 <p><strong>Original Panel (8 markers):</strong> - CK7, CK20, CDX2,
 SATB2, MUC2, MUC5AC, MUC6, CEA</p>
 <p><strong>Clustering Results:</strong></p>
@@ -1382,12 +1379,12 @@ Cost Savings:
 <hr>
 </div>
 </div>
+<div class="section level2">
+<h2 id="summary-your-distance-metric-toolkit">Summary: Your Distance Metric Toolkit<a class="anchor" aria-label="anchor" href="#summary-your-distance-metric-toolkit"></a>
+</h2>
 <div class="section level3">
-<h3 id="summary-your-distance-metric-toolkit">Summary: Your Distance Metric Toolkit<a class="anchor" aria-label="anchor" href="#summary-your-distance-metric-toolkit"></a>
+<h3 id="quick-decision-matrix">Quick Decision Matrix<a class="anchor" aria-label="anchor" href="#quick-decision-matrix"></a>
 </h3>
-<div class="section level4">
-<h4 id="quick-decision-matrix">Quick Decision Matrix<a class="anchor" aria-label="anchor" href="#quick-decision-matrix"></a>
-</h4>
 <table class="table">
 <colgroup>
 <col width="20%">
@@ -1453,9 +1450,9 @@ Cost Savings:
 </tbody>
 </table>
 </div>
-<div class="section level4">
-<h4 id="key-takeaways-for-pathologists">Key Takeaways for Pathologists<a class="anchor" aria-label="anchor" href="#key-takeaways-for-pathologists"></a>
-</h4>
+<div class="section level3">
+<h3 id="key-takeaways-for-pathologists">Key Takeaways for Pathologists<a class="anchor" aria-label="anchor" href="#key-takeaways-for-pathologists"></a>
+</h3>
 <ol style="list-style-type: decimal">
 <li>
 <strong>Clustering reveals co-expression</strong>, not causation
@@ -1495,9 +1492,9 @@ Cost Savings:
 <hr>
 </div>
 </div>
-<div class="section level3">
-<h3 id="glossary-for-pathologists">Glossary for Pathologists<a class="anchor" aria-label="anchor" href="#glossary-for-pathologists"></a>
-</h3>
+<div class="section level2">
+<h2 id="glossary-for-pathologists">Glossary for Pathologists<a class="anchor" aria-label="anchor" href="#glossary-for-pathologists"></a>
+</h2>
 <p><strong>Distance</strong>: How different two markers are (0 =
 identical, 1 = completely different)</p>
 <p><strong>Similarity</strong>: How alike two markers are (opposite of
@@ -1520,12 +1517,12 @@ distances between levels not equal</p>
 percentages)</p>
 <hr>
 </div>
+<div class="section level2">
+<h2 id="further-reading-for-pathologists">Further Reading for Pathologists<a class="anchor" aria-label="anchor" href="#further-reading-for-pathologists"></a>
+</h2>
 <div class="section level3">
-<h3 id="further-reading-for-pathologists">Further Reading for Pathologists<a class="anchor" aria-label="anchor" href="#further-reading-for-pathologists"></a>
+<h3 id="foundational-papers">Foundational Papers<a class="anchor" aria-label="anchor" href="#foundational-papers"></a>
 </h3>
-<div class="section level4">
-<h4 id="foundational-papers">Foundational Papers<a class="anchor" aria-label="anchor" href="#foundational-papers"></a>
-</h4>
 <ol style="list-style-type: decimal">
 <li>Greenacre M (2017). <em>Correspondence Analysis in Practice</em>.
 3rd ed. Chapman &amp; Hall/CRC.
@@ -1547,9 +1544,9 @@ immunohistochemistry…” <em>Modern Pathology</em> 19:1238-1251.
 </li>
 </ol>
 </div>
-<div class="section level4">
-<h4 id="statistical-references">Statistical References<a class="anchor" aria-label="anchor" href="#statistical-references"></a>
-</h4>
+<div class="section level3">
+<h3 id="statistical-references">Statistical References<a class="anchor" aria-label="anchor" href="#statistical-references"></a>
+</h3>
 <ol start="4" style="list-style-type: decimal">
 <li>Agresti A (2013). <em>Categorical Data Analysis</em>. 3rd ed. Wiley.
 <ul>
@@ -1564,9 +1561,9 @@ Springer.
 </li>
 </ol>
 </div>
-<div class="section level4">
-<h4 id="online-resources">Online Resources<a class="anchor" aria-label="anchor" href="#online-resources"></a>
-</h4>
+<div class="section level3">
+<h3 id="online-resources">Online Resources<a class="anchor" aria-label="anchor" href="#online-resources"></a>
+</h3>
 <ol start="6" style="list-style-type: decimal">
 <li>CAP Guidelines: <a href="https://www.cap.org" class="external-link">www.cap.org</a>
 <ul>
@@ -1587,7 +1584,6 @@ bioinformatics/biostatistics support team</p>
 <p><em>This guide is designed for practicing pathologists. For
 statistical details, consult the technical documentation in
 <code>MARKER_CLUSTERING_DISTANCES.md</code></em></p>
-</div>
 </div>
 </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>

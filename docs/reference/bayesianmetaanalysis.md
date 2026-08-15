@@ -20,6 +20,7 @@ bayesianmetaanalysis(
   mcmcChains = 4,
   mcmcIterations = 5000,
   warmupIterations = 2500,
+  credibleInterval = 95,
   publicationBias = FALSE,
   posteriorPredictive = TRUE,
   plotForest = TRUE,
@@ -73,6 +74,10 @@ bayesianmetaanalysis(
 
   number of warmup (burn-in) iterations per chain
 
+- credibleInterval:
+
+  width of the credible/confidence interval as a percentage
+
 - publicationBias:
 
   whether to assess and adjust for publication bias
@@ -96,6 +101,7 @@ A results object containing:
 |                                  |     |     |     |     |          |
 |----------------------------------|-----|-----|-----|-----|----------|
 | `results$instructions`           |     |     |     |     | a html   |
+| `results$notices`                |     |     |     |     | a html   |
 | `results$modelSummary`           |     |     |     |     | a table  |
 | `results$studyEffects`           |     |     |     |     | a table  |
 | `results$mcmcDiagnostics`        |     |     |     |     | a table  |

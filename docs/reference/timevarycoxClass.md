@@ -5,6 +5,11 @@ with time-varying covariates. This R6 class provides comprehensive
 functionality for survival analysis with covariates that change over
 time during follow-up.
 
+## Value
+
+An `R6` class generator object for the `timevarycoxClass` backend; used
+internally by the jamovi analysis wrapper and not called directly.
+
 ## Details
 
 The timevarycoxClass implements time-varying Cox regression methods

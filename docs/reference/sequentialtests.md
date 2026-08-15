@@ -4,7 +4,7 @@ Analyzes how diagnostic accuracy changes when applying two tests in
 sequence, comparing three different testing strategies: serial positive
 (confirmation), serial negative (exclusion), and parallel testing.
 Provides comprehensive analysis including population flow, cost
-implications, and Fagan nomograms.
+implications, and diagnostic plots.
 
 ## Usage
 
@@ -25,7 +25,7 @@ sequentialtests(
   show_explanation = FALSE,
   show_formulas = FALSE,
   show_cost_analysis = FALSE,
-  show_nomogram = FALSE
+  show_plots = FALSE
 )
 ```
 
@@ -34,8 +34,12 @@ sequentialtests(
 - preset:
 
   Select a clinical preset or use custom values. Presets load
-  evidence-based test parameters and optimal strategies from medical
-  literature.
+  illustrative test parameters for demonstration and teaching only. They
+  are rounded, approximate figures chosen to show how each strategy
+  behaves; they are NOT validated clinical parameters, are not drawn
+  from any specific published study, and the prevalence will not match
+  your population. Replace them with values from your own setting before
+  drawing any clinical conclusion.
 
 - test1_name:
 
@@ -94,7 +98,7 @@ sequentialtests(
 
   .
 
-- show_nomogram:
+- show_plots:
 
   .
 

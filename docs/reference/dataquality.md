@@ -9,7 +9,7 @@ detection, missing value analysis, and data completeness summary
 ``` r
 dataquality(
   data,
-  vars,
+  vars = NULL,
   check_duplicates = FALSE,
   check_missing = FALSE,
   complete_cases_only = FALSE,
@@ -31,8 +31,8 @@ dataquality(
 
 - vars:
 
-  Variables to assess for data quality. If none selected, entire dataset
-  will be analyzed.
+  Variables to assess for data quality. At least one variable must be
+  selected; the analysis does not fall back to the whole dataset.
 
 - check_duplicates:
 

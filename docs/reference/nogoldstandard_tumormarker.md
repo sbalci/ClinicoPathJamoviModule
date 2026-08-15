@@ -65,7 +65,11 @@ nogoldstandard(data = nogoldstandard_tumormarker,
                clinicalPreset = "tumor_markers")
 #> 
 #>  ANALYSIS WITHOUT GOLD STANDARD
+#> WARNING: Clinical preset: tumor markers
+#> Specialized for tumor marker validation studies Use when validating cancer biomarkers or prognostic tests This preset does NOT change your settings automatically -- set them yourself in the options panel: Bootstrap confidence intervals: currently off, recommended on.
 #> 
+#> Analysing 220 cases
+#> All 220 cases have a result for every selected test.
 #>  Agreement Statistics (Cohen's Kappa)                    
 #>  ─────────────────────────────────────────────────────── 
 #>    Test Pair       Kappa        p-value      Agreement   
@@ -77,22 +81,26 @@ nogoldstandard(data = nogoldstandard_tumormarker,
 #>    HE4 vs AFP      0.2364230    0.0021283     69.09091   
 #>    CEA vs AFP      0.3221419    0.0000247     73.63636   
 #>  ─────────────────────────────────────────────────────── 
+#>    Note. Kappa standard errors and p-values use a
+#>    large-sample normal approximation rather than the
+#>    exact asymptotic SE (e.g. vcd::Kappa); interpret
+#>    p-values cautiously, especially in small samples.
 #> 
 #> 
 #>  <div class='clinical-summary' style='background: #f0f8ff; padding:
 #>  15px; border-radius: 8px; margin: 10px 0;'><h4 style='color: #1565c0;
 #>  margin-top: 0;'> Clinical Summary
 #> 
-#>  Analysis: No gold standard analysis using all_positive method
+#>  Analysis: No gold standard analysis using latent_class method
 #> 
 #>  Tests analyzed: CA125, HE4, CEA, AFP (N=4)
 #> 
-#>  Disease prevalence: 5.5%
+#>  Disease prevalence: 22.4%
 #> 
-#>  Test sensitivities: Range from 100.0% to 100.0%
+#>  Test sensitivities: Range from 63.1% to 78.3%
 #> 
-#>  Clinical interpretation: Low prevalence setting - high NPV expected,
-#>  focus on ruling out disease
+#>  Clinical interpretation: Moderate prevalence setting - balanced
+#>  diagnostic performance
 #> 
 #>  <div style='background: #f8f9fa; padding: 20px; border-radius: 8px;
 #>  margin: 15px 0; border-left: 4px solid #007bff;'><h3 style='color:
@@ -107,8 +115,10 @@ nogoldstandard(data = nogoldstandard_tumormarker,
 #> 
 #>  Best for: Diagnostic validation studies with 3+ tests and N>=100
 #> 
-#>  Strengths: Handles conditional dependence, provides model fit
-#>  statistics, most statistically rigorous
+#>  Strengths: The only method here that estimates accuracy rather than
+#>  agreement with a self-built reference; provides model fit statistics.
+#>  Assumes the tests are conditionally independent given true status --
+#>  it does NOT model conditional dependence
 #> 
 #>  <div style='margin: 15px 0; padding: 15px; background: #e3f2fd;
 #>  border-radius: 5px;'><h4 style='color: #1565c0; margin-top: 0;'>
@@ -133,8 +143,10 @@ nogoldstandard(data = nogoldstandard_tumormarker,
 #>  Best for: Inter-rater agreement studies with 3+ tests, exploratory
 #>  analysis
 #> 
-#>  Strengths: Simple and intuitive, requires minimal assumptions, good
-#>  starting point
+#>  Strengths: Simple and intuitive. Not an accuracy estimate: each test
+#>  helps build the standard it is judged against, which inflates its
+#>  apparent performance. Needs 3+ tests -- with 2 a tie counts as
+#>  diseased, making it identical to Any Test Positive
 #> 
 #>  <div style='margin: 15px 0; padding: 15px; background: #fce4ec;
 #>  border-radius: 5px;'><h4 style='color: #c2185b; margin-top: 0;'> All
@@ -146,7 +158,10 @@ nogoldstandard(data = nogoldstandard_tumormarker,
 #>  Best for: Highly specific diagnoses where false positives are very
 #>  costly
 #> 
-#>  Strengths: High specificity reference, minimizes false positives
+#>  Strengths: A deliberately strict reference. Sensitivity and NPV cannot
+#>  be estimated under this rule -- they are fixed at 100% by construction
+#>  -- so only specificity and PPV are shown, and both are inflated by the
+#>  same circularity
 #> 
 #>  <div style='margin: 15px 0; padding: 15px; background: #e8f5e8;
 #>  border-radius: 5px;'><h4 style='color: #388e3c; margin-top: 0;'> Any
@@ -157,7 +172,10 @@ nogoldstandard(data = nogoldstandard_tumormarker,
 #> 
 #>  Best for: Population screening scenarios where missing cases is costly
 #> 
-#>  Strengths: High sensitivity reference, minimizes false negatives
+#>  Strengths: A deliberately permissive reference. Specificity and PPV
+#>  cannot be estimated under this rule -- they are fixed at 100% by
+#>  construction -- so only sensitivity and NPV are shown, and both are
+#>  inflated by the same circularity
 #> 
 #>  <div style='margin: 15px 0; padding: 10px; background: #fff8e1;
 #>  border-radius: 5px; border-left: 3px solid #ffb300;'><h4 style='color:
@@ -172,7 +190,7 @@ nogoldstandard(data = nogoldstandard_tumormarker,
 #>  ─────────────────────────────────────── 
 #>    Estimate     Lower CI     Upper CI    
 #>  ─────────────────────────────────────── 
-#>      5.45455      2.45375      8.45534   
+#>     22.42637     16.91482     27.93791   
 #>  ─────────────────────────────────────── 
 #> 
 #> 
@@ -180,11 +198,46 @@ nogoldstandard(data = nogoldstandard_tumormarker,
 #>  ───────────────────────────────────────────────────────────────────────────────────────────────────────────────────── 
 #>    Test     Sensitivity    Lower CI     Upper CI     Specificity    Lower CI     Upper CI     PPV          NPV         
 #>  ───────────────────────────────────────────────────────────────────────────────────────────────────────────────────── 
-#>    CA125      100.00000    100.00000    100.00000       75.48077     69.79606     81.16548     19.04762    100.00000   
-#>    HE4        100.00000    100.00000    100.00000       75.96154     70.31494     81.60814     19.35484    100.00000   
-#>    CEA        100.00000    100.00000    100.00000       79.80769     74.50310     85.11229     22.22222    100.00000   
-#>    AFP        100.00000    100.00000    100.00000       75.96154     70.31494     81.60814     19.35484    100.00000   
+#>    CA125       78.30606     66.80537     89.80676       85.72304     80.47440     90.97167     61.32484     93.18258   
+#>    HE4         63.06144     49.59418     76.52870       81.90180     76.12558     87.67803     50.18267     88.46535   
+#>    CEA         68.67277     55.73050     81.61504       88.21165     83.37362     93.04969     62.74403     90.68902   
+#>    AFP         77.50376     65.85248     89.15504       86.07704     80.88320     91.27089     61.67549     92.97519   
 #>  ───────────────────────────────────────────────────────────────────────────────────────────────────────────────────── 
+#>    Note. 95% intervals are normal-approximation (Wald) intervals, using the estimated number of diseased cases as
+#>    the denominator for sensitivity and non-diseased for specificity. They treat the estimates as observed
+#>    proportions and so understate the uncertainty of a latent-variable model; enable Bootstrap for intervals that
+#>    account for the estimation itself.
+#> 
+#> 
+#>  Model Fit Statistics                  
+#>  ───────────────────────────────────── 
+#>    Statistic             Value         
+#>  ───────────────────────────────────── 
+#>    BIC                   1000.145895   
+#>    AIC                    969.603247   
+#>    Log-Likelihood        -475.801624   
+#>    G-squared                2.860211   
+#>    Chi-squared              2.685605   
+#>    Degrees of Freedom       6.000000   
+#>  ───────────────────────────────────── 
+#> 
+#> 
+#>  Conditional Independence Check (Bivariate Residuals)                   
+#>  ────────────────────────────────────────────────────────────────────── 
+#>    Test Pair       Bivariate Residual    Interpretation                 
+#>  ────────────────────────────────────────────────────────────────────── 
+#>    CA125 vs HE4           0.005259860    Consistent with independence   
+#>    CA125 vs CEA           0.018283695    Consistent with independence   
+#>    CA125 vs AFP           0.011987178    Consistent with independence   
+#>    HE4 vs CEA             0.110814148    Consistent with independence   
+#>    HE4 vs AFP             0.017676569    Consistent with independence   
+#>    CEA vs AFP             4.144993e-4    Consistent with independence   
+#>  ────────────────────────────────────────────────────────────────────── 
+#>    Note. A residual above 3.84 (the 5% point of chi-squared on 1
+#>    degree of freedom) is evidence that the pair does not err
+#>    independently. This is a descriptive check, not a formal test:
+#>    the residuals are correlated with one another and no
+#>    multiplicity adjustment is applied.
 #> 
 #> 
 #>  Test Cross-Tabulation                               

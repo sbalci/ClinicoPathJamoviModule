@@ -343,16 +343,6 @@ fragilityindexBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
 #' non-significant result, the reverse fragility index is reported: the number 
 #' of outcome changes needed to reach significance.
 #' 
-#'
-#' @examples
-#' \donttest{
-#' # From a 2x2 summary:
-#' fragilityindex(
-#'     dataFormat = "summary",
-#'     events1 = 10, n1 = 100,
-#'     events2 = 25, n2 = 100,
-#'     alpha = 0.05, testType = "fisher")
-#'}
 #' @param data The data as a data frame (used only when dataFormat = "raw").
 #' @param dataFormat Whether to enter summary 2x2 counts directly or supply
 #'   raw group and outcome variables from the dataset.

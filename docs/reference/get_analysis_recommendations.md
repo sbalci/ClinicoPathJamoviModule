@@ -21,3 +21,8 @@ get_analysis_recommendations(results, context, sample_size)
 - sample_size:
 
   Sample size
+
+## Value
+
+A character vector of comprehensive analysis recommendations (empty if
+none apply).

@@ -5,6 +5,11 @@ R6 class provides comprehensive functionality for survival analysis with
 complex survey designs, incorporating sampling weights, stratification,
 and clustering effects for proper population-level inference.
 
+## Value
+
+An `R6` class generator object for the `surveysurvivalClass` backend;
+used internally by the jamovi analysis wrapper and not called directly.
+
 ## Details
 
 The surveysurvivalClass implements survey-weighted survival methods

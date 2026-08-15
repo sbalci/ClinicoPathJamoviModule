@@ -6,6 +6,11 @@ supports multiple groups, confidence intervals, trend lines, and
 statistical overlays, making it ideal for analyzing longitudinal data,
 treatment responses, and biomarker trends over time.
 
+## Value
+
+An `R6` class generator object for the `linechartClass` backend; used
+internally by the jamovi analysis wrapper and not called directly.
+
 ## Details
 
 The line chart function is designed specifically for clinical research

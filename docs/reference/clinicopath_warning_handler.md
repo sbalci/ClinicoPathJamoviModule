@@ -25,3 +25,8 @@ clinicopath_warning_handler(
 - clinical_context:
 
   Clinical context for the warning
+
+## Value
+
+A list with `success` (TRUE), `warning` (TRUE), a user-friendly
+`warning_message`, a `warning_id`, and the `detailed_log` entry.

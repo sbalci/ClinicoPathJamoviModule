@@ -4,6 +4,12 @@ This module provides comprehensive power analysis for survival studies,
 allowing researchers to calculate statistical power, required sample
 size, or minimum detectable hazard ratio for survival analysis designs.
 
+## Value
+
+An `R6` class generator object for the `advancedSurvivalPowerClass`
+backend; used internally by the jamovi analysis wrapper and not called
+directly.
+
 ## Details
 
 The powersurvival function implements power calculations based on the

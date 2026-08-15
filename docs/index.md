@@ -95,8 +95,7 @@ accelerate the translation of clinical data into meaningful insights.
 ## Documentation
 
 For a comprehensive guide to all the documentation available for this
-package, please see the [Documentation
-Hub](https://www.serdarbalci.com/ClinicoPathJamoviModule/vignettes/documentation_hub.md).
+package, please see the Documentation Hub.
 
 ------------------------------------------------------------------------
 
@@ -154,26 +153,26 @@ download.file(
 **NEW!** Comprehensive tutorial series for ClinicoPath users:
 
 - **[Tutorial Series
-  Home](https://www.serdarbalci.com/ClinicoPathJamoviModule/tutorials/README.md)** -
+  Home](https://github.com/sbalci/ClinicoPathJamoviModule/blob/master/tutorials/README.md)** -
   Complete learning paths for clinical trials, diagnostic pathology, and
   advanced analyses
 - **Quick Start:** [Getting Started with
-  ClinicoPath](https://www.serdarbalci.com/ClinicoPathJamoviModule/tutorials/01-getting-started.qmd)
+  ClinicoPath](https://github.com/sbalci/ClinicoPathJamoviModule/blob/master/tutorials/01-getting-started.qmd)
   (30 min)
 - **Clinical Trials:** [Table One for Baseline
-  Characteristics](https://www.serdarbalci.com/ClinicoPathJamoviModule/tutorials/02-table-one-clinical-trial.qmd)
+  Characteristics](https://github.com/sbalci/ClinicoPathJamoviModule/blob/master/tutorials/02-table-one-clinical-trial.qmd)
   (45 min)
 - **Survival Analysis:** [Kaplan-Meier & Cox
-  Regression](https://www.serdarbalci.com/ClinicoPathJamoviModule/tutorials/03-survival-analysis-cancer.qmd)
+  Regression](https://github.com/sbalci/ClinicoPathJamoviModule/blob/master/tutorials/03-survival-analysis-cancer.qmd)
   (45 min)
 - **Diagnostic Testing:** [ROC Analysis & Optimal
-  Cutpoints](https://www.serdarbalci.com/ClinicoPathJamoviModule/tutorials/04-roc-diagnostic-test.qmd)
+  Cutpoints](https://github.com/sbalci/ClinicoPathJamoviModule/blob/master/tutorials/04-roc-diagnostic-test.qmd)
   (45 min)
 - **Advanced Modeling:** [Decision Curve
-  Analysis](https://www.serdarbalci.com/ClinicoPathJamoviModule/tutorials/05-decision-curve-analysis.qmd)
+  Analysis](https://github.com/sbalci/ClinicoPathJamoviModule/blob/master/tutorials/05-decision-curve-analysis.qmd)
   (50 min)
 - **Reproducibility:** [Automated Reports & Version
-  Control](https://www.serdarbalci.com/ClinicoPathJamoviModule/tutorials/06-reproducible-reports.qmd)
+  Control](https://github.com/sbalci/ClinicoPathJamoviModule/blob/master/tutorials/06-reproducible-reports.qmd)
   (40 min)
 
 **Total Learning Time:** 4.5 hours \| **No Programming Required**
@@ -517,14 +516,13 @@ remotes::install_github("sbalci/OncoPath")
 
 ##### [Swimmer Plot](https://www.serdarbalci.com/OncoPath/articles/swimmerplot_documentation.html)
 
-![](reference/figures/jamovi-OncoPath-swimmerplot.gif) (Comprehensive
-swimmer plots for visualizing patient timelines, clinical events, and
-treatment responses)
+(Comprehensive swimmer plots for visualizing patient timelines, clinical
+events, and treatment responses)
 
 ##### [Waterfall Plot](https://www.serdarbalci.com/OncoPath/articles/waterfall_documentation.html)
 
-![](reference/figures/jamovi-OncoPath-waterfall.gif) (Treatment response
-analysis with RECIST criteria, waterfall plots, and spider plots)
+(Treatment response analysis with RECIST criteria, waterfall plots, and
+spider plots)
 
 ------------------------------------------------------------------------
 
@@ -674,7 +672,7 @@ Made possible via the codes, help, and guidence of
   Love](https://github.com/jonathon-love),
 - [finalfit](https://finalfit.org/) developer [Ewen
   Harrison](https://github.com/ewenharrison),
-- [ggstatsplot](https://indrajeetpatil.github.io/ggstatsplot/) developer
+- [ggstatsplot](https://www.indrapatil.com/ggstatsplot/) developer
   [Indrajeet Patil](https://github.com/IndrajeetPatil),
 - [tangram](https://github.com/spgarbet/tangram) developer [Shawn
   Garbett](https://github.com/spgarbet),
@@ -704,7 +702,7 @@ a coffee](https://www.buymeacoffee.com/bS0teIs)
 ------------------------------------------------------------------------
 
 ![Buy Me A
-Coffee](https://cdn.buymeacoffee.com/buttons/arial-orange.png)  
+Coffee](https://cdn.buymeacoffee.com/buttons/arial-orange.png)\
 ![Twitter
 Follow](https://img.shields.io/twitter/follow/serdarbalci?style=social)![GitHub
 followers](https://img.shields.io/github/followers/sbalci?style=social)[![Say
@@ -712,18 +710,18 @@ Thanks!](https://img.shields.io/badge/Say%20Thanks-!-1EAEDB.svg)](https://saytha
 
 ## Development Status
 
-**Code**  
+**Code**\
 [![Launch Rstudio
-Binder](http://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/sbalci/ClinicoPathJamoviModule/master?urlpath=rstudio)
+Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/sbalci/ClinicoPathJamoviModule/master?urlpath=rstudio)
 [![Gitpod
 Ready-to-Code](https://img.shields.io/badge/Gitpod-Ready--to--Code-blue?logo=gitpod)](https://gitpod.io/#https://github.com/sbalci/ClinicoPathJamoviModule)
 [![Download
 ClinicoPathJamoviModule](https://img.shields.io/sourceforge/dt/clinicopathjamovimodule.svg)](https://sourceforge.net/projects/clinicopathjamovimodule/files/latest/download)
 
-**Status**  
+**Status**\
 [![Project Status: Active – The project has reached a stable, usable
 state and is being actively
-developed.](https://www.repostatus.org/badges/latest/active.svg)](https://www.repostatus.org/#active)  
+developed.](https://www.repostatus.org/badges/latest/active.svg)](https://www.repostatus.org/#active)\
 [![lifecycle](https://img.shields.io/badge/lifecycle-maturing-blue.svg)](https://www.tidyverse.org/lifecycle/)
 [![stability-unstable](https://img.shields.io/badge/stability-unstable-yellow.svg)](https://github.com/joethorley/stability-badges#unstable)
 [![GitHub
@@ -731,7 +729,7 @@ issues](https://img.shields.io/github/issues/sbalci/clinicopathjamovimodule.svg)
 ![GitHub
 issues](https://img.shields.io/github/issues/sbalci/clinicopathjamovimodule)
 
-**Check, CI**  
+**Check, CI**\
 ![R-CMD-check](https://github.com/sbalci/ClinicoPathJamoviModule/workflows/R-CMD-check/badge.svg)
 
 [![Codacy
@@ -751,7 +749,7 @@ badge](https://badges.guardrails.io/sbalci/ClinicoPathJamoviModule.svg?token=940
 [![Test
 Coverage](https://api.codeclimate.com/v1/badges/692e4af79330f43dac48/test_coverage)](https://codeclimate.com/github/sbalci/ClinicoPathJamoviModule/test_coverage)
 
-**Recency, Updates**  
+**Recency, Updates**\
 ![GitHub](https://img.shields.io/github/license/sbalci/clinicopathjamovimodule.svg)[![GitHub
 last
 commit](https://img.shields.io/github/last-commit/sbalci/clinicopathjamovimodule)](https://github.com/sbalci/clinicopathjamovimodule/commits/master)
@@ -761,12 +759,12 @@ Date](https://img.shields.io/github/release-date/sbalci/clinicopathjamovimodule)
 commit
 activity](https://img.shields.io/github/commit-activity/m/sbalci/clinicopathjamovimodule)
 
-**Webpage, Links, Size, Download**  
-[![Website](https://img.shields.io/badge/website-ClinicoPathJamoviModule-orange.svg?colorB=E91E63)](https://sbalci.github.io/ClinicoPathJamoviModule/)
+**Webpage, Links, Size, Download**\
+[![Website](https://img.shields.io/badge/website-ClinicoPathJamoviModule-orange.svg?colorB=E91E63)](https://www.serdarbalci.com/ClinicoPathJamoviModule/)
 [![GitHub code size in
 bytes](https://img.shields.io/github/languages/code-size/sbalci/clinicopathjamovimodule.svg)](https://github.com/sbalci/ClinicoPathJamoviModule)
 
-**Dependencies**  
+**Dependencies**\
 [![minimal R
 version](https://img.shields.io/badge/R%3E%3D-3.6.3-6666ff.svg)](https://cran.r-project.org/)
 [![Libraries.io dependency status for GitHub
@@ -774,7 +772,7 @@ repo](https://img.shields.io/librariesio/github/sbalci/clinicopathjamovimodule.s
 [![Requirements
 Status](https://requires.io/github/sbalci/ClinicoPathJamoviModule/requirements.svg?branch=gh-pages)](https://requires.io/github/sbalci/ClinicoPathJamoviModule/requirements/?branch=gh-pages)
 
-**Interaction, Shares**  
+**Interaction, Shares**\
 [![GitHub
 forks](https://img.shields.io/github/forks/sbalci/clinicopathjamovimodule.svg)](https://github.com/sbalci/clinicopathjamovimodule/network)
 ![GitHub
@@ -783,7 +781,7 @@ stars](https://img.shields.io/github/stars/sbalci/clinicopathjamovimodule.svg)](
 [![Github
 Stars](https://img.shields.io/github/stars/sbalci/clinicopathjamovimodule.svg?style=social&label=Github)](https://github.com/sbalci/clinicopathjamovimodule)
 ![GitHub
-stars](https://img.shields.io/github/stars/sbalci/clinicopathjamovimodule?style=social)[![Twitter](https://img.shields.io/twitter/url/https/github.com/sbalci/clinicopathjamovimodule.svg?style=social)](https://twitter.com/intent/tweet?text=A%20@jamovistats%20module%20for%20%23histopathology%20%23clinicopathology%20%23pathology%20%23research%20using%20various%20%23rstats%20packages%20%F0%9F%93%A6.%20@serdarbalci&url=https%3A%2F%2Fsbalci.github.io%2ClinicoPathJamoviModule%2)
+stars](https://img.shields.io/github/stars/sbalci/clinicopathjamovimodule?style=social)[![Twitter](https://img.shields.io/twitter/url/https/github.com/sbalci/clinicopathjamovimodule.svg?style=social)](https://twitter.com/intent/tweet?text=A%20@jamovistats%20module%20for%20%23histopathology%20%23clinicopathology%20%23pathology%20%23research%20using%20various%20%23rstats%20packages%20%F0%9F%93%A6.%20@serdarbalci&url=https%3A%2F%2Fwww.serdarbalci.com%2ClinicoPathJamoviModule%2)
 [![contributions
 welcome](https://img.shields.io/badge/contributions-welcome-brightgreen.svg?style=flat)](https://github.com/sbalci/clinicopathjamovimodule/issues)
 ![GitHub

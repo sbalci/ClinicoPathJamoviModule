@@ -5,6 +5,11 @@ allows customization of bin width (age group granularity) and plot
 title. It creates a visually appealing plot showing the distribution of
 age by gender.
 
+## Value
+
+An `R6` class generator object for the `agepyramidClass` backend; used
+internally by the jamovi analysis wrapper and not called directly.
+
 ## Super classes
 
 [`jmvcore::Analysis`](https://rdrr.io/pkg/jmvcore/man/Analysis.html) -\>

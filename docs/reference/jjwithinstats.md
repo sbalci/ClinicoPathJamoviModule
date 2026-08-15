@@ -182,7 +182,9 @@ jjwithinstats(
 
 - ggpubrPalette:
 
-  Color palette for ggpubr plot.
+  Color palette for the ggpubr plot. Applies to the boxplot, violin and
+  paired plot types; the line plot draws a single mean trajectory, so a
+  categorical palette has nothing to colour there.
 
 - ggpubrAddStats:
 
@@ -208,7 +210,6 @@ A results object containing:
 |--------------------------|-----|-----|-----|-----|----------|
 | `results$todo`           |     |     |     |     | a html   |
 | `results$warnings`       |     |     |     |     | a html   |
-| `results$notices`        |     |     |     |     | a html   |
 | `results$interpretation` |     |     |     |     | a html   |
 | `results$explanations`   |     |     |     |     | a html   |
 | `results$plot`           |     |     |     |     | an image |

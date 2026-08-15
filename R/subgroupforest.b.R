@@ -65,7 +65,7 @@
 #' - Consider multiple comparison adjustments for many subgroups
 #'
 #' @examples
-#' \donttest{
+#' \dontrun{
 #' # Survival outcome subgroup analysis
 #' subgroupforest(
 #'   data = clinical_trial,

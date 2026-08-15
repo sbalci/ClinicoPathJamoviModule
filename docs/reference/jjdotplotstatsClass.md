@@ -1,6 +1,11 @@
-# Dot Chart
+# Horizontal Box-Violin Comparison
 
-Dot Chart
+Horizontal Box-Violin Comparison
+
+## Value
+
+An `R6` class generator object for the `jjdotplotstatsClass` backend;
+used internally by the jamovi analysis wrapper and not called directly.
 
 ## Super classes
 

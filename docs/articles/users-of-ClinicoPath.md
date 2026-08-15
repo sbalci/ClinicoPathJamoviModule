@@ -260,7 +260,7 @@ JavaScript çalıştırılamıyor.
 
 - Baseline Ultrasound Assessment Improves the Response to Apremilast in
   Patients with Psoriatic Arthritis: Results from a Multicentre Study
-  <http://www.mjrheum.org/assets/files/792/file614_2232.pdf>
+  <https://www.mjrheum.org/assets/files/792/file614_2232.pdf>
 
 - The Importance of Stroma and Stromal SMA Expression in Pancreatic
   Ductal Adenocarcinoma <https://turkjpath.org/text.php?id=2068>
@@ -277,7 +277,8 @@ JavaScript çalıştırılamıyor.
 
 JavaScript çalıştırılamıyor.
 
-![](./images/jsurvival-course.jpg)<https://stats-co.eu/analyse-de-survie_53/>
+![jsurvival survival analysis course flyer from
+stats-co.eu](images/jsurvival-course.jpg)<https://stats-co.eu/analyse-de-survie_53/>
 
 ## meddecide
 
@@ -357,7 +358,7 @@ JavaScript çalıştırılamıyor.
 
 - Assess the effectiveness of digital platforms in facilitating content
   delivery and pedagogical strategies
-  <http://efsupit.ro/images/stories/septembrie2024/Art%20254.pdf>
+  <https://efsupit.ro/images/stories/septembrie2024/Art%20254.pdf>
 
 - Clinical practice selectively follows acute appendicitis guidelines
   <https://link.springer.com/article/10.1007/s00068-022-02208-2>

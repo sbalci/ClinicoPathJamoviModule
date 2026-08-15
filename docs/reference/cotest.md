@@ -48,13 +48,21 @@ cotest(
 
 - cond_dep_pos:
 
-  Conditional dependence between tests for subjects with disease. Value
-  between 0 (independence) and 1 (complete dependence).
+  Correlation between the two test results among subjects with disease,
+  where 0 is conditional independence and 1 is the strongest dependence
+  the marginals allow. Negative values describe tests that compensate
+  for each other's errors; they are permitted, but the feasible negative
+  range is narrow for tests with high specificity and values beyond it
+  are truncated with a warning.
 
 - cond_dep_neg:
 
-  Conditional dependence between tests for subjects without disease.
-  Value between 0 (independence) and 1 (complete dependence).
+  Correlation between the two test results among subjects without
+  disease, where 0 is conditional independence and 1 is the strongest
+  dependence the marginals allow. Negative values describe tests that
+  compensate for each other's errors; they are permitted, but the
+  feasible negative range is narrow for tests with high specificity and
+  values beyond it are truncated with a warning.
 
 - prevalence:
 

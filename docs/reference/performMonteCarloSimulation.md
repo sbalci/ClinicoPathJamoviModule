@@ -31,3 +31,9 @@ performMonteCarloSimulation(
 - distributionType:
 
   Character string
+
+## Value
+
+`NULL`. This function is deprecated and performs no computation; it only
+emits a deprecation warning directing callers to use the internal PSA
+methods of `decisiongraphClass`.

@@ -74,12 +74,3 @@ Percent Change (APC). The overall Average Annual Percent Change (AAPC)
 summarizes the whole period. Use it to detect when a rate began rising or
 falling and to quantify the rate of change in each period.
 }
-\examples{
-\donttest{
-joinpoint(
-    data = mydata,
-    time = "year",
-    rate = "incidence_rate",
-    maxJoinpoints = 3)
-}
-}

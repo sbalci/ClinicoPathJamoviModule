@@ -6,6 +6,11 @@ summary statistics including median survival time with confidence
 intervals. It generates both tabular results and Kaplan-Meier survival
 plots.
 
+## Value
+
+An `R6` class generator object for the `oneSurvivalClass` backend; used
+internally by the jamovi analysis wrapper and not called directly.
+
 ## Details
 
 The function performs the following analyses:

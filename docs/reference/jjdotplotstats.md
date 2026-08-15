@@ -1,9 +1,11 @@
-# Dot Chart
+# Horizontal Box-Violin Comparison
 
-Wrapper Function for ggstatsplot::ggbetweenstats and
-ggstatsplot::grouped_ggbetweenstats to generate dot-style comparisons of
-continuous variables between groups with statistical annotations and
-significance testing.
+Compares a continuous variable across groups and draws the comparison
+horizontally - values on the x axis, group labels down the y axis - with
+an optional vertical reference line. Wraps ggstatsplot::ggbetweenstats
+and ggstatsplot::grouped_ggbetweenstats, so the figure is a box-violin
+plot with the individual observations shown, and the test is a
+between-groups comparison using every observation.
 
 ## Usage
 
@@ -12,7 +14,7 @@ jjdotplotstats(
   data,
   dep,
   group,
-  grvar,
+  grvar = NULL,
   typestatistics = "parametric",
   effsizetype = "biased",
   centralityplotting = FALSE,
@@ -110,9 +112,11 @@ jjdotplotstats(
 
 - testvalue:
 
-  Reference value for hypothesis testing (usually 0 for group
-  comparisons). Can be changed to test against a specific clinically
-  meaningful value.
+  Position of the optional reference line, in the units of the dependent
+  variable. Use it to mark a clinically meaningful threshold such as an
+  upper limit of normal. No hypothesis test is performed against this
+  value; it only draws a line, and only when 'Reference value line' is
+  ticked.
 
 - bfmessage:
 
@@ -135,8 +139,9 @@ jjdotplotstats(
 
 - testvalueline:
 
-  Display a vertical reference line at the test value. Useful for
-  showing clinically significant thresholds or normal reference ranges.
+  Draw a dashed vertical line at 'Reference Line Value'. Useful for
+  marking a clinical threshold or a normal reference limit. This is a
+  visual annotation only.
 
 - centralityparameter:
 
@@ -145,8 +150,10 @@ jjdotplotstats(
 
 - centralityk:
 
-  Decimal places for central tendency values displayed on the plot.
-  Should match the precision meaningful for your measurement scale.
+  Deprecated and ignored. The statistics package no longer accepts a
+  separate precision for the centrality labels; they follow 'Statistical
+  Precision (Decimal Places)'. Retained so existing scripts keep
+  running, and removed from the user interface.
 
 - plotwidth:
 
@@ -162,14 +169,22 @@ jjdotplotstats(
 
 A results object containing:
 
-|                           |     |     |     |     |          |
-|---------------------------|-----|-----|-----|-----|----------|
-| `results$todo`            |     |     |     |     | a html   |
-| `results$notices`         |     |     |     |     | a html   |
-| `results$plot2`           |     |     |     |     | an image |
-| `results$plot`            |     |     |     |     | an image |
-| `results$interpretation`  |     |     |     |     | a html   |
-| `results$assumptions`     |     |     |     |     | a html   |
-| `results$reportSentence`  |     |     |     |     | a html   |
-| `results$guidedSteps`     |     |     |     |     | a html   |
-| `results$recommendations` |     |     |     |     | a html   |
+|                   |     |     |     |     |          |
+|-------------------|-----|-----|-----|-----|----------|
+| `results$todo`    |     |     |     |     | a html   |
+| `results$notices` |     |     |     |     | a html   |
+| `results$plot2`   |     |     |     |     | an image |
+| `results$plot`    |     |     |     |     | an image |
+
+## Details
+
+This analysis was previously titled "Dot Chart", which described neither
+the figure nor the statistic: it draws violins and boxplots, not a dot
+chart, and it is a between-groups test rather than a one-sample one. For
+a genuine Cleveland dot chart - one summary point per label, tested
+against a reference value - use "Dot Chart (Summary vs Reference
+Value)", which wraps ggstatsplot::ggdotplotstats.
+
+Prefer this over "Box-Violin Plots to Compare Between Groups" when the
+group labels are long or numerous, since the horizontal layout gives
+them room, or when a clinical threshold line is useful.

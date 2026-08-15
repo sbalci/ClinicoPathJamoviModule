@@ -1,19 +1,41 @@
-# Treatment Response Analysis
+# Treatment Response: Patient-Level Burden
 
-Creates waterfall and spider plots to analyze tumor response data
-following RECIST criteria.
+Use this when you have one tumour burden number per patient: either a
+percent change from baseline you have already calculated (one row per
+patient), or a single measurement recorded at each visit (one row per
+patient per visit). It draws waterfall and spider plots, assigns each
+patient a best response from their largest shrinkage from baseline, and
+reports ORR and DCR with exact binomial confidence intervals, group
+comparison, time to response and duration of response. When a time
+variable is supplied, progression is measured against the patient's
+smallest recorded burden (nadir), not against baseline. Categories are
+named CR, PR, SD and PD and the thresholds are adapted from RECIST v1.1,
+but this is NOT a RECIST v1.1 implementation: because it never sees
+individual lesions it cannot sum target lesions, detect a new lesion, or
+judge non-target progression, and it cannot apply the 4-week
+confirmation rule itself (you may supply your own confirmation column).
+If your data list each lesion separately, use the lesion-level RECIST
+v1.1 analysis. It will be available in upcoming releases.
 
 ## Usage
 
 ``` r
 waterfall(
   data,
-  patientID,
-  responseVar,
+  patientID = NULL,
+  responseVar = NULL,
   timeVar = NULL,
   groupVar = NULL,
   inputType = "percentage",
   sortBy = "response",
+  sortDirection = "conventional",
+  showBaseline = TRUE,
+  confirmationVar = NULL,
+  ongoingVar = NULL,
+  responseCategoryVar = NULL,
+  showCategoryLabels = FALSE,
+  showSpiderLabels = FALSE,
+  annotationVars = NULL,
   showThresholds = TRUE,
   labelOutliers = FALSE,
   showMedian = FALSE,
@@ -32,7 +54,9 @@ waterfall(
   showClinicalSignificance = FALSE,
   showConfidenceIntervals = TRUE,
   enableGuidedMode = FALSE,
-  showExplanations = FALSE
+  showExplanations = FALSE,
+  showResponseDuration = FALSE,
+  seed = 123
 )
 ```
 
@@ -78,6 +102,57 @@ waterfall(
 - sortBy:
 
   Sort the waterfall plot by best response or patient ID.
+
+- sortDirection:
+
+  Direction for the response sort. 'conventional' places the highest
+  (worst) response on the left and the lowest (best, most negative) on
+  the right, following the standard oncology waterfall convention.
+
+- showBaseline:
+
+  Draw a horizontal reference line at 0 percent change to mark the
+  baseline.
+
+- confirmationVar:
+
+  Optional categorical variable indicating response confirmation status
+  (e.g., Confirmed vs Unconfirmed CR/PR). A distinct marker is drawn at
+  each bar tip according to the level of this variable.
+
+- ongoingVar:
+
+  Optional variable flagging patients still on treatment / with an
+  ongoing response. Truthy values (TRUE, non-zero, or text matching
+  yes/y/true/on/ongoing/1) draw an upward arrow at the bar tip.
+
+- responseCategoryVar:
+
+  Optional per-patient RECIST category (CR/PR/SD/PD). When supplied it
+  overrides the category computed from the percentage value, so a
+  patient with target-lesion shrinkage can still be classified PD (e.g.,
+  a new lesion). Affects both bar coloring and response metrics
+  (ORR/DCR).
+
+- showCategoryLabels:
+
+  Print the response category (CR, PR, SD, PD) above each waterfall bar,
+  so the category can be read directly instead of being mapped back from
+  the bar colour.
+
+- showSpiderLabels:
+
+  Label the end of every spider trajectory with its patient ID, so an
+  outlying line can be traced to a patient without reading a large
+  legend.
+
+- annotationVars:
+
+  Optional patient-level variables drawn as coloured tracks beneath the
+  waterfall bars, aligned to the same patient ordering. One row of tiles
+  per variable. Use for biomarker status, mutation, prior therapy,
+  treatment arm or any covariate you want read off against each
+  patient's response.
 
 - showThresholds:
 
@@ -164,6 +239,20 @@ waterfall(
   Display comprehensive explanation of what this analysis does, when to
   use it, data requirements, and key assumptions/limitations
 
+- showResponseDuration:
+
+  Show a censoring-aware time-to-response (TTR) and duration-of-response
+  (DoR) table. DoR is summarized with the Kaplan-Meier median
+  (accounting for responders still in response at last follow-up), which
+  the naive median understates.
+
+- seed:
+
+  Random seed for the reproducible bootstrap confidence interval of the
+  median response (used when 'Show Confidence Interval' is enabled).
+  Change it to draw a different bootstrap sample; the default (123)
+  reproduces the previous fixed behaviour.
+
 ## Value
 
 A results object containing:
@@ -188,6 +277,7 @@ A results object containing:
 | `results$spiderplot`              |     |     |     |     | an image  |
 | `results$naturalLanguageSummary`  |     |     |     |     | a html    |
 | `results$explanations`            |     |     |     |     | a html    |
+| `results$responseDurationTable`   |     |     |     |     | a table   |
 | `results$addResponseCategory`     |     |     |     |     | an output |
 | `results$notices`                 |     |     |     |     | a html    |
 
@@ -198,9 +288,3 @@ example:
 `results$summaryTable$asDF`
 
 `as.data.frame(results$summaryTable)`
-
-## Details
-
-Supports both raw tumor measurements and pre-calculated percentage
-changes. Provides comprehensive response analysis including ORR, DCR,
-and person-time metrics.

@@ -13,8 +13,8 @@ for enhanced customization and connectivity features.
 ``` r
 advancedraincloud(
   data,
-  y_var,
-  x_var,
+  y_var = NULL,
+  x_var = NULL,
   fill_var = NULL,
   id_var = NULL,
   cov_var = NULL,
@@ -257,6 +257,7 @@ A results object containing:
 |                           |     |     |     |     |          |
 |---------------------------|-----|-----|-----|-----|----------|
 | `results$todo`            |     |     |     |     | a html   |
+| `results$analysisNotes`   |     |     |     |     | a html   |
 | `results$plot`            |     |     |     |     | an image |
 | `results$statistics`      |     |     |     |     | a html   |
 | `results$comparisons`     |     |     |     |     | a html   |

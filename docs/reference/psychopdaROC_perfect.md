@@ -43,7 +43,6 @@ data(psychopdaROC_perfect)
 psychopdaROC(data = psychopdaROC_perfect, dependentVars = "perfect_test",
              classVar = "condition", positiveClass = "Positive",
              refVar = "perfect_test")
-#> Multiple optimal cutpoints found, applying break_ties.
 #> Warning: ci.auc() of a ROC curve with AUC == 1 is always 1-1 and can be misleading.
 #> Warning: var() of a ROC curve with AUC == 1 is always 0 and can be misleading.
 #> Warning: ci.auc() of a ROC curve with AUC == 1 is always 1-1 and can be misleading.
@@ -61,7 +60,7 @@ psychopdaROC(data = psychopdaROC_perfect, dependentVars = "perfect_test",
 #>  The ROC analysis has been completed using the following
 #>  specifications:
 #> 
-#>  &nbsp;
+#>   
 #> 
 #>  Measure Variable(s): perfect_test
 #> 
@@ -69,7 +68,7 @@ psychopdaROC(data = psychopdaROC_perfect, dependentVars = "perfect_test",
 #> 
 #>  Positive Class: Positive
 #> 
-#>  &nbsp;
+#>   
 #> 
 #>  Method: maximize_metric
 #> 
@@ -81,9 +80,9 @@ psychopdaROC(data = psychopdaROC_perfect, dependentVars = "perfect_test",
 #> 
 #>  Tie Breakers: mean
 #> 
-#>  Metric Tolerance: 0.05
+#>  Metric Tolerance: 1e-06
 #> 
-#>  &nbsp;
+#>   
 #> 
 #>  <hr />
 #> 
@@ -101,6 +100,11 @@ psychopdaROC(data = psychopdaROC_perfect, dependentVars = "perfect_test",
 #>  ────────────────────────────────────────────────────────────────────────── 
 #>    perfect_test    1.0000000       1.0000000       1.0000000                
 #>  ────────────────────────────────────────────────────────────────────────── 
+#>    Note. Reading of the test values: <b>HIGHER values were taken to
+#>    indicate Positive</b> (Classification Direction = ">="). If that is
+#>    the wrong way round for this marker, every sensitivity, specificity,
+#>    cutpoint and AUC below is reversed — switch Classification Direction
+#>    to "<=" and the AUC becomes 1 minus the value shown.
 #>    Note. AUC 95% confidence intervals computed using the DeLong method.
 #> 
 #> 
@@ -118,7 +122,7 @@ psychopdaROC(data = psychopdaROC_perfect, dependentVars = "perfect_test",
 #>  ───────────────────────────────────────────────────────────────────────────────────────────────────────────────── 
 #>    Cutpoint      Sensitivity    Specificity    PPV          NPV          Youden's J    AUC          Metric Score   
 #>  ───────────────────────────────────────────────────────────────────────────────────────────────────────────────── 
-#>    55.9117509      100.00000      100.00000    100.00000    100.00000     1.0000000    1.0000000       1.0000000   
+#>    80.4946577      100.00000      100.00000    100.00000    100.00000     1.0000000    1.0000000       1.0000000   
 #>  ───────────────────────────────────────────────────────────────────────────────────────────────────────────────── 
 #> 
 #> 
@@ -128,6 +132,11 @@ psychopdaROC(data = psychopdaROC_perfect, dependentVars = "perfect_test",
 #>  ────────────────────────────────────────────────────────────────────────── 
 #>    perfect_test    1.0000000       1.0000000       1.0000000                
 #>  ────────────────────────────────────────────────────────────────────────── 
+#>    Note. Reading of the test values: <b>HIGHER values were taken to
+#>    indicate Positive</b> (Classification Direction = ">="). If that is
+#>    the wrong way round for this marker, every sensitivity, specificity,
+#>    cutpoint and AUC below is reversed — switch Classification Direction
+#>    to "<=" and the AUC becomes 1 minus the value shown.
 #>    Note. AUC 95% confidence intervals computed using the DeLong method.
 #> 
 

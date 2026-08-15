@@ -14,7 +14,7 @@ relativesurvival(
   age,
   sex,
   year,
-  covariates,
+  covariates = NULL,
   ratetable = "us",
   method = "poharperme",
   time_scale = "years",

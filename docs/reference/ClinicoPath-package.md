@@ -190,7 +190,8 @@ GPL-2
 
 ## Links
 
-- Package website: <https://sbalci.github.io/ClinicoPathJamoviModule/>
+- Package website:
+  <https://www.serdarbalci.com/ClinicoPathJamoviModule/>
 
 - GitHub repository:
   <https://github.com/sbalci/ClinicoPathJamoviModule/>
@@ -217,12 +218,12 @@ GPL-2
 ## Author
 
 **Maintainer**: Serdar Balci <serdarbalci@serdarbalci.com>
-([ORCID](https://orcid.org/0000-0002-7852-3851))
+([ORCID](https://orcid.org/0000-0002-7852-3851)) \[copyright holder\]
 
 Authors:
 
 - Serdar Balci <serdarbalci@serdarbalci.com>
-  ([ORCID](https://orcid.org/0000-0002-7852-3851))
+  ([ORCID](https://orcid.org/0000-0002-7852-3851)) \[copyright holder\]
 
 ## Examples
 

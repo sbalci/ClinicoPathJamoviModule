@@ -6,6 +6,11 @@ or 3D space to reveal natural patient groupings. Inspired by Orange Data
 Mining's interactive projection widgets, adapted for jamovi with
 comprehensive cluster analysis and statistical validation.
 
+## Value
+
+An `R6` class generator object for the `patientsimilarityClass` backend;
+used internally by the jamovi analysis wrapper and not called directly.
+
 ## Details
 
 This analysis performs dimensionality reduction to visualize patient

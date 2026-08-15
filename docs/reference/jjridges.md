@@ -285,6 +285,7 @@ A results object containing:
 |                            |     |     |     |     |                |
 |----------------------------|-----|-----|-----|-----|----------------|
 | `results$notices`          |     |     |     |     | a preformatted |
+| `results$warnings`         |     |     |     |     | a html         |
 | `results$instructions`     |     |     |     |     | a html         |
 | `results$clinicalSummary`  |     |     |     |     | a html         |
 | `results$reportSummary`    |     |     |     |     | a html         |

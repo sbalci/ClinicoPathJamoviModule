@@ -3,6 +3,11 @@
 R6 class for performing treatment response analysis using waterfall
 plots.
 
+## Value
+
+An `R6` class generator object for the `waterfallClass` backend; used
+internally by the jamovi analysis wrapper and not called directly.
+
 ## Super classes
 
 [`jmvcore::Analysis`](https://rdrr.io/pkg/jmvcore/man/Analysis.html) -\>

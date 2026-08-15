@@ -1,5 +1,12 @@
 # Overall, Cause Specific, and Competing Survival - Comprehensive Guide
 
+> **Not yet released.** The `competingsurvival` analysis is on a
+> development menu route, so it does not appear in the jamovi menus of
+> ClinicoPath or of any of its submodules. It is documented here ahead
+> of a future release, and its options, defaults and output may still
+> change. The R function is exported, so the examples below run from an
+> R console; what is not yet available is the jamovi analysis itself.
+
 > **Note:**
 > [`competingsurvival()`](https://www.serdarbalci.com/ClinicoPathJamoviModule/reference/competingsurvival.md)
 > is designed primarily for the jamovi GUI. The R syntax shown here is

@@ -12,7 +12,7 @@ allow-listed parser.
 ## Usage
 
 ``` r
-.asSurvivalFormula(x)
+.asSurvivalFormula(x, env = parent.frame())
 ```
 
 ## Arguments
@@ -21,6 +21,22 @@ allow-listed parser.
 
   A character formula string (e.g. `"survival::Surv(t, d) ~ x"`).
 
+- env:
+
+  Environment to attach to the returned formula. Defaults to the calling
+  frame, which is what downstream re-evaluation needs.
+
 ## Value
 
 A parsed formula object.
+
+## Details
+
+The returned formula's environment is set to the CALLER's frame.
+`asFormula` otherwise leaves it pointing at its own evaluation frame,
+which does not hold the caller's `mydata`. Model fitting still works,
+because `coxph(fml, data=)` is handed the data directly — but any method
+that later re-evaluates the model call does not get it. `cox.zph()` is
+the visible casualty: ticking "Proportional hazards assumption" aborted
+the entire analysis with "object 'mydata' not found", taking every other
+result down with it.

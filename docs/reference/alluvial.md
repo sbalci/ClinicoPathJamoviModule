@@ -63,8 +63,8 @@ alluvial(
 
 - fillGgalluvial:
 
-  A string naming the variable from `data` that will be used to color
-  the flows in the ggalluvial plot.
+  A string naming the categorical variable from `data` that will be used
+  to color the flows in the ggalluvial plot.
 
 - bin:
 
@@ -92,7 +92,8 @@ alluvial(
 - custombinlabels:
 
   Custom labels for bins, separated by commas (e.g., "Low,Medium,High").
-  Leave empty to use bin option defaults.
+  The number of labels determines the number of bins. Leave empty to use
+  the selected bin-label method.
 
 - colorPalette:
 

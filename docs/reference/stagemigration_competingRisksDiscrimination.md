@@ -13,3 +13,8 @@ stagemigration_competingRisksDiscrimination(
   time_points = c(12, 24, 60)
 )
 ```
+
+## Value
+
+List with `time_dependent_auc` and `concordance` discrimination metrics
+for the competing risks models.

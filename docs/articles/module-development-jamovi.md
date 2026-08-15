@@ -1,7 +1,5 @@
 # ClinicoPath Module Development Guide
 
-## ClinicoPath Module Development Guide
-
 This comprehensive guide provides instructions for developing and
 maintaining the ClinicoPath jamovi module for clinicopathological
 research analysis.
@@ -101,7 +99,7 @@ install.packages('jmvtools', repos = c('https://repo.jamovi.org', 'https://cran.
 
 - **Analysis Definitions**: `.a.yaml` files define parameters and
   options
-- **UI Definitions**: `.u.yaml` files define user interface layout  
+- **UI Definitions**: `.u.yaml` files define user interface layout\
 - **Results Definitions**: `.r.yaml` files define output tables and
   plots
 - **Backend Implementation**: `.b.R` files contain the R6 class analysis
@@ -132,7 +130,7 @@ Rscript _updateModules_enhanced.R
 ```
 
 **Key Features**: - ✅ **Automated testing** and validation - ✅
-**Backup and rollback** capabilities  
+**Backup and rollback** capabilities\
 - ✅ **Multi-module distribution** to specialized repos - ✅
 **Configuration management** via YAML - ✅ **Security validation** and
 integrity checks
@@ -4441,8 +4439,6 @@ DiagrammeR::mermaid(
 )
 ```
 
-
-
     Remotes:
 
         easystats/correlation,
@@ -4642,7 +4638,7 @@ DiagrammeR::mermaid(
     # #
     # #
     # #     # repeated, factor, factor ----
-    # #     # http://corybrunson.github.io/ggalluvial/
+    # #     # https://corybrunson.github.io/ggalluvial/
     # #
     # #     if (direction == "repeated" && class(mygroup) == "factor" && class(mydep) == "factor") {
     # #             plotData <- data.frame(gr = mygroup,
@@ -4774,7 +4770,7 @@ DiagrammeR::mermaid(
     # #
     # #
     # #     # repeated, factor, factor ----
-    # #     # http://corybrunson.github.io/ggalluvial/
+    # #     # https://corybrunson.github.io/ggalluvial/
     # #     # networkD3
     # #
     # #
@@ -5959,7 +5955,7 @@ DiagrammeR::mermaid(
                 #
                 # ggscatterstats    scatterplots    for correlations between two variables
 
-                # http://corybrunson.github.io/ggalluvial/
+                # https://corybrunson.github.io/ggalluvial/
 
 
                 # plot <- ggplot(plotData, aes(x = gr,
@@ -6206,7 +6202,7 @@ DiagrammeR::mermaid(
     ## bench
 
 
-    High Precision Timing of R Expressions http://bench.r-lib.org/
+    High Precision Timing of R Expressions https://bench.r-lib.org/
 
     https://github.com/r-lib/bench
 

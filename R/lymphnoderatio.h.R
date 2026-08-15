@@ -339,15 +339,6 @@ lymphnoderatioBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
 #' head-and-neck cancers, and is more robust than absolute node counts when 
 #' nodal yield varies between specimens.
 #' 
-#'
-#' @examples
-#' \donttest{
-#' lymphnoderatio(
-#'     data = mydata,
-#'     positiveNodes = "n_positive",
-#'     examinedNodes = "n_examined",
-#'     survivalTime = "months", survivalStatus = "dead")
-#'}
 #' @param data The data as a data frame (one row per patient).
 #' @param positiveNodes Number of lymph nodes containing metastatic carcinoma.
 #' @param examinedNodes Total number of lymph nodes examined.

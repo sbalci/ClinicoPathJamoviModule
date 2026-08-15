@@ -2,6 +2,11 @@
 
 Cure Models for Long-term Survivors
 
+## Value
+
+An `R6` class generator object for the `curemodelsClass` backend; used
+internally by the jamovi analysis wrapper and not called directly.
+
 ## Super classes
 
 [`jmvcore::Analysis`](https://rdrr.io/pkg/jmvcore/man/Analysis.html) -\>

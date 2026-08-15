@@ -5,6 +5,11 @@ Supports Cox proportional hazards, logistic regression, and linear
 regression. Provides unified comparison with AIC, BIC, R^2, C-index.
 Inspired by Orange Data Mining's Test & Score widget.
 
+## Value
+
+An `R6` class generator object for the `modelperformanceClass` backend;
+used internally by the jamovi analysis wrapper and not called directly.
+
 ## Author
 
 ClinicoPath Development Team

@@ -5,6 +5,11 @@ binary classification problems. Supports LASSO, Ridge, and Elastic Net
 penalties. Includes suitability assessment, bootstrap validation, ROC
 analysis, and automated scoring system generation.
 
+## Value
+
+An `R6` class generator object for the `lassologisticClass` backend;
+used internally by the jamovi analysis wrapper and not called directly.
+
 ## Super classes
 
 [`jmvcore::Analysis`](https://rdrr.io/pkg/jmvcore/man/Analysis.html) -\>

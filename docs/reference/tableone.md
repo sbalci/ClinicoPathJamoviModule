@@ -9,7 +9,7 @@ multiple output styles for flexible formatting.
 ``` r
 tableone(
   data,
-  vars,
+  vars = NULL,
   sty = "t1",
   excl = FALSE,
   showSummary = FALSE,

@@ -2,6 +2,11 @@
 
 R6 class for performing time-dependent decision curve analysis.
 
+## Value
+
+An `R6` class generator object for the `timedependentdcaClass` backend;
+used internally by the jamovi analysis wrapper and not called directly.
+
 ## Super classes
 
 [`jmvcore::Analysis`](https://rdrr.io/pkg/jmvcore/man/Analysis.html) -\>

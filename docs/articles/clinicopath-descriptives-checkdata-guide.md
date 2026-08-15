@@ -1,8 +1,6 @@
 # Single Variable Quality Check (checkdata) - Comprehensive Guide
 
-## Single Variable Quality Check (`checkdata`) - Comprehensive Guide
-
-### Overview
+## Overview
 
 The **Single Variable Quality Check** module provides comprehensive data
 quality assessment for individual variables in clinical and pathological
@@ -16,9 +14,9 @@ not validated diagnostic metrics.
 
 ------------------------------------------------------------------------
 
-### Key Features
+## Key Features
 
-#### 1. **Multi-Method Outlier Detection**
+### 1. **Multi-Method Outlier Detection**
 
 - Three independent outlier detection methods:
   - **Z-score** (\|z\| \> 3): Standard approach, assumes normality
@@ -31,7 +29,7 @@ not validated diagnostic metrics.
 - **Transformation support**: Log or square-root transformation for
   right-skewed data
 
-#### 2. **Missing Data Pattern Analysis**
+### 2. **Missing Data Pattern Analysis**
 
 - **Statistical runs test** with p-values for clustering/alternating
   patterns
@@ -41,7 +39,7 @@ not validated diagnostic metrics.
 - **Optional MCAR test** (requires `naniar` package)
 - All methods labeled as **HEURISTIC** with limitations disclosed
 
-#### 3. **Distribution Analysis**
+### 3. **Distribution Analysis**
 
 - Central tendency (mean, median) with symmetry assessment
 - Variability metrics:
@@ -53,7 +51,7 @@ not validated diagnostic metrics.
   instability
 - Skewness and shape interpretation
 
-#### 4. **Clinical Plausibility Checks**
+### 4. **Clinical Plausibility Checks**
 
 - **Unit-aware validation** for:
   - Age (years, with biological limits)
@@ -64,14 +62,14 @@ not validated diagnostic metrics.
 - All checks labeled **“PLAUSIBILITY CHECK”** with thresholds disclosed
 - Can be enabled/disabled globally
 
-#### 5. **Categorical Variable Analysis**
+### 5. **Categorical Variable Analysis**
 
 - **Entropy-based balance index** with maximum entropy context
 - **Rare category detection** (configurable threshold, default 5%)
 - Tied to statistical assumptions (chi-squared expected cell counts)
 - Frequency distribution with duplicate detection
 
-#### 6. **Heuristic Quality Score**
+### 6. **Heuristic Quality Score**
 
 - **Transparent component scoring**:
   - Missing Data: max 40 pts penalty
@@ -88,9 +86,9 @@ not validated diagnostic metrics.
 
 ------------------------------------------------------------------------
 
-### Configuration Options
+## Configuration Options
 
-#### Display Options
+### Display Options
 
 - **Show Outlier Analysis**: Enable/disable multi-method outlier
   detection
@@ -98,9 +96,9 @@ not validated diagnostic metrics.
 - **Show Duplicate Analysis**: Enable/disable duplicate value detection
 - **Show Data Patterns**: Enable/disable missing data pattern analysis
 
-#### Advanced Settings
+### Advanced Settings
 
-##### Outlier Detection
+#### Outlier Detection
 
 - **Transformation** (default: None)
   - None: Use raw data
@@ -109,21 +107,21 @@ not validated diagnostic metrics.
   - Square root transform: For moderate right skew (requires
     non-negative values)
 
-##### Variability Assessment
+#### Variability Assessment
 
 - **Minimum Mean for CV** (default: 0.01)
   - Suppress coefficient of variation when \|mean\| below this threshold
   - Prevents reporting unstable CVs for data centered near zero
   - Recommended: 0.01 for most applications
 
-##### Categorical Analysis
+#### Categorical Analysis
 
 - **Rare Category Threshold** (default: 5%, range: 0.1-20%)
   - Percentage below which categories are flagged as rare
   - Tied to chi-squared expected cell count assumptions
   - Adjust based on downstream analysis plans
 
-##### Clinical Validation
+#### Clinical Validation
 
 - **Enable Clinical Plausibility Checks** (default: true)
   - Toggle all context-specific validation (age, weight, height, labs)
@@ -133,7 +131,7 @@ not validated diagnostic metrics.
   - Metric: Force SI units (kg, cm, g/L, µmol/L)
   - Imperial: Force US units (lbs, feet, g/dL, mg/dL)
 
-##### Missing Data Analysis
+#### Missing Data Analysis
 
 - **Perform MCAR Statistical Test** (default: false)
   - Enable Little’s MCAR test (requires `naniar` package installation)
@@ -142,11 +140,11 @@ not validated diagnostic metrics.
 
 ------------------------------------------------------------------------
 
-### Interpreting Results
+## Interpreting Results
 
-#### Outlier Detection Tables
+### Outlier Detection Tables
 
-##### Method Summary Table
+#### Method Summary Table
 
 Shows each detection method’s performance: - **Method**: Detection
 approach used - **Threshold**: Criterion applied - **Outliers Found**:
@@ -156,7 +154,7 @@ Count per method - **Note**: Method characteristics and limitations
 agreement - Higher MAD count suggests robust outliers (not just z-score
 artifacts) - If only Z-score flags points, consider transformation
 
-##### Consensus Outliers Table (n\>=10)
+#### Consensus Outliers Table (n\>=10)
 
 Shows points flagged by \>=2 methods: - **Row**: Original data row
 number - **Value**: Observed value - **Z-Score**: On transformed scale
@@ -170,7 +168,7 @@ notation
 **Scale Notation**: - “(2/3 methods)” = consensus from 2 of 3 methods -
 “(on log scale)” = severity assessed after log transformation
 
-##### Informative-Only Mode (n=3-9)
+#### Informative-Only Mode (n=3-9)
 
 For small samples, single-method flags shown with warning: -
 **“INFORMATIVE ONLY (n\<10)”**: Not statistically robust - Use for
@@ -184,9 +182,9 @@ decisions
 
 ------------------------------------------------------------------------
 
-#### Missing Data Analysis
+### Missing Data Analysis
 
-##### Missing Data Table
+#### Missing Data Table
 
 - **Metric**: Aspect measured
 - **Value**: Observed statistic
@@ -220,9 +218,9 @@ analysis
 
 ------------------------------------------------------------------------
 
-#### Distribution Analysis
+### Distribution Analysis
 
-##### For Numeric Variables
+#### For Numeric Variables
 
 **Central Tendency**: - **Mean close to Median** → Symmetric
 distribution - **Mean \> Median** → Right-skewed (consider log
@@ -254,7 +252,7 @@ skew \| Transform before parametric tests \|
 High CV with outliers → Report MAD instead - Check distribution plots
 before parametric tests
 
-##### For Categorical Variables
+#### For Categorical Variables
 
 **Category Balance Index (Entropy)**: - Shows: “2.45 of 3.00 max
 entropy; well balanced” - **High balance** (\>0.8): Categories roughly
@@ -268,7 +266,7 @@ Message: “may violate chi-squared assumptions (expected cell count
 
 ------------------------------------------------------------------------
 
-#### Heuristic Quality Score
+### Heuristic Quality Score
 
 **Score Breakdown**:
 
@@ -314,7 +312,7 @@ investigator before analysis - May need additional data collection
 
 ------------------------------------------------------------------------
 
-#### Clinical Plausibility Checks
+### Clinical Plausibility Checks
 
 All messages prefixed **“PLAUSIBILITY CHECK:”** with detected units and
 thresholds.
@@ -345,9 +343,9 @@ populations - Disable clinical checks for non-clinical variables
 
 ------------------------------------------------------------------------
 
-### Best Practices
+## Best Practices
 
-#### Before Running Analysis
+### Before Running Analysis
 
 1.  **Understand Your Data**:
     - Know expected ranges for clinical variables
@@ -362,7 +360,7 @@ populations - Disable clinical checks for non-clinical variables
     - Check date variables are properly formatted
     - Verify factor levels are meaningful
 
-#### Interpreting Results
+### Interpreting Results
 
 1.  **Outliers**:
     - ✅ **Do**: Investigate consensus outliers (\>=2 methods)
@@ -387,7 +385,7 @@ populations - Disable clinical checks for non-clinical variables
     - ❌ **Don’t**: Assume all flags are true errors
     - ❌ **Don’t**: Apply checks to non-clinical variables
 
-#### After Quality Assessment
+### After Quality Assessment
 
 1.  **Document Findings**:
     - Record quality issues identified
@@ -404,9 +402,9 @@ populations - Disable clinical checks for non-clinical variables
 
 ------------------------------------------------------------------------
 
-### Common Scenarios
+## Common Scenarios
 
-#### Scenario 1: Right-Skewed Lab Values with Outliers
+### Scenario 1: Right-Skewed Lab Values with Outliers
 
 **Symptoms**: - High skewness (\>1) - Only Z-score flags outliers,
 IQR/MAD don’t - Large CV (\>50%)
@@ -427,7 +425,7 @@ spread 4. Use log-transformed values for parametric tests
     - Outliers: 2 consensus (2/3 methods on log scale)
     - CV: 12% (moderate)
 
-#### Scenario 2: Small Sample (n=7) with Potential Errors
+### Scenario 2: Small Sample (n=7) with Potential Errors
 
 **Symptoms**: - Table shows “INFORMATIVE ONLY (n\<10)” - Single-method
 flags present - Need early QC
@@ -445,7 +443,7 @@ validated outliers
     - Row 5: Value 85 (✓ Z-score, - IQR, - MAD)
       → Weak signal, likely not outlier
 
-#### Scenario 3: High Missing Rate with Dropout Pattern
+### Scenario 3: High Missing Rate with Dropout Pattern
 
 **Symptoms**: - Missing %: 35% - Pattern: “HEURISTIC: Likely dropout
 (75%, 95% CI: 62-88%)” - Quality Grade: C
@@ -456,7 +454,7 @@ imputation method: - LOCF if values expected stable - Trajectory
 modeling if time-dependent 4. Perform sensitivity analysis with
 complete-case vs imputed 5. Report missingness mechanism assessment
 
-#### Scenario 4: CV Suppressed Due to Mean Near Zero
+### Scenario 4: CV Suppressed Due to Mean Near Zero
 
 **Symptoms**: - Message: “CV suppressed: \|mean\| \< 0.01” - Mean:
 0.003, SD: 0.12 - Data are difference scores or changes
@@ -466,7 +464,7 @@ force CV calculation (unstable) 3. Report: “Median \[IQR\] = 0.002
 \[0.001, 0.008\]” 4. Consider if ratio-scale interpretation is
 appropriate
 
-#### Scenario 5: Clinical Check False Positives (Pediatric Data)
+### Scenario 5: Clinical Check False Positives (Pediatric Data)
 
 **Symptoms**: - Many weight/height plausibility flags - Data from
 pediatric population - Units are correct (kg, cm)
@@ -478,9 +476,9 @@ quality checks by age group
 
 ------------------------------------------------------------------------
 
-### Limitations and Caveats
+## Limitations and Caveats
 
-#### Outlier Detection
+### Outlier Detection
 
 **Assumptions**: - Z-score assumes approximate normality (robust to
 moderate violations) - IQR assumes symmetric-ish distribution - MAD most
@@ -494,7 +492,7 @@ transform: Z-score over-flags high values
 (\>=2 methods) for n\>=10 - Investigate clinical context of flagged
 values
 
-#### Missingness Patterns
+### Missingness Patterns
 
 **Assumptions**: - Runs test assumes independence under MCAR - Dropout
 heuristic assumes ordered data (e.g., time, ID) - Thresholds (50-150%
@@ -508,7 +506,7 @@ samples
 test for formal assessment - Report confidence intervals for dropout -
 Complement with subject-matter knowledge
 
-#### Quality Score
+### Quality Score
 
 **Assumptions**: - Penalty weights (40, 30, 25, 20, 30) are arbitrary -
 Thresholds (e.g., \>50% missing = 40 pts) are rules-of-thumb - Letter
@@ -522,7 +520,7 @@ may not suit all applications
 screening tool only - Apply clinical judgment to final decision - Do not
 report grade without caveats
 
-#### Clinical Plausibility
+### Clinical Plausibility
 
 **Assumptions**: - Hard-coded ranges (e.g., age \>120, hemoglobin 3-20
 g/dL) - Unit detection from data range (heuristic) - Western adult
@@ -538,11 +536,11 @@ non-clinical variables - Document population characteristics
 
 ------------------------------------------------------------------------
 
-### Technical Details
+## Technical Details
 
-#### Statistical Methods
+### Statistical Methods
 
-##### Runs Test for Missingness
+#### Runs Test for Missingness
 
 - **Wald-Wolfowitz runs test**
 - Null hypothesis: Missing pattern is random
@@ -553,7 +551,7 @@ non-clinical variables - Document population characteristics
 - Two-tailed p-value from standard normal
 - **Limitation**: Approximate, assumes large-sample
 
-##### Wilson Score Confidence Interval (Dropout)
+#### Wilson Score Confidence Interval (Dropout)
 
 - For proportion p̂ with n observations:
 - Center = (p̂ + z²/2n) / (1 + z²/n)
@@ -561,7 +559,7 @@ non-clinical variables - Document population characteristics
 - z = 1.96 for 95% CI
 - More accurate than normal approximation for small n
 
-##### Modified Z-Score (MAD-based)
+#### Modified Z-Score (MAD-based)
 
 - M_i = 0.6745 × (x_i - median) / MAD
 - MAD = median(\|x_i - median\|) × 1.4826
@@ -569,14 +567,14 @@ non-clinical variables - Document population characteristics
 - Threshold: \|M_i\| \> 3.5
 - Most robust to outliers in outlier detection itself
 
-##### Entropy Balance Index
+#### Entropy Balance Index
 
 - H = -∑ p_i × log₂(p_i)
 - H_max = log₂(k) for k categories
 - Balance = H / H_max ∈ \[0, 1\]
 - 1 = perfect balance, 0 = one category dominates
 
-#### Sample Size Considerations
+### Sample Size Considerations
 
 | Analysis | Minimum n | Recommended n | Note |
 |----|----|----|----|
@@ -586,7 +584,7 @@ non-clinical variables - Document population characteristics
 | Skewness/kurtosis | 3 | 20+ | Unstable for very small n |
 | CV calculation | 2 | 10+ | Requires mean stability |
 
-#### Transformation Details
+### Transformation Details
 
 **Log Transform**: - Applied: log(x) for all x \> 0 - Fails: If any x
 \<= 0 (message: “negative values present”) - Use for: Right-skewed,
@@ -602,9 +600,9 @@ indicates transformation
 
 ------------------------------------------------------------------------
 
-### Frequently Asked Questions
+## Frequently Asked Questions
 
-#### Q1: Should I remove all flagged outliers?
+### Q1: Should I remove all flagged outliers?
 
 **A**: No. Outlier detection identifies *potential* data quality issues
 or extreme but valid values.
@@ -614,7 +612,7 @@ in source documents 3. Assess clinical plausibility 4. Consider: - Data
 entry error → Correct - Valid extreme value → Keep - Impossible value →
 Remove or query 5. Document all decisions
 
-#### Q2: My quality grade is C. Can I still analyze the data?
+### Q2: My quality grade is C. Can I still analyze the data?
 
 **A**: Yes, with caveats. Grade C = “quality concerns detected” (by
 heuristic rules).
@@ -626,7 +624,7 @@ Consult statistician for appropriate methods
 
 Grade D (\<70) requires more serious consideration of data validity.
 
-#### Q3: Why is CV suppressed when my mean is 0.005?
+### Q3: Why is CV suppressed when my mean is 0.005?
 
 **A**: Coefficient of variation is unstable when mean is near zero
 (creates very large or undefined ratios).
@@ -638,7 +636,7 @@ changes cause huge CV swings - Example: mean=0.001, SD=0.01 → CV=1000%
 \[IQR\] instead of mean ± SD - Consider if ratio-scale interpretation
 makes sense for your data
 
-#### Q4: Informative-only mode shows 4 outliers in my n=8 sample. What does this mean?
+### Q4: Informative-only mode shows 4 outliers in my n=8 sample. What does this mean?
 
 **A**: Single-method flags are shown for QC, but **not statistically
 robust**.
@@ -652,7 +650,7 @@ Check for typos (e.g., 250 instead of 25.0) 3. Verify clinical
 plausibility 4. Do NOT report as “statistically validated outliers” 5.
 If collect more data, re-check with full sample
 
-#### Q5: Clinical checks flag many values, but they’re correct. What should I do?
+### Q5: Clinical checks flag many values, but they’re correct. What should I do?
 
 **A**: Clinical plausibility checks may not suit your specific
 population.
@@ -668,7 +666,7 @@ for your population 3. **Option 3**: Override unit system if
 auto-detection wrong 4. **Future**: Request custom plausibility ranges
 feature
 
-#### Q6: Can I use this quality score in my manuscript?
+### Q6: Can I use this quality score in my manuscript?
 
 **A**: With substantial caveats only. Not suitable as primary quality
 metric.
@@ -686,7 +684,7 @@ Claiming score is externally validated
 outliers, skewness) - Use established quality frameworks (STROBE,
 RECORD, etc.) - Quality score is for internal screening, not publication
 
-#### Q7: What’s the difference between MAD and SD for spread?
+### Q7: What’s the difference between MAD and SD for spread?
 
 **A**: Both measure spread, but MAD is robust to outliers.
 
@@ -704,7 +702,7 @@ RECORD, etc.) - Quality score is for internal screening, not publication
 **Action**: - If outliers present: Report MAD - If normal distribution:
 Report SD - Can report both for transparency
 
-#### Q8: The runs test says “random” but I know data collection had issues. Why?
+### Q8: The runs test says “random” but I know data collection had issues. Why?
 
 **A**: Statistical tests have limited power, especially with small
 samples or subtle patterns.
@@ -720,9 +718,9 @@ issues regardless of test result
 
 ------------------------------------------------------------------------
 
-### Reporting Quality Assessment Results
+## Reporting Quality Assessment Results
 
-#### In Methods Section
+### In Methods Section
 
 **Minimal**: \> “Data quality was assessed for all variables using
 automated screening. Variables with \>20% missing data were imputed
@@ -742,7 +740,7 @@ outlier detection. Heuristic quality scoring (A-D grades) was used for
 internal screening but not as a validated quality metric. \[Specific
 details of quality issues and resolutions\].”
 
-#### In Results Section
+### In Results Section
 
 **Minimal**: \> “All variables had \<15% missing data. Three outliers
 were identified and verified as data entry errors (corrected), and 2
@@ -759,7 +757,7 @@ severe right skew (skewness \>1.5) and were log-transformed for outlier
 detection and subsequent parametric tests. Heuristic quality scores
 ranged from B to A across variables.”
 
-#### In Limitations
+### In Limitations
 
 **Example**: \> “Data quality assessment used heuristic screening tools
 with arbitrary thresholds (e.g., \|z\|\>3 for outliers); these are not
@@ -770,9 +768,9 @@ cannot be excluded.”
 
 ------------------------------------------------------------------------
 
-### Advanced Topics
+## Advanced Topics
 
-#### When to Use Each Outlier Transformation
+### When to Use Each Outlier Transformation
 
 | Data Characteristic | Recommended Transform | Rationale |
 |----|----|----|
@@ -782,7 +780,7 @@ cannot be excluded.”
 | Symmetric with heavy tails | None | Use MAD-based detection instead |
 | Bimodal distribution | None | Outlier detection may misidentify modes |
 
-#### Interpreting MCAR Test Results (if enabled)
+### Interpreting MCAR Test Results (if enabled)
 
 **Little’s MCAR Test** (requires `naniar` package): - Null hypothesis:
 Data are missing completely at random - p \< 0.05: Reject MCAR, suggests
@@ -795,7 +793,7 @@ limits utility
 0.05: Plan imputation or sensitivity analysis - Combine with runs test
 for convergent evidence
 
-#### Quality Score Customization (future)
+### Quality Score Customization (future)
 
 Current penalty weights are fixed: - Missing: 40 pts max - Outliers: 30
 pts max - Variability: 25 pts max - Clinical: 20 pts max - Sample size:
@@ -809,9 +807,9 @@ Example: If missingness is critical, weight it 50 pts instead
 
 ------------------------------------------------------------------------
 
-### Troubleshooting
+## Troubleshooting
 
-#### Issue: All outliers flagged by Z-score only, none by IQR/MAD
+### Issue: All outliers flagged by Z-score only, none by IQR/MAD
 
 **Likely cause**: Data are right-skewed; Z-score over-flags upper tail
 
@@ -819,7 +817,7 @@ Example: If missingness is critical, weight it 50 pts instead
 Transform: Log** 3. Verify consensus on log scale 4. Report: “Outlier
 detection performed on log-transformed scale”
 
-#### Issue: CV suppression message even though I want to see it
+### Issue: CV suppression message even though I want to see it
 
 **Likely cause**: Mean is near zero (by design to avoid unstable ratios)
 
@@ -829,7 +827,7 @@ data (weight, concentration, time) - ❌ Misleading: Interval scale
 (temperature in °C), difference scores 3. Use MAD-based relative spread:
 MAD / median
 
-#### Issue: Clinical checks flag many correct values
+### Issue: Clinical checks flag many correct values
 
 **Likely cause**: Population or unit mismatch
 
@@ -838,7 +836,7 @@ for mixed units - Override to Metric or Imperial if known 2. Disable
 checks for specialized populations (pediatric, ICU, etc.) 3. Manually
 review flagged values and document as expected for your cohort
 
-#### Issue: Quality grade seems too harsh/lenient
+### Issue: Quality grade seems too harsh/lenient
 
 **Likely cause**: Heuristic thresholds don’t suit your context
 
@@ -848,7 +846,7 @@ be excellent - Real-world observational: Grade C may be expected 3. Use
 component metrics directly instead of letter grade 4. Remember: Grade is
 screening tool, not validated metric
 
-#### Issue: “INFORMATIVE ONLY” warning for n=9 sample
+### Issue: “INFORMATIVE ONLY” warning for n=9 sample
 
 **Not an issue**: This is by design for n\<10
 
@@ -862,9 +860,9 @@ outliers - Collect more data if possible for robust detection
 
 ------------------------------------------------------------------------
 
-### Example Workflow
+## Example Workflow
 
-#### Step 1: Initial Screening
+### Step 1: Initial Screening
 
 **Run checkdata with defaults**: - Enable all display options - Use
 auto-detect for unit system - Default transformation (None)
@@ -872,7 +870,7 @@ auto-detect for unit system - Default transformation (None)
 **Review**: - Quality grade for overall impression - Missing % for each
 variable - Outlier counts
 
-#### Step 2: Detailed Investigation
+### Step 2: Detailed Investigation
 
 **For variables with issues**:
 
@@ -886,7 +884,7 @@ transformation - Verify consensus outliers manually
 **Clinical check flags**: - Review in clinical context - Override unit
 system if needed - Document expected outliers for population
 
-#### Step 3: Data Cleaning
+### Step 3: Data Cleaning
 
 **For each identified issue**:
 
@@ -900,7 +898,7 @@ missing
 **Valid extreme values**: - Retain in dataset - Flag for sensitivity
 analysis - Document clinical rationale
 
-#### Step 4: Final Quality Report
+### Step 4: Final Quality Report
 
 **Prepare summary**:
 
@@ -918,7 +916,7 @@ analysis - Document clinical rationale
     - Planned multiple imputation for 2 variables (22-28% missing)
     - Log-transformed 5 right-skewed variables for analysis
 
-#### Step 5: Documentation
+### Step 5: Documentation
 
 **For methods section**: - Summarize quality assessment approach -
 Report key quality metrics (% missing, \# outliers) - Describe cleaning
@@ -933,9 +931,9 @@ log - Archive cleaning decisions with rationale
 
 ------------------------------------------------------------------------
 
-### References and Further Reading
+## References and Further Reading
 
-#### Statistical Methods
+### Statistical Methods
 
 1.  **Outlier Detection**:
     - Iglewicz, B., & Hoaglin, D. C. (1993). *How to detect and handle
@@ -957,28 +955,30 @@ log - Archive cleaning decisions with rationale
     - Kang, H. (2013). The prevention and handling of the missing data.
       *Korean Journal of Anesthesiology*, 64(5), 402-406.
 
-#### Reporting Guidelines
+### Reporting Guidelines
 
 - STROBE Statement (observational studies):
   <https://www.strobe-statement.org/>
 - RECORD Guidelines (routinely collected data):
   <https://www.record-statement.org/>
-- CONSORT (clinical trials): <http://www.consort-statement.org/>
+- CONSORT (clinical trials): <https://www.consort-statement.org/>
 
-#### R Packages Used
+### R Packages Used
 
 - Base R: [`stats::mad()`](https://rdrr.io/r/stats/mad.html),
   [`stats::quantile()`](https://rdrr.io/r/stats/quantile.html),
   `stats::scale()`
-- Optional: `naniar::mcar_test()` (if MCAR test enabled)
+- Optional:
+  [`naniar::mcar_test()`](https://naniar.njtierney.com/reference/mcar_test.html)
+  (if MCAR test enabled)
 
 ------------------------------------------------------------------------
 
-### Version History
+## Version History
 
 **Current Version: 0.0.31**
 
-#### Recent Improvements (v0.0.31)
+### Recent Improvements (v0.0.31)
 
 **Outlier Detection**: - ✅ Added per-method flags (Z-score, IQR, MAD)
 in results table - ✅ Implemented transformation support (log, sqrt) for
@@ -1013,7 +1013,7 @@ precise points - ✅ Enhanced warning: “NOT a validated metric”
 
 ------------------------------------------------------------------------
 
-### Contact and Support
+## Contact and Support
 
 **Issues/Bug Reports**: - GitHub repository: \[Add repository link\] -
 Report bugs with example data and screenshots
@@ -1028,9 +1028,9 @@ Example analyses with real data
 
 ------------------------------------------------------------------------
 
-### Appendix: Quick Reference
+## Appendix: Quick Reference
 
-#### Interpretation Thresholds
+### Interpretation Thresholds
 
 | Metric | Threshold | Interpretation |
 |----|----|----|
@@ -1054,7 +1054,7 @@ Example analyses with real data
 |  | C (70-79) | Quality concerns detected |
 |  | D (\<70) | Significant quality issues |
 
-#### Decision Tree
+### Decision Tree
 
     Variable Quality Check
     │

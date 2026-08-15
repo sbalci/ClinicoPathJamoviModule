@@ -46,7 +46,6 @@ data(psychopdaROC_spectrum)
 psychopdaROC(data = psychopdaROC_spectrum, dependentVars = "continuous_marker",
              classVar = "binary_status", positiveClass = "Positive",
              refVar = "continuous_marker")
-#> Multiple optimal cutpoints found, applying break_ties.
 #> 
 #>  ADVANCED ROC ANALYSIS
 #> 
@@ -60,7 +59,7 @@ psychopdaROC(data = psychopdaROC_spectrum, dependentVars = "continuous_marker",
 #>  The ROC analysis has been completed using the following
 #>  specifications:
 #> 
-#>  &nbsp;
+#>   
 #> 
 #>  Measure Variable(s): continuous_marker
 #> 
@@ -68,7 +67,7 @@ psychopdaROC(data = psychopdaROC_spectrum, dependentVars = "continuous_marker",
 #> 
 #>  Positive Class: Positive
 #> 
-#>  &nbsp;
+#>   
 #> 
 #>  Method: maximize_metric
 #> 
@@ -80,9 +79,9 @@ psychopdaROC(data = psychopdaROC_spectrum, dependentVars = "continuous_marker",
 #> 
 #>  Tie Breakers: mean
 #> 
-#>  Metric Tolerance: 0.05
+#>  Metric Tolerance: 1e-06
 #> 
-#>  &nbsp;
+#>   
 #> 
 #>  <hr />
 #> 
@@ -100,6 +99,11 @@ psychopdaROC(data = psychopdaROC_spectrum, dependentVars = "continuous_marker",
 #>  ──────────────────────────────────────────────────────────────────────────────── 
 #>    continuous_marker    0.9549407       0.9258927       0.9839887    < .0000001   
 #>  ──────────────────────────────────────────────────────────────────────────────── 
+#>    Note. Reading of the test values: <b>HIGHER values were taken to indicate
+#>    Positive</b> (Classification Direction = ">="). If that is the wrong way
+#>    round for this marker, every sensitivity, specificity, cutpoint and AUC
+#>    below is reversed — switch Classification Direction to "<=" and the AUC
+#>    becomes 1 minus the value shown.
 #>    Note. AUC 95% confidence intervals computed using the DeLong method.
 #> 
 #> 
@@ -117,7 +121,7 @@ psychopdaROC(data = psychopdaROC_spectrum, dependentVars = "continuous_marker",
 #>  ───────────────────────────────────────────────────────────────────────────────────────────────────────────────── 
 #>    Cutpoint      Sensitivity    Specificity    PPV          NPV          Youden's J    AUC          Metric Score   
 #>  ───────────────────────────────────────────────────────────────────────────────────────────────────────────────── 
-#>    53.7661964       86.95652       94.54545     97.08738     77.61194     0.8150198    0.9549407       0.8150198   
+#>    52.7643388       87.82609       94.54545     97.11538     78.78788     0.8237154    0.9549407       0.8237154   
 #>  ───────────────────────────────────────────────────────────────────────────────────────────────────────────────── 
 #> 
 #> 
@@ -127,6 +131,11 @@ psychopdaROC(data = psychopdaROC_spectrum, dependentVars = "continuous_marker",
 #>  ──────────────────────────────────────────────────────────────────────────────── 
 #>    continuous_marker    0.9549407       0.9258927       0.9839887    < .0000001   
 #>  ──────────────────────────────────────────────────────────────────────────────── 
+#>    Note. Reading of the test values: <b>HIGHER values were taken to indicate
+#>    Positive</b> (Classification Direction = ">="). If that is the wrong way
+#>    round for this marker, every sensitivity, specificity, cutpoint and AUC
+#>    below is reversed — switch Classification Direction to "<=" and the AUC
+#>    becomes 1 minus the value shown.
 #>    Note. AUC 95% confidence intervals computed using the DeLong method.
 #> 
 

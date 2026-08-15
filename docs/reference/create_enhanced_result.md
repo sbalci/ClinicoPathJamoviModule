@@ -21,3 +21,8 @@ create_enhanced_result(results, function_name, success = TRUE)
 - success:
 
   Whether the analysis succeeded
+
+## Value
+
+A `clinicopath_result` object: a list with `results` and `metadata`,
+plus `errors`/`warnings` logs when any were recorded.

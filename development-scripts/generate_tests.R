@@ -1,6 +1,6 @@
 
 # Auto-generator for Jamovi Module Tests
-# Usage: source("tests/generate_tests.R"); generate_test_for_module("jamovi/adaptivelasso.a.yaml")
+# Usage: source("development-scripts/generate_tests.R"); generate_test_for_module("jamovi/adaptivelasso.a.yaml")
 
 library(yaml)
 library(stringr)

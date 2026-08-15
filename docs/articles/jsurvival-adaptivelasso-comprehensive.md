@@ -1,5 +1,12 @@
 # Adaptive LASSO Cox Regression for Variable Selection in Survival Analysis
 
+> **Not yet released.** The `adaptivelasso` analysis is on a development
+> menu route, so it does not appear in the jamovi menus of ClinicoPath
+> or of any of its submodules. It is documented here ahead of a future
+> release, and its options, defaults and output may still change. The R
+> function is exported, so the examples below run from an R console;
+> what is not yet available is the jamovi analysis itself.
+
 > **Note:** The
 > [`adaptivelasso()`](https://www.serdarbalci.com/ClinicoPathJamoviModule/reference/adaptivelasso.md)
 > function is designed for use within **jamovi’s GUI**. The code
@@ -724,7 +731,7 @@ adaptivelasso(
                  "crp_level", "albumin", "gender", "stage", "grade"),
   stability_selection = TRUE,
   stability_threshold = 0.6,
-  bootstrap_samples = 100,
+  bootstrap_samples = 50,
   subsampling_ratio = 0.8,
   suitabilityCheck = FALSE,
   show_coefficients = TRUE,
@@ -768,7 +775,7 @@ adaptivelasso(
                  "crp_level", "albumin", "gender", "stage", "grade"),
   stability_selection = TRUE,
   stability_threshold = 0.9,
-  bootstrap_samples = 100,
+  bootstrap_samples = 50,
   subsampling_ratio = 0.8,
   suitabilityCheck = FALSE,
   show_coefficients = TRUE,
@@ -795,7 +802,7 @@ adaptivelasso(
                  "crp_level", "albumin", "gender", "stage", "grade"),
   stability_selection = TRUE,
   stability_threshold = 0.5,
-  bootstrap_samples = 100,
+  bootstrap_samples = 50,
   subsampling_ratio = 0.8,
   suitabilityCheck = FALSE,
   show_coefficients = TRUE,

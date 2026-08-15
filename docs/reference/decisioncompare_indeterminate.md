@@ -50,14 +50,13 @@ option to control handling.
 ``` r
 data(decisioncompare_indeterminate)
 decisioncompare(data = decisioncompare_indeterminate, gold = "GoldStandard",
-                goldPositive = "Positive", test1 = "Test1",
-                test1Positive = "Positive", test2 = "Test2",
-                test2Positive = "Positive", test3Positive = "",
+                goldPositive = "Positive", goldNegative = NULL, test1 = "Test1",
+                test1Positive = "Positive", test1Negative = NULL, test2 = "Test2",
+                test2Positive = "Positive", test2Negative = NULL,
+                test3Positive = "", test3Negative = NULL,
                 excludeIndeterminate = TRUE)
 #> 
 #>  COMPARE MEDICAL DECISION TESTS
-#> 
-#> character(0)
 #> 
 #>  Test 1 - Recoded Data                                            
 #>  ──────────────────────────────────────────────────────────────── 
@@ -79,16 +78,6 @@ decisioncompare(data = decisioncompare_indeterminate, gold = "GoldStandard",
 #>  ──────────────────────────────────────────────────────────────── 
 #> 
 #> 
-#>  Test 3 - Recoded Data                                        
-#>  ──────────────────────────────────────────────────────────── 
-#>                     Gold Positive    Gold Negative    Total   
-#>  ──────────────────────────────────────────────────────────── 
-#>    Test Positive    .                .                .       
-#>    Test Negative    .                .                .       
-#>    Total            .                .                .       
-#>  ──────────────────────────────────────────────────────────── 
-#> 
-#> 
 #>  Decision Test Comparison                                                                                                                                                                                                                                 
 #>  ──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────── 
 #>    Test                                                                                     Sensitivity    Specificity    Accuracy     Positive Predictive Value    Negative Predictive Value    Positive Likelihood Ratio    Negative Likelihood Ratio   
@@ -100,24 +89,17 @@ decisioncompare(data = decisioncompare_indeterminate, gold = "GoldStandard",
 #>  ──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────── 
 #> 
 #> 
-#>  Stratified Diagnostic Accuracy                                                                              
-#>  ─────────────────────────────────────────────────────────────────────────────────────────────────────────── 
-#>    Subgroup    N    Test    Sensitivity    Specificity    Accuracy     PPV          NPV          OPA         
-#>  ─────────────────────────────────────────────────────────────────────────────────────────────────────────── 
-#>  ─────────────────────────────────────────────────────────────────────────────────────────────────────────── 
-#> 
-#> 
 #>  <div style="font-family: Arial, sans-serif; max-width: 800px; margin:
 #>  0 auto; padding: 20px;"><h2 style="color: #2c3e50; border-bottom: 2px
 #>  solid #3498db;"> Clinical Summary
 #> 
 #>  Among the tests evaluated, Test1 demonstrated optimal diagnostic
-#>  performance with 89.1% sensitivity (95% CI: [see confidence interval
-#>  table]), 88.7% specificity (95% CI: [see confidence interval table]),
-#>  74.5% positive predictive value, 95.7% negative predictive value, and
-#>  88.8% overall accuracy. The likelihood ratio for positive results was
-#>  7.89 and for negative results was 0.12.<h3 style="color: #27ae60;
-#>  margin-top: 30px;"> Report Sentences
+#>  performance, with 89.1% sensitivity (95% CI: 76.4-96.4%), 88.7%
+#>  specificity (95% CI: 81.8-93.7%), 74.5% positive predictive value,
+#>  95.7% negative predictive value, and 88.8% overall accuracy. The
+#>  likelihood ratio for positive results was 7.89 and for negative
+#>  results was 0.12.<h3 style="color: #27ae60; margin-top: 30px;"> Report
+#>  Sentences
 #> 
 #>  <div style="background-color: #f8f9fa; padding: 15px; border-left: 4px
 #>  solid #28a745; margin: 15px 0;"><h4 style="margin-top: 0;">Methods
@@ -135,12 +117,11 @@ decisioncompare(data = decisioncompare_indeterminate, gold = "GoldStandard",
 #>  Section:
 #> 
 #>  <p style="font-style: italic; line-height: 1.6;">Among the tests
-#>  evaluated, Test1 demonstrated optimal diagnostic performance with
-#>  89.1% sensitivity (95% CI: [see confidence interval table]), 88.7%
-#>  specificity (95% CI: [see confidence interval table]), 74.5% positive
-#>  predictive value, 95.7% negative predictive value, and 88.8% overall
-#>  accuracy. The likelihood ratio for positive results was 7.89 and for
-#>  negative results was 0.12.
+#>  evaluated, Test1 demonstrated optimal diagnostic performance, with
+#>  89.1% sensitivity (95% CI: 76.4-96.4%), 88.7% specificity (95% CI:
+#>  81.8-93.7%), 74.5% positive predictive value, 95.7% negative
+#>  predictive value, and 88.8% overall accuracy. The likelihood ratio for
+#>  positive results was 7.89 and for negative results was 0.12.
 #> 
 #>  <h3 style="color: #8e44ad; margin-top: 30px;"> Clinical
 #>  Recommendations
@@ -246,7 +227,14 @@ decisioncompare(data = decisioncompare_indeterminate, gold = "GoldStandard",
 #>  and NPV vary with disease prevalenceMcNemar Test: Requires
 #>  paired/matched data for statistical comparisonsMissing Data: Cases
 #>  with incomplete data are excluded from analysisConfidence Intervals:
-#>  Calculated using Wilson method for better accuracy
+#>  The per-test CI tables report Clopper-Pearson exact intervals for the
+#>  proportions (sensitivity, specificity, PPV, NPV, accuracy and
+#>  prevalence), as computed by epiR::epi.tests() with its default
+#>  settings. Likelihood ratios are reported as point estimates only,
+#>  without confidence intervals. The Overall Percent Agreement (OPA)
+#>  table uses the method you select under "CI Method for Agreement"
+#>  (Wilson score by default). Paired differences between tests use
+#>  normal-approximation (Wald) intervals.
 #> 
 #>  <div style='margin: 10px 0;'><div style='background-color: #fff7ed;
 #>  border-left: 4px solid #fdba74; padding: 12px; margin: 8px 0;
@@ -258,6 +246,17 @@ decisioncompare(data = decisioncompare_indeterminate, gold = "GoldStandard",
 #>  specificity&#x2F;NPV if equivocal results are present. 115
 #>  non-positive cases detected. Consider enabling &quot;Exclude
 #>  Indeterminate&quot; option or using binary variables.<div
+#>  style='background-color: #fff7ed; border-left: 4px solid #fdba74;
+#>  padding: 12px; margin: 8px 0; border-radius: 4px;'><strong
+#>  style='color: #ea580c;'> Cannot Exclude Indeterminate Levels
+#>  Automatically
+#>  <span style='color: #374151;'>&quot;Exclude
+#>  indeterminate&#x2F;Equivocal levels&quot; is enabled, but no negative
+#>  level has been selected for Test1, which has more than two levels. The
+#>  analysis cannot tell which non-positive level is a genuine negative
+#>  and which is equivocal, so no rows were excluded for it: every
+#>  non-positive value is still being counted as Negative, which inflates
+#>  specificity and NPV. Select the negative level for that variable.<div
 #>  style='background-color: #eff6ff; border-left: 4px solid #93c5fd;
 #>  padding: 12px; margin: 8px 0; border-radius: 4px;'><strong
 #>  style='color: #2563eb;'> Analysis Completed Successfully

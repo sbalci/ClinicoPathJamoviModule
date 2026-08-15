@@ -4,7 +4,7 @@
 
 **Total .omv Files:** 945
 
-**Last Updated:** 2026-07-06
+**Last Updated:** 2026-08-15
 
 **GitHub Repository:**
 [ClinicoPathJamoviModule](https://github.com/sbalci/ClinicoPathJamoviModule)
