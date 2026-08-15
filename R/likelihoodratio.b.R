@@ -200,8 +200,8 @@ likelihoodratioClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cla
                     "one side of the split, so sensitivity and specificity cannot both ",
                     "be estimated.</p>",
                     "<p><i>", htmltools::htmlEscape(self$options$testVariable), "</i> ",
-                    "ranges from <b>", format(rng[1], digits = 4), "</b> to <b>",
-                    format(rng[2], digits = 4), "</b> - choose a cutpoint between those ",
+                    "ranges from <b>", base::format(rng[1], digits = 4), "</b> to <b>",
+                    base::format(rng[2], digits = 4), "</b> - choose a cutpoint between those ",
                     "values, or pick an estimated cutpoint method (Youden index, ",
                     "cost-weighted, ROC01, concordance) to have one derived from the ",
                     "data.</p>"))

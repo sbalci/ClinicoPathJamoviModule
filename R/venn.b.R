@@ -29,8 +29,11 @@
 #' mtcars$am <- factor(mtcars$am, levels = c(0, 1), labels = c("Automatic", "Manual"))
 #'
 #' # Create Venn diagram showing overlap between V-shaped engines and Manual transmission
+#' # var3true..var7true are Level options with no default, so the wrapper requires
+#' # them even when their variable is unused; pass NULL for the ones not in play.
 #' venn(data = mtcars, var1 = "vs", var1true = "V-shaped",
-#'      var2 = "am", var2true = "Manual")
+#'      var2 = "am", var2true = "Manual",
+#'      var3 = NULL, var3true = NULL, var4 = NULL, var4true = NULL)
 #'
 #' # Example 2: 3-variable Venn diagram with penguins data
 #' library(palmerpenguins)

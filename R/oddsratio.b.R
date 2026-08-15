@@ -40,7 +40,9 @@
 #' result <- oddsratio(
 #'   data = clinical_data,
 #'   explanatory = c("age", "gender", "smoking"),
-#'   outcome = "mortality"
+#'   outcome = "mortality",
+#'   outcomeLevel = "Yes",
+#'   predictorLevel = NULL
 #' )
 #'
 #' # With nomogram and specified outcome level
@@ -49,6 +51,7 @@
 #'   explanatory = c("age", "treatment"),
 #'   outcome = "recurrence",
 #'   outcomeLevel = "Yes",
+#'   predictorLevel = NULL,
 #'   showNomogram = TRUE
 #' )
 #' }

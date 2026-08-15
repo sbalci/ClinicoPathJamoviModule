@@ -877,8 +877,11 @@ ihcheterogeneityClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cl
                 
                 for (idx in seq_along(correlation_categories)) {
                     effect_size <- correlation_categories[idx]
-                    # Skip if effect size is zero or near-zero
-                    if (abs(effect_size) < 0.01) {
+                    # Skip if effect size is zero, near-zero, or undefined. cor()
+                    # returns NA when either measurement has zero variance (e.g. a
+                    # marker scored identically in every case), which would other-
+                    # wise abort the whole analysis at this if().
+                    if (is.na(effect_size) || abs(effect_size) < 0.01) {
                         next
                     }
 

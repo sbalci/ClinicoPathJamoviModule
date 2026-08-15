@@ -35,7 +35,8 @@
 #' result <- lollipop(
 #'   data = patient_data,
 #'   dep = "biomarker_level",
-#'   group = "patient_id"
+#'   group = "patient_id",
+#'   highlight = NULL
 #' )
 #' 
 #' # Horizontal lollipop with sorting
@@ -45,7 +46,8 @@
 #'   group = "treatment_type",
 #'   sortBy = "value_desc",
 #'   orientation = "horizontal",
-#'   showValues = TRUE
+#'   showValues = TRUE,
+#'   highlight = NULL
 #' )
 #' 
 #' # Clinical timeline with highlighting

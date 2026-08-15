@@ -51,7 +51,9 @@ When showNomogram is enabled, the function generates:
 result <- oddsratio(
   data = clinical_data,
   explanatory = c("age", "gender", "smoking"),
-  outcome = "mortality"
+  outcome = "mortality",
+  outcomeLevel = "Yes",
+  predictorLevel = NULL
 )
 
 # With nomogram and specified outcome level
@@ -60,6 +62,7 @@ result <- oddsratio(
   explanatory = c("age", "treatment"),
   outcome = "recurrence",
   outcomeLevel = "Yes",
+  predictorLevel = NULL,
   showNomogram = TRUE
 )
 }

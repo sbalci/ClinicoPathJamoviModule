@@ -110,8 +110,7 @@ result4 <- survivalcont(
   contexpl = "biomarker",
   person_time = TRUE,
   time_intervals = "6, 12, 24",
-  rate_multiplier = 1000,
-  calculatedtime = TRUE
+  rate_multiplier = 1000
 )
 
 # Comprehensive analysis with all features
@@ -136,9 +135,7 @@ result5 <- survivalcont(
   kmunicate = TRUE,
   loglog = TRUE,
   ci95 = TRUE,
-  risktable = TRUE,
-  calculatedcutoff = TRUE,
-  calculatedmulticut = TRUE
+  risktable = TRUE
 )
 }
 

@@ -127,9 +127,10 @@ options:
       default: vert
       description:
           R: >
-            Orientation of the plot. Default is 'vertical'.
+            Orientation of the plot. One of 'horr' (horizontal) or 'vert'
+            (vertical). Default is 'vert'.
           jamovi: >
-            Orientation of the plot. Default is 'vertical'.
+            Orientation of the plot. Default is vertical.
 
     - name: usetitle
       title: Custom title

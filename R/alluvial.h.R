@@ -405,7 +405,8 @@ alluvialBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   text only, not the binning method. easyalluvial uses its own internal
 #'   binning algorithm. For custom binning, create categorized variables before
 #'   analysis.
-#' @param orient Orientation of the plot. Default is 'vertical'.
+#' @param orient Orientation of the plot. One of 'horr' (horizontal) or 'vert'
+#'   (vertical). Default is 'vert'.
 #' @param usetitle Use a custom title for the plot.
 #' @param mytitle Title for the plot.
 #' @param maxvars Maximum number of variables to include in the alluvial plot.

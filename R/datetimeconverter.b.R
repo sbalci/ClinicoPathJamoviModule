@@ -1304,6 +1304,10 @@ datetimeconverterClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
         .run = function() {
 
+            # Notices accumulate on the instance, which persists across run cycles;
+            # without this reset the same notice is re-rendered once per option change.
+            private$.noticeList <- list()
+
             # Show welcome message if no variable selected
             if (is.null(self$options$datetime_var) || self$options$datetime_var == "") {
                 welcome_msg <- "

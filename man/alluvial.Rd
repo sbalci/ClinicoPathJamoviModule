@@ -54,7 +54,8 @@ text only, not the binning method. easyalluvial uses its own internal
 binning algorithm. For custom binning, create categorized variables before
 analysis.}
 
-\item{orient}{Orientation of the plot. Default is 'vertical'.}
+\item{orient}{Orientation of the plot. One of 'horr' (horizontal) or 'vert'
+(vertical). Default is 'vert'.}
 
 \item{usetitle}{Use a custom title for the plot.}
 
