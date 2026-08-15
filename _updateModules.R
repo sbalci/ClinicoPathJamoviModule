@@ -1039,6 +1039,58 @@ postprocess_module_examples <- function(module_dir, module_name) {
               n, module_name, module_name))
 }
 
+# Verified jamovi module install ----
+# jmvtools::install() shells the build out to jamovi and RETURNS NORMALLY when the
+# build fails - it only prints "Could not build module" to the console. So a failed
+# build used to be followed by "✅ <module> processing completed" and a release
+# would ship without a .jmo. Verify the artefact on disk instead of trusting the
+# return value. Modules that fail are collected in .jmo_build_failures and re-
+# reported at the very end, where a warning cannot scroll past unnoticed.
+.jmo_build_failures <- character()
+
+install_module_verified <- function(module_name, version = new_version) {
+  module_dir <- getwd()
+  # Match on the module prefix rather than the exact version: a submodule whose
+  # DESCRIPTION carries a different version would otherwise look like a failure.
+  jmo_of <- function() sort(list.files(module_dir,
+                                       pattern = sprintf("^%s_.*\\.jmo$", module_name),
+                                       full.names = TRUE))
+  expected <- file.path(module_dir, sprintf("%s_%s.jmo", module_name, version))
+  before_files <- jmo_of()
+  before <- if (length(before_files)) max(file.mtime(before_files)) else as.POSIXct(NA)
+
+  # A leftover 00LOCK-* directory from an interrupted install makes every later
+  # build fail with "failed to lock directory". This script installs modules one
+  # at a time, so any lock still present here is stale and safe to clear.
+  build_root <- file.path(module_dir, "build")
+  if (dir.exists(build_root)) {
+    for (vdir in list.dirs(build_root, recursive = FALSE)) {
+      locks <- list.files(vdir, pattern = "^00LOCK", full.names = TRUE)
+      locks <- locks[dir.exists(locks)]
+      for (l in locks) {
+        cat("  🧹 Removing stale build lock:", l, "\n")
+        unlink(l, recursive = TRUE, force = TRUE)
+      }
+    }
+  }
+
+  jmvtools::install()
+
+  fail <- function(why) {
+    .jmo_build_failures <<- unique(c(.jmo_build_failures, module_name))
+    stop(sprintf("jamovi module NOT built for %s (%s). Expected: %s",
+                 module_name, why, expected), call. = FALSE)
+  }
+  after_files <- jmo_of()
+  if (!length(after_files)) fail("no .jmo produced")
+  newest <- after_files[which.max(file.mtime(after_files))]
+  if (!is.na(before) && file.mtime(newest) <= before) fail(".jmo not regenerated")
+
+  cat(sprintf("  ✅ Built and installed %s (%s)\n", basename(newest),
+              format(structure(file.size(newest), class = "object_size"), units = "auto")))
+  invisible(newest)
+}
+
 # Data distribution helpers (P: automatic example-data + omv distribution) ----
 # Escape a string for safe use inside an .Rd \item{}{} produced by roxygen.
 .rd_escape <- function(x) {
@@ -2392,7 +2444,7 @@ if (extended) {
       devtools::document()
       postprocess_module_examples(getwd(), basename(getwd()))
       cat("  📦 Installing...\n")
-      jmvtools::install()
+      install_module_verified("jjstatsplot")
 
       if (check) {
         cat("  🔍 Running R CMD check...\n")
@@ -2447,7 +2499,7 @@ if (extended) {
       devtools::document()
       postprocess_module_examples(getwd(), basename(getwd()))
       cat("  📦 Installing...\n")
-      jmvtools::install()
+      install_module_verified("meddecide")
 
       if (check) {
         cat("  🔍 Running R CMD check...\n")
@@ -2502,7 +2554,7 @@ if (extended) {
       devtools::document()
       postprocess_module_examples(getwd(), basename(getwd()))
       cat("  📦 Installing...\n")
-      jmvtools::install()
+      install_module_verified("jsurvival")
 
       if (check) {
         cat("  🔍 Running R CMD check...\n")
@@ -2557,7 +2609,7 @@ if (extended) {
       devtools::document()
       postprocess_module_examples(getwd(), basename(getwd()))
       cat("  📦 Installing...\n")
-      jmvtools::install()
+      install_module_verified("ClinicoPathDescriptives")
 
       if (check) {
         cat("  🔍 Running R CMD check...\n")
@@ -2612,7 +2664,7 @@ if (extended) {
       devtools::document()
       postprocess_module_examples(getwd(), basename(getwd()))
       cat("  📦 Installing...\n")
-      jmvtools::install()
+      install_module_verified("OncoPath")
       if (check) {
         cat("  🔍 Running R CMD check...\n")
         devtools::check()
@@ -2669,7 +2721,7 @@ if (extended) {
       devtools::document()
       postprocess_module_examples(getwd(), basename(getwd()))
       cat("  📦 Installing...\n")
-      jmvtools::install()
+      install_module_verified("JamoviTest")
 
       if (check) {
         cat("  🔍 Running R CMD check...\n")
@@ -2688,6 +2740,20 @@ if (extended) {
 }
 
 setwd(main_repo_dir)
+
+# Final build verdict ----
+# Per-module failures surface as warnings, which scroll past in a long run. Repeat
+# them here as the last thing printed, and exit non-zero so a release script or CI
+# cannot treat a run that produced no .jmo as a success.
+if (length(.jmo_build_failures) > 0) {
+  cat("\n❌ ====== JAMOVI MODULE BUILD FAILED ======\n")
+  cat("   No .jmo was produced for:", paste(.jmo_build_failures, collapse = ", "), "\n")
+  cat("   Do NOT release: these modules are unchanged from their last successful build.\n")
+  cat("   Check the log above for 'Could not build module' and re-run after fixing.\n\n")
+  if (!interactive()) quit(status = 1, save = "no")
+} else {
+  cat("\n✅ All jamovi modules built and installed.\n")
+}
 
 # NAMESPACE-DESCRIPTION synchronization now occurs within each module's processing block
 # This ensures updated DESCRIPTION files are used during the second jmvtools::prepare() and installation
