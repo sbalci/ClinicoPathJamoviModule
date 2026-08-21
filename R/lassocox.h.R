@@ -313,7 +313,7 @@ lassocoxResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                         `format`="zto"),
                     list(
                         `name`="importance", 
-                        `title`="Importance", 
+                        `title`="Scale-Adjusted Magnitude |beta| x SD", 
                         `type`="number", 
                         `format`="zto")),
                 clearWith=list(
@@ -481,7 +481,7 @@ lassocoxResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                         `type`="text"),
                     list(
                         `name`="importance_score", 
-                        `title`="Importance Score", 
+                        `title`="Scale-Adjusted Magnitude |beta| x SD", 
                         `type`="number", 
                         `format`="zto"),
                     list(
@@ -491,7 +491,7 @@ lassocoxResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                         `format`="pc"),
                     list(
                         `name`="stability_rank", 
-                        `title`="Importance Rank", 
+                        `title`="Magnitude Rank", 
                         `type`="integer")),
                 clearWith=list(
                     "showVariableImportance",
@@ -548,7 +548,7 @@ lassocoxResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             self$add(jmvcore::Html$new(
                 options=options,
                 name="regularizationPathExplanation",
-                title="Understanding Regularization Path",
+                title="Understanding the Coefficient Summary Plot",
                 visible="(showExplanations && coef_plot)",
                 clearWith=list(
                     "showExplanations",
@@ -607,9 +607,10 @@ lassocoxBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   for numeric binary outcomes, the larger observed value is used (or 1 for
 #'   0/1 coding).
 #' @param censorLevel Level of \code{outcome} considered as censored (no
-#'   event). Together with \code{outcomeLevel}, this defines a strict two-level
-#'   encoding: rows whose outcome matches neither level are treated as missing
-#'   and excluded.
+#'   event). Together with \code{outcomeLevel}, this must identify the exactly
+#'   two observed nonmissing outcome values. Rows with an actually missing
+#'   outcome are excluded; additional observed event types cause the analysis to
+#'   stop and must be recoded explicitly for a cause-specific analysis.
 #' @param explanatory Variables to be considered for selection in the
 #'   Lasso-Cox regression. Constant variables are removed before fitting.
 #'   Categorical predictors are expanded into indicator columns, which LASSO

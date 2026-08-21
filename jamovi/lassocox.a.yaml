@@ -64,8 +64,10 @@ options:
       description:
         R: >
           Level of `outcome` considered as censored (no event). Together with
-          `outcomeLevel`, this defines a strict two-level encoding: rows whose
-          outcome matches neither level are treated as missing and excluded.
+          `outcomeLevel`, this must identify the exactly two observed nonmissing
+          outcome values. Rows with an actually missing outcome are excluded;
+          additional observed event types cause the analysis to stop and must be
+          recoded explicitly for a cause-specific analysis.
 
     - name: explanatory
       title: Explanatory Variables

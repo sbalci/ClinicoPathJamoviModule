@@ -455,7 +455,20 @@ decisioncurveResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                 options=options,
                 name="procedureNotes",
                 title="Analysis Summary",
-                visible=TRUE))
+                visible=TRUE,
+                clearWith=list(
+                    "outcome",
+                    "outcomePositive",
+                    "models",
+                    "thresholdRange",
+                    "thresholdMin",
+                    "thresholdMax",
+                    "thresholdStep",
+                    "modelNames",
+                    "clinicalDecisionRule",
+                    "decisionRuleVar",
+                    "decisionRulePositive",
+                    "decisionRuleLabel")))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="notices",
@@ -473,7 +486,6 @@ decisioncurveResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                     "clinicalDecisionRule",
                     "decisionRuleVar",
                     "decisionRulePositive",
-                    "decisionRuleLabel",
                     "decisionRuleLabel")))
             self$add(jmvcore::Table$new(
                 options=options,

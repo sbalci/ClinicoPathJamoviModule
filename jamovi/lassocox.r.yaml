@@ -73,7 +73,7 @@ items:
           type: number
           format: zto
         - name: importance
-          title: "Importance"
+          title: "Scale-Adjusted Magnitude |beta| x SD"
           type: number
           format: zto
       clearWith:
@@ -238,7 +238,7 @@ items:
           title: "Variable"
           type: text
         - name: importance_score
-          title: "Importance Score"
+          title: "Scale-Adjusted Magnitude |beta| x SD"
           type: number
           format: zto
         - name: selection_frequency
@@ -246,7 +246,7 @@ items:
           type: number
           format: pc
         - name: stability_rank
-          title: "Importance Rank"
+          title: "Magnitude Rank"
           type: integer
       clearWith:
           - showVariableImportance
@@ -297,7 +297,7 @@ items:
           - random_seed
 
     - name: regularizationPathExplanation
-      title: Understanding Regularization Path
+      title: Understanding the Coefficient Summary Plot
       type: Html
       visible: (showExplanations && coef_plot)
       clearWith:

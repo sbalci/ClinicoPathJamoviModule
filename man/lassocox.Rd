@@ -42,9 +42,10 @@ for numeric binary outcomes, the larger observed value is used (or 1 for
 0/1 coding).}
 
 \item{censorLevel}{Level of \code{outcome} considered as censored (no
-event). Together with \code{outcomeLevel}, this defines a strict two-level
-encoding: rows whose outcome matches neither level are treated as missing
-and excluded.}
+event). Together with \code{outcomeLevel}, this must identify the exactly
+two observed nonmissing outcome values. Rows with an actually missing
+outcome are excluded; additional observed event types cause the analysis to
+stop and must be recoded explicitly for a cause-specific analysis.}
 
 \item{explanatory}{Variables to be considered for selection in the
 Lasso-Cox regression. Constant variables are removed before fitting.

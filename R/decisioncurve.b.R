@@ -2146,7 +2146,8 @@ decisioncurveClass <- if (requireNamespace("jmvcore")) R6::R6Class(
                 ggtheme
 
             # Add confidence intervals if calculated and display requested
-            if (self$options$showNetBenefitCI && "ci_lower" %in% names(plot_data)) {
+            if ((self$options$confidenceIntervals || self$options$showNetBenefitCI) &&
+                "ci_lower" %in% names(plot_data)) {
                 model_data <- plot_data[!plot_data$model %in% c("Treat All", "Treat None"), ]
                 if (nrow(model_data) > 0) {
                     p <- p + ggplot2::geom_ribbon(

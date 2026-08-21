@@ -691,10 +691,21 @@ lassocoxClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                 jmvcore::reject(jmvcore::format(.('Error fitting final model: {msg}'), msg = e$message))
             })
             
-            # Extract coefficients and selected variables
+            # Extract coefficients and selected variables. Use glmnet's fitted degrees
+            # of freedom to distinguish a genuinely empty fit from very small coefficients
+            # on large-unit predictors. A fixed cutoff on the original coefficient scale
+            # is not scale invariant and can erase a clinically meaningful linear predictor.
             coef_matrix <- as.matrix(coef(final_model, s = lambda_optimal))
-            coef_matrix[abs(coef_matrix) <= 1e-8] <- 0
-            selected_vars <- which(coef_matrix[, 1] != 0)
+            fitted_df <- as.integer(final_model$df[length(final_model$df)])
+            if (length(fitted_df) != 1 || is.na(fitted_df) || fitted_df < 0) {
+                fitted_df <- sum(coef_matrix[, 1] != 0)
+            }
+            if (fitted_df == 0) {
+                coef_matrix[,] <- 0
+                selected_vars <- integer(0)
+            } else {
+                selected_vars <- which(coef_matrix[, 1] != 0)
+            }
 
             if (length(selected_vars) == 0) {
                 warning(jmvcore::format(
@@ -702,11 +713,10 @@ lassocoxClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                     rule = lambda_rule_used))
             }
             
-            # Calculate scores from the same tolerance-cleaned coefficient vector that is
-            # reported in the table. glmnet may return coefficients around machine epsilon
-            # at an otherwise empty lambda; using predict() on those residuals can create a
-            # nonconstant score and a spurious apparent C-index despite reporting no selected
-            # predictors. A Cox glmnet model has no intercept, so X %*% beta is the link.
+            # Calculate scores from the same coefficient vector that is reported in the
+            # table. For df = 0 this explicitly removes machine-epsilon residue so an empty
+            # model cannot imply discrimination. A Cox glmnet model has no intercept, so
+            # X %*% beta is the link.
             risk_scores <- if (length(selected_vars) == 0) {
                 rep(0, nrow(data$X))
             } else {
@@ -716,9 +726,16 @@ lassocoxClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             # Calculate comprehensive performance metrics
             performance_metrics <- private$.calculatePerformanceMetrics(y, risk_scores, data)
             
-            # Calculate variable importance (absolute coefficient values)
+            # Scale-adjusted coefficient magnitude. Raw glmnet coefficients are on
+            # original predictor units, so |beta| alone is not comparable across columns
+            # measured in different units. |beta| * SD(X) is the absolute change in the
+            # linear predictor for a one-SD change in that encoded design column.
             if (length(selected_vars) > 0) {
-                var_importance <- abs(coef_matrix[selected_vars, 1])
+                column_sd <- apply(data$X, 2, stats::sd)
+                column_sd[!is.finite(column_sd) | column_sd <= 0] <- NA_real_
+                var_importance <- abs(
+                    coef_matrix[selected_vars, 1] * column_sd[selected_vars]
+                )
                 names(var_importance) <- data$variable_names[selected_vars]
                 var_importance <- sort(var_importance, decreasing = TRUE)
             } else {
@@ -865,6 +882,8 @@ lassocoxClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
 
             table$setNote("penalized",
                 .("Coefficient and Hazard Ratio are from the penalized LASSO Cox fit at the selected lambda. Conventional p-values and confidence intervals are intentionally not reported because same-data post-selection inference would not account for variable and penalty selection."))
+            table$setNote("importance",
+                .("Scale-adjusted magnitude is |coefficient| multiplied by the complete-case SD of that encoded design column. It describes a one-SD change in the fitted linear predictor, not causal importance or selection stability; for a factor indicator it is not the category-versus-reference hazard ratio."))
             if (!is.null(results$data$scaling_info)) {
                 table$setNote("scale",
                     .("Predictors were standardized internally within glmnet fitting for the penalty calculation. glmnet back-transforms the displayed coefficients to the original design-column scale; indicator-column hazard ratios therefore compare that category with its reference category. Indicators are still penalized and selected separately rather than as a grouped factor."))
@@ -1151,7 +1170,8 @@ lassocoxClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             }
 
             if (self$options$coef_plot && length(results$selected_vars) > 0) {
-                # Align coef_values with var_importance ordering (sorted by |coef|)
+                # Align original-unit coefficients with the scale-adjusted-magnitude
+                # ordering used by the companion importance column.
                 all_coefs <- results$coef_matrix[, 1]
                 names(all_coefs) <- results$data$variable_names
                 aligned_coefs <- all_coefs[names(results$var_importance)]
@@ -1344,10 +1364,10 @@ lassocoxClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             
             <h4> Variable Importance Metrics:</h4>
             <ul>
-                <li><strong>Coefficient Magnitude:</strong> Larger |\u{03B2}| indicates stronger effect</li>
+                <li><strong>Scale-adjusted magnitude:</strong> |\u{03B2}| \u{00D7} SD(X) is the absolute fitted linear-predictor change for a one-SD change in an encoded design column</li>
+                <li><strong>Interpretation:</strong> This descriptive magnitude is not causal importance or selection stability; for a factor indicator it is not the category-versus-reference hazard ratio</li>
                 <li><strong>Path Inclusion Proportion:</strong> Fraction of lambda values in the regularization path where the variable has a non-zero coefficient</li>
                 <li><strong>Limitation:</strong> Path inclusion is not a bootstrap selection frequency and does not measure selection stability</li>
-                <li><strong>Path Entry:</strong> Lambda value at which variable first enters the model</li>
             </ul>
             
             <div class='alert alert-info'>
@@ -1355,8 +1375,8 @@ lassocoxClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                 <ul>
                     <li>Uses coordinate descent algorithm for optimization</li>
                     <li>Handles ties in survival times using Breslow approximation (glmnet default)</li>
-                    <li>Standardization (if enabled) is applied to predictors but not survival times</li>
-                    <li>When standardization is enabled, coefficients are per 1 SD of each encoded design column; indicator-column hazard ratios are not ordinary category-versus-reference contrasts</li>
+                    <li>Standardization (if enabled) is performed internally within each glmnet model fit, not on survival times</li>
+                    <li>glmnet back-transforms displayed coefficients to the original design-column scale; an indicator-column hazard ratio is therefore its category-versus-reference contrast, although indicators are penalized and selected separately</li>
                 </ul>
             </div>
             "
@@ -1484,7 +1504,7 @@ lassocoxClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                 <li><strong>X-axis:</strong> Selected variables</li>
                 <li><strong>Y-axis:</strong> Coefficient values at the selected lambda</li>
                 <li><strong>Color coding:</strong> Direction of effect (higher vs lower hazard)</li>
-                <li><strong>Magnitude:</strong> Larger absolute coefficients indicate stronger contribution to risk score</li>
+                <li><strong>Ordering:</strong> Variables are ordered by |\u{03B2}| \u{00D7} SD(X); raw coefficient heights are on original predictor units and should not be compared across differently scaled variables</li>
             </ul>
             
             <p><strong>Variable Selection:</strong> Variables with non-zero coefficients at the chosen \u{03BB} are included in the final model.</p>
@@ -1543,18 +1563,18 @@ lassocoxClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             )
             n_lambdas <- if (!is.null(all_coefs)) ncol(all_coefs) else 0
 
-            # Compute importance-based ranks
-            abs_coefs <- abs(results$coef_matrix[results$selected_vars, 1])
-            importance_order <- order(abs_coefs, decreasing = TRUE)
+            # Compute ranks from the same scale-adjusted magnitudes displayed elsewhere.
+            selected_names <- results$data$variable_names[results$selected_vars]
+            selected_importance <- results$var_importance[selected_names]
+            importance_order <- order(selected_importance, decreasing = TRUE,
+                                      na.last = TRUE)
             importance_ranks <- integer(length(results$selected_vars))
             importance_ranks[importance_order] <- seq_along(importance_order)
 
             for (i in seq_along(results$selected_vars)) {
                 var_idx <- results$selected_vars[i]
                 var_name <- results$data$variable_names[var_idx]
-                coef_val <- abs(results$coef_matrix[var_idx, 1])
-
-                importance <- coef_val
+                importance <- selected_importance[i]
 
                 # Selection frequency: fraction of lambda path where variable is non-zero
                 freq <- if (!is.null(all_coefs) && n_lambdas > 0) {
@@ -1570,6 +1590,11 @@ lassocoxClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                     stability_rank = importance_ranks[i]
                 ))
             }
+
+            table$setNote(
+                "importance",
+                .("Scale-adjusted magnitude is |coefficient| multiplied by the complete-case SD of each encoded design column. It is descriptive, not causal importance or selection stability. Path inclusion proportion is the fraction of the fitted lambda path with a nonzero coefficient, not a bootstrap selection frequency.")
+            )
         },
 
         # ── Data Suitability Assessment ─────────────────────────────
