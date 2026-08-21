@@ -18,7 +18,6 @@ items:
     - name: todo
       title: Welcome
       type: Html
-      visible: (!xvar)
 
     - name: plot
       title: ggpubr Plot

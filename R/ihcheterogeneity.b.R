@@ -235,9 +235,17 @@ ihcheterogeneityClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cl
         },
         
         .run = function() {
+            # Unset Variable options cannot be tested reliably with a leading `!`
+            # in r.yaml (the expression is silently treated as always visible).
+            # Keep the welcome panel synchronized here on every option change.
+            has_regional_measurement <-
+                !is.null(self$options$biopsy1) ||
+                (!is.null(self$options$biopsies) && length(self$options$biopsies) > 0)
+            self$results$welcome$setVisible(!has_regional_measurement)
+
             # Check required variables - need at least 2 regional measurements for analysis
             # wholesection is now optional (for inter-regional studies)
-            if (is.null(self$options$biopsy1) && is.null(self$options$biopsies)) {
+            if (!has_regional_measurement) {
                 return()
             }
 

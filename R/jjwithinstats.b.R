@@ -618,7 +618,12 @@ jjwithinstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             missing_vars <- vars[!vars %in% names(mydata)]
             if (length(missing_vars) > 0) {
                 private$.accumulateDataMessage(
-                    paste0(.("<br> Variables not found in dataset: "), private$.safeHtmlOutput(paste(missing_vars, collapse = ", ")), "<br>")
+                    paste0(
+                        "<br>",
+                        jmvcore::format(
+                            .("Variables not found in the dataset: {vars}."),
+                            vars = private$.safeHtmlOutput(paste(missing_vars, collapse = ", "))),
+                        "<br>")
                 )
                 private$.prepared_data <- NULL
                 return(NULL)
@@ -1214,7 +1219,10 @@ jjwithinstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             }, error = function(e) {
                 # htmlEscape e$message - ggwithinstats errors may include user column-name fragments
                 error_msg <- paste0(
-                    .("<br>Error creating within-subjects plot: "), private$.safeHtmlOutput(e$message),
+                    "<br>",
+                    jmvcore::format(
+                        .("The within-subjects plot could not be created: {error}"),
+                        error = private$.safeHtmlOutput(e$message)),
                     .("<br><br>Please check that:"),
                     .("<br>\u2022 All measurement variables contain numeric values"),
                     .("<br>\u2022 Data has at least 2 complete rows"),
@@ -1441,8 +1449,10 @@ jjwithinstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 # Surface the (html-escaped) error instead of failing silently.
                 # ggpubr messages may embed user column-name fragments.
                 error_msg <- paste0(
-                    .("<br>Error creating ggpubr plot: "),
-                    private$.safeHtmlOutput(e$message),
+                    "<br>",
+                    jmvcore::format(
+                        .("The ggpubr plot could not be created: {error}"),
+                        error = private$.safeHtmlOutput(e$message)),
                     .("<br>The primary within-subjects plot above is unaffected.<br><hr>")
                 )
                 self$results$todo$setContent(error_msg)

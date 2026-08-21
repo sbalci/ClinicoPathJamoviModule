@@ -39,11 +39,11 @@ pathologyagreementClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                 # type: "ERROR", "STRONG_WARNING", "WARNING", or "INFO"
 
                 style <- switch(type,
-                    "ERROR" = "background-color: rgba(216, 33, 50, 0.18); color: inherit; border-left: 4px solid #dc3545; color: inherit;",
-                    "STRONG_WARNING" = "background-color: rgba(255, 202, 33, 0.23); color: inherit; border-left: 4px solid #ff6b6b; color: inherit;",
-                    "WARNING" = "background-color: rgba(255, 202, 33, 0.23); color: inherit; border-left: 4px solid #ffc107; color: inherit;",
-                    "INFO" = "background-color: rgba(33, 163, 188, 0.21); color: inherit; border-left: 4px solid #17a2b8; color: inherit;",
-                    "background-color: rgba(138, 155, 172, 0.06); color: inherit; border-left: 4px solid #6c757d; color: inherit;"
+                    "ERROR" = "background-color: rgba(216, 33, 50, 0.18); color: inherit; border-left: 4px solid #dc3545; ",
+                    "STRONG_WARNING" = "background-color: rgba(255, 202, 33, 0.23); color: inherit; border-left: 4px solid #ff6b6b; ",
+                    "WARNING" = "background-color: rgba(255, 202, 33, 0.23); color: inherit; border-left: 4px solid #ffc107; ",
+                    "INFO" = "background-color: rgba(33, 163, 188, 0.21); color: inherit; border-left: 4px solid #17a2b8; ",
+                    "background-color: rgba(138, 155, 172, 0.06); color: inherit; border-left: 4px solid #6c757d; "
                 )
 
                 icon <- switch(type,

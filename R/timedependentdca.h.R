@@ -407,7 +407,7 @@ timedependentdcaResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6
                 clearWith=list(
                     "time",
                     "event",
-                    "predictor",
+                    "predictors",
                     "time_points",
                     "reference_strategy",
                     "use_bootstrap",
@@ -426,7 +426,7 @@ timedependentdcaResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6
                 clearWith=list(
                     "time",
                     "event",
-                    "predictor",
+                    "predictors",
                     "time_points",
                     "smoothing",
                     "use_bootstrap",

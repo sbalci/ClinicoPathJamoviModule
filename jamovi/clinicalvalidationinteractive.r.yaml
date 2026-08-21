@@ -196,7 +196,6 @@ items:
     clearWith:
       - outcome
       - predictors
-      - calibration_bins
 
   - name: thresholdPlot
     title: Threshold Optimization Plot

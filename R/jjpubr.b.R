@@ -79,6 +79,16 @@ jjpubrClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         .run = function() {
             private$.noticeList <- list()
 
+            # r.yaml cannot express `!xvar`: leading-negation expressions are
+            # silently treated as always visible. Synchronize the welcome/error
+            # panel imperatively so it also updates after the initial run.
+            has_x <- !is.null(self$options$xvar) && nzchar(self$options$xvar)
+            self$results$todo$setVisible(!has_x)
+            if (!has_x) {
+                self$results$todo$setContent(private$.generateWelcomeMessage())
+                return()
+            }
+
             if (!private$.validateInputs()) return()
 
             if (!requireNamespace("ggpubr", quietly = TRUE)) {

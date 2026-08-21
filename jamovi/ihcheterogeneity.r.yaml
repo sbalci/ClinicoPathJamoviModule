@@ -7,7 +7,6 @@ items:
     - name: welcome
       title: ""
       type: Html
-      visible: (!biopsy1)
       description: Welcome screen shown when no variables selected
 
     - name: interpretation

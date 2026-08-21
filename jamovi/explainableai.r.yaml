@@ -312,7 +312,7 @@ items:
 
         - name: featureclusteringtable
           title: Feature Clustering Results
-          visible: (!clustering_method:none)
+          visible: (clustering_method:none == FALSE)
           type: Table
           description: Groups of similar features
           columns:
@@ -339,7 +339,7 @@ items:
 
         - name: featureclusterplot
           title: Feature Clustering Visualization
-          visible: (!clustering_method:none)
+          visible: (clustering_method:none == FALSE)
           type: Image
           description: Dendrogram or cluster plot of features
           width: 700

@@ -183,9 +183,9 @@ patientdashboardClass <- R6::R6Class(
                 .patient-header { color: #2c3e50; font-size: 20px; font-weight: bold; margin-bottom: 15px; border-bottom: 2px solid #3498db; padding-bottom: 10px; }
                 .summary-section { margin: 10px 0; padding: 10px; background-color: rgba(138, 155, 172, 0.06); color: inherit; border-radius: 6px; border-left: 4px solid #3498db; }
                 .vital-status { display: inline-block; margin: 5px; padding: 3px 8px; border-radius: 4px; font-weight: bold; }
-                .normal { background-color: rgba(33, 197, 123, 0.19); color: inherit; color: inherit; }
-                .abnormal { background-color: rgba(227, 50, 33, 0.18); color: inherit; color: #e74c3c; }
-                .critical { background-color: rgba(186, 44, 33, 0.19); color: inherit; color: inherit; font-size: 14px; }
+                .normal { background-color: rgba(33, 197, 123, 0.19); color: inherit; }
+                .abnormal { background-color: rgba(227, 50, 33, 0.18); color: inherit; }
+                .critical { background-color: rgba(186, 44, 33, 0.19); color: inherit; font-size: 14px; }
                 .timestamp { color: #7f8c8d; font-size: 12px; font-style: italic; }
             </style></head><body>"
             

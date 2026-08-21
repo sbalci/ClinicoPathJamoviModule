@@ -260,7 +260,7 @@ aivalidationResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
                 options=options,
                 name="cvPerformanceTable",
                 title="Cross-Validation Performance",
-                visible="(!crossValidation:none)",
+                visible="(crossValidation:none == FALSE)",
                 clearWith=list(
                     "predictorVars",
                     "outcomeVar",

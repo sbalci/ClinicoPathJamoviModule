@@ -825,7 +825,7 @@ items:
       visible: (showLNAnalysis)
       clearWith:
         - totalPopulation
-        - metastaticLN
+        - positiveLymphNodes
         - lnrThreshold1
         - lnrThreshold2
       columns:
@@ -851,7 +851,7 @@ items:
       type: Table
       visible: (showLNAnalysis)
       clearWith:
-        - metastaticLN
+        - positiveLymphNodes
       columns:
         - name: nStage
           title: 'N Stage'
@@ -876,7 +876,7 @@ items:
       visible: (showLNAnalysis)
       clearWith:
         - totalPopulation
-        - metastaticLN
+        - positiveLymphNodes
       columns:
         - name: elnGroup
           title: 'ELN Group'
@@ -907,7 +907,7 @@ items:
       visible: (showEffectSizes)
       clearWith:
         - totalPopulation
-        - metastaticLN
+        - positiveLymphNodes
       columns:
         - name: measure
           title: 'Measure'

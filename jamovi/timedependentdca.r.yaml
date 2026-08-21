@@ -174,7 +174,7 @@ items:
       clearWith:
         - time
         - event
-        - predictor
+        - predictors
         - time_points
         - reference_strategy
         - use_bootstrap
@@ -193,7 +193,7 @@ items:
       clearWith:
         - time
         - event
-        - predictor
+        - predictors
         - time_points
         - smoothing
         - use_bootstrap

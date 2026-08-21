@@ -416,13 +416,13 @@ factoranalysisResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
                                     `title`="Rotated Eigenvalue", 
                                     `type`="number", 
                                     `format`="zto", 
-                                    `visible`="(!rotation:none)"),
+                                    `visible`="(rotation:none == FALSE)"),
                                 list(
                                     `name`="variance_percent_rotated", 
                                     `title`="Rotated % Variance", 
                                     `type`="number", 
                                     `format`="zto", 
-                                    `visible`="(!rotation:none)"))))
+                                    `visible`="(rotation:none == FALSE)"))))
                         self$add(jmvcore::Table$new(
                             options=options,
                             name="parallelAnalysis",
@@ -511,7 +511,7 @@ factoranalysisResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
                             options=options,
                             name="factorScoresStats",
                             title="Factor Scores Statistics",
-                            visible="(!scores:none)",
+                            visible="(scores:none == FALSE)",
                             columns=list(
                                 list(
                                     `name`="factor", 

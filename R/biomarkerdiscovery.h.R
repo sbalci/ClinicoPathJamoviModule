@@ -1275,7 +1275,7 @@ biomarkerdiscoveryResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::
                 renderFun=".plot_nomogram",
                 clearWith=list(
                     "nomogram_development",
-                    "selected_biomarkers")))}))
+                    "biomarker_vars")))}))
 
 biomarkerdiscoveryBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
     "biomarkerdiscoveryBase",

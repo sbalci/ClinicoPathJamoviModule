@@ -1577,7 +1577,7 @@ pathsamplingResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
                 visible="(showLNAnalysis)",
                 clearWith=list(
                     "totalPopulation",
-                    "metastaticLN",
+                    "positiveLymphNodes",
                     "lnrThreshold1",
                     "lnrThreshold2"),
                 columns=list(
@@ -1608,7 +1608,7 @@ pathsamplingResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
                 title="AJCC N Stage Distribution",
                 visible="(showLNAnalysis)",
                 clearWith=list(
-                    "metastaticLN"),
+                    "positiveLymphNodes"),
                 columns=list(
                     list(
                         `name`="nStage", 
@@ -1638,7 +1638,7 @@ pathsamplingResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
                 visible="(showLNAnalysis)",
                 clearWith=list(
                     "totalPopulation",
-                    "metastaticLN"),
+                    "positiveLymphNodes"),
                 columns=list(
                     list(
                         `name`="elnGroup", 
@@ -1673,7 +1673,7 @@ pathsamplingResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
                 visible="(showEffectSizes)",
                 clearWith=list(
                     "totalPopulation",
-                    "metastaticLN"),
+                    "positiveLymphNodes"),
                 columns=list(
                     list(
                         `name`="measure", 

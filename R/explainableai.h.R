@@ -688,7 +688,7 @@ explainableaiResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                             options=options,
                             name="featureclusteringtable",
                             title="Feature Clustering Results",
-                            visible="(!clustering_method:none)",
+                            visible="(clustering_method:none == FALSE)",
                             columns=list(
                                 list(
                                     `name`="cluster_id", 
@@ -717,7 +717,7 @@ explainableaiResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                             options=options,
                             name="featureclusterplot",
                             title="Feature Clustering Visualization",
-                            visible="(!clustering_method:none)",
+                            visible="(clustering_method:none == FALSE)",
                             width=700,
                             height=500,
                             renderFun=".plotFeatureClustering"))}))$new(options=options))

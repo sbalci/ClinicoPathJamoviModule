@@ -21,7 +21,9 @@ items:
                 - dep
                 - group
                 - analysisType
-                - measures
+                - measures_cohens_d
+                - measures_hedges_g
+                - measures_glass_delta
                 - testValue
                 - group1Value
                 - group2Value
@@ -459,7 +461,9 @@ items:
                 - dep
                 - group
                 - analysisType
-                - measures
+                - measures_cohens_d
+                - measures_hedges_g
+                - measures_glass_delta
                 - testValue
                 - group1Value
                 - group2Value

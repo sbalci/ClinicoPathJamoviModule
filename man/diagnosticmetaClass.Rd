@@ -15,6 +15,7 @@ Diagnostic Test Meta-Analysis for Pathology
 \section{Methods}{
 \subsection{Public methods}{
   \itemize{
+    \item \href{#method-diagnosticmetaClass-asSource}{\code{diagnosticmetaClass$asSource()}}
     \item \href{#method-diagnosticmetaClass-clone}{\code{diagnosticmetaClass$clone()}}
   }
 }
@@ -36,7 +37,6 @@ Diagnostic Test Meta-Analysis for Pathology
   <li><span class="pkg-link" data-pkg="jmvcore" data-topic="Analysis" data-id=".setStatePathSource"><a href='../../jmvcore/html/Analysis.html#method-Analysis-.setStatePathSource'><code>jmvcore::Analysis$.setStatePathSource()</code></a></span></li>
   <li><span class="pkg-link" data-pkg="jmvcore" data-topic="Analysis" data-id="addAddon"><a href='../../jmvcore/html/Analysis.html#method-Analysis-addAddon'><code>jmvcore::Analysis$addAddon()</code></a></span></li>
   <li><span class="pkg-link" data-pkg="jmvcore" data-topic="Analysis" data-id="asProtoBuf"><a href='../../jmvcore/html/Analysis.html#method-Analysis-asProtoBuf'><code>jmvcore::Analysis$asProtoBuf()</code></a></span></li>
-  <li><span class="pkg-link" data-pkg="jmvcore" data-topic="Analysis" data-id="asSource"><a href='../../jmvcore/html/Analysis.html#method-Analysis-asSource'><code>jmvcore::Analysis$asSource()</code></a></span></li>
   <li><span class="pkg-link" data-pkg="jmvcore" data-topic="Analysis" data-id="check"><a href='../../jmvcore/html/Analysis.html#method-Analysis-check'><code>jmvcore::Analysis$check()</code></a></span></li>
   <li><span class="pkg-link" data-pkg="jmvcore" data-topic="Analysis" data-id="init"><a href='../../jmvcore/html/Analysis.html#method-Analysis-init'><code>jmvcore::Analysis$init()</code></a></span></li>
   <li><span class="pkg-link" data-pkg="jmvcore" data-topic="Analysis" data-id="optionsChangedHandler"><a href='../../jmvcore/html/Analysis.html#method-Analysis-optionsChangedHandler'><code>jmvcore::Analysis$optionsChangedHandler()</code></a></span></li>
@@ -51,6 +51,21 @@ Diagnostic Test Meta-Analysis for Pathology
   <li><code>diagnosticmetaBase$initialize()</code></li>
 </ul>
 </details>}}
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-diagnosticmetaClass-asSource"></a>}}
+\if{latex}{\out{\hypertarget{method-diagnosticmetaClass-asSource}{}}}
+\subsection{\code{diagnosticmetaClass$asSource()}}{
+  Generate R source code for diagnostic test meta-analysis
+  \subsection{Usage}{
+    \if{html}{\out{<div class="r">}}
+    \preformatted{diagnosticmetaClass$asSource()}
+    \if{html}{\out{</div>}}
+  }
+  \subsection{Returns}{
+    Character string with reproducible R syntax
+  }
+}
+
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-diagnosticmetaClass-clone"></a>}}
 \if{latex}{\out{\hypertarget{method-diagnosticmetaClass-clone}{}}}

@@ -1491,9 +1491,9 @@ chisqposttestClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     # Determine cell styling based on significance
                     cell_style <- if (is_significant) {
                         if (residual_val > 0) {
-                            "border: 1px solid #e1e5e9; padding: 8px; text-align: center; background-color: rgba(255, 33, 67, 0.09); color: inherit; color: inherit; font-weight: bold;"
+                            "border: 1px solid #e1e5e9; padding: 8px; text-align: center; background-color: rgba(255, 33, 67, 0.09); color: inherit; font-weight: bold;"
                         } else {
-                            "border: 1px solid #e1e5e9; padding: 8px; text-align: center; background-color: rgba(33, 152, 239, 0.13); color: inherit; color: inherit; font-weight: bold;"
+                            "border: 1px solid #e1e5e9; padding: 8px; text-align: center; background-color: rgba(33, 152, 239, 0.13); color: inherit; font-weight: bold;"
                         }
                     } else {
                         "border: 1px solid #e1e5e9; padding: 8px; text-align: center; background-color: rgba(155, 155, 155, 0.06); color: inherit;"

@@ -7,7 +7,6 @@ items:
     - name: todo
       title: Welcome
       type: Html
-      visible: (!participant_id)
 
     - name: flowImbalanceNotice
       title: ''

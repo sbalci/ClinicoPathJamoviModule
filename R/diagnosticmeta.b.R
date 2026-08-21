@@ -3204,25 +3204,60 @@ diagnosticmetaClass <- R6::R6Class(
                 private$.renderSymbols(html)
             )
         }
+    ),
+    public = list(
+        #' @description
+        #' Generate R source code for diagnostic test meta-analysis
+        #' @return Character string with reproducible R syntax
+        asSource = function() {
+            required <- c(
+                self$options$study,
+                self$options$true_positives,
+                self$options$false_positives,
+                self$options$false_negatives,
+                self$options$true_negatives
+            )
+            if (any(vapply(required, is.null, logical(1))))
+                return("")
 
-        # TODO (forward-looking): no `.asSource()` method - the jamovi syntax
-        # pane therefore cannot render the equivalent R call for the user's
-        # configured analysis (users cannot copy-paste the analysis as
-        # reproducible R code). Adding one requires emitting a call shape like:
-        #   diagnosticmeta(
-        #       data           = data,
-        #       study          = <varname>,
-        #       true_positives = <varname>, ...
-        #       bivariate_analysis   = <bool>,
-        #       confidence_level     = <int>,
-        #       method               = <enum>,
-        #       zero_cell_correction = <enum>,
-        #       ...
-        #   )
-        # Use `jmvcore::sourcifyOption()` per option and `jmvcore::sourcifyName()`
-        # for variable references (NOT manual paste0 quoting - see project
-        # MEMORY.md `feedback_sourcify_quoting_correct_helper`). The
-        # `/add-R-code diagnosticmeta` skill scaffolds this with the
-        # `showRCode` option + `rCode` Html output.
+            # Variable options are emitted as quoted R strings. deparse() handles
+            # spaces, quotes, backslashes and Unicode safely. Other options retain
+            # jmvcore's canonical sourcification and default suppression.
+            args <- character(0)
+            for (option in private$.options$options) {
+                if (identical(option$name, "data"))
+                    next
+
+                if (inherits(option, "OptionVariable") ||
+                    inherits(option, "OptionVariables")) {
+                    value <- option$value
+                    if (!is.null(value)) {
+                        args <- c(
+                            args,
+                            paste0(
+                                option$name,
+                                " = ",
+                                paste0(deparse(value), collapse = "")
+                            )
+                        )
+                    }
+                } else {
+                    source_arg <- private$.sourcifyOption(option)
+                    if (!identical(source_arg, ""))
+                        args <- c(args, source_arg)
+                }
+            }
+
+            package <- utils::packageName()
+            if (is.null(package))
+                package <- "ClinicoPath"
+
+            paste0(
+                package,
+                "::diagnosticmeta(\n    data = data,\n    ",
+                paste(args, collapse = ",\n    "),
+                ")"
+            )
+        }
     )
 )

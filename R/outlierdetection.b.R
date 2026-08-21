@@ -198,11 +198,11 @@ outlierdetectionClass <- if (requireNamespace("jmvcore")) R6::R6Class("outlierde
         .createHTMLSection = function(title, content, style = "info", icon = NULL) {
             # Helper function to create consistent HTML sections
             styles <- list(
-                info = "background-color: rgba(33, 152, 239, 0.13); color: inherit; color: inherit;",
-                warning = "background-color: rgba(255, 169, 33, 0.14); color: inherit; color: inherit;",
-                error = "background-color: rgba(255, 33, 67, 0.09); color: inherit; color: #d32f2f;",
-                success = "background-color: rgba(33, 159, 43, 0.1); color: inherit; color: inherit;",
-                neutral = "background-color: rgba(88, 88, 88, 0.06); color: inherit; color: inherit;"
+                info = "background-color: rgba(33, 152, 239, 0.13); color: inherit;",
+                warning = "background-color: rgba(255, 169, 33, 0.14); color: inherit;",
+                error = "background-color: rgba(255, 33, 67, 0.09); color: inherit;",
+                success = "background-color: rgba(33, 159, 43, 0.1); color: inherit;",
+                neutral = "background-color: rgba(88, 88, 88, 0.06); color: inherit;"
             )
 
             icon_html <- if (!is.null(icon)) paste0(icon, " ") else ""
@@ -517,11 +517,13 @@ outlierdetectionClass <- if (requireNamespace("jmvcore")) R6::R6Class("outlierde
                 if (is.factor(column))
                     column <- as.character(column)
                 converted <- suppressWarnings(as.numeric(column))
-                if (all(is.na(converted)) && !all(is.na(column)))
+                failed <- !is.na(column) & is.na(converted)
+                if (any(failed))
                     jmvcore::reject(
                         jmvcore::format(
-                            .("Variable '{var}' is not numeric and could not be converted, so outlier detection cannot run on it. Select a continuous variable."),
-                            var = var),
+                            .("Variable '{var}' contains {n} non-missing value(s) that cannot be converted to numbers, so outlier detection cannot run on it. Correct those values or select a continuous variable."),
+                            var = var,
+                            n = sum(failed)),
                         code = "non_numeric_variable")
                 analysis_data[[var]] <- converted
             }
@@ -1485,9 +1487,11 @@ outlierdetectionClass <- if (requireNamespace("jmvcore")) R6::R6Class("outlierde
                     if (is.character(var_data) || is.factor(var_data)) {
                         # Try to convert to numeric
                         numeric_conversion <- suppressWarnings(as.numeric(as.character(var_data)))
-                        if (all(is.na(numeric_conversion))) {
+                        failed <- !is.na(var_data) & is.na(numeric_conversion)
+                        if (any(failed)) {
                             validation_results$errors <- c(validation_results$errors,
-                                paste("Variable", var, "cannot be converted to numeric"))
+                                paste("Variable", var, "contains", sum(failed),
+                                      "non-missing value(s) that cannot be converted to numeric"))
                             validation_results$should_stop <- TRUE
                             next
                         } else {

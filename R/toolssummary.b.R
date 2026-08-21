@@ -136,7 +136,6 @@ toolssummaryClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                         padding: 12px 8px;
                         text-align: left;
                         font-weight: bold;
-                        color: inherit;
                     }
                     .freq-table td {
                         border: 1px solid #ddd;

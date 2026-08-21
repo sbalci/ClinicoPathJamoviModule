@@ -324,13 +324,13 @@ haralicktextureResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
                 options=options,
                 name="clinicalinterpretation",
                 title="Clinical Interpretation",
-                visible="(!biomarker_context:general)"))
+                visible="(biomarker_context:general == FALSE)"))
             self$add(jmvcore::Table$new(
                 options=options,
                 name="prognosticsummary",
                 title="Prognostic Summary",
                 columns=list(),
-                visible="(!biomarker_context:general)",
+                visible="(biomarker_context:general == FALSE)",
                 clearWith=list(
                     "texture_features",
                     "biomarker_context",

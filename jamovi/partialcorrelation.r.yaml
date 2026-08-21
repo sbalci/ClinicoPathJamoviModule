@@ -38,7 +38,7 @@ items:
         title: p (adjusted)
         type: number
         format: zto,pvalue
-        visible: (!multipleComparison:none)
+        visible: (multipleComparison:none == FALSE)
       - name: df
         title: df
         type: integer
@@ -108,7 +108,7 @@ items:
         title: p (adjusted)
         type: number
         format: zto,pvalue
-        visible: (!multipleComparison:none)
+        visible: (multipleComparison:none == FALSE)
       - name: df
         title: df
         type: integer

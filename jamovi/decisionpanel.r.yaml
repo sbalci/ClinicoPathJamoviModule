@@ -801,7 +801,16 @@ items:
       renderFun: .plotTree
       visible: (plotTree && createTree)
       clearWith:
-        - tests
+        - test1
+        - test1Positive
+        - test2
+        - test2Positive
+        - test3
+        - test3Positive
+        - test4
+        - test4Positive
+        - test5
+        - test5Positive
         - gold
         - goldPositive
         - treeMethod
@@ -816,7 +825,16 @@ items:
       renderFun: .plotStrategyComparison
       visible: (plotComparison && compareStrategies)
       clearWith:
-        - tests
+        - test1
+        - test1Positive
+        - test2
+        - test2Positive
+        - test3
+        - test3Positive
+        - test4
+        - test4Positive
+        - test5
+        - test5Positive
         - strategies
         - optimizationCriteria
 
@@ -828,7 +846,16 @@ items:
       renderFun: .plotCostEffectiveness
       visible: (plotCostEffect && useCosts)
       clearWith:
-        - tests
+        - test1
+        - test1Positive
+        - test2
+        - test2Positive
+        - test3
+        - test3Positive
+        - test4
+        - test4Positive
+        - test5
+        - test5Positive
         - testCosts
         - fpCost
         - fnCost
@@ -841,7 +868,16 @@ items:
       renderFun: .plotROCCurves
       visible: (plotROC)
       clearWith:
-        - tests
+        - test1
+        - test1Positive
+        - test2
+        - test2Positive
+        - test3
+        - test3Positive
+        - test4
+        - test4Positive
+        - test5
+        - test5Positive
         - topN
 
     # ==========================================

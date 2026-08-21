@@ -70,7 +70,6 @@ items:
         - eventOfInterest
         - censorLevel
         - covariates
-        - strata
         - confLevel
 
     # Gray's test results

@@ -316,16 +316,14 @@ linechartClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
 
             # Enhanced minimum data requirements with suggestions
             if (nrow(data) < 3) {
-                jmvcore::reject(paste0(.("At least 3 complete observations are required for line chart analysis. "),
-                           .("Current dataset has "), nrow(data), .(" observations. "),
-                           .("Consider checking for missing values or selecting different variables.")))
+                jmvcore::reject(jmvcore::format(
+                    .("At least 3 complete observations are required for line chart analysis. The current dataset has {n} observation(s). Consider checking for missing values or selecting different variables."),
+                    n = nrow(data)))
             }
 
             # Enhanced variation check with suggestions
             if (var(data[[yvar]], na.rm = TRUE) == 0) {
-                jmvcore::reject(paste0(.("Y-axis variable has no variation (all values are identical). "),
-                           .("Line charts require variation in the Y variable. "),
-                           .("Please select a different variable with varying values.")))
+                jmvcore::reject(.("The Y-axis variable has no variation (all values are identical). Line charts require variation in the Y variable. Please select a different variable with varying values."))
             }
 
             # (refline is a numeric Number option: no non-numeric validation needed here)
@@ -430,9 +428,20 @@ linechartClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                 correlation_stats$pearson_ci_upper_naive <- cor_result$conf.int[2]
 
                 # Spearman correlation (rank-based)
-                cor_spearman <- cor.test(x_data, y_data, method = "spearman")
+                # Tied ranks make the exact Spearman test unavailable. Request
+                # the asymptotic calculation explicitly in that case so the
+                # backend does not emit a console-only warning, and carry the
+                # inferential limitation into the visible results table.
+                has_spearman_ties <- anyDuplicated(x_data) > 0L ||
+                    anyDuplicated(y_data) > 0L
+                cor_spearman <- cor.test(
+                    x_data,
+                    y_data,
+                    method = "spearman",
+                    exact = if (has_spearman_ties) FALSE else NULL)
                 correlation_stats$spearman_r_naive <- cor_spearman$estimate
                 correlation_stats$spearman_p_naive <- cor_spearman$p.value
+                correlation_stats$spearman_has_ties <- has_spearman_ties
 
                 # Linear regression statistics
                 lm_result <- lm(y_data ~ x_data)
@@ -540,20 +549,23 @@ linechartClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                 table$addRow(rowKey = row_num, values = list(
                     measure = .("R-squared (Effect Size)"),
                     value = correlation_stats$r_squared,
-                    interpretation = paste0(round(correlation_stats$r_squared * 100, 1),
-                                          .("% of variance explained. "),
-                                          private$.interpretEffectSize(correlation_stats$r_squared))
+                    interpretation = jmvcore::format(
+                        .("{percent}% of variance explained. {interpretation}"),
+                        percent = round(correlation_stats$r_squared * 100, 1),
+                        interpretation = private$.interpretEffectSize(correlation_stats$r_squared))
                 ))
                 row_num <- row_num + 1
 
                 # Enhanced slope interpretation
-                slope_interpretation <- paste0(
-                    if (correlation_stats$slope > 0) .("Positive trend: ") else .("Negative trend: "),
-                    .("Each unit increase in X corresponds to "),
-                    private$.fmtNum(abs(correlation_stats$slope)),
-                    if (correlation_stats$slope > 0) .(" unit increase") else .(" unit decrease"),
-                    .(" in Y on average.")
-                )
+                slope_interpretation <- if (correlation_stats$slope > 0) {
+                    jmvcore::format(
+                        .("Positive trend: Each unit increase in X corresponds to an average {slope} unit increase in Y."),
+                        slope = private$.fmtNum(abs(correlation_stats$slope)))
+                } else {
+                    jmvcore::format(
+                        .("Negative trend: Each unit increase in X corresponds to an average {slope} unit decrease in Y."),
+                        slope = private$.fmtNum(abs(correlation_stats$slope)))
+                }
 
                 table$addRow(rowKey = row_num, values = list(
                     measure = .("Regression Slope"),
@@ -573,7 +585,7 @@ linechartClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                 # Add independence assumption warning if applicable
                 if (!is.null(correlation_stats$independence_note)) {
                     table$addRow(rowKey = row_num, values = list(
-                        measure = .(" Statistical Validity"),
+                        measure = .("Statistical Validity"),
                         value = "",
                         interpretation = correlation_stats$independence_note
                     ))
@@ -583,6 +595,13 @@ linechartClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
 
             # Spearman correlation with enhanced interpretation
             if (!is.null(correlation_stats$spearman_r)) {
+                spearman_note <- if (isTRUE(correlation_stats$spearman_has_ties)) {
+                    paste0(
+                        " ",
+                        .("The p-value uses an asymptotic approximation because tied ranks prevent exact inference."))
+                } else {
+                    ""
+                }
                 table$addRow(rowKey = row_num, values = list(
                     measure = .("Spearman Correlation (Rank-based)"),
                     value = correlation_stats$spearman_r,
@@ -590,7 +609,8 @@ linechartClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                                                                          correlation_stats$spearman_p,
                                                                          has_repeated_measures,
                                                                          has_grouping),
-                                          " ", .("This non-parametric measure is robust to outliers."))
+                                          " ", .("This rank-based measure is less sensitive to extreme values than Pearson correlation."),
+                                          spearman_note)
                 ))
                 row_num <- row_num + 1
             }
@@ -598,11 +618,9 @@ linechartClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             # ANOVA for categorical X with enhanced interpretation
             if (!is.null(correlation_stats$anova_f)) {
                 anova_interpretation <- if (correlation_stats$anova_p < 0.05) {
-                    paste0(.("Significant differences between groups detected (p < 0.05). "),
-                          .("Post-hoc testing recommended to identify specific group differences."))
+                    .("Significant differences between groups were detected (p < 0.05). Post-hoc testing is recommended to identify specific group differences.")
                 } else {
-                    paste0(.("No significant differences between groups detected (p \u2265 0.05). "),
-                          .("Groups show similar mean values."))
+                    .("No statistically significant differences between groups were detected (p \u2265 0.05). This result does not establish equivalence between the group means.")
                 }
 
                 table$addRow(rowKey = row_num, values = list(
@@ -630,16 +648,17 @@ linechartClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             direction <- if (r > 0) .("positive") else .("negative")
             strength <- private$.correlationStrength(r)
 
-            copy_ready <- paste0(
-                .("Analysis revealed a "), strength, " ", direction, " ", .("correlation between the variables "),
-                "(r = ", round(r, 3), ", ", sig_level, "). ",
-                .("The correlation explains "), round(r_squared * 100, 1), .("% of the variance. "),
-                if (is_significant) {
-                    .("This relationship is statistically significant.")
-                } else {
-                    .("This relationship is not statistically significant.")
-                }
-            )
+            copy_ready <- if (is_significant) {
+                jmvcore::format(
+                    .("The analysis found a {strength} {direction} correlation between the variables (r = {r}, {p}). The correlation explains {variance}% of the variance, and the relationship is statistically significant."),
+                    strength = strength, direction = direction, r = round(r, 3),
+                    p = sig_level, variance = round(r_squared * 100, 1))
+            } else {
+                jmvcore::format(
+                    .("The analysis found a {strength} {direction} correlation between the variables (r = {r}, {p}). The correlation explains {variance}% of the variance, and the relationship is not statistically significant."),
+                    strength = strength, direction = direction, r = round(r, 3),
+                    p = sig_level, variance = round(r_squared * 100, 1))
+            }
             
             # Add caution if needed
             if (has_repeated_measures) {
@@ -801,9 +820,9 @@ linechartClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                         quad_r2 <- summary(quadratic_model)$r.squared
                         improvement <- quad_r2 - linear_r2
                         if (improvement > 0.05) {
-                            .(" Potential non-linear relationship detected. Consider polynomial or spline fitting.")
+                            .("Potential non-linear relationship detected. Consider polynomial or spline fitting.")
                         } else {
-                            .(" Linear relationship assumption appears reasonable.")
+                            .("The linear relationship assumption appears reasonable.")
                         }
                     } else {
                         .("Unable to assess linearity automatically.")
@@ -823,9 +842,9 @@ linechartClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
 
                         if (!is.null(shapiro_result)) {
                             if (shapiro_result$p.value > 0.05) {
-                                .(" Residuals appear normally distributed (Shapiro-Wilk p > 0.05).")
+                                .("Residuals appear normally distributed (Shapiro-Wilk p > 0.05).")
                             } else {
-                                .(" Residuals may not be normally distributed (Shapiro-Wilk p \u2264 0.05). Consider robust methods.")
+                                .("Residuals may not be normally distributed (Shapiro-Wilk p \u2264 0.05). Consider robust methods.")
                             }
                         } else {
                             .("Unable to test normality of residuals.")

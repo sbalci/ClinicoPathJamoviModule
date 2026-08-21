@@ -290,7 +290,7 @@ partialcorrelationResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::
                         `title`="p (adjusted)", 
                         `type`="number", 
                         `format`="zto,pvalue", 
-                        `visible`="(!multipleComparison:none)"),
+                        `visible`="(multipleComparison:none == FALSE)"),
                     list(
                         `name`="df", 
                         `title`="df", 
@@ -375,7 +375,7 @@ partialcorrelationResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::
                         `title`="p (adjusted)", 
                         `type`="number", 
                         `format`="zto,pvalue", 
-                        `visible`="(!multipleComparison:none)"),
+                        `visible`="(multipleComparison:none == FALSE)"),
                     list(
                         `name`="df", 
                         `title`="df", 

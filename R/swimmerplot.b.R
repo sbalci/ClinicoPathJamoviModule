@@ -3040,20 +3040,24 @@ swimmerplotClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6Class
                 }
 
                 response_text <- if (!rates$evaluable) {
-                    .(" Response categories were not RECIST-coded, so objective response and disease control rates were not calculated.")
+                    .("Response categories were not RECIST-coded, so objective response and disease control rates were not calculated.")
                 } else {
-                    sprintf(
-                        " Response evaluation showed an objective response rate (ORR) of %.1f%% (%d/%d patients%s) and disease control rate (DCR) of %.1f%% (%d/%d patients%s).",
-                        orr_pct, orr_count, total_responses, orr_ci_text,
-                        dcr_pct, dcr_count, total_responses, dcr_ci_text
-                    )
+                    jmvcore::format(
+                        .("Response evaluation showed an objective response rate (ORR) of {orr}% ({orr_n}/{total} patients{orr_ci}) and a disease control rate (DCR) of {dcr}% ({dcr_n}/{total} patients{dcr_ci})."),
+                        orr = sprintf("%.1f", orr_pct),
+                        orr_n = orr_count,
+                        total = total_responses,
+                        orr_ci = orr_ci_text,
+                        dcr = sprintf("%.1f", dcr_pct),
+                        dcr_n = dcr_count,
+                        dcr_ci = dcr_ci_text)
                 }
             }
 
             # Methodology note
-            methods_text <- " Timeline visualization was created using the ggswim package, providing comprehensive swimmer plots suitable for clinical research reporting and regulatory submissions."
+            methods_text <- .("Timeline visualization was created using the ggswim package, providing comprehensive swimmer plots suitable for clinical research reporting and regulatory submissions.")
 
-            full_text <- paste0(basic_text, response_text, methods_text)
+            full_text <- paste(Filter(nzchar, c(basic_text, response_text, methods_text)), collapse = " ")
 
             copy_ready_html <- paste0(
                 "<div style='background-color: rgba(33, 159, 33, 0.1); padding: 20px; border-left: 4px solid #28a745; border-radius: 8px; margin: 15px 0; font-family: system-ui, -apple-system, sans-serif; color: inherit;'>",

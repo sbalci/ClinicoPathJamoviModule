@@ -246,8 +246,7 @@ ihcheterogeneityResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6
             self$add(jmvcore::Html$new(
                 options=options,
                 name="welcome",
-                title="",
-                visible="(!biopsy1)"))
+                title=""))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="interpretation",

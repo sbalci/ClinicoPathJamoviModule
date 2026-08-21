@@ -180,11 +180,11 @@ clinicalheatmapClass <- if (requireNamespace("jmvcore")) {
             .createHTMLSection = function(title, content, style = "info", icon = NULL) {
                 # Helper function to create consistent HTML sections
                 styles <- list(
-                    info = "background-color: rgba(33, 152, 239, 0.13); color: inherit; color: inherit; border-left: 4px solid #2196f3;",
-                    warning = "background-color: rgba(255, 169, 33, 0.14); color: inherit; color: inherit; border-left: 4px solid #ff9800;",
-                    error = "background-color: rgba(255, 33, 67, 0.09); color: inherit; color: #d32f2f; border-left: 4px solid #f44336;",
-                    success = "background-color: rgba(33, 159, 43, 0.1); color: inherit; color: inherit; border-left: 4px solid #4caf50;",
-                    neutral = "background-color: rgba(88, 88, 88, 0.06); color: inherit; color: inherit; border-left: 4px solid #757575;"
+                    info = "background-color: rgba(33, 152, 239, 0.13); color: inherit; border-left: 4px solid #2196f3;",
+                    warning = "background-color: rgba(255, 169, 33, 0.14); color: inherit; border-left: 4px solid #ff9800;",
+                    error = "background-color: rgba(255, 33, 67, 0.09); color: inherit; border-left: 4px solid #f44336;",
+                    success = "background-color: rgba(33, 159, 43, 0.1); color: inherit; border-left: 4px solid #4caf50;",
+                    neutral = "background-color: rgba(88, 88, 88, 0.06); color: inherit; border-left: 4px solid #757575;"
                 )
 
                 icon_html <- if (!is.null(icon)) paste0(icon, " ") else ""

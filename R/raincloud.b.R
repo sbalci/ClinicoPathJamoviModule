@@ -205,7 +205,7 @@ raincloudClass <- if (requireNamespace("jmvcore")) R6::R6Class("raincloudClass",
             # to make. It is accepted, but the user is told why the plot looks
             # degenerate instead of being left to guess.
             redundant_role_note <- if (!is.null(facet_var) && facet_var != "" && facet_var == group_var)
-                .(" <span style='color:#d9534f'>(the faceting variable is the same as the grouping variable, so each panel contains a single group and the groups can no longer be compared side by side)</span>")
+                paste0(" ", .("<span style='color:#d9534f'>(the faceting variable is the same as the grouping variable, so each panel contains a single group and the groups can no longer be compared side by side)</span>"))
             else ""
 
             summary_msg <- paste0(
@@ -835,10 +835,12 @@ raincloudClass <- if (requireNamespace("jmvcore")) R6::R6Class("raincloudClass",
             if (any(group_ns < 2)) {
                 return(paste0(
                     "<div style='background-color: rgba(216, 33, 50, 0.18);color: inherit;padding:12px;border-radius:8px;'>",
-                    .("A group comparison needs at least two observations in every group. These have fewer: "),
-                    htmltools::htmlEscape(paste(sprintf("%s (n=%d)", names(group_ns)[group_ns < 2],
-                                                       group_ns[group_ns < 2]), collapse = ", ")),
-                    ".</div>"))
+                    jmvcore::format(
+                        .("A group comparison needs at least two observations in every group. The following groups have fewer: {groups}."),
+                        groups = htmltools::htmlEscape(paste(
+                            sprintf("%s (n=%d)", names(group_ns)[group_ns < 2],
+                                    group_ns[group_ns < 2]), collapse = ", "))),
+                    "</div>"))
             }
 
             # Variance homogeneity. Classic one-way ANOVA (aov) assumes equal
@@ -902,9 +904,9 @@ raincloudClass <- if (requireNamespace("jmvcore")) R6::R6Class("raincloudClass",
             if (test_key %in% c("ttest", "wilcoxon") && n_groups != 2) {
                 return(paste0(
                     "<div style='background-color: rgba(255, 202, 33, 0.23);padding:12px;border-radius:8px; color: inherit;'>",
-                    .("The selected test (t-test or Wilcoxon) requires exactly two groups, but the grouping variable has "),
-                    n_groups,
-                    .(" levels. Choose ANOVA or Kruskal-Wallis, or use Automatic selection."),
+                    jmvcore::format(
+                        .("The selected test (t-test or Wilcoxon) requires exactly two groups, but the grouping variable has {n} levels. Choose ANOVA or Kruskal-Wallis, or use Automatic selection."),
+                        n = n_groups),
                     "</div>"
                 ))
             }

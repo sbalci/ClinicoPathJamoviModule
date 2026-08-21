@@ -339,8 +339,9 @@ jjridgesClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 private$.addNotice(
                     "WARNING",
                     .("Invalid quantiles"),
-                    paste0(conditionMessage(e),
-                           ". The default quantiles (0.25, 0.5, 0.75) were drawn instead."))
+                    jmvcore::format(
+                        .("{error}. The default quantiles (0.25, 0.5, 0.75) were drawn instead."),
+                        error = conditionMessage(e)))
                 c(0.25, 0.5, 0.75)
             })
         },

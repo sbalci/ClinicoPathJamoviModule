@@ -617,7 +617,7 @@ items:
       renderFun: .plot_nomogram
       clearWith:
           - nomogram_development
-          - selected_biomarkers
+          - biomarker_vars
 
 
 refs:

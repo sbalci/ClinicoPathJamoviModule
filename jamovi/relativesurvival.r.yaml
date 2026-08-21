@@ -130,7 +130,7 @@ items:
     - name:  regressionTable
       title: Regression Model Results
       type:  Table
-      visible: (!regression_model:none)
+      visible: (regression_model:none == FALSE)
       rows: 1
       columns:
           - name: variable
@@ -265,7 +265,7 @@ items:
     - name:  modelFit
       title: Model Fit Statistics
       type:  Table
-      visible: (!regression_model:none)
+      visible: (regression_model:none == FALSE)
       rows: 1
       columns:
           - name: metric

@@ -438,7 +438,7 @@ relativesurvivalResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6
                 options=options,
                 name="regressionTable",
                 title="Regression Model Results",
-                visible="(!regression_model:none)",
+                visible="(regression_model:none == FALSE)",
                 rows=1,
                 columns=list(
                     list(
@@ -590,7 +590,7 @@ relativesurvivalResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6
                 options=options,
                 name="modelFit",
                 title="Model Fit Statistics",
-                visible="(!regression_model:none)",
+                visible="(regression_model:none == FALSE)",
                 rows=1,
                 columns=list(
                     list(

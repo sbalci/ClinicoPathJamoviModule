@@ -125,6 +125,15 @@ consortdiagramClass <- if (requireNamespace("jmvcore")) {
 
             # run ----
             .run = function() {
+                # Unset Variable options cannot be negated reliably in r.yaml.
+                # Reset the onboarding panel on each run; validation may turn it
+                # back on with a more specific explanation (for example, when no
+                # exclusion variables have been selected).
+                has_participant_id <-
+                    !is.null(self$options$participant_id) &&
+                    length(self$options$participant_id) > 0
+                self$results$todo$setVisible(!has_participant_id)
+
                 # Checkpoint before validation
                 private$.checkpoint()
 

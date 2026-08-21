@@ -644,8 +644,7 @@ clinicalvalidationinteractiveResults <- if (requireNamespace("jmvcore", quietly=
                 requiresData=TRUE,
                 clearWith=list(
                     "outcome",
-                    "predictors",
-                    "calibration_bins")))
+                    "predictors")))
             self$add(jmvcore::Image$new(
                 options=options,
                 name="thresholdPlot",

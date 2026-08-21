@@ -3742,7 +3742,6 @@ multisurvivalClass <- if (requireNamespace('jmvcore'))
             padding: 15px;
             border-radius: 4px;
             margin: 15px 0;
-            color: inherit;
         }
         .instructions {
             background-color: rgba(33, 159, 43, 0.1); color: inherit;

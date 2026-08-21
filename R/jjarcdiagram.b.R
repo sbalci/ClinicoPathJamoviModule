@@ -86,6 +86,10 @@ jjarcdiagramClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         .run = function() {
 
             private$.noticeList <- list()
+            # This Html result persists on the R6 object across option changes.
+            # Render the empty list immediately so a notice from the previous
+            # run cannot survive when the new run has nothing to report.
+            private$.renderNotices()
 
             # Check for required variables
             if (is.null(self$options$source) || is.null(self$options$target) || 

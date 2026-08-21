@@ -66,12 +66,12 @@ items:
                   title: 'Rotated Eigenvalue'
                   type: number
                   format: zto
-                  visible: (!rotation:none)
+                  visible: (rotation:none == FALSE)
                 - name: variance_percent_rotated
                   title: 'Rotated % Variance'
                   type: number
                   format: zto
-                  visible: (!rotation:none)
+                  visible: (rotation:none == FALSE)
 
           # Parallel Analysis Results
           - name: parallelAnalysis
@@ -169,7 +169,7 @@ items:
             title: Factor Scores Statistics
             type: Table
             description: Descriptive statistics for factor scores
-            visible: (!scores:none)
+            visible: (scores:none == FALSE)
             
             columns:
                 - name: factor

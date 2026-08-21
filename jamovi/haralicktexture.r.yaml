@@ -113,14 +113,14 @@ items:
       title: Clinical Interpretation
       type: Html
       description: Context-specific clinical interpretation
-      visible: (!biomarker_context:general)
+      visible: (biomarker_context:general == FALSE)
 
     - name: prognosticsummary
       title: Prognostic Summary
       type: Table
       description: Prognostic relevance of texture features
       columns: []
-      visible: (!biomarker_context:general)
+      visible: (biomarker_context:general == FALSE)
       clearWith:
           - texture_features
           - biomarker_context

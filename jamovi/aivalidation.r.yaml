@@ -92,7 +92,7 @@ items:
       title: Cross-Validation Performance
       type: Table
       description: Cross-validated performance metrics for each predictor
-      visible: (!crossValidation:none)
+      visible: (crossValidation:none == FALSE)
       clearWith:
         - predictorVars
         - outcomeVar

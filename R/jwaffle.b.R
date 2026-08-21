@@ -947,7 +947,7 @@ jwaffleClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 todo <- paste0(
                     "<div style='background: rgba(138, 155, 172, 0.06); color: inherit; ",
                     "padding: 30px; border-radius: 8px; border: 2px solid #dee2e6; ",
-                    "margin: 20px 0; color: #212529;'>",
+                    "margin: 20px 0; '>",
 
                     "<h2 style='margin-top: 0; font-size: 24px; font-weight: bold; color: #495057;'>",
                     " Welcome to Waffle Charts</h2>",
@@ -973,7 +973,7 @@ jwaffleClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     "</ul>",
 
                     "<p style='font-size: 14px; margin-top: 20px; padding: 10px; ",
-                    "background: rgba(33, 144, 255, 0.11); color: inherit; border-left: 3px solid #0066cc; color: inherit;'>",
+                    "background: rgba(33, 144, 255, 0.11); color: inherit; border-left: 3px solid #0066cc; '>",
                     "<strong> Tip:</strong> Each square represents ~1% of your sample, ",
                     "making percentages immediately clear.</p>",
                     "</div>"
@@ -1166,7 +1166,7 @@ jwaffleClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 strip.background = ggplot2::element_rect(
                     fill = "grey95",
                     color = "grey85",
-                    size = 0.5
+                    linewidth = 0.5
                 ),
                 strip.text = ggplot2::element_text(
                     size = 12,

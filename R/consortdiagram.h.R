@@ -253,8 +253,7 @@ consortdiagramResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
             self$add(jmvcore::Html$new(
                 options=options,
                 name="todo",
-                title="Welcome",
-                visible="(!participant_id)"))
+                title="Welcome"))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="flowImbalanceNotice",
