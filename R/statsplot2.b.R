@@ -1302,11 +1302,11 @@ statsplot2Class <- if (requireNamespace('jmvcore'))
                 # variables instead of every column in the data frame.
                 alluvial_data <- prepared_data$data[, c(prepared_data$group, prepared_data$dep), drop = FALSE]
 
-                plot <- easyalluvial::alluvial_wide(
+                plot <- .quietly(easyalluvial::alluvial_wide(
                     data = alluvial_data,
                     max_variables = 2,
                     fill_by = 'first_variable'
-                )
+                ))
                 return(plot)
             },
             

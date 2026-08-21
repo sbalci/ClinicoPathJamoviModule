@@ -276,7 +276,9 @@ rpasurvivalResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
                 options=options,
                 name="",
                 title="Recursive Partitioning Analysis for Survival",
-                refs="survival, rpart")
+                refs=list(
+                    "survival",
+                    "rpart"))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="instructions",

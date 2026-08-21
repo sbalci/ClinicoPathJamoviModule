@@ -2527,7 +2527,7 @@ diagnosticmetaClass <- R6::R6Class(
                     ))
                 }
             } else {
-                private$.renderSymbols("<p><strong>Negative Likelihood Ratio:</strong> Not estimable with the current data (sensitivity [[APPROX]] 100% or model unstable).</p>")
+                private$.renderSymbols("<p><strong>Negative Likelihood Ratio:</strong> Not estimable with the current data. LR- is (1 - sensitivity) / specificity, so it needs a pooled specificity above zero and finite pooled estimates; here the pooled specificity is 0 or an estimate did not converge. Read the pooled specificity and its confidence interval in the summary above to see which.</p>")
             }
 
             copy_text <- sprintf(
@@ -2591,7 +2591,7 @@ diagnosticmetaClass <- R6::R6Class(
                 <h4>Meta-Analysis Summary</h4>
                 <p><strong>Analysis Type:</strong> Diagnostic test accuracy meta-analysis of %d studies</p>
 
-                <div style='background-color: white; padding: 15px; border-radius: 5px; margin: 10px 0;'>
+                <div style='background-color: rgba(255, 255, 255, 0.06); color: inherit; padding: 15px; border-radius: 5px; margin: 10px 0;'>
                     <h5>Pooled Test Performance</h5>
                     <p><strong>Sensitivity:</strong> %.1f%% - The test correctly identifies %.0f out of 100 patients with disease</p>
                     <p><strong>Specificity:</strong> %.1f%% - The test correctly identifies %.0f out of 100 healthy individuals</p>
@@ -2669,7 +2669,7 @@ diagnosticmetaClass <- R6::R6Class(
                 <h4>Meta-Analysis Summary</h4>
                 <p><strong>Analysis Status:</strong> %s</p>
 
-                <div style='background-color: white; padding: 15px; border-radius: 5px; margin: 10px 0;'>
+                <div style='background-color: rgba(255, 255, 255, 0.06); color: inherit; padding: 15px; border-radius: 5px; margin: 10px 0;'>
                     <h5>Study Overview</h5>
                     <p><strong>Number of Studies:</strong> %d</p>
                     <p><strong>Total Sample Size:</strong> %d participants</p>
@@ -3114,7 +3114,7 @@ diagnosticmetaClass <- R6::R6Class(
             <div class='plot-explanation' style='background-color: rgba(138, 155, 172, 0.06); padding: 20px; border-radius: 8px; margin: 10px 0; color: inherit;'>
                 <h4> Forest Plot Interpretation Guide</h4>
 
-                <div style='background-color: white; padding: 15px; border-radius: 5px; margin: 10px 0;'>
+                <div style='background-color: rgba(255, 255, 255, 0.06); color: inherit; padding: 15px; border-radius: 5px; margin: 10px 0;'>
                     <h5>What This Plot Shows</h5>
                     <p><strong>Forest Plot:</strong> Displays individual study results for sensitivity and specificity with confidence intervals. Each study is represented by a point (estimate) with horizontal lines (confidence intervals).</p>
 
@@ -3156,7 +3156,7 @@ diagnosticmetaClass <- R6::R6Class(
             <div class='plot-explanation' style='background-color: rgba(138, 155, 172, 0.06); padding: 20px; border-radius: 8px; margin: 10px 0; color: inherit;'>
                 <h4> Summary ROC Plot Interpretation Guide</h4>
 
-                <div style='background-color: white; padding: 15px; border-radius: 5px; margin: 10px 0;'>
+                <div style='background-color: rgba(255, 255, 255, 0.06); color: inherit; padding: 15px; border-radius: 5px; margin: 10px 0;'>
                     <h5>What This Plot Shows</h5>
                     <p><strong>SROC Plot:</strong> Summary Receiver Operating Characteristic curve showing the trade-off between sensitivity and specificity across all studies.</p>
 
@@ -3217,7 +3217,7 @@ diagnosticmetaClass <- R6::R6Class(
             <div class='plot-explanation' style='background-color: rgba(138, 155, 172, 0.06); padding: 20px; border-radius: 8px; margin: 10px 0; color: inherit;'>
                 <h4> Funnel Plot Interpretation Guide</h4>
 
-                <div style='background-color: white; padding: 15px; border-radius: 5px; margin: 10px 0;'>
+                <div style='background-color: rgba(255, 255, 255, 0.06); color: inherit; padding: 15px; border-radius: 5px; margin: 10px 0;'>
                     <h5>What This Plot Shows</h5>
                     <p><strong>Funnel Plot:</strong> Assesses publication bias by plotting study precision against effect size (log diagnostic odds ratio).</p>
 

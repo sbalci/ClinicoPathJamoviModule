@@ -889,7 +889,7 @@ decisioncalculatorClass <- if (requireNamespace("jmvcore")) {
 
                     multipleCutoffTable$setNote(
                         "sameData",
-                        jmvcore::.("Grades in this column describe the point estimates of each scenario in this sample only, and the good and excellent grades require Youden's index and accuracy to reach that band together, so a grade can be lower than either column on its own would suggest. Because the cut-offs are graded on the same counts used to evaluate them, the best-performing row is optimistically biased; performance in independent data is generally lower.")
+                        jmvcore::.("This column holds two different kinds of statement. On the two named cut-off rows it is a grade of that scenario's point estimates in this sample; the good and excellent grades require Youden's index AND accuracy to reach the band together, so a grade can be lower than either column on its own would suggest. On the Current (Reference) row it is not a grade at all: it reports which of the three cut-offs had the highest Youden's J, by how much, and whether that cut-off's accuracy interval still overlaps the current one's. Because all three cut-offs are judged on the same counts used to evaluate them, whichever row comes out ahead is optimistically biased; performance in independent data is generally lower.")
                     )
 
                     multipleCutoffTable$setNote(

@@ -633,7 +633,7 @@ lassologisticClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                     cv_args$nfolds <- nfolds
                 }
 
-                cv_fit <- do.call(glmnet::cv.glmnet, cv_args)
+                cv_fit <- .quietly(do.call(glmnet::cv.glmnet, cv_args))
 
                 # Select lambda
                 lambda_optimal <- switch(self$options$lambda,
@@ -643,14 +643,14 @@ lassologisticClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                 )
 
                 # Final model
-                final_model <- glmnet::glmnet(
+                final_model <- .quietly(glmnet::glmnet(
                     x = data$X,
                     y = data$y,
                     family = "binomial",
                     alpha = alpha_val,
                     lambda = lambda_optimal,
                     standardize = FALSE
-                )
+                ))
 
                 # Extract coefficients
                 coefs <- as.matrix(coef(final_model, s = lambda_optimal))
@@ -1436,11 +1436,11 @@ lassologisticClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                             nfolds_boot <- min(fit$nfolds, length(unique(idx)) - 1)
                             nfolds_boot <- max(nfolds_boot, 3)
 
-                            cv_boot <- glmnet::cv.glmnet(
+                            cv_boot <- .quietly(glmnet::cv.glmnet(
                                 x = X_boot, y = y_boot,
                                 family = "binomial", alpha = alpha_val,
                                 nfolds = nfolds_boot, standardize = FALSE
-                            )
+                            ))
                             lambda_boot <- switch(self$options$lambda,
                                 "lambda.min" = cv_boot$lambda.min,
                                 "lambda.1se" = cv_boot$lambda.1se,

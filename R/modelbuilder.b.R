@@ -603,13 +603,13 @@ modelbuilderClass <- if (requireNamespace("jmvcore")) R6::R6Class(
                     # Multiple imputation using mice
                     n_imputations <- self$options$imputationSets %||% 5
                     
-                    mice_result <- mice::mice(
+                    mice_result <- .quietly(mice::mice(
                         data = data,
                         m = n_imputations,
                         maxit = 5,
                         method = "auto",
                         printFlag = FALSE
-                    )
+                    ))
                     
                     # Return the first completed dataset for model building
                     result <- mice::complete(mice_result, 1)
@@ -678,12 +678,12 @@ modelbuilderClass <- if (requireNamespace("jmvcore")) R6::R6Class(
                 
                 # Fit model with cross-validation for lambda selection
                 set.seed(self$options$randomSeed)
-                cv_fit <- glmnet::cv.glmnet(X, y, family = "binomial", alpha = alpha, 
-                                          nfolds = min(10, nrow(X)), type.measure = "auc")
+                cv_fit <- .quietly(glmnet::cv.glmnet(X, y, family = "binomial", alpha = alpha, 
+                                          nfolds = min(10, nrow(X)), type.measure = "auc"))
                 
                 # Get best model
-                best_model <- glmnet::glmnet(X, y, family = "binomial", alpha = alpha, 
-                                           lambda = cv_fit$lambda.1se)
+                best_model <- .quietly(glmnet::glmnet(X, y, family = "binomial", alpha = alpha, 
+                                           lambda = cv_fit$lambda.1se))
                 
                 # Create a wrapper object that mimics glm interface
                 penalized_model <- list(

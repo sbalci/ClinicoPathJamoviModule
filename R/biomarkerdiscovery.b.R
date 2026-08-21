@@ -252,7 +252,7 @@ biomarkerdiscoveryClass <- R6::R6Class(
                     }
                     
                     # Apply ComBat
-                    corrected_data <- sva::ComBat(biomarker_matrix, batch = batch, mod = mod)
+                    corrected_data <- .quietly(sva::ComBat(biomarker_matrix, batch = batch, mod = mod))
                     
                     # Update data
                     data[, biomarker_vars] <- t(corrected_data)
@@ -423,10 +423,10 @@ biomarkerdiscoveryClass <- R6::R6Class(
                 }
                 
                 # Cross-validation to find optimal lambda
-                cv_fit <- glmnet::cv.glmnet(x, y, family = family, alpha = 0.5, nfolds = 10)
+                cv_fit <- .quietly(glmnet::cv.glmnet(x, y, family = family, alpha = 0.5, nfolds = 10))
                 
                 # Fit final model
-                final_fit <- glmnet::glmnet(x, y, family = family, alpha = 0.5, lambda = cv_fit$lambda.1se)
+                final_fit <- .quietly(glmnet::glmnet(x, y, family = family, alpha = 0.5, lambda = cv_fit$lambda.1se))
                 
                 # Extract coefficients
                 coef_matrix <- as.matrix(coef(final_fit))
@@ -442,12 +442,12 @@ biomarkerdiscoveryClass <- R6::R6Class(
                 formula_str <- jmvcore::constructFormula(outcome_var, predictor_vars)
                 model_formula <- jmvcore::asFormula(formula_str)
                 
-                rf_model <- randomForest::randomForest(
+                rf_model <- .quietly(randomForest::randomForest(
                     model_formula, 
                     data = data,
                     ntree = 500,
                     importance = TRUE
-                )
+                ))
                 
                 # Extract feature importance
                 if (is.factor(data[[outcome_var]])) {
@@ -514,8 +514,8 @@ biomarkerdiscoveryClass <- R6::R6Class(
                 }
                 
                 tryCatch({
-                    cv_fit <- glmnet::cv.glmnet(x, y, family = family, alpha = 0.5, nfolds = 5)
-                    final_fit <- glmnet::glmnet(x, y, family = family, alpha = 0.5, lambda = cv_fit$lambda.1se)
+                    cv_fit <- .quietly(glmnet::cv.glmnet(x, y, family = family, alpha = 0.5, nfolds = 5))
+                    final_fit <- .quietly(glmnet::glmnet(x, y, family = family, alpha = 0.5, lambda = cv_fit$lambda.1se))
                     
                     coef_matrix <- as.matrix(coef(final_fit))
                     selected_features <- row.names(coef_matrix)[coef_matrix[, 1] != 0][-1]

@@ -188,7 +188,7 @@ clinicalpredictionClass <- R6::R6Class(
                 return(data)
             } else if (method == "mice_imputation") {
                 if (requireNamespace("mice", quietly = TRUE)) {
-                    mice_result <- mice::mice(data, m = 5, printFlag = FALSE)
+                    mice_result <- .quietly(mice::mice(data, m = 5, printFlag = FALSE))
                     return(mice::complete(mice_result))
                 } else {
                     # Fallback to mean/median
@@ -233,7 +233,7 @@ clinicalpredictionClass <- R6::R6Class(
                 x <- as.matrix(data[, predictor_vars, drop = FALSE])
                 y <- data[[outcome_var]]
                 
-                cv_fit <- glmnet::cv.glmnet(x, y, family = "binomial", alpha = 1)
+                cv_fit <- .quietly(glmnet::cv.glmnet(x, y, family = "binomial", alpha = 1))
                 coef_lasso <- as.matrix(coef(cv_fit, s = "lambda.1se"))
                 selected_features <- row.names(coef_lasso)[coef_lasso[, 1] != 0][-1]  # Remove intercept
                 
@@ -246,7 +246,7 @@ clinicalpredictionClass <- R6::R6Class(
                 x <- data[, predictor_vars, drop = FALSE]
                 y <- data[[outcome_var]]
                 
-                rfe_result <- caret::rfe(x, y, sizes = c(1:min(10, length(predictor_vars))), rfeControl = control)
+                rfe_result <- .quietly(caret::rfe(x, y, sizes = c(1:min(10, length(predictor_vars))), rfeControl = control))
                 selected_features <- rfe_result$optVariables
                 
                 keep_vars <- c(outcome_var, selected_features)
@@ -280,12 +280,12 @@ clinicalpredictionClass <- R6::R6Class(
             
             if (model_type == "random_forest") {
                 if (requireNamespace("randomForest", quietly = TRUE)) {
-                    private$.model <- randomForest::randomForest(
+                    private$.model <- .quietly(randomForest::randomForest(
                         model_formula, 
                         data = train_data,
                         ntree = 500,
                         importance = TRUE
-                    )
+                    ))
                 }
             } else if (model_type == "gradient_boosting") {
                 if (requireNamespace("xgboost", quietly = TRUE)) {
@@ -301,13 +301,13 @@ clinicalpredictionClass <- R6::R6Class(
                     #                         levels(train_data[[outcome_var]])[2])
                     y_train <- as.numeric(train_data[[outcome_var]]) - 1  # 0-1 encoding
                     
-                    private$.model <- xgboost::xgboost(
+                    private$.model <- .quietly(xgboost::xgboost(
                         data = x_train,
                         label = y_train,
                         objective = "binary:logistic",
                         nrounds = 100,
                         verbose = 0
-                    )
+                    ))
                 }
             } else if (model_type == "logistic_regression") {
                 private$.model <- glm(model_formula, data = train_data, family = binomial())
@@ -438,12 +438,12 @@ clinicalpredictionClass <- R6::R6Class(
                         }
                     }
                     
-                    shap_values <- fastshap::explain(
+                    shap_values <- .quietly(fastshap::explain(
                         model, 
                         X = x_explain, 
                         pred_wrapper = pred_wrapper,
                         nsim = 50
-                    )
+                    ))
                     
                     private$.shap_values <- shap_values
                 }, error = function(e) {

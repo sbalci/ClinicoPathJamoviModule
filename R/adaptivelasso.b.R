@@ -661,7 +661,7 @@ adaptivelassoClass <- R6::R6Class(
             single_lambda_mode <- !is.null(lambda_seq) && length(lambda_seq) == 1
 
             if (single_lambda_mode) {
-                full_fit <- glmnet::glmnet(
+                full_fit <- .quietly(glmnet::glmnet(
                     x = cox_data$x,
                     y = y_glmnet,
                     family = "cox", cox.ties = "breslow",
@@ -671,7 +671,7 @@ adaptivelassoClass <- R6::R6Class(
                     thresh = self$options$convergence_threshold,
                     maxit = self$options$max_iterations,
                     standardize = FALSE
-                )
+                ))
 
                 cv_fit <- list(
                     lambda = as.numeric(lambda_seq),
@@ -684,10 +684,10 @@ adaptivelassoClass <- R6::R6Class(
                     glmnet.fit = full_fit
                 )
             } else {
-                cv_fit <- do.call(glmnet::cv.glmnet, cv_args)
+                cv_fit <- .quietly(do.call(glmnet::cv.glmnet, cv_args))
 
                 # Fit full model for path
-                full_fit <- glmnet::glmnet(
+                full_fit <- .quietly(glmnet::glmnet(
                     x = cox_data$x,
                     y = y_glmnet,
                     family = "cox", cox.ties = "breslow",
@@ -697,7 +697,7 @@ adaptivelassoClass <- R6::R6Class(
                     thresh = self$options$convergence_threshold,
                     maxit = self$options$max_iterations,
                     standardize = FALSE
-                )
+                ))
             }
 
             # Extract coefficients at optimal lambda
@@ -751,13 +751,13 @@ adaptivelassoClass <- R6::R6Class(
 
             if (method == "ridge") {
                 # Ridge regression for initial estimates
-                ridge_fit <- glmnet::glmnet(
+                ridge_fit <- .quietly(glmnet::glmnet(
                     x = cox_data$x,
                     y = y_glmnet,
                     family = "cox", cox.ties = "breslow",
                     alpha = 0,  # Pure ridge
                     standardize = FALSE
-                )
+                ))
 
                 # Use lambda that gives reasonable shrinkage
                 lambda_ridge <- ridge_fit$lambda[length(ridge_fit$lambda) %/% 4]
@@ -794,21 +794,21 @@ adaptivelassoClass <- R6::R6Class(
                         initial_coefs <- coef(cox_fit)
                     }, error = function(e) {
                         # Fallback to ridge if Cox fails
-                        ridge_fit <- glmnet::glmnet(
+                        ridge_fit <- .quietly(glmnet::glmnet(
                             cox_data$x, y_glmnet,
                             family = "cox", cox.ties = "breslow",
                             alpha = 0
-                        )
+                        ))
                         lambda_ridge <- ridge_fit$lambda[length(ridge_fit$lambda) %/% 4]
                         initial_coefs <<- as.vector(coef(ridge_fit, s = lambda_ridge))
                     })
                 } else {
                     # Too many variables, use ridge instead
-                    ridge_fit <- glmnet::glmnet(
+                    ridge_fit <- .quietly(glmnet::glmnet(
                         cox_data$x, y_glmnet,
                         family = "cox", cox.ties = "breslow",
                         alpha = 0
-                    )
+                    ))
                     lambda_ridge <- ridge_fit$lambda[length(ridge_fit$lambda) %/% 4]
                     initial_coefs <- as.vector(coef(ridge_fit, s = lambda_ridge))
                 }
@@ -945,18 +945,18 @@ adaptivelassoClass <- R6::R6Class(
 
                 tryCatch({
                     # Fit adaptive LASSO on bootstrap sample
-                    boot_fit <- glmnet::glmnet(
+                    boot_fit <- .quietly(glmnet::glmnet(
                         x = boot_x,
                         y = boot_surv,
                         family = "cox", cox.ties = "breslow",
                         alpha = self$options$alpha,
                         penalty.factor = adaptive_weights,
                         standardize = FALSE
-                    )
+                    ))
 
                     # Use cross-validation to select lambda
                     boot_nfold <- min(5, self$options$cv_folds, max(3, n_sub - 1))
-                    boot_cv <- glmnet::cv.glmnet(
+                    boot_cv <- .quietly(glmnet::cv.glmnet(
                         x = boot_x,
                         y = boot_surv,
                         family = "cox", cox.ties = "breslow",
@@ -965,7 +965,7 @@ adaptivelassoClass <- R6::R6Class(
                         nfolds = boot_nfold,
                         standardize = FALSE,
                         parallel = parallel_enabled
-                    )
+                    ))
 
                     # Extract selected variables
                     boot_coef <- as.vector(coef(boot_fit, s = boot_cv$lambda.1se))

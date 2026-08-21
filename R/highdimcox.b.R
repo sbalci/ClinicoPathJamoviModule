@@ -431,11 +431,11 @@ highdimcoxClass <- if (requireNamespace('jmvcore', quietly=TRUE))
           alpha <- 1.0
           # Compute adaptive penalty weights from CV-selected Ridge initial estimates
           penalty_weights <- tryCatch({
-            cv_ridge <- glmnet::cv.glmnet(
+            cv_ridge <- .quietly(glmnet::cv.glmnet(
               x = X, y = y, family = "cox", cox.ties = "breslow",
               alpha = 0, standardize = TRUE,
               nfolds = min(cv_folds, nrow(X))
-            )
+            ))
             initial_coefs <- as.vector(coef(cv_ridge, s = cv_ridge$lambda.min))
             gamma <- 1  # standard adaptive LASSO exponent
             w <- 1 / (abs(initial_coefs) + 1e-6)^gamma
@@ -447,7 +447,7 @@ highdimcoxClass <- if (requireNamespace('jmvcore', quietly=TRUE))
         # else: elastic_net uses user-provided alpha_value
 
         # Perform cross-validation
-        cv_fit <- glmnet::cv.glmnet(
+        cv_fit <- .quietly(glmnet::cv.glmnet(
           x = X,
           y = y,
           family = "cox", cox.ties = "breslow",
@@ -456,7 +456,7 @@ highdimcoxClass <- if (requireNamespace('jmvcore', quietly=TRUE))
           nfolds = cv_folds,
           standardize = TRUE,
           parallel = FALSE
-        )
+        ))
 
         # Select lambda based on method
         lambda_selection <- self$options$cv_method
@@ -467,14 +467,14 @@ highdimcoxClass <- if (requireNamespace('jmvcore', quietly=TRUE))
         }
 
         # Fit final model
-        final_fit <- glmnet::glmnet(
+        final_fit <- .quietly(glmnet::glmnet(
           x = X,
           y = y,
           family = "cox", cox.ties = "breslow",
           alpha = alpha,
           penalty.factor = penalty_weights,
           standardize = TRUE
-        )
+        ))
         
         # Extract coefficients at selected lambda
         coefficients <- as.vector(coef(final_fit, s = selected_lambda))
@@ -531,12 +531,12 @@ highdimcoxClass <- if (requireNamespace('jmvcore', quietly=TRUE))
         # Per Meinshausen & Buhlmann (2010): use a FIXED lambda across all subsamples
         # to maintain theoretical FDR/FWER control. Compute lambda from full-data CV.
         fixed_lambda <- tryCatch({
-          cv_full <- glmnet::cv.glmnet(
+          cv_full <- .quietly(glmnet::cv.glmnet(
             x = X, y = y, family = "cox", cox.ties = "breslow",
             alpha = stab_alpha,
             nfolds = min(self$options$cv_folds, n_obs),
             standardize = TRUE
-          )
+          ))
           cv_full$lambda.1se
         }, error = function(e) NULL)
 
@@ -567,10 +567,10 @@ highdimcoxClass <- if (requireNamespace('jmvcore', quietly=TRUE))
 
           tryCatch({
             # Fit glmnet path (NOT cv.glmnet) - much faster per iteration
-            fit_boot <- glmnet::glmnet(
+            fit_boot <- .quietly(glmnet::glmnet(
               x = X_boot, y = y_boot, family = "cox", cox.ties = "breslow",
               alpha = stab_alpha, standardize = TRUE
-            )
+            ))
 
             # Extract coefficients at the fixed lambda
             coeffs <- as.vector(coef(fit_boot, s = fixed_lambda))

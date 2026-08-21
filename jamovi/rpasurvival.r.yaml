@@ -2,7 +2,9 @@
 name: rpasurvival
 title: Recursive Partitioning Analysis for Survival
 jrs: '1.1'
-refs: survival, rpart
+refs:
+    - survival
+    - rpart
 
 items:
     - name: instructions

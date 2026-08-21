@@ -378,7 +378,7 @@ sequentialtestsClass <- if (requireNamespace('jmvcore'))
 
                 # Under positive conditional dependence the two combined figures move in
                 # OPPOSITE directions, so "too optimistic" is wrong for one of them in every
-                # run. serial_positive multiplies sensitivities (understates sens) and unions
+                # run. serial_positive multiplies sensitivities (understates sens) and multiplies
                 # false-positive rates (overstates spec); serial_negative and parallel do the
                 # reverse. Name the direction that actually applies to this strategy.
                 dependence_caveat <- if (strategy == "serial_positive")
@@ -725,22 +725,12 @@ sequentialtestsClass <- if (requireNamespace('jmvcore'))
                         explanation <- paste0(explanation, "</ol>")
                         explanation <- paste0(
                             explanation,
-                            "<p>This strategy <strong>maximizes specificity</strong> at the expense of sensitivity. It's useful when:</p>"
+                            "<p>Because a case counts as positive only when both tests are positive, the two sensitivities multiply and the two false-positive rates multiply as well. That is why the Combined Specificity cell in the Summary of Testing Strategy table is higher than either single specificity in the Individual Test Performance table, while Combined Sensitivity is lower than either single sensitivity.</p>"
                         )
-                        explanation <- paste0(explanation, "<ul>")
                         explanation <- paste0(
                             explanation,
-                            "<li>The first test has good sensitivity but lower specificity</li>"
+                            "<p>What this does not mean: two positive results are not a confirmed diagnosis. The Combined PPV cell is the probability of disease after two positives, and at low prevalence it can stay modest even when both tests are accurate. The cases lost to the drop in sensitivity are counted in the False Negatives column of the Population Flow Analysis table below.</p>"
                         )
-                        explanation <- paste0(explanation,
-                                              "<li>The second test has high specificity</li>")
-                        explanation <- paste0(explanation,
-                                              "<li>You want to minimize false positives</li>")
-                        explanation <- paste0(
-                            explanation,
-                            "<li>The consequences of false positive results are serious (e.g., harmful or expensive treatments)</li>"
-                        )
-                        explanation <- paste0(explanation, "</ul>")
                     } else if (strategy == "serial_negative") {
                         explanation <- paste0(
                             explanation,
@@ -774,22 +764,12 @@ sequentialtestsClass <- if (requireNamespace('jmvcore'))
                         explanation <- paste0(explanation, "</ol>")
                         explanation <- paste0(
                             explanation,
-                            "<p>This strategy <strong>maximizes sensitivity</strong> at the expense of specificity. It's useful when:</p>"
+                            "<p>Because a case counts as negative only when both tests are negative, the two false-negative rates multiply and the two specificities multiply as well. That is why the Combined Sensitivity cell in the Summary of Testing Strategy table is higher than either single sensitivity in the Individual Test Performance table, while Combined Specificity is lower than either single specificity.</p>"
                         )
-                        explanation <- paste0(explanation, "<ul>")
                         explanation <- paste0(
                             explanation,
-                            "<li>The first test has good specificity but lower sensitivity</li>"
+                            "<p>What this does not mean: two negative results do not rule the disease out. The Combined NPV cell is the probability of being disease-free after two negatives, and it depends on the prevalence you entered as much as on the two tests. The extra false alarms that come with the higher sensitivity are counted in the False Positives column of the Population Flow Analysis table below.</p>"
                         )
-                        explanation <- paste0(explanation,
-                                              "<li>The second test has high sensitivity</li>")
-                        explanation <- paste0(explanation,
-                                              "<li>You want to minimize false negatives</li>")
-                        explanation <- paste0(
-                            explanation,
-                            "<li>The consequences of false negative results are serious (e.g., missing a serious diagnosis)</li>"
-                        )
-                        explanation <- paste0(explanation, "</ul>")
                     } else if (strategy == "parallel") {
                         explanation <- paste0(
                             explanation,
@@ -819,18 +799,12 @@ sequentialtestsClass <- if (requireNamespace('jmvcore'))
                         explanation <- paste0(explanation, "</ol>")
                         explanation <- paste0(
                             explanation,
-                            "<p>This strategy <strong>maximizes sensitivity</strong> at the expense of specificity. It's useful when:</p>"
+                            "<p>Because a case counts as positive when either test is positive, the two false-negative rates multiply and the two specificities multiply as well. That is why the Combined Sensitivity cell in the Summary of Testing Strategy table is higher than either single sensitivity in the Individual Test Performance table, while Combined Specificity is lower than either single specificity. These are the same accuracy formulas as the serial negative strategy; only the number of second tests performed differs.</p>"
                         )
-                        explanation <- paste0(explanation, "<ul>")
-                        explanation <- paste0(explanation,
-                                              "<li>You want to minimize false negatives</li>")
                         explanation <- paste0(
                             explanation,
-                            "<li>The tests complement each other by detecting different manifestations of the disease</li>"
+                            "<p>What this does not mean: the two sensitivities do not add up. The whole gain comes from cases the second test catches and the first misses, so two tests that fail on the same cases add very little. The extra false alarms that come with the higher sensitivity are counted in the False Positives column of the Population Flow Analysis table below.</p>"
                         )
-                        explanation <- paste0(explanation,
-                                              "<li>Missing the diagnosis has serious consequences</li>")
-                        explanation <- paste0(explanation, "</ul>")
                     }
 
                     # Results explanation

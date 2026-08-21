@@ -22,6 +22,45 @@ utils::globalVariables(c(
     "x"
 ))
 
+#' Run third-party code without leaking package chatter into the results
+#'
+#' jamovi's engine captures `message()` and `warning()` conditions raised while
+#' an analysis runs and renders them in the "Analysis Notes" panel, where users
+#' see them. Third-party modelling packages emit a lot of chatter that is
+#' meaningless to a pathologist reading their results -- glmnet's `cox.ties`
+#' migration notice, for example, appeared twelve times in a single Lasso-Cox
+#' run.
+#'
+#' Wrap a third-party call in `.quietly()` to keep that noise out of the
+#' results pane. It suppresses ALL messages (package chatter is never the user's
+#' problem) but muffles only *deprecation-flavoured* warnings, matched by
+#' `deprecation_pattern`. Substantive warnings -- non-convergence, NAs
+#' introduced, rank deficiency -- still propagate, because those change how the
+#' output should be read and must not be hidden.
+#'
+#' @param expr Expression to evaluate.
+#' @param deprecation_pattern Regex matched against warning messages; matches are
+#'   muffled. Defaults to the usual deprecation/migration vocabulary.
+#' @return The value of `expr`.
+#' @keywords internal
+#' @examples
+#' \dontrun{
+#' fit <- .quietly(glmnet::cv.glmnet(x, y, family = "cox"))
+#' }
+.quietly <- function(expr,
+                     deprecation_pattern = paste(
+                         "deprecat", "defunct", "superseded", "will change from",
+                         "is no longer", "renamed", "future version", "startup",
+                         sep = "|")) {
+    withCallingHandlers(
+        suppressMessages(suppressPackageStartupMessages(expr)),
+        warning = function(w) {
+            if (grepl(deprecation_pattern, conditionMessage(w), ignore.case = TRUE))
+                invokeRestart("muffleWarning")
+        }
+    )
+}
+
 #' Escape variable names containing special characters for formulas
 #'
 #' Adds backticks around names that contain anything other than

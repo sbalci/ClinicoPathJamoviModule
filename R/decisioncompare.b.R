@@ -1248,11 +1248,24 @@ decisioncompareClass <- if (requireNamespace("jmvcore")) {
                     interpretations <- c(interpretations, "Moderate negative evidence")
                 }
 
-                # Combine interpretations or provide fallback
+                # Combine interpretations or provide fallback. The fallback also fires when
+                # every band test is NA (.computeRate returns NA when a gold class has no
+                # cases), so separate "measured and below the bands" from "not estimable".
                 if (length(interpretations) > 0) {
                     return(paste(interpretations, collapse = "; "))
+                } else if (is.na(sens_pct) || is.na(spec_pct)) {
+                    return(paste0(
+                        "Sensitivity and/or specificity could not be computed here: one gold-standard class has no cases, ",
+                        "so that rate has an empty denominator and is reported as blank rather than as a low value. ",
+                        "The 2x2 counts behind this row are in the Recoded Data table for this test"
+                    ))
                 } else {
-                    return("Neither sensitivity nor specificity reached 85%, and neither likelihood ratio reached LR+ >= 5 or LR- <= 0.2, in this sample")
+                    return(paste0(
+                        "In this sample neither sensitivity nor specificity reached 85%, and neither likelihood ratio ",
+                        "reached LR+ >= 5 or LR- <= 0.2. That describes these counts at this operating point, not the ",
+                        "test in general; the Confidence Intervals table for this test (95% CI option) shows how ",
+                        "precisely each rate is pinned down by this many cases"
+                    ))
                 }
             },
 
@@ -1493,7 +1506,7 @@ decisioncompareClass <- if (requireNamespace("jmvcore")) {
                             p_value < 0.001 ~ "Highly significant overall difference among tests (p<0.001)",
                             p_value < 0.01 ~ "Significant overall difference among tests (p<0.01)",
                             p_value < 0.05 ~ "Statistically significant overall difference among tests (p<0.05)",
-                            TRUE ~ "No significant overall difference among tests (p>=0.05)"
+                            TRUE ~ "No significant overall difference detected among tests (p>=0.05); this does not establish that the tests perform equally"
                         )
 
                         mcnemarTable$addRow(
@@ -1511,7 +1524,14 @@ decisioncompareClass <- if (requireNamespace("jmvcore")) {
                             mcnemarTable$addFootnote(
                                 rowKey = "cochran_q_global",
                                 col = "interpretation",
-                                "Cochran's Q test shows no significant difference. Pairwise comparisons below may not be meaningful."
+                                paste0(
+                                    "Cochran's Q is a single test of whether the tests differ in accuracy anywhere among them. ",
+                                    "It did not reach p < 0.05 here, which means these data did not separate the tests, not that ",
+                                    "the tests agree. The per-pair rows in this table are exploratory in that situation: read them ",
+                                    "alongside the paired differences and their 95% confidence intervals in the ",
+                                    "Differences with 95% Confidence Intervals table, which show how large a real difference ",
+                                    "is still compatible with this sample."
+                                )
                             )
                         }
                     },
@@ -2193,11 +2213,30 @@ decisioncompareClass <- if (requireNamespace("jmvcore")) {
                         "<p><strong>Measured performance:</strong> ", best_test_safe,
                         sprintf(" had high specificity (%.1f%%) but lower sensitivity (%.1f%%) in this sample: few false positives, more false negatives.</p>", spec_pct, sens_pct)
                     )
+                } else if (is.na(sens_pct) || is.na(spec_pct)) {
+                    # The isTRUE() guards above route NA metrics here. Do not state a
+                    # numeric negative about a rate that has no denominator.
+                    recommendations <- paste0(
+                        recommendations,
+                        "<p><strong>Measured performance:</strong> sensitivity and/or specificity could not be computed for ",
+                        best_test_safe,
+                        " because one gold-standard class has no cases, so that rate has an empty denominator. ",
+                        "This test is named here only because the ranking had nothing else to compare; check the 2x2 counts in the ",
+                        "Recoded Data table before reading any other panel.</p>"
+                    )
                 } else {
                     recommendations <- paste0(
                         recommendations,
                         "<p><strong>Measured performance:</strong> ", best_test_safe,
-                        sprintf(" reached neither 95%% sensitivity (%.1f%%) nor 95%% specificity (%.1f%%) in this sample.</p>", sens_pct, spec_pct)
+                        sprintf(
+                            paste0(
+                                " reached neither 95%% sensitivity (%.1f%%) nor 95%% specificity (%.1f%%) in this sample, so at this ",
+                                "operating point it produces both false negatives and false positives at a rate you can read off the ",
+                                "Decision Test Comparison table. These are the rates observed in these particular cases, not a fixed ",
+                                "property of the test.</p>"
+                            ),
+                            sens_pct, spec_pct
+                        )
                     )
                 }
 
@@ -2576,9 +2615,12 @@ decisioncompareClass <- if (requireNamespace("jmvcore")) {
                                 html,
                                 "<span style='color:#388e3c;'><b>did not detect a significant difference</b></span> ",
                                 "among the three tests. This is not evidence that they perform equally: with this sample size a ",
-                                "clinically important accuracy difference could go undetected, and no equivalence test against a ",
-                                "pre-specified margin was performed. The confidence intervals for the paired differences in the difference table above show ",
-                                "how large a difference remains compatible with these data.</p>"
+                                "clinically important accuracy difference could go undetected, and no test of one test against ",
+                                "another across a pre-specified equivalence margin was performed. (The noninferiority column in the ",
+                                "Overall Percent Agreement table uses a margin, but it compares each test on its own to a fixed ",
+                                "agreement threshold, not the tests to each other.) The confidence intervals for the paired ",
+                                "differences in the Differences with 95% Confidence Intervals table show how large a difference ",
+                                "remains compatible with these data.</p>"
                             )
                         }
                     }
@@ -2667,7 +2709,12 @@ decisioncompareClass <- if (requireNamespace("jmvcore")) {
                         if (q_p >= private$P_THRESHOLD_SIGNIFICANT) {
                             report <- paste0(
                                 report,
-                                "This does not establish that the tests perform equally; no equivalence test against a pre-specified margin was performed. "
+                                paste0(
+                                    "This does not establish that the tests perform equally; no test of one test against another ",
+                                    "across a pre-specified equivalence margin was performed. (The noninferiority column in the ",
+                                    "Overall Percent Agreement table does use a margin, but it compares each test on its own to a ",
+                                    "fixed agreement threshold, not the tests to each other.) "
+                                )
                             )
                         }
 

@@ -3422,14 +3422,14 @@ singlearmClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             return(private$.competingRiskPlotRefusal(
               .("The cumulative-incidence plot could not be estimated")))
 
-          plot_obj <- survminer::ggcompetingrisks(
+          plot_obj <- .quietly(survminer::ggcompetingrisks(
               fit = cuminc_fit,
               conf.int = self$options$ci95,
               title = .("Cumulative Incidence Function (CIF)"),
               xlab = paste0('Time (', self$options$timetypeoutput, ')'),
               xlim = c(0, self$options$endplot),
               ylim = c(self$options$ybegin_plot, self$options$yend_plot),
-              risk.table = FALSE)
+              risk.table = FALSE))
 
           # Name the curves.
           #
@@ -3500,7 +3500,7 @@ singlearmClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             breaks = seq(0, self$options$endplot, by = self$options$byplot)) +
           ggplot2::theme(legend.position = 'bottom')
 
-        print(plot_obj)
+        .quietly(print(plot_obj))
         TRUE
       }
 

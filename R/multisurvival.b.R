@@ -1898,7 +1898,12 @@ multisurvivalClass <- if (requireNamespace('jmvcore'))
         if (self$options$uselandmark) {
           landmark <- jmvcore::toNumeric(self$options$landmark)
 
-          n_before_landmark <- nrow(cleanData)
+          # dplyr::filter also drops rows whose mytime is NA (NA >= landmark is
+          # NA), and .definemytime() yields NA for a blank time cell or a date
+          # lubridate could not parse. Those rows are not pre-landmark
+          # follow-up, so they are taken out of the count before it is reported.
+          n_missing_time <- sum(is.na(cleanData$mytime))
+          n_before_landmark <- nrow(cleanData) - n_missing_time
           cleanData <- cleanData %>%
             dplyr::filter(mytime >= landmark) %>%
             dplyr::mutate(mytime = mytime - landmark)
@@ -3584,12 +3589,12 @@ multisurvivalClass <- if (requireNamespace('jmvcore'))
              # Note: cph uses its own formula parsing, variables must be in data
              fg_cph_formula <- update(fg_formula_obj, survival::Surv(fgstart, fgstop, fgstatus) ~ .)
              
-             f <- rms::cph(formula = fg_cph_formula,
+             f <- .quietly(rms::cph(formula = fg_cph_formula,
                           data = fg_data,
                           weights = fgwt,  # Use Fine-Gray weights
                           x = TRUE,
                           y = TRUE,
-                          surv = TRUE)
+                          surv = TRUE))
                           
              # Restore datadist option later if needed
         } else {
@@ -3597,11 +3602,11 @@ multisurvivalClass <- if (requireNamespace('jmvcore'))
              # Create formula and fit model using consolidated function
              coxformula <- base_formula
              
-             f <- rms::cph(formula = coxformula,
+             f <- .quietly(rms::cph(formula = coxformula,
                           data = mydata,
                           x = TRUE,
                           y = TRUE,
-                          surv = TRUE)
+                          surv = TRUE))
         }
 
         # Get prediction timepoints
@@ -3637,12 +3642,12 @@ multisurvivalClass <- if (requireNamespace('jmvcore'))
           base_surv <- survival::survfit(f)
           surv_at_time <- summary(base_surv, times = pred_times[1])$surv[1]
 
-          rms::nomogram(f,
+          .quietly(rms::nomogram(f,
                         fun = function(lp) {
                           1 - surv_at_time^exp(lp - mean(f$linear.predictors))
                         },
                         funlabel = paste("Predicted", pred_times[1], self$options$timetypeoutput, "risk"),
-                        fun.at = seq(0.1, 0.9, by = 0.1))
+                        fun.at = seq(0.1, 0.9, by = 0.1)))
         }, silent = TRUE)
 
 
@@ -4249,7 +4254,7 @@ multisurvivalClass <- if (requireNamespace('jmvcore'))
           error = function(e) NULL)
 
         plot <- tryCatch({
-          finalfit::hr_plot(
+          .quietly(finalfit::hr_plot(
             .data = mydata,
             dependent = myformula,
             explanatory = formula2,
@@ -4270,7 +4275,7 @@ multisurvivalClass <- if (requireNamespace('jmvcore'))
               ggplot2::theme(axis.title =
                                ggplot2::element_text(size = 12))
             )
-          )
+          ))
         }, error = function(e) {
           grid::grid.newpage()
           grid::grid.text(
@@ -4285,7 +4290,7 @@ multisurvivalClass <- if (requireNamespace('jmvcore'))
         # print plot ----
 
         if (!is.null(plot)) {
-          print(plot)
+          .quietly(print(plot))
           TRUE
         } else {
           TRUE
@@ -4394,7 +4399,7 @@ multisurvivalClass <- if (requireNamespace('jmvcore'))
         }
         
         plot3 <- tryCatch({
-          survminer::ggforest(model = cox_model, data = mydata)
+          .quietly(survminer::ggforest(model = cox_model, data = mydata))
         }, error = function(e) {
           grid::grid.newpage()
           grid::grid.text(
@@ -4409,7 +4414,7 @@ multisurvivalClass <- if (requireNamespace('jmvcore'))
         # print plot ----
 
         if (!is.null(plot3)) {
-            print(plot3)
+            .quietly(print(plot3))
             TRUE
         } else {
             FALSE
@@ -4460,7 +4465,7 @@ multisurvivalClass <- if (requireNamespace('jmvcore'))
 
         # Create plot using survminer
         plot8 <- tryCatch(
-          survminer::ggcoxzph(zph),
+          .quietly(survminer::ggcoxzph(zph)),
           error = function(e) {
             grid::grid.newpage()
             grid::grid.text(
@@ -4473,7 +4478,7 @@ multisurvivalClass <- if (requireNamespace('jmvcore'))
         )
 
         if (!is.null(plot8)) {
-          print(plot8)
+          .quietly(print(plot8))
         }
 
         TRUE
@@ -4617,7 +4622,7 @@ multisurvivalClass <- if (requireNamespace('jmvcore'))
 
         title2 <- as.character(thefactor)
 
-        plotKM <- mydata %>%
+        plotKM <- .quietly(mydata %>%
           finalfit::surv_plot(
             .data = .,
             dependent = paste0('survival::Surv(', .escapeVariableNames("mytime"), ', ', .escapeVariableNames("myoutcome"), ')'),
@@ -4635,11 +4640,11 @@ multisurvivalClass <- if (requireNamespace('jmvcore'))
             censor = self$options$censored,
             surv.median.line = self$options$medianline
 
-          )
+          ))
 
         # plot <- plot + ggtheme
 
-        print(plotKM)
+        .quietly(print(plotKM))
         TRUE
 
 
@@ -5089,7 +5094,7 @@ Patients were then divided at empirical quantile cutpoints into {as.character(le
         fit <- survival::survfit(survival::Surv(time, status) ~ group, data = plotData)
 
         # Create plot
-        plot <- survminer::ggsurvplot(
+        plot <- .quietly(survminer::ggsurvplot(
           fit = fit,
           data = plotData,
           risk.table.height = 0.3,
@@ -5124,9 +5129,9 @@ Patients were then divided at empirical quantile cutpoints into {as.character(le
               axis.text = ggplot2::element_text(size = 10),
               legend.text = ggplot2::element_text(size = 10)
             )
-        )
+        ))
 
-        print(plot)
+        .quietly(print(plot))
         TRUE
       }
 
@@ -6928,13 +6933,13 @@ Patients were then divided at empirical quantile cutpoints into {as.character(le
     # a column merely CONTAINING an explanatory name could be dragged in and
     # factorised. Do not "tidy away" this argument.
     if (is.null(strata_ff)) {
-      finalfit::finalfit(
+      .quietly(finalfit::finalfit(
         .data = mydata,
         dependent = dependent_formula,
         explanatory = explanatory_formula,
         cont_cut = 0,
         metrics = TRUE
-      ) -> tCox
+      )) -> tCox
     } else {
       covars_multi <- explanatory_formula[!explanatory_formula %in% strata_ff]
 
@@ -6950,14 +6955,14 @@ Patients were then divided at empirical quantile cutpoints into {as.character(le
         return(invisible(NULL))
       }
 
-      finalfit::finalfit(
+      .quietly(finalfit::finalfit(
         .data = mydata,
         dependent = dependent_formula,
         explanatory = explanatory_formula,
         explanatory_multi = c(covars_multi, paste0("strata(", strata_ff, ")")),
         cont_cut = 0,
         metrics = TRUE
-      ) -> tCox
+      )) -> tCox
     }
 
     # Convert finalfit table to HTML with nice formatting
@@ -7196,7 +7201,7 @@ Patients were then divided at empirical quantile cutpoints into {as.character(le
         <div class="explanation-box" style="background-color: rgba(33, 152, 255, 0.07); padding: 15px; border-radius: 8px; margin: 10px 0; color: inherit;">
             <h3 style="color: #2c5282; margin-top: 0;"> Understanding Multivariable Cox Regression</h3>
 
-            <div style="background-color: white; padding: 12px; border-radius: 5px; margin: 10px 0;">
+            <div style="background-color: rgba(255, 255, 255, 0.06); color: inherit; padding: 12px; border-radius: 5px; margin: 10px 0;">
                 <h4 style="color: #2d3748; margin-top: 0;">What is Multivariable Survival Analysis?</h4>
                 <p style="margin: 8px 0;">Multivariable Cox regression analyzes <strong>multiple variables simultaneously</strong> to estimate each variable&#39;s conditional association with the event hazard, given the others in the fitted model.</p>
 
@@ -7229,7 +7234,7 @@ Patients were then divided at empirical quantile cutpoints into {as.character(le
             <div style="background-color: rgba(33, 159, 43, 0.1); padding: 12px; border-radius: 5px; margin: 10px 0; color: inherit;">
                 <h4 style="color: #2e7d32; margin-top: 0;"> Clinical Examples</h4>
 
-                <div style="background-color: white; padding: 10px; border-radius: 5px; margin: 10px 0;">
+                <div style="background-color: rgba(255, 255, 255, 0.06); color: inherit; padding: 10px; border-radius: 5px; margin: 10px 0;">
                     <strong>Example: Cancer Survival Model</strong>
                     <p style="margin: 8px 0;"><strong>Variables:</strong> Age, Stage, Grade, Treatment</p>
                     <table style="width: 100%; margin: 5px 0;">
@@ -7253,7 +7258,7 @@ Patients were then divided at empirical quantile cutpoints into {as.character(le
 
             <div style="background-color: rgba(33, 152, 239, 0.13); padding: 12px; border-radius: 5px; margin: 10px 0; color: inherit;">
                 <h4 style="color: #1976d2; margin-top: 0;"> Model Building Strategy</h4>
-                <div style="background-color: white; padding: 10px; border-radius: 5px; margin: 10px 0;">
+                <div style="background-color: rgba(255, 255, 255, 0.06); color: inherit; padding: 10px; border-radius: 5px; margin: 10px 0;">
                     <strong>1. Variable Selection:</strong>
                     <ul style="margin: 5px 0; padding-left: 20px;">
                         <li>Include clinically important variables</li>
@@ -7366,7 +7371,7 @@ Patients were then divided at empirical quantile cutpoints into {as.character(le
                 <h4 style="color: #2e7d32; margin-top: 0;"> Adjusted Survival Curves</h4>
                 <p style="margin: 8px 0;">Adjusted curves show model-based survival or cumulative-incidence predictions under the selected covariate standardisation.</p>
 
-                <div style="background-color: white; padding: 10px; border-radius: 5px; margin: 10px 0;">
+                <div style="background-color: rgba(255, 255, 255, 0.06); color: inherit; padding: 10px; border-radius: 5px; margin: 10px 0;">
                     <strong>Key Features:</strong>
                     <ul style="margin: 5px 0; padding-left: 20px;">
                         <li><strong>Covariate-adjusted:</strong> Conditions or standardises over measured model variables</li>
@@ -7403,7 +7408,7 @@ Patients were then divided at empirical quantile cutpoints into {as.character(le
                 <h4 style="color: #d68910; margin-top: 0;"> Hazard Ratio (Forest) Plots</h4>
                 <p style="margin: 8px 0;">Forest plots visualize <strong>hazard ratios and confidence intervals</strong> for multiple variables simultaneously, enabling comparison of the relative magnitude of hazard ratios across variables.</p>
 
-                <div style="background-color: white; padding: 10px; border-radius: 5px; margin: 10px 0;">
+                <div style="background-color: rgba(255, 255, 255, 0.06); color: inherit; padding: 10px; border-radius: 5px; margin: 10px 0;">
                     <strong>Reading Forest Plots:</strong>
                     <ul style="margin: 5px 0; padding-left: 20px;">
                         <li><strong>Vertical line at HR=1:</strong> Line of no effect (reference)</li>
@@ -7427,7 +7432,7 @@ Patients were then divided at empirical quantile cutpoints into {as.character(le
             <div style="background-color: rgba(33, 184, 255, 0.11); padding: 12px; border-radius: 5px; margin: 10px 0; color: inherit;">
                 <h4 style="color: #1976d2; margin-top: 0;"> Clinical Applications</h4>
 
-                <div style="background-color: white; padding: 10px; border-radius: 5px; margin: 10px 0;">
+                <div style="background-color: rgba(255, 255, 255, 0.06); color: inherit; padding: 10px; border-radius: 5px; margin: 10px 0;">
                     <strong>1. Treatment Comparison:</strong>
                     <ul style="margin: 5px 0; padding-left: 20px;">
                         <li>Adjusted curves account for measured variables included in the model; residual confounding can remain</li>
@@ -7638,10 +7643,10 @@ Patients were then divided at empirical quantile cutpoints into {as.character(le
                 '<div style="background-color: rgba(33, 184, 255, 0.11); padding: 10px; border-radius: 5px; margin-top: 10px; color: inherit;">',
                 '<strong> ', .("Interpretation Guide:"), '</strong>',
                 '<ul style="margin: 5px 0; padding-left: 20px; font-size: 0.95em;">',
-                '<li>', .("HR > 1: Factor increases the hazard (risk) of the event"), '</li>',
-                '<li>', .("HR < 1: Factor decreases the hazard (risk) of the event"), '</li>',
-                '<li>', .("HR = 1: No association between factor and event timing"), '</li>',
-                '<li>', .("95% CI not crossing 1.0 indicates statistical significance"), '</li>',
+                '<li>', .("HR > 1: the event occurs at a faster rate in this group, among the patients still event-free at each moment. It is not a ratio of cumulative risks."), '</li>',
+                '<li>', .("HR < 1: the event occurs at a slower rate in this group, on the same instantaneous scale."), '</li>',
+                '<li>', .("HR = 1: no association between this factor and event timing was estimated."), '</li>',
+                '<li>', .("A 95% CI that excludes 1.0 means the data are unlikely under a hazard ratio of exactly 1. A CI that includes 1.0 is absence of evidence, not evidence of no effect: read how wide the interval is to see which hazard ratios remain compatible with these data."), '</li>',
                 '</ul>',
                 '</div>'
             )
@@ -7802,7 +7807,7 @@ Patients were then divided at empirical quantile cutpoints into {as.character(le
             summary_html <- paste0(
               "<div style='background-color: rgba(33, 144, 255, 0.11); border: 1px solid #b3d9ff; padding: 20px; border-radius: 8px; margin: 15px 0; color: inherit;'>",
               "<h3 style='color: #0056b3; margin-top: 0; margin-bottom: 15px;'> ", .("Clinical Summary"), "</h3>",
-              "<div style='background-color: white; padding: 15px; border-radius: 5px; border-left: 4px solid #0056b3;'>",
+              "<div style='background-color: rgba(255, 255, 255, 0.06); color: inherit; padding: 15px; border-radius: 5px; border-left: 4px solid #0056b3;'>",
               "<p style='font-size: 16px; line-height: 1.6; margin: 0;'>", clinical_summary$summary, "</p>",
               "</div>"
             )

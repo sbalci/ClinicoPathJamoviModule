@@ -1067,6 +1067,22 @@ jjbetweenstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
     self$results$assumptions$setContent(assumptions_content)
 },
 .generateInterpretationGuide = function() {
+    # The effect size and its confidence interval are rendered only inside the
+    # ggstatsplot subtitle, and `resultssubtitle` is FALSE by default - so any
+    # pointer to them has to be conditional or it sends the reader to an empty
+    # corner of the plot (same trap already handled in .generateClinicalSummary).
+    subtitle_on <- isTRUE(self$options$resultssubtitle)
+
+    compatible_effects <- if (subtitle_on)
+        "the effect size and its confidence interval in the plot subtitle show which effect sizes are still compatible with these data, and that range may include effects large enough to matter clinically"
+    else
+        "an effect size with its confidence interval shows which effect sizes are still compatible with these data, and that range may include effects large enough to matter clinically - switch on 'Statistical results' to display it in the plot subtitle"
+
+    precision_note <- if (subtitle_on)
+        "<li>Read the width of the confidence interval next to the effect size in the plot subtitle: a wide interval means this sample locates the effect only loosely, which is usually a matter of how many observations each group contributes.</li>"
+    else
+        "<li>Precision matters as much as the point estimate: a wide confidence interval means the sample locates the effect only loosely, which is usually a matter of how many observations each group contributes. Switch on 'Statistical results' to display the effect size and its interval in the plot subtitle.</li>"
+
     interpretation_content <- paste0(
         "<div style='padding: 15px; background-color: rgba(33, 163, 188, 0.21); border-left: 4px solid #17a2b8; margin: 10px 0; color: inherit;'>",
         "<h4 style='color: #0c5460; margin-top: 0;'> How to Interpret Results</h4>",
@@ -1074,7 +1090,7 @@ jjbetweenstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         "<p><strong>Statistical Significance:</strong></p>",
         "<ul>",
         "<li><strong>p < 0.05:</strong> Significant difference between groups.</li>",
-        "<li><strong>p >= 0.05:</strong> No significant difference was detected. This does not establish that the groups are equal - the effect size and its confidence interval in the plot subtitle show which effect sizes remain compatible with these data, and may include ones large enough to matter clinically.</li>",
+        paste0("<li><strong>p >= 0.05:</strong> No significant difference was detected. This is an absence of evidence for a difference, not evidence that the groups are the same: ", compatible_effects, ".</li>"),
         "<li>When several pairwise comparisons are displayed, read the adjusted p-values: the chance of at least one false positive rises with the number of comparisons.</li>",
         "</ul>",
         
@@ -1087,7 +1103,7 @@ jjbetweenstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         "<p><strong>Clinical Context:</strong></p>",
         "<ul>",
         "<li>Consider if the observed difference is clinically meaningful, not just statistically significant.</li>",
-        "<li>Look at the confidence intervals to understand the precision of the effect size estimate.</li>",
+        precision_note,
         "<li>Examine the plots to understand the distribution and overlap between groups.</li>",
         "</ul>",
         "</div>"
@@ -1118,7 +1134,14 @@ jjbetweenstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
     }
     
     test_method <- private$.testLabel(n_groups)
-    
+
+    # Same trap as .generateInterpretationGuide: the numbers this template asks
+    # the user to paste in exist only in the plot subtitle, which is off by default.
+    stats_source <- if (isTRUE(self$options$resultssubtitle))
+        "the plot subtitle"
+    else
+        "the plot subtitle - switch on 'Statistical results' to display it"
+
     report_template <- paste0(
         "<div style='padding: 15px; background-color: rgba(138, 155, 172, 0.06); border: 1px solid #dee2e6; margin: 10px 0; color: inherit;'>",
         "<h4 style='color: #495057; margin-top: 0;'> Copy-Ready Report Template</h4>",
@@ -1139,11 +1162,11 @@ jjbetweenstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         "</p>",
         
         "<h5>Results:</h5>",
-        "<p>[Insert the statistics shown in the plot subtitle: test statistic, p-value, effect size with CI]</p>",
+        paste0("<p>[Insert the statistics shown in ", stats_source, ": test statistic, p-value, effect size with CI]</p>"),
         # The example used to assert a significant difference, an F statistic and
         # post-hoc tests unconditionally - wrong whenever the result was null,
         # the test was not an F test, or pairwise comparisons were not requested.
-        "<p>Template (fill in from the plot subtitle; state the direction only if the test was significant): ",
+        paste0("<p>Template (fill in from ", stats_source, "; state the direction only if the test was significant): "),
         "\"", htmltools::htmlEscape(test_method), " showed [a / no] statistically significant difference in [dependent variable] ",
         "between the ", n_groups, " groups ([statistic] = [value], p = [value], [effect size] = [value], ",
         round(100 * self$options$conflevel), "% CI [lower, upper]).\"</p>",

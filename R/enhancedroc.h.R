@@ -991,7 +991,7 @@ enhancedROCResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
                                     `type`="text"),
                                 list(
                                     `name`="clinical_utility", 
-                                    `title`="Discrimination Level", 
+                                    `title`="AUC in Context", 
                                     `type`="text"))))
                         self$add(jmvcore::Table$new(
                             options=options,

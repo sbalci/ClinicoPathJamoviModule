@@ -918,26 +918,26 @@ alluvialClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     )
                 } else {
                     # Use easyalluvial engine (default)
-                    plot <- easyalluvial::alluvial_wide(
+                    plot <- .quietly(easyalluvial::alluvial_wide(
                         data = mydata,
                         max_variables = maxvars,
                         bins = bins,
                         fill_by = fill,
                         verbose = FALSE,  # Disabled to prevent console clutter in jamovi
                         bin_labels = bin
-                    )
+                    ))
                 }
 
                 # Add marginal histograms if requested (easyalluvial only) ----
                 marg <- self$options$marg
                 if (marg && engine == "easyalluvial") {
-                    plot <- easyalluvial::add_marginal_histograms(
+                    plot <- .quietly(easyalluvial::add_marginal_histograms(
                         p = plot,
                         data_input = mydata,
                         keep_labels = TRUE,
                         top = TRUE,
                         plot = TRUE
-                    )
+                    ))
                 }
 
                 # Post-processing below adds ggplot layers (scales, themes,
@@ -1014,12 +1014,12 @@ alluvialClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 return(FALSE)
 
             tryCatch({
-                plot <- rlang::inject(
+                plot <- .quietly(rlang::inject(
                     easyalluvial::plot_condensation(
                         df = state$data,
                         first = !!rlang::sym(state$condensation_var)
                     )
-                )
+                ))
                 plot <- private$.applyColorPalette(plot, self$options$colorPalette)
                 plot <- private$.applyThemeStyle(plot, self$options$themeStyle)
                 print(plot)

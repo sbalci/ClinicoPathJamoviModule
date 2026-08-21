@@ -690,7 +690,16 @@ jjhistostatsClass <- if (requireNamespace('jmvcore'))
                         } else if (!is.na(shapiro_p) && shapiro_p <= 0.05) {
                             "Symmetric but not normal - e.g. bimodal, or heavier/lighter tails than a normal curve; inspect the histogram before using parametric tests"
                         } else {
-                            "Approximately symmetric (parametric tests are reasonable; symmetry alone does not rule out bimodality or heavy tails, so check the histogram)"
+                            # Must agree with `is_normal`: at n = 2 the skewness is exactly 0
+                            # and Shapiro-Wilk cannot run, so the old unconditional
+                            # "parametric tests are reasonable" contradicted the
+                            # "Non-normal distribution" bullet three lines below.
+                            paste0("Approximately symmetric",
+                                   if (is_normal)
+                                       " (parametric tests are reasonable; symmetry alone does not rule out bimodality or heavy tails, so check the histogram)"
+                                   else
+                                       paste0(" - but with n = ", n,
+                                              " the normality check below could not be run, so symmetry here is not evidence of a normal distribution"))
                         }, "</li>",
                         if (!is.na(shapiro_p))
                             paste0("<li><strong>Normality (Shapiro-Wilk):</strong> W-test p = ",

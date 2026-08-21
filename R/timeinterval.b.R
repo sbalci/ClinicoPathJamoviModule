@@ -904,7 +904,7 @@ timeintervalClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
                                         (range: {round(summary_stats$min, 1)} to {round(summary_stats$max, 1)} {self$options$output_unit}),
 
-                                        the follow-up distribution is {if(summary_stats$mean > summary_stats$median) 'right-skewed (mean above median)' else 'not right-skewed (mean at or below median)'}.
+                                        {if(summary_stats$mean > summary_stats$median) 'the mean sits above the median, which usually indicates a right-skewed follow-up distribution - a minority of cases followed much longer than the rest' else 'the mean sits at or below the median, which gives no indication of a right-skewed follow-up distribution'} (no skewness coefficient is computed here; compare the Median time and Range lines above).
 
                                         The total person-time ({round(summary_stats$total_person_time, 1)} person-{self$options$output_unit})
 

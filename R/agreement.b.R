@@ -64,7 +64,7 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                     gwetTable$getColumn("ci_upper")$setTitle(paste0(conf_pct, "% CI Upper"))
                 }
             },
-            .createSummary = function(result1, result2, wght, exct) {
+            .createSummary = function(result1, result2, wght, exct, ci_lo = NA_real_, ci_hi = NA_real_) {
                 # Create plain-language summary of agreement results
 
                 # Extract values with safety checks
@@ -80,8 +80,31 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                     p_val <- NA
                 }
 
+                # Confidence-interval pointer used by the sentences below.
+                #
+                # ci_lo/ci_hi reach the Interrater Reliability table ONLY when there
+                # are exactly 2 raters (non-null ASE from vcd::Kappa via
+                # .pairKappaWithCI). With 3+ raters the row carries
+                # Fleiss'/Conger's kappa and both CI cells are blank, and the
+                # 2-rater path can also fail. The old text told every reader to
+                # "read the confidence interval", which sent the Fleiss user to an
+                # empty cell. Only name the interval when one was actually written.
+                have_ci <- length(ci_lo) == 1L && length(ci_hi) == 1L &&
+                    is.finite(ci_lo) && is.finite(ci_hi)
+                if (have_ci) {
+                    ci_pointer <- sprintf(
+                        "The Confidence Interval columns of the table above put that range at %.3f to %.3f for these data.",
+                        ci_lo, ci_hi)
+                } else if (!is.null(n_raters) && !is.na(n_raters) && n_raters >= 3) {
+                    ci_pointer <- "No interval is shown beside this kappa: with three or more raters the row reports Fleiss'/Conger's kappa, for which only the test against zero is available here. The All-Pairs Kappa table, if you switch it on together with its confidence intervals, reports every rater pair separately with an interval."
+                } else {
+                    ci_pointer <- "No interval could be computed for this kappa, so the table above carries the point estimate only and says nothing about how precisely this sample pins it down."
+                }
+
                 # Interpret kappa (Landis & Koch, 1977)
-                if (is.na(kappa_val) || kappa_val < 0) {
+                if (!is.finite(kappa_val)) {
+                    interp <- "not available - kappa could not be computed for these data"
+                } else if (kappa_val < 0) {
                     interp <- "poor agreement (worse than chance)"
                 } else if (kappa_val < 0.20) {
                     interp <- "slight agreement"
@@ -144,7 +167,7 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                     </table>
 
                     <p style='margin: 10px 0;'><strong>Method:</strong> ", method, exact_note, weight_desc, "</p>
-                    <p style='margin: 10px 0;'><strong>Statistical test:</strong> ", sig_text, " for the null hypothesis that agreement is no better than chance (kappa = 0). A small p-value only rules out zero agreement; it does not indicate whether the level of agreement is adequate - read the kappa value and its confidence interval for that.</p>
+                    <p style='margin: 10px 0;'><strong>Statistical test:</strong> ", sig_text, " for the null hypothesis that agreement is no better than chance (kappa = 0). A small p-value only rules out zero agreement; it does not say how large the agreement is. The size of kappa answers that, and the interval around kappa says how precisely these cases pin it down. ", ci_pointer, "</p>
                     <p style='margin: 10px 0;'><strong>Interpretation:</strong> ", interp, "</p>
 
                     <div style='background-color: rgba(155, 155, 155, 0.06); border: 1px solid #ccc; padding: 12px; margin: 15px 0; color: inherit;'>
@@ -159,11 +182,11 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                     if (!is.finite(kappa_val)) {
                         "Kappa could not be computed for these data, so no consistency statement can be made. Check the notes on the results table for the reason."
                     } else if (kappa_val >= 0.60) {
-                        "Agreement is substantial or higher on the Landis &amp; Koch scale. What counts as adequate depends on the consequence of a disagreement: a kappa near 0.60 still implies frequent disagreement on individual cases. Read the confidence interval reported with the kappa - with few cases the plausible range is wide."
+                        paste0("Agreement is substantial or higher on the Landis &amp; Koch scale - that phrase labels the size of the number, it is not a verdict on any particular use. Kappa is chance-corrected, so it is not the share of cases the raters matched on: that share is the Agreement % shown above, always the higher of the two once kappa is read as a percentage. ", ci_pointer)
                     } else if (kappa_val >= 0.40) {
-                        "The raters show moderate consistency. Consider additional training or clearer protocols."
+                        paste0("A kappa between 0.40 and 0.60 means the raters agreed moderately more often than chance alone would produce. It is not the proportion of cases they matched on - that is the Agreement % above, always the higher of the two once kappa is read as a percentage. A rare rating category can also hold kappa down while raw matching stays high; any low-prevalence note under the table flags that. ", ci_pointer)
                     } else {
-                        "The raters show low consistency. Measurement reliability is questionable - review criteria and provide training."
+                        paste0("A kappa below 0.40 means the raters agreed little more often than chance alone would produce, so in these data one rater's category does not reliably predict another's. Before reading that as a rater problem, look at the Data Summary: when nearly all cases fall into one category, kappa can be low even though the raters matched on most cases - compare it with the Agreement % above. ", ci_pointer)
                     }, "</p>
                     </div>
 
@@ -1073,7 +1096,7 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                         <li><strong>Challenge:</strong> Pathologists agree >90% of the time - skewed distribution</li>
                         <li><strong>Kappa problem:</strong> Cohen's kappa paradoxically low despite excellent clinical agreement</li>
                         <li><strong>Why Finn:</strong> Variance-based approach provides stable reliability estimate in high-agreement scenarios</li>
-                        <li><strong>Clinical Impact:</strong> Validates expert panel for surveillance program quality assurance</li>
+                        <li><strong>What Finn's coefficient reports:</strong> the share of the score variance that is not rater disagreement, on a case set where nearly every biopsy is graded &quot;none&quot;. That describes how these four readers behaved on these cases; it is not evidence that their grades are correct, since four readers can agree on the same wrong grade</li>
                     </ul>
 
                     <p style='margin: 0 0 10px 0; font-weight: bold;'>2. Tumor Grade Harmonization (Post-Training Assessment):</p>
@@ -1379,7 +1402,7 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                         <li><strong>Purpose:</strong> Identify cases suitable for training vs. requiring expert consultation</li>
                         <li><strong>W = 0.75:</strong> Strong agreement - pathologists generally concur on which cases are easy vs. challenging</li>
                         <li><strong>Application:</strong> High-concordance difficult cases become core training material; low-concordance cases may need expert consensus review</li>
-                        <li><strong>Educational value:</strong> Validates curriculum development for residency training programs</li>
+                        <li><strong>What W shows:</strong> The four pathologists put the cases in a similar order of difficulty. W measures concordance among rankings and nothing else - no learning outcome enters it - so it does not establish that this ordering picks out teachable cases or that a curriculum built on it works.</li>
                     </ul>
 
                     <p style='margin: 0 0 10px 0; font-weight: bold;'>2. Tumor Grade Severity Ordering (Prognostic Validation):</p>
@@ -1593,8 +1616,8 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                         <li><strong>Scenario:</strong> Two pathologists grade 80 breast carcinomas (G1, G2, G3)</li>
                         <li><strong>Challenge:</strong> Most cases are G2 (skewed distribution)</li>
                         <li><strong>Why Robinson's A:</strong> Less affected by G2 prevalence than weighted kappa</li>
-                        <li><strong>A = 0.78:</strong> Strong ordinal agreement - pathologists consistently agree on relative aggressiveness</li>
-                        <li><strong>Clinical value:</strong> Validates grading reliability despite category imbalance</li>
+                        <li><strong>A = 0.78:</strong> Falls in the band this analysis labels good ordinal agreement (0.60-0.80) - the two pathologists order cases by relative aggressiveness similarly</li>
+                        <li><strong>What A adds here:</strong> A counts only case pairs the raters ordered, so a dominant G2 category thins the comparison set rather than deflating the coefficient the way it deflates weighted kappa. Consistent ordering is not the same as correct grading: A compares the two readers with each other, not with any external standard</li>
                     </ul>
 
                     <p style='margin: 0 0 10px 0; font-weight: bold;'>2. Dysplasia Severity Assessment (Barrett's Esophagus):</p>
@@ -1602,7 +1625,7 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                         <li><strong>Scenario:</strong> Expert and community pathologist assess 100 Barrett's biopsies (none, LGD, HGD)</li>
                         <li><strong>Distribution:</strong> 70% non-dysplastic, 20% LGD, 10% HGD (highly skewed)</li>
                         <li><strong>Weighted kappa issue:</strong> Paradoxically low despite good clinical agreement</li>
-                        <li><strong>Robinson's A = 0.72:</strong> Point estimate consistent with substantial ordinal agreement; report the confidence interval, which at n = 100 with a highly skewed distribution will be wide</li>
+                        <li><strong>Robinson's A = 0.72:</strong> Falls in the band this analysis labels good ordinal agreement (0.60-0.80). A is (concordant - discordant) / (concordant + discordant) counted over case pairs that both raters ordered, so it is not the proportion of biopsies scored identically, and pairs either rater tied drop out of the calculation. The Robinson's A table reports A with an SE, z and p-value but no confidence interval; the p-value only tests A against zero, so the SE column is what says how tightly 0.72 is estimated</li>
                         <li><strong>Application:</strong> One coefficient does not by itself settle a credentialing question - that needs a prespecified agreement threshold, a representative case mix, and review of the discordant cases, particularly at the LGD/HGD boundary</li>
                     </ul>
 
@@ -1621,7 +1644,7 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                         <li><strong>Learning objective:</strong> Assess if trainee recognizes severity progression</li>
                         <li><strong>Robinson's A = 0.68:</strong> Good ordinal agreement on activity trajectory</li>
                         <li><strong>Educational feedback:</strong> Trainee reliably orders cases by severity despite some category mismatches</li>
-                        <li><strong>Training focus:</strong> High A validates understanding of inflammatory progression; category-specific training addresses exact scoring</li>
+                        <li><strong>What A does and does not show:</strong> A = 0.68 says the trainee orders biopsies by activity much as the attending does. A is computed only over case pairs the two raters ordered differently, so it is silent on how often they picked the same category - the exact-match rate is what the kappa and Agreement % outputs report</li>
                     </ul>
 
                     <p style='margin: 0 0 10px 0; font-weight: bold;'>5. Digital Pathology Validation (Gleason Grading):</p>
@@ -2607,8 +2630,10 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                             &#x2022; Mean difference: WSI 0.3 mitoses/10HPF higher (not significant)
                         </p>
                         <p style='margin: 5px 0; padding-left: 30px;'>
-                            <strong>Clinical Interpretation:</strong> Excellent agreement (CCC=0.93) with minimal systematic
-                            bias (C<sub>b</sub>=0.99). High r and high C<sub>b</sub> both contribute to strong CCC.
+                            <strong>Clinical Interpretation:</strong> CCC=0.93 sits in the band this analysis prints as good
+                            concordance (0.90-0.95). CCC multiplies precision (r=0.94, how tightly the paired counts follow a
+                            straight line) by accuracy (C<sub>b</sub>=0.99, how close that line lies to the 45-degree line of
+                            identity); both are high here, which is why CCC comes out close to r.
                         </p>
                         <p style='margin: 5px 0; padding-left: 30px;'>
                             <strong>Application:</strong> This level of concordance in one cohort supports proceeding to a
@@ -2635,8 +2660,10 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                             &#x2022; SP263 scores average 8% higher than 22C3
                         </p>
                         <p style='margin: 5px 0; padding-left: 30px;'>
-                            <strong>Clinical Interpretation:</strong> Poor agreement (CCC=0.75) despite good correlation
-                            (r=0.89). Low C<sub>b</sub> (0.84) indicates substantial systematic bias between clones.
+                            <strong>Clinical Interpretation:</strong> CCC=0.75 sits in the band this analysis prints as
+                            moderate concordance (0.70-0.90), despite a high correlation (r=0.89). Correlation only asks
+                            whether the two clones rank cases in the same order; CCC also penalises distance from the line of
+                            identity, and C<sub>b</sub>=0.84 locates the loss there - a systematic offset, not scatter.
                         </p>
                         <p style='margin: 5px 0; padding-left: 30px;'>
                             <strong>Application:</strong> The systematic offset falls in the range that spans the 1% and 50%
@@ -2662,14 +2689,16 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                             &#x2022; Imaging overestimates by 3.2 mm on average (includes surrounding edema)
                         </p>
                         <p style='margin: 5px 0; padding-left: 30px;'>
-                            <strong>Clinical Interpretation:</strong> Poor agreement (CCC=0.67) due to both imperfect
-                            correlation (r=0.82) and systematic bias (C<sub>b</sub>=0.82). Both precision and accuracy
-                            contribute to disagreement.
+                            <strong>Clinical Interpretation:</strong> CCC=0.67 sits in the band this analysis prints as fair
+                            concordance (0.40-0.70). Both components are down here: r=0.82 is scatter around the line, and
+                            C<sub>b</sub>=0.82 says the line itself sits off identity. Unlike the previous example, the
+                            disagreement is therefore not a pure offset.
                         </p>
                         <p style='margin: 5px 0; padding-left: 30px;'>
-                            <strong>Application:</strong> Pathology remains gold standard for tumor staging. Radiologic
-                            measurements require -3mm correction factor for surgical planning but still have high
-                            individual case variability.
+                            <strong>What the numbers do and do not report:</strong> the 3.2 mm is an average difference over
+                            200 cases and says nothing about how far a single case can be off - the Bland-Altman limits of
+                            agreement in this analysis carry that spread. Because C<sub>b</sub> is not the only shortfall,
+                            subtracting the average offset would leave the two measurements still disagreeing.
                         </p>
                     </div>
 
@@ -2690,8 +2719,9 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                             &#x2022; Mean difference: CISH 0.05 ratio units lower (not clinically significant)
                         </p>
                         <p style='margin: 5px 0; padding-left: 30px;'>
-                            <strong>Clinical Interpretation:</strong> Very high concordance (CCC=0.96) with both high precision
-                            (r=0.97) and high accuracy (C<sub>b</sub>=0.99).
+                            <strong>Clinical Interpretation:</strong> CCC=0.96 sits in the band this analysis prints as
+                            substantial concordance (0.95-0.99), with both high precision (r=0.97) and high accuracy
+                            (C<sub>b</sub>=0.99).
                         </p>
                         <p style='margin: 5px 0; padding-left: 30px;'>
                             <strong>Application:</strong> A CCC of this size is consistent with close agreement, but it is not an
@@ -5120,15 +5150,18 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                             &#x2022; RE = 0.79
                         </p>
                         <p style='margin: 5px 0; padding-left: 30px;'>
-                            <strong>Clinical Interpretation:</strong> High RE both pre (0.83) and post (0.79) training indicates
-                            random error is the primary problem. Training successfully reduced total variance by 53%, with both
-                            systematic and random components decreasing proportionally. RE remained stable, confirming the
-                            intervention appropriately targeted the predominant error source.
+                            <strong>Clinical Interpretation:</strong> RE is the share of total error variance that is random
+                            rather than systematic. It is high in both rounds (0.83 then 0.79), so random scatter dominates
+                            before and after. Total variance fell 53% between rounds while RE stayed near constant, which
+                            means the systematic and random components shrank in roughly the same proportion - not that one
+                            was targeted and the other was not.
                         </p>
                         <p style='margin: 5px 0; padding-left: 30px;'>
-                            <strong>Application:</strong> Demonstrates training effectiveness. Stable high RE validates that
-                            training (not calibration) was the correct intervention. Continued monitoring with RE analysis
-                            ensures sustained quality improvement.
+                            <strong>What this comparison can and cannot say:</strong> two rounds on the same readers with no
+                            comparison group is an uncontrolled before-and-after design, so the drop in variance cannot be
+                            attributed to the training rather than to practice, a different case mix, or regression to the
+                            mean. RE describes the mix of error types present; it carries no information about what produced
+                            the change between rounds.
                         </p>
                     </div>
                 </div>
@@ -5472,16 +5505,21 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                             &#x2022; Inter-rater: Overall ICC=0.82
                         </p>
                         <p style='margin: 5px 0; padding-left: 30px;'>
-                            <strong>Clinical Interpretation:</strong> Individual consistency between glass and digital platforms
-                            is good by the Koo &amp; Li (2016) bands (ICC 0.78-0.91), as is inter-rater reliability (ICC=0.82).
-                            A high ICC does not exclude a systematic offset between platforms: the ICC is dominated by
-                            between-case variance and can stay high in the presence of a constant shift. Use the Bland-Altman
-                            mean difference and its confidence interval, judged against a clinically acceptable difference,
-                            to assess bias.
+                            <strong>Clinical Interpretation:</strong> Individual consistency between glass and digital
+                            platforms is good to excellent by the Koo &amp; Li (2016) bands (ICC 0.78-0.91), and inter-rater
+                            reliability is good (ICC=0.82). An ICC is the share of the total variance that sits between
+                            cases, so a high value does not exclude a systematic offset between platforms: adding a constant
+                            to every WSI count leaves the between-case variance untouched and the ICC barely moves. The
+                            Bland-Altman Statistics table in this analysis is where such an offset shows up, as the Mean
+                            Difference, with the Lower and Upper limits of agreement giving the spread of individual
+                            case differences around it.
                         </p>
                         <p style='margin: 5px 0; padding-left: 30px;'>
-                            <strong>Application:</strong> Provides evidence for digital pathology implementation, showing
-                            individual pathologists are reliable across platforms and maintain group concordance.
+                            <strong>What these ICCs cover:</strong> how consistently each pathologist reproduced their own
+                            mitotic count across the two platforms, and how consistently the four ranked the same cases, in
+                            this one cohort. They carry no information about the size of any glass-to-WSI offset, nor about
+                            behaviour at the mitotic-count thresholds that change grade - the Bland-Altman output and
+                            agreement measured at those thresholds are the parts of this analysis that address those.
                         </p>
                     </div>
 
@@ -5533,13 +5571,16 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                             &#x2022; Inter-rater: Baseline &#x3BA;=0.72, Month 6 &#x3BA;=0.76
                         </p>
                         <p style='margin: 5px 0; padding-left: 30px;'>
-                            <strong>Clinical Interpretation:</strong> All experts demonstrate good individual test-retest
-                            reliability (&#x3BA;>=0.68). Inter-rater agreement actually improved after recalibration session (0.72&#x2192;0.76),
-                            indicating successful standardization.
+                            <strong>Clinical Interpretation:</strong> Each expert repeated their own dysplasia grades
+                            consistently (intra-rater &#x3BA; 0.68-0.84). Baseline 0.72 and month-6 0.76 are two point
+                            estimates from the same 80 cases; a gap of 0.04 is well inside the sampling variation a kappa on
+                            80 cases carries, so the numbers do not show that agreement changed at all.
                         </p>
                         <p style='margin: 5px 0; padding-left: 30px;'>
-                            <strong>Application:</strong> Validates central review process for clinical trial, showing both
-                            individual pathologist reliability and improved group concordance with periodic recalibration.
+                            <strong>What this comparison can and cannot say:</strong> it reports how consistently the central
+                            reviewers graded at two time points. It is an uncontrolled before-and-after look with no group
+                            that skipped recalibration, so even a real difference could not be attributed to the
+                            recalibration session rather than to case mix, drift or practice.
                         </p>
                     </div>
 
@@ -5562,8 +5603,10 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                         </p>
                         <p style='margin: 5px 0; padding-left: 30px;'>
                             <strong>Clinical Interpretation:</strong> Individual reproducibility is good to excellent
-                            (ICC 0.79-0.92) and inter-rater reliability is good (ICC=0.81). With four scorers the confidence
-                            intervals around these ICCs are wide, so the ordering among scorers is not firmly established.
+                            (ICC 0.79-0.92) and inter-rater reliability is good (ICC=0.81). Each intra-rater ICC rests on 60
+                            cases read twice, and its precision is set by that case count, not by how many scorers took part;
+                            all four are point estimates carrying sampling error, so the ordering among scorers is not
+                            established by the point estimates alone.
                         </p>
                         <p style='margin: 5px 0; padding-left: 30px;'>
                             <strong>Application:</strong> Consistent with adequate reproducibility within and across the scoring
@@ -6158,7 +6201,7 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                             detail <- "Raters have systematically different rating patterns (p < .05). Examine individual rater frequency distributions to identify which raters are lenient/strict."
                         } else {
                             interp <- "Strong evidence of bias"
-                            detail <- "Raters have markedly different rating patterns (p < .01). This indicates some raters systematically over-diagnose or under-diagnose. Recommend retraining or excluding biased raters."
+                            detail <- "Raters have markedly different rating patterns (p < .01): at least one rater assigns the categories at systematically different rates than the others, over and above case-level disagreement. This test compares how often each rater used each category, not which cases they disagreed on, so it does not identify which rater differs or in which direction - the individual rater frequency distributions show that."
                         }
 
                         self$results$raterBiasTable$setNote(
@@ -6263,7 +6306,7 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                         <li><strong>Agreement:</strong> 60% perfect agreement on diagonal</li>
                         <li><strong>Marginal frequencies:</strong> AI: 20% negative, 35% LSIL, 30% HSIL, 15% CA; Pathologist: 25%, 30%, 30%, 15%</li>
                         <li><strong>Bhapkar p = 0.03:</strong> AI systematically assigns fewer &quot;negative&quot; and more &quot;LSIL&quot; diagnoses</li>
-                        <li><strong>Action:</strong> Algorithm requires recalibration to match expert diagnostic thresholds</li>
+                        <li><strong>What p = 0.03 says:</strong> the algorithm's and the pathologist's category totals differ by more than chance would explain. The test compares totals only, so it does not say which of the two is closer to the truth on any case - the pathologist's grades are the comparator here, not a verified reference standard</li>
                     </ul>
 
                     <p style='margin: 0 0 10px 0; font-weight: bold;'>2. Pre-Post Training Evaluation (Inflammatory Bowel Disease):</p>
@@ -6273,7 +6316,7 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                         <li><strong>Hypothesis:</strong> Training should standardize scoring, reducing tendency to overgrade mild cases</li>
                         <li><strong>Bhapkar test:</strong> Tests if marginal distributions changed after training</li>
                         <li><strong>p &lt; 0.05:</strong> Significant shift - pathologist now uses &quot;quiescent&quot; more and &quot;mild&quot; less frequently</li>
-                        <li><strong>Interpretation:</strong> Training successfully recalibrated diagnostic thresholds</li>
+                        <li><strong>What this shows:</strong> the pathologist's category totals shifted between the two readings by more than chance. With one reader, no comparison group and no repeat reading without the workshop, the test cannot attribute the shift to the workshop, and it does not say whether the new distribution is the more accurate one</li>
                     </ul>
 
                     <p style='margin: 0 0 10px 0; font-weight: bold;'>3. Trainee vs. Expert Comparison (Glomerulonephritis):</p>
@@ -6553,7 +6596,7 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                         <li><strong>Original grading:</strong> 35% benign, 25% atypical, 20% DCIS, 20% invasive</li>
                         <li><strong>Post-training:</strong> 30% benign, 20% atypical, 25% DCIS, 25% invasive</li>
                         <li><strong>Stuart-Maxwell p = 0.04:</strong> Significant shift toward more aggressive diagnoses</li>
-                        <li><strong>Interpretation:</strong> Training recalibrated diagnostic thresholds - investigate if improvement or overcorrection</li>
+                        <li><strong>What p = 0.04 shows:</strong> the reader's category totals moved between the two readings by more than chance. A shift in totals is not by itself a shift toward the correct diagnosis, and with a single uncontrolled before-and-after reading the test cannot separate the workshop from practice or recall of the cases</li>
                     </ul>
 
                     <p style='margin: 0 0 10px 0; font-weight: bold;'>2. Digital vs. Glass Slide Diagnosis (Method Comparison):</p>
@@ -6593,7 +6636,7 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                         <li><strong>Context:</strong> 2019 criteria refined cribriform pattern and intraductal carcinoma definitions</li>
                         <li><strong>Stuart-Maxwell test:</strong> Quantifies impact of criteria change on diagnostic distribution</li>
                         <li><strong>p = 0.001:</strong> 2019 criteria yield significantly more Gleason 7 and fewer Gleason 6 diagnoses</li>
-                        <li><strong>Clinical impact:</strong> Demonstrates systematic shift in treatment thresholds with updated guidelines</li>
+                        <li><strong>What p = 0.001 shows:</strong> the two criteria sets produce different category totals on the same 90 biopsies by more than chance. The test compares totals, not individual cases, so it does not report how many biopsies changed category or in which direction any single one moved - the contingency table in this analysis shows that</li>
                     </ul>
                 </div>
 
@@ -6824,27 +6867,27 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                         <tr style='background-color: rgba(88, 88, 88, 0.06); color: inherit;'>
                             <th style='padding: 8px; text-align: left; border-bottom: 2px solid #333;'>Kappa</th>
                             <th style='padding: 8px; text-align: left; border-bottom: 2px solid #333;'>Agreement Level</th>
-                            <th style='padding: 8px; text-align: left; border-bottom: 2px solid #333;'>Training Status</th>
+                            <th style='padding: 8px; text-align: left; border-bottom: 2px solid #333;'>What the value says about this rater</th>
                         </tr>
                         <tr>
                             <td style='padding: 8px; border-bottom: 1px solid #ddd;'><strong>&#x3BA; < 0.40</strong></td>
                             <td style='padding: 8px; border-bottom: 1px solid #ddd;'>Poor to fair</td>
-                            <td style='padding: 8px; border-bottom: 1px solid #ddd;'> Needs significant training</td>
+                            <td style='padding: 8px; border-bottom: 1px solid #ddd;'>Grades land on the reference category little more often than chance would produce</td>
                         </tr>
                         <tr>
                             <td style='padding: 8px; border-bottom: 1px solid #ddd;'><strong>0.40-0.60</strong></td>
                             <td style='padding: 8px; border-bottom: 1px solid #ddd;'>Moderate</td>
-                            <td style='padding: 8px; border-bottom: 1px solid #ddd;'> Additional training recommended</td>
+                            <td style='padding: 8px; border-bottom: 1px solid #ddd;'>Clearly better than chance, but disagreement with the reference is still common</td>
                         </tr>
                         <tr>
                             <td style='padding: 8px; border-bottom: 1px solid #ddd;'><strong>0.60-0.75</strong></td>
                             <td style='padding: 8px; border-bottom: 1px solid #ddd;'>Substantial</td>
-                            <td style='padding: 8px; border-bottom: 1px solid #ddd;'> Acceptable performance</td>
+                            <td style='padding: 8px; border-bottom: 1px solid #ddd;'>Grades track the reference well beyond chance; disagreements concentrate on a minority of cases</td>
                         </tr>
                         <tr>
                             <td style='padding: 8px;'><strong>&#x3BA; > 0.75</strong></td>
                             <td style='padding: 8px;'>Excellent</td>
-                            <td style='padding: 8px;'> No training gap indicated by this comparison</td>
+                            <td style='padding: 8px;'>Close alignment with the reference rater on this case set; no training gap is indicated by this comparison</td>
                         </tr>
                     </table>
                 </div>
@@ -6877,20 +6920,24 @@ agreementClass <- if (requireNamespace("jmvcore")) {
 
                 <div style='background-color: rgba(155, 155, 155, 0.06); border-left: 4px solid #333; padding: 15px; margin-bottom: 20px; color: inherit;'>
                     <h4 style='margin: 0 0 10px 0; color: #333;'>Clinical Example: Trainee Certification</h4>
-                    <p style='margin: 0; padding: 10px; background: white; border-radius: 4px; font-size: 13px;'>
+                    <p style='margin: 0; padding: 10px; background-color: rgba(155, 155, 155, 0.06); color: inherit; border-radius: 4px; font-size: 13px;'>
                         <strong>Scenario:</strong> Five pathology residents (Raters 1-5) grade 100 tumor samples.
                         A senior pathologist provides reference diagnoses.<br><br>
                         <strong>Results:</strong><br>
-                        &#x2022; Resident 1: &#x3BA; = 0.82 (Excellent)  Ready for certification<br>
-                        &#x2022; Resident 2: &#x3BA; = 0.68 (Substantial)  Acceptable, continue monitoring<br>
-                        &#x2022; Resident 3: &#x3BA; = 0.52 (Moderate)  Additional training needed<br>
-                        &#x2022; Resident 4: &#x3BA; = 0.45 (Moderate)  Review difficult cases with expert<br>
-                        &#x2022; Resident 5: &#x3BA; = 0.28 (Poor)  Requires intensive retraining<br><br>
-                        <strong>Action:</strong> Residents 1-2 certified. Residents 3-5 receive targeted training
-                        based on specific error patterns, then retest after 3 months.<br><br>
+                        &#x2022; Resident 1: &#x3BA; = 0.82 - almost perfect agreement with the reference grades<br>
+                        &#x2022; Resident 2: &#x3BA; = 0.68 - substantial agreement<br>
+                        &#x2022; Resident 3: &#x3BA; = 0.52 - moderate agreement<br>
+                        &#x2022; Resident 4: &#x3BA; = 0.45 - moderate agreement<br>
+                        &#x2022; Resident 5: &#x3BA; = 0.28 - fair agreement, only a little above what chance alone
+                        would produce<br><br>
+                        <strong>What each number is:</strong> how far that resident's grades exceed chance agreement with
+                        one senior pathologist's grades on the same 100 cases. It is agreement with a particular reader, not
+                        a measure of diagnostic ability, and it absorbs any error in the reference grades themselves - a
+                        resident who is right where the senior reader is wrong scores lower, not higher.<br><br>
                         <strong>Caveat:</strong> these are point estimates from 100 cases against a single reference rater
-                        whose own reliability is unknown. At this sample size the confidence intervals of adjacent residents
-                        overlap, so the ordering is not a precise ranking of ability.
+                        whose own reliability is unknown. This analysis computes no confidence intervals for the Pairwise
+                        Kappa table, so how much of the gap between adjacent residents is sampling variation cannot be read
+                        off these numbers, and the ordering is not a precise ranking.
                     </p>
                 </div>
 
@@ -8586,7 +8633,7 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                                 interpretation <- switch(category,
                                     "All Agreed" = "Complete consensus (100%) across all raters",
                                     "Majority Agreed" = sprintf(">=%.0f%% of raters agree on the same rating", self$options$simpleThreshold),
-                                    "No Agreement" = sprintf("<%.0f%% agreement - review recommended", self$options$simpleThreshold)
+                                    "No Agreement" = sprintf("Fewer than %.0f%% of raters chose any single rating for these cases", self$options$simpleThreshold)
                                 )
 
                                 loa_table$addRow(rowKey = category, values = list(
@@ -8760,28 +8807,28 @@ agreementClass <- if (requireNamespace("jmvcore")) {
 
                 fit_result <- tryCatch(
                     {
-                        m <- lme4::lmer(
+                        m <- .quietly(lme4::lmer(
                             score ~ 1 + (1 | case_id) + (1 | rater) + (1 | cluster),
                             data = long_df,
                             control = lme4::lmerControl(
                                 optimizer = "bobyqa",
                                 calc.derivs = FALSE
                             )
-                        )
+                        ))
                         list(model = m, ok = TRUE)
                     },
                     error = function(e) {
                         # Try simpler model without rater effect
                         tryCatch(
                             {
-                                m <- lme4::lmer(
+                                m <- .quietly(lme4::lmer(
                                     score ~ 1 + (1 | case_id) + (1 | cluster),
                                     data = long_df,
                                     control = lme4::lmerControl(
                                         optimizer = "bobyqa",
                                         calc.derivs = FALSE
                                     )
-                                )
+                                ))
                                 self$results$hierarchicalOverallTable$setNote(
                                     "model_note",
                                     "Rater random effect was singular; a reduced model (case + cluster) was fit."
@@ -9093,7 +9140,7 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                     tryCatch(
                         {
                             # Likelihood ratio test: full model vs model without cluster
-                            model_reduced <- lme4::lmer(
+                            model_reduced <- .quietly(lme4::lmer(
                                 score ~ 1 + (1 | case_id) + (1 | rater),
                                 data = long_df,
                                 REML = FALSE,
@@ -9101,7 +9148,7 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                                     optimizer = "bobyqa",
                                     calc.derivs = FALSE
                                 )
-                            )
+                            ))
                             model_full_ml <- stats::update(model, REML = FALSE)
 
                             lr_test <- stats::anova(model_reduced, model_full_ml)
@@ -9253,27 +9300,27 @@ agreementClass <- if (requireNamespace("jmvcore")) {
 
                 fit_result <- tryCatch(
                     {
-                        m <- lme4::lmer(
+                        m <- .quietly(lme4::lmer(
                             score ~ condition + (1 | case_id) + (1 | rater),
                             data = long_df,
                             control = lme4::lmerControl(
                                 optimizer = "bobyqa",
                                 calc.derivs = FALSE
                             )
-                        )
+                        ))
                         list(model = m, ok = TRUE)
                     },
                     error = function(e) {
                         tryCatch(
                             {
-                                m <- lme4::lmer(
+                                m <- .quietly(lme4::lmer(
                                     score ~ condition + (1 | case_id),
                                     data = long_df,
                                     control = lme4::lmerControl(
                                         optimizer = "bobyqa",
                                         calc.derivs = FALSE
                                     )
-                                )
+                                ))
                                 self$results$mixedEffectsTable$setNote(
                                     "model_note",
                                     "Rater random effect was singular; reduced model (case only) was fit."
@@ -10486,8 +10533,10 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                     <p style='margin: 0; font-style: italic;'>
                         In a multi-site tumor grading study where 5 pathologists each reviewed a subset of cases
                         (not all pathologists reviewed every slide), Krippendorff's alpha is the ideal choice because
-                        it handles the incomplete design naturally. If \u{03B1} = 0.72 for histologic grade,
-                        conclusions should be considered tentative and additional consensus training is recommended.
+                        it handles the incomplete design naturally. An \u{03B1} of 0.72 for histologic grade sits between
+                        the two benchmarks listed above - above Krippendorff's 0.667 floor and below his 0.800 level.
+                        Those cutoffs are a convention carried over from content analysis, so the number tells you where
+                        this study falls against a published convention, not what the grades mean for any case.
                     </p>
                 </div>
 
@@ -11122,7 +11171,12 @@ agreementClass <- if (requireNamespace("jmvcore")) {
 
                     # Natural-language summary (if requested) ----
                     if (self$options$showSummary && exists("result1") && exists("result2")) {
-                        summary_text <- private$.createSummary(result1, result2, wght, exct)
+                        # ci_lo/ci_hi exist only if the categorical-kappa block
+                        # above ran; inherits = FALSE keeps the lookup in this frame.
+                        summary_text <- private$.createSummary(
+                            result1, result2, wght, exct,
+                            ci_lo = if (exists("ci_lo", inherits = FALSE)) ci_lo else NA_real_,
+                            ci_hi = if (exists("ci_hi", inherits = FALSE)) ci_hi else NA_real_)
                         self$results$summary$setContent(summary_text)
                     }
 

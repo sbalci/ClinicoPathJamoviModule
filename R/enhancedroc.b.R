@@ -761,13 +761,14 @@ enhancedROCClass <- R6::R6Class(
                         # Create ROC object - always use DeLong CI initially
                         # Bootstrap CI is computed separately via pROC::ci.auc() so
                         # the user's bootstrap method choice (BCa/percentile/basic) takes effect
-                        roc_obj <- pROC::roc(
+                        roc_obj <- .quietly(pROC::roc(
                             response = response_var,
                             predictor = data[[predictor]],
                             direction = direction,
                             ci = TRUE,
-                            conf.level = self$options$confidenceLevel / 100
-                        )
+                            conf.level = self$options$confidenceLevel / 100,
+                            quiet = TRUE
+                        ))
 
                         # If bootstrap CI requested, recompute CI via ci.auc() with correct type
                         if (use_boot) {
@@ -1044,9 +1045,9 @@ enhancedROCClass <- R6::R6Class(
                 )
                 predictions <- factor(predictions, levels = levels(data[[private$.outcome]]))
 
-                cm <- caret::confusionMatrix(predictions, data[[private$.outcome]],
+                cm <- .quietly(caret::confusionMatrix(predictions, data[[private$.outcome]],
                     positive = levels(data[[private$.outcome]])[2]
-                )
+                ))
 
                 # Access confusion matrix by level name for robustness
                 pos_lvl <- levels(data[[private$.outcome]])[2]
@@ -1105,9 +1106,9 @@ enhancedROCClass <- R6::R6Class(
             )
             predictions <- factor(predictions, levels = levels(data[[private$.outcome]]))
 
-            cm <- caret::confusionMatrix(predictions, data[[private$.outcome]],
+            cm <- .quietly(caret::confusionMatrix(predictions, data[[private$.outcome]],
                 positive = levels(data[[private$.outcome]])[2]
-            )
+            ))
 
             # Access confusion matrix by level name for robustness
             pos_lvl <- levels(data[[private$.outcome]])[2]
@@ -1167,9 +1168,9 @@ enhancedROCClass <- R6::R6Class(
                         )
                         predictions <- factor(predictions, levels = levels(outcome_var))
 
-                        cm <- caret::confusionMatrix(predictions, outcome_var,
+                        cm <- .quietly(caret::confusionMatrix(predictions, outcome_var,
                             positive = levels(outcome_var)[2]
-                        )
+                        ))
 
                         # Store results
                         custom_results <- rbind(custom_results, data.frame(
@@ -1197,7 +1198,7 @@ enhancedROCClass <- R6::R6Class(
             private$.noteDirection(aucTable, private$.rocObjects)
             aucTable$setNote(
                 "context_reference",
-                .("The last column compares each AUC with the reference level conventionally quoted for the selected clinical context (0.75 for screening, 0.80 for diagnosis); it is left blank for contexts that have no such conventional reference. The band for the AUC itself is in the AUC Interpretation column.")
+                .("The last column restates each AUC as what it actually is: the probability that a randomly chosen case scores higher than a randomly chosen non-case. Where the selected clinical context has a conventionally quoted reference level (0.75 for screening, 0.80 for diagnosis) it also says which side of that level this AUC falls; those levels are reporting conventions, not thresholds for patient care, and the AUC Interpretation column is the same number placed in the same kind of conventional band. Both are in-sample estimates from these data; the AUC Lower CI and AUC Upper CI columns show how precisely this sample pins the AUC down.")
             )
 
             for (predictor in names(private$.rocResults)) {
@@ -1676,6 +1677,10 @@ enhancedROCClass <- R6::R6Class(
 
             statSummaryTable <- self$results$results$statisticalSummary
             statSummaryTable$deleteRows()   # jamovi re-runs .run() on the same object; addRow() would stack duplicates
+            statSummaryTable$setNote(
+                "no_equivalence",
+                .("\"No significant difference (p >= 0.05)\" means no difference between the two AUCs was detected in this sample; it does not establish that the two predictors perform equally, because the test may lack the power to detect a difference of the size that would matter here. The p-value is the probability of seeing a gap at least this large if the two AUCs were identical, not the probability that they are identical. The Effect Magnitude column reports only how far apart the two observed AUCs are, so a wide observed gap and a large p-value can appear on the same row when the sample is small.")
+            )
 
             # Get all predictor pairs
             predictors <- names(private$.rocResults)
@@ -2341,17 +2346,30 @@ enhancedROCClass <- R6::R6Class(
             return(.("Below chance (reversed)"))
         },
         .assessClinicalUtility = function(auc, context) {
-            # The discrimination band for this AUC is already reported in the AUC
-            # Interpretation column. This column places the same AUC against the reference
-            # level conventionally quoted for the selected context, so that the two columns
-            # do not grade one quantity on two different scales. Contexts with no such
-            # conventional reference return "" (blank cell).
-            if (context == "screening") {
-                return(if (auc < 0.75) .("Below the 0.75 screening reference") else .("At or above the 0.75 screening reference"))
-            } else if (context == "diagnosis") {
-                return(if (auc < 0.80) .("Below the 0.80 diagnostic reference") else .("At or above the 0.80 diagnostic reference"))
+            # This column always says something about the AUC in front of the user: first the
+            # plain-language reading of the number itself (a ranking probability), then, for the
+            # contexts that have one, which side of the conventionally quoted reference level it
+            # falls. Contexts without such a convention say so rather than returning a blank cell.
+            if (is.na(auc)) {
+                return(.("AUC not available"))
             }
-            return("")
+            plain <- sprintf(.("Ranks a random case above a random non-case %.0f%% of the time"), auc * 100)
+            reference <- if (context == "screening") {
+                if (auc < 0.75) {
+                    .("below the 0.75 level conventionally quoted for screening")
+                } else {
+                    .("at or above the 0.75 level conventionally quoted for screening")
+                }
+            } else if (context == "diagnosis") {
+                if (auc < 0.80) {
+                    .("below the 0.80 level conventionally quoted for diagnosis")
+                } else {
+                    .("at or above the 0.80 level conventionally quoted for diagnosis")
+                }
+            } else {
+                .("no single reference level is conventional for this context")
+            }
+            return(paste0(plain, "; ", reference))
         },
         .generateClinicalRecommendation = function(optimal, context, predictor) {
             sens <- optimal$sensitivity
@@ -2366,12 +2384,12 @@ enhancedROCClass <- R6::R6Class(
                     sprintf(.("the prevalence you entered (%.3f)"), self$options$prevalence)
                 }
                 ppv_hint <- if (isTRUE(self$options$clinicalMetrics)) {
-                    sprintf(.("The Clinical Metrics table reports the PPV at %s."), prev_txt)
+                    sprintf(.("The Clinical Application Metrics table reports the PPV at %s."), prev_txt)
                 } else {
-                    sprintf(.("Switch on 'Clinical metrics' to see the PPV at %s."), prev_txt)
+                    sprintf(.("Switch on 'Clinical metrics' to see the PPV at %s in the Clinical Application Metrics table."), prev_txt)
                 }
                 if (sens >= 0.90 && spec >= 0.70) {
-                    return(paste(sprintf(.("Sensitivity %.2f, specificity %.2f: few false negatives in this sample. At low prevalence a specificity at this level still yields a large majority of false positives among those testing positive."), sens, spec), ppv_hint))
+                    return(paste(sprintf(.("Sensitivity %.2f, specificity %.2f: at this cutpoint few cases were missed in this sample. What share of the positive results are true positives is not fixed by these two numbers; it also depends on prevalence."), sens, spec), ppv_hint))
                 } else if (sens >= 0.85) {
                     return(paste(sprintf(.("Sensitivity %.2f, specificity %.2f: the false-positive burden depends on prevalence."), sens, spec), ppv_hint))
                 } else {
@@ -2412,8 +2430,10 @@ enhancedROCClass <- R6::R6Class(
 
             # Add NPV/PPV context
             if (context == "screening") {
-                lr_neg_txt <- if (is.na(lr_neg) || is.infinite(lr_neg)) {
+                lr_neg_txt <- if (is.na(lr_neg)) {
                     .("not estimable")
+                } else if (is.infinite(lr_neg)) {
+                    .("infinite")
                 } else {
                     sprintf("%.2f", lr_neg)
                 }
@@ -2642,15 +2662,17 @@ enhancedROCClass <- R6::R6Class(
                 interpretation <- private$.interpretAUC(best_auc)
                 clinical_utility <- private$.assessClinicalUtility(best_auc, context)
 
+                # .assessClinicalUtility() returns a full sentence fragment, so it is appended as
+                # its own sentence rather than folded into the parenthesis.
                 utility_clause <- if (nzchar(clinical_utility)) {
-                    paste0(", ", private$.safeHtmlOutput(clinical_utility))
+                    paste0(" ", private$.safeHtmlOutput(clinical_utility), ".")
                 } else {
                     ""
                 }
                 summary_text <- paste0(
                     summary_text,
                     sprintf(
-                        .("The best performing predictor was '%s' with an AUC of %.3f (%s performance%s)."),
+                        .("The best performing predictor was '%s' with an AUC of %.3f (%s performance).%s"),
                         private$.safeHtmlOutput(best_predictor), best_auc, private$.safeHtmlOutput(interpretation), utility_clause
                     ),
                     "</p>"
@@ -2775,7 +2797,7 @@ enhancedROCClass <- R6::R6Class(
                 report_html <- paste0(report_html, "<div style='background-color: white; padding: 10px; border-left: 4px solid #dc3545; margin: 5px 0;'>")
                 if (isTRUE(self$options$pairwiseComparisons) && identical(self$options$analysisType, "comparative")) {
                     comparative_text <- sprintf(
-                        .("Among the %d predictors evaluated, %s had the highest observed AUC (%.3f). Pairwise comparisons using %s methodology are reported in the ROC Comparisons table; a higher observed AUC is not a demonstrated difference unless the corresponding comparison is statistically significant, and a comparison that is not significant does not establish that two predictors perform equally."),
+                        .("Among the %d predictors evaluated, %s had the highest observed AUC (%.3f). Pairwise comparisons using %s methodology are reported in the ROC Curve Comparisons table; a higher observed AUC is not a demonstrated difference unless the corresponding comparison is statistically significant, and a comparison that is not significant does not establish that two predictors perform equally."),
                         n_predictors,
                         private$.safeHtmlOutput(best_predictor),
                         best_auc,
@@ -4094,11 +4116,11 @@ enhancedROCClass <- R6::R6Class(
                         pred_vals <- data[[predictor]]
 
                         # Run Multi-class ROC
-                        mc_roc <- pROC::multiclass.roc(
+                        mc_roc <- .quietly(pROC::multiclass.roc(
                             response = outcome,
                             predictor = pred_vals,
                             levels = levels(outcome)
-                        )
+                        ))
 
                         # Hand-Till pairwise AUC from pROC::multiclass.roc
                         mc_auc_val <- as.numeric(mc_roc$auc)

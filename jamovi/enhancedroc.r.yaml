@@ -160,7 +160,7 @@ items:
                   title: 'AUC Interpretation'
                   type: text
                 - name: clinical_utility
-                  title: 'Discrimination Level'
+                  title: 'AUC in Context'
                   type: text
 
           # ROC Curve Comparisons

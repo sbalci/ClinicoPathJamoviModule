@@ -70,12 +70,6 @@ children:
         name: coef_plot
       - type: CheckBox
         name: survival_plot
-  - type: LayoutBox
-    margin: large
-    children:
-      - type: TextBox
-        name: random_seed
-        format: number
   - type: CollapseBox
     label: Output Options
     collapsed: true
@@ -103,3 +97,16 @@ children:
         name: showVariableImportance
       - type: CheckBox
         name: showModelComparison
+  - type: CollapseBox
+    label: Seed
+    collapsed: true
+    stretchFactor: 1
+    children:
+      - type: Label
+        label: Random seed
+        children:
+          - type: TextBox
+            name: random_seed
+            format: number
+            width: large
+

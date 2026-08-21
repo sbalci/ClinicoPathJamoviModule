@@ -376,13 +376,13 @@ clinicalnomogramsClass <- R6::R6Class(
                     
                     if (nomogram_type == "survival_nomogram") {
                         y <- survival::Surv(data[[vars$time]], data[[vars$status]])
-                        cv_fit <- glmnet::cv.glmnet(x, y, family = "cox", cox.ties = "breslow")
+                        cv_fit <- .quietly(glmnet::cv.glmnet(x, y, family = "cox", cox.ties = "breslow"))
                     } else if (nomogram_type == "logistic_nomogram") {
                         y <- data[[vars$outcome]]
-                        cv_fit <- glmnet::cv.glmnet(x, y, family = "binomial")
+                        cv_fit <- .quietly(glmnet::cv.glmnet(x, y, family = "binomial"))
                     } else {
                         y <- data[[vars$outcome]]
-                        cv_fit <- glmnet::cv.glmnet(x, y, family = "gaussian")
+                        cv_fit <- .quietly(glmnet::cv.glmnet(x, y, family = "gaussian"))
                     }
                     
                     lasso_coefs <- coef(cv_fit, s = "lambda.min")
@@ -435,11 +435,11 @@ clinicalnomogramsClass <- R6::R6Class(
 
                     if (requireNamespace('rms', quietly = TRUE)) {
                         # Use rms for nomogram compatibility
-                        model <- rms::cph(model_formula,
+                        model <- .quietly(rms::cph(model_formula,
                                         data = data,
                                         x = TRUE,
                                         y = TRUE,
-                                        surv = TRUE)
+                                        surv = TRUE))
                     } else {
                         model <- survival::coxph(model_formula, data = data)
                     }
@@ -450,10 +450,10 @@ clinicalnomogramsClass <- R6::R6Class(
                         jmvcore::constructFormula(vars$outcome, selected_vars))
 
                     if (requireNamespace('rms', quietly = TRUE)) {
-                        model <- rms::lrm(model_formula,
+                        model <- .quietly(rms::lrm(model_formula,
                                         data = data,
                                         x = TRUE,
-                                        y = TRUE)
+                                        y = TRUE))
                     } else {
                         model <- glm(model_formula,
                                    data = data,
@@ -466,10 +466,10 @@ clinicalnomogramsClass <- R6::R6Class(
                         jmvcore::constructFormula(vars$outcome, selected_vars))
 
                     if (requireNamespace('rms', quietly = TRUE)) {
-                        model <- rms::ols(model_formula,
+                        model <- .quietly(rms::ols(model_formula,
                                         data = data,
                                         x = TRUE,
-                                        y = TRUE)
+                                        y = TRUE))
                     } else {
                         model <- lm(model_formula, data = data)
                     }
@@ -633,7 +633,7 @@ clinicalnomogramsClass <- R6::R6Class(
                 if (nomogram_type == "survival_nomogram") {
                     # Create survival nomogram
                     if (length(pred_times) > 0) {
-                        nomogram_obj <- rms::nomogram(
+                        nomogram_obj <- .quietly(rms::nomogram(
                             model,
                             fun = list(
                                 function(x) 1 - rms::survest(model, times = pred_times[1], newdata = x)$surv,
@@ -642,14 +642,14 @@ clinicalnomogramsClass <- R6::R6Class(
                             ),
                             funlabel = paste0("Mortality Risk at ", pred_times, " years"),
                             maxscale = points_scale
-                        )
+                        ))
                     } else {
                         # Default nomogram without specific time points
-                        nomogram_obj <- rms::nomogram(model, maxscale = points_scale)
+                        nomogram_obj <- .quietly(rms::nomogram(model, maxscale = points_scale))
                     }
                 } else {
                     # Non-survival nomograms
-                    nomogram_obj <- rms::nomogram(model, maxscale = points_scale)
+                    nomogram_obj <- .quietly(rms::nomogram(model, maxscale = points_scale))
                 }
                 
                 # Store nomogram object
@@ -810,10 +810,10 @@ clinicalnomogramsClass <- R6::R6Class(
                         # For survival, rms::calibrate needs specific parameters set during cph call 
                         # usually x=TRUE, y=TRUE, time.inc=...
                         # If we have them, we can plot
-                        cal <- rms::calibrate(model, u = pred_times, method = "boot", B = self$options$bootstrap_samples)
+                        cal <- .quietly(rms::calibrate(model, u = pred_times, method = "boot", B = self$options$bootstrap_samples))
                         plot(cal, main = paste("Calibration at", pred_times, "units"))
                     } else if (nomogram_type == "logistic_nomogram") {
-                        cal <- rms::calibrate(model, method = "boot", B = self$options$bootstrap_samples)
+                        cal <- .quietly(rms::calibrate(model, method = "boot", B = self$options$bootstrap_samples))
                         plot(cal, main = "Calibration Plot (Bootstrap)")
                     } else {
                         # Linear calibration
@@ -861,7 +861,7 @@ clinicalnomogramsClass <- R6::R6Class(
                 if (requireNamespace("pROC", quietly = TRUE)) {
                     vars <- private$variable_names
                     prob <- predict(model, type = "fitted")
-                    roc_obj <- pROC::roc(response = data[[vars$outcome]], predictor = prob)
+                    roc_obj <- pROC::roc(response = data[[vars$outcome]], predictor = prob, quiet = TRUE)
                     plot(roc_obj, print.auc = TRUE, main = "ROC Curve")
                     return(TRUE)
                 }
@@ -930,7 +930,7 @@ clinicalnomogramsClass <- R6::R6Class(
                         ))
                     }
                 } else if (nomogram_type == "logistic_nomogram") {
-                    cal <- rms::calibrate(model, method = "boot", B = self$options$bootstrap_samples)
+                    cal <- .quietly(rms::calibrate(model, method = "boot", B = self$options$bootstrap_samples))
                     
                     # For simple display, let's just add a row
                     table$addRow(rowKey = "1", values = list(
@@ -1343,13 +1343,13 @@ clinicalnomogramsClass <- R6::R6Class(
 
                 if (nomogram_type == "survival_nomogram") {
                     y <- survival::Surv(data[[vars$time]], data[[vars$status]])
-                    cv_fit <- glmnet::cv.glmnet(x, y, family = "cox", cox.ties = "breslow")
+                    cv_fit <- .quietly(glmnet::cv.glmnet(x, y, family = "cox", cox.ties = "breslow"))
                 } else if (nomogram_type == "logistic_nomogram") {
                     y <- as.numeric(data[[vars$outcome]]) - 1
-                    cv_fit <- glmnet::cv.glmnet(x, y, family = "binomial")
+                    cv_fit <- .quietly(glmnet::cv.glmnet(x, y, family = "binomial"))
                 } else {
                     y <- data[[vars$outcome]]
-                    cv_fit <- glmnet::cv.glmnet(x, y, family = "gaussian")
+                    cv_fit <- .quietly(glmnet::cv.glmnet(x, y, family = "gaussian"))
                 }
                 
                 lasso_coefs <- coef(cv_fit, s = "lambda.min")
@@ -1368,7 +1368,7 @@ clinicalnomogramsClass <- R6::R6Class(
                     options(datadist = "private$dd")
                     
                     # Internal validation using bootstrap
-                    v <- rms::validate(model, method = "boot", B = self$options$bootstrap_samples)
+                    v <- .quietly(rms::validate(model, method = "boot", B = self$options$bootstrap_samples))
                     
                     # Create a report in results
                     html <- "<h4>Internal Validation Report (Bootstrap)</h4>"

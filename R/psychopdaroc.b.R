@@ -384,7 +384,7 @@ psychopdaROCClass <- if (requireNamespace("jmvcore")) {
             private$.modeInstructionsHtml,
             "<h4>Balanced Diagnostic Test</h4>",
             "<p>Youden's J index optimizes for balanced sensitivity and specificity. ",
-            "Suitable for general diagnostic applications.</p>",
+            "It weights one unit of sensitivity the same as one unit of specificity, so the cutpoint it returns does not favour either kind of error.</p>",
             "<p style='color: #856404;'><b>Note:</b> This preset provides guidance only. ",
             "The cutpoint method is still: <b>", self$options$method, "</b> with metric: <b>", self$options$metric, "</b>.</p>"
           ))
@@ -441,7 +441,15 @@ psychopdaROCClass <- if (requireNamespace("jmvcore")) {
           .("poor")
         }
 
-        interpretation <- paste(interpretation, sprintf(.("indicating %s discrimination in this sample: the marker ranks a randomly chosen case from the positive class ahead of a randomly chosen case from the negative class about %.0f%% of the time, in the classification direction in use. AUC is a ranking property of pairs, computed over all cutpoints; it does not depend on which cutpoint was selected, and it does not describe how reliably any single cutpoint classifies an individual patient, which also depends on the cutpoint and on disease prevalence. This AUC is an in-sample estimate that has not been internally or externally validated. The sensitivity and specificity quoted at the selected cutpoint are a separate matter: those are optimistic, because that cutpoint was searched for on these same data."), band, auc * 100))
+        # With method = "oc_manual" the cut score comes from the user and nothing is searched,
+        # so the cutpoint-selection optimism does not apply. Same carve-out as .noteCutpointOptimism().
+        cut_clause <- if (identical(self$options$method, "oc_manual")) {
+          .("The sensitivity and specificity quoted at the cut score you supplied are a separate matter: those were not inflated by any cutpoint search, but they still carry ordinary sampling error.")
+        } else {
+          .("The sensitivity and specificity quoted at the selected cutpoint are a separate matter: those are optimistic, because that cutpoint was searched for on these same data.")
+        }
+
+        interpretation <- paste(interpretation, sprintf(.("indicating %s discrimination in this sample: the marker ranks a randomly chosen case from the positive class ahead of a randomly chosen case from the negative class about %.0f%% of the time, in the classification direction in use. AUC is a ranking property of pairs, computed over all cutpoints; it does not depend on which cutpoint was selected, and it does not describe how reliably any single cutpoint classifies an individual patient, which also depends on the cutpoint and on disease prevalence. This AUC is an in-sample estimate that has not been internally or externally validated. %s"), band, auc * 100, cut_clause))
 
         return(interpretation)
       },
@@ -885,7 +893,7 @@ psychopdaROCClass <- if (requireNamespace("jmvcore")) {
             "<li> <strong>Conservative Approach</strong>: Errs on the side of caution</li>",
             "<li> <strong>Observed Data Only</strong>: Uses actual data points</li>",
             "<li> <strong>Meets/Exceeds Target</strong>: Ensures target is achieved or surpassed</li>",
-            "<li> <strong>Clinical Safety</strong>: Preferred when patient safety is paramount</li>",
+            "<li> <strong>Trade-off</strong>: because it will not interpolate between observed values, the achieved value usually overshoots the target rather than landing on it</li>",
             "</ul>"
           )
         }
@@ -901,7 +909,7 @@ psychopdaROCClass <- if (requireNamespace("jmvcore")) {
           "<li><strong>Corresponding ", if (analysis_type == "sensitivity") "Specificity" else "Sensitivity", "</strong>: The trade-off metric</li>",
           "<li><strong>PPV/NPV</strong>: Predictive values depend on disease prevalence</li>",
           "<li><strong>Youden's J</strong>: Overall balance (Sensitivity + Specificity - 1)</li>",
-          "<li><strong>Cutpoint</strong>: The threshold value to use in practice</li>",
+          "<li><strong>Cutpoint</strong>: The test value at which the sensitivity and specificity in this table were measured. It was located in these same data, so those two figures are apparent (in-sample) values rather than validated estimates</li>",
           "</ul>",
           "</div>"
         )
@@ -909,16 +917,14 @@ psychopdaROCClass <- if (requireNamespace("jmvcore")) {
         # Add clinical decision framework
         explanation <- paste0(
           explanation,
-          "<h5 style='color: #495057;'> Clinical Decision Framework</h5>",
+          "<h5 style='color: #495057;'> How to Read These Numbers</h5>",
           "<div style='background-color: rgba(33, 41, 56, 0.13); padding: 10px; border-radius: 5px; margin: 10px 0; color: inherit;'>",
-          "<p><strong>Steps for Implementation:</strong></p>",
-          "<ol style='margin-bottom: 0;'>",
-          "<li><strong>Validate Performance</strong>: Confirm achieved ", analysis_type, " meets your requirements</li>",
-          "<li><strong>Assess Trade-offs</strong>: Evaluate the corresponding ", if (analysis_type == "sensitivity") "specificity" else "sensitivity", " value</li>",
-          "<li><strong>Consider Context</strong>: Factor in prevalence, costs, and consequences</li>",
-          "<li><strong>Pilot Testing</strong>: Test the cutpoint in your clinical setting</li>",
-          "<li><strong>Monitor Performance</strong>: Track real-world performance metrics</li>",
-          "</ol>",
+          "<ul style='margin-bottom: 0;'>",
+          "<li><strong>Achieved is not guaranteed</strong>: the achieved ", analysis_type, " is what this sample produced at this cutpoint; it is not a level the test will reproduce in another sample</li>",
+          "<li><strong>The two move together</strong>: fixing ", analysis_type, " pins one number and lets the other float, and the corresponding ", if (analysis_type == "sensitivity") "specificity" else "sensitivity", " column is where that cost shows up</li>",
+          "<li><strong>Prevalence is not in these two numbers</strong>: sensitivity and specificity are computed within the diseased and non-diseased groups separately, so they do not shift with disease frequency, while PPV and NPV do</li>",
+          "<li><strong>Precision</strong>: each figure rests on the number of cases in one group only, so with few positives (or few negatives) it moves considerably from sample to sample</li>",
+          "</ul>",
           "</div>"
         )
 
@@ -2026,11 +2032,51 @@ psychopdaROCClass <- if (requireNamespace("jmvcore")) {
             error = function(e) NULL)
           return(invisible(NULL))
         }
-        metric <- tryCatch(self$options$metric, error = function(e) NULL)
-        metric_txt <- if (is.null(metric) || !nzchar(metric)) {
-          .("the selected metric")
+        # Only the maximize/minimize families actually use the Optimization Metric setting.
+        # The Youden-smoothing methods use their own criterion, and oc_cost_ratio /
+        # oc_equal_sens_spec / oc_closest_01 have their cutpoint recomputed afterwards
+        # without reading it (see the override block in .run()), so naming the metric
+        # for those methods would tell the user something untrue.
+        method_key <- if (is.null(method)) "" else method
+        metric_txt <- if (method_key %in% c("maximize_metric", "minimize_metric",
+                                            "maximize_loess_metric", "minimize_loess_metric",
+                                            "maximize_boot_metric", "minimize_boot_metric")) {
+          metric <- tryCatch(self$options$metric, error = function(e) NULL)
+          metric_titles <- c(
+            youden = "Youden Index (Sens + Spec - 1)",
+            sum_sens_spec = "Sum of sensitivity and specificity",
+            accuracy = "Overall accuracy",
+            sum_ppv_npv = "Sum of PPV and NPV",
+            prod_sens_spec = "Product of sensitivity and specificity",
+            prod_ppv_npv = "Product of PPV and NPV",
+            cohens_kappa = "Cohen's Kappa",
+            abs_d_sens_spec = "Minimize |Sens - Spec|",
+            abs_d_ppv_npv = "Minimize |PPV - NPV|",
+            F1_score = "F1 Score",
+            odds_ratio = "Diagnostic odds ratio",
+            risk_ratio = "Risk ratio",
+            misclassification_cost = "Misclassification cost",
+            total_utility = "Total utility",
+            roc01 = "Distance to (0,1) in ROC space",
+            p_chisquared = "Chi-squared statistic"
+          )
+          if (!is.null(metric) && nzchar(metric) && metric %in% names(metric_titles)) {
+            sprintf(.("the metric you chose under Optimization Metric (%s)"), metric_titles[[metric]])
+          } else {
+            .("the metric you chose under Optimization Metric")
+          }
+        } else if (method_key == "oc_youden_kernel") {
+          .("the Youden index (sensitivity + specificity - 1) read off a kernel-smoothed ROC curve; the Optimization Metric setting is not used by this method")
+        } else if (method_key == "oc_youden_normal") {
+          .("the Youden index (sensitivity + specificity - 1) computed under a normal-distribution model for the two groups; the Optimization Metric setting is not used by this method")
+        } else if (method_key == "oc_cost_ratio") {
+          .("expected misclassification cost, using the cost ratio you set for false positives against false negatives; the Optimization Metric setting is not used by this method")
+        } else if (method_key == "oc_equal_sens_spec") {
+          .("the balance between sensitivity and specificity, by taking the cutpoint at which the two come closest to being equal; the Optimization Metric setting is not used by this method")
+        } else if (method_key == "oc_closest_01") {
+          .("closeness to the top-left corner of the ROC plot, the point of perfect sensitivity and specificity; the Optimization Metric setting is not used by this method")
         } else {
-          sprintf(.("the selected metric (%s)"), metric)
+          .("the criterion belonging to the cutpoint method you selected")
         }
         note <- sprintf(.("The cutpoint was chosen to optimise %s on these same data. The sensitivity, specificity and other metrics reported at that cutpoint are therefore optimistically biased and will typically be lower in a new sample; the bias grows as the sample gets smaller and as more candidate cutpoints are searched. Use bootstrap or split-sample validation before quoting these figures."), metric_txt)
         if (isTRUE(self$options$allObserved)) {

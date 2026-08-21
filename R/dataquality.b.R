@@ -25,7 +25,7 @@ dataqualityClass <- if (requireNamespace("jmvcore")) R6::R6Class("dataqualityCla
         }
 
         tryCatch({
-            result <- as.data.frame(naniar::mcar_test(numeric_data))[1, , drop = FALSE]
+            result <- as.data.frame(.quietly(naniar::mcar_test(numeric_data)))[1, , drop = FALSE]
             interpretation <- if (result$p.value < 0.05) {
                 "The data provide evidence against the MCAR assumption."
             } else {
@@ -592,7 +592,7 @@ dataqualityClass <- if (requireNamespace("jmvcore")) R6::R6Class("dataqualityCla
 
         tryCatch({
             # Create data overview plot
-            plot <- visdat::vis_dat(plotData$data) +
+            plot <- .quietly(visdat::vis_dat(plotData$data)) +
                 ggtheme +
                 ggplot2::theme(
                     axis.text.x = ggplot2::element_text(
@@ -630,12 +630,12 @@ dataqualityClass <- if (requireNamespace("jmvcore")) R6::R6Class("dataqualityCla
             # Create missing patterns plot
             # Note: visdat::vis_miss doesn't have threshold highlighting capability
             # It shows all missing values with sort_miss option
-            plot <- visdat::vis_miss(
+            plot <- .quietly(visdat::vis_miss(
                 plotData$data,
                 sort_miss = TRUE,  # Sort by missingness for clarity
                 show_perc = TRUE,  # Show percentage missing
                 show_perc_col = TRUE  # Show percentage by column
-            ) +
+            )) +
                 ggplot2::labs(
                     subtitle = paste0("Missing value patterns (threshold for warnings: ", plotData$threshold, "%)")
                 ) +
@@ -674,7 +674,7 @@ dataqualityClass <- if (requireNamespace("jmvcore")) R6::R6Class("dataqualityCla
 
         tryCatch({
             # Create data types plot
-            plot <- visdat::vis_guess(plotData$data) +
+            plot <- .quietly(visdat::vis_guess(plotData$data)) +
                 ggtheme +
                 ggplot2::theme(
                     axis.text.x = ggplot2::element_text(

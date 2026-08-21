@@ -586,7 +586,7 @@ grouplassoClass <- R6::R6Class(
             set.seed(self$options$random_seed)
 
             # Fit with cross-validation via grpreg
-            cv_result <- grpreg::cv.grpsurv(
+            cv_result <- .quietly(grpreg::cv.grpsurv(
                 X = group_data$x,
                 y = group_data$y,
                 group = group_data$groups,
@@ -598,7 +598,7 @@ grouplassoClass <- R6::R6Class(
                 eps = self$options$tolerance,
                 max.iter = self$options$max_iterations,
                 seed = self$options$random_seed
-            )
+            ))
 
             full_fit <- cv_result$fit
             lambda_min <- cv_result$lambda.min
@@ -663,13 +663,13 @@ grouplassoClass <- R6::R6Class(
                 # Ridge Cox via glmnet (alpha = 0)
                 tryCatch({
                     if (requireNamespace("glmnet", quietly = TRUE)) {
-                        ridge_fit <- glmnet::glmnet(
+                        ridge_fit <- .quietly(glmnet::glmnet(
                             x = group_data$x,
                             y = group_data$y,
                             family = "cox", cox.ties = "breslow",
                             alpha = 0,
                             standardize = FALSE
-                        )
+                        ))
                         lambda_ridge <- ridge_fit$lambda[max(1, length(ridge_fit$lambda) %/% 4)]
                         coefs <- as.numeric(coef(ridge_fit, s = lambda_ridge))
                         return(coefs)
@@ -700,13 +700,13 @@ grouplassoClass <- R6::R6Class(
             # Fallback: use least-penalized coefficients from grpreg path
             # (smallest lambda = least shrinkage, approximating ridge)
             tryCatch({
-                fallback_fit <- grpreg::grpsurv(
+                fallback_fit <- .quietly(grpreg::grpsurv(
                     X = group_data$x,
                     y = group_data$y,
                     group = group_data$groups,
                     penalty = "grLasso",
                     nlambda = 50
-                )
+                ))
                 # Pick the last lambda (smallest penalty = least shrinkage)
                 last_idx <- ncol(fallback_fit$beta)
                 coefs <- as.numeric(fallback_fit$beta[, last_idx])
@@ -765,7 +765,7 @@ grouplassoClass <- R6::R6Class(
                 boot_y <- group_data$y[boot_idx]
 
                 tryCatch({
-                    boot_cv <- grpreg::cv.grpsurv(
+                    boot_cv <- .quietly(grpreg::cv.grpsurv(
                         X = boot_x,
                         y = boot_y,
                         group = group_vector,
@@ -773,7 +773,7 @@ grouplassoClass <- R6::R6Class(
                         group.multiplier = group_multiplier,
                         nfolds = min(5, self$options$cv_folds),
                         seed = self$options$random_seed + b
-                    )
+                    ))
 
                     boot_coef <- as.numeric(coef(boot_cv$fit, lambda = boot_cv$lambda.min))
 
@@ -833,7 +833,7 @@ grouplassoClass <- R6::R6Class(
                 test_y <- group_data$y[test_idx]
 
                 tryCatch({
-                    inner_cv <- grpreg::cv.grpsurv(
+                    inner_cv <- .quietly(grpreg::cv.grpsurv(
                         X = train_x,
                         y = train_y,
                         group = group_vector,
@@ -841,7 +841,7 @@ grouplassoClass <- R6::R6Class(
                         group.multiplier = group_multiplier,
                         nfolds = inner_folds,
                         seed = self$options$random_seed + k
-                    )
+                    ))
 
                     optimal_lambdas[k] <- inner_cv$lambda.min
 
@@ -891,14 +891,14 @@ grouplassoClass <- R6::R6Class(
             # Observed model
             set.seed(self$options$random_seed)
             obs_cv <- tryCatch({
-                grpreg::cv.grpsurv(
+                .quietly(grpreg::cv.grpsurv(
                     X = group_data$x, y = group_data$y,
                     group = group_vector,
                     penalty = penalty,
                     group.multiplier = group_multiplier,
                     nfolds = min(5, self$options$cv_folds),
                     seed = self$options$random_seed
-                )
+                ))
             }, error = function(e) NULL)
 
             if (is.null(obs_cv)) return(NULL)
@@ -923,14 +923,14 @@ grouplassoClass <- R6::R6Class(
                 perm_y <- group_data$y[perm_idx]
 
                 tryCatch({
-                    perm_cv <- grpreg::cv.grpsurv(
+                    perm_cv <- .quietly(grpreg::cv.grpsurv(
                         X = group_data$x, y = perm_y,
                         group = group_vector,
                         penalty = penalty,
                         group.multiplier = group_multiplier,
                         nfolds = min(5, self$options$cv_folds),
                         seed = self$options$random_seed + b
-                    )
+                    ))
                     perm_coef <- as.numeric(coef(perm_cv$fit, lambda = perm_cv$lambda.min))
                     perm_n_groups[b] <- length(unique(group_vector[abs(perm_coef) > 1e-8]))
                     perm_deviance[b] <- min(perm_cv$cve, na.rm = TRUE)

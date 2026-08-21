@@ -2,7 +2,8 @@
 name: groomecompare
 title: Groome Staging System Comparison
 jrs: '1.1'
-refs: survival
+refs:
+    - survival
 
 items:
     - name: instructions

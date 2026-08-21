@@ -403,11 +403,11 @@ leaveonecenteroutClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R
             nfolds_inner <- min(10, length(y_train) - 1)
             nfolds_inner <- max(nfolds_inner, 3)
 
-            cv_fit <- glmnet::cv.glmnet(
+            cv_fit <- .quietly(glmnet::cv.glmnet(
                 x = X_train_mm, y = y_train,
                 family = "binomial", alpha = 1,
                 nfolds = nfolds_inner
-            )
+            ))
 
             lambda_opt <- switch(self$options$lambdaMethod,
                 "lambda.min" = cv_fit$lambda.min,
@@ -469,10 +469,10 @@ leaveonecenteroutClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R
             nfolds_inner <- min(10, length(y_train) - 1)
             nfolds_inner <- max(nfolds_inner, 3)
 
-            cv_fit <- glmnet::cv.glmnet(
+            cv_fit <- .quietly(glmnet::cv.glmnet(
                 x = X_train_mm, y = y_surv,
                 family = "cox", cox.ties = "breslow", alpha = 1,
-                nfolds = nfolds_inner)
+                nfolds = nfolds_inner))
 
             lambda_opt <- switch(self$options$lambdaMethod,
                 "lambda.min" = cv_fit$lambda.min,

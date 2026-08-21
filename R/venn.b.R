@@ -1819,9 +1819,13 @@ vennClass <- if (requireNamespace('jmvcore'))
                     "<p style='margin: 0 0 8px 0;'><strong>Key Finding:</strong> In this dataset of ", total_n, " cases, ",
                     "'", largest_var, "' shows the highest prevalence with ", largest_count, " positive cases (", largest_pct, "%).</p>",
                     "<p style='margin: 0 0 8px 0;'><strong>Overlap Pattern:</strong> Across the selected variables, the average share of positive cases is ", overlap_level, ". ",
-                    if (overlap_level == "high") "Each variable is positive in more than half of cases on average."
-                    else if (overlap_level == "moderate") "Each variable is positive in roughly one fifth to one half of cases on average."
-                    else "Each variable is positive in less than one fifth of cases on average.",
+                    # `intersection_data` is summaryData: one row PER VARIABLE, so
+                    # mean_overlap / total_n is the average positivity ACROSS variables.
+                    # Phrasing it as "each variable" was false whenever the variables
+                    # differ in prevalence (e.g. 90% and 20% average to "high").
+                    if (overlap_level == "high") "That is, averaged over the variables, more than half of cases are positive; single variables can sit far above or below that average, so read the True % column of the Summary of True Counts table."
+                    else if (overlap_level == "moderate") "That is, averaged over the variables, between one fifth and one half of cases are positive; single variables can sit outside that range, so read the True % column of the Summary of True Counts table."
+                    else "That is, averaged over the variables, under one fifth of cases are positive; single variables can sit outside that range, so read the True % column of the Summary of True Counts table.",
                     " Overlap size depends on how common each variable is and does not by itself measure association.", "</p>",
                     "<p style='margin: 0; font-size: 0.9em; color: #6c757d;'>",
                     " <em>Clinical Relevance:</em> Use Venn diagrams to identify patient subgroups, assess diagnostic overlap, ",

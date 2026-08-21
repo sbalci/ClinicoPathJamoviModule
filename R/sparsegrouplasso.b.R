@@ -805,12 +805,12 @@ sparsegrouplassoClass <- R6::R6Class(
                 # Adaptive: use glmnet's own lambda sequence (data-driven spacing)
                 tryCatch({
                     y_surv <- survival::Surv(y_time, y_event)
-                    auto_fit <- glmnet::glmnet(
+                    auto_fit <- .quietly(glmnet::glmnet(
                         x = X, y = y_surv, family = "cox", cox.ties = "breslow",
                         alpha = self$options$alpha_sgl,
                         standardize = FALSE,
                         nlambda = n_lambda
-                    )
+                    ))
                     return(auto_fit$lambda)
                 }, error = function(e) NULL)
             }
@@ -828,13 +828,13 @@ sparsegrouplassoClass <- R6::R6Class(
             tryCatch({
                 y_surv <- survival::Surv(y_time, y_event)
                 # Let glmnet choose its own lambda sequence and take the max
-                fit <- glmnet::glmnet(
+                fit <- .quietly(glmnet::glmnet(
                     x = X, y = y_surv,
                     family = "cox", cox.ties = "breslow",
                     alpha = self$options$alpha_sgl,
                     standardize = FALSE,
                     nlambda = 20
-                )
+                ))
                 lambda_max <- max(fit$lambda)
                 # Add a small margin
                 return(lambda_max * 1.1)
@@ -893,12 +893,12 @@ sparsegrouplassoClass <- R6::R6Class(
             # Ridge Cox regression using glmnet with alpha=0
             tryCatch({
                 y_surv <- survival::Surv(y_time, y_event)
-                cv_ridge <- glmnet::cv.glmnet(
+                cv_ridge <- .quietly(glmnet::cv.glmnet(
                     x = X, y = y_surv,
                     family = "cox", cox.ties = "breslow", alpha = 0,
                     nfolds = min(5, floor(nrow(X) / 3)),
                     standardize = FALSE
-                )
+                ))
                 coef_ridge <- as.numeric(coef(cv_ridge, s = cv_ridge$lambda.min))
                 return(list(coefficients = coef_ridge))
             }, error = function(e) {
@@ -924,12 +924,12 @@ sparsegrouplassoClass <- R6::R6Class(
             # LASSO Cox regression using glmnet with alpha=1
             tryCatch({
                 y_surv <- survival::Surv(y_time, y_event)
-                cv_lasso <- glmnet::cv.glmnet(
+                cv_lasso <- .quietly(glmnet::cv.glmnet(
                     x = X, y = y_surv,
                     family = "cox", cox.ties = "breslow", alpha = 1,
                     nfolds = min(5, floor(nrow(X) / 3)),
                     standardize = FALSE
-                )
+                ))
                 coef_lasso <- as.numeric(coef(cv_lasso, s = cv_lasso$lambda.min))
                 return(list(coefficients = coef_lasso))
             }, error = function(e) {
@@ -986,7 +986,7 @@ sparsegrouplassoClass <- R6::R6Class(
                 cvsd_accum <- NULL
                 for (r in seq_len(cv_repeats)) {
                     set.seed(self$options$seed_value + r - 1)
-                    cv_r <- glmnet::cv.glmnet(
+                    cv_r <- .quietly(glmnet::cv.glmnet(
                         x = X, y = y_surv,
                         family = "cox", cox.ties = "breslow",
                         alpha = alpha_sgl,
@@ -994,7 +994,7 @@ sparsegrouplassoClass <- R6::R6Class(
                         nfolds = nfolds_safe,
                         standardize = FALSE,
                         lambda = lambda_seq
-                    )
+                    ))
                     if (is.null(cvm_accum)) {
                         cvm_accum <- cv_r$cvm
                         cvsd_accum <- cv_r$cvsd^2
@@ -1013,7 +1013,7 @@ sparsegrouplassoClass <- R6::R6Class(
                 idx_1se <- which(cv_fit$cvm <= min(cv_fit$cvm) + cv_fit$cvsd[which.min(cv_fit$cvm)])
                 cv_fit$lambda.1se <- cv_fit$lambda[min(idx_1se)]
             } else {
-                cv_fit <- glmnet::cv.glmnet(
+                cv_fit <- .quietly(glmnet::cv.glmnet(
                     x = X, y = y_surv,
                     family = "cox", cox.ties = "breslow",
                     alpha = alpha_sgl,
@@ -1021,18 +1021,18 @@ sparsegrouplassoClass <- R6::R6Class(
                     nfolds = nfolds_safe,
                     standardize = FALSE,
                     lambda = lambda_seq
-                )
+                ))
             }
 
             # Fit full model across the lambda sequence
-            full_fit <- glmnet::glmnet(
+            full_fit <- .quietly(glmnet::glmnet(
                 x = X, y = y_surv,
                 family = "cox", cox.ties = "breslow",
                 alpha = alpha_sgl,
                 penalty.factor = penalty_factor,
                 standardize = FALSE,
                 lambda = lambda_seq
-            )
+            ))
 
             # Extract coefficient path (single call, no per-lambda loop)
             coefficients_path <- as.matrix(coef(full_fit, s = lambda_seq))
@@ -1098,14 +1098,14 @@ sparsegrouplassoClass <- R6::R6Class(
 
             y_surv <- survival::Surv(y_time, y_event)
             tryCatch({
-                fit <- glmnet::glmnet(
+                fit <- .quietly(glmnet::glmnet(
                     x = X, y = y_surv,
                     family = "cox", cox.ties = "breslow",
                     alpha = alpha_sgl,
                     penalty.factor = penalty_factor,
                     lambda = lambda,
                     standardize = FALSE
-                )
+                ))
                 return(as.numeric(coef(fit, s = lambda)))
             }, error = function(e) {
                 return(rep(0, n_vars))
@@ -1231,14 +1231,14 @@ sparsegrouplassoClass <- R6::R6Class(
                 # Fit entire lambda path at once (much faster than per-lambda)
                 tryCatch({
                     y_surv_sub <- survival::Surv(y_time_sub, y_event_sub)
-                    fit_sub <- glmnet::glmnet(
+                    fit_sub <- .quietly(glmnet::glmnet(
                         x = X_sub, y = y_surv_sub,
                         family = "cox", cox.ties = "breslow",
                         alpha = alpha_sgl,
                         penalty.factor = penalty_factor,
                         lambda = lambda_subset,
                         standardize = FALSE
-                    )
+                    ))
                     for (l in seq_along(lambda_subset)) {
                         coefs <- as.numeric(coef(fit_sub, s = lambda_subset[l]))
                         selection_matrix[, l, b] <- as.numeric(abs(coefs) > 1e-8)
@@ -1537,11 +1537,11 @@ sparsegrouplassoClass <- R6::R6Class(
                 tryCatch({
                     nfolds_safe <- max(3, min(self$options$cv_folds,
                                               floor(sum(results$y_event) / 3)))
-                    ref_cv <- glmnet::cv.glmnet(
+                    ref_cv <- .quietly(glmnet::cv.glmnet(
                         x = results$X, y = y_surv,
                         family = "cox", cox.ties = "breslow", alpha = alpha_val,
                         nfolds = nfolds_safe, standardize = FALSE
-                    )
+                    ))
                     ref_coefs <- as.numeric(coef(ref_cv, s = ref_cv$lambda.min))
                     n_sel <- sum(abs(ref_coefs) > 1e-8)
                     n_grp_sel <- if (n_sel > 0) length(unique(results$groups[abs(ref_coefs) > 1e-8])) else 0L

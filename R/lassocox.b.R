@@ -652,7 +652,7 @@ lassocoxClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                 )
                 cv_args$foldid <- foldid
                 private$.checkpoint()
-                cv_fit <- do.call(glmnet::cv.glmnet, cv_args)
+                cv_fit <- .quietly(do.call(glmnet::cv.glmnet, cv_args))
                 
                 # Check if cross-validation succeeded
                 if (is.null(cv_fit$lambda.min) || is.na(cv_fit$lambda.min)) {
@@ -678,14 +678,14 @@ lassocoxClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             
             # Fit final model with optimal lambda
             tryCatch({
-                final_model <- glmnet::glmnet(
+                final_model <- .quietly(glmnet::glmnet(
                     x = data$X,
                     y = y,
                     family = "cox", cox.ties = "breslow",
                     alpha = 1,
                     lambda = lambda_optimal,
                     standardize = isTRUE(self$options$standardize)
-                )
+                ))
                 
             }, error = function(e) {
                 jmvcore::reject(jmvcore::format(.('Error fitting final model: {msg}'), msg = e$message))
@@ -1105,7 +1105,7 @@ lassocoxClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                 
                 # Create enhanced survival plot
                 if (requireNamespace("survminer", quietly = TRUE)) {
-                    p <- survminer::ggsurvplot(
+                    p <- .quietly(survminer::ggsurvplot(
                         fit,
                         data = plot_data,
                         risk.table = TRUE,
@@ -1119,8 +1119,8 @@ lassocoxClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                         legend.title = .("Risk Group"),
                         legend.labs = c(.("Low Risk"), .("High Risk")),
                         palette = c("#2166AC", "#B2182B")
-                    )
-                    print(p)
+                    ))
+                    .quietly(print(p))
                 } else {
                     # Fallback to base plot
                     plot(fit, col = c("blue", "red"), lwd = 2,

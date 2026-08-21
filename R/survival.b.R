@@ -2146,21 +2146,20 @@ survivalClass <- if (requireNamespace('jmvcore'))
                     cox_explanation_html <- '
                     <div style="margin-bottom: 20px; padding: 15px; background-color: rgba(33, 152, 255, 0.07); border-left: 4px solid #4169e1; color: inherit;">
                         <h4 style="margin-top: 0; color: #2c3e50;">Understanding Cox Proportional Hazards Regression</h4>
-                        <p style="margin-bottom: 10px;">Cox regression models the relationship between explanatory variables and the hazard (risk) of experiencing the event:</p>
+                        <p style="margin-bottom: 10px;">Cox regression models the relationship between explanatory variables and the hazard: the rate at which the event occurs among the patients still event-free at each moment.</p>
                         <ul style="margin-left: 20px;">
                             <li><strong>Hazard Ratio (HR):</strong> Ratio of instantaneous event rates versus the reference group (a relative rate, not a cumulative risk)</li>
-                            <li><strong>HR > 1:</strong> Increased risk of event occurrence</li>
-                            <li><strong>HR < 1:</strong> Decreased risk of event occurrence</li>
-                            <li><strong>P-value:</strong> Statistical significance of the association</li>
-                            <li><strong>95% CI:</strong> Range of plausible values for the true HR</li>
+                            <li><strong>HR > 1:</strong> The event occurs at a faster rate than in the reference group</li>
+                            <li><strong>HR < 1:</strong> The event occurs at a slower rate than in the reference group</li>
+                            <li><strong>P-value:</strong> How compatible these data are with a hazard ratio of exactly 1; it is not the probability that the two groups are the same</li>
+                            <li><strong>95% CI:</strong> The range of hazard ratios compatible with these data; over repeated studies 95% of such intervals would contain the true HR</li>
                         </ul>
-                        <p style="margin-bottom: 5px;"><strong>Clinical interpretation:</strong></p>
+                        <p style="margin-bottom: 5px;"><strong>Reading the numbers:</strong></p>
                         <ul style="margin-left: 20px;">
-                            <li>HR = 2.0 means twice the hazard compared to reference</li>
-                            <li>HR = 0.5 means half the hazard compared to reference</li>
-                            <li>Use for identifying prognostic factors and risk stratification</li>
-                            <li>Assumes proportional hazards over time</li>
-                            <li>Consider both statistical and clinical significance</li>
+                            <li>HR = 2.0 means twice the hazard of the reference group at any given moment, not twice as many events by the end of follow-up</li>
+                            <li>HR = 0.5 means half the hazard of the reference group at any given moment</li>
+                            <li>One HR summarizes the whole follow-up, so it assumes the ratio stays constant over time; the Proportional Hazards Assumption option tests that</li>
+                            <li>These are associations measured in observational data, not causal effects, and a small p-value can sit next to an HR too close to 1 to matter</li>
                         </ul>
                     </div>
                     '
@@ -2682,11 +2681,11 @@ survivalClass <- if (requireNamespace('jmvcore'))
                     }
                 }
 
-                results_pairwise <-
+                results_pairwise <- .quietly(
                     survminer::pairwise_survdiff(formula = formula_p,
                                                  data = mydata,
                                                  p.adjust.method = padjustmethod,
-                                                 rho = pw_rho)
+                                                 rho = pw_rho))
 
 
                 mypairwise2 <-
@@ -3192,8 +3191,10 @@ survivalClass <- if (requireNamespace('jmvcore'))
                     } else {
                         "With 50+ events, the model has reasonable stability. "
                     },
-                    "External validation on independent data is always recommended before ",
-                    "clinical use.</p>",
+                    "The bootstrap correction removes optimism relative to THIS dataset and ",
+                    "this set of predictors only; it cannot show how the model behaves in a ",
+                    "different population, laboratory or era. Only fitting the same model to ",
+                    "independent data answers that question.</p>",
 
                     "<p><i>Reference: Harrell FE Jr, Lee KL, Mark DB (1996). ",
                     "Multivariable prognostic models: issues in developing models, ",
@@ -4026,10 +4027,10 @@ survivalClass <- if (requireNamespace('jmvcore'))
                 private$.setExplanationContent("coxRegressionExplanation", '
                 <div style="margin-bottom: 20px; padding: 15px; background-color: rgba(255, 202, 33, 0.23); border-left: 4px solid #ffc107; color: inherit;">
                     <h4> Understanding Your Cox Regression Results</h4>
-                    <p><strong>What is Cox Regression?</strong> This analysis compares the risk of experiencing an event between different groups, adjusting for time.</p>
+                    <p><strong>What is Cox Regression?</strong> This analysis compares the rate at which the event occurs between groups, using every patient for as long as they were actually followed.</p>
                     
                     <h5> Key Metric: Hazard Ratio (HR)</h5>
-                    <p>The hazard ratio tells you how much more (or less) likely one group is to experience the event compared to another.</p>
+                    <p>The hazard ratio compares how fast the event is happening in one group versus another, counting only the patients still event-free at each moment. It is not a ratio of cumulative risks and it does not mean one group is X times more likely to have the event: an HR of 2 does not say that twice as many patients end up with the event by the end of follow-up. For cumulative percentages read the survival probability table and the Kaplan-Meier curve in this same analysis.</p>
                     
                     <table style="width:100%; margin: 10px 0; border-collapse: collapse;">
                         <tr style="background-color: rgba(138, 155, 172, 0.06); color: inherit;">
@@ -4523,43 +4524,43 @@ survivalClass <- if (requireNamespace('jmvcore'))
                     <h4> Clinical Terminology Glossary</h4>
                     
                     <div style="display: grid; gap: 10px; margin-top: 15px;">
-                        <div style="background-color: white; padding: 10px; border-radius: 5px;">
+                        <div style="background-color: rgba(255, 255, 255, 0.06); color: inherit; padding: 10px; border-radius: 5px;">
                             <strong>Event:</strong> The outcome of interest being studied (e.g., death, disease recurrence, treatment failure)
                         </div>
                         
-                        <div style="background-color: white; padding: 10px; border-radius: 5px;">
+                        <div style="background-color: rgba(255, 255, 255, 0.06); color: inherit; padding: 10px; border-radius: 5px;">
                             <strong>Censoring:</strong> When a patient is lost to follow-up or the study ends before the event occurs
                         </div>
                         
-                        <div style="background-color: white; padding: 10px; border-radius: 5px;">
+                        <div style="background-color: rgba(255, 255, 255, 0.06); color: inherit; padding: 10px; border-radius: 5px;">
                             <strong>Median Survival:</strong> Time point when 50% of patients have experienced the event
                         </div>
                         
-                        <div style="background-color: white; padding: 10px; border-radius: 5px;">
+                        <div style="background-color: rgba(255, 255, 255, 0.06); color: inherit; padding: 10px; border-radius: 5px;">
                             <strong>Hazard Ratio (HR):</strong> Ratio of instantaneous event rates between two groups (HR=2 means the event rate is twice as high at any given moment). It is a relative rate, not a cumulative risk ratio - the absolute difference depends on baseline risk and follow-up length.
                         </div>
                         
-                        <div style="background-color: white; padding: 10px; border-radius: 5px;">
+                        <div style="background-color: rgba(255, 255, 255, 0.06); color: inherit; padding: 10px; border-radius: 5px;">
                             <strong>95% Confidence Interval:</strong> Range of values compatible with the data; over repeated studies, 95% of such intervals contain the true value
                         </div>
                         
-                        <div style="background-color: white; padding: 10px; border-radius: 5px;">
+                        <div style="background-color: rgba(255, 255, 255, 0.06); color: inherit; padding: 10px; border-radius: 5px;">
                             <strong>P-value:</strong> How compatible the data are with no difference - the probability of a result at least this extreme if there were truly no difference. It is not the probability that the finding occurred by chance, nor that the null hypothesis is true.
                         </div>
                         
-                        <div style="background-color: white; padding: 10px; border-radius: 5px;">
+                        <div style="background-color: rgba(255, 255, 255, 0.06); color: inherit; padding: 10px; border-radius: 5px;">
                             <strong>Person-Time:</strong> Total follow-up time accounting for varying observation periods
                         </div>
                         
-                        <div style="background-color: white; padding: 10px; border-radius: 5px;">
+                        <div style="background-color: rgba(255, 255, 255, 0.06); color: inherit; padding: 10px; border-radius: 5px;">
                             <strong>Kaplan-Meier:</strong> Non-parametric method to estimate survival probability over time
                         </div>
                         
-                        <div style="background-color: white; padding: 10px; border-radius: 5px;">
+                        <div style="background-color: rgba(255, 255, 255, 0.06); color: inherit; padding: 10px; border-radius: 5px;">
                             <strong>Cox Regression:</strong> Statistical model comparing hazard rates between groups adjusting for time
                         </div>
                         
-                        <div style="background-color: white; padding: 10px; border-radius: 5px;">
+                        <div style="background-color: rgba(255, 255, 255, 0.06); color: inherit; padding: 10px; border-radius: 5px;">
                             <strong>RMST:</strong> Restricted Mean Survival Time - average survival within a specific time window
                         </div>
                     </div>
@@ -4873,7 +4874,7 @@ survivalClass <- if (requireNamespace('jmvcore'))
                     copy_html <- '<div style="margin-bottom: 20px; padding: 15px; background-color: rgba(255, 202, 33, 0.23); border-left: 4px solid #ffc107; color: inherit;"><h4> Copy-Ready Clinical Report Sentences</h4>'
                     
                     for (section_name in names(copy_sentences)) {
-                        copy_html <- paste0(copy_html, '<h5>', tools::toTitleCase(gsub("_", " ", section_name)), ':</h5><div style="background-color: white; padding: 10px; border-radius: 5px; margin: 10px 0;">')
+                        copy_html <- paste0(copy_html, '<h5>', tools::toTitleCase(gsub("_", " ", section_name)), ':</h5><div style="background-color: rgba(255, 255, 255, 0.06); color: inherit; padding: 10px; border-radius: 5px; margin: 10px 0;">')
                         
                         for (sentence in copy_sentences[[section_name]]) {
                             copy_html <- paste0(copy_html, '<p style="margin: 5px 0; padding: 5px; background-color: rgba(138, 155, 172, 0.06); border-radius: 3px; color: inherit;">', htmltools::htmlEscape(sentence), '</p>')
@@ -5924,9 +5925,9 @@ survivalClass <- if (requireNamespace('jmvcore'))
                             any_sig <- any(int_pvals < 0.05)
 
                             if (any_sig) {
-                                int_msg <- "<p><b>Significant age-group interaction detected.</b> The estimated effect of the explanatory variable on survival differed by age group in this sample. Age-stratified results may describe the data better than a single adjusted hazard ratio.</p>"
+                                int_msg <- "<p><b>Significant age interaction detected.</b> Age enters this model as a continuous variable, so the interaction row in the Age x Group Interaction Test table is the change in the log hazard ratio of the explanatory variable per one-unit increase in age, not a comparison between age bands. It says the estimated effect is not flat across ages in this sample; it does not say at which age the effect becomes important. Reporting the hazard ratio at specific ages, or an age-stratified model, describes such data more fully than one overall adjusted hazard ratio.</p>"
                             } else {
-                                int_msg <- "<p><b>No significant age-group interaction was detected.</b> Interaction tests have low power, so this does not establish that the effect is constant across age groups. Inspect the interaction hazard ratios and their confidence intervals: if they are wide, effect modification of clinically important size has not been excluded. The choice between age adjustment and stratification rests on the proportional hazards check and on subject-matter grounds, not on this p-value.</p>"
+                                int_msg <- "<p><b>No significant age interaction was detected.</b> This is absence of evidence, not evidence that the effect is the same at every age: interaction tests have low power, so a real difference can go undetected. Age is continuous here, so the interaction row in the Age x Group Interaction Test table is the change in the log hazard ratio per one-unit increase in age; compare its Coefficient with its SE column, because an SE that is large next to the coefficient means effect modification of clinically important size has not been ruled out. The choice between age adjustment and stratification rests on the proportional hazards check and on subject-matter grounds, not on this p-value.</p>"
                             }
                             # Append interaction message to existing interpretation
                             # Note: jamovi result objects don't expose a .content property,
@@ -5961,8 +5962,9 @@ survivalClass <- if (requireNamespace('jmvcore'))
                         "hazards (Surv ~ group + strata(age_group)). No assumption about the age-hazard ",
                         "relationship. Preferred when the proportional hazards assumption for age is violated.</li>",
                         "<li><b>Age Interaction Test:</b> Tests whether the group effect varies by age ",
-                        "(Surv ~ group * age). A significant interaction suggests the treatment/exposure ",
-                        "effect differs across age groups.</li>",
+                        "(Surv ~ group * age). Age stays continuous here, so the interaction ",
+                        "coefficient is the change in the log hazard ratio per one-unit increase ",
+                        "in age, not a contrast between age bands.</li>",
                         "</ul>",
                         "<h5>Interpretation Guide:</h5>",
                         "<p>A change of more than 10% in the log hazard ratio (the model coefficient, which is ",
@@ -6433,7 +6435,7 @@ survivalClass <- if (requireNamespace('jmvcore'))
                         data = plot_data)
 
                     # Plot using survminer
-                    p <- survminer::ggsurvplot(
+                    p <- .quietly(survminer::ggsurvplot(
                         fit,
                         data = plot_data,
                         conf.int = self$options$ci95,
@@ -6443,9 +6445,9 @@ survivalClass <- if (requireNamespace('jmvcore'))
                         ggtheme = ggtheme,
                         title = "Age-Stratified Kaplan-Meier Curves",
                         facet.by = "age_group"
-                    )
+                    ))
 
-                    print(p)
+                    .quietly(print(p))
                     return(TRUE)
 
                 }, error = function(e) {
@@ -6515,7 +6517,7 @@ survivalClass <- if (requireNamespace('jmvcore'))
                     )
 
                     # Generate adjusted curves
-                    p <- survminer::ggadjustedcurves(
+                    p <- .quietly(survminer::ggadjustedcurves(
                         cox_fit,
                         data = plot_data,
                         variable = "group",
@@ -6523,7 +6525,7 @@ survivalClass <- if (requireNamespace('jmvcore'))
                         ggtheme = ggtheme,
                         legend.title = myfactor,
                         title = paste0("Survival Curves Adjusted for ", age_var)
-                    )
+                    ))
 
                     # Add subtitle with model info
                     p <- p + ggplot2::labs(
@@ -6531,7 +6533,7 @@ survivalClass <- if (requireNamespace('jmvcore'))
                             myfactor, " + ", age_var, "  (N=", nrow(plot_data), ")")
                     )
 
-                    print(p)
+                    .quietly(print(p))
                     return(TRUE)
 
                 }, error = function(e) {

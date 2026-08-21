@@ -1647,7 +1647,11 @@ ihcheterogeneityClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cl
                 "<div style='background-color: rgba(33, 152, 239, 0.13); padding: 12px; border-radius: 5px; color: inherit;'>",
                 "<ul>",
                 "<li><strong>IHC Heterogeneity:</strong> Quantitative comparison of biomarker measurements from regional tissue areas</li>",
-                "<li><strong>Statistical Framework:</strong> Reproducibility assessed using Spearman correlation and intraclass correlation coefficient (ICC)</li>",
+                "<li><strong>Statistical Framework:</strong> Reproducibility assessed using Spearman correlation",
+                if (identical(private$.repro_stats$icc_method, "icc"))
+                    " and the intraclass correlation coefficient (ICC(2,1), absolute agreement)</li>"
+                else
+                    "; an intraclass correlation coefficient could not be estimated from these data, so the Reproducibility Assessment table reports the mean Spearman correlation in its place</li>",
                 "<li><strong>Variability Metrics:</strong> Coefficient of variation (CV) calculated per case and averaged across the dataset</li>",
                 "<li><strong>Reference Standard:</strong> Whole-section measurements serve as the gold standard for biomarker quantification</li>",
                 "</ul>",
@@ -1784,6 +1788,13 @@ ihcheterogeneityClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cl
             }
 
             icc_value <- metrics$icc
+            # .calculateICC returns the mean Spearman correlation instead of an ICC on
+            # five fallback paths (psych unavailable, fewer than 2 measurements, fewer
+            # than 3 complete cases, zero variance, psych error) and records that in
+            # icc_method. Same guard as the Methods paragraph: never print the word
+            # "ICC" next to a number that is not one.
+            is_icc <- identical(private$.repro_stats$icc_method, "icc")
+            metric_label <- if (is_icc) "ICC" else "mean correlation"
             mean_cv <- metrics$mean_cv
             avg_correlation <- if (!is.null(metrics$correlations) && any(!is.na(metrics$correlations))) {
                 mean(metrics$correlations, na.rm = TRUE)
@@ -1807,8 +1818,9 @@ ihcheterogeneityClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cl
                 descriptor <- if (icc_value > 0.75) "are highly representative" else if (icc_value > 0.50) "show moderate agreement" else "may not fully represent"
                 paste0(
                     "<li><strong>Agreement Level:</strong> ", to_title(agreement_level),
-                    " (ICC = ", sprintf("%.2f", icc_value), ") - Regional measurements ", descriptor,
+                    " (", metric_label, " = ", sprintf("%.2f", icc_value), ") - Regional measurements ", descriptor,
                     if (metrics$has_reference) " of the reference region." else " of one another.",
+                    if (!is_icc) " This number is a mean Spearman correlation, not an ICC, so the ICC reliability bands do not apply to it - see the note under the Reproducibility Assessment table." else "",
                     "</li>"
                 )
             } else {
@@ -1838,13 +1850,22 @@ ihcheterogeneityClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cl
 
             icc_target <- if (isTRUE(metrics$has_reference)) "between the regions and the reference measurement" else "between regions"
             clinical_sentence <- if (!is.na(icc_value)) {
-                if (icc_value > 0.75) {
-                    paste0("Agreement ", icc_target, " was high in this dataset (ICC above 0.75): the measurements gave similar values.")
+                # Band labels must match the branch cut-points exactly: the moderate
+                # branch is the half-open interval (0.50, 0.75], so "0.50 to 0.75"
+                # would claim an endpoint that falls in the branch below.
+                band <- if (icc_value > 0.75) {
+                    paste0("Agreement ", icc_target, " was high in this dataset (", metric_label, " above 0.75): the measurements gave similar values.")
                 } else if (icc_value > 0.50) {
-                    paste0("Agreement ", icc_target, " was moderate in this dataset (ICC 0.50 to 0.75): appreciable variability remained.")
+                    paste0("Agreement ", icc_target, " was moderate in this dataset (", metric_label, " above 0.50 and up to 0.75): appreciable variability remained.")
                 } else {
-                    paste0("Agreement ", icc_target, " was low in this dataset (ICC of 0.50 or below): the measurements differed substantially.")
+                    paste0("Agreement ", icc_target, " was low in this dataset (", metric_label, " of 0.50 or below): the measurements differed substantially.")
                 }
+                detail <- if (is_icc) {
+                    paste0(" The ICC reported here is the absolute-agreement form: it is the share of the total variation in scores that comes from genuine differences between cases rather than from which region was measured, and a consistent offset between regions counts against it. It is not the proportion of cases whose scores matched, and it depends on how spread out your cohort is - the same measurement error yields a lower ICC when the cases have a narrow range of values. The 95% CI Lower and 95% CI Upper columns of the Reproducibility Assessment table show how precisely these ", metrics$n_cases, " cases pin the figure down.")
+                } else {
+                    " That figure is the mean Spearman correlation rather than an ICC, because an ICC could not be fitted to these data. A correlation only asks whether the regions rank the cases in the same order, so two regions that rank identically but differ by a constant offset still score close to 1; the note under the Reproducibility Assessment table explains why the ICC was not estimable."
+                }
+                paste0(band, detail)
             } else if (!is.na(mean_cv)) {
                 if (mean_cv < 15) {
                     "Variability between measurements was low in this dataset (mean CV below 15%)."
@@ -2181,11 +2202,16 @@ ihcheterogeneityClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cl
                         region_icc <- icc_result$value
                         region_icc_lower <- icc_result$lower
                         region_icc_upper <- icc_result$upper
+                        # .calculateICC falls back to the mean Spearman correlation;
+                        # carry the flag so the table row is not labelled "ICC".
+                        region_icc_method <- icc_result$method
                     } else {
                         region_icc <- region_icc_lower <- region_icc_upper <- NA
+                        region_icc_method <- NA_character_
                     }
                 } else {
                     region_icc <- region_icc_lower <- region_icc_upper <- NA
+                    region_icc_method <- NA_character_
                 }
 
                 # Calculate mean CV for this compartment
@@ -2225,6 +2251,7 @@ ihcheterogeneityClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cl
                 # Store compartment statistics
                 compartment_stats[[as.character(region)]] <- list(
                     icc = region_icc,
+                    icc_method = region_icc_method,
                     icc_lower = region_icc_lower,
                     icc_upper = region_icc_upper,
                     cv = region_mean_cv,
@@ -2259,7 +2286,11 @@ ihcheterogeneityClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cl
                     }
 
                     comp_table$addRow(rowKey = row_key, values = list(
-                        metric = "ICC(3,1)",
+                        # .calculateICC returns ICC(2,1) absolute agreement, or the
+                        # mean Spearman correlation when no ICC could be fitted.
+                        metric = if (identical(stats$icc_method, "icc"))
+                                     "ICC(2,1) - absolute agreement"
+                                 else "Mean correlation (ICC not estimable)",
                         compartment = region,
                         value = stats$icc,
                         ci_lower = stats$icc_lower,

@@ -2943,10 +2943,10 @@ survivalcontClass <- if (requireNamespace("jmvcore")) {
                 myformula <- .asSurvivalFormula(formula)
 
 
-                fit <- survminer::surv_fit(
+                fit <- .quietly(survminer::surv_fit(
                     formula = myformula,
                     data = res.cat
-                )
+                ))
 
                 # The "Plot Customization" panel advertises these controls for the
                 # survival curves, but this plot -- the primary Kaplan-Meier output --
@@ -2955,7 +2955,7 @@ survivalcontClass <- if (requireNamespace("jmvcore")) {
                 # silently did nothing here, while .plot2/.plot3 already honoured
                 # them. Applying them makes the panel mean what it says (and does
                 # bound the x-axis at Plot End Time, as it already did elsewhere).
-                plot5 <- survminer::ggsurvplot(
+                plot5 <- .quietly(survminer::ggsurvplot(
                     fit,
                     data = res.cat,
                     xlab = private$.timeAxisLabel(),
@@ -2966,8 +2966,8 @@ survivalcontClass <- if (requireNamespace("jmvcore")) {
                     conf.int = self$options$ci95,
                     censor = self$options$censored,
                     surv.median.line = self$options$medianline
-                )
-                print(plot5)
+                ))
+                .quietly(print(plot5))
                 TRUE
             }
 
@@ -3398,13 +3398,13 @@ survivalcontClass <- if (requireNamespace("jmvcore")) {
 
                 for (i in 1:num_cuts) {
                     fit_err <- tryCatch({
-                        res.cut <- survminer::surv_cutpoint(
+                        res.cut <- .quietly(survminer::surv_cutpoint(
                             current_data,
                             time = mytime,
                             event = myoutcome,
                             variables = mycontexpl,
                             minprop = self$options$min_group_size / 100
-                        )
+                        ))
 
                         cutoffs[i] <- summary(res.cut)$cutpoint
 
@@ -4032,7 +4032,7 @@ survivalcontClass <- if (requireNamespace("jmvcore")) {
                     fit <- survival::survfit(surv_formula, data = plot_data)
 
                     # Create survival plot
-                    surv_plot <- survminer::ggsurvplot(
+                    surv_plot <- .quietly(survminer::ggsurvplot(
                         fit,
                         data = plot_data,
                         title = paste0("Survival Curves - Multiple Cut-offs for ", self$options$contexpl),
@@ -4049,9 +4049,9 @@ survivalcontClass <- if (requireNamespace("jmvcore")) {
                         ylim = c(self$options$ybegin_plot, self$options$yend_plot),
                         palette = "jco",
                         ggtheme = ggplot2::theme_minimal()
-                    )
+                    ))
 
-                    print(surv_plot)
+                    .quietly(print(surv_plot))
                 }, error = function(e) {
                     # Fallback plot
                     plot <- ggplot2::ggplot() +
@@ -4535,7 +4535,7 @@ survivalcontClass <- if (requireNamespace("jmvcore")) {
 
                 tryCatch({
                     # Create log-log plot using survminer
-                    loglog_plot <- survminer::ggsurvplot(
+                    loglog_plot <- .quietly(survminer::ggsurvplot(
                         fit,
                         data = res.cat,
                         fun = "cloglog",
@@ -4545,9 +4545,9 @@ survivalcontClass <- if (requireNamespace("jmvcore")) {
                         legend.title = self$options$contexpl,
                         risk.table = FALSE,
                         conf.int = FALSE
-                    )
+                    ))
 
-                    print(loglog_plot)
+                    .quietly(print(loglog_plot))
                 }, error = function(e) {
                     # Fallback: create simple log-log plot with ggplot2
                     surv_data <- data.frame(

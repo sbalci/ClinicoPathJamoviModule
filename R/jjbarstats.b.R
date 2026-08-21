@@ -667,6 +667,15 @@ jjbarstatsClass <- if (requireNamespace('jmvcore'))
             },
 
             .generateInterpretationGuide = function() {
+                # There is no results table in jjbarstats.r.yaml: Cramer's V and its
+                # confidence interval exist only inside the ggstatsplot subtitle, and
+                # `resultssubtitle` is FALSE by default - so the pointer must be
+                # conditional, read through the same .option() the plot uses.
+                effect_pointer <- if (isTRUE(private$.option("resultssubtitle")))
+                    "Cram\u00e9r's V, reported with the test in the plot subtitle, measures how strong the association is on a scale from 0 (none) to 1 (perfect), and its confidence interval shows how loosely this sample pins that value down."
+                else
+                    "Cram\u00e9r's V measures how strong the association is on a scale from 0 (none) to 1 (perfect), and its confidence interval shows how loosely this sample pins that value down; switch on 'Statistical results in subtitle' to display them."
+
                 interpretation_content <- paste0(
                     "<div style='padding: 15px; background-color: rgba(33, 163, 188, 0.21); border-left: 4px solid #17a2b8; margin: 10px 0; color: inherit;'>",
                     "<h4 style='color: #0c5460; margin-top: 0;'> How to Interpret Results</h4>",
@@ -674,7 +683,7 @@ jjbarstatsClass <- if (requireNamespace('jmvcore'))
                     "<p><strong>Statistical Significance:</strong></p>",
                     "<ul>",
                     "<li><strong>p < 0.05:</strong> Significant association between variables</li>",
-                    "<li><strong>p \u2265 0.05:</strong> No significant association was detected. This does not establish that the variables are independent - an association of small or moderate size may simply be undetectable at this sample size. Read Cram\u00e9r's V and its confidence interval alongside the p-value.</li>",
+                    paste0("<li><strong>p \u2265 0.05:</strong> No significant association was detected. This is an absence of evidence for an association, not evidence that the variables are independent - an association of small or moderate size may simply be undetectable at this sample size. ", effect_pointer, "</li>"),
                     "<li>When several tables are tested, use adjusted p-values: the chance of at least one false positive rises with the number of comparisons.</li>",
                     "</ul>",
                     
@@ -762,9 +771,15 @@ jjbarstatsClass <- if (requireNamespace('jmvcore'))
                     
                     "<h5>Results:</h5>",
                     "<p>[Insert specific results here: test statistic, p-value, effect size with 95% CI]</p>",
-                    "<p>Example: \"There was a statistically significant association between [variable 1] and [variable 2] ",
-                    "(\u03c7\u00b2 = [value], p = [value], Cram\u00e9r's V = [value], 95% CI [lower, upper]). ",
-                    "Post-hoc analysis revealed significant differences between [specific groups].\"</p>",
+                    # The example used to assert a significant association, and a
+                    # post-hoc sentence, unconditionally - wrong whenever the result
+                    # was null or pairwise comparisons were not requested.
+                    "<p>Template (state the direction only if the test was significant): ",
+                    "\"There was [a / no] statistically significant association between [variable 1] and [variable 2] ",
+                    "(\u03c7\u00b2 = [value], p = [value], Cram\u00e9r's V = [value], 95% CI [lower, upper]).",
+                    if (isTRUE(private$.option("pairwisecomparisons")) && n_groups > 2)
+                        " Post-hoc comparisons differed between [specific groups]." else "",
+                    "\"</p>",
                     
                     "<h5>Conclusion:</h5>",
                     "<p>[Interpret findings in clinical context, considering both statistical significance and clinical relevance]</p>",

@@ -1519,12 +1519,12 @@ oddsratioClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 # Fit logistic regression model
                 private$.checkpoint()
 
-                fit <- rms::lrm(
+                fit <- .quietly(rms::lrm(
                     formula = .asSurvivalFormula(formula_str),
                     data = data,
                     x = TRUE,
                     y = TRUE
-                )
+                ))
 
                 return(list(fit = fit, dd = dd))
             }, error = function(e) {
@@ -1560,10 +1560,10 @@ oddsratioClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
             # Create nomogram
             nom <- try({
-                rms::nomogram(fit,
+                .quietly(rms::nomogram(fit,
                               fun = stats::plogis,  # Convert from log odds to probability
                               funlabel = "Predicted Probability"
-                )
+                ))
             })
 
             if (!inherits(nom, "try-error")) {
@@ -1594,8 +1594,8 @@ oddsratioClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 prep <- private$.prepareRmsNomogram(st$data, st$dependent, st$explanatory)
                 if (!is.null(prep$fit)) {
                     nom <- try(
-                        rms::nomogram(prep$fit, fun = stats::plogis,
-                                      funlabel = "Predicted Probability"),
+                        .quietly(rms::nomogram(prep$fit, fun = stats::plogis,
+                                      funlabel = "Predicted Probability")),
                         silent = TRUE)
                     if (inherits(nom, "try-error")) nom <- NULL
                 }

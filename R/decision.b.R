@@ -654,11 +654,12 @@ decisionClass <- if (requireNamespace("jmvcore"))
 
                 summary_template <- .("<div style='margin: 15px; padding: 15px; border-left: 5px solid #4CAF50; background-color: rgba(114, 184, 33, 0.1); color: inherit;'><h3 style='color: #2E7D32; margin-top: 0;'>Clinical Summary</h3><p style='font-size: 16px;'><strong>Analysis:</strong> Diagnostic test performance evaluation comparing %s against gold standard %s.</p><p><strong>Sample:</strong> %s. Predictive values below are computed at a disease prevalence of %s.</p><p><strong>Test Performance:</strong> The test shows <strong>%s</strong> discriminatory ability with sensitivity of <strong>%s</strong> (<em>%s</em>) and specificity of <strong>%s</strong> (<em>%s</em>).</p><p><strong>Discrimination Profile:</strong> %s.</p><p><strong>Likelihood Ratios:</strong> Positive LR: %s (<em>%s</em>), Negative LR: %s (<em>%s</em>)</p><p><strong>Key Findings:</strong> When positive, the post-test disease probability is <strong>%s</strong> (PPV %s). When negative, the disease probability falls to <strong>%s</strong> and the probability of being disease-free is <strong>%s</strong> (NPV %s).</p></div>")
 
-                lr_pos_safe <- if (is.na(lr_pos)) "not calculated"
-                    else if (!is.finite(lr_pos)) "not estimable (specificity is 100% in this sample)"
+                # Only the NA arm can fire: a zero cell triggers the Haldane-Anscombe 0.5
+                # correction before the LRs are formed, so neither LR is ever Inf here,
+                # and both are NA exactly when sensitivity or specificity is NA.
+                lr_pos_safe <- if (is.na(lr_pos)) "not calculated (needs both sensitivity and specificity)"
                     else sprintf("%.2f", lr_pos)
-                lr_neg_safe <- if (is.na(lr_neg)) "not calculated"
-                    else if (!is.finite(lr_neg)) "not estimable (specificity is 0% in this sample)"
+                lr_neg_safe <- if (is.na(lr_neg)) "not calculated (needs both sensitivity and specificity)"
                     else sprintf("%.2f", lr_neg)
 
                 # Escape user-derived variable names before HTML interpolation
@@ -851,7 +852,7 @@ decisionClass <- if (requireNamespace("jmvcore"))
                     private$.addNotice(
                         type = "STRONG_WARNING",
                         title = sprintf('Very small sample size: n = %d (< 20 cases)', total_n),
-                        content = "Results may be unreliable and unstable. Confidence intervals will be very wide. Consider collecting more data before making clinical decisions. Minimum recommended: 100 cases for robust estimates."
+                        content = "With fewer than 20 cases each proportion rests on a handful of patients, so one reclassified case moves sensitivity or specificity by several percentage points and the 95% confidence intervals (enable the 95% CI option) will be very wide. Read the intervals rather than the point estimates; diagnostic accuracy studies usually need on the order of 100 cases before the intervals narrow usefully."
                     )
                 } else if (total_n < 50) {
                     private$.addNotice(
@@ -880,26 +881,35 @@ decisionClass <- if (requireNamespace("jmvcore"))
             .addClinicalBenchmarks = function(sens, spec, lr_pos, lr_neg) {
                 benchmarks <- list()
 
-                # Sensitivity benchmarks (SnNout - Sensitive test, Negative result rules OUT)
-                benchmarks$sens_quality <- if (sens >= 0.95) "Excellent for ruling OUT disease"
-                                           else if (sens >= 0.90) "Very good for ruling OUT disease"
-                                           else if (sens >= 0.80) "Good for ruling OUT disease"
-                                           else "Limited ability for ruling OUT disease"
+                # Sensitivity describes the false-negative side of the 2x2: how many
+                # gold-standard positive cases this test called negative. The is.na()
+                # guard is required -- sensitivity is NA when no case is gold-standard
+                # positive, and an unguarded `sens >= 0.95` throws "missing value where
+                # TRUE/FALSE needed", which the caller's tryCatch would swallow into a
+                # bare fallback panel.
+                benchmarks$sens_quality <- if (is.na(sens)) "not estimable: no gold-standard positive cases"
+                                           else if (sens >= 0.95) "5% or fewer diseased cases missed in this sample"
+                                           else if (sens >= 0.90) "up to 1 diseased case in 10 missed in this sample"
+                                           else if (sens >= 0.80) "up to 1 diseased case in 5 missed in this sample"
+                                           else "more than 1 diseased case in 5 missed in this sample"
 
-                # Specificity benchmarks (SpPin - Specific test, Positive result rules IN)
-                benchmarks$spec_quality <- if (spec >= 0.95) "Excellent for ruling IN disease"
-                                           else if (spec >= 0.90) "Very good for ruling IN disease"
-                                           else if (spec >= 0.80) "Good for ruling IN disease"
-                                           else "Limited ability for ruling IN disease"
+                # Specificity describes the false-positive side: how many gold-standard
+                # negative cases this test called positive. Same NA guard, for a cohort
+                # with no gold-standard negative cases.
+                benchmarks$spec_quality <- if (is.na(spec)) "not estimable: no gold-standard negative cases"
+                                           else if (spec >= 0.95) "5% or fewer disease-free cases flagged positive in this sample"
+                                           else if (spec >= 0.90) "up to 1 disease-free case in 10 flagged positive in this sample"
+                                           else if (spec >= 0.80) "up to 1 disease-free case in 5 flagged positive in this sample"
+                                           else "more than 1 disease-free case in 5 flagged positive in this sample"
 
                 # Likelihood ratio benchmarks
-                benchmarks$lr_pos_interpretation <- if (!is.finite(lr_pos)) "Cannot be calculated"
+                benchmarks$lr_pos_interpretation <- if (!is.finite(lr_pos)) "Cannot be calculated: LR+ is sensitivity / (1 - specificity), and one of those is not estimable here"
                                                     else if (lr_pos > 10) "Strong evidence for disease"
                                                     else if (lr_pos > 5) "Moderate evidence for disease"
                                                     else if (lr_pos > 2) "Weak evidence for disease"
                                                     else "Minimal evidence for disease"
 
-                benchmarks$lr_neg_interpretation <- if (!is.finite(lr_neg)) "Cannot be calculated"
+                benchmarks$lr_neg_interpretation <- if (!is.finite(lr_neg)) "Cannot be calculated: LR- is (1 - sensitivity) / specificity, and one of those is not estimable here"
                                                     else if (lr_neg < 0.1) "Strong evidence against disease"
                                                     else if (lr_neg < 0.2) "Moderate evidence against disease"
                                                     else if (lr_neg < 0.5) "Weak evidence against disease"
@@ -994,9 +1004,9 @@ decisionClass <- if (requireNamespace("jmvcore"))
                         "<p><strong>Test Performance Summary:</strong></p>",
                         "<ul>",
                         sprintf("<li><strong>Sensitivity:</strong> %s - %s</li>", sens_text,
-                                if (is.na(sens)) "Unable to assess" else if (sens >= 0.9) "Excellent for ruling out disease" else if (sens >= 0.8) "Good for ruling out disease" else "Limited ability to rule out disease"),
+                                if (is.na(sens)) "not estimable: no gold-standard positive cases" else if (sens >= 0.9) "up to 1 diseased case in 10 missed here" else if (sens >= 0.8) "up to 1 diseased case in 5 missed here" else "more than 1 diseased case in 5 missed here"),
                         sprintf("<li><strong>Specificity:</strong> %s - %s</li>", spec_text,
-                                if (is.na(spec)) "Unable to assess" else if (spec >= 0.9) "Excellent for ruling in disease" else if (spec >= 0.8) "Good for ruling in disease" else "Limited ability to rule in disease"),
+                                if (is.na(spec)) "not estimable: no gold-standard negative cases" else if (spec >= 0.9) "up to 1 disease-free case in 10 flagged positive here" else if (spec >= 0.8) "up to 1 disease-free case in 5 flagged positive here" else "more than 1 disease-free case in 5 flagged positive here"),
                         sprintf("<li><strong>Youden's Index:</strong> %s - %s</li>", youden_text, interpretation$test_utility),
                         "</ul>",
                         "<p><strong>Likelihood Ratio Interpretation:</strong></p>",
@@ -2272,7 +2282,8 @@ decisionClass <- if (requireNamespace("jmvcore"))
                 if (n_fp > 0) {
                     html <- paste0(html,
                         "<li>Review false positive cases to identify common characteristics</li>",
-                        "<li>Check whether the test cutpoint used here is the one you intended</li>")
+                        "<li>Check that the level you chose under Test Positive Level is the one you meant: this analysis has no numeric cutpoint, ",
+                        "it simply treats that level as a positive result, so choosing the other level swaps every false positive with a false negative</li>")
                 }
 
                 if (n_fn > 0) {
