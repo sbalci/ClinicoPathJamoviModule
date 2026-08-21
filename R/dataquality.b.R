@@ -11,6 +11,70 @@
 dataqualityClass <- if (requireNamespace("jmvcore")) R6::R6Class("dataqualityClass",
     inherit = dataqualityBase, private = list(
 
+    # Notice collection helpers. A single Preformatted (plain-text) output item:
+    # avoids BOTH the jmvcore::Notice serialization error from
+    # self$results$insert(999, Notice) AND any HTML in notices (project convention:
+    # notice content must be plain text). ====
+    .noticeList = list(),
+
+    .addNotice = function(type, title, content) {
+        duplicate <- vapply(private$.noticeList, function(notice) {
+            identical(notice$type, type) &&
+                identical(notice$title, title) &&
+                identical(notice$content, content)
+        }, logical(1))
+        if (any(duplicate))
+            return()
+
+        private$.noticeList[[length(private$.noticeList) + 1]] <- list(
+            type = type,
+            title = title,
+            content = content
+        )
+        # Render immediately so early-return validation aborts still display the notice
+        private$.renderNotices()
+    },
+
+    .renderNotices = function() {
+        if (length(private$.noticeList) == 0) {
+            self$results$notices$setContent("")
+            return()
+        }
+
+        # Plain text only notices avoid HTML by project convention; the Preformatted
+        # output item renders this literally (no markup, no injection surface).
+        blocks <- vapply(private$.noticeList, function(notice) {
+            prefix <- switch(notice$type,
+                ERROR          = "ERROR: ",
+                STRONG_WARNING = "WARNING: ",
+                WARNING        = "WARNING: ",
+                "")
+            paste0(prefix, notice$title, "\n", notice$content)
+        }, character(1))
+
+        self$results$notices$setContent(paste(blocks, collapse = "\n\n"))
+    },
+
+    # A plot renderer cannot populate a results element, so when a plot fails the
+    # explanation has to travel inside the plot itself.
+    .placeholderPlot = function(message) {
+        plot <- ggplot2::ggplot() +
+            ggplot2::geom_text(
+                ggplot2::aes(
+                    x = 0.5,
+                    y = 0.5,
+                    label = paste(strwrap(message, width = 70), collapse = "\n")
+                ),
+                size = 4
+            ) +
+            ggplot2::xlim(0, 1) +
+            ggplot2::ylim(0, 1) +
+            ggplot2::theme_void()
+
+        print(plot)
+        return(TRUE)
+    },
+
     .mcarTestMessage = function(data) {
         numeric_data <- data[vapply(data, is.numeric, logical(1))]
         if (ncol(numeric_data) < 2) {
@@ -54,6 +118,10 @@ dataqualityClass <- if (requireNamespace("jmvcore")) R6::R6Class("dataqualityCla
     },
 
     .run = function() {
+
+        # Reset notices so the same message is not appended once per run cycle
+        private$.noticeList <- list()
+        private$.renderNotices()
 
         # TODO (forward-looking): no `.()` wrapping in this file (~1.1k LOC
         # of welcome HTML, recommendations, and explanations). Address in
@@ -385,6 +453,22 @@ dataqualityClass <- if (requireNamespace("jmvcore")) R6::R6Class("dataqualityCla
         # visdat Visual Analysis - Individual plot options
         if (self$options$plot_data_overview || self$options$plot_missing_patterns ||
             self$options$plot_data_types) {
+            if (!requireNamespace("visdat", quietly = TRUE)) {
+                private$.addNotice(
+                    "WARNING",
+                    "Visual plots unavailable",
+                    paste0(
+                        "The requested visual data quality plots cannot be drawn ",
+                        "because the visdat package is not installed on this ",
+                        "computer. All numeric checks above - missing values, ",
+                        "duplicates, constant variables and outliers - are complete ",
+                        "and unaffected. To get the plots, install the package with ",
+                        "install.packages('visdat') and re-run the analysis; ",
+                        "otherwise switch the plot options off to hide the empty ",
+                        "plot areas."
+                    )
+                )
+            }
             visdat_results <- private$.generate_visdat_analysis(analysis_data)
             quality_results$visual <- visdat_results
         }
@@ -608,8 +692,17 @@ dataqualityClass <- if (requireNamespace("jmvcore")) R6::R6Class("dataqualityCla
             return(TRUE)
 
         }, error = function(e) {
-            warning(paste("Data overview plot generation failed:", e$message))
-            return(FALSE)
+            private$.placeholderPlot(paste0(
+                "The data overview plot could not be drawn for the ",
+                ncol(plotData$data), " selected variable(s). ",
+                "Every other data quality check above is unaffected - only this ",
+                "picture is missing. This usually means one of the selected ",
+                "variables has a type the overview cannot display, such as a wide ",
+                "free-text field, a date/time column or a list column. ",
+                "Try removing those variables from the selection, or turn off ",
+                "'Data overview plot' and read the Variable Quality Summary table ",
+                "instead. Technical detail: ", conditionMessage(e)
+            ))
         })
     },
 
@@ -654,8 +747,18 @@ dataqualityClass <- if (requireNamespace("jmvcore")) R6::R6Class("dataqualityCla
             return(TRUE)
 
         }, error = function(e) {
-            warning(paste("Missing patterns plot generation failed:", e$message))
-            return(FALSE)
+            private$.placeholderPlot(paste0(
+                "The missing-values pattern plot could not be drawn for the ",
+                ncol(plotData$data), " selected variable(s). ",
+                "The missing-value counts and percentages in the summary table ",
+                "above are unaffected - only this picture is missing, so you ",
+                "cannot see how the gaps line up across variables. ",
+                "This usually means a selected variable has a type the plot ",
+                "cannot display, or that no value is missing at all. ",
+                "Try removing wide free-text or date variables from the ",
+                "selection and running again. Technical detail: ",
+                conditionMessage(e)
+            ))
         })
     },
 
@@ -690,8 +793,17 @@ dataqualityClass <- if (requireNamespace("jmvcore")) R6::R6Class("dataqualityCla
             return(TRUE)
 
         }, error = function(e) {
-            warning(paste("Data types plot generation failed:", e$message))
-            return(FALSE)
+            private$.placeholderPlot(paste0(
+                "The data types plot could not be drawn for the ",
+                ncol(plotData$data), " selected variable(s). ",
+                "The 'Type' column of the Variable Quality Summary table above ",
+                "still reports each variable's storage type - only this ",
+                "value-by-value guess is missing. Guessing types cell by cell is ",
+                "also slow on large tables, so this can fail on very wide or very ",
+                "long data. Try selecting fewer variables, or turn off ",
+                "'Data types plot' and use the summary table instead. ",
+                "Technical detail: ", conditionMessage(e)
+            ))
         })
     },
 

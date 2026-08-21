@@ -5,6 +5,16 @@ jrs:   '1.1'
 
 items:
 
+    - name: notices
+      title: Important Information
+      type: Preformatted
+      clearWith:
+          - vars
+          - group
+          - excl
+          - sty
+          - p_adjust
+
     - name: errorNotice
       title: Error
       type: Html

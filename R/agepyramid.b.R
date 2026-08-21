@@ -14,7 +14,53 @@ agepyramidClass <- if (requireNamespace('jmvcore')) R6::R6Class(
     "agepyramidClass",
     inherit = agepyramidBase,
     private = list(
+
+        # Notice collection helpers. A single Preformatted (plain-text) output item:
+        # avoids BOTH the jmvcore::Notice serialization error from
+        # self$results$insert(999, Notice) AND any HTML in notices (project convention:
+        # notice content must be plain text). ====
+        .noticeList = list(),
+
+        .addNotice = function(type, title, content) {
+            duplicate <- vapply(private$.noticeList, function(notice) {
+                identical(notice$type, type) &&
+                    identical(notice$title, title) &&
+                    identical(notice$content, content)
+            }, logical(1))
+            if (any(duplicate))
+                return()
+
+            private$.noticeList[[length(private$.noticeList) + 1]] <- list(
+                type = type,
+                title = title,
+                content = content
+            )
+            # Render immediately so early-return validation aborts still display the notice
+            private$.renderNotices()
+        },
+
+        .renderNotices = function() {
+            if (length(private$.noticeList) == 0) {
+                self$results$notices$setContent("")
+                return()
+            }
+
+            # Plain text only notices avoid HTML by project convention; the Preformatted
+            # output item renders this literally (no markup, no injection surface).
+            blocks <- vapply(private$.noticeList, function(notice) {
+                prefix <- switch(notice$type,
+                    ERROR          = "ERROR: ",
+                    STRONG_WARNING = "WARNING: ",
+                    WARNING        = "WARNING: ",
+                    "")
+                paste0(prefix, notice$title, "\n", notice$content)
+            }, character(1))
+
+            self$results$notices$setContent(paste(blocks, collapse = "\n\n"))
+        },
         .run = function() {
+            private$.noticeList <- list()
+
             # TODO (forward-looking): no `.()` wrapping anywhere in this file - 
             # the welcome HTML, error HTML, plot title fallback ("Age Pyramid"),
             # and the data-summary section in `.build_data_summary_html` are all
@@ -294,6 +340,23 @@ agepyramidClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             # Store the raw grid; .plotGGCharts prepares it once at render time
             # (avoids preparing the data twice).
             if (self$options$enableGGCharts) {
+                # Detectable here (unlike inside the renderer, which cannot write to
+                # results), so raise a proper notice rather than only a placeholder panel.
+                if (!requireNamespace("ggcharts", quietly = TRUE)) {
+                    private$.addNotice(
+                        "WARNING",
+                        "The ggcharts pyramid cannot be drawn",
+                        paste0(
+                            "The R package 'ggcharts' is not installed, so the second ",
+                            "pyramid (the 'Age Pyramid (ggcharts)' plot) is empty. ",
+                            "The main Age Pyramid plot and the Population Data table ",
+                            "above are complete and unaffected. ",
+                            "To get the ggcharts version, install the package with ",
+                            "install.packages(\"ggcharts\") and re-run; otherwise clear the ",
+                            "'ggcharts pyramid' checkbox to hide the empty plot."
+                        )
+                    )
+                }
                 imageGGCharts <- self$results$plotGGCharts
                 imageGGCharts$setState(plotData)
             }
@@ -578,18 +641,26 @@ agepyramidClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 print(plot)
                 return(TRUE)
             }, error = function(e) {
-                # Surface the failure to the user instead of a silent blank plot:
-                # draw a placeholder panel explaining why the ggcharts pyramid could
-                # not be rendered (also logged as an R warning for the console).
-                warning("ggcharts pyramid failed: ", e$message)
+                # A render-phase failure cannot write to a results element, so the
+                # guidance is drawn into the plot panel itself (IN_PLOT_FALLBACK).
+                # A bare warning() would be invisible in jamovi anyway.
+                n_groups <- length(unique(as.character(plotData$Pop)))
                 fallback <- ggplot2::ggplot() +
                     ggplot2::annotate(
-                        "text", x = 0, y = 0, hjust = 0.5, vjust = 0.5, size = 4,
+                        "text", x = 0, y = 0, hjust = 0.5, vjust = 0.5, size = 3.5,
                         label = paste0(
-                            "The ggcharts pyramid could not be drawn.\n\n",
-                            "Reason: ", e$message, "\n\n",
-                            "Try turning off 'ggcharts pyramid', or adjust the\n",
-                            "age groups / custom colors and re-run."
+                            "The ggcharts pyramid could not be drawn.\n",
+                            "(ggcharts received ", nrow(plotData), " rows covering ",
+                            n_groups, " age group(s).)\n\n",
+                            "The main Age Pyramid plot and the Population Data table\n",
+                            "above are complete and unaffected - only this second,\n",
+                            "optional plot is missing.\n\n",
+                            "What to try next: widen the age bin width (or choose a\n",
+                            "preset) so more than one age group is produced, and check\n",
+                            "that any custom bar colors are valid color names or\n",
+                            "#RRGGBB codes. If you do not need this view, clear the\n",
+                            "'ggcharts pyramid' checkbox to hide it.\n\n",
+                            "Technical detail from ggcharts: ", e$message
                         )
                     ) +
                     ggplot2::theme_void()

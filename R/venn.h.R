@@ -490,6 +490,7 @@ vennResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
     "vennResults",
     inherit = jmvcore::Group,
     active = list(
+        notices = function() private$.items[["notices"]],
         welcome = function() private$.items[["welcome"]],
         todo = function() private$.items[["todo"]],
         summary = function() private$.items[["summary"]],
@@ -550,6 +551,25 @@ vennResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "setLabelColor",
                     "fillColorMapping",
                     "colorPalette"))
+            self$add(jmvcore::Preformatted$new(
+                options=options,
+                name="notices",
+                title="Important Information",
+                clearWith=list(
+                    "var1",
+                    "var1true",
+                    "var2",
+                    "var2true",
+                    "var3",
+                    "var3true",
+                    "var4",
+                    "var4true",
+                    "var5",
+                    "var5true",
+                    "var6",
+                    "var6true",
+                    "var7",
+                    "var7true")))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="welcome",
@@ -823,6 +843,7 @@ vennBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   interpretations.
 #' @return A results object containing:
 #' \tabular{llllll}{
+#'   \code{results$notices} \tab \tab \tab \tab \tab a preformatted \cr
 #'   \code{results$welcome} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$todo} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$summary} \tab \tab \tab \tab \tab a table \cr

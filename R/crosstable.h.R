@@ -111,6 +111,7 @@ crosstableResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
     "crosstableResults",
     inherit = jmvcore::Group,
     active = list(
+        notices = function() private$.items[["notices"]],
         errorNotice = function() private$.items[["errorNotice"]],
         dataQualityNotice = function() private$.items[["dataQualityNotice"]],
         analysisInfo = function() private$.items[["analysisInfo"]],
@@ -139,6 +140,16 @@ crosstableResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "finalfit",
                     "gtsummary",
                     "tangram"))
+            self$add(jmvcore::Preformatted$new(
+                options=options,
+                name="notices",
+                title="Important Information",
+                clearWith=list(
+                    "vars",
+                    "group",
+                    "excl",
+                    "sty",
+                    "p_adjust")))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="errorNotice",
@@ -355,6 +366,7 @@ crosstableBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   conventionally indicates negligible imbalance.
 #' @return A results object containing:
 #' \tabular{llllll}{
+#'   \code{results$notices} \tab \tab \tab \tab \tab a preformatted \cr
 #'   \code{results$errorNotice} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$dataQualityNotice} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$analysisInfo} \tab \tab \tab \tab \tab a html \cr

@@ -4,6 +4,19 @@ title: Data Quality Assessment
 jrs: '1.1'
 
 items:
+    - name: notices
+      title: Important Information
+      type: Preformatted
+      clearWith:
+          - vars
+          - check_duplicates
+          - check_missing
+          - complete_cases_only
+          - missing_threshold_visual
+          - plot_data_overview
+          - plot_missing_patterns
+          - plot_data_types
+
     - name: todo
       type: Html
       visible: true

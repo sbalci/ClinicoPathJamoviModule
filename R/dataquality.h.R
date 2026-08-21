@@ -113,6 +113,7 @@ dataqualityResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
     "dataqualityResults",
     inherit = jmvcore::Group,
     active = list(
+        notices = function() private$.items[["notices"]],
         todo = function() private$.items[["todo"]],
         text = function() private$.items[["text"]],
         summary = function() private$.items[["summary"]],
@@ -134,6 +135,19 @@ dataqualityResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
                     "naniar",
                     "dplyr",
                     "ggplot2"))
+            self$add(jmvcore::Preformatted$new(
+                options=options,
+                name="notices",
+                title="Important Information",
+                clearWith=list(
+                    "vars",
+                    "check_duplicates",
+                    "check_missing",
+                    "complete_cases_only",
+                    "missing_threshold_visual",
+                    "plot_data_overview",
+                    "plot_missing_patterns",
+                    "plot_data_types")))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="todo",
@@ -245,6 +259,7 @@ dataqualityBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   and statistical tests used in the analysis.
 #' @return A results object containing:
 #' \tabular{llllll}{
+#'   \code{results$notices} \tab \tab \tab \tab \tab a preformatted \cr
 #'   \code{results$todo} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$text} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$summary} \tab \tab \tab \tab \tab a html \cr

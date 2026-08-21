@@ -220,6 +220,7 @@ agepyramidResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
     "agepyramidResults",
     inherit = jmvcore::Group,
     active = list(
+        notices = function() private$.items[["notices"]],
         welcome = function() private$.items[["welcome"]],
         dataInfo = function() private$.items[["dataInfo"]],
         pyramidTable = function() private$.items[["pyramidTable"]],
@@ -234,6 +235,20 @@ agepyramidResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 title="Age Pyramid",
                 refs=list(
                     "ClinicoPathJamoviModule"))
+            self$add(jmvcore::Preformatted$new(
+                options=options,
+                name="notices",
+                title="Important Information",
+                clearWith=list(
+                    "age",
+                    "gender",
+                    "female",
+                    "male",
+                    "age_groups",
+                    "age_interval",
+                    "bin_width",
+                    "custom_breaks",
+                    "enableGGCharts")))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="welcome",
@@ -401,6 +416,7 @@ agepyramidBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' @param ggcharts_xlab X-axis label for ggcharts pyramid.
 #' @return A results object containing:
 #' \tabular{llllll}{
+#'   \code{results$notices} \tab \tab \tab \tab \tab a preformatted \cr
 #'   \code{results$welcome} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$dataInfo} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$pyramidTable} \tab \tab \tab \tab \tab a table \cr

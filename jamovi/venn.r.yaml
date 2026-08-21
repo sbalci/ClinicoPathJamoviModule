@@ -41,6 +41,25 @@ clearWith:
 
 items:
 
+    - name: notices
+      title: Important Information
+      type: Preformatted
+      clearWith:
+        - var1
+        - var1true
+        - var2
+        - var2true
+        - var3
+        - var3true
+        - var4
+        - var4true
+        - var5
+        - var5true
+        - var6
+        - var6true
+        - var7
+        - var7true
+
     - name: welcome
       title: "Welcome"
       type: Html

@@ -5,6 +5,20 @@ jrs:   '1.1'
 
 items:
 
+    - name: notices
+      title: Important Information
+      type: Preformatted
+      clearWith:
+          - age
+          - gender
+          - female
+          - male
+          - age_groups
+          - age_interval
+          - bin_width
+          - custom_breaks
+          - enableGGCharts
+
     - name: welcome
       title: 'Getting Started'
       type: Html

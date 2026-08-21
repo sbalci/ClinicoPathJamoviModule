@@ -353,9 +353,25 @@ alluvialClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
         # Helper method to create ggalluvial plots
         .createGgalluvialPlot = function(data, vars, fill_var, weight_var = NULL) {
-            # Check for required package
+            # Check for required package. .prepareMainPlotState already raises a
+            # notice for this during .run, so normally we never get here; this is
+            # the render-phase fallback, where results elements cannot be set.
             if (!requireNamespace("ggalluvial", quietly = TRUE)) {
-                stop("Package 'ggalluvial' is required for manual control engine. Please install it.")
+                return(
+                    ggplot2::ggplot() +
+                        ggplot2::geom_text(
+                            ggplot2::aes(x = 0.5, y = 0.5, label = paste0(
+                                "The GG Alluvial engine needs the R package 'ggalluvial',\n",
+                                "which is not installed, so this plot cannot be drawn.\n\n",
+                                "Switch the 'Plot engine' option to 'Easy Alluvial',\n",
+                                "or run install.packages(\"ggalluvial\") in R and restart jamovi."
+                            )),
+                            size = 4
+                        ) +
+                        ggplot2::xlim(0, 1) +
+                        ggplot2::ylim(0, 1) +
+                        ggplot2::theme_void()
+                )
             }
 
             # Prepare data - convert to factors
@@ -537,6 +553,27 @@ alluvialClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             }
             engine <- self$options$engine
             weight_var <- self$options$weight
+
+            # ggalluvial is an optional dependency. Detect it here, during .run,
+            # so the user gets an actionable notice instead of a raw package
+            # error raised from the render callback (which cannot populate
+            # results elements).
+            if (engine == "ggalluvial" && !requireNamespace("ggalluvial", quietly = TRUE)) {
+                private$.addNotice(
+                    "ERROR",
+                    "GG Alluvial Engine Not Available",
+                    paste0(
+                        "The 'GG Alluvial' plot engine needs the R package 'ggalluvial', ",
+                        "which is not installed on this computer, so no alluvial plot can be drawn. ",
+                        "What to do next: switch the 'Plot engine' option to 'Easy Alluvial' - ",
+                        "it is already installed and shows the same category flows ",
+                        "(weighted flows and a separate fill variable are only available in GG Alluvial); ",
+                        "or install the package by running install.packages(\"ggalluvial\") in R, ",
+                        "then restart jamovi and run the analysis again."
+                    )
+                )
+                return(NULL)
+            }
 
             # Pre-render validations that depend only on options are performed
             # here (during .run) rather than inside the .plot render callback.

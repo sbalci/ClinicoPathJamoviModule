@@ -235,6 +235,51 @@ crosstableClass <- if (requireNamespace('jmvcore'))
         "crosstableClass",
         inherit = crosstableBase,
         private = list(
+
+            # Notice collection helpers. A single Preformatted (plain-text) output item:
+            # avoids BOTH the jmvcore::Notice serialization error from
+            # self$results$insert(999, Notice) AND any HTML in notices (project convention:
+            # notice content must be plain text). ====
+            .noticeList = list(),
+
+            .addNotice = function(type, title, content) {
+                duplicate <- vapply(private$.noticeList, function(notice) {
+                    identical(notice$type, type) &&
+                        identical(notice$title, title) &&
+                        identical(notice$content, content)
+                }, logical(1))
+                if (any(duplicate))
+                    return()
+
+                private$.noticeList[[length(private$.noticeList) + 1]] <- list(
+                    type = type,
+                    title = title,
+                    content = content
+                )
+                # Render immediately so early-return validation aborts still display the notice
+                private$.renderNotices()
+            },
+
+            .renderNotices = function() {
+                if (length(private$.noticeList) == 0) {
+                    self$results$notices$setContent("")
+                    return()
+                }
+
+                # Plain text only notices avoid HTML by project convention; the Preformatted
+                # output item renders this literally (no markup, no injection surface).
+                blocks <- vapply(private$.noticeList, function(notice) {
+                    prefix <- switch(notice$type,
+                        ERROR          = "ERROR: ",
+                        STRONG_WARNING = "WARNING: ",
+                        WARNING        = "WARNING: ",
+                        "")
+                    paste0(prefix, notice$title, "\n", notice$content)
+                }, character(1))
+
+                self$results$notices$setContent(paste(blocks, collapse = "\n\n"))
+            },
+
             .htmlSafeTableData = function(data) {
                 escape <- function(value) {
                     as.character(htmltools::htmlEscape(as.character(value)))
@@ -298,6 +343,7 @@ crosstableClass <- if (requireNamespace('jmvcore'))
                 # Report any critical issues
                 if (length(validation_results$issues) > 0) {
                     jmvcore::reject("Variable name issues detected: {}",
+                                    code = NULL,
                                     paste(validation_results$issues, collapse = "; "))
                 }
 
@@ -324,7 +370,17 @@ crosstableClass <- if (requireNamespace('jmvcore'))
                         matched_indices <- match(user_vars, all_labels)
                         if (any(is.na(matched_indices))) {
                             missing_vars <- user_vars[is.na(matched_indices)]
-                            warning(paste("Could not find variables:", paste(missing_vars, collapse = ", ")))
+                            private$.addNotice(
+                                "WARNING",
+                                "Some selected variables were left out of the table",
+                                paste0(
+                                    "These variables could not be matched to a column in the data: ",
+                                    paste(missing_vars, collapse = ", "),
+                                    " - so no rows are shown for them and they are not included in any test. ",
+                                    "This usually happens when a column was renamed, removed or re-typed after it was selected. ",
+                                    "Re-select them in the Variables box, or drop them from the selection to clear this message."
+                                )
+                            )
                         }
                         myvars <- names(all_labels)[matched_indices[!is.na(matched_indices)]]
                     } else {
@@ -337,7 +393,6 @@ crosstableClass <- if (requireNamespace('jmvcore'))
                         if (length(group_match) > 0) {
                             mygroup <- names(all_labels)[group_match[1]]  # Take first match
                         } else {
-                            warning(paste("Could not find grouping variable:", self$options$group))
                             mygroup <- character(0)
                         }
                     } else {
@@ -345,7 +400,16 @@ crosstableClass <- if (requireNamespace('jmvcore'))
                     }
 
                 }, error = function(e) {
-                    jmvcore::reject("Variable matching failed: {}", e$message)
+                    jmvcore::reject(
+                        paste0(
+                            "The selected variables could not be matched to the columns in the data, ",
+                            "so no cross table could be built. Re-select the variables and grouping ",
+                            "variable, or check that the data still contains those columns. ",
+                            "Technical detail: {}"
+                        ),
+                        code = NULL,
+                        conditionMessage(e)
+                    )
                 })
 
                 # Report warnings about variable names if any
@@ -365,9 +429,30 @@ crosstableClass <- if (requireNamespace('jmvcore'))
                     self$results$varNameWarnings$setVisible(TRUE)
                 }
 
-                # If any user-specified variable could not be matched, block analysis
-                if (length(myvars) == 0 || length(mygroup) == 0) {
-                    jmvcore::reject("Selected variables could not be matched to the dataset after cleaning labels. Please reselect variables.")
+                # If any user-specified variable could not be matched, block analysis.
+                # Reported here rather than inside the tryCatch() above, whose error handler
+                # would otherwise swallow the message and replace it with a generic one.
+                if (length(mygroup) == 0) {
+                    jmvcore::reject(
+                        paste0(
+                            "The grouping variable '{}' could not be matched to a column in the data, ",
+                            "so there are no groups to compare across and no table can be built. ",
+                            "This usually happens when the column was renamed, removed or re-typed after ",
+                            "it was selected. Re-select the grouping variable in the Group box."
+                        ),
+                        code = NULL,
+                        self$options$group
+                    )
+                }
+                if (length(myvars) == 0) {
+                    jmvcore::reject(
+                        paste0(
+                            "None of the selected variables could be matched to a column in the data, ",
+                            "so the table would have no rows. This usually happens when the columns were ",
+                            "renamed or removed after they were selected. Re-select the variables in the ",
+                            "Variables box."
+                        )
+                    )
                 }
 
                 return(list(
@@ -465,6 +550,10 @@ crosstableClass <- if (requireNamespace('jmvcore'))
 
             # .run ----
             .run = function() {
+                # Reset notices so the same message is not appended once per run cycle
+                private$.noticeList <- list()
+                private$.renderNotices()
+
                 sty <- self$options$sty
                 # If required options are missing, show a welcome message with instructions.
                 if (is.null(self$options$vars) || is.null(self$options$group)) {
@@ -549,14 +638,29 @@ crosstableClass <- if (requireNamespace('jmvcore'))
                 # Performance safeguards for large datasets
                 n_rows <- nrow(self$data)
                 n_vars <- length(self$options$vars)
-                n_combinations <- n_vars * length(unique(self$data[[self$options$group]]))
-                
+                n_group_levels <- length(unique(self$data[[self$options$group]]))
+                n_combinations <- n_vars * n_group_levels
+
                 if (n_rows > 50000) {
-                    warning(paste(.("Large dataset detected:"), n_rows, .("rows. Analysis may take longer.")))
+                    private$.addNotice(
+                        "INFO",
+                        .("Large dataset - the table may take a while to appear"),
+                        sprintf(
+                            .("The data has %s rows, well above the 50,000-row point where building this table starts to feel slow. Nothing is wrong with the results - every row is used - but the table can take a while to appear and is rebuilt each time you change an option. If you are still exploring, apply a row filter while you settle on the options and remove it for the final table."),
+                            format(n_rows, big.mark = ",", scientific = FALSE, trim = TRUE)
+                        )
+                    )
                 }
-                
+
                 if (n_combinations > 100) {
-                    warning(paste(.("Large number of variable combinations:"), n_combinations, .("Consider reducing variables.")))
+                    private$.addNotice(
+                        "INFO",
+                        .("Many variable-by-group combinations"),
+                        sprintf(
+                            .("This selection produces %d variable-by-group combinations (%d variables x %d group levels). Each variable adds rows and one more significance test, so the table becomes long to read and the multiple-testing correction gets more conservative - genuine differences are harder to detect. Consider splitting the variables over two or three separate Cross Table analyses, or grouping rare levels of the grouping variable together."),
+                            n_combinations, n_vars, n_group_levels
+                        )
+                    )
                 }
 
                 # Read and label data with robust variable name handling.

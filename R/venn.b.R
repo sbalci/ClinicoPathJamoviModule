@@ -173,6 +173,50 @@ vennClass <- if (requireNamespace('jmvcore'))
             .warnings = character(0),
             .info = character(0),
 
+            # Notice collection helpers. A single Preformatted (plain-text) output item:
+            # avoids BOTH the jmvcore::Notice serialization error from
+            # self$results$insert(999, Notice) AND any HTML in notices (project convention:
+            # notice content must be plain text). ====
+            .noticeList = list(),
+
+            .addNotice = function(type, title, content) {
+                duplicate <- vapply(private$.noticeList, function(notice) {
+                    identical(notice$type, type) &&
+                        identical(notice$title, title) &&
+                        identical(notice$content, content)
+                }, logical(1))
+                if (any(duplicate))
+                    return()
+
+                private$.noticeList[[length(private$.noticeList) + 1]] <- list(
+                    type = type,
+                    title = title,
+                    content = content
+                )
+                # Render immediately so early-return validation aborts still display the notice
+                private$.renderNotices()
+            },
+
+            .renderNotices = function() {
+                if (length(private$.noticeList) == 0) {
+                    self$results$notices$setContent("")
+                    return()
+                }
+
+                # Plain text only notices avoid HTML by project convention; the Preformatted
+                # output item renders this literally (no markup, no injection surface).
+                blocks <- vapply(private$.noticeList, function(notice) {
+                    prefix <- switch(notice$type,
+                        ERROR          = "ERROR: ",
+                        STRONG_WARNING = "WARNING: ",
+                        WARNING        = "WARNING: ",
+                        "")
+                    paste0(prefix, notice$title, "\n", notice$content)
+                }, character(1))
+
+                self$results$notices$setContent(paste(blocks, collapse = "\n\n"))
+            },
+
             .init = function() {
                 # Count number of selected variables for dynamic sizing
                 num_vars <- 0
@@ -236,6 +280,8 @@ vennClass <- if (requireNamespace('jmvcore'))
                 private$.errors <- character(0)
                 private$.warnings <- character(0)
                 private$.info <- character(0)
+                private$.noticeList <- list()
+                private$.renderNotices()
 
                 # Validate required variables and their true levels
                 if (!private$.validateVariables()) {
@@ -885,7 +931,16 @@ vennClass <- if (requireNamespace('jmvcore'))
                     if (is.numeric(column_data)) {
                         column_data <- as.logical(column_data)
                     } else {
-                        warning(paste("Column", safe_varname, "is not logical and cannot be converted"))
+                        private$.addNotice(
+                            "WARNING",
+                            paste0("Variable '", display_name, "' Was Left Out"),
+                            paste0("Variable '", display_name, "' holds ",
+                                class(column_data)[1],
+                                " values, which cannot be turned into the yes/no set membership this analysis needs, so it contributes no row to the summary table and no set to the diagrams. ",
+                                "Pick a nominal or ordinal variable (or a 0/1 numeric one) and set its 'true' level in the options, or recode '",
+                                display_name,
+                                "' into two categories first, then run the analysis again.")
+                        )
                         return(NULL)
                     }
                 }
@@ -1772,6 +1827,9 @@ vennClass <- if (requireNamespace('jmvcore'))
 
             # Populate jamovi tables safely using a data frame and column mapping
             .populateTableSafely = function(table_result, data_frame, column_mapping) {
+                # Declared outside tryCatch so the error handler can always report progress
+                rows_added <- 0
+
                 tryCatch({
                     if (is.null(data_frame) || nrow(data_frame) == 0) {
                         return(invisible(NULL))
@@ -1790,13 +1848,22 @@ vennClass <- if (requireNamespace('jmvcore'))
                         }
 
                         table_result$addRow(rowKey = i, values = row_values)
+                        rows_added <- rows_added + 1
 
                         if (i %% 100 == 0) {
                             private$.checkpoint()
                         }
                     }
                 }, error = function(e) {
-                    warning(paste(.("Table population failed:"), e$message))
+                    private$.addNotice(
+                        "WARNING",
+                        "Membership Table Is Incomplete",
+                        paste0("Only ", rows_added, " of ", nrow(data_frame),
+                            " case rows could be written into the membership table before an internal error stopped it, so the remaining cases are missing from that table. ",
+                            "The Venn and UpSet diagrams and the summary counts are computed separately and are unaffected. ",
+                            "You can switch off 'Show membership table' to hide it, or select fewer variables and run again. ",
+                            "Technical detail: ", conditionMessage(e))
+                    )
                 })
             },
 
