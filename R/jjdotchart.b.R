@@ -1,7 +1,5 @@
 #' @title Dot Chart (Summary vs Reference Value)
 #' @importFrom R6 R6Class
-#' @import jmvcore
-#' @import ggplot2
 #' @importFrom rlang sym
 #'
 #' @return An \code{R6} class generator object for the \code{jjdotchartClass}

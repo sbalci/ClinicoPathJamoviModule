@@ -17,7 +17,7 @@
 #' clinical research workflows within the jamovi environment
 #'
 #' @importFrom R6 R6Class
-#' @import jmvcore
+#' @importFrom jmvcore .
 #' @importFrom ggplot2 ggplot aes geom_col position_fill coord_flip geom_bar
 #' @importFrom ggplot2 theme_minimal theme_classic theme_bw labs scale_fill_brewer
 #' @importFrom ggplot2 scale_fill_viridis_d geom_text element_text theme element_rect

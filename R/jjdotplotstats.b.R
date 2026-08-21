@@ -1,8 +1,5 @@
 #' @title Horizontal Box-Violin Comparison
 #' @importFrom R6 R6Class
-#' @import jmvcore
-#' @import glue
-#' @import ggplot2
 #' @importFrom rlang sym
 #' @importFrom digest digest
 #'

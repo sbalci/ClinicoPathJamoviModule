@@ -70,6 +70,7 @@ items:
 
 refs:
     - ClinicoPathJamoviModule
+    - RCorTestDocumentation
 
 
 ...

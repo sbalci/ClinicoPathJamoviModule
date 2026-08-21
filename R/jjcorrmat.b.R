@@ -1,7 +1,6 @@
 #' @title Correlation Matrix
 #' @importFrom R6 R6Class
-#' @import jmvcore
-#' @import glue
+#' @importFrom jmvcore .
 #' @importFrom rlang sym
 #'
 #' @return An \code{R6} class generator object for the \code{jjcorrmatClass} backend; used internally by the jamovi analysis wrapper and not called directly.

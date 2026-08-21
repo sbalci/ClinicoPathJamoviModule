@@ -57,7 +57,7 @@
 #' }
 #'
 #' @importFrom R6 R6Class
-#' @import jmvcore
+#' @importFrom jmvcore .
 #' @return An \code{R6} class generator object for the \code{linechartClass} backend; used internally by the jamovi analysis wrapper and not called directly.
 
 linechartClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
@@ -65,12 +65,8 @@ linechartClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
     inherit = linechartBase,
     private = list(
 
-        # base::format() is MASKED in this file. `@import jmvcore` brings jmvcore's
-        # own format() into scope, and that one is a string-template helper which
-        # ignores `digits` and stringifies at full precision - so every
-        # format(x, digits = 3) here silently produced 15-16 significant digits,
-        # e.g. "Each unit increase in X corresponds to 0.829075514952931 unit
-        # increase in Y". Round explicitly instead of relying on a masked generic.
+        # Use one explicit formatter for result text so numeric precision is
+        # stable regardless of namespace imports or the caller's print options.
         .fmtNum = function(x, digits = 3) {
             if (length(x) != 1 || !is.finite(x)) return("NA")
             formatC(signif(x, digits), format = "fg", flag = "#", digits = digits)
@@ -449,6 +445,11 @@ linechartClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                 correlation_stats$intercept_naive <- coef(lm_result)[1]
                 correlation_stats$r_squared_naive <- summary(lm_result)$r.squared
                 correlation_stats$regression_p_naive <- summary(lm_result)$coefficients[2, 4]
+                slope_scale <- stats::sd(y_data) / stats::sd(x_data)
+                correlation_stats$slope_is_zero <-
+                    is.finite(slope_scale) &&
+                    abs(correlation_stats$slope_naive) <=
+                        sqrt(.Machine$double.eps) * slope_scale
 
                 # Set "display" values - use naive with clear labeling
                 correlation_stats$pearson_r <- correlation_stats$pearson_r_naive
@@ -557,7 +558,10 @@ linechartClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                 row_num <- row_num + 1
 
                 # Enhanced slope interpretation
-                slope_interpretation <- if (correlation_stats$slope > 0) {
+                slope_is_zero <- isTRUE(correlation_stats$slope_is_zero)
+                slope_interpretation <- if (slope_is_zero) {
+                    .("No linear trend: The estimated regression slope is effectively zero at numerical precision.")
+                } else if (correlation_stats$slope > 0) {
                     jmvcore::format(
                         .("Positive trend: Each unit increase in X corresponds to an average {slope} unit increase in Y."),
                         slope = private$.fmtNum(abs(correlation_stats$slope)))
@@ -645,10 +649,17 @@ linechartClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             is_significant <- p < 0.05
 
             # Build copy-ready sentence
+            correlation_is_zero <- isTRUE(all.equal(
+                unname(r), 0, tolerance = sqrt(.Machine$double.eps)))
             direction <- if (r > 0) .("positive") else .("negative")
             strength <- private$.correlationStrength(r)
 
-            copy_ready <- if (is_significant) {
+            copy_ready <- if (correlation_is_zero) {
+                jmvcore::format(
+                    .("The analysis found a negligible correlation between the variables (r = {r}, {p}). The correlation explains {variance}% of the variance, and the relationship is not statistically significant."),
+                    r = round(r, 3), p = sig_level,
+                    variance = round(r_squared * 100, 1))
+            } else if (is_significant) {
                 jmvcore::format(
                     .("The analysis found a {strength} {direction} correlation between the variables (r = {r}, {p}). The correlation explains {variance}% of the variance, and the relationship is statistically significant."),
                     strength = strength, direction = direction, r = round(r, 3),
@@ -725,10 +736,17 @@ linechartClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             abs_r <- abs(r)
             strength <- private$.correlationStrength(r)
 
-            direction <- if (r > 0) .("positive") else .("negative")
-
             # Create copy-ready interpretation
-            base_interpretation <- paste0(strength, " ", direction, " ", .("correlation"), " (", sig_text, ")")
+            correlation_is_zero <- isTRUE(all.equal(
+                unname(r), 0, tolerance = sqrt(.Machine$double.eps)))
+            base_interpretation <- if (correlation_is_zero) {
+                paste0(.("negligible correlation"), " (", sig_text, ")")
+            } else {
+                direction <- if (r > 0) .("positive") else .("negative")
+                paste0(
+                    strength, " ", direction, " ", .("correlation"),
+                    " (", sig_text, ")")
+            }
 
             # Add clinical context
             if (has_repeated_measures) {
@@ -739,8 +757,10 @@ linechartClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                 clinical_note <- .("This suggests a clinically meaningful relationship.")
             } else if (abs_r >= 0.3) {
                 clinical_note <- .("This suggests a moderate association worth investigating.")
-            } else {
+            } else if (abs_r >= 0.1) {
                 clinical_note <- .("This suggests a weak association with limited clinical significance.")
+            } else {
+                clinical_note <- .("This suggests a negligible association with minimal clinical significance.")
             }
 
             return(paste0(base_interpretation, " - ", clinical_note))
@@ -1200,15 +1220,29 @@ linechartClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                     correlation_stats <- private$.calculateCorrelation(data)
                 }
                 if (!is.null(correlation_stats$slope)) {
-                    trend_direction <- if (correlation_stats$slope > 0) .("increasing") else .("decreasing")
-                    # Use the shared |r|-based strength convention for consistency
-                    # with the correlation table and copy-ready summary.
-                    trend_strength <- private$.correlationStrength(correlation_stats$pearson_r)
+                    slope_is_zero <- isTRUE(correlation_stats$slope_is_zero)
+                    trend_sentence <- if (slope_is_zero) {
+                        jmvcore::format(
+                            .("No clear linear trend was detected (R\u00b2 = {r2})."),
+                            r2 = round(correlation_stats$r_squared, 3))
+                    } else {
+                        trend_direction <- if (correlation_stats$slope > 0) {
+                            .("increasing")
+                        } else {
+                            .("decreasing")
+                        }
+                        jmvcore::format(
+                            .("A {strength} {direction} trend was detected (R\u00b2 = {r2})."),
+                            strength = private$.correlationStrength(
+                                correlation_stats$pearson_r),
+                            direction = trend_direction,
+                            r2 = round(correlation_stats$r_squared, 3))
+                    }
 
-                    summary_text <- paste0(summary_text,
-                        "<p><strong>", .("Trend:"), "</strong> ", trend_strength, " ", trend_direction, " ", .("trend detected"),
-                        " (R\u00b2 = ", round(correlation_stats$r_squared, 3), ")</p>"
-                    )
+                    summary_text <- paste0(
+                        summary_text,
+                        "<p><strong>", .("Trend:"), "</strong> ",
+                        trend_sentence, "</p>")
                 }
             }
 

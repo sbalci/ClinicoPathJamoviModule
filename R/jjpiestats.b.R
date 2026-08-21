@@ -1,6 +1,6 @@
 #' @title Pie Charts
 #' @importFrom R6 R6Class
-#' @import jmvcore
+#' @importFrom jmvcore .
 #' @importFrom digest digest
 #' @importFrom rlang sym
 #' @importFrom glue glue

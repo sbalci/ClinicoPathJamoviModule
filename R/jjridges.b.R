@@ -1,11 +1,15 @@
 #' @title Advanced Ridge Plot
 #' @description Creates advanced ridgeline plots with robust statistical analysis
 #' @importFrom R6 R6Class
-#' @import jmvcore
-#' @import ggplot2
-#' @import ggridges
-#' @rawNamespace import(dplyr, except = c(as_data_frame, groups, select, union))
-#' @import tidyr
+#' @importFrom jmvcore .
+#' @importFrom ggplot2 aes after_stat annotate element_blank element_line
+#' @importFrom ggplot2 element_rect element_text facet_wrap geom_text geom_vline
+#' @importFrom ggplot2 ggplot labeller labs margin scale_fill_brewer
+#' @importFrom ggplot2 scale_fill_gradient scale_fill_manual scale_fill_viridis_d
+#' @importFrom ggplot2 theme theme_classic theme_minimal
+#' @importFrom grid unit
+#' @importFrom dplyr across all_of distinct group_by mutate n summarise
+#' @importFrom magrittr %>%
 #' @importFrom effectsize cohens_d hedges_g eta_squared omega_squared
 #'
 #' @return An \code{R6} class generator object for the \code{jjridgesClass} backend; used internally by the jamovi analysis wrapper and not called directly.

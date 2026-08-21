@@ -2,7 +2,7 @@
 #' @return Advanced raincloud plots using ggrain package
 #'
 #' @importFrom R6 R6Class
-#' @import jmvcore
+#' @importFrom jmvcore .
 #' @importFrom rlang .data
 #' @importFrom ggplot2 ggplot aes labs theme_minimal theme element_text
 #' @importFrom ggplot2 scale_fill_manual scale_color_manual

@@ -135,10 +135,6 @@
 #' @keywords hplot distribution categorical
 #'
 #' @importFrom R6 R6Class
-#' @import jmvcore
-#' @import ggplot2
-#' @import waffle
-#' @rawNamespace import(dplyr, except = c(as_data_frame, groups, select, union))
 #' @importFrom magrittr %>%
 #' @importFrom glue glue
 #' @importFrom rlang sym

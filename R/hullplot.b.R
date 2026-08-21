@@ -2,7 +2,6 @@
 #' @return Hull plot using ggforce for cluster and group visualization
 #'
 #' @importFrom R6 R6Class
-#' @import jmvcore
 #' @importFrom magrittr %>%
 #' @importFrom ggplot2 ggplot aes geom_point scale_color_manual scale_fill_manual
 #' @importFrom ggplot2 theme_minimal theme_classic theme_light theme_dark labs

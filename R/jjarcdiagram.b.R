@@ -1,9 +1,8 @@
 #' @title Arc Diagram
 #' @importFrom R6 R6Class
-#' @import jmvcore
+#' @importFrom jmvcore .
 #' @importFrom igraph betweenness blocks closeness is_connected max_degree
-#' @import grDevices
-#' @import RColorBrewer
+#' @importFrom grDevices adjustcolor col2rgb hsv rgb
 #' @importFrom graphics par title legend
 #' @return An \code{R6} class generator object for the \code{jjarcdiagramClass} backend; used internally by the jamovi analysis wrapper and not called directly.
 

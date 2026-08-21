@@ -144,10 +144,7 @@
 #' @keywords hplot htest
 #'
 #' @importFrom R6 R6Class
-#' @import jmvcore
-#' @import glue
-#' @import tidyr
-#' @import ggplot2
+#' @importFrom jmvcore .
 #' @importFrom rlang sym
 #' @importFrom digest digest
 #' @importFrom ggstatsplot ggwithinstats theme_ggstatsplot

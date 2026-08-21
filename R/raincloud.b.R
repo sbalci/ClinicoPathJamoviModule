@@ -2,7 +2,7 @@
 #' @return Raincloud plot using ggdist for comprehensive distribution analysis
 #'
 #' @importFrom R6 R6Class
-#' @import jmvcore
+#' @importFrom jmvcore .
 #' @importFrom magrittr %>%
 #' @importFrom ggplot2 ggplot aes geom_boxplot coord_flip labs theme_minimal theme_classic
 #' @importFrom ggplot2 scale_fill_manual scale_color_manual theme element_text facet_wrap
