@@ -28,8 +28,12 @@ items:
         - thresholdMax
         - thresholdStep
         - selectedThresholds
+        - modelNames
         - clinicalDecisionRule
         - decisionRuleVar
+        - decisionRulePositive
+        - decisionRuleLabel
+        - decisionRuleLabel
 
     # Main results table
     - name: resultsTable
@@ -57,6 +61,7 @@ items:
         - thresholdRange
         - thresholdMin
         - thresholdMax
+        - thresholdStep
         - selectedThresholds
         - modelNames
         - clinicalDecisionRule
@@ -93,10 +98,12 @@ items:
         - thresholdRange
         - thresholdMin
         - thresholdMax
+        - thresholdStep
         - modelNames
         - clinicalDecisionRule
         - decisionRuleVar
         - decisionRulePositive
+        - decisionRuleLabel
 
     # Clinical impact table
     - name: clinicalImpactTable
@@ -113,23 +120,23 @@ items:
           type: number
           format: pc
         - name: interventions_per_100
-          title: 'Interventions per 100'
+          title: 'Projected Interventions'
           type: number
           format: zto
         - name: true_positives_per_100
-          title: 'True Positives per 100'
+          title: 'Projected True Positives'
           type: number
           format: zto
         - name: false_positives_per_100
-          title: 'False Positives per 100'
+          title: 'Projected False Positives'
           type: number
           format: zto
         - name: interventions_avoided
-          title: 'Interventions Avoided per 100 vs Treat All'
+          title: 'Projected Net Interventions Avoided vs Treat All'
           type: number
           format: zto
         - name: number_needed_to_screen
-          title: 'Number Needed to Screen'
+          title: 'Patients Screened per True Positive'
           type: number
           format: zto
       clearWith:
@@ -137,15 +144,20 @@ items:
         - outcomePositive
         - models
         - populationSize
+        - thresholdRange
+        - thresholdMin
+        - thresholdMax
+        - thresholdStep
         - selectedThresholds
         - modelNames
         - clinicalDecisionRule
         - decisionRuleVar
         - decisionRulePositive
+        - decisionRuleLabel
 
     # Model comparison table
     - name: comparisonTable
-      title: Model Comparison
+      title: Exploratory Model Comparison
       type: Table
       visible: (compareModels)
       rows: 0
@@ -182,11 +194,15 @@ items:
         - ciLevel
         - seed
         - modelNames
+        - thresholdRange
+        - thresholdMin
+        - thresholdMax
+        - thresholdStep
 
     # Average net benefit over the threshold range (area under the decision curve,
     # normalised by range width). Unweighted despite the historical option name.
     - name: weightedAUCTable
-      title: Average Net Benefit Over Threshold Range
+      title: Descriptive Average Net Benefit Over Threshold Range
       type: Table
       visible: (weightedAUC)
       rows: 0
@@ -212,10 +228,12 @@ items:
         - thresholdRange
         - thresholdMin
         - thresholdMax
+        - thresholdStep
         - modelNames
         - clinicalDecisionRule
         - decisionRuleVar
         - decisionRulePositive
+        - decisionRuleLabel
 
     # Decision curve plot
     - name: dcaPlot
@@ -224,7 +242,8 @@ items:
       width: 700
       height: 500
       renderFun: .plotDCA
-      visible: (showPlot)
+      visible: (showPlot || confidenceIntervals || showNetBenefitCI)
+      description: Net-benefit curves with optional pointwise bootstrap intervals; ribbons are not simultaneous confidence bands
       clearWith:
         - outcome
         - outcomePositive
@@ -257,7 +276,7 @@ items:
       height: 500
       renderFun: .plotClinicalImpact
       visible: (calculateClinicalImpact || showClinicalImpactPlot)
-      description: Number of true/false positives per population unit
+      description: Projected true and false positives for the selected population size
       clearWith:
         - outcome
         - outcomePositive
@@ -266,16 +285,22 @@ items:
         - thresholdRange
         - thresholdMin
         - thresholdMax
+        - thresholdStep
+        - selectedThresholds
         - modelNames
+        - clinicalDecisionRule
+        - decisionRuleVar
+        - decisionRulePositive
+        - decisionRuleLabel
 
     # Interventions avoided plot
     - name: interventionsAvoidedPlot
-      title: Interventions Avoided
+      title: Net Interventions Avoided vs Treat All
       type: Image
       width: 700
       height: 500
       renderFun: .plotInterventionsAvoided
-      visible: (showInterventionAvoided && showPlot)
+      visible: (showInterventionAvoided)
       clearWith:
         - outcome
         - outcomePositive
@@ -283,7 +308,12 @@ items:
         - thresholdRange
         - thresholdMin
         - thresholdMax
+        - thresholdStep
         - modelNames
+        - clinicalDecisionRule
+        - decisionRuleVar
+        - decisionRulePositive
+        - decisionRuleLabel
 
     # Summary text
     - name: summaryText
@@ -297,13 +327,25 @@ items:
         - thresholdRange
         - thresholdMin
         - thresholdMax
+        - thresholdStep
         - modelNames
+        - clinicalDecisionRule
+        - decisionRuleVar
+        - decisionRulePositive
+        - decisionRuleLabel
+        - confidenceIntervals
+        - showNetBenefitCI
+        - bootReps
+        - ciLevel
+        - seed
+        - calculateClinicalImpact
+        - populationSize
 
     # Enhanced Decision Curve Analysis Results
     - name: costBenefitTable
-      title: Cost-Benefit Analysis
+      title: Exploratory Monetary Payoff (Not Cost-Effectiveness)
       type: Table
-      description: Cost-benefit analysis at selected thresholds
+      description: Simple monetary payoff projection under explicit assumptions; not an ICER, QALY or formal health-economic analysis
       visible: (costBenefitAnalysis)
       columns:
         - name: model
@@ -312,7 +354,7 @@ items:
         - name: threshold
           title: 'Threshold'
           type: number
-          format: zto
+          format: pc
         - name: total_cost
           title: 'Total Cost'
           type: number
@@ -320,16 +362,16 @@ items:
           title: 'Total Benefit'
           type: number
         - name: net_monetary_benefit
-          title: 'Net Monetary Benefit'
+          title: 'Net Payoff'
           type: number
         - name: incremental_cost
           title: 'Incremental Cost'
           type: number
         - name: incremental_benefit
-          title: 'Incremental Benefit'
+          title: 'Incremental Assigned Benefit vs Treat All'
           type: number
-        - name: icer
-          title: 'ICER'
+        - name: incremental_net_payoff
+          title: 'Net Payoff vs Treat All'
           type: number
       clearWith:
         - outcome
@@ -345,6 +387,12 @@ items:
         - benefitCorrectTreatment
         - harmFalseTreatment
         - populationSize
+        - selectedThresholds
+        - modelNames
+        - clinicalDecisionRule
+        - decisionRuleVar
+        - decisionRulePositive
+        - decisionRuleLabel
 
     - name: decisionConsequencesTable
       title: Decision Consequences
@@ -397,11 +445,16 @@ items:
         - thresholdStep
         - showDecisionConsequences
         - selectedThresholds
+        - modelNames
+        - clinicalDecisionRule
+        - decisionRuleVar
+        - decisionRulePositive
+        - decisionRuleLabel
 
     - name: modelComparisonEnhanced
-      title: Enhanced Model Comparison
+      title: Exploratory Pairwise Model Comparison
       type: Table
-      description: Pairwise statistical comparison of models
+      description: Exploratory case-resampling comparison of average net benefit over the selected range
       visible: (multiModelComparison)
       columns:
         - name: model1
@@ -425,7 +478,7 @@ items:
         - name: p_value
           title: 'p-value'
           type: number
-          format: zto;pvalue
+          format: zto,pvalue
         - name: conclusion
           title: 'Conclusion'
           type: text
@@ -440,12 +493,14 @@ items:
         - multiModelComparison
         - comparisonMethod
         - bootReps
+        - ciLevel
         - seed
+        - modelNames
 
     - name: resourceUtilizationTable
       title: Resource Utilization
       type: Table
-      description: Resource utilization at selected thresholds
+      description: Resource utilization projected to the selected population size
       visible: (resourceUtilization)
       columns:
         - name: model
@@ -456,16 +511,16 @@ items:
           type: number
           format: pc
         - name: tests_per_1000
-          title: 'Tests per 1000'
+          title: 'Projected Tests'
           type: number
         - name: treatments_per_1000
-          title: 'Treatments per 1000'
+          title: 'Projected Treatments'
           type: number
         - name: unnecessary_treatments
-          title: 'Unnecessary Tx per 1000'
+          title: 'Projected Unnecessary Treatments'
           type: number
         - name: missed_cases
-          title: 'Missed Cases per 1000'
+          title: 'Projected Missed Cases'
           type: number
         - name: reduction_vs_treat_all
           title: '% Reduction vs Treat All'
@@ -482,6 +537,11 @@ items:
         - resourceUtilization
         - selectedThresholds
         - populationSize
+        - modelNames
+        - clinicalDecisionRule
+        - decisionRuleVar
+        - decisionRulePositive
+        - decisionRuleLabel
 
     - name: relativeUtilityPlot
       title: Relative Utility Curve
@@ -501,11 +561,15 @@ items:
         - thresholdStep
         - showRelativeUtility
         - modelNames
+        - clinicalDecisionRule
+        - decisionRuleVar
+        - decisionRulePositive
+        - decisionRuleLabel
 
     - name: standardizedNetBenefitPlot
       title: Standardized Net Benefit
       type: Image
-      description: Net benefit per 100 patients
+      description: Dimensionless net benefit divided by outcome prevalence; not net benefit per 100 patients
       visible: (showStandardizedNetBenefit)
       renderFun: .plotStandardizedNetBenefit
       width: 700
@@ -520,14 +584,16 @@ items:
         - thresholdStep
         - showStandardizedNetBenefit
         - modelNames
+        - clinicalDecisionRule
+        - decisionRuleVar
+        - decisionRulePositive
+        - decisionRuleLabel
 
 refs:
-    # Vickers2006 is the source of the net-benefit definition implemented here; it was
-    # missing while DecisionCurve and rmda were cited despite never being called
-    # (grep for rmda:: / DecisionCurve:: in R/decisioncurve.b.R returns nothing).
-    - Vickers2006
-    - ggplot2
-    - dplyr
-    - tidyr
+    # Primary DCA method, clinical interpretation, standardized net benefit, and
+    # pointwise bootstrap inference.
     - ClinicoPathJamoviModule
-
+    - Vickers2006
+    - Vickers2019DCA
+    - Kerr2016DCA
+    - Vickers2023DCAInference

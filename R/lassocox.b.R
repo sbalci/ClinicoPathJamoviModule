@@ -1,22 +1,23 @@
 #' @title Lasso-Cox Regression for Variable Selection in Survival Analysis
 #' @description
 #' Performs Lasso-penalized Cox proportional hazards regression for variable selection
-#' in survival analysis. This function uses penalized likelihood to identify the most
-#' important predictors while preventing overfitting, making it ideal for high-dimensional
-#' survival data where the number of potential predictors may approach or exceed the sample size.
+#' in survival analysis. This function uses penalized likelihood to shrink coefficients and
+#' produce a sparse candidate model. Regularization can reduce, but does not eliminate,
+#' overfitting; development results require internal and external validation before clinical use.
 #' 
 #' @details
 #' The Lasso-Cox regression combines the Cox proportional hazards model with L1 regularization
-#' (Lasso penalty) to perform automatic variable selection. The method minimizes the partial
-#' likelihood penalized by the L1 norm of the coefficient vector, effectively shrinking
-#' less important coefficients toward zero and setting some exactly to zero.
+#' (Lasso penalty) to estimate a sparse coefficient vector. The method minimizes the partial
+#' likelihood penalized by the L1 norm of the coefficient vector, shrinking coefficients
+#' toward zero and setting some exactly to zero. A zero coefficient is a model-selection
+#' result in these data and does not establish that a predictor is clinically irrelevant.
 #' 
 #' Key features:
 #' - Automatic variable selection through L1 regularization
 #' - Cross-validation for optimal tuning parameter selection
 #' - Risk score calculation and stratification
-#' - Comprehensive model performance evaluation
-#' - Survival curve visualization by risk groups
+#' - Apparent development-sample discrimination
+#' - Exploratory survival-curve visualization by a development-sample median split
 #' 
 #' The function uses the glmnet package for efficient computation and supports both
 #' lambda.min (minimum cross-validation error) and lambda.1se (1 standard error rule)
@@ -126,17 +127,17 @@ lassocoxClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                 "<ul>",
                 "<li>", .("Variable selection with Lasso regularization"), "</li>",
                 "<li>", .("Cross-validation for optimal tuning parameter"), "</li>",
-                "<li>", .("Model performance metrics (C-index, etc.)"), "</li>",
-                "<li>", .("Risk score calculation and stratification"), "</li>",
-                "<li>", .("Survival curves by risk groups"), "</li>",
+                "<li>", .("Apparent development-sample discrimination (C-index)"), "</li>",
+                "<li>", .("Risk score calculation for model development"), "</li>",
+                "<li>", .("Exploratory survival curves from a development-sample median split"), "</li>",
                 "<li>", .("Comprehensive visualizations"), "</li>",
                 "</ul>",
                 "<h5>", .("Key Features:"), "</h5>",
                 "<ul>",
                 "<li>", .("Handles high-dimensional data (p >= n scenarios)"), "</li>",
-                "<li>", .("Automatic variable selection"), "</li>",
-                "<li>", .("Prevents overfitting through regularization"), "</li>",
-                "<li>", .("Clinical risk stratification"), "</li>",
+                "<li>", .("Sparse coefficient estimation"), "</li>",
+                "<li>", .("Can reduce overfitting through regularization"), "</li>",
+                "<li>", .("Supports model development; it does not establish clinical utility"), "</li>",
                 "</ul>",
                 "</div>"
                 )
@@ -196,14 +197,15 @@ lassocoxClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                     data <- private$.cleanData()
                     if (is.null(data)) return()
 
-                    # Run suitability assessment (advisory only, always proceeds)
-                    if (self$options$suitabilityCheck) {
-                        private$.assessSuitability(data)
-                    }
-
                     # Fit Lasso-Cox model
                     results <- private$.fitModel(data)
                     if (is.null(results)) return()
+
+                    # Suitability includes diagnostics for the selected model, so it
+                    # must run after fitting rather than screening unrelated variables.
+                    if (self$options$suitabilityCheck) {
+                        private$.assessSuitability(results)
+                    }
 
                     # Populate result tables
                     private$.populateModelSummary(results)
@@ -291,9 +293,8 @@ lassocoxClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             if (is.factor(outcome_raw) || is.character(outcome_raw)) {
                 outcome_chr <- as.character(outcome_raw)
                 observed_levels <- sort(unique(outcome_chr[!is.na(outcome_chr)]))
-                if (length(observed_levels) < 2) {
-                    # See file-wide TODO (correctness) near line 73 - broken format-list pattern.
-                    jmvcore::reject(jmvcore::format(.('Outcome variable must have at least 2 observed values. Found {n} level(s): {levels}'),
+                if (length(observed_levels) != 2) {
+                    jmvcore::reject(jmvcore::format(.('Outcome variable must have exactly 2 observed values. Found {n} level(s): {levels}. For competing events, construct an explicit binary cause-specific status in which the event of interest is 1 and every non-event observation is 0; do not omit other event types.'),
                         n = length(observed_levels), levels = paste(observed_levels, collapse = ", ")))
                 }
 
@@ -330,26 +331,17 @@ lassocoxClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                     jmvcore::reject(.("Event level and censored level must be different."))
                 }
 
-                # Strict two-level encoding: only recognized levels get 0/1
+                # Strict two-level encoding: only recognized levels get 0/1.
                 status <- rep(NA_real_, length(outcome_chr))
                 status[outcome_chr == event_level_used] <- 1
                 status[outcome_chr == censor_level_used] <- 0
-                # Rows with NA outcome_chr or unrecognized values stay NA
-
-                n_unrecognized <- sum(!is.na(outcome_chr) &
-                                      outcome_chr != event_level_used &
-                                      outcome_chr != censor_level_used)
-                if (n_unrecognized > 0) {
-                    warning(jmvcore::format(
-                        .('Outcome contains {n} row(s) with values other than the event ("{event}") or censored ("{censor}") levels. These rows will be excluded.'),
-                        n = n_unrecognized, event = event_level_used, censor = censor_level_used))
-                }
+                # Rows with missing outcome remain missing and are handled below.
             } else {
                 outcome_num <- jmvcore::toNumeric(outcome_raw)
                 observed_levels <- sort(unique(outcome_num[!is.na(outcome_num)]))
-                if (length(observed_levels) < 2) {
-                    jmvcore::reject(jmvcore::format(.('Numeric outcome must have at least 2 observed values. Found: {values}'),
-                        values = paste(observed_levels, collapse = ", ")))
+                if (length(observed_levels) != 2) {
+                    jmvcore::reject(jmvcore::format(.('Numeric outcome must have exactly 2 observed values. Found {n} value(s): {values}. For competing events, construct an explicit binary cause-specific status in which the event of interest is 1 and every non-event observation is 0; do not omit other event types.'),
+                        n = length(observed_levels), values = paste(observed_levels, collapse = ", ")))
                 }
 
                 # Resolve event level
@@ -389,15 +381,6 @@ lassocoxClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                 status <- rep(NA_real_, length(outcome_num))
                 status[outcome_num == event_level_num] <- 1
                 status[outcome_num == censor_level_num] <- 0
-
-                n_unrecognized <- sum(!is.na(outcome_num) &
-                                      outcome_num != event_level_num &
-                                      outcome_num != censor_level_num)
-                if (n_unrecognized > 0) {
-                    warning(jmvcore::format(
-                        .('Outcome contains {n} row(s) with values other than the event ({event}) or censored ({censor}) levels. These rows will be excluded.'),
-                        n = n_unrecognized, event = event_level_used, censor = censor_level_used))
-                }
             }
 
             # Remove constant explanatory variables instead of failing hard
@@ -456,22 +439,25 @@ lassocoxClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             }
 
             n_events <- sum(status_cc == 1)
-            if (n_events < 5) {
-                jmvcore::reject(jmvcore::format(.('Too few events for analysis ({n}). Need at least 5 events for reliable estimation.'),
-                    n = n_events))
+            n_censored <- sum(status_cc == 0)
+            if (n_events < 3 || n_censored < 3) {
+                jmvcore::reject(jmvcore::format(
+                    .('Stratified cross-validation requires at least 3 events and 3 censored observations. Found {nEvents} events and {nCensored} censored observations. This is a computational minimum, not evidence that the sample is adequate for prediction modeling.'),
+                    nEvents = n_events, nCensored = n_censored))
             }
 
-            # Validate events-per-predictor ratio
-            n_predictors <- ncol(predictors)
-            if (n_events < n_predictors && n_events < 10) {
-                warning(jmvcore::format(.('Low events-per-predictor ratio ({nEvents} events, {nPred} predictors). Consider stronger regularization or fewer predictors.'),
-                    nEvents = n_events, nPred = n_predictors))
+            if (n_events < 10 || n_censored < 10) {
+                warning(jmvcore::format(
+                    .('Only {nEvents} events and {nCensored} censored observations are available. Cross-validation and selected coefficients may be highly unstable; no fixed event count guarantees reliable prediction modeling.'),
+                    nEvents = n_events, nCensored = n_censored))
             }
 
             # Create design matrix with robust factor handling
+            factor_predictors <- character(0)
             tryCatch({
                 factor_vars <- sapply(predictors[complete, , drop = FALSE], is.factor)
                 if (any(factor_vars)) {
+                    factor_predictors <- names(factor_vars)[factor_vars]
                     for (var_name in names(factor_vars)[factor_vars]) {
                         factor_levels <- length(unique(predictors[complete, var_name]))
                         if (factor_levels < 2) {
@@ -498,16 +484,28 @@ lassocoxClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                     msg = e$message))
             })
 
-            # Standardize variables if requested
+            if (length(factor_predictors) > 0) {
+                warning(jmvcore::format(
+                    .('Categorical predictors are represented by indicator columns and LASSO selects those columns individually rather than selecting each factor as a group. Factor(s): {vars}.'),
+                    vars = paste(factor_predictors, collapse = ", ")))
+            }
+
+            if (n_events < ncol(X)) {
+                warning(jmvcore::format(
+                    .('There are {nEvents} events for {nColumns} encoded predictor columns. Regularization permits fitting in this setting but does not guarantee stable selection or performance; use resampling that repeats the entire modeling process.'),
+                    nEvents = n_events, nColumns = ncol(X)))
+            }
+
+            # Keep the design matrix on its original scale. glmnet receives the
+            # standardize option below, so each cross-validation training fit performs
+            # its own internal scaling rather than using means/SDs calculated from the
+            # held-out rows. glmnet back-transforms returned coefficients to the original
+            # predictor scale; the values retained here are descriptive only.
             if (self$options$standardize) {
-                X_scaled <- scale(X)
-                scale_vals <- attr(X_scaled, "scaled:scale")
+                scale_vals <- apply(X, 2, stats::sd)
                 scale_vals[is.na(scale_vals) | scale_vals == 0] <- 1
-                attr(X_scaled, "scaled:scale") <- scale_vals
-                X <- as.matrix(X_scaled)
-                X[is.na(X)] <- 0
                 scaling_info <- list(
-                    center = attr(X_scaled, "scaled:center"),
+                    center = colMeans(X),
                     scale = scale_vals
                 )
             } else {
@@ -524,9 +522,10 @@ lassocoxClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                 X = X,
                 n = n_complete,
                 n_events = n_events,
-                n_censored = n_complete - n_events,
+                n_censored = n_censored,
                 variable_names = colnames(X),
                 original_variable_names = explanatory_vars,
+                factor_predictors = factor_predictors,
                 scaling_info = scaling_info,
                 complete_cases = which(complete),
                 event_level_used = event_level_used,
@@ -609,10 +608,16 @@ lassocoxClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
 
             # Set up cross-validation parameters
             nfolds_requested <- as.integer(self$options$nfolds)
-            nfolds <- max(3, min(nfolds_requested, data$n - 1))
+            nfolds <- min(nfolds_requested, data$n_events, data$n_censored)
+            if (nfolds < 3) {
+                jmvcore::reject(jmvcore::format(
+                    .('Cannot form stratified cross-validation folds: at least 3 folds require at least 3 events and 3 censored observations. Found {nEvents} events and {nCensored} censored observations.'),
+                    nEvents = data$n_events, nCensored = data$n_censored))
+            }
             if (nfolds != nfolds_requested) {
-                warning(jmvcore::format(.('Reduced number of CV folds to {n} due to sample size constraints.'),
-                    n = nfolds))
+                warning(jmvcore::format(
+                    .('Reduced the number of CV folds from {requested} to {used} so every fold contains event and censored observations.'),
+                    requested = nfolds_requested, used = nfolds))
             }
 
             seed_value <- tryCatch(as.integer(self$options$random_seed), error = function(e) NA_integer_)
@@ -622,7 +627,7 @@ lassocoxClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
 
             foldid <- private$.makeStratifiedFoldId(data$status, nfolds, seed_value)
             if (is.null(foldid)) {
-                warning(.("Could not create stratified CV folds; using default fold assignment."))
+                jmvcore::reject(.("Could not create event/censor-stratified cross-validation folds. Reduce the requested folds or provide more outcome observations."))
             }
 
             # Fit cross-validated Lasso-Cox model
@@ -642,14 +647,10 @@ lassocoxClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                     y = y,
                     family = "cox", cox.ties = "breslow",
                     alpha = 1,  # Lasso (L1) penalty
-                    standardize = FALSE,  # Already standardized if requested
+                    standardize = isTRUE(self$options$standardize),
                     parallel = FALSE  # Avoid parallel processing issues
                 )
-                if (is.null(foldid)) {
-                    cv_args$nfolds <- nfolds
-                } else {
-                    cv_args$foldid <- foldid
-                }
+                cv_args$foldid <- foldid
                 private$.checkpoint()
                 cv_fit <- do.call(glmnet::cv.glmnet, cv_args)
                 
@@ -662,19 +663,18 @@ lassocoxClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                 jmvcore::reject(jmvcore::format(.('Error in cross-validation: {msg}'), msg = e$message))
             })
             
-            # Get optimal lambda based on user selection. Track the rule that is
-            # ACTUALLY used: when the 1-SE rule retains nothing the code below silently
-            # refits at lambda.min, and every summary surface used to keep reporting
-            # self$options$lambda - an active false statement about the fitted model.
-            # The bundled demo dataset at the shipped defaults takes that path every
-            # time, so this was the first thing most users saw.
+            # Respect the selected rule exactly. In particular, an empty model at
+            # lambda.1se is a valid cross-validation result and must not be replaced
+            # data-dependently by lambda.min merely to force predictors into the table.
             lambda_optimal <- switch(self$options$lambda,
                 "lambda.min" = cv_fit$lambda.min,
                 "lambda.1se" = cv_fit$lambda.1se,
                 cv_fit$lambda.1se  # Default fallback
             )
             lambda_rule_used <- self$options$lambda
-            lambda_fallback <- FALSE
+            if (length(lambda_optimal) != 1 || !is.finite(lambda_optimal) || lambda_optimal <= 0) {
+                jmvcore::reject(.("The selected cross-validation rule did not produce a valid positive lambda."))
+            }
             
             # Fit final model with optimal lambda
             tryCatch({
@@ -684,7 +684,7 @@ lassocoxClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                     family = "cox", cox.ties = "breslow",
                     alpha = 1,
                     lambda = lambda_optimal,
-                    standardize = FALSE
+                    standardize = isTRUE(self$options$standardize)
                 )
                 
             }, error = function(e) {
@@ -693,24 +693,25 @@ lassocoxClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             
             # Extract coefficients and selected variables
             coef_matrix <- as.matrix(coef(final_model, s = lambda_optimal))
-            selected_vars <- which(abs(coef_matrix) > 1e-8)
-            
+            coef_matrix[abs(coef_matrix) <= 1e-8] <- 0
+            selected_vars <- which(coef_matrix[, 1] != 0)
+
             if (length(selected_vars) == 0) {
-                warning(.("The 1-SE rule retained no variables, so lambda.min was used instead. The model reported below is the lambda.min fit."))
-                # Use lambda.min as fallback
-                lambda_rule_used <- "lambda.min"
-                lambda_fallback <- TRUE
-                lambda_optimal <- cv_fit$lambda.min
-                final_model <- glmnet::glmnet(
-                    x = data$X, y = y, family = "cox", cox.ties = "breslow",
-                    alpha = 1, lambda = lambda_optimal, standardize = FALSE
-                )
-                coef_matrix <- as.matrix(coef(final_model, s = lambda_optimal))
-                selected_vars <- which(abs(coef_matrix) > 1e-8)
+                warning(jmvcore::format(
+                    .('The {rule} rule retained no predictor columns. The valid empty model has been preserved; choose a different lambda rule only as a prespecified modeling decision, not because the empty result is inconvenient.'),
+                    rule = lambda_rule_used))
             }
             
-            # Calculate risk scores
-            risk_scores <- as.numeric(predict(final_model, newx = data$X, s = lambda_optimal, type = "link"))
+            # Calculate scores from the same tolerance-cleaned coefficient vector that is
+            # reported in the table. glmnet may return coefficients around machine epsilon
+            # at an otherwise empty lambda; using predict() on those residuals can create a
+            # nonconstant score and a spurious apparent C-index despite reporting no selected
+            # predictors. A Cox glmnet model has no intercept, so X %*% beta is the link.
+            risk_scores <- if (length(selected_vars) == 0) {
+                rep(0, nrow(data$X))
+            } else {
+                as.numeric(data$X %*% coef_matrix[, 1])
+            }
             
             # Calculate comprehensive performance metrics
             performance_metrics <- private$.calculatePerformanceMetrics(y, risk_scores, data)
@@ -731,7 +732,7 @@ lassocoxClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                 selected_vars = selected_vars,
                 lambda_optimal = lambda_optimal,
                 lambda_rule_used = lambda_rule_used,
-                lambda_fallback = lambda_fallback,
+                nfolds_used = nfolds,
                 risk_scores = risk_scores,
                 performance_metrics = performance_metrics,
                 var_importance = var_importance,
@@ -753,32 +754,6 @@ lassocoxClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             }, error = function(e) {
                 metrics$cindex <<- NA
                 metrics$cindex_se <<- NA
-            })
-            
-            # Risk group analysis
-            tryCatch({
-                risk_groups <- private$.makeBinaryRiskGroups(risk_scores)
-                if (is.null(risk_groups)) {
-                    jmvcore::reject(.("Unable to form two risk groups from risk scores."))
-                }
-                
-                # Log-rank test
-                fit <- survival::survdiff(y ~ risk_groups)
-                metrics$logrank_p <- 1 - pchisq(fit$chisq, df = length(fit$n) - 1)
-                
-                # Hazard ratio between risk groups
-                cox_fit <- survival::coxph(y ~ risk_groups)
-                hr <- exp(as.numeric(coef(cox_fit)[1]))
-                ci <- exp(stats::confint(cox_fit))
-                metrics$hazard_ratio <- hr
-                metrics$hr_ci_lower <- as.numeric(ci[1, 1])
-                metrics$hr_ci_upper <- as.numeric(ci[1, 2])
-                
-            }, error = function(e) {
-                metrics$logrank_p <<- NA
-                metrics$hazard_ratio <<- NA
-                metrics$hr_ci_lower <<- NA
-                metrics$hr_ci_upper <<- NA
             })
             
             return(metrics)
@@ -818,34 +793,36 @@ lassocoxClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
 
             table$addRow(rowKey = 5, values = list(
                 statistic = .("Penalty Selected By"),
-                value = if (isTRUE(results$lambda_fallback))
-                    jmvcore::format(.("{rule} (the 1-SE rule you selected retained no variables)"),
-                                    rule = results$lambda_rule_used)
-                else results$lambda_rule_used
+                value = results$lambda_rule_used
             ))
 
             table$addRow(rowKey = 6, values = list(
+                statistic = .("Stratified CV Folds Used"),
+                value = results$nfolds_used
+            ))
+
+            table$addRow(rowKey = 7, values = list(
                 statistic = .("Sample Size"),
                 value = results$data$n
             ))
 
-            table$addRow(rowKey = 7, values = list(
+            table$addRow(rowKey = 8, values = list(
                 statistic = .("Number of Events"),
                 value = results$data$n_events
             ))
 
-            table$addRow(rowKey = 8, values = list(
+            table$addRow(rowKey = 9, values = list(
                 statistic = .("Censoring Rate"),
                 value = paste0(round(100 * results$data$n_censored / results$data$n, 1), "%")
             ))
 
-            table$addRow(rowKey = 9, values = list(
+            table$addRow(rowKey = 10, values = list(
                 statistic = .("Event Level Used"),
                 value = results$data$event_level_used
             ))
 
             if (!is.null(results$data$excluded_rows) && results$data$excluded_rows > 0) {
-                table$addRow(rowKey = 10, values = list(
+                table$addRow(rowKey = 11, values = list(
                     statistic = .("Rows Excluded (Missing Data)"),
                     value = results$data$excluded_rows
                 ))
@@ -863,47 +840,12 @@ lassocoxClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                     variable = .("No variables selected"),
                     coefficient = NA,
                     hazardRatio = NA,
-                    ci_lower = NA,
-                    ci_upper = NA,
-                    p_value = NA,
                     importance = NA
                 ))
+                table$setNote("empty",
+                    .("The selected cross-validation rule produced a valid empty model. No less-penalized model was substituted."))
                 return()
             }
-            
-            # Post-selection unpenalized Cox refit for CIs and p-values
-            refit_results <- NULL
-            tryCatch({
-                selected_X <- results$data$X[, results$selected_vars, drop = FALSE]
-                y <- survival::Surv(results$data$time, results$data$status)
-                refit_df <- as.data.frame(selected_X)
-                # Refit under internal, syntactically safe predictor names. User column
-                # names would be backtick-quoted in the formula and come back
-                # backtick-quoted in the coxph rownames, so they never matched the
-                # display names and the CI/p columns stayed blank. This also keeps all
-                # user-controlled text out of the parsed formula.
-                safe_names <- paste0(".v", seq_len(ncol(selected_X)))
-                names(refit_df) <- safe_names
-                refit_df$.time <- results$data$time
-                refit_df$.status <- results$data$status
-                # Only refit if p < n (standard Cox requires this)
-                if (ncol(selected_X) < nrow(selected_X)) {
-                    refit_formula <- jmvcore::asFormula(paste0(
-                        "Surv(.time, .status) ~ ",
-                        paste(safe_names, collapse = " + ")
-                    ))
-                    refit_cox <- survival::coxph(refit_formula, data = refit_df)
-                    refit_summary <- summary(refit_cox)
-                    refit_results <- list(
-                        coefs = refit_summary$coefficients,
-                        ci = refit_summary$conf.int,
-                        names = safe_names
-                    )
-                }
-            }, error = function(e) {
-                # Silently fall back to LASSO coefficients without CIs
-                refit_results <<- NULL
-            })
 
             # Add coefficient rows for selected variables
             for (i in seq_along(results$selected_vars)) {
@@ -913,49 +855,22 @@ lassocoxClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                 hr_val <- exp(coef_val)
                 importance <- results$var_importance[var_name]
 
-                # Try to get CI and p-value from post-selection Cox refit
-                ci_lo <- NA
-                ci_up <- NA
-                p_val <- NA
-                if (!is.null(refit_results)) {
-                    # Match by position via the internal refit name (see above)
-                    refit_row <- match(refit_results$names[i], rownames(refit_results$coefs))
-                    if (!is.na(refit_row)) {
-                        ci_lo <- refit_results$ci[refit_row, 3]  # lower .95
-                        ci_up <- refit_results$ci[refit_row, 4]  # upper .95
-                        p_val <- refit_results$coefs[refit_row, 5]  # Pr(>|z|)
-                        # Use refit HR/coef for consistency with CIs
-                        hr_val <- refit_results$ci[refit_row, 1]  # exp(coef)
-                        coef_val <- refit_results$coefs[refit_row, 1]  # coef
-                    }
-                }
-
                 table$addRow(rowKey = i, values = list(
                     variable = var_name,
                     coefficient = coef_val,
                     hazardRatio = hr_val,
-                    ci_lower = ci_lo,
-                    ci_upper = ci_up,
-                    p_value = p_val,
                     importance = round(importance, 4)
                 ))
             }
 
-            # Notes about methodology
-            if (!is.null(refit_results)) {
-                # The old note named only CIs and p-values, but Coefficient and Hazard
-                # Ratio come from the refit too, while Importance is the absolute
-                # PENALIZED coefficient. Two estimators sat in adjacent cells of one row
-                # with nothing on screen distinguishing them.
-                table$setNote("refit",
-                    .("Coefficient, Hazard Ratio, CI and p are all from an unpenalized Cox model refitted on the LASSO-selected variables (Efron ties). Importance is the absolute penalized LASSO coefficient (Breslow ties) and is shrunk relative to Coefficient, so the two columns will not agree. Post-selection CIs and p-values do not account for the selection step and are anti-conservative: a variable can look significant simply because it survived selection."))
-            } else {
-                table$setNote("noci",
-                    .("CIs and p-values could not be computed (post-selection Cox refit failed or p >= n)."))
-            }
+            table$setNote("penalized",
+                .("Coefficient and Hazard Ratio are from the penalized LASSO Cox fit at the selected lambda. Conventional p-values and confidence intervals are intentionally not reported because same-data post-selection inference would not account for variable and penalty selection."))
             if (!is.null(results$data$scaling_info)) {
                 table$setNote("scale",
-                    .("Coefficients are on the standardized scale (per 1-SD change in the predictor)."))
+                    .("Predictors were standardized internally within glmnet fitting for the penalty calculation. glmnet back-transforms the displayed coefficients to the original design-column scale; indicator-column hazard ratios therefore compare that category with its reference category. Indicators are still penalized and selected separately rather than as a grouped factor."))
+            } else if (length(results$data$factor_predictors) > 0) {
+                table$setNote("factor",
+                    .("Categorical predictors are expanded into indicator columns and those columns are selected separately; this is not grouped selection of the whole factor."))
             }
         },
 
@@ -968,70 +883,19 @@ lassocoxClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             
             # C-index
             if (!is.na(metrics$cindex)) {
-                cindex_text <- if (!is.na(metrics$cindex_se)) {
-                    paste0(round(metrics$cindex, 3), " (SE: ", round(metrics$cindex_se, 3), ")")
-                } else {
-                    round(metrics$cindex, 3)
-                }
+                cindex_text <- round(metrics$cindex, 3)
                 
                 table$addRow(rowKey = 1, values = list(
-                    metric = .("C-index"),
+                    metric = .("Apparent C-index"),
                     value = cindex_text,
-                    interpretation = private$.interpretCindex(metrics$cindex)
+                    interpretation = .("Development data only; optimism not corrected")
                 ))
             }
 
-            # This note used to sit INSIDE the C-index branch. When concordance failed the
-            # C-index row vanished and took the caveat with it, leaving the two most
-            # optimistic numbers on screen - the log-rank p and the group hazard ratio -
-            # with nothing qualifying them. Both come from a median split of a risk score
-            # built on these same patients, so they need the caveat more than the C-index does.
             table$setNote("apparent",
-                .("Every value in this table is apparent (training) performance, computed on the same patients used to choose the penalty and the variables, so all of it is optimistically biased. The log-rank p-value and the high-vs-low hazard ratio additionally come from a median split of that same training-set risk score. Validate in an independent cohort before reporting these as performance."))
-
-            # Log-rank test p-value
-            if (!is.null(metrics$logrank_p) && !is.na(metrics$logrank_p)) {
-                table$addRow(rowKey = 2, values = list(
-                    metric = .("Log-rank p-value"),
-                    value = if (metrics$logrank_p < 0.001) "< 0.001" else round(metrics$logrank_p, 3),
-                    interpretation = if (metrics$logrank_p < 0.05) .("Significant risk stratification") else .("Non-significant stratification")
-                ))
-            }
-
-            # Hazard ratio between risk groups
-            if (!is.null(metrics$hazard_ratio) && !is.na(metrics$hazard_ratio)) {
-                hr_text <- if (!is.null(metrics$hr_ci_lower) && !is.na(metrics$hr_ci_lower) &&
-                               !is.null(metrics$hr_ci_upper) && !is.na(metrics$hr_ci_upper)) {
-                    paste0(round(metrics$hazard_ratio, 2), " (95% CI: ",
-                          round(metrics$hr_ci_lower, 2), "-", round(metrics$hr_ci_upper, 2), ")")
-                } else {
-                    round(metrics$hazard_ratio, 2)
-                }
-
-                table$addRow(rowKey = 3, values = list(
-                    metric = .("Hazard Ratio (High vs Low Risk)"),
-                    value = hr_text,
-                    interpretation = private$.interpretHazardRatio(metrics$hazard_ratio)
-                ))
-            }
+                .("This C-index is apparent (training) performance from the same patients used for preprocessing, penalty selection, and model fitting. Its uncertainty does not include the modeling process. Use bootstrap optimism correction or nested cross-validation that repeats all preprocessing and tuning, followed by external validation before clinical use."))
         },
         
-        # Helper functions for interpretation
-        .interpretCindex = function(cindex) {
-            if (is.na(cindex)) return(.("Not available"))
-            if (cindex < 0.6) return(.("Poor discrimination"))
-            if (cindex < 0.7) return(.("Fair discrimination"))
-            if (cindex < 0.8) return(.("Good discrimination"))
-            return(.("Excellent discrimination"))
-        },
-
-        .interpretHazardRatio = function(hr) {
-            if (is.na(hr)) return(.("Not available"))
-            if (hr < 1.5) return(.("Weak risk stratification"))
-            if (hr < 2.5) return(.("Moderate risk stratification"))
-            return(.("Strong risk stratification"))
-        },
-
         # Enhanced plotting functions
         .cvPlot = function(image, ggtheme, theme, ...) {
             if (!self$options$cv_plot) return()
@@ -1098,14 +962,10 @@ lassocoxClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                 ggplot2::coord_flip() +
                 ggplot2::labs(
                     title = .("Selected Variables and Coefficients"),
-                    # This plot draws results$coef_matrix - the PENALIZED coefficients -
-                    # while the Selected Variables table shows the unpenalized refit values
-                    # in a column also headed "Coefficient". Same variable, two different
-                    # numbers on adjacent outputs, so say which one this is.
                     subtitle = paste(
-                        .("Penalized LASSO coefficients; the Selected Variables table reports the unpenalized refit, which is larger."),
+                        .("Penalized LASSO coefficients at the selected lambda."),
                         if (!is.null(self$options$standardize) && self$options$standardize)
-                            .("Coefficients reflect standardized effect sizes.") else ""
+                            .("Internal standardization was used for fitting; displayed coefficients are back-transformed to the original design-column scale.") else ""
                     ),
                     x = .("Variables"),
                     y = .("Penalized coefficient")
@@ -1124,7 +984,7 @@ lassocoxClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
 
             # Check if risk scores are available and valid
             if (is.null(state$risk_scores) || length(state$risk_scores) == 0) {
-                text_warning <- .("No risk scores available.\nLASSO selected no variables.\n\nConsider using:\n\u2022 lambda.min instead of lambda.1se\n\u2022 Less regularization (lower lambda)\n\u2022 More explanatory variables")
+                text_warning <- .("No variable-based risk scores are available because the selected rule retained no predictors.\n\nThe empty model is a valid result. Choose another lambda rule only as a prespecified modeling decision and report that choice transparently.")
                 
                 # Create a new page with proper formatting
                 grid::grid.newpage()
@@ -1156,7 +1016,7 @@ lassocoxClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             
             # Check if all risk scores are the same (no discrimination)
             if (length(unique(state$risk_scores)) <= 1) {
-                text_warning <- .("Risk scores are uniform.\nNo discrimination possible.\n\nThis can happen when:\n\u2022 All selected variables have very small coefficients\n\u2022 The model overfits to noise\n\u2022 Lambda value is inappropriate")
+                text_warning <- .("Risk scores are uniform, so no risk-group curve can be formed. This is expected for an empty model or when all fitted linear predictors are identical.")
                 
                 grid::grid.newpage()
                 vp <- grid::viewport(width = 0.9, height = 0.9, x = 0.5, y = 0.5)
@@ -1171,7 +1031,7 @@ lassocoxClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                 return(TRUE)
             }
             
-            # Create risk groups based on median risk score
+            # Development-sample median split for descriptive visualization only
             tryCatch({
                 risk_groups <- private$.makeBinaryRiskGroups(state$risk_scores)
                 if (is.null(risk_groups)) {
@@ -1231,10 +1091,10 @@ lassocoxClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                         data = plot_data,
                         risk.table = TRUE,
                         risk.table.y.text = FALSE,
-                        pval = TRUE,
+                        pval = FALSE,
                         conf.int = TRUE,
                         ggtheme = ggtheme,
-                        title = .("Survival Curves by Risk Groups"),
+                        title = .("Exploratory Development-Sample Risk Groups"),
                         xlab = .("Time"),
                         ylab = .("Survival Probability"),
                         legend.title = .("Risk Group"),
@@ -1246,7 +1106,7 @@ lassocoxClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                     # Fallback to base plot
                     plot(fit, col = c("blue", "red"), lwd = 2,
                          xlab = .("Time"), ylab = .("Survival Probability"),
-                         main = .("Survival Curves by Risk Groups"))
+                         main = .("Exploratory Development-Sample Risk Groups"))
                     legend("topright", legend = c(.("Low Risk"), .("High Risk")),
                            col = c("blue", "red"), lwd = 2)
                 }
@@ -1369,7 +1229,7 @@ lassocoxClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             
             <div class='alert alert-info'>
                 <h4> What is LASSO Cox Regression?</h4>
-                <p>LASSO (Least Absolute Shrinkage and Selection Operator) Cox regression combines the Cox proportional hazards model with LASSO regularization for automatic variable selection in survival analysis.</p>
+                <p>LASSO (Least Absolute Shrinkage and Selection Operator) Cox regression combines the Cox proportional hazards model with an L1 penalty to estimate a sparse candidate prediction model.</p>
             </div>
             
             <h4> Key Concepts:</h4>
@@ -1382,9 +1242,9 @@ lassocoxClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                     </ul>
                 </li>
                 
-                <li><strong>Variable Selection:</strong> LASSO automatically sets coefficients of unimportant variables to exactly zero</li>
+                <li><strong>Sparsity:</strong> LASSO sets some fitted coefficients to zero; this does not prove that those predictors are clinically irrelevant</li>
                 
-                <li><strong>Cross-Validation:</strong> K-fold CV determines optimal \u{03BB} that minimizes prediction error</li>
+                <li><strong>Cross-Validation:</strong> Event/censor-stratified K-fold CV estimates partial-likelihood deviance and applies the selected lambda rule</li>
                 
                 <li><strong>Shrinkage:</strong> Coefficients of selected variables are shrunk toward zero, reducing overfitting</li>
             </ul>
@@ -1400,11 +1260,10 @@ lassocoxClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             <div class='alert alert-success'>
                 <h4> Advantages of LASSO Cox:</h4>
                 <ul>
-                    <li>Automatic variable selection eliminates manual stepwise procedures</li>
-                    <li>Reduces overfitting in high-dimensional data</li>
-                    <li>Handles multicollinearity by selecting one variable from correlated groups</li>
-                    <li>Provides parsimonious models suitable for clinical prediction</li>
-                    <li>Objective, reproducible variable selection process</li>
+                    <li>Produces sparse candidate models without stepwise significance testing</li>
+                    <li>Can reduce overfitting, but does not prevent it</li>
+                    <li>Can select one among correlated predictors; the choice may be unstable</li>
+                    <li>Provides a reproducible fitting procedure when preprocessing and folds are fixed</li>
                 </ul>
             </div>
             
@@ -1413,7 +1272,8 @@ lassocoxClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                 <ul>
                     <li>Variable selection depends on the specific dataset and may vary with new data</li>
                     <li>Standardization is typically required for fair penalization across variables</li>
-                    <li>Results should be validated in independent datasets</li>
+                    <li>Categorical predictors are expanded into indicator columns and selected column by column, not as whole factors</li>
+                    <li>All preprocessing and tuning must be repeated inside bootstrap or nested cross-validation; external validation is also required before clinical use</li>
                     <li>Clinical expertise should guide final model interpretation</li>
                 </ul>
             </div>
@@ -1443,7 +1303,7 @@ lassocoxClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             <ol>
                 <li><strong>Data Preprocessing:</strong>
                     <ul>
-                        <li>Handle missing values (complete case analysis or imputation)</li>
+                        <li>This analysis uses complete cases. If imputation is used in a separate workflow, estimate it inside each resampling training split to avoid information leakage</li>
                         <li>Standardize continuous variables (mean=0, SD=1)</li>
                         <li>Create dummy variables for categorical predictors</li>
                     </ul>
@@ -1469,8 +1329,8 @@ lassocoxClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                 <li><strong>Performance Assessment:</strong>
                     <ul>
                         <li>Calculate C-index (concordance probability)</li>
-                        <li>Perform log-rank test between risk groups</li>
-                        <li>Generate survival curves for risk stratification</li>
+                        <li>Report the apparent development-sample C-index as descriptive only</li>
+                        <li>Generate exploratory curves using a development-sample median split without inferential testing</li>
                     </ul>
                 </li>
             </ol>
@@ -1479,14 +1339,14 @@ lassocoxClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             <ul>
                 <li><strong>\u{03BB}.min:</strong> Lambda that minimizes CV error</li>
                 <li><strong>\u{03BB}.1se:</strong> Largest lambda within 1 SE of minimum (more parsimonious)</li>
-                <li><strong>Choice:</strong> \u{03BB}.1se often preferred for better generalizability</li>
+                <li><strong>Choice:</strong> \u{03BB}.1se is more regularized, but neither rule guarantees generalizability; choose and report the rule transparently</li>
             </ul>
             
             <h4> Variable Importance Metrics:</h4>
             <ul>
                 <li><strong>Coefficient Magnitude:</strong> Larger |\u{03B2}| indicates stronger effect</li>
                 <li><strong>Path Inclusion Proportion:</strong> Fraction of lambda values in the regularization path where the variable has a non-zero coefficient</li>
-                <li><strong>Stability:</strong> Consistency of coefficient estimates across folds</li>
+                <li><strong>Limitation:</strong> Path inclusion is not a bootstrap selection frequency and does not measure selection stability</li>
                 <li><strong>Path Entry:</strong> Lambda value at which variable first enters the model</li>
             </ul>
             
@@ -1496,7 +1356,7 @@ lassocoxClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                     <li>Uses coordinate descent algorithm for optimization</li>
                     <li>Handles ties in survival times using Breslow approximation (glmnet default)</li>
                     <li>Standardization (if enabled) is applied to predictors but not survival times</li>
-                    <li>When standardization is enabled, coefficients are on the standardized scale</li>
+                    <li>When standardization is enabled, coefficients are per 1 SD of each encoded design column; indicator-column hazard ratios are not ordinary category-versus-reference contrasts</li>
                 </ul>
             </div>
             "
@@ -1511,10 +1371,9 @@ lassocoxClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             <div class='alert alert-success'>
                 <h4> Clinical Applications</h4>
                 <ul>
-                    <li><strong>Prognostic Models:</strong> Identify key factors affecting patient survival</li>
-                    <li><strong>Risk Stratification:</strong> Classify patients into risk groups for treatment planning</li>
-                    <li><strong>Biomarker Discovery:</strong> Screen large sets of potential biomarkers</li>
-                    <li><strong>Clinical Decision Support:</strong> Develop tools for personalized medicine</li>
+                    <li><strong>Prognostic Model Development:</strong> Build a sparse candidate predictor model for later validation</li>
+                    <li><strong>Biomarker Screening:</strong> Explore large candidate sets while recognizing selection instability</li>
+                    <li><strong>Not Clinical Decision Support:</strong> This development analysis alone does not establish calibration, clinical utility, or a treatment threshold</li>
                 </ul>
             </div>
             
@@ -1536,39 +1395,27 @@ lassocoxClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                     <ul>
                         <li><strong>Higher risk score:</strong> Worse expected survival</li>
                         <li><strong>Lower risk score:</strong> Better expected survival</li>
-                        <li><strong>Threshold:</strong> Often use median to split low/high risk</li>
-                        <li><strong>Validation:</strong> Test in independent cohorts</li>
+                        <li><strong>Displayed groups:</strong> The median split is descriptive and data-dependent; it is not a validated clinical cutoff</li>
+                        <li><strong>Validation:</strong> Repeat all preprocessing and tuning during internal validation, then test the locked model in independent cohorts</li>
                     </ul>
                 </div>
             </div>
             
-            <h4> Clinical Decision Making:</h4>
+            <h4> Clinical-use boundary:</h4>
             <ul>
-                <li><strong>Treatment Selection:</strong> High-risk patients may benefit from aggressive therapy</li>
-                <li><strong>Follow-up Intensity:</strong> Adjust monitoring frequency based on risk</li>
-                <li><strong>Patient Counseling:</strong> Inform patients about prognosis and options</li>
-                <li><strong>Clinical Trial Stratification:</strong> Balance risk factors between treatment arms</li>
+                <li>Do not use the selected variables, apparent C-index, or median-split curves to choose treatment or follow-up.</li>
+                <li>Before clinical use, specify the prediction time horizon, estimate baseline survival, assess calibration and discrimination with uncertainty, and evaluate clinical utility in the target setting.</li>
+                <li>Any cutoff must be prespecified or developed and validated in separate data; the sample median is not a clinical threshold.</li>
             </ul>
             
             <h4> Model Performance Assessment:</h4>
-            <table class='table table-sm'>
-                <thead>
-                    <tr><th>C-index Range</th><th>Discrimination</th><th>Clinical Utility</th></tr>
-                </thead>
-                <tbody>
-                    <tr><td>0.50 - 0.60</td><td>Poor</td><td>Limited clinical value</td></tr>
-                    <tr><td>0.60 - 0.70</td><td>Acceptable</td><td>May inform decisions</td></tr>
-                    <tr><td>0.70 - 0.80</td><td>Good</td><td>Useful for risk stratification</td></tr>
-                    <tr><td>0.80 - 0.90</td><td>Excellent</td><td>Strong clinical utility</td></tr>
-                    <tr><td>> 0.90</td><td>Outstanding</td><td>May indicate overfitting</td></tr>
-                </tbody>
-            </table>
+            <p>The C-index measures ranking discrimination only. No universal C-index threshold establishes calibration, clinical utility, transportability, or readiness for patient care.</p>
             
             <div class='alert alert-warning'>
                 <h4> Clinical Validation Requirements:</h4>
                 <ul>
-                    <li><strong>External Validation:</strong> Test model in different populations</li>
-                    <li><strong>Temporal Validation:</strong> Verify performance over time</li>
+                    <li><strong>Internal Validation:</strong> Use bootstrap optimism correction or nested cross-validation that repeats preprocessing and lambda selection</li>
+                    <li><strong>External Validation:</strong> Test a locked model in representative independent populations</li>
                     <li><strong>Clinical Impact:</strong> Demonstrate improved patient outcomes</li>
                     <li><strong>Implementation:</strong> Consider practical feasibility in clinical workflow</li>
                 </ul>
@@ -1579,7 +1426,7 @@ lassocoxClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                 <ul>
                     <li>Report both \u{03BB}.min and \u{03BB}.1se results</li>
                     <li>Describe variable selection process and stability</li>
-                    <li>Provide confidence intervals for C-index</li>
+                    <li>Report optimism-corrected discrimination and calibration with uncertainty</li>
                     <li>Include calibration assessment when possible</li>
                     <li>Discuss clinical context and limitations</li>
                     <li>Share code and data for reproducibility</li>
@@ -1619,7 +1466,7 @@ lassocoxClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                 <li><strong>Numbers at top:</strong> Number of non-zero variables at each \u{03BB}</li>
             </ul>
             
-            <p><strong>Interpretation:</strong> Choose \u{03BB}.1se (right line) for more robust, generalizable models with fewer variables.</p>
+            <p><strong>Interpretation:</strong> \u{03BB}.1se is the more regularized rule and may select an empty model. It must not be replaced automatically by \u{03BB}.min; neither rule guarantees generalizability.</p>
             "
             
             self$results$crossValidationExplanation$setContent(html_content)
@@ -1651,7 +1498,7 @@ lassocoxClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             <h4> Understanding Risk Scores and Survival Curves</h4>
             
             <div class='alert alert-info'>
-                <p>Risk scores combine selected variables to predict individual patient risk. Survival curves show outcomes for different risk groups.</p>
+                <p>The linear predictor combines selected design columns. The displayed survival curves split the development data at its own median score and are exploratory only.</p>
             </div>
             
             <h5>Risk Score Calculation:</h5>
@@ -1659,15 +1506,15 @@ lassocoxClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                 <li><strong>Formula:</strong> Risk Score = \u{03B2}\u{2081}\u{00D7}X\u{2081} + \u{03B2}\u{2082}\u{00D7}X\u{2082} + ... + \u{03B2}\u{2096}\u{00D7}X\u{2096}</li>
                 <li><strong>Higher scores:</strong> Increased risk (worse prognosis)</li>
                 <li><strong>Lower scores:</strong> Decreased risk (better prognosis)</li>
-                <li><strong>Risk groups:</strong> Often split at median (low vs high risk)</li>
+                <li><strong>Displayed groups:</strong> Split at the development-sample median; this is not a validated clinical cutoff</li>
             </ul>
             
             <h5>Survival Curve Interpretation:</h5>
             <ul>
                 <li><strong>Y-axis:</strong> Survival probability (1.0 = 100% survival)</li>
                 <li><strong>X-axis:</strong> Time (same units as input data)</li>
-                <li><strong>Curve separation:</strong> Better separation indicates stronger risk prediction</li>
-                <li><strong>P-value:</strong> Statistical significance of risk group differences</li>
+                <li><strong>Curve separation:</strong> Apparent separation is optimistically biased because the same data selected and fitted the model</li>
+                <li><strong>Inference:</strong> No log-rank p-value or group hazard ratio is reported because a same-data, data-dependent split would give anti-conservative inference</li>
                 <li><strong>Risk table:</strong> Number of patients at risk at each time point</li>
             </ul>
             "
@@ -1726,7 +1573,8 @@ lassocoxClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
         },
 
         # ── Data Suitability Assessment ─────────────────────────────
-        .assessSuitability = function(data) {
+        .assessSuitability = function(results) {
+            data <- results$data
             checks <- list()
             n <- data$n
             n_events <- data$n_events
@@ -1739,19 +1587,19 @@ lassocoxClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                 checks$epv <- list(
                     color = "green", label = .("Events-Per-Variable"),
                     value = sprintf("%.1f (nEvents=%d, p=%d)", epv, n_events, p),
-                    detail = .("Excellent EPV ratio. Reliable coefficient estimates expected.")
+                    detail = .("Higher event information per encoded candidate column. This descriptive ratio is not a sample-size guarantee and does not establish stable selection.")
                 )
-            } else if (epv >= 2) {
+            } else if (epv >= 5) {
                 checks$epv <- list(
                     color = "yellow", label = .("Events-Per-Variable"),
                     value = sprintf("%.1f (nEvents=%d, p=%d)", epv, n_events, p),
-                    detail = .("Adequate for LASSO (which handles low EPV better than standard Cox), but interpret with caution.")
+                    detail = .("Limited event information per encoded candidate column. Penalization enables fitting but does not make selection or performance reliable.")
                 )
             } else {
                 checks$epv <- list(
                     color = "red", label = .("Events-Per-Variable"),
                     value = sprintf("%.1f (nEvents=%d, p=%d)", epv, n_events, p),
-                    detail = .("Very low EPV. Results may be unreliable even with LASSO regularization. Consider reducing variables or collecting more data.")
+                    detail = .("Very low event information per encoded candidate column. Expect unstable selection and optimistic apparent performance; consider reducing prespecified candidates or collecting more outcome information.")
                 )
             }
 
@@ -1760,7 +1608,7 @@ lassocoxClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                 checks$regularization <- list(
                     color = "green", label = .("Regularization Need"),
                     value = sprintf("p=%d, n=%d (ratio=%.2f)", p, n, p / n),
-                    detail = .("High-dimensional setting. LASSO regularization is strongly indicated.")
+                    detail = .("High-dimensional setting where an unpenalized full Cox model is unlikely to be stable. Penalization is appropriate, but rigorous internal validation remains necessary.")
                 )
             } else if (p <= 5 && epv >= 30) {
                 checks$regularization <- list(
@@ -1778,50 +1626,37 @@ lassocoxClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                 checks$regularization <- list(
                     color = "green", label = .("Regularization Need"),
                     value = sprintf("p=%d, n=%d", p, n),
-                    detail = .("LASSO regularization is appropriate for this data dimension.")
+                    detail = .("Penalized regression is a reasonable candidate approach for this data dimension; this check does not establish sample-size adequacy.")
                 )
             }
 
             # - Check 3: Sample Size --
-            if (n >= 100) {
-                checks$sample_size <- list(
-                    color = "green", label = .("Sample Size"),
-                    value = sprintf("n=%d", n),
-                    detail = .("Adequate sample size for penalized regression.")
-                )
-            } else if (n >= 20) {
-                checks$sample_size <- list(
-                    color = "yellow", label = .("Sample Size"),
-                    value = sprintf("n=%d", n),
-                    detail = .("Small sample. Cross-validation folds may be unstable. Consider reducing the number of CV folds.")
-                )
-            } else {
-                checks$sample_size <- list(
-                    color = "red", label = .("Sample Size"),
-                    value = sprintf("n=%d", n),
-                    detail = .("Very small sample. Penalized regression results will be highly variable. Consider simpler analyses.")
-                )
-            }
+            checks$sample_size <- list(
+                color = if (n < 20 || n_events < 10) "red" else "yellow",
+                label = .("Sample Size"),
+                value = sprintf("n=%d, events=%d, p=%d", n, n_events, p),
+                detail = .("Sample-size adequacy cannot be determined from total n or a universal EPV cutoff. Use a prediction-model sample-size calculation based on outcome frequency, candidate parameters, anticipated model fit, and target optimism.")
+            )
 
             # - Check 4: Event Rate --
             if (event_rate >= 0.20 && event_rate <= 0.80) {
                 checks$event_rate <- list(
                     color = "green", label = .("Event Rate"),
                     value = sprintf("%.1f%% (%d/%d)", event_rate * 100, n_events, n),
-                    detail = .("Balanced event rate. Good for model estimation.")
+                    detail = .("Event and censoring observations are both represented; adequacy still depends on absolute counts and model complexity.")
                 )
             } else if ((event_rate >= 0.10 && event_rate < 0.20) ||
                        (event_rate > 0.80 && event_rate <= 0.90)) {
                 checks$event_rate <- list(
                     color = "yellow", label = .("Event Rate"),
                     value = sprintf("%.1f%% (%d/%d)", event_rate * 100, n_events, n),
-                    detail = .("Imbalanced event rate. Model calibration may be affected.")
+                    detail = .("Outcome imbalance may make folds and performance estimates unstable; inspect absolute event and censoring counts.")
                 )
             } else {
                 checks$event_rate <- list(
                     color = "red", label = .("Event Rate"),
                     value = sprintf("%.1f%% (%d/%d)", event_rate * 100, n_events, n),
-                    detail = .("Extreme event rate. Consider whether survival analysis is appropriate or collect longer follow-up.")
+                    detail = .("Extreme outcome imbalance provides limited information for one outcome state and may destabilize cross-validation.")
                 )
             }
 
@@ -1881,7 +1716,7 @@ lassocoxClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                         checks$collinearity <- list(
                             color = "yellow", label = .("Multicollinearity"),
                             value = sprintf("Max |r| = %.2f", max_cor),
-                            detail = paste0(.("Moderate collinearity. LASSO handles this by selecting one from correlated groups. Consider Elastic Net (Adaptive LASSO or NCVReg Cox in ClinicoPath) if you want to retain correlated predictors."), pair_text)
+                            detail = paste0(.("Moderate collinearity. LASSO may select one of several correlated columns, and that choice can be unstable. Consider Elastic Net if retaining correlated predictors is important."), pair_text)
                         )
                     } else if (max_cor < 0.99) {
                         checks$collinearity <- list(
@@ -1905,9 +1740,9 @@ lassocoxClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                 }
             }, error = function(e) {
                 checks$collinearity <<- list(
-                    color = "green", label = .("Multicollinearity"),
+                    color = "yellow", label = .("Multicollinearity"),
                     value = .("Could not compute"),
-                    detail = .("Correlation matrix could not be computed (e.g., all categorical predictors). Proceeding without this check.")
+                    detail = .("The correlation summary could not be computed. This is an unavailable diagnostic, not evidence that collinearity is absent.")
                 )
             })
 
@@ -1931,11 +1766,11 @@ lassocoxClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                 checks$data_quality <- list(
                     color = "yellow", label = .("Data Quality"),
                     value = sprintf(.("%.1f%% missing (%d rows excluded)"), pct_missing, n_missing),
-                    detail = .("Minor missingness. Complete-case analysis used. Results should be reliable if data is missing at random.")
+                    detail = .("Complete-case analysis was used. Even a small excluded fraction can bias results when missingness is informative.")
                 )
             } else {
                 issues <- character(0)
-                if (pct_missing > 5) issues <- c(issues, sprintf(.("%.1f%% missing data (%d rows excluded). Consider multiple imputation."), pct_missing, n_missing))
+                if (pct_missing > 5) issues <- c(issues, sprintf(.("%.1f%% missing data (%d rows excluded). If multiple imputation is used, estimate imputation and preprocessing separately within each resampling training split."), pct_missing, n_missing))
                 if (n_constant > 0) issues <- c(issues, sprintf(.("%d constant predictor column(s) detected."), n_constant))
                 checks$data_quality <- list(
                     color = if (pct_missing > 20) "red" else "yellow",
@@ -1946,53 +1781,64 @@ lassocoxClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             }
 
             # - Check 7: Proportional Hazards Assumption (advisory) --
-            tryCatch({
-                # Fit a simple Cox model with top predictors to check PH
-                # Use at most 5 columns to keep computation fast
-                n_check <- min(5, ncol(data$X))
-                top_cols <- order(apply(data$X, 2, function(col) {
-                    tryCatch(abs(cor(col, data$status, use = "complete.obs")), error = function(e) 0)
-                }), decreasing = TRUE)[seq_len(n_check)]
-                check_df <- as.data.frame(data$X[, top_cols, drop = FALSE])
-                check_df$.time <- data$time
-                check_df$.status <- data$status
-                # Backtick-escape user-controlled predictor names via composeTerms,
-                # and parse via jmvcore::asFormula(). Surv is globally allow-listed;
-                # drop the survival:: prefix.
-                check_formula <- jmvcore::asFormula(paste0(
-                    "Surv(.time, .status) ~ ",
-                    paste(jmvcore::composeTerms(as.list(colnames(data$X)[top_cols])), collapse = " + ")
-                ))
-                check_cox <- survival::coxph(check_formula, data = check_df)
-                ph_test <- survival::cox.zph(check_cox)
-                global_p <- ph_test$table["GLOBAL", "p"]
-
-                if (global_p >= 0.05) {
-                    checks$ph_assumption <- list(
-                        color = "green", label = .("Proportional Hazards"),
-                        value = sprintf(.("Global test p = %.3f"), global_p),
-                        detail = .("No evidence of PH violation in top predictors (Schoenfeld residuals test).")
-                    )
-                } else if (global_p >= 0.01) {
-                    checks$ph_assumption <- list(
-                        color = "yellow", label = .("Proportional Hazards"),
-                        value = sprintf(.("Global test p = %.3f"), global_p),
-                        detail = .("Possible PH violation. LASSO variable selection is still valid, but hazard ratios may vary over time. Consider time-dependent effects.")
-                    )
-                } else {
-                    checks$ph_assumption <- list(
-                        color = "yellow", label = .("Proportional Hazards"),
-                        value = sprintf(.("Global test p = %.3f"), global_p),
-                        detail = .("Evidence of PH violation. Variable selection is still meaningful, but interpret hazard ratios with caution. Consider stratified models or time-varying coefficients in downstream analysis.")
-                    )
-                }
-            }, error = function(e) {
-                checks$ph_assumption <<- list(
-                    color = "green", label = .("Proportional Hazards"),
-                    value = .("Could not test"),
-                    detail = .("PH assumption test could not be performed (e.g., insufficient data or all categorical predictors). Proceeding without this check.")
+            # cox.zph() does not accept a glmnet fit. Assess the same selected encoded
+            # columns in an unpenalized Cox refit and label the result honestly: this is
+            # an exploratory diagnostic, not valid post-selection inference on the
+            # penalized estimator.
+            if (length(results$selected_vars) == 0) {
+                checks$ph_assumption <- list(
+                    color = "yellow", label = .("Proportional Hazards"),
+                    value = .("Not assessable (empty model)"),
+                    detail = .("The selected lambda retained no predictor columns, so there is no fitted predictor effect for a Schoenfeld-residual diagnostic.")
                 )
-            })
+            } else {
+                tryCatch({
+                    ph_df <- as.data.frame(
+                        data$X[, results$selected_vars, drop = FALSE]
+                    )
+                    names(ph_df) <- paste0(".v", seq_len(ncol(ph_df)))
+                    ph_df$.time <- data$time
+                    ph_df$.status <- data$status
+
+                    ph_fit <- survival::coxph(
+                        survival::Surv(.time, .status) ~ .,
+                        data = ph_df,
+                        ties = "breslow",
+                        x = TRUE
+                    )
+                    ph_test <- survival::cox.zph(ph_fit)
+                    p_rows <- ph_test$table[, "p"]
+                    global_p <- if ("GLOBAL" %in% names(p_rows)) {
+                        unname(p_rows["GLOBAL"])
+                    } else {
+                        unname(p_rows[1])
+                    }
+                    if (length(global_p) != 1 || !is.finite(global_p)) {
+                        stop("non-finite Schoenfeld-residual test result")
+                    }
+
+                    if (global_p >= 0.05) {
+                        checks$ph_assumption <- list(
+                            color = "green", label = .("Proportional Hazards"),
+                            value = sprintf(.("Selected-refit test p = %.3f"), global_p),
+                            detail = .("No evidence of non-proportional hazards in an exploratory unpenalized refit of the selected encoded columns. Limited power and post-selection use mean that this does not prove the assumption.")
+                        )
+                    } else {
+                        checks$ph_assumption <- list(
+                            color = if (global_p < 0.01) "red" else "yellow",
+                            label = .("Proportional Hazards"),
+                            value = sprintf(.("Selected-refit test p = %.3f"), global_p),
+                            detail = .("The exploratory selected-variable refit shows evidence of non-proportional hazards. The Cox effect estimates and selection may be misspecified; investigate time-varying effects or a prespecified alternative model.")
+                        )
+                    }
+                }, error = function(e) {
+                    checks$ph_assumption <<- list(
+                        color = "yellow", label = .("Proportional Hazards"),
+                        value = .("Could not assess"),
+                        detail = .("The selected-variable Schoenfeld-residual diagnostic could not be computed. This is an unavailable diagnostic, not evidence that proportional hazards holds.")
+                    )
+                })
+            }
 
             # - Overall Verdict --
             colors <- sapply(checks, function(x) x$color)
@@ -2004,14 +1850,14 @@ lassocoxClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                 yellow_checks <- names(checks)[colors == "yellow"]
                 if (length(yellow_checks) == 1 && yellow_checks == "regularization") {
                     overall <- "green"
-                    overall_text <- .("Data is suitable for LASSO Cox regression (though standard Cox may also be appropriate).")
+                    overall_text <- .("No major concern was identified by these limited checks; standard Cox may also be appropriate.")
                 } else {
                     overall <- "yellow"
                     overall_text <- .("Data is usable but review the flagged items.")
                 }
             } else {
                 overall <- "green"
-                overall_text <- .("Data is well-suited for LASSO Cox regression.")
+                overall_text <- .("No concern was identified by these limited checks; formal sample-size planning and validation are still required.")
             }
 
             private$.generateSuitabilityHtml(checks, overall, overall_text)
@@ -2044,7 +1890,7 @@ lassocoxClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             )
 
             for (chk in checks) {
-                dot <- paste0("<span style='color: ", dot_colors[[chk$color]], "; font-size: 18px;'>&#9679;</span>")
+                dot <- paste0("<span style='color: ", dot_colors[[chk$color]], "; font-size: 18px;'>\u{25CF}</span>")
                 html <- paste0(html,
                     "<tr style='border-bottom: 1px solid #dee2e6;'>",
                     "<td style='padding: 6px;'>", dot, "</td>",
@@ -2065,22 +1911,22 @@ lassocoxClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                     "<strong>", .("Recommendations:"), "</strong><ul style='margin: 6px 0;'>"
                 )
                 if (!is.null(checks$epv) && checks$epv$color == "red") {
-                    html <- paste0(html, "<li>", .("Consider Kaplan-Meier curves with log-rank test for very low EPV scenarios."), "</li>")
+                    html <- paste0(html, "<li>", .("Reduce candidate parameters using subject-matter knowledge or collect more outcome information; penalization alone cannot repair very limited information."), "</li>")
                 }
                 if (!is.null(checks$regularization) && checks$regularization$color == "yellow") {
                     html <- paste0(html, "<li>", .("Use <strong>Multivariable Survival</strong> in ClinicoPath for standard Cox regression with fewer predictors."), "</li>")
                 }
                 if (!is.null(checks$collinearity) && checks$collinearity$color %in% c("yellow", "red")) {
-                    html <- paste0(html, "<li>", .("Use <strong>Adaptive LASSO Cox</strong> or <strong>NCVReg Cox</strong> in ClinicoPath with Elastic Net regularization to retain correlated predictors."), "</li>")
+                    html <- paste0(html, "<li>", .("Consider an analysis that supports grouped or elastic-net penalties when correlated predictors should be retained together; ordinary LASSO may select only one member of a correlated set."), "</li>")
                 }
                 if (!is.null(checks$sample_size) && checks$sample_size$color == "red") {
                     html <- paste0(html, "<li>", .("With very small samples, consider univariable analyses or use <strong>Survival Analysis</strong> in ClinicoPath."), "</li>")
                 }
                 if (!is.null(checks$data_quality) && checks$data_quality$color %in% c("yellow", "red")) {
-                    html <- paste0(html, "<li>", .("Consider multiple imputation before LASSO analysis for substantial missing data."), "</li>")
+                    html <- paste0(html, "<li>", .("If using multiple imputation, repeat imputation and all preprocessing inside each resampling training split; imputing once before validation leaks information."), "</li>")
                 }
-                if (!is.null(checks$ph_assumption) && checks$ph_assumption$color == "yellow") {
-                    html <- paste0(html, "<li>", .("Proportional hazards assumption may not hold. Consider time-dependent coefficients or stratified analysis in downstream modeling."), "</li>")
+                if (!is.null(checks$ph_assumption) && checks$ph_assumption$color %in% c("yellow", "red")) {
+                    html <- paste0(html, "<li>", .("Review the proportional-hazards diagnostic. When violation is suspected, investigate time-dependent effects or a prespecified alternative survival model; when unavailable, do not assume PH holds."), "</li>")
                 }
                 html <- paste0(html, "</ul></div>")
             }
@@ -2088,7 +1934,7 @@ lassocoxClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             # Interpretation guidance (always shown)
             html <- paste0(html,
                 "<div style='margin-top: 10px; font-size: 12px; color: #6c757d;'>",
-                "<em>", .("This assessment is advisory. The analysis proceeds regardless of the verdict. Green = no concerns, Yellow = proceed with caution, Red = results may be unreliable."), "</em></div>"
+                "<em>", .("This assessment is advisory and cannot establish model adequacy. The analysis proceeds regardless of the verdict. Green = no issue detected by this limited check, Yellow = proceed with caution, Red = results may be highly unstable or misspecified."), "</em></div>"
             )
 
             self$results$suitabilityReport$setContent(html)
@@ -2098,17 +1944,17 @@ lassocoxClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             table <- self$results$modelComparison
             table$deleteRows()
 
-            # LASSO model metrics
-            lasso_cindex <- NA
-            lasso_aic <- NA
-            lasso_loglik <- NA
+            # Exploratory unpenalized refit after LASSO selection
+            selected_refit_cindex <- NA
+            selected_refit_aic <- NA
+            selected_refit_loglik <- NA
             failures <- character(0)
             tryCatch({
                 # Refit Cox model with only selected variables for AIC/loglik
                 if (length(results$selected_vars) > 0) {
                     selected_X <- as.data.frame(results$data$X[, results$selected_vars, drop = FALSE])
                     y <- survival::Surv(results$data$time, results$data$status)
-                    lasso_cox <- survival::coxph(y ~ ., data = selected_X)
+                    selected_refit <- survival::coxph(y ~ ., data = selected_X, ties = "breslow")
                     # No reverse= here. survival::concordance() rejects that argument on a
                     # coxph object ("reverse argument is not an appropriate fit object")
                     # because concordance.coxph already applies the Cox sign convention.
@@ -2116,21 +1962,21 @@ lassocoxClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                     # first statement in the block it also took AIC() and logLik() with it,
                     # and the empty handler below turned all six cells of this table into a
                     # permanent NA under a note describing numbers that were never computed.
-                    lasso_cindex_result <- survival::concordance(lasso_cox)
-                    lasso_cindex <- lasso_cindex_result$concordance
-                    lasso_aic <- AIC(lasso_cox)
-                    lasso_loglik <- as.numeric(logLik(lasso_cox))
+                    selected_refit_cindex_result <- survival::concordance(selected_refit)
+                    selected_refit_cindex <- selected_refit_cindex_result$concordance
+                    selected_refit_aic <- stats::AIC(selected_refit)
+                    selected_refit_loglik <- as.numeric(stats::logLik(selected_refit))
                 }
             }, error = function(e) {
                 failures <<- c(failures, sprintf("post-LASSO Cox refit: %s", conditionMessage(e)))
             })
 
             table$addRow(rowKey = 1, values = list(
-                model_type = .("Post-LASSO Standard Cox (Selected Variables)"),
+                model_type = .("Unpenalized refit after LASSO selection"),
                 n_variables = length(results$selected_vars),
-                cindex = lasso_cindex,
-                aic = lasso_aic,
-                log_likelihood = lasso_loglik
+                cindex = selected_refit_cindex,
+                aic = selected_refit_aic,
+                log_likelihood = selected_refit_loglik
             ))
 
             # Standard Cox with all variables
@@ -2140,11 +1986,11 @@ lassocoxClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             tryCatch({
                 y <- survival::Surv(results$data$time, results$data$status)
                 selected_data <- as.data.frame(results$data$X)
-                std_cox <- survival::coxph(y ~ ., data = selected_data)
+                std_cox <- survival::coxph(y ~ ., data = selected_data, ties = "breslow")
                 std_cindex_result <- survival::concordance(std_cox)
                 std_cindex <- std_cindex_result$concordance
-                std_aic <- AIC(std_cox)
-                std_loglik <- as.numeric(logLik(std_cox))
+                std_aic <- stats::AIC(std_cox)
+                std_loglik <- as.numeric(stats::logLik(std_cox))
             }, error = function(e) {
                 # Standard Cox legitimately fails when p is large relative to n - say so
                 # rather than presenting an empty row as though it were a result.
@@ -2161,7 +2007,7 @@ lassocoxClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
 
             table$setNote(
                 "comparison_note",
-                .("C-index values in this table are from the corresponding unpenalized Cox models for comparability. Apparent penalized-model C-index is reported in Model Performance.")
+                .("Both rows are unpenalized Cox fits on the same development data. The first is fitted only after those columns were selected by LASSO; it is not the penalized model. C-index, log-likelihood, and AIC are apparent and selection-biased. In particular, the AIC values must not be used as a formal model-selection comparison because the candidate model was chosen from these same data.")
             )
 
             if (length(failures) > 0) {
@@ -2181,11 +2027,10 @@ lassocoxClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             n_selected <- length(results$selected_vars)
             n_obs <- results$data$n
             n_events <- results$data$n_events
-            # The rule that produced the fitted model, not the one requested.
             lambda_method <- if (!is.null(results$lambda_rule_used)) results$lambda_rule_used
                              else self$options$lambda
-            lambda_fallback_note <- if (isTRUE(results$lambda_fallback))
-                .("The 1-SE rule you selected retained no variables, so lambda.min was used instead.")
+            empty_model_note <- if (n_selected == 0)
+                .("The selected rule retained no predictor columns; this valid empty model was preserved.")
             else ""
 
             lambda_val <- results$lambda_optimal
@@ -2199,36 +2044,17 @@ lassocoxClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                 var_list <- .("none")
             }
 
-            # C-index text
+            # Apparent C-index point estimate only. Its usual model-conditional SE
+            # does not include preprocessing, tuning, or variable selection.
             cindex_text <- if (!is.na(metrics$cindex)) {
-                ci_lo <- metrics$cindex - 1.96 * metrics$cindex_se
-                ci_hi <- metrics$cindex + 1.96 * metrics$cindex_se
-                if (!is.na(metrics$cindex_se)) {
-                    sprintf("%.3f (95%% CI: %.3f-%.3f)", metrics$cindex, max(0, ci_lo), min(1, ci_hi))
-                } else {
-                    sprintf("%.3f", metrics$cindex)
-                }
+                sprintf("%.3f", metrics$cindex)
             } else {
                 .("not available")
             }
 
-            # HR text
-            hr_text <- ""
-            if (!is.null(metrics$hazard_ratio) && !is.na(metrics$hazard_ratio)) {
-                if (!is.na(metrics$hr_ci_lower) && !is.na(metrics$hr_ci_upper)) {
-                    hr_text <- sprintf(
-                        .("The hazard ratio for high- versus low-risk group was %.2f (95%% CI: %.2f-%.2f, log-rank p %s)."),
-                        metrics$hazard_ratio, metrics$hr_ci_lower, metrics$hr_ci_upper,
-                        if (!is.null(metrics$logrank_p) && !is.na(metrics$logrank_p)) {
-                            if (metrics$logrank_p < 0.001) "< 0.001" else sprintf("= %.3f", metrics$logrank_p)
-                        } else { .("not available") }
-                    )
-                }
-            }
-
             # Standardization note
             scale_note <- if (self$options$standardize) {
-                .("Coefficients are on the standardized scale (per 1-SD change).")
+                .("Internal standardization was used for penalized fitting; glmnet back-transforms displayed coefficients to the original design-column scale.")
             } else {
                 .("Coefficients are on the original variable scale.")
             }
@@ -2243,12 +2069,11 @@ lassocoxClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                     .("The model selected {nSelected} of {nTotal} variables: {varList}."),
                     nSelected = n_selected, nTotal = n_total, varList = var_list), "</p>",
                 "<p>", jmvcore::format(
-                    .("The apparent C-index was {cindex}, indicating {interp}."),
-                    cindex = cindex_text, interp = tolower(private$.interpretCindex(metrics$cindex))), " ",
-                if (nzchar(hr_text)) hr_text else "",
-                if (nzchar(lambda_fallback_note)) paste0(" ", lambda_fallback_note) else "", "</p>",
+                    .("The apparent development-sample C-index was {cindex}."),
+                    cindex = cindex_text), " ",
+                if (nzchar(empty_model_note)) paste0(" ", empty_model_note) else "", "</p>",
                 "<p><em>", scale_note, " ",
-                .("All performance metrics are apparent (training) values; external validation is recommended before clinical use."), "</em></p>",
+                .("This output is for model development only. Use bootstrap optimism correction or nested cross-validation that repeats preprocessing and tuning, followed by external validation, before considering clinical use."), "</em></p>",
                 "</div>"
             )
 

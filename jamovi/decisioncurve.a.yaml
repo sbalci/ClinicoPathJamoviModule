@@ -11,7 +11,9 @@ description:
     main: >
         Decision Curve Analysis for evaluating the clinical utility of prediction models
         and diagnostic tests. Calculates net benefit across threshold probabilities to
-        determine if using a model provides more benefit than default strategies.
+        determine if using a model provides more benefit than default strategies. Inputs must
+        be probabilities for a clearly defined binary outcome and prediction horizon;
+        calibration must be assessed separately, and this analysis does not handle censoring.
     # R:
     #     dontrun: true
     #     usage: |
@@ -51,12 +53,14 @@ options:
       permitted: [ numeric ]
       description:
           R: >
-            Variables holding predicted probabilities between 0 and 1 (inclusive) - one column per model.
-            These must be CALIBRATED probabilities, not logits, linear predictors or raw
-            risk scores; the analysis rejects values outside the inclusive 0-to-1 range rather than rescaling
-            them, because rescaling would destroy the correspondence between the threshold
-            probability and its clinical meaning. Factors were previously permitted here
-            and crashed the analysis with a raw R error.
+            Variables holding predicted probabilities between 0 and 1 (inclusive), one column
+            per model. They must refer to the outcome and prediction horizon being evaluated,
+            not logits, linear predictors or raw risk scores. The analysis rejects values
+            outside 0 to 1 rather than rescaling them because rescaling would destroy the
+            clinical meaning of the threshold. Being within 0 to 1 does not prove calibration;
+            assess calibration separately in the target population. For time-to-event
+            predictions, use a binary fixed-horizon outcome with appropriate outcome
+            ascertainment because censoring is not handled by this function.
 
     - name: modelNames
       title: Model Names
@@ -74,13 +78,15 @@ options:
         - name: auto
           title: Automatic (0.01 to 0.99)
         - name: clinical
-          title: Clinical range (0.05 to 0.50)
+          title: Focused range (0.05 to 0.50; not a clinical recommendation)
         - name: custom
           title: Custom range
       default: clinical
       description:
           R: >
-            Range of threshold probabilities to evaluate.
+            Range of threshold probabilities to evaluate. Select the range from the actual
+            clinical action and the relative consequences of missed cases and unnecessary
+            interventions; the presets are computational conveniences, not recommendations.
 
     - name: thresholdMin
       title: Minimum Threshold
@@ -196,22 +202,24 @@ options:
             Calculate clinical impact metrics (number needed to screen, etc.).
 
     - name: populationSize
-      title: Population Size for Clinical Impact
+      title: Population Size for Projections
       type: Number
       default: 1000
       min: 100
       max: 1000000
       description:
           R: >
-            Population size for calculating clinical impact metrics.
+            Population size used to project clinical impact, resource use and exploratory
+            monetary payoff from the complete-case cohort proportions.
 
     - name: showInterventionAvoided
-      title: Show Interventions Avoided
+      title: Net Interventions Avoided
       type: Bool
       default: false
       description:
           R: >
-            Show how many unnecessary interventions are avoided compared to treat-all.
+            Display the net reduction in interventions compared with treat-all, derived from
+            the net-benefit difference after accounting for the threshold odds.
 
     - name: confidenceIntervals
       title: Bootstrap Confidence Intervals
@@ -219,7 +227,8 @@ options:
       default: false
       description:
           R: >
-            Calculate bootstrap confidence intervals for net benefit curves.
+            Calculate pointwise percentile-bootstrap confidence intervals for net benefit at
+            each threshold. These are not simultaneous confidence bands across the curve.
 
     - name: bootReps
       title: Bootstrap Replications
@@ -259,12 +268,10 @@ options:
       default: false
       description:
           R: >
-            Report, for each model, the range of threshold probabilities over which its
-            net benefit exceeds both treat-all and treat-none. Replaces the former
-            showOptimalThreshold option: net benefit decreases monotonically in the
-            threshold, so a maximum-net-benefit "optimal threshold" is always the lowest
-            threshold examined and can rank models incorrectly. Threshold probability is
-            elicited from clinical judgement, not estimated from the data.
+            Report, for each model, the range of threshold probabilities over which its net
+            benefit exceeds both treat-all and treat-none. The range is descriptive and may
+            contain separated stretches. Threshold probability should be elicited from the
+            clinical trade-off, not optimized on the same data.
 
     - name: compareModels
       title: Model Comparison Statistics
@@ -272,7 +279,9 @@ options:
       default: false
       description:
           R: >
-            Calculate statistical tests for comparing model performance.
+            Provide exploratory pairwise bootstrap comparisons of average net benefit across
+            the selected range. The p-values are approximate and should not replace comparison
+            at prespecified clinically relevant thresholds or independent validation.
 
     - name: weightedAUC
       title: Average Net Benefit Over the Threshold Range
@@ -286,7 +295,8 @@ options:
             UNWEIGHTED: every threshold in the range counts equally. The value therefore
             depends entirely on the threshold range chosen above (on one example dataset it
             moved from 0.309 to 0.163 as the range widened from 5-20% to 1-99%), so always
-            report the range alongside it.
+            report the range alongside it. Curves may cross, so this descriptive average does
+            not identify a universally best model.
 
     - name: clinicalDecisionRule
       title: Clinical Decision Rule Integration
@@ -333,8 +343,8 @@ options:
       default: false
       description:
           R: >
-            Display clinical impact plot showing number of true positives and false positives
-            per population unit across threshold probabilities.
+            Display projected true positives and false positives for the selected population
+            size at the selected threshold probabilities.
 
     - name: showNetBenefitCI
       title: Show Net Benefit Confidence Intervals
@@ -342,55 +352,62 @@ options:
       default: false
       description:
           R: >
-            Display confidence intervals around net benefit curves in the decision curve plot.
+            Display pointwise percentile-bootstrap confidence intervals around net benefit
+            curves. The ribbons are not simultaneous confidence bands.
 
     - name: costBenefitAnalysis
-      title: Cost-Benefit Analysis
+      title: Exploratory Monetary Payoff
       type: Bool
       default: false
       description:
           R: >
-            Perform cost-benefit analysis incorporating costs of testing, treatment, and outcomes.
+            Project a simple exploratory monetary payoff using user-assigned values in one
+            common currency. This is not an ICER, QALY, cost-effectiveness or formal
+            net-monetary-benefit analysis.
 
     - name: testCost
-      title: Cost of Test/Screening
+      title: Monetary Cost per Test/Screening
       type: Number
       default: 100
       min: 0
       max: 1000000
       description:
           R: >
-            Cost per test or screening procedure (in currency units).
+            Cost per test or screening procedure in the same currency and time frame as all
+            other payoff inputs.
 
     - name: treatmentCost
-      title: Cost of Treatment
+      title: Monetary Cost per Treatment
       type: Number
       default: 1000
       min: 0
       max: 1000000
       description:
           R: >
-            Cost of treatment or intervention (in currency units).
+            Cost of treatment or intervention in the same currency and time frame as all other
+            payoff inputs.
 
     - name: benefitCorrectTreatment
-      title: Benefit of Correct Treatment
+      title: Monetary Value Assigned to a True Positive
       type: Number
       default: 10000
       min: 0
       max: 10000000
       description:
           R: >
-            Monetary benefit or QALY-equivalent value of correctly treating a true positive.
+            Monetary value assigned to correctly treating a true positive, in the same
+            currency and time frame as every other payoff input. Do not enter QALYs.
 
     - name: harmFalseTreatment
-      title: Harm of False Treatment
+      title: Monetary Harm Assigned to a False Positive
       type: Number
       default: 500
       min: 0
       max: 1000000
       description:
           R: >
-            Cost or harm of treating a false positive (unnecessary treatment).
+            Monetary value assigned to the harm of treating a false positive, in the same
+            currency and time frame as every other payoff input.
 
     - name: showStandardizedNetBenefit
       title: Standardized Net Benefit
@@ -398,7 +415,9 @@ options:
       default: false
       description:
           R: >
-            Calculate and display standardized net benefit (net benefit per 100 patients).
+            Display standardized net benefit, defined as net benefit divided by outcome
+            prevalence. It is dimensionless and expresses net benefit relative to the maximum
+            achievable value; it is not net benefit per 100 patients.
 
     - name: multiModelComparison
       title: Enhanced Multi-Model Comparison
@@ -406,7 +425,8 @@ options:
       default: false
       description:
           R: >
-            Perform comprehensive pairwise comparisons between all models with statistical tests.
+            Perform exploratory pairwise bootstrap comparisons between all models. Inference is
+            approximate and conditional on the selected threshold range.
 
     - name: comparisonMethod
       title: Comparison Statistical Test
@@ -437,7 +457,8 @@ options:
       default: false
       description:
           R: >
-            Calculate resource utilization metrics (tests performed, treatments administered).
+            Project tests, treatments, unnecessary treatments and missed cases to the selected
+            population size.
 
     - name: showRelativeUtility
       title: Relative Utility Curve

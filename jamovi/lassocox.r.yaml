@@ -13,6 +13,10 @@ items:
           - censorLevel
           - elapsedtime
           - explanatory
+          - lambda
+          - nfolds
+          - standardize
+          - random_seed
 
     - name: suitabilityReport
       title: Data Suitability Assessment
@@ -25,6 +29,10 @@ items:
           - elapsedtime
           - explanatory
           - suitabilityCheck
+          - lambda
+          - nfolds
+          - standardize
+          - random_seed
 
     - name: modelSummary
       title: Model Summary
@@ -49,7 +57,7 @@ items:
           - random_seed
 
     - name: coefficients
-      title: Selected Variables
+      title: Penalized Coefficients at Selected Lambda
       type: Table
       rows: 0
       columns:
@@ -57,27 +65,13 @@ items:
           title: "Variable"
           type: text
         - name: coefficient
-          title: "Coefficient"
+          title: "Penalized Coefficient"
           type: number
           format: zto
         - name: hazardRatio
-          title: "Hazard Ratio"
+          title: "Penalized Hazard Ratio"
           type: number
           format: zto
-        - name: ci_lower
-          title: "Lower"
-          type: number
-          format: zto
-          superTitle: "95% CI"
-        - name: ci_upper
-          title: "Upper"
-          type: number
-          format: zto
-          superTitle: "95% CI"
-        - name: p_value
-          title: "p"
-          type: number
-          format: zto,pvalue
         - name: importance
           title: "Importance"
           type: number
@@ -94,7 +88,7 @@ items:
           - random_seed
 
     - name: performance
-      title: Model Performance
+      title: Apparent Development Performance
       type: Table
       rows: 0
       columns:
@@ -159,7 +153,7 @@ items:
           - random_seed
 
     - name: survival_plot
-      title: Risk Group Survival Plot
+      title: Exploratory Development-Sample Risk-Group Curves
       type: Image
       renderFun: .survivalPlot
       width: 600
@@ -182,8 +176,8 @@ items:
       title: Add Risk Score to Data
       type: Output
       measureType: continuous
-      varTitle: 'Calculated Risk Score from Lasso-Cox Regression'
-      varDescription: Risk Score Based on Lasso-Cox Model
+      varTitle: 'Development-Sample Linear Predictor from LASSO Cox'
+      varDescription: Apparent linear predictor from the fitted development model; not validated for clinical use
       clearWith:
           - outcome
           - outcomeLevel
@@ -267,7 +261,7 @@ items:
           - random_seed
 
     - name: modelComparison
-      title: LASSO vs Standard Cox Regression
+      title: Exploratory Unpenalized Refit Comparison
       type: Table
       visible: (showModelComparison)
       rows: 0
@@ -279,15 +273,15 @@ items:
           title: "N Variables"
           type: integer
         - name: cindex
-          title: "C-index"
+          title: "Apparent C-index"
           type: number
           format: zto
         - name: aic
-          title: "AIC"
+          title: "Apparent AIC"
           type: number
           format: zto
         - name: log_likelihood
-          title: "Log-Likelihood"
+          title: "Apparent Log-Likelihood"
           type: number
           format: zto
       clearWith:
@@ -331,4 +325,8 @@ refs:
     - glmnet
     - survival
     - survminer
+    - Simon2011Coxnet
+    - Taylor2018PostSelection
+    - Steyerberg2003Validation
+    - tripod
 ...

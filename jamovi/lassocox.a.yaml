@@ -4,12 +4,15 @@ title: Lasso-Cox Regression
 menuGroup: SurvivalT
 menuSubgroup: Penalized Cox Regression
 menuTitle: LASSO Cox
-menuSubtitle: Baseline feature screening. Automatically drops irrelevant predictors.
+menuSubtitle: Sparse Cox model development with cross-validated L1 penalization.
 version: '0.0.3'
 jas: '1.2'
 
 description:
-    main: Performs Lasso-penalized Cox regression for variable selection in survival analysis.
+    main: >
+        Fits a cross-validated LASSO-penalized Cox model for exploratory model
+        development. Apparent performance requires internal and external validation
+        before clinical use.
     # R:
     #     dontrun: true
     #     usage: |
@@ -73,7 +76,9 @@ options:
       description:
         R: >
           Variables to be considered for selection in the Lasso-Cox regression.
-          Constant variables are removed automatically before fitting.
+          Constant variables are removed before fitting. Categorical predictors are
+          expanded into indicator columns, which LASSO selects individually rather
+          than as a grouped factor.
       
     - name: lambda
       title: Lambda Selection Method
@@ -86,7 +91,8 @@ options:
       default: lambda.1se
       description:
         R: >
-          Method for selecting the optimal lambda parameter from cross-validation.
+          Cross-validation rule used to select lambda. A valid empty model selected
+          by the 1-SE rule is preserved and is not replaced by lambda.min.
 
     - name: nfolds
       title: Number of CV Folds
@@ -95,8 +101,9 @@ options:
       min: 3
       description:
         R: >
-          Number of folds for cross-validation. Fold count is reduced
-          automatically when sample size is limited.
+          Requested number of cross-validation folds. The count is reduced when
+          necessary so every fold contains event and censored observations; at least
+          three of each outcome state are required.
 
     - name: random_seed
       title: Random Seed
@@ -114,8 +121,11 @@ options:
       default: true
       description:
         R: >
-          Whether to standardize predictor variables before fitting. If enabled,
-          reported coefficients are on the standardized predictor scale.
+          Whether glmnet should standardize predictors internally during each model fit.
+          Cross-validation training fits therefore do not reuse full-cohort means and
+          standard deviations. Displayed coefficients are back-transformed by glmnet to
+          the original design-column scale. Factor indicators are still penalized and
+          selected separately rather than as a grouped factor.
 
     - name: suitabilityCheck
       title: Data Suitability Assessment
@@ -123,9 +133,9 @@ options:
       default: true
       description:
         R: >
-          Run a comprehensive data suitability assessment before LASSO analysis.
-          Checks sample size, events-per-variable ratio, multicollinearity,
-          and whether regularization is needed.
+          Display an advisory assessment of outcome information, model dimension,
+          missingness, collinearity, and an exploratory proportional-hazards
+          diagnostic for an unpenalized refit of the selected encoded columns.
 
     - name: cv_plot
       title: Cross-validation Plot
@@ -150,8 +160,9 @@ options:
       default: true
       description:
         R: >
-          Whether to show survival curves by risk groups. Uses `survminer`
-          if available, with a base-R fallback otherwise.
+          Whether to show exploratory survival curves after splitting the development
+          sample at its median fitted score. The split is not a validated clinical
+          cutoff and no group-comparison p-value is reported.
 
     - name: riskScore
       title: Add Risk Score to Data
@@ -168,8 +179,8 @@ options:
       default: false
       description:
         R: >
-          Display a natural-language summary paragraph of the main results,
-          suitable for copying into reports or manuscripts.
+          Display a natural-language development summary that labels discrimination
+          as apparent and states the required validation.
 
     - name: showExplanations
       title: Show Method Explanations
@@ -196,7 +207,8 @@ options:
       description:
         R: >
           Include guidance for clinical interpretation of LASSO Cox regression
-          results, risk scores, and variable selection outcomes.
+          results, emphasizing that this development analysis alone cannot support
+          patient-level decisions.
 
     - name: showVariableImportance
       title: Variable Importance Analysis
@@ -204,16 +216,17 @@ options:
       default: false
       description:
         R: >
-          Display analysis of variable importance rankings and selection
-          patterns across different lambda values.
+          Display absolute penalized coefficients and path-inclusion proportions.
+          Path inclusion is not a bootstrap selection frequency or stability measure.
 
     - name: showModelComparison
-      title: Model Comparison Analysis
+      title: Exploratory Unpenalized Refit Comparison
       type: Bool
       default: false
       description:
         R: >
-          Compare post-LASSO Cox refit (selected variables) with standard Cox
-          using all encoded predictors. Intended as an exploratory comparison.
+          Descriptively compare an unpenalized Cox refit after LASSO selection with
+          an unpenalized Cox model using all encoded predictors. All statistics are
+          apparent and selection-biased; AIC is not a formal comparison here.
 
 ...

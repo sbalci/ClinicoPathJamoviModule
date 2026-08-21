@@ -420,15 +420,15 @@ refs:
         author: Terry M Therneau
         year: 2026
         title: "survival: Survival Analysis"
-        publisher: '[R package version 3.8-6]. Retrieved from https://CRAN.R-project.org/package=survival'
+        publisher: '[R package version 3.8-9]. Retrieved from https://CRAN.R-project.org/package=survival'
         url: https://CRAN.R-project.org/package=survival
 
     survminer:
         type: 'software'
         author: Alboukadel Kassambara and Marcin Kosinski and Przemyslaw Biecek
-        year: 2019
+        year: 2026
         title: "survminer: Drawing Survival Curves using 'ggplot2'"
-        publisher: '[R package]. Retrieved from https://CRAN.R-project.org/package=survminer'
+        publisher: '[R package version 0.5.2]. Retrieved from https://CRAN.R-project.org/package=survminer'
         url: https://CRAN.R-project.org/package=survminer
 
 
@@ -1181,10 +1181,10 @@ refs:
 
     glmnet:
         type: 'software'
-        author: Jerome Friedman, Trevor Hastie, Rob Tibshirani, Balasubramanian Narasimhan, Kenneth Tay, Noah Simon
-        year: 2025
+        author: Jerome Friedman, Trevor Hastie, Rob Tibshirani, Balasubramanian Narasimhan, Kenneth Tay, Noah Simon, James Yang, Jonathan Taylor
+        year: 2026
         title: "glmnet: Lasso and Elastic-Net Regularized Generalized Linear Models"
-        publisher: '[R package version 4.1-10]. Retrieved from https://CRAN.R-project.org/package=glmnet'
+        publisher: '[R package version 5.0]. Retrieved from https://CRAN.R-project.org/package=glmnet'
         url: https://CRAN.R-project.org/package=glmnet
 
     grpreg:
@@ -3173,6 +3173,71 @@ refs:
         pages: "565-574"
         doi: 10.1177/0272989X06295361
         url: https://doi.org/10.1177/0272989X06295361
+    Vickers2019DCA:
+        type: 'article'
+        author: "Vickers, A. J., Van Calster, B., & Steyerberg, E. W."
+        year: 2019
+        title: "A simple, step-by-step guide to interpreting decision curve analysis"
+        publisher: "Diagnostic and Prognostic Research"
+        volume: 3
+        pages: "18"
+        doi: 10.1186/s41512-019-0064-7
+        url: https://doi.org/10.1186/s41512-019-0064-7
+    Kerr2016DCA:
+        type: 'article'
+        author: "Kerr, K. F., Brown, M. D., Zhu, K., & Janes, H."
+        year: 2016
+        title: "Assessing the clinical impact of risk prediction models with decision curves: guidance for correct interpretation and appropriate use"
+        publisher: "Journal of Clinical Oncology"
+        volume: 34
+        issue: 21
+        pages: "2534-2540"
+        doi: 10.1200/JCO.2015.65.5654
+        url: https://doi.org/10.1200/JCO.2015.65.5654
+    Vickers2023DCAInference:
+        type: 'article'
+        author: "Vickers, A. J., Van Calster, B., Wynants, L., & Steyerberg, E. W."
+        year: 2023
+        title: "Decision curve analysis: confidence intervals and hypothesis testing for net benefit"
+        publisher: "Diagnostic and Prognostic Research"
+        volume: 7
+        issue: 1
+        pages: "11"
+        doi: 10.1186/s41512-023-00148-y
+        url: https://doi.org/10.1186/s41512-023-00148-y
+    Simon2011Coxnet:
+        type: 'article'
+        author: "Simon, N., Friedman, J., Hastie, T., & Tibshirani, R."
+        year: 2011
+        title: "Regularization paths for Cox's proportional hazards model via coordinate descent"
+        publisher: "Journal of Statistical Software"
+        volume: 39
+        issue: 5
+        pages: "1-13"
+        doi: 10.18637/jss.v039.i05
+        url: https://doi.org/10.18637/jss.v039.i05
+    Taylor2018PostSelection:
+        type: 'article'
+        author: "Taylor, J., & Tibshirani, R."
+        year: 2018
+        title: "Post-selection inference for l1-penalized likelihood models"
+        publisher: "The Canadian Journal of Statistics"
+        volume: 46
+        issue: 1
+        pages: "41-61"
+        doi: 10.1002/cjs.11313
+        url: https://doi.org/10.1002/cjs.11313
+    Steyerberg2003Validation:
+        type: 'article'
+        author: "Steyerberg, E. W., Bleeker, S. E., Moll, H. A., Grobbee, D. E., & Moons, K. G. M."
+        year: 2003
+        title: "Internal and external validation of predictive models: a simulation study of bias and precision in small samples"
+        publisher: "Journal of Clinical Epidemiology"
+        volume: 56
+        issue: 5
+        pages: "441-447"
+        doi: 10.1016/S0895-4356(03)00047-7
+        url: https://doi.org/10.1016/S0895-4356(03)00047-7
     Steyerberg2010:
         type: 'article'
         author: "Steyerberg, E. W., Vickers, A. J., Cook, N. R., Gerds, T., Gonen, M., Obuchowski, N., Pencina, M. J., & Kattan, M. W."
@@ -3315,6 +3380,7 @@ refs:
         issue: 1
         pages: "55-63"
         doi: 10.7326/M14-0697
+        url: https://doi.org/10.7326/M14-0697
     remark:
         type: 'article'
         author: "McShane, L. M., Altman, D. G., Sauerbrei, W., Taube, S. E., Gion, M., & Clark, G. M."

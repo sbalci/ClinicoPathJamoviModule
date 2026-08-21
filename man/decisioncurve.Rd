@@ -61,17 +61,22 @@ the condition or event you want to predict.}
 positive case (presence of condition/event).}
 
 \item{models}{Variables holding predicted probabilities between 0 and 1
-(inclusive) - one column per model. These must be CALIBRATED probabilities,
-not logits, linear predictors or raw risk scores; the analysis rejects
-values outside the inclusive 0-to-1 range rather than rescaling them,
-because rescaling would destroy the correspondence between the threshold
-probability and its clinical meaning. Factors were previously permitted
-here and crashed the analysis with a raw R error.}
+(inclusive), one column per model. They must refer to the outcome and
+prediction horizon being evaluated, not logits, linear predictors or raw
+risk scores. The analysis rejects values outside 0 to 1 rather than
+rescaling them because rescaling would destroy the clinical meaning of the
+threshold. Being within 0 to 1 does not prove calibration; assess
+calibration separately in the target population. For time-to-event
+predictions, use a binary fixed-horizon outcome with appropriate outcome
+ascertainment because censoring is not handled by this function.}
 
 \item{modelNames}{Optional comma-separated list of names for the models. If
 not provided, variable names will be used.}
 
-\item{thresholdRange}{Range of threshold probabilities to evaluate.}
+\item{thresholdRange}{Range of threshold probabilities to evaluate. Select
+the range from the actual clinical action and the relative consequences of
+missed cases and unnecessary interventions; the presets are computational
+conveniences, not recommendations.}
 
 \item{thresholdMin}{Minimum threshold probability when using custom range.}
 
@@ -102,14 +107,17 @@ the plot.}
 \item{calculateClinicalImpact}{Calculate clinical impact metrics (number
 needed to screen, etc.).}
 
-\item{populationSize}{Population size for calculating clinical impact
-metrics.}
+\item{populationSize}{Population size used to project clinical impact,
+resource use and exploratory monetary payoff from the complete-case cohort
+proportions.}
 
-\item{showInterventionAvoided}{Show how many unnecessary interventions are
-avoided compared to treat-all.}
+\item{showInterventionAvoided}{Display the net reduction in interventions
+compared with treat-all, derived from the net-benefit difference after
+accounting for the threshold odds.}
 
-\item{confidenceIntervals}{Calculate bootstrap confidence intervals for net
-benefit curves.}
+\item{confidenceIntervals}{Calculate pointwise percentile-bootstrap
+confidence intervals for net benefit at each threshold. These are not
+simultaneous confidence bands across the curve.}
 
 \item{bootReps}{Number of bootstrap replications for confidence intervals.}
 
@@ -122,14 +130,14 @@ p-value on every run.}
 
 \item{showBenefitRange}{Report, for each model, the range of threshold
 probabilities over which its net benefit exceeds both treat-all and
-treat-none. Replaces the former showOptimalThreshold option: net benefit
-decreases monotonically in the threshold, so a maximum-net-benefit "optimal
-threshold" is always the lowest threshold examined and can rank models
-incorrectly. Threshold probability is elicited from clinical judgement, not
-estimated from the data.}
+treat-none. The range is descriptive and may contain separated stretches.
+Threshold probability should be elicited from the clinical trade-off, not
+optimized on the same data.}
 
-\item{compareModels}{Calculate statistical tests for comparing model
-performance.}
+\item{compareModels}{Provide exploratory pairwise bootstrap comparisons of
+average net benefit across the selected range. The p-values are approximate
+and should not replace comparison at prespecified clinically relevant
+thresholds or independent validation.}
 
 \item{weightedAUC}{Summarise each decision curve by the area under it,
 normalised by the width of the threshold range - that is, the model's
@@ -138,7 +146,8 @@ historical reasons but the average is UNWEIGHTED: every threshold in the
 range counts equally. The value therefore depends entirely on the threshold
 range chosen above (on one example dataset it moved from 0.309 to 0.163 as
 the range widened from 5-20\\% to 1-99\\%), so always report the range
-alongside it.}
+alongside it. Curves may cross, so this descriptive average does not
+identify a universally best model.}
 
 \item{clinicalDecisionRule}{Add clinical decision rule analysis and
 comparison with models.}
@@ -156,31 +165,40 @@ explicitly.}
 \item{decisionRuleLabel}{Label for the clinical decision rule in plots and
 tables.}
 
-\item{showClinicalImpactPlot}{Display clinical impact plot showing number
-of true positives and false positives per population unit across threshold
+\item{showClinicalImpactPlot}{Display projected true positives and false
+positives for the selected population size at the selected threshold
 probabilities.}
 
-\item{showNetBenefitCI}{Display confidence intervals around net benefit
-curves in the decision curve plot.}
+\item{showNetBenefitCI}{Display pointwise percentile-bootstrap confidence
+intervals around net benefit curves. The ribbons are not simultaneous
+confidence bands.}
 
-\item{costBenefitAnalysis}{Perform cost-benefit analysis incorporating
-costs of testing, treatment, and outcomes.}
+\item{costBenefitAnalysis}{Project a simple exploratory monetary payoff
+using user-assigned values in one common currency. This is not an ICER,
+QALY, cost-effectiveness or formal net-monetary-benefit analysis.}
 
-\item{testCost}{Cost per test or screening procedure (in currency units).}
+\item{testCost}{Cost per test or screening procedure in the same currency
+and time frame as all other payoff inputs.}
 
-\item{treatmentCost}{Cost of treatment or intervention (in currency units).}
+\item{treatmentCost}{Cost of treatment or intervention in the same currency
+and time frame as all other payoff inputs.}
 
-\item{benefitCorrectTreatment}{Monetary benefit or QALY-equivalent value of
-correctly treating a true positive.}
+\item{benefitCorrectTreatment}{Monetary value assigned to correctly
+treating a true positive, in the same currency and time frame as every
+other payoff input. Do not enter QALYs.}
 
-\item{harmFalseTreatment}{Cost or harm of treating a false positive
-(unnecessary treatment).}
+\item{harmFalseTreatment}{Monetary value assigned to the harm of treating a
+false positive, in the same currency and time frame as every other payoff
+input.}
 
-\item{showStandardizedNetBenefit}{Calculate and display standardized net
-benefit (net benefit per 100 patients).}
+\item{showStandardizedNetBenefit}{Display standardized net benefit, defined
+as net benefit divided by outcome prevalence. It is dimensionless and
+expresses net benefit relative to the maximum achievable value; it is not
+net benefit per 100 patients.}
 
-\item{multiModelComparison}{Perform comprehensive pairwise comparisons
-between all models with statistical tests.}
+\item{multiModelComparison}{Perform exploratory pairwise bootstrap
+comparisons between all models. Inference is approximate and conditional on
+the selected threshold range.}
 
 \item{comparisonMethod}{Statistical method for comparing decision curves
 between models. Only the case-resampling bootstrap is implemented.
@@ -191,8 +209,8 @@ the literal text "Bootstrap required" in the results table.}
 \item{showDecisionConsequences}{Show detailed table of decision
 consequences (TP, FP, TN, FN) at selected thresholds.}
 
-\item{resourceUtilization}{Calculate resource utilization metrics (tests
-performed, treatments administered).}
+\item{resourceUtilization}{Project tests, treatments, unnecessary
+treatments and missed cases to the selected population size.}
 
 \item{showRelativeUtility}{Display relative utility curve comparing each
 model to default strategies.}
@@ -208,16 +226,16 @@ A results object containing:
 \code{results$clinicalImpactTable} \tab \tab \tab \tab \tab a table \cr
 \code{results$comparisonTable} \tab \tab \tab \tab \tab a table \cr
 \code{results$weightedAUCTable} \tab \tab \tab \tab \tab a table \cr
-\code{results$dcaPlot} \tab \tab \tab \tab \tab an image \cr
-\code{results$clinicalImpactPlot} \tab \tab \tab \tab \tab Number of true/false positives per population unit \cr
+\code{results$dcaPlot} \tab \tab \tab \tab \tab Net-benefit curves with optional pointwise bootstrap intervals; ribbons are not simultaneous confidence bands \cr
+\code{results$clinicalImpactPlot} \tab \tab \tab \tab \tab Projected true and false positives for the selected population size \cr
 \code{results$interventionsAvoidedPlot} \tab \tab \tab \tab \tab an image \cr
 \code{results$summaryText} \tab \tab \tab \tab \tab a html \cr
-\code{results$costBenefitTable} \tab \tab \tab \tab \tab Cost-benefit analysis at selected thresholds \cr
+\code{results$costBenefitTable} \tab \tab \tab \tab \tab Simple monetary payoff projection under explicit assumptions; not an ICER, QALY or formal health-economic analysis \cr
 \code{results$decisionConsequencesTable} \tab \tab \tab \tab \tab Detailed consequences at selected thresholds \cr
-\code{results$modelComparisonEnhanced} \tab \tab \tab \tab \tab Pairwise statistical comparison of models \cr
-\code{results$resourceUtilizationTable} \tab \tab \tab \tab \tab Resource utilization at selected thresholds \cr
+\code{results$modelComparisonEnhanced} \tab \tab \tab \tab \tab Exploratory case-resampling comparison of average net benefit over the selected range \cr
+\code{results$resourceUtilizationTable} \tab \tab \tab \tab \tab Resource utilization projected to the selected population size \cr
 \code{results$relativeUtilityPlot} \tab \tab \tab \tab \tab Relative utility compared to default strategies \cr
-\code{results$standardizedNetBenefitPlot} \tab \tab \tab \tab \tab Net benefit per 100 patients \cr
+\code{results$standardizedNetBenefitPlot} \tab \tab \tab \tab \tab Dimensionless net benefit divided by outcome prevalence; not net benefit per 100 patients \cr
 }
 
 Tables can be converted to data frames with \code{asDF} or \code{\link{as.data.frame}}. For example:
@@ -230,5 +248,7 @@ Tables can be converted to data frames with \code{asDF} or \code{\link{as.data.f
 Decision Curve Analysis for evaluating the clinical utility of prediction
 models and diagnostic tests. Calculates net benefit across threshold
 probabilities to determine if using a model provides more benefit than
-default strategies.
+default strategies. Inputs must be probabilities for a clearly defined
+binary outcome and prediction horizon; calibration must be assessed
+separately, and this analysis does not handle censoring.
 }

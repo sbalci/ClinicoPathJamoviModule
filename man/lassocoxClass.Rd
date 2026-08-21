@@ -8,23 +8,24 @@ An \code{R6} class generator object for the \code{lassocoxClass} backend; used i
 }
 \description{
 Performs Lasso-penalized Cox proportional hazards regression for variable selection
-in survival analysis. This function uses penalized likelihood to identify the most
-important predictors while preventing overfitting, making it ideal for high-dimensional
-survival data where the number of potential predictors may approach or exceed the sample size.
+in survival analysis. This function uses penalized likelihood to shrink coefficients and
+produce a sparse candidate model. Regularization can reduce, but does not eliminate,
+overfitting; development results require internal and external validation before clinical use.
 }
 \details{
 The Lasso-Cox regression combines the Cox proportional hazards model with L1 regularization
-(Lasso penalty) to perform automatic variable selection. The method minimizes the partial
-likelihood penalized by the L1 norm of the coefficient vector, effectively shrinking
-less important coefficients toward zero and setting some exactly to zero.
+(Lasso penalty) to estimate a sparse coefficient vector. The method minimizes the partial
+likelihood penalized by the L1 norm of the coefficient vector, shrinking coefficients
+toward zero and setting some exactly to zero. A zero coefficient is a model-selection
+result in these data and does not establish that a predictor is clinically irrelevant.
 
 Key features:
 \itemize{
 \item Automatic variable selection through L1 regularization
 \item Cross-validation for optimal tuning parameter selection
 \item Risk score calculation and stratification
-\item Comprehensive model performance evaluation
-\item Survival curve visualization by risk groups
+\item Apparent development-sample discrimination
+\item Exploratory survival-curve visualization by a development-sample median split
 }
 
 The function uses the glmnet package for efficient computation and supports both

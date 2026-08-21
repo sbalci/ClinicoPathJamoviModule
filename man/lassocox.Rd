@@ -47,36 +47,45 @@ encoding: rows whose outcome matches neither level are treated as missing
 and excluded.}
 
 \item{explanatory}{Variables to be considered for selection in the
-Lasso-Cox regression. Constant variables are removed automatically before
-fitting.}
+Lasso-Cox regression. Constant variables are removed before fitting.
+Categorical predictors are expanded into indicator columns, which LASSO
+selects individually rather than as a grouped factor.}
 
-\item{lambda}{Method for selecting the optimal lambda parameter from
-cross-validation.}
+\item{lambda}{Cross-validation rule used to select lambda. A valid empty
+model selected by the 1-SE rule is preserved and is not replaced by
+lambda.min.}
 
-\item{nfolds}{Number of folds for cross-validation. Fold count is reduced
-automatically when sample size is limited.}
+\item{nfolds}{Requested number of cross-validation folds. The count is
+reduced when necessary so every fold contains event and censored
+observations; at least three of each outcome state are required.}
 
 \item{random_seed}{Random seed for reproducible cross-validation fold
 assignment.}
 
-\item{standardize}{Whether to standardize predictor variables before
-fitting. If enabled, reported coefficients are on the standardized
-predictor scale.}
+\item{standardize}{Whether glmnet should standardize predictors internally
+during each model fit. Cross-validation training fits therefore do not
+reuse full-cohort means and standard deviations. Displayed coefficients are
+back-transformed by glmnet to the original design-column scale. Factor
+indicators are still penalized and selected separately rather than as a
+grouped factor.}
 
-\item{suitabilityCheck}{Run a comprehensive data suitability assessment
-before LASSO analysis. Checks sample size, events-per-variable ratio,
-multicollinearity, and whether regularization is needed.}
+\item{suitabilityCheck}{Display an advisory assessment of outcome
+information, model dimension, missingness, collinearity, and an exploratory
+proportional-hazards diagnostic for an unpenalized refit of the selected
+encoded columns.}
 
 \item{cv_plot}{Whether to show the cross-validation plot.}
 
 \item{coef_plot}{Whether to show a bar plot of selected-variable
 coefficients at the chosen lambda value.}
 
-\item{survival_plot}{Whether to show survival curves by risk groups. Uses
-\code{survminer} if available, with a base-R fallback otherwise.}
+\item{survival_plot}{Whether to show exploratory survival curves after
+splitting the development sample at its median fitted score. The split is
+not a validated clinical cutoff and no group-comparison p-value is
+reported.}
 
-\item{showSummary}{Display a natural-language summary paragraph of the main
-results, suitable for copying into reports or manuscripts.}
+\item{showSummary}{Display a natural-language development summary that
+labels discrimination as apparent and states the required validation.}
 
 \item{showExplanations}{Display detailed explanations of LASSO Cox
 regression methodology, including regularization concepts and
@@ -86,15 +95,17 @@ interpretation guidance.}
 regularization, cross-validation, and variable selection process.}
 
 \item{includeClinicalGuidance}{Include guidance for clinical interpretation
-of LASSO Cox regression results, risk scores, and variable selection
-outcomes.}
+of LASSO Cox regression results, emphasizing that this development analysis
+alone cannot support patient-level decisions.}
 
-\item{showVariableImportance}{Display analysis of variable importance
-rankings and selection patterns across different lambda values.}
+\item{showVariableImportance}{Display absolute penalized coefficients and
+path-inclusion proportions. Path inclusion is not a bootstrap selection
+frequency or stability measure.}
 
-\item{showModelComparison}{Compare post-LASSO Cox refit (selected
-variables) with standard Cox using all encoded predictors. Intended as an
-exploratory comparison.}
+\item{showModelComparison}{Descriptively compare an unpenalized Cox refit
+after LASSO selection with an unpenalized Cox model using all encoded
+predictors. All statistics are apparent and selection-biased; AIC is not a
+formal comparison here.}
 }
 \value{
 A results object containing:
@@ -126,6 +137,7 @@ Tables can be converted to data frames with \code{asDF} or \code{\link{as.data.f
 \code{as.data.frame(results$modelSummary)}
 }
 \description{
-Performs Lasso-penalized Cox regression for variable selection in survival
-analysis.
+Fits a cross-validated LASSO-penalized Cox model for exploratory model
+development. Apparent performance requires internal and external validation
+before clinical use.
 }

@@ -1365,10 +1365,11 @@ analyses:
     menuGroup: SurvivalT
     menuSubgroup: Penalized Cox Regression
     menuTitle: LASSO Cox
-    menuSubtitle: Baseline feature screening. Automatically drops irrelevant predictors.
-    description: >-
-      Performs Lasso-penalized Cox regression for variable selection in survival
-      analysis.
+    menuSubtitle: Sparse Cox model development with cross-validated L1 penalization.
+    description: >
+      Fits a cross-validated LASSO-penalized Cox model for exploratory model
+      development. Apparent performance requires internal and external
+      validation before clinical use.
     ribbon: analyses
     category: analyses
   - title: Enhanced ROC Analysis
@@ -1599,7 +1600,9 @@ analyses:
       Decision Curve Analysis for evaluating the clinical utility of prediction
       models and diagnostic tests. Calculates net benefit across threshold
       probabilities to determine if using a model provides more benefit than
-      default strategies.
+      default strategies. Inputs must be probabilities for a clearly defined
+      binary outcome and prediction horizon; calibration must be assessed
+      separately, and this analysis does not handle censoring.
     ribbon: analyses
     category: analyses
   - title: Prediction Model Builder

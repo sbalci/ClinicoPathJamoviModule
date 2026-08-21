@@ -232,7 +232,11 @@ lassocoxResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "ClinicoPathJamoviModule",
                     "glmnet",
                     "survival",
-                    "survminer"))
+                    "survminer",
+                    "Simon2011Coxnet",
+                    "Taylor2018PostSelection",
+                    "Steyerberg2003Validation",
+                    "tripod"))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="todo",
@@ -242,7 +246,11 @@ lassocoxResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "outcomeLevel",
                     "censorLevel",
                     "elapsedtime",
-                    "explanatory")))
+                    "explanatory",
+                    "lambda",
+                    "nfolds",
+                    "standardize",
+                    "random_seed")))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="suitabilityReport",
@@ -254,7 +262,11 @@ lassocoxResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "censorLevel",
                     "elapsedtime",
                     "explanatory",
-                    "suitabilityCheck")))
+                    "suitabilityCheck",
+                    "lambda",
+                    "nfolds",
+                    "standardize",
+                    "random_seed")))
             self$add(jmvcore::Table$new(
                 options=options,
                 name="modelSummary",
@@ -282,7 +294,7 @@ lassocoxResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             self$add(jmvcore::Table$new(
                 options=options,
                 name="coefficients",
-                title="Selected Variables",
+                title="Penalized Coefficients at Selected Lambda",
                 rows=0,
                 columns=list(
                     list(
@@ -291,31 +303,14 @@ lassocoxResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                         `type`="text"),
                     list(
                         `name`="coefficient", 
-                        `title`="Coefficient", 
+                        `title`="Penalized Coefficient", 
                         `type`="number", 
                         `format`="zto"),
                     list(
                         `name`="hazardRatio", 
-                        `title`="Hazard Ratio", 
+                        `title`="Penalized Hazard Ratio", 
                         `type`="number", 
                         `format`="zto"),
-                    list(
-                        `name`="ci_lower", 
-                        `title`="Lower", 
-                        `type`="number", 
-                        `format`="zto", 
-                        `superTitle`="95% CI"),
-                    list(
-                        `name`="ci_upper", 
-                        `title`="Upper", 
-                        `type`="number", 
-                        `format`="zto", 
-                        `superTitle`="95% CI"),
-                    list(
-                        `name`="p_value", 
-                        `title`="p", 
-                        `type`="number", 
-                        `format`="zto,pvalue"),
                     list(
                         `name`="importance", 
                         `title`="Importance", 
@@ -334,7 +329,7 @@ lassocoxResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             self$add(jmvcore::Table$new(
                 options=options,
                 name="performance",
-                title="Model Performance",
+                title="Apparent Development Performance",
                 rows=0,
                 columns=list(
                     list(
@@ -402,7 +397,7 @@ lassocoxResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             self$add(jmvcore::Image$new(
                 options=options,
                 name="survival_plot",
-                title="Risk Group Survival Plot",
+                title="Exploratory Development-Sample Risk-Group Curves",
                 renderFun=".survivalPlot",
                 width=600,
                 height=400,
@@ -424,8 +419,8 @@ lassocoxResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 name="riskScore",
                 title="Add Risk Score to Data",
                 measureType="continuous",
-                varTitle="Calculated Risk Score from Lasso-Cox Regression",
-                varDescription="Risk Score Based on Lasso-Cox Model",
+                varTitle="Development-Sample Linear Predictor from LASSO Cox",
+                varDescription="Apparent linear predictor from the fitted development model; not validated for clinical use",
                 clearWith=list(
                     "outcome",
                     "outcomeLevel",
@@ -512,7 +507,7 @@ lassocoxResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             self$add(jmvcore::Table$new(
                 options=options,
                 name="modelComparison",
-                title="LASSO vs Standard Cox Regression",
+                title="Exploratory Unpenalized Refit Comparison",
                 visible="(showModelComparison)",
                 rows=0,
                 columns=list(
@@ -526,17 +521,17 @@ lassocoxResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                         `type`="integer"),
                     list(
                         `name`="cindex", 
-                        `title`="C-index", 
+                        `title`="Apparent C-index", 
                         `type`="number", 
                         `format`="zto"),
                     list(
                         `name`="aic", 
-                        `title`="AIC", 
+                        `title`="Apparent AIC", 
                         `type`="number", 
                         `format`="zto"),
                     list(
                         `name`="log_likelihood", 
-                        `title`="Log-Likelihood", 
+                        `title`="Apparent Log-Likelihood", 
                         `type`="number", 
                         `format`="zto")),
                 clearWith=list(
@@ -598,8 +593,10 @@ lassocoxBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 
 #' Lasso-Cox Regression
 #'
-#' Performs Lasso-penalized Cox regression for variable selection in survival 
-#' analysis.
+#' Fits a cross-validated LASSO-penalized Cox model for exploratory model 
+#' development. Apparent performance requires internal and external validation 
+#' before clinical use.
+#' 
 #' @param data The data as a data frame.
 #' @param elapsedtime The numeric variable representing follow-up time until
 #'   the event or last observation.
@@ -614,40 +611,51 @@ lassocoxBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   encoding: rows whose outcome matches neither level are treated as missing
 #'   and excluded.
 #' @param explanatory Variables to be considered for selection in the
-#'   Lasso-Cox regression. Constant variables are removed automatically before
-#'   fitting.
-#' @param lambda Method for selecting the optimal lambda parameter from
-#'   cross-validation.
-#' @param nfolds Number of folds for cross-validation. Fold count is reduced
-#'   automatically when sample size is limited.
+#'   Lasso-Cox regression. Constant variables are removed before fitting.
+#'   Categorical predictors are expanded into indicator columns, which LASSO
+#'   selects individually rather than as a grouped factor.
+#' @param lambda Cross-validation rule used to select lambda. A valid empty
+#'   model selected by the 1-SE rule is preserved and is not replaced by
+#'   lambda.min.
+#' @param nfolds Requested number of cross-validation folds. The count is
+#'   reduced when necessary so every fold contains event and censored
+#'   observations; at least three of each outcome state are required.
 #' @param random_seed Random seed for reproducible cross-validation fold
 #'   assignment.
-#' @param standardize Whether to standardize predictor variables before
-#'   fitting. If enabled, reported coefficients are on the standardized
-#'   predictor scale.
-#' @param suitabilityCheck Run a comprehensive data suitability assessment
-#'   before LASSO analysis. Checks sample size, events-per-variable ratio,
-#'   multicollinearity, and whether regularization is needed.
+#' @param standardize Whether glmnet should standardize predictors internally
+#'   during each model fit. Cross-validation training fits therefore do not
+#'   reuse full-cohort means and standard deviations. Displayed coefficients are
+#'   back-transformed by glmnet to the original design-column scale. Factor
+#'   indicators are still penalized and selected separately rather than as a
+#'   grouped factor.
+#' @param suitabilityCheck Display an advisory assessment of outcome
+#'   information, model dimension, missingness, collinearity, and an exploratory
+#'   proportional-hazards diagnostic for an unpenalized refit of the selected
+#'   encoded columns.
 #' @param cv_plot Whether to show the cross-validation plot.
 #' @param coef_plot Whether to show a bar plot of selected-variable
 #'   coefficients at the chosen lambda value.
-#' @param survival_plot Whether to show survival curves by risk groups. Uses
-#'   \code{survminer} if available, with a base-R fallback otherwise.
-#' @param showSummary Display a natural-language summary paragraph of the main
-#'   results, suitable for copying into reports or manuscripts.
+#' @param survival_plot Whether to show exploratory survival curves after
+#'   splitting the development sample at its median fitted score. The split is
+#'   not a validated clinical cutoff and no group-comparison p-value is
+#'   reported.
+#' @param showSummary Display a natural-language development summary that
+#'   labels discrimination as apparent and states the required validation.
 #' @param showExplanations Display detailed explanations of LASSO Cox
 #'   regression methodology, including regularization concepts and
 #'   interpretation guidance.
 #' @param showMethodologyNotes Show comprehensive technical notes about LASSO
 #'   regularization, cross-validation, and variable selection process.
 #' @param includeClinicalGuidance Include guidance for clinical interpretation
-#'   of LASSO Cox regression results, risk scores, and variable selection
-#'   outcomes.
-#' @param showVariableImportance Display analysis of variable importance
-#'   rankings and selection patterns across different lambda values.
-#' @param showModelComparison Compare post-LASSO Cox refit (selected
-#'   variables) with standard Cox using all encoded predictors. Intended as an
-#'   exploratory comparison.
+#'   of LASSO Cox regression results, emphasizing that this development analysis
+#'   alone cannot support patient-level decisions.
+#' @param showVariableImportance Display absolute penalized coefficients and
+#'   path-inclusion proportions. Path inclusion is not a bootstrap selection
+#'   frequency or stability measure.
+#' @param showModelComparison Descriptively compare an unpenalized Cox refit
+#'   after LASSO selection with an unpenalized Cox model using all encoded
+#'   predictors. All statistics are apparent and selection-biased; AIC is not a
+#'   formal comparison here.
 #' @return A results object containing:
 #' \tabular{llllll}{
 #'   \code{results$todo} \tab \tab \tab \tab \tab a html \cr
