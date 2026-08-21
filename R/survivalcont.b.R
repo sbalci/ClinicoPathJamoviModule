@@ -1000,7 +1000,7 @@ survivalcontClass <- if (requireNamespace("jmvcore")) {
                                 "Numeric dates are not epoch seconds",
                                 paste0(
                                     "The numeric date columns hold values too small to be Unix epoch seconds ",
-                                    "(the largest is ", format(max(abs(epoch_vals)), big.mark = ","),
+                                    "(the largest is ", base::format(max(abs(epoch_vals)), big.mark = ","),
                                     ", which is January 1970). They look like day counts, as produced by an R ",
                                     "Date column or an Excel serial date. Numeric dates must be seconds since ",
                                     "1970-01-01 -- use the DateTime Converter's corrected_datetime_numeric ",

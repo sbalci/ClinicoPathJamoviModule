@@ -1,7 +1,7 @@
 #' @title Progression-Free Survival Analysis
 #' @importFrom R6 R6Class
 #' @import jmvcore
-#' @import ggplot2
+#' @importFrom ggplot2 theme_minimal
 #' @importFrom survival Surv survfit coxph
 #' @importFrom cmprsk cuminc crr
 #' @importFrom survminer ggsurvplot

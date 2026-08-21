@@ -1,7 +1,7 @@
 #' @title Publication-Ready Plots using ggpubr
 #' @importFrom R6 R6Class
 #' @import jmvcore
-#' @import ggplot2
+#' @importFrom ggplot2 stat_summary geom_vline theme_classic theme_minimal theme_light theme_dark
 #' @export
 #' @return An \code{R6} class generator object for the \code{jjpubrClass} backend; used internally by the jamovi analysis wrapper and not called directly.
 

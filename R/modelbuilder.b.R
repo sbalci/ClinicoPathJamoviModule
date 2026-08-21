@@ -452,7 +452,7 @@ modelbuilderClass <- if (requireNamespace("jmvcore")) R6::R6Class(
                 data.frame(
                     operation = operation,
                     execution_time = execution_time,
-                    timestamp = format(Sys.time(), "%Y-%m-%d %H:%M:%S"),
+                    timestamp = base::format(Sys.time(), "%Y-%m-%d %H:%M:%S"),
                     stringsAsFactors = FALSE
                 )
             )

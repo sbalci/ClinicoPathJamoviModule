@@ -1,9 +1,7 @@
 #' @title Weighted Cox Regression  
 #' @importFrom R6 R6Class
 #' @import jmvcore
-#' @import survival
-#' @import ggplot2
-#' @rawNamespace import(dplyr, except = c(as_data_frame, groups, select, union))
+#' @importFrom survival Surv strata
 #' @export
 #' @return An \code{R6} class generator object for the \code{coxphwClass} backend; used internally by the jamovi analysis wrapper and not called directly.
 

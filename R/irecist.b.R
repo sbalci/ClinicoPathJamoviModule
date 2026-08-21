@@ -1,8 +1,10 @@
 #' @title iRECIST Analysis
 #' @importFrom R6 R6Class
 #' @import jmvcore
-#' @import ggplot2
-#' @importFrom dplyr mutate filter group_by arrange summarise n ungroup lead lag left_join group_modify transmute bind_rows
+#' @importFrom ggplot2 ggplot aes geom_bar geom_hline scale_fill_manual labs theme_minimal theme
+#' @importFrom ggplot2 element_blank geom_segment geom_point geom_line geom_histogram
+#' @importFrom dplyr mutate filter group_by arrange summarise n ungroup lead lag left_join
+#' @importFrom dplyr group_modify transmute bind_rows
 #' @importFrom tidyr pivot_longer
 #' @importFrom stats binom.test
 #' @export

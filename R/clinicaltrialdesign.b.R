@@ -1,7 +1,6 @@
 # This file is a generated template, your changes will not be overwritten
 
 #' @import jmvcore
-#' @import R6
 #' @importFrom stats power.t.test power.prop.test pnorm qnorm
 #' @importFrom pwr pwr.t.test pwr.anova.test pwr.chisq.test pwr.r.test pwr.2p.test pwr.p.test
 #' @export

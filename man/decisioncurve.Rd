@@ -60,13 +60,13 @@ the condition or event you want to predict.}
 \item{outcomePositive}{Which level of the outcome variable represents the
 positive case (presence of condition/event).}
 
-\item{models}{Variables holding predicted probabilities in \link{0, 1} - one
-column per model. These must be CALIBRATED probabilities, not logits,
-linear predictors or raw risk scores; the analysis rejects values outside
-\link{0, 1} rather than rescaling them, because rescaling would destroy the
-correspondence between the threshold probability and its clinical meaning.
-Factors were previously permitted here and crashed the analysis with a raw
-R error.}
+\item{models}{Variables holding predicted probabilities between 0 and 1
+(inclusive) - one column per model. These must be CALIBRATED probabilities,
+not logits, linear predictors or raw risk scores; the analysis rejects
+values outside the inclusive 0-to-1 range rather than rescaling them,
+because rescaling would destroy the correspondence between the threshold
+probability and its clinical meaning. Factors were previously permitted
+here and crashed the analysis with a raw R error.}
 
 \item{modelNames}{Optional comma-separated list of names for the models. If
 not provided, variable names will be used.}

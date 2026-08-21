@@ -1,7 +1,7 @@
 #' @title Parametric Frailty Models
 #' @importFrom R6 R6Class
 #' @import jmvcore
-#' @import survival
+#' @importFrom survival frailty
 #' @importFrom stats anova
 #' @export
 #' @return An \code{R6} class generator object for the \code{parametricfrailtyClass} backend; used internally by the jamovi analysis wrapper and not called directly.

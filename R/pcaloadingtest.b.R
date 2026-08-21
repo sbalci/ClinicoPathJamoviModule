@@ -1,10 +1,11 @@
 #' @title PCA Loading Significance Test
 #' @importFrom R6 R6Class
 #' @import jmvcore
-#' @import glue
-#' @import ggplot2
-#' @rawNamespace import(dplyr, except = c(as_data_frame, groups, select, union))
-#' @import tidyr
+#' @importFrom ggplot2 aes geom_col geom_errorbar scale_fill_gradient2 coord_flip theme_minimal labs
+#' @importFrom ggplot2 geom_hline geom_text ggplot geom_line geom_point scale_y_continuous
+#' @importFrom dplyr group_by mutate ungroup filter arrange slice
+#' @importFrom magrittr %>%
+#' @importFrom rlang .data
 #' @importFrom scales pvalue
 #'
 #' @return An \code{R6} class generator object for the \code{pcaloadingtestClass} backend; used internally by the jamovi analysis wrapper and not called directly.

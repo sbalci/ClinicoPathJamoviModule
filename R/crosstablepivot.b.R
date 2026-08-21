@@ -4,12 +4,10 @@
 #' while maintaining compatibility with existing crosstable functionality.
 #' @importFrom R6 R6Class
 #' @import jmvcore
-#' @import pivottabler
-#' @rawNamespace import(dplyr, except = c(as_data_frame, groups, select, union))
 #' @export
 #' @return An \code{R6} class generator object for the \code{crosstablepivotClass} backend; used internally by the jamovi analysis wrapper and not called directly.
-# TODO (cleanup): replace whole-namespace `@import pivottabler` / `@import dplyr` with `@importFrom`
-#   for the specific functions actually used (R CMD check prefers narrow imports).
+# The unfinished pivot-table path below uses qualified calls, so it does not require
+# package-wide namespace imports.
 
 crosstablepivotClass <- if (requireNamespace('jmvcore')) R6::R6Class(
     "crosstablepivotClass",

@@ -1423,7 +1423,7 @@ costeffectivenessClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6C
             for (i in seq_along(nmb_values)) {
                 text(x = (i - 0.5) * 1.2,
                      y = nmb_values[i],
-                     labels = format(round(nmb_values[i]), big.mark = ","),
+                     labels = base::format(round(nmb_values[i]), big.mark = ","),
                      pos = if (nmb_values[i] > 0) 3 else 1,
                      cex = 0.7)
             }

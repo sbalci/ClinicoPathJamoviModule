@@ -39,7 +39,7 @@
 #' @importFrom janitor clean_names
 #' @importFrom labelled set_variable_labels var_label
 #' @importFrom car vif
-#' @rawNamespace import(magrittr, except = c(extract, set_names))
+#' @importFrom magrittr %>%
 #'
 
 coxdiagnosticsClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {

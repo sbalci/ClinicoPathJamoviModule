@@ -1,9 +1,7 @@
 #' @title Rank-based AFT Estimation with GEE
 #' @importFrom R6 R6Class
 #' @import jmvcore
-#' @import survival
-#' @import ggplot2
-#' @rawNamespace import(dplyr, except = c(as_data_frame, groups, select, union))
+#' @importFrom survival Surv
 #' @export
 #' @return An \code{R6} class generator object for the \code{raftgeeClass} backend; used internally by the jamovi analysis wrapper and not called directly.
 

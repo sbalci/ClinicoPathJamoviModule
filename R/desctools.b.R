@@ -1,8 +1,8 @@
 #' @title Advanced Statistical Tests
 #' @importFrom R6 R6Class
 #' @import jmvcore
-#' @rawNamespace import(magrittr, except = c(extract, set_names))
-#' @importFrom DescTools CohenD HosmerLemeshowTest AndersonDarlingTest BarnardTest CochranArmitageTest JarqueBeraTest CramerVonMisesTest
+#' @importFrom DescTools CohenD HosmerLemeshowTest AndersonDarlingTest BarnardTest
+#' @importFrom DescTools CochranArmitageTest JarqueBeraTest CramerVonMisesTest
 #' @return An \code{R6} class generator object for the \code{desctoolsClass} backend; used internally by the jamovi analysis wrapper and not called directly.
 
 desctoolsClass <- if (requireNamespace("jmvcore")) {

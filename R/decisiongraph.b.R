@@ -13,8 +13,6 @@
 #' @importFrom R6 R6Class
 #' @importFrom jmvcore .
 #' @import jmvcore
-#' @import ggplot2
-#' @rawNamespace import(dplyr, except = c(as_data_frame, groups, select, union))
 # Provide a safe fallback for the translation helper used as .("text")
 # In environments where jmvcore's translator isn't available, treat it as identity
 if (!exists(".") || !is.function(get(".", inherits = TRUE))) {
@@ -1222,8 +1220,8 @@ decisiongraphClass <- if (requireNamespace("jmvcore")) {
                 results$nmb_components <- paste0(
                     "NMB = (", round(results$expectedUtility, 3),
                     " * $", base::format(wtp, big.mark = ","),
-                    ") - $", format(round(results$expectedCost, 2), big.mark = ","),
-                    " = $", format(round(results$netBenefit, 2), big.mark = ",")
+                    ") - $", base::format(round(results$expectedCost, 2), big.mark = ","),
+                    " = $", base::format(round(results$netBenefit, 2), big.mark = ",")
                 )
 
                 # Calculate incremental NMB if multiple strategies
@@ -2202,7 +2200,7 @@ decisiongraphClass <- if (requireNamespace("jmvcore")) {
                     "<div style='background-color: rgba(138, 155, 172, 0.06); padding: 10px; margin: 10px 0; border-left: 4px solid #007bff; color: inherit;'>",
                     "<h4 style='margin-top: 0;'>Key Findings</h4>",
                     "<p><strong>Optimal Strategy:</strong> ", htmltools::htmlEscape(summary$optimal_strategy), "</p>",
-                    "<p><strong>Optimal NMB:</strong> $", format(round(summary$optimal_nmb, 2), big.mark = ","), "</p>",
+                    "<p><strong>Optimal NMB:</strong> $", base::format(round(summary$optimal_nmb, 2), big.mark = ","), "</p>",
                     "<p><strong>Strategies Evaluated:</strong> ", summary$strategies_evaluated, "</p>",
                     "<p><strong>Dominated Strategies:</strong> ", summary$dominated_strategies, "</p>",
                     "</div>",
@@ -2220,8 +2218,8 @@ decisiongraphClass <- if (requireNamespace("jmvcore")) {
                         "<tr", dominance_color, ">",
                         "<td>", if (!is.null(results$nmbRank)) results$nmbRank[i] else i, "</td>",
                         "<td>", htmltools::htmlEscape(results$strategy[i]), "</td>",
-                        "<td>$", format(round(results$netBenefit[i], 2), big.mark = ","), "</td>",
-                        "<td>$", format(round(results$expectedCost[i], 2), big.mark = ","), "</td>",
+                        "<td>$", base::format(round(results$netBenefit[i], 2), big.mark = ","), "</td>",
+                        "<td>$", base::format(round(results$expectedCost[i], 2), big.mark = ","), "</td>",
                         "<td>", round(results$expectedUtility[i], 3), "</td>",
                         "<td>", results$dominance_status[i], "</td>",
                         "<td style='font-size: 0.8em;'>", htmltools::htmlEscape(results$nmb_components[i]), "</td>",
@@ -2248,7 +2246,7 @@ decisiongraphClass <- if (requireNamespace("jmvcore")) {
                             "<tr>",
                             "<td>", htmltools::htmlEscape(threshold_analysis$threshold_range[i]), "</td>",
                             "<td>", htmltools::htmlEscape(threshold_analysis$optimal_strategy[i]), "</td>",
-                            "<td>$", format(round(threshold_analysis$nmb_advantage[i], 2), big.mark = ","), "</td>",
+                            "<td>$", base::format(round(threshold_analysis$nmb_advantage[i], 2), big.mark = ","), "</td>",
                             "</tr>"
                         )
                     }
@@ -2284,7 +2282,7 @@ decisiongraphClass <- if (requireNamespace("jmvcore")) {
                 for (i in seq_len(nrow(results))) {
                     html_content <- paste0(
                         html_content,
-                        "<p><strong>", htmltools::htmlEscape(results$strategy[i]), ":</strong> $", format(round(results$max_acceptable_cost[i], 2), big.mark = ","), "</p>"
+                        "<p><strong>", htmltools::htmlEscape(results$strategy[i]), ":</strong> $", base::format(round(results$max_acceptable_cost[i], 2), big.mark = ","), "</p>"
                     )
                 }
 
@@ -2356,12 +2354,12 @@ decisiongraphClass <- if (requireNamespace("jmvcore")) {
                         "<h3>Budget Impact Analysis</h3>",
                         "<p><strong>Target Population:</strong> ", base::format(targetPop, big.mark = ","), " patients</p>",
                         "<p><strong>Market Penetration:</strong> ", round(marketPen * 100, 1), "%</p>",
-                        "<p><strong>Annual Budget Impact:</strong> $", format(round(budgetImpact, 0), big.mark = ","), "</p>",
+                        "<p><strong>Annual Budget Impact:</strong> $", base::format(round(budgetImpact, 0), big.mark = ","), "</p>",
                         "<p><strong>Cost per Patient (New Intervention):</strong> $", round(results$expectedCost[1], 2), "</p>",
                         "<p><strong>Cost per Patient (Standard Care):</strong> $", round(results$expectedCost[2], 2), "</p>",
                         "<h4>Interpretation</h4>",
                         "<p>", if (budgetImpact > 0) "The new intervention will increase" else "The new intervention will decrease",
-                        " healthcare costs by $", format(abs(round(budgetImpact, 0)), big.mark = ","),
+                        " healthcare costs by $", base::format(abs(round(budgetImpact, 0)), big.mark = ","),
                         " annually for the target population.</p>"
                     )
 
@@ -2451,7 +2449,7 @@ decisiongraphClass <- if (requireNamespace("jmvcore")) {
                 html_content <- paste0(
                     "<h3>Value of Information Analysis</h3>",
                     "<p><strong>Expected Value of Perfect Information (EVPI):</strong> $", round(evpiResults$evpi, 2), " per patient</p>",
-                    "<p><strong>Population EVPI:</strong> $", format(round(evpiResults$populationEVPI, 0), big.mark = ","), "</p>",
+                    "<p><strong>Population EVPI:</strong> $", base::format(round(evpiResults$populationEVPI, 0), big.mark = ","), "</p>",
                     "<p><strong>Cohort Size:</strong> ", base::format(self$options$cohortSize, big.mark = ","), " patients</p>",
                     "<h4>Interpretation</h4>",
                     "<p>The EVPI represents the maximum value that perfect information about all uncertain parameters would have for decision making.</p>",
@@ -3195,7 +3193,7 @@ decisiongraphClass <- if (requireNamespace("jmvcore")) {
                                 html$setContent(paste0(
                                     "<h3>Enhanced Markov Model Analysis</h3>",
                                     "<p><strong>Model Structure:</strong> ", length(markovData$uniqueStates), " states, ", markovData$numCycles, " cycles", featuresText, "</p>",
-                                    "<p><strong>Total Cost:</strong> $", format(round(markovData$totalCost, 2), big.mark = ","), "</p>",
+                                    "<p><strong>Total Cost:</strong> $", base::format(round(markovData$totalCost, 2), big.mark = ","), "</p>",
                                     "<p><strong>Total Utility:</strong> ", round(markovData$totalUtility, 3), " QALYs</p>",
                                     "<p><strong>Cycle Length:</strong> ", markovData$cycleLength, " years</p>",
                                     if (markovData$converged) "<p><strong>Status:</strong> <span style='color: green;'> Model converged</span></p>" else "<p><strong>Status:</strong> <span style='color: orange;'> Model did not fully converge</span></p>"

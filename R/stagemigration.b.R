@@ -184,7 +184,8 @@
 #' @import jmvcore
 #' @importFrom survival Surv survfit coxph concordance survdiff
 #' @importFrom survminer ggsurvplot
-#' @importFrom ggplot2 ggplot aes geom_point geom_line labs theme_minimal
+#' @importFrom ggplot2 ggplot aes geom_point geom_line geom_rug labs theme_minimal
+#' @importFrom ggplot2 coord_fixed scale_linetype_manual
 #' @importFrom dplyr mutate group_by summarize
 #' @importFrom stats chisq.test fisher.test AIC BIC
 #' @importFrom boot boot boot.ci

@@ -1,7 +1,8 @@
 #' @title Screening Program Evaluation & Performance Analysis
 #' @importFrom R6 R6Class
 #' @import jmvcore
-#' @import ggplot2
+#' @importFrom ggplot2 ggplot aes geom_col geom_errorbar labs scale_y_continuous theme_minimal theme
+#' @importFrom ggplot2 element_text
 #' @importFrom stats chisq.test fisher.test prop.test binom.test
 #' @export
 #' @return An \code{R6} class generator object for the \code{screeningevaluationClass} backend; used internally by the jamovi analysis wrapper and not called directly.

@@ -169,16 +169,16 @@ jcorrelationClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                         # Format correlation with significance flagging
                         if (self$options$flag && p_val < alpha) {
                             if (p_val < 0.001) {
-                                cor_text <- paste0(format(round(cor_val, 3), nsmall = 3), "***")
+                                cor_text <- paste0(base::format(round(cor_val, 3), nsmall = 3), "***")
                             } else if (p_val < 0.01) {
-                                cor_text <- paste0(format(round(cor_val, 3), nsmall = 3), "**")
+                                cor_text <- paste0(base::format(round(cor_val, 3), nsmall = 3), "**")
                             } else if (p_val < 0.05) {
-                                cor_text <- paste0(format(round(cor_val, 3), nsmall = 3), "*")
+                                cor_text <- paste0(base::format(round(cor_val, 3), nsmall = 3), "*")
                             } else {
-                                cor_text <- format(round(cor_val, 3), nsmall = 3)
+                                cor_text <- base::format(round(cor_val, 3), nsmall = 3)
                             }
                         } else {
-                            cor_text <- format(round(cor_val, 3), nsmall = 3)
+                            cor_text <- base::format(round(cor_val, 3), nsmall = 3)
                         }
                         
                         row_values[[vars[j]]] <- cor_text

@@ -1486,7 +1486,7 @@ advancedbarplotClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                             science_colors <- c("#3182bd", "#e6550d", "#31a354", "#756bb1", "#636363", "#969696")
                             return(plot + ggplot2::scale_fill_manual(values = science_colors))
                             # GraphPad Prism color palettes with fallbacks
-                        } else if (startsWith(palette_name, "prism_")) {
+                        } else if (base::startsWith(palette_name, "prism_")) {
                             prism_name <- gsub("prism_", "", palette_name)
                             return(private$.apply_prism_palette(plot, prism_name))
                         }

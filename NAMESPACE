@@ -533,35 +533,7 @@ export(waterfallrecist)
 export(weightedlogrank)
 export(winratio)
 export(winratioClass)
-import(R6)
-import(dplyr, except = c(as_data_frame, groups, select, union))
-import(dplyr, except = c(as_data_frame, groups, select, union))
-
-import(eurostat)
-import(flexsurv)
-import(geepack)
-import(ggfortify)
-import(ggplot2)
-import(ggrepel)
-import(giscoR)
-import(glue)
 import(jmvcore)
-import(magrittr, except = c(extract, set_names))
-import(magrittr, except = c(extract, set_names))
-
-import(mlr3)
-import(mlr3learners)
-import(mlr3pipelines)
-import(mlr3viz)
-import(moments)
-import(patchwork)
-import(pivottabler)
-import(sf)
-import(survival)
-import(survminer)
-import(tidyplots)
-import(tidyr)
-import(timereg)
 importFrom(ComplexUpset,intersection_size)
 importFrom(DataExplorer,
   create_report,
@@ -685,24 +657,30 @@ importFrom(dplyr,
   arrange,
   bind_cols,
   bind_rows,
+  c_across,
   case_when,
   count,
   desc,
   distinct,
   everything,
   filter,
+  first,
   group_by,
   group_modify,
   if_else,
   inner_join,
+  intersect,
   lag,
+  last,
   lead,
   left_join,
   mutate,
   n,
   n_distinct,
   pull,
+  rename,
   row_number,
+  setdiff,
   slice,
   slice_tail,
   summarise,
@@ -782,9 +760,13 @@ importFrom(ggmice,
 )
 importFrom(ggplot2,
   aes,
+  aes_string,
   after_stat,
   annotate,
+  arrow,
   coord_cartesian,
+  coord_equal,
+  coord_fixed,
   coord_flip,
   coord_polar,
   element_blank,
@@ -803,10 +785,15 @@ importFrom(ggplot2,
   geom_errorbarh,
   geom_histogram,
   geom_hline,
+  geom_jitter,
   geom_line,
   geom_point,
+  geom_polygon,
+  geom_raster,
   geom_rect,
   geom_ribbon,
+  geom_rug,
+  geom_segment,
   geom_smooth,
   geom_step,
   geom_text,
@@ -816,6 +803,7 @@ importFrom(ggplot2,
   ggplot,
   ggsave,
   ggtitle,
+  guide_colorbar,
   guide_legend,
   guides,
   labeller,
@@ -826,6 +814,7 @@ importFrom(ggplot2,
   position_jitter,
   position_stack,
   rel,
+  scale_alpha_identity,
   scale_color_brewer,
   scale_color_gradient2,
   scale_color_identity,
@@ -837,6 +826,7 @@ importFrom(ggplot2,
   scale_fill_manual,
   scale_fill_viridis_c,
   scale_fill_viridis_d,
+  scale_linetype_manual,
   scale_shape_manual,
   scale_size_continuous,
   scale_x_continuous,
@@ -857,7 +847,11 @@ importFrom(ggplot2,
   theme_light,
   theme_minimal,
   theme_void,
+  unit,
+  vars,
+  xlab,
   xlim,
+  ylab,
   ylim
 )
 importFrom(ggpubr,
@@ -1101,6 +1095,26 @@ importFrom(mice,
   md.pattern,
   mice
 )
+importFrom(mlr3,
+  TaskClassif,
+  as_learner,
+  lrn,
+  msr,
+  resample,
+  rsmp
+)
+importFrom(mlr3learners,
+  LearnerClassifKKNN,
+  LearnerClassifLogReg,
+  LearnerClassifNaiveBayes,
+  LearnerClassifRanger,
+  LearnerClassifSVM
+)
+importFrom(mlr3pipelines,
+  "%>>%",
+  po
+)
+importFrom(mlr3viz,autoplot)
 importFrom(moments,
   kurtosis,
   skewness
@@ -1317,6 +1331,7 @@ importFrom(survival,
   cox.zph,
   coxph,
   frailty,
+  strata,
   survdiff,
   survfit
 )

@@ -2,8 +2,6 @@
 #' @description Quality-adjusted Time Without Symptoms or Toxicity Analysis
 #' @importFrom R6 R6Class
 #' @import jmvcore
-#' @import survival
-#' @import ggplot2
 #' @importFrom dplyr mutate filter group_by summarise n
 #' @importFrom tidyr pivot_longer
 #' @importFrom stats quantile sd median

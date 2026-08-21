@@ -2,7 +2,6 @@
 #' @title Predictive Power Score Analysis
 #' @importFrom R6 R6Class
 #' @import jmvcore
-#' @import ggplot2
 #' @export
 #' @return An \code{R6} class generator object for the \code{jppsClass} backend; used internally by the jamovi analysis wrapper and not called directly.
 

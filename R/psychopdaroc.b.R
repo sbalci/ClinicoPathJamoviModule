@@ -1974,7 +1974,7 @@ psychopdaROCClass <- if (requireNamespace("jmvcore")) {
               "<i>not</i> necessarily the cutpoint that maximises the metric, and its ",
               "sensitivity and specificity can differ appreciably from the maximum. Set the ",
               "tolerance to 0 to report the maximising cutpoint itself."),
-              format(tol), format(tol),
+              base::format(tol), base::format(tol),
               tryCatch(self$options$metric, error = function(e) "metric"),
               tryCatch(self$options$break_ties, error = function(e) "average"))),
           error = function(e) NULL)

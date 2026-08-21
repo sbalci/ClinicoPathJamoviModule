@@ -3,7 +3,6 @@
 #' outlier detection, diagnostic plots, and bootstrap confidence intervals.
 #' @importFrom R6 R6Class
 #' @import jmvcore
-#' @import glue
 #' @export
 #' @noRd
 

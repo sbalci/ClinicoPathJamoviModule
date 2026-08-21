@@ -1,11 +1,12 @@
 #' @title Enhanced Clinical Classification Analysis
 #' @importFrom R6 R6Class
 #' @import jmvcore
-#' @import mlr3
-#' @import mlr3learners
-#' @import mlr3pipelines
+#' @importFrom mlr3 TaskClassif as_learner lrn msr resample rsmp
+#' @importFrom mlr3learners LearnerClassifKKNN LearnerClassifNaiveBayes LearnerClassifLogReg
+#' @importFrom mlr3learners LearnerClassifRanger LearnerClassifSVM
+#' @importFrom mlr3pipelines %>>% po
+#' @importFrom mlr3viz autoplot
 # @import mlr3extralearners
-#' @import mlr3viz
 #' @importFrom boot boot boot.ci
 #' @importFrom kknn kknn
 #' @importFrom naivebayes naive_bayes
@@ -87,7 +88,7 @@ classificationClass <- if (requireNamespace("jmvcore")) {
             },
             .run = function() {
                 # Packages (mlr3, mlr3pipelines, pROC, ggplot2, rpart.plot) are
-                # declared via @import/@importFrom and resolved through the package
+                # declared through targeted namespace imports and resolved through the package
                 # namespace - no library() attach needed here or in plot helpers.
 
                 if (length(self$options$dep) == 0 || length(self$options$indep) == 0) {

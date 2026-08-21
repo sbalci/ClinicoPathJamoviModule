@@ -6,7 +6,6 @@
 #'
 #' @importFrom R6 R6Class
 #' @import jmvcore
-#' @import ggplot2
 #' @importFrom splines ns
 #' @importFrom rms rcs
 #' @importFrom stats lm glm AIC BIC logLik quantile median

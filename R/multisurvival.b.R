@@ -7696,7 +7696,7 @@ Patients were then divided at empirical quantile cutpoints into {as.character(le
                 summary_html <- paste0(
                     "<div style='font-family: -apple-system, BlinkMacSystemFont, \"Segoe UI\", Roboto, sans-serif; line-height: 1.6; max-width: 820px;'>",
                     "<p>", sprintf(.("This nomogram is a visual calculator derived from a multivariable Cox proportional-hazards model fitted on <b>%s patients</b> with <b>%s events</b>. It turns the model into a point-scoring tool so an individual patient's risk can be read off directly."),
-                                   format(n_patients), format(n_events)), "</p>",
+                                   base::format(n_patients), base::format(n_events)), "</p>",
                     "<p><b>", .("Predictors included:"), "</b></p><ul>", pred_html, "</ul>",
                     strat_html,
                     "<p>", sprintf(.("The nomogram estimates the probability of the event within <b>%g months</b> of follow-up. Model discrimination (Harrell's C-index) is <b>%s</b>, where 0.5 is no better than chance and 1.0 is perfect separation."),

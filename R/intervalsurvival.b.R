@@ -194,7 +194,7 @@ intervalsurvivalClass <- R6::R6Class(
 
                 if (model_type == "nonparametric") {
                     private$.performNonparametricAnalysis(analysis_data, left_time, right_time, covariates)
-                } else if (startsWith(model_type, "aft_")) {
+                } else if (base::startsWith(model_type, "aft_")) {
                     private$.performAFTAnalysis(analysis_data, left_time, right_time, covariates)
                 } else if (model_type == "cox_ph") {
                     private$.performCoxAnalysis(analysis_data, left_time, right_time, covariates)

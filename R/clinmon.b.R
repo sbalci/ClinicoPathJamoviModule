@@ -1,7 +1,6 @@
 #' @title Clinical Hemodynamic Monitoring
 #' @importFrom R6 R6Class
 #' @import jmvcore
-#' @rawNamespace import(magrittr, except = c(extract, set_names))
 #' @importFrom clintools clinmon
 #' @return An \code{R6} class generator object for the \code{clinmonClass} backend; used internally by the jamovi analysis wrapper and not called directly.
 

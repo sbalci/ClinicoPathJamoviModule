@@ -2,9 +2,7 @@
 #' @title EM-Algorithm Frailty Models
 #' @importFrom R6 R6Class
 #' @import jmvcore
-#' @import survival
-#' @import ggplot2
-#' @rawNamespace import(dplyr, except = c(as_data_frame, groups, select, union))
+#' @importFrom survival Surv frailty
 #' @export
 #' @return An \code{R6} class generator object for the \code{emfrailtyClass} backend; used internally by the jamovi analysis wrapper and not called directly.
 

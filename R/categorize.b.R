@@ -576,7 +576,7 @@ categorizeClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                         "Excluded {} observation(s) ({}%) that fall outside the break points [{}, {}]: {} below and {} above. These are not counted in any category. Turn off 'Out-of-range value exclusion' to extend the outer breaks and keep every case.",
                         n_dropped,
                         round(100 * n_dropped / sum(!is.na(x)), 1),
-                        format(min(breaks)), format(max(breaks)),
+                        base::format(min(breaks)), base::format(max(breaks)),
                         below, above))
                 }
             }

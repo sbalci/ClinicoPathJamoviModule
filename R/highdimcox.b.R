@@ -385,7 +385,7 @@ highdimcoxClass <- if (requireNamespace('jmvcore', quietly=TRUE))
           for (j in seq_along(mm_names)) {
             if (mm_names[j] == safe_pv || mm_names[j] == pv) {
               display_names[j] <- pv
-            } else if (startsWith(mm_names[j], safe_pv)) {
+            } else if (base::startsWith(mm_names[j], safe_pv)) {
               # Factor dummy: e.g. "GradeLow" → "Grade: Low"
               level_part <- substring(mm_names[j], nchar(safe_pv) + 1)
               display_names[j] <- paste0(pv, ": ", level_part)

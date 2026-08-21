@@ -1,10 +1,10 @@
 #' @title Flexible Parametric Survival Models
 #' @importFrom R6 R6Class
 #' @import jmvcore
-#' @import survival
-#' @import flexsurv
-#' @import ggplot2
-#' @rawNamespace import(dplyr, except = c(as_data_frame, groups, select, union))
+#' @importFrom survival Surv
+#' @importFrom ggplot2 ggplot aes geom_line geom_ribbon labs scale_y_continuous theme_minimal theme
+#' @importFrom ggplot2 element_text geom_point geom_smooth geom_hline annotate theme_void
+#' @importFrom dplyr setdiff
 #' @importFrom stats AIC BIC nobs vcov qnorm pnorm
 #'
 #' @return An \code{R6} class generator object for the \code{flexparametricClass} backend; used internally by the jamovi analysis wrapper and not called directly.

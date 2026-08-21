@@ -573,7 +573,7 @@ sparsegrouplassoClass <- R6::R6Class(
                     # Multiple variables: find common original predictor name
                     matched_orig <- NULL
                     for (pv in original_pred_vars) {
-                        if (all(g_cols == pv | startsWith(g_cols, paste0(pv, "_")))) {
+                        if (all(g_cols == pv | base::startsWith(g_cols, paste0(pv, "_")))) {
                             matched_orig <- pv
                             break
                         }
@@ -636,7 +636,7 @@ sparsegrouplassoClass <- R6::R6Class(
             for (idx in sorted_idx) {
                 var <- orig_vars[idx]
                 # Match exact name or name followed by "_" (dummy suffix)
-                matched <- which(x_cols == var | startsWith(x_cols, paste0(var, "_")))
+                matched <- which(x_cols == var | base::startsWith(x_cols, paste0(var, "_")))
                 matched <- matched[groups[matched] == 0L]
                 if (length(matched) > 0) {
                     groups[matched] <- current_group
@@ -705,7 +705,7 @@ sparsegrouplassoClass <- R6::R6Class(
                     pv <- pred_vars[i]
                     # Match if predictor starts with pathway name (with separator)
                     # or pathway name contains predictor name
-                    if (startsWith(pv, paste0(pw, "_")) || startsWith(pv, paste0(pw, "."))) {
+                    if (base::startsWith(pv, paste0(pw, "_")) || base::startsWith(pv, paste0(pw, "."))) {
                         groups[i] <- j
                         matched <- TRUE
                         break
@@ -750,7 +750,7 @@ sparsegrouplassoClass <- R6::R6Class(
                 # Check if this column is a dummy from a factor
                 is_dummy <- FALSE
                 for (pv in pred_vars) {
-                    if (col != pv && startsWith(col, paste0(pv, "_"))) {
+                    if (col != pv && base::startsWith(col, paste0(pv, "_"))) {
                         is_dummy <- TRUE
                         break
                     }

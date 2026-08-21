@@ -1,7 +1,6 @@
 #' @title Biomarker Response Association
 #' @importFrom R6 R6Class
 #' @import jmvcore
-#' @import ggplot2
 #' @importFrom dplyr group_by summarise mutate
 #' @importFrom pROC roc auc ci.auc coords
 #' @description Analyzes and visualizes relationships between biomarker levels and treatment responses

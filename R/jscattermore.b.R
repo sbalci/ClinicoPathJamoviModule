@@ -522,7 +522,7 @@ jscattermoreClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                 "<p><strong>Rendering Performance:</strong></p>",
                 "<ul>",
                 paste0("<li>Actual rendering time: ", round(render_time, 4), " seconds</li>"),
-                paste0("<li>Points per second: ", format(round(n_points / render_time, 0), big.mark = ","), "</li>"),
+                paste0("<li>Points per second: ", base::format(round(n_points / render_time, 0), big.mark = ","), "</li>"),
                 paste0("<li>Estimated base plot() time: ", round(base_plot_est, 4), " seconds</li>"),
                 paste0("<li>Estimated ggplot2 time: ", round(ggplot_est, 4), " seconds</li>"),
                 "</ul>",

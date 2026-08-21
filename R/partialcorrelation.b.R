@@ -1,7 +1,8 @@
 #' @title Partial Correlation Analysis
 #' @importFrom R6 R6Class
 #' @import jmvcore
-#' @import ggplot2
+#' @importFrom ggplot2 ggplot aes geom_tile geom_text scale_fill_gradient2 labs theme_minimal theme
+#' @importFrom ggplot2 element_text
 #' @importFrom stats cor cor.test lm residuals complete.cases
 #' @export
 #' @return An \code{R6} class generator object for the \code{partialcorrelationClass} backend; used internally by the jamovi analysis wrapper and not called directly.

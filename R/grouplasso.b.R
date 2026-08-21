@@ -328,7 +328,7 @@ grouplassoClass <- R6::R6Class(
                 for (i in sorted_idx) {
                     var <- pred_vars[i]
                     # Exact match or match with level suffix (factor dummies)
-                    col_indices <- which(col_names == var | startsWith(col_names, paste0(var, ".")))
+                    col_indices <- which(col_names == var | base::startsWith(col_names, paste0(var, ".")))
                     # Only assign to columns not yet mapped
                     col_indices <- col_indices[assign_vec[col_indices] == 0L]
                     assign_vec[col_indices] <- i
@@ -410,7 +410,7 @@ grouplassoClass <- R6::R6Class(
                         # Try to find matching pred_var
                         matched <- FALSE
                         for (pv in pred_vars) {
-                            if (all(startsWith(g_names, pv))) {
+                            if (all(base::startsWith(g_names, pv))) {
                                 matched <- TRUE
                                 return(pv)
                             }
@@ -448,7 +448,7 @@ grouplassoClass <- R6::R6Class(
                     } else {
                         g_names <- var_names[g_idx]
                         for (pv in pred_vars) {
-                            if (all(startsWith(g_names, pv))) return(pv)
+                            if (all(base::startsWith(g_names, pv))) return(pv)
                         }
                         paste(g_names, collapse = "+")
                     }
@@ -484,7 +484,7 @@ grouplassoClass <- R6::R6Class(
                     var_name <- parts[1]
                     group_id <- suppressWarnings(as.integer(parts[2]))
                     # Match using startsWith to handle factor dummies
-                    var_idx <- which(startsWith(var_names, var_name))
+                    var_idx <- which(base::startsWith(var_names, var_name))
                     if (length(var_idx) > 0 && !is.na(group_id)) {
                         group_vector[var_idx] <- group_id
                     }

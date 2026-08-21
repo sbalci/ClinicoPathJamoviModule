@@ -1,10 +1,10 @@
 #' @title Time-Dependent Covariates & ROC Analysis
 #' @importFrom R6 R6Class
 #' @import jmvcore
-#' @import survival
-#' @import timereg
-#' @import ggplot2
-#' @rawNamespace import(dplyr, except = c(as_data_frame, groups, select, union))
+#' @importFrom survival Surv
+#' @importFrom dplyr all_of
+#' @importFrom magrittr %>%
+#' @importFrom rlang sym
 #' @return An \code{R6} class generator object for the \code{timedependentClass} backend; used internally by the jamovi analysis wrapper and not called directly.
 
 timedependentClass <- if (requireNamespace('jmvcore'))

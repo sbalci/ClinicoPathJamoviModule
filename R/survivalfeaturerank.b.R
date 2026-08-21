@@ -60,7 +60,6 @@
 #' @author ClinicoPath Development Team
 #' @importFrom R6 R6Class
 #' @import jmvcore
-#' @import survival
 #' @importFrom glue glue
 #' @return An \code{R6} class generator object for the \code{survivalfeaturerankClass} backend; used internally by the jamovi analysis wrapper and not called directly.
 

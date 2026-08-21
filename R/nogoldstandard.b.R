@@ -1413,7 +1413,7 @@ nogoldstandardClass <- if (requireNamespace("jmvcore")) {
 
                 private$.diagSuppressed <- FALSE
                 private$.diag(sprintf("Bootstrap       : %d resamples, seed %s, %d failed (%.1f%%)",
-                                      nboot, format(seed_val), error_count,
+                                      nboot, base::format(seed_val), error_count,
                                       100 * error_count / nboot))
                 if (!is.null(warm_start))
                     private$.diag("                  latent class replicates warm-started from the full-sample fit")

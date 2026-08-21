@@ -2,7 +2,7 @@
 #' @title Dynamic Coefficient Models
 #' @importFrom R6 R6Class
 #' @import jmvcore
-#' @import survival
+#' @importFrom survival Surv
 #' @importFrom stats predict fitted residuals confint
 #' @importFrom utils capture.output
 #' @export

@@ -1099,7 +1099,7 @@ lassologisticClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                     ci <- cuts[[i]]
                     if (is.null(ci) || is.na(ci$binary)) return(NA_character_)
                     if (isTRUE(ci$binary)) return(.("present"))
-                    sprintf(.("> %s"), format(round(ci$cut_raw, 3), trim = TRUE))
+                    sprintf(.("> %s"), base::format(round(ci$cut_raw, 3), trim = TRUE))
                 }, character(1), USE.NAMES = FALSE)
             },
 

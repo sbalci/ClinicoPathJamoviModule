@@ -1,7 +1,8 @@
 #' @title RECIST 1.1 Multi-Lesion Aggregation
 #' @importFrom R6 R6Class
 #' @import jmvcore
-#' @import ggplot2
+#' @importFrom ggplot2 ggplot aes geom_line geom_point labs theme_minimal theme geom_bar geom_hline
+#' @importFrom ggplot2 scale_fill_manual element_blank
 #' @importFrom dplyr mutate filter group_by arrange summarise n ungroup lead lag row_number slice
 #' @importFrom tidyr pivot_wider
 #' @importFrom stats binom.test

@@ -1,8 +1,8 @@
 #' @title Modality Comparison Analysis
 #' @importFrom R6 R6Class
 #' @import jmvcore
-#' @import ggplot2
-#' @rawNamespace import(dplyr, except = c(as_data_frame, groups, select, union))
+#' @importFrom ggplot2 ggplot aes geom_jitter geom_abline scale_color_manual labs theme_minimal
+#' @importFrom ggplot2 theme element_text annotate xlim ylim theme_void geom_col coord_flip
 #' @importFrom irr kappa2
 #' @importFrom scales percent
 #' @importFrom reshape2 melt

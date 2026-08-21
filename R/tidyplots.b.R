@@ -6,7 +6,6 @@
 #'
 #' @importFrom R6 R6Class
 #' @import jmvcore
-#' @import tidyplots
 #' @return An \code{R6} class generator object for the \code{tidyplotsClass} backend; used internally by the jamovi analysis wrapper and not called directly.
 
 tidyplotsClass <- if (requireNamespace('jmvcore')) R6::R6Class(

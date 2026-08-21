@@ -400,7 +400,7 @@ jjcorrmatClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             if (!is.na(bf) && is.na(p_value)) {
                 is_notable <- bf >= 3
                 significance <- sprintf(.("supported by a Bayes factor of %s"),
-                                        format(signif(bf, 3), scientific = bf >= 1e5))
+                                        base::format(signif(bf, 3), scientific = bf >= 1e5))
             } else if (is.na(p_value)) {
                 is_notable <- FALSE
                 significance <- .("of undetermined significance")
@@ -584,7 +584,7 @@ jjcorrmatClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     parts <- c(parts, sprintf(
                         .("<li><strong>%s</strong> (n = %s): %d of %d pairs strong (|%s| \u2265 0.5), %d meeting the significance threshold. Strongest: %s = %s (%s vs %s).</li>"),
                         htmltools::htmlEscape(as.character(lvl)),
-                        format(max(sub_res$n, na.rm = TRUE)),
+                        base::format(max(sub_res$n, na.rm = TRUE)),
                         sum(strong), nrow(sub_res),
                         private$.coefSymbol(options_data$typestatistics),
                         sum(sig),
@@ -640,10 +640,10 @@ jjcorrmatClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             sig_label <- if (is_bayes)
                 .("Pairs with at least moderate evidence (BF<sub>10</sub> \u2265 3)")
             else if (options_data$padjustmethod == "none")
-                sprintf(.("Significant correlations (unadjusted p &lt; %s)"), format(alpha))
+                sprintf(.("Significant correlations (unadjusted p &lt; %s)"), base::format(alpha))
             else
                 sprintf(.("Significant correlations (%s-adjusted p &lt; %s)"),
-                        private$.padjustLabel(options_data$padjustmethod), format(alpha))
+                        private$.padjustLabel(options_data$padjustmethod), base::format(alpha))
 
             n_label <- if (n_min == n_obs) sprintf(.("%d observations"), n_obs)
                        else if (identical(options_data$naHandling, "pairwise"))
@@ -796,7 +796,7 @@ jjcorrmatClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             private$.addWarning("WARNING", sprintf(
                 .('%d of %d rows (%s%%) were excluded because they had a missing value in at least one selected variable. %d rows were analysed.'),
                 n_dropped, private$.n_before,
-                format(round(100 * n_dropped / private$.n_before, 1)),
+                base::format(round(100 * n_dropped / private$.n_before, 1)),
                 private$.n_after))
         } else if (identical(self$options$naHandling, "pairwise") &&
                    length(private$.pair_n) > 0 &&
@@ -1024,7 +1024,7 @@ jjcorrmatClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         table$setNote("padj", sprintf(
             .("<b>p (adjusted)</b> applies the %s correction across all pairwise tests. This is the p-value the plot uses to mark cells as non-significant at %s."),
             private$.padjustLabel(options_data$padjustmethod),
-            format(options_data$siglevel)))
+            base::format(options_data$siglevel)))
     }
 },
 

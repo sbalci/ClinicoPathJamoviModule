@@ -253,7 +253,7 @@ kappaSizeFixedNClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cla
                 prev_txt,
                 "\nThey would like to know the lowest value of kappa that the study can expect to\n",
                 "rule out - the lower bound of the one-sided ",
-                format(100 * (1 - alpha), scientific = FALSE), "% confidence interval.",
+                base::format(100 * (1 - alpha), scientific = FALSE), "% confidence interval.",
                 if (length(kappaL_val) == 1 && is.finite(kappaL_val))
                     paste0("\nThe expected lower bound for kappa is ", signif(kappaL_val, 4), ".",
                            if (kappaL_val <= 0)

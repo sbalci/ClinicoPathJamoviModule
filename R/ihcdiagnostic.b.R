@@ -4,7 +4,6 @@
 #' @import jmvcore
 #' @importFrom cluster daisy pam
 #' @importFrom stats hclust cutree
-#' @import ggplot2
 
 # IHC utility functions (calculateHScore, calculateIHCDistance, ...) are
 # provided by ihc_utilities.R via the package Collate/namespace and are

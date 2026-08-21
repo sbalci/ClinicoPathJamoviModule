@@ -1,9 +1,7 @@
 #' @title Simon-Makuch Time-Dependent Survival Analysis
 #' @importFrom R6 R6Class
 #' @import jmvcore
-#' @import survival
-#' @import survminer
-#' @import ggplot2
+#' @importFrom survival Surv
 #' @importFrom dplyr mutate filter arrange group_by summarise n
 #' @importFrom tidyr pivot_longer pivot_wider
 #' @export

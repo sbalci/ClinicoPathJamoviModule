@@ -4488,7 +4488,7 @@ survivalClass <- if (requireNamespace('jmvcore'))
                             } else if (p_val < 0.001) {
                                 .("p < 0.001")
                             } else {
-                                jmvcore::format(.("p = {p}"), p = format(round(p_val, 3), nsmall = 3))
+                                jmvcore::format(.("p = {p}"), p = base::format(round(p_val, 3), nsmall = 3))
                             }
 
                             crosses_one <- !is.na(ci_lower) && !is.na(ci_upper) &&

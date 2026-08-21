@@ -742,10 +742,10 @@ benfordClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             # Add key statistics
             enhanced_text <- paste0(
                 "\nDATA SUMMARY:\n",
-                "  Total observations: ", format(length(cleaned_data), big.mark = ","), "\n",
-                "  Data range: ", format(min(cleaned_data), big.mark = ","),
-                " to ", format(max(cleaned_data), big.mark = ","), "\n",
-                "  Range ratio: ", format(round(max(cleaned_data)/min(cleaned_data), 2), big.mark = ","), "x\n",
+                "  Total observations: ", base::format(length(cleaned_data), big.mark = ","), "\n",
+                "  Data range: ", base::format(min(cleaned_data), big.mark = ","),
+                " to ", base::format(max(cleaned_data), big.mark = ","), "\n",
+                "  Range ratio: ", base::format(round(max(cleaned_data)/min(cleaned_data), 2), big.mark = ","), "x\n",
                 dist_table,
                 "\n",
                 "STATISTICAL TESTS:\n",

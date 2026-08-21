@@ -39,7 +39,7 @@
 #' @importFrom janitor clean_names
 #' @importFrom labelled set_variable_labels var_label
 #' @importFrom haven as_factor
-#' @rawNamespace import(magrittr, except = c(extract, set_names))
+#' @importFrom magrittr %>%
 basegraphicsClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
     "basegraphicsClass",
     inherit = basegraphicsBase,

@@ -177,7 +177,7 @@ jjdotplotstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             # opaque error, so guard against them explicitly here.
             conf_level <- self$options$conflevel
             if (!is.null(conf_level) && (conf_level <= 0 || conf_level >= 1)) {
-                private$.addNotice(sprintf('Confidence level must be greater than 0 and less than 1 (received %s). A typical value is 0.95.', format(conf_level)), "ERROR")
+                private$.addNotice(sprintf('Confidence level must be greater than 0 and less than 1 (received %s). A typical value is 0.95.', base::format(conf_level)), "ERROR")
                 return(FALSE)
             }
 
@@ -207,7 +207,7 @@ jjdotplotstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             if (length(dep_vals) > 0 && length(unique(dep_vals)) < 2) {
                 private$.addNotice(sprintf('"%s" takes the same value (%s) in every row, so there is no variation to compare between groups. Check that the correct variable is selected.',
                                            htmltools::htmlEscape(self$options$dep),
-                                           format(dep_vals[1])), "ERROR")
+                                           base::format(dep_vals[1])), "ERROR")
                 return(FALSE)
             }
 

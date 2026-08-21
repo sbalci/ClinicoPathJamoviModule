@@ -1,7 +1,6 @@
 #' @title Enhanced Two-Way Frequency Analysis
 #' @importFrom R6 R6Class
 #' @import jmvcore
-#' @import ggplot2
 #' @importFrom stats chisq.test fisher.test
 #' @importFrom vcd assocstats
 #' @export

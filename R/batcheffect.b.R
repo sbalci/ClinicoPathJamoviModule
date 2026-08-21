@@ -1,7 +1,6 @@
 # This file is a generated template, your changes will not be overwritten
 
 #' @import jmvcore
-#' @import R6
 #' @importFrom sva ComBat
 #' @importFrom stats prcomp var cor dist hclust cutree
 #' @importFrom utils capture.output

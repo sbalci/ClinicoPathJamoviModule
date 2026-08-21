@@ -1,7 +1,6 @@
 #' @importFrom R6 R6Class
 #' @importFrom stats quantile var dist
 #' @importFrom utils head
-#' @import ggplot2
 
 ihcimmuneClass <- R6::R6Class(
     "ihcimmuneClass",

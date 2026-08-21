@@ -1,7 +1,6 @@
 #' @title Cause-Specific Hazards Models
 #' @importFrom R6 R6Class
 #' @import jmvcore
-#' @import survival
 #' @importFrom stats anova
 #' @export
 #' @return An \code{R6} class generator object for the \code{causespecifichazardsClass} backend; used internally by the jamovi analysis wrapper and not called directly.

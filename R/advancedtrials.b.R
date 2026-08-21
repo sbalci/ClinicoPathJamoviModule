@@ -1,7 +1,7 @@
 #' @title Advanced Clinical Trial Methods
 #' @importFrom R6 R6Class
 #' @import jmvcore
-#' @import ggplot2
+#' @importFrom ggplot2 ggplot aes geom_line geom_point labs theme_minimal theme
 #' @importFrom survival Surv survfit coxph
 #' @importFrom gsDesign gsDesign sfLDOF sfHSD sfPower
 #' @importFrom dplyr mutate filter group_by summarise

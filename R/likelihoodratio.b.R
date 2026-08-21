@@ -196,7 +196,7 @@ likelihoodratioClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cla
                 rng <- range(testVar, na.rm = TRUE)
                 self$results$instructions$setContent(paste0(
                     "<p><b>Enter a cutpoint inside the range of your test variable.</b></p>",
-                    "<p>The cutpoint <b>", format(cut_value), "</b> puts every case on ",
+                    "<p>The cutpoint <b>", base::format(cut_value), "</b> puts every case on ",
                     "one side of the split, so sensitivity and specificity cannot both ",
                     "be estimated.</p>",
                     "<p><i>", htmltools::htmlEscape(self$options$testVariable), "</i> ",

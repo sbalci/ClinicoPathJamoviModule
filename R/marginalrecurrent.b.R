@@ -1,7 +1,6 @@
 #' @title Marginal Models for Recurrent Events
 #' @importFrom R6 R6Class
 #' @import jmvcore
-#' @import survival
 #' @importFrom ggplot2 ggplot aes geom_line geom_step geom_point labs theme_minimal
 #' @export
 #' @return An \code{R6} class generator object for the \code{marginalrecurrentClass} backend; used internally by the jamovi analysis wrapper and not called directly.

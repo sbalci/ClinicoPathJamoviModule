@@ -183,7 +183,7 @@ autoedaClass <- if (requireNamespace("jmvcore")) R6::R6Class("autoedaClass",
                 "<tr><td style='padding: 8px; border: 1px solid #ddd;'><strong>Continuous Columns:</strong></td><td style='padding: 8px; border: 1px solid #ddd;'>", intro_result$continuous_columns, "</td></tr>",
                 "<tr><td style='padding: 8px; border: 1px solid #ddd;'><strong>Complete Rows:</strong></td><td style='padding: 8px; border: 1px solid #ddd;'>", intro_result$complete_rows, " (", round(intro_result$complete_rows/intro_result$rows*100, 1), "%)</td></tr>",
                 "<tr><td style='padding: 8px; border: 1px solid #ddd;'><strong>Missing Values:</strong></td><td style='padding: 8px; border: 1px solid #ddd;'>", intro_result$total_missing_values, " (", round(intro_result$total_missing_values/(intro_result$rows * intro_result$columns)*100, 1), "%)</td></tr>",
-                "<tr><td style='padding: 8px; border: 1px solid #ddd;'><strong>Memory Usage:</strong></td><td style='padding: 8px; border: 1px solid #ddd;'>", format(object.size(data), units = "auto"), "</td></tr>",
+                "<tr><td style='padding: 8px; border: 1px solid #ddd;'><strong>Memory Usage:</strong></td><td style='padding: 8px; border: 1px solid #ddd;'>", base::format(object.size(data), units = "auto"), "</td></tr>",
                 "</table>",
                 "</div>"
             )

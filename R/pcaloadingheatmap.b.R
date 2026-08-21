@@ -1,10 +1,13 @@
 #' @title PCA Loading Heatmap
 #' @importFrom R6 R6Class
 #' @import jmvcore
-#' @import glue
-#' @import ggplot2
-#' @rawNamespace import(dplyr, except = c(as_data_frame, groups, select, union))
-#' @import tidyr
+#' @importFrom ggplot2 ggplot aes geom_raster scale_fill_gradient2 labs ylab xlab theme_minimal
+#' @importFrom ggplot2 geom_text geom_col coord_flip facet_grid scale_fill_manual theme geom_hline
+#' @importFrom ggplot2 ylim geom_line geom_point scale_y_continuous
+#' @importFrom tidyr pivot_longer
+#' @importFrom dplyr setdiff mutate group_by summarise n left_join ungroup
+#' @importFrom magrittr %>%
+#' @importFrom rlang .data
 #' @importFrom stats prcomp setNames
 #'
 #' @return An \code{R6} class generator object for the \code{pcaloadingheatmapClass} backend; used internally by the jamovi analysis wrapper and not called directly.

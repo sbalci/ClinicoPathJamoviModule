@@ -13,11 +13,8 @@
 #' Maps can be static or interactive with customizable styling.
 #' @importFrom R6 R6Class
 #' @import jmvcore
-#' @import eurostat
+#' @importFrom magrittr %>%
 #' @importFrom tmap tmap_mode tm_shape tm_fill tm_borders tm_layout
-#' @import sf
-#' @rawNamespace import(dplyr, except = c(as_data_frame, groups, select, union))
-#' @import giscoR
 eurostatmapClass <- if (requireNamespace('jmvcore')) R6::R6Class(
     "eurostatmapClass",
     inherit = eurostatmapBase,
@@ -151,14 +148,14 @@ eurostatmapClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     dataset = "Local Data",
                     title = "User Provided Data",
                     observations = nrow(plotData),
-                    last_update = format(Sys.Date(), "%Y-%m-%d")
+                    last_update = base::format(Sys.Date(), "%Y-%m-%d")
                 ))
             } else {
                 info_table$setRow(rowNo = 1, values = list(
                     dataset = dataset_id,
                     title = "Eurostat Dataset",
                     observations = nrow(plotData),
-                    last_update = format(Sys.Date(), "%Y-%m-%d")
+                    last_update = base::format(Sys.Date(), "%Y-%m-%d")
                 ))
             }
             

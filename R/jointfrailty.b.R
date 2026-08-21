@@ -2,8 +2,9 @@
 #' @importFrom R6 R6Class
 #' @import jmvcore
 #' @importFrom frailtypack hazard terminal
-#' @import survival
-#' @importFrom ggplot2 ggplot aes geom_line geom_step geom_point geom_histogram geom_density labs theme_minimal facet_wrap
+#' @importFrom survival Surv
+#' @importFrom ggplot2 ggplot aes geom_line geom_step geom_point geom_histogram geom_density labs
+#' @importFrom ggplot2 theme_minimal facet_wrap
 #' @export
 #' @return An \code{R6} class generator object for the \code{jointfrailtyClass} backend; used internally by the jamovi analysis wrapper and not called directly.
 

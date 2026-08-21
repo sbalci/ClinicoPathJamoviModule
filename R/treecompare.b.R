@@ -1405,7 +1405,7 @@ treecompareClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                     # directory: on shared/cloud jamovi the cwd may be read-only or shared.
                     # (No injection risk: top_algorithm is a hardcoded algorithm label, not user data.)
                     safe_name <- tolower(gsub(" ", "_", top_algorithm))
-                    filename <- paste0("best_model_", safe_name, "_", format(Sys.Date(), "%Y%m%d"), ".rds")
+                    filename <- paste0("best_model_", safe_name, "_", base::format(Sys.Date(), "%Y%m%d"), ".rds")
                     filepath <- file.path(tempdir(), filename)
 
                     tryCatch({

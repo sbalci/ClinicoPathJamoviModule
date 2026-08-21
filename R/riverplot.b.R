@@ -25,7 +25,7 @@
 #' @importFrom ggplot2 scale_fill_brewer coord_flip theme_void guides guide_legend
 #' @importFrom ggalluvial geom_alluvium geom_stratum StatStratum geom_flow stat_stratum
 #' @importFrom dplyr group_by summarise n mutate arrange filter distinct
-#' @importFrom dplyr case_when if_else left_join bind_rows across all_of
+#' @importFrom dplyr case_when if_else left_join bind_rows across all_of rename
 #' @importFrom tidyr pivot_longer pivot_wider gather spread
 #' @importFrom rlang sym syms !! !!! .data
 #' @importFrom stringr str_detect str_replace_all str_to_title str_wrap

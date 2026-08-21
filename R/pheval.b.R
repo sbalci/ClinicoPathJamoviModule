@@ -1,7 +1,7 @@
 #' @title Proportional Hazards Testing
 #' @importFrom R6 R6Class
 #' @import jmvcore
-#' @import survival
+#' @importFrom survival Surv
 #' @importFrom stats predict fitted residuals confint cor.test
 #' @importFrom utils capture.output
 #' @export

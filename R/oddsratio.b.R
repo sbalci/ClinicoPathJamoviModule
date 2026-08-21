@@ -1925,7 +1925,7 @@ oddsratioClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     else {
                         # Try to find a matching cleaned name that's a prefix
                         for (clean_name in names(name_mapping)) {
-                            if (startsWith(trimmed_name, clean_name)) {
+                            if (base::startsWith(trimmed_name, clean_name)) {
                                 # Replace the cleaned prefix with original name
                                 suffix <- substring(trimmed_name, nchar(clean_name) + 1)
                                 suffix <- trimws(gsub("^[:=]", "", suffix))

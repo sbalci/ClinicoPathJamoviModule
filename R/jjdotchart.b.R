@@ -249,8 +249,8 @@ jjdotchartClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 far <- span == 0 || min(abs(tv - rng)) > 3 * span
                 private$.addNotice(sprintf(
                     "The Reference Value (%s) lies outside the range of the group %ss (%s to %s).%s",
-                    format(tv), private$.summaryLabelLower(),
-                    format(signif(rng[1], 4)), format(signif(rng[2], 4)),
+                    base::format(tv), private$.summaryLabelLower(),
+                    base::format(signif(rng[1], 4)), base::format(signif(rng[2], 4)),
                     if (far) " That is far outside, which can make the effect size impossible to bound and leave the plot with no statistics at all - pick a value on the scale of your measurement." else ""),
                     if (far) "WARNING" else "INFO")
             }
@@ -323,7 +323,7 @@ jjdotchartClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             t$setNote("agg", sprintf(
                 "Each row is one plotted point. 'Summary' is the %s of that group's observations, which is the statistic the selected test uses, and Lower/Upper are the same %g%% interval drawn as that point's error bar on the chart. 'SD' is the standard deviation of the raw observations. 'vs Reference' is Summary minus the Reference Value (%s).",
                 private$.summaryLabelLower(), 100 * self$options$conflevel,
-                format(self$options$testvalue)))
+                base::format(self$options$testvalue)))
             # jmvcore Tables have no setRows(); clear and re-add.
             t$deleteRows()
             for (i in seq_len(nrow(tab))) {
@@ -351,7 +351,7 @@ jjdotchartClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 xintercept = o$testvalue, linetype = "dashed",
                 colour = "#b22222", linewidth = 0.7))
 
-            cap <- paste0("Dashed red line: Reference Value = ", format(o$testvalue))
+            cap <- paste0("Dashed red line: Reference Value = ", base::format(o$testvalue))
             if (isTRUE(o$centralityplotting))
                 cap <- paste0(cap, ". Solid blue line: centre of the plotted points (not the reference).")
 

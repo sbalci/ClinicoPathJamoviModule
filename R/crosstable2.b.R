@@ -28,10 +28,12 @@
 #'
 #' @importFrom R6 R6Class
 #' @import jmvcore
-#' @importFrom gtsummary tbl_summary modify_header add_n add_overall bold_labels add_p add_q bold_levels bold_p all_continuous all_categorical all_stat_cols style_pvalue as_kable_extra
+#' @importFrom gtsummary tbl_summary modify_header add_n add_overall bold_labels add_p add_q
+#' @importFrom gtsummary bold_levels bold_p all_continuous all_categorical all_stat_cols
+#' @importFrom gtsummary style_pvalue as_kable_extra
 #' @importFrom gt md
 #' @importFrom purrr partial
-#' @rawNamespace import(magrittr, except = c(extract, set_names))
+#' @importFrom magrittr %>%
 #'
 
 crosstable2Class <- if (requireNamespace('jmvcore'))

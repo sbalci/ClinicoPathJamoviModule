@@ -1,11 +1,9 @@
 #' @title Comparing Survival Outcomes
 #' @importFrom R6 R6Class
 #' @import jmvcore
-#' @rawNamespace import(magrittr, except = c(extract, set_names))
 #' @importFrom survival survdiff survfit Surv
 #' @importFrom ggplot2 ggplot aes geom_step geom_ribbon labs theme_minimal
 #' @importFrom survminer ggsurvplot
-#' @import ggfortify
 #' @return An \code{R6} class generator object for the \code{comparingSurvivalClass} backend; used internally by the jamovi analysis wrapper and not called directly.
 
 comparingSurvivalClass <- if (requireNamespace('jmvcore')) R6::R6Class(

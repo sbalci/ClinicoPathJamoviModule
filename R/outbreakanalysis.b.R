@@ -1,7 +1,8 @@
 #' @title Outbreak Analysis & Epidemiological Investigation
 #' @importFrom R6 R6Class
 #' @import jmvcore
-#' @import ggplot2
+#' @importFrom ggplot2 ggplot aes geom_histogram labs theme_minimal theme element_text geom_col
+#' @importFrom ggplot2 scale_y_continuous
 #' @importFrom stats chisq.test fisher.test prop.test binom.test t.test wilcox.test
 #' @export
 #' @return An \code{R6} class generator object for the \code{outbreakanalysisClass} backend; used internally by the jamovi analysis wrapper and not called directly.

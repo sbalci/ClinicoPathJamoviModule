@@ -229,9 +229,9 @@ recurrentsurvivalClass <- R6::R6Class(
 
                 if (model_type == "ag_model") {
                     private$.performAndersenGillAnalysis(transformed_data, covariates)
-                } else if (startsWith(model_type, "pwp_")) {
+                } else if (base::startsWith(model_type, "pwp_")) {
                     private$.performPWPAnalysis(transformed_data, covariates, model_type)
-                } else if (startsWith(model_type, "frailty_")) {
+                } else if (base::startsWith(model_type, "frailty_")) {
                     private$.performFrailtyAnalysis(transformed_data, covariates, model_type)
                 } else if (model_type == "msm_model") {
                     private$.performMultiStateAnalysis(transformed_data, covariates)

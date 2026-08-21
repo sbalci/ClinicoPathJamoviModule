@@ -1,7 +1,7 @@
 #' @title Excess Mortality Analysis
 #' @importFrom R6 R6Class
 #' @import jmvcore
-#' @import ggplot2
+#' @importFrom ggplot2 ggplot aes geom_line labs theme_minimal theme element_text geom_hline ylim
 #' @importFrom stats complete.cases predict
 #' @export
 #' @return An \code{R6} class generator object for the \code{excessmortalityClass} backend; used internally by the jamovi analysis wrapper and not called directly.

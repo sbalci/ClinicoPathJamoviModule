@@ -508,7 +508,7 @@ singlearmClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
           private$.addInfo(sprintf(
             'Requested time point(s) %s lie beyond the longest follow-up in the data (%s %s). Every subject observed at that time had a terminal event, so %s.',
             paste(utimes[beyond], collapse = ", "),
-            format(round(max_followup, 1)), self$options$timetypeoutput,
+            base::format(round(max_followup, 1)), self$options$timetypeoutput,
             final_text))
           return(utimes)
         }
@@ -516,7 +516,7 @@ singlearmClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
         private$.addWarning(sprintf(
           'Requested time point(s) %s are beyond the longest follow-up in the data (%s %s) and were omitted: the longest observation is censored, so subjects were still event-free when observation stopped and the estimate is undefined past that point.',
           paste(utimes[beyond], collapse = ", "),
-          format(round(max_followup, 1)), self$options$timetypeoutput))
+          base::format(round(max_followup, 1)), self$options$timetypeoutput))
         utimes[!beyond]
       },
 
@@ -599,7 +599,7 @@ singlearmClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
           y1 <- self$options$yend_plot
           if (!is.finite(y0) || !is.finite(y1) || y0 < 0 || y1 > 1) {
             private$.addError(sprintf('Y-axis limits must lie within 0 and 1 (received %s to %s): the axis shows a survival probability. Please adjust plot axis settings.',
-                                      format(y0), format(y1)))
+                                      base::format(y0), base::format(y1)))
             return(FALSE)
           }
           if (y0 >= y1) {
@@ -1234,7 +1234,7 @@ singlearmClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
           if (is.finite(med_years) && med_years > 100)
             private$.addWarning(sprintf(
               'Median follow-up in "%s" is %s, which under the declared unit "%s" is %.0f years - longer than a human lifetime. The unit is probably mis-declared (a column of days or weeks read as %s). Check "Time Type in Output"; nothing has been changed automatically.',
-              self$options$elapsedtime, format(round(med, 1)),
+              self$options$elapsedtime, base::format(round(med, 1)),
               self$options$timetypeoutput, med_years, self$options$timetypeoutput))
         } else {
           max_years <- suppressWarnings(max(df_time$mytime, na.rm = TRUE)) / yr
@@ -1405,7 +1405,7 @@ singlearmClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
           # guard covers programmatic calls, which bypass it.)
           if (is.na(landmark) || landmark < 0) {
             private$.addError(sprintf('Landmark time must be zero or positive (received %s). A landmark is a time point during follow-up; a negative value would shift every subject\'s follow-up forward instead of conditioning on surviving to it.',
-                                      format(self$options$landmark)))
+                                      base::format(self$options$landmark)))
             private$.displayMessages()
             return(NULL)
           }
@@ -1429,7 +1429,7 @@ singlearmClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
           if (n_after == 0) {
             private$.addError(sprintf('No subjects remain after the landmark at %s %s: every subject\'s follow-up ended at or before that time (longest follow-up was %s %s). Choose a landmark inside the observed follow-up range.',
                                       landmark, self$options$timetypeoutput,
-                                      format(round(max_before, 1)),
+                                      base::format(round(max_before, 1)),
                                       self$options$timetypeoutput))
             private$.displayMessages()
             return(NULL)
@@ -2064,7 +2064,7 @@ singlearmClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
           medianTable$setNote(
             "rmst",
             sprintf(.("Restricted mean survival time is the area under the Kaplan-Meier curve from time 0 to the largest observed time in this analysis (%s %s). It is therefore horizon-dependent and should only be compared when the same restriction time is used."),
-                    format(round(max(mydata[[mytime]], na.rm = TRUE), 2), trim = TRUE),
+                    base::format(round(max(mydata[[mytime]], na.rm = TRUE), 2), trim = TRUE),
                     self$options$timetypeoutput))
           self$results$medianSummary$setTitle(
             paste0(estimand_meta$median, ": Natural Language Summary"))
@@ -2108,7 +2108,7 @@ singlearmClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
         .med   <- suppressWarnings(as.numeric(results1table$median))
         .lcl   <- suppressWarnings(as.numeric(results1table$x0_95lcl))
         .ucl   <- suppressWarnings(as.numeric(results1table$x0_95ucl))
-        .bound <- function(x) ifelse(is.finite(x), format(round(x, 1), trim = TRUE),
+        .bound <- function(x) ifelse(is.finite(x), base::format(round(x, 1), trim = TRUE),
                                      "not reached")
         .ci_txt <- ifelse(is.finite(.lcl) | is.finite(.ucl),
                           paste0(" [95% CI: ", .bound(.lcl), " - ", .bound(.ucl), "]"), "")
@@ -2827,7 +2827,7 @@ singlearmClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
         rate_multiplier <- self$options$rate_multiplier
         if (!is.finite(rate_multiplier) || rate_multiplier <= 0) {
           private$.addError(sprintf('Rate multiplier must be a finite positive number (received %s). It is the unit rates are expressed in - 100 for "events per 100 person-%s", 1000 for "per 1000". A negative or zero multiplier would report negative incidence rates. Person-time analysis was not performed.',
-                                    format(self$options$rate_multiplier),
+                                    base::format(self$options$rate_multiplier),
                                     self$options$timetypeoutput))
           return()
         }
@@ -2886,7 +2886,7 @@ singlearmClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             private$.addInfo(sprintf(
               .("Person-time interval boundaries %s are at or beyond the longest observed follow-up (%s %s), so no person-time can accrue past them. They were omitted rather than producing an empty or negative interval."),
               paste(base::format(.dropped, trim = TRUE), collapse = ", "),
-              format(round(.max_fu, 1), trim = TRUE),
+              base::format(round(.max_fu, 1), trim = TRUE),
               self$options$timetypeoutput))
         }
 

@@ -1,7 +1,8 @@
 #' @title Flexible Relative Survival Analysis
 #' @importFrom R6 R6Class
 #' @import jmvcore
-#' @import ggplot2
+#' @importFrom ggplot2 ggplot aes geom_ribbon geom_line geom_hline labs ylim theme_minimal theme
+#' @importFrom ggplot2 element_text geom_col
 #' @importFrom stats complete.cases predict glm poisson spline
 #' @export
 #' @return An \code{R6} class generator object for the \code{flexiblerelativesurvivalClass} backend; used internally by the jamovi analysis wrapper and not called directly.

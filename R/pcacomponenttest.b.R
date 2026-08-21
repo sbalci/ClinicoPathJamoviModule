@@ -1,9 +1,10 @@
 #' @title PCA Component Significance Test
 #' @importFrom R6 R6Class
 #' @import jmvcore
-#' @import glue
-#' @import ggplot2
-#' @rawNamespace import(dplyr, except = c(as_data_frame, groups, select, union))
+#' @importFrom ggplot2 aes geom_point geom_line geom_errorbar scale_color_manual theme_minimal labs
+#' @importFrom ggplot2 theme element_rect geom_col element_text geom_hline annotate coord_flip
+#' @importFrom ggplot2 facet_wrap scale_fill_manual
+#' @importFrom rlang .data
 #'
 #' @return An \code{R6} class generator object for the \code{pcacomponenttestClass} backend; used internally by the jamovi analysis wrapper and not called directly.
 

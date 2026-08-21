@@ -2,7 +2,6 @@
 #' @return Tables and plots for decision curve analysis
 #' @importFrom R6 R6Class
 #' @import jmvcore
-#' @import ggplot2
 #' @importFrom stats rbeta quantile
 #' @importFrom RColorBrewer brewer.pal
 #' @importFrom scales percent

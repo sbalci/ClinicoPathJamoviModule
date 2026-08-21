@@ -1,7 +1,9 @@
 #' @title Quality of Life Analysis & Patient-Centered Outcomes
 #' @importFrom R6 R6Class
 #' @import jmvcore
-#' @import ggplot2
+#' @importFrom ggplot2 ggplot aes geom_boxplot geom_jitter labs theme_minimal theme element_text
+#' @importFrom ggplot2 geom_col coord_polar ylim element_blank geom_tile scale_fill_gradient2
+#' @importFrom ggplot2 geom_histogram geom_line geom_point
 #' @importFrom stats cor t.test wilcox.test aov kruskal.test
 #' @export
 #' @return An \code{R6} class generator object for the \code{qualityoflifeClass} backend; used internally by the jamovi analysis wrapper and not called directly.

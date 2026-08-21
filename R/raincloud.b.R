@@ -1188,7 +1188,7 @@ raincloudClass <- if (requireNamespace("jmvcore")) R6::R6Class("raincloudClass",
                 .("distributions") else .("means")
 
             p_txt <- private$.fmtP(p_value)
-            p_txt <- if (startsWith(p_txt, "&lt;")) paste0("p ", p_txt) else paste0("p = ", p_txt)
+            p_txt <- if (base::startsWith(p_txt, "&lt;")) paste0("p ", p_txt) else paste0("p = ", p_txt)
 
             report_text <- if (p_value < 0.05)
                 sprintf(.("A %s comparing %s found a statistically significant difference in %s (%s)."),

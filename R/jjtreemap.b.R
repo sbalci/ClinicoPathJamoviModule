@@ -1,7 +1,7 @@
 #' @title Treemap
 #' @importFrom R6 R6Class
 #' @import jmvcore
-#' @import ggplot2
+#' @importFrom ggplot2 ggplot geom_rect aes labs theme_void theme element_text margin
 #' @return An \code{R6} class generator object for the \code{jjtreemapClass} backend; used internally by the jamovi analysis wrapper and not called directly.
 
 jjtreemapClass <- if (requireNamespace('jmvcore')) R6::R6Class(

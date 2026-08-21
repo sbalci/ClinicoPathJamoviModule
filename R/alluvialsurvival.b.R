@@ -1,8 +1,9 @@
 #' @importFrom R6 R6Class
 #' @import jmvcore
-#' @import ggplot2
+#' @importFrom ggplot2 after_stat
+#' @importFrom rlang sym
 #' @importFrom ggalluvial geom_flow geom_stratum
-#' @importFrom dplyr group_by summarise mutate n arrange
+#' @importFrom dplyr group_by summarise mutate n arrange first last
 #' @importFrom tidyr separate_rows
 #' @importFrom magrittr %>%
 #' @importFrom survival survfit Surv

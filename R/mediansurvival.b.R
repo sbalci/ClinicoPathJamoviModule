@@ -1,9 +1,9 @@
 #' @title Median Survival Comparisons
 #' @importFrom R6 R6Class
 #' @import jmvcore
-#' @import survival
-#' @import survminer
-#' @import ggplot2
+#' @importFrom survival Surv survfit survdiff
+#' @importFrom survminer ggsurvplot
+#' @importFrom ggplot2 geom_hline geom_vline ggplot aes geom_point geom_errorbar labs theme_minimal
 #'
 #' @return An \code{R6} class generator object for the \code{mediansurvivalClass} backend; used internally by the jamovi analysis wrapper and not called directly.
 

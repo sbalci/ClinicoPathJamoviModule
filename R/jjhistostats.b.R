@@ -364,11 +364,11 @@ jjhistostatsClass <- if (requireNamespace('jmvcore'))
                         n_bins <- rng / self$options$binwidth
                         if (n_bins > max_bins)
                             return(list(valid = FALSE, message = paste0(
-                                "Bin width ", format(self$options$binwidth), " would split '", v,
-                                "' into ", format(round(n_bins), big.mark = ","),
+                                "Bin width ", base::format(self$options$binwidth), " would split '", v,
+                                "' into ", base::format(round(n_bins), big.mark = ","),
                                 " bins, so the histogram would be unreadable (or blank). '", v,
-                                "' ranges over ", format(signif(rng, 4)),
-                                "; a bin width of about ", format(signif(rng / 30, 3)),
+                                "' ranges over ", base::format(signif(rng, 4)),
+                                "; a bin width of about ", base::format(signif(rng / 30, 3)),
                                 " gives roughly 30 bins.")))
                     }
                 }
@@ -501,7 +501,7 @@ jjhistostatsClass <- if (requireNamespace('jmvcore'))
                     if (length(unique(var_data)) == 1) {
                         warnings <- c(warnings, paste0(
                             " <strong>Variable '", htmltools::htmlEscape(var), "' has constant values</strong> (every row is ",
-                            htmltools::htmlEscape(format(var_data[1])), "). There is no range to bin, so the histogram ",
+                            htmltools::htmlEscape(base::format(var_data[1])), "). There is no range to bin, so the histogram ",
                             "panel for this variable will be empty. Check the variable selection and any active row filters."
                         ))
                     }

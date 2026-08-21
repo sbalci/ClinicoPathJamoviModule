@@ -378,7 +378,7 @@ decisioncurveClass <- if (requireNamespace("jmvcore")) R6::R6Class(
                     title = "Some thresholds ignored",
                     content = sprintf(
                         "Ignored %s. Threshold probabilities must be numbers strictly between 0 and 1, separated by commas or spaces.",
-                        paste(c(unparsed, format(out_of_range)), collapse = ", ")
+                        paste(c(unparsed, base::format(out_of_range)), collapse = ", ")
                     )
                 )
             }

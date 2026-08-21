@@ -1,7 +1,7 @@
 #' @title Epidemiological Survival Analysis
 #' @importFrom R6 R6Class
 #' @import jmvcore
-#' @import ggplot2
+#' @importFrom ggplot2 theme_minimal
 #' @importFrom survival Surv survfit coxph
 #' @importFrom Epi apc.fit Lexis splitLexis cal.yr
 #' @importFrom survey svycoxph svykm

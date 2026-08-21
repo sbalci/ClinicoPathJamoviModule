@@ -35,9 +35,9 @@
 #' @importFrom R6 R6Class
 #' @import jmvcore
 #' @importFrom gsDesign nSurvival nEvents hrn2z hrz2n zn2hr
-#' @rawNamespace import(magrittr, except = c(extract, set_names))
 #' @importFrom ggplot2 ggplot aes geom_line geom_hline geom_point geom_rect annotate
-#' @importFrom ggplot2 labs scale_y_continuous scale_y_discrete scale_fill_manual theme_minimal theme element_text element_blank
+#' @importFrom ggplot2 labs scale_y_continuous scale_y_discrete scale_fill_manual theme_minimal
+#' @importFrom ggplot2 theme element_text element_blank
 #' @importFrom scales percent
 classicalSurvivalPowerClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
     R6::R6Class(

@@ -1,4 +1,5 @@
-#' @import ggplot2
+#' @importFrom ggplot2 ggplot geom_text aes xlim ylim theme_void geom_ribbon geom_line geom_abline
+#' @importFrom ggplot2 labs theme_minimal theme element_text geom_area facet_wrap scale_fill_manual
 
 hierarchicalbayesClass <- R6::R6Class(
     "hierarchicalbayesClass",

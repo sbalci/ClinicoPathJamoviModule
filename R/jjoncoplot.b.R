@@ -2,11 +2,9 @@
 #' @description Creates oncoplots (mutation landscapes) to visualize genomic alterations across genes and samples with optional clinical annotations
 #' @importFrom R6 R6Class
 #' @import jmvcore
-#' @rawNamespace import(dplyr, except = c(as_data_frame, groups, select, union))
+#' @importFrom dplyr setdiff intersect everything desc c_across
 #' @importFrom magrittr %>%
-#' @import ggplot2
-#' @import tidyr
-#' @import patchwork
+#' @importFrom magrittr %>%
 #' @param data Data frame containing mutation and clinical data
 #' @param sampleVar Column name for sample identifiers
 #' @param geneVars Column names for gene mutation variables

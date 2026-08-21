@@ -521,7 +521,7 @@ tableoneClass <- if (requireNamespace("jmvcore", quietly = TRUE)) R6::R6Class(
             has_missing <- n_complete_original < n_original
             missing_pct_original <- round(100 * (1 - n_complete_original / n_original), 1)
             missing_pct_label <- if (has_missing && missing_pct_original < 0.1)
-                "&lt;0.1" else format(missing_pct_original)
+                "&lt;0.1" else base::format(missing_pct_original)
 
             # Variable type analysis (on final data for consistency)
             var_types <- sapply(data, function(x) {

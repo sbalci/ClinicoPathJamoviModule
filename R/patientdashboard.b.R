@@ -205,7 +205,7 @@ patientdashboardClass <- R6::R6Class(
                 "\u{2022} Monitoring Frequency: ", self$options$monitoring_frequency, "<br>",
                 "\u{2022} Alert Thresholds: ", self$options$alert_thresholds, "<br>",
                 "\u{2022} Time Window: ", self$options$time_window, " hours<br>",
-                "<span class='timestamp'>Last Updated: ", format(Sys.time(), "%Y-%m-%d %H:%M:%S"), "</span>",
+                "<span class='timestamp'>Last Updated: ", base::format(Sys.time(), "%Y-%m-%d %H:%M:%S"), "</span>",
                 "</div>"
             )
             
@@ -296,7 +296,7 @@ patientdashboardClass <- R6::R6Class(
                 normalRange <- private$.getNormalRange(vitalVar, alertThresholds)
                 status <- private$.determineVitalStatus(currentValue, normalRange)
                 trend <- private$.calculateTrend(vitalData)
-                lastUpdated <- format(Sys.time(), "%H:%M")
+                lastUpdated <- base::format(Sys.time(), "%H:%M")
                 
                 # Update table
                 vitalsTable$setRow(rowNo = i, values = list(
@@ -337,7 +337,7 @@ patientdashboardClass <- R6::R6Class(
                 refRange <- private$.getReferenceRange(labVar, alertThresholds)
                 status <- private$.determineLabStatus(currentResult, refRange)
                 trendDirection <- private$.calculateTrend(labData)
-                collectionTime <- format(Sys.time() - runif(1, 0, 4) * 3600, "%H:%M")
+                collectionTime <- base::format(Sys.time() - runif(1, 0, 4) * 3600, "%H:%M")
                 
                 # Update table
                 labTable$setRow(rowNo = i, values = list(
@@ -386,7 +386,7 @@ patientdashboardClass <- R6::R6Class(
                             paste(">", normalRange$upper)
                         }
                         
-                        alertTime <- format(Sys.time() - runif(1, 0, 2) * 3600, "%H:%M")
+                        alertTime <- base::format(Sys.time() - runif(1, 0, 2) * 3600, "%H:%M")
                         responseTime <- if (priority == "CRITICAL") "< 5 min" else "< 15 min"
                         
                         alertTable$addRow(rowKey = alertCount, values = list(
@@ -426,7 +426,7 @@ patientdashboardClass <- R6::R6Class(
                             paste(">", refRange$upper)
                         }
                         
-                        alertTime <- format(Sys.time() - runif(1, 0, 4) * 3600, "%H:%M")
+                        alertTime <- base::format(Sys.time() - runif(1, 0, 4) * 3600, "%H:%M")
                         
                         alertTable$addRow(rowKey = alertCount, values = list(
                             alert_time = alertTime,
@@ -518,8 +518,8 @@ patientdashboardClass <- R6::R6Class(
                     medication_name = sampleMeds[i],
                     dose = "As prescribed",
                     frequency = "Daily",
-                    last_administered = format(Sys.time() - runif(1, 2, 8) * 3600, "%H:%M"),
-                    next_due = format(Sys.time() + runif(1, 4, 20) * 3600, "%H:%M"),
+                    last_administered = base::format(Sys.time() - runif(1, 2, 8) * 3600, "%H:%M"),
+                    next_due = base::format(Sys.time() + runif(1, 4, 20) * 3600, "%H:%M"),
                     compliance_status = sample(c("Compliant", "Partial", "Non-compliant"), 1, prob = c(0.7, 0.2, 0.1))
                 ))
             }
@@ -602,7 +602,7 @@ patientdashboardClass <- R6::R6Class(
             summary_html <- paste0(summary_html,
                 "<div class='summary-section'>",
                 "<b>Patient:</b> ", htmltools::htmlEscape(currentPatient), "<br>",
-                "<b>Report Generated:</b> ", format(Sys.time(), "%Y-%m-%d %H:%M:%S"), "<br>",
+                "<b>Report Generated:</b> ", base::format(Sys.time(), "%Y-%m-%d %H:%M:%S"), "<br>",
                 "<b>Monitoring Period:</b> ", self$options$time_window, " hours",
                 "</div>"
             )

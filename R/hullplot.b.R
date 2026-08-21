@@ -210,7 +210,7 @@ hullplotClass <- if (requireNamespace("jmvcore")) R6::R6Class("hullplotClass",
                 validation_warnings$excluded <- sprintf(
                     "%d of %d rows (%s%%) were excluded because a selected variable was missing%s. %d rows were plotted.",
                     n_excluded, n_before,
-                    format(round(100 * n_excluded / n_before, 1)),
+                    base::format(round(100 * n_excluded / n_before, 1)),
                     if (n_nonfinite > 0)
                         sprintf(" or not a finite number (%d infinite/undefined value(s) found)", n_nonfinite)
                     else "",

@@ -105,8 +105,6 @@
 #' @importFrom gt gt
 #' @importFrom htmltools HTML
 #' @importFrom gtExtras gt_plt_summary
-#' @import moments
-#' @import pivottabler
 #' @importFrom summarytools dfSummary descr freq ctable view st_options
 #' @importFrom lubridate ymd ymd_hms dmy dmy_hms mdy mdy_hms ydm parse_date_time is.Date
 #' @importFrom purrr map

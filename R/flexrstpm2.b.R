@@ -34,7 +34,8 @@
 #' @seealso \code{\link{flexrstpm2}} for the main user interface function
 #' @importFrom R6 R6Class
 #' @import jmvcore
-#' @import ggplot2
+#' @importFrom ggplot2 ggplot aes geom_line labs theme_minimal theme element_text geom_col geom_text
+#' @importFrom ggplot2 facet_wrap
 #' @keywords internal
 #' @return An \code{R6} class generator object for the \code{flexrstpm2Class} backend; used internally by the jamovi analysis wrapper and not called directly.
 

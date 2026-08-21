@@ -37,7 +37,7 @@
 #' @importFrom janitor clean_names
 #' @importFrom labelled set_variable_labels var_label
 #' @importFrom stringr str_to_title
-#' @rawNamespace import(magrittr, except = c(extract, set_names))
+#' @importFrom magrittr %>%
 #'
 
 enhancedcrosstableClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(

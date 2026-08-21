@@ -21,8 +21,7 @@
 #'
 #' @importFrom R6 R6Class
 #' @import jmvcore
-#' @import ggplot2
-#' @import glue
+#' @importFrom rlang .data
 #' @importFrom pROC roc auc ci.auc roc.test
 #' @return An \code{R6} class generator object for the \code{timerocClass} backend; used internally by the jamovi analysis wrapper and not called directly.
 

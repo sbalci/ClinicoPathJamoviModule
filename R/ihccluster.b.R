@@ -2015,7 +2015,7 @@ ihcclusterClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                     # Check if variable already exists
                     existing_cols <- colnames(self$data)
                     if (cluster_var_name %in% existing_cols) {
-                        cluster_var_name <- paste0(cluster_var_name, "_", format(Sys.time(), "%Y%m%d_%H%M%S"))
+                        cluster_var_name <- paste0(cluster_var_name, "_", base::format(Sys.time(), "%Y%m%d_%H%M%S"))
                     }
 
                     # Add clusters to dataset (Jamovi-compatible approach)

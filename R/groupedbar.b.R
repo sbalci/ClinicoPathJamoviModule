@@ -19,7 +19,7 @@
 #' @importFrom ggplot2 position_dodge position_stack position_fill coord_flip
 #' @importFrom ggplot2 theme_minimal theme_classic labs scale_fill_brewer
 #' @importFrom ggplot2 scale_fill_viridis_d scale_fill_manual geom_text
-#' @importFrom ggplot2 facet_wrap facet_grid theme element_text geom_hline
+#' @importFrom ggplot2 facet_wrap facet_grid vars theme element_text geom_hline
 #' @importFrom ggplot2 geom_errorbar element_rect geom_ribbon guides guide_legend
 #' @importFrom dplyr group_by summarise mutate arrange filter distinct
 #' @importFrom dplyr case_when if_else n left_join across all_of

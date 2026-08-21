@@ -1,4 +1,6 @@
-#' @import ggplot2
+#' @importFrom ggplot2 ggplot aes geom_line labs scale_y_continuous scale_color_manual theme_minimal
+#' @importFrom ggplot2 theme element_text element_blank geom_col geom_text coord_flip geom_point
+#' @importFrom ggplot2 geom_smooth geom_abline scale_x_continuous
 
 flexcompriskClass <- R6::R6Class(
     "flexcompriskClass",

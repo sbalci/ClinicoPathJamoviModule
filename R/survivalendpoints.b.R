@@ -2,9 +2,7 @@
 #' @title Survival Endpoint Derivation
 #' @importFrom R6 R6Class
 #' @import jmvcore
-#' @import survival
-#' @rawNamespace import(dplyr, except = c(as_data_frame, groups, select, union))
-#' @import ggplot2
+#' @importFrom ggplot2 theme_minimal
 #' @importFrom survminer ggsurvplot
 #' @export
 #' @return An \code{R6} class generator object for the \code{survivalendpointsClass} backend; used internally by the jamovi analysis wrapper and not called directly.
@@ -1059,7 +1057,7 @@ survivalendpointsClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6C
             }
 
             # Generate filename with timestamp
-            timestamp <- format(Sys.time(), "%Y%m%d_%H%M%S")
+            timestamp <- base::format(Sys.time(), "%Y%m%d_%H%M%S")
             filename <- file.path(export_dir,
                 paste0("derived_endpoints_", timestamp, ".csv"))
 

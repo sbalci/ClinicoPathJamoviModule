@@ -77,13 +77,13 @@ clinicalscoreClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6Cla
             candidates <- var_list[vapply(var_list, function(v) {
                 # Use make.names to get the R-safe column name
                 safe_v <- make.names(v)
-                startsWith(term, safe_v) || startsWith(term, v)
+                base::startsWith(term, safe_v) || base::startsWith(term, v)
             }, logical(1))]
             if (length(candidates) > 0) {
                 # Pick the longest match
                 best <- candidates[which.max(nchar(candidates))]
                 safe_best <- make.names(best)
-                if (startsWith(term, safe_best)) {
+                if (base::startsWith(term, safe_best)) {
                     cat_part <- substring(term, nchar(safe_best) + 1)
                 } else {
                     cat_part <- substring(term, nchar(best) + 1)

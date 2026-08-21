@@ -91,8 +91,6 @@
 #'
 #' @importFrom R6 R6Class
 #' @import jmvcore
-#' @import ggplot2
-#' @import survival
 #' @importFrom dplyr group_by summarise mutate arrange
 #' @importFrom stats glm binomial confint coef
 #'

@@ -1,10 +1,11 @@
 #' @title Syndromic Plot for PCA
 #' @importFrom R6 R6Class
 #' @import jmvcore
-#' @import glue
-#' @import ggplot2
-#' @rawNamespace import(dplyr, except = c(as_data_frame, groups, select, union))
-#' @import ggrepel
+#' @importFrom ggplot2 aes geom_polygon arrow unit element_blank element_text coord_equal
+#' @importFrom ggplot2 geom_segment
+#' @importFrom dplyr desc n filter
+#' @importFrom magrittr %>%
+#' @importFrom rlang .data
 #'
 #' @return An \code{R6} class generator object for the \code{jjsyndromicplotClass} backend; used internally by the jamovi analysis wrapper and not called directly.
 

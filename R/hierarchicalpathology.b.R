@@ -1,7 +1,6 @@
 # This file is a generated template, your changes will not be overwritten
 
 #' @import jmvcore
-#' @import R6
 #' @importFrom performance icc
 #' @importFrom glmmTMB glmmTMB nbinom2
 #' @importFrom stats formula terms model.matrix model.frame na.omit

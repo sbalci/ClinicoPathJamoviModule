@@ -1,9 +1,8 @@
 #' @title Conditional GEE for Recurrent Events Gap Times
 #' @importFrom R6 R6Class
 #' @import jmvcore
-#' @import geepack
-#' @import survival
-#' @importFrom ggplot2 ggplot aes geom_line geom_step geom_point geom_boxplot geom_violin labs theme_minimal facet_wrap
+#' @importFrom ggplot2 ggplot aes geom_line geom_step geom_point geom_boxplot geom_violin labs
+#' @importFrom ggplot2 theme_minimal facet_wrap
 #' @export
 #' @return An \code{R6} class generator object for the \code{conditionalgeeClass} backend; used internally by the jamovi analysis wrapper and not called directly.
 

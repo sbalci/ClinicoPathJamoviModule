@@ -1015,8 +1015,8 @@ jjsegmentedtotalbarClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R
                 # Format
                 fmt <- switch(
                     private$.displayOpt("percentage_format"),
-                    "decimal1" = function(z) paste0(format(round(z, 1), nsmall = 1), "%"),
-                    "decimal2" = function(z) paste0(format(round(z, 2), nsmall = 2), "%"),
+                    "decimal1" = function(z) paste0(base::format(round(z, 1), nsmall = 1), "%"),
+                    "decimal2" = function(z) paste0(base::format(round(z, 2), nsmall = 2), "%"),
                     function(z) paste0(round(z), "%")
                 )
                 label_data$..lab <- fmt(label_data$percentage)

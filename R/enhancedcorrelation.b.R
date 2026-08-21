@@ -1,7 +1,10 @@
 #' @title Enhanced Correlation Analysis
 #' @importFrom R6 R6Class
 #' @import jmvcore
-#' @import ggplot2
+#' @importFrom ggplot2 ggplot aes geom_tile geom_text scale_fill_gradient2 guide_colorbar
+#' @importFrom ggplot2 scale_alpha_identity labs theme_minimal theme element_text element_blank
+#' @importFrom ggplot2 geom_segment geom_point scale_color_gradient2 scale_size_continuous
+#' @importFrom ggplot2 theme_void coord_equal aes_string geom_smooth
 #' @importFrom stats cor.test complete.cases cor
 #' @importFrom psych corr.test
 #' @export

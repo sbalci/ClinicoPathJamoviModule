@@ -1,7 +1,8 @@
 #' @title Patient-Reported Outcomes & Quality of Life Analysis
 #' @importFrom R6 R6Class
 #' @import jmvcore
-#' @import ggplot2
+#' @importFrom ggplot2 ggplot aes geom_histogram geom_vline labs theme_minimal theme element_text
+#' @importFrom ggplot2 geom_bar facet_wrap geom_tile scale_fill_manual
 #' @importFrom stats cor t.test aov kruskal.test wilcox.test
 #' @export
 #' @return An \code{R6} class generator object for the \code{patientreportedClass} backend; used internally by the jamovi analysis wrapper and not called directly.

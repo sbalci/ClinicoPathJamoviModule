@@ -1,8 +1,8 @@
 #' @title Group and Summarize
 #' @importFrom R6 R6Class
 #' @import jmvcore
-#' @rawNamespace import(dplyr, except = c(as_data_frame, groups, select, union))
-#' @import ggplot2
+#' @importFrom magrittr %>%
+#' @importFrom rlang .data
 #'
 #' @return An \code{R6} class generator object for the \code{groupsummaryClass} backend; used internally by the jamovi analysis wrapper and not called directly.
 
@@ -211,7 +211,7 @@ groupsummaryClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             # ("TOTAL"/"") and any factor/numeric/date group values all display.
             for (var in groupVars) {
                 col_title <- var
-                if (!is.null(dateVar) && startsWith(var, paste0(dateVar, "_"))) {
+                if (!is.null(dateVar) && base::startsWith(var, paste0(dateVar, "_"))) {
                     col_title <- gsub("_", " ", var)
                     col_title <- tools::toTitleCase(col_title)
                 }
@@ -273,7 +273,7 @@ groupsummaryClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 # Format date values for display
                 row_values <- as.list(summary_data[i, ])
                 for (var in groupVars) {
-                    if (!is.null(dateVar) && startsWith(var, paste0(dateVar, "_"))) {
+                    if (!is.null(dateVar) && base::startsWith(var, paste0(dateVar, "_"))) {
                         # Format date based on aggregation level.
                         # base:: is required: NAMESPACE has import(jmvcore), and
                         # jmvcore exports its own format() -- a {}-placeholder string
@@ -409,7 +409,7 @@ groupsummaryClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
             # Check if we're plotting time series data
             is_time_series <- !is.null(plotData$dateVar) &&
-                any(startsWith(groupVars, paste0(plotData$dateVar, "_")))
+                any(base::startsWith(groupVars, paste0(plotData$dateVar, "_")))
 
             if (is_time_series && length(groupVars) == 1) {
                 # Time series line plot

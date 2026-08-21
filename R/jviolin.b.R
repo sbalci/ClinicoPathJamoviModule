@@ -3,7 +3,7 @@
 #' @return A violin plot showing distribution of continuous variables across groups
 #' @importFrom R6 R6Class
 #' @import jmvcore
-#' @import ggplot2
+#' @importFrom rlang .data
 #' @importFrom dplyr %>%
 jviolinClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6Class(
     "jviolinClass",

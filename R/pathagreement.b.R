@@ -1,9 +1,11 @@
 #' @title Pathology Interrater Reliability Analysis
 #' @importFrom R6 R6Class
 #' @import jmvcore
-#' @rawNamespace import(magrittr, except = c(extract, set_names))
-#' @import ggplot2
-#' @rawNamespace import(dplyr, except = c(as_data_frame, groups, select, union))
+#' @importFrom ggplot2 ggplot aes geom_tile geom_text scale_fill_viridis_c scale_fill_gradient2 labs
+#' @importFrom ggplot2 theme_minimal theme element_text xlim ylim theme_void geom_segment geom_rect
+#' @importFrom ggplot2 theme_classic element_blank margin scale_x_continuous scale_y_continuous
+#' @importFrom ggplot2 scale_fill_manual scale_x_discrete scale_y_discrete coord_cartesian
+#' @importFrom magrittr %>%
 #' @importFrom irr kappa2 kappam.fleiss agree
 #' @importFrom psych ICC
 #' @importFrom htmlTable htmlTable

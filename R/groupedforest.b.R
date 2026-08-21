@@ -248,7 +248,7 @@ groupedforestClass <- if (requireNamespace("jmvcore")) R6::R6Class("groupedfores
                     # prefix (fixed, so regex metacharacters are literal) and exclude
                     # any interaction terms, so a covariate whose name merely contains
                     # the treatment-variable string is never picked up.
-                    is_trt <- startsWith(model_summary$term, treatment_var) &
+                    is_trt <- base::startsWith(model_summary$term, treatment_var) &
                               !grepl(":", model_summary$term, fixed = TRUE)
                     treatment_coef <- model_summary[is_trt, ]
 
@@ -427,7 +427,7 @@ groupedforestClass <- if (requireNamespace("jmvcore")) R6::R6Class("groupedfores
             # (literal, not regex) and exclude interaction terms, mirroring
             # .perform_grouped_analysis. Avoids regex-metacharacter surprises and
             # false matches on covariates whose names contain the treatment name.
-            is_trt <- startsWith(model_summary$term, treatment_var) &
+            is_trt <- base::startsWith(model_summary$term, treatment_var) &
                       !grepl(":", model_summary$term, fixed = TRUE)
             treatment_coef <- model_summary[is_trt, ]
             

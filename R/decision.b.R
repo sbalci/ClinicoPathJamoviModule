@@ -600,10 +600,10 @@ decisionClass <- if (requireNamespace("jmvcore"))
                 parts <- character(0)
                 if (missing_count > 0)
                     parts <- c(parts, sprintf(.("%d case(s) (%s%%) removed for missing values on the test or gold-standard variable"),
-                                              missing_count, format(pct(missing_count))))
+                                              missing_count, base::format(pct(missing_count))))
                 if (level_excluded > 0)
                     parts <- c(parts, sprintf(.("%d case(s) (%s%%) removed because their level was neither the positive nor the negative level you selected (these are NOT missing values)"),
-                                              level_excluded, format(pct(level_excluded))))
+                                              level_excluded, base::format(pct(level_excluded))))
 
                 jmvcore::format(
                     .("Case exclusion summary: {details}. {analysed} of {total} cases analysed."),

@@ -1,7 +1,6 @@
 # This file is a generated template, your changes will not be overwritten
 
 #' @import jmvcore
-#' @import R6
 #' @importFrom vcd assocstats
 #' @importFrom DescTools CramerV Phi Lambda GoodmanKruskalTau GoodmanKruskalGamma ContCoef
 #' @importFrom stats chisq.test fisher.test residuals xtabs

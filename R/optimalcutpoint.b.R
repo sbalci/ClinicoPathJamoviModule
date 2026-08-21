@@ -1,9 +1,7 @@
 # This file is a generated template, your changes will not be overwritten
 
 #' @import jmvcore
-#' @import R6
-#' @import survival
-#' @import survminer
+#' @importFrom survival Surv
 #' @importFrom maxstat maxstat.test
 #' @importFrom cutpointr cutpointr
 #' @importFrom pROC roc coords

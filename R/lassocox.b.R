@@ -1837,7 +1837,7 @@ lassocoxClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                 for (v in sorted_vars) {
                     v_safe <- make.names(v)
                     unassigned <- is.na(col_origin)
-                    col_origin[unassigned & (startsWith(col_names, v) | startsWith(col_names, v_safe))] <- v
+                    col_origin[unassigned & (base::startsWith(col_names, v) | base::startsWith(col_names, v_safe))] <- v
                 }
                 # Fallback for unmatched columns
                 col_origin[is.na(col_origin)] <- col_names[is.na(col_origin)]

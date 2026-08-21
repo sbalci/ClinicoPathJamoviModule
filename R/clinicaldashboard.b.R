@@ -1,7 +1,8 @@
 #' @title Interactive Clinical Dashboard
 #' @importFrom R6 R6Class
 #' @import jmvcore
-#' @import ggplot2
+#' @importFrom ggplot2 ggplot aes geom_line geom_point geom_smooth labs theme_minimal geom_histogram
+#' @importFrom ggplot2 geom_density
 #' @importFrom stats complete.cases median quantile sd
 #' @export
 #' @return An \code{R6} class generator object for the \code{clinicaldashboardClass} backend; used internally by the jamovi analysis wrapper and not called directly.
@@ -377,7 +378,7 @@ clinicaldashboardClass <- R6::R6Class(
                 '<li><b>Time Window:</b> ', tools::toTitleCase(gsub("_", " ", time_window)), '</li>',
                 '<li><b>Data Points:</b> ', nrow(data), '</li>',
                 '<li><b>Variables:</b> ', ncol(data), '</li>',
-                '<li><b>Last Updated:</b> ', format(Sys.time(), "%Y-%m-%d %H:%M"), '</li>',
+                '<li><b>Last Updated:</b> ', base::format(Sys.time(), "%Y-%m-%d %H:%M"), '</li>',
                 '</ul>',
                 '<p><b>Status:</b> Dashboard operational - monitoring clinical indicators and generating alerts as configured.</p>',
                 '</div>'

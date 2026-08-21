@@ -530,8 +530,8 @@ timeintervalClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             if (length(negative_idx) > 0 && !self$options$remove_negative) {
                 example_rows <- head(negative_idx, 3)
                 examples <- paste0(
-                    "Row ", example_rows, ": Start=", format(start_dates_raw[example_rows]),
-                    ", End=", format(end_dates_raw[example_rows])
+                    "Row ", example_rows, ": Start=", base::format(start_dates_raw[example_rows]),
+                    ", End=", base::format(end_dates_raw[example_rows])
                 )
                 jmvcore::reject(jmvcore::format(
                     .("Negative time intervals detected (end date before start date) in {count} rows.\nPlease correct the dates or enable 'Remove Negative Intervals'.\nExamples:\n{examples}"),

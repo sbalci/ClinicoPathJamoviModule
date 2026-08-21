@@ -1,7 +1,8 @@
 #' @title Clinical Prediction Models with ML Interpretability
 #' @importFrom R6 R6Class
 #' @import jmvcore
-#' @import ggplot2
+#' @importFrom ggplot2 ggplot aes geom_line geom_abline labs theme_minimal theme element_text
+#' @importFrom ggplot2 geom_col coord_flip geom_histogram
 #' @importFrom stats predict glm binomial
 #' @export
 #' @return An \code{R6} class generator object for the \code{clinicalpredictionClass} backend; used internally by the jamovi analysis wrapper and not called directly.
