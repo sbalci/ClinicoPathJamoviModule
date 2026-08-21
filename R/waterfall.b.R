@@ -3533,7 +3533,7 @@ waterfallClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             orr_interpretation <- if (orr_test$p.value < 0.05) {
               .("Statistically significant difference in response rates between groups")
             } else {
-              .("No statistically significant difference in response rates between groups")
+              .("No statistically significant difference in response rates was detected; this does not establish that the rates are equal")
             }
 
             self$results$groupComparisonTest$addRow(rowKey = row_count, values = list(
@@ -3550,7 +3550,7 @@ waterfallClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             dcr_interpretation <- if (dcr_test$p.value < 0.05) {
               .("Statistically significant difference in disease control rates between groups")
             } else {
-              .("No statistically significant difference in disease control rates between groups")
+              .("No statistically significant difference in disease control rates was detected; this does not establish that the rates are equal")
             }
 
             self$results$groupComparisonTest$addRow(rowKey = row_count, values = list(
@@ -3598,7 +3598,7 @@ waterfallClass <- if (requireNamespace('jmvcore')) R6::R6Class(
           "<div style='margin-top: 15px;'>",
           "<h5 style='color: #6c757d; margin-bottom: 10px;'>", .("Statistical Terms"), "</h5>",
           "<ul style='margin: 0; padding-left: 15px; line-height: 1.6;'>",
-          "<li><strong>95% CI (Confidence Interval):</strong> ", .("Range of values likely to contain the true population parameter"), "</li>",
+          "<li><strong>95% CI (Confidence Interval):</strong> ", .("Range of values compatible with the observed data; over repeated studies, 95% of such intervals contain the true population parameter"), "</li>",
           "<li><strong>Fisher's Exact Test:</strong> ", .("Statistical test for comparing response rates between groups"), "</li>",
           "<li><strong>Binomial CI:</strong> ", .("Exact confidence interval for proportions (more accurate than normal approximation)"), "</li>",
           "<li><strong>Waterfall Plot:</strong> ", .("Bar chart showing best response for each patient, sorted by magnitude"), "</li>",
@@ -3632,7 +3632,7 @@ waterfallClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         } else if (n_patients < 100) {
           .("Moderate sample size: Results provide reasonable evidence for preliminary conclusions.")
         } else {
-          .("Adequate sample size: Results provide reliable evidence for clinical interpretation.")
+          .("Adequate sample size (n>=100): confidence intervals for ORR and DCR will be comparatively narrow.")
         }
 
         significance_text <- paste0(
@@ -3650,9 +3650,9 @@ waterfallClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
           "<h5>", .("Clinical Context:"), "</h5>",
           "<ul>",
-          "<li>", .("ORR <15%: May not warrant further development without compelling rationale"), "</li>",
-          "<li>", .("ORR 15-30%: Moderate activity, may justify phase III evaluation"), "</li>",
-          "<li>", .("ORR >30%: Promising activity, strong candidate for further development"), "</li>",
+          "<li>", .("ORR <15%: below the activity range conventionally cited for phase II single-agent studies"), "</li>",
+          "<li>", .("ORR 15-30%: within the moderate-activity range conventionally cited for phase II single-agent studies"), "</li>",
+          "<li>", .("ORR >30%: above the activity range conventionally cited for phase II single-agent studies"), "</li>",
           "</ul>",
 
           "</div>"
@@ -3765,7 +3765,7 @@ waterfallClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         if (orr >= 30) {
           return(.("Promising activity for single-agent therapy (general benchmark; verify against tumor-specific thresholds)"))
         } else if (orr >= 15) {
-          return(.("Moderate activity - may justify phase III evaluation (context-dependent)"))
+          return(.("Moderate activity by general phase II benchmarks (context-dependent)"))
         } else {
           return(.("Limited activity by general phase II standards (may still be clinically meaningful in refractory settings)"))
         }
@@ -3778,7 +3778,7 @@ waterfallClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         } else if (dcr >= 50) {
           return(.("Good disease control for exploratory cohort"))
         } else {
-          return(.("Limited disease control - evaluate clinical benefit beyond response rates"))
+          return(.("Limited disease control by general benchmarks"))
         }
       }
 

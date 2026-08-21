@@ -99,13 +99,13 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                 if (is.na(p_val)) {
                     sig_text <- "p-value not available"
                 } else if (p_val < 0.001) {
-                    sig_text <- "p < .001, highly statistically significant"
+                    sig_text <- "p < .001"
                 } else if (p_val < 0.01) {
-                    sig_text <- sprintf("p = %.3f, statistically significant", p_val)
+                    sig_text <- sprintf("p = %.3f", p_val)
                 } else if (p_val < 0.05) {
-                    sig_text <- sprintf("p = %.3f, statistically significant", p_val)
+                    sig_text <- sprintf("p = %.3f", p_val)
                 } else {
-                    sig_text <- sprintf("p = %.3f, not statistically significant", p_val)
+                    sig_text <- sprintf("p = %.3f", p_val)
                 }
 
                 # Weight description
@@ -144,7 +144,7 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                     </table>
 
                     <p style='margin: 10px 0;'><strong>Method:</strong> ", method, exact_note, weight_desc, "</p>
-                    <p style='margin: 10px 0;'><strong>Statistical test:</strong> ", sig_text, "</p>
+                    <p style='margin: 10px 0;'><strong>Statistical test:</strong> ", sig_text, " for the null hypothesis that agreement is no better than chance (kappa = 0). A small p-value only rules out zero agreement; it does not indicate whether the level of agreement is adequate - read the kappa value and its confidence interval for that.</p>
                     <p style='margin: 10px 0;'><strong>Interpretation:</strong> ", interp, "</p>
 
                     <div style='background-color: rgba(155, 155, 155, 0.06); border: 1px solid #ccc; padding: 12px; margin: 15px 0; color: inherit;'>
@@ -159,7 +159,7 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                     if (!is.finite(kappa_val)) {
                         "Kappa could not be computed for these data, so no consistency statement can be made. Check the notes on the results table for the reason."
                     } else if (kappa_val >= 0.60) {
-                        "The raters show good consistency, suggesting reliable measurements for clinical decisions or research."
+                        "Agreement is substantial or higher on the Landis &amp; Koch scale. What counts as adequate depends on the consequence of a disagreement: a kappa near 0.60 still implies frequent disagreement on individual cases. Read the confidence interval reported with the kappa - with few cases the plausible range is wide."
                     } else if (kappa_val >= 0.40) {
                         "The raters show moderate consistency. Consider additional training or clearer protocols."
                     } else {
@@ -724,7 +724,7 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                             <li><strong>Quality control studies</strong> - Most cases straightforward, few difficult</li>
                         </ul>
                         <p style='margin: 0; padding: 10px; background-color: rgba(155, 155, 155, 0.06); border-left: 3px solid #333; font-size: 13px; color: inherit;'>
-                            <strong> Tip:</strong> Run both Kappa and Gwet's AC - if they differ substantially, Gwet's AC is more reliable
+                            <strong> Tip:</strong> Decide before the analysis which coefficient you will report. Gwet's AC is less affected by skewed category prevalence than kappa, so it is the usual choice when one category dominates; kappa remains the convention for balanced categories. If the two differ substantially, report both and state which was prespecified - do not select after seeing the results.
                         </p>
                     </div>
 
@@ -865,7 +865,7 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                         <tr>
                             <td style='padding: 8px; border-bottom: 1px solid #ddd;'><strong>Use when</strong></td>
                             <td style='padding: 8px; border-bottom: 1px solid #ddd;'>Raters differ systematically</td>
-                            <td style='padding: 8px; border-bottom: 1px solid #ddd;'>Raters are similar/interchangeable</td>
+                            <td style='padding: 8px; border-bottom: 1px solid #ddd;'>Raters have similar marginal distributions</td>
                         </tr>
                         <tr>
                             <td style='padding: 8px;'><strong>Typical value</strong></td>
@@ -974,7 +974,11 @@ agreementClass <- if (requireNamespace("jmvcore")) {
 
                         # Add interpretation note
                         kappa_val <- light_result$value
-                        if (kappa_val < 0.20) {
+                        if (is.na(kappa_val)) {
+                            interp <- "Not estimable"
+                        } else if (kappa_val < 0) {
+                            interp <- "Worse than chance - systematic disagreement"
+                        } else if (kappa_val < 0.20) {
                             interp <- "Slight agreement"
                         } else if (kappa_val < 0.40) {
                             interp <- "Fair agreement"
@@ -1270,17 +1274,11 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                         ))
 
                         # Add interpretation note
-                        sig_text <- if (finn_result$p.value < 0.05) {
-                            "statistically significant (p < 0.05)"
-                        } else {
-                            "not statistically significant (p >= 0.05)"
-                        }
-
                         self$results$finnTable$setNote(
                             "interpretation",
                             sprintf(
-                                "%s. Agreement is %s. The variance-based approach is especially useful when rater variance is low.",
-                                interp, sig_text
+                                "%s. The accompanying F-test (p = %.3f) only asks whether agreement exceeds chance, which is rarely the question of interest; judge adequacy from the coefficient itself and its precision, not from the p-value. The variance-based approach is especially useful when rater variance is low.",
+                                interp, finn_result$p.value
                             )
                         )
                     },
@@ -1390,7 +1388,7 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                         <li><strong>Context:</strong> Validating whether pathologists intuitively rank cases consistent with formal grading systems (FNCLCC)</li>
                         <li><strong>Ordinal data:</strong> Mitotic count, differentiation score, necrosis percentage inform rankings</li>
                         <li><strong>W = 0.82:</strong> Very strong agreement - pathologists rank aggressiveness similarly</li>
-                        <li><strong>Clinical validation:</strong> High W confirms grading system aligns with expert prognostic intuition</li>
+                        <li><strong>What W shows:</strong> The pathologists rank aggressiveness consistently with one another. It does not show that their ranking matches the FNCLCC grade or predicts outcome - no outcome data enter the statistic, and consistent raters can be consistently wrong.</li>
                     </ul>
 
                     <p style='margin: 0 0 10px 0; font-weight: bold;'>3. Specimen Adequacy Ranking (Quality Control):</p>
@@ -1408,7 +1406,7 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                         <li><strong>Ordinal features:</strong> Crypt distortion, neutrophil infiltration, erosions, crypt abscesses</li>
                         <li><strong>Gold standard:</strong> Compare rankings to validated Nancy Histological Index scores</li>
                         <li><strong>W = 0.71:</strong> Strong concordance indicates pathologists assess severity consistently</li>
-                        <li><strong>Clinical relevance:</strong> Validates ability to stratify patients for escalation of biologic therapy</li>
+                        <li><strong>What W shows:</strong> The four pathologists order the biopsies by inflammation severity consistently with one another. Concordance among raters says nothing about whether their ranking matches the Nancy Histological Index or predicts response to therapy - no outcome data enter the statistic.</li>
                     </ul>
 
                     <p style='margin: 0 0 10px 0; font-weight: bold;'>5. Treatment Response Priority Ranking (Clinical Trial Design):</p>
@@ -1417,8 +1415,7 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                         <li><strong>Assessment:</strong> Pre- and post-treatment tumor burden, necrosis, fibrosis, residual viable tumor</li>
                         <li><strong>Purpose:</strong> Determine if pathologic assessment aligns with radiologic RECIST criteria</li>
                         <li><strong>W = 0.79:</strong> Strong agreement on response ranking</li>
-                        <li><strong>Trial application:</strong> High W supports pathologic response as trial endpoint; discordant cases identify RECIST limitations</li>
-                        <li><strong>Biomarker development:</strong> Agreement validates pathologic response for predictive biomarker studies</li>
+                        <li><strong>What W shows:</strong> The six pathologists rank degree of response consistently with one another; discordant cases are worth reviewing. Reproducibility among raters is a prerequisite for, but not evidence of, validity as a trial endpoint or predictive biomarker - that requires outcome data, which do not enter W</li>
                     </ul>
                 </div>
 
@@ -1605,8 +1602,8 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                         <li><strong>Scenario:</strong> Expert and community pathologist assess 100 Barrett's biopsies (none, LGD, HGD)</li>
                         <li><strong>Distribution:</strong> 70% non-dysplastic, 20% LGD, 10% HGD (highly skewed)</li>
                         <li><strong>Weighted kappa issue:</strong> Paradoxically low despite good clinical agreement</li>
-                        <li><strong>Robinson's A = 0.72:</strong> Confirms strong ordinal agreement unaffected by skew</li>
-                        <li><strong>Application:</strong> Validates community pathologist for surveillance program</li>
+                        <li><strong>Robinson's A = 0.72:</strong> Point estimate consistent with substantial ordinal agreement; report the confidence interval, which at n = 100 with a highly skewed distribution will be wide</li>
+                        <li><strong>Application:</strong> One coefficient does not by itself settle a credentialing question - that needs a prespecified agreement threshold, a representative case mix, and review of the discordant cases, particularly at the LGD/HGD boundary</li>
                     </ul>
 
                     <p style='margin: 0 0 10px 0; font-weight: bold;'>3. Fibrosis Stage Concordance (Chronic Liver Disease):</p>
@@ -1615,7 +1612,7 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                         <li><strong>Ordinal progression:</strong> F0 &#x2192; F1 &#x2192; F2 &#x2192; F3 &#x2192; F4 represents increasing severity</li>
                         <li><strong>Focus:</strong> Agreement on progression severity more important than exact stage</li>
                         <li><strong>A = 0.81:</strong> Excellent ordinal agreement on disease severity trajectory</li>
-                        <li><strong>Clinical decision:</strong> Reliable staging for antiviral treatment timing</li>
+                        <li><strong>What A shows:</strong> The two hepatopathologists order cases by fibrosis severity consistently. Ordinal agreement between raters does not establish that either stage assignment is correct, so it does not on its own support a staging-driven treatment decision.</li>
                     </ul>
 
                     <p style='margin: 0 0 10px 0; font-weight: bold;'>4. Inflammation Activity Scoring (Inflammatory Bowel Disease):</p>
@@ -1633,8 +1630,8 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                         <li><strong>Challenge:</strong> Most cases Gleason 6-7 (unbalanced distribution)</li>
                         <li><strong>Why Robinson's A:</strong> Emphasizes agreement on prognostic ordering (low vs. intermediate vs. high risk)</li>
                         <li><strong>A = 0.75:</strong> Strong ordinal agreement on risk stratification</li>
-                        <li><strong>Validation outcome:</strong> AI reliably captures prognostic progression despite some grade discordance</li>
-                        <li><strong>Regulatory value:</strong> Ordinal agreement supports AI as clinical decision support tool</li>
+                        <li><strong>What A shows:</strong> The algorithm orders cases similarly to the expert grade; no outcome data enter the statistic, so it says nothing about prognostic performance</li>
+                        <li><strong>Scope:</strong> Ordinal agreement with experts describes concordance of ordering only; it does not address absolute grade accuracy, calibration, or outcome prediction, so it does not on its own answer whether the algorithm is fit for any particular use</li>
                     </ul>
                 </div>
 
@@ -1949,7 +1946,7 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                         <li><strong>Scenario:</strong> Four pathologists grade 50 neuroendocrine tumors (G1, G2, G3) based on Ki-67 and mitotic count</li>
                         <li><strong>Purpose:</strong> Assess if pathologists rank tumors by aggressiveness consistently</li>
                         <li><strong>Mean &#x3C1; = 0.85:</strong> Strong rank correlation - pathologists agree on relative tumor aggressiveness</li>
-                        <li><strong>Clinical value:</strong> High correlation validates grading system reliability for prognostic stratification</li>
+                        <li><strong>What it shows:</strong> The four pathologists order tumors by aggressiveness consistently with one another. This is reproducibility, not prognostic validity - no outcome data enter the statistic</li>
                         <li><strong>Advantage:</strong> Less sensitive to exact grade disagreement (G1 vs. G2) than kappa; focuses on ordinal progression</li>
                     </ul>
 
@@ -1959,7 +1956,7 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                         <li><strong>Challenge:</strong> Specialists may use different thresholds but recognize same severity progression</li>
                         <li><strong>Mean &#x3C1; = 0.78:</strong> Good rank correlation despite potential systematic differences in grading</li>
                         <li><strong>Interpretation:</strong> Both pathologists recognize severity trajectory; category-specific calibration may still be needed</li>
-                        <li><strong>Application:</strong> Validates general pathologist competency for IBD assessment with specialist oversight</li>
+                        <li><strong>Scope:</strong> The two pathologists order cases similarly, but a single rank correlation against one comparator does not settle a competency question - that needs a prespecified threshold, a representative case mix, and review of the discordant cases</li>
                     </ul>
 
                     <p style='margin: 0 0 10px 0; font-weight: bold;'>3. Fibrosis Progression Assessment (Longitudinal Consistency):</p>
@@ -1967,7 +1964,7 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                         <li><strong>Scenario:</strong> Three hepatopathologists rank 40 liver biopsies by fibrosis severity (Ishak 0-6 or Metavir F0-F4)</li>
                         <li><strong>Ordinal nature:</strong> Fibrosis stages represent clear progression from none to cirrhosis</li>
                         <li><strong>Mean &#x3C1; = 0.89:</strong> Excellent rank correlation on disease progression</li>
-                        <li><strong>Clinical decision:</strong> Consistent severity ranking supports reliable treatment timing recommendations</li>
+                        <li><strong>What the coefficient shows:</strong> The three pathologists order cases by fibrosis severity similarly. Rank correlation says nothing about whether the assigned stages are correct, so it does not on its own support any staging-driven decision</li>
                         <li><strong>Robust to staging system:</strong> Correlation reflects biological progression regardless of exact staging scheme</li>
                     </ul>
 
@@ -1985,9 +1982,9 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                         <li><strong>Scenario:</strong> Compare AI algorithm vs. three expert pathologists on Gleason grading (6-10) for 100 prostate cores</li>
                         <li><strong>Validation focus:</strong> AI should rank cases by prognostic severity similar to experts</li>
                         <li><strong>Mean &#x3C1; = 0.81:</strong> Strong rank correlation between AI and expert consensus</li>
-                        <li><strong>Regulatory value:</strong> High correlation demonstrates AI captures prognostic progression</li>
+                        <li><strong>What it shows:</strong> The algorithm orders cases similarly to the expert consensus grade; no outcome data enter the statistic, so it says nothing about prognostic performance</li>
                         <li><strong>Advantage:</strong> Robust measure unaffected by systematic grade shifts (AI consistently one grade higher/lower)</li>
-                        <li><strong>Clinical deployment:</strong> Supports AI as decision support for risk stratification</li>
+                        <li><strong>Scope:</strong> Rank correlation with experts describes ordering only; it does not address absolute grade accuracy, calibration, or outcome prediction, so it does not on its own answer whether the algorithm is fit for any particular use</li>
                     </ul>
                 </div>
 
@@ -2240,7 +2237,7 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                         <li><strong>Challenge:</strong> Visual estimation varies between observers but should correlate</li>
                         <li><strong>Mean r = 0.88:</strong> High correlation indicates pathologists identify high vs. low proliferation consistently</li>
                         <li><strong>ICC comparison:</strong> ICC may be lower due to systematic differences in thresholds, but correlation remains high</li>
-                        <li><strong>Clinical value:</strong> Validates Ki-67 for risk stratification despite inter-observer scaling differences</li>
+                        <li><strong>What it shows:</strong> The pathologists order cases by proliferation similarly. Correlation is unchanged by systematic scaling differences, so it does not show that the reported percentages agree, and no outcome data enter it</li>
                     </ul>
 
                     <p style='margin: 0 0 10px 0; font-weight: bold;'>3. Digital Image Analysis (Nuclear Area Measurement):</p>
@@ -2257,7 +2254,7 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                         <li><strong>Scenario:</strong> Five pathologists count mitotic figures per 10 HPF in 40 sarcoma cases (range: 0-35)</li>
                         <li><strong>Count data:</strong> Discrete counts treated as continuous for correlation</li>
                         <li><strong>Mean r = 0.82:</strong> High correlation - pathologists identify mitotically active vs. inactive tumors</li>
-                        <li><strong>Prognostic value:</strong> High correlation validates mitotic count for grading despite count variability</li>
+                        <li><strong>What it shows:</strong> The pathologists order cases by mitotic activity similarly. Counts that differ by a constant factor still correlate perfectly, so this is not agreement on the count that drives the grade, and no outcome data enter it</li>
                         <li><strong>Training assessment:</strong> Lower correlations identify pathologists needing mitosis recognition training</li>
                     </ul>
 
@@ -2267,7 +2264,7 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                         <li><strong>Measurement:</strong> Continuous percentage (0-100%) from Sirius Red staining</li>
                         <li><strong>Comparison:</strong> AI algorithm vs. three expert hepatopathologists</li>
                         <li><strong>Mean r = 0.91:</strong> Excellent correlation between AI and human quantification</li>
-                        <li><strong>Regulatory significance:</strong> High correlation supports AI for automated fibrosis quantification</li>
+                        <li><strong>Scope:</strong> Correlation describes shared ordering only; a proportional or constant offset leaves it high, so it does not address absolute agreement or calibration and does not on its own answer whether the algorithm is fit for any particular use</li>
                         <li><strong>Efficiency gain:</strong> AI provides objective, reproducible measurements with human-level correlation</li>
                     </ul>
                 </div>
@@ -2493,36 +2490,38 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                         <tr>
                             <td style='padding: 8px; border-bottom: 1px solid #ddd;'><strong>&lt; 0.40</strong></td>
                             <td style='padding: 8px; border-bottom: 1px solid #ddd;'>Poor</td>
-                            <td style='padding: 8px; border-bottom: 1px solid #ddd;'>Substantial disagreement - methods not interchangeable</td>
+                            <td style='padding: 8px; border-bottom: 1px solid #ddd;'>Large deviation from the line of identity</td>
                         </tr>
                         <tr>
                             <td style='padding: 8px; border-bottom: 1px solid #ddd;'><strong>0.40 - 0.70</strong></td>
                             <td style='padding: 8px; border-bottom: 1px solid #ddd;'>Fair</td>
-                            <td style='padding: 8px; border-bottom: 1px solid #ddd;'>Consider method calibration before use</td>
+                            <td style='padding: 8px; border-bottom: 1px solid #ddd;'>Appreciable deviation from the line of identity</td>
                         </tr>
                         <tr>
                             <td style='padding: 8px; border-bottom: 1px solid #ddd;'><strong>0.70 - 0.90</strong></td>
                             <td style='padding: 8px; border-bottom: 1px solid #ddd;'>Moderate</td>
-                            <td style='padding: 8px; border-bottom: 1px solid #ddd;'>Acceptable for some applications with caution</td>
+                            <td style='padding: 8px; border-bottom: 1px solid #ddd;'>Moderate deviation from the line of identity</td>
                         </tr>
                         <tr>
                             <td style='padding: 8px; border-bottom: 1px solid #ddd;'><strong>0.90 - 0.95</strong></td>
                             <td style='padding: 8px; border-bottom: 1px solid #ddd;'>Good</td>
-                            <td style='padding: 8px; border-bottom: 1px solid #ddd;'>Methods reasonably interchangeable</td>
+                            <td style='padding: 8px; border-bottom: 1px solid #ddd;'>Small deviation from the line of identity</td>
                         </tr>
                         <tr>
                             <td style='padding: 8px; border-bottom: 1px solid #ddd;'><strong>0.95 - 0.99</strong></td>
                             <td style='padding: 8px; border-bottom: 1px solid #ddd;'>Substantial</td>
-                            <td style='padding: 8px; border-bottom: 1px solid #ddd;'>Methods highly interchangeable</td>
+                            <td style='padding: 8px; border-bottom: 1px solid #ddd;'>Very small deviation from the line of identity</td>
                         </tr>
                         <tr>
                             <td style='padding: 8px; border-bottom: 1px solid #ddd;'><strong>&gt; 0.99</strong></td>
                             <td style='padding: 8px; border-bottom: 1px solid #ddd;'>Almost perfect</td>
-                            <td style='padding: 8px; border-bottom: 1px solid #ddd;'>Excellent interchangeability</td>
+                            <td style='padding: 8px; border-bottom: 1px solid #ddd;'>Negligible deviation from the line of identity</td>
                         </tr>
                     </table>
                     <p style='margin: 15px 0 0 0; font-style: italic; color: #555;'>
-                        Note: Thresholds are context-dependent. Clinical applications may require CCC > 0.95 for safety-critical measurements.
+                        Note: these band boundaries are more lenient than McBride's (2005) published CCC scale, and they are
+                        context-dependent. A CCC does not establish that two methods can be used in place of one another - that
+                        requires a prespecified acceptable difference, assessed with the Total Deviation Index or Bland-Altman limits.
                     </p>
                 </div>
 
@@ -2612,8 +2611,10 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                             bias (C<sub>b</sub>=0.99). High r and high C<sub>b</sub> both contribute to strong CCC.
                         </p>
                         <p style='margin: 5px 0; padding-left: 30px;'>
-                            <strong>Application:</strong> WSI validated for mitotic count assessment; can replace glass slides
-                            for this application without calibration.
+                            <strong>Application:</strong> This level of concordance in one cohort supports proceeding to a
+                            formal validation study. A single-cohort CCC does not itself validate substituting WSI for glass
+                            slides: it does not address readers outside the study, case-mix effects, or behaviour at the
+                            mitotic-count thresholds that change grade.
                         </p>
                     </div>
 
@@ -2638,8 +2639,9 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                             (r=0.89). Low C<sub>b</sub> (0.84) indicates substantial systematic bias between clones.
                         </p>
                         <p style='margin: 5px 0; padding-left: 30px;'>
-                            <strong>Application:</strong> Clones are NOT interchangeable for therapy selection cutoffs
-                            (1%, 50%). Use clone-specific thresholds or apply correction factors.
+                            <strong>Application:</strong> The systematic offset falls in the range that spans the 1% and 50%
+                            TPS cutoffs, so scores from the two clones are not directly comparable at those cutoffs without
+                            further study of clone-specific behaviour.
                         </p>
                     </div>
 
@@ -2688,12 +2690,13 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                             &#x2022; Mean difference: CISH 0.05 ratio units lower (not clinically significant)
                         </p>
                         <p style='margin: 5px 0; padding-left: 30px;'>
-                            <strong>Clinical Interpretation:</strong> Excellent agreement (CCC=0.96) with both high precision
-                            (r=0.97) and high accuracy (C<sub>b</sub>=0.99). Methods are essentially equivalent.
+                            <strong>Clinical Interpretation:</strong> Very high concordance (CCC=0.96) with both high precision
+                            (r=0.97) and high accuracy (C<sub>b</sub>=0.99).
                         </p>
                         <p style='margin: 5px 0; padding-left: 30px;'>
-                            <strong>Application:</strong> CISH validated as acceptable alternative to FISH for HER2 testing.
-                            Methods are interchangeable at standard cutoffs (ratio >=2.0).
+                            <strong>Application:</strong> A CCC of this size is consistent with close agreement, but it is not an
+                            equivalence test. Whether the two assays may be used in place of one another at the ratio >=2.0
+                            cutoff requires a prespecified acceptable difference and concordance assessed at that cutoff.
                         </p>
                     </div>
                 </div>
@@ -2846,19 +2849,23 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                                     ci_upper <- if (is.finite(ci_upper)) min(1, ci_upper) else NA_real_
                                 }
 
-                                # Interpretation (McBride 2005, adjusted for clinical research)
+                                # Interpretation labels. NOTE: these band boundaries
+                                # (0.40/0.70/0.90/0.95/0.99) are more lenient than
+                                # McBride's (2005) published CCC scale; the boundaries
+                                # actually used are stated in the table note so the
+                                # reader is not misled by an attribution.
                                 if (ccc < 0.40) {
-                                    interp <- "Poor agreement - methods not interchangeable"
+                                    interp <- "Poor concordance"
                                 } else if (ccc < 0.70) {
-                                    interp <- "Fair agreement - consider method calibration"
+                                    interp <- "Fair concordance"
                                 } else if (ccc < 0.90) {
-                                    interp <- "Moderate agreement - use with caution"
+                                    interp <- "Moderate concordance"
                                 } else if (ccc < 0.95) {
-                                    interp <- "Good agreement - methods reasonably interchangeable"
+                                    interp <- "Good concordance"
                                 } else if (ccc < 0.99) {
-                                    interp <- "Substantial agreement - methods highly interchangeable"
+                                    interp <- "Substantial concordance"
                                 } else {
-                                    interp <- "Almost perfect agreement - excellent interchangeability"
+                                    interp <- "Almost perfect concordance"
                                 }
 
                                 cccTable$addRow(rowKey = comparison_name, list(
@@ -2873,6 +2880,11 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                                 ))
                             }
                         }
+
+                        cccTable$setNote(
+                            "scale",
+                            "Concordance labels use the band boundaries 0.40 / 0.70 / 0.90 / 0.95 / 0.99. These are more lenient than McBride's (2005) published CCC scale, so the same CCC will be described differently by the two conventions. Whether two methods may be used in place of one another depends on whether their differences stay inside a clinically acceptable limit, which the CCC alone does not address - see the Total Deviation Index and Bland-Altman output."
+                        )
                     },
                     error = function(e) {
                         self$results$linCCCTable$setNote(
@@ -2919,13 +2931,14 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                 html <- paste0(html, "<p><strong>Decision Rule:</strong></p>")
                 html <- paste0(html, "<ul>")
                 html <- paste0(
-                    html, '<li>If <strong>TDI <= Acceptable Limit</strong>: Methods are <span style="color: green;">',
-                    "<strong>equivalent/acceptable</strong></span> - the specified proportion of differences ",
-                    "falls within acceptable bounds</li>"
+                    html, '<li>If the <strong>upper confidence bound of the TDI <= Acceptable Limit</strong>: the ',
+                    '<span style="color: green;"><strong>equivalence criterion is met</strong></span> - the specified ',
+                    "proportion of differences falls within acceptable bounds. A point estimate inside the limit whose ",
+                    "upper bound is outside it is inconclusive, not a pass</li>"
                 )
                 html <- paste0(
-                    html, '<li>If <strong>TDI > Acceptable Limit</strong>: Methods are <span style="color: red;">',
-                    "<strong>not equivalent</strong></span> - too many differences exceed acceptable bounds</li>"
+                    html, '<li>If <strong>TDI > Acceptable Limit</strong>: the <span style="color: red;">',
+                    "<strong>equivalence criterion is not met</strong></span> - too many differences exceed acceptable bounds</li>"
                 )
                 html <- paste0(html, "</ul>")
 
@@ -2949,9 +2962,9 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                 html <- paste0(html, "<ul>")
                 html <- paste0(html, "<li><strong>Acceptable Limit:</strong> 5 mm (clinical decision threshold)</li>")
                 html <- paste0(html, "<li><strong>Coverage:</strong> 90% of differences should be <=5 mm</li>")
-                html <- paste0(html, '<li><strong>Result:</strong> If TDI = 3.8 mm \u{2192} <span style="color: green;">Methods equivalent</span></li>')
-                html <- paste0(html, '<li><strong>Result:</strong> If TDI = 6.2 mm \u{2192} <span style="color: red;">Methods not equivalent</span></li>')
-                html <- paste0(html, "<li><strong>Action:</strong> Acceptable agreement allows replacement of manual with digital measurements</li>")
+                html <- paste0(html, '<li><strong>Result:</strong> If TDI = 3.8 mm and its upper bound is also below 5 mm \u{2192} <span style="color: green;">equivalence criterion met</span></li>')
+                html <- paste0(html, '<li><strong>Result:</strong> If TDI = 6.2 mm \u{2192} <span style="color: red;">equivalence criterion not met</span></li>')
+                html <- paste0(html, "<li><strong>What it reports:</strong> the criterion is met or not met at the stated limit and coverage; it does not by itself settle whether one measurement method may take the place of the other in practice</li>")
                 html <- paste0(html, "</ul>")
 
                 html <- paste0(html, "<p><strong>Example 2: Ki-67 Proliferation Index</strong></p>")
@@ -2959,8 +2972,8 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                 html <- paste0(html, "<ul>")
                 html <- paste0(html, "<li><strong>Acceptable Limit:</strong> 10% absolute difference (clinical cutoff significance)</li>")
                 html <- paste0(html, "<li><strong>Coverage:</strong> 95% of differences should be <=10%</li>")
-                html <- paste0(html, "<li><strong>Result:</strong> If TDI = 7.5% \u{2192} Automated method acceptable for clinical use</li>")
-                html <- paste0(html, "<li><strong>Clinical Impact:</strong> Supports FDA 510(k) submission for digital pathology system</li>")
+                html <- paste0(html, "<li><strong>Result:</strong> If TDI = 7.5% \u{2192} 95% of differences fall within the 10% limit</li>")
+                html <- paste0(html, "<li><strong>Reporting:</strong> A TDI stated against a prespecified limit and coverage is one of the metrics method-comparison submissions expect; on its own it does not establish fitness for any particular use</li>")
                 html <- paste0(html, "</ul>")
 
                 html <- paste0(html, "<p><strong>Example 3: Mitotic Count Comparison</strong></p>")
@@ -2968,8 +2981,8 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                 html <- paste0(html, "<ul>")
                 html <- paste0(html, "<li><strong>Acceptable Limit:</strong> 5 mitoses (affects tumor grade)</li>")
                 html <- paste0(html, "<li><strong>Coverage:</strong> 90% of differences should be <=5</li>")
-                html <- paste0(html, "<li><strong>Result:</strong> If TDI = 4.2 \u{2192} Inter-observer agreement acceptable</li>")
-                html <- paste0(html, "<li><strong>Quality Control:</strong> Can be used to certify pathologist performance</li>")
+                html <- paste0(html, "<li><strong>Result:</strong> If TDI = 4.2 \u{2192} 90% of count differences fall within the 5-mitosis limit</li>")
+                html <- paste0(html, "<li><strong>Quality Control:</strong> Gives a difference measured in the same units as the grading threshold, so it can be compared against a prespecified quality-control limit</li>")
                 html <- paste0(html, "</ul>")
 
                 html <- paste0(html, "</div>")
@@ -3130,21 +3143,27 @@ agreementClass <- if (requireNamespace("jmvcore")) {
 
                                 # Determine if methods meet acceptability criteria
                                 meets_criteria <- tdi_estimate <= acceptable_limit
-                                acceptable_text <- ifelse(meets_criteria,
-                                    " Yes (Acceptable)",
-                                    " No (Not Acceptable)"
-                                )
+                                # Match the interpretation column: a point estimate inside the
+                                # limit whose upper confidence bound is outside it is
+                                # inconclusive, not a pass.
+                                acceptable_text <- if (meets_criteria && ci_upper <= acceptable_limit) {
+                                    " Yes (criterion met)"
+                                } else if (meets_criteria) {
+                                    " Inconclusive (upper CI exceeds limit)"
+                                } else {
+                                    " No (criterion not met)"
+                                }
 
                                 # Interpretation
                                 if (meets_criteria) {
                                     if (ci_upper <= acceptable_limit) {
                                         interp <- sprintf(
-                                            "Methods are equivalent - %.0f%% of differences <=%.1f (limit: %.1f). Upper CI also acceptable.",
+                                            "Equivalence criterion met - %.0f%% of differences <=%.1f (limit: %.1f), and the upper confidence bound is also within the limit.",
                                             coverage * 100, tdi_estimate, acceptable_limit
                                         )
                                     } else {
                                         interp <- sprintf(
-                                            "Methods likely equivalent - TDI=%.1f <= limit (%.1f), but upper CI (%.1f) exceeds limit. Consider more data.",
+                                            "Equivalence NOT demonstrated - the TDI point estimate (%.1f) is within the limit (%.1f) but its upper confidence bound (%.1f) is not. Lin's criterion requires the upper bound to fall inside the limit.",
                                             tdi_estimate, acceptable_limit, ci_upper
                                         )
                                     }
@@ -3153,12 +3172,12 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                                     pct_over <- if (acceptable_limit > 0) (margin / acceptable_limit) * 100 else NA
                                     if (!is.na(pct_over)) {
                                         interp <- sprintf(
-                                            "Methods NOT equivalent - TDI=%.1f exceeds acceptable limit (%.1f) by %.1f (%.0f%%). Unacceptable disagreement.",
+                                            "Equivalence criterion NOT met - TDI=%.1f exceeds the acceptable limit (%.1f) by %.1f (%.0f%%).",
                                             tdi_estimate, acceptable_limit, margin, pct_over
                                         )
                                     } else {
                                         interp <- sprintf(
-                                            "Methods NOT equivalent - TDI=%.1f exceeds acceptable limit (%.1f) by %.1f. Unacceptable disagreement.",
+                                            "Equivalence criterion NOT met - TDI=%.1f exceeds the acceptable limit (%.1f) by %.1f.",
                                             tdi_estimate, acceptable_limit, margin
                                         )
                                     }
@@ -3233,7 +3252,7 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                 html <- paste0(html, "<ul>")
                 html <- paste0(
                     html, '<li><strong>>0.90:</strong> <span style="color: green;">Excellent</span> - ',
-                    "category has strong agreement, reliable for clinical use</li>"
+                    "category has strong agreement between raters</li>"
                 )
                 html <- paste0(
                     html, '<li><strong>0.75-0.90:</strong> <span style="color: orange;">Good</span> - ',
@@ -4283,6 +4302,27 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                             # scale, named, for the whole analysis.
                             interpretation <- if (is.na(agreement_stat)) {
                                 "Error calculating agreement"
+                            } else if (identical(stat_type, "ICC(2,1)")) {
+                                # An ICC is not graded on the Landis & Koch kappa
+                                # bands; use the Koo & Li (2016) bands that the
+                                # main ICC table already uses, or the same ICC
+                                # gets two different words in one output. This
+                                # branch comes first because "worse than chance"
+                                # is a chance-corrected-kappa concept: a negative
+                                # ICC(2,1) means within-subject variance exceeds
+                                # between-subject variance, and Koo & Li has no
+                                # such band.
+                                if (agreement_stat < 0.50) {
+                                    "Poor"
+                                } else if (agreement_stat < 0.75) {
+                                    "Moderate"
+                                } else if (agreement_stat < 0.90) {
+                                    "Good"
+                                } else {
+                                    "Excellent"
+                                }
+                            } else if (agreement_stat < 0) {
+                                "Worse than chance"
                             } else if (agreement_stat < 0.20) {
                                 "Slight"
                             } else if (agreement_stat < 0.40) {
@@ -4324,6 +4364,10 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                         for (row in result_rows) {
                             table$addRow(rowKey = row$subgroup, values = row)
                         }
+                        table$setNote(
+                            "scale",
+                            "Interpretation labels follow Landis & Koch (1977) for kappa and Koo & Li (2016) for ICC(2,1); the two scales are not interchangeable, so read the label together with the statistic named in the Statistic column."
+                        )
 
                         # Store forest plot state
                         if (self$options$subgroupForestPlot && nrow(forest_data) > 0) {
@@ -5372,6 +5416,11 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                             <td style='padding: 8px; border-bottom: 1px solid #ddd;'>Outstanding reliability</td>
                         </tr>
                     </table>
+                    <p style='margin: 10px 0 0 0; font-size: 13px;'>
+                        Note: these bands are a different convention from the Landis &amp; Koch (1977) bands quoted in the
+                        Analysis Summary and from the Koo &amp; Li (2016) ICC bands used in the ICC table. The same value will
+                        be described differently by each convention, so state which one you are reporting.
+                    </p>
                 </div>
 
                 <div style='background-color: rgba(155, 155, 155, 0.06); border-left: 4px solid #333; padding: 15px; margin-bottom: 20px; color: inherit;'>
@@ -5423,9 +5472,12 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                             &#x2022; Inter-rater: Overall ICC=0.82
                         </p>
                         <p style='margin: 5px 0; padding-left: 30px;'>
-                            <strong>Clinical Interpretation:</strong> All pathologists show excellent individual consistency
-                            (ICC 0.78-0.91) between glass and digital platforms. Strong inter-rater agreement (ICC=0.82)
-                            indicates the digital platform does not introduce systematic bias.
+                            <strong>Clinical Interpretation:</strong> Individual consistency between glass and digital platforms
+                            is good by the Koo &amp; Li (2016) bands (ICC 0.78-0.91), as is inter-rater reliability (ICC=0.82).
+                            A high ICC does not exclude a systematic offset between platforms: the ICC is dominated by
+                            between-case variance and can stay high in the presence of a constant shift. Use the Bland-Altman
+                            mean difference and its confidence interval, judged against a clinically acceptable difference,
+                            to assess bias.
                         </p>
                         <p style='margin: 5px 0; padding-left: 30px;'>
                             <strong>Application:</strong> Provides evidence for digital pathology implementation, showing
@@ -5456,8 +5508,10 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                             mild group-level fatigue effect but still within acceptable range.
                         </p>
                         <p style='margin: 5px 0; padding-left: 30px;'>
-                            <strong>Application:</strong> Demonstrates that frozen section adequacy assessment remains
-                            reliable throughout standard shifts, supporting current work scheduling practices.
+                            <strong>Application:</strong> These point estimates are consistent with stable adequacy assessment
+                            across the shift, but kappas from a single study carry wide confidence intervals and a small
+                            drop of this size is within sampling noise. The comparison does not by itself settle any
+                            question about scheduling.
                         </p>
                     </div>
 
@@ -5507,13 +5561,15 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                             &#x2022; Inter-rater: Overall ICC=0.81
                         </p>
                         <p style='margin: 5px 0; padding-left: 30px;'>
-                            <strong>Clinical Interpretation:</strong> All scorers show good-to-excellent individual reproducibility
-                            (ICC 0.79-0.92). Scorer3 with lower ICC (0.79) is still acceptable but might benefit from additional
-                            training. Strong inter-rater ICC (0.81) supports use for therapeutic decision-making.
+                            <strong>Clinical Interpretation:</strong> Individual reproducibility is good to excellent
+                            (ICC 0.79-0.92) and inter-rater reliability is good (ICC=0.81). With four scorers the confidence
+                            intervals around these ICCs are wide, so the ordering among scorers is not firmly established.
                         </p>
                         <p style='margin: 5px 0; padding-left: 30px;'>
-                            <strong>Application:</strong> Establishes that PD-L1 scoring is sufficiently reproducible both
-                            within individual scorers and across the scoring team, critical for biomarker-driven therapy selection.
+                            <strong>Application:</strong> Consistent with adequate reproducibility within and across the scoring
+                            team, subject to those confidence intervals. What counts as sufficient depends on a prespecified
+                            acceptance threshold and on agreement measured at the clinical cutoffs (TPS 1% and 50%), where
+                            discordance actually changes categories - an overall ICC does not report that.
                         </p>
                     </div>
                 </div>
@@ -6023,9 +6079,9 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                     <h4 style='margin: 0 0 10px 0; color: #333;'>Relationship to Agreement Measures</h4>
                     <p style='margin: 0; font-size: 13px;'>
                         Rater bias is <strong>independent from agreement</strong>. You can have:<br><br>
-                         <strong>High agreement + No bias:</strong> Ideal situation<br>
+                         <strong>High agreement + no bias detected:</strong> Best case among these four<br>
                          <strong>High agreement + Bias:</strong> All raters systematically lenient/strict together<br>
-                         <strong>Low agreement + No bias:</strong> Random disagreement but no systematic patterns<br>
+                         <strong>Low agreement + no bias detected:</strong> Random disagreement with no systematic pattern found<br>
                          <strong>Low agreement + Bias:</strong> Both random and systematic errors present
                     </p>
                 </div>
@@ -6096,7 +6152,7 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                         # Add interpretation note
                         if (bias_result$p.value >= 0.05) {
                             interp <- "No significant bias detected"
-                            detail <- "Raters use rating categories with similar frequencies. No evidence of systematic lenient/strict patterns."
+                            detail <- "No systematic lenient/strict rating pattern was detected. Absence of a detected pattern is not evidence that none exists; it only means none was detected in these data. Inspect the marginal frequency distributions directly."
                         } else if (bias_result$p.value >= 0.01) {
                             interp <- "Significant bias detected"
                             detail <- "Raters have systematically different rating patterns (p < .05). Examine individual rater frequency distributions to identify which raters are lenient/strict."
@@ -6236,8 +6292,8 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                         <li><strong>Categories:</strong> TPS <1%, 1-49%, 50-74%, >=75%</li>
                         <li><strong>Same pathologist:</strong> Evaluates paired sections stained with different antibodies</li>
                         <li><strong>Bhapkar test:</strong> Tests if antibodies yield different category distributions</li>
-                        <li><strong>p = 0.12:</strong> No significant difference - antibodies produce comparable scoring distributions</li>
-                        <li><strong>Conclusion:</strong> Methods can be used interchangeably for clinical decision-making</li>
+                        <li><strong>p = 0.12:</strong> No marginal shift in category usage was detected between the two clones</li>
+                        <li><strong>Conclusion:</strong> A non-significant test is not an equivalence test, so this does not establish that the clones may be used in place of one another. That would need an equivalence design with a prespecified margin - concordance at the TPS cutpoints that change category - and adequate power</li>
                     </ul>
 
                     <p style='margin: 0 0 10px 0; font-weight: bold;'>5. Rater Drift Detection (Longitudinal Quality Control):</p>
@@ -6294,7 +6350,7 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                          <strong>Confusion matrix:</strong> Shows specific disagreement patterns<br>
                          <strong>Marginal frequency tables:</strong> Identify which categories differ most<br><br>
 
-                        <strong>Ideal scenario:</strong> High kappa (good agreement) + Non-significant Bhapkar (no bias)
+                        <strong>Best case among the combinations:</strong> High kappa (good agreement) + non-significant Bhapkar (no marginal bias detected; a null result is not proof that none is present)
                     </p>
                 </div>
 
@@ -6365,7 +6421,7 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                         if (is.na(bhapkar_result$p.value)) {
                             interp <- "Cannot interpret"
                         } else if (bhapkar_result$p.value >= 0.05) {
-                            interp <- "No significant difference in marginal distributions"
+                            interp <- "No significant difference detected (does not establish equality)"
                         } else if (bhapkar_result$p.value >= 0.01) {
                             interp <- "Significant marginal heterogeneity (p < .05)"
                         } else {
@@ -6395,9 +6451,11 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                             )
                         } else {
                             detail <- sprintf(
-                                "No significant difference in marginal distributions (p = %.3f).
-                                     Both raters use rating categories with similar frequencies, suggesting no systematic bias.",
-                                bhapkar_result$p.value
+                                "The test did not detect a difference in marginal distributions (p = %.3f).
+                                     A non-significant result does not establish that the two raters use the categories with equal
+                                     frequency; it only means no difference was detected in these %d cases. Inspect the marginal
+                                     frequency tables directly to judge whether any difference is clinically material.",
+                                bhapkar_result$p.value, nrow(ratings_clean)
                             )
                         }
 
@@ -6504,8 +6562,8 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                         <li><strong>Categories:</strong> Normal, dysplastic nevus, melanoma in-situ, invasive melanoma</li>
                         <li><strong>Concern:</strong> Digital platform may alter diagnostic behavior</li>
                         <li><strong>Stuart-Maxwell test:</strong> Detects if marginal distributions differ between modalities</li>
-                        <li><strong>p = 0.68:</strong> No significant difference in category usage between digital and glass</li>
-                        <li><strong>Validation outcome:</strong> Digital pathology yields equivalent diagnostic distributions - suitable for clinical use</li>
+                        <li><strong>p = 0.68:</strong> No shift in category usage was detected between digital and glass</li>
+                        <li><strong>What that does and does not show:</strong> Marginal homogeneity is the null hypothesis, so failing to reject it does not demonstrate equivalence. The test also compares category totals only and is blind to case-level disagreement, so pair it with a case-level agreement statistic and a prespecified concordance margin before drawing any validation conclusion</li>
                     </ul>
 
                     <p style='margin: 0 0 10px 0; font-weight: bold;'>3. Temporal Stability Assessment (Intra-Rater Reliability):</p>
@@ -6514,8 +6572,8 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                         <li><strong>Categories:</strong> Proliferative, hyperplasia without atypia, atypical hyperplasia, carcinoma</li>
                         <li><strong>Quality control:</strong> Assess consistency of diagnostic criteria over time</li>
                         <li><strong>Stuart-Maxwell test:</strong> Tests if marginal distributions are stable</li>
-                        <li><strong>p = 0.89:</strong> No significant drift - pathologist maintains consistent diagnostic thresholds</li>
-                        <li><strong>QA implication:</strong> Demonstrates long-term diagnostic reliability</li>
+                        <li><strong>p = 0.89:</strong> No drift in category usage was detected between the two readings</li>
+                        <li><strong>QA implication:</strong> A null result is not evidence that thresholds are stable - with 60 cases only a large shift would have been detected, and the test compares category totals rather than case-level consistency</li>
                     </ul>
 
                     <p style='margin: 0 0 10px 0; font-weight: bold;'>4. Stain Protocol Optimization (Immunohistochemistry):</p>
@@ -6544,7 +6602,7 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                     <table style='width: 100%; border-collapse: collapse; font-size: 14px;'>
                         <tr>
                             <td style='padding: 5px; font-weight: bold; border-bottom: 1px solid #ddd;'>p >= 0.05</td>
-                            <td style='padding: 5px; border-bottom: 1px solid #ddd;'>No significant difference - marginal homogeneity holds</td>
+                            <td style='padding: 5px; border-bottom: 1px solid #ddd;'>No significant departure from marginal homogeneity detected (this does not establish that the marginals are equal)</td>
                         </tr>
                         <tr>
                             <td style='padding: 5px; font-weight: bold; border-bottom: 1px solid #ddd;'>p &lt; 0.05</td>
@@ -6662,7 +6720,7 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                         if (is.na(stuart_result$p.value)) {
                             interp <- "Cannot interpret"
                         } else if (stuart_result$p.value >= 0.05) {
-                            interp <- "No significant difference - marginal homogeneity holds"
+                            interp <- "No significant departure from marginal homogeneity detected (does not establish equality)"
                         } else if (stuart_result$p.value >= 0.01) {
                             interp <- "Significant marginal heterogeneity (p < .05)"
                         } else {
@@ -6692,9 +6750,11 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                             )
                         } else {
                             detail <- sprintf(
-                                "No significant difference in marginal distributions (p = %.3f).
-                                     Marginal homogeneity holds - both raters/conditions use categories with similar frequencies.",
-                                stuart_result$p.value
+                                "The test did not detect a difference in how often each category was used (p = %.3f).
+                                     Absence of a significant result is not evidence that the marginal distributions are the same;
+                                     it only means no shift was detected in these %d subjects. Inspect the marginal frequency
+                                     table directly.",
+                                stuart_result$p.value, nrow(ratings_clean)
                             )
                         }
 
@@ -6767,7 +6827,7 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                             <th style='padding: 8px; text-align: left; border-bottom: 2px solid #333;'>Training Status</th>
                         </tr>
                         <tr>
-                            <td style='padding: 8px; border-bottom: 1px solid #ddd;'><strong>\u{03BA} < 0.40</strong></td>
+                            <td style='padding: 8px; border-bottom: 1px solid #ddd;'><strong>&#x3BA; < 0.40</strong></td>
                             <td style='padding: 8px; border-bottom: 1px solid #ddd;'>Poor to fair</td>
                             <td style='padding: 8px; border-bottom: 1px solid #ddd;'> Needs significant training</td>
                         </tr>
@@ -6782,9 +6842,9 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                             <td style='padding: 8px; border-bottom: 1px solid #ddd;'> Acceptable performance</td>
                         </tr>
                         <tr>
-                            <td style='padding: 8px;'><strong>\u{03BA} > 0.75</strong></td>
+                            <td style='padding: 8px;'><strong>&#x3BA; > 0.75</strong></td>
                             <td style='padding: 8px;'>Excellent</td>
-                            <td style='padding: 8px;'> Certified/Expert level</td>
+                            <td style='padding: 8px;'> No training gap indicated by this comparison</td>
                         </tr>
                     </table>
                 </div>
@@ -6821,13 +6881,16 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                         <strong>Scenario:</strong> Five pathology residents (Raters 1-5) grade 100 tumor samples.
                         A senior pathologist provides reference diagnoses.<br><br>
                         <strong>Results:</strong><br>
-                        \u{2022} Resident 1: \u{03BA} = 0.82 (Excellent)  Ready for certification<br>
-                        \u{2022} Resident 2: \u{03BA} = 0.68 (Substantial)  Acceptable, continue monitoring<br>
-                        \u{2022} Resident 3: \u{03BA} = 0.52 (Moderate)  Additional training needed<br>
-                        \u{2022} Resident 4: \u{03BA} = 0.45 (Moderate)  Review difficult cases with expert<br>
-                        \u{2022} Resident 5: \u{03BA} = 0.28 (Poor)  Requires intensive retraining<br><br>
+                        &#x2022; Resident 1: &#x3BA; = 0.82 (Excellent)  Ready for certification<br>
+                        &#x2022; Resident 2: &#x3BA; = 0.68 (Substantial)  Acceptable, continue monitoring<br>
+                        &#x2022; Resident 3: &#x3BA; = 0.52 (Moderate)  Additional training needed<br>
+                        &#x2022; Resident 4: &#x3BA; = 0.45 (Moderate)  Review difficult cases with expert<br>
+                        &#x2022; Resident 5: &#x3BA; = 0.28 (Poor)  Requires intensive retraining<br><br>
                         <strong>Action:</strong> Residents 1-2 certified. Residents 3-5 receive targeted training
-                        based on specific error patterns, then retest after 3 months.
+                        based on specific error patterns, then retest after 3 months.<br><br>
+                        <strong>Caveat:</strong> these are point estimates from 100 cases against a single reference rater
+                        whose own reliability is unknown. At this sample size the confidence intervals of adjacent residents
+                        overlap, so the ordering is not a precise ranking of ability.
                     </p>
                 </div>
 
@@ -6846,9 +6909,9 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                     <h4 style='margin: 0 0 10px 0; color: #333;'>Pairwise vs Overall Agreement</h4>
                     <p style='margin: 0; font-size: 13px;'>
                         <strong>Pairwise Kappa (vs Reference):</strong> Measures each rater's agreement with gold standard<br>
-                        \u{2192} <em>Focus: Individual performance assessment</em><br><br>
+                        &#x2192; <em>Focus: Individual performance assessment</em><br><br>
                         <strong>Fleiss'/Light's Kappa:</strong> Measures overall agreement among all raters<br>
-                        \u{2192} <em>Focus: General reliability of rating system</em><br><br>
+                        &#x2192; <em>Focus: General reliability of rating system</em><br><br>
                         <strong>Recommendation:</strong> Use both! Overall kappa shows if your rating system is reliable.
                         Pairwise kappa identifies which specific raters need training.
                     </p>
@@ -7002,13 +7065,13 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                         # Add interpretation
                         kappa_val <- result$kappa
                         if (kappa_val < 0.40) {
-                            interp <- "Poor to fair - needs training"
+                            interp <- "Poor to fair agreement with the reference rater"
                         } else if (kappa_val < 0.60) {
-                            interp <- "Moderate - additional training recommended"
+                            interp <- "Moderate agreement with the reference rater"
                         } else if (kappa_val < 0.75) {
-                            interp <- "Substantial - acceptable"
+                            interp <- "Substantial agreement with the reference rater"
                         } else {
-                            interp <- "Excellent - certified/expert level"
+                            interp <- "Excellent agreement with the reference rater"
                         }
 
                         pairwise_table$addFootnote(rowKey = result$rater, col = "kappa", interp)
@@ -7024,7 +7087,7 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                     pairwise_table$setNote(
                         "summary",
                         sprintf(
-                            "Average kappa across %d raters: %.3f. Raters are compared individually against the reference rater using Cohen's kappa.",
+                            "Average kappa across %d raters: %.3f. Raters are compared individually against the reference rater using Cohen's kappa. These are point estimates against a single reference rater whose own reliability is unknown, and no confidence intervals are shown here, so apparent differences between raters may reflect sampling variation alone; any ranking shown is not a measure of individual competence.",
                             n_valid, mean_kappa
                         )
                     )
@@ -7835,7 +7898,7 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                             <li><strong>Scenario:</strong> Quality control study comparing pathologists' IHC scoring</li>
                             <li><strong>Variables:</strong> ER Allred score (0-8), PR Allred score (0-8), HER2 score (0-3+), Ki-67 percentage (0-100)</li>
                             <li><strong>Why Iota:</strong> Accounts for biological correlation between biomarkers (ER and PR often concordant)</li>
-                            <li><strong>Clinical Impact:</strong> Ensures reliable breast cancer subtype classification for treatment decisions</li>
+                            <li><strong>What it reports:</strong> the joint reproducibility of the marker panel across raters; it does not address whether the markers are correctly classified against a reference</li>
                         </ul>
 
                         <p style='margin: 0 0 10px 0; font-weight: bold;'>3. Digital Pathology Validation (Multi-Feature Assessment):</p>
@@ -7843,7 +7906,7 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                             <li><strong>Scenario:</strong> Validating AI algorithm vs. expert pathologists on prostate biopsies</li>
                             <li><strong>Variables:</strong> Gleason pattern 3 percentage, pattern 4 percentage, pattern 5 percentage, cribriform pattern presence, perineural invasion extent</li>
                             <li><strong>Why Iota:</strong> Multivariate assessment matches clinical workflow where multiple features inform Gleason score</li>
-                            <li><strong>Application:</strong> Validates AI systems for clinical deployment</li>
+                            <li><strong>Application:</strong> Quantifies multivariate agreement between the algorithm and expert readers; a validation conclusion needs a prespecified acceptance threshold and a reference standard, neither of which the coefficient supplies</li>
                         </ul>
 
                         <p style='margin: 0 0 10px 0; font-weight: bold;'>4. Multi-Organ Biopsy Agreement (Transplant Pathology):</p>
@@ -9056,7 +9119,7 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                             conclusion <- if (!is.na(p_val) && p_val < 0.05) {
                                 "Significant heterogeneity across clusters (p < 0.05); agreement differs by institution."
                             } else if (!is.na(p_val)) {
-                                "No significant heterogeneity detected; agreement is similar across clusters."
+                                sprintf("No significant cluster heterogeneity detected (p = %.3f, %d clusters). Failing to reject the null does not establish that agreement is similar across clusters; read the per-cluster estimates and their confidence intervals.", p_val, n_clusters)
                             } else {
                                 "Test result inconclusive."
                             }

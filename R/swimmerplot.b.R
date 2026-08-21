@@ -1527,7 +1527,7 @@ swimmerplotClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6Class
                 best_pct <- stats$response_percentages[[best_response]]
 
                 interpretation$response <- sprintf(
-                    .("Most common response was %s (%.1f%% of patients). Response distribution shows clinical patterns suitable for efficacy analysis."),
+                    .("Most common response was %s (%.1f%% of patients)."),
                     htmltools::htmlEscape(best_response),
                     best_pct
                 )
@@ -2310,7 +2310,7 @@ swimmerplotClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6Class
                     orr_interpretation <- if (orr_test$p.value < 0.05) {
                         .("Statistically significant difference in response rates between groups (p < 0.05)")
                     } else {
-                        .("No statistically significant difference in response rates between groups")
+                        .("No statistically significant difference in response rates was detected; this does not establish that the rates are equal, as the test may lack power")
                     }
 
                     self$results$groupComparisonTest$addRow(rowKey = 1, values = list(
@@ -2338,7 +2338,7 @@ swimmerplotClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6Class
                     dcr_interpretation <- if (dcr_test$p.value < 0.05) {
                         .("Statistically significant difference in disease control rates between groups (p < 0.05)")
                     } else {
-                        .("No statistically significant difference in disease control rates between groups")
+                        .("No statistically significant difference in disease control rates was detected; this does not establish that the rates are equal, as the test may lack power")
                     }
 
                     self$results$groupComparisonTest$addRow(rowKey = 2, values = list(
@@ -2950,7 +2950,7 @@ swimmerplotClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6Class
                 "<div style='margin: 10px 0;'>",
                 "<h4 style='color: #0056b3; margin: 10px 0 5px 0;'>Statistical Terms</h4>",
                 "<ul style='margin: 5px 0; padding-left: 20px;'>",
-                "<li><strong>95% CI (Confidence Interval):</strong> Range of values likely to contain the true population parameter. For response rates, exact binomial CIs are used for accuracy with small sample sizes.</li>",
+                "<li><strong>95% CI (Confidence Interval):</strong> Range of values compatible with the observed data; over repeated studies, 95% of such intervals contain the true population parameter. For response rates, exact binomial CIs are used for accuracy with small sample sizes.</li>",
                 "<li><strong>Fisher's Exact Test:</strong> Statistical test for comparing categorical outcomes (like response rates) between groups. Used to determine if response rates differ significantly between patient groups. Does not require large sample sizes and is valid for small cell counts.</li>",
                 "<li><strong>Odds Ratio (OR):</strong> Measure of association between group membership and outcome. OR > 1 indicates higher odds of response in the comparison group; OR < 1 indicates lower odds. Example: OR = 2.5 means the comparison group has 2.5 times the odds of responding.</li>",
                 "<li><strong>P-value:</strong> Probability of observing results as extreme or more extreme than observed, assuming no true difference exists. Convention: p < 0.05 indicates statistical significance, but clinical significance should also be considered alongside statistical significance.</li>",
@@ -3055,7 +3055,7 @@ swimmerplotClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6Class
             }
 
             # Methodology note
-            methods_text <- .("Timeline visualization was created using the ggswim package, providing comprehensive swimmer plots suitable for clinical research reporting and regulatory submissions.")
+            methods_text <- .("Timeline visualization was created using the ggswim package.")
 
             full_text <- paste(Filter(nzchar, c(basic_text, response_text, methods_text)), collapse = " ")
 
@@ -3131,7 +3131,7 @@ swimmerplotClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6Class
                 "<div style='margin: 15px 0;'>",
                 "<h4 style='color: #856404; margin: 10px 0 5px 0;'>Output Interpretation</h4>",
                 "<p style='margin: 5px 0; line-height: 1.6;'>",
-                "The swimmer plot displays individual patient timelines with optional color coding for response categories. Milestone markers show key events, and summary statistics provide overall study metrics including person-time analysis and response rates suitable for clinical reporting.",
+                "The swimmer plot displays individual patient timelines with optional color coding for response categories. Milestone markers show key events, and summary statistics provide overall study metrics including person-time analysis and response rates.",
                 "</p>",
                 "</div>",
 

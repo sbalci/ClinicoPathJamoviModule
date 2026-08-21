@@ -923,7 +923,7 @@ vennClass <- if (requireNamespace('jmvcore'))
                     "<li>", .("Choose the 'true' level for each variable (e.g., 'Positive', 'Present', 'Yes')"), "</li>",
                     "<li>", .("Select one or more plot engines in the Plot Selection panel"), "</li>",
                     "<li>", .("Adjust visualization options as needed"), "</li>",
-                    "<li>", .("Interpret intersections - larger overlaps indicate stronger associations"), "</li>",
+                    "<li>", .("Interpret intersections - larger overlaps mean more shared cases; overlap size also depends on how common each variable is"), "</li>",
                     "</ol>",
                     "<p><strong>", .("Choosing a Plot Engine:"), "</strong></p>",
                     "<ul style='margin-left: 20px;'>",
@@ -1033,13 +1033,15 @@ vennClass <- if (requireNamespace('jmvcore'))
 
                 # Generate comprehensive clinical paragraph
                 clinical_paragraph <- sprintf(
-                    "Analysis of %s cases revealed distinct patterns of variable expression. %s The intersection analysis demonstrated %s overlap patterns, which may have clinical implications for patient stratification and treatment planning.",
+                    "Analysis of %s cases revealed distinct patterns of variable expression. %s%s",
                     total_n,
                     paste(individual_sentences, collapse = " "),
                     if (length(var_names) >= 2) {
                         mean_overlap <- mean(summaryData$TrueCount) / total_n
-                        if (mean_overlap > 0.5) "significant" else if (mean_overlap > 0.2) "moderate" else "limited"
-                    } else "individual variable"
+                        sprintf(paste0(" Across the selected variables, the average share of positive cases was %s;",
+                                       " overlap between variables is shown in the diagram and depends on how common each variable is."),
+                                if (mean_overlap > 0.5) "high" else if (mean_overlap > 0.2) "moderate" else "low")
+                    } else ""
                 )
 
                 report_content <- paste0(
@@ -1074,7 +1076,7 @@ vennClass <- if (requireNamespace('jmvcore'))
                     
                     "<h5>", .("How to Interpret:"), "</h5>",
                     "<ul style='margin-left: 20px;'>",
-                    "<li><strong>", .("Venn Diagram:"), "</strong> ", .("Circle overlaps show shared cases. Larger intersections indicate stronger associations."), "</li>",
+                    "<li><strong>", .("Venn Diagram:"), "</strong> ", .("Circle overlaps show shared cases. Intersection size depends on how common each variable is and does not by itself measure association."), "</li>",
                     "<li><strong>", .("UpSet Plot:"), "</strong> ", .("Bar heights show intersection sizes. Dots below indicate which variables are included."), "</li>",
                     "<li><strong>", .("Summary Table:"), "</strong> ", .("Shows counts and percentages for each variable individually."), "</li>",
                     "</ul>",
@@ -1090,7 +1092,7 @@ vennClass <- if (requireNamespace('jmvcore'))
                     "<h5>", .("Clinical Considerations:"), "</h5>",
                     "<ul style='margin-left: 20px;'>",
                     "<li>", .("Consider sample size when interpreting small intersections"), "</li>",
-                    "<li>", .("Large overlaps may suggest related biological pathways"), "</li>",
+                    "<li>", .("Large overlaps may reflect high positivity rates rather than a shared mechanism; test association formally before interpreting them"), "</li>",
                     "<li>", .("Use statistical tests for formal association analysis"), "</li>",
                     "<li>", .("Consider clinical context when interpreting patterns"), "</li>",
                     "</ul>",
@@ -1816,10 +1818,11 @@ vennClass <- if (requireNamespace('jmvcore'))
                     "<h5 style='margin: 0 0 10px 0; color: #155724;'> Clinical Interpretation</h5>",
                     "<p style='margin: 0 0 8px 0;'><strong>Key Finding:</strong> In this dataset of ", total_n, " cases, ",
                     "'", largest_var, "' shows the highest prevalence with ", largest_count, " positive cases (", largest_pct, "%).</p>",
-                    "<p style='margin: 0 0 8px 0;'><strong>Overlap Pattern:</strong> The variables show ", overlap_level, " levels of intersection, ",
-                    if (overlap_level == "high") "suggesting strong associations between the measured characteristics."
-                    else if (overlap_level == "moderate") "indicating meaningful but not dominant relationships."
-                    else "suggesting the variables capture largely distinct characteristics.", "</p>",
+                    "<p style='margin: 0 0 8px 0;'><strong>Overlap Pattern:</strong> Across the selected variables, the average share of positive cases is ", overlap_level, ". ",
+                    if (overlap_level == "high") "Each variable is positive in more than half of cases on average."
+                    else if (overlap_level == "moderate") "Each variable is positive in roughly one fifth to one half of cases on average."
+                    else "Each variable is positive in less than one fifth of cases on average.",
+                    " Overlap size depends on how common each variable is and does not by itself measure association.", "</p>",
                     "<p style='margin: 0; font-size: 0.9em; color: #6c757d;'>",
                     " <em>Clinical Relevance:</em> Use Venn diagrams to identify patient subgroups, assess diagnostic overlap, ",
                     "or evaluate multi-marker patterns in pathology and oncology research.</p>",

@@ -412,8 +412,8 @@ jjpiestatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
             clinical_context <- switch(self$options$clinicalpreset %||% "custom",
                 "diagnostic" = .('For diagnostic tests: Focus on sensitivity (true positive rate) and specificity (true negative rate). Example: Sensitivity = 85% means test correctly identifies 85 out of 100 diseased patients. Specificity = 92% means test correctly identifies 92 out of 100 healthy individuals. PPV and NPV depend on disease prevalence in your population.'),
-                "treatment" = .('For treatment response: Look for significant differences between treatment arms. Example: 45% response in Treatment A vs 25% in Treatment B (p = 0.012, Cram\u00e9r\'s V = 0.31) indicates moderate effect size with clinical relevance. Consider absolute risk reduction (20%) and number needed to treat (NNT = 5).'),
-                "biomarker" = .('For biomarker analysis: Examine distribution patterns across patient groups. Example: High biomarker expression in 65% of responders vs 30% in non-responders (p < 0.001, OR = 4.3 [2.1-8.7]) suggests biomarker may predict treatment response. Consider biological mechanisms and validation cohorts.'),
+                "treatment" = .('For treatment response: Look for significant differences between treatment arms. Example: 45% response in Treatment A vs 25% in Treatment B (p = 0.012, Cram\u00e9r\'s V = 0.31) indicates a moderate effect size. Whether a difference of this magnitude matters for patients is a judgement about the outcome, not a property of the statistic; on the count scale the same contrast is an absolute risk difference of 20 percentage points, i.e. a number needed to treat of 1/0.20 = 5.'),
+                "biomarker" = .('For biomarker analysis: Examine distribution patterns across patient groups. Example: High biomarker expression in 65% of responders vs 30% in non-responders (p < 0.001, OR = 4.3 [2.1-8.7]) describes an association between expression and response in this sample. A cross-sectional association does not establish predictive value; that requires evaluation in an independent cohort.'),
                 .('Interpret results in the context of your specific research question and clinical setting. Focus on effect sizes (Cram\u00e9r\'s V, odds ratios) alongside p-values for clinical significance assessment.')
             )
 
@@ -430,8 +430,8 @@ jjpiestatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 "<p><strong>", .('Effect Size Interpretation (Cram\u00e9r\'s V):'), "</strong></p>",
                 "<ul>",
                 "<li>", .('Small effect: V = 0.10 (subtle association, may require large samples to detect)'), "</li>",
-                "<li>", .('Medium effect: V = 0.30 (noticeable association, clinically relevant in many contexts)'), "</li>",
-                "<li>", .('Large effect: V = 0.50 (strong association, typically clinically important)'), "</li>",
+                "<li>", .('Medium effect: V = 0.30 (noticeable association)'), "</li>",
+                "<li>", .('Large effect: V = 0.50 (strong association)'), "</li>",
                 "</ul>",
                 "<p><em>", .('Note: the chart subtitle reports the bias-corrected Cram\u00e9r\'s V (Bergsma 2013), which is smaller than the classical statistic these landmarks describe - especially in small samples and larger tables. Treat the thresholds as approximate, and read the confidence interval next to V rather than the point estimate alone.'), "</em></p>"
             )
@@ -447,7 +447,7 @@ jjpiestatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 method_title = .('Statistical Method'),
                 clinical_title = .('Clinical Context'),
                 general_title = .('General Guidance'),
-                general_guidance = .('Pie charts show proportions visually - larger slices represent higher frequencies. Statistical tests determine if observed differences are likely due to chance or represent true group differences. Always report both statistical significance (p-values) and effect sizes (Cram\u00e9r\'s V, odds ratios) for complete interpretation.')
+                general_guidance = .('Pie charts show proportions visually - larger slices represent higher frequencies. A significance test reports how compatible the observed data are with the hypothesis of no group difference: a small p-value means data this extreme would be unusual if there were no difference. It is not the probability that the difference is due to chance, nor the probability that the null hypothesis is true, and a large p-value does not establish that the groups are the same. Report both the p-value and the effect size (Cram\u00e9r\'s V, odds ratios) for complete interpretation.')
             )
         },
         

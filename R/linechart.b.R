@@ -677,7 +677,7 @@ linechartClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             } else if (has_grouping) {
                 copy_ready <- paste0(copy_ready, " ", .("Note: Results should be interpreted with caution as grouped data may mask within-group patterns."))
             } else if (is_significant) {
-                copy_ready <- paste0(copy_ready, " ", .("This finding may have clinical relevance."))
+                copy_ready <- paste0(copy_ready, " ", .("Statistical significance reflects sample size as well as the size of the association; the magnitude of r and the R-squared value reported above describe the strength of the relationship. Correlation does not imply causation."))
             }
 
             return(copy_ready)
@@ -713,15 +713,18 @@ linechartClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
         # distinct from .correlationStrength() (which labels |r|). The R-squared
         # thresholds below are intentionally conservative for clinical reporting.
         .interpretEffectSize = function(r_squared) {
-            if (r_squared >= 0.5) {
-                return(.("Large effect size - clinically meaningful association."))
+            label <- if (r_squared >= 0.5) {
+                .("Large effect size")
             } else if (r_squared >= 0.25) {
-                return(.("Medium effect size - moderate practical significance."))
+                .("Medium effect size")
             } else if (r_squared >= 0.1) {
-                return(.("Small effect size - limited practical significance."))
+                .("Small effect size")
             } else {
-                return(.("Very small effect size - minimal practical significance."))
+                .("Very small effect size")
             }
+            jmvcore::format(
+                .("{label}. Whether an association of this magnitude matters in a given setting depends on the outcome and the context, and cannot be read off R-squared alone."),
+                label = label)
         },
 
         # Enhanced correlation interpretation with clinical context
@@ -732,8 +735,7 @@ linechartClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             sig_text <- if (p_value < 0.001) "***" else if (p_value < 0.01) "**" else if (p_value < 0.05) "*" else "ns"
             clinical_sig <- if (p_value < 0.05) .("statistically significant") else .("not statistically significant")
 
-            # Strength interpretation with clinical relevance
-            abs_r <- abs(r)
+            # Strength label (single source of truth: .correlationStrength)
             strength <- private$.correlationStrength(r)
 
             # Create copy-ready interpretation
@@ -753,14 +755,8 @@ linechartClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                 clinical_note <- .("Caution: Repeated measures detected. Standard correlation assumes independence and may overstate significance.")
             } else if (has_grouping) {
                 clinical_note <- .("Caution: Grouped data detected. Correlation across groups may mask within-group patterns (Simpson's paradox).")
-            } else if (abs_r >= 0.5) {
-                clinical_note <- .("This suggests a clinically meaningful relationship.")
-            } else if (abs_r >= 0.3) {
-                clinical_note <- .("This suggests a moderate association worth investigating.")
-            } else if (abs_r >= 0.1) {
-                clinical_note <- .("This suggests a weak association with limited clinical significance.")
             } else {
-                clinical_note <- .("This suggests a negligible association with minimal clinical significance.")
+                clinical_note <- .("Correlation does not imply causation.")
             }
 
             return(paste0(base_interpretation, " - ", clinical_note))
@@ -904,10 +900,10 @@ linechartClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                 "<div class='card-body'>",
                 "<h6>", .("Effect Size Interpretation:"), "</h6>",
                 "<ul>",
-                "<li>", .("<strong>R\u00b2 \u2265 0.50:</strong> Large effect - clinically significant relationship"), "</li>",
-                "<li>", .("<strong>R\u00b2 = 0.25-0.49:</strong> Medium effect - moderate clinical relevance"), "</li>",
-                "<li>", .("<strong>R\u00b2 = 0.10-0.24:</strong> Small effect - limited clinical significance"), "</li>",
-                "<li>", .("<strong>R\u00b2 < 0.10:</strong> Very small effect - minimal clinical importance"), "</li>",
+                "<li>", .("<strong>R\u00b2 \u2265 0.50:</strong> Large effect - at least 50% of the variance accounted for"), "</li>",
+                "<li>", .("<strong>R\u00b2 = 0.25-0.49:</strong> Medium effect - 25% to 49% of the variance accounted for"), "</li>",
+                "<li>", .("<strong>R\u00b2 = 0.10-0.24:</strong> Small effect - 10% to 24% of the variance accounted for"), "</li>",
+                "<li>", .("<strong>R\u00b2 < 0.10:</strong> Very small effect - under 10% of the variance accounted for"), "</li>",
                 "</ul>",
                 "<h6>", .("Confidence Intervals:"), "</h6>",
                 "<p>", .("When displayed, confidence intervals show the uncertainty around trend lines. Wider intervals indicate greater uncertainty."), "</p>",

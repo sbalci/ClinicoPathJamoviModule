@@ -40,10 +40,10 @@ cotestClass <- if (requireNamespace("jmvcore"))
 
 <h4>Key Clinical Scenarios</h4>
 <ul>
-<li><strong>Either Test Positive (Parallel Rule)</strong>: At least one test is positive \u{2192} rule in disease (high sensitivity strategy)</li>
-<li><strong>Both Tests Positive</strong>: Maximum certainty for disease presence (high specificity strategy)</li>
-<li><strong>Both Tests Negative</strong>: Strong evidence against disease (rule out strategy)</li>
-<li><strong>Single Positive</strong>: Only one test positive \u{2192} intermediate probability requiring clinical judgment</li>
+<li><strong>Either Test Positive (Parallel Rule)</strong>: At least one test is positive. This combination rule raises sensitivity relative to either test used alone, at the cost of specificity, so the complementary arm carries the rule-out information. The <em>Either Test Positive</em> row is the probability of disease given <em>at least one</em> positive result, so it pools single-positive and double-positive cases; when only one test is positive read the <em>Test 1 Positive Only</em> or <em>Test 2 Positive Only</em> row instead. How far any result moves the probability is set by the corresponding likelihood ratio, reported in the tables below.</li>
+<li><strong>Both Tests Positive</strong>: Both tests are positive. The resulting post-test probability depends on the pre-test prevalence, on the positive likelihood ratios of both tests and on any conditional dependence you specify - read the computed value in the <em>Both Tests Positive</em> row.</li>
+<li><strong>Both Tests Negative</strong>: Neither test is positive. This is the arm the parallel rule is designed to act on; how far it lowers the probability is set by the combined negative likelihood ratio - read the computed value in the <em>Both Tests Negative</em> row.</li>
+<li><strong>Single Positive</strong>: Only one of the two tests is positive. This result is driven by the positive likelihood ratio of one test together with the negative likelihood ratio of the other - read the <em>Test 1 Positive Only</em> or <em>Test 2 Positive Only</em> row.</li>
 </ul>
 
 <h4>Preset Scenarios Include</h4>
@@ -277,15 +277,15 @@ cotestClass <- if (requireNamespace("jmvcore"))
                 
                 # Additional clinical validity checks
                 if (test1_sens + test1_spec < 1.1) {
-                    private$.addNotice("Test 1 has low discriminatory power (sensitivity plus specificity below 1.1). Consider if this test adds clinical value.", "warning")
+                    private$.addNotice("Test 1 has low discriminatory power (sensitivity plus specificity below 1.1, i.e. a Youden index below 0.1). Check its likelihood ratios in the results table: an operating point close to the chance diagonal can still give an informative LR+ or LR- when sensitivity and specificity are very unequal.", "warning")
                 }
                 if (test2_sens + test2_spec < 1.1) {
-                    private$.addNotice("Test 2 has low discriminatory power (sensitivity plus specificity below 1.1). Consider if this test adds clinical value.", "warning")
+                    private$.addNotice("Test 2 has low discriminatory power (sensitivity plus specificity below 1.1, i.e. a Youden index below 0.1). Check its likelihood ratios in the results table: an operating point close to the chance diagonal can still give an informative LR+ or LR- when sensitivity and specificity are very unequal.", "warning")
                 }
 
                 # Check for extreme prevalence that might cause numerical issues
                 if (prevalence < 0.001) {
-                    private$.addNotice("Very low prevalence (below 0.1%) may lead to unstable results. Consider if co-testing is appropriate for such rare conditions.", "warning")
+                    private$.addNotice("Very low prevalence (below 0.1%) may lead to unstable results; the computed post-test probabilities are highly sensitive to small changes in the entered prevalence.", "warning")
                 }
                 if (prevalence > 0.5) {
                     private$.addNotice("High prevalence (above 50%) detected. Ensure this reflects your actual clinical population.", "info")

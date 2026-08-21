@@ -480,7 +480,11 @@ decisioncalculatorClass <- if (requireNamespace("jmvcore")) {
 
                     ratioTable$addFootnote(rowNo = 1, col = "Spec", "Specificity (True Negatives among Healthy)")
 
-                    ratioTable$addFootnote(rowNo = 1, col = "AccurT", "Accuracy (True Test Result Ratio)")
+                    ratioTable$addFootnote(rowNo = 1, col = "AccurT", sprintf(
+                        "Accuracy (proportion of all test results that were correct). Unlike sensitivity and specificity, accuracy depends on disease prevalence: it is computed here at the prevalence observed in this sample (%.1f%%)%s, and it will differ in a population with a different case mix.",
+                        PrevalenceD * 100,
+                        if (pp) ", not at the population prevalence shown in the Prevalence column" else ""
+                    ))
 
                     prev_note <- if (pp) {
                         "Prevalence used: the user-supplied population prevalence (prior probability), not the prevalence observed in this study sample."
@@ -728,22 +732,23 @@ decisioncalculatorClass <- if (requireNamespace("jmvcore")) {
                             msg <- sprintf('Cut-off "%s" has incomplete data.', cutoff_name)
                             if (diseased == 0) msg <- paste0(msg, " \u{2022} No diseased cases (TP+FN=0): Sensitivity is undefined.")
                             if (healthy == 0) msg <- paste0(msg, " \u{2022} No healthy cases (TN+FP=0): Specificity is undefined.")
-                            msg <- paste0(msg, " \u{2022} Consider this cut-off unreliable for clinical decisions.")
+                            msg <- paste0(msg, " \u{2022} The metrics shown for this cut-off are computed from incomplete counts.")
                             private$.addNotice("WARNING", "Incomplete Cut-off Data", msg)
                         }
 
-                        # Clinical recommendation based on Youden index and balanced metrics
-                        # Only make recommendations when all metrics are valid
+                        # Descriptive grade of the point estimates in THIS sample.
+                        # Not a recommendation: the counts carry no interval, and the
+                        # cut-offs are graded on the same data that produced them.
                         if (is.na(youden) || is.na(accuracy)) {
-                            recommendation <- "Incomplete data - Cannot recommend"
+                            recommendation <- "Incomplete data - cannot be graded"
                         } else if (youden > private$.YOUDEN_EXCELLENT && accuracy > private$.ACCURACY_EXCELLENT) {
-                            recommendation <- "Excellent performance - Recommended"
+                            recommendation <- "Excellent in this sample"
                         } else if (youden > private$.YOUDEN_GOOD && accuracy > private$.ACCURACY_GOOD) {
-                            recommendation <- "Good performance - Consider for use"
+                            recommendation <- "Good in this sample"
                         } else if (youden > private$.YOUDEN_FAIR) {
-                            recommendation <- "Fair performance - Use with caution"
+                            recommendation <- "Fair in this sample"
                         } else {
-                            recommendation <- "Poor performance - Not recommended"
+                            recommendation <- "Poor in this sample"
                         }
 
                         return(list(
@@ -881,6 +886,11 @@ decisioncalculatorClass <- if (requireNamespace("jmvcore")) {
                                                    else "")
                         }
                     }
+
+                    multipleCutoffTable$setNote(
+                        "sameData",
+                        jmvcore::.("Grades in this column describe the point estimates of each scenario in this sample only, and the good and excellent grades require Youden's index and accuracy to reach that band together, so a grade can be lower than either column on its own would suggest. Because the cut-offs are graded on the same counts used to evaluate them, the best-performing row is optimistically biased; performance in independent data is generally lower.")
+                    )
 
                     multipleCutoffTable$setNote(
                         "uncertainty",
@@ -1071,7 +1081,7 @@ decisioncalculatorClass <- if (requireNamespace("jmvcore")) {
                     "weak evidence against disease when test negative"
                 }
 
-                # Recommendation
+                # Descriptive performance summary (not a recommendation)
                 recommendation <- private$.getRecommendation(Youden, Accuracy, LRP, LRN)
 
                 sprintf(
@@ -1081,7 +1091,7 @@ decisioncalculatorClass <- if (requireNamespace("jmvcore")) {
                 </div>
 
                 <div style='font-size: 14px; color: #333;'>
-                    <p style='margin: 10px 0;'><strong>Overall Assessment:</strong> This test demonstrates %s (Youden index: %.3f, Accuracy: %.1f%%).</p>
+                    <p style='margin: 10px 0;'><strong>Overall Assessment:</strong> This test demonstrates %s (Youden index: %.3f, Accuracy: %.1f%%). The good and excellent grades require Youden's index and accuracy to reach that band together, so the grade can be lower than either number on its own would suggest. Accuracy is computed at the prevalence observed in this sample and will differ where the case mix differs; Youden's index does not.</p>
 
                     <table style='width: 100%%; border-collapse: collapse; margin: 15px 0;'>
                     <tr>
@@ -1117,7 +1127,7 @@ decisioncalculatorClass <- if (requireNamespace("jmvcore")) {
                     </ul>
 
                     <div style='background-color: rgba(155, 155, 155, 0.06); border: 1px solid #ccc; padding: 12px; margin: 15px 0; color: inherit;'>
-                        <p style='margin: 0; font-weight: bold;'>Clinical Recommendation</p>
+                        <p style='margin: 0; font-weight: bold;'>Performance Summary</p>
                         <p style='margin: 5px 0 0 0;'>%s</p>
                     </div>
                 </div>
@@ -1302,16 +1312,26 @@ decisioncalculatorClass <- if (requireNamespace("jmvcore")) {
             </div>
             </div>"
             },
+            # Describes where the point estimates fall. Deliberately issues no
+            # clinical verdict: the inputs are one 2x2 table at one cut-off, with
+            # no interval, no validation cohort and no account of spectrum or
+            # verification bias.
             .getRecommendation = function(Youden, Accuracy, LRP, LRN) {
-                if (Youden > private$.YOUDEN_EXCELLENT && Accuracy > private$.ACCURACY_EXCELLENT && LRP > 10 && LRN < 0.1) {
-                    "This test shows excellent performance across all metrics. Recommended for clinical use."
+                # PPV/NPV are Bayes-adjusted to the supplied prior when pp is on, so the
+                # prevalence they depend on is not this sample's; accuracy always is.
+                prev_source <- if (isTRUE(self$options$pp))
+                    "the population prevalence you supplied" else "the prevalence of this sample"
+                caveat <- paste0("These are single-cohort point estimates at one cut-off. Accuracy depends on the prevalence of this sample, and the predictive values on ", prev_source, ". They do not on their own establish how the test would perform elsewhere; the confidence intervals, the representativeness of the sample, and the quality and blinding of the reference standard all bear on that.")
+                band <- if (Youden > private$.YOUDEN_EXCELLENT && Accuracy > private$.ACCURACY_EXCELLENT && LRP > 10 && LRN < 0.1) {
+                    "Youden's index, accuracy and both likelihood ratios all fall in the highest bands in this sample."
                 } else if (Youden > private$.YOUDEN_GOOD && Accuracy > private$.ACCURACY_GOOD) {
-                    "This test shows good performance. Consider clinical implementation with appropriate quality controls."
+                    "Youden's index and accuracy both reach at least the good band in this sample."
                 } else if (Youden > private$.YOUDEN_FAIR) {
-                    "This test shows fair performance. Use with caution; consider combining with other diagnostic information."
+                    "Youden's index reaches at least the fair band in this sample, but Youden's index and accuracy do not both reach the good band."
                 } else {
-                    "This test shows limited discriminatory ability. Not recommended as standalone diagnostic tool. Consider alternative tests or additional validation."
+                    "Youden's index falls in the lowest band in this sample, so positive and negative results separate diseased from healthy patients only weakly."
                 }
+                paste(band, caveat)
             }
         )
     )

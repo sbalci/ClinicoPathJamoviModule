@@ -1372,9 +1372,13 @@ ihcheterogeneityClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cl
                        "<span style='color: red;'>Calibrate the regional measurement before using it in place of the ",
                        comparison_target, ".</span></p>")
             } else if (metrics$overall_corr >= correlation_threshold && metrics$mean_cv <= cv_threshold) {
-                paste0("<p><strong> ADEQUATE SAMPLING:</strong> Regional measurements provide good representation of ",
-                       comparison_target, " (correlation \u{2265} ", correlation_threshold, ", CV \u{2264} ", cv_threshold, "%). ",
-                       "<span style='color: green;'>Current sampling approach is suitable for clinical use.</span></p>")
+                paste0("<p><strong> AGREEMENT THRESHOLDS MET:</strong> Regional measurements agree with the ",
+                       comparison_target, " in this dataset (correlation \u{2265} ", correlation_threshold, ", CV \u{2264} ", cv_threshold, "%), ",
+                       if (!is.na(metrics$bias_p) && is.finite(private$.relativeBias(metrics)))
+                           "and no material systematic bias was detected. "
+                       else
+                           "Systematic bias could not be assessed in this run. ",
+                       "<span style='color: green;'>These are summary statistics from this dataset alone; they are not an external validation and they do not describe agreement at the score thresholds used to classify cases.</span></p>")
             } else if (metrics$overall_corr >= (correlation_threshold - 0.2) && metrics$mean_cv <= (cv_threshold * 1.5)) {
                 paste0("<p><strong> MODERATE SAMPLING:</strong> Regional measurements show moderate agreement with ",
                        comparison_target, " (thresholds: correlation \u{2265} ", correlation_threshold, ", CV \u{2264} ", cv_threshold, "%). ",
@@ -1480,7 +1484,7 @@ ihcheterogeneityClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cl
                         paste0("Systematic bias was detected between regional and reference measurements (p = ",
                                ifelse(metrics$bias_p < 0.001, "<0.001", round(metrics$bias_p, 3)), "). ")
                     } else {
-                        "No systematic bias was detected between regional and reference measurements. "
+                        "No systematic bias was detected between regional and reference measurements (p \u{2265} 0.05); this does not establish that the two agree, as the test may lack power to detect a difference of relevant size. "
                     }
                 } else {
                     "Bias testing could not be performed due to limited paired observations. "
@@ -1491,35 +1495,35 @@ ihcheterogeneityClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cl
 
             quality_status <- if (!is.na(metrics$overall_corr) && metrics$overall_corr >= correlation_threshold &&
                                    !is.na(metrics$mean_cv) && metrics$mean_cv <= cv_threshold) {
-                "adequate for clinical use"
+                "met the predefined quality criteria"
             } else if (!is.na(metrics$overall_corr) && metrics$overall_corr >= (correlation_threshold - 0.2) &&
                        !is.na(metrics$mean_cv) && metrics$mean_cv <= (cv_threshold * 1.5)) {
-                "moderately adequate, with recommendations for optimization"
+                "partially met the predefined quality criteria"
             } else if (is.na(metrics$overall_corr) || is.na(metrics$mean_cv)) {
                 "unable to be evaluated due to insufficient data"
             } else {
-                "inadequate and requires protocol revision"
+                "did not meet the predefined quality criteria"
             }
 
             quality_sentence <- switch(
                 quality_status,
-                "adequate for clinical use" = "Based on predefined quality criteria, the biopsy sampling approach was adequate for clinical use. ",
-                "moderately adequate, with recommendations for optimization" = "Based on predefined quality criteria, the sampling approach was moderately adequate, with recommendations for optimization. ",
-                "inadequate and requires protocol revision" = "Based on predefined quality criteria, the sampling approach was inadequate and requires protocol revision. ",
+                "met the predefined quality criteria" = "The biopsy sampling approach met the predefined quality criteria (correlation and CV thresholds set in the analysis options). ",
+                "partially met the predefined quality criteria" = "The sampling approach met the correlation and CV criteria only after relaxing them to correlation \u{2265} (threshold - 0.20) and CV \u{2264} (1.5 \u{00D7} threshold). ",
+                "did not meet the predefined quality criteria" = "The sampling approach did not meet the predefined quality criteria. ",
                 "unable to be evaluated due to insufficient data" = "Data were insufficient to evaluate overall sampling quality against predefined criteria. ",
                 ""
             )
 
             clinical_sentence <- if (!is.na(metrics$mean_cv)) {
                 if (metrics$mean_cv <= cv_threshold/2) {
-                    "current sampling protocols provide sufficient precision for routine clinical use"
+                    "measurement variability was well within the CV threshold set for this analysis"
                 } else if (metrics$mean_cv <= cv_threshold) {
-                    "sampling protocols may benefit from additional core biopsies to improve precision"
+                    "measurement variability was within, but close to, the CV threshold set for this analysis"
                 } else {
-                    "significant protocol modifications are recommended to achieve acceptable sampling precision"
+                    "measurement variability exceeded the CV threshold set for this analysis"
                 }
             } else {
-                "additional data are required to assess sampling precision"
+                "the available data were insufficient to quantify measurement variability"
             }
 
             report_sentences <- paste0(
@@ -1563,7 +1567,7 @@ ihcheterogeneityClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cl
                 # biomarker assessment protocols" - including reports whose own
                 # preceding sentence said the sampling was inadequate and required
                 # protocol revision.
-                "These findings suggest that ", clinical_sentence, ".",
+                "In this dataset, ", clinical_sentence, ".",
                 "</p>",
 
                 "</div>",
@@ -1677,13 +1681,13 @@ ihcheterogeneityClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cl
                 "</div>",
 
                 "<div style='margin: 15px 0;'>",
-                "<h4> Clinical Application Guidelines</h4>",
+                "<h4> Scope of These Estimates</h4>",
                 "<div style='background-color: rgba(153, 33, 170, 0.12); padding: 12px; border-radius: 5px; color: inherit;'>",
                 "<ul>",
-                "<li><strong>Quality Thresholds:</strong> Correlation \u{2265}0.80 and CV \u{2264}20% recommended for routine clinical use</li>",
+                "<li><strong>Quality Thresholds:</strong> The default criteria applied by this analysis are correlation \u{2265}0.80 and CV \u{2264}20%; both are set in the analysis options</li>",
                 "<li><strong>Biomarker-Specific Adjustment:</strong> Thresholds may require adjustment for specific biomarkers</li>",
                 "<li><strong>Protocol Validation:</strong> Results should inform but not replace empirical validation studies</li>",
-                "<li><strong>Continuous Monitoring:</strong> Regular quality assessment recommended for clinical implementation</li>",
+                "<li><strong>Continuous Monitoring:</strong> These estimates describe the cases analyzed here and say nothing about performance over time</li>",
                 "<li><strong>Multi-Center Studies:</strong> Additional validation needed for multi-institutional protocols</li>",
                 "</ul>",
                 "</div>",
@@ -1832,24 +1836,25 @@ ihcheterogeneityClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cl
                 "<li><strong>Correlation:</strong> Not available - correlation metrics were not estimable.</li>"
             }
 
+            icc_target <- if (isTRUE(metrics$has_reference)) "between the regions and the reference measurement" else "between regions"
             clinical_sentence <- if (!is.na(icc_value)) {
-                if (icc_value > 0.80) {
-                    "Single regional measurements appear highly reliable for this biomarker. The low heterogeneity suggests consistent expression patterns across tissue regions."
-                } else if (icc_value > 0.60) {
-                    "Regional measurements show good reliability but some variability exists. Consider measuring multiple regions for critical diagnostic decisions."
+                if (icc_value > 0.75) {
+                    paste0("Agreement ", icc_target, " was high in this dataset (ICC above 0.75): the measurements gave similar values.")
+                } else if (icc_value > 0.50) {
+                    paste0("Agreement ", icc_target, " was moderate in this dataset (ICC 0.50 to 0.75): appreciable variability remained.")
                 } else {
-                    "Significant heterogeneity detected. Single regional measurements may not accurately represent overall biomarker status. Multiple region sampling recommended."
+                    paste0("Agreement ", icc_target, " was low in this dataset (ICC of 0.50 or below): the measurements differed substantially.")
                 }
             } else if (!is.na(mean_cv)) {
                 if (mean_cv < 15) {
-                    "Sampling variability is low, supporting confident interpretation of regional measurements."
+                    "Variability between measurements was low in this dataset (mean CV below 15%)."
                 } else if (mean_cv < 30) {
-                    "Moderate variability observed. Consider additional sampling for borderline clinical decisions."
+                    "Variability between measurements was moderate in this dataset (mean CV 15-30%)."
                 } else {
-                    "High variability observed. Clinical protocols should incorporate additional regions or repeat measurements."
+                    "Variability between measurements was high in this dataset (mean CV of 30% or more)."
                 }
             } else {
-                "Data were insufficient to provide clinical guidance on sampling reliability."
+                "Data were insufficient to characterize sampling reliability."
             }
 
             summary_content <- paste0(
@@ -1873,7 +1878,7 @@ ihcheterogeneityClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cl
                 "</div>",
 
                 "<div style='background-color: white; padding: 15px; border-radius: 6px; margin: 15px 0; border-left: 4px solid #ffc107;'>",
-                "<h4 style='color: #856404; margin-top: 0;'> Clinical Implications:</h4>",
+                "<h4 style='color: #856404; margin-top: 0;'> Interpretation:</h4>",
                 "<p style='margin: 0; line-height: 1.6;'>",
                 clinical_sentence,
                 "</p>",
@@ -2434,7 +2439,7 @@ ihcheterogeneityClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cl
                         interpretation <- if (levene_p < 0.05) {
                             "Significant difference in variability heterogeneity across compartments"
                         } else {
-                            "No significant difference in variability patterns across compartments"
+                            "No significant difference in variability patterns detected across compartments; this does not establish that they are the same"
                         }
 
                         test_table$addRow(rowKey = row_key, values = list(
@@ -2484,10 +2489,8 @@ ihcheterogeneityClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cl
 
                         interpretation <- if (kw_p < 0.05) {
                             "Significant difference in biomarker distributions across compartments"
-                        } else if (kw_p < 0.10) {
-                            "Marginal difference in biomarker distributions (p < 0.10)"
                         } else {
-                            "No significant difference in biomarker distributions across compartments"
+                            "No significant difference in biomarker distributions detected across compartments; this does not establish that the distributions are the same"
                         }
 
                         test_table$addRow(rowKey = row_key, values = list(

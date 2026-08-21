@@ -1466,8 +1466,18 @@ jjsegmentedtotalbarClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R
                 interpretation <- if (is_significant) {
                     paste0("Significant association between ", x_var, " and ", fill_var, " (p < ", alpha, ")")
                 } else {
-                    paste0("No significant association between ", x_var, " and ", fill_var, " (p >= ", alpha, ")")
+                    paste0("No significant association was detected between ", x_var, " and ", fill_var,
+                           " (p >= ", alpha, "); this does not establish that the variables are independent")
                 }
+
+                # The expected-count caveat travels with the verdict: on a sparse
+                # table the chi-square p-value is unreliable in BOTH directions, so
+                # neither the significant nor the non-significant reading stands alone.
+                if (low > 0)
+                    interpretation <- paste0(interpretation,
+                        ". Chi-square approximation unreliable here (", low, " of ",
+                        length(chi_test$expected), " cells with expected count < 5) - ",
+                        "Fisher's exact test is the alternative")
 
                 # Add test results to table
                 test_row <- list(

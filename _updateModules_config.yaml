@@ -8,6 +8,9 @@
 
 # Rscript -e "jmvtools::prepare()"
 # Rscript -e "jmvtools::prepare(home = '/Applications/jamovi.app')"
+# Rscript -e 'Sys.unsetenv("ELECTRON_RUN_AS_NODE"); jmvtools::prepare(".")' 2>&1 | tail -25
+
+
 # Rscript -e "devtools::document()"
 # Rscript -e "devtools::load_all()"
 
@@ -42,8 +45,8 @@
 # ==============================================
 
 
-new_version: "1.0.6"
-new_date: "2026-08-15"
+new_version: "1.0.6.02"
+new_date: "2026-08-21"
 quick: false
 TEST: false
 jjstatsplot: true

@@ -991,7 +991,7 @@ enhancedROCResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
                                     `type`="text"),
                                 list(
                                     `name`="clinical_utility", 
-                                    `title`="Clinical Utility", 
+                                    `title`="Discrimination Level", 
                                     `type`="text"))))
                         self$add(jmvcore::Table$new(
                             options=options,
@@ -1158,7 +1158,7 @@ enhancedROCResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
                                     `format`="zto"),
                                 list(
                                     `name`="clinical_recommendation", 
-                                    `title`="Clinical Recommendation", 
+                                    `title`="Performance Summary", 
                                     `type`="text"))))
                         self$add(jmvcore::Table$new(
                             options=options,

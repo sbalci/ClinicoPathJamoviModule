@@ -1907,11 +1907,11 @@ nogoldstandardClass <- if (requireNamespace("jmvcore")) {
 
                 # Generate interpretation based on prevalence
                 prev_interp <- if (results$prevalence < 0.10) {
-                    .("Low prevalence setting - high NPV expected, focus on ruling out disease")
+                    .("Low estimated prevalence: holding sensitivity and specificity fixed, a lower prevalence raises negative predictive value and lowers positive predictive value relative to a higher-prevalence setting.")
                 } else if (results$prevalence > 0.30) {
-                    .("High prevalence setting - high PPV expected, focus on confirming disease")
+                    .("High estimated prevalence: holding sensitivity and specificity fixed, a higher prevalence raises positive predictive value and lowers negative predictive value relative to a lower-prevalence setting.")
                 } else {
-                    .("Moderate prevalence setting - balanced diagnostic performance")
+                    .("Moderate estimated prevalence: positive and negative predictive values are more balanced at this prevalence.")
                 }
 
                 # Sensitivity range

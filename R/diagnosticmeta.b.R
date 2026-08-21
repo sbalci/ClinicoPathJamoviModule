@@ -171,6 +171,14 @@ diagnosticmetaClass <- R6::R6Class(
             private$.pooled_sensitivity <- NULL
             private$.pooled_specificity <- NULL
             private$.biv_model <- NULL
+            # The CI/PI fields are written late in the bivariate fit (and the PI
+            # only inside a tryCatch that can fail), so without clearing them a
+            # failed re-run would reuse the previous dataset's intervals in the
+            # summary and heterogeneity text.
+            private$.pooled_sens_ci <- NULL
+            private$.pooled_spec_ci <- NULL
+            private$.pooled_sens_pi <- NULL
+            private$.pooled_spec_pi <- NULL
 
             # Check if data is ready
             if (is.null(self$data) || nrow(self$data) == 0) {
@@ -1496,6 +1504,12 @@ diagnosticmetaClass <- R6::R6Class(
                             "A continuity correction of 0.5 was applied to %d study/studies with a zero cell so the odds ratio was finite.",
                             n_zero))
                     }
+                    if (nrow(fit_data) < 10) {
+                        note <- paste(note, sprintf(
+                            paste("With only %d studies the test is underpowered (at least 10 are usually required),",
+                                  "so a non-significant result does not establish that publication bias is absent."),
+                            nrow(fit_data)))
+                    }
                     bias_table$setNote("deeks_method", note)
                 }
             }
@@ -2321,7 +2335,7 @@ diagnosticmetaClass <- R6::R6Class(
                 situation the SROC curve exists to model - rather than a reason to abandon the
                 analysis. Treat them as rough orientation, and prefer the prediction region.</em></p>
                 <ul>
-                    <li><strong>I[[SUP2]] < 25%:</strong> Low heterogeneity - results can be reliably pooled</li>
+                    <li><strong>I[[SUP2]] < 25%:</strong> Little heterogeneity detected on this margin. I[[SUP2]] is imprecisely estimated when few studies are pooled and does not describe the bivariate model, so on its own it does not establish that pooling is appropriate - inspect the prediction region and check that positivity thresholds, patient spectrum and reference standards are comparable</li>
                     <li><strong>I[[SUP2]] 25-50%:</strong> Moderate heterogeneity - investigate potential sources</li>
                     <li><strong>I[[SUP2]] 50-75%:</strong> Substantial heterogeneity - pooling questionable</li>
                     <li><strong>I[[SUP2]] &gt; 75%:</strong> Considerable heterogeneity - a single pooled point is unlikely to describe the evidence; investigate thresholds, spectrum and reference standards, and report the SROC curve and prediction region</li>
@@ -2340,7 +2354,7 @@ diagnosticmetaClass <- R6::R6Class(
             
             <h4>Deeks' Funnel Plot Test:</h4>
             <ul>
-                <li><strong>p [[GE]] 0.05:</strong> No significant asymmetry - low risk of publication bias</li>
+                <li><strong>p [[GE]] 0.05:</strong> No statistically significant funnel-plot asymmetry was detected. This does NOT indicate that publication bias is unlikely: Deeks' test has low power and is unreliable with fewer than 10 studies, so a non-significant result is uninformative when few studies are pooled</li>
                 <li><strong>p < 0.05:</strong> Significant asymmetry - potential publication bias detected</li>
             </ul>
             
@@ -2365,9 +2379,9 @@ diagnosticmetaClass <- R6::R6Class(
             
             <h4>AI Algorithm Implementation:</h4>
             <ul>
-                <li><strong>Consistent Performance:</strong> Low heterogeneity supports broad implementation</li>
-                <li><strong>Variable Performance:</strong> High heterogeneity suggests population-specific validation needed</li>
-                <li><strong>External Validation:</strong> Meta-analysis provides evidence for regulatory approval</li>
+                <li><strong>Consistent Performance:</strong> low measured heterogeneity means the included studies produced similar estimates; with few studies it is imprecisely estimated and does not by itself show that performance transfers to a new setting</li>
+                <li><strong>Variable Performance:</strong> high heterogeneity indicates that accuracy differed across the included populations and protocols</li>
+                <li><strong>Not external validation:</strong> a meta-analysis summarises existing published evidence and inherits any publication, spectrum or reference-standard bias of the included studies; it is not a prospective evaluation in an intended-use population with a pre-specified threshold</li>
             </ul>
             
             <h4>Predictive Values in Clinical Practice:</h4>
@@ -2759,45 +2773,66 @@ diagnosticmetaClass <- R6::R6Class(
                         sprintf("With %.1f%% sensitivity, this test will detect %.0f out of 100 patients with disease, missing only %.0f. ",
                                 sens, sens, 100 - sens)
                     },
-                    "<strong>Clinical implication:</strong> Excellent for ruling OUT disease when test is negative (SnNout principle). "
+                    if (is.finite(lr_neg) && lr_neg < 0.1) {
+                        sprintf("Rule-out power is governed by the negative likelihood ratio rather than by sensitivity alone; here LR- = %.2f, which lowers the post-test odds substantially (the SnNout pattern). ",
+                                lr_neg)
+                    } else if (is.finite(lr_neg)) {
+                        sprintf("Rule-out power is governed by the negative likelihood ratio rather than by sensitivity alone; here LR- = %.2f, which provides %s evidence against disease after a negative result. ",
+                                lr_neg, nlr_class)
+                    } else {
+                        "Rule-out power is governed by the negative likelihood ratio rather than by sensitivity alone, and LR- is not estimable here. "
+                    }
                 )
             } else if (sens >= 80) {
                 interpretation <- paste0(interpretation,
                     sprintf("With %.1f%% sensitivity, approximately %.0f out of 100 diseased patients will be correctly identified. ",
                             sens, sens),
-                    "<strong>Clinical implication:</strong> Acceptable for screening, but negative results should be interpreted with caution. "
+                    "<strong>Interpretation:</strong> a negative result reduces, but does not remove, the possibility of disease at this sensitivity. "
                 )
             } else {
                 interpretation <- paste0(interpretation,
                     sprintf("With %.1f%% sensitivity, up to %.0f out of 100 diseased patients may be missed. ",
                             sens, 100 - sens),
-                    "<strong>Clinical implication:</strong> Limited screening utility - negative results do NOT effectively rule out disease. "
+                    "<strong>Interpretation:</strong> at this sensitivity a substantial proportion of diseased patients are expected to test negative. "
                 )
             }
 
             # Add specificity interpretation
             interpretation <- paste0(interpretation,
-                sprintf("<br><br><strong>Your pooled specificity of %.1f%%</strong> is classified as <em>%s</em> for confirmatory testing. ",
-                        spec, spec_class)
+                sprintf("<br><br><strong>Your pooled specificity of %.1f%%%s</strong> is classified as <em>%s</em> for confirmatory testing. ",
+                        spec, ci_txt(spec_ci), spec_class)
             )
+            if (spec_uncertain) {
+                interpretation <- paste0(interpretation,
+                    "<strong>Note:</strong> the confidence interval spans more than one performance category, ",
+                    "so this classification is not firmly established by the pooled data. ")
+            }
 
             if (spec >= 90) {
                 interpretation <- paste0(interpretation,
                     sprintf("With %.1f%% specificity, only %.0f out of 100 healthy individuals will test positive (false alarms). ",
                             spec, 100 - spec),
-                    "<strong>Clinical implication:</strong> Excellent for ruling IN disease when test is positive (SpPin principle). "
+                    if (is.finite(lr_pos) && lr_pos > 10) {
+                        sprintf("Rule-in power is governed by the positive likelihood ratio rather than by specificity alone; here LR+ = %.2f, which raises the post-test odds substantially (the SpPin pattern). ",
+                                lr_pos)
+                    } else if (is.finite(lr_pos)) {
+                        sprintf("Rule-in power is governed by the positive likelihood ratio rather than by specificity alone; here LR+ = %.2f, which provides %s evidence for disease after a positive result. ",
+                                lr_pos, plr_class)
+                    } else {
+                        "Rule-in power is governed by the positive likelihood ratio rather than by specificity alone, and LR+ is not estimable here. "
+                    }
                 )
             } else if (spec >= 80) {
                 interpretation <- paste0(interpretation,
                     sprintf("With %.1f%% specificity, approximately %.0f out of 100 healthy individuals will be correctly classified. ",
                             spec, spec),
-                    "<strong>Clinical implication:</strong> Acceptable for confirmation, but positive results may include false positives. "
+                    "<strong>Interpretation:</strong> at this specificity an appreciable share of positive results are expected to be false positives. "
                 )
             } else {
                 interpretation <- paste0(interpretation,
                     sprintf("With %.1f%% specificity, up to %.0f out of 100 healthy individuals may test positive. ",
                             spec, 100 - spec),
-                    "<strong>Clinical implication:</strong> Limited confirmatory value - positive results do NOT strongly confirm disease. "
+                    "<strong>Interpretation:</strong> at this specificity a large share of positive results are expected to be false positives. "
                 )
             }
 
@@ -2819,7 +2854,8 @@ diagnosticmetaClass <- R6::R6Class(
                     )
                 } else {
                     interpretation <- paste0(interpretation,
-                        "A positive result provides only weak evidence - clinical context is essential. "
+                        sprintf("A positive result multiplies the pre-test odds by %.2fx; the post-test probability also depends on the pre-test probability. ",
+                                lr_pos)
                     )
                 }
             }
@@ -2841,27 +2877,50 @@ diagnosticmetaClass <- R6::R6Class(
                     )
                 } else {
                     interpretation <- paste0(interpretation,
-                        "A negative result provides only weak evidence - clinical context is essential. "
+                        sprintf("A negative result multiplies the pre-test odds by %.2fx; the post-test probability also depends on the pre-test probability. ",
+                                lr_neg)
                     )
                 }
             }
 
-            # Overall recommendation
+            # Overall summary of the pooled estimates. This describes what was
+            # computed; it deliberately issues no fitness-for-use verdict, and it
+            # is qualified by the between-study heterogeneity the same analysis
+            # measured - a single pooled pair does not describe any one setting
+            # when the prediction interval is wide.
             if (sens >= 90 && spec >= 90) {
                 interpretation <- paste0(interpretation,
-                    "<br><br><strong>Overall Assessment:</strong> This test demonstrates <em>excellent</em> diagnostic accuracy suitable for both screening and confirmatory use in appropriate clinical populations."
+                    sprintf("<br><br><strong>Overall Summary:</strong> pooled sensitivity (%.1f%%) and pooled specificity (%.1f%%) both fall in the <em>excellent</em> band.",
+                            sens, spec)
                 )
             } else if (sens >= 80 && spec >= 80) {
                 interpretation <- paste0(interpretation,
-                    "<br><br><strong>Overall Assessment:</strong> This test demonstrates <em>good</em> diagnostic accuracy and can be useful for clinical decision-making when combined with other clinical information."
+                    sprintf("<br><br><strong>Overall Summary:</strong> pooled sensitivity (%.1f%%) and pooled specificity (%.1f%%) both fall in the <em>good</em> band or above.",
+                            sens, spec)
                 )
             } else if (sens >= 90 || spec >= 90) {
                 interpretation <- paste0(interpretation,
-                    "<br><br><strong>Overall Assessment:</strong> This test has <em>asymmetric</em> performance - excellent for one purpose (rule-in OR rule-out) but limited for the other. Use strategically based on clinical goals."
+                    sprintf("<br><br><strong>Overall Summary:</strong> performance is <em>asymmetric</em> - pooled sensitivity (%.1f%%) and pooled specificity (%.1f%%) fall in different performance bands.",
+                            sens, spec)
                 )
             } else {
                 interpretation <- paste0(interpretation,
-                    "<br><br><strong>Overall Assessment:</strong> This test demonstrates <em>moderate</em> diagnostic accuracy. Consider using in combination with other tests or as part of a broader diagnostic algorithm rather than as a standalone test."
+                    sprintf("<br><br><strong>Overall Summary:</strong> pooled sensitivity (%.1f%%, <em>%s</em>) and pooled specificity (%.1f%%, <em>%s</em>) do not both reach the <em>good</em> band.",
+                            sens, sens_class, spec, spec_class)
+                )
+            }
+
+            # Qualify the summary with the measured between-study heterogeneity.
+            pi_wide <- function(pi) {
+                !is.null(pi) && length(pi) == 2 && all(is.finite(pi)) && (max(pi) - min(pi)) > 30
+            }
+            if (pi_wide(private$.pooled_sens_pi) || pi_wide(private$.pooled_spec_pi)) {
+                interpretation <- paste0(interpretation,
+                    " Between-study heterogeneity is substantial - the prediction interval spans a wide range of accuracy - so this pooled pair does not describe any single population or laboratory. Read the prediction region and the subgroup or meta-regression results rather than the pooled point."
+                )
+            } else {
+                interpretation <- paste0(interpretation,
+                    " These are pooled estimates from the included studies only; how far they carry to another setting depends on the prediction region and on how comparable the positivity thresholds, patient spectrum and reference standards are."
                 )
             }
 
@@ -3180,11 +3239,12 @@ diagnosticmetaClass <- R6::R6Class(
                 </div>
 
                 <div style='background-color: rgba(33, 162, 64, 0.19); padding: 15px; border-radius: 5px; margin: 10px 0; color: inherit;'>
-                    <h5> No Bias Indicators</h5>
+                    <h5> Features Consistent With a Symmetric Funnel</h5>
                     <ul>
                         <li><strong>Symmetric Funnel:</strong> Studies distributed evenly on both sides</li>
                         <li><strong>Deeks' Test p [[GE]] 0.05:</strong> No statistical evidence of asymmetry</li>
                         <li><strong>Small Studies Present:</strong> Range of precision levels represented</li>
+                        <li><em>These features do not establish that publication bias is absent: asymmetry tests have low power, and are unreliable with fewer than 10 studies.</em></li>
                     </ul>
                 </div>
 

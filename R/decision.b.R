@@ -568,10 +568,10 @@ decisionClass <- if (requireNamespace("jmvcore"))
                 youden_index <- if (is.na(sens) || is.na(spec)) NA_real_ else sens + spec - 1
                 test_utility <- dplyr::case_when(
                     is.na(youden_index) ~ "Insufficient data to evaluate discriminatory power",
-                    youden_index >= 0.5 ~ "Excellent discriminatory power",
-                    youden_index >= 0.3 ~ "Good discriminatory power",
-                    youden_index >= 0.1 ~ "Fair discriminatory power",
-                    TRUE ~ "Poor discriminatory power - limited clinical utility"
+                    youden_index >= 0.8 ~ "Excellent discriminatory power (Youden's index 0.80 or above)",
+                    youden_index >= 0.6 ~ "Good discriminatory power (Youden's index 0.60 to 0.79)",
+                    youden_index >= 0.4 ~ "Fair discriminatory power (Youden's index 0.40 to 0.59)",
+                    TRUE ~ "Poor discriminatory power (Youden's index below 0.40)"
                 )
                 
                 return(list(
@@ -632,12 +632,13 @@ decisionClass <- if (requireNamespace("jmvcore"))
                     TRUE ~ "limited"
                 )
 
-                # Determine primary clinical utility
+                # Describe the discrimination profile (no use recommendation is made)
                 primary_utility <- dplyr::case_when(
-                    !is.na(sens) && sens >= 0.9 && (is.na(spec) || spec < 0.8) ~ "ruling out disease",
-                    !is.na(spec) && spec >= 0.9 && (is.na(sens) || sens < 0.8) ~ "confirming disease",
-                    !is.na(sens) && !is.na(spec) && sens >= 0.8 && spec >= 0.8 ~ "both ruling out and confirming disease",
-                    TRUE ~ "diagnostic screening"
+                    is.na(sens) || is.na(spec) ~ "sensitivity or specificity could not be computed in this sample, so the discrimination profile is incomplete",
+                    sens >= 0.9 && spec < 0.8 ~ "sensitivity is high (0.90 or above) while specificity is below 0.80: few false negatives, more false positives in this sample",
+                    spec >= 0.9 && sens < 0.8 ~ "specificity is high (0.90 or above) while sensitivity is below 0.80: few false positives, more false negatives in this sample",
+                    sens >= 0.8 && spec >= 0.8 ~ "sensitivity and specificity are both 0.80 or above in this sample",
+                    TRUE ~ "sensitivity and specificity were not both 0.80 or above in this sample"
                 )
 
                 prevalence_text <- format_percent(prevalence, "not reported")
@@ -651,10 +652,14 @@ decisionClass <- if (requireNamespace("jmvcore"))
 
                 sample_text <- if (!is.na(total_pop)) sprintf("%d cases analyzed", total_pop) else "Sample size not available"
 
-                summary_template <- .("<div style='margin: 15px; padding: 15px; border-left: 5px solid #4CAF50; background-color: rgba(114, 184, 33, 0.1); color: inherit;'><h3 style='color: #2E7D32; margin-top: 0;'>Clinical Summary</h3><p style='font-size: 16px;'><strong>Analysis:</strong> Diagnostic test performance evaluation comparing %s against gold standard %s.</p><p><strong>Sample:</strong> %s. Predictive values below are computed at a disease prevalence of %s.</p><p><strong>Test Performance:</strong> The test shows <strong>%s</strong> discriminatory ability with sensitivity of <strong>%s</strong> (<em>%s</em>) and specificity of <strong>%s</strong> (<em>%s</em>).</p><p><strong>Clinical Utility:</strong> This test is most useful for <strong>%s</strong> in the clinical setting.</p><p><strong>Likelihood Ratios:</strong> Positive LR: %.2f (<em>%s</em>), Negative LR: %.2f (<em>%s</em>)</p><p><strong>Key Findings:</strong> When positive, the post-test disease probability is <strong>%s</strong> (PPV %s). When negative, the disease probability falls to <strong>%s</strong> and the probability of being disease-free is <strong>%s</strong> (NPV %s).</p></div>")
+                summary_template <- .("<div style='margin: 15px; padding: 15px; border-left: 5px solid #4CAF50; background-color: rgba(114, 184, 33, 0.1); color: inherit;'><h3 style='color: #2E7D32; margin-top: 0;'>Clinical Summary</h3><p style='font-size: 16px;'><strong>Analysis:</strong> Diagnostic test performance evaluation comparing %s against gold standard %s.</p><p><strong>Sample:</strong> %s. Predictive values below are computed at a disease prevalence of %s.</p><p><strong>Test Performance:</strong> The test shows <strong>%s</strong> discriminatory ability with sensitivity of <strong>%s</strong> (<em>%s</em>) and specificity of <strong>%s</strong> (<em>%s</em>).</p><p><strong>Discrimination Profile:</strong> %s.</p><p><strong>Likelihood Ratios:</strong> Positive LR: %s (<em>%s</em>), Negative LR: %s (<em>%s</em>)</p><p><strong>Key Findings:</strong> When positive, the post-test disease probability is <strong>%s</strong> (PPV %s). When negative, the disease probability falls to <strong>%s</strong> and the probability of being disease-free is <strong>%s</strong> (NPV %s).</p></div>")
 
-                lr_pos_safe <- if (is.na(lr_pos) || !is.finite(lr_pos)) 0 else lr_pos
-                lr_neg_safe <- if (is.na(lr_neg) || !is.finite(lr_neg)) 0 else lr_neg
+                lr_pos_safe <- if (is.na(lr_pos)) "not calculated"
+                    else if (!is.finite(lr_pos)) "not estimable (specificity is 100% in this sample)"
+                    else sprintf("%.2f", lr_pos)
+                lr_neg_safe <- if (is.na(lr_neg)) "not calculated"
+                    else if (!is.finite(lr_neg)) "not estimable (specificity is 0% in this sample)"
+                    else sprintf("%.2f", lr_neg)
 
                 # Escape user-derived variable names before HTML interpolation
                 test_name_safe <- private$.safeHtmlOutput(test_name)
@@ -2249,33 +2254,30 @@ decisionClass <- if (requireNamespace("jmvcore"))
                 ))
                 html <- paste0(html, "</ul>")
 
-                # Clinical interpretation
+                # Error balance (descriptive only)
                 if (n_fp > n_fn) {
                     html <- paste0(html,
-                        "<p><b>Clinical Implication:</b> The test tends to over-diagnose (more false positives). ",
-                        "This may lead to unnecessary treatments but rarely misses disease.</p>")
+                        "<p><b>Error Balance:</b> False positives outnumbered false negatives in this sample.</p>")
                 } else if (n_fn > n_fp) {
                     html <- paste0(html,
-                        "<p><b>Clinical Implication:</b> The test tends to under-diagnose (more false negatives). ",
-                        "This may miss cases that need treatment but reduces unnecessary interventions.</p>")
+                        "<p><b>Error Balance:</b> False negatives outnumbered false positives in this sample.</p>")
                 } else {
                     html <- paste0(html,
-                        "<p><b>Clinical Implication:</b> The test has balanced error types.</p>")
+                        "<p><b>Error Balance:</b> False positives and false negatives occurred equally often in this sample.</p>")
                 }
 
-                # Recommendations
-                html <- paste0(html, "<p><b>Recommendations:</b></p><ul>")
+                # Follow-up checks on the analysis itself
+                html <- paste0(html, "<p><b>Follow-up checks on this analysis:</b></p><ul>")
 
                 if (n_fp > 0) {
                     html <- paste0(html,
                         "<li>Review false positive cases to identify common characteristics</li>",
-                        "<li>Consider if test cutpoint needs adjustment to reduce false positives</li>")
+                        "<li>Check whether the test cutpoint used here is the one you intended</li>")
                 }
 
                 if (n_fn > 0) {
                     html <- paste0(html,
-                        "<li>Review false negative cases to understand what the test misses</li>",
-                        "<li>Consider supplementary tests for cases with high clinical suspicion</li>")
+                        "<li>Review false negative cases to understand what the test misses</li>")
                 }
 
                 html <- paste0(html, "</ul>")

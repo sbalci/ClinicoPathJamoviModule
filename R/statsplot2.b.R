@@ -486,7 +486,7 @@ statsplot2Class <- if (requireNamespace('jmvcore'))
                         "<p>This <strong>paired violin plot</strong> compares <code>{dep_var_safe}</code> between two time points or conditions (<code>{group_var_safe}</code>).</p>",
                         "<ul style='margin: 10px 0; padding-left: 20px;'>",
                         "<li><strong>Connected points:</strong> Show individual subject changes over time</li>",
-                        "<li><strong>Distribution shift:</strong> Reveals overall treatment/time effect</li>",
+                        "<li><strong>Distribution shift:</strong> Shows the overall change between the two time points or conditions</li>",
                         "<li><strong>Statistical test:</strong> Evaluates if mean change differs significantly from zero</li>",
                         "<li><strong>Individual variability:</strong> Lines show subject-specific responses</li>",
                         "</ul>"
@@ -751,7 +751,7 @@ statsplot2Class <- if (requireNamespace('jmvcore'))
                         "\u2022 Statistical tests may fail or produce meaningless p-values<br/>",
                         "\u2022 Effect sizes and confidence intervals will be very imprecise<br/>",
                         "\u2022 Normality assumptions cannot be verified<br/><br/>",
-                        "<strong>Clinical recommendations:</strong><br/>",
+                        "<strong>Analysis recommendations:</strong><br/>",
                         "1. <strong>Collect more data</strong> before drawing conclusions<br/>",
                         "2. Use descriptive statistics only (no hypothesis testing)<br/>",
                         "3. Consider exact tests if n\u22655 (Fisher's exact test)<br/>",

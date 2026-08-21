@@ -364,7 +364,7 @@ items:
           title: "Youden Index"
           type: number
         - name: recommendation
-          title: "Clinical Recommendation"
+          title: "Performance Summary"
           type: text
       clearWith:
           - multiplecuts

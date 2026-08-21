@@ -1142,6 +1142,7 @@ refs:
         authors:
             - name: Sam El-Kamand
               url: https://github.com/selkamand/ggoncoplot
+        year: 2022
         title: 'ggoncoplot: Create Oncoplots with ggplot2'
         publisher: GitHub
         url: https://github.com/selkamand/ggoncoplot
@@ -3414,99 +3415,99 @@ refs:
         url: https://www.jstatsoft.org/article/view/v105i07
     DecisionCurve:
         type: 'software'
-        author:
-        year:
+        author: ""
+        year: ""
         title: "DecisionCurve: R package"
         publisher: "[R package]. Retrieved from https://CRAN.R-project.org/package=DecisionCurve"
         url: https://CRAN.R-project.org/package=DecisionCurve
     DiagTest3Grp:
         type: 'software'
-        author:
-        year:
+        author: ""
+        year: 2014
         title: "DiagTest3Grp: R package"
         publisher: "[R package]. Retrieved from https://CRAN.R-project.org/package=DiagTest3Grp"
         url: https://CRAN.R-project.org/package=DiagTest3Grp
     NPHMC:
         type: 'software'
-        author:
-        year:
+        author: ""
+        year: 2025
         title: "NPHMC: R package"
         publisher: "[R package]. Retrieved from https://CRAN.R-project.org/package=NPHMC"
         url: https://CRAN.R-project.org/package=NPHMC
     ReliabilityTheory:
         type: 'software'
-        author:
-        year:
+        author: ""
+        year: 2024
         title: "ReliabilityTheory: R package"
         publisher: "[R package]. Retrieved from https://CRAN.R-project.org/package=ReliabilityTheory"
         url: https://CRAN.R-project.org/package=ReliabilityTheory
     SemiMarkov:
         type: 'software'
-        author:
-        year:
+        author: ""
+        year: 2019
         title: "SemiMarkov: R package"
         publisher: "[R package]. Retrieved from https://CRAN.R-project.org/package=SemiMarkov"
         url: https://CRAN.R-project.org/package=SemiMarkov
     VIM:
         type: 'software'
-        author:
-        year:
+        author: ""
+        year: 2026
         title: "VIM: R package"
         publisher: "[R package]. Retrieved from https://CRAN.R-project.org/package=VIM"
         url: https://CRAN.R-project.org/package=VIM
     forestplot:
         type: 'software'
-        author:
-        year:
+        author: ""
+        year: 2026
         title: "forestplot: R package"
         publisher: "[R package]. Retrieved from https://CRAN.R-project.org/package=forestplot"
         url: https://CRAN.R-project.org/package=forestplot
     nricens:
         type: 'software'
-        author:
-        year:
+        author: ""
+        year: 2018
         title: "nricens: R package"
         publisher: "[R package]. Retrieved from https://CRAN.R-project.org/package=nricens"
         url: https://CRAN.R-project.org/package=nricens
     regplot:
         type: 'software'
-        author:
-        year:
+        author: ""
+        year: 2020
         title: "regplot: R package"
         publisher: "[R package]. Retrieved from https://CRAN.R-project.org/package=regplot"
         url: https://CRAN.R-project.org/package=regplot
     rmda:
         type: 'software'
-        author:
-        year:
+        author: ""
+        year: 2018
         title: "rmda: R package"
         publisher: "[R package]. Retrieved from https://CRAN.R-project.org/package=rmda"
         url: https://CRAN.R-project.org/package=rmda
     rpact:
         type: 'software'
-        author:
-        year:
+        author: ""
+        year: 2026
         title: "rpact: R package"
         publisher: "[R package]. Retrieved from https://CRAN.R-project.org/package=rpact"
         url: https://CRAN.R-project.org/package=rpact
     survSNP:
         type: 'software'
-        author:
-        year:
+        author: ""
+        year: 2023
         title: "survSNP: R package"
         publisher: "[R package]. Retrieved from https://CRAN.R-project.org/package=survSNP"
         url: https://CRAN.R-project.org/package=survSNP
     tidycmprsk:
         type: 'software'
-        author:
-        year:
+        author: ""
+        year: 2026
         title: "tidycmprsk: R package"
         publisher: "[R package]. Retrieved from https://CRAN.R-project.org/package=tidycmprsk"
         url: https://CRAN.R-project.org/package=tidycmprsk
     ICC:
         type: 'software'
-        author:
-        year:
+        author: ""
+        year: 2022
         title: "ICC: R package"
         publisher: "[R package]. Retrieved from https://CRAN.R-project.org/package=ICC"
         url: https://CRAN.R-project.org/package=ICC

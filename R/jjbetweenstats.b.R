@@ -1074,7 +1074,8 @@ jjbetweenstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         "<p><strong>Statistical Significance:</strong></p>",
         "<ul>",
         "<li><strong>p < 0.05:</strong> Significant difference between groups.</li>",
-        "<li><strong>p \u2265 0.05:</strong> No significant difference detected.</li>",
+        "<li><strong>p >= 0.05:</strong> No significant difference was detected. This does not establish that the groups are equal - the effect size and its confidence interval in the plot subtitle show which effect sizes remain compatible with these data, and may include ones large enough to matter clinically.</li>",
+        "<li>When several pairwise comparisons are displayed, read the adjusted p-values: the chance of at least one false positive rises with the number of comparisons.</li>",
         "</ul>",
         
         "<p><strong>Effect Size Interpretation:</strong></p>",

@@ -375,7 +375,7 @@ survivalcontClass <- if (requireNamespace("jmvcore")) {
                         if (identical(hr_val, "N/A")) {
                             glue::glue(.('Analysis of {variable} could not determine hazard ratio.'), variable = variable_name)
                         } else {
-                            glue::glue(.('When {variable} increases by 1 unit, the hazard (risk) of the event changes by a factor of {hr}.'),
+                            glue::glue(.('When {variable} increases by 1 unit, the instantaneous hazard rate of the event is multiplied by {hr} (a hazard ratio, not a risk ratio).'),
                                      variable = variable_name, hr = hr_val)
                         }
                     },

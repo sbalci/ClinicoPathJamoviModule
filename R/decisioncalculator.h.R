@@ -613,7 +613,7 @@ decisioncalculatorResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::
                         `type`="number"),
                     list(
                         `name`="recommendation", 
-                        `title`="Clinical Recommendation", 
+                        `title`="Performance Summary", 
                         `type`="text")),
                 clearWith=list(
                     "multiplecuts",

@@ -314,7 +314,7 @@ test_that("the manuscript-ready report does not claim a winner it cannot support
 
     txt <- strip_html(res$clinicalReport$content)
     expect_false(grepl("demonstrated optimal diagnostic performance", txt, fixed = TRUE))
-    expect_match(txt, "had the highest observed accuracy")
+    expect_match(txt, "ranked highest on the combined Youden-index-plus-accuracy score")
     expect_match(txt, "should not be reported as evidence that one test outperforms")
 
     # the placeholder must be gone, replaced by a real Clopper-Pearson interval
@@ -325,9 +325,9 @@ test_that("the manuscript-ready report does not claim a winner it cannot support
 })
 
 
-test_that("a genuinely significant difference is still reported as optimal", {
-    # Guard against over-correcting: when the tests DO separate, the report must
-    # not hedge.
+test_that("a genuinely significant difference is reported without the hedge", {
+    # Guard against over-correcting: when the tests DO separate, the report names
+    # the top-ranked test without the "do not read this as evidence" caveat.
     set.seed(4)
     n <- 200
     gold <- sample(c("pos", "neg"), n, TRUE)
@@ -344,6 +344,6 @@ test_that("a genuinely significant difference is still reported as optimal", {
 
     expect_lt(res$mcnemarTable$asDF$p[1], 0.05)
     txt <- strip_html(res$clinicalReport$content)
-    expect_match(txt, "demonstrated optimal diagnostic performance")
+    expect_match(txt, "ranked highest on the combined Youden-index-plus-accuracy score")
     expect_false(grepl("should not be reported as evidence", txt, fixed = TRUE))
 })

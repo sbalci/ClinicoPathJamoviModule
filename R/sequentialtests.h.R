@@ -449,7 +449,7 @@ sequentialtestsResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
             self$add(jmvcore::Html$new(
                 options=options,
                 name="clinical_guidance",
-                title="Clinical Guidance"))}))
+                title="Testing Strategy Notes"))}))
 
 sequentialtestsBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
     "sequentialtestsBase",

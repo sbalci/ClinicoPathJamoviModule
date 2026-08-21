@@ -599,7 +599,7 @@ jjcorrmatClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     "<p>", sprintf(.("Correlations are computed separately within each level of <strong>%s</strong>, matching the figure and the table. Pooling the groups would be misleading whenever they differ in direction."),
                                    htmltools::htmlEscape(self$options$grvar)), "</p>",
                     "<ul>", paste(parts, collapse = ""), "</ul>",
-                    "<p><strong>", .("Clinical Recommendations:"), "</strong><br>",
+                    "<p><strong>", .("Interpretation Notes:"), "</strong><br>",
                     "\u2022 ", .("Compare the groups deliberately: a correlation present in one group and absent (or reversed) in another is a finding in itself, not noise."),
                     "<br>\u2022 ", .("Remember that correlation does not imply causation."), "</p>"))
                 return()
@@ -712,9 +712,9 @@ jjcorrmatClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
             interpretation <- paste0(
                 interpretation,
-                "<p><strong>", .("Clinical Recommendations:"), "</strong><br>",
+                "<p><strong>", .("Interpretation Notes:"), "</strong><br>",
                 if (sum(sig) > 0) {
-                    .("\u2022 Consider these correlations in your clinical interpretation and hypothesis generation.")
+                    .("\u2022 These correlations are exploratory and hypothesis-generating; they describe association within this sample only.")
                 } else {
                     .("\u2022 No correlations reached the chosen threshold. Consider a larger sample size or different variables.")
                 },

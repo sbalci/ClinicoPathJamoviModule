@@ -892,7 +892,7 @@ psychopdaROCResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
                         `type`="text"),
                     list(
                         `name`="clinical_recommendation", 
-                        `title`="Clinical Recommendation", 
+                        `title`="Performance Summary", 
                         `type`="text"),
                     list(
                         `name`="interpretation_text", 

@@ -918,9 +918,9 @@ outlierdetectionClass <- if (requireNamespace("jmvcore")) R6::R6Class("outlierde
 
             # Create clinical context interpretation
             clinical_context <- if (n_outliers == 0) {
-                "No unusual values were detected in your data. This suggests good data quality with consistent measurements."
+                "No values exceeded the detection thresholds used here. This does not by itself establish data quality: outliers can mask one another, so these methods may miss them."
             } else if (outlier_pct < 1) {
-                "A very small number of unusual values were found. These are likely genuine extreme cases or rare clinical presentations."
+                "A very small number of unusual values were found. The detection method cannot tell whether these are data entry errors or genuine extreme values; review them individually."
             } else if (outlier_pct < 5) {
                 "A modest number of unusual values were identified. Review these cases to determine if they represent data entry errors or genuine clinical variation."
             } else if (outlier_pct < 10) {
@@ -931,7 +931,7 @@ outlierdetectionClass <- if (requireNamespace("jmvcore")) R6::R6Class("outlierde
 
             # Create action recommendations
             action_text <- if (n_outliers == 0) {
-                "Your data appears ready for statistical analysis."
+                "No observations exceeded the detection thresholds, so none are listed below for review. This is not a confirmation that the data contain no errors."
             } else if (outlier_pct < 5) {
                 paste0("Review the ", n_outliers, " flagged observation(s) below. ",
                        "In clinical data, outliers may represent: ",
@@ -983,7 +983,7 @@ outlierdetectionClass <- if (requireNamespace("jmvcore")) R6::R6Class("outlierde
                     "we identified ", n_outliers, " potential outlier(s) (", outlier_pct, "%) using ",
                     method_desc, ".", sampling_caveat, "</p>",
                     "<p><strong>Clinical interpretation:</strong> ", clinical_context, "</p>",
-                    "<p><strong>Recommended action:</strong> ", action_text, "</p>"
+                    "<p><strong>", if (n_outliers == 0) "What this means" else "Recommended action", ":</strong> ", action_text, "</p>"
                 ),
                 style = if(n_outliers == 0) "success" else if(outlier_pct < 5) "info" else "warning",
                 icon = ""
@@ -1001,8 +1001,8 @@ outlierdetectionClass <- if (requireNamespace("jmvcore")) R6::R6Class("outlierde
                 if (subsampled)
                     "Because a subsample was analysed, this count is a lower bound on the outliers present in the full dataset. "
                 else "",
-                if(n_outliers == 0) "No data quality issues were detected."
-                else if(outlier_pct < 5) "The low outlier rate suggests acceptable data quality."
+                if(n_outliers == 0) "No observations exceeded the detection thresholds applied."
+                else if(outlier_pct < 5) "A small proportion of observations exceeded the detection thresholds."
                 else "Further data review is recommended."
             )
 

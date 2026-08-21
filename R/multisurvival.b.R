@@ -268,7 +268,7 @@
                 if (!is.na(hr_val) && abs(log(hr_val)) > abs(log(strongest_hr))) {
                   strongest_hr <- hr_val
                   strongest_var <- results[i, 1]  # First column usually contains variable names
-                  strongest_effect <- if (hr_val > 1) "increased risk" else "decreased risk"
+                  strongest_effect <- if (hr_val > 1) "a higher fitted hazard" else "a lower fitted hazard"
                 }
               }
             }
@@ -306,7 +306,8 @@
     } else {
       summary_parts$findings <- paste0(
         "No statistically significant associations were identified among the", " ",
-        n_vars, " ", factor_word, " examined", " (", "all p-values \u2265 0.05", ")."
+        n_vars, " ", factor_word, " examined", " (", "all p-values \u2265 0.05", "). ",
+        "This does not establish that no association exists; the analysis may lack power to detect one."
       )
     }
 
@@ -420,6 +421,9 @@ multisurvivalClass <- if (requireNamespace('jmvcore'))
       # recode disclosure without redoing the work.
       .eventRecode = NULL,
       .dataComputed = FALSE,
+      # Number of rows dropped by the landmark filter, so the landmark
+      # disclosure can state how many patients were excluded.
+      .landmarkExcluded = NULL,
       .coxCache = NULL,
       .coxComputed = FALSE,
 
@@ -479,11 +483,27 @@ multisurvivalClass <- if (requireNamespace('jmvcore'))
           self$results[[output_name]]$setVisible(TRUE)
       },
 
+      # Landmark analyses drop everyone whose follow-up ended before the
+      # landmark AND reset the clock to the landmark, so every time below is
+      # measured from the landmark and is conditional on surviving to it. A bare
+      # "Landmark time used as: 12 months" did not say either of those things.
+      .landmarkDisclosure = function(landmark) {
+          n_excluded <- private$.landmarkExcluded
+          excl <- if (is.null(n_excluded) || is.na(n_excluded) || n_excluded <= 0) ""
+              else sprintf(.(" Patients whose follow-up ended before the landmark were excluded (n = %d removed)."), n_excluded)
+          paste0(
+              sprintf(.("<br><b>Landmark analysis at %s %s.</b>"), format(landmark), self$options$timetypeoutput),
+              excl,
+              .(" All times reported here are measured FROM the landmark, not from study entry, and all estimates are conditional on being event-free at the landmark. They are not comparable with unlandmarked survival times.")
+          )
+      },
+
       # Reset the per-run compute caches so a re-run recomputes cleaned data and
       # the Cox model with the current options. Called at the top of .run().
       .resetComputeCaches = function() {
           private$.dataCache <- NULL
           private$.dataComputed <- FALSE
+          private$.landmarkExcluded <- NULL
           private$.coxCache <- NULL
           private$.coxComputed <- FALSE
       },
@@ -1878,9 +1898,11 @@ multisurvivalClass <- if (requireNamespace('jmvcore'))
         if (self$options$uselandmark) {
           landmark <- jmvcore::toNumeric(self$options$landmark)
 
+          n_before_landmark <- nrow(cleanData)
           cleanData <- cleanData %>%
             dplyr::filter(mytime >= landmark) %>%
             dplyr::mutate(mytime = mytime - landmark)
+          private$.landmarkExcluded <- n_before_landmark - nrow(cleanData)
         }
 
         ## Names cleanData ----
@@ -2261,7 +2283,26 @@ multisurvivalClass <- if (requireNamespace('jmvcore'))
           n_obs <- nrow(mydata)
           n_events <- sum(event_indicator, na.rm = TRUE)
           event_rate <- (n_events / n_obs) * 100
-          median_followup <- median(mydata$mytime, na.rm = TRUE)
+          # Median FOLLOW-UP by reverse Kaplan-Meier (Schemper & Smith): the
+          # censoring indicator becomes the "event", so the estimate answers
+          # "how long was this cohort actually watched". median(mytime) is the
+          # median time to event-or-censoring, which in a high-event cohort is
+          # close to the median SURVIVAL and understates the observation window.
+          median_followup <- NA_real_
+          followup_is_reverse_km <- FALSE
+          cens <- as.integer(!is.na(event_indicator) & event_indicator == 0)
+          if (sum(cens) > 0) {
+            fit_fu <- try(survival::survfit(survival::Surv(mydata$mytime, cens) ~ 1), silent = TRUE)
+            if (!inherits(fit_fu, "try-error")) {
+              m_fu <- unname(summary(fit_fu)$table[["median"]])
+              if (!is.na(m_fu)) {
+                median_followup <- m_fu
+                followup_is_reverse_km <- TRUE
+              }
+            }
+          }
+          if (!followup_is_reverse_km)
+            median_followup <- median(mydata$mytime, na.rm = TRUE)
           time_unit <- self$options$timetypeoutput
 
           # Reconcile against the recode disclosure shown just above.
@@ -2290,7 +2331,10 @@ multisurvivalClass <- if (requireNamespace('jmvcore'))
             "info",
             .("Analysis complete"),
             paste0(sprintf(
-              .("Analysis completed successfully using %d observations with %d events (%.1f%% event rate) over %.1f %s median follow-up."),
+              if (followup_is_reverse_km)
+                .("Analysis completed using %d observations with %d events (%.1f%% event rate) over a median follow-up of %.1f %s (reverse Kaplan-Meier).")
+              else
+                .("Analysis completed using %d observations with %d events (%.1f%% event rate). Median follow-up could not be estimated by reverse Kaplan-Meier; the median observed time (to event or censoring) was %.1f %s, which is not the same quantity."),
               n_obs, n_events, event_rate, median_followup, time_unit
             ), recode_note)
           )
@@ -3407,7 +3451,7 @@ multisurvivalClass <- if (requireNamespace('jmvcore'))
               pvalue = pval,
               interpretation = if (isTRUE(pval < 0.05)) "Significant contribution to fit"
                                else if (is.na(pval)) "Not estimable (term is aliased)"
-                               else "No significant contribution"
+                               else "No detected improvement in fit (p >= 0.05)"
             ))
           }
 
@@ -6312,7 +6356,7 @@ Patients were then divided at empirical quantile cutpoints into {as.character(le
         landmark <- jmvcore::toNumeric(self$options$landmark)
         tCoxtext2 <- glue::glue(
           tCoxtext2,
-          "Landmark time used as: ", landmark, " ", self$options$timetypeoutput, "."
+          private$.landmarkDisclosure(landmark)
         )
       }
 
@@ -6972,11 +7016,7 @@ Patients were then divided at empirical quantile cutpoints into {as.character(le
 
       text2_html <- glue::glue(
         text2_html,
-        "Landmark time used as: ",
-        landmark,
-        " ",
-        self$options$timetypeoutput,
-        "."
+        private$.landmarkDisclosure(landmark)
       )
     }
 
@@ -7047,7 +7087,8 @@ Patients were then divided at empirical quantile cutpoints into {as.character(le
         } else {
           summary_parts$findings <- paste0(
             "<br><br><b>Key Finding:</b> No statistically significant associations were identified among the ",
-            n_vars, " factors examined (all p-values \u2265 0.05)."
+            n_vars, " factors examined (all p-values \u2265 0.05). ",
+            "This does not establish that no association exists; the analysis may lack power to detect one."
           )
         }
 
@@ -7360,7 +7401,7 @@ Patients were then divided at empirical quantile cutpoints into {as.character(le
 
             <div style="background-color: rgba(255, 169, 33, 0.14); padding: 12px; border-radius: 5px; margin: 10px 0; color: inherit;">
                 <h4 style="color: #d68910; margin-top: 0;"> Hazard Ratio (Forest) Plots</h4>
-                <p style="margin: 8px 0;">Forest plots visualize <strong>hazard ratios and confidence intervals</strong> for multiple variables simultaneously, enabling quick assessment of relative risk factors.</p>
+                <p style="margin: 8px 0;">Forest plots visualize <strong>hazard ratios and confidence intervals</strong> for multiple variables simultaneously, enabling comparison of the relative magnitude of hazard ratios across variables.</p>
 
                 <div style="background-color: white; padding: 10px; border-radius: 5px; margin: 10px 0;">
                     <strong>Reading Forest Plots:</strong>

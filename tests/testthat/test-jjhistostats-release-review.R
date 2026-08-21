@@ -222,9 +222,9 @@ test_that("symmetric non-normal data is not certified as normal", {
     expect_lt(shapiro.test(uniform)$p.value, 0.05)
     expect_gt(shapiro.test(normal)$p.value, 0.05)
 
-    expect_false(grepl("Normal distribution allows use of parametric", verdict(bimodal)))
-    expect_false(grepl("Normal distribution allows use of parametric", verdict(uniform)))
-    expect_true(grepl("Normal distribution allows use of parametric",  verdict(normal)))
+    expect_false(grepl("No evidence of a departure from normality", verdict(bimodal)))
+    expect_false(grepl("No evidence of a departure from normality", verdict(uniform)))
+    expect_true(grepl("No evidence of a departure from normality",  verdict(normal)))
 
     # and the panel now reports which test it used
     expect_match(verdict(bimodal), "Shapiro-Wilk")
@@ -232,7 +232,7 @@ test_that("symmetric non-normal data is not certified as normal", {
     # a constant column is called out rather than being handed a normality verdict
     const <- verdict(rep(50, 40))
     expect_match(const, "constant")
-    expect_false(grepl("Normal distribution allows use of parametric", const))
+    expect_false(grepl("No evidence of a departure from normality", const))
 })
 
 

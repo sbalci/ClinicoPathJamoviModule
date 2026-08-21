@@ -690,7 +690,7 @@ jjhistostatsClass <- if (requireNamespace('jmvcore'))
                         } else if (!is.na(shapiro_p) && shapiro_p <= 0.05) {
                             "Symmetric but not normal - e.g. bimodal, or heavier/lighter tails than a normal curve; inspect the histogram before using parametric tests"
                         } else {
-                            "Approximately symmetric (suitable for parametric tests)"
+                            "Approximately symmetric (parametric tests are reasonable; symmetry alone does not rule out bimodality or heavy tails, so check the histogram)"
                         }, "</li>",
                         if (!is.na(shapiro_p))
                             paste0("<li><strong>Normality (Shapiro-Wilk):</strong> W-test p = ",
@@ -706,7 +706,7 @@ jjhistostatsClass <- if (requireNamespace('jmvcore'))
                         if (sd_val == 0) {
                             "This variable is constant - every observation has the same value. There is no distribution to summarise and no test to run on it."
                         } else if (is_normal) {
-                            "Normal distribution allows use of parametric statistics (t-tests, ANOVA). Mean and SD are appropriate summary measures."
+                            "No evidence of a departure from normality was found, so parametric statistics (t-tests, ANOVA) are reasonable here. Absence of evidence against normality does not establish that the distribution is normal, particularly at small n or when the Shapiro-Wilk test could not be run. Mean and SD are appropriate summary measures."
                         } else {
                             "Non-normal distribution: prefer rank-based methods. Within this analysis that is the Wilcoxon signed-rank option; if you go on to compare groups, the rank-based equivalents are Mann-Whitney (two groups) and Kruskal-Wallis (three or more). Median and IQR are the more appropriate summary measures here."
                         }, "</li>",

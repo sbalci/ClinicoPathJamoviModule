@@ -77,7 +77,7 @@ items:
           title: Performance Level
           type: text
         - name: clinical_recommendation
-          title: Clinical Recommendation
+          title: Performance Summary
           type: text
         - name: interpretation_text
           title: Detailed Interpretation

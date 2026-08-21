@@ -674,7 +674,8 @@ jjbarstatsClass <- if (requireNamespace('jmvcore'))
                     "<p><strong>Statistical Significance:</strong></p>",
                     "<ul>",
                     "<li><strong>p < 0.05:</strong> Significant association between variables</li>",
-                    "<li><strong>p \u2265 0.05:</strong> No significant association detected</li>",
+                    "<li><strong>p \u2265 0.05:</strong> No significant association was detected. This does not establish that the variables are independent - an association of small or moderate size may simply be undetectable at this sample size. Read Cram\u00e9r's V and its confidence interval alongside the p-value.</li>",
+                    "<li>When several tables are tested, use adjusted p-values: the chance of at least one false positive rises with the number of comparisons.</li>",
                     "</ul>",
                     
                     "<p><strong>Effect Size Interpretation:</strong></p>",
@@ -702,7 +703,7 @@ jjbarstatsClass <- if (requireNamespace('jmvcore'))
                         "biomarker" = paste0(
                             "<ul>",
                             "<li><strong>Expression Patterns:</strong> Compare distribution across clinical groups</li>",
-                            "<li><strong>Prognostic Value:</strong> Association with outcomes indicates potential clinical utility</li>",
+                            "<li><strong>Prognostic Value:</strong> Association with outcomes is a starting point only; prognostic or predictive value has to be established in an independent cohort</li>",
                             "<li><strong>Validation:</strong> Consider external validation and clinical correlation</li>",
                             "</ul>"
                         ),

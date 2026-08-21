@@ -160,7 +160,7 @@ items:
                   title: 'AUC Interpretation'
                   type: text
                 - name: clinical_utility
-                  title: 'Clinical Utility'
+                  title: 'Discrimination Level'
                   type: text
 
           # ROC Curve Comparisons
@@ -312,7 +312,7 @@ items:
                   type: number
                   format: zto
                 - name: clinical_recommendation
-                  title: 'Clinical Recommendation'
+                  title: 'Performance Summary'
                   type: text
 
           # Detailed Cutoff Analysis

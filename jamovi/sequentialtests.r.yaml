@@ -216,7 +216,7 @@ items:
       visible: (show_plots)
 
     - name: clinical_guidance
-      title: 'Clinical Guidance'
+      title: 'Testing Strategy Notes'
       type: Html
 
 

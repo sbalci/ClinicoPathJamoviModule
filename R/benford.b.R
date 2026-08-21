@@ -583,7 +583,7 @@ benfordClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 if (!is.null(suspects_safe) && nrow(suspects_safe) > 0) {
                     suspects_text <- private$.generateEnhancedSuspectsOutput(suspects_safe, valid_count)
                 } else {
-                    suspects_text <- .("No suspicious data points identified. Data follows expected Benford's Law distribution.")
+                    suspects_text <- .("No individual observations were flagged as suspicious by the algorithm. This does not by itself establish conformity to Benford's Law; see the MAD and chi-square results in the summary table.")
                 }
                 
                 self$results$text2$setContent(suspects_text)

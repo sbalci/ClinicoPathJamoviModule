@@ -904,7 +904,7 @@ timeintervalClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
                                         (range: {round(summary_stats$min, 1)} to {round(summary_stats$max, 1)} {self$options$output_unit}),
 
-                                        this cohort provides {if(summary_stats$mean > summary_stats$median) 'adequate' else 'good'} observation time.
+                                        the follow-up distribution is {if(summary_stats$mean > summary_stats$median) 'right-skewed (mean above median)' else 'not right-skewed (mean at or below median)'}.
 
                                         The total person-time ({round(summary_stats$total_person_time, 1)} person-{self$options$output_unit})
 

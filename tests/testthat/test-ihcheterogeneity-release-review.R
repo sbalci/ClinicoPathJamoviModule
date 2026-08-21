@@ -137,12 +137,12 @@ test_that("a material systematic bias vetoes the adequacy verdict", {
     verdict <- function(d) {
         txt <- gsub("<[^>]+>", " ", run_ihc(d)$interpretation$content)
         regmatches(txt, regexpr(
-          "(ADEQUATE SAMPLING|MODERATE SAMPLING|INADEQUATE SAMPLING|NOT ADEQUATE FOR SUBSTITUTION|INSUFFICIENT DATA)", txt))
+          "(AGREEMENT THRESHOLDS MET|MODERATE SAMPLING|INADEQUATE SAMPLING|NOT ADEQUATE FOR SUBSTITUTION|INSUFFICIENT DATA)", txt))
     }
     # Correlation and CV thresholds alone declared this "ADEQUATE SAMPLING ...
     # suitable for clinical use" while the bias table reported p < 1e-13.
     expect_equal(verdict(biased_data()), "NOT ADEQUATE FOR SUBSTITUTION")
-    expect_equal(verdict(clean_data()),  "ADEQUATE SAMPLING")
+    expect_equal(verdict(clean_data()),  "AGREEMENT THRESHOLDS MET")
 })
 
 test_that("copy-ready text makes no claim the analysis did not support", {

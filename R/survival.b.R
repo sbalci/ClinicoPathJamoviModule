@@ -1043,7 +1043,8 @@ survivalClass <- if (requireNamespace('jmvcore'))
                           paste0("Landmark analysis at ", self$options$landmark, " ",
                                  self$options$timetypeoutput,
                                  ": ", n_excluded_landmark,
-                                 " patients excluded (events/censoring before landmark)."))
+                                 " patients excluded (events/censoring before landmark). ",
+                                 .("All times are measured FROM the landmark, not from study entry, and all estimates are conditional on being event-free at the landmark; they are not comparable with unlandmarked survival times.")))
                   }
                 }
 
@@ -2039,10 +2040,11 @@ survivalClass <- if (requireNamespace('jmvcore'))
 
                   landmark <- jmvcore::toNumeric(self$options$landmark)
 
-                  tCoxtext2 <- glue::glue(tCoxtext2,
-                                          "Landmark time used as: ",
-                                          landmark, " ",
-                                          self$options$timetypeoutput, "."
+                  tCoxtext2 <- paste0(tCoxtext2,
+                                      sprintf(.("<br><b>Landmark analysis at %s %s.</b>"),
+                                              format(landmark),
+                                              self$options$timetypeoutput),
+                                      .(" All times reported here are measured FROM the landmark, not from study entry, and all estimates are conditional on being event-free at the landmark. They are not comparable with unlandmarked survival times.")
                   )
                 }
 
@@ -2121,7 +2123,7 @@ survivalClass <- if (requireNamespace('jmvcore'))
                     dplyr::mutate(firstlevel = dplyr::first(Levels)) %>%
                     dplyr::mutate(
                         coxdescription = glue::glue(
-                            "When {Explanatory} is {Levels}, there is {HR_univariable} times risk than when {Explanatory} is {firstlevel}. \n For {Explanatory}, compared to the reference group ({firstlevel}), subjects in the {Levels} group had {HR_univariable} times the risk of experiencing the event at any given time point."
+                            "For {Explanatory}, the {Levels} group had an estimated hazard ratio of {HR_univariable} relative to the reference group ({firstlevel}). \n A hazard ratio is a ratio of instantaneous event rates among those still at risk, not a ratio of cumulative risks, and it assumes the ratio stays constant over follow-up. If the confidence interval includes 1, the data are compatible with no difference in hazard."
 
                         )
                     ) %>%
@@ -2134,7 +2136,7 @@ survivalClass <- if (requireNamespace('jmvcore'))
                 coxSummary <- unlist(coxSummary)
 
                 coxSummary <- c(coxSummary,
-                                "A hazard ratio greater than 1 indicates increased risk, while less than 1 indicates decreased risk compared to the reference group."
+                                "A hazard ratio greater than 1 indicates a higher event rate than the reference group, and less than 1 a lower event rate. These are unadjusted, univariable associations estimated from observational data: they are not adjusted for confounding, they are not causal effects, and they assume proportional hazards over the follow-up period."
                 )
 
                 self$results$coxSummary$setContent(coxSummary)
@@ -4038,7 +4040,7 @@ survivalClass <- if (requireNamespace('jmvcore'))
                         <tr>
                             <td style="padding: 8px; border-top: 1px solid #dee2e6;"><strong>HR = 1.0</strong></td>
                             <td style="padding: 8px; border-top: 1px solid #dee2e6;">No difference</td>
-                            <td style="padding: 8px; border-top: 1px solid #dee2e6;">Groups have equal risk</td>
+                            <td style="padding: 8px; border-top: 1px solid #dee2e6;">Event rate is the same in both groups at any given moment</td>
                         </tr>
                         <tr style="background-color: rgba(255, 33, 67, 0.09); color: inherit;">
                             <td style="padding: 8px;"><strong>HR = 2.0</strong></td>
@@ -4255,11 +4257,11 @@ survivalClass <- if (requireNamespace('jmvcore'))
                     <table style="width:100%; margin: 10px 0;">
                         <tr>
                             <td style="padding: 8px; background-color: rgba(33, 159, 43, 0.1); color: inherit;"><strong> Curves separate early</strong></td>
-                            <td style="padding: 8px;">Groups differ significantly</td>
+                            <td style="padding: 8px;">Visible separation; check the log-rank test for statistical evidence</td>
                         </tr>
                         <tr>
                             <td style="padding: 8px; background-color: rgba(255, 33, 67, 0.09); color: inherit;"><strong> Curves overlap</strong></td>
-                            <td style="padding: 8px;">No significant difference</td>
+                            <td style="padding: 8px;">No clear separation by eye; overlap is not evidence of no difference - check the log-rank test, especially with few events</td>
                         </tr>
                         <tr>
                             <td style="padding: 8px; background-color: rgba(33, 152, 239, 0.13); color: inherit;"><strong> Curves cross</strong></td>
@@ -4287,7 +4289,7 @@ survivalClass <- if (requireNamespace('jmvcore'))
                     <ul>
                         <li><strong>Median survival:</strong> Where curve crosses 50% line</li>
                         <li><strong>1-year survival:</strong> Height of curve at 12 months</li>
-                        <li><strong>Statistical significance:</strong> Check if confidence bands overlap</li>
+                        <li><strong>Statistical significance:</strong> Read it from the log-rank test or the Cox p-value; overlapping confidence bands do not by themselves mean p &gt;= 0.05</li>
                         <li><strong>Clinical significance:</strong> Consider if differences are meaningful for patients</li>
                     </ul>
                 </div>
@@ -4706,16 +4708,33 @@ survivalClass <- if (requireNamespace('jmvcore'))
                             # claim. A hazard ratio is a relative rate.
                             direction <- ifelse(hr < 1, .("a lower hazard"), .("a higher hazard"))
 
-                            sentence <- jmvcore::format(
-                                .("Cox regression showed {direction} for {comparison}, with a hazard ratio of {hr} (95% CI: {lower} to {upper}, p = {p}), which was {significance}."),
-                                direction = direction,
-                                comparison = comparison,
-                                hr = round(hr, 2),
-                                lower = round(ci_lower, 2),
-                                upper = round(ci_upper, 2),
-                                p = round(p_val, 3),
-                                significance = significance
-                            )
+                            # Do not lead with a direction the interval does not
+                            # support: an HR of 0.85 with a CI of 0.60 to 1.20 is
+                            # compatible with both a lower and a higher hazard.
+                            crosses_one <- !is.na(ci_lower) && !is.na(ci_upper) &&
+                                           ci_lower < 1 && ci_upper > 1
+
+                            sentence <- if (crosses_one) {
+                                jmvcore::format(
+                                    .("Cox regression estimated a hazard ratio of {hr} for {comparison} (95% CI: {lower} to {upper}, p = {p}); the interval includes 1, so these data are compatible with both a lower and a higher hazard."),
+                                    comparison = comparison,
+                                    hr = round(hr, 2),
+                                    lower = round(ci_lower, 2),
+                                    upper = round(ci_upper, 2),
+                                    p = round(p_val, 3)
+                                )
+                            } else {
+                                jmvcore::format(
+                                    .("Cox regression estimated {direction} for {comparison}, with a hazard ratio of {hr} (95% CI: {lower} to {upper}, p = {p}), which was {significance}."),
+                                    direction = direction,
+                                    comparison = comparison,
+                                    hr = round(hr, 2),
+                                    lower = round(ci_lower, 2),
+                                    upper = round(ci_upper, 2),
+                                    p = round(p_val, 3),
+                                    significance = significance
+                                )
+                            }
                             cox_sentences <- c(cox_sentences, sentence)
                         }
                     }
@@ -5848,11 +5867,11 @@ survivalClass <- if (requireNamespace('jmvcore'))
 
                         if (hr_change > 10) {
                             interpretation_parts <- c(interpretation_parts,
-                                sprintf("<p><b>Age is a confounder:</b> The hazard ratio changed by %.1f%% after age adjustment, suggesting that age confounds the relationship between %s and survival. The age-adjusted HR should be preferred.</p>",
+                                sprintf("<p><b>The log hazard ratio (the model coefficient) changed by %.1f%% after age adjustment.</b> A change of this size is the conventional change-in-estimate signal for confounding by age, but it does not establish it: the Cox model is non-collapsible, so adjusted and unadjusted hazard ratios differ in magnitude even when the added covariate is unrelated to the exposure. If age lies on the causal pathway between %s and survival, adjustment removes part of the association rather than removing bias. This comparison covers the first coefficient of the model only.</p>",
                                     hr_change, myfactor))
                         } else {
                             interpretation_parts <- c(interpretation_parts,
-                                sprintf("<p><b>Minimal confounding by age:</b> The hazard ratio changed by only %.1f%% after age adjustment, suggesting that age does not substantially confound the relationship between %s and survival.</p>",
+                                sprintf("<p><b>The log hazard ratio (the model coefficient) changed by %.1f%% after age adjustment</b>, below the conventional 10%% change-in-estimate threshold. A small change does not rule out confounding by age in the relationship between %s and survival: opposing biases can cancel, the change-in-estimate rule is a heuristic with no inferential guarantee, and this comparison covers the first coefficient of the model only.</p>",
                                     hr_change, myfactor))
                         }
                     }
@@ -5905,9 +5924,9 @@ survivalClass <- if (requireNamespace('jmvcore'))
                             any_sig <- any(int_pvals < 0.05)
 
                             if (any_sig) {
-                                int_msg <- "<p><b>Significant age-group interaction detected.</b> The effect of the explanatory variable on survival differs by age. Consider reporting age-stratified results.</p>"
+                                int_msg <- "<p><b>Significant age-group interaction detected.</b> The estimated effect of the explanatory variable on survival differed by age group in this sample. Age-stratified results may describe the data better than a single adjusted hazard ratio.</p>"
                             } else {
-                                int_msg <- "<p><b>No significant age-group interaction.</b> The effect of the explanatory variable on survival is consistent across ages. Age-adjusted (not stratified) analysis is appropriate.</p>"
+                                int_msg <- "<p><b>No significant age-group interaction was detected.</b> Interaction tests have low power, so this does not establish that the effect is constant across age groups. Inspect the interaction hazard ratios and their confidence intervals: if they are wide, effect modification of clinically important size has not been excluded. The choice between age adjustment and stratification rests on the proportional hazards check and on subject-matter grounds, not on this p-value.</p>"
                             }
                             # Append interaction message to existing interpretation
                             # Note: jamovi result objects don't expose a .content property,
@@ -5946,9 +5965,13 @@ survivalClass <- if (requireNamespace('jmvcore'))
                         "effect differs across age groups.</li>",
                         "</ul>",
                         "<h5>Interpretation Guide:</h5>",
-                        "<p>If the HR changes by >10% after age adjustment, age is a confounder and the ",
-                        "adjusted estimate should be reported. If the interaction test is significant, ",
-                        "consider reporting age-stratified results rather than a single adjusted HR.</p>",
+                        "<p>A change of more than 10% in the log hazard ratio (the model coefficient, which is ",
+                        "the quantity reported above as the change) after age adjustment is the conventional ",
+                        "change-in-estimate signal for confounding by age. It does not establish confounding: ",
+                        "the Cox model is non-collapsible, so adjusted and unadjusted hazard ratios differ in ",
+                        "magnitude even when the added covariate is unrelated to the exposure, and a small ",
+                        "change does not rule confounding out either. If the interaction test is significant, ",
+                        "age-stratified results may be more informative than a single adjusted HR.</p>",
                         "<h5>References:</h5>",
                         "<p>Rothman KJ, Greenland S, Lash TL. Modern Epidemiology. 3rd ed. ",
                         "Lippincott Williams & Wilkins; 2008.</p>")
