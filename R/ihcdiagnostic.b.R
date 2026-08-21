@@ -1004,7 +1004,7 @@ ihcdiagnosticClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                         # Generate clinical interpretation
                         summary_text <- sprintf(
                             "<h3>Clinical Summary</h3>
-                    <div style='background-color: #f0f8ff; padding: 15px; border-radius: 5px;'>
+                    <div style='background-color: rgba(33, 152, 255, 0.07); padding: 15px; border-radius: 5px; color: inherit;'>
                     <p><b>Analysis Overview:</b></p>
                     <ul>
                         <li>Analyzed %d cases with %d IHC markers across %d diagnostic groups</li>
@@ -1145,7 +1145,7 @@ ihcdiagnosticClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                         }
                         guide_html <- "
                 <h3>Interpretation Guide</h3>
-                <div style='background-color: #fffacd; padding: 15px; border-radius: 5px;'>
+                <div style='background-color: rgba(255, 233, 33, 0.23); padding: 15px; border-radius: 5px; color: inherit;'>
 
                 <h4>Understanding Diagnostic Metrics:</h4>
                 <ul>
@@ -1158,7 +1158,7 @@ ihcdiagnosticClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
 
                 <h4>Clinical Interpretation Guidelines:</h4>
                 <table style='width: 100%; border-collapse: collapse;'>
-                    <tr style='background-color: #e6e6e6;'>
+                    <tr style='background-color: rgba(33, 33, 33, 0.11); color: inherit;'>
                         <th style='padding: 8px; border: 1px solid #ddd;'>AUC Range</th>
                         <th style='padding: 8px; border: 1px solid #ddd;'>Diagnostic Value</th>
                         <th style='padding: 8px; border: 1px solid #ddd;'>Clinical Application</th>

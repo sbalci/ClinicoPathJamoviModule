@@ -262,7 +262,7 @@ children:
                     enable: (plotROC && combinePlots && !directLabel)
                   - type: CheckBox
                     name: smoothing
-                    label: Apply LOESS smoothing
+                    label: LOESS smoothing
                     enable: (plotROC)
                   - type: CheckBox
                     name: displaySE
@@ -270,7 +270,7 @@ children:
                     enable: (plotROC && smoothing && !cleanPlot)
                   - type: CheckBox
                     name: interactiveROC
-                    label: Create interactive plot
+                    label: Interactive plot
                     enable: (plotROC)
           - type: LayoutBox
             cell: { column: 1, row: 0 }
@@ -327,7 +327,7 @@ children:
             label: Partial AUC
           - type: CheckBox
             name: partialAUC
-            label: Calculate partial AUC
+            label: Partial AUC
           - type: TextBox
             name: partialAUCfrom
             format: number
@@ -379,10 +379,10 @@ children:
             label: Discrimination and Reclassification
           - type: CheckBox
             name: calculateIDI
-            label: Calculate IDI (integrated discrimination improvement)
+            label: IDI (integrated discrimination improvement)
           - type: CheckBox
             name: calculateNRI
-            label: Calculate NRI (net reclassification index)
+            label: NRI (net reclassification index)
           - type: LevelSelector
             name: refVar
             label: Reference Variable
@@ -504,7 +504,7 @@ children:
         children:
           - type: CheckBox
             name: metaAnalysis
-            label: Perform meta-analysis of AUC values
+            label: Meta-analysis of AUC values
             enable: (dependentVars)
           - type: ComboBox
             name: metaAnalysisMethod

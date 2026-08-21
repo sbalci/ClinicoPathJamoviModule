@@ -639,7 +639,7 @@ jsjplotClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                 
                 # Create HTML table
                 html_table <- "<table style='border-collapse: collapse; width: 100%;'>"
-                html_table <- paste0(html_table, "<tr style='background-color: #f2f2f2;'>")
+                html_table <- paste0(html_table, "<tr style='background-color: rgba(38, 38, 38, 0.06); color: inherit;'>")
                 html_table <- paste0(html_table, "<th style='border: 1px solid #ddd; padding: 8px;'>Term</th>")
                 html_table <- paste0(html_table, "<th style='border: 1px solid #ddd; padding: 8px;'>Estimate</th>")
                 html_table <- paste0(html_table, "<th style='border: 1px solid #ddd; padding: 8px;'>Std. Error</th>")
@@ -780,7 +780,7 @@ jsjplotClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                 # htmlEscape user column name + factor-level values before HTML interpolation
                 freq_html <- paste0(freq_html, "<h4>", htmltools::htmlEscape(var), "</h4>")
                 freq_html <- paste0(freq_html, "<table style='border-collapse: collapse; margin-bottom: 20px;'>")
-                freq_html <- paste0(freq_html, "<tr style='background-color: #f2f2f2;'>")
+                freq_html <- paste0(freq_html, "<tr style='background-color: rgba(38, 38, 38, 0.06); color: inherit;'>")
                 freq_html <- paste0(freq_html, "<th style='border: 1px solid #ddd; padding: 8px;'>Level</th>")
                 freq_html <- paste0(freq_html, "<th style='border: 1px solid #ddd; padding: 8px;'>Frequency</th>")
                 freq_html <- paste0(freq_html, "<th style='border: 1px solid #ddd; padding: 8px;'>Percentage</th>")
@@ -833,7 +833,7 @@ jsjplotClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             cor_html <- paste0(cor_html, "<table style='border-collapse: collapse;'>")
             
             # Header row
-            cor_html <- paste0(cor_html, "<tr style='background-color: #f2f2f2;'>")
+            cor_html <- paste0(cor_html, "<tr style='background-color: rgba(38, 38, 38, 0.06); color: inherit;'>")
             cor_html <- paste0(cor_html, "<th style='border: 1px solid #ddd; padding: 8px;'>Variable</th>")
             for (var in colnames(cor_matrix)) {
                 # htmlEscape user numeric variable name before HTML interpolation
@@ -896,7 +896,7 @@ jsjplotClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             
             pca_html <- "<h3>PCA Summary</h3>"
             pca_html <- paste0(pca_html, "<table style='border-collapse: collapse;'>")
-            pca_html <- paste0(pca_html, "<tr style='background-color: #f2f2f2;'>")
+            pca_html <- paste0(pca_html, "<tr style='background-color: rgba(38, 38, 38, 0.06); color: inherit;'>")
             pca_html <- paste0(pca_html, "<th style='border: 1px solid #ddd; padding: 8px;'>Component</th>")
             pca_html <- paste0(pca_html, "<th style='border: 1px solid #ddd; padding: 8px;'>Standard Deviation</th>")
             pca_html <- paste0(pca_html, "<th style='border: 1px solid #ddd; padding: 8px;'>Proportion of Variance</th>")

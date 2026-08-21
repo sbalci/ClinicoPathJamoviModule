@@ -48,7 +48,7 @@ children:
             label: Plot type
           - type: TextBox
             name: scale
-            label: Ridge Height Scale
+            label: Ridge height scale
             format: number
           - type: ComboBox
             name: bandwidth
@@ -56,12 +56,12 @@ children:
             enable: (plot_type != 'histogram_ridges')
           - type: TextBox
             name: bandwidth_value
-            label: Custom Bandwidth
+            label: Custom bandwidth
             format: number
             enable: (bandwidth == 'custom' && plot_type != 'histogram_ridges')
           - type: TextBox
             name: binwidth
-            label: Histogram Bin Width
+            label: Histogram bin width
             format: number
             enable: (plot_type == 'histogram_ridges')
   - type: CollapseBox
@@ -73,13 +73,13 @@ children:
         children:
           - type: CheckBox
             name: add_boxplot
-            label: Add boxplot inside
+            label: Boxplot inside
           - type: CheckBox
             name: add_points
             label: Data points
           - type: TextBox
             name: point_alpha
-            label: Point Transparency
+            label: Point transparency
             format: number
             enable: (add_points)
           - type: CheckBox
@@ -87,7 +87,7 @@ children:
             label: Quantile lines
           - type: TextBox
             name: quantiles
-            label: Quantile Values
+            label: Quantile values
             format: string
             enable: (add_quantiles)
           - type: CheckBox
@@ -127,7 +127,7 @@ children:
         children:
           - type: TextBox
             name: alpha
-            label: Ridge Transparency
+            label: Ridge transparency
             format: number
             enable: (fill_ridges || plot_type == 'violin_ridges')
           - type: CheckBox
@@ -138,17 +138,17 @@ children:
             label: Color palette
           - type: TextBox
             name: custom_colors
-            label: Custom Colors
+            label: Custom colors
             format: string
             enable: (color_palette == 'custom')
           - type: TextBox
             name: gradient_low
-            label: Gradient Low Color
+            label: Gradient low color
             format: string
             enable: (plot_type == 'density_ridges_gradient')
           - type: TextBox
             name: gradient_high
-            label: Gradient High Color
+            label: Gradient high color
             format: string
             enable: (plot_type == 'density_ridges_gradient')
           - type: CheckBox
@@ -186,17 +186,17 @@ children:
         children:
           - type: TextBox
             name: plot_title
-            label: Plot Title
+            label: Plot title
             format: string
             width: largest
           - type: TextBox
             name: plot_subtitle
-            label: Plot Subtitle
+            label: Plot subtitle
             format: string
             width: largest
           - type: TextBox
             name: plot_caption
-            label: Plot Caption
+            label: Plot caption
             format: string
             width: largest
       - type: LayoutBox
@@ -204,11 +204,11 @@ children:
         children:
           - type: TextBox
             name: x_label
-            label: X Axis Label
+            label: X axis label
             format: string
           - type: TextBox
             name: y_label
-            label: Y Axis Label
+            label: Y axis label
             format: string
   - type: CollapseBox
     label: Annotations
@@ -225,7 +225,7 @@ children:
             label: Density values
           - type: TextBox
             name: custom_annotations
-            label: Custom Annotations
+            label: Custom annotations
             format: string
             width: largest
   - type: CollapseBox
@@ -237,11 +237,11 @@ children:
         children:
           - type: TextBox
             name: width
-            label: Plot Width
+            label: Plot width
             format: number
           - type: TextBox
             name: height
-            label: Plot Height
+            label: Plot height
             format: number
           - type: TextBox
             name: dpi

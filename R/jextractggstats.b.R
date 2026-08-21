@@ -11,7 +11,7 @@ jextractggstatsClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cla
         .init = function() {
             if (is.null(self$data) || is.null(self$options$dep_var)) {
                 instructions_html <- paste0(
-                    "<div style='padding: 20px; background-color: #f8f9fa; border-radius: 8px;'>",
+                    "<div style='padding: 20px; background-color: rgba(138, 155, 172, 0.06); border-radius: 8px; color: inherit;'>",
                     "<h2>Statistical Data Extraction from ggstatsplot</h2>",
                     "<p>This analysis extracts the underlying statistical details ",
                     "(subtitle, caption, pairwise comparisons, and descriptive statistics) ",
@@ -342,7 +342,7 @@ jextractggstatsClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cla
             if (!is.null(extracted_data$extraction_error)) {
                 html <- paste0(
                     html,
-                    "<div style='padding: 12px; border-left: 4px solid #c0392b; background-color: #fdecea;'>",
+                    "<div style='padding: 12px; border-left: 4px solid #c0392b; background-color: rgba(234, 54, 33, 0.09); color: inherit;'>",
                     "<strong>Could not extract statistical components.</strong><br>",
                     htmltools::htmlEscape(extracted_data$extraction_error),
                     "</div>"

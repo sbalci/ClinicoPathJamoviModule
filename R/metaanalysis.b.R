@@ -85,7 +85,7 @@ metaanalysisClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                 # Display warnings if packages are missing
                 if (length(missing_packages) > 0) {
                     self$results$instructions$setContent(
-                        paste0("<div style='color: #dc3545; padding: 15px; background-color: #f8d7da; border-radius: 5px;'>
+                        paste0("<div style='color: inherit; padding: 15px; background-color: rgba(216, 33, 50, 0.18); border-radius: 5px;'>
                            <h4> Missing Required Packages</h4>
                            <p>Please install the following packages to use meta-analysis:</p>
                            <ul><li>", paste(missing_packages, collapse = "</li><li>"), "</li></ul>
@@ -97,7 +97,7 @@ metaanalysisClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
 
                 # Note optional features if packages missing
                 if (length(optional_features) > 0) {
-                    feature_note <- paste0("<div style='color: #856404; padding: 10px; background-color: #fff3cd; border-radius: 5px; margin-bottom: 10px;'>
+                    feature_note <- paste0("<div style='color: inherit; padding: 10px; background-color: rgba(255, 202, 33, 0.23); border-radius: 5px; margin-bottom: 10px;'>
                                        <h5> Optional Features Available</h5>
                                        <p>Install additional packages for enhanced functionality:</p>
                                        <ul><li>", paste(optional_features, collapse = "</li><li>"), "</li></ul>
@@ -110,7 +110,7 @@ metaanalysisClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                 # Check for required packages
                 if (!requireNamespace("metafor", quietly = TRUE)) {
                     self$results$instructions$setContent(
-                        "<div style='color: #dc3545; padding: 15px; background-color: #f8d7da; border-radius: 5px;'>
+                        "<div style='color: inherit; padding: 15px; background-color: rgba(216, 33, 50, 0.18); border-radius: 5px;'>
                     <h4> Required Package Missing</h4>
                     <p>Meta-analysis requires the 'metafor' package.</p>
                     <p>Install with: <code>install.packages('metafor')</code></p>
@@ -197,7 +197,7 @@ metaanalysisClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                 # Generate warning/error message
                 if (length(errors) > 0) {
                     message <- paste0(
-                        "<div style='color: #dc3545; padding: 15px; background-color: #f8d7da; border-radius: 5px;'>
+                        "<div style='color: inherit; padding: 15px; background-color: rgba(216, 33, 50, 0.18); border-radius: 5px;'>
                     <h4> Data Issues Found</h4>
                     <p><b>The following issues must be resolved:</b></p>
                     <ul><li>", paste(errors, collapse = "</li><li>"), "</li></ul>
@@ -208,7 +208,7 @@ metaanalysisClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
 
                 if (length(warnings) > 0) {
                     message <- paste0(
-                        "<div style='color: #856404; padding: 15px; background-color: #fff3cd; border-radius: 5px;'>
+                        "<div style='color: inherit; padding: 15px; background-color: rgba(255, 202, 33, 0.23); border-radius: 5px;'>
                     <h4> Data Quality Warnings</h4>
                     <p><b>Please review the following:</b></p>
                     <ul><li>", paste(warnings, collapse = "</li><li>"), "</li></ul>
@@ -271,7 +271,7 @@ metaanalysisClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
 
                 if (sum(complete_cases) < 2) {
                     self$results$instructions$setContent(
-                        paste0("<div style='color: #dc3545; padding: 15px; background-color: #f8d7da; border-radius: 5px;'>
+                        paste0("<div style='color: inherit; padding: 15px; background-color: rgba(216, 33, 50, 0.18); border-radius: 5px;'>
                     <h4> Insufficient Data</h4>
                     <p>Meta-analysis requires at least 2 studies with complete effect size and variance data.</p>
                     <p><b>Current status:</b> Found ", sum(complete_cases), " complete cases out of ", length(effect_sizes), " total.</p>
@@ -434,7 +434,7 @@ metaanalysisClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
 
                 # Start with summary
                 summary_html <- paste0(
-                    "<div style='background-color: #e8f5e8; padding: 15px; border-radius: 5px; margin: 10px 0;'>
+                    "<div style='background-color: rgba(33, 159, 33, 0.1); padding: 15px; border-radius: 5px; margin: 10px 0; color: inherit;'>
                 <h4> Analysis Summary</h4>
                 <p>", summary_text, "</p>
                 </div>"
@@ -450,10 +450,10 @@ metaanalysisClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                 if (!is.null(copy_ready_text)) {
                     summary_html <- paste0(
                         summary_html,
-                        "<div style='background-color: #f8f9fa; padding: 15px; border-radius: 5px; margin: 10px 0; border-left: 4px solid #28a745;'>
+                        "<div style='background-color: rgba(138, 155, 172, 0.06); padding: 15px; border-radius: 5px; margin: 10px 0; border-left: 4px solid #28a745; color: inherit;'>
                     <h4> Copy-Ready Interpretation</h4>
                     <p><i>Click to select and copy:</i></p>
-                    <p style='background-color: #ffffff; padding: 10px; border: 1px dashed #ccc; border-radius: 3px; font-family: monospace; font-size: 14px;' onclick='this.select();'>",
+                    <p style='background-color: rgba(255, 255, 255, 0.06); padding: 10px; border: 1px dashed #ccc; border-radius: 3px; font-family: monospace; font-size: 14px; color: inherit;' onclick='this.select();'>",
                         copy_ready_text, "</p>
                     </div>"
                     )

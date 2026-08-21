@@ -82,7 +82,7 @@ variablebiplotClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
 
                 if (n_groups < 2) {
                     self$results$todo$setContent(paste0(
-                        "<div style='padding: 1em; background: #fff3cd; border-left: 4px solid #ffc107;'>",
+                        "<div style='padding: 1em; background-color: rgba(255, 202, 33, 0.23); border-left: 4px solid #ffc107; color: inherit;'>",
                         "<p><b> Grouping Variable Issue:</b></p>",
                         "<p>The selected grouping variable has only <b>", n_groups, " unique value</b>. ",
                         "Biplot analysis requires at least <b>2 groups</b> to compare.</p>",
@@ -98,7 +98,7 @@ variablebiplotClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
 
                 if (min_size < 3) {
                     warning_msg <- paste0(
-                        "<div style='padding: 1em; background: #fff3cd; border-left: 4px solid #ffc107;'>",
+                        "<div style='padding: 1em; background-color: rgba(255, 202, 33, 0.23); border-left: 4px solid #ffc107; color: inherit;'>",
                         "<p><b> Small Group Size Warning:</b></p>",
                         "<p>One or more groups have very few samples (minimum: <b>", min_size, "</b>).</p>",
                         "<p><b>Recommendation:</b> At least 5 samples per group for reliable results. ",
@@ -114,7 +114,7 @@ variablebiplotClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                     existing_content <- self$results$assumptions$state
                     warning_msg <- paste0(
                         if (!is.null(existing_content)) existing_content else "",
-                        "<div style='padding: 1em; background: #d1ecf1; border-left: 4px solid #0c5460;'>",
+                        "<div style='padding: 1em; background-color: rgba(33, 163, 188, 0.21); border-left: 4px solid #0c5460; color: inherit;'>",
                         "<p><b> Missing Data Notice:</b></p>",
                         "<p><b>", round(missing_pct, 1), "%</b> of cases have missing data in the grouping variable. ",
                         "These cases will be excluded from analysis.</p>",
@@ -128,7 +128,7 @@ variablebiplotClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                     feat_data <- private$.getVarData(feat)
                     if (is.factor(feat_data) && !is.ordered(feat_data)) {
                         self$results$todo$setContent(paste0(
-                            "<div style='padding: 1em; background: #f8d7da; border-left: 4px solid #dc3545;'>",
+                            "<div style='padding: 1em; background-color: rgba(216, 33, 50, 0.18); border-left: 4px solid #dc3545; color: inherit;'>",
                             "<p><b> Feature Type Error:</b></p>",
                             "<p>Feature <b>'", htmltools::htmlEscape(feat), "'</b> is categorical (nominal factor). ",
                             "Biplot analysis requires <b>numeric or ordinal</b> features.</p>",
@@ -150,7 +150,7 @@ variablebiplotClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
 
                 }, error = function(e) {
                     self$results$todo$setContent(paste0(
-                        "<div style='padding: 1em; background: #f8d7da; border-left: 4px solid #dc3545;'>",
+                        "<div style='padding: 1em; background-color: rgba(216, 33, 50, 0.18); border-left: 4px solid #dc3545; color: inherit;'>",
                         "<p><b> Input Error:</b></p>",
                         "<p>", e$message, "</p>",
                         "</div>"
@@ -176,7 +176,7 @@ variablebiplotClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                 if (n_samples < 30 && method == "lda") {
                     warnings <- paste0(
                         warnings,
-                        "<div style='margin: 0.5em 0; padding: 0.8em; background: #fff3cd; border-left: 4px solid #ffc107;'>",
+                        "<div style='margin: 0.5em 0; padding: 0.8em; background-color: rgba(255, 202, 33, 0.23); border-left: 4px solid #ffc107; color: inherit;'>",
                         "<p><b> Small Sample Size for LDA:</b></p>",
                         "<p>You have <b>", n_samples, " samples</b>. LDA typically requires n>=30 ",
                         "and assumes normally distributed data.</p>",
@@ -190,7 +190,7 @@ variablebiplotClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                 if (n_features > n_samples * 0.5) {
                     warnings <- paste0(
                         warnings,
-                        "<div style='margin: 0.5em 0; padding: 0.8em; background: #fff3cd; border-left: 4px solid #ffc107;'>",
+                        "<div style='margin: 0.5em 0; padding: 0.8em; background-color: rgba(255, 202, 33, 0.23); border-left: 4px solid #ffc107; color: inherit;'>",
                         "<p><b> High Feature-to-Sample Ratio:</b></p>",
                         "<p>You have <b>", n_features, " features</b> but only <b>", n_samples, " samples</b>. ",
                         "This high ratio (>50%) may lead to overfitting.</p>",
@@ -207,7 +207,7 @@ variablebiplotClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                 if (method == "lda" && n_features > (n_groups - 1)) {
                     warnings <- paste0(
                         warnings,
-                        "<div style='margin: 0.5em 0; padding: 0.8em; background: #d1ecf1; border-left: 4px solid #0c5460;'>",
+                        "<div style='margin: 0.5em 0; padding: 0.8em; background-color: rgba(33, 163, 188, 0.21); border-left: 4px solid #0c5460; color: inherit;'>",
                         "<p><b> LDA Dimensionality Note:</b></p>",
                         "<p>LDA produces at most <b>", n_groups - 1, " discriminant functions</b> ",
                         "for ", n_groups, " groups. You selected ", n_features, " features, ",
@@ -221,7 +221,7 @@ variablebiplotClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                 if (method == "pca" && n_groups >= 2) {
                     warnings <- paste0(
                         warnings,
-                        "<div style='margin: 0.5em 0; padding: 0.8em; background: #d4edda; border-left: 4px solid #28a745;'>",
+                        "<div style='margin: 0.5em 0; padding: 0.8em; background-color: rgba(33, 162, 64, 0.19); border-left: 4px solid #28a745; color: inherit;'>",
                         "<p><b> Tip for Biomarker Discovery:</b></p>",
                         "<p>You're using <b>PCA</b> (unsupervised), which explores overall patterns ",
                         "but doesn't focus on separating your groups.</p>",
@@ -249,10 +249,10 @@ variablebiplotClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                     ".about-panel h4 { color: #34495e; margin-top: 1em; margin-bottom: 0.4em; }",
                     ".about-panel ul { margin-left: 1.5em; margin-bottom: 0.8em; }",
                     ".about-panel table { width: 100%; border-collapse: collapse; margin: 1em 0; }",
-                    ".about-panel th { padding: 8px; text-align: left; background: #f8f9fa; border-bottom: 2px solid #dee2e6; }",
+                    ".about-panel th { padding: 8px; text-align: left; background: rgba(138, 155, 172, 0.06); color: inherit; border-bottom: 2px solid #dee2e6; }",
                     ".about-panel td { padding: 8px; border-bottom: 1px solid #dee2e6; }",
-                    ".clinical-example { background: #f8f9fa; padding: 1em; border-left: 4px solid #3498db; margin: 1em 0; }",
-                    ".tip-box { background: #d4edda; padding: 0.8em; border-left: 4px solid #28a745; margin: 0.8em 0; }",
+                    ".clinical-example { background: rgba(138, 155, 172, 0.06); color: inherit; padding: 1em; border-left: 4px solid #3498db; margin: 1em 0; }",
+                    ".tip-box { background: rgba(33, 162, 64, 0.19); color: inherit; padding: 0.8em; border-left: 4px solid #28a745; margin: 0.8em 0; }",
                     "</style>",
                     "<div class='about-panel'>",
                     "<h3> Variable Importance Biplot</h3>",
@@ -667,7 +667,7 @@ variablebiplotClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
 
                 # Generate interpretation
                 interpretation_html <- paste0(
-                    "<div style='padding: 1em; background: #f0f8ff; border-left: 4px solid #0066cc;'>",
+                    "<div style='padding: 1em; background-color: rgba(33, 152, 255, 0.07); border-left: 4px solid #0066cc; color: inherit;'>",
                     "<h4> Clinical Interpretation</h4>",
                     "<p><b>Top Contributing Features:</b></p>",
                     "<ol>"
@@ -893,7 +893,7 @@ variablebiplotClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                 if (self$options$showSummary) {
                     summary_text <- sprintf(
                         paste0(
-                        "<div style='padding: 1em; background: #f8f9fa; border-left: 4px solid #3498db;'>",
+                        "<div style='padding: 1em; background-color: rgba(138, 155, 172, 0.06); border-left: 4px solid #3498db; color: inherit;'>",
                         "<h4> Summary</h4>",
                         "<p><b>Analysis:</b> %s biplot comparing <b>%d groups</b> using <b>%d features</b> ",
                         "from %d observations.</p>",
@@ -981,7 +981,7 @@ variablebiplotClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
 
                 report_html <- sprintf(
                     paste0(
-                    "<div style='padding: 1em; background: #e7f3ff; border: 1px solid #0066cc;'>",
+                    "<div style='padding: 1em; background-color: rgba(33, 144, 255, 0.11); border: 1px solid #0066cc; color: inherit;'>",
                     "<h4> Copy-Ready Report Paragraph</h4>",
                     "<div style='background: white; padding: 1em; margin: 1em 0; font-family: Georgia, serif;'>",
                     "We performed %s to visualize group separation based on %d clinical/pathological features ",
@@ -1013,7 +1013,7 @@ variablebiplotClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
             #---------------------------------------------
             .generateInterpretationGuide = function(method_name) {
                 guide_html <- paste0(
-                    "<div style='padding: 1em; background: #f8f9fa;'>",
+                    "<div style='padding: 1em; background-color: rgba(138, 155, 172, 0.06); color: inherit;'>",
                     "<h4> How to Read This Biplot</h4>",
                     "<p><b>Visual Elements:</b></p>",
                     "<ul>",
@@ -1391,7 +1391,7 @@ print(lda_result$scaling)
 
                 # Format with syntax highlighting hints
                 r_code_html <- paste0(
-                    "<div style='background: #f5f5f5; padding: 1em; border: 1px solid #ddd; border-radius: 4px;'>",
+                    "<div style='background-color: rgba(88, 88, 88, 0.06); padding: 1em; border: 1px solid #ddd; border-radius: 4px; color: inherit;'>",
                     "<h4> Copy-Ready R Code</h4>",
                     "<p><b>Instructions:</b></p>",
                     "<ul>",

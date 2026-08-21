@@ -364,7 +364,7 @@ survivalPowerClass <- R6::R6Class(
 
             # VERSION 0.3.0 LIMITATIONS WARNING - Added to prevent misleading users
             instructions <- paste0(
-                "<div style='background-color: #fff3cd; border: 2px solid #ff9800; border-radius: 5px; padding: 15px; margin-bottom: 15px;'>",
+                "<div style='background-color: rgba(255, 202, 33, 0.23); border: 2px solid #ff9800; border-radius: 5px; padding: 15px; margin-bottom: 15px; color: inherit;'>",
                 "<h4 style='color: #ff6f00; margin-top: 0;'> Beta Version 0.3.0 - Known Limitations</h4>",
                 "<p><strong>Current Implementation Status:</strong></p>",
                 "<ul style='margin-bottom: 10px;'>",

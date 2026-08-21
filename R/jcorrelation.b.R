@@ -275,7 +275,7 @@ jcorrelationClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         },
 
         .generateReport = function(data) {
-            report_html <- "<div style='background-color: #f8f9fa; padding: 15px; border-radius: 5px; margin: 10px 0;'>"
+            report_html <- "<div style='background-color: rgba(138, 155, 172, 0.06); padding: 15px; border-radius: 5px; margin: 10px 0; color: inherit;'>"
             report_html <- paste0(report_html, "<h4 style='color: #495057; margin-top: 0;'>Correlation Analysis Summary</h4>")
             
             # Check if correlation package is available for advanced reporting

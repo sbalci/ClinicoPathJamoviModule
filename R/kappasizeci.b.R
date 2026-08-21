@@ -413,11 +413,11 @@ kappaSizeCIClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
         # to avoid the notice serialization / no-newline limitations in jamovi.
         .buildNotices = function(required_n, sparse_cells = FALSE) {
             info <- paste0(
-                "<div style='margin:6px 0; padding:8px 10px; border-left:3px solid #3c8dbc; background:#f4f8fb;'>",
+                "<div style='margin:6px 0; padding:8px 10px; border-left:3px solid #3c8dbc; background-color: rgba(72, 138, 188, 0.06); color: inherit;'>",
                 "<b>Methodology.</b> The required sample size is computed with the confidence-interval ",
                 "width approach implemented in the kappaSize package (Rotondi &amp; Donner). It returns ",
-                "the minimum number of subjects so that the 100(1 &minus; &alpha;)% confidence interval ",
-                "for Cohen's &kappa; (two-sided, or one-sided lower bound) attains the requested precision, ",
+                "the minimum number of subjects so that the 100(1 \u{2212} \u{03B1})% confidence interval ",
+                "for Cohen's \u{03BA} (two-sided, or one-sided lower bound) attains the requested precision, ",
                 "given the expected category proportions and the number of raters.",
                 "</div>"
             )
@@ -429,7 +429,7 @@ kappaSizeCIClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             # the asymptotics the method relies on, and it was reaching only the Summary pane.
             if (!is.null(sparse_cells) && isTRUE(sparse_cells)) {
                 warn <- paste0(warn,
-                    "<div style='margin:6px 0; padding:8px 10px; border-left:3px solid #ec971f; background:#fdf7ef;'>",
+                    "<div style='margin:6px 0; padding:8px 10px; border-left:3px solid #ec971f; background-color: rgba(227, 144, 33, 0.07); color: inherit;'>",
                     "<b>Sparse categories.</b> At the computed sample size at least one category is ",
                     "expected to contain fewer than five subjects. The kappaSize calculation is based ",
                     "on a large-sample approximation, so the required n is less dependable here. ",
@@ -440,7 +440,7 @@ kappaSizeCIClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
 
             if (!is.na(required_n) && required_n > 1000) {
                 warn <- paste0(
-                    "<div style='margin:6px 0; padding:8px 10px; border-left:3px solid #d9534f; background:#fdf3f3;'>",
+                    "<div style='margin:6px 0; padding:8px 10px; border-left:3px solid #d9534f; background-color: rgba(222, 55, 55, 0.06); color: inherit;'>",
                     "<b>Warning.</b> The computed sample size (", required_n, ") is very large and may be ",
                     "impractical for a typical interobserver-agreement study. Consider a wider confidence ",
                     "interval (lower precision), revisiting the expected category proportions, or increasing ",

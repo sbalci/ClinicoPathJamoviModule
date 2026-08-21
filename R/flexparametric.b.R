@@ -128,7 +128,7 @@ flexparametricClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                     return(list(
                         valid = FALSE,
                         message = paste0(
-                            "<div style='background-color: #f8d7da; padding: 15px; border-radius: 5px; margin: 10px 0;'>",
+                            "<div style='background-color: rgba(216, 33, 50, 0.18); padding: 15px; border-radius: 5px; margin: 10px 0; color: inherit;'>",
                             "<h4> INSUFFICIENT EVENTS</h4>",
                             "<p><strong>Found:</strong> ", n_events, " events in ", n_obs, " observations (", round(event_rate, 1), "% event rate)</p>",
                             "<p><strong>Required:</strong> >=10 events for basic parametric modeling</p>",
@@ -146,7 +146,7 @@ flexparametricClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                         return(list(
                             valid = FALSE,
                             message = paste0(
-                                "<div style='background-color: #f8d7da; padding: 15px; border-radius: 5px; margin: 10px 0;'>",
+                                "<div style='background-color: rgba(216, 33, 50, 0.18); padding: 15px; border-radius: 5px; margin: 10px 0; color: inherit;'>",
                                 "<h4> TOO MANY COVARIATES</h4>",
                                 "<p><strong>Current:</strong> ", n_covs, " covariates with ", n_events, " events (ratio: ", round(events_per_var, 1), ")</p>",
                                 "<p><strong>Rule of thumb:</strong> Need >=5 events per covariate for reliable estimates</p>",
@@ -207,7 +207,7 @@ flexparametricClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                 # Combine warnings
                 warnings_html <- if (length(warnings_list) > 0) {
                     paste0(
-                        "<div style='background-color: #fff3cd; padding: 15px; border-radius: 5px; margin: 10px 0;'>",
+                        "<div style='background-color: rgba(255, 202, 33, 0.23); padding: 15px; border-radius: 5px; margin: 10px 0; color: inherit;'>",
                         "<h4> Analysis Warnings</h4>",
                         paste(warnings_list, collapse = ""),
                         "</div>"
@@ -734,7 +734,7 @@ flexparametricClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
 
                 summary_html <- paste0(
                     "<h3> Model Summary</h3>",
-                    "<div style='background-color: #f8f9fa; padding: 15px; border-radius: 5px; margin: 10px 0;'>",
+                    "<div style='background-color: rgba(138, 155, 172, 0.06); padding: 15px; border-radius: 5px; margin: 10px 0; color: inherit;'>",
                     "<p><strong>Approach:</strong> ",
                     switch(approach,
                         "traditional" = "Traditional Parametric",
@@ -865,7 +865,7 @@ flexparametricClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
 
                 clinical_html <- paste0(
                     "<h3> Clinical Summary</h3>",
-                    "<div style='background-color: #e8f5e8; padding: 15px; border-radius: 5px; margin: 10px 0;'>",
+                    "<div style='background-color: rgba(33, 159, 33, 0.1); padding: 15px; border-radius: 5px; margin: 10px 0; color: inherit;'>",
                     "<h4> Model Performance</h4>",
                     "<p><strong>Distribution Fit:</strong> ", distribution, " distribution provides ",
                     private$.assessModelFit(model), "</p>",
@@ -878,7 +878,7 @@ flexparametricClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                 if (!is.null(covariate_names) && length(covariate_names) > 0) {
                     clinical_html <- paste0(
                         clinical_html,
-                        "<div style='background-color: #fff3cd; padding: 15px; border-radius: 5px; margin: 10px 0;'>",
+                        "<div style='background-color: rgba(255, 202, 33, 0.23); padding: 15px; border-radius: 5px; margin: 10px 0; color: inherit;'>",
                         "<h4> Clinical Findings</h4>",
                         private$.generateClinicalFindings(model, covariate_names),
                         "</div>"
@@ -889,7 +889,7 @@ flexparametricClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                 assumptions_check <- private$.checkModelAssumptions(model_results, data)
                 clinical_html <- paste0(
                     clinical_html,
-                    "<div style='background-color: #fff3cd; padding: 15px; border-radius: 5px; margin: 10px 0;'>",
+                    "<div style='background-color: rgba(255, 202, 33, 0.23); padding: 15px; border-radius: 5px; margin: 10px 0; color: inherit;'>",
                     "<h4> Model Assumptions & Validation</h4>",
                     assumptions_check,
                     "</div>"
@@ -898,7 +898,7 @@ flexparametricClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                 # Add copy-ready report section
                 clinical_html <- paste0(
                     clinical_html,
-                    "<div style='background-color: #d1ecf1; padding: 15px; border-radius: 5px; margin: 10px 0;'>",
+                    "<div style='background-color: rgba(33, 163, 188, 0.21); padding: 15px; border-radius: 5px; margin: 10px 0; color: inherit;'>",
                     "<h4> Copy-Ready Report</h4>",
                     "<p style='font-family: monospace; background-color: white; padding: 10px; border: 1px solid #ccc;'>",
                     private$.generateCopyReadyReport(model_results),
@@ -1093,13 +1093,13 @@ flexparametricClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                 # Add overall assessment
                 if (warnings_count == 0) {
                     assumptions_html <- paste0(
-                        "<p style='background-color: #d4edda; padding: 8px; border-radius: 3px;'>",
+                        "<p style='background-color: rgba(33, 162, 64, 0.19); padding: 8px; border-radius: 3px; color: inherit;'>",
                         "<strong> Overall Assessment:</strong> All key assumptions appear satisfied. Model results are reliable.</p>",
                         assumptions_html
                     )
                 } else {
                     assumptions_html <- paste0(
-                        "<p style='background-color: #fff3cd; padding: 8px; border-radius: 3px;'>",
+                        "<p style='background-color: rgba(255, 202, 33, 0.23); padding: 8px; border-radius: 3px; color: inherit;'>",
                         "<strong> Overall Assessment:</strong> ", warnings_count, " assumption concerns detected. Interpret results with caution.</p>",
                         assumptions_html
                     )
@@ -1205,7 +1205,7 @@ flexparametricClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                 methodology_html <- "
             <h3> About This Analysis</h3>
 
-            <div style='background-color: #e8f4fd; padding: 15px; border-radius: 5px; margin: 10px 0;'>
+            <div style='background-color: rgba(33, 149, 236, 0.1); padding: 15px; border-radius: 5px; margin: 10px 0; color: inherit;'>
             <h4> What This Analysis Does</h4>
             <p>Flexible parametric survival modeling fits smooth mathematical functions to survival data, allowing for complex hazard patterns that Cox regression cannot capture. This approach is especially useful when you need to:</p>
             <ul>
@@ -1216,7 +1216,7 @@ flexparametricClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
             </ul>
             </div>
 
-            <div style='background-color: #f8f9fa; padding: 15px; border-radius: 5px; margin: 10px 0;'>
+            <div style='background-color: rgba(138, 155, 172, 0.06); padding: 15px; border-radius: 5px; margin: 10px 0; color: inherit;'>
             <h4> When to Use This Analysis</h4>
             <p><strong>Ideal for:</strong></p>
             <ul>
@@ -1233,7 +1233,7 @@ flexparametricClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
             </ul>
             </div>
 
-            <div style='background-color: #fff3cd; padding: 15px; border-radius: 5px; margin: 10px 0;'>
+            <div style='background-color: rgba(255, 202, 33, 0.23); padding: 15px; border-radius: 5px; margin: 10px 0; color: inherit;'>
             <h4> Key Assumptions & Limitations</h4>
             <ul>
                 <li><strong>Independent observations:</strong> Each patient contributes one survival time</li>
@@ -1244,7 +1244,7 @@ flexparametricClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
             </ul>
             </div>
 
-            <div style='background-color: #d4edda; padding: 15px; border-radius: 5px; margin: 10px 0;'>
+            <div style='background-color: rgba(33, 162, 64, 0.19); padding: 15px; border-radius: 5px; margin: 10px 0; color: inherit;'>
             <h4> How to Use This Function</h4>
             <ol>
                 <li><strong>Select Variables:</strong> Choose time variable (months/years), event indicator (1/0), and covariates</li>
@@ -1255,7 +1255,7 @@ flexparametricClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
             </ol>
             </div>
 
-            <div style='background-color: #f0f0f0; padding: 15px; border-radius: 5px; margin: 10px 0;'>
+            <div style='background-color: rgba(33, 33, 33, 0.07); padding: 15px; border-radius: 5px; margin: 10px 0; color: inherit;'>
             <h4> Distribution Guide</h4>
             <p><strong>Weibull:</strong> Most common, good for increasing/decreasing hazards (cancer, wear-out)</p>
             <p><strong>Log-normal:</strong> Bell-shaped hazard, good for acute conditions with recovery</p>
@@ -1264,7 +1264,7 @@ flexparametricClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
             <p><strong>Spline Models:</strong> Maximum flexibility, good for complex or unknown hazard shapes</p>
             </div>
 
-            <div style='background-color: #e2e3e5; padding: 15px; border-radius: 5px; margin: 10px 0;'>
+            <div style='background-color: rgba(33, 41, 56, 0.13); padding: 15px; border-radius: 5px; margin: 10px 0; color: inherit;'>
             <h4> Reporting Template</h4>
             <p style='font-style: italic;'>\"Flexible parametric survival analysis was performed using [distribution] distribution. The model included [N] patients with [N] events ([%] event rate). [Covariate] was associated with [HR] hazard of [outcome] (HR=X.XX, 95% CI X.XX-X.XX, p=X.XXX). Model fit was assessed using AIC ([value]) and diagnostic plots.\"</p>
             </div>"

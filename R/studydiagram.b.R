@@ -207,7 +207,7 @@ studydiagramClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                           "Participant counts increase between steps - this violates flow diagram logic. Please verify your participant count variable shows decreasing or constant values (e.g., 1000 -> 850 -> 720)."
                       )
                       self$results$diagram$setContent(
-                          "<div style='background:#ffebee; padding:15px; border-left:4px solid #f44336;'><h4> Data Error Detected</h4><p>Participant counts must decrease or stay constant between sequential steps. Your data shows increases, which is illogical for a study flow diagram.</p><p><b>Action:</b> Check that your count variable is cumulative and in the correct order.</p></div>"
+                          "<div style='background-color: rgba(255, 33, 67, 0.09); padding:15px; border-left:4px solid #f44336; color: inherit;'><h4> Data Error Detected</h4><p>Participant counts must decrease or stay constant between sequential steps. Your data shows increases, which is illogical for a study flow diagram.</p><p><b>Action:</b> Check that your count variable is cumulative and in the correct order.</p></div>"
                       )
                       return()
                  }
@@ -395,7 +395,7 @@ studydiagramClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 )
 
                 message <- paste0(
-                    "<div style='background: #f9f9f9; padding: 15px; margin: 10px; border: 1px solid #ddd;'>",
+                    "<div style='background-color: rgba(155, 155, 155, 0.06); padding: 15px; margin: 10px; border: 1px solid #ddd; color: inherit;'>",
                     "<h4>Missing Required Variables</h4>",
                     "<p>Please select the following required variables for ", data_format, " format:</p>",
                     "<ul>",
@@ -429,7 +429,7 @@ studydiagramClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 }
 
                 warning_msg <- paste0(
-                    "<div style='background: #fff3cd; padding: 15px; margin: 10px; border: 1px solid #ffc107;'>",
+                    "<div style='background-color: rgba(255, 202, 33, 0.23); padding: 15px; margin: 10px; border: 1px solid #ffc107; color: inherit;'>",
                     "<h4> Variable Selection Warning</h4>",
                     paste0("<p>", warnings, "</p>", collapse = ""),
                     "<p>Please verify you have selected the correct data format.</p>",
@@ -701,7 +701,7 @@ studydiagramClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             # DiagrammeR/Viz.js doesn't work in jamovi HTML output
             # Provide informative message to use the plot output instead
             return(paste0(
-                "<div style='text-align: center; padding: 20px; background: #f0f8ff; border: 1px solid #ccc;'>",
+                "<div style='text-align: center; padding: 20px; background-color: rgba(33, 152, 255, 0.07); border: 1px solid #ccc; color: inherit;'>",
                 "<h4> CONSORT Diagram Available in Plot Output</h4>",
                 "<p>The interactive diagram is displayed in the <strong>Plot</strong> section above.</p>",
                 "<p>You can customize the appearance using the options panel:</p>",
@@ -718,7 +718,7 @@ studydiagramClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         .generateConsortGgplotHtml = function() {
             # ggconsort rendering handled in plot output
             return(paste0(
-                "<div style='text-align: center; padding: 20px; background: #f0f8ff; border: 1px solid #ccc;'>",
+                "<div style='text-align: center; padding: 20px; background-color: rgba(33, 152, 255, 0.07); border: 1px solid #ccc; color: inherit;'>",
                 "<h4> CONSORT Diagram Available in Plot Output</h4>",
                 "<p>The diagram is displayed in the <strong>Plot</strong> section above using ggplot2.</p>",
                 "<p style='margin-top: 15px;'><em>Right-click the plot to save as image</em></p>",
@@ -729,7 +729,7 @@ studydiagramClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         .generateFlowchartStandardHtml = function() {
             # consort package rendering handled in plot output
             return(paste0(
-                "<div style='text-align: center; padding: 20px; background: #f0f8ff; border: 1px solid #ccc;'>",
+                "<div style='text-align: center; padding: 20px; background-color: rgba(33, 152, 255, 0.07); border: 1px solid #ccc; color: inherit;'>",
                 "<h4> Flow Diagram Available in Plot Output</h4>",
                 "<p>The diagram is displayed in the <strong>Plot</strong> section above.</p>",
                 "<p style='margin-top: 15px;'><em>Right-click the plot to save as image</em></p>",
@@ -740,7 +740,7 @@ studydiagramClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         .generateFlowchartGgplotHtml = function() {
             # ggplot rendering handled in plot output
             return(paste0(
-                "<div style='text-align: center; padding: 20px; background: #f0f8ff; border: 1px solid #ccc;'>",
+                "<div style='text-align: center; padding: 20px; background-color: rgba(33, 152, 255, 0.07); border: 1px solid #ccc; color: inherit;'>",
                 "<h4> Flow Diagram Available in Plot Output</h4>",
                 "<p>The diagram is displayed in the <strong>Plot</strong> section above using ggplot2.</p>",
                 "<p style='margin-top: 15px;'><em>Right-click the plot to save as image</em></p>",
@@ -899,7 +899,7 @@ studydiagramClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             summary <- private$.flowSummary
 
             html_content <- paste0(
-                "<div style='background: #f9f9f9; padding: 15px; margin: 10px; border: 1px solid #ddd;'>",
+                "<div style='background-color: rgba(155, 155, 155, 0.06); padding: 15px; margin: 10px; border: 1px solid #ddd; color: inherit;'>",
                 "<h4>Study Flow Summary</h4>",
                 "<p><strong>Data format:</strong> ", summary$format, "</p>",
                 "<p><strong>Initial participants:</strong> ", summary$total_initial, "</p>",
@@ -908,7 +908,7 @@ studydiagramClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 "<p><strong>Retention rate:</strong> ", summary$retention_rate, "%</p>",
                 "</div>",
 
-                "<div style='background: #f0f8ff; padding: 15px; margin: 10px; border: 1px solid #ccc;'>",
+                "<div style='background-color: rgba(33, 152, 255, 0.07); padding: 15px; margin: 10px; border: 1px solid #ccc; color: inherit;'>",
                 "<h4>Interpretation</h4>",
                 "<p>This diagram shows the flow of participants through your study.</p>",
                 "<ul>",
@@ -925,7 +925,7 @@ studydiagramClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
         .generateWelcomeMessage = function() {
             return(paste0(
-                "<div style='background: #f9f9f9; padding: 20px; margin: 10px; border: 1px solid #ddd;'>",
+                "<div style='background-color: rgba(155, 155, 155, 0.06); padding: 20px; margin: 10px; border: 1px solid #ddd; color: inherit;'>",
                 "<h3>Study Diagram Generator</h3>",
                 "<p>Create professional study flow diagrams including CONSORT diagrams for clinical trials.</p>",
 
@@ -995,7 +995,7 @@ studydiagramClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             # Generate warnings or success message
             if (length(warnings) > 0) {
                 html <- paste0(
-                    "<div style='background-color: #fff3cd; border-left: 4px solid #ffc107; padding: 12px; margin: 10px 0;'>",
+                    "<div style='background-color: rgba(255, 202, 33, 0.23); border-left: 4px solid #ffc107; padding: 12px; margin: 10px 0; color: inherit;'>",
                     paste(warnings, collapse = "<br/><br/>"),
                     "</div>"
                 )
@@ -1003,7 +1003,7 @@ studydiagramClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             } else {
                 self$results$warnings$setContent(
                     paste0(
-                    "<div style='background-color: #d4edda; border-left: 4px solid #28a745; padding: 12px; margin: 10px 0;'>" ,
+                    "<div style='background-color: rgba(33, 162, 64, 0.19); border-left: 4px solid #28a745; padding: 12px; margin: 10px 0; color: inherit;'>" ,
                     " <b>No data quality issues detected.</b> All stages have documented exclusions and retention is adequate." ,
                     "</div>"
                     )
@@ -1033,7 +1033,7 @@ studydiagramClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
             summary_html <- sprintf(
                 paste0(
-                    "<div style='background-color: #f8f9fa; border: 1px solid #dee2e6; padding: 15px; border-radius: 5px;'>" ,
+                    "<div style='background-color: rgba(138, 155, 172, 0.06); border: 1px solid #dee2e6; padding: 15px; border-radius: 5px; color: inherit;'>" ,
                     "<h4 style='margin-top: 0;'> Study Flow Summary</h4>" ,
                     "<p><b>Initial participants:</b> %d</p>" ,
                     "<p><b>Exclusion stages:</b> %d</p>" ,
@@ -1077,14 +1077,14 @@ studydiagramClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
             report_html <- sprintf(
                 paste0(
-                    "<div style='background-color: #e7f3ff; border-left: 4px solid #0066cc; padding: 15px; margin: 10px 0;'>" ,
+                    "<div style='background-color: rgba(33, 144, 255, 0.11); border-left: 4px solid #0066cc; padding: 15px; margin: 10px 0; color: inherit;'>" ,
                     "<h4 style='margin-top: 0;'> Copy-Ready Report Sentence</h4>" ,
                     "<p style='font-family: \"Times New Roman\", serif; font-size: 14px; line-height: 1.6;' id='reportText'>" ,
                     "Figure X shows the participant flow through the study. Of %d individuals assessed, " ,
                     "%d (%s%%) completed all study stages and were included in the final analysis.%s" ,
                     "</p>" ,
                     "<button onclick='navigator.clipboard.writeText(document.getElementById(\"reportText\").innerText)' " ,
-                    "style='background-color: #0066cc; color: white; border: none; padding: 8px 16px; " ,
+                    "style='background-color: #0066cc; color: #ffffff; color: white; border: none; padding: 8px 16px; " ,
                     "border-radius: 4px; cursor: pointer; font-size: 12px; margin-top: 10px;'>" ,
                     " Copy to Clipboard</button>" ,
                     "</div>"
@@ -1106,7 +1106,7 @@ studydiagramClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
             about_html <- sprintf(
                 paste0(
-                    "<div style='background-color: #f8f9fa; padding: 15px; border-radius: 5px;'>" ,
+                    "<div style='background-color: rgba(138, 155, 172, 0.06); padding: 15px; border-radius: 5px; color: inherit;'>" ,
                     "<h4 style='margin-top: 0;'> About This Analysis</h4>" ,
                     "<p><b>Analysis Type:</b> %s</p>" ,
                     "<p><b>Purpose:</b> %s</p>" ,
@@ -1166,7 +1166,7 @@ studydiagramClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             # Add context-specific warnings
             if (!is.null(summary$retention_rate) && summary$retention_rate < 50) {
                 caveats <- c(caveats,
-                    "<div style='background-color: #fff3cd; padding: 10px; margin-top: 10px; border-radius: 4px;'>",
+                    "<div style='background-color: rgba(255, 202, 33, 0.23); padding: 10px; margin-top: 10px; border-radius: 4px; color: inherit;'>",
                     "<b> High Attrition Alert:</b> Less than 50% of initial participants reached final analysis. ",
                     "Consider:",
                     "<ul style='margin-bottom: 0;'>",
@@ -1179,7 +1179,7 @@ studydiagramClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             }
 
             caveats_html <- paste0(
-                "<div style='background-color: #fff8e1; border-left: 4px solid #ff9800; padding: 15px;'>",
+                "<div style='background-color: rgba(255, 203, 33, 0.14); border-left: 4px solid #ff9800; padding: 15px; color: inherit;'>",
                 "<h4 style='margin-top: 0;'> Caveats & Assumptions</h4>",
                 paste(caveats, collapse = "\n"),
                 "</div>"

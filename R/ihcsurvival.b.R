@@ -1123,7 +1123,7 @@ ihcsurvivalClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
             .updateReportPanel = function() {
                 report_text <- private$.generateReportSentence()
                 report_html <- sprintf(
-                    "<h4>Clinical Report Summary</h4><div style='background-color: #f8f9fa; padding: 15px; border-left: 4px solid #007bff; margin: 10px 0;'>%s</div><p><small><i>Click to select and copy the text above for use in your reports.</i></small></p>",
+                    "<h4>Clinical Report Summary</h4><div style='background-color: rgba(138, 155, 172, 0.06); padding: 15px; border-left: 4px solid #007bff; margin: 10px 0; color: inherit;'>%s</div><p><small><i>Click to select and copy the text above for use in your reports.</i></small></p>",
                     report_text
                 )
                 self$results$reportSentence$setContent(report_html)

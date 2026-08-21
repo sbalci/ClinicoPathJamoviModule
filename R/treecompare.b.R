@@ -171,7 +171,7 @@ treecompareClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
 
         .show_welcome_message = function() {
             welcome_html <- "
-            <div style='background-color: #e8f5e8; padding: 20px; border-radius: 8px; margin: 20px 0;'>
+            <div style='background-color: rgba(33, 159, 33, 0.1); padding: 20px; border-radius: 8px; margin: 20px 0; color: inherit;'>
             <h3 style='color: #2e7d32; margin-top: 0;'>Clinical Tree Algorithm Comparison</h3>
             <p><strong>Compare multiple decision tree algorithms for optimal clinical performance</strong></p>
             
@@ -1241,7 +1241,7 @@ treecompareClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             }
             
             summary_html <- paste0(
-                "<div style='background-color: #f8f9fa; padding: 15px; border-radius: 5px;'>",
+                "<div style='background-color: rgba(138, 155, 172, 0.06); padding: 15px; border-radius: 5px; color: inherit;'>",
                 "<h4>Algorithm Comparison Summary</h4>",
                 "<ul>",
                 "<li><strong>Algorithms compared:</strong> ", algorithm_count, "</li>",
@@ -1356,9 +1356,9 @@ treecompareClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             }
             
             recommendations_html <- paste0(
-                "<div style='background-color: #f0f8ff; padding: 15px; border-radius: 5px;'>",
+                "<div style='background-color: rgba(33, 152, 255, 0.07); padding: 15px; border-radius: 5px; color: inherit;'>",
                 "<h4>Clinical Algorithm Recommendations</h4>",
-                "<div style='background-color: #e8f5e8; padding: 10px; border-radius: 3px; margin: 10px 0;'>",
+                "<div style='background-color: rgba(33, 159, 33, 0.1); padding: 10px; border-radius: 3px; margin: 10px 0; color: inherit;'>",
                 "<p><strong> Recommended Algorithm:</strong> ", top_algorithm, "</p>",
                 "<p><strong>Combined Score:</strong> ", round(top_combined_score, 3), 
                 " (Performance: ", round(top_performance_score, 3), 
@@ -1456,7 +1456,7 @@ treecompareClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             # Update summary with ensemble information
             if (length(ensemble_info$models) > 0) {
                 ensemble_text <- paste0(
-                    "<div style='background-color: #fff3cd; padding: 10px; border-radius: 3px; margin-top: 10px;'>",
+                    "<div style='background-color: rgba(255, 202, 33, 0.23); padding: 10px; border-radius: 3px; margin-top: 10px; color: inherit;'>",
                     "<p><strong>Ensemble Created:</strong></p>",
                     "<ul>"
                 )

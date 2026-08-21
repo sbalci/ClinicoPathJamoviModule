@@ -51,7 +51,7 @@ NULL
 # Security note: `message` is HTML-escaped via htmltools::htmlEscape() at the
 # interpolation site below, so a future caller passing a variable name or factor
 # label cannot inject markup. (Escaping is applied — do not remove it.)
-.createNoticeHTML <- function(message, type = c("ERROR", "STRONG_WARNING", "WARNING", "INFO")) {
+.crosstableNoticeHTML <- function(message, type = c("ERROR", "STRONG_WARNING", "WARNING", "INFO")) {
     type <- match.arg(type)
 
     # Define styles for each notice type
@@ -99,7 +99,7 @@ NULL
 }
 
 # Helper function to escape variable names with special characters
-.escapeVariableNames <- function(var_names) {
+.crosstableEscapeVariableNames <- function(var_names) {
     # Check if variable names contain special characters that need escaping
     need_escaping <- grepl("[^a-zA-Z0-9._]", var_names)
     var_names[need_escaping] <- paste0("`", var_names[need_escaping], "`")
@@ -107,13 +107,17 @@ NULL
 }
 
 # Helper function to get display name from mapping
-.getDisplayName <- function(cleaned_name, name_mapping) {
+.crosstableDisplayName <- function(cleaned_name, name_mapping) {
     # Get original display name from mapping
     original_name <- name_mapping[[cleaned_name]]
     if (is.null(original_name)) {
-        return(cleaned_name)  # Fallback to cleaned name
+        return(unname(cleaned_name))  # Fallback to cleaned name
     }
-    return(original_name)
+    # unname() is load-bearing: the mapping can carry names through, and
+    # jmvcore's Table$setRow() matches rowKeys with identical(), which is
+    # type-strict -- c(num = "num") is NOT identical to "num", so a named
+    # result makes setRow() fail with "rowKey '<name>' not found".
+    return(unname(original_name))
 }
 
 # Helper function to validate variable names and detect issues
@@ -268,9 +272,9 @@ crosstableClass <- if (requireNamespace('jmvcore'))
             # .reportTableError ----
             # Route a table-builder failure to the styled HTML error notice
             # instead of surfacing a raw R error. conditionMessage(e) is
-            # HTML-escaped inside .createNoticeHTML().
+            # HTML-escaped inside .crosstableNoticeHTML().
             .reportTableError = function(e) {
-                error_html <- .createNoticeHTML(
+                error_html <- .crosstableNoticeHTML(
                     paste0("Table generation failed: ", conditionMessage(e)),
                     type = "ERROR"
                 )
@@ -350,7 +354,7 @@ crosstableClass <- if (requireNamespace('jmvcore'))
                     # line-break markup is preserved while user-supplied column names
                     # embedded in the warning text are rendered inert.
                     warning_msg <- paste0(
-                        "<div style='background-color: #fff3cd; padding: 10px; margin: 10px 0; border-radius: 5px; border-left: 4px solid #ffc107;'>",
+                        "<div style='background-color: rgba(255, 202, 33, 0.23); padding: 10px; margin: 10px 0; border-radius: 5px; border-left: 4px solid #ffc107; color: inherit;'>",
                         "<strong> Variable Name Warnings:</strong><br>",
                         paste(htmltools::htmlEscape(unlist(validation_results$warnings)), collapse = "<br>"),
                         "</div>"
@@ -382,7 +386,7 @@ crosstableClass <- if (requireNamespace('jmvcore'))
                 if (method_type == "FWER") {
                     # Family-Wise Error Rate control (Bonferroni, Holm)
                     test_info <- paste0(
-                        "<div style='background-color: #e8f4fd; padding: 15px; margin: 10px 0; border-radius: 5px; border-left: 4px solid #2196F3;'>",
+                        "<div style='background-color: rgba(33, 149, 236, 0.1); padding: 15px; margin: 10px 0; border-radius: 5px; border-left: 4px solid #2196F3; color: inherit;'>",
                         "<h4 style='margin-top: 0; color: #1976D2;'>Adjusted P-values and FWER Control</h4>",
 
                         "<p><strong>What are Adjusted P-values?</strong><br>",
@@ -411,7 +415,7 @@ crosstableClass <- if (requireNamespace('jmvcore'))
                 } else {
                     # False Discovery Rate control (BH, BY)
                     test_info <- paste0(
-                        "<div style='background-color: #e8f4fd; padding: 15px; margin: 10px 0; border-radius: 5px; border-left: 4px solid #2196F3;'>",
+                        "<div style='background-color: rgba(33, 149, 236, 0.1); padding: 15px; margin: 10px 0; border-radius: 5px; border-left: 4px solid #2196F3; color: inherit;'>",
                         "<h4 style='margin-top: 0; color: #1976D2;'>Q-values and FDR Control</h4>",
 
                         "<p><strong>What are Q-values?</strong><br>",
@@ -442,6 +446,23 @@ crosstableClass <- if (requireNamespace('jmvcore'))
                 self$results$testInformation$setContent(test_info)
             },
 
+            # .init ----
+            .init = function() {
+                # The SMD table carries one row per selected variable, which is
+                # fully determined by the options. Build that structure here so the
+                # table does not appear empty and then restructure on every run;
+                # .populateSMD() fills the computed cells with setRow().
+                # Row keys are the ORIGINAL variable names, which is what
+                # .crosstableDisplayName() resolves the cleaned names back to.
+                if (isTRUE(self$options$showSMD)) {
+                    tab <- self$results$smdTable
+                    for (v in self$options$vars) {
+                        key <- unname(as.character(v))
+                        tab$addRow(rowKey = key, values = list(variable = key))
+                    }
+                }
+            },
+
             # .run ----
             .run = function() {
                 sty <- self$options$sty
@@ -451,7 +472,7 @@ crosstableClass <- if (requireNamespace('jmvcore'))
                     self$results$errorNotice$setVisible(FALSE)
 
                     todo <- paste0(
-                        "<div style='background-color: #f8f9fa; padding: 20px; margin: 15px 0; border-radius: 8px; border-left: 5px solid #007bff;'>",
+                        "<div style='background-color: rgba(138, 155, 172, 0.06); padding: 20px; margin: 15px 0; border-radius: 8px; border-left: 5px solid #007bff; color: inherit;'>",
                         "<h3 style='margin-top: 0; color: #007bff;'>Welcome to Cross Table Analysis</h3>",
 
                         "<p><strong>Purpose:</strong> Compare distributions of clinical variables across groups with automatic test selection.</p>",
@@ -516,7 +537,7 @@ crosstableClass <- if (requireNamespace('jmvcore'))
                 # Check if data has complete rows.
                 if (nrow(self$data) == 0) {
                     # Use HTML error notice instead of dynamic Notice to avoid serialization errors
-                    error_html <- .createNoticeHTML(
+                    error_html <- .crosstableNoticeHTML(
                         'Dataset contains no complete rows. Please check your data and filters.',
                         type = "ERROR"
                     )
@@ -547,8 +568,8 @@ crosstableClass <- if (requireNamespace('jmvcore'))
                 cleaned_names_mapping <- cleaneddata$cleaned_names_mapping
 
                 # Build formula using escaped variable names for safety.
-                escaped_myvars <- .escapeVariableNames(myvars)
-                escaped_mygroup <- .escapeVariableNames(mygroup)
+                escaped_myvars <- .crosstableEscapeVariableNames(myvars)
+                escaped_mygroup <- .crosstableEscapeVariableNames(mygroup)
                 formula <- jmvcore::constructFormula(terms = escaped_myvars, dep = escaped_mygroup)
                 formula <- jmvcore::asFormula(formula)
 
@@ -594,7 +615,7 @@ crosstableClass <- if (requireNamespace('jmvcore'))
                         }
 
                         # Create HTML for this warning
-                        warning_html_parts[i] <- .createNoticeHTML(warn, type = notice_type)
+                        warning_html_parts[i] <- .crosstableNoticeHTML(warn, type = notice_type)
                     }
 
                     # Combine all warnings into single HTML output
@@ -786,7 +807,7 @@ crosstableClass <- if (requireNamespace('jmvcore'))
                 if (p_adjust_method != "none") {
                     # Warn if adjusting with only 1 variable (pointless)
                     if (n_vars == 1) {
-                        single_var_warning <- .createNoticeHTML(
+                        single_var_warning <- .crosstableNoticeHTML(
                             paste0("P-value adjustment with only 1 variable has no effect. ",
                                    "Adjusted p-value will equal the original p-value. ",
                                    "Multiple testing correction is only meaningful when testing multiple variables simultaneously."),
@@ -856,7 +877,7 @@ crosstableClass <- if (requireNamespace('jmvcore'))
                     if (is_fdr) {
                         # FDR methods - use "q-values"
                         qvalue_explanation <- paste0(
-                            "<div style='background-color: #f0f8ff; padding: 15px; margin-top: 20px; border-radius: 5px; border: 1px solid #4682b4;'>",
+                            "<div style='background-color: rgba(33, 152, 255, 0.07); padding: 15px; margin-top: 20px; border-radius: 5px; border: 1px solid #4682b4; color: inherit;'>",
                             "<h4 style='margin-top: 0;'>Multiple Testing Correction: ", method_names[[p_adjust_method]], "</h4>",
                             "<p><strong>Method:</strong> ", method_descriptions[[p_adjust_method]], "</p>",
 
@@ -892,7 +913,7 @@ crosstableClass <- if (requireNamespace('jmvcore'))
                     } else {
                         # FWER methods - use "adjusted p-values"
                         qvalue_explanation <- paste0(
-                            "<div style='background-color: #f0f8ff; padding: 15px; margin-top: 20px; border-radius: 5px; border: 1px solid #4682b4;'>",
+                            "<div style='background-color: rgba(33, 152, 255, 0.07); padding: 15px; margin-top: 20px; border-radius: 5px; border: 1px solid #4682b4; color: inherit;'>",
                             "<h4 style='margin-top: 0;'>Multiple Testing Correction: ", method_names[[p_adjust_method]], "</h4>",
                             "<p><strong>Method:</strong> ", method_descriptions[[p_adjust_method]], "</p>",
 
@@ -964,7 +985,7 @@ crosstableClass <- if (requireNamespace('jmvcore'))
                         caption = paste0(
                             "Cross Table for Dependent ",
                             htmltools::htmlEscape(
-                                .getDisplayName(mygroup, original_names_mapping)
+                                .crosstableDisplayName(mygroup, original_names_mapping)
                             )
                         ),
                         id = "tbl3"
@@ -1020,7 +1041,7 @@ crosstableClass <- if (requireNamespace('jmvcore'))
 
                 ignored <- requested[!(names(requested) %in% supported)]
                 if (length(ignored) > 0) {
-                    ignored_html <- .createNoticeHTML(
+                    ignored_html <- .crosstableNoticeHTML(
                         sprintf(
                             "The %s style does not apply the following setting(s), so the table below is unchanged by them: %s. %s",
                             style_display,
@@ -1047,7 +1068,7 @@ crosstableClass <- if (requireNamespace('jmvcore'))
                     self$results$dataQualityNotice$setVisible(TRUE)
                 }
 
-                info_html <- .createNoticeHTML(info_message, type = "INFO")
+                info_html <- .crosstableNoticeHTML(info_message, type = "INFO")
                 self$results$analysisInfo$setContent(info_html)
                 self$results$analysisInfo$setVisible(TRUE)
 
@@ -1096,8 +1117,8 @@ crosstableClass <- if (requireNamespace('jmvcore'))
                            else if (a < 0.1) "negligible (< 0.1)"
                            else if (a < 0.2) "small (0.1-0.2)"
                            else "notable (>= 0.2)"
-                    display_name <- .getDisplayName(v, name_mapping)
-                    tab$addRow(rowKey = v, values = list(
+                    display_name <- .crosstableDisplayName(v, name_mapping)
+                    tab$setRow(rowKey = display_name, values = list(
                         variable = display_name, vtype = vtype, smd = smd,
                         absSMD = a, balance = bal))
                 }

@@ -16,7 +16,6 @@ clearWith:
     - padjustmethod
     - originaltheme
     - resultssubtitle
-    - messages
     - label
     - digits
     - digitsperc

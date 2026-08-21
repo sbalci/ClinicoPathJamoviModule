@@ -20,10 +20,10 @@ marginalrecurrentClass <- R6::R6Class(
                     <style>
                         h1 {color: #3366cc;}
                         body {font-family: Arial, sans-serif; margin: 40px;}
-                        .info {background-color: #f0f8ff; padding: 15px; border-left: 5px solid #3366cc;}
-                        .step {margin: 10px 0; padding: 8px; background-color: #f9f9f9;}
-                        .formula {background-color: #f5f5f5; padding: 10px; font-family: monospace; margin: 10px 0;}
-                        .interpretation {background-color: #e8f5e8; padding: 15px; border-left: 5px solid #4CAF50; margin: 15px 0;}
+                        .info {background-color: rgba(33, 152, 255, 0.07); color: inherit; padding: 15px; border-left: 5px solid #3366cc;}
+                        .step {margin: 10px 0; padding: 8px; background-color: rgba(155, 155, 155, 0.06); color: inherit;}
+                        .formula {background-color: rgba(88, 88, 88, 0.06); color: inherit; padding: 10px; font-family: monospace; margin: 10px 0;}
+                        .interpretation {background-color: rgba(33, 159, 33, 0.1); color: inherit; padding: 15px; border-left: 5px solid #4CAF50; margin: 15px 0;}
                     </style>
                     </head>
                     <body>
@@ -667,10 +667,10 @@ marginalrecurrentClass <- R6::R6Class(
             <head>
             <style>
                 body { font-family: Arial, sans-serif; margin: 20px; }
-                .section { margin: 20px 0; padding: 15px; border-left: 4px solid #2196F3; background-color: #f8f9fa; }
-                .formula { background-color: #f5f5f5; padding: 15px; font-family: 'Courier New', monospace; margin: 10px 0; border: 1px solid #ddd; }
-                .interpretation { background-color: #e8f5e8; padding: 15px; border-left: 4px solid #4CAF50; }
-                h3 { color: #1976D2; margin-top: 25px; }
+                .section { margin: 20px 0; padding: 15px; border-left: 4px solid #2196F3; background-color: rgba(138, 155, 172, 0.06); color: inherit; }
+                .formula { background-color: rgba(88, 88, 88, 0.06); color: inherit; padding: 15px; font-family: 'Courier New', monospace; margin: 10px 0; border: 1px solid #ddd; }
+                .interpretation { background-color: rgba(33, 159, 33, 0.1); color: inherit; padding: 15px; border-left: 4px solid #4CAF50; }
+                h3 { color: inherit; margin-top: 25px; }
                 ul { padding-left: 20px; }
                 li { margin: 8px 0; }
             </style>
@@ -743,11 +743,11 @@ marginalrecurrentClass <- R6::R6Class(
             <head>
             <style>
                 body { font-family: Arial, sans-serif; margin: 20px; }
-                .summary { background-color: #e3f2fd; padding: 20px; border-radius: 5px; margin: 15px 0; }
-                .interpretation { background-color: #f1f8e9; padding: 15px; border-left: 4px solid #8bc34a; margin: 10px 0; }
-                .warning { background-color: #fff3e0; padding: 15px; border-left: 4px solid #ff9800; margin: 10px 0; }
-                h3 { color: #1565c0; }
-                .result-item { margin: 10px 0; padding: 8px; background-color: #f8f9fa; }
+                .summary { background-color: rgba(33, 152, 239, 0.13); color: inherit; padding: 20px; border-radius: 5px; margin: 15px 0; }
+                .interpretation { background-color: rgba(114, 184, 33, 0.1); color: inherit; padding: 15px; border-left: 4px solid #8bc34a; margin: 10px 0; }
+                .warning { background-color: rgba(255, 169, 33, 0.14); color: inherit; padding: 15px; border-left: 4px solid #ff9800; margin: 10px 0; }
+                h3 { color: inherit; }
+                .result-item { margin: 10px 0; padding: 8px; background-color: rgba(138, 155, 172, 0.06); color: inherit; }
             </style>
             </head>
             <body>

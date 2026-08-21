@@ -349,6 +349,9 @@ pathologycompositionClass <- R6::R6Class(
         },
         .plotCompositionPlot = function(image, ggtheme, theme, ...) {
             state <- image$state
+
+            if (is.null(state))
+                return(FALSE)
             data <- state$data
             outcome_var <- state$outcome_var
             component_vars <- state$component_vars

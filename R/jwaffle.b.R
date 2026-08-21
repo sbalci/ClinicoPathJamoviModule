@@ -518,11 +518,27 @@ jwaffleClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         },
         
         .validateInputs = function() {
-            # Check for large datasets and warn user
+            # jamovi does not surface base warning() output, so the slow-render
+            # heads-up has to reach an element the user can actually see.
+            #
+            # Two constraints decide where and how:
+            #   1. It lives HERE, not in .run(). .plot() calls .resetMessages()
+            #      (which blanks the notices item) and then calls this method again,
+            #      so only notices produced from here are re-created on the render
+            #      pass; one emitted in .run() is wiped the moment the plot draws.
+            #   2. It goes through .accumulateMessage(), NOT .addNotice().
+            #      .accumulateMessage() REPLACES the whole notice list with a single
+            #      "Data Quality Notes" block built from private$.messages, so any
+            #      notice added separately via .addNotice() is destroyed as soon as
+            #      the next message accumulates.
             if (nrow(self$data) > 100000) {
-                warning("Large dataset detected (", nrow(self$data), " rows). Performance may be affected. Consider sampling or aggregating your data.")
+                private$.accumulateMessage(
+                    paste0("Large dataset detected (", nrow(self$data),
+                           " rows). Rendering may be slow. Consider sampling or ",
+                           "aggregating your data.<br>"),
+                    notice_type = "WARNING")
             }
-            
+
             # Check if required groups variable exists
             if (is.null(self$options$groups) || self$options$groups == "") {
                 jmvcore::reject("Please specify a grouping variable for the waffle chart.")
@@ -929,7 +945,7 @@ jwaffleClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             private$.noticeList <- list()
             if (is.null(self$options$groups)) {
                 todo <- paste0(
-                    "<div style='background: #f8f9fa; ",
+                    "<div style='background: rgba(138, 155, 172, 0.06); color: inherit; ",
                     "padding: 30px; border-radius: 8px; border: 2px solid #dee2e6; ",
                     "margin: 20px 0; color: #212529;'>",
 
@@ -957,7 +973,7 @@ jwaffleClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     "</ul>",
 
                     "<p style='font-size: 14px; margin-top: 20px; padding: 10px; ",
-                    "background: #e7f3ff; border-left: 3px solid #0066cc; color: #004085;'>",
+                    "background: rgba(33, 144, 255, 0.11); color: inherit; border-left: 3px solid #0066cc; color: inherit;'>",
                     "<strong> Tip:</strong> Each square represents ~1% of your sample, ",
                     "making percentages immediately clear.</p>",
                     "</div>"
@@ -989,7 +1005,7 @@ jwaffleClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 # class set inside .validateInputs().
                 jmvcore::reject(conditionMessage(e))
             })
-            
+
             # Performance optimization: prepare data and options with caching
             mydata <- private$.prepareData()
             options <- private$.prepareOptions()

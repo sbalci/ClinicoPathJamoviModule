@@ -24,12 +24,16 @@
 #' 
 #' @examples
 #' \dontrun{
+#' # Both outcomeLevel and censorLevel are `type: Level` options. jamovi forbids a
+#' # default on a Level, so both are REQUIRED arguments of this function even though
+#' # the GUI fills them in for you - pass them explicitly when calling from R.
 #' # Basic Lasso-Cox regression
 #' result <- lassocox(
 #'   data = survival_data,
 #'   elapsedtime = "time",
 #'   outcome = "status", 
 #'   outcomeLevel = "1",
+#'   censorLevel = "0",
 #'   explanatory = c("age", "gender", "stage", "grade"),
 #'   lambda = "lambda.1se",
 #'   nfolds = 10
@@ -41,6 +45,7 @@
 #'   elapsedtime = "survival_time",
 #'   outcome = "event",
 #'   outcomeLevel = "death",
+#'   censorLevel = "alive",
 #'   explanatory = gene_variables,
 #'   lambda = "lambda.min",
 #'   nfolds = 5,
@@ -68,44 +73,29 @@ lassocoxClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                 missing_packages <- c(missing_packages, "survival")
             }
             
-            # TODO (correctness): file-wide `jmvcore::format(template, list(name=value))`
-            # pattern silently fails to interpolate - emits "…" placeholders instead of
-            # actual values. Empirical confirmation:
-            #   > jmvcore::format("Found {n}", list(n = 3))   → "Found …"
-            #   > jmvcore::format("Found {n}", n = 3)         → "Found 3"
-            # Reason: jmvcore::format reads `...` as positional args and does NOT
-            # auto-unwrap a single-list arg, so the inner list() becomes one ignored
-            # positional value and named {n}, {levels}, {pkgs}, {cmd}, {msg} etc. all
-            # resolve to the "…" fallback (see deparse(jmvcore::format), the named-arg
-            # branch checks `name %in% names(args)` where names(args) is "" because
-            # the outer ... wasn't named).
-            #
-            # Project-wide scan (2026-05-27): lassocox.b.R is the ONLY file in this
-            # codebase using this broken pattern. 23 affected sites in this file.
-            # To enumerate the current sites, run:
-            #   grep -nE 'jmvcore::format\\(' R/lassocox.b.R |
-            #     awk '/jmvcore::format/,/\\)/'  # then keep lines that also contain "list("
-            # (or use the paren-balanced awk script in the audit chat for an exact count).
-            #
-            # Fix shape per site - drop the format() wrapper, pass placeholders as
-            # named `...` args directly (jmvcore::reject forwards them to format()):
-            #   # broken (current)
-            #   jmvcore::reject(jmvcore::format(.('Found {n}'), list(n = v)))
-            #   # correct
-            #   jmvcore::reject(.('Found {n}'), n = v)
-            # And for the format-only sites that feed setContent (e.g. lines 73, 1195),
-            # call format() directly with named args: jmvcore::format(.('…{n}…'), n = v).
-            #
-            # Behavior change: users currently see "…" in error/info messages; after
-            # the fix they'll see the actual values. Defer to a dedicated correctness
-            # pass - not appropriate for a drop-in jamovify migration.
+            # NOTE on jmvcore::format placeholders - two constraints, both easy to
+            # violate and neither of which errors:
+            #   1. Pass substitutions as named dots, NOT wrapped in list(). format()
+            #      reads `...` and checks `name %in% names(args)`; a single unnamed
+            #      list matches nothing, so every token falls through to the "..."
+            #      default. jmvcore::reject is worse - its second positional argument
+            #      is `code`, so a list lands there and is never seen as a value.
+            #   2. Placeholder names must be camelCase. The token regex is
+            #      `\\{ *[A-Za-z][A-Za-z0-9]* *\\}` (jmvcore 2.7.38) - it does NOT
+            #      accept an underscore, so `{n_obs}` stays literal even when the
+            #      matching named dot is supplied correctly.
+            # Verified 2026-08-20:
+            #   jmvcore::format("n = {n_obs}", list(n_obs = 242))  -> "n = {n_obs}"
+            #   jmvcore::format("n = {n_obs}", n_obs = 242)        -> "n = {n_obs}"
+            #   jmvcore::format("n = {nObs}",  nObs  = 242)        -> "n = 242"
+            # Both were wrong throughout this file (24 list() sites, 9 underscored
+            # tokens) and are now fixed. Keep new strings camelCase.
             if (length(missing_packages) > 0) {
                 pkg_list <- paste(missing_packages, collapse = ", ")
                 install_cmd <- paste0("install.packages(c(", paste0("'", missing_packages, "'", collapse = ", "), "))")
                 error_msg <- jmvcore::format(
                     .("The following required packages are not installed: {pkgs}\n\nPlease install them using:\n{cmd}"),
-                    list(pkgs = pkg_list, cmd = install_cmd)
-                )
+                    pkgs = pkg_list, cmd = install_cmd)
 
                 self$results$todo$setContent(paste0(
                     "<div class='alert alert-danger'>",
@@ -304,7 +294,7 @@ lassocoxClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                 if (length(observed_levels) < 2) {
                     # See file-wide TODO (correctness) near line 73 - broken format-list pattern.
                     jmvcore::reject(jmvcore::format(.('Outcome variable must have at least 2 observed values. Found {n} level(s): {levels}'),
-                        list(n = length(observed_levels), levels = paste(observed_levels, collapse = ", "))))
+                        n = length(observed_levels), levels = paste(observed_levels, collapse = ", ")))
                 }
 
                 # Resolve event level
@@ -315,7 +305,7 @@ lassocoxClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                     event_level_used <- as.character(outcome_level_opt)
                     if (!(event_level_used %in% observed_levels)) {
                         jmvcore::reject(jmvcore::format(.("Selected event level ('{level}') is not present in observed outcome data."),
-                            list(level = event_level_used)))
+                            level = event_level_used))
                     }
                 }
 
@@ -332,7 +322,7 @@ lassocoxClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                     censor_level_used <- as.character(censor_level_opt)
                     if (!(censor_level_used %in% observed_levels)) {
                         jmvcore::reject(jmvcore::format(.("Selected censored level ('{level}') is not present in observed outcome data."),
-                            list(level = censor_level_used)))
+                            level = censor_level_used))
                     }
                 }
 
@@ -352,14 +342,14 @@ lassocoxClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                 if (n_unrecognized > 0) {
                     warning(jmvcore::format(
                         .('Outcome contains {n} row(s) with values other than the event ("{event}") or censored ("{censor}") levels. These rows will be excluded.'),
-                        list(n = n_unrecognized, event = event_level_used, censor = censor_level_used)))
+                        n = n_unrecognized, event = event_level_used, censor = censor_level_used))
                 }
             } else {
                 outcome_num <- jmvcore::toNumeric(outcome_raw)
                 observed_levels <- sort(unique(outcome_num[!is.na(outcome_num)]))
                 if (length(observed_levels) < 2) {
                     jmvcore::reject(jmvcore::format(.('Numeric outcome must have at least 2 observed values. Found: {values}'),
-                        list(values = paste(observed_levels, collapse = ", "))))
+                        values = paste(observed_levels, collapse = ", ")))
                 }
 
                 # Resolve event level
@@ -406,7 +396,7 @@ lassocoxClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                 if (n_unrecognized > 0) {
                     warning(jmvcore::format(
                         .('Outcome contains {n} row(s) with values other than the event ({event}) or censored ({censor}) levels. These rows will be excluded.'),
-                        list(n = n_unrecognized, event = event_level_used, censor = censor_level_used)))
+                        n = n_unrecognized, event = event_level_used, censor = censor_level_used))
                 }
             }
 
@@ -424,7 +414,7 @@ lassocoxClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                 predictors <- predictors[, !constant_vars, drop = FALSE]
                 explanatory_vars <- names(predictors)
                 warning(jmvcore::format(.('Removed constant explanatory variables: {vars}'),
-                    list(vars = paste(constant_var_names, collapse = ", "))))
+                    vars = paste(constant_var_names, collapse = ", ")))
             }
             if (ncol(predictors) == 0) {
                 jmvcore::reject(.("No valid explanatory variables remain after removing constant predictors."))
@@ -440,11 +430,11 @@ lassocoxClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
 
             if (n_complete < 10) {
                 jmvcore::reject(jmvcore::format(.('Too few complete cases for analysis ({n}). Need at least 10 complete observations.'),
-                    list(n = n_complete)))
+                    n = n_complete))
             }
             if (n_excluded > 0) {
                 warning(jmvcore::format(.('Excluded {n} row(s) with missing values in time/outcome/predictors (complete-case analysis).'),
-                    list(n = n_excluded)))
+                    n = n_excluded))
             }
 
             time_cc <- time[complete]
@@ -468,14 +458,14 @@ lassocoxClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             n_events <- sum(status_cc == 1)
             if (n_events < 5) {
                 jmvcore::reject(jmvcore::format(.('Too few events for analysis ({n}). Need at least 5 events for reliable estimation.'),
-                    list(n = n_events)))
+                    n = n_events))
             }
 
             # Validate events-per-predictor ratio
             n_predictors <- ncol(predictors)
             if (n_events < n_predictors && n_events < 10) {
-                warning(jmvcore::format(.('Low events-per-predictor ratio ({n_events} events, {n_pred} predictors). Consider stronger regularization or fewer predictors.'),
-                    list(n_events = n_events, n_pred = n_predictors)))
+                warning(jmvcore::format(.('Low events-per-predictor ratio ({nEvents} events, {nPred} predictors). Consider stronger regularization or fewer predictors.'),
+                    nEvents = n_events, nPred = n_predictors))
             }
 
             # Create design matrix with robust factor handling
@@ -486,7 +476,7 @@ lassocoxClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                         factor_levels <- length(unique(predictors[complete, var_name]))
                         if (factor_levels < 2) {
                             jmvcore::reject(jmvcore::format(.("Factor variable '{var}' has insufficient variation in complete cases."),
-                                list(var = var_name)))
+                                var = var_name))
                         }
                     }
                 }
@@ -505,7 +495,7 @@ lassocoxClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                 X <- X[, valid_cols, drop = FALSE]
             }, error = function(e) {
                 jmvcore::reject(jmvcore::format(.('Error creating design matrix: {msg}. Check factor coding and missing values.'),
-                    list(msg = e$message)))
+                    msg = e$message))
             })
 
             # Standardize variables if requested
@@ -622,7 +612,7 @@ lassocoxClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             nfolds <- max(3, min(nfolds_requested, data$n - 1))
             if (nfolds != nfolds_requested) {
                 warning(jmvcore::format(.('Reduced number of CV folds to {n} due to sample size constraints.'),
-                    list(n = nfolds)))
+                    n = nfolds))
             }
 
             seed_value <- tryCatch(as.integer(self$options$random_seed), error = function(e) NA_integer_)
@@ -650,7 +640,7 @@ lassocoxClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                 cv_args <- list(
                     x = data$X,
                     y = y,
-                    family = "cox",
+                    family = "cox", cox.ties = "breslow",
                     alpha = 1,  # Lasso (L1) penalty
                     standardize = FALSE,  # Already standardized if requested
                     parallel = FALSE  # Avoid parallel processing issues
@@ -669,29 +659,36 @@ lassocoxClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                 }
                 
             }, error = function(e) {
-                jmvcore::reject(jmvcore::format(.('Error in cross-validation: {msg}'), list(msg = e$message)))
+                jmvcore::reject(jmvcore::format(.('Error in cross-validation: {msg}'), msg = e$message))
             })
             
-            # Get optimal lambda based on user selection
+            # Get optimal lambda based on user selection. Track the rule that is
+            # ACTUALLY used: when the 1-SE rule retains nothing the code below silently
+            # refits at lambda.min, and every summary surface used to keep reporting
+            # self$options$lambda - an active false statement about the fitted model.
+            # The bundled demo dataset at the shipped defaults takes that path every
+            # time, so this was the first thing most users saw.
             lambda_optimal <- switch(self$options$lambda,
                 "lambda.min" = cv_fit$lambda.min,
                 "lambda.1se" = cv_fit$lambda.1se,
                 cv_fit$lambda.1se  # Default fallback
             )
+            lambda_rule_used <- self$options$lambda
+            lambda_fallback <- FALSE
             
             # Fit final model with optimal lambda
             tryCatch({
                 final_model <- glmnet::glmnet(
                     x = data$X,
                     y = y,
-                    family = "cox",
+                    family = "cox", cox.ties = "breslow",
                     alpha = 1,
                     lambda = lambda_optimal,
                     standardize = FALSE
                 )
                 
             }, error = function(e) {
-                jmvcore::reject(jmvcore::format(.('Error fitting final model: {msg}'), list(msg = e$message)))
+                jmvcore::reject(jmvcore::format(.('Error fitting final model: {msg}'), msg = e$message))
             })
             
             # Extract coefficients and selected variables
@@ -699,11 +696,13 @@ lassocoxClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             selected_vars <- which(abs(coef_matrix) > 1e-8)
             
             if (length(selected_vars) == 0) {
-                warning(.("No variables selected by Lasso. Consider using lambda.min or less regularization."))
+                warning(.("The 1-SE rule retained no variables, so lambda.min was used instead. The model reported below is the lambda.min fit."))
                 # Use lambda.min as fallback
+                lambda_rule_used <- "lambda.min"
+                lambda_fallback <- TRUE
                 lambda_optimal <- cv_fit$lambda.min
                 final_model <- glmnet::glmnet(
-                    x = data$X, y = y, family = "cox",
+                    x = data$X, y = y, family = "cox", cox.ties = "breslow",
                     alpha = 1, lambda = lambda_optimal, standardize = FALSE
                 )
                 coef_matrix <- as.matrix(coef(final_model, s = lambda_optimal))
@@ -731,6 +730,8 @@ lassocoxClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                 coef_matrix = coef_matrix,
                 selected_vars = selected_vars,
                 lambda_optimal = lambda_optimal,
+                lambda_rule_used = lambda_rule_used,
+                lambda_fallback = lambda_fallback,
                 risk_scores = risk_scores,
                 performance_metrics = performance_metrics,
                 var_importance = var_importance,
@@ -816,27 +817,35 @@ lassocoxClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             ))
 
             table$addRow(rowKey = 5, values = list(
+                statistic = .("Penalty Selected By"),
+                value = if (isTRUE(results$lambda_fallback))
+                    jmvcore::format(.("{rule} (the 1-SE rule you selected retained no variables)"),
+                                    rule = results$lambda_rule_used)
+                else results$lambda_rule_used
+            ))
+
+            table$addRow(rowKey = 6, values = list(
                 statistic = .("Sample Size"),
                 value = results$data$n
             ))
 
-            table$addRow(rowKey = 6, values = list(
+            table$addRow(rowKey = 7, values = list(
                 statistic = .("Number of Events"),
                 value = results$data$n_events
             ))
 
-            table$addRow(rowKey = 7, values = list(
+            table$addRow(rowKey = 8, values = list(
                 statistic = .("Censoring Rate"),
                 value = paste0(round(100 * results$data$n_censored / results$data$n, 1), "%")
             ))
 
-            table$addRow(rowKey = 8, values = list(
+            table$addRow(rowKey = 9, values = list(
                 statistic = .("Event Level Used"),
                 value = results$data$event_level_used
             ))
 
             if (!is.null(results$data$excluded_rows) && results$data$excluded_rows > 0) {
-                table$addRow(rowKey = 9, values = list(
+                table$addRow(rowKey = 10, values = list(
                     statistic = .("Rows Excluded (Missing Data)"),
                     value = results$data$excluded_rows
                 ))
@@ -868,23 +877,27 @@ lassocoxClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                 selected_X <- results$data$X[, results$selected_vars, drop = FALSE]
                 y <- survival::Surv(results$data$time, results$data$status)
                 refit_df <- as.data.frame(selected_X)
+                # Refit under internal, syntactically safe predictor names. User column
+                # names would be backtick-quoted in the formula and come back
+                # backtick-quoted in the coxph rownames, so they never matched the
+                # display names and the CI/p columns stayed blank. This also keeps all
+                # user-controlled text out of the parsed formula.
+                safe_names <- paste0(".v", seq_len(ncol(selected_X)))
+                names(refit_df) <- safe_names
                 refit_df$.time <- results$data$time
                 refit_df$.status <- results$data$status
                 # Only refit if p < n (standard Cox requires this)
                 if (ncol(selected_X) < nrow(selected_X)) {
-                    # Backtick-escape user-controlled predictor names via composeTerms,
-                    # and parse via jmvcore::asFormula() to block code-injection. Surv is
-                    # globally allow-listed; drop the survival:: prefix (the validator's
-                    # name regex doesn't permit `::`-namespaced calls).
                     refit_formula <- jmvcore::asFormula(paste0(
                         "Surv(.time, .status) ~ ",
-                        jmvcore::composeTerms(as.list(colnames(selected_X)))
+                        paste(safe_names, collapse = " + ")
                     ))
                     refit_cox <- survival::coxph(refit_formula, data = refit_df)
                     refit_summary <- summary(refit_cox)
                     refit_results <- list(
                         coefs = refit_summary$coefficients,
-                        ci = refit_summary$conf.int
+                        ci = refit_summary$conf.int,
+                        names = safe_names
                     )
                 }
             }, error = function(e) {
@@ -905,8 +918,8 @@ lassocoxClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                 ci_up <- NA
                 p_val <- NA
                 if (!is.null(refit_results)) {
-                    # Match variable name in refit results
-                    refit_row <- match(var_name, rownames(refit_results$coefs))
+                    # Match by position via the internal refit name (see above)
+                    refit_row <- match(refit_results$names[i], rownames(refit_results$coefs))
                     if (!is.na(refit_row)) {
                         ci_lo <- refit_results$ci[refit_row, 3]  # lower .95
                         ci_up <- refit_results$ci[refit_row, 4]  # upper .95
@@ -930,8 +943,12 @@ lassocoxClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
 
             # Notes about methodology
             if (!is.null(refit_results)) {
+                # The old note named only CIs and p-values, but Coefficient and Hazard
+                # Ratio come from the refit too, while Importance is the absolute
+                # PENALIZED coefficient. Two estimators sat in adjacent cells of one row
+                # with nothing on screen distinguishing them.
                 table$setNote("refit",
-                    .("CIs and p-values are from an unpenalized Cox model refitted with LASSO-selected variables (post-selection inference). These do not account for the variable selection step and may be anti-conservative."))
+                    .("Coefficient, Hazard Ratio, CI and p are all from an unpenalized Cox model refitted on the LASSO-selected variables (Efron ties). Importance is the absolute penalized LASSO coefficient (Breslow ties) and is shrunk relative to Coefficient, so the two columns will not agree. Post-selection CIs and p-values do not account for the selection step and are anti-conservative: a variable can look significant simply because it survived selection."))
             } else {
                 table$setNote("noci",
                     .("CIs and p-values could not be computed (post-selection Cox refit failed or p >= n)."))
@@ -962,9 +979,15 @@ lassocoxClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                     value = cindex_text,
                     interpretation = private$.interpretCindex(metrics$cindex)
                 ))
-                table$setNote("cindex",
-                    .("All performance metrics are apparent (training) values computed on the same data used for model fitting. They may be optimistic. External validation is recommended."))
             }
+
+            # This note used to sit INSIDE the C-index branch. When concordance failed the
+            # C-index row vanished and took the caveat with it, leaving the two most
+            # optimistic numbers on screen - the log-rank p and the group hazard ratio -
+            # with nothing qualifying them. Both come from a median split of a risk score
+            # built on these same patients, so they need the caveat more than the C-index does.
+            table$setNote("apparent",
+                .("Every value in this table is apparent (training) performance, computed on the same patients used to choose the penalty and the variables, so all of it is optimistically biased. The log-rank p-value and the high-vs-low hazard ratio additionally come from a median split of that same training-set risk score. Validate in an independent cohort before reporting these as performance."))
 
             # Log-rank test p-value
             if (!is.null(metrics$logrank_p) && !is.na(metrics$logrank_p)) {
@@ -1060,15 +1083,32 @@ lassocoxClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
 
             p <- ggplot2::ggplot(coef_data, ggplot2::aes(x = variable, y = coefficient)) +
                 ggplot2::geom_col(ggplot2::aes(fill = coefficient > 0), alpha = 0.7) +
+                # Both vectors must be NAME-matched. `values` already was, but `labels`
+                # was a bare positional vector, so when every selected coefficient shared a
+                # sign only one level existed and the first label landed on it: an
+                # all-positive (risk-increasing) model drew red bars labelled "Protective".
+                # Mixed signs happened to render correctly, which is why it survived.
                 ggplot2::scale_fill_manual(values = c("TRUE" = "red", "FALSE" = "blue"),
-                                          labels = c(.("Protective"), .("Risk Factor")),
+                                          labels = c("FALSE" = .("Protective"),
+                                                     "TRUE"  = .("Risk Factor")),
+                                          breaks = c("FALSE", "TRUE"),
+                                          limits = c("FALSE", "TRUE"),
+                                          drop = FALSE,
                                           name = .("Effect")) +
                 ggplot2::coord_flip() +
                 ggplot2::labs(
                     title = .("Selected Variables and Coefficients"),
-                    subtitle = if (!is.null(self$options$standardize) && self$options$standardize) .("Coefficients reflect standardized effect sizes.") else NULL,
+                    # This plot draws results$coef_matrix - the PENALIZED coefficients -
+                    # while the Selected Variables table shows the unpenalized refit values
+                    # in a column also headed "Coefficient". Same variable, two different
+                    # numbers on adjacent outputs, so say which one this is.
+                    subtitle = paste(
+                        .("Penalized LASSO coefficients; the Selected Variables table reports the unpenalized refit, which is larger."),
+                        if (!is.null(self$options$standardize) && self$options$standardize)
+                            .("Coefficients reflect standardized effect sizes.") else ""
+                    ),
                     x = .("Variables"),
-                    y = .("Coefficient")
+                    y = .("Penalized coefficient")
                 ) +
                 ggtheme
 
@@ -1213,7 +1253,7 @@ lassocoxClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
 
             }, error = function(e) {
                 # Handle any errors gracefully using grid graphics
-                text_warning <- jmvcore::format(.("Error creating survival plot:\n{msg}\n\nPlease check your data and model parameters."), list(msg = e$message))
+                text_warning <- jmvcore::format(.("Error creating survival plot:\n{msg}\n\nPlease check your data and model parameters."), msg = e$message)
                 
                 grid::grid.newpage()
                 vp <- grid::viewport(width = 0.9, height = 0.9, x = 0.5, y = 0.5)
@@ -1698,19 +1738,19 @@ lassocoxClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             if (epv >= 20) {
                 checks$epv <- list(
                     color = "green", label = .("Events-Per-Variable"),
-                    value = sprintf("%.1f (n_events=%d, p=%d)", epv, n_events, p),
+                    value = sprintf("%.1f (nEvents=%d, p=%d)", epv, n_events, p),
                     detail = .("Excellent EPV ratio. Reliable coefficient estimates expected.")
                 )
             } else if (epv >= 2) {
                 checks$epv <- list(
                     color = "yellow", label = .("Events-Per-Variable"),
-                    value = sprintf("%.1f (n_events=%d, p=%d)", epv, n_events, p),
+                    value = sprintf("%.1f (nEvents=%d, p=%d)", epv, n_events, p),
                     detail = .("Adequate for LASSO (which handles low EPV better than standard Cox), but interpret with caution.")
                 )
             } else {
                 checks$epv <- list(
                     color = "red", label = .("Events-Per-Variable"),
-                    value = sprintf("%.1f (n_events=%d, p=%d)", epv, n_events, p),
+                    value = sprintf("%.1f (nEvents=%d, p=%d)", epv, n_events, p),
                     detail = .("Very low EPV. Results may be unreliable even with LASSO regularization. Consider reducing variables or collecting more data.")
                 )
             }
@@ -1921,7 +1961,7 @@ lassocoxClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                 # drop the survival:: prefix.
                 check_formula <- jmvcore::asFormula(paste0(
                     "Surv(.time, .status) ~ ",
-                    jmvcore::composeTerms(as.list(colnames(data$X)[top_cols]))
+                    paste(jmvcore::composeTerms(as.list(colnames(data$X)[top_cols])), collapse = " + ")
                 ))
                 check_cox <- survival::coxph(check_formula, data = check_df)
                 ph_test <- survival::cox.zph(check_cox)
@@ -1980,9 +2020,9 @@ lassocoxClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
         .generateSuitabilityHtml = function(checks, overall, overall_text) {
             # Color mapping
             bg_colors <- list(
-                green  = "background-color: #d4edda; color: #155724; border: 1px solid #c3e6cb;",
-                yellow = "background-color: #fff3cd; color: #856404; border: 1px solid #ffeeba;",
-                red    = "background-color: #f8d7da; color: #721c24; border: 1px solid #f5c6cb;"
+                green  = "background-color: rgba(33, 162, 64, 0.19); color: inherit; color: inherit; border: 1px solid #c3e6cb;",
+                yellow = "background-color: rgba(255, 202, 33, 0.23); color: inherit; color: inherit; border: 1px solid #ffeeba;",
+                red    = "background-color: rgba(216, 33, 50, 0.18); color: inherit; color: inherit; border: 1px solid #f5c6cb;"
             )
             dot_colors <- list(green = "#28a745", yellow = "#ffc107", red = "#dc3545")
 
@@ -2021,7 +2061,7 @@ lassocoxClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             colors <- sapply(checks, function(x) x$color)
             if (any(colors %in% c("yellow", "red"))) {
                 html <- paste0(html,
-                    "<div style='margin-top: 12px; padding: 10px; background-color: #f8f9fa; border-radius: 4px;'>",
+                    "<div style='margin-top: 12px; padding: 10px; background-color: rgba(138, 155, 172, 0.06); border-radius: 4px; color: inherit;'>",
                     "<strong>", .("Recommendations:"), "</strong><ul style='margin: 6px 0;'>"
                 )
                 if (!is.null(checks$epv) && checks$epv$color == "red") {
@@ -2062,19 +2102,27 @@ lassocoxClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             lasso_cindex <- NA
             lasso_aic <- NA
             lasso_loglik <- NA
+            failures <- character(0)
             tryCatch({
                 # Refit Cox model with only selected variables for AIC/loglik
                 if (length(results$selected_vars) > 0) {
                     selected_X <- as.data.frame(results$data$X[, results$selected_vars, drop = FALSE])
                     y <- survival::Surv(results$data$time, results$data$status)
                     lasso_cox <- survival::coxph(y ~ ., data = selected_X)
-                    lasso_cindex_result <- survival::concordance(lasso_cox, reverse = TRUE)
+                    # No reverse= here. survival::concordance() rejects that argument on a
+                    # coxph object ("reverse argument is not an appropriate fit object")
+                    # because concordance.coxph already applies the Cox sign convention.
+                    # It used to be passed, so this call errored on EVERY dataset; being the
+                    # first statement in the block it also took AIC() and logLik() with it,
+                    # and the empty handler below turned all six cells of this table into a
+                    # permanent NA under a note describing numbers that were never computed.
+                    lasso_cindex_result <- survival::concordance(lasso_cox)
                     lasso_cindex <- lasso_cindex_result$concordance
                     lasso_aic <- AIC(lasso_cox)
                     lasso_loglik <- as.numeric(logLik(lasso_cox))
                 }
             }, error = function(e) {
-                # silently use NA
+                failures <<- c(failures, sprintf("post-LASSO Cox refit: %s", conditionMessage(e)))
             })
 
             table$addRow(rowKey = 1, values = list(
@@ -2093,12 +2141,14 @@ lassocoxClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                 y <- survival::Surv(results$data$time, results$data$status)
                 selected_data <- as.data.frame(results$data$X)
                 std_cox <- survival::coxph(y ~ ., data = selected_data)
-                std_cindex_result <- survival::concordance(std_cox, reverse = TRUE)
+                std_cindex_result <- survival::concordance(std_cox)
                 std_cindex <- std_cindex_result$concordance
                 std_aic <- AIC(std_cox)
                 std_loglik <- as.numeric(logLik(std_cox))
             }, error = function(e) {
-                # Standard Cox may fail with too many variables (p > n)
+                # Standard Cox legitimately fails when p is large relative to n - say so
+                # rather than presenting an empty row as though it were a result.
+                failures <<- c(failures, sprintf("standard Cox on all variables: %s", conditionMessage(e)))
             })
 
             table$addRow(rowKey = 2, values = list(
@@ -2113,6 +2163,16 @@ lassocoxClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                 "comparison_note",
                 .("C-index values in this table are from the corresponding unpenalized Cox models for comparability. Apparent penalized-model C-index is reported in Model Performance.")
             )
+
+            if (length(failures) > 0) {
+                table$setNote(
+                    "failed",
+                    jmvcore::format(
+                        .("Some rows could not be computed ({detail}). Empty cells mean the model could not be fitted, not that it performed poorly."),
+                        detail = paste(failures, collapse = "; ")
+                    )
+                )
+            }
         },
 
         # Natural-language summary for copy-ready clinical reporting
@@ -2121,7 +2181,13 @@ lassocoxClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             n_selected <- length(results$selected_vars)
             n_obs <- results$data$n
             n_events <- results$data$n_events
-            lambda_method <- self$options$lambda
+            # The rule that produced the fitted model, not the one requested.
+            lambda_method <- if (!is.null(results$lambda_rule_used)) results$lambda_rule_used
+                             else self$options$lambda
+            lambda_fallback_note <- if (isTRUE(results$lambda_fallback))
+                .("The 1-SE rule you selected retained no variables, so lambda.min was used instead.")
+            else ""
+
             lambda_val <- results$lambda_optimal
             metrics <- results$performance_metrics
 
@@ -2168,21 +2234,19 @@ lassocoxClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             }
 
             summary_text <- paste0(
-                "<div style='background-color: #f0f7ff; border: 1px solid #b8d4f0; border-radius: 6px; padding: 14px; margin-bottom: 12px;'>",
+                "<div style='background-color: rgba(33, 137, 255, 0.07); border: 1px solid #b8d4f0; border-radius: 6px; padding: 14px; margin-bottom: 12px; color: inherit;'>",
                 "<h4 style='margin-top: 0;'>", .("Results Summary"), "</h4>",
                 "<p>", jmvcore::format(
-                    .("LASSO Cox regression was performed on {n_obs} observations ({n_events} events) with {n_total} candidate predictors using {lambda_method} for lambda selection."),
-                    list(n_obs = n_obs, n_events = n_events, n_total = n_total, lambda_method = lambda_method)
-                ), " ",
+                    .("LASSO Cox regression was performed on {nObs} observations ({nEvents} events) with {nTotal} candidate predictors using {lambdaMethod} for lambda selection."),
+                    nObs = n_obs, nEvents = n_events, nTotal = n_total, lambdaMethod = lambda_method), " ",
                 jmvcore::format(
-                    .("The model selected {n_selected} of {n_total} variables: {var_list}."),
-                    list(n_selected = n_selected, n_total = n_total, var_list = var_list)
-                ), "</p>",
+                    .("The model selected {nSelected} of {nTotal} variables: {varList}."),
+                    nSelected = n_selected, nTotal = n_total, varList = var_list), "</p>",
                 "<p>", jmvcore::format(
                     .("The apparent C-index was {cindex}, indicating {interp}."),
-                    list(cindex = cindex_text, interp = tolower(private$.interpretCindex(metrics$cindex)))
-                ), " ",
-                if (nzchar(hr_text)) hr_text else "", "</p>",
+                    cindex = cindex_text, interp = tolower(private$.interpretCindex(metrics$cindex))), " ",
+                if (nzchar(hr_text)) hr_text else "",
+                if (nzchar(lambda_fallback_note)) paste0(" ", lambda_fallback_note) else "", "</p>",
                 "<p><em>", scale_note, " ",
                 .("All performance metrics are apparent (training) values; external validation is recommended before clinical use."), "</em></p>",
                 "</div>"

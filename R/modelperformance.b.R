@@ -400,7 +400,7 @@ modelperformanceClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6
                 coefs <- summary(model$fit)$coefficients
 
                 html <- paste0(html, "<table style='border-collapse: collapse; width: 100%;'>",
-                             "<tr style='background: #f0f0f0;'>",
+                             "<tr style='background-color: rgba(33, 33, 33, 0.07); color: inherit;'>",
                              "<th style='padding: 5px; border: 1px solid #ddd;'>Variable</th>",
                              "<th style='padding: 5px; border: 1px solid #ddd;'>Coefficient</th>",
                              "<th style='padding: 5px; border: 1px solid #ddd;'>p-value</th></tr>")

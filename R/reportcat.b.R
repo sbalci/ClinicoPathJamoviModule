@@ -45,7 +45,7 @@ reportcatClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
                 # Enhanced input validation with proper error handling
                 if (nrow(self$data) == 0) {
-                    self$results$error$setContent(glue::glue("<div style='padding: 15px; background-color: #f8d7da; border: 1px solid #f5c6cb; border-radius: 4px; color: #721c24;'><strong>{error_label}:</strong> {error_msg}</div>",
+                    self$results$error$setContent(glue::glue("<div style='padding: 15px; background-color: rgba(216, 33, 50, 0.18); border: 1px solid #f5c6cb; border-radius: 4px; color: inherit;'><strong>{error_label}:</strong> {error_msg}</div>",
                         error_label = .("Error"),
                         error_msg = .("Data contains no (complete) rows.")))
                     self$results$error$setVisible(TRUE)
@@ -61,7 +61,7 @@ reportcatClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 
                 # Comprehensive validation of selected variables
                 if (length(myvars) == 0) {
-                    self$results$error$setContent(glue::glue("<div style='padding: 15px; background-color: #f8d7da; border: 1px solid #f5c6cb; border-radius: 4px; color: #721c24;'><strong>{error_label}:</strong> {error_msg}</div>",
+                    self$results$error$setContent(glue::glue("<div style='padding: 15px; background-color: rgba(216, 33, 50, 0.18); border: 1px solid #f5c6cb; border-radius: 4px; color: inherit;'><strong>{error_label}:</strong> {error_msg}</div>",
                         error_label = .("Error"),
                         error_msg = .("No valid variables selected.")))
                     self$results$error$setVisible(TRUE)
@@ -71,7 +71,7 @@ reportcatClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 # Check for variables that don't exist in the data
                 missing_vars <- myvars[!myvars %in% names(mydata)]
                 if (length(missing_vars) > 0) {
-                    self$results$error$setContent(glue::glue("<div style='padding: 15px; background-color: #f8d7da; border: 1px solid #f5c6cb; border-radius: 4px; color: #721c24;'><strong>{error_label}:</strong> {error_msg}: {vars}.</div>",
+                    self$results$error$setContent(glue::glue("<div style='padding: 15px; background-color: rgba(216, 33, 50, 0.18); border: 1px solid #f5c6cb; border-radius: 4px; color: inherit;'><strong>{error_label}:</strong> {error_msg}: {vars}.</div>",
                         error_label = .("Error"),
                         error_msg = .("Variables not found in data"),
                         vars = paste(htmltools::htmlEscape(missing_vars), collapse = ", ")))
@@ -82,7 +82,7 @@ reportcatClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 # Validate that selected variables are actually categorical
                 non_categorical <- myvars[!sapply(mydata[myvars], function(x) is.factor(x) || is.character(x))]
                 if (length(non_categorical) > 0) {
-                    self$results$error$setContent(glue::glue("<div style='padding: 15px; background-color: #f8d7da; border: 1px solid #f5c6cb; border-radius: 4px; color: #721c24;'><strong>{error_label}:</strong> {error_msg}: {vars}. {instruction}</div>",
+                    self$results$error$setContent(glue::glue("<div style='padding: 15px; background-color: rgba(216, 33, 50, 0.18); border: 1px solid #f5c6cb; border-radius: 4px; color: inherit;'><strong>{error_label}:</strong> {error_msg}: {vars}. {instruction}</div>",
                         error_label = .("Error"),
                         error_msg = .("Non-categorical variables detected"),
                         vars = paste(htmltools::htmlEscape(non_categorical), collapse = ", "),
@@ -101,7 +101,7 @@ reportcatClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 })]
                 
                 if (length(empty_vars) > 0) {
-                    warning_msg <- glue::glue("<div style='padding: 15px; background-color: #fff3cd; border: 1px solid #ffeaa7; border-radius: 4px; color: #856404;'><strong>{warning_label}:</strong> {warning_msg}: {vars}. {action}</div>",
+                    warning_msg <- glue::glue("<div style='padding: 15px; background-color: rgba(255, 202, 33, 0.23); border: 1px solid #ffeaa7; border-radius: 4px; color: inherit;'><strong>{warning_label}:</strong> {warning_msg}: {vars}. {action}</div>",
                         warning_label = .("Warning"),
                         warning_msg = .("Variables with no valid levels or all missing values"),
                         vars = paste(htmltools::htmlEscape(empty_vars), collapse = ", "),
@@ -112,7 +112,7 @@ reportcatClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     # Remove empty variables from analysis
                     myvars <- myvars[!myvars %in% empty_vars]
                     if (length(myvars) == 0) {
-                        self$results$error$setContent(glue::glue("<div style='padding: 15px; background-color: #f8d7da; border: 1px solid #f5c6cb; border-radius: 4px; color: #721c24;'><strong>{error_label}:</strong> {error_msg}</div>",
+                        self$results$error$setContent(glue::glue("<div style='padding: 15px; background-color: rgba(216, 33, 50, 0.18); border: 1px solid #f5c6cb; border-radius: 4px; color: inherit;'><strong>{error_label}:</strong> {error_msg}</div>",
                             error_label = .("Error"),
                             error_msg = .("No valid categorical variables remaining after validation.")))
                         return()
@@ -231,7 +231,7 @@ reportcatClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                         html_output <- gt::as_raw_html(gt_table)
                         htmltools::HTML(html_output)
                     } else {
-                        htmltools::HTML(glue::glue("<div style='padding: 15px; background-color: #f8f9fa; border: 1px solid #dee2e6; border-radius: 4px;'><p>{msg}</p></div>",
+                        htmltools::HTML(glue::glue("<div style='padding: 15px; background-color: rgba(138, 155, 172, 0.06); border: 1px solid #dee2e6; border-radius: 4px; color: inherit;'><p>{msg}</p></div>",
                             msg = .("No categorical variables found.")))
                     }
                 }, error = function(e) {
@@ -265,7 +265,7 @@ reportcatClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 misuse_warnings <- private$.detectMisusePatterns(mydata, myvars)
                 if (length(misuse_warnings) > 0) {
                     warning_content <- glue::glue(
-                        "<div style='padding: 15px; background-color: #fff3cd; border: 1px solid #ffeaa7; border-radius: 4px; color: #856404; margin-top: 10px;'>
+                        "<div style='padding: 15px; background-color: rgba(255, 202, 33, 0.23); border: 1px solid #ffeaa7; border-radius: 4px; color: inherit; margin-top: 10px;'>
                         <strong>{title}:</strong><br>{warnings}</div>",
                         title = .("Statistical Guidance"),
                         warnings = paste(misuse_warnings, collapse = "<br>")
@@ -289,7 +289,7 @@ reportcatClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             
             # Create simple HTML table
             html <- "<table style='border-collapse: collapse; margin: 10px 0; width: 100%;'>"
-            html <- paste0(html, "<tr style='background-color: #f8f9fa;'>")
+            html <- paste0(html, "<tr style='background-color: rgba(138, 155, 172, 0.06); color: inherit;'>")
             html <- paste0(html, "<th style='border: 1px solid #ccc; padding: 8px;'>", .("Variable"), "</th>")
             html <- paste0(html, "<th style='border: 1px solid #ccc; padding: 8px;'>", .("Levels"), "</th>")
             html <- paste0(html, "<th style='border: 1px solid #ccc; padding: 8px;'>", .("N"), "</th>")
@@ -331,7 +331,7 @@ reportcatClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             
             # High-level clinical interpretation
             interpretation <- glue::glue(
-                "<div style='padding: 20px; background-color: #e8f5e8; border-left: 4px solid #28a745; margin: 10px 0;'>
+                "<div style='padding: 20px; background-color: rgba(33, 159, 33, 0.1); border-left: 4px solid #28a745; margin: 10px 0; color: inherit;'>
                 <h4 style='color: #155724; margin-top: 0;'>{title}</h4>
                 <p><strong>{summary}:</strong> {desc}</p>
                 <p><strong>{quality}:</strong> {quality_desc}</p>
@@ -397,7 +397,7 @@ reportcatClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             
             if (length(sentences) > 0) {
                 report_content <- glue::glue(
-                    "<div style='padding: 15px; background-color: #f8f9fa; border: 1px solid #dee2e6; border-radius: 4px;'>
+                    "<div style='padding: 15px; background-color: rgba(138, 155, 172, 0.06); border: 1px solid #dee2e6; border-radius: 4px; color: inherit;'>
                     <h5 style='color: #495057; margin-top: 0;'>{title}</h5>
                     <div style='font-family: Georgia, serif; line-height: 1.6;'>
                     {content}
@@ -410,7 +410,7 @@ reportcatClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 )
             } else {
                 report_content <- glue::glue(
-                    "<div style='padding: 15px; background-color: #f8f9fa; border: 1px solid #dee2e6; border-radius: 4px;'>
+                    "<div style='padding: 15px; background-color: rgba(138, 155, 172, 0.06); border: 1px solid #dee2e6; border-radius: 4px; color: inherit;'>
                     <p>{msg}</p>
                     </div>",
                     msg = .("No valid categorical data available for report generation.")
@@ -423,7 +423,7 @@ reportcatClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         # Generate about content explaining the analysis
         .generateAboutContent = function() {
             about_content <- glue::glue(
-                "<div style='padding: 20px; background-color: #e3f2fd; border-left: 4px solid #2196f3; margin: 10px 0;'>
+                "<div style='padding: 20px; background-color: rgba(33, 152, 239, 0.13); border-left: 4px solid #2196f3; margin: 10px 0; color: inherit;'>
                 <h4 style='color: #1565c0; margin-top: 0;'>{title}</h4>
                 
                 <h5 style='color: #1976d2;'>{what_title}</h5>
@@ -470,7 +470,7 @@ reportcatClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         # (static guidance; dynamic checks live in .detectMisusePatterns)
         .generateAssumptionsContent = function() {
             assumptions_content <- glue::glue(
-                "<div style='padding: 20px; background-color: #fff3e0; border-left: 4px solid #ff9800; margin: 10px 0;'>
+                "<div style='padding: 20px; background-color: rgba(255, 169, 33, 0.14); border-left: 4px solid #ff9800; margin: 10px 0; color: inherit;'>
                 <h4 style='color: #e65100; margin-top: 0;'>{title}</h4>
                 
                 <h5 style='color: #f57c00;'>{data_title}</h5>

@@ -16,8 +16,8 @@ splinehazardClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                 <head>
                 <style>
                 h2 { color: #3498db; }
-                .status { background-color: #f8f9fa; padding: 10px; border-left: 4px solid #3498db; }
-                .complete { color: #27ae60; }
+                .status { background-color: rgba(138, 155, 172, 0.06); color: inherit; padding: 10px; border-left: 4px solid #3498db; }
+                .complete { color: inherit; }
                 .pending { color: #e74c3c; }
                 </style>
                 </head>

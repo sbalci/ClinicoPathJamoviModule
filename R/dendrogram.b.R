@@ -102,7 +102,7 @@ dendrogramClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             if (length(vars) == 0) {
                 self$results$welcome$setVisible(TRUE)
                 self$results$welcome$setContent(
-                    "<div class='jmv-welcome' style='margin: 2em; padding: 2em; background: #f8f9fa; border-left: 4px solid #007bff;'>
+                    "<div class='jmv-welcome' style='margin: 2em; padding: 2em; background-color: rgba(138, 155, 172, 0.06); border-left: 4px solid #007bff; color: inherit;'>
                     <h3 style='margin-top: 0; color: #007bff;'>Hierarchical Clustering Dendrogram</h3>
                     <p style='margin-bottom: 1em;'>Select <strong>2 or more numeric variables</strong> to begin clustering analysis.</p>
                     <p style='font-size: 0.9em; color: #6c757d; margin-bottom: 0;'>

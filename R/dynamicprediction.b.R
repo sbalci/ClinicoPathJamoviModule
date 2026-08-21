@@ -278,7 +278,7 @@ dynamicpredictionClass <- R6::R6Class(
                     # composeTerms backtick-escapes user column names; asFormula
                     # validates against jamovi's allow-list (Surv is allow-listed).
                     formula_str <- paste0("Surv(time_adj, event) ~ ",
-                                          jmvcore::composeTerms(as.list(formula_vars)))
+                                          paste(jmvcore::composeTerms(as.list(formula_vars)), collapse = " + "))
                     formula_obj <- jmvcore::asFormula(formula_str,
                                                      additional_allowed_functions = c("Surv"))
 
@@ -349,7 +349,7 @@ dynamicpredictionClass <- R6::R6Class(
                 # allow-list (Surv is allow-listed).
                 formula_vars <- c(self$options$baseline, self$options$longitudinal)
                 formula_str <- paste0("Surv(tstart, tstop, event) ~ ",
-                                      jmvcore::composeTerms(as.list(formula_vars)))
+                                      paste(jmvcore::composeTerms(as.list(formula_vars)), collapse = " + "))
                 formula_obj <- jmvcore::asFormula(formula_str,
                                                  additional_allowed_functions = c("Surv"))
 

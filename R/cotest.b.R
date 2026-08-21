@@ -193,7 +193,7 @@ cotestClass <- if (requireNamespace("jmvcore"))
                 <li>Test 1 positive only: <strong>%.1f%%</strong> %s</li>
                 <li>Test 2 positive only: <strong>%.1f%%</strong> %s</li>
                 </ul>
-                <div style='background-color: #f0f8ff; padding: 10px; border-radius: 5px; margin-top: 15px;'>
+                <div style='background-color: rgba(33, 152, 255, 0.07); padding: 10px; border-radius: 5px; margin-top: 15px; color: inherit;'>
                 <p><strong>Copy-ready summary:</strong></p>
                 <p style='font-family: monospace; font-size: 12px;'>%s</p>
                 </div>",
@@ -899,7 +899,7 @@ cotestClass <- if (requireNamespace("jmvcore"))
                 }
 
                 notices_html <- paste0(
-                    '<div style="background-color: #f8f9fa; border: 1px solid #dee2e6; border-radius: 5px; padding: 15px; margin: 10px 0;">',
+                    '<div style="background-color: rgba(138, 155, 172, 0.06); border: 1px solid #dee2e6; border-radius: 5px; padding: 15px; margin: 10px 0; color: inherit;">',
                     '<h4 style="margin-top: 0;">Validation Notices</h4>',
                     '<ul style="margin-bottom: 0; padding-left: 20px;">',
                     items_html,

@@ -1,4 +1,3 @@
----
 name: rpasurvival
 title: RPA for Survival Staging
 jus: '3.0'
@@ -16,7 +15,6 @@ children:
             name: time
             maxItemCount: 1
             isTarget: true
-
       - type: TargetLayoutBox
         label: Event Status
         children:
@@ -24,7 +22,6 @@ children:
             name: event
             maxItemCount: 1
             isTarget: true
-
       - type: TargetLayoutBox
         label: Predictor Variables
         children:
@@ -32,7 +29,6 @@ children:
             name: predictors
             isTarget: true
             height: large
-
   - type: CollapseBox
     label: Tree Parameters
     collapsed: true
@@ -46,44 +42,37 @@ children:
             children:
               - type: ComboBox
                 name: eventValue
-
           - type: Label
             label: Time Unit
             children:
               - type: ComboBox
                 name: time_unit
-
           - type: Label
             label: Minimum Node Size
             children:
               - type: TextBox
                 name: minbucket
                 format: number
-
           - type: Label
             label: Complexity Parameter
             children:
               - type: TextBox
                 name: cp
                 format: number
-
           - type: Label
             label: Maximum Tree Depth
             children:
               - type: TextBox
                 name: maxdepth
                 format: number
-
           - type: Label
             label: Cross-Validation Folds
             children:
               - type: TextBox
                 name: nfolds
                 format: number
-
           - type: CheckBox
             name: prunetree
-
   - type: CollapseBox
     label: Plot Options
     collapsed: true
@@ -94,22 +83,17 @@ children:
         children:
           - type: CheckBox
             name: treeplot
-
           - type: CheckBox
             name: kmplot
-
           - type: CheckBox
             name: kmci
             enable: (kmplot)
-
           - type: CheckBox
             name: risktable
             enable: (kmplot)
-
           - type: CheckBox
             name: pval
             enable: (kmplot)
-
   - type: CollapseBox
     label: Output Options
     collapsed: true
@@ -120,22 +104,17 @@ children:
         children:
           - type: CheckBox
             name: riskgrouptable
-
           - type: CheckBox
             name: cptable
-
           - type: CheckBox
             name: variableimportance
-
           - type: Label
             label: Risk Group Labels
             children:
               - type: ComboBox
                 name: riskgrouplabels
-
           - type: CheckBox
             name: createnewvar
-
           - type: Label
             label: New Variable Name
             children:
@@ -143,13 +122,14 @@ children:
                 name: newvarname
                 format: string
                 enable: (createnewvar)
-
           - type: CheckBox
             name: showSummary
-
+          - type: LayoutBox
+            margin: large
+            children:
+              - type: Output
+                name: riskgroupvar
           - type: CheckBox
             name: showInterpretation
-
           - type: CheckBox
             name: showReport
-...

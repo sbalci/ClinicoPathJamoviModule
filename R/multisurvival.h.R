@@ -1612,6 +1612,7 @@ multisurvivalResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                 options=options,
                 name="addRiskGroup",
                 title="Add Calculated Risk Group to Data",
+                measureType="nominal",
                 varTitle="`Calculated Risk Group in Multivariable Survival Function`",
                 varDescription="Calculated Risk Group Based on Model",
                 clearWith=list(
@@ -2301,7 +2302,6 @@ multisurvivalResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                 clearWith=list(
                     "ac",
                     "hr",
-                    "outcome",
                     "outcome")))}))
 
 multisurvivalBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(

@@ -2010,11 +2010,11 @@ decisioncompareClass <- if (requireNamespace("jmvcore")) {
                     '<h2 style="color: #2c3e50; border-bottom: 2px solid #3498db;"> Clinical Summary</h2>',
                     results_section,
                     '<h3 style="color: #27ae60; margin-top: 30px;"> Report Sentences</h3>',
-                    '<div style="background-color: #f8f9fa; padding: 15px; border-left: 4px solid #28a745; margin: 15px 0;">',
+                    '<div style="background-color: rgba(138, 155, 172, 0.06); padding: 15px; border-left: 4px solid #28a745; margin: 15px 0; color: inherit;">',
                     '<h4 style="margin-top: 0;">Methods Section:</h4>',
                     '<p style="font-style: italic; line-height: 1.6;">', methods_section, "</p>",
                     "</div>",
-                    '<div style="background-color: #e8f4f8; padding: 15px; border-left: 4px solid #3498db; margin: 15px 0;">',
+                    '<div style="background-color: rgba(33, 149, 188, 0.1); padding: 15px; border-left: 4px solid #3498db; margin: 15px 0; color: inherit;">',
                     '<h4 style="margin-top: 0;">Results Section:</h4>',
                     '<p style="font-style: italic; line-height: 1.6;">', results_section, "</p>",
                     "</div>",
@@ -2151,7 +2151,7 @@ decisioncompareClass <- if (requireNamespace("jmvcore")) {
                 spec_pct <- best_metrics$Spec * 100
                 best_test_safe <- private$.safeHtmlOutput(best_test)
 
-                recommendations <- '<div style="background-color: #fff3cd; padding: 15px; border-radius: 8px;">'
+                recommendations <- '<div style="background-color: rgba(255, 202, 33, 0.23); padding: 15px; border-radius: 8px; color: inherit;">'
 
                 if (sens_pct >= 95 && spec_pct >= 95) {
                     recommendations <- paste0(
@@ -2182,7 +2182,7 @@ decisioncompareClass <- if (requireNamespace("jmvcore")) {
                     isFALSE(private$.any_significant_comparison)) {
                     recommendations <- paste0(
                         recommendations,
-                        '<p style="background-color: #f8d7da; padding: 10px; border-radius: 4px;">',
+                        '<p style="background-color: rgba(216, 33, 50, 0.18); padding: 10px; border-radius: 4px; color: inherit;">',
                         "<strong>Caution:</strong> No statistically significant difference was found between the tests compared. ",
                         best_test_safe, " is named here only because it ranked highest in this sample; the data do not establish ",
                         "that it outperforms the others. Base any choice between these tests on cost, availability, turnaround ",
@@ -2217,7 +2217,7 @@ decisioncompareClass <- if (requireNamespace("jmvcore")) {
                     "</div>",
 
                     # When to Use
-                    '<div style="background-color: #f1f8e9; border: 1px solid #8bc34a; padding: 20px; border-radius: 8px; margin: 20px 0;">',
+                    '<div style="background-color: rgba(114, 184, 33, 0.1); border: 1px solid #8bc34a; padding: 20px; border-radius: 8px; margin: 20px 0; color: inherit;">',
                     '<h3 style="color: #4a7c59; margin-top: 0;"> When to Use This Analysis</h3>',
                     '<ul style="line-height: 1.8; color: #4a7c59;">',
                     "<li><strong>Test Validation:</strong> Comparing new diagnostic methods against established standards</li>",
@@ -2229,7 +2229,7 @@ decisioncompareClass <- if (requireNamespace("jmvcore")) {
                     "</div>",
 
                     # How to Use
-                    '<div style="background-color: #fff3e0; border: 1px solid #ff9800; padding: 20px; border-radius: 8px; margin: 20px 0;">',
+                    '<div style="background-color: rgba(255, 169, 33, 0.14); border: 1px solid #ff9800; padding: 20px; border-radius: 8px; margin: 20px 0; color: inherit;">',
                     '<h3 style="color: #e65100; margin-top: 0;"> How to Use This Analysis</h3>',
                     '<ol style="line-height: 1.8; color: #e65100;">',
                     "<li><strong>Select Gold Standard:</strong> Choose your most reliable reference test (e.g., biopsy, expert consensus)</li>",
@@ -2242,7 +2242,7 @@ decisioncompareClass <- if (requireNamespace("jmvcore")) {
                     "</div>",
 
                     # Key Metrics Explained
-                    '<div style="background-color: #f3e5f5; border: 1px solid #9c27b0; padding: 20px; border-radius: 8px; margin: 20px 0;">',
+                    '<div style="background-color: rgba(153, 33, 170, 0.12); border: 1px solid #9c27b0; padding: 20px; border-radius: 8px; margin: 20px 0; color: inherit;">',
                     '<h3 style="color: #6a1b9a; margin-top: 0;"> Key Metrics Explained</h3>',
                     '<div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; color: #6a1b9a;">',
                     "<div>",
@@ -2261,7 +2261,7 @@ decisioncompareClass <- if (requireNamespace("jmvcore")) {
                     "</div>",
 
                     # Clinical Guidelines
-                    '<div style="background-color: #e8f5e8; border: 1px solid #4caf50; padding: 20px; border-radius: 8px; margin: 20px 0;">',
+                    '<div style="background-color: rgba(33, 159, 33, 0.1); border: 1px solid #4caf50; padding: 20px; border-radius: 8px; margin: 20px 0; color: inherit;">',
                     '<h3 style="color: #2e7d32; margin-top: 0;"> Clinical Interpretation Guidelines</h3>',
                     '<div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; color: #2e7d32;">',
                     "<div>",
@@ -2276,7 +2276,7 @@ decisioncompareClass <- if (requireNamespace("jmvcore")) {
                     "</div>",
 
                     # Assumptions and Limitations
-                    '<div style="background-color: #fff8e1; border: 1px solid #ffc107; padding: 20px; border-radius: 8px; margin: 20px 0;">',
+                    '<div style="background-color: rgba(255, 203, 33, 0.14); border: 1px solid #ffc107; padding: 20px; border-radius: 8px; margin: 20px 0; color: inherit;">',
                     '<h3 style="color: #f57f17; margin-top: 0;"> Important Assumptions & Limitations</h3>',
                     '<ul style="line-height: 1.6; color: #f57f17;">',
                     "<li><strong>Gold Standard:</strong> Assumes your reference test is truly accurate</li>",
@@ -2302,8 +2302,16 @@ decisioncompareClass <- if (requireNamespace("jmvcore")) {
             .plot1 = function(image1, ggtheme, ...) {
                 plotData <- image1$state
 
+                if (is.null(plotData))
+                    return(FALSE)
+
                 # Optimized data frame building - pre-allocate and batch create
                 df <- private$.buildBarPlotData(plotData)
+
+                # .buildBarPlotData() returns a COLUMN-LESS data.frame() when the state
+                # is empty, and aes() below cannot resolve its variables against that.
+                if (nrow(df) == 0)
+                    return(FALSE)
 
                 # Create plot
                 plot <- ggplot2::ggplot(df, ggplot2::aes(x = metric, y = value, fill = test)) +
@@ -2325,8 +2333,17 @@ decisioncompareClass <- if (requireNamespace("jmvcore")) {
             .plotRadar = function(imageRadar, ggtheme, ...) {
                 plotData <- imageRadar$state
 
+                if (is.null(plotData))
+                    return(FALSE)
+
                 # Optimized radar plot data building with clinical thresholds
                 df <- private$.buildRadarPlotData(plotData)
+
+                # .buildRadarPlotData() returns a COLUMN-LESS data.frame() when the
+                # state is empty, so aes(x = metric, ...) below could not resolve its
+                # variables. A NULL state and an empty state are different things.
+                if (nrow(df) == 0)
+                    return(FALSE)
 
                 # Ensure factor ordering for consistent radar plot
                 df$metric <- factor(df$metric,
@@ -2483,7 +2500,7 @@ decisioncompareClass <- if (requireNamespace("jmvcore")) {
                 n_tests <- length(test_results)
                 test_names <- names(test_results)
 
-                html <- "<div style='background-color:#f9f9f9; border-left:4px solid #2196F3; padding:15px; margin:10px 0;'>"
+                html <- "<div style='background-color: rgba(155, 155, 155, 0.06); border-left:4px solid #2196F3; padding:15px; margin:10px 0; color: inherit;'>"
                 html <- paste0(html, "<h4 style='margin-top:0;'> Summary</h4>")
 
                 if (n_tests == 3) {
@@ -2581,14 +2598,14 @@ decisioncompareClass <- if (requireNamespace("jmvcore")) {
                 n_tests <- length(test_results)
                 test_names <- names(test_results)
 
-                html <- "<div style='background-color:#f0f0f0; padding:15px; border:1px solid #ccc; margin:10px 0;'>"
+                html <- "<div style='background-color: rgba(33, 33, 33, 0.07); padding:15px; border:1px solid #ccc; margin:10px 0; color: inherit;'>"
                 html <- paste0(html, "<h4 style='margin-top:0;'> Manuscript-Ready Report</h4>")
                 html <- paste0(
                     html, "<p style='font-size:10pt; color:#666; margin-bottom:10px;'>",
                     "Copy and adapt to your manuscript. Verify all statistical values and add clinical context.</p>"
                 )
 
-                html <- paste0(html, "<div style='background-color:#fff; padding:12px; font-family:serif; font-size:11pt; line-height:1.8;'>")
+                html <- paste0(html, "<div style='background-color: rgba(255, 255, 255, 0.06); padding:12px; font-family:serif; font-size:11pt; line-height:1.8; color: inherit;'>")
 
                 if (n_tests == 3) {
                     # Match the Cochran row by its KEY ("cochran_q_global"), not the cell value.

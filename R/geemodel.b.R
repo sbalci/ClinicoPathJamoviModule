@@ -56,7 +56,7 @@ geemodelClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                     .instructions { font-family: sans-serif; padding: 20px; }
                     .instructions h3 { color: #2c3e50; }
                     .instructions ul { line-height: 1.6; }
-                    .instructions code { background: #f4f4f4; padding: 2px 6px; border-radius: 3px; }
+                    .instructions code { background: rgba(72, 72, 72, 0.06); color: inherit; padding: 2px 6px; border-radius: 3px; }
                     </style>
                     </head>
                     <body>
@@ -744,8 +744,8 @@ geemodelClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             html <- paste0("<html>
             <head>
             <style>
-            .interpretation { font-family: sans-serif; padding: 15px; background: #f8f9fa; }
-            .interpretation h4 { color: #2c3e50; }
+            .interpretation { font-family: sans-serif; padding: 15px; background: rgba(138, 155, 172, 0.06); color: inherit; }
+            .interpretation h4 { color: inherit; }
             .interpretation p { line-height: 1.6; }
             .interpretation .important { color: #e74c3c; font-weight: bold; }
             </style>

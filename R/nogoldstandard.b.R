@@ -187,7 +187,7 @@ nogoldstandardClass <- if (requireNamespace("jmvcore")) {
                     # Show welcome/instruction message
                     instructions <- paste0(
                         "<html><head></head><body>",
-                        "<div class='instructions' style='background-color: #f8f9fa; padding: 20px; border-radius: 8px; margin: 20px 0;'>",
+                        "<div class='instructions' style='background-color: rgba(138, 155, 172, 0.06); padding: 20px; border-radius: 8px; margin: 20px 0; color: inherit;'>",
                         "<h3 style='color: #2e7d32; margin-top: 0;'> ", .("Analysis Without Gold Standard"), "</h3>",
                         "<p><strong>", .("Analyze diagnostic test performance when no perfect reference test (gold standard) is available."), "</strong></p>",
                         "<p>", .("This analysis uses advanced statistical methods to estimate test sensitivity, specificity, and disease prevalence from imperfect test results."), "</p>",
@@ -211,7 +211,7 @@ nogoldstandardClass <- if (requireNamespace("jmvcore")) {
                         # Add preset guidance if available
                         if (!is.null(private$.preset_info)) {
                             paste0(
-                                "<div style='background: #e8f5e8; padding: 15px; border-radius: 8px; margin: 15px 0; border-left: 4px solid #4caf50;'>",
+                                "<div style='background-color: rgba(33, 159, 33, 0.1); padding: 15px; border-radius: 8px; margin: 15px 0; border-left: 4px solid #4caf50; color: inherit;'>",
                                 "<h4 style='color: #2e7d32; margin-top: 0;'> ", .("Active Clinical Preset"), "</h4>",
                                 "<p><strong>", .("Scenario"), ":</strong> ", self$options$clinicalPreset, "</p>",
                                 "<p><strong>", .("Description"), ":</strong> ", private$.preset_info$description, "</p>",
@@ -1751,39 +1751,39 @@ nogoldstandardClass <- if (requireNamespace("jmvcore")) {
             .showMethodGuide = function() {
                 # Create comprehensive method selection guide in HTML
                 guide_html <- paste0(
-                    "<div style='background: #f8f9fa; padding: 20px; border-radius: 8px; margin: 15px 0; border-left: 4px solid #007bff;'>",
+                    "<div style='background-color: rgba(138, 155, 172, 0.06); padding: 20px; border-radius: 8px; margin: 15px 0; border-left: 4px solid #007bff; color: inherit;'>",
                     "<h3 style='color: #007bff; margin-top: 0;'> ", .("Method Selection Guide"), "</h3>",
-                    "<div style='margin: 15px 0; padding: 15px; background: #e8f5e8; border-radius: 5px;'>",
+                    "<div style='margin: 15px 0; padding: 15px; background-color: rgba(33, 159, 33, 0.1); border-radius: 5px; color: inherit;'>",
                     "<h4 style='color: #2e7d32; margin-top: 0;'> ", .("Latent Class Analysis (Recommended)"), "</h4>",
                     "<p><strong>", .("Description"), ":</strong> ", .("Most robust method using mixture models. Estimates disease prevalence and test parameters simultaneously."), "</p>",
                     "<p><strong>", .("Best for"), ":</strong> ", .("Diagnostic validation studies with 3+ tests and N>=100"), "</p>",
                     "<p><strong>", .("Strengths"), ":</strong> ", .("The only method here that estimates accuracy rather than agreement with a self-built reference; provides model fit statistics. Assumes the tests are conditionally independent given true status -- it does NOT model conditional dependence"), "</p>",
                     "</div>",
-                    "<div style='margin: 15px 0; padding: 15px; background: #e3f2fd; border-radius: 5px;'>",
+                    "<div style='margin: 15px 0; padding: 15px; background-color: rgba(33, 152, 239, 0.13); border-radius: 5px; color: inherit;'>",
                     "<h4 style='color: #1565c0; margin-top: 0;'> ", .("Bayesian Analysis"), "</h4>",
                     "<p><strong>", .("Description"), ":</strong> ", .("Incorporates prior knowledge about test performance using Bayesian methods."), "</p>",
                     "<p><strong>", .("Best for"), ":</strong> ", .("Studies where you have prior information about expected sensitivity/specificity"), "</p>",
                     "<p><strong>", .("Strengths"), ":</strong> ", .("Uses prior knowledge, handles uncertainty well, good for smaller samples"), "</p>",
                     "</div>",
-                    "<div style='margin: 15px 0; padding: 15px; background: #fff3e0; border-radius: 5px;'>",
+                    "<div style='margin: 15px 0; padding: 15px; background-color: rgba(255, 169, 33, 0.14); border-radius: 5px; color: inherit;'>",
                     "<h4 style='color: #ef6c00; margin-top: 0;'> ", .("Composite Reference"), "</h4>",
                     "<p><strong>", .("Description"), ":</strong> ", .("Uses majority vote of available tests as pseudo-gold standard."), "</p>",
                     "<p><strong>", .("Best for"), ":</strong> ", .("Inter-rater agreement studies with 3+ tests, exploratory analysis"), "</p>",
                     "<p><strong>", .("Strengths"), ":</strong> ", .("Simple and intuitive. Not an accuracy estimate: each test helps build the standard it is judged against, which inflates its apparent performance. Needs 3+ tests -- with 2 a tie counts as diseased, making it identical to Any Test Positive"), "</p>",
                     "</div>",
-                    "<div style='margin: 15px 0; padding: 15px; background: #fce4ec; border-radius: 5px;'>",
+                    "<div style='margin: 15px 0; padding: 15px; background-color: rgba(230, 33, 99, 0.12); border-radius: 5px; color: inherit;'>",
                     "<h4 style='color: #c2185b; margin-top: 0;'> ", .("All Tests Positive"), "</h4>",
                     "<p><strong>", .("Description"), ":</strong> ", .("Conservative approach - disease present only if ALL tests are positive."), "</p>",
                     "<p><strong>", .("Best for"), ":</strong> ", .("Highly specific diagnoses where false positives are very costly"), "</p>",
                     "<p><strong>", .("Strengths"), ":</strong> ", .("A deliberately strict reference. Sensitivity and NPV cannot be estimated under this rule -- they are fixed at 100% by construction -- so only specificity and PPV are shown, and both are inflated by the same circularity"), "</p>",
                     "</div>",
-                    "<div style='margin: 15px 0; padding: 15px; background: #e8f5e8; border-radius: 5px;'>",
+                    "<div style='margin: 15px 0; padding: 15px; background-color: rgba(33, 159, 33, 0.1); border-radius: 5px; color: inherit;'>",
                     "<h4 style='color: #388e3c; margin-top: 0;'> ", .("Any Test Positive"), "</h4>",
                     "<p><strong>", .("Description"), ":</strong> ", .("Liberal approach - disease present if ANY test is positive."), "</p>",
                     "<p><strong>", .("Best for"), ":</strong> ", .("Population screening scenarios where missing cases is costly"), "</p>",
                     "<p><strong>", .("Strengths"), ":</strong> ", .("A deliberately permissive reference. Specificity and PPV cannot be estimated under this rule -- they are fixed at 100% by construction -- so only sensitivity and NPV are shown, and both are inflated by the same circularity"), "</p>",
                     "</div>",
-                    "<div style='margin: 15px 0; padding: 10px; background: #fff8e1; border-radius: 5px; border-left: 3px solid #ffb300;'>",
+                    "<div style='margin: 15px 0; padding: 10px; background-color: rgba(255, 203, 33, 0.14); border-radius: 5px; border-left: 3px solid #ffb300; color: inherit;'>",
                     "<h4 style='color: #e65100; margin-top: 0;'> ", .("Selection Tips"), "</h4>",
                     "<ul>",
                     "<li>", .("Start with Latent Class Analysis for most diagnostic studies"), "</li>",
@@ -1919,7 +1919,7 @@ nogoldstandardClass <- if (requireNamespace("jmvcore")) {
                 sens_max <- sprintf("%.1f%%", max(results$sensitivities) * 100)
 
                 summary_html <- paste0(
-                    "<div class='clinical-summary' style='background: #f0f8ff; padding: 15px; border-radius: 8px; margin: 10px 0;'>",
+                    "<div class='clinical-summary' style='background-color: rgba(33, 152, 255, 0.07); padding: 15px; border-radius: 8px; margin: 10px 0; color: inherit;'>",
                     "<h4 style='color: #1565c0; margin-top: 0;'> ", .("Clinical Summary"), "</h4>",
                     "<p><strong>", .("Analysis:"), "</strong> ", sprintf(.("No gold standard analysis using %s method"), method), "</p>",
                     "<p><strong>", .("Tests analyzed:"), "</strong> ", paste(htmltools::htmlEscape(unlist(tests)), collapse = ", "), " (N=", n_tests, ")</p>",

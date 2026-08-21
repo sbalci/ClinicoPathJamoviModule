@@ -23,7 +23,7 @@ imagingcorrelationClass <- R6::R6Class(
                         .step {
                             margin: 8px 0;
                             padding: 5px;
-                            background-color: #f8f9fa;
+                            background-color: rgba(138, 155, 172, 0.06); color: inherit;
                             border-left: 3px solid #3498db;
                         }
                     </style>
@@ -539,9 +539,9 @@ imagingcorrelationClass <- R6::R6Class(
             
             summary_html <- "<html><head><style>
                 .summary-title { color: #2c3e50; font-size: 18px; font-weight: bold; margin-bottom: 15px; }
-                .summary-section { margin: 10px 0; padding: 8px; background-color: #f8f9fa; border-radius: 4px; }
+                .summary-section { margin: 10px 0; padding: 8px; background-color: rgba(138, 155, 172, 0.06); color: inherit; border-radius: 4px; }
                 .highlight { color: #e74c3c; font-weight: bold; }
-                .concordant { color: #27ae60; }
+                .concordant { color: inherit; }
                 .discordant { color: #f39c12; }
             </style></head><body>"
             
@@ -602,9 +602,9 @@ imagingcorrelationClass <- R6::R6Class(
             
             recommendations_html <- "<html><head><style>
                 .rec-title { color: #2c3e50; font-size: 18px; font-weight: bold; margin-bottom: 15px; }
-                .rec-section { margin: 10px 0; padding: 8px; background-color: #e8f5e8; border-left: 4px solid #27ae60; }
-                .urgent { background-color: #fdf2f2; border-left: 4px solid #e74c3c; }
-                .monitoring { background-color: #fef9e7; border-left: 4px solid #f39c12; }
+                .rec-section { margin: 10px 0; padding: 8px; background-color: rgba(33, 159, 33, 0.1); color: inherit; border-left: 4px solid #27ae60; }
+                .urgent { background-color: rgba(222, 38, 38, 0.06); color: inherit; border-left: 4px solid #e74c3c; }
+                .monitoring { background-color: rgba(246, 200, 33, 0.11); color: inherit; border-left: 4px solid #f39c12; }
             </style></head><body>"
             
             recommendations_html <- paste0(recommendations_html, 
@@ -645,8 +645,8 @@ imagingcorrelationClass <- R6::R6Class(
             
             confidence_html <- "<html><head><style>
                 .conf-title { color: #2c3e50; font-size: 18px; font-weight: bold; margin-bottom: 15px; }
-                .conf-section { margin: 10px 0; padding: 8px; background-color: #f0f8ff; border-radius: 4px; }
-                .high-conf { color: #27ae60; font-weight: bold; }
+                .conf-section { margin: 10px 0; padding: 8px; background-color: rgba(33, 152, 255, 0.07); color: inherit; border-radius: 4px; }
+                .high-conf { color: inherit; font-weight: bold; }
                 .mod-conf { color: #f39c12; font-weight: bold; }
                 .low-conf { color: #e74c3c; font-weight: bold; }
             </style></head><body>"

@@ -27,13 +27,13 @@ patientfollowupintroClass <- if (requireNamespace("jmvcore", quietly = TRUE)) R6
             .pfg th { padding: 8px; text-align: left; border-bottom: 2px solid #333; vertical-align: top; }
             .pfg td { padding: 8px; border-bottom: 1px solid #ccc; vertical-align: top; }
             .pfg td.name { width: 22%; font-weight: 600; }
-            .pfg pre { background: #f6f8fa; border: 1px solid #d0d7de; padding: 10px;
+            .pfg pre { background: rgba(105, 138, 172, 0.06); color: inherit; border: 1px solid #d0d7de; padding: 10px;
                        border-radius: 4px; overflow-x: auto; font-size: 12px; }
-            .pfg .callout { background: #f8f4e8; border-left: 4px solid #c9a825;
+            .pfg .callout { background: rgba(188, 149, 33, 0.1); color: inherit; border-left: 4px solid #c9a825;
                             padding: 12px 16px; margin: 16px 0; }
-            .pfg .warn { background: #fff4f2; border-left: 4px solid #d1493f;
+            .pfg .warn { background: rgba(255, 72, 38, 0.06); color: inherit; border-left: 4px solid #d1493f;
                          padding: 12px 16px; margin: 16px 0; }
-            .pfg .ok { background: #f1f8f2; border-left: 4px solid #2e7d32;
+            .pfg .ok { background: rgba(33, 144, 49, 0.06); color: inherit; border-left: 4px solid #2e7d32;
                        padding: 12px 16px; margin: 16px 0; }
             </style>'
         },

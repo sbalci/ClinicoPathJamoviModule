@@ -1,245 +1,217 @@
-# Test file for critical mathematical fixes in decisioncurve
-# Tests validate fixes for:
-# 1. Probability validation (no auto-scaling)
-# 2. Treat-all baseline on same cohort
-# 3. Clinical decision rule warnings
-# 4. Net benefit calculation accuracy
+# Regression tests for the release-blocking defects fixed in decisioncurve.
+#
+# Every test here calls decisioncurve() and asserts against what the analysis
+# actually returned. The previous version of this file re-implemented each
+# formula inside the test body and compared the copy against itself, which is
+# why a degenerate "optimal threshold" table and a p-value that could be exactly
+# zero both survived to release review with the suite green.
 
-test_that("decisioncurve rejects non-probability inputs", {
-  skip_if_not_installed('jmvReadWrite')
-    skip_if_not_installed("ClinicoPath")
-
-    # Create test data with logit-scale predictions (NOT probabilities)
-    test_data <- data.frame(
-        outcome = factor(c(rep("Event", 50), rep("No Event", 50))),
-        logit_score = c(rnorm(50, mean = 2, sd = 1), rnorm(50, mean = -2, sd = 1))  # Logits outside [0,1]
+testdata_dca <- function(n = 400, seed = 20260820) {
+    set.seed(seed)
+    x <- stats::rnorm(n)
+    lp <- -0.6 + 1.4 * x
+    p <- stats::plogis(lp)
+    y <- stats::rbinom(n, 1, p)
+    data.frame(
+        outcome    = factor(ifelse(y == 1, "Event", "No Event"), levels = c("No Event", "Event")),
+        good_model = p,
+        # A predictor carrying no information about the outcome. It must never be
+        # reported as beating both reference strategies.
+        noise      = stats::runif(n),
+        stringsAsFactors = FALSE
     )
+}
 
-    # The FIXED code should REJECT this and provide helpful error
-    # (Cannot test full jamovi module here, but we can test the validation logic)
-
-    # Simulate the validation check
-    predictions <- test_data$logit_score
-    pred_min <- min(predictions)
-    pred_max <- max(predictions)
-
-    expect_true(pred_min < 0 || pred_max > 1)  # Confirms this IS outside range
-
-    # The error should be thrown when predictions are outside [0,1]
-    # (In actual module this would stop execution with informative message)
-})
-
-
-test_that("Net benefit calculation is mathematically correct", {
-    skip_if_not_installed("ClinicoPath")
-
-    # Known example from Vickers & Elkin (2006) Decision Curve Analysis
-    # Simplified test case with known net benefit values
-
-    # Create test data: 100 patients, 40% prevalence
-    set.seed(42)
-    n <- 100
-    prevalence <- 0.4
-    outcome <- c(rep(1, 40), rep(0, 60))  # 40 positive, 60 negative
-
-    # Perfect predictor (probabilities match true outcome)
-    perfect_pred <- outcome
-
-    # Calculate net benefit at threshold = 0.20
-    threshold <- 0.20
-
-    # At threshold 0.20, perfect predictor treats all patients >= 0.20
-    # For perfect predictor: all 40 positives get probability 1.0, all negatives get 0
-    predicted_positive <- perfect_pred >= threshold
-    tp <- sum(predicted_positive & outcome == 1)
-    fp <- sum(predicted_positive & outcome == 0)
-
-    # Net Benefit = (TP/n) - (FP/n) × [threshold/(1-threshold)]
-    expected_nb <- (tp / n) - (fp / n) * (threshold / (1 - threshold))
-
-    # For perfect predictor: TP = 40, FP = 0 (all positives correctly identified, no false positives)
-    expect_equal(tp, 40)
-    expect_equal(fp, 0)
-    expect_equal(expected_nb, 0.4)  # Net benefit = prevalence when perfect
-
-    # Treat All strategy net benefit at threshold = 0.20
-    # Treat All: sensitivity = 1, specificity = 0
-    # NB_all = prevalence - (1-prevalence) × [threshold/(1-threshold)]
-    nb_treat_all <- prevalence - (1 - prevalence) * (threshold / (1 - threshold))
-    expect_equal(round(nb_treat_all, 4), round(0.4 - 0.6 * (0.20/0.80), 4))
-    expect_equal(round(nb_treat_all, 4), 0.25)  # 0.4 - 0.15 = 0.25
-
-    # Treat None strategy: always 0
-    nb_treat_none <- 0
-    expect_equal(nb_treat_none, 0)
-
-    # Perfect model should be better than or equal to treat all
-    expect_true(expected_nb >= nb_treat_all)
-})
-
-
-test_that("Treat-all baseline uses same cohort as models", {
-    skip_if_not_installed("ClinicoPath")
-
-    # Create test data with missing values in predictor (but not outcome)
-    test_data <- data.frame(
-        outcome = factor(c(rep("Event", 60), rep("No Event", 40))),
-        model1 = c(runif(60, 0.6, 0.9), runif(30, 0.1, 0.4), rep(NA, 10))  # 10 missing values
+run_dca <- function(df, ...) {
+    ClinicoPath::decisioncurve(
+        data                 = df,
+        outcome              = "outcome",
+        outcomePositive      = "Event",
+        models               = c("good_model", "noise"),
+        decisionRulePositive = NULL,
+        ...
     )
+}
 
-    # After filtering to complete cases:
-    # - Model analysis uses 90 patients (60 events, 30 non-events) → prevalence = 60/90 = 66.7%
-    # - OLD BUGGY CODE used full dataset for treat-all → prevalence = 60/100 = 60%
-    # - FIXED CODE uses same 90 patients → prevalence = 66.7%
 
-    complete_cases <- complete.cases(test_data)
-    analysis_cohort <- test_data[complete_cases, ]
+test_that("the degenerate optimal-threshold output is gone", {
+    skip_if_not_installed("ClinicoPath")
 
-    # Prevalence in analysis cohort
-    outcomes_analysis <- analysis_cohort$outcome
-    prev_analysis <- mean(outcomes_analysis == "Event")
-    expect_equal(prev_analysis, 60/90)  # 0.6667
-
-    # Prevalence in FULL dataset (buggy baseline)
-    outcomes_full <- test_data$outcome
-    prev_full <- mean(outcomes_full == "Event")
-    expect_equal(prev_full, 60/100)  # 0.60
-
-    # These should be DIFFERENT - confirming the bug would occur
-    expect_false(prev_analysis == prev_full)
-
-    # Treat-all net benefit at threshold 0.20
-    threshold <- 0.20
-
-    # CORRECT: Use analysis cohort
-    nb_treat_all_correct <- prev_analysis - (1 - prev_analysis) * (threshold / (1 - threshold))
-
-    # BUGGY: Use full dataset
-    nb_treat_all_buggy <- prev_full - (1 - prev_full) * (threshold / (1 - threshold))
-
-    # These net benefits should differ
-    expect_false(abs(nb_treat_all_correct - nb_treat_all_buggy) < 0.001)
-
-    # The FIXED code should use the analysis cohort value
-    # (This test documents the fix - actual module test would verify this)
+    # Net benefit is (TP/n) - (FP/n) * t/(1-t) at threshold t. The subtracted term
+    # increases in t while the treated set shrinks, so the curve is non-increasing
+    # and its argmax is always the lowest threshold on the grid. Reporting that as
+    # an "optimal threshold" is uninformative, and ranking models by their net
+    # benefit at that single point can invert the true ordering.
+    res <- run_dca(testdata_dca())
+    expect_true("benefitRangeTable" %in% names(res))
+    expect_false("optimalTable" %in% names(res))
 })
 
 
-test_that("Bootstrap CI calculation handles edge cases", {
+test_that("range of benefit is measured against treat-all, not only treat-none", {
     skip_if_not_installed("ClinicoPath")
 
-    # Test bootstrap with small sample
-    set.seed(123)
-    n <- 30
-    outcome <- c(rep(1, 15), rep(0, 15))
-    predictions <- c(runif(15, 0.6, 0.9), runif(15, 0.1, 0.4))
-    threshold <- 0.20
+    res <- run_dca(testdata_dca(), showBenefitRange = TRUE)
+    tab <- as.data.frame(res$benefitRangeTable)
 
-    # Simulate ONE bootstrap sample
-    boot_idx <- sample(n, n, replace = TRUE)
-    boot_pred <- predictions[boot_idx]
-    boot_out <- outcome[boot_idx]
+    expect_equal(nrow(tab), 2L)
 
-    # Check for outcome variation
-    has_variation <- length(unique(boot_out)) >= 2
-    expect_true(has_variation)  # Most samples should have variation
+    noise_row <- tab[tab$model == "noise", ]
+    good_row  <- tab[tab$model == "good_model", ]
 
-    # Calculate net benefit for bootstrap sample
-    predicted_positive <- boot_pred >= threshold
-    tp <- sum(predicted_positive & boot_out == 1)
-    fp <- sum(predicted_positive & boot_out == 0)
-    nb <- (tp / n) - (fp / n) * (threshold / (1 - threshold))
+    # A pure-noise predictor beats treat-none across most low thresholds, which is
+    # why the old "net_benefits > 0" range flattered it. Against treat-all as well,
+    # it must have no range of benefit at all.
+    expect_true(is.na(noise_row$range_start))
 
-    # Net benefit should be numeric and finite
-    expect_true(is.numeric(nb))
-    expect_true(is.finite(nb))
+    # An informative model must have one.
+    expect_false(is.na(good_row$range_start))
+    expect_gte(good_row$range_end, good_row$range_start)
+    expect_equal(good_row$range_width, good_row$range_end - good_row$range_start,
+                 tolerance = 1e-8)
 })
 
 
-test_that("Optimal threshold identification is correct", {
+test_that("bootstrap comparison p-values are never exactly zero and are Holm-adjusted", {
     skip_if_not_installed("ClinicoPath")
 
-    # Create net benefit curve with known maximum
-    thresholds <- seq(0.01, 0.99, by = 0.01)
+    res <- run_dca(testdata_dca(), compareModels = TRUE, bootReps = 200)
+    tab <- as.data.frame(res$comparisonTable)
 
-    # Artificial net benefit curve: peaks at threshold = 0.25
-    net_benefits <- ifelse(thresholds <= 0.25,
-                           thresholds * 4,           # Increasing up to 0.25
-                           1 - (thresholds - 0.25) * 2)  # Decreasing after 0.25
+    expect_true(nrow(tab) >= 1L)
+    expect_true("p_value_adj" %in% names(tab))
 
-    # Find optimal threshold (maximum net benefit)
-    max_idx <- which.max(net_benefits)
-    optimal_threshold <- thresholds[max_idx]
-    max_nb <- net_benefits[max_idx]
+    p_raw <- tab$p_value[!is.na(tab$p_value)]
+    expect_true(length(p_raw) > 0)
 
-    # Should identify 0.25 as optimal (or very close)
-    expect_true(abs(optimal_threshold - 0.25) < 0.02)
+    # The (b+1)/(B+1) convention bounds the p-value below by 2/(B+1) and above by 1.
+    # good_model vs noise separates completely, so without the correction this
+    # returned exactly 0 from every replicate falling on one side of the null.
+    expect_true(all(p_raw > 0))
+    expect_true(all(p_raw <= 1))
+    expect_true(all(p_raw >= 2 / (200 + 1) - 1e-9))
 
-    # Net benefit at optimal should be maximum
-    expect_equal(max_nb, max(net_benefits))
+    p_adj <- tab$p_value_adj[!is.na(tab$p_value_adj)]
+    expect_true(all(p_adj >= p_raw - 1e-9))
+    expect_true(all(p_adj <= 1))
 })
 
 
-test_that("Weighted AUC calculation is numerically stable", {
+test_that("apparent net benefit is flagged as apparent", {
     skip_if_not_installed("ClinicoPath")
 
-    # Test trapezoidal integration for weighted AUC
-    thresholds <- c(0.0, 0.25, 0.50, 0.75, 1.0)
-    net_benefits <- c(0.0, 0.10, 0.15, 0.05, 0.0)
+    res <- run_dca(testdata_dca())
+    notices <- as.character(res$notices$content)
 
-    # Trapezoidal rule: AUC = sum of trapezoid areas
-    # Area = (base/2) × (height1 + height2)
-    auc <- 0
-    for (i in 2:length(thresholds)) {
-        width <- thresholds[i] - thresholds[i-1]
-        height <- (net_benefits[i] + net_benefits[i-1]) / 2
-        auc <- auc + width * height
+    # The analysis cannot know whether the supplied risks were fitted on these rows,
+    # so it must say so unconditionally rather than presenting the curves as validated.
+    expect_match(notices, "apparent", ignore.case = TRUE)
+    expect_match(notices, "optimistically biased", ignore.case = TRUE)
+})
+
+
+test_that("notices do not accumulate across run cycles", {
+    skip_if_not_installed("ClinicoPath")
+
+    df <- testdata_dca()
+    once  <- as.character(run_dca(df)$notices$content)
+
+    count_of <- function(html, needle) {
+        length(gregexpr(needle, html, fixed = TRUE)[[1]][gregexpr(needle, html, fixed = TRUE)[[1]] > 0])
     }
 
-    # Normalize by range
-    total_range <- max(thresholds) - min(thresholds)
-    weighted_auc <- auc / total_range
-
-    # Manual calculation:
-    # Trap 1: width=0.25, heights=(0+0.10)/2=0.05, area=0.0125
-    # Trap 2: width=0.25, heights=(0.10+0.15)/2=0.125, area=0.03125
-    # Trap 3: width=0.25, heights=(0.15+0.05)/2=0.10, area=0.025
-    # Trap 4: width=0.25, heights=(0.05+0)/2=0.025, area=0.00625
-    # Total AUC = 0.075
-    # Weighted AUC = 0.075 / 1.0 = 0.075
-
-    expect_equal(round(weighted_auc, 4), 0.0750)
+    # jamovi reuses the analysis object between runs; .noticeList is a private field,
+    # so without an explicit reset at the top of .run() the same notice is appended
+    # again on every option change.
+    expect_equal(count_of(once, "Analysis Complete"), 1L)
 })
 
 
-test_that("Probability range warnings trigger correctly", {
+test_that("the clinical impact table uses one denominator throughout", {
     skip_if_not_installed("ClinicoPath")
 
-    # Test data with very narrow probability range
-    narrow_range_probs <- runif(100, 0.48, 0.52)  # Range = 0.04
+    res <- run_dca(testdata_dca(), calculateClinicalImpact = TRUE, populationSize = 1000)
+    tab <- as.data.frame(res$clinicalImpactTable)
 
-    pred_min <- min(narrow_range_probs)
-    pred_max <- max(narrow_range_probs)
+    expect_true(nrow(tab) > 0)
 
-    # Should trigger warning if range < 0.05
-    range_size <- pred_max - pred_min
-    expect_true(range_size < 0.05)
-
-    # The FIXED code should warn about this
-    # (In actual module, warning would be emitted)
+    # Every column in this table is per 100 patients. interventions_avoided used to be
+    # scaled to populationSize (default 1000) while its neighbours were per 100, so a
+    # single row carried two different denominators with nothing on screen to say so.
+    expect_true(all(tab$interventions_avoided <= 100 + 1e-8, na.rm = TRUE))
+    expect_true(all(tab$interventions_avoided >= -1e-8, na.rm = TRUE))
+    expect_equal(tab$interventions_avoided, 100 - tab$interventions_per_100, tolerance = 1e-8)
 })
 
 
-test_that("Clinical decision rule emits approximation warning", {
+test_that("gain vs treat-all is a net-benefit difference, not an unstable ratio", {
     skip_if_not_installed("ClinicoPath")
 
-    # When clinical decision rule is enabled, user should be warned
-    # that this is a simplified approximation, not patient-level evaluation
+    res <- run_dca(testdata_dca(), weightedAUC = TRUE)
+    tab <- as.data.frame(res$weightedAUCTable)
 
-    # This test documents the expected behavior:
-    # The .calculateClinicalDecisionRule() function should emit a warning
-    # explaining the limitation of the current implementation
+    expect_true("benefit_gain" %in% names(tab))
+    expect_false("relative_benefit" %in% names(tab))
 
-    # (Full test would require module execution)
-    expect_true(TRUE)  # Placeholder for documentation
+    # Treat-all net benefit crosses zero at a threshold equal to the prevalence, so
+    # dividing by it produced percentages in the hundreds. A difference on the
+    # net-benefit scale stays bounded by the net benefits themselves.
+    gains <- tab$benefit_gain[!is.na(tab$benefit_gain)]
+    expect_true(all(abs(gains) < 1))
+})
+
+test_that("bootstrap output is reproducible across identical runs", {
+    skip_if_not_installed("ClinicoPath")
+
+    df <- testdata_dca()
+
+    a <- run_dca(df, compareModels = TRUE, bootReps = 200, seed = 42)
+    b <- run_dca(df, compareModels = TRUE, bootReps = 200, seed = 42)
+
+    ta <- as.data.frame(a$comparisonTable)
+    tb <- as.data.frame(b$comparisonTable)
+
+    # Unseeded, eight identical reruns of this analysis at bootReps = 1000 moved the
+    # comparison p-value between 0.030 and 0.060 and the 95% CI crossed zero in two of
+    # them. A clinician who reruns must get the same numbers.
+    expect_equal(ta$p_value,  tb$p_value,  tolerance = 0)
+    expect_equal(ta$ci_lower, tb$ci_lower, tolerance = 0)
+    expect_equal(ta$ci_upper, tb$ci_upper, tolerance = 0)
+
+    # A different seed is allowed to differ - that is honest Monte-Carlo error, not a bug.
+    c <- as.data.frame(run_dca(df, compareModels = TRUE, bootReps = 200, seed = 7)$comparisonTable)
+    expect_false(isTRUE(all.equal(ta$ci_lower, c$ci_lower)))
+})
+
+
+test_that("running the analysis does not disturb the caller's RNG stream", {
+    skip_if_not_installed("ClinicoPath")
+
+    set.seed(99)
+    before <- runif(3)
+
+    set.seed(99)
+    invisible(run_dca(testdata_dca(), compareModels = TRUE, bootReps = 200))
+    after <- runif(3)
+
+    # .run() saves and restores .Random.seed, so an R-API caller's stream is untouched.
+    expect_equal(before, after)
+})
+
+
+test_that("instructions return when the user clears their variables", {
+    skip_if_not_installed("ClinicoPath")
+
+    # instructions is declared visible: true with an empty clearWith, and .run() hides it
+    # once an analysis succeeds. Without the matching setVisible(TRUE) in the guard branch
+    # the panel stayed hidden for the rest of the session.
+    res <- ClinicoPath::decisioncurve(
+        data                 = testdata_dca(),
+        outcome              = NULL,
+        outcomePositive      = NULL,
+        models               = NULL,
+        decisionRulePositive = NULL
+    )
+    expect_true(res$instructions$visible)
+    expect_match(as.character(res$instructions$content), "Decision Curve Analysis")
 })

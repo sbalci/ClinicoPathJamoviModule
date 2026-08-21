@@ -729,7 +729,7 @@ continuousmarkovClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     if (any(offdiag > 0, na.rm = TRUE)) {
                         idx <- which(offdiag == max(offdiag, na.rm = TRUE), arr.ind = TRUE)[1, ]
                         fastest <- paste0(
-                            htmltools::htmlEscape(state_labels[idx[1]]), " &rarr; ",
+                            htmltools::htmlEscape(state_labels[idx[1]]), " \u{2192} ",
                             htmltools::htmlEscape(state_labels[idx[2]])
                         )
                         interp <- paste0(interp,

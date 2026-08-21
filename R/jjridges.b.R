@@ -122,7 +122,7 @@ jjridgesClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     "<h3>", .("Ridge Plot Instructions"), "</h3>",
                     "<p>", .("Welcome to the Advanced Ridge Plot analysis!"), "</p>",
 
-                    "<div style='background:#f0f8ff; border-left:4px solid #2196F3; padding:15px; margin:15px 0;'>",
+                    "<div style='background-color: rgba(33, 152, 255, 0.07); border-left:4px solid #2196F3; padding:15px; margin:15px 0; color: inherit;'>",
                         "<h4 style='color:#2196F3; margin-top:0;'> ", .("Clinical Guidance"), "</h4>",
                         "<p><strong>", .("When to Use Ridge Plots:"), "</strong></p>",
                         "<ul style='margin-bottom:10px;'>",
@@ -333,8 +333,14 @@ jjridgesClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 return(vals)
                 
             }, error = function(e) {
-                # Log warning and use defaults
-                warning(.("Invalid quantiles specified: "), e$message, .(", using defaults"))
+                # The plot is built inside .run(), so the silent substitution of the
+                # default quantiles can be disclosed in the notices output (jamovi never
+                # shows base warning() output to the user).
+                private$.addNotice(
+                    "WARNING",
+                    .("Invalid quantiles"),
+                    paste0(conditionMessage(e),
+                           ". The default quantiles (0.25, 0.5, 0.75) were drawn instead."))
                 c(0.25, 0.5, 0.75)
             })
         },
@@ -347,7 +353,7 @@ jjridgesClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
             # Basic summary
             summary <- paste0(
-                "<div class='clinical-summary' style='background:#f8f9fa; border-left:4px solid #007bff; padding:15px; margin:10px 0;'>",
+                "<div class='clinical-summary' style='background-color: rgba(138, 155, 172, 0.06); border-left:4px solid #007bff; padding:15px; margin:10px 0; color: inherit;'>",
                 "<h4 style='color:#007bff; margin-top:0;'>", .("Clinical Summary"), "</h4>",
                 "<p><strong>", .("Analysis:"), "</strong> ", .("Ridge plot comparing the distribution of"), " <strong>",
                 x_var_safe, "</strong> ", .("across"), " <strong>", n_groups, " ", .("groups"), "</strong> ", .("defined by"), " <strong>",
@@ -391,7 +397,7 @@ jjridgesClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
             # Build plain text summary
             text_summary <- paste0(
-                "<div style='background:#fff8e1; border:1px solid #ffc107; padding:15px; margin:10px 0; font-family:monospace;'>",
+                "<div style='background-color: rgba(255, 203, 33, 0.14); border:1px solid #ffc107; padding:15px; margin:10px 0; font-family:monospace; color: inherit;'>",
                 "<h4 style='color:#f57c00; margin-top:0;'> Copy-Ready Report Summary</h4>",
                 "<p style='font-size:11px; color:#666; margin-bottom:10px;'>",
                 "Select and copy the text below for inclusion in reports or presentations.",
@@ -480,7 +486,7 @@ jjridgesClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         .generateAboutPanel = function() {
             # Comprehensive educational guide about ridge plots
             html <- paste0(
-                "<div style='background:#e8f5e9; border-left:4px solid #4caf50; padding:15px; margin:10px 0;'>",
+                "<div style='background-color: rgba(33, 159, 43, 0.1); border-left:4px solid #4caf50; padding:15px; margin:10px 0; color: inherit;'>",
                 "<h3 style='color:#2e7d32; margin-top:0;'> About Ridge Plots</h3>",
 
                 "<h4 style='color:#2e7d32;'>What are Ridge Plots?</h4>",
@@ -563,7 +569,7 @@ jjridgesClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
             if (!has_stats) {
                 html <- paste0(
-                    "<div style='background:#fff3cd; border-left:4px solid #ffc107; padding:15px; margin:10px 0;'>",
+                    "<div style='background-color: rgba(255, 202, 33, 0.23); border-left:4px solid #ffc107; padding:15px; margin:10px 0; color: inherit;'>",
                     "<h4 style='color:#856404; margin-top:0;'> Statistical Testing Disabled</h4>",
                     "<p>Enable 'Show Statistics' to view statistical assumptions and methodological notes.</p>",
                     "</div>"
@@ -573,7 +579,7 @@ jjridgesClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
             # Build assumptions based on test type
             html <- paste0(
-                "<div style='background:#fff3cd; border-left:4px solid #ffc107; padding:15px; margin:10px 0;'>",
+                "<div style='background-color: rgba(255, 202, 33, 0.23); border-left:4px solid #ffc107; padding:15px; margin:10px 0; color: inherit;'>",
                 "<h3 style='color:#856404; margin-top:0;'> Statistical Assumptions & Caveats</h3>",
                 "<p><strong>Selected Test Type:</strong> ", tools::toTitleCase(gsub("_", " ", test_type)), "</p>"
             )
@@ -660,14 +666,6 @@ jjridgesClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             return(html)
         },
 
-        # TODO (correctness): `.applyClinicalPreset` writes back to jamovi option objects
-        # via `opt$value <- value` at L628. jamovi options are read-only at runtime;
-        # this mutation pattern may silently no-op or raise a runtime error in newer
-        # jamovi versions. Same concern as jjbarstats/jjcoefstats/jjhistostats/jjpubr.
-        # The `private$overrides` + `private$.option(name)` indirection works without
-        # the mutation - drop the direct `opt$value <- value` line and rely on the
-        # override list (jjoncoplot's `.optionsWithPreset` L34-93 is the right pattern).
-        #
         # TODO (UX): L719 emits `warning(msg)` AND L723-728 sets `warnings$setContent`.
         # Duplicate notification; keep only the panel since R warnings are not visible
         # to the typical jamovi UI user.
@@ -2346,7 +2344,7 @@ jjridgesClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             if (private$.option("plot_type") == "density_ridges_gradient") {
                 interpretation <- paste0(
                     interpretation,
-                    "<div style='background:#e3f2fd; padding:10px; margin:10px 0; border-radius:4px;'>",
+                    "<div style='background-color: rgba(33, 152, 239, 0.13); padding:10px; margin:10px 0; border-radius:4px; color: inherit;'>",
                     "<strong> ", .("Gradient Coloring:"), "</strong> ", .("Colors represent the value of"), " ",
                     x_var_safe, " ", .("along each ridge, helping visualize how values are distributed within groups."), "</div>"
                 )
@@ -2355,7 +2353,7 @@ jjridgesClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             if (private$.option("add_boxplot")) {
                 interpretation <- paste0(
                     interpretation,
-                    "<div style='background:#e8f5e8; padding:10px; margin:10px 0; border-radius:4px;'>",
+                    "<div style='background-color: rgba(33, 159, 33, 0.1); padding:10px; margin:10px 0; border-radius:4px; color: inherit;'>",
                     "<strong> ", .("Boxplots:"), "</strong> ", .("Show median (center line), quartiles (box boundaries), and outliers for each group."), " ",
                     .("Compare medians and quartile ranges across groups for clinical significance."), "</div>"
                 )
@@ -2365,7 +2363,7 @@ jjridgesClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             if (private$.option("show_stats")) {
                 interpretation <- paste0(
                     interpretation,
-                    "<div style='background:#fff3e0; padding:10px; margin:10px 0; border-radius:4px;'>",
+                    "<div style='background-color: rgba(255, 169, 33, 0.14); padding:10px; margin:10px 0; border-radius:4px; color: inherit;'>",
                     "<strong> ", .("Statistical Tests:"), "</strong> ", .("Pairwise comparisons test whether group differences are statistically significant."), " ",
                     .("Consider effect sizes alongside p-values for clinical importance. Adjust for multiple comparisons when appropriate."), "</div>"
                 )

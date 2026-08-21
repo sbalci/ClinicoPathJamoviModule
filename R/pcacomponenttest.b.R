@@ -159,7 +159,7 @@ pcacomponenttestClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             if (!is.null(private$.messages) && length(private$.messages) > 0) {
                 # Format messages
                 msg_html <- paste0(
-                    "<div style='border: 1px solid #e6e6e6; background-color: #fafafa; padding: 10px; margin-bottom: 10px; border-radius: 5px;'>",
+                    "<div style='border: 1px solid #e6e6e6; background-color: rgba(172, 172, 172, 0.06); padding: 10px; margin-bottom: 10px; border-radius: 5px; color: inherit;'>",
                     "<b>Note:</b><br>",
                     paste(unlist(private$.messages), collapse = "<br>"),
                     "</div>"
@@ -426,7 +426,7 @@ pcacomponenttestClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 sig_comps <- which(private$.adjPvalues < 0.05)
                 if (length(sig_comps) > 0) {
                     summary_text <- sprintf(
-                        "<div style='background:#e8f4f8; padding:15px; border-left:4px solid #2196F3; margin:10px 0;'>
+                        "<div style='background-color: rgba(33, 149, 188, 0.1); padding:15px; border-left:4px solid #2196F3; margin:10px 0; color: inherit;'>
                         <b>Summary:</b> Analysis identified <b>%d significant principal component%s</b> from your %d variables (N=%d observations).
                         <br><br>
                         <b>What this means:</b> The first %d component%s %s %.1f%% of the variation in your data. These components represent underlying patterns that explain most of the differences between samples.
@@ -440,7 +440,7 @@ pcacomponenttestClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                         sum(private$.originalVAF[sig_comps]) * 100
                     )
                 } else {
-                    summary_text <- "<div style='background:#fff3cd; padding:15px; border-left:4px solid #ffc107;'>
+                    summary_text <- "<div style='background-color: rgba(255, 202, 33, 0.23); padding:15px; border-left:4px solid #ffc107; color: inherit;'>
                         <b>No significant components identified.</b> This suggests the variance in your data may be primarily noise, or the number of permutations may be too low to detect weak signals.
                         </div>"
                 }
@@ -453,7 +453,7 @@ pcacomponenttestClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             # Interpretation guide panel
             if (isTRUE(self$options$showGuide)) {
                 guide_text <- "
-                <div style='background:#f5f5f5; padding:15px; margin:10px 0;'>
+                <div style='background-color: rgba(88, 88, 88, 0.06); padding:15px; margin:10px 0; color: inherit;'>
                 <b>Understanding Your Results:</b>
                 <ul>
                 <li><b>Original VAF:</b> Percentage of total variance explained by each component in your actual data</li>

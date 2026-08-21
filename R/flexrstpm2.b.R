@@ -274,7 +274,7 @@ flexrstpm2Class <- if (requireNamespace("jmvcore", quietly = TRUE)) {
 
             if (n_events < 30) {
               warnings_html <- paste0(
-                "<div style='background-color:#fff3cd; padding:10px; border-left:4px solid #ffc107;'>",
+                "<div style='background-color: rgba(255, 202, 33, 0.23); padding:10px; border-left:4px solid #ffc107; color: inherit;'>",
                 "<strong> Low Event Count Warning</strong><br>",
                 "Only ", n_events, " events detected. Flexible parametric models work best with >=30 events.<br>",
                 "Recommendations:<br>",
@@ -298,7 +298,7 @@ flexrstpm2Class <- if (requireNamespace("jmvcore", quietly = TRUE)) {
               if (df > 4 && n_events < 100) {
                 warnings_html <- paste0(
                   warnings_html,
-                  "<div style='background-color:#f8d7da; padding:10px; border-left:4px solid #dc3545; margin-top:10px;'>",
+                  "<div style='background-color: rgba(216, 33, 50, 0.18); padding:10px; border-left:4px solid #dc3545; margin-top:10px; color: inherit;'>",
                   "<strong> Overfitting Risk</strong><br>",
                   "High complexity (df=", df, ") with only ", n_events, " events.<br>",
                   "Recommendation: Use df=3-4 for <100 events",
@@ -309,7 +309,7 @@ flexrstpm2Class <- if (requireNamespace("jmvcore", quietly = TRUE)) {
               if (events_per_df < 10) {
                 warnings_html <- paste0(
                   warnings_html,
-                  "<div style='background-color:#fff3cd; padding:10px; border-left:4px solid #ffc107; margin-top:10px;'>",
+                  "<div style='background-color: rgba(255, 202, 33, 0.23); padding:10px; border-left:4px solid #ffc107; margin-top:10px; color: inherit;'>",
                   "<strong> Sparse Data</strong><br>",
                   "Only ", round(events_per_df, 1), " events per degree of freedom.<br>",
                   "Minimum 10 events/df recommended. Consider df=", max(1, floor(n_events / 10)),
@@ -328,7 +328,7 @@ flexrstpm2Class <- if (requireNamespace("jmvcore", quietly = TRUE)) {
               if (n_events < min_events_tvc) {
                 warnings_html <- paste0(
                   warnings_html,
-                  "<div style='background-color:#fff3cd; padding:10px; border-left:4px solid #ffc107; margin-top:10px;'>",
+                  "<div style='background-color: rgba(255, 202, 33, 0.23); padding:10px; border-left:4px solid #ffc107; margin-top:10px; color: inherit;'>",
                   "<strong> Time-Varying Effects</strong><br>",
                   "Complex model needs >=", min_events_tvc, " events for ", n_tvc, " time-varying covariate(s).<br>",
                   "You have ", n_events, " events. Consider simpler model.",
@@ -1401,7 +1401,7 @@ flexrstpm2Class <- if (requireNamespace("jmvcore", quietly = TRUE)) {
             if (is.null(pred_times)) pred_times <- c(1, 2, 5, 10)
 
             summary_text <- paste(
-              "<div style='background-color: #f8f9fa; border: 2px solid #28a745; padding: 15px; margin: 15px 0; border-radius: 8px;'>",
+              "<div style='background-color: rgba(138, 155, 172, 0.06); border: 2px solid #28a745; padding: 15px; margin: 15px 0; border-radius: 8px; color: inherit;'>",
               "<h4 style='color: #155724; margin-top: 0;'> Clinical Summary</h4>",
               "<p><strong>Analysis:</strong> ", model_type, " model with ", spline_df,
               " degrees of freedom", if (n_covariates > 0) paste(" and", n_covariates, "covariates") else "", ".</p>",
@@ -1418,9 +1418,9 @@ flexrstpm2Class <- if (requireNamespace("jmvcore", quietly = TRUE)) {
               "</div>",
 
               # Copy-ready template
-              "<div style='background-color: #fff; border: 1px solid #dee2e6; padding: 10px; margin: 10px 0; border-radius: 5px;'>",
+              "<div style='background-color: rgba(255, 255, 255, 0.06); border: 1px solid #dee2e6; padding: 10px; margin: 10px 0; border-radius: 5px; color: inherit;'>",
               "<h5> Copy-Ready Report Template</h5>",
-              "<div style='background-color: #f8f9fa; padding: 10px; margin: 5px 0; border-radius: 3px; font-family: monospace; font-size: 12px;'>",
+              "<div style='background-color: rgba(138, 155, 172, 0.06); padding: 10px; margin: 5px 0; border-radius: 3px; font-family: monospace; font-size: 12px; color: inherit;'>",
               "Flexible parametric survival analysis was performed using ", model_type, " models with ", spline_df, " degrees of freedom. ",
               if (n_covariates > 0) paste("Analysis included", n_covariates, "covariates. ") else "No covariates were included. ",
               "The Royston-Parmar approach provides smooth survival curves with enhanced extrapolation capability beyond observed follow-up. ",
@@ -1444,7 +1444,7 @@ flexrstpm2Class <- if (requireNamespace("jmvcore", quietly = TRUE)) {
       # Generate comprehensive method explanation and "About this Analysis" panel
       .generateMethodExplanation = function() {
         explanation_html <- paste0(
-          "<div style='background-color:#e7f3ff; padding:20px; border-left:5px solid #0066cc; margin:15px 0;'>",
+          "<div style='background-color: rgba(33, 144, 255, 0.11); padding:20px; border-left:5px solid #0066cc; margin:15px 0; color: inherit;'>",
           "<h3 style='color:#004080; margin-top:0;'> About Flexible Parametric Survival Models</h3>",
           "<h4>What This Analysis Does</h4>",
           "<p>Flexible parametric (Royston-Parmar) models fit smooth survival curves using restricted cubic splines ",
@@ -1488,7 +1488,7 @@ flexrstpm2Class <- if (requireNamespace("jmvcore", quietly = TRUE)) {
           "</dl>",
           "<h4>Sample Size Requirements</h4>",
           "<table style='border-collapse:collapse; margin:10px 0;'>",
-          "<tr style='background-color:#f0f0f0;'>",
+          "<tr style='background-color: rgba(33, 33, 33, 0.07); color: inherit;'>",
           "<th style='border:1px solid #ddd; padding:8px;'>Model Complexity</th>",
           "<th style='border:1px solid #ddd; padding:8px;'>Minimum Events</th>",
           "<th style='border:1px solid #ddd; padding:8px;'>Recommended Events</th>",
@@ -1530,7 +1530,7 @@ flexrstpm2Class <- if (requireNamespace("jmvcore", quietly = TRUE)) {
           "<li>Time-varying effects need careful interpretation</li>",
           "</ul>",
           "<h4>Glossary of Terms</h4>",
-          "<dl style='margin-left:20px; background-color:#f8f9fa; padding:10px;'>",
+          "<dl style='margin-left:20px; background-color: rgba(138, 155, 172, 0.06); padding:10px; color: inherit;'>",
           "<dt><strong>Hazard Function</strong></dt>",
           "<dd>Instantaneous risk of event at time t, given survival to t</dd>",
           "<dt><strong>Restricted Cubic Splines</strong></dt>",

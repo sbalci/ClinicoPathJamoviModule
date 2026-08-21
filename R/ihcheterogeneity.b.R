@@ -107,7 +107,7 @@ ihcheterogeneityClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cl
         .init = function() {
             # Populate welcome screen
             self$results$welcome$setContent("
-                <div class='jmv-welcome' style='padding: 20px; background: #f8f9fa; border-left: 4px solid #007bff;'>
+                <div class='jmv-welcome' style='padding: 20px; background-color: rgba(138, 155, 172, 0.06); border-left: 4px solid #007bff; color: inherit;'>
                     <h3 style='margin-top: 0;'> IHC Heterogeneity Analysis</h3>
                     <p><strong>Get started:</strong></p>
                     <ol>
@@ -127,6 +127,22 @@ ihcheterogeneityClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cl
                 is.null(self$options$biopsy1) &&
                 (is.null(self$options$biopsies) || length(self$options$biopsies) == 0)
             )
+
+            # Fixed row structure for the variance component table: three
+            # components plus a total, every run. Two of the component labels
+            # depend on whether a reference measurement was supplied, which is
+            # an option, not a result - so the whole structure belongs here.
+            # Placed before the no-data return so every .init() path builds it.
+            has_reference <- !is.null(self$options$wholesection)
+            variance_components <- c(
+                if (has_reference) "Between-Case Variance" else "Between-Case Variance (Regional Means)",
+                "Within-Case Variance (Sampling)",
+                if (has_reference) "Method Variance" else "Regional Method Variance",
+                "Total Variance"
+            )
+            for (r in 1:4)
+                self$results$variancetable$addRow(
+                    rowKey = r, values = list(component = variance_components[r]))
 
             if (is.null(self$data)) {
                 self$results$interpretation$setContent(
@@ -273,7 +289,7 @@ ihcheterogeneityClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cl
             warnings <- private$.detectMisuse(whole_section, biopsy_data)
             if (length(warnings) > 0) {
                 warning_html <- paste0(
-                    "<div style='background-color: #fff3cd; border: 1px solid #ffeaa7; padding: 15px; border-radius: 5px; margin: 10px 0;'>",
+                    "<div style='background-color: rgba(255, 202, 33, 0.23); border: 1px solid #ffeaa7; padding: 15px; border-radius: 5px; margin: 10px 0; color: inherit;'>",
                     "<h4 style='color: #856404; margin-top: 0;'> Data Quality Warnings</h4>",
                     "<ul style='color: #856404; margin: 5px 0; padding-left: 20px;'>",
                     paste0("<li>", warnings, "</li>", collapse = ""),
@@ -748,10 +764,7 @@ ihcheterogeneityClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cl
             insufficient <- function(msg) {
                 variance_table$setNote("vc", msg)
                 for (r in 1:4) {
-                    variance_table$addRow(rowKey = r, values = list(
-                        component = c("Between-Case Variance",
-                                      "Within-Case Variance (Sampling)",
-                                      "Method Variance", "Total Variance")[r],
+                    variance_table$setRow(rowKey = r, values = list(
                         variance = NA_real_, percentage = NA_real_,
                         contribution = .("Not estimable")
                     ))
@@ -817,7 +830,7 @@ ihcheterogeneityClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cl
             error_pct  <- pct(var_error)
             method_pct <- pct(var_method)
 
-            variance_table$addRow(rowKey = 1, values = list(
+            variance_table$setRow(rowKey = 1L, values = list(
                 component = if (has_reference) "Between-Case Variance" else "Between-Case Variance (Regional Means)",
                 variance = var_case,
                 percentage = case_pct,
@@ -825,7 +838,7 @@ ihcheterogeneityClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cl
                                      ifelse(!is.na(case_pct) && case_pct >= 30, "Moderate contributor", "Minor contributor"))
             ))
 
-            variance_table$addRow(rowKey = 2, values = list(
+            variance_table$setRow(rowKey = 2L, values = list(
                 component = "Within-Case Variance (Sampling)",
                 variance = var_error,
                 percentage = error_pct,
@@ -833,7 +846,7 @@ ihcheterogeneityClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cl
                                      ifelse(!is.na(error_pct) && error_pct >= 15, "Moderate sampling variability", "Low sampling variability"))
             ))
 
-            variance_table$addRow(rowKey = 3, values = list(
+            variance_table$setRow(rowKey = 3L, values = list(
                 component = if (has_reference) "Method Variance" else "Regional Method Variance",
                 variance = var_method,
                 percentage = method_pct,
@@ -841,7 +854,7 @@ ihcheterogeneityClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cl
                                      ifelse(!is.na(method_pct) && method_pct >= 10, "Minor method differences", "Negligible method differences"))
             ))
 
-            variance_table$addRow(rowKey = 4, values = list(
+            variance_table$setRow(rowKey = 4L, values = list(
                 component = "Total Variance",
                 variance = total_variance,
                 percentage = if (!is.na(total_variance)) 100 else NA,
@@ -1373,7 +1386,7 @@ ihcheterogeneityClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cl
                 "</ul>",
 
                 "<h4>Clinical Assessment:</h4>",
-                "<div style='background-color: #f8f9fa; padding: 10px; border-left: 4px solid #007bff;'>",
+                "<div style='background-color: rgba(138, 155, 172, 0.06); padding: 10px; border-left: 4px solid #007bff; color: inherit;'>",
                 status_text,
                 "</div>"
             )
@@ -1503,7 +1516,7 @@ ihcheterogeneityClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cl
 
             report_sentences <- paste0(
                 "<h3>Copy-Ready Report Sentences</h3>",
-                "<div style='background-color: #f8f9fa; padding: 15px; border: 1px solid #dee2e6; border-radius: 5px;'>",
+                "<div style='background-color: rgba(138, 155, 172, 0.06); padding: 15px; border: 1px solid #dee2e6; border-radius: 5px; color: inherit;'>",
 
                 "<h4>Methods Section:</h4>",
                 "<p style='font-family: monospace; background: white; padding: 10px; border-left: 4px solid #007bff;'>",
@@ -1598,7 +1611,7 @@ ihcheterogeneityClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cl
             }
             if (!is.null(private$.strategy_notes)) {
                 strategy_html <- paste0(
-                    "<div style='background-color: #f8f9fa; padding: 10px; border-left: 4px solid #6c757d; margin: 10px 0;'>",
+                    "<div style='background-color: rgba(138, 155, 172, 0.06); padding: 10px; border-left: 4px solid #6c757d; margin: 10px 0; color: inherit;'>",
                     gsub("\n\n", "<br><br>", trimws(private$.strategy_notes), fixed = TRUE),
                     "</div>"
                 )
@@ -1619,7 +1632,7 @@ ihcheterogeneityClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cl
 
                 "<div style='margin: 15px 0;'>",
                 "<h4> Analysis Methodology</h4>",
-                "<div style='background-color: #e3f2fd; padding: 12px; border-radius: 5px;'>",
+                "<div style='background-color: rgba(33, 152, 239, 0.13); padding: 12px; border-radius: 5px; color: inherit;'>",
                 "<ul>",
                 "<li><strong>IHC Heterogeneity:</strong> Quantitative comparison of biomarker measurements from regional tissue areas</li>",
                 "<li><strong>Statistical Framework:</strong> Reproducibility assessed using Spearman correlation and intraclass correlation coefficient (ICC)</li>",
@@ -1631,7 +1644,7 @@ ihcheterogeneityClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cl
 
                 "<div style='margin: 15px 0;'>",
                 "<h4> Data Requirements & Assumptions</h4>",
-                "<div style='background-color: #fff3e0; padding: 12px; border-radius: 5px;'>",
+                "<div style='background-color: rgba(255, 169, 33, 0.14); padding: 12px; border-radius: 5px; color: inherit;'>",
                 "<ul>",
                 "<li><strong>Sample Size:</strong> Minimum 5 cases required for statistical analysis (current: ", metrics$n_cases, " cases)</li>",
                 "<li><strong>Measurement Scale:</strong> Continuous biomarker values (percentages, scores, or quantitative units)</li>",
@@ -1644,7 +1657,7 @@ ihcheterogeneityClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cl
 
                 "<div style='margin: 15px 0;'>",
                 "<h4> Important Limitations</h4>",
-                "<div style='background-color: #ffebee; padding: 12px; border-radius: 5px;'>",
+                "<div style='background-color: rgba(255, 33, 67, 0.09); padding: 12px; border-radius: 5px; color: inherit;'>",
                 "<ul>",
                 "<li><strong>Simulation vs Reality:</strong> Results based on computational simulation, not actual tissue sampling</li>",
                 "<li><strong>Biomarker Specificity:</strong> Findings may not generalize across different biomarkers or tissue types</li>",
@@ -1657,7 +1670,7 @@ ihcheterogeneityClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cl
 
                 "<div style='margin: 15px 0;'>",
                 "<h4> Clinical Application Guidelines</h4>",
-                "<div style='background-color: #f3e5f5; padding: 12px; border-radius: 5px;'>",
+                "<div style='background-color: rgba(153, 33, 170, 0.12); padding: 12px; border-radius: 5px; color: inherit;'>",
                 "<ul>",
                 "<li><strong>Quality Thresholds:</strong> Correlation \u{2265}0.80 and CV \u{2264}20% recommended for routine clinical use</li>",
                 "<li><strong>Biomarker-Specific Adjustment:</strong> Thresholds may require adjustment for specific biomarkers</li>",
@@ -1670,7 +1683,7 @@ ihcheterogeneityClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cl
 
                 "<div style='margin: 15px 0;'>",
                 "<h4> References & Standards</h4>",
-                "<div style='background-color: #e8f5e8; padding: 12px; border-radius: 5px;'>",
+                "<div style='background-color: rgba(33, 159, 33, 0.1); padding: 12px; border-radius: 5px; color: inherit;'>",
                 "<ul>",
                 "<li><strong>Primary Methodology:</strong> Zilenaite-Petrulaitiene et al. (Am J Clin Pathol 2025)</li>",
                 "<li><strong>ICC Guidelines:</strong> Koo & Li (J Chiropr Med 2016) - ICC interpretation standards</li>",
@@ -1689,7 +1702,7 @@ ihcheterogeneityClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cl
                 "<div style='max-width: 800px; margin: 0 auto; font-family: Arial, sans-serif;'>",
                 "<h3 style='color: #2c5282; border-bottom: 2px solid #4a90e2; padding-bottom: 8px;'>Statistical Terms Glossary</h3>",
 
-                "<div style='margin: 15px 0; padding: 15px; background-color: #f8f9ff; border-left: 4px solid #4a90e2; border-radius: 4px;'>",
+                "<div style='margin: 15px 0; padding: 15px; background-color: rgba(138, 155, 255, 0.06); border-left: 4px solid #4a90e2; border-radius: 4px; color: inherit;'>",
                 "<h4 style='color: #2c5282; margin-top: 0;'> Correlation Measures</h4>",
                 "<ul style='margin: 10px 0; padding-left: 20px;'>",
                 "<li><strong>Spearman Correlation:</strong> Measures rank-order relationship between measurements. ",
@@ -1699,7 +1712,7 @@ ihcheterogeneityClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cl
                 "</ul>",
                 "</div>",
 
-                "<div style='margin: 15px 0; padding: 15px; background-color: #fff8f0; border-left: 4px solid #ff8c42; border-radius: 4px;'>",
+                "<div style='margin: 15px 0; padding: 15px; background-color: rgba(255, 152, 33, 0.07); border-left: 4px solid #ff8c42; border-radius: 4px; color: inherit;'>",
                 "<h4 style='color: #b7410e; margin-top: 0;'> Reliability Measures</h4>",
                 "<ul style='margin: 10px 0; padding-left: 20px;'>",
                 "<li><strong>ICC (Intraclass Correlation):</strong> Measures agreement between measurements from same subjects. ",
@@ -1710,7 +1723,7 @@ ihcheterogeneityClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cl
                 "</ul>",
                 "</div>",
 
-                "<div style='margin: 15px 0; padding: 15px; background-color: #f0fff4; border-left: 4px solid #48bb78; border-radius: 4px;'>",
+                "<div style='margin: 15px 0; padding: 15px; background-color: rgba(33, 255, 92, 0.07); border-left: 4px solid #48bb78; border-radius: 4px; color: inherit;'>",
                 "<h4 style='color: #276749; margin-top: 0;'> Variability Measures</h4>",
                 "<ul style='margin: 10px 0; padding-left: 20px;'>",
                 "<li><strong>CV (Coefficient of Variation):</strong> Standardized measure of variability = (SD/Mean) \u{00d7} 100%. ",
@@ -1721,7 +1734,7 @@ ihcheterogeneityClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cl
                 "</ul>",
                 "</div>",
 
-                "<div style='margin: 15px 0; padding: 15px; background-color: #fefefe; border-left: 4px solid #805ad5; border-radius: 4px;'>",
+                "<div style='margin: 15px 0; padding: 15px; background-color: rgba(238, 238, 238, 0.06); border-left: 4px solid #805ad5; border-radius: 4px; color: inherit;'>",
                 "<h4 style='color: #553c9a; margin-top: 0;'> IHC-Specific Terms</h4>",
                 "<ul style='margin: 10px 0; padding-left: 20px;'>",
                 "<li><strong>Spatial Heterogeneity:</strong> Variation in biomarker expression across different tissue regions.</li>",
@@ -1731,7 +1744,7 @@ ihcheterogeneityClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cl
                 "</ul>",
                 "</div>",
 
-                "<div style='margin: 15px 0; padding: 15px; background-color: #fffaf0; border-left: 4px solid #ed8936; border-radius: 4px;'>",
+                "<div style='margin: 15px 0; padding: 15px; background-color: rgba(255, 181, 33, 0.07); border-left: 4px solid #ed8936; border-radius: 4px; color: inherit;'>",
                 "<h4 style='color: #9c4221; margin-top: 0;'> Clinical Interpretation Guidelines</h4>",
                 "<ul style='margin: 10px 0; padding-left: 20px;'>",
                 "<li><strong>Excellent Agreement (ICC > 0.90):</strong> Regional measurements highly representative of reference.</li>",
@@ -1832,7 +1845,7 @@ ihcheterogeneityClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cl
             }
 
             summary_content <- paste0(
-                "<div style='max-width: 700px; margin: 0 auto; padding: 20px; background-color: #f8f9fa; border-radius: 8px; font-family: Arial, sans-serif;'>",
+                "<div style='max-width: 700px; margin: 0 auto; padding: 20px; background-color: rgba(138, 155, 172, 0.06); border-radius: 8px; font-family: Arial, sans-serif; color: inherit;'>",
                 "<h3 style='color: #495057; margin-bottom: 15px; text-align: center;'> Analysis Summary in Plain Language</h3>",
 
                 "<div style='background-color: white; padding: 15px; border-radius: 6px; margin: 15px 0; border-left: 4px solid #007bff;'>",

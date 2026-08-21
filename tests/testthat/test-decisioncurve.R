@@ -188,7 +188,7 @@ test_that("decisioncurve function works with optimal threshold analysis", {
       outcome = "Death",
       outcomePositive = "1",
       models = "age_prob",
-      showOptimalThreshold = TRUE,
+      showBenefitRange = TRUE,
       decisionRuleVar = NULL,
       decisionRulePositive = NULL
     )
@@ -199,13 +199,15 @@ test_that("decisioncurve function works with optimal threshold analysis", {
     outcome = "Death",
     outcomePositive = "1",
     models = "age_prob",
-    showOptimalThreshold = TRUE,
+    showBenefitRange = TRUE,
     decisionRuleVar = NULL,
     decisionRulePositive = NULL
   )
   
-  # Check that optimal threshold table is included
-  expect_true("optimalTable" %in% names(result))
+  # The degenerate optimal-threshold table was replaced by the range of benefit
+  # measured against both reference strategies.
+  expect_true("benefitRangeTable" %in% names(result))
+  expect_false("optimalTable" %in% names(result))
 })
 
 test_that("decisioncurve function works with weighted AUC", {
@@ -513,7 +515,7 @@ test_that("decisioncurve function output structure is complete", {
     outcome = "Death",
     outcomePositive = "1",
     models = c("age_prob", "measurement_prob"),
-    showOptimalThreshold = TRUE,
+    showBenefitRange = TRUE,
     calculateClinicalImpact = TRUE,
     weightedAUC = TRUE,
     compareModels = TRUE,
@@ -524,7 +526,7 @@ test_that("decisioncurve function output structure is complete", {
   
   # Check all expected output components exist
   expected_components <- c("instructions", "procedureNotes", "resultsTable", 
-                          "optimalTable", "clinicalImpactTable", "comparisonTable",
+                          "benefitRangeTable", "clinicalImpactTable", "comparisonTable",
                           "weightedAUCTable", "dcaPlot", "clinicalImpactPlot",
                           "interventionsAvoidedPlot", "summaryText")
   

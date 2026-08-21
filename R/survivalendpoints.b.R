@@ -76,22 +76,22 @@ survivalendpointsClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6C
                     .guide .section {
                         margin: 15px 0;
                         padding: 10px;
-                        background-color: #f8f9fa;
+                        background-color: rgba(138, 155, 172, 0.06); color: inherit;
                         border-left: 4px solid #3498db;
                     }
                     .guide .endpoint {
                         margin: 10px 0;
                         padding: 8px;
-                        background-color: #ffffff;
+                        background-color: rgba(255, 255, 255, 0.06); color: inherit;
                         border: 1px solid #dee2e6;
                     }
                     .guide .endpoint-name {
                         font-weight: bold;
-                        color: #2c3e50;
+                        color: inherit;
                     }
                     .guide .formula {
                         font-family: monospace;
-                        background-color: #f1f3f5;
+                        background-color: rgba(33, 65, 97, 0.06); color: inherit;
                         padding: 2px 5px;
                         border-radius: 3px;
                     }
@@ -1068,7 +1068,7 @@ survivalendpointsClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6C
                 write.csv(derivedData, filename, row.names = FALSE)
 
                 message <- paste0(
-                    "<div style='padding: 15px; background-color: #d4edda; ",
+                    "<div style='padding: 15px; background-color: rgba(33, 162, 64, 0.19); color: inherit; ",
                     "border: 1px solid #c3e6cb; border-radius: 5px;'>",
                     "<strong>Export Successful!</strong><br/>",
                     "File saved to: <code>", filename, "</code><br/><br/>",
@@ -1084,7 +1084,7 @@ survivalendpointsClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6C
                 self$results$exportMessage$setContent(message)
             }, error = function(e) {
                 message <- paste0(
-                    "<div style='padding: 15px; background-color: #f8d7da; ",
+                    "<div style='padding: 15px; background-color: rgba(216, 33, 50, 0.18); color: inherit; ",
                     "border: 1px solid #f5c6cb; border-radius: 5px;'>",
                     "<strong>Export Failed</strong><br/>",
                     "Error: ", htmltools::htmlEscape(e$message),
@@ -1111,7 +1111,7 @@ survivalendpointsClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6C
                 "    padding-bottom: 5px;",
                 "}",
                 ".usage-guide .workflow {",
-                "    background-color: #f8f9fa;",
+                "    background-color: rgba(138, 155, 172, 0.06); color: inherit;",
                 "    padding: 15px;",
                 "    margin: 15px 0;",
                 "    border-left: 4px solid #28a745;",
@@ -1121,7 +1121,7 @@ survivalendpointsClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6C
                 "    padding-left: 20px;",
                 "}",
                 ".usage-guide .note {",
-                "    background-color: #fff3cd;",
+                "    background-color: rgba(255, 202, 33, 0.23); color: inherit;",
                 "    border: 1px solid #ffc107;",
                 "    padding: 10px;",
                 "    margin: 10px 0;",

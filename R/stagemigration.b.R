@@ -615,7 +615,7 @@ stagemigrationClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
 
                 # Generate copy-ready paragraphs
                 copy_ready_html <- paste0(
-                    '<div style="background: #f8f9fa; border-left: 5px solid #007bff; padding: 20px; margin: 20px 0; border-radius: 0 10px 10px 0;">',
+                    '<div style="background-color: rgba(138, 155, 172, 0.06); border-left: 5px solid #007bff; padding: 20px; margin: 20px 0; border-radius: 0 10px 10px 0; color: inherit;">',
                     '<h3 style="color: #007bff; margin-top: 0;"> ', t$title, "</h3>",
                     '<div style="background: white; padding: 15px; border-radius: 8px; margin: 15px 0;">',
                     '<h4 style="color: #28a745; margin-top: 0;">', t$methods_header, "</h4>",
@@ -660,7 +660,7 @@ stagemigrationClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                     },
                     "</p>",
                     "</div>",
-                    '<div style="text-align: center; margin-top: 20px; padding: 10px; background: #e3f2fd; border-radius: 5px;">',
+                    '<div style="text-align: center; margin-top: 20px; padding: 10px; background-color: rgba(33, 152, 239, 0.13); border-radius: 5px; color: inherit;">',
                     '<small style="color: #666;">',
                     " <strong>Usage Note:</strong> This summary can be copied directly into clinical reports or adapted for manuscript preparation. ",
                     "Statistical details and complete methodology are available in the detailed analysis results above.",
@@ -1011,7 +1011,7 @@ stagemigrationClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                 # Handle validation errors
                 if (!validation_result$valid) {
                     # Create formatted error HTML
-                    error_html <- "<div style='color: #d32f2f; padding: 15px; background-color: #ffebee; border-left: 4px solid #d32f2f;'>"
+                    error_html <- "<div style='color: inherit; padding: 15px; background-color: rgba(255, 33, 67, 0.09); border-left: 4px solid #d32f2f;'>"
                     error_html <- paste0(error_html, "<h3 style='margin-top: 0;'>Validation Errors:</h3><ul>")
 
                     for (error in validation_result$errors) {
@@ -3201,7 +3201,7 @@ stagemigrationClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
 
                         if (is_multi_institutional) {
                             cv_explanation_html <- paste0(
-                                '<div style="margin-bottom: 20px; padding: 15px; background-color: #f0f8ff; border-left: 4px solid #1565c0;">
+                                '<div style="margin-bottom: 20px; padding: 15px; background-color: rgba(33, 152, 255, 0.07); border-left: 4px solid #1565c0; color: inherit;">
                             <h4 style="margin-top: 0; color: #2c3e50;">Understanding Multi-Institutional Validation Results</h4>
                             <p style="margin-bottom: 10px;">Multi-institutional validation provides the strongest evidence for staging system generalizability by testing across different medical centers:</p>
 
@@ -3228,7 +3228,7 @@ stagemigrationClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                             )
                         } else {
                             cv_explanation_html <- paste0(
-                                '<div style="margin-bottom: 20px; padding: 15px; background-color: #f0f8ff; border-left: 4px solid #1565c0;">
+                                '<div style="margin-bottom: 20px; padding: 15px; background-color: rgba(33, 152, 255, 0.07); border-left: 4px solid #1565c0; color: inherit;">
                             <h4 style="margin-top: 0; color: #2c3e50;">Understanding Cross-Validation Results</h4>
                             <p style="margin-bottom: 10px;">Cross-validation assesses model generalizability by testing performance on independent data splits:</p>
 
@@ -3406,11 +3406,11 @@ stagemigrationClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
             .generateWelcomeMessage = function() {
                 # Generate comprehensive welcome message
                 welcome_html <- "
-            <div style='background-color: #e3f2fd; padding: 25px; border-radius: 10px; margin: 20px 0;'>
+            <div style='background-color: rgba(33, 152, 239, 0.13); padding: 25px; border-radius: 10px; margin: 20px 0; color: inherit;'>
             <h2 style='color: #1976d2; margin-top: 0; text-align: center;'> Advanced TNM Stage Migration Analysis</h2>
             <p style='text-align: center; font-size: 16px; margin-bottom: 25px;'><strong>State-of-the-Art Staging System Validation for Pathologists</strong></p>
 
-            <div style='background-color: #fff; padding: 20px; border-radius: 8px; margin-bottom: 20px;'>
+            <div style='background-color: rgba(255, 255, 255, 0.06); padding: 20px; border-radius: 8px; margin-bottom: 20px; color: inherit;'>
             <h3 style='color: #1976d2; margin-top: 0;'> Quick Start Guide</h3>
             <ol style='line-height: 1.8;'>
             <li><strong>Select Core Variables:</strong>
@@ -3427,7 +3427,7 @@ stagemigrationClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
             </ol>
             </div>
 
-            <div style='background-color: #f8f9fa; padding: 20px; border-radius: 8px; margin-bottom: 20px;'>
+            <div style='background-color: rgba(138, 155, 172, 0.06); padding: 20px; border-radius: 8px; margin-bottom: 20px; color: inherit;'>
             <h3 style='color: #1976d2; margin-top: 0;'> Advanced Statistical Methods</h3>
             <div style='display: grid; grid-template-columns: 1fr 1fr; gap: 15px;'>
                 <div>
@@ -3451,7 +3451,7 @@ stagemigrationClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
             </div>
             </div>
 
-            <div style='background-color: #fff3cd; padding: 20px; border-radius: 8px; margin-bottom: 20px;'>
+            <div style='background-color: rgba(255, 202, 33, 0.23); padding: 20px; border-radius: 8px; margin-bottom: 20px; color: inherit;'>
             <h3 style='color: #856404; margin-top: 0;'> Clinical Applications</h3>
             <ul style='line-height: 1.8;'>
             <li><strong>TNM Edition Transitions:</strong> Validate 7th to 8th edition changes</li>
@@ -3462,7 +3462,7 @@ stagemigrationClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
             </ul>
             </div>
 
-            <div style='background-color: #d1ecf1; padding: 20px; border-radius: 8px; margin-bottom: 20px;'>
+            <div style='background-color: rgba(33, 163, 188, 0.21); padding: 20px; border-radius: 8px; margin-bottom: 20px; color: inherit;'>
             <h3 style='color: #0c5460; margin-top: 0;'> Comprehensive Output</h3>
             <div style='display: grid; grid-template-columns: 1fr 1fr; gap: 15px;'>
                 <div>
@@ -3486,7 +3486,7 @@ stagemigrationClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
             </div>
             </div>
 
-            <div style='background-color: #d4edda; padding: 20px; border-radius: 8px;'>
+            <div style='background-color: rgba(33, 162, 64, 0.19); padding: 20px; border-radius: 8px; color: inherit;'>
             <h3 style='color: #155724; margin-top: 0;'> Getting Started</h3>
             <p style='margin-bottom: 15px;'><strong>For optimal results:</strong></p>
             <ul style='line-height: 1.8; margin-bottom: 15px;'>
@@ -3510,7 +3510,7 @@ stagemigrationClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                     # Add explanatory text for executive summary
                     if (isTRUE(self$options$showExplanations)) {
                         executive_summary_explanation_html <- '
-                    <div style="margin-bottom: 20px; padding: 15px; background-color: #f8f9fa; border-left: 4px solid #6c757d;">
+                    <div style="margin-bottom: 20px; padding: 15px; background-color: rgba(138, 155, 172, 0.06); border-left: 4px solid #6c757d; color: inherit;">
                         <h4 style="margin-top: 0; color: #2c3e50;">Understanding the Executive Summary</h4>
                         <p style="margin-bottom: 10px;">This table provides a high-level overview of key findings for stakeholders:</p>
                         <ul style="margin-left: 20px;">
@@ -3538,7 +3538,7 @@ stagemigrationClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                     # Add explanatory text for migration overview
                     if (isTRUE(self$options$showExplanations)) {
                         explanation_html <- '
-                <div style="margin-bottom: 20px; padding: 15px; background-color: #f0f4f8; border-left: 4px solid #3498db;">
+                <div style="margin-bottom: 20px; padding: 15px; background-color: rgba(33, 92, 152, 0.07); border-left: 4px solid #3498db; color: inherit;">
                     <h4 style="margin-top: 0; color: #2c3e50;">Understanding the Migration Overview Table</h4>
                     <p style="margin-bottom: 10px;">This table provides fundamental migration statistics showing the overall impact of the new staging system:</p>
                     <ul style="margin-left: 20px;">
@@ -3561,7 +3561,7 @@ stagemigrationClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                     # Add explanatory text for migration summary
                     if (isTRUE(self$options$showExplanations)) {
                         summary_explanation_html <- '
-                    <div style="margin-bottom: 20px; padding: 15px; background-color: #e8f4f8; border-left: 4px solid #17a2b8;">
+                    <div style="margin-bottom: 20px; padding: 15px; background-color: rgba(33, 149, 188, 0.1); border-left: 4px solid #17a2b8; color: inherit;">
                         <h4 style="margin-top: 0; color: #2c3e50;">Understanding Migration Statistical Tests</h4>
                         <p style="margin-bottom: 10px;">This table provides formal statistical tests to evaluate migration patterns:</p>
                         <ul style="margin-left: 20px;">
@@ -3588,7 +3588,7 @@ stagemigrationClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                     # Add explanatory text for stage distribution
                     if (isTRUE(self$options$showExplanations)) {
                         distribution_explanation_html <- '
-                    <div style="margin-bottom: 20px; padding: 15px; background-color: #fff4e6; border-left: 4px solid #f39c12;">
+                    <div style="margin-bottom: 20px; padding: 15px; background-color: rgba(255, 157, 33, 0.11); border-left: 4px solid #f39c12; color: inherit;">
                         <h4 style="margin-top: 0; color: #2c3e50;">Understanding Stage Distribution Changes</h4>
                         <p style="margin-bottom: 10px;">This table compares how patients are distributed across stages in both systems:</p>
                         <ul style="margin-left: 20px;">
@@ -3616,7 +3616,7 @@ stagemigrationClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                     # Add explanatory text for migration matrix
                     if (isTRUE(self$options$showExplanations)) {
                         matrix_explanation_html <- '
-                <div style="margin-bottom: 20px; padding: 15px; background-color: #f5f3ff; border-left: 4px solid #9b59b6;">
+                <div style="margin-bottom: 20px; padding: 15px; background-color: rgba(88, 55, 255, 0.06); border-left: 4px solid #9b59b6; color: inherit;">
                     <h4 style="margin-top: 0; color: #2c3e50;">How to Read the Migration Matrix</h4>
                     <p style="margin-bottom: 10px;">This cross-tabulation matrix shows patient movement between staging systems:</p>
                     <ul style="margin-left: 20px;">
@@ -3640,7 +3640,7 @@ stagemigrationClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                     # Add explanatory text for statistical comparison
                     if (isTRUE(self$options$showExplanations)) {
                         statistical_explanation_html <- '
-                    <div style="margin-bottom: 20px; padding: 15px; background-color: #e8f4fd; border-left: 4px solid #3498db;">
+                    <div style="margin-bottom: 20px; padding: 15px; background-color: rgba(33, 149, 236, 0.1); border-left: 4px solid #3498db; color: inherit;">
                         <h4 style="margin-top: 0; color: #2c3e50;">Understanding Statistical Comparison Metrics</h4>
                         <p style="margin-bottom: 10px;">This table provides quantitative measures of how well each staging system performs:</p>
                         <ul style="margin-left: 20px;">
@@ -3669,7 +3669,7 @@ stagemigrationClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                     # Add explanatory text for concordance comparison
                     if (isTRUE(self$options$showExplanations)) {
                         concordance_explanation_html <- '
-                    <div style="margin-bottom: 20px; padding: 15px; background-color: #f0f8ed; border-left: 4px solid #27ae60;">
+                    <div style="margin-bottom: 20px; padding: 15px; background-color: rgba(70, 169, 33, 0.08); border-left: 4px solid #27ae60; color: inherit;">
                         <h4 style="margin-top: 0; color: #2c3e50;">Understanding Concordance (C-Index) Analysis</h4>
                         <p style="margin-bottom: 10px;">The concordance index (C-index) measures how well each staging system discriminates between patients with different survival outcomes:</p>
                         <ul style="margin-left: 20px;">
@@ -3698,7 +3698,7 @@ stagemigrationClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                     # Add explanatory text for NRI analysis
                     if (isTRUE(self$options$showExplanations)) {
                         nri_explanation_html <- '
-                    <div style="margin-bottom: 20px; padding: 15px; background-color: #fff0f5; border-left: 4px solid #e91e63;">
+                    <div style="margin-bottom: 20px; padding: 15px; background-color: rgba(255, 33, 107, 0.07); border-left: 4px solid #e91e63; color: inherit;">
                         <h4 style="margin-top: 0; color: #2c3e50;">Understanding Net Reclassification Improvement (NRI)</h4>
                         <p style="margin-bottom: 10px;">NRI measures how the new staging system reclassifies patients into different risk categories compared to the old system:</p>
 
@@ -3755,7 +3755,7 @@ stagemigrationClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                             <li><strong>Weighted NRI:</strong> Gives higher importance to correct classification of high-risk patients (2.0x weight vs 1.0x for low-risk) - clinically relevant emphasis</li>
                         </ul>
 
-                        <p style="margin-bottom: 0; background-color: #f8f9fa; padding: 10px; border-radius: 4px; font-style: italic;">
+                        <p style="margin-bottom: 0; background-color: rgba(138, 155, 172, 0.06); padding: 10px; border-radius: 4px; font-style: italic; color: inherit;">
                         <strong>Example:</strong> At 24 months, if NRI+ = 0.15 and NRI- = 0.10, it means the new staging system correctly moved 15% more event patients to higher risk categories and 10% more non-event patients to lower risk categories. A weighted NRI of 0.18 would indicate even better performance when emphasizing high-risk patients.
                         </p>
                     </div>
@@ -3770,7 +3770,7 @@ stagemigrationClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                     # Add explanatory text for IDI analysis
                     if (isTRUE(self$options$showExplanations)) {
                         idi_explanation_html <- '
-                    <div style="margin-bottom: 20px; padding: 15px; background-color: #f3e5f5; border-left: 4px solid #9c27b0;">
+                    <div style="margin-bottom: 20px; padding: 15px; background-color: rgba(153, 33, 170, 0.12); border-left: 4px solid #9c27b0; color: inherit;">
                         <h4 style="margin-top: 0; color: #2c3e50;">Understanding Integrated Discrimination Improvement (IDI)</h4>
                         <p style="margin-bottom: 10px;">IDI measures the improvement in discrimination slope between staging systems:</p>
                         <ul style="margin-left: 20px;">
@@ -3779,7 +3779,7 @@ stagemigrationClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                             <li><strong>p-value:</strong> Statistical significance of the discrimination improvement <span style="color: #d32f2f; font-weight: bold;">(requires Bootstrap Validation to be enabled)</span></li>
                             <li><strong>Interpretation:</strong> Clinical significance assessment based on IDI magnitude</li>
                         </ul>
-                        <div style="background-color: #ffebee; padding: 10px; border-radius: 5px; margin: 10px 0;">
+                        <div style="background-color: rgba(255, 33, 67, 0.09); padding: 10px; border-radius: 5px; margin: 10px 0; color: inherit;">
                             <p style="margin: 0; color: #c62828;"><strong> Important:</strong> To obtain 95% confidence intervals and p-values for IDI, you must enable <strong>"Bootstrap Validation"</strong> in the Advanced Options section. Without bootstrap, only the point estimate of IDI will be calculated.</p>
                         </div>
                         <p style="margin-bottom: 5px;"><strong>Clinical interpretation:</strong></p>
@@ -3813,7 +3813,7 @@ stagemigrationClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                     # Add explanatory text for DCA analysis
                     if (isTRUE(self$options$showExplanations)) {
                         dca_explanation_html <- '
-                    <div style="margin-bottom: 20px; padding: 15px; background-color: #e8f4fd; border-left: 4px solid #2196f3;">
+                    <div style="margin-bottom: 20px; padding: 15px; background-color: rgba(33, 149, 236, 0.1); border-left: 4px solid #2196f3; color: inherit;">
                         <h4 style="margin-top: 0; color: #2c3e50;">Understanding Decision Curve Analysis (DCA)</h4>
                         <p style="margin-bottom: 10px;">DCA evaluates the clinical utility of staging systems by quantifying net benefit across different decision thresholds:</p>
                         <ul style="margin-left: 20px;">
@@ -3823,7 +3823,7 @@ stagemigrationClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                             <li><strong>Treat None:</strong> Strategy of treating no patients regardless of staging</li>
                             <li><strong>Model Lines:</strong> Net benefit curves for original and new staging systems</li>
                         </ul>
-                        <div style="background-color: #f3f8ff; padding: 10px; border-radius: 5px; margin: 10px 0;">
+                        <div style="background-color: rgba(55, 138, 255, 0.06); padding: 10px; border-radius: 5px; margin: 10px 0; color: inherit;">
                             <p style="margin: 0; color: #1565c0;"><strong> Clinical Interpretation:</strong></p>
                             <ul style="margin: 5px 0 0 20px; color: #1565c0;">
                                 <li><strong>Higher curve = better net benefit</strong> at that threshold</li>
@@ -3853,7 +3853,7 @@ stagemigrationClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                     # Add explanatory text for pseudo R-squared
                     if (isTRUE(self$options$showExplanations)) {
                         pseudo_r2_explanation_html <- '
-                    <div style="margin-bottom: 20px; padding: 15px; background-color: #e8f5e8; border-left: 4px solid #4caf50;">
+                    <div style="margin-bottom: 20px; padding: 15px; background-color: rgba(33, 159, 33, 0.1); border-left: 4px solid #4caf50; color: inherit;">
                         <h4 style="margin-top: 0; color: #2c3e50;">Understanding Pseudo R-squared Measures</h4>
                         <p style="margin-bottom: 10px;">Pseudo R-squared measures quantify the explanatory power of Cox proportional hazards models:</p>
                         <ul style="margin-left: 20px;">
@@ -3863,7 +3863,7 @@ stagemigrationClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                             <li><strong>Adjusted McFadden R\u{00B2}:</strong> Penalizes for model complexity, can be negative if overfitted</li>
                             <li><strong>Royston & Sauerbrei R\u{00B2}:</strong> Measures explained variation in survival times, accounts for censoring patterns</li>
                         </ul>
-                        <div style="background-color: #f0f8f0; padding: 10px; border-radius: 5px; margin: 10px 0;">
+                        <div style="background-color: rgba(33, 152, 33, 0.07); padding: 10px; border-radius: 5px; margin: 10px 0; color: inherit;">
                             <p style="margin: 0; color: #2e7d32;"><strong> Clinical Interpretation:</strong></p>
                             <ul style="margin: 5px 0 0 20px; color: #2e7d32;">
                                 <li><strong>Nagelkerke R\u{00B2} >0.3:</strong> Acceptable explanatory power</li>
@@ -3905,7 +3905,7 @@ stagemigrationClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                     # Add explanatory text for calibration analysis
                     if (isTRUE(self$options$showExplanations)) {
                         calibration_explanation_html <- '
-                    <div style="margin-bottom: 20px; padding: 15px; background-color: #fff3e0; border-left: 4px solid #ff9800;">
+                    <div style="margin-bottom: 20px; padding: 15px; background-color: rgba(255, 169, 33, 0.14); border-left: 4px solid #ff9800; color: inherit;">
                         <h4 style="margin-top: 0; color: #2c3e50;">Understanding Enhanced Calibration Analysis</h4>
                         <p style="margin-bottom: 10px;">Comprehensive calibration analysis assesses how well predicted survival probabilities match observed outcomes using both traditional and advanced spline-based methods:</p>
                         <div style="margin-bottom: 15px;">
@@ -3957,7 +3957,7 @@ stagemigrationClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                         # Add explanatory text for Will Rogers analysis
                         if (isTRUE(self$options$showExplanations)) {
                             will_rogers_explanation_html <- '
-                        <div style="margin-bottom: 20px; padding: 15px; background-color: #fdf2e9; border-left: 4px solid #f39c12;">
+                        <div style="margin-bottom: 20px; padding: 15px; background-color: rgba(235, 124, 33, 0.1); border-left: 4px solid #f39c12; color: inherit;">
                             <h4 style="margin-top: 0; color: #2c3e50;">Understanding Will Rogers Phenomenon Analysis</h4>
                             <p style="margin-bottom: 10px;">The Will Rogers phenomenon occurs when patients migrate between stages, potentially creating artificial improvements:</p>
                             <ul style="margin-left: 20px;">
@@ -3988,7 +3988,7 @@ stagemigrationClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                     # Add explanatory text for clinical interpretation
                     if (isTRUE(self$options$showExplanations)) {
                         clinical_interpretation_explanation_html <- '
-                    <div style="margin-bottom: 20px; padding: 15px; background-color: #e8f5e8; border-left: 4px solid #4caf50;">
+                    <div style="margin-bottom: 20px; padding: 15px; background-color: rgba(33, 159, 33, 0.1); border-left: 4px solid #4caf50; color: inherit;">
                         <h4 style="margin-top: 0; color: #2c3e50;">Understanding Clinical Interpretation Guide</h4>
                         <p style="margin-bottom: 10px;">This table provides evidence-based recommendations for staging system adoption:</p>
                         <ul style="margin-left: 20px;">
@@ -4016,7 +4016,7 @@ stagemigrationClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                     # Add explanatory text for likelihood ratio tests
                     if (isTRUE(self$options$showExplanations)) {
                         likelihood_tests_explanation_html <- '
-                    <div style="margin-bottom: 20px; padding: 15px; background-color: #f0f8ff; border-left: 4px solid #2196f3;">
+                    <div style="margin-bottom: 20px; padding: 15px; background-color: rgba(33, 152, 255, 0.07); border-left: 4px solid #2196f3; color: inherit;">
                         <h4 style="margin-top: 0; color: #2c3e50;">Understanding Likelihood Ratio Tests</h4>
                         <p style="margin-bottom: 10px;">Likelihood ratio tests compare the goodness-of-fit between nested Cox models to assess if the new staging system provides significantly better survival prediction:</p>
                         <ul style="margin-left: 20px;">
@@ -4055,7 +4055,7 @@ stagemigrationClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                     # Add explanatory text for homogeneity tests
                     if (isTRUE(self$options$showExplanations)) {
                         homogeneity_tests_explanation_html <- '
-                    <div style="margin-bottom: 20px; padding: 15px; background-color: #fff5e6; border-left: 4px solid #ff9800;">
+                    <div style="margin-bottom: 20px; padding: 15px; background-color: rgba(255, 166, 33, 0.11); border-left: 4px solid #ff9800; color: inherit;">
                         <h4 style="margin-top: 0; color: #2c3e50;">Understanding Stage Homogeneity Tests</h4>
                         <p style="margin-bottom: 10px;">Stage homogeneity tests evaluate whether patients within each stage have similar survival outcomes (internal consistency) and whether there is a clear prognostic gradient across stages:</p>
 
@@ -4104,7 +4104,7 @@ stagemigrationClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                     # Add explanatory text for trend tests
                     if (isTRUE(self$options$showExplanations)) {
                         trend_tests_explanation_html <- '
-                    <div style="margin-bottom: 20px; padding: 15px; background-color: #fff3e0; border-left: 4px solid #ff9800;">
+                    <div style="margin-bottom: 20px; padding: 15px; background-color: rgba(255, 169, 33, 0.14); border-left: 4px solid #ff9800; color: inherit;">
                         <h4 style="margin-top: 0; color: #2c3e50;">Understanding Stage Trend Analysis</h4>
                         <p style="margin-bottom: 10px;">Stage trend analysis evaluates whether there is a monotonic progression in survival outcomes across stage levels:</p>
                         <ul style="margin-left: 20px;">
@@ -4112,7 +4112,7 @@ stagemigrationClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                             <li><strong>Positive Coefficient:</strong> Higher stage numbers associated with worse survival (expected)</li>
                             <li><strong>Negative Coefficient:</strong> Higher stage numbers associated with better survival (unexpected - check stage ordering)</li>
                         </ul>
-                        <div style="margin-top: 15px; padding: 10px; background-color: #f5f5f5; border-radius: 4px;">
+                        <div style="margin-top: 15px; padding: 10px; background-color: rgba(88, 88, 88, 0.06); border-radius: 4px; color: inherit;">
                             <strong>Clinical Interpretation:</strong>
                             <ul style="margin-left: 20px; margin-bottom: 0;">
                                 <li><strong>p < 0.05:</strong> Significant trend exists across stages</li>
@@ -4132,7 +4132,7 @@ stagemigrationClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                     # Add explanatory text for statistical summary
                     if (isTRUE(self$options$showExplanations)) {
                         statistical_summary_explanation_html <- '
-                    <div style="margin-bottom: 20px; padding: 15px; background-color: #e3f2fd; border-left: 4px solid #2196f3;">
+                    <div style="margin-bottom: 20px; padding: 15px; background-color: rgba(33, 152, 239, 0.13); border-left: 4px solid #2196f3; color: inherit;">
                         <h4 style="margin-top: 0; color: #2c3e50;">Understanding the Statistical Summary</h4>
                         <p style="margin-bottom: 10px;">This table consolidates all statistical tests and measures in one comprehensive view:</p>
                         <ul style="margin-left: 20px;">
@@ -4162,7 +4162,7 @@ stagemigrationClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                     # Add explanatory text for effect sizes
                     if (isTRUE(self$options$showExplanations)) {
                         effect_sizes_explanation_html <- '
-                    <div style="margin-bottom: 20px; padding: 15px; background-color: #fff8e1; border-left: 4px solid #ff9800;">
+                    <div style="margin-bottom: 20px; padding: 15px; background-color: rgba(255, 203, 33, 0.14); border-left: 4px solid #ff9800; color: inherit;">
                         <h4 style="margin-top: 0; color: #2c3e50;">Understanding Effect Sizes</h4>
                         <p style="margin-bottom: 10px;">Effect sizes quantify the magnitude of differences between staging systems, independent of sample size:</p>
                         <ul style="margin-left: 20px;">
@@ -4171,7 +4171,7 @@ stagemigrationClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                             <li><strong>Eta-squared (\u{03B7}\u{00B2}):</strong> Proportion of variance explained by staging system</li>
                             <li><strong>Omega-squared (\u{03C9}\u{00B2}):</strong> Unbiased estimate of effect size</li>
                         </ul>
-                        <div style="margin-top: 15px; padding: 10px; background-color: #f5f5f5; border-radius: 4px;">
+                        <div style="margin-top: 15px; padding: 10px; background-color: rgba(88, 88, 88, 0.06); border-radius: 4px; color: inherit;">
                             <strong>Interpretation Guidelines:</strong>
                             <ul style="margin-left: 20px; margin-bottom: 0;">
                                 <li><strong>Small Effect:</strong> d \u{2248} 0.2, \u{03B7}\u{00B2} \u{2248} 0.01 (minimal practical importance)</li>
@@ -4193,7 +4193,7 @@ stagemigrationClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                     # Add explanatory text for advanced migration analysis
                     if (isTRUE(self$options$showExplanations)) {
                         advanced_migration_explanation_html <- '
-                    <div style="margin-bottom: 20px; padding: 15px; background-color: #e8f5e8; border-left: 4px solid #4caf50;">
+                    <div style="margin-bottom: 20px; padding: 15px; background-color: rgba(33, 159, 33, 0.1); border-left: 4px solid #4caf50; color: inherit;">
                         <h4 style="margin-top: 0; color: #2c3e50;">Understanding Advanced Migration Analysis</h4>
 
                         <h5>Monotonicity Assessment</h5>
@@ -4224,7 +4224,7 @@ stagemigrationClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                 # Methodology Notes
                 if (self$options$showMethodologyNotes) {
                     methodology_html <- '
-                <div style="margin-bottom: 20px; padding: 15px; background-color: #f5f5f5; border-left: 4px solid #333;">
+                <div style="margin-bottom: 20px; padding: 15px; background-color: rgba(88, 88, 88, 0.06); border-left: 4px solid #333; color: inherit;">
                     <h4 style="margin-top: 0; color: #2c3e50;">Statistical Methodology</h4>
 
                     <h5>Concordance Index (C-Index)</h5>
@@ -4268,7 +4268,7 @@ stagemigrationClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                     # Add explanatory text for multifactorial analysis
                     if (isTRUE(self$options$showExplanations)) {
                         multifactorial_explanation_html <- '
-                    <div style="margin-bottom: 20px; padding: 15px; background-color: #f0f8ff; border-left: 4px solid #4169e1;">
+                    <div style="margin-bottom: 20px; padding: 15px; background-color: rgba(33, 152, 255, 0.07); border-left: 4px solid #4169e1; color: inherit;">
                         <h4 style="margin-top: 0; color: #2c3e50;">Advanced Multifactorial Stage Migration Analysis</h4>
                         <p style="margin-bottom: 15px;">This comprehensive analysis evaluates staging system performance using state-of-the-art multivariable methods, accounting for other prognostic factors and providing clinically actionable insights.</p>
 
@@ -4295,7 +4295,7 @@ stagemigrationClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                             </div>
                         </div>
 
-                        <div style="background-color: #fff; padding: 12px; border-radius: 4px; margin-bottom: 15px;">
+                        <div style="background-color: rgba(255, 255, 255, 0.06); padding: 12px; border-radius: 4px; margin-bottom: 15px; color: inherit;">
                             <h5 style="color: #d32f2f; margin-bottom: 8px;">Clinical Significance Thresholds</h5>
                             <ul style="margin: 0; padding-left: 16px; font-size: 14px;">
                                 <li>C-index improvement >= 0.02 (clinically meaningful discrimination gain)</li>
@@ -4305,7 +4305,7 @@ stagemigrationClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                             </ul>
                         </div>
 
-                        <div style="background-color: #e8f5e8; padding: 12px; border-radius: 4px;">
+                        <div style="background-color: rgba(33, 159, 33, 0.1); padding: 12px; border-radius: 4px; color: inherit;">
                             <h5 style="color: #2e7d32; margin-bottom: 8px;">Clinical Applications</h5>
                             <ul style="margin: 0; padding-left: 16px; font-size: 14px;">
                                 <li><strong>Evidence-based adoption:</strong> Robust statistical evidence for staging system changes</li>
@@ -4316,7 +4316,7 @@ stagemigrationClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                             </ul>
                         </div>
 
-                        <div style="background-color: #fff3e0; padding: 12px; border-radius: 4px; margin-top: 15px;">
+                        <div style="background-color: rgba(255, 169, 33, 0.14); padding: 12px; border-radius: 4px; margin-top: 15px; color: inherit;">
                             <h5 style="color: #e65100; margin-bottom: 8px;">Configuration Guidance & Resource Estimation</h5>
                             <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
                                 <div>
@@ -4365,7 +4365,7 @@ stagemigrationClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                     # Add explanation if enabled
                     if (isTRUE(self$options$showExplanations)) {
                         heatmap_explanation_html <- '
-                    <div style="margin-bottom: 20px; padding: 15px; background-color: #fff8e1; border-left: 4px solid #ffc107;">
+                    <div style="margin-bottom: 20px; padding: 15px; background-color: rgba(255, 203, 33, 0.14); border-left: 4px solid #ffc107; color: inherit;">
                         <h4 style="margin-top: 0; color: #2c3e50;">Interpreting the Migration Heatmap</h4>
                         <p style="margin-bottom: 10px;">This heatmap visualizes patient movement between staging systems:</p>
                         <ul style="margin-left: 20px;">
@@ -4397,7 +4397,7 @@ stagemigrationClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                 #     # Add explanation if enabled
                 #     if (isTRUE(self$options$showExplanations)) {
                 #         sankey_explanation_html <- '
-                #         <div style="margin-bottom: 20px; padding: 15px; background-color: #e8f5e8; border-left: 4px solid #4caf50;">
+                #         <div style="margin-bottom: 20px; padding: 15px; background-color: rgba(33, 159, 33, 0.1); border-left: 4px solid #4caf50; color: inherit;">
                 #             <h4 style="margin-top: 0; color: #2c3e50;">Understanding the Stage Migration Flow Diagram</h4>
                 #             <p style="margin-bottom: 10px;">This Sankey diagram visualizes patient flow between staging systems:</p>
                 #             <ul style="margin-left: 20px;">
@@ -4433,7 +4433,7 @@ stagemigrationClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                     # Add explanation if enabled
                     if (isTRUE(self$options$showExplanations)) {
                         roc_explanation_html <- '
-                    <div style="margin-bottom: 20px; padding: 15px; background-color: #e8f4fd; border-left: 4px solid #2196f3;">
+                    <div style="margin-bottom: 20px; padding: 15px; background-color: rgba(33, 149, 236, 0.1); border-left: 4px solid #2196f3; color: inherit;">
                         <h4 style="margin-top: 0; color: #2c3e50;">Understanding Time-dependent ROC Curves</h4>
                         <p style="margin-bottom: 10px;">ROC curves show the discriminative ability of staging systems at specific time points:</p>
                         <ul style="margin-left: 20px;">
@@ -4505,7 +4505,7 @@ stagemigrationClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                     # Add explanation if enabled
                     if (isTRUE(self$options$showExplanations)) {
                         forest_explanation_html <- '
-                    <div style="margin-bottom: 20px; padding: 15px; background-color: #f0f8ed; border-left: 4px solid #4caf50;">
+                    <div style="margin-bottom: 20px; padding: 15px; background-color: rgba(70, 169, 33, 0.08); border-left: 4px solid #4caf50; color: inherit;">
                         <h4 style="margin-top: 0; color: #2c3e50;">Understanding Hazard Ratio Forest Plots</h4>
                         <p style="margin-bottom: 10px;">Forest plots display hazard ratios (HR) with confidence intervals for each stage:</p>
                         <ul style="margin-left: 20px;">
@@ -4551,7 +4551,7 @@ stagemigrationClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                     # Add explanation if enabled
                     if (isTRUE(self$options$showExplanations)) {
                         calibration_explanation_html <- '
-                    <div style="margin-bottom: 20px; padding: 15px; background-color: #fff3e0; border-left: 4px solid #ff9800;">
+                    <div style="margin-bottom: 20px; padding: 15px; background-color: rgba(255, 169, 33, 0.14); border-left: 4px solid #ff9800; color: inherit;">
                         <h4 style="margin-top: 0; color: #2c3e50;">Understanding Enhanced Calibration Plots</h4>
                         <p style="margin-bottom: 10px;">Enhanced calibration plots provide comprehensive visual assessment of how well predicted survival probabilities match observed outcomes using dual-curve methodology:</p>
                         <div style="margin-bottom: 15px;">
@@ -4632,7 +4632,7 @@ stagemigrationClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                     # Add explanation if enabled
                     if (isTRUE(self$options$showExplanations)) {
                         decision_curves_explanation_html <- '
-                    <div style="margin-bottom: 20px; padding: 15px; background-color: #f3e5f5; border-left: 4px solid #9c27b0;">
+                    <div style="margin-bottom: 20px; padding: 15px; background-color: rgba(153, 33, 170, 0.12); border-left: 4px solid #9c27b0; color: inherit;">
                         <h4 style="margin-top: 0; color: #2c3e50;">Understanding Decision Curve Analysis</h4>
                         <p style="margin-bottom: 10px;">Decision curves help determine when using a staging system provides clinical benefit:</p>
                         <ul style="margin-left: 20px;">
@@ -4683,7 +4683,7 @@ stagemigrationClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                     # Add explanation if enabled
                     if (isTRUE(self$options$showExplanations)) {
                         survival_curves_explanation_html <- '
-                    <div style="margin-bottom: 20px; padding: 15px; background-color: #e8f5e8; border-left: 4px solid #4caf50;">
+                    <div style="margin-bottom: 20px; padding: 15px; background-color: rgba(33, 159, 33, 0.1); border-left: 4px solid #4caf50; color: inherit;">
                         <h4 style="margin-top: 0; color: #2c3e50;">Understanding Survival Curves Comparison</h4>
                         <p style="margin-bottom: 10px;">Survival curves show the probability of event-free survival over time for each stage:</p>
                         <ul style="margin-left: 20px;">
@@ -5954,7 +5954,7 @@ stagemigrationClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                 # Add explanatory text if available
                 if (self$options$showExplanations && "linearTrendTestExplanation" %in% names(self$results)) {
                     trend_explanation_html <- '
-                <div style="margin-bottom: 20px; padding: 15px; background-color: #f0f8ff; border-left: 4px solid #2196f3;">
+                <div style="margin-bottom: 20px; padding: 15px; background-color: rgba(33, 152, 255, 0.07); border-left: 4px solid #2196f3; color: inherit;">
                     <h4 style="margin-top: 0; color: #2c3e50;">Understanding Linear Trend Chi-square Tests</h4>
                     <p style="margin-bottom: 10px;">Linear trend tests assess whether there is a systematic increase in hazard across ordered stages:</p>
                     <ul style="margin-left: 20px;">
@@ -7487,7 +7487,7 @@ stagemigrationClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                         # Add dashboard explanation if enabled
                         if (isTRUE(self$options$showExplanations)) {
                             dashboard_explanation_html <- '
-                    <div style="margin-bottom: 20px; padding: 15px; background-color: #f0f8ff; border-left: 4px solid #1976d2;">
+                    <div style="margin-bottom: 20px; padding: 15px; background-color: rgba(33, 152, 255, 0.07); border-left: 4px solid #1976d2; color: inherit;">
                         <h4 style="margin-top: 0; color: #2c3e50;">Understanding the Comparative Analysis Dashboard</h4>
                         <p style="margin-bottom: 10px;">This dashboard provides an executive summary of all stage migration analyses. It synthesizes complex statistical results into actionable insights for clinical decision-making.</p>
 
@@ -7580,7 +7580,7 @@ stagemigrationClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                         # Add comprehensive abbreviation glossary if enabled
                         if (self$options$showAbbreviationGlossary) {
                             abbreviation_glossary_html <- '
-                    <div style="margin-bottom: 20px; padding: 20px; background-color: #f8f9fa; border: 1px solid #dee2e6; border-radius: 5px;">
+                    <div style="margin-bottom: 20px; padding: 20px; background-color: rgba(138, 155, 172, 0.06); border: 1px solid #dee2e6; border-radius: 5px; color: inherit;">
                         <h3 style="margin-top: 0; color: #2c3e50; text-align: center;">Comprehensive Abbreviation Glossary and Statistical Terms</h3>
                         <p style="text-align: center; color: #6c757d; margin-bottom: 20px;">Quick reference for all abbreviations and technical terms used in stage migration analysis</p>
 
@@ -7760,7 +7760,7 @@ stagemigrationClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
 
                         </div>
 
-                        <div style="margin-top: 20px; padding: 15px; background-color: #e3f2fd; border-radius: 5px;">
+                        <div style="margin-top: 20px; padding: 15px; background-color: rgba(33, 152, 239, 0.13); border-radius: 5px; color: inherit;">
                             <h5 style="margin-top: 0; color: #1565c0;">Quick Tips for Using This Glossary:</h5>
                             <ul style="margin: 0; padding-left: 20px;">
                                 <li>Use <strong>Ctrl+F</strong> (or <strong>Cmd+F</strong> on Mac) to search for specific terms</li>
@@ -7831,7 +7831,7 @@ stagemigrationClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                             if (isTRUE(self$options$showExplanations)) {
                                 bootstrap_reps <- if (is.null(self$options$bootstrapReps)) 1000 else self$options$bootstrapReps
                                 bootstrap_explanation_html <- paste0(
-                                    '<div style="margin-bottom: 20px; padding: 15px; background-color: #e8f5e8; border-left: 4px solid #28a745;">
+                                    '<div style="margin-bottom: 20px; padding: 15px; background-color: rgba(33, 159, 33, 0.1); border-left: 4px solid #28a745; color: inherit;">
                             <h4 style="margin-top: 0; color: #2c3e50;">Understanding Bootstrap Validation Results</h4>
                             <p style="margin-bottom: 10px;">Bootstrap validation uses resampling to assess internal validity and correct for optimism in model performance:</p>
 
@@ -15621,7 +15621,7 @@ stagemigrationClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                     # Add explanatory text for multifactorial results table
                     if (isTRUE(self$options$showExplanations)) {
                         multifactorial_results_explanation_html <- '
-                    <div style="margin-bottom: 20px; padding: 15px; background-color: #f0f8ff; border-left: 4px solid #4169e1;">
+                    <div style="margin-bottom: 20px; padding: 15px; background-color: rgba(33, 152, 255, 0.07); border-left: 4px solid #4169e1; color: inherit;">
                         <h4 style="margin-top: 0; color: #2c3e50;">Understanding Multifactorial Model Results</h4>
                         <p style="margin-bottom: 10px;">This table compares the performance of different models that combine staging systems with covariates:</p>
                         <ul style="margin-left: 20px;">
@@ -15695,7 +15695,7 @@ stagemigrationClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                     # Add explanatory output for adjusted C-index comparison
                     if (isTRUE(self$options$showExplanations)) {
                         adjusted_cindex_explanation_html <- '
-                    <div style="margin-bottom: 20px; padding: 15px; background-color: #f0f8ff; border-left: 4px solid #4169e1;">
+                    <div style="margin-bottom: 20px; padding: 15px; background-color: rgba(33, 152, 255, 0.07); border-left: 4px solid #4169e1; color: inherit;">
                         <h4 style="margin-top: 0; color: #2c3e50;">Understanding Adjusted C-Index Comparison</h4>
                         <p style="margin-bottom: 10px;">This table compares the discriminative ability (C-index) of models adjusted for covariates:</p>
                         <ul style="margin-left: 20px;">
@@ -15752,7 +15752,7 @@ stagemigrationClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                     # Add explanatory output for nested model tests
                     if (isTRUE(self$options$showExplanations)) {
                         nested_model_explanation_html <- '
-                    <div style="margin-bottom: 20px; padding: 15px; background-color: #f0f8ff; border-left: 4px solid #4169e1;">
+                    <div style="margin-bottom: 20px; padding: 15px; background-color: rgba(33, 152, 255, 0.07); border-left: 4px solid #4169e1; color: inherit;">
                         <h4 style="margin-top: 0; color: #2c3e50;">Understanding Nested Model Tests</h4>
                         <p style="margin-bottom: 10px;">These likelihood ratio tests compare nested models to assess if adding variables significantly improves model fit:</p>
                         <ul style="margin-left: 20px;">
@@ -15916,7 +15916,7 @@ stagemigrationClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                     # Add explanatory output for stepwise results
                     if (isTRUE(self$options$showExplanations)) {
                         stepwise_explanation_html <- '
-                    <div style="margin-bottom: 20px; padding: 15px; background-color: #f0f8ff; border-left: 4px solid #4169e1;">
+                    <div style="margin-bottom: 20px; padding: 15px; background-color: rgba(33, 152, 255, 0.07); border-left: 4px solid #4169e1; color: inherit;">
                         <h4 style="margin-top: 0; color: #2c3e50;">Understanding Stepwise Selection Results</h4>
                         <p style="margin-bottom: 10px;">This table shows the results of automatic variable selection to identify the most important predictors:</p>
                         <ul style="margin-left: 20px;">
@@ -16033,7 +16033,7 @@ stagemigrationClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                     # Add explanatory output for interaction tests
                     if (isTRUE(self$options$showExplanations)) {
                         interaction_explanation_html <- '
-                    <div style="margin-bottom: 20px; padding: 15px; background-color: #f0f8ff; border-left: 4px solid #4169e1;">
+                    <div style="margin-bottom: 20px; padding: 15px; background-color: rgba(33, 152, 255, 0.07); border-left: 4px solid #4169e1; color: inherit;">
                         <h4 style="margin-top: 0; color: #2c3e50;">Understanding Stage-Covariate Interaction Tests</h4>
                         <p style="margin-bottom: 10px;">These tests examine whether the effect of staging systems varies across different covariate levels:</p>
                         <ul style="margin-left: 20px;">
@@ -16089,7 +16089,7 @@ stagemigrationClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                     # Add explanatory output for stratified analysis
                     if (isTRUE(self$options$showExplanations)) {
                         stratified_explanation_html <- '
-                    <div style="margin-bottom: 20px; padding: 15px; background-color: #f0f8ff; border-left: 4px solid #4169e1;">
+                    <div style="margin-bottom: 20px; padding: 15px; background-color: rgba(33, 152, 255, 0.07); border-left: 4px solid #4169e1; color: inherit;">
                         <h4 style="margin-top: 0; color: #2c3e50;">Understanding Stratified Analysis</h4>
                         <p style="margin-bottom: 10px;">This analysis examines staging system performance within specific patient subgroups:</p>
                         <ul style="margin-left: 20px;">
@@ -16368,7 +16368,7 @@ stagemigrationClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                         # Add explanatory text
                         if (isTRUE(self$options$showExplanations)) {
                             explanation_html <- '
-                    <div style="margin-bottom: 20px; padding: 15px; background-color: #f0f8ff; border-left: 4px solid #1e88e5;">
+                    <div style="margin-bottom: 20px; padding: 15px; background-color: rgba(33, 152, 255, 0.07); border-left: 4px solid #1e88e5; color: inherit;">
                         <h4 style="margin-top: 0; color: #0d47a1;">Understanding Will Rogers Evidence Assessment Framework</h4>
                         <p style="margin-bottom: 10px;">This comprehensive framework evaluates multiple lines of evidence to determine if stage migration represents legitimate prognostic improvement:</p>
                         <ul style="margin-left: 20px;">

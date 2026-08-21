@@ -11,8 +11,8 @@ adaptivelassoClass <- R6::R6Class(
                     <style>
                         h2 {color: #e74c3c;}
                         body {font-family: Arial, sans-serif; margin: 20px;}
-                        .highlight {background-color: #f39c12; padding: 2px 4px; border-radius: 3px;}
-                        .step {margin: 10px 0; padding: 8px; background-color: #ecf0f1; border-radius: 5px;}
+                        .highlight {background-color: #f39c12; color: #111111; padding: 2px 4px; border-radius: 3px;}
+                        .step {margin: 10px 0; padding: 8px; background-color: rgba(33, 80, 92, 0.09); color: inherit; border-radius: 5px;}
                     </style>
                     </head>
                     <body>
@@ -643,7 +643,7 @@ adaptivelassoClass <- R6::R6Class(
             cv_args <- list(
                 x = cox_data$x,
                 y = y_glmnet,
-                family = "cox",
+                family = "cox", cox.ties = "breslow",
                 alpha = self$options$alpha,
                 penalty.factor = adaptive_weights,
                 nfolds = nfolds,
@@ -664,7 +664,7 @@ adaptivelassoClass <- R6::R6Class(
                 full_fit <- glmnet::glmnet(
                     x = cox_data$x,
                     y = y_glmnet,
-                    family = "cox",
+                    family = "cox", cox.ties = "breslow",
                     alpha = self$options$alpha,
                     penalty.factor = adaptive_weights,
                     lambda = lambda_seq,
@@ -690,7 +690,7 @@ adaptivelassoClass <- R6::R6Class(
                 full_fit <- glmnet::glmnet(
                     x = cox_data$x,
                     y = y_glmnet,
-                    family = "cox",
+                    family = "cox", cox.ties = "breslow",
                     alpha = self$options$alpha,
                     penalty.factor = adaptive_weights,
                     lambda = cv_fit$lambda,
@@ -754,7 +754,7 @@ adaptivelassoClass <- R6::R6Class(
                 ridge_fit <- glmnet::glmnet(
                     x = cox_data$x,
                     y = y_glmnet,
-                    family = "cox",
+                    family = "cox", cox.ties = "breslow",
                     alpha = 0,  # Pure ridge
                     standardize = FALSE
                 )
@@ -796,7 +796,7 @@ adaptivelassoClass <- R6::R6Class(
                         # Fallback to ridge if Cox fails
                         ridge_fit <- glmnet::glmnet(
                             cox_data$x, y_glmnet,
-                            family = "cox",
+                            family = "cox", cox.ties = "breslow",
                             alpha = 0
                         )
                         lambda_ridge <- ridge_fit$lambda[length(ridge_fit$lambda) %/% 4]
@@ -806,7 +806,7 @@ adaptivelassoClass <- R6::R6Class(
                     # Too many variables, use ridge instead
                     ridge_fit <- glmnet::glmnet(
                         cox_data$x, y_glmnet,
-                        family = "cox",
+                        family = "cox", cox.ties = "breslow",
                         alpha = 0
                     )
                     lambda_ridge <- ridge_fit$lambda[length(ridge_fit$lambda) %/% 4]
@@ -948,7 +948,7 @@ adaptivelassoClass <- R6::R6Class(
                     boot_fit <- glmnet::glmnet(
                         x = boot_x,
                         y = boot_surv,
-                        family = "cox",
+                        family = "cox", cox.ties = "breslow",
                         alpha = self$options$alpha,
                         penalty.factor = adaptive_weights,
                         standardize = FALSE
@@ -959,7 +959,7 @@ adaptivelassoClass <- R6::R6Class(
                     boot_cv <- glmnet::cv.glmnet(
                         x = boot_x,
                         y = boot_surv,
-                        family = "cox",
+                        family = "cox", cox.ties = "breslow",
                         alpha = self$options$alpha,
                         penalty.factor = adaptive_weights,
                         nfolds = boot_nfold,

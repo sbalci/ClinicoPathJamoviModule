@@ -270,11 +270,23 @@ options:
       default: false
 
     - name: newvarname
-      title: New Variable Name
+      title: New Variable Name (retired - name the column in the output box)
       type: String
       default: rpa_stage
       description:
-          R: name for the new variable containing RPA stage assignments
+          R: >
+            retired and ignored. The risk-group column is written by the
+            `riskgroupvar` output, which carries its own name. Kept so that
+            existing syntax keeps parsing.
+
+    - name: riskgroupvar
+      title: Add RPA Risk Group to Data
+      type: Output
+      description:
+          R: >
+            if TRUE, the RPA risk-group assignment is added to your data as a new
+            variable. It covers every row of the dataset; a row excluded from the
+            analysis for missing time, event or predictor values stays empty.
 
     - name: showSummary
       title: Show Plain-Language Summary

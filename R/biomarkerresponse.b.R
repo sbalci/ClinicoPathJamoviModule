@@ -65,7 +65,7 @@ biomarkerresponseClass <- if (requireNamespace("jmvcore")) {
                 # Validate we have exactly 2 levels
                 if (length(current_levels) != 2) {
                     html <- paste0(
-                        "<div style='background-color: #fff3cd; border-left: 4px solid #ffc107; padding: 15px; margin: 10px 0;'>",
+                        "<div style='background-color: rgba(255, 202, 33, 0.23); border-left: 4px solid #ffc107; padding: 15px; margin: 10px 0; color: inherit;'>",
                         "<h4 style='margin-top: 0; color: #856404;'> Non-Binary Response Data</h4>",
                         "<p style='color: #856404;'>Binary response type selected but found ", length(current_levels), " levels.</p>",
                         "<p><strong>Current levels:</strong> ", paste(htmltools::htmlEscape(current_levels), collapse = ", "), "</p>",
@@ -86,7 +86,7 @@ biomarkerresponseClass <- if (requireNamespace("jmvcore")) {
                     # Check if specified level exists
                     if (!(positive_level %in% current_levels)) {
                         html <- paste0(
-                            "<div style='background-color: #fff3cd; border-left: 4px solid #ffc107; padding: 15px; margin: 10px 0;'>",
+                            "<div style='background-color: rgba(255, 202, 33, 0.23); border-left: 4px solid #ffc107; padding: 15px; margin: 10px 0; color: inherit;'>",
                             "<h4 style='margin-top: 0; color: #856404;'> Specified Positive Level Not Found</h4>",
                             "<p style='color: #856404;'>Positive level '<strong>", htmltools::htmlEscape(positive_level), "</strong>' not found in response data.</p>",
                             "<p><strong>Available levels:</strong> ", paste(htmltools::htmlEscape(current_levels), collapse = ", "), "</p>",
@@ -226,7 +226,7 @@ biomarkerresponseClass <- if (requireNamespace("jmvcore")) {
                 # Issue warning if insufficient class representation
                 if (total_positive == 0 || total_negative == 0) {
                     html <- paste0(
-                        "<div style='background-color: #fff3cd; border-left: 4px solid #ffc107; padding: 15px; margin: 10px 0;'>",
+                        "<div style='background-color: rgba(255, 202, 33, 0.23); border-left: 4px solid #ffc107; padding: 15px; margin: 10px 0; color: inherit;'>",
                         "<h4 style='margin-top: 0; color: #856404;'> Single-Class Cohort Detected</h4>",
                         "<p style='color: #856404;'>All patients belong to a single response class. Cannot calculate classification metrics.</p>",
                         "<p><strong>Data distribution:</strong></p>",
@@ -497,7 +497,7 @@ biomarkerresponseClass <- if (requireNamespace("jmvcore")) {
                 # Enhanced error checking and validation
                 if (nrow(self$data) == 0) {
                     html <- paste0(
-                        "<div style='background-color: #f8d7da; border-left: 4px solid #dc3545; padding: 15px; margin: 10px 0;'>",
+                        "<div style='background-color: rgba(216, 33, 50, 0.18); border-left: 4px solid #dc3545; padding: 15px; margin: 10px 0; color: inherit;'>",
                         "<h4 style='margin-top: 0; color: #721c24;'> No Data Available</h4>",
                         "<p style='color: #721c24;'>Dataset contains no rows.</p>",
                         "<p>Please load data for biomarker analysis.</p>",
@@ -530,7 +530,7 @@ biomarkerresponseClass <- if (requireNamespace("jmvcore")) {
                 # Initial data validation
                 if (is.null(raw_biomarker_values)) {
                     html <- paste0(
-                        "<div style='background-color: #f8d7da; border-left: 4px solid #dc3545; padding: 15px; margin: 10px 0;'>",
+                        "<div style='background-color: rgba(216, 33, 50, 0.18); border-left: 4px solid #dc3545; padding: 15px; margin: 10px 0; color: inherit;'>",
                         "<h4 style='margin-top: 0; color: #721c24;'> Variable Not Found</h4>",
                         "<p style='color: #721c24;'>Biomarker variable '<strong>", htmltools::htmlEscape(biomarker_var), "</strong>' could not be found in the dataset.</p>",
                         "<p>Please check that the variable name is correct and exists in your data.</p>",
@@ -542,7 +542,7 @@ biomarkerresponseClass <- if (requireNamespace("jmvcore")) {
 
                 if (is.null(raw_response_values)) {
                     html <- paste0(
-                        "<div style='background-color: #f8d7da; border-left: 4px solid #dc3545; padding: 15px; margin: 10px 0;'>",
+                        "<div style='background-color: rgba(216, 33, 50, 0.18); border-left: 4px solid #dc3545; padding: 15px; margin: 10px 0; color: inherit;'>",
                         "<h4 style='margin-top: 0; color: #721c24;'> Variable Not Found</h4>",
                         "<p style='color: #721c24;'>Response variable '<strong>", htmltools::htmlEscape(response_var), "</strong>' could not be found in the dataset.</p>",
                         "<p>Please check that the variable name is correct and exists in your data.</p>",
@@ -554,7 +554,7 @@ biomarkerresponseClass <- if (requireNamespace("jmvcore")) {
 
                 if (all(is.na(raw_biomarker_values))) {
                     html <- paste0(
-                        "<div style='background-color: #f8d7da; border-left: 4px solid #dc3545; padding: 15px; margin: 10px 0;'>",
+                        "<div style='background-color: rgba(216, 33, 50, 0.18); border-left: 4px solid #dc3545; padding: 15px; margin: 10px 0; color: inherit;'>",
                         "<h4 style='margin-top: 0; color: #721c24;'> All Values Missing</h4>",
                         "<p style='color: #721c24;'>Biomarker variable contains only missing values.</p>",
                         "<p><strong>Solutions:</strong></p>",
@@ -571,7 +571,7 @@ biomarkerresponseClass <- if (requireNamespace("jmvcore")) {
 
                 if (all(is.na(raw_response_values))) {
                     html <- paste0(
-                        "<div style='background-color: #f8d7da; border-left: 4px solid #dc3545; padding: 15px; margin: 10px 0;'>",
+                        "<div style='background-color: rgba(216, 33, 50, 0.18); border-left: 4px solid #dc3545; padding: 15px; margin: 10px 0; color: inherit;'>",
                         "<h4 style='margin-top: 0; color: #721c24;'> All Values Missing</h4>",
                         "<p style='color: #721c24;'>Response variable contains only missing values.</p>",
                         "<p><strong>Solutions:</strong></p>",
@@ -594,7 +594,7 @@ biomarkerresponseClass <- if (requireNamespace("jmvcore")) {
                         },
                         error = function(e) {
                             html <- paste0(
-                                "<div style='background-color: #f8d7da; border-left: 4px solid #dc3545; padding: 15px; margin: 10px 0;'>",
+                                "<div style='background-color: rgba(216, 33, 50, 0.18); border-left: 4px solid #dc3545; padding: 15px; margin: 10px 0; color: inherit;'>",
                                 "<h4 style='margin-top: 0; color: #721c24;'> Invalid Biomarker Data Type</h4>",
                                 "<p style='color: #721c24;'>Biomarker variable must be numeric or convertible to numeric.</p>",
                                 "<p><strong>Current variable type:</strong> ", htmltools::htmlEscape(class(raw_biomarker_values)[1]), "</p>",
@@ -634,7 +634,7 @@ biomarkerresponseClass <- if (requireNamespace("jmvcore")) {
                             },
                             error = function(e) {
                                 html <- paste0(
-                                    "<div style='background-color: #f8d7da; border-left: 4px solid #dc3545; padding: 15px; margin: 10px 0;'>",
+                                    "<div style='background-color: rgba(216, 33, 50, 0.18); border-left: 4px solid #dc3545; padding: 15px; margin: 10px 0; color: inherit;'>",
                                     "<h4 style='margin-top: 0; color: #721c24;'> Invalid Response Data Type</h4>",
                                     "<p style='color: #721c24;'>Continuous response variable must be numeric or convertible to numeric.</p>",
                                     "<p><strong>Current variable type:</strong> ", htmltools::htmlEscape(class(raw_response_values)[1]), "</p>",
@@ -777,7 +777,7 @@ biomarkerresponseClass <- if (requireNamespace("jmvcore")) {
                 # Final data validation
                 if (length(biomarker_values) == 0) {
                     html <- paste0(
-                        "<div style='background-color: #f8d7da; border-left: 4px solid #dc3545; padding: 15px; margin: 10px 0;'>",
+                        "<div style='background-color: rgba(216, 33, 50, 0.18); border-left: 4px solid #dc3545; padding: 15px; margin: 10px 0; color: inherit;'>",
                         "<h4 style='margin-top: 0; color: #721c24;'> No Valid Data Points</h4>",
                         "<p style='color: #721c24;'>No valid data points remain after preprocessing.</p>",
                         "<p><strong>Possible causes:</strong></p>",
@@ -820,7 +820,7 @@ biomarkerresponseClass <- if (requireNamespace("jmvcore")) {
                 biomarker_range <- max(biomarker_values) - min(biomarker_values)
                 if (biomarker_range == 0) {
                     html <- paste0(
-                        "<div style='background-color: #f8d7da; border-left: 4px solid #dc3545; padding: 15px; margin: 10px 0;'>",
+                        "<div style='background-color: rgba(216, 33, 50, 0.18); border-left: 4px solid #dc3545; padding: 15px; margin: 10px 0; color: inherit;'>",
                         "<h4 style='margin-top: 0; color: #721c24;'> Constant Biomarker Values</h4>",
                         "<p style='color: #721c24;'>All biomarker values are identical. Cannot perform analysis.</p>",
                         "<p><strong>Current value:</strong> ", htmltools::htmlEscape(as.character(unique(biomarker_values)[1])), "</p>",
@@ -1169,7 +1169,7 @@ biomarkerresponseClass <- if (requireNamespace("jmvcore")) {
                         min_value <- min(non_na_data, na.rm = TRUE)
 
                         html <- paste0(
-                            "<div style='background-color: #f8d7da; border-left: 4px solid #dc3545; padding: 15px; margin: 10px 0;'>",
+                            "<div style='background-color: rgba(216, 33, 50, 0.18); border-left: 4px solid #dc3545; padding: 15px; margin: 10px 0; color: inherit;'>",
                             "<h4 style='margin-top: 0; color: #721c24;'> Invalid Data for Log Transformation</h4>",
                             "<p style='color: #721c24;'>Log transformation requires non-negative values.</p>",
                             "<p><strong>Your data contains:</strong></p>",
@@ -1202,7 +1202,7 @@ biomarkerresponseClass <- if (requireNamespace("jmvcore")) {
                         nan_count <- sum(is.nan(processed_data), na.rm = TRUE)
 
                         html <- paste0(
-                            "<div style='background-color: #fff3cd; border-left: 4px solid #ffc107; padding: 15px; margin: 10px 0;'>",
+                            "<div style='background-color: rgba(255, 202, 33, 0.23); border-left: 4px solid #ffc107; padding: 15px; margin: 10px 0; color: inherit;'>",
                             "<h4 style='margin-top: 0; color: #856404;'> Log Transformation Issues</h4>",
                             "<p style='color: #856404;'>Log transformation produced invalid values.</p>",
                             "<p><strong>Issues detected:</strong></p>",

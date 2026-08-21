@@ -116,7 +116,7 @@ vartreeClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             # Initial check for variables
             if (is.null(self$options$vars) || length(self$options$vars) == 0) {
                 todo <- paste0(
-                    "<div style='background-color: #f8f9fa; padding: 15px; border-radius: 5px;'>",
+                    "<div style='background-color: rgba(138, 155, 172, 0.06); padding: 15px; border-radius: 5px; color: inherit;'>",
                     "<h3 style='color: #007bff; margin-top: 0;'>", .("Welcome to Variable Tree Analysis"), "</h3>",
                     "<p>", .("This tool creates hierarchical visualizations of categorical variables to identify patient subgroups and clinical patterns."), "</p>",
                     
@@ -693,7 +693,7 @@ vartreeClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         # Generate clinical summary with practical guidance
         .generateClinicalSummary = function() {
             summary_parts <- c(
-                paste0("<div style='background-color: #f8f9fa; padding: 10px; border-left: 4px solid #007bff; margin: 10px 0;'>"),
+                paste0("<div style='background-color: rgba(138, 155, 172, 0.06); padding: 10px; border-left: 4px solid #007bff; margin: 10px 0; color: inherit;'>"),
                 paste0("<b>", .("Clinical Summary:"), "</b><br>"),
                 paste0("\u{2022} ", .("Variable trees help identify patient subgroups and treatment patterns"), "<br>"),
                 paste0("\u{2022} ", .("Each branch represents a unique combination of patient characteristics"), "<br>"),
@@ -716,7 +716,7 @@ vartreeClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         # Generate About This Analysis section
         .generateAboutSection = function() {
             about_parts <- c(
-                paste0("<div style='background-color: #e8f4f8; padding: 10px; border-left: 4px solid #28a745; margin: 10px 0;'>"),
+                paste0("<div style='background-color: rgba(33, 149, 188, 0.1); padding: 10px; border-left: 4px solid #28a745; margin: 10px 0; color: inherit;'>"),
                 paste0("<b>", .("About This Analysis:"), "</b><br>"),
                 paste0("\u{2022} <b>", .("Purpose:"), "</b> ", .("Explore relationships between categorical variables in clinical data"), "<br>"),
                 paste0("\u{2022} <b>", .("Best for:"), "</b> ", .("Identifying patient subgroups, treatment patterns, and outcome associations"), "<br>"),
@@ -782,7 +782,7 @@ vartreeClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         # Enhancement 4: Generate tree terminology glossary
         .generateTreeGlossary = function() {
             glossary_parts <- c(
-                paste0("<div style='background-color: #fff3cd; padding: 10px; border-left: 4px solid #ffc107; margin: 10px 0;'>"),
+                paste0("<div style='background-color: rgba(255, 202, 33, 0.23); padding: 10px; border-left: 4px solid #ffc107; margin: 10px 0; color: inherit;'>"),
                 paste0("<b>", .("Tree Terminology Guide:"), "</b><br>"),
                 paste0("\u{2022} <b>", .("Root Node:"), "</b> ", .("Top of tree showing total sample size (N) and starting point for all branches"), "<br>"),
                 paste0("\u{2022} <b>", .("Branch:"), "</b> ", .("Path from root to leaf representing a sequence of variable splits"), "<br>"),

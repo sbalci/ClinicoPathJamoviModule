@@ -119,7 +119,7 @@ enhancedtablesClass <- if (requireNamespace("jmvcore")) R6::R6Class(
         
         .create_welcome_message = function() {
             paste(
-                "<div style='background-color: #f8f9fa; padding: 20px; border-radius: 8px; margin: 10px;'>",
+                "<div style='background-color: rgba(138, 155, 172, 0.06); padding: 20px; border-radius: 8px; margin: 10px; color: inherit;'>",
                 "<h3 style='color: #2c3e50; margin-top: 0;'>Enhanced Tables with gt Package</h3>",
                 "<p><strong>Create professional, publication-ready tables with advanced formatting.</strong></p>",
                 "<h4>Quick Start:</h4>",
@@ -575,7 +575,7 @@ enhancedtablesClass <- if (requireNamespace("jmvcore")) R6::R6Class(
             data <- private$.processed_data
             
             stats_html <- paste(
-                "<div style='background-color: #f8f9fa; padding: 15px; border-radius: 5px; margin: 10px;'>",
+                "<div style='background-color: rgba(138, 155, 172, 0.06); padding: 15px; border-radius: 5px; margin: 10px; color: inherit;'>",
                 "<h4>Summary Statistics</h4>",
                 "<ul>",
                 paste0("<li><strong>Dataset Size:</strong> ", nrow(data), " observations, ", ncol(data), " variables</li>"),
@@ -598,7 +598,7 @@ enhancedtablesClass <- if (requireNamespace("jmvcore")) R6::R6Class(
             data <- private$.processed_data
             group_var <- self$options$group_var
             
-            comparison_results <- "<div style='background-color: #fff3cd; padding: 15px; border-radius: 5px; margin: 10px;'>"
+            comparison_results <- "<div style='background-color: rgba(255, 202, 33, 0.23); padding: 15px; border-radius: 5px; margin: 10px; color: inherit;'>"
             comparison_results <- paste(comparison_results, "<h4>Group Comparison Results</h4>")
             
             # Perform statistical tests for each variable
@@ -688,7 +688,7 @@ enhancedtablesClass <- if (requireNamespace("jmvcore")) R6::R6Class(
             data <- private$.processed_data
             
             interpretation_html <- paste(
-                "<div style='background-color: #d1ecf1; padding: 15px; border-radius: 5px; margin: 10px;'>",
+                "<div style='background-color: rgba(33, 163, 188, 0.21); padding: 15px; border-radius: 5px; margin: 10px; color: inherit;'>",
                 "<h4>Clinical Interpretation & Usage Guide</h4>",
                 "<h5>Table Interpretation:</h5>",
                 "<ul>",
@@ -735,7 +735,7 @@ enhancedtablesClass <- if (requireNamespace("jmvcore")) R6::R6Class(
         
         .create_export_table = function() {
             export_html <- paste(
-                "<div style='background-color: #f8f9fa; padding: 15px; border-radius: 5px; margin: 10px;'>",
+                "<div style='background-color: rgba(138, 155, 172, 0.06); padding: 15px; border-radius: 5px; margin: 10px; color: inherit;'>",
                 "<h4>Export Information</h4>",
                 "<p><strong>Export Format:</strong> ", self$options$export_format, "</p>",
                 "<p><strong>Note:</strong> The table above is optimized for ", self$options$export_format, " export.</p>",

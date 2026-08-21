@@ -252,7 +252,7 @@ hullplotClass <- if (requireNamespace("jmvcore")) R6::R6Class("hullplotClass",
             if (is.null(self$options$x_var) || is.null(self$options$y_var) || is.null(self$options$group_var) ||
                 self$options$x_var == "" || self$options$y_var == "" || self$options$group_var == "") {
                 intro_msg <- "
-                <div style='background-color: #e3f2fd; padding: 20px; border-radius: 8px; margin: 20px 0;'>
+                <div style='background-color: rgba(33, 152, 239, 0.13); padding: 20px; border-radius: 8px; margin: 20px 0; color: inherit;'>
                 <h3 style='color: #1976d2; margin-top: 0;'> Welcome to Hull Plot Visualization!</h3>
                 <p><strong>Create stunning cluster visualizations</strong> using ggforce hull polygons</p>
                 <p>Based on R-Bloggers tutorial: 'Make a Hull Plot to Visualize Clusters in ggplot2'</p>
@@ -288,7 +288,7 @@ hullplotClass <- if (requireNamespace("jmvcore")) R6::R6Class("hullplotClass",
             # Safely require ggforce and concaveman
             if (!requireNamespace("ggforce", quietly = TRUE)) {
                 error_msg <- "
-                <div style='color: red; background-color: #ffebee; padding: 20px; border-radius: 8px;'>
+                <div style='color: red; background-color: rgba(255, 33, 67, 0.09); padding: 20px; border-radius: 8px;'>
                 <h4>ggforce Package Required</h4>
                 <p>The ggforce package is required for hull plot functionality.</p>
                 <p>Please install it using: <code>install.packages('ggforce')</code></p>
@@ -303,7 +303,7 @@ hullplotClass <- if (requireNamespace("jmvcore")) R6::R6Class("hullplotClass",
             fallback_note <- NULL
             if (!(v8_available && concaveman_available)) {
                 fallback_note <- paste0(
-                    "<div style='color: #856404; background-color: #fff3cd; padding: 12px; border-radius: 6px; margin: 12px 0;'>",
+                    "<div style='color: inherit; background-color: rgba(255, 202, 33, 0.23); padding: 12px; border-radius: 6px; margin: 12px 0;'>",
                     "<strong>Concave hulls unavailable:</strong> V8/concaveman not installed. Showing convex hulls. ",
                     "Install with <code>install.packages('V8'); install.packages('concaveman')</code> for concave hulls.",
                     "</div>")
@@ -316,7 +316,7 @@ hullplotClass <- if (requireNamespace("jmvcore")) R6::R6Class("hullplotClass",
                 # here means the dataset is empty or absent. Previously every
                 # panel was simply left blank with no explanation.
                 self$results$todo$setContent(paste0(
-                    "<div style='background-color: #fff3cd; border-left: 4px solid #ffc107; ",
+                    "<div style='background-color: rgba(255, 202, 33, 0.23); color: inherit; border-left: 4px solid #ffc107; ",
                     "padding: 15px; border-radius: 4px;'>",
                     "<h4 style='color: #856404; margin-top: 0;'>No data to plot</h4>",
                     "<p style='color: #856404; margin: 5px 0;'>The dataset contains no rows. ",
@@ -637,7 +637,7 @@ hullplotClass <- if (requireNamespace("jmvcore")) R6::R6Class("hullplotClass",
             
             # Create HTML table
             stats_html <- paste0(
-                "<div style='background-color: #f8f9fa; padding: 20px; border-radius: 8px; margin-bottom: 20px;'>",
+                "<div style='background-color: rgba(138, 155, 172, 0.06); padding: 20px; border-radius: 8px; margin-bottom: 20px; color: inherit;'>",
                 "<h3 style='color: #495057; margin-top: 0;'> Group Statistics Summary</h3>",
                 "<table style='width: 100%; border-collapse: collapse; font-family: Arial, sans-serif;'>",
                 "<thead><tr style='background-color: #6c757d; color: white;'>",
@@ -704,7 +704,7 @@ hullplotClass <- if (requireNamespace("jmvcore")) R6::R6Class("hullplotClass",
             }
             
             outlier_html <- paste0(
-                "<div style='background-color: #fff3cd; padding: 20px; border-radius: 8px; margin-bottom: 20px;'>",
+                "<div style='background-color: rgba(255, 202, 33, 0.23); padding: 20px; border-radius: 8px; margin-bottom: 20px; color: inherit;'>",
                 "<h3 style='color: #856404; margin-top: 0;'> Outlier Detection (IQR Method)</h3>",
                 "<ul>"
             )
@@ -743,7 +743,7 @@ hullplotClass <- if (requireNamespace("jmvcore")) R6::R6Class("hullplotClass",
             warnings_html <- ""
             if (length(validation_warnings) > 0) {
                 warnings_html <- paste0(
-                    "<div style='background-color: #fff3cd; border-left: 4px solid #ffc107; padding: 15px; margin-bottom: 20px; border-radius: 4px;'>",
+                    "<div style='background-color: rgba(255, 202, 33, 0.23); border-left: 4px solid #ffc107; padding: 15px; margin-bottom: 20px; border-radius: 4px; color: inherit;'>",
                     "<h4 style='color: #856404; margin-top: 0;'> Data Quality Warnings</h4>"
                 )
                 for (warning in validation_warnings) {
@@ -754,7 +754,7 @@ hullplotClass <- if (requireNamespace("jmvcore")) R6::R6Class("hullplotClass",
 
             interpretation_html <- paste0(
                 warnings_html,
-                "<div style='background-color: #d1ecf1; padding: 20px; border-radius: 8px;'>",
+                "<div style='background-color: rgba(33, 163, 188, 0.21); padding: 20px; border-radius: 8px; color: inherit;'>",
                 "<h3 style='color: #0c5460; margin-top: 0;'> Hull Plot Interpretation Guide</h3>",
 
                 "<h4 style='color: #0c5460;'>Plot Summary:</h4>",
@@ -847,12 +847,12 @@ hullplotClass <- if (requireNamespace("jmvcore")) R6::R6Class("hullplotClass",
 
             # Generate copy-ready summary
             summary_html <- paste0(
-                "<div style='background-color: #e8f5e8; border-left: 4px solid #28a745; padding: 20px; margin-bottom: 20px; border-radius: 4px;'>",
+                "<div style='background-color: rgba(33, 159, 33, 0.1); border-left: 4px solid #28a745; padding: 20px; margin-bottom: 20px; border-radius: 4px; color: inherit;'>",
                 "<h3 style='color: #155724; margin-top: 0;'> Natural Language Summary</h3>",
 
                 # Add disclaimer about descriptive nature
                 if (n_groups >= 2) paste0(
-                    "<div style='background-color: #fff3cd; border-left: 3px solid #ffc107; padding: 10px; margin: 10px 0;'>",
+                    "<div style='background-color: rgba(255, 202, 33, 0.23); border-left: 3px solid #ffc107; padding: 10px; margin: 10px 0; color: inherit;'>",
                     "<p style='margin: 0; font-size: 13px;'><strong> Note on 'Separation' Assessment:</strong> ",
                     "The descriptors '", separation_quality, "' are based on a descriptive heuristic (discriminability index = ",
                     "mean distance between group centroids / mean standard deviation). ",
@@ -862,7 +862,7 @@ hullplotClass <- if (requireNamespace("jmvcore")) R6::R6Class("hullplotClass",
                     "</div>"
                 ) else "",
 
-                "<div style='background-color: #ffffff; padding: 15px; border-radius: 6px; margin: 15px 0; border: 1px solid #c3e6cb;'>",
+                "<div style='background-color: rgba(255, 255, 255, 0.06); padding: 15px; border-radius: 6px; margin: 15px 0; border: 1px solid #c3e6cb; color: inherit;'>",
                 "<h4 style='color: #155724; margin-top: 0;'>Copy-Ready Text:</h4>",
                 "<p style='font-family: \"Times New Roman\", serif; line-height: 1.6; margin: 0;'>",
                 # With a single group the comparative wording is not merely
@@ -933,7 +933,7 @@ hullplotClass <- if (requireNamespace("jmvcore")) R6::R6Class("hullplotClass",
 
         .generate_assumptions_guide = function() {
             assumptions_html <- paste0(
-                "<div style='background-color: #fff8e1; border-left: 4px solid #ff9800; padding: 20px; margin-bottom: 20px; border-radius: 4px;'>",
+                "<div style='background-color: rgba(255, 203, 33, 0.14); border-left: 4px solid #ff9800; padding: 20px; margin-bottom: 20px; border-radius: 4px; color: inherit;'>",
                 "<h3 style='color: #e65100; margin-top: 0;'> Data Requirements & Assumptions</h3>",
 
                 "<h4 style='color: #e65100;'>Data Requirements:</h4>",
@@ -969,7 +969,7 @@ hullplotClass <- if (requireNamespace("jmvcore")) R6::R6Class("hullplotClass",
                 "<li><strong>Quality Control:</strong> Detecting unusual patterns or data quality issues</li>",
                 "</ul>",
 
-                "<div style='background-color: #ffe0b2; padding: 15px; border-radius: 6px; margin-top: 15px; border: 2px solid #ff9800;'>",
+                "<div style='background-color: rgba(255, 166, 33, 0.35); padding: 15px; border-radius: 6px; margin-top: 15px; border: 2px solid #ff9800; color: inherit;'>",
                 "<h4 style='color: #bf360c; margin-top: 0;'> Critical Reminder: Exploratory vs. Inferential Analysis</h4>",
                 "<p style='color: #bf360c; margin: 5px 0;'><strong>Hull plots are DESCRIPTIVE VISUALIZATIONS, not statistical tests.</strong></p>",
                 "<ul style='color: #bf360c; margin: 10px 0;'>",

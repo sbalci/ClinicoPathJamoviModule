@@ -28,7 +28,7 @@ benfordClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
             if (nrow(self$data) == 0) {
                 html <- paste0(
-                    "<div style='background-color: #f8d7da; border-left: 4px solid #dc3545; padding: 15px; margin: 10px 0;'>",
+                    "<div style='background-color: rgba(216, 33, 50, 0.18); border-left: 4px solid #dc3545; padding: 15px; margin: 10px 0; color: inherit;'>",
                     "<h4 style='margin-top: 0; color: #721c24;'> No Data Available</h4>",
                     "<p style='color: #721c24;'>", .("Data contains no (complete) rows."), "</p>",
                     "<p>", .("Please check your data for missing values or filtering issues."), "</p>",
@@ -45,7 +45,7 @@ benfordClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             # Check minimum sample size
             if (valid_count < 30) {
                 html <- paste0(
-                    "<div style='background-color: #f8d7da; border-left: 4px solid #dc3545; padding: 15px; margin: 10px 0;'>",
+                    "<div style='background-color: rgba(216, 33, 50, 0.18); border-left: 4px solid #dc3545; padding: 15px; margin: 10px 0; color: inherit;'>",
                     "<h4 style='margin-top: 0; color: #721c24;'> Insufficient Data</h4>",
                     "<p style='color: #721c24;'>", .("Benford's Law analysis requires at least <strong>30 valid observations</strong> for meaningful results."), "</p>",
                     "<p><strong>", .("Current data:"), "</strong> ", valid_count, " ", .("valid observations"), "</p>",
@@ -70,7 +70,7 @@ benfordClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 negative_count <- sum(non_na_data < 0)
 
                 html <- paste0(
-                    "<div style='background-color: #f8d7da; border-left: 4px solid #dc3545; padding: 15px; margin: 10px 0;'>",
+                    "<div style='background-color: rgba(216, 33, 50, 0.18); border-left: 4px solid #dc3545; padding: 15px; margin: 10px 0; color: inherit;'>",
                     "<h4 style='margin-top: 0; color: #721c24;'> Invalid Values Detected</h4>",
                     "<p style='color: #721c24;'><strong>", .("Benford's Law only applies to positive numbers."), "</strong></p>",
                     "<p>", .("Your data contains:"), "</p>",
@@ -99,7 +99,7 @@ benfordClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
             if (magnitude_range < 1) {
                 html <- paste0(
-                    "<div style='background-color: #fff3cd; border-left: 4px solid #ffc107; padding: 15px; margin: 10px 0;'>",
+                    "<div style='background-color: rgba(255, 202, 33, 0.23); border-left: 4px solid #ffc107; padding: 15px; margin: 10px 0; color: inherit;'>",
                     "<h4 style='margin-top: 0; color: #856404;'> Limited Data Range</h4>",
                     "<p style='color: #856404;'><strong>", .("Warning: Data spans less than one order of magnitude."), "</strong></p>",
                     "<p>", .("Benford's Law works best when data spans multiple orders of magnitude (e.g., values ranging from 10 to 1000+)."), "</p>",
@@ -349,7 +349,7 @@ benfordClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         
         .generateClinicalExplanation = function() {
             explanation <- glue::glue("
-            <div style='padding: 15px; background-color: #f8f9fa; border-left: 4px solid #007bff; margin-bottom: 20px;'>
+            <div style='padding: 15px; background-color: rgba(138, 155, 172, 0.06); border-left: 4px solid #007bff; margin-bottom: 20px; color: inherit;'>
                 <h4 style='color: #007bff; margin-top: 0;'>{title}</h4>
                 <p><strong>{what_title}</strong> {what_text}</p>
                 <p><strong>{when_title}</strong> {when_text}</p>
@@ -393,7 +393,7 @@ benfordClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             }
 
             report <- glue::glue("
-            <div style='padding: 15px; background-color: #e8f5e8; border: 1px solid #28a745; border-radius: 5px;'>
+            <div style='padding: 15px; background-color: rgba(33, 159, 33, 0.1); border: 1px solid #28a745; border-radius: 5px; color: inherit;'>
                 <h4 style='color: #28a745; margin-top: 0;'>{title}</h4>
                 <p style='font-size: 16px; margin-bottom: 10px;'>
                     <strong>{summary}</strong>
@@ -410,11 +410,29 @@ benfordClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             return(report)
         },
         
+        .init = function() {
+            # The summary table always carries the same six statistics, so its
+            # row structure is built here rather than in .run(): otherwise the
+            # table appears empty and then visibly restructures on every run.
+            # .run() fills only the computed cells (setRow).
+            statistics <- c(
+                .("Sample Size"),
+                .("MAD (Mean Absolute Deviation)"),
+                .("Chi-square Test"),
+                .("Mantissa Arc Test"),
+                .("Flagged Observations"),
+                .("Assessment"))
+
+            for (i in seq_along(statistics))
+                self$results$summary$addRow(rowKey=i, values=list(
+                    statistic=statistics[i]))
+        },
+
         .run = function() {
             # Welcome message when no variable selected
             if (is.null(self$options$var)) {
                 welcome_html <- glue::glue("
-                <div style='padding: 20px; background-color: #f8f9fa; border-left: 4px solid #007bff; margin: 20px 0;'>
+                <div style='padding: 20px; background-color: rgba(138, 155, 172, 0.06); border-left: 4px solid #007bff; margin: 20px 0; color: inherit;'>
                     <h3 style='color: #007bff; margin-top: 0;'>Benford's Law Analysis</h3>
                     <p><strong>{getting_started}</strong></p>
                     <ol style='margin: 10px 0;'>
@@ -455,7 +473,7 @@ benfordClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             # Guidelines
             doclink <- .("Package documentation")
             guidelines <- glue::glue("
-                <div style='padding: 10px; background-color: #fff3cd; border: 1px solid #ffeaa7; border-radius: 3px;'>
+                <div style='padding: 10px; background-color: rgba(255, 202, 33, 0.23); border: 1px solid #ffeaa7; border-radius: 3px; color: inherit;'>
                     <p><strong>{guidelines_title}</strong></p>
                     <ul style='margin-bottom: 10px;'>
                         <li>{guideline1}</li>
@@ -513,11 +531,6 @@ benfordClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             # Perform Benford analysis with error handling
             private$.checkpoint()
             tryCatch({
-                # Clear any prior summary rows up front so a run that errors part
-                # way through cannot leave stale rows, and so re-adding rowKey 1-6
-                # never collides with rows from a previous run.
-                self$results$summary$deleteRows()
-
                 # Run Benford analysis
                 bfd.cp <- benford.analysis::benford(data = var,
                                                    number.of.digits = digits)
@@ -580,8 +593,7 @@ benfordClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
                 # Populate summary table with TRANSPARENT statistical evidence
                 # First, show sample size
-                self$results$summary$addRow(rowKey=1, values=list(
-                    statistic=.("Sample Size"),
+                self$results$summary$setRow(rowKey=1L, values=list(
                     value=as.character(interpretation$total_observations),
                     interpretation=.("Number of observations analyzed")
                 ))
@@ -601,36 +613,31 @@ benfordClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                         interpretation$n_digits, interpretation$mad_floor,
                         ceiling(private$.minNForMadLabel(interpretation$n_digits)))
                 }
-                self$results$summary$addRow(rowKey=2, values=list(
-                    statistic=.("MAD (Mean Absolute Deviation)"),
+                self$results$summary$setRow(rowKey=2L, values=list(
                     value=sprintf("%.4f", interpretation$mad_value),
                     interpretation=mad_note
                 ))
 
                 # Third, show Chi-square goodness-of-fit test
-                self$results$summary$addRow(rowKey=3, values=list(
-                    statistic=.("Chi-square Test"),
+                self$results$summary$setRow(rowKey=3L, values=list(
                     value=sprintf("X\u{00B2} = %.2f, df = %d", interpretation$chisq_statistic, interpretation$chisq_df),
                     interpretation=sprintf(.("p-value = %.4f"), interpretation$chisq_pvalue)
                 ))
 
                 # Fourth, show Mantissa Arc Test
-                self$results$summary$addRow(rowKey=4, values=list(
-                    statistic=.("Mantissa Arc Test"),
+                self$results$summary$setRow(rowKey=4L, values=list(
                     value=sprintf("L\u{00B2} = %.4f, df = %d", interpretation$mat_statistic, interpretation$mat_df),
                     interpretation=sprintf(.("p-value = %.4e"), interpretation$mat_pvalue)
                 ))
 
                 # Fifth, show suspect counts (descriptive, not primary evidence)
-                self$results$summary$addRow(rowKey=5, values=list(
-                    statistic=.("Flagged Observations"),
+                self$results$summary$setRow(rowKey=5L, values=list(
                     value=sprintf("%d (%.1f%%)", interpretation$suspicious_count, interpretation$suspicion_rate),
                     interpretation=.("Individual outliers identified by algorithm")
                 ))
 
                 # Sixth, show EVIDENCE-BASED clinical assessment
-                self$results$summary$addRow(rowKey=6, values=list(
-                    statistic=.("Assessment"),
+                self$results$summary$setRow(rowKey=6L, values=list(
                     value=interpretation$concern_level,
                     interpretation=interpretation$clinical_interpretation
                 ))
@@ -657,10 +664,15 @@ benfordClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
                 # Surface fatal errors via the dataWarning Html item (which has
                 # clearWith) rather than as a summary-table row. This keeps error
-                # text from co-mingling with stale statistical rows and avoids a
-                # duplicate rowKey=1 collision if the error was thrown after some
-                # rows had already been added.
-                self$results$summary$deleteRows()
+                # text from co-mingling with the statistical rows, and avoids
+                # leaving stale values if the error was thrown after some rows
+                # had already been filled. The six rows themselves are created
+                # once in .init(), so they are blanked here rather than deleted -
+                # deleting them would make a later setRow() (e.g. when a
+                # checkpoint restart re-enters .run()) fail with "rowKey not found".
+                for (i in 1:6)
+                    self$results$summary$setRow(rowKey=i, values=list(
+                        value="", interpretation=""))
                 # Escape the (potentially data-derived) error message before it
                 # enters the Html item, so it cannot inject markup.
                 error_msg_html <- as.character(error_msg)
@@ -668,7 +680,7 @@ benfordClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 error_msg_html <- gsub("<", "&lt;", error_msg_html, fixed = TRUE)
                 error_msg_html <- gsub(">", "&gt;", error_msg_html, fixed = TRUE)
                 error_html <- paste0(
-                    "<div style='background-color: #f8d7da; border-left: 4px solid #dc3545; padding: 15px; margin: 10px 0;'>",
+                    "<div style='background-color: rgba(216, 33, 50, 0.18); border-left: 4px solid #dc3545; padding: 15px; margin: 10px 0; color: inherit;'>",
                     "<h4 style='margin-top: 0; color: #721c24;'>", .("Analysis Error"), "</h4>",
                     "<p style='color: #721c24;'>", error_msg_html, "</p>",
                     "</div>"

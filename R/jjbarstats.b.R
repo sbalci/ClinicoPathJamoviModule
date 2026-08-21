@@ -338,7 +338,7 @@ jjbarstatsClass <- if (requireNamespace('jmvcore'))
 
             .generateAboutContent = function() {
                 about_content <- paste0(
-                    "<div style='padding: 15px; background-color: #f8f9fa; border-left: 4px solid #007bff; margin: 10px 0;'>",
+                    "<div style='padding: 15px; background-color: rgba(138, 155, 172, 0.06); border-left: 4px solid #007bff; margin: 10px 0; color: inherit;'>",
                     "<h4 style='color: #007bff; margin-top: 0;'> About Bar Chart Analysis</h4>",
                     "<p><strong>Purpose:</strong> Compare the distribution of categorical variables across groups using statistical testing.</p>",
                     "<p><strong>When to Use:</strong></p>",
@@ -384,7 +384,7 @@ jjbarstatsClass <- if (requireNamespace('jmvcore'))
                 )
 
                 summary_content <- paste0(
-                    "<div style='padding: 15px; background-color: #e8f5e8; border-left: 4px solid #28a745; margin: 10px 0;'>",
+                    "<div style='padding: 15px; background-color: rgba(33, 159, 33, 0.1); border-left: 4px solid #28a745; margin: 10px 0; color: inherit;'>",
                     "<h4 style='color: #28a745; margin-top: 0;'> Analysis Summary</h4>",
                     "<p><strong>Variables Analyzed:</strong> ", dep_vars, " by ", htmltools::htmlEscape(self$options$group), "</p>",
                     "<p><strong>Sample Size:</strong> ", n_total, " observations across ", n_groups, " groups</p>",
@@ -638,7 +638,7 @@ jjbarstatsClass <- if (requireNamespace('jmvcore'))
 
                 # Generate assumptions content
                 assumptions_content <- paste0(
-                    "<div style='padding: 15px; background-color: #fff3cd; border-left: 4px solid #ffc107; margin: 10px 0;'>",
+                    "<div style='padding: 15px; background-color: rgba(255, 202, 33, 0.23); border-left: 4px solid #ffc107; margin: 10px 0; color: inherit;'>",
                     "<h4 style='color: #856404; margin-top: 0;'> Statistical Assumptions & Warnings</h4>",
 
                     "<p><strong>General Assumptions:</strong></p>",
@@ -668,7 +668,7 @@ jjbarstatsClass <- if (requireNamespace('jmvcore'))
 
             .generateInterpretationGuide = function() {
                 interpretation_content <- paste0(
-                    "<div style='padding: 15px; background-color: #d1ecf1; border-left: 4px solid #17a2b8; margin: 10px 0;'>",
+                    "<div style='padding: 15px; background-color: rgba(33, 163, 188, 0.21); border-left: 4px solid #17a2b8; margin: 10px 0; color: inherit;'>",
                     "<h4 style='color: #0c5460; margin-top: 0;'> How to Interpret Results</h4>",
                     
                     "<p><strong>Statistical Significance:</strong></p>",
@@ -736,10 +736,10 @@ jjbarstatsClass <- if (requireNamespace('jmvcore'))
 
                 # Generate template report
                 report_template <- paste0(
-                    "<div style='padding: 15px; background-color: #f8f9fa; border: 1px solid #dee2e6; margin: 10px 0;'>",
+                    "<div style='padding: 15px; background-color: rgba(138, 155, 172, 0.06); border: 1px solid #dee2e6; margin: 10px 0; color: inherit;'>",
                     "<h4 style='color: #495057; margin-top: 0;'> Copy-Ready Report Template</h4>",
 
-                    "<div style='background-color: #ffffff; padding: 15px; border: 1px dashed #6c757d; margin: 10px 0;'>",
+                    "<div style='background-color: rgba(255, 255, 255, 0.06); padding: 15px; border: 1px dashed #6c757d; margin: 10px 0; color: inherit;'>",
                     "<h5>Methods:</h5>",
                     "<p>Bar chart analysis was performed to examine the association between ", dep_vars,
                     " and ", htmltools::htmlEscape(self$options$group), " using ",
@@ -770,7 +770,7 @@ jjbarstatsClass <- if (requireNamespace('jmvcore'))
                     "</div>",
                     
                     "<button onclick='navigator.clipboard.writeText(this.parentElement.querySelector(\"div\").innerText)' ",
-                    "style='background-color: #007bff; color: white; border: none; padding: 8px 16px; border-radius: 4px; cursor: pointer;'>",
+                    "style='background-color: #007bff; color: #ffffff; color: white; border: none; padding: 8px 16px; border-radius: 4px; cursor: pointer;'>",
                     " Copy Template to Clipboard</button>",
                     "</div>"
                 )
@@ -1202,7 +1202,7 @@ jjbarstatsClass <- if (requireNamespace('jmvcore'))
                     is.null(self$options$group)) {
                     
                     todo <- glue::glue(
-                        "<div style='padding: 15px; background-color: #e7f3ff; border-left: 4px solid #0066cc; margin: 10px 0;'>",
+                        "<div style='padding: 15px; background-color: rgba(33, 144, 255, 0.11); border-left: 4px solid #0066cc; margin: 10px 0; color: inherit;'>",
                         "<h4 style='color: #0066cc; margin-top: 0;'> Getting Started</h4>",
                         "<p><strong>Step 1:</strong> Select your <strong>Outcome Variable</strong> (what you want to analyze)</p>",
                         "<p><strong>Step 2:</strong> Choose a <strong>Group Variable</strong> (what you want to compare)</p>",

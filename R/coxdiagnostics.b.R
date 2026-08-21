@@ -54,7 +54,7 @@ coxdiagnosticsClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
             .init = function() {
                 # Initialize instructions
                 instructions_html <- paste(
-                    "<div style='background-color: #e3f2fd; padding: 20px; border-radius: 8px; margin: 10px 0;'>",
+                    "<div style='background-color: rgba(33, 152, 239, 0.13); padding: 20px; border-radius: 8px; margin: 10px 0; color: inherit;'>",
                     "<h3 style='color: #1565c0; margin-top: 0;'>Cox Proportional Hazards Model Diagnostics</h3>",
                     "<div style='margin: 10px 0;'>",
                     "<h4 style='color: #1976d2; margin: 10px 0 5px 0;'>Essential Model Validation:</h4>",
@@ -77,7 +77,7 @@ coxdiagnosticsClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                     "<li><strong>Review Results:</strong> Examine plots and statistical tests</li>",
                     "</ol>",
                     "</div>",
-                    "<div style='background-color: #fff3e0; padding: 10px; border-radius: 5px; margin: 10px 0;'>",
+                    "<div style='background-color: rgba(255, 169, 33, 0.14); padding: 10px; border-radius: 5px; margin: 10px 0; color: inherit;'>",
                     "<p style='margin: 0; color: #ef6c00;'><strong>Clinical Note:</strong> These diagnostics are essential for validating Cox model assumptions in clinical research. Violations may require model adjustments or alternative analytical approaches.</p>",
                     "</div>",
                     "<p style='margin: 10px 0 0 0; color: #666; font-style: italic;'> This module implements the diagnostic capabilities from GitHub Issue #61 using survminer's ggcoxdiagnostics.</p>",
@@ -242,7 +242,7 @@ coxdiagnosticsClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
 
                         # Create HTML summary
                         summary_html <- "<h4>Cox Proportional Hazards Model Summary</h4>"
-                        summary_html <- paste0(summary_html, "<div style='background-color: #f5f5f5; padding: 15px; border-radius: 5px; margin: 10px 0;'>")
+                        summary_html <- paste0(summary_html, "<div style='background-color: rgba(88, 88, 88, 0.06); padding: 15px; border-radius: 5px; margin: 10px 0; color: inherit;'>")
 
                         # Model information
                         summary_html <- paste0(summary_html, "<p><strong>Model Formula:</strong> ", deparse(private$.cox_model$formula), "</p>")
@@ -317,7 +317,7 @@ coxdiagnosticsClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
 
                         # Create HTML for proportional hazards test
                         ph_html <- "<h4>Proportional Hazards Assumption Test</h4>"
-                        ph_html <- paste0(ph_html, "<div style='background-color: #fff3e0; padding: 15px; border-radius: 5px; margin: 10px 0;'>")
+                        ph_html <- paste0(ph_html, "<div style='background-color: rgba(255, 169, 33, 0.14); padding: 15px; border-radius: 5px; margin: 10px 0; color: inherit;'>")
 
                         ph_html <- paste0(ph_html, "<p><strong>Schoenfeld Residuals Test (cox.zph):</strong></p>")
                         ph_html <- paste0(ph_html, "<p>Tests the null hypothesis that hazards are proportional over time.</p>")
@@ -418,7 +418,7 @@ coxdiagnosticsClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
 
                         # Create HTML for VIF results
                         vif_html <- "<h4>Variance Inflation Factor (VIF) Analysis</h4>"
-                        vif_html <- paste0(vif_html, "<div style='background-color: #e8f5e8; padding: 15px; border-radius: 5px; margin: 10px 0;'>")
+                        vif_html <- paste0(vif_html, "<div style='background-color: rgba(33, 159, 33, 0.1); padding: 15px; border-radius: 5px; margin: 10px 0; color: inherit;'>")
 
                         vif_html <- paste0(vif_html, "<p><strong>Multicollinearity Assessment:</strong></p>")
                         vif_html <- paste0(vif_html, "<p>VIF measures how much the variance of coefficient estimates increases due to collinearity.</p>")
@@ -497,7 +497,7 @@ coxdiagnosticsClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
             },
             .generate_interpretation = function() {
                 interp_html <- "<h4>Cox Model Diagnostic Interpretation Guide</h4>"
-                interp_html <- paste0(interp_html, "<div style='background-color: #f3e5f5; padding: 15px; border-radius: 5px; margin: 10px 0;'>")
+                interp_html <- paste0(interp_html, "<div style='background-color: rgba(153, 33, 170, 0.12); padding: 15px; border-radius: 5px; margin: 10px 0; color: inherit;'>")
 
                 interp_html <- paste0(interp_html, "<h5>Diagnostic Plot Interpretation:</h5>")
 

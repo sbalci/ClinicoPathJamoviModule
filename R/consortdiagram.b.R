@@ -50,7 +50,7 @@ consortdiagramClass <- if (requireNamespace("jmvcore")) {
                 html <- paste0(
                     "<p style='font-weight: bold; color: #721c24; margin-bottom: 10px;'>",
                     "ERROR: ", message, "</p>",
-                    "<div style='background: #f8d7da; padding: 15px; margin: 10px; border: 1px solid #f5c6cb;'>",
+                    "<div style='background-color: rgba(216, 33, 50, 0.18); padding: 15px; margin: 10px; border: 1px solid #f5c6cb; color: inherit;'>",
                     "<h3> ", title, "</h3>"
                 )
                 if (!is.null(details)) {
@@ -66,7 +66,7 @@ consortdiagramClass <- if (requireNamespace("jmvcore")) {
                 html <- paste0(
                     "<p style='font-weight: bold; color: #856404; margin-bottom: 10px;'>",
                     "WARNING: ", message, "</p>",
-                    "<div style='background: #fff3cd; padding: 15px; margin: 10px; border: 1px solid #ffc107;'>",
+                    "<div style='background-color: rgba(255, 202, 33, 0.23); padding: 15px; margin: 10px; border: 1px solid #ffc107; color: inherit;'>",
                     "<h4> ", title, "</h4>"
                 )
                 if (!is.null(details)) {
@@ -78,7 +78,7 @@ consortdiagramClass <- if (requireNamespace("jmvcore")) {
                 }
                 paste0(html, "</div>")
             },
-            .htmlInfo = function(title, content, style = "background: #f9f9f9; padding: 15px; margin: 10px; border: 1px solid #ddd;") {
+            .htmlInfo = function(title, content, style = "background-color: rgba(155, 155, 155, 0.06); padding: 15px; margin: 10px; border: 1px solid #ddd; color: inherit;") {
                 paste0(
                     "<div style='", style, "'>",
                     "<h3>", title, "</h3>",
@@ -112,7 +112,7 @@ consortdiagramClass <- if (requireNamespace("jmvcore")) {
                             "The consort package is required for creating CONSORT diagrams. Install using: install.packages('consort')",
                             c(
                                 "The <strong>consort</strong> package is required for creating CONSORT diagrams",
-                                "Install using: <code style='background: #f5f5f5; padding: 2px 6px;'>install.packages('consort')</code>"
+                                "Install using: <code style='background-color: rgba(88, 88, 88, 0.06); padding: 2px 6px; color: inherit;'>install.packages('consort')</code>"
                             )
                         )
                     )
@@ -544,7 +544,7 @@ consortdiagramClass <- if (requireNamespace("jmvcore")) {
                 retention_rate <- round(final_n / total_n * 100, 1)
 
                 html <- paste0(
-                    "<div style='background: #f0f8ff; padding: 15px; margin: 10px; border: 1px solid #ccc;'>",
+                    "<div style='background-color: rgba(33, 152, 255, 0.07); padding: 15px; margin: 10px; border: 1px solid #ccc; color: inherit;'>",
                     "<h4> Participant Flow Summary</h4>",
                     "<ul>",
                     "<li><strong>Initial participants:</strong> ", total_n, "</li>",
@@ -559,7 +559,7 @@ consortdiagramClass <- if (requireNamespace("jmvcore")) {
                 if (!is.null(private$.armData) && length(private$.armData) > 0) {
                     html <- paste0(
                         html,
-                        "<div style='background: #f9f9f9; padding: 15px; margin: 10px; border: 1px solid #ddd;'>",
+                        "<div style='background-color: rgba(155, 155, 155, 0.06); padding: 15px; margin: 10px; border: 1px solid #ddd; color: inherit;'>",
                         "<h4>Treatment Arms</h4>",
                         "<ul>"
                     )
@@ -580,7 +580,7 @@ consortdiagramClass <- if (requireNamespace("jmvcore")) {
                 # Interpretation guidance
                 html <- paste0(
                     html,
-                    "<div style='background: #fff3cd; padding: 15px; margin: 10px; border: 1px solid #ffc107;'>",
+                    "<div style='background-color: rgba(255, 202, 33, 0.23); padding: 15px; margin: 10px; border: 1px solid #ffc107; color: inherit;'>",
                     "<h4> Interpretation Guidance</h4>",
                     "<p><strong>Retention Rate Assessment:</strong></p>",
                     "<ul>",
@@ -620,7 +620,7 @@ consortdiagramClass <- if (requireNamespace("jmvcore")) {
                 )
 
                 html <- paste0(
-                    "<div style='background: #f9f9f9; padding: 15px; margin: 10px; border: 1px solid #ddd;'>",
+                    "<div style='background-color: rgba(155, 155, 155, 0.06); padding: 15px; margin: 10px; border: 1px solid #ddd; color: inherit;'>",
                     "<h4> CONSORT 2010 Compliance Checklist</h4>",
                     "<p><strong>Required Elements:</strong></p>",
                     "<ul>"
@@ -669,7 +669,7 @@ consortdiagramClass <- if (requireNamespace("jmvcore")) {
                 )
 
                 html <- paste0(
-                    "<div style='background: #e7f3ff; padding: 10px; margin: 10px; border: 1px solid #b3d9ff;'>",
+                    "<div style='background-color: rgba(33, 144, 255, 0.11); padding: 10px; margin: 10px; border: 1px solid #b3d9ff; color: inherit;'>",
                     "<p><strong>Export Settings:</strong></p>",
                     "<ul>",
                     "<li>Format: ", format_desc, "</li>",
@@ -740,7 +740,7 @@ consortdiagramClass <- if (requireNamespace("jmvcore")) {
                 }
 
                 html <- paste0(
-                    "<div style='background: #f0f8ff; padding: 15px; margin: 10px; border: 1px solid #4a90e2;'>",
+                    "<div style='background-color: rgba(33, 152, 255, 0.07); padding: 15px; margin: 10px; border: 1px solid #4a90e2; color: inherit;'>",
                     "<h4> Manuscript-Ready Summary</h4>",
                     "<div style='background: white; padding: 12px; margin: 10px 0; border-left: 3px solid #4a90e2;'>",
                     "<p style='font-family: \"Times New Roman\", serif; line-height: 1.6;'>",
@@ -756,7 +756,7 @@ consortdiagramClass <- if (requireNamespace("jmvcore")) {
                 if (length(quality_warnings) > 0) {
                     html <- paste0(
                         html,
-                        "<div style='background: #fff3cd; padding: 10px; margin: 10px 0; border: 1px solid #ffc107;'>",
+                        "<div style='background-color: rgba(255, 202, 33, 0.23); padding: 10px; margin: 10px 0; border: 1px solid #ffc107; color: inherit;'>",
                         "<p><strong>Data Quality Alerts:</strong></p>",
                         "<ul style='margin: 5px 0;'>"
                     )
@@ -774,7 +774,7 @@ consortdiagramClass <- if (requireNamespace("jmvcore")) {
             # Generate about analysis ----
             .generateAboutAnalysis = function() {
                 html <- paste0(
-                    "<div style='background: #f9f9f9; padding: 15px; margin: 10px; border: 1px solid #ddd;'>",
+                    "<div style='background-color: rgba(155, 155, 155, 0.06); padding: 15px; margin: 10px; border: 1px solid #ddd; color: inherit;'>",
                     "<h4> About CONSORT Flow Diagrams</h4>",
                     "<p><strong>What is a CONSORT diagram?</strong></p>",
                     "<p style='margin-left: 15px;'>",
@@ -869,7 +869,7 @@ consortdiagramClass <- if (requireNamespace("jmvcore")) {
 
                 # Build HTML
                 html <- paste0(
-                    "<div style='background: #fff8e1; padding: 15px; margin: 10px; border: 1px solid #ffa726;'>",
+                    "<div style='background-color: rgba(255, 203, 33, 0.14); padding: 15px; margin: 10px; border: 1px solid #ffa726; color: inherit;'>",
                     "<h4> Caveats & Assumptions</h4>",
                     "<p><strong>Key Assumptions:</strong></p>",
                     "<ul style='margin-left: 15px;'>",
@@ -884,7 +884,7 @@ consortdiagramClass <- if (requireNamespace("jmvcore")) {
 
                 # Add strengths
                 if (length(strengths) > 0) {
-                    html <- paste0(html, "<div style='background: #d4edda; padding: 8px; margin: 5px 0; border-radius: 3px;'>")
+                    html <- paste0(html, "<div style='background-color: rgba(33, 162, 64, 0.19); padding: 8px; margin: 5px 0; border-radius: 3px; color: inherit;'>")
                     for (strength in strengths) {
                         html <- paste0(html, "<div style='margin: 3px 0;'>", strength, "</div>")
                     }
@@ -893,7 +893,7 @@ consortdiagramClass <- if (requireNamespace("jmvcore")) {
 
                 # Add issues
                 if (length(issues) > 0) {
-                    html <- paste0(html, "<div style='background: #fff3cd; padding: 8px; margin: 5px 0; border-radius: 3px;'>")
+                    html <- paste0(html, "<div style='background-color: rgba(255, 202, 33, 0.23); padding: 8px; margin: 5px 0; border-radius: 3px; color: inherit;'>")
                     for (issue in issues) {
                         html <- paste0(html, "<div style='margin: 3px 0;'>", issue, "</div>")
                     }
@@ -994,7 +994,7 @@ consortdiagramClass <- if (requireNamespace("jmvcore")) {
             # Welcome message ----
             .generateWelcomeMessage = function() {
                 return(paste0(
-                    "<div style='background: #f9f9f9; padding: 20px; margin: 10px; border: 1px solid #ddd;'>",
+                    "<div style='background-color: rgba(155, 155, 155, 0.06); padding: 20px; margin: 10px; border: 1px solid #ddd; color: inherit;'>",
                     "<h3> CONSORT Flow Diagram Generator</h3>",
                     "<p>Create CONSORT 2010 compliant flow diagrams using the <strong>consort</strong> R package.</p>",
                     "<h4>How It Works:</h4>",
@@ -1018,7 +1018,7 @@ consortdiagramClass <- if (requireNamespace("jmvcore")) {
                     "</ol>",
                     "<h4>Example Data Structure:</h4>",
                     "<table style='border-collapse: collapse; margin: 10px 0;'>",
-                    "<tr style='background: #f0f0f0;'>",
+                    "<tr style='background-color: rgba(33, 33, 33, 0.07); color: inherit;'>",
                     "<th style='border: 1px solid #ccc; padding: 5px;'>ID</th>",
                     "<th style='border: 1px solid #ccc; padding: 5px;'>age_exclusion</th>",
                     "<th style='border: 1px solid #ccc; padding: 5px;'>consent_exclusion</th>",

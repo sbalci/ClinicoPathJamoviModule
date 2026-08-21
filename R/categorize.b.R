@@ -388,7 +388,7 @@ categorizeClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             # serialization failure triggered by dynamic jmvcore::Notice objects
             # (see docs/NOTICE_TO_HTML_CONVERSION_GUIDE.md).
             .errBox <- function(msg)
-                paste0("<div style='padding: 15px; background-color: #f8d7da; border-left: 4px solid #dc3545; color: #721c24; border-radius: 5px;'><strong>Error:</strong> ", msg, "</div>")
+                paste0("<div style='padding: 15px; background-color: rgba(216, 33, 50, 0.18); border-left: 4px solid #dc3545; color: inherit; border-radius: 5px;'><strong>Error:</strong> ", msg, "</div>")
 
             if (!(varname %in% names(self$data))) {
                 self$results$todo$setContent(.errBox(jmvcore::format(
@@ -565,7 +565,7 @@ categorizeClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             )
 
             # Report cases dropped for falling outside the break points. Only
-            # reachable when "Exclude values outside the break points" is on with
+            # reachable when "Out-of-range value exclusion" is on with
             # manual breaks - otherwise the range is extended and nothing is lost.
             if (exclude_oor) {
                 n_dropped <- sum(!is.na(x) & is.na(x_cat))
@@ -573,7 +573,7 @@ categorizeClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     below <- sum(!is.na(x) & x < min(breaks))
                     above <- sum(!is.na(x) & x > max(breaks))
                     notice_html$outOfRange <- .noticeBox("WARNING", jmvcore::format(
-                        "Excluded {} observation(s) ({}%) that fall outside the break points [{}, {}]: {} below and {} above. These are not counted in any category. Turn off 'Exclude values outside the break points' to extend the outer breaks and keep every case.",
+                        "Excluded {} observation(s) ({}%) that fall outside the break points [{}, {}]: {} below and {} above. These are not counted in any category. Turn off 'Out-of-range value exclusion' to extend the outer breaks and keep every case.",
                         n_dropped,
                         round(100 * n_dropped / sum(!is.na(x)), 1),
                         format(min(breaks)), format(max(breaks)),
@@ -739,7 +739,7 @@ categorizeClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 )
 
                 code_html <- paste0(
-                    "<div style='background-color: #f8f9fa; padding: 15px; ",
+                    "<div style='background-color: rgba(138, 155, 172, 0.06); color: inherit; padding: 15px; ",
                     "border-radius: 4px; font-family: monospace; white-space: pre-wrap;'>",
                     htmltools::htmlEscape(code),
                     "</div>"

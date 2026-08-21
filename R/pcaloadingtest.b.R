@@ -61,7 +61,7 @@ pcaloadingtestClass <- if (requireNamespace("jmvcore")) {
 
                 # Populate clinical guide
                 clinical_guide <- glue::glue("
-<div style='background:#f8f9fa; padding:15px; border-left:4px solid #0066cc; margin:10px 0;'>
+<div style='background-color: rgba(138, 155, 172, 0.06); padding:15px; border-left:4px solid #0066cc; margin:10px 0; color: inherit;'>
 <h4 style='color:#0066cc; margin-top:0;'>Clinical Applications in Pathology & Oncology:</h4>
 <ul style='margin:8px 0;'>
 <li><b>Biomarker Panel Validation:</b> Identify which biomarkers significantly contribute to patient stratification or disease subtypes</li>
@@ -72,11 +72,11 @@ pcaloadingtestClass <- if (requireNamespace("jmvcore")) {
 
 <h4 style='color:#0066cc;'>Interpretation Guide:</h4>
 <table style='width:100%; border-collapse:collapse; margin:8px 0;'>
-<tr style='background:#e9ecef;'><th style='padding:6px; text-align:left;'>Loading Magnitude</th><th style='padding:6px; text-align:left;'>Interpretation</th></tr>
+<tr style='background-color: rgba(33, 63, 94, 0.1); color: inherit;'><th style='padding:6px; text-align:left;'>Loading Magnitude</th><th style='padding:6px; text-align:left;'>Interpretation</th></tr>
 <tr><td style='padding:6px;'><b>|loading| &lt; 0.3</b></td><td style='padding:6px;'>Weak contribution (likely not clinically meaningful)</td></tr>
-<tr style='background:#f8f9fa;'><td style='padding:6px;'><b>|loading| 0.3 - 0.5</b></td><td style='padding:6px;'>Moderate contribution (consider in context)</td></tr>
+<tr style='background-color: rgba(138, 155, 172, 0.06); color: inherit;'><td style='padding:6px;'><b>|loading| 0.3 - 0.5</b></td><td style='padding:6px;'>Moderate contribution (consider in context)</td></tr>
 <tr><td style='padding:6px;'><b>|loading| &gt; 0.5</b></td><td style='padding:6px;'>Strong contribution (clinically important if p &lt; 0.05)</td></tr>
-<tr style='background:#f8f9fa;'><td style='padding:6px;'><b>FDR-adjusted p &lt; 0.05</b></td><td style='padding:6px;'>Significant after controlling for multiple testing (recommended threshold)</td></tr>
+<tr style='background-color: rgba(138, 155, 172, 0.06); color: inherit;'><td style='padding:6px;'><b>FDR-adjusted p &lt; 0.05</b></td><td style='padding:6px;'>Significant after controlling for multiple testing (recommended threshold)</td></tr>
 </table>
 
 <h4 style='color:#0066cc;'>Sample Size Recommendations:</h4>
@@ -482,7 +482,7 @@ through <b>Procrustes rotation</b> to handle sign/reflection indeterminacy in PC
                 )
 
                 copy_ready_html <- glue::glue("
-<div style='background:#f0f7ff; padding:15px; border:2px solid #0066cc; border-radius:5px; margin:15px 0;'>
+<div style='background-color: rgba(33, 137, 255, 0.07); padding:15px; border:2px solid #0066cc; border-radius:5px; margin:15px 0; color: inherit;'>
 <h4 style='color:#0066cc; margin-top:0;'> Copy-Ready Report Text</h4>
 <p style='background:white; padding:12px; border-radius:3px; font-family:serif; line-height:1.6;'>
 {report_text}

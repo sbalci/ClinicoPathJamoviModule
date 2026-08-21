@@ -59,7 +59,7 @@ outcomeorganizerClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             current_content <- self$results[[output_name]]$content
             if (is.null(current_content)) current_content <- ""
             new_message <- sprintf(
-                '<div style="margin: 10px 0; padding: 10px; border-left: 4px solid %s; background-color: #f8f9fa;"><strong>%s:</strong> %s</div>',
+                '<div style="margin: 10px 0; padding: 10px; border-left: 4px solid %s; background-color: rgba(138, 155, 172, 0.06); color: inherit;"><strong>%s:</strong> %s</div>',
                 border_color,
                 htmltools::htmlEscape(title),
                 htmltools::htmlEscape(message)
@@ -122,7 +122,7 @@ outcomeorganizerClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             }, silent = TRUE)
 
             if (inherits(mydata_cleaned, "try-error")) {
-                jmvcore::reject('Error cleaning variable names. Please check column names.')
+                jmvcore::reject(.("Error cleaning variable names. Please check column names."))
             }
 
             # Map original variables to cleaned variables by INDEX
@@ -342,7 +342,7 @@ outcomeorganizerClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
             # Check if required variables exist
             if (length(outcome_var) == 0 && !is.null(self$options$outcome)) {
-                jmvcore::reject('Could not find outcome variable')
+                jmvcore::reject(.("Could not find outcome variable"))
             }
 
             # Get parameters from UI options
@@ -403,12 +403,9 @@ outcomeorganizerClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     # assignment mydata[["myoutcome"]] <- numeric(0) errors with
                     # "replacement has 0 rows, data has n".
                     if (is.null(recurrence_level)) {
-                        jmvcore::reject(paste0(
-                            'A recurrence/progression variable is selected for ',
-                            toupper(analysistype),
-                            ' analysis, but no recurrence event level was chosen. Please ',
-                            'select the level that indicates recurrence/progression in the ',
-                            '"Event Level" option under the Recurrence/Progression Variable.'))
+                        jmvcore::reject(jmvcore::format(
+                            .('A recurrence/progression variable is selected for {analysis} analysis, but no recurrence event level was chosen. Please select the level that indicates recurrence/progression in the "Event Level" option under the Recurrence/Progression Variable.'),
+                            analysis = toupper(analysistype)))
                     }
 
                     # Mark recurrences as events (1)
@@ -468,11 +465,7 @@ outcomeorganizerClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     # Guard: recurrence variable selected but no progression event level
                     # chosen -> logical(0) recode that crashes the assignment (see above).
                     if (is.null(recurrence_level)) {
-                        jmvcore::reject(paste0(
-                            'A recurrence/progression variable is selected for TTP analysis, ',
-                            'but no progression event level was chosen. Please select the level ',
-                            'that indicates progression in the "Event Level" option under the ',
-                            'Recurrence/Progression Variable.'))
+                        jmvcore::reject(.('A recurrence/progression variable is selected for TTP analysis, but no progression event level was chosen. Please select the level that indicates progression in the "Event Level" option under the Recurrence/Progression Variable.'))
                     }
 
                     # Only progression counts as an event
@@ -552,11 +545,9 @@ outcomeorganizerClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     unmapped <- setdiff(as.character(unique(outcome1[!is.na(outcome1)])),
                                         as.character(c(dod, dooc, awd, awod)))
                     if (length(unmapped) > 0)
-                        jmvcore::reject(paste0(
-                            'Outcome level(s) not assigned to any state: ',
-                            paste(unmapped, collapse = ", "),
-                            '. Assign every level to one of the four states; unassigned ',
-                            'levels would otherwise be dropped from the analysis.'))
+                        jmvcore::reject(jmvcore::format(
+                            .("Outcome level(s) not assigned to any state: {levels}. Assign every level to one of the four states; unassigned levels would otherwise be dropped from the analysis."),
+                            levels = paste(unmapped, collapse = ", ")))
 
                     # Multistate model: Different states given different codes
                     mydata[["myoutcome"]] <- NA_integer_
@@ -574,24 +565,19 @@ outcomeorganizerClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     # Reaching here left myoutcome entirely NA and the run failed
                     # with the misleading "all values are NA", which reads as a
                     # data problem rather than an unsupported combination.
-                    jmvcore::reject(paste0(
-                        "'", toupper(analysistype), "' is not available with Multiple Event Levels ",
-                        "enabled. Recurrence-based endpoints (RFS, PFS, DFS, TTP) are built from ",
-                        "the Recurrence/Progression variable together with the outcome, not from ",
-                        "the four vital-status categories. Turn Multiple Event Levels off and ",
-                        "select a Recurrence/Progression variable, or choose Overall Survival, ",
-                        "Cause-Specific, Competing Risks or Multistate."))
+                    jmvcore::reject(jmvcore::format(
+                        .("'{analysis}' is not available with Multiple Event Levels enabled. Recurrence-based endpoints (RFS, PFS, DFS, TTP) are built from the Recurrence/Progression variable together with the outcome, not from the four vital-status categories. Turn Multiple Event Levels off and select a Recurrence/Progression variable, or choose Overall Survival, Cause-Specific, Competing Risks or Multistate."),
+                        analysis = toupper(analysistype)))
                 }
 
                 # FIX: Verify that recoding actually worked (not all NAs)
                 # This catches cases where selected levels don't match any data values
                 n_recoded <- sum(!is.na(mydata[["myoutcome"]]))
                 if (n_recoded == 0) {
-                    jmvcore::reject('Outcome recoding failed: all values are NA. This usually means the selected outcome levels ',
-                         '("', dod, '", "', dooc, '", "', awd, '", "', awod, '") do not match the actual values in your data. ',
-                         'Available values in outcome variable: ',
-                         paste(unique(outcome1[!is.na(outcome1)]), collapse = ", "),
-                         '. Please verify your level selections are correct.')
+                    jmvcore::reject(jmvcore::format(
+                        .('Outcome recoding failed: all values are NA. This usually means the selected outcome levels ("{dod}", "{dooc}", "{awd}", "{awod}") do not match the actual values in your data. Available values in outcome variable: {available}. Please verify your level selections are correct.'),
+                        dod = dod, dooc = dooc, awd = awd, awod = awod,
+                        available = paste(unique(outcome1[!is.na(outcome1)]), collapse = ", ")))
                 } else if (n_recoded < length(outcome1) * 0.5) {
                     # Warn if more than 50% are NA (likely wrong level selection)
                     warning('More than 50% of outcomes are NA after recoding (',
@@ -845,7 +831,7 @@ outcomeorganizerClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
         .showGlossary = function() {
             glossary_html <- "
-            <div style='background-color: #f9f9f9; padding: 15px; border-radius: 8px;'>
+            <div style='background-color: rgba(155, 155, 155, 0.06); padding: 15px; border-radius: 8px; color: inherit;'>
             <h4>Survival Analysis Glossary</h4>
             <dl>
                 <dt><b>Overall Survival (OS)</b></dt>
@@ -936,7 +922,7 @@ outcomeorganizerClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             }
 
             if (nrow(self$data) == 0)
-                jmvcore::reject('Data contains no (complete) rows')
+                jmvcore::reject(.("Data contains no (complete) rows"))
 
             # Create table if needed
             private$.checkpoint()
@@ -1364,7 +1350,7 @@ outcomeorganizerClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 }
 
                 natural_summary <- sprintf(
-                    "<div style='background-color: #e7f3ff; padding: 15px; border-radius: 8px; margin: 10px 0;'>
+                    "<div style='background-color: rgba(33, 144, 255, 0.11); padding: 15px; border-radius: 8px; margin: 10px 0; color: inherit;'>
                     <b> Copy-Ready Report Text:</b><br><br>
                     The outcome variable '<b>%s</b>' was recoded for <b>%s</b> analysis.
                     Events (coded as 1) represent %s.

@@ -163,7 +163,7 @@ jjsegmentedtotalbarClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R
             # Initialize comprehensive instructions with clinical context
 
             html_content <- paste(
-                "<div style='font-family: sans-serif; padding: 15px; background-color: #f5f5f5; border-radius: 5px;'>",
+                "<div style='font-family: sans-serif; padding: 15px; background-color: rgba(88, 88, 88, 0.06); border-radius: 5px; color: inherit;'>",
                 "<h3>Segmented Total Bar Chart Instructions</h3>",
                 "<p>This tool creates publication-quality segmented bar charts (also known as stacked bar charts), ideal for visualizing the relationship between two categorical variables.</p>",
                 "<ul>",
@@ -861,7 +861,7 @@ jjsegmentedtotalbarClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R
                 dplyr::slice(1)
 
             interpretation_html <- paste(
-                "<div style='background-color: #f8f9fa; padding: 15px; border-radius: 6px; margin: 10px 0;'>",
+                "<div style='background-color: rgba(138, 155, 172, 0.06); padding: 15px; border-radius: 6px; margin: 10px 0; color: inherit;'>",
                 "<h4 style='color: #495057; margin-top: 0;'>Chart Interpretation</h4>",
                 "<p><strong>Data Overview:</strong></p>",
                 "<ul>",
@@ -1282,10 +1282,10 @@ jjsegmentedtotalbarClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R
 
             # Create clinical summary HTML
             clinical_summary_html <- paste(
-                "<div style='background-color: #f0f8ff; padding: 20px; border-radius: 8px; margin: 15px 0; border-left: 4px solid #1e88e5;'>",
+                "<div style='background-color: rgba(33, 152, 255, 0.07); padding: 20px; border-radius: 8px; margin: 15px 0; border-left: 4px solid #1e88e5; color: inherit;'>",
                 paste0("<h4 style='color: #1565c0; margin-top: 0;'>", .("Clinical Summary"), "</h4>"),
                 paste0("<p style='margin: 10px 0; line-height: 1.6;'>", summary_text, "</p>"),
-                paste0("<div style='background-color: #e3f2fd; padding: 12px; border-radius: 4px; margin: 15px 0;'>"),
+                paste0("<div style='background-color: rgba(33, 152, 239, 0.13); padding: 12px; border-radius: 4px; margin: 15px 0; color: inherit;'>"),
                 paste0("<h5 style='color: #0d47a1; margin-top: 0;'>", .("Copy-Ready Report Sentence:"), "</h5>"),
                 paste0("<p style='margin: 5px 0; font-style: italic; font-size: 14px;'>", report_sentence, "</p>"),
                 paste0("</div>"),
@@ -1378,10 +1378,10 @@ jjsegmentedtotalbarClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R
             preset_name <- stringr::str_to_title(gsub("_", " ", self$options$analysis_preset))
             
             guidance_html <- paste(
-                "<div style='background-color: #e8f4fd; padding: 15px; border-radius: 6px; margin: 10px 0; border-left: 4px solid #2196f3;'>",
+                "<div style='background-color: rgba(33, 149, 236, 0.1); padding: 15px; border-radius: 6px; margin: 10px 0; border-left: 4px solid #2196f3; color: inherit;'>",
                 paste0("<h4 style='color: #1565c0; margin-top: 0;'>", preset_name, " Template</h4>"),
                 paste0("<p style='margin: 8px 0; line-height: 1.5;'>", config$guidance, "</p>"),
-                "<div style='background-color: #fff; padding: 10px; border-radius: 4px; margin: 10px 0;'>",
+                "<div style='background-color: rgba(255, 255, 255, 0.06); padding: 10px; border-radius: 4px; margin: 10px 0; color: inherit;'>",
                 "<h5 style='color: #333; margin-top: 0;'>Suggested Variable Labels:</h5>",
                 "<ul style='margin: 5px 0; padding-left: 20px;'>",
                 paste0("<li><strong>X-axis:</strong> ", config$suggested_x_label, "</li>"),
@@ -1394,18 +1394,18 @@ jjsegmentedtotalbarClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R
                 # "chart settings, color palettes, and statistical options", which
                 # was doubly wrong: nothing was applied at all, and the template has
                 # never had any bearing on the statistical options.
-                "<div style='background-color: #f8f9fa; padding: 10px; border-radius: 4px; margin: 10px 0;'>",
+                "<div style='background-color: rgba(138, 155, 172, 0.06); padding: 10px; border-radius: 4px; margin: 10px 0; color: inherit;'>",
                 "<h5 style='color: #495057; margin-top: 0;'>What this template changes:</h5>",
                 "<ul style='font-size: 13px; line-height: 1.4; margin: 5px 0; padding-left: 20px;'>",
-                paste0("<li>Chart style &rarr; <strong>", htmltools::htmlEscape(config$chart_style), "</strong></li>"),
-                paste0("<li>Color palette &rarr; <strong>", htmltools::htmlEscape(config$color_palette), "</strong></li>"),
-                paste0("<li>Percentage labels &rarr; <strong>",
+                paste0("<li>Chart style \u{2192} <strong>", htmltools::htmlEscape(config$chart_style), "</strong></li>"),
+                paste0("<li>Color palette \u{2192} <strong>", htmltools::htmlEscape(config$color_palette), "</strong></li>"),
+                paste0("<li>Percentage labels \u{2192} <strong>",
                        if (isTRUE(config$show_percentages)) "on" else "off",
                        "</strong>, formatted as <strong>",
                        htmltools::htmlEscape(config$percentage_format), "</strong></li>"),
                 "</ul>",
                 "<p style='font-size: 13px; line-height: 1.4; margin: 5px 0;'>",
-                "Each of these applies only while you leave that control at its default &ndash; ",
+                "Each of these applies only while you leave that control at its default \u{2013} ",
                 "change one yourself and your choice is kept. The template does not change ",
                 "your variables, the axis titles above (those are suggestions to type in), ",
                 "or anything under Statistical Tests.",

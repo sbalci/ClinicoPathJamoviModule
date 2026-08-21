@@ -184,7 +184,7 @@ summarydata2Class <- if (requireNamespace("jmvcore")) R6::R6Class("summarydata2C
             }, error = function(e) {
                 # Display validation error in a user-friendly way
                 error_msg <- paste0(
-                    "<div style='color: red; background-color: #ffebee; padding: 15px; border-radius: 5px; margin: 10px 0;'>",
+                    "<div style='color: red; background-color: rgba(255, 33, 67, 0.09); padding: 15px; border-radius: 5px; margin: 10px 0;'>",
                     "<h4> Input Validation Error</h4>",
                     "<p>", htmltools::htmlEscape(e$message), "</p>",
                     "<p><em>Please check your variable selections and data, then try again.</em></p>",
@@ -210,7 +210,7 @@ summarydata2Class <- if (requireNamespace("jmvcore")) R6::R6Class("summarydata2C
             # Additional runtime validation
             if (nrow(self$data) == 0) {
                 error_msg <- paste0(
-                    "<div style='color: red; background-color: #ffebee; padding: 15px; border-radius: 5px;'>",
+                    "<div style='color: red; background-color: rgba(255, 33, 67, 0.09); padding: 15px; border-radius: 5px;'>",
                     "<h4> Data Error</h4>",
                     "<p>The dataset contains no complete rows. Please check your data and try again.</p>",
                     "</div>"
@@ -521,7 +521,7 @@ summarydata2Class <- if (requireNamespace("jmvcore")) R6::R6Class("summarydata2C
                     results <- paste(unlist(group_results), collapse = "<hr>")
                 }, error = function(e) {
                     error_msg <- paste0(
-                        "<div style='color: red; padding: 10px; background-color: #ffebee;'>",
+                        "<div style='color: red; padding: 10px; background-color: rgba(255, 33, 67, 0.09);'>",
                         "<strong>Error in grouped analysis:</strong> ", htmltools::htmlEscape(e$message),
                         "<br>Falling back to ungrouped analysis.",
                         "</div><br>"
@@ -557,7 +557,7 @@ summarydata2Class <- if (requireNamespace("jmvcore")) R6::R6Class("summarydata2C
             # summarytools operations are resource-intensive and may cause jamovi to terminate
             if (self$options$summary_format %in% c("summarytools_df", "summarytools_desc", "summarytools_freq")) {
                 warning_html <- paste0(
-                    "<div style='color: orange; padding: 20px; background-color: #fff3cd; border-radius: 5px; margin: 10px 0;'>",
+                    "<div style='color: orange; padding: 20px; background-color: rgba(255, 202, 33, 0.23); border-radius: 5px; margin: 10px 0;'>",
                     "<h4> Feature Temporarily Disabled</h4>",
                     "<p>summarytools functionality has been temporarily disabled to prevent resource limit issues in jamovi.</p>",
                     "<p>Please use 'standard' or 'sumvar' format instead for reliable analysis.</p>",
@@ -572,7 +572,7 @@ summarydata2Class <- if (requireNamespace("jmvcore")) R6::R6Class("summarydata2C
             #         self$results$text$setContent(summarytools_html)
             #     }, error = function(e) {
             #         error_html <- paste0(
-            #             "<div style='color: red; background-color: #ffebee; padding: 20px; border-radius: 8px;'>",
+            #             "<div style='color: red; background-color: rgba(255, 33, 67, 0.09); padding: 20px; border-radius: 8px;'>",
             #             "<h4>summarytools Error</h4>",
             #             "<p>Error generating summarytools output: ", e$message, "</p>",
             #             "<p><em>Falling back to standard summary format.</em></p>",
@@ -621,7 +621,7 @@ summarydata2Class <- if (requireNamespace("jmvcore")) R6::R6Class("summarydata2C
         .create_simple_summary_table = function(dataset, numeric_vars) {
             # Create simple HTML table
             html <- "<table style='border-collapse: collapse; margin: 10px 0; width: 100%;'>"
-            html <- paste0(html, "<tr style='background-color: #f8f9fa;'>")
+            html <- paste0(html, "<tr style='background-color: rgba(138, 155, 172, 0.06); color: inherit;'>")
             html <- paste0(html, "<th style='border: 1px solid #ccc; padding: 8px;'>Variable</th>")
             html <- paste0(html, "<th style='border: 1px solid #ccc; padding: 8px;'>N</th>")
             html <- paste0(html, "<th style='border: 1px solid #ccc; padding: 8px;'>Mean</th>")
@@ -690,7 +690,7 @@ summarydata2Class <- if (requireNamespace("jmvcore")) R6::R6Class("summarydata2C
                 return(html_table)
             }, error = function(e) {
                 return(paste0(
-                    "<div style='color: red; padding: 15px; background-color: #ffebee;'>",
+                    "<div style='color: red; padding: 15px; background-color: rgba(255, 33, 67, 0.09);'>",
                     "<strong>Error generating pivot summary:</strong> ", htmltools::htmlEscape(e$message),
                     "</div>"
                 ))
@@ -776,7 +776,7 @@ summarydata2Class <- if (requireNamespace("jmvcore")) R6::R6Class("summarydata2C
 
         .generate_export_info = function() {
             export_html <- paste0(
-                "<div style='background-color: #d4edda; padding: 15px; border-radius: 5px; margin: 10px 0;'>",
+                "<div style='background-color: rgba(33, 162, 64, 0.19); padding: 15px; border-radius: 5px; margin: 10px 0; color: inherit;'>",
                 "<h4 style='color: #155724; margin-top: 0;'> Export Ready</h4>",
                 "<p style='margin: 5px 0;'>Your pivot summary is ready for export in multiple formats:</p>",
                 "<ul style='margin: 10px 0; padding-left: 20px;'>",
@@ -900,7 +900,7 @@ summarydata2Class <- if (requireNamespace("jmvcore")) R6::R6Class("summarydata2C
                     )
 
                     header_html <- paste0(
-                        "<div style='background-color: #e3f2fd; padding: 15px; border-radius: 8px; margin-bottom: 20px;'>",
+                        "<div style='background-color: rgba(33, 152, 239, 0.13); padding: 15px; border-radius: 8px; margin-bottom: 20px; color: inherit;'>",
                         "<h3 style='color: #1976d2; margin: 0;'> summarytools: Dataset Summary (dfSummary)</h3>",
                         "<p style='margin: 5px 0 0 0; color: #555;'>Comprehensive overview with embedded visualizations - Based on autoEDA research (R Journal 2019)</p>",
                         "</div>"
@@ -931,7 +931,7 @@ summarydata2Class <- if (requireNamespace("jmvcore")) R6::R6Class("summarydata2C
                     )
 
                     header_html <- paste0(
-                        "<div style='background-color: #f3e5f5; padding: 15px; border-radius: 8px; margin-bottom: 20px;'>",
+                        "<div style='background-color: rgba(153, 33, 170, 0.12); padding: 15px; border-radius: 8px; margin-bottom: 20px; color: inherit;'>",
                         "<h3 style='color: #7b1fa2; margin: 0;'> summarytools: Advanced Descriptive Statistics</h3>",
                         "<p style='margin: 5px 0 0 0; color: #555;'>Enhanced descriptives with skewness, kurtosis, and robust statistics</p>",
                         "</div>"
@@ -971,7 +971,7 @@ summarydata2Class <- if (requireNamespace("jmvcore")) R6::R6Class("summarydata2C
                     }
 
                     header_html <- paste0(
-                        "<div style='background-color: #ffebee; padding: 15px; border-radius: 8px; margin-bottom: 20px;'>",
+                        "<div style='background-color: rgba(255, 33, 67, 0.09); padding: 15px; border-radius: 8px; margin-bottom: 20px; color: inherit;'>",
                         "<h3 style='color: #d32f2f; margin: 0;'> summarytools: Frequency Analysis</h3>",
                         "<p style='margin: 5px 0 0 0; color: #555;'>Enhanced frequency tables with percentages and cumulative statistics</p>",
                         "</div>"
@@ -982,7 +982,7 @@ summarydata2Class <- if (requireNamespace("jmvcore")) R6::R6Class("summarydata2C
 
             }, error = function(e) {
                 error_html <- paste0(
-                    "<div style='color: red; background-color: #ffebee; padding: 20px; border-radius: 8px;'>",
+                    "<div style='color: red; background-color: rgba(255, 33, 67, 0.09); padding: 20px; border-radius: 8px;'>",
                     "<h4>summarytools Error</h4>",
                     "<p>Error generating summarytools output: ", htmltools::htmlEscape(e$message), "</p>",
                     "<p><em>Please check your data and try again.</em></p>",

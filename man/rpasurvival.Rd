@@ -85,8 +85,9 @@ complexity parameter}
 
 \item{createnewvar}{.}
 
-\item{newvarname}{name for the new variable containing RPA stage
-assignments}
+\item{newvarname}{retired and ignored. The risk-group column is written by
+the \code{riskgroupvar} output, which carries its own name. Kept so that
+existing syntax keeps parsing.}
 
 \item{showSummary}{.}
 
@@ -109,6 +110,7 @@ A results object containing:
 \code{results$varimp} \tab \tab \tab \tab \tab a table \cr
 \code{results$coxmodel} \tab \tab \tab \tab \tab a table \cr
 \code{results$notices} \tab \tab \tab \tab \tab a html \cr
+\code{results$riskgroupvar} \tab \tab \tab \tab \tab an output \cr
 }
 
 Tables can be converted to data frames with \code{asDF} or \code{\link{as.data.frame}}. For example:

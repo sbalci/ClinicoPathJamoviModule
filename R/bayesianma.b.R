@@ -10,9 +10,9 @@ bayesianmaClass <- R6::R6Class(
                     <head>
                     <style>
                         .main { margin: 10px; }
-                        .todo { background-color: #E8F4FD; padding: 15px; border-radius: 10px; margin: 10px 0; }
-                        .instructions { background-color: #E8F4FD; padding: 15px; border-radius: 10px; }
-                        .todo-title { font-weight: bold; font-size: 18px; margin-bottom: 10px; color: #2E86AB; }
+                        .todo { background-color: rgba(33, 149, 236, 0.1); color: inherit; padding: 15px; border-radius: 10px; margin: 10px 0; }
+                        .instructions { background-color: rgba(33, 149, 236, 0.1); color: inherit; padding: 15px; border-radius: 10px; }
+                        .todo-title { font-weight: bold; font-size: 18px; margin-bottom: 10px; color: inherit; }
                         .todo-item { margin: 8px 0; }
                     </style>
                     </head>
@@ -50,8 +50,8 @@ bayesianmaClass <- R6::R6Class(
                     <head>
                     <style>
                         .main { margin: 10px; }
-                        .todo { background-color: #FFF3CD; padding: 15px; border-radius: 10px; margin: 10px 0; }
-                        .todo-title { font-weight: bold; font-size: 18px; margin-bottom: 10px; color: #856404; }
+                        .todo { background-color: rgba(255, 202, 33, 0.23); color: inherit; padding: 15px; border-radius: 10px; margin: 10px 0; }
+                        .todo-title { font-weight: bold; font-size: 18px; margin-bottom: 10px; color: inherit; }
                         .todo-item { margin: 8px 0; }
                     </style>
                     </head>
@@ -81,8 +81,8 @@ bayesianmaClass <- R6::R6Class(
                 <head>
                 <style>
                     .main { margin: 10px; }
-                    .info { background-color: #D4EDDA; padding: 15px; border-radius: 10px; }
-                    .info-title { font-weight: bold; font-size: 16px; margin-bottom: 10px; color: #155724; }
+                    .info { background-color: rgba(33, 162, 64, 0.19); color: inherit; padding: 15px; border-radius: 10px; }
+                    .info-title { font-weight: bold; font-size: 16px; margin-bottom: 10px; color: inherit; }
                 </style>
                 </head>
                 <body>
@@ -1067,11 +1067,11 @@ bayesianmaClass <- R6::R6Class(
             <html>
             <head>
             <style>
-                .explanation { margin: 10px; padding: 15px; background-color: #f8f9fa; border-radius: 8px; }
+                .explanation { margin: 10px; padding: 15px; background-color: rgba(138, 155, 172, 0.06); color: inherit; border-radius: 8px; }
                 .result-section { margin: 15px 0; }
-                .highlight { background-color: #fff3cd; padding: 2px 4px; border-radius: 3px; }
-                .interpretation { background-color: #e8f4fd; padding: 10px; border-radius: 5px; margin: 10px 0; }
-                .method-info { background-color: #e1f5fe; padding: 10px; border-radius: 5px; }
+                .highlight { background-color: rgba(255, 202, 33, 0.23); color: inherit; padding: 2px 4px; border-radius: 3px; }
+                .interpretation { background-color: rgba(33, 149, 236, 0.1); color: inherit; padding: 10px; border-radius: 5px; margin: 10px 0; }
+                .method-info { background-color: rgba(33, 181, 248, 0.14); color: inherit; padding: 10px; border-radius: 5px; }
             </style>
             </head>
             <body>

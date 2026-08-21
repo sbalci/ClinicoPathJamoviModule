@@ -12,7 +12,7 @@ clinicalvalidationinteractiveClass <- R6::R6Class(
       # Check if analysis is ready with proper validation
       if (!private$.isReady()) {
         self$results$interactiveGuidance$setContent(
-          "<div style='padding: 20px; background: #e3f2fd; border-left: 4px solid #2196f3;'>
+          "<div style='padding: 20px; background-color: rgba(33, 152, 239, 0.13); border-left: 4px solid #2196f3; color: inherit;'>
            <h4> Interactive Clinical Model Validation</h4>
            <p><strong>Getting Started:</strong> Select an outcome variable and at least one predictor variable to begin analysis.</p>
            <p><strong> Pro Tip:</strong> Try using a clinical preset from the dropdown for optimized parameters!</p>
@@ -572,7 +572,7 @@ clinicalvalidationinteractiveClass <- R6::R6Class(
       performance_level <- if (auc_val > 0.85) "Excellent" else if (auc_val > 0.75) "Good" else "Fair"
 
       html_content <- sprintf(
-        "<div style='padding: 15px; background: #e8f5e8; border-left: 4px solid #4caf50;'>
+        "<div style='padding: 15px; background-color: rgba(33, 159, 33, 0.1); border-left: 4px solid #4caf50; color: inherit;'>
          <h4> Analysis Complete - Interactive Clinical Validation</h4>
          <p><strong>Overall Performance:</strong> %s (AUC = %.3f)</p>
          <div style='margin: 10px 0;'>
@@ -597,7 +597,7 @@ clinicalvalidationinteractiveClass <- R6::R6Class(
     # Generate real-time metrics HTML
     .generateRealtimeMetrics = function(validation_results) {
       html_content <- sprintf(
-        "<div class='realtime-metrics' style='background: #f8f9fa; padding: 15px; border-radius: 8px; font-family: Arial, sans-serif;'>
+        "<div class='realtime-metrics' style='background-color: rgba(138, 155, 172, 0.06); padding: 15px; border-radius: 8px; font-family: Arial, sans-serif; color: inherit;'>
          <h5 style='color: #1976d2; margin-bottom: 15px;'> Real-Time Performance Dashboard</h5>
          <div style='display: flex; flex-wrap: wrap; gap: 15px;'>
            <div class='metric-card' style='flex: 1; min-width: 150px; background: white; padding: 12px; border-radius: 6px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);'>
@@ -616,7 +616,7 @@ clinicalvalidationinteractiveClass <- R6::R6Class(
              <div style='font-size: 11px; color: #999;'>95%% CI: %.1f%% - %.1f%%</div>
            </div>
          </div>
-         <div style='margin-top: 10px; padding: 8px; background: #e3f2fd; border-radius: 4px; font-size: 12px;'>
+         <div style='margin-top: 10px; padding: 8px; background-color: rgba(33, 152, 239, 0.13); border-radius: 4px; font-size: 12px; color: inherit;'>
          <strong>Method:</strong> %s | <strong>Sample Size:</strong> %d | <strong>Confidence Level:</strong> %.0f%%
          </div>
          </div>",

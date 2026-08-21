@@ -30,7 +30,7 @@ bayesianmetaanalysisClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::
             if (is.null(current))
                 current <- ""
             new_message <- sprintf(
-                '<div style="margin: 10px 0; padding: 10px; border-left: 4px solid %s; background-color: #f8f9fa;"><strong>%s:</strong> %s</div>',
+                '<div style="margin: 10px 0; padding: 10px; border-left: 4px solid %s; background-color: rgba(138, 155, 172, 0.06); color: inherit;"><strong>%s:</strong> %s</div>',
                 border_color,
                 htmltools::htmlEscape(title),
                 htmltools::htmlEscape(message)
@@ -55,7 +55,7 @@ bayesianmetaanalysisClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::
                 .instructions p {margin: 5px 0;}
                 .instructions ul {margin-left: 20px;}
                 .instructions li {margin: 5px 0;}
-                .note {background-color: #e7f3ff; padding: 10px; border-left: 3px solid #2196F3; margin: 10px 0;}
+                .note {background-color: rgba(33, 144, 255, 0.11); color: inherit; padding: 10px; border-left: 3px solid #2196F3; margin: 10px 0;}
                 </style>
                 </head>
                 <body>

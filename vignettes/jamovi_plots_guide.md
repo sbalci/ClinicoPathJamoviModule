@@ -222,6 +222,90 @@ plotData <- list(
 self$results$plotName$setState(plotData)
 ```
 
+### MANDATORY: NULL-guard every `image$state` read
+
+**[MEDIUM] — raised by the jamovi library reviewer against three of five modules.**
+
+A render function can run when `.run()` did **not** set the state. Three real paths:
+
+1. **`.run()` returned early.** Validation failed, so `setState()` was never reached
+   — but the plot element still exists and still renders.
+2. **Resize / redraw.** jamovi re-invokes the renderer without re-running.
+3. **Reopening a saved `.omv`.** `jmvcore`'s `.load()` restores an analysis from
+   disk without re-running it.
+
+Without a guard, `image$state` is `NULL`, `state$whatever` silently yields `NULL`,
+and the plotting library raises a raw error — instead of the clean validation
+message the analysis already built.
+
+```R
+# WRONG - the guards below cover missing options and empty data, but not a
+#         missing state, which is the case that actually happens.
+.plotVenn = function(image, ggtheme, theme, ...) {
+    if (is.null(self$options$var1) || is.null(self$options$var2))
+        return()
+    if (nrow(self$data) == 0)
+        jmvcore::reject(.('Data contains no (complete) rows'))
+
+    results  <- image$state
+    mydata2  <- results$mydata          # NULL -> raw library error
+    ...
+}
+
+# RIGHT - the house pattern
+.plotVenn = function(image, ggtheme, theme, ...) {
+    private$.checkpoint()
+
+    results <- image$state
+    if (is.null(results))
+        return(FALSE)
+
+    mydata2 <- results$mydata
+    ...
+    print(plot)
+    TRUE
+}
+```
+
+`return(FALSE)` — not bare `return()` — is the jamovi convention for "nothing was
+drawn". Reference implementations: `R/agepyramid.b.R`, `R/benford.b.R`,
+`R/dataquality.b.R`, `R/outlierdetection.b.R`.
+
+#### Sub-field reads: guard the parent
+
+```R
+# WRONG - image$state may be NULL
+predicted <- image$state$predicted
+actual    <- image$state$actual
+
+# RIGHT
+if (is.null(image$state))
+    return(FALSE)
+predicted <- image$state$predicted
+actual    <- image$state$actual
+```
+
+#### A NULL state is not the same as an empty state
+
+If a downstream builder returns a bare `data.frame()` with **no columns**,
+`ggplot2::aes(x = metric, y = value)` still fails, because the mapping cannot
+resolve its variables. Guard both:
+
+```R
+df <- private$.buildBarPlotData(plotData)
+if (is.null(df) || nrow(df) == 0)
+    return(FALSE)
+```
+
+#### Enforce it
+
+```bash
+python3 tools/check_state_guards.py        # exits 1 if any unguarded read remains
+```
+
+`tests/testthat/test-zzz-results-rendering-contract.R` asserts the same invariant
+across the whole module.
+
 ### State Data Structure Best Practices
 
 #### Recommended State Structure

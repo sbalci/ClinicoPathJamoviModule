@@ -288,4 +288,22 @@ items:
       type: Html
       visible: true
       refs: []
+
+    - name: riskgroupvar
+      title: Add RPA Risk Group to Data
+      type: Output
+      measureType: nominal
+      varTitle: 'RPA Risk Group'
+      varDescription: 'RPA risk group from recursive partitioning of survival time on the selected predictors'
+      clearWith:
+        - time
+        - event
+        - eventValue
+        - predictors
+        - minbucket
+        - cp
+        - maxdepth
+        - nfolds
+        - prunetree
+        - riskgrouplabels
 ...

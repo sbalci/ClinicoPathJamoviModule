@@ -166,7 +166,7 @@ ihcclusterClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
             .showBinaryConversionNotice = function(df, catVars, contVars) {
                 # Generate HTML notice about binary conversion for Jaccard distance
 
-                html <- "<div style='padding:15px; background-color:#fff3cd; border-left:4px solid #ffc107;'>"
+                html <- "<div style='padding:15px; background-color: rgba(255, 202, 33, 0.23); border-left:4px solid #ffc107; color: inherit;'>"
                 html <- paste0(html, "<h4 style='color:#856404; margin-top:0;'>IMPORTANT: Binary Conversion for Jaccard Distance</h4>")
 
                 html <- paste0(html, "<p><b>Jaccard distance requires binary (0/1) data.</b> Your data has been automatically converted as follows:</p>")
@@ -182,7 +182,7 @@ ihcclusterClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                 if (length(catVars) > 0) {
                     html <- paste0(html, "<h5 style='color:#856404;'>Categorical Markers (n=", length(catVars), "):</h5>")
                     html <- paste0(html, "<table style='width:100%; border-collapse:collapse; margin-bottom:10px;'>")
-                    html <- paste0(html, "<tr style='background-color:#f8f9fa; font-weight:bold;'>")
+                    html <- paste0(html, "<tr style='background-color: rgba(138, 155, 172, 0.06); font-weight:bold; color: inherit;'>")
                     html <- paste0(html, "<td style='padding:8px; border:1px solid #dee2e6;'>Marker</td>")
                     html <- paste0(html, "<td style='padding:8px; border:1px solid #dee2e6;'>Original Levels</td>")
                     html <- paste0(html, "<td style='padding:8px; border:1px solid #dee2e6;'>Positive (1)</td>")
@@ -222,7 +222,7 @@ ihcclusterClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                 if (length(contVars) > 0) {
                     html <- paste0(html, "<h5 style='color:#856404; margin-top:15px;'>Continuous Markers (n=", length(contVars), ") - Median Split:</h5>")
                     html <- paste0(html, "<table style='width:100%; border-collapse:collapse; margin-bottom:10px;'>")
-                    html <- paste0(html, "<tr style='background-color:#f8f9fa; font-weight:bold;'>")
+                    html <- paste0(html, "<tr style='background-color: rgba(138, 155, 172, 0.06); font-weight:bold; color: inherit;'>")
                     html <- paste0(html, "<td style='padding:8px; border:1px solid #dee2e6;'>Marker</td>")
                     html <- paste0(html, "<td style='padding:8px; border:1px solid #dee2e6;'>Range</td>")
                     html <- paste0(html, "<td style='padding:8px; border:1px solid #dee2e6;'>Median</td>")
@@ -259,7 +259,7 @@ ihcclusterClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                 }
 
                 # Important notes section
-                html <- paste0(html, "<div style='margin-top:15px; padding:10px; background-color:#f8d7da; border:1px solid #f5c6cb;'>")
+                html <- paste0(html, "<div style='margin-top:15px; padding:10px; background-color: rgba(216, 33, 50, 0.18); border:1px solid #f5c6cb; color: inherit;'>")
                 html <- paste0(html, "<h5 style='color:#721c24; margin-top:0;'>VERIFY BEFORE INTERPRETING RESULTS:</h5>")
                 html <- paste0(html, "<ol style='margin:5px 0; padding-left:20px;'>")
                 html <- paste0(html, "<li><b>Categorical markers:</b> Ensure 'Positive'/'Negative' coding is correct. Non-standard codes (e.g., 'Present', 'Absent') will be treated as negative.</li>")
@@ -270,7 +270,7 @@ ihcclusterClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                 html <- paste0(html, "</div>")
 
                 # When to use section
-                html <- paste0(html, "<div style='margin-top:10px; padding:10px; background-color:#d1ecf1; border:1px solid #bee5eb;'>")
+                html <- paste0(html, "<div style='margin-top:10px; padding:10px; background-color: rgba(33, 163, 188, 0.21); border:1px solid #bee5eb; color: inherit;'>")
                 html <- paste0(html, "<h5 style='color:#0c5460; margin-top:0;'>When Jaccard Distance is Appropriate:</h5>")
                 html <- paste0(html, "<ul style='margin:5px 0; padding-left:20px;'>")
                 html <- paste0(html, "<li>Tissue microarray (TMA) data with binary scoring (positive/negative only)</li>")
@@ -2072,13 +2072,13 @@ ihcclusterClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                 # Minimum: at least 2 markers total (can be all categorical, all continuous, or mixed)
                 if (totalVars < 2) {
                     html <- '
-                <div style="background-color: #f0f8ff; padding: 20px; margin: 15px 0; border-radius: 8px; border-left: 5px solid #2196F3;">
+                <div style="background-color: rgba(33, 152, 255, 0.07); padding: 20px; margin: 15px 0; border-radius: 8px; border-left: 5px solid #2196F3; color: inherit;">
                 <h3 style="margin-top: 0; color: #1976D2;"> Welcome to IHC Clustering Analysis</h3>
 
                 <div style="background-color: white; padding: 15px; margin: 10px 0; border-radius: 5px;">
                 <h4> Step 1: Select Your Variables</h4>
                 <table style="width: 100%; border-collapse: collapse;">
-                <tr style="background-color: #f8f9fa;">
+                <tr style="background-color: rgba(138, 155, 172, 0.06); color: inherit;">
                 <th style="padding: 10px; text-align: left; border: 1px solid #dee2e6;">Variable Type</th>
                 <th style="padding: 10px; text-align: left; border: 1px solid #dee2e6;">Examples</th>
                 <th style="padding: 10px; text-align: left; border: 1px solid #dee2e6;">Data Format</th>
@@ -2120,7 +2120,7 @@ ihcclusterClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                 </ul>
                 </div>
 
-                <div style="background-color: #fff3cd; padding: 10px; margin: 10px 0; border-radius: 5px; border: 1px solid #ffc107;">
+                <div style="background-color: rgba(255, 202, 33, 0.23); padding: 10px; margin: 10px 0; border-radius: 5px; border: 1px solid #ffc107; color: inherit;">
                 <p style="margin: 0;"><b> Note:</b> This analysis uses Gower distance to appropriately handle mixed categorical and continuous data.</p>
                 </div>
                 </div>'
@@ -2128,7 +2128,7 @@ ihcclusterClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                     # Variables selected - show brief configuration summary
                     # Analysis will run automatically once minimum requirements are met
                     html <- paste0(
-                        '<div style="background-color: #e8f4fd; padding: 15px; margin: 10px 0; border-radius: 5px; border-left: 4px solid #2196F3;">',
+                        '<div style="background-color: rgba(33, 149, 236, 0.1); padding: 15px; margin: 10px 0; border-radius: 5px; border-left: 4px solid #2196F3; color: inherit;">',
                         '<h4 style="margin-top: 0; color: #1976D2;"> Analysis Configuration</h4>',
                         "<p><b>Variables Selected:</b> ", nCat, " categorical + ", nCont, " continuous markers</p>"
                     )
@@ -2155,7 +2155,7 @@ ihcclusterClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
             # distance metrics, and statistical methods used in the analysis.
             .initTechnicalNotes = function() {
                 html <- '
-            <div style="background-color: #f8f9fa; padding: 20px; margin: 15px 0; border-radius: 8px; border: 1px solid #dee2e6;">
+            <div style="background-color: rgba(138, 155, 172, 0.06); padding: 20px; margin: 15px 0; border-radius: 8px; border: 1px solid #dee2e6; color: inherit;">
             <h3 style="margin-top: 0; color: #495057;"> Technical Implementation Details</h3>
 
             <div style="background-color: white; padding: 15px; margin: 10px 0; border-radius: 5px;">
@@ -2172,7 +2172,7 @@ ihcclusterClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
             <div style="background-color: white; padding: 15px; margin: 10px 0; border-radius: 5px;">
             <h4> Clustering Algorithms</h4>
             <table style="width: 100%; border-collapse: collapse; margin: 10px 0;">
-            <tr style="background-color: #e9ecef;">
+            <tr style="background-color: rgba(33, 63, 94, 0.1); color: inherit;">
             <th style="padding: 10px; text-align: left; border: 1px solid #dee2e6;">Algorithm</th>
             <th style="padding: 10px; text-align: left; border: 1px solid #dee2e6;">Strengths</th>
             <th style="padding: 10px; text-align: left; border: 1px solid #dee2e6;">Best Use Cases</th>
@@ -2204,7 +2204,7 @@ ihcclusterClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
             <li><b>Statistical Tests:</b> Chi-square/Fisher (categorical), Kruskal-Wallis/ANOVA (continuous)</li>
             </ul>
 
-            <div style="background-color: #f0f9ff; padding: 10px; margin: 10px 0; border-radius: 3px; border-left: 3px solid #0ea5e9;">
+            <div style="background-color: rgba(33, 166, 255, 0.07); padding: 10px; margin: 10px 0; border-radius: 3px; border-left: 3px solid #0ea5e9; color: inherit;">
             <h5>Silhouette Interpretation:</h5>
             <ul style="margin: 5px 0;">
             <li><span style="color: #059669;">0.7 - 1.0:</span> Strong, well-separated clusters</li>
@@ -2216,13 +2216,13 @@ ihcclusterClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
 
             <div style="background-color: white; padding: 15px; margin: 10px 0; border-radius: 5px;">
             <h4> R Package Dependencies</h4>
-            <code style="background-color: #f1f3f4; padding: 8px; border-radius: 3px; display: block; margin: 5px 0;">
+            <code style="background-color: rgba(33, 65, 81, 0.06); padding: 8px; border-radius: 3px; display: block; margin: 5px 0; color: inherit;">
             cluster (PAM, Gower distance), FactoMineR (MCA/PCA), factoextra (visualization),<br>
             ComplexHeatmap (advanced heatmaps), survival (survival analysis)
             </code>
             </div>
 
-            <div style="background-color: #f0fdf4; padding: 10px; margin: 10px 0; border-radius: 5px; border: 1px solid #22c55e;">
+            <div style="background-color: rgba(33, 225, 92, 0.07); padding: 10px; margin: 10px 0; border-radius: 5px; border: 1px solid #22c55e; color: inherit;">
             <p style="margin: 0;"><b> Reference:</b> Gower, J.C. (1971). A general coefficient of similarity and some of its properties. <em>Biometrics</em>, 27(4), 857-871.</p>
             </div>
             </div>'
@@ -2235,7 +2235,7 @@ ihcclusterClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
             # including guidelines for validation and clinical application.
             .initInterpretationGuide = function() {
                 html <- '
-            <div style="background-color: #fff8e1; padding: 20px; margin: 15px 0; border-radius: 8px; border-left: 5px solid #ffc107;">
+            <div style="background-color: rgba(255, 203, 33, 0.14); padding: 20px; margin: 15px 0; border-radius: 8px; border-left: 5px solid #ffc107; color: inherit;">
             <h3 style="margin-top: 0; color: #e65100;"> Clinical Interpretation Guide</h3>'
 
                 html <- paste0(html, '
@@ -2243,7 +2243,7 @@ ihcclusterClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
             <div style="background-color: white; padding: 15px; margin: 10px 0; border-radius: 5px;">
             <h4> Understanding Your Results</h4>
             <table style="width: 100%; border-collapse: collapse;">
-            <tr style="background-color: #f8f9fa;">
+            <tr style="background-color: rgba(138, 155, 172, 0.06); color: inherit;">
             <th style="padding: 12px; text-align: left; border: 1px solid #dee2e6;">Output</th>
             <th style="padding: 12px; text-align: left; border: 1px solid #dee2e6;">Interpretation</th>
             <th style="padding: 12px; text-align: left; border: 1px solid #dee2e6;">Clinical Significance</th>
@@ -2306,7 +2306,7 @@ ihcclusterClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
 
             <div style="background-color: white; padding: 15px; margin: 10px 0; border-radius: 5px;">
             <h4> Important Considerations</h4>
-            <div style="background-color: #fef2f2; padding: 12px; border-radius: 5px; border: 1px solid #fca5a5; margin: 10px 0;">
+            <div style="background-color: rgba(238, 38, 38, 0.06); padding: 12px; border-radius: 5px; border: 1px solid #fca5a5; margin: 10px 0; color: inherit;">
             <h5 style="margin-top: 0; color: #dc2626;">Limitations & Cautions</h5>
             <ul style="margin: 5px 0;">
             <li>Clustering is <b>exploratory</b> - validate findings independently</li>
@@ -2317,7 +2317,7 @@ ihcclusterClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
             </ul>
             </div>
 
-            <div style="background-color: #f0fdf4; padding: 12px; border-radius: 5px; border: 1px solid #86efac; margin: 10px 0;">
+            <div style="background-color: rgba(33, 225, 92, 0.07); padding: 12px; border-radius: 5px; border: 1px solid #86efac; margin: 10px 0; color: inherit;">
             <h5 style="margin-top: 0; color: #059669;">Best Practices</h5>
             <ul style="margin: 5px 0;">
             <li>Document cluster definitions for reproducible classification</li>
@@ -2328,7 +2328,7 @@ ihcclusterClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
             </div>
             </div>
 
-            <div style="background-color: #e3f2fd; padding: 15px; margin: 10px 0; border-radius: 5px; border: 1px solid #90caf9;">
+            <div style="background-color: rgba(33, 152, 239, 0.13); padding: 15px; margin: 10px 0; border-radius: 5px; border: 1px solid #90caf9; color: inherit;">
             <p style="margin: 0;"><b> Next Steps:</b> Export cluster assignments and test associations with clinical variables using the survival analysis or cross-table modules.</p>
             </div>
             </div>')
@@ -5971,7 +5971,7 @@ ihcclusterClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                     for (group_name in names(supervisedResults)) {
                         result <- supervisedResults[[group_name]]
 
-                        html <- paste0(html, "<div style='margin-top:20px; padding:15px; border:1px solid #dee2e6; background-color:#f8f9fa;'>")
+                        html <- paste0(html, "<div style='margin-top:20px; padding:15px; border:1px solid #dee2e6; background-color: rgba(138, 155, 172, 0.06); color: inherit;'>")
                         html <- paste0(html, "<h5 style='margin-top:0; color:#495057;'>Group: ", htmltools::htmlEscape(result$group), "</h5>")
                         html <- paste0(html, "<p><b>N Cases:</b> ", result$n_cases, "</p>")
 
@@ -5982,7 +5982,7 @@ ihcclusterClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                             # Cluster sizes
                             html <- paste0(html, "<p><b>Cluster Sizes:</b></p>")
                             html <- paste0(html, "<table style='margin-left:20px; border-collapse:collapse;'>")
-                            html <- paste0(html, "<tr style='background-color:#e9ecef;'><th style='padding:5px; border:1px solid #dee2e6;'>Cluster</th><th style='padding:5px; border:1px solid #dee2e6;'>N</th></tr>")
+                            html <- paste0(html, "<tr style='background-color: rgba(33, 63, 94, 0.1); color: inherit;'><th style='padding:5px; border:1px solid #dee2e6;'>Cluster</th><th style='padding:5px; border:1px solid #dee2e6;'>N</th></tr>")
                             for (cl in names(result$cluster_sizes)) {
                                 html <- paste0(html, "<tr><td style='padding:5px; border:1px solid #dee2e6;'>", cl, "</td><td style='padding:5px; border:1px solid #dee2e6;'>", result$cluster_sizes[[cl]], "</td></tr>")
                             }
@@ -6130,7 +6130,7 @@ ihcclusterClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                 html <- self$results$interpretationGuide
 
                 guide_html <- paste0(
-                    "<div style='background-color: #e8f4f8; border: 2px solid #3498db; padding: 20px; margin: 10px 0;'>",
+                    "<div style='background-color: rgba(33, 149, 188, 0.1); border: 2px solid #3498db; padding: 20px; margin: 10px 0; color: inherit;'>",
                     "<h3 style='color: #2c3e50; margin-top: 0;'>Clinical Interpretation Guide</h3>",
                     "<h4 style='color: #34495e; margin-top: 15px;'>Understanding Cluster Results</h4>",
                     "<ul style='line-height: 1.6;'>",
@@ -6163,7 +6163,7 @@ ihcclusterClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                     "<li>Perform survival analysis or clinical correlation to assess prognostic significance</li>",
                     "<li>Consider reproducibility testing (random split validation) for publication-ready results</li>",
                     "</ol>",
-                    "<p style='margin-top: 15px; padding: 10px; background-color: #fff3cd; border-left: 4px solid #f0ad4e;'>",
+                    "<p style='margin-top: 15px; padding: 10px; background-color: rgba(255, 202, 33, 0.23); border-left: 4px solid #f0ad4e; color: inherit;'>",
                     "<strong> Important:</strong> IHC clustering results are exploratory and hypothesis-generating. ",
                     "Clinical decisions should integrate clustering results with morphology, clinical context, and expert pathologist review.",
                     "</p>",
@@ -6227,11 +6227,11 @@ ihcclusterClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                 }
 
                 notes_html <- paste0(
-                    "<div style='background-color: #f8f9fa; border: 2px solid #6c757d; padding: 20px; margin: 10px 0;'>",
+                    "<div style='background-color: rgba(138, 155, 172, 0.06); border: 2px solid #6c757d; padding: 20px; margin: 10px 0; color: inherit;'>",
                     "<h3 style='color: #2c3e50; margin-top: 0;'>Technical Implementation Details</h3>",
                     "<h4 style='color: #34495e; margin-top: 15px;'>Clustering Method</h4>",
                     "<table style='width: 100%; border-collapse: collapse; margin: 10px 0;'>",
-                    "<tr style='background-color: #e9ecef;'>",
+                    "<tr style='background-color: rgba(33, 63, 94, 0.1); color: inherit;'>",
                     "<td style='padding: 8px; border: 1px solid #dee2e6; width: 40%;'><strong>Algorithm:</strong></td>",
                     "<td style='padding: 8px; border: 1px solid #dee2e6;'>", method_name, "</td>",
                     "</tr>",
@@ -6239,7 +6239,7 @@ ihcclusterClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                     "<td style='padding: 8px; border: 1px solid #dee2e6;'><strong>Distance Metric:</strong></td>",
                     "<td style='padding: 8px; border: 1px solid #dee2e6;'>", distance_name, "</td>",
                     "</tr>",
-                    "<tr style='background-color: #e9ecef;'>",
+                    "<tr style='background-color: rgba(33, 63, 94, 0.1); color: inherit;'>",
                     "<td style='padding: 8px; border: 1px solid #dee2e6;'><strong>Linkage Method:</strong></td>",
                     "<td style='padding: 8px; border: 1px solid #dee2e6;'>", linkage_name, "</td>",
                     "</tr>",
@@ -6247,14 +6247,14 @@ ihcclusterClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                     "<td style='padding: 8px; border: 1px solid #dee2e6;'><strong>Number of Clusters:</strong></td>",
                     "<td style='padding: 8px; border: 1px solid #dee2e6;'>", k_selection, "</td>",
                     "</tr>",
-                    "<tr style='background-color: #e9ecef;'>",
+                    "<tr style='background-color: rgba(33, 63, 94, 0.1); color: inherit;'>",
                     "<td style='padding: 8px; border: 1px solid #dee2e6;'><strong>Random Seed:</strong></td>",
                     "<td style='padding: 8px; border: 1px solid #dee2e6;'>", opts$seed, " (for reproducibility)</td>",
                     "</tr>",
                     "</table>",
                     "<h4 style='color: #34495e; margin-top: 15px;'>Data Preprocessing</h4>",
                     "<table style='width: 100%; border-collapse: collapse; margin: 10px 0;'>",
-                    "<tr style='background-color: #e9ecef;'>",
+                    "<tr style='background-color: rgba(33, 63, 94, 0.1); color: inherit;'>",
                     "<td style='padding: 8px; border: 1px solid #dee2e6; width: 40%;'><strong>Continuous Variable Scaling:</strong></td>",
                     "<td style='padding: 8px; border: 1px solid #dee2e6;'>", scaling_status, "</td>",
                     "</tr>",
@@ -6262,7 +6262,7 @@ ihcclusterClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                     "<td style='padding: 8px; border: 1px solid #dee2e6;'><strong>Missing Data Handling:</strong></td>",
                     "<td style='padding: 8px; border: 1px solid #dee2e6;'>", missing_method, "</td>",
                     "</tr>",
-                    "<tr style='background-color: #e9ecef;'>",
+                    "<tr style='background-color: rgba(33, 63, 94, 0.1); color: inherit;'>",
                     "<td style='padding: 8px; border: 1px solid #dee2e6;'><strong>Consensus Clustering:</strong></td>",
                     "<td style='padding: 8px; border: 1px solid #dee2e6;'>", consensus_status, "</td>",
                     "</tr>",
@@ -6286,7 +6286,7 @@ ihcclusterClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                     "<code>FactoMineR</code> (MCA/PCA), <code>ComplexHeatmap</code> (heatmaps), and <code>ggplot2</code> (plotting). ",
                     "Gower distance is computed using <code>cluster::daisy()</code> which handles mixed data types appropriately.",
                     "</p>",
-                    "<p style='margin-top: 15px; padding: 10px; background-color: #d1ecf1; border-left: 4px solid #17a2b8;'>",
+                    "<p style='margin-top: 15px; padding: 10px; background-color: rgba(33, 163, 188, 0.21); border-left: 4px solid #17a2b8; color: inherit;'>",
                     "<strong> Note:</strong> For reproducible research, document all analysis settings including the random seed, ",
                     "clustering method, distance metric, and any data preprocessing steps (scaling, missing data handling).",
                     "</p>",
@@ -6299,11 +6299,11 @@ ihcclusterClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                 html <- self$results$diagnosticGlossary
 
                 glossary_html <- paste0(
-                    "<div style='background-color: #fff8e1; border: 2px solid #ffc107; padding: 20px; margin: 10px 0;'>",
+                    "<div style='background-color: rgba(255, 203, 33, 0.14); border: 2px solid #ffc107; padding: 20px; margin: 10px 0; color: inherit;'>",
                     "<h3 style='color: #2c3e50; margin-top: 0;'> Diagnostic Metrics Glossary</h3>",
                     "<h4 style='color: #34495e; margin-top: 15px;'>Understanding Marker Performance</h4>",
                     "<table style='width: 100%; border-collapse: collapse; margin: 15px 0;'>",
-                    "<tr style='background-color: #ffe082;'>",
+                    "<tr style='background-color: rgba(255, 200, 33, 0.56); color: inherit;'>",
                     "<th style='padding: 12px; border: 2px solid #ffa000; text-align: left; width: 25%;'>Metric</th>",
                     "<th style='padding: 12px; border: 2px solid #ffa000; text-align: left; width: 35%;'>Definition</th>",
                     "<th style='padding: 12px; border: 2px solid #ffa000; text-align: left; width: 40%;'>Clinical Interpretation</th>",
@@ -6318,7 +6318,7 @@ ihcclusterClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                     "<strong>Low sensitivity</strong> means many false negatives (missed diagnoses).",
                     "</td>",
                     "</tr>",
-                    "<tr style='background-color: #fff3e0;'>",
+                    "<tr style='background-color: rgba(255, 169, 33, 0.14); color: inherit;'>",
                     "<td style='padding: 10px; border: 1px solid #ffb74d;'><strong>Specificity</strong></td>",
                     "<td style='padding: 10px; border: 1px solid #ffb74d;'>True Negative Rate<br><em>P(Marker- | Disease-)</em></td>",
                     "<td style='padding: 10px; border: 1px solid #ffb74d;'>",
@@ -6338,7 +6338,7 @@ ihcclusterClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                     "<strong>Critical for patient counseling</strong> after a positive result.",
                     "</td>",
                     "</tr>",
-                    "<tr style='background-color: #fff3e0;'>",
+                    "<tr style='background-color: rgba(255, 169, 33, 0.14); color: inherit;'>",
                     "<td style='padding: 10px; border: 1px solid #ffb74d;'><strong>NPV</strong><br>(Negative Predictive Value)</td>",
                     "<td style='padding: 10px; border: 1px solid #ffb74d;'>Negative Precision<br><em>P(Disease- | Marker-)</em></td>",
                     "<td style='padding: 10px; border: 1px solid #ffb74d;'>",
@@ -6358,7 +6358,7 @@ ihcclusterClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                     "Use with caution.",
                     "</td>",
                     "</tr>",
-                    "<tr style='background-color: #fff3e0;'>",
+                    "<tr style='background-color: rgba(255, 169, 33, 0.14); color: inherit;'>",
                     "<td style='padding: 10px; border: 1px solid #ffb74d;'><strong>Likelihood Ratio+</strong></td>",
                     "<td style='padding: 10px; border: 1px solid #ffb74d;'>LR+ = Sensitivity / (1-Specificity)</td>",
                     "<td style='padding: 10px; border: 1px solid #ffb74d;'>",
@@ -6384,24 +6384,24 @@ ihcclusterClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                     "<tr>",
                     "<td style='border: none;'></td>",
                     "<td style='border: none;'></td>",
-                    "<td colspan='2' style='padding: 8px; background-color: #e3f2fd; border: 2px solid #1976d2;'><strong>Gold Standard Diagnosis</strong></td>",
+                    "<td colspan='2' style='padding: 8px; background-color: rgba(33, 152, 239, 0.13); border: 2px solid #1976d2; color: inherit;'><strong>Gold Standard Diagnosis</strong></td>",
                     "</tr>",
                     "<tr>",
                     "<td style='border: none;'></td>",
                     "<td style='border: none;'></td>",
-                    "<td style='padding: 8px; background-color: #e3f2fd; border: 2px solid #1976d2;'><strong>Disease+</strong></td>",
-                    "<td style='padding: 8px; background-color: #e3f2fd; border: 2px solid #1976d2;'><strong>Disease-</strong></td>",
+                    "<td style='padding: 8px; background-color: rgba(33, 152, 239, 0.13); border: 2px solid #1976d2; color: inherit;'><strong>Disease+</strong></td>",
+                    "<td style='padding: 8px; background-color: rgba(33, 152, 239, 0.13); border: 2px solid #1976d2; color: inherit;'><strong>Disease-</strong></td>",
                     "</tr>",
                     "<tr>",
-                    "<td rowspan='2' style='padding: 8px; background-color: #fff3e0; border: 2px solid #ffa000; vertical-align: middle;'><strong>IHC Marker</strong></td>",
-                    "<td style='padding: 8px; background-color: #fff3e0; border: 2px solid #ffa000;'><strong>Marker+</strong></td>",
-                    "<td style='padding: 12px; border: 2px solid #4caf50; background-color: #c8e6c9;'><strong>TP</strong><br>True Positive</td>",
-                    "<td style='padding: 12px; border: 2px solid #f44336; background-color: #ffcdd2;'><strong>FP</strong><br>False Positive</td>",
+                    "<td rowspan='2' style='padding: 8px; background-color: rgba(255, 169, 33, 0.14); border: 2px solid #ffa000; vertical-align: middle; color: inherit;'><strong>IHC Marker</strong></td>",
+                    "<td style='padding: 8px; background-color: rgba(255, 169, 33, 0.14); border: 2px solid #ffa000; color: inherit;'><strong>Marker+</strong></td>",
+                    "<td style='padding: 12px; border: 2px solid #4caf50; background-color: rgba(33, 154, 37, 0.25); color: inherit;'><strong>TP</strong><br>True Positive</td>",
+                    "<td style='padding: 12px; border: 2px solid #f44336; background-color: rgba(255, 33, 55, 0.23); color: inherit;'><strong>FP</strong><br>False Positive</td>",
                     "</tr>",
                     "<tr>",
-                    "<td style='padding: 8px; background-color: #fff3e0; border: 2px solid #ffa000;'><strong>Marker-</strong></td>",
-                    "<td style='padding: 12px; border: 2px solid #f44336; background-color: #ffcdd2;'><strong>FN</strong><br>False Negative</td>",
-                    "<td style='padding: 12px; border: 2px solid #4caf50; background-color: #c8e6c9;'><strong>TN</strong><br>True Negative</td>",
+                    "<td style='padding: 8px; background-color: rgba(255, 169, 33, 0.14); border: 2px solid #ffa000; color: inherit;'><strong>Marker-</strong></td>",
+                    "<td style='padding: 12px; border: 2px solid #f44336; background-color: rgba(255, 33, 55, 0.23); color: inherit;'><strong>FN</strong><br>False Negative</td>",
+                    "<td style='padding: 12px; border: 2px solid #4caf50; background-color: rgba(33, 154, 37, 0.25); color: inherit;'><strong>TN</strong><br>True Negative</td>",
                     "</tr>",
                     "</table>",
                     "<h4 style='color: #34495e; margin-top: 20px;'> Key Considerations</h4>",

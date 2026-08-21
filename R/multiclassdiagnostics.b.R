@@ -449,6 +449,9 @@ multiclassdiagnosticsClass <- R6::R6Class(
                 return(FALSE)
             }
             
+            if (is.null(image$state))
+                return(FALSE)
+
             predicted <- image$state$predicted
             actual <- image$state$actual
             classes <- image$state$classes
@@ -517,6 +520,9 @@ multiclassdiagnosticsClass <- R6::R6Class(
                 return(FALSE)
             }
             
+            if (is.null(image$state))
+                return(FALSE)
+
             predicted <- image$state$predicted
             actual <- image$state$actual
             classes <- image$state$classes

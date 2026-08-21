@@ -529,6 +529,7 @@ patientsimilarityResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R
                 options=options,
                 name="exportClusters",
                 title="Cluster Assignments",
+                measureType="nominal",
                 varTitle="`Cluster`",
                 varDescription="Patient cluster assignments from similarity analysis",
                 clearWith=list(

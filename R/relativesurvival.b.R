@@ -1430,7 +1430,7 @@ relativesurvivalClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 icon <- type_icons[[n$type]]
                 paste0(
                     "<div style='", style,
-                    "padding:4px 8px;margin:4px 0;background:#fafafa;'>",
+                    "padding:4px 8px;margin:4px 0;background: rgba(172, 172, 172, 0.06); color: inherit;'>",
                     # TODO (security): n$title / n$content are interpolated into notices HTML
                     # unescaped. No live XSS today - every .addNotice() call passes developer
                     # literals or numeric scalars - but if a future .addNotice ever passes a

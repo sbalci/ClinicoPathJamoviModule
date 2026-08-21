@@ -50,7 +50,7 @@ comparingSurvivalClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             # Show instructions if variables not selected
             if (is.null(self$options$times) || is.null(self$options$status) || is.null(self$options$groups)) {
                 instructions_html <- "
-                <div style='background-color: #e8f5e8; padding: 20px; border-radius: 8px; margin: 10px 0;'>
+                <div style='background-color: rgba(33, 159, 33, 0.1); padding: 20px; border-radius: 8px; margin: 10px 0; color: inherit;'>
                     <h3>Comparing Survival Outcomes Between Groups</h3>
                     <p><strong>Compare survival curves and test for significant differences between groups using the log-rank test.</strong></p>
 
@@ -290,7 +290,7 @@ comparingSurvivalClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             n_excluded <- n_before - n_after
             
             exclusion_msg <- paste0(
-                "<div style='background-color: #fff3cd; padding: 15px; border-radius: 5px; margin: 10px 0;'>",
+                "<div style='background-color: rgba(255, 202, 33, 0.23); padding: 15px; border-radius: 5px; margin: 10px 0; color: inherit;'>",
                 "<strong>Landmark Analysis Applied:</strong><br>",
                 "\u{2022} Landmark time: ", self$options$landmarkTime, " ",
                 if (self$options$landmarkUnit != "same") self$options$landmarkUnit else "time units", "<br>",

@@ -117,7 +117,7 @@ screeningcalculatorClass <- if (requireNamespace("jmvcore"))
                 <em>Clinical use: Determines confidence in negative results. NPV >95% suggests disease can be ruled out.</em></p>
                 
                 <p><strong>Likelihood Ratios (LR)</strong>:<br>
-                Positive LR = Sensitivity / (1-Specificity) &nbsp;&nbsp;&nbsp; Negative LR = (1-Sensitivity) / Specificity<br>
+                Positive LR = Sensitivity / (1-Specificity) \u{00A0}\u{00A0}\u{00A0} Negative LR = (1-Sensitivity) / Specificity<br>
                 <em>Clinical interpretation: LR+ >10 = strong evidence for disease; LR- <0.1 = strong evidence against disease</em></p>
                 
                 <p><strong>Sequential Testing Formula</strong>: For each subsequent test, the post-test probability from the previous test becomes the new pre-test probability.<br>
@@ -727,6 +727,9 @@ screeningcalculatorClass <- if (requireNamespace("jmvcore"))
                 if (!exists("nomogrammer")) {
                     # Create informative message plot when nomogrammer is not available
                     plotData1 <- image1$state
+
+                    if (is.null(plotData1))
+                        return(FALSE)
                     
                     # Create a basic informative plot using ggplot2
                     info_plot <- ggplot2::ggplot() +
@@ -766,6 +769,9 @@ screeningcalculatorClass <- if (requireNamespace("jmvcore"))
                 
                 plotData1 <- image1$state
 
+                if (is.null(plotData1))
+                    return(FALSE)
+
                 plot1 <- nomogrammer(
                     Prevalence = plotData1$Prevalence,
                     Sens = plotData1$Sens,
@@ -788,6 +794,9 @@ screeningcalculatorClass <- if (requireNamespace("jmvcore"))
                 # Check for nomogrammer function availability
                 if (!exists("nomogrammer")) {
                     plotData2 <- image2PP$state
+
+                    if (is.null(plotData2))
+                        return(FALSE)
                     
                     # Create informative message plot
                     info_plot <- ggplot2::ggplot() +
@@ -820,6 +829,11 @@ screeningcalculatorClass <- if (requireNamespace("jmvcore"))
                 
                 plotData2 <- image2PP$state
 
+                
+                if (is.null(plotData2))
+                
+                    return(FALSE)
+
                 plot2PP <- nomogrammer(
                     Prevalence = plotData2$Prevalence,
                     Sens = plotData2$Sens,
@@ -842,6 +856,9 @@ screeningcalculatorClass <- if (requireNamespace("jmvcore"))
                 # Check for nomogrammer function availability
                 if (!exists("nomogrammer")) {
                     plotData2 <- image2NN$state
+
+                    if (is.null(plotData2))
+                        return(FALSE)
                     
                     # Create informative message plot
                     info_plot <- ggplot2::ggplot() +
@@ -874,6 +891,11 @@ screeningcalculatorClass <- if (requireNamespace("jmvcore"))
                 
                 plotData2 <- image2NN$state
 
+                
+                if (is.null(plotData2))
+                
+                    return(FALSE)
+
                 plot2NN <- nomogrammer(
                     Prevalence = plotData2$Prevalence,
                     Sens = plotData2$Sens,
@@ -896,6 +918,9 @@ screeningcalculatorClass <- if (requireNamespace("jmvcore"))
                 # Check for nomogrammer function availability
                 if (!exists("nomogrammer")) {
                     plotData3 <- image3PPP$state
+
+                    if (is.null(plotData3))
+                        return(FALSE)
                     
                     # Create informative message plot
                     info_plot <- ggplot2::ggplot() +
@@ -928,6 +953,11 @@ screeningcalculatorClass <- if (requireNamespace("jmvcore"))
                 
                 plotData3 <- image3PPP$state
 
+                
+                if (is.null(plotData3))
+                
+                    return(FALSE)
+
                 plot3PPP <- nomogrammer(
                     Prevalence = plotData3$Prevalence,
                     Sens = plotData3$Sens,
@@ -950,6 +980,9 @@ screeningcalculatorClass <- if (requireNamespace("jmvcore"))
                 # Check for nomogrammer function availability
                 if (!exists("nomogrammer")) {
                     plotData3 <- image3NNN$state
+
+                    if (is.null(plotData3))
+                        return(FALSE)
                     
                     # Create informative message plot
                     info_plot <- ggplot2::ggplot() +
@@ -981,6 +1014,11 @@ screeningcalculatorClass <- if (requireNamespace("jmvcore"))
                 }
                 
                 plotData3 <- image3NNN$state
+
+                
+                if (is.null(plotData3))
+                
+                    return(FALSE)
 
                 plot3NNN <- nomogrammer(
                     Prevalence = plotData3$Prevalence,

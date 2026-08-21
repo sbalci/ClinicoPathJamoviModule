@@ -209,6 +209,7 @@ items:
     - name: exportClusters
       title: Cluster Assignments
       type: Output
+      measureType: nominal
       varTitle: '`Cluster`'
       varDescription: Patient cluster assignments from similarity analysis
       clearWith:

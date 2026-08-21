@@ -115,22 +115,22 @@ children:
           - type: TextBox
             name: plot_title
             format: string
-            label: Chart Title
+            label: Chart title
             width: largest
           - type: TextBox
             name: x_title
             format: string
-            label: X-axis Title
+            label: X-axis title
             width: largest
           - type: TextBox
             name: y_title
             format: string
-            label: Y-axis Title
+            label: Y-axis title
             width: largest
           - type: TextBox
             name: legend_title
             format: string
-            label: Legend Title
+            label: Legend title
             width: largest
   - type: CollapseBox
     label: Data Labels
@@ -154,7 +154,7 @@ children:
             name: label_threshold
             format: number
             suffix: '%'
-            label: Min Segment Size for Labels
+            label: Minimum segment size for labels
   - type: CollapseBox
     label: Statistical Tests
     collapsed: true
@@ -172,16 +172,16 @@ children:
             style: list-inline
           - type: CheckBox
             name: y_is_count
-            label: Value Variable counts cases
+            label: Value variable counts cases
           - type: CheckBox
             name: show_statistical_tests
-            label: Perform chi-square test
+            label: Chi-square test
             enable: (y_is_count)
           - type: TextBox
             name: confidence_level
             enable: (y_is_count && show_statistical_tests)
             format: number
-            label: Confidence Level
+            label: Confidence level
   - type: CollapseBox
     label: Layout and Styling
     collapsed: true
@@ -197,10 +197,10 @@ children:
             name: bar_width
             format: number
             suffix: ''
-            label: Bar Width
+            label: Bar width
           - type: CheckBox
             name: add_outline
-            label: Add segment outlines
+            label: Segment outlines
           - type: ComboBox
             name: outline_color
             enable: (add_outline)
@@ -217,12 +217,12 @@ children:
             name: plot_width
             format: number
             suffix: ' inches'
-            label: Plot Width (inches)
+            label: Plot width (inches)
           - type: TextBox
             name: plot_height
             format: number
             suffix: ' inches'
-            label: Plot Height (inches)
+            label: Plot height (inches)
           - type: CheckBox
             name: export_ready
             label: Export ready
@@ -245,7 +245,7 @@ children:
           - type: TextBox
             name: flerlage_label_size
             format: number
-            label: Label Size
+            label: Label size
             enable: (plot_type == 'flerlage' && flerlage_show_labels)
           - type: ComboBox
             name: flerlage_label_color
@@ -254,7 +254,7 @@ children:
           - type: TextBox
             name: flerlage_alpha
             format: number
-            label: Background Transparency
+            label: Background transparency
             enable: (plot_type == 'flerlage')
           - type: ComboBox
             name: flerlage_box_color

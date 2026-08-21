@@ -155,7 +155,7 @@ curemodelsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             # Check if variables are selected
             if (is.null(self$options$time) || is.null(self$options$status)) {
                 self$results$todo$setContent(paste0(
-                    "<div style='background-color: #f8f9fa; padding: 20px; margin: 15px 0; border-radius: 8px; border-left: 5px solid #007bff;'>",
+                    "<div style='background-color: rgba(138, 155, 172, 0.06); padding: 20px; margin: 15px 0; border-radius: 8px; border-left: 5px solid #007bff; color: inherit;'>",
                     "<h3 style='margin-top: 0; color: #007bff;'>Welcome to Cure Models Analysis</h3>",
 
                     "<p><strong>Purpose:</strong> Model survival data with a cured fraction of long-term survivors who will never experience the event.</p>",
@@ -1436,7 +1436,7 @@ curemodelsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                      else data[[status_var]] == 1), na.rm = TRUE)
 
                 sens_html <- paste0(
-                    "<div style='background: #fff3cd; padding: 15px; margin: 10px 0; border-left: 4px solid #ffc107;'>",
+                    "<div style='background-color: rgba(255, 202, 33, 0.23); padding: 15px; margin: 10px 0; border-left: 4px solid #ffc107; color: inherit;'>",
                     "<h4 style='margin-top:0'>Sensitivity Analysis</h4>",
                     "<p><strong>Note:</strong> For comprehensive sensitivity analysis, refit models ",
                     "with different cure thresholds, distributions, and covariates.</p>",
@@ -1648,7 +1648,7 @@ curemodelsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
                 interp_html <- paste0(interp_html,
                     "<h5>Report Sentence (copy-ready):</h5>",
-                    "<div style='background-color:#f8f9fa; padding:10px; border-left:3px solid #007bff; margin:8px 0; font-style:italic;'>",
+                    "<div style='background-color: rgba(138, 155, 172, 0.06); padding:10px; border-left:3px solid #007bff; margin:8px 0; font-style:italic; color: inherit;'>",
                     report_sentence,
                     "</div>",
                     "<p style='font-size:0.85em; color:#666;'>Tip: Copy the text above directly into your manuscript results section.</p>"

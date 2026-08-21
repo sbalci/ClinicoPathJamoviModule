@@ -432,7 +432,7 @@ highdimcoxClass <- if (requireNamespace('jmvcore', quietly=TRUE))
           # Compute adaptive penalty weights from CV-selected Ridge initial estimates
           penalty_weights <- tryCatch({
             cv_ridge <- glmnet::cv.glmnet(
-              x = X, y = y, family = "cox",
+              x = X, y = y, family = "cox", cox.ties = "breslow",
               alpha = 0, standardize = TRUE,
               nfolds = min(cv_folds, nrow(X))
             )
@@ -450,7 +450,7 @@ highdimcoxClass <- if (requireNamespace('jmvcore', quietly=TRUE))
         cv_fit <- glmnet::cv.glmnet(
           x = X,
           y = y,
-          family = "cox",
+          family = "cox", cox.ties = "breslow",
           alpha = alpha,
           penalty.factor = penalty_weights,
           nfolds = cv_folds,
@@ -470,7 +470,7 @@ highdimcoxClass <- if (requireNamespace('jmvcore', quietly=TRUE))
         final_fit <- glmnet::glmnet(
           x = X,
           y = y,
-          family = "cox",
+          family = "cox", cox.ties = "breslow",
           alpha = alpha,
           penalty.factor = penalty_weights,
           standardize = TRUE
@@ -532,7 +532,7 @@ highdimcoxClass <- if (requireNamespace('jmvcore', quietly=TRUE))
         # to maintain theoretical FDR/FWER control. Compute lambda from full-data CV.
         fixed_lambda <- tryCatch({
           cv_full <- glmnet::cv.glmnet(
-            x = X, y = y, family = "cox",
+            x = X, y = y, family = "cox", cox.ties = "breslow",
             alpha = stab_alpha,
             nfolds = min(self$options$cv_folds, n_obs),
             standardize = TRUE
@@ -568,7 +568,7 @@ highdimcoxClass <- if (requireNamespace('jmvcore', quietly=TRUE))
           tryCatch({
             # Fit glmnet path (NOT cv.glmnet) - much faster per iteration
             fit_boot <- glmnet::glmnet(
-              x = X_boot, y = y_boot, family = "cox",
+              x = X_boot, y = y_boot, family = "cox", cox.ties = "breslow",
               alpha = stab_alpha, standardize = TRUE
             )
 
@@ -1179,9 +1179,9 @@ highdimcoxClass <- if (requireNamespace('jmvcore', quietly=TRUE))
       .generateSuitabilityHtml = function(checks, overall, overall_text) {
           # Color mapping
           bg_colors <- list(
-              green  = "background-color: #d4edda; color: #155724; border: 1px solid #c3e6cb;",
-              yellow = "background-color: #fff3cd; color: #856404; border: 1px solid #ffeeba;",
-              red    = "background-color: #f8d7da; color: #721c24; border: 1px solid #f5c6cb;"
+              green  = "background-color: rgba(33, 162, 64, 0.19); color: inherit; color: inherit; border: 1px solid #c3e6cb;",
+              yellow = "background-color: rgba(255, 202, 33, 0.23); color: inherit; color: inherit; border: 1px solid #ffeeba;",
+              red    = "background-color: rgba(216, 33, 50, 0.18); color: inherit; color: inherit; border: 1px solid #f5c6cb;"
           )
           dot_colors <- list(green = "#28a745", yellow = "#ffc107", red = "#dc3545")
 

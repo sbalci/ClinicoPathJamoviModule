@@ -61,7 +61,7 @@ summarydataClass <- if (requireNamespace("jmvcore")) R6::R6Class("summarydataCla
             }
 
             if (length(warning_msgs) > 0) {
-                self$results$todo$setContent(paste0("<div style='color: #856404; background: #fff3cd; padding: 10px; border-radius: 4px;'>",
+                self$results$todo$setContent(paste0("<div style='color: inherit; background-color: rgba(255, 202, 33, 0.23); padding: 10px; border-radius: 4px;'>",
                     paste(warning_msgs, collapse="<br>"),
                     "</div>"))
             }
@@ -441,7 +441,7 @@ summarydataClass <- if (requireNamespace("jmvcore")) R6::R6Class("summarydataCla
             
             # Generate clinical context
             clinical_text <- paste0(
-                "<div style='padding: 15px; background-color: #e8f5e8; border-left: 4px solid #4caf50; margin: 10px 0; border-radius: 4px;'>",
+                "<div style='padding: 15px; background-color: rgba(33, 159, 33, 0.1); border-left: 4px solid #4caf50; margin: 10px 0; border-radius: 4px; color: inherit;'>",
                 "<h4 style='margin-top: 0; color: #2e7d32;'>", .("Clinical Interpretation Guide"), "</h4>",
                 "<p><strong>", .("Dataset Overview"), ":</strong> ", 
                 paste0("Analysis of ", n_vars, " continuous variable(s) from ", total_obs, " patient records"), "</p>",
@@ -475,7 +475,7 @@ summarydataClass <- if (requireNamespace("jmvcore")) R6::R6Class("summarydataCla
         # Generate explanatory content about the analysis
         .generateAboutContent = function() {
             about_text <- paste0(
-                "<div style='padding: 15px; background-color: #f3f4f6; border-left: 4px solid #6b7280; margin: 10px 0; border-radius: 4px;'>",
+                "<div style='padding: 15px; background-color: rgba(55, 72, 105, 0.06); border-left: 4px solid #6b7280; margin: 10px 0; border-radius: 4px; color: inherit;'>",
                 "<h4 style='margin-top: 0; color: #374151;'>", .("About This Analysis"), "</h4>",
                 
                 "<p><strong>", .("What this analysis provides"), ":</strong></p>",
@@ -552,7 +552,7 @@ summarydataClass <- if (requireNamespace("jmvcore")) R6::R6Class("summarydataCla
             outlier_results <- private$.detectOutliers(dataset, variables)
             
             report_html <- paste0(
-                "<div style='padding: 15px; background-color: #fff3cd; border-left: 4px solid #ffc107; margin: 10px 0; border-radius: 4px;'>",
+                "<div style='padding: 15px; background-color: rgba(255, 202, 33, 0.23); border-left: 4px solid #ffc107; margin: 10px 0; border-radius: 4px; color: inherit;'>",
                 "<h4 style='margin-top: 0; color: #856404;'>", .("Outlier Detection Results"), "</h4>",
                 "<p>", .("Outliers detected using IQR method (values beyond Q1-1.5\u{D7}IQR or Q3+1.5\u{D7}IQR):"), "</p>"
             )
@@ -651,7 +651,7 @@ summarydataClass <- if (requireNamespace("jmvcore")) R6::R6Class("summarydataCla
             }
             
             report_html <- paste0(
-                "<div style='padding: 15px; background-color: #e8f5e8; border-left: 4px solid #4caf50; margin: 10px 0; border-radius: 4px;'>",
+                "<div style='padding: 15px; background-color: rgba(33, 159, 33, 0.1); border-left: 4px solid #4caf50; margin: 10px 0; border-radius: 4px; color: inherit;'>",
                 "<h4 style='margin-top: 0; color: #2e7d32;'>", .("Copy-Ready Clinical Summary"), "</h4>",
                 "<div style='background-color: white; padding: 10px; border-radius: 3px; border: 1px solid #c8e6c9;'>",
                 paste(sentences, collapse = "<br><br>"),
@@ -668,7 +668,7 @@ summarydataClass <- if (requireNamespace("jmvcore")) R6::R6Class("summarydataCla
         # Generate statistical terminology glossary
         .generateGlossary = function() {
             glossary_html <- paste0(
-                "<div style='padding: 15px; background-color: #f3f4f6; border-left: 4px solid #6b7280; margin: 10px 0; border-radius: 4px;'>",
+                "<div style='padding: 15px; background-color: rgba(55, 72, 105, 0.06); border-left: 4px solid #6b7280; margin: 10px 0; border-radius: 4px; color: inherit;'>",
                 "<h4 style='margin-top: 0; color: #374151;'>", .("Statistical Terminology"), "</h4>",
                 
                 "<div style='margin-bottom: 10px;'>",

@@ -313,7 +313,7 @@ options:
         jamovi: Set plot height for optimal display.
 
     - name: add_outline
-      title: "Add segment outlines"
+      title: "Segment outlines"
       type: Bool
       default: false
       description:

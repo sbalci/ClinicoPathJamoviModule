@@ -471,7 +471,7 @@ leaveonecenteroutClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R
 
             cv_fit <- glmnet::cv.glmnet(
                 x = X_train_mm, y = y_surv,
-                family = "cox", alpha = 1,
+                family = "cox", cox.ties = "breslow", alpha = 1,
                 nfolds = nfolds_inner)
 
             lambda_opt <- switch(self$options$lambdaMethod,

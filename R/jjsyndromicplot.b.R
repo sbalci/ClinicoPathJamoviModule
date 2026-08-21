@@ -199,7 +199,7 @@ jjsyndromicplotClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
             if (preset == "biomarker_discovery") {
                 preset_message <- paste0(
-                    "<div style='background:#e3f2fd; border-left:4px solid #2196F3; padding:15px; margin:10px 0;'>",
+                    "<div style='background-color: rgba(33, 152, 239, 0.13); border-left:4px solid #2196F3; padding:15px; margin:10px 0; color: inherit;'>",
                     "<h4 style='color:#1976D2; margin-top:0;'> Clinical Preset Applied: Biomarker Discovery</h4>",
                     "<p><strong>The following settings have been automatically configured:</strong></p>",
                     "<ul>",
@@ -222,7 +222,7 @@ jjsyndromicplotClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
             } else if (preset == "disease_subtyping") {
                 preset_message <- paste0(
-                    "<div style='background:#e3f2fd; border-left:4px solid #2196F3; padding:15px; margin:10px 0;'>",
+                    "<div style='background-color: rgba(33, 152, 239, 0.13); border-left:4px solid #2196F3; padding:15px; margin:10px 0; color: inherit;'>",
                     "<h4 style='color:#1976D2; margin-top:0;'> Clinical Preset Applied: Disease Subtyping</h4>",
                     "<p><strong>The following settings have been automatically configured:</strong></p>",
                     "<ul>",
@@ -327,7 +327,7 @@ jjsyndromicplotClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 )
             }
             summary_msg <- paste0(
-                "<div style='background:#f5f5f5; padding:10px; margin:10px 0; border:1px solid #ddd;'>",
+                "<div style='background-color: rgba(88, 88, 88, 0.06); padding:10px; margin:10px 0; border:1px solid #ddd; color: inherit;'>",
                 "<strong>Data Summary:</strong>",
                 "<ul>",
                 "<li>Initial N: ", initial_n, "</li>",
@@ -377,7 +377,7 @@ jjsyndromicplotClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     type = 1
                 )
                 error_msg <- paste0(
-                    "<div style='background:#fff3cd; border-left:4px solid #ff9800; padding:15px; margin:10px 0;'>",
+                    "<div style='background-color: rgba(255, 202, 33, 0.23); border-left:4px solid #ff9800; padding:15px; margin:10px 0; color: inherit;'>",
                     "<h4 style='color:#ff6f00; margin-top:0;'> Categorical Variables Detected</h4>",
                     "<p><strong>PCA requires continuous numeric variables only.</strong></p>",
                     "<p>The following variables are categorical/non-numeric:</p>",
@@ -446,7 +446,7 @@ jjsyndromicplotClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 warning_msgs <- c(
                     warning_msgs,
                     paste0(
-                        "<div style='background:#fff3cd; border-left:4px solid #ff9800; padding:15px; margin:10px 0;'>",
+                        "<div style='background-color: rgba(255, 202, 33, 0.23); border-left:4px solid #ff9800; padding:15px; margin:10px 0; color: inherit;'>",
                         "<h4 style='color:#ff6f00; margin-top:0;'> Component Number Out of Bounds</h4>",
                         "<p><strong>Requested component ", requested_component,
                         " exceeds available components.</strong></p>",

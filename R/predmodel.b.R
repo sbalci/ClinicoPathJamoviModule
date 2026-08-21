@@ -97,7 +97,7 @@ predmodelClass <- if (requireNamespace('jmvcore'))
                 # column names like `stop(system("ls"))`.
                 formula <- jmvcore::asFormula(paste0(
                     jmvcore::composeTerm(outcome), " ~ ",
-                    jmvcore::composeTerms(as.list(predictors))
+                    paste(jmvcore::composeTerms(as.list(predictors)), collapse = " + ")
                 ))
                 # deparse1 emits user column names verbatim inside backticks.
                 # Backticks are R-syntax armor but NOT HTML armor - wrap with
@@ -316,7 +316,7 @@ predmodelClass <- if (requireNamespace('jmvcore'))
                 # Same Defense 1 + Defense 2 shape as .fitModel().
                 formula <- jmvcore::asFormula(paste0(
                     jmvcore::composeTerm(outcome), " ~ ",
-                    jmvcore::composeTerms(as.list(predictors))
+                    paste(jmvcore::composeTerms(as.list(predictors)), collapse = " + ")
                 ))
 
                 y_actual <- as.numeric(private$.data[[outcome]]) - 1
@@ -401,7 +401,7 @@ predmodelClass <- if (requireNamespace('jmvcore'))
                 if (is.null(private$.model)) return()
 
                 interpretation <- paste0(
-                    "<div style='padding: 15px; background-color: #f8f9fa;'>",
+                    "<div style='padding: 15px; background-color: rgba(138, 155, 172, 0.06); color: inherit;'>",
                     "<h4>Clinical Interpretation</h4>",
                     "<p>This logistic regression model predicts the probability of the outcome based on the specified predictors.</p>",
                     "<ul>",

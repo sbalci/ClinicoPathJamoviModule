@@ -2037,6 +2037,7 @@ survivalcontResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
                 options=options,
                 name="calculatedmulticut",
                 title="Add Multiple Cut-off Groups to Data",
+                measureType="nominal",
                 varTitle="`Multiple Cut-off Risk Groups - from ${ contexpl }`",
                 varDescription="Multiple Cut-off Risk Groups from given Cut-offs in Continuous Survival Function",
                 clearWith=list(

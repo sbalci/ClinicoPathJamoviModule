@@ -13,7 +13,7 @@ labcontrolchartsClass <- R6::R6Class(
                         .section { margin-bottom: 20px; }
                         .list { margin-left: 20px; }
                         .feature { margin: 5px 0; color: #2d3748; }
-                        .important { background-color: #edf2f7; padding: 10px; border-left: 3px solid #3182ce; margin: 10px 0; }
+                        .important { background-color: rgba(33, 95, 156, 0.08); color: inherit; padding: 10px; border-left: 3px solid #3182ce; margin: 10px 0; }
                     </style>
                     </head>
                     <body>
@@ -565,10 +565,10 @@ labcontrolchartsClass <- R6::R6Class(
                 <head>
                 <style>
                     .main { margin: 20px; font-family: sans-serif; }
-                    .formula { background-color: #f8f9fa; padding: 15px; margin: 10px 0; font-family: monospace; border-left: 4px solid #007bff; }
-                    .interpretation { background-color: #e8f4f8; padding: 15px; margin: 10px 0; border-left: 4px solid #17a2b8; }
-                    .clinical { background-color: #f0f8e8; padding: 15px; margin: 10px 0; border-left: 4px solid #28a745; }
-                    .warning { background-color: #fff3cd; padding: 15px; margin: 10px 0; border-left: 4px solid #ffc107; }
+                    .formula { background-color: rgba(138, 155, 172, 0.06); color: inherit; padding: 15px; margin: 10px 0; font-family: monospace; border-left: 4px solid #007bff; }
+                    .interpretation { background-color: rgba(33, 149, 188, 0.1); color: inherit; padding: 15px; margin: 10px 0; border-left: 4px solid #17a2b8; }
+                    .clinical { background-color: rgba(110, 188, 33, 0.1); color: inherit; padding: 15px; margin: 10px 0; border-left: 4px solid #28a745; }
+                    .warning { background-color: rgba(255, 202, 33, 0.23); color: inherit; padding: 15px; margin: 10px 0; border-left: 4px solid #ffc107; }
                 </style>
                 </head>
                 <body>

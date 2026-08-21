@@ -2160,8 +2160,8 @@ refs:
         author: "Gaston Sanchez"
         year: 2018
         title: "arcdiagram: R package"
-        publisher: '[R package]. Retrieved from https://CRAN.R-project.org/package=arcdiagram'
-        url: https://CRAN.R-project.org/package=arcdiagram
+        publisher: '[R package]. Retrieved from https://github.com/gastonstat/arcdiagram'
+        url: https://github.com/gastonstat/arcdiagram
 
     ggpubr:
         type: 'software'
@@ -3083,12 +3083,14 @@ refs:
         volume: 44
         issue: 3
         pages: "837-845"
+        url: https://doi.org/10.2307/2531595
     Cohen1988:
         type: 'book'
         author: "Cohen, J."
         year: 1988
         title: "Statistical Power Analysis for the Behavioral Sciences (2nd ed.)"
         publisher: "Lawrence Erlbaum Associates"
+        url: https://doi.org/10.4324/9780203771587
     DerSimonian1986:
         type: 'article'
         author: "DerSimonian, R., & Laird, N."
@@ -3099,6 +3101,7 @@ refs:
         issue: 3
         pages: "177-188"
         doi: 10.1016/0197-2456(86)90046-2
+        url: https://doi.org/10.1016/0197-2456(86)90046-2
     Higgins2003:
         type: 'article'
         author: "Higgins, J. P. T., Thompson, S. G., Deeks, J. J., & Altman, D. G."
@@ -3109,6 +3112,7 @@ refs:
         issue: 7414
         pages: "557-560"
         doi: 10.1136/bmj.327.7414.557
+        url: https://doi.org/10.1136/bmj.327.7414.557
     Hedges1981:
         type: 'article'
         author: "Hedges, L. V."
@@ -3118,6 +3122,7 @@ refs:
         volume: 6
         issue: 2
         pages: "107-128"
+        url: https://doi.org/10.3102/10769986006002107
     Pencina2008:
         type: 'article'
         author: "Pencina, M. J., D'Agostino Sr, R. B., D'Agostino Jr, R. B., & Vasan, R. S."
@@ -3128,6 +3133,7 @@ refs:
         issue: 2
         pages: "157-172"
         doi: 10.1002/sim.2929
+        url: https://doi.org/10.1002/sim.2929
     Pencina2011:
         type: 'article'
         author: "Pencina, M. J., D'Agostino Sr, R. B., & Steyerberg, E. W."
@@ -3138,6 +3144,7 @@ refs:
         issue: 1
         pages: "11-21"
         doi: 10.1002/sim.4085
+        url: https://doi.org/10.1002/sim.4085
     Vickers2006:
         type: 'article'
         author: "Vickers, A. J., & Elkin, E. B."
@@ -3148,6 +3155,7 @@ refs:
         issue: 6
         pages: "565-574"
         doi: 10.1177/0272989X06295361
+        url: https://doi.org/10.1177/0272989X06295361
     Steyerberg2010:
         type: 'article'
         author: "Steyerberg, E. W., Vickers, A. J., Cook, N. R., Gerds, T., Gonen, M., Obuchowski, N., Pencina, M. J., & Kattan, M. W."
@@ -3158,6 +3166,7 @@ refs:
         issue: 1
         pages: "128-138"
         doi: 10.1097/EDE.0b013e3181c30fb2
+        url: https://doi.org/10.1097/EDE.0b013e3181c30fb2
     harrell2015:
         type: 'book'
         author: "Harrell Jr, F. E."
@@ -3175,6 +3184,7 @@ refs:
         issue: 2
         pages: "175-191"
         doi: 10.3758/BF03193146
+        url: https://doi.org/10.3758/BF03193146
     Matthews1975:
         type: 'article'
         author: "Matthews, B. W."
@@ -3195,6 +3205,7 @@ refs:
         issue: 3
         pages: "190-195"
         doi: 10.1177/0272989X8900900307
+        url: https://doi.org/10.1177/0272989X8900900307
     Saito2015:
         type: 'article'
         author: "Saito, T., & Rehmsmeier, M."
@@ -3223,18 +3234,21 @@ refs:
         issue: 10
         pages: "1348-1356"
         doi: 10.1093/bioinformatics/btq140
+        url: https://doi.org/10.1093/bioinformatics/btq140
     Kruschke2014:
         type: 'book'
         author: "Kruschke, J. K."
         year: 2014
         title: "Doing Bayesian Data Analysis: A Tutorial with R, JAGS, and Stan (2nd ed.)"
         publisher: "Academic Press"
+        url: https://doi.org/10.1016/C2012-0-00477-2
     McElreath2020:
         type: 'book'
         author: "McElreath, R."
         year: 2020
         title: "Statistical Rethinking: A Bayesian Course with Examples in R and Stan (2nd ed.)"
         publisher: "CRC Press"
+        url: https://doi.org/10.1201/9780429029608
     Hothorn2006:
         type: 'article'
         author: "Hothorn, T., Hornik, K., & Zeileis, A."
@@ -3455,5 +3469,6 @@ refs:
         issue: 61
         pages: "3236"
         doi: 10.21105/joss.03236
+        url: https://doi.org/10.21105/joss.03236
 
 ...

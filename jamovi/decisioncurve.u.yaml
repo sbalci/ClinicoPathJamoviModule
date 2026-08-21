@@ -64,14 +64,11 @@ children:
             label: Analysis Features
             children:
               - type: CheckBox
-                name: showOptimalThreshold
-                label: Identify optimal thresholds
-              - type: CheckBox
                 name: compareModels
                 label: Statistical model comparison
               - type: CheckBox
                 name: weightedAUC
-                label: Calculate weighted AUC
+                label: Average net benefit over range
               - type: CheckBox
                 name: clinicalDecisionRule
                 label: Include clinical decision rule
@@ -118,8 +115,8 @@ children:
             label: Thresholds for table (comma-separated)
             enable: (showTable)
           - type: CheckBox
-            name: showOptimalThreshold
-            label: Show optimal thresholds
+            name: showBenefitRange
+            label: Range of benefit table
           - type: CheckBox
             name: showDecisionConsequences
             label: Decision consequences table
@@ -219,7 +216,7 @@ children:
             enable: (compareModels || multiModelComparison)
           - type: CheckBox
             name: weightedAUC
-            label: Weighted AUC
+            label: Average net benefit table
   - type: CollapseBox
     label: Clinical Impact
     margin: normal
@@ -264,3 +261,7 @@ children:
             format: number
             label: Confidence level
             enable: (confidenceIntervals)
+          - type: TextBox
+            name: seed
+            format: number
+            label: Random seed

@@ -562,7 +562,7 @@ likelihoodratioClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cla
         
         .initInstructions = function() {
             html <- '
-            <div style="background-color: #f0f8ff; padding: 15px; margin: 10px 0; border-radius: 5px;">
+            <div style="background-color: rgba(33, 152, 255, 0.07); padding: 15px; margin: 10px 0; border-radius: 5px; color: inherit;">
             <h4>Likelihood Ratio Analysis</h4>
             <p>This module calculates likelihood ratios and diagnostic performance measures for evaluating diagnostic tests.</p>
             
@@ -587,7 +587,7 @@ likelihoodratioClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cla
         
         .initClinicalInterpretation = function() {
             html <- '
-            <div style="background-color: #fff3cd; padding: 15px; margin: 10px 0; border-radius: 5px;">
+            <div style="background-color: rgba(255, 202, 33, 0.23); padding: 15px; margin: 10px 0; border-radius: 5px; color: inherit;">
             <h4>Clinical Interpretation Guidelines</h4>
             
             <h5>Likelihood Ratios (LR):</h5>

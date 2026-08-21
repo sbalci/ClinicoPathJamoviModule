@@ -157,6 +157,8 @@ rpasurvivalOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
                 "newvarname",
                 newvarname,
                 default="rpa_stage")
+            private$..riskgroupvar <- jmvcore::OptionOutput$new(
+                "riskgroupvar")
             private$..showSummary <- jmvcore::OptionBool$new(
                 "showSummary",
                 showSummary,
@@ -191,6 +193,7 @@ rpasurvivalOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
             self$.addOption(private$..variableimportance)
             self$.addOption(private$..createnewvar)
             self$.addOption(private$..newvarname)
+            self$.addOption(private$..riskgroupvar)
             self$.addOption(private$..showSummary)
             self$.addOption(private$..showInterpretation)
             self$.addOption(private$..showReport)
@@ -217,6 +220,7 @@ rpasurvivalOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
         variableimportance = function() private$..variableimportance$value,
         createnewvar = function() private$..createnewvar$value,
         newvarname = function() private$..newvarname$value,
+        riskgroupvar = function() private$..riskgroupvar$value,
         showSummary = function() private$..showSummary$value,
         showInterpretation = function() private$..showInterpretation$value,
         showReport = function() private$..showReport$value),
@@ -242,6 +246,7 @@ rpasurvivalOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
         ..variableimportance = NA,
         ..createnewvar = NA,
         ..newvarname = NA,
+        ..riskgroupvar = NA,
         ..showSummary = NA,
         ..showInterpretation = NA,
         ..showReport = NA)
@@ -262,7 +267,8 @@ rpasurvivalResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
         cptable = function() private$.items[["cptable"]],
         varimp = function() private$.items[["varimp"]],
         coxmodel = function() private$.items[["coxmodel"]],
-        notices = function() private$.items[["notices"]]),
+        notices = function() private$.items[["notices"]],
+        riskgroupvar = function() private$.items[["riskgroupvar"]]),
     private = list(),
     public=list(
         initialize=function(options) {
@@ -557,7 +563,25 @@ rpasurvivalResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
                 name="notices",
                 title="Notices",
                 visible=TRUE,
-                refs=list()))}))
+                refs=list()))
+            self$add(jmvcore::Output$new(
+                options=options,
+                name="riskgroupvar",
+                title="Add RPA Risk Group to Data",
+                measureType="nominal",
+                varTitle="RPA Risk Group",
+                varDescription="RPA risk group from recursive partitioning of survival time on the selected predictors",
+                clearWith=list(
+                    "time",
+                    "event",
+                    "eventValue",
+                    "predictors",
+                    "minbucket",
+                    "cp",
+                    "maxdepth",
+                    "nfolds",
+                    "prunetree",
+                    "riskgrouplabels")))}))
 
 rpasurvivalBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
     "rpasurvivalBase",
@@ -577,7 +601,7 @@ rpasurvivalBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 pause = NULL,
                 completeWhenFilled = FALSE,
                 requiresMissings = FALSE,
-                weightsSupport = 'auto')
+                weightsSupport = 'none')
         }))
 
 #' Recursive Partitioning Analysis for Survival
@@ -618,8 +642,9 @@ rpasurvivalBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' @param cptable .
 #' @param variableimportance .
 #' @param createnewvar .
-#' @param newvarname name for the new variable containing RPA stage
-#'   assignments
+#' @param newvarname retired and ignored. The risk-group column is written by
+#'   the \code{riskgroupvar} output, which carries its own name. Kept so that
+#'   existing syntax keeps parsing.
 #' @param showSummary .
 #' @param showInterpretation .
 #' @param showReport .
@@ -637,6 +662,7 @@ rpasurvivalBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   \code{results$varimp} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$coxmodel} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$notices} \tab \tab \tab \tab \tab a html \cr
+#'   \code{results$riskgroupvar} \tab \tab \tab \tab \tab an output \cr
 #' }
 #'
 #' Tables can be converted to data frames with \code{asDF} or \code{\link{as.data.frame}}. For example:

@@ -2119,7 +2119,7 @@ def segment_nuclei(image_path):
             # Initialize About This Analysis panel
             .initializeAboutAnalysis = function() {
                 about_html <- paste0(
-                    "<div style='background-color: #f0f8ff; padding: 20px; border-radius: 8px; margin: 10px 0;'>",
+                    "<div style='background-color: rgba(33, 152, 255, 0.07); padding: 20px; border-radius: 8px; margin: 10px 0; color: inherit;'>",
                     "<h4> About IHC Scoring Analysis</h4>",
                     "<p><strong>Purpose:</strong> Standardize immunohistochemistry scoring using validated clinical methods (H-score and Allred score)</p>",
                     "<p><strong>When to Use:</strong></p>",
@@ -2145,7 +2145,7 @@ def segment_nuclei(image_path):
             # Initialize Assumptions & Caveats panel
             .initializeAssumptions = function() {
                 assumptions_html <- paste0(
-                    "<div style='background-color: #fff3cd; padding: 20px; border-radius: 8px; margin: 10px 0; border-left: 5px solid #ffc107;'>",
+                    "<div style='background-color: rgba(255, 202, 33, 0.23); padding: 20px; border-radius: 8px; margin: 10px 0; border-left: 5px solid #ffc107; color: inherit;'>",
                     "<h4> Important Assumptions & Caveats</h4>",
                     "<p><strong>Data Requirements:</strong></p>",
                     "<ul>",
@@ -2252,17 +2252,17 @@ def segment_nuclei(image_path):
                 )
 
                 summary_html <- paste0(
-                    "<div style='background-color: #e8f5e8; padding: 20px; border-radius: 8px; margin: 10px 0; border-left: 5px solid #28a745;'>",
+                    "<div style='background-color: rgba(33, 159, 33, 0.1); padding: 20px; border-radius: 8px; margin: 10px 0; border-left: 5px solid #28a745; color: inherit;'>",
                     "<h4> Analysis Summary</h4>",
                     "<div style='background-color: white; padding: 15px; border-radius: 5px; margin: 10px 0;'>",
                     "<h5>Key Findings (Copy-Ready)</h5>",
-                    "<p style='font-family: monospace; background-color: #f8f9fa; padding: 10px; border-radius: 3px;'>",
+                    "<p style='font-family: monospace; background-color: rgba(138, 155, 172, 0.06); padding: 10px; border-radius: 3px; color: inherit;'>",
                     "IHC analysis of <strong>", n, " cases</strong> showed ", biomarker_name, " expression with mean H-score of <strong>", hscore_mean, "</strong> (range: ", hscore_range, "). ",
                     "Using a cutoff of ", cutpoint, ", <strong>", positive_count, "/", n, " (", positive_percent, "%)</strong> cases were classified as positive. ",
                     "The correlation between H-score and Allred methods was ", agreement_level, " (r=", round(correlation, 3), "), indicating reliable scoring consistency.",
                     "</p>",
                     "</div>",
-                    "<div style='background-color: #fff3cd; padding: 10px; border-radius: 5px;'>",
+                    "<div style='background-color: rgba(255, 202, 33, 0.23); padding: 10px; border-radius: 5px; color: inherit;'>",
                     "<strong>Clinical Interpretation:</strong> ",
                     if (positive_percent >= 50) {
                         "High proportion of positive cases suggests strong biomarker expression suitable for targeted therapy consideration."
@@ -2401,7 +2401,7 @@ def segment_nuclei(image_path):
                     # For now, we'll add to the interpretation
                     current_content <- self$results$interpretation$content %||% ""
                     warning_content <- paste0(
-                        "<div style='background-color: #f8d7da; padding: 10px; border-radius: 5px; margin: 10px 0; border-left: 3px solid #dc3545;'>",
+                        "<div style='background-color: rgba(216, 33, 50, 0.18); padding: 10px; border-radius: 5px; margin: 10px 0; border-left: 3px solid #dc3545; color: inherit;'>",
                         "<strong> Analysis Warnings:</strong><br>", warning_html,
                         "</div>"
                     )

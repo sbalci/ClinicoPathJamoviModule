@@ -677,7 +677,7 @@ jjwithinstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
             if (complete_cases < 3) {
                 warning_msg <- paste0(
-                    "<div style='background:#fff3cd; border-left:4px solid #ff9800; padding:15px; margin:10px 0;'>",
+                    "<div style='background-color: rgba(255, 202, 33, 0.23); border-left:4px solid #ff9800; padding:15px; margin:10px 0; color: inherit;'>",
                     "<h4 style='color:#ff6f00; margin-top:0;'> Insufficient Complete Cases for Paired Analysis</h4>",
                     "<p><strong>Within-subjects analysis requires complete data across all measurements.</strong></p>",
                     "<p>Current status:</p>",
@@ -696,7 +696,7 @@ jjwithinstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
             if (missing_pct > 50) {
                 warning_msg <- paste0(
-                    "<div style='background:#fff3cd; border-left:4px solid #ffc107; padding:15px; margin:10px 0;'>",
+                    "<div style='background-color: rgba(255, 202, 33, 0.23); border-left:4px solid #ffc107; padding:15px; margin:10px 0; color: inherit;'>",
                     "<h4 style='color:#ff9800; margin-top:0;'> High Missing Data Rate</h4>",
                     "<p><strong>Warning:</strong> ", round(missing_pct, 1), "% of subjects have incomplete measurements.</p>",
                     "<p>Paired analysis will only use the ", complete_cases, " subjects with complete data.</p>",
@@ -915,7 +915,7 @@ jjwithinstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             guidance <- .(" <strong>What to look for:</strong><br>\u2022 Statistical significance (p < 0.05) indicates real changes over time<br>\u2022 Effect sizes show practical importance<br>\u2022 Individual trajectories reveal response patterns<br>\u2022 Outliers may indicate treatment non-responders or measurement errors")
             
             interpretation_parts <- list(
-                paste0("<div style='background-color:#f8f9fa;padding:15px;margin:10px 0;border-left:4px solid #007bff;'>"),
+                paste0("<div style='background-color: rgba(138, 155, 172, 0.06);padding:15px;margin:10px 0;border-left:4px solid #007bff; color: inherit;'>"),
                 paste0("<h4 style='margin-top:0;color:#007bff;'>", .("Clinical Context"), "</h4>"),
                 paste0("<p>", clinical_context, "</p>"),
                 paste0("<p><strong>", .("Test Used:"), "</strong> ", test_explanation, "</p>"),
@@ -958,7 +958,7 @@ jjwithinstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             }
             
             summary_parts <- list(
-                paste0("<div style='background-color:#f0f8f0;padding:10px;border:1px solid #28a745;'>"),
+                paste0("<div style='background-color: rgba(33, 152, 33, 0.07);padding:10px;border:1px solid #28a745; color: inherit;'>"),
                 summary_header,
                 config_summary,
                 "</div>"

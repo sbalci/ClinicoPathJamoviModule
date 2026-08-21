@@ -30,7 +30,7 @@ children:
           - type: LevelSelector
             name: highlight
             enable: (group && useHighlight)
-            label: Highlight Level
+            label: Highlight level
   - type: CollapseBox
     label: Chart Configuration
     collapsed: false
@@ -75,11 +75,11 @@ children:
           - type: TextBox
             name: pointSize
             format: number
-            label: Point Size (1-10)
+            label: Point size (1-10)
           - type: TextBox
             name: lineWidth
             format: number
-            label: Line Width (0.5-5)
+            label: Line width (0.5-5)
       - type: LayoutBox
         margin: large
         children:
@@ -89,7 +89,7 @@ children:
           - type: TextBox
             name: baseline
             format: number
-            label: Baseline Value
+            label: Baseline value
   - type: CollapseBox
     label: Advanced Coloring
     collapsed: true
@@ -104,7 +104,7 @@ children:
             name: colorThreshold
             format: number
             enable: (conditionalColor)
-            label: Color Threshold
+            label: Color threshold
   - type: CollapseBox
     label: Labels & Titles
     collapsed: true
@@ -115,18 +115,18 @@ children:
           - type: TextBox
             name: title
             format: string
-            label: Chart Title
+            label: Chart title
       - type: LayoutBox
         margin: large
         children:
           - type: TextBox
             name: xlabel
             format: string
-            label: X-axis Label
+            label: X-axis label
           - type: TextBox
             name: ylabel
             format: string
-            label: Y-axis Label
+            label: Y-axis label
   - type: CollapseBox
     label: Plot Size
     collapsed: true

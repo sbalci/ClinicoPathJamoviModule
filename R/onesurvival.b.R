@@ -316,7 +316,7 @@ oneSurvivalClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             # Check for empty data
             if (nrow(self$data) == 0) {
                 error_msg <- paste(
-                    "<div style='background-color: #f8d7da; padding: 15px; border-radius: 8px; margin: 10px 0;'>",
+                    "<div style='background-color: rgba(216, 33, 50, 0.18); padding: 15px; border-radius: 8px; margin: 10px 0; color: inherit;'>",
                     "<b> Data Error:</b> No data available for survival analysis<br><br>",
                     "<b> Possible reasons:</b><br>",
                     "\u{2022} Dataset has no rows<br>",
@@ -344,7 +344,7 @@ oneSurvivalClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             # Handle validation errors - stop execution if critical errors found
             if (validation_results$should_stop) {
                 error_msg <- paste(
-                    "<div style='background-color: #f8d7da; padding: 15px; border-radius: 8px; margin: 10px 0;'>",
+                    "<div style='background-color: rgba(216, 33, 50, 0.18); padding: 15px; border-radius: 8px; margin: 10px 0; color: inherit;'>",
                     "<b> Critical Error(s) Detected:</b><br>",
                     paste(validation_results$errors, collapse = "<br>"),
                     "<br><br><b> Suggestions:</b><br>",
@@ -362,14 +362,14 @@ oneSurvivalClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             validation_summary <- ""
             if (length(validation_results$warnings) > 0) {
                 validation_summary <- paste0(validation_summary, 
-                    "<div style='background-color: #fff3cd; padding: 10px; margin: 10px 0; border-radius: 5px;'>",
+                    "<div style='background-color: rgba(255, 202, 33, 0.23); padding: 10px; margin: 10px 0; border-radius: 5px; color: inherit;'>",
                     "<b> Warnings:</b><br>", 
                     paste(validation_results$warnings, collapse = "<br>"),
                     "</div>")
             }
             if (length(validation_results$info) > 0) {
                 validation_summary <- paste0(validation_summary,
-                    "<div style='background-color: #d1ecf1; padding: 10px; margin: 10px 0; border-radius: 5px;'>",
+                    "<div style='background-color: rgba(33, 163, 188, 0.21); padding: 10px; margin: 10px 0; border-radius: 5px; color: inherit;'>",
                     "<b> Information:</b><br>", 
                     paste(validation_results$info, collapse = "<br>"),
                     "</div>")
@@ -415,7 +415,7 @@ oneSurvivalClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
             }, error = function(e) {
                 detailed_error <- paste(
-                    "<div style='background-color: #f8d7da; padding: 15px; border-radius: 8px; margin: 10px 0;'>",
+                    "<div style='background-color: rgba(216, 33, 50, 0.18); padding: 15px; border-radius: 8px; margin: 10px 0; color: inherit;'>",
                     "<b> Survival Analysis Error:</b><br>",
                     paste("Technical error:", htmltools::htmlEscape(conditionMessage(e))), "<br><br>",
                     "<b> Common causes and solutions:</b><br>",
@@ -445,6 +445,9 @@ oneSurvivalClass <- if (requireNamespace('jmvcore')) R6::R6Class(
               return()
 
             plotData <- image$state
+
+            if (is.null(plotData))
+                return(FALSE)
             conf.int <- self$options$ciyn
             xlab <- ifelse(self$options$timeunits=="None","Time",paste("Time (",self$options$timeunits,")",sep=""))
             

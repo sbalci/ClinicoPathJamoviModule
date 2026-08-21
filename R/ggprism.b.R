@@ -48,7 +48,7 @@ ggprismClass <- if (requireNamespace("jmvcore")) {
                 # Check if required variables have been selected
                 if (is.null(self$options$x_var) || is.null(self$options$y_var)) {
                     intro_msg <- "
-                <div style='background-color: #e3f2fd; padding: 20px; border-radius: 8px; margin: 20px 0;'>
+                <div style='background-color: rgba(33, 152, 239, 0.13); padding: 20px; border-radius: 8px; margin: 20px 0; color: inherit;'>
                 <h3 style='color: #1976d2; margin-top: 0;'> Welcome to GraphPad Prism Style Plots!</h3>
                 <p><strong>Publication-ready visualizations</strong> with authentic GraphPad Prism styling</p>
                 <p>Based on the ggprism R package for creating professional scientific graphics</p>
@@ -95,7 +95,7 @@ ggprismClass <- if (requireNamespace("jmvcore")) {
                 # Safely require ggprism
                 if (!requireNamespace("ggprism", quietly = TRUE)) {
                     error_msg <- "
-                <div style='color: red; background-color: #ffebee; padding: 20px; border-radius: 8px;'>
+                <div style='color: red; background-color: rgba(255, 33, 67, 0.09); padding: 20px; border-radius: 8px;'>
                 <h4>ggprism Package Required</h4>
                 <p>The ggprism package is required for GraphPad Prism style plots.</p>
                 <p>Please install it using: <code>install.packages('ggprism')</code></p>
@@ -592,7 +592,7 @@ ggprismClass <- if (requireNamespace("jmvcore")) {
                 }
 
                 summary_html <- paste0(
-                    "<div style='background-color: #f8f9fa; padding: 20px; border-radius: 8px; margin-bottom: 20px;'>",
+                    "<div style='background-color: rgba(138, 155, 172, 0.06); padding: 20px; border-radius: 8px; margin-bottom: 20px; color: inherit;'>",
                     "<h3 style='color: #495057; margin-top: 0;'> Summary Statistics</h3>",
                     "<table style='width: 100%; border-collapse: collapse; font-family: Arial, sans-serif;'>",
                     "<thead><tr style='background-color: #6c757d; color: white;'>",
@@ -637,7 +637,7 @@ ggprismClass <- if (requireNamespace("jmvcore")) {
 
                 if (is.null(group_var) || group_var == "") {
                     stats_html <- paste0(
-                        "<div style='background-color: #fff3cd; padding: 20px; border-radius: 8px;'>",
+                        "<div style='background-color: rgba(255, 202, 33, 0.23); padding: 20px; border-radius: 8px; color: inherit;'>",
                         "<h3 style='color: #856404; margin-top: 0;'> Statistical Analysis</h3>",
                         "<p>No grouping variable specified. Statistical comparisons require a grouping variable.</p>",
                         "</div>"
@@ -732,7 +732,7 @@ ggprismClass <- if (requireNamespace("jmvcore")) {
                 significance <- if (p_value < 0.001) "Highly significant (***)" else if (p_value < 0.01) "Very significant (**)" else if (p_value < 0.05) "Significant (*)" else "Not significant"
 
                 stats_html <- paste0(
-                    "<div style='background-color: #f3e5f5; padding: 20px; border-radius: 8px; margin-bottom: 20px;'>",
+                    "<div style='background-color: rgba(153, 33, 170, 0.12); padding: 20px; border-radius: 8px; margin-bottom: 20px; color: inherit;'>",
                     "<h3 style='color: #7b1fa2; margin-top: 0;'> Statistical Test Results</h3>",
                     "<table style='width: 100%; border-collapse: collapse;'>",
                     "<tr><td style='padding: 8px; border: 1px solid #ddd;'><strong>Test Method:</strong></td><td style='padding: 8px; border: 1px solid #ddd;'>", test_method, "</td></tr>",
@@ -877,7 +877,7 @@ ggprismClass <- if (requireNamespace("jmvcore")) {
                 prism_palette <- self$options$prism_palette
 
                 guide_html <- paste0(
-                    "<div style='background-color: #e8f5e8; padding: 20px; border-radius: 8px;'>",
+                    "<div style='background-color: rgba(33, 159, 33, 0.1); padding: 20px; border-radius: 8px; color: inherit;'>",
                     "<h3 style='color: #2e7d32; margin-top: 0;'> GraphPad Prism Style Guide</h3>",
                     "<h4 style='color: #2e7d32;'>Current Configuration:</h4>",
                     "<ul>",
@@ -941,7 +941,7 @@ ggprismClass <- if (requireNamespace("jmvcore")) {
                 current_info <- palette_info[[palette_name]] %||% "Professional color palette for scientific visualization"
 
                 info_html <- paste0(
-                    "<div style='background-color: #fff3e0; padding: 20px; border-radius: 8px;'>",
+                    "<div style='background-color: rgba(255, 169, 33, 0.14); padding: 20px; border-radius: 8px; color: inherit;'>",
                     "<h3 style='color: #ef6c00; margin-top: 0;'> Color Palette Information</h3>",
                     "<h4 style='color: #ef6c00;'>Current Palette: ", stringr::str_to_title(palette_name), "</h4>",
                     "<p><strong>Description:</strong> ", current_info, "</p>",
@@ -977,7 +977,7 @@ ggprismClass <- if (requireNamespace("jmvcore")) {
                 title_lit <- htmltools::htmlEscape(deparse(self$options$plot_title))
 
                 code_html <- paste0(
-                    "<div style='background-color: #f5f5f5; padding: 20px; border-radius: 8px;'>",
+                    "<div style='background-color: rgba(88, 88, 88, 0.06); padding: 20px; border-radius: 8px; color: inherit;'>",
                     "<h3 style='color: #424242; margin-top: 0;'> Reproducible R Code</h3>",
                     "<p>Use this code to recreate your plot in R:</p>",
                     "<pre style='background-color: #263238; color: #eeffff; padding: 15px; border-radius: 5px; overflow-x: auto;'>",
@@ -1004,7 +1004,7 @@ ggprismClass <- if (requireNamespace("jmvcore")) {
             },
             .generate_accessibility_notes = function() {
                 accessibility_html <- paste0(
-                    "<div style='background-color: #e1f5fe; padding: 20px; border-radius: 8px;'>",
+                    "<div style='background-color: rgba(33, 181, 248, 0.14); padding: 20px; border-radius: 8px; color: inherit;'>",
                     "<h3 style='color: #0277bd; margin-top: 0;'> Accessibility & Best Practices</h3>",
                     "<h4 style='color: #0277bd;'>Color Accessibility:</h4>",
                     "<ul>",
@@ -1149,7 +1149,7 @@ ggprismClass <- if (requireNamespace("jmvcore")) {
                 )
 
                 summary_html <- paste(
-                    "<div style='background-color: #e8f5e8; padding: 20px; border-radius: 8px; margin: 10px 0; border-left: 5px solid #2e7d32;'>",
+                    "<div style='background-color: rgba(33, 159, 33, 0.1); padding: 20px; border-radius: 8px; margin: 10px 0; border-left: 5px solid #2e7d32; color: inherit;'>",
                     "<h3 style='color: #2e7d32; margin-top: 0;'> Clinical Summary</h3>",
                     paste0(
                         "<p><strong>Analysis:</strong> ", stringr::str_to_title(analysis_type), " of ", htmltools::htmlEscape(y_var),
@@ -1162,7 +1162,7 @@ ggprismClass <- if (requireNamespace("jmvcore")) {
                     paste0("<p><strong>Statistical Analysis:</strong> ", stats_info, "</p>"),
                     if (length(private$.clinical_warnings) > 0) {
                         paste0(
-                            "<div style='background-color: #fff3e0; padding: 10px; border-radius: 5px; margin: 10px 0;'>",
+                            "<div style='background-color: rgba(255, 169, 33, 0.14); padding: 10px; border-radius: 5px; margin: 10px 0; color: inherit;'>",
                             "<p style='color: #e65100; margin: 0;'><strong> Clinical Considerations:</strong></p>",
                             "<ul style='margin: 5px 0; color: #e65100;'>",
                             paste0("<li>", private$.clinical_warnings, "</li>", collapse = ""),
@@ -1180,7 +1180,7 @@ ggprismClass <- if (requireNamespace("jmvcore")) {
                 plot_type <- self$options$plot_type
 
                 interpretation_html <- paste(
-                    "<div style='background-color: #f3e5f5; padding: 20px; border-radius: 8px; margin: 10px 0;'>",
+                    "<div style='background-color: rgba(153, 33, 170, 0.12); padding: 20px; border-radius: 8px; margin: 10px 0; color: inherit;'>",
                     "<h3 style='color: #7b1fa2; margin-top: 0;'> How to Interpret This Plot</h3>",
                     switch(plot_type,
                         "violin" = paste(
@@ -1248,7 +1248,7 @@ ggprismClass <- if (requireNamespace("jmvcore")) {
                 stats_method <- self$options$stats_method
 
                 assumptions_html <- paste(
-                    "<div style='background-color: #fff3e0; padding: 20px; border-radius: 8px; margin: 10px 0;'>",
+                    "<div style='background-color: rgba(255, 169, 33, 0.14); padding: 20px; border-radius: 8px; margin: 10px 0; color: inherit;'>",
                     "<h3 style='color: #ef6c00; margin-top: 0;'> Statistical Assumptions & Requirements</h3>",
                     switch(stats_method,
                         "ttest" = paste(
@@ -1291,14 +1291,14 @@ ggprismClass <- if (requireNamespace("jmvcore")) {
                     ),
                     if (length(private$.clinical_warnings) > 0) {
                         paste0(
-                            "<div style='background-color: #ffebee; padding: 10px; border-radius: 5px; margin: 10px 0;'>",
+                            "<div style='background-color: rgba(255, 33, 67, 0.09); padding: 10px; border-radius: 5px; margin: 10px 0; color: inherit;'>",
                             "<h4 style='color: #c62828;'>Detected Issues:</h4>",
                             "<ul style='color: #c62828;'>",
                             paste0("<li>", private$.clinical_warnings, "</li>", collapse = ""),
                             "</ul></div>"
                         )
                     } else {
-                        "<div style='background-color: #e8f5e8; padding: 10px; border-radius: 5px; margin: 10px 0;'><p style='color: #2e7d32; margin: 0;'> No major assumption violations detected.</p></div>"
+                        "<div style='background-color: rgba(33, 159, 33, 0.1); padding: 10px; border-radius: 5px; margin: 10px 0; color: inherit;'><p style='color: #2e7d32; margin: 0;'> No major assumption violations detected.</p></div>"
                     },
                     "</div>"
                 )
@@ -1365,7 +1365,7 @@ ggprismClass <- if (requireNamespace("jmvcore")) {
                 )
 
                 report_html <- paste(
-                    "<div style='background-color: #f5f5f5; padding: 20px; border-radius: 8px; margin: 10px 0;'>",
+                    "<div style='background-color: rgba(88, 88, 88, 0.06); padding: 20px; border-radius: 8px; margin: 10px 0; color: inherit;'>",
                     "<h3 style='color: #424242; margin-top: 0;'> Copy-Ready Report Sentences</h3>",
                     "<div style='background-color: white; padding: 15px; border-radius: 5px; border: 1px solid #ddd;'>",
                     "<h4>Results Description:</h4>",
@@ -1374,7 +1374,7 @@ ggprismClass <- if (requireNamespace("jmvcore")) {
                     "<p style='font-family: \"Times New Roman\", serif; line-height: 1.6;'>", method_sentence, "</p>",
                     "</div>",
                     "<div style='margin-top: 15px;'>",
-                    "<button onclick='navigator.clipboard.writeText(\"", gsub("\"", "'", paste(report_sentence, method_sentence)), "\")' style='background-color: #1976d2; color: white; border: none; padding: 8px 16px; border-radius: 4px; cursor: pointer;'>",
+                    "<button onclick='navigator.clipboard.writeText(\"", gsub("\"", "'", paste(report_sentence, method_sentence)), "\")' style='background-color: #1976d2; color: #ffffff; color: white; border: none; padding: 8px 16px; border-radius: 4px; cursor: pointer;'>",
                     " Copy to Clipboard",
                     "</button>",
                     "</div>",
@@ -1388,7 +1388,7 @@ ggprismClass <- if (requireNamespace("jmvcore")) {
             },
             .generate_statistical_glossary = function() {
                 glossary_html <- paste(
-                    "<div style='background-color: #e3f2fd; padding: 20px; border-radius: 8px; margin: 10px 0;'>",
+                    "<div style='background-color: rgba(33, 152, 239, 0.13); padding: 20px; border-radius: 8px; margin: 10px 0; color: inherit;'>",
                     "<h3 style='color: #1565c0; margin-top: 0;'> Statistical Terms Glossary</h3>",
                     "<div style='column-count: 2; column-gap: 20px;'>",
                     "<div style='break-inside: avoid; margin-bottom: 15px;'>",
@@ -1423,7 +1423,7 @@ ggprismClass <- if (requireNamespace("jmvcore")) {
             },
             .generate_clinical_presets = function() {
                 presets_html <- paste(
-                    "<div style='background-color: #f3e5f5; padding: 20px; border-radius: 8px; margin: 10px 0;'>",
+                    "<div style='background-color: rgba(153, 33, 170, 0.12); padding: 20px; border-radius: 8px; margin: 10px 0; color: inherit;'>",
                     "<h3 style='color: #7b1fa2; margin-top: 0;'> Clinical Research Presets</h3>",
                     "<p>Common configurations for clinical research scenarios:</p>",
                     "<div style='display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-top: 15px;'>",
@@ -1468,7 +1468,7 @@ ggprismClass <- if (requireNamespace("jmvcore")) {
                     "<p style='font-size: 12px; color: #666; margin: 5px 0;'><em>Best for examining relationships between variables</em></p>",
                     "</div>",
                     "</div>",
-                    "<div style='margin-top: 20px; padding: 15px; background-color: #e8f5e8; border-radius: 5px;'>",
+                    "<div style='margin-top: 20px; padding: 15px; background-color: rgba(33, 159, 33, 0.1); border-radius: 5px; color: inherit;'>",
                     "<h4 style='color: #2e7d32; margin-top: 0;'>Quick Selection Guide:</h4>",
                     "<ul style='font-size: 14px;'>",
                     "<li><strong>2 groups, normal data:</strong> Box plot + t-test</li>",

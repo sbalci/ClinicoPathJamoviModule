@@ -452,7 +452,7 @@ cohenskappaClass <- R6::R6Class(
 
                     <h4>Kappa Value Interpretation (Landis & Koch, 1977)</h4>
                     <table style='border-collapse: collapse; width: 100%;'>
-                    <tr style='border: 1px solid #ddd; background-color: #f2f2f2;'>
+                    <tr style='border: 1px solid #ddd; background-color: rgba(38, 38, 38, 0.06); color: inherit;'>
                     <th style='border: 1px solid #ddd; padding: 8px;'>Kappa Range</th>
                     <th style='border: 1px solid #ddd; padding: 8px;'>Interpretation</th>
                     <th style='border: 1px solid #ddd; padding: 8px;'>Clinical Meaning</th>
@@ -462,7 +462,7 @@ cohenskappaClass <- R6::R6Class(
                     <td style='border: 1px solid #ddd; padding: 8px;'>Poor agreement</td>
                     <td style='border: 1px solid #ddd; padding: 8px;'>Agreement worse than chance; systematic disagreement</td>
                     </tr>
-                    <tr style='border: 1px solid #ddd; background-color: #f9f9f9;'>
+                    <tr style='border: 1px solid #ddd; background-color: rgba(155, 155, 155, 0.06); color: inherit;'>
                     <td style='border: 1px solid #ddd; padding: 8px;'>0.00 - 0.20</td>
                     <td style='border: 1px solid #ddd; padding: 8px;'>Slight agreement</td>
                     <td style='border: 1px solid #ddd; padding: 8px;'>Minimal agreement beyond chance; unreliable for clinical use</td>
@@ -472,7 +472,7 @@ cohenskappaClass <- R6::R6Class(
                     <td style='border: 1px solid #ddd; padding: 8px;'>Fair agreement</td>
                     <td style='border: 1px solid #ddd; padding: 8px;'>Some agreement but substantial disagreement; needs improvement</td>
                     </tr>
-                    <tr style='border: 1px solid #ddd; background-color: #f9f9f9;'>
+                    <tr style='border: 1px solid #ddd; background-color: rgba(155, 155, 155, 0.06); color: inherit;'>
                     <td style='border: 1px solid #ddd; padding: 8px;'>0.41 - 0.60</td>
                     <td style='border: 1px solid #ddd; padding: 8px;'>Moderate agreement</td>
                     <td style='border: 1px solid #ddd; padding: 8px;'>Acceptable agreement for some applications</td>
@@ -482,7 +482,7 @@ cohenskappaClass <- R6::R6Class(
                     <td style='border: 1px solid #ddd; padding: 8px;'>Substantial agreement</td>
                     <td style='border: 1px solid #ddd; padding: 8px;'>Good agreement suitable for most clinical applications</td>
                     </tr>
-                    <tr style='border: 1px solid #ddd; background-color: #f9f9f9;'>
+                    <tr style='border: 1px solid #ddd; background-color: rgba(155, 155, 155, 0.06); color: inherit;'>
                     <td style='border: 1px solid #ddd; padding: 8px;'>0.81 - 1.00</td>
                     <td style='border: 1px solid #ddd; padding: 8px;'>Almost perfect agreement</td>
                     <td style='border: 1px solid #ddd; padding: 8px;'>Excellent agreement suitable for critical applications</td>

@@ -17,7 +17,6 @@ jjbarstatsOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             padjustmethod = "holm",
             originaltheme = FALSE,
             resultssubtitle = FALSE,
-            messages = FALSE,
             paired = FALSE,
             label = "percentage",
             digits = 2,
@@ -121,10 +120,6 @@ jjbarstatsOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 "resultssubtitle",
                 resultssubtitle,
                 default=FALSE)
-            private$..messages <- jmvcore::OptionBool$new(
-                "messages",
-                messages,
-                default=FALSE)
             private$..paired <- jmvcore::OptionBool$new(
                 "paired",
                 paired,
@@ -217,7 +212,6 @@ jjbarstatsOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             self$.addOption(private$..padjustmethod)
             self$.addOption(private$..originaltheme)
             self$.addOption(private$..resultssubtitle)
-            self$.addOption(private$..messages)
             self$.addOption(private$..paired)
             self$.addOption(private$..label)
             self$.addOption(private$..digits)
@@ -246,7 +240,6 @@ jjbarstatsOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         padjustmethod = function() private$..padjustmethod$value,
         originaltheme = function() private$..originaltheme$value,
         resultssubtitle = function() private$..resultssubtitle$value,
-        messages = function() private$..messages$value,
         paired = function() private$..paired$value,
         label = function() private$..label$value,
         digits = function() private$..digits$value,
@@ -274,7 +267,6 @@ jjbarstatsOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         ..padjustmethod = NA,
         ..originaltheme = NA,
         ..resultssubtitle = NA,
-        ..messages = NA,
         ..paired = NA,
         ..label = NA,
         ..digits = NA,
@@ -331,7 +323,6 @@ jjbarstatsResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "padjustmethod",
                     "originaltheme",
                     "resultssubtitle",
-                    "messages",
                     "label",
                     "digits",
                     "digitsperc",
@@ -457,8 +448,6 @@ jjbarstatsBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' @param originaltheme .
 #' @param resultssubtitle Display statistical test results in plot subtitle.
 #'   Disabling improves performance significantly.
-#' @param messages Display statistical messages in console.  Disabling
-#'   improves performance.
 #' @param paired Logical indicating whether data came from a within-subjects
 #'   or repeated measures design study. If TRUE, McNemar's test  will be used.
 #'   If FALSE, Pearson's chi-square test will be used.
@@ -520,7 +509,6 @@ jjbarstats <- function(
     padjustmethod = "holm",
     originaltheme = FALSE,
     resultssubtitle = FALSE,
-    messages = FALSE,
     paired = FALSE,
     label = "percentage",
     digits = 2,
@@ -568,7 +556,6 @@ jjbarstats <- function(
         padjustmethod = padjustmethod,
         originaltheme = originaltheme,
         resultssubtitle = resultssubtitle,
-        messages = messages,
         paired = paired,
         label = label,
         digits = digits,

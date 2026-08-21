@@ -1545,7 +1545,7 @@ tumorgrowthClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
             growth_model <- self$options$growthModel %||% "gompertz"
 
-            html <- "<div style='background-color: #e8f5e9; padding: 15px; border-left: 4px solid #4caf50; margin: 10px 0;'>"
+            html <- "<div style='background-color: rgba(33, 159, 43, 0.1); padding: 15px; border-left: 4px solid #4caf50; margin: 10px 0; color: inherit;'>"
             html <- paste0(html, "<h4>Clinical Interpretation Guide</h4>")
 
             # Model-specific interpretation
@@ -1658,7 +1658,7 @@ tumorgrowthClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 n_obs <- nrow(data)
                 n_patients <- if (!is.null(self$options$patientId)) length(unique(data[[self$options$patientId]])) else 1
 
-                html <- "<div style='background-color: #e3f2fd; padding: 15px; border-left: 4px solid #2196f3; margin: 10px 0;'>"
+                html <- "<div style='background-color: rgba(33, 152, 239, 0.13); padding: 15px; border-left: 4px solid #2196f3; margin: 10px 0; color: inherit;'>"
                 html <- paste0(html, "<h4>Growth Model Summary</h4>")
 
                 # Dataset description
@@ -1778,7 +1778,7 @@ tumorgrowthClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         .populateGlossary = function() {
             # Populate technical terms glossary
 
-            html <- "<div style='background-color: #fff9e6; padding: 15px; border-left: 4px solid #ffc107; margin: 10px 0;'>"
+            html <- "<div style='background-color: rgba(255, 202, 33, 0.11); padding: 15px; border-left: 4px solid #ffc107; margin: 10px 0; color: inherit;'>"
             html <- paste0(html, "<h4>Technical Terms Glossary</h4>")
 
             html <- paste0(html, "<dl style='margin-left: 10px;'>")

@@ -175,6 +175,61 @@ These properties can be used with any result element type:
 
 ## 5. Result Element Types: Detailed Coverage
 
+### The complete list of valid `type:` values
+
+The jamovi compiler validates `.r.yaml` against a fixed enum. Anything else is a
+hard compile failure. As of **jamovi-compiler 0.3.5** (shipped with jmvtools 28.3):
+
+```
+Table   Group   Array   Image   Preformatted   Html
+State   Property   Output   Notification   Action
+```
+
+Two traps in that list:
+
+- **`Notice` is NOT valid**, despite being the obvious home for warnings and the
+  thing the jamovi library reviewer recommends. `jmvtools::prepare()` fails with
+  `results.items[0].type is not one of enum values: ...`. jamovi's protobuf
+  defines `ResultsNotice` and `compiler.js` has a `Notice` branch, but the schema
+  enum has not caught up. Re-test after every jmvtools upgrade.
+- **`Notification` compiles but breaks at runtime.** `resultsify()` emits
+  `jmvcore::Notification$new(...)` — and `jmvcore::Notification` does not exist,
+  so the generated `.h.R` adds a plain `list()` where a results element is
+  expected.
+
+Until the enum gains `Notice`, use `type: Html` for inline warnings (styled per
+`vignettes/jamovi_notices_guide.md` §13.2) and `jmvcore::reject()` for fatal
+validation.
+
+### `setVisible(FALSE)` is not an error mechanism
+
+**[MEDIUM/HIGH] — raised by the jamovi library reviewer against three of five modules.**
+
+jamovi already has a presentation for a failed analysis: it greys the results pane
+and shows an analysis-level error. **That presentation depends on the results
+staying in place.** Removing an element instead makes the pane collapse and
+re-expand as the user types through invalid intermediate states, which reads as
+the interface glitching rather than as a diagnosable problem.
+
+| Situation | Correct mechanism |
+|---|---|
+| Element depends on an option | `visible: (optionName)` — **declarative** |
+| Element depends on several options | `visible: (a \|\| b)` |
+| Fatal; the user must change something | `jmvcore::reject(.("..."), code = "...")` |
+| Non-fatal warning, rest of output still valid | an always-visible `Html` notice element |
+| Deliberate methodological guard (no post-hoc when the omnibus test is n.s.) | hide it **and** explain why — this one is fine |
+| Onboarding panel before variables are chosen | `setVisible()` is fine — that is option state |
+
+**Never pair an imperative `setVisible(FALSE)` in `.init()` with a
+`setVisible(TRUE)` in `.run()`.** That pair overrides the declarative `visible:`
+binding and can drift out of sync — in `psychopdaroc` four plots were computed and
+then thrown away because `.run()` restored some elements and never those four.
+Ticking the checkbox did nothing: no plot, no error, no explanation. The
+declarative form cannot drift.
+
+**Never write a note or content to an element you just hid** — it is not
+rendered, so the explanation is never shown.
+
 ### Core Output Types
 
 #### `Html`
@@ -487,8 +542,27 @@ format: currency    # Currency formatting ($1,234.56)
 #### Simple Boolean Conditions
 ```yaml
 visible: (showTable)              # When option is true
-visible: (!hideResults)           # When option is false (negation)
 ```
+
+> **A leading `!` NEVER works and fails silently.** `jmvcore::Options$eval()`
+> routes a `visible:` string to the expression evaluator with
+> `regexpr("^\\([\\$A-Za-z].*\\)$", value)` — the character after `(` must be `$`
+> or a **letter**. `(!hideResults)` does not match, so the string is returned
+> verbatim; `.update()` then falls through to `visibleValue = (length(vis) > 0)`,
+> which is `TRUE` for any non-empty string. **The element is always visible, on
+> every run, with no error.**
+>
+> ```yaml
+> visible: (!hideResults)          # WRONG - always visible, silently
+> visible: (hideResults == FALSE)  # RIGHT - starts with a letter
+>
+> visible: (!method:none)          # WRONG
+> visible: (method:none == FALSE)  # RIGHT
+> ```
+>
+> For an unset `Variable` option, drive visibility from `.run()` with
+> `setVisible()` instead — see `jamovi/agepyramid.r.yaml`, which documents the
+> same trap inline.
 
 #### Value-Based Conditions
 ```yaml

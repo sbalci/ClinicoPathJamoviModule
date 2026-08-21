@@ -154,7 +154,7 @@ options:
 
     # Advanced Features
     - name: add_boxplot
-      title: Add boxplot inside
+      title: Boxplot inside
       type: Bool
       default: false
       description:

@@ -142,7 +142,7 @@ statsplot2Class <- if (requireNamespace('jmvcore'))
                         group_var_safe <- private$.safeHtmlOutput(group_var)
                         group_levels_safe <- private$.safeHtmlOutput(paste(group_levels, collapse = ', '))
                         warning_msg <- glue::glue(
-                            "<div style='background: #fff3e0; border-left: 4px solid #f57c00; padding: 12px; margin: 10px 0;'>",
+                            "<div style='background-color: rgba(255, 169, 33, 0.14); border-left: 4px solid #f57c00; padding: 12px; margin: 10px 0; color: inherit;'>",
                             "<strong>Design-Data Mismatch Warning</strong><br/>",
                             "You selected <strong>Repeated Measures</strong> design, but the data structure may not match:<br/>",
                             "\u2022 Total observations: {n_obs}<br/>",
@@ -164,7 +164,7 @@ statsplot2Class <- if (requireNamespace('jmvcore'))
                         # Perfectly balanced groups often indicate independent samples
                         obs_per_group <- unique(group_counts)[1]
                         warning_msg <- glue::glue(
-                            "<div style='background: #e3f2fd; border-left: 4px solid #2196f3; padding: 12px; margin: 10px 0;'>",
+                            "<div style='background-color: rgba(33, 152, 239, 0.13); border-left: 4px solid #2196f3; padding: 12px; margin: 10px 0; color: inherit;'>",
                             "<strong>Design Check</strong><br/>",
                             "Perfectly balanced groups detected ({obs_per_group} observations per group).<br/>",
                             "\u2022 This pattern is common in <strong>independent groups</strong> designs<br/>",
@@ -350,7 +350,7 @@ statsplot2Class <- if (requireNamespace('jmvcore'))
                 group_type_safe <- private$.safeHtmlOutput(analysis_info$group_type)
 
                 # Generate HTML explanation message based on plot type
-                html <- "<div style='background: #f8f9fa; border-left: 4px solid #2196f3; padding: 15px; margin: 10px 0; border-radius: 4px;'>"
+                html <- "<div style='background-color: rgba(138, 155, 172, 0.06); border-left: 4px solid #2196f3; padding: 15px; margin: 10px 0; border-radius: 4px; color: inherit;'>"
                 html <- paste0(html, "<h4 style='margin-top: 0; color: #1976d2;'>Plot Selection Summary</h4>")
 
                 # Main message based on plot type
@@ -366,7 +366,7 @@ statsplot2Class <- if (requireNamespace('jmvcore'))
                     ),
                     "independent_continuous_factor" = glue::glue(
                         "<p><strong>Dot plot</strong> will compare <code>{dep_var_safe}</code> <em>({dep_type_safe})</em> with <code>{group_var_safe}</code> <em>({group_type_safe})</em>.</p>",
-                        "<p style='background: #fff3e0; padding: 8px; border-radius: 4px; color: #f57c00;'>",
+                        "<p style='background-color: rgba(255, 169, 33, 0.14); padding: 8px; border-radius: 4px; color: inherit;'>",
                         "<strong>Tip:</strong> Consider switching variables for a more conventional visualization.</p>"
                     ),
                     "repeated_factor_continuous" = glue::glue(
@@ -377,7 +377,7 @@ statsplot2Class <- if (requireNamespace('jmvcore'))
                     ),
                     "repeated_continuous_continuous" = glue::glue(
                         "<p><strong>Basic scatter plot</strong> will be generated for repeated measurements of <code>{group_var_safe}</code> and <code>{dep_var_safe}</code>.</p>",
-                        "<div style='background: #fff3e0; padding: 10px; margin: 10px 0; border-radius: 4px;'>",
+                        "<div style='background-color: rgba(255, 169, 33, 0.14); padding: 10px; margin: 10px 0; border-radius: 4px; color: inherit;'>",
                         "<strong>Limited Support:</strong> Specialized functions don't support this combination. Consider:<br>",
                         "<ul style='margin: 5px 0; padding-left: 20px;'>",
                         "<li>Using 'independent' design instead</li>",
@@ -390,7 +390,7 @@ statsplot2Class <- if (requireNamespace('jmvcore'))
                     ),
                     "repeated_continuous_factor" = glue::glue(
                         "<p><strong>Basic visualization</strong> will be generated for <code>{dep_var_safe}</code> vs <code>{group_var_safe}</code> in repeated measures.</p>",
-                        "<div style='background: #fff3e0; padding: 10px; margin: 10px 0; border-radius: 4px;'>",
+                        "<div style='background-color: rgba(255, 169, 33, 0.14); padding: 10px; margin: 10px 0; border-radius: 4px; color: inherit;'>",
                         "<strong>Limited Support:</strong> Consider alternatives:<br>",
                         "<ul style='margin: 5px 0; padding-left: 20px;'>",
                         "<li>Switching variables (<code>{group_var_safe}</code> as dependent)</li>",
@@ -413,7 +413,7 @@ statsplot2Class <- if (requireNamespace('jmvcore'))
                 # Note about statistical approach
                 if (analysis_info$dep_type == "factor" && analysis_info$group_type == "factor") {
                     notes_html <- paste0(notes_html,
-                        "<p style='background: #e3f2fd; padding: 8px; border-radius: 4px; font-size: 0.9em;'>",
+                        "<p style='background-color: rgba(33, 152, 239, 0.13); padding: 8px; border-radius: 4px; font-size: 0.9em; color: inherit;'>",
                         "<strong>Note:</strong> Statistical approach option does not apply to categorical comparisons.</p>"
                     )
                 }
@@ -421,12 +421,12 @@ statsplot2Class <- if (requireNamespace('jmvcore'))
                 # Note about alluvial style
                 if (analysis_info$plot_type == "repeated_factor_factor") {
                     notes_html <- paste0(notes_html,
-                        "<p style='background: #e8f5e9; padding: 8px; border-radius: 4px; font-size: 0.9em;'>",
+                        "<p style='background-color: rgba(33, 159, 43, 0.1); padding: 8px; border-radius: 4px; font-size: 0.9em; color: inherit;'>",
                         "<strong>Alluvial style option is available</strong> for this repeated categorical comparison.</p>"
                     )
                 } else if (analysis_info$direction == "repeated") {
                     notes_html <- paste0(notes_html,
-                        "<p style='background: #e3f2fd; padding: 8px; border-radius: 4px; font-size: 0.9em;'>",
+                        "<p style='background-color: rgba(33, 152, 239, 0.13); padding: 8px; border-radius: 4px; font-size: 0.9em; color: inherit;'>",
                         "<strong>Note:</strong> Alluvial style option only applies to repeated factor vs factor comparisons.</p>"
                     )
                 }
@@ -451,7 +451,7 @@ statsplot2Class <- if (requireNamespace('jmvcore'))
                 group_var_safe <- private$.safeHtmlOutput(analysis_info$group_var)
 
                 # Start HTML container
-                html <- "<div style='background: #f1f8e9; border-left: 4px solid #689f38; padding: 15px; margin: 10px 0; border-radius: 4px;'>"
+                html <- "<div style='background-color: rgba(114, 184, 33, 0.1); border-left: 4px solid #689f38; padding: 15px; margin: 10px 0; border-radius: 4px; color: inherit;'>"
                 html <- paste0(html, "<h4 style='margin-top: 0; color: #558b2f;'>Clinical Interpretation</h4>")
 
                 # Main interpretation based on plot type
@@ -522,7 +522,7 @@ statsplot2Class <- if (requireNamespace('jmvcore'))
 
                 # Add assumption notes based on statistical approach
                 if (analysis_info$dep_type == "continuous" || analysis_info$group_type == "continuous") {
-                    assumption_html <- "<div style='background: #ffffff; padding: 10px; margin-top: 10px; border-radius: 4px; border: 1px solid #ddd;'>"
+                    assumption_html <- "<div style='background-color: rgba(255, 255, 255, 0.06); padding: 10px; margin-top: 10px; border-radius: 4px; border: 1px solid #ddd; color: inherit;'>"
                     assumption_html <- paste0(assumption_html, "<h5 style='margin-top: 0; color: #424242;'>Statistical Approach</h5>")
 
                     if (analysis_info$distribution == "p") {
@@ -677,7 +677,7 @@ statsplot2Class <- if (requireNamespace('jmvcore'))
                 if (is.null(analysis_info)) {
 
                     todo <- glue::glue(
-                "<div style='padding: 20px; background: #f5f5f5; border-radius: 8px;'>",
+                "<div style='padding: 20px; background-color: rgba(88, 88, 88, 0.06); border-radius: 8px; color: inherit;'>",
                 "<h3 style='color: #1976d2; margin-top: 0;'>Welcome to Automatic Plot Selection</h3>",
                 "<p style='font-size: 14px;'>This tool automatically selects the most appropriate statistical visualization based on your variable types.</p>",
                 "<h4 style='color: #424242;'>Getting Started:</h4>",
@@ -719,7 +719,7 @@ statsplot2Class <- if (requireNamespace('jmvcore'))
                     dep_name <- private$.safeHtmlOutput(self$options$dep %||% "not selected")
                     group_name <- private$.safeHtmlOutput(self$options$group %||% "not selected")
                     error_html <- glue::glue(
-                        "<div style='color: #d32f2f; padding: 15px; border-left: 4px solid #d32f2f; background: #ffebee;'>",
+                        "<div style='color: inherit; padding: 15px; border-left: 4px solid #d32f2f; background-color: rgba(255, 33, 67, 0.09);'>",
                         "<h4 style='margin-top: 0;'>No Data Available</h4>",
                         "<p><strong>Variables selected:</strong></p>",
                         "<ul style='margin: 5px 0;'>",
@@ -744,7 +744,7 @@ statsplot2Class <- if (requireNamespace('jmvcore'))
                 # Critical: n < 10
                 if (n_complete < 10) {
                     validation_warnings <- paste0(validation_warnings, glue::glue(
-                        "<div style='background: #ffebee; border-left: 4px solid #d32f2f; padding: 12px; margin: 10px 0;'>",
+                        "<div style='background-color: rgba(255, 33, 67, 0.09); border-left: 4px solid #d32f2f; padding: 12px; margin: 10px 0; color: inherit;'>",
                         "<strong>CRITICAL: Very Small Sample (n={n_complete})</strong><br/>",
                         "Your analysis has only <strong>{n_complete} complete observations</strong>.<br/><br/>",
                         "<strong>Statistical concerns:</strong><br/>",
@@ -762,7 +762,7 @@ statsplot2Class <- if (requireNamespace('jmvcore'))
                 } else if (n_complete < 30) {
                     # Warning: 10 \u2264 n < 30
                     validation_warnings <- paste0(validation_warnings, glue::glue(
-                        "<div style='background: #fff3e0; border-left: 4px solid #f57c00; padding: 12px; margin: 10px 0;'>",
+                        "<div style='background-color: rgba(255, 169, 33, 0.14); border-left: 4px solid #f57c00; padding: 12px; margin: 10px 0; color: inherit;'>",
                         "<strong>Small Sample Warning (n={n_complete})</strong><br/>",
                         "You have <strong>{n_complete} complete observations</strong> (below the conventional n\u226530 guideline).<br/><br/>",
                         "<strong>Recommendations:</strong><br/>",
@@ -915,11 +915,11 @@ statsplot2Class <- if (requireNamespace('jmvcore'))
                 if (length(missing_packages) > 0) {
                     install_cmd <- paste0("install.packages(c('", paste(missing_packages, collapse = "', '"), "'))")
                     warning_html <- glue::glue(
-                        "<div style='color: #f57c00; padding: 15px; border-left: 4px solid #f57c00; background: #fff3e0;'>",
+                        "<div style='color: inherit; padding: 15px; border-left: 4px solid #f57c00; background-color: rgba(255, 169, 33, 0.14);'>",
                         "<h4 style='margin-top: 0;'>Optional Packages Missing</h4>",
                         "<p><strong>Missing:</strong> {paste(missing_packages, collapse = ', ')}</p>",
                         "<p><strong>Install with:</strong></p>",
-                        "<pre style='background: #f5f5f5; padding: 8px; border-radius: 4px; overflow-x: auto;'>{install_cmd}</pre>",
+                        "<pre style='background-color: rgba(88, 88, 88, 0.06); padding: 8px; border-radius: 4px; overflow-x: auto; color: inherit;'>{install_cmd}</pre>",
                         "<p style='margin-bottom: 0;'><em>Basic functionality will still work. Some plot types may use simpler visualizations.</em></p>",
                         "</div>"
                     )

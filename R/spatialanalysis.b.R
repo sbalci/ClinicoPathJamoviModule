@@ -1002,7 +1002,7 @@ spatialanalysisClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cla
                 
                 # Start building summary
                 summary_text <- paste0(
-                    "<div style='border: 1px solid #ddd; padding: 15px; margin: 10px 0; background-color: #f9f9f9;'>",
+                    "<div style='border: 1px solid #ddd; padding: 15px; margin: 10px 0; background-color: rgba(155, 155, 155, 0.06); color: inherit;'>",
                     "<h4> Copy-Ready Summary</h4>",
                     "<p><strong>Spatial Analysis Results Summary:</strong></p>",
                     "<p>We analyzed the spatial distribution of ", n_points, " cells"

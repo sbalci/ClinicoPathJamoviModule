@@ -11,8 +11,8 @@ pathsamplingClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                 lineHeight = "line-height: 1.4;",
                 colorPrimary = "color: #333;",
                 colorSecondary = "color: #666;",
-                bgLight = "background: #f5f5f5;",
-                bgLighter = "background: #f9f9f9;",
+                bgLight = "background: rgba(88, 88, 88, 0.06); color: inherit;",
+                bgLighter = "background: rgba(155, 155, 155, 0.06); color: inherit;",
                 bgWhite = "background: white;",
                 borderPrimary = "border: 2px solid #333;",
                 borderSecondary = "border: 1px solid #ccc;",
@@ -106,7 +106,7 @@ pathsamplingClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                 welcome <- self$results$welcome
                 welcomeHtml <- "
             <div style='font-family: Arial, sans-serif; max-width: 800px; line-height: 1.4;'>
-                <div style='background: #f5f5f5; border: 2px solid #333; padding: 20px; margin-bottom: 20px;'>
+                <div style='background-color: rgba(88, 88, 88, 0.06); border: 2px solid #333; padding: 20px; margin-bottom: 20px; color: inherit;'>
                     <h2 style='margin: 0 0 10px 0; font-size: 18px; color: #333;'>Pathology Sampling Adequacy Analysis</h2>
                     <p style='margin: 0; font-size: 14px; color: #666;'>Determine the minimum number of tissue samples required to detect lesions with specified confidence levels</p>
                 </div>
@@ -146,7 +146,7 @@ pathsamplingClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                     </tr>
                 </table>
 
-                <div style='background: #f9f9f9; border: 1px solid #ccc; padding: 15px;'>
+                <div style='background-color: rgba(155, 155, 155, 0.06); border: 1px solid #ccc; padding: 15px; color: inherit;'>
                     <h4 style='margin: 0 0 10px 0; font-size: 15px; color: #333;'>Statistical Methods</h4>
                     <p style='margin: 0 0 10px 0; font-size: 14px; color: #333;'>
                         <strong>Core Methods:</strong> Binomial probability models, Bootstrap resampling, Hypergeometric and Beta-Binomial models for finite populations
@@ -254,7 +254,7 @@ pathsamplingClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                             private$.styleConstants$colorSecondary
                         ),
                         private$.buildStyle(
-                            "background: #fff3cd;",
+                            "background: rgba(255, 202, 33, 0.23); color: inherit;",
                             private$.styleConstants$borderSecondary,
                             private$.styleConstants$padding10,
                             private$.styleConstants$margin10
@@ -813,7 +813,7 @@ pathsamplingClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
 
                 # === Key Results Summary ===
                 keyResults <- self$results$keyResults
-                keyResultsHtml <- "<div style='padding: 15px; background: #e9f5ff; border: 2px solid #b3d7ff; margin-bottom: 20px;'>
+                keyResultsHtml <- "<div style='padding: 15px; background-color: rgba(33, 154, 255, 0.1); border: 2px solid #b3d7ff; margin-bottom: 20px; color: inherit;'>
                                 <h3 style='margin: 0 0 10px 0; font-size: 16px; color: #0056b3;'>Key Results</h3>
                                 <p style='margin: 0; font-size: 14px; color: #0056b3;'>This section will be populated with the key findings from the analysis.</p>
                              </div>"
@@ -1072,7 +1072,7 @@ pathsamplingClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
 
                     if (analysisContext == "tumor") {
                         binomialWarning <- sprintf(
-                            "<div style='background: #ffebee; border: 1px solid #ef5350; padding: 12px; margin: 10px 0; border-radius: 4px;'>
+                            "<div style='background-color: rgba(255, 33, 67, 0.09); border: 1px solid #ef5350; padding: 12px; margin: 10px 0; border-radius: 4px; color: inherit;'>
                         <p style='%s margin: 0;'><b> WARNING: Binomial Model May Underestimate Sensitivity for Tumor Sampling</b></p>
                         <p style='%s margin: 8px 0 0 0;'>
                             Sequential tumor samples (blocks) are <b>not independent</b> - they are serial sections through the same lesion
@@ -1094,7 +1094,7 @@ pathsamplingClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                         )
                     } else if (analysisContext == "margin") {
                         binomialWarning <- sprintf(
-                            "<div style='background: #fff3e0; border: 1px solid #ff9800; padding: 12px; margin: 10px 0; border-radius: 4px;'>
+                            "<div style='background-color: rgba(255, 169, 33, 0.14); border: 1px solid #ff9800; padding: 12px; margin: 10px 0; border-radius: 4px; color: inherit;'>
                         <p style='%s margin: 0;'><b> Caution: Margin samples may show spatial clustering</b></p>
                         <p style='%s margin: 8px 0 0 0;'>
                             Consider using empirical methods if margin positivity is geographically clustered.
@@ -1110,7 +1110,7 @@ pathsamplingClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                     if (length(dataQualityWarnings) > 0) {
                         warningList <- paste(sprintf("<li>%s</li>", dataQualityWarnings), collapse = "\n")
                         dataQualityWarningHTML <- sprintf(
-                            "<div style='background: #ffebee; border: 2px solid #d32f2f; padding: 15px; margin: 10px 0; border-radius: 4px;'>
+                            "<div style='background-color: rgba(255, 33, 67, 0.09); border: 2px solid #d32f2f; padding: 15px; margin: 10px 0; border-radius: 4px; color: inherit;'>
                         <p style='%s margin: 0 0 10px 0;'><b> DATA QUALITY WARNINGS</b></p>
                         <ul style='%s margin: 0;'>
                             %s
@@ -2434,7 +2434,7 @@ pathsamplingClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                         contextNote <- ""
                         if (analysisContext == "tumor") {
                             contextNote <- sprintf(
-                                "<div style='background: #fff3cd; border: 1px solid #ffc107; padding: 12px; margin: 10px 0; border-radius: 4px;'>
+                                "<div style='background-color: rgba(255, 202, 33, 0.23); border: 1px solid #ffc107; padding: 12px; margin: 10px 0; border-radius: 4px; color: inherit;'>
                             <p style='%s margin: 0;'><b> Note for Tumor Sampling:</b> Sequential tumor samples (blocks) are not independent -
                             they represent serial sections through the same lesion. Spatial clustering of features like venous invasion (VI) or
                             perineural invasion (PNI) is expected. The <b>empirical method is recommended</b> over parametric models (binomial/geometric)
@@ -2447,7 +2447,7 @@ pathsamplingClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                             )
                         } else if (analysisContext == "margin") {
                             contextNote <- sprintf(
-                                "<div style='background: #d1ecf1; border: 1px solid #0c5460; padding: 12px; margin: 10px 0; border-radius: 4px;'>
+                                "<div style='background-color: rgba(33, 163, 188, 0.21); border: 1px solid #0c5460; padding: 12px; margin: 10px 0; border-radius: 4px; color: inherit;'>
                             <p style='%s margin: 0;'><b> Note for Margin Sampling:</b> Margin samples may show spatial clustering -
                             positive margins are often geographically close. Empirical approach recommended for accurate sensitivity estimates.</p>
                         </div>",
@@ -4446,7 +4446,7 @@ pathsamplingClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
 
             <p><b>Risk-Stratified Recommendations:</b></p>
             <table style='border-collapse: collapse; width: 100%;'>
-                <tr style='background: #f0f0f0;'>
+                <tr style='background-color: rgba(33, 33, 33, 0.07); color: inherit;'>
                     <th style='border: 1px solid #ddd; padding: 8px;'>Scenario</th>
                     <th style='border: 1px solid #ddd; padding: 8px;'>Maglalang MPR</th>
                     <th style='border: 1px solid #ddd; padding: 8px;'>Recommended Blocks</th>

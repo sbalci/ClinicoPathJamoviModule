@@ -17,7 +17,6 @@ jjbarstats(
   padjustmethod = "holm",
   originaltheme = FALSE,
   resultssubtitle = FALSE,
-  messages = FALSE,
   paired = FALSE,
   label = "percentage",
   digits = 2,
@@ -61,9 +60,6 @@ represents a single observation.}
 
 \item{resultssubtitle}{Display statistical test results in plot subtitle.
 Disabling improves performance significantly.}
-
-\item{messages}{Display statistical messages in console.  Disabling
-improves performance.}
 
 \item{paired}{Logical indicating whether data came from a within-subjects
 or repeated measures design study. If TRUE, McNemar's test  will be used.

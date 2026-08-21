@@ -4,7 +4,7 @@ title: Decision Curve Analysis
 menuGroup: meddecideT
 menuSubgroup: Decision Curve Analysis
 menuSubtitle: Clinical Utility, Net Benefit, Threshold Analysis
-version: '1.0.4'
+version: '1.0.6'
 jas: '1.2'
 
 description:
@@ -46,12 +46,17 @@ options:
     - name: models
       title: Prediction Variables/Models
       type: Variables
+      default: NULL
       suggested: [ continuous ]
-      permitted: [ numeric, factor ]
+      permitted: [ numeric ]
       description:
           R: >
-            Variables representing predicted probabilities or risk scores from
-            different models. Can include multiple models for comparison.
+            Variables holding predicted probabilities in [0, 1] - one column per model.
+            These must be CALIBRATED probabilities, not logits, linear predictors or raw
+            risk scores; the analysis rejects values outside [0, 1] rather than rescaling
+            them, because rescaling would destroy the correspondence between the threshold
+            probability and its clinical meaning. Factors were previously permitted here
+            and crashed the analysis with a raw R error.
 
     - name: modelNames
       title: Model Names
@@ -218,13 +223,25 @@ options:
 
     - name: bootReps
       title: Bootstrap Replications
-      type: Number
+      type: Integer
       default: 1000
       min: 100
       max: 10000
       description:
           R: >
             Number of bootstrap replications for confidence intervals.
+
+    - name: seed
+      title: "Random Seed"
+      type: Integer
+      default: 42
+      min: 1
+      max: 999999
+      description:
+          R: >
+            Random seed for the bootstrap resampling used in the confidence intervals and
+            the model-comparison p-values. Without a fixed seed the same data and the same
+            options produce a different interval and a different p-value on every run.
 
     - name: ciLevel
       title: Confidence Level
@@ -236,13 +253,18 @@ options:
           R: >
             Confidence level for bootstrap confidence intervals.
 
-    - name: showOptimalThreshold
-      title: Show Optimal Thresholds
+    - name: showBenefitRange
+      title: Range of Benefit
       type: Bool
       default: false
       description:
           R: >
-            Identify and display optimal threshold probabilities for each model.
+            Report, for each model, the range of threshold probabilities over which its
+            net benefit exceeds both treat-all and treat-none. Replaces the former
+            showOptimalThreshold option: net benefit decreases monotonically in the
+            threshold, so a maximum-net-benefit "optimal threshold" is always the lowest
+            threshold examined and can rank models incorrectly. Threshold probability is
+            elicited from clinical judgement, not estimated from the data.
 
     - name: compareModels
       title: Model Comparison Statistics
@@ -253,12 +275,18 @@ options:
             Calculate statistical tests for comparing model performance.
 
     - name: weightedAUC
-      title: Calculate Weighted AUC
+      title: Average Net Benefit Over the Threshold Range
       type: Bool
       default: false
       description:
           R: >
-            Calculate weighted area under the decision curve.
+            Summarise each decision curve by the area under it, normalised by the width of
+            the threshold range - that is, the model's average net benefit over that range.
+            The option is named weightedAUC for historical reasons but the average is
+            UNWEIGHTED: every threshold in the range counts equally. The value therefore
+            depends entirely on the threshold range chosen above (on one example dataset it
+            moved from 0.309 to 0.163 as the range widened from 5-20% to 1-99%), so always
+            report the range alongside it.
 
     - name: clinicalDecisionRule
       title: Clinical Decision Rule Integration
@@ -284,7 +312,11 @@ options:
       variable: (decisionRuleVar)
       description:
           R: >
-            Which level of the rule variable indicates a positive recommendation (treat/intervene).
+            Which level of the rule variable indicates a positive recommendation
+            (treat/intervene). jamovi does not permit a default on a Level option, so this
+            is always a required argument of the R function even when clinicalDecisionRule
+            is FALSE. Programmatic callers that are not using a clinical decision rule must
+            pass decisionRulePositive = NULL explicitly.
 
     - name: decisionRuleLabel
       title: Decision Rule Label
@@ -382,14 +414,14 @@ options:
       options:
         - name: bootstrap
           title: Bootstrap Test
-        - name: permutation
-          title: Permutation Test
-        - name: integral
-          title: Integral Difference Test
       default: bootstrap
       description:
           R: >
-            Statistical method for comparing decision curves between models.
+            Statistical method for comparing decision curves between models. Only the
+            case-resampling bootstrap is implemented. Permutation and integral-difference
+            options were previously offered here but had no code behind them: selecting
+            either produced an empty p-value and the literal text "Bootstrap required" in
+            the results table.
 
     - name: showDecisionConsequences
       title: Decision Consequences Table

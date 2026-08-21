@@ -36,6 +36,42 @@ This directory contains comprehensive guides for jamovi module development in th
 
 ---
 
+## Release Gate (READ BEFORE SUBMITTING TO THE JAMOVI LIBRARY)
+
+### 🚦 `jamovi_library_review_guide.md` - **What the jamovi library reviewer checks**
+
+**Created:** 2026-08-20
+**Source:** Five real audit reports in `jamovi-library-audit/` (ClinicoPathDescriptives,
+jsurvival, meddecide, OncoPath, jjstatsplot — 2026-07-13 and 2026-08-17/18 rounds)
+
+**Use this guide for:**
+- The pre-submission checklist (runnable commands, one per finding class)
+- The ten findings that recur across **every** module
+- Knowing which fixes the reviewer treats as MEDIUM/HIGH vs. polish
+
+**Contents:**
+1. Pre-submission checklist
+2. Findings that recur across every module
+3. Render functions must NULL-guard `image$state`
+4. HTML output must be theme-safe (dark mode)
+5. `setVisible(FALSE)` is not an error mechanism
+6. Row structure that isn't result-dependent belongs in `.init()`
+7. No named HTML entities except the structural five
+8. `warning()` is invisible to jamovi users
+9. Translatable strings are whole sentences
+10. Every package used must be declared — including base packages
+11. Dead code must not reference a schema that no longer exists
+12. UI label conventions
+13. **The `type: Notice` trap** — it does not compile; re-test after every jmvtools upgrade
+14. Encoding review findings as tests
+
+**Tooling that goes with it:**
+- `tools/check_state_guards.py` — exits 1 on any unguarded `image$state` read
+- `tools/theme_safe_html.py` — the dark-theme transform (idempotent; `--apply` to write)
+- `tests/testthat/test-zzz-results-rendering-contract.R` — the same rules as tests
+
+---
+
 ## Specialized Guides (By Topic)
 
 ### File-Specific Guides

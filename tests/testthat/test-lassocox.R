@@ -583,14 +583,12 @@ describe("lassocox Output Interpretation", {
     skip_if_not_installed("survival")
     skip_if_not_installed("jmvcore")
     
-    # Test interpretation function
-    interpret_cindex <- function(cindex) {
-      if (is.na(cindex)) return("Not available")
-      if (cindex < 0.6) return("Poor discrimination")
-      if (cindex < 0.7) return("Fair discrimination") 
-      if (cindex < 0.8) return("Good discrimination")
-      return("Excellent discrimination")
-    }
+    # Call the module's OWN method. This block used to define a local copy of the
+    # interpretation function and assert the copy against itself, so it exercised no
+    # ClinicoPath code at all and could not fail if the real thresholds changed.
+    skip_if_not_installed("ClinicoPath")
+    interpret_cindex <- function(cindex)
+      ClinicoPath:::lassocoxClass$private_methods$.interpretCindex(cindex)
     
     expect_equal(interpret_cindex(0.5), "Poor discrimination")
     expect_equal(interpret_cindex(0.65), "Fair discrimination")
@@ -604,13 +602,10 @@ describe("lassocox Output Interpretation", {
     skip_if_not_installed("survival")
     skip_if_not_installed("jmvcore")
     
-    # Test interpretation function
-    interpret_hr <- function(hr) {
-      if (is.na(hr)) return("Not available")
-      if (hr < 1.5) return("Weak risk stratification")
-      if (hr < 2.5) return("Moderate risk stratification")
-      return("Strong risk stratification")
-    }
+    # Same tautology as above - call the real method.
+    skip_if_not_installed("ClinicoPath")
+    interpret_hr <- function(hr)
+      ClinicoPath:::lassocoxClass$private_methods$.interpretHazardRatio(hr)
     
     expect_equal(interpret_hr(1.2), "Weak risk stratification")
     expect_equal(interpret_hr(2.0), "Moderate risk stratification")

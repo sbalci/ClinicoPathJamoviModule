@@ -124,6 +124,21 @@ diagnosticmetaClass <- R6::R6Class(
             self$results$about$setVisible(self$options$show_methodology)
             self$results$interpretation$setVisible(FALSE)
 
+            # Fixed row structure for the bivariate results table: the same five
+            # parameters with the same labels on every run. Only the estimates
+            # depend on the fitted model, so .run() fills them with setRow().
+            biv_parameters <- list(
+                sensitivity = "Pooled Sensitivity",
+                specificity = "Pooled Specificity",
+                plr         = "Positive Likelihood Ratio",
+                nlr         = "Negative Likelihood Ratio",
+                dor         = "Diagnostic Odds Ratio"
+            )
+            for (biv_key in names(biv_parameters))
+                self$results$bivariateresults$addRow(
+                    rowKey = biv_key,
+                    values = list(parameter = biv_parameters[[biv_key]]))
+
         },
         
         .run = function() {
@@ -243,7 +258,20 @@ diagnosticmetaClass <- R6::R6Class(
                     sum(drop), original_n, paste(reasons, collapse = "; "), nrow(meta_data)))
             }
 
-            # Enhanced validation with user-friendly warnings
+            if (nrow(meta_data) < 3) {
+                # Fatal: reject() so jamovi greys the results and reports an
+                # analysis-level error. Writing this into the instructions panel
+                # left the pane looking healthy, so a hard stop read as advice.
+                jmvcore::reject(
+                    jmvcore::format(
+                        .("At least 3 studies with complete diagnostic test data are required ({n} found)."),
+                        n = nrow(meta_data)),
+                    code = "insufficient_studies")
+            }
+
+            # Enhanced validation with user-friendly warnings. Its own
+            # <3-studies branch is unreachable now that the reject above fires
+            # first; it is kept as a guard for any other caller.
             validation_result <- private$.validateStudyData(meta_data, original_n)
             if (!validation_result) {
                 return()
@@ -251,14 +279,7 @@ diagnosticmetaClass <- R6::R6Class(
 
             # Store number of studies for summary
             private$.n_studies <- nrow(meta_data)
-            
-            if (nrow(meta_data) < 3) {
-                self$results$instructions$setContent(
-                    "<p><strong>Error:</strong> Insufficient valid studies for meta-analysis.</p>
-                     <p>At least 3 studies with complete diagnostic test data are required.</p>"
-                )
-                return()
-            }
+
 
             prepared_data <- private$.prepareAnalysisData(meta_data)
             analysis_data <- prepared_data$analysis_data
@@ -575,7 +596,6 @@ diagnosticmetaClass <- R6::R6Class(
             z_crit <- stats::qnorm(1 - (1 - conf_level) / 2)
 
             bivariate_table <- self$results$bivariateresults
-            bivariate_table$deleteRows()
 
             ci_lower_col <- grep("ci\\.lb$", colnames(coefficients), value = TRUE)
             ci_upper_col <- grep("ci\\.ub$", colnames(coefficients), value = TRUE)
@@ -681,8 +701,7 @@ diagnosticmetaClass <- R6::R6Class(
                 }
             }, error = function(e) NULL)
 
-            bivariate_table$addRow(rowKey = "sensitivity", values = list(
-                parameter = "Pooled Sensitivity",
+            bivariate_table$setRow(rowKey = "sensitivity", values = list(
                 estimate = pooled_sens * 100,  # Convert to percentage
                 ci_lower = sens_ci[1] * 100,   # Convert to percentage
                 ci_upper = sens_ci[2] * 100,   # Convert to percentage
@@ -690,8 +709,7 @@ diagnosticmetaClass <- R6::R6Class(
                 p_value = sens_logit_row[1, "Pr(>|z|)"]
             ))
 
-            bivariate_table$addRow(rowKey = "specificity", values = list(
-                parameter = "Pooled Specificity",
+            bivariate_table$setRow(rowKey = "specificity", values = list(
                 estimate = pooled_spec * 100,  # Convert to percentage
                 ci_lower = spec_ci[1] * 100,   # Convert to percentage
                 ci_upper = spec_ci[2] * 100,   # Convert to percentage
@@ -754,8 +772,7 @@ diagnosticmetaClass <- R6::R6Class(
                 }
             }
 
-            bivariate_table$addRow(rowKey = "plr", values = list(
-                parameter = "Positive Likelihood Ratio",
+            bivariate_table$setRow(rowKey = "plr", values = list(
                 estimate = pooled_plr,
                 ci_lower = lr_ci$plr[1],
                 ci_upper = lr_ci$plr[2],
@@ -763,8 +780,7 @@ diagnosticmetaClass <- R6::R6Class(
                 p_value = NA_real_
             ))
 
-            bivariate_table$addRow(rowKey = "nlr", values = list(
-                parameter = "Negative Likelihood Ratio",
+            bivariate_table$setRow(rowKey = "nlr", values = list(
                 estimate = pooled_nlr,
                 ci_lower = lr_ci$nlr[1],
                 ci_upper = lr_ci$nlr[2],
@@ -772,8 +788,7 @@ diagnosticmetaClass <- R6::R6Class(
                 p_value = NA_real_
             ))
 
-            bivariate_table$addRow(rowKey = "dor", values = list(
-                parameter = "Diagnostic Odds Ratio",
+            bivariate_table$setRow(rowKey = "dor", values = list(
                 estimate = pooled_dor,
                 ci_lower = lr_ci$dor[1],
                 ci_upper = lr_ci$dor[2],
@@ -1565,6 +1580,9 @@ diagnosticmetaClass <- R6::R6Class(
 
             state <- image$state
 
+            if (is.null(state))
+                return(FALSE)
+
             # Unpack state. New state is a list carrying the study data plus the
             # serialized pooled point and CIs. Legacy states (older saved .omv
             # files) stored only the data frame - fall back to private fields,
@@ -2117,7 +2135,7 @@ diagnosticmetaClass <- R6::R6Class(
             </ul>
             
             <h3>Data Preparation Checklist</h3>
-            <div style='background-color: #f8f9fa; padding: 15px; border-left: 4px solid #007bff; margin: 10px 0;'>
+            <div style='background-color: rgba(138, 155, 172, 0.06); padding: 15px; border-left: 4px solid #007bff; margin: 10px 0; color: inherit;'>
                 <p><strong>Before running analysis, verify:</strong></p>
                 <ul>
                     <li> No missing values in TP, FP, FN, TN columns</li>
@@ -2130,7 +2148,7 @@ diagnosticmetaClass <- R6::R6Class(
             
             <h3>Example Data Format</h3>
             <table style='border-collapse: collapse; width: 100%; margin: 10px 0;'>
-                <tr style='background-color: #f1f1f1;'>
+                <tr style='background-color: rgba(33, 33, 33, 0.06); color: inherit;'>
                     <th style='border: 1px solid #ddd; padding: 8px;'>study_name</th>
                     <th style='border: 1px solid #ddd; padding: 8px;'>true_positives</th>
                     <th style='border: 1px solid #ddd; padding: 8px;'>false_positives</th>
@@ -2165,7 +2183,7 @@ diagnosticmetaClass <- R6::R6Class(
             </ul>
 
             <h3>Statistical Method Selection Guide</h3>
-            <div style='background-color: #f8f9fa; padding: 15px; border-left: 4px solid #28a745; margin: 10px 0;'>
+            <div style='background-color: rgba(138, 155, 172, 0.06); padding: 15px; border-left: 4px solid #28a745; margin: 10px 0; color: inherit;'>
                 <p><strong>Choose the appropriate estimation method for your meta-analysis:</strong></p>
                 <ul>
                     <li><strong>REML (Recommended):</strong> Default choice for most diagnostic meta-analyses. Most robust for random effects modeling with good performance across different scenarios.</li>
@@ -2248,7 +2266,7 @@ diagnosticmetaClass <- R6::R6Class(
             
             <h4>Likelihood Ratios for Clinical Decision-Making</h4>
             <table style='border-collapse: collapse; width: 100%; margin: 10px 0;'>
-                <tr style='background-color: #f1f1f1;'>
+                <tr style='background-color: rgba(33, 33, 33, 0.06); color: inherit;'>
                     <th style='border: 1px solid #ddd; padding: 8px;'>Likelihood Ratio</th>
                     <th style='border: 1px solid #ddd; padding: 8px;'>Value Range</th>
                     <th style='border: 1px solid #ddd; padding: 8px;'>Clinical Interpretation</th>
@@ -2295,7 +2313,7 @@ diagnosticmetaClass <- R6::R6Class(
             
             <h3> Heterogeneity Assessment</h3>
             
-            <div style='background-color: #fff3cd; padding: 15px; border-left: 4px solid #ffc107; margin: 10px 0;'>
+            <div style='background-color: rgba(255, 202, 33, 0.23); padding: 15px; border-left: 4px solid #ffc107; margin: 10px 0; color: inherit;'>
                 <h4>I[[SUP2]] Statistic Interpretation:</h4>
                 <p><em>The bands below are Higgins' conventional cut-points from intervention
                 meta-analysis. They are not established thresholds for diagnostic accuracy, where a
@@ -2326,7 +2344,7 @@ diagnosticmetaClass <- R6::R6Class(
                 <li><strong>p < 0.05:</strong> Significant asymmetry - potential publication bias detected</li>
             </ul>
             
-            <div style='background-color: #f8d7da; padding: 15px; border-left: 4px solid #dc3545; margin: 10px 0;'>
+            <div style='background-color: rgba(216, 33, 50, 0.18); padding: 15px; border-left: 4px solid #dc3545; margin: 10px 0; color: inherit;'>
                 <p><strong> When Publication Bias is Detected:</strong></p>
                 <ul>
                     <li>Pooled estimates may be overoptimistic</li>
@@ -2356,7 +2374,7 @@ diagnosticmetaClass <- R6::R6Class(
             <p><strong>Important:</strong> Sensitivity and specificity are test characteristics, but clinicians need predictive values that depend on disease prevalence in their population.</p>
             
             <table style='border-collapse: collapse; width: 100%; margin: 10px 0;'>
-                <tr style='background-color: #f1f1f1;'>
+                <tr style='background-color: rgba(33, 33, 33, 0.06); color: inherit;'>
                     <th style='border: 1px solid #ddd; padding: 8px;'>Disease Prevalence</th>
                     <th style='border: 1px solid #ddd; padding: 8px;'>PPV (Sen=90%, Spe=80%)</th>
                     <th style='border: 1px solid #ddd; padding: 8px;'>NPV (Sen=90%, Spe=80%)</th>
@@ -2391,7 +2409,7 @@ diagnosticmetaClass <- R6::R6Class(
                 <li> <strong>Limitations:</strong> Study quality, missing data, generalizability</li>
             </ul>
             
-            <div style='background-color: #d1ecf1; padding: 15px; border-left: 4px solid #17a2b8; margin: 10px 0;'>
+            <div style='background-color: rgba(33, 163, 188, 0.21); padding: 15px; border-left: 4px solid #17a2b8; margin: 10px 0; color: inherit;'>
                 <p><strong> Pro Tip:</strong> Always interpret meta-analysis results in the context of your specific clinical population and intended use. A test excellent for one application may be inappropriate for another.</p>
             </div>
             "
@@ -2540,7 +2558,7 @@ diagnosticmetaClass <- R6::R6Class(
                     self$results$bivariateresults$setNote("zero_cell_warning", warning_msg)
 
                     correction_disclosure <- sprintf(
-                        "<div style='background-color: #fff3cd; padding: 15px; border-radius: 5px; margin: 10px 0;'>
+                        "<div style='background-color: rgba(255, 202, 33, 0.23); padding: 15px; border-radius: 5px; margin: 10px 0; color: inherit;'>
                             <h5> Zero-Cell Correction Applied</h5>
                             <p><strong>Method:</strong> %s</p>
                             <p><strong>Studies corrected:</strong> %d of %d (%s)</p>
@@ -2555,7 +2573,7 @@ diagnosticmetaClass <- R6::R6Class(
             }
 
             summary_html <- sprintf("
-            <div class='analysis-summary' style='background-color: #e8f4f8; padding: 20px; border-radius: 8px; margin: 10px 0;'>
+            <div class='analysis-summary' style='background-color: rgba(33, 149, 188, 0.1); padding: 20px; border-radius: 8px; margin: 10px 0; color: inherit;'>
                 <h4>Meta-Analysis Summary</h4>
                 <p><strong>Analysis Type:</strong> Diagnostic test accuracy meta-analysis of %d studies</p>
 
@@ -2567,13 +2585,13 @@ diagnosticmetaClass <- R6::R6Class(
 
                 %s
 
-                <div style='background-color: #f8f9fa; padding: 15px; border-radius: 5px; margin: 10px 0;'>
+                <div style='background-color: rgba(138, 155, 172, 0.06); padding: 15px; border-radius: 5px; margin: 10px 0; color: inherit;'>
                     <h5>Clinical Decision Metrics</h5>
                     %s
                     %s
                 </div>
 
-                <div style='background-color: #fff3cd; padding: 15px; border-radius: 5px; margin: 10px 0;'>
+                <div style='background-color: rgba(255, 202, 33, 0.23); padding: 15px; border-radius: 5px; margin: 10px 0; color: inherit;'>
                     <h5>Interpretation Guide</h5>
                     <p>%s</p>
                 </div>
@@ -2581,7 +2599,7 @@ diagnosticmetaClass <- R6::R6Class(
                 <div style='margin-top: 15px;'>
                     <button onclick='navigator.clipboard.writeText(this.getAttribute(\"data-text\"))'
                             data-text='%s'
-                            style='background-color: #007bff; color: white; border: none; padding: 8px 16px; border-radius: 4px; cursor: pointer;'>
+                            style='background-color: #007bff; color: #ffffff; color: white; border: none; padding: 8px 16px; border-radius: 4px; cursor: pointer;'>
                         Copy Summary to Clipboard
                     </button>
                 </div>
@@ -2633,7 +2651,7 @@ diagnosticmetaClass <- R6::R6Class(
             }
 
             summary_html <- sprintf("
-            <div class='analysis-summary' style='background-color: #e8f4f8; padding: 20px; border-radius: 8px; margin: 10px 0;'>
+            <div class='analysis-summary' style='background-color: rgba(33, 149, 188, 0.1); padding: 20px; border-radius: 8px; margin: 10px 0; color: inherit;'>
                 <h4>Meta-Analysis Summary</h4>
                 <p><strong>Analysis Status:</strong> %s</p>
 
@@ -2644,14 +2662,14 @@ diagnosticmetaClass <- R6::R6Class(
                     <p><strong>Sample Size Range:</strong> %d - %d per study</p>
                 </div>
 
-                <div style='background-color: #f8f9fa; padding: 15px; border-radius: 5px; margin: 10px 0;'>
+                <div style='background-color: rgba(138, 155, 172, 0.06); padding: 15px; border-radius: 5px; margin: 10px 0; color: inherit;'>
                     <h5>Individual Study Performance (Descriptive)</h5>
                     <p><strong>Sensitivity:</strong> Mean %.1f%% (Range: %.1f%% - %.1f%%)</p>
                     <p><strong>Specificity:</strong> Mean %.1f%% (Range: %.1f%% - %.1f%%)</p>
                     <p><em>Note: These are simple averages, not meta-analytic pooled estimates.</em></p>
                 </div>
 
-                <div style='background-color: #fff3cd; padding: 15px; border-radius: 5px; margin: 10px 0;'>
+                <div style='background-color: rgba(255, 202, 33, 0.23); padding: 15px; border-radius: 5px; margin: 10px 0; color: inherit;'>
                     <h5>Recommendation</h5>
                     <p>%s</p>
                     <p>Individual study results are available in the table below for detailed examination.</p>
@@ -2854,7 +2872,7 @@ diagnosticmetaClass <- R6::R6Class(
         .populateAboutPanel = function() {
 
             html <- "
-            <div class='about-panel' style='background-color: #f8f9fa; padding: 20px; border-radius: 8px; margin: 10px 0;'>
+            <div class='about-panel' style='background-color: rgba(138, 155, 172, 0.06); padding: 20px; border-radius: 8px; margin: 10px 0; color: inherit;'>
                 <h4> About Diagnostic Test Meta-Analysis</h4>
 
                 <div style='margin: 15px 0;'>
@@ -2868,7 +2886,7 @@ diagnosticmetaClass <- R6::R6Class(
                     </ul>
                 </div>
 
-                <div style='margin: 15px 0; background-color: #e3f2fd; padding: 15px; border-radius: 5px; border-left: 4px solid #2196F3;'>
+                <div style='margin: 15px 0; background-color: rgba(33, 152, 239, 0.13); padding: 15px; border-radius: 5px; border-left: 4px solid #2196F3; color: inherit;'>
                     <h5> Understanding Bivariate and Proportional-Hazards SROC Models</h5>
                     <p><strong>These models answer related questions using different parameterizations:</strong></p>
 
@@ -2903,7 +2921,7 @@ diagnosticmetaClass <- R6::R6Class(
                     </ul>
                 </div>
 
-                <div style='margin: 15px 0; background-color: #fff3cd; padding: 15px; border-radius: 5px;'>
+                <div style='margin: 15px 0; background-color: rgba(255, 202, 33, 0.23); padding: 15px; border-radius: 5px; color: inherit;'>
                     <h5> Key Requirements & Assumptions</h5>
                     <ul>
                         <li>Minimum 3 studies with 2[[TIMES]]2 diagnostic data</li>
@@ -2924,7 +2942,7 @@ diagnosticmetaClass <- R6::R6Class(
                     </ol>
                 </div>
 
-                <div style='background-color: #d1ecf1; padding: 15px; border-radius: 5px; margin: 15px 0;'>
+                <div style='background-color: rgba(33, 163, 188, 0.21); padding: 15px; border-radius: 5px; margin: 15px 0; color: inherit;'>
                     <p><strong> Tip:</strong> Start with the bivariate model and forest plot to understand overall performance, then explore heterogeneity sources with meta-regression if needed.</p>
                 </div>
             </div>
@@ -3034,7 +3052,7 @@ diagnosticmetaClass <- R6::R6Class(
         # Plot explanation functions
         .populateForestPlotExplanation = function() {
             html <- "
-            <div class='plot-explanation' style='background-color: #f8f9fa; padding: 20px; border-radius: 8px; margin: 10px 0;'>
+            <div class='plot-explanation' style='background-color: rgba(138, 155, 172, 0.06); padding: 20px; border-radius: 8px; margin: 10px 0; color: inherit;'>
                 <h4> Forest Plot Interpretation Guide</h4>
 
                 <div style='background-color: white; padding: 15px; border-radius: 5px; margin: 10px 0;'>
@@ -3049,7 +3067,7 @@ diagnosticmetaClass <- R6::R6Class(
                     </ul>
                 </div>
 
-                <div style='background-color: #e8f5e8; padding: 15px; border-radius: 5px; margin: 10px 0;'>
+                <div style='background-color: rgba(33, 159, 33, 0.1); padding: 15px; border-radius: 5px; margin: 10px 0; color: inherit;'>
                     <h5>Clinical Interpretation</h5>
                     <ul>
                         <li><strong>Consistent Results:</strong> Points clustered together = low heterogeneity</li>
@@ -3059,7 +3077,7 @@ diagnosticmetaClass <- R6::R6Class(
                     </ul>
                 </div>
 
-                <div style='background-color: #fff3cd; padding: 15px; border-radius: 5px; margin: 10px 0;'>
+                <div style='background-color: rgba(255, 202, 33, 0.23); padding: 15px; border-radius: 5px; margin: 10px 0; color: inherit;'>
                     <h5> Quick Assessment Tips</h5>
                     <ul>
                         <li>Look for outlier studies (points far from others)</li>
@@ -3076,7 +3094,7 @@ diagnosticmetaClass <- R6::R6Class(
 
         .populateSROCPlotExplanation = function() {
             html <- "
-            <div class='plot-explanation' style='background-color: #f8f9fa; padding: 20px; border-radius: 8px; margin: 10px 0;'>
+            <div class='plot-explanation' style='background-color: rgba(138, 155, 172, 0.06); padding: 20px; border-radius: 8px; margin: 10px 0; color: inherit;'>
                 <h4> Summary ROC Plot Interpretation Guide</h4>
 
                 <div style='background-color: white; padding: 15px; border-radius: 5px; margin: 10px 0;'>
@@ -3093,7 +3111,7 @@ diagnosticmetaClass <- R6::R6Class(
                     </ul>
                 </div>
 
-                <div style='background-color: #fff3cd; padding: 15px; border-radius: 5px; margin: 10px 0;'>
+                <div style='background-color: rgba(255, 202, 33, 0.23); padding: 15px; border-radius: 5px; margin: 10px 0; color: inherit;'>
                     <h5>Confidence region vs prediction region</h5>
                     <p>These answer different questions and are routinely confused. A tight
                     <strong>confidence</strong> region means the pooled estimate is well determined; it says
@@ -3105,7 +3123,7 @@ diagnosticmetaClass <- R6::R6Class(
                     and the pooled point alone should not drive the decision.</p>
                 </div>
 
-                <div style='background-color: #e8f5e8; padding: 15px; border-radius: 5px; margin: 10px 0;'>
+                <div style='background-color: rgba(33, 159, 33, 0.1); padding: 15px; border-radius: 5px; margin: 10px 0; color: inherit;'>
                     <h5>Clinical Interpretation</h5>
                     <ul>
                         <li><strong>Upper Left Corner:</strong> Ideal performance (high sensitivity, low false positive rate)</li>
@@ -3115,7 +3133,7 @@ diagnosticmetaClass <- R6::R6Class(
                     </ul>
                 </div>
 
-                <div style='background-color: #fff3cd; padding: 15px; border-radius: 5px; margin: 10px 0;'>
+                <div style='background-color: rgba(255, 202, 33, 0.23); padding: 15px; border-radius: 5px; margin: 10px 0; color: inherit;'>
                     <h5> Quick Assessment Tips</h5>
                     <ul>
                         <li>Closer to upper-left corner = better overall diagnostic accuracy</li>
@@ -3125,7 +3143,7 @@ diagnosticmetaClass <- R6::R6Class(
                     </ul>
                 </div>
 
-                <div style='background-color: #d1ecf1; padding: 15px; border-radius: 5px; margin: 10px 0;'>
+                <div style='background-color: rgba(33, 163, 188, 0.21); padding: 15px; border-radius: 5px; margin: 10px 0; color: inherit;'>
                     <h5> Clinical Decision Making</h5>
                     <p><strong>Use this plot to:</strong> Visualize test performance trade-offs, identify optimal operating points, and assess consistency across different study populations and settings.</p>
                 </div>
@@ -3137,7 +3155,7 @@ diagnosticmetaClass <- R6::R6Class(
 
         .populateFunnelPlotExplanation = function() {
             html <- "
-            <div class='plot-explanation' style='background-color: #f8f9fa; padding: 20px; border-radius: 8px; margin: 10px 0;'>
+            <div class='plot-explanation' style='background-color: rgba(138, 155, 172, 0.06); padding: 20px; border-radius: 8px; margin: 10px 0; color: inherit;'>
                 <h4> Funnel Plot Interpretation Guide</h4>
 
                 <div style='background-color: white; padding: 15px; border-radius: 5px; margin: 10px 0;'>
@@ -3152,7 +3170,7 @@ diagnosticmetaClass <- R6::R6Class(
                     </ul>
                 </div>
 
-                <div style='background-color: #f8d7da; padding: 15px; border-radius: 5px; margin: 10px 0;'>
+                <div style='background-color: rgba(216, 33, 50, 0.18); padding: 15px; border-radius: 5px; margin: 10px 0; color: inherit;'>
                     <h5> Publication Bias Indicators</h5>
                     <ul>
                         <li><strong>Asymmetric Funnel:</strong> Missing studies on one side (usually left = negative results)</li>
@@ -3161,7 +3179,7 @@ diagnosticmetaClass <- R6::R6Class(
                     </ul>
                 </div>
 
-                <div style='background-color: #d4edda; padding: 15px; border-radius: 5px; margin: 10px 0;'>
+                <div style='background-color: rgba(33, 162, 64, 0.19); padding: 15px; border-radius: 5px; margin: 10px 0; color: inherit;'>
                     <h5> No Bias Indicators</h5>
                     <ul>
                         <li><strong>Symmetric Funnel:</strong> Studies distributed evenly on both sides</li>
@@ -3170,7 +3188,7 @@ diagnosticmetaClass <- R6::R6Class(
                     </ul>
                 </div>
 
-                <div style='background-color: #fff3cd; padding: 15px; border-radius: 5px; margin: 10px 0;'>
+                <div style='background-color: rgba(255, 202, 33, 0.23); padding: 15px; border-radius: 5px; margin: 10px 0; color: inherit;'>
                     <h5> Interpretation Caveats</h5>
                     <ul>
                         <li><strong>Small Sample:</strong> Funnel plot unreliable with <10 studies</li>

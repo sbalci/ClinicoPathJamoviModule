@@ -51,7 +51,7 @@ children:
             label: "Confidence intervals"
           - type: CheckBox
             name: trendline
-            label: "Add linear trend analysis"
+            label: "Linear trend analysis"
 
   - type: CollapseBox
     label: "Clinical Reference"
@@ -66,12 +66,12 @@ children:
           - type: TextBox
             name: refline
             format: number
-            label: "Reference Value"
+            label: "Reference value"
             enable: (showRefline)
           - type: TextBox
             name: reflineLabel
             format: string
-            label: "Reference Label"
+            label: "Reference label"
             enable: (showRefline)
 
   - type: CollapseBox
@@ -119,18 +119,18 @@ children:
           - type: TextBox
             name: title
             format: string
-            label: "Chart Title"
+            label: "Chart title"
       - type: LayoutBox
         margin: large
         children:
           - type: TextBox
             name: xlabel
             format: string
-            label: "X-axis Label"
+            label: "X-axis label"
           - type: TextBox
             name: ylabel
             format: string
-            label: "Y-axis Label"
+            label: "Y-axis label"
 
   - type: CollapseBox
     label: "Plot Size"

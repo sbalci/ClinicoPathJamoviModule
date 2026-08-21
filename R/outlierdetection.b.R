@@ -198,11 +198,11 @@ outlierdetectionClass <- if (requireNamespace("jmvcore")) R6::R6Class("outlierde
         .createHTMLSection = function(title, content, style = "info", icon = NULL) {
             # Helper function to create consistent HTML sections
             styles <- list(
-                info = "background-color: #e3f2fd; color: #1976d2;",
-                warning = "background-color: #fff3e0; color: #f57c00;",
-                error = "background-color: #ffebee; color: #d32f2f;",
-                success = "background-color: #e8f5e9; color: #388e3c;",
-                neutral = "background-color: #f5f5f5; color: #333;"
+                info = "background-color: rgba(33, 152, 239, 0.13); color: inherit; color: inherit;",
+                warning = "background-color: rgba(255, 169, 33, 0.14); color: inherit; color: inherit;",
+                error = "background-color: rgba(255, 33, 67, 0.09); color: inherit; color: #d32f2f;",
+                success = "background-color: rgba(33, 159, 43, 0.1); color: inherit; color: inherit;",
+                neutral = "background-color: rgba(88, 88, 88, 0.06); color: inherit; color: inherit;"
             )
 
             icon_html <- if (!is.null(icon)) paste0(icon, " ") else ""
@@ -231,7 +231,7 @@ outlierdetectionClass <- if (requireNamespace("jmvcore")) R6::R6Class("outlierde
             # Check if required variables have been selected
             if (is.null(self$options$vars) || length(self$options$vars) == 0) {
                 intro_msg <- "
-                <div style='background-color: #e3f2fd; padding: 20px; border-radius: 8px; margin: 20px 0;'>
+                <div style='background-color: rgba(33, 152, 239, 0.13); padding: 20px; border-radius: 8px; margin: 20px 0; color: inherit;'>
                 <h3 style='color: #1976d2; margin-top: 0;'> Welcome to Outlier Detection!</h3>
                 <p><strong>Comprehensive outlier detection using easystats performance package</strong></p>
                 <p>Complements existing ClinicoPath data quality modules with state-of-the-art detection methods</p>
@@ -504,15 +504,26 @@ outlierdetectionClass <- if (requireNamespace("jmvcore")) R6::R6Class("outlierde
                 return()
             }
 
-            # TODO (correctness, ? behavior risk): `as.numeric()` on a factor returns
-            # level indices, not the jamovi values-attribute coding. `vars` is permitted:numeric
-            # in .a.yaml but if a user accidentally selects a factor that gets coerced, all
-            # downstream outlier-detection statistics would be wrong by an unpredictable offset.
-            # Consider guarding with `is.factor(...)` -> skip or reject, or swap to
-            # `jmvcore::toNumeric()`. Needs manual review before swapping (could shift results).
-            # Convert to numeric with safe variable access
+            # Convert to numeric with safe variable access.
+            # A bare as.numeric() on a factor returns LEVEL INDICES (1, 2, 3 ...),
+            # not the labels, so every downstream outlier statistic would be wrong
+            # by an unpredictable offset. `vars` is permitted:[numeric] so the GUI
+            # never sends a factor, but the R API can. Convert through the labels
+            # instead, and reject rather than silently analysing nonsense.
+            # (jmvcore::toNumeric() is not a substitute here -- it is a no-op on
+            # factors and characters, it only unwraps a `values` attribute.)
             for (var in selected_vars) {
-                analysis_data[[var]] <- as.numeric(analysis_data[[var]])
+                column <- analysis_data[[var]]
+                if (is.factor(column))
+                    column <- as.character(column)
+                converted <- suppressWarnings(as.numeric(column))
+                if (all(is.na(converted)) && !all(is.na(column)))
+                    jmvcore::reject(
+                        jmvcore::format(
+                            .("Variable '{var}' is not numeric and could not be converted, so outlier detection cannot run on it. Select a continuous variable."),
+                            var = var),
+                        code = "non_numeric_variable")
+                analysis_data[[var]] <- converted
             }
 
             # Initialize outlier_results variable
@@ -525,7 +536,7 @@ outlierdetectionClass <- if (requireNamespace("jmvcore")) R6::R6Class("outlierde
 
             }, error = function(e) {
                 error_msg <- paste0("
-                <div style='color: #721c24; background-color: #f8d7da; padding: 20px; border-radius: 8px;'>
+                <div style='color: inherit; background-color: rgba(216, 33, 50, 0.18); padding: 20px; border-radius: 8px;'>
                 <h4> Outlier Detection Error</h4>
                 <p><strong>Error:</strong> ", htmltools::htmlEscape(conditionMessage(e)), "</p>
                 <p><strong>Method:</strong> ", self$options$method_category, "</p>
@@ -1076,7 +1087,7 @@ outlierdetectionClass <- if (requireNamespace("jmvcore")) R6::R6Class("outlierde
             sampling_notice <- ""
             if (!is.null(original_n) && original_n != nrow(outlier_df)) {
                 sampling_notice <- paste0(
-                    "<p style='color: #856404; background-color: #fff3cd; padding: 10px; border-radius: 4px;'>",
+                    "<p style='color: inherit; background-color: rgba(255, 202, 33, 0.23); padding: 10px; border-radius: 4px;'>",
                     "<strong> Sampling Applied:</strong> Analysis performed on ", nrow(outlier_df),
                     " randomly sampled observations from the original ", original_n, " observations. ",
                     "Outlier counts and rates shown below refer to the sampled subset.</p>"
@@ -1084,7 +1095,7 @@ outlierdetectionClass <- if (requireNamespace("jmvcore")) R6::R6Class("outlierde
             }
 
             table_html <- paste0(
-                "<div style='background-color: #f8f9fa; padding: 20px; border-radius: 8px; margin-bottom: 20px;'>",
+                "<div style='background-color: rgba(138, 155, 172, 0.06); padding: 20px; border-radius: 8px; margin-bottom: 20px; color: inherit;'>",
                 "<h3 style='color: #495057; margin-top: 0;'> Outlier Detection Results</h3>",
                 "<p><strong>Method:</strong> ", private$.get_method_description(), "</p>",
                 "<p><strong>Total Observations:</strong> ", total_n,
@@ -1125,7 +1136,7 @@ outlierdetectionClass <- if (requireNamespace("jmvcore")) R6::R6Class("outlierde
                     sprintf("Flagged Observations (all %d)", n_flagged)
                 }
                 table_html <- paste0(table_html,
-                    "<div style='background-color: #ffffff; padding: 15px; border-radius: 8px; margin-top: 20px;'>",
+                    "<div style='background-color: rgba(255, 255, 255, 0.06); padding: 15px; border-radius: 8px; margin-top: 20px; color: inherit;'>",
                     "<h4>", heading, "</h4>",
                     "<p style='font-size: 12px; color: #666; margin-top: 0;'>",
                     "Row numbers refer to the original dataset",
@@ -1137,7 +1148,7 @@ outlierdetectionClass <- if (requireNamespace("jmvcore")) R6::R6Class("outlierde
                 )
             } else {
                 table_html <- paste0(table_html,
-                    "<div style='background-color: #ffffff; padding: 15px; border-radius: 8px; margin-top: 20px;'>",
+                    "<div style='background-color: rgba(255, 255, 255, 0.06); padding: 15px; border-radius: 8px; margin-top: 20px; color: inherit;'>",
                     "<p style='margin: 0;'>No observation reached the outlier threshold, ",
                     "so there is nothing to list here.</p></div>"
                 )
@@ -1153,7 +1164,7 @@ outlierdetectionClass <- if (requireNamespace("jmvcore")) R6::R6Class("outlierde
             
             table_html <- "<table style='width: 100%; border-collapse: collapse; font-family: Arial, sans-serif;'>"
             table_html <- paste0(table_html,
-                "<thead><tr style='background-color: #6c757d; color: white;'>",
+                "<thead><tr style='background-color: #6c757d; color: #ffffff; color: white;'>",
                 "<th style='padding: 8px; border: 1px solid #dee2e6;'>Row</th>"
             )
             
@@ -1204,7 +1215,7 @@ outlierdetectionClass <- if (requireNamespace("jmvcore")) R6::R6Class("outlierde
             detailed_data <- outlier_results$outlier_data
             
             comparison_html <- paste0(
-                "<div style='background-color: #e8f5e8; padding: 20px; border-radius: 8px;'>",
+                "<div style='background-color: rgba(33, 159, 33, 0.1); padding: 20px; border-radius: 8px; color: inherit;'>",
                 "<h3 style='color: #2e7d32; margin-top: 0;'> Method Comparison & Composite Breakdown</h3>"
             )
 
@@ -1227,7 +1238,7 @@ outlierdetectionClass <- if (requireNamespace("jmvcore")) R6::R6Class("outlierde
                      comparison_html <- paste0(comparison_html,
                         "<p>The table below shows how many observations were flagged by each individual method included in the composite score.</p>",
                         "<table style='width: 100%; border-collapse: collapse; margin-top: 15px;'>",
-                        "<tr style='background-color: #4caf50; color: white;'>",
+                        "<tr style='background-color: #4caf50; color: #ffffff; color: white;'>",
                         "<th style='padding: 10px; border: 1px solid #ddd;'>Method</th>",
                         "<th style='padding: 10px; border: 1px solid #ddd;'>Outliers Detected</th>",
                         "<th style='padding: 10px; border: 1px solid #ddd;'>Agreement Rate (%)</th>",
@@ -1301,14 +1312,14 @@ outlierdetectionClass <- if (requireNamespace("jmvcore")) R6::R6Class("outlierde
             sampling_note <- ""
             if (!is.null(original_n) && original_n != n_analyzed) {
                 sampling_note <- paste0(
-                    "<p style='color: #856404; background-color: #fff3cd; padding: 10px; border-radius: 4px; margin-bottom: 10px;'>",
+                    "<p style='color: inherit; background-color: rgba(255, 202, 33, 0.23); padding: 10px; border-radius: 4px; margin-bottom: 10px;'>",
                     "<strong> Note:</strong> Statistics below refer to the ", n_analyzed,
                     " sampled observations from the original ", original_n, " observations.</p>"
                 )
             }
 
             exclusion_html <- paste0(
-                "<div style='background-color: #fff3e0; padding: 20px; border-radius: 8px;'>",
+                "<div style='background-color: rgba(255, 169, 33, 0.14); padding: 20px; border-radius: 8px; color: inherit;'>",
                 "<h3 style='color: #ef6c00; margin-top: 0;'> Exclusion Recommendations</h3>",
                 sampling_note,
                 "<table style='width: 100%; border-collapse: collapse;'>",
@@ -1354,7 +1365,7 @@ outlierdetectionClass <- if (requireNamespace("jmvcore")) R6::R6Class("outlierde
             method_category <- self$options$method_category
             
             interpretation_html <- paste0(
-                "<div style='background-color: #e3f2fd; padding: 20px; border-radius: 8px;'>",
+                "<div style='background-color: rgba(33, 152, 239, 0.13); padding: 20px; border-radius: 8px; color: inherit;'>",
                 "<h3 style='color: #1976d2; margin-top: 0;'> Analysis Interpretation Guide</h3>",
                 
                 "<h4 style='color: #1976d2;'>Current Method: ", private$.get_method_description(), "</h4>"
@@ -1591,12 +1602,12 @@ outlierdetectionClass <- if (requireNamespace("jmvcore")) R6::R6Class("outlierde
         },
 
         .generateValidationSummary = function(validation_results) {
-            html_content <- "<div style='background-color: #f8f9fa; padding: 15px; border-radius: 8px; margin: 10px 0;'>"
+            html_content <- "<div style='background-color: rgba(138, 155, 172, 0.06); padding: 15px; border-radius: 8px; margin: 10px 0; color: inherit;'>"
             html_content <- paste0(html_content, "<h4 style='color: #495057; margin-top: 0;'> Data Validation Summary</h4>")
             
             # Add errors
             if (length(validation_results$errors) > 0) {
-                html_content <- paste0(html_content, "<div style='background-color: #f8d7da; padding: 10px; border-radius: 4px; margin: 10px 0;'>")
+                html_content <- paste0(html_content, "<div style='background-color: rgba(216, 33, 50, 0.18); padding: 10px; border-radius: 4px; margin: 10px 0; color: inherit;'>")
                 html_content <- paste0(html_content, "<h5 style='color: #721c24; margin-top: 0;'> Errors (Analysis Stopped)</h5>")
                 html_content <- paste0(html_content, "<ul>")
                 for (error in validation_results$errors) {
@@ -1607,7 +1618,7 @@ outlierdetectionClass <- if (requireNamespace("jmvcore")) R6::R6Class("outlierde
             
             # Add warnings
             if (length(validation_results$warnings) > 0) {
-                html_content <- paste0(html_content, "<div style='background-color: #fff3cd; padding: 10px; border-radius: 4px; margin: 10px 0;'>")
+                html_content <- paste0(html_content, "<div style='background-color: rgba(255, 202, 33, 0.23); padding: 10px; border-radius: 4px; margin: 10px 0; color: inherit;'>")
                 html_content <- paste0(html_content, "<h5 style='color: #856404; margin-top: 0;'> Warnings</h5>")
                 html_content <- paste0(html_content, "<ul>")
                 for (warning in validation_results$warnings) {
@@ -1618,7 +1629,7 @@ outlierdetectionClass <- if (requireNamespace("jmvcore")) R6::R6Class("outlierde
             
             # Add info messages
             if (length(validation_results$info) > 0) {
-                html_content <- paste0(html_content, "<div style='background-color: #d1ecf1; padding: 10px; border-radius: 4px; margin: 10px 0;'>")
+                html_content <- paste0(html_content, "<div style='background-color: rgba(33, 163, 188, 0.21); padding: 10px; border-radius: 4px; margin: 10px 0; color: inherit;'>")
                 html_content <- paste0(html_content, "<h5 style='color: #0c5460; margin-top: 0;'> Information</h5>")
                 html_content <- paste0(html_content, "<ul>")
                 for (info in validation_results$info) {

@@ -223,11 +223,11 @@ NULL
 }
 
 # Helper function to get display name for variables (original name or fallback)
-.getDisplayName <- function(var_name, name_mapping) {
+.survivalDisplayName <- function(var_name, name_mapping) {
     if (is.null(name_mapping) || is.null(var_name) || length(var_name) == 0) {
         return(as.character(var_name))
     }
-    return(name_mapping[var_name] %||% as.character(var_name))
+    return(unname(name_mapping[var_name] %||% as.character(var_name)))
 }
 
 survivalClass <- if (requireNamespace('jmvcore'))
@@ -266,7 +266,7 @@ survivalClass <- if (requireNamespace('jmvcore'))
                 current_content <- self$results[[output_name]]$content
                 if (is.null(current_content)) current_content <- ""
                 new_message <- sprintf(
-                    '<div style="margin: 10px 0; padding: 10px; border-left: 4px solid %s; background-color: #f8f9fa;"><strong>%s:</strong> %s</div>',
+                    '<div style="margin: 10px 0; padding: 10px; border-left: 4px solid %s; background-color: rgba(138, 155, 172, 0.06); color: inherit;"><strong>%s:</strong> %s</div>',
                     border_color,
                     htmltools::htmlEscape(title),
                     htmltools::htmlEscape(message)
@@ -723,41 +723,8 @@ survivalClass <- if (requireNamespace('jmvcore'))
                         message = conditionMessage(e)
                     ))
                 })
-            }
-            
-            # Safe Analysis Wrapper ----
-            ,
-            .safeAnalysis = function(analysis_func, error_message = "Analysis step failed") {
-                # Wrapper for safer analysis execution with better error recovery
-                tryCatch({
-                    analysis_func()
-                    TRUE
-                }, error = function(e) {
-                    # Cleanup memory and reset state on error
-                    gc(verbose = FALSE)
-                    private$.resetErrorState()
-                    warning(paste(error_message, ":", e$message))
-                    FALSE
-                })
             },
             
-            .resetErrorState = function() {
-                # Hide conditional outputs on error to prevent inconsistent state
-                self$results$plot$setVisible(FALSE)
-                self$results$plot2$setVisible(FALSE)
-                self$results$plot3$setVisible(FALSE)
-                self$results$plot6$setVisible(FALSE)
-                self$results$plot7$setVisible(FALSE)
-                self$results$plot8$setVisible(FALSE)
-                self$results$pairwiseTable$setVisible(FALSE)
-                self$results$personTimeTable$setVisible(FALSE)
-                self$results$rmstTable$setVisible(FALSE)
-                # Clear any large objects from memory
-                if (exists('.large_objects', envir = private)) {
-                    rm(.large_objects, envir = private)
-                }
-            },
-
             # FIX: Helper functions for competing risk analysis ----
             # These functions provide proper cumulative incidence function (CIF)
             # support for competing risk scenarios (analysistype = "compete")
@@ -1852,7 +1819,7 @@ survivalClass <- if (requireNamespace('jmvcore'))
                 # Add explanatory output for median survival
                 if (self$options$showExplanations) {
                     median_explanation_html <- '
-                    <div style="margin-bottom: 20px; padding: 15px; background-color: #f0f8ff; border-left: 4px solid #4169e1;">
+                    <div style="margin-bottom: 20px; padding: 15px; background-color: rgba(33, 152, 255, 0.07); border-left: 4px solid #4169e1; color: inherit;">
                         <h4 style="margin-top: 0; color: #2c3e50;">Understanding Median Survival by Groups</h4>
                         <p style="margin-bottom: 10px;">This analysis compares median survival times between different groups in your data:</p>
                         <ul style="margin-left: 20px;">
@@ -2175,7 +2142,7 @@ survivalClass <- if (requireNamespace('jmvcore'))
                 # Add explanatory output for Cox regression
                 if (self$options$showExplanations) {
                     cox_explanation_html <- '
-                    <div style="margin-bottom: 20px; padding: 15px; background-color: #f0f8ff; border-left: 4px solid #4169e1;">
+                    <div style="margin-bottom: 20px; padding: 15px; background-color: rgba(33, 152, 255, 0.07); border-left: 4px solid #4169e1; color: inherit;">
                         <h4 style="margin-top: 0; color: #2c3e50;">Understanding Cox Proportional Hazards Regression</h4>
                         <p style="margin-bottom: 10px;">Cox regression models the relationship between explanatory variables and the hazard (risk) of experiencing the event:</p>
                         <ul style="margin-left: 20px;">
@@ -2337,21 +2304,21 @@ survivalClass <- if (requireNamespace('jmvcore'))
 
                     # Build HTML interpretation
                     html <- paste0(
-                        "<div style='background-color: #f8f9fa; padding: 20px; border-radius: 8px; margin: 10px 0;'>",
+                        "<div style='background-color: rgba(138, 155, 172, 0.06); padding: 20px; border-radius: 8px; margin: 10px 0; color: inherit;'>",
                         "<h4 style='margin-top: 0; color: #2c3e50;'>Proportional Hazards Assessment</h4>"
                     )
 
                     # Status indicator
                     if (ph_violated) {
                         html <- paste0(html,
-                            "<div style='background-color: #fff3cd; border-left: 4px solid #ffc107; padding: 15px; margin: 15px 0; border-radius: 4px;'>",
+                            "<div style='background-color: rgba(255, 202, 33, 0.23); border-left: 4px solid #ffc107; padding: 15px; margin: 15px 0; border-radius: 4px; color: inherit;'>",
                             "<strong style='color: #856404;'> WARNING: Proportional Hazards Assumption May Be Violated</strong><br/>",
                             sprintf("<p style='margin: 10px 0 0 0;'>Global test p-value = %.4f (p < 0.05 suggests violation)</p>", p_value),
                             "</div>"
                         )
                     } else {
                         html <- paste0(html,
-                            "<div style='background-color: #d4edda; border-left: 4px solid #28a745; padding: 15px; margin: 15px 0; border-radius: 4px;'>",
+                            "<div style='background-color: rgba(33, 162, 64, 0.19); border-left: 4px solid #28a745; padding: 15px; margin: 15px 0; border-radius: 4px; color: inherit;'>",
                             "<strong style='color: #155724;'> No Evidence Against the Proportional Hazards Assumption</strong><br/>",
                             sprintf("<p style='margin: 10px 0 0 0;'>Global test p-value = %.4f (p \u2265 0.05)</p>", p_value),
                             "</div>"
@@ -2373,15 +2340,15 @@ survivalClass <- if (requireNamespace('jmvcore'))
                     # Recommendations if violated
                     if (ph_violated) {
                         html <- paste0(html,
-                            "<div style='background-color: #e7f3ff; padding: 15px; border-radius: 4px; margin: 15px 0;'>",
+                            "<div style='background-color: rgba(33, 144, 255, 0.11); padding: 15px; border-radius: 4px; margin: 15px 0; color: inherit;'>",
                             "<h5 style='color: #0056b3; margin-top: 0;'> Recommended Solutions:</h5>",
                             "<ol style='line-height: 1.8; margin: 10px 0;'>",
                             "<li><strong>Stratified Cox Model:</strong> Stratify by '", covariate_name, "' if it has few categories",
-                            "<pre style='background: #fff; padding: 10px; margin: 5px 0; border-left: 3px solid #0056b3;'>",
+                            "<pre style='background-color: rgba(255, 255, 255, 0.06); padding: 10px; margin: 5px 0; border-left: 3px solid #0056b3; color: inherit;'>",
                             "survival::coxph(Surv(time, status) ~ other_vars + strata(", covariate_name, "))",
                             "</pre></li>",
                             "<li><strong>Time-Dependent Coefficients:</strong> Add interaction with time",
-                            "<pre style='background: #fff; padding: 10px; margin: 5px 0; border-left: 3px solid #0056b3;'>",
+                            "<pre style='background-color: rgba(255, 255, 255, 0.06); padding: 10px; margin: 5px 0; border-left: 3px solid #0056b3; color: inherit;'>",
                             "survival::coxph(Surv(time, status) ~ ", covariate_name, " + tt(", covariate_name, "), tt = function(x, t, ...) x * t)",
                             "</pre></li>",
                             "<li><strong>Alternative Approaches:</strong>",
@@ -2395,7 +2362,7 @@ survivalClass <- if (requireNamespace('jmvcore'))
                         )
                     } else {
                         html <- paste0(html,
-                            "<div style='background-color: #e8f5e9; padding: 15px; border-radius: 4px; margin: 15px 0;'>",
+                            "<div style='background-color: rgba(33, 159, 43, 0.1); padding: 15px; border-radius: 4px; margin: 15px 0; color: inherit;'>",
                             "<h5 style='color: #2e7d32; margin-top: 0;'> Next Steps:</h5>",
                             "<p style='margin: 5px 0;'>The test did not detect a departure from proportional hazards. ",
                             "That is absence of evidence, not evidence of absence: a non-significant test is also ",
@@ -2754,7 +2721,7 @@ survivalClass <- if (requireNamespace('jmvcore'))
                 # Get original display name for table title
                 labelled_data <- private$.getData()
                 original_names_mapping <- labelled_data$original_names_mapping
-                title2 <- .getDisplayName(self$options$explanatory, original_names_mapping)
+                title2 <- .survivalDisplayName(self$options$explanatory, original_names_mapping)
 
                 pairwiseTable$setTitle(jmvcore::format(
                     .("Pairwise comparisons: {factor}"),
@@ -2878,7 +2845,7 @@ survivalClass <- if (requireNamespace('jmvcore'))
                 # Get display name for title
                 labelled_data <- private$.getData()
                 original_names_mapping <- labelled_data$original_names_mapping
-                title2 <- .getDisplayName(self$options$explanatory, original_names_mapping)
+                title2 <- .survivalDisplayName(self$options$explanatory, original_names_mapping)
                 table$setTitle(paste0("Weighted Log-Rank Tests - ", title2))
 
                 table$setNote("tests", paste0(
@@ -3120,7 +3087,7 @@ survivalClass <- if (requireNamespace('jmvcore'))
                     # Get display name
                     labelled_data <- private$.getData()
                     original_names_mapping <- labelled_data$original_names_mapping
-                    title2 <- .getDisplayName(self$options$explanatory, original_names_mapping)
+                    title2 <- .survivalDisplayName(self$options$explanatory, original_names_mapping)
 
                     table$setTitle(paste0("Bootstrap Internal Validation - ", title2))
 
@@ -3429,7 +3396,7 @@ survivalClass <- if (requireNamespace('jmvcore'))
                 # Add explanatory output for person-time analysis
                 if (self$options$showExplanations) {
                     person_time_explanation_html <- '
-                    <div style="margin-bottom: 20px; padding: 15px; background-color: #f0f8ff; border-left: 4px solid #4169e1;">
+                    <div style="margin-bottom: 20px; padding: 15px; background-color: rgba(33, 152, 255, 0.07); border-left: 4px solid #4169e1; color: inherit;">
                         <h4 style="margin-top: 0; color: #2c3e50;">Understanding Person-Time Analysis</h4>
                         <p style="margin-bottom: 10px;">Person-time analysis calculates incidence rates by accounting for the total time each patient was at risk:</p>
                         <ul style="margin-left: 20px;">
@@ -3507,7 +3474,7 @@ survivalClass <- if (requireNamespace('jmvcore'))
                 # Get original display name for plot title
                 labelled_data <- private$.getData()
                 original_names_mapping <- labelled_data$original_names_mapping
-                title2 <- .getDisplayName(myfactor, original_names_mapping)
+                title2 <- .survivalDisplayName(myfactor, original_names_mapping)
 
                 plot <- plotData %>%
                     finalfit::surv_plot(
@@ -3586,7 +3553,7 @@ survivalClass <- if (requireNamespace('jmvcore'))
                 # Get original display name for plot title
                 labelled_data <- private$.getData()
                 original_names_mapping <- labelled_data$original_names_mapping
-                title2 <- .getDisplayName(myfactor, original_names_mapping)
+                title2 <- .survivalDisplayName(myfactor, original_names_mapping)
 
                 plot2 <- plotData %>%
                     finalfit::surv_plot(
@@ -3663,7 +3630,7 @@ survivalClass <- if (requireNamespace('jmvcore'))
                 # Get original display name for plot title
                 labelled_data <- private$.getData()
                 original_names_mapping <- labelled_data$original_names_mapping
-                title2 <- .getDisplayName(myfactor, original_names_mapping)
+                title2 <- .survivalDisplayName(myfactor, original_names_mapping)
 
                 plot3 <- plotData %>%
                     finalfit::surv_plot(
@@ -3739,7 +3706,7 @@ survivalClass <- if (requireNamespace('jmvcore'))
                 # Get original display name for plot title
                 labelled_data <- private$.getData()
                 original_names_mapping <- labelled_data$original_names_mapping
-                title2 <- .getDisplayName(myfactor, original_names_mapping)
+                title2 <- .survivalDisplayName(myfactor, original_names_mapping)
 
                 # Create log-log plot
                 tryCatch({
@@ -3842,7 +3809,7 @@ survivalClass <- if (requireNamespace('jmvcore'))
                 # Get original display name for plot title
                 labelled_data <- private$.getData()
                 original_names_mapping <- labelled_data$original_names_mapping
-                title2 <- .getDisplayName(myfactor, original_names_mapping)
+                title2 <- .survivalDisplayName(myfactor, original_names_mapping)
 
 
                 myformula <- .asSurvivalFormula(private$.buildSurvFormula(mytime, myoutcome, myfactor))
@@ -4008,13 +3975,13 @@ survivalClass <- if (requireNamespace('jmvcore'))
                 
                 # Median Survival Explanation
                 private$.setExplanationContent("medianSurvivalExplanation", '
-                <div style="margin-bottom: 20px; padding: 15px; background-color: #e8f4f8; border-left: 4px solid #17a2b8;">
+                <div style="margin-bottom: 20px; padding: 15px; background-color: rgba(33, 149, 188, 0.1); border-left: 4px solid #17a2b8; color: inherit;">
                     <h4> Understanding Your Median Survival Results</h4>
                     <p><strong>What is Median Survival?</strong> The median survival time tells you when half of your study population experienced the event you are studying.</p>
                     
                     <h5> How to Read Your Results:</h5>
                     <table style="width:100%; margin: 10px 0;">
-                        <tr style="background-color: #f8f9fa;">
+                        <tr style="background-color: rgba(138, 155, 172, 0.06); color: inherit;">
                             <td style="padding: 5px;"><strong>Records</strong></td>
                             <td style="padding: 5px;">Total number of patients in your study group</td>
                         </tr>
@@ -4022,7 +3989,7 @@ survivalClass <- if (requireNamespace('jmvcore'))
                             <td style="padding: 5px;"><strong>Events</strong></td>
                             <td style="padding: 5px;">Number of patients who experienced the outcome (e.g., death, recurrence)</td>
                         </tr>
-                        <tr style="background-color: #f8f9fa;">
+                        <tr style="background-color: rgba(138, 155, 172, 0.06); color: inherit;">
                             <td style="padding: 5px;"><strong>Median</strong></td>
                             <td style="padding: 5px;">The time when 50% of patients had the event</td>
                         </tr>
@@ -4030,7 +3997,7 @@ survivalClass <- if (requireNamespace('jmvcore'))
                             <td style="padding: 5px;"><strong>95% CI</strong></td>
                             <td style="padding: 5px;">Range of median values compatible with the data (over repeated studies, 95% of such intervals contain the true median)</td>
                         </tr>
-                        <tr style="background-color: #f8f9fa;">
+                        <tr style="background-color: rgba(138, 155, 172, 0.06); color: inherit;">
                             <td style="padding: 5px;"><strong>Not Reached (NR)</strong></td>
                             <td style="padding: 5px;">Fewer than half the patients had the event during the observed follow-up. This may mean long survival, but short follow-up or heavy censoring gives the same result.</td>
                         </tr>
@@ -4055,7 +4022,7 @@ survivalClass <- if (requireNamespace('jmvcore'))
                 
                 # Cox Regression Explanation
                 private$.setExplanationContent("coxRegressionExplanation", '
-                <div style="margin-bottom: 20px; padding: 15px; background-color: #fff3cd; border-left: 4px solid #ffc107;">
+                <div style="margin-bottom: 20px; padding: 15px; background-color: rgba(255, 202, 33, 0.23); border-left: 4px solid #ffc107; color: inherit;">
                     <h4> Understanding Your Cox Regression Results</h4>
                     <p><strong>What is Cox Regression?</strong> This analysis compares the risk of experiencing an event between different groups, adjusting for time.</p>
                     
@@ -4063,7 +4030,7 @@ survivalClass <- if (requireNamespace('jmvcore'))
                     <p>The hazard ratio tells you how much more (or less) likely one group is to experience the event compared to another.</p>
                     
                     <table style="width:100%; margin: 10px 0; border-collapse: collapse;">
-                        <tr style="background-color: #f8f9fa;">
+                        <tr style="background-color: rgba(138, 155, 172, 0.06); color: inherit;">
                             <th style="padding: 8px; text-align: left;">HR Value</th>
                             <th style="padding: 8px; text-align: left;">Meaning</th>
                             <th style="padding: 8px; text-align: left;">Plain English</th>
@@ -4073,22 +4040,22 @@ survivalClass <- if (requireNamespace('jmvcore'))
                             <td style="padding: 8px; border-top: 1px solid #dee2e6;">No difference</td>
                             <td style="padding: 8px; border-top: 1px solid #dee2e6;">Groups have equal risk</td>
                         </tr>
-                        <tr style="background-color: #ffebee;">
+                        <tr style="background-color: rgba(255, 33, 67, 0.09); color: inherit;">
                             <td style="padding: 8px;"><strong>HR = 2.0</strong></td>
                             <td style="padding: 8px;">Twice the hazard</td>
                             <td style="padding: 8px;">Event rate is 2\u00d7 as high at any given moment</td>
                         </tr>
-                        <tr style="background-color: #e8f5e9;">
+                        <tr style="background-color: rgba(33, 159, 43, 0.1); color: inherit;">
                             <td style="padding: 8px;"><strong>HR = 0.5</strong></td>
                             <td style="padding: 8px;">Half the hazard</td>
                             <td style="padding: 8px;">Event rate is half as high at any given moment</td>
                         </tr>
-                        <tr style="background-color: #ffebee;">
+                        <tr style="background-color: rgba(255, 33, 67, 0.09); color: inherit;">
                             <td style="padding: 8px;"><strong>HR = 3.0</strong></td>
                             <td style="padding: 8px;">Three times the hazard</td>
                             <td style="padding: 8px;">Event rate is 3\u00d7 as high at any given moment</td>
                         </tr>
-                        <tr style="background-color: #e8f5e9;">
+                        <tr style="background-color: rgba(33, 159, 43, 0.1); color: inherit;">
                             <td style="padding: 8px;"><strong>HR = 0.25</strong></td>
                             <td style="padding: 8px;">Quarter the hazard</td>
                             <td style="padding: 8px;">Event rate is one quarter as high at any given moment</td>
@@ -4104,7 +4071,7 @@ survivalClass <- if (requireNamespace('jmvcore'))
                     
                     <h5> Clinical Example:</h5>
                     <p>If Treatment A vs Treatment B shows HR = 0.60 (95% CI: 0.40-0.85, p=0.004):</p>
-                    <ul style="background-color: #e8f5e9; padding: 10px; border-radius: 5px;">
+                    <ul style="background-color: rgba(33, 159, 43, 0.1); padding: 10px; border-radius: 5px; color: inherit;">
                         <li>Treatment A has 0.60 times the hazard of Treatment B at any moment - a relative rate, not a 40% cut in cumulative risk</li>
                         <li>The result is statistically significant (p < 0.05 and CI excludes 1.0)</li>
                         <li>The interval 0.40 to 0.85 is the range of hazard ratios compatible with the data; it does not translate directly into a cumulative risk difference</li>
@@ -4121,13 +4088,13 @@ survivalClass <- if (requireNamespace('jmvcore'))
                 
                 # Survival Tables Explanation
                 private$.setExplanationContent("survivalTablesExplanation", '
-                <div style="margin-bottom: 20px; padding: 15px; background-color: #d4edda; border-left: 4px solid #28a745;">
+                <div style="margin-bottom: 20px; padding: 15px; background-color: rgba(33, 162, 64, 0.19); border-left: 4px solid #28a745; color: inherit;">
                     <h4> Understanding Your Survival Probability Tables</h4>
                     <p><strong>What are Survival Tables?</strong> These tables show the percentage of patients surviving at key time points, which are standard benchmarks in medical research.</p>
                     
                     <h5> How to Read the Table Columns:</h5>
                     <table style="width:100%; margin: 10px 0; border-collapse: collapse;">
-                        <tr style="background-color: #f8f9fa;">
+                        <tr style="background-color: rgba(138, 155, 172, 0.06); color: inherit;">
                             <th style="padding: 8px; text-align: left;">Column</th>
                             <th style="padding: 8px; text-align: left;">What It Means</th>
                             <th style="padding: 8px; text-align: left;">Example</th>
@@ -4137,7 +4104,7 @@ survivalClass <- if (requireNamespace('jmvcore'))
                             <td style="padding: 8px; border-top: 1px solid #dee2e6;">Time point of measurement</td>
                             <td style="padding: 8px; border-top: 1px solid #dee2e6;">12 months (1 year)</td>
                         </tr>
-                        <tr style="background-color: #f8f9fa;">
+                        <tr style="background-color: rgba(138, 155, 172, 0.06); color: inherit;">
                             <td style="padding: 8px;"><strong>n.risk</strong></td>
                             <td style="padding: 8px;">Patients still being followed</td>
                             <td style="padding: 8px;">85 of 100 still in study</td>
@@ -4147,7 +4114,7 @@ survivalClass <- if (requireNamespace('jmvcore'))
                             <td style="padding: 8px;">Cumulative events occurred</td>
                             <td style="padding: 8px;">15 events by this time</td>
                         </tr>
-                        <tr style="background-color: #f8f9fa;">
+                        <tr style="background-color: rgba(138, 155, 172, 0.06); color: inherit;">
                             <td style="padding: 8px;"><strong>survival</strong></td>
                             <td style="padding: 8px;">% surviving past this time</td>
                             <td style="padding: 8px;">85% still event-free</td>
@@ -4160,7 +4127,7 @@ survivalClass <- if (requireNamespace('jmvcore'))
                     </table>
                     
                     <h5> Common Medical Benchmarks:</h5>
-                    <div style="background-color: #e3f2fd; padding: 10px; border-radius: 5px; margin: 10px 0;">
+                    <div style="background-color: rgba(33, 152, 239, 0.13); padding: 10px; border-radius: 5px; margin: 10px 0; color: inherit;">
                         <ul style="margin: 5px 0;">
                             <li><strong>1-year survival:</strong> Short-term prognosis indicator</li>
                             <li><strong>3-year survival:</strong> Medium-term outcome measure</li>
@@ -4171,7 +4138,7 @@ survivalClass <- if (requireNamespace('jmvcore'))
                     
                     <h5> Practical Example:</h5>
                     <p>If your table shows:</p>
-                    <table style="background-color: #f8f9fa; padding: 5px; margin: 10px 0;">
+                    <table style="background-color: rgba(138, 155, 172, 0.06); padding: 5px; margin: 10px 0; color: inherit;">
                         <tr>
                             <td>5-year survival = 72% (95% CI: 65-79%)</td>
                         </tr>
@@ -4195,7 +4162,7 @@ survivalClass <- if (requireNamespace('jmvcore'))
                 
                 # Person-Time Analysis Explanation
                 private$.setExplanationContent("personTimeExplanation", '
-                <div style="margin-bottom: 20px; padding: 15px; background-color: #f8d7da; border-left: 4px solid #dc3545;">
+                <div style="margin-bottom: 20px; padding: 15px; background-color: rgba(216, 33, 50, 0.18); border-left: 4px solid #dc3545; color: inherit;">
                     <h4>Understanding Person-Time Analysis</h4>
                     <p><strong>Person-Time:</strong> Accounts for varying follow-up durations by calculating total observation time.</p>
                     <ul>
@@ -4210,7 +4177,7 @@ survivalClass <- if (requireNamespace('jmvcore'))
                 
                 # RMST Explanation
                 private$.setExplanationContent("rmstExplanation", '
-                <div style="margin-bottom: 20px; padding: 15px; background-color: #e2e3e5; border-left: 4px solid #6c757d;">
+                <div style="margin-bottom: 20px; padding: 15px; background-color: rgba(33, 41, 56, 0.13); border-left: 4px solid #6c757d; color: inherit;">
                     <h4>Understanding Restricted Mean Survival Time (RMST)</h4>
                     <p><strong>RMST:</strong> Average survival time up to a specified time horizon (\u03c4).</p>
                     <ul>
@@ -4225,7 +4192,7 @@ survivalClass <- if (requireNamespace('jmvcore'))
                 
                 # Residual Diagnostics Explanation
                 private$.setExplanationContent("residualDiagnosticsExplanation", '
-                <div style="margin-bottom: 20px; padding: 15px; background-color: #ffeaa7; border-left: 4px solid #fdcb6e;">
+                <div style="margin-bottom: 20px; padding: 15px; background-color: rgba(255, 202, 33, 0.4); border-left: 4px solid #fdcb6e; color: inherit;">
                     <h4>Understanding Cox Model Residual Diagnostics</h4>
                     <p><strong>Model Residuals:</strong> Help assess model fit and identify potential problems.</p>
                     <ul>
@@ -4240,13 +4207,13 @@ survivalClass <- if (requireNamespace('jmvcore'))
                 
                 # Survival Plots Explanation
                 private$.setExplanationContent("survivalPlotsExplanation", '
-                <div style="margin-bottom: 20px; padding: 15px; background-color: #d1ecf1; border-left: 4px solid #bee5eb;">
+                <div style="margin-bottom: 20px; padding: 15px; background-color: rgba(33, 163, 188, 0.21); border-left: 4px solid #bee5eb; color: inherit;">
                     <h4> Understanding Your Survival Curves and Plots</h4>
                     <p><strong>What are Survival Curves?</strong> These graphs show how the probability of survival changes over time for different groups.</p>
                     
                     <h5> Types of Plots Available:</h5>
                     <table style="width:100%; margin: 10px 0; border-collapse: collapse;">
-                        <tr style="background-color: #f8f9fa;">
+                        <tr style="background-color: rgba(138, 155, 172, 0.06); color: inherit;">
                             <th style="padding: 8px; text-align: left;">Plot Type</th>
                             <th style="padding: 8px; text-align: left;">What It Shows</th>
                             <th style="padding: 8px; text-align: left;">When to Use</th>
@@ -4256,7 +4223,7 @@ survivalClass <- if (requireNamespace('jmvcore'))
                             <td style="padding: 8px; border-top: 1px solid #dee2e6;">% surviving over time</td>
                             <td style="padding: 8px; border-top: 1px solid #dee2e6;">Standard presentation</td>
                         </tr>
-                        <tr style="background-color: #f8f9fa;">
+                        <tr style="background-color: rgba(138, 155, 172, 0.06); color: inherit;">
                             <td style="padding: 8px;"><strong>Cumulative Events</strong></td>
                             <td style="padding: 8px;">% experiencing event</td>
                             <td style="padding: 8px;">Focus on event occurrence</td>
@@ -4266,7 +4233,7 @@ survivalClass <- if (requireNamespace('jmvcore'))
                             <td style="padding: 8px;">Accumulated risk</td>
                             <td style="padding: 8px;">Technical assessment</td>
                         </tr>
-                        <tr style="background-color: #f8f9fa;">
+                        <tr style="background-color: rgba(138, 155, 172, 0.06); color: inherit;">
                             <td style="padding: 8px;"><strong>Log-Log Plot</strong></td>
                             <td style="padding: 8px;">Model assumptions</td>
                             <td style="padding: 8px;">Check proportional hazards</td>
@@ -4274,7 +4241,7 @@ survivalClass <- if (requireNamespace('jmvcore'))
                     </table>
                     
                     <h5> How to Read Survival Curves:</h5>
-                    <div style="background-color: #fff3cd; padding: 10px; border-radius: 5px; margin: 10px 0;">
+                    <div style="background-color: rgba(255, 202, 33, 0.23); padding: 10px; border-radius: 5px; margin: 10px 0; color: inherit;">
                         <ul style="margin: 5px 0;">
                             <li><strong>Y-axis (0-1 or 0-100%):</strong> Probability of survival</li>
                             <li><strong>X-axis:</strong> Time since study start</li>
@@ -4287,23 +4254,23 @@ survivalClass <- if (requireNamespace('jmvcore'))
                     <h5> What to Look For:</h5>
                     <table style="width:100%; margin: 10px 0;">
                         <tr>
-                            <td style="padding: 8px; background-color: #e8f5e9;"><strong> Curves separate early</strong></td>
+                            <td style="padding: 8px; background-color: rgba(33, 159, 43, 0.1); color: inherit;"><strong> Curves separate early</strong></td>
                             <td style="padding: 8px;">Groups differ significantly</td>
                         </tr>
                         <tr>
-                            <td style="padding: 8px; background-color: #ffebee;"><strong> Curves overlap</strong></td>
+                            <td style="padding: 8px; background-color: rgba(255, 33, 67, 0.09); color: inherit;"><strong> Curves overlap</strong></td>
                             <td style="padding: 8px;">No significant difference</td>
                         </tr>
                         <tr>
-                            <td style="padding: 8px; background-color: #e3f2fd;"><strong> Curves cross</strong></td>
+                            <td style="padding: 8px; background-color: rgba(33, 152, 239, 0.13); color: inherit;"><strong> Curves cross</strong></td>
                             <td style="padding: 8px;">Effect changes over time</td>
                         </tr>
                         <tr>
-                            <td style="padding: 8px; background-color: #fff3cd;"><strong> Steep drop</strong></td>
+                            <td style="padding: 8px; background-color: rgba(255, 202, 33, 0.23); color: inherit;"><strong> Steep drop</strong></td>
                             <td style="padding: 8px;">High early event rate</td>
                         </tr>
                         <tr>
-                            <td style="padding: 8px; background-color: #f3e5f5;"><strong>\u2192 Flat plateau</strong></td>
+                            <td style="padding: 8px; background-color: rgba(153, 33, 170, 0.12); color: inherit;"><strong>\u2192 Flat plateau</strong></td>
                             <td style="padding: 8px;">Stable period (few events)</td>
                         </tr>
                     </table>
@@ -4328,7 +4295,7 @@ survivalClass <- if (requireNamespace('jmvcore'))
                 
                 # Parametric Models Explanation
                 private$.setExplanationContent("parametricModelsExplanation", '
-                <div style="margin-bottom: 20px; padding: 15px; background-color: #f8d7da; border-left: 4px solid #dc3545;">
+                <div style="margin-bottom: 20px; padding: 15px; background-color: rgba(216, 33, 50, 0.18); border-left: 4px solid #dc3545; color: inherit;">
                     <h4>Understanding Parametric Survival Models</h4>
                     <p><strong>Parametric Models:</strong> Alternative to Cox regression with explicit hazard function shapes.</p>
                     <ul>
@@ -4528,15 +4495,15 @@ survivalClass <- if (requireNamespace('jmvcore'))
                                            ci_lower < 1 && ci_upper > 1
 
                             clinical_meaning <- jmvcore::format(
-                                .("{comparison}: hazard ratio {hr} (95% CI {lower} to {upper}, {stats}) - {direction} in the compared group relative to the reference. The hazard ratio is a relative rate, not a cumulative risk difference; the absolute benefit or harm depends on the baseline risk, the endpoint and the length of follow-up.{ci_note}"),
+                                .("{comparison}: hazard ratio {hr} (95% CI {lower} to {upper}, {stats}) - {direction} in the compared group relative to the reference. The hazard ratio is a relative rate, not a cumulative risk difference; the absolute benefit or harm depends on the baseline risk, the endpoint and the length of follow-up.{cinote}"),
                                 comparison = comparison,
                                 hr = round(hr, 2),
                                 lower = round(ci_lower, 2),
                                 upper = round(ci_upper, 2),
                                 stats = statistical_context,
                                 direction = direction,
-                                ci_note = if (crosses_one)
-                                    .(" The confidence interval includes 1, so the data are compatible with no difference.") else ""
+                                cinote = if (crosses_one)
+                                    paste0(" ", .("The confidence interval includes 1, so the data are compatible with no difference.")) else ""
                             )
 
                             interpretations[[paste("cox", gsub(" ", "_", comparison))]] <- clinical_meaning
@@ -4550,7 +4517,7 @@ survivalClass <- if (requireNamespace('jmvcore'))
             ,
             .generateClinicalGlossary = function() {
                 glossary_html <- '
-                <div style="margin-bottom: 20px; padding: 15px; background-color: #f8f9fa; border-left: 4px solid #6c757d;">
+                <div style="margin-bottom: 20px; padding: 15px; background-color: rgba(138, 155, 172, 0.06); border-left: 4px solid #6c757d; color: inherit;">
                     <h4> Clinical Terminology Glossary</h4>
                     
                     <div style="display: grid; gap: 10px; margin-top: 15px;">
@@ -4871,7 +4838,7 @@ survivalClass <- if (requireNamespace('jmvcore'))
                 # Add Enhanced Clinical Interpretation
                 if (self$options$showSummaries && length(clinical_interpretations) > 0) {
                     interpretation_html <- paste(
-                        '<div style="margin-bottom: 20px; padding: 15px; background-color: #e8f4fd; border-left: 4px solid #007bff;">',
+                        '<div style="margin-bottom: 20px; padding: 15px; background-color: rgba(33, 149, 236, 0.1); border-left: 4px solid #007bff; color: inherit;">',
                         '<h4> Clinical Interpretation</h4>',
                         paste(lapply(clinical_interpretations, function(x) paste('<p>', htmltools::htmlEscape(x), '</p>')), collapse = ""),
                         '</div>'
@@ -4884,13 +4851,13 @@ survivalClass <- if (requireNamespace('jmvcore'))
                 
                 # Add Copy-Ready Clinical Report Sentences
                 if (self$options$showSummaries && length(copy_sentences) > 0) {
-                    copy_html <- '<div style="margin-bottom: 20px; padding: 15px; background-color: #fff3cd; border-left: 4px solid #ffc107;"><h4> Copy-Ready Clinical Report Sentences</h4>'
+                    copy_html <- '<div style="margin-bottom: 20px; padding: 15px; background-color: rgba(255, 202, 33, 0.23); border-left: 4px solid #ffc107; color: inherit;"><h4> Copy-Ready Clinical Report Sentences</h4>'
                     
                     for (section_name in names(copy_sentences)) {
                         copy_html <- paste0(copy_html, '<h5>', tools::toTitleCase(gsub("_", " ", section_name)), ':</h5><div style="background-color: white; padding: 10px; border-radius: 5px; margin: 10px 0;">')
                         
                         for (sentence in copy_sentences[[section_name]]) {
-                            copy_html <- paste0(copy_html, '<p style="margin: 5px 0; padding: 5px; background-color: #f8f9fa; border-radius: 3px;">', htmltools::htmlEscape(sentence), '</p>')
+                            copy_html <- paste0(copy_html, '<p style="margin: 5px 0; padding: 5px; background-color: rgba(138, 155, 172, 0.06); border-radius: 3px; color: inherit;">', htmltools::htmlEscape(sentence), '</p>')
                         }
                         
                         copy_html <- paste0(copy_html, '</div>')
@@ -5180,7 +5147,7 @@ survivalClass <- if (requireNamespace('jmvcore'))
                             "<li><strong>C-index</strong>: Discrimination ability (0.5 = random, 1.0 = perfect). ",
                             "Note: good discrimination does not guarantee good calibration.</li>",
                             "</ul>",
-                            "<div style='background-color: #E8F5E9; padding: 12px; border-left: 4px solid #4CAF50; margin-top: 15px;'>",
+                            "<div style='background-color: rgba(33, 159, 43, 0.1); padding: 12px; border-left: 4px solid #4CAF50; margin-top: 15px; color: inherit;'>",
                             "<strong>Clinical note:</strong> For survival models used to guide treatment decisions, ",
                             "calibration is as important as discrimination. A well-discriminating model that is ",
                             "poorly calibrated may systematically over- or under-estimate risk, leading to inappropriate ",
@@ -5395,7 +5362,7 @@ survivalClass <- if (requireNamespace('jmvcore'))
                             "<p>The hazard ratio curve shows how the relative risk changes across values of ", rcs_var,
                             ", with the reference point at the median value (", round(var_median, 1),
                             "). A flat line would indicate a constant HR (linear on log-HR scale).</p>",
-                            "<div style='background-color: #FFF3E0; padding: 12px; border-left: 4px solid #FF9800; margin-top: 15px;'>",
+                            "<div style='background-color: rgba(255, 169, 33, 0.14); padding: 12px; border-left: 4px solid #FF9800; margin-top: 15px; color: inherit;'>",
                             "<strong>Clinical note:</strong> Non-linear effects are common for continuous variables ",
                             "like age (J-shaped mortality), tumor size (threshold effects), and biomarker levels. ",
                             "If non-linearity is significant, reporting only a single HR per unit increase is misleading. ",
@@ -6710,7 +6677,7 @@ survivalClass <- if (requireNamespace('jmvcore'))
                 html_parts <- list("<h3>REMARK Reporting Checklist</h3>")
                 html_parts <- c(html_parts, "<p><small>Based on McShane LM et al. <i>JNCI</i> 2005;97(16):1180-1184</small></p>")
                 html_parts <- c(html_parts, "<table style='border-collapse: collapse; width: 100%; font-size: 0.9em;'>")
-                html_parts <- c(html_parts, "<tr style='background: #f0f0f0;'><th style='padding: 6px; text-align: left; border: 1px solid #ddd;'>Item</th><th style='padding: 6px; text-align: left; border: 1px solid #ddd;'>Status</th><th style='padding: 6px; text-align: left; border: 1px solid #ddd;'>Note</th></tr>")
+                html_parts <- c(html_parts, "<tr style='background-color: rgba(33, 33, 33, 0.07); color: inherit;'><th style='padding: 6px; text-align: left; border: 1px solid #ddd;'>Item</th><th style='padding: 6px; text-align: left; border: 1px solid #ddd;'>Status</th><th style='padding: 6px; text-align: left; border: 1px solid #ddd;'>Note</th></tr>")
 
                 for (item in items) {
                     icon <- switch(item$status,

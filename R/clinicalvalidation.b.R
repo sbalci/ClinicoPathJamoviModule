@@ -1160,7 +1160,7 @@ clinicalvalidationClass <- R6::R6Class(
         "</ul>",
         "<h3>Performance Summary</h3>",
         "<table border='1' style='border-collapse: collapse; width: 100%; margin: 10px 0;'>",
-        "<tr style='background: #f0f0f0;'><th>Metric</th><th>Value</th><th>Interpretation</th></tr>",
+        "<tr style='background-color: rgba(33, 33, 33, 0.07); color: inherit;'><th>Metric</th><th>Value</th><th>Interpretation</th></tr>",
         "<tr><td>AUC (Discrimination)</td><td>", sprintf("%.3f%s", perf$auc, ci_text), "</td><td>", interp$auc %||% "", "</td></tr>",
         "<tr><td>Sensitivity</td><td>", sprintf("%.1f%%", perf$sensitivity * 100), "</td><td>", interp$sensitivity %||% "", "</td></tr>",
         "<tr><td>Specificity</td><td>", sprintf("%.1f%%", perf$specificity * 100), "</td><td>Correctly identifies true negatives</td></tr>",
@@ -1207,7 +1207,7 @@ clinicalvalidationClass <- R6::R6Class(
       html <- paste0(
         html,
         "<h3>Copy-Ready Report Text</h3>",
-        "<div style='background: #f9f9f9; border-left: 4px solid #007bff; padding: 15px; margin: 10px 0;'>",
+        "<div style='background-color: rgba(155, 155, 155, 0.06); border-left: 4px solid #007bff; padding: 15px; margin: 10px 0; color: inherit;'>",
         "<p><strong>Methods:</strong> We developed a ", model_results$model_type, " model to predict ", outcome_esc,
         " using ", length(self$options$predictors), " predictor variables (", predictors_esc,
         ") in ", nobs(model_results$model), " patients. Model performance was assessed using ", self$options$validation_method,

@@ -103,7 +103,7 @@ jjbetweenstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             if (!is.null(private$.accumulated_messages) && length(private$.accumulated_messages) > 0) {
                 body <- paste(private$.accumulated_messages, collapse = "")
                 private$.diagnosticsHtml <- paste0(
-                    "<div style='padding: 12px 15px; background-color: #eef2f7; ",
+                    "<div style='padding: 12px 15px; background-color: rgba(33, 85, 151, 0.08); color: inherit; ",
                     "border-left: 4px solid #6c757d; margin: 10px 0;'>",
                     "<strong>Data Diagnostics &amp; Assumptions</strong>", body, "</div>"
                 )
@@ -475,7 +475,7 @@ jjbetweenstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             else
                 .("See the plot subtitle for the test statistic, p-value, and effect size.")
             clinical_text <- sprintf(
-                .("<div style='padding: 12px 15px; background-color: #eef7ee; border-left: 4px solid #28a745; margin: 10px 0;'><h4 style='margin-top:0;'>Results Summary</h4><p>%s comparing %s across %d group(s) (n = %d). %s</p></div>"),
+                .("<div style='padding: 12px 15px; background-color: rgba(33, 151, 33, 0.08); border-left: 4px solid #28a745; margin: 10px 0; color: inherit;'><h4 style='margin-top:0;'>Results Summary</h4><p>%s comparing %s across %d group(s) (n = %d). %s</p></div>"),
                 test_name,
                 vars,
                 n_groups,
@@ -938,7 +938,7 @@ jjbetweenstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             diag_html <- if (nzchar(diag_html))
                 sub("</div>$", paste0(sub_html, "</div>"), diag_html)
             else paste0(
-                "<div style='padding: 12px 15px; background-color: #eef2f7; ",
+                "<div style='padding: 12px 15px; background-color: rgba(33, 85, 151, 0.08); color: inherit; ",
                 "border-left: 4px solid #6c757d; margin: 10px 0;'>",
                 "<strong>Data Diagnostics &amp; Assumptions</strong>", sub_html, "</div>")
         }
@@ -951,7 +951,7 @@ jjbetweenstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 },
 .generateAboutContent = function() {
     about_content <- paste0(
-        "<div style='padding: 15px; background-color: #f8f9fa; border-left: 4px solid #007bff; margin: 10px 0;'>",
+        "<div style='padding: 15px; background-color: rgba(138, 155, 172, 0.06); border-left: 4px solid #007bff; margin: 10px 0; color: inherit;'>",
         "<h4 style='color: #007bff; margin-top: 0;'> About Between-Group Comparison</h4>",
         "<p><strong>Purpose:</strong> Compare a continuous variable across different groups to identify significant differences.</p>",
         "<p><strong>When to Use:</strong></p>",
@@ -998,7 +998,7 @@ jjbetweenstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
     }
 
     summary_content <- paste0(
-        "<div style='padding: 15px; background-color: #e8f5e8; border-left: 4px solid #28a745; margin: 10px 0;'>",
+        "<div style='padding: 15px; background-color: rgba(33, 159, 33, 0.1); border-left: 4px solid #28a745; margin: 10px 0; color: inherit;'>",
         "<h4 style='color: #28a745; margin-top: 0;'> Analysis Summary</h4>",
         "<p><strong>Variables Analyzed:</strong> ", dep_vars, " by ", htmltools::htmlEscape(self$options$group), "</p>",
         multi_var_note,  # Add multi-variable clarification
@@ -1034,7 +1034,7 @@ jjbetweenstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
     multi_endpoint_note <- ""
     if (length(self$options$dep) > 1) {
         multi_endpoint_note <- paste0(
-            "<div style='background-color: #ffe5e5; border-left: 4px solid #dc3545; padding: 10px; margin: 10px 0;'>",
+            "<div style='background-color: rgba(255, 33, 33, 0.12); border-left: 4px solid #dc3545; padding: 10px; margin: 10px 0; color: inherit;'>",
             "<p><strong> Multiple Endpoint Testing:</strong> You are analyzing ",
             length(self$options$dep), " dependent variables. Each test uses the standard \u03b1 = 0.05 threshold. ",
             "The 'Multiple Endpoint Correction Guidance' option above provides instructions for manual p-value adjustment. ",
@@ -1044,7 +1044,7 @@ jjbetweenstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
     }
 
     assumptions_content <- paste0(
-        "<div style='padding: 15px; background-color: #fff3cd; border-left: 4px solid #ffc107; margin: 10px 0;'>",
+        "<div style='padding: 15px; background-color: rgba(255, 202, 33, 0.23); border-left: 4px solid #ffc107; margin: 10px 0; color: inherit;'>",
         "<h4 style='color: #856404; margin-top: 0;'> Statistical Assumptions & Warnings</h4>",
 
         multi_endpoint_note,
@@ -1070,7 +1070,7 @@ jjbetweenstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 },
 .generateInterpretationGuide = function() {
     interpretation_content <- paste0(
-        "<div style='padding: 15px; background-color: #d1ecf1; border-left: 4px solid #17a2b8; margin: 10px 0;'>",
+        "<div style='padding: 15px; background-color: rgba(33, 163, 188, 0.21); border-left: 4px solid #17a2b8; margin: 10px 0; color: inherit;'>",
         "<h4 style='color: #0c5460; margin-top: 0;'> How to Interpret Results</h4>",
         
         "<p><strong>Statistical Significance:</strong></p>",
@@ -1121,10 +1121,10 @@ jjbetweenstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
     test_method <- private$.testLabel(n_groups)
     
     report_template <- paste0(
-        "<div style='padding: 15px; background-color: #f8f9fa; border: 1px solid #dee2e6; margin: 10px 0;'>",
+        "<div style='padding: 15px; background-color: rgba(138, 155, 172, 0.06); border: 1px solid #dee2e6; margin: 10px 0; color: inherit;'>",
         "<h4 style='color: #495057; margin-top: 0;'> Copy-Ready Report Template</h4>",
         
-        "<div style='background-color: #ffffff; padding: 15px; border: 1px dashed #6c757d; margin: 10px 0;'>",
+        "<div style='background-color: rgba(255, 255, 255, 0.06); padding: 15px; border: 1px dashed #6c757d; margin: 10px 0; color: inherit;'>",
         "<h5>Methods:</h5>",
         "<p>A between-groups analysis was conducted to compare the levels of ", dep_vars,
         " across ", n_groups, " groups of ", htmltools::htmlEscape(self$options$group), ". A ", test_method,
@@ -1154,7 +1154,7 @@ jjbetweenstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         "</div>",
         
         "<button onclick='navigator.clipboard.writeText(this.parentElement.querySelector(\"div\").innerText)' ",
-        "style='background-color: #007bff; color: white; border: none; padding: 8px 16px; border-radius: 4px; cursor: pointer;'>",
+        "style='background-color: #007bff; color: #ffffff; color: white; border: none; padding: 8px 16px; border-radius: 4px; cursor: pointer;'>",
         " Copy Template to Clipboard</button>",
         "</div>"
     )

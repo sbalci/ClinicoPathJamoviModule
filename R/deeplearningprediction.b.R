@@ -592,7 +592,7 @@ deeplearningpredictionClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6
             
             summary_content <- paste(
                 "<h3> Deep Learning Training Complete</h3>",
-                "<div style='background-color: #f0f8f0; padding: 15px; border-left: 5px solid #28a745; margin: 10px 0;'>",
+                "<div style='background-color: rgba(33, 152, 33, 0.07); padding: 15px; border-left: 5px solid #28a745; margin: 10px 0; color: inherit;'>",
                 "<h4>Training Summary</h4>",
                 "<ul>",
                 paste0("<li><strong>Model:</strong> ", self$options$model_type, "</li>"),

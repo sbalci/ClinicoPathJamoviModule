@@ -475,7 +475,7 @@ jscattermoreClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
 
                 "<p><strong>Variable Statistics:</strong></p>",
                 "<table style='border-collapse: collapse; width: 100%;'>",
-                "<tr style='background-color: #f2f2f2;'>",
+                "<tr style='background-color: rgba(38, 38, 38, 0.06); color: inherit;'>",
                 "<th style='border: 1px solid #ddd; padding: 8px;'>Variable</th>",
                 "<th style='border: 1px solid #ddd; padding: 8px;'>Min</th>",
                 "<th style='border: 1px solid #ddd; padding: 8px;'>Median</th>",

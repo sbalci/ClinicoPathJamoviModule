@@ -230,7 +230,7 @@ flexcompriskClass <- R6::R6Class(
             model_type <- self$options$modelType
             
             educational_content <- paste0(
-                "<div style='background-color: #f8f9fa; padding: 15px; border-left: 4px solid #007bff; margin: 10px 0;'>",
+                "<div style='background-color: rgba(138, 155, 172, 0.06); padding: 15px; border-left: 4px solid #007bff; margin: 10px 0; color: inherit;'>",
                 "<h4> Flexible Competing Risks Models</h4>",
                 "<p><b>Current Model:</b> ", switch(model_type,
                     "splines" = "Flexible Parametric (Spline-based)",
@@ -433,7 +433,7 @@ flexcompriskClass <- R6::R6Class(
             validation_type <- self$options$validationType
             
             methods_content <- paste0(
-                "<div style='background-color: #e7f3ff; padding: 15px; border-left: 4px solid #0066cc; margin: 10px 0;'>",
+                "<div style='background-color: rgba(33, 144, 255, 0.11); padding: 15px; border-left: 4px solid #0066cc; margin: 10px 0; color: inherit;'>",
                 "<h4> Statistical Methods</h4>",
                 "<p><b>Model Type:</b> ", tools::toTitleCase(model_type), " competing risks model</p>",
                 
@@ -475,7 +475,7 @@ flexcompriskClass <- R6::R6Class(
             model_type <- private$.model_type
             
             recommendations <- paste0(
-                "<div style='background-color: #fff3cd; padding: 15px; border-left: 4px solid #ffc107; margin: 10px 0;'>",
+                "<div style='background-color: rgba(255, 202, 33, 0.23); padding: 15px; border-left: 4px solid #ffc107; margin: 10px 0; color: inherit;'>",
                 "<h4> Model Selection and Interpretation</h4>",
                 
                 "<p><b>Current Model Benefits:</b></p>",

@@ -960,7 +960,7 @@ jjcoefstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
             summary_html <- glue::glue("
             <h4>Plain-Language Summary</h4>
-            <div style='background-color: #f8f9fa; padding: 15px; border-left: 4px solid #007bff; margin: 10px 0;'>
+            <div style='background-color: rgba(138, 155, 172, 0.06); padding: 15px; border-left: 4px solid #007bff; margin: 10px 0; color: inherit;'>
             <p>This analysis examined <b>{n_coefs} predictors</b> using <b>{model_type_label}</b> (N = {n_obs} observations).
             Results are presented as <b>{scale_label}</b> with <b>{self$options$ciLevel * 100}% confidence intervals</b>.</p>
             {if (example_text != '') paste0('<p>', example_text, '</p>') else ''}

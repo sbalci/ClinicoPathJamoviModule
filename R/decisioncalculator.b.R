@@ -67,7 +67,7 @@ decisioncalculatorClass <- if (requireNamespace("jmvcore")) {
                 # Welcome message
                 welcome_html <- "
             <div style='font-family: Arial, sans-serif; max-width: 800px; line-height: 1.4;'>
-                <div style='background: #f5f5f5; border: 2px solid #333; padding: 20px; margin-bottom: 20px;'>
+                <div style='background-color: rgba(88, 88, 88, 0.06); border: 2px solid #333; padding: 20px; margin-bottom: 20px; color: inherit;'>
                 <h2 style='margin: 0 0 10px 0; font-size: 18px; color: #333;'>Medical Decision Calculator</h2>
                 <p style='margin: 0; font-size: 14px; color: #666;'>
                 Comprehensive diagnostic test evaluation for clinical decision-making
@@ -86,7 +86,7 @@ decisioncalculatorClass <- if (requireNamespace("jmvcore")) {
                     <li>Optionally enable summary, glossary, or about panels for additional guidance</li>
                 </ol>
 
-                <div style='background: #f9f9f9; border: 1px solid #ccc; padding: 12px; margin: 15px 0;'>
+                <div style='background-color: rgba(155, 155, 155, 0.06); border: 1px solid #ccc; padding: 12px; margin: 15px 0; color: inherit;'>
                     <p style='margin: 0; font-size: 13px;'><strong>Quick Example:</strong>
                     If you tested 200 patients (100 diseased, 100 healthy) and your test correctly
                     identified 90 diseased (TP=90) and 80 healthy (TN=80), you have FN=10 and FP=20.</p>
@@ -120,6 +120,23 @@ decisioncalculatorClass <- if (requireNamespace("jmvcore")) {
                     values = list(
                         newtest = "Total"
                     )
+                )
+
+                # The cut-off comparison always has exactly these three rows -- the two
+                # user-named scenarios and the current cut-off. Creating them here keeps the
+                # structure stable and leaves .run() setting only the computed cells.
+                multipleCutoffTable <- self$results$multipleCutoffTable
+                multipleCutoffTable$addRow(
+                    rowKey = 1,
+                    values = list(cutoffName = self$options$cutoff1)
+                )
+                multipleCutoffTable$addRow(
+                    rowKey = 2,
+                    values = list(cutoffName = self$options$cutoff2)
+                )
+                multipleCutoffTable$addRow(
+                    rowKey = 3,
+                    values = list(cutoffName = "Current (Reference)")
                 )
             },
             .run = function() {
@@ -677,7 +694,6 @@ decisioncalculatorClass <- if (requireNamespace("jmvcore")) {
                 # Multiple cut-off evaluation (DiagROC inspired)
                 if (self$options$multiplecuts) {
                     multipleCutoffTable <- self$results$multipleCutoffTable
-                    multipleCutoffTable$deleteRows()
 
                     # Helper function to calculate metrics for a cut-off
                     calculate_cutoff_metrics <- function(tp, fp, tn, fn, cutoff_name) {
@@ -761,13 +777,13 @@ decisioncalculatorClass <- if (requireNamespace("jmvcore")) {
                         return()
                     }
 
-                    # Add rows to comparison table
-                    multipleCutoffTable$addRow(
+                    # Rows are created in .init(); only the computed cells are set here.
+                    multipleCutoffTable$setRow(
                         rowKey = 1,
                         values = cutoff1_metrics
                     )
 
-                    multipleCutoffTable$addRow(
+                    multipleCutoffTable$setRow(
                         rowKey = 2,
                         values = cutoff2_metrics
                     )
@@ -871,7 +887,7 @@ decisioncalculatorClass <- if (requireNamespace("jmvcore")) {
                         jmvcore::.("Cut-offs are compared on point estimates only. A formal test would need to know, for each patient, how the two thresholds classified them; four summary counts per scenario cannot supply that. The accuracy intervals referred to above are Wilson 95% intervals computed separately per scenario, so overlap is a conservative signal that the counts do not separate the cut-offs.")
                     )
 
-                    multipleCutoffTable$addRow(
+                    multipleCutoffTable$setRow(
                         rowKey = 3,
                         values = list(
                             cutoffName = "Current (Reference)",
@@ -963,7 +979,7 @@ decisioncalculatorClass <- if (requireNamespace("jmvcore")) {
                 if (!is.null(fagan_item) && isTRUE(self$options$fagan)) {
                     if (!fagan_ok) {
                         fagan_item$setContent(paste0(
-                            "<div style='padding:12px;border-left:4px solid #c00;background:#fff5f5;'>",
+                            "<div style='padding:12px;border-left:4px solid #c00;background-color: rgba(255, 88, 88, 0.06); color: inherit;'>",
                             "<p>", .("No nomogram is drawn for this table."), " ",
                             sprintf(.("The positive likelihood ratio is %.3f, so a positive result lowers the probability of disease rather than raising it."), LRP),
                             "</p></div>"))
@@ -974,9 +990,9 @@ decisioncalculatorClass <- if (requireNamespace("jmvcore")) {
                         src <- if (isTRUE(self$options$pp))
                             .("the population prevalence you supplied") else .("this study's own prevalence")
                         fagan_item$setContent(paste0(
-                            "<div style='padding:12px;border-left:4px solid #1565c0;background:#f5f9ff;'>",
+                            "<div style='padding:12px;border-left:4px solid #1565c0;background-color: rgba(88, 155, 255, 0.06); color: inherit;'>",
                             "<p><b>", .("Pre-test probability"), ":</b> ",
-                            sprintf("%.1f%%", 100 * pre), " &mdash; ", src, ".</p>",
+                            sprintf("%.1f%%", 100 * pre), " \u{2014} ", src, ".</p>",
                             "<p><b>", .("If the test is POSITIVE"), ":</b> ",
                             sprintf(.("likelihood ratio %.2f raises the probability from %.1f%% to <b>%.1f%%</b>."),
                                     LRP, 100 * pre, 100 * post_pos), "</p>",
@@ -1060,7 +1076,7 @@ decisioncalculatorClass <- if (requireNamespace("jmvcore")) {
 
                 sprintf(
                     "<div style='font-family: Arial, sans-serif; max-width: 800px; line-height: 1.4;'>
-                <div style='background: #f5f5f5; border: 2px solid #333; padding: 15px; margin-bottom: 15px;'>
+                <div style='background-color: rgba(88, 88, 88, 0.06); border: 2px solid #333; padding: 15px; margin-bottom: 15px; color: inherit;'>
                 <h3 style='margin: 0 0 5px 0; font-size: 16px; color: #333;'>Diagnostic Test Performance Summary</h3>
                 </div>
 
@@ -1069,24 +1085,24 @@ decisioncalculatorClass <- if (requireNamespace("jmvcore")) {
 
                     <table style='width: 100%%; border-collapse: collapse; margin: 15px 0;'>
                     <tr>
-                        <td style='border: 1px solid #ccc; padding: 10px; background: #f9f9f9;'>
+                        <td style='border: 1px solid #ccc; padding: 10px; background-color: rgba(155, 155, 155, 0.06); color: inherit;'>
                         <strong>Sensitivity</strong><br>
                         <span style='font-size: 18px;'>%.1f%%</span><br>
                         <span style='font-size: 12px; color: #666;'>True positive rate</span>
                         </td>
-                        <td style='border: 1px solid #ccc; padding: 10px; background: #f9f9f9;'>
+                        <td style='border: 1px solid #ccc; padding: 10px; background-color: rgba(155, 155, 155, 0.06); color: inherit;'>
                         <strong>Specificity</strong><br>
                         <span style='font-size: 18px;'>%.1f%%</span><br>
                         <span style='font-size: 12px; color: #666;'>True negative rate</span>
                         </td>
                     </tr>
                     <tr>
-                        <td style='border: 1px solid #ccc; padding: 10px; background: #f9f9f9;'>
+                        <td style='border: 1px solid #ccc; padding: 10px; background-color: rgba(155, 155, 155, 0.06); color: inherit;'>
                         <strong>PPV</strong><br>
                         <span style='font-size: 18px;'>%.1f%%</span><br>
                         <span style='font-size: 12px; color: #666;'>At %.1f%% prevalence</span>
                         </td>
-                        <td style='border: 1px solid #ccc; padding: 10px; background: #f9f9f9;'>
+                        <td style='border: 1px solid #ccc; padding: 10px; background-color: rgba(155, 155, 155, 0.06); color: inherit;'>
                         <strong>NPV</strong><br>
                         <span style='font-size: 18px;'>%.1f%%</span><br>
                         <span style='font-size: 12px; color: #666;'>At %.1f%% prevalence</span>
@@ -1100,7 +1116,7 @@ decisioncalculatorClass <- if (requireNamespace("jmvcore")) {
                     <li>The negative likelihood ratio of %.3f indicates %s.</li>
                     </ul>
 
-                    <div style='background: #f9f9f9; border: 1px solid #ccc; padding: 12px; margin: 15px 0;'>
+                    <div style='background-color: rgba(155, 155, 155, 0.06); border: 1px solid #ccc; padding: 12px; margin: 15px 0; color: inherit;'>
                         <p style='margin: 0; font-weight: bold;'>Clinical Recommendation</p>
                         <p style='margin: 5px 0 0 0;'>%s</p>
                     </div>
@@ -1117,7 +1133,7 @@ decisioncalculatorClass <- if (requireNamespace("jmvcore")) {
             },
             .createAboutPanel = function() {
                 "<div style='font-family: Arial, sans-serif; max-width: 800px; line-height: 1.4;'>
-            <div style='background: #f5f5f5; border: 2px solid #333; padding: 15px; margin-bottom: 15px;'>
+            <div style='background-color: rgba(88, 88, 88, 0.06); border: 2px solid #333; padding: 15px; margin-bottom: 15px; color: inherit;'>
             <h3 style='margin: 0 0 5px 0; font-size: 16px; color: #333;'>About Diagnostic Test Evaluation</h3>
             </div>
 
@@ -1194,19 +1210,19 @@ decisioncalculatorClass <- if (requireNamespace("jmvcore")) {
                 }
 
                 warning_html <- if (length(warnings) > 0) {
-                    sprintf("<div style='background: #fff3cd; padding: 15px; margin: 10px 0; border-left: 4px solid #f0ad4e;'>
+                    sprintf("<div style='background-color: rgba(255, 202, 33, 0.23); padding: 15px; margin: 10px 0; border-left: 4px solid #f0ad4e; color: inherit;'>
                 <h4 style='margin-top: 0; color: #856404;'> Warnings</h4>
                 <ul style='margin: 10px 0; padding-left: 20px;'>%s</ul>
                 </div>", paste(warnings, collapse = "\n"))
                 } else {
-                    "<div style='background: #d4edda; padding: 15px; margin: 10px 0; border-left: 4px solid #28a745;'>
+                    "<div style='background-color: rgba(33, 162, 64, 0.19); padding: 15px; margin: 10px 0; border-left: 4px solid #28a745; color: inherit;'>
                 <p style='margin: 0; color: #155724;'><strong> No issues detected</strong> - Sample size and distribution appear adequate.</p>
                 </div>"
                 }
 
                 sprintf(
                     "<div style='font-family: Arial, sans-serif; max-width: 800px; line-height: 1.4;'>
-                <div style='background: #f5f5f5; border: 2px solid #333; padding: 15px; margin-bottom: 15px;'>
+                <div style='background-color: rgba(88, 88, 88, 0.06); border: 2px solid #333; padding: 15px; margin-bottom: 15px; color: inherit;'>
                 <h3 style='margin: 0 0 5px 0; font-size: 16px; color: #333;'>Assumptions & Caveats</h3>
                 </div>
 
@@ -1244,7 +1260,7 @@ decisioncalculatorClass <- if (requireNamespace("jmvcore")) {
             },
             .createGlossary = function() {
                 "<div style='font-family: Arial, sans-serif; max-width: 800px; line-height: 1.4;'>
-            <div style='background: #f5f5f5; border: 2px solid #333; padding: 15px; margin-bottom: 15px;'>
+            <div style='background-color: rgba(88, 88, 88, 0.06); border: 2px solid #333; padding: 15px; margin-bottom: 15px; color: inherit;'>
             <h3 style='margin: 0 0 5px 0; font-size: 16px; color: #333;'>Clinical Terms Glossary</h3>
             </div>
 

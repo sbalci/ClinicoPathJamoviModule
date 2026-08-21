@@ -152,7 +152,7 @@ populationhealthClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cl
             total_patients <- nrow(data)
             
             summary_content <- htmltools::div(
-                style = "font-family: Arial, sans-serif; padding: 20px; background-color: #f8f9fa;",
+                style = "font-family: Arial, sans-serif; padding: 20px; background-color: rgba(138, 155, 172, 0.06); color: inherit;",
                 
                 htmltools::h3("Population Health Analytics Summary", 
                     style = "color: #2c3e50; border-bottom: 2px solid #3498db; padding-bottom: 10px;"),
@@ -665,7 +665,7 @@ populationhealthClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cl
                 ),
                 
                 htmltools::p(
-                    style = "font-style: italic; color: #7f8c8d; margin-top: 30px; padding: 20px; background-color: #ecf0f1; border-radius: 8px;",
+                    style = "font-style: italic; color: inherit; margin-top: 30px; padding: 20px; background-color: rgba(33, 80, 92, 0.09); border-radius: 8px;",
                     "This report is generated using evidence-based population health analytics methods and should be ",
                     "interpreted in conjunction with clinical expertise and local health system knowledge."
                 )
@@ -680,7 +680,7 @@ populationhealthClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cl
             }
             
             summary_content <- htmltools::div(
-                style = "background: #f8f9fa; padding: 25px; border-radius: 10px; border-left: 5px solid #007bff;",
+                style = "background-color: rgba(138, 155, 172, 0.06); padding: 25px; border-radius: 10px; border-left: 5px solid #007bff; color: inherit;",
                 htmltools::h3("Executive Summary - Population Health Analytics", 
                     style = "color: #007bff; margin-top: 0;"),
                 htmltools::p("This analysis provides actionable insights for population health management, ",

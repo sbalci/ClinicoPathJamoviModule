@@ -308,7 +308,7 @@ pseudosurvivalClass <- R6::R6Class(
                 if (length(covariates) > 0) {
                     X <- model.matrix(
                         jmvcore::asFormula(paste0(
-                            "~ ", jmvcore::composeTerms(as.list(covariates))
+                            "~ ", paste(jmvcore::composeTerms(as.list(covariates)), collapse = " + ")
                         )),
                         data = analysis_data
                     )
@@ -374,7 +374,7 @@ pseudosurvivalClass <- R6::R6Class(
                                 # Same Defense 1 + Defense 2 shape as L305.
                                 reg_formula <- jmvcore::asFormula(paste0(
                                     "pseudo_surv ~ ",
-                                    jmvcore::composeTerms(as.list(covariates))
+                                    paste(jmvcore::composeTerms(as.list(covariates)), collapse = " + ")
                                 ))
                                 model <- lm(reg_formula, data = regression_data)
                             } else {
@@ -462,7 +462,7 @@ pseudosurvivalClass <- R6::R6Class(
                                     # Same Defense 1 + Defense 2 shape as L305.
                                     gee_formula <- jmvcore::asFormula(paste0(
                                         "pseudo_surv ~ ",
-                                        jmvcore::composeTerms(as.list(covariates))
+                                        paste(jmvcore::composeTerms(as.list(covariates)), collapse = " + ")
                                     ))
                                     gee_model <- geepack::geeglm(gee_formula, data = regression_data,
                                                                id = id, family = gaussian(), corstr = "independence")
@@ -569,7 +569,7 @@ pseudosurvivalClass <- R6::R6Class(
                     # Same Defense 1 + Defense 2 shape as L305.
                     reg_formula <- jmvcore::asFormula(paste0(
                         "individual_rmst ~ ",
-                        jmvcore::composeTerms(as.list(covariates))
+                        paste(jmvcore::composeTerms(as.list(covariates)), collapse = " + ")
                     ))
                     rmst_model <- lm(reg_formula, data = data.frame(individual_rmst = individual_rmst, analysis_data))
 

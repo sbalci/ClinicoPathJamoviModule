@@ -131,12 +131,12 @@ toolssummaryClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                         border: 1px solid #ddd;
                     }
                     .freq-table th {
-                        background-color: #f8f9fa;
+                        background-color: rgba(138, 155, 172, 0.06); color: inherit;
                         border: 1px solid #ddd;
                         padding: 12px 8px;
                         text-align: left;
                         font-weight: bold;
-                        color: #333;
+                        color: inherit;
                     }
                     .freq-table td {
                         border: 1px solid #ddd;
@@ -144,10 +144,10 @@ toolssummaryClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                         text-align: left;
                     }
                     .freq-table tr:nth-child(even) {
-                        background-color: #f9f9f9;
+                        background-color: rgba(155, 155, 155, 0.06); color: inherit;
                     }
                     .freq-table tr:hover {
-                        background-color: #f5f5f5;
+                        background-color: rgba(88, 88, 88, 0.06); color: inherit;
                     }
                     .variable-title {
                         font-size: 16px;

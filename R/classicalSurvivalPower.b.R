@@ -49,7 +49,7 @@ classicalSurvivalPowerClass <- if (requireNamespace("jmvcore", quietly = TRUE)) 
             .init = function() {
                 # Initialize instructions
                 instructions_html <- paste(
-                    "<div style='background-color: #e1f5fe; padding: 20px; border-radius: 8px; margin: 10px 0;'>",
+                    "<div style='background-color: rgba(33, 181, 248, 0.14); padding: 20px; border-radius: 8px; margin: 10px 0; color: inherit;'>",
                     "<h3 style='color: #0277bd; margin-top: 0;'>Survival Analysis Power & Sample Size</h3>",
                     "<div style='margin: 10px 0;'>",
                     "<h4 style='color: #0288d1; margin: 10px 0 5px 0;'>Power Analysis for Clinical Trials:</h4>",
@@ -76,7 +76,7 @@ classicalSurvivalPowerClass <- if (requireNamespace("jmvcore", quietly = TRUE)) 
                     "<li><strong>Review Results:</strong> Sample size, power, and study design summary</li>",
                     "</ol>",
                     "</div>",
-                    "<div style='background-color: #fff3e0; padding: 10px; border-radius: 5px; margin: 10px 0;'>",
+                    "<div style='background-color: rgba(255, 169, 33, 0.14); padding: 10px; border-radius: 5px; margin: 10px 0; color: inherit;'>",
                     "<p style='margin: 0; color: #f57c00;'><strong>Clinical Note:</strong> These calculations are essential for proper clinical trial design. Consider consultation with a biostatistician for complex studies.</p>",
                     "</div>",
                     "<p style='margin: 10px 0 0 0; color: #666; font-style: italic;'> This module implements GitHub Issue #72 using gsDesign package methods.</p>",
@@ -325,7 +325,7 @@ classicalSurvivalPowerClass <- if (requireNamespace("jmvcore", quietly = TRUE)) 
 
                 # Create HTML summary
                 summary_html <- "<h4>Power Analysis Results</h4>"
-                summary_html <- paste0(summary_html, "<div style='background-color: #f5f5f5; padding: 15px; border-radius: 5px; margin: 10px 0;'>")
+                summary_html <- paste0(summary_html, "<div style='background-color: rgba(88, 88, 88, 0.06); padding: 15px; border-radius: 5px; margin: 10px 0; color: inherit;'>")
 
                 # Method and calculation type
                 summary_html <- paste0(summary_html, "<p><strong>Method:</strong> ", data$method, "</p>")
@@ -384,7 +384,7 @@ classicalSurvivalPowerClass <- if (requireNamespace("jmvcore", quietly = TRUE)) 
                 data <- private$.results_data
 
                 formulas_html <- "<h4>Mathematical Formulas</h4>"
-                formulas_html <- paste0(formulas_html, "<div style='background-color: #fff9c4; padding: 15px; border-radius: 5px; margin: 10px 0;'>")
+                formulas_html <- paste0(formulas_html, "<div style='background-color: rgba(255, 232, 33, 0.27); padding: 15px; border-radius: 5px; margin: 10px 0; color: inherit;'>")
 
                 if (data$method == "Lachin-Foulkes") {
                     formulas_html <- paste0(formulas_html, "<h5>Lachin-Foulkes Method</h5>")
@@ -419,7 +419,7 @@ classicalSurvivalPowerClass <- if (requireNamespace("jmvcore", quietly = TRUE)) 
                 data <- private$.results_data
 
                 interp_html <- "<h4>Clinical Interpretation</h4>"
-                interp_html <- paste0(interp_html, "<div style='background-color: #e8f5e8; padding: 15px; border-radius: 5px; margin: 10px 0;'>")
+                interp_html <- paste0(interp_html, "<div style='background-color: rgba(33, 159, 33, 0.1); padding: 15px; border-radius: 5px; margin: 10px 0; color: inherit;'>")
 
                 # Interpretation based on calculation type
                 if (grepl("Sample Size", data$calculation)) {
@@ -787,7 +787,7 @@ classicalSurvivalPowerClass <- if (requireNamespace("jmvcore", quietly = TRUE)) 
                 }
             },
             .generate_export_summary = function() {
-                summary_html <- "<div style='background-color: #e8f5e8; padding: 15px; border-radius: 5px; margin: 10px 0;'>"
+                summary_html <- "<div style='background-color: rgba(33, 159, 33, 0.1); padding: 15px; border-radius: 5px; margin: 10px 0; color: inherit;'>"
                 summary_html <- paste0(summary_html, "<h4>Export Summary</h4>")
 
                 if (self$options$export_results) {

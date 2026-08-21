@@ -376,7 +376,7 @@ clinicalnomogramsClass <- R6::R6Class(
                     
                     if (nomogram_type == "survival_nomogram") {
                         y <- survival::Surv(data[[vars$time]], data[[vars$status]])
-                        cv_fit <- glmnet::cv.glmnet(x, y, family = "cox")
+                        cv_fit <- glmnet::cv.glmnet(x, y, family = "cox", cox.ties = "breslow")
                     } else if (nomogram_type == "logistic_nomogram") {
                         y <- data[[vars$outcome]]
                         cv_fit <- glmnet::cv.glmnet(x, y, family = "binomial")
@@ -572,7 +572,7 @@ clinicalnomogramsClass <- R6::R6Class(
                     term_strings <- c(
                         term_strings,
                         paste0("(", formatC(coefs[[nm]], format = "f", digits = 4),
-                               " &times; ", htmltools::htmlEscape(nm), ")")
+                               " \u{00D7} ", htmltools::htmlEscape(nm), ")")
                     )
                 }
 
@@ -1184,7 +1184,7 @@ clinicalnomogramsClass <- R6::R6Class(
                 
                 html <- "<h3>Clinical Scenario Examples</h3>"
                 html <- paste0(html, "<table border='1' style='border-collapse: collapse; width: 100%;'>")
-                html <- paste0(html, "<tr style='background-color: #f2f2f2;'><th>Scenario</th><th>Predictors</th><th>Predicted Risk / Probability</th></tr>")
+                html <- paste0(html, "<tr style='background-color: rgba(38, 38, 38, 0.06); color: inherit;'><th>Scenario</th><th>Predictors</th><th>Predicted Risk / Probability</th></tr>")
                 
                 for (n in names(scenarios)) {
                     s_data <- scenarios[[n]]
@@ -1231,7 +1231,7 @@ clinicalnomogramsClass <- R6::R6Class(
                 html <- paste0(html, "<p>Use the fields below to calculate individualized risk estimates.</p>")
                 
                 # We'll create a simple form
-                html <- paste0(html, "<div style='background-color: #f9f9f9; padding: 15px; border-radius: 5px;'>")
+                html <- paste0(html, "<div style='background-color: rgba(155, 155, 155, 0.06); padding: 15px; border-radius: 5px; color: inherit;'>")
                 
                 for (v in vars$covariates) {
                     d <- data[[v]]
@@ -1343,7 +1343,7 @@ clinicalnomogramsClass <- R6::R6Class(
 
                 if (nomogram_type == "survival_nomogram") {
                     y <- survival::Surv(data[[vars$time]], data[[vars$status]])
-                    cv_fit <- glmnet::cv.glmnet(x, y, family = "cox")
+                    cv_fit <- glmnet::cv.glmnet(x, y, family = "cox", cox.ties = "breslow")
                 } else if (nomogram_type == "logistic_nomogram") {
                     y <- as.numeric(data[[vars$outcome]]) - 1
                     cv_fit <- glmnet::cv.glmnet(x, y, family = "binomial")

@@ -211,7 +211,7 @@ ppvClass <- R6::R6Class(
 
             # Build HTML content with enhanced formatting and methodology explanation
             content <- paste0(
-                "<div style='background-color: #f8f9fa; padding: 15px; border-radius: 5px; margin-bottom: 15px;'>",
+                "<div style='background-color: rgba(138, 155, 172, 0.06); padding: 15px; border-radius: 5px; margin-bottom: 15px; color: inherit;'>",
                 "<h4 style='margin-top: 0;'> Results Summary</h4>",
                 "<p><b>Positive Predictive Value (PPV)</b>: ", ppv_percentage, "%</p>",
                 "<p style='margin-left: 20px; color: #666;'>",
@@ -225,7 +225,7 @@ ppvClass <- R6::R6Class(
                 "</p>",
                 "</div>",
                 
-                "<div style='background-color: #e8f4f8; padding: 15px; border-radius: 5px; margin-bottom: 15px;'>",
+                "<div style='background-color: rgba(33, 149, 188, 0.1); padding: 15px; border-radius: 5px; margin-bottom: 15px; color: inherit;'>",
                 "<h4 style='margin-top: 0;'> Research Interpretation</h4>",
                 "<p><strong>", interpretation, "</strong></p>",
                 if (ppv_percentage < 50) {
@@ -242,7 +242,7 @@ ppvClass <- R6::R6Class(
                 },
                 "</div>",
                 
-                "<div style='background-color: #f0f8ff; padding: 15px; border-radius: 5px; margin-bottom: 15px;'>",
+                "<div style='background-color: rgba(33, 152, 255, 0.07); padding: 15px; border-radius: 5px; margin-bottom: 15px; color: inherit;'>",
                 "<h4 style='margin-top: 0;'> Methodology Notes</h4>",
                 "<p><strong>Confusion Matrix Context:</strong></p>",
                 "<ul style='margin: 5px 0 10px 20px;'>",
@@ -256,7 +256,7 @@ ppvClass <- R6::R6Class(
                 " research studies to estimate the reliability of claimed findings.</p>",
                 "</div>",
                 
-                "<div style='background-color: #fff3cd; padding: 15px; border-radius: 5px;'>",
+                "<div style='background-color: rgba(255, 202, 33, 0.23); padding: 15px; border-radius: 5px; color: inherit;'>",
                 "<h4 style='margin-top: 0;'> Study Parameters Used</h4>",
                 "<ul style='margin: 5px 0;'>",
                 "<li><strong>Prior probability of true hypotheses:</strong> ", self$options$percTrue, "%</li>",
@@ -264,7 +264,7 @@ ppvClass <- R6::R6Class(
                 "<li><strong>Statistical power:</strong> ", self$options$power, "</li>",
                 "<li><strong>Percentage of p-hacked studies:</strong> ", self$options$percHack, "%</li>",
                 "</ul>",
-                "<p style='margin-top: 15px; padding: 10px; background-color: #fff; border-left: 4px solid #ffc107; font-size: 0.9em;'>",
+                "<p style='margin-top: 15px; padding: 10px; background-color: rgba(255, 255, 255, 0.06); border-left: 4px solid #ffc107; font-size: 0.9em; color: inherit;'>",
                 "<strong>Reference:</strong> Ioannidis, J. P. (2005). Why most published research findings are false. ",
                 "<em>PLoS Medicine</em>, 2(8), e124. ",
                 "<br><strong>Formula:</strong> PPV = (Power \u{00D7} R + u \u{00D7} \u{03B2} \u{00D7} R) / (R + \u{03B1} - \u{03B2} \u{00D7} R + u - u \u{00D7} \u{03B1} + u \u{00D7} \u{03B2} \u{00D7} R)",

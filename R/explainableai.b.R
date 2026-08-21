@@ -183,7 +183,7 @@ explainableaiClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class
             }
             
             warning_content <- paste(
-                "<div style='background-color: #fff3cd; border: 1px solid #ffeaa7; padding: 15px; margin: 10px; border-radius: 5px;'>",
+                "<div style='background-color: rgba(255, 202, 33, 0.23); border: 1px solid #ffeaa7; padding: 15px; margin: 10px; border-radius: 5px; color: inherit;'>",
                 "<h4 style='color: #856404;'> ", package_name, " Not Available</h4>",
                 "<p style='color: #856404;'>", message, "</p>",
                 install_instructions,
@@ -692,7 +692,7 @@ explainableaiClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class
                 
                 # Update overview with save status
                 save_message <- paste(
-                    "<div style='background-color: #d4edda; padding: 10px; border: 1px solid #c3e6cb; margin: 5px 0;'>",
+                    "<div style='background-color: rgba(33, 162, 64, 0.19); padding: 10px; border: 1px solid #c3e6cb; margin: 5px 0; color: inherit;'>",
                     "<strong> Explanations Saved:</strong> ", htmltools::htmlEscape(file_path),
                     "</div>"
                 )
@@ -703,7 +703,7 @@ explainableaiClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class
             }, error = function(e) {
                 # Show error message
                 error_message <- paste(
-                    "<div style='background-color: #f8d7da; padding: 10px; border: 1px solid #f5c6cb; margin: 5px 0;'>",
+                    "<div style='background-color: rgba(216, 33, 50, 0.18); padding: 10px; border: 1px solid #f5c6cb; margin: 5px 0; color: inherit;'>",
                     "<strong> Save Error:</strong> ", htmltools::htmlEscape(e$message),
                     "</div>"
                 )
@@ -743,7 +743,7 @@ explainableaiClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class
             )
             
             summary_content <- paste(
-                "<div style='background-color: #f0f8f0; padding: 15px; border-left: 5px solid #28a745; margin: 10px 0;'>",
+                "<div style='background-color: rgba(33, 152, 33, 0.07); padding: 15px; border-left: 5px solid #28a745; margin: 10px 0; color: inherit;'>",
                 "<h4> Analysis Complete</h4>",
                 "<p>", results_summary, "</p>",
                 "<ul>",
@@ -777,7 +777,7 @@ explainableaiClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class
             if (grepl("Analysis Complete", current_content)) {
                 # Replace existing summary
                 self$results$overview$setContent(gsub(
-                    "<div style='background-color: #f0f8f0.*?</ul>", 
+                    "<div style='background-color: rgba(33, 152, 33, 0.07); color: inherit.*?</ul>", 
                     summary_content, 
                     current_content, 
                     perl = TRUE

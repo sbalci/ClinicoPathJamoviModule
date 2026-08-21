@@ -451,7 +451,7 @@ hiddenmarkovClass <- R6::R6Class(
                 '<h2 style="color: #2E86C1; border-bottom: 2px solid #2E86C1; padding-bottom: 10px;">',
                 'Hidden Markov Models for Survival Analysis</h2>',
                 
-                '<div style="background-color: #F8F9FA; padding: 15px; border-left: 4px solid #2E86C1; margin: 20px 0;">',
+                '<div style="background-color: rgba(138, 155, 172, 0.06); padding: 15px; border-left: 4px solid #2E86C1; margin: 20px 0; color: inherit;">',
                 '<h3 style="color: #1B4F72; margin-top: 0;">Overview</h3>',
                 '<p><strong>Hidden Markov Models (HMMs)</strong> are particularly useful when the true disease states ',
                 'are not directly observable but must be inferred from noisy or imperfect measurements. Unlike standard ',
@@ -468,11 +468,11 @@ hiddenmarkovClass <- R6::R6Class(
                 
                 '<h3 style="color: #1B4F72;">Model Components</h3>',
                 '<div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin: 20px 0;">',
-                '<div style="background-color: #EBF5FB; padding: 15px; border-radius: 5px;">',
+                '<div style="background-color: rgba(33, 144, 211, 0.09); padding: 15px; border-radius: 5px; color: inherit;">',
                 '<h4 style="color: #2E86C1; margin-top: 0;">Transition Model</h4>',
                 '<p>Models how patients move between hidden disease states over time using continuous-time Markov processes.</p>',
                 '</div>',
-                '<div style="background-color: #EAFAF1; padding: 15px; border-radius: 5px;">',
+                '<div style="background-color: rgba(33, 202, 107, 0.09); padding: 15px; border-radius: 5px; color: inherit;">',
                 '<h4 style="color: #27AE60; margin-top: 0;">Observation Model</h4>',
                 '<p>Models the relationship between true hidden states and observed measurements or clinical assessments.</p>',
                 '</div>',
@@ -487,18 +487,18 @@ hiddenmarkovClass <- R6::R6Class(
                 '</ul>',
                 
                 '<h3 style="color: #1B4F72;">Interpretation Guide</h3>',
-                '<div style="background-color: #FEF9E7; padding: 15px; border-left: 4px solid #F39C12; margin: 20px 0;">',
+                '<div style="background-color: rgba(246, 200, 33, 0.11); padding: 15px; border-left: 4px solid #F39C12; margin: 20px 0; color: inherit;">',
                 '<h4 style="color: #D68910; margin-top: 0;">Transition Intensities</h4>',
                 '<p>Higher values indicate faster transitions between states. Units are in events per time unit.</p>',
                 '</div>',
                 
-                '<div style="background-color: #FDEDEC; padding: 15px; border-left: 4px solid #E74C3C; margin: 20px 0;">',
+                '<div style="background-color: rgba(232, 45, 33, 0.09); padding: 15px; border-left: 4px solid #E74C3C; margin: 20px 0; color: inherit;">',
                 '<h4 style="color: #C0392B; margin-top: 0;">Misclassification Probabilities</h4>',
                 '<p>Diagonal elements should be high (accurate classification). Off-diagonal elements represent ',
                 'misclassification rates.</p>',
                 '</div>',
                 
-                '<div style="background-color: #F4ECF7; padding: 15px; border-left: 4px solid #8E44AD; margin: 20px 0;">',
+                '<div style="background-color: rgba(127, 33, 162, 0.09); padding: 15px; border-left: 4px solid #8E44AD; margin: 20px 0; color: inherit;">',
                 '<h4 style="color: #7D3C98; margin-top: 0;">State Prevalence</h4>',
                 '<p>Expected proportion of patients in each hidden state at specified time points.</p>',
                 '</div>',
@@ -511,7 +511,7 @@ hiddenmarkovClass <- R6::R6Class(
                 '<li><strong>Residuals:</strong> Examine model fit using standardized residuals</li>',
                 '</ul>',
                 
-                '<div style="background-color: #E8F8F5; padding: 15px; border-left: 4px solid #17A2B8; margin: 20px 0;">',
+                '<div style="background-color: rgba(33, 188, 159, 0.1); padding: 15px; border-left: 4px solid #17A2B8; margin: 20px 0; color: inherit;">',
                 '<h4 style="color: #138496; margin-top: 0;">R Package Reference</h4>',
                 '<p>This analysis uses the <code>msm</code> package. For more details, see: ',
                 'Jackson, C.H. (2011). Multi-State Models for Panel Data: The msm Package for R. ',

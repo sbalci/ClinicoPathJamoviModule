@@ -229,7 +229,13 @@ sync_namespace_with_description <- function(module_dir, dry_run = FALSE) {
     # Clean up package names
     imported_packages <- unique(trimws(imported_packages))
     imported_packages <- imported_packages[nchar(imported_packages) > 0]
-    imported_packages <- imported_packages[!imported_packages %in% c("stats", "utils", "base", "methods", "graphics", "grDevices")]
+    # Only `base` is implicit. Every OTHER base-priority package (grDevices,
+    # grid, stats, utils, methods, graphics, ...) still needs a DESCRIPTION
+    # declaration when it appears in NAMESPACE, or R CMD check emits
+    # "'::' or ':::' import not declared from: 'grDevices'" plus a namespace
+    # dependency NOTE. Filtering them out here is what let
+    # importFrom(grDevices, hcl.colors) ship with grDevices absent from Imports.
+    imported_packages <- imported_packages[imported_packages != "base"]
     
     if (length(imported_packages) == 0) {
       message("ℹ️ No external packages found in NAMESPACE for ", basename(module_dir))
@@ -958,23 +964,19 @@ setup_parallel_processing <- function(enabled = FALSE, max_workers = 4) {
 # so package-like text in comments and strings is ignored. Unguarded namespace or
 # package-attachment use must be declared in Imports/Depends. Use that is proven
 # optional by lexical requireNamespace() control flow may instead be in Suggests.
-# Only Priority: base packages are implicit; Recommended and transitive packages
-# still require a direct declaration.
+# Only `base` itself is implicit; every other base-priority package (grDevices,
+# grid, stats, utils, ...) plus Recommended and transitive packages still require
+# a direct declaration.
 # =============================================================================
 
-# Only Priority: base packages are implicit. Priority: recommended packages (for
-# example MASS and boot) still need direct DESCRIPTION declarations when used.
+# `base` is the ONLY package R CMD check lets you use without declaring it.
+# grDevices/grid/stats/utils/methods/graphics are base-PRIORITY but not implicit:
+# using them via `pkg::` or importFrom() without an Imports entry produces
+# "'::' or ':::' import not declared from: 'grDevices'". Treating all base-priority
+# packages as implicit here is what hid the missing grDevices in
+# ClinicoPathDescriptives and the missing grid/grDevices/stats/utils in OncoPath.
 get_base_packages <- function() {
-  fallback <- c("base", "compiler", "datasets", "graphics", "grDevices", "grid",
-                "methods", "parallel", "splines", "stats", "stats4", "tcltk",
-                "tools", "utils")
-  out <- tryCatch({
-    ip <- utils::installed.packages()
-    prio <- ip[, "Priority"]
-    base <- rownames(ip)[!is.na(prio) & prio == "base"]
-    unique(c(fallback, base))
-  }, error = function(e) fallback)
-  out
+  "base"
 }
 
 # Extract packages referenced through `pkg::` / `pkg:::` and classify each use by

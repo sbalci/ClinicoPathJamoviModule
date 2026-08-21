@@ -1563,6 +1563,22 @@ swimmerplotClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6Class
                 instructions <- private$.generateInstructions()
                 self$results$instructions$setContent(instructions)
             }
+
+            # Fixed row structure for the summary table: the same six metrics on
+            # every run. Only the values are computed, so .updateSummaryTable()
+            # fills them with setRow(). The response-rate rows that follow them
+            # depend on the levels actually present and stay in .run().
+            summary_metrics <- c(
+                .("Number of Patients"),
+                .("Total Observations"),
+                .("Median Duration (observed)"),
+                .("Mean Duration"),
+                .("Total Person-Time"),
+                .("Mean Follow-up")
+            )
+            for (i in seq_along(summary_metrics))
+                self$results$summary$addRow(
+                    rowKey = i, values = list(metric = summary_metrics[i]))
         },
 
         .run = function() {
@@ -1618,24 +1634,24 @@ swimmerplotClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6Class
                         "<div style='font-family: Arial, sans-serif; max-width: 800px; line-height: 1.4;'>",
 
                         # Main mismatch notice
-                        "<div style='background: #f5f5f5; border: 2px solid #d63384; padding: 20px; margin-bottom: 20px;'>",
+                        "<div style='background-color: rgba(88, 88, 88, 0.06); border: 2px solid #d63384; padding: 20px; margin-bottom: 20px; color: inherit;'>",
                         "<h2 style='margin: 0 0 10px 0; font-size: 20px; color: #d63384;'> Data Type Mismatch</h2>",
                         "<p style='margin: 0; font-size: 14px; color: #666;'>",
                         "You selected <strong style='color: #333;'>Date/Time</strong> input type, but your data contains <strong style='color: #333;'>numeric values</strong>",
                         "</p>",
                         "<p style='margin: 10px 0 0 0; font-size: 14px; color: #666;'>",
-                        "Examples: <code style='background: #e9e9e9; padding: 2px 6px; border-radius: 3px; font-family: monospace;'>",
-                        paste(safe_examples, collapse = "</code>, <code style='background: #e9e9e9; padding: 2px 6px; border-radius: 3px; font-family: monospace;'>"),
+                        "Examples: <code style='background-color: rgba(33, 33, 33, 0.1); padding: 2px 6px; border-radius: 3px; font-family: monospace; color: inherit;'>",
+                        paste(safe_examples, collapse = "</code>, <code style='background-color: rgba(33, 33, 33, 0.1); padding: 2px 6px; border-radius: 3px; font-family: monospace; color: inherit;'>"),
                         "</code>",
                         "</p>",
                         "</div>",
 
                         # Required action section
-                        "<div style='background: #f9f9f9; border-left: 4px solid #d63384; padding: 15px; margin-bottom: 20px;'>",
+                        "<div style='background-color: rgba(155, 155, 155, 0.06); border-left: 4px solid #d63384; padding: 15px; margin-bottom: 20px; color: inherit;'>",
                         "<h3 style='margin: 0 0 10px 0; color: #333; font-size: 16px;'> Required Action</h3>",
                         "<ol style='margin: 0; padding-left: 20px; font-size: 14px; line-height: 1.6;'>",
                         "<li><strong>Go to 'Time & Date Settings'</strong> section (click to expand)</li>",
-                        "<li><strong>Change 'Time Input Type'</strong> from 'Date/Time' to <span style='background: #e9e9e9; padding: 2px 6px; border-radius: 3px;'>Raw Values</span></li>",
+                        "<li><strong>Change 'Time Input Type'</strong> from 'Date/Time' to <span style='background-color: rgba(33, 33, 33, 0.1); padding: 2px 6px; border-radius: 3px; color: inherit;'>Raw Values</span></li>",
                         "<li><strong>Select appropriate 'Time Unit'</strong> (Days, Weeks, Months, or Years)</li>",
                         "<li><strong>Choose your preferred 'Time Display'</strong> mode</li>",
                         "<li><strong>Re-run the analysis</strong></li>",
@@ -1643,7 +1659,7 @@ swimmerplotClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6Class
                         "</div>",
 
                         # Helpful tip section
-                        "<div style='background: #f9f9f9; border: 1px solid #ccc; padding: 15px;'>",
+                        "<div style='background-color: rgba(155, 155, 155, 0.06); border: 1px solid #ccc; padding: 15px; color: inherit;'>",
                         "<h4 style='margin: 0 0 10px 0; font-size: 15px; color: #333;'> Data Type Guide</h4>",
                         "<p style='margin: 0; font-size: 14px; color: #666;'>",
                         "<strong>Use Date/Time for:</strong> 2023-01-15, 15/01/2023, 2023-01-15 14:30:00<br>",
@@ -1674,25 +1690,25 @@ swimmerplotClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6Class
                         "<div style='font-family: Arial, sans-serif; max-width: 800px; line-height: 1.4;'>",
 
                         # Main detection notice with clean styling like decisionpanel
-                        "<div style='background: #f5f5f5; border: 2px solid #333; padding: 20px; margin-bottom: 20px;'>",
+                        "<div style='background-color: rgba(88, 88, 88, 0.06); border: 2px solid #333; padding: 20px; margin-bottom: 20px; color: inherit;'>",
                         "<h2 style='margin: 0 0 10px 0; font-size: 20px; color: #333;'> Date Format Detected</h2>",
                         "<p style='margin: 0; font-size: 14px; color: #666;'>",
                         "Found date format: <strong style='color: #333;'>", safe_format, "</strong> in your time variables",
                         "</p>",
                         "<p style='margin: 10px 0 0 0; font-size: 14px; color: #666;'>",
-                        "Examples: <code style='background: #e9e9e9; padding: 2px 6px; border-radius: 3px; font-family: monospace;'>",
-                        paste(safe_examples_date, collapse = "</code>, <code style='background: #e9e9e9; padding: 2px 6px; border-radius: 3px; font-family: monospace;'>"),
+                        "Examples: <code style='background-color: rgba(33, 33, 33, 0.1); padding: 2px 6px; border-radius: 3px; font-family: monospace; color: inherit;'>",
+                        paste(safe_examples_date, collapse = "</code>, <code style='background-color: rgba(33, 33, 33, 0.1); padding: 2px 6px; border-radius: 3px; font-family: monospace; color: inherit;'>"),
                         "</code>",
                         "</p>",
                         "</div>",
 
                         # Required action section with clean border styling
-                        "<div style='background: #f9f9f9; border-left: 4px solid #333; padding: 15px; margin-bottom: 20px;'>",
+                        "<div style='background-color: rgba(155, 155, 155, 0.06); border-left: 4px solid #333; padding: 15px; margin-bottom: 20px; color: inherit;'>",
                         "<h3 style='margin: 0 0 10px 0; color: #333; font-size: 16px;'> Required Action</h3>",
                         "<ol style='margin: 0; padding-left: 20px; font-size: 14px; line-height: 1.6;'>",
                         "<li><strong>Go to 'Time & Date Settings'</strong> section (click to expand)</li>",
-                        "<li><strong>Change 'Time Input Type'</strong> from 'Raw Values' to <span style='background: #e9e9e9; padding: 2px 6px; border-radius: 3px;'>Date/Time</span></li>",
-                        "<li><strong>Select 'Date Format':</strong> <span style='background: #e9e9e9; padding: 2px 6px; border-radius: 3px;'>",
+                        "<li><strong>Change 'Time Input Type'</strong> from 'Raw Values' to <span style='background-color: rgba(33, 33, 33, 0.1); padding: 2px 6px; border-radius: 3px; color: inherit;'>Date/Time</span></li>",
+                        "<li><strong>Select 'Date Format':</strong> <span style='background-color: rgba(33, 33, 33, 0.1); padding: 2px 6px; border-radius: 3px; color: inherit;'>",
                         safe_format, "</span></li>",
                         "<li><strong>Choose your preferred 'Time Display'</strong> mode (Relative or Absolute)</li>",
                         "<li><strong>The analysis will be re-run with your settings.</strong></li>",
@@ -1700,7 +1716,7 @@ swimmerplotClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6Class
                         "</div>",
 
                         # Helpful tip section with subtle styling
-                        "<div style='background: #f9f9f9; border: 1px solid #ccc; padding: 15px;'>",
+                        "<div style='background-color: rgba(155, 155, 155, 0.06); border: 1px solid #ccc; padding: 15px; color: inherit;'>",
                         "<h4 style='margin: 0 0 10px 0; font-size: 15px; color: #333;'> Important Note</h4>",
                         "<p style='margin: 0; font-size: 14px; color: #666;'>",
                         "Configuring the date settings properly ensures accurate timeline calculations ",
@@ -1759,7 +1775,7 @@ swimmerplotClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6Class
 
                 if (length(warning_messages) > 0) {
                     warning_msg <- paste0(
-                        "<div style='color: #8a6d00; background-color: #fff8e1; padding: 15px; border: 1px solid #ffc107; border-radius: 5px; margin: 10px;'>",
+                        "<div style='color: inherit; background-color: rgba(255, 203, 33, 0.14); padding: 15px; border: 1px solid #ffc107; border-radius: 5px; margin: 10px;'>",
                         .("<h4>Analysis Information</h4>"),
                         "<ul>",
                         paste0("<li>", warning_messages, "</li>", collapse = ""),
@@ -1773,7 +1789,7 @@ swimmerplotClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6Class
                 if (is_date_scale && identical(self$options$timeDisplay, "absolute")) {
                     if (self$options$referenceLines %in% c("median", "protocol")) {
                         note_html <- paste0(
-                            "<div style='background-color:#fff8e1; border:1px solid #f0c36d; color:#6d4c00; padding:12px; border-radius:6px; margin:10px 0;'>",
+                            "<div style='background-color: rgba(255, 203, 33, 0.14); border:1px solid #f0c36d; color: inherit; padding:12px; border-radius:6px; margin:10px 0;'>",
                             "<strong>", .("Reference lines on absolute dates:"), "</strong> ",
                             .("Median/Protocol reference lines are not shown for absolute date scales because patient timelines start on different calendar dates."),
                             " ", .("Use 'Custom Time' with 'Custom Reference Date' or a time offset instead."),
@@ -1786,7 +1802,7 @@ swimmerplotClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6Class
                         cref_str <- tryCatch(self$options$customReferenceDate, error = function(e) NULL)
                         if (is.null(cref_str) || nchar(trimws(as.character(cref_str))) == 0) {
                             note_html <- paste0(
-                                "<div style='background-color:#e8f5e9; border:1px solid #a5d6a7; color:#1b5e20; padding:12px; border-radius:6px; margin:10px 0;'>",
+                                "<div style='background-color: rgba(33, 159, 43, 0.1); border:1px solid #a5d6a7; color: inherit; padding:12px; border-radius:6px; margin:10px 0;'>",
                                 "<strong>", .("Custom reference in absolute mode:"), "</strong> ",
                                 .("No 'Custom Reference Date' provided; using 'Custom Reference Time' as an offset from the earliest start date."),
                                 "</div>"
@@ -1894,7 +1910,7 @@ swimmerplotClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6Class
         
         .generateInstructions = function() {
             paste0(
-                "<div style='background-color: #e1f5fe; padding: 20px; border-radius: 8px; margin: 10px 0;'>",
+                "<div style='background-color: rgba(33, 181, 248, 0.14); padding: 20px; border-radius: 8px; margin: 10px 0; color: inherit;'>",
                 .("<h3 style='color: #0277bd; margin-top: 0;'> Swimmer Plot Analysis</h3>"),
                 .("<p>Create comprehensive swimmer plots for visualizing patient timelines, treatments, and clinical events using the advanced ggswim package.</p>"),
                 
@@ -1940,11 +1956,11 @@ swimmerplotClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6Class
                 "</ul>",
                 "</div>",
                 
-                "<div style='background-color: #fff3e0; padding: 10px; border-radius: 5px; margin: 10px 0;'>",
+                "<div style='background-color: rgba(255, 169, 33, 0.14); padding: 10px; border-radius: 5px; margin: 10px 0; color: inherit;'>",
                 "<p style='margin: 0; color: #f57c00;'><strong>Clinical Research Applications:</strong> Ideal for oncology trials, treatment response visualization, progression tracking, and regulatory submissions.</p>",
                 "</div>",
                 
-                "<div style='background-color: #f3e5f5; padding: 10px; border-radius: 5px; margin: 10px 0;'>",
+                "<div style='background-color: rgba(153, 33, 170, 0.12); padding: 10px; border-radius: 5px; margin: 10px 0; color: inherit;'>",
                 "<p style='margin: 0; color: #7b1fa2;'><strong> Enhanced Features:</strong> Complete ggswim package integration with swim lanes, event markers, status arrows, and professional clinical themes for maximum flexibility and publication-ready output.</p>",
                 "</div>",
                 
@@ -1956,49 +1972,33 @@ swimmerplotClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6Class
         },
         
         .updateSummaryTable = function(stats) {
-            # Clear existing rows
-            self$results$summary$deleteRows()
-            
-            # Add basic statistics
-            self$results$summary$addRow(rowKey = 1, values = list(
-                metric = .("Number of Patients"),
-                value = stats$n_patients
-            ))
-            
-            self$results$summary$addRow(rowKey = 2, values = list(
-                metric = .("Total Observations"),
-                value = stats$n_observations
-            ))
-            
-            self$results$summary$addRow(rowKey = 3, values = list(
-                metric = .("Median Duration (observed)"),
-                value = round(stats$median_duration, 2)
-            ))
-            
-            self$results$summary$addRow(rowKey = 4, values = list(
-                metric = .("Mean Duration"),
-                value = round(stats$mean_duration, 2)
-            ))
-            
-            self$results$summary$addRow(rowKey = 5, values = list(
-                metric = .("Total Person-Time"),
-                value = round(stats$total_person_time, 2)
-            ))
-            
-            self$results$summary$addRow(rowKey = 6, values = list(
-                metric = .("Mean Follow-up"),
-                value = round(stats$mean_follow_up, 2)
-            ))
-            
-            # Add response statistics if available
+            summary_table <- self$results$summary
+
+            # The six metric rows and their labels are created in .init(); only
+            # the values are computed here. deleteRows() would take those rows
+            # with it, and a subsequent setRow() on a missing key aborts the
+            # analysis, so the response rows below are cleared selectively.
+            summary_table$setRow(rowKey = 1L, values = list(value = stats$n_patients))
+            summary_table$setRow(rowKey = 2L, values = list(value = stats$n_observations))
+            summary_table$setRow(rowKey = 3L, values = list(value = round(stats$median_duration, 2)))
+            summary_table$setRow(rowKey = 4L, values = list(value = round(stats$mean_duration, 2)))
+            summary_table$setRow(rowKey = 5L, values = list(value = round(stats$total_person_time, 2)))
+            summary_table$setRow(rowKey = 6L, values = list(value = round(stats$mean_follow_up, 2)))
+
+            # Add response statistics if available. These rows are appended, so
+            # re-set a key a previous run already created rather than adding it
+            # twice; a changed responseVar clears the table via clearWith.
             if (!is.null(stats$response_counts)) {
-                row_idx <- 7
                 for (response in names(stats$response_counts)) {
-                    self$results$summary$addRow(rowKey = row_idx, values = list(
+                    row_key <- paste0("response_", response)
+                    row_values <- list(
                         metric = jmvcore::format(.("{response} Rate (%)"), response = response),
                         value = round(stats$response_percentages[[response]], 1)
-                    ))
-                    row_idx <- row_idx + 1
+                    )
+                    if (any(vapply(summary_table$rowKeys, identical, logical(1), row_key)))
+                        summary_table$setRow(rowKey = row_key, values = row_values)
+                    else
+                        summary_table$addRow(rowKey = row_key, values = row_values)
                 }
             }
         },
@@ -2359,7 +2359,7 @@ swimmerplotClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6Class
             if (!is.na(min_cell) && min_cell < 5) {
                 # REPLACED Notice with HTML to prevent serialization errors
                 warning_html <- sprintf(
-                    "<div style='background:#fff3cd;border-left:4px solid #ffc107;padding:12px;margin:10px 0;font-family:Arial,sans-serif;'>
+                    "<div style='background-color: rgba(255, 202, 33, 0.23);border-left:4px solid #ffc107;padding:12px;margin:10px 0;font-family:Arial,sans-serif; color: inherit;'>
                     <strong style='color:#856404;'>Warning:</strong> Fisher exact test has cells with counts &lt; 5 (minimum cell count = %d).
                     Test remains valid but interpret p-values cautiously with small cell counts.
                     Consider grouping categories or collecting more data.
@@ -2431,7 +2431,7 @@ swimmerplotClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6Class
             # Update export information panel
             if (self$options$exportTimeline || self$options$exportSummary) {
                 export_info <- paste0(
-                    "<div style='background-color: #f0f8ff; padding: 15px; border-radius: 5px; margin: 10px 0;'>",
+                    "<div style='background-color: rgba(33, 152, 255, 0.07); padding: 15px; border-radius: 5px; margin: 10px 0; color: inherit;'>",
                     "<h4>Export Information</h4>",
                     "<p>Data has been exported to the following outputs:</p>",
                     "<ul>",
@@ -2447,7 +2447,7 @@ swimmerplotClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6Class
         
         .generateInterpretationOutput = function(interpretation) {
             interp_html <- paste0(
-                "<div style='background-color: #e8f5e8; padding: 15px; border-radius: 5px; margin: 10px 0;'>",
+                "<div style='background-color: rgba(33, 159, 33, 0.1); padding: 15px; border-radius: 5px; margin: 10px 0; color: inherit;'>",
                 "<h4>Clinical Interpretation</h4>",
                 "<div style='margin: 10px 0;'>",
                 "<h5 style='color: #2e7d32;'>Timeline Analysis:</h5>",
@@ -2923,7 +2923,7 @@ swimmerplotClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6Class
         # Generate clinical glossary
         .generateClinicalGlossary = function() {
             glossary_html <- paste0(
-                "<div style='background-color: #f8f9fa; padding: 20px; border-radius: 8px; margin: 15px 0; font-family: system-ui, -apple-system, sans-serif;'>",
+                "<div style='background-color: rgba(138, 155, 172, 0.06); padding: 20px; border-radius: 8px; margin: 15px 0; font-family: system-ui, -apple-system, sans-serif; color: inherit;'>",
                 "<h3 style='color: #007bff; margin-top: 0;'> Clinical Glossary</h3>",
 
                 "<div style='margin: 10px 0;'>",
@@ -3056,7 +3056,7 @@ swimmerplotClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6Class
             full_text <- paste0(basic_text, response_text, methods_text)
 
             copy_ready_html <- paste0(
-                "<div style='background-color: #e8f5e8; padding: 20px; border-left: 4px solid #28a745; border-radius: 8px; margin: 15px 0; font-family: system-ui, -apple-system, sans-serif;'>",
+                "<div style='background-color: rgba(33, 159, 33, 0.1); padding: 20px; border-left: 4px solid #28a745; border-radius: 8px; margin: 15px 0; font-family: system-ui, -apple-system, sans-serif; color: inherit;'>",
                 "<h3 style='color: #155724; margin-top: 0; display: flex; align-items: center;'>",
                 "<span style='margin-right: 8px;'></span>",
                 "Copy-Ready Manuscript Text",
@@ -3064,7 +3064,7 @@ swimmerplotClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6Class
                 "<div style='background-color: white; padding: 15px; border-radius: 6px; margin: 10px 0; box-shadow: 0 1px 3px rgba(0,0,0,0.1);'>",
                 "<p style='margin: 0; line-height: 1.6; color: #333; font-size: 0.95em; text-align: justify;'>", full_text, "</p>",
                 "</div>",
-                "<div style='margin-top: 15px; padding: 10px; background-color: #d1ecf1; border-radius: 4px; border: 1px dashed #0c5460;'>",
+                "<div style='margin-top: 15px; padding: 10px; background-color: rgba(33, 163, 188, 0.21); border-radius: 4px; border: 1px dashed #0c5460; color: inherit;'>",
                 "<p style='margin: 0; font-size: 0.85em; color: #0c5460;'>",
                 "<strong>Usage:</strong> This text is formatted for direct use in manuscripts, clinical reports, and regulatory submissions. Copy and paste into your document and adjust as needed for your specific requirements.",
                 "</p>",
@@ -3078,7 +3078,7 @@ swimmerplotClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6Class
         # Generate about analysis information
         .generateAboutAnalysis = function() {
             about_html <- paste0(
-                "<div style='background-color: #fff3cd; padding: 20px; border-left: 4px solid #ffc107; border-radius: 8px; margin: 15px 0; font-family: system-ui, -apple-system, sans-serif;'>",
+                "<div style='background-color: rgba(255, 202, 33, 0.23); padding: 20px; border-left: 4px solid #ffc107; border-radius: 8px; margin: 15px 0; font-family: system-ui, -apple-system, sans-serif; color: inherit;'>",
                 "<h3 style='color: #856404; margin-top: 0; display: flex; align-items: center;'>",
                 "<span style='margin-right: 8px;'></span>",
                 "About Swimmer Plot Analysis",

@@ -936,7 +936,7 @@ survivalmodelvalidationClass <- R6::R6Class(
             c_index <- results$corrected_performance
             interpretation <- private$.interpretCIndex(c_index)
             
-            html <- paste0(html, "<div style='background-color: #f8f9fa; padding: 15px; border-radius: 5px; border-left: 5px solid #4477AA;'>")
+            html <- paste0(html, "<div style='background-color: rgba(138, 155, 172, 0.06); padding: 15px; border-radius: 5px; border-left: 5px solid #4477AA; color: inherit;'>")
             html <- paste0(html, "<p style='margin: 0;'><b>Bias-Corrected C-index:</b> <span style='font-size: 1.2em; color: #4477AA;'>", round(c_index, 4), "</span></p>")
             html <- paste0(html, "<p style='margin: 5px 0 0 0;'><b>Interpretation:</b> ", interpretation, "</p>")
             html <- paste0(html, "</div>")
@@ -1053,7 +1053,7 @@ survivalmodelvalidationClass <- R6::R6Class(
             html <- "<h4>Clinical Impact & Utility Assessment</h4>"
             html <- paste0(html, "<p>Clinical impact assessment evaluates whether using the model to guide treatment decisions would results in better outcomes than current standard strategies (treating everyone or treating no one).</p>")
             
-            html <- paste0(html, "<div style='background-color: #eef2f7; padding: 15px; border-radius: 5px; margin: 10px 0;'>")
+            html <- paste0(html, "<div style='background-color: rgba(33, 85, 151, 0.08); padding: 15px; border-radius: 5px; margin: 10px 0; color: inherit;'>")
             html <- paste0(html, "<p style='margin-top: 0;'><b>Understanding Net Benefit:</b></p>")
             html <- paste0(html, "<ul>")
             html <- paste0(html, "<li><b>Net Benefit:</b> The balance between true positives and weighted false positives at a specific risk threshold.</li>")
@@ -1076,7 +1076,7 @@ survivalmodelvalidationClass <- R6::R6Class(
             cindex <- validation_results$corrected_performance
             optimism <- validation_results$optimism
             
-            html <- paste0(html, "<div style='background-color: #fcfcfc; border: 1px solid #eee; padding: 20px; border-radius: 8px;'>")
+            html <- paste0(html, "<div style='background-color: rgba(205, 205, 205, 0.06); border: 1px solid #eee; padding: 20px; border-radius: 8px; color: inherit;'>")
             html <- paste0(html, "<h4 style='margin-top:0;'>Core Performance Metrics</h4>")
             
             # Discrimination
@@ -1118,7 +1118,7 @@ survivalmodelvalidationClass <- R6::R6Class(
             
             # Performance-based recommendations
             if (cindex < 0.6) {
-                html <- paste0(html, "<div style='border: 1px solid #ffcccc; background-color: #fff5f5; padding: 10px; border-radius: 5px; margin-bottom: 10px;'>")
+                html <- paste0(html, "<div style='border: 1px solid #ffcccc; background-color: rgba(255, 88, 88, 0.06); padding: 10px; border-radius: 5px; margin-bottom: 10px; color: inherit;'>")
                 html <- paste0(html, "<h4 style='color: #cc0000; margin-top: 0;'>Critical: Poor Model Discrimination</h4>")
                 html <- paste0(html, "<p>The model shows low discriminative ability (C-index < 0.6). Recommendations:</p>")
                 html <- paste0(html, "<ul>")
@@ -1127,7 +1127,7 @@ survivalmodelvalidationClass <- R6::R6Class(
                 html <- paste0(html, "<li><b>Model Class:</b> Consider flexible models like Gradient Boosting or Random Survival Forests.</li>")
                 html <- paste0(html, "</ul></div>")
             } else if (cindex >= 0.75) {
-                html <- paste0(html, "<div style='border: 1px solid #c3e6cb; background-color: #d4edda; padding: 10px; border-radius: 5px; margin-bottom: 10px;'>")
+                html <- paste0(html, "<div style='border: 1px solid #c3e6cb; background-color: rgba(33, 162, 64, 0.19); padding: 10px; border-radius: 5px; margin-bottom: 10px; color: inherit;'>")
                 html <- paste0(html, "<h4 style='color: #155724; margin-top: 0;'>Excellent Performance</h4>")
                 html <- paste0(html, "<p>The model demonstrates strong discrimination (C-index > 0.75). It may be highly suitable for clinical decision support after external validation.</p>")
                 html <- paste0(html, "</div>")
@@ -1135,7 +1135,7 @@ survivalmodelvalidationClass <- R6::R6Class(
             
             # Sample size and Event rate alerts
             if (n_obs < 150 || (n_obs * event_rate) < 20) {
-                html <- paste0(html, "<div style='border: 1px solid #ffeeba; background-color: #fff3cd; padding: 10px; border-radius: 5px; margin-bottom: 10px;'>")
+                html <- paste0(html, "<div style='border: 1px solid #ffeeba; background-color: rgba(255, 202, 33, 0.23); padding: 10px; border-radius: 5px; margin-bottom: 10px; color: inherit;'>")
                 html <- paste0(html, "<h4 style='color: #856404; margin-top: 0;'>Stability Warning</h4>")
                 html <- paste0(html, "<p>Small sample size or low event count may lead to unreliable estimates. Internal validation optimism may be underestimated.</p>")
                 html <- paste0(html, "</div>")
@@ -1181,7 +1181,7 @@ survivalmodelvalidationClass <- R6::R6Class(
                            "and a later evaluation portion (based on row order).</li>")
             html <- paste0(html, "</ul>")
 
-            html <- paste0(html, "<div style='background-color: #fff8e1; border-left: 5px solid #f0ad4e; padding: 12px; margin: 10px 0;'>")
+            html <- paste0(html, "<div style='background-color: rgba(255, 203, 33, 0.14); border-left: 5px solid #f0ad4e; padding: 12px; margin: 10px 0; color: inherit;'>")
             html <- paste0(html, "<p style='margin:0;'><b>Important interpretation caveat.</b> This analysis validates a ",
                            "<i>pre-computed</i> risk score / linear predictor rather than re-estimating model coefficients. ",
                            "Because the predictor is held fixed across resamples, the reported optimism and ",

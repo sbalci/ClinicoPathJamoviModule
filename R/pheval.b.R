@@ -235,7 +235,7 @@ phevalClass <- R6::R6Class(
                     # the result against jamovi 2.7.27+'s hardened as.formula.
                     cox_formula <- .asSurvivalFormula(paste0(
                         "Surv(time, event) ~ ",
-                        jmvcore::composeTerms(as.list(covariate_cols))
+                        paste(jmvcore::composeTerms(as.list(covariate_cols)), collapse = " + ")
                     ))
                     cox_model <- survival::coxph(cox_formula, data = data)
 
@@ -599,7 +599,7 @@ phevalClass <- R6::R6Class(
                 .value { font-weight: bold; color: #2c3e50; }
                 .coef-table { border-collapse: collapse; width: 100%; margin: 10px 0; }
                 .coef-table th, .coef-table td { border: 1px solid #ddd; padding: 8px; text-align: left; }
-                .coef-table th { background-color: #f2f2f2; }
+                .coef-table th { background-color: rgba(38, 38, 38, 0.06); color: inherit; }
             </style></head><body><div class='summary'>"
 
             html <- paste0(html, "<h3>Cox Proportional Hazards Model Summary</h3>")
@@ -803,9 +803,9 @@ phevalClass <- R6::R6Class(
             html <- "<html><head><style>
                 .recommendations { font-family: Arial, sans-serif; margin: 10px; }
                 .recommendation { margin: 15px 0; padding: 10px; border-left: 4px solid #3498db; }
-                .pass { border-left-color: #27ae60; background-color: #d5f4e6; }
-                .fail { border-left-color: #e74c3c; background-color: #fadbd8; }
-                .warning { border-left-color: #f39c12; background-color: #fdeaa7; }
+                .pass { border-left-color: #27ae60; background-color: rgba(33, 197, 123, 0.19); color: inherit; }
+                .fail { border-left-color: #e74c3c; background-color: rgba(227, 50, 33, 0.18); color: inherit; }
+                .warning { border-left-color: #f39c12; background-color: rgba(250, 202, 33, 0.4); color: inherit; }
             </style></head><body><div class='recommendations'>"
 
             html <- paste0(html, "<h3>Proportional Hazards Assessment & Recommendations</h3>")
@@ -877,8 +877,8 @@ phevalClass <- R6::R6Class(
             # Create natural language analysis summary
             html <- "<html><head><style>
                 .summary { font-family: Arial, sans-serif; line-height: 1.6; margin: 10px; }
-                .highlight { background-color: #f39c12; color: white; padding: 2px 4px; border-radius: 3px; }
-                .conclusion { background-color: #ecf0f1; padding: 10px; border-radius: 5px; margin: 10px 0; }
+                .highlight { background-color: #f39c12; color: #111111; color: white; padding: 2px 4px; border-radius: 3px; }
+                .conclusion { background-color: rgba(33, 80, 92, 0.09); color: inherit; padding: 10px; border-radius: 5px; margin: 10px 0; }
             </style></head><body><div class='summary'>"
 
             html <- paste0(html, "<h3>Proportional Hazards Testing Summary</h3>")
@@ -955,8 +955,8 @@ phevalClass <- R6::R6Class(
             html <- "<html><head><style>
                 .explanation { font-family: Arial, sans-serif; line-height: 1.6; margin: 10px; }
                 .method-section { margin: 15px 0; padding: 10px; border-left: 4px solid #3498db; }
-                .equation { background-color: #f8f9fa; padding: 8px; border-radius: 4px; font-family: 'Courier New', monospace; }
-                .test-method { margin: 10px 0; padding: 8px; background-color: #f9f9f9; border-radius: 4px; }
+                .equation { background-color: rgba(138, 155, 172, 0.06); color: inherit; padding: 8px; border-radius: 4px; font-family: 'Courier New', monospace; }
+                .test-method { margin: 10px 0; padding: 8px; background-color: rgba(155, 155, 155, 0.06); color: inherit; border-radius: 4px; }
             </style></head><body><div class='explanation'>"
 
             html <- paste0(html, "<h3>Proportional Hazards Testing Methodology</h3>")

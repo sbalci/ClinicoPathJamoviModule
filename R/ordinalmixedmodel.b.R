@@ -457,7 +457,7 @@ ordinalmixedmodelClass <- R6::R6Class(
                 "<h4>Model Specification</h4>",
                 "<p>The cumulative model assumes that the ordinal response Y has categories ",
                 "1 &lt; 2 &lt; ... &lt; J, and models:</p>",
-                "<p style='font-family: monospace; background: #f5f5f5; padding: 8px;'>",
+                "<p style='font-family: monospace; background-color: rgba(88, 88, 88, 0.06); padding: 8px; color: inherit;'>",
                 "logit[P(Y \u{2264} j)] = \u{03B1}<sub>j</sub> - X\u{03B2} - Zu</p>",
                 "<p>where \u{03B1}<sub>j</sub> are threshold parameters, X\u{03B2} are fixed effects, ",
                 "and Zu are random effects.</p>",

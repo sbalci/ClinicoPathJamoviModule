@@ -281,7 +281,7 @@ dynamiccoeffClass <- R6::R6Class(
                     # resolved through survival::coxph at evaluation time.
                     cox_formula <- jmvcore::asFormula(
                         paste0("Surv(time, event) ~ ",
-                               jmvcore::composeTerms(as.list(covariate_cols))),
+                               paste(jmvcore::composeTerms(as.list(covariate_cols)), collapse = " + ")),
                         additional_allowed_functions = c("Surv")
                     )
                     static_cox <- survival::coxph(cox_formula, data = data)
@@ -756,7 +756,7 @@ dynamiccoeffClass <- R6::R6Class(
                 .section { margin: 15px 0; padding: 10px; border-left: 3px solid #3498db; }
                 .metric { margin: 5px 0; }
                 .value { font-weight: bold; color: #2c3e50; }
-                .method { background-color: #ecf0f1; padding: 8px; border-radius: 4px; }
+                .method { background-color: rgba(33, 80, 92, 0.09); color: inherit; padding: 8px; border-radius: 4px; }
             </style></head><body><div class='summary'>"
             
             html <- paste0(html, "<h3>Dynamic Coefficient Model Summary</h3>")
@@ -1247,8 +1247,8 @@ dynamiccoeffClass <- R6::R6Class(
             # Create natural language analysis summary
             html <- "<html><head><style>
                 .summary { font-family: Arial, sans-serif; line-height: 1.6; margin: 10px; }
-                .highlight { background-color: #f39c12; color: white; padding: 2px 4px; border-radius: 3px; }
-                .conclusion { background-color: #ecf0f1; padding: 10px; border-radius: 5px; margin: 10px 0; }
+                .highlight { background-color: #f39c12; color: #111111; color: white; padding: 2px 4px; border-radius: 3px; }
+                .conclusion { background-color: rgba(33, 80, 92, 0.09); color: inherit; padding: 10px; border-radius: 5px; margin: 10px 0; }
             </style></head><body><div class='summary'>"
             
             html <- paste0(html, "<h3>Dynamic Coefficient Analysis Summary</h3>")
@@ -1312,7 +1312,7 @@ dynamiccoeffClass <- R6::R6Class(
             html <- "<html><head><style>
                 .explanation { font-family: Arial, sans-serif; line-height: 1.6; margin: 10px; }
                 .method-section { margin: 15px 0; padding: 10px; border-left: 4px solid #3498db; }
-                .equation { background-color: #f8f9fa; padding: 8px; border-radius: 4px; font-family: 'Courier New', monospace; }
+                .equation { background-color: rgba(138, 155, 172, 0.06); color: inherit; padding: 8px; border-radius: 4px; font-family: 'Courier New', monospace; }
                 .advantage { color: #27ae60; font-weight: bold; }
                 .limitation { color: #e74c3c; font-weight: bold; }
             </style></head><body><div class='explanation'>"

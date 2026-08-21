@@ -143,7 +143,7 @@ treeadvancedClass <- if (requireNamespace("jmvcore")) {
             },
             .show_welcome_message = function() {
                 welcome_html <- "
-            <div style='background-color: #e3f2fd; padding: 20px; border-radius: 8px; margin: 20px 0;'>
+            <div style='background-color: rgba(33, 152, 239, 0.13); padding: 20px; border-radius: 8px; margin: 20px 0; color: inherit;'>
             <h3 style='color: #1565c0; margin-top: 0;'>Advanced Clinical Decision Trees</h3>
             <p><strong>Enhanced CART with hyperparameter tuning and advanced validation</strong></p>
 
@@ -1094,7 +1094,7 @@ treeadvancedClass <- if (requireNamespace("jmvcore")) {
                 }
 
                 summary_html <- paste0(
-                    "<div style='background-color: #f8f9fa; padding: 15px; border-radius: 5px;'>",
+                    "<div style='background-color: rgba(138, 155, 172, 0.06); padding: 15px; border-radius: 5px; color: inherit;'>",
                     "<h4>Advanced Model Summary</h4>",
                     "<ul>",
                     "<li><strong>Algorithm:</strong> Enhanced CART (rpart) with advanced features</li>",
@@ -1286,7 +1286,7 @@ treeadvancedClass <- if (requireNamespace("jmvcore")) {
                 best_score <- private$.tuning_results$best_score
 
                 tuning_html <- paste0(
-                    "<div style='background-color: #fff3e0; padding: 15px; border-radius: 5px;'>",
+                    "<div style='background-color: rgba(255, 169, 33, 0.14); padding: 15px; border-radius: 5px; color: inherit;'>",
                     "<h4>Hyperparameter Tuning Results</h4>",
                     "<p><strong>Tuning Method:</strong> ", self$options$tuning_method, " search</p>",
                     "<p><strong>Optimization Metric:</strong> ", self$options$tuning_metric, "</p>",
@@ -1374,7 +1374,7 @@ treeadvancedClass <- if (requireNamespace("jmvcore")) {
                 )
 
                 clinical_html <- paste0(
-                    "<div style='background-color: #f0f8ff; padding: 15px; border-radius: 5px;'>",
+                    "<div style='background-color: rgba(33, 152, 255, 0.07); padding: 15px; border-radius: 5px; color: inherit;'>",
                     interpretation,
                     "<p><strong>Performance:</strong> ", performance_metrics, "</p>",
                     "<h4>Advanced Features Used:</h4>",

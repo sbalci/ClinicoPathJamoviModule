@@ -330,6 +330,107 @@ survivalTable <- self$results$survivalTable
 coxTable <- self$results$coxTable
 ```
 
+### FIRST: decide whether the rows belong in `.init()` or `.run()`
+
+**[MEDIUM] — raised by the jamovi library reviewer against four of five modules.**
+
+jamovi builds results in two phases, and **where you declare a table's structure
+decides what the user sees while the analysis runs**. A table declared `rows: 0`
+and filled with `addRow()` from `.run()` first appears empty, then visibly
+restructures once computation finishes — a jump on every single run. Declaring
+the structure up front means the table appears complete and only the values fill
+in.
+
+#### The test
+
+> Does the **row set** depend on a computed result, or only on options and data shape?
+
+| Row set depends on | Where it belongs |
+|---|---|
+| Nothing — always the same rows | `.init()` (or `rows: N` in `.r.yaml`) |
+| Option values (one row per selected variable) | `.init()` |
+| Data shape (numeric vs categorical variable) | `.init()` |
+| A **computed result** — discovered factor-level pairs, computed bins, RECIST categories actually present in the data | `.run()`, correct as is |
+
+Real examples the reviewer flagged: `checkdata`'s `missingVals` (always exactly
+four rows), `benford`'s `summary` (always rowKeys 1–6), `venn`'s `summary` (one
+row per selected variable), `crosstable`'s `tab` (one row per `vars` entry),
+`sequentialtests`' `cost_analysis_table` (always Test 1 / Test 2 / Total),
+`diagnosticmeta`'s `bivariateresults` (always sensitivity / specificity / plr /
+nlr / dor).
+
+Real examples the reviewer explicitly did **not** flag: `agepyramid`'s
+`pyramidTable`, `categorize`'s break and frequency tables, `chisqposttest`'s
+`posthocTable`, `waterfall`'s `summaryTable`. Those have genuinely
+result-dependent structure.
+
+#### The pattern
+
+```r
+.init = function() {
+    table <- self$results$missingVals
+    table$addRow(rowKey = "total_obs",      values = list(metric = .("Total observations")))
+    table$addRow(rowKey = "missing_vals",   values = list(metric = .("Missing values")))
+    table$addRow(rowKey = "complete_cases", values = list(metric = .("Complete cases")))
+    table$addRow(rowKey = "unique_vals",    values = list(metric = .("Unique values")))
+},
+
+.run = function() {
+    ...
+    table <- self$results$missingVals
+    table$setRow(rowKey = "total_obs",      values = list(value = n_total))
+    table$setRow(rowKey = "missing_vals",   values = list(value = n_missing))
+    table$setRow(rowKey = "complete_cases", values = list(value = n_complete))
+    table$setRow(rowKey = "unique_vals",    values = list(value = n_unique))
+}
+```
+
+> **`setRow()` on a rowKey that does not exist throws.** Every key you `setRow()`
+> in `.run()` must be created in `.init()` on **every** path that reaches it. If a
+> row is genuinely conditional, create it unconditionally in `.init()` and leave
+> it blank rather than skipping it.
+
+#### `setRow()` matches rowKeys with `identical()` — attributes count
+
+This is the trap that actually bit. `jmvcore::Table$setRow()` finds the row with
+`base::identical()`, so the key must match in **type and attributes**, not just in
+printed value:
+
+```r
+key <- c(num = "num")          # a NAMED character
+identical(key, "num")          # FALSE
+tab$setRow(rowKey = key, ...)  # Error: rowKey 'num' not found  -> aborts the analysis
+```
+
+A named character is easy to produce by accident — `mapping[name]` (single
+bracket) keeps the name, `mapping[[name]]` drops it. Likewise `1` is not
+`identical()` to `1L`, so an integer key created in `.init()` will not match a
+double literal in `.run()`.
+
+Defensive habits:
+
+- Build keys with `unname(as.character(x))` in `.init()`.
+- Use `[[` not `[` in any helper that resolves a display name.
+- Use `1L`, not `1`, for integer rowKeys on both sides.
+
+**None of this is visible to a parse check, a grep, or a schema-consistency
+test.** It aborts on the happy path at runtime. Any table whose rows move into
+`.init()` needs a test that actually *runs* the analysis and asserts `rowCount` —
+see `tests/testthat/test-zzz-init-row-structure-runtime.R`.
+
+#### `deleteRows()` at the top of a population method is a tell
+
+It exists to stop rows accumulating across runs, and it becomes unnecessary once
+the rows are created once in `.init()` — jamovi rebuilds the results skeleton
+from the schema on every run anyway.
+
+#### Don't push numbers through a `type: text` column
+
+Two summary tables declared `value` as `type: text` and fed it `as.character()`
+output. That gives up jamovi's own number formatting and decimal-place handling,
+and text columns don't right-align, so a column of numbers reads ragged. Split
+numeric statistics into a `type: number` column.
+
 ### Table Population Methods
 
 #### Method 1: `addRow()` - Row-by-Row Addition

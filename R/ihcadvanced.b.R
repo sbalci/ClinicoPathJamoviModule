@@ -651,12 +651,12 @@ ihcadvancedClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                     <li>Method used: %s</li>
                 </ul>
 
-                <div style='background-color: #e8f4fd; padding: 15px; border-radius: 5px; margin: 10px 0;'>
+                <div style='background-color: rgba(33, 149, 236, 0.1); padding: 15px; border-radius: 5px; margin: 10px 0; color: inherit;'>
                 <h4>Clinical Interpretation:</h4>
                 <p>%s</p>
                 </div>
 
-                <div style='background-color: #f0f8ff; padding: 10px; border: 1px solid #ccc; border-radius: 3px; margin: 10px 0;'>
+                <div style='background-color: rgba(33, 152, 255, 0.07); padding: 10px; border: 1px solid #ccc; border-radius: 3px; margin: 10px 0; color: inherit;'>
                 <h4>Report Summary (Copy-Ready):</h4>
                 <p>%s</p>
                 </div>",

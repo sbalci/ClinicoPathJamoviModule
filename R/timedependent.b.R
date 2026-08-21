@@ -47,7 +47,7 @@ timedependentClass <- if (requireNamespace('jmvcore'))
         
         if (length(missing_packages) > 0) {
           error_msg <- paste0(
-            "<div style='color: red; background-color: #ffebee; padding: 20px; border-radius: 8px;'>",
+            "<div style='color: red; background-color: rgba(255, 33, 67, 0.09); padding: 20px; border-radius: 8px;'>",
             "<h4>Missing Required Packages</h4>",
             "<p>The following packages are required for time-dependent analysis:</p>",
             "<ul>", paste0("<li>", missing_packages, "</li>", collapse = ""), "</ul>",
@@ -103,7 +103,7 @@ timedependentClass <- if (requireNamespace('jmvcore'))
           
         }, error = function(e) {
           error_msg <- paste0(
-            "<div style='color: red; background-color: #ffebee; padding: 15px; border-radius: 8px;'>",
+            "<div style='color: red; background-color: rgba(255, 33, 67, 0.09); padding: 15px; border-radius: 8px;'>",
             "<h4>Analysis Error</h4>",
             "<p><strong>Error:</strong> ", htmltools::htmlEscape(e$message), "</p>",
             "</div>"
@@ -175,7 +175,7 @@ timedependentClass <- if (requireNamespace('jmvcore'))
           
         }, error = function(e) {
           error_msg <- paste0(
-            "<div style='color: red; background-color: #ffebee; padding: 15px; border-radius: 8px;'>",
+            "<div style='color: red; background-color: rgba(255, 33, 67, 0.09); padding: 15px; border-radius: 8px;'>",
             "<h4>Data Preparation Error</h4>",
             "<p><strong>Error:</strong> ", htmltools::htmlEscape(e$message), "</p>",
             "<p>Please check your data format and variable selections.</p>",
@@ -785,7 +785,7 @@ timedependentClass <- if (requireNamespace('jmvcore'))
         aic <- -2 * loglik[2] + 2 * length(model$coefficients)
         
         summary_html <- paste0(
-          "<div style='background-color: #e3f2fd; padding: 20px; border-radius: 8px; margin: 10px 0;'>",
+          "<div style='background-color: rgba(33, 152, 239, 0.13); padding: 20px; border-radius: 8px; margin: 10px 0; color: inherit;'>",
           "<h3 style='color: #1976d2; margin-top: 0;'>Time-Dependent Survival Analysis Summary</h3>",
           
           "<h4 style='color: #2c5aa0;'>Model Information:</h4>",
@@ -834,7 +834,7 @@ timedependentClass <- if (requireNamespace('jmvcore'))
       .generate_interpretation = function(model_results) {
         
         interpretation_html <- paste0(
-          "<div style='background-color: #f3e5f5; padding: 20px; border-radius: 8px; margin: 10px 0;'>",
+          "<div style='background-color: rgba(153, 33, 170, 0.12); padding: 20px; border-radius: 8px; margin: 10px 0; color: inherit;'>",
           "<h3 style='color: #7b1fa2; margin-top: 0;'>Clinical Interpretation</h3>",
           
           "<h4 style='color: #8e24aa;'>Time-Dependent Effects:</h4>",
@@ -867,7 +867,7 @@ timedependentClass <- if (requireNamespace('jmvcore'))
       .generate_recommendations = function() {
         
         recommendations_html <- paste0(
-          "<div style='background-color: #e8f5e8; padding: 20px; border-radius: 8px; margin: 10px 0;'>",
+          "<div style='background-color: rgba(33, 159, 33, 0.1); padding: 20px; border-radius: 8px; margin: 10px 0; color: inherit;'>",
           "<h3 style='color: #2e7d32; margin-top: 0;'>Clinical Recommendations</h3>",
           
           "<h4 style='color: #388e3c;'>Model Validation:</h4>",
@@ -900,7 +900,7 @@ timedependentClass <- if (requireNamespace('jmvcore'))
       .create_welcome_message = function() {
         
         paste0(
-          "<div style='background-color: #e8f5e8; padding: 20px; border-radius: 8px; margin: 20px 0;'>",
+          "<div style='background-color: rgba(33, 159, 33, 0.1); padding: 20px; border-radius: 8px; margin: 20px 0; color: inherit;'>",
           "<h3 style='color: #2e7d32; margin-top: 0;'>Welcome to Time-Dependent Covariates & ROC Analysis!</h3>",
           "<p><strong>Advanced survival analysis with time-varying effects and dynamic predictions</strong></p>",
           

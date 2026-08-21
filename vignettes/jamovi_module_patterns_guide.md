@@ -19,6 +19,13 @@
 
 ---
 
+> **Before a library submission, read `vignettes/jamovi_library_review_guide.md`.**
+> It distils five real jamovi library audit reports into a pre-submission
+> checklist and the ten findings that recur across every module — unguarded
+> `image$state`, opaque light-theme HTML, fixed table rows built in `.run()`,
+> `setVisible(FALSE)` used to signal failure, named HTML entities, invisible
+> `warning()` calls, spliced `.()` fragments, and undeclared base packages.
+
 ## Module Structure
 
 ### Standard Directory Layout
@@ -105,6 +112,35 @@ Remotes:
     jbengler/tidyplots,
     ClinicoPath/waffle
 ```
+
+**Base-priority packages count too.** `grDevices`, `grid`, `stats`, `utils`,
+`methods`, `tools` ship with every R installation and cannot go missing, so there
+is no runtime fragility — but `R CMD check` treats an undeclared `::` call or
+`importFrom()` as a **declaration error**:
+
+```
+WARNING: '::' or ':::' import not declared from: 'grDevices'
+WARNING: Namespace dependencies not required: 'stats' 'utils'
+```
+
+That's a check failure standing between you and a clean build, and it's easy to
+miss because the module runs perfectly in jamovi regardless. The jamovi library
+reviewer raised it against two modules. If your dependency guard test excludes
+base-priority packages wholesale, narrow the exclusion to `base` itself.
+
+**Runtime dependencies must be `Imports`, never `Suggests`.** jamovi installs
+`Imports` on first run and cannot install a missing package on demand, so a
+`requireNamespace()`-guarded runtime dependency parked in `Suggests` is simply a
+broken analysis for the user. Accept the CRAN "unused Imports" NOTE. Only
+`testthat` / `knitr` / `rmarkdown` belong in `Suggests`.
+
+**Declared-but-unused is a finding too.** A package held alive only by an
+`@importFrom` roxygen tag with no call site is a package every user installs for
+nothing. So is a `Remotes:` entry for a dependency you have since vendored or
+dropped — it can only cause an unnecessary GitHub fetch at install time.
+
+**Pin every `Remotes:` entry to a full commit SHA**, so a push to the upstream
+default branch cannot silently change what a build pulls in.
 
 **Practical notes:**
 
@@ -317,6 +353,52 @@ children:
 - `TargetLayoutBox` - Drop target for variables
 
 ---
+
+## Two top-level functions with the same name silently shadow each other
+
+Every `R/*.b.R` file contributes its top-level functions to **one** package
+namespace. Two files defining `.getDisplayName()` do not get one each — the file
+that comes **last in the `Collate:` field of `DESCRIPTION` wins**, and every
+caller in the package gets that one, including callers in the other file.
+
+This is silent. No warning at build, no warning at load, nothing in `R CMD check`.
+
+It cost a real bug here: `R/crosstable.b.R` defined `.getDisplayName()` using
+`mapping[[name]]` (drops names); `R/survival.b.R` defined a *different*
+`.getDisplayName()` using `mapping[name]` (**keeps** names). `survival.b.R`
+collates later, so `crosstable` had been calling survival's version all along.
+Harmless while the result only went into a plot title — and fatal the moment the
+value became a `setRow()` rowKey, because a named character is not `identical()`
+to a plain one.
+
+Find them:
+
+```bash
+python3 - <<'EOF'
+import re, glob, collections
+pat = re.compile(r'^([A-Za-z._][\w.]*)\s*(?:<-|=)\s*function\s*\(', re.M)
+defs = collections.defaultdict(list)
+for f in sorted(glob.glob('R/*.R')):
+    src = open(f, encoding='utf-8').read()
+    for m in pat.finditer(src):
+        defs[m.group(1)].append('%s:%d' % (f, src[:m.start()].count(chr(10)) + 1))
+for k, v in defs.items():
+    if len(v) > 1:
+        print(k, '->', ' | '.join(v))
+EOF
+```
+
+(Unindented members of an R6 `private = list(...)` produce false positives —
+confirm a hit is really at top level before acting on it.)
+
+**Rules:**
+
+- Prefix a shared helper with the analysis that owns it —
+  `.crosstableDisplayName()`, `.survivalDisplayName()` — or move the single
+  canonical version into `R/utils.R` and delete the copies.
+- Never hand-write the public wrapper in `.b.R`: the generated `.h.R` defines it
+  too, collates after, and wins, leaving your version dead while still emitting a
+  duplicate `@export`.
 
 ## Data Handling Patterns
 

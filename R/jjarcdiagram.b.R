@@ -28,9 +28,19 @@ jjarcdiagramClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         .noticeList = list(),
 
         .addNotice = function(type, title, content) {
-            private$.noticeList[[length(private$.noticeList) + 1]] <- list(
-                type = type, title = title, content = content
-            )
+            entry <- list(type = type, title = title, content = content)
+            # Idempotent by identity. Both .run() and .plot() call
+            # .prepareNetworkData() on the SAME R6 instance, so the render pass
+            # re-emits every network notice. Dropping an exact duplicate here is
+            # what lets .prepareNetworkData() stop wiping the list -- and the wipe
+            # was destroying notices raised OUTSIDE it (the summary-failure notice
+            # in .run() is added after prepare, so the render pass deleted it and
+            # the user never saw why the summary was missing).
+            for (existing in private$.noticeList) {
+                if (identical(existing, entry))
+                    return(invisible(NULL))
+            }
+            private$.noticeList[[length(private$.noticeList) + 1]] <- entry
             private$.renderNotices()
         },
 
@@ -127,11 +137,17 @@ jjarcdiagramClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 tryCatch({
                     private$.generateReportSentence(network_data)
                 }, error = function(e) {
-                    warning(paste("Report generation failed:", e$message))
+                    # jamovi does not surface base warning() output, so the reason the
+                    # summary is missing goes to the notices item the user can see.
+                    private$.addNotice(
+                        "WARNING",
+                        .("Summary could not be generated"),
+                        paste0(conditionMessage(e),
+                               ". The network plot and statistics above are unaffected."))
                     # Set fallback content
                     fallback_html <- paste(
                         .("<h3> Analysis Summary</h3>"),
-                        "<div style='background-color: #fff3cd; padding: 10px; border-left: 4px solid #ffc107;'>",
+                        "<div style='background-color: rgba(255, 202, 33, 0.23); padding: 10px; border-left: 4px solid #ffc107; color: inherit;'>",
                         .("<p><strong>Status:</strong> Network analysis completed successfully.</p>"),
                         .("<p><strong>Note:</strong> Detailed summary generation encountered an issue. Basic network visualization is available above.</p>"),
                         "</div>",
@@ -252,7 +268,7 @@ jjarcdiagramClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             
             guidance <- switch(preset,
                 "gene_interaction" = paste(
-                    "<div style='background-color: #e8f5e8; padding: 10px; margin: 10px 0; border-left: 4px solid #4CAF50;'>",
+                    "<div style='background-color: rgba(33, 159, 33, 0.1); padding: 10px; margin: 10px 0; border-left: 4px solid #4CAF50; color: inherit;'>",
                     .("<h4> Gene Interaction Network Analysis</h4>"),
                     .("<p><strong>Optimized for:</strong> Gene regulatory relationships, protein interactions, pathway analysis</p>"),
                     .("<p><strong>Recommendations:</strong> Use gene symbols as nodes, interaction scores as weights, pathways/functions as groups</p>"),
@@ -261,7 +277,7 @@ jjarcdiagramClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     sep = "\n"
                 ),
                 "patient_network" = paste(
-                    "<div style='background-color: #e3f2fd; padding: 10px; margin: 10px 0; border-left: 4px solid #2196F3;'>",
+                    "<div style='background-color: rgba(33, 152, 239, 0.13); padding: 10px; margin: 10px 0; border-left: 4px solid #2196F3; color: inherit;'>",
                     .("<h4> Patient Similarity Network Analysis</h4>"),
                     .("<p><strong>Optimized for:</strong> Patient similarity, treatment response, clinical outcomes</p>"),
                     .("<p><strong>Recommendations:</strong> Use patient IDs as nodes, similarity scores as weights, clinical subtypes as groups</p>"),
@@ -270,7 +286,7 @@ jjarcdiagramClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     sep = "\n"
                 ),
                 "pathway_network" = paste(
-                    "<div style='background-color: #fff3e0; padding: 10px; margin: 10px 0; border-left: 4px solid #ff9800;'>",
+                    "<div style='background-color: rgba(255, 169, 33, 0.14); padding: 10px; margin: 10px 0; border-left: 4px solid #ff9800; color: inherit;'>",
                     .("<h4> Biological Pathway Network Analysis</h4>"),
                     .("<p><strong>Optimized for:</strong> Pathway interactions, biological processes, functional modules</p>"),
                     .("<p><strong>Recommendations:</strong> Use pathway names as nodes, interaction strength as weights, functional categories as groups</p>"),
@@ -279,7 +295,7 @@ jjarcdiagramClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     sep = "\n"
                 ),
                 "comorbidity_network" = paste(
-                    "<div style='background-color: #fce4ec; padding: 10px; margin: 10px 0; border-left: 4px solid #e91e63;'>",
+                    "<div style='background-color: rgba(230, 33, 99, 0.12); padding: 10px; margin: 10px 0; border-left: 4px solid #e91e63; color: inherit;'>",
                     .("<h4> Disease Co-occurrence Network Analysis</h4>"),
                     .("<p><strong>Optimized for:</strong> Disease associations, comorbidity patterns, epidemiological analysis</p>"),
                     .("<p><strong>Recommendations:</strong> Use disease codes/names as nodes, co-occurrence frequency as weights, disease categories as groups</p>"),
@@ -334,11 +350,13 @@ jjarcdiagramClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         
         # Helper method to prepare network data
         .prepareNetworkData = function() {
-            # Reset notices at the start of every preparation pass. Both .run() and .plot()
-            # call this method on the SAME R6 instance; without a reset here the render pass
-            # (.plot) re-appends every warning, duplicating the notices panel each cycle.
-            private$.noticeList <- list()
-            private$.renderNotices()
+            # NOTE: deliberately does NOT reset the notice list. It used to, because
+            # both .run() and .plot() call this method on the same R6 instance and the
+            # render pass would otherwise duplicate every warning. That reset also
+            # destroyed notices raised outside this method -- the summary-failure
+            # notice added later in .run() vanished as soon as the plot drew.
+            # Duplication is now prevented in .addNotice() instead, which ignores an
+            # exact repeat. A fresh .run() still clears the list at its top.
 
             mydata <- self$data
 
@@ -898,7 +916,7 @@ jjarcdiagramClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             # Add clinical interpretation summary
             clinical_summary <- paste(
                 .("<h4> Clinical Interpretation:</h4>"),
-                "<div style='background-color: #f0f8ff; padding: 10px; margin: 10px 0; border-left: 4px solid #4CAF50;'>",
+                "<div style='background-color: rgba(33, 152, 255, 0.07); padding: 10px; margin: 10px 0; border-left: 4px solid #4CAF50; color: inherit;'>",
                 # density_interp is an ADVERB ("moderately connected"); it cannot also
                 # modify a noun, which produced "showing moderately connectivity".
                 sprintf(.("<p><strong>Network Overview:</strong> This network contains %d entities with %d relationships, and is %s connected (density = %.3f).</p>"),
@@ -980,7 +998,7 @@ jjarcdiagramClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 is_connected <- igraph::is_connected(g)
                 if (!is_connected) {
                     stats_text <- paste(stats_text,
-                        "<div style='background-color: #fff3cd; padding: 8px; margin: 8px 0; border-left: 4px solid #ffc107;'>",
+                        "<div style='background-color: rgba(255, 202, 33, 0.23); padding: 8px; margin: 8px 0; border-left: 4px solid #ffc107; color: inherit;'>",
                         .("<p><strong> Disconnected Network:</strong> This network contains isolated components. Centrality measures (betweenness, closeness) may be less meaningful. Nodes unreachable from others are assigned zero centrality.</p>"),
                         "</div>",
                         sep = "\n"
@@ -1000,7 +1018,7 @@ jjarcdiagramClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 } else {
                     # Fallback if no valid centrality values
                     stats_text <- paste(stats_text,
-                        "<div style='background-color: #f8d7da; padding: 8px; margin: 8px 0; border-left: 4px solid #dc3545;'>",
+                        "<div style='background-color: rgba(216, 33, 50, 0.18); padding: 8px; margin: 8px 0; border-left: 4px solid #dc3545; color: inherit;'>",
                         .("<p><strong> Error:</strong> Could not calculate valid centrality measures. Network may be too disconnected or contain invalid data.</p>"),
                         "</div>",
                         sep = "\n"
@@ -1020,7 +1038,7 @@ jjarcdiagramClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
                 # Add centrality interpretation
                 centrality_interp <- paste(
-                    "<div style='background-color: #fff5f5; padding: 8px; margin: 8px 0; border-left: 4px solid #FF6B6B;'>",
+                    "<div style='background-color: rgba(255, 88, 88, 0.06); padding: 8px; margin: 8px 0; border-left: 4px solid #FF6B6B; color: inherit;'>",
                     sprintf(.("<p><strong> Key Players:</strong> '%s' is the most connected entity (%.2f %s), suggesting it may be a hub or central player.</p>"),
                             htmltools::htmlEscape(highest_degree_node), max_degree, degree_label),
                     if (highest_betweenness_node != highest_degree_node) {
@@ -1056,7 +1074,7 @@ jjarcdiagramClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         .createAssumptions = function() {
             assumptions <- paste(
                 .("<h3> Network Analysis Assumptions & Guidelines</h3>"),
-                "<div style='background-color: #f9f9f9; padding: 15px; margin: 10px 0; border-radius: 5px;'>",
+                "<div style='background-color: rgba(155, 155, 155, 0.06); padding: 15px; margin: 10px 0; border-radius: 5px; color: inherit;'>",
 
                 .("<h4> Data Requirements:</h4>"),
                 "<ul style='margin-left: 20px;'>",
@@ -1120,7 +1138,7 @@ jjarcdiagramClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             # Create the copy-ready sentence
             report_html <- paste(
                 .("<h3> Copy-Ready Analysis Summary</h3>"),
-                "<div style='background-color: #e8f5e8; padding: 15px; margin: 10px 0; border-radius: 5px; border-left: 4px solid #4CAF50;'>",
+                "<div style='background-color: rgba(33, 159, 33, 0.1); padding: 15px; margin: 10px 0; border-radius: 5px; border-left: 4px solid #4CAF50; color: inherit;'>",
                 
                 sprintf(.("<p><strong>Network Summary:</strong> Arc diagram analysis of a %s network revealed %d entities connected by %d relationships, with a network density of %.3f indicating %s structure.</p>"),
                         analysis_type, network_data$n_nodes, network_data$n_edges, network_data$density, density_desc),
@@ -1163,7 +1181,7 @@ jjarcdiagramClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         .generateGlossary = function() {
             glossary_html <- paste(
                 .("<h3> Network Analysis Glossary</h3>"),
-                "<div style='background-color: #f9f9f9; padding: 15px; margin: 10px 0; border-radius: 5px; border-left: 4px solid #2196F3;'>",
+                "<div style='background-color: rgba(155, 155, 155, 0.06); padding: 15px; margin: 10px 0; border-radius: 5px; border-left: 4px solid #2196F3; color: inherit;'>",
 
                 "<dl style='margin: 0;'>",
 

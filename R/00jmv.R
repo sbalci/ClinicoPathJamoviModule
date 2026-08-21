@@ -1858,8 +1858,8 @@
         `author`="Gaston Sanchez", 
         `year`=2018, 
         `title`="arcdiagram: R package", 
-        `publisher`="[R package]. Retrieved from https://CRAN.R-project.org/package=arcdiagram", 
-        `url`="https://CRAN.R-project.org/package=arcdiagram"), 
+        `publisher`="[R package]. Retrieved from https://github.com/gastonstat/arcdiagram", 
+        `url`="https://github.com/gastonstat/arcdiagram"), 
     `ggpubr`=list(
         `type`="software", 
         `author`="Alboukadel Kassambara", 
@@ -2686,13 +2686,15 @@
         `publisher`="Biometrics", 
         `volume`=44, 
         `issue`=3, 
-        `pages`="837-845"), 
+        `pages`="837-845", 
+        `url`="https://doi.org/10.2307/2531595"), 
     `Cohen1988`=list(
         `type`="book", 
         `author`="Cohen, J.", 
         `year`=1988, 
         `title`="Statistical Power Analysis for the Behavioral Sciences (2nd ed.)", 
-        `publisher`="Lawrence Erlbaum Associates"), 
+        `publisher`="Lawrence Erlbaum Associates", 
+        `url`="https://doi.org/10.4324/9780203771587"), 
     `DerSimonian1986`=list(
         `type`="article", 
         `author`="DerSimonian, R., & Laird, N.", 
@@ -2702,7 +2704,8 @@
         `volume`=7, 
         `issue`=3, 
         `pages`="177-188", 
-        `doi`="10.1016/0197-2456(86)90046-2"), 
+        `doi`="10.1016/0197-2456(86)90046-2", 
+        `url`="https://doi.org/10.1016/0197-2456(86)90046-2"), 
     `Higgins2003`=list(
         `type`="article", 
         `author`="Higgins, J. P. T., Thompson, S. G., Deeks, J. J., & Altman, D. G.", 
@@ -2712,7 +2715,8 @@
         `volume`=327, 
         `issue`=7414, 
         `pages`="557-560", 
-        `doi`="10.1136/bmj.327.7414.557"), 
+        `doi`="10.1136/bmj.327.7414.557", 
+        `url`="https://doi.org/10.1136/bmj.327.7414.557"), 
     `Hedges1981`=list(
         `type`="article", 
         `author`="Hedges, L. V.", 
@@ -2721,7 +2725,8 @@
         `publisher`="Journal of Educational Statistics", 
         `volume`=6, 
         `issue`=2, 
-        `pages`="107-128"), 
+        `pages`="107-128", 
+        `url`="https://doi.org/10.3102/10769986006002107"), 
     `Pencina2008`=list(
         `type`="article", 
         `author`="Pencina, M. J., D'Agostino Sr, R. B., D'Agostino Jr, R. B., & Vasan, R. S.", 
@@ -2731,7 +2736,8 @@
         `volume`=27, 
         `issue`=2, 
         `pages`="157-172", 
-        `doi`="10.1002/sim.2929"), 
+        `doi`="10.1002/sim.2929", 
+        `url`="https://doi.org/10.1002/sim.2929"), 
     `Pencina2011`=list(
         `type`="article", 
         `author`="Pencina, M. J., D'Agostino Sr, R. B., & Steyerberg, E. W.", 
@@ -2741,7 +2747,8 @@
         `volume`=30, 
         `issue`=1, 
         `pages`="11-21", 
-        `doi`="10.1002/sim.4085"), 
+        `doi`="10.1002/sim.4085", 
+        `url`="https://doi.org/10.1002/sim.4085"), 
     `Vickers2006`=list(
         `type`="article", 
         `author`="Vickers, A. J., & Elkin, E. B.", 
@@ -2751,7 +2758,8 @@
         `volume`=26, 
         `issue`=6, 
         `pages`="565-574", 
-        `doi`="10.1177/0272989X06295361"), 
+        `doi`="10.1177/0272989X06295361", 
+        `url`="https://doi.org/10.1177/0272989X06295361"), 
     `Steyerberg2010`=list(
         `type`="article", 
         `author`="Steyerberg, E. W., Vickers, A. J., Cook, N. R., Gerds, T., Gonen, M., Obuchowski, N., Pencina, M. J., & Kattan, M. W.", 
@@ -2761,7 +2769,8 @@
         `volume`=21, 
         `issue`=1, 
         `pages`="128-138", 
-        `doi`="10.1097/EDE.0b013e3181c30fb2"), 
+        `doi`="10.1097/EDE.0b013e3181c30fb2", 
+        `url`="https://doi.org/10.1097/EDE.0b013e3181c30fb2"), 
     `harrell2015`=list(
         `type`="book", 
         `author`="Harrell Jr, F. E.", 
@@ -2778,7 +2787,8 @@
         `volume`=39, 
         `issue`=2, 
         `pages`="175-191", 
-        `doi`="10.3758/BF03193146"), 
+        `doi`="10.3758/BF03193146", 
+        `url`="https://doi.org/10.3758/BF03193146"), 
     `Matthews1975`=list(
         `type`="article", 
         `author`="Matthews, B. W.", 
@@ -2798,7 +2808,8 @@
         `volume`=9, 
         `issue`=3, 
         `pages`="190-195", 
-        `doi`="10.1177/0272989X8900900307"), 
+        `doi`="10.1177/0272989X8900900307", 
+        `url`="https://doi.org/10.1177/0272989X8900900307"), 
     `Saito2015`=list(
         `type`="article", 
         `author`="Saito, T., & Rehmsmeier, M.", 
@@ -2826,19 +2837,22 @@
         `volume`=26, 
         `issue`=10, 
         `pages`="1348-1356", 
-        `doi`="10.1093/bioinformatics/btq140"), 
+        `doi`="10.1093/bioinformatics/btq140", 
+        `url`="https://doi.org/10.1093/bioinformatics/btq140"), 
     `Kruschke2014`=list(
         `type`="book", 
         `author`="Kruschke, J. K.", 
         `year`=2014, 
         `title`="Doing Bayesian Data Analysis: A Tutorial with R, JAGS, and Stan (2nd ed.)", 
-        `publisher`="Academic Press"), 
+        `publisher`="Academic Press", 
+        `url`="https://doi.org/10.1016/C2012-0-00477-2"), 
     `McElreath2020`=list(
         `type`="book", 
         `author`="McElreath, R.", 
         `year`=2020, 
         `title`="Statistical Rethinking: A Bayesian Course with Examples in R and Stan (2nd ed.)", 
-        `publisher`="CRC Press"), 
+        `publisher`="CRC Press", 
+        `url`="https://doi.org/10.1201/9780429029608"), 
     `Hothorn2006`=list(
         `type`="article", 
         `author`="Hothorn, T., Hornik, K., & Zeileis, A.", 
@@ -3056,4 +3070,5 @@
         `volume`=6, 
         `issue`=61, 
         `pages`="3236", 
-        `doi`="10.21105/joss.03236"))
+        `doi`="10.21105/joss.03236", 
+        `url`="https://doi.org/10.21105/joss.03236"))

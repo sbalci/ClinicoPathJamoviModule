@@ -180,11 +180,11 @@ clinicalheatmapClass <- if (requireNamespace("jmvcore")) {
             .createHTMLSection = function(title, content, style = "info", icon = NULL) {
                 # Helper function to create consistent HTML sections
                 styles <- list(
-                    info = "background-color: #e3f2fd; color: #1976d2; border-left: 4px solid #2196f3;",
-                    warning = "background-color: #fff3e0; color: #f57c00; border-left: 4px solid #ff9800;",
-                    error = "background-color: #ffebee; color: #d32f2f; border-left: 4px solid #f44336;",
-                    success = "background-color: #e8f5e9; color: #388e3c; border-left: 4px solid #4caf50;",
-                    neutral = "background-color: #f5f5f5; color: #333; border-left: 4px solid #757575;"
+                    info = "background-color: rgba(33, 152, 239, 0.13); color: inherit; color: inherit; border-left: 4px solid #2196f3;",
+                    warning = "background-color: rgba(255, 169, 33, 0.14); color: inherit; color: inherit; border-left: 4px solid #ff9800;",
+                    error = "background-color: rgba(255, 33, 67, 0.09); color: inherit; color: #d32f2f; border-left: 4px solid #f44336;",
+                    success = "background-color: rgba(33, 159, 43, 0.1); color: inherit; color: inherit; border-left: 4px solid #4caf50;",
+                    neutral = "background-color: rgba(88, 88, 88, 0.06); color: inherit; color: inherit; border-left: 4px solid #757575;"
                 )
 
                 icon_html <- if (!is.null(icon)) paste0(icon, " ") else ""
@@ -210,7 +210,7 @@ clinicalheatmapClass <- if (requireNamespace("jmvcore")) {
                 # Check if required variables have been selected
                 if (is.null(self$options$rowVar) || is.null(self$options$colVar) || is.null(self$options$valueVar)) {
                     intro_msg <- "
-                <div style='background-color: #e3f2fd; padding: 20px; border-radius: 8px; margin: 20px 0;'>
+                <div style='background-color: rgba(33, 152, 239, 0.13); padding: 20px; border-radius: 8px; margin: 20px 0; color: inherit;'>
                 <h3 style='color: #1976d2; margin-top: 0;'> Welcome to Clinical Heatmap Analysis!</h3>
                 <p><strong>Advanced heatmap visualization for clinical and biomedical data</strong></p>
                 <p>Create publication-ready heatmaps from tidy clinical datasets with comprehensive customization options</p>
@@ -271,7 +271,7 @@ clinicalheatmapClass <- if (requireNamespace("jmvcore")) {
 
                     # Keep detailed HTML explanation
                     error_msg <- "
-                <div style='color: #721c24; background-color: #f8d7da; padding: 20px; border-radius: 8px;'>
+                <div style='color: inherit; background-color: rgba(216, 33, 50, 0.18); padding: 20px; border-radius: 8px;'>
                 <h4> Dataset Error</h4>
                 <p><strong>Problem:</strong> The provided dataset contains no rows.</p>
                 <h5>Possible Solutions:</h5>
@@ -294,14 +294,14 @@ clinicalheatmapClass <- if (requireNamespace("jmvcore")) {
 
                     # Keep detailed HTML explanation
                     error_msg <- "
-                <div style='color: #721c24; background-color: #f8d7da; padding: 20px; border-radius: 8px;'>
+                <div style='color: inherit; background-color: rgba(216, 33, 50, 0.18); padding: 20px; border-radius: 8px;'>
                 <h4> Required Package Missing</h4>
                 <p><strong>Problem:</strong> The 'tidyheatmaps' package is required for clinical heatmap functionality.</p>
                 <h5>Solution:</h5>
                 <ol>
                 <li><strong>Install tidyheatmaps Package:</strong></li>
                 <ul>
-                <li>In R Console: <code style='background-color: #f1f1f1; padding: 2px;'>install.packages('tidyheatmaps')</code></li>
+                <li>In R Console: <code style='background-color: rgba(33, 33, 33, 0.06); padding: 2px; color: inherit;'>install.packages('tidyheatmaps')</code></li>
                 <li>Or use RStudio's Package tab to install 'tidyheatmaps'</li>
                 </ul>
                 <li><strong>Restart R Session:</strong> After installation, restart R/RStudio</li>
@@ -379,7 +379,7 @@ clinicalheatmapClass <- if (requireNamespace("jmvcore")) {
 
                     # Keep detailed HTML explanation
                     error_msg <- "
-                <div style='color: #721c24; background-color: #f8d7da; padding: 20px; border-radius: 8px;'>
+                <div style='color: inherit; background-color: rgba(216, 33, 50, 0.18); padding: 20px; border-radius: 8px;'>
                 <h4> Data Preparation Failed</h4>
                 <p><strong>Problem:</strong> Unable to prepare data for heatmap visualization.</p>
                 <h5>Common Causes:</h5>
@@ -421,7 +421,7 @@ clinicalheatmapClass <- if (requireNamespace("jmvcore")) {
                 # Populate annotation summaries if annotations are used
                 if (!is.null(self$options$annotationCols) && length(self$options$annotationCols) > 0) {
                     col_ann_html <- paste0(
-                        "<div style='background-color: #f0f8ff; padding: 10px; border-radius: 4px;'>",
+                        "<div style='background-color: rgba(33, 152, 255, 0.07); padding: 10px; border-radius: 4px; color: inherit;'>",
                         "<p><strong>Column Annotations:</strong> ",
                         paste(htmltools::htmlEscape(self$options$annotationCols), collapse = ", "),
                         "</p>",
@@ -432,7 +432,7 @@ clinicalheatmapClass <- if (requireNamespace("jmvcore")) {
 
                 if (!is.null(self$options$annotationRows) && length(self$options$annotationRows) > 0) {
                     row_ann_html <- paste0(
-                        "<div style='background-color: #f0f8ff; padding: 10px; border-radius: 4px;'>",
+                        "<div style='background-color: rgba(33, 152, 255, 0.07); padding: 10px; border-radius: 4px; color: inherit;'>",
                         "<p><strong>Row Annotations:</strong> ",
                         paste(htmltools::htmlEscape(self$options$annotationRows), collapse = ", "),
                         "</p>",
@@ -889,12 +889,12 @@ clinicalheatmapClass <- if (requireNamespace("jmvcore")) {
             # likewise escape at construction - OR this rendering point should be
             # rewritten to escape uniformly here as defense-in-depth.
             .generateValidationSummary = function(validation_results) {
-                html_content <- "<div style='background-color: #f8f9fa; padding: 15px; border-radius: 8px; margin: 10px 0;'>"
+                html_content <- "<div style='background-color: rgba(138, 155, 172, 0.06); padding: 15px; border-radius: 8px; margin: 10px 0; color: inherit;'>"
                 html_content <- paste0(html_content, "<h4 style='color: #495057; margin-top: 0;'> Data Validation Summary</h4>")
 
                 # Add errors
                 if (length(validation_results$errors) > 0) {
-                    html_content <- paste0(html_content, "<div style='background-color: #f8d7da; padding: 10px; border-radius: 4px; margin: 10px 0;'>")
+                    html_content <- paste0(html_content, "<div style='background-color: rgba(216, 33, 50, 0.18); padding: 10px; border-radius: 4px; margin: 10px 0; color: inherit;'>")
                     html_content <- paste0(html_content, "<h5 style='color: #721c24; margin-top: 0;'> Errors (Analysis Stopped)</h5>")
                     html_content <- paste0(html_content, "<ul>")
                     for (error in validation_results$errors) {
@@ -905,7 +905,7 @@ clinicalheatmapClass <- if (requireNamespace("jmvcore")) {
 
                 # Add warnings
                 if (length(validation_results$warnings) > 0) {
-                    html_content <- paste0(html_content, "<div style='background-color: #fff3cd; padding: 10px; border-radius: 4px; margin: 10px 0;'>")
+                    html_content <- paste0(html_content, "<div style='background-color: rgba(255, 202, 33, 0.23); padding: 10px; border-radius: 4px; margin: 10px 0; color: inherit;'>")
                     html_content <- paste0(html_content, "<h5 style='color: #856404; margin-top: 0;'> Warnings</h5>")
                     html_content <- paste0(html_content, "<ul>")
                     for (warning in validation_results$warnings) {
@@ -916,7 +916,7 @@ clinicalheatmapClass <- if (requireNamespace("jmvcore")) {
 
                 # Add info messages
                 if (length(validation_results$info) > 0) {
-                    html_content <- paste0(html_content, "<div style='background-color: #d1ecf1; padding: 10px; border-radius: 4px; margin: 10px 0;'>")
+                    html_content <- paste0(html_content, "<div style='background-color: rgba(33, 163, 188, 0.21); padding: 10px; border-radius: 4px; margin: 10px 0; color: inherit;'>")
                     html_content <- paste0(html_content, "<h5 style='color: #0c5460; margin-top: 0;'> Information</h5>")
                     html_content <- paste0(html_content, "<ul>")
                     for (info in validation_results$info) {
@@ -930,7 +930,7 @@ clinicalheatmapClass <- if (requireNamespace("jmvcore")) {
             },
             .generateAboutAnalysis = function() {
                 about_content <- paste0(
-                    "<div style='background-color: #f8f9fa; padding: 15px; border-radius: 5px; margin-bottom: 15px;'>",
+                    "<div style='background-color: rgba(138, 155, 172, 0.06); padding: 15px; border-radius: 5px; margin-bottom: 15px; color: inherit;'>",
                     "<h4 style='color: #2c3e50; margin-top: 0;'> About Clinical Heatmaps</h4>",
                     "<p><strong>Purpose:</strong> Clinical heatmaps visualize multivariate patterns in biomedical data, ",
                     "commonly used for biomarker profiling, genomic analysis, and quality control assessment.</p>",
@@ -1031,7 +1031,7 @@ clinicalheatmapClass <- if (requireNamespace("jmvcore")) {
                 sd_val <- round(stats::sd(data[[value_var]], na.rm = TRUE), 2)
 
                 clinical_summary <- paste0(
-                    "<div style='background-color: #e8f4fd; padding: 15px; border-radius: 5px; border-left: 4px solid #3498db;'>",
+                    "<div style='background-color: rgba(33, 149, 236, 0.1); padding: 15px; border-radius: 5px; border-left: 4px solid #3498db; color: inherit;'>",
                     "<h4 style='color: #2980b9; margin-top: 0;'> Clinical Summary</h4>",
                     "<p><strong>Dataset Overview:</strong> ", n_obs, " observations across ", n_rows, " ", row_var_esc, " and ", n_cols, " ", col_var_esc, "</p>",
                     "<p><strong>Value Distribution:</strong> Mean = ", mean_val, " (SD = ", sd_val, ")</p>",
@@ -1079,7 +1079,7 @@ clinicalheatmapClass <- if (requireNamespace("jmvcore")) {
                 )
 
                 report_content <- paste0(
-                    "<div style='background-color: #f0f8f0; padding: 15px; border-radius: 5px; border-left: 4px solid #27ae60;'>",
+                    "<div style='background-color: rgba(33, 152, 33, 0.07); padding: 15px; border-radius: 5px; border-left: 4px solid #27ae60; color: inherit;'>",
                     "<h4 style='color: #27ae60; margin-top: 0;'> Copy-Ready Clinical Summary</h4>",
                     "<div style='background-color: white; padding: 10px; border-radius: 3px; font-family: Georgia, serif; line-height: 1.6;'>",
                     "<p>", report_sentence, "</p>",
@@ -1142,7 +1142,7 @@ clinicalheatmapClass <- if (requireNamespace("jmvcore")) {
                 summary_text <- paste0(summary_text, practical_text)
 
                 plain_summary_html <- paste0(
-                    "<div style='background-color: #f8f9fa; padding: 20px; border-radius: 8px; border-left: 5px solid #6c757d;'>",
+                    "<div style='background-color: rgba(138, 155, 172, 0.06); padding: 20px; border-radius: 8px; border-left: 5px solid #6c757d; color: inherit;'>",
                     "<h4 style='color: #495057; margin-top: 0;'> Plain-Language Summary</h4>",
                     "<div style='background-color: white; padding: 15px; border-radius: 5px; font-family: Georgia, serif; line-height: 1.8;'>",
                     "<p style='text-align: justify;'>", summary_text, "</p>",
@@ -1158,7 +1158,7 @@ clinicalheatmapClass <- if (requireNamespace("jmvcore")) {
             },
             .generateWorkflowGuide = function() {
                 workflow_content <- paste0(
-                    "<div style='background-color: #e8f5e9; padding: 20px; border-radius: 8px; border-left: 5px solid #4caf50;'>",
+                    "<div style='background-color: rgba(33, 159, 43, 0.1); padding: 20px; border-radius: 8px; border-left: 5px solid #4caf50; color: inherit;'>",
                     "<h3 style='color: #2e7d32; margin-top: 0;'> Clinical Workflow Guidance</h3>",
                     "<h4 style='color: #2e7d32;'>Step 1: Data Preparation</h4>",
                     "<ul>",
@@ -1202,7 +1202,7 @@ clinicalheatmapClass <- if (requireNamespace("jmvcore")) {
                     "<li><strong>Report Methods:</strong> Include scaling, clustering, and annotation details</li>",
                     "<li><strong>Share Results:</strong> Present findings to clinical team for validation</li>",
                     "</ul>",
-                    "<div style='background-color: #fff3cd; padding: 15px; border-radius: 5px; margin-top: 20px;'>",
+                    "<div style='background-color: rgba(255, 202, 33, 0.23); padding: 15px; border-radius: 5px; margin-top: 20px; color: inherit;'>",
                     "<h5 style='color: #856404; margin-top: 0;'> Important Considerations</h5>",
                     "<ul style='color: #856404; margin-left: 20px;'>",
                     "<li>Heatmaps show associations, not causation</li>",
@@ -1219,7 +1219,7 @@ clinicalheatmapClass <- if (requireNamespace("jmvcore")) {
             },
             .generateInterpretationGuide = function() {
                 interpretation_content <- paste0(
-                    "<div style='background-color: #e3f2fd; padding: 20px; border-radius: 8px;'>",
+                    "<div style='background-color: rgba(33, 152, 239, 0.13); padding: 20px; border-radius: 8px; color: inherit;'>",
                     "<h3 style='color: #1976d2; margin-top: 0;'> Heatmap Interpretation Guide</h3>",
                     "<h4 style='color: #1976d2;'>Color Interpretation:</h4>",
                     "<ul>",
@@ -1265,7 +1265,7 @@ clinicalheatmapClass <- if (requireNamespace("jmvcore")) {
             },
             .generateAssumptions = function() {
                 assumptions_content <- paste0(
-                    "<div style='background-color: #fff8dc; padding: 15px; border-radius: 5px; border-left: 4px solid #f39c12;'>",
+                    "<div style='background-color: rgba(255, 211, 33, 0.16); padding: 15px; border-radius: 5px; border-left: 4px solid #f39c12; color: inherit;'>",
                     "<h4 style='color: #e67e22; margin-top: 0;'> Assumptions & Technical Notes</h4>",
                     "<h5>Data Assumptions:</h5>",
                     "<ul style='margin-left: 20px;'>",
@@ -1651,7 +1651,7 @@ clinicalheatmapClass <- if (requireNamespace("jmvcore")) {
 
                         # Add interpretation
                         interp_html <- paste0(
-                            "<div style='background-color: #e3f2fd; padding: 15px; border-radius: 5px;'>",
+                            "<div style='background-color: rgba(33, 152, 239, 0.13); padding: 15px; border-radius: 5px; color: inherit;'>",
                             "<h4>Cluster Characteristics Interpretation</h4>",
                             "<p>P-values indicate whether there are significant differences in each variable across clusters.</p>",
                             "<ul>",

@@ -211,7 +211,7 @@ diagnosticsamplesizeClass <- R6::R6Class(
             )
 
             html <- sprintf(
-                "<div style='padding: 15px; background-color: #f9f9f9; border-left: 4px solid #4CAF50;'>
+                "<div style='padding: 15px; background-color: rgba(155, 155, 155, 0.06); border-left: 4px solid #4CAF50; color: inherit;'>
                 <h3>Sample Size Justification Statement</h3>
 
                 <p><strong>Study Objective:</strong> This study aims to evaluate a %s.</p>

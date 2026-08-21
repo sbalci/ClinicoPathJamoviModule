@@ -241,7 +241,7 @@ alluvialClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     collapse = ", ")
 
                 info_html <- paste0(
-                    "<div style='padding: 15px; margin: 6px 0; background-color: #d1ecf1; border-left: 4px solid #17a2b8; color: #0c5460; border-radius: 5px;'>",
+                    "<div style='padding: 15px; margin: 6px 0; background-color: rgba(33, 163, 188, 0.21); border-left: 4px solid #17a2b8; color: inherit; border-radius: 5px;'>",
                     "<strong>Missing Data Excluded:</strong> ", n_removed, " of ", n_total,
                     " observations (", pct_removed, "%) excluded due to missing values.<br/>",
                     "Variables with missingness: ", missing_details, "<br/>",
@@ -267,7 +267,7 @@ alluvialClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
             if (length(self$options$vars) < 2) {
                 html <- paste0(
-                    "<div style='background-color: #f8d7da; border-left: 4px solid #dc3545; padding: 15px; margin: 10px 0;'>",
+                    "<div style='background-color: rgba(216, 33, 50, 0.18); border-left: 4px solid #dc3545; padding: 15px; margin: 10px 0; color: inherit;'>",
                     "<h4 style='margin-top: 0; color: #721c24;'>Insufficient Variables</h4>",
                     "<p style='color: #721c24;'>Alluvial diagrams require at least <strong>2 variables</strong>.</p>",
                     "<p>Please select additional variables from the left panel.</p>",
@@ -280,7 +280,7 @@ alluvialClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
             if (nrow(self$data) == 0) {
                 html <- paste0(
-                    "<div style='background-color: #f8d7da; border-left: 4px solid #dc3545; padding: 15px; margin: 10px 0;'>",
+                    "<div style='background-color: rgba(216, 33, 50, 0.18); border-left: 4px solid #dc3545; padding: 15px; margin: 10px 0; color: inherit;'>",
                     "<h4 style='margin-top: 0; color: #721c24;'>No Data Available</h4>",
                     "<p style='color: #721c24;'>Data contains no (complete) rows.</p>",
                     "<p>Please check your data for missing values or filtering issues.</p>",
@@ -307,7 +307,7 @@ alluvialClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 if (!(var %in% names(self$data))) {
                     var_safe <- htmltools::htmlEscape(var)
                     html <- paste0(
-                        "<div style='background-color: #f8d7da; border-left: 4px solid #dc3545; padding: 15px; margin: 10px 0;'>",
+                        "<div style='background-color: rgba(216, 33, 50, 0.18); border-left: 4px solid #dc3545; padding: 15px; margin: 10px 0; color: inherit;'>",
                         "<h4 style='margin-top: 0; color: #721c24;'>Variable Not Found</h4>",
                         "<p style='color: #721c24;'>Variable '<strong>", var_safe, "</strong>' not found in the data.</p>",
                         "<p>Please ensure all selected variables exist in your dataset.</p>",
@@ -330,7 +330,7 @@ alluvialClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                         var_safe <- htmltools::htmlEscape(var)
 
                         self$results$dataWarning$setContent(sprintf(
-                            "<div style='padding: 15px; margin: 6px 0; background-color: #f8d7da; border-left: 4px solid #dc3545; color: #721c24; border-radius: 5px;'><strong>Error:</strong> Continuous Variable Not Allowed: Variable '%s' has %d unique values and appears continuous. Alluvial plots require categorical data. Please use the categorize function.</div>",
+                            "<div style='padding: 15px; margin: 6px 0; background-color: rgba(216, 33, 50, 0.18); border-left: 4px solid #dc3545; color: inherit; border-radius: 5px;'><strong>Error:</strong> Continuous Variable Not Allowed: Variable '%s' has %d unique values and appears continuous. Alluvial plots require categorical data. Please use the categorize function.</div>",
                             var_safe, unique_values))
                         self$results$dataWarning$setVisible(TRUE)
                         return(FALSE)
@@ -644,7 +644,7 @@ alluvialClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
             if (length(vars_name) > max_vars) {
                 warning_html <- paste0(
-                    "<div style='background-color: #d1ecf1; border-left: 4px solid #17a2b8; padding: 15px; margin: 10px 0;'>",
+                    "<div style='background-color: rgba(33, 163, 188, 0.21); border-left: 4px solid #17a2b8; padding: 15px; margin: 10px 0; color: inherit;'>",
                     "<h4 style='margin-top: 0; color: #0c5460;'>Variables Truncated</h4>",
                     "<p style='color: #0c5460;'>You selected <strong>",
                     length(vars_name), "</strong> variables, but the maximum is <strong>",
@@ -717,7 +717,7 @@ alluvialClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 if (unique_values > 10) {
                     cond_var_safe <- htmltools::htmlEscape(cond_var)
                     html <- paste0(
-                        "<div style='background-color: #fff3cd; border-left: 4px solid #ffc107; padding: 15px; margin: 10px 0;'>",
+                        "<div style='background-color: rgba(255, 202, 33, 0.23); border-left: 4px solid #ffc107; padding: 15px; margin: 10px 0; color: inherit;'>",
                         "<h4 style='margin-top: 0; color: #856404;'>Continuous Condensation Variable</h4>",
                         "<p>Condensation variable '<strong>", cond_var_safe,
                         "</strong>' has <strong>", unique_values,
@@ -770,7 +770,7 @@ alluvialClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                   <h2> Alluvial Diagrams</h2>
                   <p>Visualize the flow of categorical data across multiple dimensions.</p>
 
-                  <div style='background-color: #e7f3ff; border-left: 4px solid #2196F3; padding: 10px; margin: 10px 0;'>
+                  <div style='background-color: rgba(33, 144, 255, 0.11); border-left: 4px solid #2196F3; padding: 10px; margin: 10px 0; color: inherit;'>
                     <h3 style='margin-top: 0;'> Quick Start</h3>
                     <ul style='margin-bottom: 0;'>
                       <li>Select <strong>2-5 categorical variables</strong> (optimal: 3-4)</li>
@@ -779,7 +779,7 @@ alluvialClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     </ul>
                   </div>
 
-                  <div style='background-color: #f0f8f0; border-left: 4px solid #4caf50; padding: 10px; margin: 10px 0;'>
+                  <div style='background-color: rgba(33, 152, 33, 0.07); border-left: 4px solid #4caf50; padding: 10px; margin: 10px 0; color: inherit;'>
                     <h3 style='margin-top: 0;'> Clinical Use Cases</h3>
                     <ul style='margin-bottom: 0;'>
                       <li><strong>Patient flow:</strong> Track progression through treatment stages</li>
@@ -789,7 +789,7 @@ alluvialClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     </ul>
                   </div>
 
-                  <div style='background-color: #fff8e1; border-left: 4px solid #ffc107; padding: 10px; margin: 10px 0;'>
+                  <div style='background-color: rgba(255, 203, 33, 0.14); border-left: 4px solid #ffc107; padding: 10px; margin: 10px 0; color: inherit;'>
                     <h3 style='margin-top: 0;'> Tips</h3>
                     <ul style='margin-bottom: 0;'>
                       <li>Arrange variables in <strong>logical order</strong> (e.g., temporal sequence: Grade \u{2192} Stage \u{2192} Response)</li>

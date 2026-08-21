@@ -12,7 +12,7 @@ haralicktextureClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
 
                     # Initialize Summary section
                     self$results$summary$setContent(
-                        "<div class='summary-placeholder' style='background-color: #f8f9fa; padding: 15px; border: 1px dashed #dee2e6; border-radius: 5px;'>
+                        "<div class='summary-placeholder' style='background-color: rgba(138, 155, 172, 0.06); padding: 15px; border: 1px dashed #dee2e6; border-radius: 5px; color: inherit;'>
                     <h4> Analysis Summary</h4>
                     <p style='color: #6c757d; font-style: italic;'>Summary will appear here after running the analysis with your texture feature data.</p>
                     <p><small>This section will provide a copy-ready summary of key findings, statistical results, and clinical interpretation.</small></p>
@@ -21,7 +21,7 @@ haralicktextureClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
 
                     # Initialize interpretation section
                     self$results$interpretation$setContent(
-                        "<div style='background-color: #e3f2fd; padding: 15px; border-left: 4px solid #2196f3; margin: 10px 0;'>
+                        "<div style='background-color: rgba(33, 152, 239, 0.13); padding: 15px; border-left: 4px solid #2196f3; margin: 10px 0; color: inherit;'>
                     <h4> Getting Started</h4>
                     <p>Select your Haralick texture features to begin the analysis. This function will provide comprehensive statistical analysis and clinical interpretation of spatial texture heterogeneity.</p>
                     <p><strong>Next steps:</strong></p>
@@ -43,7 +43,7 @@ haralicktextureClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                 # Check required variables
                 if (is.null(self$options$texture_features) || length(self$options$texture_features) == 0) {
                     self$results$interpretation$setContent(
-                        "<div style='background-color: #fff3cd; padding: 15px; border-left: 4px solid #ffc107; margin: 10px 0;'>
+                        "<div style='background-color: rgba(255, 202, 33, 0.23); padding: 15px; border-left: 4px solid #ffc107; margin: 10px 0; color: inherit;'>
                     <h4> No Texture Features Selected</h4>
                     <p>To perform Haralick texture analysis, you need to:</p>
                     <ol>
@@ -69,7 +69,7 @@ haralicktextureClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                     },
                     error = function(e) {
                         self$results$interpretation$setContent(
-                            paste0("<div style='background-color: #f8d7da; padding: 15px; border-left: 4px solid #dc3545; margin: 10px 0;'>
+                            paste0("<div style='background-color: rgba(216, 33, 50, 0.18); padding: 15px; border-left: 4px solid #dc3545; margin: 10px 0; color: inherit;'>
                     <h4> Data Validation Error</h4>
                     <p><strong>Problem:</strong> ", htmltools::htmlEscape(e$message), "</p>
                     <p><strong>Common solutions:</strong></p>
@@ -99,7 +99,7 @@ haralicktextureClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
 
                 # Set initial processing message
                 self$results$summary$setContent(
-                    paste0("<div style='background-color: #d4edda; padding: 10px; border-left: 4px solid #28a745; margin: 10px 0;'>
+                    paste0("<div style='background-color: rgba(33, 162, 64, 0.19); padding: 10px; border-left: 4px solid #28a745; margin: 10px 0; color: inherit;'>
                 <p> <strong>Processing texture analysis...</strong></p>
                 <p>Analyzing ", nrow(texture_data), " cases with ", length(self$options$texture_features), " texture features.</p>
                 </div>")
@@ -300,7 +300,7 @@ haralicktextureClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
             },
             .generateAboutContent = function() {
                 return(paste0(
-                    "<div style='background-color: #f8f9fa; padding: 20px; border-radius: 8px; margin-bottom: 20px;'>",
+                    "<div style='background-color: rgba(138, 155, 172, 0.06); padding: 20px; border-radius: 8px; margin-bottom: 20px; color: inherit;'>",
                     "<h3> About Haralick Texture Analysis</h3>",
                     "<h4>What This Analysis Does:</h4>",
                     "<p>Haralick texture analysis quantifies spatial patterns in digital pathology images using ",
@@ -330,15 +330,15 @@ haralicktextureClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                     "<li><strong>Optional:</strong> Clinical outcomes for prognostic analysis</li>",
                     "</ul>",
                     "<h4>How to Interpret Results:</h4>",
-                    "<div style='background-color: #e8f5e8; padding: 10px; border-left: 3px solid #4caf50; margin: 10px 0;'>",
+                    "<div style='background-color: rgba(33, 159, 33, 0.1); padding: 10px; border-left: 3px solid #4caf50; margin: 10px 0; color: inherit;'>",
                     "<p><strong> High Heterogeneity (CV > 1.0):</strong></p>",
                     "<ul><li>Complex tissue architecture</li><li>May indicate aggressive biology</li><li>Requires comprehensive sampling</li></ul>",
                     "</div>",
-                    "<div style='background-color: #fff3cd; padding: 10px; border-left: 3px solid #ffc107; margin: 10px 0;'>",
+                    "<div style='background-color: rgba(255, 202, 33, 0.23); padding: 10px; border-left: 3px solid #ffc107; margin: 10px 0; color: inherit;'>",
                     "<p><strong> Moderate Heterogeneity (CV 0.5-1.0):</strong></p>",
                     "<ul><li>Mixed tissue patterns</li><li>Standard for most biomarkers</li><li>Good for prognostic analysis</li></ul>",
                     "</div>",
-                    "<div style='background-color: #f8d7da; padding: 10px; border-left: 3px solid #dc3545; margin: 10px 0;'>",
+                    "<div style='background-color: rgba(216, 33, 50, 0.18); padding: 10px; border-left: 3px solid #dc3545; margin: 10px 0; color: inherit;'>",
                     "<p><strong> Low Heterogeneity (CV < 0.5):</strong></p>",
                     "<ul><li>Uniform tissue patterns</li><li>May need different features</li><li>Consider sampling adequacy</li></ul>",
                     "</div>",
@@ -1116,7 +1116,7 @@ haralicktextureClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                         "cd8" = "CD8+ T-cell Analysis",
                         "Biomarker Analysis"
                     ), ":</h4>",
-                    "<div style='background-color: #f0f8f0; padding: 10px; border-left: 4px solid #28a745; margin: 10px 0;'>"
+                    "<div style='background-color: rgba(33, 152, 33, 0.07); padding: 10px; border-left: 4px solid #28a745; margin: 10px 0; color: inherit;'>"
                 )
 
                 if (biomarker_context == "ki67") {
@@ -1403,7 +1403,7 @@ haralicktextureClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                     },
                     "</ul>",
                     "<h4>Clinical Interpretation:</h4>",
-                    "<div style='background-color: #f8f9fa; padding: 10px; border-left: 4px solid #007bff;'>",
+                    "<div style='background-color: rgba(138, 155, 172, 0.06); padding: 10px; border-left: 4px solid #007bff; color: inherit;'>",
                     if (highest_cv > 1.0) {
                         "<p><strong>High Spatial Heterogeneity:</strong> Texture features show substantial variability,
                     indicating significant spatial heterogeneity. <span style='color: blue;'>This may have prognostic significance
@@ -1510,7 +1510,7 @@ haralicktextureClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                 copy_text <- paste0(main_finding, " ", clinical_interpretation, quality_note, stats_note)
 
                 return(paste0(
-                    "<div class='copy-ready-summary' style='background-color: #f8f9fa; padding: 20px; border-radius: 8px; border: 1px solid #dee2e6;'>",
+                    "<div class='copy-ready-summary' style='background-color: rgba(138, 155, 172, 0.06); padding: 20px; border-radius: 8px; border: 1px solid #dee2e6; color: inherit;'>",
                     "<h4> Copy-Ready Summary</h4>",
                     "<div style='background-color: white; padding: 15px; border-radius: 5px; border: 1px solid #e9ecef; margin: 10px 0;'>",
                     "<p style='margin: 0; line-height: 1.6;'>", copy_text, "</p>",
@@ -1549,7 +1549,7 @@ haralicktextureClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                         "comprehensive" = "Comprehensive Analysis"
                     ), "</li>",
                     "</ul>",
-                    "<div style='margin-top: 15px; padding: 10px; background-color: #e8f4fd; border-left: 4px solid #2196f3; border-radius: 4px;'>",
+                    "<div style='margin-top: 15px; padding: 10px; background-color: rgba(33, 149, 236, 0.1); border-left: 4px solid #2196f3; border-radius: 4px; color: inherit;'>",
                     "<p style='margin: 0; font-size: 0.9em;'><strong> Reference:</strong> ",
                     "Haralick texture features computed following validated methodology (Haralick et al., 1973) ",
                     "with clinical applications in digital pathology biomarker assessment.</p>",
@@ -1785,7 +1785,7 @@ haralicktextureClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                 }
 
                 warning_html <- paste0(
-                    "<div style='background-color: #fff3cd; border: 1px solid #ffc107; border-radius: 8px; padding: 15px; margin: 20px 0;'>",
+                    "<div style='background-color: rgba(255, 202, 33, 0.23); border: 1px solid #ffc107; border-radius: 8px; padding: 15px; margin: 20px 0; color: inherit;'>",
                     "<h4 style='color: #856404; margin-top: 0;'> Clinical Usage Warnings & Recommendations</h4>",
                     "<div style='line-height: 1.6;'>",
                     paste(warnings, collapse = "<br><br>"),

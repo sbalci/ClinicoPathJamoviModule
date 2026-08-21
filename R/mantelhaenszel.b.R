@@ -266,7 +266,7 @@ mantelhaenszelClass <- R6::R6Class(
             res <- private$.results_cache
 
             html <- sprintf(
-                "<div style='padding: 15px; background-color: #f9f9f9; border-left: 4px solid #2196F3;'>
+                "<div style='padding: 15px; background-color: rgba(155, 155, 155, 0.06); border-left: 4px solid #2196F3; color: inherit;'>
                 <h3>Interpretation</h3>
 
                 <p><strong>Mantel-Haenszel Common Odds Ratio: %.3f</strong> (95%% CI: %.3f - %.3f)</p>

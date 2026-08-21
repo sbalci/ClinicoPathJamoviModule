@@ -39,11 +39,11 @@ pathologyagreementClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                 # type: "ERROR", "STRONG_WARNING", "WARNING", or "INFO"
 
                 style <- switch(type,
-                    "ERROR" = "background-color: #f8d7da; border-left: 4px solid #dc3545; color: #721c24;",
-                    "STRONG_WARNING" = "background-color: #fff3cd; border-left: 4px solid #ff6b6b; color: #856404;",
-                    "WARNING" = "background-color: #fff3cd; border-left: 4px solid #ffc107; color: #856404;",
-                    "INFO" = "background-color: #d1ecf1; border-left: 4px solid #17a2b8; color: #0c5460;",
-                    "background-color: #f8f9fa; border-left: 4px solid #6c757d; color: #383d41;"
+                    "ERROR" = "background-color: rgba(216, 33, 50, 0.18); color: inherit; border-left: 4px solid #dc3545; color: inherit;",
+                    "STRONG_WARNING" = "background-color: rgba(255, 202, 33, 0.23); color: inherit; border-left: 4px solid #ff6b6b; color: inherit;",
+                    "WARNING" = "background-color: rgba(255, 202, 33, 0.23); color: inherit; border-left: 4px solid #ffc107; color: inherit;",
+                    "INFO" = "background-color: rgba(33, 163, 188, 0.21); color: inherit; border-left: 4px solid #17a2b8; color: inherit;",
+                    "background-color: rgba(138, 155, 172, 0.06); color: inherit; border-left: 4px solid #6c757d; color: inherit;"
                 )
 
                 icon <- switch(type,
@@ -1065,7 +1065,7 @@ pathologyagreementClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                 )
 
                 summary_html <- paste0(
-                    "<div style='background-color: #e8f5e9; padding: 20px; border-radius: 8px; border-left: 5px solid #4caf50;'>",
+                    "<div style='background-color: rgba(33, 159, 43, 0.1); padding: 20px; border-radius: 8px; border-left: 5px solid #4caf50; color: inherit;'>",
                     "<h4> Plain Language Summary</h4>",
                     "<p style='font-size: 14px; line-height: 1.6;'>", summary_text, "</p>",
                     "<p style='font-size: 12px; color: #666; margin-top: 15px;'><em>This summary is suitable for copying into pathology reports, research manuscripts, or presentations. It provides key findings in accessible language without technical jargon.</em></p>",
@@ -1077,7 +1077,7 @@ pathologyagreementClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
             .generateEducationalExplanations = function() {
                 # FIX 4: Generate educational content explaining the analysis
                 explanations_html <- paste0(
-                    "<div style='background-color: #f0f4ff; padding: 20px; border-radius: 8px; border-left: 5px solid #2196f3;'>",
+                    "<div style='background-color: rgba(33, 92, 255, 0.07); padding: 20px; border-radius: 8px; border-left: 5px solid #2196f3; color: inherit;'>",
                     "<h3> About This Analysis: Agreement Analysis for Digital Pathology</h3>",
                     "<h4>What This Analysis Does:</h4>",
                     "<p>Agreement analysis evaluates whether two (or more) measurement methods produce consistent results on the same samples. ",
@@ -1227,7 +1227,7 @@ pathologyagreementClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                 )
 
                 report_html <- paste0(
-                    "<div style='background-color: #f8f9fa; padding: 15px; border-radius: 5px; margin: 10px 0;'>",
+                    "<div style='background-color: rgba(138, 155, 172, 0.06); padding: 15px; border-radius: 5px; margin: 10px 0; color: inherit;'>",
                     "<h4> Copy-Ready Report Sentences</h4>",
                     "<div style='font-family: monospace; background-color: white; padding: 12px; border: 1px solid #ddd; border-radius: 3px; margin: 8px 0;'>",
                     "<strong>Methods:</strong><br>", methods_sentence,
@@ -1246,7 +1246,7 @@ pathologyagreementClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
             },
             .generateStatisticalGlossary = function() {
                 glossary_html <- paste0(
-                    "<div style='background-color: #f0f8ff; padding: 15px; border-radius: 5px;'>",
+                    "<div style='background-color: rgba(33, 152, 255, 0.07); padding: 15px; border-radius: 5px; color: inherit;'>",
                     "<h4> Statistical Terms Glossary</h4>",
                     "<div style='margin: 10px 0;'>",
                     "<p><strong>ICC (Intraclass Correlation Coefficient):</strong> Measures reliability and agreement between measurement methods. ",
@@ -1286,7 +1286,7 @@ pathologyagreementClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                 )
 
                 guide_html <- paste0(
-                    "<div style='background-color: #e8f5e8; padding: 15px; border-radius: 5px; border-left: 4px solid #28a745;'>",
+                    "<div style='background-color: rgba(33, 159, 33, 0.1); padding: 15px; border-radius: 5px; border-left: 4px solid #28a745; color: inherit;'>",
                     "<h4> ICC Selection Guide</h4>",
                     "<div style='margin: 15px 0;'>",
                     "<h5>Current Selection: <span style='color: #007bff; font-weight: bold;'>",
@@ -1309,11 +1309,11 @@ pathologyagreementClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                     "<li><strong>Research Question:</strong> 'Do methods give identical values?'</li>",
                     "</ul>",
                     "</div>",
-                    "<div style='background-color: #f8f9fa; padding: 12px; border-radius: 3px; margin: 10px 0;'>",
+                    "<div style='background-color: rgba(138, 155, 172, 0.06); padding: 12px; border-radius: 3px; margin: 10px 0; color: inherit;'>",
                     "<h5> Clinical Preset Guidance:</h5>",
                     "<p>", preset_recommendation, "</p>",
                     "</div>",
-                    "<div style='background-color: #fff3cd; padding: 12px; border-radius: 3px; margin: 10px 0;'>",
+                    "<div style='background-color: rgba(255, 202, 33, 0.23); padding: 12px; border-radius: 3px; margin: 10px 0; color: inherit;'>",
                     "<h5> Key Differences:</h5>",
                     "<ul>",
                     "<li><strong>Consistency:</strong> Focuses on relative agreement - methods may differ by a constant but rank similarly</li>",

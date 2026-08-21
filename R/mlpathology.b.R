@@ -571,6 +571,9 @@ mlpathologyClass <- R6::R6Class(
         .plotConfusionMatrixPlot = function(image, ggtheme, theme, ...) {
             
             state <- image$state
+
+            if (is.null(state))
+                return(FALSE)
             actual <- state$actual
             predicted <- state$predicted
             
@@ -614,6 +617,9 @@ mlpathologyClass <- R6::R6Class(
         .plotROCPlot = function(image, ggtheme, theme, ...) {
             
             state <- image$state
+
+            if (is.null(state))
+                return(FALSE)
             actual <- state$actual
             probabilities <- state$probabilities
             

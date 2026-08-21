@@ -38,7 +38,7 @@ bbcplotsClass <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 "<p style='margin: 0; font-size: 16px; opacity: 0.9;'>Create professional news-quality graphics with BBC design standards</p>",
                 "</div>",
                 
-                "<div style='background-color: #f8f9fa; padding: 20px; border-radius: 8px; margin-bottom: 15px;'>",
+                "<div style='background-color: rgba(138, 155, 172, 0.06); padding: 20px; border-radius: 8px; margin-bottom: 15px; color: inherit;'>",
                 "<h3 style='color: #1380A1; margin: 0 0 15px 0;'> Key Features</h3>",
                 "<ul style='margin: 0; padding-left: 20px; line-height: 1.8;'>",
                 "<li><strong>BBC Design Standards:</strong> Authentic Helvetica typography and professional color schemes</li>",
@@ -59,7 +59,7 @@ bbcplotsClass <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 "</ol>",
                 "</div>",
                 
-                "<div style='background-color: #e8f4fd; padding: 15px; border-radius: 5px; margin: 10px 0;'>",
+                "<div style='background-color: rgba(33, 149, 236, 0.1); padding: 15px; border-radius: 5px; margin: 10px 0; color: inherit;'>",
                 "<p style='margin: 0; color: #1380A1;'><strong> Pro Tip:</strong> BBC style emphasizes clarity and accessibility. Use high contrast colors, clear titles, and minimal decoration for maximum impact in news and publication contexts.</p>",
                 "</div>",
                 "</div>"
@@ -263,7 +263,7 @@ bbcplotsClass <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         
         .show_error_message = function(title, details = NULL) {
             error_html <- paste0(
-                "<div style='background-color: #fff3cd; border: 1px solid #ffeaa7; border-radius: 8px; padding: 20px; margin: 10px 0;'>",
+                "<div style='background-color: rgba(255, 202, 33, 0.23); border: 1px solid #ffeaa7; border-radius: 8px; padding: 20px; margin: 10px 0; color: inherit;'>",
                 "<div style='display: flex; align-items: center; margin-bottom: 10px;'>",
                 "<span style='font-size: 24px; margin-right: 10px;'></span>",
                 "<h4 style='color: #856404; margin: 0;'>", htmltools::htmlEscape(as.character(title)), "</h4>",
@@ -297,7 +297,7 @@ bbcplotsClass <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 
                 if (outliers > 0) {
                     warning_html <- paste0(
-                        "<div style='background-color: #e7f3ff; border: 1px solid #b3d9ff; border-radius: 5px; padding: 10px; margin: 5px 0;'>",
+                        "<div style='background-color: rgba(33, 144, 255, 0.11); border: 1px solid #b3d9ff; border-radius: 5px; padding: 10px; margin: 5px 0; color: inherit;'>",
                         "<p style='margin: 0; color: #0066cc;'><strong> Data Quality Note:</strong> ",
                         "Found ", outliers, " potential outliers in Y-variable. ",
                         "Consider reviewing extreme values for data accuracy.</p>",
@@ -320,7 +320,7 @@ bbcplotsClass <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 
                 if (min_count < 3) {
                     warning_html <- paste0(
-                        "<div style='background-color: #fff3e0; border: 1px solid #ffcc80; border-radius: 5px; padding: 10px; margin: 5px 0;'>",
+                        "<div style='background-color: rgba(255, 169, 33, 0.14); border: 1px solid #ffcc80; border-radius: 5px; padding: 10px; margin: 5px 0; color: inherit;'>",
                         "<p style='margin: 0; color: #f57c00;'><strong> Small Sample Warning:</strong> ",
                         "Some categories have fewer than 3 observations. ",
                         "Results may be unstable for categories with very small samples.</p>",
@@ -437,7 +437,7 @@ bbcplotsClass <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         .update_bbplot_status_info = function() {
             bbplot_status_html <- if (private$.bbplot_available) {
                 paste0(
-                    "<div style='background-color: #e8f5e8; border: 1px solid #4caf50; border-radius: 5px; padding: 15px; margin: 10px 0;'>",
+                    "<div style='background-color: rgba(33, 159, 33, 0.1); border: 1px solid #4caf50; border-radius: 5px; padding: 15px; margin: 10px 0; color: inherit;'>",
                     "<h5 style='color: #2e7d32; margin: 0 0 10px 0;'> Enhanced BBC Functionality Available</h5>",
                     "<p style='margin: 0; color: #2e7d32;'>",
                     "The official BBC bbplot package (v", private$.bbplot_version, ") is installed, providing:",
@@ -452,7 +452,7 @@ bbcplotsClass <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 )
             } else {
                 paste0(
-                    "<div style='background-color: #fff3e0; border: 1px solid #ff9800; border-radius: 5px; padding: 15px; margin: 10px 0;'>",
+                    "<div style='background-color: rgba(255, 169, 33, 0.14); border: 1px solid #ff9800; border-radius: 5px; padding: 15px; margin: 10px 0; color: inherit;'>",
                     "<h5 style='color: #f57c00; margin: 0 0 10px 0;'> Optional Enhancement Available</h5>",
                     "<p style='margin: 0 0 10px 0; color: #f57c00;'>",
                     "Install the official BBC bbplot package for enhanced functionality:",
@@ -608,7 +608,7 @@ bbcplotsClass <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             # Base accessibility information
             return(paste(
                 "<h4 style='color: #1380A1;'> Accessibility & Standards</h4>",
-                "<div style='background-color: #fff3e0; padding: 15px; border-radius: 5px; margin: 10px 0;'>",
+                "<div style='background-color: rgba(255, 169, 33, 0.14); padding: 15px; border-radius: 5px; margin: 10px 0; color: inherit;'>",
                 "<h5>BBC Accessibility Standards:</h5>",
                 "<ul>",
                 "<li><strong>Color Contrast:</strong> All text meets WCAG AA standards (4.5:1 ratio minimum)</li>",
@@ -624,7 +624,7 @@ bbcplotsClass <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 "<li>Provide chart descriptions in accompanying text</li>",
                 "<li>Test with screen readers and accessibility tools</li>",
                 "</ul>",
-                "<p style='margin: 10px 0 0 0; padding: 10px; background-color: #e8f5e8; border-radius: 4px;'>",
+                "<p style='margin: 10px 0 0 0; padding: 10px; background-color: rgba(33, 159, 33, 0.1); border-radius: 4px; color: inherit;'>",
                 "<strong> Tip:</strong> BBC charts prioritize clarity and accessibility over visual complexity. This ensures your message reaches the widest possible audience effectively.",
                 "</p>",
                 "</div>"
@@ -661,7 +661,7 @@ bbcplotsClass <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             
             tryCatch({
                 stat_html <- "<h4 style='color: #1380A1;'> Enhanced Statistical Analysis Results</h4>"
-                stat_html <- paste0(stat_html, "<div style='background-color: #f8f9fa; padding: 15px; border-radius: 5px; margin: 10px 0;'>")
+                stat_html <- paste0(stat_html, "<div style='background-color: rgba(138, 155, 172, 0.06); padding: 15px; border-radius: 5px; margin: 10px 0; color: inherit;'>")
                 
                 # Enhanced auto-selection with more sophisticated logic
                 if (stat_method == "auto") {
@@ -919,7 +919,7 @@ bbcplotsClass <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         
         .add_interpretation_guide = function(stat_method) {
             guide_html <- paste0(
-                "<div style='background-color: #e8f4fd; border: 1px solid #b3d9ff; border-radius: 5px; padding: 10px; margin: 15px 0;'>",
+                "<div style='background-color: rgba(33, 149, 236, 0.1); border: 1px solid #b3d9ff; border-radius: 5px; padding: 10px; margin: 15px 0; color: inherit;'>",
                 "<h6 style='color: #1380A1; margin: 0 0 8px 0;'> BBC Editorial Guidelines for Statistical Reporting:</h6>"
             )
             
@@ -1067,7 +1067,7 @@ bbcplotsClass <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             group_var <- self$options$group_var
 
             summary_html <- "<h4 style='color: #1380A1;'> Chart Summary Statistics</h4>"
-            summary_html <- paste0(summary_html, "<div style='background-color: #f0f8ff; padding: 15px; border-radius: 5px; margin: 10px 0;'>")
+            summary_html <- paste0(summary_html, "<div style='background-color: rgba(33, 152, 255, 0.07); padding: 15px; border-radius: 5px; margin: 10px 0; color: inherit;'>")
             
             # Overall summary
             total_n <- nrow(data)
@@ -1202,7 +1202,7 @@ bbcplotsClass <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             
             code_html <- paste(
                 "<h4 style='color: #1380A1;'> Reproducible R Code</h4>",
-                "<div style='background-color: #f8f9fa; padding: 15px; border-radius: 5px; margin: 10px 0;'>",
+                "<div style='background-color: rgba(138, 155, 172, 0.06); padding: 15px; border-radius: 5px; margin: 10px 0; color: inherit;'>",
                 "<p><strong>Complete R code for BBC-style visualization:</strong></p>",
                 "<pre style='background-color: #2d3748; color: #e2e8f0; padding: 15px; border-radius: 5px; overflow-x: auto; font-size: 12px;'>",
                 "<code>", htmltools::htmlEscape(actual_code), "</code>",
@@ -1219,13 +1219,13 @@ bbcplotsClass <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         .init_color_guide = function() {
             color_html <- paste(
                 "<h4 style='color: #1380A1;'> BBC Color Guidelines</h4>",
-                "<div style='background-color: #f8f9fa; padding: 15px; border-radius: 5px; margin: 10px 0;'>",
+                "<div style='background-color: rgba(138, 155, 172, 0.06); padding: 15px; border-radius: 5px; margin: 10px 0; color: inherit;'>",
                 "<h5>Official BBC Colors:</h5>",
                 "<div style='display: flex; flex-wrap: wrap; gap: 10px; margin: 10px 0;'>",
-                "<div style='background-color: #1380A1; color: white; padding: 8px 12px; border-radius: 4px; font-size: 12px;'>#1380A1 BBC Blue</div>",
-                "<div style='background-color: #FAAB18; color: black; padding: 8px 12px; border-radius: 4px; font-size: 12px;'>#FAAB18 BBC Orange</div>",
-                "<div style='background-color: #007f7f; color: white; padding: 8px 12px; border-radius: 4px; font-size: 12px;'>#007f7f BBC Teal</div>",
-                "<div style='background-color: #333333; color: white; padding: 8px 12px; border-radius: 4px; font-size: 12px;'>#333333 BBC Gray</div>",
+                "<div style='background-color: #1380A1; color: #ffffff; color: white; padding: 8px 12px; border-radius: 4px; font-size: 12px;'>#1380A1 BBC Blue</div>",
+                "<div style='background-color: #FAAB18; color: #111111; color: black; padding: 8px 12px; border-radius: 4px; font-size: 12px;'>#FAAB18 BBC Orange</div>",
+                "<div style='background-color: #007f7f; color: #ffffff; color: white; padding: 8px 12px; border-radius: 4px; font-size: 12px;'>#007f7f BBC Teal</div>",
+                "<div style='background-color: #333333; color: #ffffff; color: white; padding: 8px 12px; border-radius: 4px; font-size: 12px;'>#333333 BBC Gray</div>",
                 "</div>",
                 "<p><strong>Usage Guidelines:</strong></p>",
                 "<ul>",
@@ -1244,7 +1244,7 @@ bbcplotsClass <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         .init_design_guide = function() {
             design_html <- paste(
                 "<h4 style='color: #1380A1;'> BBC Design Principles</h4>",
-                "<div style='background-color: #f0f8ff; padding: 15px; border-radius: 5px; margin: 10px 0;'>",
+                "<div style='background-color: rgba(33, 152, 255, 0.07); padding: 15px; border-radius: 5px; margin: 10px 0; color: inherit;'>",
                 "<h5>Core Design Standards:</h5>",
                 "<ul>",
                 "<li><strong>Typography:</strong> Helvetica font family at specific sizes (28pt titles, 22pt subtitles, 18pt body)</li>",
@@ -1271,7 +1271,7 @@ bbcplotsClass <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         .init_accessibility_info = function() {
             access_html <- paste(
                 "<h4 style='color: #1380A1;'> Accessibility & Standards</h4>",
-                "<div style='background-color: #fff3e0; padding: 15px; border-radius: 5px; margin: 10px 0;'>",
+                "<div style='background-color: rgba(255, 169, 33, 0.14); padding: 15px; border-radius: 5px; margin: 10px 0; color: inherit;'>",
                 "<h5>BBC Accessibility Standards:</h5>",
                 "<ul>",
                 "<li><strong>Color Contrast:</strong> All text meets WCAG AA standards (4.5:1 ratio minimum)</li>",
@@ -1287,7 +1287,7 @@ bbcplotsClass <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 "<li>Provide chart descriptions in accompanying text</li>",
                 "<li>Test with screen readers and accessibility tools</li>",
                 "</ul>",
-                "<p style='margin: 10px 0 0 0; padding: 10px; background-color: #e8f5e8; border-radius: 4px;'>",
+                "<p style='margin: 10px 0 0 0; padding: 10px; background-color: rgba(33, 159, 33, 0.1); border-radius: 4px; color: inherit;'>",
                 "<strong> Tip:</strong> BBC charts prioritize clarity and accessibility over visual complexity. This ensures your message reaches the widest possible audience effectively.",
                 "</p>",
                 "</div>"
@@ -1512,7 +1512,7 @@ bbcplotsClass <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         .init_template_system = function() {
             template_html <- paste(
                 "<h4 style='color: #1380A1;'> BBC News Templates</h4>",
-                "<div style='background-color: #f8f9fa; padding: 15px; border-radius: 5px; margin: 10px 0;'>",
+                "<div style='background-color: rgba(138, 155, 172, 0.06); padding: 15px; border-radius: 5px; margin: 10px 0; color: inherit;'>",
                 "<p><strong>Pre-configured layouts for different BBC coverage areas:</strong></p>",
                 "<div style='display: grid; gap: 10px; margin: 15px 0;'>",
                 private$.get_template_cards(),
@@ -1674,7 +1674,7 @@ bbcplotsClass <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 
                 # Update template guide with applied template
                 applied_html <- paste0(
-                    "<div style='background-color: #e8f5e8; border: 1px solid #4caf50; border-radius: 5px; padding: 15px; margin: 10px 0;'>",
+                    "<div style='background-color: rgba(33, 159, 33, 0.1); border: 1px solid #4caf50; border-radius: 5px; padding: 15px; margin: 10px 0; color: inherit;'>",
                     "<h5 style='color: #2e7d32; margin: 0 0 10px 0;'>", template$icon, " Applied: ", template$display_name, "</h5>",
                     "<p style='margin: 0 0 10px 0; color: #2e7d32;'>", template$description, "</p>",
                     "<p style='margin: 0; font-size: 0.9em; color: #2e7d32;'>",

@@ -28,7 +28,7 @@ lassointroClass <- if (requireNamespace("jmvcore", quietly = TRUE)) R6::R6Class(
             .lg td { padding: 8px; border-bottom: 1px solid #ccc; }
             .lg td.center { text-align: center; }
             .lg td.vtop, .lg th.vtop { vertical-align: top; width: 28%; }
-            .lg .callout { background: #f8f4e8; border-left: 4px solid #c9a825; padding: 12px 16px; margin: 16px 0; }
+            .lg .callout { background: rgba(188, 149, 33, 0.1); color: inherit; border-left: 4px solid #c9a825; padding: 12px 16px; margin: 16px 0; }
             </style>'
         },
 

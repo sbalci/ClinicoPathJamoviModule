@@ -141,7 +141,7 @@ options:
             Add the new categorized variable directly to the dataset.
 
     - name: excludeoutofrange
-      title: Exclude values outside the break points
+      title: Out-of-range value exclusion
       type: Bool
       default: false
       description:

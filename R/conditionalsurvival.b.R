@@ -730,7 +730,7 @@ conditionalsurvivalClass <- R6::R6Class(
 
             html_content <- paste0(
                 "<h4>Report Sentence (copy-ready)</h4>",
-                "<div style='background-color:#f8f9fa; padding:10px; border-left:3px solid #007bff; margin:8px 0; font-style:italic;'>",
+                "<div style='background-color: rgba(138, 155, 172, 0.06); padding:10px; border-left:3px solid #007bff; margin:8px 0; font-style:italic; color: inherit;'>",
                 paste(sentences, collapse = "<br><br>"),
                 "</div>",
                 "<p style='font-size:0.85em; color:#666;'>",

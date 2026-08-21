@@ -10,7 +10,7 @@ NULL
 # Helper function to escape variable names with special characters for formulas.
 # Thin adapter around jmvcore::composeTerm so the 4 call sites (L366, L367,
 # L1297, L1298) keep their existing signature while using the project idiom.
-.escapeVariableNames <- function(var_names) {
+.decisionpanelEscapeVariableNames <- function(var_names) {
     vapply(var_names, jmvcore::composeTerm, character(1), USE.NAMES = FALSE)
 }
 
@@ -377,8 +377,8 @@ decisionpanelClass <- if (requireNamespace("jmvcore")) {
                 }
 
                 # Escape variable names for safe access
-                escaped_gold <- .escapeVariableNames(goldVariable)
-                escaped_tests <- .escapeVariableNames(testVariables)
+                escaped_gold <- .decisionpanelEscapeVariableNames(goldVariable)
+                escaped_tests <- .decisionpanelEscapeVariableNames(testVariables)
 
                 # Create binary versions safely with escaped names
                 working_data$gold_binary <- as.numeric(working_data[[goldVariable]] == goldPositive)
@@ -492,11 +492,11 @@ decisionpanelClass <- if (requireNamespace("jmvcore")) {
                 # Create clean, accessible welcome message
                 welcome_html <- paste0(
                     "<div style='font-family: Arial, sans-serif; max-width: 800px; line-height: 1.4;'>",
-                    "<div style='background: #f5f5f5; border: 2px solid #333; padding: 20px; margin-bottom: 20px;'>",
+                    "<div style='background-color: rgba(88, 88, 88, 0.06); border: 2px solid #333; padding: 20px; margin-bottom: 20px; color: inherit;'>",
                     "<h2 style='margin: 0 0 10px 0; font-size: 20px; color: #333;'>Decision Panel Optimization</h2>",
                     "<p style='margin: 0; font-size: 14px; color: #666;'>Optimize diagnostic test combinations for maximum clinical performance</p>",
                     "</div>",
-                    "<div style='background: #f9f9f9; border-left: 4px solid #333; padding: 15px; margin-bottom: 20px;'>",
+                    "<div style='background-color: rgba(155, 155, 155, 0.06); border-left: 4px solid #333; padding: 15px; margin-bottom: 20px; color: inherit;'>",
                     "<h3 style='margin: 0 0 10px 0; color: #333; font-size: 16px;'>Setup Progress</h3>"
                 )
 
@@ -541,7 +541,7 @@ decisionpanelClass <- if (requireNamespace("jmvcore")) {
                     "<li><strong>Strategy comparison</strong> (parallel vs sequential)</li>",
                     "<li><strong>Bootstrap validation</strong> with confidence intervals</li>",
                     "</ul></td></tr></table>",
-                    "<div style='background: #f9f9f9; border: 1px solid #ccc; padding: 15px;'>",
+                    "<div style='background-color: rgba(155, 155, 155, 0.06); border: 1px solid #ccc; padding: 15px; color: inherit;'>",
                     "<h4 style='margin: 0 0 10px 0; font-size: 15px;'>Important Notes</h4>",
                     "<ul style='margin: 0; padding-left: 20px; font-size: 14px;'>",
                     "<li><strong>Typical panels:</strong> 3-5 tests work best for most clinical scenarios</li>",
@@ -589,7 +589,7 @@ decisionpanelClass <- if (requireNamespace("jmvcore")) {
                     "<h3 style='color: #333; font-size: 18px;'>Analysis Starting...</h3>",
                     "<p>Optimizing <strong>", test_info$count, "</strong> diagnostic tests with gold standard</p>",
                     "<div style='margin: 20px 0;'>",
-                    "<div style='background: #f5f5f5; border: 2px solid #333; padding: 15px; display: inline-block;'>",
+                    "<div style='background-color: rgba(88, 88, 88, 0.06); border: 2px solid #333; padding: 15px; display: inline-block; color: inherit;'>",
                     "<strong>Tests:</strong> ", paste(htmltools::htmlEscape(test_info$variables), collapse = ", "), "<br>",
                     "<strong>Gold Standard:</strong> ", htmltools::htmlEscape(self$options$gold),
                     "</div></div></div>"
@@ -666,7 +666,7 @@ decisionpanelClass <- if (requireNamespace("jmvcore")) {
                 initial_summary <- paste0(
                     "<div style='text-align: center; padding: 20px;'>",
                     "<h3 style='color: #059669;'> Analysis Configuration</h3>",
-                    "<div style='background: #f0fdf4; border: 1px solid #bbf7d0; border-radius: 8px; padding: 20px; display: inline-block; text-align: left; margin: 15px;'>",
+                    "<div style='background-color: rgba(33, 225, 92, 0.07); border: 1px solid #bbf7d0; border-radius: 8px; padding: 20px; display: inline-block; text-align: left; margin: 15px; color: inherit;'>",
                     "<p style='margin: 0 0 15px 0;'><strong>Test Configuration:</strong></p>",
                     "<div style='margin-bottom: 15px; font-size: 14px;'>", test_level_info, "</div>",
                     "<div style='margin-bottom: 15px;'><strong>Gold Standard:</strong> ", htmltools::htmlEscape(self$options$gold), " ('", htmltools::htmlEscape(goldPositive), "' = positive)</div>",
@@ -867,7 +867,7 @@ decisionpanelClass <- if (requireNamespace("jmvcore")) {
                 clinical_warnings <- private$.checkClinicalAssumptions(mydata, testVariables, goldVariable, goldPositive)
                 if (length(clinical_warnings) > 0) {
                     warnings_html <- paste0(
-                        "<div style='background: #fff3cd; border: 1px solid #ffc107; border-radius: 8px; padding: 15px; margin: 10px 0;'>",
+                        "<div style='background-color: rgba(255, 202, 33, 0.23); border: 1px solid #ffc107; border-radius: 8px; padding: 15px; margin: 10px 0; color: inherit;'>",
                         "<h4 style='color: #856404; margin-top: 0;'> Clinical Considerations</h4>",
                         "<ul style='margin: 10px 0; padding-left: 20px;'>",
                         paste("<li>", htmltools::htmlEscape(clinical_warnings), "</li>", collapse = ""),
@@ -1326,8 +1326,8 @@ decisionpanelClass <- if (requireNamespace("jmvcore")) {
                 tree_data <- mydata[, c(testVariables, goldVariable)]
 
                 # Create formula with escaped variable names
-                escaped_gold <- .escapeVariableNames(goldVariable)
-                escaped_tests <- .escapeVariableNames(testVariables)
+                escaped_gold <- .decisionpanelEscapeVariableNames(goldVariable)
+                escaped_tests <- .decisionpanelEscapeVariableNames(testVariables)
                 formula <- jmvcore::asFormula(paste(
                     escaped_gold, "~",
                     paste(escaped_tests, collapse = " + ")
@@ -2203,7 +2203,7 @@ decisionpanelClass <- if (requireNamespace("jmvcore")) {
                 n_tests <- length(testVariables)
 
                 summary_html <- paste0(
-                    "<div style='background: #f8f9fa; border: 1px solid #dee2e6; border-radius: 8px; padding: 20px; margin: 10px 0;'>",
+                    "<div style='background-color: rgba(138, 155, 172, 0.06); border: 1px solid #dee2e6; border-radius: 8px; padding: 20px; margin: 10px 0; color: inherit;'>",
                     "<h4 style='color: #2c3e50; margin-top: 0;'> Clinical Decision Summary</h4>",
                     "<div style='background: white; padding: 15px; border-radius: 5px; margin: 10px 0;'>",
                     "<strong>Recommended Test Panel:</strong><br>",
@@ -2223,7 +2223,7 @@ decisionpanelClass <- if (requireNamespace("jmvcore")) {
                     "<div style='color: #7f8c8d; font-size: 12px;'>Specificity</div>",
                     "</div>",
                     "</div>",
-                    "<div style='background: #e8f6f3; padding: 10px; border-radius: 5px; border-left: 4px solid #27ae60;'>",
+                    "<div style='background-color: rgba(33, 168, 139, 0.1); padding: 10px; border-radius: 5px; border-left: 4px solid #27ae60; color: inherit;'>",
                     "<strong>Clinical Interpretation:</strong> ",
                     "This panel correctly identifies <strong>", round(best_panel$sensitivity * 100, 1), "%</strong> of positive cases ",
                     "and correctly excludes <strong>", round(best_panel$specificity * 100, 1), "%</strong> of negative cases.",
@@ -2245,7 +2245,7 @@ decisionpanelClass <- if (requireNamespace("jmvcore")) {
                 npv <- if (!is.null(best_panel$npv)) best_panel$npv else 0.5
 
                 interpretation_html <- paste0(
-                    "<div style='background: #fff8e1; border: 1px solid #ffc107; border-radius: 8px; padding: 20px; margin: 10px 0;'>",
+                    "<div style='background-color: rgba(255, 203, 33, 0.14); border: 1px solid #ffc107; border-radius: 8px; padding: 20px; margin: 10px 0; color: inherit;'>",
                     "<h4 style='color: #f57c00; margin-top: 0;'> Clinical Performance Analysis</h4>",
                     "<div style='margin: 15px 0;'>",
                     "<h5 style='color: #5d4037;'>Test Performance Meaning:</h5>",
@@ -2273,7 +2273,7 @@ decisionpanelClass <- if (requireNamespace("jmvcore")) {
                     } else {
                         ""
                     },
-                    "<div style='background: #e3f2fd; padding: 10px; border-radius: 5px; border-left: 4px solid #2196f3;'>",
+                    "<div style='background-color: rgba(33, 152, 239, 0.13); padding: 10px; border-radius: 5px; border-left: 4px solid #2196f3; color: inherit;'>",
                     "<strong>Clinical Recommendation:</strong> ",
                     if (best_panel$sensitivity > 0.9) {
                         "This panel has excellent sensitivity for screening applications. "
@@ -2320,7 +2320,7 @@ decisionpanelClass <- if (requireNamespace("jmvcore")) {
                 )
 
                 report_html <- paste0(
-                    "<div style='background: #f5f5f5; border: 2px dashed #999; border-radius: 8px; padding: 20px; margin: 10px 0;'>",
+                    "<div style='background-color: rgba(88, 88, 88, 0.06); border: 2px dashed #999; border-radius: 8px; padding: 20px; margin: 10px 0; color: inherit;'>",
                     "<h4 style='margin-top: 0; color: #333;'> Copy-Ready Clinical Report</h4>",
                     "<div style='background: white; padding: 15px; border-radius: 5px; font-family: Times, serif; line-height: 1.6;'>",
                     report_text,
@@ -3769,6 +3769,9 @@ decisionpanelClass <- if (requireNamespace("jmvcore")) {
             .plotCostEffectiveness = function(image, ggtheme, theme, ...) {
                 all_combinations <- image$state
 
+                if (is.null(all_combinations))
+                    return(FALSE)
+
                 # Extract cost and effectiveness data
                 plot_data <- data.frame(
                     cost = sapply(all_combinations, function(x) x$cost),
@@ -3813,6 +3816,9 @@ decisionpanelClass <- if (requireNamespace("jmvcore")) {
             },
             .plotROCCurves = function(image, ggtheme, theme, ...) {
                 state <- image$state
+
+                if (is.null(state))
+                    return(FALSE)
                 mydata <- state$data
                 panels <- state$panels
                 goldVariable <- state$goldVariable

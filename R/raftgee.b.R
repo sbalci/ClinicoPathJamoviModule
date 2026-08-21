@@ -224,7 +224,7 @@ raftgeeClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             } else {
                 formula <- .asSurvivalFormula(paste0(
                     "Surv(time, status) ~ ",
-                    jmvcore::composeTerms(as.list(covariates))
+                    paste(jmvcore::composeTerms(as.list(covariates)), collapse = " + ")
                 ))
             }
             

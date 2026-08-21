@@ -50,9 +50,9 @@ sparsegrouplassoClass <- R6::R6Class(
                     <head>
                     <style>
                         .main { margin: 10px; }
-                        .todo { background-color: #E8F4FD; padding: 15px; border-radius: 10px; margin: 10px 0; }
-                        .instructions { background-color: #E8F4FD; padding: 15px; border-radius: 10px; }
-                        .todo-title { font-weight: bold; font-size: 18px; margin-bottom: 10px; color: #2E86AB; }
+                        .todo { background-color: rgba(33, 149, 236, 0.1); color: inherit; padding: 15px; border-radius: 10px; margin: 10px 0; }
+                        .instructions { background-color: rgba(33, 149, 236, 0.1); color: inherit; padding: 15px; border-radius: 10px; }
+                        .todo-title { font-weight: bold; font-size: 18px; margin-bottom: 10px; color: inherit; }
                         .todo-item { margin: 8px 0; }
                     </style>
                     </head>
@@ -90,8 +90,8 @@ sparsegrouplassoClass <- R6::R6Class(
                     <head>
                     <style>
                         .main { margin: 10px; }
-                        .todo { background-color: #FFF3CD; padding: 15px; border-radius: 10px; margin: 10px 0; }
-                        .todo-title { font-weight: bold; font-size: 18px; margin-bottom: 10px; color: #856404; }
+                        .todo { background-color: rgba(255, 202, 33, 0.23); color: inherit; padding: 15px; border-radius: 10px; margin: 10px 0; }
+                        .todo-title { font-weight: bold; font-size: 18px; margin-bottom: 10px; color: inherit; }
                         .todo-item { margin: 8px 0; }
                     </style>
                     </head>
@@ -124,8 +124,8 @@ sparsegrouplassoClass <- R6::R6Class(
                 <head>
                 <style>
                     .main { margin: 10px; }
-                    .info { background-color: #D4EDDA; padding: 15px; border-radius: 10px; }
-                    .info-title { font-weight: bold; font-size: 16px; margin-bottom: 10px; color: #155724; }
+                    .info { background-color: rgba(33, 162, 64, 0.19); color: inherit; padding: 15px; border-radius: 10px; }
+                    .info-title { font-weight: bold; font-size: 16px; margin-bottom: 10px; color: inherit; }
                 </style>
                 </head>
                 <body>
@@ -806,7 +806,7 @@ sparsegrouplassoClass <- R6::R6Class(
                 tryCatch({
                     y_surv <- survival::Surv(y_time, y_event)
                     auto_fit <- glmnet::glmnet(
-                        x = X, y = y_surv, family = "cox",
+                        x = X, y = y_surv, family = "cox", cox.ties = "breslow",
                         alpha = self$options$alpha_sgl,
                         standardize = FALSE,
                         nlambda = n_lambda
@@ -830,7 +830,7 @@ sparsegrouplassoClass <- R6::R6Class(
                 # Let glmnet choose its own lambda sequence and take the max
                 fit <- glmnet::glmnet(
                     x = X, y = y_surv,
-                    family = "cox",
+                    family = "cox", cox.ties = "breslow",
                     alpha = self$options$alpha_sgl,
                     standardize = FALSE,
                     nlambda = 20
@@ -895,7 +895,7 @@ sparsegrouplassoClass <- R6::R6Class(
                 y_surv <- survival::Surv(y_time, y_event)
                 cv_ridge <- glmnet::cv.glmnet(
                     x = X, y = y_surv,
-                    family = "cox", alpha = 0,
+                    family = "cox", cox.ties = "breslow", alpha = 0,
                     nfolds = min(5, floor(nrow(X) / 3)),
                     standardize = FALSE
                 )
@@ -926,7 +926,7 @@ sparsegrouplassoClass <- R6::R6Class(
                 y_surv <- survival::Surv(y_time, y_event)
                 cv_lasso <- glmnet::cv.glmnet(
                     x = X, y = y_surv,
-                    family = "cox", alpha = 1,
+                    family = "cox", cox.ties = "breslow", alpha = 1,
                     nfolds = min(5, floor(nrow(X) / 3)),
                     standardize = FALSE
                 )
@@ -988,7 +988,7 @@ sparsegrouplassoClass <- R6::R6Class(
                     set.seed(self$options$seed_value + r - 1)
                     cv_r <- glmnet::cv.glmnet(
                         x = X, y = y_surv,
-                        family = "cox",
+                        family = "cox", cox.ties = "breslow",
                         alpha = alpha_sgl,
                         penalty.factor = penalty_factor,
                         nfolds = nfolds_safe,
@@ -1015,7 +1015,7 @@ sparsegrouplassoClass <- R6::R6Class(
             } else {
                 cv_fit <- glmnet::cv.glmnet(
                     x = X, y = y_surv,
-                    family = "cox",
+                    family = "cox", cox.ties = "breslow",
                     alpha = alpha_sgl,
                     penalty.factor = penalty_factor,
                     nfolds = nfolds_safe,
@@ -1027,7 +1027,7 @@ sparsegrouplassoClass <- R6::R6Class(
             # Fit full model across the lambda sequence
             full_fit <- glmnet::glmnet(
                 x = X, y = y_surv,
-                family = "cox",
+                family = "cox", cox.ties = "breslow",
                 alpha = alpha_sgl,
                 penalty.factor = penalty_factor,
                 standardize = FALSE,
@@ -1100,7 +1100,7 @@ sparsegrouplassoClass <- R6::R6Class(
             tryCatch({
                 fit <- glmnet::glmnet(
                     x = X, y = y_surv,
-                    family = "cox",
+                    family = "cox", cox.ties = "breslow",
                     alpha = alpha_sgl,
                     penalty.factor = penalty_factor,
                     lambda = lambda,
@@ -1233,7 +1233,7 @@ sparsegrouplassoClass <- R6::R6Class(
                     y_surv_sub <- survival::Surv(y_time_sub, y_event_sub)
                     fit_sub <- glmnet::glmnet(
                         x = X_sub, y = y_surv_sub,
-                        family = "cox",
+                        family = "cox", cox.ties = "breslow",
                         alpha = alpha_sgl,
                         penalty.factor = penalty_factor,
                         lambda = lambda_subset,
@@ -1539,7 +1539,7 @@ sparsegrouplassoClass <- R6::R6Class(
                                               floor(sum(results$y_event) / 3)))
                     ref_cv <- glmnet::cv.glmnet(
                         x = results$X, y = y_surv,
-                        family = "cox", alpha = alpha_val,
+                        family = "cox", cox.ties = "breslow", alpha = alpha_val,
                         nfolds = nfolds_safe, standardize = FALSE
                     )
                     ref_coefs <- as.numeric(coef(ref_cv, s = ref_cv$lambda.min))
@@ -2047,7 +2047,7 @@ sparsegrouplassoClass <- R6::R6Class(
 
             # Draft status warning (always shown)
             warnings_html <- paste0(warnings_html,
-                "<div style='background-color: #fff3cd; border: 1px solid #ffc107; padding: 12px; border-radius: 5px; margin: 10px 0;'>",
+                "<div style='background-color: rgba(255, 202, 33, 0.23); border: 1px solid #ffc107; padding: 12px; border-radius: 5px; margin: 10px 0; color: inherit;'>",
                 "<strong>DRAFT STATUS:</strong> This analysis is in the Drafts submenu. ",
                 "It uses glmnet's elastic net Cox regression with weighted penalty factors to approximate ",
                 "sparse group LASSO behavior. This is NOT a true sparse group LASSO implementation (which ",
@@ -2059,7 +2059,7 @@ sparsegrouplassoClass <- R6::R6Class(
             # Pathway warning
             if (!is.null(private$.pathwayWarning)) {
                 warnings_html <- paste0(warnings_html,
-                    "<div style='background-color: #f8d7da; border: 1px solid #f5c6cb; padding: 12px; border-radius: 5px; margin: 10px 0;'>",
+                    "<div style='background-color: rgba(216, 33, 50, 0.18); border: 1px solid #f5c6cb; padding: 12px; border-radius: 5px; margin: 10px 0; color: inherit;'>",
                     "<strong>PATHWAY GROUPING WARNING:</strong> ", private$.pathwayWarning,
                     "</div>")
             }
@@ -2068,11 +2068,11 @@ sparsegrouplassoClass <- R6::R6Class(
             <html>
             <head>
             <style>
-                .explanation { margin: 10px; padding: 15px; background-color: #f8f9fa; border-radius: 8px; }
+                .explanation { margin: 10px; padding: 15px; background-color: rgba(138, 155, 172, 0.06); color: inherit; border-radius: 8px; }
                 .result-section { margin: 15px 0; }
-                .highlight { background-color: #fff3cd; padding: 2px 4px; border-radius: 3px; }
-                .interpretation { background-color: #e8f4fd; padding: 10px; border-radius: 5px; margin: 10px 0; }
-                .method-info { background-color: #e1f5fe; padding: 10px; border-radius: 5px; }
+                .highlight { background-color: rgba(255, 202, 33, 0.23); color: inherit; padding: 2px 4px; border-radius: 3px; }
+                .interpretation { background-color: rgba(33, 149, 236, 0.1); color: inherit; padding: 10px; border-radius: 5px; margin: 10px 0; }
+                .method-info { background-color: rgba(33, 181, 248, 0.14); color: inherit; padding: 10px; border-radius: 5px; }
             </style>
             </head>
             <body>

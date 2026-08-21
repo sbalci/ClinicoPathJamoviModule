@@ -156,6 +156,49 @@ print(df[, c("line_number", "linter", "message")])
 
 **Verify after fixing:** re-run the scoped lint (target: 0 real findings), confirm the file still parses (`parse("R/$ARGUMENTS.b.R")`), then drive the analysis on bundled data via `devtools::load_all()`. For `seq_linter` fixes specifically, exercise the empty/one-column edge case (no variables selected, zero-row filtered data) the fix targets, and confirm identical output on non-empty input.
 
+### jamovi Library Review Gate
+
+These are the findings the jamovi library reviewer raised against this project's
+five submodules in the 2026-08 round. Full rationale and fixes:
+`vignettes/jamovi_library_review_guide.md`.
+
+```bash
+python3 tools/check_state_guards.py    # image$state read with no is.null() guard
+python3 tools/theme_safe_html.py       # opaque light-theme background (dark-mode unreadable)
+grep -oh "&[a-zA-Z][a-zA-Z0-9]\{1,12\};" R/<fn>.b.R | sort -u   # only &lt; &gt; &amp; &quot; &apos; are safe
+grep -n "setVisible(FALSE)" R/<fn>.b.R # every hit must be OPTION-driven, never a failure signal
+grep -n "^\s*warning(" R/<fn>.b.R      # jamovi never shows R warnings to the user
+grep -n "addRow(rowKey" R/<fn>.b.R     # a fixed / option-determined row set belongs in .init()
+grep -n "visible: *( *!" jamovi/<fn>.r.yaml   # a leading "!" is silently ALWAYS VISIBLE
+Rscript -e 'testthat::test_file("tests/testthat/test-zzz-results-rendering-contract.R")'
+```
+
+Checklist:
+
+- [ ] Every `x <- image$state` read is followed by `if (is.null(x)) return(FALSE)`;
+      every `image$state$field` read is preceded by a guard on the parent.
+- [ ] No `style=` attribute sets a hex `background-color` without a `color:`. Pale
+      panel fills are translucent `rgba()` + `color: inherit`; saturated chips keep
+      their fill but declare an explicit foreground.
+- [ ] Only the five structural HTML entities appear. Everything else is a `\u{}` escape.
+- [ ] `setVisible(FALSE)` never signals failure; nothing is written to a hidden element;
+      no `.init()`-hides / `.run()`-restores pair (use the declarative `visible:`).
+- [ ] Table rows that depend only on options or data shape are created in `.init()` and
+      filled with `setRow()` in `.run()`.
+- [ ] `warning()` is reserved for internal diagnostics; anything the user would notice
+      goes to a notice element.
+- [ ] Every `.()` wraps a complete sentence with `{}` placeholders — no `paste0()` splices,
+      no leading/trailing space, no `\n` inside the string. `jmvcore::reject()` messages
+      are wrapped too.
+- [ ] Every package reached via `::` or `importFrom()` is in `Imports:` — `grDevices`,
+      `grid`, `stats`, `utils` included.
+- [ ] Checkbox labels name the thing, not the action; individual control labels are
+      sentence case; the `.u.yaml` panel title matches the `.a.yaml` title.
+- [ ] No option, result, or `ui.<name>` in `.events.js` refers to a schema entry that is
+      commented out or removed.
+- [ ] **Do not add `type: Notice` to `.r.yaml`** — it is not in the compiler enum and
+      `jmvtools::prepare()` fails on it. `type: Notification` compiles but breaks at runtime.
+
 ### Documentation & UX
 
 **Visibility rule:** Natural‑language summaries and educational/explanatory outputs must render **only when** the corresponding UI options are enabled by the user (see the `.u.yaml` checkboxes below). Keep these sections hidden by default unless selected.

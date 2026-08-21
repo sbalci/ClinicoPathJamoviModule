@@ -469,7 +469,7 @@ jrecodeClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             # rejects HTML metachars but a one-line edit relaxing the pattern would
             # open this site to XSS)
             notice <- paste0(
-                "<div style='padding: 10px; background-color: #e7f3ff; border-left: 4px solid #2196F3;'>",
+                "<div style='padding: 10px; background-color: rgba(33, 144, 255, 0.11); border-left: 4px solid #2196F3; color: inherit;'>",
                 "<b>To create the new variable '", htmltools::htmlEscape(new_var_name), "':</b><br>",
                 "1. Copy the generated R code below<br>",
                 "2. Use Data \u{2192} Compute to create a new variable<br>",

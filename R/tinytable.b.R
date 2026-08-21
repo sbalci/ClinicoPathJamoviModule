@@ -20,7 +20,7 @@ tinytableClass <- if (requireNamespace("jmvcore")) R6::R6Class("tinytableClass",
             # Check if required variables have been selected
             if (is.null(self$options$vars) || length(self$options$vars) == 0) {
                 intro_msg <- "
-                <div style='background-color: #e3f2fd; padding: 20px; border-radius: 8px; margin: 20px 0;'>
+                <div style='background-color: rgba(33, 152, 239, 0.13); padding: 20px; border-radius: 8px; margin: 20px 0; color: inherit;'>
                 <h3 style='color: #1976d2; margin-top: 0;'> Welcome to Modern Table Formatting!</h3>
                 <p><strong>Publication-ready tables with tinytable</strong> - zero dependencies, maximum flexibility</p>
                 <p>Create beautiful, modern tables for clinical research and data presentation</p>
@@ -91,7 +91,7 @@ tinytableClass <- if (requireNamespace("jmvcore")) R6::R6Class("tinytableClass",
             if (length(missing_packages) > 0) {
                 pkg_list <- paste(missing_packages, collapse = ", ")
                 error_msg <- paste0("
-                <div style='color: red; background-color: #ffebee; padding: 20px; border-radius: 8px;'>
+                <div style='color: red; background-color: rgba(255, 33, 67, 0.09); padding: 20px; border-radius: 8px;'>
                 <h4>Missing Required Packages</h4>
                 <p>The following packages are required for modern table formatting: <strong>", pkg_list, "</strong></p>
                 <p>Please install them using:</p>
@@ -135,7 +135,7 @@ tinytableClass <- if (requireNamespace("jmvcore")) R6::R6Class("tinytableClass",
                 }
             }, error = function(e) {
                 error_msg <- paste0("
-                <div style='color: red; background-color: #ffebee; padding: 20px; border-radius: 8px;'>
+                <div style='color: red; background-color: rgba(255, 33, 67, 0.09); padding: 20px; border-radius: 8px;'>
                 <h4>Table Generation Error</h4>
                 <p><strong>Error:</strong> ", htmltools::htmlEscape(e$message), "</p>
                 
@@ -467,7 +467,7 @@ tinytableClass <- if (requireNamespace("jmvcore")) R6::R6Class("tinytableClass",
             output_format <- self$options$output_format
             
             interpretation_html <- paste0(
-                "<div style='background-color: #e8f5e8; padding: 20px; border-radius: 8px;'>",
+                "<div style='background-color: rgba(33, 159, 33, 0.1); padding: 20px; border-radius: 8px; color: inherit;'>",
                 "<h3 style='color: #2e7d32; margin-top: 0;'> Modern Table Formatting Guide</h3>",
                 
                 "<h4 style='color: #2e7d32;'>Current Table Configuration:</h4>",

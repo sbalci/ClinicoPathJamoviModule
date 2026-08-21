@@ -65,7 +65,7 @@ raincloudClass <- if (requireNamespace("jmvcore")) R6::R6Class("raincloudClass",
             # Check if required variables have been selected
             if (is.null(self$options$dep_var) || is.null(self$options$group_var)) {
                 intro_msg <- "
-                <div style='background-color: #e3f2fd; padding: 20px; border-radius: 8px; margin: 20px 0;'>
+                <div style='background-color: rgba(33, 152, 239, 0.13); padding: 20px; border-radius: 8px; margin: 20px 0; color: inherit;'>
                 <h3 style='color: #1976d2; margin-top: 0;'> Welcome to Raincloud Plot Visualization!</h3>
                 <p><strong>Comprehensive distribution analysis</strong> using ggdist raincloud plots</p>
                 <p>Based on R-Bloggers tutorial: 'Make a Raincloud Plot to Visualize Distribution in ggplot2'</p>
@@ -111,7 +111,7 @@ raincloudClass <- if (requireNamespace("jmvcore")) R6::R6Class("raincloudClass",
             # Safely require ggdist
             if (!requireNamespace("ggdist", quietly = TRUE)) {
                 error_msg <- "
-                <div style='color: red; background-color: #ffebee; padding: 20px; border-radius: 8px;'>
+                <div style='color: red; background-color: rgba(255, 33, 67, 0.09); padding: 20px; border-radius: 8px;'>
                 <h4>ggdist Package Required</h4>
                 <p>The ggdist package is required for raincloud plot functionality.</p>
                 <p>Please install it using: <code>install.packages('ggdist')</code></p>
@@ -209,7 +209,7 @@ raincloudClass <- if (requireNamespace("jmvcore")) R6::R6Class("raincloudClass",
             else ""
 
             summary_msg <- paste0(
-                "<div style='background-color:#f8f9fa;padding:12px;border-radius:8px;margin-bottom:12px;'>",
+                "<div style='background-color: rgba(138, 155, 172, 0.06);padding:12px;border-radius:8px;margin-bottom:12px; color: inherit;'>",
                 "<strong>Data summary:</strong> ", nrow(analysis_data), " complete rows (removed ",
                 nrow(dataset) - nrow(analysis_data), " with missing values). ",
                 length(group_counts), " groups: ",
@@ -260,7 +260,7 @@ raincloudClass <- if (requireNamespace("jmvcore")) R6::R6Class("raincloudClass",
             if (isTRUE(self$options$log_transform) && any(analysis_data[[dep_var]] <= 0)) {
                 interpretation_html <- paste0(
                     interpretation_html,
-                    "<div style='background-color:#f8d7da;color:#721c24;padding:12px;border-radius:8px;margin-top:12px;'>",
+                    "<div style='background-color: rgba(216, 33, 50, 0.18);color: inherit;padding:12px;border-radius:8px;margin-top:12px;'>",
                     .("Log transform was requested but the dependent variable contains non-positive values; the log scale was skipped."),
                     "</div>"
                 )
@@ -593,7 +593,7 @@ raincloudClass <- if (requireNamespace("jmvcore")) R6::R6Class("raincloudClass",
                 )
             
             stats_html <- paste0(
-                "<div style='background-color: #f8f9fa; padding: 20px; border-radius: 8px; margin-bottom: 20px;'>",
+                "<div style='background-color: rgba(138, 155, 172, 0.06); padding: 20px; border-radius: 8px; margin-bottom: 20px; color: inherit;'>",
                 "<h3 style='color: #495057; margin-top: 0;'> Distribution Summary Statistics</h3>",
                 "<table style='width: 100%; border-collapse: collapse; font-family: Arial, sans-serif;'>",
                 "<thead><tr style='background-color: #6c757d; color: white;'>",
@@ -681,7 +681,7 @@ raincloudClass <- if (requireNamespace("jmvcore")) R6::R6Class("raincloudClass",
             }
             
             outlier_html <- paste0(
-                "<div style='background-color: #fff3cd; padding: 20px; border-radius: 8px; margin-bottom: 20px;'>",
+                "<div style='background-color: rgba(255, 202, 33, 0.23); padding: 20px; border-radius: 8px; margin-bottom: 20px; color: inherit;'>",
                 "<h3 style='color: #856404; margin-top: 0;'> Outlier Detection (", stringr::str_to_title(outlier_method), " Method)</h3>",
                 "<ul>"
             )
@@ -723,10 +723,10 @@ raincloudClass <- if (requireNamespace("jmvcore")) R6::R6Class("raincloudClass",
             # Perform normality tests for each group
             
             normality_html <- paste0(
-                "<div style='background-color: #d1ecf1; padding: 20px; border-radius: 8px; margin-bottom: 20px;'>",
+                "<div style='background-color: rgba(33, 163, 188, 0.21); padding: 20px; border-radius: 8px; margin-bottom: 20px; color: inherit;'>",
                 "<h3 style='color: #0c5460; margin-top: 0;'> Normality Tests (Shapiro-Wilk)</h3>",
                 "<table style='width: 100%; border-collapse: collapse;'>",
-                "<tr style='background-color: #e0e0e0;'>",
+                "<tr style='background-color: rgba(33, 33, 33, 0.14); color: inherit;'>",
                 "<th style='padding: 8px; border: 1px solid #ddd;'>Group</th>",
                 "<th style='padding: 8px; border: 1px solid #ddd;'>W Statistic</th>",
                 "<th style='padding: 8px; border: 1px solid #ddd;'>P-value</th>",
@@ -820,7 +820,7 @@ raincloudClass <- if (requireNamespace("jmvcore")) R6::R6Class("raincloudClass",
             effect_size_flag <- isTRUE(tryCatch(self$options$effect_size, error = function(...) FALSE))
 
             if (n_groups < 2) {
-                return("<div style='background-color:#fff3cd;padding:12px;border-radius:8px;'>At least two groups are required for comparisons.</div>")
+                return("<div style='background-color: rgba(255, 202, 33, 0.23);padding:12px;border-radius:8px; color: inherit;'>At least two groups are required for comparisons.</div>")
             }
 
             # Determine an UNTRANSLATED test key so branch dispatch is
@@ -834,7 +834,7 @@ raincloudClass <- if (requireNamespace("jmvcore")) R6::R6Class("raincloudClass",
             names(group_ns) <- levels(data[[group_var]])
             if (any(group_ns < 2)) {
                 return(paste0(
-                    "<div style='background-color:#f8d7da;color:#721c24;padding:12px;border-radius:8px;'>",
+                    "<div style='background-color: rgba(216, 33, 50, 0.18);color: inherit;padding:12px;border-radius:8px;'>",
                     .("A group comparison needs at least two observations in every group. These have fewer: "),
                     htmltools::htmlEscape(paste(sprintf("%s (n=%d)", names(group_ns)[group_ns < 2],
                                                        group_ns[group_ns < 2]), collapse = ", ")),
@@ -901,7 +901,7 @@ raincloudClass <- if (requireNamespace("jmvcore")) R6::R6Class("raincloudClass",
             # unassigned and crashed the whole analysis. Fail soft instead.
             if (test_key %in% c("ttest", "wilcoxon") && n_groups != 2) {
                 return(paste0(
-                    "<div style='background-color:#fff3cd;padding:12px;border-radius:8px;'>",
+                    "<div style='background-color: rgba(255, 202, 33, 0.23);padding:12px;border-radius:8px; color: inherit;'>",
                     .("The selected test (t-test or Wilcoxon) requires exactly two groups, but the grouping variable has "),
                     n_groups,
                     .(" levels. Choose ANOVA or Kruskal-Wallis, or use Automatic selection."),
@@ -1005,7 +1005,7 @@ raincloudClass <- if (requireNamespace("jmvcore")) R6::R6Class("raincloudClass",
                     }
                     if (unequal_var)
                         assumption_note <- paste0(
-                            "<div style='background-color:#f8d7da;color:#721c24;padding:10px;border-radius:6px;margin-top:10px;'>",
+                            "<div style='background-color: rgba(216, 33, 50, 0.18);color: inherit;padding:10px;border-radius:6px;margin-top:10px;'>",
                             sprintf(.("Equal variances are doubtful (Bartlett p = %s), and ordinary ANOVA assumes them. With unequal variances and unequal group sizes it can report a significant difference where none exists. Use Welch's ANOVA (choose Automatic) or Kruskal-Wallis."),
                                     private$.fmtP(var_p)),
                             "</div>")
@@ -1025,7 +1025,7 @@ raincloudClass <- if (requireNamespace("jmvcore")) R6::R6Class("raincloudClass",
             # Safety net: if no branch produced a result, fail soft (never crash).
             if (is.null(p_value) || !is.finite(p_value)) {
                 return(paste0(
-                    "<div style='background-color:#fff3cd;padding:12px;border-radius:8px;'>",
+                    "<div style='background-color: rgba(255, 202, 33, 0.23);padding:12px;border-radius:8px; color: inherit;'>",
                     .("The group comparison could not be computed for this data. Check that every group has at least two distinct values."),
                     "</div>"))
             }
@@ -1061,7 +1061,7 @@ raincloudClass <- if (requireNamespace("jmvcore")) R6::R6Class("raincloudClass",
                         "<h4 style='color:#7b1fa2;margin-bottom:6px;'>",
                         sprintf(.("Pairwise comparisons (%s-adjusted)"), adjust_method), "</h4>",
                         "<table style='width:100%; border-collapse:collapse;'>",
-                        "<tr style='background-color:#e0e0e0;'><th style='padding:6px;border:1px solid #ddd;'>",
+                        "<tr style='background-color: rgba(33, 33, 33, 0.14); color: inherit;'><th style='padding:6px;border:1px solid #ddd;'>",
                         .("Comparison"), "</th><th style='padding:6px;border:1px solid #ddd;'>",
                         .("Adjusted p"), "</th></tr>", rows, "</table>")
                 }
@@ -1082,7 +1082,7 @@ raincloudClass <- if (requireNamespace("jmvcore")) R6::R6Class("raincloudClass",
                           if (p_value < 0.05) .("p &lt; 0.05") else .("not significant at the 0.05 level")
 
             comparison_html <- paste0(
-                "<div style='background-color: #f3e5f5; padding: 20px; border-radius: 8px; margin-bottom: 20px;'>",
+                "<div style='background-color: rgba(153, 33, 170, 0.12); padding: 20px; border-radius: 8px; margin-bottom: 20px; color: inherit;'>",
                 "<h3 style='color: #7b1fa2; margin-top: 0;'> Group Comparison Test</h3>",
                 "<table style='width: 100%; border-collapse: collapse;'>",
                 "<tr><td style='padding: 8px; border: 1px solid #ddd;'><strong>Test Method:</strong></td><td style='padding: 8px; border: 1px solid #ddd;'>", test_method, "</td></tr>",
@@ -1115,7 +1115,7 @@ raincloudClass <- if (requireNamespace("jmvcore")) R6::R6Class("raincloudClass",
             n_total <- nrow(data)
             
             interpretation_html <- paste0(
-                "<div style='background-color: #e8f5e8; padding: 20px; border-radius: 8px;'>",
+                "<div style='background-color: rgba(33, 159, 33, 0.1); padding: 20px; border-radius: 8px; color: inherit;'>",
                 "<h3 style='color: #2e7d32; margin-top: 0;'> Raincloud Plot Interpretation Guide</h3>",
                 
                 "<h4 style='color: #2e7d32;'>Plot Summary:</h4>",
@@ -1196,7 +1196,7 @@ raincloudClass <- if (requireNamespace("jmvcore")) R6::R6Class("raincloudClass",
                         test_method, paste(groups, collapse = " vs "), quantity, p_txt)
             
             return(paste0(
-                "<div style='background-color: #e3f2fd; padding: 15px; border-radius: 5px; margin: 10px 0;'>",
+                "<div style='background-color: rgba(33, 152, 239, 0.13); padding: 15px; border-radius: 5px; margin: 10px 0; color: inherit;'>",
                 "<h4 style='margin-top: 0; color: #1976d2;'> Copy-Ready Result</h4>",
                 "<p style='font-family: monospace; background: white; padding: 10px; border: 1px solid #ddd; border-radius: 3px;'>",
                 report_text,

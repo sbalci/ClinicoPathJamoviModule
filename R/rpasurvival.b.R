@@ -93,7 +93,7 @@ rpasurvivalClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
             # Initialize function
             .init = function() {
                 # Set instructions
-                instructions <- '<div style="font-family: Arial; padding: 15px; background-color: #f8f9fa; border-radius: 5px; margin: 10px 0;">
+                instructions <- '<div style="font-family: Arial; padding: 15px; background-color: rgba(138, 155, 172, 0.06); border-radius: 5px; margin: 10px 0; color: inherit;">
                 <h3 style="color: #0066cc; margin-top: 0;">Recursive Partitioning Analysis for Survival</h3>
                 <p><strong>Purpose:</strong> Develop risk stratification groups using binary tree partitioning on survival data.</p>
                 <p><strong>Method:</strong> CART (Classification and Regression Trees) for survival endpoints.</p>
@@ -571,28 +571,44 @@ rpasurvivalClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                     labels = labels
                 ))
 
-                # Create new variable if requested
-                if (self$options$createnewvar) {
-                    newVarName <- self$options$newvarname
-                    if (newVarName == "" || is.null(newVarName)) {
-                        newVarName <- "rpa_stage"
-                    }
-
-                    # Create full-length variable (with NAs for excluded rows)
-                    fullRiskGroup <- rep(NA, nrow(self$data))
+                # Add the risk-group assignment to the dataset.
+                #
+                # This used to call self$results$.addColumn(), which is not a method of a
+                # jmvcore results Group -- ticking the box errored the whole analysis.
+                # Writing a column back to the data requires a `type: Output` option
+                # (riskgroupvar) plus the matching result item, then setRowNums/setValues.
+                #
+                # Values are full-length over self$data: a row dropped by complete-case
+                # filtering keeps NA, which is the honest value for "not classified".
+                # The factor levels are declared explicitly so the group order survives the
+                # hand-off -- as.character() would come back sorted alphabetically and put
+                # "High Risk" before "Low Risk".
+                if (isTRUE(self$options$riskgroupvar) &&
+                    self$results$riskgroupvar$isNotFilled()) {
+                    fullRiskGroup <- rep(NA_character_, nrow(self$data))
                     fullRiskGroup[completeIdx] <- as.character(riskGroup)
 
-                    # Add to dataset
-                    self$results$.addColumn(
-                        name = newVarName,
-                        title = paste0("RPA Stage (", nGroups, " groups)"),
-                        type = "text",
-                        values = fullRiskGroup
+                    self$results$riskgroupvar$setRowNums(seq_len(nrow(self$data)))
+                    self$results$riskgroupvar$setValues(
+                        factor(fullRiskGroup, levels = levels(riskGroup))
                     )
 
                     private$.addNotice(
                         "INFO", "Variable Created",
-                        paste0("New variable '", htmltools::htmlEscape(newVarName), "' created with ", nGroups, " risk groups.")
+                        paste0("RPA risk group added to the dataset with ", nGroups,
+                               " groups. Rows excluded from the analysis are empty.")
+                    )
+                }
+
+                # `createnewvar` / `newvarname` are retired: they drove the broken
+                # .addColumn() call. Tell the user where the working control is rather
+                # than letting the old checkbox be a silent no-op.
+                if (isTRUE(self$options$createnewvar) && !isTRUE(self$options$riskgroupvar)) {
+                    private$.addNotice(
+                        "WARNING", "Use 'Add RPA Risk Group to Data'",
+                        paste0("'Create New Variable with Risk Groups' no longer does anything. ",
+                               "Use the 'Add RPA Risk Group to Data' output box to write the ",
+                               "risk groups back to your data.")
                     )
                 }
 
@@ -608,13 +624,13 @@ rpasurvivalClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
 
                 # Plain-language summary (if enabled)
                 if (self$options$showSummary) {
-                    summary_html <- '<div style="font-family: Arial; padding: 15px; background-color: #e7f3ff; border-left: 4px solid #0066cc; border-radius: 3px; margin: 10px 0;">'
+                    summary_html <- '<div style="font-family: Arial; padding: 15px; background-color: rgba(33, 144, 255, 0.11); border-left: 4px solid #0066cc; border-radius: 3px; margin: 10px 0; color: inherit;">'
                     summary_html <- paste0(summary_html, '<h4 style="color: #0066cc; margin-top: 0;"> Analysis Summary</h4>')
                     summary_html <- paste0(summary_html, sprintf("<p><b>RPA identified %d prognostic risk groups</b> from %d predictor variable(s).</p>", nGroups, nPredictors))
 
                     # Add details for each group
                     summary_html <- paste0(summary_html, '<table style="width: 100%; border-collapse: collapse; margin-top: 10px;">')
-                    summary_html <- paste0(summary_html, '<tr style="background-color: #f0f8ff; font-weight: bold;"><td>Risk Group</td><td>Patients</td><td>Events</td><td>Median OS</td><td>5-yr OS</td></tr>')
+                    summary_html <- paste0(summary_html, '<tr style="background-color: rgba(33, 152, 255, 0.07); font-weight: bold; color: inherit;"><td>Risk Group</td><td>Patients</td><td>Events</td><td>Median OS</td><td>5-yr OS</td></tr>')
 
                     for (i in 1:nGroups) {
                         summary_html <- paste0(
@@ -651,7 +667,7 @@ rpasurvivalClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
 
                 # Interpretation guide (if enabled)
                 if (self$options$showInterpretation) {
-                    interp_html <- '<div style="font-family: Arial; padding: 15px; background-color: #fff8e1; border-left: 4px solid #ffa726; border-radius: 3px; margin: 10px 0;">'
+                    interp_html <- '<div style="font-family: Arial; padding: 15px; background-color: rgba(255, 203, 33, 0.14); border-left: 4px solid #ffa726; border-radius: 3px; margin: 10px 0; color: inherit;">'
                     interp_html <- paste0(interp_html, '<h4 style="color: #f57c00; margin-top: 0;"> How to Interpret These Results</h4>')
 
                     interp_html <- paste0(interp_html, "<p><b>Decision Tree:</b></p><ul>")
@@ -688,7 +704,7 @@ rpasurvivalClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
 
                 # Report sentence (if enabled)
                 if (self$options$showReport) {
-                    report_html <- '<div style="font-family: Arial; padding: 15px; background-color: #e8f5e9; border-left: 4px solid #66bb6a; border-radius: 3px; margin: 10px 0;">'
+                    report_html <- '<div style="font-family: Arial; padding: 15px; background-color: rgba(33, 159, 43, 0.1); border-left: 4px solid #66bb6a; border-radius: 3px; margin: 10px 0; color: inherit;">'
                     report_html <- paste0(report_html, '<h4 style="color: #2e7d32; margin-top: 0;"> Report Sentence (Copy-Ready)</h4>')
                     report_html <- paste0(report_html, '<p style="background: white; padding: 10px; border: 1px dashed #66bb6a; border-radius: 3px;">')
 

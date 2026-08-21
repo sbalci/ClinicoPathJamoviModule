@@ -17,7 +17,7 @@
 NULL
 
 # Helper function to create styled HTML notice (replaces jmvcore::Notice to avoid serialization errors)
-.createNoticeHTML <- function(message, type = c("ERROR", "STRONG_WARNING", "WARNING", "INFO")) {
+.singlearmNoticeHTML <- function(message, type = c("ERROR", "STRONG_WARNING", "WARNING", "INFO")) {
     type <- match.arg(type)
 
     # Define styles for each notice type
@@ -281,7 +281,7 @@ singlearmClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
         # Display accumulated error messages
         if (length(private$.errorMessages) > 0) {
           html_content <- paste(sapply(private$.errorMessages, function(msg) {
-            .createNoticeHTML(msg, "ERROR")
+            .singlearmNoticeHTML(msg, "ERROR")
           }), collapse = "")
           self$results$errors$setContent(html_content)
           self$results$errors$setVisible(TRUE)
@@ -294,7 +294,7 @@ singlearmClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
           html_content <- paste(sapply(private$.warningMessages, function(msg) {
             # Determine if it's a STRONG_WARNING or regular WARNING based on keywords
             type <- if (grepl("Very few events|critically", msg, ignore.case = TRUE)) "STRONG_WARNING" else "WARNING"
-            .createNoticeHTML(msg, type)
+            .singlearmNoticeHTML(msg, type)
           }), collapse = "")
           self$results$warnings$setContent(html_content)
           self$results$warnings$setVisible(TRUE)
@@ -305,7 +305,7 @@ singlearmClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
         # Display accumulated info messages
         if (length(private$.infoMessages) > 0) {
           html_content <- paste(sapply(private$.infoMessages, function(msg) {
-            .createNoticeHTML(msg, "INFO")
+            .singlearmNoticeHTML(msg, "INFO")
           }), collapse = "")
           self$results$info$setContent(html_content)
           self$results$info$setVisible(TRUE)
@@ -2219,7 +2219,7 @@ singlearmClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
         # did not compute.
         if (self$options$showExplanations && private$.isCompetingRisk()) {
             self$results$medianSurvivalExplanation$setContent(paste0(
-              '<div class="explanation-box" style="background-color: #f0f8ff; padding: 15px; border-radius: 8px; margin: 10px 0;">',
+              '<div class="explanation-box" style="background-color: rgba(33, 152, 255, 0.07); padding: 15px; border-radius: 8px; margin: 10px 0; color: inherit;">',
               '<h3 style="color: #2c5282; margin-top: 0;">', .("Understanding the Median Time to the Event of Interest"), '</h3>',
               '<p>', .("This is not median survival. It is the first time at which the estimated cumulative incidence of the event of interest reaches 50% or greater, with competing risks accounted for. Because the curve changes in steps, it need not equal exactly 50% at that time; the estimate indicates that at least half the cohort has had the event of interest by then."), '</p>',
               '<ul>',
@@ -2231,14 +2231,14 @@ singlearmClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
               '</div>'))
         } else if (self$options$showExplanations) {
             median_explanation_html <- '
-            <div class="explanation-box" style="background-color: #f0f8ff; padding: 15px; border-radius: 8px; margin: 10px 0;">
+            <div class="explanation-box" style="background-color: rgba(33, 152, 255, 0.07); padding: 15px; border-radius: 8px; margin: 10px 0; color: inherit;">
                 <h3 style="color: #2c5282; margin-top: 0;"> Understanding the Kaplan-Meier Median</h3>
                 
                 <div style="background-color: white; padding: 12px; border-radius: 5px; margin: 10px 0;">
                     <h4 style="color: #2d3748; margin-top: 0;">What is the Kaplan-Meier Median?</h4>
                     <p style="margin: 8px 0;">It is the <strong>first time at which the estimated event-free probability is 50% or lower</strong>. Because the curve changes in steps, the estimate need not equal exactly 50% at that time. Its clinical name depends on the selected endpoint.</p>
                     
-                    <div style="background-color: #e6f7ff; padding: 10px; border-radius: 5px; margin: 10px 0;">
+                    <div style="background-color: rgba(33, 184, 255, 0.11); padding: 10px; border-radius: 5px; margin: 10px 0; color: inherit;">
                         <strong> Key Concept:</strong> If the median time-to-event = 24 months, it means:
                         <ul style="margin: 5px 0; padding-left: 20px;">
                             <li>The estimated event-free curve has reached 50% or lower by 24 months</li>
@@ -2248,10 +2248,10 @@ singlearmClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                     </div>
                 </div>
                 
-                <div style="background-color: #fef5e7; padding: 12px; border-radius: 5px; margin: 10px 0;">
+                <div style="background-color: rgba(246, 163, 33, 0.11); padding: 12px; border-radius: 5px; margin: 10px 0; color: inherit;">
                     <h4 style="color: #d68910; margin-top: 0;"> Understanding the Results Table</h4>
                     <table style="width: 100%; border-collapse: collapse; margin: 10px 0;">
-                        <tr style="background-color: #fff3cd;">
+                        <tr style="background-color: rgba(255, 202, 33, 0.23); color: inherit;">
                             <th style="padding: 8px; text-align: left; border: 1px solid #ffc107;">Measure</th>
                             <th style="padding: 8px; text-align: left; border: 1px solid #ffc107;">Meaning</th>
                         </tr>
@@ -2259,7 +2259,7 @@ singlearmClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                             <td style="padding: 8px; border: 1px solid #ffc107;"><strong>Records</strong></td>
                             <td style="padding: 8px; border: 1px solid #ffc107;">Total number of patients in analysis</td>
                         </tr>
-                        <tr style="background-color: #fffbf0;">
+                        <tr style="background-color: rgba(255, 196, 33, 0.07); color: inherit;">
                             <td style="padding: 8px; border: 1px solid #ffc107;"><strong>Events</strong></td>
                             <td style="padding: 8px; border: 1px solid #ffc107;">Number who experienced the event</td>
                         </tr>
@@ -2267,14 +2267,14 @@ singlearmClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                             <td style="padding: 8px; border: 1px solid #ffc107;"><strong>Median</strong></td>
                             <td style="padding: 8px; border: 1px solid #ffc107;">First time the estimated event-free probability reaches 50% or lower</td>
                         </tr>
-                        <tr style="background-color: #fffbf0;">
+                        <tr style="background-color: rgba(255, 196, 33, 0.07); color: inherit;">
                             <td style="padding: 8px; border: 1px solid #ffc107;"><strong>95% CI</strong></td>
                             <td style="padding: 8px; border: 1px solid #ffc107;">Range of plausible values</td>
                         </tr>
                     </table>
                 </div>
                 
-                <div style="background-color: #e8f5e9; padding: 12px; border-radius: 5px; margin: 10px 0;">
+                <div style="background-color: rgba(33, 159, 43, 0.1); padding: 12px; border-radius: 5px; margin: 10px 0; color: inherit;">
                     <h4 style="color: #2e7d32; margin-top: 0;"> Clinical Interpretation Guide</h4>
                     
                     <div style="background-color: white; padding: 10px; border-radius: 5px; margin: 10px 0;">
@@ -2287,7 +2287,7 @@ singlearmClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                         </ul>
                     </div>
                     
-                    <div style="background-color: #f3e5f5; padding: 10px; border-radius: 5px; margin: 10px 0;">
+                    <div style="background-color: rgba(153, 33, 170, 0.12); padding: 10px; border-radius: 5px; margin: 10px 0; color: inherit;">
                         <strong> When Median is "Not Reached" (NR):</strong>
                         <p style="margin: 5px 0;">The estimated event-free curve remains above 50% during observed follow-up</p>
                         <ul style="margin: 5px 0; padding-left: 20px;">
@@ -2298,7 +2298,7 @@ singlearmClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                     </div>
                 </div>
                 
-                <div style="background-color: #fff3e0; padding: 10px; border-radius: 5px; margin-top: 10px; border-left: 4px solid #ff9800;">
+                <div style="background-color: rgba(255, 169, 33, 0.14); padding: 10px; border-radius: 5px; margin-top: 10px; border-left: 4px solid #ff9800; color: inherit;">
                     <strong> Practical Tips:</strong>
                     <ul style="margin: 5px 0; padding-left: 20px;">
                         <li><strong>Robust measure:</strong> Less affected by extreme values than mean survival</li>
@@ -2519,7 +2519,7 @@ singlearmClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
           # falling through to the standard one.
           if (self$options$showExplanations) {
             self$results$survivalProbabilityExplanation$setContent(paste0(
-              '<div class="explanation-box" style="background-color: #f0f8ff; padding: 15px; border-radius: 8px; margin: 10px 0;">',
+              '<div class="explanation-box" style="background-color: rgba(33, 152, 255, 0.07); padding: 15px; border-radius: 8px; margin: 10px 0; color: inherit;">',
               '<h3 style="color: #2c5282; margin-top: 0;">', .("Understanding Cumulative Incidence at Selected Time Points"), '</h3>',
               '<p>', .("Each row gives the estimated probability that the event of interest has occurred by that time, accounting for the competing event. It is a cumulative incidence function (CIF), not a survival probability, and it is not 1 minus a Kaplan-Meier estimate: subjects who have the competing event can no longer experience the event of interest, and a Kaplan-Meier analysis that censored them would over-state the risk."), '</p>',
               '<ul>',
@@ -2649,7 +2649,7 @@ singlearmClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
         # Add explanatory output for survival probabilities
         if (self$options$showExplanations) {
             survival_probability_explanation_html <- '
-            <div class="explanation-box" style="background-color: #f0f8ff; padding: 15px; border-radius: 8px; margin: 10px 0;">
+            <div class="explanation-box" style="background-color: rgba(33, 152, 255, 0.07); padding: 15px; border-radius: 8px; margin: 10px 0; color: inherit;">
                 <h3 style="color: #2c5282; margin-top: 0;"> Understanding Kaplan-Meier Time-Specific Estimates</h3>
                 
                 <div style="background-color: white; padding: 12px; border-radius: 5px; margin: 10px 0;">
@@ -2657,7 +2657,7 @@ singlearmClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                     <p style="margin: 8px 0;">These show the <strong>estimated percentage of the cohort remaining event-free</strong> at specific milestone time points.
                     The displayed time points are exactly those selected for this analysis, in the declared output unit.</p>
                     
-                    <div style="background-color: #e6f7ff; padding: 10px; border-radius: 5px; margin: 10px 0;">
+                    <div style="background-color: rgba(33, 184, 255, 0.11); padding: 10px; border-radius: 5px; margin: 10px 0; color: inherit;">
                         <strong> Example Interpretation:</strong>
                         <p style="margin: 5px 0;">If the event-free estimate at a selected time is 75% (95% CI: 68-82%)</p>
                         <ul style="margin: 5px 0; padding-left: 20px;">
@@ -2668,10 +2668,10 @@ singlearmClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                     </div>
                 </div>
                 
-                <div style="background-color: #fef5e7; padding: 12px; border-radius: 5px; margin: 10px 0;">
+                <div style="background-color: rgba(246, 163, 33, 0.11); padding: 12px; border-radius: 5px; margin: 10px 0; color: inherit;">
                     <h4 style="color: #d68910; margin-top: 0;"> Understanding Each Column</h4>
                     <table style="width: 100%; border-collapse: collapse; margin: 10px 0;">
-                        <tr style="background-color: #fff3cd;">
+                        <tr style="background-color: rgba(255, 202, 33, 0.23); color: inherit;">
                             <th style="padding: 8px; text-align: left; border: 1px solid #ffc107;">Column</th>
                             <th style="padding: 8px; text-align: left; border: 1px solid #ffc107;">Meaning</th>
                             <th style="padding: 8px; text-align: left; border: 1px solid #ffc107;">Clinical Use</th>
@@ -2681,7 +2681,7 @@ singlearmClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                             <td style="padding: 8px; border: 1px solid #ffc107;">Milestone timepoint</td>
                             <td style="padding: 8px; border: 1px solid #ffc107;">Standard follow-up intervals</td>
                         </tr>
-                        <tr style="background-color: #fffbf0;">
+                        <tr style="background-color: rgba(255, 196, 33, 0.07); color: inherit;">
                             <td style="padding: 8px; border: 1px solid #ffc107;"><strong>Number at Risk</strong></td>
                             <td style="padding: 8px; border: 1px solid #ffc107;">Subjects event-free and uncensored just before the time point</td>
                             <td style="padding: 8px; border: 1px solid #ffc107;">Reliability of estimates</td>
@@ -2691,7 +2691,7 @@ singlearmClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                             <td style="padding: 8px; border: 1px solid #ffc107;">Events in interval</td>
                             <td style="padding: 8px; border: 1px solid #ffc107;">Observed event counts between requested time points</td>
                         </tr>
-                        <tr style="background-color: #fffbf0;">
+                        <tr style="background-color: rgba(255, 196, 33, 0.07); color: inherit;">
                             <td style="padding: 8px; border: 1px solid #ffc107;"><strong>Event-free estimate</strong></td>
                             <td style="padding: 8px; border: 1px solid #ffc107;">Kaplan-Meier probability for the selected endpoint</td>
                             <td style="padding: 8px; border: 1px solid #ffc107;">Descriptive cohort context</td>
@@ -2704,7 +2704,7 @@ singlearmClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                     </table>
                 </div>
                 
-                <div style="background-color: #e8f5e9; padding: 12px; border-radius: 5px; margin: 10px 0;">
+                <div style="background-color: rgba(33, 159, 43, 0.1); padding: 12px; border-radius: 5px; margin: 10px 0; color: inherit;">
                     <h4 style="color: #2e7d32; margin-top: 0;"> Descriptive Clinical Context</h4>
                     
                     <div style="background-color: white; padding: 10px; border-radius: 5px; margin: 10px 0;">
@@ -2712,7 +2712,7 @@ singlearmClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                         <p style="margin: 5px 0;">"In this cohort, about 8 out of 10 patients were event-free at 3 years"</p>
                     </div>
                     
-                    <div style="background-color: #f3e5f5; padding: 10px; border-radius: 5px; margin: 10px 0;">
+                    <div style="background-color: rgba(153, 33, 170, 0.12); padding: 10px; border-radius: 5px; margin: 10px 0; color: inherit;">
                         <strong> Descriptive Interpretation:</strong>
                         <ul style="margin: 5px 0; padding-left: 20px;">
                             <li>These estimates describe this cohort; they do not identify a treatment effect or prescribe a follow-up schedule</li>
@@ -2721,7 +2721,7 @@ singlearmClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                         </ul>
                     </div>
                     
-                    <div style="background-color: #e3f2fd; padding: 10px; border-radius: 5px; margin: 10px 0;">
+                    <div style="background-color: rgba(33, 152, 239, 0.13); padding: 10px; border-radius: 5px; margin: 10px 0; color: inherit;">
                         <strong> Comparison with Standards:</strong>
                         <p style="margin: 5px 0;">Contextual comparisons may use the sources below, but differences in case mix, entry dates, outcome definitions, and follow-up can invalidate direct comparisons:</p>
                         <ul style="margin: 5px 0; padding-left: 20px;">
@@ -2732,7 +2732,7 @@ singlearmClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                     </div>
                 </div>
                 
-                <div style="background-color: #fff3e0; padding: 10px; border-radius: 5px; margin-top: 10px; border-left: 4px solid #ff9800;">
+                <div style="background-color: rgba(255, 169, 33, 0.14); padding: 10px; border-radius: 5px; margin-top: 10px; border-left: 4px solid #ff9800; color: inherit;">
                     <strong> Important Considerations:</strong>
                     <ul style="margin: 5px 0; padding-left: 20px;">
                         <li><strong>Sample size matters:</strong> Fewer patients at later time points = less reliable estimates</li>
@@ -3020,7 +3020,7 @@ singlearmClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
         # Add explanatory output for person-time analysis
         if (self$options$showExplanations) {
             person_time_explanation_html <- '
-            <div style="margin-bottom: 20px; padding: 15px; background-color: #f0f8ff; border-left: 4px solid #4169e1;">
+            <div style="margin-bottom: 20px; padding: 15px; background-color: rgba(33, 152, 255, 0.07); border-left: 4px solid #4169e1; color: inherit;">
                 <h4 style="margin-top: 0; color: #2c3e50;">Understanding Person-Time Analysis</h4>
                 <p style="margin-bottom: 10px;">Person-time analysis calculates incidence rates by accounting for the total time each patient was at risk:</p>
                 <ul style="margin-left: 20px;">
@@ -3062,7 +3062,7 @@ singlearmClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
         unit <- htmltools::htmlEscape(self$options$timetypeoutput)
         if (private$.isCompetingRisk()) {
           txt <- paste0(
-            '<div class="explanation-box" style="background-color:#f0f8ff;padding:15px;border-radius:8px;margin:10px 0;">',
+            '<div class="explanation-box" style="background-color: rgba(33, 152, 255, 0.07);padding:15px;border-radius:8px;margin:10px 0; color: inherit;">',
             '<h3 style="color:#2c5282;margin-top:0;">Understanding the Cumulative-Incidence Plot</h3>',
             '<p>The plot shows the cumulative incidence of each terminal event state. ',
             'For the event of interest, this is the estimated probability that it has occurred by time <i>t</i>, ',
@@ -3076,7 +3076,7 @@ singlearmClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             '<p><em>These are descriptive estimates from one cohort and do not establish treatment effects or individual prognosis.</em></p></div>')
         } else {
           txt <- paste0(
-            '<div class="explanation-box" style="background-color:#f0f8ff;padding:15px;border-radius:8px;margin:10px 0;">',
+            '<div class="explanation-box" style="background-color: rgba(33, 152, 255, 0.07);padding:15px;border-radius:8px;margin:10px 0; color: inherit;">',
             '<h3 style="color:#2c5282;margin-top:0;">Understanding Survival Curves and Plots</h3>',
             '<p>The Kaplan-Meier curve estimates the probability of remaining event-free over time. ',
             'It steps down at event times; censoring changes the risk set but does not make the curve step down.</p>',
@@ -3186,7 +3186,7 @@ singlearmClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
 
         if (self$options$showSummaries) {
           self$results$baselineHazardSummary$setContent(glue::glue("
-            <div style='background-color:#fff9e6;border-left:4px solid #ffc107;padding:12px;margin-bottom:15px;'>
+            <div style='background-color: rgba(255, 202, 33, 0.11);border-left:4px solid #ffc107;padding:12px;margin-bottom:15px; color: inherit;'>
               <p style='margin:5px 0;'><strong>Methodological note:</strong>
               This output reports piecewise event rates, computed as events divided by exact
               person-time within equal-width intervals. The number of intervals is limited to
@@ -3208,7 +3208,7 @@ singlearmClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
 
         if (self$options$showExplanations) {
           self$results$baselineHazardExplanation$setContent(paste0(
-            '<div class="explanation-box" style="background-color:#f0f8ff;padding:15px;border-radius:8px;margin:10px 0;">',
+            '<div class="explanation-box" style="background-color: rgba(33, 152, 255, 0.07);padding:15px;border-radius:8px;margin:10px 0; color: inherit;">',
             '<h3 style="color:#2c5282;margin-top:0;">Understanding Piecewise Hazard-Rate Estimates</h3>',
             '<p>A hazard is an event rate among subjects still at risk, expressed per unit of person-time. ',
             'It is not an event probability and can exceed 1 per time unit. This table groups follow-up into equal-width intervals and divides events by the exact person-time accrued in each interval.</p>',
@@ -4152,12 +4152,12 @@ singlearmClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
         # Generate data quality summary
         if (self$options$showSummaries) {
           warning_text <- if (length(dq$warnings) > 0) {
-            paste("<div style='background-color: #fff3cd; padding: 10px; border-radius: 5px; margin: 10px 0; border-left: 4px solid #ffc107;'>",
+            paste("<div style='background-color: rgba(255, 202, 33, 0.23); padding: 10px; border-radius: 5px; margin: 10px 0; border-left: 4px solid #ffc107; color: inherit;'>",
                   "<strong> Data Quality Considerations:</strong><ul>",
                   paste0("<li>", dq$warnings, "</li>", collapse = ""),
                   "</ul></div>")
           } else {
-            paste0("<div style='background-color:#e3f2fd;padding:10px;border-radius:5px;margin:10px 0;border-left:4px solid #2196f3;'>",
+            paste0("<div style='background-color: rgba(33, 152, 239, 0.13);padding:10px;border-radius:5px;margin:10px 0;border-left:4px solid #2196f3; color: inherit;'>",
                    "<strong>Automated grading:</strong> No universal adequacy grade is assigned. Review the event counts, risk sets, confidence intervals, follow-up, missingness, and endpoint context directly.</div>")
           }
 
@@ -4167,13 +4167,13 @@ singlearmClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             paste0(dq$n_events, " event(s) and ", dq$n_censored, " censored")
 
           summary_html <- paste0(
-            "<div style='background-color: #f8f9fa; padding: 15px; border-radius: 8px; margin: 10px 0;'>",
+            "<div style='background-color: rgba(138, 155, 172, 0.06); padding: 15px; border-radius: 8px; margin: 10px 0; color: inherit;'>",
             "<h4 style='color: #2c3e50; margin-top: 0;'> Descriptive Data Diagnostics</h4>",
             "<p>This analysis includes <strong>", dq$n_total, " subjects</strong>: <strong>",
             count_text, "</strong> (", dq$event_rate, "% observed target-event proportion) over an observed-time range of ",
             dq$min_time, " to ", dq$max_time, " ", self$options$timetypeoutput, ".</p>",
             warning_text,
-            "<div style='background-color: #e3f2fd; padding: 10px; border-radius: 5px; margin: 10px 0;'>",
+            "<div style='background-color: rgba(33, 152, 239, 0.13); padding: 10px; border-radius: 5px; margin: 10px 0; color: inherit;'>",
             "<strong>Interpretive limitations:</strong>",
             "<ul style='margin: 5px 0; padding-left: 20px;'>",
             "<li>Rows missing time or outcome are excluded by complete-case analysis; bias depends on why values are missing.</li>",
@@ -4255,8 +4255,8 @@ singlearmClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
               paste0(estimand_meta$median, " was %.1f %s")
             median_text <- sprintf(median_label, median_survival, time_unit)
             if (is.finite(ci_lower) && is.finite(ci_upper))
-              median_text <- paste0(median_text, sprintf(
-                .(" (95%% CI: %.1f-%.1f %s)"), ci_lower, ci_upper, time_unit))
+              median_text <- paste0(median_text, " ", sprintf(
+                .("(95%% CI: %.1f-%.1f %s)"), ci_lower, ci_upper, time_unit))
           } else if (n_events == 0) {
             # Same estimand distinction as above: with competing risks there is
             # no median survival to be estimated in the first place.
@@ -4298,7 +4298,7 @@ singlearmClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
 
           # Format the complete summary
           summary_html <- paste0(
-            "<div style='background-color: #f8f9fa; padding: 20px; border-radius: 8px; margin: 15px 0; border-left: 4px solid #007bff;'>",
+            "<div style='background-color: rgba(138, 155, 172, 0.06); padding: 20px; border-radius: 8px; margin: 15px 0; border-left: 4px solid #007bff; color: inherit;'>",
             "<h4 style='color: #2c3e50; margin-top: 0; margin-bottom: 15px;'> ", .("Descriptive Cohort Summary"), "</h4>",
             "<p style='margin-bottom: 15px; font-size: 16px; line-height: 1.6;'>",
             "<strong>", preset_context, ":</strong> ", paste(summary_parts, collapse = " "), "</p>"
@@ -4306,7 +4306,7 @@ singlearmClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
           
           if (length(recommendations) > 0) {
             summary_html <- paste0(summary_html,
-              "<div style='background-color: #e3f2fd; padding: 15px; border-radius: 5px; margin-top: 15px;'>",
+              "<div style='background-color: rgba(33, 152, 239, 0.13); padding: 15px; border-radius: 5px; margin-top: 15px; color: inherit;'>",
               "<h5 style='color: #1976d2; margin-top: 0; margin-bottom: 10px;'> ", .("Clinical Considerations"), "</h5>",
               "<ul style='margin: 0; padding-left: 20px;'>",
               paste0("<li>", recommendations, "</li>", collapse = ""),
@@ -4317,7 +4317,7 @@ singlearmClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
           # Add copy button functionality
           summary_html <- paste0(summary_html,
             "<div style='text-align: right; margin-top: 15px;'>",
-            "<small style='color: #6c757d;'>", .(" Copy-ready descriptive cohort summary"), "</small>",
+            "<small style='color: #6c757d;'>", .("Copy-ready descriptive cohort summary"), "</small>",
             "</div></div>"
           )
           
@@ -4328,7 +4328,7 @@ singlearmClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
           # The primary tables remain available even if this optional narrative
           # cannot be assembled.
           fallback_html <- paste0(
-            "<div style='background-color: #fff3cd; padding: 15px; border-radius: 5px; margin: 10px 0;'>",
+            "<div style='background-color: rgba(255, 202, 33, 0.23); padding: 15px; border-radius: 5px; margin: 10px 0; color: inherit;'>",
             "<p>", .("The optional descriptive cohort summary could not be generated. The numerical tables above remain the authoritative results."), "</p>",
             "</div>"
           )

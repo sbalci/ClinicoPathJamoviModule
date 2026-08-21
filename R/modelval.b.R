@@ -131,7 +131,7 @@ modelvalClass <- if (requireNamespace('jmvcore'))
                 event_rate <- n_events / n
 
                 summary_html <- paste0(
-                    "<div style='padding: 15px; background-color: #f8f9fa; border-radius: 5px;'>",
+                    "<div style='padding: 15px; background-color: rgba(138, 155, 172, 0.06); border-radius: 5px; color: inherit;'>",
                     "<h4>", validation_type, "</h4>",
                     "<table style='width: 100%; margin-top: 10px;'>",
                     "<tr><td><strong>Sample size:</strong></td><td>", n, "</td></tr>",
@@ -357,7 +357,7 @@ modelvalClass <- if (requireNamespace('jmvcore'))
                 cal_slope <- private$.cal_slope
 
                 recommendations <- paste0(
-                    "<div style='padding: 15px; background-color: #e8f5e9; border-left: 4px solid #4caf50;'>",
+                    "<div style='padding: 15px; background-color: rgba(33, 159, 43, 0.1); border-left: 4px solid #4caf50; color: inherit;'>",
                     "<h4>Evidence-Based Recommendations</h4>",
                     "<ol style='line-height: 1.8;'>"
                 )

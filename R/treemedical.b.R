@@ -95,7 +95,7 @@ treemedicalClass <- if (requireNamespace("jmvcore")) R6::R6Class("treemedicalCla
 
         .show_welcome_message = function() {
             welcome_html <- "
-            <div style='background-color: #e8f5e8; padding: 20px; border-radius: 8px; margin: 20px 0;'>
+            <div style='background-color: rgba(33, 159, 33, 0.1); padding: 20px; border-radius: 8px; margin: 20px 0; color: inherit;'>
             <h3 style='color: #2e7d32; margin-top: 0;'>Medical Decision Trees</h3>
             <p><strong>Simple decision tree analysis for clinical research</strong></p>
             
@@ -398,7 +398,7 @@ treemedicalClass <- if (requireNamespace("jmvcore")) R6::R6Class("treemedicalCla
             }
             
             summary_html <- paste0(
-                "<div style='background-color: #f8f9fa; padding: 15px; border-radius: 5px;'>",
+                "<div style='background-color: rgba(138, 155, 172, 0.06); padding: 15px; border-radius: 5px; color: inherit;'>",
                 "<h4>Model Summary</h4>",
                 "<ul>",
                 "<li><strong>Algorithm:</strong> Enhanced CART (rpart)</li>",
@@ -644,7 +644,7 @@ treemedicalClass <- if (requireNamespace("jmvcore")) R6::R6Class("treemedicalCla
             }
             
             clinical_html <- paste0(
-                "<div style='background-color: #f0f8ff; padding: 15px; border-radius: 5px;'>",
+                "<div style='background-color: rgba(33, 152, 255, 0.07); padding: 15px; border-radius: 5px; color: inherit;'>",
                 interpretation,
                 "<p><strong>Performance:</strong> ", performance_metrics, "</p>",
                 cost_sensitive_info,

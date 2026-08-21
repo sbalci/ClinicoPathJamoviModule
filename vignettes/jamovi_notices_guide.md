@@ -16,6 +16,7 @@ This is the comprehensive guide to implementing user notices and alerts in jamov
 10. [Complete Examples](#10-complete-examples)
 11. [Real-World Patterns from jamovi Core](#11-real-world-patterns-from-jamovi-core)
 12. [References and Additional Resources](#12-references-and-additional-resources)
+13. [Library-review rules for user-facing output](#13-library-review-rules-for-user-facing-output)
 
 ---
 
@@ -2801,3 +2802,263 @@ This guide is part of the ClinicoPath jamovi module project. Contributions and i
 **Last Updated:** Based on jamovi/jmv commit 8aa8270 and official API documentation
 **Author:** ClinicoPath Development Team
 **License:** Follow jamovi module licensing guidelines
+
+---
+
+## 13. Library-review rules for user-facing output
+
+Every rule in this section was raised by the jamovi library reviewer against a
+real file in this project. See `vignettes/jamovi_library_review_guide.md` for the
+full report digest.
+
+### 13.1 `type: Notice` does NOT compile in `.r.yaml`
+
+The ClinicoPathDescriptives audit suggests replacing hand-styled HTML panels with
+`type: Notice` result elements declared in `.r.yaml`, reasoning (correctly) that
+the serialization problem is specific to *constructing* Notice objects
+dynamically. **The reasoning is right, but the option is not available today.**
+
+Verified empirically against **jamovi 28.1.0 / jmvtools 28.3 / jamovi-compiler 0.3.5**:
+
+```
+$ jmvtools::prepare(".")
+Unable to compile 'nt.r.yaml':
+	results.items[0].type is not one of enum values:
+	Table,Group,Array,Image,Preformatted,Html,State,Property,Output,Notification,Action
+```
+
+The compiler's `schemas/resultsschema.yaml` enum has no `Notice`, even though
+`compiler.js` has a `Notice` branch in `sourcifyResults` and jamovi's protobuf
+defines `ResultsNotice` with `NoticeType {ERROR=0, STRONG_WARNING=1, WARNING=2,
+INFO=3}`. The toolchain is mid-migration.
+
+**`Notification` is a worse trap.** It *is* in the enum, so it compiles — and the
+generated `.h.R` contains:
+
+```r
+self$add(list(`name`="warn", `title`="Warning", `type`="Notification"))
+```
+
+a plain list rather than a results element, because `jmvcore::Notification` does
+not exist. It fails at *runtime* instead of at *compile time*.
+
+**Re-check this when jmvtools updates.** The moment the compiler enum gains
+`Notice`, declarative notices become the right answer for every hand-styled panel
+in this module, and the theme-safety problem in 13.2 disappears — jamovi styles
+notices itself, in whichever theme is active.
+
+```r
+# minimal re-test: a scratch module whose .r.yaml has one `type: Notice` item
+Sys.unsetenv("ELECTRON_RUN_AS_NODE")   # VS Code sets this and breaks prepare()
+jmvtools::prepare(".")
+```
+
+Until then:
+
+| Need | Use |
+|---|---|
+| Fatal validation error | `jmvcore::reject(.("..."), code = "...")` |
+| Non-fatal warning shown inline | `type: Html` element, styled per 13.2 |
+| Dynamic notice | `jmvcore::Notice` — but **never** via `self$results$insert(999, notice)` |
+
+`insert()` with a `jmvcore::Notice` raises `attempt to apply non-function`: Notice
+objects hold function references that jamovi's protobuf layer cannot serialize.
+See `docs/NOTICE_TO_HTML_CONVERSION_GUIDE.md` and `R/waterfall.b.R`.
+
+Also note `jmvcore::NoticeType` is `ERROR = 0`, `STRONG_WARNING = 1`,
+`WARNING = 2`, `INFO = 3`. Hand-written `switch()` mappings in `.addNotice()`
+helpers have been off by one in this codebase before, rendering a
+`STRONG_WARNING` as a red "Error".
+
+### 13.2 HTML output must be theme-safe
+
+**[MEDIUM] — 150 style attributes in ClinicoPathDescriptives alone; ~1,750 module-wide.**
+
+jamovi has a dark theme. A fixed light-theme hex background with **no explicit
+text colour** is fine in light mode (the inherited text colour is dark) and
+low-contrast to genuinely unreadable in dark mode (the inherited text colour is
+light, landing on a pale pastel). Those blocks carry the error messages, warnings
+and clinical interpretations — so the dark-theme user loses exactly the output
+that matters most when something has gone wrong.
+
+Setting *both* a background and a foreground keeps it legible but makes the panel
+a light-theme island pasted into a dark results pane. Either way the panel
+ignores the user's chosen theme.
+
+> **Never set a `background-color` without controlling the foreground, and prefer
+> a translucent tint over an opaque fill.** A translucent background *tints*
+> whatever is behind it instead of replacing it, so one declaration is correct in
+> both themes.
+
+#### The transform (light theme is unchanged)
+
+Compositing an `rgba` fill is `result = (1 - a) * bg + a * tint`. Given the
+original pastel `P` (designed against a white pane), the tint that reproduces it
+exactly over white is:
+
+```
+T = (P - (1 - a) * 255) / a          valid while  a >= max_channel((255 - P) / 255)
+```
+
+Pick that minimum alpha with a little headroom and the light theme is
+**pixel-identical**, while the same declaration becomes a hue-preserving tint over
+a dark pane.
+
+```
+#f8d7da  ->  rgba(216, 33, 50, 0.18)      composites to #f8d7da over white
+#fff3cd  ->  rgba(255, 202, 33, 0.23)     composites to #fff3cc over white
+#e3f2fd  ->  rgba(33, 152, 239, 0.13)     composites to #e2f2fd over white
+#f8f9fa  ->  rgba(138, 155, 172, 0.06)    composites to #f8f9fa over white
+```
+
+`tools/theme_safe_html.py` implements exactly this and is idempotent (an `rgba()`
+value no longer matches the hex pattern it looks for).
+
+#### Writing new panels
+
+```r
+# WRONG - opaque pastel, no foreground. Unreadable in dark mode.
+"<div style='background-color: #f8d7da; border-left: 4px solid #dc3545;
+             padding: 15px;'>"
+
+# RIGHT - translucent tint, foreground follows the pane, saturated accent border
+"<div style='background-color: rgba(216, 33, 50, 0.18);
+             border-left: 4px solid #dc3545;
+             padding: 15px; color: inherit;'>"
+```
+
+- **Panel tints** (pale fills, HSL lightness above ~0.80): translucent + `color: inherit`.
+- **Badges / chips** (saturated opaque fills like `#dc3545`, `#007bff`): keep the
+  fill, but *always* set an explicit `color:` — white on a dark chip, near-black
+  on a light one.
+- **Borders and accents**: leave saturated hexes alone; they read in both themes.
+- **Explicit dark text** (`#721c24`, `#856404`, `#155724`) inside a panel you made
+  translucent: change to `color: inherit`. The semantics are carried by the border.
+
+### 13.3 Only five named HTML entities are safe
+
+**[MEDIUM] — raised against three of five modules.**
+
+Structural entities stand for characters with special meaning in HTML and must be
+escaped:
+
+```
+&lt;   &gt;   &amp;   &quot;   &apos;
+```
+
+**Everything else works only because jamovi's Html renderer currently happens to
+expand arbitrary named entities.** That behaviour is incidental — a documented
+upcoming jamovi fix corrects that rendering path, after which they display
+literally, so a methodology note starts reading `Cohen's &kappa;`. They also
+already fail non-HTML export: copy the panel into Word or export to PDF and the
+raw entity text comes through.
+
+Use the real character, written as a `\u{}` escape because `R CMD check` flags
+literal non-ASCII bytes in R source:
+
+| Entity | Char | Escape | | Entity | Char | Escape |
+|---|---|---|---|---|---|---|
+| `&minus;` | − | `\u{2212}` | | `&alpha;` | α | `\u{03B1}` |
+| `&mdash;` | — | `\u{2014}` | | `&beta;` | β | `\u{03B2}` |
+| `&ndash;` | – | `\u{2013}` | | `&kappa;` | κ | `\u{03BA}` |
+| `&rarr;` | → | `\u{2192}` | | `&ge;` | ≥ | `\u{2265}` |
+| `&times;` | × | `\u{00D7}` | | `&eacute;` | é | `\u{00E9}` |
+| `&plusmn;` | ± | `\u{00B1}` | | `&nbsp;` | (nbsp) | `\u{00A0}` |
+
+For `&nbsp;` used purely as a table-cell spacer, drop it — `<td></td>` renders
+the same in HTML and exports cleanly.
+
+**Caveat for very large HTML literals.** In a string literal longer than ~10,000
+characters, `\u{}` escapes can hit a parse trap in a non-UTF-8 locale. There, use
+HTML *numeric* entities (`&#x2192;`) — numeric entities are part of the HTML spec
+and are unaffected by the named-entity change.
+
+Code that *strips* entities — `gsub("&nbsp;", " ", x)` — is correct as it stands.
+
+### 13.4 `warning()` is invisible to your users
+
+**[MEDIUM] — 24 occurrences across six analyses in jjstatsplot.**
+
+**jamovi does not surface R condition warnings in the results pane.** Every
+`warning()` in an analysis is written to a console the user is not looking at.
+
+Several of the flagged ones described a plot that *silently differed from what was
+requested*: falling back to plain geoms when `ggrain` errored, disabling covariate
+mapping when the covariate had NAs, substituting `'l'` for an invalid
+`rain.side`, falling back to default colours when palette generation failed. The
+user ticks an option, gets a plot that doesn't reflect it, and there is nothing on
+screen explaining why.
+
+> **Any condition that changes what the user sees must be reported in the results
+> pane.** `warning()` is for genuinely internal diagnostics only, and that list
+> should be short and deliberate.
+
+**The awkward case: conditions detected inside `.plot()`.** You cannot populate a
+results element from the render phase. Detect the same condition in `.run()` — an
+NA check and an option-validity check are both cheap and data-only — and record
+the note there.
+
+### 13.4b A notice must survive the RENDER pass, not just `.run()`
+
+Routing a `warning()` to a notice is only half the job. jamovi calls `.plot()`
+after `.run()`, and a render pass that resets the notice list will erase anything
+`.run()` added but `.plot()`'s own code path does not re-create. Two real cases:
+
+- **Reset-then-revalidate.** `.plot()` calls `.resetMessages()` and then
+  `.validateInputs()`. Only notices emitted *from inside* `.validateInputs()` come
+  back; one emitted in `.run()` is gone the moment the plot draws.
+- **Reset inside a shared preparer.** `.prepareNetworkData()` cleared the list at
+  its top, and `.plot()` calls it — so a notice added in `.run()` *after* prepare
+  was deleted on render. The fix is to make `.addNotice()` idempotent by identity
+  and drop the reset, leaving only `.run()`'s reset at the top of a fresh run.
+
+Watch for a third trap: a helper that **replaces** the list rather than appending.
+`jwaffle`'s `.accumulateMessage()` rebuilds `.noticeList` as a single
+"Data Quality Notes" block from `private$.messages`, so any notice added via
+`.addNotice()` is destroyed by the next accumulated message. There, the message
+pipeline is the one that survives.
+
+**Always verify empirically — render, then re-read the item:**
+
+```r
+r <- ClinicoPath::myanalysis(data = d, ...)
+before <- r$notices$content
+png(tempfile()); print(r$plot); dev.off()
+after <- r$notices$content
+stopifnot(grepl("my message", before), grepl("my message", after))
+```
+
+Two more things to check while you are there:
+
+- **Is the note reachable at all?** A note gated on an option value that jmvcore
+  already rejects at the wrapper is dead code — e.g. an "invalid value" note for a
+  `type: List` option, whose option set is closed.
+- **Does the note assert an outcome the render phase may not have taken?** If
+  `.plot()` recomputes the condition on cleaned data, a `.run()`-side note saying
+  "the layer was skipped" can contradict the figure. State the counts and the
+  rule instead of the outcome.
+
+### 13.5 Never write a note to an element you just hid
+
+```r
+# WRONG - a note on a hidden table is never rendered. The user sees the output
+#         silently disappear and never learns why.
+self$results$blandAltmanStats$setVisible(FALSE)
+self$results$blandAltmanStats$setNote("error", "Requires exactly 2 raters.")
+```
+
+More generally, `setVisible(FALSE)` is **not** an error mechanism — see
+`vignettes/jamovi_r_yaml_guide.md`.
+
+### 13.6 Reset accumulating notice elements at the top of `.run()`
+
+An append-style `.addHtmlMessage()` / `.addNotice()` helper accumulates the same
+notice N times over N run cycles. Reset every notice `Html` output at the start of
+`.run()`. And remember that N `setContent()` calls to **one** `Html` item in a
+single `.run()` keep only the **last** — compose onto an accumulated local and
+write once:
+
+```r
+self$results$notices$setContent(paste(Filter(nzchar, private$.noticeList), collapse = "\n"))
+```
+

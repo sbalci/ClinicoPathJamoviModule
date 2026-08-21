@@ -38,11 +38,11 @@ economistplotsClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
             .init = function() {
                 # Initialize instructions
                 instructions_html <- paste(
-                    "<div style='background-color: #f8f9fa; padding: 20px; border-radius: 8px; margin: 10px 0;'>",
+                    "<div style='background-color: rgba(138, 155, 172, 0.06); padding: 20px; border-radius: 8px; margin: 10px 0; color: inherit;'>",
                     "<h3 style='color: #c7254e; margin-top: 0;'> Economist-Style Distribution Plots</h3>",
                     "<div style='margin: 10px 0;'>",
                     "<p><strong>Create professional distribution visualizations inspired by The Economist magazine's distinctive style.</strong></p>",
-                    "<div style='background-color: #e8f4fd; padding: 15px; border-radius: 5px; margin: 10px 0;'>",
+                    "<div style='background-color: rgba(33, 149, 236, 0.1); padding: 15px; border-radius: 5px; margin: 10px 0; color: inherit;'>",
                     "<h4 style='color: #1e6091; margin: 0 0 10px 0;'>Key Features:</h4>",
                     "<ul style='margin: 5px 0; padding-left: 20px; line-height: 1.6;'>",
                     "<li><strong>Diminutive Distribution Charts:</strong> Compact yet informative visualization style</li>",
@@ -62,7 +62,7 @@ economistplotsClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                     "<li><strong>Customization:</strong> Adjust colors, statistical tests, and annotations</li>",
                     "</ol>",
                     "</div>",
-                    "<div style='background-color: #fff3cd; padding: 10px; border-radius: 5px; margin: 10px 0;'>",
+                    "<div style='background-color: rgba(255, 202, 33, 0.23); padding: 10px; border-radius: 5px; margin: 10px 0; color: inherit;'>",
                     "<p style='margin: 0; color: #856404;'><strong> Pro Tip:</strong> The Economist style is perfect for showing price variations, outcome distributions, or any data where you want to emphasize distribution characteristics in a compact, elegant format.</p>",
                     "</div>",
                     "</div>"
@@ -98,7 +98,7 @@ economistplotsClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                     # Create comprehensive error message with font guidance
                     font_guidance <- if (!font_status$optimal_available) {
                         paste(
-                            "<div style='background-color: #fff3cd; padding: 10px; border-radius: 5px; margin: 10px 0;'>",
+                            "<div style='background-color: rgba(255, 202, 33, 0.23); padding: 10px; border-radius: 5px; margin: 10px 0; color: inherit;'>",
                             "<h4 style='color: #856404; margin: 0 0 8px 0;'> Font Installation Guide</h4>",
                             "<p style='margin: 5px 0; color: #856404;'><strong>Current font:</strong> ", font_status$best_font, "</p>",
                             if (!font_status$optimal_available) {
@@ -123,7 +123,7 @@ economistplotsClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                     }
 
                     error_msg <- paste(
-                        "<div style='color: red; padding: 10px; border-radius: 5px; background-color: #f8d7da;'>",
+                        "<div style='color: red; padding: 10px; border-radius: 5px; background-color: rgba(216, 33, 50, 0.18);'>",
                         "<strong>Package Required:</strong> The 'ggeconodist' package is required for Economist-style plots.",
                         "<br><br><strong>Installation Options:</strong>",
                         "<br>\u{2022} CRAN: <code>install.packages('ggeconodist')</code>",
@@ -281,7 +281,7 @@ economistplotsClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                 tryCatch(
                     {
                         stat_html <- "<h4>Statistical Analysis Results</h4>"
-                        stat_html <- paste0(stat_html, "<div style='background-color: #e8f5e8; padding: 15px; border-radius: 5px; margin: 10px 0;'>")
+                        stat_html <- paste0(stat_html, "<div style='background-color: rgba(33, 159, 33, 0.1); padding: 15px; border-radius: 5px; margin: 10px 0; color: inherit;'>")
 
                         if (stat_method == "anova") {
                             # One-way ANOVA - composeTerm backtick-escapes user column
@@ -418,7 +418,7 @@ economistplotsClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
 
                 # Create HTML summary table
                 summary_html <- "<h4>Distribution Summary Statistics</h4>"
-                summary_html <- paste0(summary_html, "<div style='background-color: #f8f9fa; padding: 15px; border-radius: 5px; margin: 10px 0;'>")
+                summary_html <- paste0(summary_html, "<div style='background-color: rgba(138, 155, 172, 0.06); padding: 15px; border-radius: 5px; margin: 10px 0; color: inherit;'>")
 
                 summary_html <- paste0(summary_html, "<table class='table table-striped' style='margin: 10px 0; max-width: 900px;'>")
                 summary_html <- paste0(summary_html, "<thead><tr>")
@@ -460,7 +460,7 @@ economistplotsClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
             },
             .generate_legend_info = function() {
                 legend_html <- "<h4>Economist Distribution Legend</h4>"
-                legend_html <- paste0(legend_html, "<div style='background-color: #f3e5f5; padding: 15px; border-radius: 5px; margin: 10px 0;'>")
+                legend_html <- paste0(legend_html, "<div style='background-color: rgba(153, 33, 170, 0.12); padding: 15px; border-radius: 5px; margin: 10px 0; color: inherit;'>")
 
                 legend_html <- paste0(legend_html, "<p><strong>Understanding the Economist-Style Distribution Plot:</strong></p>")
                 legend_html <- paste0(legend_html, "<ul style='margin: 5px 0; padding-left: 20px; line-height: 1.8;'>")
@@ -489,7 +489,7 @@ economistplotsClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                 # Implementation for pairwise comparisons would go here
                 # This is a simplified version
                 comp_html <- "<h4>Pairwise Comparisons</h4>"
-                comp_html <- paste0(comp_html, "<div style='background-color: #fff3e0; padding: 15px; border-radius: 5px; margin: 10px 0;'>")
+                comp_html <- paste0(comp_html, "<div style='background-color: rgba(255, 169, 33, 0.14); padding: 15px; border-radius: 5px; margin: 10px 0; color: inherit;'>")
                 comp_html <- paste0(comp_html, "<p>Pairwise comparison analysis would be displayed here when implemented.</p>")
                 comp_html <- paste0(comp_html, "</div>")
 
@@ -529,7 +529,7 @@ economistplotsClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
 
                 code_html <- paste(
                     "<h4>Reproducible R Code</h4>",
-                    "<div style='background-color: #f8f9fa; padding: 15px; border-radius: 5px; margin: 10px 0;'>",
+                    "<div style='background-color: rgba(138, 155, 172, 0.06); padding: 15px; border-radius: 5px; margin: 10px 0; color: inherit;'>",
                     "<p><strong>Complete R code using ggeconodist package:</strong></p>",
                     "<pre style='background-color: #2d3748; color: #e2e8f0; padding: 15px; border-radius: 5px; overflow-x: auto;'>",
                     "<code>", actual_code, "</code>",
@@ -546,7 +546,7 @@ economistplotsClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                 style <- self$options$distribution_style
 
                 interp_html <- "<h4>Plot Interpretation Guide</h4>"
-                interp_html <- paste0(interp_html, "<div style='background-color: #e8f4fd; padding: 15px; border-radius: 5px; margin: 10px 0;'>")
+                interp_html <- paste0(interp_html, "<div style='background-color: rgba(33, 149, 236, 0.1); padding: 15px; border-radius: 5px; margin: 10px 0; color: inherit;'>")
 
                 # Style-specific guidance
                 if (style == "classic") {

@@ -115,6 +115,28 @@ lollipopClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                 self$results$plot$setSize(self$options$width, self$options$height)
             }
 
+            # The summary table has a fixed row set, so build the skeleton (rowKey
+            # + statistic label) here; .populateSummary() then only fills `value`.
+            # Placed before the missing-package early return below so every rowKey
+            # exists on every path (setRow() on a missing rowKey aborts the run).
+            summaryTable <- self$results$summary
+            summaryTable$addRow(rowKey = "n_obs", values = list(
+                statistic = .("Number of Observations")))
+            summaryTable$addRow(rowKey = "n_groups", values = list(
+                statistic = .("Number of Groups")))
+            summaryTable$addRow(rowKey = "mean", values = list(
+                statistic = .("Mean Value")))
+            summaryTable$addRow(rowKey = "median", values = list(
+                statistic = .("Median Value")))
+            summaryTable$addRow(rowKey = "sd", values = list(
+                statistic = .("Standard Deviation")))
+            summaryTable$addRow(rowKey = "range", values = list(
+                statistic = .("Value Range")))
+            summaryTable$addRow(rowKey = "highest", values = list(
+                statistic = .("Highest Value Group")))
+            summaryTable$addRow(rowKey = "lowest", values = list(
+                statistic = .("Lowest Value Group")))
+
             # Check for required packages
             missing_packages <- c()
             if (!requireNamespace("ggplot2", quietly = TRUE)) {
@@ -604,10 +626,10 @@ lollipopClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             }
         },
         
-        # Populate summary table
+        # Populate summary table. Rows are created in .init(); only the `value`
+        # cells are written here.
         .populateSummary = function(summary_stats) {
             table <- self$results$summary
-            table$deleteRows()
 
             # When aggregation is active, the statistics below describe the plotted
             # per-group aggregated values (e.g. mean of sums when aggregation = sum),
@@ -623,58 +645,33 @@ lollipopClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                 table$setNote("aggregation", NULL)
             }
 
-            row_num <- 1
-            
             # Data characteristics
-            table$addRow(rowKey = row_num, values = list(
-                statistic = .("Number of Observations"),
-                value = as.character(summary_stats$n_observations)
-            ))
-            row_num <- row_num + 1
-            
-            table$addRow(rowKey = row_num, values = list(
-                statistic = .("Number of Groups"),
-                value = as.character(summary_stats$n_groups)
-            ))
-            row_num <- row_num + 1
-            
+            table$setRow(rowKey = "n_obs", values = list(
+                value = as.character(summary_stats$n_observations)))
+
+            table$setRow(rowKey = "n_groups", values = list(
+                value = as.character(summary_stats$n_groups)))
+
             # Dependent variable statistics
-            table$addRow(rowKey = row_num, values = list(
-                statistic = .("Mean Value"),
-                value = base::format(summary_stats$dep_mean, digits = 3)
-            ))
-            row_num <- row_num + 1
-            
-            table$addRow(rowKey = row_num, values = list(
-                statistic = .("Median Value"),
-                value = base::format(summary_stats$dep_median, digits = 3)
-            ))
-            row_num <- row_num + 1
-            
-            table$addRow(rowKey = row_num, values = list(
-                statistic = .("Standard Deviation"),
-                value = base::format(summary_stats$dep_sd, digits = 3)
-            ))
-            row_num <- row_num + 1
-            
-            table$addRow(rowKey = row_num, values = list(
-                statistic = .("Value Range"),
-                value = paste(base::format(summary_stats$dep_min, digits = 3), "-", 
-                             base::format(summary_stats$dep_max, digits = 3))
-            ))
-            row_num <- row_num + 1
-            
+            table$setRow(rowKey = "mean", values = list(
+                value = base::format(summary_stats$dep_mean, digits = 3)))
+
+            table$setRow(rowKey = "median", values = list(
+                value = base::format(summary_stats$dep_median, digits = 3)))
+
+            table$setRow(rowKey = "sd", values = list(
+                value = base::format(summary_stats$dep_sd, digits = 3)))
+
+            table$setRow(rowKey = "range", values = list(
+                value = paste(base::format(summary_stats$dep_min, digits = 3), "-",
+                              base::format(summary_stats$dep_max, digits = 3))))
+
             # Group information
-            table$addRow(rowKey = row_num, values = list(
-                statistic = .("Highest Value Group"),
-                value = as.character(summary_stats$groups_with_highest)
-            ))
-            row_num <- row_num + 1
-            
-            table$addRow(rowKey = row_num, values = list(
-                statistic = .("Lowest Value Group"),
-                value = as.character(summary_stats$groups_with_lowest)
-            ))
+            table$setRow(rowKey = "highest", values = list(
+                value = as.character(summary_stats$groups_with_highest)))
+
+            table$setRow(rowKey = "lowest", values = list(
+                value = as.character(summary_stats$groups_with_lowest)))
         },
         
         # Get color scheme

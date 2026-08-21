@@ -47,7 +47,7 @@ classificationClass <- if (requireNamespace("jmvcore")) {
             # Display accumulated warnings
             .showWarnings = function() {
                 if (length(private$.warnings) > 0) {
-                    html <- paste("<div style='padding: 10px; background-color: #f8f9fa; border-left: 4px solid #ffc107;'>",
+                    html <- paste("<div style='padding: 10px; background-color: rgba(138, 155, 172, 0.06); border-left: 4px solid #ffc107; color: inherit;'>",
                         paste(private$.warnings, collapse = ""),
                         "</div>",
                         sep = ""
@@ -953,7 +953,7 @@ classificationClass <- if (requireNamespace("jmvcore")) {
                 conf_matrix <- thresholded_prediction$confusion
                 class_names <- rownames(conf_matrix)
 
-                html <- "<div style='padding: 15px; background-color: #f8f9fa; border-left: 4px solid #007bff;'>"
+                html <- "<div style='padding: 15px; background-color: rgba(138, 155, 172, 0.06); border-left: 4px solid #007bff; color: inherit;'>"
                 html <- paste0(html, "<h4>Clinical Summary</h4>")
                 html <- paste0(html, sprintf("<p><strong>Analysis Type:</strong> %s classification using %s</p>", classifier_name, validation_name))
                 html <- paste0(html, sprintf("<p><strong>Sample Size:</strong> %d patients across %d outcome categories</p>", n_total, n_classes))

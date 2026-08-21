@@ -107,7 +107,7 @@ ihcbasicClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6Class(
             warnings <- private$.assessClinicalSignificance()
             if (length(warnings) > 0) {
                 warning_html <- paste0(
-                    "<div style='background-color: #fff3cd; border: 1px solid #ffeaa7; padding: 10px; margin: 10px 0;'>",
+                    "<div style='background-color: rgba(255, 202, 33, 0.23); border: 1px solid #ffeaa7; padding: 10px; margin: 10px 0; color: inherit;'>",
                     "<h4 style='color: #856404; margin-top: 0;'> Clinical Considerations:</h4>",
                     "<ul>",
                     paste0("<li>", warnings, "</li>", collapse = ""),
@@ -429,7 +429,7 @@ ihcbasicClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6Class(
 
             # Clinical summary with plain language
             clinical_html <- sprintf(
-                "<div style='background-color: #f8f9fa; padding: 15px; border-left: 4px solid #007bff; margin-bottom: 15px;'>
+                "<div style='background-color: rgba(138, 155, 172, 0.06); padding: 15px; border-left: 4px solid #007bff; margin-bottom: 15px; color: inherit;'>
                 <h4 style='margin-top: 0; color: #007bff;'> Clinical Interpretation</h4>
                 <p><strong>Key Finding:</strong> Analysis of %d patient samples identified <strong>%d distinct IHC expression patterns</strong> using %d biomarkers.</p>
 
@@ -537,7 +537,7 @@ ihcbasicClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6Class(
 
             # Generate formatted report text
             report_html <- sprintf(
-                "<div style='background-color: #fff8dc; padding: 15px; border: 1px solid #ffd700; margin-bottom: 15px;'>
+                "<div style='background-color: rgba(255, 211, 33, 0.16); padding: 15px; border: 1px solid #ffd700; margin-bottom: 15px; color: inherit;'>
                 <h4 style='margin-top: 0; color: #b8860b;'> Copy-Ready Report Text</h4>
 
                 <div style='background-color: white; padding: 10px; border: 1px dashed #ccc; font-family: monospace; font-size: 13px;'>

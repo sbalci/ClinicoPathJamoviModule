@@ -236,7 +236,7 @@ reportcat2Class <- if (requireNamespace('jmvcore')) R6::R6Class(
             
             # Create simple HTML table
             html <- "<table style='border-collapse: collapse; margin: 10px 0; width: 100%;'>"
-            html <- paste0(html, "<tr style='background-color: #f8f9fa;'>")
+            html <- paste0(html, "<tr style='background-color: rgba(138, 155, 172, 0.06); color: inherit;'>")
             html <- paste0(html, "<th style='border: 1px solid #ccc; padding: 8px;'>Variable</th>")
             html <- paste0(html, "<th style='border: 1px solid #ccc; padding: 8px;'>Levels</th>")
             html <- paste0(html, "<th style='border: 1px solid #ccc; padding: 8px;'>N</th>")

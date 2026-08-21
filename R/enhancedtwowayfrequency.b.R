@@ -631,7 +631,7 @@ enhancedtwowayfrequencyClass <- R6::R6Class(
                         "Smallest expected frequency (%.2f) is below %g; prefer Fisher's exact test.",
                         min_exp, self$options$minimumExpected))
                 if (chi$p.value < 0.05)
-                    recs <- c(recs, "The association is statistically significant; report an effect size (Cram&eacute;r's V / Phi) alongside the p-value.")
+                    recs <- c(recs, "The association is statistically significant; report an effect size (Cram\u{00E9}r's V / Phi) alongside the p-value.")
                 else
                     recs <- c(recs, "No statistically significant association was detected; consider statistical power and sample size before concluding independence.")
             }
@@ -658,7 +658,7 @@ enhancedtwowayfrequencyClass <- R6::R6Class(
 
             assoc_text <- if (!is.na(cramers_v)) {
                 interp <- private$.interpretCramersV(cramers_v)
-                sprintf("The strength of association between <b>%s</b> and <b>%s</b> is <b>%s</b> (Cram&eacute;r's V = %.3f).",
+                sprintf("The strength of association between <b>%s</b> and <b>%s</b> is <b>%s</b> (Cram\u{00E9}r's V = %.3f).",
                         rowVar, colVar, tolower(interp$interpretation), cramers_v)
             } else {
                 sprintf("Association between <b>%s</b> and <b>%s</b> could not be quantified.",
@@ -690,7 +690,7 @@ enhancedtwowayfrequencyClass <- R6::R6Class(
                 <li><b>Pearson chi-square test:</b> Tests independence of two categorical variables using observed versus expected frequencies under independence.</li>
                 <li><b>Fisher's exact test:</b> Exact test of association, recommended when expected cell counts are small.</li>
                 <li><b>Yates' continuity correction:</b> Adjustment applied to 2x2 chi-square tests to reduce approximation error.</li>
-                <li><b>Cram&eacute;r's V:</b> Effect size for association, ranging 0 to 1, derived from the chi-square statistic.</li>
+                <li><b>Cram\u{00E9}r's V:</b> Effect size for association, ranging 0 to 1, derived from the chi-square statistic.</li>
                 <li><b>Phi coefficient:</b> Association measure for 2x2 tables.</li>
                 <li><b>Contingency coefficient:</b> General association measure derived from chi-square.</li>
                 <li><b>Standardized residuals:</b> Identify the cells contributing most to a significant chi-square result.</li>

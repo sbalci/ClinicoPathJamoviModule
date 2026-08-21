@@ -38,7 +38,8 @@ lassocoxOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 suggested=list(
                     "continuous"),
                 permitted=list(
-                    "numeric"))
+                    "numeric"),
+                default=NULL)
             private$..outcome <- jmvcore::OptionVariable$new(
                 "outcome",
                 outcome,
@@ -47,7 +48,8 @@ lassocoxOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "nominal"),
                 permitted=list(
                     "factor",
-                    "numeric"))
+                    "numeric"),
+                default=NULL)
             private$..outcomeLevel <- jmvcore::OptionLevel$new(
                 "outcomeLevel",
                 outcomeLevel,
@@ -65,7 +67,8 @@ lassocoxOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "continuous"),
                 permitted=list(
                     "factor",
-                    "numeric"))
+                    "numeric"),
+                default=NULL)
             private$..lambda <- jmvcore::OptionList$new(
                 "lambda",
                 lambda,
@@ -676,11 +679,11 @@ lassocoxBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' @export
 lassocox <- function(
     data,
-    elapsedtime,
-    outcome,
+    elapsedtime = NULL,
+    outcome = NULL,
     outcomeLevel,
     censorLevel,
-    explanatory,
+    explanatory = NULL,
     lambda = "lambda.1se",
     nfolds = 10,
     random_seed = 123456,

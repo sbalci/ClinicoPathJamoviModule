@@ -61,7 +61,7 @@ children:
                 label: Exclude missing data
               - type: CheckBox
                 name: paired
-                label: Paired/Matched data (McNemar's test)
+                label: Paired/matched data (McNemar's test)
       - type: Label
         label: Statistical Method
         fitToGrid: true
@@ -87,7 +87,7 @@ children:
             children:
               - type: CheckBox
                 name: pairwisecomparisons
-                label: Perform group-by-group comparisons
+                label: Group-by-group comparisons
                 children:
                   - type: ComboBox
                     name: pairwisedisplay
@@ -106,11 +106,11 @@ children:
             children:
               - type: TextBox
                 name: conflevel
-                label: Confidence Level (0.90-0.99)
+                label: Confidence level (0.90-0.99)
                 format: number
               - type: TextBox
                 name: ratio
-                label: Expected Proportions (e.g., 0.5,0.5)
+                label: Expected proportions (e.g., 0.5,0.5)
                 format: string
   - type: CollapseBox
     label: Plot Appearance
@@ -129,9 +129,6 @@ children:
               - type: CheckBox
                 name: resultssubtitle
                 label: Statistics in plot subtitle
-              - type: CheckBox
-                name: messages
-                label: Console messages
       - type: Label
         label: Bar Chart Labels
         fitToGrid: true
@@ -144,11 +141,11 @@ children:
                 label: Bar label type
               - type: TextBox
                 name: digits
-                label: Decimal Places (Statistics)
+                label: Decimal places (statistics)
                 format: number
               - type: TextBox
                 name: digitsperc
-                label: Decimal Places (Percentages)
+                label: Decimal places (percentages)
                 format: number
   - type: CollapseBox
     label: Balloon Plot (ggpubr)

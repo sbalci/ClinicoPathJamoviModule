@@ -74,13 +74,13 @@ icccoeffClass <- R6::R6Class(
                     line-height: 1.5;
                 }
                 .requirements {
-                    background-color: #f5f5f5;
+                    background-color: rgba(88, 88, 88, 0.06); color: inherit;
                     padding: 15px;
                     border-left: 4px solid #2196f3;
                     margin-bottom: 20px;
                 }
                 .note {
-                    background-color: #fff3e0;
+                    background-color: rgba(255, 169, 33, 0.14); color: inherit;
                     padding: 15px;
                     border-left: 4px solid #ff9800;
                     margin-bottom: 20px;
@@ -115,7 +115,7 @@ icccoeffClass <- R6::R6Class(
                     ICC analysis ready! Your data includes ratings from multiple raters. 
                     Choose the appropriate ICC type based on your study design.
                 </div>
-                <div style='background-color: #e8f5e8; padding: 15px; border-radius: 8px; border-left: 4px solid #4caf50;'>
+                <div style='background-color: rgba(33, 159, 33, 0.1); padding: 15px; border-radius: 8px; border-left: 4px solid #4caf50; color: inherit;'>
                     <strong> Analysis configured correctly</strong><br>
                     Select ICC type and review results below.
                 </div>"
@@ -290,14 +290,14 @@ icccoeffClass <- R6::R6Class(
             apa_text <- paste0(
                 "<div style='font-family: -apple-system,BlinkMacSystemFont,Segoe UI,Roboto,Arial,sans-serif; padding: 20px;'>",
                 "<h3 style='color: #1976d2; margin-bottom: 15px;'> APA Style Results</h3>",
-                "<div style='background-color: #f5f5f5; padding: 15px; border-radius: 8px; font-family: monospace;'>",
+                "<div style='background-color: rgba(88, 88, 88, 0.06); padding: 15px; border-radius: 8px; font-family: monospace; color: inherit;'>",
                 "<strong>", results$icc_type, "</strong> = ", icc_formatted,
                 ", ", sprintf("%.0f", results$conf_level * 100), "% CI [", ci_formatted, "]",
                 ", <em>F</em>(", results$df1, ", ", results$df2, ") = ", 
                 sprintf("%.3f", results$f_value), ", <em>p</em> ",
                 if (results$p_value < 0.001) "< .001" else paste("=", sprintf("%.3f", results$p_value)),
                 "</div>",
-                "<div style='margin-top: 15px; padding: 10px; background-color: #e3f2fd; border-radius: 6px;'>",
+                "<div style='margin-top: 15px; padding: 10px; background-color: rgba(33, 152, 239, 0.13); border-radius: 6px; color: inherit;'>",
                 "<strong>Interpretation:</strong> The ICC indicates ", 
                 private$.interpretICCValue(results$icc_value), " reliability and is ",
                 sig_text, " at \u{03B1} = ", alpha, ".",
@@ -359,7 +359,7 @@ icccoeffClass <- R6::R6Class(
             <div style='font-family: -apple-system,BlinkMacSystemFont,Segoe UI,Roboto,Arial,sans-serif; padding: 20px;'>
                 <h3 style='color: #1976d2; margin-bottom: 15px;'> ICC Interpretation Guide</h3>
                 
-                <div style='background-color: #e8f5e8; padding: 15px; border-radius: 8px; border-left: 4px solid #4caf50; margin-bottom: 15px;'>
+                <div style='background-color: rgba(33, 159, 33, 0.1); padding: 15px; border-radius: 8px; border-left: 4px solid #4caf50; margin-bottom: 15px; color: inherit;'>
                     <strong>ICC Value Interpretation (Koo & Li, 2016):</strong><br>
                     \u{2022} <strong>< 0.50:</strong> Poor reliability<br>
                     \u{2022} <strong>0.50-0.75:</strong> Moderate reliability<br>
@@ -367,7 +367,7 @@ icccoeffClass <- R6::R6Class(
                     \u{2022} <strong>> 0.90:</strong> Excellent reliability
                 </div>
                 
-                <div style='background-color: #f3e5f5; padding: 15px; border-radius: 8px; border-left: 4px solid #9c27b0; margin-bottom: 15px;'>
+                <div style='background-color: rgba(153, 33, 170, 0.12); padding: 15px; border-radius: 8px; border-left: 4px solid #9c27b0; margin-bottom: 15px; color: inherit;'>
                     <strong>ICC Types:</strong><br>
                     \u{2022} <strong>ICC(1,1):</strong> One-way random, single measures<br>
                     \u{2022} <strong>ICC(2,1):</strong> Two-way random, single measures<br>
@@ -377,7 +377,7 @@ icccoeffClass <- R6::R6Class(
                     \u{2022} <strong>ICC(3,k):</strong> Two-way mixed, average measures
                 </div>
                 
-                <div style='background-color: #fff3e0; padding: 15px; border-radius: 8px; border-left: 4px solid #ff9800;'>
+                <div style='background-color: rgba(255, 169, 33, 0.14); padding: 15px; border-radius: 8px; border-left: 4px solid #ff9800; color: inherit;'>
                     <strong>Agreement Types:</strong><br>
                     \u{2022} <strong>Consistency (C):</strong> Measures if raters maintain consistent relative ranking<br>
                     \u{2022} <strong>Absolute Agreement (A):</strong> Measures if raters give identical scores<br><br>

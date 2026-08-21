@@ -270,7 +270,7 @@ emfrailtyClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                 formula <- "Surv(time, status) ~ frailty(frailty_id)"
             } else {
                 formula <- paste0("Surv(time, status) ~ ",
-                                  jmvcore::composeTerms(as.list(covariates)),
+                                  paste(jmvcore::composeTerms(as.list(covariates)), collapse = " + "),
                                   " + frailty(frailty_id)")
             }
             
@@ -357,7 +357,7 @@ emfrailtyClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                 cox_formula <- "Surv(time, status) ~ 1"
             } else {
                 cox_formula <- paste0("Surv(time, status) ~ ",
-                                      jmvcore::composeTerms(as.list(covariates)))
+                                      paste(jmvcore::composeTerms(as.list(covariates)), collapse = " + "))
             }
             
             results <- list()

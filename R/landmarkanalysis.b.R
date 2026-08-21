@@ -154,7 +154,7 @@ landmarkanalysisClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 formula_str <- paste0(
                     "Surv(", jmvcore::composeTerm(private$time_var), ", ",
                     jmvcore::composeTerm(private$status_var), ") ~ ",
-                    jmvcore::composeTerms(as.list(private$predictors))
+                    paste(jmvcore::composeTerms(as.list(private$predictors)), collapse = " + ")
                 )
                 formula <- jmvcore::asFormula(formula_str)
 
@@ -235,7 +235,7 @@ landmarkanalysisClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     # R-syntactic names; only the user-supplied predictors need escaping.
                     formula_str <- paste0(
                         "Surv(lm_time, lm_status) ~ ",
-                        jmvcore::composeTerms(as.list(private$predictors))
+                        paste(jmvcore::composeTerms(as.list(private$predictors)), collapse = " + ")
                     )
                     formula <- jmvcore::asFormula(formula_str)
 

@@ -481,7 +481,7 @@ jjpiestatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             
             glue::glue(
                 "<h4>{report_title}</h4>
-                <div style='background-color: #f8f9fa; padding: 15px; border: 1px solid #dee2e6; border-radius: 5px;'>
+                <div style='background-color: rgba(138, 155, 172, 0.06); padding: 15px; border: 1px solid #dee2e6; border-radius: 5px; color: inherit;'>
                 <p><strong>{methods_title}:</strong></p>
                 <p>{sample_description} {additional_details}</p>
                 <p><strong>{results_title}:</strong></p>

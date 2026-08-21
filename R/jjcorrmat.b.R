@@ -66,22 +66,22 @@ jjcorrmatClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             for (warning in private$.warnings) {
                 if (warning$type == "ERROR") {
                     warning_html <- paste0(warning_html,
-                        "<div style='background-color: #f8d7da; border-left: 4px solid #dc3545; padding: 10px; margin: 5px 0; border-radius: 4px;'>",
+                        "<div style='background-color: rgba(216, 33, 50, 0.18); border-left: 4px solid #dc3545; padding: 10px; margin: 5px 0; border-radius: 4px; color: inherit;'>",
                         "<strong style='color: #721c24;'> ERROR:</strong> <span style='color: #721c24;'>", warning$message, "</span>",
                         "</div>")
                 } else if (warning$type == "STRONG_WARNING") {
                     warning_html <- paste0(warning_html,
-                        "<div style='background-color: #fff3cd; border-left: 4px solid #ff9800; padding: 10px; margin: 5px 0; border-radius: 4px;'>",
+                        "<div style='background-color: rgba(255, 202, 33, 0.23); border-left: 4px solid #ff9800; padding: 10px; margin: 5px 0; border-radius: 4px; color: inherit;'>",
                         "<strong style='color: #856404;'> STRONG WARNING:</strong> <span style='color: #856404;'>", warning$message, "</span>",
                         "</div>")
                 } else if (warning$type == "WARNING") {
                     warning_html <- paste0(warning_html,
-                        "<div style='background-color: #fff8e1; border-left: 4px solid #ffc107; padding: 10px; margin: 5px 0; border-radius: 4px;'>",
+                        "<div style='background-color: rgba(255, 203, 33, 0.14); border-left: 4px solid #ffc107; padding: 10px; margin: 5px 0; border-radius: 4px; color: inherit;'>",
                         "<strong style='color: #664d03;'> WARNING:</strong> <span style='color: #664d03;'>", warning$message, "</span>",
                         "</div>")
                 } else if (warning$type == "INFO") {
                     warning_html <- paste0(warning_html,
-                        "<div style='background-color: #d1ecf1; border-left: 4px solid #0c5460; padding: 10px; margin: 5px 0; border-radius: 4px;'>",
+                        "<div style='background-color: rgba(33, 163, 188, 0.21); border-left: 4px solid #0c5460; padding: 10px; margin: 5px 0; border-radius: 4px; color: inherit;'>",
                         "<strong style='color: #0c5460;'> INFO:</strong> <span style='color: #0c5460;'>", warning$message, "</span>",
                         "</div>")
                 }

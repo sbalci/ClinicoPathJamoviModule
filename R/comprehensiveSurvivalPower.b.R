@@ -48,7 +48,7 @@ comprehensiveSurvivalPowerClass <- if (requireNamespace('jmvcore', quietly=TRUE)
 
         .populateInstructions = function() {
             instructions_html <- paste0(
-                "<div style='padding: 20px; background-color: #f8f9fa; border-radius: 8px; margin: 15px 0;'>",
+                "<div style='padding: 20px; background-color: rgba(138, 155, 172, 0.06); border-radius: 8px; margin: 15px 0; color: inherit;'>",
                 "<h3 style='color: #2c3e50; margin-top: 0;'> Comprehensive Survival Power Analysis</h3>",
                 "<p><strong>This unified tool combines all survival power analysis methods:</strong></p>",
                 "<ul style='margin-left: 20px;'>",
@@ -63,7 +63,7 @@ comprehensiveSurvivalPowerClass <- if (requireNamespace('jmvcore', quietly=TRUE)
                 "<li>Pick the specific <strong>Statistical Method</strong></li>",
                 "<li>Enter your study parameters</li>",
                 "</ol>",
-                "<p style='margin-top: 15px; padding: 10px; background-color: #e8f4fd; border-left: 4px solid #2196F3;'>",
+                "<p style='margin-top: 15px; padding: 10px; background-color: rgba(33, 149, 236, 0.1); border-left: 4px solid #2196F3; color: inherit;'>",
                 "<strong> Tip:</strong> Enable 'Show Detailed Output' for comprehensive results including assumptions and sensitivity analysis.",
                 "</p>",
                 "</div>"
@@ -722,7 +722,7 @@ comprehensiveSurvivalPowerClass <- if (requireNamespace('jmvcore', quietly=TRUE)
             calculation_type <- self$options$calculation_type
 
             interpretation_html <- paste0(
-                "<div style='padding: 20px; background-color: #f0f8ff; border-radius: 8px; margin: 15px 0;'>",
+                "<div style='padding: 20px; background-color: rgba(33, 152, 255, 0.07); border-radius: 8px; margin: 15px 0; color: inherit;'>",
                 "<h4 style='color: #2c3e50; margin-top: 0;'> Clinical Interpretation</h4>"
             )
 

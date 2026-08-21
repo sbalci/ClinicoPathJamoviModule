@@ -149,7 +149,7 @@ timeintervalClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             sample_end <- end_vector[!is.na(end_vector)]
             
             if (length(sample_start) == 0 && length(sample_end) == 0) {
-                jmvcore::reject("No valid dates found for format detection in either column")
+                jmvcore::reject(.("No valid dates found for format detection in either column"))
             }
             
             sample_size <-  min(50, max(length(sample_start), length(sample_end)))
@@ -207,9 +207,9 @@ timeintervalClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             }
 
             if (best_score < 0.5) {
-                jmvcore::reject(glue::glue(
-                    "Could not detect a common date format for columns '{start_name}' and '{end_name}'. ",
-                    "Please select the correct format manually."
+                jmvcore::reject(jmvcore::format(
+                    .("Could not detect a common date format for columns '{start}' and '{end}'. Please select the correct format manually."),
+                    start = start_name, end = end_name
                 ))
             }
             
@@ -230,7 +230,8 @@ timeintervalClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 "myd" = lubridate::myd,
                 "dmy" = lubridate::dmy,
                 "dym" = lubridate::dym,
-                jmvcore::reject(paste("Unsupported date format:", format))
+                jmvcore::reject(jmvcore::format(
+                    .("Unsupported date format: {format}"), format = format))
             )
 
             tryCatch({
@@ -242,7 +243,9 @@ timeintervalClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 }
                 return(parsed_dates)
             }, error = function(e) {
-                jmvcore::reject(paste("Error parsing dates with format", format, ":", e$message))
+                jmvcore::reject(jmvcore::format(
+                    .("Error parsing dates with format {format}: {message}"),
+                    format = format, message = conditionMessage(e)))
             })
         },
         
@@ -251,22 +254,24 @@ timeintervalClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             successful <- sum(!is.na(parsed_dates))
             
             if (total_non_missing == 0) {
-                jmvcore::reject(glue::glue("Column '{column_name}' contains only missing values; cannot calculate time intervals."))
+                jmvcore::reject(jmvcore::format(
+                    .("Column '{column}' contains only missing values; cannot calculate time intervals."),
+                    column = column_name))
             }
             
             if (successful == 0) {
                 sample_values <- paste(utils::head(unique(original_vector), 3), collapse = ", ")
-                jmvcore::reject(glue::glue(
-                    "Date parsing failed for column '{column_name}' using format '{format_label}'. ",
-                    "Example values: {sample_values}"
+                jmvcore::reject(jmvcore::format(
+                    .("Date parsing failed for column '{column}' using format '{format}'. Example values: {examples}"),
+                    column = column_name, format = format_label, examples = sample_values
                 ))
             }
             
             success_rate <- successful / total_non_missing
             if (success_rate < 0.8) {
-                jmvcore::reject(glue::glue(
-                    "Only {round(100 * success_rate, 1)}% of non-missing values in '{column_name}' were parsed with format '{format_label}'. ",
-                    "Please verify that the selected format matches all values or standardise the column."
+                jmvcore::reject(jmvcore::format(
+                    .("Only {percent}% of non-missing values in '{column}' were parsed with format '{format}'. Please verify that the selected format matches all values or standardise the column."),
+                    percent = round(100 * success_rate, 1), column = column_name, format = format_label
                 ))
             }
         },
@@ -276,11 +281,11 @@ timeintervalClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             
             # Check for valid date objects
             if (!inherits(start_dates, "Date") && !inherits(start_dates, "POSIXct")) {
-                jmvcore::reject("Start dates are not valid date objects")
+                jmvcore::reject(.("Start dates are not valid date objects"))
             }
             
             if (!inherits(end_dates, "Date") && !inherits(end_dates, "POSIXct")) {
-                jmvcore::reject("End dates are not valid date objects")
+                jmvcore::reject(.("End dates are not valid date objects"))
             }
             
             # Calculate intervals
@@ -306,10 +311,10 @@ timeintervalClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         .calculateCalendarIntervals = function(start_dates, end_dates, output_unit) {
             # Calendar-aware interval calculation that respects varying month lengths
             if (!inherits(start_dates, "Date") && !inherits(start_dates, "POSIXct")) {
-                jmvcore::reject("Start dates are not valid date objects")
+                jmvcore::reject(.("Start dates are not valid date objects"))
             }
             if (!inherits(end_dates, "Date") && !inherits(end_dates, "POSIXct")) {
-                jmvcore::reject("End dates are not valid date objects")
+                jmvcore::reject(.("End dates are not valid date objects"))
             }
 
             intervals <- lubridate::interval(start_dates, end_dates)
@@ -337,7 +342,7 @@ timeintervalClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             if (output_unit == "months") return(total_months)
             if (output_unit == "years") return(total_months / 12)
 
-            jmvcore::reject("Unsupported output unit for calendar-based calculation")
+            jmvcore::reject(.("Unsupported output unit for calendar-based calculation"))
         },
         
         .applyLandmarkAnalysis = function(calculated_time, data, landmark_time, output_unit) {
@@ -353,7 +358,7 @@ timeintervalClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             }
             
             if (!is.numeric(landmark_time) || landmark_time < 0) {
-                jmvcore::reject("Landmark time must be a non-negative number")
+                jmvcore::reject(.("Landmark time must be a non-negative number"))
             }
             
             # Identify cases before landmark time
@@ -491,12 +496,9 @@ timeintervalClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
             # CRITICAL FIX: Validate parsing success
             if (all(is.na(start_dates)) || all(is.na(end_dates))) {
-                jmvcore::reject(glue::glue(
-                    "Date parsing failed. All values became NA using format '{detected_format}'.\n",
-                    "Please verify:\n",
-                    "- Date format setting matches your data\n",
-                    "- Date columns contain valid date values\n",
-                    "- Dates are not stored as numeric codes without proper formatting"
+                jmvcore::reject(jmvcore::format(
+                    .("Date parsing failed. All values became NA using format '{format}'.\nPlease verify:\n- Date format setting matches your data\n- Date columns contain valid date values\n- Dates are not stored as numeric codes without proper formatting"),
+                    format = detected_format
                 ))
             }
 
@@ -508,7 +510,7 @@ timeintervalClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             }
 
             if (all(is.na(calculated_time_raw))) {
-                jmvcore::reject("No valid time intervals could be calculated; please verify start/end dates and selected format.")
+                jmvcore::reject(.("No valid time intervals could be calculated; please verify start/end dates and selected format."))
             }
 
             # Preserve original parsed vectors for quality assessment
@@ -531,10 +533,9 @@ timeintervalClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     "Row ", example_rows, ": Start=", format(start_dates_raw[example_rows]),
                     ", End=", format(end_dates_raw[example_rows])
                 )
-                jmvcore::reject(glue::glue(
-                    "Negative time intervals detected (end date before start date) in {length(negative_idx)} rows.\n",
-                    "Please correct the dates or enable 'Remove Negative Intervals'.\n",
-                    "Examples:\n{paste(examples, collapse = '\\n')}"
+                jmvcore::reject(jmvcore::format(
+                    .("Negative time intervals detected (end date before start date) in {count} rows.\nPlease correct the dates or enable 'Remove Negative Intervals'.\nExamples:\n{examples}"),
+                    count = length(negative_idx), examples = paste(examples, collapse = "\n")
                 ))
             }
 
@@ -753,7 +754,7 @@ timeintervalClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
             # Populate About panel
             about_html <- "
-                <div style='background-color: #f0f7ff; padding: 15px; border-left: 4px solid #0066cc; margin: 15px 0;'>
+                <div style='background-color: rgba(33, 137, 255, 0.07); padding: 15px; border-left: 4px solid #0066cc; margin: 15px 0; color: inherit;'>
                     <h4 style='margin-top: 0; color: #004085;'> What does this analysis do?</h4>
                     <p>Calculates time intervals between two dates, designed for survival analysis and epidemiological studies.</p>
 
@@ -895,7 +896,7 @@ timeintervalClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
                     Filters applied: {filter_text}<br>
 
-                                    <div style='background-color: #e8f5e9; padding: 12px; margin-top: 12px; border-left: 3px solid #4caf50;'>
+                                    <div style='background-color: rgba(33, 159, 43, 0.1); padding: 12px; margin-top: 12px; border-left: 3px solid #4caf50; color: inherit;'>
 
                                         <strong> Interpretation Example:</strong><br>
 
@@ -934,7 +935,7 @@ timeintervalClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             } else {
                 # Handle case with no valid calculated times
                 error_summary <- "
-                    <div style='background-color: #f8d7da; padding: 15px; border-left: 4px solid #dc3545; margin: 15px 0;'>
+                    <div style='background-color: rgba(216, 33, 50, 0.18); padding: 15px; border-left: 4px solid #dc3545; margin: 15px 0; color: inherit;'>
                         <h4 style='margin-top: 0; color: #721c24;'> No Valid Time Intervals</h4>
                         <p>No valid time intervals could be calculated from the provided data.</p>
                         <p><strong>Please check:</strong></p>
@@ -983,7 +984,7 @@ timeintervalClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 }
 
                 summary_html <- glue::glue("
-                    <div style='background-color: #e8f4f8; padding: 20px; border-left: 5px solid #0066cc; margin: 15px 0;'>
+                    <div style='background-color: rgba(33, 149, 188, 0.1); padding: 20px; border-left: 5px solid #0066cc; margin: 15px 0; color: inherit;'>
                         <h3 style='margin-top: 0; color: #004080;'> Clinical Summary</h3>
                         <p style='font-size: 1.1em; line-height: 1.6;'>
                         <strong>Time interval analysis</strong> was performed on <strong>{n_obs} participants</strong>{landmark_text}.
@@ -991,7 +992,7 @@ timeintervalClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                         contributing a total of <strong>{total_pt} person-{unit}</strong> of observation.{quality_text}
                         </p>
 
-                        <div style='background-color: #f0f7ff; padding: 15px; margin-top: 15px; border-radius: 5px;'>
+                        <div style='background-color: rgba(33, 137, 255, 0.07); padding: 15px; margin-top: 15px; border-radius: 5px; color: inherit;'>
                             <p style='font-size: 0.95em; color: #333; margin: 0;'>
                             <strong> Copy-Ready Sentence:</strong><br>
                             <em style='color: #555;'>\"Follow-up data were available for {n_obs} participants
@@ -1008,7 +1009,7 @@ timeintervalClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             # Populate Glossary if requested
             if (self$options$show_glossary) {
                 glossary_html <- "
-                    <div style='background-color: #f3e5f5; padding: 15px; border-left: 4px solid #9c27b0; margin: 15px 0;'>
+                    <div style='background-color: rgba(153, 33, 170, 0.12); padding: 15px; border-left: 4px solid #9c27b0; margin: 15px 0; color: inherit;'>
                         <h4 style='margin-top: 0; color: #4a148c;'> Key Terms Explained</h4>
 
                         <dl style='margin: 5px 0;'>
@@ -1071,13 +1072,13 @@ timeintervalClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 quality <- calculated_times$quality
 
                 quality_html <- glue::glue(
-                    "<div style='background-color: #f8f9fa; padding: 15px; border-left: 4px solid #007bff; margin: 15px 0;'>",
+                    "<div style='background-color: rgba(138, 155, 172, 0.06); padding: 15px; border-left: 4px solid #007bff; margin: 15px 0; color: inherit;'>",
                         "<h4 style='margin-top: 0; color: #004085;'> Data Quality Assessment</h4>",
 
                         "<p><strong>Overall Quality:</strong> {quality$overall_quality}</p>",
 
                         "<table style='width: 100%; border-collapse: collapse; margin-top: 10px;'>",
-                            "<tr style='background-color: #e9ecef;'>",
+                            "<tr style='background-color: rgba(33, 63, 94, 0.1); color: inherit;'>",
                                 "<th style='padding: 8px; text-align: left; border: 1px solid #dee2e6;'>Metric</th>",
                                 "<th style='padding: 8px; text-align: right; border: 1px solid #dee2e6;'>Count</th>",
                                 "<th style='padding: 8px; text-align: right; border: 1px solid #dee2e6;'>%</th>",
@@ -1087,12 +1088,12 @@ timeintervalClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                                 "<td style='padding: 8px; text-align: right; border: 1px solid #dee2e6;'>{quality$total_observations}</td>",
                                 "<td style='padding: 8px; text-align: right; border: 1px solid #dee2e6;'>100%</td>",
                             "</tr>",
-                            "<tr style='background-color: #fff3cd;'>",
+                            "<tr style='background-color: rgba(255, 202, 33, 0.23); color: inherit;'>",
                                 "<td style='padding: 8px; border: 1px solid #dee2e6;'>Missing Values</td>",
                                 "<td style='padding: 8px; text-align: right; border: 1px solid #dee2e6;'>{quality$missing_values}</td>",
                                 "<td style='padding: 8px; text-align: right; border: 1px solid #dee2e6;'>{round(100*quality$missing_values/quality$total_observations, 1)}%</td>",
                             "</tr>",
-                            "<tr style='background-color: #f8d7da;'>",
+                            "<tr style='background-color: rgba(216, 33, 50, 0.18); color: inherit;'>",
                                 "<td style='padding: 8px; border: 1px solid #dee2e6;'>Negative Intervals</td>",
                                 "<td style='padding: 8px; text-align: right; border: 1px solid #dee2e6;'>{quality$negative_intervals}</td>",
                                 "<td style='padding: 8px; text-align: right; border: 1px solid #dee2e6;'>{round(100*quality$negative_intervals/quality$total_observations, 1)}%</td>",
@@ -1102,7 +1103,7 @@ timeintervalClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                                 "<td style='padding: 8px; text-align: right; border: 1px solid #dee2e6;'>{quality$zero_intervals}</td>",
                                 "<td style='padding: 8px; text-align: right; border: 1px solid #dee2e6;'>{round(100*quality$zero_intervals/quality$total_observations, 1)}%</td>",
                             "</tr>",
-                            "<tr style='background-color: #fff3cd;'>",
+                            "<tr style='background-color: rgba(255, 202, 33, 0.23); color: inherit;'>",
                                 "<td style='padding: 8px; border: 1px solid #dee2e6;'>Extreme Values</td>",
                                 "<td style='padding: 8px; text-align: right; border: 1px solid #dee2e6;'>{quality$extreme_values}</td>",
                                 "<td style='padding: 8px; text-align: right; border: 1px solid #dee2e6;'>{round(100*quality$extreme_values/quality$total_observations, 1)}%</td>",
@@ -1119,7 +1120,7 @@ timeintervalClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
                 # Populate Caveats panel (only when quality metrics enabled)
                 caveats_html <- "
-                    <div style='background-color: #fff8e1; padding: 15px; border-left: 4px solid #ff9800; margin: 15px 0;'>
+                    <div style='background-color: rgba(255, 203, 33, 0.14); padding: 15px; border-left: 4px solid #ff9800; margin: 15px 0; color: inherit;'>
                         <h4 style='margin-top: 0; color: #7f5006;'> Important Assumptions</h4>
                         <ul style='margin: 5px 0;'>
                             <li><strong>Time Units (Months/Years):</strong> To ensure statistical consistency for survival analysis, this tool uses <strong>standardized durations</strong> (1 month = 30.4375 days, 1 year = 365.25 days) rather than calendar units. This prevents bias from varying month lengths (28-31 days).</li>

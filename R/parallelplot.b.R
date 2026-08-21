@@ -95,7 +95,7 @@ parallelplotClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             if (is.null(self$options$vars) || length(self$options$vars) == 0) {
                 # Show instructions
                 instructions_html <- "
-                <div style='padding: 20px; background-color: #f8f9fa; border-left: 4px solid #007bff; margin: 10px 0;'>
+                <div style='padding: 20px; background-color: rgba(138, 155, 172, 0.06); border-left: 4px solid #007bff; margin: 10px 0; color: inherit;'>
                     <h3 style='color: #007bff; margin-top: 0;'>Welcome to Parallel Coordinates Plot</h3>
                     <h4>What is a Parallel Coordinates Plot?</h4>
                     <p>A parallel coordinates plot displays each data point as a connected line across multiple parallel axes (variables). It's excellent for:</p>

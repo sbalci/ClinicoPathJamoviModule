@@ -6,11 +6,11 @@
 \usage{
 lassocox(
   data,
-  elapsedtime,
-  outcome,
+  elapsedtime = NULL,
+  outcome = NULL,
   outcomeLevel,
   censorLevel,
-  explanatory,
+  explanatory = NULL,
   lambda = "lambda.1se",
   nfolds = 10,
   random_seed = 123456,

@@ -20,7 +20,7 @@ methodcomparisonClass <- R6::R6Class(
                         .step {
                             margin: 8px 0;
                             padding: 8px;
-                            background-color: #f8f9fa;
+                            background-color: rgba(138, 155, 172, 0.06); color: inherit;
                             border-left: 3px solid #3498db;
                         }
                     </style>

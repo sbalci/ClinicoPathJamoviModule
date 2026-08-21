@@ -71,7 +71,7 @@ decisionClass <- if (requireNamespace("jmvcore"))
                             <li><strong>Select Test Positive Level:</strong> Choose which level represents a positive test result</li>
                         </ol>
 
-                        <div style='background: #fff; padding: 15px; border-radius: 5px; margin-top: 15px;'>
+                        <div style='background-color: rgba(255, 255, 255, 0.06); padding: 15px; border-radius: 5px; margin-top: 15px; color: inherit;'>
                             <h4 style='margin-top: 0; color: #2c3e50;'> What You'll Get:</h4>
                             <ul style='font-size: 13px; color: #34495e; line-height: 1.6;'>
                                 <li><strong>Sensitivity & Specificity:</strong> How well the test identifies disease presence and absence</li>
@@ -605,8 +605,11 @@ decisionClass <- if (requireNamespace("jmvcore"))
                     parts <- c(parts, sprintf(.("%d case(s) (%s%%) removed because their level was neither the positive nor the negative level you selected (these are NOT missing values)"),
                                               level_excluded, format(pct(level_excluded))))
 
-                paste0(.("Case exclusion summary: "), paste(parts, collapse = "; "),
-                       sprintf(.(". %d of %d cases analysed."), nrow(processed_data), n_orig))
+                jmvcore::format(
+                    .("Case exclusion summary: {details}. {analysed} of {total} cases analysed."),
+                    details = paste(parts, collapse = "; "),
+                    analysed = nrow(processed_data),
+                    total = n_orig)
             },
             
             # Generate natural language summary for clinical use
@@ -648,7 +651,7 @@ decisionClass <- if (requireNamespace("jmvcore"))
 
                 sample_text <- if (!is.na(total_pop)) sprintf("%d cases analyzed", total_pop) else "Sample size not available"
 
-                summary_template <- .("<div style='margin: 15px; padding: 15px; border-left: 5px solid #4CAF50; background: #f1f8e9;'><h3 style='color: #2E7D32; margin-top: 0;'>Clinical Summary</h3><p style='font-size: 16px;'><strong>Analysis:</strong> Diagnostic test performance evaluation comparing %s against gold standard %s.</p><p><strong>Sample:</strong> %s. Predictive values below are computed at a disease prevalence of %s.</p><p><strong>Test Performance:</strong> The test shows <strong>%s</strong> discriminatory ability with sensitivity of <strong>%s</strong> (<em>%s</em>) and specificity of <strong>%s</strong> (<em>%s</em>).</p><p><strong>Clinical Utility:</strong> This test is most useful for <strong>%s</strong> in the clinical setting.</p><p><strong>Likelihood Ratios:</strong> Positive LR: %.2f (<em>%s</em>), Negative LR: %.2f (<em>%s</em>)</p><p><strong>Key Findings:</strong> When positive, the post-test disease probability is <strong>%s</strong> (PPV %s). When negative, the disease probability falls to <strong>%s</strong> and the probability of being disease-free is <strong>%s</strong> (NPV %s).</p></div>")
+                summary_template <- .("<div style='margin: 15px; padding: 15px; border-left: 5px solid #4CAF50; background-color: rgba(114, 184, 33, 0.1); color: inherit;'><h3 style='color: #2E7D32; margin-top: 0;'>Clinical Summary</h3><p style='font-size: 16px;'><strong>Analysis:</strong> Diagnostic test performance evaluation comparing %s against gold standard %s.</p><p><strong>Sample:</strong> %s. Predictive values below are computed at a disease prevalence of %s.</p><p><strong>Test Performance:</strong> The test shows <strong>%s</strong> discriminatory ability with sensitivity of <strong>%s</strong> (<em>%s</em>) and specificity of <strong>%s</strong> (<em>%s</em>).</p><p><strong>Clinical Utility:</strong> This test is most useful for <strong>%s</strong> in the clinical setting.</p><p><strong>Likelihood Ratios:</strong> Positive LR: %.2f (<em>%s</em>), Negative LR: %.2f (<em>%s</em>)</p><p><strong>Key Findings:</strong> When positive, the post-test disease probability is <strong>%s</strong> (PPV %s). When negative, the disease probability falls to <strong>%s</strong> and the probability of being disease-free is <strong>%s</strong> (NPV %s).</p></div>")
 
                 lr_pos_safe <- if (is.na(lr_pos) || !is.finite(lr_pos)) 0 else lr_pos
                 lr_neg_safe <- if (is.na(lr_neg) || !is.finite(lr_neg)) 0 else lr_neg
@@ -693,7 +696,7 @@ decisionClass <- if (requireNamespace("jmvcore"))
                 )
                 
                 # Generate template
-                template_string <- .("<div style='margin: 15px; padding: 15px; border: 2px dashed #2196F3; background: #e3f2fd;'><h3 style='color: #1976D2; margin-top: 0;'>Copy-Ready Clinical Report</h3><div style='background: white; padding: 10px; border-radius: 5px; font-family: Arial, sans-serif;'><p><strong>DIAGNOSTIC TEST EVALUATION</strong></p><p>We evaluated the diagnostic performance of %s compared to the gold standard %s. The test demonstrated a sensitivity of %.1f%% and specificity of %.1f%% %s. At a disease prevalence of %.1f%%, the positive predictive value was %.1f%% and the negative predictive value was %.1f%%. The positive likelihood ratio of %.1f provides %s.</p></div><p style='font-size: 12px; color: #666;'><em>Copy the text above for your clinical report. Modify as needed for your specific context.</em></p></div>")
+                template_string <- .("<div style='margin: 15px; padding: 15px; border: 2px dashed #2196F3; background-color: rgba(33, 152, 239, 0.13); color: inherit;'><h3 style='color: #1976D2; margin-top: 0;'>Copy-Ready Clinical Report</h3><div style='background: white; padding: 10px; border-radius: 5px; font-family: Arial, sans-serif;'><p><strong>DIAGNOSTIC TEST EVALUATION</strong></p><p>We evaluated the diagnostic performance of %s compared to the gold standard %s. The test demonstrated a sensitivity of %.1f%% and specificity of %.1f%% %s. At a disease prevalence of %.1f%%, the positive predictive value was %.1f%% and the negative predictive value was %.1f%%. The positive likelihood ratio of %.1f provides %s.</p></div><p style='font-size: 12px; color: #666;'><em>Copy the text above for your clinical report. Modify as needed for your specific context.</em></p></div>")
 
                 # Escape user-derived variable names before HTML interpolation
                 test_name_safe <- private$.safeHtmlOutput(test_name)
@@ -753,7 +756,7 @@ decisionClass <- if (requireNamespace("jmvcore"))
             # Generate About This Analysis content
             .generateAboutAnalysis = function() {
                 about_content <- paste0(
-                    "<div style='margin: 15px; padding: 15px; background: #f5f5f5; border-radius: 8px;'>",
+                    "<div style='margin: 15px; padding: 15px; background-color: rgba(88, 88, 88, 0.06); border-radius: 8px; color: inherit;'>",
                     "<h3 style='color: #1976D2; margin-top: 0;'>About Diagnostic Test Evaluation</h3>",
 
                     "<h4 style='color: #424242;'>", .("What This Analysis Does"), "</h4>",
@@ -783,7 +786,7 @@ decisionClass <- if (requireNamespace("jmvcore"))
                     "</ul>",
                     
                     "<h4 style='color: #424242;'>", .("Clinical Interpretation Guidelines"), "</h4>",
-                    "<div style='background: #e8f5e8; padding: 10px; border-radius: 5px; margin: 10px 0;'>",
+                    "<div style='background-color: rgba(33, 159, 33, 0.1); padding: 10px; border-radius: 5px; margin: 10px 0; color: inherit;'>",
                     "<strong>", .("Excellent Tests"), ":</strong><br>",
                     "\u{2022} ", .("Sensitivity >90% excellent for ruling OUT disease"), "<br>",
                     "\u{2022} ", .("Specificity >90% excellent for ruling IN disease"), "<br>",
@@ -981,7 +984,7 @@ decisionClass <- if (requireNamespace("jmvcore"))
                     lr_neg_text <- ifelse(is.na(lr_neg), "undefined", sprintf("%.2f", lr_neg))
 
                     paste0(
-                        "<div style='margin: 15px; padding: 10px; border-left: 4px solid #2196F3; background: #f8f9fa;'>",
+                        "<div style='margin: 15px; padding: 10px; border-left: 4px solid #2196F3; background-color: rgba(138, 155, 172, 0.06); color: inherit;'>",
                         "<h4 style='color: #1976D2; margin-top: 0;'>Clinical Interpretation</h4>",
                         "<p><strong>Test Performance Summary:</strong></p>",
                         "<ul>",
@@ -1005,7 +1008,7 @@ decisionClass <- if (requireNamespace("jmvcore"))
                     )
                 }, error = function(e) {
                     paste0(
-                        "<div style='margin: 15px; padding: 10px; border-left: 4px solid #ff9800; background: #fff3e0;'>",
+                        "<div style='margin: 15px; padding: 10px; border-left: 4px solid #ff9800; background-color: rgba(255, 169, 33, 0.14); color: inherit;'>",
                         "<h4 style='color: #f57c00; margin-top: 0;'>Clinical Interpretation</h4>",
                         "<p>Unable to generate detailed clinical interpretation due to data limitations.</p>",
                         sprintf("<p><strong>Basic Results:</strong> Sensitivity: %s, Specificity: %s</p>",
@@ -1030,7 +1033,7 @@ decisionClass <- if (requireNamespace("jmvcore"))
                         total_pop, test_name, gold_name
                     )
                 }, error = function(e) {
-                    fallback_template <- .("<div style='margin: 15px; padding: 15px; border-left: 5px solid #FF9800; background: #fff3e0;'><h3 style='color: #F57C00; margin-top: 0;'>Clinical Summary</h3><p>Basic diagnostic test evaluation completed with %d cases.</p><p><strong>Results:</strong> Sensitivity %.1f%%, Specificity %.1f%%</p></div>")
+                    fallback_template <- .("<div style='margin: 15px; padding: 15px; border-left: 5px solid #FF9800; background-color: rgba(255, 169, 33, 0.14); color: inherit;'><h3 style='color: #F57C00; margin-top: 0;'>Clinical Summary</h3><p>Basic diagnostic test evaluation completed with %d cases.</p><p><strong>Results:</strong> Sensitivity %.1f%%, Specificity %.1f%%</p></div>")
 
                     sprintf(
                         fallback_template,
@@ -1048,7 +1051,7 @@ decisionClass <- if (requireNamespace("jmvcore"))
                         prevalence = prior_prob
                     )
                 }, error = function(e) {
-                    fallback_template <- .("<div style='margin: 15px; padding: 15px; border: 2px dashed #2196F3; background: #e3f2fd;'><h3 style='color: #1976D2; margin-top: 0;'>Copy-Ready Clinical Report</h3><p>Diagnostic test evaluation shows sensitivity of %.1f%% and specificity of %.1f%%.</p></div>")
+                    fallback_template <- .("<div style='margin: 15px; padding: 15px; border: 2px dashed #2196F3; background-color: rgba(33, 152, 239, 0.13); color: inherit;'><h3 style='color: #1976D2; margin-top: 0;'>Copy-Ready Clinical Report</h3><p>Diagnostic test evaluation shows sensitivity of %.1f%% and specificity of %.1f%%.</p></div>")
 
                     sprintf(
                         fallback_template,
@@ -1703,7 +1706,7 @@ decisionClass <- if (requireNamespace("jmvcore"))
                     if (length(warnings) > 0) {
                         warning_text <- paste(warnings, collapse = "<br>")
                         warning_panel <- sprintf(
-                            "<div style='margin: 10px; padding: 10px; border-left: 4px solid #FF5722; background: #ffebee;'><h4 style='color: #D32F2F; margin-top: 0;'>Analysis Warnings</h4>%s</div>",
+                            "<div style='margin: 10px; padding: 10px; border-left: 4px solid #FF5722; background-color: rgba(255, 33, 67, 0.09); color: inherit;'><h4 style='color: #D32F2F; margin-top: 0;'>Analysis Warnings</h4>%s</div>",
                             warning_text
                         )
                         
@@ -2132,7 +2135,7 @@ decisionClass <- if (requireNamespace("jmvcore"))
                 # (Declared in decision.r.yaml as `misclassifiedHeading`, visible when
                 # showMisclassified; previously never set anywhere in the backend.)
                 self$results$misclassifiedHeading$setContent(paste0(
-                    "<div style='margin: 15px; padding: 12px; border-left: 4px solid #607D8B; background: #eceff1;'>",
+                    "<div style='margin: 15px; padding: 12px; border-left: 4px solid #607D8B; background-color: rgba(33, 68, 92, 0.09); color: inherit;'>",
                     "<h3 style='color: #37474F; margin-top: 0;'>", .("Misclassified Cases Analysis"), "</h3>",
                     "<p>", .("Cases where the diagnostic test disagreed with the gold standard are examined below. False positives (test positive, disease absent) and false negatives (test negative, disease present) are listed with their original row numbers so individual records can be reviewed."), "</p>",
                     "</div>"

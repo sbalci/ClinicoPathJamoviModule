@@ -18,7 +18,7 @@ crosstablepivotClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         .init = function() {
             # Initialize instructions
             instructions_html <- paste(
-                "<div style='background-color: #f8f9fa; padding: 15px; border-radius: 5px; margin: 10px 0;'>",
+                "<div style='background-color: rgba(138, 155, 172, 0.06); padding: 15px; border-radius: 5px; margin: 10px 0; color: inherit;'>",
                 "<h4 style='color: #495057; margin-top: 0;'>Enhanced Cross Tables with Pivot Functionality:</h4>",
                 "<ul style='margin: 5px 0; padding-left: 20px;'>",
                 "<li><strong>Select Variables (Rows):</strong> Choose variables to display in table rows</li>",
@@ -171,7 +171,7 @@ crosstablepivotClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         
         show_export_info = function() {
             export_html <- paste(
-                "<div style='background-color: #d4edda; padding: 10px; border-radius: 5px;'>",
+                "<div style='background-color: rgba(33, 162, 64, 0.19); padding: 10px; border-radius: 5px; color: inherit;'>",
                 "<h5 style='color: #155724; margin-top: 0;'>Excel Export Ready:</h5>",
                 "<p style='margin: 5px 0;'>Your pivot table can be exported to Excel format.</p>",
                 "<p style='margin: 5px 0; font-size: 12px;'>Note: Excel export functionality requires additional implementation.</p>",

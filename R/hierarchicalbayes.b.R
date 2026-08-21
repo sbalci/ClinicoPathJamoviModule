@@ -68,8 +68,8 @@ hierarchicalbayesClass <- R6::R6Class(
                 <head>
                 <style>
                     .main { margin: 20px; font-family: sans-serif; }
-                    .formula { background-color: #f8f9fa; padding: 10px; margin: 10px 0; font-family: monospace; }
-                    .interpretation { background-color: #e8f4f8; padding: 10px; margin: 10px 0; }
+                    .formula { background-color: rgba(138, 155, 172, 0.06); color: inherit; padding: 10px; margin: 10px 0; font-family: monospace; }
+                    .interpretation { background-color: rgba(33, 149, 188, 0.1); color: inherit; padding: 10px; margin: 10px 0; }
                 </style>
                 </head>
                 <body>

@@ -23,7 +23,7 @@ patientdashboardClass <- R6::R6Class(
                         .step {
                             margin: 8px 0;
                             padding: 5px;
-                            background-color: #f8f9fa;
+                            background-color: rgba(138, 155, 172, 0.06); color: inherit;
                             border-left: 3px solid #3498db;
                         }
                     </style>
@@ -181,11 +181,11 @@ patientdashboardClass <- R6::R6Class(
             
             summary_html <- "<html><head><style>
                 .patient-header { color: #2c3e50; font-size: 20px; font-weight: bold; margin-bottom: 15px; border-bottom: 2px solid #3498db; padding-bottom: 10px; }
-                .summary-section { margin: 10px 0; padding: 10px; background-color: #f8f9fa; border-radius: 6px; border-left: 4px solid #3498db; }
+                .summary-section { margin: 10px 0; padding: 10px; background-color: rgba(138, 155, 172, 0.06); color: inherit; border-radius: 6px; border-left: 4px solid #3498db; }
                 .vital-status { display: inline-block; margin: 5px; padding: 3px 8px; border-radius: 4px; font-weight: bold; }
-                .normal { background-color: #d5f4e6; color: #27ae60; }
-                .abnormal { background-color: #fadbd8; color: #e74c3c; }
-                .critical { background-color: #f2d7d5; color: #a93226; font-size: 14px; }
+                .normal { background-color: rgba(33, 197, 123, 0.19); color: inherit; color: inherit; }
+                .abnormal { background-color: rgba(227, 50, 33, 0.18); color: inherit; color: #e74c3c; }
+                .critical { background-color: rgba(186, 44, 33, 0.19); color: inherit; color: inherit; font-size: 14px; }
                 .timestamp { color: #7f8c8d; font-size: 12px; font-style: italic; }
             </style></head><body>"
             
@@ -582,9 +582,9 @@ patientdashboardClass <- R6::R6Class(
             
             summary_html <- "<html><head><style>
                 .clinical-title { color: #2c3e50; font-size: 18px; font-weight: bold; margin-bottom: 15px; }
-                .summary-section { margin: 10px 0; padding: 8px; background-color: #f8f9fa; border-radius: 4px; }
+                .summary-section { margin: 10px 0; padding: 8px; background-color: rgba(138, 155, 172, 0.06); color: inherit; border-radius: 4px; }
                 .highlight { color: #e74c3c; font-weight: bold; }
-                .normal { color: #27ae60; }
+                .normal { color: inherit; }
                 .timestamp { color: #7f8c8d; font-size: 12px; }
             </style></head><body>"
             
@@ -651,9 +651,9 @@ patientdashboardClass <- R6::R6Class(
             
             predictive_html <- "<html><head><style>
                 .pred-title { color: #2c3e50; font-size: 18px; font-weight: bold; margin-bottom: 15px; }
-                .pred-section { margin: 10px 0; padding: 8px; background-color: #f0f8ff; border-radius: 4px; }
+                .pred-section { margin: 10px 0; padding: 8px; background-color: rgba(33, 152, 255, 0.07); color: inherit; border-radius: 4px; }
                 .high-risk { color: #e74c3c; font-weight: bold; }
-                .low-risk { color: #27ae60; }
+                .low-risk { color: inherit; }
             </style></head><body>"
             
             predictive_html <- paste0(predictive_html, "<div class='pred-title'> Predictive Analytics</div>")
@@ -689,7 +689,7 @@ patientdashboardClass <- R6::R6Class(
             
             outcomes_html <- "<html><head><style>
                 .outcome-title { color: #2c3e50; font-size: 18px; font-weight: bold; margin-bottom: 15px; }
-                .outcome-section { margin: 10px 0; padding: 8px; background-color: #e8f5e8; border-radius: 4px; }
+                .outcome-section { margin: 10px 0; padding: 8px; background-color: rgba(33, 159, 33, 0.1); color: inherit; border-radius: 4px; }
                 .metric { margin: 5px 0; padding: 3px; }
             </style></head><body>"
             

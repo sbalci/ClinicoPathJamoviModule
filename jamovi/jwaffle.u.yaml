@@ -45,7 +45,7 @@ children:
               - type: TextBox
                 name: rows
                 format: number
-                label: Number of Rows
+                label: Number of rows
               - type: CheckBox
                 name: flip
                 label: Flip chart
@@ -76,12 +76,12 @@ children:
               - type: TextBox
                 name: mytitle
                 format: string
-                label: Chart Title
+                label: Chart title
                 width: largest
               - type: TextBox
                 name: legendtitle
                 format: string
-                label: Legend Title
+                label: Legend title
                 width: largest
 
   - type: CollapseBox

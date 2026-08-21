@@ -52,7 +52,7 @@ enhancedcrosstableClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6
         .init = function() {
             # Initialize instructions
             instructions_html <- paste(
-                "<div style='background-color: #e8f5e8; padding: 20px; border-radius: 8px; margin: 10px 0;'>",
+                "<div style='background-color: rgba(33, 159, 33, 0.1); padding: 20px; border-radius: 8px; margin: 10px 0; color: inherit;'>",
                 "<h3 style='color: #2e7d32; margin-top: 0;'>Enhanced Cross Tables with danchaltiel/crosstable</h3>",
                 "<div style='margin: 10px 0;'>",
                 "<h4 style='color: #1976d2; margin: 10px 0 5px 0;'>Key Features:</h4>",
@@ -281,7 +281,7 @@ enhancedcrosstableClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6
         
         .generate_statistics = function() {
             stats_html <- "<h4>Automated Statistical Tests</h4>"
-            stats_html <- paste0(stats_html, "<div style='background-color: #f0f8ff; padding: 15px; border-radius: 5px; margin: 10px 0;'>")
+            stats_html <- paste0(stats_html, "<div style='background-color: rgba(33, 152, 255, 0.07); padding: 15px; border-radius: 5px; margin: 10px 0; color: inherit;'>")
             stats_html <- paste0(stats_html, "<p>Statistical tests are automatically selected based on variable types and distributions:</p>")
             stats_html <- paste0(stats_html, "<ul>")
             stats_html <- paste0(stats_html, "<li><strong>Categorical variables:</strong> Chi-square test or Fisher's exact test (when expected frequencies < 5)</li>")
@@ -346,7 +346,7 @@ enhancedcrosstableClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6
                                 else "Strong"
 
                     effect_html <- paste0(effect_html,
-                        "<div style='background-color: #f5f5f5; padding: 12px; border-radius: 5px; margin: 8px 0;'>",
+                        "<div style='background-color: rgba(88, 88, 88, 0.06); padding: 12px; border-radius: 5px; margin: 8px 0; color: inherit;'>",
                         "<strong>",
                         htmltools::htmlEscape(var_name), " vs. ",
                         htmltools::htmlEscape(by_var), "</strong>",
@@ -393,7 +393,7 @@ enhancedcrosstableClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6
         
         .generate_interpretation = function() {
             interp_html <- "<h4>Statistical Interpretation</h4>"
-            interp_html <- paste0(interp_html, "<div style='background-color: #f3e5f5; padding: 15px; border-radius: 5px; margin: 10px 0;'>")
+            interp_html <- paste0(interp_html, "<div style='background-color: rgba(153, 33, 170, 0.12); padding: 15px; border-radius: 5px; margin: 10px 0; color: inherit;'>")
             interp_html <- paste0(interp_html, "<h5>Interpretation Guidelines:</h5>")
             interp_html <- paste0(interp_html, "<ul>")
             interp_html <- paste0(interp_html, "<li><strong>P-values:</strong> < 0.05 indicates statistically significant associations</li>")
@@ -422,7 +422,7 @@ enhancedcrosstableClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6
             by_var_clean <- janitor::make_clean_names(self$options$by_var)
             
             summary_html <- "<h4>Summary Statistics</h4>"
-            summary_html <- paste0(summary_html, "<div style='background-color: #f5f5f5; padding: 15px; border-radius: 5px; margin: 10px 0;'>")
+            summary_html <- paste0(summary_html, "<div style='background-color: rgba(88, 88, 88, 0.06); padding: 15px; border-radius: 5px; margin: 10px 0; color: inherit;'>")
             
             # Sample sizes
             total_n <- nrow(mydata)

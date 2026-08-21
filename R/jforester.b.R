@@ -80,7 +80,7 @@ jforesterClass <- R6::R6Class(
                     line-height: 1.5;
                 }
                 .requirements {
-                    background-color: #f5f5f5;
+                    background-color: rgba(88, 88, 88, 0.06); color: inherit;
                     padding: 15px;
                     border-left: 4px solid #4caf50;
                     margin-bottom: 20px;
@@ -98,7 +98,7 @@ jforesterClass <- R6::R6Class(
                     content: counter(step-counter);
                     position: absolute;
                     left: 0;
-                    background-color: #4caf50;
+                    background-color: #4caf50; color: #ffffff;
                     color: white;
                     width: 20px;
                     height: 20px;
@@ -142,7 +142,7 @@ jforesterClass <- R6::R6Class(
                     Forest plot ready! Your data includes point estimates with confidence intervals 
                     for visualization. Customize colors, labels, and layout options as needed.
                 </div>
-                <div style='background-color: #e8f5e8; padding: 15px; border-radius: 8px; border-left: 4px solid #4caf50;'>
+                <div style='background-color: rgba(33, 159, 33, 0.1); padding: 15px; border-radius: 8px; border-left: 4px solid #4caf50; color: inherit;'>
                     <strong> Analysis configured correctly</strong><br>
                     Review your forest plot settings and examine the results below.
                 </div>"
@@ -349,12 +349,12 @@ jforesterClass <- R6::R6Class(
             <div style='font-family: -apple-system,BlinkMacSystemFont,Segoe UI,Roboto,Arial,sans-serif; padding: 20px;'>
                 <h3 style='color: #2e7d32; margin-bottom: 15px;'> Forest Plot Interpretation</h3>
                 
-                <div style='background-color: #e8f5e8; padding: 15px; border-radius: 8px; border-left: 4px solid #4caf50; margin-bottom: 15px;'>
+                <div style='background-color: rgba(33, 159, 33, 0.1); padding: 15px; border-radius: 8px; border-left: 4px solid #4caf50; margin-bottom: 15px; color: inherit;'>
                     <strong>Effect Measure: ", effect_type, "</strong><br>
                     ", effect_interpretation, "
                 </div>
                 
-                <div style='background-color: #f3e5f5; padding: 15px; border-radius: 8px; border-left: 4px solid #9c27b0; margin-bottom: 15px;'>
+                <div style='background-color: rgba(153, 33, 170, 0.12); padding: 15px; border-radius: 8px; border-left: 4px solid #9c27b0; margin-bottom: 15px; color: inherit;'>
                     <strong>Reading the Forest Plot:</strong><br>
                     \u{2022} Each horizontal line represents a study with point estimate and confidence interval<br>
                     \u{2022} Point size may reflect sample size or study weight<br>
@@ -362,7 +362,7 @@ jforesterClass <- R6::R6Class(
                     \u{2022} Confidence intervals crossing the reference line suggest non-significance
                 </div>
                 
-                <div style='background-color: #fff3e0; padding: 15px; border-radius: 8px; border-left: 4px solid #ff9800;'>
+                <div style='background-color: rgba(255, 169, 33, 0.14); padding: 15px; border-radius: 8px; border-left: 4px solid #ff9800; color: inherit;'>
                     <strong> Important Considerations:</strong><br>
                     \u{2022} Consider heterogeneity between studies when interpreting results<br>
                     \u{2022} Check for outliers or studies with unusually wide confidence intervals<br>

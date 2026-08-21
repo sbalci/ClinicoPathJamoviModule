@@ -33,12 +33,16 @@ for tuning parameter selection.
 }
 \examples{
 \dontrun{
+# Both outcomeLevel and censorLevel are `type: Level` options. jamovi forbids a
+# default on a Level, so both are REQUIRED arguments of this function even though
+# the GUI fills them in for you - pass them explicitly when calling from R.
 # Basic Lasso-Cox regression
 result <- lassocox(
   data = survival_data,
   elapsedtime = "time",
   outcome = "status", 
   outcomeLevel = "1",
+  censorLevel = "0",
   explanatory = c("age", "gender", "stage", "grade"),
   lambda = "lambda.1se",
   nfolds = 10
@@ -50,6 +54,7 @@ result <- lassocox(
   elapsedtime = "survival_time",
   outcome = "event",
   outcomeLevel = "death",
+  censorLevel = "alive",
   explanatory = gene_variables,
   lambda = "lambda.min",
   nfolds = 5,

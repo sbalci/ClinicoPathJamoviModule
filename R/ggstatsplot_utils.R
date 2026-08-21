@@ -1,5 +1,5 @@
 # ============================================================================
-# CLINICOPATH ggstatsplot UTILITY FUNCTIONS
+# ggstatsplot UTILITY FUNCTIONS
 # ============================================================================
 # Shared helpers for the analyses that wrap ggstatsplot / statsExpressions.
 
@@ -7,18 +7,24 @@
 #'
 #' This is not defensive programming, it is a live session-wide bug.
 #'
-#' `logistf` is in this package's Imports (the odds-ratio analysis needs it) and
-#' pulls in `formula.tools`, which registers an `as.character.formula` S3 method
-#' returning ONE deparsed string where base R returns three elements:
+#' Any package loaded in the session can register an `as.character.formula` S3
+#' method, and `formula.tools` does exactly that - returning ONE deparsed string
+#' where base R returns three elements:
 #'
 #' ```
 #' as.character(v ~ g)   # base:          c("~", "v", "g")   length 3
 #' as.character(v ~ g)   # formula.tools: "v ~ g"            length 1
 #' ```
 #'
+#' In this umbrella repo `formula.tools` arrives via `logistf` (an Import, used by
+#' the odds-ratio and Firth regression analyses). The generated jjstatsplot module
+#' ships neither, but the shield stays: the method is registered session-wide by
+#' whoever loads it, so a user with `formula.tools` (or any package depending on
+#' it) attached breaks these plots just the same.
+#'
 #' `stats::oneway.test()` does `dp <- as.character(formula)` and rejects
-#' anything of length != 3 with "a two-sided formula is required". So merely
-#' loading ClinicoPath breaks Welch's ANOVA for the whole R session, not just
+#' anything of length != 3 with "a two-sided formula is required". So once that
+#' method is registered, Welch's ANOVA is broken for the whole R session, not just
 #' inside this package.
 #'
 #' The damage is silent. `ggstatsplot` swallows the failure and hands back a plot

@@ -59,7 +59,7 @@ coefplotClass <- if (requireNamespace("jmvcore")) {
                 # Early return with instructions if no variables selected
                 if (is.null(self$options$dep) || is.null(self$options$covs) || length(self$options$covs) == 0) {
                     instructions_html <- "
-                    <div style='background-color: #e8f5e8; padding: 20px; border-radius: 8px; margin: 10px 0;'>
+                    <div style='background-color: rgba(33, 159, 33, 0.1); padding: 20px; border-radius: 8px; margin: 10px 0; color: inherit;'>
                         <h3>Coefficient Plots for Regression Models</h3>
                         <p><strong>Create professional forest plots to visualize regression coefficients and confidence intervals.</strong></p>
 
@@ -328,7 +328,7 @@ coefplotClass <- if (requireNamespace("jmvcore")) {
                 # Model fit statistics
                 html_content <- paste0(html_content, "<h4>Model Fit Statistics</h4>")
                 html_content <- paste0(html_content, "<table border='1' cellpadding='5' cellspacing='0' style='border-collapse: collapse;'>")
-                html_content <- paste0(html_content, "<tr style='background-color: #f0f0f0; font-weight: bold;'>")
+                html_content <- paste0(html_content, "<tr style='background-color: rgba(33, 33, 33, 0.07); font-weight: bold; color: inherit;'>")
                 html_content <- paste0(html_content, "<th>Statistic</th><th>Value</th></tr>")
 
                 if (self$options$model_type == "linear") {
@@ -404,7 +404,7 @@ coefplotClass <- if (requireNamespace("jmvcore")) {
                            self$options$model_type %in% c("logistic", "cox", "poisson")
 
                 # Header
-                html_content <- paste0(html_content, "<tr style='background-color: #f0f0f0; font-weight: bold;'>")
+                html_content <- paste0(html_content, "<tr style='background-color: rgba(33, 33, 33, 0.07); font-weight: bold; color: inherit;'>")
                 html_content <- paste0(html_content, "<th>Variable</th>")
 
                 if (exp_coefs) {

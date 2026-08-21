@@ -186,7 +186,7 @@ interruptedtimeseriesClass <- R6::R6Class(
                 "<h4>Segmented regression for interrupted time series</h4>
                 <p>The model fitted is
                 <i>Y<sub>t</sub> = \u{03B2}<sub>0</sub> + \u{03B2}<sub>1</sub>\u{00B7}time +
-                \u{03B2}<sub>2</sub>\u{00B7}post + \u{03B2}<sub>3</sub>\u{00B7}time&nbsp;after&nbsp;intervention</i>,
+                \u{03B2}<sub>2</sub>\u{00B7}post + \u{03B2}<sub>3</sub>\u{00B7}time\u{00A0}after\u{00A0}intervention</i>,
                 where <i>post</i> indicates the post-intervention period and
                 <i>time after intervention</i> counts time points since the intervention
                 (Wagner et al., 2002; Bernal et al., 2017).</p>

@@ -48,7 +48,7 @@ advancedbarplotClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                 private$.check_package_availability()
                 # Initialize instructions
                 instructions_html <- paste(
-                    "<div style='background-color: #e3f2fd; padding: 20px; border-radius: 8px; margin: 10px 0;'>",
+                    "<div style='background-color: rgba(33, 152, 239, 0.13); padding: 20px; border-radius: 8px; margin: 10px 0; color: inherit;'>",
                     "<h3 style='color: #1565c0; margin-top: 0;'>Advanced Bar Charts - 5 Professional Approaches</h3>",
                     "<div style='margin: 10px 0;'>",
                     "<p><strong>Choose from 5 different bar chart approaches, each optimized for specific use cases:</strong></p>",
@@ -75,7 +75,7 @@ advancedbarplotClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                     "<li><strong>Customize:</strong> Adjust colors, statistics, and styling options</li>",
                     "</ol>",
                     "</div>",
-                    "<div style='background-color: #fff3e0; padding: 10px; border-radius: 5px; margin: 10px 0;'>",
+                    "<div style='background-color: rgba(255, 169, 33, 0.14); padding: 10px; border-radius: 5px; margin: 10px 0; color: inherit;'>",
                     "<p style='margin: 0; color: #ef6c00;'><strong>Pro Tip:</strong> Each approach includes automatic code generation to help you reproduce the visualization in R.</p>",
                     "</div>",
                     "</div>"
@@ -170,7 +170,7 @@ advancedbarplotClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                         # natively, drop this tryCatch entirely.
                         self$results$approach_description$setContent(
                             paste0(
-                                "<div style='color: red; background-color: #fee; padding: 10px; border-radius: 5px;'>",
+                                "<div style='color: red; background-color: rgba(255, 33, 33, 0.08); padding: 10px; border-radius: 5px;'>",
                                 "<strong>Validation Error:</strong> ", htmltools::htmlEscape(e$message), "</div>"
                             )
                         )
@@ -433,7 +433,7 @@ advancedbarplotClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                 desc <- descriptions[[approach]]
 
                 html_content <- paste(
-                    "<div style='background-color: #f8f9fa; padding: 15px; border-radius: 5px; margin: 10px 0;'>",
+                    "<div style='background-color: rgba(138, 155, 172, 0.06); padding: 15px; border-radius: 5px; margin: 10px 0; color: inherit;'>",
                     paste0("<h4 style='color: #495057; margin-top: 0;'>", desc$title, "</h4>"),
                     paste0("<p><strong>Description:</strong> ", desc$description, "</p>"),
                     "<p><strong>Key Strengths:</strong></p>",
@@ -458,7 +458,7 @@ advancedbarplotClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
 
                 # Create summary statistics table
                 summary_html <- "<h4>Summary Statistics</h4>"
-                summary_html <- paste0(summary_html, "<div style='background-color: #f8f9fa; padding: 15px; border-radius: 5px; margin: 10px 0;'>")
+                summary_html <- paste0(summary_html, "<div style='background-color: rgba(138, 155, 172, 0.06); padding: 15px; border-radius: 5px; margin: 10px 0; color: inherit;'>")
 
                 summary_html <- paste0(summary_html, "<table class='table table-striped' style='margin: 10px 0; max-width: 600px;'>")
                 summary_html <- paste0(summary_html, "<thead><tr>")
@@ -537,7 +537,7 @@ advancedbarplotClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                 tryCatch(
                     {
                         stat_html <- "<h4>Statistical Test Results</h4>"
-                        stat_html <- paste0(stat_html, "<div style='background-color: #e8f5e8; padding: 15px; border-radius: 5px; margin: 10px 0;'>")
+                        stat_html <- paste0(stat_html, "<div style='background-color: rgba(33, 159, 33, 0.1); padding: 15px; border-radius: 5px; margin: 10px 0; color: inherit;'>")
 
                         if (stat_method == "anova") {
                             # One-way ANOVA
@@ -646,7 +646,7 @@ advancedbarplotClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
 
                 code_html <- paste(
                     "<h4>R Code Example</h4>",
-                    "<div style='background-color: #f8f9fa; padding: 15px; border-radius: 5px; margin: 10px 0;'>",
+                    "<div style='background-color: rgba(138, 155, 172, 0.06); padding: 15px; border-radius: 5px; margin: 10px 0; color: inherit;'>",
                     "<p><strong>Reproducible R code for this approach:</strong></p>",
                     "<pre style='background-color: #2d3748; color: #e2e8f0; padding: 15px; border-radius: 5px; overflow-x: auto;'>",
                     "<code>", actual_code, "</code>",
@@ -655,15 +655,15 @@ advancedbarplotClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                     "<p style='color: #666; font-size: 0.9em;'>Copy this code to reproduce the visualization in your R environment.</p>",
                     "<details style='margin-top: 10px;'>",
                     "<summary style='cursor: pointer; color: #007bff;'>Export Options</summary>",
-                    "<div style='padding: 10px; background-color: #f8f9fa; border-radius: 5px; margin-top: 5px;'>",
+                    "<div style='padding: 10px; background-color: rgba(138, 155, 172, 0.06); border-radius: 5px; margin-top: 5px; color: inherit;'>",
                     "<p style='margin: 5px 0; font-size: 0.9em;'><strong>High-Quality Export:</strong></p>",
-                    "<code style='background-color: #e9ecef; padding: 2px 4px; border-radius: 3px; font-size: 0.8em;'>",
+                    "<code style='background-color: rgba(33, 63, 94, 0.1); padding: 2px 4px; border-radius: 3px; font-size: 0.8em; color: inherit;'>",
                     "ggsave('plot.png', width = 10, height = 6, dpi = 300)",
                     "</code><br>",
-                    "<code style='background-color: #e9ecef; padding: 2px 4px; border-radius: 3px; font-size: 0.8em;'>",
+                    "<code style='background-color: rgba(33, 63, 94, 0.1); padding: 2px 4px; border-radius: 3px; font-size: 0.8em; color: inherit;'>",
                     "ggsave('plot.svg', width = 10, height = 6)  # Vector format",
                     "</code><br>",
-                    "<code style='background-color: #e9ecef; padding: 2px 4px; border-radius: 3px; font-size: 0.8em;'>",
+                    "<code style='background-color: rgba(33, 63, 94, 0.1); padding: 2px 4px; border-radius: 3px; font-size: 0.8em; color: inherit;'>",
                     "ggsave('plot.pdf', width = 10, height = 6)  # Publication ready",
                     "</code>",
                     "</div>",
@@ -679,7 +679,7 @@ advancedbarplotClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                 stat_type <- self$options$stat_type
 
                 interp_html <- "<h4>Interpretation Guide</h4>"
-                interp_html <- paste0(interp_html, "<div style='background-color: #f3e5f5; padding: 15px; border-radius: 5px; margin: 10px 0;'>")
+                interp_html <- paste0(interp_html, "<div style='background-color: rgba(153, 33, 170, 0.12); padding: 15px; border-radius: 5px; margin: 10px 0; color: inherit;'>")
 
                 # Approach-specific guidance
                 if (approach == "statistical") {
@@ -942,7 +942,7 @@ advancedbarplotClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                                 },
                                 error = function(e) {
                                     paste(
-                                        "<div style='color: orange; padding: 15px; background-color: #fff3e0; border-radius: 5px;'>",
+                                        "<div style='color: orange; padding: 15px; background-color: rgba(255, 169, 33, 0.14); border-radius: 5px;'>",
                                         "<strong>Interactive Plot Error:</strong> ", htmltools::htmlEscape(e$message),
                                         "<br>Displaying static version instead.",
                                         "</div>"
@@ -954,7 +954,7 @@ advancedbarplotClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                         } else {
                             # Fallback message
                             fallback_html <- paste(
-                                "<div style='color: #666; padding: 15px; background-color: #f5f5f5; border-radius: 5px;'>",
+                                "<div style='color: inherit; padding: 15px; background-color: rgba(88, 88, 88, 0.06); border-radius: 5px;'>",
                                 "<strong>Interactive Plot Unavailable:</strong><br>",
                                 "Install 'plotly' and 'htmltools' packages for interactive functionality.<br>",
                                 "Static plot is displayed in the main plot section.",
@@ -965,7 +965,7 @@ advancedbarplotClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                     },
                     error = function(e) {
                         error_html <- paste(
-                            "<div style='color: red; padding: 15px; background-color: #fee; border-radius: 5px;'>",
+                            "<div style='color: red; padding: 15px; background-color: rgba(255, 33, 33, 0.08); border-radius: 5px;'>",
                             "<strong>Interactive Plot Error:</strong> ", htmltools::htmlEscape(e$message),
                             "</div>"
                         )

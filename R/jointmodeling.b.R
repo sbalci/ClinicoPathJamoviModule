@@ -28,7 +28,7 @@ jointmodelingClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             
             if (length(packages_missing) > 0) {
                 error_msg <- paste0(
-                    "<div style='color: red; padding: 15px; border-left: 4px solid red; background-color: #fff5f5;'>",
+                    "<div style='color: red; padding: 15px; border-left: 4px solid red; background-color: rgba(255, 88, 88, 0.06);'>",
                     "<h4>Required Packages Missing</h4>",
                     "<p>The following packages are required but not installed:</p>",
                     "<ul>",
@@ -45,7 +45,7 @@ jointmodelingClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             
             if (length(packages_optional_missing) > 0) {
                 warning_msg <- paste0(
-                    "<div style='color: orange; padding: 10px; border-left: 4px solid orange; background-color: #fffbf0;'>",
+                    "<div style='color: orange; padding: 10px; border-left: 4px solid orange; background-color: rgba(255, 196, 33, 0.07);'>",
                     "<h4>Optional Packages</h4>",
                     "<p>Consider installing for enhanced functionality: ",
                     paste(packages_optional_missing, collapse = ", "), "</p>",
@@ -64,7 +64,7 @@ jointmodelingClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 self$results$instructions$setContent(
                     "<h3>Welcome to Joint Longitudinal-Survival Modeling</h3>
                     
-                    <div style='background-color: #e8f4fd; padding: 20px; border-radius: 8px; margin: 15px 0;'>
+                    <div style='background-color: rgba(33, 149, 236, 0.1); padding: 20px; border-radius: 8px; margin: 15px 0; color: inherit;'>
                     <h4> What are Joint Models?</h4>
                     <p>Joint models simultaneously analyze:</p>
                     <ul>
@@ -74,7 +74,7 @@ jointmodelingClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     </ul>
                     </div>
                     
-                    <div style='background-color: #f0f8e8; padding: 20px; border-radius: 8px; margin: 15px 0;'>
+                    <div style='background-color: rgba(110, 188, 33, 0.1); padding: 20px; border-radius: 8px; margin: 15px 0; color: inherit;'>
                     <h4> Clinical Applications</h4>
                     <ul>
                     <li><b>Oncology:</b> PSA trajectory and prostate cancer survival</li>
@@ -85,7 +85,7 @@ jointmodelingClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     </ul>
                     </div>
                     
-                    <div style='background-color: #fff8e1; padding: 20px; border-radius: 8px; margin: 15px 0;'>
+                    <div style='background-color: rgba(255, 203, 33, 0.14); padding: 20px; border-radius: 8px; margin: 15px 0; color: inherit;'>
                     <h4> Data Requirements</h4>
                     <p><b>Your data must be in LONG format:</b></p>
                     <ul>
@@ -106,7 +106,7 @@ jointmodelingClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     </table>
                     </div>
                     
-                    <div style='background-color: #ffebee; padding: 20px; border-radius: 8px; margin: 15px 0;'>
+                    <div style='background-color: rgba(255, 33, 67, 0.09); padding: 20px; border-radius: 8px; margin: 15px 0; color: inherit;'>
                     <h4> Computational Notes</h4>
                     <ul>
                     <li><b>Analysis Time:</b> 2-10 minutes depending on data size</li>
@@ -203,10 +203,10 @@ jointmodelingClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 progress_pct <- round((private$.current_step / private$.progress_steps) * 100)
                 
                 progress_html <- glue::glue(
-                    "<div style='background-color: #e3f2fd; padding: 15px; border-radius: 8px; margin: 10px 0;'>
+                    "<div style='background-color: rgba(33, 152, 239, 0.13); padding: 15px; border-radius: 8px; margin: 10px 0; color: inherit;'>
                     <h4> Joint Model Analysis Progress</h4>
-                    <div style='background-color: #ddd; border-radius: 10px; padding: 3px;'>
-                    <div style='width: {progress_pct}%; background-color: #2196F3; height: 20px; border-radius: 8px; 
+                    <div style='background-color: rgba(33, 33, 33, 0.15); border-radius: 10px; padding: 3px; color: inherit;'>
+                    <div style='width: {progress_pct}%; background-color: #2196F3; color: #ffffff; height: 20px; border-radius: 8px; 
                     display: flex; align-items: center; justify-content: center; color: white; font-weight: bold;'>
                     {progress_pct}%
                     </div>
@@ -217,7 +217,7 @@ jointmodelingClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 )
             } else {
                 progress_html <- glue::glue(
-                    "<div style='background-color: #e8f5e8; padding: 15px; border-radius: 8px; margin: 10px 0;'>
+                    "<div style='background-color: rgba(33, 159, 33, 0.1); padding: 15px; border-radius: 8px; margin: 10px 0; color: inherit;'>
                     <h4> {message}</h4>
                     <p>Joint model analysis completed. Results are ready for interpretation.</p>
                     </div>"
@@ -307,7 +307,7 @@ jointmodelingClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 
                 # Create data summary
                 data_summary <- glue::glue(
-                    "<div style='background-color: #f5f5f5; padding: 15px; border-radius: 8px; margin: 10px 0;'>
+                    "<div style='background-color: rgba(88, 88, 88, 0.06); padding: 15px; border-radius: 8px; margin: 10px 0; color: inherit;'>
                     <h4> Data Summary</h4>
                     <ul>
                     <li><b>Number of Patients:</b> {n_patients}</li>
@@ -327,7 +327,7 @@ jointmodelingClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             }, error = function(e) {
                 # htmlEscape e$message - nlme/JMbayes2/etc. errors may include user column-name fragments
                 error_msg <- paste0(
-                    "<div style='color: red; background-color: #ffebee; padding: 15px; border-radius: 8px;'>
+                    "<div style='color: red; background-color: rgba(255, 33, 67, 0.09); padding: 15px; border-radius: 8px;'>
                     <h4>Data Preparation Error</h4>
                     <p><b>Error:</b> ", htmltools::htmlEscape(e$message), "</p>
                     <p><b>Common Issues:</b></p>
@@ -379,7 +379,7 @@ jointmodelingClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
                 # Add covariates if present (composeTerms backtick-escapes each name)
                 if (!is.null(vars$covariates)) {
-                    fixed_formula <- paste(fixed_formula, "+", jmvcore::composeTerms(as.list(vars$covariates)))
+                    fixed_formula <- paste(fixed_formula, "+", paste(jmvcore::composeTerms(as.list(vars$covariates)), collapse = " + "))
                 }
 
                 # Random effects formula. nlme's `~ form | group` uses the `|` conditioning
@@ -433,7 +433,7 @@ jointmodelingClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             }, error = function(e) {
                 # htmlEscape e$message - nlme errors may include user column-name fragments
                 error_msg <- paste0(
-                    "<div style='color: red; background-color: #ffebee; padding: 15px; border-radius: 8px;'>
+                    "<div style='color: red; background-color: rgba(255, 33, 67, 0.09); padding: 15px; border-radius: 8px;'>
                     <h4>Longitudinal Model Fitting Error</h4>
                     <p><b>Error:</b> ", htmltools::htmlEscape(e$message), "</p>
                     <p><b>Possible Solutions:</b></p>
@@ -465,7 +465,7 @@ jointmodelingClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             }, error = function(e) {
                 # htmlEscape e$message - JMbayes2/joineR errors may include user column-name fragments
                 error_msg <- paste0(
-                    "<div style='color: red; background-color: #ffebee; padding: 15px; border-radius: 8px;'>
+                    "<div style='color: red; background-color: rgba(255, 33, 67, 0.09); padding: 15px; border-radius: 8px;'>
                     <h4>Joint Model Fitting Error</h4>
                     <p><b>Error:</b> ", htmltools::htmlEscape(e$message), "</p>
                     <p><b>Troubleshooting:</b></p>
@@ -502,7 +502,7 @@ jointmodelingClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             )
             
             progress_update <- glue::glue(
-                "<div style='background-color: #fff3cd; padding: 10px; border-radius: 5px; margin: 5px 0;'>
+                "<div style='background-color: rgba(255, 202, 33, 0.23); padding: 10px; border-radius: 5px; margin: 5px 0; color: inherit;'>
                 <p><b>MCMC Sampling in Progress:</b></p>
                 <ul>
                 <li>Chains: {n_chains}</li>
@@ -542,7 +542,7 @@ jointmodelingClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             random_effects_var <- nlme::VarCorr(long_model)
             
             long_summary <- glue::glue(
-                "<div style='background-color: #f8f9fa; padding: 15px; border-radius: 8px; margin: 10px 0;'>
+                "<div style='background-color: rgba(138, 155, 172, 0.06); padding: 15px; border-radius: 8px; margin: 10px 0; color: inherit;'>
                 <h4> Longitudinal Model Results</h4>
                 <p><b>Fixed Effects (Population Level):</b></p>
                 <ul>",
@@ -577,7 +577,7 @@ jointmodelingClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 surv_formula <- paste("Surv(", surv_time_t, ",", surv_status_t, ") ~ 1")
                 if (!is.null(vars$covariates)) {
                     surv_formula <- paste("Surv(", surv_time_t, ",", surv_status_t, ") ~",
-                                        jmvcore::composeTerms(as.list(vars$covariates)))
+                                        paste(jmvcore::composeTerms(as.list(vars$covariates)), collapse = " + "))
                 }
 
                 # Fit survival model based on type
@@ -607,7 +607,7 @@ jointmodelingClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             }, error = function(e) {
                 # htmlEscape e$message - survival package errors may include user column-name fragments
                 error_msg <- paste0(
-                    "<div style='color: red; background-color: #ffebee; padding: 15px; border-radius: 8px;'>
+                    "<div style='color: red; background-color: rgba(255, 33, 67, 0.09); padding: 15px; border-radius: 8px;'>
                     <h4>Survival Model Fitting Error</h4>
                     <p><b>Error:</b> ", htmltools::htmlEscape(e$message), "</p>
                     <p><b>Possible Solutions:</b></p>
@@ -631,7 +631,7 @@ jointmodelingClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 coef_table <- summary(surv_model)$coefficients
                 if (nrow(coef_table) > 0) {
                     surv_summary <- glue::glue(
-                        "<div style='background-color: #fff3cd; padding: 15px; border-radius: 8px; margin: 10px 0;'>
+                        "<div style='background-color: rgba(255, 202, 33, 0.23); padding: 15px; border-radius: 8px; margin: 10px 0; color: inherit;'>
                         <h4> Cox Survival Model Results</h4>
                         <p><b>Hazard Ratios:</b></p>
                         <ul>",
@@ -653,7 +653,7 @@ jointmodelingClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             } else if (inherits(surv_model, "survreg")) {
                 coef_table <- summary(surv_model)$table
                 surv_summary <- glue::glue(
-                    "<div style='background-color: #fff3cd; padding: 15px; border-radius: 8px; margin: 10px 0;'>
+                    "<div style='background-color: rgba(255, 202, 33, 0.23); padding: 15px; border-radius: 8px; margin: 10px 0; color: inherit;'>
                     <h4> Parametric Survival Model Results</h4>
                     <p><b>Distribution:</b> {surv_model$dist}</p>
                     <p><b>Coefficients:</b></p>
@@ -731,7 +731,7 @@ jointmodelingClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     inherits(joint_model, c("jm", "JMbayes2"))) {
                     
                     # MCMC diagnostics for Bayesian models
-                    diagnostic_html <- "<div style='background-color: #e8f4f8; padding: 15px; border-radius: 8px; margin: 10px 0;'>
+                    diagnostic_html <- "<div style='background-color: rgba(33, 149, 188, 0.1); padding: 15px; border-radius: 8px; margin: 10px 0; color: inherit;'>
                     <h4> MCMC Diagnostics</h4>"
                     
                     # Check for convergence diagnostics
@@ -751,7 +751,7 @@ jointmodelingClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     
                 } else {
                     # Non-Bayesian diagnostics
-                    diagnostic_html <- "<div style='background-color: #e8f4f8; padding: 15px; border-radius: 8px; margin: 10px 0;'>
+                    diagnostic_html <- "<div style='background-color: rgba(33, 149, 188, 0.1); padding: 15px; border-radius: 8px; margin: 10px 0; color: inherit;'>
                     <h4> Model Diagnostics</h4>
                     <p><b>Model Type:</b> Two-stage estimation</p>
                     <p><b>Convergence:</b> Standard errors computed successfully</p>
@@ -782,7 +782,7 @@ jointmodelingClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     vars <- private$variable_names
                     unique_ids <- unique(data[[vars$id]])[1:min(10, length(unique(data[[vars$id]])))]  # Limit to 10 for speed
                     
-                    prediction_html <- "<div style='background-color: #f0f8ff; padding: 15px; border-radius: 8px; margin: 10px 0;'>
+                    prediction_html <- "<div style='background-color: rgba(33, 152, 255, 0.07); padding: 15px; border-radius: 8px; margin: 10px 0; color: inherit;'>
                     <h4> Dynamic Risk Predictions</h4>
                     <p><b>Prediction Window:</b> "
                     prediction_html <- paste0(prediction_html, pred_window, " time units</p>")
@@ -796,7 +796,7 @@ jointmodelingClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     
                 } else {
                     # For other models, provide general information
-                    prediction_html <- "<div style='background-color: #f0f8ff; padding: 15px; border-radius: 8px; margin: 10px 0;'>
+                    prediction_html <- "<div style='background-color: rgba(33, 152, 255, 0.07); padding: 15px; border-radius: 8px; margin: 10px 0; color: inherit;'>
                     <h4> Dynamic Predictions</h4>
                     <p><b>Note:</b> Dynamic predictions available with Bayesian joint models</p>
                     <p><b>Current Model:</b> Two-stage estimation</p>
@@ -820,7 +820,7 @@ jointmodelingClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     
                     # Simplified validation metrics
                     validation_html <- glue::glue(
-                        "<div style='background-color: #f5f5dc; padding: 15px; border-radius: 8px; margin: 10px 0;'>
+                        "<div style='background-color: rgba(192, 192, 33, 0.16); padding: 15px; border-radius: 8px; margin: 10px 0; color: inherit;'>
                         <h4> Internal Validation Results</h4>
                         <p><b>Validation Method:</b> {cv_folds}-fold cross-validation</p>
                         <p><b>Discrimination Metrics:</b></p>
@@ -836,7 +836,7 @@ jointmodelingClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     self$results$validation$setContent(validation_html)
                     
                 } else {
-                    validation_html <- "<div style='background-color: #f5f5dc; padding: 15px; border-radius: 8px; margin: 10px 0;'>
+                    validation_html <- "<div style='background-color: rgba(192, 192, 33, 0.16); padding: 15px; border-radius: 8px; margin: 10px 0; color: inherit;'>
                     <h4> Model Validation</h4>
                     <p>Validation metrics disabled. Enable discrimination metrics for detailed validation.</p>
                     </div>"
@@ -905,7 +905,7 @@ jointmodelingClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 time_long_safe <- htmltools::htmlEscape(vars$time_long)
 
                 final_summary <- glue::glue(
-                    "<div style='background-color: #e8f5e8; padding: 20px; border-radius: 8px; margin: 15px 0; border: 2px solid #4caf50;'>
+                    "<div style='background-color: rgba(33, 159, 33, 0.1); padding: 20px; border-radius: 8px; margin: 15px 0; border: 2px solid #4caf50; color: inherit;'>
                     <h3> Joint Longitudinal-Survival Model Summary</h3>
 
                     <h4> Model Specification</h4>

@@ -576,7 +576,7 @@ chisqposttestClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 p_value <- result$actual_pvalue
                 
                 test_results <- htmltools::div(
-                    style = "margin-bottom: 15px; padding: 10px; background-color: #f5f5f5; border-radius: 3px;",
+                    style = "margin-bottom: 15px; padding: 10px; background-color: rgba(88, 88, 88, 0.06); border-radius: 3px; color: inherit;",
                     htmltools::strong("Test Results:"), htmltools::br(),
                     "Method: ", test_method, " (", 
                     if (use_fisher) "used due to low expected frequencies" else "standard approach", 
@@ -611,7 +611,7 @@ chisqposttestClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             # Create header row with variable names
             header_cells <- list(
                 htmltools::tags$th(
-                    style = "border: 1px solid #e1e5e9; padding: 8px; text-align: center; background-color: #f8f9fa;", 
+                    style = "border: 1px solid #e1e5e9; padding: 8px; text-align: center; background-color: rgba(138, 155, 172, 0.06); color: inherit;", 
                     htmltools::div(
                         style = "font-weight: bold; color: #495057;",
                         if (!is.null(col_var_name)) paste0(col_var_name, " \u{2192}") else "",
@@ -624,7 +624,7 @@ chisqposttestClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             # Add column headers with variable name context
             for (col in col_names) {
                 header_cells[[length(header_cells) + 1]] <- htmltools::tags$th(
-                    style = "border: 1px solid #e1e5e9; padding: 8px; text-align: center; background-color: #e3f2fd;", 
+                    style = "border: 1px solid #e1e5e9; padding: 8px; text-align: center; background-color: rgba(33, 152, 239, 0.13); color: inherit;", 
                     htmltools::div(
                         style = "font-weight: bold;",
                         if (!is.null(col_var_name)) {
@@ -638,13 +638,13 @@ chisqposttestClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     )
                 )
             }
-            header_row <- htmltools::tags$tr(style = "background-color: #e3f2fd;", header_cells)
+            header_row <- htmltools::tags$tr(style = "background-color: rgba(33, 152, 239, 0.13); color: inherit;", header_cells)
             
             # Create data rows
             data_rows <- lapply(seq_along(row_names), function(i) {
                 row_cells <- list(
                     htmltools::tags$th(
-                        style = "border: 1px solid #e1e5e9; padding: 8px; background-color: #e3f2fd; font-weight: bold;",
+                        style = "border: 1px solid #e1e5e9; padding: 8px; background-color: rgba(33, 152, 239, 0.13); font-weight: bold; color: inherit;",
                         if (!is.null(row_var_name)) {
                             htmltools::div(
                                 htmltools::div(style = "font-size: 11px; color: #6c757d; margin-bottom: 2px;", row_var_name),
@@ -709,7 +709,7 @@ chisqposttestClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             # so 2xC / Rx2 subtables render all categories)
             header_cells <- list(
                 htmltools::tags$th(
-                    style = "border: 1px solid #e1e5e9; padding: 8px; text-align: center; background-color: #f8f9fa;",
+                    style = "border: 1px solid #e1e5e9; padding: 8px; text-align: center; background-color: rgba(138, 155, 172, 0.06); color: inherit;",
                     if (!is.null(col_var_name) || !is.null(row_var_name)) {
                         htmltools::div(
                             style = "font-weight: bold; color: #495057; font-size: 11px;",
@@ -737,13 +737,13 @@ chisqposttestClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             }
             header_cells[[length(header_cells) + 1]] <- htmltools::tags$th(
                 style = "border: 1px solid #e1e5e9; padding: 8px; text-align: center;", htmltools::strong("Total"))
-            header_row <- htmltools::tags$tr(style = "background-color: #e3f2fd;", header_cells)
+            header_row <- htmltools::tags$tr(style = "background-color: rgba(33, 152, 239, 0.13); color: inherit;", header_cells)
 
             # Create data rows (iterate over every row and every column)
             data_rows <- lapply(seq_along(row_names), function(i) {
                 cells <- list(
                     htmltools::tags$td(
-                        style = "border: 1px solid #e1e5e9; padding: 8px; background-color: #e3f2fd; font-weight: bold;",
+                        style = "border: 1px solid #e1e5e9; padding: 8px; background-color: rgba(33, 152, 239, 0.13); font-weight: bold; color: inherit;",
                         if (!is.null(row_var_name)) {
                             htmltools::div(
                                 htmltools::div(style = "font-size: 11px; color: #6c757d; margin-bottom: 2px;", row_var_name),
@@ -783,7 +783,7 @@ chisqposttestClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 style = "border: 1px solid #e1e5e9; padding: 8px; text-align: center;",
                 grand_total
             )
-            total_row <- htmltools::tags$tr(style = "background-color: #f5f5f5; font-weight: bold;", total_cells)
+            total_row <- htmltools::tags$tr(style = "background-color: rgba(88, 88, 88, 0.06); font-weight: bold; color: inherit;", total_cells)
 
             # Build complete table
             htmltools::tags$table(
@@ -1028,7 +1028,7 @@ chisqposttestClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         # Create statistical glossary
         .createGlossaryPanel = function() {
             glossary <- htmltools::div(
-                style = "padding: 15px; background-color: #f8f9fa; border-left: 4px solid #6c757d; margin: 10px 0;",
+                style = "padding: 15px; background-color: rgba(138, 155, 172, 0.06); border-left: 4px solid #6c757d; margin: 10px 0; color: inherit;",
                 htmltools::h4(.("Statistical Terms Glossary"), style = "color: #495057; margin-top: 0;"),
 
                 htmltools::tags$dl(
@@ -1065,7 +1065,7 @@ chisqposttestClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         .createEducationalPanel = function(type = "overview", num_comparisons = NULL, alpha = 0.05) {
             if (type == "overview") {
                 return(htmltools::div(
-                    style = "padding: 15px; background-color: #f8f9fa; border-left: 4px solid #1976d2; margin: 10px 0;",
+                    style = "padding: 15px; background-color: rgba(138, 155, 172, 0.06); border-left: 4px solid #1976d2; margin: 10px 0; color: inherit;",
                     htmltools::h4(.("Chi-Square Post-Hoc Analysis Guide"), style = "color: #1976d2; margin-top: 0;"),
                     htmltools::p(htmltools::strong(.("Three-Step Comprehensive Analysis:"))),
                     htmltools::div(
@@ -1077,12 +1077,12 @@ chisqposttestClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 ))
             } else if (type == "residuals") {
                 return(htmltools::div(
-                    style = "padding: 15px; background-color: #e8f5e8; border-left: 4px solid #4caf50; margin: 10px 0;",
+                    style = "padding: 15px; background-color: rgba(33, 159, 33, 0.1); border-left: 4px solid #4caf50; margin: 10px 0; color: inherit;",
                     htmltools::h4(.("Standardized Residuals Interpretation"), style = "color: #2e7d32; margin-top: 0;"),
                     htmltools::p(htmltools::strong(.("What are standardized residuals?"))),
                     htmltools::p(.("Standardized residuals measure how much each cell deviates from what we'd expect if there was no association. They're calculated as (Observed - Expected) / \u{221A}Expected, then adjusted for multiple comparisons.")),
                     htmltools::div(
-                        style = "background-color: #f1f8e9; padding: 10px; border-radius: 3px;",
+                        style = "background-color: rgba(114, 184, 33, 0.1); padding: 10px; border-radius: 3px; color: inherit;",
                         htmltools::strong(.("Interpretation Guidelines:")), htmltools::br(),
                         .("\u{2022} |Residual| > 2.0: Suggests meaningful deviation"), htmltools::br(),
                         .("\u{2022} |Residual| > 3.0: Strong evidence of deviation"), htmltools::br(),
@@ -1093,12 +1093,12 @@ chisqposttestClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             } else if (type == "multiple_testing" && !is.null(num_comparisons)) {
                 adjusted_alpha <- alpha / num_comparisons
                 return(htmltools::div(
-                    style = "padding: 15px; background-color: #fff3e0; border-left: 4px solid #ff9800; margin: 10px 0;",
+                    style = "padding: 15px; background-color: rgba(255, 169, 33, 0.14); border-left: 4px solid #ff9800; margin: 10px 0; color: inherit;",
                     htmltools::h4(.("Multiple Testing Correction"), style = "color: #e65100; margin-top: 0;"),
                     htmltools::p(htmltools::strong(.("Why correction is needed:"))),
                     htmltools::p(.("When performing multiple tests, the probability of finding at least one false positive increases. With {num_comparisons} comparisons, there's a {false_positive_rate}% chance of a false positive without correction.")),
                     htmltools::div(
-                        style = "background-color: #fce4ec; padding: 10px; border-radius: 3px;",
+                        style = "background-color: rgba(230, 33, 99, 0.12); padding: 10px; border-radius: 3px; color: inherit;",
                         htmltools::strong(.("Correction Applied:")), htmltools::br(),
                         .("\u{2022} Number of comparisons:"), " ", num_comparisons, htmltools::br(),
                         .("\u{2022} Adjusted significance level:"), " \u{3B1} = ", round(adjusted_alpha, 4), htmltools::br(),
@@ -1111,7 +1111,7 @@ chisqposttestClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         # Create detailed guidance HTML for residuals interpretation
         .createResidualsGuidanceHTML = function(cutoff) {
             guidance <- htmltools::div(
-                style = "padding: 15px; background-color: #f0f7ff; border-left: 4px solid #1976d2; margin: 10px 0; font-family: 'Segoe UI', system-ui, sans-serif;",
+                style = "padding: 15px; background-color: rgba(33, 137, 255, 0.07); color: inherit; border-left: 4px solid #1976d2; margin: 10px 0; font-family: 'Segoe UI', system-ui, sans-serif;",
                 htmltools::h4(.("Residuals Interpretation Guidance"), style = "color: #1976d2; margin-top: 0;"),
                 htmltools::p(
                     htmltools::strong(.("How to read the Residuals Table:")),
@@ -1119,7 +1119,7 @@ chisqposttestClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     .("Standardized residuals identify which specific cells in the table drive the overall significant association. They represent the distance (in standard deviations) between the observed count and the expected count.")
                 ),
                 htmltools::div(
-                    style = "background-color: #ffffff; padding: 12px; border: 1px border; border-color: #d1e3f8; border-radius: 5px; margin-bottom: 15px;",
+                    style = "background-color: rgba(255, 255, 255, 0.06); padding: 12px; border: 1px border; border-color: #d1e3f8; border-radius: 5px; margin-bottom: 15px; color: inherit;",
                     htmltools::tags$ul(
                         style = "margin: 0; padding-left: 20px;",
                         htmltools::tags$li(
@@ -1137,7 +1137,7 @@ chisqposttestClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     )
                 ),
                 htmltools::div(
-                    style = "font-style: italic; background-color: #f8f9fa; padding: 10px; border-radius: 4px; border: 1px dashed #dee2e6;",
+                    style = "font-style: italic; background-color: rgba(138, 155, 172, 0.06); padding: 10px; border-radius: 4px; border: 1px dashed #dee2e6; color: inherit;",
                     htmltools::strong(.("Example Interpretation:")), htmltools::br(),
                     sprintf(.("If the cell 'Grade 3 \u{D7} Positive' has a residual of +3.2 (with cutoff \u{B1}%.2f):"), cutoff), htmltools::br(),
                     .("It indicates that Grade 3 cases are significantly over-represented among the Positive group compared to what would be expected by chance.")
@@ -1248,7 +1248,7 @@ chisqposttestClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             if (nrow(self$data) == 0) {
                 # Use HTML message in todo element instead of Notice object
                 self$results$todo$setContent(
-                    paste0("<div style='padding: 15px; background-color: #f8d7da; border: 1px solid #f5c6cb; color: #721c24;'>",
+                    paste0("<div style='padding: 15px; background-color: rgba(216, 33, 50, 0.18); border: 1px solid #f5c6cb; color: inherit;'>",
                           "<strong>Error:</strong> Data contains no (complete) rows. Please check your dataset and variable selections.",
                           "</div>"))
                 return(NULL)
@@ -1264,7 +1264,7 @@ chisqposttestClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             if (!is.null(counts) && !(counts %in% names(data))) {
                 # Use HTML message in todo element instead of Notice object
                 self$results$todo$setContent(
-                    paste0("<div style='padding: 15px; background-color: #f8d7da; border: 1px solid #f5c6cb; color: #721c24;'>",
+                    paste0("<div style='padding: 15px; background-color: rgba(216, 33, 50, 0.18); border: 1px solid #f5c6cb; color: inherit;'>",
                           "<strong>Error:</strong> The counts variable '", htmltools::htmlEscape(counts), "' does not exist in the data. Please select a valid numeric variable for counts.",
                           "</div>"))
                 return(NULL)
@@ -1312,7 +1312,7 @@ chisqposttestClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 # Use HTML message in todo element instead of Notice object
                 if (show_warnings) {
                     self$results$todo$setContent(
-                        paste0("<div style='padding: 15px; background-color: #f8d7da; border: 1px solid #f5c6cb; color: #721c24;'>",
+                        paste0("<div style='padding: 15px; background-color: rgba(216, 33, 50, 0.18); border: 1px solid #f5c6cb; color: inherit;'>",
                               "<strong>Error:</strong> Error creating contingency table. Please check your data format and variable selections. Ensure rows and columns variables are categorical.",
                               "</div>"))
                 }
@@ -1324,7 +1324,7 @@ chisqposttestClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 # Use HTML message in todo element instead of Notice object
                 if (show_warnings) {
                     self$results$todo$setContent(
-                        paste0("<div style='padding: 15px; background-color: #f8d7da; border: 1px solid #f5c6cb; color: #721c24;'>",
+                        paste0("<div style='padding: 15px; background-color: rgba(216, 33, 50, 0.18); border: 1px solid #f5c6cb; color: inherit;'>",
                               "<strong>Error:</strong> Contingency table must have at least 2 rows and 2 columns. Please check that your variables have at least 2 categories each.",
                               "</div>"))
                 }
@@ -1336,7 +1336,7 @@ chisqposttestClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             # rendered empty (does not require the Educational panels toggle).
             if (!is.null(counts) && show_warnings) {
                 weight_warning <- htmltools::div(
-                    style = "padding: 10px; background-color: #e1f5fe; border-left: 4px solid #0277bd; margin: 10px 0;",
+                    style = "padding: 10px; background-color: rgba(33, 181, 248, 0.14); border-left: 4px solid #0277bd; margin: 10px 0; color: inherit;",
                     htmltools::h5(" Weighted Data Analysis", style = "color: #01579b; margin-top: 0;"),
                     htmltools::p("The data is being treated as frequency counts. Each row represents a combination of categories with the specified count/weight.")
                 )
@@ -1436,7 +1436,7 @@ chisqposttestClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             # Create header row with variable names
             header_cells <- list(
                 htmltools::tags$th(
-                    style = "border: 1px solid #e1e5e9; padding: 8px; background-color: #f8f9fa;", 
+                    style = "border: 1px solid #e1e5e9; padding: 8px; background-color: rgba(138, 155, 172, 0.06); color: inherit;", 
                     htmltools::div(
                         style = "font-weight: bold; color: #495057;",
                         if (!is.null(col_var_name)) paste0(col_var_name, " \u{2192}") else "",
@@ -1449,7 +1449,7 @@ chisqposttestClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             # Add column headers with variable name context
             for (col in col_names) {
                 header_cells[[length(header_cells) + 1]] <- htmltools::tags$th(
-                    style = "border: 1px solid #e1e5e9; padding: 8px; text-align: center; background-color: #e8f5e8;", 
+                    style = "border: 1px solid #e1e5e9; padding: 8px; text-align: center; background-color: rgba(33, 159, 33, 0.1); color: inherit;", 
                     htmltools::div(
                         style = "font-weight: bold;",
                         if (!is.null(col_var_name)) {
@@ -1463,14 +1463,14 @@ chisqposttestClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     )
                 )
             }
-            header_row <- htmltools::tags$tr(style = "background-color: #e8f5e8;", header_cells)
+            header_row <- htmltools::tags$tr(style = "background-color: rgba(33, 159, 33, 0.1); color: inherit;", header_cells)
             
             # Create data rows
             data_rows <- lapply(seq_along(row_names), function(i) {
                 # Row header
                 row_cells <- list(
                     htmltools::tags$td(
-                        style = "border: 1px solid #e1e5e9; padding: 8px; font-weight: bold; background-color: #f5f5f5;",
+                        style = "border: 1px solid #e1e5e9; padding: 8px; font-weight: bold; background-color: rgba(88, 88, 88, 0.06); color: inherit;",
                         if (!is.null(row_var_name)) {
                             htmltools::div(
                                 htmltools::div(style = "font-size: 11px; color: #6c757d; margin-bottom: 2px;", row_var_name),
@@ -1491,12 +1491,12 @@ chisqposttestClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     # Determine cell styling based on significance
                     cell_style <- if (is_significant) {
                         if (residual_val > 0) {
-                            "border: 1px solid #e1e5e9; padding: 8px; text-align: center; background-color: #ffebee; color: #c62828; font-weight: bold;"
+                            "border: 1px solid #e1e5e9; padding: 8px; text-align: center; background-color: rgba(255, 33, 67, 0.09); color: inherit; color: inherit; font-weight: bold;"
                         } else {
-                            "border: 1px solid #e1e5e9; padding: 8px; text-align: center; background-color: #e3f2fd; color: #1565c0; font-weight: bold;"
+                            "border: 1px solid #e1e5e9; padding: 8px; text-align: center; background-color: rgba(33, 152, 239, 0.13); color: inherit; color: inherit; font-weight: bold;"
                         }
                     } else {
-                        "border: 1px solid #e1e5e9; padding: 8px; text-align: center; background-color: #f9f9f9;"
+                        "border: 1px solid #e1e5e9; padding: 8px; text-align: center; background-color: rgba(155, 155, 155, 0.06); color: inherit;"
                     }
                     
                     row_cells <- c(row_cells, list(
@@ -1539,7 +1539,7 @@ chisqposttestClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     "Please select Bonferroni, Holm, or FDR for pairwise testing with appropriate corrections."
                 )
                 self$results$multipleTestingInfo$setContent(
-                    paste0("<div style='padding: 15px; background-color: #f8d7da; border: 1px solid #f5c6cb;'>",
+                    paste0("<div style='padding: 15px; background-color: rgba(216, 33, 50, 0.18); border: 1px solid #f5c6cb; color: inherit;'>",
                           "<strong>", .("Post-hoc Testing Disabled:"), "</strong> ",
                           message_text,
                           "</div>"))
@@ -1563,7 +1563,7 @@ chisqposttestClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     "and constitutes data dredging."
                 )
                 self$results$multipleTestingInfo$setContent(
-                    paste0("<div style='padding: 15px; background-color: #fff3cd; border: 1px solid #ffc107;'>",
+                    paste0("<div style='padding: 15px; background-color: rgba(255, 202, 33, 0.23); border: 1px solid #ffc107; color: inherit;'>",
                           "<strong>", .("Post-hoc Testing Not Performed:"), "</strong> ",
                           message_text,
                           "</div>"))
@@ -1589,7 +1589,7 @@ chisqposttestClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 fisher_notice <- NULL
                 if (fisher_used) {
                     fisher_notice <- htmltools::div(
-                        style = "padding: 10px; background-color: #e3f2fd; border-left: 4px solid #1976d2; margin: 8px 0;",
+                        style = "padding: 10px; background-color: rgba(33, 152, 239, 0.13); border-left: 4px solid #1976d2; margin: 8px 0; color: inherit;",
                         htmltools::strong(.("Method notice: Pairwise comparisons with expected cell counts below 5 are automatically analysed with Fisher's exact test; the reported p-values use that exact method."))
                     )
                 }
@@ -1638,11 +1638,12 @@ chisqposttestClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     self$results$detailedComparisons$setContent(detailed_html)
                 }
             } else {
-                # No valid pairwise comparisons possible
-                # Hide the posthoc table when no valid pairwise comparisons
-                self$results$posthocTable$setVisible(FALSE)
+                # No valid pairwise comparisons possible. The (empty) posthoc
+                # table is left visible: this is a failure state, not an
+                # option-driven one, and hiding it makes the results pane
+                # collapse and re-expand while the user picks variables.
                 self$results$multipleTestingInfo$setContent(
-                    paste0("<div style='padding: 15px; background-color: #fff3cd; border: 1px solid #ffeaa7;'>", .("No valid pairwise comparisons could be performed. This may be due to insufficient data in subtables or table structure."), "</div>"))
+                    paste0("<div style='padding: 15px; background-color: rgba(255, 202, 33, 0.23); border: 1px solid #ffeaa7; color: inherit;'>", .("No valid pairwise comparisons could be performed. This may be due to insufficient data in subtables or table structure."), "</div>"))
             }
 
             # NOTE: The export table is generated once from .run() (not here) to
@@ -1854,7 +1855,7 @@ chisqposttestClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             # Display combined warnings in todo element if any exist
             if (length(warning_messages) > 0) {
                 combined_warnings <- paste0(
-                    "<div style='padding: 15px; background-color: #fff3cd; border: 1px solid #ffc107; color: #856404;'>",
+                    "<div style='padding: 15px; background-color: rgba(255, 202, 33, 0.23); border: 1px solid #ffc107; color: inherit;'>",
                     "<strong>Warning:</strong><ul>",
                     paste0("<li>", warning_messages, "</li>", collapse = ""),
                     "</ul></div>"
@@ -1911,9 +1912,9 @@ chisqposttestClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         # Display clinical summary
         .displayClinicalSummary = function(clinical_summary) {
             summary_style <- if (clinical_summary$significant) {
-                "padding: 15px; background-color: #e8f5e8; border-left: 4px solid #4caf50; margin: 10px 0;"
+                "padding: 15px; background-color: rgba(33, 159, 33, 0.1); color: inherit; border-left: 4px solid #4caf50; margin: 10px 0;"
             } else {
-                "padding: 15px; background-color: #fff3e0; border-left: 4px solid #ff9800; margin: 10px 0;"
+                "padding: 15px; background-color: rgba(255, 169, 33, 0.14); color: inherit; border-left: 4px solid #ff9800; margin: 10px 0;"
             }
             
             summary_content <- htmltools::div(
@@ -1995,7 +1996,7 @@ chisqposttestClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         # Display report sentences
         .displayReportSentences = function(sentences) {
             sentences_content <- htmltools::div(
-                style = "padding: 15px; background-color: #f3e5f5; border-left: 4px solid #9c27b0; margin: 10px 0;",
+                style = "padding: 15px; background-color: rgba(153, 33, 170, 0.12); border-left: 4px solid #9c27b0; margin: 10px 0; color: inherit;",
                 htmltools::h4(.("Report-Ready Sentences"), style = "color: #7b1fa2; margin-top: 0;"),
 
                 htmltools::div(

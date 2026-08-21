@@ -25,12 +25,12 @@ kappaSizeFixedNClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cla
         # raw kappaSize summary text.
         .buildNotices = function(kappaL_val, sparse_cells = FALSE) {
             info <- paste0(
-                "<div style='margin:6px 0; padding:8px 10px; border-left:3px solid #3c8dbc; background:#f4f8fb;'>",
+                "<div style='margin:6px 0; padding:8px 10px; border-left:3px solid #3c8dbc; background-color: rgba(72, 138, 188, 0.06); color: inherit;'>",
                 "<b>Methodology.</b> With the sample size already fixed, this reports the lower bound ",
-                "of the one-sided 100(1 &minus; &alpha;)% confidence interval for Cohen's &kappa; that ",
+                "of the one-sided 100(1 \u{2212} \u{03B1})% confidence interval for Cohen's \u{03BA} that ",
                 "the study can expect to achieve, using the large-sample method implemented in the ",
                 "kappaSize package (Rotondi &amp; Donner). It answers &quot;given the subjects I have, ",
-                "how little agreement am I still unable to rule out?&quot; &mdash; the mirror image of ",
+                "how little agreement am I still unable to rule out?&quot; \u{2014} the mirror image of ",
                 "the sample-size question. Note that <b>kappa0 here is the agreement you anticipate ",
                 "observing</b>, not a null hypothesis value as it is in kappaSizePower.",
                 "</div>"
@@ -43,7 +43,7 @@ kappaSizeFixedNClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cla
             # asymptotics the method relies on, and it was reaching only the Summary pane.
             if (isTRUE(sparse_cells)) {
                 warn <- paste0(warn,
-                    "<div style='margin:6px 0; padding:8px 10px; border-left:3px solid #ec971f; background:#fdf7ef;'>",
+                    "<div style='margin:6px 0; padding:8px 10px; border-left:3px solid #ec971f; background-color: rgba(227, 144, 33, 0.07); color: inherit;'>",
                     "<b>Sparse categories.</b> At this sample size at least one category is expected to ",
                     "contain fewer than five subjects. The calculation rests on a large-sample ",
                     "approximation, so the bound shown is less dependable here. Consider collapsing ",
@@ -56,7 +56,7 @@ kappaSizeFixedNClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cla
             # agreement no better than chance, whatever the point estimate turns out to be.
             if (length(kappaL_val) == 1 && is.finite(kappaL_val) && kappaL_val <= 0) {
                 warn <- paste0(warn,
-                    "<div style='margin:6px 0; padding:8px 10px; border-left:3px solid #d9534f; background:#fdf3f3;'>",
+                    "<div style='margin:6px 0; padding:8px 10px; border-left:3px solid #d9534f; background-color: rgba(222, 55, 55, 0.06); color: inherit;'>",
                     "<b>This sample size cannot demonstrate agreement.</b> The expected lower bound is ",
                     signif(kappaL_val, 4), ", at or below zero, so even if the study observes the ",
                     "anticipated kappa it will not be able to rule out agreement no better than chance. ",

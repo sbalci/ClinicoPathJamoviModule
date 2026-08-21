@@ -73,8 +73,8 @@ firthregressionClass <- R6::R6Class(
                     <head><style>
                         h2 { color: #2563EB; }
                         body { font-family: Arial, sans-serif; margin: 20px; }
-                        .highlight { background-color: #DBEAFE; padding: 2px 6px; border-radius: 3px; }
-                        .step { margin: 10px 0; padding: 8px; background-color: #F3F4F6; border-radius: 5px; }
+                        .highlight { background-color: rgba(33, 126, 249, 0.16); color: inherit; padding: 2px 6px; border-radius: 3px; }
+                        .step { margin: 10px 0; padding: 8px; background-color: rgba(55, 72, 105, 0.06); color: inherit; border-radius: 5px; }
                     </style></head>
                     <body>
                     <h2>Firth's Penalized Likelihood Regression</h2>
@@ -1118,7 +1118,7 @@ firthregressionClass <- R6::R6Class(
             }
 
             content <- paste0(
-                "<html><div style='padding: 10px; background: #F9FAFB; border-radius: 5px;'>",
+                "<html><div style='padding: 10px; background-color: rgba(155, 172, 188, 0.06); border-radius: 5px; color: inherit;'>",
                 "<p>A ", model_label, " was fitted with ", data_info$n, " observations (",
                 data_info$n_events, " events) and ", data_info$n_predictors,
                 " predictor variables (model matrix columns).</p>",

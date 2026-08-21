@@ -847,10 +847,10 @@ datetimeconverterClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             }
 
             table_html <- paste0(
-                "<div style='background-color: #f8f9fa; padding: 15px; border-radius: 8px; overflow-x: auto;'>",
+                "<div style='background-color: rgba(138, 155, 172, 0.06); padding: 15px; border-radius: 8px; overflow-x: auto; color: inherit;'>",
                 "<p><strong>Showing first ", n_show, " of ", length(original), " observations</strong></p>",
                 "<table style='width: 100%; border-collapse: collapse; font-size: 12px;'>",
-                "<thead><tr style='background-color: #6c757d; color: white;'>",
+                "<thead><tr style='background-color: #6c757d; color: #ffffff; color: white;'>",
                 "<th style='padding: 6px; border: 1px solid #dee2e6;'>Row</th>",
                 "<th style='padding: 6px; border: 1px solid #dee2e6;'>Original Value</th>",
                 "<th style='padding: 6px; border: 1px solid #dee2e6;'>Converted DateTime</th>",
@@ -912,10 +912,10 @@ datetimeconverterClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             n_show <- min(n, length(components[[1]]))
 
             table_html <- paste0(
-                "<div style='background-color: #f8f9fa; padding: 15px; border-radius: 8px; overflow-x: auto;'>",
+                "<div style='background-color: rgba(138, 155, 172, 0.06); padding: 15px; border-radius: 8px; overflow-x: auto; color: inherit;'>",
                 "<p><strong>Showing first ", n_show, " of ", length(components[[1]]), " observations</strong></p>",
                 "<table style='width: 100%; border-collapse: collapse; font-size: 12px;'>",
-                "<thead><tr style='background-color: #6c757d; color: white;'>",
+                "<thead><tr style='background-color: #6c757d; color: #ffffff; color: white;'>",
                 "<th style='padding: 6px; border: 1px solid #dee2e6;'>Row</th>"
             )
 
@@ -1010,11 +1010,11 @@ datetimeconverterClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             parsing_bg <- if (quality$failed_parsing > 0) "'#f8d7da'" else "'#d4edda'"
 
             quality_html <- glue::glue("
-                <div style='background-color: #f0f7ff; padding: 15px; border-left: 4px solid #2196F3;'>
+                <div style='background-color: rgba(33, 137, 255, 0.07); padding: 15px; border-left: 4px solid #2196F3; color: inherit;'>
                     <h4 style='margin-top: 0; color: #1565c0;'> Data Quality Assessment</h4>
 
                     <table style='width: 100%; border-collapse: collapse; margin-top: 10px;'>
-                        <tr style='background-color: #e3f2fd;'>
+                        <tr style='background-color: rgba(33, 152, 239, 0.13); color: inherit;'>
                             <th style='padding: 8px; text-align: left; border: 1px solid #90caf9;'>Metric</th>
                             <th style='padding: 8px; text-align: right; border: 1px solid #90caf9;'>Count</th>
                             <th style='padding: 8px; text-align: right; border: 1px solid #90caf9;'>%</th>
@@ -1042,7 +1042,7 @@ datetimeconverterClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     </table>
 
                     <p style='margin-top: 10px;'><strong>Quality Score:</strong> {quality_summary}</p>
-                    {if (length(misuse_warnings) > 0) paste0('<div style=\"background-color: #fff3cd; padding: 10px; margin-top: 10px; border-left: 3px solid #ffc107;\"><strong> Warnings:</strong><ul>', paste0('<li>', misuse_warnings, '</li>', collapse=''), '</ul></div>') else ''}
+                    {if (length(misuse_warnings) > 0) paste0('<div style=\"background-color: rgba(255, 202, 33, 0.23); color: inherit; padding: 10px; margin-top: 10px; border-left: 3px solid #ffc107;\"><strong> Warnings:</strong><ul>', paste0('<li>', misuse_warnings, '</li>', collapse=''), '</ul></div>') else ''}
                 </div>
             ")
 
@@ -1082,7 +1082,7 @@ datetimeconverterClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             datetime_var_safe <- htmltools::htmlEscape(datetime_var)
             tz_display_safe <- htmltools::htmlEscape(tz_display)
             summary_html <- glue::glue("
-                <div style='background-color: #f0f7ff; padding: 15px; border: 1px solid #b3d9ff; border-radius: 5px;'>
+                <div style='background-color: rgba(33, 137, 255, 0.07); padding: 15px; border: 1px solid #b3d9ff; border-radius: 5px; color: inherit;'>
                     <h4 style='margin-top: 0;'> Analysis Summary</h4>
                     <p><strong>Source column:</strong> {datetime_var_safe}</p>
                     <p><strong>Format detected/used:</strong> {detected_format}</p>
@@ -1090,7 +1090,7 @@ datetimeconverterClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     <p><strong>Successful conversions:</strong> {quality$successfully_parsed}/{quality$total_observations} ({round(quality$success_rate, 1)}%)</p>
                     <p><strong>Components extracted:</strong> {extraction_text}</p>
 
-                    <div style='background-color: #e8f4f8; padding: 10px; margin-top: 15px; border-radius: 3px;'>
+                    <div style='background-color: rgba(33, 149, 188, 0.1); padding: 10px; margin-top: 15px; border-radius: 3px; color: inherit;'>
                         <p style='margin: 0;'><strong> Copy-Ready Summary:</strong></p>
                         <p style='font-family: monospace; font-size: 0.9em; margin: 10px 0;'>
                         We extracted {extraction_text} from {quality$total_observations} datetime values in column '{datetime_var_safe}' using {detected_format} format, with {round(quality$success_rate, 1)}% successful parsing.
@@ -1110,7 +1110,7 @@ datetimeconverterClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
             # About Panel
             about_html <- "
-            <div style='background-color: #f9f9f9; padding: 15px; border-radius: 5px;'>
+            <div style='background-color: rgba(155, 155, 155, 0.06); padding: 15px; border-radius: 5px; color: inherit;'>
                 <h4 style='margin-top: 0;'> What This Function Does</h4>
                 <p>The DateTime Converter extracts components (year, month, day, hour, etc.)
                 from datetime columns and creates new variables for downstream analysis.</p>
@@ -1140,7 +1140,7 @@ datetimeconverterClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
             # Caveats Panel
             caveats_html <- "
-            <div style='background-color: #fff3cd; padding: 15px; border-left: 4px solid #ffc107; border-radius: 3px;'>
+            <div style='background-color: rgba(255, 202, 33, 0.23); padding: 15px; border-left: 4px solid #ffc107; border-radius: 3px; color: inherit;'>
                 <h4 style='margin-top: 0;'> Important Considerations</h4>
                 <ul>
                     <li><strong>Format matching:</strong> Date format selection must match your data.
@@ -1202,7 +1202,7 @@ datetimeconverterClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             }
 
             glossary_html <- "
-            <div style='background-color: #f3e5f5; padding: 15px; border-radius: 5px;'>
+            <div style='background-color: rgba(153, 33, 170, 0.12); padding: 15px; border-radius: 5px; color: inherit;'>
                 <h4 style='margin-top: 0;'> Key Terms & Concepts</h4>
                 <dl style='line-height: 1.6;'>
                     <dt style='font-weight: bold; margin-top: 10px;'>Excel Serial Date</dt>
@@ -1311,7 +1311,7 @@ datetimeconverterClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             # Show welcome message if no variable selected
             if (is.null(self$options$datetime_var) || self$options$datetime_var == "") {
                 welcome_msg <- "
-                <div style='background-color: #e3f2fd; padding: 20px; border-radius: 8px; margin: 20px 0;'>
+                <div style='background-color: rgba(33, 152, 239, 0.13); padding: 20px; border-radius: 8px; margin: 20px 0; color: inherit;'>
                 <h3 style='color: #1976d2; margin-top: 0;'> Welcome to DateTime Converter!</h3>
                 <p><strong>Convert datetime variables and extract components for analysis</strong></p>
 
@@ -1556,7 +1556,7 @@ datetimeconverterClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             }
 
             format_html <- paste0(
-                "<div style='background-color: #fff3e0; padding: 15px; border-radius: 8px;'>",
+                "<div style='background-color: rgba(255, 169, 33, 0.14); padding: 15px; border-radius: 8px; color: inherit;'>",
                 "<h4 style='color: #ef6c00; margin-top: 0;'>Format Detection</h4>",
                 "<p><strong>Detected/Selected Format:</strong> ", format_display, " (", detected_format, ")</p>",
                 format_context,
@@ -1573,7 +1573,7 @@ datetimeconverterClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             }
 
             quality_html <- paste0(
-                "<div style='background-color: #e8f5e8; padding: 15px; border-radius: 8px;'>",
+                "<div style='background-color: rgba(33, 159, 33, 0.1); padding: 15px; border-radius: 8px; color: inherit;'>",
                 "<h4 style='color: #2e7d32; margin-top: 0;'>Quality Assessment</h4>",
                 "<table style='width: 100%; border-collapse: collapse;'>",
                 "<tr><td style='padding: 6px; border: 1px solid #ddd;'><strong>Total Observations:</strong></td><td style='padding: 6px; border: 1px solid #ddd;'>", quality$total_observations, "</td></tr>",

@@ -1840,7 +1840,7 @@ nonparametricClass <- R6::R6Class(
             
             # Add copy-ready paragraph
             copy_ready <- paste(
-                "<div style='background-color: #f8f9fa; padding: 15px; border-left: 4px solid #007bff; margin: 10px 0;'>",
+                "<div style='background-color: rgba(138, 155, 172, 0.06); padding: 15px; border-left: 4px solid #007bff; margin: 10px 0; color: inherit;'>",
                 "<h4 style='margin-top: 0;'>", .("Analysis Summary"), "</h4>",
                 "<p>", summary_text, "</p>",
                 "<small style='color: #6c757d;'>", .("Copy-ready summary for reports"), "</small>",

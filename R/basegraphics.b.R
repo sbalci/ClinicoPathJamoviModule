@@ -98,7 +98,7 @@ basegraphicsClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
         .init = function() {
             # Initialize instructions
             instructions_html <- paste(
-                "<div style='background-color: #fff3cd; padding: 15px; border-radius: 8px; margin: 10px 0; border-left: 4px solid #ff9800;'>",
+                "<div style='background-color: rgba(255, 202, 33, 0.23); padding: 15px; border-radius: 8px; margin: 10px 0; border-left: 4px solid #ff9800; color: inherit;'>",
                 "<h4 style='color: #e65100; margin-top: 0;'> IMPORTANT: Exploratory Visualization Only</h4>",
                 "<p style='margin: 5px 0; color: #d84315;'><strong>This module provides DESCRIPTIVE and EXPLORATORY visualization only.</strong></p>",
                 "<p style='margin: 5px 0;'><strong>NOT intended for:</strong></p>",
@@ -109,7 +109,7 @@ basegraphicsClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                 "</ul>",
                 "<p style='margin: 5px 0;'><strong>Statistical overlays (correlation, R\u{00B2}) are exploratory estimates only</strong> and should NOT be interpreted as rigorous statistical tests. For clinical research, always use appropriate statistical methods with proper validation.</p>",
                 "</div>",
-                "<div style='background-color: #e8f5e8; padding: 20px; border-radius: 8px; margin: 10px 0;'>",
+                "<div style='background-color: rgba(33, 159, 33, 0.1); padding: 20px; border-radius: 8px; margin: 10px 0; color: inherit;'>",
                 "<h3 style='color: #2e7d32; margin-top: 0;'>Base Graphics Visualization</h3>",
                 "<div style='margin: 10px 0;'>",
                 "<h4 style='color: #388e3c; margin: 10px 0 5px 0;'>Fast & Customizable Base R Plots:</h4>",
@@ -134,7 +134,7 @@ basegraphicsClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                 "<li><strong>View Results:</strong> Generate fast, customizable base R graphics</li>",
                 "</ol>",
                 "</div>",
-                "<div style='background-color: #fff8e1; padding: 10px; border-radius: 5px; margin: 10px 0;'>",
+                "<div style='background-color: rgba(255, 203, 33, 0.14); padding: 10px; border-radius: 5px; margin: 10px 0; color: inherit;'>",
                 "<p style='margin: 0; color: #f57c00;'><strong>Performance Note:</strong> Base R graphics are blazing fast and require no external dependencies, making them ideal for large datasets and rapid exploration.</p>",
                 "</div>",
                 "<p style='margin: 10px 0 0 0; color: #666; font-style: italic;'> This module implements GitHub Issue #75 showcasing the power of base R graphics.</p>",
@@ -518,7 +518,7 @@ basegraphicsClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
 
             # Create description based on plot type
             desc_html <- "<h4>Base R Graphics Plot Description</h4>"
-            desc_html <- paste0(desc_html, "<div style='background-color: #f5f5f5; padding: 15px; border-radius: 5px; margin: 10px 0;'>")
+            desc_html <- paste0(desc_html, "<div style='background-color: rgba(88, 88, 88, 0.06); padding: 15px; border-radius: 5px; margin: 10px 0; color: inherit;'>")
 
             if (plot_type == "scatter") {
                 desc_html <- paste0(desc_html, "<p><strong>Scatter Plot:</strong> Shows the relationship between ", safe_x)
@@ -560,7 +560,7 @@ basegraphicsClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
         .generate_glossary = function() {
             # Generate statistical glossary for terms used in this module
             glossary_html <- "<h4>Statistical Glossary</h4>"
-            glossary_html <- paste0(glossary_html, "<div style='background-color: #f9f9f9; padding: 15px; border-radius: 5px; margin: 10px 0;'>")
+            glossary_html <- paste0(glossary_html, "<div style='background-color: rgba(155, 155, 155, 0.06); padding: 15px; border-radius: 5px; margin: 10px 0; color: inherit;'>")
             glossary_html <- paste0(glossary_html, "<dl style='margin: 0;'>")
 
             # Pearson correlation
@@ -649,7 +649,7 @@ basegraphicsClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
 
             # Build summary
             summary_html <- "<h4>Plain-Language Summary</h4>"
-            summary_html <- paste0(summary_html, "<div style='background-color: #e8f4f8; padding: 15px; border-radius: 5px; margin: 10px 0;'>")
+            summary_html <- paste0(summary_html, "<div style='background-color: rgba(33, 149, 188, 0.1); padding: 15px; border-radius: 5px; margin: 10px 0; color: inherit;'>")
 
             # Main interpretation
             safe_x <- htmltools::htmlEscape(self$options$x_var)
@@ -693,7 +693,7 @@ basegraphicsClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             summary_html <- paste0(summary_html, "</ul>")
 
             # Important reminder
-            summary_html <- paste0(summary_html, "<p style='margin-top: 10px; padding: 10px; background-color: #fff3cd; border-left: 4px solid #ffc107;'>")
+            summary_html <- paste0(summary_html, "<p style='margin-top: 10px; padding: 10px; background-color: rgba(255, 202, 33, 0.23); border-left: 4px solid #ffc107; color: inherit;'>")
             summary_html <- paste0(summary_html, "<strong> Important:</strong> This is an <em>exploratory</em> analysis. ")
             summary_html <- paste0(summary_html, "Correlation does not prove causation. Formal hypothesis testing is needed before using these findings for clinical decisions.")
             summary_html <- paste0(summary_html, "</p>")

@@ -55,7 +55,7 @@ groomecompareClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
             # Initialize
             .init = function() {
                 # Set instructions
-                instructions <- '<div style="font-family: Arial; padding: 15px; background-color: #f8f9fa; border-radius: 5px; margin: 10px 0;">
+                instructions <- '<div style="font-family: Arial; padding: 15px; background-color: rgba(138, 155, 172, 0.06); border-radius: 5px; margin: 10px 0; color: inherit;">
                 <h3 style="color: #0066cc; margin-top: 0;">Groome Staging System Comparison</h3>
                 <p><strong>Purpose:</strong> Compare two staging systems using well-accepted criteria (Groome et al., 2001).</p>
                 <p><strong>Criteria Explained:</strong></p>

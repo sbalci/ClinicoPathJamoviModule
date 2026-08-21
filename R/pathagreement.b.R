@@ -2577,11 +2577,11 @@ pathagreementClass <- if (requireNamespace("jmvcore")) {
                 # Create clean, accessible welcome message similar to decisionpanel
                 welcome_html <- paste0(
                     "<div style='font-family: Arial, sans-serif; max-width: 800px; line-height: 1.4;'>",
-                    "<div style='background: #f5f5f5; border: 2px solid #2e7d32; padding: 20px; margin-bottom: 20px;'>",
+                    "<div style='background-color: rgba(88, 88, 88, 0.06); border: 2px solid #2e7d32; padding: 20px; margin-bottom: 20px; color: inherit;'>",
                     "<h2 style='margin: 0 0 10px 0; font-size: 20px; color: #2e7d32;'>Inter-rater Reliability Analysis</h2>",
                     "<p style='margin: 0; font-size: 14px; color: #666;'>Evaluate agreement between multiple raters/observers using statistical measures</p>",
                     "</div>",
-                    "<div style='background: #f9f9f9; border-left: 4px solid #2e7d32; padding: 15px; margin-bottom: 20px;'>",
+                    "<div style='background-color: rgba(155, 155, 155, 0.06); border-left: 4px solid #2e7d32; padding: 15px; margin-bottom: 20px; color: inherit;'>",
                     "<h3 style='margin: 0 0 10px 0; color: #2e7d32; font-size: 16px;'>Setup Progress</h3>"
                 )
 
@@ -2627,7 +2627,7 @@ pathagreementClass <- if (requireNamespace("jmvcore")) {
                     "<li><strong>Agreement heatmap</strong> with customizable color themes</li>",
                     "<li><strong>Consensus analysis</strong> for determining agreed ratings</li>",
                     "</ul></td></tr></table>",
-                    "<div style='background: #fff3e0; border: 1px solid #f57c00; padding: 15px;'>",
+                    "<div style='background-color: rgba(255, 169, 33, 0.14); border: 1px solid #f57c00; padding: 15px; color: inherit;'>",
                     "<h4 style='margin: 0 0 10px 0; font-size: 15px; color: #f57c00;'>Important Notes for Clinical Use</h4>",
                     "<ul style='margin: 0; padding-left: 20px; font-size: 14px;'>",
                     "<li><strong>Sample size:</strong> At least 30 cases recommended for reliable kappa estimates</li>",
@@ -2752,13 +2752,13 @@ pathagreementClass <- if (requireNamespace("jmvcore")) {
 
                 summary_html <- paste0(
                     "<div style='font-family: Arial, sans-serif; max-width: 700px; line-height: 1.5;'>",
-                    "<div style='background: #e8f5e8; border-left: 4px solid #2e7d32; padding: 15px; margin-bottom: 15px;'>",
+                    "<div style='background-color: rgba(33, 159, 33, 0.1); border-left: 4px solid #2e7d32; padding: 15px; margin-bottom: 15px; color: inherit;'>",
                     "<h4 style='margin: 0 0 10px 0; color: #2e7d32; font-size: 16px;'>Clinical Summary</h4>",
                     "<p style='margin: 0; font-size: 14px;'>",
                     "Inter-rater agreement analysis of <strong>", private$.n_raters, " raters</strong> evaluating <strong>",
                     private$.n_cases, " cases</strong> using <strong>", length(private$.categories), " categories</strong>.</p>",
                     "</div>",
-                    "<div style='background: #f8f8f8; border: 1px solid #ddd; padding: 15px; margin-bottom: 15px;'>",
+                    "<div style='background-color: rgba(138, 138, 138, 0.06); border: 1px solid #ddd; padding: 15px; margin-bottom: 15px; color: inherit;'>",
                     "<h4 style='margin: 0 0 10px 0; color: #333; font-size: 15px;'>Key Findings</h4>",
                     "<p style='margin: 0 0 10px 0; font-size: 14px;'><strong>", method_name, ":</strong> \u{03BA} = ",
                     round(kappa_val, 3), " (", interpretation, ")</p>",
@@ -2773,7 +2773,7 @@ pathagreementClass <- if (requireNamespace("jmvcore")) {
                     "<p style='margin: 0; font-size: 14px;'><strong>Statistical Significance:</strong> ",
                     if (p_value < 0.001) "p < 0.001" else paste0("p = ", round(p_value, 3)), "</p>",
                     "</div>",
-                    "<div style='background: #fff8e1; border: 1px solid #ffa000; padding: 15px;'>",
+                    "<div style='background-color: rgba(255, 203, 33, 0.14); border: 1px solid #ffa000; padding: 15px; color: inherit;'>",
                     "<h4 style='margin: 0 0 10px 0; color: #f57c00; font-size: 15px;'>Clinical Interpretation</h4>",
                     "<p style='margin: 0; font-size: 14px;'>", clinical_interp, "</p>",
                     "</div></div>"
@@ -2864,18 +2864,18 @@ pathagreementClass <- if (requireNamespace("jmvcore")) {
                 # Create copy-ready template
                 report_html <- paste0(
                     "<div style='font-family: Arial, sans-serif; max-width: 700px; line-height: 1.6;'>",
-                    "<div style='background: #e3f2fd; border: 1px solid #1976d2; padding: 15px; margin-bottom: 15px;'>",
+                    "<div style='background-color: rgba(33, 152, 239, 0.13); border: 1px solid #1976d2; padding: 15px; margin-bottom: 15px; color: inherit;'>",
                     "<h4 style='margin: 0 0 10px 0; color: #1976d2; font-size: 16px;'> Copy-Ready Report Template</h4>",
                     "<p style='margin: 0; font-size: 13px; color: #666;'>Click inside the boxes to select text, then copy (Ctrl+C/Cmd+C) for use in reports:</p>",
                     "</div>",
-                    "<div style='background: #f8f9fa; border: 1px solid #dee2e6; padding: 12px; margin-bottom: 10px; border-radius: 4px;'>",
+                    "<div style='background-color: rgba(138, 155, 172, 0.06); border: 1px solid #dee2e6; padding: 12px; margin-bottom: 10px; border-radius: 4px; color: inherit;'>",
                     "<h5 style='margin: 0 0 8px 0; font-size: 14px; color: #495057;'>Main Result:</h5>",
                     "<div style='font-family: Times, serif; font-size: 14px; line-height: 1.5; padding: 8px; background: white; border: 1px solid #ced4da; cursor: text;' onclick='this.select()' contenteditable='false'>",
                     main_sentence,
                     "</div></div>",
                     if (nchar(overall_sentence) > 0) {
                         paste0(
-                            "<div style='background: #f8f9fa; border: 1px solid #dee2e6; padding: 12px; margin-bottom: 10px; border-radius: 4px;'>",
+                            "<div style='background-color: rgba(138, 155, 172, 0.06); border: 1px solid #dee2e6; padding: 12px; margin-bottom: 10px; border-radius: 4px; color: inherit;'>",
                             "<h5 style='margin: 0 0 8px 0; font-size: 14px; color: #495057;'>Additional Detail:</h5>",
                             "<div style='font-family: Times, serif; font-size: 14px; line-height: 1.5; padding: 8px; background: white; border: 1px solid #ced4da; cursor: text;' onclick='this.select()' contenteditable='false'>",
                             paste(method_sentence, overall_sentence),
@@ -2884,12 +2884,12 @@ pathagreementClass <- if (requireNamespace("jmvcore")) {
                     } else {
                         ""
                     },
-                    "<div style='background: #f8f9fa; border: 1px solid #dee2e6; padding: 12px; margin-bottom: 10px; border-radius: 4px;'>",
+                    "<div style='background-color: rgba(138, 155, 172, 0.06); border: 1px solid #dee2e6; padding: 12px; margin-bottom: 10px; border-radius: 4px; color: inherit;'>",
                     "<h5 style='margin: 0 0 8px 0; font-size: 14px; color: #495057;'>Clinical Interpretation:</h5>",
                     "<div style='font-family: Times, serif; font-size: 14px; line-height: 1.5; padding: 8px; background: white; border: 1px solid #ced4da; cursor: text;' onclick='this.select()' contenteditable='false'>",
                     recommendation,
                     "</div></div>",
-                    "<div style='background: #fff3e0; border: 1px solid #f57c00; padding: 10px; font-size: 12px;'>",
+                    "<div style='background-color: rgba(255, 169, 33, 0.14); border: 1px solid #f57c00; padding: 10px; font-size: 12px; color: inherit;'>",
                     "<strong> Tip:</strong> Combine these sentences and adapt the language to match your publication style. ",
                     "Consider adding information about rater training, case characteristics, or clinical context as appropriate.",
                     "</div></div>"
@@ -2920,7 +2920,7 @@ pathagreementClass <- if (requireNamespace("jmvcore")) {
             .generateAboutAnalysis = function() {
                 about_html <- paste0(
                     "<div style='font-family: Arial, sans-serif; max-width: 700px; line-height: 1.5;'>",
-                    "<div style='background: #f5f5f5; border: 2px solid #2e7d32; padding: 20px; margin-bottom: 20px;'>",
+                    "<div style='background-color: rgba(88, 88, 88, 0.06); border: 2px solid #2e7d32; padding: 20px; margin-bottom: 20px; color: inherit;'>",
                     "<h3 style='margin: 0 0 15px 0; color: #2e7d32; font-size: 18px;'>About Inter-rater Reliability Analysis</h3>",
                     "<h4 style='margin: 15px 0 8px 0; color: #333; font-size: 15px;'>What does this analysis do?</h4>",
                     "<p style='margin: 0 0 12px 0; font-size: 14px;'>",
@@ -2959,7 +2959,7 @@ pathagreementClass <- if (requireNamespace("jmvcore")) {
             .generateAssumptions = function() {
                 assumptions_html <- paste0(
                     "<div style='font-family: Arial, sans-serif; max-width: 700px; line-height: 1.5;'>",
-                    "<div style='background: #fff3e0; border: 2px solid #f57c00; padding: 20px;'>",
+                    "<div style='background-color: rgba(255, 169, 33, 0.14); border: 2px solid #f57c00; padding: 20px; color: inherit;'>",
                     "<h3 style='margin: 0 0 15px 0; color: #f57c00; font-size: 18px;'>Assumptions & Caveats</h3>",
                     "<h4 style='margin: 15px 0 8px 0; color: #d84315; font-size: 15px;'> Important Assumptions</h4>",
                     "<ul style='margin: 0 0 15px 0; padding-left: 20px; font-size: 14px;'>",
@@ -2983,7 +2983,7 @@ pathagreementClass <- if (requireNamespace("jmvcore")) {
                     "<li><strong>Case difficulty:</strong> Easy/difficult cases may show different agreement patterns</li>",
                     "</ul>",
                     "<h4 style='margin: 15px 0 8px 0; color: #d84315; font-size: 15px;'> Interpretation Guidelines</h4>",
-                    "<div style='background: #f8f8f8; padding: 12px; border-radius: 4px; font-size: 14px;'>",
+                    "<div style='background-color: rgba(138, 138, 138, 0.06); padding: 12px; border-radius: 4px; font-size: 14px; color: inherit;'>",
                     "<p style='margin: 0 0 8px 0;'><strong>Kappa Interpretation (Landis & Koch, 1977):</strong></p>",
                     "<ul style='margin: 0 0 8px 0; padding-left: 20px;'>",
                     "<li>\u{03BA} < 0.00: Poor agreement (worse than chance)</li>",
@@ -3008,7 +3008,7 @@ pathagreementClass <- if (requireNamespace("jmvcore")) {
 
                 guide_html <- paste0(
                     "<div style='font-family: Arial, sans-serif; max-width: 700px; line-height: 1.5;'>",
-                    "<div style='background: #e3f2fd; border-left: 4px solid #1976d2; padding: 15px; margin-bottom: 15px;'>",
+                    "<div style='background-color: rgba(33, 152, 239, 0.13); border-left: 4px solid #1976d2; padding: 15px; margin-bottom: 15px; color: inherit;'>",
                     "<h3 style='margin: 0 0 10px 0; color: #1976d2; font-size: 18px;'> Weighted Kappa Guide</h3>",
                     "<p style='margin: 0; font-size: 14px; color: #424242;'>",
                     "You have selected <strong>", switch(current_weighting,
@@ -3017,11 +3017,11 @@ pathagreementClass <- if (requireNamespace("jmvcore")) {
                         "Weighted kappa"
                     ), "</strong>. Here's when and why to use different weighting schemes:",
                     "</p></div>",
-                    "<div style='background: #f9f9f9; padding: 15px; border-radius: 6px; margin-bottom: 15px;'>",
+                    "<div style='background-color: rgba(155, 155, 155, 0.06); padding: 15px; border-radius: 6px; margin-bottom: 15px; color: inherit;'>",
                     "<h4 style='margin: 0 0 12px 0; color: #2e7d32; font-size: 16px;'> Weighting Schemes Explained</h4>",
                     "<div style='margin-bottom: 15px;'>",
                     "<h5 style='margin: 0 0 8px 0; color: #1976d2; font-size: 14px;'> Linear/Equal Weighting (",
-                    if (current_weighting == "equal") "<span style='background: #c8e6c9; padding: 2px 6px; border-radius: 3px;'>SELECTED</span>" else "Not selected", ")</h5>",
+                    if (current_weighting == "equal") "<span style='background-color: rgba(33, 154, 37, 0.25); padding: 2px 6px; border-radius: 3px; color: inherit;'>SELECTED</span>" else "Not selected", ")</h5>",
                     "<div style='font-size: 13px; margin-left: 15px;'>",
                     "<p style='margin: 0 0 6px 0;'><strong>Formula:</strong> w = 1 - |i - j| / (k - 1)</p>",
                     "<p style='margin: 0 0 6px 0;'><strong>When to use:</strong></p>",
@@ -3034,7 +3034,7 @@ pathagreementClass <- if (requireNamespace("jmvcore")) {
                     "</div></div>",
                     "<div style='margin-bottom: 15px;'>",
                     "<h5 style='margin: 0 0 8px 0; color: #1976d2; font-size: 14px;'> Quadratic/Squared Weighting (",
-                    if (current_weighting == "squared") "<span style='background: #c8e6c9; padding: 2px 6px; border-radius: 3px;'>SELECTED</span>" else "Not selected", ")</h5>",
+                    if (current_weighting == "squared") "<span style='background-color: rgba(33, 154, 37, 0.25); padding: 2px 6px; border-radius: 3px; color: inherit;'>SELECTED</span>" else "Not selected", ")</h5>",
                     "<div style='font-size: 13px; margin-left: 15px;'>",
                     "<p style='margin: 0 0 6px 0;'><strong>Formula:</strong> w = 1 - [(i - j) / (k - 1)]\u{00B2}</p>",
                     "<p style='margin: 0 0 6px 0;'><strong>When to use:</strong></p>",
@@ -3057,7 +3057,7 @@ pathagreementClass <- if (requireNamespace("jmvcore")) {
                     "<p style='margin: 0; color: #666;'><em>All disagreements treated equally, regardless of distance</em></p>",
                     "</div></div>",
                     "</div>",
-                    "<div style='background: #fff3e0; border-left: 4px solid #f57c00; padding: 15px; margin-bottom: 15px;'>",
+                    "<div style='background-color: rgba(255, 169, 33, 0.14); border-left: 4px solid #f57c00; padding: 15px; margin-bottom: 15px; color: inherit;'>",
                     "<h4 style='margin: 0 0 10px 0; color: #e65100; font-size: 15px;'> Clinical Decision Guide</h4>",
                     "<div style='font-size: 14px;'>",
                     "<p style='margin: 0 0 8px 0;'><strong>Choose Linear weighting when:</strong></p>",
@@ -3075,7 +3075,7 @@ pathagreementClass <- if (requireNamespace("jmvcore")) {
                     "<p style='margin: 0; font-weight: 500; color: #d84315;'>",
                     " <em>When in doubt, quadratic weighting is often preferred in medical research as it better reflects clinical reality.</em></p>",
                     "</div></div>",
-                    "<div style='background: #f3e5f5; border-left: 4px solid #8e24aa; padding: 15px;'>",
+                    "<div style='background-color: rgba(153, 33, 170, 0.12); border-left: 4px solid #8e24aa; padding: 15px; color: inherit;'>",
                     "<h4 style='margin: 0 0 10px 0; color: #6a1b9a; font-size: 15px;'> Interpretation Impact</h4>",
                     "<div style='font-size: 14px;'>",
                     "<p style='margin: 0 0 8px 0;'>Weighted kappa values are typically:</p>",
@@ -3095,13 +3095,13 @@ pathagreementClass <- if (requireNamespace("jmvcore")) {
             .generateStatisticalGlossary = function() {
                 glossary_html <- paste0(
                     "<div style='font-family: Arial, sans-serif; max-width: 800px; line-height: 1.5;'>",
-                    "<div style='background: #f5f5f5; border: 2px solid #2e7d32; padding: 20px; margin-bottom: 20px;'>",
+                    "<div style='background-color: rgba(88, 88, 88, 0.06); border: 2px solid #2e7d32; padding: 20px; margin-bottom: 20px; color: inherit;'>",
                     "<h3 style='margin: 0 0 15px 0; color: #2e7d32; font-size: 18px;'> Statistical Terms Glossary</h3>",
                     "<p style='margin: 0; font-size: 14px; color: #666;'>Quick reference for inter-rater reliability statistics and their clinical meanings</p>",
                     "</div>",
 
                     # Cohen's Kappa
-                    "<div style='border: 1px solid #e0e0e0; padding: 15px; margin-bottom: 15px; background: #fafafa;'>",
+                    "<div style='border: 1px solid #e0e0e0; padding: 15px; margin-bottom: 15px; background-color: rgba(172, 172, 172, 0.06); color: inherit;'>",
                     "<h4 style='margin: 0 0 10px 0; color: #1976d2; font-size: 16px;'>Cohen's Kappa (\u{03BA})</h4>",
                     "<p style='margin: 0 0 8px 0; font-size: 14px;'><strong>What it measures:</strong> Agreement between exactly 2 raters, corrected for chance agreement</p>",
                     "<p style='margin: 0 0 8px 0; font-size: 14px;'><strong>Range:</strong> -1 to +1 (0 = chance agreement, 1 = perfect agreement)</p>",
@@ -3110,7 +3110,7 @@ pathagreementClass <- if (requireNamespace("jmvcore")) {
                     "</div>",
 
                     # Fleiss' Kappa
-                    "<div style='border: 1px solid #e0e0e0; padding: 15px; margin-bottom: 15px; background: #fafafa;'>",
+                    "<div style='border: 1px solid #e0e0e0; padding: 15px; margin-bottom: 15px; background-color: rgba(172, 172, 172, 0.06); color: inherit;'>",
                     "<h4 style='margin: 0 0 10px 0; color: #1976d2; font-size: 16px;'>Fleiss' Kappa</h4>",
                     "<p style='margin: 0 0 8px 0; font-size: 14px;'><strong>What it measures:</strong> Agreement among 3+ raters, extension of Cohen's kappa</p>",
                     "<p style='margin: 0 0 8px 0; font-size: 14px;'><strong>Range:</strong> -1 to +1 (same interpretation as Cohen's kappa)</p>",
@@ -3119,7 +3119,7 @@ pathagreementClass <- if (requireNamespace("jmvcore")) {
                     "</div>",
 
                     # Krippendorff's Alpha
-                    "<div style='border: 1px solid #e0e0e0; padding: 15px; margin-bottom: 15px; background: #fafafa;'>",
+                    "<div style='border: 1px solid #e0e0e0; padding: 15px; margin-bottom: 15px; background-color: rgba(172, 172, 172, 0.06); color: inherit;'>",
                     "<h4 style='margin: 0 0 10px 0; color: #1976d2; font-size: 16px;'>Krippendorff's Alpha (\u{03B1})</h4>",
                     "<p style='margin: 0 0 8px 0; font-size: 14px;'><strong>What it measures:</strong> Universal reliability measure for any number of raters and data types</p>",
                     "<p style='margin: 0 0 8px 0; font-size: 14px;'><strong>Range:</strong> 0 to 1 (0 = no agreement, 1 = perfect agreement)</p>",
@@ -3128,7 +3128,7 @@ pathagreementClass <- if (requireNamespace("jmvcore")) {
                     "</div>",
 
                     # ICC
-                    "<div style='border: 1px solid #e0e0e0; padding: 15px; margin-bottom: 15px; background: #fafafa;'>",
+                    "<div style='border: 1px solid #e0e0e0; padding: 15px; margin-bottom: 15px; background-color: rgba(172, 172, 172, 0.06); color: inherit;'>",
                     "<h4 style='margin: 0 0 10px 0; color: #1976d2; font-size: 16px;'>Intraclass Correlation Coefficient (ICC)</h4>",
                     "<p style='margin: 0 0 8px 0; font-size: 14px;'><strong>What it measures:</strong> Proportion of total variance due to between-subject differences</p>",
                     "<p style='margin: 0 0 8px 0; font-size: 14px;'><strong>Range:</strong> 0 to 1 (0 = no reliability, 1 = perfect reliability)</p>",
@@ -3137,7 +3137,7 @@ pathagreementClass <- if (requireNamespace("jmvcore")) {
                     "</div>",
 
                     # PABAK
-                    "<div style='border: 1px solid #e0e0e0; padding: 15px; margin-bottom: 15px; background: #fafafa;'>",
+                    "<div style='border: 1px solid #e0e0e0; padding: 15px; margin-bottom: 15px; background-color: rgba(172, 172, 172, 0.06); color: inherit;'>",
                     "<h4 style='margin: 0 0 10px 0; color: #1976d2; font-size: 16px;'>PABAK (Prevalence-Adjusted Bias-Adjusted Kappa)</h4>",
                     "<p style='margin: 0 0 8px 0; font-size: 14px;'><strong>What it measures:</strong> Kappa corrected for uneven category distributions</p>",
                     "<p style='margin: 0 0 8px 0; font-size: 14px;'><strong>Range:</strong> -1 to +1 (higher than regular kappa when categories are imbalanced)</p>",
@@ -3146,7 +3146,7 @@ pathagreementClass <- if (requireNamespace("jmvcore")) {
                     "</div>",
 
                     # Gwet's AC
-                    "<div style='border: 1px solid #e0e0e0; padding: 15px; margin-bottom: 15px; background: #fafafa;'>",
+                    "<div style='border: 1px solid #e0e0e0; padding: 15px; margin-bottom: 15px; background-color: rgba(172, 172, 172, 0.06); color: inherit;'>",
                     "<h4 style='margin: 0 0 10px 0; color: #1976d2; font-size: 16px;'>Gwet's Agreement Coefficients (AC1/AC2)</h4>",
                     "<p style='margin: 0 0 8px 0; font-size: 14px;'><strong>What it measures:</strong> Agreement less affected by prevalence than kappa</p>",
                     "<p style='margin: 0 0 8px 0; font-size: 14px;'><strong>Range:</strong> -1 to +1 (often higher than kappa in high-agreement scenarios)</p>",
@@ -3155,11 +3155,11 @@ pathagreementClass <- if (requireNamespace("jmvcore")) {
                     "</div>",
 
                     # Interpretation Guide
-                    "<div style='background: #e8f5e8; border: 1px solid #4caf50; padding: 15px; margin-bottom: 15px;'>",
+                    "<div style='background-color: rgba(33, 159, 33, 0.1); border: 1px solid #4caf50; padding: 15px; margin-bottom: 15px; color: inherit;'>",
                     "<h4 style='margin: 0 0 10px 0; color: #2e7d32; font-size: 16px;'> Interpretation Guidelines</h4>",
                     "<div style='font-size: 14px;'>",
                     "<table style='width: 100%; border-collapse: collapse; margin: 10px 0;'>",
-                    "<tr style='background: #f5f5f5;'><th style='padding: 8px; border: 1px solid #ddd; text-align: left;'>Kappa/Alpha Value</th><th style='padding: 8px; border: 1px solid #ddd; text-align: left;'>Interpretation</th><th style='padding: 8px; border: 1px solid #ddd; text-align: left;'>Clinical Action</th></tr>",
+                    "<tr style='background-color: rgba(88, 88, 88, 0.06); color: inherit;'><th style='padding: 8px; border: 1px solid #ddd; text-align: left;'>Kappa/Alpha Value</th><th style='padding: 8px; border: 1px solid #ddd; text-align: left;'>Interpretation</th><th style='padding: 8px; border: 1px solid #ddd; text-align: left;'>Clinical Action</th></tr>",
                     "<tr><td style='padding: 8px; border: 1px solid #ddd;'>&lt; 0.00</td><td style='padding: 8px; border: 1px solid #ddd;'>Poor (worse than chance)</td><td style='padding: 8px; border: 1px solid #ddd;'>Review criteria, retrain</td></tr>",
                     "<tr><td style='padding: 8px; border: 1px solid #ddd;'>0.00 - 0.20</td><td style='padding: 8px; border: 1px solid #ddd;'>Slight agreement</td><td style='padding: 8px; border: 1px solid #ddd;'>Substantial improvement needed</td></tr>",
                     "<tr><td style='padding: 8px; border: 1px solid #ddd;'>0.21 - 0.40</td><td style='padding: 8px; border: 1px solid #ddd;'>Fair agreement</td><td style='padding: 8px; border: 1px solid #ddd;'>Additional training recommended</td></tr>",
@@ -3170,7 +3170,7 @@ pathagreementClass <- if (requireNamespace("jmvcore")) {
                     "</div></div>",
 
                     # Tips
-                    "<div style='background: #fff3e0; border: 1px solid #f57c00; padding: 15px;'>",
+                    "<div style='background-color: rgba(255, 169, 33, 0.14); border: 1px solid #f57c00; padding: 15px; color: inherit;'>",
                     "<h4 style='margin: 0 0 10px 0; color: #e65100; font-size: 15px;'> Practical Tips</h4>",
                     "<ul style='margin: 0; padding-left: 20px; font-size: 14px;'>",
                     "<li><strong>Sample size:</strong> Minimum 30 cases for reliable estimates, 50+ preferred</li>",
@@ -4294,25 +4294,25 @@ pathagreementClass <- if (requireNamespace("jmvcore")) {
             # Generate inline statistical comments
             .generateInlineComments = function() {
                 comments_html <- paste0(
-                    "<div style='background: #f8f9fa; border: 1px solid #dee2e6; border-radius: 8px; padding: 20px; font-family: \"Segoe UI\", Arial, sans-serif; line-height: 1.6;'>",
+                    "<div style='background: rgba(138, 155, 172, 0.06); color: inherit; border: 1px solid #dee2e6; border-radius: 8px; padding: 20px; font-family: \"Segoe UI\", Arial, sans-serif; line-height: 1.6;'>",
                     "<h3 style='margin: 0 0 15px 0; color: #1976d2; font-size: 18px; border-bottom: 2px solid #e3f2fd; padding-bottom: 8px;'>",
                     " Statistical Commentary & Educational Notes</h3>",
-                    "<div style='background: #e8f5e8; border-left: 4px solid #4caf50; padding: 15px; margin-bottom: 15px;'>",
+                    "<div style='background-color: rgba(33, 159, 33, 0.1); border-left: 4px solid #4caf50; padding: 15px; margin-bottom: 15px; color: inherit;'>",
                     "<h4 style='margin: 0 0 10px 0; color: #2e7d32; font-size: 15px;'> Understanding Your Results</h4>",
                     "<div style='font-size: 14px;'>",
                     private$.generateResultsExplanation(),
                     "</div></div>",
-                    "<div style='background: #fff3e0; border-left: 4px solid #ff9800; padding: 15px; margin-bottom: 15px;'>",
+                    "<div style='background-color: rgba(255, 169, 33, 0.14); border-left: 4px solid #ff9800; padding: 15px; margin-bottom: 15px; color: inherit;'>",
                     "<h4 style='margin: 0 0 10px 0; color: #f57c00; font-size: 15px;'> Statistical Interpretation Guide</h4>",
                     "<div style='font-size: 14px;'>",
                     private$.generateInterpretationGuide(),
                     "</div></div>",
-                    "<div style='background: #e1f5fe; border-left: 4px solid #0277bd; padding: 15px; margin-bottom: 15px;'>",
+                    "<div style='background-color: rgba(33, 181, 248, 0.14); border-left: 4px solid #0277bd; padding: 15px; margin-bottom: 15px; color: inherit;'>",
                     "<h4 style='margin: 0 0 10px 0; color: #01579b; font-size: 15px;'> Educational Insights</h4>",
                     "<div style='font-size: 14px;'>",
                     private$.generateEducationalInsights(),
                     "</div></div>",
-                    "<div style='background: #fce4ec; border-left: 4px solid #c2185b; padding: 15px;'>",
+                    "<div style='background-color: rgba(230, 33, 99, 0.12); border-left: 4px solid #c2185b; padding: 15px; color: inherit;'>",
                     "<h4 style='margin: 0 0 10px 0; color: #ad1457; font-size: 15px;'> Important Considerations</h4>",
                     "<div style='font-size: 14px;'>",
                     private$.generateImportantConsiderations(),

@@ -1,5 +1,167 @@
 # ClinicoPath News
 
+# ClinicoPath 1.0.6 — Lasso-Cox regression prepared for release (2026-08-20)
+
+`lassocox` is the first of the penalized Cox family to be readied for the production Survival menu.
+It was chosen over `highdimcox` on code, not on statistics: it is the only member of the family with
+a seed option, event-stratified cross-validation folds and RNG restoration, and the only one whose
+design matrix uses correct k-1 contrast coding. It stays dev-routed until the fixes below are run
+against an installed build.
+
+**The coefficient plot mislabelled risk factors as protective.** In `scale_fill_manual` the `values`
+vector was name-matched but `labels` was a bare positional vector, so whenever every selected
+coefficient shared a sign only one level existed and the first label landed on it — an all-positive
+model drew red bars reading "Protective". Mixed signs happened to render correctly, which is why it
+survived review. Both vectors are now name-matched with pinned breaks and limits. This was the only
+defect in the family that a clinician could act on without noticing anything was wrong.
+
+**The "LASSO vs Standard Cox" table was dead on every dataset.** Both rows called
+`survival::concordance()` on a `coxph` object with `reverse = TRUE`, which that method rejects
+outright — `concordance.coxph` already applies the Cox sign convention. Being the first statement
+inside its `tryCatch`, the error took `AIC()` and `logLik()` with it, and an empty error handler
+turned all six numeric cells into a permanent NA under a note describing numbers that were never
+computed. The argument is removed and failures are now named on the table instead of swallowed.
+Note the distinction: `reverse = TRUE` remains correct — and necessary — on the *formula* form,
+`concordance(Surv(t, d) ~ lp)`, where it is still used.
+
+**The results summary printed its own placeholders.** `jmvcore::format` needs substitutions passed
+as named dots, not wrapped in `list()` — and its token regex does not accept an underscore, so
+`{n_obs}` stayed literal even once the wrapper was removed. Both were wrong throughout the file: 24
+`list()` sites and 9 underscored tokens, now all corrected and audited. Two of the affected strings
+were `"Error in cross-validation: {msg}"` and `"Error fitting final model: {msg}"`, which had been
+hiding the underlying error text from anyone trying to diagnose a failure.
+
+**The reported penalty rule was not the rule that ran.** When the 1-SE rule retains no variables the
+backend silently refits at `lambda.min`, but every summary surface kept reporting the requested
+rule. The bundled demo dataset at the shipped defaults takes that path every time, so this was the
+first thing most users saw. A "Penalty Selected By" row now reports what actually executed and says
+why, and the summary paragraph states the fallback in words.
+
+**Smaller corrections.** The apparent-performance caveat sat inside the C-index branch, so when
+concordance failed it vanished along with the C-index row and left the two most optimistic numbers
+on screen — the log-rank p and the group hazard ratio, both from a median split of a training-set
+risk score — with nothing qualifying them; it is now unconditional and names them. The Selected
+Variables note covered only CIs and p-values although Coefficient and Hazard Ratio come from the
+unpenalized refit too, while Importance is the absolute penalized coefficient — two estimators in
+adjacent cells of one row. The coefficient plot draws the penalized values and is now labelled as
+such rather than sharing the table's "Coefficient" heading. `elapsedtime`, `outcome` and
+`explanatory` gained `default: NULL` so the R function can be called without them; both documented
+examples omitted `censorLevel`, which `type: Level` makes a required argument, and now pass it.
+
+Two `test_that` blocks in `test-lassocox.R` defined a local copy of an interpretation function and
+asserted the copy against itself; they now call the real private methods.
+`tests/testthat/test-lassocox-release-fixes.R` adds six regression blocks, each asserting against
+what `lassocox()` returned.
+
+# ClinicoPath 1.0.6 — Decision Curve Analysis promoted to the production meddecide menu (2026-08-20)
+
+`decisioncurve` moves out of test routing and into the `meddecide` menu. jamovi had no way to
+produce a decision curve, so anyone reporting net benefit alongside discrimination and calibration
+was exporting to R or Stata for that one figure.
+
+Five things a clinician reads straight off the screen were wrong, and are fixed.
+
+**The "Optimal Thresholds" table has been removed.** Net benefit falls monotonically as the
+threshold probability rises, so the maximum was always at the lowest threshold examined — in
+simulation the reported optimum landed on the grid minimum in 200 of 200 runs. Worse, ranking
+models by their net benefit at that single point put the weaker model on top in 36% of runs.
+Threshold probability in decision curve analysis expresses how a clinician weighs a missed case
+against an unnecessary treatment; it is elicited, not estimated, so there is no optimal value to
+report, and `dcurves` and `rmda` emit none either. In its place is a **Range of Benefit** table
+giving, for each model, the thresholds over which it beats *both* treat-all and treat-none. The
+old "beneficial range" compared against treat-none only, which flattered useless predictors: a
+pure-noise variable cleared it at 29 of 46 thresholds and now correctly shows no range at all.
+Non-contiguous ranges are footnoted rather than reported as a single span.
+
+**Bootstrap comparison p-values could be exactly zero.** They now use the `(b+1)/(B+1)` convention
+of Davison & Hinkley, so a comparison that separates completely reports the attainable floor
+rather than an impossible `p = 0`. Pairwise model comparisons are additionally **Holm-adjusted**
+across the whole family, with the unadjusted p retained beside it — a five-model screen produces
+ten tests and was previously reported as if it were one.
+
+**Net benefit is now labelled as apparent.** The analysis is handed predicted risks and cannot know
+whether they were fitted on the same rows. For the common case of a marker developed on the dataset
+in front of you, every curve is optimistically biased in the model's favour and can show the model
+beating treat-all when it does not. This is stated unconditionally on screen.
+
+**Two numbers were on the wrong scale.** In the Clinical Impact table, "Interventions Avoided" was
+scaled to `populationSize` (default 1000) while the three columns beside it were per 100, so one
+row carried two denominators with nothing to say so. And "Relative Benefit vs Treat All" divided by
+the treat-all weighted AUC, which crosses zero at a threshold equal to the outcome prevalence —
+ordinary differences were displayed as percentages in the hundreds. It is now reported as a
+difference on the net-benefit scale.
+
+**The Relative Utility curve no longer truncates itself silently.** Rows were dropped and then the
+axis dropped more, so a poorly performing model's line simply stopped. The plot now zooms instead
+of filtering, and captions any model that runs off the bottom.
+
+Also: notices no longer accumulate across run cycles; comparisons that cannot be bootstrap-tested
+are named rather than skipped in silence; and a duplicate checkbox bound to the same option was
+removed from the options panel.
+
+A subsequent end-to-end release review found six further defects, all now fixed.
+
+**`bootReps` at its own documented maximum crashed the analysis.** `.calculateBootstrapCI()`
+delegated to a chunked path when `n_boot >= 10000` while the chunked path delegated back when
+`n_boot <= 10000`, so the maximum value satisfied both guards and the two recursed until R
+aborted with "evaluation nested too deeply". The chunked path is removed rather than repaired:
+it was unreachable for any legal setting other than the crash, and where it did run it averaged
+per-chunk quantiles instead of taking quantiles of the pooled replicates, which understates the
+interval width. `bootReps` is also now an `Integer` rather than a `Number`, since a fractional
+entry aborted a run that formats it with `%d`.
+
+**Bootstrap results were not reproducible.** There was no `set.seed` anywhere and no seed option.
+Across eight identical reruns at the default 1000 replications the model-comparison p-value moved
+between 0.030 and 0.060 and the 95% CI crossed zero in two of them — the same data and the same
+options giving a different published conclusion each time. A `seed` option (default 42) now fixes
+the RNG for the whole run, and the caller's `.Random.seed` is saved and restored so an R-API user's
+stream is untouched.
+
+**Tables and curves could disagree about which outcome level was the event.** When the "Positive
+Outcome Level Not Found" fallback fired it corrected a local variable inside `.run()`, but twelve
+downstream table and plot methods re-read the raw option, so every table was computed against a
+level not present in the data while the plot looked correct. The resolved level is now stored and
+read through a single accessor.
+
+**"Gain vs Treat All" was measured against a strategy no clinician would adopt.** Treat-all net
+benefit goes sharply negative above the prevalence, so the difference credited a model for beating
+it: on a 20.6%-prevalence cohort the gain came out at 20.3 extra true positives per 100 patients
+when only 20.6 cases existed per 100. It is now measured against the better of treating everyone
+and treating no one at each threshold — 4.0 per 100 on that same cohort — and is titled **Gain vs
+Best Default**. The Relative Utility curve had the same denominator error, which let the
+do-nothing strategy plot at 99% of perfect at high thresholds; it now correctly sits at zero.
+
+**Four tables duplicated their rows on every re-run** because they appended without clearing, and
+six result items had no `clearWith` at all. Both are fixed, along with the analysis state itself:
+an early return used to leave the *previous* run's curves on screen beside the new error notice.
+
+**Smaller corrections.** A factor in the Models box crashed at `min()` with a raw R error — that box
+now permits numeric columns only, with a backend guard for programmatic callers. Space-separated
+threshold lists silently parsed to nothing and fell back to defaults (`\s` is literal inside a POSIX
+bracket expression), and ignored entries are now named. "Weighted AUC" is neither weighted nor an
+AUC — it is the unweighted mean net benefit over the chosen range, which moved from 0.309 to 0.163
+purely as the range widened, so it is retitled **Average Net Benefit Over Threshold Range** with the
+range-dependence stated. The `permutation` and `integral` comparison methods are removed: neither
+had any code behind it, and selecting one shipped the literal text "Bootstrap required" into the
+results. The Enhanced Model Comparison now Holm-adjusts like the table beside it instead of
+declaring significance from an unadjusted p, and discloses that its replications are capped at 1000.
+The Model Comparison CI columns no longer claim "95%" when the user chose another level. Citations
+now include Vickers & Elkin (2006), the source of the implemented formula, and drop `rmda` and
+`DecisionCurve`, neither of which the code calls.
+
+**BREAKING CHANGE.** The option `showOptimalThreshold` is renamed `showBenefitRange`, the result
+table `optimalTable` is renamed `benefitRangeTable`, and the `relative_benefit` column is replaced
+by `benefit_gain`. Saved `.omv` files and scripts referring to the old names must be updated. The
+`models` option gained `default: NULL` so the R function can be called without it; note that
+`decisionRulePositive` is a jamovi `Level`, which cannot carry a default, so programmatic callers
+must pass `decisionRulePositive = NULL` when they are not using a clinical decision rule.
+
+`tests/testthat/test-decisioncurve-critical-fixes.R` was rewritten. The previous version had eight
+`test_that` blocks and no calls to `decisioncurve()` at all — it re-implemented each formula in the
+test body and compared the copy against itself, which is how the degenerate threshold table passed
+review with a green suite.
+
+
 # ClinicoPath 1.0.4 — pre-release review of the diagnostic-decision and agreement analyses (2026-08-07)
 
 Fourteen `meddecide` analyses were reviewed end to end for this release — `decisioncompare`,

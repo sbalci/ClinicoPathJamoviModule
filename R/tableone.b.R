@@ -112,7 +112,7 @@ tableoneClass <- if (requireNamespace("jmvcore", quietly = TRUE)) R6::R6Class(
 
             if (length(all_na_vars) > 0) {
                 self$results$todo$setContent(paste0(
-                    "<div style='background:#fff3cd;border-left:4px solid #ffc107;",
+                    "<div style='background: rgba(255, 202, 33, 0.23); color: inherit;border-left:4px solid #ffc107;",
                     "padding:10px;margin:10px 0;'><b>",
                     .("Not included"), ":</b> ",
                     paste(vapply(all_na_vars, htmltools::htmlEscape, character(1)),
@@ -378,7 +378,7 @@ tableoneClass <- if (requireNamespace("jmvcore", quietly = TRUE)) R6::R6Class(
                     if (length(skipped_vars) > 0) {
                         body <- paste0(
                             body,
-                            "<div style='background:#fff3cd;border-left:4px solid #ffc107;",
+                            "<div style='background: rgba(255, 202, 33, 0.23); color: inherit;border-left:4px solid #ffc107;",
                             "padding:10px;margin:10px 0;'><b>",
                             .("Not tabulated"), ":</b> ",
                             paste(unlist(skipped_vars), collapse = "; "),
@@ -387,7 +387,7 @@ tableoneClass <- if (requireNamespace("jmvcore", quietly = TRUE)) R6::R6Class(
                     }
                     if (!nzchar(trimws(gsub("<[^>]*>", "", body))))
                         body <- paste0(
-                            "<div style='background:#fff3cd;border-left:4px solid #ffc107;",
+                            "<div style='background: rgba(255, 202, 33, 0.23); color: inherit;border-left:4px solid #ffc107;",
                             "padding:10px;margin:10px 0;'>",
                             .("None of the selected variables has few enough distinct values for a frequency table. Choose the tableone, gtsummary or arsenal style instead."),
                             "</div>")
@@ -434,7 +434,7 @@ tableoneClass <- if (requireNamespace("jmvcore", quietly = TRUE)) R6::R6Class(
             }
 
             html <- paste0(
-                "<div style='background-color: #fff8dc; padding: 15px; border-left: 4px solid #ffa500; margin: 10px 0;'>",
+                "<div style='background-color: rgba(255, 211, 33, 0.16); padding: 15px; border-left: 4px solid #ffa500; margin: 10px 0; color: inherit;'>",
                 "<h4>Data Quality & Assumptions</h4>"
             )
 
@@ -460,7 +460,7 @@ tableoneClass <- if (requireNamespace("jmvcore", quietly = TRUE)) R6::R6Class(
         .buildDataQualityOkHtml = function(n_final, missing_pct_original) {
             # Build HTML for successful data quality check
             paste0(
-                "<div style='background-color: #e8f5e9; padding: 15px; border-left: 4px solid #4caf50; margin: 10px 0;'>",
+                "<div style='background-color: rgba(33, 159, 43, 0.1); padding: 15px; border-left: 4px solid #4caf50; margin: 10px 0; color: inherit;'>",
                 "<h4>Data Quality Check </h4>",
                 "<p><strong>Sample size:</strong> N = ", n_final, "</p>",
                 "<p><strong>Complete cases:</strong> ", round(100 - missing_pct_original, 1), "%</p>",
@@ -471,7 +471,7 @@ tableoneClass <- if (requireNamespace("jmvcore", quietly = TRUE)) R6::R6Class(
         
         .setAboutContent = function() {
             about_text <- "
-            <div style='background-color: #f8f9fa; padding: 15px; border-radius: 5px; margin: 10px 0;'>
+            <div style='background-color: rgba(138, 155, 172, 0.06); padding: 15px; border-radius: 5px; margin: 10px 0; color: inherit;'>
                 <h4>About Table One</h4>
                 <p><strong>Purpose:</strong> Table One is a standardized descriptive table used in medical research to summarize baseline characteristics and demographic information of study participants.</p>
                 
@@ -543,7 +543,7 @@ tableoneClass <- if (requireNamespace("jmvcore", quietly = TRUE)) R6::R6Class(
 
             # Build summary text with transparent reporting
             summary_text <- paste0(
-                "<div style='background-color: #e8f4fd; padding: 15px; border-left: 4px solid #007bff; margin: 10px 0;'>",
+                "<div style='background-color: rgba(33, 149, 236, 0.1); padding: 15px; border-left: 4px solid #007bff; margin: 10px 0; color: inherit;'>",
                 "<h4>Analysis Summary</h4>",
 
                 # Original dataset info
@@ -568,13 +568,13 @@ tableoneClass <- if (requireNamespace("jmvcore", quietly = TRUE)) R6::R6Class(
                            excluded_n, " cases (", round(100 * excluded_n / n_original, 1),
                            "%) excluded due to missing values. <strong>Final N = ", n_final,
                            "</strong></p>",
-                           "<p style='color: #856404; background-color: #fff3cd; padding: 8px; border-radius: 4px;'>",
+                           "<p style='color: inherit; background-color: rgba(255, 202, 33, 0.23); padding: 8px; border-radius: 4px;'>",
                            "<em>Note: Listwise deletion was applied. The table below shows statistics for the ",
                            n_final, " complete cases only. Per-variable denominators may differ if variables have different missing patterns.</em></p>")
                 } else {
                     paste0("<p><strong>Analysis sample:</strong> ", n_final, " cases (no exclusions applied)</p>",
                            if (has_missing) {
-                               "<p style='color: #856404; background-color: #fff3cd; padding: 8px; border-radius: 4px;'><em> Note: Missing values are present but NOT excluded. Different variables may have different sample sizes (denominators) in the table below. Consider enabling 'Exclude Missing Values' for consistent denominators.</em></p>"
+                               "<p style='color: inherit; background-color: rgba(255, 202, 33, 0.23); padding: 8px; border-radius: 4px;'><em> Note: Missing values are present but NOT excluded. Different variables may have different sample sizes (denominators) in the table below. Consider enabling 'Exclude Missing Values' for consistent denominators.</em></p>"
                            } else "")
                 },
 
@@ -727,7 +727,7 @@ tableoneClass <- if (requireNamespace("jmvcore", quietly = TRUE)) R6::R6Class(
 
             # Format with copy button styling
             html_output <- paste0(
-                "<div style='background-color: #f0f8ff; border: 2px solid #4682b4; border-radius: 5px; padding: 15px; margin: 10px 0;'>",
+                "<div style='background-color: rgba(33, 152, 255, 0.07); border: 2px solid #4682b4; border-radius: 5px; padding: 15px; margin: 10px 0; color: inherit;'>",
                 "<h4 style='margin-top: 0; color: #2c5aa0;'> Copy-Ready Report Sentence</h4>",
                 "<p style='font-family: Georgia, serif; font-size: 14px; line-height: 1.6; color: #333;'>",
                 htmltools::htmlEscape(report_text),

@@ -8,7 +8,7 @@ decisioncurve(
   data,
   outcome = NULL,
   outcomePositive,
-  models,
+  models = NULL,
   modelNames = "",
   thresholdRange = "clinical",
   thresholdMin = 0.05,
@@ -27,8 +27,9 @@ decisioncurve(
   showInterventionAvoided = FALSE,
   confidenceIntervals = FALSE,
   bootReps = 1000,
+  seed = 42,
   ciLevel = 0.95,
-  showOptimalThreshold = FALSE,
+  showBenefitRange = FALSE,
   compareModels = FALSE,
   weightedAUC = FALSE,
   clinicalDecisionRule = FALSE,
@@ -59,8 +60,13 @@ the condition or event you want to predict.}
 \item{outcomePositive}{Which level of the outcome variable represents the
 positive case (presence of condition/event).}
 
-\item{models}{Variables representing predicted probabilities or risk scores
-from different models. Can include multiple models for comparison.}
+\item{models}{Variables holding predicted probabilities in \link{0, 1} - one
+column per model. These must be CALIBRATED probabilities, not logits,
+linear predictors or raw risk scores; the analysis rejects values outside
+\link{0, 1} rather than rescaling them, because rescaling would destroy the
+correspondence between the threshold probability and its clinical meaning.
+Factors were previously permitted here and crashed the analysis with a raw
+R error.}
 
 \item{modelNames}{Optional comma-separated list of names for the models. If
 not provided, variable names will be used.}
@@ -107,15 +113,32 @@ benefit curves.}
 
 \item{bootReps}{Number of bootstrap replications for confidence intervals.}
 
+\item{seed}{Random seed for the bootstrap resampling used in the confidence
+intervals and the model-comparison p-values. Without a fixed seed the same
+data and the same options produce a different interval and a different
+p-value on every run.}
+
 \item{ciLevel}{Confidence level for bootstrap confidence intervals.}
 
-\item{showOptimalThreshold}{Identify and display optimal threshold
-probabilities for each model.}
+\item{showBenefitRange}{Report, for each model, the range of threshold
+probabilities over which its net benefit exceeds both treat-all and
+treat-none. Replaces the former showOptimalThreshold option: net benefit
+decreases monotonically in the threshold, so a maximum-net-benefit "optimal
+threshold" is always the lowest threshold examined and can rank models
+incorrectly. Threshold probability is elicited from clinical judgement, not
+estimated from the data.}
 
 \item{compareModels}{Calculate statistical tests for comparing model
 performance.}
 
-\item{weightedAUC}{Calculate weighted area under the decision curve.}
+\item{weightedAUC}{Summarise each decision curve by the area under it,
+normalised by the width of the threshold range - that is, the model's
+average net benefit over that range. The option is named weightedAUC for
+historical reasons but the average is UNWEIGHTED: every threshold in the
+range counts equally. The value therefore depends entirely on the threshold
+range chosen above (on one example dataset it moved from 0.309 to 0.163 as
+the range widened from 5-20\\% to 1-99\\%), so always report the range
+alongside it.}
 
 \item{clinicalDecisionRule}{Add clinical decision rule analysis and
 comparison with models.}
@@ -124,7 +147,11 @@ comparison with models.}
 recommends intervention (1/0 or yes/no).}
 
 \item{decisionRulePositive}{Which level of the rule variable indicates a
-positive recommendation (treat/intervene).}
+positive recommendation (treat/intervene). jamovi does not permit a default
+on a Level option, so this is always a required argument of the R function
+even when clinicalDecisionRule is FALSE. Programmatic callers that are not
+using a clinical decision rule must pass decisionRulePositive = NULL
+explicitly.}
 
 \item{decisionRuleLabel}{Label for the clinical decision rule in plots and
 tables.}
@@ -156,7 +183,10 @@ benefit (net benefit per 100 patients).}
 between all models with statistical tests.}
 
 \item{comparisonMethod}{Statistical method for comparing decision curves
-between models.}
+between models. Only the case-resampling bootstrap is implemented.
+Permutation and integral-difference options were previously offered here
+but had no code behind them: selecting either produced an empty p-value and
+the literal text "Bootstrap required" in the results table.}
 
 \item{showDecisionConsequences}{Show detailed table of decision
 consequences (TP, FP, TN, FN) at selected thresholds.}
@@ -174,7 +204,7 @@ A results object containing:
 \code{results$procedureNotes} \tab \tab \tab \tab \tab a html \cr
 \code{results$notices} \tab \tab \tab \tab \tab a html \cr
 \code{results$resultsTable} \tab \tab \tab \tab \tab a table \cr
-\code{results$optimalTable} \tab \tab \tab \tab \tab a table \cr
+\code{results$benefitRangeTable} \tab \tab \tab \tab \tab a table \cr
 \code{results$clinicalImpactTable} \tab \tab \tab \tab \tab a table \cr
 \code{results$comparisonTable} \tab \tab \tab \tab \tab a table \cr
 \code{results$weightedAUCTable} \tab \tab \tab \tab \tab a table \cr

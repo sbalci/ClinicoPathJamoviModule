@@ -115,7 +115,7 @@ jppsClass <- R6::R6Class(
                     line-height: 1.5;
                 }
                 .requirements {
-                    background-color: #f5f5f5;
+                    background-color: rgba(88, 88, 88, 0.06); color: inherit;
                     padding: 15px;
                     border-left: 4px solid #2196f3;
                     margin-bottom: 20px;
@@ -133,7 +133,7 @@ jppsClass <- R6::R6Class(
                     content: counter(step-counter);
                     position: absolute;
                     left: 0;
-                    background-color: #2196f3;
+                    background-color: #2196f3; color: #ffffff;
                     color: white;
                     width: 20px;
                     height: 20px;
@@ -198,7 +198,7 @@ jppsClass <- R6::R6Class(
                     PPS analysis ready! PPS uses machine learning to detect predictive 
                     relationships and can identify non-linear patterns that correlation analysis might miss.
                 </div>
-                <div style='background-color: #e8f5e8; padding: 15px; border-radius: 8px; border-left: 4px solid #4caf50;'>
+                <div style='background-color: rgba(33, 159, 33, 0.1); padding: 15px; border-radius: 8px; border-left: 4px solid #4caf50; color: inherit;'>
                     <strong> Analysis configured correctly</strong><br>
                     Review your settings and examine the results below.
                 </div>"
@@ -605,7 +605,7 @@ jppsClass <- R6::R6Class(
             <div style='font-family: -apple-system,BlinkMacSystemFont,Segoe UI,Roboto,Arial,sans-serif; padding: 20px;'>
                 <h3 style='color: #3f51b5; margin-bottom: 15px;'> PPS Interpretation Guide</h3>
                 
-                <div style='background-color: #e8f5e8; padding: 15px; border-radius: 8px; border-left: 4px solid #4caf50; margin-bottom: 15px;'>
+                <div style='background-color: rgba(33, 159, 33, 0.1); padding: 15px; border-radius: 8px; border-left: 4px solid #4caf50; margin-bottom: 15px; color: inherit;'>
                     <strong>PPS Score Interpretation:</strong><br>
                     \u{2022} <strong>0.0:</strong> No predictive power (random prediction)<br>
                     \u{2022} <strong>0.0-0.2:</strong> Weak predictive relationship<br>
@@ -614,7 +614,7 @@ jppsClass <- R6::R6Class(
                     \u{2022} <strong>0.8-1.0:</strong> Very strong to perfect prediction
                 </div>
                 
-                <div style='background-color: #f3e5f5; padding: 15px; border-radius: 8px; border-left: 4px solid #9c27b0; margin-bottom: 15px;'>
+                <div style='background-color: rgba(153, 33, 170, 0.12); padding: 15px; border-radius: 8px; border-left: 4px solid #9c27b0; margin-bottom: 15px; color: inherit;'>
                     <strong>Key Advantages of PPS:</strong><br>
                     \u{2022} Detects non-linear relationships that correlation might miss<br>
                     \u{2022} Asymmetric: X\u{2192}Y may differ from Y\u{2192}X predictive power<br>
@@ -622,7 +622,7 @@ jppsClass <- R6::R6Class(
                     \u{2022} Uses machine learning for robust relationship detection
                 </div>
                 
-                <div style='background-color: #fff3e0; padding: 15px; border-radius: 8px; border-left: 4px solid #ff9800;'>
+                <div style='background-color: rgba(255, 169, 33, 0.14); padding: 15px; border-radius: 8px; border-left: 4px solid #ff9800; color: inherit;'>
                     <strong> Important Considerations:</strong><br>
                     \u{2022} PPS is a \"quick and dirty\" exploration tool<br>
                     \u{2022} High PPS doesn't necessarily imply causation<br>

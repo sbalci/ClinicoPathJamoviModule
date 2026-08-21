@@ -635,7 +635,7 @@ clinicalalertsClass <- R6::R6Class(
             summary_text <- glue::glue("
             <h3>Clinical Alert Analysis Summary</h3>
             
-            <div style='background-color: #f8f9fa; padding: 15px; border-left: 4px solid #007bff; margin: 10px 0;'>
+            <div style='background-color: rgba(138, 155, 172, 0.06); padding: 15px; border-left: 4px solid #007bff; margin: 10px 0; color: inherit;'>
             <h4> Alert Overview</h4>
             <ul>
             <li><b>Total Alerts:</b> {total_alerts}</li>
@@ -650,7 +650,7 @@ clinicalalertsClass <- R6::R6Class(
             
             if (critical_count > 0) {
                 summary_text <- paste0(summary_text, "
-                <div style='background-color: #f8d7da; color: #721c24; padding: 15px; border: 1px solid #f5c6cb; border-radius: 5px; margin: 10px 0;'>
+                <div style='background-color: rgba(216, 33, 50, 0.18); color: inherit; padding: 15px; border: 1px solid #f5c6cb; border-radius: 5px; margin: 10px 0;'>
                 <h4> CRITICAL ALERT STATUS</h4>
                 <p><b>{critical_count} critical alert(s) detected.</b></p>
                 <p><b>Required Action:</b> Immediate clinical intervention (< 15 minutes)</p>
@@ -661,7 +661,7 @@ clinicalalertsClass <- R6::R6Class(
             
             if (high_count > 0) {
                 summary_text <- paste0(summary_text, "
-                <div style='background-color: #fff3cd; color: #856404; padding: 15px; border: 1px solid #ffeaa7; border-radius: 5px; margin: 10px 0;'>
+                <div style='background-color: rgba(255, 202, 33, 0.23); color: inherit; padding: 15px; border: 1px solid #ffeaa7; border-radius: 5px; margin: 10px 0;'>
                 <h4> HIGH PRIORITY ALERTS</h4>
                 <p><b>{high_count} high priority alert(s) detected.</b></p>
                 <p><b>Required Action:</b> Urgent clinical attention (1-4 hours)</p>
@@ -671,7 +671,7 @@ clinicalalertsClass <- R6::R6Class(
             }
             
             summary_text <- paste0(summary_text, "
-            <div style='background-color: #d4edda; color: #155724; padding: 15px; border: 1px solid #c3e6cb; border-radius: 5px; margin: 10px 0;'>
+            <div style='background-color: rgba(33, 162, 64, 0.19); color: inherit; padding: 15px; border: 1px solid #c3e6cb; border-radius: 5px; margin: 10px 0;'>
             <h4> Clinical Decision Support</h4>
             <ul>
             <li><b>Evidence-Based Thresholds:</b> Alerts based on clinical guidelines and best practices</li>
@@ -681,7 +681,7 @@ clinicalalertsClass <- R6::R6Class(
             </ul>
             </div>
             
-            <div style='background-color: #e2e3e5; color: #383d41; padding: 15px; border: 1px solid #d6d8db; border-radius: 5px; margin: 10px 0;'>
+            <div style='background-color: rgba(33, 41, 56, 0.13); color: inherit; padding: 15px; border: 1px solid #d6d8db; border-radius: 5px; margin: 10px 0;'>
             <h4> Next Steps</h4>
             <ol>
             <li>Review detailed alerts table for specific threshold violations</li>
@@ -700,29 +700,29 @@ clinicalalertsClass <- R6::R6Class(
             interpretation_text <- "
             <h3>Clinical Alert Interpretation Guidelines</h3>
             
-            <div style='background-color: #f8f9fa; padding: 15px; border-radius: 5px; margin: 10px 0;'>
+            <div style='background-color: rgba(138, 155, 172, 0.06); padding: 15px; border-radius: 5px; margin: 10px 0; color: inherit;'>
             <h4> Alert Priority Levels</h4>
             <table style='border-collapse: collapse; width: 100%; margin-top: 10px;'>
-            <tr style='background-color: #dc3545; color: white;'>
+            <tr style='background-color: #dc3545; color: #ffffff; color: white;'>
             <th style='border: 1px solid #ddd; padding: 8px;'>Critical</th>
             <td style='border: 1px solid #ddd; padding: 8px;'>Life-threatening values requiring immediate intervention (< 15 minutes)</td>
             </tr>
-            <tr style='background-color: #fd7e14; color: white;'>
+            <tr style='background-color: #fd7e14; color: #111111; color: white;'>
             <th style='border: 1px solid #ddd; padding: 8px;'>High</th>
             <td style='border: 1px solid #ddd; padding: 8px;'>Serious values requiring urgent attention (1-4 hours)</td>
             </tr>
-            <tr style='background-color: #ffc107; color: black;'>
+            <tr style='background-color: #ffc107; color: #111111; color: black;'>
             <th style='border: 1px solid #ddd; padding: 8px;'>Medium</th>
             <td style='border: 1px solid #ddd; padding: 8px;'>Concerning values requiring monitoring (within 24 hours)</td>
             </tr>
-            <tr style='background-color: #28a745; color: white;'>
+            <tr style='background-color: #28a745; color: #ffffff; color: white;'>
             <th style='border: 1px solid #ddd; padding: 8px;'>Low</th>
             <td style='border: 1px solid #ddd; padding: 8px;'>Noteworthy values for next clinical review</td>
             </tr>
             </table>
             </div>
             
-            <div style='background-color: #e7f3ff; padding: 15px; border-radius: 5px; margin: 10px 0;'>
+            <div style='background-color: rgba(33, 144, 255, 0.11); padding: 15px; border-radius: 5px; margin: 10px 0; color: inherit;'>
             <h4> Clinical Context</h4>
             <ul>
             <li><b>Patient-Specific Factors:</b> Consider individual patient history, comorbidities, and medications when interpreting alerts</li>
@@ -733,7 +733,7 @@ clinicalalertsClass <- R6::R6Class(
             </ul>
             </div>
             
-            <div style='background-color: #fff3cd; padding: 15px; border-radius: 5px; margin: 10px 0;'>
+            <div style='background-color: rgba(255, 202, 33, 0.23); padding: 15px; border-radius: 5px; margin: 10px 0; color: inherit;'>
             <h4> Important Considerations</h4>
             <ul>
             <li>These thresholds are evidence-based guidelines, not absolute clinical rules</li>
@@ -752,7 +752,7 @@ clinicalalertsClass <- R6::R6Class(
             evidence_text <- "
             <h3>Evidence Base & Clinical References</h3>
             
-            <div style='background-color: #f8f9fa; padding: 15px; border-radius: 5px; margin: 10px 0;'>
+            <div style='background-color: rgba(138, 155, 172, 0.06); padding: 15px; border-radius: 5px; margin: 10px 0; color: inherit;'>
             <h4> Clinical Guidelines</h4>
             <ul>
             <li><b>Laboratory Medicine:</b> Clinical and Laboratory Standards Institute (CLSI) guidelines</li>
@@ -762,7 +762,7 @@ clinicalalertsClass <- R6::R6Class(
             </ul>
             </div>
             
-            <div style='background-color: #e7f3ff; padding: 15px; border-radius: 5px; margin: 10px 0;'>
+            <div style='background-color: rgba(33, 144, 255, 0.11); padding: 15px; border-radius: 5px; margin: 10px 0; color: inherit;'>
             <h4> Evidence-Based Thresholds</h4>
             <p><b>Laboratory Values:</b></p>
             <ul>
@@ -773,7 +773,7 @@ clinicalalertsClass <- R6::R6Class(
             </ul>
             </div>
             
-            <div style='background-color: #d4edda; padding: 15px; border-radius: 5px; margin: 10px 0;'>
+            <div style='background-color: rgba(33, 162, 64, 0.19); padding: 15px; border-radius: 5px; margin: 10px 0; color: inherit;'>
             <h4> Key References</h4>
             <ol>
             <li>Don't miss the opportunity: quality indicators for critical value reporting</li>
@@ -784,7 +784,7 @@ clinicalalertsClass <- R6::R6Class(
             </ol>
             </div>
             
-            <div style='background-color: #fff3cd; padding: 15px; border-radius: 5px; margin: 10px 0;'>
+            <div style='background-color: rgba(255, 202, 33, 0.23); padding: 15px; border-radius: 5px; margin: 10px 0; color: inherit;'>
             <h4> Regulatory Compliance</h4>
             <ul>
             <li><b>CAP:</b> College of American Pathologists laboratory accreditation requirements</li>
@@ -802,7 +802,7 @@ clinicalalertsClass <- R6::R6Class(
             quality_text <- glue::glue("
             <h3>Quality Assurance & Safety Metrics</h3>
             
-            <div style='background-color: #f8f9fa; padding: 15px; border-radius: 5px; margin: 10px 0;'>
+            <div style='background-color: rgba(138, 155, 172, 0.06); padding: 15px; border-radius: 5px; margin: 10px 0; color: inherit;'>
             <h4> Current Analysis Metrics</h4>
             <ul>
             <li><b>Total Alerts Generated:</b> {total_alerts}</li>
@@ -812,7 +812,7 @@ clinicalalertsClass <- R6::R6Class(
             </ul>
             </div>
             
-            <div style='background-color: #e7f3ff; padding: 15px; border-radius: 5px; margin: 10px 0;'>
+            <div style='background-color: rgba(33, 144, 255, 0.11); padding: 15px; border-radius: 5px; margin: 10px 0; color: inherit;'>
             <h4> Quality Indicators</h4>
             <ul>
             <li><b>Alert Appropriateness:</b> Percentage of alerts leading to clinical action</li>
@@ -823,7 +823,7 @@ clinicalalertsClass <- R6::R6Class(
             </ul>
             </div>
             
-            <div style='background-color: #d4edda; padding: 15px; border-radius: 5px; margin: 10px 0;'>
+            <div style='background-color: rgba(33, 162, 64, 0.19); padding: 15px; border-radius: 5px; margin: 10px 0; color: inherit;'>
             <h4> Quality Assurance Recommendations</h4>
             <ul>
             <li><b>Regular Review:</b> Monthly analysis of alert patterns and clinical outcomes</li>
@@ -834,7 +834,7 @@ clinicalalertsClass <- R6::R6Class(
             </ul>
             </div>
             
-            <div style='background-color: #fff3cd; padding: 15px; border-radius: 5px; margin: 10px 0;'>
+            <div style='background-color: rgba(255, 202, 33, 0.23); padding: 15px; border-radius: 5px; margin: 10px 0; color: inherit;'>
             <h4> Patient Safety Considerations</h4>
             <ul>
             <li>This system supports but does not replace clinical judgment</li>

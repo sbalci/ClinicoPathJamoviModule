@@ -102,6 +102,30 @@ linechartClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             # .validateParameters() and by min/max in linechart.a.yaml).
             self$results$plot$setSize(self$options$width, self$options$height)
 
+            # The summary table has a fixed row set, so build the skeleton (rowKey
+            # + statistic label) here; .populateSummary() then only fills `value`.
+            # Group Names is gated on the groupby option - the SAME condition
+            # .populateSummary() uses - so every rowKey it sets exists on every
+            # path (setRow() on a missing rowKey aborts the analysis).
+            summaryTable <- self$results$summary
+            summaryTable$addRow(rowKey = "n_obs", values = list(
+                statistic = .("Number of Observations")))
+            summaryTable$addRow(rowKey = "n_x", values = list(
+                statistic = .("Number of X-axis Points")))
+            summaryTable$addRow(rowKey = "n_groups", values = list(
+                statistic = .("Number of Groups")))
+            if (!is.null(self$options$groupby))
+                summaryTable$addRow(rowKey = "group_names", values = list(
+                    statistic = .("Group Names")))
+            summaryTable$addRow(rowKey = "y_mean", values = list(
+                statistic = .("Y Mean")))
+            summaryTable$addRow(rowKey = "y_median", values = list(
+                statistic = .("Y Median")))
+            summaryTable$addRow(rowKey = "y_sd", values = list(
+                statistic = .("Y Standard Deviation")))
+            summaryTable$addRow(rowKey = "y_range", values = list(
+                statistic = .("Y Range")))
+
             # Initialize with enhanced welcome message if no variables selected
             if (is.null(self$options$xvar) || is.null(self$options$yvar)) {
                 private$.showWelcomeMessage()
@@ -119,17 +143,11 @@ linechartClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             #
             # A bare return() here left the panel completely blank - no welcome
             # text (variables ARE selected, so .init() did not write one) and no
-            # explanation - while the plot still rendered as an empty frame.
+            # explanation. reject() states the reason; setVisible() is reserved
+            # for option-driven visibility, not for signalling failure.
             if (is.null(self$data) || nrow(self$data) == 0) {
-                if (!is.null(self$options$xvar) && !is.null(self$options$yvar)) {
-                    self$results$todo$setContent(paste0(
-                        "<div class='alert alert-warning'><h6>",
-                        .("No rows to plot"), "</h6><p>",
-                        .("The dataset has no rows, so there is nothing to chart. If a row filter is active, it may be excluding every case."),
-                        "</p></div>"))
-                    self$results$todo$setVisible(TRUE)
-                    self$results$plot$setVisible(FALSE)
-                }
+                if (!is.null(self$options$xvar) && !is.null(self$options$yvar))
+                    jmvcore::reject(.("The dataset has no rows, so there is nothing to chart. If a row filter is active, it may be excluding every case."))
                 return()
             }
 
@@ -258,17 +276,10 @@ linechartClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                     data[[groupby]] <- factor(group_data)
                 }
 
-                # Check number of groups
-                n_groups <- length(unique(data[[groupby]]))
-                if (n_groups > 10) {
-                    # TODO (UX): migrate warning() calls to the .addNotice() HTML pattern from
-                    #   R/waterfall.b.R + docs/NOTICE_TO_HTML_CONVERSION_GUIDE.md so messages
-                    #   surface as a structured panel rather than R warnings (which jamovi
-                    #   collapses into a generic banner). Sites in this file:
-                    #   L208 (groups > 10), L223 (rows removed), L244 (refline non-numeric),
-                    #   L315 (grouped-data independence), L325 (repeated-measures independence).
-                    warning(.("Grouping variable has more than 10 levels. Consider reducing groups for clarity."))
-                }
+                # A high group count reaches the user through .checkDataQuality()
+                # ("Many groups detected ..."), which writes into the results panel.
+                # A warning() here only reached the R console, which jamovi never
+                # shows, so it was a duplicate of an invisible message.
             }
 
             # Remove rows with missing values.
@@ -302,11 +313,6 @@ linechartClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             private$.n_excluded_missing  <- complete_before - complete_after - n_nonfinite
             private$.n_excluded_nonfinite <- n_nonfinite
             private$.n_rows_analysed      <- complete_after
-
-            if (complete_after < complete_before) {
-                warning(paste(complete_before - complete_after,
-                              .("rows with missing or infinite values were removed from analysis.")))
-            }
 
             # Enhanced minimum data requirements with suggestions
             if (nrow(data) < 3) {
@@ -394,17 +400,19 @@ linechartClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             #   true within-subject replication, or document the heuristic in the panel.
             has_repeated_measures <- avg_obs_per_x > 1.5  # More than 1.5 obs per x on average
 
-            # Issue warnings for statistical validity (translatable via .())
+            # No warning() here: the independence caveat reaches the user through
+            # correlation_stats$independence_note (the "Statistical Validity" row of
+            # the correlation table), through .interpretCorrelation(), and through
+            # the Independence bullet in the assumptions panel.
             if (!is.null(groupby)) {
-                warning(.("Correlation statistics treat all observations as independent, which may not be appropriate for grouped data. For more rigorous analysis of grouped longitudinal data, consider mixed-effects models using additional software."))
                 correlation_stats$has_grouping <- TRUE
             }
 
             if (has_repeated_measures) {
                 # Only naive (independence-assuming) statistics are computed and
                 # shown; no patient-level aggregate statistics are produced. The
-                # message describes exactly what is reported to avoid over-claiming.
-                warning(.("Data appears to have repeated measures (multiple observations per time point). The correlation and regression statistics shown treat all observations as independent and may overstate statistical significance for longitudinal data. Interpret them as exploratory descriptives, and consider mixed-effects models in specialized software for formal inference."))
+                # caveat is carried to the user by independence_note and the
+                # interpretation columns below, not by warning().
                 correlation_stats$has_repeated_measures <- TRUE
             }
 
@@ -471,64 +479,36 @@ linechartClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             return(correlation_stats)
         },
 
-        # Populate summary table
+        # Populate summary table. Rows are created in .init(); only the `value`
+        # cells are written here.
         .populateSummary = function(summary_stats) {
             table <- self$results$summary
-            table$deleteRows()
 
-            row_num <- 1
+            table$setRow(rowKey = "n_obs", values = list(
+                value = as.character(summary_stats$n_observations)))
 
-            # Data characteristics
-            table$addRow(rowKey = row_num, values = list(
-                statistic = .("Number of Observations"),
-                value = as.character(summary_stats$n_observations)
-            ))
-            row_num <- row_num + 1
+            table$setRow(rowKey = "n_x", values = list(
+                value = as.character(summary_stats$n_x_points)))
 
-            table$addRow(rowKey = row_num, values = list(
-                statistic = .("Number of X-axis Points"),
-                value = as.character(summary_stats$n_x_points)
-            ))
-            row_num <- row_num + 1
+            table$setRow(rowKey = "n_groups", values = list(
+                value = as.character(summary_stats$n_groups)))
 
-            table$addRow(rowKey = row_num, values = list(
-                statistic = .("Number of Groups"),
-                value = as.character(summary_stats$n_groups)
-            ))
-            row_num <- row_num + 1
+            if (!is.null(self$options$groupby))
+                table$setRow(rowKey = "group_names", values = list(
+                    value = summary_stats$group_names))
 
-            if (summary_stats$n_groups > 1) {
-                table$addRow(rowKey = row_num, values = list(
-                    statistic = .("Group Names"),
-                    value = summary_stats$group_names
-                ))
-                row_num <- row_num + 1
-            }
+            table$setRow(rowKey = "y_mean", values = list(
+                value = private$.fmtNum(summary_stats$y_mean)))
 
-            # Y variable statistics
-            table$addRow(rowKey = row_num, values = list(
-                statistic = .("Y Mean"),
-                value = private$.fmtNum(summary_stats$y_mean)
-            ))
-            row_num <- row_num + 1
+            table$setRow(rowKey = "y_median", values = list(
+                value = private$.fmtNum(summary_stats$y_median)))
 
-            table$addRow(rowKey = row_num, values = list(
-                statistic = .("Y Median"),
-                value = private$.fmtNum(summary_stats$y_median)
-            ))
-            row_num <- row_num + 1
+            table$setRow(rowKey = "y_sd", values = list(
+                value = private$.fmtNum(summary_stats$y_sd)))
 
-            table$addRow(rowKey = row_num, values = list(
-                statistic = .("Y Standard Deviation"),
-                value = private$.fmtNum(summary_stats$y_sd)
-            ))
-            row_num <- row_num + 1
-
-            table$addRow(rowKey = row_num, values = list(
-                statistic = .("Y Range"),
+            table$setRow(rowKey = "y_range", values = list(
                 value = paste(private$.fmtNum(summary_stats$y_min), "-",
-                             private$.fmtNum(summary_stats$y_max))
-            ))
+                              private$.fmtNum(summary_stats$y_max))))
         },
 
         # Enhanced correlation table with copy-ready interpretations

@@ -14,7 +14,8 @@ description:
     #     dontrun: true
     #     usage: |
     #         lassocox(data = data, elapsedtime = "Time", outcome = "Status",
-    #             outcomeLevel = "1", explanatory = vars(age, stage, grade))
+    #             outcomeLevel = "1", censorLevel = "0",
+    #             explanatory = vars(age, stage, grade))
 
 options:
     - name: data
@@ -27,6 +28,7 @@ options:
       type: Variable
       suggested: [ continuous ]
       permitted: [ numeric ]
+      default: NULL
       description:
         R: >
           The numeric variable representing follow-up time until the event or last observation.
@@ -36,6 +38,7 @@ options:
       type: Variable
       suggested: [ ordinal, nominal ]
       permitted: [ factor, numeric ]
+      default: NULL
       description:
         R: >
           Binary event indicator variable (event vs censored). Can be factor or
@@ -66,6 +69,7 @@ options:
       type: Variables
       suggested: [ nominal, ordinal, continuous ]
       permitted: [ factor, numeric ]
+      default: NULL
       description:
         R: >
           Variables to be considered for selection in the Lasso-Cox regression.

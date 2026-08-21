@@ -54,12 +54,12 @@ datevalidatorClass <- if (requireNamespace("jmvcore")) {
                 # Check if required variables have been selected
                 if (is.null(self$options$date_vars) || length(self$options$date_vars) == 0) {
                     intro_msg <- "
-                <div style='background-color: #e8f5e8; padding: 20px; border-radius: 8px; margin: 20px 0;'>
+                <div style='background-color: rgba(33, 159, 33, 0.1); padding: 20px; border-radius: 8px; margin: 20px 0; color: inherit;'>
                 <h3 style='color: #2e7d32; margin-top: 0;'> Welcome to Date/DateTime Validator!</h3>
                 <p><strong>Comprehensive date and datetime validation for clinical research databases</strong></p>
                 <p>Validates and diagnoses messy date/datetime formats using multiple R packages (datefixR, anytime, lubridate)</p>
 
-                <div style='background-color: #fff9c4; padding: 10px; border-radius: 5px; margin: 15px 0;'>
+                <div style='background-color: rgba(255, 232, 33, 0.27); padding: 10px; border-radius: 5px; margin: 15px 0; color: inherit;'>
                 <p style='margin: 0;'><strong> For datetime conversion with component extraction:</strong></p>
                 <p style='margin: 5px 0 0 0;'>Use the <strong>DateTime Converter</strong> module to extract year, month, day, hour, minute, second components into separate columns.</p>
                 </div>
@@ -634,7 +634,7 @@ datevalidatorClass <- if (requireNamespace("jmvcore")) {
                 total_vars <- length(results)
 
                 table_html <- paste0(
-                    "<div style='background-color: #f8f9fa; padding: 20px; border-radius: 8px; margin-bottom: 20px;'>",
+                    "<div style='background-color: rgba(138, 155, 172, 0.06); padding: 20px; border-radius: 8px; margin-bottom: 20px; color: inherit;'>",
                     "<h3 style='color: #495057; margin-top: 0;'> Date/DateTime Validation Results</h3>",
                     "<p><strong>Method:</strong> ", private$.get_method_description(), "</p>",
                     "<p><strong>Variables Processed:</strong> ", total_vars, "</p>"
@@ -665,7 +665,7 @@ datevalidatorClass <- if (requireNamespace("jmvcore")) {
 
                     table_html <- paste0(
                         table_html,
-                        "<div style='background-color: #ffffff; padding: 15px; border-radius: 8px; margin-top: 20px;'>",
+                        "<div style='background-color: rgba(255, 255, 255, 0.06); padding: 15px; border-radius: 8px; margin-top: 20px; color: inherit;'>",
                         "<h4>", htmltools::htmlEscape(var_name), " - Success Rate: ", var_success, "/", var_total, " (", var_rate, "%)</h4>"
                     )
 
@@ -675,7 +675,7 @@ datevalidatorClass <- if (requireNamespace("jmvcore")) {
                         table_html <- paste0(
                             table_html,
                             "<table style='width: 100%; border-collapse: collapse; font-size: 12px;'>",
-                            "<thead><tr style='background-color: #6c757d; color: white;'>",
+                            "<thead><tr style='background-color: #6c757d; color: #ffffff; color: white;'>",
                             "<th style='padding: 6px; border: 1px solid #dee2e6;'>Row</th>",
                             "<th style='padding: 6px; border: 1px solid #dee2e6;'>Original</th>",
                             "<th style='padding: 6px; border: 1px solid #dee2e6;'>Validated</th>",
@@ -767,7 +767,7 @@ datevalidatorClass <- if (requireNamespace("jmvcore")) {
                 success_rate <- round(successful_corrections / total_observations * 100, 2)
 
                 quality_html <- paste0(
-                    "<div style='background-color: #e3f2fd; padding: 20px; border-radius: 8px;'>",
+                    "<div style='background-color: rgba(33, 152, 239, 0.13); padding: 20px; border-radius: 8px; color: inherit;'>",
                     "<h3 style='color: #1976d2; margin-top: 0;'> Quality Assessment</h3>",
                     "<h4 style='color: #1976d2;'>Overall Performance:</h4>",
                     "<table style='width: 100%; border-collapse: collapse;'>",
@@ -874,7 +874,7 @@ datevalidatorClass <- if (requireNamespace("jmvcore")) {
                 }
 
                 format_html <- paste0(
-                    "<div style='background-color: #fff3e0; padding: 20px; border-radius: 8px;'>",
+                    "<div style='background-color: rgba(255, 169, 33, 0.14); padding: 20px; border-radius: 8px; color: inherit;'>",
                     "<h3 style='color: #ef6c00; margin-top: 0;'> Format Analysis</h3>",
                     "<h4 style='color: #ef6c00;'>Detected Patterns:</h4>",
                     "<table style='width: 100%; border-collapse: collapse;'>"
@@ -938,7 +938,7 @@ datevalidatorClass <- if (requireNamespace("jmvcore")) {
             },
             .generate_correction_summary = function(results) {
                 summary_html <- paste0(
-                    "<div style='background-color: #e8f5e8; padding: 20px; border-radius: 8px;'>",
+                    "<div style='background-color: rgba(33, 159, 33, 0.1); padding: 20px; border-radius: 8px; color: inherit;'>",
                     "<h3 style='color: #2e7d32; margin-top: 0;'> Validation Summary</h3>",
                     "<h4 style='color: #2e7d32;'>Processing Settings:</h4>",
                     "<ul>",
@@ -970,9 +970,9 @@ datevalidatorClass <- if (requireNamespace("jmvcore")) {
                 method <- self$options$correction_method
 
                 interpretation_html <- paste0(
-                    "<div style='background-color: #f3e5f5; padding: 20px; border-radius: 8px;'>",
+                    "<div style='background-color: rgba(153, 33, 170, 0.12); padding: 20px; border-radius: 8px; color: inherit;'>",
                     "<h3 style='color: #7b1fa2; margin-top: 0;'> Date/DateTime Validation Guide</h3>",
-                    "<div style='background-color: #fff9c4; padding: 12px; border-radius: 5px; margin-bottom: 15px;'>",
+                    "<div style='background-color: rgba(255, 232, 33, 0.27); padding: 12px; border-radius: 5px; margin-bottom: 15px; color: inherit;'>",
                     "<p style='margin: 0;'><strong> Related Module:</strong></p>",
                     "<p style='margin: 5px 0 0 0;'>For datetime conversion with component extraction (year, month, day, hour, minute, second), ",
                     "use the <strong>DateTime Converter</strong> module. This validator focuses on quality assessment and format validation.</p>",

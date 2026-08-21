@@ -199,7 +199,7 @@ jjpubrClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             }, error = function(e) {
                 self$results$todo$setVisible(TRUE)
                 self$results$todo$setContent(paste0(
-                    "<div style='padding: 20px; background: #fff3cd; border: 2px solid #ff6b6b;'>",
+                    "<div style='padding: 20px; background-color: rgba(255, 202, 33, 0.23); border: 2px solid #ff6b6b; color: inherit;'>",
                     "<h3> Data Validation Error</h3>",
                     "<p><strong>", htmltools::htmlEscape(e$message), "</strong></p>",
                     "</div>"))
@@ -1297,7 +1297,7 @@ jjpubrClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 dotplot = "Dot Plot", line = "Line Plot", errorplot = "Error Plot", "Plot")
 
             html <- paste0(
-                "<div style='padding: 10px; background: #f9f9f9; border: 1px solid #ddd;'>",
+                "<div style='padding: 10px; background-color: rgba(155, 155, 155, 0.06); border: 1px solid #ddd; color: inherit;'>",
                 "<h4>", plot_name, "</h4>",
                 "<p><strong>X:</strong> ", htmltools::htmlEscape(self$options$xvar), "</p>")
 
@@ -1314,7 +1314,7 @@ jjpubrClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
         .generateWelcomeMessage = function() {
             paste0(
-                "<div style='padding: 20px; background: #f9f9f9; border: 1px solid #ddd;'>",
+                "<div style='padding: 20px; background-color: rgba(155, 155, 155, 0.06); border: 1px solid #ddd; color: inherit;'>",
                 "<h3> Welcome to ggpubr Plots!</h3>",
                 "<p>Create publication-ready visualizations using the ggpubr package.</p>",
                 "<h4>Getting Started:</h4>",

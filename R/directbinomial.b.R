@@ -173,7 +173,7 @@ directbinomialClass <- R6::R6Class(
         
         .populateEducationalInfo = function() {
             educational_content <- paste0(
-                "<div style='background-color: #f8f9fa; padding: 15px; border-left: 4px solid #007bff; margin: 10px 0;'>",
+                "<div style='background-color: rgba(138, 155, 172, 0.06); padding: 15px; border-left: 4px solid #007bff; margin: 10px 0; color: inherit;'>",
                 "<h4> Direct Binomial Regression for Competing Risks</h4>",
                 "<p><b>Method Overview:</b> Direct binomial regression models cumulative incidence functions ",
                 "directly without assuming proportional subdistribution hazards. This approach is particularly ",
@@ -334,7 +334,7 @@ directbinomialClass <- R6::R6Class(
         
         .populateResidualAnalysis = function() {
             residual_content <- paste0(
-                "<div style='background-color: #fff3cd; padding: 15px; border-left: 4px solid #ffc107; margin: 10px 0;'>",
+                "<div style='background-color: rgba(255, 202, 33, 0.23); padding: 15px; border-left: 4px solid #ffc107; margin: 10px 0; color: inherit;'>",
                 "<h4> Residual Analysis</h4>",
                 "<p><b>Model Diagnostics:</b> Direct binomial regression residuals help assess model adequacy.</p>",
                 
@@ -359,7 +359,7 @@ directbinomialClass <- R6::R6Class(
         
         .populateMethodsInfo = function() {
             methods_content <- paste0(
-                "<div style='background-color: #e7f3ff; padding: 15px; border-left: 4px solid #0066cc; margin: 10px 0;'>",
+                "<div style='background-color: rgba(33, 144, 255, 0.11); padding: 15px; border-left: 4px solid #0066cc; margin: 10px 0; color: inherit;'>",
                 "<h4> Statistical Methods</h4>",
                 
                 "<p><b>Analysis Method:</b> Direct binomial regression for competing risks using the timereg package.</p>",

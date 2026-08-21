@@ -177,7 +177,7 @@ tidyplotsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
         .createInstructions = function() {
             paste0(
-                "<div style='padding: 20px; background-color: #f8f9fa; border-left: 4px solid #007bff; margin: 10px 0;'>",
+                "<div style='padding: 20px; background-color: rgba(138, 155, 172, 0.06); border-left: 4px solid #007bff; margin: 10px 0; color: inherit;'>",
                 "<h3 style='color: #007bff; margin-top: 0;'>Comprehensive Tidy Plots</h3>",
                 "<h4>Create Advanced Statistical Visualizations</h4>",
                 "<p>This tool creates publication-ready plots with extensive customization options.</p>",
@@ -794,7 +794,7 @@ tidyplotsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             }
 
             guide_html <- paste0(
-                "<div style='padding: 15px; background: #fff8e1; border-left: 4px solid #ffa726; margin: 10px 0;'>",
+                "<div style='padding: 15px; background-color: rgba(255, 203, 33, 0.14); border-left: 4px solid #ffa726; margin: 10px 0; color: inherit;'>",
                 "<h4 style='margin-top: 0; color: #f57c00;'>Quick Start Guide</h4>",
                 "<h5>Step 1: Select Your Data</h5>",
                 "<ul>",
@@ -839,7 +839,7 @@ tidyplotsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             }
 
             glossary_html <- paste0(
-                "<div style='padding: 15px; background: #f0f7ff; border-left: 4px solid #2196f3; margin: 10px 0;'>",
+                "<div style='padding: 15px; background-color: rgba(33, 137, 255, 0.07); border-left: 4px solid #2196f3; margin: 10px 0; color: inherit;'>",
                 "<h4 style='margin-top: 0; color: #1565c0;'>Statistical Terms Guide</h4>",
                 "<dl style='margin: 0;'>",
                 "<dt><strong>Mean (Average)</strong></dt>",
@@ -944,7 +944,7 @@ tidyplotsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
                 # Create HTML output
                 summary_html <- paste0(
-                    "<div style='padding: 15px; background: #e8f5e9; border-left: 4px solid #4caf50; margin: 10px 0;'>",
+                    "<div style='padding: 15px; background-color: rgba(33, 159, 43, 0.1); border-left: 4px solid #4caf50; margin: 10px 0; color: inherit;'>",
                     "<h4 style='margin-top: 0; color: #2e7d32;'>Plot Summary</h4>",
                     "<p style='margin-bottom: 0;'>", paste(summary_parts, collapse = " "), "</p>",
                     "</div>"

@@ -296,7 +296,7 @@ simonmakuchClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                 <li>Proper handling of exposure timing</li>
             </ul>
 
-            <div class='alert alert-warning' style='background-color: #fff3cd; border: 1px solid #ffc107; padding: 10px; margin: 10px 0;'>
+            <div class='alert alert-warning' style='background-color: rgba(255, 202, 33, 0.23); border: 1px solid #ffc107; padding: 10px; margin: 10px 0; color: inherit;'>
                 <h4 style='margin-top: 0; color: #856404;'> Current Implementation Limitations</h4>
                 <p style='margin-bottom: 5px;'><strong>Single Exposure Change Only:</strong></p>
                 <ul style='margin-bottom: 5px;'>

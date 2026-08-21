@@ -28,7 +28,7 @@ groupedforestClass <- if (requireNamespace("jmvcore")) R6::R6Class("groupedfores
             if (is.null(self$options$time_var) || is.null(self$options$event_var) || 
                 is.null(self$options$treatment_var) || is.null(self$options$grouping_var)) {
                 intro_msg <- "
-                <div style='background-color: #e8f5e8; padding: 20px; border-radius: 8px; margin: 20px 0;'>
+                <div style='background-color: rgba(33, 159, 33, 0.1); padding: 20px; border-radius: 8px; margin: 20px 0; color: inherit;'>
                 <h3 style='color: #2e7d32; margin-top: 0;'> Welcome to Grouped Hazard Forest Plot!</h3>
                 <p><strong>Compare treatment effects across subgroups</strong> with grouped Cox regression forest plots</p>
                 <p>Addresses GitHub Issue #88: Create grouped forest plots showing treatment vs control for each variant</p>
@@ -361,7 +361,7 @@ groupedforestClass <- if (requireNamespace("jmvcore")) R6::R6Class("groupedfores
             # Generate detailed statistics table
             
             stats_html <- paste0(
-                "<div style='background-color: #f8f9fa; padding: 20px; border-radius: 8px; margin-bottom: 20px;'>",
+                "<div style='background-color: rgba(138, 155, 172, 0.06); padding: 20px; border-radius: 8px; margin-bottom: 20px; color: inherit;'>",
                 "<h3 style='color: #495057; margin-top: 0;'> Hazard Ratios by Subgroup</h3>",
                 "<table style='width: 100%; border-collapse: collapse; font-family: Arial, sans-serif;'>",
                 "<thead><tr style='background-color: #6c757d; color: white;'>",
@@ -432,7 +432,7 @@ groupedforestClass <- if (requireNamespace("jmvcore")) R6::R6Class("groupedfores
             treatment_coef <- model_summary[is_trt, ]
             
             overall_html <- paste0(
-                "<div style='background-color: #e3f2fd; padding: 20px; border-radius: 8px; margin-bottom: 20px;'>",
+                "<div style='background-color: rgba(33, 152, 239, 0.13); padding: 20px; border-radius: 8px; margin-bottom: 20px; color: inherit;'>",
                 "<h3 style='color: #1976d2; margin-top: 0;'> Overall Analysis (All Groups Combined)</h3>",
                 "<table style='width: 100%; border-collapse: collapse;'>",
                 "<tr><td style='padding: 8px; border: 1px solid #ddd;'><strong>Total Sample Size:</strong></td><td style='padding: 8px; border: 1px solid #ddd;'>", nrow(data), "</td></tr>",
@@ -455,10 +455,10 @@ groupedforestClass <- if (requireNamespace("jmvcore")) R6::R6Class("groupedfores
                 dplyr::summarise(n = dplyr::n(), .groups = 'drop')
             
             counts_html <- paste0(
-                "<div style='background-color: #fff3e0; padding: 20px; border-radius: 8px; margin-bottom: 20px;'>",
+                "<div style='background-color: rgba(255, 169, 33, 0.14); padding: 20px; border-radius: 8px; margin-bottom: 20px; color: inherit;'>",
                 "<h3 style='color: #f57c00; margin-top: 0;'> Sample Sizes by Group and Treatment</h3>",
                 "<table style='width: 100%; border-collapse: collapse;'>",
-                "<tr style='background-color: #e0e0e0;'>",
+                "<tr style='background-color: rgba(33, 33, 33, 0.14); color: inherit;'>",
                 "<th style='padding: 8px; border: 1px solid #ddd;'>Subgroup</th>",
                 "<th style='padding: 8px; border: 1px solid #ddd;'>Treatment Level</th>",
                 "<th style='padding: 8px; border: 1px solid #ddd;'>N</th>",
@@ -523,7 +523,7 @@ groupedforestClass <- if (requireNamespace("jmvcore")) R6::R6Class("groupedfores
             interaction_terms <- model_summary[grepl(":", model_summary$term), ]
             
             interaction_html <- paste0(
-                "<div style='background-color: #f3e5f5; padding: 20px; border-radius: 8px; margin-bottom: 20px;'>",
+                "<div style='background-color: rgba(153, 33, 170, 0.12); padding: 20px; border-radius: 8px; margin-bottom: 20px; color: inherit;'>",
                 "<h3 style='color: #7b1fa2; margin-top: 0;'> Treatment \u{00D7} Subgroup Interaction Test</h3>",
                 "<p><strong>Interaction Terms:</strong></p>",
                 "<table style='width: 100%; border-collapse: collapse;'>"
@@ -531,7 +531,7 @@ groupedforestClass <- if (requireNamespace("jmvcore")) R6::R6Class("groupedfores
             
             if (nrow(interaction_terms) > 0) {
                 interaction_html <- paste0(interaction_html,
-                    "<tr style='background-color: #e0e0e0;'>",
+                    "<tr style='background-color: rgba(33, 33, 33, 0.14); color: inherit;'>",
                     "<th style='padding: 8px; border: 1px solid #ddd;'>Interaction Term</th>",
                     "<th style='padding: 8px; border: 1px solid #ddd;'>Coefficient</th>",
                     "<th style='padding: 8px; border: 1px solid #ddd;'>P-value</th>",
@@ -587,7 +587,7 @@ groupedforestClass <- if (requireNamespace("jmvcore")) R6::R6Class("groupedfores
             n_groups <- length(grouped_results)
             
             interpretation_html <- paste0(
-                "<div style='background-color: #e8f5e8; padding: 20px; border-radius: 8px;'>",
+                "<div style='background-color: rgba(33, 159, 33, 0.1); padding: 20px; border-radius: 8px; color: inherit;'>",
                 "<h3 style='color: #2e7d32; margin-top: 0;'> Grouped Forest Plot Interpretation</h3>",
                 
                 "<h4 style='color: #2e7d32;'>Analysis Summary:</h4>",

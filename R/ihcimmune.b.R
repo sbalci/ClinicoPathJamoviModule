@@ -704,7 +704,7 @@ ihcimmuneClass <- R6::R6Class(
 
                 # Generate preset application message
                 preset_message <- paste0(
-                    "<div style='background-color: #e6f3ff; border: 1px solid #0066cc; padding: 10px; margin: 10px 0;'>",
+                    "<div style='background-color: rgba(33, 149, 255, 0.11); border: 1px solid #0066cc; padding: 10px; margin: 10px 0; color: inherit;'>",
                     "<h5 style='color: #0066cc; margin-top: 0;'> Clinical Preset Auto-Applied</h5>",
                     "<p><strong>", preset$name, "</strong></p>",
                     "<p>", preset$description, "</p>",
@@ -728,7 +728,7 @@ ihcimmuneClass <- R6::R6Class(
                 }), collapse = "<br>")
 
                 preset_message <- paste0(
-                    "<div style='background-color: #fff3cd; border: 1px solid #ffc107; padding: 10px; margin: 10px 0;'>",
+                    "<div style='background-color: rgba(255, 202, 33, 0.23); border: 1px solid #ffc107; padding: 10px; margin: 10px 0; color: inherit;'>",
                     "<h5 style='color: #856404; margin-top: 0;'> Multiple Clinical Presets Available</h5>",
                     "<p>Based on your marker selection, multiple tumor-specific presets are available:</p>",
                     "<p>", preset_options, "</p>",
@@ -855,7 +855,7 @@ ihcimmuneClass <- R6::R6Class(
             if (n_samples > private$.large_dataset_threshold) {
                 # Large dataset optimizations
                 sample_message <- paste0(
-                    "<div style='background-color: #fff8dc; border: 1px solid #daa520; padding: 10px; margin: 10px 0;'>",
+                    "<div style='background-color: rgba(255, 211, 33, 0.16); border: 1px solid #daa520; padding: 10px; margin: 10px 0; color: inherit;'>",
                     "<h5 style='color: #b8860b; margin-top: 0;'> Large Dataset Optimization</h5>",
                     "<p><strong>Dataset size:</strong> ", n_samples, " samples (>", private$.large_dataset_threshold, " threshold)</p>",
                     "<p><strong>Optimizations applied:</strong></p>",
@@ -1258,7 +1258,7 @@ ihcimmuneClass <- R6::R6Class(
                 "<hr>",
                 "<h5>Copy-Ready Clinical Report</h5>",
                 "<p><i>The following section provides a comprehensive clinical report suitable for copy-paste into clinical documentation:</i></p>",
-                "<div style='border: 1px solid #ccc; padding: 10px; background-color: #f9f9f9; font-family: Arial, sans-serif;'>",
+                "<div style='border: 1px solid #ccc; padding: 10px; background-color: rgba(155, 155, 155, 0.06); font-family: Arial, sans-serif; color: inherit;'>",
                 private$.generateClinicalReport(),
                 "</div>"
             )

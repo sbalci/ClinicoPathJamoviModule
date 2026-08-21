@@ -57,7 +57,7 @@ desctoolsClass <- if (requireNamespace("jmvcore")) {
                     !self$options$goodness_of_fit &&
                     !self$options$categorical_tests) {
                     instructions_html <- "
-                    <div style='background-color: #e8f5e8; padding: 20px; border-radius: 8px; margin: 10px 0;'>
+                    <div style='background-color: rgba(33, 159, 33, 0.1); padding: 20px; border-radius: 8px; margin: 10px 0; color: inherit;'>
                         <h3>Advanced Statistical Tests from DescTools</h3>
                         <p><strong>This module provides advanced statistical tests for clinical and epidemiological research.</strong></p>
 
@@ -212,7 +212,7 @@ desctoolsClass <- if (requireNamespace("jmvcore")) {
                 # Summary statistics
                 html_content <- paste0(html_content, "<h4>Group Summary Statistics</h4>")
                 html_content <- paste0(html_content, "<table border='1' cellpadding='5' cellspacing='0' style='border-collapse: collapse;'>")
-                html_content <- paste0(html_content, "<tr style='background-color: #f0f0f0; font-weight: bold;'>")
+                html_content <- paste0(html_content, "<tr style='background-color: rgba(33, 33, 33, 0.07); font-weight: bold; color: inherit;'>")
                 html_content <- paste0(html_content, "<th>Group</th><th>N</th><th>Mean</th><th>SD</th><th>Min</th><th>Max</th></tr>")
 
                 html_content <- paste0(html_content, "<tr>")
@@ -238,7 +238,7 @@ desctoolsClass <- if (requireNamespace("jmvcore")) {
                 # Effect size results
                 html_content <- paste0(html_content, "<h4>Effect Size Results</h4>")
                 html_content <- paste0(html_content, "<table border='1' cellpadding='5' cellspacing='0' style='border-collapse: collapse;'>")
-                html_content <- paste0(html_content, "<tr style='background-color: #f0f0f0; font-weight: bold;'>")
+                html_content <- paste0(html_content, "<tr style='background-color: rgba(33, 33, 33, 0.07); font-weight: bold; color: inherit;'>")
 
                 effect_name <- if (self$options$hedges_correction) "Hedges' g" else "Cohen's d"
                 html_content <- paste0(html_content, "<th>Measure</th><th>Value</th>")
@@ -276,7 +276,7 @@ desctoolsClass <- if (requireNamespace("jmvcore")) {
                 # Clinical interpretation
                 if (self$options$show_interpretations) {
                     html_content <- paste0(html_content, "<h4>Clinical Interpretation</h4>")
-                    html_content <- paste0(html_content, "<div style='background-color: #f9f9f9; padding: 10px; border-left: 4px solid #007acc;'>")
+                    html_content <- paste0(html_content, "<div style='background-color: rgba(155, 155, 155, 0.06); padding: 10px; border-left: 4px solid #007acc; color: inherit;'>")
 
                     interpretation <- if (magnitude == "Negligible") {
                         "The effect size is negligible, suggesting minimal practical difference between groups."
@@ -340,7 +340,7 @@ desctoolsClass <- if (requireNamespace("jmvcore")) {
 
                             html_content <- paste0(html_content, "<h4>Hosmer-Lemeshow Goodness of Fit Test</h4>")
                             html_content <- paste0(html_content, "<table border='1' cellpadding='5' cellspacing='0' style='border-collapse: collapse;'>")
-                            html_content <- paste0(html_content, "<tr style='background-color: #f0f0f0; font-weight: bold;'>")
+                            html_content <- paste0(html_content, "<tr style='background-color: rgba(33, 33, 33, 0.07); font-weight: bold; color: inherit;'>")
                             html_content <- paste0(html_content, "<th>Statistic</th><th>Value</th><th>df</th><th>p-value</th></tr>")
 
                             html_content <- paste0(html_content, "<tr>")
@@ -382,7 +382,7 @@ desctoolsClass <- if (requireNamespace("jmvcore")) {
 
                             html_content <- paste0(html_content, "<h4>Normality Tests</h4>")
                             html_content <- paste0(html_content, "<table border='1' cellpadding='5' cellspacing='0' style='border-collapse: collapse;'>")
-                            html_content <- paste0(html_content, "<tr style='background-color: #f0f0f0; font-weight: bold;'>")
+                            html_content <- paste0(html_content, "<tr style='background-color: rgba(33, 33, 33, 0.07); font-weight: bold; color: inherit;'>")
                             html_content <- paste0(html_content, "<th>Test</th><th>Statistic</th><th>p-value</th><th>Conclusion</th></tr>")
 
                             # Anderson-Darling
@@ -457,7 +457,7 @@ desctoolsClass <- if (requireNamespace("jmvcore")) {
 
                             html_content <- paste0(html_content, "<h4>Cochran-Armitage Trend Test</h4>")
                             html_content <- paste0(html_content, "<table border='1' cellpadding='5' cellspacing='0' style='border-collapse: collapse;'>")
-                            html_content <- paste0(html_content, "<tr style='background-color: #f0f0f0; font-weight: bold;'>")
+                            html_content <- paste0(html_content, "<tr style='background-color: rgba(33, 33, 33, 0.07); font-weight: bold; color: inherit;'>")
                             html_content <- paste0(html_content, "<th>Statistic</th><th>Value</th><th>p-value</th></tr>")
 
                             html_content <- paste0(html_content, "<tr>")

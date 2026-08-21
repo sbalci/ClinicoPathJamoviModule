@@ -1393,9 +1393,9 @@ plscoxClass <- R6::R6Class(
 
         .generateSuitabilityHtml = function(checks, overall, overall_text) {
             bg_colors <- list(
-                green  = "background-color: #d4edda; color: #155724; border: 1px solid #c3e6cb;",
-                yellow = "background-color: #fff3cd; color: #856404; border: 1px solid #ffeeba;",
-                red    = "background-color: #f8d7da; color: #721c24; border: 1px solid #f5c6cb;"
+                green  = "background-color: rgba(33, 162, 64, 0.19); color: inherit; color: inherit; border: 1px solid #c3e6cb;",
+                yellow = "background-color: rgba(255, 202, 33, 0.23); color: inherit; color: inherit; border: 1px solid #ffeeba;",
+                red    = "background-color: rgba(216, 33, 50, 0.18); color: inherit; color: inherit; border: 1px solid #f5c6cb;"
             )
             dot_colors <- list(green = "#28a745", yellow = "#ffc107", red = "#dc3545")
 

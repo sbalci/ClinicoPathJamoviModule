@@ -795,7 +795,7 @@ psychopdaROCClass <- if (requireNamespace("jmvcore")) {
 
         # Generate comprehensive explanation
         explanation <- paste0(
-          "<div style='background-color: #f8f9fa; padding: 15px; border-left: 4px solid #007bff; margin: 10px 0;'>",
+          "<div style='background-color: rgba(138, 155, 172, 0.06); padding: 15px; border-left: 4px solid #007bff; margin: 10px 0; color: inherit;'>",
           "<h4 style='color: #007bff; margin-top: 0;'> Fixed ", tools::toTitleCase(analysis_type), " Analysis Guide</h4>",
           "<h5 style='color: #495057; margin-top: 20px;'> Analysis Overview</h5>",
           "<p>This analysis determines the <strong>cutpoint threshold</strong> that achieves a target ", analysis_type, " of <strong>", round(target_value, 3), "</strong> (", round(target_value * 100, 1), "%). ",
@@ -814,7 +814,7 @@ psychopdaROCClass <- if (requireNamespace("jmvcore")) {
             "<li> <strong>Emergency Settings</strong>: When missing a case has severe consequences</li>",
             "<li> <strong>Cost Consideration</strong>: Accept more false positives to avoid missed diagnoses</li>",
             "</ul>",
-            "<div style='background-color: #d4edda; padding: 10px; border-radius: 5px; margin: 10px 0;'>",
+            "<div style='background-color: rgba(33, 162, 64, 0.19); padding: 10px; border-radius: 5px; margin: 10px 0; color: inherit;'>",
             "<strong> Clinical Pearl:</strong> High sensitivity = \"SnOUT\" (Sensitivity rules OUT) - a negative test with high sensitivity confidently excludes the condition.",
             "</div>"
           )
@@ -828,7 +828,7 @@ psychopdaROCClass <- if (requireNamespace("jmvcore")) {
             "<li> <strong>Treatment Decision</strong>: Before starting costly or risky treatments</li>",
             "<li> <strong>Legal/Insurance</strong>: When false positives have significant consequences</li>",
             "</ul>",
-            "<div style='background-color: #d1ecf1; padding: 10px; border-radius: 5px; margin: 10px 0;'>",
+            "<div style='background-color: rgba(33, 163, 188, 0.21); padding: 10px; border-radius: 5px; margin: 10px 0; color: inherit;'>",
             "<strong> Clinical Pearl:</strong> High specificity = \"SpIN\" (Specificity rules IN) - a positive test with high specificity confidently confirms the condition.",
             "</div>"
           )
@@ -879,7 +879,7 @@ psychopdaROCClass <- if (requireNamespace("jmvcore")) {
         explanation <- paste0(
           explanation,
           "<h5 style='color: #495057;'> Results Interpretation</h5>",
-          "<div style='background-color: #fff3cd; padding: 10px; border-radius: 5px; margin: 10px 0;'>",
+          "<div style='background-color: rgba(255, 202, 33, 0.23); padding: 10px; border-radius: 5px; margin: 10px 0; color: inherit;'>",
           "<p><strong>Key Metrics to Review:</strong></p>",
           "<ul style='margin-bottom: 0;'>",
           "<li><strong>Achieved Value</strong>: How close we got to the target ", analysis_type, "</li>",
@@ -895,7 +895,7 @@ psychopdaROCClass <- if (requireNamespace("jmvcore")) {
         explanation <- paste0(
           explanation,
           "<h5 style='color: #495057;'> Clinical Decision Framework</h5>",
-          "<div style='background-color: #e2e3e5; padding: 10px; border-radius: 5px; margin: 10px 0;'>",
+          "<div style='background-color: rgba(33, 41, 56, 0.13); padding: 10px; border-radius: 5px; margin: 10px 0; color: inherit;'>",
           "<p><strong>Steps for Implementation:</strong></p>",
           "<ol style='margin-bottom: 0;'>",
           "<li><strong>Validate Performance</strong>: Confirm achieved ", analysis_type, " meets your requirements</li>",
@@ -911,7 +911,7 @@ psychopdaROCClass <- if (requireNamespace("jmvcore")) {
         explanation <- paste0(
           explanation,
           "<h5 style='color: #dc3545;'> Important Considerations</h5>",
-          "<div style='background-color: #f8d7da; padding: 10px; border-radius: 5px; margin: 10px 0;'>",
+          "<div style='background-color: rgba(216, 33, 50, 0.18); padding: 10px; border-radius: 5px; margin: 10px 0; color: inherit;'>",
           "<ul style='margin-bottom: 0;'>",
           "<li><strong>Population Specificity</strong>: Results may not generalize to different populations</li>",
           "<li><strong>Prevalence Impact</strong>: PPV and NPV change with disease prevalence</li>",
@@ -1845,31 +1845,18 @@ psychopdaROCClass <- if (requireNamespace("jmvcore")) {
 
       # Initialize the analysis
       .init = function() {
-        # Keep main tables visible but empty them to prevent loading animations
-        self$results$simpleResultsTable$setVisible(TRUE)
-        self$results$runSummary$setVisible(TRUE)
-        self$results$aucSummaryTable$setVisible(TRUE)
-        self$results$clinicalInterpretationTable$setVisible(TRUE)
-
-        # Hide optional elements initially
-        self$results$resultsTable$setVisible(FALSE)
-        self$results$sensSpecTable$setVisible(FALSE)
-        self$results$thresholdTable$setVisible(FALSE)
-        self$results$delongComparisonTable$setVisible(FALSE)
-        self$results$delongTest$setVisible(FALSE)
-        self$results$plotROC$setVisible(FALSE)
-        self$results$criterionPlot$setVisible(FALSE)
-        self$results$prevalencePlot$setVisible(FALSE)
-        self$results$dotPlot$setVisible(FALSE)
+        # Visibility is expressed declaratively in jamovi/psychopdaroc.r.yaml
+        # (`visible: (showCriterionPlot)`, `visible: (metaAnalysis)`, ...) and is
+        # NOT repeated here. An imperative setVisible(FALSE) in .init() overrides
+        # that binding for the run, so it has to be undone by a matching
+        # setVisible(TRUE) in .run() -- and the two halves drift. They did:
+        # criterionPlot, prevalencePlot, dotPlot and precisionRecallPlot were
+        # hidden here and never restored, so those four options computed a plot
+        # and silently threw it away. The declarative form cannot drift.
 
         # Apply clinical mode and preset configurations
         private$.applyClinicalModeSettings()
         private$.applyClinicalPresetSettings()
-        self$results$precisionRecallPlot$setVisible(FALSE)
-        self$results$procedureNotes$setVisible(FALSE)
-        self$results$metaAnalysisWarning$setVisible(FALSE)
-        self$results$metaAnalysisTable$setVisible(FALSE)
-        self$results$metaAnalysisForestPlot$setVisible(FALSE)
 
         # Initialize advanced plot states (enable rendering when data is ready)
         # These plots have renderFun defined in .r.yaml but need setState to activate
@@ -2099,30 +2086,15 @@ psychopdaROCClass <- if (requireNamespace("jmvcore")) {
             jmvcore::reject(val)
           }
 
-          # Hide instructions when inputs are provided
+          # Hide instructions when inputs are provided. This one is genuine
+          # option/data-driven visibility (the onboarding panel), not a failure
+          # signal, so it stays. The block that used to follow -- restoring
+          # procedureNotes, plotROC, resultsTable, thresholdTable, sensSpecTable,
+          # delongComparisonTable and delongTest -- only existed to undo the
+          # setVisible(FALSE) calls that .init() no longer makes. Each of those
+          # elements already carries the equivalent `visible:` expression in
+          # jamovi/psychopdaroc.r.yaml.
           self$results$instructions$setVisible(FALSE)
-
-          # Show procedure notes when analysis proceeds
-          self$results$procedureNotes$setVisible(TRUE)
-
-          # Make ROC plots visible if requested
-          if (self$options$plotROC) {
-            self$results$plotROC$setVisible(TRUE)
-          }
-
-          self$results$resultsTable$setVisible(TRUE)
-
-          # Make optional tables/plots visible based on options
-          if (self$options$showThresholdTable) {
-            self$results$thresholdTable$setVisible(TRUE)
-          }
-          if (self$options$sensSpecTable) {
-            self$results$sensSpecTable$setVisible(TRUE)
-          }
-          if (self$options$delongTest) {
-            self$results$delongComparisonTable$setVisible(TRUE)
-            self$results$delongTest$setVisible(TRUE)
-          }
 
           # Create procedure notes with analysis details
           procedureNotes <- paste0(
@@ -2279,7 +2251,7 @@ psychopdaROCClass <- if (requireNamespace("jmvcore")) {
 
         # Populate Run Summary
         run_summary_html <- paste0(
-          "<div style='padding: 10px; background-color: #f8f9fa; border: 1px solid #dee2e6; border-radius: 4px; margin-bottom: 15px;'>",
+          "<div style='padding: 10px; background-color: rgba(138, 155, 172, 0.06); border: 1px solid #dee2e6; border-radius: 4px; margin-bottom: 15px; color: inherit;'>",
           "<h4>Analysis Status</h4>",
           "<ul>",
           "<li><strong>Seed:</strong> ", self$options$seed, "</li>",
@@ -2290,7 +2262,7 @@ psychopdaROCClass <- if (requireNamespace("jmvcore")) {
         if (length(summary_status$warnings) > 0) {
           run_summary_html <- paste0(
             run_summary_html,
-            "</ul><div style='background-color: #fff3cd; color: #856404; padding: 10px; border-radius: 4px; margin-top: 10px;'>",
+            "</ul><div style='background-color: rgba(255, 202, 33, 0.23); color: inherit; padding: 10px; border-radius: 4px; margin-top: 10px;'>",
             "<strong>Warnings:</strong><ul>"
           )
           for (w in summary_status$warnings) {
@@ -5401,7 +5373,7 @@ psychopdaROCClass <- if (requireNamespace("jmvcore")) {
         # BLOCK analysis instead of just warning - meta-analysis requires independent studies
         if (!isTRUE(self$options$overrideMetaAnalysisWarning)) {
           error_html <- paste0(
-            "<div style='padding: 15px; background-color: #f8d7da; border: 2px solid #f5c6cb; border-radius: 4px; color: #721c24;'>",
+            "<div style='padding: 15px; background-color: rgba(216, 33, 50, 0.18); border: 2px solid #f5c6cb; border-radius: 4px; color: inherit;'>",
             "<h4 style='margin-top: 0;'> Meta-Analysis Not Recommended</h4>",
             "<p><strong>Issue:</strong> Standard meta-analysis assumes <em>independent studies</em>. ",
             "Comparing multiple markers from the <strong>same dataset</strong> violates this fundamental assumption.</p>",

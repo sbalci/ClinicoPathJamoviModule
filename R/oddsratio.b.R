@@ -118,7 +118,7 @@ oddsratioClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             current_content <- self$results[[output_name]]$content
             if (is.null(current_content)) current_content <- ""
             new_message <- sprintf(
-                '<div style="margin: 10px 0; padding: 10px; border-left: 4px solid %s; background-color: #f8f9fa;"><strong>%s:</strong> %s</div>',
+                '<div style="margin: 10px 0; padding: 10px; border-left: 4px solid %s; background-color: rgba(138, 155, 172, 0.06); color: inherit;"><strong>%s:</strong> %s</div>',
                 border_color,
                 htmltools::htmlEscape(title),
                 htmltools::htmlEscape(message)
@@ -428,7 +428,7 @@ oddsratioClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
 
                 if (nrow(self$data) == 0) {
-                    jmvcore::reject("No data available for analysis. The dataset has no rows or all observations have been filtered out. Check your data import, verify variable selections, and review missing-value patterns.")
+                    jmvcore::reject(.("No data available for analysis. The dataset has no rows or all observations have been filtered out. Check your data import, verify variable selections, and review missing-value patterns."))
                 }
 
                 # CHECKPOINT: Before data preprocessing - which can be time-consuming
@@ -449,9 +449,9 @@ oddsratioClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
                 missing_columns <- setdiff(selected_columns, names(self$data))
                 if (length(missing_columns) > 0) {
-                    jmvcore::reject(paste0(
-                        "Selected variable(s) not found in the data: ",
-                        paste(missing_columns, collapse = ", "), "."
+                    jmvcore::reject(jmvcore::format(
+                        .("Selected variable(s) not found in the data: {variables}."),
+                        variables = paste(missing_columns, collapse = ", ")
                     ))
                 }
 
@@ -472,10 +472,9 @@ oddsratioClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                         "",
                         paste(validation_results$errors, collapse = "; ")
                     )
-                    critical_message <- paste0(
-                        "Critical validation errors detected: ",
-                        validation_error,
-                        ". Ensure the outcome variable has exactly 2 levels, explanatory variables have sufficient variation, and consider removing rows with missing data.")
+                    critical_message <- jmvcore::format(
+                        .("Critical validation errors detected: {errors}. Ensure the outcome variable has exactly 2 levels, explanatory variables have sufficient variation, and consider removing rows with missing data."),
+                        errors = validation_error)
                     # Surface the critical error in the dedicated 'errors' Html output
                     # before aborting, so the previously-empty item is populated.
                     private$.addNotice(jmvcore::NoticeType$ERROR, critical_message)
@@ -504,7 +503,7 @@ oddsratioClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 dependent_variable_name_from_label <- names(all_labels)[all_labels == self$options$outcome]
                 if (length(dependent_variable_name_from_label) == 0) {
                     jmvcore::reject(
-                        "The selected outcome could not be mapped after variable-name normalization."
+                        .("The selected outcome could not be mapped after variable-name normalization.")
                     )
                 }
                 if (length(dependent_variable_name_from_label) > 1) {
@@ -618,7 +617,7 @@ oddsratioClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
                 if (nrow(mydata) == 0) {
                     jmvcore::reject(
-                        "No complete observations remain for the selected outcome and explanatory variables."
+                        .("No complete observations remain for the selected outcome and explanatory variables.")
                     )
                 }
 
@@ -635,9 +634,9 @@ oddsratioClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 }
                 if (nlevels(observed_outcome) != 2 ||
                     !(self$options$outcomeLevel %in% levels(observed_outcome))) {
-                    jmvcore::reject(paste0(
-                        "After removing incomplete cases for the selected model, the outcome must retain exactly two observed levels including the selected positive level '",
-                        self$options$outcomeLevel, "'."
+                    jmvcore::reject(jmvcore::format(
+                        .("After removing incomplete cases for the selected model, the outcome must retain exactly two observed levels including the selected positive level '{level}'."),
+                        level = self$options$outcomeLevel
                     ))
                 }
 
@@ -647,10 +646,9 @@ oddsratioClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     logical(1)
                 )
                 if (any(no_variation)) {
-                    jmvcore::reject(paste0(
-                        "The following explanatory variable(s) have no variation after complete-case filtering: ",
-                        paste(self$options$explanatory[no_variation], collapse = ", "),
-                        "."
+                    jmvcore::reject(jmvcore::format(
+                        .("The following explanatory variable(s) have no variation after complete-case filtering: {variables}."),
+                        variables = paste(self$options$explanatory[no_variation], collapse = ", ")
                     ))
                 }
 
@@ -660,10 +658,9 @@ oddsratioClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     logical(1)
                 )
                 if (any(non_finite)) {
-                    jmvcore::reject(paste0(
-                        "The following numeric explanatory variable(s) contain infinite values: ",
-                        paste(self$options$explanatory[non_finite], collapse = ", "),
-                        ". Replace infinite values before fitting the model."
+                    jmvcore::reject(jmvcore::format(
+                        .("The following numeric explanatory variable(s) contain infinite values: {variables}. Replace infinite values before fitting the model."),
+                        variables = paste(self$options$explanatory[non_finite], collapse = ", ")
                     ))
                 }
 
@@ -745,10 +742,9 @@ oddsratioClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                             metrics = TRUE
                         ),
                         error = function(e) {
-                            message <- paste0(
-                                "Standard logistic regression could not be fitted: ",
-                                conditionMessage(e),
-                                ". Review outcome coding, predictor variation, sparse categories, and separation; consider Firth penalized regression when appropriate."
+                            message <- jmvcore::format(
+                                .("Standard logistic regression could not be fitted: {message}. Review outcome coding, predictor variation, sparse categories, and separation; consider Firth penalized regression when appropriate."),
+                                message = conditionMessage(e)
                             )
                             private$.addNotice(jmvcore::NoticeType$ERROR, message)
                             jmvcore::reject(message)
@@ -1037,7 +1033,7 @@ oddsratioClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                         "<br>",
                         predictor_warning,
 
-                        "<div style='background-color: #f8f9fa; padding: 15px; border-radius: 8px; margin: 10px 0;'>",
+                        "<div style='background-color: rgba(138, 155, 172, 0.06); padding: 15px; border-radius: 8px; margin: 10px 0; color: inherit;'>",
                         "<b>Diagnostic Metrics:</b><br>",
                         "Sensitivity: ", sens_txt, "<br>",
                         "Specificity: ", spec_txt, "<br>",
@@ -1049,7 +1045,7 @@ oddsratioClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                         statistical_warnings,
                         statistical_recommendations,
 
-                        "<div style='background-color: #e8f5e9; padding: 15px; border-radius: 8px; margin: 10px 0;'>",
+                        "<div style='background-color: rgba(33, 159, 43, 0.1); padding: 15px; border-radius: 8px; margin: 10px 0; color: inherit;'>",
                         "<b> Important: Please Verify These Interpretations</b><br>",
                         "<small>",
                         "<b>Positive outcome level:</b> '", htmltools::htmlEscape(lr_results$positive_outcome_used), "' ",
@@ -1322,14 +1318,14 @@ oddsratioClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             # Create messaging for predictor level determination
             if (predictor_determination_method == "User-specified") {
                  predictor_level_warning <- paste0(
-                    "<div style='background-color: #d1ecf1; border-left: 4px solid #0c5460; padding: 15px; margin: 10px 0; border-radius: 4px;'>",
+                    "<div style='background-color: rgba(33, 163, 188, 0.21); border-left: 4px solid #0c5460; padding: 15px; margin: 10px 0; border-radius: 4px; color: inherit;'>",
                     "<b>Predictor Level Modeling:</b><br>",
                     "The level '", htmltools::htmlEscape(positive_predictor_level), "' is used as the positive/exposure category as specified.",
                     "</div>"
                 )
             } else {
                 predictor_level_warning <- paste0(
-                    "<div style='background-color: #fff3cd; border-left: 4px solid #ffc107; padding: 15px; margin: 10px 0; border-radius: 4px;'>",
+                    "<div style='background-color: rgba(255, 202, 33, 0.23); border-left: 4px solid #ffc107; padding: 15px; margin: 10px 0; border-radius: 4px; color: inherit;'>",
                     "<h4 style='margin-top: 0; color: #856404;'> Automatic Predictor Level Detection</h4>",
                     "<p><strong>The positive predictor level was automatically detected as: '", htmltools::htmlEscape(positive_predictor_level), "'</strong></p>",
                     "<p>Method: ", htmltools::htmlEscape(predictor_determination_method), "</p>",
@@ -1353,7 +1349,7 @@ oddsratioClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             diagnostic_warnings <- ""
             if (length(assumption_check$warnings) > 0) {
                 diagnostic_warnings <- paste0(
-                    "<div style='background-color: #fff3cd; padding: 10px; border-radius: 5px; margin: 10px 0;'>",
+                    "<div style='background-color: rgba(255, 202, 33, 0.23); padding: 10px; border-radius: 5px; margin: 10px 0; color: inherit;'>",
                     "<b>Statistical Assumptions Check:</b><br>",
                     paste(assumption_check$warnings, collapse = "<br>"),
                     "</div>"
@@ -1372,7 +1368,7 @@ oddsratioClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 })
                 
                 recommendation_text <- paste0(
-                    "<div style='background-color: #d4edda; padding: 10px; border-radius: 5px; margin: 10px 0;'>",
+                    "<div style='background-color: rgba(33, 162, 64, 0.19); padding: 10px; border-radius: 5px; margin: 10px 0; color: inherit;'>",
                     "<b> Statistical Recommendations:</b><br>",
                     paste(recommendations_list, collapse = "<br>"),
                     "</div>"
@@ -1631,8 +1627,11 @@ oddsratioClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     if (is.null(self$options$explanatory) || is.null(self$options$outcome))
                 return()
                     if (nrow(self$data) == 0)
-                jmvcore::reject('Data contains no (complete) rows')
+                jmvcore::reject(.("Data contains no (complete) rows"))
                     plotList <- image$state
+
+                    if (is.null(plotList))
+                        return(FALSE)
 
                     mydata <- plotList$plotData
                     formulaDependent <- plotList$formulaDependent
@@ -1714,7 +1713,7 @@ oddsratioClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         ,
         .createNomogramDisplay = function(nom) {
             # Create HTML display for the nomogram information
-            html_content <- '<div style="background-color: #f8f9fa; padding: 15px; border-radius: 8px; margin: 10px 0;">'
+            html_content <- '<div style="background-color: rgba(138, 155, 172, 0.06); padding: 15px; border-radius: 8px; margin: 10px 0; color: inherit;">'
             html_content <- paste0(html_content, '<h4 style="color: #495057; margin-top: 0;">Nomogram Information</h4>')
             html_content <- paste0(html_content, '<p>The nomogram plot above provides a visual tool for prediction based on the maximum-likelihood logistic regression model.</p>')
             html_content <- paste0(html_content, '<p><strong>Components:</strong></p>')
@@ -1736,7 +1735,7 @@ oddsratioClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             # Odds Ratio Analysis Explanation
             tryCatch({
                 self$results$oddsRatioExplanation$setContent('
-            <div style="margin-bottom: 20px; padding: 15px; background-color: #e8f4f8; border-left: 4px solid #17a2b8;">
+            <div style="margin-bottom: 20px; padding: 15px; background-color: rgba(33, 149, 188, 0.1); border-left: 4px solid #17a2b8; color: inherit;">
                 <h4 style="margin-top: 0; color: #2c3e50;">Understanding Odds Ratio Analysis</h4>
                 <p><strong>Odds Ratio (OR):</strong> Measures the strength of association between risk factors and binary outcomes.</p>
                 <ul>
@@ -1756,7 +1755,7 @@ oddsratioClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             # Odds Ratio vs Risk Ratio Explanation
             tryCatch({
                 self$results$riskMeasuresExplanation$setContent('
-            <div style="margin-bottom: 20px; padding: 15px; background-color: #d4edda; border-left: 4px solid #28a745;">
+            <div style="margin-bottom: 20px; padding: 15px; background-color: rgba(33, 162, 64, 0.19); border-left: 4px solid #28a745; color: inherit;">
                 <h4 style="margin-top: 0; color: #2c3e50;">Understanding Odds Ratio vs Risk Ratio</h4>
                 <p><strong>Odds Ratio (OR):</strong> The measure calculated by this analysis.</p>
                 <ul>
@@ -1782,7 +1781,7 @@ oddsratioClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             # Diagnostic Test Performance Explanation
             tryCatch({
                 self$results$diagnosticTestExplanation$setContent('
-            <div style="margin-bottom: 20px; padding: 15px; background-color: #fff3cd; border-left: 4px solid #ffc107;">
+            <div style="margin-bottom: 20px; padding: 15px; background-color: rgba(255, 202, 33, 0.23); border-left: 4px solid #ffc107; color: inherit;">
                 <h4 style="margin-top: 0; color: #2c3e50;">Understanding Diagnostic Test Performance</h4>
                 <p><strong>Diagnostic Metrics Calculated:</strong> This analysis evaluates how well a binary predictor distinguishes between outcome states.</p>
                 <ul>
@@ -1828,7 +1827,7 @@ oddsratioClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             # Nomogram Analysis Explanation
             tryCatch({
                 self$results$nomogramAnalysisExplanation$setContent('
-            <div style="margin-bottom: 20px; padding: 15px; background-color: #f8d7da; border-left: 4px solid #dc3545;">
+            <div style="margin-bottom: 20px; padding: 15px; background-color: rgba(216, 33, 50, 0.18); border-left: 4px solid #dc3545; color: inherit;">
                 <h4 style="margin-top: 0; color: #721c24;">Understanding Prediction and Diagnostic Outputs</h4>
 
                 <p><strong>Prediction nomogram:</strong> The plotted nomogram assigns points to all explanatory variables in the maximum-likelihood logistic regression model and maps total points to predicted outcome probability. It is not a Fagan nomogram and does not display pre-test-to-post-test probability conversion.</p>
@@ -1848,7 +1847,7 @@ oddsratioClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
                 <p><strong>The diagnostic predictor is the single binary variable you want to evaluate as a diagnostic test.</strong></p>
 
-                <div style="background-color: #fff3cd; padding: 10px; border-radius: 5px; margin: 10px 0;">
+                <div style="background-color: rgba(255, 202, 33, 0.23); padding: 10px; border-radius: 5px; margin: 10px 0; color: inherit;">
                     <strong>Example:</strong> If you select "LVI" (Lymphovascular Invasion: Absent/Present) as the diagnostic predictor,
                     the diagnostic table answers: <em>"How well does LVI alone distinguish the selected outcome states?"</em>
                 </div>
@@ -1885,7 +1884,7 @@ oddsratioClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     <li><strong>Not in your model:</strong> Evaluates it independently using paired complete outcome/test observations</li>
                 </ul>
 
-                <div style="background-color: #d1ecf1; padding: 10px; border-radius: 5px; margin: 10px 0;">
+                <div style="background-color: rgba(33, 163, 188, 0.21); padding: 10px; border-radius: 5px; margin: 10px 0; color: inherit;">
                     <strong> Clinical Tip:</strong> If your first variable is continuous (e.g., Age), you must manually select
                     a binary diagnostic predictor to obtain sensitivity, specificity, and likelihood ratios. The prediction nomogram can still be generated from the regression variables.
                 </div>
@@ -2297,7 +2296,8 @@ oddsratioClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             fit <- tryCatch({
                 logistf::logistf(f, data = .data)
             }, error = function(e) {
-                jmvcore::reject(paste0("Error fitting Firth model: ", e$message))
+                jmvcore::reject(jmvcore::format(
+                    .("Error fitting Firth model: {message}"), message = conditionMessage(e)))
             })
             
             # Extract coefficients and CIs

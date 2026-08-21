@@ -17,7 +17,7 @@ friedmantestClass <- R6::R6Class(
                     <style>
                         .main { margin: 2em 2em 2em 2em; color: #3E4053; }
                         .section { margin-bottom: 2em; }
-                        .formula { font-family: monospace; background: #f5f5f5; padding: 10px; margin: 10px 0; }
+                        .formula { font-family: monospace; background: rgba(88, 88, 88, 0.06); color: inherit; padding: 10px; margin: 10px 0; }
                     </style>
                     </head>
                     <body>

@@ -58,31 +58,32 @@ items:
         - thresholdMin
         - thresholdMax
         - selectedThresholds
+        - modelNames
+        - clinicalDecisionRule
+        - decisionRuleVar
+        - decisionRulePositive
+        - decisionRuleLabel
 
-    # Optimal thresholds table
-    - name: optimalTable
-      title: Optimal Thresholds
+    # Range over which each model beats both reference strategies
+    - name: benefitRangeTable
+      title: Range of Benefit
       type: Table
-      visible: (showOptimalThreshold)
+      visible: (showBenefitRange)
       rows: 0
       columns:
         - name: model
           title: 'Model'
           type: text
-        - name: optimal_threshold
-          title: 'Optimal Threshold'
+        - name: range_start
+          title: 'From'
           type: number
           format: pc
-        - name: max_net_benefit
-          title: 'Maximum Net Benefit'
-          type: number
-          format: zto
-        - name: threshold_range_start
-          title: 'Beneficial Range Start'
+        - name: range_end
+          title: 'To'
           type: number
           format: pc
-        - name: threshold_range_end
-          title: 'Beneficial Range End'
+        - name: range_width
+          title: 'Width'
           type: number
           format: pc
       clearWith:
@@ -92,6 +93,10 @@ items:
         - thresholdRange
         - thresholdMin
         - thresholdMax
+        - modelNames
+        - clinicalDecisionRule
+        - decisionRuleVar
+        - decisionRulePositive
 
     # Clinical impact table
     - name: clinicalImpactTable
@@ -120,7 +125,7 @@ items:
           type: number
           format: zto
         - name: interventions_avoided
-          title: 'Interventions Avoided vs Treat All'
+          title: 'Interventions Avoided per 100 vs Treat All'
           type: number
           format: zto
         - name: number_needed_to_screen
@@ -133,6 +138,10 @@ items:
         - models
         - populationSize
         - selectedThresholds
+        - modelNames
+        - clinicalDecisionRule
+        - decisionRuleVar
+        - decisionRulePositive
 
     # Model comparison table
     - name: comparisonTable
@@ -145,19 +154,23 @@ items:
           title: 'Comparison'
           type: text
         - name: weighted_auc_diff
-          title: 'Weighted AUC Difference'
+          title: 'Difference in Average Net Benefit'
           type: number
           format: zto
         - name: ci_lower
-          title: '95% CI Lower'
+          title: 'CI Lower'
           type: number
           format: zto
         - name: ci_upper
-          title: '95% CI Upper'
+          title: 'CI Upper'
           type: number
           format: zto
         - name: p_value
-          title: 'P-value'
+          title: 'p'
+          type: number
+          format: zto,pvalue
+        - name: p_value_adj
+          title: 'p (Holm)'
           type: number
           format: zto,pvalue
       clearWith:
@@ -165,10 +178,15 @@ items:
         - outcomePositive
         - models
         - compareModels
+        - bootReps
+        - ciLevel
+        - seed
+        - modelNames
 
-    # Weighted AUC table
+    # Average net benefit over the threshold range (area under the decision curve,
+    # normalised by range width). Unweighted despite the historical option name.
     - name: weightedAUCTable
-      title: Weighted Area Under Decision Curve
+      title: Average Net Benefit Over Threshold Range
       type: Table
       visible: (weightedAUC)
       rows: 0
@@ -177,16 +195,16 @@ items:
           title: 'Model'
           type: text
         - name: weighted_auc
-          title: 'Weighted AUC'
+          title: 'Average Net Benefit'
           type: number
           format: zto
         - name: auc_range
           title: 'Threshold Range'
           type: text
-        - name: relative_benefit
-          title: 'Relative Benefit vs Treat All'
+        - name: benefit_gain
+          title: 'Gain vs Best Default'
           type: number
-          format: pc
+          format: zto
       clearWith:
         - outcome
         - outcomePositive
@@ -194,6 +212,10 @@ items:
         - thresholdRange
         - thresholdMin
         - thresholdMax
+        - modelNames
+        - clinicalDecisionRule
+        - decisionRuleVar
+        - decisionRulePositive
 
     # Decision curve plot
     - name: dcaPlot
@@ -215,6 +237,17 @@ items:
         - showReferenceLinesLabels
         - highlightRange
         - confidenceIntervals
+        - showNetBenefitCI
+        - bootReps
+        - ciLevel
+        - seed
+        - highlightMin
+        - highlightMax
+        - modelNames
+        - clinicalDecisionRule
+        - decisionRuleVar
+        - decisionRulePositive
+        - decisionRuleLabel
 
     # Clinical impact plot
     - name: clinicalImpactPlot
@@ -233,6 +266,7 @@ items:
         - thresholdRange
         - thresholdMin
         - thresholdMax
+        - modelNames
 
     # Interventions avoided plot
     - name: interventionsAvoidedPlot
@@ -249,6 +283,7 @@ items:
         - thresholdRange
         - thresholdMin
         - thresholdMax
+        - modelNames
 
     # Summary text
     - name: summaryText
@@ -262,6 +297,7 @@ items:
         - thresholdRange
         - thresholdMin
         - thresholdMax
+        - modelNames
 
     # Enhanced Decision Curve Analysis Results
     - name: costBenefitTable
@@ -295,6 +331,20 @@ items:
         - name: icer
           title: 'ICER'
           type: number
+      clearWith:
+        - outcome
+        - outcomePositive
+        - models
+        - thresholdRange
+        - thresholdMin
+        - thresholdMax
+        - thresholdStep
+        - costBenefitAnalysis
+        - testCost
+        - treatmentCost
+        - benefitCorrectTreatment
+        - harmFalseTreatment
+        - populationSize
 
     - name: decisionConsequencesTable
       title: Decision Consequences
@@ -337,6 +387,16 @@ items:
           title: 'NPV'
           type: number
           format: pc
+      clearWith:
+        - outcome
+        - outcomePositive
+        - models
+        - thresholdRange
+        - thresholdMin
+        - thresholdMax
+        - thresholdStep
+        - showDecisionConsequences
+        - selectedThresholds
 
     - name: modelComparisonEnhanced
       title: Enhanced Model Comparison
@@ -369,6 +429,18 @@ items:
         - name: conclusion
           title: 'Conclusion'
           type: text
+      clearWith:
+        - outcome
+        - outcomePositive
+        - models
+        - thresholdRange
+        - thresholdMin
+        - thresholdMax
+        - thresholdStep
+        - multiModelComparison
+        - comparisonMethod
+        - bootReps
+        - seed
 
     - name: resourceUtilizationTable
       title: Resource Utilization
@@ -399,6 +471,17 @@ items:
           title: '% Reduction vs Treat All'
           type: number
           format: pc
+      clearWith:
+        - outcome
+        - outcomePositive
+        - models
+        - thresholdRange
+        - thresholdMin
+        - thresholdMax
+        - thresholdStep
+        - resourceUtilization
+        - selectedThresholds
+        - populationSize
 
     - name: relativeUtilityPlot
       title: Relative Utility Curve
@@ -408,6 +491,16 @@ items:
       renderFun: .plotRelativeUtility
       width: 700
       height: 500
+      clearWith:
+        - outcome
+        - outcomePositive
+        - models
+        - thresholdRange
+        - thresholdMin
+        - thresholdMax
+        - thresholdStep
+        - showRelativeUtility
+        - modelNames
 
     - name: standardizedNetBenefitPlot
       title: Standardized Net Benefit
@@ -417,14 +510,24 @@ items:
       renderFun: .plotStandardizedNetBenefit
       width: 700
       height: 500
+      clearWith:
+        - outcome
+        - outcomePositive
+        - models
+        - thresholdRange
+        - thresholdMin
+        - thresholdMax
+        - thresholdStep
+        - showStandardizedNetBenefit
+        - modelNames
 
 refs:
-    - DecisionCurve
-    - rmda
+    # Vickers2006 is the source of the net-benefit definition implemented here; it was
+    # missing while DecisionCurve and rmda were cited despite never being called
+    # (grep for rmda:: / DecisionCurve:: in R/decisioncurve.b.R returns nothing).
+    - Vickers2006
     - ggplot2
     - dplyr
+    - tidyr
     - ClinicoPathJamoviModule
 
-
-    - tidyr
-...

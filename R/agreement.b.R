@@ -124,7 +124,7 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                 html_output <- paste0(
                     "
             <div style='font-family: Arial, sans-serif; max-width: 800px; line-height: 1.4;'>
-                <div style='background: #f5f5f5; border: 2px solid #333; padding: 15px; margin-bottom: 15px;'>
+                <div style='background-color: rgba(88, 88, 88, 0.06); border: 2px solid #333; padding: 15px; margin-bottom: 15px; color: inherit;'>
                 <h3 style='margin: 0 0 5px 0; font-size: 16px; color: #333;'>Agreement Analysis Summary</h3>
                 <p style='margin: 0; font-size: 14px; color: #666;'>", n_subjects, " cases rated by ", n_raters, " raters</p>
                 </div>
@@ -132,11 +132,11 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                 <div style='font-size: 14px; color: #333;'>
                     <table style='width: 100%; border-collapse: collapse; margin-bottom: 15px;'>
                     <tr>
-                        <td style='border: 1px solid #ccc; padding: 10px; background: #f9f9f9;'>
+                        <td style='border: 1px solid #ccc; padding: 10px; background-color: rgba(155, 155, 155, 0.06); color: inherit;'>
                         <strong>Raw Agreement</strong><br>
                         <span style='font-size: 18px;'>", perc_agree, "%</span>
                         </td>
-                        <td style='border: 1px solid #ccc; padding: 10px; background: #f9f9f9;'>
+                        <td style='border: 1px solid #ccc; padding: 10px; background-color: rgba(155, 155, 155, 0.06); color: inherit;'>
                         <strong>Kappa (\u{03BA})</strong><br>
                         <span style='font-size: 18px;'>", kappa_val, "</span>
                         </td>
@@ -147,7 +147,7 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                     <p style='margin: 10px 0;'><strong>Statistical test:</strong> ", sig_text, "</p>
                     <p style='margin: 10px 0;'><strong>Interpretation:</strong> ", interp, "</p>
 
-                    <div style='background: #f9f9f9; border: 1px solid #ccc; padding: 12px; margin: 15px 0;'>
+                    <div style='background-color: rgba(155, 155, 155, 0.06); border: 1px solid #ccc; padding: 12px; margin: 15px 0; color: inherit;'>
                         <p style='margin: 0 0 8px 0; font-weight: bold;'>Clinical Meaning</p>
                         <p style='margin: 0; font-size: 14px;'>",
                     # The Landis & Koch chain above guards is.na(kappa_val); this
@@ -167,7 +167,7 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                     }, "</p>
                     </div>
 
-                    <div style='background: #f9f9f9; border: 1px solid #ccc; padding: 12px; margin: 15px 0;'>
+                    <div style='background-color: rgba(155, 155, 155, 0.06); border: 1px solid #ccc; padding: 12px; margin: 15px 0; color: inherit;'>
                         <p style='margin: 0 0 8px 0; font-weight: bold;'>Key Assumptions</p>
                         <ul style='margin: 0; font-size: 13px; padding-left: 20px;'>
                             <li>All raters scored the same cases independently</li>
@@ -192,7 +192,7 @@ agreementClass <- if (requireNamespace("jmvcore")) {
 
                 html_output <- paste0("
             <div style='font-family: Arial, sans-serif; max-width: 800px; line-height: 1.4;'>
-                <div style='background: #f5f5f5; border: 2px solid #333; padding: 15px; margin-bottom: 15px;'>
+                <div style='background-color: rgba(88, 88, 88, 0.06); border: 2px solid #333; padding: 15px; margin-bottom: 15px; color: inherit;'>
                 <h3 style='margin: 0 0 5px 0; font-size: 16px; color: #333;'>About This Analysis</h3>
                 <p style='margin: 0; font-size: 14px; color: #666;'>Understanding interrater reliability methods and applications</p>
                 </div>
@@ -242,7 +242,7 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                     </tr>
                     </table>
 
-                    <div style='background: #f9f9f9; border: 1px solid #ccc; padding: 10px; margin-top: 15px;'>
+                    <div style='background-color: rgba(155, 155, 155, 0.06); border: 1px solid #ccc; padding: 10px; margin-top: 15px; color: inherit;'>
                         <p style='margin: 0; font-size: 13px;'><strong>Tip:</strong> For ordinal data (e.g., tumor grades), use weighted kappa to account for degree of disagreement.</p>
                     </div>
                 </div>
@@ -262,7 +262,7 @@ agreementClass <- if (requireNamespace("jmvcore")) {
 
                     example_table <- "
                 <table style='margin: 15px auto; border-collapse: collapse; font-size: 12px;'>
-                <tr style='background: #f0f0f0;'>
+                <tr style='background-color: rgba(33, 33, 33, 0.07); color: inherit;'>
                     <th style='padding: 6px 12px; border: 1px solid #ddd;'>Distance</th>
                     <th style='padding: 6px 12px; border: 1px solid #ddd;'>Example</th>
                     <th style='padding: 6px 12px; border: 1px solid #ddd;'>Weight</th>
@@ -311,7 +311,7 @@ agreementClass <- if (requireNamespace("jmvcore")) {
 
                     example_table <- "
                 <table style='margin: 15px auto; border-collapse: collapse; font-size: 12px;'>
-                <tr style='background: #f0f0f0;'>
+                <tr style='background-color: rgba(33, 33, 33, 0.07); color: inherit;'>
                     <th style='padding: 6px 12px; border: 1px solid #ddd;'>Distance</th>
                     <th style='padding: 6px 12px; border: 1px solid #ddd;'>Example</th>
                     <th style='padding: 6px 12px; border: 1px solid #ddd;'>Weight</th>
@@ -358,13 +358,13 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                 html_output <- paste0(
                     "
             <div style='font-family: Arial, sans-serif; max-width: 800px; line-height: 1.4;'>
-                <div style='background: #f5f5f5; border: 2px solid #333; padding: 15px; margin-bottom: 15px;'>
+                <div style='background-color: rgba(88, 88, 88, 0.06); border: 2px solid #333; padding: 15px; margin-bottom: 15px; color: inherit;'>
                 <h3 style='margin: 0 0 5px 0; font-size: 16px; color: #333;'>", weight_name, "</h3>
                 <p style='margin: 0; font-size: 14px; color: #666;'>", weight_desc, "</p>
                 </div>
 
                 <div style='font-size: 14px; color: #333;'>
-                    <div style='background: #f9f9f9; border: 1px solid #ccc; padding: 12px; margin: 15px 0;'>
+                    <div style='background-color: rgba(155, 155, 155, 0.06); border: 1px solid #ccc; padding: 12px; margin: 15px 0; color: inherit;'>
                         <p style='margin: 0 0 8px 0; font-weight: bold;'>Formula</p>
                         <p style='font-family: monospace; font-size: 13px; margin: 5px 0; background: white; padding: 8px; border: 1px solid #ccc;'>",
                     formula, "</p>
@@ -374,22 +374,22 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                     <p style='margin: 15px 0; font-weight: bold;'>Example (5-point scale):</p>",
                     example_table, "
 
-                    <div style='background: #f9f9f9; border: 1px solid #ccc; padding: 12px; margin: 15px 0;'>
+                    <div style='background-color: rgba(155, 155, 155, 0.06); border: 1px solid #ccc; padding: 12px; margin: 15px 0; color: inherit;'>
                         <p style='margin: 0 0 8px 0; font-weight: bold;'>When to Use</p>
                         <p style='margin: 0; font-size: 14px;'>", use_case, "</p>
                     </div>
 
-                    <div style='background: #f9f9f9; border: 1px solid #ccc; padding: 12px; margin: 15px 0;'>
+                    <div style='background-color: rgba(155, 155, 155, 0.06); border: 1px solid #ccc; padding: 12px; margin: 15px 0; color: inherit;'>
                         <p style='margin: 0 0 8px 0; font-weight: bold;'>Key Points</p>",
                     interpretation, "
                     </div>
 
-                    <div style='background: #f9f9f9; border: 1px solid #ccc; padding: 12px; margin: 15px 0;'>
+                    <div style='background-color: rgba(155, 155, 155, 0.06); border: 1px solid #ccc; padding: 12px; margin: 15px 0; color: inherit;'>
                         <p style='margin: 0 0 8px 0; font-weight: bold;'>Important Note</p>
                         <p style='margin: 0; font-size: 14px;'>Weighted kappa values cannot be directly compared to unweighted kappa. They measure different aspects of agreement.</p>
                     </div>
 
-                    <div style='background: #f9f9f9; border: 1px solid #ccc; padding: 12px; margin: 15px 0;'>
+                    <div style='background-color: rgba(155, 155, 155, 0.06); border: 1px solid #ccc; padding: 12px; margin: 15px 0; color: inherit;'>
                         <p style='margin: 0 0 8px 0; font-weight: bold;'>Interpretation Guidelines (Landis & Koch, 1977)</p>
                         <table style='width: 100%; font-size: 13px;'>
                         <tr><td style='padding: 2px 0;'>&lt; 0.00</td><td style='padding: 2px 0;'>Poor agreement</td></tr>
@@ -613,7 +613,7 @@ agreementClass <- if (requireNamespace("jmvcore")) {
 
                 html_content <- "
             <div style='font-family: Arial, sans-serif; max-width: 800px; line-height: 1.6;'>
-                <div style='background: #f9f9f9; border-left: 4px solid #333; padding: 15px; margin-bottom: 20px;'>
+                <div style='background-color: rgba(155, 155, 155, 0.06); border-left: 4px solid #333; padding: 15px; margin-bottom: 20px; color: inherit;'>
                     <h3 style='margin: 0 0 10px 0; color: #333;'>What is Gwet's AC Coefficient?</h3>
                     <p style='margin: 0; color: #333;'>
                         Gwet's AC coefficient solves the <strong>kappa paradox</strong> where Cohen's/Fleiss' kappa
@@ -621,7 +621,7 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                     </p>
                 </div>
 
-                <div style='background: #f9f9f9; border-left: 4px solid #333; padding: 15px; margin-bottom: 20px;'>
+                <div style='background-color: rgba(155, 155, 155, 0.06); border-left: 4px solid #333; padding: 15px; margin-bottom: 20px; color: inherit;'>
                     <h4 style='margin: 0 0 10px 0; color: #333;'>When to Use Gwet's AC</h4>
                     <p style='margin: 0 0 10px 0;'><strong>This method is particularly valuable when you have:</strong></p>
                     <ul style='margin: 0; padding-left: 20px;'>
@@ -631,10 +631,10 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                     </ul>
                 </div>
 
-                <div style='background: #f9f9f9; border-left: 4px solid #333; padding: 15px; margin-bottom: 20px;'>
+                <div style='background-color: rgba(155, 155, 155, 0.06); border-left: 4px solid #333; padding: 15px; margin-bottom: 20px; color: inherit;'>
                     <h4 style='margin: 0 0 10px 0; color: #333;'>AC1 vs AC2</h4>
                     <table style='width: 100%; border-collapse: collapse;'>
-                        <tr style='background: #f5f5f5;'>
+                        <tr style='background-color: rgba(88, 88, 88, 0.06); color: inherit;'>
                             <th style='padding: 8px; text-align: left; border-bottom: 2px solid #333;'>Method</th>
                             <th style='padding: 8px; text-align: left; border-bottom: 2px solid #333;'>Use Case</th>
                         </tr>
@@ -653,7 +653,7 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                     </table>
                 </div>
 
-                <div style='background: #f9f9f9; border-left: 4px solid #333; padding: 15px;'>
+                <div style='background-color: rgba(155, 155, 155, 0.06); border-left: 4px solid #333; padding: 15px; color: inherit;'>
                     <h4 style='margin: 0 0 10px 0; color: #333;'>Clinical Example</h4>
                     <p style='margin: 0; font-style: italic;'>
                         When diagnosing a rare tumor subtype that appears in only 2% of cases, kappa may be low (e.g., 0.40)
@@ -662,7 +662,7 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                     </p>
                 </div>
 
-                <div style='margin-top: 15px; padding: 10px; background: #f5f5f5; border-radius: 4px;'>
+                <div style='margin-top: 15px; padding: 10px; background-color: rgba(88, 88, 88, 0.06); border-radius: 4px; color: inherit;'>
                     <p style='margin: 0; font-size: 12px; color: #666;'>
                         <strong>Reference:</strong> Gwet, K. L. (2008). Computing inter-rater reliability and its variance
                         in the presence of high agreement. <em>British Journal of Mathematical and Statistical Psychology</em>, 61(1), 29-48.
@@ -678,16 +678,16 @@ agreementClass <- if (requireNamespace("jmvcore")) {
 
                 html_content <- "
             <div style='font-family: Arial, sans-serif; max-width: 900px; line-height: 1.6;'>
-                <div style='background: #f5f5f5; border: 2px solid #333; padding: 20px; margin-bottom: 20px;'>
+                <div style='background-color: rgba(88, 88, 88, 0.06); border: 2px solid #333; padding: 20px; margin-bottom: 20px; color: inherit;'>
                     <h2 style='margin: 0 0 10px 0;'>Clinical Use Cases & Method Selection Guide</h2>
                     <p style='margin: 0; opacity: 0.9;'>Choose the right agreement measure for your pathology research</p>
                 </div>
 
                 <!-- Categorical Data Methods -->
-                <div style='background: #f9f9f9; border-left: 4px solid #333; padding: 20px; margin-bottom: 20px;'>
+                <div style='background-color: rgba(155, 155, 155, 0.06); border-left: 4px solid #333; padding: 20px; margin-bottom: 20px; color: inherit;'>
                     <h3 style='margin: 0 0 15px 0; color: #333;'> Categorical/Ordinal Data</h3>
 
-                    <div style='background: #f9f9f9; border: 1px solid #ccc; padding: 15px; margin-bottom: 15px;'>
+                    <div style='background-color: rgba(155, 155, 155, 0.06); border: 1px solid #ccc; padding: 15px; margin-bottom: 15px; color: inherit;'>
                         <h4 style='margin: 0 0 10px 0; color: #333;'>Cohen's/Fleiss' Kappa (Standard Method)</h4>
                         <p style='margin: 0 0 10px 0;'><strong>Use for:</strong></p>
                         <ul style='margin: 0 0 10px 0; padding-left: 20px;'>
@@ -700,7 +700,7 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                         <p style='margin: 0; font-size: 13px; color: #666;'><em>Note: May be problematic with high agreement or rare categories</em></p>
                     </div>
 
-                    <div style='background: #f9f9f9; border: 1px solid #ccc; padding: 15px; margin-bottom: 15px;'>
+                    <div style='background-color: rgba(155, 155, 155, 0.06); border: 1px solid #ccc; padding: 15px; margin-bottom: 15px; color: inherit;'>
                         <h4 style='margin: 0 0 10px 0; color: #333;'>Weighted Kappa (Ordinal Data)</h4>
                         <p style='margin: 0 0 10px 0;'><strong>Use for ordered categories where partial credit matters:</strong></p>
                         <ul style='margin: 0 0 10px 0; padding-left: 20px;'>
@@ -709,12 +709,12 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                             <li><strong>Inflammation severity</strong> - Absent, mild, moderate, severe</li>
                             <li><strong>Fibrosis stage</strong> - F0, F1, F2, F3, F4</li>
                         </ul>
-                        <p style='margin: 0; padding: 10px; background: #f9f9f9; border-left: 3px solid #333; font-size: 13px;'>
+                        <p style='margin: 0; padding: 10px; background-color: rgba(155, 155, 155, 0.06); border-left: 3px solid #333; font-size: 13px; color: inherit;'>
                             <strong> Important:</strong> Use \"Show Level Ordering Information\" to verify proper ordering (e.g., F0 &#x2192; F1 &#x2192; F2 &#x2192; F3 &#x2192; F4)
                         </p>
                     </div>
 
-                    <div style='background: #f9f9f9; border: 1px solid #ccc; padding: 15px; margin-bottom: 15px;'>
+                    <div style='background-color: rgba(155, 155, 155, 0.06); border: 1px solid #ccc; padding: 15px; margin-bottom: 15px; color: inherit;'>
                         <h4 style='margin: 0 0 10px 0; color: #333;'>Gwet's AC1/AC2 (Kappa Paradox Solution)</h4>
                         <p style='margin: 0 0 10px 0;'><strong>Choose when you have:</strong></p>
                         <ul style='margin: 0 0 10px 0; padding-left: 20px;'>
@@ -723,12 +723,12 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                             <li><strong>Unbalanced categories</strong> - Metastasis (5% positive) vs primary (95%)</li>
                             <li><strong>Quality control studies</strong> - Most cases straightforward, few difficult</li>
                         </ul>
-                        <p style='margin: 0; padding: 10px; background: #f9f9f9; border-left: 3px solid #333; font-size: 13px;'>
+                        <p style='margin: 0; padding: 10px; background-color: rgba(155, 155, 155, 0.06); border-left: 3px solid #333; font-size: 13px; color: inherit;'>
                             <strong> Tip:</strong> Run both Kappa and Gwet's AC - if they differ substantially, Gwet's AC is more reliable
                         </p>
                     </div>
 
-                    <div style='background: #f9f9f9; border: 1px solid #ccc; padding: 15px; margin-bottom: 15px;'>
+                    <div style='background-color: rgba(155, 155, 155, 0.06); border: 1px solid #ccc; padding: 15px; margin-bottom: 15px; color: inherit;'>
                         <h4 style='margin: 0 0 10px 0; color: #333;'>Krippendorff's Alpha (Missing Data/Flexible)</h4>
                         <p style='margin: 0 0 10px 0;'><strong>Use when:</strong></p>
                         <ul style='margin: 0; padding-left: 20px;'>
@@ -740,10 +740,10 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                 </div>
 
                 <!-- Continuous Data Methods -->
-                <div style='background: #f9f9f9; border-left: 4px solid #333; padding: 20px; margin-bottom: 20px;'>
+                <div style='background-color: rgba(155, 155, 155, 0.06); border-left: 4px solid #333; padding: 20px; margin-bottom: 20px; color: inherit;'>
                     <h3 style='margin: 0 0 15px 0; color: #333;'> Continuous/Numeric Data</h3>
 
-                    <div style='background: #f9f9f9; border: 1px solid #ccc; padding: 15px; margin-bottom: 15px;'>
+                    <div style='background-color: rgba(155, 155, 155, 0.06); border: 1px solid #ccc; padding: 15px; margin-bottom: 15px; color: inherit;'>
                         <h4 style='margin: 0 0 10px 0; color: #333;'>ICC (Intraclass Correlation Coefficient)</h4>
                         <p style='margin: 0 0 10px 0;'><strong>Use for:</strong></p>
                         <ul style='margin: 0 0 10px 0; padding-left: 20px;'>
@@ -754,12 +754,12 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                             <li><strong>Digital pathology</strong> - Automated vs manual measurements</li>
                             <li><strong>Continuous scores</strong> - Visual analog scales (0-100)</li>
                         </ul>
-                        <p style='margin: 0; padding: 10px; background: #f9f9f9; border-left: 3px solid #333; font-size: 13px;'>
+                        <p style='margin: 0; padding: 10px; background-color: rgba(155, 155, 155, 0.06); border-left: 3px solid #333; font-size: 13px; color: inherit;'>
                             <strong> Model selection:</strong> Use ICC(2,1) or ICC(3,1) for most pathology studies where all cases are rated by the same pathologists
                         </p>
                     </div>
 
-                    <div style='background: #f9f9f9; border: 1px solid #ccc; padding: 15px; margin-bottom: 15px;'>
+                    <div style='background-color: rgba(155, 155, 155, 0.06); border: 1px solid #ccc; padding: 15px; margin-bottom: 15px; color: inherit;'>
                         <h4 style='margin: 0 0 10px 0; color: #333;'>Bland-Altman Plot (Visual Assessment)</h4>
                         <p style='margin: 0 0 10px 0;'><strong>Use alongside ICC to:</strong></p>
                         <ul style='margin: 0 0 10px 0; padding-left: 20px;'>
@@ -768,17 +768,17 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                             <li><strong>Check proportional bias</strong> - Does disagreement increase with measurement size?</li>
                             <li><strong>Define acceptable limits</strong> - What range of disagreement is clinically acceptable?</li>
                         </ul>
-                        <p style='margin: 0; padding: 10px; background: #f9f9f9; border-left: 3px solid #333; font-size: 13px;'>
+                        <p style='margin: 0; padding: 10px; background-color: rgba(155, 155, 155, 0.06); border-left: 3px solid #333; font-size: 13px; color: inherit;'>
                             <strong> Best practice:</strong> Always use ICC + Bland-Altman together for continuous data
                         </p>
                     </div>
                 </div>
 
                 <!-- Quick Decision Guide -->
-                <div style='background: #f5f5f5; border: 2px solid #333; padding: 20px; margin-bottom: 20px;'>
+                <div style='background-color: rgba(88, 88, 88, 0.06); border: 2px solid #333; padding: 20px; margin-bottom: 20px; color: inherit;'>
                     <h3 style='margin: 0 0 15px 0;'> Quick Decision Guide</h3>
                     <table style='width: 100%; background: white; color: #333; border-radius: 4px; overflow: hidden;'>
-                        <tr style='background: #f8f9fa;'>
+                        <tr style='background-color: rgba(138, 155, 172, 0.06); color: inherit;'>
                             <th style='padding: 12px; text-align: left; border-bottom: 2px solid #dee2e6;'>Your Data Type</th>
                             <th style='padding: 12px; text-align: left; border-bottom: 2px solid #dee2e6;'>Recommended Method</th>
                         </tr>
@@ -806,7 +806,7 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                 </div>
 
                 <!-- Sample Size Recommendations -->
-                <div style='margin-top: 20px; padding: 15px; background: #f9f9f9; border-left: 4px solid #333;'>
+                <div style='margin-top: 20px; padding: 15px; background-color: rgba(155, 155, 155, 0.06); border-left: 4px solid #333; color: inherit;'>
                     <h4 style='margin: 0 0 10px 0; color: #333;'> Sample Size Recommendations</h4>
                     <ul style='margin: 0; padding-left: 20px; font-size: 14px;'>
                         <li><strong>Minimum:</strong> 30 cases for stable kappa/ICC estimates</li>
@@ -825,7 +825,7 @@ agreementClass <- if (requireNamespace("jmvcore")) {
 
                 html_content <- "
             <div style='font-family: Arial, sans-serif; max-width: 800px; line-height: 1.6;'>
-                <div style='background: #f9f9f9; border-left: 4px solid #333; padding: 15px; margin-bottom: 20px;'>
+                <div style='background-color: rgba(155, 155, 155, 0.06); border-left: 4px solid #333; padding: 15px; margin-bottom: 20px; color: inherit;'>
                     <h3 style='margin: 0 0 10px 0; color: #333;'>What is Light's Kappa?</h3>
                     <p style='margin: 0; color: #333;'>
                         Light's kappa is an alternative agreement measure for <strong>3 or more raters</strong>.
@@ -833,7 +833,7 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                     </p>
                 </div>
 
-                <div style='background: #f9f9f9; border-left: 4px solid #333; padding: 15px; margin-bottom: 20px;'>
+                <div style='background-color: rgba(155, 155, 155, 0.06); border-left: 4px solid #333; padding: 15px; margin-bottom: 20px; color: inherit;'>
                     <h4 style='margin: 0 0 10px 0; color: #333;'>When to Use Light's Kappa</h4>
                     <p style='margin: 0 0 10px 0;'><strong>Choose Light's kappa instead of Fleiss' kappa when:</strong></p>
                     <ul style='margin: 0; padding-left: 20px;'>
@@ -844,10 +844,10 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                     </ul>
                 </div>
 
-                <div style='background: #f9f9f9; border-left: 4px solid #333; padding: 15px; margin-bottom: 20px;'>
+                <div style='background-color: rgba(155, 155, 155, 0.06); border-left: 4px solid #333; padding: 15px; margin-bottom: 20px; color: inherit;'>
                     <h4 style='margin: 0 0 10px 0; color: #333;'>Light's Kappa vs Fleiss' Kappa</h4>
                     <table style='width: 100%; border-collapse: collapse;'>
-                        <tr style='background: #f5f5f5;'>
+                        <tr style='background-color: rgba(88, 88, 88, 0.06); color: inherit;'>
                             <th style='padding: 8px; text-align: left; border-bottom: 2px solid #333;'>Feature</th>
                             <th style='padding: 8px; text-align: left; border-bottom: 2px solid #333;'>Light's Kappa</th>
                             <th style='padding: 8px; text-align: left; border-bottom: 2px solid #333;'>Fleiss' Kappa</th>
@@ -875,7 +875,7 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                     </table>
                 </div>
 
-                <div style='background: #f9f9f9; border-left: 4px solid #333; padding: 15px; margin-bottom: 20px;'>
+                <div style='background-color: rgba(155, 155, 155, 0.06); border-left: 4px solid #333; padding: 15px; margin-bottom: 20px; color: inherit;'>
                     <h4 style='margin: 0 0 10px 0; color: #333;'>Clinical Example</h4>
                     <p style='margin: 0; font-style: italic;'>
                         In a study with 3 pathologists grading dysplasia (none, low-grade, high-grade):
@@ -886,7 +886,7 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                     </p>
                 </div>
 
-                <div style='background: #f9f9f9; border-left: 4px solid #333; padding: 15px;'>
+                <div style='background-color: rgba(155, 155, 155, 0.06); border-left: 4px solid #333; padding: 15px; color: inherit;'>
                     <h4 style='margin: 0 0 10px 0; color: #333;'>Interpretation</h4>
                     <p style='margin: 0 0 5px 0;'>Use the same interpretation guidelines as Cohen's kappa:</p>
                     <table style='width: 100%; border-collapse: collapse; font-size: 14px;'>
@@ -913,7 +913,7 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                     </table>
                 </div>
 
-                <div style='margin-top: 15px; padding: 10px; background: #f5f5f5; border-radius: 4px;'>
+                <div style='margin-top: 15px; padding: 10px; background-color: rgba(88, 88, 88, 0.06); border-radius: 4px; color: inherit;'>
                     <p style='margin: 0; font-size: 12px; color: #666;'>
                         <strong>Reference:</strong> Light, R. J. (1971). Measures of response agreement for qualitative data: Some generalizations and alternatives.
                         <em>Psychological Bulletin</em>, 76(5), 365-377.
@@ -1007,7 +1007,7 @@ agreementClass <- if (requireNamespace("jmvcore")) {
 
                 html_content <- "
             <div style='font-family: Arial, sans-serif; max-width: 800px; line-height: 1.6;'>
-                <div style='background: #f9f9f9; border-left: 4px solid #333; padding: 15px; margin-bottom: 20px;'>
+                <div style='background-color: rgba(155, 155, 155, 0.06); border-left: 4px solid #333; padding: 15px; margin-bottom: 20px; color: inherit;'>
                     <h3 style='margin: 0 0 10px 0; color: #333;'>What is the Finn Coefficient?</h3>
                     <p style='margin: 0; color: #333;'>
                         The Finn coefficient is a <strong>variance-based agreement measure</strong> for categorical data.
@@ -1017,7 +1017,7 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                     </p>
                 </div>
 
-                <div style='background: #f9f9f9; border-left: 4px solid #333; padding: 15px; margin-bottom: 20px;'>
+                <div style='background-color: rgba(155, 155, 155, 0.06); border-left: 4px solid #333; padding: 15px; margin-bottom: 20px; color: inherit;'>
                     <h4 style='margin: 0 0 10px 0; color: #333;'>When to Use Finn Coefficient</h4>
                     <p style='margin: 0 0 10px 0;'><strong>Particularly useful for:</strong></p>
                     <ul style='margin: 0; padding-left: 20px;'>
@@ -1029,10 +1029,10 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                     </ul>
                 </div>
 
-                <div style='background: #f9f9f9; border-left: 4px solid #333; padding: 15px; margin-bottom: 20px;'>
+                <div style='background-color: rgba(155, 155, 155, 0.06); border-left: 4px solid #333; padding: 15px; margin-bottom: 20px; color: inherit;'>
                     <h4 style='margin: 0 0 10px 0; color: #333;'>Finn Coefficient vs Kappa</h4>
                     <table style='width: 100%; border-collapse: collapse;'>
-                        <tr style='background: #f5f5f5;'>
+                        <tr style='background-color: rgba(88, 88, 88, 0.06); color: inherit;'>
                             <th style='padding: 8px; text-align: left; border-bottom: 2px solid #333;'>Feature</th>
                             <th style='padding: 8px; text-align: left; border-bottom: 2px solid #333;'>Finn Coefficient</th>
                             <th style='padding: 8px; text-align: left; border-bottom: 2px solid #333;'>Cohen's/Fleiss' Kappa</th>
@@ -1060,7 +1060,7 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                     </table>
                 </div>
 
-                <div style='background: #f9f9f9; border-left: 4px solid #333; padding: 15px; margin-bottom: 20px;'>
+                <div style='background-color: rgba(155, 155, 155, 0.06); border-left: 4px solid #333; padding: 15px; margin-bottom: 20px; color: inherit;'>
                     <h4 style='margin: 0 0 10px 0; color: #333;'>Clinical Pathology Use Cases</h4>
 
                     <p style='margin: 0 0 10px 0; font-weight: bold;'>1. Dysplasia Grading in Barrett's Esophagus (High Agreement Scenario):</p>
@@ -1109,7 +1109,7 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                     </ul>
                 </div>
 
-                <div style='background: #f9f9f9; border-left: 4px solid #333; padding: 15px; margin-bottom: 20px;'>
+                <div style='background-color: rgba(155, 155, 155, 0.06); border-left: 4px solid #333; padding: 15px; margin-bottom: 20px; color: inherit;'>
                     <h4 style='margin: 0 0 10px 0; color: #333;'>Model Types</h4>
                     <p style='margin: 0 0 10px 0;'><strong>One-way model (subjects random):</strong></p>
                     <ul style='margin: 0 0 10px 0; padding-left: 20px;'>
@@ -1125,7 +1125,7 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                     </ul>
                 </div>
 
-                <div style='background: #f9f9f9; border-left: 4px solid #333; padding: 15px;'>
+                <div style='background-color: rgba(155, 155, 155, 0.06); border-left: 4px solid #333; padding: 15px; color: inherit;'>
                     <h4 style='margin: 0 0 10px 0; color: #333;'>Interpretation</h4>
                     <p style='margin: 0 0 5px 0;'>The Finn coefficient ranges from 0 to 1:</p>
                     <table style='width: 100%; border-collapse: collapse; font-size: 14px;'>
@@ -1156,7 +1156,7 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                     </p>
                 </div>
 
-                <div style='margin-top: 15px; padding: 10px; background: #f5f5f5; border-radius: 4px;'>
+                <div style='margin-top: 15px; padding: 10px; background-color: rgba(88, 88, 88, 0.06); border-radius: 4px; color: inherit;'>
                     <p style='margin: 0; font-size: 12px; color: #666;'>
                         <strong>Reference:</strong> Finn, R. H. (1970). A note on estimating the reliability of categorical data.
                         <em>Educational and Psychological Measurement</em>, 30, 71-76.
@@ -1300,7 +1300,7 @@ agreementClass <- if (requireNamespace("jmvcore")) {
 
                 html_content <- "
             <div style='font-family: Arial, sans-serif; max-width: 800px; line-height: 1.6;'>
-                <div style='background: #f9f9f9; border-left: 4px solid #333; padding: 15px; margin-bottom: 20px;'>
+                <div style='background-color: rgba(155, 155, 155, 0.06); border-left: 4px solid #333; padding: 15px; margin-bottom: 20px; color: inherit;'>
                     <h3 style='margin: 0 0 10px 0; color: #333;'>What is Kendall's W?</h3>
                     <p style='margin: 0; color: #333;'>
                         Kendall's coefficient of concordance (W) measures the <strong>agreement among multiple raters</strong>
@@ -1309,7 +1309,7 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                     </p>
                 </div>
 
-                <div style='background: #f9f9f9; border-left: 4px solid #333; padding: 15px; margin-bottom: 20px;'>
+                <div style='background-color: rgba(155, 155, 155, 0.06); border-left: 4px solid #333; padding: 15px; margin-bottom: 20px; color: inherit;'>
                     <h4 style='margin: 0 0 10px 0; color: #333;'>When to Use Kendall's W</h4>
                     <p style='margin: 0 0 10px 0;'><strong>Particularly useful for:</strong></p>
                     <ul style='margin: 0; padding-left: 20px;'>
@@ -1320,7 +1320,7 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                     </ul>
                 </div>
 
-                <div style='background: #f9f9f9; border-left: 4px solid #333; padding: 15px; margin-bottom: 20px;'>
+                <div style='background-color: rgba(155, 155, 155, 0.06); border-left: 4px solid #333; padding: 15px; margin-bottom: 20px; color: inherit;'>
                     <h4 style='margin: 0 0 10px 0; color: #333;'>Interpreting Kendall's W</h4>
                     <table style='width: 100%; border-collapse: collapse;'>
                         <tr>
@@ -1346,10 +1346,10 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                     </table>
                 </div>
 
-                <div style='background: #f9f9f9; border-left: 4px solid #333; padding: 15px; margin-bottom: 20px;'>
+                <div style='background-color: rgba(155, 155, 155, 0.06); border-left: 4px solid #333; padding: 15px; margin-bottom: 20px; color: inherit;'>
                     <h4 style='margin: 0 0 10px 0; color: #333;'>Kendall's W vs Other Methods</h4>
                     <table style='width: 100%; border-collapse: collapse; font-size: 13px;'>
-                        <tr style='background: #f5f5f5;'>
+                        <tr style='background-color: rgba(88, 88, 88, 0.06); color: inherit;'>
                             <th style='padding: 8px; text-align: left; border-bottom: 2px solid #333;'>Method</th>
                             <th style='padding: 8px; text-align: left; border-bottom: 2px solid #333;'>Best For</th>
                         </tr>
@@ -1372,7 +1372,7 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                     </table>
                 </div>
 
-                <div style='background: #f9f9f9; border-left: 4px solid #333; padding: 15px; margin-bottom: 20px;'>
+                <div style='background-color: rgba(155, 155, 155, 0.06); border-left: 4px solid #333; padding: 15px; margin-bottom: 20px; color: inherit;'>
                     <h4 style='margin: 0 0 10px 0; color: #333;'>Clinical Pathology Use Cases</h4>
 
                     <p style='margin: 0 0 10px 0; font-weight: bold;'>1. Diagnostic Difficulty Ranking (Educational Assessment):</p>
@@ -1422,7 +1422,7 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                     </ul>
                 </div>
 
-                <div style='background: #f9f9f9; border-left: 4px solid #333; padding: 15px;'>
+                <div style='background-color: rgba(155, 155, 155, 0.06); border-left: 4px solid #333; padding: 15px; color: inherit;'>
                     <h4 style='margin: 0 0 10px 0; color: #333;'>Statistical Significance</h4>
                     <p style='margin: 0; font-size: 13px;'>
                         The chi-square test evaluates whether the observed agreement (W) is statistically different from
@@ -1431,7 +1431,7 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                     </p>
                 </div>
 
-                <div style='margin-top: 15px; padding: 10px; background: #f5f5f5; border-radius: 4px;'>
+                <div style='margin-top: 15px; padding: 10px; background-color: rgba(88, 88, 88, 0.06); border-radius: 4px; color: inherit;'>
                     <p style='margin: 0; font-size: 12px; color: #666;'>
                         <strong>Reference:</strong> Kendall, M. G., & Babington Smith, B. (1939). The problem of m rankings.
                         <em>The Annals of Mathematical Statistics</em>, 10(3), 275-287.
@@ -1535,7 +1535,7 @@ agreementClass <- if (requireNamespace("jmvcore")) {
 
                 html_content <- "
             <div style='font-family: Arial, sans-serif; max-width: 800px; line-height: 1.6;'>
-                <div style='background: #f9f9f9; border-left: 4px solid #333; padding: 15px; margin-bottom: 20px;'>
+                <div style='background-color: rgba(155, 155, 155, 0.06); border-left: 4px solid #333; padding: 15px; margin-bottom: 20px; color: inherit;'>
                     <h3 style='margin: 0 0 10px 0; color: #333;'>What is Robinson's A?</h3>
                     <p style='margin: 0; color: #333;'>
                         Robinson's A is an <strong>ordinal agreement coefficient</strong> based on the proportion of
@@ -1545,7 +1545,7 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                     </p>
                 </div>
 
-                <div style='background: #f9f9f9; border-left: 4px solid #333; padding: 15px; margin-bottom: 20px;'>
+                <div style='background-color: rgba(155, 155, 155, 0.06); border-left: 4px solid #333; padding: 15px; margin-bottom: 20px; color: inherit;'>
                     <h4 style='margin: 0 0 10px 0; color: #333;'>When to Use Robinson's A</h4>
                     <p style='margin: 0 0 10px 0;'><strong>Particularly useful for:</strong></p>
                     <ul style='margin: 0; padding-left: 20px;'>
@@ -1557,10 +1557,10 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                     </ul>
                 </div>
 
-                <div style='background: #f9f9f9; border-left: 4px solid #333; padding: 15px; margin-bottom: 20px;'>
+                <div style='background-color: rgba(155, 155, 155, 0.06); border-left: 4px solid #333; padding: 15px; margin-bottom: 20px; color: inherit;'>
                     <h4 style='margin: 0 0 10px 0; color: #333;'>Robinson's A vs Other Ordinal Measures</h4>
                     <table style='width: 100%; border-collapse: collapse;'>
-                        <tr style='background: #f5f5f5;'>
+                        <tr style='background-color: rgba(88, 88, 88, 0.06); color: inherit;'>
                             <th style='padding: 8px; text-align: left; border-bottom: 2px solid #333;'>Measure</th>
                             <th style='padding: 8px; text-align: left; border-bottom: 2px solid #333;'>Focus</th>
                             <th style='padding: 8px; text-align: left; border-bottom: 2px solid #333;'>Sensitivity</th>
@@ -1588,7 +1588,7 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                     </table>
                 </div>
 
-                <div style='background: #f9f9f9; border-left: 4px solid #333; padding: 15px; margin-bottom: 20px;'>
+                <div style='background-color: rgba(155, 155, 155, 0.06); border-left: 4px solid #333; padding: 15px; margin-bottom: 20px; color: inherit;'>
                     <h4 style='margin: 0 0 10px 0; color: #333;'>Clinical Pathology Use Cases</h4>
 
                     <p style='margin: 0 0 10px 0; font-weight: bold;'>1. Tumor Grade Agreement (Ordinal Classification):</p>
@@ -1638,7 +1638,7 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                     </ul>
                 </div>
 
-                <div style='background: #f9f9f9; border-left: 4px solid #333; padding: 15px; margin-bottom: 20px;'>
+                <div style='background-color: rgba(155, 155, 155, 0.06); border-left: 4px solid #333; padding: 15px; margin-bottom: 20px; color: inherit;'>
                     <h4 style='margin: 0 0 10px 0; color: #333;'>Interpretation Guidelines</h4>
                     <table style='width: 100%; border-collapse: collapse; font-size: 14px;'>
                         <tr>
@@ -1668,7 +1668,7 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                     </p>
                 </div>
 
-                <div style='background: #f9f9f9; border-left: 4px solid #333; padding: 15px;'>
+                <div style='background-color: rgba(155, 155, 155, 0.06); border-left: 4px solid #333; padding: 15px; color: inherit;'>
                     <h4 style='margin: 0 0 10px 0; color: #333;'>Key Advantages</h4>
                     <ul style='margin: 0; padding-left: 20px; font-size: 13px;'>
                         <li><strong>Robust to skewed distributions:</strong> Less affected by category imbalance than kappa</li>
@@ -1678,7 +1678,7 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                     </ul>
                 </div>
 
-                <div style='margin-top: 15px; padding: 10px; background: #f5f5f5; border-radius: 4px;'>
+                <div style='margin-top: 15px; padding: 10px; background-color: rgba(88, 88, 88, 0.06); border-radius: 4px; color: inherit;'>
                     <p style='margin: 0; font-size: 12px; color: #666;'>
                         <strong>Reference:</strong> Robinson, W. S. (1957). The statistical measurement of agreement.
                         <em>American Sociological Review</em>, 22(1), 17-25.
@@ -1876,7 +1876,7 @@ agreementClass <- if (requireNamespace("jmvcore")) {
 
                 html_content <- "
             <div style='font-family: Arial, sans-serif; max-width: 800px; line-height: 1.6;'>
-                <div style='background: #f9f9f9; border-left: 4px solid #333; padding: 15px; margin-bottom: 20px;'>
+                <div style='background-color: rgba(155, 155, 155, 0.06); border-left: 4px solid #333; padding: 15px; margin-bottom: 20px; color: inherit;'>
                     <h3 style='margin: 0 0 10px 0; color: #333;'>What is Mean Spearman Rho?</h3>
                     <p style='margin: 0; color: #333;'>
                         Mean Spearman Rho (&#x3C1;) is the <strong>average rank correlation coefficient</strong> across all
@@ -1887,7 +1887,7 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                     </p>
                 </div>
 
-                <div style='background: #f9f9f9; border-left: 4px solid #333; padding: 15px; margin-bottom: 20px;'>
+                <div style='background-color: rgba(155, 155, 155, 0.06); border-left: 4px solid #333; padding: 15px; margin-bottom: 20px; color: inherit;'>
                     <h4 style='margin: 0 0 10px 0; color: #333;'>When to Use Mean Spearman Rho</h4>
                     <p style='margin: 0 0 10px 0;'><strong>Particularly useful for:</strong></p>
                     <ul style='margin: 0; padding-left: 20px;'>
@@ -1900,10 +1900,10 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                     </ul>
                 </div>
 
-                <div style='background: #f9f9f9; border-left: 4px solid #333; padding: 15px; margin-bottom: 20px;'>
+                <div style='background-color: rgba(155, 155, 155, 0.06); border-left: 4px solid #333; padding: 15px; margin-bottom: 20px; color: inherit;'>
                     <h4 style='margin: 0 0 10px 0; color: #333;'>Spearman Rho vs Other Ordinal Measures</h4>
                     <table style='width: 100%; border-collapse: collapse;'>
-                        <tr style='background: #f5f5f5;'>
+                        <tr style='background-color: rgba(88, 88, 88, 0.06); color: inherit;'>
                             <th style='padding: 8px; text-align: left; border-bottom: 2px solid #333;'>Measure</th>
                             <th style='padding: 8px; text-align: left; border-bottom: 2px solid #333;'>What It Measures</th>
                             <th style='padding: 8px; text-align: left; border-bottom: 2px solid #333;'>Best Use</th>
@@ -1941,7 +1941,7 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                     </p>
                 </div>
 
-                <div style='background: #f9f9f9; border-left: 4px solid #333; padding: 15px; margin-bottom: 20px;'>
+                <div style='background-color: rgba(155, 155, 155, 0.06); border-left: 4px solid #333; padding: 15px; margin-bottom: 20px; color: inherit;'>
                     <h4 style='margin: 0 0 10px 0; color: #333;'>Clinical Pathology Use Cases</h4>
 
                     <p style='margin: 0 0 10px 0; font-weight: bold;'>1. Tumor Grade Severity Correlation (Multi-Rater Consistency):</p>
@@ -1991,7 +1991,7 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                     </ul>
                 </div>
 
-                <div style='background: #f9f9f9; border-left: 4px solid #333; padding: 15px; margin-bottom: 20px;'>
+                <div style='background-color: rgba(155, 155, 155, 0.06); border-left: 4px solid #333; padding: 15px; margin-bottom: 20px; color: inherit;'>
                     <h4 style='margin: 0 0 10px 0; color: #333;'>Interpretation Guidelines</h4>
                     <table style='width: 100%; border-collapse: collapse; font-size: 14px;'>
                         <tr>
@@ -2022,7 +2022,7 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                     </p>
                 </div>
 
-                <div style='background: #f9f9f9; border-left: 4px solid #333; padding: 15px;'>
+                <div style='background-color: rgba(155, 155, 155, 0.06); border-left: 4px solid #333; padding: 15px; color: inherit;'>
                     <h4 style='margin: 0 0 10px 0; color: #333;'>Key Advantages</h4>
                     <ul style='margin: 0; padding-left: 20px; font-size: 13px;'>
                         <li><strong>Nonparametric:</strong> No assumptions about distribution or linearity</li>
@@ -2033,7 +2033,7 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                     </ul>
                 </div>
 
-                <div style='margin-top: 15px; padding: 10px; background: #f5f5f5; border-radius: 4px;'>
+                <div style='margin-top: 15px; padding: 10px; background-color: rgba(88, 88, 88, 0.06); border-radius: 4px; color: inherit;'>
                     <p style='margin: 0; font-size: 12px; color: #666;'>
                         <strong>Reference:</strong> Spearman, C. (1904). The proof and measurement of association between two things.
                         <em>American Journal of Psychology</em>, 15(1), 72-101.
@@ -2162,7 +2162,7 @@ agreementClass <- if (requireNamespace("jmvcore")) {
 
                 html_content <- "
             <div style='font-family: Arial, sans-serif; max-width: 800px; line-height: 1.6;'>
-                <div style='background: #f9f9f9; border-left: 4px solid #333; padding: 15px; margin-bottom: 20px;'>
+                <div style='background-color: rgba(155, 155, 155, 0.06); border-left: 4px solid #333; padding: 15px; margin-bottom: 20px; color: inherit;'>
                     <h3 style='margin: 0 0 10px 0; color: #333;'>What is Mean Pearson Correlation?</h3>
                     <p style='margin: 0; color: #333;'>
                         Mean Pearson Correlation (r) is the <strong>average linear correlation coefficient</strong> across all
@@ -2173,7 +2173,7 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                     </p>
                 </div>
 
-                <div style='background: #f9f9f9; border-left: 4px solid #333; padding: 15px; margin-bottom: 20px;'>
+                <div style='background-color: rgba(155, 155, 155, 0.06); border-left: 4px solid #333; padding: 15px; margin-bottom: 20px; color: inherit;'>
                     <h4 style='margin: 0 0 10px 0; color: #333;'>When to Use Mean Pearson Correlation</h4>
                     <p style='margin: 0 0 10px 0;'><strong>Particularly useful for:</strong></p>
                     <ul style='margin: 0; padding-left: 20px;'>
@@ -2186,10 +2186,10 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                     </ul>
                 </div>
 
-                <div style='background: #f9f9f9; border-left: 4px solid #333; padding: 15px; margin-bottom: 20px;'>
+                <div style='background-color: rgba(155, 155, 155, 0.06); border-left: 4px solid #333; padding: 15px; margin-bottom: 20px; color: inherit;'>
                     <h4 style='margin: 0 0 10px 0; color: #333;'>Pearson r vs Other Continuous Measures</h4>
                     <table style='width: 100%; border-collapse: collapse;'>
-                        <tr style='background: #f5f5f5;'>
+                        <tr style='background-color: rgba(88, 88, 88, 0.06); color: inherit;'>
                             <th style='padding: 8px; text-align: left; border-bottom: 2px solid #333;'>Measure</th>
                             <th style='padding: 8px; text-align: left; border-bottom: 2px solid #333;'>What It Measures</th>
                             <th style='padding: 8px; text-align: left; border-bottom: 2px solid #333;'>Best Use</th>
@@ -2222,7 +2222,7 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                     </p>
                 </div>
 
-                <div style='background: #f9f9f9; border-left: 4px solid #333; padding: 15px; margin-bottom: 20px;'>
+                <div style='background-color: rgba(155, 155, 155, 0.06); border-left: 4px solid #333; padding: 15px; margin-bottom: 20px; color: inherit;'>
                     <h4 style='margin: 0 0 10px 0; color: #333;'>Clinical Pathology Use Cases</h4>
 
                     <p style='margin: 0 0 10px 0; font-weight: bold;'>1. Tumor Measurement Agreement (Longest Diameter):</p>
@@ -2272,7 +2272,7 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                     </ul>
                 </div>
 
-                <div style='background: #f9f9f9; border-left: 4px solid #333; padding: 15px; margin-bottom: 20px;'>
+                <div style='background-color: rgba(155, 155, 155, 0.06); border-left: 4px solid #333; padding: 15px; margin-bottom: 20px; color: inherit;'>
                     <h4 style='margin: 0 0 10px 0; color: #333;'>Interpretation Guidelines</h4>
                     <table style='width: 100%; border-collapse: collapse; font-size: 14px;'>
                         <tr>
@@ -2303,7 +2303,7 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                     </p>
                 </div>
 
-                <div style='background: #f9f9f9; border-left: 4px solid #333; padding: 15px; margin-bottom: 20px;'>
+                <div style='background-color: rgba(155, 155, 155, 0.06); border-left: 4px solid #333; padding: 15px; margin-bottom: 20px; color: inherit;'>
                     <h4 style='margin: 0 0 10px 0; color: #333;'>Correlation vs. Agreement</h4>
                     <p style='margin: 0 0 10px 0; font-size: 13px;'>
                         <strong>Important distinction:</strong> Pearson correlation measures how measurements <em>vary together</em>,
@@ -2321,7 +2321,7 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                     </p>
                 </div>
 
-                <div style='background: #f9f9f9; border-left: 4px solid #333; padding: 15px;'>
+                <div style='background-color: rgba(155, 155, 155, 0.06); border-left: 4px solid #333; padding: 15px; color: inherit;'>
                     <h4 style='margin: 0 0 10px 0; color: #333;'>Key Advantages</h4>
                     <ul style='margin: 0; padding-left: 20px; font-size: 13px;'>
                         <li><strong>Simple and familiar:</strong> Widely understood correlation coefficient</li>
@@ -2332,7 +2332,7 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                     </ul>
                 </div>
 
-                <div style='margin-top: 15px; padding: 10px; background: #f5f5f5; border-radius: 4px;'>
+                <div style='margin-top: 15px; padding: 10px; background-color: rgba(88, 88, 88, 0.06); border-radius: 4px; color: inherit;'>
                     <p style='margin: 0; font-size: 12px; color: #666;'>
                         <strong>Reference:</strong> Pearson, K. (1895). Note on regression and inheritance in the case of two parents.
                         <em>Proceedings of the Royal Society of London</em>, 58, 240-242.
@@ -2453,7 +2453,7 @@ agreementClass <- if (requireNamespace("jmvcore")) {
 
                 html_content <- "
             <div style='font-family: Arial, sans-serif; max-width: 800px; line-height: 1.6;'>
-                <div style='background: #f9f9f9; border-left: 4px solid #333; padding: 15px; margin-bottom: 20px;'>
+                <div style='background-color: rgba(155, 155, 155, 0.06); border-left: 4px solid #333; padding: 15px; margin-bottom: 20px; color: inherit;'>
                     <h3 style='margin: 0 0 10px 0; color: #333;'>What is Lin's Concordance Correlation Coefficient (CCC)?</h3>
                     <p style='margin: 0; color: #333;'>
                         Lin's CCC evaluates <strong>agreement</strong> (not just association) by measuring both:
@@ -2470,7 +2470,7 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                     </p>
                 </div>
 
-                <div style='background: #f9f9f9; border-left: 4px solid #333; padding: 15px; margin-bottom: 20px;'>
+                <div style='background-color: rgba(155, 155, 155, 0.06); border-left: 4px solid #333; padding: 15px; margin-bottom: 20px; color: inherit;'>
                     <h4 style='margin: 0 0 10px 0; color: #333;'>When to Use Lin's CCC</h4>
                     <p style='margin: 0 0 10px 0;'><strong>Essential for method comparison and validation:</strong></p>
                     <ul style='margin: 0; padding-left: 20px;'>
@@ -2482,10 +2482,10 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                     </ul>
                 </div>
 
-                <div style='background: #f9f9f9; border-left: 4px solid #333; padding: 15px; margin-bottom: 20px;'>
+                <div style='background-color: rgba(155, 155, 155, 0.06); border-left: 4px solid #333; padding: 15px; margin-bottom: 20px; color: inherit;'>
                     <h4 style='margin: 0 0 10px 0; color: #333;'>Interpreting CCC Values</h4>
                     <table style='width: 100%; border-collapse: collapse;'>
-                        <tr style='background: #f5f5f5;'>
+                        <tr style='background-color: rgba(88, 88, 88, 0.06); color: inherit;'>
                             <th style='padding: 8px; text-align: left; border-bottom: 2px solid #333;'>CCC Value</th>
                             <th style='padding: 8px; text-align: left; border-bottom: 2px solid #333;'>Agreement Strength</th>
                             <th style='padding: 8px; text-align: left; border-bottom: 2px solid #333;'>Interpretation</th>
@@ -2526,10 +2526,10 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                     </p>
                 </div>
 
-                <div style='background: #f9f9f9; border-left: 4px solid #333; padding: 15px; margin-bottom: 20px;'>
+                <div style='background-color: rgba(155, 155, 155, 0.06); border-left: 4px solid #333; padding: 15px; margin-bottom: 20px; color: inherit;'>
                     <h4 style='margin: 0 0 10px 0; color: #333;'>CCC vs. Pearson's r: Key Differences</h4>
                     <table style='width: 100%; border-collapse: collapse;'>
-                        <tr style='background: #f5f5f5;'>
+                        <tr style='background-color: rgba(88, 88, 88, 0.06); color: inherit;'>
                             <th style='padding: 8px; text-align: left; border-bottom: 2px solid #333;'>Characteristic</th>
                             <th style='padding: 8px; text-align: left; border-bottom: 2px solid #333;'>Pearson's r</th>
                             <th style='padding: 8px; text-align: left; border-bottom: 2px solid #333;'>Lin's CCC</th>
@@ -2561,7 +2561,7 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                     </p>
                 </div>
 
-                <div style='background: #f9f9f9; border-left: 4px solid #333; padding: 15px; margin-bottom: 20px;'>
+                <div style='background-color: rgba(155, 155, 155, 0.06); border-left: 4px solid #333; padding: 15px; margin-bottom: 20px; color: inherit;'>
                     <h4 style='margin: 0 0 10px 0; color: #333;'>Clinical Use Cases in Pathology</h4>
 
                     <div style='margin-bottom: 20px;'>
@@ -2698,7 +2698,7 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                     </div>
                 </div>
 
-                <div style='background: #f9f9f9; border-left: 4px solid #333; padding: 15px; margin-bottom: 20px;'>
+                <div style='background-color: rgba(155, 155, 155, 0.06); border-left: 4px solid #333; padding: 15px; margin-bottom: 20px; color: inherit;'>
                     <h4 style='margin: 0 0 10px 0; color: #333;'> Important Considerations</h4>
                     <ul style='margin: 0; padding-left: 20px;'>
                         <li><strong>Sample size:</strong> Minimum 30 paired observations; 100+ preferred for stable estimates</li>
@@ -2711,7 +2711,7 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                     </ul>
                 </div>
 
-                <div style='background: #f9f9f9; border-left: 4px solid #333; padding: 15px;'>
+                <div style='background-color: rgba(155, 155, 155, 0.06); border-left: 4px solid #333; padding: 15px; color: inherit;'>
                     <h4 style='margin: 0 0 10px 0; color: #333;'>Statistical Notes</h4>
                     <ul style='margin: 0; padding-left: 20px;'>
                         <li><strong>CCC formula:</strong> &#x3C1;<sub>c</sub> = 2&#x3C1;&#x3C3;<sub>x</sub>&#x3C3;<sub>y</sub> / (&#x3C3;<sub>x</sub>&#xB2; + &#x3C3;<sub>y</sub>&#xB2; + (&#x3BC;<sub>x</sub> - &#x3BC;<sub>y</sub>)&#xB2;)</li>
@@ -2977,7 +2977,7 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                 # Advantages Over Alternatives
                 html <- paste0(html, "<h3>Advantages Over Alternative Methods</h3>")
                 html <- paste0(html, '<table style="width: 100%; border-collapse: collapse;">')
-                html <- paste0(html, '<tr style="background-color: #f0f0f0;">')
+                html <- paste0(html, '<tr style="background-color: rgba(33, 33, 33, 0.07); color: inherit;">')
                 html <- paste0(html, '<th style="border: 1px solid #ddd; padding: 8px;">Method</th>')
                 html <- paste0(html, '<th style="border: 1px solid #ddd; padding: 8px;">Limitation</th>')
                 html <- paste0(html, '<th style="border: 1px solid #ddd; padding: 8px;">TDI Advantage</th>')
@@ -3324,7 +3324,7 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                 # Comparison Table
                 html <- paste0(html, "<h3>Comparison with Overall Metrics</h3>")
                 html <- paste0(html, '<table style="width: 100%; border-collapse: collapse;">')
-                html <- paste0(html, '<tr style="background-color: #f0f0f0;">')
+                html <- paste0(html, '<tr style="background-color: rgba(33, 33, 33, 0.07); color: inherit;">')
                 html <- paste0(html, '<th style="border: 1px solid #ddd; padding: 8px;">Metric</th>')
                 html <- paste0(html, '<th style="border: 1px solid #ddd; padding: 8px;">What It Measures</th>')
                 html <- paste0(html, '<th style="border: 1px solid #ddd; padding: 8px;">Best Use</th>')
@@ -3664,7 +3664,7 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                 # Color Scheme Guide
                 html <- paste0(html, "<h3>Choosing Color Schemes</h3>")
                 html <- paste0(html, '<table style="width: 100%; border-collapse: collapse;">')
-                html <- paste0(html, '<tr style="background-color: #f0f0f0;">')
+                html <- paste0(html, '<tr style="background-color: rgba(33, 33, 33, 0.07); color: inherit;">')
                 html <- paste0(html, '<th style="border: 1px solid #ddd; padding: 8px;">Color Scheme</th>')
                 html <- paste0(html, '<th style="border: 1px solid #ddd; padding: 8px;">Best Use</th>')
                 html <- paste0(html, '<th style="border: 1px solid #ddd; padding: 8px;">Considerations</th>')
@@ -3785,7 +3785,7 @@ agreementClass <- if (requireNamespace("jmvcore")) {
 
                 html_content <- "
             <div style='font-family: Arial, sans-serif; max-width: 800px; line-height: 1.6;'>
-                <div style='background: #f9f9f9; border-left: 4px solid #333; padding: 15px; margin-bottom: 20px;'>
+                <div style='background-color: rgba(155, 155, 155, 0.06); border-left: 4px solid #333; padding: 15px; margin-bottom: 20px; color: inherit;'>
                     <h3 style='margin: 0 0 10px 0; color: #333;'>What are Rater Profile Plots?</h3>
                     <p style='margin: 0; color: #333;'>
                         Rater Profile Plots visualize the <strong>distribution of ratings</strong> for each individual rater.
@@ -3794,7 +3794,7 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                     </p>
                 </div>
 
-                <div style='background: #f9f9f9; border-left: 4px solid #333; padding: 15px; margin-bottom: 20px;'>
+                <div style='background-color: rgba(155, 155, 155, 0.06); border-left: 4px solid #333; padding: 15px; margin-bottom: 20px; color: inherit;'>
                     <h4 style='margin: 0 0 10px 0; color: #333;'>When to Use Rater Profile Plots</h4>
                     <p style='margin: 0 0 10px 0;'><strong>Essential when:</strong></p>
                     <ul style='margin: 0; padding-left: 20px;'>
@@ -3808,7 +3808,7 @@ agreementClass <- if (requireNamespace("jmvcore")) {
 
                 <h4 style='color: #333;'>Plot Types and When to Use Them</h4>
                 <table style='width: 100%; border-collapse: collapse; margin-bottom: 20px; border: 1px solid #ccc;'>
-                    <tr style='background: #f5f5f5;'>
+                    <tr style='background-color: rgba(88, 88, 88, 0.06); color: inherit;'>
                         <th style='padding: 8px; border: 1px solid #ccc; text-align: left;'>Plot Type</th>
                         <th style='padding: 8px; border: 1px solid #ccc; text-align: left;'>Best For</th>
                         <th style='padding: 8px; border: 1px solid #ccc; text-align: left;'>Shows</th>
@@ -3832,7 +3832,7 @@ agreementClass <- if (requireNamespace("jmvcore")) {
 
                 <h4 style='color: #333;'>Clinical Use Cases in Pathology</h4>
 
-                <div style='background: #f9f9f9; padding: 15px; margin-bottom: 15px; border-left: 3px solid #333;'>
+                <div style='background-color: rgba(155, 155, 155, 0.06); padding: 15px; margin-bottom: 15px; border-left: 3px solid #333; color: inherit;'>
                     <h5 style='margin: 0 0 10px 0; color: #333;'>1. Tumor Grade Assessment (Ordinal Data)</h5>
                     <p style='margin: 0 0 10px 0; color: #666;'>
                         <strong>Scenario:</strong> Five pathologists grade 100 breast tumors as G1/G2/G3.
@@ -3854,7 +3854,7 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                     </p>
                 </div>
 
-                <div style='background: #f9f9f9; padding: 15px; margin-bottom: 15px; border-left: 3px solid #333;'>
+                <div style='background-color: rgba(155, 155, 155, 0.06); padding: 15px; margin-bottom: 15px; border-left: 3px solid #333; color: inherit;'>
                     <h5 style='margin: 0 0 10px 0; color: #333;'>2. Ki-67 Proliferation Index (Continuous Data)</h5>
                     <p style='margin: 0 0 10px 0; color: #666;'>
                         <strong>Scenario:</strong> Four pathologists score Ki-67 (0-100%) on 80 breast cancers.
@@ -3875,7 +3875,7 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                     </p>
                 </div>
 
-                <div style='background: #f9f9f9; padding: 15px; margin-bottom: 15px; border-left: 3px solid #333;'>
+                <div style='background-color: rgba(155, 155, 155, 0.06); padding: 15px; margin-bottom: 15px; border-left: 3px solid #333; color: inherit;'>
                     <h5 style='margin: 0 0 10px 0; color: #333;'>3. Mitotic Count (Continuous with Outliers)</h5>
                     <p style='margin: 0 0 10px 0; color: #666;'>
                         <strong>Scenario:</strong> Six pathologists count mitoses per 10 HPF in 60 sarcomas.
@@ -3894,7 +3894,7 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                     </p>
                 </div>
 
-                <div style='background: #f9f9f9; border-left: 4px solid #333; padding: 15px; margin-bottom: 20px;'>
+                <div style='background-color: rgba(155, 155, 155, 0.06); border-left: 4px solid #333; padding: 15px; margin-bottom: 20px; color: inherit;'>
                     <h4 style='margin: 0 0 10px 0; color: #333;'> Important Interpretation Notes</h4>
                     <ul style='margin: 0; padding-left: 20px;'>
                         <li><strong>Distribution differences &#x2260; poor agreement:</strong> Raters can have different distributions
@@ -3911,7 +3911,7 @@ agreementClass <- if (requireNamespace("jmvcore")) {
 
                 <h4 style='color: #333;'>What to Do Based on Profile Patterns</h4>
                 <table style='width: 100%; border-collapse: collapse; margin-bottom: 20px; border: 1px solid #ccc;'>
-                    <tr style='background: #f5f5f5;'>
+                    <tr style='background-color: rgba(88, 88, 88, 0.06); color: inherit;'>
                         <th style='padding: 8px; border: 1px solid #ccc; text-align: left;'>Pattern</th>
                         <th style='padding: 8px; border: 1px solid #ccc; text-align: left;'>Interpretation</th>
                         <th style='padding: 8px; border: 1px solid #ccc; text-align: left;'>Action</th>
@@ -3943,7 +3943,7 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                     </tr>
                 </table>
 
-                <div style='background: #f9f9f9; border-left: 4px solid #333; padding: 15px;'>
+                <div style='background-color: rgba(155, 155, 155, 0.06); border-left: 4px solid #333; padding: 15px; color: inherit;'>
                     <h4 style='margin: 0 0 10px 0; color: #333;'> Best Practices</h4>
                     <ul style='margin: 0; padding-left: 20px;'>
                         <li>Use alongside agreement statistics (kappa/ICC) - not a replacement</li>
@@ -4104,11 +4104,11 @@ agreementClass <- if (requireNamespace("jmvcore")) {
 
             .populateSubgroupExplanation = function() {
                 html <- "<div style='font-family: Arial, sans-serif; max-width: 800px; line-height: 1.6;'>
-                <div style='background: #f9f9f9; border-left: 4px solid #333; padding: 15px; margin-bottom: 20px;'>
+                <div style='background-color: rgba(155, 155, 155, 0.06); border-left: 4px solid #333; padding: 15px; margin-bottom: 20px; color: inherit;'>
                     <h3 style='margin: 0 0 10px 0; color: #333;'>Agreement by Subgroup (Stratified Analysis)</h3>
                     <p style='margin: 0; color: #333;'>Calculate agreement separately for each subgroup to identify which case types show reliable agreement.</p>
                 </div>
-                <div style='background: #f9f9f9; border-left: 4px solid #333; padding: 15px;'>
+                <div style='background-color: rgba(155, 155, 155, 0.06); border-left: 4px solid #333; padding: 15px; color: inherit;'>
                     <h4 style='margin: 0 0 10px 0; color: #333;'>Use Cases</h4>
                     <ul style='margin: 0; padding-left: 20px;'>
                         <li>Compare agreement across tumor types (benign vs. malignant)</li>
@@ -4344,11 +4344,11 @@ agreementClass <- if (requireNamespace("jmvcore")) {
 
             .populateRaterClusterExplanation = function() {
                 html <- "<div style='font-family: Arial, sans-serif; max-width: 800px; line-height: 1.6;'>
-                <div style='background: #f9f9f9; border-left: 4px solid #333; padding: 15px; margin-bottom: 20px;'>
+                <div style='background-color: rgba(155, 155, 155, 0.06); border-left: 4px solid #333; padding: 15px; margin-bottom: 20px; color: inherit;'>
                     <h3 style='margin: 0 0 10px 0; color: #333;'>Rater Clustering</h3>
                     <p style='margin: 0; color: #333;'>Identifies groups of raters with similar rating patterns using hierarchical or k-means clustering.</p>
                 </div>
-                <div style='background: #f9f9f9; border-left: 4px solid #333; padding: 15px;'>
+                <div style='background-color: rgba(155, 155, 155, 0.06); border-left: 4px solid #333; padding: 15px; color: inherit;'>
                     <h4 style='margin: 0 0 10px 0; color: #333;'>Use Cases</h4>
                     <ul style='margin: 0; padding-left: 20px;'>
                         <li>Identify subgroups of similarly-trained raters</li>
@@ -4578,11 +4578,11 @@ agreementClass <- if (requireNamespace("jmvcore")) {
             },
             .populateCaseClusterExplanation = function() {
                 html <- "<div style='font-family: Arial, sans-serif; max-width: 800px; line-height: 1.6;'>
-                <div style='background: #f9f9f9; border-left: 4px solid #333; padding: 15px; margin-bottom: 20px;'>
+                <div style='background-color: rgba(155, 155, 155, 0.06); border-left: 4px solid #333; padding: 15px; margin-bottom: 20px; color: inherit;'>
                     <h3 style='margin: 0 0 10px 0; color: #333;'>Case Clustering</h3>
                     <p style='margin: 0; color: #333;'>Identifies groups of cases with similar rating patterns across raters using hierarchical or k-means clustering.</p>
                 </div>
-                <div style='background: #f9f9f9; border-left: 4px solid #333; padding: 15px;'>
+                <div style='background-color: rgba(155, 155, 155, 0.06); border-left: 4px solid #333; padding: 15px; color: inherit;'>
                     <h4 style='margin: 0 0 10px 0; color: #333;'>Use Cases</h4>
                     <ul style='margin: 0; padding-left: 20px;'>
                         <li>Identify subgroups of cases with consistent rating patterns</li>
@@ -4884,7 +4884,7 @@ agreementClass <- if (requireNamespace("jmvcore")) {
 
                 html_content <- "
             <div style='font-family: Arial, sans-serif; max-width: 800px; line-height: 1.6;'>
-                <div style='background: #f9f9f9; border-left: 4px solid #333; padding: 15px; margin-bottom: 20px;'>
+                <div style='background-color: rgba(155, 155, 155, 0.06); border-left: 4px solid #333; padding: 15px; margin-bottom: 20px; color: inherit;'>
                     <h3 style='margin: 0 0 10px 0; color: #333;'>What is Maxwell's Random Error (RE) Index?</h3>
                     <p style='margin: 0; color: #333;'>
                         Maxwell's RE index <strong>decomposes total measurement variance</strong> into two components:
@@ -4901,7 +4901,7 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                     </p>
                 </div>
 
-                <div style='background: #f9f9f9; border-left: 4px solid #333; padding: 15px; margin-bottom: 20px;'>
+                <div style='background-color: rgba(155, 155, 155, 0.06); border-left: 4px solid #333; padding: 15px; margin-bottom: 20px; color: inherit;'>
                     <h4 style='margin: 0 0 10px 0; color: #333;'>When to Use Maxwell's RE</h4>
                     <p style='margin: 0 0 10px 0;'><strong>Essential for understanding error sources in:</strong></p>
                     <ul style='margin: 0; padding-left: 20px;'>
@@ -4913,10 +4913,10 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                     </ul>
                 </div>
 
-                <div style='background: #f9f9f9; border-left: 4px solid #333; padding: 15px; margin-bottom: 20px;'>
+                <div style='background-color: rgba(155, 155, 155, 0.06); border-left: 4px solid #333; padding: 15px; margin-bottom: 20px; color: inherit;'>
                     <h4 style='margin: 0 0 10px 0; color: #333;'>Interpreting RE Values</h4>
                     <table style='width: 100%; border-collapse: collapse;'>
-                        <tr style='background: #f5f5f5;'>
+                        <tr style='background-color: rgba(88, 88, 88, 0.06); color: inherit;'>
                             <th style='padding: 8px; text-align: left; border-bottom: 2px solid #333;'>RE Value</th>
                             <th style='padding: 8px; text-align: left; border-bottom: 2px solid #333;'>Error Type</th>
                             <th style='padding: 8px; text-align: left; border-bottom: 2px solid #333;'>Intervention Strategy</th>
@@ -4939,7 +4939,7 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                     </table>
                 </div>
 
-                <div style='background: #f9f9f9; border-left: 4px solid #333; padding: 15px; margin-bottom: 20px;'>
+                <div style='background-color: rgba(155, 155, 155, 0.06); border-left: 4px solid #333; padding: 15px; margin-bottom: 20px; color: inherit;'>
                     <h4 style='margin: 0 0 10px 0; color: #333;'>Clinical Use Cases in Pathology</h4>
 
                     <div style='margin-bottom: 20px;'>
@@ -5089,7 +5089,7 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                     </div>
                 </div>
 
-                <div style='background: #f9f9f9; border-left: 4px solid #333; padding: 15px; margin-bottom: 20px;'>
+                <div style='background-color: rgba(155, 155, 155, 0.06); border-left: 4px solid #333; padding: 15px; margin-bottom: 20px; color: inherit;'>
                     <h4 style='margin: 0 0 10px 0; color: #333;'>Understanding the Decomposition</h4>
                     <p style='margin: 0 0 10px 0;'><strong>Variance components:</strong></p>
                     <ul style='margin: 0; padding-left: 20px;'>
@@ -5104,7 +5104,7 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                     </p>
                 </div>
 
-                <div style='background: #f9f9f9; border-left: 4px solid #333; padding: 15px; margin-bottom: 20px;'>
+                <div style='background-color: rgba(155, 155, 155, 0.06); border-left: 4px solid #333; padding: 15px; margin-bottom: 20px; color: inherit;'>
                     <h4 style='margin: 0 0 10px 0; color: #333;'> Important Considerations</h4>
                     <ul style='margin: 0; padding-left: 20px;'>
                         <li><strong>Data requirements:</strong> Requires 2+ raters/methods with repeated or paired measurements</li>
@@ -5117,7 +5117,7 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                     </ul>
                 </div>
 
-                <div style='background: #f9f9f9; border-left: 4px solid #333; padding: 15px;'>
+                <div style='background-color: rgba(155, 155, 155, 0.06); border-left: 4px solid #333; padding: 15px; color: inherit;'>
                     <h4 style='margin: 0 0 10px 0; color: #333;'>Statistical Notes</h4>
                     <ul style='margin: 0; padding-left: 20px;'>
                         <li>Calculation based on one-way ANOVA variance decomposition</li>
@@ -5295,7 +5295,7 @@ agreementClass <- if (requireNamespace("jmvcore")) {
 
                 html_content <- "
             <div style='font-family: Arial, sans-serif; max-width: 800px; line-height: 1.6;'>
-                <div style='background: #f9f9f9; border-left: 4px solid #333; padding: 15px; margin-bottom: 20px;'>
+                <div style='background-color: rgba(155, 155, 155, 0.06); border-left: 4px solid #333; padding: 15px; margin-bottom: 20px; color: inherit;'>
                     <h3 style='margin: 0 0 10px 0; color: #333;'>What is Inter/Intra-Rater Reliability?</h3>
                     <p style='margin: 0; color: #333;'>
                         This analysis simultaneously assesses two critical aspects of measurement reliability:
@@ -5308,7 +5308,7 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                     </ul>
                 </div>
 
-                <div style='background: #f9f9f9; border-left: 4px solid #333; padding: 15px; margin-bottom: 20px;'>
+                <div style='background-color: rgba(155, 155, 155, 0.06); border-left: 4px solid #333; padding: 15px; margin-bottom: 20px; color: inherit;'>
                     <h4 style='margin: 0 0 10px 0; color: #333;'>When to Use This Analysis</h4>
                     <p style='margin: 0 0 10px 0;'><strong>Essential for test-retest reliability studies where:</strong></p>
                     <ul style='margin: 0; padding-left: 20px;'>
@@ -5320,12 +5320,12 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                     </ul>
                 </div>
 
-                <div style='background: #f9f9f9; border-left: 4px solid #333; padding: 15px; margin-bottom: 20px;'>
+                <div style='background-color: rgba(155, 155, 155, 0.06); border-left: 4px solid #333; padding: 15px; margin-bottom: 20px; color: inherit;'>
                     <h4 style='margin: 0 0 10px 0; color: #333;'>Data Structure Requirements</h4>
                     <p style='margin: 0 0 10px 0;'>
                         Column names must follow a pattern to identify rater-timepoint pairs:
                     </p>
-                    <div style='background: #fff; padding: 10px; border-radius: 5px; font-family: monospace;'>
+                    <div style='background-color: rgba(255, 255, 255, 0.06); padding: 10px; border-radius: 5px; font-family: monospace; color: inherit;'>
                         <strong>Pattern:</strong> RaterID<span style='color: #333;'>[separator]</span>TimePoint<br>
                         <strong>Example with underscore (_):</strong><br>
                         &#x2022; Rater1_Time1, Rater1_Time2, Rater1_Time3<br>
@@ -5338,7 +5338,7 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                     <p style='margin: 10px 0 0 0;'><em>The separator character (default: underscore) is specified in the analysis options.</em></p>
                 </div>
 
-                <div style='background: #f9f9f9; border-left: 4px solid #333; padding: 15px; margin-bottom: 20px;'>
+                <div style='background-color: rgba(155, 155, 155, 0.06); border-left: 4px solid #333; padding: 15px; margin-bottom: 20px; color: inherit;'>
                     <h4 style='margin: 0 0 10px 0; color: #333;'>Statistical Methods Used</h4>
                     <p style='margin: 0 0 10px 0;'>The analysis automatically selects appropriate statistics based on data type:</p>
                     <ul style='margin: 0 0 10px 0; padding-left: 20px;'>
@@ -5347,7 +5347,7 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                         <li><strong>Inter-Rater:</strong> Overall agreement metric across all raters and time points</li>
                     </ul>
                     <table style='width: 100%; border-collapse: collapse; margin-top: 15px;'>
-                        <tr style='background: #f5f5f5;'>
+                        <tr style='background-color: rgba(88, 88, 88, 0.06); color: inherit;'>
                             <th style='padding: 8px; text-align: left; border-bottom: 2px solid #333;'>Reliability Value</th>
                             <th style='padding: 8px; text-align: left; border-bottom: 2px solid #333;'>Interpretation</th>
                         </tr>
@@ -5374,7 +5374,7 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                     </table>
                 </div>
 
-                <div style='background: #f9f9f9; border-left: 4px solid #333; padding: 15px; margin-bottom: 20px;'>
+                <div style='background-color: rgba(155, 155, 155, 0.06); border-left: 4px solid #333; padding: 15px; margin-bottom: 20px; color: inherit;'>
                     <h4 style='margin: 0 0 10px 0; color: #333;'>Clinical Use Cases in Pathology</h4>
 
                     <div style='margin-bottom: 20px;'>
@@ -5518,7 +5518,7 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                     </div>
                 </div>
 
-                <div style='background: #f9f9f9; border-left: 4px solid #333; padding: 15px; margin-bottom: 20px;'>
+                <div style='background-color: rgba(155, 155, 155, 0.06); border-left: 4px solid #333; padding: 15px; margin-bottom: 20px; color: inherit;'>
                     <h4 style='margin: 0 0 10px 0; color: #333;'> Important Considerations</h4>
                     <ul style='margin: 0; padding-left: 20px;'>
                         <li><strong>Blinding:</strong> Raters should be blinded to their previous assessments to measure true reproducibility</li>
@@ -5531,7 +5531,7 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                     </ul>
                 </div>
 
-                <div style='background: #f9f9f9; border-left: 4px solid #333; padding: 15px;'>
+                <div style='background-color: rgba(155, 155, 155, 0.06); border-left: 4px solid #333; padding: 15px; color: inherit;'>
                     <h4 style='margin: 0 0 10px 0; color: #333;'>Statistical Notes</h4>
                     <ul style='margin: 0; padding-left: 20px;'>
                         <li>Confidence intervals estimated using Fisher's Z transformation (continuous) or asymptotic standard errors (categorical)</li>
@@ -5926,7 +5926,7 @@ agreementClass <- if (requireNamespace("jmvcore")) {
 
                 html_content <- "
             <div style='font-family: Arial, sans-serif; max-width: 800px; line-height: 1.6;'>
-                <div style='background: #f9f9f9; border-left: 4px solid #333; padding: 15px; margin-bottom: 20px;'>
+                <div style='background-color: rgba(155, 155, 155, 0.06); border-left: 4px solid #333; padding: 15px; margin-bottom: 20px; color: inherit;'>
                     <h3 style='margin: 0 0 10px 0; color: #333;'>What is the Rater Bias Test?</h3>
                     <p style='margin: 0; color: #333;'>
                         The Rater Bias Test uses a <strong>chi-square test</strong> to detect whether raters have
@@ -5935,7 +5935,7 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                     </p>
                 </div>
 
-                <div style='background: #f9f9f9; border-left: 4px solid #333; padding: 15px; margin-bottom: 20px;'>
+                <div style='background-color: rgba(155, 155, 155, 0.06); border-left: 4px solid #333; padding: 15px; margin-bottom: 20px; color: inherit;'>
                     <h4 style='margin: 0 0 10px 0; color: #333;'>When to Use This Test</h4>
                     <p style='margin: 0 0 10px 0;'><strong>Essential for quality control when:</strong></p>
                     <ul style='margin: 0; padding-left: 20px;'>
@@ -5947,10 +5947,10 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                     </ul>
                 </div>
 
-                <div style='background: #f9f9f9; border-left: 4px solid #333; padding: 15px; margin-bottom: 20px;'>
+                <div style='background-color: rgba(155, 155, 155, 0.06); border-left: 4px solid #333; padding: 15px; margin-bottom: 20px; color: inherit;'>
                     <h4 style='margin: 0 0 10px 0; color: #333;'>Interpreting Results</h4>
                     <table style='width: 100%; border-collapse: collapse;'>
-                        <tr style='background: #f5f5f5;'>
+                        <tr style='background-color: rgba(88, 88, 88, 0.06); color: inherit;'>
                             <th style='padding: 8px; text-align: left; border-bottom: 2px solid #333;'>Result</th>
                             <th style='padding: 8px; text-align: left; border-bottom: 2px solid #333;'>Interpretation</th>
                         </tr>
@@ -5969,10 +5969,10 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                     </table>
                 </div>
 
-                <div style='background: #f9f9f9; border-left: 4px solid #333; padding: 15px; margin-bottom: 20px;'>
+                <div style='background-color: rgba(155, 155, 155, 0.06); border-left: 4px solid #333; padding: 15px; margin-bottom: 20px; color: inherit;'>
                     <h4 style='margin: 0 0 10px 0; color: #333;'>Common Bias Patterns in Pathology</h4>
                     <table style='width: 100%; border-collapse: collapse; font-size: 13px;'>
-                        <tr style='background: #f5f5f5;'>
+                        <tr style='background-color: rgba(88, 88, 88, 0.06); color: inherit;'>
                             <th style='padding: 8px; text-align: left; border-bottom: 2px solid #333;'>Pattern</th>
                             <th style='padding: 8px; text-align: left; border-bottom: 2px solid #333;'>Clinical Impact</th>
                         </tr>
@@ -5995,7 +5995,7 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                     </table>
                 </div>
 
-                <div style='background: #f9f9f9; border-left: 4px solid #333; padding: 15px; margin-bottom: 20px;'>
+                <div style='background-color: rgba(155, 155, 155, 0.06); border-left: 4px solid #333; padding: 15px; margin-bottom: 20px; color: inherit;'>
                     <h4 style='margin: 0 0 10px 0; color: #333;'>Clinical Example</h4>
                     <p style='margin: 0; padding: 10px; background: white; border-radius: 4px; font-size: 13px;'>
                         <strong>Scenario:</strong> Three pathologists grade 50 tumor samples as G1/G2/G3.<br><br>
@@ -6008,7 +6008,7 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                     </p>
                 </div>
 
-                <div style='background: #f9f9f9; border-left: 4px solid #333; padding: 15px; margin-bottom: 20px;'>
+                <div style='background-color: rgba(155, 155, 155, 0.06); border-left: 4px solid #333; padding: 15px; margin-bottom: 20px; color: inherit;'>
                     <h4 style='margin: 0 0 10px 0; color: #333;'>Important Considerations</h4>
                     <ul style='margin: 0; padding-left: 20px; font-size: 13px;'>
                         <li><strong>Sample size matters:</strong> Test has limited power with small samples (< 30 cases)</li>
@@ -6019,7 +6019,7 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                     </ul>
                 </div>
 
-                <div style='background: #f9f9f9; border-left: 4px solid #333; padding: 15px;'>
+                <div style='background-color: rgba(155, 155, 155, 0.06); border-left: 4px solid #333; padding: 15px; color: inherit;'>
                     <h4 style='margin: 0 0 10px 0; color: #333;'>Relationship to Agreement Measures</h4>
                     <p style='margin: 0; font-size: 13px;'>
                         Rater bias is <strong>independent from agreement</strong>. You can have:<br><br>
@@ -6030,7 +6030,7 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                     </p>
                 </div>
 
-                <div style='margin-top: 15px; padding: 10px; background: #f5f5f5; border-radius: 4px;'>
+                <div style='margin-top: 15px; padding: 10px; background-color: rgba(88, 88, 88, 0.06); border-radius: 4px; color: inherit;'>
                     <p style='margin: 0; font-size: 12px; color: #666;'>
                         <strong>Reference:</strong> Stuart, A. A. (1955). A test for homogeneity of the marginal distributions
                         in a two-way classification. <em>Biometrika</em>, 42(3/4), 412-416.
@@ -6134,7 +6134,7 @@ agreementClass <- if (requireNamespace("jmvcore")) {
 
                 html_content <- "
             <div style='font-family: Arial, sans-serif; max-width: 800px; line-height: 1.6;'>
-                <div style='background: #f9f9f9; border-left: 4px solid #333; padding: 15px; margin-bottom: 20px;'>
+                <div style='background-color: rgba(155, 155, 155, 0.06); border-left: 4px solid #333; padding: 15px; margin-bottom: 20px; color: inherit;'>
                     <h3 style='margin: 0 0 10px 0; color: #333;'>What is the Bhapkar Test?</h3>
                     <p style='margin: 0; color: #333;'>
                         The Bhapkar test is a <strong>chi-square test for marginal homogeneity</strong> between
@@ -6144,7 +6144,7 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                     </p>
                 </div>
 
-                <div style='background: #f9f9f9; border-left: 4px solid #333; padding: 15px; margin-bottom: 20px;'>
+                <div style='background-color: rgba(155, 155, 155, 0.06); border-left: 4px solid #333; padding: 15px; margin-bottom: 20px; color: inherit;'>
                     <h4 style='margin: 0 0 10px 0; color: #333;'>When to Use Bhapkar Test</h4>
                     <p style='margin: 0 0 10px 0;'><strong>Ideal for paired comparisons with &gt;2 categories:</strong></p>
                     <ul style='margin: 0; padding-left: 20px;'>
@@ -6157,10 +6157,10 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                     </ul>
                 </div>
 
-                <div style='background: #f9f9f9; border-left: 4px solid #333; padding: 15px; margin-bottom: 20px;'>
+                <div style='background-color: rgba(155, 155, 155, 0.06); border-left: 4px solid #333; padding: 15px; margin-bottom: 20px; color: inherit;'>
                     <h4 style='margin: 0 0 10px 0; color: #333;'>Bhapkar vs. Related Tests</h4>
                     <table style='width: 100%; border-collapse: collapse;'>
-                        <tr style='background: #f5f5f5;'>
+                        <tr style='background-color: rgba(88, 88, 88, 0.06); color: inherit;'>
                             <th style='padding: 8px; text-align: left; border-bottom: 2px solid #333;'>Test</th>
                             <th style='padding: 8px; text-align: left; border-bottom: 2px solid #333;'>Raters</th>
                             <th style='padding: 8px; text-align: left; border-bottom: 2px solid #333;'>Categories</th>
@@ -6197,7 +6197,7 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                     </p>
                 </div>
 
-                <div style='background: #f9f9f9; border-left: 4px solid #333; padding: 15px; margin-bottom: 20px;'>
+                <div style='background-color: rgba(155, 155, 155, 0.06); border-left: 4px solid #333; padding: 15px; margin-bottom: 20px; color: inherit;'>
                     <h4 style='margin: 0 0 10px 0; color: #333;'>Clinical Pathology Use Cases</h4>
 
                     <p style='margin: 0 0 10px 0; font-weight: bold;'>1. AI Algorithm Validation (Dysplasia Detection):</p>
@@ -6251,7 +6251,7 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                     </ul>
                 </div>
 
-                <div style='background: #f9f9f9; border-left: 4px solid #333; padding: 15px; margin-bottom: 20px;'>
+                <div style='background-color: rgba(155, 155, 155, 0.06); border-left: 4px solid #333; padding: 15px; margin-bottom: 20px; color: inherit;'>
                     <h4 style='margin: 0 0 10px 0; color: #333;'>Interpretation</h4>
                     <table style='width: 100%; border-collapse: collapse; font-size: 14px;'>
                         <tr>
@@ -6274,7 +6274,7 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                     </p>
                 </div>
 
-                <div style='background: #f9f9f9; border-left: 4px solid #333; padding: 15px; margin-bottom: 20px;'>
+                <div style='background-color: rgba(155, 155, 155, 0.06); border-left: 4px solid #333; padding: 15px; margin-bottom: 20px; color: inherit;'>
                     <h4 style='margin: 0 0 10px 0; color: #333;'>Requirements and Assumptions</h4>
                     <ul style='margin: 0; padding-left: 20px; font-size: 13px;'>
                         <li><strong>Exactly 2 raters:</strong> Test designed for paired comparisons only</li>
@@ -6285,7 +6285,7 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                     </ul>
                 </div>
 
-                <div style='background: #f9f9f9; border-left: 4px solid #333; padding: 15px;'>
+                <div style='background-color: rgba(155, 155, 155, 0.06); border-left: 4px solid #333; padding: 15px; color: inherit;'>
                     <h4 style='margin: 0 0 10px 0; color: #333;'>Complementary Analyses</h4>
                     <p style='margin: 0; font-size: 13px;'>
                         Use Bhapkar test <strong>together with</strong>:<br><br>
@@ -6298,7 +6298,7 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                     </p>
                 </div>
 
-                <div style='margin-top: 15px; padding: 10px; background: #f5f5f5; border-radius: 4px;'>
+                <div style='margin-top: 15px; padding: 10px; background-color: rgba(88, 88, 88, 0.06); border-radius: 4px; color: inherit;'>
                     <p style='margin: 0; font-size: 12px; color: #666;'>
                         <strong>Reference:</strong> Bhapkar, V. P. (1966). A note on the equivalence of two test criteria
                         for hypotheses in categorical data. <em>Journal of the American Statistical Association</em>, 61, 228-235.
@@ -6431,7 +6431,7 @@ agreementClass <- if (requireNamespace("jmvcore")) {
 
                 html_content <- "
             <div style='font-family: Arial, sans-serif; max-width: 800px; line-height: 1.6;'>
-                <div style='background: #f9f9f9; border-left: 4px solid #333; padding: 15px; margin-bottom: 20px;'>
+                <div style='background-color: rgba(155, 155, 155, 0.06); border-left: 4px solid #333; padding: 15px; margin-bottom: 20px; color: inherit;'>
                     <h3 style='margin: 0 0 10px 0; color: #333;'>What is the Stuart-Maxwell Test?</h3>
                     <p style='margin: 0; color: #333;'>
                         The Stuart-Maxwell test is a <strong>classic chi-square test for marginal homogeneity</strong>
@@ -6442,7 +6442,7 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                     </p>
                 </div>
 
-                <div style='background: #f9f9f9; border-left: 4px solid #333; padding: 15px; margin-bottom: 20px;'>
+                <div style='background-color: rgba(155, 155, 155, 0.06); border-left: 4px solid #333; padding: 15px; margin-bottom: 20px; color: inherit;'>
                     <h4 style='margin: 0 0 10px 0; color: #333;'>When to Use Stuart-Maxwell Test</h4>
                     <p style='margin: 0 0 10px 0;'><strong>Ideal for matched/paired comparisons:</strong></p>
                     <ul style='margin: 0; padding-left: 20px;'>
@@ -6455,10 +6455,10 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                     </ul>
                 </div>
 
-                <div style='background: #f9f9f9; border-left: 4px solid #333; padding: 15px; margin-bottom: 20px;'>
+                <div style='background-color: rgba(155, 155, 155, 0.06); border-left: 4px solid #333; padding: 15px; margin-bottom: 20px; color: inherit;'>
                     <h4 style='margin: 0 0 10px 0; color: #333;'>Stuart-Maxwell vs. Related Tests</h4>
                     <table style='width: 100%; border-collapse: collapse;'>
-                        <tr style='background: #f5f5f5;'>
+                        <tr style='background-color: rgba(88, 88, 88, 0.06); color: inherit;'>
                             <th style='padding: 8px; text-align: left; border-bottom: 2px solid #333;'>Test</th>
                             <th style='padding: 8px; text-align: left; border-bottom: 2px solid #333;'>Categories</th>
                             <th style='padding: 8px; text-align: left; border-bottom: 2px solid #333;'>Characteristics</th>
@@ -6485,7 +6485,7 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                     </p>
                 </div>
 
-                <div style='background: #f9f9f9; border-left: 4px solid #333; padding: 15px; margin-bottom: 20px;'>
+                <div style='background-color: rgba(155, 155, 155, 0.06); border-left: 4px solid #333; padding: 15px; margin-bottom: 20px; color: inherit;'>
                     <h4 style='margin: 0 0 10px 0; color: #333;'>Clinical Pathology Use Cases</h4>
 
                     <p style='margin: 0 0 10px 0; font-weight: bold;'>1. Post-Training Diagnostic Recalibration (Breast Pathology):</p>
@@ -6539,7 +6539,7 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                     </ul>
                 </div>
 
-                <div style='background: #f9f9f9; border-left: 4px solid #333; padding: 15px; margin-bottom: 20px;'>
+                <div style='background-color: rgba(155, 155, 155, 0.06); border-left: 4px solid #333; padding: 15px; margin-bottom: 20px; color: inherit;'>
                     <h4 style='margin: 0 0 10px 0; color: #333;'>Interpretation</h4>
                     <table style='width: 100%; border-collapse: collapse; font-size: 14px;'>
                         <tr>
@@ -6562,7 +6562,7 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                     </p>
                 </div>
 
-                <div style='background: #f9f9f9; border-left: 4px solid #333; padding: 15px; margin-bottom: 20px;'>
+                <div style='background-color: rgba(155, 155, 155, 0.06); border-left: 4px solid #333; padding: 15px; margin-bottom: 20px; color: inherit;'>
                     <h4 style='margin: 0 0 10px 0; color: #333;'>Assumptions and Requirements</h4>
                     <ul style='margin: 0; padding-left: 20px; font-size: 13px;'>
                         <li><strong>Paired/matched data:</strong> Same subjects rated twice or same cases by two raters</li>
@@ -6574,7 +6574,7 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                     </ul>
                 </div>
 
-                <div style='background: #f9f9f9; border-left: 4px solid #333; padding: 15px;'>
+                <div style='background-color: rgba(155, 155, 155, 0.06); border-left: 4px solid #333; padding: 15px; color: inherit;'>
                     <h4 style='margin: 0 0 10px 0; color: #333;'>Use Together With</h4>
                     <p style='margin: 0; font-size: 13px;'>
                         <strong>Complementary analyses:</strong><br><br>
@@ -6589,7 +6589,7 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                     </p>
                 </div>
 
-                <div style='margin-top: 15px; padding: 10px; background: #f5f5f5; border-radius: 4px;'>
+                <div style='margin-top: 15px; padding: 10px; background-color: rgba(88, 88, 88, 0.06); border-radius: 4px; color: inherit;'>
                     <p style='margin: 0; font-size: 12px; color: #666;'>
                         <strong>References:</strong><br>
                         Stuart, A. A. (1955). A test for homogeneity of the marginal distributions in a two-way
@@ -6736,7 +6736,7 @@ agreementClass <- if (requireNamespace("jmvcore")) {
 
                 html_content <- "
             <div style='font-family: Arial, sans-serif; max-width: 800px; line-height: 1.6;'>
-                <div style='background: #f9f9f9; border-left: 4px solid #333; padding: 15px; margin-bottom: 20px;'>
+                <div style='background-color: rgba(155, 155, 155, 0.06); border-left: 4px solid #333; padding: 15px; margin-bottom: 20px; color: inherit;'>
                     <h3 style='margin: 0 0 10px 0; color: #333;'>What is Pairwise Kappa Analysis?</h3>
                     <p style='margin: 0; color: #333;'>
                         Pairwise Kappa Analysis compares <strong>each rater individually</strong> against a
@@ -6746,7 +6746,7 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                     </p>
                 </div>
 
-                <div style='background: #f9f9f9; border-left: 4px solid #333; padding: 15px; margin-bottom: 20px;'>
+                <div style='background-color: rgba(155, 155, 155, 0.06); border-left: 4px solid #333; padding: 15px; margin-bottom: 20px; color: inherit;'>
                     <h4 style='margin: 0 0 10px 0; color: #333;'>When to Use Pairwise Analysis</h4>
                     <p style='margin: 0 0 10px 0;'><strong>Essential for:</strong></p>
                     <ul style='margin: 0; padding-left: 20px;'>
@@ -6758,10 +6758,10 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                     </ul>
                 </div>
 
-                <div style='background: #f9f9f9; border-left: 4px solid #333; padding: 15px; margin-bottom: 20px;'>
+                <div style='background-color: rgba(155, 155, 155, 0.06); border-left: 4px solid #333; padding: 15px; margin-bottom: 20px; color: inherit;'>
                     <h4 style='margin: 0 0 10px 0; color: #333;'>Interpreting Kappa Values</h4>
                     <table style='width: 100%; border-collapse: collapse;'>
-                        <tr style='background: #f5f5f5;'>
+                        <tr style='background-color: rgba(88, 88, 88, 0.06); color: inherit;'>
                             <th style='padding: 8px; text-align: left; border-bottom: 2px solid #333;'>Kappa</th>
                             <th style='padding: 8px; text-align: left; border-bottom: 2px solid #333;'>Agreement Level</th>
                             <th style='padding: 8px; text-align: left; border-bottom: 2px solid #333;'>Training Status</th>
@@ -6789,10 +6789,10 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                     </table>
                 </div>
 
-                <div style='background: #f9f9f9; border-left: 4px solid #333; padding: 15px; margin-bottom: 20px;'>
+                <div style='background-color: rgba(155, 155, 155, 0.06); border-left: 4px solid #333; padding: 15px; margin-bottom: 20px; color: inherit;'>
                     <h4 style='margin: 0 0 10px 0; color: #333;'>Choosing the Reference Rater</h4>
                     <table style='width: 100%; border-collapse: collapse; font-size: 13px;'>
-                        <tr style='background: #f5f5f5;'>
+                        <tr style='background-color: rgba(88, 88, 88, 0.06); color: inherit;'>
                             <th style='padding: 8px; text-align: left; border-bottom: 2px solid #333;'>Reference Type</th>
                             <th style='padding: 8px; text-align: left; border-bottom: 2px solid #333;'>Use Case</th>
                         </tr>
@@ -6815,7 +6815,7 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                     </table>
                 </div>
 
-                <div style='background: #f9f9f9; border-left: 4px solid #333; padding: 15px; margin-bottom: 20px;'>
+                <div style='background-color: rgba(155, 155, 155, 0.06); border-left: 4px solid #333; padding: 15px; margin-bottom: 20px; color: inherit;'>
                     <h4 style='margin: 0 0 10px 0; color: #333;'>Clinical Example: Trainee Certification</h4>
                     <p style='margin: 0; padding: 10px; background: white; border-radius: 4px; font-size: 13px;'>
                         <strong>Scenario:</strong> Five pathology residents (Raters 1-5) grade 100 tumor samples.
@@ -6831,7 +6831,7 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                     </p>
                 </div>
 
-                <div style='background: #f9f9f9; border-left: 4px solid #333; padding: 15px; margin-bottom: 20px;'>
+                <div style='background-color: rgba(155, 155, 155, 0.06); border-left: 4px solid #333; padding: 15px; margin-bottom: 20px; color: inherit;'>
                     <h4 style='margin: 0 0 10px 0; color: #333;'>Ranking Raters</h4>
                     <p style='margin: 0; font-size: 13px;'>
                         When <strong>Rank Raters by Performance</strong> is enabled, raters are sorted from highest
@@ -6842,7 +6842,7 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                     </p>
                 </div>
 
-                <div style='background: #f9f9f9; border-left: 4px solid #333; padding: 15px;'>
+                <div style='background-color: rgba(155, 155, 155, 0.06); border-left: 4px solid #333; padding: 15px; color: inherit;'>
                     <h4 style='margin: 0 0 10px 0; color: #333;'>Pairwise vs Overall Agreement</h4>
                     <p style='margin: 0; font-size: 13px;'>
                         <strong>Pairwise Kappa (vs Reference):</strong> Measures each rater's agreement with gold standard<br>
@@ -6854,7 +6854,7 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                     </p>
                 </div>
 
-                <div style='margin-top: 15px; padding: 10px; background: #f5f5f5; border-radius: 4px;'>
+                <div style='margin-top: 15px; padding: 10px; background-color: rgba(88, 88, 88, 0.06); border-radius: 4px; color: inherit;'>
                     <p style='margin: 0; font-size: 12px; color: #666;'>
                         <strong>Reference:</strong> Cohen, J. (1960). A coefficient of agreement for nominal scales.
                         <em>Educational and Psychological Measurement</em>, 20(1), 37-46.
@@ -7033,7 +7033,7 @@ agreementClass <- if (requireNamespace("jmvcore")) {
             .populateAllPairsKappaExplanation = function() {
                 html_content <- "
             <div style='font-family: Arial, sans-serif; max-width: 800px; line-height: 1.6;'>
-                <div style='background: #f9f9f9; border-left: 4px solid #333; padding: 15px; margin-bottom: 20px;'>
+                <div style='background-color: rgba(155, 155, 155, 0.06); border-left: 4px solid #333; padding: 15px; margin-bottom: 20px; color: inherit;'>
                     <h3 style='margin: 0 0 10px 0; color: #333;'>What is the All-Pairs Kappa table?</h3>
                     <p style='margin: 0; color: #333;'>
                         For studies with three or more raters, the All-Pairs table reports
@@ -7044,7 +7044,7 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                         Fleiss kappa.
                     </p>
                 </div>
-                <div style='background: #f9f9f9; border-left: 4px solid #333; padding: 15px; margin-bottom: 20px;'>
+                <div style='background-color: rgba(155, 155, 155, 0.06); border-left: 4px solid #333; padding: 15px; margin-bottom: 20px; color: inherit;'>
                     <h4 style='margin: 0 0 10px 0; color: #333;'>When to use it</h4>
                     <ul style='margin: 0; padding-left: 20px;'>
                         <li>Identifying which rater pairs disagree most (training needs)</li>
@@ -7052,7 +7052,7 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                         <li>Detecting outlier raters whose pairwise kappas are systematically lower</li>
                     </ul>
                 </div>
-                <div style='background: #fff3cd; border-left: 4px solid #856404; padding: 15px; margin-bottom: 20px;'>
+                <div style='background-color: rgba(255, 202, 33, 0.23); border-left: 4px solid #856404; padding: 15px; margin-bottom: 20px; color: inherit;'>
                     <h4 style='margin: 0 0 10px 0; color: #856404;'>Multiplicity caveat</h4>
                     <p style='margin: 0; color: #856404;'>
                         With k raters you compute C(k,2) p-values. For k=4 that is 6 tests; for
@@ -7310,7 +7310,7 @@ agreementClass <- if (requireNamespace("jmvcore")) {
             .populateItemModalAgreementExplanation = function() {
                 html_content <- "
             <div style='font-family: Arial, sans-serif; max-width: 800px; line-height: 1.6;'>
-                <div style='background: #f9f9f9; border-left: 4px solid #333; padding: 15px; margin-bottom: 20px;'>
+                <div style='background-color: rgba(155, 155, 155, 0.06); border-left: 4px solid #333; padding: 15px; margin-bottom: 20px; color: inherit;'>
                     <h3 style='margin: 0 0 10px 0; color: #333;'>What is item-modal-category agreement?</h3>
                     <p style='margin: 0; color: #333;'>
                         For each rating category <em>c</em>, this metric reports the mean
@@ -7320,7 +7320,7 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                         has no unique mode and is excluded.
                     </p>
                 </div>
-                <div style='background: #f9f9f9; border-left: 4px solid #333; padding: 15px; margin-bottom: 20px;'>
+                <div style='background-color: rgba(155, 155, 155, 0.06); border-left: 4px solid #333; padding: 15px; margin-bottom: 20px; color: inherit;'>
                     <h4 style='margin: 0 0 10px 0; color: #333;'>When to use it</h4>
                     <ul style='margin: 0; padding-left: 20px;'>
                         <li>Identifying which categories are the agreement bottleneck (e.g., YSRB Category IV 'suspicious' in breast cytology)</li>
@@ -7416,7 +7416,7 @@ agreementClass <- if (requireNamespace("jmvcore")) {
 
                 html_content <- "
             <div style='font-family: Arial, sans-serif; max-width: 800px; line-height: 1.6;'>
-                <div style='background: #f9f9f9; border-left: 4px solid #333; padding: 15px; margin-bottom: 20px;'>
+                <div style='background-color: rgba(155, 155, 155, 0.06); border-left: 4px solid #333; padding: 15px; margin-bottom: 20px; color: inherit;'>
                     <h3 style='margin: 0 0 10px 0; color: #333;'>What is ICC (Intraclass Correlation Coefficient)?</h3>
                     <p style='margin: 0; color: #333;'>
                         ICC measures the reliability and agreement of <strong>continuous measurements</strong>
@@ -7424,7 +7424,7 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                     </p>
                 </div>
 
-                <div style='background: #f9f9f9; border-left: 4px solid #333; padding: 15px; margin-bottom: 20px;'>
+                <div style='background-color: rgba(155, 155, 155, 0.06); border-left: 4px solid #333; padding: 15px; margin-bottom: 20px; color: inherit;'>
                     <h4 style='margin: 0 0 10px 0; color: #333;'>When to Use ICC</h4>
                     <p style='margin: 0 0 10px 0;'><strong>Use ICC for continuous measurements:</strong></p>
                     <ul style='margin: 0; padding-left: 20px;'>
@@ -7435,10 +7435,10 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                     </ul>
                 </div>
 
-                <div style='background: #f9f9f9; border-left: 4px solid #333; padding: 15px; margin-bottom: 20px;'>
+                <div style='background-color: rgba(155, 155, 155, 0.06); border-left: 4px solid #333; padding: 15px; margin-bottom: 20px; color: inherit;'>
                     <h4 style='margin: 0 0 10px 0; color: #333;'>ICC Model Selection Guide</h4>
                     <table style='width: 100%; border-collapse: collapse; font-size: 13px;'>
-                        <tr style='background: #f5f5f5;'>
+                        <tr style='background-color: rgba(88, 88, 88, 0.06); color: inherit;'>
                             <th style='padding: 8px; text-align: left; border-bottom: 2px solid #333;'>Model</th>
                             <th style='padding: 8px; text-align: left; border-bottom: 2px solid #333;'>Design</th>
                             <th style='padding: 8px; text-align: left; border-bottom: 2px solid #333;'>Use Case</th>
@@ -7479,14 +7479,14 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                     </p>
                 </div>
 
-                <div style='background: #f9f9f9; border-left: 4px solid #333; padding: 15px; margin-bottom: 20px;'>
+                <div style='background-color: rgba(155, 155, 155, 0.06); border-left: 4px solid #333; padding: 15px; margin-bottom: 20px; color: inherit;'>
                     <h4 style='margin: 0 0 10px 0; color: #333;'>Technical Reference: irr::icc() Parameters</h4>
                     <p style='margin: 0 0 10px 0; font-size: 13px; color: #555;'>
                         This table shows the exact parameters passed to the <code>irr::icc()</code> function for each model.
                         Useful for understanding implementation details and replicating results in R.
                     </p>
                     <table style='width: 100%; border-collapse: collapse; font-size: 12px; font-family: monospace;'>
-                        <tr style='background: #f5f5f5;'>
+                        <tr style='background-color: rgba(88, 88, 88, 0.06); color: inherit;'>
                             <th style='padding: 8px; text-align: left; border-bottom: 2px solid #333;'>Model</th>
                             <th style='padding: 8px; text-align: left; border-bottom: 2px solid #333;'>irr::icc Parameters</th>
                             <th style='padding: 8px; text-align: left; border-bottom: 2px solid #333;'>Use Case</th>
@@ -7529,7 +7529,7 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                     </p>
                 </div>
 
-                <div style='background: #f9f9f9; border-left: 4px solid #333; padding: 15px; margin-bottom: 20px;'>
+                <div style='background-color: rgba(155, 155, 155, 0.06); border-left: 4px solid #333; padding: 15px; margin-bottom: 20px; color: inherit;'>
                     <h4 style='margin: 0 0 10px 0; color: #333;'>Interpreting ICC Values</h4>
                     <table style='width: 100%; border-collapse: collapse;'>
                         <tr>
@@ -7551,7 +7551,7 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                     </table>
                 </div>
 
-                <div style='background: #f9f9f9; border-left: 4px solid #333; padding: 15px;'>
+                <div style='background-color: rgba(155, 155, 155, 0.06); border-left: 4px solid #333; padding: 15px; color: inherit;'>
                     <h4 style='margin: 0 0 10px 0; color: #333;'>ICC vs Bland-Altman</h4>
                     <p style='margin: 0;'>
                         <strong>ICC</strong> quantifies reliability with a single coefficient (0-1).<br>
@@ -7560,7 +7560,7 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                     </p>
                 </div>
 
-                <div style='margin-top: 15px; padding: 10px; background: #f5f5f5; border-radius: 4px;'>
+                <div style='margin-top: 15px; padding: 10px; background-color: rgba(88, 88, 88, 0.06); border-radius: 4px; color: inherit;'>
                     <p style='margin: 0; font-size: 12px; color: #666;'>
                         <strong>Reference:</strong> Shrout, P. E., & Fleiss, J. L. (1979). Intraclass correlations: Uses in assessing rater reliability.
                         <em>Psychological Bulletin</em>, 86(2), 420-428.
@@ -7811,7 +7811,7 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                         Iota Coefficient for Multivariate Interrater Agreement
                     </h3>
 
-                    <div style='background: #E8F5E9; padding: 15px; border-left: 4px solid #4CAF50; margin: 20px 0;'>
+                    <div style='background-color: rgba(33, 159, 43, 0.1); padding: 15px; border-left: 4px solid #4CAF50; margin: 20px 0; color: inherit;'>
                         <h4 style='margin: 0 0 10px 0; color: #333;'>What is Iota?</h4>
                         <p style='margin: 0; line-height: 1.6;'>
                             Iota (\u{03B9}) is a <strong>chance-corrected agreement index</strong> for multivariate observations. Unlike ICC which
@@ -7819,7 +7819,7 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                         </p>
                     </div>
 
-                    <div style='background: #FFF3E0; padding: 15px; border-left: 4px solid #FF9800; margin: 20px 0;'>
+                    <div style='background-color: rgba(255, 169, 33, 0.14); padding: 15px; border-left: 4px solid #FF9800; margin: 20px 0; color: inherit;'>
                         <h4 style='margin: 0 0 10px 0; color: #333;'>Clinical Pathology Use Cases</h4>
 
                         <p style='margin: 0 0 10px 0; font-weight: bold;'>1. Comprehensive Tumor Assessment (Multiple Parameters):</p>
@@ -7863,7 +7863,7 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                         </ul>
                     </div>
 
-                    <div style='background: #f9f9f9; border: 1px solid #ccc; padding: 15px;'>
+                    <div style='background-color: rgba(155, 155, 155, 0.06); border: 1px solid #ccc; padding: 15px; color: inherit;'>
                         <h4 style='margin: 0 0 10px 0;'>Interpretation</h4>
                         <p><strong>< 0.40:</strong> Poor | <strong>0.40-0.60:</strong> Fair | <strong>0.60-0.75:</strong> Good | <strong>0.75-0.90:</strong> Very good | <strong>> 0.90:</strong> Excellent</p>
                     </div>
@@ -8171,23 +8171,23 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                 # Only applicable for 2 raters with numeric/continuous data
 
                 # Validate inputs
+                # Do NOT hide these on a validation failure. A note on a hidden
+                # table is never rendered, so hiding here threw away the very
+                # explanation the user needs -- they just saw the output vanish.
+                # Leaving the (empty) table in place lets the note do its job.
                 if (ncol(ratings) != 2) {
-                    self$results$blandAltman$setVisible(FALSE)
-                    self$results$blandAltmanStats$setVisible(FALSE)
                     self$results$blandAltmanStats$setNote(
                         "error",
-                        "Bland-Altman analysis requires exactly 2 raters. Please select only 2 variables."
+                        .("Bland-Altman analysis requires exactly 2 raters. Please select only 2 variables.")
                     )
                     return()
                 }
 
                 # Check if data is numeric/continuous
                 if (!is.numeric(ratings[[1]]) || !is.numeric(ratings[[2]])) {
-                    self$results$blandAltman$setVisible(FALSE)
-                    self$results$blandAltmanStats$setVisible(FALSE)
                     self$results$blandAltmanStats$setNote(
                         "error",
-                        "Bland-Altman analysis requires continuous (numeric) data. Your data appears to be categorical."
+                        .("Bland-Altman analysis requires continuous (numeric) data. Your data appears to be categorical.")
                     )
                     return()
                 }
@@ -9094,7 +9094,7 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                 html <- paste0(html, "
                 <h3 style='color: #333; margin-top: 0;'>Hierarchical/Multilevel Kappa Analysis</h3>
 
-                <div style='background-color: #f9f9f9; padding: 12px; border-left: 4px solid #333; margin-bottom: 15px;'>
+                <div style='background-color: rgba(155, 155, 155, 0.06); padding: 12px; border-left: 4px solid #333; margin-bottom: 15px; color: inherit;'>
                     <strong>What is it?</strong><br/>
                     Hierarchical kappa extends standard kappa to account for nested data structures where raters
                     are grouped within clusters (institutions, centers, scanners). It decomposes agreement into
@@ -9125,7 +9125,7 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                     <li><strong>Shrinkage</strong>: Pulls extreme cluster estimates toward overall mean</li>
                 </ul>
 
-                <div style='background-color: #f9f9f9; padding: 12px; border-left: 4px solid #333; margin-top: 15px;'>
+                <div style='background-color: rgba(155, 155, 155, 0.06); padding: 12px; border-left: 4px solid #333; margin-top: 15px; color: inherit;'>
                     <strong>Note:</strong> Full hierarchical analysis is computationally intensive and requires sufficient
                     data within each cluster (typically >=10 cases per cluster recommended).
                 </div>
@@ -9387,7 +9387,7 @@ agreementClass <- if (requireNamespace("jmvcore")) {
             .populateMixedEffectsExplanation = function() {
                 html <- "<div style='font-family: Arial, sans-serif; padding: 15px; line-height: 1.6;'>
                 <h3 style='color: #333; margin-top: 0;'>Mixed-Effects Condition Comparison</h3>
-                <div style='background-color: #f9f9f9; padding: 12px; border-left: 4px solid #333; margin-bottom: 15px;'>
+                <div style='background-color: rgba(155, 155, 155, 0.06); padding: 12px; border-left: 4px solid #333; margin-bottom: 15px; color: inherit;'>
                     <strong>What is it?</strong><br/>
                     A linear mixed-effects model that compares measurement conditions (e.g., AI-assisted vs.
                     conventional scoring) while properly accounting for the crossed structure of rater x case data.
@@ -9528,7 +9528,7 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                     <li><strong>Recall (Sensitivity)</strong>: TP / (TP + FN)</li>
                     <li><strong>F1 Score</strong>: Harmonic mean of precision and recall</li>
                 </ul>
-                <div style='background-color: #f9f9f9; padding: 12px; border-left: 4px solid #333; margin-top: 15px;'>
+                <div style='background-color: rgba(155, 155, 155, 0.06); padding: 12px; border-left: 4px solid #333; margin-top: 15px; color: inherit;'>
                     <strong>Clinical Use:</strong> In ordinal scoring (e.g., HER2 0/1+/2+/3+), the confusion
                     matrix reveals systematic misclassification patterns.
                 </div>
@@ -9796,7 +9796,7 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                     <li><strong>95% CI</strong>: Range containing the true metric with 95% confidence</li>
                     <li><strong>Bias</strong>: Mean bootstrap estimate minus observed; large bias suggests instability</li>
                 </ul>
-                <div style='background-color: #f9f9f9; padding: 12px; border-left: 4px solid #333; margin-top: 15px;'>
+                <div style='background-color: rgba(155, 155, 155, 0.06); padding: 12px; border-left: 4px solid #333; margin-top: 15px; color: inherit;'>
                     <strong>Recommendation:</strong> Use bootstrap CIs when reporting agreement metrics in publications.
                     They are distribution-free and provide more robust coverage than analytical CIs.
                 </div>
@@ -9947,7 +9947,7 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                 <p>Evaluates predictions against all annotators simultaneously. A prediction is correct
                 if it matches ANY reference annotator's label (concordance) or only the majority
                 consensus (strict).</p>
-                <div style='background-color: #f9f9f9; padding: 12px; border-left: 4px solid #333; margin-top: 15px;'>
+                <div style='background-color: rgba(155, 155, 155, 0.06); padding: 12px; border-left: 4px solid #333; margin-top: 15px; color: inherit;'>
                     <strong>Reference:</strong> Ottl et al. (2025) used concordance F1 for HER2 scoring
                     evaluation with multiple annotators.
                 </div>
@@ -10070,7 +10070,7 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                 <h3>Paired Agreement Comparison</h3>
                 <p>Compares interobserver agreement between two conditions applied to the same cases
                 (e.g., manual vs AI-assisted scoring). Uses case-bootstrap test.</p>
-                <div style='background-color: #f9f9f9; padding: 12px; border-left: 4px solid #333; margin-top: 15px;'>
+                <div style='background-color: rgba(155, 155, 155, 0.06); padding: 12px; border-left: 4px solid #333; margin-top: 15px; color: inherit;'>
                     <strong>Study design note:</strong> Assumes a paired (crossover) design where the same
                     cases are scored under both conditions.
                 </div>
@@ -10214,7 +10214,7 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                     <li><strong>Kappa (2-5 categories)</strong>: kappaSize implementation of Sim & Wright/Donner methods</li>
                     <li><strong>ICC</strong>: Based on Walter, Eliasziw & Donner (1998)</li>
                 </ul>
-                <div style='background-color: #f9f9f9; padding: 12px; border-left: 4px solid #333; margin-top: 15px;'>
+                <div style='background-color: rgba(155, 155, 155, 0.06); padding: 12px; border-left: 4px solid #333; margin-top: 15px; color: inherit;'>
                     <strong>Note:</strong> Kappa sample sizes assume equal marginal proportions across categories.
                     Highly imbalanced categories generally require larger sample sizes.
                 </div>
@@ -10224,7 +10224,7 @@ agreementClass <- if (requireNamespace("jmvcore")) {
             .populateContingencyTableExplanation = function() {
                 html_content <- "
             <div style='font-family: Arial, sans-serif; max-width: 800px; line-height: 1.6;'>
-                <div style='background: #f9f9f9; border-left: 4px solid #333; padding: 15px; margin-bottom: 20px;'>
+                <div style='background-color: rgba(155, 155, 155, 0.06); border-left: 4px solid #333; padding: 15px; margin-bottom: 20px; color: inherit;'>
                     <h3 style='margin: 0 0 10px 0; color: #333;'>What are Contingency Tables &amp; Rating Combinations?</h3>
                     <p style='margin: 0; color: #333;'>
                         These tables show the <strong>raw frequency distribution</strong> of ratings across raters.
@@ -10233,7 +10233,7 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                     </p>
                 </div>
 
-                <div style='background: #f9f9f9; border-left: 4px solid #333; padding: 15px; margin-bottom: 20px;'>
+                <div style='background-color: rgba(155, 155, 155, 0.06); border-left: 4px solid #333; padding: 15px; margin-bottom: 20px; color: inherit;'>
                     <h4 style='margin: 0 0 10px 0; color: #333;'>How to Read the Table</h4>
                     <ul style='margin: 0; padding-left: 20px;'>
                         <li><strong>Diagonal cells</strong> (where Row = Column) represent <strong>agreement</strong> - both raters assigned the same category</li>
@@ -10243,7 +10243,7 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                     </ul>
                 </div>
 
-                <div style='background: #f9f9f9; border-left: 4px solid #333; padding: 15px; margin-bottom: 20px;'>
+                <div style='background-color: rgba(155, 155, 155, 0.06); border-left: 4px solid #333; padding: 15px; margin-bottom: 20px; color: inherit;'>
                     <h4 style='margin: 0 0 10px 0; color: #333;'>When to Use</h4>
                     <ul style='margin: 0; padding-left: 20px;'>
                         <li><strong>Before computing agreement statistics</strong> - inspect the raw data to identify unexpected patterns</li>
@@ -10253,7 +10253,7 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                     </ul>
                 </div>
 
-                <div style='background: #f9f9f9; border-left: 4px solid #333; padding: 15px;'>
+                <div style='background-color: rgba(155, 155, 155, 0.06); border-left: 4px solid #333; padding: 15px; color: inherit;'>
                     <h4 style='margin: 0 0 10px 0; color: #333;'>Clinical Example</h4>
                     <p style='margin: 0; font-style: italic;'>
                         In a breast cancer grading study, the contingency table might reveal that Grade 1 vs Grade 2
@@ -10268,7 +10268,7 @@ agreementClass <- if (requireNamespace("jmvcore")) {
             .populateBlandAltmanExplanation = function() {
                 html_content <- "
             <div style='font-family: Arial, sans-serif; max-width: 800px; line-height: 1.6;'>
-                <div style='background: #f9f9f9; border-left: 4px solid #333; padding: 15px; margin-bottom: 20px;'>
+                <div style='background-color: rgba(155, 155, 155, 0.06); border-left: 4px solid #333; padding: 15px; margin-bottom: 20px; color: inherit;'>
                     <h3 style='margin: 0 0 10px 0; color: #333;'>What is Bland-Altman Analysis?</h3>
                     <p style='margin: 0; color: #333;'>
                         The Bland-Altman method assesses <strong>agreement between two continuous measurements</strong>
@@ -10277,7 +10277,7 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                     </p>
                 </div>
 
-                <div style='background: #f9f9f9; border-left: 4px solid #333; padding: 15px; margin-bottom: 20px;'>
+                <div style='background-color: rgba(155, 155, 155, 0.06); border-left: 4px solid #333; padding: 15px; margin-bottom: 20px; color: inherit;'>
                     <h4 style='margin: 0 0 10px 0; color: #333;'>When to Use Bland-Altman</h4>
                     <ul style='margin: 0; padding-left: 20px;'>
                         <li><strong>Comparing two measurement methods</strong> - e.g., automated vs manual Ki-67 scoring</li>
@@ -10287,10 +10287,10 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                     </ul>
                 </div>
 
-                <div style='background: #f9f9f9; border-left: 4px solid #333; padding: 15px; margin-bottom: 20px;'>
+                <div style='background-color: rgba(155, 155, 155, 0.06); border-left: 4px solid #333; padding: 15px; margin-bottom: 20px; color: inherit;'>
                     <h4 style='margin: 0 0 10px 0; color: #333;'>Interpreting the Results</h4>
                     <table style='width: 100%; border-collapse: collapse;'>
-                        <tr style='background: #f5f5f5;'>
+                        <tr style='background-color: rgba(88, 88, 88, 0.06); color: inherit;'>
                             <th style='padding: 8px; text-align: left; border-bottom: 2px solid #333;'>Metric</th>
                             <th style='padding: 8px; text-align: left; border-bottom: 2px solid #333;'>Interpretation</th>
                         </tr>
@@ -10313,7 +10313,7 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                     </table>
                 </div>
 
-                <div style='background: #f9f9f9; border-left: 4px solid #333; padding: 15px; margin-bottom: 20px;'>
+                <div style='background-color: rgba(155, 155, 155, 0.06); border-left: 4px solid #333; padding: 15px; margin-bottom: 20px; color: inherit;'>
                     <h4 style='margin: 0 0 10px 0; color: #333;'>Clinical Decision Rule</h4>
                     <p style='margin: 0; font-style: italic;'>
                         The key question is: \u{201C}Are the limits of agreement clinically acceptable?\u{201D} For example,
@@ -10323,7 +10323,7 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                     </p>
                 </div>
 
-                <div style='margin-top: 15px; padding: 10px; background: #f5f5f5; border-radius: 4px;'>
+                <div style='margin-top: 15px; padding: 10px; background-color: rgba(88, 88, 88, 0.06); border-radius: 4px; color: inherit;'>
                     <p style='margin: 0; font-size: 12px; color: #666;'>
                         <strong>Reference:</strong> Bland, J. M., &amp; Altman, D. G. (1986). Statistical methods for assessing
                         agreement between two methods of clinical measurement. <em>The Lancet</em>, 327(8476), 307-310.
@@ -10336,7 +10336,7 @@ agreementClass <- if (requireNamespace("jmvcore")) {
             .populateKrippExplanation = function() {
                 html_content <- "
             <div style='font-family: Arial, sans-serif; max-width: 800px; line-height: 1.6;'>
-                <div style='background: #f9f9f9; border-left: 4px solid #333; padding: 15px; margin-bottom: 20px;'>
+                <div style='background-color: rgba(155, 155, 155, 0.06); border-left: 4px solid #333; padding: 15px; margin-bottom: 20px; color: inherit;'>
                     <h3 style='margin: 0 0 10px 0; color: #333;'>What is Krippendorff's Alpha?</h3>
                     <p style='margin: 0; color: #333;'>
                         Krippendorff's alpha (\u{03B1}) is a versatile reliability coefficient that works with
@@ -10346,7 +10346,7 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                     </p>
                 </div>
 
-                <div style='background: #f9f9f9; border-left: 4px solid #333; padding: 15px; margin-bottom: 20px;'>
+                <div style='background-color: rgba(155, 155, 155, 0.06); border-left: 4px solid #333; padding: 15px; margin-bottom: 20px; color: inherit;'>
                     <h4 style='margin: 0 0 10px 0; color: #333;'>When to Use Krippendorff's Alpha</h4>
                     <ul style='margin: 0; padding-left: 20px;'>
                         <li><strong>Missing data</strong> - Unlike kappa, it naturally handles incomplete designs where not all raters rate all cases</li>
@@ -10356,10 +10356,10 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                     </ul>
                 </div>
 
-                <div style='background: #f9f9f9; border-left: 4px solid #333; padding: 15px; margin-bottom: 20px;'>
+                <div style='background-color: rgba(155, 155, 155, 0.06); border-left: 4px solid #333; padding: 15px; margin-bottom: 20px; color: inherit;'>
                     <h4 style='margin: 0 0 10px 0; color: #333;'>Interpretation Thresholds (Krippendorff 2004)</h4>
                     <table style='width: 100%; border-collapse: collapse;'>
-                        <tr style='background: #f5f5f5;'>
+                        <tr style='background-color: rgba(88, 88, 88, 0.06); color: inherit;'>
                             <th style='padding: 8px; text-align: left; border-bottom: 2px solid #333;'>Alpha Range</th>
                             <th style='padding: 8px; text-align: left; border-bottom: 2px solid #333;'>Interpretation</th>
                             <th style='padding: 8px; text-align: left; border-bottom: 2px solid #333;'>Action</th>
@@ -10382,10 +10382,10 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                     </table>
                 </div>
 
-                <div style='background: #e3f2fd; border-left: 4px solid #1565C0; padding: 15px; margin-bottom: 20px;'>
+                <div style='background-color: rgba(33, 152, 239, 0.13); border-left: 4px solid #1565C0; padding: 15px; margin-bottom: 20px; color: inherit;'>
                     <h4 style='margin: 0 0 10px 0; color: #333;'>Krippendorff's Alpha vs Other Measures</h4>
                     <table style='width: 100%; border-collapse: collapse;'>
-                        <tr style='background: #f5f5f5;'>
+                        <tr style='background-color: rgba(88, 88, 88, 0.06); color: inherit;'>
                             <th style='padding: 8px; text-align: left; border-bottom: 2px solid #333;'>Feature</th>
                             <th style='padding: 8px; text-align: center; border-bottom: 2px solid #333;'>Krippendorff</th>
                             <th style='padding: 8px; text-align: center; border-bottom: 2px solid #333;'>Fleiss' Kappa</th>
@@ -10418,7 +10418,7 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                     </table>
                 </div>
 
-                <div style='background: #f9f9f9; border-left: 4px solid #333; padding: 15px;'>
+                <div style='background-color: rgba(155, 155, 155, 0.06); border-left: 4px solid #333; padding: 15px; color: inherit;'>
                     <h4 style='margin: 0 0 10px 0; color: #333;'>Clinical Example</h4>
                     <p style='margin: 0; font-style: italic;'>
                         In a multi-site tumor grading study where 5 pathologists each reviewed a subset of cases
@@ -10428,7 +10428,7 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                     </p>
                 </div>
 
-                <div style='margin-top: 15px; padding: 10px; background: #f5f5f5; border-radius: 4px;'>
+                <div style='margin-top: 15px; padding: 10px; background-color: rgba(88, 88, 88, 0.06); border-radius: 4px; color: inherit;'>
                     <p style='margin: 0; font-size: 12px; color: #666;'>
                         <strong>Reference:</strong> Krippendorff, K. (2004). <em>Content Analysis: An Introduction to Its Methodology</em>
                         (2nd ed.). Sage Publications. Chapter 11.
@@ -10441,7 +10441,7 @@ agreementClass <- if (requireNamespace("jmvcore")) {
             .populatePABAKExplanation = function() {
                 html_content <- "
             <div style='font-family: Arial, sans-serif; max-width: 800px; line-height: 1.6;'>
-                <div style='background: #f9f9f9; border-left: 4px solid #333; padding: 15px; margin-bottom: 20px;'>
+                <div style='background-color: rgba(155, 155, 155, 0.06); border-left: 4px solid #333; padding: 15px; margin-bottom: 20px; color: inherit;'>
                     <h3 style='margin: 0 0 10px 0; color: #333;'>What is PABAK?</h3>
                     <p style='margin: 0; color: #333;'>
                         PABAK (Prevalence-Adjusted Bias-Adjusted Kappa) corrects Cohen's kappa for the effects of
@@ -10451,7 +10451,7 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                     </p>
                 </div>
 
-                <div style='background: #f9f9f9; border-left: 4px solid #333; padding: 15px; margin-bottom: 20px;'>
+                <div style='background-color: rgba(155, 155, 155, 0.06); border-left: 4px solid #333; padding: 15px; margin-bottom: 20px; color: inherit;'>
                     <h4 style='margin: 0 0 10px 0; color: #333;'>When to Use PABAK</h4>
                     <ul style='margin: 0; padding-left: 20px;'>
                         <li><strong>Rare diagnoses</strong> - When one category is much more common than others (e.g., benign vs malignant in screening)</li>
@@ -10461,10 +10461,10 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                     </ul>
                 </div>
 
-                <div style='background: #f9f9f9; border-left: 4px solid #333; padding: 15px; margin-bottom: 20px;'>
+                <div style='background-color: rgba(155, 155, 155, 0.06); border-left: 4px solid #333; padding: 15px; margin-bottom: 20px; color: inherit;'>
                     <h4 style='margin: 0 0 10px 0; color: #333;'>Key Indices Explained</h4>
                     <table style='width: 100%; border-collapse: collapse;'>
-                        <tr style='background: #f5f5f5;'>
+                        <tr style='background-color: rgba(88, 88, 88, 0.06); color: inherit;'>
                             <th style='padding: 8px; text-align: left; border-bottom: 2px solid #333;'>Index</th>
                             <th style='padding: 8px; text-align: left; border-bottom: 2px solid #333;'>Formula</th>
                             <th style='padding: 8px; text-align: left; border-bottom: 2px solid #333;'>Interpretation</th>
@@ -10487,7 +10487,7 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                     </table>
                 </div>
 
-                <div style='background: #f9f9f9; border-left: 4px solid #333; padding: 15px; margin-bottom: 20px;'>
+                <div style='background-color: rgba(155, 155, 155, 0.06); border-left: 4px solid #333; padding: 15px; margin-bottom: 20px; color: inherit;'>
                     <h4 style='margin: 0 0 10px 0; color: #333;'>Clinical Example: The Kappa Paradox</h4>
                     <p style='margin: 0; font-style: italic;'>
                         Two pathologists classify 100 biopsies as benign/malignant. Results: 90 both say benign,
@@ -10498,7 +10498,7 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                     </p>
                 </div>
 
-                <div style='margin-top: 15px; padding: 10px; background: #f5f5f5; border-radius: 4px;'>
+                <div style='margin-top: 15px; padding: 10px; background-color: rgba(88, 88, 88, 0.06); border-radius: 4px; color: inherit;'>
                     <p style='margin: 0; font-size: 12px; color: #666;'>
                         <strong>Reference:</strong> Byrt, T., Bishop, J., &amp; Carlin, J. B. (1993). Bias, prevalence and kappa.
                         <em>Journal of Clinical Epidemiology</em>, 46(5), 423-429.
@@ -10534,12 +10534,12 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                     self$results$welcome$setVisible(TRUE)
                     self$results$welcome$setContent(
                         "<div style='font-family: Arial, sans-serif; max-width: 800px; line-height: 1.4;'>
-                <div style='background: #f5f5f5; border: 2px solid #333; padding: 20px; margin-bottom: 20px;'>
+                <div style='background-color: rgba(88, 88, 88, 0.06); border: 2px solid #333; padding: 20px; margin-bottom: 20px; color: inherit;'>
                 <h2 style='margin: 0 0 10px 0; font-size: 18px; color: #333;'>Interrater Reliability Analysis</h2>
                 <p style='margin: 0; font-size: 14px; color: #666;'>Measure agreement between multiple raters scoring the same cases</p>
                 </div>
 
-                <div style='background: #f9f9f9; border-left: 4px solid #333; padding: 15px; margin-bottom: 20px;'>
+                <div style='background-color: rgba(155, 155, 155, 0.06); border-left: 4px solid #333; padding: 15px; margin-bottom: 20px; color: inherit;'>
                 <h3 style='margin: 0 0 10px 0; color: #333; font-size: 16px;'>Setup Progress</h3>
                 <div style='margin-bottom: 10px; font-size: 14px;'>
                 [ ] Raters: 0/2 minimum - Select at least 2 rater variables to begin
@@ -10669,8 +10669,27 @@ agreementClass <- if (requireNamespace("jmvcore")) {
 
                     # Skip kappa for continuous data - kappa is only meaningful for categorical/ordinal data
                     if (is_continuous && n_unique_vals > 20) {
-                        self$results$irrtableHeading$setVisible(FALSE)
-                        self$results$irrtable$setVisible(FALSE)
+                        # Kappa is not computed for continuous measurements, but the table is
+                        # left visible: hiding it also hid the only place this table can say
+                        # why, so the result simply vanished. Say it in the table instead.
+                        self$results$irrtable$setRow(rowNo = 1, values = list(
+                            method = "Kappa not computed (continuous data)",
+                            subjects = sum(stats::complete.cases(ratings)),
+                            raters = ncol(ratings)
+                        ))
+                        self$results$irrtable$setNote(
+                            "continuous",
+                            sprintf(
+                                paste0(
+                                    "Cohen's/Fleiss' kappa was not computed: every selected variable is numeric ",
+                                    "with up to %d distinct values, so these are measurements rather than ",
+                                    "categories and there is no category for the raters to agree on. Use ICC, ",
+                                    "Lin's CCC, Bland-Altman limits of agreement, TDI or Krippendorff's alpha ",
+                                    "for continuous ratings."
+                                ),
+                                n_unique_vals
+                            )
+                        )
 
                         # Check if any continuous-appropriate analyses are enabled
                         has_continuous_analysis <- self$options$icc || self$options$meanPearson ||
@@ -10682,12 +10701,12 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                             self$results$welcome$setVisible(TRUE)
                             self$results$welcome$setContent(
                                 "<div style='font-family: Arial, sans-serif; max-width: 800px; line-height: 1.4;'>
-                        <div style='background: #fff3cd; border: 2px solid #856404; padding: 20px; margin-bottom: 20px;'>
+                        <div style='background-color: rgba(255, 202, 33, 0.23); border: 2px solid #856404; padding: 20px; margin-bottom: 20px; color: inherit;'>
                         <h2 style='margin: 0 0 10px 0; font-size: 18px; color: #856404;'>Continuous Data Detected</h2>
                         <p style='margin: 0; font-size: 14px; color: #664d03;'>Your variables have many unique values (>20), indicating continuous measurements. Cohen's/Fleiss' Kappa requires categorical data and has been skipped.</p>
                         </div>
 
-                        <div style='background: #f9f9f9; border-left: 4px solid #0d6efd; padding: 15px; margin-bottom: 20px;'>
+                        <div style='background-color: rgba(155, 155, 155, 0.06); border-left: 4px solid #0d6efd; padding: 15px; margin-bottom: 20px; color: inherit;'>
                         <h3 style='margin: 0 0 10px 0; color: #333; font-size: 16px;'>Recommended Analyses for Continuous Data</h3>
                         <table style='width: 100%; border-collapse: collapse;'>
                         <tr><td style='padding: 8px; border-bottom: 1px solid #ddd;'><strong>ICC</strong></td><td style='padding: 8px; border-bottom: 1px solid #ddd;'>Intraclass Correlation Coefficient - standard measure for continuous rater agreement</td></tr>

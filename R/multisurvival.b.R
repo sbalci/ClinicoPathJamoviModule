@@ -39,26 +39,6 @@
 
 
 
-# Helper function for package dependency checking with graceful fallbacks
-.checkPackageDependency <- function(package_name, method_name, alternative_method = "Cox regression") {
-  if (!requireNamespace(package_name, quietly = TRUE)) {
-    fallback_info <- list(
-      available = FALSE,
-      message = paste0("
-        <div style='background-color: #fff3cd; border: 1px solid #ffeaa7; padding: 15px; border-radius: 5px; margin: 10px 0;'>
-          <h4 style='color: #856404; margin-top: 0;'> ", method_name, " ", "Package Not Available", "</h4>
-          <p><strong>", "Issue:", "</strong> ", "The", " '", package_name, "' ", "package is required but not installed.", "</p>
-          <p><strong>", "Solution:", "</strong> ", "Install the package using:", " <code>install.packages('", package_name, "')</code></p>
-          <p><strong>", "Alternative:", "</strong> ", "Automatically switching to", " ", alternative_method, " ", "analysis.", "</p>
-        </div>
-      ")
-    )
-  } else {
-    fallback_info <- list(available = TRUE, message = "")
-  }
-  return(fallback_info)
-}
-
 # Helper function for comprehensive data validation
 .validateSurvivalData <- function(data, time_var = "mytime", outcome_var = "myoutcome",
                                   event_level = NULL, multievent = FALSE,
@@ -429,12 +409,6 @@ multisurvivalClass <- if (requireNamespace('jmvcore'))
       DEFAULT_PLOT_WIDTH = 600,
       DEFAULT_PLOT_HEIGHT = 450,
 
-      # Debug helpers (disabled)
-      # Temporarily used during plot debugging; intentionally disabled and hidden.
-      .debug_enabled = function() FALSE,
-      .debug_dummy_plot_enabled = function() FALSE,
-      .debug_write = function(lines) invisible(FALSE),
-
       # Per-run compute caches. .cleandata() is invoked ~25x and .cox_model()
       # ~15x within a single .run(); each .cox_model() call re-fits Cox (and,
       # for competing risks, re-expands the dataset via survival::finegray).
@@ -489,7 +463,7 @@ multisurvivalClass <- if (requireNamespace('jmvcore'))
           current_content <- self$results[[output_name]]$content
           if (is.null(current_content)) current_content <- ""
           new_message <- sprintf(
-              '<div class="%s" style="margin: 10px 0; padding: 10px; border-left: 4px solid %s; background-color: #f8f9fa;"><strong>%s:</strong> %s</div>',
+              '<div class="%s" style="margin: 10px 0; padding: 10px; border-left: 4px solid %s; background-color: rgba(138, 155, 172, 0.06); color: inherit;"><strong>%s:</strong> %s</div>',
               css_class,
               border_color,
               htmltools::htmlEscape(title),
@@ -559,7 +533,7 @@ multisurvivalClass <- if (requireNamespace('jmvcore'))
           "<p><b>Why do the subgroup HRs nearly match but the CIs and p-values differ from separate within-subgroup Cox models?</b> ",
           "This is the expected, core statistical distinction between one interaction model and per-subgroup fits:</p>",
           "<table style='border-collapse:collapse;font-size:12px;margin:6px 0;'>",
-          "<tr style='background:#f0f0f0;'>",
+          "<tr style='background-color: rgba(33, 33, 33, 0.07); color: inherit;'>",
           "<th style='border:1px solid #ccc;padding:3px 8px;text-align:left;'></th>",
           "<th style='border:1px solid #ccc;padding:3px 8px;text-align:left;'>Interaction model (this module)</th>",
           "<th style='border:1px solid #ccc;padding:3px 8px;text-align:left;'>Separate Cox per subgroup</th></tr>",
@@ -827,7 +801,7 @@ multisurvivalClass <- if (requireNamespace('jmvcore'))
       # - Bootstrap-compatible styling for jamovi integration
       .formatErrorMessage = function(title, message, suggestions = NULL) {
         error_html <- paste0(
-          "<div style='background-color: #fff3cd; border: 1px solid #ffeaa7; border-radius: 5px; padding: 15px; margin: 10px;'>",
+          "<div style='background-color: rgba(255, 202, 33, 0.23); border: 1px solid #ffeaa7; border-radius: 5px; padding: 15px; margin: 10px; color: inherit;'>",
           "<h4 style='color: #856404; margin-top: 0;'> ", title, "</h4>",
           "<p style='color: #856404; margin: 10px 0;'>", message, "</p>"
         )
@@ -1031,83 +1005,6 @@ multisurvivalClass <- if (requireNamespace('jmvcore'))
         )
       },
 
-      # ============================================================================
-      # PLANNED FEATURES - IMPLEMENTATION STUBS (Future Development)
-      # ============================================================================
-      # The following features were identified in code review (2025-12-07) as
-      # beneficial enhancements but are deferred pending:
-      #   - User feedback on implemented features (summaries, glossary, assumptions)
-      #   - External validation and clinical testing results
-      #   - Priority assessment based on usage patterns
-      #
-      # Status: DRAFT - Commented out, not active in production
-      #
-      # To implement: See corresponding commented options in multisurvival.a.yaml
-      # Implementation checklist when activating:
-      #   1. Uncomment options in .a.yaml (PLANNED FEATURES section)
-      #   2. Add output definitions in .r.yaml
-      #   3. Implement helper methods below
-      #   4. Add unit tests in tests/testthat/test-multisurvival-statistical.R
-      #   5. Update vignettes with examples
-      #   6. Test on reference datasets (colon, veteran, lung)
-      # ============================================================================
-
-      # PLANNED: Configurable Alpha Level (Priority: Medium)
-      # Replace hardcoded p < 0.05 with user-configurable threshold
-      # Affects: PH diagnostics (line 2143), log-rank tests (line 4862)
-      # .getAlphaLevel = function() {
-      #   if (!is.null(self$options$alpha_level)) {
-      #     return(self$options$alpha_level)
-      #   }
-      #   return(0.05)  # default
-      # },
-
-      # PLANNED: Advanced Performance Metrics (Priority: Low)
-      # Add Brier score, time-dependent AUC, calibration plots
-      # Dependencies: pec, survAUC packages
-      # .calculateAdvancedMetrics = function(cox_model, mydata) {
-      #   if (!self$options$advancedMetrics) return(NULL)
-      #   metrics <- list()
-      #   timepoints <- private$.parseTimepoints(self$options$brierTimepoints)
-      #   # Brier score
-      #   metrics$brier <- private$.calculateBrierScore(cox_model, mydata, timepoints)
-      #   # Time-dependent AUC
-      #   metrics$tdAUC <- private$.calculateTimeDependentAUC(cox_model, mydata, timepoints, self$options$tdAUC_method)
-      #   return(metrics)
-      # },
-
-      # PLANNED: Residual Diagnostic Plots (Priority: Low)
-      # Schoenfeld, martingale, deviance, dfbeta residuals
-      # .generateResidualPlots = function(cox_model, mydata) {
-      #   if (!self$options$showResidualDiagnostics) return(NULL)
-      #   # Implementation stub - create plot objects for each residual type
-      # },
-
-      # PLANNED: Guided Wizard Mode (Priority: Medium)
-      # Progressive UI disclosure for novice users
-      # .handleWizardStep = function() {
-      #   if (!self$options$guidedMode) return(NULL)
-      #   # Control UI element visibility based on wizard progress
-      # },
-
-      # PLANNED: Clinical Presets (Priority: Medium-Low)
-      # One-click analysis templates
-      # .applyPreset = function() {
-      #   preset <- self$options$analysisPreset
-      #   if (preset == "none") return(NULL)
-      #   # Auto-configure options based on preset
-      # },
-
-      # PLANNED: Color Palette Selection (Priority: Low)
-      # .getPlotColors = function(n) {
-      #   palette <- self$options$colorPalette
-      #   # Return n colors from selected palette
-      # },
-
-      # ============================================================================
-      # END PLANNED FEATURES
-      # ============================================================================
-
       # init ----
       .init = function() {
         # Initialize mutable private fields
@@ -1166,18 +1063,6 @@ multisurvivalClass <- if (requireNamespace('jmvcore'))
         # Restore plot visibility based on current options (avoids .init() overriding
         # the .r.yaml visibility expressions permanently).
         vis_flags <- private$.setPlotVisibility()
-        private$.debug_write(list(
-          phase = ".init(visibility)",
-          options = list(
-            hr = self$options$hr,
-            sty = self$options$sty,
-            km = self$options$km,
-            ac = self$options$ac,
-            ph_cox = self$options$ph_cox,
-            showNomogram = self$options$showNomogram
-          ),
-          visible = vis_flags
-        ))
 
         # Initialize all summary outputs and headings to FALSE first
         self$results$multivariableCoxSummaryHeading$setVisible(FALSE)
@@ -1236,14 +1121,6 @@ multisurvivalClass <- if (requireNamespace('jmvcore'))
                 self$results$riskScoreSummaryHeading$setVisible(TRUE)
                 self$results$riskScoreSummary$setVisible(TRUE)
             }
-            # EXPERIMENTAL: Disabled - result elements not in .r.yaml
-            # if (self$options$use_tree) {
-            #     self$results$treeSummaryHeading$setVisible(TRUE)
-            #     self$results$tree_summary$setVisible(TRUE)
-            # }
-            # if (self$options$ml_method == 'ensemble') {
-            #     self$results$ml_ensemble_summary$setVisible(TRUE)
-            # }
         }
 
         # Handle showExplanations visibility
@@ -1251,7 +1128,7 @@ multisurvivalClass <- if (requireNamespace('jmvcore'))
             # ENHANCEMENT: Add statistical glossary panel for clinical users
             # Provides plain-language definitions of key statistical terms
             self$results$glossaryPanel$setContent(
-              "<div style='padding: 15px; background-color: #f8f9fa; border-left: 4px solid #007bff; border-radius: 5px; margin: 10px 0;'>
+              "<div style='padding: 15px; background-color: rgba(138, 155, 172, 0.06); border-left: 4px solid #007bff; border-radius: 5px; margin: 10px 0; color: inherit;'>
               <h4 style='color: #0056b3; margin-top: 0;'>Statistical Terms Glossary</h4>
               <dl style='line-height: 1.6;'>
                 <dt><b>Hazard Ratio (HR)</b></dt>
@@ -1276,7 +1153,7 @@ multisurvivalClass <- if (requireNamespace('jmvcore'))
             # ENHANCEMENT: Add assumptions checklist panel for clinical safety
             # Lists key assumptions and provides guidance on checking them
             self$results$assumptionsPanel$setContent(
-              "<div style='padding: 15px; background-color: #fff3cd; border-left: 4px solid #ffc107; border-radius: 5px; margin: 10px 0;'>
+              "<div style='padding: 15px; background-color: rgba(255, 202, 33, 0.23); border-left: 4px solid #ffc107; border-radius: 5px; margin: 10px 0; color: inherit;'>
               <h4 style='color: #856404; margin-top: 0;'>Cox Model Assumptions and Caveats</h4>
               <p style='line-height: 1.6;'><b>Before interpreting results, verify these assumptions:</b></p>
               <ul style='line-height: 1.6;'>
@@ -1301,7 +1178,7 @@ multisurvivalClass <- if (requireNamespace('jmvcore'))
             # Main explanation section
             self$results$multivariableCoxHeading3$setVisible(TRUE)
             self$results$multivariableCoxExplanation$setContent(
-              "<div style='padding: 15px; background-color: #e7f3ff; border-left: 4px solid #2196F3; border-radius: 5px; margin: 10px 0;'>
+              "<div style='padding: 15px; background-color: rgba(33, 144, 255, 0.11); border-left: 4px solid #2196F3; border-radius: 5px; margin: 10px 0; color: inherit;'>
               <h4 style='color: #1976D2; margin-top: 0;'>Understanding Multivariable Cox Regression</h4>
               <p style='line-height: 1.6;'>This analysis adjusts for multiple variables simultaneously, providing <b>conditional associations</b> for each term given the others in the fitted model.</p>
               <ul style='line-height: 1.6;'>
@@ -1317,7 +1194,7 @@ multisurvivalClass <- if (requireNamespace('jmvcore'))
             # Conditional explanations - require both showExplanations AND their specific option
             if (self$options$ac) {
                 self$results$adjustedSurvivalExplanation$setContent(
-                  "<div style='padding: 15px; background-color: #fff3e0; border-left: 4px solid #ff9800; border-radius: 5px; margin: 10px 0;'>
+                  "<div style='padding: 15px; background-color: rgba(255, 169, 33, 0.14); border-left: 4px solid #ff9800; border-radius: 5px; margin: 10px 0; color: inherit;'>
                   <h4 style='color: #F57C00; margin-top: 0;'>Understanding Adjusted Survival Curves</h4>
                   <p style='line-height: 1.6;'>Adjusted curves are model-based survival or cumulative-incidence predictions under the selected standardisation.</p>
                   <p style='line-height: 1.6;'><b>Key Points:</b></p>
@@ -1332,7 +1209,7 @@ multisurvivalClass <- if (requireNamespace('jmvcore'))
             }
             if (self$options$calculateRiskScore) {
                 self$results$riskScoreExplanation$setContent(
-                  "<div style='padding: 15px; background-color: #f3e5f5; border-left: 4px solid #9c27b0; border-radius: 5px; margin: 10px 0;'>
+                  "<div style='padding: 15px; background-color: rgba(153, 33, 170, 0.12); border-left: 4px solid #9c27b0; border-radius: 5px; margin: 10px 0; color: inherit;'>
                   <h4 style='color: #7B1FA2; margin-top: 0;'>Understanding Risk Score Analysis</h4>
                   <p style='line-height: 1.6;'>The displayed score is exp(centered linear predictor), a relative Cox risk score rather than an absolute event probability.</p>
                   <p style='line-height: 1.6;'><b>How It Works:</b></p>
@@ -1348,7 +1225,7 @@ multisurvivalClass <- if (requireNamespace('jmvcore'))
             }
             if (self$options$showNomogram) {
                 self$results$nomogramExplanation$setContent(
-                  "<div style='padding: 15px; background-color: #e8f5e9; border-left: 4px solid #4caf50; border-radius: 5px; margin: 10px 0;'>
+                  "<div style='padding: 15px; background-color: rgba(33, 159, 43, 0.1); border-left: 4px solid #4caf50; border-radius: 5px; margin: 10px 0; color: inherit;'>
                   <h4 style='color: #388E3C; margin-top: 0;'>Understanding Nomograms</h4>
                   <p style='line-height: 1.6;'>A nomogram is a <b>graphical representation</b> of predictions from the fitted regression model.</p>
                   <p style='line-height: 1.6;'><b>How to Use:</b></p>
@@ -1366,7 +1243,7 @@ multisurvivalClass <- if (requireNamespace('jmvcore'))
             }
             if (self$options$person_time) {
                 self$results$personTimeExplanation$setContent(
-                  "<div style='padding: 15px; background-color: #fce4ec; border-left: 4px solid #e91e63; border-radius: 5px; margin: 10px 0;'>
+                  "<div style='padding: 15px; background-color: rgba(230, 33, 99, 0.12); border-left: 4px solid #e91e63; border-radius: 5px; margin: 10px 0; color: inherit;'>
                   <h4 style='color: #C2185B; margin-top: 0;'>Understanding Person-Time Analysis</h4>
                   <p style='line-height: 1.6;'>Person-time measures the <b>total time individuals are at risk</b> in your study, accounting for different follow-up durations.</p>
                   <p style='line-height: 1.6;'><b>Key Concepts:</b></p>
@@ -1382,7 +1259,7 @@ multisurvivalClass <- if (requireNamespace('jmvcore'))
             }
             if (self$options$use_stratify) {
                 self$results$stratifiedAnalysisExplanation$setContent(
-                  "<div style='padding: 15px; background-color: #fff8e1; border-left: 4px solid #ffc107; border-radius: 5px; margin: 10px 0;'>
+                  "<div style='padding: 15px; background-color: rgba(255, 203, 33, 0.14); border-left: 4px solid #ffc107; border-radius: 5px; margin: 10px 0; color: inherit;'>
                   <h4 style='color: #F57F17; margin-top: 0;'>Understanding Stratified Cox Regression</h4>
                   <p style='line-height: 1.6;'>Stratification is used when a variable <b>violates the proportional hazards assumption</b> but you still want to control for its effect.</p>
                   <p style='line-height: 1.6;'><b>What It Does:</b></p>
@@ -1401,7 +1278,7 @@ multisurvivalClass <- if (requireNamespace('jmvcore'))
             if (self$options$ac || self$options$hr || self$options$km) {
                 self$results$survivalPlotsHeading3$setVisible(TRUE)
                 self$results$survivalPlotsExplanation$setContent(
-                  "<div style='padding: 15px; background-color: #e0f2f1; border-left: 4px solid #009688; border-radius: 5px; margin: 10px 0;'>
+                  "<div style='padding: 15px; background-color: rgba(33, 162, 155, 0.14); border-left: 4px solid #009688; border-radius: 5px; margin: 10px 0; color: inherit;'>
                   <h4 style='color: #00796B; margin-top: 0;'>Understanding Survival Curves and Plots</h4>
                   <p style='line-height: 1.6;'>Survival curves visualize the <b>probability of surviving</b> (not experiencing the event) over time.</p>
                   <p style='line-height: 1.6;'><b>Reading the Plot:</b></p>
@@ -1438,7 +1315,7 @@ multisurvivalClass <- if (requireNamespace('jmvcore'))
       .getData = function() {
         # Check if data exists and has content
         if (is.null(self$data) || nrow(self$data) == 0) {
-          jmvcore::reject('Data contains no (complete) rows')
+          jmvcore::reject(.("Data contains no (complete) rows"))
         }
 
         # Get the data
@@ -1447,7 +1324,7 @@ multisurvivalClass <- if (requireNamespace('jmvcore'))
 
         # Check if data has names
         if (is.null(names(mydata))) {
-          jmvcore::reject('Data must have column names')
+          jmvcore::reject(.("Data must have column names"))
         }
 
         # Add row names if missing
@@ -1631,7 +1508,7 @@ multisurvivalClass <- if (requireNamespace('jmvcore'))
         # Handle validation issues and warnings
         if (length(validation_results$issues) > 0) {
           issue_message <- paste0(
-            "<div style='background-color: #f8d7da; border: 1px solid #f5c6cb; padding: 15px; border-radius: 5px; margin: 10px 0;'>",
+            "<div style='background-color: rgba(216, 33, 50, 0.18); border: 1px solid #f5c6cb; padding: 15px; border-radius: 5px; margin: 10px 0; color: inherit;'>",
             "<h4 style='color: #721c24; margin-top: 0;'> ", .("Data Validation Issues"), "</h4>",
             "<ul style='margin: 5px 0; padding-left: 20px;'>",
             paste(lapply(validation_results$issues, function(x) paste0("<li>", x, "</li>")), collapse = ""),
@@ -1645,7 +1522,7 @@ multisurvivalClass <- if (requireNamespace('jmvcore'))
         # Display warnings if any
         if (length(validation_results$warnings) > 0) {
           warning_message <- paste0(
-            "<div style='background-color: #fff3cd; border: 1px solid #ffeaa7; padding: 15px; border-radius: 5px; margin: 10px 0;'>",
+            "<div style='background-color: rgba(255, 202, 33, 0.23); border: 1px solid #ffeaa7; padding: 15px; border-radius: 5px; margin: 10px 0; color: inherit;'>",
             "<h4 style='color: #856404; margin-top: 0;'> ", .("Data Validation Warnings"), "</h4>",
             "<ul style='margin: 5px 0; padding-left: 20px;'>",
             paste(lapply(validation_results$warnings, function(x) paste0("<li>", x, "</li>")), collapse = ""),
@@ -1813,23 +1690,23 @@ multisurvivalClass <- if (requireNamespace('jmvcore'))
                   mydata[["start"]] <- func(mydata[[dxdate]])
                   mydata[["end"]] <- func(mydata[[fudate]])
               } else {
-                  jmvcore::reject(paste0("Unsupported time type format: ", timetypedata,
-                             ". Supported formats are: ", paste(names(lubridate_functions), collapse = ", ")))
+                  jmvcore::reject(jmvcore::format(
+                      .("Unsupported time type format: {format}. Supported formats are: {supported}"),
+                      format = timetypedata,
+                      supported = paste(names(lubridate_functions), collapse = ", ")))
               }
           } else {
               # Mixed types error
-              jmvcore::reject("Diagnosis date and follow-up date must be in the same format (both numeric or both text)")
+              jmvcore::reject(.("Diagnosis date and follow-up date must be in the same format (both numeric or both text)"))
           }
 
 
           if (sum(!is.na(mydata[["start"]])) == 0 ||
               sum(!is.na(mydata[["end"]])) == 0)  {
-            jmvcore::reject(
-              paste0(
-                "Time difference cannot be calculated. Make sure that time type in variables are correct. Currently it is: ",
-                self$options$timetypedata
-              )
-            )
+            jmvcore::reject(jmvcore::format(
+              .("Time difference cannot be calculated. Make sure that time type in variables are correct. Currently it is: {format}"),
+              format = self$options$timetypedata
+            ))
           }
 
           timetypeoutput <-
@@ -1853,9 +1730,9 @@ multisurvivalClass <- if (requireNamespace('jmvcore'))
           # Notice Disabled per user request (serialization issues)
           # notice <- jmvcore::Notice$new(...)
           
-          error_msg <- sprintf(
-              "Negative Survival Times Detected: %d observation(s) have negative time values. This typically indicates:\n\u2022 Follow-up date occurs before diagnosis date\n\u2022 Incorrect date variable selection (dates reversed)\n\u2022 Data entry errors in date fields\n\nTo Fix:\n1. Verify 'Diagnosis Date' and 'Follow-up Date' are correctly assigned\n2. Check that diagnosis always precedes follow-up\n3. Review date formats and ensure consistency\n4. Examine observations with negative times for data errors",
-              n_negative
+          error_msg <- jmvcore::format(
+              .("Negative Survival Times Detected: {count} observation(s) have negative time values. This typically indicates:\n\u2022 Follow-up date occurs before diagnosis date\n\u2022 Incorrect date variable selection (dates reversed)\n\u2022 Data entry errors in date fields\n\nTo Fix:\n1. Verify 'Diagnosis Date' and 'Follow-up Date' are correctly assigned\n2. Check that diagnosis always precedes follow-up\n3. Review date formats and ensure consistency\n4. Examine observations with negative times for data errors"),
+              count = n_negative
           )
           
           self$results$todo$setVisible(TRUE)
@@ -2208,15 +2085,7 @@ multisurvivalClass <- if (requireNamespace('jmvcore'))
           analysis_results <- private$.performSurvivalAnalysis(cleaneddata)
           survival_time <- private$.stopPerformanceTimer("survival_analysis")
 
-          # Machine learning analysis (if requested)
-          # EXPERIMENTAL: Disabled - ml_method option not in .a.yaml
-          # if (self$options$ml_method != "none") {
-          #   private$.startPerformanceTimer("ml_analysis")
-          #   private$.runMLAnalysis()
-          #   ml_time <- private$.stopPerformanceTimer("ml_analysis")
-          # } else {
-            ml_time <- 0
-          # }
+          ml_time <- 0
 
           # Optimism-corrected discrimination (bootstrap C-index), if requested
           private$.calculateOptimismCIndex()
@@ -2273,7 +2142,7 @@ multisurvivalClass <- if (requireNamespace('jmvcore'))
 
         # Stop if Empty Data
         if (nrow(self$data) == 0) {
-          jmvcore::reject('Data contains no (complete) rows')
+          jmvcore::reject(.("Data contains no (complete) rows"))
         }
 
         # Fit central Cox model once for downstream plots
@@ -2282,14 +2151,6 @@ multisurvivalClass <- if (requireNamespace('jmvcore'))
         if (isTRUE(getOption("multisurvival.debug"))) {
           message("[multisurvival.debug] performSurvivalAnalysis: cox_model fitted = ", !is.null(cox_model))
         }
-
-        private$.debug_write(list(
-          phase = ".performSurvivalAnalysis",
-          cox_model_null = is.null(cox_model),
-          hr = self$options$hr,
-          km = self$options$km,
-          ac = self$options$ac
-        ))
 
         # Short-circuit if model fails
         if (is.null(cox_model)) {
@@ -2317,10 +2178,6 @@ multisurvivalClass <- if (requireNamespace('jmvcore'))
           tryCatch(
             private$.cox_ph(cox_model),
             error = function(e) {
-              private$.debug_write(list(
-                phase = ".cox_ph(error)",
-                message = e$message
-              ))
               self$results$plot8$setVisible(FALSE)
               NULL
             }
@@ -2344,11 +2201,6 @@ multisurvivalClass <- if (requireNamespace('jmvcore'))
           private$.calculate_nomogram()
         }
 
-        # AFT Model Analysis - COMMENTED OUT (options disabled in .a.yaml/.u.yaml)
-        # if (self$options$use_aft) {
-        #   private$.calculate_aft()
-        # }
-
         # Model performance metrics (C-index, IPCW Brier / AUC, IBS via riskRegression)
         if (self$options$show_survmetrics) {
           private$.calculate_survmetrics()
@@ -2358,10 +2210,6 @@ multisurvivalClass <- if (requireNamespace('jmvcore'))
         if (self$options$compare_models) {
           private$.compare_models()
         }
-
-        # EXPERIMENTAL:         if (self$options$use_tree) {
-        # EXPERIMENTAL:           private$.calculate_survivaldecisiontree()
-        # EXPERIMENTAL:         }
 
         # Return success indicator
         return(TRUE)
@@ -2430,12 +2278,12 @@ multisurvivalClass <- if (requireNamespace('jmvcore'))
             dropped <- rc_total - n_obs
             dropped_ev <- if (!is.null(rc$n_event)) rc$n_event - n_events else NA_integer_
             if (!is.na(dropped) && dropped > 0)
-              recode_note <- sprintf(
-                .(" A further %d row(s)%s were excluded from the model because the follow-up time or at least one selected covariate was missing; the outcome recode shown above counts the outcome column alone."),
-                dropped,
-                if (!is.na(dropped_ev) && dropped_ev > 0)
-                  sprintf(.(" (%d of them events)"), dropped_ev) else ""
-              )
+              recode_note <- paste0(" ", jmvcore::format(
+                .("A further {rows} row(s){events} were excluded from the model because the follow-up time or at least one selected covariate was missing; the outcome recode shown above counts the outcome column alone."),
+                rows = dropped,
+                events = if (!is.na(dropped_ev) && dropped_ev > 0)
+                  paste0(" ", jmvcore::format(.("({count} of them events)"), count = dropped_ev)) else ""
+              ))
           }
 
           private$.addHtmlMessage(
@@ -2683,89 +2531,6 @@ multisurvivalClass <- if (requireNamespace('jmvcore'))
         private$.checkpoint()
 
         # (mydata_labelled / all_labels are defined above, before the formula build)
-
-        # Handle Time-Dependent Covariates
-        # EXPERIMENTAL:         if (self$options$use_time_dependent && !is.null(self$options$time_dep_vars)) {
-        # EXPERIMENTAL: 
-        # EXPERIMENTAL:           # Get time-dependent variable names
-        # EXPERIMENTAL:           time_dep_vars <- names(all_labels)[match(self$options$time_dep_vars, all_labels)]
-        # EXPERIMENTAL: 
-        # EXPERIMENTAL:           if (self$options$td_format == "wide") {
-        # EXPERIMENTAL:             # Handle wide format data - convert to long format
-        # EXPERIMENTAL:             mydata <- private$.convertWideToLong(mydata, time_dep_vars, all_labels)
-        # EXPERIMENTAL: 
-        # EXPERIMENTAL:             # Update formula for time-dependent covariates (long format)
-        # EXPERIMENTAL:             td_predictors <- c(formula_parts, time_dep_vars)
-        # EXPERIMENTAL:             coxformula <- .buildSurvivalFormula(
-        # EXPERIMENTAL:               time_var = "tstart",
-        # EXPERIMENTAL:               outcome_var = myoutcome,
-        # EXPERIMENTAL:               predictors = td_predictors,
-        # EXPERIMENTAL:               survival_type = "counting",
-        # EXPERIMENTAL:               start_var = "tstart",
-        # EXPERIMENTAL:               stop_var = "tstop"
-        # EXPERIMENTAL:             )
-        # EXPERIMENTAL: 
-        # EXPERIMENTAL:           } else if (self$options$td_format == "long") {
-        # EXPERIMENTAL:             # Handle long format data
-        # EXPERIMENTAL:             if (!is.null(self$options$start_time_var) && !is.null(self$options$stop_time_var)) {
-        # EXPERIMENTAL:               start_time_var <- names(all_labels)[all_labels == self$options$start_time_var]
-        # EXPERIMENTAL:               stop_time_var <- names(all_labels)[all_labels == self$options$stop_time_var]
-        # EXPERIMENTAL: 
-        # EXPERIMENTAL:               # Update formula for time-dependent covariates
-        # EXPERIMENTAL:               long_predictors <- c(formula_parts, time_dep_vars)
-        # EXPERIMENTAL:               coxformula <- .buildSurvivalFormula(
-        # EXPERIMENTAL:                 time_var = start_time_var,
-        # EXPERIMENTAL:                 outcome_var = myoutcome,
-        # EXPERIMENTAL:                 predictors = long_predictors,
-        # EXPERIMENTAL:                 survival_type = "counting",
-        # EXPERIMENTAL:                 start_var = start_time_var,
-        # EXPERIMENTAL:                 stop_var = stop_time_var
-        # EXPERIMENTAL:               )
-        # EXPERIMENTAL:             }
-        # EXPERIMENTAL:           }
-        # EXPERIMENTAL:         }
-        # EXPERIMENTAL: 
-        # EXPERIMENTAL:         # Handle Frailty Models
-        # EXPERIMENTAL:         if (self$options$use_frailty && !is.null(self$options$frailty_var)) {
-        # EXPERIMENTAL:           frailty_var <- names(all_labels)[all_labels == self$options$frailty_var]
-        # EXPERIMENTAL: 
-        # EXPERIMENTAL:           # Add frailty term based on distribution
-        # EXPERIMENTAL:           frailty_term <- switch(self$options$frailty_distribution,
-        # EXPERIMENTAL:             "gamma" = paste0("frailty(", frailty_var, ", distribution='gamma')"),
-        # EXPERIMENTAL:             "gaussian" = paste0("frailty(", frailty_var, ", distribution='gaussian')"),
-        # EXPERIMENTAL:             "logt" = paste0("frailty(", frailty_var, ", distribution='logt')")
-        # EXPERIMENTAL:           )
-        # EXPERIMENTAL: 
-        # EXPERIMENTAL:           formula_parts <- c(formula_parts, frailty_term)
-        # EXPERIMENTAL:           RHT <- paste(formula_parts, collapse = " + ")
-        # EXPERIMENTAL:           coxformula <- .asSurvivalFormula(paste0(LHT, " ~ ", RHT))
-        # EXPERIMENTAL:         }
-        # EXPERIMENTAL: 
-        # EXPERIMENTAL:         # Handle Splines for Non-Proportional Hazards
-        # EXPERIMENTAL:         if (self$options$use_splines && !is.null(self$options$spline_vars)) {
-        # EXPERIMENTAL:           spline_vars <- names(all_labels)[match(self$options$spline_vars, all_labels)]
-        # EXPERIMENTAL: 
-        # EXPERIMENTAL:           # Create spline terms
-        # EXPERIMENTAL:           for (var in spline_vars) {
-        # EXPERIMENTAL:             spline_term <- switch(self$options$spline_type,
-        # EXPERIMENTAL:               "pspline" = paste0("pspline(", var, ", df=", self$options$spline_df, ")"),
-        # EXPERIMENTAL:               "ns" = paste0("ns(", var, ", df=", self$options$spline_df, ")"),
-        # EXPERIMENTAL:               "bs" = paste0("bs(", var, ", df=", self$options$spline_df, ")")
-        # EXPERIMENTAL:             )
-        # EXPERIMENTAL: 
-        # EXPERIMENTAL:             # Replace the linear term with spline term
-        # EXPERIMENTAL:             formula_parts <- formula_parts[formula_parts != var]
-        # EXPERIMENTAL:             formula_parts <- c(formula_parts, spline_term)
-        # EXPERIMENTAL:           }
-        # EXPERIMENTAL: 
-        # EXPERIMENTAL:           RHT <- paste(formula_parts, collapse = " + ")
-        # EXPERIMENTAL:           coxformula <- .asSurvivalFormula(paste0(LHT, " ~ ", RHT))
-        # EXPERIMENTAL: 
-        # EXPERIMENTAL:           # Load splines package if needed
-        # EXPERIMENTAL:           if (self$options$spline_type %in% c("ns", "bs")) {
-        # EXPERIMENTAL:             requireNamespace("splines", quietly = TRUE)
-        # EXPERIMENTAL:           }
-        # EXPERIMENTAL:         }
 
         # Check for competing risks analysis.
         #
@@ -3180,223 +2945,6 @@ multisurvivalClass <- if (requireNamespace('jmvcore'))
       }
 
       ,
-      # AFT Model (Accelerated Failure Time) ----
-      # DISABLED: `use_aft` is commented out in .a.yaml/.u.yaml, all five AFT
-      # result items are commented out in .r.yaml, and the only call site is
-      # commented out in .performSurvivalAnalysis(). The `if (TRUE) return()`
-      # below is a third layer of the same switch.
-      #
-      # DO NOT REVIVE THIS WITHOUT FIXING THE FOLLOWING. They were found while
-      # fixing the identical problems in the live Cox output, and this code
-      # predates those fixes, so it still carries every one of them:
-      #
-      # 1. RAW COEFFICIENT NAMES. `var_name <- rownames(coef_table)[i]` below
-      #    yields model-matrix names such as "stageIV" or "treatmentTreatment A".
-      #    The adjusted Cox table shipped those to clinicians until it was fixed.
-      #    Use private$.coefTerms(), which already resolves a fitted model's
-      #    coefficients into variable / level / reference level.
-      #
-      # 2. FACTOR CONTRASTS ARE NOT "UNIT INCREASES". Whatever prose is written
-      #    here, a factor level is "<level> compared with <reference>", never
-      #    "per 1-unit increase". Only genuinely continuous predictors get the
-      #    per-unit phrasing.
-      #
-      # 3. THIS IS A TIME-RATIO MODEL, NOT A HAZARD MODEL. survreg gives
-      #    acceleration factors: TR > 1 means LONGER survival, the opposite
-      #    direction to HR > 1. Do not copy wording from the Cox summaries --
-      #    the existing "% longer survival time" text below is right in kind and
-      #    must stay that way.
-      #
-      # 4. IF IT EVER CALLS finalfit, PIN cont_cut = 0. The default of 5
-      #    silently converts any numeric predictor with fewer than 5 distinct
-      #    values into a factor, which is how the Cox table and the adjusted Cox
-      #    table came to be two different models fitted on the same data.
-      #
-      # 5. STRATIFICATION AND COMPETING RISKS are not handled anywhere below.
-      #    Decide deliberately whether to support or refuse them; silently
-      #    ignoring a strata() selection is what caused MS-03.
-      .calculate_aft = function() {
-        # SAFEGUARD: Feature disabled
-        if (TRUE) return()
-
-        # Early return if AFT not requested
-        # if (!self$options$use_aft) {
-        #   return()
-        # }
-
-
-        if (private$.isCompetingRisk()) {
-          private$.addHtmlMessage(
-            "info",
-            .("AFT not run under competing risks"),
-            .("AFT models are not calculated when competing-risk (Fine-Gray) analysis is selected.")
-          )
-          return()
-        }
-
-        private$.checkpoint()
-
-        # Get cleaned data
-        cleaneddata <- private$.cleandata()
-        mydata <- cleaneddata$cleanData
-
-        # Harmonize outcome for AFT (requires numeric/censoring)
-        if (is.factor(mydata$myoutcome)) {
-          if ("Event" %in% levels(mydata$myoutcome)) {
-            mydata$myoutcome <- as.numeric(mydata$myoutcome == "Event")
-          } else if (nlevels(mydata$myoutcome) == 2) {
-            # Binary factor: use level matching outcomeLevel or second level as event
-            mydata$myoutcome <- as.numeric(mydata$myoutcome == levels(mydata$myoutcome)[2])
-          } else {
-
-            private$.addHtmlMessage(
-              "error",
-              .("AFT outcome error"),
-              .("Outcome with more than two levels is not supported for AFT models. Please select a binary outcome variable or disable competing risk analysis for AFT.")
-            )
-            return()
-          }
-        }
-
-        # Extract variable names
-        myexplanatory <- NULL
-        if (!is.null(self$options$explanatory)) {
-          myexplanatory <- as.vector(cleaneddata$myexplanatory_labelled)
-        }
-
-        mycontexpl <- NULL
-        if (!is.null(self$options$contexpl)) {
-          mycontexpl <- as.vector(cleaneddata$mycontexpl_labelled)
-        }
-
-        # Build formula for AFT model
-        formula_parts <- c(myexplanatory, mycontexpl)
-        aft_formula <- paste("survival::Surv(mytime, myoutcome) ~",
-                            paste(formula_parts, collapse = " + "))
-        aft_formula <- .asSurvivalFormula(aft_formula)
-
-        # Get distribution
-        distribution <- self$options$aft_distribution
-
-        private$.checkpoint()
-
-        # Fit AFT model using survreg
-        aft_model <- tryCatch({
-          survival::survreg(aft_formula, data = mydata, dist = distribution)
-        }, error = function(e) {
-          private$.addHtmlMessage(
-            "error",
-            .("AFT model fitting error"),
-            paste0(e$message, .(". Check data quality, ensure adequate events, and verify distribution choice is appropriate for your data."))
-          )
-          return(NULL)
-        })
-
-        if (is.null(aft_model)) {
-          return()
-        }
-
-        private$.checkpoint()
-
-        # Extract coefficients and statistics
-        aft_summary <- summary(aft_model)
-        coef_table <- aft_summary$table
-
-        # Populate AFT results table
-        row_num <- 1
-        for (i in seq_len(nrow(coef_table))) {
-          var_name <- rownames(coef_table)[i]
-
-          # Skip intercept for the table
-          if (var_name == "(Intercept)") {
-            next
-          }
-
-          coefficient <- coef_table[i, "Value"]
-          se <- coef_table[i, "Std. Error"]
-          z_stat <- coef_table[i, "z"]
-          p_value <- coef_table[i, "p"]
-
-          # Calculate Time Ratio (TR) = exp(coefficient)
-          # In AFT models, positive coefficient means longer survival time
-          time_ratio <- exp(coefficient)
-          tr_lower <- exp(coefficient - 1.96 * se)
-          tr_upper <- exp(coefficient + 1.96 * se)
-
-          # Generate natural language interpretation
-          interpretation <- ""
-          if (self$options$aft_show_interpretation) {
-            if (time_ratio > 1) {
-              pct_increase <- round((time_ratio - 1) * 100, 1)
-              interpretation <- paste0("Associated with ", pct_increase, "% longer survival time")
-            } else {
-              pct_decrease <- round((1 - time_ratio) * 100, 1)
-              interpretation <- paste0("Associated with ", pct_decrease, "% shorter survival time")
-            }
-
-            if (p_value < 0.05) {
-              interpretation <- paste0(interpretation, " (significant)")
-            } else {
-              interpretation <- paste0(interpretation, " (not significant)")
-            }
-          }
-
-          # Add row to table
-          self$results$aftModelTable$addRow(rowKey = row_num, values = list(
-            variable = var_name,
-            coefficient = coefficient,
-            time_ratio = time_ratio,
-            tr_lower = tr_lower,
-            tr_upper = tr_upper,
-            se = se,
-            z_stat = z_stat,
-            p_value = p_value,
-            interpretation = interpretation
-          ))
-
-          row_num <- row_num + 1
-        }
-
-        # Generate AFT Summary HTML
-        if (self$options$showSummaries) {
-          n_significant <- sum(coef_table[-1, "p"] < 0.05, na.rm = TRUE)  # Exclude intercept
-          n_total <- nrow(coef_table) - 1
-
-          summary_html <- glue::glue("
-<h4>AFT Model Summary ({distribution} distribution)</h4>
-<p><b>Model Type:</b> Accelerated Failure Time (AFT) Regression</p>
-<p><b>Distribution:</b> {tools::toTitleCase(distribution)}</p>
-<p><b>Number of observations:</b> {aft_model$df[1] + aft_model$df[2]}</p>
-<p><b>Number of events:</b> {sum(mydata$myoutcome)}</p>
-<p><b>Significant predictors:</b> {n_significant} out of {n_total}</p>
-<p><b>Log-likelihood:</b> {round(aft_model$loglik[2], 2)}</p>
-<p><b>AIC:</b> {round(AIC(aft_model), 2)}</p>
-<p style='margin-top:15px;'><i>Note: Time Ratios (TR) > 1 indicate longer survival times; TR < 1 indicate shorter survival times.</i></p>
-")
-          self$results$aftSummary$setContent(summary_html)
-        }
-
-        # Generate AFT Model Info
-        info_html <- glue::glue("
-<h4>AFT Model Information</h4>
-<p><b>Distribution:</b> {tools::toTitleCase(distribution)}</p>
-<p><b>Scale parameter:</b> {round(aft_model$scale, 4)}</p>
-<p><b>Log-likelihood:</b> {round(aft_model$loglik[2], 2)}</p>
-<p><b>AIC:</b> {round(AIC(aft_model), 2)}</p>
-<p><b>BIC:</b> {round(BIC(aft_model), 2)}</p>
-")
-
-        # Add HR equivalent if requested
-        if (self$options$aft_show_hr_equivalent && distribution == "weibull") {
-          info_html <- paste0(info_html, "
-<p style='margin-top:10px;'><i>For Weibull AFT models, Hazard Ratio \u2248 1/Time Ratio. This is only an approximation.</i></p>
-")
-        }
-
-        self$results$aftModelInfo$setContent(info_html)
-      }
-
-      ,
       # SurvMetrics - Model Performance Metrics ----
       # DISABLED: Options commented out in .a.yaml and .u.yaml
       # Function call commented out in .run() (line ~1919)
@@ -3641,7 +3189,7 @@ multisurvivalClass <- if (requireNamespace('jmvcore'))
               "reported against the Kaplan-Meier model fitted to the same data, because a fixed cut-off ",
               "such as 0.25 is the non-informative benchmark only when the event probability is 50%. ",
               "The <b>Integrated Brier Score</b> integrates it over a dense grid across the follow-up.</p>",
-              "<p style='background:#fff4e5;border-left:4px solid #e67e22;padding:8px;margin:10px 0;'>",
+              "<p style='background-color: rgba(255, 161, 33, 0.12);border-left:4px solid #e67e22;padding:8px;margin:10px 0; color: inherit;'>",
               "<b>These are apparent (in-sample) estimates.</b> The model was fitted and evaluated on the ",
               "same observations, with no bootstrap correction, cross-validation or held-out set, so every ",
               "value here is optimistic - typically substantially so with many covariates or few events. ",
@@ -4104,20 +3652,6 @@ multisurvivalClass <- if (requireNamespace('jmvcore'))
       .plot_nomogram = function(image, ggtheme, theme, ...) {
         oldpar <- graphics::par(no.readonly = TRUE)
         on.exit(graphics::par(oldpar), add = TRUE)
-        if (private$.debug_dummy_plot_enabled()) {
-          private$.debug_write(list(
-            phase = ".plot_nomogram(dummy)",
-            nom_object_is_null = is.null(private$.nom_object)
-          ))
-          graphics::plot(
-            1:10, (1:10)^2,
-            type = "b",
-            xlab = "x",
-            ylab = "y",
-            main = "multisurvival debug dummy plot (.plot_nomogram)"
-          )
-          return(TRUE)
-        }
 
         if(is.null(private$.nom_object)) {
           return(FALSE)
@@ -4198,20 +3732,20 @@ multisurvivalClass <- if (requireNamespace('jmvcore'))
             max-width: 800px;
             margin: 20px auto;
             padding: 20px;
-            background-color: #fff;
+            background-color: rgba(255, 255, 255, 0.06); color: inherit;
             box-shadow: 0 2px 4px rgba(0,0,0,0.1);
             border-radius: 8px;
         }
         .tech-details {
             font-family: "Roboto Mono", monospace;
-            background-color: #f8f9fa;
+            background-color: rgba(138, 155, 172, 0.06); color: inherit;
             padding: 15px;
             border-radius: 4px;
             margin: 15px 0;
-            color: #666;
+            color: inherit;
         }
         .instructions {
-            background-color: #e8f5e9;
+            background-color: rgba(33, 159, 43, 0.1); color: inherit;
             padding: 20px;
             margin: 20px 0;
             border-radius: 8px;
@@ -4225,14 +3759,14 @@ multisurvivalClass <- if (requireNamespace('jmvcore'))
         .variable-section {
             margin: 15px 0;
             padding: 15px;
-            background-color: #f8f9fa;
+            background-color: rgba(138, 155, 172, 0.06); color: inherit;
             border-left: 4px solid #2196f3;
             border-radius: 4px;
         }
         .section-title {
             font-size: 1.2em;
             font-weight: 600;
-            color: #2c3e50;
+            color: inherit;
             margin-bottom: 10px;
         }
         .values {
@@ -4244,7 +3778,7 @@ multisurvivalClass <- if (requireNamespace('jmvcore'))
         }
         .outputs-section {
             margin-top: 30px;
-            background-color: #fff3e0;
+            background-color: rgba(255, 169, 33, 0.14); color: inherit;
             border: 1px solid #ffe0b2;
             border-radius: 8px;
             padding: 20px;
@@ -4262,11 +3796,11 @@ multisurvivalClass <- if (requireNamespace('jmvcore'))
             border-bottom: 1px solid #ffe0b2;
         }
         .prediction-table th {
-            background-color: #fff3e0;
+            background-color: rgba(255, 169, 33, 0.14); color: inherit;
             font-weight: 600;
         }
         .notes {
-            background-color: #fffde7;
+            background-color: rgba(255, 237, 33, 0.11); color: inherit;
             padding: 15px;
             margin-top: 20px;
             border-radius: 4px;
@@ -4467,11 +4001,6 @@ multisurvivalClass <- if (requireNamespace('jmvcore'))
         zph <- tryCatch(
           survival::cox.zph(cox_model),
           error = function(e) {
-            private$.debug_write(list(
-              phase = ".cox_ph(cox.zph error)",
-              message = e$message,
-              cox_model_class = class(cox_model)[1]
-            ))
             structure(list(error = e$message), class = "multisurvival_ph_error")
           }
         )
@@ -4537,13 +4066,6 @@ multisurvivalClass <- if (requireNamespace('jmvcore'))
         image8 <- self$results$plot8
         image8$setState(zph)
 
-        private$.debug_write(list(
-          phase = ".cox_ph(state set)",
-          zph_class = class(zph)[1],
-          has_y = !inherits(zph, "multisurvival_ph_error") && !is.null(zph$y),
-          table_dim = if (inherits(zph, "multisurvival_ph_error") || is.null(zph$table)) NULL else dim(zph$table)
-        ))
-
       }
 
 
@@ -4562,22 +4084,6 @@ multisurvivalClass <- if (requireNamespace('jmvcore'))
 
         plotData <- image$state
 
-        if (private$.debug_dummy_plot_enabled()) {
-          private$.debug_write(list(
-            phase = ".plot(dummy)",
-            state_is_null = is.null(plotData),
-            state_names = if (is.null(plotData)) NULL else names(plotData)
-          ))
-          graphics::plot(
-            1:10, 1:10,
-            type = "b",
-            xlab = "x",
-            ylab = "y",
-            main = "multisurvival debug dummy plot (.plot)"
-          )
-          return(TRUE)
-        }
-        
         if (is.null(plotData)) {
           if (isTRUE(getOption("multisurvival.debug"))) {
             message("[multisurvival.debug] .plot: state is NULL, recomputing...")
@@ -4762,22 +4268,6 @@ multisurvivalClass <- if (requireNamespace('jmvcore'))
 
         plotData <- image3$state
 
-        if (private$.debug_dummy_plot_enabled()) {
-          private$.debug_write(list(
-            phase = ".plot3(dummy)",
-            state_is_null = is.null(plotData),
-            state_names = if (is.null(plotData)) NULL else names(plotData)
-          ))
-          graphics::plot(
-            1:10, 10:1,
-            type = "b",
-            xlab = "x",
-            ylab = "y",
-            main = "multisurvival debug dummy plot (.plot3)"
-          )
-          return(TRUE)
-        }
-        
         if (is.null(plotData)) {
           if (isTRUE(getOption("multisurvival.debug"))) {
             message("[multisurvival.debug] .plot3: state is NULL, recomputing...")
@@ -4789,12 +4279,6 @@ multisurvivalClass <- if (requireNamespace('jmvcore'))
             message("[multisurvival.debug] .plot3: state found.")
           }
         }
-
-        private$.debug_write(list(
-          phase = ".plot3",
-          state_is_null = is.null(plotData),
-          cleanData_dim = if (is.null(plotData$cleanData)) NULL else dim(plotData$cleanData)
-        ))
 
         name1time <- plotData$name1time
         name2outcome <- plotData$name2outcome
@@ -4899,24 +4383,7 @@ multisurvivalClass <- if (requireNamespace('jmvcore'))
 
         zph_state <- image8$state
 
-        if (private$.debug_dummy_plot_enabled()) {
-          private$.debug_write(list(
-            phase = ".plot8(dummy)",
-            state_is_null = is.null(zph_state),
-            state_class = class(zph_state)[1]
-          ))
-          graphics::plot(
-            1:10, stats::rnorm(10),
-            type = "b",
-            xlab = "index",
-            ylab = "value",
-            main = "multisurvival debug dummy plot (.plot8)"
-          )
-          return(TRUE)
-        }
-
         if (is.null(zph_state)) {
-          private$.debug_write(list(phase = ".plot8", state_is_null = TRUE))
           grid::grid.newpage()
           grid::grid.text(
             "PH plot is unavailable because diagnostics were not computed (state is NULL). Re-run the analysis.",
@@ -4928,11 +4395,6 @@ multisurvivalClass <- if (requireNamespace('jmvcore'))
 
         zph <- zph_state
         if (inherits(zph_state, "multisurvival_ph_error")) {
-          private$.debug_write(list(
-            phase = ".plot8",
-            state_class = class(zph_state)[1],
-            error = zph_state$error
-          ))
           grid::grid.newpage()
           grid::grid.text(
             paste0("Unable to compute PH diagnostics (cox.zph): ", zph_state$error),
@@ -4941,14 +4403,6 @@ multisurvivalClass <- if (requireNamespace('jmvcore'))
           )
           return(TRUE)
         }
-
-        private$.debug_write(list(
-          phase = ".plot8",
-          state_class = class(zph)[1],
-          state_names = names(zph),
-          has_y = !is.null(zph$y),
-          table_dim = if (is.null(zph$table)) NULL else dim(zph$table)
-        ))
 
         # Check if there are variables to plot
         if (is.null(zph$y)) {
@@ -4965,10 +4419,6 @@ multisurvivalClass <- if (requireNamespace('jmvcore'))
         plot8 <- tryCatch(
           survminer::ggcoxzph(zph),
           error = function(e) {
-            private$.debug_write(list(
-              phase = ".plot8(ggcoxzph error)",
-              message = e$message
-            ))
             grid::grid.newpage()
             grid::grid.text(
               paste0("Unable to draw PH plot (ggcoxzph): ", e$message),
@@ -4994,24 +4444,6 @@ multisurvivalClass <- if (requireNamespace('jmvcore'))
 
       .plotKM = function(imageKM, ggtheme, theme, ...) {
 
-        if (private$.debug_dummy_plot_enabled()) {
-          private$.debug_write(list(
-            phase = ".plotKM(dummy)",
-            state_is_null = is.null(imageKM$state),
-            explanatory = self$options$explanatory,
-            contexpl = self$options$contexpl
-          ))
-          graphics::plot(
-            1:10, (1:10) / 10,
-            type = "b",
-            xlab = "time",
-            ylab = "survival",
-            ylim = c(0, 1),
-            main = "multisurvival debug dummy plot (.plotKM)"
-          )
-          return(TRUE)
-        }
-      
         # Kaplan-Meier is not an absolute-risk estimator in the presence of a
         # competing terminal event. Direct users to the Fine-Gray/Aalen-Johansen
         # outputs instead of letting a standard survival plot silently censor
@@ -5104,12 +4536,6 @@ multisurvivalClass <- if (requireNamespace('jmvcore'))
           plotData <- private$.cleandata()
           if (is.null(plotData$cleanData)) return(FALSE)
         }
-
-        private$.debug_write(list(
-          phase = ".plotKM",
-          state_is_null = is.null(plotData),
-          cleanData_dim = if (is.null(plotData$cleanData)) NULL else dim(plotData$cleanData)
-        ))
 
         name1time <- plotData$name1time
         name2outcome <- plotData$name2outcome
@@ -5502,7 +4928,7 @@ Patients were then divided at empirical quantile cutpoints into {as.character(le
             fold_diff <- highest_median_score / risk_summary$median_score[lowest_risk_idx]
 
             summary_html <- paste0(
-              "<div style='background-color: #f3e5f5; padding: 15px; border-radius: 5px; margin: 10px 0; border-left: 4px solid #9c27b0;'>",
+              "<div style='background-color: rgba(153, 33, 170, 0.12); padding: 15px; border-radius: 5px; margin: 10px 0; border-left: 4px solid #9c27b0; color: inherit;'>",
               "<p style='margin: 0; line-height: 1.8;'>",
               "Risk stratification identified <b>", nrow(risk_summary), " distinct risk groups</b> from the Cox model. ",
               "The <b>", highest_risk_group, "</b> group showed the highest median risk score (",
@@ -5931,7 +5357,7 @@ Patients were then divided at empirical quantile cutpoints into {as.character(le
         private$.addHtmlMessage(
           "warning",
           .("Adjusted curves unavailable"),
-          paste(paste0(.("Adjustment method: "), method, "."), detail,
+          paste(jmvcore::format(.("Adjustment method: {method}."), method = method), detail,
                 .("No adjusted curve or table is shown; nothing was substituted for it. Choose Average (standardised over the observed patients) or Conditional Mean instead."))
         )
         return(NULL)
@@ -6064,7 +5490,7 @@ Patients were then divided at empirical quantile cutpoints into {as.character(le
 
       item$setContent(paste0(
         "<div style='font-family: -apple-system, BlinkMacSystemFont, \"Segoe UI\", Roboto, sans-serif; ",
-        "line-height:1.55; max-width:820px; background:#f5f8fc; border-left:4px solid #0056b3; ",
+        "line-height:1.55; max-width:820px; background: rgba(88, 138, 205, 0.06); color: inherit; border-left:4px solid #0056b3; ",
         "padding:12px 16px;'>", body, caveat, "</div>"))
 
       invisible(NULL)
@@ -6256,23 +5682,6 @@ Patients were then divided at empirical quantile cutpoints into {as.character(le
 
         if (!self$options$ac) return(FALSE)
 
-        if (private$.debug_dummy_plot_enabled()) {
-          private$.debug_write(list(
-            phase = ".plot_adj(dummy)",
-            state_is_null = is.null(image_plot_adj$state),
-            adjexplanatory = self$options$adjexplanatory
-          ))
-          graphics::plot(
-            1:10, seq(0.1, 1, length.out = 10),
-            type = "b",
-            xlab = "time",
-            ylab = "adjusted survival",
-            ylim = c(0, 1),
-            main = "multisurvival debug dummy plot (.plot_adj)"
-          )
-          return(TRUE)
-        }
-
 
         plotData <- image_plot_adj$state
         
@@ -6283,13 +5692,6 @@ Patients were then divided at empirical quantile cutpoints into {as.character(le
           plotData <- private$.cleandata()
           if (is.null(plotData$cleanData)) return(FALSE)
         }
-
-        private$.debug_write(list(
-          phase = ".plot_adj",
-          state_is_null = is.null(plotData),
-          cleanData_dim = if (is.null(plotData$cleanData)) NULL else dim(plotData$cleanData),
-          adjexplanatory_name = plotData$adjexplanatory_name
-        ))
 
         name1time <- plotData$name1time
         name2outcome <- plotData$name2outcome
@@ -6406,8 +5808,8 @@ Patients were then divided at empirical quantile cutpoints into {as.character(le
               x = paste0("Time (", self$options$timetypeoutput, ")"),
               y = .("Cumulative incidence"),
               colour = self$options$adjexplanatory,
-              title = paste0(.("Adjusted Cumulative Incidence for "),
-                             self$options$adjexplanatory),
+              title = jmvcore::format(.("Adjusted Cumulative Incidence for {variable}"),
+                                      variable = self$options$adjexplanatory),
               subtitle = private$.adjustedEstimandNote(self$options$ac_method),
               caption = .("Cumulative incidence, not 1 - Kaplan-Meier: competing events are accounted for.")) +
             ggplot2::theme_bw() +
@@ -6442,7 +5844,8 @@ Patients were then divided at empirical quantile cutpoints into {as.character(le
             y = .("Adjusted survival"),
             colour = self$options$adjexplanatory,
             fill = self$options$adjexplanatory,
-            title = paste0(.("Adjusted Survival Curves for "), self$options$adjexplanatory),
+            title = jmvcore::format(.("Adjusted Survival Curves for {variable}"),
+                                    variable = self$options$adjexplanatory),
             subtitle = private$.adjustedEstimandNote(method)) +
           ggplot2::theme_bw() +
           ggplot2::theme(plot.subtitle = ggplot2::element_text(size = 8),
@@ -7308,278 +6711,6 @@ Patients were then divided at empirical quantile cutpoints into {as.character(le
 
 
 
-      ,
-    ## Fit Cox Model with Selection ----
-    ## DISABLED: Model selection options commented out in .a.yaml and .u.yaml
-    ## This function will not be called when modelSelection options are unavailable
-.fitModelWithSelection = function(formula, data) {
-  tryCatch({
-    # Get the selection method and criteria from options
-    modelSelection <- self$options$modelSelection
-    selectionCriteria <- self$options$selectionCriteria
-    pEntry <- self$options$pEntry
-    pRemoval <- self$options$pRemoval
-
-    # Validation checks
-    if (self$options$pEntry >= self$options$pRemoval) {
-      jmvcore::reject(.("Entry significance must be less than removal significance"))
-    }
-
-    if (self$options$modelSelection != "enter" &&
-        length(c(self$options$explanatory, self$options$contexpl)) < 2) {
-      jmvcore::reject(.("Variable selection requires at least 2 predictor variables"))
-    }
-
-    private$.checkpoint()
-
-    # If no selection requested, return full model
-    if (modelSelection == "enter") {
-      # Just fit and return the full model with all variables
-      full_model <- survival::coxph(formula, data = data)
-      return(full_model)
-    }
-
-    # For Cox models we need to preserve the exact Surv() object on the left side
-    surv_part <- formula[[2]]  # Gets the Surv() expression itself
-    pred_part <- attr(terms(formula), "term.labels")  # All predictor variables
-
-    # Create full and null models
-    full_model <- survival::coxph(formula, data = data)
-    null_formula <- .asSurvivalFormula(paste(deparse(surv_part), "~ 1"))
-    null_model <- survival::coxph(null_formula, data = data)
-
-    # For backward selection
-    if (modelSelection == "backward") {
-      # Start with all variables
-      current_vars <- pred_part
-      current_model <- full_model
-
-      # Set status to indicate backward selection is starting
-      # EXPERIMENTAL: Disabled - result element not in .r.yaml
-      # self$results$text_model_selection$setStatus('running')
-      # self$results$text2_model_selection$setStatus('running')
-
-      # Initial checkpoint to push status to UI
-      private$.checkpoint()
-
-      # Track variables removed for reporting
-      removed_vars <- character(0)
-
-      # Remove variables one-by-one if they don't contribute significantly
-      changed <- TRUE
-      iteration <- 0
-      while(changed && length(current_vars) > 0) {
-        iteration <- iteration + 1
-        changed <- FALSE
-
-        # Add checkpoint at beginning of each iteration
-        private$.checkpoint(flush=FALSE)
-
-        # Only try to examine p-values if we have variables
-        if (length(current_vars) > 0) {
-          # Get model summary
-          model_summary <- summary(current_model)
-
-          # Check if we have coefficients
-          if (!is.null(model_summary$coefficients)) {
-            # Store p-values for each variable
-            coef_summary <- model_summary$coefficients
-            var_p_values <- coef_summary[, "Pr(>|z|)"]
-
-            # Find least significant variable
-            max_p <- max(var_p_values)
-            if (max_p > pRemoval) {
-              # Which variable has highest p-value
-              drop_var_idx <- which.max(var_p_values)
-              drop_var <- names(var_p_values)[drop_var_idx]
-
-              # Remove this variable
-              current_vars <- setdiff(current_vars, drop_var)
-              removed_vars <- c(removed_vars, drop_var)
-
-              # Update status with progress information
-              status_msg <- paste0("Removing variable: ", drop_var,
-                                   " (p=", format.pval(max_p, digits=3), ")")
-              # EXPERIMENTAL: Disabled - result element not in .r.yaml
-              # self$results$text2_model_selection$setContent(status_msg)
-
-              # Critical checkpoint before expensive operation - always flush here
-              private$.checkpoint()
-
-              if (length(current_vars) > 0) {
-                # Create new formula without this variable
-                new_formula <- .asSurvivalFormula(paste(deparse(surv_part), "~",
-                                                paste(current_vars, collapse = " + ")))
-
-                # This is the most computationally expensive step
-                current_model <- survival::coxph(new_formula, data = data)
-              } else {
-                # If no variables left, use null model
-                current_model <- null_model
-              }
-
-              changed <- TRUE
-            }
-          }
-        }
-
-        # Add checkpoint after expensive operation to show progress
-        # Only flush every 2nd iteration to balance responsiveness with performance
-        if (iteration %% 2 == 0) {
-          private$.checkpoint()
-        }
-      }
-
-      # Final model is ready - set status to complete
-      # EXPERIMENTAL: Disabled - result element not in .r.yaml
-      # self$results$text_model_selection$setStatus('complete')
-      # EXPERIMENTAL: Disabled - result element not in .r.yaml
-      # self$results$text2_model_selection$setStatus('complete')
-
-      # Final checkpoint to push complete results
-      private$.checkpoint()
-
-      # Store selection steps for reporting
-      attr(current_model, "selection_steps") <- list(
-        removed = removed_vars,
-        remaining = current_vars
-      )
-
-      return(current_model)
-    }
-
-    # For forward selection
-    else if (modelSelection == "forward") {
-      # Start with no variables
-      selected_vars <- character(0)
-      current_model <- null_model
-      added_vars <- character(0)
-
-      # Set status to indicate forward selection is starting
-      # EXPERIMENTAL: Disabled - result element not in .r.yaml
-      # self$results$text_model_selection$setStatus('running')
-      # EXPERIMENTAL: Disabled - result element not in .r.yaml
-      # self$results$text2_model_selection$setStatus('running')
-
-      private$.checkpoint()
-
-      # Add variables one by one
-      while (length(selected_vars) < length(pred_part)) {
-        private$.checkpoint(flush=FALSE)
-
-        best_var <- NULL
-        best_p <- Inf
-        best_model <- NULL
-
-        # Try adding each remaining variable
-        remaining_vars <- setdiff(pred_part, selected_vars)
-
-        for (var in remaining_vars) {
-          test_vars <- c(selected_vars, var)
-          test_formula <- .asSurvivalFormula(paste(deparse(surv_part), "~",
-                                           paste(test_vars, collapse = " + ")))
-
-          tryCatch({
-            test_model <- survival::coxph(test_formula, data = data)
-            test_summary <- summary(test_model)
-
-            if (!is.null(test_summary$coefficients)) {
-              # Get p-value for the new variable
-              var_p <- test_summary$coefficients[var, "Pr(>|z|)"]
-
-              if (var_p < best_p) {
-                best_p <- var_p
-                best_var <- var
-                best_model <- test_model
-              }
-            }
-          }, error = function(e) {
-            # Skip this variable if model fails
-            NULL
-          })
-        }
-
-        # Add the best variable if it meets criteria
-        if (!is.null(best_var) && best_p < pEntry) {
-          selected_vars <- c(selected_vars, best_var)
-          added_vars <- c(added_vars, best_var)
-          current_model <- best_model
-
-          # Update status
-          status_msg <- paste0("Adding variable: ", best_var,
-                               " (p=", format.pval(best_p, digits=3), ")")
-          # EXPERIMENTAL: Disabled - result element not in .r.yaml
-          # self$results$text2_model_selection$setContent(status_msg)
-
-          private$.checkpoint()
-        } else {
-          # No more variables meet criteria
-          break
-        }
-      }
-
-      # Final model is ready
-      # EXPERIMENTAL: Disabled - result element not in .r.yaml
-      # self$results$text_model_selection$setStatus('complete')
-      # EXPERIMENTAL: Disabled - result element not in .r.yaml
-      # self$results$text2_model_selection$setStatus('complete')
-      private$.checkpoint()
-
-      # Store selection steps for reporting
-      attr(current_model, "selection_steps") <- list(
-        added = added_vars,
-        final = selected_vars
-      )
-
-      return(current_model)
-    }
-
-    # For stepwise (both directions)
-    else if (modelSelection == "both") {
-      # Use MASS::stepAIC for bidirectional selection
-      if (requireNamespace("MASS", quietly = TRUE)) {
-        # Set status
-        # EXPERIMENTAL: Disabled - result element not in .r.yaml
-      # self$results$text_model_selection$setStatus('running')
-        # EXPERIMENTAL: Disabled - result element not in .r.yaml
-        # self$results$text2_model_selection$setStatus('running')
-
-        private$.checkpoint()
-
-        # Use stepwise selection with AIC
-        step_model <- MASS::stepAIC(full_model,
-                                    scope = list(lower = null_model, upper = full_model),
-                                    direction = "both",
-                                    trace = 0)  # Silent operation
-
-        # Final model is ready
-        # EXPERIMENTAL: Disabled - result element not in .r.yaml
-      # self$results$text_model_selection$setStatus('complete')
-        # EXPERIMENTAL: Disabled - result element not in .r.yaml
-        # self$results$text2_model_selection$setStatus('complete')
-        private$.checkpoint()
-
-        return(step_model)
-      } else {
-        # Fallback to backward selection if MASS not available
-        return(private$.fitModelWithSelection(formula, data))
-      }
-    }
-
-    # Default: return full model
-    return(full_model)
-
-  }, error = function(e) {
-    # Set error status
-    # EXPERIMENTAL: Disabled - result element not in .r.yaml
-    # self$results$text_model_selection$setStatus('error')
-    # self$results$text2_model_selection$setContent(paste(.("Model selection error:"), e$message))
-
-    # Return full model as fallback
-    return(survival::coxph(formula, data = data))
-  })
-}
-
 ,
     ## Final Fit ----
 .final_fit2 = function() {
@@ -7923,7 +7054,7 @@ Patients were then divided at empirical quantile cutpoints into {as.character(le
 
         # Combine all parts into HTML
         full_summary <- paste0(
-          "<div style='background-color: #f8f9fa; padding: 15px; border-radius: 5px; margin: 10px 0; border-left: 4px solid #007bff;'>",
+          "<div style='background-color: rgba(138, 155, 172, 0.06); padding: 15px; border-radius: 5px; margin: 10px 0; border-left: 4px solid #007bff; color: inherit;'>",
           "<p style='margin: 0; line-height: 1.8;'>",
           paste(unlist(summary_parts), collapse = ""),
           "</p>",
@@ -8003,460 +7134,6 @@ Patients were then divided at empirical quantile cutpoints into {as.character(le
   })
 }
 
-      # Survival Decision Tree Function ----
-      ,
-      .survivalTree = function(results) {
-        tryCatch({
-          # Skip if tree analysis not requested
-          # NOTE: use_tree option not defined in .a.yaml - experimental feature
-          use_tree <- tryCatch(self$options$use_tree, error = function(e) FALSE)
-          if (!isTRUE(use_tree)) {
-            return(NULL)
-          }
-
-          # Check required packages
-          if (!requireNamespace("rpart", quietly = TRUE)) {
-            self$results$tree_summary$setContent(
-              "<p>Error: The 'rpart' package is required for decision tree analysis but not available.</p>"
-            )
-            return(NULL)
-          }
-
-          # Get cleaned data
-          cleanData <- results$cleanData
-          # Use the standardized column names that actually exist in cleanData
-          mytime <- "mytime"
-          myoutcome <- "myoutcome"
-
-
-
-
-
-
-
-
-
-
-
-
-
-          # Validate data
-          if (is.null(cleanData) || nrow(cleanData) == 0) {
-            self$results$tree_summary$setContent(
-              "<p>Error: No data available for decision tree analysis.</p>"
-            )
-            return(NULL)
-          }
-
-          # Check if standardized columns exist
-          if (!"mytime" %in% names(cleanData) || !"myoutcome" %in% names(cleanData)) {
-            self$results$tree_summary$setContent(
-              paste0("<p>Error: Required columns not found in cleaned data. Available columns: ",
-                     paste(names(cleanData), collapse = ", "), "</p>")
-            )
-            return(NULL)
-          }
-
-          # Get explanatory variables
-          expl_vars <- NULL
-          if (!is.null(self$options$explanatory)) {
-            expl_vars <- c(expl_vars, as.vector(results$myexplanatory_labelled))
-          }
-          if (!is.null(self$options$contexpl)) {
-            expl_vars <- c(expl_vars, as.vector(results$mycontexpl_labelled))
-          }
-
-          # Check for explanatory variables
-          if (length(expl_vars) == 0) {
-            self$results$tree_summary$setContent(
-              "<p>Error: At least one explanatory variable is required for decision tree analysis.</p>"
-            )
-            return(NULL)
-          }
-
-          # Validate that explanatory variables exist in data
-          missing_vars <- setdiff(expl_vars, names(cleanData))
-          if (length(missing_vars) > 0) {
-            self$results$tree_summary$setContent(
-              paste0("<p>Error: Variables not found in data: ", paste(missing_vars, collapse = ", "), "</p>")
-            )
-            return(NULL)
-          }
-
-          private$.checkpoint()
-
-          # Create formula for rpart using the actual column names from results
-          formula_string <- paste("survival::Surv(", mytime, ", ", myoutcome, ") ~ ",
-                                   paste(expl_vars, collapse = " + "))
-          formula <- .asSurvivalFormula(formula_string)
-
-          # Validate minimum parameters (with safe defaults for undefined options)
-          # NOTE: These options not defined in .a.yaml - experimental feature
-          min_node <- tryCatch(max(1, self$options$min_node), error = function(e) 10)
-          complexity <- tryCatch(max(0.001, self$options$complexity), error = function(e) 0.01)
-          max_depth <- tryCatch(max(1, min(30, self$options$max_depth)), error = function(e) 10)
-
-          # Fit survival tree using rpart with error handling
-          tree <- tryCatch({
-            rpart::rpart(
-              formula = formula,
-              data = cleanData,
-              method = "exp",  # exponential survival model
-              control = rpart::rpart.control(
-                minsplit = 2 * min_node,
-                minbucket = min_node,
-                cp = complexity,
-                maxdepth = max_depth
-              )
-            )
-          }, error = function(e) {
-            NULL
-          })
-
-          # Create summary text
-          if (is.null(tree) || nrow(tree$frame) == 0) {
-            tree_text <- paste0(
-              "<h3>Survival Decision Tree Results</h3>",
-              "<p><strong>The survival tree could not be built with the current parameters.</strong></p>",
-              "<p>This may be due to:</p>",
-              "<ul>",
-              "<li>Insufficient data for the specified minimum node size</li>",
-              "<li>Complexity parameter too high</li>",
-              "<li>Variables not providing meaningful splits</li>",
-              "</ul>",
-              "<p>Try adjusting the parameters:</p>",
-              "<ul>",
-              "<li>Reduce minimum node size</li>",
-              "<li>Lower complexity parameter</li>",
-              "<li>Include more variables</li>",
-              "</ul>"
-            )
-          } else {
-            # Get variable importance
-            var_imp <- tree$variable.importance
-            if (!is.null(var_imp) && length(var_imp) > 0) {
-              var_imp_df <- data.frame(
-                Variable = names(var_imp),
-                Importance = var_imp,
-                stringsAsFactors = FALSE
-              )
-              var_imp_df <- var_imp_df[order(-var_imp_df$Importance), ]
-
-              var_imp_html <- paste(
-                "<tr>",
-                "<td>", var_imp_df$Variable, "</td>",
-                "<td>", round(var_imp_df$Importance, 2), "</td>",
-                "</tr>",
-                collapse = ""
-              )
-
-              var_imp_table <- paste0(
-                "<table class='jmv-results-table'>",
-                "<thead><tr><th>Variable</th><th>Importance</th></tr></thead>",
-                "<tbody>", var_imp_html, "</tbody>",
-                "</table>"
-              )
-            } else {
-              var_imp_table <- "<p>No variable importance measures available.</p>"
-            }
-
-            # Get tree statistics
-            n_terminal <- sum(tree$frame$var == "<leaf>")
-            n_splits <- nrow(tree$frame) - 1
-
-            tree_text <- paste0(
-              "<h3>Survival Decision Tree Results</h3>",
-              "<p>The decision tree was successfully built with the following characteristics:</p>",
-              "<ul>",
-              "<li><strong>Terminal nodes:</strong> ", n_terminal, "</li>",
-              "<li><strong>Internal splits:</strong> ", n_splits, "</li>",
-              "<li><strong>Variables used:</strong> ", length(unique(tree$frame$var[tree$frame$var != "<leaf>"])), "</li>",
-              "</ul>",
-              "<p><strong>Parameters used:</strong></p>",
-              "<ul>",
-              "<li>Complexity parameter: ", complexity, "</li>",
-              "<li>Minimum node size: ", min_node, "</li>",
-              "<li>Maximum depth: ", max_depth, "</li>",
-              "</ul>",
-              "<h4>Variable Importance</h4>",
-              var_imp_table,
-              "<p><i>Note: The decision tree plot visualizes how the variables split the data into groups with different survival outcomes.</i></p>"
-            )
-          }
-
-          self$results$tree_summary$setContent(tree_text)
-
-          # Store tree for plotting
-          return(tree)
-
-        }, error = function(e) {
-          private$.addHtmlMessage(
-            "error",
-            .("Survival decision tree error"),
-            paste0(e$message, .(". Recommendations: (1) check sufficient data for tree building, (2) try reducing minimum node size, or (3) ensure variables contain valid data."))
-          )
-          return(NULL)
-        })
-      }
-
-      # Plot Tree ----
-      ,
-      .plotTree = function(image, ggtheme, theme, ...) {
-        tryCatch({
-          # Skip if tree analysis not requested
-          # NOTE: use_tree option not defined in .a.yaml - experimental feature
-          use_tree <- tryCatch(self$options$use_tree, error = function(e) FALSE)
-          if (!isTRUE(use_tree)) {
-            return(FALSE)
-          }
-
-          # Check required packages
-          if (!requireNamespace("rpart.plot", quietly = TRUE)) {
-            return(FALSE)
-          }
-
-          # Get results and tree
-          results <- private$.cleandata()
-          tree <- private$.survivalTree(results)
-
-          if (is.null(tree) || nrow(tree$frame) == 0) {
-            return(FALSE)
-          }
-
-            self$results$mydataview_survivaldecisiontree$setContent(
-    list(
-      results = results,
-      tree = tree
-    )
-  )
-
-
-          # Add checkpoint before plotting
-          private$.checkpoint()
-
-          # Plot tree with error handling
-          rpart.plot::rpart.plot(
-            tree,
-            main = "Survival Decision Tree",
-            extra = 101,  # show fitted risk and percentage of observations
-            box.palette = "auto",  # color by fitted risk
-            shadow.col = "gray",  # add shadows to the boxes
-            nn = TRUE,  # show node numbers
-            fallen.leaves = TRUE,  # align leaf nodes
-            roundint = FALSE,  # don't round integers
-            cex = 0.8,  # text size
-            clip.right.labs = FALSE  # don't clip labels
-          )
-
-          return(TRUE)
-
-        }, error = function(e) {
-          # Report tree plotting error for debugging
-          self$results$tree_summary$setContent(
-            paste0("<p>Tree plotting error: ", e$message, "</p>")
-          )
-          return(FALSE)
-        })
-      }
-
-      # Plot Node Survival ----
-      ,
-      .plotNodeSurvival = function(image, ggtheme, theme, ...) {
-        tryCatch({
-          # Skip if not requested
-          # NOTE: use_tree and show_terminal_nodes options not defined in .a.yaml - experimental feature
-          use_tree <- tryCatch(self$options$use_tree, error = function(e) FALSE)
-          show_terminal_nodes <- tryCatch(self$options$show_terminal_nodes, error = function(e) FALSE)
-          if (!isTRUE(use_tree) || !isTRUE(show_terminal_nodes)) {
-            return(FALSE)
-          }
-
-          # Check required packages
-          if (!requireNamespace("survminer", quietly = TRUE)) {
-            return(FALSE)
-          }
-
-          # Get results and tree
-          results <- private$.cleandata()
-          message("Node survival: results obtained, cleanData columns: ", paste(names(results$cleanData), collapse = ", "))
-          tree <- private$.survivalTree(results)
-          message("Node survival: tree obtained")
-
-          if (is.null(tree) || nrow(tree$frame) == 0) {
-            return(FALSE)
-          }
-
-          # Get cleaned data
-          cleanData <- results$cleanData
-          # Use the standardized column names that actually exist in cleanData
-          mytime <- "mytime"
-          myoutcome <- "myoutcome"
-
-          # Validate data
-          if (is.null(cleanData) || nrow(cleanData) == 0) {
-            return(FALSE)
-          }
-
-          # Add checkpoint before plotting
-          private$.checkpoint()
-
-          # Get terminal node assignments for each observation
-          message("Node survival: getting node assignments")
-          node_assignments <- tree$where
-          cleanData$node <- paste("Node", node_assignments)
-          message("Node survival: node assignments created, unique nodes: ", length(unique(cleanData$node)))
-
-          # Check if we have at least 2 nodes
-          unique_nodes <- unique(cleanData$node)
-          if (length(unique_nodes) < 2) {
-            message("Node survival: insufficient nodes (", length(unique_nodes), ")")
-            return(FALSE)
-          }
-
-          # Plot survival curves for each terminal node
-          # Check that required columns exist
-          if (!"mytime" %in% names(cleanData)) {
-            message("Error: mytime column not found in cleanData")
-            return(FALSE)
-          }
-          if (!"myoutcome" %in% names(cleanData)) {
-            message("Error: myoutcome column not found in cleanData")
-            return(FALSE)
-          }
-
-          # Create formula properly
-          message("Node survival: creating formula with proper syntax")
-          formula <- .asSurvivalFormula("Surv(mytime, myoutcome) ~ node")
-          message("Node survival: formula created: ", deparse(formula))
-
-          message("Node survival: calling survfit")
-          fit <- survival::survfit(formula, data = cleanData)
-          message("Node survival: survfit completed")
-
-          message("Node survival: trying minimal ggsurvplot call")
-
-          # Try the most minimal ggsurvplot call possible
-          plot <- survminer::ggsurvplot(
-            fit,
-            data = cleanData
-          )
-
-          message("Node survival: minimal ggsurvplot completed, printing")
-          print(plot)
-          message("Node survival: plot printed successfully")
-          return(TRUE)
-
-        }, error = function(e) {
-          # Report node survival plotting error for debugging
-          message("Node survival plotting error: ", e$message)
-          return(FALSE)
-        })
-
-        # Educational Explanations ----
-        if (self$options$showExplanations) {
-          private$.addExplanations()
-        }
-      }
-
-      # Convert Wide Format to Long Format for Time-Dependent Covariates ----
-      ,
-      .convertWideToLong = function(mydata, time_dep_vars, all_labels) {
-
-        # Get change time points with input sanitization
-        change_times <- private$.sanitizeStringInput(
-          self$options$change_times,
-          private$DEFAULT_CHANGE_TIMES,
-          "^[0-9., ]+$"  # Only numbers, commas, periods, spaces
-        )
-
-        # Parse change times
-        time_points <- tryCatch({
-          as.numeric(trimws(strsplit(change_times, ",")[[1]]))
-        }, error = function(e) {
-          as.numeric(trimws(strsplit(private$DEFAULT_CHANGE_TIMES, ",")[[1]]))
-        })
-        time_points <- sort(time_points[!is.na(time_points)])
-
-        # Get suffix pattern with input sanitization
-        suffix_pattern <- private$.sanitizeStringInput(
-          self$options$td_suffix_pattern,
-          private$DEFAULT_TD_SUFFIX,
-          "^[a-zA-Z0-9_{}]+$"  # Only alphanumeric, underscore, braces
-        )
-
-        # Initialize long format data
-        long_data <- data.frame()
-
-        for (i in seq_len(nrow(mydata))) {
-          subject_data <- mydata[i, ]
-
-          # Get subject's total follow-up time
-          total_time <- subject_data$mytime
-
-          # Create time intervals: 0, change_times, total_time
-          intervals <- c(0, time_points[time_points < total_time], total_time)
-          intervals <- unique(sort(intervals))
-
-          # If subject has very short follow-up, create just one interval
-          if (length(intervals) < 2) {
-            intervals <- c(0, total_time)
-          }
-
-          # Create rows for each interval
-          for (j in 1:(length(intervals)-1)) {
-            tstart <- intervals[j]
-            tstop <- intervals[j+1]
-
-            # Status is 1 only in the last interval if subject has event
-            status <- ifelse(j == (length(intervals)-1), subject_data$myoutcome, 0)
-
-            # Create new row
-            new_row <- subject_data
-            new_row$tstart <- tstart
-            new_row$tstop <- tstop
-            new_row$myoutcome <- status
-
-            # Update time-dependent variables for this interval
-            for (var in time_dep_vars) {
-
-              # Determine which time-dependent version to use
-              if (tstart == 0) {
-                # Use baseline version for first interval
-                baseline_var <- paste0(var, "_baseline")
-                if (baseline_var %in% names(mydata)) {
-                  new_row[[var]] <- subject_data[[baseline_var]]
-                } else {
-                  # If no baseline version, use the base variable
-                  new_row[[var]] <- subject_data[[var]]
-                }
-              } else {
-                # Find appropriate time-dependent version
-                applicable_times <- time_points[time_points <= tstart]
-                if (length(applicable_times) > 0) {
-                  use_time <- max(applicable_times)
-                  td_var_name <- gsub("\\{time\\}", use_time, suffix_pattern)
-                  full_var_name <- paste0(var, td_var_name)
-
-                  if (full_var_name %in% names(mydata)) {
-                    new_row[[var]] <- subject_data[[full_var_name]]
-                  } else {
-                    # Fall back to previous value or baseline
-                    new_row[[var]] <- subject_data[[var]]
-                  }
-                } else {
-                  # Use baseline if no applicable time found
-                  new_row[[var]] <- subject_data[[var]]
-                }
-              }
-            }
-
-            long_data <- rbind(long_data, new_row)
-          }
-        }
-
-        return(long_data)
-      }
-
       ,
       # Helper: set explanation content on a (possibly absent) result item.
       # Defined as a proper private method. Previously this was assigned at run
@@ -8476,22 +7153,22 @@ Patients were then divided at empirical quantile cutpoints into {as.character(le
 
         # Multivariable Cox Regression Explanation
         private$.setExplanationContent("multivariableCoxExplanation", '
-        <div class="explanation-box" style="background-color: #f0f8ff; padding: 15px; border-radius: 8px; margin: 10px 0;">
+        <div class="explanation-box" style="background-color: rgba(33, 152, 255, 0.07); padding: 15px; border-radius: 8px; margin: 10px 0; color: inherit;">
             <h3 style="color: #2c5282; margin-top: 0;"> Understanding Multivariable Cox Regression</h3>
 
             <div style="background-color: white; padding: 12px; border-radius: 5px; margin: 10px 0;">
                 <h4 style="color: #2d3748; margin-top: 0;">What is Multivariable Survival Analysis?</h4>
                 <p style="margin: 8px 0;">Multivariable Cox regression analyzes <strong>multiple variables simultaneously</strong> to estimate each variable&#39;s conditional association with the event hazard, given the others in the fitted model.</p>
 
-                <div style="background-color: #e6f7ff; padding: 10px; border-radius: 5px; margin: 10px 0;">
+                <div style="background-color: rgba(33, 184, 255, 0.11); padding: 10px; border-radius: 5px; margin: 10px 0; color: inherit;">
                     <strong> Key Advantage:</strong> Reports mutually adjusted associations while making the model specification explicit
                 </div>
             </div>
 
-            <div style="background-color: #fef5e7; padding: 12px; border-radius: 5px; margin: 10px 0;">
+            <div style="background-color: rgba(246, 163, 33, 0.11); padding: 12px; border-radius: 5px; margin: 10px 0; color: inherit;">
                 <h4 style="color: #d68910; margin-top: 0;"> Adjusted vs Unadjusted Hazard Ratios</h4>
                 <table style="width: 100%; border-collapse: collapse; margin: 10px 0;">
-                    <tr style="background-color: #fff3cd;">
+                    <tr style="background-color: rgba(255, 202, 33, 0.23); color: inherit;">
                         <th style="padding: 8px; text-align: left; border: 1px solid #ffc107;">Type</th>
                         <th style="padding: 8px; text-align: left; border: 1px solid #ffc107;">What It Shows</th>
                         <th style="padding: 8px; text-align: left; border: 1px solid #ffc107;">Clinical Use</th>
@@ -8501,7 +7178,7 @@ Patients were then divided at empirical quantile cutpoints into {as.character(le
                         <td style="padding: 8px; border: 1px solid #ffc107;">Raw association with survival</td>
                         <td style="padding: 8px; border: 1px solid #ffc107;">Initial screening of factors</td>
                     </tr>
-                    <tr style="background-color: #fffbf0;">
+                    <tr style="background-color: rgba(255, 196, 33, 0.07); color: inherit;">
                         <td style="padding: 8px; border: 1px solid #ffc107;"><strong>Adjusted HR</strong></td>
                         <td style="padding: 8px; border: 1px solid #ffc107;">Conditional association given the other model variables</td>
                         <td style="padding: 8px; border: 1px solid #ffc107;">Model-based prognostic association</td>
@@ -8509,7 +7186,7 @@ Patients were then divided at empirical quantile cutpoints into {as.character(le
                 </table>
             </div>
 
-            <div style="background-color: #e8f5e9; padding: 12px; border-radius: 5px; margin: 10px 0;">
+            <div style="background-color: rgba(33, 159, 43, 0.1); padding: 12px; border-radius: 5px; margin: 10px 0; color: inherit;">
                 <h4 style="color: #2e7d32; margin-top: 0;"> Clinical Examples</h4>
 
                 <div style="background-color: white; padding: 10px; border-radius: 5px; margin: 10px 0;">
@@ -8524,7 +7201,7 @@ Patients were then divided at empirical quantile cutpoints into {as.character(le
                     <p style="margin: 8px 0;"><strong>Interpretation:</strong> In this illustrative fitted model, stage has the largest adjusted hazard-ratio magnitude. This does not establish causality or transportability.</p>
                 </div>
 
-                <div style="background-color: #f3e5f5; padding: 10px; border-radius: 5px; margin: 10px 0;">
+                <div style="background-color: rgba(153, 33, 170, 0.12); padding: 10px; border-radius: 5px; margin: 10px 0; color: inherit;">
                     <strong> Confounding Example:</strong>
                     <ul style="margin: 5px 0; padding-left: 20px;">
                         <li><strong>Unadjusted:</strong> Age HR = 1.05 (appears strongly associated)</li>
@@ -8534,7 +7211,7 @@ Patients were then divided at empirical quantile cutpoints into {as.character(le
                 </div>
             </div>
 
-            <div style="background-color: #e3f2fd; padding: 12px; border-radius: 5px; margin: 10px 0;">
+            <div style="background-color: rgba(33, 152, 239, 0.13); padding: 12px; border-radius: 5px; margin: 10px 0; color: inherit;">
                 <h4 style="color: #1976d2; margin-top: 0;"> Model Building Strategy</h4>
                 <div style="background-color: white; padding: 10px; border-radius: 5px; margin: 10px 0;">
                     <strong>1. Variable Selection:</strong>
@@ -8553,7 +7230,7 @@ Patients were then divided at empirical quantile cutpoints into {as.character(le
                 </div>
             </div>
 
-            <div style="background-color: #fff3e0; padding: 10px; border-radius: 5px; margin-top: 10px; border-left: 4px solid #ff9800;">
+            <div style="background-color: rgba(255, 169, 33, 0.14); padding: 10px; border-radius: 5px; margin-top: 10px; border-left: 4px solid #ff9800; color: inherit;">
                 <strong> Clinical Applications:</strong>
                 <ul style="margin: 5px 0; padding-left: 20px;">
                     <li><strong>Prognostic models:</strong> Identify independent risk factors</li>
@@ -8567,7 +7244,7 @@ Patients were then divided at empirical quantile cutpoints into {as.character(le
 
         # Adjusted Survival Curves Explanation
         private$.setExplanationContent("adjustedSurvivalExplanation", '
-        <div style="margin-bottom: 20px; padding: 15px; background-color: #d1ecf1; border-left: 4px solid #bee5eb;">
+        <div style="margin-bottom: 20px; padding: 15px; background-color: rgba(33, 163, 188, 0.21); border-left: 4px solid #bee5eb; color: inherit;">
             <h4 style="margin-top: 0; color: #2c3e50;">Understanding Adjusted Survival Curves</h4>
             <p><strong>Adjusted Curves:</strong> Model-based survival or cumulative-incidence predictions under the selected covariate standardisation.</p>
             <ul>
@@ -8582,7 +7259,7 @@ Patients were then divided at empirical quantile cutpoints into {as.character(le
 
         # Risk Score Analysis Explanation
         private$.setExplanationContent("riskScoreExplanation", '
-        <div style="margin-bottom: 20px; padding: 15px; background-color: #fff3cd; border-left: 4px solid #ffc107;">
+        <div style="margin-bottom: 20px; padding: 15px; background-color: rgba(255, 202, 33, 0.23); border-left: 4px solid #ffc107; color: inherit;">
             <h4 style="margin-top: 0; color: #2c3e50;">Understanding Risk Score Analysis</h4>
             <p><strong>Risk Scoring:</strong> Combines model terms into the Cox relative-risk score, exp(centered linear predictor).</p>
             <ul>
@@ -8597,7 +7274,7 @@ Patients were then divided at empirical quantile cutpoints into {as.character(le
 
         # Nomogram Explanation
         private$.setExplanationContent("nomogramExplanation", '
-        <div style="margin-bottom: 20px; padding: 15px; background-color: #f8d7da; border-left: 4px solid #dc3545;">
+        <div style="margin-bottom: 20px; padding: 15px; background-color: rgba(216, 33, 50, 0.18); border-left: 4px solid #dc3545; color: inherit;">
             <h4 style="margin-top: 0; color: #721c24;">Understanding Nomograms</h4>
             <p><strong>Nomogram:</strong> Graphical representation of predictions from the fitted Cox model.</p>
             <ul>
@@ -8612,7 +7289,7 @@ Patients were then divided at empirical quantile cutpoints into {as.character(le
 
         # Person-Time Analysis Explanation
         private$.setExplanationContent("personTimeExplanation", '
-        <div style="margin-bottom: 20px; padding: 15px; background-color: #d4edda; border-left: 4px solid #28a745;">
+        <div style="margin-bottom: 20px; padding: 15px; background-color: rgba(33, 162, 64, 0.19); border-left: 4px solid #28a745; color: inherit;">
             <h4 style="margin-top: 0; color: #2c3e50;">Understanding Person-Time Analysis</h4>
             <p><strong>Person-Time:</strong> Comprehensive measure combining participant count and observation duration.</p>
             <ul>
@@ -8627,7 +7304,7 @@ Patients were then divided at empirical quantile cutpoints into {as.character(le
 
         # Stratified Analysis Explanation
         private$.setExplanationContent("stratifiedAnalysisExplanation", '
-        <div style="margin-bottom: 20px; padding: 15px; background-color: #e2e3e5; border-left: 4px solid #6c757d;">
+        <div style="margin-bottom: 20px; padding: 15px; background-color: rgba(33, 41, 56, 0.13); border-left: 4px solid #6c757d; color: inherit;">
             <h4 style="margin-top: 0; color: #2c3e50;">Understanding Stratified Cox Regression</h4>
             <p><strong>Stratification:</strong> Allows different baseline hazards for distinct patient subgroups while estimating common covariate effects.</p>
             <ul>
@@ -8642,10 +7319,10 @@ Patients were then divided at empirical quantile cutpoints into {as.character(le
 
         # Survival Plots Explanation
         private$.setExplanationContent("survivalPlotsExplanation", '
-        <div class="explanation-box" style="background-color: #f9f9f9; padding: 15px; border-radius: 8px; margin: 10px 0;">
+        <div class="explanation-box" style="background-color: rgba(155, 155, 155, 0.06); padding: 15px; border-radius: 8px; margin: 10px 0; color: inherit;">
             <h3 style="color: #2c5282; margin-top: 0;"> Understanding Adjusted Survival Curves and Hazard Ratio Plots</h3>
 
-            <div style="background-color: #e8f5e9; padding: 12px; border-radius: 5px; margin: 10px 0;">
+            <div style="background-color: rgba(33, 159, 43, 0.1); padding: 12px; border-radius: 5px; margin: 10px 0; color: inherit;">
                 <h4 style="color: #2e7d32; margin-top: 0;"> Adjusted Survival Curves</h4>
                 <p style="margin: 8px 0;">Adjusted curves show model-based survival or cumulative-incidence predictions under the selected covariate standardisation.</p>
 
@@ -8659,10 +7336,10 @@ Patients were then divided at empirical quantile cutpoints into {as.character(le
                     </ul>
                 </div>
 
-                <div style="background-color: #e3f2fd; padding: 10px; border-radius: 5px; margin: 10px 0;">
+                <div style="background-color: rgba(33, 152, 239, 0.13); padding: 10px; border-radius: 5px; margin: 10px 0; color: inherit;">
                     <strong> Interpretation Guide:</strong>
                     <table style="width: 100%; border-collapse: collapse; margin: 5px 0;">
-                        <tr style="background-color: #bbdefb;">
+                        <tr style="background-color: rgba(33, 147, 242, 0.31); color: inherit;">
                             <th style="padding: 8px; text-align: left; border: 1px solid #2196f3;">Curve Pattern</th>
                             <th style="padding: 8px; text-align: left; border: 1px solid #2196f3;">Clinical Meaning</th>
                         </tr>
@@ -8670,7 +7347,7 @@ Patients were then divided at empirical quantile cutpoints into {as.character(le
                             <td style="padding: 8px; border: 1px solid #2196f3;">Steep early decline</td>
                             <td style="padding: 8px; border: 1px solid #2196f3;">High early mortality risk</td>
                         </tr>
-                        <tr style="background-color: #f3f8ff;">
+                        <tr style="background-color: rgba(55, 138, 255, 0.06); color: inherit;">
                             <td style="padding: 8px; border: 1px solid #2196f3;">Plateau phase</td>
                             <td style="padding: 8px; border: 1px solid #2196f3;">Stable survival period with low event rate</td>
                         </tr>
@@ -8682,7 +7359,7 @@ Patients were then divided at empirical quantile cutpoints into {as.character(le
                 </div>
             </div>
 
-            <div style="background-color: #fff3e0; padding: 12px; border-radius: 5px; margin: 10px 0;">
+            <div style="background-color: rgba(255, 169, 33, 0.14); padding: 12px; border-radius: 5px; margin: 10px 0; color: inherit;">
                 <h4 style="color: #d68910; margin-top: 0;"> Hazard Ratio (Forest) Plots</h4>
                 <p style="margin: 8px 0;">Forest plots visualize <strong>hazard ratios and confidence intervals</strong> for multiple variables simultaneously, enabling quick assessment of relative risk factors.</p>
 
@@ -8697,7 +7374,7 @@ Patients were then divided at empirical quantile cutpoints into {as.character(le
                     </ul>
                 </div>
 
-                <div style="background-color: #fef5e7; padding: 10px; border-radius: 5px; margin: 10px 0;">
+                <div style="background-color: rgba(246, 163, 33, 0.11); padding: 10px; border-radius: 5px; margin: 10px 0; color: inherit;">
                     <strong> Clinical Example - Cancer Study:</strong>
                     <table style="width: 100%; margin: 5px 0;">
                         <tr><td><strong>Age (per year):</strong></td><td>HR = 1.02 [0.99-1.05] \u2192 Small, imprecisely estimated association per year</td></tr>
@@ -8707,7 +7384,7 @@ Patients were then divided at empirical quantile cutpoints into {as.character(le
                 </div>
             </div>
 
-            <div style="background-color: #e6f7ff; padding: 12px; border-radius: 5px; margin: 10px 0;">
+            <div style="background-color: rgba(33, 184, 255, 0.11); padding: 12px; border-radius: 5px; margin: 10px 0; color: inherit;">
                 <h4 style="color: #1976d2; margin-top: 0;"> Clinical Applications</h4>
 
                 <div style="background-color: white; padding: 10px; border-radius: 5px; margin: 10px 0;">
@@ -8734,7 +7411,7 @@ Patients were then divided at empirical quantile cutpoints into {as.character(le
                 </div>
             </div>
 
-            <div style="background-color: #f3e5f5; padding: 10px; border-radius: 5px; margin-top: 10px; border-left: 4px solid #9c27b0;">
+            <div style="background-color: rgba(153, 33, 170, 0.12); padding: 10px; border-radius: 5px; margin-top: 10px; border-left: 4px solid #9c27b0; color: inherit;">
                 <strong> Best Practices:</strong>
                 <ul style="margin: 5px 0; padding-left: 20px;">
                     <li><strong>Always report confidence intervals:</strong> Shows precision of estimates</li>
@@ -8745,607 +7422,6 @@ Patients were then divided at empirical quantile cutpoints into {as.character(le
             </div>
         </div>
         ')
-      }
-
-      # Machine Learning Methods ----
-
-      ,
-
-.runMLAnalysis = function() {
-        tryCatch({
-          cleaneddata <- private$.cleandata()
-
-          # EXPERIMENTAL: Disabled - ml_method and related options not in .a.yaml
-          # # Check for required packages
-          # if (self$options$ml_method == "rsf" && !requireNamespace("randomForestSRC", quietly = TRUE)) {
-          #   self$results$ml_performance_metrics$setContent(.("randomForestSRC package not available. Please install it to use Random Survival Forest."))
-          #   return()
-          # }
-          #
-          # if (self$options$ml_method == "glmnet" && !requireNamespace("glmnet", quietly = TRUE)) {
-          #   self$results$ml_performance_metrics$setContent(.("glmnet package not available. Please install it to use regularized regression."))
-          #   return()
-          # }
-          #
-          # if (self$options$ml_method == "xgboost" && !requireNamespace("xgboost", quietly = TRUE)) {
-          #   self$results$ml_performance_metrics$setContent(.("xgboost package not available. Please install it to use XGBoost survival models."))
-          #   return()
-          # }
-          #
-          # if (self$options$ml_method == "svm" && !requireNamespace("survivalsvm", quietly = TRUE)) {
-          #   self$results$ml_performance_metrics$setContent(.("survivalsvm package not available. Please install it to use SVM survival analysis."))
-          #   return()
-          # }
-          #
-          # # Select ML method
-          # if (self$options$ml_method == "rsf") {
-          #   private$.performRandomForest(cleaneddata)
-          # } else if (self$options$ml_method == "glmnet") {
-          #   private$.performGlmnet(cleaneddata)
-          # } else if (self$options$ml_method == "xgboost") {
-          #   private$.performXGBoost(cleaneddata)
-          # } else if (self$options$ml_method == "svm") {
-          #   private$.performSVM(cleaneddata)
-          # } else if (self$options$ml_method == "deepsurv") {
-          #   private$.performDeepSurvival(cleaneddata)
-          # } else if (self$options$ml_method == "ensemble") {
-          #   private$.performEnsemble(cleaneddata)
-          # }
-          #
-          # # Feature selection if requested
-          # if (self$options$ml_feature_selection) {
-          #   private$.performFeatureSelection(cleaneddata)
-          # }
-          #
-          # # Cross-validation if requested
-          # if (self$options$ml_validation == "cv" && self$options$ml_method != "none") {
-          #   private$.performCrossValidation(cleaneddata)
-          # }
-          #
-          # # SHAP values if requested
-          # if (self$options$ml_shap && self$options$ml_method %in% c("rsf", "xgboost")) {
-          #   private$.calculateSHAPValues(cleaneddata)
-          # }
-
-          # EXPERIMENTAL: Disabled - ml_performance option not in .a.yaml
-          # # Performance metrics if requested
-          # if (self$options$ml_performance) {
-          #   private$.calculateMLPerformanceMetrics(cleaneddata)
-          # }
-
-        }, error = function(e) {
-          error_msg <- glue::glue("Error in ML analysis: {e$message}")
-          self$results$ml_performance_metrics$setContent(error_msg)
-        })
-      }
-
-      ,
-.performRandomForest = function(cleaneddata) {
-        # Random Forest survival analysis
-        formula_vars <- private$.prepareMLFormula(cleaneddata)
-
-        tryCatch({
-          # Fit Random Forest
-          rf_model <- randomForestSRC::rfsrc(
-            formula = formula_vars$formula,
-            data = cleaneddata,
-            ntree = 1000,
-            importance = TRUE,
-            proximity = TRUE
-          )
-
-          # Variable importance
-          var_imp <- rf_model$importance
-          private$.populateVariableImportance(var_imp)
-
-          # Performance metrics
-          oob_error <- rf_model$err.rate[length(rf_model$err.rate)]
-          c_index <- 1 - oob_error
-
-          metrics_html <- paste0(
-            "<h4>", .("Random Forest Survival Model Results"), "</h4>",
-            "<p><strong>", .("Out-of-Bag Error Rate:"), "</strong> ", round(oob_error, 4), "</p>",
-            "<p><strong>", .("Concordance Index:"), "</strong> ", round(c_index, 4), "</p>",
-            "<p><strong>", .("Number of Trees:"), "</strong> ", rf_model$ntree, "</p>",
-            "<p><strong>", .("Variables Used:"), "</strong> ", length(formula_vars$variables), "</p>"
-          )
-
-          self$results$ml_performance_metrics$setContent(metrics_html)
-
-          # Prediction intervals
-          predictions <- predict(rf_model, newdata = cleaneddata)
-          private$.populatePredictionIntervals(predictions, cleaneddata)
-
-        }, error = function(e) {
-          error_msg <- glue::glue("Random Forest error: {e$message}")
-          self$results$ml_performance_metrics$setContent(error_msg)
-        })
-      }
-
-      ,
-.performGlmnet = function(cleaneddata) {
-        # Regularized Cox regression with cross-validation
-        formula_vars <- private$.prepareMLFormula(cleaneddata)
-
-        tryCatch({
-          # Prepare data for glmnet
-          x <- model.matrix(formula_vars$formula, data = cleaneddata)[,-1]
-          y <- survival::Surv(cleaneddata$mytime, cleaneddata$myoutcome)
-
-          # Cross-validated glmnet
-          cv_fit <- glmnet::cv.glmnet(x, y, family = "cox", alpha = 0.5, nfolds = self$options$ml_cv_folds)
-
-          # Best lambda
-          best_lambda <- cv_fit$lambda.min
-
-          # Final model coefficients
-          coefs <- coef(cv_fit, s = "lambda.min")
-          selected_vars <- which(coefs != 0)
-
-          # Performance metrics
-          c_index <- max(cv_fit$glmnet.fit$dev.ratio)
-
-          metrics_html <- paste0(
-            "<h4>", .("Regularized Cox Regression Results"), "</h4>",
-            "<p><strong>", .("Best Lambda:"), "</strong> ", round(best_lambda, 6), "</p>",
-            "<p><strong>", .("Selected Variables:"), "</strong> ", length(selected_vars), " out of ", ncol(x), "</p>",
-            "<p><strong>", .("Deviance Explained:"), "</strong> ", round(c_index * 100, 2), "%</p>",
-            "<p><strong>", .("Cross-Validation Folds:"), "</strong> ", self$options$ml_cv_folds, "</p>"
-          )
-
-          self$results$ml_performance_metrics$setContent(metrics_html)
-
-          # Variable importance from coefficients
-          if (length(selected_vars) > 0) {
-            var_names <- rownames(coefs)[selected_vars]
-            var_coefs <- as.numeric(coefs[selected_vars])
-            var_imp <- abs(var_coefs)
-            names(var_imp) <- var_names
-            private$.populateVariableImportance(var_imp)
-          }
-
-        }, error = function(e) {
-          error_msg <- glue::glue("Glmnet error: {e$message}")
-          self$results$ml_performance_metrics$setContent(error_msg)
-        })
-      }
-
-      ,
-.performEnsemble = function(cleaneddata) {
-        # Ensemble of multiple methods
-        tryCatch({
-          ensemble_results <- list()
-
-          # Random Forest component
-          if (requireNamespace("randomForestSRC", quietly = TRUE)) {
-            formula_vars <- private$.prepareMLFormula(cleaneddata)
-            rf_model <- randomForestSRC::rfsrc(
-              formula = formula_vars$formula,
-              data = cleaneddata,
-              ntree = 500,
-              importance = TRUE
-            )
-            ensemble_results$rf <- rf_model
-          }
-
-          # Cox regression component
-          cox_model <- private$.cox_model()
-          ensemble_results$cox <- cox_model
-
-          # Glmnet component
-          if (requireNamespace("glmnet", quietly = TRUE)) {
-            formula_vars <- private$.prepareMLFormula(cleaneddata)
-            x <- model.matrix(formula_vars$formula, data = cleaneddata)[,-1]
-            y <- survival::Surv(cleaneddata$mytime, cleaneddata$myoutcome)
-            glmnet_model <- glmnet::cv.glmnet(x, y, family = "cox", alpha = 0.5)
-            ensemble_results$glmnet <- glmnet_model
-          }
-
-          # Ensemble summary
-          n_models <- length(ensemble_results)
-          model_names <- paste(names(ensemble_results), collapse = ", ")
-
-          ensemble_html <- glue::glue("
-            <h4>Ensemble Model Summary</h4>
-            <p><strong>Component Models:</strong> {model_names}</p>
-            <p><strong>Total Models:</strong> {n_models}</p>
-            <p><strong>Ensemble Method:</strong> {self$options$ml_ensemble_weights}</p>
-            <p>Ensemble predictions combine multiple modeling approaches for robust predictions.</p>
-          ")
-
-          self$results$ml_ensemble_summary$setContent(ensemble_html)
-
-        }, error = function(e) {
-          error_msg <- glue::glue("Ensemble error: {e$message}")
-          self$results$ml_performance_metrics$setContent(error_msg)
-        })
-      }
-
-      ,
-.performFeatureSelection = function(cleaneddata) {
-        # Cross-validated feature selection
-        tryCatch({
-          formula_vars <- private$.prepareMLFormula(cleaneddata)
-          all_vars <- formula_vars$variables
-
-          # Stability selection simulation
-          n_bootstrap <- 50
-          selected_vars <- character(0)
-          selection_freq <- rep(0, length(all_vars))
-          names(selection_freq) <- all_vars
-
-          for (i in 1:n_bootstrap) {
-            # Bootstrap sample
-            boot_indices <- sample(nrow(cleaneddata), replace = TRUE)
-            boot_data <- cleaneddata[boot_indices, ]
-
-            # Fit model and select variables (simplified)
-            if (requireNamespace("glmnet", quietly = TRUE)) {
-              x <- model.matrix(formula_vars$formula, data = boot_data)[,-1]
-              y <- survival::Surv(boot_data$mytime, boot_data$myoutcome)
-              cv_fit <- glmnet::cv.glmnet(x, y, family = "cox", alpha = 1)
-              coefs <- coef(cv_fit, s = "lambda.min")
-              selected <- which(coefs != 0)
-
-              if (length(selected) > 0) {
-                var_names <- rownames(coefs)[selected]
-                for (var in var_names) {
-                  if (var %in% names(selection_freq)) {
-                    selection_freq[var] <- selection_freq[var] + 1
-                  }
-                }
-              }
-            }
-          }
-
-          # Normalize frequencies
-          selection_freq <- selection_freq / n_bootstrap
-
-          # Populate results table
-          feature_results <- data.frame(
-            variable = names(selection_freq),
-            selected = ifelse(selection_freq >= 0.8, "Yes", ifelse(selection_freq >= 0.5, "Maybe", "No")),
-            selection_frequency = selection_freq,
-            importance_score = selection_freq,
-            stringsAsFactors = FALSE
-          )
-
-          # Sort by frequency
-          feature_results <- feature_results[order(-feature_results$selection_frequency), ]
-
-          table <- self$results$ml_feature_selection_results
-          for (i in seq_len(nrow(feature_results))) {
-            table$addRow(rowKey = i, values = list(
-              variable = feature_results$variable[i],
-              selected = feature_results$selected[i],
-              selection_frequency = round(feature_results$selection_frequency[i], 3),
-              importance_score = round(feature_results$importance_score[i], 3)
-            ))
-          }
-
-        }, error = function(e) {
-          error_msg <- glue::glue("Feature selection error: {e$message}")
-          self$results$ml_performance_metrics$setContent(error_msg)
-        })
-      }
-
-      ,
-.performXGBoost = function(cleaneddata) {
-        # XGBoost survival analysis
-        formula_vars <- private$.prepareMLFormula(cleaneddata)
-
-        tryCatch({
-          # Check for required packages with graceful fallback
-          pkg_check <- .checkPackageDependency("xgboost", "XGBoost Survival", "Random Survival Forest")
-          if (!pkg_check$available) {
-            self$results$ml_performance_metrics$setContent(pkg_check$message)
-            # Fallback to Random Forest if available, or Cox regression
-            if (requireNamespace("randomForestSRC", quietly = TRUE)) {
-              private$.performRandomForest(cleaneddata)
-            } else {
-              private$.cox_model()
-            }
-            return()
-          }
-
-          # Prepare data for xgboost
-          x <- model.matrix(formula_vars$formula, data = cleaneddata)[,-1]
-          y <- survival::Surv(cleaneddata$mytime, cleaneddata$myoutcome)
-
-          # XGBoost survival model
-          dtrain <- xgboost::xgb.DMatrix(data = x, label = cleaneddata$mytime)
-
-          # Set survival-specific parameters
-          params <- list(
-            objective = "survival:cox",
-            eta = 0.1,
-            max_depth = 6,
-            subsample = 0.8,
-            colsample_bytree = 0.8
-          )
-
-          # Train model
-          xgb_model <- xgboost::xgb.train(
-            params = params,
-            data = dtrain,
-            nrounds = 100,
-            verbose = 0
-          )
-
-          # Variable importance
-          var_imp <- xgboost::xgb.importance(model = xgb_model)
-          importance_scores <- setNames(var_imp$Gain, var_imp$Feature)
-          private$.populateVariableImportance(importance_scores)
-
-          # Performance metrics (simplified)
-          metrics_html <- paste0(
-            "<h4>", .("XGBoost Survival Model Results"), "</h4>",
-            "<p><strong>", .("Model Type:"), "</strong> ", .("Cox Proportional Hazards with Gradient Boosting"), "</p>",
-            "<p><strong>", .("Number of Rounds:"), "</strong> 100</p>",
-            "<p><strong>", .("Variables Used:"), "</strong> ", length(formula_vars$variables), "</p>",
-            "<p><strong>", .("Learning Rate:"), "</strong> ", params$eta, "</p>",
-            "<p><strong>", .("Max Depth:"), "</strong> ", params$max_depth, "</p>"
-          )
-
-          self$results$ml_performance_metrics$setContent(metrics_html)
-
-        }, error = function(e) {
-          error_msg <- glue::glue("XGBoost error: {e$message}")
-          self$results$ml_performance_metrics$setContent(error_msg)
-        })
-      }
-
-      ,
-.performSVM = function(cleaneddata) {
-        # Support Vector Survival analysis
-        formula_vars <- private$.prepareMLFormula(cleaneddata)
-
-        tryCatch({
-          # Check for required packages with graceful fallback
-          pkg_check <- .checkPackageDependency("survivalsvm", "SVM Survival", "Random Survival Forest")
-          if (!pkg_check$available) {
-            self$results$ml_performance_metrics$setContent(pkg_check$message)
-            # Fallback to Random Forest if available, or Cox regression
-            if (requireNamespace("randomForestSRC", quietly = TRUE)) {
-              private$.performRandomForest(cleaneddata)
-            } else {
-              private$.cox_model()
-            }
-            return()
-          }
-
-          # Prepare data for SVM
-          x <- model.matrix(formula_vars$formula, data = cleaneddata)[,-1]
-          y <- survival::Surv(cleaneddata$mytime, cleaneddata$myoutcome)
-
-          # Fit SVM survival model
-          svm_model <- survivalsvm::survivalsvm(
-            formula = formula_vars$formula,
-            data = cleaneddata,
-            gamma.mu = 1
-          )
-
-          # Performance metrics
-          metrics_html <- paste0(
-            "<h4>", .("Support Vector Survival Model Results"), "</h4>",
-            "<p><strong>", .("Model Type:"), "</strong> ", .("Support Vector Machines for Survival Analysis"), "</p>",
-            "<p><strong>", .("Variables Used:"), "</strong> ", length(formula_vars$variables), "</p>",
-            "<p><strong>", .("Kernel:"), "</strong> ", .("RBF (Radial Basis Function)"), "</p>",
-            "<p><strong>", .("Note:"), "</strong> ", .("SVM survival analysis provides non-parametric survival predictions"), "</p>"
-          )
-
-          self$results$ml_performance_metrics$setContent(metrics_html)
-
-        }, error = function(e) {
-          error_msg <- paste(.("SVM Survival error:"), e$message, .("Note: This method requires the 'survivalsvm' package."))
-          self$results$ml_performance_metrics$setContent(error_msg)
-        })
-      }
-
-      ,
-.performDeepSurvival = function(cleaneddata) {
-        # Deep Learning Survival analysis
-        tryCatch({
-          # Note: Deep survival is complex and would typically require Python integration
-          # For now, provide informative message about implementation status
-
-          metrics_html <- paste0(
-            "<h4>", .("Deep Survival Learning"), "</h4>",
-            "<p><strong>", .("Status:"), "</strong> ", .("Deep survival methods are computationally intensive and typically require specialized Python packages (DeepSurv, DeepHit)."), "</p>",
-            "<p><strong>", .("Alternative:"), "</strong> ", .("Consider using Random Survival Forest or XGBoost for advanced non-linear survival modeling."), "</p>",
-            "<p><strong>", .("Implementation Note:"), "</strong> ", .("Full deep learning integration would require:"), "</p>",
-            "<ul>",
-              "<li>", .("Python environment with TensorFlow/PyTorch"), "</li>",
-              "<li>", .("Deep survival libraries (pycox, scikit-survival)"), "</li>",
-              "<li>", .("GPU acceleration for optimal performance"), "</li>",
-            "</ul>",
-            "<p><strong>", .("Recommendation:"), "</strong> ", .("Use ensemble methods or XGBoost for similar performance with easier implementation."), "</p>"
-          )
-
-          self$results$ml_performance_metrics$setContent(metrics_html)
-
-        }, error = function(e) {
-          error_msg <- glue::glue("Deep Survival: {e$message}")
-          self$results$ml_performance_metrics$setContent(error_msg)
-        })
-      }
-
-      ,
-.performCrossValidation = function(cleaneddata) {
-        # Cross-validation for ML methods
-        tryCatch({
-          formula_vars <- private$.prepareMLFormula(cleaneddata)
-          n_folds <- self$options$ml_cv_folds
-
-          # Create folds
-          folds <- sample(rep(1:n_folds, length.out = nrow(cleaneddata)))
-          cv_results <- numeric(n_folds)
-
-          for (i in 1:n_folds) {
-            train_data <- cleaneddata[folds != i, ]
-            test_data <- cleaneddata[folds == i, ]
-
-            # EXPERIMENTAL: Disabled - ml_method option not in .a.yaml
-            # # Simple C-index calculation for cross-validation
-            # if (self$options$ml_method == "rsf" && requireNamespace("randomForestSRC", quietly = TRUE)) {
-            #   model <- randomForestSRC::rfsrc(
-            #     formula = formula_vars$formula,
-            #     data = train_data,
-            #     ntree = 500
-            #   )
-            #   pred <- predict(model, newdata = test_data)
-            #   cv_results[i] <- 1 - pred$err.rate[length(pred$err.rate)]
-            # }
-          }
-
-          mean_cv_score <- mean(cv_results, na.rm = TRUE)
-          sd_cv_score <- sd(cv_results, na.rm = TRUE)
-
-          cv_html <- glue::glue("
-            <h4>Cross-Validation Results</h4>
-            <p><strong>Method:</strong> {n_folds}-fold cross-validation</p>
-            <p><strong>Mean CV Score:</strong> {round(mean_cv_score, 4)} \u00b1 {round(sd_cv_score, 4)}</p>
-            <p><strong>Individual Fold Scores:</strong> {paste(round(cv_results, 3), collapse = ', ')}</p>
-          ")
-
-          self$results$ml_cross_validation_summary$setContent(cv_html)
-
-        }, error = function(e) {
-          error_msg <- glue::glue(.("Cross-validation error: {e$message}"))
-          self$results$ml_cross_validation_summary$setContent(error_msg)
-        })
-      }
-
-      ,
-.calculateSHAPValues = function(cleaneddata) {
-        # SHAP values for interpretability
-        tryCatch({
-          shap_html <- paste0("
-            <h4>", .("SHAP Values (SHapley Additive exPlanations)"), "</h4>
-            <p><strong>", .("Status:"), "</strong> ", .("SHAP values provide model-agnostic interpretability by showing how each feature contributes to individual predictions."), "</p>
-            <p><strong>", .("Implementation Note:"), "</strong> ", .("Full SHAP implementation requires specialized packages and significant computation time."), "</p>
-            <p><strong>", .("Alternatives available in this module:"), "</strong></p>
-            <ul>
-              <li>", .("Variable importance scores (available in Random Forest and XGBoost methods)"), "</li>
-              <li>", .("Hazard ratios from Cox regression (traditional interpretability)"), "</li>
-              <li>", .("Decision tree visualization (rule-based interpretability)"), "</li>
-            </ul>
-            <p><strong>", .("For advanced SHAP analysis:"), "</strong> ", .("Consider using Python packages like 'shap' with 'scikit-survival' for comprehensive survival SHAP values."), "</p>
-          ")
-
-          # Note: Full SHAP implementation would require significant development
-          # This provides informative guidance instead
-          self$results$ml_performance_metrics$setContent(shap_html)
-
-        }, error = function(e) {
-          error_msg <- glue::glue(.("SHAP calculation error: {e$message}"))
-          self$results$ml_performance_metrics$setContent(error_msg)
-        })
-      }
-
-      ,
-.calculateMLPerformanceMetrics = function(cleaneddata) {
-        # Comprehensive performance metrics
-        tryCatch({
-          formula_vars <- private$.prepareMLFormula(cleaneddata)
-
-          performance_html <- paste0("
-            <h4>", .("Machine Learning Performance Metrics"), "</h4>
-            <p><strong>", .("Available Metrics:"), "</strong></p>
-            <table style='border-collapse: collapse; width: 100%;'>
-              <tr style='border-bottom: 1px solid #ddd;'>
-                <th style='text-align: left; padding: 8px;'>", .("Metric"), "</th>
-                <th style='text-align: left; padding: 8px;'>", .("Description"), "</th>
-                <th style='text-align: left; padding: 8px;'>", .("Status"), "</th>
-              </tr>
-              <tr style='border-bottom: 1px solid #ddd;'>
-                <td style='padding: 8px;'>", .("Concordance Index (C-index)"), "</td>
-                <td style='padding: 8px;'>", .("Discrimination ability"), "</td>
-                <td style='padding: 8px;'>", .("Available in model outputs"), "</td>
-              </tr>
-              <tr style='border-bottom: 1px solid #ddd;'>
-                <td style='padding: 8px;'>", .("Integrated Brier Score (IBS)"), "</td>
-                <td style='padding: 8px;'>", .("Time-dependent prediction error"), "</td>
-                <td style='padding: 8px;'>", .("Requires pec package"), "</td>
-              </tr>
-              <tr style='border-bottom: 1px solid #ddd;'>
-                <td style='padding: 8px;'>", .("Time-dependent AUC"), "</td>
-                <td style='padding: 8px;'>", .("Dynamic discrimination"), "</td>
-                <td style='padding: 8px;'>", .("Available via survivalROC"), "</td>
-              </tr>
-              <tr>
-                <td style='padding: 8px;'>", .("Calibration Plot"), "</td>
-                <td style='padding: 8px;'>", .("Prediction reliability"), "</td>
-                <td style='padding: 8px;'>", .("Requires specialized implementation"), "</td>
-              </tr>
-            </table>
-            <p><strong>", .("Note:"), "</strong> ", .("Detailed performance metrics require additional computational resources and specialized packages. Use the cross-validation option for robust performance assessment."), "</p>
-          ")
-
-          self$results$ml_performance_metrics$setContent(performance_html)
-
-        }, error = function(e) {
-          error_msg <- glue::glue(.("Performance metrics error: {e$message}"))
-          self$results$ml_performance_metrics$setContent(error_msg)
-        })
-      }
-
-      ,
-.prepareMLFormula = function(cleaneddata) {
-        # Prepare formula and variables for ML methods
-        myexplanatory_labelled <- private$.getData()$myexplanatory_labelled
-        mycontexpl_labelled <- private$.getData()$mycontexpl_labelled
-
-        # Combine all explanatory variables
-        all_vars <- c(myexplanatory_labelled, mycontexpl_labelled)
-
-        # Create survival formula
-        formula_str <- paste("Surv(mytime, myoutcome) ~", paste(all_vars, collapse = " + "))
-        formula_obj <- .asSurvivalFormula(formula_str)
-
-        return(list(
-          formula = formula_obj,
-          variables = all_vars
-        ))
-      }
-
-      ,
-.populateVariableImportance = function(var_imp) {
-        # Populate variable importance table
-        if (length(var_imp) > 0) {
-          var_imp_sorted <- sort(var_imp, decreasing = TRUE)
-
-          table <- self$results$ml_variable_importance
-          for (i in seq_along(var_imp_sorted)) {
-            table$addRow(rowKey = i, values = list(
-              variable = names(var_imp_sorted)[i],
-              importance = round(var_imp_sorted[i], 4),
-              rank = i
-            ))
-          }
-        }
-      }
-
-      ,
-      .populatePredictionIntervals = function(predictions, cleaneddata) {
-        # Populate prediction intervals table (simplified)
-        if (!is.null(predictions)) {
-          n_show <- min(10, nrow(cleaneddata))  # Show first 10 observations
-
-          table <- self$results$ml_prediction_intervals
-          for (i in 1:n_show) {
-            # Simplified prediction intervals (would need proper implementation)
-            pred_value <- if (is.list(predictions)) predictions$predicted[i] else predictions[i]
-
-            table$addRow(rowKey = i, values = list(
-              observation = i,
-              prediction = round(pred_value, 4),
-              lower_ci = round(pred_value * 0.8, 4),  # Simplified
-              upper_ci = round(pred_value * 1.2, 4),  # Simplified
-              risk_group = ifelse(pred_value > median(predictions, na.rm = TRUE), "High", "Low")
-            ))
-          }
-        }
       }
 
         # Natural Language Summary Generation ----
@@ -9363,7 +7439,7 @@ Patients were then divided at empirical quantile cutpoints into {as.character(le
 
                 # Generate main summary text
                 summary_html <- paste0(
-                    '<div style="background-color: #f0f8ff; padding: 15px; border-radius: 8px; margin: 10px 0;">',
+                    '<div style="background-color: rgba(33, 152, 255, 0.07); padding: 15px; border-radius: 8px; margin: 10px 0; color: inherit;">',
                     '<h4 style="color: #2c5282; margin-top: 0;"> ', .("Multivariable Cox Regression Summary"), '</h4>',
                     '<p style="margin: 10px 0;"><strong>', .("Analysis Overview:"), '</strong> ', .("Multivariable Cox proportional hazards regression was performed to examine the relationship between"), ' ',
                     length(explanatory_vars), ' ', .("explanatory variable(s) and the time-to-event outcome"), ' <em>', outcome_var, '</em>.</p>'
@@ -9519,7 +7595,7 @@ Patients were then divided at empirical quantile cutpoints into {as.character(le
         .generateClinicalInterpretation = function(cox_table, outcome_var) {
             # Generate interpretation guide
             summary_html <- paste0(
-                '<div style="background-color: #e6f7ff; padding: 10px; border-radius: 5px; margin-top: 10px;">',
+                '<div style="background-color: rgba(33, 184, 255, 0.11); padding: 10px; border-radius: 5px; margin-top: 10px; color: inherit;">',
                 '<strong> ', .("Interpretation Guide:"), '</strong>',
                 '<ul style="margin: 5px 0; padding-left: 20px; font-size: 0.95em;">',
                 '<li>', .("HR > 1: Factor increases the hazard (risk) of the event"), '</li>',
@@ -9565,7 +7641,6 @@ Patients were then divided at empirical quantile cutpoints into {as.character(le
                     private$.nomogram(cox_model)
                     !is.null(private$.nom_object)
                 }, error = function(e) {
-                    private$.debug_write(list(phase = ".nomogram(error)", message = e$message))
                     FALSE
                 })
 
@@ -9638,32 +7713,10 @@ Patients were then divided at empirical quantile cutpoints into {as.character(le
                 self$results$nomogramSummary$setContent(summary_html)
 
             }, error = function(e) {
-                error_msg <- paste(.("Nomogram calculation error:"),
-                                   htmltools::htmlEscape(conditionMessage(e)))
+                error_msg <- jmvcore::format(
+                    .("Nomogram calculation error: {message}"),
+                    message = htmltools::htmlEscape(conditionMessage(e)))
                 self$results$nomogramSummary$setContent(error_msg)
-            })
-        }
-
-        ,
-        .calculate_survivaldecisiontree = function() {
-            # Decision tree calculation function
-            tryCatch({
-                # Get cleaned data
-                cleaneddata <- private$.cleandata()
-
-                # Use the existing decision tree analysis
-                tree_results <- private$.survivalTree(list(cleanData = cleaneddata$cleanData))
-
-                if (!is.null(tree_results)) {
-                    # Tree analysis completed successfully
-                    # Results are populated in .survivalTree function
-                } else {
-                    self$results$tree_summary$setContent(.("Decision tree analysis could not be completed."))
-                }
-
-            }, error = function(e) {
-                error_msg <- paste(.("Decision tree calculation error:"), e$message)
-                self$results$tree_summary$setContent(error_msg)
             })
         }
 
@@ -9707,7 +7760,7 @@ Patients were then divided at empirical quantile cutpoints into {as.character(le
 
             # Format for display
             summary_html <- paste0(
-              "<div style='background-color: #e7f3ff; border: 1px solid #b3d9ff; padding: 20px; border-radius: 8px; margin: 15px 0;'>",
+              "<div style='background-color: rgba(33, 144, 255, 0.11); border: 1px solid #b3d9ff; padding: 20px; border-radius: 8px; margin: 15px 0; color: inherit;'>",
               "<h3 style='color: #0056b3; margin-top: 0; margin-bottom: 15px;'> ", .("Clinical Summary"), "</h3>",
               "<div style='background-color: white; padding: 15px; border-radius: 5px; border-left: 4px solid #0056b3;'>",
               "<p style='font-size: 16px; line-height: 1.6; margin: 0;'>", clinical_summary$summary, "</p>",
@@ -9717,7 +7770,7 @@ Patients were then divided at empirical quantile cutpoints into {as.character(le
             # Add study details
             if (n_vars > 0) {
               summary_html <- paste0(summary_html,
-                "<div style='margin-top: 15px; padding: 10px; background-color: #f8f9fa; border-radius: 5px;'>",
+                "<div style='margin-top: 15px; padding: 10px; background-color: rgba(138, 155, 172, 0.06); border-radius: 5px; color: inherit;'>",
                 "<p style='margin: 5px 0; font-size: 14px;'><strong>", .("Study Details:"), "</strong></p>",
                 "<ul style='margin: 5px 0; padding-left: 20px; font-size: 14px;'>",
                 "<li>", .("Total patients:"), " ", n_total, "</li>",
@@ -9731,7 +7784,7 @@ Patients were then divided at empirical quantile cutpoints into {as.character(le
             # Add recommendations if there are issues
             if (n_events < 10) {
               summary_html <- paste0(summary_html,
-                "<div style='margin-top: 15px; padding: 10px; background-color: #fff3cd; border: 1px solid #ffeaa7; border-radius: 5px;'>",
+                "<div style='margin-top: 15px; padding: 10px; background-color: rgba(255, 202, 33, 0.23); border: 1px solid #ffeaa7; border-radius: 5px; color: inherit;'>",
                 "<p style='margin: 0; color: #856404;'><strong> ", .("Recommendation:"), "</strong> ",
                 .("With fewer than 10 events, results should be interpreted cautiously. Consider longer follow-up or pooled analysis."),
                 "</p>",

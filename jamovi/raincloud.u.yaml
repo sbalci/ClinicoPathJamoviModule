@@ -73,26 +73,26 @@ children:
           - type: TextBox
             name: violin_width
             format: number
-            label: "Violin Width"
+            label: "Violin width"
           - type: TextBox
             name: box_width
             format: number
-            label: "Box Plot Width"
+            label: "Box plot width"
           - type: TextBox
             name: dots_size
             format: number
-            label: "Dots Size"
+            label: "Dots size"
       - type: LayoutBox
         margin: large
         children:
           - type: TextBox
             name: alpha_violin
             format: number
-            label: "Violin Transparency"
+            label: "Violin transparency"
           - type: TextBox
             name: alpha_dots
             format: number
-            label: "Dots Transparency"
+            label: "Dots transparency"
 
   - type: CollapseBox
     label: Colors & Themes
@@ -118,7 +118,7 @@ children:
           - type: TextBox
             name: plot_title
             format: string
-            label: "Plot Title"
+            label: "Plot title"
             width: largest
       - type: LayoutBox
         margin: large
@@ -126,12 +126,12 @@ children:
           - type: TextBox
             name: x_label
             format: string
-            label: "X-Axis Label"
+            label: "X-axis label"
             width: largest
           - type: TextBox
             name: y_label
             format: string
-            label: "Y-Axis Label"
+            label: "Y-axis label"
             width: largest
 
   - type: CollapseBox
@@ -169,7 +169,7 @@ children:
         margin: large
         children:
           - type: Label
-            label: Group Comparisons
+            label: Group comparisons
             style: list-inline
           - type: CheckBox
             name: comparison_test

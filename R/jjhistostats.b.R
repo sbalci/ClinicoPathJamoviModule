@@ -722,9 +722,9 @@ jjhistostatsClass <- if (requireNamespace('jmvcore'))
                 
                 if (length(interpretation_parts) > 0) {
                     full_interpretation <- paste0(
-                        "<div style='background-color: #f8f9fa; border: 1px solid #dee2e6; padding: 15px; margin: 10px 0;'>",
+                        "<div style='background-color: rgba(138, 155, 172, 0.06); border: 1px solid #dee2e6; padding: 15px; margin: 10px 0; color: inherit;'>",
                         "<h3>Clinical Interpretation</h3>",
-                        "<div style='background-color: #fff3cd; border-left: 3px solid #ffc107; padding: 10px; margin: 10px 0;'>",
+                        "<div style='background-color: rgba(255, 202, 33, 0.23); border-left: 3px solid #ffc107; padding: 10px; margin: 10px 0; color: inherit;'>",
                         "<strong> Note:</strong> Normality is judged by the <strong>Shapiro-Wilk test</strong> (p &gt; 0.05 and ",
                         "|skewness| &lt; 1) whenever it is applicable (3 \u2264 n \u2264 5000); outside that range the skewness ",
                         "<strong>rule-of-thumb</strong> (|skewness| &lt; 0.5 and n \u2265 30) is used instead and the bullet says so. ",
@@ -842,14 +842,14 @@ jjhistostatsClass <- if (requireNamespace('jmvcore'))
                     ## todo ----
 
                     todo <- glue::glue(
-                    "<div style='background-color: #f8f9fa; border: 1px solid #dee2e6; padding: 20px; margin: 10px 0; border-radius: 5px;'>
+                    "<div style='background-color: rgba(138, 155, 172, 0.06); border: 1px solid #dee2e6; padding: 20px; margin: 10px 0; border-radius: 5px; color: inherit;'>
                     <h2 style='color: #495057; margin-top: 0;'> Histogram Analysis</h2>
                     <p style='font-size: 16px; color: #6c757d; margin: 15px 0;'>
                     <strong>Welcome to ClinicoPath Histogram Tool!</strong><br>
                     Create statistical histograms with clinical interpretation and advanced visualization options.
                     </p>
                     
-                    <div style='background-color: #e3f2fd; border-left: 4px solid #2196f3; padding: 15px; margin: 15px 0;'>
+                    <div style='background-color: rgba(33, 152, 239, 0.13); border-left: 4px solid #2196f3; padding: 15px; margin: 15px 0; color: inherit;'>
                     <h4 style='color: #1976d2; margin-top: 0;'> Getting Started:</h4>
                     <ol style='margin: 10px 0; padding-left: 20px;'>
                     <li><strong>Select Variables:</strong> Choose one or more continuous variables from the left panel</li>
@@ -858,7 +858,7 @@ jjhistostatsClass <- if (requireNamespace('jmvcore'))
                     </ol>
                     </div>
                     
-                    <div style='background-color: #fff3cd; border-left: 4px solid #ffc107; padding: 15px; margin: 15px 0;'>
+                    <div style='background-color: rgba(255, 202, 33, 0.23); border-left: 4px solid #ffc107; padding: 15px; margin: 15px 0; color: inherit;'>
                     <h4 style='color: #856404; margin-top: 0;'> Clinical Examples:</h4>
                     <ul style='margin: 10px 0; padding-left: 20px;'>
                     <li><strong>Lab Values:</strong> Cholesterol levels, blood glucose, biomarker concentrations</li>
@@ -912,7 +912,7 @@ jjhistostatsClass <- if (requireNamespace('jmvcore'))
                         warning_text <- paste(all_warnings, collapse = "<br>")
                         todo <- glue::glue(
                             "<br>You have selected to make a histogram.<br><hr>",
-                            "<div style='background-color: #fff3cd; border: 1px solid #ffeaa7; padding: 10px; margin: 5px 0;'>",
+                            "<div style='background-color: rgba(255, 202, 33, 0.23); border: 1px solid #ffeaa7; padding: 10px; margin: 5px 0; color: inherit;'>",
                             "<strong>Clinical & Performance Considerations:</strong><br>",
                             "{warning_text}",
                             "</div><hr>"

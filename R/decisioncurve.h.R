@@ -27,8 +27,9 @@ decisioncurveOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
             showInterventionAvoided = FALSE,
             confidenceIntervals = FALSE,
             bootReps = 1000,
+            seed = 42,
             ciLevel = 0.95,
-            showOptimalThreshold = FALSE,
+            showBenefitRange = FALSE,
             compareModels = FALSE,
             weightedAUC = FALSE,
             clinicalDecisionRule = FALSE,
@@ -70,11 +71,11 @@ decisioncurveOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
             private$..models <- jmvcore::OptionVariables$new(
                 "models",
                 models,
+                default=NULL,
                 suggested=list(
                     "continuous"),
                 permitted=list(
-                    "numeric",
-                    "factor"))
+                    "numeric"))
             private$..modelNames <- jmvcore::OptionString$new(
                 "modelNames",
                 modelNames,
@@ -163,21 +164,27 @@ decisioncurveOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                 "confidenceIntervals",
                 confidenceIntervals,
                 default=FALSE)
-            private$..bootReps <- jmvcore::OptionNumber$new(
+            private$..bootReps <- jmvcore::OptionInteger$new(
                 "bootReps",
                 bootReps,
                 default=1000,
                 min=100,
                 max=10000)
+            private$..seed <- jmvcore::OptionInteger$new(
+                "seed",
+                seed,
+                default=42,
+                min=1,
+                max=999999)
             private$..ciLevel <- jmvcore::OptionNumber$new(
                 "ciLevel",
                 ciLevel,
                 default=0.95,
                 min=0.8,
                 max=0.99)
-            private$..showOptimalThreshold <- jmvcore::OptionBool$new(
-                "showOptimalThreshold",
-                showOptimalThreshold,
+            private$..showBenefitRange <- jmvcore::OptionBool$new(
+                "showBenefitRange",
+                showBenefitRange,
                 default=FALSE)
             private$..compareModels <- jmvcore::OptionBool$new(
                 "compareModels",
@@ -255,9 +262,7 @@ decisioncurveOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                 "comparisonMethod",
                 comparisonMethod,
                 options=list(
-                    "bootstrap",
-                    "permutation",
-                    "integral"),
+                    "bootstrap"),
                 default="bootstrap")
             private$..showDecisionConsequences <- jmvcore::OptionBool$new(
                 "showDecisionConsequences",
@@ -293,8 +298,9 @@ decisioncurveOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
             self$.addOption(private$..showInterventionAvoided)
             self$.addOption(private$..confidenceIntervals)
             self$.addOption(private$..bootReps)
+            self$.addOption(private$..seed)
             self$.addOption(private$..ciLevel)
-            self$.addOption(private$..showOptimalThreshold)
+            self$.addOption(private$..showBenefitRange)
             self$.addOption(private$..compareModels)
             self$.addOption(private$..weightedAUC)
             self$.addOption(private$..clinicalDecisionRule)
@@ -337,8 +343,9 @@ decisioncurveOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
         showInterventionAvoided = function() private$..showInterventionAvoided$value,
         confidenceIntervals = function() private$..confidenceIntervals$value,
         bootReps = function() private$..bootReps$value,
+        seed = function() private$..seed$value,
         ciLevel = function() private$..ciLevel$value,
-        showOptimalThreshold = function() private$..showOptimalThreshold$value,
+        showBenefitRange = function() private$..showBenefitRange$value,
         compareModels = function() private$..compareModels$value,
         weightedAUC = function() private$..weightedAUC$value,
         clinicalDecisionRule = function() private$..clinicalDecisionRule$value,
@@ -380,8 +387,9 @@ decisioncurveOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
         ..showInterventionAvoided = NA,
         ..confidenceIntervals = NA,
         ..bootReps = NA,
+        ..seed = NA,
         ..ciLevel = NA,
-        ..showOptimalThreshold = NA,
+        ..showBenefitRange = NA,
         ..compareModels = NA,
         ..weightedAUC = NA,
         ..clinicalDecisionRule = NA,
@@ -411,7 +419,7 @@ decisioncurveResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
         procedureNotes = function() private$.items[["procedureNotes"]],
         notices = function() private$.items[["notices"]],
         resultsTable = function() private$.items[["resultsTable"]],
-        optimalTable = function() private$.items[["optimalTable"]],
+        benefitRangeTable = function() private$.items[["benefitRangeTable"]],
         clinicalImpactTable = function() private$.items[["clinicalImpactTable"]],
         comparisonTable = function() private$.items[["comparisonTable"]],
         weightedAUCTable = function() private$.items[["weightedAUCTable"]],
@@ -433,12 +441,11 @@ decisioncurveResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                 name="",
                 title="Decision Curve Analysis",
                 refs=list(
-                    "DecisionCurve",
-                    "rmda",
+                    "Vickers2006",
                     "ggplot2",
                     "dplyr",
-                    "ClinicoPathJamoviModule",
-                    "tidyr"))
+                    "tidyr",
+                    "ClinicoPathJamoviModule"))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="instructions",
@@ -493,12 +500,17 @@ decisioncurveResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                     "thresholdRange",
                     "thresholdMin",
                     "thresholdMax",
-                    "selectedThresholds")))
+                    "selectedThresholds",
+                    "modelNames",
+                    "clinicalDecisionRule",
+                    "decisionRuleVar",
+                    "decisionRulePositive",
+                    "decisionRuleLabel")))
             self$add(jmvcore::Table$new(
                 options=options,
-                name="optimalTable",
-                title="Optimal Thresholds",
-                visible="(showOptimalThreshold)",
+                name="benefitRangeTable",
+                title="Range of Benefit",
+                visible="(showBenefitRange)",
                 rows=0,
                 columns=list(
                     list(
@@ -506,23 +518,18 @@ decisioncurveResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                         `title`="Model", 
                         `type`="text"),
                     list(
-                        `name`="optimal_threshold", 
-                        `title`="Optimal Threshold", 
+                        `name`="range_start", 
+                        `title`="From", 
                         `type`="number", 
                         `format`="pc"),
                     list(
-                        `name`="max_net_benefit", 
-                        `title`="Maximum Net Benefit", 
-                        `type`="number", 
-                        `format`="zto"),
-                    list(
-                        `name`="threshold_range_start", 
-                        `title`="Beneficial Range Start", 
+                        `name`="range_end", 
+                        `title`="To", 
                         `type`="number", 
                         `format`="pc"),
                     list(
-                        `name`="threshold_range_end", 
-                        `title`="Beneficial Range End", 
+                        `name`="range_width", 
+                        `title`="Width", 
                         `type`="number", 
                         `format`="pc")),
                 clearWith=list(
@@ -531,7 +538,11 @@ decisioncurveResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                     "models",
                     "thresholdRange",
                     "thresholdMin",
-                    "thresholdMax")))
+                    "thresholdMax",
+                    "modelNames",
+                    "clinicalDecisionRule",
+                    "decisionRuleVar",
+                    "decisionRulePositive")))
             self$add(jmvcore::Table$new(
                 options=options,
                 name="clinicalImpactTable",
@@ -565,7 +576,7 @@ decisioncurveResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                         `format`="zto"),
                     list(
                         `name`="interventions_avoided", 
-                        `title`="Interventions Avoided vs Treat All", 
+                        `title`="Interventions Avoided per 100 vs Treat All", 
                         `type`="number", 
                         `format`="zto"),
                     list(
@@ -578,7 +589,11 @@ decisioncurveResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                     "outcomePositive",
                     "models",
                     "populationSize",
-                    "selectedThresholds")))
+                    "selectedThresholds",
+                    "modelNames",
+                    "clinicalDecisionRule",
+                    "decisionRuleVar",
+                    "decisionRulePositive")))
             self$add(jmvcore::Table$new(
                 options=options,
                 name="comparisonTable",
@@ -592,33 +607,42 @@ decisioncurveResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                         `type`="text"),
                     list(
                         `name`="weighted_auc_diff", 
-                        `title`="Weighted AUC Difference", 
+                        `title`="Difference in Average Net Benefit", 
                         `type`="number", 
                         `format`="zto"),
                     list(
                         `name`="ci_lower", 
-                        `title`="95% CI Lower", 
+                        `title`="CI Lower", 
                         `type`="number", 
                         `format`="zto"),
                     list(
                         `name`="ci_upper", 
-                        `title`="95% CI Upper", 
+                        `title`="CI Upper", 
                         `type`="number", 
                         `format`="zto"),
                     list(
                         `name`="p_value", 
-                        `title`="P-value", 
+                        `title`="p", 
+                        `type`="number", 
+                        `format`="zto,pvalue"),
+                    list(
+                        `name`="p_value_adj", 
+                        `title`="p (Holm)", 
                         `type`="number", 
                         `format`="zto,pvalue")),
                 clearWith=list(
                     "outcome",
                     "outcomePositive",
                     "models",
-                    "compareModels")))
+                    "compareModels",
+                    "bootReps",
+                    "ciLevel",
+                    "seed",
+                    "modelNames")))
             self$add(jmvcore::Table$new(
                 options=options,
                 name="weightedAUCTable",
-                title="Weighted Area Under Decision Curve",
+                title="Average Net Benefit Over Threshold Range",
                 visible="(weightedAUC)",
                 rows=0,
                 columns=list(
@@ -628,7 +652,7 @@ decisioncurveResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                         `type`="text"),
                     list(
                         `name`="weighted_auc", 
-                        `title`="Weighted AUC", 
+                        `title`="Average Net Benefit", 
                         `type`="number", 
                         `format`="zto"),
                     list(
@@ -636,17 +660,21 @@ decisioncurveResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                         `title`="Threshold Range", 
                         `type`="text"),
                     list(
-                        `name`="relative_benefit", 
-                        `title`="Relative Benefit vs Treat All", 
+                        `name`="benefit_gain", 
+                        `title`="Gain vs Best Default", 
                         `type`="number", 
-                        `format`="pc")),
+                        `format`="zto")),
                 clearWith=list(
                     "outcome",
                     "outcomePositive",
                     "models",
                     "thresholdRange",
                     "thresholdMin",
-                    "thresholdMax")))
+                    "thresholdMax",
+                    "modelNames",
+                    "clinicalDecisionRule",
+                    "decisionRuleVar",
+                    "decisionRulePositive")))
             self$add(jmvcore::Image$new(
                 options=options,
                 name="dcaPlot",
@@ -666,7 +694,18 @@ decisioncurveResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                     "plotStyle",
                     "showReferenceLinesLabels",
                     "highlightRange",
-                    "confidenceIntervals")))
+                    "confidenceIntervals",
+                    "showNetBenefitCI",
+                    "bootReps",
+                    "ciLevel",
+                    "seed",
+                    "highlightMin",
+                    "highlightMax",
+                    "modelNames",
+                    "clinicalDecisionRule",
+                    "decisionRuleVar",
+                    "decisionRulePositive",
+                    "decisionRuleLabel")))
             self$add(jmvcore::Image$new(
                 options=options,
                 name="clinicalImpactPlot",
@@ -682,7 +721,8 @@ decisioncurveResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                     "populationSize",
                     "thresholdRange",
                     "thresholdMin",
-                    "thresholdMax")))
+                    "thresholdMax",
+                    "modelNames")))
             self$add(jmvcore::Image$new(
                 options=options,
                 name="interventionsAvoidedPlot",
@@ -697,7 +737,8 @@ decisioncurveResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                     "models",
                     "thresholdRange",
                     "thresholdMin",
-                    "thresholdMax")))
+                    "thresholdMax",
+                    "modelNames")))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="summaryText",
@@ -709,7 +750,8 @@ decisioncurveResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                     "models",
                     "thresholdRange",
                     "thresholdMin",
-                    "thresholdMax")))
+                    "thresholdMax",
+                    "modelNames")))
             self$add(jmvcore::Table$new(
                 options=options,
                 name="costBenefitTable",
@@ -748,7 +790,21 @@ decisioncurveResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                     list(
                         `name`="icer", 
                         `title`="ICER", 
-                        `type`="number"))))
+                        `type`="number")),
+                clearWith=list(
+                    "outcome",
+                    "outcomePositive",
+                    "models",
+                    "thresholdRange",
+                    "thresholdMin",
+                    "thresholdMax",
+                    "thresholdStep",
+                    "costBenefitAnalysis",
+                    "testCost",
+                    "treatmentCost",
+                    "benefitCorrectTreatment",
+                    "harmFalseTreatment",
+                    "populationSize")))
             self$add(jmvcore::Table$new(
                 options=options,
                 name="decisionConsequencesTable",
@@ -799,7 +855,17 @@ decisioncurveResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                         `name`="npv", 
                         `title`="NPV", 
                         `type`="number", 
-                        `format`="pc"))))
+                        `format`="pc")),
+                clearWith=list(
+                    "outcome",
+                    "outcomePositive",
+                    "models",
+                    "thresholdRange",
+                    "thresholdMin",
+                    "thresholdMax",
+                    "thresholdStep",
+                    "showDecisionConsequences",
+                    "selectedThresholds")))
             self$add(jmvcore::Table$new(
                 options=options,
                 name="modelComparisonEnhanced",
@@ -837,7 +903,19 @@ decisioncurveResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                     list(
                         `name`="conclusion", 
                         `title`="Conclusion", 
-                        `type`="text"))))
+                        `type`="text")),
+                clearWith=list(
+                    "outcome",
+                    "outcomePositive",
+                    "models",
+                    "thresholdRange",
+                    "thresholdMin",
+                    "thresholdMax",
+                    "thresholdStep",
+                    "multiModelComparison",
+                    "comparisonMethod",
+                    "bootReps",
+                    "seed")))
             self$add(jmvcore::Table$new(
                 options=options,
                 name="resourceUtilizationTable",
@@ -873,7 +951,18 @@ decisioncurveResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                         `name`="reduction_vs_treat_all", 
                         `title`="% Reduction vs Treat All", 
                         `type`="number", 
-                        `format`="pc"))))
+                        `format`="pc")),
+                clearWith=list(
+                    "outcome",
+                    "outcomePositive",
+                    "models",
+                    "thresholdRange",
+                    "thresholdMin",
+                    "thresholdMax",
+                    "thresholdStep",
+                    "resourceUtilization",
+                    "selectedThresholds",
+                    "populationSize")))
             self$add(jmvcore::Image$new(
                 options=options,
                 name="relativeUtilityPlot",
@@ -881,7 +970,17 @@ decisioncurveResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                 visible="(showRelativeUtility)",
                 renderFun=".plotRelativeUtility",
                 width=700,
-                height=500))
+                height=500,
+                clearWith=list(
+                    "outcome",
+                    "outcomePositive",
+                    "models",
+                    "thresholdRange",
+                    "thresholdMin",
+                    "thresholdMax",
+                    "thresholdStep",
+                    "showRelativeUtility",
+                    "modelNames")))
             self$add(jmvcore::Image$new(
                 options=options,
                 name="standardizedNetBenefitPlot",
@@ -889,7 +988,17 @@ decisioncurveResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                 visible="(showStandardizedNetBenefit)",
                 renderFun=".plotStandardizedNetBenefit",
                 width=700,
-                height=500))}))
+                height=500,
+                clearWith=list(
+                    "outcome",
+                    "outcomePositive",
+                    "models",
+                    "thresholdRange",
+                    "thresholdMin",
+                    "thresholdMax",
+                    "thresholdStep",
+                    "showStandardizedNetBenefit",
+                    "modelNames")))}))
 
 decisioncurveBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
     "decisioncurveBase",
@@ -899,7 +1008,7 @@ decisioncurveBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             super$initialize(
                 package = "ClinicoPath",
                 name = "decisioncurve",
-                version = c(1,0,4),
+                version = c(1,0,6),
                 options = options,
                 results = decisioncurveResults$new(options=options),
                 data = data,
@@ -924,8 +1033,13 @@ decisioncurveBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   the condition or event you want to predict.
 #' @param outcomePositive Which level of the outcome variable represents the
 #'   positive case (presence of condition/event).
-#' @param models Variables representing predicted probabilities or risk scores
-#'   from different models. Can include multiple models for comparison.
+#' @param models Variables holding predicted probabilities in [0, 1] - one
+#'   column per model. These must be CALIBRATED probabilities, not logits,
+#'   linear predictors or raw risk scores; the analysis rejects values outside
+#'   [0, 1] rather than rescaling them, because rescaling would destroy the
+#'   correspondence between the threshold probability and its clinical meaning.
+#'   Factors were previously permitted here and crashed the analysis with a raw
+#'   R error.
 #' @param modelNames Optional comma-separated list of names for the models. If
 #'   not provided, variable names will be used.
 #' @param thresholdRange Range of threshold probabilities to evaluate.
@@ -953,18 +1067,38 @@ decisioncurveBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' @param confidenceIntervals Calculate bootstrap confidence intervals for net
 #'   benefit curves.
 #' @param bootReps Number of bootstrap replications for confidence intervals.
+#' @param seed Random seed for the bootstrap resampling used in the confidence
+#'   intervals and the model-comparison p-values. Without a fixed seed the same
+#'   data and the same options produce a different interval and a different
+#'   p-value on every run.
 #' @param ciLevel Confidence level for bootstrap confidence intervals.
-#' @param showOptimalThreshold Identify and display optimal threshold
-#'   probabilities for each model.
+#' @param showBenefitRange Report, for each model, the range of threshold
+#'   probabilities over which its net benefit exceeds both treat-all and
+#'   treat-none. Replaces the former showOptimalThreshold option: net benefit
+#'   decreases monotonically in the threshold, so a maximum-net-benefit "optimal
+#'   threshold" is always the lowest threshold examined and can rank models
+#'   incorrectly. Threshold probability is elicited from clinical judgement, not
+#'   estimated from the data.
 #' @param compareModels Calculate statistical tests for comparing model
 #'   performance.
-#' @param weightedAUC Calculate weighted area under the decision curve.
+#' @param weightedAUC Summarise each decision curve by the area under it,
+#'   normalised by the width of the threshold range - that is, the model's
+#'   average net benefit over that range. The option is named weightedAUC for
+#'   historical reasons but the average is UNWEIGHTED: every threshold in the
+#'   range counts equally. The value therefore depends entirely on the threshold
+#'   range chosen above (on one example dataset it moved from 0.309 to 0.163 as
+#'   the range widened from 5-20\% to 1-99\%), so always report the range
+#'   alongside it.
 #' @param clinicalDecisionRule Add clinical decision rule analysis and
 #'   comparison with models.
 #' @param decisionRuleVar Binary variable indicating whether the clinical rule
 #'   recommends intervention (1/0 or yes/no).
 #' @param decisionRulePositive Which level of the rule variable indicates a
-#'   positive recommendation (treat/intervene).
+#'   positive recommendation (treat/intervene). jamovi does not permit a default
+#'   on a Level option, so this is always a required argument of the R function
+#'   even when clinicalDecisionRule is FALSE. Programmatic callers that are not
+#'   using a clinical decision rule must pass decisionRulePositive = NULL
+#'   explicitly.
 #' @param decisionRuleLabel Label for the clinical decision rule in plots and
 #'   tables.
 #' @param showClinicalImpactPlot Display clinical impact plot showing number
@@ -985,7 +1119,10 @@ decisioncurveBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' @param multiModelComparison Perform comprehensive pairwise comparisons
 #'   between all models with statistical tests.
 #' @param comparisonMethod Statistical method for comparing decision curves
-#'   between models.
+#'   between models. Only the case-resampling bootstrap is implemented.
+#'   Permutation and integral-difference options were previously offered here
+#'   but had no code behind them: selecting either produced an empty p-value and
+#'   the literal text "Bootstrap required" in the results table.
 #' @param showDecisionConsequences Show detailed table of decision
 #'   consequences (TP, FP, TN, FN) at selected thresholds.
 #' @param resourceUtilization Calculate resource utilization metrics (tests
@@ -998,7 +1135,7 @@ decisioncurveBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   \code{results$procedureNotes} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$notices} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$resultsTable} \tab \tab \tab \tab \tab a table \cr
-#'   \code{results$optimalTable} \tab \tab \tab \tab \tab a table \cr
+#'   \code{results$benefitRangeTable} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$clinicalImpactTable} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$comparisonTable} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$weightedAUCTable} \tab \tab \tab \tab \tab a table \cr
@@ -1025,7 +1162,7 @@ decisioncurve <- function(
     data,
     outcome = NULL,
     outcomePositive,
-    models,
+    models = NULL,
     modelNames = "",
     thresholdRange = "clinical",
     thresholdMin = 0.05,
@@ -1044,8 +1181,9 @@ decisioncurve <- function(
     showInterventionAvoided = FALSE,
     confidenceIntervals = FALSE,
     bootReps = 1000,
+    seed = 42,
     ciLevel = 0.95,
-    showOptimalThreshold = FALSE,
+    showBenefitRange = FALSE,
     compareModels = FALSE,
     weightedAUC = FALSE,
     clinicalDecisionRule = FALSE,
@@ -1104,8 +1242,9 @@ decisioncurve <- function(
         showInterventionAvoided = showInterventionAvoided,
         confidenceIntervals = confidenceIntervals,
         bootReps = bootReps,
+        seed = seed,
         ciLevel = ciLevel,
-        showOptimalThreshold = showOptimalThreshold,
+        showBenefitRange = showBenefitRange,
         compareModels = compareModels,
         weightedAUC = weightedAUC,
         clinicalDecisionRule = clinicalDecisionRule,

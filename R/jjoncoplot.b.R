@@ -294,7 +294,7 @@ jjoncoplotClass <- if (requireNamespace("jmvcore")) {
                 notes <- private$.guidanceNotes %||% character()
 
                 # Build helpful guidance HTML
-                guidance_html <- "<div style='padding: 15px; background-color: #f8f9fa; border-radius: 8px; margin: 10px 0;'>"
+                guidance_html <- "<div style='padding: 15px; background-color: rgba(138, 155, 172, 0.06); border-radius: 8px; margin: 10px 0; color: inherit;'>"
 
                 if (is.null(sampleVar) || length(sampleVar) == 0) {
                     guidance_html <- paste0(
@@ -345,7 +345,7 @@ jjoncoplotClass <- if (requireNamespace("jmvcore")) {
                             guidance_html,
                             "<h4 style='color: #dc3545; margin-top: 15px;'> Variable Check</h4>",
                             "<p style='margin: 8px 0;'>These variables were not found in your dataset:</p>",
-                            "<p style='background-color: #ffe6e6; padding: 8px; border-radius: 4px; margin: 8px 0;'>",
+                            "<p style='background-color: rgba(255, 33, 33, 0.11); padding: 8px; border-radius: 4px; margin: 8px 0; color: inherit;'>",
                             htmltools::htmlEscape(paste(missing_vars, collapse = ", ")), "</p>",
                             "<p style='margin: 8px 0;'><strong> Tip:</strong> Check variable names for typos or case sensitivity</p>"
                         )
@@ -363,7 +363,7 @@ jjoncoplotClass <- if (requireNamespace("jmvcore")) {
                     if (length(notes) > 0) {
                         guidance_html <- paste0(
                             guidance_html,
-                            "<div style='background-color: #fff3cd; border-left: 4px solid #f39c12; padding: 10px; margin: 10px 0;'>",
+                            "<div style='background-color: rgba(255, 202, 33, 0.23); border-left: 4px solid #f39c12; padding: 10px; margin: 10px 0; color: inherit;'>",
                             "<h4 style='color: #e67e22; margin-top: 0;'> Data Warnings</h4>",
                             "<ul style='margin: 5px 0;'>",
                             paste0("<li>", notes, "</li>", collapse = ""),
@@ -386,7 +386,7 @@ jjoncoplotClass <- if (requireNamespace("jmvcore")) {
                 if (!is.null(sampleVar) && !is.null(geneVars) && length(geneVars) > 0) {
                     guidance_html <- paste0(
                         guidance_html,
-                        "<div style='background-color: #d4edda; padding: 10px; border-radius: 4px; margin-top: 15px;'>",
+                        "<div style='background-color: rgba(33, 162, 64, 0.19); padding: 10px; border-radius: 4px; margin-top: 15px; color: inherit;'>",
                         "<h4 style='color: #155724; margin-top: 0;'> Ready for Analysis!</h4>",
                         "<p style='margin: 5px 0; color: #155724;'>Minimum requirements met. The oncoplot will appear below.</p>",
                         "</div>"
@@ -947,10 +947,10 @@ jjoncoplotClass <- if (requireNamespace("jmvcore")) {
             .init = function() {
                 # Set up clinical context and instructions
                 instructions_html <- "
-            <div style='background-color: #f8f9fa; border-radius: 8px; padding: 15px; margin: 10px 0;'>
+            <div style='background-color: rgba(138, 155, 172, 0.06); border-radius: 8px; padding: 15px; margin: 10px 0; color: inherit;'>
             <h3 style='color: #2c3e50; margin-top: 0;'> Genomic Landscape Visualization for Clinical Research</h3>
 
-            <div style='background-color: #e8f4fd; border-left: 4px solid #3498db; padding: 10px; margin: 10px 0;'>
+            <div style='background-color: rgba(33, 149, 236, 0.1); border-left: 4px solid #3498db; padding: 10px; margin: 10px 0; color: inherit;'>
             <h4 style='color: #2980b9; margin-top: 0;'> Clinical Applications</h4>
             <p><strong>Oncoplots</strong> help pathologists and oncologists visualize mutation landscapes across cancer samples to:</p>
             <ul style='margin-bottom: 5px;'>
@@ -962,7 +962,7 @@ jjoncoplotClass <- if (requireNamespace("jmvcore")) {
             </ul>
             </div>
 
-            <div style='background-color: #fff3cd; border-left: 4px solid #f39c12; padding: 10px; margin: 10px 0;'>
+            <div style='background-color: rgba(255, 202, 33, 0.23); border-left: 4px solid #f39c12; padding: 10px; margin: 10px 0; color: inherit;'>
             <h4 style='color: #e67e22; margin-top: 0;'> When to Use This Analysis</h4>
             <ul style='margin-bottom: 5px;'>
             <li><strong>Tumor Profiling:</strong> Characterizing mutation landscapes in cancer cohorts</li>
@@ -973,7 +973,7 @@ jjoncoplotClass <- if (requireNamespace("jmvcore")) {
             </ul>
             </div>
 
-            <div style='background-color: #d4edda; border-left: 4px solid #28a745; padding: 10px; margin: 10px 0;'>
+            <div style='background-color: rgba(33, 162, 64, 0.19); border-left: 4px solid #28a745; padding: 10px; margin: 10px 0; color: inherit;'>
             <h4 style='color: #27ae60; margin-top: 0;'> Data Requirements</h4>
             <ul style='margin-bottom: 5px;'>
             <li><strong>Sample ID:</strong> Patient/tumor identifiers (e.g., TCGA-AA-3818, P001)</li>
@@ -983,7 +983,7 @@ jjoncoplotClass <- if (requireNamespace("jmvcore")) {
             </ul>
             </div>
 
-            <div style='background-color: #f8d7da; border-left: 4px solid #dc3545; padding: 10px; margin: 10px 0;'>
+            <div style='background-color: rgba(216, 33, 50, 0.18); border-left: 4px solid #dc3545; padding: 10px; margin: 10px 0; color: inherit;'>
             <h4 style='color: #c0392b; margin-top: 0;'> Important Considerations</h4>
             <ul style='margin-bottom: 5px;'>
             <li><strong>Sample Size:</strong> Minimum 10 samples recommended for meaningful patterns</li>
@@ -1206,7 +1206,7 @@ jjoncoplotClass <- if (requireNamespace("jmvcore")) {
                 # Overall summary
                 clinical_text <- paste0(
                     clinical_text,
-                    "<div style='background-color: #f8f9fa; border-radius: 8px; padding: 15px; margin: 15px 0;'>\n",
+                    "<div style='background-color: rgba(138, 155, 172, 0.06); border-radius: 8px; padding: 15px; margin: 15px 0; color: inherit;'>\n",
                     "<h3 style='color: #2c3e50; margin-top: 0;'> Clinical Interpretation</h3>\n"
                 )
 
@@ -1214,7 +1214,7 @@ jjoncoplotClass <- if (requireNamespace("jmvcore")) {
                 if (nrow(top_genes) > 0) {
                     clinical_text <- paste0(
                         clinical_text,
-                        "<div style='background-color: #e8f4fd; border-left: 4px solid #3498db; padding: 10px; margin: 10px 0;'>\n",
+                        "<div style='background-color: rgba(33, 149, 236, 0.1); border-left: 4px solid #3498db; padding: 10px; margin: 10px 0; color: inherit;'>\n",
                         "<h4 style='color: #2980b9; margin-top: 0;'> Most Frequently Mutated Genes</h4>\n",
                         "<ul style='margin-bottom: 5px;'>\n"
                     )
@@ -1247,7 +1247,7 @@ jjoncoplotClass <- if (requireNamespace("jmvcore")) {
 
                     clinical_text <- paste0(
                         clinical_text,
-                        "<div style='background-color: #e8f5e8; border-left: 4px solid #27ae60; padding: 10px; margin: 10px 0;'>\n",
+                        "<div style='background-color: rgba(33, 159, 33, 0.1); border-left: 4px solid #27ae60; padding: 10px; margin: 10px 0; color: inherit;'>\n",
                         "<h4 style='color: #27ae60; margin-top: 0;'> Mutation Burden Analysis</h4>\n",
                         "<p><strong>Average mutated genes per sample:</strong> ", round(avg_tmb, 2), "</p>\n",
                         "<p><strong>Samples with >=10 mutated genes:</strong> ", high_tmb_samples, "/", total_samples,
@@ -1260,7 +1260,7 @@ jjoncoplotClass <- if (requireNamespace("jmvcore")) {
                 # Clinical recommendations based on mutation patterns
                 clinical_text <- paste0(
                     clinical_text,
-                    "<div style='background-color: #fff3cd; border-left: 4px solid #ffc107; padding: 10px; margin: 10px 0;'>\n",
+                    "<div style='background-color: rgba(255, 202, 33, 0.23); border-left: 4px solid #ffc107; padding: 10px; margin: 10px 0; color: inherit;'>\n",
                     "<h4 style='color: #856404; margin-top: 0;'> Clinical Recommendations</h4>\n"
                 )
 
@@ -1293,7 +1293,7 @@ jjoncoplotClass <- if (requireNamespace("jmvcore")) {
                 if (total_samples >= 10) {
                     clinical_text <- paste0(
                         clinical_text,
-                        "<div style='background-color: #f3e5f5; border-left: 4px solid #9c27b0; padding: 10px; margin: 10px 0;'>\n",
+                        "<div style='background-color: rgba(153, 33, 170, 0.12); border-left: 4px solid #9c27b0; padding: 10px; margin: 10px 0; color: inherit;'>\n",
                         "<h4 style='color: #7b1fa2; margin-top: 0;'> Sample Stratification Insights</h4>\n",
                         "<p><strong>Sample size:</strong> ", total_samples, " samples analyzed</p>\n"
                     )
@@ -1356,12 +1356,12 @@ jjoncoplotClass <- if (requireNamespace("jmvcore")) {
                 top_genes <- head(mutation_summary, 3)
 
                 summary_text <- paste0(
-                    "<div style='background-color: #f8f9fa; border: 1px solid #dee2e6; border-radius: 8px; padding: 20px; margin: 15px 0;'>\n",
+                    "<div style='background-color: rgba(138, 155, 172, 0.06); border: 1px solid #dee2e6; border-radius: 8px; padding: 20px; margin: 15px 0; color: inherit;'>\n",
                     "<h3 style='color: #2c3e50; margin-top: 0; border-bottom: 2px solid #3498db; padding-bottom: 10px;'>",
                     " Clinical Summary for Reports</h3>\n",
                     "<div style='background-color: white; padding: 15px; border-radius: 5px; border-left: 4px solid #28a745;'>\n",
                     "<p style='margin-bottom: 15px; font-weight: bold; color: #28a745;'>Copy-Ready Summary Text:</p>\n",
-                    "<div style='font-family: Georgia, serif; line-height: 1.6; padding: 10px; background-color: #f8f9fa; border-radius: 3px;'>\n"
+                    "<div style='font-family: Georgia, serif; line-height: 1.6; padding: 10px; background-color: rgba(138, 155, 172, 0.06); border-radius: 3px; color: inherit;'>\n"
                 )
 
                 # Generate publication-ready text
@@ -1429,7 +1429,7 @@ jjoncoplotClass <- if (requireNamespace("jmvcore")) {
                 summary_text <- paste0(
                     summary_text,
                     "</div>\n",
-                    "<div style='margin-top: 15px; padding: 10px; background-color: #e9ecef; border-radius: 3px;'>\n",
+                    "<div style='margin-top: 15px; padding: 10px; background-color: rgba(33, 63, 94, 0.1); border-radius: 3px; color: inherit;'>\n",
                     "<p style='margin: 0; font-size: 0.9em; color: #6c757d;'><strong>Methods Note:</strong> ",
                     "Genomic landscape visualization was performed using oncoplot analysis with ",
                     ifelse(effectiveOptions$plotType == "oncoplot", "mutation matrix visualization",

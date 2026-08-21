@@ -38,6 +38,19 @@ sequentialtestsClass <- if (requireNamespace('jmvcore'))
                                  values = list(stage = "After First Test"))
                 flowTable$addRow(rowKey = "after_test2",
                                  values = list(stage = "After Second Test"))
+
+                # The cost table always has exactly these three rows. Creating them here
+                # (rather than adding them each run) keeps the structure visible before the
+                # analysis runs and removes the need to clear stale rows in .run(). The item
+                # labels are placeholders: .run() rewrites them because a clinical preset can
+                # override the test names.
+                costTable <- self$results$cost_analysis_table
+                costTable$addRow(rowKey = "test1",
+                                 values = list(item = paste0("Test 1: ", self$options$test1_name)))
+                costTable$addRow(rowKey = "test2",
+                                 values = list(item = paste0("Test 2: ", self$options$test2_name)))
+                costTable$addRow(rowKey = "total",
+                                 values = list(item = "Total Protocol Cost"))
             },
 
             .run = function() {
@@ -388,7 +401,7 @@ sequentialtestsClass <- if (requireNamespace('jmvcore'))
                     }
 
                     summary <- sprintf(
-                        "<div style='background:#e8f4f8;padding:15px;border-left:4px solid #0077be;font-size:1.05em;line-height:1.6;'><strong>Clinical Summary:</strong> Using a %s with %s followed by %s, the combined test achieves %.1f%% sensitivity (detects %.0f of every 100 diseased individuals) and %.1f%% specificity (correctly rules out %.0f of every 100 healthy individuals). At your specified disease prevalence of %.1f%%, a positive result indicates a %s chance the person truly has the disease (PPV), while a negative result indicates a %s chance the person is truly disease-free (NPV).%s %s</div>",
+                        "<div style='background-color: rgba(33, 149, 188, 0.1);padding:15px;border-left:4px solid #0077be;font-size:1.05em;line-height:1.6; color: inherit;'><strong>Clinical Summary:</strong> Using a %s with %s followed by %s, the combined test achieves %.1f%% sensitivity (detects %.0f of every 100 diseased individuals) and %.1f%% specificity (correctly rules out %.0f of every 100 healthy individuals). At your specified disease prevalence of %.1f%%, a positive result indicates a %s chance the person truly has the disease (PPV), while a negative result indicates a %s chance the person is truly disease-free (NPV).%s %s</div>",
                         strategy_desc,
                         private$.safeHtmlOutput(test1_name),
                         private$.safeHtmlOutput(test2_name),
@@ -585,24 +598,22 @@ sequentialtestsClass <- if (requireNamespace('jmvcore'))
                     costTable <- self$results$cost_analysis_table
                     costTable$setTitle(sprintf('Cost Analysis (Per %s Patients)', base::format(pop_size, big.mark = ',')))
 
-                    # Clear rows from any previous run before repopulating to avoid duplicates
-                    costTable$deleteRows()
-
-                    costTable$addRow(rowKey = "test1", values = list(
+                    # Rows are created in .init(); only the computed cells are set here.
+                    costTable$setRow(rowKey = "test1", values = list(
                         item = paste0("Test 1: ", test1_name),
                         unit_cost = test1_cost,
                         number_tests = as.integer(n_test1),
                         total_cost = total_cost1
                     ))
                     
-                    costTable$addRow(rowKey = "test2", values = list(
+                    costTable$setRow(rowKey = "test2", values = list(
                         item = paste0("Test 2: ", test2_name),
                         unit_cost = test2_cost,
                         number_tests = as.integer(n_test2),
                         total_cost = total_cost2
                     ))
                     
-                    costTable$addRow(rowKey = "total", values = list(
+                    costTable$setRow(rowKey = "total", values = list(
                         item = "Total Protocol Cost",
                         unit_cost = NA,
                         number_tests = as.integer(n_test1 + n_test2),
@@ -890,7 +901,7 @@ sequentialtestsClass <- if (requireNamespace('jmvcore'))
 
                     # Add independence assumption note to explanation
                     independence_note <- paste0(
-                        "<div style='background-color:#f8f9fa;padding:10px;border-radius:6px;margin-top:8px;'>",
+                        "<div style='background-color: rgba(138, 155, 172, 0.06);padding:10px;border-radius:6px;margin-top:8px; color: inherit;'>",
                         "<strong>Assumption:</strong> Combined metrics assume conditional independence between tests. ",
                         "If tests are correlated (similar biology/technology), combined PPV/NPV may be overstated.",
                         "</div>"
@@ -900,7 +911,7 @@ sequentialtestsClass <- if (requireNamespace('jmvcore'))
 
                 # Populate clinical guidance
                 guidance_html <- paste0(
-                    "<div class='jmv-guidance' style='background-color:#f8f9fa;padding:15px;border-radius:6px;margin-top:10px;'>",
+                    "<div class='jmv-guidance' style='background-color: rgba(138, 155, 172, 0.06);padding:15px;border-radius:6px;margin-top:10px; color: inherit;'>",
                     "<h4>Clinical Decision Making Guide</h4>",
                     "<p><strong>When to Use Each Strategy:</strong></p>",
                     "<ul>",
@@ -1172,6 +1183,9 @@ sequentialtestsClass <- if (requireNamespace('jmvcore'))
                 if (!requireNamespace("ggplot2", quietly = TRUE)) return(TRUE)
 
                 plotData <- image$state
+
+                if (is.null(plotData))
+                    return(FALSE)
                 strategy <- plotData$Strategy
 
                 # Enhanced flow diagram with better visual design
@@ -1377,6 +1391,9 @@ sequentialtestsClass <- if (requireNamespace('jmvcore'))
 
                 plotData <- image$state
 
+                if (is.null(plotData))
+                    return(FALSE)
+
                 # Create comparison data
                 perf_data <- data.frame(
                     Test = rep(c(plotData$Test1_Name, plotData$Test2_Name, "Combined"), 4),
@@ -1418,6 +1435,9 @@ sequentialtestsClass <- if (requireNamespace('jmvcore'))
                 if (!requireNamespace("ggplot2", quietly = TRUE)) return(TRUE)
 
                 plotData <- image$state
+
+                if (is.null(plotData))
+                    return(FALSE)
 
                 # Calculate probability progression
                 prevalence <- plotData$Prevalence
@@ -1489,6 +1509,9 @@ sequentialtestsClass <- if (requireNamespace('jmvcore'))
                 if (!requireNamespace("ggplot2", quietly = TRUE)) return(TRUE)
 
                 plotData <- image$state
+
+                if (is.null(plotData))
+                    return(FALSE)
 
                 # Create Sankey-like flow visualization
                 pop_size <- plotData$Pop_Size
@@ -1589,6 +1612,9 @@ sequentialtestsClass <- if (requireNamespace('jmvcore'))
                 if (!requireNamespace("ggplot2", quietly = TRUE)) return(TRUE)
 
                 plotData <- image$state
+
+                if (is.null(plotData))
+                    return(FALSE)
 
                 # Create prevalence range from 0.01 to 0.99
                 prev_range <- seq(0.01, 0.99, by = 0.01)

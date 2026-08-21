@@ -45,7 +45,7 @@ clinmonClass <- if (requireNamespace("jmvcore")) {
                 # Early return with instructions if no time variable selected
                 if (is.null(self$options$time_var)) {
                     instructions_html <- "
-                    <div style='background-color: #e8f5e8; padding: 20px; border-radius: 8px; margin: 10px 0;'>
+                    <div style='background-color: rgba(33, 159, 33, 0.1); padding: 20px; border-radius: 8px; margin: 10px 0; color: inherit;'>
                         <h3>Clinical Hemodynamic Monitoring</h3>
                         <p><strong>This module calculates hemodynamic indices from continuous monitoring data using the clintools package.</strong></p>
                         
@@ -302,7 +302,7 @@ clinmonClass <- if (requireNamespace("jmvcore")) {
                     html_content <- "<div style='font-family: Arial, sans-serif;'>"
                     html_content <- paste0(html_content, "<h3>Hemodynamic Indices Summary</h3>")
                     html_content <- paste0(html_content, "<table border='1' cellpadding='5' cellspacing='0' style='border-collapse: collapse;'>")
-                    html_content <- paste0(html_content, "<tr style='background-color: #f0f0f0; font-weight: bold;'>")
+                    html_content <- paste0(html_content, "<tr style='background-color: rgba(33, 33, 33, 0.07); font-weight: bold; color: inherit;'>")
                     html_content <- paste0(html_content, "<th>Index</th><th>Description</th><th>Mean</th><th>SD</th><th>Min</th><th>Max</th><th>N</th></tr>")
                     
                     for (i in seq_len(nrow(summary_stats))) {
@@ -352,7 +352,7 @@ clinmonClass <- if (requireNamespace("jmvcore")) {
                 html_content <- paste0(html_content, "<table border='1' cellpadding='3' cellspacing='0' style='border-collapse: collapse; font-size: 12px;'>")
                 
                 # Header
-                html_content <- paste0(html_content, "<tr style='background-color: #f0f0f0; font-weight: bold;'>")
+                html_content <- paste0(html_content, "<tr style='background-color: rgba(33, 33, 33, 0.07); font-weight: bold; color: inherit;'>")
                 for (col_name in names(display_results)) {
                     html_content <- paste0(html_content, "<th>", col_name, "</th>")
                 }

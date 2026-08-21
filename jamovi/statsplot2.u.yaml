@@ -65,4 +65,4 @@ children:
           - type: TextBox
             name: seed
             format: number
-            label: Random Seed
+            label: Random seed

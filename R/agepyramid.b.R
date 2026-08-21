@@ -25,7 +25,7 @@ agepyramidClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             # Check if required options (age and gender) are provided
             if (is.null(self$options$age) || is.null(self$options$gender)) {
                 self$results$welcome$setContent(
-                    "<div style='background-color: #e3f2fd; padding: 20px; border-radius: 8px; border-left: 4px solid #2196F3;'>
+                    "<div style='background-color: rgba(33, 152, 239, 0.13); padding: 20px; border-radius: 8px; border-left: 4px solid #2196F3; color: inherit;'>
                     <h3 style='color: #1976d2; margin-top: 0;'> Age Pyramid Analysis</h3>
                     <p style='font-size: 15px;'>Create demographic visualizations showing age distribution by gender.</p>
                     <h4 style='color: #1976d2; margin-bottom: 8px;'>Required Variables:</h4>
@@ -112,7 +112,7 @@ agepyramidClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             # Validate that female and male levels are different
             if (!is.null(female_level) && !is.null(male_level) && female_level == male_level) {
                 error_html <- paste0(
-                    "<div style='background-color: #ffebee; padding: 20px; border-radius: 8px; border-left: 4px solid #f44336;'>",
+                    "<div style='background-color: rgba(255, 33, 67, 0.09); padding: 20px; border-radius: 8px; border-left: 4px solid #f44336; color: inherit;'>",
                     "<h3 style='color: #c62828; margin-top: 0;'> Configuration Error</h3>",
                     "<p style='font-size: 15px;'><strong>Female and Male gender levels cannot be the same.</strong></p>",
                     "<p style='font-size: 14px;'>You have selected '<strong>", htmltools::htmlEscape(female_level), "</strong>' for both Female and Male.</p>",
@@ -722,7 +722,7 @@ agepyramidClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             # breakdown sub-items sum exactly to the total Excluded.
             n_source_na <- max(0, n_excluded - n_invalid_age - n_missing_gender - n_unbinned)
 
-            html <- "<div style='background-color: #e3f2fd; padding: 15px; border-radius: 8px; border-left: 4px solid #2196F3;'>"
+            html <- "<div style='background-color: rgba(33, 152, 239, 0.13); padding: 15px; border-radius: 8px; border-left: 4px solid #2196F3; color: inherit;'>"
             html <- paste0(html, "<h4 style='margin: 0 0 8px 0; color: #1976d2;'> Data Summary</h4>")
             html <- paste0(html, "<table style='width: 100%; font-size: 14px;'>")
             html <- paste0(html, "<tr><td><strong>Initial observations:</strong></td><td>", n_initial, "</td></tr>")

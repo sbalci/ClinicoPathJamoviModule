@@ -120,7 +120,7 @@ riverplotClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                 )
                 
                 self$results$todo$setContent(paste0(
-                    "<div style='background-color: #f8d7da; color: #721c24; padding: 15px; border-radius: 5px; border: 1px solid #f5c6cb;'>",
+                    "<div style='background-color: rgba(216, 33, 50, 0.18); color: inherit; padding: 15px; border-radius: 5px; border: 1px solid #f5c6cb;'>",
                     "<h4> ", .("Missing Dependencies"), "</h4>",
                     "<p>", error_msg, "</p>",
                     "</div>"
@@ -230,7 +230,7 @@ riverplotClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                 )
                 
                 preset_info <- paste0(
-                    "<div style='background-color: #d1ecf1; color: #0c5460; padding: 10px; border-radius: 5px; border: 1px solid #bee5eb; margin: 5px 0;'>",
+                    "<div style='background-color: rgba(33, 163, 188, 0.21); color: inherit; padding: 10px; border-radius: 5px; border: 1px solid #bee5eb; margin: 5px 0;'>",
                     "<small> ", .("Applied preset:"), " <strong>", preset_names[[preset]], "</strong></small>",
                     "</div>"
                 )
@@ -242,7 +242,7 @@ riverplotClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
         .show_welcome_message = function() {
             if (is.null(self$options$strata) || length(self$options$strata) < 1) {
                 welcome_html <- paste0(
-                    "<div style='background-color: #e3f2fd; padding: 20px; border-radius: 8px; margin: 10px 0;'>",
+                    "<div style='background-color: rgba(33, 152, 239, 0.13); padding: 20px; border-radius: 8px; margin: 10px 0; color: inherit;'>",
                     "<h3 style='color: #0277bd; margin-top: 0;'> ", .("River Plots & Alluvial Diagrams"), "</h3>",
                     "<div style='margin: 15px 0;'>",
                     "<p><strong>", .("Visualize flows, transitions, and categorical changes across time or stages:"), "</strong></p>",
@@ -254,7 +254,7 @@ riverplotClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                     "</ul>",
                     "</div>",
                     
-                    "<div style='background-color: #fff3e0; padding: 12px; border-radius: 5px; margin: 15px 0;'>",
+                    "<div style='background-color: rgba(255, 169, 33, 0.14); padding: 12px; border-radius: 5px; margin: 15px 0; color: inherit;'>",
                     "<h4 style='color: #ff8f00; margin: 0 0 8px 0;'> ", .("Required Data Setup:"), "</h4>",
                     "<ul style='margin: 5px 0; padding-left: 20px; line-height: 1.6;'>",
                     "<li><strong>", .("Strata Variables:"), "</strong> ", .("Categories that flow between stages (required)"), "</li>",
@@ -265,7 +265,7 @@ riverplotClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                     "</div>",
                     
                     "<div style='display: flex; gap: 15px; margin: 15px 0;'>",
-                    "<div style='flex: 1; background-color: #f3e5f5; padding: 10px; border-radius: 5px;'>",
+                    "<div style='flex: 1; background-color: rgba(153, 33, 170, 0.12); padding: 10px; border-radius: 5px; color: inherit;'>",
                     "<h5 style='color: #7b1fa2; margin: 0 0 5px 0;'> ", .("Plot Types"), "</h5>",
                     "<ul style='font-size: 12px; margin: 0; padding-left: 15px;'>",
                     "<li><strong>", .("Alluvial:"), "</strong> ", .("Curved flowing streams"), "</li>",
@@ -274,7 +274,7 @@ riverplotClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                     "<li><strong>", .("Flow:"), "</strong> ", .("Individual entity tracking"), "</li>",
                     "</ul>",
                     "</div>",
-                    "<div style='flex: 1; background-color: #e8f5e8; padding: 10px; border-radius: 5px;'>",
+                    "<div style='flex: 1; background-color: rgba(33, 159, 33, 0.1); padding: 10px; border-radius: 5px; color: inherit;'>",
                     "<h5 style='color: #2e7d32; margin: 0 0 5px 0;'> ", .("Data Formats"), "</h5>",
                     "<ul style='font-size: 12px; margin: 0; padding-left: 15px;'>",
                     "<li><strong>", .("Long:"), "</strong> ", .("Time variable + single strata"), "</li>",
@@ -285,7 +285,7 @@ riverplotClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                     "</div>",
                     "</div>",
                     
-                    "<div style='background-color: #fff8e1; padding: 10px; border-radius: 5px; margin: 10px 0;'>",
+                    "<div style='background-color: rgba(255, 203, 33, 0.14); padding: 10px; border-radius: 5px; margin: 10px 0; color: inherit;'>",
                     "<p style='margin: 0; color: #ef6c00;'><strong> ", .("Quick Start:"), "</strong> ", .("Add your strata variables above to begin. The analysis will auto-detect your data format and suggest optimal settings."), "</p>",
                     "</div>",
                     "</div>"
@@ -475,7 +475,7 @@ riverplotClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                 }
                 
                 error_html <- paste0(
-                    "<div style='background-color: #f8d7da; color: #721c24; padding: 15px; border-radius: 5px; border: 1px solid #f5c6cb;'>",
+                    "<div style='background-color: rgba(216, 33, 50, 0.18); color: inherit; padding: 15px; border-radius: 5px; border: 1px solid #f5c6cb;'>",
                     "<h4> ", .("Analysis Error"), "</h4>",
                     "<p><strong>", .("Error:"), "</strong> ", safe_message, "</p>",
                     "<p><em>", .("Please check your data format and variable selections."), "</em></p>",
@@ -739,7 +739,7 @@ riverplotClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             if (length(warnings) == 0) return()
             
             warning_html <- paste0(
-                "<div style='background-color: #fff3cd; color: #856404; padding: 12px; border-radius: 5px; border: 1px solid #ffeaa7; margin: 10px 0;'>",
+                "<div style='background-color: rgba(255, 202, 33, 0.23); color: inherit; padding: 12px; border-radius: 5px; border: 1px solid #ffeaa7; margin: 10px 0;'>",
                 "<h5 style='color: #856404; margin: 0 0 8px 0;'> ", .("Analysis Recommendations"), "</h5>",
                 "<ul style='margin: 5px 0; font-size: 12px; line-height: 1.4;'>",
                 paste0("<li>", warnings, "</li>", collapse = ""),
@@ -1516,7 +1516,7 @@ riverplotClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             )
             
             summary_html <- paste0(
-                "<div style='background-color: #e8f5e8; padding: 15px; border-radius: 8px; border-left: 4px solid #2e7d32;'>",
+                "<div style='background-color: rgba(33, 159, 33, 0.1); padding: 15px; border-radius: 8px; border-left: 4px solid #2e7d32; color: inherit;'>",
                 "<h4 style='color: #2e7d32; margin-top: 0;'> ", .("Analysis Overview"), "</h4>",
                 "<p><strong>", .("Data Configuration:"), "</strong> ", 
                 sprintf(.("This analysis visualizes %s using %s across %d stages with %d categories (%d observations)."), 
@@ -1525,7 +1525,7 @@ riverplotClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                 sprintf(.("%s diagram %s - %s."), plot_type, weight_desc, clinical_use), "</p>",
                 
                 # Add clinical guidance
-                "<div style='background-color: #fff3e0; padding: 10px; border-radius: 5px; margin: 10px 0;'>",
+                "<div style='background-color: rgba(255, 169, 33, 0.14); padding: 10px; border-radius: 5px; margin: 10px 0; color: inherit;'>",
                 "<h5 style='color: #ef6c00; margin: 0 0 5px 0;'> ", .("Clinical Interpretation Guide"), "</h5>",
                 "<ul style='margin: 5px 0; font-size: 12px;'>",
                 "<li><strong>", .("Flow Width:"), "</strong> ", .("Proportional to number of patients/cases in that pathway"), "</li>",
@@ -1628,12 +1628,12 @@ riverplotClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             
             # Generate clean HTML report
             report_html <- paste0(
-                "<div style='background-color: #f8f9fa; padding: 15px; border-radius: 8px; border: 1px solid #dee2e6;'>",
+                "<div style='background-color: rgba(138, 155, 172, 0.06); padding: 15px; border-radius: 8px; border: 1px solid #dee2e6; color: inherit;'>",
                 "<h5 style='color: #495057; margin: 0 0 10px 0;'> ", .("Clinical Report"), "</h5>",
                 "<div style='background-color: white; padding: 12px; border-radius: 5px; font-family: serif; line-height: 1.6; border: 1px solid #e9ecef; margin: 8px 0;'>",
                 complete_report,
                 "</div>",
-                "<div style='margin-top: 8px; padding: 8px; background-color: #e9ecef; border-radius: 4px; font-size: 11px; color: #6c757d;'>",
+                "<div style='margin-top: 8px; padding: 8px; background-color: rgba(33, 63, 94, 0.1); border-radius: 4px; font-size: 11px; color: inherit;'>",
                 "<strong>", .("Usage Note:"), "</strong> ",
                 .("This text is formatted for inclusion in clinical reports, research manuscripts, or case presentations. Adjust terminology as needed for your specific context."),
                 "</div>",
@@ -1648,7 +1648,7 @@ riverplotClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             data <- private$.processedData
             
             diagnostics_html <- paste0(
-                "<div style='background-color: #f8f9fa; padding: 15px; border-radius: 5px; font-family: monospace;'>",
+                "<div style='background-color: rgba(138, 155, 172, 0.06); padding: 15px; border-radius: 5px; font-family: monospace; color: inherit;'>",
                 "<h4 style='color: #495057; margin-top: 0;'> Data Processing Diagnostics</h4>",
                 "<table style='width: 100%; border-collapse: collapse;'>",
                 "<tr><td><strong>Data Format:</strong></td><td>", str_to_title(opts$data_format), "</td></tr>",
@@ -1703,7 +1703,7 @@ riverplotClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             )
 
             about_html <- paste0(
-                "<div style='background-color: #f8f9fa; padding: 20px; border-radius: 8px; border-left: 4px solid #007bff;'>",
+                "<div style='background-color: rgba(138, 155, 172, 0.06); padding: 20px; border-radius: 8px; border-left: 4px solid #007bff; color: inherit;'>",
                 "<h3 style='color: #495057; margin-top: 0; font-size: 18px;'> About This Analysis</h3>",
 
                 "<div style='margin-bottom: 16px;'>",
@@ -1732,7 +1732,7 @@ riverplotClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                     )
                 } else {""},
 
-                "<div style='background-color: #e9ecef; padding: 12px; border-radius: 6px; margin-top: 16px;'>",
+                "<div style='background-color: rgba(33, 63, 94, 0.1); padding: 12px; border-radius: 6px; margin-top: 16px; color: inherit;'>",
                 "<h4 style='color: #495057; font-size: 13px; margin: 0 0 8px 0;'> Clinical Interpretation Tips</h4>",
                 "<ul style='margin: 0; padding-left: 20px; line-height: 1.5; font-size: 13px;'>",
                 "<li>", .("Wide flows indicate common pathways or frequent transitions"), "</li>",
@@ -2527,7 +2527,7 @@ riverplotClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
         
         .format_riverplot_object_display = function(obj) {
             html <- paste0(
-                "<div style='background-color: #f8f9fa; padding: 15px; border-radius: 5px; font-family: monospace;'>",
+                "<div style='background-color: rgba(138, 155, 172, 0.06); padding: 15px; border-radius: 5px; font-family: monospace; color: inherit;'>",
                 "<h4 style='color: #495057; margin-top: 0;'> CRAN Riverplot Object Structure</h4>",
                 "<h5>Nodes:</h5>",
                 "<pre style='background: white; padding: 10px; border-radius: 3px; overflow-x: auto; font-size: 11px;'>",
@@ -2545,7 +2545,7 @@ riverplotClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
         
         .generate_riverplot_code = function(obj) {
             code_html <- paste0(
-                "<div style='background-color: #f8f9fa; padding: 15px; border-radius: 5px;'>",
+                "<div style='background-color: rgba(138, 155, 172, 0.06); padding: 15px; border-radius: 5px; color: inherit;'>",
                 "<h4 style='color: #495057; margin-top: 0;'> CRAN Riverplot Code</h4>",
                 "<pre style='background: #2d3748; color: #e2e8f0; padding: 15px; border-radius: 5px; overflow-x: auto; font-size: 12px;'>",
                 "<code>",
@@ -2642,7 +2642,7 @@ riverplotClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                 }
                 
                 validation_html <- paste0(
-                    "<div style='background-color: #f8f9fa; padding: 20px; border-radius: 8px; border: 1px solid #dee2e6;'>",
+                    "<div style='background-color: rgba(138, 155, 172, 0.06); padding: 20px; border-radius: 8px; border: 1px solid #dee2e6; color: inherit;'>",
                     "<h4 style='color: #495057; margin-top: 0;'> ", .("Enhanced Data Validation Report"), "</h4>",
                     
                     "<div style='background-color: white; padding: 15px; border-radius: 5px; margin: 15px 0; border-left: 4px solid ", quality_level$color, ";'>",
@@ -2653,7 +2653,7 @@ riverplotClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                     
                     if (length(validation_issues) > 0) {
                         paste0(
-                            "<div style='background-color: #fff3cd; padding: 12px; border-radius: 5px; border: 1px solid #ffeaa7;'>",
+                            "<div style='background-color: rgba(255, 202, 33, 0.23); padding: 12px; border-radius: 5px; border: 1px solid #ffeaa7; color: inherit;'>",
                             "<h5 style='color: #856404; margin: 0 0 10px 0;'> ", .("Validation Issues Detected"), "</h5>",
                             "<ul style='margin: 5px 0; padding-left: 20px;'>",
                             paste0("<li style='margin: 3px 0;'>", validation_issues, "</li>", collapse = ""),
@@ -2662,7 +2662,7 @@ riverplotClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                         )
                     } else {
                         paste0(
-                            "<div style='background-color: #d4edda; padding: 12px; border-radius: 5px; border: 1px solid #c3e6cb;'>",
+                            "<div style='background-color: rgba(33, 162, 64, 0.19); padding: 12px; border-radius: 5px; border: 1px solid #c3e6cb; color: inherit;'>",
                             "<p style='color: #155724; margin: 0;'> ", .("No significant validation issues detected. Data appears suitable for flow analysis."), "</p>",
                             "</div>"
                         )
@@ -2674,7 +2674,7 @@ riverplotClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                 
             }, error = function(e) {
                 error_html <- paste0(
-                    "<div style='background-color: #f8d7da; color: #721c24; padding: 15px; border-radius: 5px;'>",
+                    "<div style='background-color: rgba(216, 33, 50, 0.18); color: inherit; padding: 15px; border-radius: 5px;'>",
                     "<h5> ", .("Validation Report Error"), "</h5>",
                     "<p>", .("Unable to generate validation report:"), " ", private$.sanitizeHTML(e$message), "</p>",
                     "</div>"
@@ -2731,10 +2731,10 @@ riverplotClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                 
                 # Generate recommendations HTML
                 suggestion_html <- paste0(
-                    "<div style='background-color: #f8f9fa; padding: 20px; border-radius: 8px; border: 1px solid #dee2e6;'>",
+                    "<div style='background-color: rgba(138, 155, 172, 0.06); padding: 20px; border-radius: 8px; border: 1px solid #dee2e6; color: inherit;'>",
                     "<h4 style='color: #495057; margin-top: 0;'> ", .("Alternative Analysis Suggestions"), "</h4>",
                     
-                    "<div style='background-color: #e7f3ff; padding: 12px; border-radius: 5px; border-left: 4px solid #007bff; margin: 15px 0;'>",
+                    "<div style='background-color: rgba(33, 144, 255, 0.11); padding: 12px; border-radius: 5px; border-left: 4px solid #007bff; margin: 15px 0; color: inherit;'>",
                     "<h5 style='color: #004085; margin: 0 0 8px 0;'> ", .("Current Analysis: River Plot"), "</h5>",
                     "<p style='margin: 5px 0; color: #004085;'>",
                     .("Excellent choice for visualizing flows and transitions between categories."),
@@ -2744,7 +2744,7 @@ riverplotClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                     
                     if (length(alternative_approaches) > 0) {
                         paste0(
-                            "<div style='background-color: #fff3cd; padding: 15px; border-radius: 5px; border: 1px solid #ffeaa7;'>",
+                            "<div style='background-color: rgba(255, 202, 33, 0.23); padding: 15px; border-radius: 5px; border: 1px solid #ffeaa7; color: inherit;'>",
                             "<h5 style='color: #856404; margin: 0 0 12px 0;'> ", .("Consider These Complementary Approaches"), "</h5>",
                             paste0(sapply(alternative_approaches, function(approach) {
                                 paste0(
@@ -2759,7 +2759,7 @@ riverplotClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                         )
                     } else {
                         paste0(
-                            "<div style='background-color: #d4edda; padding: 12px; border-radius: 5px; border: 1px solid #c3e6cb;'>",
+                            "<div style='background-color: rgba(33, 162, 64, 0.19); padding: 12px; border-radius: 5px; border: 1px solid #c3e6cb; color: inherit;'>",
                             "<p style='color: #155724; margin: 0;'> ", .("River plot analysis is optimal for your data structure. No alternative approaches recommended at this time."), "</p>",
                             "</div>"
                         )
@@ -2771,7 +2771,7 @@ riverplotClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                 
             }, error = function(e) {
                 error_html <- paste0(
-                    "<div style='background-color: #f8d7da; color: #721c24; padding: 15px; border-radius: 5px;'>",
+                    "<div style='background-color: rgba(216, 33, 50, 0.18); color: inherit; padding: 15px; border-radius: 5px;'>",
                     "<h5> ", .("Cross-Reference Error"), "</h5>",
                     "<p>", .("Unable to generate analysis suggestions:"), " ", private$.sanitizeHTML(e$message), "</p>",
                     "</div>"
@@ -2863,7 +2863,7 @@ riverplotClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                 }
                 
                 optimization_html <- paste0(
-                    "<div style='background-color: #f8f9fa; padding: 20px; border-radius: 8px; border: 1px solid #dee2e6;'>",
+                    "<div style='background-color: rgba(138, 155, 172, 0.06); padding: 20px; border-radius: 8px; border: 1px solid #dee2e6; color: inherit;'>",
                     "<h4 style='color: #495057; margin-top: 0;'> ", .("Quality Optimization Report"), "</h4>",
                     
                     "<div style='background-color: white; padding: 15px; border-radius: 5px; margin: 15px 0; border-left: 4px solid ", quality_assessment$color, ";'>",
@@ -2874,7 +2874,7 @@ riverplotClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                     
                     if (length(optimizations_applied) > 0) {
                         paste0(
-                            "<div style='background-color: #d4edda; padding: 12px; border-radius: 5px; border: 1px solid #c3e6cb;'>",
+                            "<div style='background-color: rgba(33, 162, 64, 0.19); padding: 12px; border-radius: 5px; border: 1px solid #c3e6cb; color: inherit;'>",
                             "<h5 style='color: #155724; margin: 0 0 10px 0;'> ", .("Active Optimizations"), "</h5>",
                             "<ul style='margin: 5px 0; padding-left: 20px;'>",
                             paste0("<li style='margin: 3px 0;'>", optimizations_applied, "</li>", collapse = ""),
@@ -2883,7 +2883,7 @@ riverplotClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                         )
                     } else {
                         paste0(
-                            "<div style='background-color: #fff3cd; padding: 12px; border-radius: 5px; border: 1px solid #ffeaa7;'>",
+                            "<div style='background-color: rgba(255, 202, 33, 0.23); padding: 12px; border-radius: 5px; border: 1px solid #ffeaa7; color: inherit;'>",
                             "<p style='color: #856404; margin: 0;'> ", .("No specific optimizations currently active. Consider enabling optimization features for better results."), "</p>",
                             "</div>"
                         )
@@ -2891,7 +2891,7 @@ riverplotClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                     
                     if (length(suggestions) > 0) {
                         paste0(
-                            "<div style='background-color: #e7f3ff; padding: 12px; border-radius: 5px; border: 1px solid #b8daff; margin-top: 15px;'>",
+                            "<div style='background-color: rgba(33, 144, 255, 0.11); padding: 12px; border-radius: 5px; border: 1px solid #b8daff; margin-top: 15px; color: inherit;'>",
                             "<h6 style='color: #004085; margin: 0 0 8px 0;'> ", .("Additional Optimization Suggestions"), "</h6>",
                             "<ul style='font-size: 12px; margin: 5px 0; padding-left: 20px; color: #004085;'>",
                             paste0("<li>", suggestions, "</li>", collapse = ""),
@@ -2906,7 +2906,7 @@ riverplotClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                 
             }, error = function(e) {
                 error_html <- paste0(
-                    "<div style='background-color: #f8d7da; color: #721c24; padding: 15px; border-radius: 5px;'>",
+                    "<div style='background-color: rgba(216, 33, 50, 0.18); color: inherit; padding: 15px; border-radius: 5px;'>",
                     "<h5> ", .("Optimization Report Error"), "</h5>",
                     "<p>", .("Unable to generate optimization report:"), " ", private$.sanitizeHTML(e$message), "</p>",
                     "</div>"
@@ -2972,7 +2972,7 @@ riverplotClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                 
                 # Generate HTML output
                 clinical_html <- paste0(
-                    "<div style='background-color: #f0f8ff; padding: 20px; border-radius: 8px; border: 1px solid #b8dcf0;'>",
+                    "<div style='background-color: rgba(33, 152, 255, 0.07); padding: 20px; border-radius: 8px; border: 1px solid #b8dcf0; color: inherit;'>",
                     "<h4 style='color: #1e5594; margin-top: 0;'> ", .("Clinical Decision Support"), "</h4>",
                     
                     if (length(insights) > 0) {
@@ -2988,7 +2988,7 @@ riverplotClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                     
                     if (length(recommendations) > 0) {
                         paste0(
-                            "<div style='background-color: #e7f3ff; padding: 12px; border-radius: 5px; margin: 10px 0; border-left: 3px solid #007bff;'>",
+                            "<div style='background-color: rgba(33, 144, 255, 0.11); padding: 12px; border-radius: 5px; margin: 10px 0; border-left: 3px solid #007bff; color: inherit;'>",
                             "<h6 style='color: #004085; margin: 0 0 8px 0;'> ", .("Clinical Recommendations"), "</h6>",
                             "<ul style='margin: 5px 0; padding-left: 20px;'>",
                             paste0("<li style='margin: 5px 0;'>", recommendations, "</li>", collapse = ""),
@@ -2997,7 +2997,7 @@ riverplotClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                         )
                     } else {""},
                     
-                    "<div style='background-color: #f1f3f4; padding: 10px; border-radius: 5px; margin-top: 15px;'>",
+                    "<div style='background-color: rgba(33, 65, 81, 0.06); padding: 10px; border-radius: 5px; margin-top: 15px; color: inherit;'>",
                     "<p style='margin: 0; font-size: 12px; color: #5f6368;'>",
                     "<strong>", .("Note:"), "</strong> ", .("Clinical insights are based on flow pattern analysis and should be interpreted within the context of your specific clinical setting and patient population."),
                     "</p>",
@@ -3009,7 +3009,7 @@ riverplotClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                 
             }, error = function(e) {
                 error_html <- paste0(
-                    "<div style='background-color: #f8d7da; color: #721c24; padding: 15px; border-radius: 5px;'>",
+                    "<div style='background-color: rgba(216, 33, 50, 0.18); color: inherit; padding: 15px; border-radius: 5px;'>",
                     "<h5> ", .("Clinical Insights Error"), "</h5>",
                     "<p>", .("Unable to generate clinical insights:"), " ", private$.sanitizeHTML(e$message), "</p>",
                     "</div>"
@@ -3070,7 +3070,7 @@ riverplotClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                 
                 # Generate comprehensive caveats HTML
                 caveats_html <- paste0(
-                    "<div style='background-color: #fff8e1; padding: 20px; border-radius: 8px; border: 1px solid #ffcc02;'>",
+                    "<div style='background-color: rgba(255, 203, 33, 0.14); padding: 20px; border-radius: 8px; border: 1px solid #ffcc02; color: inherit;'>",
                     "<h4 style='color: #ef6c00; margin-top: 0;'> ", .("Clinical Assumptions & Considerations"), "</h4>",
                     
                     "<div style='background-color: white; padding: 12px; border-radius: 5px; margin: 10px 0; border-left: 3px solid #ff9800;'>",
@@ -3082,7 +3082,7 @@ riverplotClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                     
                     if (length(considerations) > 0) {
                         paste0(
-                            "<div style='background-color: #e7f3ff; padding: 12px; border-radius: 5px; margin: 10px 0; border-left: 3px solid #2196f3;'>",
+                            "<div style='background-color: rgba(33, 144, 255, 0.11); padding: 12px; border-radius: 5px; margin: 10px 0; border-left: 3px solid #2196f3; color: inherit;'>",
                             "<h6 style='color: #1565c0; margin: 0 0 8px 0;'> ", .("Clinical Considerations"), "</h6>",
                             "<ul style='margin: 5px 0; padding-left: 20px; font-size: 13px;'>",
                             paste0("<li style='margin: 3px 0;'>", considerations, "</li>", collapse = ""),
@@ -3093,7 +3093,7 @@ riverplotClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                     
                     if (length(warnings) > 0) {
                         paste0(
-                            "<div style='background-color: #ffebee; padding: 12px; border-radius: 5px; margin: 10px 0; border-left: 3px solid #f44336;'>",
+                            "<div style='background-color: rgba(255, 33, 67, 0.09); padding: 12px; border-radius: 5px; margin: 10px 0; border-left: 3px solid #f44336; color: inherit;'>",
                             "<h6 style='color: #d32f2f; margin: 0 0 8px 0;'> ", .("Important Warnings"), "</h6>",
                             "<ul style='margin: 5px 0; padding-left: 20px; font-size: 13px;'>",
                             paste0("<li style='margin: 3px 0;'>", warnings, "</li>", collapse = ""),
@@ -3102,14 +3102,14 @@ riverplotClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                         )
                     } else {""},
                     
-                    "<div style='background-color: #f5f5f5; padding: 12px; border-radius: 5px; margin: 10px 0;'>",
+                    "<div style='background-color: rgba(88, 88, 88, 0.06); padding: 12px; border-radius: 5px; margin: 10px 0; color: inherit;'>",
                     "<h6 style='color: #424242; margin: 0 0 8px 0;'> ", .("Interpretation Guidelines"), "</h6>",
                     "<ul style='margin: 5px 0; padding-left: 20px; font-size: 12px; color: #424242;'>",
                     paste0("<li style='margin: 3px 0;'>", interpretation_notes, "</li>", collapse = ""),
                     "</ul>",
                     "</div>",
                     
-                    "<div style='background-color: #e8f5e8; padding: 10px; border-radius: 5px; margin-top: 15px;'>",
+                    "<div style='background-color: rgba(33, 159, 33, 0.1); padding: 10px; border-radius: 5px; margin-top: 15px; color: inherit;'>",
                     "<p style='margin: 0; font-size: 12px; color: #2e7d32;'>",
                     "<strong>", .("Best Practice:"), "</strong> ", .("Always interpret flow analysis results within the context of clinical knowledge, institutional protocols, and patient-specific factors."),
                     "</p>",
@@ -3121,7 +3121,7 @@ riverplotClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                 
             }, error = function(e) {
                 error_html <- paste0(
-                    "<div style='background-color: #f8d7da; color: #721c24; padding: 15px; border-radius: 5px;'>",
+                    "<div style='background-color: rgba(216, 33, 50, 0.18); color: inherit; padding: 15px; border-radius: 5px;'>",
                     "<h5> ", .("Caveats Generation Error"), "</h5>",
                     "<p>", .("Unable to generate clinical caveats:"), " ", private$.sanitizeHTML(e$message), "</p>",
                     "</div>"

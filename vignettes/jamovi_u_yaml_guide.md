@@ -379,6 +379,55 @@ Container for variable drop targets with labels.
 
 ---
 
+## 5b. Label conventions (library-review rules)
+
+Every rule here was raised by the jamovi library reviewer. They are cosmetic
+individually and visible on every panel collectively.
+
+| Element | Convention | Wrong | Right |
+|---|---|---|---|
+| CheckBox label | name the **thing**, not the action | `Show residual plot`, `Perform chi-square test`, `Apply LOESS smoothing`, `Calculate partial AUC` | `Residual plot`, `Chi-square test`, `LOESS smoothing`, `Partial AUC` |
+| Individual controls (TextBox, ComboBox, CheckBox) | **sentence case** | `Ridge Height Scale`, `X-axis Title` | `Ridge height scale`, `X-axis title` |
+| `CollapseBox` / `TargetLayoutBox` headings | **Title Case** | — | `Statistical Options` |
+| Panel title (`.u.yaml` line 1) | must **match** the `.a.yaml` `title:` | panel says `Treatment Response Analysis`, menu says `Treatment Response: Patient-Level Burden` | identical in both |
+
+Title-cased *individual* controls read as headings, which is why the convention
+reserves title case for group headings and variable-box labels.
+
+**The one exception:** a leading verb is correct when the checkbox really performs
+an action on the dataset. `Add test pattern to data` is accurate and should stay.
+
+### Panel structure
+
+- **Variable selection comes first** in every panel — the `VariableSupplier` /
+  `TargetLayoutBox` block, before anything else.
+- Everything else goes in `CollapseBox` groups with `collapsed: true`.
+- `margin: large` throughout.
+- Every control type must match its option type: `Bool` → `CheckBox`, `List` →
+  `ComboBox` / `RadioButton`, `Variables` → `VariablesListBox`, and so on.
+
+### Two schema traps
+
+- **`Label` may not carry `visible:`** — the compiler rejects the extra property.
+- **`description:` is not allowed** anywhere in `.u.yaml`.
+- **`enable:` is a string expression, not a boolean.** `enable: false` fails to
+  compile (`not of a type(s) string`); it accepts `(optionName)` expressions only.
+  To retire a dead control, give it an honest `.a.yaml` `title:` and explain in a
+  backend notice.
+
+### `compilerMode: tame` is not a freeze
+
+Set it on every `.u.yaml` — it preserves your hand-crafted structure instead of
+regenerating the layout from scratch on each compile. But the compiler **still**
+adds controls for new options, drops controls for removed ones, and rewrites the
+file when it does. `tame` protects the structure, not your comments or key order.
+
+An `.a.yaml` option with no UI element gets **re-injected as a stray top-level
+`LayoutBox`** — so deleting a control from `.u.yaml` without deleting the option
+does not stick.
+
+---
+
 ## 6. Layout and Organization Patterns
 
 ### Hierarchical Organization Strategy

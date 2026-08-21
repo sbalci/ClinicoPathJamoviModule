@@ -1000,20 +1000,20 @@ multiplexanalysisClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
 
                 # Generate copy-ready clinical report sentences
                 clinical_report <- paste0(
-                    "<div style='background-color: #f8f9fa; padding: 15px; border-left: 4px solid #007bff; margin: 10px 0;'>",
+                    "<div style='background-color: rgba(138, 155, 172, 0.06); padding: 15px; border-left: 4px solid #007bff; margin: 10px 0; color: inherit;'>",
                     "<h4> Copy-Ready Clinical Report</h4>",
                     "<div style='background-color: white; padding: 10px; border-radius: 5px; margin: 10px 0;'>",
                     "<h5>Study Summary</h5>",
-                    "<p style='font-family: monospace; background-color: #f1f3f4; padding: 10px; border-radius: 3px;'>",
+                    "<p style='font-family: monospace; background-color: rgba(33, 65, 81, 0.06); padding: 10px; border-radius: 3px; color: inherit;'>",
                     sprintf("Multiplex immunofluorescence analysis was performed on %d samples using a %d-marker panel. ", n_samples, n_markers),
                     sprintf("Co-expression analysis identified %d significant correlations among %d possible marker pairs (%.1f%%). ", n_correlations, total_pairs, correlation_percentage),
                     cluster_info, pca_info, spatial_info,
                     "</p>",
-                    "<button onclick='navigator.clipboard.writeText(this.previousElementSibling.textContent)' style='background-color: #007bff; color: white; border: none; padding: 5px 10px; border-radius: 3px; cursor: pointer;'> Copy Summary</button>",
+                    "<button onclick='navigator.clipboard.writeText(this.previousElementSibling.textContent)' style='background-color: #007bff; color: #ffffff; color: white; border: none; padding: 5px 10px; border-radius: 3px; cursor: pointer;'> Copy Summary</button>",
                     "</div>",
                     "<div style='background-color: white; padding: 10px; border-radius: 5px; margin: 10px 0;'>",
                     "<h5>Correlation Analysis</h5>",
-                    "<p style='font-family: monospace; background-color: #f1f3f4; padding: 10px; border-radius: 3px;'>",
+                    "<p style='font-family: monospace; background-color: rgba(33, 65, 81, 0.06); padding: 10px; border-radius: 3px; color: inherit;'>",
                     if (correlation_percentage > 50) {
                         sprintf("Strong co-expression patterns were observed with %.1f%% of marker pairs showing significant correlation (r >= 0.5), suggesting coordinated biological processes and potential functional marker relationships.", correlation_percentage)
                     } else if (correlation_percentage > 20) {
@@ -1022,18 +1022,18 @@ multiplexanalysisClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                         sprintf("Independent expression patterns predominated with only %.1f%% of marker pairs showing significant correlation, suggesting diverse cellular phenotypes and limited functional redundancy.", correlation_percentage)
                     },
                     "</p>",
-                    "<button onclick='navigator.clipboard.writeText(this.previousElementSibling.textContent)' style='background-color: #007bff; color: white; border: none; padding: 5px 10px; border-radius: 3px; cursor: pointer;'> Copy Correlation</button>",
+                    "<button onclick='navigator.clipboard.writeText(this.previousElementSibling.textContent)' style='background-color: #007bff; color: #ffffff; color: white; border: none; padding: 5px 10px; border-radius: 3px; cursor: pointer;'> Copy Correlation</button>",
                     "</div>",
                     if (self$options$perform_clustering && !is.null(private$.cluster_data)) {
                         n_clusters <- length(unique(private$.cluster_data$cluster))
                         paste0(
                             "<div style='background-color: white; padding: 10px; border-radius: 5px; margin: 10px 0;'>",
                             "<h5>Cell Population Analysis</h5>",
-                            "<p style='font-family: monospace; background-color: #f1f3f4; padding: 10px; border-radius: 3px;'>",
+                            "<p style='font-family: monospace; background-color: rgba(33, 65, 81, 0.06); padding: 10px; border-radius: 3px; color: inherit;'>",
                             sprintf("Unsupervised clustering analysis identified %d distinct cell populations based on multiplex marker expression profiles. ", n_clusters),
                             "Each cluster exhibited characteristic marker expression patterns suggesting distinct cellular phenotypes and functional states relevant for tumor microenvironment characterization.",
                             "</p>",
-                            "<button onclick='navigator.clipboard.writeText(this.previousElementSibling.textContent)' style='background-color: #007bff; color: white; border: none; padding: 5px 10px; border-radius: 3px; cursor: pointer;'> Copy Clustering</button>",
+                            "<button onclick='navigator.clipboard.writeText(this.previousElementSibling.textContent)' style='background-color: #007bff; color: #ffffff; color: white; border: none; padding: 5px 10px; border-radius: 3px; cursor: pointer;'> Copy Clustering</button>",
                             "</div>"
                         )
                     } else {
@@ -1044,11 +1044,11 @@ multiplexanalysisClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                         paste0(
                             "<div style='background-color: white; padding: 10px; border-radius: 5px; margin: 10px 0;'>",
                             "<h5>Principal Component Analysis</h5>",
-                            "<p style='font-family: monospace; background-color: #f1f3f4; padding: 10px; border-radius: 3px;'>",
+                            "<p style='font-family: monospace; background-color: rgba(33, 65, 81, 0.06); padding: 10px; border-radius: 3px; color: inherit;'>",
                             sprintf("Principal component analysis revealed structured variance in the multiplex data, with the first two components explaining %.1f%% of total expression variance. ", total_variance),
                             "This dimensionality reduction approach facilitated visualization of major expression patterns and identification of key marker relationships driving phenotypic diversity.",
                             "</p>",
-                            "<button onclick='navigator.clipboard.writeText(this.previousElementSibling.textContent)' style='background-color: #007bff; color: white; border: none; padding: 5px 10px; border-radius: 3px; cursor: pointer;'> Copy PCA</button>",
+                            "<button onclick='navigator.clipboard.writeText(this.previousElementSibling.textContent)' style='background-color: #007bff; color: #ffffff; color: white; border: none; padding: 5px 10px; border-radius: 3px; cursor: pointer;'> Copy PCA</button>",
                             "</div>"
                         )
                     } else {
@@ -1056,11 +1056,11 @@ multiplexanalysisClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                     },
                     "<div style='background-color: white; padding: 10px; border-radius: 5px; margin: 10px 0;'>",
                     "<h5>Clinical Implications</h5>",
-                    "<p style='font-family: monospace; background-color: #f1f3f4; padding: 10px; border-radius: 3px;'>",
+                    "<p style='font-family: monospace; background-color: rgba(33, 65, 81, 0.06); padding: 10px; border-radius: 3px; color: inherit;'>",
                     "These multiplex immunofluorescence findings provide quantitative characterization of the tumor immune microenvironment suitable for biomarker discovery, therapeutic target identification, and patient stratification in precision oncology applications. ",
                     "The identified marker relationships and cellular populations warrant further validation in independent cohorts for clinical implementation.",
                     "</p>",
-                    "<button onclick='navigator.clipboard.writeText(this.previousElementSibling.textContent)' style='background-color: #007bff; color: white; border: none; padding: 5px 10px; border-radius: 3px; cursor: pointer;'> Copy Implications</button>",
+                    "<button onclick='navigator.clipboard.writeText(this.previousElementSibling.textContent)' style='background-color: #007bff; color: #ffffff; color: white; border: none; padding: 5px 10px; border-radius: 3px; cursor: pointer;'> Copy Implications</button>",
                     "</div>",
                     "</div>"
                 )

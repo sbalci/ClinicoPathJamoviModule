@@ -411,7 +411,7 @@
             paste0("<tr><td>Competing event</td><td>", comp,
                    "</td><td align='right'>",
                    res$n_competing, "</td></tr>") else "",
-        "<tr><td>Excluded (missing outcome)</td><td>&nbsp;</td><td align='right'>",
+        "<tr><td>Excluded (missing outcome)</td><td></td><td align='right'>",
             res$n_missing, "</td></tr>",
         "<tr><td>Estimand</td><td colspan='2'>", res$estimand, "</td></tr>")
 
@@ -451,7 +451,7 @@
     if (isTRUE(res$n_event == 0)) {
         zero <- paste0(
             "<p style='margin-top:8px;padding:8px;border-left:4px solid #c0392b;",
-            "background-color:#fdecea'><b>No events: check the event level.</b> ",
+            "background-color: rgba(234, 54, 33, 0.09); color: inherit'><b>No events: check the event level.</b> ",
             "The event level (", event_label, ") occurs in <b>0</b> of the ",
             res$n_event + res$n_censored + res$n_competing,
             " rows with a non-missing '", outcome_name, "' value. ",
@@ -480,7 +480,7 @@
     if (identical(res$estimand, "disease-free survival")) {
         dfs <- paste0(
             "<p style='margin-top:8px;padding:8px;border-left:4px solid #d68910;",
-            "background-color:#fef5e7'><b>Disease-free survival requires a time to the ",
+            "background-color: rgba(246, 163, 33, 0.11); color: inherit'><b>Disease-free survival requires a time to the ",
             "DFS event.</b> \"Alive with Disease\" is counted as an event, and it is placed ",
             "at whatever time the time variable gives for that subject. These results are ",
             "correct only if that time is the time to recurrence or progression. If it is ",

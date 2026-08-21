@@ -947,7 +947,7 @@ irecistClass <- R6::R6Class(
             ci_dcr <- binom.test(n_dcr, total)$conf.int
 
             html <- paste0(
-                "<div style='background-color: #f0f8ff; padding: 15px; border-left: 4px solid #4682b4; margin: 10px 0;'>",
+                "<div style='background-color: rgba(33, 152, 255, 0.07); padding: 15px; border-left: 4px solid #4682b4; margin: 10px 0; color: inherit;'>",
                 "<h4 style='margin-top: 0;'>Executive Summary</h4>",
                 "<p><b>Study Population:</b> ", total, " patients analyzed using iRECIST criteria (Seymour et al. 2017)</p>",
                 "<p><b>Key Efficacy Results:</b></p>",
@@ -988,7 +988,7 @@ irecistClass <- R6::R6Class(
         # ---- Populate Glossary ----
         .populateGlossary = function() {
             html <- paste0(
-                "<div style='background-color: #fff9e6; padding: 15px; border-left: 4px solid #ffa500; margin: 10px 0;'>",
+                "<div style='background-color: rgba(255, 202, 33, 0.11); padding: 15px; border-left: 4px solid #ffa500; margin: 10px 0; color: inherit;'>",
                 "<h4 style='margin-top: 0;'>iRECIST Glossary</h4>",
                 "<dl>",
                 "<dt><b>iCR (Immune Complete Response)</b></dt>",
@@ -1030,7 +1030,7 @@ irecistClass <- R6::R6Class(
         # ---- Populate Assumptions ----
         .populateAssumptions = function() {
             html <- paste0(
-                "<div style='background-color: #ffe6e6; padding: 15px; border-left: 4px solid #dc143c; margin: 10px 0;'>",
+                "<div style='background-color: rgba(255, 33, 33, 0.11); padding: 15px; border-left: 4px solid #dc143c; margin: 10px 0; color: inherit;'>",
                 "<h4 style='margin-top: 0;'>Assumptions & Caveats</h4>",
                 "<p><b>Data Requirements:</b></p>",
                 "<ul>",

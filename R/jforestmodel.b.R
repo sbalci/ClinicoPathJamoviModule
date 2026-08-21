@@ -35,7 +35,7 @@ jforestmodelClass <- R6::R6Class(
                             line-height: 1.5;
                         }
                         .requirements {
-                            background-color: #f5f5f5;
+                            background-color: rgba(88, 88, 88, 0.06); color: inherit;
                             padding: 15px;
                             border-left: 4px solid #2196f3;
                             margin-bottom: 20px;
@@ -53,7 +53,7 @@ jforestmodelClass <- R6::R6Class(
                             content: counter(step-counter);
                             position: absolute;
                             left: 0;
-                            background-color: #2196f3;
+                            background-color: #2196f3; color: #ffffff;
                             color: white;
                             width: 20px;
                             height: 20px;
@@ -399,19 +399,19 @@ jforestmodelClass <- R6::R6Class(
             interpretation_html <- paste0("
             <div style='font-family: -apple-system,BlinkMacSystemFont,Segoe UI,Roboto,Arial,sans-serif; padding: 20px;'>
                 <h3 style='color: #3f51b5; margin-bottom: 15px;'> Results Interpretation</h3>
-                <div style='background-color: #e8f5e8; padding: 15px; border-radius: 8px; border-left: 4px solid #4caf50;'>
+                <div style='background-color: rgba(33, 159, 33, 0.1); padding: 15px; border-radius: 8px; border-left: 4px solid #4caf50; color: inherit;'>
                     <strong>Coefficient Interpretation:</strong><br>
                     ", interpretation, "
                 </div>
                 
-                <div style='margin-top: 15px; background-color: #f3e5f5; padding: 15px; border-radius: 8px; border-left: 4px solid #9c27b0;'>
+                <div style='margin-top: 15px; background-color: rgba(153, 33, 170, 0.12); padding: 15px; border-radius: 8px; border-left: 4px solid #9c27b0; color: inherit;'>
                     <strong>Confidence Intervals (", conf_percent, "%):</strong><br>
                     The confidence intervals indicate the range of plausible values for each coefficient. 
                     If the interval includes ", ifelse(exponentiate, "1", "0"), " (null effect), 
                     the association may not be statistically significant.
                 </div>
                 
-                <div style='margin-top: 15px; padding: 15px; background-color: #fff3e0; border-radius: 8px; border-left: 4px solid #ff9800;'>
+                <div style='margin-top: 15px; padding: 15px; background-color: rgba(255, 169, 33, 0.14); border-radius: 8px; border-left: 4px solid #ff9800; color: inherit;'>
                     <strong> Important Considerations:</strong><br>
                     \u{2022} Check model assumptions before interpreting results<br>
                     \u{2022} Consider potential confounders not included in the model<br>

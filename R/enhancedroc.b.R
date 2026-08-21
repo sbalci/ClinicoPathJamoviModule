@@ -484,7 +484,7 @@ enhancedROCClass <- R6::R6Class(
             if (levels_count < 2) {
                 self$results$results$instructions$setContent(
                     paste0(
-                        "<div style='padding: 10px; background: #f8d7da; border: 1px solid #f5c6cb; border-radius: 4px;'>",
+                        "<div style='padding: 10px; background-color: rgba(216, 33, 50, 0.18); border: 1px solid #f5c6cb; border-radius: 4px; color: inherit;'>",
                         "<h4 style='color: #721c24; margin-top: 0;'>Insufficient Outcome Variable Levels</h4>",
                         "<p><strong>Error:</strong> Outcome variable '<code>", private$.safeHtmlOutput(private$.outcome),
                         "</code>' has only 1 unique value: '<code>", private$.safeHtmlOutput(levels(outcome_var)[1]), "</code>'</p>",
@@ -515,7 +515,7 @@ enhancedROCClass <- R6::R6Class(
 
                     # Inform user
                     info_msg <- paste0(
-                        "<div style='padding: 10px; background: #d1ecf1; border: 1px solid #bee5eb; border-radius: 4px; margin-top: 10px;'>",
+                        "<div style='padding: 10px; background-color: rgba(33, 163, 188, 0.21); border: 1px solid #bee5eb; border-radius: 4px; margin-top: 10px; color: inherit;'>",
                         "<h4 style='color: #0c5460; margin-top: 0;'> Multi-Class Analysis Enabled</h4>",
                         "<p>Outcome variable '<code>", private$.safeHtmlOutput(private$.outcome), "</code>' has ", levels_count, " levels.</p>",
                         "<p>Multi-Class ROC metrics will be calculated.</p>",
@@ -542,7 +542,7 @@ enhancedROCClass <- R6::R6Class(
                     if (is.null(positive_class) || positive_class == "" || !positive_class %in% available_levels) {
                         self$results$results$instructions$setContent(
                             paste0(
-                                "<div style='padding: 10px; background: #fff3cd; border: 1px solid #ffeaa7; border-radius: 4px;'>",
+                                "<div style='padding: 10px; background-color: rgba(255, 202, 33, 0.23); border: 1px solid #ffeaa7; border-radius: 4px; color: inherit;'>",
                                 "<h4 style='color: #856404; margin-top: 0;'>Multi-level Outcome Variable Detected</h4>",
                                 "<p><strong>Issue:</strong> Outcome variable '<code>", private$.safeHtmlOutput(private$.outcome),
                                 "</code>' has ", levels_count, " levels for ROC analysis: <strong>", private$.safeHtmlOutput(paste(available_levels, collapse = ", ")), "</strong></p>",
@@ -568,7 +568,7 @@ enhancedROCClass <- R6::R6Class(
 
                     # Inform user about the conversion
                     info_msg <- paste0(
-                        "<div style='padding: 10px; background: #d4edda; border: 1px solid #c3e6cb; border-radius: 4px; margin-top: 10px;'>",
+                        "<div style='padding: 10px; background-color: rgba(33, 162, 64, 0.19); border: 1px solid #c3e6cb; border-radius: 4px; margin-top: 10px; color: inherit;'>",
                         "<h4 style='color: #155724; margin-top: 0;'> Outcome Variable Converted to Binary</h4>",
                         "<p><strong>Positive Class:</strong> '<code>", private$.safeHtmlOutput(positive_class), "</code>' (cases of interest)</p>",
                         "<p><strong>Negative Class:</strong> '<code>Other</code>' (combined: ",
@@ -591,7 +591,7 @@ enhancedROCClass <- R6::R6Class(
                     if (!positive_class %in% available_levels) {
                         self$results$results$instructions$setContent(
                             paste0(
-                                "<div style='padding: 10px; background: #f8d7da; border: 1px solid #f5c6cb; border-radius: 4px;'>",
+                                "<div style='padding: 10px; background-color: rgba(216, 33, 50, 0.18); border: 1px solid #f5c6cb; border-radius: 4px; color: inherit;'>",
                                 "<h4 style='color: #721c24; margin-top: 0;'>Invalid Positive Class Selection</h4>",
                                 "<p><strong>Error:</strong> Selected positive class '<code>", private$.safeHtmlOutput(positive_class),
                                 "</code>' not found in outcome variable '<code>", private$.safeHtmlOutput(private$.outcome), "</code>'.</p>",
@@ -641,7 +641,7 @@ enhancedROCClass <- R6::R6Class(
             if (length(non_numeric_preds) > 0) {
                 self$results$results$instructions$setContent(
                     paste0(
-                        "<div style='padding: 10px; background: #f8d7da; border: 1px solid #f5c6cb; border-radius: 4px;'>",
+                        "<div style='padding: 10px; background-color: rgba(216, 33, 50, 0.18); border: 1px solid #f5c6cb; border-radius: 4px; color: inherit;'>",
                         "<h4 style='color: #721c24; margin-top: 0;'>Non-numeric Predictor Variables</h4>",
                         "<p><strong>Error:</strong> The following predictor variable(s) are not numeric: <code>",
                         paste(vapply(non_numeric_preds, private$.safeHtmlOutput, character(1)), collapse = "</code>, <code>"),
@@ -674,7 +674,7 @@ enhancedROCClass <- R6::R6Class(
             warnings <- private$.validateClinicalAssumptions(data)
             if (length(warnings) > 0) {
                 warning_html <- paste0(
-                    "<div style='background-color: #fff3cd; border: 1px solid #ffeaa7; padding: 10px; margin: 10px 0;'>",
+                    "<div style='background-color: rgba(255, 202, 33, 0.23); border: 1px solid #ffeaa7; padding: 10px; margin: 10px 0; color: inherit;'>",
                     "<h4 style='color: #856404; margin-top: 0;'>", .("Clinical Assumptions & Recommendations"), "</h4>",
                     paste(warnings, collapse = ""),
                     "</div>"
@@ -2598,7 +2598,7 @@ enhancedROCClass <- R6::R6Class(
 
             # Generate summary paragraph
             summary_text <- paste0(
-                "<div style='background-color: #f8f9fa; padding: 15px; border-left: 4px solid #007bff; margin: 10px 0;'>",
+                "<div style='background-color: rgba(138, 155, 172, 0.06); padding: 15px; border-left: 4px solid #007bff; margin: 10px 0; color: inherit;'>",
                 "<h4 style='margin-top: 0; color: #007bff;'>", .("Analysis Summary"), "</h4>",
                 "<p><strong>", .("ROC Analysis Results:"), "</strong> ",
                 sprintf(
@@ -2682,7 +2682,7 @@ enhancedROCClass <- R6::R6Class(
             ci_upper <- if (!is.null(ci)) round(as.numeric(ci)[3], 3) else "N/A"
 
             # Generate report sections
-            report_html <- "<div style='background-color: #f0f8ff; border: 1px solid #0066cc; padding: 15px; margin: 10px 0;'>"
+            report_html <- "<div style='background-color: rgba(33, 152, 255, 0.07); border: 1px solid #0066cc; padding: 15px; margin: 10px 0; color: inherit;'>"
             report_html <- paste0(report_html, "<h4 style='color: #0066cc; margin-top: 0;'>", .("Clinical Report Sentences"), "</h4>")
             report_html <- paste0(report_html, "<p><em>", .("Copy and paste the sections below into your clinical reports or publications"), ":</em></p>")
 
@@ -2721,10 +2721,10 @@ enhancedROCClass <- R6::R6Class(
             nnd_text <- ""
             if (!is.na(best_cutoff$youden_index) && best_cutoff$youden_index > 0) {
                 nnd <- ceiling(1 / best_cutoff$youden_index)
-                nnd_text <- sprintf(
-                    .(" The Number Needed to Diagnose (NND) was %d, meaning on average %d patients need to be tested to correctly identify one additional true positive beyond chance."),
-                    nnd, nnd
-                )
+                nnd_text <- paste0(" ", jmvcore::format(
+                    .("The Number Needed to Diagnose (NND) was {nnd}, meaning on average {nnd} patients need to be tested to correctly identify one additional true positive beyond chance."),
+                    nnd = nnd
+                ))
             }
 
             report_html <- paste0(report_html, results_text, nnd_text, "</div>")
@@ -2944,7 +2944,7 @@ enhancedROCClass <- R6::R6Class(
             instructions <- paste0(
                 instructions,
                 "<h2 style='color: #2c5530;'>Enhanced ROC Analysis</h2>",
-                "<div style='background: #f8f9fa; padding: 15px; border-left: 4px solid #28a745; margin: 10px 0;'>",
+                "<div style='background-color: rgba(138, 155, 172, 0.06); padding: 15px; border-left: 4px solid #28a745; margin: 10px 0; color: inherit;'>",
                 "<p><strong>Purpose:</strong> ROC (Receiver Operating Characteristic) analysis evaluates how well continuous variables (biomarkers, test scores) can distinguish between two outcome groups (e.g., disease vs. healthy).</p>",
                 "</div>",
                 "<h3 style='color: #2c5530;'> Setup Instructions:</h3>",
@@ -2958,7 +2958,7 @@ enhancedROCClass <- R6::R6Class(
                 "<li><strong>Clinical Context:</strong> Select appropriate context for tailored interpretation</li>",
                 "</ol>",
                 "<h3 style='color: #2c5530;'> Quick Start Presets:</h3>",
-                "<div style='background: #e7f3ff; padding: 10px; border-radius: 4px; margin: 10px 0;'>",
+                "<div style='background-color: rgba(33, 144, 255, 0.11); padding: 10px; border-radius: 4px; margin: 10px 0; color: inherit;'>",
                 "<p><strong>Clinical Presets</strong> automatically configure analysis settings:</p>",
                 "<ul style='margin-left: 20px;'>",
                 "<li><strong>Biomarker Screening:</strong> High sensitivity (catch all cases)</li>",
@@ -2969,7 +2969,7 @@ enhancedROCClass <- R6::R6Class(
                 "</div>",
                 "<h3 style='color: #2c5530;'> Key Output Metrics:</h3>",
                 "<div style='display: flex; flex-wrap: wrap; gap: 10px; margin: 10px 0;'>",
-                "<div style='background: #fff3cd; padding: 10px; border-radius: 4px; flex: 1; min-width: 250px;'>",
+                "<div style='background-color: rgba(255, 202, 33, 0.23); padding: 10px; border-radius: 4px; flex: 1; min-width: 250px; color: inherit;'>",
                 "<strong>AUC (Area Under Curve):</strong><br>",
                 "\u{2022} Below 0.60 = No discrimination<br>",
                 "\u{2022} 0.60-0.69 = Poor<br>",
@@ -2977,14 +2977,14 @@ enhancedROCClass <- R6::R6Class(
                 "\u{2022} 0.80-0.89 = Good<br>",
                 "\u{2022} 0.90-1.00 = Excellent",
                 "</div>",
-                "<div style='background: #d1ecf1; padding: 10px; border-radius: 4px; flex: 1; min-width: 250px;'>",
+                "<div style='background-color: rgba(33, 163, 188, 0.21); padding: 10px; border-radius: 4px; flex: 1; min-width: 250px; color: inherit;'>",
                 "<strong>Youden Index:</strong><br>",
                 "Optimal cutoff that maximizes<br>",
                 "(Sensitivity + Specificity - 1)<br>",
                 "Best balance of true/false rates",
                 "</div>",
                 "</div>",
-                "<details style='margin: 15px 0; padding: 10px; background: #f8f9fa; border-radius: 4px;'>",
+                "<details style='margin: 15px 0; padding: 10px; background-color: rgba(138, 155, 172, 0.06); border-radius: 4px; color: inherit;'>",
                 "<summary style='cursor: pointer; font-weight: bold; color: #495057;'> Statistical Terms Glossary</summary>",
                 "<div style='margin-top: 10px; padding-left: 20px;'>",
                 "<p><strong>Sensitivity (True Positive Rate):</strong> Proportion of actual positives correctly identified</p>",
@@ -2995,7 +2995,7 @@ enhancedROCClass <- R6::R6Class(
                 "<p><strong>LR- (Negative Likelihood Ratio):</strong> How much a negative test decreases odds of disease</p>",
                 "</div>",
                 "</details>",
-                "<div style='background: #d4edda; padding: 10px; border: 1px solid #c3e6cb; border-radius: 4px; margin: 10px 0;'>",
+                "<div style='background-color: rgba(33, 162, 64, 0.19); padding: 10px; border: 1px solid #c3e6cb; border-radius: 4px; margin: 10px 0; color: inherit;'>",
                 "<p style='margin: 0;'><strong> Tip:</strong> For clinical decision making, consider both statistical significance and clinical relevance of the cutoff thresholds.</p>",
                 "</div>",
                 "</div>"

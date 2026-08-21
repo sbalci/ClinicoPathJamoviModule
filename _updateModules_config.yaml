@@ -139,6 +139,11 @@ modules:
       - "lymphoma_diagnostic_styles.rda"
       - "thyroid_function_data.rda"
       - "roc_analysis_test_data.RData"   # bundles master/cancer/cardiac/sepsis/thyroid_data
+      # decisioncurve promoted to production meddecide (menuGroup: meddecide) - its
+      # bundled example data must ship with it.
+      - "comprehensive_dca_data.rda"
+      - "dca_test.rda"
+      - "dca_test_data.rda"
   jsurvival:
     directory: "/Users/serdarbalci/Documents/GitHub/jsurvival"
     r_files:

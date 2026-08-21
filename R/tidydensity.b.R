@@ -22,7 +22,7 @@ tidydensityClass <- if (requireNamespace("jmvcore")) {
                     self$options$n_observations == 100 &&
                     self$options$n_simulations == 1) {
                     intro_msg <- "
-                <div style='background-color: #e3f2fd; padding: 20px; border-radius: 8px; margin: 20px 0;'>
+                <div style='background-color: rgba(33, 152, 239, 0.13); padding: 20px; border-radius: 8px; margin: 20px 0; color: inherit;'>
                 <h3 style='color: #1976d2; margin-top: 0;'> Welcome to Statistical Distribution Generator!</h3>
                 <p><strong>Comprehensive distribution analysis using TidyDensity package</strong></p>
                 <p>Generate random data from various statistical distributions with advanced visualization and analysis</p>
@@ -83,7 +83,7 @@ tidydensityClass <- if (requireNamespace("jmvcore")) {
                 # Check if TidyDensity package is available
                 if (!requireNamespace("TidyDensity", quietly = TRUE)) {
                     error_msg <- "
-                <div style='color: red; background-color: #ffebee; padding: 20px; border-radius: 8px;'>
+                <div style='color: red; background-color: rgba(255, 33, 67, 0.09); padding: 20px; border-radius: 8px;'>
                 <h4>TidyDensity Package Required</h4>
                 <p>The TidyDensity package is required for distribution generation functionality.</p>
                 <p>Please install it using: <code>install.packages('TidyDensity')</code></p>
@@ -295,13 +295,13 @@ tidydensityClass <- if (requireNamespace("jmvcore")) {
 
                         # Convert to HTML table
                         stats_html <- paste0(
-                            "<div style='background-color: #f8f9fa; padding: 20px; border-radius: 8px;'>",
+                            "<div style='background-color: rgba(138, 155, 172, 0.06); padding: 20px; border-radius: 8px; color: inherit;'>",
                             "<h3 style='color: #495057; margin-top: 0;'> Distribution Statistics</h3>",
                             "<p><strong>Distribution:</strong> ", stringr::str_to_title(self$options$distribution_type), "</p>",
                             "<p><strong>Sample Size:</strong> ", self$options$n_observations, "</p>",
                             "<p><strong>Simulations:</strong> ", self$options$n_simulations, "</p>",
                             "<table style='width: 100%; border-collapse: collapse; margin-top: 15px;'>",
-                            "<thead><tr style='background-color: #6c757d; color: white;'>",
+                            "<thead><tr style='background-color: #6c757d; color: #ffffff; color: white;'>",
                             "<th style='padding: 8px; border: 1px solid #dee2e6;'>Simulation</th>",
                             "<th style='padding: 8px; border: 1px solid #dee2e6;'>Mean</th>",
                             "<th style='padding: 8px; border: 1px solid #dee2e6;'>Variance</th>",
@@ -357,7 +357,7 @@ tidydensityClass <- if (requireNamespace("jmvcore")) {
                             )
 
                         summary_html <- paste0(
-                            "<div style='background-color: #e8f5e8; padding: 20px; border-radius: 8px;'>",
+                            "<div style='background-color: rgba(33, 159, 33, 0.1); padding: 20px; border-radius: 8px; color: inherit;'>",
                             "<h3 style='color: #2e7d32; margin-top: 0;'> Summary Statistics Table</h3>",
                             "<table style='width: 100%; border-collapse: collapse; font-size: 12px;'>",
                             "<thead><tr style='background-color: #388e3c; color: white;'>",
@@ -535,7 +535,7 @@ tidydensityClass <- if (requireNamespace("jmvcore")) {
                 )
 
                 html_content <- paste0(
-                    "<div style='background-color: #fff3e0; padding: 20px; border-radius: 8px;'>",
+                    "<div style='background-color: rgba(255, 169, 33, 0.14); padding: 20px; border-radius: 8px; color: inherit;'>",
                     "<h3 style='color: #ef6c00; margin-top: 0;'> ", param_info$title, "</h3>",
                     "<p><strong>Description:</strong> ", param_info$description, "</p>",
                     "<h4 style='color: #ef6c00;'>Current Parameters:</h4>",
@@ -561,7 +561,7 @@ tidydensityClass <- if (requireNamespace("jmvcore")) {
             },
             .generate_interpretation_guide = function() {
                 interpretation_html <- paste0(
-                    "<div style='background-color: #f3e5f5; padding: 20px; border-radius: 8px;'>",
+                    "<div style='background-color: rgba(153, 33, 170, 0.12); padding: 20px; border-radius: 8px; color: inherit;'>",
                     "<h3 style='color: #7b1fa2; margin-top: 0;'> Statistical Distribution Guide</h3>",
                     "<h4 style='color: #7b1fa2;'>Understanding Plot Types:</h4>",
                     "<ul>",

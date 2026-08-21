@@ -48,8 +48,8 @@ grouplassoClass <- R6::R6Class(
                     <style>
                         h2 {color: #2ecc71;}
                         body {font-family: Arial, sans-serif; margin: 20px;}
-                        .highlight {background-color: #f39c12; padding: 2px 4px; border-radius: 3px;}
-                        .step {margin: 10px 0; padding: 8px; background-color: #ecf0f1; border-radius: 5px;}
+                        .highlight {background-color: #f39c12; color: #111111; padding: 2px 4px; border-radius: 3px;}
+                        .step {margin: 10px 0; padding: 8px; background-color: rgba(33, 80, 92, 0.09); color: inherit; border-radius: 5px;}
                     </style>
                     </head>
                     <body>
@@ -666,7 +666,7 @@ grouplassoClass <- R6::R6Class(
                         ridge_fit <- glmnet::glmnet(
                             x = group_data$x,
                             y = group_data$y,
-                            family = "cox",
+                            family = "cox", cox.ties = "breslow",
                             alpha = 0,
                             standardize = FALSE
                         )
@@ -1631,9 +1631,9 @@ grouplassoClass <- R6::R6Class(
 
         .generateSuitabilityHtml = function(checks, overall, overall_text) {
             bg_colors <- list(
-                green  = "background-color: #d4edda; color: #155724; border: 1px solid #c3e6cb;",
-                yellow = "background-color: #fff3cd; color: #856404; border: 1px solid #ffeeba;",
-                red    = "background-color: #f8d7da; color: #721c24; border: 1px solid #f5c6cb;"
+                green  = "background-color: rgba(33, 162, 64, 0.19); color: inherit; color: inherit; border: 1px solid #c3e6cb;",
+                yellow = "background-color: rgba(255, 202, 33, 0.23); color: inherit; color: inherit; border: 1px solid #ffeeba;",
+                red    = "background-color: rgba(216, 33, 50, 0.18); color: inherit; color: inherit; border: 1px solid #f5c6cb;"
             )
             dot_colors <- list(green = "#28a745", yellow = "#ffc107", red = "#dc3545")
 

@@ -147,15 +147,6 @@ options:
             Display statistical test results in plot subtitle. 
             Disabling improves performance significantly.
 
-    - name: messages
-      title: Console messages
-      type: Bool
-      default: false
-      description:
-          R: >
-            Display statistical messages in console. 
-            Disabling improves performance.
-
     - name: paired
       title: Paired/Repeated measures
       type: Bool

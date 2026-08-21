@@ -64,7 +64,7 @@ dataqualityClass <- if (requireNamespace("jmvcore")) R6::R6Class("dataqualityCla
         # Check if variables have been selected. If not, display a welcoming message.
         if (length(self$options$vars) == 0) {
             intro_msg <- "
-            <div style='background-color: #e8f5e8; padding: 20px; border-radius: 8px; margin: 20px 0;'>
+            <div style='background-color: rgba(33, 159, 33, 0.1); padding: 20px; border-radius: 8px; margin: 20px 0; color: inherit;'>
             <h3 style='color: #2e7d32; margin-top: 0;'>Welcome to Enhanced Data Quality Assessment!</h3>
             <p><strong>Comprehensive data quality analysis</strong> with visual exploration capabilities</p>
             <p>Enhanced with <strong>visdat integration</strong> based on autoEDA research (R Journal 2019)</p>
@@ -101,7 +101,7 @@ dataqualityClass <- if (requireNamespace("jmvcore")) R6::R6Class("dataqualityCla
         # error triggered by dynamically inserted jmvcore::Notice objects.
         if (nrow(self$data) == 0) {
             self$results$todo$setContent(
-                "<div style='padding: 15px; background-color: #f8d7da; border-left: 4px solid #dc3545; color: #721c24; border-radius: 5px;'><strong>Error:</strong> Dataset contains no rows. Please provide data with at least one observation.</div>"
+                "<div style='padding: 15px; background-color: rgba(216, 33, 50, 0.18); border-left: 4px solid #dc3545; color: inherit; border-radius: 5px;'><strong>Error:</strong> Dataset contains no rows. Please provide data with at least one observation.</div>"
             )
             return()
         }
@@ -120,7 +120,7 @@ dataqualityClass <- if (requireNamespace("jmvcore")) R6::R6Class("dataqualityCla
             if (length(missing_vars) > 0) {
                 missing_safe <- paste(vapply(missing_vars, htmltools::htmlEscape, character(1)), collapse = ", ")
                 self$results$todo$setContent(sprintf(
-                    "<div style='padding: 15px; background-color: #f8d7da; border-left: 4px solid #dc3545; color: #721c24; border-radius: 5px;'><strong>Error:</strong> Variables not found in dataset: %s. Please check variable names and try again.</div>",
+                    "<div style='padding: 15px; background-color: rgba(216, 33, 50, 0.18); border-left: 4px solid #dc3545; color: inherit; border-radius: 5px;'><strong>Error:</strong> Variables not found in dataset: %s. Please check variable names and try again.</div>",
                     missing_safe
                 ))
                 return()
@@ -236,7 +236,7 @@ dataqualityClass <- if (requireNamespace("jmvcore")) R6::R6Class("dataqualityCla
         }
         if (length(critical_warnings) > 0) {
             quality_results$critical_warnings <- paste0(
-                "<div style='background-color: #fff3cd; padding: 15px; border-left: 4px solid #ffc107; border-radius: 5px;'>",
+                "<div style='background-color: rgba(255, 202, 33, 0.23); padding: 15px; border-left: 4px solid #ffc107; border-radius: 5px; color: inherit;'>",
                 "<h4 style='margin-top: 0; color: #856404;'>Critical Data Quality Warnings</h4>",
                 "<ul style='margin-bottom: 0;'><li>",
                 paste(critical_warnings, collapse = "</li><li>"),
@@ -323,7 +323,7 @@ dataqualityClass <- if (requireNamespace("jmvcore")) R6::R6Class("dataqualityCla
                 # but say so rather than appearing to ignore the setting.
                 if (isTRUE(self$options$complete_cases_only) && length(var_list) <= 1) {
                     quality_results$duplicate_mode_note <- paste0(
-                        "<div style='background-color: #e7f3fe; padding: 10px; ",
+                        "<div style='background-color: rgba(33, 144, 246, 0.11); color: inherit; padding: 10px; ",
                         "border-left: 4px solid #2196f3; border-radius: 4px; margin-bottom: 10px;'>",
                         "Row-level duplicate analysis needs at least two variables to define a row ",
                         "signature. With one variable selected, a duplicate row and a duplicate value ",
@@ -458,7 +458,7 @@ dataqualityClass <- if (requireNamespace("jmvcore")) R6::R6Class("dataqualityCla
         # NOTE: Using HTML warning instead of Notice to avoid serialization errors
         if (!requireNamespace("visdat", quietly = TRUE)) {
             return(paste0(
-                "<div style='background-color: #fff3cd; padding: 15px; border-left: 4px solid #ffc107; margin: 10px 0;'>",
+                "<div style='background-color: rgba(255, 202, 33, 0.23); padding: 15px; border-left: 4px solid #ffc107; margin: 10px 0; color: inherit;'>",
                 "<strong> Warning:</strong> visdat package not installed. Visual exploration disabled.<br>",
                 "Install via: <code>install.packages('visdat')</code>",
                 "</div>"
@@ -475,7 +475,7 @@ dataqualityClass <- if (requireNamespace("jmvcore")) R6::R6Class("dataqualityCla
 
         # Generate visual analysis summary
         header_html <- paste0(
-            "<div style='background-color: #e3f2fd; padding: 20px; border-radius: 8px; margin-bottom: 20px;'>",
+            "<div style='background-color: rgba(33, 152, 239, 0.13); padding: 20px; border-radius: 8px; margin-bottom: 20px; color: inherit;'>",
             "<h3 style='color: #1976d2; margin-top: 0;'>Visual Data Exploration (visdat)</h3>",
             "<p>Advanced visual data quality assessment - Based on autoEDA research</p>",
             "<p><strong>Enabled Analyses:</strong> ", paste(enabled_analyses, collapse = ", "), "</p>",
@@ -489,7 +489,7 @@ dataqualityClass <- if (requireNamespace("jmvcore")) R6::R6Class("dataqualityCla
         complete_vars <- n_vars - missing_vars
 
         overview_html <- paste0(
-            "<div style='background-color: #f5f5f5; padding: 15px; border-radius: 8px; margin-bottom: 15px;'>",
+            "<div style='background-color: rgba(88, 88, 88, 0.06); padding: 15px; border-radius: 8px; margin-bottom: 15px; color: inherit;'>",
             "<h4 style='color: #333; margin-top: 0;'>Visual Analysis Overview</h4>",
             "<table style='width: 100%; border-collapse: collapse;'>",
             "<tr><td style='padding: 8px; border: 1px solid #ddd;'><strong>Variables:</strong></td><td style='padding: 8px; border: 1px solid #ddd;'>", n_vars, "</td></tr>",
@@ -510,7 +510,7 @@ dataqualityClass <- if (requireNamespace("jmvcore")) R6::R6Class("dataqualityCla
         # Generate insights based on enabled plot types
 
         insights_html <- paste0(
-            "<div style='background-color: #fff8e1; padding: 15px; border-radius: 8px; margin-bottom: 15px;'>",
+            "<div style='background-color: rgba(255, 203, 33, 0.14); padding: 15px; border-radius: 8px; margin-bottom: 15px; color: inherit;'>",
             "<h4 style='color: #f57f17; margin-top: 0;'>Visual Analysis Insights</h4>"
         )
 
@@ -733,7 +733,7 @@ dataqualityClass <- if (requireNamespace("jmvcore")) R6::R6Class("dataqualityCla
         }, logical(1)))
 
         summary_html <- paste0(
-            "<div style='background-color: #e8f5e9; padding: 20px; border-radius: 8px; border-left: 5px solid #4caf50;'>",
+            "<div style='background-color: rgba(33, 159, 43, 0.1); padding: 20px; border-radius: 8px; border-left: 5px solid #4caf50; color: inherit;'>",
             "<h3 style='color: #2e7d32; margin-top: 0;'> Plain-Language Summary</h3>",
 
             "<div style='background-color: white; padding: 15px; border-radius: 5px; margin-bottom: 15px;'>",
@@ -825,7 +825,7 @@ dataqualityClass <- if (requireNamespace("jmvcore")) R6::R6Class("dataqualityCla
         # Generate actionable recommendations for addressing quality issues
 
         recs_html <- paste0(
-            "<div style='background-color: #fff3e0; padding: 20px; border-radius: 8px; border-left: 5px solid #ff8f00;'>",
+            "<div style='background-color: rgba(255, 169, 33, 0.14); padding: 20px; border-radius: 8px; border-left: 5px solid #ff8f00; color: inherit;'>",
             "<h3 style='color: #e65100; margin-top: 0;'> Recommended Actions</h3>",
 
             "<p style='font-size: 1.05em; margin-bottom: 20px;'>",
@@ -854,7 +854,7 @@ dataqualityClass <- if (requireNamespace("jmvcore")) R6::R6Class("dataqualityCla
                 "</ul></li>",
                 "<li><strong>Alternative:</strong> Restrict to complete cases but report potential selection bias</li>",
                 "</ol>",
-                "<p style='background-color: #fff3cd; padding: 10px; border-radius: 4px; margin-top: 10px;'>",
+                "<p style='background-color: rgba(255, 202, 33, 0.23); padding: 10px; border-radius: 4px; margin-top: 10px; color: inherit;'>",
                 "<strong> Warning:</strong> Listwise deletion (complete-case analysis) with >50% missing can severely bias results. ",
                 "Consult a statistician if you're uncertain about the best approach.",
                 "</p>",
@@ -981,7 +981,7 @@ dataqualityClass <- if (requireNamespace("jmvcore")) R6::R6Class("dataqualityCla
         # If no issues detected
         if (!has_recommendations) {
             recs_html <- paste0(recs_html,
-                "<div style='background-color: #d1f2eb; padding: 15px; border-radius: 5px;'>",
+                "<div style='background-color: rgba(33, 192, 159, 0.21); padding: 15px; border-radius: 5px; color: inherit;'>",
                 "<h4 style='color: #00695c; margin-top: 0;'> No Critical Issues Detected</h4>",
                 "<p style='line-height: 1.8;'>",
                 "Your data quality appears acceptable for analysis. However, always:",
@@ -1011,7 +1011,7 @@ dataqualityClass <- if (requireNamespace("jmvcore")) R6::R6Class("dataqualityCla
         # Generate educational explanations of quality metrics
 
         expl_html <- paste0(
-            "<div style='background-color: #e3f2fd; padding: 20px; border-radius: 8px; border-left: 5px solid #1976d2;'>",
+            "<div style='background-color: rgba(33, 152, 239, 0.13); padding: 20px; border-radius: 8px; border-left: 5px solid #1976d2; color: inherit;'>",
             "<h3 style='color: #0d47a1; margin-top: 0;'> Understanding Quality Metrics</h3>",
 
             "<p style='font-size: 1.05em; margin-bottom: 20px;'>",
@@ -1149,7 +1149,7 @@ dataqualityClass <- if (requireNamespace("jmvcore")) R6::R6Class("dataqualityCla
 
             "<p><strong>General rules of thumb:</strong></p>",
             "<table border='1' cellspacing='0' cellpadding='8' style='width:100%; border-collapse: collapse;'>",
-            "<tr style='background-color: #f5f5f5;'>",
+            "<tr style='background-color: rgba(88, 88, 88, 0.06); color: inherit;'>",
             "<th>Sample Size</th><th>Analysis Type</th><th>Recommendation</th>",
             "</tr>",
             "<tr><td>n &lt; 20</td><td>Any</td><td>Descriptive only; avoid inference</td></tr>",

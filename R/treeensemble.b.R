@@ -103,7 +103,7 @@ treeensembleClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
 
         .show_welcome_message = function() {
             welcome_html <- "
-            <div style='background-color: #e8f5e8; padding: 20px; border-radius: 8px; margin: 20px 0;'>
+            <div style='background-color: rgba(33, 159, 33, 0.1); padding: 20px; border-radius: 8px; margin: 20px 0; color: inherit;'>
             <h3 style='color: #2e7d32; margin-top: 0;'>Clinical Random Forest Analysis</h3>
             <p><strong>Random Forest ensemble methods for clinical research and biomarker discovery</strong></p>
             
@@ -362,7 +362,7 @@ treeensembleClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             class_info <- paste(htmltools::htmlEscape(names(class_dist)), class_dist, sep="=", collapse=", ")
             
             summary_html <- paste0(
-                "<div style='background-color: #f8f9fa; padding: 15px; border-radius: 5px;'>",
+                "<div style='background-color: rgba(138, 155, 172, 0.06); padding: 15px; border-radius: 5px; color: inherit;'>",
                 "<h4>Random Forest Model Summary</h4>",
                 "<ul>",
                 "<li><strong>Algorithm:</strong> Random Forest (randomForest)</li>",
@@ -604,7 +604,7 @@ treeensembleClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             )
             
             clinical_html <- paste0(
-                "<div style='background-color: #f0f8ff; padding: 15px; border-radius: 5px;'>",
+                "<div style='background-color: rgba(33, 152, 255, 0.07); padding: 15px; border-radius: 5px; color: inherit;'>",
                 interpretation,
                 "<p><strong>Performance:</strong> ", performance_metrics, "</p>",
                 "<h4>Random Forest Advantages:</h4>",

@@ -284,7 +284,7 @@ esquisseautoClass <- if (requireNamespace('jmvcore'))
 
             .populateInstructions = function() {
                 html <- "
-                <div style='padding: 15px; background: #f8f9fa; border-radius: 8px;'>
+                <div style='padding: 15px; background-color: rgba(138, 155, 172, 0.06); border-radius: 8px; color: inherit;'>
                     <h3 style='margin-top: 0;'>How to Use Auto-Plot</h3>
 
                     <h4>1. Select Variables:</h4>
@@ -306,7 +306,7 @@ esquisseautoClass <- if (requireNamespace('jmvcore'))
 
                     <h4>3. Automatic Plot Type Selection:</h4>
                     <table style='width: 100%; border-collapse: collapse; margin-top: 10px;'>
-                        <tr style='background: #e9ecef;'>
+                        <tr style='background-color: rgba(33, 63, 94, 0.1); color: inherit;'>
                             <th style='padding: 8px; text-align: left; border: 1px solid #dee2e6;'>X Variable</th>
                             <th style='padding: 8px; text-align: left; border: 1px solid #dee2e6;'>Y Variable</th>
                             <th style='padding: 8px; text-align: left; border: 1px solid #dee2e6;'>Auto Plot Type</th>
@@ -316,7 +316,7 @@ esquisseautoClass <- if (requireNamespace('jmvcore'))
                             <td style='padding: 8px; border: 1px solid #dee2e6;'>(Empty)</td>
                             <td style='padding: 8px; border: 1px solid #dee2e6;'>Histogram</td>
                         </tr>
-                        <tr style='background: #f8f9fa;'>
+                        <tr style='background-color: rgba(138, 155, 172, 0.06); color: inherit;'>
                             <td style='padding: 8px; border: 1px solid #dee2e6;'>Categorical</td>
                             <td style='padding: 8px; border: 1px solid #dee2e6;'>(Empty)</td>
                             <td style='padding: 8px; border: 1px solid #dee2e6;'>Bar Chart</td>
@@ -326,7 +326,7 @@ esquisseautoClass <- if (requireNamespace('jmvcore'))
                             <td style='padding: 8px; border: 1px solid #dee2e6;'>Continuous</td>
                             <td style='padding: 8px; border: 1px solid #dee2e6;'>Scatter Plot</td>
                         </tr>
-                        <tr style='background: #f8f9fa;'>
+                        <tr style='background-color: rgba(138, 155, 172, 0.06); color: inherit;'>
                             <td style='padding: 8px; border: 1px solid #dee2e6;'>Categorical</td>
                             <td style='padding: 8px; border: 1px solid #dee2e6;'>Continuous</td>
                             <td style='padding: 8px; border: 1px solid #dee2e6;'>Column Chart</td>
@@ -336,7 +336,7 @@ esquisseautoClass <- if (requireNamespace('jmvcore'))
                             <td style='padding: 8px; border: 1px solid #dee2e6;'>Categorical</td>
                             <td style='padding: 8px; border: 1px solid #dee2e6;'>Bar Chart (Grouped)</td>
                         </tr>
-                        <tr style='background: #f8f9fa;'>
+                        <tr style='background-color: rgba(138, 155, 172, 0.06); color: inherit;'>
                             <td style='padding: 8px; border: 1px solid #dee2e6;'>Categorical</td>
                             <td style='padding: 8px; border: 1px solid #dee2e6;'>Categorical</td>
                             <td style='padding: 8px; border: 1px solid #dee2e6;'>Tile/Heatmap</td>
@@ -450,7 +450,7 @@ esquisseautoClass <- if (requireNamespace('jmvcore'))
                 aes_list_html <- paste(paste0("<li>", aes_info, "</li>"), collapse = "\n")
 
                 html <- glue::glue("
-                <div style='padding: 10px; background: #e7f3ff; border-left: 4px solid #2196F3; border-radius: 4px;'>
+                <div style='padding: 10px; background-color: rgba(33, 144, 255, 0.11); border-left: 4px solid #2196F3; border-radius: 4px; color: inherit;'>
                     <p style='margin: 0;'><strong>Plot Configuration:</strong></p>
                     <ul style='margin-bottom: 5px;'>
                         {aes_list_html}

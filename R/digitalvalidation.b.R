@@ -413,7 +413,7 @@ digitalvalidationClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                     "<li><strong>Precision (SD of differences):</strong> ", round(sd_diff, 3), "</li>",
                     "</ul>",
                     "<h4>Clinical Validation Assessment:</h4>",
-                    "<div style='background-color: #f8f9fa; padding: 10px; border-left: 4px solid #007bff;'>",
+                    "<div style='background-color: rgba(138, 155, 172, 0.06); padding: 10px; border-left: 4px solid #007bff; color: inherit;'>",
                     if (correlation >= 0.95 && systematic_p >= 0.05 && prop_bias_p >= 0.05) {
                         "<p><strong> VALIDATION PASSED:</strong> The test method demonstrates excellent analytical performance
                     with no significant bias. <span style='color: green;'>Suitable for clinical implementation.</span></p>"

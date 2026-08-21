@@ -488,6 +488,67 @@ jmvtools::i18nUpdate("tr")
 paste0(.('Results for '), varname, .(' variable'))  # Bad
 ```
 
+### 5.1b Library-review findings on `.()` usage
+
+All five jamovi library audits raised fragmented translatable strings. Three
+sub-cases the sections above don't cover explicitly:
+
+#### A paragraph hard-wrapped across several `.()` calls
+
+```r
+# WRONG - one English paragraph split across seven .() calls. Each line break of
+#         the ENGLISH layout is baked into the catalog; the translator sees four
+#         disconnected fragments, none of which is a sentence, and the second
+#         starts AND ends mid-clause. The leading indentation lives inside the
+#         translatable string and is easy to drop.
+.("  rules of thumb, not validated reference ranges, so they may not suit\n"),
+.("  paediatric, ICU, oncology or athlete populations. Which checks run is\n"),
+.("  decided by matching the variable NAME, so non-standard naming can skip a\n"),
+
+# RIGHT - one complete paragraph; layout applied in R afterwards
+note <- jmvcore::format(
+    .("This component cost {points} points. Plausibility bounds are general-population rules of thumb, not validated reference ranges, so they may not suit paediatric, ICU, oncology or athlete populations. Which checks run is decided by matching the variable NAME, so non-standard naming can skip a check or apply the wrong one."),
+    points = component_scores$clinical$penalty)
+```
+
+**No `\n` and no indentation inside a `.()` string.** Word order *and line length*
+both differ across languages, so an English line break in the catalog cannot be
+translated correctly even in principle.
+
+#### `jmvcore::reject()` messages need wrapping too
+
+56 of 77 `reject()` calls in `jsurvival` passed a bare string. Those are precisely
+the strings a struggling user reads — the "you selected the wrong thing" messages
+— and they stay English on a translated install.
+
+```r
+# WRONG
+jmvcore::reject("Kaplan-Meier function allows maximum of 2 explanatory variables")
+
+# RIGHT
+jmvcore::reject(
+    jmvcore::format(.("Unsupported date format: {format}"), format = format),
+    code = "bad_date_format")
+```
+
+Note `reject()`'s second **positional** argument is `code=`, not a value to
+interpolate. Pass `code = NULL` explicitly if you need a positional message.
+
+#### Coverage should be even across the module
+
+Two thoroughly translated analyses and two untranslated ones in the same menu
+"reads as broken rather than as partial." If you internationalise, do the whole
+module — or none of it. Translations are entirely optional and their absence is
+not a defect; **partial** coverage is the thing that looks wrong.
+
+#### `.()` needs `self` in the caller frame
+
+`jmvcore`'s `.()` resolves the analysis from the calling frame. Calling it from a
+top-level (non-method) helper throws `object 'self' not found` — and because it
+only fires on the branch that reaches the helper, it is data-dependent and easy to
+miss in testing. Keep `.()` inside R6 methods, or pass the already-translated
+string in.
+
 ### 5.2 Avoid String Concatenation
 
 **❌ Bad - Fragmented translation:**

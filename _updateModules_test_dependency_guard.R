@@ -268,20 +268,13 @@
   )
 }
 
+# `base` is the ONLY package that may be used without a DESCRIPTION entry.
+# grDevices/grid/stats/utils/methods/graphics are base-PRIORITY but NOT implicit:
+# R CMD check reports "'::' or ':::' import not declared from: 'grDevices'" for
+# them. Exempting every base-priority package here is why this guard stayed green
+# while ClinicoPathDescriptives shipped grDevices::adjustcolor() undeclared.
 .dependency_guard_base_packages <- function() {
-  fallback <- c(
-    "base", "compiler", "datasets", "graphics", "grDevices", "grid",
-    "methods", "parallel", "splines", "stats", "stats4", "tcltk", "tools",
-    "utils"
-  )
-  tryCatch({
-    installed <- utils::installed.packages()
-    priority <- installed[, "Priority"]
-    unique(c(
-      fallback,
-      rownames(installed)[!is.na(priority) & priority == "base"]
-    ))
-  }, error = function(e) fallback)
+  "base"
 }
 
 testthat::test_that("runtime dependencies are declared at the correct strength", {

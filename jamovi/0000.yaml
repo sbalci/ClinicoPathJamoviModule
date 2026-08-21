@@ -2732,7 +2732,7 @@ analyses:
       validation
 
       and biomarker diagnostic accuracy synthesis.
-    menuSubgroup: IHC Analysis
+    menuSubgroup: Meta-Analysis
   - title: Classification Performance Metrics for Digital Pathology
     name: mlpathology
     ns: ClinicoPath

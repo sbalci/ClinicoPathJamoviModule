@@ -694,6 +694,52 @@ checkdataClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         .init = function() {
             # Set initial visibility states
             # This runs once when the analysis is created
+
+            # Fixed row structure is built here rather than in .run() so the
+            # tables do not appear empty and then visibly restructure on every
+            # run cycle. .run() only fills the computed cells (setRow).
+            if (is.null(self$options$var) || is.null(self$data))
+                return()
+
+            self$results$missingVals$addRow(rowKey="total_obs", values=list(
+                metric="Total Observations"))
+            self$results$missingVals$addRow(rowKey="missing_vals", values=list(
+                metric="Missing Values"))
+            self$results$missingVals$addRow(rowKey="complete_cases", values=list(
+                metric="Complete Cases"))
+            self$results$missingVals$addRow(rowKey="unique_vals", values=list(
+                metric="Unique Values"))
+
+            if (!self$options$showDistribution)
+                return()
+
+            # The distribution table carries one of two fixed row sets, chosen by
+            # the variable's type. The type is already known at init time (the
+            # header-only dataset carries column classes), so the choice is made
+            # here with exactly the predicates .populateDistributionAnalysis uses.
+            variable <- self$data[[self$options$var]]
+            if (is.numeric(variable)) {
+                metrics <- c(
+                    mean="Mean",
+                    median="Median",
+                    std_dev="Standard Deviation",
+                    mad="MAD (Median Abs. Deviation)",
+                    coeff_var="Coefficient of Variation (%)",
+                    skewness="Skewness",
+                    range="Range",
+                    iqr="Interquartile Range (IQR)")
+            } else if (is.factor(variable) || is.character(variable)) {
+                metrics <- c(
+                    num_categories="Number of Categories",
+                    modal_category="Modal Category",
+                    balance_index="Category Balance Index (Entropy)")
+            } else {
+                metrics <- character(0)
+            }
+
+            for (key in names(metrics))
+                self$results$distribution$addRow(rowKey=key, values=list(
+                    metric=metrics[[key]]))
         },
 
         # Populate distribution analysis table
@@ -718,29 +764,25 @@ checkdataClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 cv_valid <- abs(mean_val) >= cv_min_mean
                 cv <- ifelse(cv_valid && mean_val != 0, abs(sd_val / mean_val) * 100, NA)
 
-                self$results$distribution$addRow(rowKey="mean", values=list(
-                    metric="Mean",
+                self$results$distribution$setRow(rowKey="mean", values=list(
                     value=round(mean_val, 4),
                     interpretation=ifelse(!is.na(cv) && cv < 10, "Stable central value",
                                         ifelse(!is.na(cv), "Variable central tendency", "Central tendency"))
                 ))
 
-                self$results$distribution$addRow(rowKey="median", values=list(
-                    metric="Median",
+                self$results$distribution$setRow(rowKey="median", values=list(
                     value=round(median_val, 4),
                     interpretation=ifelse(abs(mean_val - median_val) / sd_val < 0.2,
                                         "Close to mean (symmetric)", "Different from mean (skewed)")
                 ))
 
-                self$results$distribution$addRow(rowKey="std_dev", values=list(
-                    metric="Standard Deviation",
+                self$results$distribution$setRow(rowKey="std_dev", values=list(
                     value=round(sd_val, 4),
                     interpretation=sprintf("Absolute variability (see also MAD: %.3f)", mad_val)
                 ))
 
                 # Add MAD as a robust alternative to SD
-                self$results$distribution$addRow(rowKey="mad", values=list(
-                    metric="MAD (Median Abs. Deviation)",
+                self$results$distribution$setRow(rowKey="mad", values=list(
                     value=round(mad_val, 4),
                     interpretation="Robust spread measure (resistant to outliers)"
                 ))
@@ -751,21 +793,18 @@ checkdataClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                                         ifelse(cv < 20, "Moderate relative variability",
                                               ifelse(cv < 50, "High relative variability",
                                                     "Very high relative variability")))
-                    self$results$distribution$addRow(rowKey="coeff_var", values=list(
-                        metric="Coefficient of Variation (%)",
+                    self$results$distribution$setRow(rowKey="coeff_var", values=list(
                         value=round(cv, 2),
                         interpretation=paste(cv_interpretation, " - appropriate for ratio scale data")
                     ))
                 } else {
-                    self$results$distribution$addRow(rowKey="coeff_var", values=list(
-                        metric="Coefficient of Variation (%)",
+                    self$results$distribution$setRow(rowKey="coeff_var", values=list(
                         value=NA,
                         interpretation=sprintf("Suppressed (|mean| < %.3f); use MAD or IQR for spread", cv_min_mean)
                     ))
                 }
 
-                self$results$distribution$addRow(rowKey="skewness", values=list(
-                    metric="Skewness",
+                self$results$distribution$setRow(rowKey="skewness", values=list(
                     value=round(skewness, 3),
                     interpretation=private$.interpretSkewness(skewness)
                 ))
@@ -775,8 +814,7 @@ checkdataClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 max_val <- max(clean_var)
                 range_val <- max_val - min_val
 
-                self$results$distribution$addRow(rowKey="range", values=list(
-                    metric="Range",
+                self$results$distribution$setRow(rowKey="range", values=list(
                     value=round(range_val, 4),
                     interpretation=sprintf("From %.3f to %.3f", min_val, max_val)
                 ))
@@ -786,8 +824,7 @@ checkdataClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 q3 <- quantile(clean_var, 0.75)
                 iqr <- q3 - q1
 
-                self$results$distribution$addRow(rowKey="iqr", values=list(
-                    metric="Interquartile Range (IQR)",
+                self$results$distribution$setRow(rowKey="iqr", values=list(
                     value=round(iqr, 4),
                     interpretation=sprintf("Q1: %.3f, Q3: %.3f - robust spread metric", q1, q3)
                 ))
@@ -817,22 +854,19 @@ checkdataClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 rare_threshold_n <- (rare_threshold_pct / 100) * n_complete
                 rare_categories <- sum(freq_table < rare_threshold_n)
 
-                self$results$distribution$addRow(rowKey="num_categories", values=list(
-                    metric="Number of Categories",
+                self$results$distribution$setRow(rowKey="num_categories", values=list(
                     value=n_categories,
                     interpretation=ifelse(n_categories <= 5, "Manageable number of categories",
                                         ifelse(n_categories <= 10, "Moderate number of categories",
                                               "Many categories - consider grouping"))
                 ))
 
-                self$results$distribution$addRow(rowKey="modal_category", values=list(
-                    metric="Modal Category",
+                self$results$distribution$setRow(rowKey="modal_category", values=list(
                     value=paste0(modal_category, " (", modal_freq, ")"),
                     interpretation=sprintf("Most frequent: %s (%.1f%%)", modal_category, modal_pct)
                 ))
 
-                self$results$distribution$addRow(rowKey="balance_index", values=list(
-                    metric="Category Balance Index (Entropy)",
+                self$results$distribution$setRow(rowKey="balance_index", values=list(
                     value=round(balance_index, 3),
                     interpretation=sprintf("%.2f of %.2f max entropy; %s",
                                           entropy, max_entropy,
@@ -1099,7 +1133,7 @@ checkdataClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             if (nrow(self$data) == 0) {
                 self$results$todo$setVisible(TRUE)
                 self$results$todo$setContent(
-                    "<div style='padding: 15px; background-color: #f8d7da; border-left: 4px solid #dc3545; color: #721c24; border-radius: 5px;'><strong>Error:</strong> Dataset contains no rows. Please provide data for quality assessment.</div>"
+                    "<div style='padding: 15px; background-color: rgba(216, 33, 50, 0.18); border-left: 4px solid #dc3545; color: inherit; border-radius: 5px;'><strong>Error:</strong> Dataset contains no rows. Please provide data for quality assessment.</div>"
                 )
                 return()
             }
@@ -1116,7 +1150,7 @@ checkdataClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 self$results$todo$setVisible(TRUE)
                 err_msg <- htmltools::htmlEscape(paste(validation_results$error_messages, collapse = "; "))
                 self$results$todo$setContent(sprintf(
-                    "<div style='padding: 15px; background-color: #f8d7da; border-left: 4px solid #dc3545; color: #721c24; border-radius: 5px;'><strong>Data Validation Error:</strong> %s</div>",
+                    "<div style='padding: 15px; background-color: rgba(216, 33, 50, 0.18); border-left: 4px solid #dc3545; color: inherit; border-radius: 5px;'><strong>Data Validation Error:</strong> %s</div>",
                     err_msg
                 ))
                 return()
@@ -1136,29 +1170,25 @@ checkdataClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             is_logical <- is.logical(variable)
             
             # Enhanced missing value analysis with clinical interpretation
-            self$results$missingVals$addRow(rowKey="total_obs", values=list(
-                metric="Total Observations",
+            self$results$missingVals$setRow(rowKey="total_obs", values=list(
                 value=as.character(n_total),
                 interpretation=ifelse(n_total >= 100, "Adequate sample size",
                                     ifelse(n_total >= 30, "Moderate sample size", "Small sample size"))
             ))
 
-            self$results$missingVals$addRow(rowKey="missing_vals", values=list(
-                metric="Missing Values",
+            self$results$missingVals$setRow(rowKey="missing_vals", values=list(
                 value=sprintf("%d (%.1f%%)", n_missing, missing_pct),
                 interpretation=private$.interpretMissing(missing_pct)
             ))
 
-            self$results$missingVals$addRow(rowKey="complete_cases", values=list(
-                metric="Complete Cases",
+            self$results$missingVals$setRow(rowKey="complete_cases", values=list(
                 value=sprintf("%d (%.1f%%)", n_complete, 100-missing_pct),
                 interpretation=ifelse(n_complete >= 0.9 * n_total, "Excellent completeness",
                                     ifelse(n_complete >= 0.8 * n_total, "Good completeness",
                                           ifelse(n_complete >= 0.7 * n_total, "Acceptable completeness", "Poor completeness")))
             ))
 
-            self$results$missingVals$addRow(rowKey="unique_vals", values=list(
-                metric="Unique Values",
+            self$results$missingVals$setRow(rowKey="unique_vals", values=list(
                 value=sprintf("%d (%.1f%%)", n_unique, unique_pct),
                 interpretation=ifelse(unique_pct > 95, "Very high variability", 
                                     ifelse(unique_pct > 50, "High variability",
@@ -1626,15 +1656,16 @@ checkdataClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 } else {
                     sprintf(.("set to '%s'"), self$options$unitSystem)
                 }
+                clinical_note <- jmvcore::format(
+                    .("This component cost {points} points. Plausibility bounds are general-population rules of thumb, not validated reference ranges, so they may not suit paediatric, ICU, oncology or athlete populations. Which checks run is decided by matching the variable NAME, so non-standard naming can skip a check or apply the wrong one, and units were {units}. Confirm each flag against your study protocol before acting on it."),
+                    points = component_scores$clinical$penalty,
+                    units = unit_note)
+                # Wrapping and indentation are applied here, never inside .()
                 quality_text <- paste0(quality_text,
-                    .("  NOTE ON THE CLINICAL PENALTY\n"),
-                    sprintf(.("  This component cost %d points. Plausibility bounds are general-population\n"),
-                            component_scores$clinical$penalty),
-                    .("  rules of thumb, not validated reference ranges, so they may not suit\n"),
-                    .("  paediatric, ICU, oncology or athlete populations. Which checks run is\n"),
-                    .("  decided by matching the variable NAME, so non-standard naming can skip a\n"),
-                    sprintf(.("  check or apply the wrong one, and units were %s.\n"), unit_note),
-                    .("  Confirm each flag against your study protocol before acting on it.\n\n"))
+                    "  ", .("NOTE ON THE CLINICAL PENALTY"), "\n",
+                    paste(strwrap(clinical_note, width = 78, prefix = "  "),
+                          collapse = "\n"),
+                    "\n\n")
             }
             
             # Variable type and basic characteristics
@@ -1891,7 +1922,7 @@ checkdataClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
             # Natural-Language Summary (for copying to reports)
             if (self$options$showSummary) {
-                summary_html <- "<div style='font-family: Georgia, serif; line-height: 1.8; padding: 15px; background-color: #f9f9f9; border-left: 4px solid #2c5aa0;'>"
+                summary_html <- "<div style='font-family: Georgia, serif; line-height: 1.8; padding: 15px; background-color: rgba(155, 155, 155, 0.06); border-left: 4px solid #2c5aa0; color: inherit;'>"
                 summary_html <- paste0(summary_html, "<h3 style='color: #2c5aa0; margin-top: 0;'>Data Quality Summary</h3>")
                 summary_html <- paste0(summary_html, "<p><strong>Variable:</strong> ", htmltools::htmlEscape(var_name), "</p>")
                 summary_html <- paste0(summary_html, "<p><strong>Overall Quality Grade:</strong> ", quality_grade, " (", max(0, min(100, quality_score)), "/100 by heuristic scoring)</p>")
@@ -1950,7 +1981,7 @@ checkdataClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
             # About This Analysis panel
             if (self$options$showAbout) {
-                about_html <- "<div style='font-family: Arial, sans-serif; line-height: 1.6; padding: 15px; background-color: #f0f8ff; border-left: 4px solid #4682b4;'>"
+                about_html <- "<div style='font-family: Arial, sans-serif; line-height: 1.6; padding: 15px; background-color: rgba(33, 152, 255, 0.07); border-left: 4px solid #4682b4; color: inherit;'>"
                 about_html <- paste0(about_html, "<h3 style='color: #4682b4; margin-top: 0;'>About Data Quality Assessment</h3>")
 
                 about_html <- paste0(about_html, "<h4>Purpose</h4>")
@@ -1988,7 +2019,7 @@ checkdataClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
             # Caveats & Assumptions panel
             if (self$options$showCaveats) {
-                caveats_html <- "<div style='font-family: Arial, sans-serif; line-height: 1.6; padding: 15px; background-color: #fff8dc; border-left: 4px solid #ffa500;'>"
+                caveats_html <- "<div style='font-family: Arial, sans-serif; line-height: 1.6; padding: 15px; background-color: rgba(255, 211, 33, 0.16); border-left: 4px solid #ffa500; color: inherit;'>"
                 caveats_html <- paste0(caveats_html, "<h3 style='color: #d2691e; margin-top: 0;'> Important Caveats & Assumptions</h3>")
 
                 caveats_html <- paste0(caveats_html, "<h4>Heuristic-Based Assessment</h4>")
@@ -2030,7 +2061,7 @@ checkdataClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 caveats_html <- paste0(caveats_html, "</ul>")
 
                 caveats_html <- paste0(caveats_html, "<h4>Recommended Workflow</h4>")
-                caveats_html <- paste0(caveats_html, "<p style='background-color: #fff; padding: 10px; border-left: 3px solid #ffa500;'>")
+                caveats_html <- paste0(caveats_html, "<p style='background-color: rgba(255, 255, 255, 0.06); padding: 10px; border-left: 3px solid #ffa500; color: inherit;'>")
                 caveats_html <- paste0(caveats_html, "<strong>Step 1:</strong> Use this tool for initial automated screening<br>")
                 caveats_html <- paste0(caveats_html, "<strong>Step 2:</strong> Manually verify all flagged observations with clinical/domain expertise<br>")
                 caveats_html <- paste0(caveats_html, "<strong>Step 3:</strong> Investigate root causes (data entry errors, measurement issues, true biological variation)<br>")

@@ -59,7 +59,7 @@ children:
             children:
               - type: CheckBox
                 name: paired
-                label: Paired/Matched data (McNemar's test)
+                label: Paired/matched data (McNemar's test)
       - type: Label
         label: Test Method
         fitToGrid: true
@@ -84,11 +84,11 @@ children:
             children:
               - type: TextBox
                 name: conflevel
-                label: Confidence Level (0.50-0.99)
+                label: Confidence level (0.50-0.99)
                 format: number
               - type: TextBox
                 name: ratio
-                label: Expected Proportions (e.g., 0.5,0.5)
+                label: Expected proportions (e.g., 0.5,0.5)
                 format: string
   - type: CollapseBox
     label: Plot Appearance
@@ -124,7 +124,7 @@ children:
                 label: Slice label type
               - type: TextBox
                 name: digits
-                label: Decimal Places (Statistics)
+                label: Decimal places (statistics)
                 format: number
       - type: Label
         label: Donut Chart Options

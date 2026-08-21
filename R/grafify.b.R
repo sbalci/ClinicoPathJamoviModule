@@ -123,7 +123,7 @@ grafifyClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
         
         .create_welcome_message = function() {
             paste(
-                "<div style='background-color: #f8f9fa; padding: 20px; border-radius: 8px; margin: 10px;'>",
+                "<div style='background-color: rgba(138, 155, 172, 0.06); padding: 20px; border-radius: 8px; margin: 10px; color: inherit;'>",
                 "<h3 style='color: #2c3e50; margin-top: 0;'>Scientific Visualization with Grafify</h3>",
                 "<p><strong>Create beautiful, color-blind friendly scientific plots with advanced statistical integration.</strong></p>",
                 "<h4>Getting Started:</h4>",
@@ -461,7 +461,7 @@ grafifyClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             plot_type <- self$options$plot_type
             experimental_design <- self$options$experimental_design
             
-            html <- "<div style='background-color: #e8f5e8; padding: 15px; border-radius: 5px; margin: 10px;'>"
+            html <- "<div style='background-color: rgba(33, 159, 33, 0.1); padding: 15px; border-radius: 5px; margin: 10px; color: inherit;'>"
             html <- paste(html, "<h4>Plot Interpretation Guide</h4>")
             
             # Plot type specific guidance
@@ -505,7 +505,7 @@ grafifyClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
         },
         
         .create_export_info = function() {
-            html <- "<div style='background-color: #fff3cd; padding: 15px; border-radius: 5px; margin: 10px;'>"
+            html <- "<div style='background-color: rgba(255, 202, 33, 0.23); padding: 15px; border-radius: 5px; margin: 10px; color: inherit;'>"
             html <- paste(html, "<h4>Data Export Information</h4>")
             html <- paste(html, "<p>Processed data and summary statistics are available for export.</p>")
             html <- paste(html, "<ul>")
