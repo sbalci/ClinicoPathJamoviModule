@@ -269,4 +269,3 @@ reportcat2Class <- if (requireNamespace('jmvcore')) R6::R6Class(
     )
 )
 
-
