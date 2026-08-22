@@ -107,52 +107,56 @@ density-based local outliers. ACM sigmod record, 29(2), 93-104.
 
 \examples{
 \dontrun{
-# Example 1: Basic univariate outlier detection
-# Load clinical data
-data(clinical_data)
+# All examples use the 250-row `histopathology` dataset bundled with the module.
+data(histopathology)
 
-# Detect outliers using robust z-score
+# Example 1: univariate outlier detection on a single lab-style measurement
 outlierdetection(
-  data = clinical_data,
-  vars = c("hemoglobin", "glucose", "creatinine"),
+  data = histopathology,
+  vars = c("Age", "MeasurementA", "MeasurementB"),
   method_category = "univariate",
   univariate_methods = "zscore_robust",
   zscore_threshold = 3.29,
-  show_outlier_table = TRUE,
-  show_visualization = TRUE
+  show_outlier_table = TRUE
 )
 
-# Example 2: Multivariate outlier detection
-# Detect multivariate outliers in biomarker data
+# Example 2: multivariate detection across correlated measurements.
+# NOTE: multivariate_methods = "mahalanobis_robust" is routed through the
+# bigutilsr package by performance; where bigutilsr is not available the
+# analysis reports that and produces no result. "mcd" needs only robustbase,
+# which ships with the module, so it is the portable robust alternative.
 outlierdetection(
-  data = biomarker_data,
-  vars = c("protein_1", "protein_2", "protein_3"),
+  data = histopathology,
+  vars = c("MeasurementA", "MeasurementB", "OverallTime"),
   method_category = "multivariate",
   multivariate_methods = "mahalanobis",
   show_method_comparison = TRUE,
   show_exclusion_summary = TRUE
 )
 
-# Example 3: Composite outlier detection
-# Robust detection using multiple methods
+# Example 3: composite detection (the default category).
+# In this category the Z-score threshold and IQR multiplier below are passed
+# through to the individual methods.
 outlierdetection(
-  data = patient_data,
-  vars = c("age", "weight", "height", "bmi"),
+  data = histopathology,
+  vars = c("Age", "OverallTime", "MeasurementA"),
   method_category = "composite",
   composite_threshold = 0.6,
+  zscore_threshold = 3.0,
+  iqr_multiplier = 1.5,
   show_outlier_table = TRUE,
   show_interpretation = TRUE
 )
 
-# Example 4: Comprehensive analysis
-# Compare all available methods
+# Example 4: every method that is available in this installation.
+# Techniques whose optional packages are absent are reported in Analysis
+# Messages and left out of the composite rather than failing the run.
 outlierdetection(
-  data = lab_data,
-  vars = c("alt", "ast", "bilirubin", "albumin"),
+  data = histopathology,
+  vars = c("Age", "MeasurementA", "MeasurementB"),
   method_category = "all",
   show_method_comparison = TRUE,
-  show_exclusion_summary = TRUE,
-  show_visualization = TRUE
+  show_exclusion_summary = TRUE
 )
 }
 

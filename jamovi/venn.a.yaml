@@ -176,21 +176,45 @@ options:
       title: "UpSetR plot"
       type: Bool
       default: false
+      description:
+          R: >
+            Show the UpSetR matrix-style intersection plot. Suited to 4 or more sets, where a Venn diagram becomes unreadable.
+          jamovi: >
+            Show the UpSetR intersection plot (best for 4 or more variables).
+
 
     - name: show_complexUpset
       title: "ComplexUpset plot"
       type: Bool
       default: false
+      description:
+          R: >
+            Show the ComplexUpset intersection plot: the same matrix layout as UpSetR, plus optional percentage labels, a minimum intersection size filter and degree sorting.
+          jamovi: >
+            Show the ComplexUpset intersection plot, which adds percentage labels, minimum-size filtering and degree sorting.
+
 
     - name: show_ggvenn
       title: "ggvenn plot"
       type: Bool
       default: true
+      description:
+          R: >
+            Show the classic ggvenn Venn diagram. Handles up to 4 sets; with 5 or more it displays a message pointing to ggVennDiagram instead.
+          jamovi: >
+            Show the classic Venn diagram (up to 4 variables).
+
 
     - name: show_ggVennDiagram
       title: "ggVennDiagram plot"
       type: Bool
       default: false
+      description:
+          R: >
+            Show the ggVennDiagram Venn diagram, which supports 2 to 7 sets and the shape, label, edge and palette options in the ggVennDiagram Styling panel.
+          jamovi: >
+            Show the advanced Venn diagram (2 to 7 variables, with styling options).
+
 
 
 
@@ -207,12 +231,13 @@ options:
       default: freq
       description:
           R: >
-            How to sort the intersections in the UpSet plot. 'None' (unsorted)
-            applies to the ComplexUpset engine only; the UpSetR engine always
-            orders intersections by frequency.
+            How to sort the intersections in the UpSet plots. 'Frequency' orders by
+            intersection size and 'Degree' groups by the number of sets involved;
+            both engines honour these. 'None' (unsorted) applies to the ComplexUpset
+            engine only - UpSetR has no unsorted mode and falls back to frequency.
           jamovi: >
             Choose how to sort the intersections. 'None' applies to ComplexUpset
-            only; UpSetR always sorts by frequency.
+            only; UpSetR falls back to frequency when 'None' is selected.
 
     - name: minSize
       title: 'Minimum intersection size'
@@ -238,14 +263,17 @@ options:
             Add percentage labels and enhanced text formatting to the plot.
 
     - name: explanatory
-      title: "Explanatory output"
+      title: "All explanatory panels"
       type: Bool
       default: false
       description:
           R: >
-            Add detailed explanatory footnotes with interpretation guidance for Venn diagrams and set operations.
+            Show all four explanatory panels at once - About This Analysis, Clinical
+            Summary, Copy-Ready Clinical Summary and Interpretation Guide & Assumptions -
+            without ticking them individually.
           jamovi: >
-            Add detailed explanatory footnotes with interpretation guidance.
+            Show all four explanatory panels at once (About this analysis, Clinical
+            summary, Report sentences, Assumptions).
 
     - name: aboutAnalysis
       title: "About this analysis"

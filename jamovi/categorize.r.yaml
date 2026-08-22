@@ -10,8 +10,18 @@ items:
       type:  Html
       clearWith:
           - var
+
+    # Errors and the run-time notice stack live here, not under the
+    # "Instructions" heading, which now carries the welcome text only.
+    - name:  notices
+      title: Notes
+      type:  Html
+      clearWith:
+          - var
           - method
           - nbins
+          - breaks
+          - excludeoutofrange
           - labels
           - customlabels
           - sdmult
@@ -36,6 +46,7 @@ items:
           - method
           - nbins
           - breaks
+          - excludeoutofrange
           - sdmult
           - labels
           - customlabels
@@ -70,6 +81,7 @@ items:
           - method
           - nbins
           - breaks
+          - excludeoutofrange
           - sdmult
           - excl
       columns:
@@ -93,6 +105,7 @@ items:
           - method
           - nbins
           - breaks
+          - excludeoutofrange
           - sdmult
           - excl
 
@@ -105,6 +118,7 @@ items:
           - method
           - nbins
           - breaks
+          - excludeoutofrange
           - sdmult
           - labels
           - customlabels
@@ -125,6 +139,7 @@ items:
           - method
           - nbins
           - breaks
+          - excludeoutofrange
           - sdmult
           - labels
           - customlabels

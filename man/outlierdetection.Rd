@@ -43,26 +43,38 @@ multivariate for complete blood count panels.}
 when univariate category is selected.}
 
 \item{multivariate_methods}{Specific multivariate method for outlier
-detection when multivariate category is selected.}
+detection when multivariate category is selected. NOTE:
+"mahalanobis_robust" is computed through the bigutilsr package; where
+bigutilsr is not available the analysis says so and that choice produces no
+result. "mcd" gives a robust multivariate distance through robustbase,
+which ships with the module.}
 
 \item{composite_threshold}{Threshold for composite outlier score (0.1-1.0).
 Default 0.5 means observations  classified as outliers by at least half of
-the methods are considered outliers.}
+the methods are considered outliers. Applies to the composite and
+all-methods categories.}
 
 \item{zscore_threshold}{Threshold for Z-score based methods. CLINICAL
 EXAMPLES: 3.0 = 99.7 percent confidence (standard screening for most lab
 values), 3.29 = 99.9 percent confidence (stringent, for critical values
 like cardiac enzymes), 2.5 = 98.8 percent confidence (sensitive detection
-for research). Recommended: 3.29 for clinical quality control.}
+for research). Recommended: 3.29 for clinical quality control. Applies to
+the univariate Z-score methods and to the Z-score component of the
+composite and all-methods categories.}
 
 \item{iqr_multiplier}{Multiplier for IQR-based outlier detection. CLINICAL
 EXAMPLES: 1.5 = Tukey's standard (sensitive, may flag ~0.7 percent of
 normal data), 1.7 = conservative (recommended for clinical screening), 2.0
 = very conservative (for critical biomarkers). Useful for non-normal
-distributions common in clinical data.}
+distributions common in clinical data. Applies to the univariate IQR method
+and to the IQR component of the composite and all-methods categories.}
 
 \item{confidence_level}{Confidence level for interval-based methods (ETI,
-HDI). Default 99.9 percent identifies the most extreme observations.}
+HDI). Default 99.9 percent identifies the most extreme observations. The
+highest density interval needs at least 1 / (1 - level) observations to be
+estimable, so the 0.999 default requires at least 1000 complete cases;
+below that, lower the level or use the equal-tailed interval. Does not
+apply to the composite category, which uses no interval method.}
 
 \item{show_outlier_table}{Display a comprehensive table of outlier
 detection results including outlier scores, distances, and classification

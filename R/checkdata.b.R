@@ -11,6 +11,30 @@ checkdataClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         # the scale (the helper-local `outlier_analysis` is not visible in .run).
         .outlier_transform = "none",
 
+        # TRUE once outlier detection has actually been computed in the current
+        # run. Distinguishes "no value was flagged" from "outlier screening was
+        # never run" (option unticked, non-numeric variable, or n < 3). The
+        # quality summary and the scoring breakdown must not conflate the two:
+        # .populateOutlierAnalysis returns 0 for both.
+        .outliers_assessed = FALSE,
+
+        # Set alongside .outliers_assessed by .populateOutlierAnalysis.
+        #
+        # .outliers_informative_only is TRUE for 3 <= n_complete < 10, where
+        # .advancedOutlierDetection relaxes consensus to a SINGLE method and
+        # labels the result "not statistically robust". Those flags must not feed
+        # the quality grade or the outlier-rate warnings: at n = 9 one IQR flag is
+        # an 11.1% outlier rate, which cost 20 points on top of the 30-point
+        # small-sample penalty and produced a warning telling the user to review
+        # each outlier - all from a flag the analysis had itself declared
+        # non-robust.
+        #
+        # .outlier_n_methods is 2 whenever the MAD method is unavailable
+        # (n_complete <= 3, or MAD == 0 because half the values are identical),
+        # so no message may hard-code "of the 3 methods".
+        .outliers_informative_only = FALSE,
+        .outlier_n_methods = 3,
+
         # Generate interpretation for missing data
         .interpretMissing = function(missing_pct) {
             if (missing_pct == 0) {
@@ -50,24 +74,100 @@ checkdataClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             m3 / m2^1.5
         },
         
-        # Determine outlier severity
-        # FIXED: Previous version returned "High" for all values including z~0
-        .outlierSeverity = function(zscore) {
-            abs_z <- abs(zscore)
-            if (abs_z > 4) {
+        # Magnitude label for a point that has ALREADY been flagged as an
+        # outlier. The argument is a robust deviation in approximate SD units:
+        # the MAD-based modified Z-score where it is available, otherwise the
+        # ordinary Z-score.
+        #
+        # The bin below |score| = 2 must NOT be a magnitude class. An earlier
+        # version returned "Not an outlier" there, which was wrong for a row that
+        # had reached the outliers table; the fix collapsed the floor into "Mild",
+        # which is wrong in the other direction. Below n = 10 consensus is relaxed
+        # to a single method, so x = c(1,1,1,1,1,1,2,10) reaches this table twice:
+        # MAD is 0 (no modified Z), the IQR fence alone flags the value 2, and its
+        # ordinary Z is -0.079. Labelling a point 0.08 SD from the centre "Mild"
+        # asserts a magnitude the statistic does not show. The floor now names
+        # what was actually measured, and the caller states which statistic was
+        # ranked and how many methods fired.
+        .outlierSeverity = function(score) {
+            abs_s <- abs(score)
+            if (!is.finite(abs_s)) {
+                return("Undetermined")
+            } else if (abs_s > 4) {
                 return("Extreme")
-            } else if (abs_z > 3.5) {
+            } else if (abs_s > 3.5) {
                 return("Very High")
-            } else if (abs_z > 3) {
+            } else if (abs_s > 3) {
                 return("High")
-            } else if (abs_z > 2.5) {
+            } else if (abs_s > 2.5) {
                 return("Moderate")
-            } else if (abs_z > 2) {
+            } else if (abs_s > 2) {
                 return("Mild")
             } else {
-                return("Not an outlier")  # Should not happen if only called on detected outliers
+                return("Below magnitude thresholds")
             }
         },
+
+        # Split a column name into lower-case word tokens, honouring separators
+        # (space, underscore, dot, dash, digits) AND camelCase boundaries, so
+        # "AgeAtDiagnosis", "age_years" and "Age (years)" all yield the token
+        # "age" while "TStage" and "Percentage" do not.
+        .nameTokens = function(var_name) {
+            if (length(var_name) != 1 || is.na(var_name))
+                return(character(0))
+            s <- gsub("([a-z0-9])([A-Z])", "\\1 \\2", var_name)
+            s <- gsub("([A-Z]+)([A-Z][a-z])", "\\1 \\2", s)
+            tokens <- strsplit(tolower(s), "[^a-z0-9]+")[[1]]
+            tokens[nzchar(tokens)]
+        },
+
+        # TRUE when any whole word of the column name is one of `words`.
+        #
+        # The two name-matching policies in this file were wrong in opposite
+        # directions. The clinical checks matched unanchored substrings:
+        # grepl("creatinine|cr", name) fires on Necrosis, NecrosisPercent,
+        # Cribriform, Crush, Screening and Description, so a NecrosisPercent
+        # column holding 0-100 was reported as "Creatinine outside 30-1000
+        # umol/L" - a false flag that also cost up to 20 points of the headline
+        # quality grade. grepl("age", name) fires on TStage and Percentage, and
+        # grepl("hemoglobin|hgb|hb", name) on HBsAg and HBV. .validateData used
+        # the opposite extreme, an exact all-lowercase match that never fired on
+        # a real column name ("Age"). Whole-word, case-insensitive matching is
+        # now the single policy both paths share, so they cannot drift again.
+        .nameMatches = function(var_name, words) {
+            if (length(var_name) != 1 || is.na(var_name))
+                return(FALSE)
+            # Whole-name form with separators removed, so a name that
+            # camelCase-splits into fragments ("SCr" -> "s", "cr") still matches
+            # its own compact form ("scr"). This is still a whole-NAME match and
+            # never a substring match, so "NecrosisPercent" cannot reach
+            # "creatinine" and "TStage" cannot reach "age".
+            compact <- tolower(gsub("[^A-Za-z0-9]", "", var_name))
+            tokens <- private$.nameTokens(var_name)
+            # A derived quantity carries the raw measurement's name but not its
+            # units, so the raw reference range must not be applied to it.
+            # "HbA1c" tokenises to [hb, a1c] and hit the haemoglobin rules: in
+            # IFCC units (mmol/mol, roughly 20-130) any(> 25) picked the SI
+            # branch and any(< 30) then fired on every value in the 20-29 band,
+            # reporting "Hemoglobin outside 30-200 g/L". "CreatinineClearance"
+            # tokenises to [creatinine, clearance] and hit the creatinine rules,
+            # reporting an ordinary mL/min clearance as "Creatinine outside
+            # 30-1000 umol/L". Both are common column names and each false flag
+            # also cost 5 points of the headline grade. The compact form is
+            # tested too, because "HbA1C" splits to [hb, a1, c] and never yields
+            # an "a1c" token.
+            if (any(tokens %in% private$.nameDisqualifiers) ||
+                compact %in% private$.nameDisqualifiers)
+                return(FALSE)
+            if (any(tokens %in% words))
+                return(TRUE)
+            isTRUE(compact %in% words)
+        },
+
+        # Whole words that mark a column as a derived / relative quantity rather
+        # than the raw measurement the plausibility ranges are written for.
+        .nameDisqualifiers = c("a1c", "hba1c", "clearance", "ratio", "percent",
+                               "index", "score", "change", "delta"),
         
         # Enhanced data validation with comprehensive error checking
         .validateData = function(variable, var_name) {
@@ -78,11 +178,18 @@ checkdataClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 recommendations = character()
             )
             
-            # Check for completely empty variable
+            # Check for completely empty variable. This also covers an empty
+            # dataset and a row filter that excludes every case: self$data[[var]]
+            # then has length 0. It is the single error exit of the analysis -
+            # .run() no longer carries its own nrow(self$data) == 0 test, whose
+            # earlier return used to make this branch unreachable.
             if (length(variable) == 0) {
                 validation_results$is_valid <- FALSE
                 validation_results$error_messages <- c(validation_results$error_messages,
-                    paste("Variable", var_name, "is empty (length = 0)"))
+                    sprintf(paste("Variable '%s' contains no observations, so no quality assessment can be computed.",
+                                  "This happens when the dataset has no rows, or when a row filter excludes every case.",
+                                  "Load data or relax the filter, then re-run."),
+                            var_name))
                 return(validation_results)
             }
             
@@ -136,7 +243,8 @@ checkdataClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 }
                 
                 # Check for negative values in contexts where they shouldn't exist
-                if (any(clean_var < 0) && var_name %in% c("age", "weight", "height", "time", "duration", "count")) {
+                if (any(clean_var < 0) &&
+                    private$.nameMatches(var_name, c("age", "weight", "height", "time", "duration", "count"))) {
                     validation_results$warnings <- c(validation_results$warnings,
                         paste("Negative values detected in", var_name, "which should typically be positive"))
                     validation_results$recommendations <- c(validation_results$recommendations,
@@ -194,24 +302,53 @@ checkdataClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 ))
             }
 
-            # Apply transformation if requested (for right-skewed distributions)
+            # Apply transformation if requested (for right-skewed distributions).
+            #
+            # A requested transform that cannot be applied MUST leave
+            # transform_applied as the literal "none". Three downstream consumers
+            # test `transform_applied != "none"`, so the previous sentence-valued
+            # "none (negative values present)" sent all three down the
+            # transform-was-applied path and produced text such as
+            # "High (2/3 methods on none (negative values present) scale)" and a
+            # Method Summary row whose Threshold cell held that sentence. The
+            # reason now travels separately and is shown once, as a table note.
+            # The log guard is `> 0`, so a zero blocks it too - the old wording
+            # claimed negative values in percentages and counts that had none.
             transform_type <- self$options$outlierTransform
+            transform_applied <- "none"
+            transform_skipped <- NULL
             if (transform_type == "log") {
                 if (all(clean_var > 0)) {
                     clean_var <- log(clean_var)
                     transform_applied <- "log"
                 } else {
-                    transform_applied <- "none (negative values present)"
+                    # The square root is only an alternative when the log was
+                    # blocked by zeros ALONE: the sqrt branch below requires
+                    # all(clean_var >= 0), so with a negative value present it is
+                    # skipped for exactly the same data and following the advice
+                    # would earn a second "not applied" note.
+                    log_alternative <- if (any(clean_var < 0)) {
+                        paste("Negative values are present, so the square-root transform is unavailable for this",
+                              "variable as well; add a constant offset before the analysis if a transform is needed.")
+                    } else {
+                        paste("Add a constant offset before the analysis, or choose the square-root transform, if a",
+                              "transform is needed.")
+                    }
+                    transform_skipped <- sprintf(
+                        paste("Log transform requested but not applied: %d of %d complete values are zero or negative,",
+                              "where the logarithm is undefined. Outlier detection ran on the raw values instead. %s"),
+                        sum(clean_var <= 0), length(clean_var), log_alternative)
                 }
             } else if (transform_type == "sqrt") {
                 if (all(clean_var >= 0)) {
                     clean_var <- sqrt(clean_var)
                     transform_applied <- "sqrt"
                 } else {
-                    transform_applied <- "none (negative values present)"
+                    transform_skipped <- sprintf(
+                        paste("Square-root transform requested but not applied: %d of %d complete values are negative,",
+                              "where the square root is undefined. Outlier detection ran on the raw values instead."),
+                        sum(clean_var < 0), length(clean_var))
                 }
-            } else {
-                transform_applied <- "none"
             }
 
             outlier_results <- list()
@@ -240,6 +377,7 @@ checkdataClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             )
 
             # Method 3: Modified Z-score (MAD-based, most robust)
+            modified_z_all <- NULL
             if (length(clean_var) > 3) {
                 # Iglewicz & Hoaglin (1993) modified Z-score, as in the NIST
                 # e-Handbook 1.3.5.17:  M_i = 0.6745 (x_i - median) / MAD_raw,
@@ -259,6 +397,7 @@ checkdataClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 mad_val <- mad(clean_var, constant = 1.4826)  # consistent estimate of sigma
                 if (mad_val > 0) {
                     modified_z <- (clean_var - median(clean_var)) / mad_val
+                    modified_z_all <- modified_z  # full vector, for severity ranking
                     mad_outliers <- which(abs(modified_z) > 3.5)
                     outlier_results$mad <- list(
                         indices = mad_outliers,
@@ -309,6 +448,8 @@ checkdataClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 all_methods = outlier_results,
                 methods_used = c("Z-score", "IQR", if(!is.null(outlier_results$mad)) "Modified Z-score (MAD)"),
                 transform_applied = transform_applied,
+                transform_skipped = transform_skipped,
+                modified_z_scores = modified_z_all,  # NULL when MAD unavailable
                 original_n = length(original_var),
                 n_methods = n_methods,
                 transformed_z_scores = transformed_z_scores,  # For severity on correct scale
@@ -409,8 +550,19 @@ checkdataClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 missing_in_last_quarter <- sum(missing_indices > last_quarter_start)
                 dropout_prop <- missing_in_last_quarter / n_missing
 
+                # Reference value for the comparison below: the share of ROWS
+                # that lie after last_quarter_start (0.25 for n = 120, where
+                # round(90) leaves rows 91-120). If missingness were unrelated to
+                # row position that is the expected share of missing values
+                # falling there. The previous code tested the Wilson lower bound
+                # against 0.5 - twice the null - so 45% of missing in the last
+                # quarter, an ~1.8x enrichment, fired neither branch; and the
+                # printed CI invited comparison against a 50% that was never the
+                # right reference.
+                null_prop <- (n_total - last_quarter_start) / n_total
+
                 # 95% CI for dropout proportion (Wilson score interval)
-                if (n_missing > 0) {
+                if (n_missing > 0 && null_prop > 0 && null_prop < 1) {
                     p_hat <- dropout_prop
                     z <- 1.96
                     denom <- 1 + z^2 / n_missing
@@ -419,15 +571,15 @@ checkdataClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     ci_low <- max(0, center - margin)
                     ci_high <- min(1, center + margin)
 
-                    if (ci_low > 0.5) {
+                    if (ci_low > null_prop) {
                         patterns$dropout <- sprintf(
-                            "HEURISTIC: Likely dropout pattern (%.1f%% of missing in last quarter, 95%% CI: %.1f%%-%.1f%%)",
-                            dropout_prop * 100, ci_low * 100, ci_high * 100
+                            "HEURISTIC: Likely dropout pattern (%.1f%% of missing values fall in the last quarter of rows, 95%% CI: %.1f%%-%.1f%%; %.1f%% expected if missingness were unrelated to row position)",
+                            dropout_prop * 100, ci_low * 100, ci_high * 100, null_prop * 100
                         )
-                    } else if (dropout_prop > 0.6) {
+                    } else if (dropout_prop > 1.5 * null_prop) {
                         patterns$possible_dropout <- sprintf(
-                            "HEURISTIC: Possible dropout pattern (%.1f%% of missing in last quarter, 95%% CI: %.1f%%-%.1f%%) - CI overlaps 50%%",
-                            dropout_prop * 100, ci_low * 100, ci_high * 100
+                            "HEURISTIC: Possible dropout pattern (%.1f%% of missing values fall in the last quarter of rows, 95%% CI: %.1f%%-%.1f%%; %.1f%% expected if missingness were unrelated to row position) - the interval includes the expected share",
+                            dropout_prop * 100, ci_low * 100, ci_high * 100, null_prop * 100
                         )
                     }
                 }
@@ -553,8 +705,19 @@ checkdataClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 return("unknown")
             }
 
+            # Which rule set applies is decided by WHOLE WORDS of the column
+            # name (see .nameMatches). Unanchored substring matching used to fire
+            # these clinical rules on unrelated pathology columns - "age" on
+            # TStage and Percentage, "cr" on Necrosis and Cribriform, "hb" on
+            # HBsAg - producing a false plausibility flag, a Data Patterns row,
+            # a warning notice and a deduction from the headline quality grade.
+            # Two-letter abbreviations that cannot be disambiguated from common
+            # pathology terms are deliberately absent from these word lists: a
+            # missed check is silent, a wrong check is a false alarm on a
+            # patient's data.
+
             # Age-specific validations (unit-agnostic)
-            if (grepl("age", var_name, ignore.case = TRUE)) {
+            if (private$.nameMatches(var_name, c("age"))) {
                 if (any(clean_var < 0)) {
                     clinical_issues$negative_age <- "PLAUSIBILITY CHECK: Negative age values detected (biologically impossible)"
                 }
@@ -567,7 +730,7 @@ checkdataClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             }
 
             # Weight-specific validations with unit detection
-            if (grepl("weight", var_name, ignore.case = TRUE)) {
+            if (private$.nameMatches(var_name, c("weight", "bodyweight"))) {
                 # Auto-detect or use specified
                 if (unit_system == "auto") {
                     weight_units <- detect_units(clean_var, list(
@@ -613,7 +776,7 @@ checkdataClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             }
 
             # Height-specific validations with unit detection
-            if (grepl("height", var_name, ignore.case = TRUE)) {
+            if (private$.nameMatches(var_name, c("height", "bodyheight"))) {
                 # Auto-detect or use specified
                 if (unit_system == "auto") {
                     height_units <- detect_units(clean_var, list(
@@ -656,7 +819,7 @@ checkdataClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             }
 
             # Laboratory value ranges (assume SI units for metric, traditional for imperial)
-            if (grepl("hemoglobin|hgb|hb", var_name, ignore.case = TRUE)) {
+            if (private$.nameMatches(var_name, c("hemoglobin", "haemoglobin", "hgb", "hb"))) {
                 # g/dL is common in US, g/L in SI (multiply by 10)
                 # Most data will be in g/dL range (3-20), g/L would be 30-200
                 if (any(clean_var > 25)) {
@@ -672,7 +835,9 @@ checkdataClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 }
             }
 
-            if (grepl("creatinine|cr", var_name, ignore.case = TRUE)) {
+            # "cr" alone is excluded: in oncology and pathology datasets CR
+            # commonly means complete response, not creatinine.
+            if (private$.nameMatches(var_name, c("creatinine", "creat", "scr"))) {
                 # mg/dL (US) typically 0.3-10, umol/L (SI) typically 30-1000
                 if (any(clean_var > 20)) {
                     # Likely umol/L
@@ -710,6 +875,29 @@ checkdataClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             self$results$missingVals$addRow(rowKey="unique_vals", values=list(
                 metric="Unique Values"))
 
+            variable <- self$data[[self$options$var]]
+
+            # The outlier method-summary table carries a fixed row set - one row
+            # per detection method - so it is built here too. Built with addRow()
+            # in .run() against a `rows: 0` declaration it had no row names at
+            # Table$fromProtoBuf time, so it could never inherit the previous
+            # run's cells: it collapsed to empty and re-expanded on every run
+            # cycle. .run() now only sets the computed counts.
+            if (isTRUE(self$options$showOutliers) && is.numeric(variable)) {
+                self$results$outlierMethodSummary$addRow(rowKey="zscore", values=list(
+                    method="Z-score",
+                    threshold="|z| > 3",
+                    note="Assumes normal distribution; inflated by outliers themselves"))
+                self$results$outlierMethodSummary$addRow(rowKey="iqr", values=list(
+                    method="IQR (1.5\u{D7}IQR)",
+                    threshold="< Q1-1.5\u{D7}IQR or > Q3+1.5\u{D7}IQR",
+                    note="Robust to non-normality"))
+                self$results$outlierMethodSummary$addRow(rowKey="mad", values=list(
+                    method="Modified Z-score (MAD)",
+                    threshold="|modified-z| > 3.5",
+                    note="Most robust to outliers and skewness"))
+            }
+
             if (!self$options$showDistribution)
                 return()
 
@@ -717,7 +905,6 @@ checkdataClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             # the variable's type. The type is already known at init time (the
             # header-only dataset carries column classes), so the choice is made
             # here with exactly the predicates .populateDistributionAnalysis uses.
-            variable <- self$data[[self$options$var]]
             if (is.numeric(variable)) {
                 metrics <- c(
                     mean="Mean",
@@ -731,7 +918,7 @@ checkdataClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             } else if (is.factor(variable) || is.character(variable)) {
                 metrics <- c(
                     num_categories="Number of Categories",
-                    modal_category="Modal Category",
+                    modal_category="Modal Category (frequency)",
                     balance_index="Category Balance Index (Entropy)")
             } else {
                 metrics <- character(0)
@@ -862,8 +1049,9 @@ checkdataClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 ))
 
                 self$results$distribution$setRow(rowKey="modal_category", values=list(
-                    value=paste0(modal_category, " (", modal_freq, ")"),
-                    interpretation=sprintf("Most frequent: %s (%.1f%%)", modal_category, modal_pct)
+                    value=as.numeric(modal_freq),
+                    interpretation=sprintf("Most frequent category: %s (%d of %d, %.1f%%)",
+                                          modal_category, modal_freq, n_complete, modal_pct)
                 ))
 
                 self$results$distribution$setRow(rowKey="balance_index", values=list(
@@ -886,11 +1074,34 @@ checkdataClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 # Dominant category concern
                 if (modal_pct > 80) {
                     self$results$distribution$addRow(rowKey="dominance_warning", values=list(
-                        metric="Dominance Warning",
-                        value=paste0(modal_pct, "%"),
-                        interpretation="One category dominates - consider data quality"
+                        metric="Dominance Warning (% in modal category)",
+                        value=as.numeric(modal_pct),
+                        interpretation=sprintf("One category ('%s') holds %.1f%% of complete cases; check whether that reflects the population or a data-entry default",
+                                              modal_category, modal_pct)
                     ))
                 }
+
+            } else {
+                # .init() creates the row set from the variable's TYPE alone, but
+                # the fill conditions above are narrower. Without this branch a
+                # numeric variable with a single complete case - or a date,
+                # date-time or logical column, which is neither numeric nor
+                # factor/character - rendered a visible table whose Value and
+                # Interpretation cells were all blank, with nothing to say why.
+                reason <- if (is_numeric) {
+                    sprintf("Distribution statistics need at least 2 complete numeric observations; this variable has %d.",
+                            n_complete)
+                } else if (is_categorical) {
+                    "Distribution statistics need at least 1 complete observation; every value of this variable is missing."
+                } else {
+                    paste("Distribution statistics are computed for numeric and for factor/character variables only.",
+                          "This variable is neither (for example a date, date-time or logical column);",
+                          "convert it to a numeric or a nominal variable to describe it here.")
+                }
+                self$results$distribution$setNote("notComputable", reason)
+                for (key in self$results$distribution$rowKeys)
+                    self$results$distribution$setRow(rowKey=key, values=list(
+                        value=NA, interpretation="Not computable"))
             }
         },
 
@@ -907,6 +1118,11 @@ checkdataClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 outlier_analysis <- private$.advancedOutlierDetection(variable)
                 outliers_found <- length(outlier_analysis$outlier_indices)
                 private$.outlier_transform <- outlier_analysis$transform_applied
+                # Detection actually ran; only now may a count of 0 be reported
+                # as "nothing was flagged" rather than "nothing was looked at".
+                private$.outliers_assessed <- TRUE
+                private$.outliers_informative_only <- isTRUE(outlier_analysis$is_informative_only)
+                private$.outlier_n_methods <- outlier_analysis$n_methods
 
                 # Show informative-only warning if small sample
                 if (!is.null(outlier_analysis$is_informative_only) && outlier_analysis$is_informative_only) {
@@ -915,71 +1131,90 @@ checkdataClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     self$results$outlierMethodSummary$setTitle("Method Summary (INFORMATIVE ONLY - n<10)")
                 }
 
-                # Populate method summary table (always shown when outlier analysis runs)
+                # Populate method summary table (always shown when outlier
+                # analysis runs). The rows were created in .init(); only the
+                # computed counts are set here, so the table keeps its shape
+                # across run cycles.
                 self$results$outlierMethodSummary$setVisible(TRUE)
 
-                # Add Z-score method
-                self$results$outlierMethodSummary$addRow(rowKey="zscore", values=list(
-                    method="Z-score",
-                    threshold="|z| > 3",
-                    outliers_detected=length(outlier_analysis$all_methods$zscore$indices),
-                    note=outlier_analysis$all_methods$zscore$method_note
-                ))
+                self$results$outlierMethodSummary$setRow(rowKey="zscore", values=list(
+                    outliers_detected=length(outlier_analysis$all_methods$zscore$indices)))
 
-                # Add IQR method
-                self$results$outlierMethodSummary$addRow(rowKey="iqr", values=list(
-                    method="IQR (1.5\u{D7}IQR)",
-                    threshold="< Q1-1.5\u{D7}IQR or > Q3+1.5\u{D7}IQR",
-                    outliers_detected=length(outlier_analysis$all_methods$iqr$indices),
-                    note=outlier_analysis$all_methods$iqr$method_note
-                ))
+                self$results$outlierMethodSummary$setRow(rowKey="iqr", values=list(
+                    outliers_detected=length(outlier_analysis$all_methods$iqr$indices)))
 
-                # Add MAD method if available
                 if (!is.null(outlier_analysis$all_methods$mad)) {
-                    self$results$outlierMethodSummary$addRow(rowKey="mad", values=list(
-                        method="Modified Z-score (MAD)",
-                        threshold="|modified-z| > 3.5",
-                        outliers_detected=length(outlier_analysis$all_methods$mad$indices),
-                        note=outlier_analysis$all_methods$mad$method_note
-                    ))
+                    self$results$outlierMethodSummary$setRow(rowKey="mad", values=list(
+                        outliers_detected=length(outlier_analysis$all_methods$mad$indices)))
+                } else {
+                    self$results$outlierMethodSummary$setRow(rowKey="mad", values=list(
+                        outliers_detected=NA,
+                        note="Not computed: needs more than 3 complete values and a non-zero MAD; detection here rests on the other two methods"))
                 }
 
-                # Add transformation info if applied
-                if (outlier_analysis$transform_applied != "none") {
-                    self$results$outlierMethodSummary$addRow(rowKey="transform", values=list(
-                        method="Transformation",
-                        threshold=outlier_analysis$transform_applied,
-                        outliers_detected=NA,
-                        note="Applied before outlier detection to handle skewness"
-                    ))
+                # Transformation status is a table note rather than a fourth row,
+                # so the row set stays fixed. A note is always written (never
+                # left over from a previous run's option setting).
+                transform_status <- if (!is.null(outlier_analysis$transform_skipped)) {
+                    outlier_analysis$transform_skipped
+                } else if (outlier_analysis$transform_applied != "none") {
+                    sprintf(paste("Counts were computed after a %s transformation.",
+                                  "Flagged values are reported on the original scale, while thresholds and scores are on the %s scale,",
+                                  "so do not compare a reported bound directly against a reported value."),
+                            outlier_analysis$transform_applied, outlier_analysis$transform_applied)
+                } else {
+                    "Counts were computed on the raw (untransformed) values."
                 }
+                self$results$outlierMethodSummary$setNote("transform", transform_status)
 
                 if (outliers_found > 0) {
                     # Show outliers table, hide no outliers message
                     self$results$outliers$setVisible(TRUE)
                     self$results$noOutliers$setVisible(FALSE)
 
-                    # Get original row numbers
+                    # Get original row numbers. These index the analysis
+                    # dataset, i.e. the rows AFTER any jamovi row filter, so say
+                    # so - the surrounding text asks the user to go and check
+                    # each flagged row in the spreadsheet.
                     complete_indices <- which(!is.na(variable))
+                    self$results$outliers$setNote("rowRef", paste(
+                        "Row numbers refer to the rows included in this analysis.",
+                        "If a row filter is active they will not match the spreadsheet row numbers."))
 
                     for (i in seq_along(outlier_analysis$outlier_indices)) {
                         outlier_idx <- outlier_analysis$outlier_indices[i]
                         original_row <- complete_indices[outlier_idx]
 
-                        # FIXED: Use transformed z-score for severity
                         z_score_transformed <- outlier_analysis$transformed_z_scores[outlier_idx]
                         confidence_level <- outlier_analysis$detection_count[i]
 
+                        # Rank magnitude on the most robust statistic actually
+                        # available for this point. The ordinary Z-score is
+                        # bounded above by (n-1)/sqrt(n) - only 1.79 at n = 5 -
+                        # and is itself inflated by the outlier it is measuring,
+                        # so ranking on it understated (and at small n outright
+                        # contradicted) every point flagged by the other two
+                        # methods. The MAD-based modified Z-score is not bounded
+                        # that way and is on the same nominal sigma scale.
+                        if (!is.null(outlier_analysis$modified_z_scores)) {
+                            severity_score <- outlier_analysis$modified_z_scores[outlier_idx]
+                            severity_basis <- "modified Z"
+                        } else {
+                            severity_score <- z_score_transformed
+                            severity_basis <- "Z"
+                        }
+
                         # Build severity text with scale notation
                         scale_note <- if (outlier_analysis$transform_applied != "none") {
-                            paste0(" on ", outlier_analysis$transform_applied, " scale")
+                            paste0(", ", outlier_analysis$transform_applied, " scale")
                         } else {
                             ""
                         }
 
-                        severity_text <- paste0(private$.outlierSeverity(z_score_transformed),
-                                              " (", confidence_level, "/", outlier_analysis$n_methods, " methods",
-                                              scale_note, ")")
+                        severity_text <- paste0(private$.outlierSeverity(severity_score),
+                                              " (flagged by ", confidence_level, " of ",
+                                              outlier_analysis$n_methods, " methods; magnitude by ",
+                                              severity_basis, scale_note, ")")
 
                         # Per-method flags.
                         #
@@ -1019,11 +1254,20 @@ checkdataClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     } else {
                         ""
                     }
+                    # Neither the threshold nor the method count may be
+                    # hard-coded: the threshold is 1 below n = 10, and only 2
+                    # methods run whenever the MAD is unavailable. The old text
+                    # read ">=2 of the 3 methods" directly above a Method Summary
+                    # whose MAD row said "Not computed".
+                    min_methods <- if (isTRUE(outlier_analysis$is_informative_only)) 1L else 2L
                     no_outliers_message <- paste0(
-                        "<p style='color: #28a745; font-weight: bold;'>No consensus outliers detected</p>",
-                        "<p>No values were flagged by \u{2265}2 methods", transform_note, ". ",
-                        "See Method Summary table for individual method results. ",
-                        "This indicates good data quality for this variable.</p>"
+                        "<div style='padding: 12px 15px; background-color: rgba(40, 167, 69, 0.14); border-left: 4px solid #28a745; color: inherit; border-radius: 4px;'>",
+                        "<p style='font-weight: bold; margin-top: 0;'>No outliers detected</p>",
+                        "<p style='margin-bottom: 0;'>No value was flagged by ", min_methods, " or more of the ",
+                        outlier_analysis$n_methods, " methods that ran", transform_note, ". ",
+                        "See the Method Summary table for what each method flagged on its own. ",
+                        "This does not establish that the variable is free of erroneous values: these methods ",
+                        "detect isolated extreme values, not miscoded values that fall inside the observed range.</p></div>"
                     )
                     self$results$noOutliers$setContent(no_outliers_message)
                 }
@@ -1032,22 +1276,67 @@ checkdataClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 self$results$outliers$setVisible(FALSE)
                 self$results$outlierMethodSummary$setVisible(FALSE)
                 self$results$noOutliers$setVisible(TRUE)
-                no_outliers_message <- paste0("<p style='color: #ffc107; font-weight: bold;'>Insufficient data for outlier detection</p><p><strong>HEURISTIC LIMITATION:</strong> At least 3 complete observations are required for outlier detection. Current n=", n_complete, ".</p>")
+                no_outliers_message <- paste0(
+                    "<div style='padding: 12px 15px; background-color: rgba(255, 193, 7, 0.16); border-left: 4px solid #ffc107; color: inherit; border-radius: 4px;'>",
+                    "<p style='font-weight: bold; margin-top: 0;'>Insufficient data for outlier detection</p>",
+                    "<p style='margin-bottom: 0;'>At least 3 complete observations are required; this variable has n=", n_complete, ". ",
+                    "No outlier screening was performed, so the Outliers component of the quality grade below carries no penalty ",
+                    "and the grade says nothing about extreme values here.</p></div>")
                 self$results$noOutliers$setContent(no_outliers_message)
             } else if (!is_numeric) {
                 # Non-numeric variables - explain why outlier detection isn't applicable
                 self$results$outliers$setVisible(FALSE)
                 self$results$outlierMethodSummary$setVisible(FALSE)
                 self$results$noOutliers$setVisible(TRUE)
-                no_outliers_message <- "<p style='color: #17a2b8; font-weight: bold;'>Outlier detection not applicable</p><p>Outlier analysis is only available for numeric variables. This variable is categorical.</p>"
+                no_outliers_message <- paste0(
+                    "<div style='padding: 12px 15px; background-color: rgba(23, 162, 184, 0.14); border-left: 4px solid #17a2b8; color: inherit; border-radius: 4px;'>",
+                    "<p style='font-weight: bold; margin-top: 0;'>Outlier detection not applicable</p>",
+                    "<p style='margin-bottom: 0;'>Outlier analysis is defined for numeric variables only; this variable is not numeric. ",
+                    "The Outliers component of the quality grade below carries no penalty as a result.</p></div>")
                 self$results$noOutliers$setContent(no_outliers_message)
             }
 
             return(outliers_found)
         },
 
+        # Clear every computed output before the error exit.
+        #
+        # .init() has already created the missingVals, distribution and
+        # outlierMethodSummary rows by the time .run() can detect an empty
+        # dataset, and jmvcore restores the PREVIOUS run's cell values into rows
+        # whose clearWith does not name the option that changed. Without this, a
+        # red "no observations" box sat directly above a fully populated Missing
+        # Data table describing the pre-filter data. Only elements whose
+        # visibility .run() re-establishes on every cycle are hidden here: hiding
+        # a declaratively-visible element (aboutAnalysis, caveatsAssumptions,
+        # naturalSummary) would override its `visible:` expression and keep it
+        # hidden after the user fixed the filter.
+        .clearComputedResults = function() {
+            for (nm in c("missingVals", "distribution", "duplicates", "patterns",
+                         "outliers", "outlierMethodSummary"))
+                self$results[[nm]]$deleteRows()
+            for (nm in c("qualityText", "noOutliers", "naturalSummary"))
+                self$results[[nm]]$setContent("")
+            for (nm in c("qualityText", "missingVals", "distribution", "duplicates",
+                         "patterns", "outliers", "noOutliers", "notices"))
+                self$results[[nm]]$setVisible(FALSE)
+        },
+
         .run = function() {
             private$.outlier_transform <- "none"
+            private$.outliers_assessed <- FALSE
+            private$.outliers_informative_only <- FALSE
+            private$.outlier_n_methods <- 3
+
+            # Assigned only inside the numeric distribution block below. It is
+            # initialised here so the limitations text can test !is.null(skewness)
+            # instead of exists("skewness"): exists() searches the enclosing
+            # environment chain, which for an R6 method reaches this package's
+            # imports environment, where NAMESPACE's
+            # importFrom(moments, kurtosis, skewness) makes the name resolve to a
+            # FUNCTION. The guard was therefore always TRUE, and one change to
+            # the surrounding condition would have handed a closure to abs().
+            skewness <- NULL
 
             # TODO (forward-looking): no `.()` wrapping anywhere in this file
             # (~2.2k LOC of clinical interpretation copy). Address in a
@@ -1079,27 +1368,30 @@ checkdataClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             # Enhanced input validation with user guidance
             if (is.null(self$options$var)) {
                 todo_content <- "
-                <h3> ClinicoPath Data Quality Assessment</h3>
+                <h3>ClinicoPath Data Quality Assessment</h3>
                 <p><strong>Purpose:</strong> Comprehensive evaluation of data completeness, accuracy, and patterns for clinical research.</p>
 
-                <p><strong> IMPORTANT:</strong> Outlier detection uses a <strong>consensus approach</strong> -
+                <p><strong>IMPORTANT:</strong> Outlier detection uses a <strong>consensus approach</strong> -
                 points are only flagged if detected by \u{2265}2 of 3 methods (Z-score, IQR, Modified Z-score).
-                Points flagged by only 1 method are <strong>not shown</strong>, even if they exceed |z|>3.</p>
+                Points flagged by only 1 method are <strong>not shown</strong>, even if they exceed |z|>3.
+                Two exceptions: below n = 10 single-method flags ARE shown, labelled informative-only and excluded
+                from the quality grade; and the Modified Z-score needs more than 3 complete values and a non-zero
+                MAD, so only the other two methods run when it is unavailable.</p>
 
                 <h4>Required Input:</h4>
                 <ul>
                     <li><strong>Variable to Check:</strong> Select any variable for quality assessment</li>
                 </ul>
 
-                <h4> Analysis Options:</h4>
+                <h4>Analysis Options:</h4>
                 <ul>
                     <li><strong>Outlier Analysis:</strong> Consensus-based detection (\u{2265}2 of 3 methods: Z-score |z|>3, IQR 1.5\u{D7}rule, Modified Z-score |z|>3.5)</li>
-                    <li><strong>Distribution Analysis:</strong> Descriptive statistics and normality assessment</li>
+                    <li><strong>Distribution Analysis:</strong> Descriptive statistics, robust spread (MAD, IQR), coefficient of variation and skewness</li>
                     <li><strong>Duplicate Analysis:</strong> Identify repeated values and patterns</li>
                     <li><strong>Pattern Analysis:</strong> Missing data mechanisms and systematic issues</li>
                 </ul>
 
-                <h4> Assessment Dimensions:</h4>
+                <h4>Assessment Dimensions:</h4>
                 <ul>
                     <li><strong>Completeness:</strong> Missing data evaluation and impact assessment</li>
                     <li><strong>Accuracy:</strong> Outlier detection and range validation</li>
@@ -1107,7 +1399,7 @@ checkdataClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     <li><strong>Clinical Validity:</strong> Context-specific validation (age, lab values, etc.)</li>
                 </ul>
 
-                <h4> Quality Grading:</h4>
+                <h4>Quality Grading:</h4>
                 <ul>
                     <li><strong>Grade A:</strong> Excellent quality - ready for analysis</li>
                     <li><strong>Grade B:</strong> Good quality - minor issues documented</li>
@@ -1115,7 +1407,7 @@ checkdataClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     <li><strong>Grade D:</strong> Poor quality - major intervention required</li>
                 </ul>
 
-                <h4> Clinical Applications:</h4>
+                <h4>Clinical Applications:</h4>
                 <ul>
                     <li><strong>Clinical Trials:</strong> Regulatory compliance and data monitoring</li>
                     <li><strong>Observational Studies:</strong> Data integrity assessment</li>
@@ -1127,28 +1419,25 @@ checkdataClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 return()
             }
             
-            # Enhanced error checking and validation
-            # Render notices as HTML to avoid the jamovi protobuf serialization
-            # failure triggered by dynamically inserted jmvcore::Notice objects.
-            if (nrow(self$data) == 0) {
-                self$results$todo$setVisible(TRUE)
-                self$results$todo$setContent(
-                    "<div style='padding: 15px; background-color: rgba(216, 33, 50, 0.18); border-left: 4px solid #dc3545; color: inherit; border-radius: 5px;'><strong>Error:</strong> Dataset contains no rows. Please provide data for quality assessment.</div>"
-                )
-                return()
-            }
-
             # Get variable data with enhanced validation
             variable <- self$data[[self$options$var]]
             var_name <- self$options$var
-            
-            # Comprehensive data validation
+
+            # Comprehensive data validation. An empty dataset - no rows, or a row
+            # filter that excludes every case - arrives here as a zero-length
+            # variable and is reported by .validateData, so this is the SINGLE
+            # error exit. .run() used to carry its own nrow(self$data) == 0 test
+            # a few lines above, whose early return made this branch unreachable.
             validation_results <- private$.validateData(variable, var_name)
-            
-            # Handle validation errors
+
+            # Handle validation errors.
+            # Rendered as HTML rather than via jmvcore::Notice$new + insert(),
+            # which is a documented protobuf serialization risk (see
+            # docs/NOTICE_TO_HTML_CONVERSION_GUIDE.md).
             if (!validation_results$is_valid) {
+                private$.clearComputedResults()
                 self$results$todo$setVisible(TRUE)
-                err_msg <- htmltools::htmlEscape(paste(validation_results$error_messages, collapse = "; "))
+                err_msg <- htmltools::htmlEscape(paste(validation_results$error_messages, collapse = " "))
                 self$results$todo$setContent(sprintf(
                     "<div style='padding: 15px; background-color: rgba(216, 33, 50, 0.18); border-left: 4px solid #dc3545; color: inherit; border-radius: 5px;'><strong>Data Validation Error:</strong> %s</div>",
                     err_msg
@@ -1199,6 +1488,19 @@ checkdataClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             # Use the refactored .populateOutlierAnalysis method
             outliers_found <- private$.populateOutlierAnalysis(variable, is_numeric, n_complete)
 
+            # Two different questions, kept apart deliberately:
+            #   outliers_assessed  - did detection run at all? (0 flags means
+            #                        "nothing flagged" only when it did)
+            #   outliers_scored    - is the result robust enough to move the
+            #                        grade? Below n = 10 detection falls back to
+            #                        single-method flags that the detector itself
+            #                        labels "not statistically robust", so those
+            #                        flags are reported but not scored and do not
+            #                        raise outlier-rate warnings.
+            outliers_assessed <- isTRUE(private$.outliers_assessed)
+            outliers_informative_only <- isTRUE(private$.outliers_informative_only)
+            outliers_scored <- outliers_assessed && !outliers_informative_only
+
             # Enhanced distribution analysis for numeric and categorical variables
             # Use the refactored .populateDistributionAnalysis method
             if (self$options$showDistribution) {
@@ -1212,7 +1514,11 @@ checkdataClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 
                 # Enhanced duplicate detection
                 if (is_categorical) {
-                    # For categorical data, show all frequencies
+                    # For categorical data this lists every category, including
+                    # those occurring once - a frequency table, not duplicates -
+                    # so the heading is corrected to match what is shown. The
+                    # numeric branch below does filter to freq > 1.
+                    self$results$duplicates$setTitle("Value Frequencies (all categories)")
                     freq_table_sorted <- sort(freq_table, decreasing = TRUE)
                     max_display <- min(20, length(freq_table_sorted))  # Limit display
                     
@@ -1226,6 +1532,7 @@ checkdataClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     }
                 } else {
                     # For numeric data, show only duplicates
+                    self$results$duplicates$setTitle("Duplicate Values")
                     duplicates <- freq_table[freq_table > 1]
                     
                     if (length(duplicates) > 0) {
@@ -1331,7 +1638,7 @@ checkdataClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 }
                 
                 # High outlier rate pattern (enhanced)
-                if (outliers_found > 0.05 * n_complete) {
+                if (outliers_scored && outliers_found > 0.05 * n_complete) {
                     outlier_rate_pct <- round(100 * outliers_found / n_complete, 1)
                     severity_desc <- ifelse(outlier_rate_pct > 15, "Very high",
                                           ifelse(outlier_rate_pct > 10, "High", "Elevated"))
@@ -1424,57 +1731,109 @@ checkdataClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             quality_score <- quality_score - missing_penalty
 
             # Component 2: Outlier assessment (max penalty: 30 points)
-            outlier_rate <- ifelse(n_complete > 0, outliers_found / n_complete, 0)
+            #
+            # .populateOutlierAnalysis returns 0 both when nothing was flagged and
+            # when nothing was looked at (checkbox unticked, non-numeric variable,
+            # or n < 3). Scoring cannot tell those apart from the count alone, so
+            # the not-assessed case is now carried explicitly: no penalty is
+            # charged for a check that never ran, and the breakdown says so rather
+            # than reporting a fabricated "Outlier rate 0.0%". Unticking a
+            # display-only checkbox used to raise the headline grade by up to 30
+            # points and assert a fact the analysis had not checked.
+            outlier_rate <- ifelse(outliers_assessed && n_complete > 0, outliers_found / n_complete, 0)
             outlier_penalty <- 0
-            if (outlier_rate > 0.15) {
-                outlier_penalty <- 30
-                quality_issues <- c(quality_issues, "very high outlier rate (>15%)")
-            } else if (outlier_rate > 0.10) {
-                outlier_penalty <- 20
-                quality_issues <- c(quality_issues, "high outlier rate (10-15%)")
-            } else if (outlier_rate > 0.05) {
-                outlier_penalty <- 10
-                quality_issues <- c(quality_issues, "elevated outlier rate (5-10%)")
+            if (outliers_scored) {
+                if (outlier_rate > 0.15) {
+                    outlier_penalty <- 30
+                    quality_issues <- c(quality_issues, "very high outlier rate (>15%)")
+                } else if (outlier_rate > 0.10) {
+                    outlier_penalty <- 20
+                    quality_issues <- c(quality_issues, "high outlier rate (10-15%)")
+                } else if (outlier_rate > 0.05) {
+                    outlier_penalty <- 10
+                    quality_issues <- c(quality_issues, "elevated outlier rate (5-10%)")
+                }
             }
-            component_scores$outliers <- list(penalty = outlier_penalty, max_penalty = 30,
-                                              description = sprintf("Outlier rate %.1f%%", outlier_rate * 100))
+            outlier_skip_reason <- if (!isTRUE(self$options$showOutliers)) {
+                "the Outlier analysis option is switched off"
+            } else if (!is_numeric) {
+                "this is not a numeric variable"
+            } else if (!outliers_assessed) {
+                sprintf("outlier detection needs at least 3 complete values and this variable has %d", n_complete)
+            } else if (outliers_informative_only) {
+                sprintf(paste("below n = 10 (here n = %d) only single-method flags are available and they are not",
+                              "statistically robust, so they are reported but not scored"), n_complete)
+            } else {
+                ""   # unreachable: this branch means detection ran and was scored
+            }
+            component_scores$outliers <- list(
+                penalty = outlier_penalty, max_penalty = 30,
+                description = if (outliers_scored) sprintf("Outlier rate %.1f%%", outlier_rate * 100)
+                              else paste("NOT ASSESSED -", outlier_skip_reason))
             quality_score <- quality_score - outlier_penalty
 
             # Component 3: Variability assessment (max penalty: 25 points)
+            #
+            # Scored on the NUMBER of distinct values, not on the ratio
+            # n_unique / n_complete. The ratio makes the penalty grow with sample
+            # size for any variable with a fixed set of levels: on the bundled
+            # histopathology data (n = 250) Sex, Group, LVI, PNI and Death each
+            # have 2 distinct values, ratio 0.008, and took the full 25-point
+            # penalty - Grade C, "Quality Concerns Detected", for a complete and
+            # clean binary column - while the same column at n = 125 would have
+            # scored Grade B. The headline grade was being driven by n, not by
+            # quality. A count of distinct values does not depend on n.
+            #
+            # Only a constant is penalised: one distinct value means the column
+            # carries no information at all. A small number of levels is a
+            # property of the measurement rather than a defect, and is already
+            # described, with its percentage, in the Data Patterns table and in
+            # the VARIABLE CHARACTERISTICS block. Categorical variables are not
+            # assessed at all - "few levels" is what a factor IS.
             variability_penalty <- 0
-            uniqueness_ratio <- 0  # defined up-front so an all-NA column (n_complete==0) does not crash the component description below
-            if (n_complete > 0) {
-                uniqueness_ratio <- n_unique / n_complete
-                if (uniqueness_ratio < 0.01) {
-                    variability_penalty <- 25
-                    quality_issues <- c(quality_issues, "extremely low variability (<1% unique)")
-                } else if (uniqueness_ratio < 0.05) {
-                    variability_penalty <- 15
-                    quality_issues <- c(quality_issues, "very low variability (<5% unique)")
-                } else if (uniqueness_ratio < 0.1) {
-                    variability_penalty <- 8
-                    quality_issues <- c(quality_issues, "low variability (<10% unique)")
-                }
+            variability_assessed <- n_complete > 0 && !is_categorical
+            if (variability_assessed && n_unique == 1) {
+                variability_penalty <- 25
+                quality_issues <- c(quality_issues, "no variability (a single distinct value)")
             }
-            component_scores$variability <- list(penalty = variability_penalty, max_penalty = 25,
-                                                 description = sprintf("Uniqueness %.1f%%", uniqueness_ratio * 100))
+            component_scores$variability <- list(
+                penalty = variability_penalty, max_penalty = 25,
+                description = if (is_categorical) {
+                    "NOT ASSESSED - categorical variable"
+                } else if (n_complete == 0) {
+                    "NOT ASSESSED - no complete observations"
+                } else if (n_unique == 1) {
+                    sprintf("Constant: 1 distinct value across %d complete observations", n_complete)
+                } else {
+                    sprintf("%d distinct values across %d complete observations", n_unique, n_complete)
+                })
             quality_score <- quality_score - variability_penalty
 
             # Component 4: Clinical validity assessment (max penalty: 20 points, if enabled)
             clinical_penalty <- 0
             clinical_issues_found <- private$.clinicalContextValidation(variable, var_name)
+            # Entries that only report "units could not be auto-detected" are not
+            # plausibility failures and carry no penalty, so the printed
+            # description has to count the SAME set the penalty counts. It used
+            # the unfiltered list, so a Weight column of undetectable units
+            # printed "-0 / 20 pts  (1 plausibility checks failed)" - a
+            # self-contradicting row in the block that exists to explain the
+            # grade. Hoisted out of the if so there is one definition for the
+            # penalty, the description and the notice below.
+            penalizable_clinical <- list()
             if (!is.null(clinical_issues_found) && length(clinical_issues_found) > 0) {
-                penalizable <- clinical_issues_found[!grepl("auto-detect|could not auto", clinical_issues_found, ignore.case = TRUE)]
-                if (length(penalizable) > 0) {
-                    clinical_penalty <- min(20, length(penalizable) * 5)
-                    quality_issues <- c(quality_issues, sprintf("clinical plausibility issues (%d checks failed)", length(penalizable)))
+                penalizable_clinical <- clinical_issues_found[
+                    !grepl("auto-detect|could not auto", clinical_issues_found, ignore.case = TRUE)]
+                if (length(penalizable_clinical) > 0) {
+                    clinical_penalty <- min(20, length(penalizable_clinical) * 5)
+                    quality_issues <- c(quality_issues, sprintf("clinical plausibility issues (%d checks failed)", length(penalizable_clinical)))
                 } else {
                     quality_issues <- c(quality_issues, "clinical units unclear (not penalized)")
                 }
             }
             component_scores$clinical <- list(penalty = clinical_penalty, max_penalty = 20,
                                               description = sprintf("%d plausibility checks failed",
-                                                                   ifelse(is.null(clinical_issues_found), 0, length(clinical_issues_found))))
+                                                                   length(penalizable_clinical)))
             quality_score <- quality_score - clinical_penalty
 
             # Component 5: Sample size assessment (max penalty: 30 points)
@@ -1510,14 +1869,21 @@ checkdataClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             # docs/NOTICE_TO_HTML_CONVERSION_GUIDE.md). Note: `todo` is hidden once
             # a variable is selected, so alerts must NOT be routed there.
             quality_notices_html <- list()
+            # STRONG_WARNING and WARNING used to share a background, a foreground
+            # and the title "Warning", differing only in a 4px border colour -
+            # so "Severe missing data: 62.0% missing" rendered indistinguishably
+            # from "Small sample size (n=25)". They now differ in tint and title.
+            # Tints are translucent with `color: inherit` so they composite over
+            # jamovi's light AND dark themes; the opaque #fff3cd / #d1ecf1 cards
+            # were the last light-mode-only panels left in this file.
             .noticeBox <- function(level, msg) {
                 cfg <- switch(level,
-                    STRONG_WARNING = list(bg = "#fff3cd", border = "#ff9800", title = "Warning", color = "#856404"),
-                    WARNING        = list(bg = "#fff3cd", border = "#ffc107", title = "Warning", color = "#856404"),
-                    INFO           = list(bg = "#d1ecf1", border = "#17a2b8", title = "Note",    color = "#0c5460"))
+                    STRONG_WARNING = list(bg = "rgba(255, 152, 0, 0.20)", border = "#e65100", title = "Important Warning"),
+                    WARNING        = list(bg = "rgba(255, 193, 7, 0.14)", border = "#ffc107", title = "Warning"),
+                    INFO           = list(bg = "rgba(23, 162, 184, 0.14)", border = "#17a2b8", title = "Note"))
                 paste0(
                     "<div style='padding: 12px 15px; margin: 6px 0; background-color: ", cfg$bg,
-                    "; border-left: 4px solid ", cfg$border, "; color: ", cfg$color,
+                    "; border-left: 4px solid ", cfg$border, "; color: inherit",
                     "; border-radius: 4px;'><strong>", cfg$title, ":</strong> ", msg, "</div>")
             }
 
@@ -1533,8 +1899,14 @@ checkdataClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             }
 
             # STRONG_WARNING: Very high outlier rate (>15%)
-            outlier_rate <- ifelse(n_complete > 0, outliers_found / n_complete, 0)
-            if (outlier_rate > 0.15) {
+            # outlier_rate is the assessed-aware value computed with Component 2;
+            # recomputing it here would resurrect the not-assessed = 0% claim.
+            # Gated on outliers_scored, not merely outliers_assessed: at n = 9 a
+            # single non-robust IQR flag is an 11.1% "high outlier rate".
+            if (!outliers_scored) {
+                # no outlier-rate alert; the informative-only status is stated in
+                # the table title and in the LIMITATIONS section
+            } else if (outlier_rate > 0.15) {
                 quality_notices_html$veryHighOutliers <- .noticeBox("STRONG_WARNING", sprintf(
                     "Very high outlier rate: %.1f%% of data flagged as outliers. Verify measurement procedures and consider robust analysis methods.",
                     outlier_rate * 100))
@@ -1555,22 +1927,26 @@ checkdataClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     n_total))
             }
 
-            # STRONG_WARNING: Extremely low variability (<1% unique)
-            uniqueness_ratio <- ifelse(n_complete > 0, n_unique / n_complete, 0)
-            if (uniqueness_ratio < 0.01) {
+            # STRONG_WARNING: constant variable.
+            #
+            # Derived from the Component 3 penalty so the notice and the grade
+            # cannot disagree. The previous version recomputed the ratio as
+            # ifelse(n_complete > 0, n_unique / n_complete, 0), and 0 < 0.01, so a
+            # column in which EVERY value was missing raised "Extremely low
+            # variability ... (0 unique out of 0)" - pointing the reader at a
+            # constant-value problem that does not exist, next to the 100%-missing
+            # report that does.
+            if (variability_penalty == 25) {
                 quality_notices_html$extremeLowVar <- .noticeBox("STRONG_WARNING", sprintf(
-                    "Extremely low variability: <1%% unique values (%d unique out of %d). Investigate constant value cause or data collection procedures.",
-                    n_unique, n_complete))
+                    "No variability: all %d complete observations hold the same value. Investigate the constant value or the data collection procedure.",
+                    n_complete))
             }
 
             # WARNING: Clinical plausibility issues (if enabled and issues found)
-            if (self$options$clinicalValidation && !is.null(clinical_issues_found) && length(clinical_issues_found) > 0) {
-                penalizable <- clinical_issues_found[!grepl("auto-detect|could not auto", clinical_issues_found, ignore.case = TRUE)]
-                if (length(penalizable) > 0) {
-                    quality_notices_html$clinicalIssues <- .noticeBox("WARNING", sprintf(
-                        "Clinical plausibility issues: %d validation checks failed. Verify measurement units and clinical plausibility before analysis.",
-                        length(penalizable)))
-                }
+            if (self$options$clinicalValidation && length(penalizable_clinical) > 0) {
+                quality_notices_html$clinicalIssues <- .noticeBox("WARNING", sprintf(
+                    "Clinical plausibility issues: %d validation checks failed. Verify measurement units and clinical plausibility before analysis.",
+                    length(penalizable_clinical)))
             }
 
             # INFO: Analysis complete with quality summary
@@ -1578,8 +1954,13 @@ checkdataClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                          ifelse(quality_score >= 80, "Good",
                          ifelse(quality_score >= 70, "Fair", "Poor")))
             quality_notices_html$analysisComplete <- .noticeBox("INFO", sprintf(
-                "Quality assessment completed: %d observations analyzed. Overall quality: %s (Grade %s). Note: Scoring is heuristic-based; review component breakdown for details.",
-                n_total, grade_desc, quality_grade))
+                "Quality assessment completed: %d observations analyzed. Overall quality: %s (Grade %s). Note: Scoring is heuristic-based; review component breakdown for details.%s",
+                n_total, grade_desc, quality_grade,
+                if (outliers_scored) ""
+                else if (!outliers_assessed)
+                    " Outlier screening did not run for this variable, so the grade excludes it and says nothing about extreme values."
+                else
+                    " Outlier flags below n = 10 are informative-only, so the grade excludes them."))
 
             # Render notices in priority order: STRONG_WARNING -> WARNING -> INFO
             priority_order <- c('severeMissing', 'substantialMissing', 'veryHighOutliers', 'highOutliers',
@@ -1611,8 +1992,8 @@ checkdataClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 "Poor (<70)"
             }
 
-            quality_text <- paste0(quality_text, sprintf(" HEURISTIC QUALITY: Grade %s - %s\n", quality_grade, score_band))
-            quality_text <- paste0(quality_text, "\n  IMPORTANT: This is a HEURISTIC (rule-of-thumb) assessment, NOT a validated metric.\n")
+            quality_text <- paste0(quality_text, sprintf("HEURISTIC QUALITY: Grade %s - %s\n", quality_grade, score_band))
+            quality_text <- paste0(quality_text, "\nIMPORTANT: This is a HEURISTIC (rule-of-thumb) assessment, NOT a validated metric.\n")
             quality_text <- paste0(quality_text, "The score uses arbitrary thresholds. Apply clinical judgment, not automated rules.\n\n")
 
             # Show scoring breakdown for transparency
@@ -1639,7 +2020,7 @@ checkdataClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                                                         component_scores$sample_size$description))
 
             quality_text <- paste0(quality_text, sprintf("                     \u{2500}\u{2500}\u{2500}\u{2500}\u{2500}\u{2500}\u{2500}\u{2500}\u{2500}\u{2500}\u{2500}\u{2500}\u{2500}\u{2500}\u{2500}\u{2500}\n"))
-            quality_text <- paste0(quality_text, sprintf("  HEURISTIC GRADE:   %s (%s)\n\n",
+            quality_text <- paste0(quality_text, sprintf("HEURISTIC GRADE:     %s (%s)\n\n",
                                                         quality_grade, score_band))
 
             # The clinical component can remove up to 20 points from the headline
@@ -1678,17 +2059,26 @@ checkdataClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             quality_text <- paste0(quality_text, sprintf("\u{2022} Unique Values: %d (%.1f%% of complete cases)\n\n", n_unique, unique_pct))
             
             # Completeness assessment
-            quality_text <- paste0(quality_text, " COMPLETENESS ASSESSMENT:\n")
+            quality_text <- paste0(quality_text, "COMPLETENESS ASSESSMENT:\n")
             quality_text <- paste0(quality_text, sprintf("\u{2022} Missing Data Rate: %.1f%% (%d/%d observations)\n", 
                                                         missing_pct, n_missing, n_total))
             quality_text <- paste0(quality_text, sprintf("\u{2022} Completeness Grade: %s\n", 
                                                         private$.interpretMissing(missing_pct)))
             
             # Add missing pattern information if available
+            # Print each detected pattern's DESCRIPTION. This used to print
+            # names(missing_patterns)[1], the internal list key, so the reader saw
+            # "Missing Pattern: mcar_not_applicable" or "clustering" - and every
+            # pattern after the first was silently dropped, which with the MCAR
+            # explanation switched on hid the runs-test result entirely.
             if (n_missing > 0 && self$options$showPatterns) {
                 missing_patterns <- private$.analyzeMissingPatterns(variable)
-                if (length(missing_patterns) > 0) {
-                    quality_text <- paste0(quality_text, "\u{2022} Missing Pattern: ", names(missing_patterns)[1], "\n")
+                for (pattern_text in missing_patterns) {
+                    quality_text <- paste0(quality_text,
+                        paste(strwrap(paste0("\u{2022} Missing Pattern: ", pattern_text),
+                                      width = 78, exdent = 2),
+                              collapse = "\n"),
+                        "\n")
                 }
             }
             quality_text <- paste0(quality_text, "\n")
@@ -1711,7 +2101,7 @@ checkdataClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
                 skewness <- private$.computeSkewness(clean_var)
 
-                quality_text <- paste0(quality_text, " DISTRIBUTION ASSESSMENT:\n")
+                quality_text <- paste0(quality_text, "DISTRIBUTION ASSESSMENT:\n")
                 quality_text <- paste0(quality_text, sprintf("\u{2022} Central Tendency: Mean = %.3f, Median = %.3f\n",
                                                             mean_val, median(clean_var)))
 
@@ -1727,11 +2117,23 @@ checkdataClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 quality_text <- paste0(quality_text, sprintf("\u{2022} Distribution Shape: %s (skewness = %.2f)\n",
                                                             private$.interpretSkewness(skewness), skewness))
                 
-                if (outliers_found > 0) {
-                    quality_text <- paste0(quality_text, sprintf("\u{2022} Outliers Detected: %d (%.1f%% of data)\n", 
+                # This line sits inside `is_numeric && n_complete >= 2` and used
+                # to have no showOutliers guard at all, so with the Outlier
+                # analysis checkbox unticked it printed "None detected (excellent
+                # data quality)" about a check that had never run. Even when the
+                # check DOES run, no flag is absence of evidence, not evidence of
+                # clean data.
+                if (!outliers_assessed) {
+                    quality_text <- paste0(quality_text, "\u{2022} Outliers: not assessed - ", outlier_skip_reason, "\n")
+                } else if (outliers_found > 0) {
+                    quality_text <- paste0(quality_text, sprintf("\u{2022} Outliers Detected: %d (%.1f%% of data)\n",
                                                                 outliers_found, 100*outlier_rate))
                 } else {
-                    quality_text <- paste0(quality_text, "\u{2022} Outliers: None detected (excellent data quality)\n")
+                    quality_text <- paste0(quality_text, sprintf(
+                        "\u{2022} Outliers: no value flagged by %d or more of the %d methods that ran\n",
+                        if (outliers_informative_only) 1L else 2L, private$.outlier_n_methods))
+                    quality_text <- paste0(quality_text, "  This does not establish that the variable is free of erroneous values;\n")
+                    quality_text <- paste0(quality_text, "  these methods find isolated extreme values, not miscoded values inside the observed range.\n")
                 }
                 quality_text <- paste0(quality_text, "\n")
             }
@@ -1739,7 +2141,7 @@ checkdataClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             # Categorical data assessment
             if (is_categorical && n_complete > 0) {
                 categorical_assessment <- private$.analyzeCategoricalQuality(variable)
-                quality_text <- paste0(quality_text, "  CATEGORICAL DATA ASSESSMENT:\n")
+                quality_text <- paste0(quality_text, "CATEGORICAL DATA ASSESSMENT:\n")
                 quality_text <- paste0(quality_text, sprintf("\u{2022} Number of Categories: %d\n", n_unique))
                 
                 if (!is.null(categorical_assessment)) {
@@ -1764,7 +2166,7 @@ checkdataClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             }
             
             # Enhanced recommendations based on grade and context
-            quality_text <- paste0(quality_text, " RECOMMENDATIONS:\n")
+            quality_text <- paste0(quality_text, "RECOMMENDATIONS:\n")
             
             if (quality_grade == "A") {
                 quality_text <- paste0(quality_text, "INTERPRETATION: High-Quality Data (by heuristic rules)\n")
@@ -1798,7 +2200,7 @@ checkdataClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             }
             
             # Specific actionable recommendations
-            quality_text <- paste0(quality_text, "\n SPECIFIC ACTIONS:\n")
+            quality_text <- paste0(quality_text, "\nSPECIFIC ACTIONS:\n")
             
             if (missing_pct > 15) {
                 quality_text <- paste0(quality_text, "\u{2022} MISSING DATA: Investigate missing data mechanisms (MCAR/MAR/MNAR)\n")
@@ -1838,15 +2240,21 @@ checkdataClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             
             # Add context-specific limitations section
             quality_text <- paste0(quality_text, "\n")
-            quality_text <- paste0(quality_text, "  LIMITATIONS OF THIS ASSESSMENT:\n\n")
+            quality_text <- paste0(quality_text, "LIMITATIONS OF THIS ASSESSMENT:\n\n")
 
             limitations_added <- FALSE
 
             # Outlier detection limitations
-            if (is_numeric && self$options$showOutliers) {
+            if (!outliers_assessed) {
+                quality_text <- paste0(quality_text, "\u{2022} OUTLIERS: Not assessed - ", outlier_skip_reason, ".\n")
+                quality_text <- paste0(quality_text, "  The Outliers component of the grade above therefore carries no penalty,\n")
+                quality_text <- paste0(quality_text, "  and the grade says nothing about extreme values in this variable.\n")
+                limitations_added <- TRUE
+            } else if (is_numeric && self$options$showOutliers) {
                 if (n_complete < 10) {
                     quality_text <- paste0(quality_text, "\u{2022} OUTLIERS (n=", n_complete, "): Informative only, NOT statistically robust.\n")
                     quality_text <- paste0(quality_text, "  Single-method flags shown for early QC; manually verify before taking action.\n")
+                    quality_text <- paste0(quality_text, "  These flags do not contribute to the Outliers component of the grade above.\n")
                     limitations_added <- TRUE
                 } else if (outliers_found > 0) {
                     transform_applied <- private$.outlier_transform %in% c("log", "sqrt")
@@ -1857,7 +2265,7 @@ checkdataClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     }
                     quality_text <- paste0(quality_text, "\u{2022} OUTLIERS: Consensus detection", outlier_transform_note, "; assumes approximate normality.\n")
 
-                    if (exists("skewness") && abs(skewness) > 1 && !transform_applied) {
+                    if (!is.null(skewness) && abs(skewness) > 1 && !transform_applied) {
                         quality_text <- paste0(quality_text, "  WARNING: Severe skewness (", round(skewness, 2), ") without transform may cause Z-score false positives.\n")
                     }
                     limitations_added <- TRUE
@@ -1879,7 +2287,11 @@ checkdataClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             }
 
             # Clinical checks limitations
-            if (self$options$clinicalValidation && exists("clinical_issues_found") &&
+            # clinical_issues_found is assigned unconditionally with Component 4
+            # above, so the exists() call here was inert - and, like the skewness
+            # one, would have silently resolved to something in the package's
+            # imports environment had that ever stopped being true.
+            if (self$options$clinicalValidation &&
                 !is.null(clinical_issues_found) && length(clinical_issues_found) > 0) {
                 quality_text <- paste0(quality_text, "\u{2022} CLINICAL CHECKS: Hard-coded plausibility ranges may not suit all populations.\n")
                 quality_text <- paste0(quality_text, "  May over-flag: pediatric, ICU, elite athletes, or diverse ethnic populations.\n")
@@ -1901,9 +2313,24 @@ checkdataClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 limitations_added <- TRUE
             }
 
+            # Missingness-mechanism limitation. This is the one place the MCAR
+            # explanation is guaranteed to reach the user. Its only other consumer
+            # is .analyzeMissingPatterns, called from two sites that are both
+            # gated on showPatterns - a second, unrelated checkbox that is off by
+            # default - so out of the box, ticking "Explain MCAR testability"
+            # changed no table row and no text anywhere.
+            if (isTRUE(self$options$mcarTest)) {
+                quality_text <- paste0(quality_text, "\u{2022} MCAR: Little's MCAR test is multivariate and cannot be computed from a single\n")
+                quality_text <- paste0(quality_text, "  variable - it compares means across missingness patterns using the OTHER variables\n")
+                quality_text <- paste0(quality_text, "  in the dataset. The runs and dropout results reported here are heuristics about\n")
+                quality_text <- paste0(quality_text, "  WHERE the missing values sit, not a test of the missingness mechanism. To test\n")
+                quality_text <- paste0(quality_text, "  MCAR formally, run naniar::mcar_test() on the full dataset.\n")
+                limitations_added <- TRUE
+            }
+
             # General limitation footer
             if (limitations_added) {
-                quality_text <- paste0(quality_text, "\n CRITICAL REMINDER: This is an automated SCREENING tool to identify potential issues.\n")
+                quality_text <- paste0(quality_text, "\nCRITICAL REMINDER: This is an automated SCREENING tool to identify potential issues.\n")
                 quality_text <- paste0(quality_text, "   Final data quality decisions MUST incorporate:\n")
                 quality_text <- paste0(quality_text, "   - Clinical/domain expertise for context\n")
                 quality_text <- paste0(quality_text, "   - Manual verification of flagged values\n")
@@ -1935,12 +2362,23 @@ checkdataClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 }
 
                 # Key findings
+                # "Consensus" only below n = 10 is untrue: there the rule is a
+                # single method, and the flags are excluded from the grade.
                 if (outliers_found > 0) {
-                    summary_html <- paste0(summary_html, sprintf("Consensus outlier detection identified <strong>%d potential outliers</strong> (%.1f%% of non-missing cases). ", outliers_found, (outliers_found/n_complete)*100))
+                    outlier_basis <- if (outliers_informative_only)
+                        "Informative-only outlier screening (single-method flags, n<10, not scored in the grade)"
+                    else
+                        "Consensus outlier detection"
+                    summary_html <- paste0(summary_html, sprintf("%s identified <strong>%d potential outliers</strong> (%.1f%% of non-missing cases). ", outlier_basis, outliers_found, (outliers_found/n_complete)*100))
                 }
 
-                if (!is.null(clinical_issues_found) && length(clinical_issues_found) > 0) {
-                    summary_html <- paste0(summary_html, sprintf("Clinical plausibility checks flagged <strong>%d observations</strong> with values outside typical ranges. ", length(clinical_issues_found)))
+                # One entry per CHECK that failed, never one per observation:
+                # .clinicalContextValidation returns at most one issue per rule,
+                # so an Age column with 40 values above 120 and 3 negative values
+                # produced "flagged 2 observations". A reader pasting this panel
+                # into a methods section would have published a false count.
+                if (length(penalizable_clinical) > 0) {
+                    summary_html <- paste0(summary_html, sprintf("Clinical plausibility checks raised <strong>%d</strong> flag(s) - one per check that failed, not one per value. ", length(penalizable_clinical)))
                 }
 
                 summary_html <- paste0(summary_html, "</p>")
@@ -1973,7 +2411,7 @@ checkdataClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 }
                 summary_html <- paste0(summary_html, "</p>")
 
-                summary_html <- paste0(summary_html, "<p style='font-size: 0.9em; color: #666; margin-top: 15px;'><em>Note: This assessment uses heuristic quality rules and should be combined with clinical/domain expertise for final data quality decisions.</em></p>")
+                summary_html <- paste0(summary_html, "<p style='font-size: 0.9em; opacity: 0.75; margin-top: 15px;'><em>Note: This assessment uses heuristic quality rules and should be combined with clinical/domain expertise for final data quality decisions.</em></p>")
                 summary_html <- paste0(summary_html, "</div>")
 
                 self$results$naturalSummary$setContent(summary_html)
@@ -1991,7 +2429,7 @@ checkdataClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 about_html <- paste0(about_html, "<ul>")
                 about_html <- paste0(about_html, "<li><strong>Missing Data Analysis:</strong> Examines completeness, missing data patterns, and heuristic assessment of potential mechanisms (MCAR/MAR/MNAR) using runs test when sample size permits</li>")
                 about_html <- paste0(about_html, "<li><strong>Outlier Detection:</strong> Uses consensus approach requiring agreement from \u{2265}2 methods (Z-score |z|>3, IQR 1.5\u{D7}rule, Modified Z-score MAD-based |z|>3.5) to minimize false positives</li>")
-                about_html <- paste0(about_html, "<li><strong>Distribution Analysis:</strong> Provides descriptive statistics, normality assessment, and coefficient of variation for numeric variables</li>")
+                about_html <- paste0(about_html, "<li><strong>Distribution Analysis:</strong> Provides descriptive statistics, robust spread (MAD, IQR), coefficient of variation and the moment coefficient of skewness for numeric variables. No normality test is computed</li>")
                 about_html <- paste0(about_html, "<li><strong>Clinical Validation:</strong> Applies hard-coded plausibility ranges for common clinical variables (age, vital signs, lab values) with configurable unit systems</li>")
                 about_html <- paste0(about_html, "<li><strong>Quality Scoring:</strong> Generates heuristic composite score (0-100) based on completeness, outlier prevalence, sample size, and variability</li>")
                 about_html <- paste0(about_html, "</ul>")
@@ -2007,11 +2445,11 @@ checkdataClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 about_html <- paste0(about_html, "<h4>Advanced Options</h4>")
                 about_html <- paste0(about_html, "<ul>")
                 about_html <- paste0(about_html, "<li><strong>Outlier Transformation:</strong> Apply log or square root transformations before outlier detection for right-skewed distributions (common in lab values)</li>")
-                about_html <- paste0(about_html, "<li><strong>MCAR Test:</strong> Perform Little's MCAR test if naniar package available for formal statistical test of missing completely at random assumption</li>")
+                about_html <- paste0(about_html, "<li><strong>Explain MCAR testability:</strong> States why the missingness mechanism cannot be tested formally from a single variable. Little's MCAR test is multivariate, and the runs and dropout results reported here are heuristics about where the missing values sit, not a test of the mechanism. No formal MCAR test is performed by this analysis</li>")
                 about_html <- paste0(about_html, "<li><strong>Rare Category Threshold:</strong> Flag categories occurring in <X% of observations (important for chi-squared test assumptions and modeling stability)</li>")
                 about_html <- paste0(about_html, "</ul>")
 
-                about_html <- paste0(about_html, "<p style='font-size: 0.9em; color: #666; margin-top: 15px;'><em>For detailed methodology and validation studies, see ClinicoPath module documentation at <a href='https://www.serdarbalci.com/ClinicoPathDescriptives/' target='_blank'>https://www.serdarbalci.com/ClinicoPathDescriptives/</a></em></p>")
+                about_html <- paste0(about_html, "<p style='font-size: 0.9em; opacity: 0.75; margin-top: 15px;'><em>For detailed methodology and validation studies, see ClinicoPath module documentation at <a href='https://www.serdarbalci.com/ClinicoPathDescriptives/' target='_blank'>https://www.serdarbalci.com/ClinicoPathDescriptives/</a></em></p>")
                 about_html <- paste0(about_html, "</div>")
 
                 self$results$aboutAnalysis$setContent(about_html)
@@ -2020,7 +2458,7 @@ checkdataClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             # Caveats & Assumptions panel
             if (self$options$showCaveats) {
                 caveats_html <- "<div style='font-family: Arial, sans-serif; line-height: 1.6; padding: 15px; background-color: rgba(255, 211, 33, 0.16); border-left: 4px solid #ffa500; color: inherit;'>"
-                caveats_html <- paste0(caveats_html, "<h3 style='color: #d2691e; margin-top: 0;'> Important Caveats & Assumptions</h3>")
+                caveats_html <- paste0(caveats_html, "<h3 style='color: #d2691e; margin-top: 0;'>Important Caveats &amp; Assumptions</h3>")
 
                 caveats_html <- paste0(caveats_html, "<h4>Heuristic-Based Assessment</h4>")
                 caveats_html <- paste0(caveats_html, "<ul>")
@@ -2055,9 +2493,9 @@ checkdataClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
                 caveats_html <- paste0(caveats_html, "<h4>Statistical Assumptions</h4>")
                 caveats_html <- paste0(caveats_html, "<ul>")
-                caveats_html <- paste0(caveats_html, "<li><strong>Independence assumption:</strong> Outlier and normality tests assume independent observations; may be violated in clustered/longitudinal data</li>")
+                caveats_html <- paste0(caveats_html, "<li><strong>Independence assumption:</strong> Outlier detection assumes independent observations; this may be violated in clustered or longitudinal data</li>")
                 caveats_html <- paste0(caveats_html, "<li><strong>CV calculation:</strong> Coefficient of variation only appropriate for ratio-scale data with meaningful zero; suppressed when |mean| < threshold to avoid instability</li>")
-                caveats_html <- paste0(caveats_html, "<li><strong>Normality tests:</strong> Shapiro-Wilk test is sensitive to sample size (low power for n<30, overpowered for large n); use Q-Q plots and domain knowledge</li>")
+                caveats_html <- paste0(caveats_html, "<li><strong>No normality test is performed:</strong> Distribution shape is summarised by the moment coefficient of skewness with rule-of-thumb bands (|skew| &lt; 0.5 approximately symmetric, &lt; 1 moderately skewed, otherwise highly skewed). These bands are descriptive, not a test, and a value inside a band is not evidence that the distribution is normal. Use Q-Q plots, a formal test elsewhere in jamovi, and domain knowledge when normality actually matters</li>")
                 caveats_html <- paste0(caveats_html, "</ul>")
 
                 caveats_html <- paste0(caveats_html, "<h4>Recommended Workflow</h4>")
@@ -2071,7 +2509,7 @@ checkdataClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 caveats_html <- paste0(caveats_html, "</p>")
 
                 caveats_html <- paste0(caveats_html, "<p style='font-size: 0.9em; color: #d2691e; margin-top: 15px; font-weight: bold;'>")
-                caveats_html <- paste0(caveats_html, " CRITICAL: Automated quality assessment is a starting point, not a substitute for statistical and clinical judgment. Always combine algorithmic screening with expert review before making data cleaning decisions.")
+                caveats_html <- paste0(caveats_html, "CRITICAL: Automated quality assessment is a starting point, not a substitute for statistical and clinical judgment. Always combine algorithmic screening with expert review before making data cleaning decisions.")
                 caveats_html <- paste0(caveats_html, "</p>")
 
                 caveats_html <- paste0(caveats_html, "</div>")

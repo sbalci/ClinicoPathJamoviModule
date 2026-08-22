@@ -51,14 +51,23 @@ items:
       clearWith:
           - vars
 
+    - name:  dataWarnings
+      title: 'Data Warnings'
+      type:  Html
+      visible: false
+      clearWith:
+          - vars
+
     - name:  error
       title: 'Error Message'
       type:  Html
       visible: false
+      clearWith:
+          - vars
 
 
 refs:
-    - report
+    - gt
     - gtExtras
     - ClinicoPathJamoviModule
 

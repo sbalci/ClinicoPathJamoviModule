@@ -310,24 +310,35 @@ vartreeResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 name="notices",
                 title="Important Information",
                 clearWith=list(
-                    "useprunesmaller",
-                    "prunesmaller",
                     "vars",
                     "percvar",
                     "percvarLevel",
                     "summaryvar",
                     "summarylocation",
+                    "style",
                     "prunebelow",
                     "pruneLevel1",
                     "pruneLevel2",
                     "follow",
                     "followLevel1",
                     "followLevel2",
+                    "useprunesmaller",
+                    "prunesmaller",
                     "excl",
-                    "style",
+                    "vp",
                     "pct",
+                    "showcount",
                     "pattern",
-                    "sequence")))
+                    "sequence",
+                    "ptable",
+                    "horizontal",
+                    "sline",
+                    "varnames",
+                    "nodelabel",
+                    "legend",
+                    "mytitle",
+                    "maxwidth",
+                    "showInterpretation")))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="todo",
@@ -342,17 +353,30 @@ vartreeResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "percvarLevel",
                     "summaryvar",
                     "summarylocation",
+                    "style",
                     "prunebelow",
                     "pruneLevel1",
                     "pruneLevel2",
                     "follow",
                     "followLevel1",
                     "followLevel2",
+                    "useprunesmaller",
+                    "prunesmaller",
                     "excl",
-                    "style",
+                    "vp",
                     "pct",
+                    "showcount",
                     "pattern",
-                    "sequence")))
+                    "sequence",
+                    "ptable",
+                    "horizontal",
+                    "sline",
+                    "varnames",
+                    "nodelabel",
+                    "legend",
+                    "mytitle",
+                    "maxwidth",
+                    "showInterpretation")))
             self$add(jmvcore::Preformatted$new(
                 options=options,
                 name="text2",
@@ -364,17 +388,30 @@ vartreeResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "percvarLevel",
                     "summaryvar",
                     "summarylocation",
+                    "style",
                     "prunebelow",
                     "pruneLevel1",
                     "pruneLevel2",
                     "follow",
                     "followLevel1",
                     "followLevel2",
+                    "useprunesmaller",
+                    "prunesmaller",
                     "excl",
-                    "style",
+                    "vp",
                     "pct",
+                    "showcount",
                     "pattern",
-                    "sequence")))
+                    "sequence",
+                    "ptable",
+                    "horizontal",
+                    "sline",
+                    "varnames",
+                    "nodelabel",
+                    "legend",
+                    "mytitle",
+                    "maxwidth",
+                    "showInterpretation")))
             self$add(jmvcore::Preformatted$new(
                 options=options,
                 name="reportSentence",
@@ -386,17 +423,30 @@ vartreeResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "percvarLevel",
                     "summaryvar",
                     "summarylocation",
+                    "style",
                     "prunebelow",
                     "pruneLevel1",
                     "pruneLevel2",
                     "follow",
                     "followLevel1",
                     "followLevel2",
+                    "useprunesmaller",
+                    "prunesmaller",
                     "excl",
-                    "style",
+                    "vp",
                     "pct",
+                    "showcount",
                     "pattern",
-                    "sequence")))
+                    "sequence",
+                    "ptable",
+                    "horizontal",
+                    "sline",
+                    "varnames",
+                    "nodelabel",
+                    "legend",
+                    "mytitle",
+                    "maxwidth",
+                    "showInterpretation")))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="interpretation",
@@ -408,17 +458,30 @@ vartreeResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "percvarLevel",
                     "summaryvar",
                     "summarylocation",
+                    "style",
                     "prunebelow",
                     "pruneLevel1",
                     "pruneLevel2",
                     "follow",
                     "followLevel1",
                     "followLevel2",
+                    "useprunesmaller",
+                    "prunesmaller",
                     "excl",
-                    "style",
+                    "vp",
                     "pct",
+                    "showcount",
                     "pattern",
-                    "sequence")))}))
+                    "sequence",
+                    "ptable",
+                    "horizontal",
+                    "sline",
+                    "varnames",
+                    "nodelabel",
+                    "legend",
+                    "mytitle",
+                    "maxwidth",
+                    "showInterpretation")))}))
 
 vartreeBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
     "vartreeBase",
@@ -448,6 +511,42 @@ vartreeBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' summaries, and interpretation features. Consolidates functionality from 
 #' legacy versions with modern vtree capabilities.
 #' 
+#'
+#' @examples
+#' \donttest{
+#' # percvarLevel, pruneLevel1, pruneLevel2, followLevel1 and followLevel2 are
+#' # 'Level' options. The jamovi compiler forbids a default on those, so the
+#' # generated R function takes them as REQUIRED arguments: pass NULL whenever
+#' # the variable they belong to is not being used.
+#'
+#' # Basic variable tree
+#' vartree(
+#'     data = histopathology,
+#'     vars = c("Grade", "Sex"),
+#'     style = "default",
+#'     showInterpretation = TRUE,
+#'     percvarLevel = NULL,
+#'     pruneLevel1 = NULL,
+#'     pruneLevel2 = NULL,
+#'     followLevel1 = NULL,
+#'     followLevel2 = NULL
+#' )
+#'
+#' # Mean and SD of a continuous variable inside every node
+#' vartree(
+#'     data = histopathology,
+#'     vars = c("Group", "Grade"),
+#'     summaryvar = "Age",
+#'     summarylocation = "allnodes",
+#'     style = "clean",
+#'     showInterpretation = TRUE,
+#'     percvarLevel = NULL,
+#'     pruneLevel1 = NULL,
+#'     pruneLevel2 = NULL,
+#'     followLevel1 = NULL,
+#'     followLevel2 = NULL
+#' )
+#'}
 #' @param data The data as a data frame.
 #' @param vars Categorical variables for tree construction.
 #' @param percvar Variable for percentage calculations.
@@ -455,8 +554,10 @@ vartreeBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' @param summaryvar Continuous variable for statistical summaries (mean, SD)
 #'   in tree nodes.
 #' @param summarylocation Where to display statistical summaries in the tree.
-#' @param style Visual style preset: default (colored), clean (minimal
-#'   colors),  minimal (simplified layout).
+#' @param style Visual style preset: default (gradient-coloured nodes and
+#'   labels), clean (white nodes, uncoloured labels), minimal (vtree's plain
+#'   layout - one flat tone per level, uncoloured labels, and more space between
+#'   nodes).
 #' @param prunebelow Variable for conditional pruning of tree branches.
 #' @param pruneLevel1 First level for pruning condition.
 #' @param pruneLevel2 Second level for pruning condition.
@@ -480,7 +581,9 @@ vartreeBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' @param prunesmaller Minimum count threshold for node pruning.
 #' @param showInterpretation Generate and display automatic interpretation of
 #'   tree results.
-#' @param maxwidth Maximum width for tree display in pixels.
+#' @param maxwidth Maximum rendered width of the tree, in points. A tree wider
+#'   than this is scaled down (width and height together, so it is not
+#'   distorted); a tree narrower than this is left at its natural size.
 #' @return A results object containing:
 #' \tabular{llllll}{
 #'   \code{results$notices} \tab \tab \tab \tab \tab a preformatted \cr

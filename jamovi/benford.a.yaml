@@ -6,6 +6,22 @@ menuSubgroup: ClinicoPath Data Quality
 version: '1.0.6'
 jas: '1.2'
 
+description:
+    main: >
+        Tests whether the leading digits of a numeric variable follow Benford's
+        Law, using the MAD conformity classification, a chi-square
+        goodness-of-fit test and the Mantissa Arc Test. Intended as a screen for
+        systematic recording artefacts such as rounding or preferred values.
+    R:
+        dontrun: true
+        usage: |
+            # Leading-digit screen on follow-up times. These span only 1.3
+            # orders of magnitude, so the analysis reports a narrow-range
+            # warning: Benford's Law needs at least two decades.
+            benford(
+                data = histopathology,
+                var = "OverallTime")
+
 options:
     - name: data
       type: Data

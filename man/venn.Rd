@@ -101,17 +101,26 @@ automatically).}
 \item{var7true}{The level in \code{var7} that represents the positive
 condition.}
 
-\item{show_upsetR}{.}
+\item{show_upsetR}{Show the UpSetR matrix-style intersection plot. Suited
+to 4 or more sets, where a Venn diagram becomes unreadable.}
 
-\item{show_complexUpset}{.}
+\item{show_complexUpset}{Show the ComplexUpset intersection plot: the same
+matrix layout as UpSetR, plus optional percentage labels, a minimum
+intersection size filter and degree sorting.}
 
-\item{show_ggvenn}{.}
+\item{show_ggvenn}{Show the classic ggvenn Venn diagram. Handles up to 4
+sets; with 5 or more it displays a message pointing to ggVennDiagram
+instead.}
 
-\item{show_ggVennDiagram}{.}
+\item{show_ggVennDiagram}{Show the ggVennDiagram Venn diagram, which
+supports 2 to 7 sets and the shape, label, edge and palette options in the
+ggVennDiagram Styling panel.}
 
-\item{sortBy}{How to sort the intersections in the UpSet plot. 'None'
-(unsorted) applies to the ComplexUpset engine only; the UpSetR engine
-always orders intersections by frequency.}
+\item{sortBy}{How to sort the intersections in the UpSet plots. 'Frequency'
+orders by intersection size and 'Degree' groups by the number of sets
+involved; both engines honour these. 'None' (unsorted) applies to the
+ComplexUpset engine only - UpSetR has no unsorted mode and falls back to
+frequency.}
 
 \item{minSize}{Minimum size of intersections to display. Applies to the
 ComplexUpset engine only; UpSetR does not filter intersections by minimum
@@ -120,8 +129,9 @@ size.}
 \item{showAnnotations}{Add percentage labels to intersection sizes in
 ComplexUpset plots or enhanced text scaling in UpSetR plots.}
 
-\item{explanatory}{Add detailed explanatory footnotes with interpretation
-guidance for Venn diagrams and set operations.}
+\item{explanatory}{Show all four explanatory panels at once - About This
+Analysis, Clinical Summary, Copy-Ready Clinical Summary and Interpretation
+Guide & Assumptions - without ticking them individually.}
 
 \item{aboutAnalysis}{Display detailed information about Venn diagram
 analysis and interpretation.}
@@ -197,6 +207,7 @@ interpretations.}
 \value{
 A results object containing:
 \tabular{llllll}{
+\code{results$notices} \tab \tab \tab \tab \tab a preformatted \cr
 \code{results$welcome} \tab \tab \tab \tab \tab a html \cr
 \code{results$todo} \tab \tab \tab \tab \tab a html \cr
 \code{results$summary} \tab \tab \tab \tab \tab a table \cr

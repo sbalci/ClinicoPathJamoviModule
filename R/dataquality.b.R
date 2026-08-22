@@ -1,13 +1,14 @@
-#' @title Data Quality Assessment
+#' @title Multi-Variable Visual Quality
 #' @return HTML summary of data quality issues including duplicates and missing values
 #'
 #' @importFrom R6 R6Class
 #' @import jmvcore
-#' @importFrom magrittr %>%
-#' @importFrom dplyr n_distinct
-#' @importFrom htmltools HTML
-#' @importFrom visdat vis_dat vis_miss vis_guess
-#' @importFrom ggplot2 ggsave theme_minimal labs
+#
+# NOTE: no other @importFrom tags here on purpose. Every call in this file is
+# fully namespaced (visdat::, ggplot2::, htmltools::, stats::), and the tags that
+# used to sit here named symbols the file never uses - magrittr's %>%,
+# dplyr::n_distinct, htmltools::HTML, ggplot2::ggsave/theme_minimal - which only
+# inflated NAMESPACE and fed the module-wide import-collision warnings.
 dataqualityClass <- if (requireNamespace("jmvcore")) R6::R6Class("dataqualityClass",
     inherit = dataqualityBase, private = list(
 
@@ -77,8 +78,34 @@ dataqualityClass <- if (requireNamespace("jmvcore")) R6::R6Class("dataqualityCla
 
     .mcarTestMessage = function(data) {
         numeric_data <- data[vapply(data, is.numeric, logical(1))]
+        n_non_numeric <- ncol(data) - ncol(numeric_data)
+        # The test runs on the numeric columns ONLY, but the per-variable
+        # missingness printed immediately above it covers every selected
+        # variable, so the scope has to be stated or the result reads as a
+        # statement about the whole selection.
+        scope_note <- if (n_non_numeric > 0) {
+            sprintf(
+                paste0(
+                    " Computed on the %d numeric variable(s) (%s); missingness in the ",
+                    "%d non-numeric variable(s) was not tested."
+                ),
+                ncol(numeric_data),
+                paste(names(numeric_data), collapse = ", "),
+                n_non_numeric
+            )
+        } else {
+            ""
+        }
+        assumption_note <- paste0(
+            " Little's test assumes multivariate normality within missing-data ",
+            "patterns and has little power when patterns contain few cases."
+        )
         if (ncol(numeric_data) < 2) {
-            return("Little's MCAR test was not run because it requires at least two numeric variables.")
+            return(paste0(
+                "Little's MCAR test was not run because it requires at least two ",
+                "numeric variables; it is computed on numeric variables only, and ",
+                sprintf("the selection contains %d numeric variable(s).", ncol(numeric_data))
+            ))
         }
         if (!anyNA(numeric_data)) {
             return("Little's MCAR test was not run because the selected numeric variables have no missing values.")
@@ -98,16 +125,20 @@ dataqualityClass <- if (requireNamespace("jmvcore")) R6::R6Class("dataqualityCla
                     "prove that the data are MCAR."
                 )
             }
-            sprintf(
-                paste0(
-                    "Little's MCAR test (naniar): chi-square = %.2f, df = %s, ",
-                    "p = %.4f, missing patterns = %s. %s"
+            paste0(
+                sprintf(
+                    paste0(
+                        "Little's MCAR test (naniar): chi-square = %.2f, df = %s, ",
+                        "p = %.4f, missing patterns = %s. %s"
+                    ),
+                    result$statistic,
+                    result$df,
+                    result$p.value,
+                    result$missing.patterns,
+                    interpretation
                 ),
-                result$statistic,
-                result$df,
-                result$p.value,
-                result$missing.patterns,
-                interpretation
+                scope_note,
+                assumption_note
             )
         }, error = function(e) {
             paste0(
@@ -122,6 +153,17 @@ dataqualityClass <- if (requireNamespace("jmvcore")) R6::R6Class("dataqualityCla
         # Reset notices so the same message is not appended once per run cycle
         private$.noticeList <- list()
         private$.renderNotices()
+
+        # Clear every HTML report block up front. .run() has three early-return
+        # paths (no variables selected, empty dataset, variables missing from the
+        # dataset) and without this the full report for the PREVIOUS variable set
+        # stayed on screen underneath the new welcome/error panel - stale counts,
+        # stale variable names and a stale overall verdict that a reader could
+        # copy straight into a QC log.
+        self$results$text$setContent("")
+        self$results$summary$setContent("")
+        self$results$recommendations$setContent("")
+        self$results$explanations$setContent("")
 
         # TODO (forward-looking): no `.()` wrapping in this file (~1.1k LOC
         # of welcome HTML, recommendations, and explanations). Address in
@@ -154,7 +196,7 @@ dataqualityClass <- if (requireNamespace("jmvcore")) R6::R6Class("dataqualityCla
             <li><strong>Data Type Analysis:</strong> Automatic type detection and validation</li>
             </ul>
 
-            <p style='font-size: 12px; color: #555; margin-top: 20px;'>
+            <p style='font-size: 12px; color: inherit; opacity: 0.75; margin-top: 20px;'>
             <em>Enhanced with visdat package - unique visual data exploration (68,978+ downloads)</em>
             </p>
             </div>"
@@ -242,6 +284,12 @@ dataqualityClass <- if (requireNamespace("jmvcore")) R6::R6Class("dataqualityCla
                 }
             } else {
                 high_card <- n_unique > 50 && n_unique > 0.5 * n_nonmiss
+                # A categorical variable with a single observed level (every
+                # patient "Stage IV", one hospital in Site, all-female Sex after a
+                # filter) has exactly zero variance and breaks any model it enters
+                # - the same defect the numeric branch flags via sd == 0. Without
+                # this it stayed FALSE for every factor/character variable.
+                near_zero_var <- n_nonmiss > 0 && n_unique <= 1
             }
 
             # Return the row; the caller appends it (avoids `<<-` into the
@@ -257,12 +305,23 @@ dataqualityClass <- if (requireNamespace("jmvcore")) R6::R6Class("dataqualityCla
                 near_zero_var = near_zero_var,
                 high_card = high_card,
                 outlier_n = outlier_n,
+                # An outlier COUNT cannot be read without the sample size behind
+                # it: Tukey's 1.5xIQR rule puts about 0.7% of normally
+                # distributed observations outside the fences, so 7 outliers in
+                # n=1000 is expected while 3 in n=15 is 20% of the data.
+                outlier_pct = if (!is.na(outlier_n) && n_nonmiss > 0) {
+                    round(outlier_n / n_nonmiss * 100, 1)
+                } else {
+                    NA
+                },
                 stringsAsFactors = FALSE
             ))
         }
 
-        # Pre-compute per-variable summaries for downstream reporting
+        # Pre-compute per-variable summaries for downstream reporting.
+        # .checkpoint() lets jamovi cancel a wide-table scan instead of freezing.
         for (nm in names(analysis_data)) {
+            private$.checkpoint()
             summary_rows[[length(summary_rows) + 1]] <- add_summary_row(nm, analysis_data[[nm]])
         }
 
@@ -305,7 +364,7 @@ dataqualityClass <- if (requireNamespace("jmvcore")) R6::R6Class("dataqualityCla
         if (length(critical_warnings) > 0) {
             quality_results$critical_warnings <- paste0(
                 "<div style='background-color: rgba(255, 202, 33, 0.23); padding: 15px; border-left: 4px solid #ffc107; border-radius: 5px; color: inherit;'>",
-                "<h4 style='margin-top: 0; color: #856404;'>Critical Data Quality Warnings</h4>",
+                "<h4 style='margin-top: 0; color: inherit;'>Critical Data Quality Warnings</h4>",
                 "<ul style='margin-bottom: 0;'><li>",
                 paste(critical_warnings, collapse = "</li><li>"),
                 "</li></ul></div>"
@@ -330,6 +389,7 @@ dataqualityClass <- if (requireNamespace("jmvcore")) R6::R6Class("dataqualityCla
                                     max(case_missing),
                                     ncol(analysis_data))
 
+            private$.checkpoint()
             mcar_msg <- private$.mcarTestMessage(analysis_data)
 
             # Threshold flagging
@@ -367,7 +427,18 @@ dataqualityClass <- if (requireNamespace("jmvcore")) R6::R6Class("dataqualityCla
                 # Identify top duplicated row signatures
                 dup_keys <- NA
                 if (duplicate_rows > 0) {
-                    key_freq <- as.data.frame(table(do.call(paste, c(analysis_data, sep = "||"))))
+                    # Pasting every row into a signature and tabulating it is the
+                    # most expensive step here on a large registry export.
+                    private$.checkpoint()
+                    # unname()/as.list() is load bearing: c(analysis_data, sep = "||")
+                    # keeps the column names, so a selected column called `sep`
+                    # errors ("formal argument 'sep' matched by multiple actual
+                    # arguments") and one called `collapse` is silently consumed
+                    # as paste()'s collapse=, returning ONE string instead of a
+                    # per-row vector - the duplicate count stayed right while the
+                    # evidence list below rendered empty.
+                    key_freq <- as.data.frame(table(
+                        do.call(paste, c(unname(as.list(analysis_data)), list(sep = "||")))))
                     key_freq <- key_freq[key_freq$Freq > 1, ]
                     key_freq <- key_freq[order(-key_freq$Freq), ]
                     top_keys <- head(key_freq, 5)
@@ -429,7 +500,7 @@ dataqualityClass <- if (requireNamespace("jmvcore")) R6::R6Class("dataqualityCla
                 quality_results$duplicates <- paste0(
                     "<h4>Duplicate Value Analysis</h4>",
                     paste(htmltools::htmlEscape(names(dup_summary)), dup_summary, sep = ": ", collapse = "<br>"),
-                    "<p style='margin-top: 10px; font-size: 0.9em; color: #555;'>",
+                    "<p style='margin-top: 10px; font-size: 0.9em; color: inherit; opacity: 0.75;'>",
                     "<em>Interpretation Note:</em> For categorical variables with few unique levels (e.g., 'Gender', 'Status'), ",
                     "a high number of 'Duplicates' often reflects data redundancy (many observations sharing the same valid value), ",
                     "not necessarily data errors. For identifier variables (e.g., 'Patient ID'), duplicates would typically indicate errors.",
@@ -481,11 +552,14 @@ dataqualityClass <- if (requireNamespace("jmvcore")) R6::R6Class("dataqualityCla
                 apply(df, 1, function(r) paste0("<tr>", paste0("<td>", htmltools::htmlEscape(r), "</td>", collapse = ""), "</tr>")),
                 collapse = "\n"
             )
-            header <- paste0("<tr><th>Variable</th><th>Type</th><th>N</th><th>Missing</th><th>%Missing</th><th>Unique</th><th>%Duplicates</th><th>Constant</th><th>High card</th><th>Outliers</th></tr>")
+            header <- paste0("<tr><th>Variable</th><th>Type</th><th>N</th><th>Missing</th><th>%Missing</th><th>Unique</th><th>%Duplicates</th><th>Constant</th><th>High card</th><th>Outliers</th><th>%Outliers</th></tr>")
             quality_results$summary_table <- paste0(
                 "<h4>Variable Quality Summary</h4>",
-                "<p><em>Flags:</em> constant (zero-variance) numeric variables, high cardinality (many unique values), and IQR-based outlier counts for numeric variables. ",
-                "The constant flag identifies variables with no variation at all; it does not screen for the broader <em>near-zero variance</em> case (very low but non-zero variation), for which caret::nearZeroVar() is the appropriate tool.</p>",
+                "<p><em>Flags:</em> constant (zero-variance) variables, high cardinality (many unique values), and IQR-based outlier counts for numeric variables. ",
+                "The constant flag identifies variables with no variation at all; it does not screen for the broader <em>near-zero variance</em> case (very low but non-zero variation), for which caret::nearZeroVar() is the appropriate tool. ",
+                "The high-cardinality flag is applied to categorical and text variables only - many distinct values are expected and normal for a continuous measurement, so numeric variables are deliberately never flagged. ",
+                "A high %Duplicates is expected for categorical variables with few levels (a binary variable in n=500 reads about 99.6%) and only signals a problem for identifier variables. ",
+                "Read %Outliers rather than the raw count: under the 1.5\u{D7}IQR rule about 0.7% of normally distributed observations fall outside the fences (the expected proportion does not grow with sample size, though it is estimated imprecisely in small samples, and the rule is not applied at all to variables with 10 or fewer non-missing values).</p>",
                 "<table border='1' cellspacing='0' cellpadding='4'>",
                 header,
                 summary_table,
@@ -505,14 +579,39 @@ dataqualityClass <- if (requireNamespace("jmvcore")) R6::R6Class("dataqualityCla
         )
 
         if (self$options$plot_data_overview) {
+            private$.checkpoint()
             self$results$plotDataOverview$setState(plotData)
         }
 
         if (self$options$plot_missing_patterns) {
+            private$.checkpoint()
             self$results$plotMissingPatterns$setState(plotData)
         }
 
         if (self$options$plot_data_types) {
+            private$.checkpoint()
+            # visdat::vis_guess() type-guesses every individual CELL, so its cost
+            # is proportional to rows x columns and it runs on the render thread
+            # where nothing can cancel it. Above this size the plot is replaced by
+            # an explanation rather than freezing jamovi.
+            n_cells <- nrow(analysis_data) * ncol(analysis_data)
+            if (n_cells > 2e5) {
+                plotData$skip_message <- sprintf(
+                    paste0(
+                        "The data types plot was not drawn because the selection is too large: %d rows x %d ",
+                        "variables is %s cells, and this plot guesses a type for every cell individually ",
+                        "(the limit is 200,000 cells). Nothing else in the report is affected - the 'Type' ",
+                        "column of the Variable Quality Summary above reports each variable's storage type ",
+                        "for the full selection. To see the plot, select fewer variables or apply a row ",
+                        "filter, then run again."
+                    ),
+                    nrow(analysis_data), ncol(analysis_data),
+                    # base:: is REQUIRED here: `@import jmvcore` brings
+                    # jmvcore::format(str, ..., context) into this namespace, which
+                    # masks base::format and silently swallows big.mark/scientific.
+                    base::format(n_cells, big.mark = ",", scientific = FALSE)
+                )
+            }
             self$results$plotDataTypes$setState(plotData)
         }
 
@@ -574,7 +673,7 @@ dataqualityClass <- if (requireNamespace("jmvcore")) R6::R6Class("dataqualityCla
 
         overview_html <- paste0(
             "<div style='background-color: rgba(88, 88, 88, 0.06); padding: 15px; border-radius: 8px; margin-bottom: 15px; color: inherit;'>",
-            "<h4 style='color: #333; margin-top: 0;'>Visual Analysis Overview</h4>",
+            "<h4 style='color: inherit; margin-top: 0;'>Visual Analysis Overview</h4>",
             "<table style='width: 100%; border-collapse: collapse;'>",
             "<tr><td style='padding: 8px; border: 1px solid #ddd;'><strong>Variables:</strong></td><td style='padding: 8px; border: 1px solid #ddd;'>", n_vars, "</td></tr>",
             "<tr><td style='padding: 8px; border: 1px solid #ddd;'><strong>Observations:</strong></td><td style='padding: 8px; border: 1px solid #ddd;'>", n_obs, "</td></tr>",
@@ -770,6 +869,11 @@ dataqualityClass <- if (requireNamespace("jmvcore")) R6::R6Class("dataqualityCla
             return(FALSE)
         }
 
+        # .run() refused this plot on size grounds; say so where the user is looking
+        if (!is.null(plotData$skip_message)) {
+            return(private$.placeholderPlot(plotData$skip_message))
+        }
+
         # Check if visdat package is available
         if (!requireNamespace("visdat", quietly = TRUE)) {
             return(FALSE)
@@ -813,42 +917,63 @@ dataqualityClass <- if (requireNamespace("jmvcore")) R6::R6Class("dataqualityCla
         n_vars_analyzed <- length(summary_rows)
         threshold <- self$options$missing_threshold_visual
 
-        # Calculate maximum missing percentage
-        max_missing_pct <- if (length(summary_rows) > 0) {
-            max(vapply(summary_rows, function(r) if (!is.na(r$missing_pct)) r$missing_pct else 0, numeric(1)))
-        } else {
-            0
-        }
-
-        # Shared "good quality" criterion, used for both the prose assessment
-        # and the colored status box below so the two never disagree.
-        is_good_quality <- length(high_missing_vars) == 0 && n_total >= 30 && length(near_zero_vars) == 0
-
-        # Determine overall assessment
-        overall_assessment <- if (is_good_quality) {
-            "Good - data quality is acceptable for analysis"
-        } else if (n_total < 20 || length(high_missing_vars) > 0) {
-            "Needs attention - significant quality issues detected"
-        } else {
-            "Acceptable - minor quality issues present"
-        }
+        # Identify the single worst variable for missingness. The variable name
+        # and the percentage MUST come from the same row: reading the name from
+        # high_missing_vars[1] (first variable over 50% in selection order) while
+        # reading the percentage from the overall maximum used to name one
+        # variable and report another one's number.
+        miss_pcts <- vapply(summary_rows, function(r) {
+            if (is.na(r$missing_pct)) 0 else r$missing_pct
+        }, numeric(1))
+        worst_idx <- if (length(miss_pcts) > 0) which.max(miss_pcts) else integer(0)
+        worst_missing_var <- if (length(worst_idx) > 0) summary_rows[[worst_idx]]$variable else NA_character_
+        max_missing_pct <- if (length(worst_idx) > 0) miss_pcts[worst_idx] else 0
 
         # Get duplicate info
         dup_count <- if (!is.null(duplicate_rows) && !is.na(duplicate_rows)) duplicate_rows else 0
         # Mirror the branch that actually ran in .run(): the row-level branch
         # requires more than one variable, otherwise the value-level branch runs.
-        dup_type <- if (self$options$complete_cases_only && length(summary_rows) > 1) "rows" else "values"
+        row_level_dupes <- isTRUE(self$options$complete_cases_only) && length(summary_rows) > 1
+        dup_type <- if (row_level_dupes) "rows" else "values"
 
-        # Count variables exceeding threshold
+        # Count variables exceeding the user's own stated missingness tolerance
         vars_above_threshold <- sum(vapply(summary_rows, function(r) {
             !is.na(r$missing_pct) && r$missing_pct > threshold
         }, logical(1)))
+
+        # Shared "no flags" criterion, used for both the prose assessment and the
+        # colored status box below so the two never disagree. It deliberately
+        # covers everything the Recommended Actions panel treats as a problem:
+        # previously a dataset where every variable was 49% missing, or where
+        # every row was a duplicate, was still called "Good" in a green box while
+        # the panel immediately below it raised both issues.
+        # Only ROW-level duplicates count as a flag. In value-level mode
+        # duplicate_rows is sum(non-missing - unique) over the selected variables,
+        # which is large and entirely expected for any categorical variable
+        # (histopathology / Age+Sex+Grade: 693 in n=250 with nothing wrong), so
+        # including it made the "no flags" verdict unreachable and let merely
+        # ticking the duplicate check downgrade the verdict on identical data.
+        no_flags_raised <- length(high_missing_vars) == 0 &&
+            vars_above_threshold == 0 &&
+            (!row_level_dupes || dup_count == 0) &&
+            length(near_zero_vars) == 0 &&
+            n_total >= 30
+
+        # Determine overall assessment. This describes what the checks found, not
+        # whether the data are fit for any particular purpose.
+        overall_assessment <- if (no_flags_raised) {
+            "No quality flags raised by the checks that were run"
+        } else if (n_total < 20 || length(high_missing_vars) > 0) {
+            "Quality flags raised - see Recommended Actions below"
+        } else {
+            "Minor quality flags raised - see Recommended Actions below"
+        }
 
         summary_html <- paste0(
             "<div style='background-color: rgba(33, 159, 43, 0.1); padding: 20px; border-radius: 8px; border-left: 5px solid #4caf50; color: inherit;'>",
             "<h3 style='color: #2e7d32; margin-top: 0;'> Plain-Language Summary</h3>",
 
-            "<div style='background-color: white; padding: 15px; border-radius: 5px; margin-bottom: 15px;'>",
+            "<div style='background-color: rgba(127, 127, 127, 0.08); color: inherit; padding: 15px; border-radius: 5px; margin-bottom: 15px;'>",
             "<p style='font-size: 1.1em; line-height: 1.6;'>",
             sprintf("Analyzed <strong>%d variable%s</strong> from <strong>%d observation%s</strong>. ",
                     n_vars_analyzed, if (n_vars_analyzed == 1) "" else "s",
@@ -858,21 +983,29 @@ dataqualityClass <- if (requireNamespace("jmvcore")) R6::R6Class("dataqualityCla
             "<h4 style='color: #2e7d32; margin-top: 15px;'>Key Findings:</h4>",
             "<ul style='line-height: 1.8;'>",
 
-            # Missing data summary
+            # Missing data summary. Emitted as ONE self-contained <li>: splitting
+            # the opening tag and the "(highest: ...)" tail across two independent
+            # conditions used to leak a bare fragment with an unmatched </li> into
+            # the list whenever check_missing was off but a variable was >50%
+            # missing.
             if (self$options$check_missing) {
-                sprintf("<li><strong>Missing Data:</strong> %d variable%s exceed%s %g%% missing threshold",
-                        vars_above_threshold,
-                        if (vars_above_threshold == 1) "" else "s",
-                        if (vars_above_threshold == 1) "s" else "",
-                        threshold)
-            } else {
-                ""
-            },
-            if (length(high_missing_vars) > 0) {
-                sprintf(" (highest: <em>%s</em> at %.1f%% missing)</li>",
-                        htmltools::htmlEscape(high_missing_vars[1]), max_missing_pct)
-            } else if (self$options$check_missing) {
-                "</li>"
+                paste0(
+                    sprintf("<li><strong>Missing Data:</strong> %d variable%s exceed%s %g%% missing threshold",
+                            vars_above_threshold,
+                            if (vars_above_threshold == 1) "" else "s",
+                            if (vars_above_threshold == 1) "s" else "",
+                            threshold),
+                    if (length(high_missing_vars) > 0 && !is.na(worst_missing_var)) {
+                        sprintf(" (highest: <em>%s</em> at %.1f%% missing)",
+                                htmltools::htmlEscape(worst_missing_var), max_missing_pct)
+                    } else {
+                        ""
+                    },
+                    "</li>"
+                )
+            } else if (length(high_missing_vars) > 0 && !is.na(worst_missing_var)) {
+                sprintf("<li><strong>Missing Data:</strong> highest missingness is <em>%s</em> at %.1f%%</li>",
+                        htmltools::htmlEscape(worst_missing_var), max_missing_pct)
             } else {
                 ""
             },
@@ -881,7 +1014,16 @@ dataqualityClass <- if (requireNamespace("jmvcore")) R6::R6Class("dataqualityCla
             if (self$options$check_duplicates) {
                 sprintf("<li><strong>Duplicates:</strong> %d duplicate %s detected%s</li>",
                         dup_count, dup_type,
-                        if (dup_count > 0) " - review for data entry errors or valid repetitions" else "")
+                        if (dup_count == 0) {
+                            ""
+                        } else if (row_level_dupes) {
+                            " - review for data entry errors or valid repetitions"
+                        } else {
+                            # Repeated VALUES are expected whenever a variable has
+                            # few levels, so the row-level "data entry error"
+                            # framing does not apply here.
+                            " - expected for categorical variables; only diagnostic for identifier variables"
+                        })
             } else {
                 ""
             },
@@ -913,16 +1055,18 @@ dataqualityClass <- if (requireNamespace("jmvcore")) R6::R6Class("dataqualityCla
             "</ul>",
             "</div>",
 
-            # Overall assessment box
+            # Overall assessment box. Translucent tints (they composite to the
+            # former #d1f2eb / #fff3cd over a white ground) plus an explicit
+            # color: inherit, so the text stays readable in jamovi's dark theme.
             sprintf(
-                "<div style='background-color: %s; padding: 15px; border-radius: 5px; border-left: 4px solid %s;'>",
-                if (is_good_quality) "#d1f2eb" else "#fff3cd",
-                if (is_good_quality) "#00695c" else "#ff8f00"
+                "<div style='background-color: %s; color: inherit; padding: 15px; border-radius: 5px; border-left: 4px solid %s;'>",
+                if (no_flags_raised) "rgba(25, 190, 155, 0.2)" else "rgba(255, 195, 5, 0.2)",
+                if (no_flags_raised) "#00695c" else "#ff8f00"
             ),
             "<p style='margin: 0; font-weight: bold;'>Overall Assessment: ", overall_assessment, "</p>",
             "</div>",
 
-            "<p style='margin-top: 15px; font-size: 0.9em; color: #555;'>",
+            "<p style='margin-top: 15px; font-size: 0.9em; color: inherit; opacity: 0.75;'>",
             "<em> This summary is written in plain language for clinical documentation. ",
             "Copy this text for inclusion in study reports, quality control logs, or data management plans.</em>",
             "</p>",
@@ -951,7 +1095,7 @@ dataqualityClass <- if (requireNamespace("jmvcore")) R6::R6Class("dataqualityCla
         if (length(high_missing_vars) > 0) {
             has_recommendations <- TRUE
             recs_html <- paste0(recs_html,
-                "<div style='background-color: white; padding: 15px; border-radius: 5px; margin-bottom: 15px;'>",
+                "<div style='background-color: rgba(127, 127, 127, 0.08); color: inherit; padding: 15px; border-radius: 5px; margin-bottom: 15px;'>",
                 "<h4 style='color: #e65100; margin-top: 0;'> High Missingness (>50%)</h4>",
                 "<p><strong>Variables affected:</strong> ", paste(htmltools::htmlEscape(high_missing_vars), collapse = ", "), "</p>",
                 "<p><strong>Actions:</strong></p>",
@@ -983,7 +1127,7 @@ dataqualityClass <- if (requireNamespace("jmvcore")) R6::R6Class("dataqualityCla
         if (length(moderate_missing_vars) > 0) {
             has_recommendations <- TRUE
             recs_html <- paste0(recs_html,
-                "<div style='background-color: white; padding: 15px; border-radius: 5px; margin-bottom: 15px;'>",
+                "<div style='background-color: rgba(127, 127, 127, 0.08); color: inherit; padding: 15px; border-radius: 5px; margin-bottom: 15px;'>",
                 "<h4 style='color: #ff8f00; margin-top: 0;'> Moderate Missingness (10-50%)</h4>",
                 "<p><strong>Variables affected:</strong> ", paste(htmltools::htmlEscape(moderate_missing_vars), collapse = ", "), "</p>",
                 "<p><strong>Recommended approach:</strong></p>",
@@ -1000,13 +1144,19 @@ dataqualityClass <- if (requireNamespace("jmvcore")) R6::R6Class("dataqualityCla
         # Duplicate recommendations
         dup_count <- if (!is.null(duplicate_rows) && !is.na(duplicate_rows)) duplicate_rows else 0
         if (dup_count > 0) {
-            has_recommendations <- TRUE
             # Mirror the branch that actually ran in .run(): the row-level branch
             # requires more than one variable, otherwise value-level mode runs.
-            row_level_dupes <- self$options$complete_cases_only && length(summary_rows) > 1
+            row_level_dupes <- isTRUE(self$options$complete_cases_only) && length(summary_rows) > 1
+            # Only row-level duplicates count as an issue, matching the "no flags"
+            # criterion in .generateSummary(). Repeated VALUES are expected for any
+            # low-cardinality variable, so they must not suppress the
+            # "No Critical Issues Detected" block; the block below is still shown
+            # because it explains what the value-level count does and does not mean.
+            if (row_level_dupes)
+                has_recommendations <- TRUE
             dup_type <- if (row_level_dupes) "duplicate rows" else "duplicate values"
             recs_html <- paste0(recs_html,
-                "<div style='background-color: white; padding: 15px; border-radius: 5px; margin-bottom: 15px;'>",
+                "<div style='background-color: rgba(127, 127, 127, 0.08); color: inherit; padding: 15px; border-radius: 5px; margin-bottom: 15px;'>",
                 "<h4 style='color: #e65100; margin-top: 0;'> ", dup_count, " ", dup_type, " Detected</h4>",
                 "<p><strong>Actions:</strong></p>",
                 "<ol style='line-height: 1.8;'>",
@@ -1033,7 +1183,7 @@ dataqualityClass <- if (requireNamespace("jmvcore")) R6::R6Class("dataqualityCla
         if (length(near_zero_vars) > 0) {
             has_recommendations <- TRUE
             recs_html <- paste0(recs_html,
-                "<div style='background-color: white; padding: 15px; border-radius: 5px; margin-bottom: 15px;'>",
+                "<div style='background-color: rgba(127, 127, 127, 0.08); color: inherit; padding: 15px; border-radius: 5px; margin-bottom: 15px;'>",
                 "<h4 style='color: #ff8f00; margin-top: 0;'> Constant (Zero-Variance) Variables</h4>",
                 "<p><strong>Variables affected:</strong> ", paste(htmltools::htmlEscape(near_zero_vars), collapse = ", "), "</p>",
                 "<p><strong>Actions:</strong></p>",
@@ -1051,7 +1201,7 @@ dataqualityClass <- if (requireNamespace("jmvcore")) R6::R6Class("dataqualityCla
         if (n_total < 20) {
             has_recommendations <- TRUE
             recs_html <- paste0(recs_html,
-                "<div style='background-color: white; padding: 15px; border-radius: 5px; margin-bottom: 15px;'>",
+                "<div style='background-color: rgba(127, 127, 127, 0.08); color: inherit; padding: 15px; border-radius: 5px; margin-bottom: 15px;'>",
                 "<h4 style='color: #e65100; margin-top: 0;'> Very Small Sample Size (n=", n_total, ")</h4>",
                 "<p><strong>Critical limitations:</strong></p>",
                 "<ul style='line-height: 1.8;'>",
@@ -1076,7 +1226,7 @@ dataqualityClass <- if (requireNamespace("jmvcore")) R6::R6Class("dataqualityCla
         } else if (n_total < 30) {
             has_recommendations <- TRUE
             recs_html <- paste0(recs_html,
-                "<div style='background-color: white; padding: 15px; border-radius: 5px; margin-bottom: 15px;'>",
+                "<div style='background-color: rgba(127, 127, 127, 0.08); color: inherit; padding: 15px; border-radius: 5px; margin-bottom: 15px;'>",
                 "<h4 style='color: #ff8f00; margin-top: 0;'> Small Sample Size (n=", n_total, ")</h4>",
                 "<p><strong>Recommendations:</strong></p>",
                 "<ul style='line-height: 1.8;'>",
@@ -1094,7 +1244,7 @@ dataqualityClass <- if (requireNamespace("jmvcore")) R6::R6Class("dataqualityCla
         if (!has_recommendations) {
             recs_html <- paste0(recs_html,
                 "<div style='background-color: rgba(33, 192, 159, 0.21); padding: 15px; border-radius: 5px; color: inherit;'>",
-                "<h4 style='color: #00695c; margin-top: 0;'> No Critical Issues Detected</h4>",
+                "<h4 style='color: inherit; margin-top: 0;'> No Critical Issues Detected</h4>",
                 "<p style='line-height: 1.8;'>",
                 "Your data quality appears acceptable for analysis. However, always:",
                 "</p>",
@@ -1109,7 +1259,7 @@ dataqualityClass <- if (requireNamespace("jmvcore")) R6::R6Class("dataqualityCla
         }
 
         recs_html <- paste0(recs_html,
-            "<p style='margin-top: 20px; font-size: 0.9em; color: #555;'>",
+            "<p style='margin-top: 20px; font-size: 0.9em; color: inherit; opacity: 0.75;'>",
             "<em> These recommendations are based on general statistical best practices. ",
             "Consult with a biostatistician for guidance specific to your research question and study design.</em>",
             "</p>",
@@ -1124,14 +1274,14 @@ dataqualityClass <- if (requireNamespace("jmvcore")) R6::R6Class("dataqualityCla
 
         expl_html <- paste0(
             "<div style='background-color: rgba(33, 152, 239, 0.13); padding: 20px; border-radius: 8px; border-left: 5px solid #1976d2; color: inherit;'>",
-            "<h3 style='color: #0d47a1; margin-top: 0;'> Understanding Quality Metrics</h3>",
+            "<h3 style='color: inherit; margin-top: 0;'> Understanding Quality Metrics</h3>",
 
             "<p style='font-size: 1.05em; margin-bottom: 20px;'>",
             "This guide explains the quality metrics used in this analysis and how to interpret them.",
             "</p>",
 
             # Missing Data section
-            "<div style='background-color: white; padding: 15px; border-radius: 5px; margin-bottom: 15px;'>",
+            "<div style='background-color: rgba(127, 127, 127, 0.08); color: inherit; padding: 15px; border-radius: 5px; margin-bottom: 15px;'>",
             "<h4 style='color: #1976d2; margin-top: 0;'>Missing Data Analysis</h4>",
 
             "<p><strong>What it measures:</strong> Percentage of observations with missing values for each variable.</p>",
@@ -1148,6 +1298,8 @@ dataqualityClass <- if (requireNamespace("jmvcore")) R6::R6Class("dataqualityCla
             "<p><strong>Little's MCAR Test:</strong></p>",
             "<ul style='line-height: 1.8;'>",
             "<li><strong>What it tests:</strong> Whether missing data is completely random (MCAR) vs. systematic (MAR/MNAR)</li>",
+            "<li><strong>Scope:</strong> The test is computed on the selected <em>numeric</em> variables only; missingness in factor, text and date variables is reported in the table above but is not part of the test</li>",
+            "<li><strong>Assumptions:</strong> Multivariate normality of those variables within each missing-data pattern; the test also has little power when patterns contain few cases, which is common in small clinical series</li>",
             "<li><strong>Interpretation:</strong>",
             "<ul>",
             "<li>p > 0.05: The test does not reject MCAR; it does not prove MCAR</li>",
@@ -1158,7 +1310,7 @@ dataqualityClass <- if (requireNamespace("jmvcore")) R6::R6Class("dataqualityCla
             "</div>",
 
             # Duplicate Detection section
-            "<div style='background-color: white; padding: 15px; border-radius: 5px; margin-bottom: 15px;'>",
+            "<div style='background-color: rgba(127, 127, 127, 0.08); color: inherit; padding: 15px; border-radius: 5px; margin-bottom: 15px;'>",
             "<h4 style='color: #1976d2; margin-top: 0;'>Duplicate Detection</h4>",
 
             "<p><strong>Two types checked:</strong></p>",
@@ -1183,7 +1335,7 @@ dataqualityClass <- if (requireNamespace("jmvcore")) R6::R6Class("dataqualityCla
             "</div>",
 
             # Constant / zero-variance section
-            "<div style='background-color: white; padding: 15px; border-radius: 5px; margin-bottom: 15px;'>",
+            "<div style='background-color: rgba(127, 127, 127, 0.08); color: inherit; padding: 15px; border-radius: 5px; margin-bottom: 15px;'>",
             "<h4 style='color: #1976d2; margin-top: 0;'>Constant (Zero-Variance) Variables</h4>",
 
             "<p><strong>What it means:</strong> Every observation of the variable has the same value, so its standard deviation is zero.</p>",
@@ -1206,28 +1358,30 @@ dataqualityClass <- if (requireNamespace("jmvcore")) R6::R6Class("dataqualityCla
             "</div>",
 
             # High Cardinality section
-            "<div style='background-color: white; padding: 15px; border-radius: 5px; margin-bottom: 15px;'>",
+            "<div style='background-color: rgba(127, 127, 127, 0.08); color: inherit; padding: 15px; border-radius: 5px; margin-bottom: 15px;'>",
             "<h4 style='color: #1976d2; margin-top: 0;'>High Cardinality</h4>",
 
-            "<p><strong>Definition:</strong> Variable has >50 unique values AND these represent >50% of observations.</p>",
+            "<p><strong>Definition:</strong> Variable has >50 unique values AND these represent >50% of observations. ",
+            "This flag is applied to categorical and text variables only - many distinct values are expected and normal for a continuous measurement, ",
+            "so numeric variables are deliberately never flagged and the High card column reads FALSE for all of them.</p>",
 
-            "<p><strong>Examples:</strong></p>",
+            "<p><strong>Examples that are flagged:</strong></p>",
             "<ul style='line-height: 1.8;'>",
-            "<li>Patient ID (each patient unique) - very high cardinality</li>",
-            "<li>Age in years (20-90) - moderate cardinality</li>",
-            "<li>Tumor size in mm (continuous) - high cardinality</li>",
+            "<li>Patient ID stored as text (each patient unique) - very high cardinality</li>",
+            "<li>Free-text fields such as a diagnosis comment or specimen description</li>",
+            "<li>A site or surgeon code with almost as many levels as patients</li>",
             "</ul>",
 
             "<p><strong>Implications:</strong></p>",
             "<ul style='line-height: 1.8;'>",
             "<li><strong>For categorical variables:</strong> May need to collapse categories (e.g., group age into bands)</li>",
-            "<li><strong>For continuous variables:</strong> Normal and expected</li>",
+            "<li><strong>For continuous variables:</strong> Normal and expected - a tumour size in mm or an age in years has many distinct values by construction, which is why the flag is not raised for them</li>",
             "<li><strong>For factors in regression:</strong> High cardinality increases parameters and reduces power</li>",
             "</ul>",
             "</div>",
 
             # Outliers section
-            "<div style='background-color: white; padding: 15px; border-radius: 5px; margin-bottom: 15px;'>",
+            "<div style='background-color: rgba(127, 127, 127, 0.08); color: inherit; padding: 15px; border-radius: 5px; margin-bottom: 15px;'>",
             "<h4 style='color: #1976d2; margin-top: 0;'>Outlier Detection (IQR Method)</h4>",
 
             "<p><strong>Method used:</strong> Tukey's IQR (Interquartile Range) rule</p>",
@@ -1239,11 +1393,14 @@ dataqualityClass <- if (requireNamespace("jmvcore")) R6::R6Class("dataqualityCla
             "<li>Values outside these bounds flagged as outliers</li>",
             "</ul>",
 
-            "<p><strong>Interpretation:</strong></p>",
+            "<p><strong>Interpretation:</strong> judge the <em>proportion</em> (%Outliers column), not the raw count. ",
+            "Under this rule roughly 0.7% of observations drawn from a normal distribution fall outside the fences at any sample size (the expected proportion is the same, but the observed percentage is estimated imprecisely when n is small), ",
+            "so about 7 flagged values in n=1000 is exactly what a clean variable looks like, while 3 flagged values in n=15 is 20% of the data.</p>",
             "<ul style='line-height: 1.8;'>",
-            "<li><strong>0-2 outliers:</strong> Normal for most datasets</li>",
-            "<li><strong>3-5 outliers:</strong> Review for data entry errors</li>",
-            "<li><strong>>5 outliers:</strong> May indicate skewed distribution or systematic issues</li>",
+            "<li><strong>Up to about 1%:</strong> expected from a normal distribution; no signal</li>",
+            "<li><strong>1-5%:</strong> suggests mild skew or heavier tails than normal</li>",
+            "<li><strong>Above 5%:</strong> suggests marked skew, a mixture of subpopulations, or a coding problem (e.g. 999 entered as a missing indicator)</li>",
+            "<li><strong>NA in both columns:</strong> the variable is non-numeric, or has 10 or fewer non-missing values, so the rule was not applied to it</li>",
             "</ul>",
 
             "<p><strong>Actions:</strong></p>",
@@ -1256,7 +1413,7 @@ dataqualityClass <- if (requireNamespace("jmvcore")) R6::R6Class("dataqualityCla
             "</div>",
 
             # Sample Size section
-            "<div style='background-color: white; padding: 15px; border-radius: 5px; margin-bottom: 15px;'>",
+            "<div style='background-color: rgba(127, 127, 127, 0.08); color: inherit; padding: 15px; border-radius: 5px; margin-bottom: 15px;'>",
             "<h4 style='color: #1976d2; margin-top: 0;'>Sample Size Guidelines</h4>",
 
             "<p><strong>General rules of thumb:</strong></p>",
@@ -1282,7 +1439,7 @@ dataqualityClass <- if (requireNamespace("jmvcore")) R6::R6Class("dataqualityCla
             # Visual exploration section
             if (self$options$plot_data_overview || self$options$plot_missing_patterns || self$options$plot_data_types) {
                 paste0(
-                    "<div style='background-color: white; padding: 15px; border-radius: 5px; margin-bottom: 15px;'>",
+                    "<div style='background-color: rgba(127, 127, 127, 0.08); color: inherit; padding: 15px; border-radius: 5px; margin-bottom: 15px;'>",
                     "<h4 style='color: #1976d2; margin-top: 0;'>Visual Data Exploration (visdat)</h4>",
 
                     "<p><strong>Package background:</strong> visdat provides visual exploratory data analysis based on research published in the R Journal (2019).</p>",
@@ -1319,7 +1476,7 @@ dataqualityClass <- if (requireNamespace("jmvcore")) R6::R6Class("dataqualityCla
             },
 
             # Footer
-            "<p style='margin-top: 20px; font-size: 0.9em; color: #555;'>",
+            "<p style='margin-top: 20px; font-size: 0.9em; color: inherit; opacity: 0.75;'>",
             "<em> These explanations provide general guidance for clinical researchers. ",
             "For detailed statistical consultation, work with a biostatistician familiar with your research domain.</em>",
             "</p>",

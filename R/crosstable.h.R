@@ -139,16 +139,22 @@ crosstableResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "arsenal",
                     "finalfit",
                     "gtsummary",
-                    "tangram"))
+                    "tangram",
+                    "labelled",
+                    "yangdalton2012",
+                    "kableExtra"))
             self$add(jmvcore::Preformatted$new(
                 options=options,
                 name="notices",
                 title="Important Information",
+                visible=FALSE,
                 clearWith=list(
                     "vars",
                     "group",
                     "excl",
                     "sty",
+                    "cont",
+                    "pcat",
                     "p_adjust")))
             self$add(jmvcore::Html$new(
                 options=options,
@@ -167,6 +173,9 @@ crosstableResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 clearWith=list(
                     "vars",
                     "group",
+                    "sty",
+                    "cont",
+                    "pcat",
                     "p_adjust",
                     "excl")))
             self$add(jmvcore::Html$new(
@@ -196,7 +205,8 @@ crosstableResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             self$add(jmvcore::Html$new(
                 options=options,
                 name="todo2",
-                title="To Do",
+                title="Method Note (finalfit)",
+                visible="(sty:finalfit)",
                 clearWith=list(
                     "vars",
                     "group",
@@ -219,6 +229,8 @@ crosstableResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "vars",
                     "group",
                     "sty",
+                    "cont",
+                    "pcat",
                     "excl"),
                 visible="(sty:arsenal)",
                 refs="arsenal"))
@@ -244,6 +256,7 @@ crosstableResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "group",
                     "sty",
                     "cont",
+                    "pcat",
                     "p_adjust",
                     "excl"),
                 visible="(sty:gtsummary)",
@@ -286,6 +299,7 @@ crosstableResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 name="smdTable",
                 title="Standardized Mean Differences (Balance)",
                 visible="(showSMD)",
+                refs="MASS",
                 clearWith=list(
                     "vars",
                     "group",
@@ -340,7 +354,10 @@ crosstableBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' 
 #' Currently implemented features:
 #' - Multiple table styles (arsenal, finalfit, gtsummary, NEJM, Lancet, hmisc)
-#' - Automatic test selection (chi-square, Fisher's exact, t-test, ANOVA)
+#' - Test selection (chi-square, Fisher's exact, ANOVA, Kruskal-Wallis; which 
+#' one
+#'   applies depends on the table style and on whether means or medians are 
+#' shown)
 #' - Multiple testing correction (Bonferroni, Holm, Benjamini-Hochberg, 
 #' Benjamini-Yekutieli)
 #' - Variable name safety (special characters, spaces)
@@ -350,18 +367,41 @@ crosstableBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' analysis,
 #' correspondence analysis) are planned but not yet available.
 #' 
+#'
+#' @examples
+#' \donttest{
+#' # Age and Sex compared across treatment groups
+#' crosstable(
+#'     data = histopathology,
+#'     vars = vars(Age, Sex),
+#'     group = "Group",
+#'     sty = "gtsummary")
+#'}
 #' @param data The data as a data frame.
 #' @param vars The variable(s) that will appear as rows in the cross table.
 #' @param group The variable that will appear as columns (groups) in the
 #'   table.
-#' @param sty .
+#' @param sty Table style. "arsenal", "finalfit" and "gtsummary" honour the
+#'   test and statistic options below; "nejm", "lancet" and "hmisc" are tangram
+#'   layouts that apply their own built-in tests. P-value adjustment is
+#'   available in "gtsummary" only.
 #' @param excl Exclude rows with missing values.
-#' @param cont .
-#' @param pcat .
+#' @param cont Summary shown for continuous variables. In the arsenal and
+#'   finalfit styles this also selects the test (ANOVA for "mean",
+#'   Kruskal-Wallis for "median"). In the gtsummary style it changes the
+#'   displayed statistic only, because gtsummary always tests continuous
+#'   variables with a rank-based test.
+#' @param pcat Test used for categorical variables. Applied by the arsenal,
+#'   finalfit and gtsummary styles; the nejm, lancet and hmisc styles use their
+#'   own built-in tests. With "chisq" the gtsummary style still switches to
+#'   Fisher's exact test automatically when an expected cell count falls below
+#'   5. On 2x2 tables "chisq" means Yates' continuity-corrected chi-square in
+#'   the finalfit style and the uncorrected Pearson chi-square in the arsenal
+#'   and gtsummary styles, so those p-values differ between styles.
 #' @param p_adjust Method for adjusting p-values for multiple comparisons
 #'   across variables. Only available with gtsummary table style.
 #' @param showSMD Add a standardized mean difference (SMD) column comparing
-#'   the groups for each variable — the standard balance diagnostic for matched,
+#'   the groups for each variable - the standard balance diagnostic for matched,
 #'   weighted, or propensity cohorts. Requires exactly two groups. |SMD| < 0.1
 #'   conventionally indicates negligible imbalance.
 #' @return A results object containing:

@@ -46,6 +46,7 @@ benfordResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
     inherit = jmvcore::Group,
     active = list(
         welcome = function() private$.items[["welcome"]],
+        notices = function() private$.items[["notices"]],
         explanation = function() private$.items[["explanation"]],
         dataWarning = function() private$.items[["dataWarning"]],
         summary = function() private$.items[["summary"]],
@@ -70,6 +71,13 @@ benfordResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 title="Getting Started",
                 visible=FALSE,
                 clearWith=list()))
+            self$add(jmvcore::Preformatted$new(
+                options=options,
+                name="notices",
+                title="Important Information",
+                clearWith=list(
+                    "var",
+                    "digits")))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="explanation",
@@ -123,7 +131,7 @@ benfordResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             self$add(jmvcore::Preformatted$new(
                 options=options,
                 name="text2",
-                title="Suspicious Data Points",
+                title="Leading-Digit Bin Membership",
                 clearWith=list(
                     "var",
                     "digits")))
@@ -169,7 +177,21 @@ benfordBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 
 #' Benford Analysis
 #'
+#' Tests whether the leading digits of a numeric variable follow Benford's 
+#' Law, using the MAD conformity classification, a chi-square goodness-of-fit 
+#' test and the Mantissa Arc Test. Intended as a screen for systematic 
+#' recording artefacts such as rounding or preferred values.
 #' 
+#'
+#' @examples
+#' \donttest{
+#' # Leading-digit screen on follow-up times. These span only 1.3
+#' # orders of magnitude, so the analysis reports a narrow-range
+#' # warning: Benford's Law needs at least two decades.
+#' benford(
+#'     data = histopathology,
+#'     var = "OverallTime")
+#'}
 #' @param data The data as a data frame.
 #' @param var a string naming the variable from \code{data} that contains the
 #'   continuous values used for the report
@@ -179,6 +201,7 @@ benfordBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' @return A results object containing:
 #' \tabular{llllll}{
 #'   \code{results$welcome} \tab \tab \tab \tab \tab a html \cr
+#'   \code{results$notices} \tab \tab \tab \tab \tab a preformatted \cr
 #'   \code{results$explanation} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$dataWarning} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$summary} \tab \tab \tab \tab \tab a table \cr

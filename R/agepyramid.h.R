@@ -257,7 +257,16 @@ agepyramidResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             self$add(jmvcore::Html$new(
                 options=options,
                 name="dataInfo",
-                title="Data Summary"))
+                title="Data Summary",
+                clearWith=list(
+                    "age",
+                    "gender",
+                    "female",
+                    "male",
+                    "age_groups",
+                    "age_interval",
+                    "bin_width",
+                    "custom_breaks")))
             self$add(jmvcore::Table$new(
                 options=options,
                 name="pyramidTable",
@@ -300,7 +309,6 @@ agepyramidResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 width=600,
                 height=450,
                 renderFun=".plot",
-                requiresData=TRUE,
                 clearWith=list(
                     "age",
                     "gender",
@@ -323,7 +331,6 @@ agepyramidResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 height=500,
                 renderFun=".plotGGCharts",
                 visible="(enableGGCharts)",
-                requiresData=TRUE,
                 clearWith=list(
                     "age",
                     "gender",
@@ -363,16 +370,23 @@ agepyramidBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 
 #' Age Pyramid
 #'
+#' Generates an age pyramid from an age variable and a gender variable.
 #' 
 #' @param data The data as a data frame.
 #' @param age a string naming the variable from \code{data} that contains the
 #'   continuous values used for the report
 #' @param gender a string naming the variable from \code{data} that contains
 #'   the categorical values used for the report
-#' @param female a string naming the level from \code{gender} that contains
-#'   the level female
-#' @param male a string naming the level from \code{gender} that contains the
-#'   level male
+#' @param female a string naming the level of \code{gender} that identifies
+#'   female subjects. This argument has no default (jamovi does not allow one on
+#'   a level option), so a call from R must always supply it; pass NULL to let
+#'   the analysis read the level names itself, which it reports in a note above
+#'   the results.
+#' @param male a string naming the level of \code{gender} that identifies male
+#'   subjects. This argument has no default (jamovi does not allow one on a
+#'   level option), so a call from R must always supply it; pass NULL to let the
+#'   analysis read the level names itself, which it reports in a note above the
+#'   results.
 #' @param age_groups Predefined age group categories. Choose 'custom' to use
 #'   bin_width, or select a preset. 'who' gives the WHO/UN standard five-year
 #'   groups (0-4, 5-9, ... 85+) used by the WHO World Standard Population and UN
@@ -385,12 +399,19 @@ agepyramidBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   of single years. 'right' gives (lower, upper] bands, where age 65 closes
 #'   the band below it; this reproduces the behaviour of releases before 1.0.52
 #'   and makes the lowest band one year wider than the others, which inflates
-#'   the youngest bar of the pyramid.
+#'   the youngest bar of the pyramid. Applies to the custom age grouping only:
+#'   the named presets are defined by their sources as left-closed bands, so a
+#'   right-closed setting is ignored for them and a note says so.
 #' @param bin_width The width of the age bins in years. Adjust this to change
-#'   the granularity of the age groups.
+#'   the granularity of the age groups. Ignored while \code{custom_breaks} is
+#'   filled in. A width that would produce more than 200 age bands is refused
+#'   with an explanatory note, and more than 25 bands raises a warning about how
+#'   thin the bars become.
 #' @param custom_breaks Comma-separated age break points (e.g.,
-#'   "0,18,25,50,65,100"). Only used when age_groups is set to 'custom'. Leave
-#'   empty to use bin_width.
+#'   "0,18,25,50,65,100"). Only used when age_groups is set to 'custom'. When
+#'   filled in these override bin_width; leave empty to use bin_width. Entries
+#'   that are not numbers are reported in a note and left out, and the top band
+#'   is always open-ended.
 #' @param plot_title The title displayed on the age pyramid plot.
 #' @param color_palette Color palette for gender visualization. Choose
 #'   'custom' to specify your own colors.

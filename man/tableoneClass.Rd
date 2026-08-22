@@ -4,7 +4,7 @@
 \alias{tableoneClass}
 \title{Table One}
 \value{
-A formatted table according to the chosen style.
+A results object; see the Value section of the generated tableone() documentation.
 }
 \description{
 This function creates a "Table One" - a descriptive summary table commonly used in clinicopathological research.

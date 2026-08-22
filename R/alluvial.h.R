@@ -293,7 +293,17 @@ alluvialResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "bin",
                     "custombinlabels",
                     "fill",
-                    "curveType")))
+                    "curveType",
+                    "colorPalette",
+                    "themeStyle",
+                    "enhancedGradients",
+                    "orient",
+                    "flowDirection",
+                    "sankeyStyle",
+                    "labelNodes",
+                    "showCounts",
+                    "plotSubtitle",
+                    "mytitle")))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="todo",
@@ -310,7 +320,8 @@ alluvialResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "maxvars",
                     "excl",
                     "weight",
-                    "engine")))
+                    "engine",
+                    "fillGgalluvial")))
             self$add(jmvcore::Image$new(
                 options=options,
                 title="Alluvial Diagrams",
@@ -390,7 +401,21 @@ alluvialBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 
 #' Alluvial Diagrams
 #'
+#' Draws an alluvial diagram: a flow picture of how cases move between the 
+#' categories of several categorical variables. Ribbon width is the number of 
+#' cases taking that path; with the GG Alluvial engine and a weight variable 
+#' it is the total of that weight over those cases, while the Easy Alluvial 
+#' engine always counts cases. Every axis variable is drawn with its own 
+#' recorded values as the strata.
 #' 
+#'
+#' @examples
+#' \donttest{
+#' # Flow of lymphovascular invasion, perineural invasion and treatment group
+#' alluvial(
+#'     data = histopathology,
+#'     vars = vars(LVI, PNI, Group))
+#'}
 #' @param data The data as a data frame.
 #' @param vars a string naming the variables from \code{data} that contains
 #'   the values used for the Alluvial Diagram.
@@ -401,18 +426,22 @@ alluvialBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   represented by color. Default is 'first_variable'.
 #' @param fillGgalluvial A string naming the categorical variable from
 #'   \code{data} that will be used to color the flows in the ggalluvial plot.
-#' @param bin Display labels for bin categories. Note: This controls label
-#'   text only, not the binning method. easyalluvial uses its own internal
-#'   binning algorithm. For custom binning, create categorized variables before
-#'   analysis.
+#' @param bin Names for the intervals the drawing engine creates when it has
+#'   to split a continuous variable. This analysis draws every axis variable
+#'   with its own recorded values as categories, so in practice nothing is
+#'   binned and this setting has no visible effect. To group values, recode the
+#'   variable first.
 #' @param orient Orientation of the plot. One of 'horr' (horizontal) or 'vert'
-#'   (vertical). Default is 'vert'.
+#'   (vertical). Superseded by flowDirection, which offers the same choices and
+#'   more, so this setting is applied only while flowDirection is 'left_right'.
 #' @param usetitle Use a custom title for the plot.
 #' @param mytitle Title for the plot.
 #' @param maxvars Maximum number of variables to include in the alluvial plot.
-#' @param custombinlabels Custom labels for bins, separated by commas (e.g.,
-#'   "Low,Medium,High"). The number of labels determines the number of bins.
-#'   Leave empty to use the selected bin-label method.
+#' @param custombinlabels Custom names for the intervals the drawing engine
+#'   creates when it has to split a continuous variable, separated by commas
+#'   (e.g. "Low,Medium,High"); at least two are required. As with the bin labels
+#'   above, every axis variable here is drawn as a category, so in practice
+#'   nothing is binned. Leave empty to use the selected bin-label method.
 #' @param colorPalette Color palette for the diagram flows.
 #' @param showCounts Display count values on nodes.
 #' @param themeStyle Theme style for the plot background and elements.

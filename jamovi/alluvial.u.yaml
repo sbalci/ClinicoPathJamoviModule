@@ -63,7 +63,7 @@ children:
                     enable: (engine:easyalluvial && orient:vert && !usetitle)
                   - type: ComboBox
                     name: orient
-                    enable: (!marg)
+                    enable: (flowDirection:left_right && !marg)
           - type: LayoutBox
             cell:
               column: 1
@@ -104,6 +104,7 @@ children:
                     name: plotSubtitle
                     format: string
                     width: large
+                    enable: (engine:ggalluvial || !marg)
 
   - type: CollapseBox
     label: Styling
@@ -126,10 +127,13 @@ children:
                 children:
                   - type: ComboBox
                     name: colorPalette
+                    enable: (engine:ggalluvial || !marg)
                   - type: ComboBox
                     name: themeStyle
+                    enable: (engine:ggalluvial || !marg)
                   - type: CheckBox
                     name: enhancedGradients
+                    enable: (colorPalette:default && (engine:ggalluvial || !marg))
           - type: LayoutBox
             cell:
               column: 1
@@ -186,3 +190,4 @@ children:
                 children:
                   - type: ComboBox
                     name: flowDirection
+                    enable: (engine:ggalluvial || !marg)

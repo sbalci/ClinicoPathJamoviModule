@@ -12,27 +12,23 @@ description:
 
         Currently implemented features:
         - Multiple table styles (arsenal, finalfit, gtsummary, NEJM, Lancet, hmisc)
-        - Automatic test selection (chi-square, Fisher's exact, t-test, ANOVA)
+        - Test selection (chi-square, Fisher's exact, ANOVA, Kruskal-Wallis; which one
+          applies depends on the table style and on whether means or medians are shown)
         - Multiple testing correction (Bonferroni, Holm, Benjamini-Hochberg, Benjamini-Yekutieli)
         - Variable name safety (special characters, spaces)
         - Data quality validation warnings
 
         Note: Advanced features (pairwise comparisons, effect sizes, residual analysis,
         correspondence analysis) are planned but not yet available.
-    # R:
-    #     dontrun: true
-    #     usage: |
-    #         # Example usage:
-    #         # dat <- as.data.frame(your_data)
-    #         # ClinicoPathDescriptives::crosstable(
-    #         #   data = dat,
-    #         #   vars = vars(YourRowVariable),
-    #         #   group = "YourGroupingVariable",
-    #         #   sty = "finalfit",
-    #         #   excl = TRUE,
-    #         #   cont = "mean",
-    #         #   pcat = "chisq"
-    #         # )
+    R:
+        dontrun: true
+        usage: |
+            # Age and Sex compared across treatment groups
+            crosstable(
+                data = histopathology,
+                vars = vars(Age, Sex),
+                group = "Group",
+                sty = "gtsummary")
 
 options:
     - name: data
@@ -71,6 +67,16 @@ options:
         - title: hmisc
           name: hmisc
       default: nejm
+      description:
+          R: >
+            Table style. "arsenal", "finalfit" and "gtsummary" honour the test and
+            statistic options below; "nejm", "lancet" and "hmisc" are tangram layouts
+            that apply their own built-in tests. P-value adjustment is available in
+            "gtsummary" only.
+          jamovi: >
+            Layout of the table. arsenal, finalfit and gtsummary apply the test and
+            statistic settings below; NEJM, Lancet and hmisc use their own built-in
+            tests. P-value adjustment is available with gtsummary only.
     - name: excl
       title: Missing-value exclusion (NA)
       type: Bool
@@ -87,6 +93,16 @@ options:
         - title: median
           name: median
       default: mean
+      description:
+          R: >
+            Summary shown for continuous variables. In the arsenal and finalfit styles
+            this also selects the test (ANOVA for "mean", Kruskal-Wallis for "median").
+            In the gtsummary style it changes the displayed statistic only, because
+            gtsummary always tests continuous variables with a rank-based test.
+          jamovi: >
+            Whether continuous variables are summarised as mean (SD) or median (Q1, Q3).
+            In the arsenal and finalfit styles this also selects the test (ANOVA vs
+            Kruskal-Wallis); in gtsummary it changes the displayed statistic only.
     - name: pcat
       title: Chi-square vs Fisher's exact test
       type: List
@@ -96,6 +112,21 @@ options:
         - title: fisher
           name: fisher
       default: chisq
+      description:
+          R: >
+            Test used for categorical variables. Applied by the arsenal, finalfit and
+            gtsummary styles; the nejm, lancet and hmisc styles use their own built-in
+            tests. With "chisq" the gtsummary style still switches to Fisher's exact
+            test automatically when an expected cell count falls below 5. On 2x2
+            tables "chisq" means Yates' continuity-corrected chi-square in the
+            finalfit style and the uncorrected Pearson chi-square in the arsenal and
+            gtsummary styles, so those p-values differ between styles.
+          jamovi: >
+            Test used for categorical variables. Applied by the arsenal, finalfit and
+            gtsummary styles only. With chi-square selected, gtsummary still switches to
+            Fisher's exact test automatically when an expected cell count falls below 5.
+            On 2x2 tables, finalfit applies Yates' continuity correction while arsenal
+            and gtsummary report the uncorrected Pearson chi-square.
 
     - name: p_adjust
       title: P-value adjustment method
@@ -123,7 +154,7 @@ options:
       description:
           R: >
             Add a standardized mean difference (SMD) column comparing the groups for each
-            variable — the standard balance diagnostic for matched, weighted, or propensity
+            variable - the standard balance diagnostic for matched, weighted, or propensity
             cohorts. Requires exactly two groups. |SMD| < 0.1 conventionally indicates
             negligible imbalance.
           jamovi: >

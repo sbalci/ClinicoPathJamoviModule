@@ -20,6 +20,7 @@ classification beyond 3 digits.}
 A results object containing:
 \tabular{llllll}{
 \code{results$welcome} \tab \tab \tab \tab \tab a html \cr
+\code{results$notices} \tab \tab \tab \tab \tab a preformatted \cr
 \code{results$explanation} \tab \tab \tab \tab \tab a html \cr
 \code{results$dataWarning} \tab \tab \tab \tab \tab a html \cr
 \code{results$summary} \tab \tab \tab \tab \tab a table \cr
@@ -37,5 +38,18 @@ Tables can be converted to data frames with \code{asDF} or \code{\link{as.data.f
 \code{as.data.frame(results$summary)}
 }
 \description{
-Benford Analysis
+Tests whether the leading digits of a numeric variable follow Benford's
+Law, using the MAD conformity classification, a chi-square goodness-of-fit
+test and the Mantissa Arc Test. Intended as a screen for systematic
+recording artefacts such as rounding or preferred values.
+}
+\examples{
+\donttest{
+# Leading-digit screen on follow-up times. These span only 1.3
+# orders of magnitude, so the analysis reports a narrow-range
+# warning: Benford's Law needs at least two decades.
+benford(
+    data = histopathology,
+    var = "OverallTime")
+}
 }

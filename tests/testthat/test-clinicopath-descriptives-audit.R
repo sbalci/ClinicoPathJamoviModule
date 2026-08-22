@@ -381,7 +381,18 @@ test_that("audited source removes obsolete and fragile patterns", {
   expect_match(source_text("summarydata"), "\\u{00B1}", fixed = TRUE)
   expect_false(grepl("&plusmn;", source_text("summarydata"), fixed = TRUE))
   expect_false(grepl("BaylorEdPsych", source_text("dataquality"), fixed = TRUE))
-  expect_match(source_text("vartree"), "tryCatch(vtree::vtree", fixed = TRUE)
+  # The vtree call is now dispatched through do.call() because ptable = TRUE returns
+  # a data.frame rather than the tree widget, so the tree and the pattern table are
+  # built by two separate calls. What matters is unchanged: every vtree::vtree CALL
+  # is wrapped in a tryCatch, so a vtree failure surfaces as a message rather than an
+  # unhandled error. Assert that property, not the old literal spelling.
+  vt_code <- sub("#.*$", "", source_lines("vartree"))   # drop comments first
+  vt_code <- paste(vt_code, collapse = "\n")
+  call_sites <- regmatches(vt_code,
+                           gregexpr("(?s).{200}vtree::vtree\\s*[,(]", vt_code, perl = TRUE))[[1]]
+  expect_gt(length(call_sites), 0)
+  expect_true(all(grepl("tryCatch", call_sites, fixed = TRUE)),
+              info = "every vtree::vtree call site must sit inside a tryCatch")
   expect_false(any(grepl("^\\s*stop\\(", source_lines("tableone"))))
   expect_false(any(grepl("^\\s*stop\\(", source_lines("agepyramid"))))
 

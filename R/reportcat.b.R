@@ -1,11 +1,10 @@
 #' @title Summary of Categorical Variables
-#' @return Text
+#' @return A results object containing HTML summaries of the selected categorical variables.
 #'
 #' @importFrom R6 R6Class
 #' @import jmvcore
 #' @importFrom magrittr %>%
 #' @importFrom gtExtras gt_plt_summary
-#' @importFrom utils packageVersion
 #'
 # Improved version of reportcatClass with enhanced messages and formatting
 reportcatClass <- if (requireNamespace('jmvcore')) R6::R6Class(
@@ -14,11 +13,24 @@ reportcatClass <- if (requireNamespace('jmvcore')) R6::R6Class(
     private = list(
         .run = function() {
 
+            # aboutAnalysis is declared visible: true, so it must be populated
+            # before any early return - otherwise the very first screen shows an
+            # empty "About This Analysis" heading whose text tells the user to
+            # select variables.
+            self$results$aboutAnalysis$setContent(private$.generateAboutContent())
+
+            # Clear everything written by the previous run. clearWith only reacts
+            # to OPTIONS, and `vars` is the only option here, so a change in the
+            # DATA (row filter, edited cells) does not clear anything: without
+            # this, a validation early-return below would leave the previous
+            # run's fully formed numbers on screen underneath an error message.
+            private$.resetOutputs()
+
             # Check if any variables have been selected.
             # Enhanced welcome message with HTML formatting for a more user-friendly experience.
             if (length(self$options$vars) == 0) {
                 todo <- glue::glue("
-        <div style='font-family: Arial, sans-serif; color: #2c3e50;'>
+        <div style='font-family: Arial, sans-serif;'>
           <h2>{welcome_title}</h2>
           <p>{tool_description}</p>
           <p><strong>{instructions_label}:</strong> {instructions_text}
@@ -32,32 +44,26 @@ reportcatClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         variable_types_note = .("Only Nominal, Ordinal, or Categorical variables (factors) are allowed.")
         )
                 self$results$todo$setContent(todo)
-                # Reset any stale error/warning when no variables are selected.
-                self$results$error$setVisible(FALSE)
                 return()
             } else {
-                # Clear the to-do message if variables are selected.
-                self$results$todo$setContent("")
-
-                # Reset any stale error/warning from a previous run; the
-                # validation branches below re-show it when needed.
-                self$results$error$setVisible(FALSE)
 
                 # Enhanced input validation with proper error handling
                 if (nrow(self$data) == 0) {
                     self$results$error$setContent(glue::glue("<div style='padding: 15px; background-color: rgba(216, 33, 50, 0.18); border: 1px solid #f5c6cb; border-radius: 4px; color: inherit;'><strong>{error_label}:</strong> {error_msg}</div>",
                         error_label = .("Error"),
-                        error_msg = .("Data contains no (complete) rows.")))
+                        error_msg = .("The dataset has no rows. Check whether a row filter is excluding every case.")))
                     self$results$error$setVisible(TRUE)
                     return()
                 }
 
                 mydata <- self$data
 
-                # Construct a formula from the selected variables.
-                formula <- jmvcore::constructFormula(terms = self$options$vars)
-                myvars <- jmvcore::decomposeFormula(formula = formula)
-                myvars <- unlist(myvars)
+                # Raw, unquoted variable names: every downstream use is
+                # mydata[[myvar]], which needs the raw name. (This used to
+                # round-trip through constructFormula/decomposeFormula - an
+                # identity transform here, but it reads as if the names came back
+                # backtick-quoted, which would break the data[[ ]] lookups.)
+                myvars <- unlist(self$options$vars)
                 
                 # Comprehensive validation of selected variables
                 if (length(myvars) == 0) {
@@ -101,20 +107,25 @@ reportcatClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 })]
                 
                 if (length(empty_vars) > 0) {
-                    warning_msg <- glue::glue("<div style='padding: 15px; background-color: rgba(255, 202, 33, 0.23); border: 1px solid #ffeaa7; border-radius: 4px; color: inherit;'><strong>{warning_label}:</strong> {warning_msg}: {vars}. {action}</div>",
+                    # This is an advisory, not a failure: the analysis still runs
+                    # on whatever is left. It goes to its own panel so it is not
+                    # captioned "Error", and so that the terminal message below
+                    # cannot overwrite the list of names it reports.
+                    self$results$dataWarnings$setContent(glue::glue("<div style='padding: 15px; background-color: rgba(255, 202, 33, 0.23); border: 1px solid #ffeaa7; border-radius: 4px; color: inherit;'><strong>{warning_label}:</strong> {warning_msg}: {vars}. {action}</div>",
                         warning_label = .("Warning"),
                         warning_msg = .("Variables with no valid levels or all missing values"),
                         vars = paste(htmltools::htmlEscape(empty_vars), collapse = ", "),
-                        action = .("These will be excluded from analysis."))
-                    self$results$error$setContent(warning_msg)
-                    self$results$error$setVisible(TRUE)
-                    
+                        action = .("These will be excluded from analysis.")))
+                    self$results$dataWarnings$setVisible(TRUE)
+
                     # Remove empty variables from analysis
                     myvars <- myvars[!myvars %in% empty_vars]
                     if (length(myvars) == 0) {
-                        self$results$error$setContent(glue::glue("<div style='padding: 15px; background-color: rgba(216, 33, 50, 0.18); border: 1px solid #f5c6cb; border-radius: 4px; color: inherit;'><strong>{error_label}:</strong> {error_msg}</div>",
+                        self$results$error$setContent(glue::glue("<div style='padding: 15px; background-color: rgba(216, 33, 50, 0.18); border: 1px solid #f5c6cb; border-radius: 4px; color: inherit;'><strong>{error_label}:</strong> {error_msg} {action}</div>",
                             error_label = .("Error"),
-                            error_msg = .("No valid categorical variables remaining after validation.")))
+                            error_msg = .("Every selected variable was empty or all-missing, so there is nothing to summarise."),
+                            action = .("See the Data Warnings panel for the variable names, and select at least one variable that has observed categories.")))
+                        self$results$error$setVisible(TRUE)
                         return()
                     }
                 }
@@ -125,9 +136,6 @@ reportcatClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     total_obs <- length(mydata[[myvar]])
                     missing_obs <- sum(is.na(mydata[[myvar]]))
                     valid_obs <- total_obs - missing_obs
-                    # Count observed (non-missing) levels, consistent with
-                    # misuse detection and the fallback summary table.
-                    num_levels <- length(unique(mydata[[myvar]][!is.na(mydata[[myvar]])]))
 
                     # Count levels with table(useNA = "no"), which structurally
                     # cannot produce a missing-value row.
@@ -151,8 +159,15 @@ reportcatClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                         level = names(tbl),
                         n = as.numeric(tbl),
                         stringsAsFactors = FALSE
-                    ) %>%
-                        dplyr::arrange(dplyr::desc(n))
+                    )
+                    # Only NOMINAL variables are re-ordered by descending count.
+                    # jamovi delivers an Ordinal column as an ordered factor
+                    # (jmvcore::columnType maps `ordered` -> "ordinal"), and its
+                    # level order is the clinical scale itself - grade, pT/pN,
+                    # stage, ISUP. Sorting those by frequency printed
+                    # G2, G1, G3, G4 for a G1<G2<G3<G4 factor.
+                    if (!is.ordered(mydata[[myvar]]))
+                        summar <- dplyr::arrange(summar, dplyr::desc(n))
                     summar$validtotal <- valid_obs
 
                     # Build a description for each level showing count and percentage.
@@ -163,7 +178,15 @@ reportcatClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                                 .("{level}: n = {n}, {percent} of valid cases."),
                                 level = htmltools::htmlEscape(level),
                                 n = n,
-                                percent = scales::percent(percent)
+                                # accuracy is pinned so that this panel and the
+                                # copy-ready sentences never print two different
+                                # percentages for the same count. With the
+                                # default accuracy = NULL, scales re-derives the
+                                # precision from each variable's own spread: it
+                                # printed 57% here, 39.76% for the next variable
+                                # and 57.4% in the sentence below. The
+                                # copy-ready panel now calls this same formatter.
+                                percent = scales::percent(percent, accuracy = 0.1)
                             )
                         ) %>%
                         dplyr::pull(level_description)
@@ -179,17 +202,28 @@ reportcatClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     # worth naming rather than hiding.
                     n_listed <- nrow(summar)
                     n_empty <- sum(summar$n == 0)
-                    sentence1 <- glue::glue(.("<strong>{var}</strong> has {rows} rows and {levels} levels."),
+                    # Singular/plural is branched in R rather than left to a
+                    # single string: the source language is what users see, so
+                    # "1 levels" cannot be fixed by a translator downstream.
+                    rows_phrase <- if (total_obs == 1) .("1 row") else
+                        glue::glue(.("{n} rows"), n = total_obs)
+                    levels_phrase <- if (n_listed == 1) .("1 level") else
+                        glue::glue(.("{n} levels"), n = n_listed)
+                    sentence1 <- glue::glue(.("<strong>{var}</strong> has {rows} and {levels}."),
                         var = htmltools::htmlEscape(myvar),
-                        rows = total_obs,
-                        levels = n_listed)
-                    if (n_empty > 0)
-                        sentence1 <- paste0(sentence1, " ", glue::glue(
-                            .("{count} of these levels has no observations."),
-                            count = n_empty))
+                        rows = rows_phrase,
+                        levels = levels_phrase)
+                    if (n_empty > 0) {
+                        empty_phrase <- if (n_empty == 1)
+                            .("1 of these levels has no observations.") else
+                            glue::glue(.("{count} of these levels have no observations."),
+                                count = n_empty)
+                        sentence1 <- paste0(sentence1, " ", empty_phrase)
+                    }
                     sentence2 <- glue::glue(
-                        .("Missing values: {count}."),
-                        count = missing_obs
+                        .("Missing values: {count}. Percentages above are of {valid} valid cases."),
+                        count = missing_obs,
+                        valid = valid_obs
                     )
                     full_description <- paste(c(sentence1, description, sentence2), collapse = "<br>")
                     return(full_description)
@@ -239,8 +273,18 @@ reportcatClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     tryCatch({
                         private$.gtExtras_style_fallback_cat(mydata, myvars)
                     }, error = function(e2) {
-                        # Final fallback to simple table
-                        private$.create_simple_cat_summary_table(mydata, myvars)
+                        # Final fallback to simple table. It is wrapped too: this
+                        # handler runs OUTSIDE the tryCatch above, so an error
+                        # raised here would escape .run() as a raw R error.
+                        tryCatch({
+                            private$.create_simple_cat_summary_table(mydata, myvars)
+                        }, error = function(e3) {
+                            htmltools::HTML(glue::glue(
+                                "<div style='padding: 15px; background-color: rgba(255, 202, 33, 0.23); border: 1px solid #ffeaa7; border-radius: 4px; color: inherit;'><strong>{label}:</strong> {msg} ({detail})</div>",
+                                label = .("Summary table unavailable"),
+                                msg = .("The summary table could not be produced. The variable summaries above are unaffected."),
+                                detail = htmltools::htmlEscape(conditionMessage(e3))))
+                        })
                     })
                 })
                 
@@ -254,9 +298,8 @@ reportcatClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 report_sentences <- private$.generateReportSentences(myvars, mydata)
                 self$results$reportSentences$setContent(report_sentences)
 
-                # Add about section (always visible)
-                about_content <- private$.generateAboutContent()
-                self$results$aboutAnalysis$setContent(about_content)
+                # (aboutAnalysis is populated at the top of .run(), before the
+                # early-return branches, because it is declared visible: true.)
 
                 # Add assumptions and data quality guidance
                 assumptions_content <- private$.generateAssumptionsContent()
@@ -277,6 +320,22 @@ reportcatClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             }
         },
 
+        # Clear every content item at the top of .run(). Result items are only
+        # auto-cleared by clearWith, which watches OPTIONS - and `vars` is the
+        # only option this analysis has. Without an explicit reset, editing the
+        # data or applying a row filter leaves the previous run's summaries on
+        # screen while a validation branch prints an error above them.
+        .resetOutputs = function() {
+            for (item in c("todo", "text", "text1", "clinicalSummary",
+                           "reportSentences", "assumptions")) {
+                self$results[[item]]$setContent("")
+            }
+            for (item in c("error", "dataWarnings")) {
+                self$results[[item]]$setContent("")
+                self$results[[item]]$setVisible(FALSE)
+            }
+        },
+
         # Simple categorical summary table without resource-intensive operations
         .create_simple_cat_summary_table = function(dataset, var_list) {
             # Filter to categorical/factor variables only
@@ -287,8 +346,11 @@ reportcatClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     msg = .("No categorical variables available for summary table."))))
             }
             
-            # Create simple HTML table
-            html <- "<table style='border-collapse: collapse; margin: 10px 0; width: 100%;'>"
+            # Create simple HTML table. The heading says the same thing as the
+            # gtExtras output, so say plainly that this is the reduced version.
+            html <- glue::glue("<p style='margin: 0 0 8px 0;'><em>{msg}</em></p>",
+                msg = .("The visual distribution summary could not be produced; counts only are shown below."))
+            html <- paste0(html, "<table style='border-collapse: collapse; margin: 10px 0; width: 100%;'>")
             html <- paste0(html, "<tr style='background-color: rgba(138, 155, 172, 0.06); color: inherit;'>")
             html <- paste0(html, "<th style='border: 1px solid #ccc; padding: 8px;'>", .("Variable"), "</th>")
             html <- paste0(html, "<th style='border: 1px solid #ccc; padding: 8px;'>", .("Levels"), "</th>")
@@ -320,37 +382,68 @@ reportcatClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             return(htmltools::HTML(html))
         },
         
+        # Format a percentage (already on the 0-100 scale) for display. A rate
+        # that is non-zero but rounds to 0.0 is printed as "<0.1", never as "0":
+        # printing "0%" beside a non-zero missing count is a contradiction.
+        .fmtPercent = function(x) {
+            if (is.finite(x) && x > 0 && round(x, 1) == 0)
+                "<0.1"
+            else
+                as.character(round(x, 1))
+        },
+
         # Generate clinical interpretation content
         .generateClinicalInterpretation = function(variables, data) {
             n_vars <- length(variables)
             n_patients <- nrow(data)
             
-            # Calculate overall data quality metrics
+            # Data completeness. Report the WORST variable, not just the mean:
+            # averaging hides a single 90%-missing column behind 20 complete ones,
+            # and the panel below (Data Quality) would then contradict this one.
             missing_summary <- sapply(data[variables], function(x) sum(is.na(x)) / length(x) * 100)
-            avg_missing <- round(mean(missing_summary), 1)
+            # Test the UNROUNDED maximum. round(0.033, 1) is 0, so rounding before
+            # the zero test made 1 missing value in 3000 rows render "No missing
+            # values in any of the selected variables" directly under a Variable
+            # Summaries panel reading "Missing values: 1".
+            raw_max <- max(missing_summary)
+            avg_missing <- private$.fmtPercent(mean(missing_summary))
+            min_missing <- private$.fmtPercent(min(missing_summary))
+            max_missing <- private$.fmtPercent(raw_max)
+            worst_var <- paste(htmltools::htmlEscape(
+                names(missing_summary)[missing_summary == max(missing_summary)]),
+                collapse = ", ")
             
             # High-level clinical interpretation
             interpretation <- glue::glue(
                 "<div style='padding: 20px; background-color: rgba(33, 159, 33, 0.1); border-left: 4px solid #28a745; margin: 10px 0; color: inherit;'>
-                <h4 style='color: #155724; margin-top: 0;'>{title}</h4>
+                <h4 style='margin-top: 0;'>{title}</h4>
                 <p><strong>{summary}:</strong> {desc}</p>
                 <p><strong>{quality}:</strong> {quality_desc}</p>
                 <p><strong>{clinical_use}:</strong> {use_desc}</p>
                 </div>",
                 title = .("Clinical Summary"),
                 summary = .("Dataset Overview"),
-                desc = glue::glue(.("Analysis of {n} categorical variables from {patients} patients/cases."), 
-                                n = n_vars, patients = n_patients),
-                quality = .("Data Quality"),
-                quality_desc = if (avg_missing < 5) {
-                    .("Excellent data completeness (average missing: {rate}%).") %>% 
-                    glue::glue(rate = avg_missing)
-                } else if (avg_missing < 15) {
-                    .("Good data completeness (average missing: {rate}%).") %>% 
-                    glue::glue(rate = avg_missing)
+                desc = if (n_vars == 1) {
+                    glue::glue(.("Analysis of 1 categorical variable from {patients} cases."),
+                               patients = n_patients)
                 } else {
-                    .("Moderate data completeness (average missing: {rate}%). Consider impact on analysis validity.") %>% 
-                    glue::glue(rate = avg_missing)
+                    glue::glue(.("Analysis of {n} categorical variables from {patients} cases."),
+                               n = n_vars, patients = n_patients)
+                },
+                quality = .("Data Completeness"),
+                # State what was measured instead of grading it. "Excellent" is an
+                # unsupported judgement on someone's patient data, and it was
+                # driven by the MEAN, so it stayed green while one variable was
+                # 90% missing.
+                quality_desc = if (raw_max == 0) {
+                    .("No missing values in any of the selected variables.")
+                } else if (n_vars == 1) {
+                    glue::glue(.("Missing values: {rate}% of cases."), rate = max_missing)
+                } else {
+                    glue::glue(
+                        .("Missing values range from {min}% to {max}% across the selected variables (mean {avg}%); highest: {var}."),
+                        min = min_missing, max = max_missing, avg = avg_missing,
+                        var = worst_var)
                 },
                 clinical_use = .("Clinical Applications"),
                 use_desc = .("These summaries are suitable for baseline characteristics tables, data quality assessment, and descriptive analysis in clinical research.")
@@ -370,25 +463,43 @@ reportcatClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 n_valid <- n_total - n_missing
                 
                 if (n_valid > 0) {
-                    # Get frequency distribution
+                    # Get frequency distribution.
+                    # which.max() silently returns the FIRST maximum, so a 50/50
+                    # split used to be published as "the most common category was
+                    # 'A'". These sentences are meant to be pasted into
+                    # manuscripts, so a tie has to be named as a tie.
                     freq_table <- table(var_data, useNA = "no")
-                    most_common <- names(freq_table)[which.max(freq_table)]
                     most_common_n <- max(freq_table)
-                    most_common_pct <- round(most_common_n / n_valid * 100, 1)
-                    
-                    sentence <- glue::glue(
-                        .("For {variable}, the most common category was '{category}' (n = {n}, {percent}% of valid cases)."),
-                        variable = htmltools::htmlEscape(var),
-                        category = htmltools::htmlEscape(most_common),
-                        n = most_common_n,
-                        percent = most_common_pct
-                    )
+                    most_common <- names(freq_table)[freq_table == most_common_n]
+                    most_common_pct <- scales::percent(most_common_n / n_valid, accuracy = 0.1)
+
+                    sentence <- if (length(most_common) > 1) {
+                        glue::glue(
+                            .("For {variable}, {categories} were equally the most frequent categories (n = {n} of {valid} valid cases each, {percent} each)."),
+                            variable = htmltools::htmlEscape(var),
+                            categories = paste0("'", htmltools::htmlEscape(most_common), "'", collapse = ", "),
+                            n = most_common_n,
+                            valid = n_valid,
+                            percent = most_common_pct
+                        )
+                    } else {
+                        glue::glue(
+                            .("For {variable}, the most common category was '{category}' (n = {n} of {valid} valid cases, {percent})."),
+                            variable = htmltools::htmlEscape(var),
+                            category = htmltools::htmlEscape(most_common),
+                            n = most_common_n,
+                            valid = n_valid,
+                            percent = most_common_pct
+                        )
+                    }
                     
                     if (n_missing > 0) {
-                        missing_pct <- round(n_missing / n_total * 100, 1)
-                        sentence <- paste(sentence, 
-                                        glue::glue(.("Missing data: {n} cases ({percent}%)."), 
-                                                 n = n_missing, percent = missing_pct))
+                        # "{n} of {total} cases" also removes the "1 cases" plural
+                        # bug without needing a singular/plural branch.
+                        missing_pct <- private$.fmtPercent(n_missing / n_total * 100)
+                        sentence <- paste(sentence,
+                                        glue::glue(.("Missing data: {n} of {total} cases ({percent}%)."),
+                                                 n = n_missing, total = n_total, percent = missing_pct))
                     }
                     
                     sentences <- c(sentences, sentence)
@@ -398,11 +509,11 @@ reportcatClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             if (length(sentences) > 0) {
                 report_content <- glue::glue(
                     "<div style='padding: 15px; background-color: rgba(138, 155, 172, 0.06); border: 1px solid #dee2e6; border-radius: 4px; color: inherit;'>
-                    <h5 style='color: #495057; margin-top: 0;'>{title}</h5>
+                    <h5 style='margin-top: 0;'>{title}</h5>
                     <div style='font-family: Georgia, serif; line-height: 1.6;'>
                     {content}
                     </div>
-                    <small style='color: #6c757d; margin-top: 10px; display: block;'>{note}</small>
+                    <small style='margin-top: 10px; display: block; opacity: 0.8;'>{note}</small>
                     </div>",
                     title = .("Copy-Ready Clinical Summary"),
                     content = paste(sentences, collapse = "<br><br>"),
@@ -424,12 +535,12 @@ reportcatClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         .generateAboutContent = function() {
             about_content <- glue::glue(
                 "<div style='padding: 20px; background-color: rgba(33, 152, 239, 0.13); border-left: 4px solid #2196f3; margin: 10px 0; color: inherit;'>
-                <h4 style='color: #1565c0; margin-top: 0;'>{title}</h4>
+                <h4 style='margin-top: 0;'>{title}</h4>
                 
-                <h5 style='color: #1976d2;'>{what_title}</h5>
+                <h5>{what_title}</h5>
                 <p>{what_desc}</p>
                 
-                <h5 style='color: #1976d2;'>{when_title}</h5>
+                <h5>{when_title}</h5>
                 <ul>
                 <li>{when_1}</li>
                 <li>{when_2}</li>
@@ -437,14 +548,14 @@ reportcatClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 <li>{when_4}</li>
                 </ul>
                 
-                <h5 style='color: #1976d2;'>{how_title}</h5>
+                <h5>{how_title}</h5>
                 <ol>
                 <li>{how_1}</li>
                 <li>{how_2}</li>
                 <li>{how_3}</li>
                 </ol>
                 
-                <h5 style='color: #1976d2;'>{output_title}</h5>
+                <h5>{output_title}</h5>
                 <p>{output_desc}</p>
                 </div>",
                 title = .("About Categorical Variable Analysis"),
@@ -471,16 +582,16 @@ reportcatClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         .generateAssumptionsContent = function() {
             assumptions_content <- glue::glue(
                 "<div style='padding: 20px; background-color: rgba(255, 169, 33, 0.14); border-left: 4px solid #ff9800; margin: 10px 0; color: inherit;'>
-                <h4 style='color: #e65100; margin-top: 0;'>{title}</h4>
+                <h4 style='margin-top: 0;'>{title}</h4>
                 
-                <h5 style='color: #f57c00;'>{data_title}</h5>
+                <h5>{data_title}</h5>
                 <ul>
                 <li>{data_1}</li>
                 <li>{data_2}</li>
                 <li>{data_3}</li>
                 </ul>
                 
-                <h5 style='color: #f57c00;'>{consider_title}</h5>
+                <h5>{consider_title}</h5>
                 <ul>
                 <li>{consider_1}</li>
                 <li>{consider_2}</li>
@@ -494,9 +605,9 @@ reportcatClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 data_2 = .("Each category should have sufficient sample size for reliable percentages"),
                 data_3 = .("Missing data patterns should be examined for potential bias"),
                 consider_title = .("Important Considerations"),
-                consider_1 = .("Variables with >20 categories may need recoding for analysis"),
-                consider_2 = .("Very sparse categories (<5 cases) may need combination"),
-                consider_3 = .("High missing data rates (>20%) require careful interpretation"),
+                consider_1 = .("Variables with more than 20 categories may need recoding for analysis"),
+                consider_2 = .("Very sparse categories (fewer than 5 cases) may need combination"),
+                consider_3 = .("High missing data rates (over 20%) require careful interpretation"),
                 consider_4 = .("Ordinal variables should maintain their natural ordering")
             )
             
@@ -514,7 +625,7 @@ reportcatClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 n_levels <- length(unique(var_data[!is.na(var_data)]))
                 if (n_levels > 20) {
                     warnings <- c(warnings, glue::glue(
-                        .("Variable '{var}' has {n} categories. Consider recoding variables with >20 categories for clearer interpretation."),
+                        .("Variable '{var}' has {n} observed categories. Variables with more than 20 categories are usually easier to interpret after recoding."),
                         var = htmltools::htmlEscape(var), n = n_levels
                     ))
                 }
@@ -527,13 +638,23 @@ reportcatClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     # cases each - nothing rare at all) produced "3 categories with
                     # <5 cases. Consider combining rare categories." Empty categories
                     # cannot be combined, so the advice was unactionable.
+                    #
+                    # The count is reported against the number of observed
+                    # categories. There used to be an additional
+                    # sparse/observed > 0.3 gate that the message said nothing
+                    # about, so 2 singletons among 7 categories - two cells that
+                    # will break any chi-square or logistic model - produced no
+                    # guidance at all, and the user could not tell that apart
+                    # from having no sparse categories.
                     freq_table <- table(var_data, useNA = "no")
                     observed <- freq_table[freq_table > 0]
                     sparse_categories <- sum(observed < 5)
-                    if (sparse_categories > 0 && sparse_categories / length(observed) > 0.3) {
+                    if (sparse_categories > 0) {
                         warnings <- c(warnings, glue::glue(
-                            .("Variable '{var}' has {n} categories with <5 cases. Consider combining rare categories."),
-                            var = htmltools::htmlEscape(var), n = sparse_categories
+                            .("Variable '{var}' has {n} of {total} observed categories with fewer than 5 cases. Sparse cells make chi-square and regression estimates unstable; consider combining rare categories."),
+                            var = htmltools::htmlEscape(var),
+                            n = sparse_categories,
+                            total = length(observed)
                         ))
                     }
                 }
@@ -568,10 +689,17 @@ reportcatClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 Type = rep(.("categorical"), length(cat_vars)),
                 N = sapply(dataset[cat_vars], function(x) sum(!is.na(x))),
                 Missing = sapply(dataset[cat_vars], function(x) sum(is.na(x))),
-                Levels = sapply(dataset[cat_vars], function(x) length(unique(x[!is.na(x)]))),
+                # Declared levels, matching catsummary (nrow of table(as.factor(x)))
+                # and .create_simple_cat_summary_table (length(levels(x))). This
+                # column used to count OBSERVED levels only, so a factor with an
+                # unused level read "3 levels" in the headline and "2" here.
+                Levels = sapply(dataset[cat_vars], function(x) nlevels(as.factor(x))),
                 Most_Common = sapply(dataset[cat_vars], function(x) {
                     tbl <- table(x, useNA = "no")
-                    if (length(tbl) > 0) names(tbl)[which.max(tbl)] else "NA"
+                    if (length(tbl) == 0) return("")
+                    # Name every tied mode rather than letting which.max pick the
+                    # first level in factor order and present it as the winner.
+                    paste(names(tbl)[tbl == max(tbl)], collapse = ", ")
                 }),
                 Most_Common_N = sapply(dataset[cat_vars], function(x) {
                     tbl <- table(x, useNA = "no")
@@ -611,8 +739,13 @@ reportcatClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     heading.subtitle.font.size = 12
                 )
             
-            # Convert to HTML using the documented gt API (same as primary path)
-            return(htmltools::HTML(gt::as_raw_html(gt_table)))
+            # Convert to HTML using the documented gt API (same as primary path).
+            # Prefixed with a plain statement that this is the fallback: it carries
+            # the same title as the gtExtras output but different columns and no
+            # distribution plots, so without this the substitution is invisible.
+            notice <- glue::glue("<p style='margin: 0 0 8px 0;'><em>{msg}</em></p>",
+                msg = .("The visual distribution summary could not be produced; counts only are shown below."))
+            return(htmltools::HTML(paste0(notice, gt::as_raw_html(gt_table))))
         }
     )
 )

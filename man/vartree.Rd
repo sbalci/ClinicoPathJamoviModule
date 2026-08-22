@@ -51,8 +51,10 @@ in tree nodes.}
 
 \item{summarylocation}{Where to display statistical summaries in the tree.}
 
-\item{style}{Visual style preset: default (colored), clean (minimal
-colors),  minimal (simplified layout).}
+\item{style}{Visual style preset: default (gradient-coloured nodes and
+labels), clean (white nodes, uncoloured labels), minimal (vtree's plain
+layout - one flat tone per level, uncoloured labels, and more space between
+nodes).}
 
 \item{prunebelow}{Variable for conditional pruning of tree branches.}
 
@@ -99,7 +101,9 @@ colors),  minimal (simplified layout).}
 \item{showInterpretation}{Generate and display automatic interpretation of
 tree results.}
 
-\item{maxwidth}{Maximum width for tree display in pixels.}
+\item{maxwidth}{Maximum rendered width of the tree, in points. A tree wider
+than this is scaled down (width and height together, so it is not
+distorted); a tree narrower than this is left at its natural size.}
 }
 \value{
 A results object containing:
@@ -117,4 +121,40 @@ Enhanced function for generating comprehensive tree summaries of variables.
 Supports current CRAN vtree package with advanced styling, statistical
 summaries, and interpretation features. Consolidates functionality from
 legacy versions with modern vtree capabilities.
+}
+\examples{
+\donttest{
+# percvarLevel, pruneLevel1, pruneLevel2, followLevel1 and followLevel2 are
+# 'Level' options. The jamovi compiler forbids a default on those, so the
+# generated R function takes them as REQUIRED arguments: pass NULL whenever
+# the variable they belong to is not being used.
+
+# Basic variable tree
+vartree(
+    data = histopathology,
+    vars = c("Grade", "Sex"),
+    style = "default",
+    showInterpretation = TRUE,
+    percvarLevel = NULL,
+    pruneLevel1 = NULL,
+    pruneLevel2 = NULL,
+    followLevel1 = NULL,
+    followLevel2 = NULL
+)
+
+# Mean and SD of a continuous variable inside every node
+vartree(
+    data = histopathology,
+    vars = c("Group", "Grade"),
+    summaryvar = "Age",
+    summarylocation = "allnodes",
+    style = "clean",
+    showInterpretation = TRUE,
+    percvarLevel = NULL,
+    pruneLevel1 = NULL,
+    pruneLevel2 = NULL,
+    followLevel1 = NULL,
+    followLevel2 = NULL
+)
+}
 }

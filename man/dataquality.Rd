@@ -31,9 +31,11 @@ variable or across the entire dataset.}
 \item{check_missing}{If TRUE, provides detailed missing value statistics
 and patterns.}
 
-\item{complete_cases_only}{If TRUE, checks for duplicate rows across all
-selected variables. If FALSE, checks for duplicate values within each
-variable separately.}
+\item{complete_cases_only}{Granularity of the duplicate check; this option
+does NOT restrict the analysis to complete cases despite its name. If TRUE,
+checks for duplicate rows across all selected variables (requires at least
+two variables). If FALSE, checks for duplicate values within each variable
+separately. Has no effect unless check_duplicates is TRUE.}
 
 \item{plot_data_overview}{Show data overview visualization displaying
 variable types and missing values.}
@@ -58,6 +60,7 @@ and statistical tests used in the analysis.}
 \value{
 A results object containing:
 \tabular{llllll}{
+\code{results$notices} \tab \tab \tab \tab \tab a preformatted \cr
 \code{results$todo} \tab \tab \tab \tab \tab a html \cr
 \code{results$text} \tab \tab \tab \tab \tab a html \cr
 \code{results$summary} \tab \tab \tab \tab \tab a html \cr
@@ -72,4 +75,18 @@ A results object containing:
 This module provides data quality assessment including duplicate detection,
 missing value analysis, and data completeness summary (similar to sumvar's
 dup() function).
+}
+\examples{
+data('histopathology', package = 'ClinicoPath')
+
+dataquality(
+    data = histopathology,
+    vars = c('Age', 'Sex', 'Grade'),
+    check_missing = TRUE,
+    check_duplicates = TRUE,
+    # NOTE: despite its name this does NOT restrict to complete cases; it
+    # switches duplicate detection from value-level to row-level.
+    complete_cases_only = TRUE
+)
+
 }

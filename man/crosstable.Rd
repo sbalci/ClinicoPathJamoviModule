@@ -24,25 +24,39 @@ crosstable(
 \item{group}{The variable that will appear as columns (groups) in the
 table.}
 
-\item{sty}{.}
+\item{sty}{Table style. "arsenal", "finalfit" and "gtsummary" honour the
+test and statistic options below; "nejm", "lancet" and "hmisc" are tangram
+layouts that apply their own built-in tests. P-value adjustment is
+available in "gtsummary" only.}
 
 \item{excl}{Exclude rows with missing values.}
 
-\item{cont}{.}
+\item{cont}{Summary shown for continuous variables. In the arsenal and
+finalfit styles this also selects the test (ANOVA for "mean",
+Kruskal-Wallis for "median"). In the gtsummary style it changes the
+displayed statistic only, because gtsummary always tests continuous
+variables with a rank-based test.}
 
-\item{pcat}{.}
+\item{pcat}{Test used for categorical variables. Applied by the arsenal,
+finalfit and gtsummary styles; the nejm, lancet and hmisc styles use their
+own built-in tests. With "chisq" the gtsummary style still switches to
+Fisher's exact test automatically when an expected cell count falls below
+5. On 2x2 tables "chisq" means Yates' continuity-corrected chi-square in
+the finalfit style and the uncorrected Pearson chi-square in the arsenal
+and gtsummary styles, so those p-values differ between styles.}
 
 \item{p_adjust}{Method for adjusting p-values for multiple comparisons
 across variables. Only available with gtsummary table style.}
 
 \item{showSMD}{Add a standardized mean difference (SMD) column comparing
-the groups for each variable — the standard balance diagnostic for matched,
+the groups for each variable - the standard balance diagnostic for matched,
 weighted, or propensity cohorts. Requires exactly two groups. |SMD| < 0.1
 conventionally indicates negligible imbalance.}
 }
 \value{
 A results object containing:
 \tabular{llllll}{
+\code{results$notices} \tab \tab \tab \tab \tab a preformatted \cr
 \code{results$errorNotice} \tab \tab \tab \tab \tab a html \cr
 \code{results$dataQualityNotice} \tab \tab \tab \tab \tab a html \cr
 \code{results$analysisInfo} \tab \tab \tab \tab \tab a html \cr
@@ -72,7 +86,10 @@ Function for making Cross Tables with multiple table styles.
 Currently implemented features:
 \itemize{
 \item Multiple table styles (arsenal, finalfit, gtsummary, NEJM, Lancet, hmisc)
-\item Automatic test selection (chi-square, Fisher's exact, t-test, ANOVA)
+\item Test selection (chi-square, Fisher's exact, ANOVA, Kruskal-Wallis; which
+one
+applies depends on the table style and on whether means or medians are
+shown)
 \item Multiple testing correction (Bonferroni, Holm, Benjamini-Hochberg,
 Benjamini-Yekutieli)
 \item Variable name safety (special characters, spaces)
@@ -82,4 +99,14 @@ Benjamini-Yekutieli)
 Note: Advanced features (pairwise comparisons, effect sizes, residual
 analysis,
 correspondence analysis) are planned but not yet available.
+}
+\examples{
+\donttest{
+# Age and Sex compared across treatment groups
+crosstable(
+    data = histopathology,
+    vars = vars(Age, Sex),
+    group = "Group",
+    sty = "gtsummary")
+}
 }

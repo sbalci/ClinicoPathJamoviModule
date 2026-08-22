@@ -38,6 +38,7 @@ children:
             name: age_groups
           - type: ComboBox
             name: age_interval
+            enable: (age_groups:custom)
           - type: TextBox
             name: bin_width
             format: number

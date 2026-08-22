@@ -4,6 +4,13 @@ title: Venn Diagram
 jrs:   '1.1'
 
 clearWith:
+    # Plot-engine switches: the ggvenn fallback assigns visibility imperatively,
+    # so these have to invalidate the results or a retained plot state can outlive
+    # the checkbox that produced it.
+    - show_ggvenn
+    - show_ggVennDiagram
+    - show_upsetR
+    - show_complexUpset
     - var1
     - var2
     - var3
@@ -153,22 +160,22 @@ items:
     - name: aboutAnalysis
       title: "About This Analysis"
       type: Html
-      visible: (aboutAnalysis)
+      visible: (aboutAnalysis || explanatory)
 
     - name: clinicalSummary
       title: "Clinical Summary"
       type: Html
-      visible: (clinicalSummary)
+      visible: (clinicalSummary || explanatory)
 
     - name: reportSentences
       title: "Copy-Ready Clinical Summary"
       type: Html
-      visible: (reportSentences)
+      visible: (reportSentences || explanatory)
 
     - name: assumptions
       title: "Interpretation Guide & Assumptions"
       type: Html
-      visible: (assumptions)
+      visible: (assumptions || explanatory)
 
     - name: setCalculations
       title: "Set Calculations"

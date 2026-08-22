@@ -37,11 +37,17 @@ continuous values used for the report}
 \item{gender}{a string naming the variable from \code{data} that contains
 the categorical values used for the report}
 
-\item{female}{a string naming the level from \code{gender} that contains
-the level female}
+\item{female}{a string naming the level of \code{gender} that identifies
+female subjects. This argument has no default (jamovi does not allow one on
+a level option), so a call from R must always supply it; pass NULL to let
+the analysis read the level names itself, which it reports in a note above
+the results.}
 
-\item{male}{a string naming the level from \code{gender} that contains the
-level male}
+\item{male}{a string naming the level of \code{gender} that identifies male
+subjects. This argument has no default (jamovi does not allow one on a
+level option), so a call from R must always supply it; pass NULL to let the
+analysis read the level names itself, which it reports in a note above the
+results.}
 
 \item{age_groups}{Predefined age group categories. Choose 'custom' to use
 bin_width, or select a preset. 'who' gives the WHO/UN standard five-year
@@ -56,18 +62,25 @@ exactly 65 starts the 65-69 band, and equal-width bands hold equal numbers
 of single years. 'right' gives (lower, upper] bands, where age 65 closes
 the band below it; this reproduces the behaviour of releases before 1.0.52
 and makes the lowest band one year wider than the others, which inflates
-the youngest bar of the pyramid.
+the youngest bar of the pyramid. Applies to the custom age grouping only:
+the named presets are defined by their sources as left-closed bands, so a
+right-closed setting is ignored for them and a note says so.
 
 [lower, upper) bands, the WHO/UN and demographic convention: a person aged
 exactly 65 starts the 65-69 band, and equal-width bands hold equal numbers
 of single years. 'right' gives (lower, upper]: R:lower,\%20upper)\%20bands,\%20the\%20WHO/UN\%20and\%20demographic\%20convention:\%20a\%20person\%20aged\%0Aexactly\%2065\%20starts\%20the\%2065-69\%20band,\%20and\%20equal-width\%20bands\%20hold\%20equal\%20numbers\%0Aof\%20single\%20years.\%20'right'\%20gives\%20(lower,\%20upper}
 
 \item{bin_width}{The width of the age bins in years. Adjust this to change
-the granularity of the age groups.}
+the granularity of the age groups. Ignored while \code{custom_breaks} is
+filled in. A width that would produce more than 200 age bands is refused
+with an explanatory note, and more than 25 bands raises a warning about how
+thin the bars become.}
 
 \item{custom_breaks}{Comma-separated age break points (e.g.,
-"0,18,25,50,65,100"). Only used when age_groups is set to 'custom'. Leave
-empty to use bin_width.}
+"0,18,25,50,65,100"). Only used when age_groups is set to 'custom'. When
+filled in these override bin_width; leave empty to use bin_width. Entries
+that are not numbers are reported in a note and left out, and the top band
+is always open-ended.}
 
 \item{plot_title}{The title displayed on the age pyramid plot.}
 
@@ -107,6 +120,7 @@ ggcharts_colors is 'custom'.}
 \value{
 A results object containing:
 \tabular{llllll}{
+\code{results$notices} \tab \tab \tab \tab \tab a preformatted \cr
 \code{results$welcome} \tab \tab \tab \tab \tab a html \cr
 \code{results$dataInfo} \tab \tab \tab \tab \tab a html \cr
 \code{results$pyramidTable} \tab \tab \tab \tab \tab a table \cr
@@ -121,5 +135,5 @@ Tables can be converted to data frames with \code{asDF} or \code{\link{as.data.f
 \code{as.data.frame(results$pyramidTable)}
 }
 \description{
-Age Pyramid
+Generates an age pyramid from an age variable and a gender variable.
 }

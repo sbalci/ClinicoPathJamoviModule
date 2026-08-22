@@ -1,6 +1,6 @@
 ---
 name: dataquality
-title: Data Quality Assessment
+title: Multi-Variable Visual Quality
 jrs: '1.1'
 
 items:
@@ -21,24 +21,54 @@ items:
       type: Html
       visible: true
 
+    # Every one of these four blocks reports numbers derived from the selected
+    # variables and the enabled checks, so all of them must be discarded when any
+    # of those change - otherwise a stale report (stale counts, stale variable
+    # names, stale verdict) stays on screen under the new welcome/error panel.
     - name: text
       title: Data Quality Summary
       type: Html
+      clearWith:
+          - vars
+          - check_duplicates
+          - check_missing
+          - complete_cases_only
+          - missing_threshold_visual
+          - plot_data_overview
+          - plot_missing_patterns
+          - plot_data_types
 
     - name: summary
       title: "Plain-Language Summary"
       type: Html
       visible: (showSummary)
+      clearWith:
+          - vars
+          - check_duplicates
+          - check_missing
+          - complete_cases_only
+          - missing_threshold_visual
 
     - name: recommendations
       title: "Recommended Actions"
       type: Html
       visible: (showRecommendations)
+      clearWith:
+          - vars
+          - check_duplicates
+          - check_missing
+          - complete_cases_only
+          - missing_threshold_visual
 
     - name: explanations
       title: "Understanding Quality Metrics"
       type: Html
       visible: (showExplanations)
+      clearWith:
+          - vars
+          - plot_data_overview
+          - plot_missing_patterns
+          - plot_data_types
 
     - name: plotDataOverview
       title: Data Overview

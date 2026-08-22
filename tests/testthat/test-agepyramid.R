@@ -617,7 +617,7 @@ test_that("REGRESSION: reported sample size matches aggregated table data", {
                info = "Should have excluded exactly 3 non-numeric age values")
 
   # Check that exclusion is properly reported in HTML
-  expect_true(grepl("Non-numeric ages", data_info) || grepl("non-numeric age values", data_info),
+  expect_true(grepl("Unusable ages", data_info) || grepl("non-numeric", data_info),
               info = "Data quality message should mention non-numeric age exclusions")
 })
 
@@ -643,7 +643,7 @@ test_that("REGRESSION: exclusion breakdown in summary is accurate and complete",
   data_info <- result$dataInfo$content
 
   # Should report both age and gender exclusions
-  expect_true(grepl("Non-numeric ages|non-numeric age values", data_info),
+  expect_true(grepl("Unusable ages|non-numeric", data_info),
               info = "Should report age conversion failures")
   expect_true(grepl("Missing/unrecognized gender|Gender Exclusions", data_info),
               info = "Should report gender exclusions")
@@ -651,10 +651,10 @@ test_that("REGRESSION: exclusion breakdown in summary is accurate and complete",
   # Parse exclusion counts from HTML table
   # Look for "- Non-numeric ages:" and "- Missing/unrecognized gender:" rows
   age_excl_match <- regmatches(data_info,
-                                regexpr("Non-numeric ages.*?<td[^>]*color: #d32f2f[^>]*>(\\d+)</td>",
+                                regexpr("Unusable ages.*?<td[^>]*color: #[0-9a-fA-F]{6}[^>]*>(\\d+)</td>",
                                        data_info, perl = TRUE))
   gender_excl_match <- regmatches(data_info,
-                                   regexpr("Missing/unrecognized gender.*?<td[^>]*color: #d32f2f[^>]*>(\\d+)</td>",
+                                   regexpr("Missing/unrecognized gender.*?<td[^>]*color: #[0-9a-fA-F]{6}[^>]*>(\\d+)</td>",
                                           data_info, perl = TRUE))
 
   # Verify exclusion counts are shown in breakdown

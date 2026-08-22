@@ -33,6 +33,15 @@ items:
     - name: dataInfo
       title: 'Data Summary'
       type: Html
+      clearWith:
+          - age
+          - gender
+          - female
+          - male
+          - age_groups
+          - age_interval
+          - bin_width
+          - custom_breaks
 
     - name:  pyramidTable
       title: 'Population Data'
@@ -72,7 +81,6 @@ items:
       width:  600
       height: 450
       renderFun: .plot
-      requiresData: true
       clearWith:
           - age
           - gender
@@ -95,7 +103,6 @@ items:
       height: 500
       renderFun: .plotGGCharts
       visible: (enableGGCharts)
-      requiresData: true
       clearWith:
           - age
           - gender

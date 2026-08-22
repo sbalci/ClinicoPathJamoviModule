@@ -170,6 +170,7 @@ categorizeResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
     inherit = jmvcore::Group,
     active = list(
         todo = function() private$.items[["todo"]],
+        notices = function() private$.items[["notices"]],
         summaryText = function() private$.items[["summaryText"]],
         freqTable = function() private$.items[["freqTable"]],
         breakpointsTable = function() private$.items[["breakpointsTable"]],
@@ -190,9 +191,17 @@ categorizeResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 name="todo",
                 title="Instructions",
                 clearWith=list(
+                    "var")))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="notices",
+                title="Notes",
+                clearWith=list(
                     "var",
                     "method",
                     "nbins",
+                    "breaks",
+                    "excludeoutofrange",
                     "labels",
                     "customlabels",
                     "sdmult",
@@ -217,6 +226,7 @@ categorizeResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "method",
                     "nbins",
                     "breaks",
+                    "excludeoutofrange",
                     "sdmult",
                     "labels",
                     "customlabels",
@@ -256,6 +266,7 @@ categorizeResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "method",
                     "nbins",
                     "breaks",
+                    "excludeoutofrange",
                     "sdmult",
                     "excl"),
                 columns=list(
@@ -281,6 +292,7 @@ categorizeResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "method",
                     "nbins",
                     "breaks",
+                    "excludeoutofrange",
                     "sdmult",
                     "excl")))
             self$add(jmvcore::Html$new(
@@ -293,6 +305,7 @@ categorizeResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "method",
                     "nbins",
                     "breaks",
+                    "excludeoutofrange",
                     "sdmult",
                     "labels",
                     "customlabels",
@@ -313,6 +326,7 @@ categorizeResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "method",
                     "nbins",
                     "breaks",
+                    "excludeoutofrange",
                     "sdmult",
                     "labels",
                     "customlabels",
@@ -345,13 +359,32 @@ categorizeBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 
 #' Categorize Continuous Variables
 #'
+#' Converts a continuous numeric variable into an ordered set of categories 
+#' using equal-width intervals, sample quantiles, hand-entered break points, 
+#' mean +/- SD bands, a median split, or Fisher-Jenks natural breaks. Reports 
+#' the break points and the resulting category frequencies, draws the 
+#' distribution with the boundaries marked, and can add the categorised 
+#' variable straight to the dataset.
 #' 
+#'
+#' @examples
+#' \donttest{
+#' # Age split into quartiles
+#' categorize(
+#'     data = histopathology,
+#'     var = Age,
+#'     method = 'quantile',
+#'     nbins = 4)
+#'}
 #' @param data The data as a data frame.
 #' @param var A numeric variable to be categorized into bins.
 #' @param method Method for creating bins. Options are 'equal' for equal-width
 #'   intervals, 'quantile' for quantile-based bins, 'manual' for custom break
 #'   points, 'meansd' for mean +/- standard deviation bins, 'median' for median
-#'   split, or 'jenks' for natural breaks clustering.
+#'   split, or 'jenks' for Fisher-Jenks natural breaks clustering. Jenks breaks
+#'   are computed exactly up to 20000 observations; above that classInt works
+#'   from a fixed-seed subsample and a note reports its size. Repeated runs
+#'   always give identical break points.
 #' @param nbins Number of categories to create (2-20). Used for equal,
 #'   quantile, and jenks methods.
 #' @param breaks Comma-separated break points for manual binning (e.g., "0,
@@ -361,8 +394,9 @@ categorizeBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' @param labels How to label the resulting categories.
 #' @param customlabels Comma-separated custom labels (e.g., "Low, Medium,
 #'   High"). Must match the number of categories.
-#' @param newvarname Name for the new categorized variable. Leave empty for
-#'   automatic naming.
+#' @param newvarname Name for the new categorized variable, used both for the
+#'   column added to the dataset and in the generated R code. Leave empty to
+#'   name it after the source variable with a '_cat' suffix.
 #' @param excludeoutofrange Applies to the 'manual' method only. By default
 #'   the break points are extended to the data minimum and maximum, so every
 #'   observation falls in a category and no case is lost. Set this to TRUE to
@@ -374,14 +408,21 @@ categorizeBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' @param rightclosed If TRUE, intervals are right-closed (left-open). If
 #'   FALSE, left-closed (right-open).
 #' @param ordered If TRUE, creates an ordered factor to preserve category
-#'   ordering.
-#' @param excl Exclude missing values from the analysis.
+#'   ordering, and the variable added to the dataset is marked as ordinal rather
+#'   than nominal so the category order is kept in later analyses.
+#' @param excl If TRUE (default), the percentages in the frequency table are
+#'   taken over the categorized observations only, and missing or out-of-range
+#'   rows carry no percentage. If FALSE, every row of the data is used as the
+#'   denominator, so the missing and out-of-range rows carry their own share and
+#'   the category percentages no longer sum to 100 on their own. Break points
+#'   are always computed from the non-missing values.
 #' @param showcode Display R code to reproduce the categorization.
 #' @param showplot Display a histogram/density plot showing the original
 #'   distribution and cut points.
 #' @return A results object containing:
 #' \tabular{llllll}{
 #'   \code{results$todo} \tab \tab \tab \tab \tab a html \cr
+#'   \code{results$notices} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$summaryText} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$freqTable} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$breakpointsTable} \tab \tab \tab \tab \tab a table \cr

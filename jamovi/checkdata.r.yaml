@@ -26,7 +26,9 @@ items:
         - var
         - showOutliers
         - outlierTransform
+        - showDistribution
         - showPatterns
+        - mcarTest
         - clinicalValidation
         - unitSystem
         - cvMinMean
@@ -60,7 +62,7 @@ items:
     - name: outliers
       title: "Outlier Detection (Consensus: >=2 methods)"
       type: Table
-      description: "Shows outliers detected by at least 2 of 3 methods: Z-score (|z|>3), IQR (1.5×IQR rule), Modified Z-score (MAD-based |z|>3.5). Points flagged by only 1 method are NOT shown."
+      description: "Shows outliers detected by at least 2 of the methods that ran: Z-score (|z|>3), IQR (1.5x IQR rule), Modified Z-score (MAD-based |z|>3.5, unavailable when there are 3 or fewer complete values or the MAD is zero). Points flagged by only 1 method are not shown, except below n = 10 where single-method flags are shown, labelled informative-only in the table title and excluded from the quality grade."
       visible: (showOutliers)
       clearWith:
         - var
@@ -87,7 +89,7 @@ items:
           title: "MAD"
           type: text
         - name: severity
-          title: "Severity (by Z)"
+          title: "Severity"
           type: text
 
     - name: outlierMethodSummary
@@ -161,6 +163,7 @@ items:
       clearWith:
         - var
         - showPatterns
+        - mcarTest
         - clinicalValidation
         - unitSystem
       rows: 0
@@ -202,5 +205,9 @@ items:
 
 refs:
     - ClinicoPathJamoviModule
+    - leys2013
+    - tukey1977
+    - waldwolfowitz1940
+    - wilson1927
 
 ...

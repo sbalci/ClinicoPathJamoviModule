@@ -49,13 +49,15 @@ represented by color. Default is 'first_variable'.}
 \item{fillGgalluvial}{A string naming the categorical variable from
 \code{data} that will be used to color the flows in the ggalluvial plot.}
 
-\item{bin}{Display labels for bin categories. Note: This controls label
-text only, not the binning method. easyalluvial uses its own internal
-binning algorithm. For custom binning, create categorized variables before
-analysis.}
+\item{bin}{Names for the intervals the drawing engine creates when it has
+to split a continuous variable. This analysis draws every axis variable
+with its own recorded values as categories, so in practice nothing is
+binned and this setting has no visible effect. To group values, recode the
+variable first.}
 
 \item{orient}{Orientation of the plot. One of 'horr' (horizontal) or 'vert'
-(vertical). Default is 'vert'.}
+(vertical). Superseded by flowDirection, which offers the same choices and
+more, so this setting is applied only while flowDirection is 'left_right'.}
 
 \item{usetitle}{Use a custom title for the plot.}
 
@@ -63,9 +65,11 @@ analysis.}
 
 \item{maxvars}{Maximum number of variables to include in the alluvial plot.}
 
-\item{custombinlabels}{Custom labels for bins, separated by commas (e.g.,
-"Low,Medium,High"). The number of labels determines the number of bins.
-Leave empty to use the selected bin-label method.}
+\item{custombinlabels}{Custom names for the intervals the drawing engine
+creates when it has to split a continuous variable, separated by commas
+(e.g. "Low,Medium,High"); at least two are required. As with the bin labels
+above, every axis variable here is drawn as a category, so in practice
+nothing is binned. Leave empty to use the selected bin-label method.}
 
 \item{colorPalette}{Color palette for the diagram flows.}
 
@@ -105,5 +109,18 @@ A results object containing:
 }
 }
 \description{
-Alluvial Diagrams
+Draws an alluvial diagram: a flow picture of how cases move between the
+categories of several categorical variables. Ribbon width is the number of
+cases taking that path; with the GG Alluvial engine and a weight variable
+it is the total of that weight over those cases, while the Easy Alluvial
+engine always counts cases. Every axis variable is drawn with its own
+recorded values as the strata.
+}
+\examples{
+\donttest{
+# Flow of lymphovascular invasion, perineural invasion and treatment group
+alluvial(
+    data = histopathology,
+    vars = vars(LVI, PNI, Group))
+}
 }

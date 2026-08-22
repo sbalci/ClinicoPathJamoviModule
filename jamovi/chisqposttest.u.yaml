@@ -56,9 +56,12 @@ children:
       - type: LayoutBox
         margin: large
         children:
+          - type: ComboBox
+            name: residualsCriterion
           - type: TextBox
             name: residualsCutoff
             format: number
+            enable: (residualsCriterion:fixed)
           - type: CheckBox
             name: phiCI
           - type: ComboBox

@@ -17,99 +17,54 @@ and enhanced theming options for publication-ready figures.
 }
 \examples{
 \dontrun{
-# Example 1: Basic 2-variable Venn diagram
-data("mtcars")
-mtcars$vs <- factor(mtcars$vs, levels = c(0, 1), labels = c("V-shaped", "Straight"))
-mtcars$am <- factor(mtcars$am, levels = c(0, 1), labels = c("Automatic", "Manual"))
+# The bundled `histopathology` dataset ships with this package.
+data(histopathology)
 
-# Create Venn diagram showing overlap between V-shaped engines and Manual transmission
-# var3true..var7true are Level options with no default, so the wrapper requires
-# them even when their variable is unused; pass NULL for the ones not in play.
-venn(data = mtcars, var1 = "vs", var1true = "V-shaped",
-     var2 = "am", var2true = "Manual",
-     var3 = NULL, var3true = NULL, var4 = NULL, var4true = NULL)
+# NOTE on var1true..var7true: these are jamovi `Level` options. The compiler
+# forbids a `default:` on a Level, so the generated wrapper declares every
+# one of them WITHOUT a default and they are all required arguments. Pass
+# NULL for the levels whose variable is not in play.
 
-# Example 2: 3-variable Venn diagram with penguins data
-library(palmerpenguins)
-data("penguins")
-penguins$large_bill <- factor(ifelse(penguins$bill_length_mm > 45, "Large", "Small"))
-penguins$heavy_weight <- factor(ifelse(penguins$body_mass_g > 4000, "Heavy", "Light"))
-penguins$adelie_species <- factor(ifelse(penguins$species == "Adelie", "Adelie", "Other"))
+# Example 1: two markers, classic ggvenn diagram
+venn(data = histopathology,
+     var1 = "LVI", var1true = "Present",
+     var2 = "PNI", var2true = "Present",
+     var3 = NULL, var3true = NULL, var4 = NULL, var4true = NULL,
+     var5 = NULL, var5true = NULL, var6 = NULL, var6true = NULL,
+     var7 = NULL, var7true = NULL)
 
-venn(data = penguins,
-     var1 = "large_bill", var1true = "Large",
-     var2 = "heavy_weight", var2true = "Heavy",
-     var3 = "adelie_species", var3true = "Adelie")
-
-# Example 3: Variable names with spaces and numbers (requires careful handling)
-# jamovi GUI automatically handles most problematic names
-# When calling directly in R, variable names with spaces/numbers need backticks:
-# venn(data = mydata, var1 = "`Rater 1`", var1true = "Positive",
-#      var2 = "`Score 2A`", var2true = "High")
-
-# Note: Names like "Rater 1", "Score 2A", "Item 3B" may cause parsing issues
-# at the jamovi interface level. Solutions:
-# 1. Use jamovi GUI for variable selection (recommended)
-# 2. Rename variables to avoid spaces + numbers: "Rater1", "Score2A", "Item3B"
-# 3. In R console, use backticks: `Rater 1` or quote properly
-
-# Example 4: Clinical biomarker analysis
-data("biomarkers")  # Hypothetical clinical dataset
-venn(data = biomarkers,
-     var1 = "ER_positive", var1true = "Positive",
-     var2 = "PR_positive", var2true = "Positive",
-     var3 = "HER2_amplified", var3true = "Amplified",
+# Example 2: three markers with the advanced ggVennDiagram engine
+venn(data = histopathology,
+     var1 = "LVI", var1true = "Present",
+     var2 = "PNI", var2true = "Present",
+     var3 = "LymphNodeMetastasis", var3true = "Present",
+     var4 = NULL, var4true = NULL, var5 = NULL, var5true = NULL,
+     var6 = NULL, var6true = NULL, var7 = NULL, var7true = NULL,
      show_ggVennDiagram = TRUE,
      regionLabels = "both",
      clinicalSummary = TRUE)
 
-# Example 5: Medical/Clinical comorbidity analysis
-# Create sample clinical data
-clinical_data <- data.frame(
-  patient_id = 1:100,
-  diabetes = sample(c("Yes", "No"), 100, replace = TRUE, prob = c(0.3, 0.7)),
-  hypertension = sample(c("Yes", "No"), 100, replace = TRUE, prob = c(0.4, 0.6)),
-  obesity = sample(c("Yes", "No"), 100, replace = TRUE, prob = c(0.25, 0.75))
-)
-
-# Analyze comorbidity patterns
-venn(data = clinical_data,
-     var1 = "diabetes", var1true = "Yes",
-     var2 = "hypertension", var2true = "Yes",
-     var3 = "obesity", var3true = "Yes")
-
-# Example 4: Using ComplexUpset for advanced features
-venn(data = clinical_data,
-     var1 = "diabetes", var1true = "Yes",
-     var2 = "hypertension", var2true = "Yes",
-     var3 = "obesity", var3true = "Yes",
+# Example 3: UpSet-style intersection plot with percentage labels
+venn(data = histopathology,
+     var1 = "LVI", var1true = "Present",
+     var2 = "PNI", var2true = "Present",
+     var3 = "PreinvasiveComponent", var3true = "Present",
+     var4 = NULL, var4true = NULL, var5 = NULL, var5true = NULL,
+     var6 = NULL, var6true = NULL, var7 = NULL, var7true = NULL,
      show_complexUpset = TRUE,
      sortBy = "freq",
      minSize = 5,
      showAnnotations = TRUE)
 
-# Example 5: Advanced customization using ggVennDiagram
-venn(data = clinical_data,
-     var1 = "diabetes", var1true = "Yes",
-     var2 = "hypertension", var2true = "Yes",
-     var3 = "obesity", var3true = "Yes",
-     show_ggVennDiagram = TRUE,
-     regionLabels = "both",
-     colorPalette = "Set1",
-     labelSize = 3.5,
-     setNameSize = 4.5)
-
-# Example 6: 5-variable Venn diagram using ggVennDiagram
-# Add more clinical variables
-clinical_data$smoking <- sample(c("Yes", "No"), 100, replace = TRUE, prob = c(0.2, 0.8))
-clinical_data$family_history <- sample(c("Yes", "No"), 100, replace = TRUE, prob = c(0.35, 0.65))
-
-venn(data = clinical_data,
-     var1 = "diabetes", var1true = "Yes",
-     var2 = "hypertension", var2true = "Yes",
-     var3 = "obesity", var3true = "Yes",
-     var4 = "smoking", var4true = "Yes",
-     var5 = "family_history", var5true = "Yes",
+# Example 4: five sets - ggVennDiagram handles 5+ sets, ggvenn does not
+venn(data = histopathology,
+     var1 = "LVI", var1true = "Present",
+     var2 = "PNI", var2true = "Present",
+     var3 = "PreinvasiveComponent", var3true = "Present",
+     var4 = "LymphNodeMetastasis", var4true = "Present",
+     var5 = "Mortality5yr", var5true = "Dead",
+     var6 = NULL, var6true = NULL, var7 = NULL, var7true = NULL,
+     show_ggvenn = FALSE,
      show_ggVennDiagram = TRUE,
      regionLabels = "percent",
      colorPalette = "viridis")

@@ -1,5 +1,101 @@
 ---
 refs:
+    waldwolfowitz1940:
+        type: 'article'
+        author: Wald, A., & Wolfowitz, J.
+        year: 1940
+        title: "On a test whether two samples are from the same population"
+        publisher: 'The Annals of Mathematical Statistics'
+        volume: 11
+        issue: 2
+        pages: 147-162
+        doi: 10.1214/aoms/1177731909
+        url: https://doi.org/10.1214/aoms/1177731909
+
+    wilson1927:
+        type: 'article'
+        author: Wilson, E. B.
+        year: 1927
+        title: "Probable inference, the law of succession, and statistical inference"
+        publisher: 'Journal of the American Statistical Association'
+        volume: 22
+        issue: 158
+        pages: 209-212
+        doi: 10.1080/01621459.1927.10502953
+        url: https://doi.org/10.1080/01621459.1927.10502953
+
+    holm1979:
+        type: 'article'
+        author: Holm, S.
+        year: 1979
+        title: "A simple sequentially rejective multiple test procedure"
+        publisher: 'Scandinavian Journal of Statistics'
+        volume: 6
+        pages: 65-70
+        doi: 10.2307/4615733
+        url: https://doi.org/10.2307/4615733
+
+    benjaminihochberg1995:
+        type: 'article'
+        author: Benjamini, Y., & Hochberg, Y.
+        year: 1995
+        title: "Controlling the false discovery rate: a practical and powerful approach to multiple testing"
+        publisher: 'Journal of the Royal Statistical Society: Series B'
+        volume: 57
+        issue: 1
+        pages: 289-300
+        doi: 10.1111/j.2517-6161.1995.tb02031.x
+        url: https://doi.org/10.1111/j.2517-6161.1995.tb02031.x
+
+    sharpe2015:
+        type: 'article'
+        author: Sharpe, D.
+        year: 2015
+        title: "Your chi-square test is statistically significant: now what?"
+        publisher: 'Practical Assessment, Research, and Evaluation'
+        url: https://doaj.org/article/ae3f8e9b90024f41b3dcc7b9150bf49a
+
+    leys2013:
+        type: 'article'
+        author: Leys, C., Ley, C., Klein, O., Bernard, P., & Licata, L.
+        year: 2013
+        title: "Detecting outliers: do not use standard deviation around the mean, use absolute deviation around the median"
+        publisher: 'Journal of Experimental Social Psychology'
+        volume: 49
+        issue: 4
+        pages: 764-766
+        doi: 10.1016/j.jesp.2013.03.013
+        url: https://doi.org/10.1016/j.jesp.2013.03.013
+
+    yangdalton2012:
+        type: 'article'
+        author: Yang, D., & Dalton, J. E.
+        year: 2012
+        title: "A unified approach to measuring the effect size between two groups using SAS"
+        publisher: 'SAS Global Forum 2012, paper 335-2012'
+        url: https://support.sas.com/resources/papers/proceedings12/335-2012.pdf
+
+    tukey1977:
+        type: 'book'
+        author: Tukey, J. W.
+        year: 1977
+        title: "Exploratory Data Analysis"
+        publisher: 'Addison-Wesley, Reading, MA'
+
+    agresti2013:
+        type: 'book'
+        author: Agresti, A.
+        year: 2013
+        title: "Categorical Data Analysis"
+        publisher: 'Wiley, Hoboken, NJ (3rd edition)'
+
+    kableExtra:
+        type: 'software'
+        author: Zhu, H.
+        year: 2026
+        title: "kableExtra: Construct Complex Table with kable and Pipe Syntax"
+        publisher: '[R package]. Retrieved from https://CRAN.R-project.org/package=kableExtra'
+        url: https://CRAN.R-project.org/package=kableExtra
     pocock2012winratio:
         type: 'article'
         author: Pocock, S. J., Ariti, C. A., Collier, T. J., & Wang, D.

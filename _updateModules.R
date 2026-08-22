@@ -2314,44 +2314,69 @@ if (!extended) {
   # jmvtools::install(main_repo_dir)
 }
 
-# --- Commit changes in each repository ----
-if ((commit_modules || !WIP) && !TEST) {
-  cat("\n📦 Committing changes to repositories...\n")
+# --- Commit changes in each repository ---- [DISABLED 2026-08-22] ------------
+#
+# The whole commit phase below is commented out ON PURPOSE.
+#
+# WHY: the guard was `if ((commit_modules || !WIP) && !TEST)`. With the shipped
+# config (commit_modules: false, WIP: false, TEST: false) that evaluates to
+# (FALSE || TRUE) && TRUE = TRUE, so simply running this script COMMITTED the
+# main repository. Work in progress was picked up and committed mid-edit under
+# an unrelated "Update modules to version ..." message, which made it look as
+# though changes had been reviewed and accepted when they had not.
+#
+# Committing is now a deliberate, separate step. Review the working tree, then
+# commit yourself with a message that says what actually changed:
+#     git -C <repo> status
+#     git -C <repo> add -A && git -C <repo> commit -m "..."
+#
+# TO RE-ENABLE: uncomment the block below. `commit_repo_enhanced()` and
+# `commit_repo()` are left defined above and are unchanged, so nothing else
+# needs editing. If you do re-enable it, fix the guard first - it should be
+# `if (commit_modules && !TEST)` so that commits require an explicit opt-in
+# rather than happening whenever WIP is false.
+# ---------------------------------------------------------------------------
 
-  commit_message <- sprintf("Update modules to version %s and date %s",
-                            new_version, new_date)
+# if ((commit_modules || !WIP) && !TEST) {
+#   cat("\n📦 Committing changes to repositories...\n")
+#
+#   commit_message <- sprintf("Update modules to version %s and date %s",
+#                             new_version, new_date)
+#
+#   # Always commit main repository
+#   cat("📁 Committing main repository...\n")
+#   main_commit_success <- commit_repo_enhanced(main_repo_dir, commit_message)
+#
+#   if (commit_modules) {
+#     cat("📁 Committing module repositories...\n")
+#
+#     commit_results <- list()
+#     if (jjstatsplot_module) {
+#       commit_results$jjstatsplot <- commit_repo_enhanced(jjstatsplot_dir, commit_message)
+#     }
+#     if (meddecide_module) {
+#       commit_results$meddecide <- commit_repo_enhanced(meddecide_dir, commit_message)
+#     }
+#     if (jsurvival_module) {
+#       commit_results$jsurvival <- commit_repo_enhanced(jsurvival_dir, commit_message)
+#     }
+#     if (ClinicoPathDescriptives_module) {
+#       commit_results$ClinicoPathDescriptives <- commit_repo_enhanced(ClinicoPathDescriptives_dir, commit_message)
+#     }
+#
+#     # Report commit summary
+#     successful_commits <- sum(unlist(commit_results), na.rm = TRUE)
+#     total_commits <- length(commit_results)
+#     cat("📦 Module commits: ", successful_commits, "/", total_commits, " successful\n")
+#   } else {
+#     cat("⏭️ Skipping module commits (commit_modules: false)\n")
+#   }
+# } else {
+#   cat("\n⏭️ Skipping all commits (WIP/TEST mode or commit disabled)\n")
+# }
 
-  # Always commit main repository
-  cat("📁 Committing main repository...\n")
-  main_commit_success <- commit_repo_enhanced(main_repo_dir, commit_message)
-
-  if (commit_modules) {
-    cat("📁 Committing module repositories...\n")
-
-    commit_results <- list()
-    if (jjstatsplot_module) {
-      commit_results$jjstatsplot <- commit_repo_enhanced(jjstatsplot_dir, commit_message)
-    }
-    if (meddecide_module) {
-      commit_results$meddecide <- commit_repo_enhanced(meddecide_dir, commit_message)
-    }
-    if (jsurvival_module) {
-      commit_results$jsurvival <- commit_repo_enhanced(jsurvival_dir, commit_message)
-    }
-    if (ClinicoPathDescriptives_module) {
-      commit_results$ClinicoPathDescriptives <- commit_repo_enhanced(ClinicoPathDescriptives_dir, commit_message)
-    }
-
-    # Report commit summary
-    successful_commits <- sum(unlist(commit_results), na.rm = TRUE)
-    total_commits <- length(commit_results)
-    cat("📦 Module commits: ", successful_commits, "/", total_commits, " successful\n")
-  } else {
-    cat("⏭️ Skipping module commits (commit_modules: false)\n")
-  }
-} else {
-  cat("\n⏭️ Skipping all commits (WIP/TEST mode or commit disabled)\n")
-}
+cat("\n⏭️  Commit phase is disabled in _updateModules.R (see the comment block there).\n")
+cat("   Review the working tree and commit deliberately.\n")
 
 # Final status report ----
 cat("\n🎉 ====== UPDATE PROCESS COMPLETED ======\n")

@@ -10,14 +10,20 @@ description:
   main: |
     This module provides data quality assessment including duplicate detection,
     missing value analysis, and data completeness summary (similar to sumvar's dup() function).
-  # R:
-  #   dontrun: true
-  #   usage: |
-  #     # Example:
-  #     # 1. Load your data frame.
-  #     # 2. Select variables to check for data quality issues.
-  #     # 3. Choose analysis type (duplicates, missing values, or both).
-  #     # 4. Run the dataquality module to see comprehensive data quality report.
+  R:
+    dontrun: false
+    usage: |
+      data('histopathology', package = 'ClinicoPath')
+
+      dataquality(
+          data = histopathology,
+          vars = c('Age', 'Sex', 'Grade'),
+          check_missing = TRUE,
+          check_duplicates = TRUE,
+          # NOTE: despite its name this does NOT restrict to complete cases; it
+          # switches duplicate detection from value-level to row-level.
+          complete_cases_only = TRUE
+      )
 
 options:
 
@@ -56,14 +62,22 @@ options:
         R: >
           If TRUE, provides detailed missing value statistics and patterns.
 
+    # NOTE (naming): this option does NOT perform any complete-case restriction -
+    # the name is historical and misleading. It selects the GRANULARITY of the
+    # duplicate check only. Renaming it is a breaking change to the public wrapper
+    # signature and to saved .omv files, so it is left for a maintainer decision;
+    # the description below states the real behaviour up front.
     - name: complete_cases_only
       title: "Duplicate rows"
       type: Bool
       default: false
       description:
         R: >
-          If TRUE, checks for duplicate rows across all selected variables.
-          If FALSE, checks for duplicate values within each variable separately.
+          Granularity of the duplicate check; this option does NOT restrict the
+          analysis to complete cases despite its name. If TRUE, checks for
+          duplicate rows across all selected variables (requires at least two
+          variables). If FALSE, checks for duplicate values within each variable
+          separately. Has no effect unless check_duplicates is TRUE.
 
     - name: plot_data_overview
       title: "Data overview plot (vis_dat)"
@@ -125,7 +139,7 @@ options:
           If TRUE, provides specific recommendations for addressing identified quality issues.
 
     - name: showExplanations
-      title: "Educational notes"
+      title: "Educational explanations"
       type: Bool
       default: false
       description:

@@ -1,12 +1,12 @@
 ---
 title: Common Analysis for Clinicopathological Research
 name: ClinicoPath
-version: 1.0.6.02
+version: 1.0.6.03
 jms: '1.0'
 authors:
   - Serdar Balci
 maintainer: Serdar Balci <serdarbalci@serdarbalci.com>
-date: '2026-08-21'
+date: '2026-08-22'
 type: R
 description: >-
   ClinicoPath help researchers to generate natural language summaries of their
@@ -63,6 +63,11 @@ analyses:
     menuTitle: Benford Analysis
     ribbon: analyses
     category: analyses
+    description: >
+      Tests whether the leading digits of a numeric variable follow Benford's
+      Law, using the MAD conformity classification, a chi-square goodness-of-fit
+      test and the Mantissa Arc Test. Intended as a screen for systematic
+      recording artefacts such as rounding or preferred values.
   - title: Age Pyramid
     name: agepyramid
     ns: ClinicoPath
@@ -71,6 +76,8 @@ analyses:
     menuSubgroup: ClinicoPath Descriptive Plots
     ribbon: analyses
     category: analyses
+    description: |
+      Generates an age pyramid from an age variable and a gender variable.
   - title: Alluvial Diagrams
     name: alluvial
     ns: ClinicoPath
@@ -79,6 +86,13 @@ analyses:
     menuTitle: Alluvial Diagrams
     ribbon: analyses
     category: analyses
+    description: >
+      Draws an alluvial diagram: a flow picture of how cases move between the
+      categories of several categorical variables. Ribbon width is the number of
+      cases taking that path; with the GG Alluvial engine and a weight variable
+      it is the total of that weight over those cases, while the Easy Alluvial
+      engine always counts cases. Every axis variable is drawn with its own
+      recorded values as the strata.
   - title: Venn Diagram
     name: venn
     ns: ClinicoPath
@@ -109,13 +123,12 @@ analyses:
     menuTitle: Categorize Continuous Variables
     menuSubtitle: Bin numeric variables into categories
     description: >
-      Convert continuous numeric variables into categorical variables using
-      various binning methods. Similar to questionr::icut but with multiple
-      automated options including equal intervals, quantiles, manual breaks,
-      mean +/- SD, median split, and natural breaks (Jenks). Provides frequency
-      tables, distribution plots, and R code for reproducibility. Perfect for
-      preparing variables for alluvial diagrams, cross-tables, and other
-      categorical analyses.
+      Converts a continuous numeric variable into an ordered set of categories
+      using equal-width intervals, sample quantiles, hand-entered break points,
+      mean +/- SD bands, a median split, or Fisher-Jenks natural breaks. Reports
+      the break points and the resulting category frequencies, draws the
+      distribution with the boundaries marked, and can add the categorised
+      variable straight to the dataset.
     ribbon: analyses
     category: analyses
   - title: Cross Tables
@@ -846,6 +859,19 @@ analyses:
     menuSubgroup: ClinicoPath Data Quality
     ribbon: analyses
     category: analyses
+    description: >
+      Screens a single variable for data-quality problems before it is used in
+      analysis: completeness and the shape of its missingness, consensus outlier
+      detection (at n = 10 or more a point is flagged only when at least 2
+      methods agree; below n = 10 single-method flags are shown, labelled
+      informative-only and excluded from the grade; the MAD-based method is
+      unavailable when there are 3 or fewer complete values or the MAD is zero,
+      leaving 2 methods), distribution summaries, duplicate or repeated values,
+      and optional plausibility checks for common clinical measurements. Reports
+      a heuristic letter grade with a transparent component-by-component penalty
+      breakdown. The grade uses rule-of-thumb thresholds and is not an
+      externally validated quality metric; treat it as a screening aid, not a
+      verdict.
   - title: Confidence Intervals for Mean Values
     name: ciSingle
     ns: ClinicoPath

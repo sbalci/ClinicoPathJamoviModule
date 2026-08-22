@@ -17,10 +17,15 @@ description:
           as it would encourage inappropriate multiple testing).
           No automated validation against established packages exists. Use with caution
           for clinical decision-making.
-    # R:
-    #     dontrun: true
-    #     usage: |
-    #         # example will be added
+    R:
+        dontrun: true
+        usage: |
+            # Tumour grade level by lymphovascular invasion,
+            # using the histopathology data bundled with the module
+            chisqposttest(
+                data = histopathology,
+                rows = "Grade_Level",
+                cols = "LVI")
 
 options:
     - name: data
@@ -87,11 +92,17 @@ options:
                   alpha level for significance testing
 
     - name: excl
-      title: Missing-value exclusion (NA)
+      title: Exclude missing values (always applied)
       type: Bool
-      default: false
+      default: true
       description: >
-                  exclude missing values from analysis
+                  Rows with a missing value on the row, column or counts variable are
+                  always excluded before the contingency table is built, because counting
+                  missing values as a category of their own adds a row or column to the
+                  table and changes the degrees of freedom of the chi-square test. This
+                  option is checked by default and is retained so that saved analyses and
+                  existing scripts continue to load; clearing it does not re-admit missing
+                  values. A notice reports how many rows were dropped whenever any were.
 
     - name: exp
       title: Expected values
@@ -128,6 +139,23 @@ options:
       description: >
                   display individual 2x2 tables for each pairwise comparison
 
+    - name: residualsCriterion
+      title: Residual significance criterion
+      type: List
+      options:
+        - title: Bonferroni-corrected z (recommended)
+          name: bonferroni
+        - title: Fixed cutoff
+          name: fixed
+      default: bonferroni
+      description: >
+                  How the critical value for flagging a cell residual is chosen.
+                  'Bonferroni-corrected z' divides the significance level by the number
+                  of cells and uses the corresponding normal deviate, so it accounts for
+                  the number of cells tested (2.64 for a 2x3 table, 2.96 for a 4x4).
+                  'Fixed cutoff' uses the value in the 'Residual significance cutoff'
+                  box unchanged.
+
     - name: residualsCutoff
       title: Residual significance cutoff
       type: Number
@@ -135,7 +163,9 @@ options:
       max: 4.0
       default: 2.0
       description: >
-                  critical value for identifying significant residuals (typically 2.0 or 3.0)
+                  Critical value for identifying significant residuals (typically 2.0 or
+                  3.0). Used only when 'Residual significance criterion' is set to
+                  'Fixed cutoff'.
 
     - name: phiCI
       title: Bootstrap confidence intervals for phi

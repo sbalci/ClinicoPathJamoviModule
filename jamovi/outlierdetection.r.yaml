@@ -71,6 +71,8 @@ items:
       clearWith:
         - vars
         - method_category
+        - univariate_methods
+        - multivariate_methods
         - composite_threshold
         - zscore_threshold
         - iqr_multiplier

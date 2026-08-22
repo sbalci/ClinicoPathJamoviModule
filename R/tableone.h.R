@@ -11,7 +11,8 @@ tableoneOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             excl = FALSE,
             showSummary = FALSE,
             showAbout = FALSE,
-            showReportSentence = FALSE, ...) {
+            showReportSentence = FALSE,
+            nonnormal = FALSE, ...) {
 
             super$initialize(
                 package="ClinicoPath",
@@ -48,6 +49,10 @@ tableoneOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 "showReportSentence",
                 showReportSentence,
                 default=FALSE)
+            private$..nonnormal <- jmvcore::OptionBool$new(
+                "nonnormal",
+                nonnormal,
+                default=FALSE)
 
             self$.addOption(private$..vars)
             self$.addOption(private$..sty)
@@ -55,6 +60,7 @@ tableoneOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             self$.addOption(private$..showSummary)
             self$.addOption(private$..showAbout)
             self$.addOption(private$..showReportSentence)
+            self$.addOption(private$..nonnormal)
         }),
     active = list(
         vars = function() private$..vars$value,
@@ -62,14 +68,16 @@ tableoneOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         excl = function() private$..excl$value,
         showSummary = function() private$..showSummary$value,
         showAbout = function() private$..showAbout$value,
-        showReportSentence = function() private$..showReportSentence$value),
+        showReportSentence = function() private$..showReportSentence$value,
+        nonnormal = function() private$..nonnormal$value),
     private = list(
         ..vars = NA,
         ..sty = NA,
         ..excl = NA,
         ..showSummary = NA,
         ..showAbout = NA,
-        ..showReportSentence = NA)
+        ..showReportSentence = NA,
+        ..nonnormal = NA)
 )
 
 tableoneResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
@@ -109,7 +117,8 @@ tableoneResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 title="Table One Output (tableone)",
                 clearWith=list(
                     "vars",
-                    "excl"),
+                    "excl",
+                    "nonnormal"),
                 visible="(sty:t1)",
                 refs="tableone"))
             self$add(jmvcore::Html$new(
@@ -167,6 +176,7 @@ tableoneResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 options=options,
                 name="assumptions",
                 title="Data Quality & Assumptions",
+                visible="(vars)",
                 clearWith=list(
                     "vars",
                     "excl")))}))
@@ -198,14 +208,36 @@ tableoneBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' frequently used in  clinicopathological research manuscripts. It supports 
 #' multiple output styles for flexible formatting.
 #' 
+#'
+#' @examples
+#' \donttest{
+#' data(histopathology)
+#'
+#' # Standard Table One: mean (SD) for the numeric Age,
+#' # N (percent) for the categorical Sex and Grade_Level
+#' tableone(
+#'   data = histopathology,
+#'   vars = vars(Sex, Grade_Level, Age),
+#'   sty = "t1")
+#'
+#' # Right-skewed measurements such as follow-up time are better
+#' # summarised as median (Q1, Q3)
+#' tableone(
+#'   data = histopathology,
+#'   vars = vars(Sex, Grade_Level, OverallTime),
+#'   sty = "t1",
+#'   nonnormal = TRUE)
+#'}
 #' @param data The input data as a data frame.
 #' @param vars A set of variable names from \code{data} to include in the
 #'   Table One. Supports numeric, ordinal, and categorical variables.
 #' @param sty Specify the output style for the descriptive table. 'tableone'
-#'   provides standard medical format with means/medians and frequencies,
-#'   'gtsummary' creates publication-ready descriptive tables, 'arsenal'
-#'   generates comprehensive descriptive summaries, and 'janitor' produces
-#'   simple frequency tables for categorical variables.
+#'   reports continuous variables as mean (SD) - or as median (Q1, Q3) when
+#'   nonnormal is TRUE - and categorical variables as N (percent). 'gtsummary'
+#'   reports continuous variables as median (Q1, Q3). 'arsenal' reports mean
+#'   (SD) together with the range. 'janitor' produces one frequency table of
+#'   counts and percentages per variable, for variables with a limited number of
+#'   categories.
 #' @param excl Boolean option to exclude missing values (NA) from the
 #'   analysis. Note: Exclusion may remove entire cases.
 #' @param showSummary Show detailed summary including sample size, missing
@@ -214,6 +246,11 @@ tableoneBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   it, and how to interpret results.
 #' @param showReportSentence Generate a copy-ready sentence summarizing the
 #'   table for manuscript reporting.
+#' @param nonnormal Applies only to the 'tableone' style. When TRUE,
+#'   continuous variables are summarised as median (Q1, Q3) instead of mean
+#'   (SD), which is the appropriate summary for right-skewed measurements such
+#'   as Ki-67 index, tumour size or marker concentrations. Categorical variables
+#'   are unaffected.
 #' @return A results object containing:
 #' \tabular{llllll}{
 #'   \code{results$todo} \tab \tab \tab \tab \tab a html \cr
@@ -235,7 +272,8 @@ tableone <- function(
     excl = FALSE,
     showSummary = FALSE,
     showAbout = FALSE,
-    showReportSentence = FALSE) {
+    showReportSentence = FALSE,
+    nonnormal = FALSE) {
 
     if ( ! requireNamespace("jmvcore", quietly=TRUE))
         stop("tableone requires jmvcore to be installed (restart may be required)")
@@ -253,7 +291,8 @@ tableone <- function(
         excl = excl,
         showSummary = showSummary,
         showAbout = showAbout,
-        showReportSentence = showReportSentence)
+        showReportSentence = showReportSentence,
+        nonnormal = nonnormal)
 
     analysis <- tableoneClass$new(
         options = options,

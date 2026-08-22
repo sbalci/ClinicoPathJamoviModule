@@ -168,7 +168,11 @@ checkdataResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 name="",
                 title="Single Variable Quality Check",
                 refs=list(
-                    "ClinicoPathJamoviModule"))
+                    "ClinicoPathJamoviModule",
+                    "leys2013",
+                    "tukey1977",
+                    "waldwolfowitz1940",
+                    "wilson1927"))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="notices",
@@ -192,7 +196,9 @@ checkdataResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "var",
                     "showOutliers",
                     "outlierTransform",
+                    "showDistribution",
                     "showPatterns",
+                    "mcarTest",
                     "clinicalValidation",
                     "unitSystem",
                     "cvMinMean")))
@@ -262,7 +268,7 @@ checkdataResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                         `type`="text"),
                     list(
                         `name`="severity", 
-                        `title`="Severity (by Z)", 
+                        `title`="Severity", 
                         `type`="text"))))
             self$add(jmvcore::Table$new(
                 options=options,
@@ -345,6 +351,7 @@ checkdataResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 clearWith=list(
                     "var",
                     "showPatterns",
+                    "mcarTest",
                     "clinicalValidation",
                     "unitSystem"),
                 rows=0,
@@ -410,16 +417,42 @@ checkdataBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 
 #' Single Variable Quality Check
 #'
+#' Screens a single variable for data-quality problems before it is used in 
+#' analysis: completeness and the shape of its missingness, consensus outlier 
+#' detection (at n = 10 or more a point is flagged only when at least 2 
+#' methods agree; below n = 10 single-method flags are shown, labelled 
+#' informative-only and excluded from the grade; the MAD-based method is 
+#' unavailable when there are 3 or fewer complete values or the MAD is zero, 
+#' leaving 2 methods), distribution summaries, duplicate or repeated values, 
+#' and optional plausibility checks for common clinical measurements. Reports 
+#' a heuristic letter grade with a transparent component-by-component penalty 
+#' breakdown. The grade uses rule-of-thumb thresholds and is not an externally 
+#' validated quality metric; treat it as a screening aid, not a verdict.
 #' 
-#' @param data .
-#' @param var .
+#'
+#' @examples
+#' \donttest{
+#' # Quality check of a numeric variable
+#' checkdata(
+#'     data = histopathology,
+#'     var = Age,
+#'     showDistribution = TRUE)
+#'}
+#' @param data The data as a data frame.
+#' @param var The single variable to assess. Any type is accepted; numeric
+#'   variables additionally receive outlier detection and the numeric
+#'   distribution summary, while factor and character variables receive the
+#'   categorical summary instead.
 #' @param showOutliers Detect potential outliers using three methods - z-score
 #'   (|z| > 3), the IQR fence (1.5 x IQR), and the modified Z-score (|M| > 3.5,
 #'   MAD-based) - and report points flagged by at least two of them. Below n =
 #'   10 single-method flags are shown and labelled informative-only.
 #' @param showDistribution Display descriptive statistics and distribution
 #'   characteristics.
-#' @param showDuplicates Identify and count duplicate values in the dataset.
+#' @param showDuplicates For a numeric variable, list the values that occur
+#'   more than once. For a factor or character variable, list the frequency of
+#'   every category (the table is retitled "Value Frequencies" in that case,
+#'   since categories occurring once are shown too).
 #' @param showPatterns Analyze patterns in missing data and value
 #'   distributions.
 #' @param rareCategoryThreshold Percentage threshold for flagging rare
@@ -434,7 +467,9 @@ checkdataBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   formally for this variable. Little's MCAR test is multivariate and cannot
 #'   be computed from a single variable, so this analysis reports heuristics
 #'   about where the missing values sit rather than a test of the mechanism;
-#'   enable this to state that limitation explicitly in the output.
+#'   enable this to state that limitation explicitly in the Quality Assessment
+#'   Summary (and, when Data patterns is also enabled, as a row of that table).
+#'   No formal MCAR test is performed by this analysis.
 #' @param cvMinMean Suppress coefficient of variation when absolute mean is
 #'   below this threshold (avoids instability).
 #' @param showSummary Display a plain-language summary of data quality
@@ -450,7 +485,7 @@ checkdataBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   \code{results$qualityText} \tab \tab \tab \tab \tab a preformatted \cr
 #'   \code{results$missingVals} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$noOutliers} \tab \tab \tab \tab \tab a html \cr
-#'   \code{results$outliers} \tab \tab \tab \tab \tab Shows outliers detected by at least 2 of 3 methods: Z-score (|z|>3), IQR (1.5×IQR rule), Modified Z-score (MAD-based |z|>3.5). Points flagged by only 1 method are NOT shown. \cr
+#'   \code{results$outliers} \tab \tab \tab \tab \tab Shows outliers detected by at least 2 of the methods that ran: Z-score (|z|>3), IQR (1.5x IQR rule), Modified Z-score (MAD-based |z|>3.5, unavailable when there are 3 or fewer complete values or the MAD is zero). Points flagged by only 1 method are not shown, except below n = 10 where single-method flags are shown, labelled informative-only in the table title and excluded from the quality grade. \cr
 #'   \code{results$outlierMethodSummary} \tab \tab \tab \tab \tab Summary of each outlier detection method. These are heuristic approaches; consider skewness and sample size when interpreting. \cr
 #'   \code{results$distribution} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$duplicates} \tab \tab \tab \tab \tab a table \cr

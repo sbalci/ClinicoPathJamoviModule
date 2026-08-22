@@ -16,7 +16,8 @@
 #' Currently implemented features:
 #' \itemize{
 #'   \item Multiple table styles (arsenal, finalfit, gtsummary, NEJM, Lancet, hmisc)
-#'   \item Automatic test selection (chi-square, Fisher's exact, t-test, ANOVA)
+#'   \item Test selection (chi-square, Fisher's exact, ANOVA, Kruskal-Wallis; which one
+#'         applies depends on the table style and on whether means or medians are shown)
 #'   \item Multiple testing correction (Bonferroni, Holm, BH, BY)
 #'   \item Variable name safety (handles spaces and special characters)
 #'   \item Data quality validation warnings
@@ -32,8 +33,19 @@
 #' @param sty A string indicating the desired table style.
 #'            Options include: "arsenal", "finalfit", "gtsummary", "nejm", "lancet", "hmisc".
 #' @param excl Logical. If TRUE, rows with missing values will be excluded.
-#' @param cont A string ("mean" or "median") to specify the central tendency metric.
-#' @param pcat A string ("chisq" or "fisher") to specify the primary test.
+#' @param cont A string ("mean" or "median") giving the summary shown for continuous
+#'            variables. In the arsenal and finalfit styles this also selects the test
+#'            (ANOVA for "mean", Kruskal-Wallis for "median"); in the gtsummary style it
+#'            changes only the displayed statistic, since gtsummary always tests
+#'            continuous variables with a rank-based test.
+#' @param pcat A string ("chisq" or "fisher") giving the test for categorical variables.
+#'            Applied by the arsenal, finalfit and gtsummary styles; the NEJM, Lancet and
+#'            hmisc styles use their own built-in tests.
+#' @param p_adjust A string naming the multiple-testing correction applied across
+#'            variables ("none", "bonferroni", "holm", "BH", "BY"). Available in the
+#'            gtsummary style only.
+#' @param showSMD Logical. If TRUE, adds a standardized mean difference table
+#'            quantifying between-group balance. Requires exactly two groups.
 #'
 #' @return The function produces an HTML table output in the selected style.
 #'
@@ -50,46 +62,42 @@ NULL
 # Helper function to create styled HTML notice (replaces jmvcore::Notice to avoid serialization errors)
 # Security note: `message` is HTML-escaped via htmltools::htmlEscape() at the
 # interpolation site below, so a future caller passing a variable name or factor
-# label cannot inject markup. (Escaping is applied — do not remove it.)
+# label cannot inject markup. (Escaping is applied - do not remove it.)
 .crosstableNoticeHTML <- function(message, type = c("ERROR", "STRONG_WARNING", "WARNING", "INFO")) {
     type <- match.arg(type)
 
-    # Define styles for each notice type
+    # Define styles for each notice type.
+    # Backgrounds are translucent tints that composite to the original pastel
+    # over a white pane, and the text colour follows the pane ("color: inherit"),
+    # so the panel stays readable in jamovi's dark theme. The border-left colour
+    # is opaque because it carries the severity signal.
     styles <- list(
         ERROR = list(
-            bg = "#f8d7da",
-            border = "#dc3545",
-            icon = "",
-            title_color = "#721c24"
+            bg = "rgba(216, 33, 50, 0.18)",
+            border = "#dc3545"
         ),
         STRONG_WARNING = list(
-            bg = "#fff3cd",
-            border = "#ff9800",
-            icon = "",
-            title_color = "#856404"
+            bg = "rgba(255, 202, 33, 0.23)",
+            border = "#ff9800"
         ),
         WARNING = list(
-            bg = "#fff3cd",
-            border = "#ffc107",
-            icon = "",
-            title_color = "#856404"
+            bg = "rgba(255, 202, 33, 0.23)",
+            border = "#ffc107"
         ),
         INFO = list(
-            bg = "#d1ecf1",
-            border = "#17a2b8",
-            icon = "",
-            title_color = "#0c5460"
+            bg = "rgba(33, 163, 188, 0.21)",
+            border = "#17a2b8"
         )
     )
 
     style <- styles[[type]]
 
     html <- paste0(
-        "<div style='background-color: ", style$bg, "; ",
+        "<div style='background-color: ", style$bg, "; color: inherit; ",
         "padding: 15px; margin: 10px 0; border-radius: 5px; ",
         "border-left: 4px solid ", style$border, ";'>",
-        "<p style='margin: 0; color: ", style$title_color, ";'>",
-        "<strong>", style$icon, " ", type, ":</strong> ",
+        "<p style='margin: 0; color: inherit;'>",
+        "<strong>", type, ":</strong> ",
         htmltools::htmlEscape(message),
         "</p>",
         "</div>"
@@ -98,12 +106,30 @@ NULL
     return(html)
 }
 
-# Helper function to escape variable names with special characters
+# Helper function to escape variable names with special characters.
+# Defensive only: the sole caller passes names that janitor::clean_names() has
+# already reduced to [a-z0-9_] in .labelData(), so nothing matches the pattern
+# below in practice and the formula never carries a backticked term. Kept so a
+# future change to the name-cleaning step cannot silently produce an invalid
+# formula. Use it ONLY when building formula text - never as a data[[]] key,
+# where the backticks would turn the lookup into NULL.
 .crosstableEscapeVariableNames <- function(var_names) {
     # Check if variable names contain special characters that need escaping
     need_escaping <- grepl("[^a-zA-Z0-9._]", var_names)
     var_names[need_escaping] <- paste0("`", var_names[need_escaping], "`")
     return(var_names)
+}
+
+# The module's single variable-typing rule.
+# A numeric column with 6 or fewer distinct non-missing values is almost always
+# an encoded category (grade 1/2/3, stage codes) rather than a measurement, and
+# a mean or an ANOVA on those codes is not a meaningful summary. Every site that
+# has to decide "continuous or categorical?" calls this one function so the
+# data-quality checks, the gtsummary table and the SMD table cannot drift apart
+# and label the same column differently.
+.crosstableIsCategorical <- function(v) {
+    is.factor(v) || is.character(v) ||
+        (is.numeric(v) && length(unique(stats::na.omit(v))) <= 6)
 }
 
 # Helper function to get display name from mapping
@@ -166,6 +192,7 @@ NULL
 .validateAnalysisAssumptions <- function(mydata, myvars, mygroup, name_mapping = NULL) {
     issues <- list()
     warnings <- list()
+    group_sizes <- integer(0)
 
     .display <- function(name) {
         if (!is.null(name_mapping) && !is.null(name_mapping[[name]]))
@@ -181,10 +208,14 @@ NULL
 
     # Check group sizes
     if (!is.null(mygroup) && mygroup %in% names(mydata)) {
+        # Drop levels with no observations left (row filters and the
+        # missing-value setting both empty levels out) so the counts reported
+        # below describe the data actually being analysed.
         group_sizes <- table(mydata[[mygroup]])
-        min_group_size <- min(group_sizes)
+        group_sizes <- group_sizes[group_sizes > 0]
+        min_group_size <- if (length(group_sizes) > 0) min(group_sizes) else 0L
 
-        if (min_group_size < 5) {
+        if (length(group_sizes) > 0 && min_group_size < 5) {
             warnings <- append(warnings, paste0("Small group detected (n = ", min_group_size, "). Consider combining categories or using exact tests."))
         }
 
@@ -193,14 +224,32 @@ NULL
             if (var %in% names(mydata)) {
                 # Only check categorical variables for empty cells
                 # Continuous variables naturally have many unique values that won't appear in all groups
-                is_categorical <- is.factor(mydata[[var]]) ||
-                                 is.character(mydata[[var]]) ||
-                                 (is.numeric(mydata[[var]]) && length(unique(stats::na.omit(mydata[[var]]))) <= 6)
-
-                if (is_categorical) {
+                if (.crosstableIsCategorical(mydata[[var]])) {
                     cont_table <- table(mydata[[var]], mydata[[mygroup]])
                     if (any(cont_table == 0)) {
                         warnings <- append(warnings, paste0("Empty cells detected in ", .display(var), " \u{D7} ", .display(mygroup), " table. Results may be unstable."))
+                    }
+
+                    # Cochran's condition: the chi-square approximation needs
+                    # expected counts of at least 5. Nothing else in this analysis
+                    # checks it, and only the gtsummary style switches to Fisher on
+                    # its own - arsenal and finalfit run the chi-square the user
+                    # selected and finalfit's R warning is invisible in jamovi.
+                    # Rows/columns with no observations are dropped first so that
+                    # empty factor levels do not manufacture a zero expected count.
+                    nz <- cont_table[rowSums(cont_table) > 0, colSums(cont_table) > 0, drop = FALSE]
+                    if (all(dim(nz) >= 2)) {
+                        expected <- tryCatch(
+                            suppressWarnings(stats::chisq.test(nz)$expected),
+                            error = function(e) NULL
+                        )
+                        if (!is.null(expected) && all(is.finite(expected)) && any(expected < 5)) {
+                            warnings <- append(warnings, paste0(
+                                "Low expected counts in ", .display(var), " \u{D7} ", .display(mygroup),
+                                " table (smallest expected count ", format(round(min(expected), 2), nsmall = 2),
+                                "). The chi-square approximation is unreliable for this variable, so its chi-square p-value should not be relied on; Fisher's exact test is the appropriate choice here. The gtsummary style makes that switch automatically, while the arsenal and finalfit styles use whichever test is selected in Options."
+                            ))
+                        }
                     }
                 }
             }
@@ -220,7 +269,10 @@ NULL
     return(list(
         critical_issues = issues,
         warnings = warnings,
-        sample_size = n_total
+        sample_size = n_total,
+        # Named counts of the group levels that still hold at least one row.
+        # Fewer than two means there is nothing to compare; .run() stops there.
+        group_sizes = group_sizes
     ))
 }
 
@@ -263,6 +315,7 @@ crosstableClass <- if (requireNamespace('jmvcore'))
             .renderNotices = function() {
                 if (length(private$.noticeList) == 0) {
                     self$results$notices$setContent("")
+                    self$results$notices$setVisible(FALSE)
                     return()
                 }
 
@@ -278,6 +331,7 @@ crosstableClass <- if (requireNamespace('jmvcore'))
                 }, character(1))
 
                 self$results$notices$setContent(paste(blocks, collapse = "\n\n"))
+                self$results$notices$setVisible(TRUE)
             },
 
             .htmlSafeTableData = function(data) {
@@ -427,6 +481,13 @@ crosstableClass <- if (requireNamespace('jmvcore'))
                     # not clobber the finalfit methodology note (which uses todo2).
                     self$results$varNameWarnings$setContent(warning_msg)
                     self$results$varNameWarnings$setVisible(TRUE)
+                } else {
+                    # Renaming a column in the spreadsheet is exactly what makes
+                    # these warnings appear or disappear, and it changes none of the
+                    # options in this item's clearWith - so without this reset the
+                    # stale panel would survive the rename that fixed it.
+                    self$results$varNameWarnings$setContent("")
+                    self$results$varNameWarnings$setVisible(FALSE)
                 }
 
                 # If any user-specified variable could not be matched, block analysis.
@@ -554,6 +615,12 @@ crosstableClass <- if (requireNamespace('jmvcore'))
                 private$.noticeList <- list()
                 private$.renderNotices()
 
+                # Only the success path at the end of .run() writes analysisInfo, and
+                # this run can stop before reaching it - clear it here so a previous
+                # run's "completed successfully" panel cannot sit above a new error.
+                self$results$analysisInfo$setContent("")
+                self$results$analysisInfo$setVisible(FALSE)
+
                 sty <- self$options$sty
                 # If required options are missing, show a welcome message with instructions.
                 if (is.null(self$options$vars) || is.null(self$options$group)) {
@@ -573,10 +640,10 @@ crosstableClass <- if (requireNamespace('jmvcore'))
                         "<li>Choose <strong>table style</strong> from Options (NEJM, Lancet, gtsummary, etc.)</li>",
                         "</ol>",
 
-                        "<h4 style='margin-top: 15px;'>Automatic Test Selection:</h4>",
+                        "<h4 style='margin-top: 15px;'>Test Selection:</h4>",
                         "<ul style='margin-left: 20px;'>",
-                        "<li><strong>Categorical variables:</strong> Chi-square or Fisher's exact test (based on expected counts)</li>",
-                        "<li><strong>Continuous variables:</strong> t-test, ANOVA, or non-parametric equivalents</li>",
+                        "<li><strong>Categorical variables:</strong> Chi-square or Fisher's exact test, as chosen in Options (the gtsummary style switches to Fisher automatically when an expected cell count is below 5)</li>",
+                        "<li><strong>Continuous variables:</strong> ANOVA or Kruskal-Wallis, depending on the style and on whether means or medians are displayed; the gtsummary style always uses a rank-based test</li>",
                         "<li><strong>Multiple testing correction:</strong> Benjamini-Hochberg (FDR) recommended for exploratory analysis</li>",
                         "</ul>",
 
@@ -607,14 +674,22 @@ crosstableClass <- if (requireNamespace('jmvcore'))
                 } else {
                     "No group selected"
                 }
-                self$results$subtitle$setContent(paste0("Cross Table Analysis - Grouped by ", htmltools::htmlEscape(group_display)))
+                # `subtitle` is a Preformatted item, which renders its content
+                # literally - it is not an HTML sink, so escaping here would print
+                # "Ki-67 &gt;20%" instead of the column name the user chose.
+                self$results$subtitle$setContent(paste0("Cross Table Analysis - Grouped by ", group_display))
 
                 # Provide additional information when using 'finalfit' style.
                 if (sty == "finalfit") {
+                    # p_cont_para is hard-coded to "aov" in the summary_factorlist()
+                    # call below, so Welch's t-test is never run. Verified against
+                    # finalfit 1.1.0 on two groups of n = 30 with SD 1 vs SD 4:
+                    # finalfit p = 0.581 = aov = pooled t-test; Welch = 0.583.
                     todo2 <- glue::glue(
                         "<br>
-                         <b>finalfit</b> style uses <em>aov (analysis of variance) or t.test for Welch two sample t-test</em>.
-                         For continuous non-parametric tests, Kruskal Wallis is used (equivalent to Mann-Whitney U / Wilcoxon rank sum test in two-group settings).
+                         <b>finalfit</b> style compares continuous variables with <em>aov</em> (one-way analysis of variance) when Mean (SD) is displayed. For two groups this is the pooled-variance t-test, so it assumes equal variances in the groups; that assumption is not checked here.
+                         When Median (IQR) is displayed, Kruskal-Wallis is used instead (equivalent to the Mann-Whitney U / Wilcoxon rank sum test in two-group settings).
+                         Categorical variables use the chi-square or Fisher's exact test selected in Options, and numeric variables with fewer than 5 distinct values are summarised as categories rather than as measurements.
                          See full documentation <a href='https://finalfit.org/reference/summary_factorlist.html'>here</a>.
                          "
                     )
@@ -638,7 +713,10 @@ crosstableClass <- if (requireNamespace('jmvcore'))
                 # Performance safeguards for large datasets
                 n_rows <- nrow(self$data)
                 n_vars <- length(self$options$vars)
-                n_group_levels <- length(unique(self$data[[self$options$group]]))
+                # na.omit(): unique() keeps NA as a value, which would inflate the
+                # level count reported back to the user in the notice below and trip
+                # the combination threshold one selection early.
+                n_group_levels <- length(unique(stats::na.omit(self$data[[self$options$group]])))
                 n_combinations <- n_vars * n_group_levels
 
                 if (n_rows > 50000) {
@@ -729,6 +807,88 @@ crosstableClass <- if (requireNamespace('jmvcore'))
                 } else {
                     self$results$dataQualityNotice$setContent("")
                     self$results$dataQualityNotice$setVisible(FALSE)
+                }
+
+                # A grouping variable with fewer than two non-empty levels produces
+                # a table with no p-values at all; arsenal and tangram both return
+                # successfully after only a bare R warning, so without this the user
+                # sees a complete-looking table containing no comparison.
+                group_sizes <- validation_results$group_sizes
+                if (length(group_sizes) < 2) {
+                    group_label <- .crosstableDisplayName(mygroup, original_names_mapping)
+                    present <- if (length(group_sizes) == 1)
+                        sprintf(
+                            .("Only the level '%s' is left, holding all %d rows."),
+                            names(group_sizes)[1], as.integer(group_sizes)[1]
+                        )
+                    else
+                        .("No level of it has any rows left.")
+                    private$.addNotice(
+                        "ERROR",
+                        .("Only one group - nothing to compare"),
+                        sprintf(
+                            .("The grouping variable '%s' has fewer than two groups among the rows being analysed, so there is nothing to compare across and no significance test can be computed. %s Rows dropped by a row filter or by the missing-value setting are not counted here. Widen or remove the row filter, switch off missing-value exclusion, or choose a grouping variable that has at least two levels present in the data."),
+                            group_label, present
+                        )
+                    )
+                    return()
+                }
+
+                # One typing decision, reported once, before the style branch: which
+                # numeric columns are being summarised as categories rather than as
+                # measurements. The styles do not agree on this, so say it out loud.
+                numeric_as_cat <- myvars[vapply(
+                    mydata[myvars],
+                    function(v) is.numeric(v) && .crosstableIsCategorical(v),
+                    logical(1)
+                )]
+                if (length(numeric_as_cat) > 0) {
+                    numeric_as_cat_labels <- vapply(
+                        numeric_as_cat,
+                        function(v) .crosstableDisplayName(v, original_names_mapping),
+                        character(1)
+                    )
+                    private$.addNotice(
+                        "INFO",
+                        .("Numeric variables that look like coded categories"),
+                        sprintf(
+                            .("These variables are stored as numbers but take 6 or fewer distinct values, so they are most likely encoded categories such as grade 1, 2, 3 rather than measurements: %s. The table styles do not agree on how to handle them: gtsummary summarises them as counts and percentages and tests them with a chi-square or Fisher's exact test, finalfit does the same only when the column has fewer than 5 distinct values, and arsenal, NEJM, Lancet and Hmisc treat any numeric column as continuous and test the codes with ANOVA or Kruskal-Wallis. The p-value for these variables can therefore change when you switch style, with nothing else changed. To get the same handling in every style, set their measure type to Nominal or Ordinal in the data; leave them Continuous if they really are measurements."),
+                            paste(numeric_as_cat_labels, collapse = ", ")
+                        )
+                    )
+                }
+
+                # Yates' continuity correction is not applied consistently across
+                # the three styles that honour `pcat`: finalfit's chi-square applies
+                # it on 2x2 tables, arsenal's and gtsummary's (chisq.test.no.correct)
+                # do not. Verified on neg 30/12 vs pos 30/30 (n = 102, smallest
+                # expected count 17.3, so no style auto-switches): arsenal 0.030,
+                # gtsummary 0.030, finalfit 0.050 - opposite sides of 0.05 with only
+                # the style changed. R subtracts min(0.5, |O - E|) from |O - E|, so
+                # the corrected p-value is never the smaller of the two.
+                if (identical(self$options$pcat, "chisq") &&
+                    sty %in% c("arsenal", "finalfit", "gtsummary")) {
+                    two_by_two <- myvars[vapply(myvars, function(v) {
+                        if (!.crosstableIsCategorical(mydata[[v]])) return(FALSE)
+                        tab <- table(mydata[[v]], mydata[[mygroup]])
+                        tab <- tab[rowSums(tab) > 0, colSums(tab) > 0, drop = FALSE]
+                        all(dim(tab) == 2)
+                    }, logical(1))]
+                    if (length(two_by_two) > 0) {
+                        two_by_two_labels <- vapply(
+                            two_by_two,
+                            function(v) .crosstableDisplayName(v, original_names_mapping),
+                            character(1)
+                        )
+                        private$.addNotice(
+                            "INFO",
+                            .("Chi-square on 2x2 tables is not the same test in every style"),
+                            sprintf(
+                                .("These variables form a two-by-two table with the grouping variable: %s. With Chi-square selected, the finalfit style applies Yates' continuity correction to them while the arsenal and gtsummary styles report the uncorrected Pearson chi-square. The corrected p-value is never the smaller of the two, so a two-by-two p-value can move to the other side of 0.05 when nothing but the style is changed. Fisher's exact test does not involve this choice."),
+                                paste(two_by_two_labels, collapse = ", ")
+                            )
+                        )
+                    }
                 }
 
                 # Generate table based on selected style.
@@ -836,9 +996,7 @@ crosstableClass <- if (requireNamespace('jmvcore'))
 
                 # Heuristic: treat numeric variables with few unique values as categorical to avoid t/ANOVA on encoded factors
                 # Exclude grouping variable from type specification (it's used in 'by' argument)
-                all_cat_vars <- names(mydata_subset)[vapply(mydata_subset, function(v) {
-                    is.factor(v) || is.character(v) || (is.numeric(v) && length(unique(stats::na.omit(v))) <= 6)
-                }, logical(1))]
+                all_cat_vars <- names(mydata_subset)[vapply(mydata_subset, .crosstableIsCategorical, logical(1))]
                 cat_vars <- setdiff(all_cat_vars, mygroup)  # Remove grouping variable
                 cont_vars <- setdiff(myvars, all_cat_vars)  # Continuous = myvars minus all categoricals
 
@@ -864,10 +1022,14 @@ crosstableClass <- if (requireNamespace('jmvcore'))
                 # Map user options to gtsummary syntax
                 stats_cont <- if (self$options$cont == "mean") "{mean} ({sd})" else "{median} ({p25}, {p75})"
 
-                # gtsummary's default test selection is good: categorical uses
-                # chi-square and switches to Fisher automatically when an expected
-                # count drops below 5; continuous uses Welch t-test for 2 groups and
-                # ANOVA for 3+.
+                # gtsummary's default test selection: categorical uses chi-square
+                # and switches to Fisher automatically when an expected count drops
+                # below 5. Continuous is RANK-BASED - wilcox.test for two groups,
+                # kruskal.test for three or more (verified against gtsummary 2.5.1;
+                # an earlier comment here claimed Welch t-test / ANOVA, which is
+                # wrong). That holds whether the table displays means or medians, so
+                # the notice below states it rather than silently swapping in a test
+                # the user never asked for.
                 #
                 # But an EXPLICIT request for Fisher was previously ignored here, so
                 # a user who chose "Fisher's exact test" silently got chi-square.
@@ -883,6 +1045,17 @@ crosstableClass <- if (requireNamespace('jmvcore'))
                     list(gtsummary::all_categorical() ~ "fisher.test")
                 } else {
                     NULL
+                }
+
+                # Displayed statistic and test are coupled in arsenal and finalfit
+                # but not here: asking for means does not switch gtsummary off its
+                # rank-based default.
+                if (identical(self$options$cont, "mean") && length(cont_vars) > 0) {
+                    private$.addNotice(
+                        "INFO",
+                        .("Continuous p-values are rank-based in the gtsummary style"),
+                        .("Continuous variables are displayed as Mean (SD), but the gtsummary style tests them with a rank-based test - Wilcoxon rank-sum for two groups, Kruskal-Wallis for three or more - so the p-value compares the distributions rather than the means. The two do not have to agree. Choose the arsenal or finalfit style if you need the test to match the statistic on display: both run ANOVA (for two groups, the pooled-variance t-test, which assumes equal variances) when means are shown and Kruskal-Wallis when medians are shown.")
+                    )
                 }
 
                 tablegtsummary <- tryCatch(
@@ -977,6 +1150,18 @@ crosstableClass <- if (requireNamespace('jmvcore'))
                         "BY" = "False Discovery Rate (FDR) control with additional correction for dependent tests. More conservative than Benjamini-Hochberg but still controls FDR not FWER."
                     )
 
+                    # Benjamini-Yekutieli multiplies by the harmonic sum of the
+                    # number of tests to stay valid under arbitrary dependence, so
+                    # with few variables its q-values can EXCEED Bonferroni and Holm
+                    # (p = .001, .02, .03, .20, .40 gives BY .011, .114, .114, .571,
+                    # .913 against Bonferroni .005, .100, .150, 1, 1). The blanket
+                    # "smaller than FWER-adjusted" claim only holds for BH.
+                    q_vs_fwer_bullet <- if (identical(p_adjust_method, "BY")) {
+                        "<li><strong>Q-values are larger than raw p-values.</strong> Benjamini-Yekutieli corrects for arbitrary dependence between the tests, and with a small number of variables its q-values can be larger than Bonferroni- or Holm-adjusted p-values</li>"
+                    } else {
+                        "<li><strong>Q-values are larger than raw p-values</strong> and generally smaller than Bonferroni- or Holm-adjusted p-values</li>"
+                    }
+
                     # Generate method-specific explanation
                     if (is_fdr) {
                         # FDR methods - use "q-values"
@@ -993,7 +1178,7 @@ crosstableClass <- if (requireNamespace('jmvcore'))
                             "<ul>",
                             "<li><strong>Q-value = 0.05:</strong> Among all variables with q \u{2264} 0.05, expect ~5% to be false positives</li>",
                             "<li><strong>Q-value = 0.10:</strong> Expect ~10% false positives (acceptable in exploratory research)</li>",
-                            "<li><strong>Q-values are larger than raw p-values</strong> but smaller than FWER-adjusted p-values</li>",
+                            q_vs_fwer_bullet,
                             "</ul>",
 
                             "<p><strong>When to use FDR control:</strong></p>",
@@ -1069,15 +1254,18 @@ crosstableClass <- if (requireNamespace('jmvcore'))
                 } else if (sty %in% c("nejm", "lancet", "hmisc")) {
                     private$.checkpoint()
                     sty_term <- jmvcore::composeTerm(components = self$options$sty)
-                    # Escape data-derived factor levels and character cell values on a
-                    # render-only copy before tangram injects them into the type:Html
-                    # output, mirroring the arsenal branch. Raw values would otherwise
-                    # reach the jamovi webview unescaped (HTML/JS injection risk).
-                    tangram_data <- private$.htmlSafeTableData(mydata)
+                    # No .htmlSafeTableData() here: tangram::html5() escapes the
+                    # labels and factor levels it emits itself (verified - a raw
+                    # level "<img src=x onerror=alert(1)>" and a raw label
+                    # "<script>alert(2)</script>" both come out fully escaped), so
+                    # pre-escaping produced "Ki-67 &amp;gt;20%", which the user reads
+                    # as "Ki-67 &gt;20%". The caption below IS escaped by hand
+                    # because tangram does not escape that argument. The arsenal
+                    # branch keeps its pre-escaping - arsenal emits raw HTML.
                     tabletangram <- tryCatch(tangram::html5(
                         tangram::tangram(
                             paste(deparse(formula), collapse = " "),
-                            tangram_data,
+                            mydata,
                             transform = tangram::hmisc,
                             id = "tbl3",
                             test = TRUE,
@@ -1150,10 +1338,11 @@ crosstableClass <- if (requireNamespace('jmvcore'))
                             "The %s style does not apply the following setting(s), so the table below is unchanged by them: %s. %s",
                             style_display,
                             paste(unname(ignored), collapse = "; "),
+                            # gtsummary honours every option in `requested`, so
+                            # `ignored` is always empty for it and only the
+                            # tangram styles and arsenal/finalfit can reach here.
                             if (sty_now %in% c("nejm", "lancet", "hmisc"))
                                 "These styles use their own built-in tests. Choose arsenal, finalfit or gtsummary to control the test; p-value adjustment is available in gtsummary only."
-                            else if (identical(sty_now, "gtsummary"))
-                                "Choose arsenal or finalfit to control the categorical test."
                             else
                                 "P-value adjustment is available in the gtsummary style only."),
                         type = "WARNING")
@@ -1207,7 +1396,10 @@ crosstableClass <- if (requireNamespace('jmvcore'))
 
                 for (v in vars) {
                     x <- data[[v]]
-                    isNum <- is.numeric(x) || (is.integer(x) && !is.factor(x))
+                    # Same rule as the table above: a numeric column with 6 or
+                    # fewer distinct values is an encoded category, and the
+                    # mean-difference SMD on its codes is not a balance statistic.
+                    isNum <- !.crosstableIsCategorical(x)
                     smd <- NA_real_; vtype <- "categorical"
                     if (isNum) {
                         vtype <- "continuous"

@@ -15,6 +15,7 @@ items:
     clearWith:
       - vars
       - excl
+      - nonnormal
     visible: (sty:t1)
     refs: tableone
 
@@ -76,6 +77,7 @@ items:
   - name: assumptions
     title: "Data Quality & Assumptions"
     type: Html
+    visible: (vars)
     clearWith:
       - vars
       - excl

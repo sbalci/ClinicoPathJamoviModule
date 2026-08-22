@@ -5,6 +5,23 @@ menuGroup: Exploration
 menuSubgroup: ClinicoPath Descriptive Plots
 version: '1.0.6'
 jas: '1.2'
+
+description:
+    main: >
+        Draws an alluvial diagram: a flow picture of how cases move between the
+        categories of several categorical variables. Ribbon width is the number of
+        cases taking that path; with the GG Alluvial engine and a weight variable it
+        is the total of that weight over those cases, while the Easy Alluvial engine
+        always counts cases. Every axis variable is drawn with its own recorded
+        values as the strata.
+    R:
+        dontrun: true
+        usage: |
+            # Flow of lymphovascular invasion, perineural invasion and treatment group
+            alluvial(
+                data = histopathology,
+                vars = vars(LVI, PNI, Group))
+
 options:
     - name: data
       type: Data
@@ -102,18 +119,21 @@ options:
           name: median
         - title: Min-Max
           name: min_max
-        - title: Quantile
+        - title: Interval cut points
           name: cuts
       default: default
       description:
           R: >
-            Display labels for bin categories. Note: This controls label text only,
-            not the binning method. easyalluvial uses its own internal binning algorithm.
-            For custom binning, create categorized variables before analysis.
+            Names for the intervals the drawing engine creates when it has to split a
+            continuous variable. This analysis draws every axis variable with its own
+            recorded values as categories, so in practice nothing is binned and this
+            setting has no visible effect. To group values, recode the variable first.
           jamovi: >
-            Display labels for bin categories (e.g., 'LL' for low-low, 'HH' for high-high).
-            Note: This controls label text only, not the actual binning method.
-            For custom categorization, use the categorize function to create binned variables.
+            Names for the intervals the drawing engine creates when it has to split a
+            continuous variable (e.g. 'LL' for low-low, 'HH' for high-high). This analysis
+            draws every axis variable with its own recorded values as categories, so in
+            practice nothing is binned and this setting has no visible effect. To group
+            values, use the categorize function on the variable first.
 
 
     - name: orient
@@ -128,9 +148,13 @@ options:
       description:
           R: >
             Orientation of the plot. One of 'horr' (horizontal) or 'vert'
-            (vertical). Default is 'vert'.
+            (vertical). Superseded by flowDirection, which offers the same choices
+            and more, so this setting is applied only while flowDirection is
+            'left_right'.
           jamovi: >
-            Orientation of the plot. Default is vertical.
+            Orientation of the plot. Superseded by Flow direction, which offers the
+            same choices and more, so this setting applies only while Flow direction
+            is Left to Right.
 
     - name: usetitle
       title: Custom title
@@ -170,13 +194,17 @@ options:
       default: ''
       description:
           R: >
-            Custom labels for bins, separated by commas (e.g., "Low,Medium,High").
-            The number of labels determines the number of bins. Leave empty to
-            use the selected bin-label method.
+            Custom names for the intervals the drawing engine creates when it has to
+            split a continuous variable, separated by commas (e.g. "Low,Medium,High");
+            at least two are required. As with the bin labels above, every axis variable
+            here is drawn as a category, so in practice nothing is binned. Leave empty
+            to use the selected bin-label method.
           jamovi: >
-            Custom labels for bins, separated by commas (e.g., "Low,Medium,High").
-            The number of labels determines the number of bins. Leave empty to
-            use the selected bin-label method.
+            Custom names for the intervals the drawing engine creates when it has to
+            split a continuous variable, separated by commas (e.g. "Low,Medium,High");
+            at least two are required. As with the bin labels above, every axis variable
+            here is drawn as a category, so in practice nothing is binned. Leave empty
+            to use the selected bin-label method.
 
     # === Phase 1: Easy Additions ===
 

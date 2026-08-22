@@ -23,6 +23,7 @@ A results object containing:
 \code{results$text} \tab \tab \tab \tab \tab a html \cr
 \code{results$text1} \tab \tab \tab \tab \tab a html \cr
 \code{results$reportSentences} \tab \tab \tab \tab \tab a html \cr
+\code{results$dataWarnings} \tab \tab \tab \tab \tab a html \cr
 \code{results$error} \tab \tab \tab \tab \tab a html \cr
 }
 }

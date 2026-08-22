@@ -9,24 +9,35 @@ items:
       title: Important Information
       type:  Preformatted
       clearWith:
-        - useprunesmaller
-        - prunesmaller
         - vars
         - percvar
         - percvarLevel
         - summaryvar
         - summarylocation
+        - style
         - prunebelow
         - pruneLevel1
         - pruneLevel2
         - follow
         - followLevel1
         - followLevel2
+        - useprunesmaller
+        - prunesmaller
         - excl
-        - style
+        - vp
         - pct
+        - showcount
         - pattern
         - sequence
+        - ptable
+        - horizontal
+        - sline
+        - varnames
+        - nodelabel
+        - legend
+        - mytitle
+        - maxwidth
+        - showInterpretation
 
     - name:  todo
       title: To Do
@@ -41,17 +52,30 @@ items:
         - percvarLevel
         - summaryvar
         - summarylocation
+        - style
         - prunebelow
         - pruneLevel1
         - pruneLevel2
         - follow
         - followLevel1
         - followLevel2
+        - useprunesmaller
+        - prunesmaller
         - excl
-        - style
+        - vp
         - pct
+        - showcount
         - pattern
         - sequence
+        - ptable
+        - horizontal
+        - sline
+        - varnames
+        - nodelabel
+        - legend
+        - mytitle
+        - maxwidth
+        - showInterpretation
 
     - name:  text2
       title: Pattern Table
@@ -63,17 +87,30 @@ items:
         - percvarLevel
         - summaryvar
         - summarylocation
+        - style
         - prunebelow
         - pruneLevel1
         - pruneLevel2
         - follow
         - followLevel1
         - followLevel2
+        - useprunesmaller
+        - prunesmaller
         - excl
-        - style
+        - vp
         - pct
+        - showcount
         - pattern
         - sequence
+        - ptable
+        - horizontal
+        - sline
+        - varnames
+        - nodelabel
+        - legend
+        - mytitle
+        - maxwidth
+        - showInterpretation
 
     - name:  reportSentence
       title: Copy-Ready Report Sentence
@@ -85,17 +122,30 @@ items:
         - percvarLevel
         - summaryvar
         - summarylocation
+        - style
         - prunebelow
         - pruneLevel1
         - pruneLevel2
         - follow
         - followLevel1
         - followLevel2
+        - useprunesmaller
+        - prunesmaller
         - excl
-        - style
+        - vp
         - pct
+        - showcount
         - pattern
         - sequence
+        - ptable
+        - horizontal
+        - sline
+        - varnames
+        - nodelabel
+        - legend
+        - mytitle
+        - maxwidth
+        - showInterpretation
 
     - name:  interpretation
       title: Clinical Interpretation
@@ -107,17 +157,30 @@ items:
         - percvarLevel
         - summaryvar
         - summarylocation
+        - style
         - prunebelow
         - pruneLevel1
         - pruneLevel2
         - follow
         - followLevel1
         - followLevel2
+        - useprunesmaller
+        - prunesmaller
         - excl
-        - style
+        - vp
         - pct
+        - showcount
         - pattern
         - sequence
+        - ptable
+        - horizontal
+        - sline
+        - varnames
+        - nodelabel
+        - legend
+        - mytitle
+        - maxwidth
+        - showInterpretation
 
 
 refs:

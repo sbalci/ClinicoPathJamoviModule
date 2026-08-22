@@ -4,7 +4,7 @@
 \alias{reportcatClass}
 \title{Summary of Categorical Variables}
 \value{
-Text
+A results object containing HTML summaries of the selected categorical variables.
 }
 \description{
 Summary of Categorical Variables

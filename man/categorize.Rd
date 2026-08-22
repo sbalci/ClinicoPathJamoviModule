@@ -31,7 +31,10 @@ categorize(
 \item{method}{Method for creating bins. Options are 'equal' for equal-width
 intervals, 'quantile' for quantile-based bins, 'manual' for custom break
 points, 'meansd' for mean +/- standard deviation bins, 'median' for median
-split, or 'jenks' for natural breaks clustering.}
+split, or 'jenks' for Fisher-Jenks natural breaks clustering. Jenks breaks
+are computed exactly up to 20000 observations; above that classInt works
+from a fixed-seed subsample and a note reports its size. Repeated runs
+always give identical break points.}
 
 \item{nbins}{Number of categories to create (2-20). Used for equal,
 quantile, and jenks methods.}
@@ -47,8 +50,9 @@ quantile, and jenks methods.}
 \item{customlabels}{Comma-separated custom labels (e.g., "Low, Medium,
 High"). Must match the number of categories.}
 
-\item{newvarname}{Name for the new categorized variable. Leave empty for
-automatic naming.}
+\item{newvarname}{Name for the new categorized variable, used both for the
+column added to the dataset and in the generated R code. Leave empty to
+name it after the source variable with a '_cat' suffix.}
 
 \item{excludeoutofrange}{Applies to the 'manual' method only. By default
 the break points are extended to the data minimum and maximum, so every
@@ -64,9 +68,15 @@ computed methods, whose break points already span the data.}
 FALSE, left-closed (right-open).}
 
 \item{ordered}{If TRUE, creates an ordered factor to preserve category
-ordering.}
+ordering, and the variable added to the dataset is marked as ordinal rather
+than nominal so the category order is kept in later analyses.}
 
-\item{excl}{Exclude missing values from the analysis.}
+\item{excl}{If TRUE (default), the percentages in the frequency table are
+taken over the categorized observations only, and missing or out-of-range
+rows carry no percentage. If FALSE, every row of the data is used as the
+denominator, so the missing and out-of-range rows carry their own share and
+the category percentages no longer sum to 100 on their own. Break points
+are always computed from the non-missing values.}
 
 \item{showcode}{Display R code to reproduce the categorization.}
 
@@ -77,6 +87,7 @@ distribution and cut points.}
 A results object containing:
 \tabular{llllll}{
 \code{results$todo} \tab \tab \tab \tab \tab a html \cr
+\code{results$notices} \tab \tab \tab \tab \tab a html \cr
 \code{results$summaryText} \tab \tab \tab \tab \tab a html \cr
 \code{results$freqTable} \tab \tab \tab \tab \tab a table \cr
 \code{results$breakpointsTable} \tab \tab \tab \tab \tab a table \cr
@@ -92,5 +103,20 @@ Tables can be converted to data frames with \code{asDF} or \code{\link{as.data.f
 \code{as.data.frame(results$freqTable)}
 }
 \description{
-Categorize Continuous Variables
+Converts a continuous numeric variable into an ordered set of categories
+using equal-width intervals, sample quantiles, hand-entered break points,
+mean +/- SD bands, a median split, or Fisher-Jenks natural breaks. Reports
+the break points and the resulting category frequencies, draws the
+distribution with the boundaries marked, and can add the categorised
+variable straight to the dataset.
+}
+\examples{
+\donttest{
+# Age split into quartiles
+categorize(
+    data = histopathology,
+    var = Age,
+    method = 'quantile',
+    nbins = 4)
+}
 }

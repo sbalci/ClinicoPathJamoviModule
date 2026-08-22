@@ -87,3 +87,7 @@ pony-tail-audit/
 /node_modules
 package-lock.json
 package.json
+
+# Python bytecode from tools/
+__pycache__/
+*.pyc

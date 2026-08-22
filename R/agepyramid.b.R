@@ -6,7 +6,7 @@
 #' @import jmvcore
 #' @importFrom tidyr complete pivot_wider
 #'
-#' @param age The name of the column containing age data.
+#' @seealso [agepyramid()] for the user-facing analysis function and its arguments.
 #'
 #' @return An \code{R6} class generator object for the \code{agepyramidClass} backend; used internally by the jamovi analysis wrapper and not called directly.
 
@@ -52,6 +52,7 @@ agepyramidClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     ERROR          = "ERROR: ",
                     STRONG_WARNING = "WARNING: ",
                     WARNING        = "WARNING: ",
+                    INFO           = "NOTE: ",
                     "")
                 paste0(prefix, notice$title, "\n", notice$content)
             }, character(1))
@@ -60,6 +61,10 @@ agepyramidClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         },
         .run = function() {
             private$.noticeList <- list()
+            # Clear the panel up front: .renderNotices() is otherwise only reached
+            # from .addNotice(), so a run that raises nothing would leave the
+            # previous run's notices on screen.
+            private$.renderNotices()
 
             # TODO (forward-looking): no `.()` wrapping anywhere in this file - 
             # the welcome HTML, error HTML, plot title fallback ("Age Pyramid"),
@@ -72,14 +77,14 @@ agepyramidClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             if (is.null(self$options$age) || is.null(self$options$gender)) {
                 self$results$welcome$setContent(
                     "<div style='background-color: rgba(33, 152, 239, 0.13); padding: 20px; border-radius: 8px; border-left: 4px solid #2196F3; color: inherit;'>
-                    <h3 style='color: #1976d2; margin-top: 0;'> Age Pyramid Analysis</h3>
+                    <h3 style='color: #4a9eea; margin-top: 0;'> Age Pyramid Analysis</h3>
                     <p style='font-size: 15px;'>Create demographic visualizations showing age distribution by gender.</p>
-                    <h4 style='color: #1976d2; margin-bottom: 8px;'>Required Variables:</h4>
+                    <h4 style='color: #4a9eea; margin-bottom: 8px;'>Required Variables:</h4>
                     <ol style='font-size: 14px; line-height: 1.6;'>
                         <li><strong>Age:</strong> Continuous numeric variable (e.g., patient age in years)</li>
                         <li><strong>Gender:</strong> Categorical variable (typically binary: Male/Female)</li>
                     </ol>
-                    <h4 style='color: #1976d2; margin-bottom: 8px;'>Features:</h4>
+                    <h4 style='color: #4a9eea; margin-bottom: 8px;'>Features:</h4>
                     <ul style='font-size: 14px; line-height: 1.6;'>
                         <li><strong>Age group presets:</strong> WHO/UN standard five-year groups (0-4, 5-9, ... 85+), WHO abridged with infants separated (&lt;1, 1-4, 5-9, ...), Pediatric (&lt;18), Reproductive (15-50), Geriatric (65+), Life Course, or Custom</li>
                         <li><strong>Custom age breaks:</strong> Define your own age boundaries (e.g., 0,18,25,50,65,100)</li>
@@ -89,7 +94,7 @@ agepyramidClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                         <li><strong>Table with counts and percentages</strong></li>
                         <li><strong>Gender level selection</strong> for flexible data structures</li>
                     </ul>
-                    <p style='font-size: 13px; color: #666; margin-bottom: 0; font-style: italic;'>
+                    <p style='font-size: 13px; opacity: 0.75; margin-bottom: 0; font-style: italic;'>
                     Select your Age and Gender variables to begin.
                     </p>
                     </div>"
@@ -134,51 +139,117 @@ agepyramidClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             male_level <- self$options$male
             gender_levels <- levels(mydata[["Gender"]])
 
-            # Apply smart defaults if levels not selected
+            # Apply smart defaults if levels not selected.
+            #
+            # Assigning by factor level ORDER alone is silently wrong for every
+            # coding whose first level is the male one - c("M", "F"),
+            # c("Male", "Female"), c("E", "K") - and the inversion runs all the
+            # way through: the sides of the pyramid, the legend and the
+            # "Female (n)" / "Male (n)" columns are all reversed with no visible
+            # sign. So read the level LABELS first, and disclose the outcome as a
+            # notice either way (see the assign_mode block below).
+            assign_mode <- "user"
+            auto_side <- NULL
+            auto_level <- NULL
             if (is.null(female_level) && is.null(male_level)) {
-                # Neither selected - use first two levels
-                if (length(gender_levels) >= 2) {
+                guess <- private$.guess_gender_levels(gender_levels)
+                if (!is.null(guess)) {
+                    female_level <- guess$female
+                    male_level <- guess$male
+                    assign_mode <- "label"
+                } else if (length(gender_levels) >= 2) {
                     female_level <- gender_levels[1]
                     male_level <- gender_levels[2]
+                    assign_mode <- "order"
                 } else if (length(gender_levels) == 1) {
-                    # Single level - treat as female
-                    female_level <- gender_levels[1]
-                    male_level <- NULL
+                    # Single level: put it on the side its own label names, so a
+                    # male-only cohort is not reported in the Female column.
+                    if (identical(private$.gender_side(gender_levels[1]), "male")) {
+                        male_level <- gender_levels[1]
+                    } else {
+                        female_level <- gender_levels[1]
+                    }
+                    assign_mode <- "single"
                 }
             } else if (is.null(female_level)) {
-                # Only male selected - use first non-male level as female
+                # Only male selected - fill the female side from the remaining levels
                 remaining <- gender_levels[gender_levels != male_level]
-                female_level <- if(length(remaining) > 0) remaining[1] else NULL
+                female_level <- private$.pick_level(remaining, "female")
+                assign_mode <- "partial"
+                auto_side <- "female"
+                auto_level <- female_level
             } else if (is.null(male_level)) {
-                # Only female selected - use first non-female level as male
+                # Only female selected - fill the male side from the remaining levels
                 remaining <- gender_levels[gender_levels != female_level]
-                male_level <- if(length(remaining) > 0) remaining[1] else NULL
+                male_level <- private$.pick_level(remaining, "male")
+                assign_mode <- "partial"
+                auto_side <- "male"
+                auto_level <- male_level
             }
 
-            # Validate that female and male levels are different
+            # Validate that female and male levels are different. This is a
+            # configuration error, so it belongs in the notices panel at the top of
+            # the results, not under the "Data Summary" heading.
             if (!is.null(female_level) && !is.null(male_level) && female_level == male_level) {
-                error_html <- paste0(
-                    "<div style='background-color: rgba(255, 33, 67, 0.09); padding: 20px; border-radius: 8px; border-left: 4px solid #f44336; color: inherit;'>",
-                    "<h3 style='color: #c62828; margin-top: 0;'> Configuration Error</h3>",
-                    "<p style='font-size: 15px;'><strong>Female and Male gender levels cannot be the same.</strong></p>",
-                    "<p style='font-size: 14px;'>You have selected '<strong>", htmltools::htmlEscape(female_level), "</strong>' for both Female and Male.</p>",
-                    "<h4 style='color: #c62828; margin-bottom: 8px;'>To fix this:</h4>",
-                    "<ol style='font-size: 14px; line-height: 1.6;'>",
-                    "    <li>Select different levels for Female and Male, OR</li>",
-                    "    <li>Leave one or both unselected to use auto-detection</li>",
-                    "</ol>",
-                    "<p style='font-size: 13px; color: #666; margin-bottom: 0; font-style: italic;'>",
-                    "The age pyramid requires two distinct gender categories for comparison.",
-                    "</p>",
-                    "</div>"
+                private$.addNotice(
+                    "ERROR",
+                    "Female and Male levels must be different",
+                    paste0(
+                        "The level '", female_level, "' is selected for BOTH the female and the ",
+                        "male side, so there is nothing to compare and no pyramid was drawn. ",
+                        "Choose two different levels of '", gender, "', or clear one or both ",
+                        "selectors to let the analysis read the levels from their names."
+                    )
                 )
-                self$results$dataInfo$setContent(error_html)
+                self$results$dataInfo$setContent("")
                 return()
             }
 
             # Detect single-gender cohort
             is_single_gender <- is.null(male_level) || is.null(female_level)
             single_gender_label <- if(!is.null(female_level)) female_level else male_level
+
+            # State the assignment where it is read, not only as a table row.
+            if (assign_mode == "label") {
+                private$.addNotice(
+                    "INFO",
+                    "Gender levels were read from the level names",
+                    paste0(
+                        "You did not set the gender levels, so they were matched on the level ",
+                        "names of '", gender, "': '", female_level, "' was taken as female and '",
+                        male_level, "' as male. The sides of the pyramid, the legend and the ",
+                        "'Female (n)' / 'Male (n)' table columns all follow that assignment. ",
+                        "Use the 'Female level' and 'Male level' selectors to set it explicitly."
+                    )
+                )
+            } else if (assign_mode == "order") {
+                private$.addNotice(
+                    "STRONG_WARNING",
+                    "Gender levels were assigned by level order, not by name",
+                    paste0(
+                        "The levels of '", gender, "' were not recognised as gender labels, so ",
+                        "the first level ('", female_level, "') was treated as FEMALE and the ",
+                        "second ('", male_level, "') as MALE. If your data are coded the other ",
+                        "way round, the whole analysis is reversed with them: the left and right ",
+                        "sides of the pyramid, the legend, and the 'Female (n)' and 'Male (n)' ",
+                        "table columns. Set the 'Female level' and 'Male level' selectors to ",
+                        "state the coding explicitly."
+                    )
+                )
+            } else if (assign_mode == "partial" && !is.null(auto_level)) {
+                private$.addNotice(
+                    "STRONG_WARNING",
+                    "One gender level was filled in automatically",
+                    paste0(
+                        "Only one of the two gender selectors was set, so the level '",
+                        auto_level, "' was used as the ", auto_side, " group. Check that this ",
+                        "matches your coding; if it does not, the ", auto_side, " side of the ",
+                        "pyramid and the '", if (identical(auto_side, "female")) "Female" else "Male",
+                        " (n)' column describe the wrong patients. Set both the 'Female level' ",
+                        "and 'Male level' selectors to remove the guess."
+                    )
+                )
+            }
 
             # Create standardized gender variable
             is_female <- if (!is.null(female_level)) {
@@ -215,6 +286,34 @@ agepyramidClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             age_groups <- if (!is.null(self$options$age_groups)) self$options$age_groups else 'custom'
             max_age <- max(mydata[["Age"]], na.rm = TRUE)
 
+            # An implausible age is not caught by the band-count guard further
+            # down: a 999 sentinel with the default 5-year bin width produces
+            # EXACTLY 200 bands (length(c(seq(0, 999, 5), Inf)) - 1 == 200), which
+            # is not MORE than 200. Report it and leave the rows in place - only
+            # the user can tell a sentinel from a genuine record.
+            n_implausible_age <- sum(mydata[["Age"]] > 120)
+            if (n_implausible_age > 0) {
+                private$.addNotice(
+                    "STRONG_WARNING",
+                    "Some ages are above 120 years",
+                    paste0(
+                        n_implausible_age, " observation(s) have an age above 120 years, the ",
+                        "highest being ", round(max_age, 2), ". Values that large are usually a ",
+                        "missing-value code such as 999, or an age recorded in months rather ",
+                        "than years. They were not removed: they are counted in the highest ",
+                        "age band of the pyramid. While the bands come from the bin width they ",
+                        "are also built out to ", round(max_age, 2), " years, so the figure ",
+                        "gains a long empty tail. Check the age column before reading the ",
+                        "figure."
+                    )
+                )
+            }
+
+            # Whole-year band labels ("6-10", "85+") describe a right-closed band
+            # exactly only when every age is a whole number; ages computed from
+            # dates are not. Used by .create_age_labels() below.
+            age_whole <- all(abs(mydata[["Age"]] - round(mydata[["Age"]])) < 1e-8)
+
             # Select breaks based on age_groups option
             if (age_groups == 'who') {
                 # WHO/UN standard five-year age groups: 0-4, 5-9, ... 80-84, 85+.
@@ -242,45 +341,77 @@ agepyramidClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 # Life course: Key developmental stages
                 breaks_seq <- c(0, 5, 15, 25, 45, 65, 75, 85, Inf)
             } else {
-                # Custom: Check for custom_breaks first, then use bin_width
+                # Custom: custom_breaks wins over bin_width when it is filled in.
+                #
+                # The entries are parsed one by one instead of being handed to
+                # as.numeric() wholesale: that dropped every unreadable entry in
+                # silence (so "0,abc,50,x" quietly became two bands) and, when
+                # nothing at all parsed, fell through to the bin width with no
+                # message about the breaks the user had typed.
                 custom_breaks <- self$options$custom_breaks
+                breaks_seq <- NULL
                 if (!is.null(custom_breaks) && nchar(trimws(custom_breaks)) > 0) {
-                    # Parse comma-separated values
-                    breaks_seq <- tryCatch({
-                        breaks_str <- trimws(strsplit(custom_breaks, ",")[[1]])
-                        breaks_num <- as.numeric(breaks_str)
-                        # Remove NA values and sort
-                        breaks_num <- sort(unique(breaks_num[!is.na(breaks_num)]))
-                        # Add Inf at the end if not present
-                        if (tail(breaks_num, 1) != Inf) {
-                            breaks_num <- c(breaks_num, Inf)
-                        }
-                        breaks_num
-                    }, error = function(e) {
-                        # Fall back to bin_width if parsing fails
-                        bin_width <- if (!is.null(self$options$bin_width)) self$options$bin_width else 5
-                        if (!is.numeric(bin_width) || length(bin_width) != 1 ||
-                                is.na(bin_width) || !is.finite(bin_width) || bin_width <= 0) {
-                            jmvcore::reject("Bin width must be a positive number")
-                        }
-                        breaks <- seq(from = 0, to = max_age, by = bin_width)
-                        if (max_age > tail(breaks, n = 1)) {
-                            breaks <- c(breaks, max_age)
-                        }
-                        breaks
-                    })
-                } else {
-                    # Use bin_width
-                    bin_width <- if (!is.null(self$options$bin_width)) self$options$bin_width else 5
-                    if (!is.numeric(bin_width) || length(bin_width) != 1 ||
-                            is.na(bin_width) || !is.finite(bin_width) || bin_width <= 0) {
-                        jmvcore::reject("Bin width must be a positive number")
+                    breaks_str <- trimws(strsplit(custom_breaks, ",")[[1]])
+                    breaks_str <- breaks_str[nzchar(breaks_str)]
+                    # suppressWarnings: an unreadable entry must not reach jamovi's
+                    # Analysis Notes panel as an unattached "NAs introduced by
+                    # coercion"; it is reported by the notice below instead.
+                    breaks_num <- suppressWarnings(as.numeric(breaks_str))
+                    bad_entries <- breaks_str[is.na(breaks_num)]
+                    breaks_num <- sort(unique(breaks_num[!is.na(breaks_num) & is.finite(breaks_num)]))
+
+                    if (length(bad_entries) > 0) {
+                        private$.addNotice(
+                            "WARNING",
+                            "Some custom age breaks could not be read",
+                            paste0(
+                                length(bad_entries), " of the ", length(breaks_str),
+                                " entries in 'Custom age breaks' are not numbers and were left out: ",
+                                paste(bad_entries, collapse = ", "), ". ",
+                                # Which breaks the bands actually come from is stated by
+                                # the two notices below - saying it here as well was
+                                # wrong when NOTHING parsed ("the remaining 0 break
+                                # point(s)"), because the bands then come from bin width.
+                                "Enter the break points as plain numbers separated by commas, ",
+                                "for example 0,18,45,65."
+                            )
+                        )
                     }
-                    breaks_seq <- seq(from = 0, to = max_age, by = bin_width)
-                    if (max_age > tail(breaks_seq, n = 1)) {
-                        breaks_seq <- c(breaks_seq, max_age)
+
+                    if (length(breaks_num) == 0) {
+                        private$.addNotice(
+                            "WARNING",
+                            "The custom age breaks could not be used",
+                            paste0(
+                                "No entry in 'Custom age breaks' could be read as a number, so the ",
+                                "age bands below come from the bin width (",
+                                self$options$bin_width, " years) and not from what you typed. ",
+                                "Clear the box to remove this message, or enter the break points ",
+                                "as plain numbers separated by commas, for example 0,18,45,65."
+                            )
+                        )
+                    } else {
+                        # Open-ended top band, so the oldest patients are never
+                        # dropped when the highest break sits below the oldest age.
+                        breaks_seq <- c(breaks_num, Inf)
+                        private$.addNotice(
+                            "INFO",
+                            "Custom age breaks are in use",
+                            paste0(
+                                "The age bands come from the break points you typed (",
+                                paste(format(breaks_num, trim = TRUE, scientific = FALSE),
+                                      collapse = ", "),
+                                ", then open-ended). 'Bin width' is ignored while 'Custom age ",
+                                "breaks' is filled in; clear that box to go back to bands of a ",
+                                "fixed width. Ages below the lowest break are not shown in the ",
+                                "pyramid and are counted under 'Outside age-break range' in the ",
+                                "Data Summary."
+                            )
+                        )
                     }
                 }
+                if (is.null(breaks_seq))
+                    breaks_seq <- private$.bin_width_breaks(max_age)
             }
 
             # Safeguard: ensure we have at least two unique breaks for cut()
@@ -289,15 +420,112 @@ agepyramidClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 breaks_seq <- c(0, max_age + 1)
             }
 
-            # Which end of each band is closed is now the user's choice; the
-            # default follows the WHO/UN convention. `.optionOr` is used because
-            # the option does not exist in the compiled .h.R until
-            # jmvtools::prepare() runs, and jmvcore's `$` ERRORS on an undeclared
-            # option rather than returning NULL.
-            use_right <- identical(private$.optionOr("age_interval", "left"), "right")
+            # Which end of each band is closed is the user's choice, but only for
+            # the custom paths. Every named preset is defined by its source as a
+            # set of LEFT-closed bands - the WHO/UN five-year groups are 0-4, 5-9,
+            # ... 85+, "geriatric" starts at exactly 65 - so applying right-closure
+            # to a preset shifts every boundary by a year and turns the first WHO
+            # band into a six-year band, while the UI still names the preset.
+            use_right <- identical(self$options$age_interval, "right")
+            if (use_right && age_groups != 'custom') {
+                use_right <- FALSE
+                preset_names <- c(who = "WHO/UN standard", who_infant = "WHO abridged",
+                                  pediatric = "Pediatric", reproductive = "Reproductive",
+                                  geriatric = "Geriatric", lifecourse = "Life course")
+                preset_label <- if (age_groups %in% names(preset_names))
+                    unname(preset_names[age_groups]) else age_groups
+                # INFO, not WARNING: 'age_interval' is greyed out while a preset is
+                # chosen (enable: (age_groups:custom) in the .u.yaml), so a user who
+                # set right-closure before switching to a preset cannot clear a
+                # warning from the visible UI. State what was used and how to get
+                # the selector back instead.
+                private$.addNotice(
+                    "INFO",
+                    "Right-closed bands do not apply to a preset age grouping",
+                    paste0(
+                        "'Age band boundaries' is set to right-closed, but the ", preset_label,
+                        " preset is defined by its source as left-closed bands, so the bands ",
+                        "below are the preset's own (for the WHO/UN preset: 0-4, 5-9, ... 85+). ",
+                        "Applying right-closure would have moved every boundary by one year and ",
+                        "the result could no longer be described as ", preset_label, " age ",
+                        "groups. The 'Age band boundaries' selector is greyed out while a ",
+                        "preset is chosen: set 'Age group preset' back to 'Custom (use bin ",
+                        "width)' to use right-closed bands, or to set that selector back to ",
+                        "left-closed and remove this note."
+                    )
+                )
+            }
+
+            # Guard the number of bands. bin_width deliberately has no upper bound
+            # (0.25 gives three-month neonatal bands), but nothing capped what it
+            # produced: a mistyped 0.01 over a 0-100 age range asks for 10,000
+            # bands, i.e. 10,001 table rows and 20,000 bars, which locks the
+            # session up and draws an unreadable figure. Custom breaks are
+            # unbounded in the same way.
+            n_bands <- length(breaks_seq) - 1
+            if (n_bands > 200) {
+                private$.addNotice(
+                    "ERROR",
+                    "Too many age bands to draw",
+                    paste0(
+                        "The current settings produce ", n_bands, " age bands over an age range ",
+                        "ending at ", round(max_age, 2), " years. No table or figure was drawn: ",
+                        "that many bands need one table row and two bars each, which takes a ",
+                        "long time to render and cannot be read. Increase the bin width, type ",
+                        "fewer custom breaks, or choose one of the age group presets - about 25 ",
+                        "bands or fewer is readable at the size this plot is drawn."
+                    )
+                )
+                self$results$dataInfo$setContent("")
+                return()
+            }
+            # (The "many narrow bands" warning is raised after cut(), where the
+            # occupied band count and the final n are both known.)
 
             labels <- private$.create_age_labels(breaks_seq, right = use_right,
-                                                 include_lowest = TRUE)
+                                                 include_lowest = TRUE,
+                                                 whole_ages = age_whole)
+
+            # Unequal band widths: the bars and the percentage columns are counts
+            # PER BAND, so a band covering more single years collects more people
+            # for that reason alone (the unequal-class-interval histogram error).
+            # Only the WHO/UN preset and the fixed bin width give equal bands.
+            finite_breaks <- breaks_seq[is.finite(breaks_seq)]
+            band_widths <- if (length(finite_breaks) >= 2) diff(finite_breaks) else numeric(0)
+            if (length(band_widths) >= 2 && (max(band_widths) - min(band_widths)) > 1e-8) {
+                widest <- which.max(band_widths)
+                narrowest <- which.min(band_widths)
+                private$.addNotice(
+                    "WARNING",
+                    "The age bands cover different numbers of years",
+                    paste0(
+                        "The bands are not all the same width: '", labels[widest], "' spans ",
+                        format(band_widths[widest], trim = TRUE, scientific = FALSE),
+                        " year(s) while '", labels[narrowest], "' spans ",
+                        format(band_widths[narrowest], trim = TRUE, scientific = FALSE),
+                        " year(s). The bar lengths and the 'Female (%)' / 'Male (%)' columns are ",
+                        "counts per band, not per year of age, so a wider band collects more ",
+                        "people simply by covering more years and its bar is longer for that ",
+                        "reason alone. Compare bands of equal width with each other, or divide ",
+                        "a band's count by its width in years before comparing. Bands of one ",
+                        "fixed width come from the 'Custom (use bin width)' preset."
+                    )
+                )
+            }
+
+            if (!age_whole && !use_right) {
+                private$.addNotice(
+                    "INFO",
+                    "Some ages are not whole years",
+                    paste0(
+                        "Not every age is a whole number, so read the band labels as completed ",
+                        "years of age (age at last birthday): a band labelled '10-14' holds ",
+                        "every age from 10 up to just below 15, so 14.6 years is counted in it, ",
+                        "and an age of exactly 15 starts the next band. Counts and percentages ",
+                        "are computed from the ages as recorded, not from rounded ages."
+                    )
+                )
+            }
 
             mydata[["Pop"]] <- cut(mydata[["Age"]],
                                    include.lowest = TRUE,
@@ -320,6 +548,29 @@ agepyramidClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
             if (n_final == 0) {
                 jmvcore::reject("No observations fall within the specified age break range. Adjust the custom age breaks or bin width so they cover the data.")
+            }
+
+            # Band-size notices belong HERE, not before cut(): n_final is only
+            # final once the out-of-range rows are gone, and the table and both
+            # plots draw only the bands that hold at least one observation
+            # (dplyr::count() drops empty ones), so length(breaks_seq) - 1
+            # overstates what the reader actually sees.
+            band_totals <- as.integer(table(mydata[["Pop"]]))
+            n_occupied_bands <- sum(band_totals > 0)
+            if (n_occupied_bands > 25) {
+                private$.addNotice(
+                    "WARNING",
+                    "Many narrow age bands",
+                    paste0(
+                        "The current settings fill ", n_occupied_bands, " age bands with ",
+                        n_final, " observations, an average of ",
+                        round(n_final / n_occupied_bands, 1),
+                        " observations per band. Bars that thin move by a large fraction of ",
+                        "their height when one patient is added or removed, so the outline of ",
+                        "the pyramid mostly reflects that variation. A wider bin width or one of ",
+                        "the presets gives a more readable figure."
+                    )
+                )
             }
 
             # Prepare data for plotting and table output ----
@@ -380,6 +631,85 @@ agepyramidClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             }
             total_female <- sum(plotData2$Female, na.rm = TRUE)
             total_male <- sum(plotData2$Male, na.rm = TRUE)
+
+            # Data-quality notices ----
+            # These conditions were previously visible only as coloured text inside
+            # the Data Summary table, which is easy to read past.
+            if (total_female == 0 || total_male == 0) {
+                present_label <- if (total_male == 0) "female" else "male"
+                empty_label <- if (total_male == 0) "male" else "female"
+                private$.addNotice(
+                    "STRONG_WARNING",
+                    "Only one gender group is present",
+                    paste0(
+                        "All ", n_final, " analysed observations fall in the ", present_label,
+                        " group, so the figure is a one-sided age distribution rather than a ",
+                        "two-sided pyramid, and the ", empty_label, " column of the Population ",
+                        "Data table is zero in every band. If the data do contain both groups, ",
+                        "check the 'Female level' and 'Male level' selectors and the ",
+                        "'Missing/unrecognized gender' count in the Data Summary."
+                    )
+                )
+            }
+
+            if (n_final < 30) {
+                private$.addNotice(
+                    "STRONG_WARNING",
+                    "Few observations behind each band",
+                    paste0(
+                        "The pyramid is built on ", n_final, " observations spread over ",
+                        n_occupied_bands, " age band(s). Counts this small change by whole ",
+                        "percentage ",
+                        "points when a single case is added or removed, so the percentages in ",
+                        "the table and the outline of the figure describe these particular ",
+                        "cases and not a stable estimate of the age distribution they came from."
+                    )
+                )
+            } else {
+                n_sparse <- sum(band_totals > 0 & band_totals < 5)
+                if (n_sparse > 0) {
+                    private$.addNotice(
+                        "WARNING",
+                        "Some age bands hold very few observations",
+                        paste0(
+                            n_sparse, " of the ", n_occupied_bands,
+                            " occupied age bands hold fewer than 5 observations. The percentages ",
+                            "shown for those bands move by a large step per case, so differences ",
+                            "between neighbouring short bars are not informative. Widening the ",
+                            "bin width pools them into steadier bands."
+                        )
+                    )
+                }
+            }
+
+            n_excluded_total <- n_initial - n_final
+            if (n_initial > 0 && n_excluded_total > 0 &&
+                    (n_excluded_total / n_initial) > 0.20) {
+                exclusion_reasons <- c(
+                    "missing age or gender in the source data" =
+                        max(0, n_excluded_total - n_invalid_age - n_missing_gender - n_unbinned),
+                    "ages that are not usable numbers (non-numeric, negative or infinite)" =
+                        n_invalid_age,
+                    "gender values matching neither the female nor the male level" =
+                        n_missing_gender,
+                    "ages outside the age-break range" = n_unbinned
+                )
+                top_reason <- names(exclusion_reasons)[which.max(exclusion_reasons)]
+                private$.addNotice(
+                    "STRONG_WARNING",
+                    "A large share of the rows was excluded",
+                    paste0(
+                        n_excluded_total, " of the ", n_initial, " rows (",
+                        round(n_excluded_total / n_initial * 100, 1),
+                        "%) are not in this pyramid. The largest single reason was ", top_reason,
+                        " (", max(exclusion_reasons), " rows). Every count and percentage shown ",
+                        "describes only the ", n_final, " rows that remained, so the figure is ",
+                        "representative of the whole dataset only if the excluded rows have the ",
+                        "same age and gender make-up as the kept ones. The full breakdown is in ",
+                        "the Data Summary."
+                    )
+                )
+            }
 
             # Add percentage columns (safe division).
             #
@@ -443,14 +773,11 @@ agepyramidClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             if (is.null(self$options$age) || is.null(self$options$gender))
                 return()
 
-            # Defensive check (unreachable in normal use: .run() already validates empty
-            # data via jmvcore::reject at L50, and the is.null(plotData) guard below covers
-            # the NULL-state case). Return FALSE to match .plot()'s failure handling rather
-            # than a raw stop() that would bypass jamovi's structured error UI.
-            if (nrow(self$data) == 0)
-                return(FALSE)
-
-            # Retrieve the prepared plot data
+            # No self$data read here on purpose. `requiresData: true` on the Image
+            # made jmvcore re-read the whole dataset from disk on every render -
+            # including every window resize and every reopen of a saved .omv - and
+            # the only thing that read was used for was an empty-data check that
+            # the is.null(image$state) guard below already covers.
             plotData <- image$state
 
             # Return early if no plot data available (e.g., validation errors in .run())
@@ -544,9 +871,7 @@ agepyramidClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             if (is.null(self$options$age) || is.null(self$options$gender))
                 return(FALSE)
 
-            if (nrow(self$data) == 0)
-                return(FALSE)
-
+            # See .plot(): no self$data read here, the state guard below covers it.
             # Retrieve the prepared plot data from .run()
             # We'll use the same data preparation that was done for the main plot
             plotData <- image$state
@@ -643,7 +968,8 @@ agepyramidClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             }, error = function(e) {
                 # A render-phase failure cannot write to a results element, so the
                 # guidance is drawn into the plot panel itself (IN_PLOT_FALLBACK).
-                # A bare warning() would be invisible in jamovi anyway.
+                # A bare warning() would surface only as unattached text in the
+                # Analysis Notes panel, detached from the plot it describes.
                 n_groups <- length(unique(as.character(plotData$Pop)))
                 fallback <- ggplot2::ggplot() +
                     ggplot2::annotate(
@@ -715,15 +1041,63 @@ agepyramidClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             }, error = function(e) FALSE)
         },
 
-        # Read an option that may not be present in the compiled .h.R yet.
-        # jmvcore's `$` ERRORS on an undeclared option rather than returning NULL,
-        # so a newly added option would crash every run until prepare() is run.
-        .optionOr = function(name, fallback) {
-            val <- tryCatch(self$options[[name]], error = function(e) NULL)
-            if (is.null(val) || (length(val) == 1 && is.na(val))) fallback else val
+        # Map a gender level label onto a side, or NA when it is not recognised.
+        # Deliberately narrow: an unrecognised label falls back to level order and
+        # is disclosed in a notice, which is safer than a loose guess.
+        .gender_side = function(label) {
+            key <- gsub("[^a-z]", "", tolower(trimws(as.character(label))))
+            if (length(key) != 1 || is.na(key) || !nzchar(key))
+                return(NA_character_)
+            # "kadn" is "kadin"/"kad\u{131}n" after the non-letter strip
+            if (key %in% c("f", "fem", "female", "females", "w", "woman", "women",
+                           "k", "kadin", "kadn"))
+                return("female")
+            if (key %in% c("m", "male", "males", "man", "men", "e", "erkek"))
+                return("male")
+            NA_character_
         },
 
-        .create_age_labels = function(breaks, right = FALSE, include_lowest = TRUE) {
+        # Both sides read from the level names, or NULL if that is not unambiguous.
+        .guess_gender_levels = function(gender_levels) {
+            if (length(gender_levels) < 2)
+                return(NULL)
+            sides <- vapply(gender_levels, private$.gender_side, character(1),
+                            USE.NAMES = FALSE)
+            female <- gender_levels[!is.na(sides) & sides == "female"]
+            male <- gender_levels[!is.na(sides) & sides == "male"]
+            if (length(female) == 1 && length(male) == 1)
+                return(list(female = female, male = male))
+            NULL
+        },
+
+        # Fill one side from the levels the user left over: prefer a level whose
+        # own name says which side it is, otherwise take the first remaining one.
+        .pick_level = function(candidates, side) {
+            if (length(candidates) == 0)
+                return(NULL)
+            sides <- vapply(candidates, private$.gender_side, character(1),
+                            USE.NAMES = FALSE)
+            named <- candidates[!is.na(sides) & sides == side]
+            if (length(named) == 1)
+                return(named)
+            candidates[1]
+        },
+
+        .bin_width_breaks = function(max_age) {
+            bin_width <- if (!is.null(self$options$bin_width)) self$options$bin_width else 5
+            if (!is.numeric(bin_width) || length(bin_width) != 1 ||
+                    is.na(bin_width) || !is.finite(bin_width) || bin_width <= 0) {
+                jmvcore::reject("Bin width must be a positive number")
+            }
+            # The top band is open-ended. seq() stops at or below max_age and
+            # include.lowest = TRUE then closes the top of the last FINITE band, so
+            # ages 0-100 in 5-year bins used to end in a "95-100" band holding six
+            # single years (95 to 100) while every other band held five.
+            c(seq(from = 0, to = max_age, by = bin_width), Inf)
+        },
+
+        .create_age_labels = function(breaks, right = FALSE, include_lowest = TRUE,
+                                      whole_ages = TRUE) {
             # Labels that describe exactly the ages their band contains, under
             # EITHER closure convention.
             #
@@ -754,11 +1128,29 @@ agepyramidClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 if (right) {
                     # (lower, upper], except the first band which include_lowest
                     # widens to [lower, upper].
-                    lo_named <- if (is_first && include_lowest) lower else lower + 1
+                    #
+                    # The whole-year forms ("6-10", "85+") name the band by
+                    # lower + 1, which is only the smallest age in the band when
+                    # ages are whole numbers AND the bound is a whole number:
+                    # (5, 10] holds 5.5, which is not "6-10", and (84, Inf] holds
+                    # 84.5, which is not "85+". Fall back to the exact interval
+                    # forms otherwise. The first band is closed at the bottom by
+                    # include_lowest, so it is never named with ">".
+                    closed_below <- is_first && include_lowest
                     if (is.infinite(upper)) {
-                        labels[i] <- paste0(lo_named, "+")
-                    } else if (whole(lower) && whole(upper)) {
-                        labels[i] <- paste(lo_named, upper, sep = "-")
+                        if (closed_below) {
+                            labels[i] <- paste0(lower, "+")
+                        } else if (whole(lower) && whole_ages) {
+                            labels[i] <- paste0(lower + 1, "+")
+                        } else {
+                            labels[i] <- paste0(">", lower)
+                        }
+                    } else if (closed_below) {
+                        labels[i] <- paste(lower, upper, sep = "-")
+                    } else if (whole(lower) && whole(upper) && whole_ages) {
+                        # A one-year band is "5", not "5-5".
+                        labels[i] <- if ((lower + 1) == upper) as.character(upper)
+                                     else paste(lower + 1, upper, sep = "-")
                     } else {
                         labels[i] <- paste0(">", lower, "-", upper)
                     }
@@ -772,6 +1164,10 @@ agepyramidClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     } else if (whole(lower) && whole(upper) && (upper - lower) == 1 && lower == 0) {
                         # WHO writes the infant band as "<1" rather than "0-0"
                         labels[i] <- "<1"
+                    } else if (whole(lower) && whole(upper) && (upper - lower) == 1) {
+                        # A one-year band is "1" (WHO abridged notation), not "1-1",
+                        # which is what [1, 2) got from the branch below.
+                        labels[i] <- as.character(lower)
                     } else if (whole(lower) && whole(upper) && (upper - lower) >= 1) {
                         labels[i] <- paste(lower, upper - 1, sep = "-")
                     } else {
@@ -794,33 +1190,33 @@ agepyramidClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             n_source_na <- max(0, n_excluded - n_invalid_age - n_missing_gender - n_unbinned)
 
             html <- "<div style='background-color: rgba(33, 152, 239, 0.13); padding: 15px; border-radius: 8px; border-left: 4px solid #2196F3; color: inherit;'>"
-            html <- paste0(html, "<h4 style='margin: 0 0 8px 0; color: #1976d2;'> Data Summary</h4>")
+            html <- paste0(html, "<h4 style='margin: 0 0 8px 0; color: #4a9eea;'> Data Summary</h4>")
             html <- paste0(html, "<table style='width: 100%; font-size: 14px;'>")
             html <- paste0(html, "<tr><td><strong>Initial observations:</strong></td><td>", n_initial, "</td></tr>")
             html <- paste0(html, "<tr><td><strong>Final observations:</strong></td><td>", n_final, "</td></tr>")
 
             if (n_excluded > 0) {
                 pct_excluded <- round(n_excluded / n_initial * 100, 1)
-                html <- paste0(html, "<tr><td><strong>Excluded:</strong></td><td style='color: #d32f2f;'>",
+                html <- paste0(html, "<tr><td><strong>Excluded:</strong></td><td style='color: #e05252;'>",
                     n_excluded, " (", pct_excluded, "%)</td></tr>")
                 
                 # Add breakdown (sub-items sum to the total Excluded above)
                 if (n_source_na > 0) {
-                    html <- paste0(html, "<tr><td style='padding-left: 20px; font-size: 13px;'>- Missing age/gender (source NA):</td><td style='color: #d32f2f; font-size: 13px;'>", n_source_na, "</td></tr>")
+                    html <- paste0(html, "<tr><td style='padding-left: 20px; font-size: 13px;'>- Missing age/gender (source NA):</td><td style='color: #e05252; font-size: 13px;'>", n_source_na, "</td></tr>")
                 }
                 if (n_invalid_age > 0) {
-                    html <- paste0(html, "<tr><td style='padding-left: 20px; font-size: 13px;'>- Non-numeric ages:</td><td style='color: #d32f2f; font-size: 13px;'>", n_invalid_age, "</td></tr>")
+                    html <- paste0(html, "<tr><td style='padding-left: 20px; font-size: 13px;'>- Unusable ages (non-numeric, negative or infinite):</td><td style='color: #e05252; font-size: 13px;'>", n_invalid_age, "</td></tr>")
                 }
                 if (n_missing_gender > 0) {
-                    html <- paste0(html, "<tr><td style='padding-left: 20px; font-size: 13px;'>- Missing/unrecognized gender:</td><td style='color: #d32f2f; font-size: 13px;'>", n_missing_gender, "</td></tr>")
+                    html <- paste0(html, "<tr><td style='padding-left: 20px; font-size: 13px;'>- Missing/unrecognized gender:</td><td style='color: #e05252; font-size: 13px;'>", n_missing_gender, "</td></tr>")
                 }
                 if (n_unbinned > 0) {
-                    html <- paste0(html, "<tr><td style='padding-left: 20px; font-size: 13px;'>- Outside age-break range:</td><td style='color: #d32f2f; font-size: 13px;'>", n_unbinned, "</td></tr>")
+                    html <- paste0(html, "<tr><td style='padding-left: 20px; font-size: 13px;'>- Outside age-break range:</td><td style='color: #e05252; font-size: 13px;'>", n_unbinned, "</td></tr>")
                 }
             }
 
             if (is_single_gender) {
-                html <- paste0(html, "<tr><td><strong>Cohort type:</strong></td><td style='color: #f57c00;'>",
+                html <- paste0(html, "<tr><td><strong>Cohort type:</strong></td><td style='color: #ef8c2e;'>",
                     "Single-gender (", htmltools::htmlEscape(single_gender_label), ")</td></tr>")
             } else {
                 html <- paste0(html, "<tr><td><strong>Female level:</strong></td><td>", htmltools::htmlEscape(female_level), "</td></tr>")

@@ -4,8 +4,6 @@
 \alias{benfordClass}
 \title{Benford's Law Analysis}
 \value{
-A comprehensive analysis with clinical interpretation and actionable recommendations.
-
 A comprehensive Benford's Law analysis with clinical interpretation.
 }
 \description{

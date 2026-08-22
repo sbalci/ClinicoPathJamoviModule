@@ -6,10 +6,37 @@ menuSubgroup: ClinicoPath Data Quality
 version: '1.0.6'
 jas: '1.2'
 
+description:
+    main: >
+        Screens a single variable for data-quality problems before it is used in
+        analysis: completeness and the shape of its missingness, consensus outlier
+        detection (at n = 10 or more a point is flagged only when at least 2 methods
+        agree; below n = 10 single-method flags are shown, labelled informative-only
+        and excluded from the grade; the MAD-based method is unavailable when there
+        are 3 or fewer complete values or the MAD is zero, leaving 2 methods),
+        distribution summaries, duplicate or repeated values, and optional
+        plausibility checks for common clinical measurements. Reports a heuristic
+        letter grade with a transparent component-by-component penalty breakdown.
+        The grade uses rule-of-thumb thresholds and is not an externally validated
+        quality metric; treat it as a screening aid, not a verdict.
+    R:
+        dontrun: true
+        usage: |
+            # Quality check of a numeric variable
+            checkdata(
+                data = histopathology,
+                var = Age,
+                showDistribution = TRUE)
+
 options:
     - name: data
       type: Data
-      
+      description:
+          R: >
+            The data as a data frame.
+          jamovi: >
+            The data as a data frame.
+
     - name: var
       title: Variable to check
       type: Variable
@@ -17,6 +44,12 @@ options:
       # is a supported state; without an explicit default the compiler makes `var`
       # a REQUIRED argument of the public wrapper.
       default: NULL
+      description:
+          R: >
+            The single variable to assess. Any type is accepted; numeric variables
+            additionally receive outlier detection and the numeric distribution
+            summary, while factor and character variables receive the categorical
+            summary instead.
 
     - name: showOutliers
       title: Outlier analysis
@@ -43,7 +76,10 @@ options:
       default: false
       description:
           R: >
-            Identify and count duplicate values in the dataset.
+            For a numeric variable, list the values that occur more than once. For a
+            factor or character variable, list the frequency of every category (the
+            table is retitled "Value Frequencies" in that case, since categories
+            occurring once are shown too).
 
     - name: showPatterns
       title: Data patterns
@@ -111,7 +147,9 @@ options:
             variable. Little's MCAR test is multivariate and cannot be computed from a
             single variable, so this analysis reports heuristics about where the missing
             values sit rather than a test of the mechanism; enable this to state that
-            limitation explicitly in the output.
+            limitation explicitly in the Quality Assessment Summary (and, when Data
+            patterns is also enabled, as a row of that table). No formal MCAR test is
+            performed by this analysis.
 
     - name: cvMinMean
       title: Minimum mean for CV calculation

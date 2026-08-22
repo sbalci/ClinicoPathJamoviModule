@@ -48,24 +48,28 @@ children:
           - type: TextBox
             name: composite_threshold
             format: number
+            enable: (method_category == 'composite' || method_category == 'all')
       - type: LayoutBox
         margin: large
         children:
           - type: TextBox
             name: zscore_threshold
             format: number
+            enable: (method_category == 'univariate' || method_category == 'composite' || method_category == 'all')
       - type: LayoutBox
         margin: large
         children:
           - type: TextBox
             name: iqr_multiplier
             format: number
+            enable: (method_category == 'univariate' || method_category == 'composite' || method_category == 'all')
       - type: LayoutBox
         margin: large
         children:
           - type: TextBox
             name: confidence_level
             format: number
+            enable: (method_category == 'univariate' || method_category == 'all')
       - type: LayoutBox
         margin: large
         children:

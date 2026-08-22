@@ -17,6 +17,13 @@ items:
       visible: false
       clearWith: []
 
+    - name: notices
+      title: Important Information
+      type: Preformatted
+      clearWith:
+          - var
+          - digits
+
     - name:  explanation
       title: "About Benford's Law in Clinical Data"
       type:  Html
@@ -65,7 +72,7 @@ items:
           - digits
 
     - name:  text2
-      title: Suspicious Data Points
+      title: Leading-Digit Bin Membership
       type:  Preformatted
       clearWith:
           - var

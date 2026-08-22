@@ -534,7 +534,10 @@ export(weightedlogrank)
 export(winratio)
 export(winratioClass)
 import(jmvcore)
-importFrom(ComplexUpset,intersection_size)
+importFrom(ComplexUpset,
+  get_size_mode,
+  intersection_size
+)
 importFrom(DataExplorer,
   create_report,
   drop_columns,
@@ -676,7 +679,6 @@ importFrom(dplyr,
   left_join,
   mutate,
   n,
-  n_distinct,
   pull,
   rename,
   row_number,
@@ -724,10 +726,8 @@ importFrom(frailtypack,
 )
 importFrom(geepack,geeglm)
 importFrom(ggVennDiagram,
-  Venn,
-  discern,
-  ggVennDiagram,
-  overlap
+  get_shapes,
+  ggVennDiagram
 )
 importFrom(ggalluvial,
   StatStratum,
@@ -769,6 +769,7 @@ importFrom(ggplot2,
   coord_fixed,
   coord_flip,
   coord_polar,
+  discrete_scale,
   element_blank,
   element_line,
   element_rect,
@@ -938,6 +939,7 @@ importFrom(grid,
   grid.text,
   pushViewport,
   unit,
+  upViewport,
   viewport
 )
 importFrom(gridExtra,grid.arrange)
@@ -1263,7 +1265,6 @@ importFrom(stats,
   optimize,
   p.adjust,
   pairwise.t.test,
-  pairwise.table,
   pchisq,
   pf,
   plogis,
@@ -1392,18 +1393,10 @@ importFrom(utils,
   sessionInfo,
   tail
 )
-importFrom(vcd,
-  assocstats,
-  mosaic
-)
+importFrom(vcd,assocstats)
 importFrom(viridis,
   scale_color_viridis,
   scale_fill_viridis,
   viridis
-)
-importFrom(visdat,
-  vis_dat,
-  vis_guess,
-  vis_miss
 )
 importFrom(vtree,vtree)

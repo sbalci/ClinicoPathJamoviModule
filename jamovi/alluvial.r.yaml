@@ -22,6 +22,16 @@ items:
           - custombinlabels
           - fill
           - curveType
+          - colorPalette
+          - themeStyle
+          - enhancedGradients
+          - orient
+          - flowDirection
+          - sankeyStyle
+          - labelNodes
+          - showCounts
+          - plotSubtitle
+          - mytitle
 
     - name: todo
       title: To Do
@@ -39,6 +49,7 @@ items:
           - excl
           - weight
           - engine
+          - fillGgalluvial
 
     - title: Alluvial Diagrams
       name: plot

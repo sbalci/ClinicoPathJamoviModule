@@ -23,7 +23,10 @@ the continuous values used for the report}
 test, skewness, and kurtosis) will be computed and explained.}
 
 \item{decimal_places}{Number of decimal places to display for statistical
-measures. Default of 2 aligns with standard laboratory reporting.}
+measures. Default of 2 aligns with standard laboratory reporting. Governs
+the text summary, the skewness and kurtosis values, the visual summary
+table, the outlier report and the copy-ready clinical summary. P-values are
+always shown to 3 decimal places.}
 
 \item{outliers}{If TRUE, detect and report potential outliers using IQR
 method. Helpful for quality control and identifying data entry errors.}
@@ -34,6 +37,7 @@ sentences for direct use in medical documentation.}
 \value{
 A results object containing:
 \tabular{llllll}{
+\code{results$notices} \tab \tab \tab \tab \tab a preformatted \cr
 \code{results$todo} \tab \tab \tab \tab \tab a html \cr
 \code{results$text} \tab \tab \tab \tab \tab a html \cr
 \code{results$text1} \tab \tab \tab \tab \tab a html \cr
@@ -49,4 +53,15 @@ This module generates descriptive statistics for continuous variables.
 It provides both a textual summary and a visually appealing summary table.
 Optionally, you can enable distribution diagnostics to examine normality,
 skewness, and kurtosis.
+}
+\examples{
+\donttest{
+data(histopathology)
+
+# Descriptive statistics for two continuous variables
+summarydata(data = histopathology, vars = c("Age", "OverallTime"))
+
+# Add Shapiro-Wilk, skewness and kurtosis diagnostics
+summarydata(data = histopathology, vars = "Age", distr = TRUE)
+}
 }

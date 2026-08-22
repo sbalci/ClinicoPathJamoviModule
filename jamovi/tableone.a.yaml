@@ -10,17 +10,25 @@ description:
   main: >
     This function generates a "Table One", a descriptive summary table frequently used in 
     clinicopathological research manuscripts. It supports multiple output styles for flexible formatting.
-  # R:
-  #   dontrun: true
-  #   usage: |
-  #     # Example usage:
-  #     # data('histopathology')
-  #     # dat <- as.data.frame(histopathology)
-  #     # ClinicoPathDescriptives::tableone(
-  #     #   data = dat,
-  #     #   vars = vars(Sex, PreinvasiveComponent, LVI, PNI, Grade, Age),
-  #     #   sty = "t3",
-  #     #   excl = TRUE)
+  R:
+    dontrun: true
+    usage: |
+      data(histopathology)
+
+      # Standard Table One: mean (SD) for the numeric Age,
+      # N (percent) for the categorical Sex and Grade_Level
+      tableone(
+        data = histopathology,
+        vars = vars(Sex, Grade_Level, Age),
+        sty = "t1")
+
+      # Right-skewed measurements such as follow-up time are better
+      # summarised as median (Q1, Q3)
+      tableone(
+        data = histopathology,
+        vars = vars(Sex, Grade_Level, OverallTime),
+        sty = "t1",
+        nonnormal = TRUE)
       
 options:
   - name: data
@@ -62,9 +70,9 @@ options:
     default: t1
     description:
       R: >
-        Specify the output style for the descriptive table. 'tableone' provides standard medical format with means/medians and frequencies, 'gtsummary' creates publication-ready descriptive tables, 'arsenal' generates comprehensive descriptive summaries, and 'janitor' produces simple frequency tables for categorical variables.
+        Specify the output style for the descriptive table. 'tableone' reports continuous variables as mean (SD) - or as median (Q1, Q3) when nonnormal is TRUE - and categorical variables as N (percent). 'gtsummary' reports continuous variables as median (Q1, Q3). 'arsenal' reports mean (SD) together with the range. 'janitor' produces one frequency table of counts and percentages per variable, for variables with a limited number of categories.
       jamovi: >
-        Choose the descriptive table format. 'tableone' style shows standard medical descriptives (mean ± SD, median [IQR], N ( percent)), 'gtsummary' provides polished formatting, 'arsenal' gives detailed summaries, and 'janitor' focuses on frequency counts.
+        Choose the descriptive table format. 'tableone' shows mean (SD) for continuous variables - or median (Q1, Q3) if you tick that option - and N (percent) for categories; 'gtsummary' shows median (Q1, Q3) with publication-ready formatting; 'arsenal' shows mean (SD) with the range; 'janitor' shows frequency counts and percentages only.
         
   - name: excl
     title: "Missing-value exclusion (NA)"
@@ -105,4 +113,17 @@ options:
         Generate a copy-ready sentence summarizing the table for manuscript reporting.
       jamovi: >
         Display ready-to-copy text for your manuscript.
+
+  # Declared last on purpose: the generated wrapper takes its argument order from
+  # this list, so inserting a new option higher up would silently change the
+  # meaning of any existing positional tableone(df, vars, "t1", TRUE) call.
+  - name: nonnormal
+    title: "Report continuous variables as median (Q1, Q3)"
+    type: Bool
+    default: false
+    description:
+      R: >
+        Applies only to the 'tableone' style. When TRUE, continuous variables are summarised as median (Q1, Q3) instead of mean (SD), which is the appropriate summary for right-skewed measurements such as Ki-67 index, tumour size or marker concentrations. Categorical variables are unaffected.
+      jamovi: >
+        Summarise continuous variables as median (Q1, Q3) rather than mean (SD). Use for skewed measurements. Applies to the 'tableone' style only.
 ...

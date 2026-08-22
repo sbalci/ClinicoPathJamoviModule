@@ -11,7 +11,8 @@ tableone(
   excl = FALSE,
   showSummary = FALSE,
   showAbout = FALSE,
-  showReportSentence = FALSE
+  showReportSentence = FALSE,
+  nonnormal = FALSE
 )
 }
 \arguments{
@@ -21,10 +22,12 @@ tableone(
 Table One. Supports numeric, ordinal, and categorical variables.}
 
 \item{sty}{Specify the output style for the descriptive table. 'tableone'
-provides standard medical format with means/medians and frequencies,
-'gtsummary' creates publication-ready descriptive tables, 'arsenal'
-generates comprehensive descriptive summaries, and 'janitor' produces
-simple frequency tables for categorical variables.}
+reports continuous variables as mean (SD) - or as median (Q1, Q3) when
+nonnormal is TRUE - and categorical variables as N (percent). 'gtsummary'
+reports continuous variables as median (Q1, Q3). 'arsenal' reports mean
+(SD) together with the range. 'janitor' produces one frequency table of
+counts and percentages per variable, for variables with a limited number of
+categories.}
 
 \item{excl}{Boolean option to exclude missing values (NA) from the
 analysis. Note: Exclusion may remove entire cases.}
@@ -37,6 +40,12 @@ it, and how to interpret results.}
 
 \item{showReportSentence}{Generate a copy-ready sentence summarizing the
 table for manuscript reporting.}
+
+\item{nonnormal}{Applies only to the 'tableone' style. When TRUE,
+continuous variables are summarised as median (Q1, Q3) instead of mean
+(SD), which is the appropriate summary for right-skewed measurements such
+as Ki-67 index, tumour size or marker concentrations. Categorical variables
+are unaffected.}
 }
 \value{
 A results object containing:
@@ -56,4 +65,24 @@ A results object containing:
 This function generates a "Table One", a descriptive summary table
 frequently used in  clinicopathological research manuscripts. It supports
 multiple output styles for flexible formatting.
+}
+\examples{
+\donttest{
+data(histopathology)
+
+# Standard Table One: mean (SD) for the numeric Age,
+# N (percent) for the categorical Sex and Grade_Level
+tableone(
+  data = histopathology,
+  vars = vars(Sex, Grade_Level, Age),
+  sty = "t1")
+
+# Right-skewed measurements such as follow-up time are better
+# summarised as median (Q1, Q3)
+tableone(
+  data = histopathology,
+  vars = vars(Sex, Grade_Level, OverallTime),
+  sty = "t1",
+  nonnormal = TRUE)
+}
 }

@@ -11,12 +11,13 @@ chisqposttestOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
             counts = NULL,
             posthoc = "bonferroni",
             sig = 0.05,
-            excl = FALSE,
+            excl = TRUE,
             exp = FALSE,
             plot = FALSE,
             showResiduals = FALSE,
             showEducational = FALSE,
             showDetailedTables = FALSE,
+            residualsCriterion = "bonferroni",
             residualsCutoff = 2,
             phiCI = FALSE,
             testSelection = "auto",
@@ -76,7 +77,7 @@ chisqposttestOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
             private$..excl <- jmvcore::OptionBool$new(
                 "excl",
                 excl,
-                default=FALSE)
+                default=TRUE)
             private$..exp <- jmvcore::OptionBool$new(
                 "exp",
                 exp,
@@ -97,6 +98,13 @@ chisqposttestOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                 "showDetailedTables",
                 showDetailedTables,
                 default=FALSE)
+            private$..residualsCriterion <- jmvcore::OptionList$new(
+                "residualsCriterion",
+                residualsCriterion,
+                options=list(
+                    "bonferroni",
+                    "fixed"),
+                default="bonferroni")
             private$..residualsCutoff <- jmvcore::OptionNumber$new(
                 "residualsCutoff",
                 residualsCutoff,
@@ -147,6 +155,7 @@ chisqposttestOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
             self$.addOption(private$..showResiduals)
             self$.addOption(private$..showEducational)
             self$.addOption(private$..showDetailedTables)
+            self$.addOption(private$..residualsCriterion)
             self$.addOption(private$..residualsCutoff)
             self$.addOption(private$..phiCI)
             self$.addOption(private$..testSelection)
@@ -168,6 +177,7 @@ chisqposttestOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
         showResiduals = function() private$..showResiduals$value,
         showEducational = function() private$..showEducational$value,
         showDetailedTables = function() private$..showDetailedTables$value,
+        residualsCriterion = function() private$..residualsCriterion$value,
         residualsCutoff = function() private$..residualsCutoff$value,
         phiCI = function() private$..phiCI$value,
         testSelection = function() private$..testSelection$value,
@@ -188,6 +198,7 @@ chisqposttestOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
         ..showResiduals = NA,
         ..showEducational = NA,
         ..showDetailedTables = NA,
+        ..residualsCriterion = NA,
         ..residualsCutoff = NA,
         ..phiCI = NA,
         ..testSelection = NA,
@@ -203,6 +214,7 @@ chisqposttestResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
     inherit = jmvcore::Group,
     active = list(
         todo = function() private$.items[["todo"]],
+        notices = function() private$.items[["notices"]],
         chisqTable = function() private$.items[["chisqTable"]],
         assumptionsCheck = function() private$.items[["assumptionsCheck"]],
         clinicalSummary = function() private$.items[["clinicalSummary"]],
@@ -226,9 +238,13 @@ chisqposttestResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                 name="",
                 title="Chi-Square Post-Hoc Tests",
                 refs=list(
+                    "Cohen1988",
+                    "ClinicoPathJamoviModule",
                     "chisq.posthoc.test",
-                    "vcd",
-                    "ClinicoPathJamoviModule"))
+                    "agresti2013",
+                    "sharpe2015",
+                    "holm1979",
+                    "benjaminihochberg1995"))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="todo",
@@ -236,6 +252,16 @@ chisqposttestResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                 clearWith=list(
                     "rows",
                     "cols")))
+            self$add(jmvcore::Preformatted$new(
+                options=options,
+                name="notices",
+                title="Important Information",
+                clearWith=list(
+                    "rows",
+                    "cols",
+                    "counts",
+                    "excl",
+                    "sig")))
             self$add(jmvcore::Table$new(
                 options=options,
                 name="chisqTable",
@@ -272,6 +298,9 @@ chisqposttestResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                 clearWith=list(
                     "rows",
                     "cols",
+                    "counts",
+                    "excl",
+                    "sig",
                     "showAssumptionsCheck")))
             self$add(jmvcore::Html$new(
                 options=options,
@@ -281,6 +310,11 @@ chisqposttestResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                 clearWith=list(
                     "rows",
                     "cols",
+                    "counts",
+                    "excl",
+                    "sig",
+                    "posthoc",
+                    "testSelection",
                     "showClinicalSummary")))
             self$add(jmvcore::Html$new(
                 options=options,
@@ -322,11 +356,12 @@ chisqposttestResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                     "excl",
                     "sig",
                     "showResiduals",
+                    "residualsCriterion",
                     "residualsCutoff")))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="residualsAnalysis",
-                title="Standardized Residuals Analysis",
+                title="Adjusted Standardized Residuals",
                 visible="(showResiduals)",
                 clearWith=list(
                     "rows",
@@ -335,6 +370,7 @@ chisqposttestResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                     "excl",
                     "sig",
                     "showResiduals",
+                    "residualsCriterion",
                     "residualsCutoff")))
             self$add(jmvcore::Html$new(
                 options=options,
@@ -343,11 +379,17 @@ chisqposttestResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                 clearWith=list(
                     "rows",
                     "cols",
-                    "posthoc")))
+                    "counts",
+                    "excl",
+                    "posthoc",
+                    "sig",
+                    "testSelection",
+                    "showEducational")))
             self$add(jmvcore::Table$new(
                 options=options,
                 name="posthocTable",
                 title="Pairwise Comparison Results",
+                visible="(posthoc:bonferroni || posthoc:holm || posthoc:fdr)",
                 columns=list(
                     list(
                         `name`="comparison", 
@@ -377,7 +419,7 @@ chisqposttestResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                         `type`="number"),
                     list(
                         `name`="phi_ci", 
-                        `title`="95% CI (Phi)", 
+                        `title`="Bootstrap 95% CI (Cramer's V)", 
                         `type`="text"),
                     list(
                         `name`="sig", 
@@ -437,6 +479,7 @@ chisqposttestResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                     "sig",
                     "testSelection",
                     "showResiduals",
+                    "residualsCriterion",
                     "residualsCutoff",
                     "exportResults")))
             self$add(jmvcore::Html$new(
@@ -447,6 +490,9 @@ chisqposttestResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                 clearWith=list(
                     "rows",
                     "cols",
+                    "counts",
+                    "excl",
+                    "sig",
                     "copyReadySentences")))
             self$add(jmvcore::Html$new(
                 options=options,
@@ -458,7 +504,7 @@ chisqposttestResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
             self$add(jmvcore::Image$new(
                 options=options,
                 name="plot",
-                title="Standardized Residuals",
+                title="Adjusted Standardized Residuals",
                 width=600,
                 height=400,
                 renderFun=".plot",
@@ -468,7 +514,10 @@ chisqposttestResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                     "rows",
                     "cols",
                     "counts",
-                    "excl")))}))
+                    "excl",
+                    "sig",
+                    "residualsCriterion",
+                    "residualsCutoff")))}))
 
 chisqposttestBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
     "chisqposttestBase",
@@ -502,6 +551,16 @@ chisqposttestBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' testing). No automated validation against established packages exists. Use 
 #' with caution for clinical decision-making.
 #' 
+#'
+#' @examples
+#' \donttest{
+#' # Tumour grade level by lymphovascular invasion,
+#' # using the histopathology data bundled with the module
+#' chisqposttest(
+#'     data = histopathology,
+#'     rows = "Grade_Level",
+#'     cols = "LVI")
+#'}
 #' @param data The data as a data frame.
 #' @param rows variable in the rows
 #' @param cols variable in the columns
@@ -515,7 +574,13 @@ chisqposttestBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   (less conservative), or FDR (controls false discovery rate) for pairwise
 #'   testing.
 #' @param sig alpha level for significance testing
-#' @param excl exclude missing values from analysis
+#' @param excl Rows with a missing value on the row, column or counts variable
+#'   are always excluded before the contingency table is built, because counting
+#'   missing values as a category of their own adds a row or column to the table
+#'   and changes the degrees of freedom of the chi-square test. This option is
+#'   checked by default and is retained so that saved analyses and existing
+#'   scripts continue to load; clearing it does not re-admit missing values. A
+#'   notice reports how many rows were dropped whenever any were.
 #' @param exp show expected values in the table
 #' @param plot display plot of standardized residuals
 #' @param showResiduals display standardized residuals analysis with
@@ -523,8 +588,15 @@ chisqposttestBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' @param showEducational display educational guidance and explanations
 #' @param showDetailedTables display individual 2x2 tables for each pairwise
 #'   comparison
-#' @param residualsCutoff critical value for identifying significant residuals
-#'   (typically 2.0 or 3.0)
+#' @param residualsCriterion How the critical value for flagging a cell
+#'   residual is chosen. 'Bonferroni-corrected z' divides the significance level
+#'   by the number of cells and uses the corresponding normal deviate, so it
+#'   accounts for the number of cells tested (2.64 for a 2x3 table, 2.96 for a
+#'   4x4). 'Fixed cutoff' uses the value in the 'Residual significance cutoff'
+#'   box unchanged.
+#' @param residualsCutoff Critical value for identifying significant residuals
+#'   (typically 2.0 or 3.0). Used only when 'Residual significance criterion' is
+#'   set to 'Fixed cutoff'.
 #' @param phiCI calculate bootstrap confidence intervals for the Phi
 #'   coefficient using BCa method (Bias-Corrected and accelerated). Note: This
 #'   is computationally intensive and may take longer for large tables.
@@ -543,6 +615,7 @@ chisqposttestBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' @return A results object containing:
 #' \tabular{llllll}{
 #'   \code{results$todo} \tab \tab \tab \tab \tab a html \cr
+#'   \code{results$notices} \tab \tab \tab \tab \tab a preformatted \cr
 #'   \code{results$chisqTable} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$assumptionsCheck} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$clinicalSummary} \tab \tab \tab \tab \tab a html \cr
@@ -574,12 +647,13 @@ chisqposttest <- function(
     counts = NULL,
     posthoc = "bonferroni",
     sig = 0.05,
-    excl = FALSE,
+    excl = TRUE,
     exp = FALSE,
     plot = FALSE,
     showResiduals = FALSE,
     showEducational = FALSE,
     showDetailedTables = FALSE,
+    residualsCriterion = "bonferroni",
     residualsCutoff = 2,
     phiCI = FALSE,
     testSelection = "auto",
@@ -617,6 +691,7 @@ chisqposttest <- function(
         showResiduals = showResiduals,
         showEducational = showEducational,
         showDetailedTables = showDetailedTables,
+        residualsCriterion = residualsCriterion,
         residualsCutoff = residualsCutoff,
         phiCI = phiCI,
         testSelection = testSelection,

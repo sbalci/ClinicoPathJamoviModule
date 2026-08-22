@@ -11,12 +11,13 @@ chisqposttest(
   counts = NULL,
   posthoc = "bonferroni",
   sig = 0.05,
-  excl = FALSE,
+  excl = TRUE,
   exp = FALSE,
   plot = FALSE,
   showResiduals = FALSE,
   showEducational = FALSE,
   showDetailedTables = FALSE,
+  residualsCriterion = "bonferroni",
   residualsCutoff = 2,
   phiCI = FALSE,
   testSelection = "auto",
@@ -47,7 +48,13 @@ testing.}
 
 \item{sig}{alpha level for significance testing}
 
-\item{excl}{exclude missing values from analysis}
+\item{excl}{Rows with a missing value on the row, column or counts variable
+are always excluded before the contingency table is built, because counting
+missing values as a category of their own adds a row or column to the table
+and changes the degrees of freedom of the chi-square test. This option is
+checked by default and is retained so that saved analyses and existing
+scripts continue to load; clearing it does not re-admit missing values. A
+notice reports how many rows were dropped whenever any were.}
 
 \item{exp}{show expected values in the table}
 
@@ -61,8 +68,16 @@ interpretation}
 \item{showDetailedTables}{display individual 2x2 tables for each pairwise
 comparison}
 
-\item{residualsCutoff}{critical value for identifying significant residuals
-(typically 2.0 or 3.0)}
+\item{residualsCriterion}{How the critical value for flagging a cell
+residual is chosen. 'Bonferroni-corrected z' divides the significance level
+by the number of cells and uses the corresponding normal deviate, so it
+accounts for the number of cells tested (2.64 for a 2x3 table, 2.96 for a
+4x4). 'Fixed cutoff' uses the value in the 'Residual significance cutoff'
+box unchanged.}
+
+\item{residualsCutoff}{Critical value for identifying significant residuals
+(typically 2.0 or 3.0). Used only when 'Residual significance criterion' is
+set to 'Fixed cutoff'.}
 
 \item{phiCI}{calculate bootstrap confidence intervals for the Phi
 coefficient using BCa method (Bias-Corrected and accelerated). Note: This
@@ -90,6 +105,7 @@ interpretations}
 A results object containing:
 \tabular{llllll}{
 \code{results$todo} \tab \tab \tab \tab \tab a html \cr
+\code{results$notices} \tab \tab \tab \tab \tab a preformatted \cr
 \code{results$chisqTable} \tab \tab \tab \tab \tab a table \cr
 \code{results$assumptionsCheck} \tab \tab \tab \tab \tab a html \cr
 \code{results$clinicalSummary} \tab \tab \tab \tab \tab a html \cr
@@ -122,4 +138,14 @@ pairwise testing. If you want unadjusted pairwise comparisons, this feature
 is not available (by design, as it would encourage inappropriate multiple
 testing). No automated validation against established packages exists. Use
 with caution for clinical decision-making.
+}
+\examples{
+\donttest{
+# Tumour grade level by lymphovascular invasion,
+# using the histopathology data bundled with the module
+chisqposttest(
+    data = histopathology,
+    rows = "Grade_Level",
+    cols = "LVI")
+}
 }

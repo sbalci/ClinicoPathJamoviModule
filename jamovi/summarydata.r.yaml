@@ -5,43 +5,76 @@ jrs:   '1.1'
 
 items:
 
+    - name: notices
+      title: Important Information
+      type: Preformatted
+      clearWith:
+          - vars
+
     - name:  todo
       title: To Do
       type:  Html
+      clearWith:
+          - vars
 
     - name:  text
       title: ''
       type:  Html
+      visible: (vars)
+      clearWith:
+          - vars
+          - distr
+          - decimal_places
 
     - name:  text1
       title: 'Continuous Data Plots'
       type:  Html
       visible: (vars)
+      clearWith:
+          - vars
+          - decimal_places
 
     - name:  clinicalInterpretation
       title: 'Clinical Interpretation'
       type:  Html
       visible: (vars)
-      
+      clearWith:
+          - vars
+
     - name:  aboutAnalysis
       title: 'About This Analysis'
       type:  Html
       visible: true
-      
+      clearWith:
+          - vars
+
     - name:  outlierReport
       title: 'Outlier Detection Results'
       type:  Html
       visible: (outliers)
-      
+      clearWith:
+          - vars
+          - outliers
+          - decimal_places
+
     - name:  reportSentences
       title: 'Copy-Ready Clinical Summary'
       type:  Html
       visible: (report_sentences)
-      
+      clearWith:
+          - vars
+          - report_sentences
+          - distr
+          - decimal_places
+
     - name:  glossary
       title: 'Statistical Glossary'
       type:  Html
       visible: true
+      clearWith:
+          - vars
+          - distr
+          - outliers
 
     # - name: rCode
     #   title: Reproducible R Code

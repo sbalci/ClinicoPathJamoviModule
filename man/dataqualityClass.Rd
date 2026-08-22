@@ -2,12 +2,12 @@
 % Please edit documentation in R/dataquality.b.R
 \name{dataqualityClass}
 \alias{dataqualityClass}
-\title{Data Quality Assessment}
+\title{Multi-Variable Visual Quality}
 \value{
 HTML summary of data quality issues including duplicates and missing values
 }
 \description{
-Data Quality Assessment
+Multi-Variable Visual Quality
 }
 \section{Super classes}{
 \code{\link[jmvcore:Analysis]{jmvcore::Analysis}} -> \code{dataqualityBase} -> \code{dataqualityClass}

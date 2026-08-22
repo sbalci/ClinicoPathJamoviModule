@@ -11,6 +11,16 @@ items:
           - rows
           - cols
 
+    - name:  notices
+      title: Important Information
+      type:  Preformatted
+      clearWith:
+          - rows
+          - cols
+          - counts
+          - excl
+          - sig
+
     - name:  chisqTable
       title: Chi-Square Test Results
       type:  Table
@@ -42,8 +52,11 @@ items:
       clearWith:
           - rows
           - cols
+          - counts
+          - excl
+          - sig
           - showAssumptionsCheck
-          
+
     - name:  clinicalSummary
       title: 'Clinical Summary'
       type:  Html
@@ -51,6 +64,11 @@ items:
       clearWith:
           - rows
           - cols
+          - counts
+          - excl
+          - sig
+          - posthoc
+          - testSelection
           - showClinicalSummary
           
     - name:  educationalOverview
@@ -92,10 +110,11 @@ items:
           - excl
           - sig
           - showResiduals
+          - residualsCriterion
           - residualsCutoff
 
     - name:  residualsAnalysis
-      title: 'Standardized Residuals Analysis'
+      title: 'Adjusted Standardized Residuals'
       type:  Html
       visible: (showResiduals)
       clearWith:
@@ -105,6 +124,7 @@ items:
           - excl
           - sig
           - showResiduals
+          - residualsCriterion
           - residualsCutoff
 
     - name:  multipleTestingInfo
@@ -113,11 +133,17 @@ items:
       clearWith:
           - rows
           - cols
+          - counts
+          - excl
           - posthoc
+          - sig
+          - testSelection
+          - showEducational
 
     - name:  posthocTable
       title: 'Pairwise Comparison Results'
       type:  Table
+      visible: (posthoc:bonferroni || posthoc:holm || posthoc:fdr)
       columns:
         - name: comparison
           title: "Comparison"
@@ -140,7 +166,7 @@ items:
           title: "Effect Size (Phi/V)"
           type: number
         - name: phi_ci
-          title: "95% CI (Phi)"
+          title: "Bootstrap 95% CI (Cramer's V)"
           type: text
         - name: sig
           title: "Significant"
@@ -195,6 +221,7 @@ items:
           - sig
           - testSelection
           - showResiduals
+          - residualsCriterion
           - residualsCutoff
           - exportResults
 
@@ -205,6 +232,9 @@ items:
       clearWith:
           - rows
           - cols
+          - counts
+          - excl
+          - sig
           - copyReadySentences
           
     - name:  glossaryPanel
@@ -215,7 +245,7 @@ items:
           - showGlossary
 
     - name:  plot
-      title: 'Standardized Residuals'
+      title: 'Adjusted Standardized Residuals'
       type:  Image
       width: 600
       height: 400
@@ -227,10 +257,17 @@ items:
           - cols
           - counts
           - excl
+          - sig
+          - residualsCriterion
+          - residualsCutoff
 
 refs:
-    - chisq.posthoc.test
-    - vcd
+    - Cohen1988
     - ClinicoPathJamoviModule
+    - chisq.posthoc.test
+    - agresti2013
+    - sharpe2015
+    - holm1979
+    - benjaminihochberg1995
 
 ...

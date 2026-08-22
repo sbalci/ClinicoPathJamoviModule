@@ -69,6 +69,7 @@ summarydataResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
     "summarydataResults",
     inherit = jmvcore::Group,
     active = list(
+        notices = function() private$.items[["notices"]],
         todo = function() private$.items[["todo"]],
         text = function() private$.items[["text"]],
         text1 = function() private$.items[["text1"]],
@@ -87,44 +88,77 @@ summarydataResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
                 refs=list(
                     "gtExtras",
                     "ClinicoPathJamoviModule"))
+            self$add(jmvcore::Preformatted$new(
+                options=options,
+                name="notices",
+                title="Important Information",
+                clearWith=list(
+                    "vars")))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="todo",
-                title="To Do"))
+                title="To Do",
+                clearWith=list(
+                    "vars")))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="text",
-                title=""))
+                title="",
+                visible="(vars)",
+                clearWith=list(
+                    "vars",
+                    "distr",
+                    "decimal_places")))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="text1",
                 title="Continuous Data Plots",
-                visible="(vars)"))
+                visible="(vars)",
+                clearWith=list(
+                    "vars",
+                    "decimal_places")))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="clinicalInterpretation",
                 title="Clinical Interpretation",
-                visible="(vars)"))
+                visible="(vars)",
+                clearWith=list(
+                    "vars")))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="aboutAnalysis",
                 title="About This Analysis",
-                visible=TRUE))
+                visible=TRUE,
+                clearWith=list(
+                    "vars")))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="outlierReport",
                 title="Outlier Detection Results",
-                visible="(outliers)"))
+                visible="(outliers)",
+                clearWith=list(
+                    "vars",
+                    "outliers",
+                    "decimal_places")))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="reportSentences",
                 title="Copy-Ready Clinical Summary",
-                visible="(report_sentences)"))
+                visible="(report_sentences)",
+                clearWith=list(
+                    "vars",
+                    "report_sentences",
+                    "distr",
+                    "decimal_places")))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="glossary",
                 title="Statistical Glossary",
-                visible=TRUE))}))
+                visible=TRUE,
+                clearWith=list(
+                    "vars",
+                    "distr",
+                    "outliers")))}))
 
 summarydataBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
     "summarydataBase",
@@ -154,19 +188,34 @@ summarydataBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' Optionally, you can enable distribution diagnostics to examine normality, 
 #' skewness, and kurtosis.
 #' 
+#'
+#' @examples
+#' \donttest{
+#' data(histopathology)
+#'
+#' # Descriptive statistics for two continuous variables
+#' summarydata(data = histopathology, vars = c("Age", "OverallTime"))
+#'
+#' # Add Shapiro-Wilk, skewness and kurtosis diagnostics
+#' summarydata(data = histopathology, vars = "Age", distr = TRUE)
+#'}
 #' @param data The data as a data frame.
 #' @param vars a string naming the variables from \code{data} that contains
 #'   the continuous values used for the report
 #' @param distr If TRUE, additional distribution diagnostics (Shapiro-Wilk
 #'   test, skewness, and kurtosis) will be computed and explained.
 #' @param decimal_places Number of decimal places to display for statistical
-#'   measures. Default of 2 aligns with standard laboratory reporting.
+#'   measures. Default of 2 aligns with standard laboratory reporting. Governs
+#'   the text summary, the skewness and kurtosis values, the visual summary
+#'   table, the outlier report and the copy-ready clinical summary. P-values are
+#'   always shown to 3 decimal places.
 #' @param outliers If TRUE, detect and report potential outliers using IQR
 #'   method. Helpful for quality control and identifying data entry errors.
 #' @param report_sentences If TRUE, generate copy-ready clinical report
 #'   sentences for direct use in medical documentation.
 #' @return A results object containing:
 #' \tabular{llllll}{
+#'   \code{results$notices} \tab \tab \tab \tab \tab a preformatted \cr
 #'   \code{results$todo} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$text} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$text1} \tab \tab \tab \tab \tab a html \cr

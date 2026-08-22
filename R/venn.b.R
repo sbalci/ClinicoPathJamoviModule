@@ -9,113 +9,68 @@
 #'
 #' @importFrom R6 R6Class
 #' @import jmvcore
-#' @importFrom ComplexUpset intersection_size
+#' @importFrom ComplexUpset intersection_size get_size_mode
 #' @importFrom dplyr inner_join
 #' @importFrom ggvenn ggvenn
-#' @importFrom ggVennDiagram Venn discern ggVennDiagram overlap
-#' @importFrom grid grid.text
+#' @importFrom ggVennDiagram ggVennDiagram get_shapes
+#' @importFrom grid grid.text upViewport
 #' @importFrom ggplot2 ggtitle theme element_text
 #' @importFrom magrittr %>%
-#' @importFrom rlang sym
+#' @importFrom utils combn
 #' @importFrom UpSetR upset
 #'
 #' @return The function produces a Venn diagram and an Upset diagram.
 #'
 #' @examples
 #' \dontrun{
-#' # Example 1: Basic 2-variable Venn diagram
-#' data("mtcars")
-#' mtcars$vs <- factor(mtcars$vs, levels = c(0, 1), labels = c("V-shaped", "Straight"))
-#' mtcars$am <- factor(mtcars$am, levels = c(0, 1), labels = c("Automatic", "Manual"))
+#' # The bundled `histopathology` dataset ships with this package.
+#' data(histopathology)
 #'
-#' # Create Venn diagram showing overlap between V-shaped engines and Manual transmission
-#' # var3true..var7true are Level options with no default, so the wrapper requires
-#' # them even when their variable is unused; pass NULL for the ones not in play.
-#' venn(data = mtcars, var1 = "vs", var1true = "V-shaped",
-#'      var2 = "am", var2true = "Manual",
-#'      var3 = NULL, var3true = NULL, var4 = NULL, var4true = NULL)
+#' # NOTE on var1true..var7true: these are jamovi `Level` options. The compiler
+#' # forbids a `default:` on a Level, so the generated wrapper declares every
+#' # one of them WITHOUT a default and they are all required arguments. Pass
+#' # NULL for the levels whose variable is not in play.
 #'
-#' # Example 2: 3-variable Venn diagram with penguins data
-#' library(palmerpenguins)
-#' data("penguins")
-#' penguins$large_bill <- factor(ifelse(penguins$bill_length_mm > 45, "Large", "Small"))
-#' penguins$heavy_weight <- factor(ifelse(penguins$body_mass_g > 4000, "Heavy", "Light"))
-#' penguins$adelie_species <- factor(ifelse(penguins$species == "Adelie", "Adelie", "Other"))
+#' # Example 1: two markers, classic ggvenn diagram
+#' venn(data = histopathology,
+#'      var1 = "LVI", var1true = "Present",
+#'      var2 = "PNI", var2true = "Present",
+#'      var3 = NULL, var3true = NULL, var4 = NULL, var4true = NULL,
+#'      var5 = NULL, var5true = NULL, var6 = NULL, var6true = NULL,
+#'      var7 = NULL, var7true = NULL)
 #'
-#' venn(data = penguins,
-#'      var1 = "large_bill", var1true = "Large",
-#'      var2 = "heavy_weight", var2true = "Heavy",
-#'      var3 = "adelie_species", var3true = "Adelie")
-#'
-#' # Example 3: Variable names with spaces and numbers (requires careful handling)
-#' # jamovi GUI automatically handles most problematic names
-#' # When calling directly in R, variable names with spaces/numbers need backticks:
-#' # venn(data = mydata, var1 = "`Rater 1`", var1true = "Positive",
-#' #      var2 = "`Score 2A`", var2true = "High")
-#'
-#' # Note: Names like "Rater 1", "Score 2A", "Item 3B" may cause parsing issues
-#' # at the jamovi interface level. Solutions:
-#' # 1. Use jamovi GUI for variable selection (recommended)
-#' # 2. Rename variables to avoid spaces + numbers: "Rater1", "Score2A", "Item3B"
-#' # 3. In R console, use backticks: `Rater 1` or quote properly
-#'
-#' # Example 4: Clinical biomarker analysis
-#' data("biomarkers")  # Hypothetical clinical dataset
-#' venn(data = biomarkers,
-#'      var1 = "ER_positive", var1true = "Positive",
-#'      var2 = "PR_positive", var2true = "Positive",
-#'      var3 = "HER2_amplified", var3true = "Amplified",
+#' # Example 2: three markers with the advanced ggVennDiagram engine
+#' venn(data = histopathology,
+#'      var1 = "LVI", var1true = "Present",
+#'      var2 = "PNI", var2true = "Present",
+#'      var3 = "LymphNodeMetastasis", var3true = "Present",
+#'      var4 = NULL, var4true = NULL, var5 = NULL, var5true = NULL,
+#'      var6 = NULL, var6true = NULL, var7 = NULL, var7true = NULL,
 #'      show_ggVennDiagram = TRUE,
 #'      regionLabels = "both",
 #'      clinicalSummary = TRUE)
 #'
-#' # Example 5: Medical/Clinical comorbidity analysis
-#' # Create sample clinical data
-#' clinical_data <- data.frame(
-#'   patient_id = 1:100,
-#'   diabetes = sample(c("Yes", "No"), 100, replace = TRUE, prob = c(0.3, 0.7)),
-#'   hypertension = sample(c("Yes", "No"), 100, replace = TRUE, prob = c(0.4, 0.6)),
-#'   obesity = sample(c("Yes", "No"), 100, replace = TRUE, prob = c(0.25, 0.75))
-#' )
-#' 
-#' # Analyze comorbidity patterns
-#' venn(data = clinical_data,
-#'      var1 = "diabetes", var1true = "Yes",
-#'      var2 = "hypertension", var2true = "Yes",
-#'      var3 = "obesity", var3true = "Yes")
-#' 
-#' # Example 4: Using ComplexUpset for advanced features
-#' venn(data = clinical_data,
-#'      var1 = "diabetes", var1true = "Yes",
-#'      var2 = "hypertension", var2true = "Yes",
-#'      var3 = "obesity", var3true = "Yes",
+#' # Example 3: UpSet-style intersection plot with percentage labels
+#' venn(data = histopathology,
+#'      var1 = "LVI", var1true = "Present",
+#'      var2 = "PNI", var2true = "Present",
+#'      var3 = "PreinvasiveComponent", var3true = "Present",
+#'      var4 = NULL, var4true = NULL, var5 = NULL, var5true = NULL,
+#'      var6 = NULL, var6true = NULL, var7 = NULL, var7true = NULL,
 #'      show_complexUpset = TRUE,
 #'      sortBy = "freq",
 #'      minSize = 5,
 #'      showAnnotations = TRUE)
 #'
-#' # Example 5: Advanced customization using ggVennDiagram
-#' venn(data = clinical_data,
-#'      var1 = "diabetes", var1true = "Yes",
-#'      var2 = "hypertension", var2true = "Yes",
-#'      var3 = "obesity", var3true = "Yes",
-#'      show_ggVennDiagram = TRUE,
-#'      regionLabels = "both",
-#'      colorPalette = "Set1",
-#'      labelSize = 3.5,
-#'      setNameSize = 4.5)
-#'
-#' # Example 6: 5-variable Venn diagram using ggVennDiagram
-#' # Add more clinical variables
-#' clinical_data$smoking <- sample(c("Yes", "No"), 100, replace = TRUE, prob = c(0.2, 0.8))
-#' clinical_data$family_history <- sample(c("Yes", "No"), 100, replace = TRUE, prob = c(0.35, 0.65))
-#'
-#' venn(data = clinical_data,
-#'      var1 = "diabetes", var1true = "Yes",
-#'      var2 = "hypertension", var2true = "Yes",
-#'      var3 = "obesity", var3true = "Yes",
-#'      var4 = "smoking", var4true = "Yes",
-#'      var5 = "family_history", var5true = "Yes",
+#' # Example 4: five sets - ggVennDiagram handles 5+ sets, ggvenn does not
+#' venn(data = histopathology,
+#'      var1 = "LVI", var1true = "Present",
+#'      var2 = "PNI", var2true = "Present",
+#'      var3 = "PreinvasiveComponent", var3true = "Present",
+#'      var4 = "LymphNodeMetastasis", var4true = "Present",
+#'      var5 = "Mortality5yr", var5true = "Dead",
+#'      var6 = NULL, var6true = NULL, var7 = NULL, var7true = NULL,
+#'      show_ggvenn = FALSE,
 #'      show_ggVennDiagram = TRUE,
 #'      regionLabels = "percent",
 #'      colorPalette = "viridis")
@@ -126,38 +81,6 @@ NULL
 
 #' @noRd
 NULL
-
-# Helper function to validate and clean variable names for jamovi interface
-.validateVennVariableNames <- function(var_names) {
-    if (is.null(var_names) || length(var_names) == 0) {
-        return(list(valid = TRUE, message = ""))
-    }
-
-    problematic <- c()
-
-    # Check for names that might cause parsing issues
-    for (name in var_names) {
-        if (grepl("^[0-9]", name)) {
-            problematic <- c(problematic, paste0("'", name, "' starts with a number"))
-        }
-        if (grepl("\\s+[0-9]", name)) {
-            problematic <- c(problematic, paste0("'", name, "' contains space followed by number"))
-        }
-        if (grepl("[^a-zA-Z0-9._\\s]", name)) {
-            problematic <- c(problematic, paste0("'", name, "' contains special characters"))
-        }
-    }
-
-    if (length(problematic) > 0) {
-        message <- paste0(
-            " Variable name format note: ", paste(problematic, collapse = "; "),
-            ". If you encounter parsing errors, consider renaming these variables or using the jamovi GUI for variable selection."
-        )
-        return(list(valid = FALSE, message = message))
-    }
-
-    return(list(valid = TRUE, message = ""))
-}
 
 #' Venn Diagram Class
 #' @name vennClass
@@ -178,6 +101,15 @@ vennClass <- if (requireNamespace('jmvcore'))
             # self$results$insert(999, Notice) AND any HTML in notices (project convention:
             # notice content must be plain text). ====
             .noticeList = list(),
+
+            # TRUE when `x` is something grDevices can turn into a colour (a name from
+            # colours(), "#RRGGBB", or "#RRGGBBAA"). Used to keep a typed colour option
+            # from killing the whole ggplot at grob-conversion time.
+            .isColour = function(x) {
+                if (is.null(x) || length(x) != 1 || is.na(x) || !nzchar(x))
+                    return(FALSE)
+                !inherits(try(grDevices::col2rgb(x), silent = TRUE), "try-error")
+            },
 
             .addNotice = function(type, title, content) {
                 duplicate <- vapply(private$.noticeList, function(notice) {
@@ -271,6 +203,22 @@ vennClass <- if (requireNamespace('jmvcore'))
                 for (i in seq_along(selected_vars))
                     self$results$summary$addRow(rowKey = i, values = list(
                         variable = selected_vars[[i]]))
+
+                # membershipTable's COLUMN set is equally option-determined - Row, Group,
+                # and one column per selected variable - so it is laid out here instead of
+                # being assembled with addColumn() inside .run(), which made the table
+                # visibly restructure on every run. .run() still adds anything missing, so
+                # the two cannot get out of step.
+                if (length(selected_vars) >= 2) {
+                    membership_titles <- c("Row", "Group",
+                        vapply(selected_vars, as.character, character(1)))
+                    membership_names <- make.names(membership_titles, unique = TRUE)
+                    for (i in seq_along(membership_names))
+                        self$results$membershipTable$addColumn(
+                            name = membership_names[i],
+                            title = membership_titles[i],
+                            type = if (i == 1L) "integer" else "text")
+                }
             },
 
             .run = function() {
@@ -282,6 +230,16 @@ vennClass <- if (requireNamespace('jmvcore'))
                 private$.info <- character(0)
                 private$.noticeList <- list()
                 private$.renderNotices()
+
+                # .displayNotices() only ever WRITES to these three Html items, so a
+                # resolved condition would otherwise stay on screen: exclude every case
+                # with a row filter (red "Dataset is empty" panel), then remove the
+                # filter, and the completed analysis would still be topped by the stale
+                # error. Blank and hide them here; this run repaints whatever still applies.
+                for (nm in c("validationErrors", "validationWarnings", "analysisInfo")) {
+                    self$results[[nm]]$setContent("")
+                    self$results[[nm]]$setVisible(FALSE)
+                }
 
                 # Validate required variables and their true levels
                 if (!private$.validateVariables()) {
@@ -317,12 +275,12 @@ vennClass <- if (requireNamespace('jmvcore'))
                     welcome_content <- paste0(
                         "<div style='font-family: Arial, sans-serif; max-width: 800px; line-height: 1.4;'>",
                         "<div style='background-color: rgba(88, 88, 88, 0.06); border: 2px solid #333; padding: 20px; margin-bottom: 20px; color: inherit;'>",
-                        "<h2 style='margin: 0 0 10px 0; font-size: 20px; color: #333;'>Venn Diagram Analysis</h2>",
-                        "<p style='margin: 0; font-size: 14px; color: #666;'>Visualize overlaps and intersections between categorical variables</p>",
+                        "<h2 style='margin: 0 0 10px 0; font-size: 20px; color: inherit;'>Venn Diagram Analysis</h2>",
+                        "<p style='margin: 0; font-size: 14px; color: inherit;'>Visualize overlaps and intersections between categorical variables</p>",
                         "</div>",
 
                         "<div style='background-color: rgba(155, 155, 155, 0.06); border-left: 4px solid #333; padding: 15px; margin-bottom: 20px; color: inherit;'>",
-                        "<h3 style='margin: 0 0 10px 0; color: #333; font-size: 16px;'>Setup Progress</h3>"
+                        "<h3 style='margin: 0 0 10px 0; color: inherit; font-size: 16px;'>Setup Progress</h3>"
                     )
 
                     # Progress indicators - simple and accessible
@@ -440,33 +398,42 @@ vennClass <- if (requireNamespace('jmvcore'))
                     var7 <- self$options$var7
                     var7true <- self$options$var7true
 
-                    # Validate variable names for potential parsing issues
+                    # Column names containing spaces, leading digits or punctuation
+                    # are handled below by make.names(selected_vars, unique = TRUE),
+                    # so no name-format warning is raised here.
                     all_vars <- c(var1, var2, var3, var4, var5, var6, var7)
                     selected_vars <- all_vars[!sapply(all_vars, is.null)]
-                    validation_result <- .validateVennVariableNames(selected_vars)
-
-                    if (!validation_result$valid) {
-                        # Display warning but continue with analysis
-                        private$.warnings <- c(private$.warnings, validation_result$message)
-                    }
 
                     # CRITICAL FIX: Select ONLY the variables needed for analysis
                     # This prevents dropping cases with NAs in unrelated columns
                     selected_data <- original_data[, selected_vars, drop = FALSE]
 
-                    # CRITICAL FIX: Calculate missingness BEFORE exclusion for transparency
-                    original_complete <- sum(complete.cases(selected_data))
-
-                    # Apply naOmit ONLY to selected variables, not entire dataset
+                    # Apply naOmit ONLY to selected variables, not entire dataset.
+                    # nrow(full_data) IS the number of complete cases on the selected
+                    # variables, so a separate complete.cases() count added nothing and
+                    # was never read.
                     full_data <- jmvcore::naOmit(selected_data)
                     excluded_n <- original_n - nrow(full_data)
+
+                    # Complementary missingness (var1 present where var2 is NA and vice
+                    # versa) leaves NO complete case. Everything downstream then divides
+                    # by zero: the summary table shows NaN in a percent-formatted column,
+                    # .powerAdvisories returns early so no caution is raised, and the
+                    # Analysis Information panel reports a successful run over N=0.
+                    if (nrow(full_data) == 0) {
+                        private$.errors <- c(private$.errors, sprintf(
+                            'No case has a non-missing value for every selected variable, so there is nothing to count or draw. Original N=%d, complete cases=0. Select fewer variables, or inspect the missing-data pattern of the selected variables.',
+                            original_n))
+                        private$.displayNotices()
+                        return()
+                    }
 
                     # CRITICAL WARNING: Report case loss if any exclusions occurred
                     if (excluded_n > 0) {
                         excluded_pct <- round(100 * excluded_n / original_n, 1)
                         private$.warnings <- c(private$.warnings, sprintf(
-                            '<strong>CASE EXCLUSION:</strong> %d cases (%.1f%%) excluded due to missing values. Original N=%d, Final N=%d. Venn diagram counts and percentages reflect complete cases only. Consider implications for generalizability.',
-                            excluded_n, excluded_pct, original_n, nrow(full_data)
+                            'Case exclusion: %d cases (%.1f%%) were dropped because at least one selected variable was missing. Original N=%d, analysed N=%d. Every count and percentage below, and every region of the diagrams, describes only those %d complete cases; consider whether the excluded cases differ systematically before generalising.',
+                            excluded_n, excluded_pct, original_n, nrow(full_data), nrow(full_data)
                         ))
                     }
 
@@ -588,13 +555,37 @@ vennClass <- if (requireNamespace('jmvcore'))
                                          "names" = names(mydata))
 
                     # Set state for each plot type
+                    # Assign visibility from the option on BOTH branches. A one-way
+                    # setVisible(TRUE) latched: once the fallback fired, ticking
+                    # "UpSetR plot" left the ggvenn image on screen with its own
+                    # checkbox cleared, until an unrelated clearWith option changed.
+                    self$results$plotGgvenn$setVisible(self$options$show_ggvenn || default_to_ggvenn)
                     if (self$options$show_ggvenn || default_to_ggvenn) {
-                        if (default_to_ggvenn)
-                            self$results$plotGgvenn$setVisible(TRUE)
                         self$results$plotGgvenn$setState(plotDataVenn)
                     }
                     if (self$options$show_ggVennDiagram) {
                         self$results$plotGgVennDiagram$setState(plotDataVenn)
+                        n_sets_selected <- length(selected_vars)
+                        if (self$options$shapeType != "auto" &&
+                            is.null(private$.vennShapeId(self$options$shapeType, n_sets_selected))) {
+                            private$.addNotice(
+                                "INFO",
+                                .("Requested Venn Shape Is Not Available"),
+                                sprintf(.("No %s shape is defined for %d sets, so the ggVennDiagram plot below is drawn with the automatic shape instead. Available shapes are: circle for 2-3 sets, ellipse for 4 sets, polygon for 4-7 sets, and triangle for 6 sets. Change the number of variables or set the shape back to Automatic."),
+                                        self$options$shapeType, n_sets_selected))
+                        }
+                        # Edge color and Set label color are free-text boxes. A typo
+                        # would otherwise reach ggplot2 as "Unknown colour name" and
+                        # destroy the whole figure; the helper falls back to black.
+                        for (nm in c("edgeColor", "setLabelColor")) {
+                            if (!private$.isColour(self$options[[nm]])) {
+                                private$.addNotice(
+                                    "WARNING",
+                                    .("Colour Not Recognised"),
+                                    sprintf(.("'%s' is not a colour R recognises, so the ggVennDiagram plot below is drawn with black instead. Use a colour name from the standard R palette (for example red, steelblue, grey40) or a hex code such as #2C7FB8."),
+                                            as.character(self$options[[nm]])))
+                            }
+                        }
                     }
 
                     # Prepare data for Upset diagrams by converting logical values to integers.
@@ -607,36 +598,61 @@ vennClass <- if (requireNamespace('jmvcore'))
 
                     if (self$options$show_upsetR) {
                         self$results$plotUpsetR$setState(plotDataUpset)
+                        if (self$options$minSize > 0) {
+                            private$.addNotice(
+                                "INFO",
+                                .("Minimum Intersection Size Does Not Reach the UpSetR Plot"),
+                                sprintf(.("Minimum intersection size is set to %d, but that filter is applied by the ComplexUpset engine only. The UpSetR plot below still draws every intersection it finds, including ones with fewer than %d cases. Switch on the ComplexUpset plot to see the filtered version, or read the UpSetR bars as unfiltered."),
+                                        self$options$minSize, self$options$minSize))
+                        }
                     }
                     if (self$options$show_complexUpset) {
                         self$results$plotComplexUpset$setState(plotDataUpset)
+                        # Minimum intersection size larger than any intersection in the
+                        # data makes ComplexUpset abort. .plotComplexUpsetHelper clamps
+                        # so a plot is still drawn; say so, or the filter looks ignored.
+                        max_intersection <- if (nrow(mydata2) > 0)
+                            max(table(apply(mydata2, 1, paste, collapse = "|"))) else 0L
+                        if (self$options$minSize > max_intersection) {
+                            private$.addNotice(
+                                "INFO",
+                                .("Minimum Intersection Size Is Larger Than Any Intersection"),
+                                sprintf(.("Minimum intersection size is set to %d, but the largest group of cases sharing one membership pattern contains %d cases. Filtering at %d would leave nothing to draw, so the ComplexUpset plot below is drawn with the filter reduced to %d (no intersection removed). Lower the minimum intersection size to filter."),
+                                        self$options$minSize, max_intersection,
+                                        self$options$minSize, max_intersection))
+                        }
                     }
 
                     # Create summary statistics for each variable using helper function
                     summaryData <- data.frame(
                         Variable = character(),
+                        Level = character(),
                         TrueCount = integer(),
                         FalseCount = integer(),
                         TotalCount = integer(),
                         TruePercentage = numeric(),
                         stringsAsFactors = FALSE
                     )
-                    
+
                     # Process each variable that was selected using helper function
                     variables <- list(var1, var2, var3, var4, var5, var6, var7)
-                    for (var in variables) {
+                    true_levels <- list(var1true, var2true, var3true, var4true,
+                                        var5true, var6true, var7true)
+                    for (vi in seq_along(variables)) {
+                        var <- variables[[vi]]
                         if (!is.null(var)) {
                             # Find the safe column name that corresponds to this variable
                             safe_name <- safe_lookup[[var]]
                             if (safe_name %in% names(mydata)) {
-                                varStats <- private$.calculateSummaryStats(mydata, safe_name, var)
+                                varStats <- private$.calculateSummaryStats(
+                                    mydata, safe_name, var, true_levels[[vi]])
                                 if (!is.null(varStats)) {
                                     summaryData <- rbind(summaryData, varStats)
                                 }
                             }
                         }
                     }
-                    
+
                     # Set the summary results
                     if (!is.null(self$results$summary)) {
                         for (i in seq_len(nrow(summaryData))) {
@@ -648,8 +664,24 @@ vennClass <- if (requireNamespace('jmvcore'))
                                 truePercentage = summaryData$TruePercentage[i]
                             ))
                         }
+                        # "True" is whatever level the user nominated per variable, and
+                        # nothing else in the output records which level that was. The
+                        # word "positive" appears throughout the prose panels, so the
+                        # mapping has to be visible somewhere.
+                        if (nrow(summaryData) > 0 && !all(is.na(summaryData$Level)))
+                            self$results$summary$setNote("levels", paste0(
+                                "\"True\" means the variable equals the level selected for it: ",
+                                paste(sprintf("%s = %s", summaryData$Variable,
+                                              ifelse(is.na(summaryData$Level), "(not set)", summaryData$Level)),
+                                      collapse = "; "),
+                                ". Every count, percentage and sentence below calls that level positive."))
                     }
-                    
+
+                    # Small-sample / low-prevalence advisories go to the always-visible
+                    # notices panel, independently of the optional Clinical Summary.
+                    for (adv in private$.powerAdvisories(summaryData, nrow(mydata)))
+                        private$.addNotice("STRONG_WARNING", adv$title, adv$content)
+
                     # Generate clinical interpretations if requested
                     if (self$options$explanatory || self$options$clinicalSummary) {
                         private$.generateClinicalSummary(mydata, list(var1, var2, var3, var4, var5, var6, var7), summaryData)
@@ -808,6 +840,16 @@ vennClass <- if (requireNamespace('jmvcore'))
 
                 # Print the UpSetR plot
                 print(plot)
+
+                # The title has to be drawn AFTER print(). UpSetR::upset() does not
+                # draw - it returns an object - and print.upset() reaches
+                # Make_base_plot(newpage = TRUE) -> grid.newpage(), which wiped any
+                # title drawn beforehand. Return to the root viewport first so the
+                # coordinates are page-relative and not relative to UpSetR's last
+                # pushed viewport.
+                grid::upViewport(0)
+                grid::grid.text(.("UpSetR Diagram of Selected Variables"), x = 0.5, y = 0.97,
+                                gp = grid::gpar(fontsize = 14, fontface = "bold"))
                 TRUE
             },
 
@@ -915,7 +957,8 @@ vennClass <- if (requireNamespace('jmvcore'))
             },
             
             # Helper function for calculating summary statistics
-            .calculateSummaryStats = function(data, safe_varname, original_varname = NULL) {
+            .calculateSummaryStats = function(data, safe_varname, original_varname = NULL,
+                                              true_level = NULL) {
                 if (is.null(safe_varname)) return(NULL)
 
                 # Use original name for display, safe name for data access
@@ -951,10 +994,17 @@ vennClass <- if (requireNamespace('jmvcore'))
 
                 data.frame(
                     Variable = display_name,
+                    # The level the user nominated as "true" for this variable. Every
+                    # sentence and label in the output calls that level "positive", so
+                    # the level itself has to travel with the counts - it may be
+                    # "Dead", "Absent" or "Grade 1" just as easily as "Positive".
+                    Level = if (is.null(true_level)) NA_character_ else as.character(true_level),
                     TrueCount = true_count,
                     FalseCount = false_count,
                     TotalCount = total_count,
-                    TruePercentage = round(true_count / total_count, 4),
+                    # total_count is 0 only if the column is entirely NA; 0/0 would put
+                    # a NaN into a percent-formatted table column.
+                    TruePercentage = if (total_count > 0) round(true_count / total_count, 4) else NA_real_,
                     stringsAsFactors = FALSE
                 )
             },
@@ -963,7 +1013,7 @@ vennClass <- if (requireNamespace('jmvcore'))
             .generateAboutAnalysis = function() {
                 about_content <- paste0(
                     "<div style='background-color: rgba(138, 155, 172, 0.06); padding: 15px; border-radius: 5px; margin-bottom: 15px; color: inherit;'>",
-                    "<h4 style='color: #2c3e50; margin-top: 0;'>", .("About Venn Diagrams"), "</h4>",
+                    "<h4 style='color: inherit; margin-top: 0;'>", .("About Venn Diagrams"), "</h4>",
                     "<p><strong>", .("Purpose:"), "</strong> ", .("Venn diagrams visualize overlaps and intersections between categorical variables, commonly used in clinical research to analyze:"), "</p>",
                     "<ul style='margin-left: 20px;'>",
                     "<li>", .("Biomarker co-expression patterns"), "</li>",
@@ -978,7 +1028,7 @@ vennClass <- if (requireNamespace('jmvcore'))
                     "<li>", .("Choose the 'true' level for each variable (e.g., 'Positive', 'Present', 'Yes')"), "</li>",
                     "<li>", .("Select one or more plot engines in the Plot Selection panel"), "</li>",
                     "<li>", .("Adjust visualization options as needed"), "</li>",
-                    "<li>", .("Interpret intersections - larger overlaps mean more shared cases; overlap size also depends on how common each variable is"), "</li>",
+                    "<li>", .("Interpret intersections by reading the number printed in each region - the Venn shapes are fixed geometry, so the drawn area of a region does not encode how many cases it holds"), "</li>",
                     "</ol>",
                     "<p><strong>", .("Choosing a Plot Engine:"), "</strong></p>",
                     "<ul style='margin-left: 20px;'>",
@@ -1020,7 +1070,14 @@ vennClass <- if (requireNamespace('jmvcore'))
                     intersection_analysis <- paste0(
                         "<p><strong>", .("Key Intersection:"), "</strong> ",
                         sprintf(.("%s cases (%s%%) had both %s and %s positive."), 
-                                both_true, both_pct, htmltools::htmlEscape(var_names[1]), htmltools::htmlEscape(var_names[2])), "</p>"
+                                both_true, both_pct, htmltools::htmlEscape(var_names[1]), htmltools::htmlEscape(var_names[2])),
+                        # Only the first two selected variables enter this sentence.
+                        if (length(var_names) > 2)
+                            paste0(" ", sprintf(.("This figure covers those two sets only; the other %d selected variable(s) (%s) do not enter it - read the diagram for higher-order intersections."),
+                                                length(var_names) - 2,
+                                                htmltools::htmlEscape(paste(var_names[-(1:2)], collapse = ", "))))
+                        else "",
+                        "</p>"
                     )
                 }
                 
@@ -1051,13 +1108,26 @@ vennClass <- if (requireNamespace('jmvcore'))
                 var_names <- summaryData$Variable
                 total_n <- nrow(data)
 
-                # Create individual variable sentences
+                # Create individual variable sentences. The level the user nominated as
+                # "true" is named explicitly: it can be "Dead", "Absent" or "Grade 1"
+                # just as easily as "Positive", and this prose is offered for pasting
+                # into a manuscript.
+                has_level <- "Level" %in% names(summaryData)
                 individual_sentences <- sapply(seq_len(nrow(summaryData)), function(i) {
-                    sprintf("%s was positive in %s of %s cases (%s%%).",
-                            htmltools::htmlEscape(summaryData$Variable[i]),
-                            summaryData$TrueCount[i],
-                            total_n,
-                            round(summaryData$TruePercentage[i] * 100, 1))
+                    lvl <- if (has_level) summaryData$Level[i] else NA_character_
+                    if (!is.na(lvl))
+                        sprintf("%s was %s in %s of %s cases (%s%%).",
+                                htmltools::htmlEscape(summaryData$Variable[i]),
+                                htmltools::htmlEscape(lvl),
+                                summaryData$TrueCount[i],
+                                total_n,
+                                round(summaryData$TruePercentage[i] * 100, 1))
+                    else
+                        sprintf("%s was positive in %s of %s cases (%s%%).",
+                                htmltools::htmlEscape(summaryData$Variable[i]),
+                                summaryData$TrueCount[i],
+                                total_n,
+                                round(summaryData$TruePercentage[i] * 100, 1))
                 })
 
                 # Generate intersection analysis for clinical reporting
@@ -1067,16 +1137,25 @@ vennClass <- if (requireNamespace('jmvcore'))
                     # Resolve through the same unique lookup the columns were built
                     # with; make.names() here would reintroduce the collision.
                     lk <- private$.safe_lookup
-                    col1 <- if (var_names[1] %in% names(lk)) lk[[var_names[1]]] else make.names(var_names[1])
-                    col2 <- if (var_names[2] %in% names(lk)) lk[[var_names[2]]] else make.names(var_names[2])
+                    resolve <- function(nm) if (nm %in% names(lk)) lk[[nm]] else make.names(nm)
+                    col1 <- resolve(var_names[1])
+                    col2 <- resolve(var_names[2])
                     var1_data <- as.logical(data[[col1]])
                     var2_data <- as.logical(data[[col2]])
                     both_positive <- sum(var1_data & var2_data, na.rm = TRUE)
                     both_pct <- round((both_positive / total_n) * 100, 1)
 
-                    # Calculate exclusive positivity
-                    var1_only <- sum(var1_data & !var2_data, na.rm = TRUE)
-                    var2_only <- sum(!var1_data & var2_data, na.rm = TRUE)
+                    # "Only" has to mean positive for THIS set and no other selected set.
+                    # var1_data & !var2_data ignores sets 3..7, so with three or more
+                    # variables it over-counted and contradicted the "Unique Members per
+                    # Set" figures in the Set Calculations panel, which are computed the
+                    # way this now is (degree == 1 over the full membership matrix).
+                    all_cols <- vapply(var_names, resolve, character(1), USE.NAMES = FALSE)
+                    all_cols <- all_cols[all_cols %in% names(data)]
+                    member_mat <- as.matrix(data[, all_cols, drop = FALSE]) == TRUE
+                    degree <- rowSums(member_mat, na.rm = TRUE)
+                    var1_only <- sum(degree == 1 & var1_data, na.rm = TRUE)
+                    var2_only <- sum(degree == 1 & var2_data, na.rm = TRUE)
 
                     intersection_sentences <- sprintf(
                         "Co-occurrence of %s and %s was observed in %s cases (%s%%). %s cases (%s%%) were positive for %s only, while %s cases (%s%%) were positive for %s only.",
@@ -1084,11 +1163,25 @@ vennClass <- if (requireNamespace('jmvcore'))
                         var1_only, round((var1_only/total_n)*100, 1), htmltools::htmlEscape(var_names[1]),
                         var2_only, round((var2_only/total_n)*100, 1), htmltools::htmlEscape(var_names[2])
                     )
+
+                    # The co-occurrence figure is pairwise; the "only" figures above are
+                    # exclusive across every selected set. Say so, because with three or
+                    # more sets the two clauses answer different questions.
+                    if (length(var_names) > 2) {
+                        intersection_sentences <- paste0(intersection_sentences, sprintf(
+                            " The co-occurrence figure covers %s and %s alone, whereas \"only\" means positive for that variable and negative for the other %d selected variables; the remaining variable(s) (%s) and the higher-order intersections are shown in the diagram and, if enabled, in the Set Calculations panel.",
+                            htmltools::htmlEscape(var_names[1]), htmltools::htmlEscape(var_names[2]),
+                            length(var_names) - 1,
+                            htmltools::htmlEscape(paste(var_names[-(1:2)], collapse = ", "))))
+                    }
                 }
 
                 # Generate comprehensive clinical paragraph
+                # Purely descriptive opener. This analysis performs no test of any
+                # kind, so "revealed distinct patterns" was an inferential claim being
+                # handed to the user as ready-to-paste manuscript prose.
                 clinical_paragraph <- sprintf(
-                    "Analysis of %s cases revealed distinct patterns of variable expression. %s%s",
+                    "Analysis of %s cases produced the following set membership counts. %s%s",
                     total_n,
                     paste(individual_sentences, collapse = " "),
                     if (length(var_names) >= 2) {
@@ -1102,13 +1195,13 @@ vennClass <- if (requireNamespace('jmvcore'))
                 report_content <- paste0(
                     "<div style='background-color: rgba(33, 152, 33, 0.07); padding: 15px; border-radius: 5px; border-left: 4px solid #27ae60; color: inherit;'>",
                     "<h4 style='color: #27ae60; margin-top: 0;'> Copy-Ready Clinical Summary</h4>",
-                    "<div style='background-color: white; padding: 12px; border-radius: 3px; font-family: Georgia, serif; line-height: 1.6; border: 1px solid #e9ecef;'>",
-                    "<h6 style='margin: 0 0 8px 0; color: #495057;'>Clinical Report Template</h6>",
+                    "<div style='background-color: rgba(255, 255, 255, 0.06); padding: 12px; border-radius: 3px; font-family: Georgia, serif; line-height: 1.6; border: 1px solid #e9ecef; color: inherit;'>",
+                    "<h6 style='margin: 0 0 8px 0; color: inherit;'>Clinical Report Template</h6>",
                     "<p style='margin: 0 0 10px 0;'>", clinical_paragraph, "</p>",
                     if (intersection_sentences != "") paste0("<p style='margin: 0;'>", intersection_sentences, "</p>") else "",
                     "</div>",
-                    "<div style='background-color: white; padding: 10px; border-radius: 3px; margin-top: 8px; border: 1px solid #e9ecef;'>",
-                    "<h6 style='margin: 0 0 6px 0; color: #495057;'>Individual Variable Summary</h6>",
+                    "<div style='background-color: rgba(255, 255, 255, 0.06); padding: 10px; border-radius: 3px; margin-top: 8px; border: 1px solid #e9ecef; color: inherit;'>",
+                    "<h6 style='margin: 0 0 6px 0; color: inherit;'>Individual Variable Summary</h6>",
                     "<ul style='margin: 0; padding-left: 20px;'>",
                     paste0("<li>", individual_sentences, "</li>", collapse = ""),
                     "</ul>",
@@ -1131,7 +1224,7 @@ vennClass <- if (requireNamespace('jmvcore'))
                     
                     "<h5>", .("How to Interpret:"), "</h5>",
                     "<ul style='margin-left: 20px;'>",
-                    "<li><strong>", .("Venn Diagram:"), "</strong> ", .("Circle overlaps show shared cases. Intersection size depends on how common each variable is and does not by itself measure association."), "</li>",
+                    "<li><strong>", .("Venn Diagram:"), "</strong> ", .("Circle overlaps show which sets a group of cases belongs to; the count printed in a region, not its drawn area, is the number of cases. How many cases fall in an intersection depends on how common each variable is and does not by itself measure association."), "</li>",
                     "<li><strong>", .("UpSet Plot:"), "</strong> ", .("Bar heights show intersection sizes. Dots below indicate which variables are included."), "</li>",
                     "<li><strong>", .("Summary Table:"), "</strong> ", .("Shows counts and percentages for each variable individually."), "</li>",
                     "</ul>",
@@ -1186,9 +1279,13 @@ vennClass <- if (requireNamespace('jmvcore'))
 
             # Helper function for UpSetR plotting
             .plotUpsetRHelper = function(mydata2) {
-                # Get user options
+                # Get user options.
+                # minSize is deliberately NOT read here: UpSetR's `cutoff` only takes
+                # effect in its group.by = "sets" branch, which this code never selects,
+                # so passing it did nothing (verified: cutoff = 0 and cutoff = 50 give
+                # byte-identical Main_bar data). The ComplexUpset engine applies the
+                # filter; .run() posts a notice when the two disagree.
                 sortBy <- self$options$sortBy
-                minSize <- self$options$minSize
                 showAnnotations <- self$options$showAnnotations
 
                 # Determine order.by parameter
@@ -1206,7 +1303,6 @@ vennClass <- if (requireNamespace('jmvcore'))
                     plot <- UpSetR::upset(
                         mydata2,
                         order.by = orderBy,
-                        cutoff = minSize,
                         text.scale = c(1.5, 1.3, 1.2, 1.1, 2, 1),
                         show.numbers = "yes"
                     )
@@ -1215,16 +1311,12 @@ vennClass <- if (requireNamespace('jmvcore'))
                     plot <- UpSetR::upset(
                         mydata2,
                         order.by = orderBy,
-                        cutoff = minSize,
                         text.scale = c(0.8, 0.8, 0.8, 0.8, 1, 0.6),
                         show.numbers = "no"
                     )
                 }
 
-                # Add a title to the Upset Diagram using grid.text.
-                grid::grid.text(.("UpSetR Diagram of Selected Variables"), x = 0.5, y = 0.97,
-                                gp = grid::gpar(fontsize = 14, fontface = "bold"))
-
+                # The title is drawn by .plotUpsetR AFTER print(); see the comment there.
                 return(plot)
             },
 
@@ -1242,46 +1334,80 @@ vennClass <- if (requireNamespace('jmvcore'))
                     upset_data[[col]] <- as.logical(upset_data[[col]])
                 }
 
-                # Determine sort mode for ComplexUpset
+                # ComplexUpset keeps the sort KEY and the sort DIRECTION in two
+                # separate arguments. sort_intersections alone only ever orders by
+                # cardinality, so "Sort intersections by: Degree" used to hand back a
+                # size-ordered plot with no indication that the option was ignored.
                 sort_mode <- switch(sortBy,
                     "freq" = "descending",
-                    "degree" = "ascending",
+                    "degree" = "descending",
                     "none" = FALSE,
                     "descending"  # default
                 )
+                # Verified against ComplexUpset 1.3.3 and UpSetR 1.4.1 on 3 sets:
+                # sort_intersections_by = "degree" with "descending" lists the
+                # HIGHEST-degree intersections FIRST (x order: 1-2-3, 2-3, 1-3, 1-2,
+                # 3, 2, 1, Outside). UpSetR agrees, because .plotUpsetRHelper passes a
+                # length-1 order.by = "degree", so Counter() uses decreasing[1] = TRUE
+                # (its default `decreasing = c(T, F)`); the triple intersection comes
+                # out at x = 1. Do NOT flip either engine without re-checking the other:
+                # order.by = c("freq", "degree") would take decreasing[2] = FALSE and
+                # reverse UpSetR only.
+                sort_key <- if (sortBy == "degree") "degree" else "cardinality"
 
-                # Create the base ComplexUpset plot with proper annotations
+                # Percentage labels ride on the intersection-size bars that are already
+                # drawn, instead of stacking a second, redundant panel on top of them.
+                # The label expression MUST use ComplexUpset's own size-mode helper:
+                # rlang::sym('intersection_size') resolves to a non-numeric column when
+                # the aesthetics are computed, and the whole plot died with
+                # "non-numeric argument to binary operator" as soon as the user ticked
+                # "Percentage labels". The denominator is the full analysed cohort, not
+                # sum() over the DISPLAYED intersections, so the percentages keep
+                # meaning "share of all cases" even when minSize hides small bars.
+                # text_mapping REPLACES the default count label rather than adding to
+                # it, so the count is written into the same label - the analysis tells
+                # the user elsewhere to report raw counts alongside percentages.
+                n_cases <- nrow(upset_data)
                 base_annotations_list <- list(
-                    'Intersection size' = ComplexUpset::intersection_size(
-                        text = list(size = 3)
-                    )
+                    'Intersection size' = if (showAnnotations) {
+                        ComplexUpset::intersection_size(
+                            text = list(size = 3),
+                            text_mapping = ggplot2::aes(label = paste0(
+                                !!ComplexUpset::get_size_mode('exclusive_intersection'),
+                                '\n',
+                                round(100 * !!ComplexUpset::get_size_mode('exclusive_intersection') / n_cases, 1),
+                                '%'))
+                        )
+                    } else {
+                        ComplexUpset::intersection_size(
+                            text = list(size = 3)
+                        )
+                    }
                 )
 
-                # Add custom annotations if requested
-                # Note: For ComplexUpset, showAnnotations adds percentage labels to intersection sizes
-                annotations_list <- if (showAnnotations) {
-                    list(
-                        'Intersection percentages' = ComplexUpset::intersection_size(
-                            text = list(size = 3),
-                            text_mapping = ggplot2::aes(label = paste0(round(100 * !!rlang::sym('intersection_size') / sum(!!rlang::sym('intersection_size')), 1), '%'))
-                        )
-                    )
-                } else {
-                    NULL
-                }
+                # ComplexUpset::upset() ABORTS - "No intersections left after filtering:
+                # the maximal size for `min_size` for this dataset is N" - as soon as
+                # min_size exceeds the largest exclusive intersection, and minSize is a
+                # free TextBox with no upper bound. Verified against ComplexUpset 1.3.3
+                # that the maximum it compares against INCLUDES the all-negative
+                # ("Outside of known sets") region, so the clamp is taken over every
+                # membership pattern. .run() posts a notice when the clamp bites.
+                max_intersection <- if (nrow(upset_data) > 0)
+                    max(table(apply(upset_data, 1, paste, collapse = "|"))) else 0L
+                effective_min_size <- min(minSize, max_intersection)
 
                 plot <- ComplexUpset::upset(
                     data = upset_data,
                     intersect = names(upset_data),
-                    min_size = minSize,
+                    min_size = effective_min_size,
                     sort_intersections = sort_mode,
+                    sort_intersections_by = sort_key,
                     sort_sets = sort_mode,
                     name = .("Intersection Size"),
                     width_ratio = 0.1,
                     height_ratio = 0.8,
                     wrap = TRUE,
                     base_annotations = base_annotations_list,
-                    annotations = annotations_list,
                     themes = list(
                         'intersections_matrix' = ggplot2::theme(
                             text = ggplot2::element_text(size = 10),
@@ -1304,9 +1430,49 @@ vennClass <- if (requireNamespace('jmvcore'))
                 return(plot)
             },
 
+            # Map the "Venn diagram shape" option onto a real ggVennDiagram shape_id.
+            # The available (family, number-of-sets) combinations are read from the
+            # package rather than restated here, so the mapping cannot drift out of
+            # date. Returns NULL - i.e. leave the choice automatic - when the requested
+            # family has no shape for this number of sets.
+            .vennShapeId = function(shapeType, num_sets) {
+                if (is.null(shapeType) || shapeType == "auto")
+                    return(NULL)
+
+                tryCatch({
+                    shapes <- ggVennDiagram::get_shapes()
+                    match_rows <- shapes[shapes$type == shapeType & shapes$nsets == num_sets, , drop = FALSE]
+                    if (nrow(match_rows) == 0)
+                        return(NULL)
+                    as.character(match_rows$shape_id[1])
+                }, error = function(e) NULL)
+            },
+
+            # Index of the layer that draws the SET NAMES in a ggVennDiagram plot.
+            # It is the geom_text layer whose data names the sets; the region-label
+            # layer is distinguished by carrying a "percent" column. Returns NA when
+            # the layer cannot be identified (e.g. after an upstream change), and every
+            # caller treats NA as "leave the plot alone".
+            .setLabelLayerIndex = function(plot) {
+                if (is.null(plot$layers) || length(plot$layers) == 0)
+                    return(NA_integer_)
+                hits <- which(vapply(plot$layers, function(ly) {
+                    inherits(ly$geom, "GeomText") &&
+                        is.data.frame(ly$data) &&
+                        "name" %in% names(ly$data) &&
+                        !("percent" %in% names(ly$data))
+                }, logical(1)))
+                if (length(hits) == 0) NA_integer_ else hits[1]
+            },
+
             # Helper function for ggVennDiagram plotting (advanced)
             .plotGgVennDiagramHelper = function(mydata2, namescolumn2, ggtheme, theme) {
                 private$.checkpoint()
+                # Number of analysed cases, captured before mydata2 is replaced by the
+                # index-list form below. It is the denominator every other output in
+                # this analysis uses for percentages.
+                total_n <- nrow(mydata2)
+
                 # ggVennDiagram expects a list of vectors containing row indices where each variable is TRUE
                 # Convert dataframe format to list format
 
@@ -1346,34 +1512,26 @@ vennClass <- if (requireNamespace('jmvcore'))
                 fillColorMapping <- self$options$fillColorMapping
                 colorPalette <- self$options$colorPalette
 
-                # Determine shape parameters based on number of sets and user selection
+                # Both colours are free-text options. An unknown name reaches ggplot2
+                # as "Unknown colour name: reddd" during grob conversion and destroys
+                # the whole figure. Fall back to black here; .run() names the rejected
+                # string in a notice.
+                if (!private$.isColour(edgeColor)) edgeColor <- "black"
+                if (!private$.isColour(setLabelColor)) setLabelColor <- "black"
+
+                # Determine the shape. ggVennDiagram selects a shape through `shape_id`,
+                # which is looked up BEFORE the plot is drawn (process_data(shape_id=)).
+                # The previous code built a `type` argument, which is not a formal of
+                # ggVennDiagram at all: it fell into `...`, was forwarded to plot_venn(),
+                # never reached shape selection, raised no error, and left the shape
+                # permanently automatic. The eligibility rules it encoded were wrong too
+                # (triangle exists for 6 sets, not 3), so the family/set-count table is
+                # now read from the package instead of being restated here.
                 num_sets <- length(mydata2)
                 shape_params <- list()
-
-                if (shapeType == "auto") {
-                    # Let ggVennDiagram choose the best shape automatically
-                    # Don't set any shape parameter
-                } else if (shapeType == "circle") {
-                    # Circle works for 2-4 sets
-                    if (num_sets <= 4) {
-                        shape_params$type <- "circle"
-                    }
-                } else if (shapeType == "ellipse") {
-                    # Ellipse works for 2-5 sets
-                    if (num_sets <= 5) {
-                        shape_params$type <- "ellipse"
-                    }
-                } else if (shapeType == "triangle") {
-                    # Triangle only works for exactly 3 sets
-                    if (num_sets == 3) {
-                        shape_params$type <- "triangle"
-                    }
-                } else if (shapeType == "polygon") {
-                    # Polygon works for 4+ sets
-                    if (num_sets >= 4) {
-                        shape_params$type <- "polygon"
-                    }
-                }
+                shape_id <- private$.vennShapeId(shapeType, num_sets)
+                if (!is.null(shape_id))
+                    shape_params$shape_id <- shape_id
 
                 # Get original names for display using name mapping if available
                 display_names <- namescolumn2
@@ -1390,16 +1548,25 @@ vennClass <- if (requireNamespace('jmvcore'))
                 # Create the base ggVennDiagram plot with advanced options
                 plot_args <- list(
                     x = mydata2,
-                    category.names = if (showSetLabels) display_names else NULL,
+                    # ALWAYS pass the real names. category.names = NULL does not hide the
+                    # set labels - ggVennDiagram strips the names and then auto-generates
+                    # "Set_1", "Set_2", ..., so unticking "Set names" used to produce a
+                    # figure labelled Set_1/Set_2 with no recoverable mapping back to the
+                    # variables. Hiding is done after the plot is built, further down.
+                    category.names = display_names,
                     label = regionLabels,
                     label_geom = labelGeometry,
                     label_percent_digit = labelPrecisionDigits,
                     label_size = labelSize,
-                    set_name_size = setNameSize,
+                    # `set_size`, not `set_name_size`: the latter is not a ggVennDiagram
+                    # parameter, so it was swallowed by `...` and the slider did nothing.
+                    set_size = setNameSize,
                     edge_size = edgeSize,
                     edge_lty = edgeLineType,
-                    edge_alpha = edgeAlpha,
-                    set_color = edgeColor  # Apply edge color to set boundaries
+                    # edgeAlpha has no ggVennDiagram parameter at all (no `edge_alpha`
+                    # anywhere in plot_venn's body); it is applied to the boundary layer
+                    # after the plot is built, further down.
+                    set_color = edgeColor  # boundary AND set-name colour in ggVennDiagram
                 )
 
                 # Add shape parameters if specified
@@ -1409,6 +1576,31 @@ vennClass <- if (requireNamespace('jmvcore'))
 
                 # Create the plot
                 plot <- do.call(ggVennDiagram::ggVennDiagram, plot_args)
+
+                # ggVennDiagram::plot_venn computes its region percentages as
+                # count / sum(count) over the drawn regions, i.e. over the UNION of the
+                # sets. Every other number in this analysis - the Summary of True Counts
+                # table, the clinical and copy-ready prose, the ggvenn labels, the
+                # ComplexUpset bar labels - is a share of all analysed cases. Verified
+                # on n = 100 with A-only 28, B-only 22, both 16, neither 34: ggvenn
+                # printed "28 (28.0%)" while ggVennDiagram printed 42% for the same
+                # region (28/66). Recompute the label columns against total_n so one
+                # denominator holds across the whole analysis. The aes is
+                # aes(label = .data[[label]]) over "count"/"percent"/"both", so
+                # rewriting the columns is enough; label = "none" leaves no such layer
+                # and the loop below simply finds nothing.
+                region_layer <- which(vapply(plot$layers, function(ly)
+                    is.data.frame(ly$data) && all(c("count", "percent") %in% names(ly$data)),
+                    logical(1)))
+                if (length(region_layer) > 0 && total_n > 0) {
+                    rd <- plot$layers[[region_layer[1]]]$data
+                    rd$percent <- paste0(
+                        round(rd$count * 100 / total_n, digits = labelPrecisionDigits), "%")
+                    if ("both" %in% names(rd))
+                        rd$both <- paste(format(rd$count, big.mark = ",", big.interval = 3L),
+                                         paste0("(", rd$percent, ")"), sep = "\n")
+                    plot$layers[[region_layer[1]]]$data <- rd
+                }
 
                 # Determine base fill colours from the jamovi theme or use defaults
                 base_fill_colors <- theme$fill
@@ -1469,12 +1661,32 @@ vennClass <- if (requireNamespace('jmvcore'))
                     plot <- plot + palette_scale
                 }
 
-                # Apply set label colour if it differs from default
-                if (setLabelColor != "black") {
-                    plot <- plot +
-                        ggplot2::theme(
-                            text = ggplot2::element_text(color = setLabelColor)
-                        )
+                # Set-name labels and boundary transparency are layer properties, and a
+                # ggplot2 theme cannot reach either: the set names are drawn by
+                # plot_venn as a geom_text layer that carries its own colour, so
+                # theme(text = element_text(color = ...)) recoloured the plot TITLE and
+                # left the set names untouched. Operate on the layers instead.
+                set_label_layer <- private$.setLabelLayerIndex(plot)
+
+                if (!showSetLabels && !is.na(set_label_layer)) {
+                    plot$layers[[set_label_layer]] <- NULL
+                    set_label_layer <- NA_integer_
+                } else if (!is.na(set_label_layer) &&
+                           "color" %in% names(plot$layers[[set_label_layer]]$data)) {
+                    # ggVennDiagram::plot_venn passes set_color to BOTH
+                    # get_shape_setedge() and get_shape_setlabel(), so without this the
+                    # set NAMES inherit the Edge color. Skipping the write when
+                    # setLabelColor == "black" treated the default as "unset" and left
+                    # the names red whenever Edge color was red; "black" is a choice the
+                    # user can see in the box, so it is always honoured.
+                    plot$layers[[set_label_layer]]$data$color <- setLabelColor
+                }
+
+                if (!is.null(edgeAlpha) && !is.na(edgeAlpha) && edgeAlpha < 1) {
+                    edge_layer <- which(vapply(plot$layers,
+                        function(ly) inherits(ly$geom, "GeomPath"), logical(1)))
+                    if (length(edge_layer) > 0)
+                        plot$layers[[edge_layer[1]]]$aes_params$alpha <- edgeAlpha
                 }
 
                 # Add title and remove axes for a cleaner Venn diagram display
@@ -1495,72 +1707,64 @@ vennClass <- if (requireNamespace('jmvcore'))
                 return(plot)
             },
 
-            # Generate set calculations using ggVennDiagram functions
+            # Generate set calculations.
+            # These are computed straight from the logical membership matrix rather
+            # than through ggVennDiagram's set algebra. The previous version called
+            # ggVennDiagram::overlap(venn, slice = "all") and
+            # ggVennDiagram::discern(venn, slice = "all"): `slice` is a prefix of BOTH
+            # of discern's formals (slice1, slice2), so every discern call died with
+            # "argument 2 matches multiple formal arguments" inside a silent tryCatch,
+            # and overlap returned an UNNAMED vector of row indices that neither
+            # rendering branch below could display. Doing the counting here is a few
+            # lines, is exact, and cannot break on an upstream signature change.
             .generateSetCalculations = function(mydata2, namescolumn2, summaryData) {
                 tryCatch({
-                    # Prepare calculations
                     calculations <- list()
+                    # Which toggles the user asked for, so the panel can tell
+                    # "nothing requested" apart from "requested but empty".
+                    requested <- c(
+                        overlap = isTRUE(self$options$calculateOverlap),
+                        discern = isTRUE(self$options$calculateDiscern),
+                        unite   = isTRUE(self$options$calculateUnite))
 
-                    # Create venn object for calculations if ggVennDiagram is available
-                    if (requireNamespace("ggVennDiagram", quietly = TRUE)) {
-                        # Convert dataframe to list format required by ggVennDiagram
-                        # mydata2 comes as integers (0/1), convert to logical first
-                        mydata_logical <- mydata2
-                        for (col in names(mydata_logical)) {
-                            mydata_logical[[col]] <- as.logical(mydata_logical[[col]])
+                    present <- namescolumn2[namescolumn2 %in% names(mydata2)]
+                    member_mat <- as.matrix(mydata2[, present, drop = FALSE]) == 1
+                    # Show the user's own variable names, not the sanitised ones
+                    display_names <- vapply(present, function(nm) {
+                        if (!is.null(private$.name_mapping) && nm %in% names(private$.name_mapping))
+                            as.character(private$.name_mapping[[nm]])
+                        else nm
+                    }, character(1), USE.NAMES = FALSE)
+                    degree <- rowSums(member_mat, na.rm = TRUE)
+
+                    # Overlaps: every pairwise intersection, plus the all-way
+                    # intersection once three or more sets are selected.
+                    if (requested[["overlap"]] && ncol(member_mat) >= 2) {
+                        pairs <- utils::combn(seq_len(ncol(member_mat)), 2)
+                        overlap_counts <- apply(pairs, 2, function(idx)
+                            sum(member_mat[, idx[1]] & member_mat[, idx[2]], na.rm = TRUE))
+                        names(overlap_counts) <- apply(pairs, 2, function(idx)
+                            paste(display_names[idx[1]], display_names[idx[2]], sep = " & "))
+                        if (ncol(member_mat) > 2) {
+                            all_way <- sum(degree == ncol(member_mat), na.rm = TRUE)
+                            names(all_way) <- paste(display_names, collapse = " & ")
+                            overlap_counts <- c(overlap_counts, all_way)
                         }
+                        calculations$overlaps <- overlap_counts
+                    }
 
-                        # Convert to list of row indices
-                        venn_list <- list()
-                        for (col_name in namescolumn2) {
-                            if (col_name %in% names(mydata_logical)) {
-                                # Get row indices where this variable is TRUE
-                                true_indices <- which(mydata_logical[[col_name]] == TRUE)
-                                venn_list[[col_name]] <- true_indices
-                            }
-                        }
+                    # Unique members: cases positive for exactly one of the selected sets.
+                    if (requested[["discern"]] && ncol(member_mat) >= 1) {
+                        unique_counts <- vapply(seq_len(ncol(member_mat)), function(j)
+                            sum(degree == 1 & member_mat[, j], na.rm = TRUE), numeric(1))
+                        names(unique_counts) <- display_names
+                        calculations$unique_members <- unique_counts
+                    }
 
-                        # Create venn object with the list format
-                        venn_obj <- ggVennDiagram::Venn(venn_list)
-
-                        # Calculate overlaps if requested
-                        if (self$options$calculateOverlap) {
-                            tryCatch({
-                                overlaps <- ggVennDiagram::overlap(venn_obj, slice = "all")
-                                if (!is.null(overlaps)) {
-                                    calculations$overlaps <- overlaps
-                                }
-                            }, error = function(e) {
-                                # If overlap calculation fails, continue without it
-                                NULL
-                            })
-                        }
-
-                        # Calculate unique members (discern) if requested
-                        if (self$options$calculateDiscern) {
-                            tryCatch({
-                                unique_members <- ggVennDiagram::discern(venn_obj, slice = "all")
-                                if (!is.null(unique_members)) {
-                                    calculations$unique_members <- unique_members
-                                }
-                            }, error = function(e) {
-                                # If discern calculation fails, continue without it
-                                NULL
-                            })
-                        }
-
-                        # Calculate union if requested
-                        if (self$options$calculateUnite) {
-                            tryCatch({
-                                union_result <- ggVennDiagram::unite(venn_obj, slice = "all")
-                                if (!is.null(union_result)) {
-                                    calculations$union <- union_result
-                                }
-                            }, error = function(e) {
-                                # If unite calculation fails, continue without it
-                                NULL
-                            })
-                        }
+                    # Union: cases positive for at least one of the selected sets.
+                    # Stored as row indices so the existing length() rendering still works.
+                    if (requested[["unite"]]) {
+                        calculations$union <- which(degree > 0)
                     }
 
                     # Format results for HTML output
@@ -1576,109 +1780,74 @@ vennClass <- if (requireNamespace('jmvcore'))
                         "<p><strong>Number of sets:</strong> ", length(namescolumn2), "</p>")
 
                     if (length(calculations) > 0) {
-                        if (!is.null(calculations$overlaps)) {
-                            html_content <- paste0(html_content, "<h4>Overlapping Members:</h4>")
-                            # CRITICAL FIX: overlap() returns a NAMED VECTOR, not a list
-                            overlaps <- calculations$overlaps
-                            if (!is.null(overlaps) && length(overlaps) > 0) {
-                                # Check if it's a named vector or list
-                                overlap_names <- names(overlaps)
-                                if (!is.null(overlap_names) && length(overlap_names) > 0) {
-                                    # It's a named vector - process as vector
-                                    for (i in seq_along(overlaps)) {
-                                        set_name <- overlap_names[i]
-                                        count <- overlaps[i]
-                                        # Use original name for display if available
-                                        display_name <- set_name
-                                        if (!is.null(private$.name_mapping) && set_name %in% names(private$.name_mapping)) {
-                                            display_name <- private$.name_mapping[[set_name]]
-                                        }
-                                        html_content <- paste0(html_content,
-                                            "<p><strong>", htmltools::htmlEscape(display_name), ":</strong> ",
-                                            count, " members (",
-                                            round(count/total_observations*100, 1), "%)</p>")
-                                    }
-                                } else if (is.list(overlaps)) {
-                                    # It's a list - process as list
-                                    for (i in seq_along(overlaps)) {
-                                        set_name <- names(overlaps)[i]
-                                        display_name <- set_name
-                                        if (!is.null(private$.name_mapping) && set_name %in% names(private$.name_mapping)) {
-                                            display_name <- private$.name_mapping[[set_name]]
-                                        }
-                                        members <- overlaps[[i]]
-                                        html_content <- paste0(html_content,
-                                            "<p><strong>", htmltools::htmlEscape(display_name), ":</strong> ",
-                                            length(members), " members (",
-                                            round(length(members)/total_observations*100, 1), "%)</p>")
-                                    }
-                                }
-                            } else {
-                                html_content <- paste0(html_content, "<p>No overlaps found.</p>")
+                        # Both vectors are built above as NAMED numeric vectors keyed by
+                        # the user's own variable names, so one rendering path covers them.
+                        renderCounts <- function(html, heading, counts, unit, empty_msg) {
+                            html <- paste0(html, "<h4>", heading, "</h4>")
+                            if (is.null(counts) || length(counts) == 0)
+                                return(paste0(html, "<p>", empty_msg, "</p>"))
+                            labels <- names(counts)
+                            for (i in seq_along(counts)) {
+                                html <- paste0(html,
+                                    "<p><strong>", htmltools::htmlEscape(labels[i]), ":</strong> ",
+                                    counts[[i]], " ", unit, " (",
+                                    round(counts[[i]] / total_observations * 100, 1), "%)</p>")
                             }
+                            html
+                        }
+
+                        if (!is.null(calculations$overlaps)) {
+                            html_content <- renderCounts(
+                                html_content,
+                                "Intersection Sizes (cases positive for every set listed):",
+                                calculations$overlaps, "cases",
+                                "No intersections could be formed from the selected sets.")
                         }
 
                         if (!is.null(calculations$unique_members)) {
-                            html_content <- paste0(html_content, "<h4>Unique Members per Set:</h4>")
-                            # CRITICAL FIX: discern() returns a NAMED VECTOR or LIST - handle both
-                            unique_members <- calculations$unique_members
-                            if (!is.null(unique_members) && length(unique_members) > 0) {
-                                # Check if it's a named vector or list
-                                member_names <- names(unique_members)
-                                if (!is.null(member_names) && length(member_names) > 0 && !is.list(unique_members)) {
-                                    # It's a named vector - process as vector
-                                    for (i in seq_along(unique_members)) {
-                                        set_name <- member_names[i]
-                                        count <- unique_members[i]
-                                        # Use original name for display if available
-                                        display_name <- set_name
-                                        if (!is.null(private$.name_mapping) && set_name %in% names(private$.name_mapping)) {
-                                            display_name <- private$.name_mapping[[set_name]]
-                                        }
-                                        html_content <- paste0(html_content,
-                                            "<p><strong>", htmltools::htmlEscape(display_name), ":</strong> ",
-                                            count, " unique members (",
-                                            round(count/total_observations*100, 1), "%)</p>")
-                                    }
-                                } else if (is.list(unique_members)) {
-                                    # It's a list - process as list
-                                    for (i in seq_along(unique_members)) {
-                                        set_name <- names(unique_members)[i]
-                                        display_name <- set_name
-                                        if (!is.null(private$.name_mapping) && set_name %in% names(private$.name_mapping)) {
-                                            display_name <- private$.name_mapping[[set_name]]
-                                        }
-                                        members <- unique_members[[i]]
-                                        html_content <- paste0(html_content,
-                                            "<p><strong>", htmltools::htmlEscape(display_name), ":</strong> ",
-                                            length(members), " unique members (",
-                                            round(length(members)/total_observations*100, 1), "%)</p>")
-                                    }
-                                }
-                            } else {
-                                html_content <- paste0(html_content, "<p>No unique members found.</p>")
-                            }
+                            html_content <- renderCounts(
+                                html_content,
+                                "Unique Members per Set (cases positive for that set only):",
+                                calculations$unique_members, "cases",
+                                "No case is positive for exactly one of the selected sets.")
                         }
 
                         if (!is.null(calculations$union)) {
                             html_content <- paste0(html_content, "<h4>Union of All Sets:</h4>")
                             union_size <- length(calculations$union)
                             html_content <- paste0(html_content,
-                                "<p><strong>Total unique items across all sets:</strong> ",
-                                union_size, " items (",
+                                "<p><strong>Cases positive for at least one selected set:</strong> ",
+                                union_size, " cases (",
                                 round(union_size/total_observations*100, 1), "%)</p>")
                         }
-                    } else {
+                    } else if (!any(requested)) {
                         html_content <- paste0(html_content,
                             "<div style='background-color: rgba(255, 202, 33, 0.23); padding: 10px; border: 1px solid #ffeaa7; border-radius: 4px; margin: 10px 0; color: inherit;'>",
-                            "<p><strong> Enable Calculations:</strong></p>",
-                            "<p>To see detailed set calculations, please enable the specific options:</p>",
+                            "<p><strong>Enable calculations:</strong></p>",
+                            "<p>No set calculation is currently switched on. Tick one or more of:</p>",
                             "<ul>",
-                            "<li><strong>Calculate Overlaps:</strong> Shows intersection members</li>",
-                            "<li><strong>Calculate Unique Members:</strong> Shows members exclusive to each set</li>",
-                            "<li><strong>Calculate Unions:</strong> Shows combined membership across all sets</li>",
+                            "<li><strong>Overlap calculations:</strong> how many cases fall in each pairwise (and all-way) intersection</li>",
+                            "<li><strong>Unique member calculations:</strong> how many cases are positive for exactly one set</li>",
+                            "<li><strong>Union calculations:</strong> how many cases are positive for at least one set</li>",
                             "</ul>",
                             "</div>")
+                    } else {
+                        # Something WAS requested but produced nothing. Say which, instead
+                        # of telling the user to switch on the option they already used.
+                        reasons <- character(0)
+                        if (requested[["overlap"]] && length(namescolumn2) < 2)
+                            reasons <- c(reasons, "Overlap calculations need at least two sets.")
+                        if (requested[["overlap"]] && length(namescolumn2) >= 2)
+                            reasons <- c(reasons, "Overlap calculations produced no result for these sets.")
+                        if (requested[["discern"]])
+                            reasons <- c(reasons, "Unique-member calculations produced no result for these sets.")
+                        if (requested[["unite"]])
+                            reasons <- c(reasons, "Union calculations produced no result for these sets.")
+                        html_content <- paste0(html_content,
+                            "<div style='background-color: rgba(255, 202, 33, 0.23); padding: 10px; border: 1px solid #ffeaa7; border-radius: 4px; margin: 10px 0; color: inherit;'>",
+                            "<p><strong>Requested calculations returned nothing:</strong></p><ul>",
+                            paste0("<li>", htmltools::htmlEscape(reasons), "</li>", collapse = ""),
+                            "</ul></div>")
                     }
 
                     html_content <- paste0(html_content, "</div>")
@@ -1689,9 +1858,12 @@ vennClass <- if (requireNamespace('jmvcore'))
                 }, error = function(e) {
                     # If calculations fail, show error message
                     safe_error <- htmltools::htmlEscape(conditionMessage(e))
-                    error_html <- paste0("<div class='error'>",
-                        "<p>Error in set calculations: ", safe_error, "</p>",
-                        "<p>This feature requires ggVennDiagram package.</p>",
+                    error_html <- paste0(
+                        "<div style='background-color: rgba(216, 33, 50, 0.18); border-left: 4px solid #dc3545; padding: 12px; border-radius: 4px; color: inherit;'>",
+                        "<p><strong>Set calculations could not be completed.</strong> ",
+                        "The Venn and UpSet diagrams and the Summary of True Counts table are computed separately and are unaffected. ",
+                        "Switch off 'Set calculations' to hide this panel, or select fewer variables and run again.</p>",
+                        "<p>Technical detail: ", safe_error, "</p>",
                         "</div>")
                     self$results$setCalculations$setContent(error_html)
                 })
@@ -1882,7 +2054,7 @@ vennClass <- if (requireNamespace('jmvcore'))
 
                 interpretation <- paste0(
                     "<div style='background-color: rgba(138, 155, 172, 0.06); padding: 15px; border-left: 4px solid #28a745; margin: 10px 0; border-radius: 4px; color: inherit;'>",
-                    "<h5 style='margin: 0 0 10px 0; color: #155724;'> Clinical Interpretation</h5>",
+                    "<h5 style='margin: 0 0 10px 0; color: inherit;'> Clinical Interpretation</h5>",
                     "<p style='margin: 0 0 8px 0;'><strong>Key Finding:</strong> In this dataset of ", total_n, " cases, ",
                     "'", largest_var, "' shows the highest prevalence with ", largest_count, " positive cases (", largest_pct, "%).</p>",
                     "<p style='margin: 0 0 8px 0;'><strong>Overlap Pattern:</strong> Across the selected variables, the average share of positive cases is ", overlap_level, ". ",
@@ -1894,7 +2066,7 @@ vennClass <- if (requireNamespace('jmvcore'))
                     else if (overlap_level == "moderate") "That is, averaged over the variables, between one fifth and one half of cases are positive; single variables can sit outside that range, so read the True % column of the Summary of True Counts table."
                     else "That is, averaged over the variables, under one fifth of cases are positive; single variables can sit outside that range, so read the True % column of the Summary of True Counts table.",
                     " Overlap size depends on how common each variable is and does not by itself measure association.", "</p>",
-                    "<p style='margin: 0; font-size: 0.9em; color: #6c757d;'>",
+                    "<p style='margin: 0; font-size: 0.9em; color: inherit;'>",
                     " <em>Clinical Relevance:</em> Use Venn diagrams to identify patient subgroups, assess diagnostic overlap, ",
                     "or evaluate multi-marker patterns in pathology and oncology research.</p>",
                     "</div>"
@@ -1903,49 +2075,65 @@ vennClass <- if (requireNamespace('jmvcore'))
                 return(interpretation)
             },
 
-            # Validate statistical power and provide warnings
+            # Small-sample and low-prevalence advisories.
+            # Returned as structured entries so the SAME wording can be pushed to the
+            # always-visible notices panel from .run() AND rendered into the optional
+            # Clinical Summary HTML. Previously these three checks existed only inside
+            # the Clinical Summary, which is off by default - so a two-marker analysis
+            # on a 15-case series showed no caution at all.
+            .powerAdvisories = function(intersection_data, total_n) {
+                advisories <- list()
+                if (is.null(intersection_data) || nrow(intersection_data) == 0 ||
+                    is.null(total_n) || is.na(total_n) || total_n == 0)
+                    return(advisories)
+
+                add <- function(title, content) {
+                    advisories[[length(advisories) + 1]] <<- list(title = title, content = content)
+                }
+
+                sparse <- !is.na(intersection_data$TrueCount) & intersection_data$TrueCount < 5
+                if (any(sparse)) {
+                    add(
+                        .("Very Few Positive Cases"),
+                        sprintf(.("%d of %d selected variables have fewer than 5 positive cases (%s). The counts and percentages printed in the regions built from those variables rest on a handful of cases and move substantially when a single case changes. Report the raw counts next to the percentages, and consider collapsing categories or adding cases before reading anything into those regions."),
+                                sum(sparse), nrow(intersection_data),
+                                paste(intersection_data$Variable[sparse], collapse = ", ")))
+                }
+
+                rare <- !is.na(intersection_data$TrueCount) & (intersection_data$TrueCount / total_n) < 0.05
+                if (any(rare)) {
+                    add(
+                        .("Low Prevalence"),
+                        sprintf(.("%d of %d selected variables are positive in fewer than 5%% of the %d analysed cases (%s). The Venn shapes this analysis draws are fixed geometry: a region holding one case is drawn the same size as a region holding a hundred, so a rare set is easy to over-read. Go by the counts and percentages printed inside the regions, by the Summary of True Counts table, and by the UpSet plots if you switch them on."),
+                                sum(rare), nrow(intersection_data), total_n,
+                                paste(intersection_data$Variable[rare], collapse = ", ")))
+                }
+
+                if (total_n < 30) {
+                    add(
+                        .("Small Sample"),
+                        sprintf(.("Only %d complete cases are being displayed. Every intersection count and percentage below is based on that total, so single-case changes move the percentages by more than three points. Treat the pattern as exploratory and describe it with counts rather than percentages."),
+                                total_n))
+                }
+
+                advisories
+            },
+
+            # HTML rendering of the same advisories for the Clinical Summary panel
             .validateStatisticalPower = function(intersection_data, total_n) {
-                warnings <- c()
+                advisories <- private$.powerAdvisories(intersection_data, total_n)
+                if (length(advisories) == 0)
+                    return("")
 
-                # Check for small intersection sizes
-                if (!is.null(intersection_data) && nrow(intersection_data) > 0) {
-                    small_counts <- sum(intersection_data$TrueCount < 5, na.rm = TRUE)
-                    if (small_counts > 0) {
-                        warnings <- c(warnings, paste0(
-                            " <strong>Small Sample Warning:</strong> ", small_counts, " variable(s) have fewer than 5 positive cases. ",
-                            "Consider combining categories or collecting additional data for robust statistical inference."
-                        ))
-                    }
+                items <- vapply(advisories, function(adv) paste0(
+                    "<strong>", htmltools::htmlEscape(adv$title), ":</strong> ",
+                    htmltools::htmlEscape(adv$content)), character(1))
 
-                    # Check for very low prevalence
-                    low_prev <- sum((intersection_data$TrueCount / total_n) < 0.05, na.rm = TRUE)
-                    if (low_prev > 0) {
-                        warnings <- c(warnings, paste0(
-                            " <strong>Low Prevalence Note:</strong> ", low_prev, " variable(s) have prevalence below 5%. ",
-                            "Venn diagram patterns may be difficult to interpret visually."
-                        ))
-                    }
-
-                    # Check for total sample size
-                    if (total_n < 30) {
-                        warnings <- c(warnings, paste0(
-                            " <strong>Sample Size Advisory:</strong> With only ", total_n, " cases, overlap patterns should be interpreted cautiously. ",
-                            "Consider this as exploratory analysis requiring validation in larger samples."
-                        ))
-                    }
-                }
-
-                if (length(warnings) > 0) {
-                    warning_html <- paste0(
-                        "<div style='background-color: rgba(255, 202, 33, 0.23); padding: 12px; border-left: 4px solid #ffc107; margin: 10px 0; border-radius: 4px; color: inherit;'>",
-                        "<h6 style='margin: 0 0 8px 0; color: #856404;'>Statistical Considerations</h6>",
-                        paste(warnings, collapse = "<br><br>"),
-                        "</div>"
-                    )
-                    return(warning_html)
-                }
-
-                return("")
+                paste0(
+                    "<div style='background-color: rgba(255, 202, 33, 0.23); padding: 12px; border-left: 4px solid #ffc107; margin: 10px 0; border-radius: 4px; color: inherit;'>",
+                    "<h6 style='margin: 0 0 8px 0; color: inherit;'>", .("Statistical Considerations"), "</h6>",
+                    paste(items, collapse = "<br><br>"),
+                    "</div>")
             },
 
             # Generate statistical glossary
@@ -1957,8 +2145,8 @@ vennClass <- if (requireNamespace('jmvcore'))
                     "<div style='display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 15px;'>",
 
                     # Venn Diagram Terms
-                    "<div style='background: white; padding: 12px; border-radius: 6px; border: 1px solid #e9ecef;'>",
-                    "<h6 style='margin: 0 0 8px 0; color: #495057; border-bottom: 1px solid #dee2e6; padding-bottom: 4px;'>Venn Diagram Terms</h6>",
+                    "<div style='background: rgba(255, 255, 255, 0.06); padding: 12px; border-radius: 6px; border: 1px solid #e9ecef; color: inherit;'>",
+                    "<h6 style='margin: 0 0 8px 0; color: inherit; border-bottom: 1px solid #dee2e6; padding-bottom: 4px;'>Venn Diagram Terms</h6>",
                     "<p style='margin: 0 0 6px 0; font-size: 0.9em;'><strong>Intersection:</strong> Cases positive for multiple variables simultaneously (overlap regions)</p>",
                     "<p style='margin: 0 0 6px 0; font-size: 0.9em;'><strong>Union:</strong> Cases positive for any of the variables (total covered area)</p>",
                     "<p style='margin: 0 0 6px 0; font-size: 0.9em;'><strong>Exclusive:</strong> Cases positive for only one specific variable</p>",
@@ -1966,8 +2154,8 @@ vennClass <- if (requireNamespace('jmvcore'))
                     "</div>",
 
                     # Clinical Applications
-                    "<div style='background: white; padding: 12px; border-radius: 6px; border: 1px solid #e9ecef;'>",
-                    "<h6 style='margin: 0 0 8px 0; color: #495057; border-bottom: 1px solid #dee2e6; padding-bottom: 4px;'>Clinical Applications</h6>",
+                    "<div style='background: rgba(255, 255, 255, 0.06); padding: 12px; border-radius: 6px; border: 1px solid #e9ecef; color: inherit;'>",
+                    "<h6 style='margin: 0 0 8px 0; color: inherit; border-bottom: 1px solid #dee2e6; padding-bottom: 4px;'>Clinical Applications</h6>",
                     "<p style='margin: 0 0 6px 0; font-size: 0.9em;'><strong>Biomarker Analysis:</strong> Assess multi-marker expression patterns in tumors</p>",
                     "<p style='margin: 0 0 6px 0; font-size: 0.9em;'><strong>Diagnostic Overlap:</strong> Evaluate concordance between different diagnostic methods</p>",
                     "<p style='margin: 0 0 6px 0; font-size: 0.9em;'><strong>Risk Stratification:</strong> Identify patient subgroups with multiple risk factors</p>",
@@ -1977,8 +2165,8 @@ vennClass <- if (requireNamespace('jmvcore'))
                     "</div>",
 
                     # Plot Types Explanation
-                    "<div style='background: white; padding: 12px; border-radius: 6px; border: 1px solid #e9ecef; margin-bottom: 15px;'>",
-                    "<h6 style='margin: 0 0 8px 0; color: #495057; border-bottom: 1px solid #dee2e6; padding-bottom: 4px;'>Plot Type Selection Guide</h6>",
+                    "<div style='background: rgba(255, 255, 255, 0.06); padding: 12px; border-radius: 6px; border: 1px solid #e9ecef; margin-bottom: 15px; color: inherit;'>",
+                    "<h6 style='margin: 0 0 8px 0; color: inherit; border-bottom: 1px solid #dee2e6; padding-bottom: 4px;'>Plot Type Selection Guide</h6>",
                     "<div style='display: grid; grid-template-columns: 1fr 1fr; gap: 10px;'>",
                     "<div>",
                     "<p style='margin: 0 0 4px 0; font-size: 0.9em;'><strong>ggvenn:</strong> Simple, classic Venn diagrams for 2-3 variables</p>",
@@ -1993,7 +2181,7 @@ vennClass <- if (requireNamespace('jmvcore'))
 
                     # Statistical Considerations
                     "<div style='background-color: rgba(255, 202, 33, 0.23); padding: 12px; border-radius: 6px; border: 1px solid #ffeaa7; color: inherit;'>",
-                    "<h6 style='margin: 0 0 8px 0; color: #856404;'> Statistical Considerations</h6>",
+                    "<h6 style='margin: 0 0 8px 0; color: inherit;'> Statistical Considerations</h6>",
                     "<p style='margin: 0 0 6px 0; font-size: 0.9em;'><strong>Sample Size:</strong> Ensure adequate cases in each intersection for reliable interpretation</p>",
                     "<p style='margin: 0 0 6px 0; font-size: 0.9em;'><strong>Independence:</strong> Venn diagrams show overlap but don't imply causal relationships</p>",
                     "<p style='margin: 0; font-size: 0.9em;'><strong>Clinical Context:</strong> Always interpret results within appropriate clinical and biological context</p>",
@@ -2011,8 +2199,8 @@ vennClass <- if (requireNamespace('jmvcore'))
                 if (length(private$.errors) > 0) {
                     error_html <- paste(
                         "<div style='padding: 15px; background-color: rgba(216, 33, 50, 0.18); border-left: 4px solid #dc3545; border-radius: 4px; color: inherit;'>",
-                        "<h4 style='margin-top: 0; color: #721c24;'> Validation Errors</h4>",
-                        paste(sprintf("<p style='margin: 5px 0; color: #721c24;'>\u{2022} %s</p>", htmltools::htmlEscape(private$.errors)), collapse = ""),
+                        "<h4 style='margin-top: 0; color: inherit;'> Validation Errors</h4>",
+                        paste(sprintf("<p style='margin: 5px 0; color: inherit;'>\u{2022} %s</p>", htmltools::htmlEscape(private$.errors)), collapse = ""),
                         "</div>",
                         sep = ""
                     )
@@ -2024,8 +2212,8 @@ vennClass <- if (requireNamespace('jmvcore'))
                 if (length(private$.warnings) > 0) {
                     warning_html <- paste(
                         "<div style='padding: 15px; background-color: rgba(255, 202, 33, 0.23); border-left: 4px solid #ffc107; border-radius: 4px; color: inherit;'>",
-                        "<h4 style='margin-top: 0; color: #856404;'> Important Warnings</h4>",
-                        paste(sprintf("<p style='margin: 5px 0; color: #856404;'>\u{2022} %s</p>", htmltools::htmlEscape(private$.warnings)), collapse = ""),
+                        "<h4 style='margin-top: 0; color: inherit;'> Important Warnings</h4>",
+                        paste(sprintf("<p style='margin: 5px 0; color: inherit;'>\u{2022} %s</p>", htmltools::htmlEscape(private$.warnings)), collapse = ""),
                         "</div>",
                         sep = ""
                     )
@@ -2037,8 +2225,8 @@ vennClass <- if (requireNamespace('jmvcore'))
                 if (length(private$.info) > 0) {
                     info_html <- paste(
                         "<div style='padding: 15px; background-color: rgba(33, 163, 188, 0.21); border-left: 4px solid #17a2b8; border-radius: 4px; color: inherit;'>",
-                        "<h4 style='margin-top: 0; color: #0c5460;'> Analysis Information</h4>",
-                        paste(sprintf("<p style='margin: 5px 0; color: #0c5460;'>\u{2022} %s</p>", htmltools::htmlEscape(private$.info)), collapse = ""),
+                        "<h4 style='margin-top: 0; color: inherit;'> Analysis Information</h4>",
+                        paste(sprintf("<p style='margin: 5px 0; color: inherit;'>\u{2022} %s</p>", htmltools::htmlEscape(private$.info)), collapse = ""),
                         "</div>",
                         sep = ""
                     )

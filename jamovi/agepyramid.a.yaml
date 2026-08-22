@@ -6,6 +6,24 @@ menuSubgroup: ClinicoPath Descriptive Plots
 version: '1.0.6'
 jas: '1.2'
 
+description:
+    main: >
+        Generates an age pyramid from an age variable and a gender variable.
+    # R:
+    #     dontrun: true
+    #     usage: |
+    #         # `female` and `male` are Level options: jamovi forbids a default on
+    #         # them, so they are REQUIRED arguments of this function. Pass NULL to
+    #         # have the levels read from their names.
+    #         agepyramid(
+    #             data = histopathology,
+    #             age = "Age",
+    #             gender = "Sex",
+    #             female = "Female",
+    #             male = "Male",
+    #             age_groups = "who"
+    #         )
+
 options:
     - name: data
       type: Data
@@ -49,11 +67,15 @@ options:
       variable: (gender)
       description:
           R: >
-            a string naming the level from `gender` that contains the
-            level female
+            a string naming the level of `gender` that identifies female
+            subjects. This argument has no default (jamovi does not allow one on
+            a level option), so a call from R must always supply it; pass NULL to
+            let the analysis read the level names itself, which it reports in a
+            note above the results.
           jamovi: >
-            a string naming the level from `gender` that contains the
-            level female
+            The level of the gender variable that identifies female subjects.
+            Leave both level selectors empty to have them read from the level
+            names; the assignment used is then stated above the results.
 
     - name: male
       title: Male level
@@ -61,11 +83,15 @@ options:
       variable: (gender)
       description:
           R: >
-            a string naming the level from `gender` that contains the
-            level male
+            a string naming the level of `gender` that identifies male subjects.
+            This argument has no default (jamovi does not allow one on a level
+            option), so a call from R must always supply it; pass NULL to let the
+            analysis read the level names itself, which it reports in a note
+            above the results.
           jamovi: >
-            a string naming the level from `gender` that contains the
-            level male
+            The level of the gender variable that identifies male subjects.
+            Leave both level selectors empty to have them read from the level
+            names; the assignment used is then stated above the results.
 
     - name: age_groups
       title: Age group preset
@@ -114,8 +140,12 @@ options:
             (lower, upper] bands, where age 65 closes the band below it; this reproduces
             the behaviour of releases before 1.0.52 and makes the lowest band one year
             wider than the others, which inflates the youngest bar of the pyramid.
+            Applies to the custom age grouping only: the named presets are defined by
+            their sources as left-closed bands, so a right-closed setting is ignored
+            for them and a note says so.
           jamovi: >
             Which end of each age band is closed. Left-closed is the WHO/UN standard.
+            Applies to the custom age grouping only.
 
     - name: bin_width
       title: Bin width (years)
@@ -128,9 +158,12 @@ options:
       min: 0.01
       description:
           R: >
-            The width of the age bins in years. Adjust this to change the granularity of the age groups.
+            The width of the age bins in years. Adjust this to change the granularity
+            of the age groups. Ignored while `custom_breaks` is filled in. A width that
+            would produce more than 200 age bands is refused with an explanatory note, and
+            more than 25 bands raises a warning about how thin the bars become.
           jamovi: >
-            The width of the age bins in years.
+            The width of the age bins in years. Ignored when Custom age breaks is filled in.
 
     - name: custom_breaks
       title: Custom age breaks
@@ -139,9 +172,12 @@ options:
       description:
           R: >
             Comma-separated age break points (e.g., "0,18,25,50,65,100").
-            Only used when age_groups is set to 'custom'. Leave empty to use bin_width.
+            Only used when age_groups is set to 'custom'. When filled in these override
+            bin_width; leave empty to use bin_width. Entries that are not numbers are
+            reported in a note and left out, and the top band is always open-ended.
           jamovi: >
             Comma-separated age break points (e.g., 0,18,25,50,65,100).
+            When filled in, these override the bin width.
 
     - name: plot_title
       title: Plot title
