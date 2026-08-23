@@ -237,6 +237,13 @@ test_that("sparse agreement-pattern cells are detected, not just sparse categori
     expect_match(six$notices$content, "Sparse categories")
     expect_match(six$notices$content, "agreement-pattern cell")
     expect_match(six$notices$content, "enriching the case series")
+    expect_match(six$notices$content, "smallest expected count is 0.00034 and 3 of 7 cells")
+    # Cochran's rule, not "any cell < 5": at prevalence 0.30, four raters has a single cell
+    # of 3.7 out of five and five raters one of 1.17 out of six (both pass); six raters has
+    # a cell of 0.38 (fails)
+    expect_false(grepl("Sparse categories", run_kp(raters = "4")$notices$content))
+    expect_false(grepl("Sparse categories", run_kp(raters = "5")$notices$content))
+    expect_match(run_kp(raters = "6")$notices$content, "Sparse categories")
     # the engine's own marginal warning is absent for this design, so the Notes panel is
     # the only place it can be seen
     expect_false(grepl("expected cell count", six$text1$content))

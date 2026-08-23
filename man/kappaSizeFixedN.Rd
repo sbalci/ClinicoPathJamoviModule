@@ -6,7 +6,7 @@
 \usage{
 kappaSizeFixedN(
   outcome = "2",
-  kappa0 = 0.4,
+  kappa0 = 0.6,
   props = "0.20, 0.80",
   raters = "2",
   alpha = 0.05,
@@ -46,11 +46,11 @@ A results object containing:
 }
 \description{
 For an interobserver agreement study whose number of subjects is already
-fixed, the lowest value of kappa the study can expect to rule out - the
+fixed, the lowest kappa the study would still be unable to rule out - the
 lower bound of the one-sided confidence interval around the anticipated
-kappa (kappa0) - using the kappaSize package. Use kappaSizePower to size a
-study for a hypothesis test and kappaSizeCI to size it for a target
-interval width.
+kappa (kappa0); every value below it is excluded. Computed with the
+kappaSize package. Use kappaSizePower to size a study for a hypothesis test
+and kappaSizeCI to size it for a target interval width.
 }
 \examples{
 \donttest{

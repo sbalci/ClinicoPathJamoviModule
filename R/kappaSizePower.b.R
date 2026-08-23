@@ -99,7 +99,9 @@ kappaSizePowerClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
         # "1 subjects" reads as a bug in a protocol sentence.
         .subjects = function(n) if (isTRUE(n == 1)) .("subject") else .("subjects"),
 
-        .buildNotices = function(n_required, sparse, outcome, raters, kappa0, kappa1, power) {
+        .buildNotices = function(n_required, sparse, outcome, raters, kappa0, kappa1, power,
+                                 sparse_min = NA_real_, sparse_below5 = NA_integer_,
+                                 sparse_total = NA_integer_) {
             warn_div <- "<div style='margin:6px 0; padding:8px 10px; border-left:3px solid #ec971f; background-color: rgba(227, 144, 33, 0.07); color: inherit;'>"
             info_div <- "<div style='margin:6px 0; padding:8px 10px; border-left:3px solid #3c8dbc; background-color: rgba(72, 138, 188, 0.06); color: inherit;'>"
             block <- function(div, title, ...)
@@ -163,11 +165,13 @@ kappaSizePowerClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
                         power = power)))
             }
 
-            # Sparse goodness-of-fit cells (see .gofCells). kappaSize prints its own version of
-            # this once per sparse CATEGORY inside the raw result text; it was reaching the user
-            # only as repeated lines there, and it watches the wrong quantity. Skipped when n is
-            # below 10: every cell is sparse then, the "Very small sample size" block above
-            # already says so, and "enrich the case series" would point at the wrong cause.
+            # Sparse goodness-of-fit cells (see .gofCells), judged by Cochran's rule: no expected
+            # count below 1 and at most one cell in five below 5. kappaSize prints its own
+            # marginal version once per sparse CATEGORY inside the raw result text; it was
+            # reaching the user only as repeated lines there, and it watches the wrong quantity.
+            # Skipped when n is below 10: every cell is sparse then, the "Very small sample size"
+            # block above already says so, and "enrich the case series" would point at the wrong
+            # cause.
             if (isTRUE(sparse) && !(has_n && n_required < 10)) {
                 remedy <- if (outcome == 2L) {
                     .("Consider enriching the case series so the rare finding is more common (the calculation assumes the stated prevalence), or planning a larger study.")
@@ -176,7 +180,9 @@ kappaSizePowerClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
                 }
                 warn <- paste0(warn, block(warn_div,
                     .("Sparse categories."),
-                    .("At the required sample size at least one agreement-pattern cell (for example, exactly k of the raters calling the finding present, or all raters agreeing on one category) has an expected count below five. The calculation rests on a large-sample chi-square approximation, so the sample size shown is less dependable here."),
+                    jmvcore::format(
+                        .("At the required sample size the agreement-pattern cells (for example, exactly k of the raters calling the finding present, or all raters agreeing on one category) are too sparse: the smallest expected count is {min} and {below} of {total} cells are below 5. The calculation rests on a large-sample chi-square approximation, so the sample size shown is less dependable here."),
+                        min = signif(sparse_min, 2), below = sparse_below5, total = sparse_total),
                     remedy))
             }
 
@@ -332,11 +338,13 @@ kappaSizePowerClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
                         n = n_required, subjects = private$.subjects(n_required)))
                 else ""))
 
-            cells  <- private$.gofCells(outcome, raters, props, kappa0)
-            sparse <- is.finite(n_required) && any(cells * as.numeric(result$N) < 5)
+            # Cochran's rule on the expected counts at N: no cell below 1, at most 20% below 5.
+            e      <- private$.gofCells(outcome, raters, props, kappa0) * as.numeric(result$N)
+            sparse <- is.finite(n_required) && (any(e < 1) || mean(e < 5) > 0.2)
             self$results$notices$setContent(
                 private$.buildNotices(n_required, sparse = sparse, outcome = outcome,
                                       raters = raters, kappa0 = kappa0, kappa1 = kappa1,
-                                      power = power))
+                                      power = power, sparse_min = min(e),
+                                      sparse_below5 = sum(e < 5), sparse_total = length(e)))
         })
 )

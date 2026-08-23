@@ -7,7 +7,7 @@ kappaSizeFixedNOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
     public = list(
         initialize = function(
             outcome = "2",
-            kappa0 = 0.4,
+            kappa0 = 0.6,
             props = "0.20, 0.80",
             raters = "2",
             alpha = 0.05,
@@ -31,7 +31,7 @@ kappaSizeFixedNOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
             private$..kappa0 <- jmvcore::OptionNumber$new(
                 "kappa0",
                 kappa0,
-                default=0.4,
+                default=0.6,
                 min=0.01,
                 max=0.99)
             private$..props <- jmvcore::OptionString$new(
@@ -54,7 +54,7 @@ kappaSizeFixedNOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
                 default=0.05,
                 min=0.001,
                 max=0.2)
-            private$..n <- jmvcore::OptionNumber$new(
+            private$..n <- jmvcore::OptionInteger$new(
                 "n",
                 n,
                 default=100,
@@ -171,11 +171,11 @@ kappaSizeFixedNBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
 #' Lowest Expected Value for a fixed sample size
 #'
 #' For an interobserver agreement study whose number of subjects is already 
-#' fixed, the lowest value of kappa the study can expect to rule out - the 
+#' fixed, the lowest kappa the study would still be unable to rule out - the 
 #' lower bound of the one-sided confidence interval around the anticipated 
-#' kappa (kappa0) - using the kappaSize package. Use kappaSizePower to size a 
-#' study for a hypothesis test and kappaSizeCI to size it for a target 
-#' interval width.
+#' kappa (kappa0); every value below it is excluded. Computed with the 
+#' kappaSize package. Use kappaSizePower to size a study for a hypothesis test 
+#' and kappaSizeCI to size it for a target interval width.
 #' 
 #'
 #' @examples
@@ -216,7 +216,7 @@ kappaSizeFixedNBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
 #' @export
 kappaSizeFixedN <- function(
     outcome = "2",
-    kappa0 = 0.4,
+    kappa0 = 0.6,
     props = "0.20, 0.80",
     raters = "2",
     alpha = 0.05,

@@ -68,14 +68,28 @@ kappaSize release-review tests still read `kappasizepower.a.yaml`-style lowercas
 camelCase rename -- fine on macOS, a failure on any case-sensitive file system -- and now read the
 real filenames.
 
-**`kappaSizeFixedN`.**The same goodness-of-fit sparse-cell rule, evaluated at the lower bound the
-engine returns (its chi-square denominators are `n * P_j(kappaL)`): six raters at 5% prevalence
-with n = 100 is exactly `props * n = 5`, so kappaSize's own warning stayed silent while the
-pattern cells at kappa_L = 0.195 were 2.5 / 0.17 / 0.007 / 0 / 0.98. The closed forms match every
-`FixedN*` engine's `.CalcIT` for 2-6 raters to 1e-11. The dead lowercase `kappasizefixedn.js` is
-now `kappaSizeFixedN.events.js`, bound to the outcome-levels control; the `props` option has a
-readable title, a clean default and a real description; the help page gains kappaSize's own
-`FixedNBinary` example; the engine's repeated per-category warning line is kept once.
+**`kappaSizeFixedN`.**Reviewed end to end. kappaSize's `FixedN*` engines walk the agreement
+down from `kappa0` in steps of 0.001 with no floor, and an underpowered design walks straight out
+of the common-correlation model: with prevalence 0.02, three raters, `kappa0` 0.01, n = 100 and
+alpha = 0.2 the engine returns -0.841 against a model floor of -0.0004, and the old "< -1" guard
+printed it as a real lower bound. The returned bound is now checked against the model itself (every
+agreement-pattern probability must stay non-negative) and refused with an explanation otherwise.
+The analysis description and the protocol sentence described the bound backwards ("the lowest
+value of kappa the study can expect to rule out"; a lower bound is the smallest kappa NOT ruled
+out) and the Notes called the estimand "Cohen's kappa" (it is the intraclass, Fleiss-type kappa of
+the common-correlation model; Cohen's only for two raters with equal marginals) -- both corrected,
+and the 0.001 search resolution is now stated. Sparse cells are judged by Cochran's rule (no
+expected count below 1, at most one cell in five below 5) on the agreement-pattern cells at the
+reported bound, with the offending counts quoted; the bare "any cell < 5" flagged the default
+four-rater design on a single cell of 1.85. The same rule now applies in `kappaSizePower`. The
+red "cannot demonstrate agreement" block no longer advises a less extreme prevalence (in the region
+that triggers it, balancing the prevalence lowers the bound). `n` is an Integer option; `kappa0`
+defaults to 0.60 (the anticipated-agreement meaning it shares with `kappaSizeCI`, not the 0.40 null
+of `kappaSizePower`) and its control is labelled "Anticipated kappa (kappa0)" in both analyses.
+Narrow no-break spaces (U+202F) are accepted; n of 100,000 prints as a number rather than 1e+05;
+the explanation wraps to the pane; every string is wrapped for translation and the Turkish catalog
+carries the new entries. The dead lowercase `kappasizefixedn.js` is now `kappaSizeFixedN.events.js`,
+bound to the outcome-levels control; the help page gains kappaSize's own `FixedNBinary` example.
 
 **Process.**Test tallies now count `error` as well as `failed`: three suites that reported zero
 failures were hiding 11-13 errors each (a dead CSV reference, a library name that made testthat skip

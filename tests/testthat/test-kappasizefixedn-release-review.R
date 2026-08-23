@@ -12,6 +12,8 @@ fn_run <- function(...) {
     do.call(ClinicoPath::kappaSizeFixedN, args)
 }
 fn_line <- function(res) trimws(strsplit(res$text1$content, "\n")[[1]][1])
+# text2 is wrapped at ~78 columns at render time; compare with line breaks collapsed
+flat <- function(x) gsub("\\s+", " ", x)
 
 
 test_that("the lower bound matches kappaSize exactly", {
@@ -40,7 +42,7 @@ test_that("n = Inf is refused instead of hanging the engine", {
 
     # A whole-number check is still the backend's job: `n` is a Number option, so 100.5 is
     # inside the compiled bounds and only the backend stops it before the engine sees it.
-    expect_error(fn_run(n = 100.5), "whole number")
+    expect_error(fn_run(n = 100.5), "integer")        # type: Integer, enforced by jmvcore
     expect_error(fn_run(n = 2e6), "between 11 and 1e\\+06")
 
     # NA/NaN die in jmvcore's own range check on `if (value < min)` with "missing value where
@@ -73,26 +75,37 @@ test_that("n below the engine's floor is refused with a reason, not a vendor str
     expect_match(blk, "min: 11", fixed = TRUE)
 
     # and the compiled wrapper actually carries it
-    h <- paste(readLines("../../R/kappasizefixedn.h.R", warn = FALSE), collapse = "\n")
+    h <- paste(readLines("../../R/kappaSizeFixedN.h.R", warn = FALSE), collapse = "\n")
     expect_match(h, "min=11", fixed = TRUE)
 })
 
 
-test_that("a lower bound outside kappa's range is refused, not printed", {
+test_that("a lower bound outside the model's parameter space is refused, not printed", {
     # kappaSize decrements rho from kappa0 by 0.001 with no floor, so an underpowered design
-    # walks past -1: kappa0 = 0.01, n = 11, prevalence 0.02, alpha = 0.001 returns -23.78.
-    # Cohen's kappa is bounded below by -1, so that is not a number to show a clinician.
+    # walks straight out of the common-correlation model, whose "all raters positive" cell
+    # p^r (1 - rho) + rho p turns negative below -p^(r-1) / (1 - p^(r-1)). A "< -1" check
+    # caught only the grossest case (prevalence 0.02, n 11, alpha 0.001 -> -23.78); with three
+    # raters, prevalence 0.02, kappa0 0.01, n 100, alpha 0.2 the engine returns -0.841 against
+    # a model floor of -0.0004 and the module printed it as a real bound.
     skip_if_not_installed("kappaSize")
     raw <- kappaSize::FixedNBinary(kappa0 = 0.01, n = 11, props = c(0.02, 0.98),
                                    alpha = 0.001, raters = 2)$kappaL
     expect_lt(raw, -1)                                  # the engine really does return it
     expect_error(fn_run(kappa0 = 0.01, n = 11, props = "0.02, 0.98", alpha = 0.001),
-                 "cannot be below -1")
+                 "lowest agreement the model allows")
+    raw3 <- kappaSize::FixedNBinary(kappa0 = 0.01, n = 100, props = 0.02,
+                                    alpha = 0.2, raters = 3)$kappaL
+    expect_gt(raw3, -1)                                 # inside (-1, 0) but outside the model
+    expect_error(fn_run(kappa0 = 0.01, n = 100, props = "0.02", alpha = 0.2, raters = "3"),
+                 "lowest agreement the model allows")
 
-    # a legitimately NEGATIVE bound (>= -1) is still reported, with an explanation
+    # a legitimately NEGATIVE bound (inside the model: floor is -0.3/0.7 = -0.43 here) is
+    # still reported, with an explanation, and its sparse check is evaluated AT the bound
     res <- fn_run(kappa0 = 0.20, n = 20, props = "0.30, 0.70", alpha = 0.001)
-    expect_match(res$text2$content, "-0.293", fixed = TRUE)
-    expect_match(res$text2$content, "no better than chance")
+    expect_match(flat(res$text2$content), "-0.293", fixed = TRUE)
+    expect_match(flat(res$text2$content), "no better than chance")
+    expect_match(res$notices$content, "cannot demonstrate agreement")
+    expect_false(grepl("less extreme category distribution", res$notices$content))
 })
 
 
@@ -120,11 +133,18 @@ test_that("a decimal comma is diagnosed as such, not as the wrong count", {
 
 
 test_that("the explanation states the answer and reads correctly for one prevalence", {
-    two <- fn_run(props = "0.30, 0.70")$text2$content
+    two <- flat(fn_run(props = "0.30, 0.70")$text2$content)
     expect_match(two, "The expected lower bound for kappa is")
-    expect_match(two, "proportions of the outcome categories are")
+    expect_match(two, "proportions of the outcome categories are 0.30 and 0.70", fixed = TRUE)
+    # a lower bound is the smallest kappa NOT ruled out; the old sentence said the opposite
+    expect_match(two, "still be unable to rule out")
+    expect_false(grepl("lowest value of kappa that the study can expect to rule out", two))
+    # and it fits the non-wrapping Preformatted pane
+    expect_lte(max(nchar(strsplit(fn_run(props = "0.30, 0.70")$text2$content, "\n")[[1]])), 80L)
+    expect_lte(max(nchar(strsplit(fn_run(kappa0 = 0.20, n = 20, alpha = 0.001)$text2$content,
+                                  "\n")[[1]])), 80L)
 
-    one <- fn_run(props = "0.30")$text2$content
+    one <- flat(fn_run(props = "0.30")$text2$content)
     expect_match(one, "prevalence of the trait is 0.30", fixed = TRUE)
     expect_false(grepl("proportions of the outcome categories", one, fixed = TRUE))
     # both entry styles are the same computation
@@ -166,7 +186,8 @@ test_that("proportions parse on every separator the family accepts", {
     # kappaSizeCI takes "[,;|[:space:]]+"; this analysis took "[,;[:space:]]+", so a pipe-
     # separated list that worked in one member of the family failed in the next.
     base <- fn_line(fn_run(props = "0.30, 0.70"))
-    for (ps in c("0.30 0.70", "0.30;0.70", "0.30|0.70", "0.30  ,  0.70", "0.30\t0.70"))
+    for (ps in c("0.30 0.70", "0.30;0.70", "0.30|0.70", "0.30  ,  0.70", "0.30\t0.70",
+                 "0.30\u00A00.70", "0.30\u202F0.70"))   # NBSP and narrow NBSP (macOS/FR)
         expect_equal(fn_line(fn_run(props = ps)), base, label = ps)
 })
 
@@ -184,12 +205,15 @@ test_that("the Notes panel states the method and the kappa0 hazard", {
 
     plain <- build(0.44, sparse_cells = FALSE)
     expect_match(plain, "Methodology")
+    expect_match(plain, "intraclass \\(Fleiss-type\\) kappa")
+    expect_match(plain, "steps of 0.001")
     expect_match(plain, "kappa0 here is the agreement you anticipate")
     expect_match(plain, "kappaSizePower", fixed = TRUE)
     expect_false(grepl("Sparse categories", plain, fixed = TRUE))
     expect_false(grepl("cannot demonstrate agreement", plain, fixed = TRUE))
 
-    expect_match(build(0.44, sparse_cells = TRUE), "Sparse categories")
+    expect_match(build(0.44, sparse_cells = TRUE, sparse_min = 0.11, sparse_below5 = 2L,
+                       sparse_total = 7L), "smallest expected count is 0.11 and 2 of 7 cells")
 
     # a bound at or below zero is the decisive clinical case and gets its own red block
     expect_match(build(-0.29), "cannot demonstrate agreement")
@@ -212,6 +236,15 @@ test_that("sparse agreement-pattern cells at the lower bound are flagged, not ju
     expect_match(six$notices$content, "Sparse categories")
     expect_match(six$notices$content, "agreement-pattern cell")
     expect_match(six$notices$content, "enriching the case series")
+    expect_match(six$notices$content, "of 7 cells are below 5")
+    # Cochran's rule, not "any cell < 5": the default prevalence with four raters has one
+    # cell of 1.85 out of five (passes), five and six raters have cells below 1 (fail)
+    expect_false(grepl("Sparse categories", run(kappa0 = 0.4, props = "0.20, 0.80",
+                                                  raters = "4")$notices$content))
+    expect_match(run(kappa0 = 0.4, props = "0.20, 0.80", raters = "5")$notices$content,
+                 "Sparse categories")
+    # n >= 1e5 is printed as a number, not 1e+05
+    expect_match(run(n = 100000)$text1$content, "100000 subjects", fixed = TRUE)
     # multi-category with several raters: all-agree cells from the Dirichlet-multinomial product
     four <- run(outcome = "4", raters = "5", kappa0 = 0.3, props = "0.40, 0.30, 0.06, 0.24",
                 n = 120)
@@ -246,7 +279,7 @@ test_that("the notices item is declared in .r.yaml with the same clearWith as th
     # The bool handlers matter: this analysis has an option literally named `n`, which is a
     # YAML 1.1 boolean, so R's yaml package (libyaml, 1.1) hands back FALSE where jamovi's
     # js-yaml (1.2) hands back the string "n". Without them this test compares against FALSE.
-    y <- yaml::read_yaml("../../jamovi/kappasizefixedn.r.yaml",
+    y <- yaml::read_yaml("../../jamovi/kappaSizeFixedN.r.yaml",
                          handlers = list("bool#yes" = function(x) x, "bool#no" = function(x) x))
     items <- setNames(y$items, vapply(y$items, function(i) i$name, character(1)))
     expect_true("notices" %in% names(items))

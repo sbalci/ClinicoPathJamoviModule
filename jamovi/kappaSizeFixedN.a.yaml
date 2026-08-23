@@ -10,10 +10,10 @@ jas: '1.2'
 description:
     main: >
         For an interobserver agreement study whose number of subjects is already fixed, the
-        lowest value of kappa the study can expect to rule out - the lower bound of the
-        one-sided confidence interval around the anticipated kappa (kappa0) - using the
-        kappaSize package. Use kappaSizePower to size a study for a hypothesis test and
-        kappaSizeCI to size it for a target interval width.
+        lowest kappa the study would still be unable to rule out - the lower bound of the
+        one-sided confidence interval around the anticipated kappa (kappa0); every value below
+        it is excluded. Computed with the kappaSize package. Use kappaSizePower to size a study
+        for a hypothesis test and kappaSizeCI to size it for a target interval width.
     R:
         dontrun: true
         usage: |
@@ -47,7 +47,7 @@ options:
     - name: kappa0
       title: kappa0
       type: Number
-      default: 0.40
+      default: 0.60
       min: 0.01
       max: 0.99
       description:
@@ -108,7 +108,7 @@ options:
 
     - name: 'n'
       title: N
-      type: Number
+      type: Integer
       default: 100
       min: 11
       max: 1000000

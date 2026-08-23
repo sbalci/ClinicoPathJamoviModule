@@ -62,7 +62,7 @@ children:
           children:
             - type: TextBox
               name: kappa0
-              label: 'Preliminary value'
+              label: 'Anticipated kappa (kappa0)'
               format: number
         - type: LayoutBox
           margin: large

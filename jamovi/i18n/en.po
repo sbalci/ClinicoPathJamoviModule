@@ -603,6 +603,10 @@ msgid ""
 "small samples."
 msgstr ""
 
+#: R/kappaSizeFixedN.b.R
+msgid "{a} and {b}"
+msgstr ""
+
 #: R/survival.b.R
 msgid ""
 "{comparison}: hazard ratio {hr} (95% CI {lower} to {upper}, {stats}) - "
@@ -622,6 +626,10 @@ msgstr ""
 
 #: R/jjridges.b.R
 msgid "{error}. The default quantiles (0.25, 0.5, 0.75) were drawn instead."
+msgstr ""
+
+#: R/kappaSizeFixedN.b.R
+msgid "{head} and {last}"
 msgstr ""
 
 #: R/linechart.b.R
@@ -3140,10 +3148,10 @@ msgid "0.2, 0.5"
 msgstr ""
 
 #: kappaSizeCI/options/props.default
-#: kappaSizeFixedN/options/props.default
 msgid "0.20 , 0.80"
 msgstr ""
 
+#: kappaSizeFixedN/options/props.default
 #: kappaSizePower/options/props.default
 msgid "0.20, 0.80"
 msgstr ""
@@ -4487,6 +4495,12 @@ msgstr ""
 
 #: R/jjpiestats.b.R
 msgid "a Bayesian contingency table analysis"
+msgstr ""
+
+#: R/kappaSizeFixedN.b.R
+msgid ""
+"A bound at or below zero means this many subjects cannot rule out agreement "
+"no better than chance."
 msgstr ""
 
 #: R/chisqposttest.b.R
@@ -10868,6 +10882,16 @@ msgstr ""
 msgid "Antibody Panel Size"
 msgstr ""
 
+#: kappaSizeFixedN/ui[1].label
+msgid "Anticipated Agreement"
+msgstr ""
+
+#: kappaSizeCI/ui[2][0]/kappa0.label
+#: kappaSizeFixedN/ui[1][0]/kappa0.label
+msgid "Anticipated kappa (kappa0)"
+msgstr ""
+
+#: kappaSizeFixedN/options/props.description.ui
 #: kappaSizePower/options/props.description.ui
 msgid ""
 "Anticipated share of subjects in each outcome category, separated by commas, "
@@ -11872,11 +11896,22 @@ msgstr ""
 
 #: R/kappaSizePower.b.R
 msgid ""
-"At the required sample size at least one agreement-pattern cell (for "
-"example, exactly k of the raters calling the finding present, or all raters "
-"agreeing on one category) has an expected count below five. The calculation "
-"rests on a large-sample chi-square approximation, so the sample size shown "
-"is less dependable here."
+"At the required sample size the agreement-pattern cells (for example, "
+"exactly k of the raters calling the finding present, or all raters agreeing "
+"on one category) are too sparse: the smallest expected count is {min} and "
+"{below} of {total} cells are below 5. The calculation rests on a "
+"large-sample chi-square approximation, so the sample size shown is less "
+"dependable here."
+msgstr ""
+
+#: R/kappaSizeFixedN.b.R
+msgid ""
+"At this sample size the agreement-pattern cells (for example, exactly k of "
+"the raters calling the finding present, or all raters agreeing on one "
+"category) are too sparse at the reported lower bound: the smallest expected "
+"count is {min} and {below} of {total} cells are below 5. The calculation "
+"rests on a large-sample chi-square approximation, so the bound shown is less "
+"dependable here."
 msgstr ""
 
 #: populationhealth/results/predictiveModelingTable.columns.title
@@ -30807,6 +30842,10 @@ msgstr ""
 msgid "Consider clinical context when interpreting patterns"
 msgstr ""
 
+#: R/kappaSizeFixedN.b.R
+msgid "Consider collapsing rare categories or enrolling more subjects."
+msgstr ""
+
 #: R/kappaSizePower.b.R
 msgid "Consider collapsing rare categories or planning a larger study."
 msgstr ""
@@ -30831,6 +30870,13 @@ msgstr ""
 msgid ""
 "Consider effect sizes alongside p-values for clinical importance. Adjust for "
 "multiple comparisons when appropriate."
+msgstr ""
+
+#: R/kappaSizeFixedN.b.R
+msgid ""
+"Consider enriching the case series so the rare finding is more common (the "
+"calculation assumes the stated prevalence), adding subjects, or relaxing the "
+"significance level."
 msgstr ""
 
 #: R/kappaSizePower.b.R
@@ -44289,6 +44335,7 @@ msgid ""
 "points (decreasing risk) based on the regression coefficient magnitude."
 msgstr ""
 
+#: R/kappaSizeFixedN.b.R
 #: R/kappaSizePower.b.R
 msgid "Each proportion must be strictly between 0 and 1."
 msgstr ""
@@ -46569,6 +46616,7 @@ msgstr ""
 msgid "Enter custom y-axis break points (comma-separated)."
 msgstr ""
 
+#: R/kappaSizeFixedN.b.R
 #: R/kappaSizePower.b.R
 msgid "Enter exactly {k} proportions for {k} outcome levels (received {got})."
 msgstr ""
@@ -49635,10 +49683,12 @@ msgstr ""
 msgid "Expected number of active predictors"
 msgstr ""
 
+#: kappaSizeFixedN/options/props.title
 #: kappaSizePower/options/props.title
 msgid "Expected proportion of cases in each category"
 msgstr ""
 
+#: kappaSizeFixedN/ui[2].label
 #: kappaSizePower/ui[2].label
 msgid "Expected Proportion of Cases in Each Category"
 msgstr ""
@@ -53473,10 +53523,27 @@ msgstr ""
 msgid "For 3+ raters: Fleiss' kappa or Light's kappa (average pairwise)"
 msgstr ""
 
+#: R/kappaSizeFixedN.b.R
+msgid ""
+"For a binary outcome enter either one prevalence value or two proportions "
+"that sum to 1 (received {got})."
+msgstr ""
+
 #: R/kappaSizePower.b.R
 msgid ""
 "For a binary outcome enter either one prevalence value or two proportions "
 "that sum to 1."
+msgstr ""
+
+#: package/analyses/kappaSizeFixedN.description
+#: kappaSizeFixedN/options.description.main
+msgid ""
+"For an interobserver agreement study whose number of subjects is already "
+"fixed, the lowest kappa the study would still be unable to rule out - the "
+"lower bound of the one-sided confidence interval around the anticipated "
+"kappa (kappa0); every value below it is excluded. Computed with the "
+"kappaSize package. Use kappaSizePower to size a study for a hypothesis test "
+"and kappaSizeCI to size it for a target interval width."
 msgstr ""
 
 #: R/chisqposttest.b.R
@@ -54635,12 +54702,17 @@ msgstr ""
 msgid "Funnel Plot for Publication Bias"
 msgstr ""
 
+#: R/kappaSizeFixedN.b.R
 #: R/kappaSizePower.b.R
 msgid "Further suppose that the prevalence of the trait is {p}."
 msgstr ""
 
 #: R/kappaSizePower.b.R
 msgid "Further suppose that the prevalences of the categories are {head} and {last}."
+msgstr ""
+
+#: R/kappaSizeFixedN.b.R
+msgid "Further suppose that the proportions of the outcome categories are {props}."
 msgstr ""
 
 #: R/kappaSizePower.b.R
@@ -65668,6 +65740,13 @@ msgstr ""
 msgid "Issues identified:"
 msgstr ""
 
+#: R/kappaSizeFixedN.b.R
+msgid ""
+"It answers 'given the subjects I have, how little agreement am I still "
+"unable to rule out?' - the mirror image of the sample-size question; every "
+"kappa below the bound is excluded."
+msgstr ""
+
 #: R/kappaSizePower.b.R
 msgid ""
 "It answers 'how many subjects do I need to reject kappa0 in favour of "
@@ -66424,10 +66503,6 @@ msgid ""
 "agreement is reported above and is the meaningful summary here."
 msgstr ""
 
-#: kappaSizeFixedN/ui[1].label
-msgid "Kappa Level"
-msgstr ""
-
 #: kappaSizeCI/ui[2].label
 #: kappaSizePower/ui[1].label
 msgid "Kappa Levels"
@@ -66469,12 +66544,27 @@ msgid ""
 "required sample size undefined."
 msgstr ""
 
+#: R/kappaSizeFixedN.b.R
+msgid "kappa0 must be strictly between 0 and 1."
+msgstr ""
+
 #: kappaSizePower/options/kappa1.title
 msgid "kappa1"
 msgstr ""
 
 #: kappaSizeCI/options/kappaL.title
 msgid "kappaL"
+msgstr ""
+
+#: R/kappaSizeFixedN.b.R
+msgid "kappaSize could not compute the expected lower bound: {error}"
+msgstr ""
+
+#: R/kappaSizeFixedN.b.R
+msgid ""
+"kappaSize searches downward in steps of 0.001 and reports the first value "
+"rejected, so the bound is conservative by at most 0.001 and its third "
+"decimal is the search resolution, not estimation precision."
 msgstr ""
 
 #: kappaSizeCI/options/kappaU.title
@@ -70630,11 +70720,6 @@ msgstr ""
 #: kappaSizeFixedN/ui.title
 #: kappaSizeFixedN/results.title
 msgid "Lowest Expected Value for a fixed sample size"
-msgstr ""
-
-#: package/analyses/kappaSizeFixedN.description
-#: kappaSizeFixedN/options.description.main
-msgid "Lowest Expected Value for a fixed sample size."
 msgstr ""
 
 #: R/lollipop.b.R
@@ -75186,6 +75271,7 @@ msgstr ""
 msgid "Methodology Notes"
 msgstr ""
 
+#: R/kappaSizeFixedN.b.R
 #: R/kappaSizePower.b.R
 msgid "Methodology."
 msgstr ""
@@ -83451,6 +83537,12 @@ msgstr ""
 msgid "NOTE ON THE CLINICAL PENALTY"
 msgstr ""
 
+#: R/kappaSizeFixedN.b.R
+msgid ""
+"Note that kappa0 here is the agreement you anticipate observing, not a null "
+"hypothesis value as it is in kappaSizePower."
+msgstr ""
+
 #: R/kappaSizePower.b.R
 msgid ""
 "Note that kappa0 here is the null hypothesis value, whereas in kappaSizeCI "
@@ -84608,30 +84700,34 @@ msgid "Number of observations analyzed"
 msgstr ""
 
 #: kappaSizeCI/options/outcome.title
-#: kappaSizeFixedN/options/outcome.title
 msgid "Number of outcome level"
 msgstr ""
 
 #: kappaSizeCI/ui[0][0][0].label
-#: kappaSizeFixedN/ui[0][0][0].label
 msgid "Number of Outcome Level"
 msgstr ""
 
 #: kappaSizeCI/options/outcome.description.ui
-#: kappaSizeFixedN/options/outcome.description.ui
 msgid "Number of outcome level."
 msgstr ""
 
+#: kappaSizeFixedN/options/outcome.title
 #: kappaSizePower/options/outcome.title
 msgid "Number of outcome levels"
 msgstr ""
 
+#: kappaSizeFixedN/ui[0][0][0].label
 #: kappaSizePower/ui[0][0][0].label
 msgid "Number of Outcome Levels"
 msgstr ""
 
+#: kappaSizeFixedN/options/outcome.description.ui
 #: kappaSizePower/options/outcome.description.ui
 msgid "Number of outcome levels (categories) of the rated variable."
+msgstr ""
+
+#: R/kappaSizeFixedN.b.R
+msgid "Number of outcome levels must be 2, 3, 4, or 5."
 msgstr ""
 
 #: stagemigration/results/winRatioStageSpecific.columns.title
@@ -84750,12 +84846,12 @@ msgstr ""
 msgid "Number of Raters"
 msgstr ""
 
+#: kappaSizeFixedN/options/raters.description.ui
 #: kappaSizePower/options/raters.description.ui
 msgid "Number of raters who will each rate every subject (2 to 6)."
 msgstr ""
 
 #: kappaSizeCI/options/raters.description.ui
-#: kappaSizeFixedN/options/raters.description.ui
 msgid "Number of raters."
 msgstr ""
 
@@ -84892,6 +84988,10 @@ msgstr ""
 #: oneSurvival/results/onesurvTable1.columns.title
 #: parametricfrailty/results/overview.columns.title
 msgid "Number of Subjects"
+msgstr ""
+
+#: kappaSizeFixedN/options/n.description.ui
+msgid "Number of subjects available, each rated by all raters (at least 11)."
 msgstr ""
 
 #: recurrentsurvival/options/event_plot_subjects.description.ui
@@ -87662,7 +87762,6 @@ msgstr ""
 
 #: greyzoneroc/ui/outcomeLevel.label
 #: kappaSizeCI/ui[0][0][0][0]/outcome.label
-#: kappaSizeFixedN/ui[0][0][0][0]/outcome.label
 #: stratifiedparametric/options/outcomeLevel.title
 msgid "Outcome Level"
 msgstr ""
@@ -87680,6 +87779,7 @@ msgid ""
 msgstr ""
 
 #: R/clinicalscore.b.R
+#: kappaSizeFixedN/ui[0][0][0][0]/outcome.label
 #: kappaSizePower/ui[0][0][0][0]/outcome.label
 msgid "Outcome levels"
 msgstr ""
@@ -96826,13 +96926,13 @@ msgstr ""
 
 #: R/gsdesign.b.R
 #: package/analyses/kappaSizeCI.menuGroup
-#: package/analyses/kappaSizeFixedN.menuGroup
+#: package/analyses/kappaSizePower.menuGroup
 #: adaptivetrialdesign/results/operatingCharacteristics.columns.title
 #: advancedSurvivalPower/options/calc_type/power.title
 #: competingRisksPower/results/powerCurveTable.columns.title
 #: comprehensiveSurvivalPower/results/methodComparison.columns.title
 #: kappaSizeCI/options.menuGroup
-#: kappaSizeFixedN/options.menuGroup
+#: kappaSizePower/options.menuGroup
 #: kappaSizePower/ui[3][1][0]/power.label
 msgid "Power"
 msgstr ""
@@ -97125,8 +97225,8 @@ msgstr ""
 msgid "Power/sample size sensitivity across parameter ranges"
 msgstr ""
 
-#: package/analyses/kappaSizePower.menuGroup
-#: kappaSizePower/options.menuGroup
+#: package/analyses/kappaSizeFixedN.menuGroup
+#: kappaSizeFixedN/options.menuGroup
 msgid "PowerT"
 msgstr ""
 
@@ -98546,11 +98646,6 @@ msgstr ""
 
 #: factoranalysis/options/scoresPrefix.description
 msgid "Prefix for saved factor score variables"
-msgstr ""
-
-#: kappaSizeCI/ui[2][0]/kappa0.label
-#: kappaSizeFixedN/ui[1][0]/kappa0.label
-msgid "Preliminary value"
 msgstr ""
 
 #: epidemiosurvival/options/case_cohort_method/prentice.title
@@ -100280,6 +100375,7 @@ msgstr ""
 msgid "Proportional-Hazards Test (cox.zph)"
 msgstr ""
 
+#: R/kappaSizeFixedN.b.R
 #: R/kappaSizePower.b.R
 msgid ""
 "Proportions must be numbers separated by commas, semicolons or spaces (for "
@@ -100287,10 +100383,12 @@ msgid ""
 "Note that a decimal comma is not recognised - use a point, as in 0.20."
 msgstr ""
 
+#: R/kappaSizeFixedN.b.R
 #: R/kappaSizePower.b.R
 msgid "Proportions must sum to 1 (current sum = {sum})."
 msgstr ""
 
+#: R/kappaSizeFixedN.b.R
 #: R/kappaSizePower.b.R
 msgid ""
 "Proportions must use a decimal point, not a decimal comma: write 0.30, 0.70 "
@@ -100298,17 +100396,14 @@ msgid ""
 msgstr ""
 
 #: kappaSizeCI/ui[3].label
-#: kappaSizeFixedN/ui[2].label
 msgid "Proportions of Each Outcome Level"
 msgstr ""
 
 #: kappaSizeCI/options/props.title
-#: kappaSizeFixedN/options/props.title
 msgid "Proportions of outcome level"
 msgstr ""
 
 #: kappaSizeCI/options/props.description.ui
-#: kappaSizeFixedN/options/props.description.ui
 msgid "Proportions of outcome level."
 msgstr ""
 
@@ -105376,6 +105471,12 @@ msgstr ""
 msgid "Research Table One"
 msgstr ""
 
+#: R/kappaSizeFixedN.b.R
+msgid ""
+"Researchers anticipate an agreement of kappa = {kappa0} and have access to "
+"{n} subjects, each rated by {raters} raters."
+msgstr ""
+
 #: R/kappaSizePower.b.R
 msgid ""
 "Researchers would like to determine the required sample size to test the "
@@ -108351,6 +108452,13 @@ msgstr ""
 msgid "Sample Size (N)"
 msgstr ""
 
+#: R/kappaSizeFixedN.b.R
+msgid ""
+"Sample size (N) must be a whole number of at least 11. The kappaSize method "
+"is a large-sample approximation and its engine refuses any study of 10 or "
+"fewer subjects (received {n})."
+msgstr ""
+
 #: R/jjridges.b.R
 msgid ""
 "Sample size (n={n}) is below recommended minimum of {min} for reliable ridge "
@@ -108572,10 +108680,6 @@ msgstr ""
 
 #: R/jjcorrmat.b.R
 msgid "Sample size: %s"
-msgstr ""
-
-#: kappaSizeFixedN/options/n.description.ui
-msgid "Sample size."
 msgstr ""
 
 #: jforester/options/sample_sizes.title
@@ -115922,6 +116026,10 @@ msgstr ""
 msgid "Significance Level (alpha)"
 msgstr ""
 
+#: R/kappaSizeFixedN.b.R
+msgid "Significance level (alpha) must be between 0.001 and 0.20."
+msgstr ""
+
 #: methodcomparison/options/pb_alpha.title
 msgid "Significance Level (Passing-Bablok)"
 msgstr ""
@@ -115958,7 +116066,7 @@ msgid "Significance level for statistical tests and confidence intervals."
 msgstr ""
 
 #: kappaSizeFixedN/options/alpha.description.ui
-msgid "Significance level."
+msgid "Significance level of the one-sided lower confidence bound (capped at 0.20)."
 msgstr ""
 
 #: fragilityindex/options/testType.title
@@ -117431,6 +117539,7 @@ msgstr ""
 msgid "Spanning Header Text"
 msgstr ""
 
+#: R/kappaSizeFixedN.b.R
 #: R/kappaSizePower.b.R
 msgid "Sparse categories."
 msgstr ""
@@ -126758,6 +126867,16 @@ msgid ""
 "correction."
 msgstr ""
 
+#: R/kappaSizeFixedN.b.R
+msgid ""
+"The calculation did not converge to a usable answer: the search returned "
+"{bound}, which is below the lowest agreement the model allows for these "
+"prevalences (every agreement pattern must keep a non-negative probability). "
+"With this combination of sample size, anticipated kappa and category "
+"prevalences the large-sample approximation breaks down. Increase N, use a "
+"less extreme prevalence, or raise the significance level."
+msgstr ""
+
 #: R/jjpiestats.b.R
 msgid ""
 "The chart subtitle still reports an uncorrected Pearson chi-square - no "
@@ -127066,6 +127185,18 @@ msgid ""
 "The event time variable contains calendar dates, but the timeline uses raw "
 "numeric times, so these events cannot be placed on the time axis. Switch "
 "Time Input Type to Date/Time (or supply numeric event times) to show them."
+msgstr ""
+
+#: R/kappaSizeFixedN.b.R
+msgid "The expected lower bound for kappa is {bound}."
+msgstr ""
+
+#: R/kappaSizeFixedN.b.R
+msgid ""
+"The expected lower bound is {bound}, at or below zero, so even if the study "
+"observes the anticipated kappa it will not be able to rule out agreement no "
+"better than chance. Enrol more subjects, add raters, or relax the "
+"significance level."
 msgstr ""
 
 #: oddsratio/options/explanatory.description.main
@@ -128240,6 +128371,13 @@ msgstr ""
 msgid "These will be excluded from analysis."
 msgstr ""
 
+#: R/kappaSizeFixedN.b.R
+msgid ""
+"They would like to know how low the one-sided {conf}% lower confidence bound "
+"for kappa can be expected to fall - the smallest agreement the study would "
+"still be unable to rule out; every value below it is excluded."
+msgstr ""
+
 #: jforestmodel/options/line_size.description
 msgid "Thickness of confidence interval lines"
 msgstr ""
@@ -128623,6 +128761,10 @@ msgstr ""
 msgid ""
 "This rank-based measure is less sensitive to extreme values than Pearson "
 "correlation."
+msgstr ""
+
+#: R/kappaSizeFixedN.b.R
+msgid "This sample size cannot demonstrate agreement."
 msgstr ""
 
 #: R/clinicalscore.b.R
@@ -141215,6 +141357,16 @@ msgstr ""
 
 #: stagemigration/options/rfSamplingType/swr.title
 msgid "With Replacement"
+msgstr ""
+
+#: R/kappaSizeFixedN.b.R
+msgid ""
+"With the sample size already fixed, this reports the lower bound of the "
+"one-sided 100(1 - alpha)% confidence interval that the study can expect to "
+"achieve for the intraclass (Fleiss-type) kappa of the common-correlation "
+"model used by the kappaSize package (Donner and Eliasziw; Rotondi and "
+"Donner); for two raters with equal marginal frequencies this coincides with "
+"Cohen's kappa."
 msgstr ""
 
 #: R/nogoldstandard.b.R

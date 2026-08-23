@@ -61,14 +61,14 @@ children:
 
 
   - type: Label
-    label: "Kappa Level"
+    label: "Anticipated Agreement"
     children:
       - type: LayoutBox
         margin: large
         children:
           - type: TextBox
             name: kappa0
-            label: 'Preliminary value'
+            label: 'Anticipated kappa (kappa0)'
             format: number
 
 

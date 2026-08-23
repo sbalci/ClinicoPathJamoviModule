@@ -24,7 +24,7 @@ test_that("kappaSizeFixedN works for binary outcomes (2 categories)", {
   expect_true(nchar(results$text1$content) > 0)
 
   # Explanation should contain the descriptive sentence
-  content2 <- results$text2$content
+  content2 <- gsub("\\s+", " ", results$text2$content)   # wrapped at ~78 columns
   expect_match(content2, "expected lower bound")
   expect_match(content2, "100 subjects")
   expect_match(content2, "2 raters")
@@ -47,7 +47,7 @@ test_that("kappaSizeFixedN works for 3 categories", {
 
   expect_true(nchar(results$text1$content) > 0)
   expect_match(results$text2$content, "expected lower bound")
-  expect_match(results$text2$content, "150 subjects")
+  expect_match(gsub("\\s+", " ", results$text2$content), "150 subjects")
   expect_match(results$text2$content, "3 raters")
 })
 

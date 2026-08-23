@@ -3988,9 +3988,10 @@ lintr bug-set clean, all gates clean; 3-agent adversarial verification):
 ## kappaSize family — filed from the kappaSizePower release review (2026-08-23)
 
 - [ ] [statistics] `kappaSizeCI` still detects sparse cells by grepping kappaSize's marginal
-      `props[i] * n < 5` warning (`kappaSizeFixedN` fixed 2026-08-23: its `.CalcIT` is the same
-      chi-square over `P0..Pn` agreement cells, sparse judged at kappaL). Verify `CIBinary`'s
-      `.CalcIT` the same way, then port `.gofCells()`.
+      `props[i] * n < 5` warning (`kappaSizeFixedN` and `kappaSizePower` fixed 2026-08-23 with
+      Cochran's rule on the `P0..Pn` agreement cells). Verify `CIBinary`'s `.CalcIT` the same
+      way, then port `.gofCells()`; also check whether its CI search can walk outside the model
+      the way `FixedN*` does (negative agreement-pattern probabilities). 0 `.()` wraps there too.
 - [ ] [ui] `jamovi/js/kappasizeci.js` is a lowercase rename leftover that nothing binds; wire as
       `kappaSizeCI.events.js` like its two siblings, or delete.
 - [ ] [tooling] `tools/ui_harness/render_ui.sh` cannot render any analysis that has an events

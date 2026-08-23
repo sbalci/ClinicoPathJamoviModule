@@ -9,29 +9,33 @@ kappaSizeFixedNClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cla
     inherit = kappaSizeFixedNBase,
     private = list(
 
-        # TODO [meddecide audit 2026-05-14] - see docs/audit/MODULE_AUDIT_REPORT_20260514-1847.md
-        #   [i18n] 0 .() wraps; bootstrap jamovi/i18n/ then /prepare-translation kappaSizeFixedN
+        # Resolved 2026-08-23 (review): parameter-space check on the returned bound,
+        #   Cochran sparse-cell rule on the agreement-pattern cells at kappaL, wrapped
+        #   explanation, i18n wrapping of every user-facing string.
 
-        # Split the props string into tokens (comma / semicolon / pipe / whitespace separated).
-        # The separator set matches kappaSizeCI's so the same string is accepted by every
-        # member of the family; a user moving between them should not have to retype it.
-        .parsePropTokens = function(props) {
-            # U+00A0 (non-breaking space, what Word/Excel paste) is not in [:space:].
-            props <- gsub("\u{00A0}", " ", props, fixed = TRUE)
-            toks <- unlist(strsplit(props, "[,;|[:space:]]+"), use.names = FALSE)
-            toks[nzchar(toks)]
+        # Split the proportions string into numbers. Same format as the siblings
+        # (R/kappaSizePower.b.R:.parseProps): commas, semicolons, pipes or whitespace between
+        # values, decimal point only. Text pasted from Word or Excel carries U+00A0, and macOS /
+        # French locales emit U+202F (narrow no-break space); neither is in [:space:], so both
+        # are normalised first. The normalised string is returned too so that the decimal-comma
+        # diagnosis below re-reads the same text.
+        .parseProps = function(raw) {
+            raw  <- gsub("[\u{00A0}\u{202F}]", " ", raw)
+            toks <- unlist(strsplit(raw, "[,;|[:space:]]+"), use.names = FALSE)
+            toks <- toks[nzchar(trimws(toks))]
+            list(raw = raw, tokens = trimws(toks),
+                 values = suppressWarnings(as.numeric(trimws(toks))))
         },
 
         # Expected probability of every goodness-of-fit cell at agreement rho. kappaSize's
-        # FixedN* engines find the lower bound by walking rho down from kappa0 until the
-        # chi-square sum over AGREEMENT PATTERNS -- (n P_j(kappa0) - n P_j(rho))^2 / (n P_j(rho))
-        # -- crosses qchisq(1 - 2 alpha, 1). The expected counts in the denominator are the
-        # cells at rho = kappaL, so that is where sparseness matters. Same closed forms as
-        # R/kappaSizePower.b.R:.gofCells (binomial form for a binary outcome; Dirichlet-
-        # multinomial product for 3-5 categories), verified against every FixedN* .CalcIT for
-        # raters 2-6 to 1e-11. kappaSize's own warning checks only the category marginals
-        # props[i] * n, which with 6 raters and a 5% finding at n = 100 is exactly 5 (silent)
-        # while the pattern cells at kappaL are 2.5 / 0.17 / 0.007 / 0 / 0.98.
+        # FixedN* engines find the lower bound by walking rho down from kappa0 in steps of 0.001
+        # until the chi-square sum over AGREEMENT PATTERNS -- (n P_j(kappa0) - n P_j(rho))^2 /
+        # (n P_j(rho)) -- crosses qchisq(1 - 2 alpha, 1). The expected counts in the
+        # denominator are the cells at rho = kappaL, so that is where sparseness matters, and a
+        # rho at which any cell is negative is outside the common-correlation model altogether.
+        # Same closed forms as R/kappaSizePower.b.R:.gofCells (binomial form for a binary
+        # outcome; Dirichlet-multinomial product for 3-5 categories), verified against every
+        # FixedN* .CalcIT for raters 2-6 to 1e-11.
         .gofCells = function(outcome, raters, props, rho) {
             if (outcome == 2) {
                 p <- props[1]
@@ -46,152 +50,152 @@ kappaSizeFixedNClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cla
             }
         },
 
-        # Notes panel. kappaSizeCI carries the same two blocks; this analysis had none, so its
-        # only statement of method was the reference list and its only caveat was buried in the
-        # raw kappaSize summary text.
-        .buildNotices = function(kappaL_val, sparse_cells = FALSE, outcome = 2) {
-            info <- paste0(
-                "<div style='margin:6px 0; padding:8px 10px; border-left:3px solid #3c8dbc; background-color: rgba(72, 138, 188, 0.06); color: inherit;'>",
-                "<b>Methodology.</b> With the sample size already fixed, this reports the lower bound ",
-                "of the one-sided 100(1 \u{2212} \u{03B1})% confidence interval for Cohen's \u{03BA} that ",
-                "the study can expect to achieve, using the large-sample method implemented in the ",
-                "kappaSize package (Rotondi &amp; Donner). It answers &quot;given the subjects I have, ",
-                "how little agreement am I still unable to rule out?&quot; \u{2014} the mirror image of ",
-                "the sample-size question. Note that <b>kappa0 here is the agreement you anticipate ",
-                "observing</b>, not a null hypothesis value as it is in kappaSizePower.",
-                "</div>"
-            )
+        # Preformatted panes do not wrap; wrap at render time so translated text wraps too.
+        .wrap = function(x, width = 78) paste(strwrap(x, width = width), collapse = "\n"),
+
+        # Notes panel, same shape as the two siblings: warnings first, then the method.
+        # `sparse_*` carry the Cochran-rule verdict plus the numbers behind it so the notice
+        # can say how sparse, not just that it is.
+        .buildNotices = function(kappaL_val, sparse_cells = FALSE, outcome = 2,
+                                 sparse_min = NA_real_, sparse_below5 = NA_integer_,
+                                 sparse_total = NA_integer_) {
+            warn_div <- "<div style='margin:6px 0; padding:8px 10px; border-left:3px solid #ec971f; background-color: rgba(227, 144, 33, 0.07); color: inherit;'>"
+            red_div  <- "<div style='margin:6px 0; padding:8px 10px; border-left:3px solid #d9534f; background-color: rgba(222, 55, 55, 0.06); color: inherit;'>"
+            info_div <- "<div style='margin:6px 0; padding:8px 10px; border-left:3px solid #3c8dbc; background-color: rgba(72, 138, 188, 0.06); color: inherit;'>"
+            block <- function(div, title, ...)
+                paste0(div, "<b>", title, "</b> ", paste(c(...), collapse = " "), "</div>")
 
             warn <- ""
-
-            # Sparse goodness-of-fit cells (see .gofCells). kappaSize writes its own marginal
-            # version of this into the summary text once per rare category; it was reaching only
-            # the Summary pane and it watches the wrong quantity.
-            if (isTRUE(sparse_cells)) {
-                remedy <- if (outcome == 2)
-                    "Consider enriching the case series so the rare finding is more common (the calculation assumes the stated prevalence), adding subjects, or relaxing the significance level."
-                else
-                    "Consider collapsing rare categories or enrolling more subjects."
-                warn <- paste0(warn,
-                    "<div style='margin:6px 0; padding:8px 10px; border-left:3px solid #ec971f; background-color: rgba(227, 144, 33, 0.07); color: inherit;'>",
-                    "<b>Sparse categories.</b> At this sample size at least one agreement-pattern cell ",
-                    "(for example, exactly k of the raters calling the finding present, or all raters ",
-                    "agreeing on one category) has an expected count below five at the reported lower ",
-                    "bound. The calculation rests on a large-sample chi-square approximation, so the ",
-                    "bound shown is less dependable here. ", remedy,
-                    "</div>"
-                )
-            }
+            has_bound <- length(kappaL_val) == 1 && is.finite(kappaL_val)
 
             # A bound at or below zero is the clinically decisive case: the study cannot exclude
             # agreement no better than chance, whatever the point estimate turns out to be.
-            if (length(kappaL_val) == 1 && is.finite(kappaL_val) && kappaL_val <= 0) {
-                warn <- paste0(warn,
-                    "<div style='margin:6px 0; padding:8px 10px; border-left:3px solid #d9534f; background-color: rgba(222, 55, 55, 0.06); color: inherit;'>",
-                    "<b>This sample size cannot demonstrate agreement.</b> The expected lower bound is ",
-                    signif(kappaL_val, 4), ", at or below zero, so even if the study observes the ",
-                    "anticipated kappa it will not be able to rule out agreement no better than chance. ",
-                    "Enrol more subjects, use a less extreme category distribution, add raters, or ",
-                    "relax the significance level.",
-                    "</div>"
-                )
+            # "Use a less extreme prevalence" used to be offered here, but in the low-kappa0 /
+            # small-n region that triggers this block balancing the prevalence LOWERS the bound
+            # (kappa0 0.2, n 30: prevalence 0.30 -> -0.088, 0.50 -> -0.099, 0.05 -> -0.025), so
+            # only the three remedies that move the bound the right way are listed.
+            if (has_bound && kappaL_val <= 0) {
+                warn <- paste0(warn, block(red_div,
+                    .("This sample size cannot demonstrate agreement."),
+                    jmvcore::format(
+                        .("The expected lower bound is {bound}, at or below zero, so even if the study observes the anticipated kappa it will not be able to rule out agreement no better than chance. Enrol more subjects, add raters, or relax the significance level."),
+                        bound = signif(kappaL_val, 4))))
             }
+
+            # Sparse goodness-of-fit cells (see .gofCells), judged by Cochran's rule: no expected
+            # count below 1 and at most one cell in five below 5. A bare "any cell < 5" flagged
+            # the default design with four raters on one cell of 1.85 and so fired on nearly
+            # every multi-rater study, hiding the cases that matter (six raters: 1.08 and 0.11).
+            if (isTRUE(sparse_cells)) {
+                remedy <- if (outcome == 2)
+                    .("Consider enriching the case series so the rare finding is more common (the calculation assumes the stated prevalence), adding subjects, or relaxing the significance level.")
+                else
+                    .("Consider collapsing rare categories or enrolling more subjects.")
+                warn <- paste0(warn, block(warn_div,
+                    .("Sparse categories."),
+                    jmvcore::format(
+                        .("At this sample size the agreement-pattern cells (for example, exactly k of the raters calling the finding present, or all raters agreeing on one category) are too sparse at the reported lower bound: the smallest expected count is {min} and {below} of {total} cells are below 5. The calculation rests on a large-sample chi-square approximation, so the bound shown is less dependable here."),
+                        min = signif(sparse_min, 2), below = sparse_below5, total = sparse_total),
+                    remedy))
+            }
+
+            info <- block(info_div,
+                .("Methodology."),
+                .("With the sample size already fixed, this reports the lower bound of the one-sided 100(1 - alpha)% confidence interval that the study can expect to achieve for the intraclass (Fleiss-type) kappa of the common-correlation model used by the kappaSize package (Donner and Eliasziw; Rotondi and Donner); for two raters with equal marginal frequencies this coincides with Cohen's kappa."),
+                .("It answers 'given the subjects I have, how little agreement am I still unable to rule out?' - the mirror image of the sample-size question; every kappa below the bound is excluded."),
+                .("kappaSize searches downward in steps of 0.001 and reports the first value rejected, so the bound is conservative by at most 0.001 and its third decimal is the search resolution, not estimation precision."),
+                .("Note that kappa0 here is the agreement you anticipate observing, not a null hypothesis value as it is in kappaSizePower."))
 
             paste0(warn, info)
         },
 
-        # Human-readable list: "0.20 and 0.80" or "0.20, 0.30, and 0.50"
+        # Human-readable list: "0.20 and 0.80" or "0.20, 0.30 and 0.50"
         .formatProps = function(tokens) {
             k <- length(tokens)
             if (k == 0) return("")
             if (k == 1) return(tokens)
-            if (k == 2) return(paste(tokens, collapse = " and "))
-            paste0(paste(tokens[-k], collapse = ", "), ", and ", tokens[k])
+            if (k == 2) return(jmvcore::format(.("{a} and {b}"), a = tokens[1], b = tokens[2]))
+            jmvcore::format(.("{head} and {last}"),
+                            head = paste(tokens[-k], collapse = ", "), last = tokens[k])
         },
 
-        # Validate all inputs; reject with an actionable message on failure.
-        # Kept outside any tryCatch so jmvcore::reject surfaces as a proper
-        # jamovi error rather than being swallowed into text output.
-        .validateInputs = function(outcome, kappa0, props4, alpha, n) {
+        # Validate all inputs; reject with an actionable message on failure. Kept outside any
+        # tryCatch so jmvcore::reject surfaces as a proper jamovi error.
+        # The generated option classes already enforce the List levels, the Integer type and
+        # the Number ranges before .run() is entered, so the range clauses here are BACKSTOPS
+        # for an R caller whose option bounds may one day be relaxed - they are not reached
+        # from the jamovi GUI.
+        .validateInputs = function(outcome, kappa0, parsed, alpha, n) {
+            props4 <- parsed$values
+
             if (!outcome %in% c(2, 3, 4, 5))
-                jmvcore::reject("Number of outcome levels must be 2, 3, 4, or 5.", code = NULL)
+                jmvcore::reject(.("Number of outcome levels must be 2, 3, 4, or 5."), code = NULL)
 
             if (length(props4) == 0 || any(is.na(props4)))
                 jmvcore::reject(
-                    "Proportions must be numeric values separated by commas (e.g. '0.20, 0.80').",
+                    .("Proportions must be numbers separated by commas, semicolons or spaces (for example '0.20, 0.80'). One or more entries could not be read as a number. Note that a decimal comma is not recognised - use a point, as in 0.20."),
                     code = NULL)
 
-            # A binary outcome may be given as one prevalence or as two proportions summing
-            # to 1 - kappaSize::FixedNBinary accepts both (it does props <- props[1] after the
-            # sum check). This used to demand exactly two, so the same "0.30" that works in
-            # kappaSizePower and kappaSizeCI was rejected here.
             # "0,30 0,70" splits into 0, 30, 0, 70 and would be reported as the wrong COUNT of
             # proportions, which sends the user looking in the wrong place. Diagnose the decimal
             # separator first, as the two siblings do.
             if (any(props4 >= 1, na.rm = TRUE)) {
                 as_decimal <- suppressWarnings(as.numeric(trimws(unlist(strsplit(
-                    gsub("([0-9]),([0-9])", "\\1.\\2",
-                         gsub("\u{00A0}", " ", self$options$props, fixed = TRUE)),
+                    gsub("([0-9]),([0-9])", "\\1.\\2", parsed$raw),
                     "[;|[:space:]]+")))))
                 as_decimal <- as_decimal[!is.na(as_decimal)]
                 if (length(as_decimal) > 0 && all(as_decimal > 0 & as_decimal < 1))
                     jmvcore::reject(
-                        "Proportions must use a decimal point, not a decimal comma: write 0.30, 0.70 rather than 0,30 0,70.",
+                        .("Proportions must use a decimal point, not a decimal comma: write 0.30, 0.70 rather than 0,30 0,70."),
                         code = NULL)
             }
 
+            # A binary outcome may be given as one prevalence or as two proportions summing
+            # to 1 - kappaSize::FixedNBinary accepts both (it does props <- props[1] after the
+            # sum check); the 3/4/5-category engines require exactly N proportions.
             if (outcome == 2) {
                 if (!(length(props4) %in% c(1L, 2L)))
                     jmvcore::reject(
-                        paste0("For a binary outcome enter either one prevalence value or two ",
-                               "proportions that sum to 1 (received ", length(props4), ")."),
+                        jmvcore::format(
+                            .("For a binary outcome enter either one prevalence value or two proportions that sum to 1 (received {got})."),
+                            got = length(props4)),
                         code = NULL)
             } else if (length(props4) != outcome) {
                 jmvcore::reject(
-                    paste0("Expected ", outcome, " proportions for ", outcome,
-                           " outcome levels, but got ", length(props4),
-                           ". Please provide one proportion per outcome level."),
+                    jmvcore::format(
+                        .("Enter exactly {k} proportions for {k} outcome levels (received {got})."),
+                        k = outcome, got = length(props4)),
                     code = NULL)
             }
 
             if (any(props4 <= 0) || any(props4 >= 1))
-                jmvcore::reject("Each proportion must be between 0 and 1 (exclusive).", code = NULL)
+                jmvcore::reject(.("Each proportion must be strictly between 0 and 1."), code = NULL)
 
-            # Only meaningful when two or more proportions were given: a single binary
-            # prevalence is not supposed to sum to 1.
-            # Use the engine's own predicate (abs(sum - 1) >= 0.001) rather than all.equal's
-            # <= 0.001, so the module's clearer message is not bypassed at exactly sum = 1.001.
+            # Only meaningful when two or more proportions were given. Uses the engine's own
+            # predicate (abs(sum - 1) >= 0.001) so its message is never bypassed at sum = 1.001.
             if (length(props4) >= 2 && abs(sum(props4) - 1) >= 0.001)
                 jmvcore::reject(
-                    paste0("Proportions must sum to 1. Current sum is ", round(sum(props4), 4), "."),
+                    jmvcore::format(
+                        .("Proportions must sum to 1 (current sum = {sum})."),
+                        sum = round(sum(props4), 4)),
                     code = NULL)
 
-            # !is.finite covers NA, NaN and Inf. Inf used to pass every clause here
-            # (is.na(Inf) FALSE, Inf < 2 FALSE, Inf != round(Inf) FALSE) and then hung the
-            # engine: its search loop never terminates because the test statistic is NaN.
-            # The floor is 11, not 2: every kappaSize FixedN* engine contains
-            # `if (n <= 10) stop("Sorry, your study should enroll at least 10 subjects.")`,
-            # so n of 2..10 reached the engine only to come back as a vendor error string.
-            if (!is.finite(n) || n != round(n))
+            # Backstop: every kappaSize FixedN* engine stops on n <= 10, and an Inf used to
+            # hang its search loop (the test statistic becomes NaN).
+            if (!is.finite(n) || n < 11)
                 jmvcore::reject(
-                    "Sample size (N) must be a whole number.", code = NULL)
-
-            if (n < 11)
-                jmvcore::reject(
-                    paste0("Sample size (N) must be at least 11. The kappaSize method is a ",
-                           "large-sample approximation and its engine refuses any study of 10 ",
-                           "or fewer subjects (received ", n, ")."),
+                    jmvcore::format(
+                        .("Sample size (N) must be a whole number of at least 11. The kappaSize method is a large-sample approximation and its engine refuses any study of 10 or fewer subjects (received {n})."),
+                        n = n),
                     code = NULL)
 
-            if (is.na(kappa0) || kappa0 <= 0 || kappa0 >= 1)
-                jmvcore::reject("kappa0 must be between 0 and 1 (exclusive).", code = NULL)
+            # Backstops for the compiled (0.01, 0.99) and (0.001, 0.20) bounds.
+            if (!is.finite(kappa0) || kappa0 <= 0 || kappa0 >= 1)
+                jmvcore::reject(.("kappa0 must be strictly between 0 and 1."), code = NULL)
 
-            # Match the compiled option bounds. The old (0,1) test was a false safety net:
-            # an R caller passing alpha = 0.5 reached the engine and got an opaque
-            # "missing value where TRUE/FALSE needed".
             if (!is.finite(alpha) || alpha < 0.001 || alpha > 0.20)
                 jmvcore::reject(
-                    "Significance level (alpha) must be between 0.001 and 0.20.", code = NULL)
+                    .("Significance level (alpha) must be between 0.001 and 0.20."), code = NULL)
 
             invisible(TRUE)
         },
@@ -199,8 +203,7 @@ kappaSizeFixedNClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cla
         .run = function() {
 
             # Blank the panels first: .validateInputs() rejects before anything is written, so a
-            # failed re-run used to leave the PREVIOUS run's numbers on screen with a red error
-            # above them. Both siblings clear up front.
+            # failed re-run must not leave the PREVIOUS run's numbers on screen under the error.
             self$results$text1$setContent("")
             self$results$text_summary$setContent("")
             self$results$text2$setContent("")
@@ -208,23 +211,14 @@ kappaSizeFixedNClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cla
 
             outcome <- as.numeric(self$options$outcome)
             kappa0  <- self$options$kappa0
-            props   <- self$options$props
             raters  <- as.numeric(self$options$raters)
             alpha   <- self$options$alpha
             n       <- self$options$n
 
-            props3 <- private$.parsePropTokens(props)
-            props4 <- suppressWarnings(as.numeric(props3))
+            parsed <- private$.parseProps(self$options$props)
+            props4 <- parsed$values
 
-            # Validate before any computation so failures surface as a clean
-            # jamovi error instead of an opaque kappaSize crash / silently
-            # truncated proportions.
-            private$.validateInputs(outcome, kappa0, props4, alpha, n)
-
-            if (!requireNamespace('kappaSize', quietly = TRUE))
-                jmvcore::reject(
-                    "The 'kappaSize' package is required but not installed. Install it with install.packages('kappaSize').",
-                    code = NULL)
+            private$.validateInputs(outcome, kappa0, parsed, alpha, n)
 
             kappa_fn <- switch(
                 as.character(outcome),
@@ -234,89 +228,95 @@ kappaSizeFixedNClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cla
                 "5" = kappaSize::FixedN5Cats
             )
 
-            # Convert any kappaSize error into a readable jamovi message. The
-            # reject() runs in the error handler (after tryCatch has returned),
-            # so it propagates normally rather than being re-caught.
+            # Convert any kappaSize error into a readable jamovi message. The reject() runs in
+            # the error handler (after tryCatch has returned), so it propagates normally.
+            # n goes in as an integer: the engine cat()s the value it was given, and a double
+            # of 100000 prints as "1e+05" in the Analysis result and Summary panes.
             result <- tryCatch(
                 kappa_fn(
                     kappa0 = kappa0,
-                    n      = n,
+                    n      = as.integer(n),
                     props  = props4,
                     alpha  = alpha,
                     raters = raters
                 ),
                 error = function(e)
                     jmvcore::reject(
-                        paste0("kappaSize could not compute the expected lower bound: ",
-                               conditionMessage(e)),
+                        jmvcore::format(
+                            .("kappaSize could not compute the expected lower bound: {error}"),
+                            error = conditionMessage(e)),
                         code = NULL)
             )
 
-            # Cohen's kappa is bounded below by -1, but kappaSize's search decrements rho from
-            # kappa0 by 0.001 with no floor, so an underpowered design walks straight past it:
-            # kappa0 = 0.01, n = 11, prevalence 0.02, alpha = 0.001 returns kappaL = -23.78.
-            # Printing that as "a lower limit for kappa" is meaningless.
+            # kappaSize's search decrements rho from kappa0 by 0.001 with no floor, and an
+            # underpowered design walks straight out of the common-correlation model: the
+            # probability of "all raters call the finding present" is p^r (1 - rho) + rho p,
+            # which turns negative below -p^(r-1) / (1 - p^(r-1)). With prevalence 0.02, three
+            # raters, kappa0 0.01, n 100 and alpha 0.2 the engine returns -0.841 (model floor
+            # -0.0004) and with prevalence 0.02, two raters, n 11, alpha 0.001 it returns -23.78.
+            # Neither is a lower limit for kappa; a "< -1" check catches only the second.
             kappaL_val <- suppressWarnings(as.numeric(result$kappaL))
-            if (length(kappaL_val) == 1 && is.finite(kappaL_val) && kappaL_val < -1)
+            has_bound  <- length(kappaL_val) == 1 && is.finite(kappaL_val)
+            cells <- if (has_bound) private$.gofCells(outcome, raters, props4, kappaL_val)
+                     else NA_real_
+            if (!has_bound || !all(is.finite(cells)) || any(cells < 0))
                 jmvcore::reject(
-                    paste0("The calculation did not converge to a usable answer: it returned a ",
-                           "lower bound of ", signif(kappaL_val, 4), ", and Cohen's kappa cannot ",
-                           "be below -1. With this combination of sample size, anticipated kappa ",
-                           "and category prevalences the large-sample approximation breaks down. ",
-                           "Increase N, use a less extreme prevalence, or raise the significance ",
-                           "level."),
+                    jmvcore::format(
+                        .("The calculation did not converge to a usable answer: the search returned {bound}, which is below the lowest agreement the model allows for these prevalences (every agreement pattern must keep a non-negative probability). With this combination of sample size, anticipated kappa and category prevalences the large-sample approximation breaks down. Increase N, use a less extreme prevalence, or raise the significance level."),
+                        bound = if (has_bound) signif(kappaL_val, 4) else "NA"),
                     code = NULL)
 
-            prev_txt <- if (outcome == 2 && length(props3) == 1) {
-                paste0("Further suppose that the prevalence of the trait is ",
-                       private$.formatProps(props3), ".")
-            } else {
-                paste0("Further suppose that the proportions of the outcome categories are ",
-                       private$.formatProps(props3), ".")
-            }
-
-            # "determine the expected lower bound for kappa0=0.6" reads as though the bound
-            # belonged to kappa0. It does not: kappa0 is the agreement the researchers ANTICIPATE
-            # observing, and the bound is the worst case still compatible with it at this n.
-            text2 <- paste0(
-                "Researchers anticipate an agreement of kappa = ", kappa0,
-                " and have access to ", base::format(n, scientific = FALSE),
-                " subjects rated by ", raters, " raters.\n",
-                prev_txt,
-                "\nThey would like to know the lowest value of kappa that the study can expect to\n",
-                "rule out - the lower bound of the one-sided ",
-                base::format(100 * (1 - alpha), scientific = FALSE), "% confidence interval.",
-                if (length(kappaL_val) == 1 && is.finite(kappaL_val))
-                    paste0("\nThe expected lower bound for kappa is ", signif(kappaL_val, 4), ".",
-                           if (kappaL_val <= 0)
-                               paste0(" A bound at or below zero means this many subjects cannot ",
-                                      "rule out agreement no better than chance.")
-                           else "")
-                else "")
-
-            # capture.output(print(.)) rather than the raw object: setContent then stores a plain
-            # string, which is what the other two members of the family store and what serialises
-            # predictably. Same visible text either way.
+            # --- Populate outputs ---------------------------------------------
             # The engine prints its marginal cell-count warning once per rare category (five
             # times for five levels); keep the first, the Notes panel carries the real check.
             dedupe <- function(lines)
                 lines[!(duplicated(lines) & grepl("expected cell count", lines, fixed = TRUE))]
             self$results$text1$setContent(
                 paste(dedupe(utils::capture.output(print(result))), collapse = "\n"))
+            self$results$text_summary$setContent(
+                paste(dedupe(utils::capture.output(summary(result))), collapse = "\n"))
+
+            prev_txt <- if (outcome == 2 && length(parsed$tokens) == 1) {
+                jmvcore::format(.("Further suppose that the prevalence of the trait is {p}."),
+                                p = parsed$tokens[1])
+            } else {
+                jmvcore::format(
+                    .("Further suppose that the proportions of the outcome categories are {props}."),
+                    props = private$.formatProps(parsed$tokens))
+            }
+
+            # A lower confidence bound is the smallest kappa still compatible with the
+            # anticipated result; everything BELOW it is ruled out. The old sentence ("the lowest
+            # value of kappa that the study can expect to rule out") said the opposite.
+            text2 <- paste0(
+                private$.wrap(paste(
+                    jmvcore::format(
+                        .("Researchers anticipate an agreement of kappa = {kappa0} and have access to {n} subjects, each rated by {raters} raters."),
+                        kappa0 = kappa0, n = base::format(n, scientific = FALSE),
+                        raters = raters),
+                    prev_txt)),
+                "\n",
+                private$.wrap(jmvcore::format(
+                    .("They would like to know how low the one-sided {conf}% lower confidence bound for kappa can be expected to fall - the smallest agreement the study would still be unable to rule out; every value below it is excluded."),
+                    conf = base::format(100 * (1 - alpha), scientific = FALSE))),
+                "\n",
+                private$.wrap(jmvcore::format(
+                    .("The expected lower bound for kappa is {bound}."),
+                    bound = signif(kappaL_val, 4))),
+                if (kappaL_val <= 0)
+                    paste0("\n", private$.wrap(
+                        .("A bound at or below zero means this many subjects cannot rule out agreement no better than chance.")))
+                else "")
             self$results$text2$setContent(text2)
 
-            summary_text <- paste(dedupe(utils::capture.output(summary(result))),
-                                  collapse = "\n")
-            self$results$text_summary$setContent(summary_text)
-
-            # Sparseness is judged at the lower bound the engine found (its chi-square
-            # denominators are n * P_j(kappaL)); fall back to kappa0 if no bound came back.
-            rho   <- if (length(kappaL_val) == 1 && is.finite(kappaL_val) && kappaL_val > 0)
-                kappaL_val else kappa0
-            cells <- private$.gofCells(outcome, raters, props4, rho)
+            # Cochran's rule on the expected counts at the reported bound (see .buildNotices).
+            e <- cells * n
             self$results$notices$setContent(private$.buildNotices(
                 kappaL_val,
-                sparse_cells = any(cells * n < 5),
-                outcome = outcome))
+                sparse_cells  = any(e < 1) || mean(e < 5) > 0.2,
+                outcome       = outcome,
+                sparse_min    = min(e),
+                sparse_below5 = sum(e < 5),
+                sparse_total  = length(e)))
         })
 )
