@@ -298,3 +298,141 @@ test_that("every declared option is read by the backend", {
         grepl(paste0("options\\$", o, "\\b"), backend), logical(1))]
     expect_equal(unread, character(0))
 })
+
+
+# --- second release-review pass -----------------------------------------------------------
+
+test_that("every pane renders the bound identically", {
+    # text1 is kappaSize's own cat() output (7 significant digits); the explanation used
+    # signif(, 4) and so printed a different number for the same quantity on the same screen
+    # whenever kappa0 carried more than three decimals.
+    res <- fn_run(kappa0 = 0.61234, props = "0.30, 0.70")
+    expect_match(fn_line(res), "lower limit for kappa of 0.45334", fixed = TRUE)
+    expect_match(flat(res$text2$content),
+                 "The expected lower bound for kappa is 0.45334.", fixed = TRUE)
+
+    # and the 0.001 walk's floating-point drift stays hidden in both
+    drift <- fn_run(kappa0 = 0.45, props = "0.07", raters = "5", alpha = 0.02, n = 25)
+    expect_match(fn_line(drift), "lower limit for kappa of 0.082", fixed = TRUE)
+    expect_match(flat(drift$text2$content),
+                 "The expected lower bound for kappa is 0.082.", fixed = TRUE)
+    expect_false(grepl("0.0819999", drift$text2$content, fixed = TRUE))
+})
+
+
+test_that("the Notes panel says the bound is a best case, not a guarantee", {
+    # kappaL is what the study reaches only if the observed agreement lands exactly on
+    # kappa0; about half of such studies do worse. Without this a planner reads the bound
+    # as a floor the study is guaranteed to clear.
+    notes <- fn_run()$notices$content
+    expect_match(notes, "lands exactly on kappa0", fixed = TRUE)
+    expect_match(notes, "planning expectation rather than a guarantee", fixed = TRUE)
+})
+
+
+test_that("the methodological sources are cited, not just named in prose", {
+    # The Methodology note credits Donner & Eliasziw and Rotondi & Donner; both belong in
+    # refs so the reference list a user exports actually contains them.
+    r_yaml <- paste(readLines("../../jamovi/kappaSizeFixedN.r.yaml", warn = FALSE), collapse = "\n")
+    for (key in c("donnerEliasziwKappaGOF", "rotondiDonnerKappaCI"))
+        expect_match(r_yaml, key, fixed = TRUE)
+
+    refs <- paste(readLines("../../jamovi/00refs.yaml", warn = FALSE), collapse = "\n")
+    for (key in c("donnerEliasziwKappaGOF:", "rotondiDonnerKappaCI:"))
+        expect_match(refs, key, fixed = TRUE)
+})
+
+
+test_that("the shipped example file runs and its quoted bounds are the real ones", {
+    skip_if_not_installed("kappaSize")
+    path <- "../../inst/examples/kappasizefixedn_example.R"
+    skip_if_not(file.exists(path))
+    lines <- readLines(path, warn = FALSE)
+    ex <- parse(path, keep.source = TRUE)
+    srcs <- utils::getSrcref(ex)
+
+    calls <- list(); starts <- integer()
+    for (i in seq_along(ex)) {
+        e <- ex[[i]]
+        cal <- if (is.call(e) && identical(e[[1]], as.name("kappaSizeFixedN"))) e
+               else if (is.call(e) && identical(e[[1]], as.name("<-")) && is.call(e[[3]]) &&
+                        identical(e[[3]][[1]], as.name("kappaSizeFixedN"))) e[[3]] else NULL
+        if (!is.null(cal)) {
+            calls[[length(calls) + 1]] <- cal
+            starts <- c(starts, as.integer(srcs[[i]])[3])
+        }
+    }
+    expect_gt(length(calls), 10)
+
+    quoted <- grep("^# Result: kappaL = ", lines)
+    for (i in seq_along(calls)) {
+        obj <- eval(calls[[i]], envir = new.env(parent = globalenv()))
+        got <- sub("[.] *$", "", sub(".*kappa of ", "",
+                                     strsplit(trimws(obj$text1$content), "\n")[[1]][1]))
+        q <- quoted[quoted > starts[i]][1]
+        if (!is.na(q))
+            expect_identical(got, sub("^# Result: kappaL = ", "", lines[q]),
+                             info = paste("example call", i))
+        # the bound is a confidence limit around kappa0 and can never sit above it
+        expect_lt(as.numeric(got), as.numeric(as.list(calls[[i]])$kappa0))
+    }
+})
+
+
+test_that("the shipped example file does not resurrect the power framing", {
+    path <- "../../inst/examples/kappasizefixedn_example.R"
+    skip_if_not(file.exists(path))
+    txt <- paste(readLines(path, warn = FALSE), collapse = "\n")
+    # kappa0 is the ANTICIPATED value here, and nothing is tested; the previous version of
+    # this file called it a null hypothesis and the bound a "minimum detectable kappa",
+    # which inverts the direction of the answer (kappaL is always BELOW kappa0).
+    # The file now names those phrases only to forbid them, so match the assertive forms
+    # the old version actually used rather than any mention of the words.
+    expect_false(grepl("Null hypothesis", txt, fixed = TRUE))
+    expect_false(grepl("Output: Lowest detectable kappa", txt, fixed = TRUE))
+    expect_false(grepl("returns the LOWEST kappa value detectable", txt, fixed = TRUE))
+    expect_match(txt, "It is NOT a null", fixed = TRUE)
+    expect_match(txt, "ALWAYS BELOW kappa0", fixed = TRUE)
+})
+
+
+test_that("the shipped teaching datasets do not teach the power framing", {
+    # kappasizefixedn_power_cases$teaching_point used to assert, among other things, that
+    # "More categories reduce detection capability". At balanced proportions the opposite is
+    # true for this method (n=100, kappa0=0.50, 2 raters: 2 cats -> 0.345, 5 cats -> 0.397),
+    # so the datasets now quote the computed bound instead of claiming a direction.
+    for (nm in c("kappasizefixedn_scenarios_comprehensive",
+                 "kappasizefixedn_power_cases",
+                 "kappasizefixedn_validation_cases")) {
+        f <- system.file("..", "data", paste0(nm, ".rda"), package = "ClinicoPath")
+        if (!file.exists(f)) f <- file.path("../../data", paste0(nm, ".rda"))
+        skip_if_not(file.exists(f), paste("missing", nm))
+        e <- new.env(); load(f, envir = e); d <- get(ls(e)[1], envir = e)
+        chr <- names(d)[vapply(d, is.character, TRUE)]
+        offenders <- unlist(lapply(chr, function(cc)
+            d[[cc]][grepl("detectable|can we detect|null hypothes", d[[cc]], ignore.case = TRUE)]))
+        expect_length(offenders, 0L)
+    }
+})
+
+
+test_that("kappasizefixedn_power_cases quotes the bound this function actually returns", {
+    skip_if_not_installed("kappaSize")
+    f <- "../../data/kappasizefixedn_power_cases.rda"
+    skip_if_not(file.exists(f))
+    e <- new.env(); load(f, envir = e); d <- as.data.frame(get(ls(e)[1], envir = e))
+    for (i in seq_len(nrow(d))) {
+        res <- ClinicoPath::kappaSizeFixedN(
+            outcome = as.character(d$outcome[i]), kappa0 = d$kappa0[i],
+            props = d$proportions[i], raters = as.character(d$raters[i]),
+            alpha = d$alpha[i], n = as.integer(d$n[i]))
+        got <- as.numeric(sub("[.] *$", "", sub(".*kappa of ", "",
+                          strsplit(trimws(res$text1$content), "\n")[[1]][1])))
+        expect_identical(
+            d$expected_pattern[i],
+            sprintf("Lower bound %s; %s below kappa0",
+                    formatC(got, format = "f", digits = 3),
+                    formatC(d$kappa0[i] - got, format = "f", digits = 3)),
+            info = d$case_name[i])
+    }
+})

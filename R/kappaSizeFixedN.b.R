@@ -53,6 +53,14 @@ kappaSizeFixedNClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cla
         # Preformatted panes do not wrap; wrap at render time so translated text wraps too.
         .wrap = function(x, width = 78) paste(strwrap(x, width = width), collapse = "\n"),
 
+        # One rendering of the bound for every pane. kappaSize prints kappaL with cat(), i.e.
+        # at getOption("digits") = 7 significant digits, so anything narrower disagrees with
+        # the Analysis result pane on the same screen: signif(, 4) turned the engine's
+        # "0.45334" (kappa0 = 0.61234) into "0.4533" in the explanation. Seven digits also
+        # absorbs the drift the 0.001 walk accumulates (0.0819999999999997 -> "0.082").
+        .fmtBound = function(x)
+            base::format(x, digits = 7, scientific = FALSE, trim = TRUE),
+
         # Notes panel, same shape as the two siblings: warnings first, then the method.
         # `sparse_*` carry the Cochran-rule verdict plus the numbers behind it so the notice
         # can say how sparse, not just that it is.
@@ -79,7 +87,7 @@ kappaSizeFixedNClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cla
                     .("This sample size cannot demonstrate agreement."),
                     jmvcore::format(
                         .("The expected lower bound is {bound}, at or below zero, so even if the study observes the anticipated kappa it will not be able to rule out agreement no better than chance. Enrol more subjects, add raters, or relax the significance level."),
-                        bound = signif(kappaL_val, 4))))
+                        bound = private$.fmtBound(kappaL_val))))
             }
 
             # Sparse goodness-of-fit cells (see .gofCells), judged by Cochran's rule: no expected
@@ -104,6 +112,7 @@ kappaSizeFixedNClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cla
                 .("With the sample size already fixed, this reports the lower bound of the one-sided 100(1 - alpha)% confidence interval that the study can expect to achieve for the intraclass (Fleiss-type) kappa of the common-correlation model used by the kappaSize package (Donner and Eliasziw; Rotondi and Donner); for two raters with equal marginal frequencies this coincides with Cohen's kappa."),
                 .("It answers 'given the subjects I have, how little agreement am I still unable to rule out?' - the mirror image of the sample-size question; every kappa below the bound is excluded."),
                 .("kappaSize searches downward in steps of 0.001 and reports the first value rejected, so the bound is conservative by at most 0.001 and its third decimal is the search resolution, not estimation precision."),
+                .("This is the bound the study reaches if the agreement it observes lands exactly on kappa0. Roughly half of such studies will observe less agreement than anticipated and end with a lower bound below the figure shown, so read it as a planning expectation rather than a guarantee."),
                 .("Note that kappa0 here is the agreement you anticipate observing, not a null hypothesis value as it is in kappaSizePower."))
 
             paste0(warn, info)
@@ -263,7 +272,7 @@ kappaSizeFixedNClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cla
                 jmvcore::reject(
                     jmvcore::format(
                         .("The calculation did not converge to a usable answer: the search returned {bound}, which is below the lowest agreement the model allows for these prevalences (every agreement pattern must keep a non-negative probability). With this combination of sample size, anticipated kappa and category prevalences the large-sample approximation breaks down. Increase N, use a less extreme prevalence, or raise the significance level."),
-                        bound = if (has_bound) signif(kappaL_val, 4) else "NA"),
+                        bound = if (has_bound) private$.fmtBound(kappaL_val) else "NA"),
                     code = NULL)
 
             # --- Populate outputs ---------------------------------------------
@@ -302,7 +311,7 @@ kappaSizeFixedNClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cla
                 "\n",
                 private$.wrap(jmvcore::format(
                     .("The expected lower bound for kappa is {bound}."),
-                    bound = signif(kappaL_val, 4))),
+                    bound = private$.fmtBound(kappaL_val))),
                 if (kappaL_val <= 0)
                     paste0("\n", private$.wrap(
                         .("A bound at or below zero means this many subjects cannot rule out agreement no better than chance.")))

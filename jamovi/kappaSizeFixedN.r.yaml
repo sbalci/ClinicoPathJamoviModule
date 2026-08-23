@@ -51,6 +51,8 @@ items:
 refs:
     - ClinicoPathJamoviModule
     - kappaSize
+    - donnerEliasziwKappaGOF
+    - rotondiDonnerKappaCI
 
 
 

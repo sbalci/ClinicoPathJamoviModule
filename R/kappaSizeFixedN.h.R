@@ -101,7 +101,9 @@ kappaSizeFixedNResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
                 title="Lowest Expected Value for a fixed sample size",
                 refs=list(
                     "ClinicoPathJamoviModule",
-                    "kappaSize"))
+                    "kappaSize",
+                    "donnerEliasziwKappaGOF",
+                    "rotondiDonnerKappaCI"))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="notices",

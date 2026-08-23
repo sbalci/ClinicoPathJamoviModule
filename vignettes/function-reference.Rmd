@@ -121,11 +121,11 @@ Three complementary functions for comprehensive kappa agreement study planning:
 
 #### kappasizefixedn ✨
 **Internal:** `kappaSizeFixedN`
-**Purpose:** Reverse calculation - detectable kappa for fixed sample size
+**Purpose:** For a sample size that is already fixed, the expected lower bound of the one-sided confidence interval for kappa
 **When to use:** Resource-constrained studies, completed trials, QA programs, feasibility
-**Approach:** "What can I detect with my fixed n?"
+**Approach:** "Given the subjects I have, how little agreement am I still unable to rule out?" The bound is always BELOW the anticipated kappa0; nothing is tested and nothing is "detected"
 **Test Data:**
-- [Comprehensive scenarios](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/kappasizefixedn_scenarios_comprehensive.omv) (86 scenarios)
+- [Comprehensive scenarios](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/kappasizefixedn_scenarios_comprehensive.omv) (24 scenarios)
 - [Power cases](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/kappasizefixedn_power_cases.omv)
 - [Validation cases](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/kappasizefixedn_validation_cases.omv)
 

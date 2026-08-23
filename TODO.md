@@ -3998,3 +3998,29 @@ lintr bug-set clean, all gates clean; 3-agent adversarial verification):
       file (`require is not defined` — the harness serves the compiled `.src.js` without
       bundling). `waterfall`, `agreement`, and all three kappaSize analyses fail identically;
       a data-free calculator without events (`evalue`) renders fine.
+
+## kappaSizeFixedN release review (2026-08-23) - out-of-scope follow-ups
+
+- [ ] **[docs]** `vignettes/function-reference.Rmd` links three `.omv` downloads under
+      `master/data/` for kappaSizeFixedN (and the same pattern for kappaSizeCI /
+      kappaSizePower), but only 7 `.omv` files are tracked in `data/` module-wide and none of
+      them is a kappaSize file. Every one of those download links is dead. Either commit the
+      `.omv` artefacts the data-raw scripts produce, or drop the links.
+- [ ] **[data]** Two generators write the same three files: `data-raw/kappasizefixedn_test_data.R`
+      (verified to reproduce the shipped `.rda` byte-for-byte after this pass) and
+      `data-raw/create_kappasizefixedn_test_data.R` (671 lines, different content, same output
+      filenames). Whichever runs last wins. Delete one, or rename its outputs.
+- [ ] **[data]** `kappasizefixedn_*` are pure prose tables for an analysis with
+      `requiresData: FALSE` - no jamovi user can feed them to kappaSizeFixedN. Decide whether
+      they should ship at all.
+- [ ] **[refs]** `jamovi/kappaSizePower.r.yaml` and `jamovi/kappaSizeCI.r.yaml` name Donner &
+      Eliasziw / Rotondi & Donner in their Methodology notices but cite only `kappaSize`. Add
+      `donnerEliasziwKappaGOF` and `rotondiDonnerKappaCI` (now in `jamovi/00refs.yaml`) to both.
+- [ ] **[docs]** `inst/examples/kappasizepower_example.R` and `kappasizeci_example.R` were not
+      reviewed in this pass; check them for the same "minimum detectable kappa" framing that
+      `kappasizefixedn_example.R` carried.
+- [ ] **[upstream]** `kappaSize`'s `print`/`summary` methods judge sparseness on the outcome
+      MARGINALS (`props[i] * n < 5`), which for a binary outcome only tests `props[1]`. That
+      line can therefore appear in the Analysis result pane while the module's Notes panel
+      (Cochran's rule on the agreement-pattern cells) stays quiet, and vice versa. Consider
+      one sentence in the Methodology note explaining the two checks differ.

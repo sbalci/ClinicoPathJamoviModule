@@ -1,14 +1,46 @@
 ################################################################################
-# KAPPASIZEFIXEDN FUNCTION - COMPREHENSIVE USAGE EXAMPLES
+# KAPPASIZEFIXEDN - COMPREHENSIVE USAGE EXAMPLES
 ################################################################################
 #
 # Function: kappaSizeFixedN
-# Purpose: Determine lowest detectable kappa value given a FIXED sample size
-# Approach: Reverse calculation - you have predetermined n, what kappa can you detect?
+# Purpose:  Given a sample size you cannot change, report the LOWER LIMIT of the
+#           one-sided 100(1 - alpha)% confidence interval the study can expect
+#           to achieve for kappa.
 #
-# Key Concept: This function answers "Given that I can only get N subjects
-# (due to budget, time, or availability constraints), what is the minimum
-# level of agreement I can reliably detect or estimate?"
+# WHAT THE RESULT MEANS
+#
+#   The number returned (kappaL) is the smallest level of agreement the study
+#   would still be UNABLE TO RULE OUT. Every kappa below it is excluded.
+#
+#   kappaL is ALWAYS BELOW kappa0 - it is a confidence limit around the
+#   anticipated value, not a detectable alternative. The distance
+#   (kappa0 - kappaL) is the price your fixed sample size charges in precision:
+#   the wider the gap, the vaguer the study's conclusion.
+#
+# WHAT kappa0 IS - AND IS NOT
+#
+#   kappa0 here is the agreement you ANTICIPATE OBSERVING. It is NOT a null
+#   hypothesis. (In kappaSizePower, and only there, kappa0 is the null being
+#   tested against an alternative kappa1.) Nothing in this analysis tests a
+#   hypothesis or computes power, so phrases like "minimum detectable kappa"
+#   or "detectable difference" do not apply to its output.
+#
+# THE DECISION IT SUPPORTS
+#
+#   Pick, in advance, the agreement floor your claim needs - commonly 0.40
+#   (moderate), 0.60 (substantial) or 0.80 (almost perfect) on the
+#   Landis-Koch scale, but ideally a threshold justified by the clinical use.
+#   Then ask whether kappaL clears it:
+#
+#     kappaL >= your floor  -> the fixed n can support the claim
+#     kappaL <  your floor  -> it cannot; enrol more subjects, add raters,
+#                              relax alpha, or report the limitation openly
+#     kappaL <= 0           -> the study cannot even rule out chance agreement
+#
+#   One caveat runs through every example below: kappaL is what the study
+#   reaches IF the observed agreement lands exactly on kappa0. Roughly half of
+#   such studies observe less and end with a lower bound below the figure
+#   shown. Treat it as a planning expectation, not a guarantee.
 #
 ################################################################################
 
@@ -20,583 +52,430 @@ library(ClinicoPath)
 ################################################################################
 # Clinical Context: Dermatology resident training evaluation
 # Constraint: Limited budget allows only 30 melanoma cases
-# Research Question: What minimum agreement level can we detect with n=30?
-# Justification: Pilot study to determine if full validation feasible
+# Question: With 30 cases, how vague will the agreement estimate be?
 
 kappaSizeFixedN(
-  outcome = "2", # Binary: Melanoma vs benign
-  kappa0 = 0.40, # Null hypothesis: fair agreement
-  props = "0.10, 0.90", # 10% melanoma prevalence
-  raters = "2", # Two dermatology residents
-  alpha = 0.05, # 95% confidence
-  n = 30 # FIXED: Only 30 cases available/affordable
+  outcome = "2",        # Binary: melanoma vs benign
+  kappa0  = 0.40,       # Agreement ANTICIPATED between two residents
+  props   = "0.10, 0.90", # 10% melanoma prevalence
+  raters  = "2",        # Two dermatology residents
+  alpha   = 0.05,       # One-sided 95% lower bound
+  n       = 30          # FIXED: only 30 cases available
 )
 
-# Clinical Interpretation:
-# - Result shows LOWEST kappa detectable with n=30
-# - If result is (e.g.) κ=0.60, then with 30 cases you can detect
-#   whether agreement is at least κ=0.60 vs the null of κ=0.40
-# - Use to assess feasibility: Is this detectable difference clinically meaningful?
-# - Budget Decision: If detection capability insufficient, consider increasing budget
+# Result: kappaL = 0.052
+# - Anticipating kappa = 0.40, 30 cases leave a lower bound of only 0.05.
+# - The study would exclude nothing above chance agreement in any useful sense:
+#   it cannot distinguish "slight" from "moderate" agreement.
+# - The 10% prevalence is doing much of the damage; the analysis also flags
+#   sparse agreement-pattern cells here, so even 0.052 is optimistic.
+# - Verdict: adequate for feasibility/logistics only. Do not report a kappa
+#   estimate from this study as evidence of agreement.
 
 ################################################################################
 # EXAMPLE 2: Emergency Department Feasibility - Time Constrained (n=40)
 ################################################################################
 # Clinical Context: Emergency stroke CT protocol validation
-# Constraint: Can review only 40 stroke CTs in 2-month timeframe
-# Research Question: What agreement level detectable in 2 months?
-# Justification: Time pressure for protocol implementation
+# Constraint: Can review only 40 stroke CTs in a 2-month timeframe
 
 kappaSizeFixedN(
-  outcome = "2", # Binary: Stroke present vs absent
-  kappa0 = 0.50, # Null hypothesis: moderate agreement
-  props = "0.15, 0.85", # 15% stroke prevalence in ED
-  raters = "2", # Two emergency radiologists
-  alpha = 0.05, # 95% confidence
-  n = 40 # FIXED: 2-month capacity = 40 cases
+  outcome = "2",          # Binary: hemorrhage present vs absent
+  kappa0  = 0.50,         # Anticipated moderate agreement
+  props   = "0.15, 0.85", # 15% hemorrhage rate
+  raters  = "2",
+  alpha   = 0.05,
+  n       = 40
 )
 
-# Clinical Interpretation:
-# - Time Constraint: ED can only process 40 cases in required timeframe
-# - Result indicates minimum detectable improvement over κ=0.50
-# - Decision Point: Is detectable difference adequate for protocol validation?
-# - Alternative: If insufficient, consider extending timeline or pilot approach
+# Result: kappaL = 0.186
+# - A 0.31 gap below the anticipated 0.50. The published conclusion would be
+#   "agreement is at least 0.19" - too weak to justify a clinical protocol.
+# - Verdict: extend the review window or pool a second centre before
+#   committing to protocol implementation on these data.
 
 ################################################################################
 # EXAMPLE 3: Rare Pathology - Case Availability Constrained (n=35)
 ################################################################################
 # Clinical Context: Rare tumor grading agreement
-# Constraint: Only 35 cases of rare tumor available per year
-# Research Question: What 3-level grading agreement can we assess?
-# Justification: Rare disease limits case availability
+# Constraint: Only 35 cases of the tumor available per year
 
 kappaSizeFixedN(
-  outcome = "3", # Three grades: low/moderate/high
-  kappa0 = 0.40, # Null hypothesis: fair agreement
-  props = "0.30, 0.40, 0.30", # Grade distribution
-  raters = "2", # Two pathologists
-  alpha = 0.05, # 95% confidence
-  n = 35 # FIXED: Annual case availability
+  outcome = "3",                  # Three grades: low, intermediate, high
+  kappa0  = 0.40,
+  props   = "0.30, 0.40, 0.30",   # Reasonably balanced grades
+  raters  = "2",
+  alpha   = 0.05,
+  n       = 35
 )
 
-# Clinical Interpretation:
-# - Rare Disease: Only 35 cases available annually at referral center
-# - Three Categories: More complex than binary, reduces detection power
-# - Result shows minimum detectable 3-level grading agreement
-# - Consider: Multi-center collaboration if single-center insufficient
+# Result: kappaL = 0.191
+# - Note the contrast with Example 1: 35 cases across three BALANCED grades
+#   buy a better bound than 30 cases with a 10% binary prevalence. Balance of
+#   the categories matters as much as raw n.
+# - Verdict: still short of a "moderate agreement" claim. Two or three years
+#   of accrual, or a second institution, would be needed.
 
 ################################################################################
 # EXAMPLE 4: Training Program - Educational Budget (n=50)
 ################################################################################
-# Clinical Context: Three pathology trainees post-training assessment
+# Clinical Context: Three pathology trainees, post-training assessment
 # Constraint: Training budget allows 50 cases for competency evaluation
-# Research Question: What agreement detectable with 3 trainees, 50 cases?
-# Justification: Educational resource limitations
 
 kappaSizeFixedN(
-  outcome = "2", # Binary: Adequate vs inadequate specimen
-  kappa0 = 0.50, # Null hypothesis: moderate agreement
-  props = "0.25, 0.75", # 25% inadequate specimens
-  raters = "3", # Three pathology trainees
-  alpha = 0.05, # 95% confidence
-  n = 50 # FIXED: Training budget = 50 cases
+  outcome = "2",
+  kappa0  = 0.50,
+  props   = "0.25, 0.75",
+  raters  = "3",          # Three trainees rate every case
+  alpha   = 0.05,
+  n       = 50
 )
 
-# Clinical Interpretation:
-# - Three Raters: Multiple trainees provide more information per case
-# - Educational Budget: 50 cases represents available training resources
-# - Result shows competency threshold detectable with available resources
-# - Practical: More raters (3) helps compensate for limited sample size
+# Result: kappaL = 0.318
+# - The third rater is what rescues this design: with 2 raters and otherwise
+#   identical inputs the bound would be materially lower. Extra raters buy
+#   information per subject, which is often cheaper than extra subjects.
+# - Verdict: usable for internal competency feedback; not enough to certify
+#   "substantial" (0.60) agreement.
 
 ################################################################################
 # EXAMPLE 5: Standard QA Program - Annual Protocol (n=100)
 ################################################################################
 # Clinical Context: Annual mammography quality assurance
-# Constraint: Standard QA protocol specifies 100 cases per radiologist pair
-# Research Question: What BIRADS agreement detectable with standard n=100?
-# Justification: Institutional QA protocol requirement
+# Constraint: QA protocol specifies 100 cases per radiologist pair
 
 kappaSizeFixedN(
-  outcome = "2", # Binary: Suspicious vs benign
-  kappa0 = 0.50, # Null hypothesis: moderate agreement
-  props = "0.20, 0.80", # 20% suspicious findings
-  raters = "2", # Two breast radiologists
-  alpha = 0.05, # 95% confidence
-  n = 100 # FIXED: Standard annual QA sample
+  outcome = "2",
+  kappa0  = 0.50,
+  props   = "0.20, 0.80", # 20% abnormal
+  raters  = "2",
+  alpha   = 0.05,
+  n       = 100
 )
 
-# Clinical Interpretation:
-# - Standard Protocol: Institutional policy fixes n=100 annually
-# - Result indicates QA sensitivity: What disagreement can be detected?
-# - Quality Monitoring: Determines if protocol adequate for QA goals
-# - Policy Decision: If insufficient, propose protocol modification
+# Result: kappaL = 0.314
+# - The standing QA protocol can assert only "agreement is at least 0.31".
+# - Useful QA finding in itself: if the programme wants to certify moderate
+#   agreement annually, the protocol's n is too small and should be revised.
 
 ################################################################################
 # EXAMPLE 6: Accreditation Requirement - Regulatory Minimum (n=120)
 ################################################################################
 # Clinical Context: Pathology accreditation tumor grading validation
-# Constraint: Accreditation body requires minimum 120 cases
-# Research Question: What 4-level grading agreement detectable at minimum n?
-# Justification: Regulatory compliance requirement
+# Constraint: Accreditation body requires a minimum of 120 cases
 
 kappaSizeFixedN(
-  outcome = "4", # Four grades
-  kappa0 = 0.50, # Null hypothesis
-  props = "0.25, 0.30, 0.30, 0.15", # Grade distribution
-  raters = "2", # Two pathologists
-  alpha = 0.05, # 95% confidence
-  n = 120 # FIXED: Regulatory minimum
+  outcome = "4",                        # Four tumor grades
+  kappa0  = 0.50,
+  props   = "0.25, 0.30, 0.30, 0.15",
+  raters  = "2",
+  alpha   = 0.05,
+  n       = 120
 )
 
-# Clinical Interpretation:
-# - Regulatory Minimum: Must meet n=120 for accreditation
-# - Four Categories: Complex grading system
-# - Result shows whether minimum n adequate for validation goals
-# - Accreditation Decision: Exceed minimum if detection insufficient
+# Result: kappaL = 0.398
+# - A 0.10 gap - the tightest so far, because 120 cases are spread over four
+#   reasonably balanced grades.
+# - Verdict: comfortably supports a "fair to moderate" claim; exceeding the
+#   regulatory minimum would be needed to claim 0.60.
 
 ################################################################################
 # EXAMPLE 7: Clinical Trial Endpoint - Enrollment Complete (n=150)
 ################################################################################
-# Clinical Context: Biomarker agreement in completed clinical trial
-# Constraint: Trial enrolled 150 patients (enrollment closed)
-# Research Question: What biomarker scoring agreement detectable post-hoc?
-# Justification: Trial complete, retrospective agreement assessment
+# Clinical Context: Biomarker agreement in a completed clinical trial
+# Constraint: Trial enrolled 150 patients; enrollment is closed
 
 kappaSizeFixedN(
-  outcome = "2", # Binary: Biomarker positive vs negative
-  kappa0 = 0.60, # Null hypothesis: good agreement
-  props = "0.35, 0.65", # 35% positive biomarker
-  raters = "2", # Central vs local pathologist
-  alpha = 0.05, # 95% confidence
-  n = 150 # FIXED: Trial enrollment complete
+  outcome = "2",
+  kappa0  = 0.60,         # Anticipated substantial agreement
+  props   = "0.35, 0.65", # 35% biomarker positive
+  raters  = "2",
+  alpha   = 0.05,
+  n       = 150
 )
 
-# Clinical Interpretation:
-# - Trial Complete: Cannot increase n, enrollment closed
-# - Post-hoc Assessment: Determine if existing n adequate for agreement
-# - Result informs whether central review agreement assessment valid
-# - Publication: Result critical for reporting central review validity
+# Result: kappaL = 0.476
+# - The trial can state "biomarker scoring agreement is at least 0.48".
+# - Verdict: honest and publishable, but it falls just short of certifying the
+#   0.60 threshold the anticipated value sits on. Report the bound, not
+#   kappa0, in the paper.
 
 ################################################################################
 # EXAMPLE 8: Cancer Registry - Annual Capacity (n=250)
 ################################################################################
 # Clinical Context: Cancer registry staging validation
-# Constraint: Registry has capacity to validate 250 cases per year
-# Research Question: What 5-stage TNM agreement detectable with capacity?
-# Justification: Operational resource limitation
+# Constraint: Registry can validate 250 cases per year
 
 kappaSizeFixedN(
-  outcome = "5", # Five TNM stages
-  kappa0 = 0.60, # Null hypothesis
-  props = "0.20, 0.25, 0.25, 0.20, 0.10", # Stage distribution
-  raters = "2", # Two oncologists
-  alpha = 0.05, # 95% confidence
-  n = 250 # FIXED: Annual registry capacity
+  outcome = "5",                                # Five TNM stages
+  kappa0  = 0.60,
+  props   = "0.20, 0.25, 0.25, 0.20, 0.10",
+  raters  = "2",
+  alpha   = 0.05,
+  n       = 250
 )
 
-# Clinical Interpretation:
-# - Five Categories: Maximum complexity (stages 0-IV)
-# - Annual Capacity: Registry staff can validate 250 cases/year
-# - Result shows validation capability with available resources
-# - Resource Planning: Determine if capacity expansion needed
+# Result: kappaL = 0.536
+# - A 0.064 gap. Note that five categories did NOT hurt: with balanced
+#   proportions, more categories give MORE agreement patterns to fit and a
+#   slightly tighter bound than a binary outcome at the same n.
+# - Verdict: one year of registry capacity nearly certifies substantial
+#   agreement; two years would clear 0.60 with room to spare.
 
 ################################################################################
-# EXAMPLE 9: National Screening Program - QA Sample (n=300, Stringent α)
+# EXAMPLE 9: National Screening Program - Stringent alpha (n=300)
 ################################################################################
-# Clinical Context: National mammography screening program QA
-# Constraint: National program specifies 300-case annual QA sample
-# Research Question: What agreement detectable with stringent confidence?
-# Justification: Public health program requires rigorous standards
+# Clinical Context: National mammography screening programme QA
+# Constraint: Programme specifies a 300-case annual QA sample
 
 kappaSizeFixedN(
-  outcome = "2", # Binary: Recall vs routine
-  kappa0 = 0.70, # Null hypothesis: good agreement
-  props = "0.25, 0.75", # 25% recall rate
-  raters = "2", # Two screening radiologists
-  alpha = 0.01, # 99% confidence (STRINGENT)
-  n = 300 # FIXED: National program QA sample
+  outcome = "2",
+  kappa0  = 0.70,
+  props   = "0.25, 0.75",
+  raters  = "2",
+  alpha   = 0.01,         # One-sided 99% bound - public-health rigour
+  n       = 300
 )
 
-# Clinical Interpretation:
-# - Stringent Alpha: Public health program requires 99% confidence
-# - Large Fixed Sample: n=300 reflects national program resources
-# - Result shows detection capability at high confidence level
-# - Policy Impact: Informs national screening quality standards
+# Result: kappaL = 0.574
+# - alpha = 0.01 costs precision: at alpha = 0.05 the same design would return
+#   a visibly higher bound. Stringency and precision trade off directly.
+# - Verdict: a defensible national-programme statement - "at 99% confidence,
+#   agreement is at least 0.57".
 
 ################################################################################
 # EXAMPLE 10: AI Validation Study - Budget Constraint (n=400)
 ################################################################################
-# Clinical Context: AI diagnostic algorithm validation
+# Clinical Context: AI diagnostic algorithm vs expert reference
 # Constraint: Budget allows expert labeling of 400 images
-# Research Question: What AI-human agreement detectable with budget?
-# Justification: Expert labeling expensive, limits sample size
 
 kappaSizeFixedN(
-  outcome = "2", # Binary: AI vs human classification
-  kappa0 = 0.60, # Null hypothesis: moderate-good agreement
-  props = "0.30, 0.70", # 30% positive findings
-  raters = "2", # AI algorithm vs radiologist
-  alpha = 0.05, # 95% confidence
-  n = 400 # FIXED: Expert labeling budget
+  outcome = "2",
+  kappa0  = 0.60,
+  props   = "0.30, 0.70",
+  raters  = "2",          # Algorithm and expert treated as two raters
+  alpha   = 0.05,
+  n       = 400
 )
 
-# Clinical Interpretation:
-# - Budget Constraint: Expert labeling costs limit n to 400
-# - Validation Goal: Determine if AI-human agreement adequate
-# - Result shows minimum detectable AI performance improvement
-# - Investment Decision: If insufficient, justify additional budget
+# Result: kappaL = 0.524
+# - 400 images support "algorithm-expert agreement is at least 0.52".
+# - Verdict: adequate for a validation report. To claim 0.60 substantial
+#   agreement outright, either enlarge the set or accept the bound as the
+#   headline number.
 
 ################################################################################
 # EXAMPLE 11: Biobank Study - Available Tissue (n=500)
 ################################################################################
 # Clinical Context: Biobank retrospective tumor grading review
-# Constraint: Biobank has adequate tissue for 500 cases
-# Research Question: What 4-grade agreement detectable with biobank?
-# Justification: Tissue availability constraint
+# Constraint: Adequate tissue for 500 cases
 
 kappaSizeFixedN(
-  outcome = "4", # Four tumor grades
-  kappa0 = 0.65, # Null hypothesis
-  props = "0.30, 0.30, 0.25, 0.15", # Grade distribution
-  raters = "2", # Two pathologists
-  alpha = 0.05, # 95% confidence
-  n = 500 # FIXED: Available tissue samples
+  outcome = "4",
+  kappa0  = 0.65,
+  props   = "0.30, 0.30, 0.25, 0.15",
+  raters  = "2",
+  alpha   = 0.05,
+  n       = 500
 )
 
-# Clinical Interpretation:
-# - Biobank Resource: 500 cases with adequate tissue for review
-# - Retrospective Study: Cannot collect more samples, n fixed
-# - Large Sample: n=500 provides good detection capability
-# - Result validates whether biobank resource sufficient for goals
+# Result: kappaL = 0.604
+# - A 0.046 gap: the bound itself clears the 0.60 "substantial" threshold.
+# - Verdict: this is what an adequately sized agreement study looks like. The
+#   conclusion survives without leaning on the anticipated value.
 
 ################################################################################
-# EXAMPLE 12: Pharmaceutical Trial - Phase III Complete (n=200, 3 Raters)
+# EXAMPLE 12: Pharmaceutical Trial - Phase III Complete (n=200, 3 raters)
 ################################################################################
-# Clinical Context: Phase III trial endpoint assessment complete
-# Constraint: Trial enrolled 200 patients (cannot change)
-# Research Question: What endpoint agreement detectable with 3 raters?
-# Justification: Trial design specified 3-rater consensus, n fixed
+# Clinical Context: Phase III trial endpoint assessment, 3-rater consensus
+# Constraint: Trial enrolled 200 patients; design cannot change
 
 kappaSizeFixedN(
-  outcome = "3", # Three endpoint levels
-  kappa0 = 0.60, # Null hypothesis
-  props = "0.35, 0.40, 0.25", # Endpoint distribution
-  raters = "3", # Three independent assessors
-  alpha = 0.05, # 95% confidence
-  n = 200 # FIXED: Trial enrollment
+  outcome = "3",
+  kappa0  = 0.60,
+  props   = "0.35, 0.40, 0.25",
+  raters  = "3",
+  alpha   = 0.05,
+  n       = 200
 )
 
-# Clinical Interpretation:
-# - Three Raters: Trial design specified multiple assessors
-# - More Raters Help: 3 raters provide more information per subject
-# - Trial Complete: n=200 cannot be changed post-hoc
-# - Regulatory Submission: Result supports endpoint reliability claim
+# Result: kappaL = 0.537
+# - 200 patients with 3 raters land close to 500 cases with 2 raters
+#   (Example 11) - the third rater is worth a great many subjects.
+# - Verdict: supports "at least moderate, approaching substantial" agreement.
 
 ################################################################################
 # EXAMPLE 13: International Consortium - Multi-Center (n=800)
 ################################################################################
-# Clinical Context: 8 centers each contribute 100 cases (n=800 total)
-# Constraint: Each center commits to 100 cases, total n fixed
-# Research Question: What 3-level agreement detectable consortium-wide?
-# Justification: Multi-center collaboration with predetermined contributions
+# Clinical Context: International diagnostic criteria harmonization
+# Constraint: Consortium contributed 800 cases
 
 kappaSizeFixedN(
-  outcome = "3", # Three severity levels
-  kappa0 = 0.65, # Null hypothesis: good agreement
-  props = "0.30, 0.45, 0.25", # Severity distribution
-  raters = "2", # Two pathologists
-  alpha = 0.01, # 99% confidence (stringent for consortium)
-  n = 800 # FIXED: 8 centers × 100 cases each
+  outcome = "3",
+  kappa0  = 0.65,
+  props   = "0.30, 0.45, 0.25",
+  raters  = "2",
+  alpha   = 0.01,         # Stringent, as befits a standard-setting study
+  n       = 800
 )
 
-# Clinical Interpretation:
-# - Multi-Center: International collaboration with 8 participating sites
-# - Large Sample: n=800 provides substantial detection power
-# - Stringent Alpha: Consortium standards require 99% confidence
-# - Collaboration: Result validates adequacy of center commitments
+# Result: kappaL = 0.594
+# - Even 800 cases at alpha = 0.01 leave a 0.056 gap. Precision improves with
+#   the square root of n; there is no sample size that makes the gap vanish.
+# - Verdict: a strong consortium-level statement at 99% confidence.
 
 ################################################################################
-# EXAMPLE 14: National Health Survey - Survey Design (n=1000)
+# EXAMPLE 14: Large Diagnostic Survey (n=1000)
 ################################################################################
-# Clinical Context: National health survey with predetermined sample
-# Constraint: Survey design specifies n=1000 participants
-# Research Question: What diagnostic agreement detectable in large survey?
-# Justification: Survey methodology fixes sample size a priori
+# Clinical Context: Nationwide diagnostic concordance survey
+# Constraint: Survey capacity of 1000 cases
 
 kappaSizeFixedN(
-  outcome = "2", # Binary: Disease present vs absent
-  kappa0 = 0.70, # Null hypothesis: good agreement
-  props = "0.50, 0.50", # Balanced prevalence
-  raters = "2", # Two survey physicians
-  alpha = 0.05, # 95% confidence
-  n = 1000 # FIXED: Survey design specification
+  outcome = "2",
+  kappa0  = 0.70,
+  props   = "0.50, 0.50", # Perfectly balanced - the best case for precision
+  raters  = "2",
+  alpha   = 0.05,
+  n       = 1000
 )
 
-# Clinical Interpretation:
-# - Large National Survey: n=1000 predetermined by survey design
-# - High Detection Power: Large sample detects small differences
-# - Balanced Prevalence: Optimal efficiency
-# - Survey Quality: Result validates survey diagnostic methodology
+# Result: kappaL = 0.66
+# - The smallest gap in this file (0.040): large n AND balanced categories.
+# - Verdict: certifies substantial agreement with the bound alone.
 
 ################################################################################
-# EXAMPLE 15: Small Sample Comparison - Understanding n Impact
+# EXAMPLE 15: How the Bound Moves With n
 ################################################################################
-# Clinical Context: Comparing detection capability across sample sizes
-# Educational Purpose: Demonstrate how fixed n affects detectable kappa
+# Educational: same design, four sample sizes. kappa0 = 0.50 throughout.
 
-# Very Small Sample (n=20)
 result_n20 <- kappaSizeFixedN(
   outcome = "2", kappa0 = 0.50, props = "0.50, 0.50",
   raters = "2", alpha = 0.05, n = 20
 )
 
-# Small Sample (n=50)
 result_n50 <- kappaSizeFixedN(
   outcome = "2", kappa0 = 0.50, props = "0.50, 0.50",
   raters = "2", alpha = 0.05, n = 50
 )
 
-# Moderate Sample (n=100)
 result_n100 <- kappaSizeFixedN(
   outcome = "2", kappa0 = 0.50, props = "0.50, 0.50",
   raters = "2", alpha = 0.05, n = 100
 )
 
-# Large Sample (n=300)
 result_n300 <- kappaSizeFixedN(
   outcome = "2", kappa0 = 0.50, props = "0.50, 0.50",
   raters = "2", alpha = 0.05, n = 300
 )
 
-# Educational Interpretation:
-# - Compare Results: See how detectable kappa improves with larger n
-# - n=20: Very limited detection, only large differences
-# - n=50: Moderate detection capability
-# - n=100: Good detection for most purposes
-# - n=300: High detection, can find small differences
-# - Teaching Point: Larger n allows detecting smaller kappa values
+#   n =  20  ->  kappaL = 0.135   (gap 0.365)
+#   n =  50  ->  kappaL = 0.276   (gap 0.224)
+#   n = 100  ->  kappaL = 0.345   (gap 0.155)
+#   n = 300  ->  kappaL = 0.413   (gap 0.087)
+#
+# Teaching point: the bound always climbs toward kappa0 and never reaches it.
+# Returns diminish - the first 80 subjects buy more than the next 200.
 
 ################################################################################
-# BEST PRACTICES: FIXED SAMPLE SIZE CONSIDERATIONS
+# BEST PRACTICES
 ################################################################################
 
-# 1. When to Use kappaSizeFixedN:
+# 1. When to use kappaSizeFixedN
 #
-#    Use when sample size is PREDETERMINED by:
-#    - Budget constraints (limited funding for cases/raters)
-#    - Time constraints (must complete in fixed timeframe)
-#    - Case availability (rare diseases, limited cases)
-#    - Regulatory requirements (minimum n specified)
-#    - Completed studies (retrospective power assessment)
-#    - Institutional protocols (QA programs with fixed n)
-#    - Resource capacity (staffing, equipment limitations)
+#    Use it when n is already decided by budget, time, case availability,
+#    a regulator, an institutional protocol, or a completed study - and you
+#    need to know how precise a conclusion that n can support.
 #
-#    DO NOT use when:
-#    - You can determine sample size freely
-#    - Use kappaSizePower for power-based planning
-#    - Use kappaSizeCI for precision-based planning
+#    Use kappaSizePower instead when you are TESTING a hypothesis
+#    (null kappa0 vs alternative kappa1, at a given power).
+#    Use kappaSizeCI instead when you can choose n to reach a target
+#    confidence-interval width.
 
-# 2. Understanding the Result:
+# 2. Reading the result
 #
-#    The function returns the LOWEST kappa value detectable/estimable
+#    Report kappaL, not kappa0. kappa0 is your assumption; kappaL is what the
+#    study can defend. Never describe kappaL as a "detectable" kappa or as a
+#    "minimum detectable difference" - no hypothesis is tested here.
 #
-#    Example: If result is κ=0.65 with kappa0=0.50:
-#    - With your fixed n, you can detect whether agreement reaches κ=0.65
-#    - Differences smaller than (0.65 - 0.50) = 0.15 may not be detectable
-#    - Clinical Question: Is detecting κ>=0.65 adequate for your needs?
-#
-#    Interpretation Framework:
-#    - Result much higher than kappa0 → Limited detection, consider more cases
-#    - Result moderately above kappa0 → Reasonable detection capability
-#    - Result slightly above kappa0 → Good detection, adequate sample
+#      gap = kappa0 - kappaL
+#      small gap (<= 0.05)  -> the sample size is generous
+#      moderate gap (~0.10) -> workable; report the bound as the finding
+#      large gap (>= 0.20)  -> the study will not settle the question
+#      kappaL <= 0          -> chance agreement cannot be excluded at all
 
-# 3. Sample Size Constraints Assessment:
+# 3. What actually moves the bound (all verified with this function)
 #
-#    Pilot Studies (n=20-50):
-#    - Limited precision, only detect large effects
-#    - Use for feasibility, preliminary assessment
-#    - Plan larger study if promising results
+#    Sample size - the dominant factor, with diminishing returns:
+#      kappa0 = 0.50, p = 0.50, 2 raters, alpha = 0.05
+#      n =  20 -> 0.135 | n =  50 -> 0.276 | n = 100 -> 0.345 | n = 300 -> 0.413
 #
-#    Small Studies (n=50-100):
-#    - Moderate detection capability
-#    - Adequate for many QA applications
-#    - Consider if differences of interest are moderate-large
+#    Number of raters - large gains, especially from 2 to 3:
+#      kappa0 = 0.60, p = 0.30, n = 60, alpha = 0.05
+#      2 -> 0.389 | 3 -> 0.445 | 4 -> 0.464 | 6 -> 0.480
 #
-#    Standard Studies (n=100-250):
-#    - Good detection for most purposes
-#    - Typical for clinical validation studies
-#    - Balance of feasibility and precision
+#    Balance of the categories - a rare finding is expensive:
+#      kappa0 = 0.60, 2 raters, n = 100, alpha = 0.05
+#      p = 0.05 -> 0.286 | 0.10 -> 0.363 | 0.30 -> 0.440 | 0.50 -> 0.453
 #
-#    Large Studies (n=250-500):
-#    - High detection capability
-#    - Can detect smaller differences
-#    - Justified for important clinical decisions
+#    Significance level - stringency costs precision:
+#      kappa0 = 0.60, p = 0.30, 2 raters, n = 150
+#      alpha = 0.10 -> 0.502 | 0.05 -> 0.472 | 0.01 -> 0.413
 #
-#    Very Large Studies (n>500):
-#    - Maximum detection sensitivity
-#    - Appropriate for national programs, registries
-#    - Diminishing returns beyond certain point
+#    Number of categories - with BALANCED proportions, more categories help
+#    slightly rather than hurt (contrary to the usual intuition):
+#      kappa0 = 0.60, 2 raters, n = 200, alpha = 0.05, equal proportions
+#      2 cats -> 0.499 | 3 -> 0.518 | 4 -> 0.525 | 5 -> 0.529
+#    What hurts is IMBALANCE, not category count. Collapsing categories helps
+#    only when it removes a rare one.
 
-# 4. Parameter Impact on Detection:
+# 4. Sparse agreement-pattern cells
 #
-#    Factors that IMPROVE detection (allow detecting lower kappa):
-#    - Larger n (most important factor)
-#    - More raters (provides more information per subject)
-#    - Fewer categories (binary simplest)
-#    - Balanced proportions (50-50 optimal)
-#    - Liberal alpha (90% vs 99% confidence)
-#
-#    Factors that REDUCE detection (require higher kappa):
-#    - Smaller n (fundamental constraint)
-#    - Fewer raters (standard 2 raters)
-#    - Many categories (5 categories most complex)
-#    - Imbalanced proportions (rare events especially)
-#    - Stringent alpha (99% vs 95% confidence)
+#    The method is a large-sample chi-square approximation over agreement
+#    patterns (how many raters called the finding present, or which category
+#    they all agreed on) - not over the outcome categories themselves. With a
+#    rare finding or several raters, those pattern cells go sparse long before
+#    the category totals do, and the Notes panel says so using Cochran's rule.
+#    When it fires, treat the bound as indicative rather than exact.
 
-# 5. Decision Framework After Results:
+# 5. Reporting template
 #
-#    Adequate Detection:
-#    - Lowest detectable kappa is clinically meaningful
-#    - Proceed with study using fixed n
-#    - Results will be interpretable and useful
+#    "Case availability fixed the sample at n = 50 rare tumours, each graded
+#     independently by 2 pathologists on a 3-level scale. Anticipating
+#     kappa = 0.40 with grade proportions 0.30 / 0.40 / 0.30, the study was
+#     expected to yield a one-sided 95% lower confidence limit of
+#     kappa = 0.19 (kappaSize; Donner & Eliasziw 1992; Rotondi & Donner 2012).
+#     We therefore powered the report around excluding agreement below 0.19
+#     and note that a claim of moderate agreement (kappa >= 0.40) was not
+#     attainable at this sample size."
 #
-#    Marginal Detection:
-#    - Detectable kappa borderline for clinical needs
-#    - Consider: Can you increase n slightly?
-#    - Or: Accept limitations, proceed with caution
-#    - Report limitations transparently
-#
-#    Inadequate Detection:
-#    - Detectable kappa too high for study goals
-#    - Options:
-#       a) Increase n if possible (seek more resources)
-#       b) Add more raters (if feasible and cheaper than more subjects)
-#       c) Simplify categories (if clinically appropriate)
-#       d) Use liberal alpha (if acceptable)
-#       e) Reconsider study feasibility
-#
-#    Cannot Change n:
-#    - Report detectable kappa in methods/limitations
-#    - Frame results appropriately
-#    - Acknowledge what differences can/cannot be detected
-#    - Consider pilot for larger future study
-
-# 6. Comparing to Other Kappa Sample Size Functions:
-#
-#    kappaSizeFixedN (this function):
-#    - Input: Fixed n
-#    - Output: Lowest detectable kappa
-#    - Use: When n predetermined by constraints
-#    - Question: "What can I detect with my available n?"
-#
-#    kappaSizePower:
-#    - Input: Desired kappa0, kappa1, power
-#    - Output: Required n
-#    - Use: When testing hypothesis (improvement)
-#    - Question: "How many subjects needed to detect improvement?"
-#
-#    kappaSizeCI:
-#    - Input: Desired CI width
-#    - Output: Required n
-#    - Use: When estimating with precision
-#    - Question: "How many subjects for precise estimate?"
-#
-#    Choose Based On:
-#    - n fixed → Use kappaSizeFixedN
-#    - Testing hypothesis → Use kappaSizePower
-#    - Estimating precisely → Use kappaSizeCI
-
-# 7. Reporting Requirements:
-#
-#    Always report in methods:
-#    - Sample size and how it was determined/constrained
-#    - Null hypothesis kappa (kappa0)
-#    - All input parameters
-#    - Resulting lowest detectable kappa
-#    - Clinical interpretation of detection capability
-#    - Any limitations due to fixed n
-#
-#    Example methods text:
-#    "Due to limited case availability, sample size was fixed at n=50
-#    rare tumor cases. With this sample size, 2 raters, binary grading,
-#    and assuming κ0=0.40, we could detect agreement of κ=0.65 or higher
-#    (α=0.05). This detection capability was deemed adequate for
-#    preliminary validation of the grading system."
-
-# 8. Multi-Rater Advantage:
-#
-#    When n is constrained, adding raters can help:
-#    - More raters → More information per subject
-#    - May improve detectable kappa
-#    - Trade-off: Coordination complexity, cost
-#
-#    Example Comparison:
-#    - 2 raters, n=60: Detects κ=X
-#    - 3 raters, n=60: Detects κ=X-0.05 (better)
-#
-#    Consider when:
-#    - Cannot increase n
-#    - Detection inadequate with 2 raters
-#    - Rater availability not limiting factor
-#    - Benefit justifies coordination complexity
-
-# 9. Category Simplification:
-#
-#    If detection inadequate and n fixed:
-#    - Consider collapsing categories
-#    - Example: 4 tumor grades → 2 categories (low vs high)
-#    - Simpler classification improves detection
-#    - Must be clinically justifiable
-#    - Report in methods with rationale
-
-# 10. Practical Workflow:
-#
-#     Step 1: Determine constraint
-#     - Identify what fixes your sample size
-#     - Document constraint clearly
-#
-#     Step 2: Run kappaSizeFixedN
-#     - Input: Your fixed n and parameters
-#     - Output: Lowest detectable kappa
-#
-#     Step 3: Evaluate result
-#     - Is detectable kappa clinically meaningful?
-#     - Compare to your study goals
-#
-#     Step 4: Make decision
-#     - Adequate: Proceed with study
-#     - Inadequate: Explore alternatives
-#       * Increase n if possible
-#       * Add raters
-#       * Simplify categories
-#       * Reconsider feasibility
-#
-#     Step 5: Report transparently
-#     - Document constraint and decision
-#     - Report detection capability
-#     - Acknowledge limitations
+#    Report: the constraint that fixed n, the anticipated kappa0, the category
+#    proportions, the number of raters, alpha, and the resulting lower bound -
+#    plus the limitation the gap implies.
 
 ################################################################################
 # REFERENCES
 ################################################################################
 
-# 1. Cantor AB (1996). Sample-size calculations for Cohen's kappa.
-#    Psychological Methods, 1(2), 150-153.
+# 1. Donner A, Eliasziw M (1992). A goodness-of-fit approach to inference
+#    procedures for the kappa statistic: confidence interval construction,
+#    significance-testing and sample size estimation.
+#    Statistics in Medicine, 11(11), 1511-1519. doi:10.1002/sim.4780111109
+#    -- the method this analysis implements.
 #
-# 2. Donner A, Eliasziw M (1992). A goodness-of-fit approach to inference
-#    procedures for the kappa statistic. Statistics in Medicine, 11(11),
-#    1511-1519.
+# 2. Rotondi MA, Donner A (2012). A confidence interval approach to sample
+#    size estimation for interobserver agreement studies with multiple raters
+#    and outcomes. Journal of Clinical Epidemiology, 65(7), 778-784.
+#    doi:10.1016/j.jclinepi.2011.10.019
+#    -- the multiple-rater, multiple-category extension used here.
 #
-# 3. Flack VF, Afifi AA, Lachenbruch PA, Schouten HJA (1988). Sample size
-#    determinations for the two rater kappa statistic. Psychometrika, 53(3),
-#    321-325.
+# 3. Rotondi MA (2018). kappaSize: Sample Size Estimation Functions for
+#    Studies of Interobserver Agreement. R package.
 #
-# 4. Walter SD, Eliasziw M, Donner A (1998). Sample size and optimal designs
+# 4. Landis JR, Koch GG (1977). The measurement of observer agreement for
+#    categorical data. Biometrics, 33(1), 159-174.
+#    -- the source of the 0.20/0.40/0.60/0.80 interpretive bands.
+#
+# 5. Walter SD, Eliasziw M, Donner A (1998). Sample size and optimal designs
 #    for reliability studies. Statistics in Medicine, 17(1), 101-110.
-#
-# 5. Shoukri MM, Asyali MH, Donner A (2004). Sample size requirements for the
-#    design of reliability study: review and new results. Statistical Methods
-#    in Medical Research, 13(4), 251-271.
 
 ################################################################################
 # END OF EXAMPLES
