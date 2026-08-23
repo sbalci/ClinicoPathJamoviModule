@@ -27,6 +27,8 @@ children:
             children:
               - type: ComboBox
                 name: inputType
+                events:
+                  change: './waterfall.events::onChange_inputType'
       - type: TargetLayoutBox
         label: Time Variable
         children:
@@ -34,6 +36,8 @@ children:
             name: timeVar
             maxItemCount: 1
             isTarget: true
+            events:
+              change: './waterfall.events::onChange_timeVar'
       - type: TargetLayoutBox
         label: Group Variable
         children:
@@ -41,6 +45,8 @@ children:
             name: groupVar
             maxItemCount: 1
             isTarget: true
+            events:
+              change: './waterfall.events::onChange_groupVar'
       - type: TargetLayoutBox
         label: Confirmation Status (optional)
         children:
@@ -93,6 +99,8 @@ children:
               - type: ComboBox
                 name: colorBy
                 enable: (showWaterfallPlot)
+                events:
+                  change: './waterfall.events::onChange_colorBy'
               - type: ComboBox
                 name: colorScheme
                 enable: (showWaterfallPlot)
@@ -101,8 +109,7 @@ children:
             children:
               - type: CheckBox
                 name: showCategoryLabels
-              - type: CheckBox
-                name: showSpiderLabels
+                enable: (showWaterfallPlot)
               - type: TargetLayoutBox
                 label: Annotation Tracks
                 children:
@@ -124,7 +131,7 @@ children:
               - type: TextBox
                 name: seed
                 format: number
-                label: Random Seed
+                label: Random seed
                 enable: (showCI)
               - type: CheckBox
                 name: showBaseline
@@ -155,9 +162,10 @@ children:
               - type: Label
                 label: Update Data
                 children:
+                  # No enable gate: the export runs regardless of whether the
+                  # waterfall plot is shown, so a gate here would lie.
                   - type: Output
                     name: addResponseCategory
-                    enable: (showWaterfallPlot)
   - type: CollapseBox
     label: Spider Plot Options
     collapsed: true
@@ -173,6 +181,9 @@ children:
           - type: Label
             label: Spider Plot Visualization
             children:
+              - type: CheckBox
+                name: showSpiderLabels
+                enable: (showSpiderPlot)
               - type: ComboBox
                 name: spiderColorBy
                 enable: (showSpiderPlot)

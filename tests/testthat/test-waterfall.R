@@ -300,7 +300,7 @@ test_that("Person-time analysis works correctly", {
   
   # Check that additional clinical metrics are calculated
   clinical_metrics <- result$clinicalMetrics$asDF
-  expect_true(any(grepl("Time to Response", clinical_metrics$metric)))
+  expect_true(any(grepl("Time to First Response", clinical_metrics$metric)))
   expect_true(any(grepl("Duration of Response", clinical_metrics$metric)))
 })
 

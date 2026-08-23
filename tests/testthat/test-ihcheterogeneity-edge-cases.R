@@ -27,19 +27,19 @@ test_that("ihcheterogeneity handles missing data appropriately", {
   expect_s3_class(result, "ihcheterogeneityResults")
 })
 
-test_that("ihcheterogeneity handles very small sample sizes", {
-  # Only 3 cases
+test_that("ihcheterogeneity rejects very small sample sizes with a clear message", {
+  # Only 3 cases - below the deliberate 5-case minimum
   small_data <- ihcheterogeneity_test_small[1:3, ]
 
-  result <- ihcheterogeneity(
-    data = small_data,
-    wholesection = "wholesection",
-    biopsy1 = "biopsy1",
-    biopsy2 = "biopsy2"
+  expect_error(
+    ihcheterogeneity(
+      data = small_data,
+      wholesection = "wholesection",
+      biopsy1 = "biopsy1",
+      biopsy2 = "biopsy2"
+    ),
+    "At least 5 complete cases"
   )
-
-  # Should complete but may have warnings
-  expect_s3_class(result, "ihcheterogeneityResults")
 })
 
 test_that("ihcheterogeneity handles negative values", {
@@ -170,7 +170,7 @@ test_that("ihcheterogeneity handles missing spatial_id with compartment tests", 
 
 test_that("ihcheterogeneity handles all NA in one biopsy", {
   test_data_all_na <- ihcheterogeneity_test
-  test_data_all_na$biopsy3 <- NA
+  test_data_all_na$biopsy3 <- NA_real_
 
   result <- ihcheterogeneity(
     data = test_data_all_na,

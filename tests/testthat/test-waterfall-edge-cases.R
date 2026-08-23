@@ -57,7 +57,8 @@ test_that("an all-missing cohort says why nothing was produced", {
     patientID = "patientID",
     responseVar = "best_response"
   )
-  expect_equal(result$summaryTable$rowCount, 0)
+  # The 4-row table skeleton from .init() stays, but no values are filled.
+  expect_true(all(is.na(result$summaryTable$asDF$n)))
   # Validation aborts before the analysis runs and explains itself in todo2.
   expect_match(wf_text(result, "todo2"), "No patients with valid response data")
 })
@@ -224,7 +225,11 @@ test_that("negative raw measurements are refused, not sign-inverted", {
   # the affected patient is unevaluable, not a complete responder
   cats <- as.data.frame(result$summaryTable$asDF)
   expect_equal(cats$n[cats$category == "CR"], 0)
-  expect_equal(sum(cats$n), 2)          # only B and C are scored
+  eval_cats <- cats[cats$category %in% c("CR", "PR", "SD", "PD"), ]
+  expect_equal(sum(eval_cats$n), 2)     # only B and C are scored
+  # the unevaluable patient is disclosed as its own row, not silently dropped
+  expect_true(any(grepl("Unknown", cats$category)))
+  expect_equal(sum(cats$n) - sum(eval_cats$n), 1)
 })
 
 # ═══════════════════════════════════════════════════════════
@@ -249,7 +254,7 @@ test_that("a single-patient cohort completes and is flagged as uninformative", {
     responseVar = "best_response"
   )
   expect_equal(result$summaryTable$rowCount, 4)
-  expect_match(wf_text(result), "VERY SMALL COHORT")
+  expect_match(wf_text(result), "VERY SMALL SAMPLE")
 })
 
 test_that("waterfall handles large dataset (n=200)", {

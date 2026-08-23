@@ -15,14 +15,16 @@ children:
           column: 1
         children:
           - type: Label
-            label: Number of Outcome Level
+            label: Number of Outcome Levels
             children:
               - type: LayoutBox
                 margin: large
                 children:
                   - type: ComboBox
                     name: outcome
-                    label: Outcome Level
+                    label: Outcome levels
+                    events:
+                      change: ./kappaSizePower.events::onChange_outcome
       - type: LayoutBox
         margin: large
         cell:
@@ -53,7 +55,7 @@ children:
           children:
             - type: TextBox
               name: kappa0
-              label: 'Null Hypothesis'
+              label: 'Null hypothesis'
               format: number
         - type: LayoutBox
           margin: large
@@ -63,11 +65,11 @@ children:
           children:
             - type: TextBox
               name: kappa1
-              label: 'Alternative Hypothesis'
+              label: 'Alternative hypothesis'
               format: number
 
   - type: Label
-    label: "Proportions of Each Outcome Level"
+    label: "Expected Proportion of Cases in Each Category"
     children:
       - type: LayoutBox
         margin: large

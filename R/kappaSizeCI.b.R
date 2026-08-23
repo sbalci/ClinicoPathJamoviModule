@@ -87,7 +87,8 @@ kappaSizeCIClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
 
         .validateProportions = function() {
             tryCatch({
-                props_str <- trimws(self$options$props)
+                # U+00A0 (non-breaking space, what Word/Excel paste) is not in [:space:].
+                props_str <- trimws(gsub("\u{00A0}", " ", self$options$props, fixed = TRUE))
                 if (props_str == "") {
                     return(list(error = "Proportions cannot be empty"))
                 }

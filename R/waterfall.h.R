@@ -497,6 +497,7 @@ waterfallResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 name="personTimeTable",
                 title="Person-Time Analysis",
                 rows=0,
+                visible=FALSE,
                 columns=list(
                     list(
                         `name`="category", 
@@ -604,6 +605,8 @@ waterfallResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 clearWith=list(
                     "patientID",
                     "responseVar",
+                    "timeVar",
+                    "inputType",
                     "showClinicalSignificance",
                     "responseCategoryVar")))
             self$add(jmvcore::Html$new(
@@ -685,6 +688,7 @@ waterfallResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "responseVar",
                     "groupVar",
                     "inputType",
+                    "timeVar",
                     "responseCategoryVar")))
             self$add(jmvcore::Table$new(
                 options=options,
@@ -714,6 +718,7 @@ waterfallResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "responseVar",
                     "groupVar",
                     "inputType",
+                    "timeVar",
                     "responseCategoryVar")))
             self$add(jmvcore::Image$new(
                 options=options,
@@ -739,7 +744,8 @@ waterfallResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "spiderColorScheme",
                     "timeUnitLabel",
                     "showMedian",
-                    "showCI")))
+                    "showCI",
+                    "showSpiderLabels")))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="naturalLanguageSummary",
@@ -787,14 +793,15 @@ waterfallResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 options=options,
                 name="addResponseCategory",
                 title="Add Response Category to Data",
-                varTitle="RECIST",
-                varDescription="Calculated response category based on RECIST criteria.",
+                varTitle="ResponseCategory",
+                varDescription="Threshold-based response category adapted from RECIST v1.1 (not a full RECIST v1.1 assessment).",
                 measureType="nominal",
                 clearWith=list(
                     "patientID",
                     "responseVar",
                     "timeVar",
-                    "inputType")))
+                    "inputType",
+                    "responseCategoryVar")))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="notices",
@@ -804,7 +811,12 @@ waterfallResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "responseVar",
                     "timeVar",
                     "inputType",
-                    "groupVar")))}))
+                    "groupVar",
+                    "responseCategoryVar",
+                    "showSpiderPlot",
+                    "showConfidenceIntervals",
+                    "showResponseDuration",
+                    "showCI")))}))
 
 waterfallBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
     "waterfallBase",
@@ -846,6 +858,16 @@ waterfallBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' separately, use the lesion-level RECIST v1.1 analysis. It will be available 
 #' in upcoming releases.
 #' 
+#'
+#' @examples
+#' data('waterfall_test', package = 'ClinicoPath')
+#'
+#' waterfall(
+#'     data = waterfall_test,
+#'     patientID = 'patientID',
+#'     responseVar = 'best_response',
+#'     groupVar = 'treatment')
+#'
 #' @param data The data as a data frame.
 #' @param patientID Variable containing patient identifiers (e.g., PT001,
 #'   Patient_1, Study_ID). Each patient should have a unique identifier for

@@ -487,9 +487,9 @@ advancedraincloudClass <- if (requireNamespace("jmvcore")) {
                     arm_labels <- trimws(strsplit(self$options$trial_arms, ",")[[1]])
                     if (length(arm_labels) != length(x_levels)) {
                         private$.addAnalysisNote(jmvcore::format(
-                            .("Treatment arm labels were ignored: {n_labels} label(s) were provided for {n_groups} group(s). Provide one comma-separated label per group."),
-                            n_labels = length(arm_labels),
-                            n_groups = length(x_levels)))
+                            .("Treatment arm labels were ignored: {nLabels} label(s) were provided for {nGroups} group(s). Provide one comma-separated label per group."),
+                            nLabels = length(arm_labels),
+                            nGroups = length(x_levels)))
                     }
                 }
 
@@ -498,9 +498,9 @@ advancedraincloudClass <- if (requireNamespace("jmvcore")) {
                     time_labels <- trimws(strsplit(self$options$time_labels, ",")[[1]])
                     if (length(time_labels) != length(x_levels)) {
                         private$.addAnalysisNote(jmvcore::format(
-                            .("Time point labels were ignored: {n_labels} label(s) were provided for {n_points} time point(s). Provide one comma-separated label per time point."),
-                            n_labels = length(time_labels),
-                            n_points = length(x_levels)))
+                            .("Time point labels were ignored: {nLabels} label(s) were provided for {nPoints} time point(s). Provide one comma-separated label per time point."),
+                            nLabels = length(time_labels),
+                            nPoints = length(x_levels)))
                     }
                 }
 
@@ -1044,9 +1044,9 @@ advancedraincloudClass <- if (requireNamespace("jmvcore")) {
                         p <- p + ggplot2::scale_x_discrete(labels = arm_labels)
                     } else {
                         warning(jmvcore::format(
-                            .("The number of trial-arm labels ({n_labels}) does not match the number of groups ({n_groups}), so default labels were used."),
-                            n_labels = length(arm_labels),
-                            n_groups = length(x_levels)))
+                            .("The number of trial-arm labels ({nLabels}) does not match the number of groups ({nGroups}), so default labels were used."),
+                            nLabels = length(arm_labels),
+                            nGroups = length(x_levels)))
                     }
                 }
 
@@ -1063,9 +1063,9 @@ advancedraincloudClass <- if (requireNamespace("jmvcore")) {
                             p <- p + ggplot2::scale_x_discrete(labels = time_labels)
                         } else {
                             warning(jmvcore::format(
-                                .("The number of time-point labels ({n_labels}) does not match the number of time points ({n_points}), so default labels were used."),
-                                n_labels = length(time_labels),
-                                n_points = length(x_levels)))
+                                .("The number of time-point labels ({nLabels}) does not match the number of time points ({nPoints}), so default labels were used."),
+                                nLabels = length(time_labels),
+                                nPoints = length(x_levels)))
                         }
                     }
                 }

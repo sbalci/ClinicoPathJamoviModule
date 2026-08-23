@@ -5,16 +5,23 @@ jrs:   '1.1'
 
 items:
 
+# Panel visibility is managed procedurally in .b.R: .resetOutputs() hides every
+# panel at the top of .run(), and each populate path pairs setContent() with
+# setVisible(TRUE). `visible: false` here is only the initial state. This
+# replaces setContent("") clearing (stray empty headings) and cannot be done
+# declaratively: `visible: (!vars)` fails jmvcore's routing regex and is
+# silently ALWAYS visible.
     - name:  todo
       title: To Do
       type:  Html
+      visible: false
       clearWith:
           - vars
 
     - name:  clinicalSummary
       title: 'Clinical Interpretation'
       type:  Html
-      visible: (vars)
+      visible: false
       clearWith:
           - vars
 
@@ -26,28 +33,28 @@ items:
     - name:  assumptions
       title: 'Data Quality & Assumptions'
       type:  Html
-      visible: (vars)
+      visible: false
       clearWith:
           - vars
 
     - name:  text
       title: 'Variable Summaries'
       type:  Html
-      visible: (vars)
+      visible: false
       clearWith:
           - vars
 
     - name:  text1
       title: 'Summary Table'
       type:  Html
-      visible: (vars)
+      visible: false
       clearWith:
           - vars
 
     - name:  reportSentences
       title: 'Copy-Ready Clinical Summary'
       type:  Html
-      visible: (vars)
+      visible: false
       clearWith:
           - vars
 

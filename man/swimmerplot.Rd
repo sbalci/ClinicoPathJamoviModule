@@ -70,8 +70,8 @@ If not provided, arrows are drawn for patients at the latest time point.}
 
 \item{groupVar}{Optional grouping variable for comparing response rates
 between patient groups (e.g., treatment arms, disease subtypes). When
-specified, Fisher's exact tests compare ORR and DCR between groups. Groups
-are also shown in separate colors.}
+specified, Fisher's exact tests compare ORR and DCR between groups. Lane
+colors reflect the response variable, not the group.}
 
 \item{timeType}{Select whether time values are raw numbers or dates/times.}
 
@@ -198,7 +198,20 @@ Tables can be converted to data frames with \code{asDF} or \code{\link{as.data.f
 }
 \description{
 Creates comprehensive swimmer plots using the ggswim package to visualize
-patient timelines,  clinical events, milestones, and treatment responses.
-Features enhanced data validation  and complete ggswim integration for
+patient timelines, clinical events, milestones, and treatment responses.
+Features enhanced data validation and complete ggswim integration for
 professional clinical visualization.
+}
+\examples{
+data('swimmer_data_raw', package = 'ClinicoPath')
+
+swimmerplot(
+    data = swimmer_data_raw,
+    patientID = 'PatientID',
+    startTime = 'StartTime',
+    endTime = 'EndTime',
+    responseVar = 'BestResponse',
+    timeType = 'raw',
+    timeUnit = 'months')
+
 }

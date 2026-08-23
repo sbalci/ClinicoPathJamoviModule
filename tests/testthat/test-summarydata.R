@@ -73,7 +73,7 @@ test_that("summarydata - Outlier detection", {
     results <- summarydata(data = test_data, vars = "biomarker2", outliers = TRUE)
     outlier_report <- as.character(results$outlierReport$content)
 
-    expect_match(outlier_report, "5 outliers detected")
+    expect_match(outlier_report, "5 outlier(s) detected", fixed = TRUE)
     # values are now formatted at the user's decimal_places (default 2) so that
     # they match the precision of every other number in the output
     expect_match(outlier_report, "50.00, 52.00, 55.00, 58.00, 60.00", fixed = TRUE)

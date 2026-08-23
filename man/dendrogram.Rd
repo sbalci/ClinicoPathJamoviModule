@@ -80,6 +80,7 @@ A results object containing:
 \code{results$clusterInfo} \tab \tab \tab \tab \tab a html \cr
 \code{results$summary} \tab \tab \tab \tab \tab a table \cr
 \code{results$clusterSummary} \tab \tab \tab \tab \tab a table \cr
+\code{results$clustOutput} \tab \tab \tab \tab \tab an output \cr
 }
 
 Tables can be converted to data frames with \code{asDF} or \code{\link{as.data.frame}}. For example:

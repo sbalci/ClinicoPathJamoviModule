@@ -14,6 +14,10 @@ items:
           - responseVar
           - censorVar
           - timeUnit
+          # a type-mismatch ERROR raised under one input type must clear when
+          # the user switches the type, not linger beside valid results
+          - timeType
+          - dateFormat
 
     - name: warningNotice
       title: ""
@@ -87,6 +91,9 @@ items:
           - dateFormat
           - timeUnit
           - timeDisplay
+          # unchecking Response analysis must clear the appended "<X> Rate (%)"
+          # rows; the backend cannot delete individual rows
+          - responseAnalysis
 
     - name: interpretation
       title: "Clinical Interpretation"
@@ -132,6 +139,8 @@ items:
           - endTime
           - responseVar
           - timeType
+          - dateFormat
+          - timeDisplay
           - timeUnit
           - personTimeAnalysis
 
@@ -165,6 +174,14 @@ items:
           - milestone4Name
           - milestone5Name
           - timeUnit
+          # milestone times are re-based per patient, so they depend on the
+          # timeline definition and display mode too
+          - timeType
+          - dateFormat
+          - timeDisplay
+          - patientID
+          - startTime
+          - endTime
 
     - name: eventMarkerTable
       title: "Event Marker Summary"
@@ -190,6 +207,12 @@ items:
           - eventVar
           - eventTimeVar
           - timeUnit
+          - timeType
+          - dateFormat
+          - timeDisplay
+          - patientID
+          - startTime
+          - endTime
 
     # These were declared as `type: Output`, but an Output result item writes a
     # single computed COLUMN back into the dataset and must be bound to a
@@ -290,8 +313,12 @@ items:
           - endTime
           - responseVar
           - censorVar
+          - timeType
+          - dateFormat
+          - timeDisplay
           - timeUnit
           - personTimeAnalysis
+          - responseAnalysis
 
     - name: groupComparisonTest
       title: "Group Comparison Statistical Tests"
@@ -314,6 +341,9 @@ items:
             type: text
       clearWith:
           - patientID
+          - startTime
+          - endTime
+          - timeType
           - responseVar
           - groupVar
 
@@ -332,6 +362,10 @@ items:
           - startTime
           - endTime
           - responseVar
+          # the manuscript text switches its follow-up estimator on the
+          # censoring classification and its ORR/DCR sentence on responseAnalysis
+          - censorVar
+          - responseAnalysis
           - timeUnit
           - showCopyReady
 

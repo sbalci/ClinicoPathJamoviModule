@@ -64,25 +64,32 @@ children:
         label: Indices
         children:
           - type: CheckBox
-            name: indices
+            name: indices_nlr
+            optionName: indices
             optionPart: nlr
           - type: CheckBox
-            name: indices
+            name: indices_plr
+            optionName: indices
             optionPart: plr
           - type: CheckBox
-            name: indices
+            name: indices_lmr
+            optionName: indices
             optionPart: lmr
           - type: CheckBox
-            name: indices
+            name: indices_sii
+            optionName: indices
             optionPart: sii
           - type: CheckBox
-            name: indices
+            name: indices_pni
+            optionName: indices
             optionPart: pni
           - type: CheckBox
-            name: indices
+            name: indices_car
+            optionName: indices
             optionPart: car
           - type: CheckBox
-            name: indices
+            name: indices_gps
+            optionName: indices
             optionPart: gps
       - type: ComboBox
         name: gpsType

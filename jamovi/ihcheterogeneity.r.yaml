@@ -13,24 +13,69 @@ items:
       title: Clinical Interpretation and Analysis Summary
       type: Html
       visible: true
+      clearWith:
+        - wholesection
+        - biopsy1
+        - biopsy2
+        - biopsy3
+        - biopsy4
+        - biopsies
+        - spatial_id
+        - cv_threshold
+        - correlation_threshold
+        - analysis_type
+        - sampling_strategy
 
     - name: report_sentences
       title: Copy-Ready Report Sentences
       type: Html
-      visible: true
+      visible: (showReportSentences)
       description: Pre-formatted sentences ready for clinical reports and publications
+      clearWith:
+        - wholesection
+        - biopsy1
+        - biopsy2
+        - biopsy3
+        - biopsy4
+        - biopsies
+        - spatial_id
+        - cv_threshold
+        - correlation_threshold
+        - analysis_type
 
     - name: assumptions
       title: Methodology & Assumptions
       type: Html
-      visible: true
+      visible: (showAssumptions)
       description: Analysis assumptions, data requirements, and methodological considerations
+      clearWith:
+        - wholesection
+        - biopsy1
+        - biopsy2
+        - biopsy3
+        - biopsy4
+        - biopsies
+        - spatial_id
+        - cv_threshold
+        - correlation_threshold
+        - analysis_type
 
     - name: summary
       title: Summary (Plain-Language)
       type: Html
       visible: false
       description: Natural-language summary of heterogeneity analysis results
+      clearWith:
+        - wholesection
+        - biopsy1
+        - biopsy2
+        - biopsy3
+        - biopsy4
+        - biopsies
+        - spatial_id
+        - cv_threshold
+        - correlation_threshold
+        - analysis_type
 
     - name: glossary
       title: Statistical Glossary
@@ -53,7 +98,6 @@ items:
         - cv_threshold
         - correlation_threshold
         - analysis_type
-        - sampling_strategy
       columns:
         - name: metric
           title: 'Reproducibility Metric'
@@ -89,7 +133,6 @@ items:
         - cv_threshold
         - correlation_threshold
         - analysis_type
-        - sampling_strategy
       columns:
         - name: comparison
           title: 'Comparison'
@@ -113,6 +156,7 @@ items:
     - name: variancetable
       title: Variance Component Analysis
       type: Table
+      visible: (variance_components || analysis_type:variability || analysis_type:comprehensive)
       description: Sources of measurement variability
       clearWith:
         - wholesection
@@ -125,7 +169,6 @@ items:
         - cv_threshold
         - correlation_threshold
         - analysis_type
-        - sampling_strategy
       columns:
         - name: component
           title: 'Variance Component'
@@ -145,7 +188,7 @@ items:
     - name: poweranalysistable
       title: Power Analysis Results
       type: Table
-      visible: (power_analysis)
+      visible: (power_analysis || analysis_type:comprehensive)
       description: Sample size recommendations and power calculations
       clearWith:
         - wholesection
@@ -158,7 +201,6 @@ items:
         - cv_threshold
         - correlation_threshold
         - analysis_type
-        - sampling_strategy
       columns:
         - name: scenario
           title: 'Analysis Scenario'
@@ -194,7 +236,6 @@ items:
         - cv_threshold
         - correlation_threshold
         - analysis_type
-        - sampling_strategy
       columns:
         - name: region
           title: 'Spatial Region'
@@ -230,7 +271,6 @@ items:
         - cv_threshold
         - correlation_threshold
         - analysis_type
-        - sampling_strategy
       columns:
         - name: metric
           title: 'Heterogeneity Metric'
@@ -270,7 +310,6 @@ items:
         - cv_threshold
         - correlation_threshold
         - analysis_type
-        - sampling_strategy
       columns:
         - name: test_type
           title: 'Test'
@@ -296,7 +335,7 @@ items:
       description: Distribution comparison across regional measurements and reference (if provided)
       width: 700
       height: 500
-      visible: (show_variability_plots)
+      visible: (show_variability_plots || analysis_type:variability || analysis_type:comprehensive)
       clearWith:
         - wholesection
         - biopsy1
@@ -308,7 +347,6 @@ items:
         - cv_threshold
         - correlation_threshold
         - analysis_type
-        - sampling_strategy
       renderFun: .biopsyplot
 
     - name: variabilityplot
@@ -317,7 +355,7 @@ items:
       description: Coefficient of variation by case
       width: 600
       height: 400
-      visible: (show_variability_plots)
+      visible: (show_variability_plots || analysis_type:variability || analysis_type:comprehensive)
       clearWith:
         - wholesection
         - biopsy1
@@ -329,7 +367,6 @@ items:
         - cv_threshold
         - correlation_threshold
         - analysis_type
-        - sampling_strategy
       renderFun: .variabilityplot
 
     - name: spatialplot
@@ -338,7 +375,7 @@ items:
       description: Spatial distribution of biomarker values
       width: 600
       height: 400
-      visible: (show_variability_plots)
+      visible: (show_variability_plots || analysis_type:variability || analysis_type:comprehensive)
       clearWith:
         - wholesection
         - biopsy1
@@ -350,7 +387,6 @@ items:
         - cv_threshold
         - correlation_threshold
         - analysis_type
-        - sampling_strategy
       renderFun: .spatialplot
 
 

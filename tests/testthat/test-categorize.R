@@ -148,21 +148,25 @@ test_that("categorize generates correct labels", {
 test_that("generated categorize code safely quotes names and custom labels", {
   generate_code <- categorizeClass$private_methods$.generateRCode
 
-  custom_labels <- paste0(
-    "O'Brien, path", "\\", "root, line one\nline two"
-  )
+  # .generateRCode() now receives the ALREADY PARSED label vector
+  # (labels_used) instead of the raw comma-separated option string, and takes
+  # manual_breaks / label_style / exclude_oor / n_obs. Same guarantee under
+  # test: names and labels holding ', \\ or a newline must still come back as
+  # copy-pasteable R.
   code <- generate_code(
     varname = "tumor grade",
     method = "equal",
     nbins = 3,
-    breaks = "",
+    manual_breaks = "",
     sdmult = 1,
-    labels = "custom",
-    customlabels = custom_labels,
+    label_style = "custom",
+    labels_used = c("O'Brien", "path\\root", "line one\nline two"),
     newvarname = "risk group",
     includelowest = TRUE,
     rightclosed = TRUE,
-    ordered = TRUE
+    ordered = TRUE,
+    exclude_oor = FALSE,
+    n_obs = 9
   )
 
   expect_error(parsed <- parse(text = code), NA)

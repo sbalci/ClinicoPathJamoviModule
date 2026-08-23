@@ -329,7 +329,7 @@ test_that("summarydata handles empty data frame", {
   # result. The analysis rejects an empty frame with a message naming the cause.
   expect_error(
     summarydata(data = empty_data, vars = "age_normal"),
-    "no complete rows"
+    "has no rows"
   )
 })
 

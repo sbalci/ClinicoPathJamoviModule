@@ -414,10 +414,15 @@ test_that("Range strings match breakpoints", {
   ranges <- freq_table$range
   breaks <- break_table$value
 
-  # Verify range strings match breakpoints
-  expect_true(grepl("5\\.00.*25\\.00", ranges[1]))
-  expect_true(grepl("25\\.00.*45\\.00", ranges[2]))
-  expect_true(grepl("45\\.00.*55\\.00", ranges[3]))
+  # Verify range strings match breakpoints.
+  # The decimal precision is derived from the break spacing (.autoDigits) and
+  # is no longer pinned at two places - a fixed "%.2f" printed every break of a
+  # sub-unit variable as 0.00. Compare the numbers the string actually carries
+  # against the break table, which is what this test is named for.
+  nums <- function(s) as.numeric(regmatches(s, gregexpr("-?[0-9.]+", s))[[1]])
+  expect_equal(nums(ranges[1]), breaks[1:2])
+  expect_equal(nums(ranges[2]), breaks[2:3])
+  expect_equal(nums(ranges[3]), breaks[3:4])
 })
 
 # ============================================================================
@@ -561,7 +566,9 @@ test_that("All identical values trigger expected error", {
     method = "equal",
     nbins = 3
   )
-  msg <- gsub("<[^>]*>", " ", as.character(res$todo$content))
+  # Errors now render in the dedicated `notices` item; `todo` carries the
+  # welcome text only and is blanked once a variable is chosen.
+  msg <- gsub("<[^>]*>", " ", as.character(res$notices$content))
   expect_match(msg, "zero variability")
   expect_match(msg, "constant")
   expect_equal(nrow(res$freqTable$asDF), 0L)

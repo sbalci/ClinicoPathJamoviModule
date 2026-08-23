@@ -277,7 +277,13 @@ tableoneClass <- if (requireNamespace("jmvcore", quietly = TRUE)) R6::R6Class(
                     .("Missing = percentage of cases with a missing value for that variable."),
                     "\n",
                     if (isTRUE(self$options$nonnormal))
-                        .("Continuous variables are shown as median [Q1, Q3]; categorical variables as N (percent of cases with a recorded value for that variable).")
+                        # Square brackets are NOT usable here. jmvcore's
+                        # Translator treats a trailing " [...]" as a gettext
+                        # msgctxt marker and, on a catalogue miss, returns only
+                        # what precedes it - this string lost 97 of its 137
+                        # characters on screen. Parentheses round-trip intact,
+                        # and match the wording of the option title.
+                        .("Continuous variables are shown as median (Q1, Q3); categorical variables as N (percent of cases with a recorded value for that variable).")
                     else
                         .("Continuous variables are shown as mean (SD); categorical variables as N (percent of cases with a recorded value for that variable)."))
 

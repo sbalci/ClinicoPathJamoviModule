@@ -1,489 +1,223 @@
-# Tests for diagnosticmeta Notice API implementation and Wilson score CIs
-# Validates the new jmvcore::Notice implementation and statistical accuracy
+# Wilson confidence intervals and the notices channel of diagnosticmeta.
+#
+# This file previously documented intended behavior the code did not deliver
+# (Wilson CIs in the Individual Study Results table, jmvcore::Notice objects)
+# through vacuous expect_s3_class() checks. It now tests what the module
+# actually does: Wilson score CIs in the individual-studies table (matching an
+# independent implementation), zero-cell corrections under their renamed keys,
+# and warnings/information delivered through the dedicated `notices` Html item.
 
-library(testthat)
+library(ClinicoPath)
 
-# ==============================================================================
-# WILSON SCORE CONFIDENCE INTERVAL TESTS
-# ==============================================================================
+# Independent Wilson score interval implementation (Wilson 1927), used as the
+# reference the module's table values must reproduce.
+wilson_ref <- function(x, n, conf = 0.95) {
+    z <- qnorm(1 - (1 - conf) / 2)
+    p <- x / n
+    denom <- 1 + z^2 / n
+    center <- (p + z^2 / (2 * n)) / denom
+    margin <- z * sqrt(p * (1 - p) / n + z^2 / (4 * n^2)) / denom
+    c(max(0, center - margin), min(1, center + margin))
+}
 
-test_that("Wilson score CI matches known textbook values", {
-  skip_if_not_installed('jmvReadWrite')
-  skip_if_not_installed("ClinicoPath")
+studies_df <- function(n = 6) {
+    set.seed(42)
+    data.frame(
+        study = paste0("Study", seq_len(n)),
+        tp = c(80, 85, 90, 75, 88, 92)[seq_len(n)],
+        fp = c(20, 15, 10, 25, 12, 8)[seq_len(n)],
+        fn = c(20, 15, 10, 25, 12, 8)[seq_len(n)],
+        tn = c(80, 85, 90, 75, 88, 92)[seq_len(n)],
+        stringsAsFactors = FALSE
+    )
+}
 
-  # Known test case from Agresti & Coull (1998)
-  # x=8 successes, n=10 trials, 95% CI
-  # Wilson CI should be approximately [0.444, 0.975]
+run_dm <- function(data, ...) {
+    diagnosticmeta(
+        data = data, study = "study",
+        true_positives = "tp", false_positives = "fp",
+        false_negatives = "fn", true_negatives = "tn", ...)
+}
 
-  # We need to test the internal wilson_ci function
-  # Create test data and run diagnosticmeta to verify Wilson CIs are used
-  testData <- data.frame(
-    study = paste0("Study", 1:5),
-    tp = c(8, 9, 7, 8, 9),
-    fp = c(2, 1, 3, 2, 1),
-    fn = c(2, 1, 3, 2, 1),
-    tn = c(88, 89, 87, 88, 89)
-  )
-
-  result <- diagnosticmeta(
-    data = testData,
-    study = study,
-    true_positives = tp,
-    false_positives = fp,
-    false_negatives = fn,
-    true_negatives = tn,
-    bivariate_analysis = TRUE,
-    show_individual_studies = TRUE
-  )
-
-  expect_s3_class(result, "diagnosticmetaResults")
-  expect_true("individualstudies" %in% names(result))
-})
-
-
-test_that("Wilson score CI handles extreme proportions correctly", {
-  skip_if_not_installed("ClinicoPath")
-
-  # Test extreme cases where Wald intervals fail
-  # Case 1: Very low proportion (1 success in 100 trials)
-  # Case 2: Very high proportion (99 successes in 100 trials)
-
-  testData <- data.frame(
-    study = c("LowProp", "HighProp", "Study3", "Study4", "Study5"),
-    tp = c(1, 99, 50, 55, 45),
-    fp = c(5, 1, 5, 4, 6),
-    fn = c(99, 1, 50, 45, 55),
-    tn = c(95, 99, 95, 96, 94)
-  )
-
-  result <- diagnosticmeta(
-    data = testData,
-    study = study,
-    true_positives = tp,
-    false_positives = fp,
-    false_negatives = fn,
-    true_negatives = tn,
-    bivariate_analysis = TRUE,
-    show_individual_studies = TRUE
-  )
-
-  expect_s3_class(result, "diagnosticmetaResults")
-
-  # Wilson CIs should not produce intervals outside [0,1]
-  # (Cannot easily verify from jamovi results, but validates calculation)
-})
-
-
-test_that("Wilson score CI is more accurate than Wald for small samples", {
-  skip_if_not_installed("ClinicoPath")
-
-  # Small sample sizes where Wald CIs perform poorly
-  # n=20 per study, various success rates
-  testData <- data.frame(
-    study = paste0("Study", 1:6),
-    tp = c(10, 12, 8, 15, 5, 18),
-    fp = c(2, 3, 1, 1, 4, 2),
-    fn = c(10, 8, 12, 5, 15, 2),
-    tn = c(18, 17, 19, 19, 16, 18)
-  )
-
-  result <- diagnosticmeta(
-    data = testData,
-    study = study,
-    true_positives = tp,
-    false_positives = fp,
-    false_negatives = fn,
-    true_negatives = tn,
-    bivariate_analysis = TRUE,
-    show_individual_studies = TRUE
-  )
-
-  expect_s3_class(result, "diagnosticmetaResults")
-  # Wilson CIs provide better coverage for small samples
-})
-
+notices_text <- function(res) {
+    gsub("<[^>]+>", " ", paste(res$notices$content, collapse = " "))
+}
 
 # ==============================================================================
-# ZERO-CELL CORRECTION METHOD TESTS
+# WILSON CIs IN THE INDIVIDUAL STUDY RESULTS TABLE
 # ==============================================================================
 
-test_that("Zero-cell correction: none (model-based) works correctly", {
-  skip_if_not_installed("ClinicoPath")
-  skip_if_not_installed("mada")
+test_that("Individual study table reports Wilson score CIs matching an independent implementation", {
+    skip_if_not_installed("mada")
 
-  # Test data with zero cells
-  testData <- data.frame(
-    study = paste0("Study", 1:8),
-    tp = c(0, 85, 90, 75, 88, 92, 78, 87),  # Study 1 has zero TP
-    fp = c(10, 15, 10, 25, 12, 8, 22, 13),
-    fn = c(100, 15, 10, 25, 12, 8, 22, 13),
-    tn = c(90, 85, 90, 75, 88, 92, 78, 87)
-  )
+    d <- studies_df()
+    res <- run_dm(d, show_individual_studies = TRUE)
+    tab <- res$individualstudies$asDF
 
-  result <- diagnosticmeta(
-    data = testData,
-    study = study,
-    true_positives = tp,
-    false_positives = fp,
-    false_negatives = fn,
-    true_negatives = tn,
-    bivariate_analysis = TRUE,
-    zero_cell_correction = "none"
-  )
+    expect_equal(nrow(tab), nrow(d))
+    expect_true(all(c("sens_ci_lower", "sens_ci_upper",
+                      "spec_ci_lower", "spec_ci_upper") %in% names(tab)))
 
-  expect_s3_class(result, "diagnosticmetaResults")
-  # Model-based approach should handle zeros without explicit correction
+    for (i in seq_len(nrow(d))) {
+        sens_ref <- wilson_ref(d$tp[i], d$tp[i] + d$fn[i]) * 100
+        spec_ref <- wilson_ref(d$tn[i], d$tn[i] + d$fp[i]) * 100
+        expect_equal(tab$sens_ci_lower[i], sens_ref[1], tolerance = 1e-8)
+        expect_equal(tab$sens_ci_upper[i], sens_ref[2], tolerance = 1e-8)
+        expect_equal(tab$spec_ci_lower[i], spec_ref[1], tolerance = 1e-8)
+        expect_equal(tab$spec_ci_upper[i], spec_ref[2], tolerance = 1e-8)
+    }
+
+    # CIs must bracket the point estimate
+    expect_true(all(tab$sens_ci_lower <= tab$sensitivity))
+    expect_true(all(tab$sens_ci_upper >= tab$sensitivity))
 })
 
+test_that("Individual study Wilson CIs honour the confidence level option", {
+    skip_if_not_installed("mada")
 
-test_that("Zero-cell correction: constant (+0.5) is applied correctly", {
-  skip_if_not_installed("ClinicoPath")
-  skip_if_not_installed("mada")
+    d <- studies_df()
+    res90 <- run_dm(d, show_individual_studies = TRUE, confidence_level = 90)
+    tab90 <- res90$individualstudies$asDF
 
-  testData <- data.frame(
-    study = paste0("Study", 1:6),
-    tp = c(0, 85, 90, 75, 0, 92),  # Two studies with zero cells
-    fp = c(10, 15, 10, 25, 12, 8),
-    fn = c(100, 15, 10, 25, 100, 8),
-    tn = c(90, 85, 90, 75, 88, 92)
-  )
+    ref90 <- wilson_ref(d$tp[1], d$tp[1] + d$fn[1], conf = 0.90) * 100
+    expect_equal(tab90$sens_ci_lower[1], ref90[1], tolerance = 1e-8)
+    expect_equal(tab90$sens_ci_upper[1], ref90[2], tolerance = 1e-8)
 
-  result <- diagnosticmeta(
-    data = testData,
-    study = study,
-    true_positives = tp,
-    false_positives = fp,
-    false_negatives = fn,
-    true_negatives = tn,
-    bivariate_analysis = TRUE,
-    zero_cell_correction = "constant"
-  )
-
-  expect_s3_class(result, "diagnosticmetaResults")
-  # Constant correction adds 0.5 to ALL cells of affected studies
+    # 90% interval is strictly narrower than the 95% one
+    res95 <- run_dm(d, show_individual_studies = TRUE, confidence_level = 95)
+    tab95 <- res95$individualstudies$asDF
+    expect_true(all(tab90$sens_ci_upper - tab90$sens_ci_lower <
+                    tab95$sens_ci_upper - tab95$sens_ci_lower))
 })
 
+test_that("Wilson CIs remain inside [0, 100] at extreme proportions", {
+    skip_if_not_installed("mada")
 
-test_that("Zero-cell correction: treatment_arm (add to zeros only)", {
-  skip_if_not_installed("ClinicoPath")
-  skip_if_not_installed("mada")
+    d <- studies_df()
+    d$fn[1] <- 0   # perfect sensitivity in study 1 (also a zero cell)
+    res <- run_dm(d, show_individual_studies = TRUE)
+    tab <- res$individualstudies$asDF
 
-  testData <- data.frame(
-    study = paste0("Study", 1:6),
-    tp = c(0, 85, 90, 0, 88, 92),  # Two studies with zero TP
-    fp = c(10, 0, 10, 25, 12, 8),  # One study with zero FP
-    fn = c(100, 15, 10, 100, 12, 8),
-    tn = c(90, 85, 90, 75, 88, 92)
-  )
-
-  result <- diagnosticmeta(
-    data = testData,
-    study = study,
-    true_positives = tp,
-    false_positives = fp,
-    false_negatives = fn,
-    true_negatives = tn,
-    bivariate_analysis = TRUE,
-    zero_cell_correction = "treatment_arm"
-  )
-
-  expect_s3_class(result, "diagnosticmetaResults")
-  # Treatment-arm correction adds 0.5 only to zero cells
+    expect_true(all(tab$sens_ci_lower >= 0 & tab$sens_ci_upper <= 100))
+    expect_true(all(tab$spec_ci_lower >= 0 & tab$spec_ci_upper <= 100))
+    # Perfect proportion: upper bound 100, lower bound < 100 (Wilson, not Wald)
+    expect_equal(tab$sens_ci_upper[1], 100, tolerance = 1e-8)
+    expect_lt(tab$sens_ci_lower[1], 100)
 })
-
-
-test_that("Zero-cell correction: empirical (1/N) is study-specific", {
-  skip_if_not_installed("ClinicoPath")
-  skip_if_not_installed("mada")
-
-  testData <- data.frame(
-    study = c("Small", "Large", "Study3", "Study4", "Study5"),
-    tp = c(0, 0, 90, 75, 88),  # Two studies with zero TP, different sizes
-    fp = c(5, 50, 10, 25, 12),
-    fn = c(95, 950, 10, 25, 12),  # Small study N=100, Large study N=1000
-    tn = c(5, 50, 90, 75, 88)
-  )
-
-  result <- diagnosticmeta(
-    data = testData,
-    study = study,
-    true_positives = tp,
-    false_positives = fp,
-    false_negatives = fn,
-    true_negatives = tn,
-    bivariate_analysis = TRUE,
-    zero_cell_correction = "empirical"
-  )
-
-  expect_s3_class(result, "diagnosticmetaResults")
-  # Empirical correction uses 1/N where N is total sample size per study
-  # Small study should get correction of 1/100 = 0.01
-  # Large study should get correction of 1/1000 = 0.001
-})
-
-
-test_that("Zero-cell correction generates STRONG_WARNING notice", {
-  skip_if_not_installed("ClinicoPath")
-  skip_if_not_installed("mada")
-
-  testData <- data.frame(
-    study = paste0("Study", 1:5),
-    tp = c(0, 85, 90, 0, 88),  # Two studies with zero cells
-    fp = c(10, 15, 10, 25, 12),
-    fn = c(100, 15, 10, 100, 12),
-    tn = c(90, 85, 90, 75, 88)
-  )
-
-  result <- diagnosticmeta(
-    data = testData,
-    study = study,
-    true_positives = tp,
-    false_positives = fp,
-    false_negatives = fn,
-    true_negatives = tn,
-    bivariate_analysis = TRUE,
-    zero_cell_correction = "constant",
-    show_analysis_summary = TRUE
-  )
-
-  expect_s3_class(result, "diagnosticmetaResults")
-
-  # A STRONG_WARNING notice about zero-cell correction should be present
-  # (Notice validation happens at jamovi level, we validate result object completes)
-})
-
 
 # ==============================================================================
-# NOTICE GENERATION TESTS
+# ZERO-CELL CORRECTIONS (renamed keys: zero_cells, reciprocal_n)
 # ==============================================================================
 
-test_that("ERROR notice generated for insufficient data (<3 studies)", {
-  skip_if_not_installed("ClinicoPath")
+test_that("all four zero-cell correction settings run and are disclosed", {
+    skip_if_not_installed("mada")
 
-  testData <- data.frame(
-    study = c("Study1", "Study2"),  # Only 2 studies
-    tp = c(80, 85),
-    fp = c(20, 15),
-    fn = c(20, 15),
-    tn = c(80, 85)
-  )
+    d <- studies_df()
+    d$fp[3] <- 0
 
-  result <- diagnosticmeta(
-    data = testData,
-    study = study,
-    true_positives = tp,
-    false_positives = fp,
-    false_negatives = fn,
-    true_negatives = tn,
-    bivariate_analysis = TRUE
-  )
+    for (corr in c("none", "constant", "zero_cells", "reciprocal_n")) {
+        res <- run_dm(d, zero_cell_correction = corr)
+        expect_s3_class(res, "diagnosticmetaResults")
+        expect_gt(res$bivariateresults$rowCount, 0)
 
-  expect_s3_class(result, "diagnosticmetaResults")
-  # ERROR notice should be inserted at position 1
-  # Analysis should not proceed with bivariate model
+        if (corr == "none") {
+            # model-level correction disclosed on the bivariate table
+            notes <- vapply(res$bivariateresults$notes,
+                            function(n) n$note, character(1))
+            expect_true(any(grepl("zero cell", notes, ignore.case = TRUE)))
+        } else {
+            # data-level corrections disclosed in the always-visible notices,
+            # under their human-readable labels (not the raw option keys)
+            labels <- c(constant = "+0.5 to all cells of zero-cell studies",
+                        zero_cells = "+0.5 to the zero cells only",
+                        reciprocal_n = "+1/N to all cells")
+            expect_match(notices_text(res), "Zero-cell correction applied",
+                         fixed = TRUE)
+            expect_match(notices_text(res), labels[[corr]], fixed = TRUE)
+        }
+    }
 })
 
+test_that("the corrections modify the data differently (none vs constant vs zero_cells)", {
+    skip_if_not_installed("mada")
 
-test_that("STRONG_WARNING notice for small-n meta-regression", {
-  skip_if_not_installed("ClinicoPath")
-  skip_if_not_installed("metafor")
+    d <- studies_df()
+    d$fp[3] <- 0
 
-  # Small sample for meta-regression (< 10 studies)
-  testData <- data.frame(
-    study = paste0("Study", 1:7),  # Only 7 studies
-    tp = c(80, 85, 90, 75, 88, 92, 78),
-    fp = c(20, 15, 10, 25, 12, 8, 22),
-    fn = c(20, 15, 10, 25, 12, 8, 22),
-    tn = c(80, 85, 90, 75, 88, 92, 78),
-    year = c(2015, 2016, 2017, 2018, 2019, 2020, 2021)
-  )
+    est <- function(corr) {
+        run_dm(d, zero_cell_correction = corr)$bivariateresults$asDF$estimate[2]
+    }
+    spec_none <- est("none")
+    spec_constant <- est("constant")
+    spec_zero_cells <- est("zero_cells")
 
-  result <- diagnosticmeta(
-    data = testData,
-    study = study,
-    true_positives = tp,
-    false_positives = fp,
-    false_negatives = fn,
-    true_negatives = tn,
-    covariate = year,
-    bivariate_analysis = TRUE,
-    meta_regression = TRUE
-  )
-
-  expect_s3_class(result, "diagnosticmetaResults")
-  # STRONG_WARNING notice should be present about unstable estimates
+    # "none" (mada 'single': +0.5 to all cells of the affected study at fit
+    # time) and "constant" (+0.5 to all cells before analysis) are the same
+    # arithmetic here; "zero_cells" corrects only the zero cell and must
+    # differ from both.
+    expect_equal(spec_none, spec_constant, tolerance = 1e-6)
+    expect_false(isTRUE(all.equal(spec_zero_cells, spec_constant,
+                                  tolerance = 1e-6)))
 })
-
-
-test_that("WARNING notices for analysis errors", {
-  skip_if_not_installed("ClinicoPath")
-  skip_if_not_installed("mada")
-
-  # Normal test data
-  testData <- data.frame(
-    study = paste0("Study", 1:8),
-    tp = c(80, 85, 90, 75, 88, 92, 78, 87),
-    fp = c(20, 15, 10, 25, 12, 8, 22, 13),
-    fn = c(20, 15, 10, 25, 12, 8, 22, 13),
-    tn = c(80, 85, 90, 75, 88, 92, 78, 87)
-  )
-
-  result <- diagnosticmeta(
-    data = testData,
-    study = study,
-    true_positives = tp,
-    false_positives = fp,
-    false_negatives = fn,
-    true_negatives = tn,
-    bivariate_analysis = TRUE,
-    hsroc_analysis = TRUE,
-    heterogeneity_analysis = TRUE,
-    publication_bias = TRUE
-  )
-
-  expect_s3_class(result, "diagnosticmetaResults")
-  # If any analysis fails, WARNING notices should be inserted at positions 50-54
-})
-
-
-test_that("INFO notice for analysis completion", {
-  skip_if_not_installed("ClinicoPath")
-  skip_if_not_installed("mada")
-
-  testData <- data.frame(
-    study = paste0("Study", 1:10),
-    tp = c(80, 85, 90, 75, 88, 92, 78, 87, 83, 91),
-    fp = c(20, 15, 10, 25, 12, 8, 22, 13, 17, 9),
-    fn = c(20, 15, 10, 25, 12, 8, 22, 13, 17, 9),
-    tn = c(80, 85, 90, 75, 88, 92, 78, 87, 83, 91)
-  )
-
-  result <- diagnosticmeta(
-    data = testData,
-    study = study,
-    true_positives = tp,
-    false_positives = fp,
-    false_negatives = fn,
-    true_negatives = tn,
-    bivariate_analysis = TRUE
-  )
-
-  expect_s3_class(result, "diagnosticmetaResults")
-  # INFO notice about analysis completion should be at position 999
-})
-
-
-test_that("INFO notice for I² heterogeneity explanation", {
-  skip_if_not_installed("ClinicoPath")
-  skip_if_not_installed("mada")
-
-  testData <- data.frame(
-    study = paste0("Study", 1:8),
-    tp = c(80, 85, 90, 75, 88, 92, 78, 87),
-    fp = c(20, 15, 10, 25, 12, 8, 22, 13),
-    fn = c(20, 15, 10, 25, 12, 8, 22, 13),
-    tn = c(80, 85, 90, 75, 88, 92, 78, 87)
-  )
-
-  result <- diagnosticmeta(
-    data = testData,
-    study = study,
-    true_positives = tp,
-    false_positives = fp,
-    false_negatives = fn,
-    true_negatives = tn,
-    bivariate_analysis = TRUE
-  )
-
-  expect_s3_class(result, "diagnosticmetaResults")
-  # INFO notice explaining I² removal should be present
-})
-
 
 # ==============================================================================
-# NOTICE POSITIONING TESTS
+# NOTICES CHANNEL
 # ==============================================================================
 
-test_that("Notices are inserted at correct priority positions", {
-  skip_if_not_installed("ClinicoPath")
-  skip_if_not_installed("mada")
-
-  # Create scenario that triggers multiple notice types
-  testData <- data.frame(
-    study = paste0("Study", 1:7),  # Small-n for meta-regression warning
-    tp = c(0, 85, 90, 75, 0, 92, 78),  # Zero cells for correction warning
-    fp = c(10, 15, 10, 25, 12, 8, 22),
-    fn = c(100, 15, 10, 25, 100, 8, 22),
-    tn = c(90, 85, 90, 75, 88, 92, 78),
-    year = c(2015, 2016, 2017, 2018, 2019, 2020, 2021)
-  )
-
-  result <- diagnosticmeta(
-    data = testData,
-    study = study,
-    true_positives = tp,
-    false_positives = fp,
-    false_negatives = fn,
-    true_negatives = tn,
-    covariate = year,
-    bivariate_analysis = TRUE,
-    meta_regression = TRUE,
-    zero_cell_correction = "constant"
-  )
-
-  expect_s3_class(result, "diagnosticmetaResults")
-
-  # Expected positioning:
-  # Position 2: STRONG_WARNING for small-n meta-regression
-  # Position 3: STRONG_WARNING for zero-cell correction
-  # Position 60: INFO for I² explanation
-  # Position 999: INFO for analysis completion
+test_that("fewer than 3 studies is a hard reject, not a silent note", {
+    expect_error(run_dm(studies_df(2)), "At least 3 studies")
 })
 
+test_that("meta-regression without a covariate raises an INFO notice", {
+    skip_if_not_installed("mada")
 
-# ==============================================================================
-# INTEGRATION TESTS: Notices + Statistical Fixes
-# ==============================================================================
+    res <- run_dm(studies_df(), meta_regression = TRUE, covariate = NULL)
+    expect_match(notices_text(res), "Meta-regression requires a covariate",
+                 fixed = TRUE)
+})
 
-test_that("Complete workflow: Wilson CIs + Zero-cell correction + Notices", {
-  skip_if_not_installed("ClinicoPath")
-  skip_if_not_installed("mada")
+test_that("Deeks' test below 10 studies raises the power caution notice", {
+    skip_if_not_installed("mada")
+    skip_if_not_installed("metafor")
 
-  # Comprehensive test combining all new features
-  testData <- data.frame(
-    study = paste0("Study", 1:8),
-    tp = c(0, 85, 90, 75, 1, 92, 99, 87),  # Extreme proportions + zeros
-    fp = c(10, 15, 10, 25, 99, 8, 1, 13),
-    fn = c(100, 15, 10, 25, 1, 8, 1, 13),
-    tn = c(90, 85, 90, 75, 88, 92, 99, 87)
-  )
+    res <- run_dm(studies_df(), publication_bias = TRUE)
+    expect_match(notices_text(res), "fewer than 10 studies", fixed = TRUE)
+})
 
-  result <- diagnosticmeta(
-    data = testData,
-    study = study,
-    true_positives = tp,
-    false_positives = fp,
-    false_negatives = fn,
-    true_negatives = tn,
-    bivariate_analysis = TRUE,
-    hsroc_analysis = TRUE,
-    heterogeneity_analysis = TRUE,
-    publication_bias = TRUE,
-    show_individual_studies = TRUE,
-    show_analysis_summary = TRUE,
-    zero_cell_correction = "empirical",
-    confidence_level = 95
-  )
+test_that("excluded studies are counted in a WARNING notice", {
+    skip_if_not_installed("mada")
 
-  expect_s3_class(result, "diagnosticmetaResults")
-  expect_true("bivariateresults" %in% names(result))
-  expect_true("hsrocresults" %in% names(result))
-  expect_true("heterogeneity" %in% names(result))
-  expect_true("publicationbias" %in% names(result))
-  expect_true("individualstudies" %in% names(result))
+    d <- studies_df()
+    d$tp[2] <- NA
+    res <- run_dm(d)
+    txt <- notices_text(res)
+    expect_match(txt, "Studies excluded", fixed = TRUE)
+    expect_match(txt, "1 of 6 studies were excluded", fixed = TRUE)
+})
 
-  # Wilson CIs should handle extreme proportions (Study 5: 1/2, Study 7: 99/100)
-  # Zero-cell correction should be applied with STRONG_WARNING notice
-  # Multiple notices should be properly positioned (STRONG_WARNING, INFO)
-  # All statistical outputs should be valid
+test_that("notices do not accumulate across run cycles", {
+    skip_if_not_installed("mada")
+
+    d <- studies_df()
+    d$tp[2] <- NA
+
+    options <- ClinicoPath:::diagnosticmetaOptions$new(
+        study = "study", true_positives = "tp", false_positives = "fp",
+        false_negatives = "fn", true_negatives = "tn")
+    analysis <- ClinicoPath:::diagnosticmetaClass$new(options = options, data = d)
+    analysis$run()
+    analysis$run()   # second cycle on the same instance
+
+    content <- analysis$results$notices$content
+    hits <- gregexpr("Studies excluded", content, fixed = TRUE)[[1]]
+    expect_equal(sum(hits > 0), 1)
+})
+
+test_that("instructions panel stays pure onboarding (no warning banners)", {
+    skip_if_not_installed("mada")
+
+    d <- studies_df()
+    d$tp[2] <- NA
+    res <- run_dm(d)
+    expect_false(grepl("Studies excluded", res$instructions$content, fixed = TRUE))
 })

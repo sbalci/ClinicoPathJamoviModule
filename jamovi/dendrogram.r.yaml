@@ -57,6 +57,7 @@ items:
     - name:  clusterSummary
       title: Cluster Membership
       type:  Table
+      rows: 0
       columns:
         - name: cluster
           title: Cluster
@@ -68,6 +69,28 @@ items:
           title: Percent
           type: number
           format: zto
+      clearWith:
+        - vars
+        - clusterMethod
+        - distanceMethod
+        - standardize
+        - nClusters
+
+    # The clustOutput OPTION (.a.yaml type: Output) requires this matching
+    # results item; without it every self$results$clustOutput access threw
+    # "'clustOutput' does not exist in this results element" and killed the run.
+    - name: clustOutput
+      title: Save Cluster Membership
+      type: Output
+      varTitle: Cluster
+      varDescription: Cluster membership from hierarchical clustering.
+      measureType: nominal
+      clearWith:
+        - vars
+        - clusterMethod
+        - distanceMethod
+        - standardize
+        - nClusters
 
 refs:
     - ClinicoPathJamoviModule

@@ -129,8 +129,8 @@ diagnosticmetaOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
                 options=list(
                     "none",
                     "constant",
-                    "treatment_arm",
-                    "empirical"),
+                    "zero_cells",
+                    "reciprocal_n"),
                 default="none")
             private$..forest_plot <- jmvcore::OptionBool$new(
                 "forest_plot",
@@ -254,6 +254,7 @@ diagnosticmetaResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
     inherit = jmvcore::Group,
     active = list(
         instructions = function() private$.items[["instructions"]],
+        notices = function() private$.items[["notices"]],
         summary = function() private$.items[["summary"]],
         about = function() private$.items[["about"]],
         bivariateresults = function() private$.items[["bivariateresults"]],
@@ -288,6 +289,16 @@ diagnosticmetaResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
                 visible=TRUE))
             self$add(jmvcore::Html$new(
                 options=options,
+                name="notices",
+                title="Notices",
+                clearWith=list(
+                    "study",
+                    "true_positives",
+                    "false_positives",
+                    "false_negatives",
+                    "true_negatives")))
+            self$add(jmvcore::Html$new(
+                options=options,
                 name="summary",
                 title="Analysis Summary",
                 visible="(show_analysis_summary)",
@@ -298,7 +309,9 @@ diagnosticmetaResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
                     "false_negatives",
                     "true_negatives",
                     "zero_cell_correction",
-                    "confidence_level")))
+                    "confidence_level",
+                    "method",
+                    "bivariate_analysis")))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="about",
@@ -336,11 +349,6 @@ diagnosticmetaResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
                     list(
                         `name`="ci_upper", 
                         `title`="CI Upper", 
-                        `type`="number", 
-                        `format`="zto"),
-                    list(
-                        `name`="i_squared", 
-                        `title`="I\u00B2", 
                         `type`="number", 
                         `format`="zto"),
                     list(
@@ -466,7 +474,7 @@ diagnosticmetaResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
                         `format`="zto"),
                     list(
                         `name`="z_value", 
-                        `title`="Z Value", 
+                        `title`="Test Statistic", 
                         `type`="number", 
                         `format`="zto"),
                     list(
@@ -515,7 +523,8 @@ diagnosticmetaResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
                     "true_positives",
                     "false_positives",
                     "false_negatives",
-                    "true_negatives"),
+                    "true_negatives",
+                    "confidence_level"),
                 columns=list(
                     list(
                         `name`="study", 
@@ -527,8 +536,28 @@ diagnosticmetaResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
                         `type`="number", 
                         `format`="dp:1"),
                     list(
+                        `name`="sens_ci_lower", 
+                        `title`="CI Lower", 
+                        `type`="number", 
+                        `format`="dp:1"),
+                    list(
+                        `name`="sens_ci_upper", 
+                        `title`="CI Upper", 
+                        `type`="number", 
+                        `format`="dp:1"),
+                    list(
                         `name`="specificity", 
                         `title`="Specificity (%)", 
+                        `type`="number", 
+                        `format`="dp:1"),
+                    list(
+                        `name`="spec_ci_lower", 
+                        `title`="CI Lower", 
+                        `type`="number", 
+                        `format`="dp:1"),
+                    list(
+                        `name`="spec_ci_upper", 
+                        `title`="CI Upper", 
                         `type`="number", 
                         `format`="dp:1"),
                     list(
@@ -589,7 +618,8 @@ diagnosticmetaResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
                     "zero_cell_correction",
                     "color_palette",
                     "confidence_level",
-                    "method")))
+                    "method",
+                    "bivariate_analysis")))
             self$add(jmvcore::Image$new(
                 options=options,
                 name="funnelplot",
@@ -616,35 +646,17 @@ diagnosticmetaResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
                 options=options,
                 name="forestplot_explanation",
                 title="Forest Plot Explanation",
-                visible="(show_plot_explanations && forest_plot)",
-                clearWith=list(
-                    "study",
-                    "true_positives",
-                    "false_positives",
-                    "false_negatives",
-                    "true_negatives")))
+                visible="(show_plot_explanations && forest_plot)"))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="srocplot_explanation",
                 title="SROC Plot Explanation",
-                visible="(show_plot_explanations && sroc_plot)",
-                clearWith=list(
-                    "study",
-                    "true_positives",
-                    "false_positives",
-                    "false_negatives",
-                    "true_negatives")))
+                visible="(show_plot_explanations && sroc_plot)"))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="funnelplot_explanation",
                 title="Funnel Plot Explanation",
-                visible="(show_plot_explanations && funnel_plot)",
-                clearWith=list(
-                    "study",
-                    "true_positives",
-                    "false_positives",
-                    "false_negatives",
-                    "true_negatives")))}))
+                visible="(show_plot_explanations && funnel_plot)"))}))
 
 diagnosticmetaBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
     "diagnosticmetaBase",
@@ -696,9 +708,15 @@ diagnosticmetaBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
 #' @param method Method for meta-analysis estimation (Note DerSimonian-Laird
 #'   is not appropriate for bivariate diagnostic meta-analysis)
 #' @param zero_cell_correction Method for handling zero cells in 2x2 tables.
-#'   'none' relies on bivariate model (recommended). 'constant' adds 0.5 to all
-#'   cells of affected studies. 'treatment_arm' adds correction only to zero
-#'   cells. 'empirical' uses study-specific corrections.
+#'   'none' (recommended) applies no correction to the data itself; the
+#'   normal-approximation models still add 0.5 to studies with a zero cell at
+#'   fitting time (mada's 'single' correction), which is disclosed in the
+#'   output. 'constant' adds 0.5 to all four cells of affected studies before
+#'   any analysis. 'zero_cells' adds 0.5 only to the zero cells themselves.
+#'   'reciprocal_n' adds 1/N to all cells of affected studies, where N is the
+#'   study's total sample size. (The former option keys 'treatment_arm' and
+#'   'empirical' were renamed: they did not implement the procedures those names
+#'   denote in Sweeting et al. 2004.)
 #' @param forest_plot Generate forest plot for sensitivity and specificity
 #' @param sroc_plot Generate summary receiver operating characteristic plot
 #' @param funnel_plot Generate funnel plot for publication bias assessment
@@ -717,6 +735,7 @@ diagnosticmetaBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
 #' @return A results object containing:
 #' \tabular{llllll}{
 #'   \code{results$instructions} \tab \tab \tab \tab \tab a html \cr
+#'   \code{results$notices} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$summary} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$about} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$bivariateresults} \tab \tab \tab \tab \tab a table \cr

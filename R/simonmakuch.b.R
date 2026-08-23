@@ -1214,6 +1214,7 @@ simonmakuchClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                     ylab = "Survival Probability",
                     conf.int = self$options$showConfidenceIntervals,
                     risk.table = self$options$showRiskTables,
+                    tables.theme = survminer::theme_cleantable(),
                     legend.title = "Exposure Status",
                     legend.labs = c("Unexposed", "Exposed"),
                     ggtheme = ggtheme

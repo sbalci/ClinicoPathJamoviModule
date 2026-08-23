@@ -1,12 +1,12 @@
 ---
 title: Common Analysis for Clinicopathological Research
 name: ClinicoPath
-version: 1.0.6.03
+version: 1.0.6.05
 jms: '1.0'
 authors:
   - Serdar Balci
 maintainer: Serdar Balci <serdarbalci@serdarbalci.com>
-date: '2026-08-22'
+date: '2026-08-23'
 type: R
 description: >-
   ClinicoPath help researchers to generate natural language summaries of their
@@ -196,8 +196,8 @@ analyses:
     menuTitle: Swimmer Plot
     description: >
       Creates comprehensive swimmer plots using the ggswim package to visualize
-      patient timelines,  clinical events, milestones, and treatment responses.
-      Features enhanced data validation  and complete ggswim integration for
+      patient timelines, clinical events, milestones, and treatment responses.
+      Features enhanced data validation and complete ggswim integration for
       professional clinical visualization.
     ribbon: analyses
     category: analyses
@@ -1515,12 +1515,17 @@ analyses:
   - title: Lowest Expected Value for a fixed sample size
     name: kappaSizeFixedN
     ns: ClinicoPath
-    menuGroup: Power
+    menuGroup: PowerT
     menuSubgroup: Power Analysis by meddecide
     menuTitle: Lowest Expected Value for a fixed sample size
     menuSubtitle: Find lower Kappa based on sample size
-    description: |
-      Lowest Expected Value for a fixed sample size.
+    description: >
+      For an interobserver agreement study whose number of subjects is already
+      fixed, the lowest value of kappa the study can expect to rule out - the
+      lower bound of the one-sided confidence interval around the anticipated
+      kappa (kappa0) - using the kappaSize package. Use kappaSizePower to size a
+      study for a hypothesis test and kappaSizeCI to size it for a target
+      interval width.
     ribbon: analyses
     category: analyses
   - title: Power Approach for the Number of Subjects Required
@@ -1530,8 +1535,12 @@ analyses:
     menuSubgroup: Power Analysis by meddecide
     menuTitle: Power Approach for the Number of Subjects Required
     menuSubtitle: Find sample size based on power
-    description: |
-      Power Analysis for Interobserver Agreement Analysis.
+    description: >
+      Sample size for an interobserver agreement study sized to reject a null
+      kappa (kappa0) in favour of an alternative kappa (kappa1) at a given
+      two-sided significance level and power - the power approach of the
+      kappaSize package. Use kappaSizeCI for a target confidence-interval width,
+      and kappaSizeFixedN when the number of subjects is already fixed.
     ribbon: analyses
     category: analyses
   - title: Advanced ROC Analysis
@@ -1618,7 +1627,7 @@ analyses:
   - title: Decision Curve Analysis
     name: decisioncurve
     ns: ClinicoPath
-    menuGroup: meddecideT
+    menuGroup: meddecide
     menuTitle: Decision Curve Analysis
     menuSubgroup: Decision Curve Analysis
     menuSubtitle: Clinical Utility, Net Benefit, Threshold Analysis

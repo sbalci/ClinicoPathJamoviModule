@@ -69,13 +69,16 @@ test_that("waterfall accepts data.frame and tibble", {
 
 test_that("missing required variables yield instructions, not a thrown error", {
   # jamovi keeps the analysis idle until the user assigns variables; it must not
-  # throw, and it must not emit a half-computed table.
+  # throw, and it must not emit a half-computed table. The table skeleton (4
+  # category rows) is created in .init(), so idle = 4 rows with empty values.
   r1 <- waterfall(data = waterfall_test, responseVar = "best_response")
-  expect_equal(r1$summaryTable$rowCount, 0)
+  expect_equal(r1$summaryTable$rowCount, 4)
+  expect_true(all(is.na(r1$summaryTable$asDF$n)))
   expect_match(wf_text(r1, "todo"), "Treatment Response Analysis")
 
   r2 <- waterfall(data = waterfall_test, patientID = "patientID")
-  expect_equal(r2$summaryTable$rowCount, 0)
+  expect_equal(r2$summaryTable$rowCount, 4)
+  expect_true(all(is.na(r2$summaryTable$asDF$n)))
   expect_match(wf_text(r2, "todo"), "Treatment Response Analysis")
 })
 
@@ -93,7 +96,8 @@ test_that("waterfall validates data presence", {
   # instructions and produces no results.
   empty_result <- waterfall(data = waterfall_test[0, ], patientID = "patientID",
                             responseVar = "best_response")
-  expect_equal(empty_result$summaryTable$rowCount, 0)
+  expect_equal(empty_result$summaryTable$rowCount, 4)
+  expect_true(all(is.na(empty_result$summaryTable$asDF$n)))
   expect_match(wf_text(empty_result, "todo"), "Treatment Response Analysis")
 })
 
@@ -379,5 +383,5 @@ test_that("a single-patient cohort is flagged as uninformative", {
     patientID = "patientID",
     responseVar = "best_response"
   )
-  expect_match(wf_text(result), "VERY SMALL COHORT")
+  expect_match(wf_text(result), "VERY SMALL SAMPLE")
 })

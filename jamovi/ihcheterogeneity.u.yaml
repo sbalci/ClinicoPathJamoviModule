@@ -16,7 +16,7 @@ children:
             maxItemCount: 1
             isTarget: true
       - type: TargetLayoutBox
-        label: Regional Measurement 1
+        label: Regional Measurement 1 (Required)
         children:
           - type: VariablesListBox
             name: biopsy1
@@ -61,31 +61,34 @@ children:
     children:
       - type: ComboBox
         name: analysis_type
-        label: Analysis type
+        label: Analysis focus
       - type: ComboBox
         name: sampling_strategy
         label: Sampling strategy
-  - type: LayoutBox
-    margin: large
-    children:
       - type: CheckBox
         name: compareCompartments
+        label: Spatial compartment comparison
+        enable: (spatial_id)
       - type: CheckBox
         name: compartmentTests
+        label: Compartment comparison tests
+        enable: (spatial_id)
   - type: CollapseBox
     label: Clinical Thresholds
     children:
       - type: TextBox
         name: cv_threshold
         format: number
-        label: CV Threshold (%)
+        label: CV threshold (%)
       - type: TextBox
         name: correlation_threshold
         format: number
-        label: Correlation Threshold
+        label: Correlation threshold
   - type: CollapseBox
     label: Additional Analyses
     children:
+      - type: Label
+        label: The Comprehensive focus always includes plots, variance components and power analysis; the Variance focus includes plots and variance components. Use these toggles to add them under other focuses.
       - type: CheckBox
         name: show_variability_plots
         label: Variability plots
@@ -108,3 +111,9 @@ children:
       - type: CheckBox
         name: showGlossary
         label: Statistical glossary
+      - type: CheckBox
+        name: showReportSentences
+        label: Copy-ready report sentences
+      - type: CheckBox
+        name: showAssumptions
+        label: Methodology & assumptions

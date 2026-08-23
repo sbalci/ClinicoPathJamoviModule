@@ -179,18 +179,21 @@ test_that("Minimum study count requirements are enforced", {
         tn = c(80, 85)
     )
 
-    result_small <- diagnosticmeta(
-        data = testData_small,
-        study = study,
-        true_positives = tp,
-        false_positives = fp,
-        false_negatives = fn,
-        true_negatives = tn,
-        bivariate_analysis = TRUE
+    # The <3-studies gate is a jmvcore::reject(): in jamovi it greys the
+    # results with an analysis-level error; in testthat it surfaces as an
+    # error from $run().
+    expect_error(
+        diagnosticmeta(
+            data = testData_small,
+            study = study,
+            true_positives = tp,
+            false_positives = fp,
+            false_negatives = fn,
+            true_negatives = tn,
+            bivariate_analysis = TRUE
+        ),
+        "At least 3 studies"
     )
-
-    # Should still complete but with note about insufficient data
-    expect_s3_class(result_small, "diagnosticmetaResults")
 })
 
 

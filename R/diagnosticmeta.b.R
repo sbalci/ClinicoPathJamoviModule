@@ -30,6 +30,9 @@ diagnosticmetaClass <- R6::R6Class(
         .pooled_spec_pi = NULL,
         .n_studies = 0,
         .biv_model = NULL,
+        # Accumulated user-facing notices for the current run; reset at the top
+        # of .run() and rendered into the `notices` Html item.
+        .noticeList = NULL,
 
         # Helper for null-safe operations
         `%||%` = function(x, y) {
@@ -51,6 +54,98 @@ diagnosticmetaClass <- R6::R6Class(
         .metaforLevel = function() {
             level <- self$options$confidence_level %||% 95
             max(50, min(99, as.numeric(level)))
+        },
+
+        # Human-readable zero-cell-correction name for notices and summaries.
+        .correctionLabel = function(key) {
+            switch(key %||% "none",
+                   constant = "+0.5 to all cells of zero-cell studies",
+                   zero_cells = "+0.5 to the zero cells only",
+                   reciprocal_n = "+1/N to all cells (N = study size)",
+                   as.character(key))
+        },
+
+        # Human-readable estimation-method name for table notes. Notes
+        # previously showed internal keys ("reml", "DL"), which read as debug
+        # output to a clinician.
+        .methodTitle = function(method) {
+            switch(
+                tolower(method %||% "reml"),
+                "fixed" = "fixed-effects",
+                "ml" = "maximum likelihood",
+                "reml" = "REML",
+                "mm" = "method-of-moments",
+                "vc" = "variance-components",
+                as.character(method)
+            )
+        },
+
+        # Wilson score interval for a proportion. Shared by the forest plot
+        # renderer and the Individual Study Results table so both display the
+        # same per-study intervals.
+        .wilsonCI = function(x, n, z) {
+            if (!is.finite(x) || !is.finite(n) || n == 0) {
+                return(c(0, 1))
+            }
+            p <- x / n
+            denominator <- 1 + z^2 / n
+            center <- (p + z^2 / (2 * n)) / denominator
+            margin <- z * sqrt((p * (1 - p) / n + z^2 / (4 * n^2))) / denominator
+            c(max(0, center - margin), min(1, center + margin))
+        },
+
+        # ---- Notices --------------------------------------------------------
+        # User-facing warnings and information banners. These previously went
+        # through .appendInstructionMessage(), which appended them below ~95
+        # lines of onboarding HTML in the Getting Started panel and never reset
+        # between runs, so the same banner accumulated once per run cycle.
+        # Notices now render into a dedicated always-visible `notices` Html
+        # item, rebuilt from scratch each run.
+        .addNotice = function(type, title, content) {
+            private$.noticeList[[length(private$.noticeList) + 1]] <- list(
+                type = type,
+                title = title,
+                content = content
+            )
+            # Render immediately so a notice added just before an early return
+            # is never lost.
+            private$.renderNotices()
+        },
+
+        .renderNotices = function() {
+            if (length(private$.noticeList) == 0) {
+                # Clear any content left from a previous run cycle.
+                self$results$notices$setContent("")
+                return()
+            }
+
+            # Translucent rgba tints composite over either jamovi theme;
+            # title colors are saturated enough to read on both.
+            typeStyles <- list(
+                ERROR = list(color = "#dc2626", bgcolor = "rgba(220, 38, 38, 0.10)", border = "#fca5a5"),
+                STRONG_WARNING = list(color = "#ea580c", bgcolor = "rgba(234, 88, 12, 0.10)", border = "#fdba74"),
+                WARNING = list(color = "#ca8a04", bgcolor = "rgba(202, 138, 4, 0.12)", border = "#fde047"),
+                INFO = list(color = "#2563eb", bgcolor = "rgba(37, 99, 235, 0.08)", border = "#93c5fd")
+            )
+
+            html <- "<div style='margin: 10px 0;'>"
+            for (notice in private$.noticeList) {
+                style <- typeStyles[[notice$type]] %||% typeStyles$INFO
+                html <- paste0(
+                    html,
+                    "<div style='background-color: ", style$bgcolor, "; ",
+                    "border-left: 4px solid ", style$border, "; ",
+                    "padding: 12px; margin: 8px 0; border-radius: 4px;'>",
+                    "<strong style='color: ", style$color, ";'>",
+                    htmltools::htmlEscape(notice$title), "</strong><br>",
+                    "<span style='color: inherit;'>",
+                    htmltools::htmlEscape(notice$content), "</span>",
+                    "</div>"
+                )
+            }
+            html <- paste0(html, "</div>")
+
+            self$results$notices$setContent(html)
         },
 
         .renderSymbols = function(text) {
@@ -85,9 +180,12 @@ diagnosticmetaClass <- R6::R6Class(
                 ),
                 "high_contrast" = list(
                     primary = "#000000",     # Black
-                    secondary = "#FFFFFF",   # White
+                    # secondary is used for the funnel-plot points and forest
+                    # plot elements; white (#FFFFFF) made them invisible on the
+                    # light-theme plot background.
+                    secondary = "#4D4D4D",   # Dark gray
                     tertiary = "#808080",    # Gray
-                    study_points = "#404040" # Dark gray
+                    study_points = "#404040" # Darker gray
                 ),
                 "viridis" = list(
                     primary = "#440154",     # Dark purple
@@ -113,16 +211,22 @@ diagnosticmetaClass <- R6::R6Class(
 
         .init = function() {
 
-            # Initialize content for all Html outputs
+            # Initialize content for all static Html outputs. Their visibility
+            # is governed entirely by the declarative `visible:` expressions in
+            # the .r.yaml; the imperative setVisible() overrides that used to
+            # live here made the Analysis Summary and Clinical Interpretation
+            # checkboxes dead until every variable was assigned (and left
+            # interpretation hidden after a reject).
             private$.populateInstructions()
             private$.populateAboutPanel()
             private$.populateInterpretation()
 
-            # Set initial visibility based on data state
-            self$results$instructions$setVisible(TRUE)
-            self$results$summary$setVisible(FALSE)
-            self$results$about$setVisible(self$options$show_methodology)
-            self$results$interpretation$setVisible(FALSE)
+            # The three plot-explanation panels are static interpretation
+            # guides: populate them once here so a data change can never leave
+            # a visible-but-empty titled panel behind.
+            private$.populateForestPlotExplanation()
+            private$.populateSROCPlotExplanation()
+            private$.populateFunnelPlotExplanation()
 
             # Fixed row structure for the bivariate results table: the same five
             # parameters with the same labels on every run. Only the estimates
@@ -151,17 +255,10 @@ diagnosticmetaClass <- R6::R6Class(
             # not extractable for translation. Run `/prepare-translation
             # diagnosticmeta` to wrap them and produce the .po file.
 
-            # TODO (jamovify): notices migration - error reporting uses ad-hoc
-            # patterns: (a) the 5 `setNote("error", sprintf(... e$message))`
-            # tryCatch handlers at lines 222/241/253/265/277, (b) HTML alert
-            # banners via `.appendInstructionMessage()`, (c) plain HTML
-            # written to `self$results$instructions$setContent(...)` at 151
-            # and 186. Migrate to the structured notices pattern documented
-            # in docs/NOTICE_TO_HTML_CONVERSION_GUIDE.md and demonstrated in
-            # R/waterfall.b.R (`.addNotice` / `.renderNotices`). Adds proper
-            # severity tiers (ERROR/STRONG_WARNING/WARNING/INFO) and a
-            # consistent UI location instead of the mix of `instructions`,
-            # table-footer notes, and welcome-panel overlays today.
+            # Reset the notices accumulator and clear any banner content left
+            # from the previous run cycle; every .addNotice() below re-renders.
+            private$.noticeList <- list()
+            private$.renderNotices()
 
             # Invalidate cache when data changes
             private$.data_cache_valid <- FALSE
@@ -259,10 +356,8 @@ diagnosticmetaClass <- R6::R6Class(
                     reasons <- c(reasons, sprintf("%d with negative counts", sum(negative)))
                 if (sum(empty_arm) > 0)
                     reasons <- c(reasons, sprintf("%d with no diseased or no non-diseased participants", sum(empty_arm)))
-                private$.appendInstructionMessage(sprintf(
-                    paste0("<div class='alert alert-warning'><h4>Studies excluded</h4><p>",
-                           "%d of %d studies were excluded before analysis (%s). ",
-                           "All results below are based on the remaining %d studies.</p></div>"),
+                private$.addNotice("WARNING", "Studies excluded", sprintf(
+                    "%d of %d studies were excluded before analysis (%s). All results below are based on the remaining %d studies.",
                     sum(drop), original_n, paste(reasons, collapse = "; "), nrow(meta_data)))
             }
 
@@ -293,7 +388,19 @@ diagnosticmetaClass <- R6::R6Class(
             analysis_data <- prepared_data$analysis_data
             mada_data <- prepared_data$mada_data
 
-            # Prepare data for analysis - debug info removed for clean output
+            # Disclose a user-selected zero-cell correction where it is always
+            # visible. The corrected counts feed EVERY downstream analysis
+            # (SROC, heterogeneity, meta-regression, forest plot), but the
+            # previous disclosures lived only on the bivariate table (hidden
+            # when that analysis is off) and in the optional summary panel.
+            if (isTRUE(prepared_data$continuity_correction)) {
+                corrected_names <- private$.corrected_study_names
+                private$.addNotice("INFO", "Zero-cell correction applied", sprintf(
+                    "A zero-cell correction (%s) was applied to %d study/studies (%s). Corrected counts are used by all analyses and plots; the Individual Study Results table shows the raw counts.",
+                    private$.correctionLabel(private$.correction_method_used),
+                    length(corrected_names),
+                    paste(corrected_names, collapse = ", ")))
+            }
 
             # Perform bivariate meta-analysis when enabled
             if (isTRUE(self$options$bivariate_analysis)) {
@@ -305,9 +412,10 @@ diagnosticmetaClass <- R6::R6Class(
                 }, error = function(e) {
                     private$.pooled_sensitivity <- NULL
                     private$.pooled_specificity <- NULL
-                    # SERIALIZATION FIX: Don't insert Notice objects (causes serialization errors)
-                    # Instead, use table note
-                    self$results$bivariateresults$setNote("error", sprintf('Bivariate analysis error: %s', htmltools::htmlEscape(e$message)))
+                    # Table notes are a plain-text sink (limited HTML allow-list),
+                    # so the message must NOT be HTML-escaped: escaping turned
+                    # "object 'x' not found" into "object &#39;x&#39; not found".
+                    self$results$bivariateresults$setNote("error", sprintf('Bivariate analysis error: %s', e$message))
                     private$.generateSummary(meta_data)
                 })
             } else {
@@ -316,7 +424,6 @@ diagnosticmetaClass <- R6::R6Class(
                 self$results$bivariateresults$setNote("disabled", "Bivariate analysis disabled by user option")
                 private$.generateBasicSummary(meta_data)
             }
-            self$results$summary$setVisible(self$options$show_analysis_summary)
 
             # Perform the Holling proportional-hazards SROC analysis if requested
             if (isTRUE(self$options$hsroc_analysis)) {
@@ -326,13 +433,12 @@ diagnosticmetaClass <- R6::R6Class(
                         mada_data = mada_data
                     )
                 }, error = function(e) {
-                    # SERIALIZATION FIX: Don't insert Notice objects (causes serialization errors)
-                    # Use table note instead
+                    # Table notes are plain text - do not HTML-escape.
                     self$results$hsrocresults$setNote(
                         "error",
                         sprintf(
                             "Proportional-hazards SROC analysis error: %s",
-                            htmltools::htmlEscape(e$message)
+                            e$message
                         )
                     )
                 })
@@ -344,9 +450,8 @@ diagnosticmetaClass <- R6::R6Class(
                     private$.performHeterogeneityAnalysis(meta_data = meta_data,
                                                           analysis_data = analysis_data)
                 }, error = function(e) {
-                    # SERIALIZATION FIX: Don't insert Notice objects (causes serialization errors)
-                    # Use table note instead
-                    self$results$heterogeneity$setNote("error", sprintf('Heterogeneity analysis error: %s', htmltools::htmlEscape(e$message)))
+                    # Table notes are plain text - do not HTML-escape.
+                    self$results$heterogeneity$setNote("error", sprintf('Heterogeneity analysis error: %s', e$message))
                 })
             }
 
@@ -356,9 +461,8 @@ diagnosticmetaClass <- R6::R6Class(
                     private$.performMetaRegression(meta_data = meta_data,
                                                    analysis_data = analysis_data)
                 }, error = function(e) {
-                    # SERIALIZATION FIX: Don't insert Notice objects (causes serialization errors)
-                    # Use table note instead
-                    self$results$metaregression$setNote("error", sprintf('Meta-regression error: %s', htmltools::htmlEscape(e$message)))
+                    # Table notes are plain text - do not HTML-escape.
+                    self$results$metaregression$setNote("error", sprintf('Meta-regression error: %s', e$message))
                 })
             }
 
@@ -368,9 +472,8 @@ diagnosticmetaClass <- R6::R6Class(
                     private$.performPublicationBiasAssessment(meta_data = meta_data,
                                                               analysis_data = analysis_data)
                 }, error = function(e) {
-                    # SERIALIZATION FIX: Don't insert Notice objects (causes serialization errors)
-                    # Use table note instead
-                    self$results$publicationbias$setNote("error", sprintf('Publication bias analysis error: %s', htmltools::htmlEscape(e$message)))
+                    # Table notes are plain text - do not HTML-escape.
+                    self$results$publicationbias$setNote("error", sprintf('Publication bias analysis error: %s', e$message))
                 })
             }
             
@@ -387,33 +490,11 @@ diagnosticmetaClass <- R6::R6Class(
                 private$.populateFunnelPlot(analysis_data)
             }
 
-            # Generate plot explanations if requested
-            if (self$options$show_plot_explanations) {
-                if (self$options$forest_plot) {
-                    private$.populateForestPlotExplanation()
-                }
-                if (self$options$sroc_plot) {
-                    private$.populateSROCPlotExplanation()
-                }
-                if (self$options$funnel_plot && self$options$publication_bias) {
-                    private$.populateFunnelPlotExplanation()
-                }
-            }
-
             # Populate individual studies table
             if (self$options$show_individual_studies) {
                 private$.populateIndividualStudies(meta_data)
             }
 
-            # Set visibility for interpretation and about based on options and data completeness
-            if (!is.null(study_var) && !is.null(tp_var) && !is.null(fp_var) &&
-                !is.null(fn_var) && !is.null(tn_var)) {
-                self$results$interpretation$setVisible(self$options$show_interpretation)
-                self$results$about$setVisible(self$options$show_methodology)
-            }
-
-            # SERIALIZATION FIX: Removed completion notice (causes serialization errors)
-            # Analysis completion info is shown in summary table instead
         },
         
         .performBivariateMetaAnalysis = function(meta_data, analysis_data, mada_data) {
@@ -466,11 +547,16 @@ diagnosticmetaClass <- R6::R6Class(
             correction_method <- self$options$zero_cell_correction %||% "none"
             zero_present <- any(mada_data[, c("TP", "FP", "FN", "TN")] == 0, na.rm = TRUE)
 
-            biv_model <- mada::reitsma(
+            # .quietly muffles only the named warning: mada's checkdata "non
+            # zero decimal places" fires on the deliberately fractional counts
+            # produced by the zero_cells / reciprocal_n corrections and would
+            # land in jamovi's Analysis Notes on every run. Substantive fit
+            # warnings still propagate.
+            biv_model <- .quietly(mada::reitsma(
                 mada_data, method = method_used,
                 correction = 0.5,
                 correction.control = if (identical(correction_method, "none")) "single" else "all"
-            )
+            ), deprecation_pattern = "non zero decimal places")
 
             if (zero_present) {
                 n_zero_studies <- sum(rowSums(mada_data[, c("TP", "FP", "FN", "TN")] == 0) > 0)
@@ -484,6 +570,35 @@ diagnosticmetaClass <- R6::R6Class(
                     else "all studies"))
             }
             private$.biv_model <- biv_model
+
+            # Report the fitted between-study variance components: the
+            # sens/spec correlation is the threshold-effect indicator and the
+            # tau-squared values quantify the heterogeneity the model actually
+            # estimated. Neither appeared anywhere in the output before.
+            Psi_vc <- biv_model$Psi
+            if (is.matrix(Psi_vc) && all(dim(Psi_vc) >= 2) &&
+                all(is.finite(diag(Psi_vc)[1:2])) && all(diag(Psi_vc)[1:2] > 0)) {
+                # mada parameterizes in (logit sens, logit FPR); logit(spec) =
+                # -logit(FPR), so the sens/spec correlation is the NEGATIVE of
+                # the fitted correlation.
+                corr_ss <- -Psi_vc[1, 2] / sqrt(Psi_vc[1, 1] * Psi_vc[2, 2])
+                vc_note <- sprintf(
+                    paste("Between-study variance components: tau-squared (logit sensitivity) = %.3f,",
+                          "tau-squared (logit false-positive rate) = %.3f; correlation between logit",
+                          "sensitivity and logit specificity = %.2f. A strongly negative correlation",
+                          "suggests a threshold effect (studies trading sensitivity for specificity)."),
+                    Psi_vc[1, 1], Psi_vc[2, 2], corr_ss)
+                # With few studies the correlation routinely lands on the +/-1
+                # boundary - a degenerate estimate, not evidence of a perfect
+                # relationship.
+                if (is.finite(corr_ss) && abs(corr_ss) > 0.99) {
+                    vc_note <- paste(vc_note,
+                        "The correlation is estimated at the boundary (+/-1), which with few",
+                        "studies usually means it cannot be estimated reliably - do not",
+                        "over-interpret it.")
+                }
+                self$results$bivariateresults$setNote("variance_components", vc_note)
+            }
             summary_results <- tryCatch(
                 summary(biv_model, level = conf_level),
                 error = function(e) NULL
@@ -556,9 +671,8 @@ diagnosticmetaClass <- R6::R6Class(
 
             if (is.null(coefficients) || !is.matrix(coefficients)) {
                 self$results$bivariateresults$setNote("model_error", "Reitsma model failed - coefficient matrix missing")
-                private$.appendInstructionMessage(
-                    "<div class='alert alert-warning'><h4> Bivariate Output Missing</h4><p>The Reitsma model did not return coefficient estimates, so pooled sensitivity and specificity are unavailable.</p></div>"
-                )
+                private$.addNotice("STRONG_WARNING", "Bivariate output missing",
+                    "The Reitsma model did not return coefficient estimates, so pooled sensitivity and specificity are unavailable.")
                 return()
             }
 
@@ -588,9 +702,8 @@ diagnosticmetaClass <- R6::R6Class(
                     "model_error",
                     "Reitsma model returned unexpected coefficient structure"
                 )
-                private$.appendInstructionMessage(
-                    "<div class='alert alert-warning'><h4> Bivariate Output Missing</h4><p>The Reitsma model did not return the expected coefficient estimates, so pooled sensitivity and specificity are unavailable.</p></div>"
-                )
+                private$.addNotice("STRONG_WARNING", "Bivariate output missing",
+                    "The Reitsma model did not return the expected coefficient estimates, so pooled sensitivity and specificity are unavailable.")
                 return()
             }
 
@@ -628,12 +741,6 @@ diagnosticmetaClass <- R6::R6Class(
                 }
             }
             private$.pooled_specificity <- pooled_spec
-
-            # Heterogeneity assessment: Use Q-statistic from bivariate model
-            # Note: Univariate I^2 values ignore bivariate correlation and overstate precision
-            # Proper assessment requires examining the bivariate covariance structure
-            sens_i2 <- NA_real_
-            spec_i2 <- NA_real_
 
             # SERIALIZATION FIX: Use table note instead of inserting Notice
             self$results$bivariateresults$setNote("heterogeneity_info",
@@ -674,36 +781,41 @@ diagnosticmetaClass <- R6::R6Class(
                     mu_l <- as.numeric(stats::coef(biv_model))
                     if (all(is.finite(diag(tot))) && all(diag(tot) >= 0) &&
                         length(mu_l) >= 2 && all(is.finite(mu_l[1:2]))) {
-                        z <- z_crit
-                        sens_pi <- stats::plogis(mu_l[1] + c(-1, 1) * z * sqrt(tot[1, 1])) * 100
+                        # t on k - 2 df, not z: with the small k typical of DTA
+                        # meta-analyses a normal quantile understates exactly the
+                        # between-study uncertainty the interval exists to show
+                        # (Riley et al 2011, BMJ 342:d549).
+                        k_studies <- nrow(mada_data)
+                        crit <- if (is.finite(k_studies) && k_studies >= 3)
+                            stats::qt(1 - (1 - conf_level) / 2, df = k_studies - 2)
+                        else z_crit
+                        sens_pi <- stats::plogis(mu_l[1] + c(-1, 1) * crit * sqrt(tot[1, 1])) * 100
                         # tfpr -> specificity: spec = 1 - plogis(tfpr)
-                        spec_pi <- sort((1 - stats::plogis(mu_l[2] + c(-1, 1) * z * sqrt(tot[2, 2]))) * 100)
+                        spec_pi <- sort((1 - stats::plogis(mu_l[2] + c(-1, 1) * crit * sqrt(tot[2, 2]))) * 100)
 
                         pct <- self$options$confidence_level %||% 95
                         private$.pooled_sens_pi <- sens_pi
                         private$.pooled_spec_pi <- spec_pi
 
                         bivariate_table$setNote("prediction", sprintf(
-                            paste("Prediction interval for a future study (%d%%): sensitivity %.1f%%-%.1f%%,",
-                                  "specificity %.1f%%-%.1f%%. This is where a NEW study or laboratory is expected",
-                                  "to fall and includes between-study heterogeneity; the confidence intervals",
-                                  "above describe only how precisely the pooled average is estimated."),
-                            pct, sens_pi[1], sens_pi[2], spec_pi[1], spec_pi[2]))
+                            paste("Prediction interval for a future study (%d%%, t distribution on %d df): sensitivity",
+                                  "%.1f%%-%.1f%%, specificity %.1f%%-%.1f%%. This is where a NEW study or laboratory",
+                                  "is expected to fall and includes between-study heterogeneity; the confidence",
+                                  "intervals above describe only how precisely the pooled average is estimated."),
+                            pct, max(k_studies - 2, 1), sens_pi[1], sens_pi[2], spec_pi[1], spec_pi[2]))
 
                         # Flag when heterogeneity, not sampling error, dominates.
                         if (is.finite(sens_pi[2] - sens_pi[1]) &&
                             ((sens_pi[2] - sens_pi[1]) > 30 || (spec_pi[2] - spec_pi[1]) > 30)) {
-                            private$.appendInstructionMessage(paste0(
-                                "<div class='alert alert-warning'><h4>Substantial between-study heterogeneity</h4>",
-                                "<p>The prediction interval spans a wide range of accuracy (sensitivity ",
-                                sprintf("%.0f%%-%.0f%%", sens_pi[1], sens_pi[2]), ", specificity ",
-                                sprintf("%.0f%%-%.0f%%", spec_pi[1], spec_pi[2]), "). ",
-                                "A single pooled sensitivity and specificity may not usefully describe this ",
-                                "body of evidence: studies differ more than sampling error explains, commonly ",
-                                "because of differing positivity thresholds, patient spectrum or reference ",
-                                "standards. Prefer the SROC curve and the prediction region over the pooled ",
-                                "point, and investigate the source of heterogeneity before applying these ",
-                                "figures to your own practice.</p></div>"))
+                            private$.addNotice("STRONG_WARNING", "Substantial between-study heterogeneity", sprintf(
+                                paste("The prediction interval spans a wide range of accuracy (sensitivity %.0f%%-%.0f%%,",
+                                      "specificity %.0f%%-%.0f%%). A single pooled sensitivity and specificity may not",
+                                      "usefully describe this body of evidence: studies differ more than sampling error",
+                                      "explains, commonly because of differing positivity thresholds, patient spectrum",
+                                      "or reference standards. Prefer the SROC curve and the prediction region over the",
+                                      "pooled point, and investigate the source of heterogeneity before applying these",
+                                      "figures to your own practice."),
+                                sens_pi[1], sens_pi[2], spec_pi[1], spec_pi[2]))
                         }
                     }
                 }
@@ -713,7 +825,6 @@ diagnosticmetaClass <- R6::R6Class(
                 estimate = pooled_sens * 100,  # Convert to percentage
                 ci_lower = sens_ci[1] * 100,   # Convert to percentage
                 ci_upper = sens_ci[2] * 100,   # Convert to percentage
-                i_squared = sens_i2,
                 p_value = sens_logit_row[1, "Pr(>|z|)"]
             ))
 
@@ -721,7 +832,6 @@ diagnosticmetaClass <- R6::R6Class(
                 estimate = pooled_spec * 100,  # Convert to percentage
                 ci_lower = spec_ci[1] * 100,   # Convert to percentage
                 ci_upper = spec_ci[2] * 100,   # Convert to percentage
-                i_squared = spec_i2,
                 p_value = fpr_logit_row[1, "Pr(>|z|)"]
             ))
 
@@ -784,7 +894,6 @@ diagnosticmetaClass <- R6::R6Class(
                 estimate = pooled_plr,
                 ci_lower = lr_ci$plr[1],
                 ci_upper = lr_ci$plr[2],
-                i_squared = NA_real_,
                 p_value = NA_real_
             ))
 
@@ -792,7 +901,6 @@ diagnosticmetaClass <- R6::R6Class(
                 estimate = pooled_nlr,
                 ci_lower = lr_ci$nlr[1],
                 ci_upper = lr_ci$nlr[2],
-                i_squared = NA_real_,
                 p_value = NA_real_
             ))
 
@@ -800,18 +908,22 @@ diagnosticmetaClass <- R6::R6Class(
                 estimate = pooled_dor,
                 ci_lower = lr_ci$dor[1],
                 ci_upper = lr_ci$dor[2],
-                i_squared = NA_real_,
                 p_value = NA_real_
             ))
 
-            # Analysis completed successfully - table should be populated
-            bivariate_table$setNote("success", "Analysis completed successfully - table populated")
-            bivariate_table$setNote("method", paste("Reitsma model estimated via", method_used))
+            bivariate_table$setNote("method", paste("Reitsma bivariate model,",
+                private$.methodTitle(method_used), "estimation."))
         },
         
         .performPHMSROCAnalysis = function(meta_data, mada_data) {
 
-            if (requireNamespace("mada", quietly = TRUE)) {
+            if (!requireNamespace("mada", quietly = TRUE)) {
+                self$results$hsrocresults$setNote("package_error",
+                    "The mada package is not available, so the proportional-hazards SROC model could not be fitted.")
+                return()
+            }
+
+            {
 
                 hsroc_table <- self$results$hsrocresults
                 hsroc_table$deleteRows()
@@ -852,23 +964,37 @@ diagnosticmetaClass <- R6::R6Class(
                     return()
                 }
 
-                # mada::phm() applies its documented continuity correction when
-                # zero cells are present. Surface that behavior to the user.
-                zero_cells <- any(meta_data$tp == 0 | meta_data$fp == 0 |
-                                  meta_data$fn == 0 | meta_data$tn == 0)
+                # Apply the SAME continuity-correction policy as the bivariate
+                # model. mada::phm's library default is correction.control =
+                # "all" (0.5 to every study when any zero cell exists), while
+                # reitsma is called with "single" under the default option -
+                # letting phm use its default meant the two sections of one
+                # output were fitted to different data.
+                correction_method <- self$options$zero_cell_correction %||% "none"
+                phm_correction_control <- if (identical(correction_method, "none")) "single" else "all"
+                # Check the data the model actually receives: when a user-chosen
+                # correction is active, mada_data is already zero-free and
+                # mada's own 0.5 correction never fires (the applied correction
+                # is disclosed in the notices panel instead).
+                zero_cells <- any(mada_data[, c("TP", "FP", "FN", "TN")] == 0,
+                                  na.rm = TRUE)
                 if (zero_cells) {
                     self$results$hsrocresults$setNote(
                         "zerocells",
                         paste(
-                            "Zero cells detected; mada::phm applies a continuity",
-                            "correction, so results should be interpreted cautiously."
+                            "Zero cells detected; a continuity correction of 0.5 was",
+                            "applied to the affected studies (matching the bivariate",
+                            "model), so results should be interpreted cautiously."
                         )
                     )
                 }
 
                 # Fit the Holling proportional-hazards SROC model.
                 hsroc_model <- tryCatch({
-                    result <- mada::phm(mada_data)
+                    result <- .quietly(
+                        mada::phm(mada_data, correction = 0.5,
+                                  correction.control = phm_correction_control),
+                        deprecation_pattern = "non zero decimal places")
                     if (is.null(result)) {
                         stop("Proportional-hazards SROC model fitting returned NULL")
                     }
@@ -877,7 +1003,8 @@ diagnosticmetaClass <- R6::R6Class(
                 }, warning = function(w) {
                     # Try with warnings suppressed
                     tryCatch({
-                        result <- suppressWarnings(mada::phm(mada_data))
+                        result <- suppressWarnings(mada::phm(mada_data, correction = 0.5,
+                                                             correction.control = phm_correction_control))
                         if (is.null(result)) {
                             stop("Proportional-hazards SROC model fitting returned NULL after warning")
                         }
@@ -992,8 +1119,19 @@ diagnosticmetaClass <- R6::R6Class(
                                 if (is.finite(variance) && variance > 0) {
                                     std_error <- sqrt(variance)
                                     if (is.finite(std_error) && std_error > 0 && is.finite(estimate)) {
-                                        z_value <- estimate / std_error
-                                        p_value <- 2 * (1 - stats::pnorm(abs(z_value)))
+                                        # The former z = estimate/SE tested H0:
+                                        # parameter = 0, which is the wrong null
+                                        # for BOTH parameters: for theta the
+                                        # no-accuracy null is theta = 1 (sens =
+                                        # FPR chance diagonal; theta -> 0 is a
+                                        # PERFECT test), and a Wald test of the
+                                        # variance taus_sq against 0 sits on the
+                                        # boundary of its parameter space and is
+                                        # invalid - so no p is shown for it.
+                                        if (identical(param_name, "theta")) {
+                                            z_value <- (estimate - 1) / std_error
+                                            p_value <- 2 * (1 - stats::pnorm(abs(z_value)))
+                                        }
                                     }
                                 }
                             }
@@ -1011,8 +1149,12 @@ diagnosticmetaClass <- R6::R6Class(
                     hsroc_table$setNote(
                         "method",
                         paste(
-                            "Holling proportional-hazards SROC model fitted",
-                            "with adjusted profile maximum likelihood."
+                            "Holling proportional-hazards SROC model fitted with adjusted profile",
+                            "maximum likelihood. The p-value for theta tests H0: theta = 1 (accuracy",
+                            "no better than chance); theta < 1 indicates discrimination and theta near 0",
+                            "a near-perfect test (AUC = 1/(1 + theta)). No p-value is shown for the",
+                            "between-study variance: a Wald test of a variance against zero is invalid",
+                            "at the boundary of its parameter space."
                         )
                     )
                 } else {
@@ -1026,11 +1168,19 @@ diagnosticmetaClass <- R6::R6Class(
         
         .performHeterogeneityAnalysis = function(meta_data, analysis_data) {
 
-            if (is.null(analysis_data) || nrow(analysis_data) == 0) {
+            if (!requireNamespace("metafor", quietly = TRUE)) {
+                self$results$heterogeneity$setNote("package_error",
+                    "The metafor package is not available, so heterogeneity could not be assessed.")
                 return()
             }
 
-            if (requireNamespace("metafor", quietly = TRUE)) {
+            if (is.null(analysis_data) || nrow(analysis_data) == 0) {
+                self$results$heterogeneity$setNote("data_error",
+                    "Analysis data is missing or empty, so heterogeneity could not be assessed.")
+                return()
+            }
+
+            {
 
                 analysis_data$sens <- analysis_data$tp / (analysis_data$tp + analysis_data$fn)
                 analysis_data$spec <- analysis_data$tn / (analysis_data$tn + analysis_data$fp)
@@ -1151,14 +1301,27 @@ diagnosticmetaClass <- R6::R6Class(
                 add_heterogeneity_row("specificity", "Specificity", spec_meta)
                 het_table$setNote(
                     "method",
-                    paste("Univariate auxiliary models used", rma_method, "estimation.")
+                    paste("Univariate auxiliary models used",
+                          private$.methodTitle(self$options$method), "estimation.")
                 )
             }
         },
         
         .performMetaRegression = function(meta_data, analysis_data) {
 
+            # Clear first, before any early return, so a run that bails out
+            # cannot leave rows from a previous configuration on screen.
+            self$results$metaregression$deleteRows()
+
+            if (!requireNamespace("metafor", quietly = TRUE)) {
+                self$results$metaregression$setNote("package_error",
+                    "The metafor package is not available, so meta-regression could not be run.")
+                return()
+            }
+
             if (is.null(analysis_data) || nrow(analysis_data) == 0) {
+                self$results$metaregression$setNote("data_error",
+                    "Analysis data is missing or empty, so meta-regression could not be run.")
                 return()
             }
 
@@ -1166,9 +1329,8 @@ diagnosticmetaClass <- R6::R6Class(
             if (is.null(covariate_var)) {
                 # Add message when meta-regression is enabled but no covariate is selected
                 if (isTRUE(self$options$meta_regression)) {
-                    private$.appendInstructionMessage(
-                        "<div class='alert alert-info'><h4> Meta-Regression Requires a Covariate</h4><p>To perform meta-regression analysis, please select a covariate variable (e.g., study year, population type, method) that may explain heterogeneity between studies. The covariate should be a study-level characteristic that varies across included studies.</p></div>"
-                    )
+                    private$.addNotice("INFO", "Meta-regression requires a covariate",
+                        "To perform meta-regression analysis, please select a covariate variable (e.g., study year, population type, method) that may explain heterogeneity between studies. The covariate should be a study-level characteristic that varies across included studies.")
                 }
                 return()
             }
@@ -1177,9 +1339,8 @@ diagnosticmetaClass <- R6::R6Class(
             if (is.null(covariate_values)) return()
 
             if (!"row_id" %in% names(meta_data)) {
-                private$.appendInstructionMessage(
-                    "<div class='alert alert-warning'><h4> Meta-Regression Skipped</h4><p>Row identifiers were not preserved during preprocessing, so the covariate could not be aligned with the filtered studies.</p></div>"
-                )
+                private$.addNotice("WARNING", "Meta-regression skipped",
+                    "Row identifiers were not preserved during preprocessing, so the covariate could not be aligned with the filtered studies.")
                 return()
             }
 
@@ -1247,7 +1408,6 @@ diagnosticmetaClass <- R6::R6Class(
                 analysis_data$var_logit_spec <- 1 / analysis_data$tn + 1 / analysis_data$fp
 
                 metareg_table <- self$results$metaregression
-                metareg_table$deleteRows()
 
                 sens_valid <- is.finite(analysis_data$logit_sens) &
                     is.finite(analysis_data$var_logit_sens) &
@@ -1297,18 +1457,17 @@ diagnosticmetaClass <- R6::R6Class(
                             mods = ~ covariate,
                             data = data,
                             method = rma_method,
-                            level = rma_level
+                            level = rma_level,
+                            # Knapp-Hartung adjustment: t-based inference is
+                            # materially less anticonservative than Wald z at
+                            # the small k typical of DTA meta-regression. Not
+                            # defined for fixed-effect models.
+                            test = if (identical(rma_method, "FE")) "z" else "knha"
                         ),
                         error = function(e) {
-                            private$.appendInstructionMessage(
-                                paste0(
-                                    "<div class='alert alert-warning'><h4> ",
-                                    measure,
-                                    " Meta-Regression Failed</h4><p>",
-                                    htmltools::htmlEscape(e$message),
-                                    "</p></div>"
-                                )
-                            )
+                            private$.addNotice("WARNING",
+                                paste(measure, "meta-regression failed"),
+                                e$message)
                             NULL
                         }
                     )
@@ -1326,16 +1485,37 @@ diagnosticmetaClass <- R6::R6Class(
                     "var_logit_spec",
                     "Specificity"
                 )
+                is_fe <- identical(rma_method, "FE")
                 metareg_table$setNote(
                     "method",
-                    paste("Meta-regression used", rma_method, "estimation.")
+                    paste0(
+                        "Two separate UNIVARIATE meta-regression models were fitted (logit sensitivity ",
+                        "and logit specificity), not a joint bivariate meta-regression, using ",
+                        private$.methodTitle(self$options$method), " estimation",
+                        if (is_fe) "." else
+                            " with the Knapp-Hartung adjustment (test statistics are t, not z)."
+                    )
                 )
 
-                # Defense-in-depth: even though jamovi tables render cells as
-                # plain text, the covariate parameter name originates from a
-                # user-supplied column name. Render it through htmlEscape so
-                # the cell stays safe if a future renderer ever interprets HTML.
-                safe_covariate_label <- htmltools::htmlEscape(covariate_var)
+                # Omnibus (QM) test of the covariate effect: with a multi-level
+                # factor covariate the per-contrast rows do not answer "does the
+                # covariate explain heterogeneity at all".
+                describe_omnibus <- function(model, measure) {
+                    if (is.null(model) || is.null(model$QM) || !is.finite(model$QM))
+                        return(NULL)
+                    if (identical(model$test, "knha") || identical(model$test, "t")) {
+                        sprintf("%s: F(%d, %.0f) = %.2f, p = %.4g", measure,
+                                model$QMdf[1], model$QMdf[2], model$QM, model$QMp)
+                    } else {
+                        sprintf("%s: QM(%d) = %.2f, p = %.4g", measure,
+                                model$QMdf[1], model$QM, model$QMp)
+                    }
+                }
+
+                # jamovi table cells are plain text, so the covariate name is
+                # shown as-is; escaping here rendered "Stain & Method" as
+                # "Stain &amp; Method".
+                safe_covariate_label <- covariate_var
 
                 # Emit one row per non-intercept coefficient. A categorical
                 # covariate with k > 2 levels produces k - 1 contrasts, so
@@ -1374,8 +1554,7 @@ diagnosticmetaClass <- R6::R6Class(
                             length(beta_names) >= j &&
                             !is.na(beta_names[j]) &&
                             nzchar(beta_names[j])) {
-                            htmltools::htmlEscape(
-                                sub("^covariate", paste0(covariate_var, " "), beta_names[j]))
+                            sub("^covariate", paste0(covariate_var, " "), beta_names[j])
                         } else {
                             safe_covariate_label
                         }
@@ -1396,21 +1575,39 @@ diagnosticmetaClass <- R6::R6Class(
 
                 add_metareg_rows(sens_metareg, "Sensitivity", "sens")
                 add_metareg_rows(spec_metareg, "Specificity", "spec")
+
+                omnibus_txt <- c(describe_omnibus(sens_metareg, "sensitivity"),
+                                 describe_omnibus(spec_metareg, "specificity"))
+                if (length(omnibus_txt) > 0) {
+                    metareg_table$setNote("omnibus", paste0(
+                        "Omnibus test of the covariate effect - ",
+                        paste(omnibus_txt, collapse = "; "), "."))
+                }
             }
         },
         
         .performPublicationBiasAssessment = function(meta_data, analysis_data) {
 
-            if (is.null(analysis_data) || nrow(analysis_data) == 0) {
+            # Clear first, before any early return (see .performMetaRegression).
+            self$results$publicationbias$deleteRows()
+
+            if (!requireNamespace("metafor", quietly = TRUE)) {
+                self$results$publicationbias$setNote("package_error",
+                    "The metafor package is not available, so publication bias could not be assessed.")
                 return()
             }
 
-            if (requireNamespace("metafor", quietly = TRUE)) {
+            if (is.null(analysis_data) || nrow(analysis_data) == 0) {
+                self$results$publicationbias$setNote("data_error",
+                    "Analysis data is missing or empty, so publication bias could not be assessed.")
+                return()
+            }
+
+            {
 
                 if (nrow(analysis_data) < 10) {
-                    private$.appendInstructionMessage(
-                        "<div class='alert alert-info'><h4> Publication Bias Caution</h4><p>Deeks' test is unreliable with fewer than 10 studies; interpret asymmetry results cautiously.</p></div>"
-                    )
+                    private$.addNotice("INFO", "Publication bias caution",
+                        "Deeks' test is unreliable with fewer than 10 studies; interpret asymmetry results cautiously.")
                 }
 
                 # Effective sample size for Deeks' test (Deeks, Macaskill & Irwig
@@ -1469,7 +1666,6 @@ diagnosticmetaClass <- R6::R6Class(
                 fit_data <- analysis_data[ok_rows, , drop = FALSE]
 
                 bias_table <- self$results$publicationbias
-                bias_table$deleteRows()
 
                 if (nrow(fit_data) < 3) {
                     bias_table$addRow(rowKey = "deeks_test", values = list(
@@ -1644,19 +1840,7 @@ diagnosticmetaClass <- R6::R6Class(
 
                 # Wilson score interval (proper CI for proportions, not Wald)
                 # More accurate for extreme proportions near 0 or 1
-                wilson_ci <- function(x, n, z) {
-                    if (n == 0 || !is.finite(x) || !is.finite(n)) {
-                        return(c(0, 1))
-                    }
-                    p <- x / n
-                    denominator <- 1 + z^2 / n
-                    center <- (p + z^2 / (2 * n)) / denominator
-                    margin <- z * sqrt((p * (1 - p) / n + z^2 / (4 * n^2))) / denominator
-
-                    lower <- pmax(0, center - margin)
-                    upper <- pmin(1, center + margin)
-                    c(lower, upper)
-                }
+                wilson_ci <- function(x, n, z) private$.wilsonCI(x, n, z)
 
                 # Calculate Wilson CIs for sensitivity
                 meta_data$sens_ci_lower <- NA_real_
@@ -1948,8 +2132,12 @@ diagnosticmetaClass <- R6::R6Class(
                 return(FALSE)
             }
 
-            # Check if we have summary point values
-            has_summary <- !is.null(sum_sens) && !is.null(sum_fpr)
+            # Check if we have summary point values. length-1 checks matter:
+            # if exactly one pooled coordinate is missing from the coefficient
+            # matrix it arrives as numeric(0), and data.frame(fpr, sens) then
+            # dies with "arguments imply differing number of rows".
+            has_summary <- length(sum_sens) == 1 && length(sum_fpr) == 1 &&
+                is.finite(sum_sens) && is.finite(sum_fpr)
 
             if (requireNamespace("ggplot2", quietly = TRUE)) {
 
@@ -2070,6 +2258,18 @@ diagnosticmetaClass <- R6::R6Class(
                 # Ensure meta_data is a proper data frame
                 meta_data <- as.data.frame(meta_data)
 
+                # Match Deeks' test: the test applies +0.5 to zero-cell studies
+                # so their log DOR is finite, but the plot previously computed
+                # log DOR on raw counts, so those same studies became Inf and
+                # were silently dropped by ggplot - plot and test disagreed on
+                # which studies they describe.
+                cells <- c("tp", "fp", "fn", "tn")
+                zero_rows <- rowSums(meta_data[, cells] == 0) > 0
+                n_zero_plot <- sum(zero_rows)
+                if (n_zero_plot > 0) {
+                    meta_data[zero_rows, cells] <- meta_data[zero_rows, cells] + 0.5
+                }
+
                 # Deeks' funnel plot: log DOR against 1/sqrt(ESS).
                 #
                 # This previously plotted precision = 1/SE(log DOR) on the y axis,
@@ -2096,6 +2296,9 @@ diagnosticmetaClass <- R6::R6Class(
                     ggplot2::scale_y_reverse() +
                     ggplot2::labs(
                         title = "Deeks' Funnel Plot: Publication Bias Assessment",
+                        subtitle = if (n_zero_plot > 0) sprintf(
+                            "+0.5 continuity correction applied to %d zero-cell study/studies (matching Deeks' test)",
+                            n_zero_plot) else NULL,
                         x = "Log Diagnostic Odds Ratio",
                         y = expression(1/sqrt("effective sample size"))
                     ) +
@@ -2113,15 +2316,9 @@ diagnosticmetaClass <- R6::R6Class(
             }
         },
         
-        # TODO (UX): `self$results$instructions` is overloaded as: (a) onboarding
-        # message when no data, (b) data-validation error sink (lines 151, 186),
-        # (c) meta-regression-missing-covariate notice (.appendInstructionMessage),
-        # (d) SROC unavailable / sparse-data notices. Mixing onboarding with
-        # error states makes the UI confusing - first-time users see error
-        # styling when they have not yet selected variables. Splitting into a
-        # dedicated `notices` Html output (notice-pattern from waterfall.b.R)
-        # would clarify the UX and align with the notices-migration TODO at
-        # the top of `.run()`.
+        # Pure onboarding content. Runtime warnings and errors are delivered
+        # through the dedicated `notices` Html item (.addNotice), never
+        # appended here.
         .populateInstructions = function() {
             
             html <- "
@@ -2154,7 +2351,7 @@ diagnosticmetaClass <- R6::R6Class(
                 <ul>
                     <li> No missing values in TP, FP, FN, TN columns</li>
                     <li> All values are non-negative integers</li>
-                    <li> At least 2 studies with complete data</li>
+                    <li> At least 3 studies with complete data</li>
                     <li> Study identifiers are unique</li>
                     <li> Sample sizes are realistic (TP+FP+FN+TN = total cases per study)</li>
                 </ul>
@@ -2205,7 +2402,6 @@ diagnosticmetaClass <- R6::R6Class(
                     <li><strong>Fixed Effects:</strong> Use when between-study heterogeneity is minimal or you want to assume all studies estimate the same underlying effect size.</li>
                     <li><strong>Method of Moments:</strong> Classical moment-based estimation method, useful for comparison with older meta-analyses or when computational resources are limited.</li>
                     <li><strong>Variance Components:</strong> Specialized approach for variance component estimation, typically used in advanced methodological research.</li>
-                    <li><strong>DerSimonian-Laird:</strong> Popular classical method familiar to many researchers (automatically optimized to use REML for better performance).</li>
                 </ul>
                 <p><strong> Recommendation:</strong> Start with REML unless you have specific methodological requirements. It provides the best balance of statistical properties and computational stability for diagnostic test meta-analysis.</p>
             </div>
@@ -2234,20 +2430,48 @@ diagnosticmetaClass <- R6::R6Class(
             meta_data$spec <- meta_data$tn / (meta_data$tn + meta_data$fp)
             meta_data$sample_size <- meta_data$tp + meta_data$fp + meta_data$fn + meta_data$tn
 
+            conf_pct <- private$.metaforLevel()
+            z_crit <- stats::qnorm(1 - (1 - conf_pct / 100) / 2)
+
             for (i in seq_len(nrow(meta_data))) {
+                sens_ci <- private$.wilsonCI(meta_data$tp[i],
+                                             meta_data$tp[i] + meta_data$fn[i], z_crit)
+                spec_ci <- private$.wilsonCI(meta_data$tn[i],
+                                             meta_data$tn[i] + meta_data$fp[i], z_crit)
                 table$addRow(rowKey = i, values = list(
                     study = as.character(meta_data$study[i]),
                     # Percent, matching the pooled table. These were proportions
                     # (0.82) while the bivariate table held percentages (81.59),
                     # so the same quantity appeared on two scales on one screen.
                     sensitivity = meta_data$sens[i] * 100,
+                    sens_ci_lower = sens_ci[1] * 100,
+                    sens_ci_upper = sens_ci[2] * 100,
                     specificity = meta_data$spec[i] * 100,
+                    spec_ci_lower = spec_ci[1] * 100,
+                    spec_ci_upper = spec_ci[2] * 100,
                     tp = meta_data$tp[i],
                     fp = meta_data$fp[i],
                     fn = meta_data$fn[i],
                     tn = meta_data$tn[i],
                     sample_size = meta_data$sample_size[i]
                 ))
+            }
+
+            if (isTRUE(private$.continuity_correction)) {
+                table$setNote("ci_method", sprintf(
+                    "Per-study intervals are Wilson score confidence intervals at the %d%% level, computed from the raw counts shown here.",
+                    as.integer(conf_pct)))
+            } else {
+                table$setNote("ci_method", sprintf(
+                    "Per-study intervals are Wilson score confidence intervals at the %d%% level - the same intervals drawn on the forest plot.",
+                    as.integer(conf_pct)))
+            }
+
+            if (isTRUE(private$.continuity_correction)) {
+                table$setNote("raw_counts", paste(
+                    "This table shows the RAW counts and the accuracy computed from them;",
+                    "the pooled analyses and the forest plot use the zero-cell-corrected",
+                    "counts, so values for corrected studies differ slightly."))
             }
         },
 
@@ -2415,7 +2639,7 @@ diagnosticmetaClass <- R6::R6Class(
             <p>When reporting your meta-analysis results, include:</p>
             <ul>
                 <li> <strong>Study Selection:</strong> Number of studies included and excluded</li>
-                <li> <strong>Pooled Estimates:</strong> Sensitivity and specificity with 95% confidence intervals</li>
+                <li> <strong>Pooled Estimates:</strong> Sensitivity and specificity with confidence intervals at the level chosen in Advanced Options</li>
                 <li> <strong>Likelihood Ratios:</strong> For clinical decision-making context</li>
                 <li> <strong>Heterogeneity:</strong> I[[SUP2]] values and potential sources investigated</li>
                 <li> <strong>Publication Bias:</strong> Deeks' test results and visual assessment</li>
@@ -2429,26 +2653,6 @@ diagnosticmetaClass <- R6::R6Class(
             "
             
             self$results$interpretation$setContent(private$.renderSymbols(html))
-        },
-
-        .appendInstructionMessage = function(message) {
-
-            if (is.null(message) || !nzchar(message)) {
-                return()
-            }
-
-            current <- self$results$instructions$content
-            if (!is.null(current) && nzchar(current)) {
-                self$results$instructions$setContent(paste(current, message))
-            } else {
-                self$results$instructions$setContent(message)
-            }
-            # .run() hides this element as soon as all five variables are chosen,
-            # and every warning in the analysis is routed here. Without this the
-            # messages were written into a hidden panel and never seen - and a
-            # missing cell produced a completely blank analysis with no
-            # explanation anywhere.
-            self$results$instructions$setVisible(TRUE)
         },
 
         # Enhanced data validation with user-friendly warnings
@@ -2547,15 +2751,12 @@ diagnosticmetaClass <- R6::R6Class(
             if (!is.null(private$.correction_method_used) && private$.correction_method_used != "none") {
                 n_corrected <- length(private$.corrected_study_names)
                 if (n_corrected > 0) {
-                    method_label <- switch(private$.correction_method_used,
-                                         constant = "constant +0.5 to all cells",
-                                         treatment_arm = "treatment-arm (+0.5 to zero cells only)",
-                                         empirical = "empirical (1/N) correction",
-                                         "unknown method")
+                    method_label <- private$.correctionLabel(private$.correction_method_used)
 
-                    # Escape user-supplied study names before HTML / note interpolation
+                    # Table notes are plain text (no escaping); HTML panels are
+                    # escaped below.
                     safe_studies_note <- paste(
-                        htmltools::htmlEscape(head(private$.corrected_study_names, 3)),
+                        head(private$.corrected_study_names, 3),
                         collapse = ", "
                     )
                     safe_studies_html <- paste(
@@ -3060,21 +3261,26 @@ diagnosticmetaClass <- R6::R6Class(
 
                 if (has_zero && correction_method != "none") {
                     if (correction_method == "constant") {
-                        # Global +0.5 to all cells (biased for large studies)
+                        # +0.5 to all four cells of the affected study
                         analysis_data[i, numeric_cols] <- row_counts + 0.5
                         correction_flags[i] <- TRUE
                         corrected_studies <- c(corrected_studies, as.character(analysis_data[i, "study"]))
 
-                    } else if (correction_method == "treatment_arm") {
-                        # Add 0.5 only to zero cells (treatment-arm correction)
+                    } else if (correction_method == "zero_cells") {
+                        # Add 0.5 only to the zero cells themselves. NOTE: this
+                        # is NOT Sweeting's "treatment-arm" correction (which
+                        # adds to all cells of the affected study) - the option
+                        # was renamed to say what it actually does.
                         corrected_row <- row_counts
                         corrected_row[row_counts == 0] <- 0.5
                         analysis_data[i, numeric_cols] <- corrected_row
                         correction_flags[i] <- TRUE
                         corrected_studies <- c(corrected_studies, as.character(analysis_data[i, "study"]))
 
-                    } else if (correction_method == "empirical") {
-                        # Empirical correction: use 1/N where N is total sample size
+                    } else if (correction_method == "reciprocal_n") {
+                        # Add 1/N to all cells, N = total study size. NOT
+                        # Sweeting's "empirical" correction - renamed to say
+                        # what it actually does.
                         total_n <- sum(row_counts, na.rm = TRUE)
                         if (total_n > 0) {
                             correction <- 1 / total_n
@@ -3121,7 +3327,7 @@ diagnosticmetaClass <- R6::R6Class(
                     <ul>
                         <li><strong>Left Panel (Sensitivity):</strong> Proportion of diseased cases correctly identified</li>
                         <li><strong>Right Panel (Specificity):</strong> Proportion of healthy cases correctly identified</li>
-                        <li><strong>Horizontal Lines:</strong> 95% confidence intervals showing precision of estimates</li>
+                        <li><strong>Horizontal Lines:</strong> Wilson score confidence intervals (at the chosen confidence level) showing precision of estimates</li>
                         <li><strong>Point Position:</strong> Higher on Y-axis = higher study estimate</li>
                     </ul>
                 </div>

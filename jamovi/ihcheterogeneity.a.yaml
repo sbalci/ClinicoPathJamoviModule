@@ -100,7 +100,7 @@ options:
       default: NULL
 
     - name: compareCompartments
-      title: Compare spatial compartments
+      title: Spatial compartment comparison
       type: Bool
       default: false
       description:
@@ -122,9 +122,7 @@ options:
       type: List
       options:
         - name: reproducibility
-          title: 'Reproducibility Assessment'
-        - name: bias
-          title: 'Sampling Bias Analysis'
+          title: 'Reproducibility & Bias Assessment'
         - name: variability
           title: "Variance component analysis"
         - name: comprehensive
@@ -132,7 +130,10 @@ options:
       default: comprehensive
       description:
           R: >
-            primary focus of biopsy simulation analysis
+            Primary focus of the heterogeneity analysis. (The former 'bias' level
+            was merged into 'reproducibility': the two were computationally
+            identical - the bias table is always computed when a reference is
+            supplied.)
 
     - name: sampling_strategy
       title: Sampling Strategy
@@ -224,5 +225,21 @@ options:
       description:
           R: >
             Display definitions of statistical terms (ICC, CV, correlation)
+
+    - name: showReportSentences
+      title: Copy-ready report sentences
+      type: Bool
+      default: false
+      description:
+          R: >
+            Display pre-formatted sentences ready for clinical reports and publications
+
+    - name: showAssumptions
+      title: Methodology & assumptions
+      type: Bool
+      default: false
+      description:
+          R: >
+            Display analysis assumptions, data requirements, and methodological considerations
 
 ...

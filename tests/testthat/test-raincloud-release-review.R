@@ -130,7 +130,10 @@ test_that("1d. non-normal groups still route to Kruskal-Wallis, verified against
 
     expect_match(txt, "Kruskal-Wallis test", fixed = TRUE)
     kw <- stats::kruskal.test(y ~ g, data = d)
-    expect_match(txt, format(round(unname(kw$statistic), 4)), fixed = TRUE)
+    # base:: qualified - with the package loaded, bare format() resolves to
+    # jmvcore::format, which passes a numeric through unchanged and breaks
+    # expect_match ("regexp must be a single string").
+    expect_match(txt, base::format(round(unname(kw$statistic), 4)), fixed = TRUE)
     # Kruskal-Wallis speaks to distributions, not means.
     expect_match(txt, "difference in distributions", fixed = TRUE)
 })
@@ -433,7 +436,8 @@ test_that("8b. a significant Shapiro-Wilk reads as a departure, and matches shap
     expect_match(txt, "Departs from normality", fixed = TRUE)
     expect_false(grepl("Non-normal", txt, fixed = TRUE))
     sw <- stats::shapiro.test(d$y[d$g == "A"])
-    expect_match(txt, format(round(unname(sw$statistic), 4)), fixed = TRUE)
+    # base:: qualified (see 1d above: bare format() is jmvcore::format here)
+    expect_match(txt, base::format(round(unname(sw$statistic), 4)), fixed = TRUE)
 })
 
 test_that("8c. an untestable group says so", {

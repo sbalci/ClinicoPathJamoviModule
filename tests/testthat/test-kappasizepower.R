@@ -25,10 +25,10 @@ test_that("kappaSizePower works for binary outcomes (2 categories)", {
   expect_true(nchar(results$text1$content) > 0)
 
   # Explanation should contain the descriptive sentence
-  content2 <- results$text2$content
+  content2 <- gsub("\\s+", " ", results$text2$content)   # wrapped at ~78 columns
   expect_match(content2, "required sample size")
-  expect_match(content2, "kappa0=")
-  expect_match(content2, "kappa1=")
+  expect_match(content2, "null hypothesis kappa = 0.4")
+  expect_match(content2, "alternative kappa = 0.6")
   expect_match(content2, "2 raters")
 
   # Summary should contain kappaSize summary output

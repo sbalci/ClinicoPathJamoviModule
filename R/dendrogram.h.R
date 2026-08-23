@@ -249,7 +249,8 @@ dendrogramResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         plot = function() private$.items[["plot"]],
         clusterInfo = function() private$.items[["clusterInfo"]],
         summary = function() private$.items[["summary"]],
-        clusterSummary = function() private$.items[["clusterSummary"]]),
+        clusterSummary = function() private$.items[["clusterSummary"]],
+        clustOutput = function() private$.items[["clustOutput"]]),
     private = list(),
     public=list(
         initialize=function(options) {
@@ -331,6 +332,7 @@ dendrogramResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 options=options,
                 name="clusterSummary",
                 title="Cluster Membership",
+                rows=0,
                 columns=list(
                     list(
                         `name`="cluster", 
@@ -344,7 +346,26 @@ dendrogramResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                         `name`="percent", 
                         `title`="Percent", 
                         `type`="number", 
-                        `format`="zto"))))}))
+                        `format`="zto")),
+                clearWith=list(
+                    "vars",
+                    "clusterMethod",
+                    "distanceMethod",
+                    "standardize",
+                    "nClusters")))
+            self$add(jmvcore::Output$new(
+                options=options,
+                name="clustOutput",
+                title="Save Cluster Membership",
+                varTitle="Cluster",
+                varDescription="Cluster membership from hierarchical clustering.",
+                measureType="nominal",
+                clearWith=list(
+                    "vars",
+                    "clusterMethod",
+                    "distanceMethod",
+                    "standardize",
+                    "nClusters")))}))
 
 dendrogramBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
     "dendrogramBase",
@@ -399,6 +420,7 @@ dendrogramBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   \code{results$clusterInfo} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$summary} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$clusterSummary} \tab \tab \tab \tab \tab a table \cr
+#'   \code{results$clustOutput} \tab \tab \tab \tab \tab an output \cr
 #' }
 #'
 #' Tables can be converted to data frames with \code{asDF} or \code{\link{as.data.frame}}. For example:

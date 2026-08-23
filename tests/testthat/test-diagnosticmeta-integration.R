@@ -330,7 +330,7 @@ test_that("diagnosticmeta sensitivity analysis with different corrections", {
   data(diagnosticmeta_test_zeros, package = "ClinicoPath")
 
   # Compare different zero-cell correction methods
-  corrections <- c("none", "constant", "treatment_arm")
+  corrections <- c("none", "constant", "zero_cells")
   results <- list()
 
   for (correction in corrections) {

@@ -24,7 +24,9 @@ ihcheterogeneity(
   power_analysis = FALSE,
   generate_recommendations = FALSE,
   showSummary = FALSE,
-  showGlossary = FALSE
+  showGlossary = FALSE,
+  showReportSentences = FALSE,
+  showAssumptions = FALSE
 )
 }
 \arguments{
@@ -62,7 +64,10 @@ heterogeneity differs significantly between compartments. Uses Levene's
 test for variance equality and Kruskal-Wallis for distributional
 differences.}
 
-\item{analysis_type}{primary focus of biopsy simulation analysis}
+\item{analysis_type}{Primary focus of the heterogeneity analysis. (The
+former 'bias' level was merged into 'reproducibility': the two were
+computationally identical - the bias table is always computed when a
+reference is supplied.)}
 
 \item{sampling_strategy}{biopsy sampling strategy used}
 
@@ -93,6 +98,12 @@ analysis results}
 
 \item{showGlossary}{Display definitions of statistical terms (ICC, CV,
 correlation)}
+
+\item{showReportSentences}{Display pre-formatted sentences ready for
+clinical reports and publications}
+
+\item{showAssumptions}{Display analysis assumptions, data requirements, and
+methodological considerations}
 }
 \value{
 A results object containing:

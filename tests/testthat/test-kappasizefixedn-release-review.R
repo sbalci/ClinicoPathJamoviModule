@@ -66,7 +66,7 @@ test_that("n below the engine's floor is refused with a reason, not a vendor str
     # `n` is quoted in the yaml ('n'), because a bare n is a YAML 1.1 boolean and R's yaml
     # package hands back FALSE where jamovi's js-yaml hands back the string. Accept either form
     # so this pins the bound, not the quoting style.
-    a_yaml <- paste(readLines("../../jamovi/kappasizefixedn.a.yaml", warn = FALSE), collapse = "\n")
+    a_yaml <- paste(readLines("../../jamovi/kappaSizeFixedN.a.yaml", warn = FALSE), collapse = "\n")
     blk <- regmatches(a_yaml, regexpr("(?s)    - name: '?n'?\\n.*?(?=\\n    - name: |\\Z)",
                                       a_yaml, perl = TRUE))
     expect_length(blk, 1L)
@@ -198,6 +198,34 @@ test_that("the Notes panel states the method and the kappa0 hazard", {
 })
 
 
+test_that("sparse agreement-pattern cells at the lower bound are flagged, not just sparse categories", {
+    skip_if_not_installed("kappaSize")
+    run <- function(...) {
+        args <- utils::modifyList(list(outcome = "2", kappa0 = 0.4, props = "0.30, 0.70",
+                                       raters = "2", alpha = 0.05, n = 100), list(...))
+        do.call(ClinicoPath::kappaSizeFixedN, args)
+    }
+    # kappaSize's own warning checks props[i] * n, which is exactly 5 here and stays silent,
+    # while the chi-square cells at the bound kappaL = 0.195 are 2.5 / 0.17 / 0.007 / 0 / 0.98.
+    six <- run(props = "0.05", raters = "6")
+    expect_false(grepl("expected cell count", six$text1$content, fixed = TRUE))
+    expect_match(six$notices$content, "Sparse categories")
+    expect_match(six$notices$content, "agreement-pattern cell")
+    expect_match(six$notices$content, "enriching the case series")
+    # multi-category with several raters: all-agree cells from the Dirichlet-multinomial product
+    four <- run(outcome = "4", raters = "5", kappa0 = 0.3, props = "0.40, 0.30, 0.06, 0.24",
+                n = 120)
+    expect_match(four$notices$content, "Sparse categories")
+    expect_match(four$notices$content, "collapsing rare categories")
+    # the engine's repeated per-category warning is kept once in the raw panes
+    five <- run(outcome = "5", kappa0 = 0.6, props = "0.01, 0.04, 0.15, 0.30, 0.50", n = 20)
+    expect_equal(sum(grepl("expected cell count",
+                           strsplit(five$text_summary$content, "\n")[[1]])), 1L)
+    # a dense design stays clean
+    expect_false(grepl("Sparse categories", run(n = 500)$notices$content))
+})
+
+
 test_that("the sparse-cell caveat is detected from kappaSize's own summary text", {
     skip_if_not_installed("kappaSize")
     res <- kappaSize::FixedN5Cats(kappa0 = 0.60, n = 20, props = c(0.01, 0.04, 0.15, 0.30, 0.50),
@@ -230,9 +258,9 @@ test_that("the notices item is declared in .r.yaml with the same clearWith as th
 
 
 test_that("every declared option is read by the backend", {
-    a_yaml <- readLines("../../jamovi/kappasizefixedn.a.yaml", warn = FALSE)
+    a_yaml <- readLines("../../jamovi/kappaSizeFixedN.a.yaml", warn = FALSE)
     declared <- sub("^    - name: ", "", grep("^    - name: [A-Za-z0-9_]+$", a_yaml, value = TRUE))
-    backend <- paste(readLines("../../R/kappasizefixedn.b.R", warn = FALSE), collapse = "\n")
+    backend <- paste(readLines("../../R/kappaSizeFixedN.b.R", warn = FALSE), collapse = "\n")
     unread <- declared[!vapply(declared, function(o)
         grepl(paste0("options\\$", o, "\\b"), backend), logical(1))]
     expect_equal(unread, character(0))

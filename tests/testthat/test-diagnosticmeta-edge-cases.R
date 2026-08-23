@@ -28,7 +28,8 @@ test_that("missing counts are excluded and disclosed, not thrown", {
     false_negatives = "false_negatives", true_negatives = "true_negatives")
 
   expect_s3_class(res, "diagnosticmetaResults")
-  txt <- gsub("<[^>]+>", " ", res$instructions$content)
+  # exclusion disclosures render in the dedicated notices channel
+  txt <- gsub("<[^>]+>", " ", res$notices$content)
   expect_match(txt, "Studies excluded")
   expect_match(txt, "missing counts")
 })
@@ -88,7 +89,8 @@ test_that("negative counts are excluded and disclosed, not thrown", {
     false_negatives = "false_negatives", true_negatives = "true_negatives")
 
   expect_s3_class(res, "diagnosticmetaResults")
-  txt <- gsub("<[^>]+>", " ", res$instructions$content)
+  # exclusion disclosures render in the dedicated notices channel
+  txt <- gsub("<[^>]+>", " ", res$notices$content)
   expect_match(txt, "negative counts")
 })
 
@@ -196,17 +198,17 @@ test_that("diagnosticmeta handles studies with very high heterogeneity", {
   expect_s3_class(result, "diagnosticmetaResults")
 })
 
-test_that("a single study reports insufficient data rather than throwing", {
+test_that("a single study is rejected with a quantified error", {
   single_study <- diagnosticmeta_test[1, ]
 
-  res <- diagnosticmeta(
-    data = single_study, study = "study",
-    true_positives = "true_positives", false_positives = "false_positives",
-    false_negatives = "false_negatives", true_negatives = "true_negatives")
-
-  expect_s3_class(res, "diagnosticmetaResults")
-  txt <- gsub("<[^>]+>", " ", res$instructions$content)
-  expect_true(nzchar(txt))
+  # jmvcore::reject() greys the results in jamovi; in testthat it surfaces
+  # as an error from $run().
+  expect_error(
+    diagnosticmeta(
+      data = single_study, study = "study",
+      true_positives = "true_positives", false_positives = "false_positives",
+      false_negatives = "false_negatives", true_negatives = "true_negatives"),
+    "At least 3 studies")
 })
 
 test_that("a constant covariate is refused with an explanation, not a warning", {
@@ -267,7 +269,8 @@ test_that("an all-zero study is excluded and disclosed, not thrown", {
     false_negatives = "false_negatives", true_negatives = "true_negatives")
 
   expect_s3_class(res, "diagnosticmetaResults")
-  txt <- gsub("<[^>]+>", " ", res$instructions$content)
+  # exclusion disclosures render in the dedicated notices channel
+  txt <- gsub("<[^>]+>", " ", res$notices$content)
   expect_match(txt, "no diseased or no non-diseased")
 })
 

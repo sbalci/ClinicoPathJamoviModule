@@ -1,23 +1,35 @@
 ---
 name:  kappaSizeFixedN
 title: Lowest Expected Value for a fixed sample size
-menuGroup: Power #meddecide
-menuSubgroup:  Power Analysis by meddecide 
+menuGroup: PowerT #meddecide
+menuSubgroup:  Power Analysis by meddecide
 menuSubtitle: Find lower Kappa based on sample size
 version: '1.0.6'
 jas: '1.2'
 
 description:
     main: >
-        Lowest Expected Value for a fixed sample size.
-    # R:
-    #     dontrun: true
-    #     usage: |
-    #         # example will be added
+        For an interobserver agreement study whose number of subjects is already fixed, the
+        lowest value of kappa the study can expect to rule out - the lower bound of the
+        one-sided confidence interval around the anticipated kappa (kappa0) - using the
+        kappaSize package. Use kappaSizePower to size a study for a hypothesis test and
+        kappaSizeCI to size it for a target interval width.
+    R:
+        dontrun: true
+        usage: |
+            # kappaSize::FixedNBinary example: anticipated kappa 0.7, 100 subjects,
+            # 4 raters, trait prevalence 0.50
+            kappaSizeFixedN(
+                outcome = "2",
+                kappa0 = 0.7,
+                props = "0.50",
+                raters = "4",
+                alpha = 0.05,
+                n = 100)
 
 options:
     - name: outcome
-      title: Number of outcome level
+      title: Number of outcome levels
       type: List
       options:
         - "2"
@@ -27,9 +39,9 @@ options:
       default: "2"
       description:
           ui: >
-              Number of outcome level.
+              Number of outcome levels (categories) of the rated variable.
           R: >
-              Number of outcome level.
+              Number of outcome levels (categories) of the rated variable.
 
 
     - name: kappa0
@@ -48,14 +60,21 @@ options:
               kappa". Contrast kappaSizePower, where kappa0 IS the null being tested.
 
     - name: props
-      title: Proportions of outcome level
+      title: Expected proportion of cases in each category
       type: String
-      default: '0.20 , 0.80'
+      default: '0.20, 0.80'
       description:
           ui: >
-              Proportions of outcome level.
+              Anticipated share of subjects in each outcome category, separated by commas,
+              semicolons or spaces, using a decimal point, and summing to 1 (for example
+              0.20, 0.80 for a finding present in one case in five). For a binary outcome a
+              single prevalence is enough. Enter exactly one value per outcome level otherwise.
           R: >
-              Proportions of outcome level.
+              Anticipated share of subjects in each outcome category as a single string,
+              separated by commas, semicolons or spaces, using a decimal point, and summing
+              to 1 (for example "0.20, 0.80" for a finding present in one case in five). For a
+              binary outcome a single prevalence is enough. Enter exactly one value per
+              outcome level otherwise.
 
 
     - name: raters
@@ -70,9 +89,9 @@ options:
       default: "2"
       description:
           ui: >
-              Number of raters.
+              Number of raters who will each rate every subject (2 to 6).
           R: >
-              Number of raters.
+              Number of raters who will each rate every subject (2 to 6).
 
 
     - name: alpha
@@ -83,9 +102,9 @@ options:
       max: 0.20
       description:
           ui: >
-              Significance level.
+              Significance level of the one-sided lower confidence bound (capped at 0.20).
           R: >
-              Significance level.
+              Significance level of the one-sided lower confidence bound (capped at 0.20).
 
     - name: 'n'
       title: N
@@ -95,8 +114,9 @@ options:
       max: 1000000
       description:
           ui: >
-              Sample size.
+              Number of subjects available, each rated by all raters (at least 11).
           R: >
-              Sample size.
+              Number of subjects available, each rated by all raters (at least 11; the
+              kappaSize engine refuses 10 or fewer).
 
 ...

@@ -60,8 +60,16 @@ test_that("computed methods reproduce their published definitions", {
   expect_equal(brk("meansd", sdmult = 1),
                c(min(y), mean(y) - sd(y), mean(y), mean(y) + sd(y), max(y)), tolerance = 1e-3)
   skip_if_not_installed("classInt")
+  # The natural-breaks method now asks classInt for style = "fisher", the exact
+  # Fisher-Jenks dynamic-programming optimum on the full data, instead of
+  # style = "jenks", which is the Jenks-Caspall approximation AND draws an
+  # unseeded random 10% subsample above largeN, so it returned different
+  # cut-points on consecutive runs of the same data. Measured here they differ
+  # by up to 0.25 (38.90 vs 39.13), well outside the tolerance - so this
+  # assertion tracks the definition the analysis actually implements.
   expect_equal(brk("jenks", nbins = 4),
-               classInt::classIntervals(y, n = 4, style = "jenks")$brks, tolerance = 1e-3)
+               classInt::classIntervals(y, n = 4, style = "fisher",
+                                        largeN = Inf)$brks, tolerance = 1e-3)
 })
 
 test_that("interval closure options are honoured", {
@@ -80,7 +88,7 @@ test_that("collapsed quantile bins are reported, not silently accepted", {
   # 60% ties make three of the five quartile breaks identical
   x <- c(rep(0, 60), 1:40)
   res <- ca(data.frame(lab = x), var = "lab", method = "quantile", nbins = 4)
-  msg <- ca_txt(res$todo$content)
+  msg <- ca_txt(res$notices$content)
 
   expect_match(msg, "Bin collapse")
   expect_match(msg, "requested 4 categories but only 2")
@@ -89,7 +97,7 @@ test_that("collapsed quantile bins are reported, not silently accepted", {
 
 test_that("a constant variable is refused with a clear message", {
   res <- ca(data.frame(v = rep(50, 10)), var = "v", method = "equal", nbins = 3)
-  msg <- ca_txt(res$todo$content)
+  msg <- ca_txt(res$notices$content)
   expect_match(msg, "zero variability")
   expect_equal(nrow(res$freqTable$asDF), 0L)
 })
@@ -125,10 +133,16 @@ test_that("excludeoutofrange is declared and defaults to the existing behaviour"
   expect_match(paste(ui[i:(i + 1)], collapse = " "), "method:manual")
 })
 
-test_that("reading the option before regeneration falls back instead of crashing", {
-  priv <- ca_priv(data.frame(v = rnorm(20)), var = "v")
-  expect_false(priv$.optionOr("excludeoutofrange", FALSE))
-  expect_equal(priv$.optionOr("definitely_not_an_option", "fb"), "fb")
+# The private .optionOr() shim this block used to exercise existed only while
+# the option was declared in the yaml but not yet compiled into the .h.R.
+# jmvtools::prepare() has since generated it (R/categorize.h.R declares
+# excludeoutofrange = FALSE), so .run() reads self$options directly and the
+# shim is gone. What still needs covering is that the compiled option exists
+# and keeps the previous behaviour as its default.
+test_that("the compiled option exists and defaults to the previous behaviour", {
+  ns <- asNamespace("ClinicoPath")
+  opts <- get("categorizeOptions", ns)$new(var = "v")
+  expect_false(opts$excludeoutofrange)
 })
 
 test_that("excluding keeps the break points exactly as entered", {

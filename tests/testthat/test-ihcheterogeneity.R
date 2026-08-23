@@ -59,8 +59,11 @@ test_that("ihcheterogeneity handles inter-regional analysis", {
         biopsy3 = "ki67_region3"
     )
 
-    # `wholesection` is not provided, so bias table should be empty
-    expect_equal(nrow(results$samplingbiastable$asDF()), 0)
+    # `wholesection` is not provided: the bias table carries a single
+    # explanatory row saying bias analysis needs a reference
+    bias <- results$samplingbiastable$asDF
+    expect_equal(nrow(bias), 1)
+    expect_match(bias$clinical_impact[1], "requires a reference")
 })
 
 

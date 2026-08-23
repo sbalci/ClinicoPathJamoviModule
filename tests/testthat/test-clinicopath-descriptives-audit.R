@@ -341,7 +341,9 @@ test_that("categorize source literals round-trip special characters", {
 
 test_that("chi-square chunk sizing and generated source handle both dimensions", {
   comparison_count <- chisqposttestClass$private_methods$.pairwiseComparisonCount
-  expect_equal(comparison_count(matrix(1, nrow = 2, ncol = 8)), 29)
+  # A dimension with fewer than 3 levels yields no pairwise comparison (a 2-level
+  # dimension's only "pair" is the whole table, which the omnibus test answers).
+  expect_equal(comparison_count(matrix(1, nrow = 2, ncol = 8)), 28)
 
   options <- chisqposttestOptions$new(
     rows = "tumor grade",

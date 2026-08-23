@@ -18,6 +18,16 @@ items:
       type: Html
       visible: true
 
+    - name: notices
+      title: Notices
+      type: Html
+      clearWith:
+          - study
+          - true_positives
+          - false_positives
+          - false_negatives
+          - true_negatives
+
     - name: summary
       title: Analysis Summary
       type: Html
@@ -30,6 +40,8 @@ items:
           - true_negatives
           - zero_cell_correction
           - confidence_level
+          - method
+          - bivariate_analysis
 
     - name: about
       title: About This Analysis
@@ -63,10 +75,6 @@ items:
           format: zto
         - name: ci_upper
           title: CI Upper
-          type: number
-          format: zto
-        - name: i_squared
-          title: I²
           type: number
           format: zto
         - name: p_value
@@ -175,7 +183,7 @@ items:
           type: number
           format: zto
         - name: z_value
-          title: Z Value
+          title: Test Statistic
           type: number
           format: zto
         - name: p_value
@@ -220,6 +228,7 @@ items:
           - false_positives
           - false_negatives
           - true_negatives
+          - confidence_level
       columns:
         - name: study
           title: Study
@@ -228,8 +237,24 @@ items:
           title: "Sensitivity (%)"
           type: number
           format: dp:1
+        - name: sens_ci_lower
+          title: CI Lower
+          type: number
+          format: dp:1
+        - name: sens_ci_upper
+          title: CI Upper
+          type: number
+          format: dp:1
         - name: specificity
           title: "Specificity (%)"
+          type: number
+          format: dp:1
+        - name: spec_ci_lower
+          title: CI Lower
+          type: number
+          format: dp:1
+        - name: spec_ci_upper
+          title: CI Upper
           type: number
           format: dp:1
         - name: tp
@@ -286,6 +311,7 @@ items:
           - color_palette
           - confidence_level
           - method
+          - bivariate_analysis
 
     - name: funnelplot
       title: Funnel Plot for Publication Bias
@@ -309,38 +335,23 @@ items:
       type: Html
       visible: (show_interpretation)
 
+    # The three explanation panels are static interpretation guides populated
+    # once in .init(); they carry no clearWith so a data change can never leave
+    # a visible-but-empty titled panel.
     - name: forestplot_explanation
       title: Forest Plot Explanation
       type: Html
       visible: (show_plot_explanations && forest_plot)
-      clearWith:
-          - study
-          - true_positives
-          - false_positives
-          - false_negatives
-          - true_negatives
 
     - name: srocplot_explanation
       title: SROC Plot Explanation
       type: Html
       visible: (show_plot_explanations && sroc_plot)
-      clearWith:
-          - study
-          - true_positives
-          - false_positives
-          - false_negatives
-          - true_negatives
 
     - name: funnelplot_explanation
       title: Funnel Plot Explanation
       type: Html
       visible: (show_plot_explanations && funnel_plot)
-      clearWith:
-          - study
-          - true_positives
-          - false_positives
-          - false_negatives
-          - true_negatives
 
 refs:
     - ClinicoPathJamoviModule

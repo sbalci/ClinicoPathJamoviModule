@@ -194,6 +194,7 @@ children:
                 name: eventVar
                 maxItemCount: 1
                 isTarget: true
+                enable: (showEventMarkers)
           - type: TargetLayoutBox
             label: "Event Time Variable"
             children:
@@ -201,6 +202,7 @@ children:
                 name: eventTimeVar
                 maxItemCount: 1
                 isTarget: true
+                enable: (showEventMarkers)
 
   # === VISUALIZATION OPTIONS ===
   - type: CollapseBox

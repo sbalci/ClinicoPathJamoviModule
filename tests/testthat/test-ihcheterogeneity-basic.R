@@ -18,18 +18,25 @@ test_that("ihcheterogeneity function exists and is accessible", {
   expect_type(ihcheterogeneity, "closure")
 })
 
-test_that("ihcheterogeneity runs with minimal required arguments", {
-  # Only biopsy1 is required
-  result <- ihcheterogeneity(
-    data = ihcheterogeneity_test,
-    biopsy1 = "biopsy1"
+test_that("minimal configurations: 1 region alone rejects, reference + 1 region runs", {
+  # A single region with no reference has nothing to compare against
+  expect_error(
+    ihcheterogeneity(
+      data = ihcheterogeneity_test,
+      biopsy1 = "biopsy1"
+    ),
+    "At least 2 regional measurements"
   )
 
-  # Should return a result object
+  # Reference + one region is the classic agreement design and must run
+  result <- ihcheterogeneity(
+    data = ihcheterogeneity_test,
+    wholesection = "wholesection",
+    biopsy1 = "biopsy1"
+  )
   expect_s3_class(result, "ihcheterogeneityResults")
-
-  # Should have a results component
-  expect_true("results" %in% names(result))
+  repro <- result$reproducibilitytable$asDF
+  expect_true(any(grepl("ICC", repro$metric)))
 })
 
 test_that("ihcheterogeneity runs with reference and two biopsies", {
@@ -128,7 +135,7 @@ test_that("ihcheterogeneity handles compartment tests", {
 })
 
 test_that("ihcheterogeneity handles different analysis types", {
-  analysis_types <- c("reproducibility", "bias", "variability", "comprehensive")
+  analysis_types <- c("reproducibility", "variability", "comprehensive")
 
   for (type in analysis_types) {
     result <- ihcheterogeneity(

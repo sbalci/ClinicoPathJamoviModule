@@ -1110,6 +1110,7 @@ lassocoxClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                         data = plot_data,
                         risk.table = TRUE,
                         risk.table.y.text = FALSE,
+                        tables.theme = survminer::theme_cleantable(),  # jamovi's 16-pt ggtheme otherwise swallows the 25% table strip
                         pval = FALSE,
                         conf.int = TRUE,
                         ggtheme = ggtheme,

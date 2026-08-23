@@ -1396,10 +1396,19 @@ crosstableClass <- if (requireNamespace('jmvcore'))
 
                 for (v in vars) {
                     x <- data[[v]]
-                    # Same rule as the table above: a numeric column with 6 or
-                    # fewer distinct values is an encoded category, and the
-                    # mean-difference SMD on its codes is not a balance statistic.
-                    isNum <- !.crosstableIsCategorical(x)
+                    # Deliberately NOT .crosstableIsCategorical() here, unlike the
+                    # display table above. That helper calls any numeric column with
+                    # <= 6 distinct values an encoded category, which sends every
+                    # ordinal clinical code (grade 1/2/3, TStage 1-4) to the
+                    # multinomial SMD. That statistic is unusable exactly where a
+                    # balance diagnostic matters most: when a level is missing from
+                    # one arm the pooled covariance is rank-deficient, the difference
+                    # vector lies in its null space, and ginv() projects it away.
+                    # TStage {1,2} vs {3} - complete separation - then returns
+                    # 7.5e-09 ("negligible") where the mean-difference SMD returns
+                    # -4.02. It is also unsigned, so the direction of the imbalance
+                    # is lost. Numeric columns therefore keep the continuous SMD.
+                    isNum <- is.numeric(x) && !is.factor(x)
                     smd <- NA_real_; vtype <- "categorical"
                     if (isNum) {
                         vtype <- "continuous"
@@ -1453,6 +1462,14 @@ crosstableClass <- if (requireNamespace('jmvcore'))
                 S <- (covm(P1) + covm(P2)) / 2
                 Sinv <- tryCatch(MASS::ginv(S), error = function(e) NULL)
                 if (is.null(Sinv)) return(NA_real_)
+                # A level absent from one arm makes S rank-deficient. ginv() is a
+                # pseudo-inverse, so it does not error: it silently projects the part
+                # of Tm lying in the null space away and returns a value near zero -
+                # the statistic reports "perfectly balanced" for the one situation
+                # that is maximally imbalanced. Refuse to report a number instead.
+                # Verified: Grade {1,2} vs {3} gives rank(S) = 1 where 2 is needed and
+                # yields 7.5e-09; a well-overlapped 3-level split gives full rank.
+                if (qr(S)$rank < (k - 1)) return(NA_real_)
                 val <- as.numeric(t(Tm) %*% Sinv %*% Tm)
                 if (!is.finite(val) || val < 0) return(NA_real_)
                 sqrt(val)

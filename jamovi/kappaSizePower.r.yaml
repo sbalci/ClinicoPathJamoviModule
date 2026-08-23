@@ -4,6 +4,18 @@ title: Power Approach for the Number of Subjects Required
 jrs:   '1.1'
 
 items:
+    - name:  notices
+      title: Notes
+      type:  Html
+      clearWith:
+          - outcome
+          - kappa0
+          - kappa1
+          - props
+          - raters
+          - alpha
+          - power
+
     - name:  text1
       title: Analysis result
       type:  Preformatted

@@ -10,20 +10,46 @@ kappaSizeFixedNClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cla
     private = list(
 
         # TODO [meddecide audit 2026-05-14] - see docs/audit/MODULE_AUDIT_REPORT_20260514-1847.md
-        #   [i18n] 0 .() wraps; bootstrap jamovi/i18n/ then /prepare-translation kappasizefixedn
+        #   [i18n] 0 .() wraps; bootstrap jamovi/i18n/ then /prepare-translation kappaSizeFixedN
 
         # Split the props string into tokens (comma / semicolon / pipe / whitespace separated).
         # The separator set matches kappaSizeCI's so the same string is accepted by every
         # member of the family; a user moving between them should not have to retype it.
         .parsePropTokens = function(props) {
+            # U+00A0 (non-breaking space, what Word/Excel paste) is not in [:space:].
+            props <- gsub("\u{00A0}", " ", props, fixed = TRUE)
             toks <- unlist(strsplit(props, "[,;|[:space:]]+"), use.names = FALSE)
             toks[nzchar(toks)]
+        },
+
+        # Expected probability of every goodness-of-fit cell at agreement rho. kappaSize's
+        # FixedN* engines find the lower bound by walking rho down from kappa0 until the
+        # chi-square sum over AGREEMENT PATTERNS -- (n P_j(kappa0) - n P_j(rho))^2 / (n P_j(rho))
+        # -- crosses qchisq(1 - 2 alpha, 1). The expected counts in the denominator are the
+        # cells at rho = kappaL, so that is where sparseness matters. Same closed forms as
+        # R/kappaSizePower.b.R:.gofCells (binomial form for a binary outcome; Dirichlet-
+        # multinomial product for 3-5 categories), verified against every FixedN* .CalcIT for
+        # raters 2-6 to 1e-11. kappaSize's own warning checks only the category marginals
+        # props[i] * n, which with 6 raters and a 5% finding at n = 100 is exactly 5 (silent)
+        # while the pattern cells at kappaL are 2.5 / 0.17 / 0.007 / 0 / 0.98.
+        .gofCells = function(outcome, raters, props, rho) {
+            if (outcome == 2) {
+                p <- props[1]
+                j <- 0:raters
+                choose(raters, j) * p^j * (1 - p)^(raters - j) * (1 - rho) +
+                    rho * ifelse(j == raters, p, ifelse(j == 0, 1 - p, 0))
+            } else {
+                i <- seq_len(raters) - 1
+                agree <- vapply(props, function(pj)
+                    prod((pj * (1 - rho) + i * rho) / ((1 - rho) + i * rho)), numeric(1))
+                c(1 - sum(agree), agree)
+            }
         },
 
         # Notes panel. kappaSizeCI carries the same two blocks; this analysis had none, so its
         # only statement of method was the reference list and its only caveat was buried in the
         # raw kappaSize summary text.
-        .buildNotices = function(kappaL_val, sparse_cells = FALSE) {
+        .buildNotices = function(kappaL_val, sparse_cells = FALSE, outcome = 2) {
             info <- paste0(
                 "<div style='margin:6px 0; padding:8px 10px; border-left:3px solid #3c8dbc; background-color: rgba(72, 138, 188, 0.06); color: inherit;'>",
                 "<b>Methodology.</b> With the sample size already fixed, this reports the lower bound ",
@@ -38,16 +64,21 @@ kappaSizeFixedNClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cla
 
             warn <- ""
 
-            # kappaSize writes "At least one expected cell count is less than five" into its own
-            # summary text when a category is rare at this n. That is a real caveat about the
-            # asymptotics the method relies on, and it was reaching only the Summary pane.
+            # Sparse goodness-of-fit cells (see .gofCells). kappaSize writes its own marginal
+            # version of this into the summary text once per rare category; it was reaching only
+            # the Summary pane and it watches the wrong quantity.
             if (isTRUE(sparse_cells)) {
+                remedy <- if (outcome == 2)
+                    "Consider enriching the case series so the rare finding is more common (the calculation assumes the stated prevalence), adding subjects, or relaxing the significance level."
+                else
+                    "Consider collapsing rare categories or enrolling more subjects."
                 warn <- paste0(warn,
                     "<div style='margin:6px 0; padding:8px 10px; border-left:3px solid #ec971f; background-color: rgba(227, 144, 33, 0.07); color: inherit;'>",
-                    "<b>Sparse categories.</b> At this sample size at least one category is expected to ",
-                    "contain fewer than five subjects. The calculation rests on a large-sample ",
-                    "approximation, so the bound shown is less dependable here. Consider collapsing ",
-                    "rare categories or enrolling more subjects.",
+                    "<b>Sparse categories.</b> At this sample size at least one agreement-pattern cell ",
+                    "(for example, exactly k of the raters calling the finding present, or all raters ",
+                    "agreeing on one category) has an expected count below five at the reported lower ",
+                    "bound. The calculation rests on a large-sample chi-square approximation, so the ",
+                    "bound shown is less dependable here. ", remedy,
                     "</div>"
                 )
             }
@@ -99,7 +130,8 @@ kappaSizeFixedNClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cla
             # separator first, as the two siblings do.
             if (any(props4 >= 1, na.rm = TRUE)) {
                 as_decimal <- suppressWarnings(as.numeric(trimws(unlist(strsplit(
-                    gsub("([0-9]),([0-9])", "\\1.\\2", self$options$props),
+                    gsub("([0-9]),([0-9])", "\\1.\\2",
+                         gsub("\u{00A0}", " ", self$options$props, fixed = TRUE)),
                     "[;|[:space:]]+")))))
                 as_decimal <- as_decimal[!is.na(as_decimal)]
                 if (length(as_decimal) > 0 && all(as_decimal > 0 & as_decimal < 1))
@@ -265,16 +297,26 @@ kappaSizeFixedNClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cla
             # capture.output(print(.)) rather than the raw object: setContent then stores a plain
             # string, which is what the other two members of the family store and what serialises
             # predictably. Same visible text either way.
+            # The engine prints its marginal cell-count warning once per rare category (five
+            # times for five levels); keep the first, the Notes panel carries the real check.
+            dedupe <- function(lines)
+                lines[!(duplicated(lines) & grepl("expected cell count", lines, fixed = TRUE))]
             self$results$text1$setContent(
-                paste(utils::capture.output(print(result)), collapse = "\n"))
+                paste(dedupe(utils::capture.output(print(result))), collapse = "\n"))
             self$results$text2$setContent(text2)
 
-            summary_text <- paste(utils::capture.output(summary(result)), collapse = "\n")
+            summary_text <- paste(dedupe(utils::capture.output(summary(result))),
+                                  collapse = "\n")
             self$results$text_summary$setContent(summary_text)
 
+            # Sparseness is judged at the lower bound the engine found (its chi-square
+            # denominators are n * P_j(kappaL)); fall back to kappa0 if no bound came back.
+            rho   <- if (length(kappaL_val) == 1 && is.finite(kappaL_val) && kappaL_val > 0)
+                kappaL_val else kappa0
+            cells <- private$.gofCells(outcome, raters, props4, rho)
             self$results$notices$setContent(private$.buildNotices(
                 kappaL_val,
-                sparse_cells = grepl("expected cell count is less than five", summary_text,
-                                     fixed = TRUE)))
+                sparse_cells = any(cells * n < 5),
+                outcome = outcome))
         })
 )

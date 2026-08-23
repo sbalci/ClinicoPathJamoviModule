@@ -138,7 +138,8 @@ test_that("excluded studies are disclosed rather than silently dropped", {
   d$tp[6] <- 0; d$fn[6] <- 0   # no diseased participants
 
   res <- run_dm(d)
-  txt <- gsub("<[^>]+>", " ", res$instructions$content)
+  # exclusion disclosures render in the dedicated notices channel
+  txt <- gsub("<[^>]+>", " ", res$notices$content)
 
   # a missing cell used to blank the entire analysis, and the explanation was
   # written into a panel that .run() had already hidden
@@ -244,4 +245,112 @@ test_that("meta-regression still runs when degrees of freedom allow it", {
     covariate = "grp", meta_regression = TRUE)
 
   expect_gt(res$metaregression$rowCount, 0)
+})
+
+# ── Fix-pass regressions (2026-08-22) ──────────────────────────
+
+test_that("PHM p-value tests H0: theta = 1, and the variance gets no Wald p", {
+  skip_if_not_installed("mada")
+  d <- studies()
+  hs <- run_dm(d, hsroc_analysis = TRUE)$hsrocresults$asDF
+
+  fit <- mada::phm(data.frame(TP = d$tp, FN = d$fn, FP = d$fp, TN = d$tn),
+                   correction = 0.5, correction.control = "single")
+  sm <- summary(fit)
+  theta <- sm$object$coefficients[["theta"]]
+  se_theta <- sqrt(sm$object$vcov[1, 1])
+
+  i_theta <- grep("theta", hs$parameter)[1]
+  expect_equal(hs$estimate[i_theta], theta, tolerance = 1e-6)
+  # z = (theta - 1)/SE: the no-accuracy null is theta = 1 (chance diagonal),
+  # not theta = 0 (theta -> 0 is a PERFECT test)
+  expect_equal(hs$z_value[i_theta], (theta - 1) / se_theta, tolerance = 1e-6)
+  expect_equal(hs$p_value[i_theta],
+               2 * (1 - pnorm(abs((theta - 1) / se_theta))), tolerance = 1e-8)
+
+  # a Wald test of a variance against 0 is invalid on the boundary: no p
+  i_tau <- grep("tau", hs$parameter)
+  if (length(i_tau) > 0)
+    expect_true(all(is.na(hs$p_value[i_tau])))
+})
+
+test_that("PHM uses the same continuity correction as the bivariate model", {
+  skip_if_not_installed("mada")
+  d <- studies(); d$fp[3] <- 0    # default correction option: "none"
+  hs <- run_dm(d, hsroc_analysis = TRUE)$hsrocresults$asDF
+
+  md <- data.frame(TP = d$tp, FN = d$fn, FP = d$fp, TN = d$tn)
+  theta_single <- summary(mada::phm(md, correction = 0.5,
+                                    correction.control = "single"))$object$coefficients[["theta"]]
+  theta_all <- summary(mada::phm(md, correction = 0.5,
+                                 correction.control = "all"))$object$coefficients[["theta"]]
+
+  i_theta <- grep("theta", hs$parameter)[1]
+  # must match the bivariate model's policy ("single" under 'none'), and the
+  # two policies must actually differ on this data for the pin to bite
+  expect_false(isTRUE(all.equal(theta_single, theta_all, tolerance = 1e-8)))
+  expect_equal(hs$estimate[i_theta], theta_single, tolerance = 1e-6)
+})
+
+test_that("prediction interval uses t on k-2 df, reproduced from the reitsma fit", {
+  skip_if_not_installed("mada")
+  d <- studies()
+  res <- run_dm(d)
+  notes <- vapply(res$bivariateresults$notes, function(n) n$note, character(1))
+  pi_note <- notes[grep("Prediction interval", notes)][1]
+  expect_match(pi_note, "t distribution on 8 df", fixed = TRUE)
+
+  fit <- mada::reitsma(data.frame(TP = d$tp, FN = d$fn, FP = d$fp, TN = d$tn),
+                       method = "reml", correction = 0.5,
+                       correction.control = "single")
+  tot <- vcov(fit)[1:2, 1:2] + fit$Psi[1:2, 1:2]
+  mu <- as.numeric(coef(fit))
+  crit <- qt(0.975, df = nrow(d) - 2)
+  sens_pi <- plogis(mu[1] + c(-1, 1) * crit * sqrt(tot[1, 1])) * 100
+
+  nums <- as.numeric(regmatches(pi_note, gregexpr("[0-9]+\\.[0-9]", pi_note))[[1]])
+  # note prints to 1 dp: sensitivity lower/upper are the first two numbers
+  expect_equal(nums[1], sens_pi[1], tolerance = 0.06)
+  expect_equal(nums[2], sens_pi[2], tolerance = 0.06)
+})
+
+test_that("meta-regression uses the Knapp-Hartung adjustment", {
+  skip_if_not_installed("metafor")
+  d <- studies()
+  d$grp <- factor(rep(c("a", "b"), 5))
+
+  res <- ClinicoPath::diagnosticmeta(
+    data = d, study = "study", true_positives = "tp", false_positives = "fp",
+    false_negatives = "fn", true_negatives = "tn",
+    covariate = "grp", meta_regression = TRUE)
+  mr <- res$metaregression$asDF
+
+  ls <- qlogis(d$tp / (d$tp + d$fn))
+  vs <- 1 / d$tp + 1 / d$fn
+  ref <- metafor::rma(yi = ls, vi = vs, mods = ~ grp, data = d,
+                      method = "REML", test = "knha")
+
+  i_cov <- which(mr$measure == "Sensitivity" & mr$parameter != "Intercept")[1]
+  expect_equal(mr$z_value[i_cov], ref$zval[2], tolerance = 1e-6)
+  expect_equal(mr$p_value[i_cov], ref$pval[2], tolerance = 1e-8)
+
+  notes <- vapply(res$metaregression$notes, function(n) n$note, character(1))
+  expect_true(any(grepl("UNIVARIATE", notes)))
+  expect_true(any(grepl("Knapp-Hartung", notes)))
+  expect_true(any(grepl("Omnibus", notes)))
+})
+
+test_that("bivariate variance components and sens/spec correlation are reported", {
+  skip_if_not_installed("mada")
+  d <- studies()
+  res <- run_dm(d)
+  notes <- vapply(res$bivariateresults$notes, function(n) n$note, character(1))
+  vc_note <- notes[grep("variance components", notes)][1]
+  expect_false(is.na(vc_note))
+
+  fit <- mada::reitsma(data.frame(TP = d$tp, FN = d$fn, FP = d$fp, TN = d$tn),
+                       method = "reml", correction = 0.5,
+                       correction.control = "single")
+  corr_ss <- -fit$Psi[1, 2] / sqrt(fit$Psi[1, 1] * fit$Psi[2, 2])
+  expect_match(vc_note, sprintf("%.2f", corr_ss), fixed = TRUE)
 })

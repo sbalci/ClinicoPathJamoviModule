@@ -389,3 +389,109 @@ test_that("the waterfall still renders when no annotation track is requested", {
   on.exit({ grDevices::dev.off(); unlink(f) }, add = TRUE)
   expect_error(print(result$waterfallplot), NA)
 })
+
+# ─────────────────────────────────────────────────────────────
+# Regression tests from the 2026-08 full audit fixes
+# ─────────────────────────────────────────────────────────────
+
+rr_txt <- function(res, item = "notices")
+  gsub("<[^>]+>", " ", paste(res[[item]]$content, collapse = ""))
+
+test_that("a cohort with zero evaluable patients completes and explains itself", {
+  # Every patient baseline-only: all responses demoted to Unknown, ORR = NA.
+  # This used to crash .run() with "missing value where TRUE/FALSE needed"
+  # BEFORE notices rendered, so the explanation was lost with the run.
+  b_only <- data.frame(pid = sprintf("B%02d", 1:12), time = 0, resp = 0)
+  res <- ClinicoPath::waterfall(data = b_only, patientID = "pid",
+                                responseVar = "resp", timeVar = "time",
+                                inputType = "percentage")
+  expect_match(rr_txt(res), "NOT RESPONSE-EVALUABLE")
+  # NA-safe wording, not "NA%"
+  expect_false(grepl("NA%", rr_txt(res, "clinicalSummary"), fixed = TRUE))
+})
+
+test_that("notices are delivered even when the run aborts early", {
+  # Processing error path (all responses missing) returns before the end of
+  # .run(); the on.exit(renderNotices) must still deliver what accumulated.
+  d <- data.frame(pid = paste0("P", 1:12), resp = NA_real_)
+  res <- ClinicoPath::waterfall(data = d, patientID = "pid", responseVar = "resp")
+  expect_match(rr_txt(res), "REGULATORY USE PROHIBITED")
+  expect_match(rr_txt(res), "missing response values")
+})
+
+test_that("non-fatal validation warnings reach the notices panel", {
+  # These were written to todo2 and wiped in the same run whenever validation
+  # passed, so the user never saw them.
+  d <- data.frame(pid = paste0("P", 1:15),
+                  resp = c(-45, -10, 25, -60, 5, NA, -35, 80, NA, 0, 30, -75, 15, NA, -20))
+  res <- ClinicoPath::waterfall(data = d, patientID = "pid", responseVar = "resp")
+  expect_match(rr_txt(res), "DATA VALIDATION WARNINGS")
+  expect_match(rr_txt(res), "3 missing response values")
+})
+
+test_that("safety notices describe nadir-referenced progression, not baseline", {
+  d <- data.frame(pid = rep(paste0("P", 1:12), each = 2),
+                  time = rep(c(0, 3), 12),
+                  resp = rep(c(0, -40), 12))
+  res <- ClinicoPath::waterfall(data = d, patientID = "pid", responseVar = "resp",
+                                timeVar = "time", inputType = "percentage")
+  txt <- rr_txt(res)
+  expect_match(txt, "referenced to the nadir")
+  expect_match(txt, "increase over the NADIR")
+  expect_false(grepl("measured from BASELINE, not from the NADIR", txt, fixed = TRUE))
+})
+
+test_that("group rates use the evaluable-only denominator with a table note", {
+  d <- data.frame(pid = rep(paste0("Q", 1:12), each = 2),
+                  time = rep(c(0, 3), 12),
+                  resp = as.vector(rbind(rep(0, 12), c(-45,-10,25,-60,5,15,-35,80,-20,0,30,-75))))
+  d <- d[!(d$pid %in% c("Q11", "Q12") & d$time == 3), ]  # 2 baseline-only
+  d$arm <- ifelse(as.integer(sub("Q", "", d$pid)) %% 2 == 0, "B", "A")
+  res <- ClinicoPath::waterfall(data = d, patientID = "pid", responseVar = "resp",
+                                timeVar = "time", inputType = "percentage",
+                                groupVar = "arm")
+  gc <- res$groupComparisonTable$asDF
+  expect_equal(sum(gc$n_patients), 10)   # 12 patients, 2 unevaluable
+  # summary table discloses the unevaluable patients as their own row
+  st <- res$summaryTable$asDF
+  expect_true(any(grepl("Unknown", st$category)))
+  expect_equal(sum(st$n), 12)
+})
+
+test_that("clinicalMetrics has exactly one DoR row, from the nadir-based method", {
+  set.seed(7)
+  rawd <- do.call(rbind, lapply(1:30, function(i) {
+    base <- runif(1, 20, 80)
+    mult <- cumprod(c(1, runif(3, 0.6, 1.25)))
+    data.frame(pid = sprintf("R%02d", i), time = c(0, 2, 4, 6), meas = base * mult)
+  }))
+  res <- ClinicoPath::waterfall(data = rawd, patientID = "pid", responseVar = "meas",
+                                timeVar = "time", inputType = "raw")
+  cm <- res$clinicalMetrics$asDF
+  expect_equal(sum(grepl("Median Duration of Response", cm$metric)), 1)
+  expect_false(any(grepl("rapid response|durable response", cm$value)))
+})
+
+test_that("spider data keeps patient_group on the large-dataset path", {
+  set.seed(7)
+  rawd <- do.call(rbind, lapply(1:30, function(i) {
+    base <- runif(1, 20, 80)
+    mult <- cumprod(c(1, runif(3, 0.6, 1.25)))
+    data.frame(pid = sprintf("R%02d", i), time = c(0, 2, 4, 6),
+               meas = base * mult, arm = ifelse(i %% 2, "A", "B"))
+  }))
+  res <- ClinicoPath::waterfall(data = rawd, patientID = "pid", responseVar = "meas",
+                                timeVar = "time", inputType = "raw", groupVar = "arm",
+                                showSpiderPlot = TRUE, spiderColorBy = "group")
+  expect_true("patient_group" %in% names(res$spiderplot$state$data$spider))
+})
+
+test_that("a duplicate baseline row blocks the run with a specific message", {
+  d <- data.frame(pid = rep(c("A", "B"), each = 3),
+                  time = c(0, 0, 2, 0, 2, 4),
+                  meas = c(50, 55, 30, 40, 32, 20))
+  expect_error(
+    ClinicoPath::waterfall(data = d, patientID = "pid", responseVar = "meas",
+                           timeVar = "time", inputType = "raw"),
+    "more than one baseline")
+})

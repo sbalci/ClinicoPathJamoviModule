@@ -152,7 +152,7 @@ test_that("ihcheterogeneity reproducibility analysis mode works", {
   }, NA)
 })
 
-test_that("ihcheterogeneity bias analysis mode works", {
+test_that("ihcheterogeneity reproducibility & bias analysis mode works", {
   data <- load_test_data("ihc_heterogeneity.csv")
 
   expect_error({
@@ -161,7 +161,7 @@ test_that("ihcheterogeneity bias analysis mode works", {
       wholesection = "ki67_wholesection",
       biopsy1 = "ki67_region1",
       biopsy2 = "ki67_region2",
-      analysis_type = "bias"
+      analysis_type = "reproducibility"
     )
   }, NA)
 })

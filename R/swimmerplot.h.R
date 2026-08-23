@@ -148,7 +148,7 @@ swimmerplotOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
                     "relative",
                     "absolute"),
                 default="relative")
-            private$..maxMilestones <- jmvcore::OptionNumber$new(
+            private$..maxMilestones <- jmvcore::OptionInteger$new(
                 "maxMilestones",
                 maxMilestones,
                 min=1,
@@ -514,7 +514,9 @@ swimmerplotResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
                     "endTime",
                     "responseVar",
                     "censorVar",
-                    "timeUnit")))
+                    "timeUnit",
+                    "timeType",
+                    "dateFormat")))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="warningNotice",
@@ -589,7 +591,8 @@ swimmerplotResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
                     "timeType",
                     "dateFormat",
                     "timeUnit",
-                    "timeDisplay")))
+                    "timeDisplay",
+                    "responseAnalysis")))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="interpretation",
@@ -640,6 +643,8 @@ swimmerplotResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
                     "endTime",
                     "responseVar",
                     "timeType",
+                    "dateFormat",
+                    "timeDisplay",
                     "timeUnit",
                     "personTimeAnalysis")))
             self$add(jmvcore::Table$new(
@@ -676,7 +681,13 @@ swimmerplotResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
                     "milestone3Name",
                     "milestone4Name",
                     "milestone5Name",
-                    "timeUnit")))
+                    "timeUnit",
+                    "timeType",
+                    "dateFormat",
+                    "timeDisplay",
+                    "patientID",
+                    "startTime",
+                    "endTime")))
             self$add(jmvcore::Table$new(
                 options=options,
                 name="eventMarkerTable",
@@ -705,7 +716,13 @@ swimmerplotResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
                     "showEventMarkers",
                     "eventVar",
                     "eventTimeVar",
-                    "timeUnit")))
+                    "timeUnit",
+                    "timeType",
+                    "dateFormat",
+                    "timeDisplay",
+                    "patientID",
+                    "startTime",
+                    "endTime")))
             self$add(jmvcore::Table$new(
                 options=options,
                 name="timelineData",
@@ -812,8 +829,12 @@ swimmerplotResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
                     "endTime",
                     "responseVar",
                     "censorVar",
+                    "timeType",
+                    "dateFormat",
+                    "timeDisplay",
                     "timeUnit",
-                    "personTimeAnalysis")))
+                    "personTimeAnalysis",
+                    "responseAnalysis")))
             self$add(jmvcore::Table$new(
                 options=options,
                 name="groupComparisonTest",
@@ -840,6 +861,9 @@ swimmerplotResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
                         `type`="text")),
                 clearWith=list(
                     "patientID",
+                    "startTime",
+                    "endTime",
+                    "timeType",
                     "responseVar",
                     "groupVar")))
             self$add(jmvcore::Html$new(
@@ -858,6 +882,8 @@ swimmerplotResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
                     "startTime",
                     "endTime",
                     "responseVar",
+                    "censorVar",
+                    "responseAnalysis",
                     "timeUnit",
                     "showCopyReady")))
             self$add(jmvcore::Html$new(
@@ -891,10 +917,23 @@ swimmerplotBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' Swimmer Plot
 #'
 #' Creates comprehensive swimmer plots using the ggswim package to visualize 
-#' patient timelines,  clinical events, milestones, and treatment responses. 
-#' Features enhanced data validation  and complete ggswim integration for 
+#' patient timelines, clinical events, milestones, and treatment responses. 
+#' Features enhanced data validation and complete ggswim integration for 
 #' professional clinical visualization.
 #' 
+#'
+#' @examples
+#' data('swimmer_data_raw', package = 'ClinicoPath')
+#'
+#' swimmerplot(
+#'     data = swimmer_data_raw,
+#'     patientID = 'PatientID',
+#'     startTime = 'StartTime',
+#'     endTime = 'EndTime',
+#'     responseVar = 'BestResponse',
+#'     timeType = 'raw',
+#'     timeUnit = 'months')
+#'
 #' @param data The data as a data frame containing patient timeline
 #'   information.
 #' @param patientID Variable containing unique patient identifiers.
@@ -908,8 +947,8 @@ swimmerplotBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   If not provided, arrows are drawn for patients at the latest time point.
 #' @param groupVar Optional grouping variable for comparing response rates
 #'   between patient groups (e.g., treatment arms, disease subtypes). When
-#'   specified, Fisher's exact tests compare ORR and DCR between groups. Groups
-#'   are also shown in separate colors.
+#'   specified, Fisher's exact tests compare ORR and DCR between groups. Lane
+#'   colors reflect the response variable, not the group.
 #' @param timeType Select whether time values are raw numbers or dates/times.
 #' @param dateFormat Select the date/time format in your data (only used when
 #'   Time Input Type is Date/Time).

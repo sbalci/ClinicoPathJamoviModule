@@ -668,3 +668,44 @@ test_that("Post-hoc table has all required columns", {
     }
   }
 })
+
+# ============================================================================
+# PART N: 2x2 CONTINUITY-CORRECTION FOOTNOTE
+# The footnote on chisqTable makes a factual claim about how this statistic
+# relates to jamovi's Contingency Tables analysis. jamovi's `chiSqCorr` option
+# defaults to FALSE (jmv 2.8.0 module manifest), so jamovi's chi-square row is
+# the UNCORRECTED Pearson statistic - the same one reported here. A footnote
+# claiming the two "differ" would send a cross-checking reader to enable the
+# correction and get a different p-value.
+# ============================================================================
+
+test_that("2x2 footnote does not claim jamovi corrects by default", {
+  data <- data.frame(
+    treatment = factor(rep(c("Drug", "Placebo"), c(60, 60))),
+    outcome = factor(c(
+      rep("Improved", 40), rep("Not Improved", 20),
+      rep("Improved", 20), rep("Not Improved", 40)
+    ))
+  )
+
+  result <- chisqposttest(data = data, rows = "treatment",
+                          cols = "outcome", posthoc = "none")
+
+  # `notes` is a list of jmvcore Note objects keyed by note key; the text is $note
+  note <- result$chisqTable$notes$continuity$note
+  expect_true(!is.null(note))
+
+  # The statistic really is the uncorrected Pearson one, which is exactly what
+  # jamovi's Contingency Tables reports at its defaults.
+  cont_table <- table(data$treatment, data$outcome)
+  uncorrected <- chisq.test(cont_table, correct = FALSE)
+  chisq_table <- extract_table_data(result, "chisqTable")
+  expect_equal(chisq_table$value[1], as.numeric(uncorrected$statistic),
+               tolerance = 1e-10)
+
+  # Therefore the note must not assert that jamovi applies the correction by
+  # default, nor that jamovi's result for this table differs from this one.
+  expect_false(grepl("applies that correction to 2x2 tables by default",
+                     note, fixed = TRUE))
+  expect_false(grepl("will differ slightly", note, fixed = TRUE))
+})

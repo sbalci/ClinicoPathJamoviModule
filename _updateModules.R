@@ -1142,7 +1142,10 @@ install_module_verified <- function(module_name, version = new_version) {
 # reported "Undocumented data sets" for every csv without an .rda twin.
 .ensure_rbuildignore_omv <- function(module_dir) {
   rbi <- file.path(module_dir, ".Rbuildignore")
-  want <- c("^data/.*\\.omv$", "^inst/extdata/.*\\.omv$", "^data/.*\\.csv$")
+  # Built source tarballs are release artifacts, never package payload: a stale
+  # one committed at the OncoPath root was swept into source builds.
+  want <- c("^data/.*\\.omv$", "^inst/extdata/.*\\.omv$", "^data/.*\\.csv$",
+            "^.*\\.tar\\.gz$")
   cur <- if (file.exists(rbi)) readLines(rbi, warn = FALSE) else character(0)
   add <- setdiff(want, cur)
   if (length(add) > 0) {

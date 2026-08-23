@@ -147,7 +147,10 @@ test_that("a material systematic bias vetoes the adequacy verdict", {
 
 test_that("copy-ready text makes no claim the analysis did not support", {
     for (d in list(biased_data(), clean_data())) {
-        txt <- gsub("<[^>]+>", " ", run_ihc(d)$report_sentences$content)
+        # the panel is opt-in now; without the option the content is empty and
+        # every expect_false below would pass vacuously
+        txt <- gsub("<[^>]+>", " ", run_ihc(d, showReportSentences = TRUE)$report_sentences$content)
+        expect_true(nzchar(trimws(txt)))
         # a blanket endorsement used to close EVERY report, including ones that
         # had just called the sampling inadequate
         expect_false(grepl("results support the use of biopsy simulation", txt))
@@ -229,4 +232,84 @@ test_that("Levene's test for compartment differences actually reports a result",
         expect_false(is.na(lev$df[1]))
         expect_false(grepl("Could not compute", lev$interpretation[1]))
     }
+})
+
+# ── Check-pass regressions (2026-08-23) ──────────────────────────
+
+test_that("tables do not duplicate rows when .run() re-executes on one instance", {
+  d <- read.csv("../../data/ihc_heterogeneity.csv")
+  options <- ClinicoPath:::ihcheterogeneityOptions$new(
+    wholesection = "ki67_wholesection",
+    biopsy1 = "ki67_region1", biopsy2 = "ki67_region2")
+  analysis <- ClinicoPath:::ihcheterogeneityClass$new(options = options, data = d)
+  analysis$run()
+  n1 <- analysis$results$reproducibilitytable$rowCount
+  b1 <- analysis$results$samplingbiastable$rowCount
+  analysis$run()   # jamovi re-runs without clearWith on data-cell edits
+  expect_equal(analysis$results$reproducibilitytable$rowCount, n1)
+  expect_equal(analysis$results$samplingbiastable$rowCount, b1)
+})
+
+test_that("compartment Kruskal-Wallis uses one per-case summary value, not pooled measurements", {
+  skip_if_not_installed("psych")
+  d <- read.csv("../../data/ihc_heterogeneity.csv")
+  res <- ihcheterogeneity(
+    data = d, wholesection = "ki67_wholesection",
+    biopsy1 = "ki67_region1", biopsy2 = "ki67_region2",
+    spatial_id = "spatial_region",
+    compareCompartments = TRUE, compartmentTests = TRUE)
+  tests <- res$compartmentTests$asDF
+  kw <- tests[grep("Kruskal", tests$test_type), , drop = FALSE]
+  expect_equal(nrow(kw), 1)
+
+  # independent reference: per-case mean of (reference + regions), one value
+  # per case, compared across compartments. Mirror the module's rule that a
+  # compartment needs at least 2 cases to enter the comparison.
+  case_means <- rowMeans(cbind(d$ki67_wholesection, d$ki67_region1, d$ki67_region2),
+                         na.rm = TRUE)
+  ok <- !is.na(d$spatial_region) & is.finite(case_means)
+  grp <- d$spatial_region[ok]
+  keep <- grp %in% names(which(table(grp) >= 2))
+  ref <- kruskal.test(case_means[ok][keep] ~ factor(grp[keep]))
+  expect_equal(unname(kw$statistic), unname(ref$statistic), tolerance = 1e-6)
+  expect_equal(kw$p_value, ref$p.value, tolerance = 1e-8)
+})
+
+
+test_that("report sentences and assumptions panels are opt-in", {
+  d <- clean_data()
+  off <- run_ihc(d)
+  expect_false(off$report_sentences$visible)
+  expect_false(off$assumptions$visible)
+  expect_equal(off$report_sentences$content, "")
+  expect_equal(off$assumptions$content, "")
+
+  on <- run_ihc(d, showReportSentences = TRUE, showAssumptions = TRUE)
+  expect_true(on$report_sentences$visible)
+  expect_true(on$assumptions$visible)
+  expect_true(nzchar(on$report_sentences$content))
+  expect_true(nzchar(on$assumptions$content))
+})
+
+test_that("the removed 'bias' focus level errors clearly", {
+  expect_error(run_ihc(clean_data(), analysis_type = "bias"))
+})
+
+test_that("every panel grades the mean CV with the same user-threshold bands", {
+  d <- read.csv("../../data/ihc_heterogeneity.csv")
+  grade_word <- function(x) regmatches(x, regexpr("Low|Moderate|High", x))
+  for (thr in c(5, 20, 50)) {
+    res <- ihcheterogeneity(
+      data = d, wholesection = "ki67_wholesection",
+      biopsy1 = "ki67_region1", biopsy2 = "ki67_region2",
+      cv_threshold = thr, showSummary = TRUE)
+    tab <- res$reproducibilitytable$asDF
+    tab_word <- grade_word(tab$interpretation[grepl("Coefficient of Variation", tab$metric)])
+    interp <- gsub("<[^>]+>", " ", res$interpretation$content)
+    key_word <- grade_word(regmatches(interp, regexpr("Mean CV = [0-9.]+% \\([A-Za-z]+ variability", interp)))
+    summ <- gsub("<[^>]+>", " ", res$summary$content)
+    summ_word <- grade_word(regmatches(summ, regexpr("Variability: *[A-Za-z]+", summ)))
+    expect_equal(key_word, tab_word, info = paste("Key Findings vs table at thr", thr))
+    expect_equal(summ_word, tab_word, info = paste("Summary vs table at thr", thr))
+  }
 })

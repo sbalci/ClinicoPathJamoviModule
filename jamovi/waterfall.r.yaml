@@ -101,6 +101,10 @@ items:
       title: Person-Time Analysis
       type: Table
       rows: 0
+      # Shown procedurally (option-driven): requires a time variable AND raw
+      # per-visit input; declared hidden so the empty shell never renders in the
+      # welcome state or in percentage mode, where it can never be populated.
+      visible: false
       columns:
         - name: category
           title: "Response Category"
@@ -203,6 +207,10 @@ items:
       clearWith:
          - patientID
          - responseVar
+         # timeVar and inputType change how the response (and so ORR/DCR) is
+         # derived; without them the significance text goes stale.
+         - timeVar
+         - inputType
          - showClinicalSignificance
          - responseCategoryVar
 
@@ -275,6 +283,9 @@ items:
          - responseVar
          - groupVar
          - inputType
+         # with raw input the per-group responses derive from the timeVar==0
+         # baseline, so a changed time variable changes every group rate
+         - timeVar
          - responseCategoryVar
 
     - name: groupComparisonTest
@@ -300,6 +311,7 @@ items:
          - responseVar
          - groupVar
          - inputType
+         - timeVar
          - responseCategoryVar
 
 
@@ -328,6 +340,9 @@ items:
         - timeUnitLabel
         - showMedian
         - showCI
+        # .spiderplot reads this from state; without it the rendered image does
+        # not refresh when the user toggles the per-line patient-ID labels.
+        - showSpiderLabels
 
 
 
@@ -374,14 +389,17 @@ items:
     - name: addResponseCategory
       title: Add Response Category to Data
       type: Output
-      varTitle: RECIST
-      varDescription: Calculated response category based on RECIST criteria.
+      varTitle: ResponseCategory
+      varDescription: Threshold-based response category adapted from RECIST v1.1 (not a full RECIST v1.1 assessment).
       measureType: nominal
       clearWith:
          - patientID
          - responseVar
          - timeVar
          - inputType
+         # the override rewrites exported categories; without this entry the
+         # isNotFilled() guard keeps a stale column after the override changes
+         - responseCategoryVar
 
 
     # - name: mydataview
@@ -399,6 +417,11 @@ items:
          - timeVar
          - inputType
          - groupVar
+         - responseCategoryVar
+         - showSpiderPlot
+         - showConfidenceIntervals
+         - showResponseDuration
+         - showCI
 
 
 refs:

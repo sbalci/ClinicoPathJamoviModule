@@ -45,7 +45,7 @@ test_that("diagnosticmeta handles zero-cell correction methods", {
   # Load dataset with zero cells
   data(diagnosticmeta_test_zeros, package = "ClinicoPath")
 
-  correction_methods <- c("none", "constant", "treatment_arm", "empirical")
+  correction_methods <- c("none", "constant", "zero_cells", "reciprocal_n")
 
   for (method in correction_methods) {
     result <- diagnosticmeta(

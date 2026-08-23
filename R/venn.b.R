@@ -609,15 +609,16 @@ vennClass <- if (requireNamespace('jmvcore'))
                     if (self$options$show_complexUpset) {
                         self$results$plotComplexUpset$setState(plotDataUpset)
                         # Minimum intersection size larger than any intersection in the
-                        # data makes ComplexUpset abort. .plotComplexUpsetHelper clamps
-                        # so a plot is still drawn; say so, or the filter looks ignored.
+                        # data makes ComplexUpset abort. .plotComplexUpsetHelper drops
+                        # the filter so a plot is still drawn; say so, or the filter
+                        # looks silently applied.
                         max_intersection <- if (nrow(mydata2) > 0)
                             max(table(apply(mydata2, 1, paste, collapse = "|"))) else 0L
                         if (self$options$minSize > max_intersection) {
                             private$.addNotice(
                                 "INFO",
                                 .("Minimum Intersection Size Is Larger Than Any Intersection"),
-                                sprintf(.("Minimum intersection size is set to %d, but the largest group of cases sharing one membership pattern contains %d cases. Filtering at %d would leave nothing to draw, so the ComplexUpset plot below is drawn with the filter reduced to %d (no intersection removed). Lower the minimum intersection size to filter."),
+                                sprintf(.("Minimum intersection size is set to %d, but the largest group of cases sharing one membership pattern contains %d cases. Filtering at %d would leave nothing to draw, so the filter has been switched off and the ComplexUpset plot below shows every intersection, unfiltered. Set the minimum intersection size to %d or less for it to take effect."),
                                         self$options$minSize, max_intersection,
                                         self$options$minSize, max_intersection))
                         }
@@ -1390,11 +1391,18 @@ vennClass <- if (requireNamespace('jmvcore'))
                 # min_size exceeds the largest exclusive intersection, and minSize is a
                 # free TextBox with no upper bound. Verified against ComplexUpset 1.3.3
                 # that the maximum it compares against INCLUDES the all-negative
-                # ("Outside of known sets") region, so the clamp is taken over every
-                # membership pattern. .run() posts a notice when the clamp bites.
+                # ("Outside of known sets") region, so the guard is taken over every
+                # membership pattern. .run() posts a notice when the guard bites.
+                # Clamping to max_intersection is NOT safe: ComplexUpset keeps
+                # intersections with size >= min_size, so min_size = max keeps ONLY the
+                # single largest pattern and silently drops every other bar (verified
+                # with ComplexUpset::upset_data() on histopathology LVI/PNI/
+                # PreinvasiveComponent: min_size = 77 leaves "Outside of known sets"
+                # alone, 1 of 8 patterns). An unsatisfiable filter is therefore dropped
+                # altogether, which is what the notice in .run() tells the user.
                 max_intersection <- if (nrow(upset_data) > 0)
                     max(table(apply(upset_data, 1, paste, collapse = "|"))) else 0L
-                effective_min_size <- min(minSize, max_intersection)
+                effective_min_size <- if (minSize > max_intersection) 0 else minSize
 
                 plot <- ComplexUpset::upset(
                     data = upset_data,

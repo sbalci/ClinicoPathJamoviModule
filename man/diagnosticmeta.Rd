@@ -65,9 +65,15 @@ test}
 is not appropriate for bivariate diagnostic meta-analysis)}
 
 \item{zero_cell_correction}{Method for handling zero cells in 2x2 tables.
-'none' relies on bivariate model (recommended). 'constant' adds 0.5 to all
-cells of affected studies. 'treatment_arm' adds correction only to zero
-cells. 'empirical' uses study-specific corrections.}
+'none' (recommended) applies no correction to the data itself; the
+normal-approximation models still add 0.5 to studies with a zero cell at
+fitting time (mada's 'single' correction), which is disclosed in the
+output. 'constant' adds 0.5 to all four cells of affected studies before
+any analysis. 'zero_cells' adds 0.5 only to the zero cells themselves.
+'reciprocal_n' adds 1/N to all cells of affected studies, where N is the
+study's total sample size. (The former option keys 'treatment_arm' and
+'empirical' were renamed: they did not implement the procedures those names
+denote in Sweeting et al. 2004.)}
 
 \item{forest_plot}{Generate forest plot for sensitivity and specificity}
 
@@ -97,6 +103,7 @@ including interpretation guidance}
 A results object containing:
 \tabular{llllll}{
 \code{results$instructions} \tab \tab \tab \tab \tab a html \cr
+\code{results$notices} \tab \tab \tab \tab \tab a html \cr
 \code{results$summary} \tab \tab \tab \tab \tab a html \cr
 \code{results$about} \tab \tab \tab \tab \tab a html \cr
 \code{results$bivariateresults} \tab \tab \tab \tab \tab a table \cr

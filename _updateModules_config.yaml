@@ -45,14 +45,14 @@
 # ==============================================
 
 
-new_version: "1.0.6.03"
-new_date: "2026-08-22"
+new_version: "1.0.6.05"
+new_date: "2026-08-23"
 quick: false
-TEST: true
-jjstatsplot: true
-jsurvival: true
-ClinicoPathDescriptives: true
-OncoPath: true
+TEST: false
+jjstatsplot: false
+jsurvival: false
+ClinicoPathDescriptives: false
+OncoPath: false
 meddecide: true
 
 
@@ -211,6 +211,9 @@ modules:
       # Shared RECIST v1.1 assessment engine used by the lesion-level response
       # analyses. Must ship wherever waterfallrecist ships.
       - "recist_engine.R"
+      # Static/guidance HTML builders extracted from swimmerplot.b.R.
+      # Must ship wherever swimmerplot ships.
+      - "swimmerplot_html.R"
       # ihc_utilities.R intentionally NOT shipped to production OncoPath: its
       # consumers (ihcimmune/ihcbasic/ihcadvanced/ihcdiagnostic) are dev-routed to
       # menuGroup OncoPathD/T, and the one production analysis here
@@ -256,6 +259,10 @@ modules:
       - "stagemigration-discrimination.R"
       - "stagemigration-competing-risks.R"
       - "recist_engine.R"
+      # Static/guidance HTML builders extracted from swimmerplot.b.R.
+      # Needed while swimmerplot is dev-routed here (menuGroup OncoPathT) and
+      # harmless otherwise.
+      - "swimmerplot_html.R"
       # Needed whenever a ggstatsplot analysis is dev-routed here with a
       # T-suffixed menuGroup (jjbetweenstats / jjdotplotstats / statsplot2).
       - "ggstatsplot_utils.R"

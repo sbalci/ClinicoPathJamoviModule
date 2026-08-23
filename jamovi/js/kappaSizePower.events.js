@@ -1,21 +1,23 @@
-    module.exports = {
+// UI events for kappaSizePower. Bound from jamovi/kappaSizePower.u.yaml
+// (outcome ComboBox -> events: change: ./kappaSizePower.events::onChange_outcome).
+//
+// The proportions field must hold exactly one value per outcome level, so changing the
+// number of levels always invalidates what is typed there. Replace it with a template of
+// the right length (each summing to 1) rather than leaving the user with a count error.
+const events = {
 
-        outcome_changed: function(ui, event) {
+    onChange_outcome: function(ui) {
+        const outcome = String(ui.outcome.value());
+        const templates = {
+            '2': '0.20, 0.80',
+            '3': '0.20, 0.60, 0.20',
+            '4': '0.20, 0.40, 0.20, 0.20',
+            '5': '0.10, 0.30, 0.20, 0.20, 0.20'
+        };
+        if (templates[outcome] !== undefined)
+            ui.props.setValue(templates[outcome]);
+    }
 
-let outcome = ui.outcome.value();
+};
 
-if (outcome == 2)
-  ui.props.setValue('0.20 , 0.80');
-
-if (outcome == 3)
-  ui.props.setValue('0.20 , 0.60, 0.20');
-
-  if (outcome == 4)
-  ui.props.setValue('0.20 , 0.40, 0.20, 0.20');
-
-  if (outcome == 5)
-  ui.props.setValue('0.10 , 0.30, 0.20, 0.20, 0.20');
-
-        }
-
-    };
+module.exports = events;

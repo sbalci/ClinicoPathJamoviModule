@@ -90,27 +90,31 @@ children:
               - type: CheckBox
                 name: meta_regression
                 label: Meta-regression (explore covariate effects)
-                enable: (!is.null(covariate) && covariate !="")
+                enable: (covariate)
               - type: CheckBox
                 name: publication_bias
                 label: Publication bias assessment (Deeks' test)
               - type: CheckBox
                 name: show_individual_studies
                 label: Individual study results
-      - type: Label
+      - type: CollapseBox
         label: Advanced Options
+        collapsed: true
         children:
           - type: LayoutBox
             margin: large
             children:
               - type: TextBox
                 name: confidence_level
-                label: Confidence Level (%)
+                label: Confidence level (%)
                 format: number
                 suffix: '%'
               - type: ComboBox
                 name: method
                 label: Estimation method
+              - type: ComboBox
+                name: zero_cell_correction
+                label: Zero-cell correction
       - type: Label
         label: Visualization Options
         children:
@@ -148,8 +152,3 @@ children:
               - type: CheckBox
                 name: show_analysis_summary
                 label: Analysis summary
-  - type: LayoutBox
-    margin: large
-    children:
-      - type: ComboBox
-        name: zero_cell_correction

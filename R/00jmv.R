@@ -959,7 +959,7 @@
     `kappaSize`=list(
         `type`="software", 
         `author`="Michael A Rotondi", 
-        `year`=2022, 
+        `year`=2018, 
         `title`="kappaSize: Sample Size Estimation Functions for Studies of Interobserver Agreement", 
         `publisher`="[R package]. Retrieved from https://cran.r-project.org/web/packages/kappaSize/", 
         `url`="https://cran.r-project.org/web/packages/kappaSize/"), 

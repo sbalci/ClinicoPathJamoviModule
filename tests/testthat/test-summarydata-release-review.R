@@ -137,6 +137,6 @@ test_that("outlier bounds match a hand-computed IQR fence", {
 
   expect_match(out, formatC(lo, format = "f", digits = 2), fixed = TRUE)
   expect_match(out, formatC(hi, format = "f", digits = 2), fixed = TRUE)
-  expect_match(out, "1 outliers detected")
+  expect_match(out, "1 outlier(s) detected", fixed = TRUE)
   expect_match(out, formatC(100, format = "f", digits = 2), fixed = TRUE)
 })

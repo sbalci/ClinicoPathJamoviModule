@@ -26,7 +26,7 @@ test_that("missing values are not rendered as a category", {
   expect_match(out, "B: n = 2")
 
   # percentages are of valid cases and must not exceed 100 in total
-  pcts <- as.numeric(gsub("%", "", regmatches(out, gregexpr("[0-9]+%", out))[[1]]))
+  pcts <- as.numeric(gsub("%", "", regmatches(out, gregexpr("[0-9.]+%", out))[[1]]))
   expect_lte(sum(pcts), 101)   # allow 1 point of rounding slack
 })
 
@@ -35,7 +35,7 @@ test_that("percentages of valid cases sum to 100 when missingness is heavy", {
   d <- data.frame(g = factor(c("A", rep(NA, 9))))
   out <- rc_txt(reportcat(data = d, vars = "g")$text$content)
 
-  expect_match(out, "A: n = 1, 100% of valid cases")
+  expect_match(out, "A: n = 1, 100\\.0% of valid cases")
   expect_match(out, "Missing values: 9")
   expect_false(grepl("n = 9", out, fixed = TRUE))
 })
@@ -70,7 +70,7 @@ test_that("the sparse-category warning counts observed categories only", {
   # but genuinely rare observed categories are still flagged
   f2 <- factor(c(rep("A", 30), rep("B", 30), "C", "D"))
   guidance2 <- as.character(reportcat(data = data.frame(g = f2), vars = "g")$assumptions$content)
-  expect_match(guidance2, "2 categories with")
+  expect_match(guidance2, "2 of 4 observed categories with fewer than 5 cases")
 })
 
 test_that("counts and percentages match a hand-computed frequency table", {
@@ -85,9 +85,10 @@ test_that("counts and percentages match a hand-computed frequency table", {
   n_valid <- sum(!is.na(g))
   expect_equal(sum(tab), n_valid)
 
-  # scales::percent() picks its accuracy from the WHOLE vector, so the expected
-  # strings must be built vector-wise (48.9%), not element by element (49%).
-  pct <- scales::percent(as.numeric(tab) / n_valid)
+  # The backend pins scales::percent(accuracy = 0.1) so that the level list and
+  # the copy-ready sentences never print two different percentages for the same
+  # count; the expected strings have to use that same accuracy.
+  pct <- scales::percent(as.numeric(tab) / n_valid, accuracy = 0.1)
   names(pct) <- names(tab)
 
   for (lv in names(tab)) {
@@ -109,6 +110,34 @@ test_that("variable names containing a space survive the formula round-trip", {
   expect_match(out, "Tumor Grade")
   expect_match(out, "G2: n = 2")
   expect_false(grepl("NA", out, fixed = TRUE))
+})
+
+test_that("panel visibility follows the populate state", {
+  # Visibility is managed procedurally: .resetOutputs() hides every managed
+  # panel at the top of .run(), and each populate path pairs setContent() with
+  # setVisible(TRUE). This replaced setContent("") clearing, which left stray
+  # empty headings ("To Do" above results; five empty panels under a terminal
+  # error). `visible: (!vars)` is not usable - a leading `!` fails jmvcore's
+  # routing regex and the item becomes silently ALWAYS visible.
+  d <- data.frame(g = factor(c("A", "B", "B")),
+                  allna = factor(rep(NA_character_, 3), levels = c("X", "Y")))
+
+  # success path: content panels shown, welcome panel hidden
+  res <- reportcat(data = d, vars = "g")
+  expect_false(res$todo$visible)
+  for (item in c("text", "text1", "clinicalSummary", "reportSentences", "assumptions"))
+    expect_true(res[[item]]$visible)
+  expect_false(res$error$visible)
+  expect_false(res$dataWarnings$visible)
+
+  # terminal-error path (every selected variable empty): content panels stay
+  # hidden - no empty headings - while error and dataWarnings show with content
+  res2 <- reportcat(data = d, vars = "allna")
+  for (item in c("todo", "text", "text1", "clinicalSummary", "reportSentences", "assumptions"))
+    expect_false(res2[[item]]$visible)
+  expect_true(res2$error$visible)
+  expect_true(res2$dataWarnings$visible)
+  expect_match(as.character(res2$dataWarnings$content), "allna")
 })
 
 test_that("a high-cardinality variable is not lumped into '(Other)'", {

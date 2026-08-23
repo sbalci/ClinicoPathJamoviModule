@@ -145,7 +145,12 @@ testthat::test_that("diagnosticmeta respects optional analysis flags", {
     funnel_plot = FALSE
   )
 
-  testthat::expect_equal(disabled_results$bivariateresults$rowCount, 0)
+  # The bivariate table's five parameter rows are created in .init() (fixed
+  # row structure), so the disabled state is "hidden with empty estimates",
+  # not "zero rows".
+  testthat::expect_false(disabled_results$bivariateresults$visible)
+  testthat::expect_equal(disabled_results$bivariateresults$rowCount, 5)
+  testthat::expect_true(is.na(disabled_results$bivariateresults$asDF$estimate[1]))
   testthat::expect_equal(disabled_results$hsrocresults$rowCount, 0)
   testthat::expect_equal(disabled_results$heterogeneity$rowCount, 0)
   testthat::expect_equal(disabled_results$metaregression$rowCount, 0)

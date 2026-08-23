@@ -177,18 +177,18 @@ test_that("Group coloring handles unmatched samples with neutral color", {
     )
     rownames(testData) <- testData$id
 
-    # Should produce warnings about unmatched samples
-    expect_warning(
-        result <- dendrogram(
-            data = testData,
-            vars = c("x", "y"),
-            clusterMethod = "complete",
-            distanceMethod = "euclidean",
-            colorGroups = TRUE,
-            group = "group"
-        ),
-        "could not be matched"
+    # The unmatched-samples disclosure goes to the notices panel now (jamovi
+    # never surfaces R warnings), naming the count.
+    result <- dendrogram(
+        data = testData,
+        vars = c("x", "y"),
+        clusterMethod = "complete",
+        distanceMethod = "euclidean",
+        colorGroups = TRUE,
+        group = "group"
     )
+    expect_match(paste(result$notices$content, collapse = ""),
+                 "missing or unmatched group value")
 
     # Should still produce valid result
     expect_s3_class(result, "dendrogramResults")
@@ -206,18 +206,18 @@ test_that("Group coloring does not silently reassign missing data", {
     )
     rownames(testData) <- testData$id
 
-    # Should warn about unmatched sample (patient3 with NA)
-    expect_warning(
-        dendrogram(
-            data = testData,
-            vars = c("x", "y"),
-            clusterMethod = "average",
-            distanceMethod = "euclidean",
-            colorGroups = TRUE,
-            group = "disease"
-        ),
-        "1 .* could not be matched"
+    # The disclosure goes to the notices panel now (jamovi never surfaces R
+    # warnings), naming the count of unmatched observations.
+    res <- dendrogram(
+        data = testData,
+        vars = c("x", "y"),
+        clusterMethod = "average",
+        distanceMethod = "euclidean",
+        colorGroups = TRUE,
+        group = "disease"
     )
+    expect_match(paste(res$notices$content, collapse = ""),
+                 "1 observation\\(s\\) used in clustering have a missing or unmatched group value")
 })
 
 

@@ -61,14 +61,8 @@ children:
         margin: large
         children:
           - type: Label
-            label: Analysis Features
+            label: Clinical Decision Rule
             children:
-              - type: CheckBox
-                name: compareModels
-                label: Statistical model comparison
-              - type: CheckBox
-                name: weightedAUC
-                label: Average net benefit over range
               - type: CheckBox
                 name: clinicalDecisionRule
                 label: Include clinical decision rule
@@ -86,18 +80,6 @@ children:
                 format: string
                 label: Decision rule label
                 enable: (clinicalDecisionRule)
-          - type: LayoutBox
-            margin: large
-            children:
-              - type: CheckBox
-                name: showClinicalImpactPlot
-                label: Show clinical impact plot
-              - type: CheckBox
-                name: showNetBenefitCI
-                label: Show net benefit confidence intervals
-              - type: CheckBox
-                name: costBenefitAnalysis
-                label: Run cost-benefit analysis
   - type: CollapseBox
     label: Tables & Outputs
     margin: normal

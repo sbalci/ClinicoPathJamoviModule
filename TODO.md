@@ -1,4 +1,150 @@
-## check articles
+# ClinicoPathDescriptives
+
+## Descriptives
+
+- reportcat
+summarydata
+tableone
+
+## Data Quality
+
+benford
+checkdata
+dataquality
+outlierdetection
+
+## Descriptive Plots
+
+agepyramid
+alluvial
+vartree
+venn
+
+## Comparisons
+
+chisqposttest
+crosstable
+
+## Data Preparation
+
+categorize
+
+# jjstatsplot
+
+## All-In-One
+
+statsplot2
+
+## Categorical × Categorical
+
+jjbarstats
+jjpiestats
+jjsegmentedtotalbar
+
+## Categorical × Continuous
+
+advancedraincloud
+jjbetweenstats
+jjdotchart
+jjdotplotstats
+jjwithinstats
+lollipop
+raincloud
+
+## Continuous × Continuous
+
+hullplot
+jjcorrmat
+jjscatterstats
+
+## Distribution
+
+jjhistostats
+jjridges
+jwaffle
+
+## Lines / Network
+
+linechart
+jjarcdiagram
+
+# jsurvival
+
+## ClinicoPath Survival
+
+multisurvival
+singlearm
+survival
+survivalcont
+
+## Data Preparation
+
+datetimeconverter
+outcomeorganizer
+timeinterval
+
+## General Statistics
+
+oddsratio
+
+# meddecide
+
+## Agreement
+
+agreement
+
+## Decision
+
+decision
+decisioncombine
+decisioncompare
+nogoldstandard
+
+## Decision Calculators
+
+cotest
+decisioncalculator
+sequentialtests
+
+## ROC
+
+enhancedROC
+psychopdaROC
+
+## Prediction Models
+
+lassologistic
+
+## Decision Curve Analysis
+
+decisioncurve
+
+
+## Power (menuGroup: Power)
+
+kappaSizeCI
+kappaSizeFixedN
+- kappaSizePower
+
+
+
+# OncoPath
+
+## IHC Heterogeneity
+
+- ihcheterogeneity
+
+## Diagnostic Meta-Analysis
+
+- diagnosticmeta
+
+## Visualization
+
+- swimmerplot
+
+- waterfall
+
+# check articles
 
 source .venv/bin/activate
 
@@ -3764,3 +3910,90 @@ show an item that should be hidden, so nothing errors:
 
 Fix pattern: set `visible: false` in the .r.yaml and drive it from the backend
 with `self$results$<item>$setVisible(TRUE/FALSE)`.
+
+## jmvcore::format underscored-placeholder sweep — DONE 2026-08-22
+
+Swept all 10 candidate files. Real bugs found and fixed in dendrogram.b.R (6)
+and advancedraincloud.b.R (8) — paired placeholder+argument renames, zero
+residuals, suites confirm behavior-neutral. The other 8 files were false
+alarms: every hit sits inside glue::glue(), which handles underscores fine.
+Detection rule going forward: grep hits must be paired with a jmvcore::format
+context check. Memory: reference_jmvcore_format_no_underscore_placeholders.md
+
+NOTE (pre-existing, unrelated to the sweep — verified by baseline run without
+the sweep edits): test-dendrogram.R FAIL 11/12, test-dendrogram-critical-fixes.R
+FAIL 5 + ERROR 13, test-advancedraincloud.R FAIL 4. dendrogram especially needs
+its own audit/fix pass.
+
+## dendrogram + advancedraincloud pre-existing failures — DONE 2026-08-22
+
+dendrogram: universal crash fixed (Output option `clustOutput` had no matching
+.r.yaml results item) + deleteRows guards + warning->notice; 50/50 green.
+advancedraincloud: stale snapshots accepted after diff review; 210/210 green.
+raincloud sibling: 2 test ERRORs from bare format() masked by jmvcore::format
+under load_all -> base::format; 110/110 green.
+
+## diagnosticmeta fix pass (critical/integration/statistical/code-quality) — DONE 2026-08-22
+
+All audit categories fixed; suite 266 pass / 0 fail / 0 error (was 206/1/3).
+BREAKING_CHANGE: zero_cell_correction option keys renamed
+`treatment_arm`->`zero_cells`, `empirical`->`reciprocal_n` (old names were
+Sweeting-2004 terms for procedures the code does not implement).
+Deferred (out of scope, this function):
+- [ ] i18n wrap: diagnosticmeta.b.R still has ~1 `.()` call in 3300 lines;
+      run /prepare-translation diagnosticmeta (catalog refresh + wrap tables,
+      notes, notices, panels) as its own pass. Note: catalog.pot/en.po/tr.po
+      still index the DELETED option keys (treatment_arm/empirical titles) and
+      lack the renamed ones - the jmvtools::i18nUpdate refresh in that pass
+      clears this.
+- [ ] The interpretation/about onboarding panels are long static HTML: consider
+      trimming to the house style used by newer analyses.
+- [ ] jamovi GUI smoke test after `jmvtools::prepare()` (menuGroup currently
+      OncoPathT for testing; restore to OncoPath after).
+
+## ihcheterogeneity check pass (/check-function, standard) — DONE 2026-08-23
+
+Suite 194 pass / 0 fail / 0 error (was 175 pass + 11 hidden ERRORs, incl. a
+test file that never ran due to a nonexistent CSV). Fixed: spatial-plot CV
+pooled between-patient spread (contradicted its own table); Kruskal-Wallis
+pseudo-replication (now per-case means, pinned vs kruskal.test); duplicate
+rows on data-edit re-runs (clear-first on 6 tables); reference+1-region design
+un-blocked (classic biopsy-vs-resection agreement; ICC(2,1) pinned exact vs
+psych); zero-row blank screen -> reject; silent-empty spatial tables -> notes;
+power-without-reference silent no-op -> warning; hardcoded 15/30 CV bands ->
+user threshold everywhere (plot lines included); false "adjusted for sampling
+design effects" claim removed; Html setNote latent crash; theme-unsafe white
+cards; stale .icc_consistency; dead renderer warning()s.
+Follow-up fix pass 2026-08-23 (suite 209 pass / 0 fail / 0 error):
+- [x] report_sentences + assumptions gated behind new Bool options
+      showReportSentences / showAssumptions (default false); generation skipped
+      when off.
+- [x] BREAKING_CHANGE: analysis_type level 'bias' removed (merged into
+      'reproducibility', retitled "Reproducibility & Bias Assessment") - the
+      two were computationally identical.
+- [x] sampling_strategy pruned from every clearWith except interpretation
+      (it shapes prose only).
+Review pass 2026-08-23 (suite 215 pass / 0 fail / 0 error; checktor clean,
+lintr bug-set clean, all gates clean; 3-agent adversarial verification):
+- [x] Key Findings CV + correlation grades were still on fixed constants
+      (15/30, 0.80/0.60) - now on the user thresholds like every other panel;
+      spatial table/plot bands likewise; cross-panel pin at thr 5/20/50.
+- [x] Regions with <2 cases now listed in a spatial-table note; header text no
+      longer says "simulated biopsy samples"; UI label/enable touches.
+- [ ] i18n: 10 `.()` wraps in ~2550 lines - needs its own /prepare-translation
+      pass (po catalogs also still index the removed 'bias' level title).
+- [ ] Restore menuGroup: OncoPath after GUI testing (currently OncoPathT).
+
+
+## kappaSize family — filed from the kappaSizePower release review (2026-08-23)
+
+- [ ] [statistics] `kappaSizeCI` still detects sparse cells by grepping kappaSize's marginal
+      `props[i] * n < 5` warning (`kappaSizeFixedN` fixed 2026-08-23: its `.CalcIT` is the same
+      chi-square over `P0..Pn` agreement cells, sparse judged at kappaL). Verify `CIBinary`'s
+      `.CalcIT` the same way, then port `.gofCells()`.
+- [ ] [ui] `jamovi/js/kappasizeci.js` is a lowercase rename leftover that nothing binds; wire as
+      `kappaSizeCI.events.js` like its two siblings, or delete.
+- [ ] [tooling] `tools/ui_harness/render_ui.sh` cannot render any analysis that has an events
+      file (`require is not defined` — the harness serves the compiled `.src.js` without
+      bundling). `waterfall`, `agreement`, and all three kappaSize analyses fail identically;
+      a data-free calculator without events (`evalue`) renders fine.

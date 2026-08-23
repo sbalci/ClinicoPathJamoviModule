@@ -78,14 +78,14 @@ test_that("ihcheterogeneity handles reproducibility-focused analysis", {
   expect_s3_class(result, "ihcheterogeneityResults")
 })
 
-test_that("ihcheterogeneity handles bias-focused analysis", {
+test_that("ihcheterogeneity rejects the removed bias focus level and runs the merged one", {
   result <- ihcheterogeneity(
     data = ihcheterogeneity_test,
     wholesection = "wholesection",
     biopsy1 = "biopsy1",
     biopsy2 = "biopsy2",
     biopsy3 = "biopsy3",
-    analysis_type = "bias"
+    analysis_type = "reproducibility"
   )
 
   expect_s3_class(result, "ihcheterogeneityResults")

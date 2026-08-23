@@ -176,7 +176,7 @@ NULL
 #' @description
 #' Diagnostic test accuracy meta-analysis data with intentional zero cells
 #' in several studies, designed for testing zero-cell correction methods
-#' (none, constant, treatment_arm, empirical).
+#' (none, constant, zero_cells, reciprocal_n).
 #'
 #' @format A data frame with 20 observations and 7 variables:
 #' \describe{

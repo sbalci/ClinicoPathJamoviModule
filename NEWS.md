@@ -1,5 +1,86 @@
 # ClinicoPath News
 
+# ClinicoPath 1.0.6.04 -- OncoPath release (2026-08-23)
+
+The four OncoPath analyses (`waterfall`, `swimmerplot`, `diagnosticmeta`, `ihcheterogeneity`) were
+each taken through audit, fix, review and release-review, with every changed statistic re-derived
+against an independent implementation by an adversarial verification pass. The full account is in
+the OncoPath repository's `NEWS.md` under 1.0.6.04; the headlines:
+
+**Two breaking option changes.**`diagnosticmeta` renames the zero-cell correction keys
+`treatment_arm` -> `zero_cells` and `empirical` -> `reciprocal_n`, because the old names denote
+Sweeting et al. (2004) procedures the code never implemented. `ihcheterogeneity` removes the `bias`
+analysis focus (computationally identical to `reproducibility`, which is retitled "Reproducibility &
+Bias Assessment") and makes its report-sentences and methodology panels opt-in.
+
+**`diagnosticmeta`.**The Holling SROC table tested theta against 0 instead of the chance value 1 and
+Wald-tested a variance on its boundary; the bivariate and SROC models were fitted under different
+continuity corrections; prediction intervals used z instead of t on k-2 df; meta-regression lacked
+the Knapp-Hartung adjustment and never said it was univariate; the Deeks funnel plot silently
+dropped the zero-cell studies its own test retained. All fixed. Warnings now live in a dedicated
+Notices panel that is rebuilt every run instead of accumulating below the onboarding text, per-study
+Wilson intervals joined the studies table, and the between-study variance components are reported.
+
+**`ihcheterogeneity`.**The spatial plot measured between-patient spread while the table beside it
+measured within-case heterogeneity; the Kruskal-Wallis compartment test counted 4-5 non-independent
+values per patient; the classic biopsy-versus-whole-section design was rejected outright; and four
+panels graded the same coefficient of variation with four different hard-coded bands. All fixed and
+pinned against `psych::ICC` and `stats::kruskal.test`. Tables no longer duplicate rows on data-cell
+edits, and every silent-empty path now explains itself.
+
+**`swimmerplot` and `waterfall`.**Response rates use the RECIST-evaluable population as denominator
+in both; swimmerplot's datetime events were shifted twice and its median follow-up now uses reverse
+Kaplan-Meier; waterfall's warnings are guaranteed to render even when the analysis stops early.
+
+**Elsewhere in this cycle.**`reportcat` moved to procedural visibility for its onboarding panel.
+`dendrogram` crashed on every run because its "Save cluster membership" output had no matching
+results item; fixed, along with its silent `warning()` paths. `advancedraincloud` and `dendrogram`
+printed literal `{placeholder}` tokens because `jmvcore::format()` ignores underscored names; a
+module-wide sweep found those two to be the only real cases. A stale `OncoPath_1.0.0.tar.gz` was
+removed from the OncoPath repository and `.Rbuildignore` now excludes tarballs in every submodule.
+
+**`kappaSizePower`.**Reviewed end to end against `kappaSize` 1.2; the numbers were already exact,
+the caveats around them were not. The sparse-cell warning -- kappaSize's own and the module's
+first copy of it -- tested the outcome-category marginals (`p * N < 5`), but the method is a
+chi-square over *agreement patterns* (exactly j of n raters positive), whose middle cells carry a
+`(1 - kappa0)` factor and empty out long before any marginal does: six raters at 5% prevalence
+gave N = 316 with no warning while three of the seven cells had expected counts of 0.41, 0.016
+and 0.0003. The Notes panel now computes the goodness-of-fit cells in closed form for every design --
+binary with any number of raters, and the Dirichlet-multinomial product
+`prod (p(1-k) + ik) / ((1-k) + ik)` for 3-5 categories, which reproduces kappaSize's
+polynomials to 1e-15 (a release-review verifier caught the first draft falling back to marginals
+for multi-rater multi-category designs, where a 4-category, 6-rater study at N = 99 had four of
+five cells below 5 and no warning). New warnings cover the designs the option ranges still admit -- N below 10, power
+below 0.5, a kappa gap under 0.05 (the "typed my expected kappa as kappa1" transposition), and
+N above 2000, which names all three drivers (rare finding, small gap, high power) rather than
+blaming the gap when a 1% prevalence is the cause -- and the methodology block states that this sizes the unweighted nominal kappa,
+not a weighted kappa for ordered grades. The protocol sentence no longer calls the first of two
+proportions "the prevalence of the trait"; the binary sparse remedy says enrich the case series
+rather than collapse categories; non-breaking spaces pasted from Word or Excel are accepted in
+all three kappaSize analyses. Every user-facing string is wrapped for translation and the
+Turkish catalog carries the 63 new entries. A runnable example, a distinct description, a
+readable `props` label, and the kappaSize reference year (2018, not 2022) round it off. The
+long-dead `jamovi/js/kappasizepower.js` (lowercase since the rename, and never bound from the
+`.u.yaml`) is now `kappaSizePower.events.js` and wired to the outcome-levels control, so changing
+the number of levels fills the proportions field with a template of the right length instead of
+leaving a count error. The three
+kappaSize release-review tests still read `kappasizepower.a.yaml`-style lowercase paths after the
+camelCase rename -- fine on macOS, a failure on any case-sensitive file system -- and now read the
+real filenames.
+
+**`kappaSizeFixedN`.**The same goodness-of-fit sparse-cell rule, evaluated at the lower bound the
+engine returns (its chi-square denominators are `n * P_j(kappaL)`): six raters at 5% prevalence
+with n = 100 is exactly `props * n = 5`, so kappaSize's own warning stayed silent while the
+pattern cells at kappa_L = 0.195 were 2.5 / 0.17 / 0.007 / 0 / 0.98. The closed forms match every
+`FixedN*` engine's `.CalcIT` for 2-6 raters to 1e-11. The dead lowercase `kappasizefixedn.js` is
+now `kappaSizeFixedN.events.js`, bound to the outcome-levels control; the `props` option has a
+readable title, a clean default and a real description; the help page gains kappaSize's own
+`FixedNBinary` example; the engine's repeated per-category warning line is kept once.
+
+**Process.**Test tallies now count `error` as well as `failed`: three suites that reported zero
+failures were hiding 11-13 errors each (a dead CSV reference, a library name that made testthat skip
+an entire file, `asDF()` called as a function). All are green with error counting.
+
 # ClinicoPath 1.0.6 -- Lasso-Cox regression prepared for release (2026-08-20)
 
 `lassocox` is the first of the penalized Cox family to be readied for the production Survival menu.

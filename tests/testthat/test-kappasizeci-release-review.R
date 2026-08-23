@@ -112,9 +112,9 @@ test_that("the explanation does not claim the interval width drives the sample s
 
 
 test_that("every declared option is read by the backend", {
-    a_yaml <- readLines("../../jamovi/kappasizeci.a.yaml", warn = FALSE)
+    a_yaml <- readLines("../../jamovi/kappaSizeCI.a.yaml", warn = FALSE)
     declared <- sub("^    - name: ", "", grep("^    - name: [A-Za-z0-9_]+$", a_yaml, value = TRUE))
-    backend <- paste(readLines("../../R/kappasizeci.b.R", warn = FALSE), collapse = "\n")
+    backend <- paste(readLines("../../R/kappaSizeCI.b.R", warn = FALSE), collapse = "\n")
     unread <- declared[!vapply(declared, function(o)
         grepl(paste0("options\\$", o, "\\b"), backend), logical(1))]
     expect_equal(unread, character(0))

@@ -19,11 +19,13 @@ reportcatClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             # select variables.
             self$results$aboutAnalysis$setContent(private$.generateAboutContent())
 
-            # Clear everything written by the previous run. clearWith only reacts
+            # Hide everything written by the previous run. clearWith only reacts
             # to OPTIONS, and `vars` is the only option here, so a change in the
             # DATA (row filter, edited cells) does not clear anything: without
             # this, a validation early-return below would leave the previous
             # run's fully formed numbers on screen underneath an error message.
+            # Hiding (not setContent("")) is the reset mechanism, so a panel
+            # that is not repopulated never renders a stray empty heading.
             private$.resetOutputs()
 
             # Check if any variables have been selected.
@@ -44,6 +46,7 @@ reportcatClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         variable_types_note = .("Only Nominal, Ordinal, or Categorical variables (factors) are allowed.")
         )
                 self$results$todo$setContent(todo)
+                self$results$todo$setVisible(TRUE)
                 return()
             } else {
 
@@ -74,17 +77,11 @@ reportcatClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     return()
                 }
                 
-                # Check for variables that don't exist in the data
-                missing_vars <- myvars[!myvars %in% names(mydata)]
-                if (length(missing_vars) > 0) {
-                    self$results$error$setContent(glue::glue("<div style='padding: 15px; background-color: rgba(216, 33, 50, 0.18); border: 1px solid #f5c6cb; border-radius: 4px; color: inherit;'><strong>{error_label}:</strong> {error_msg}: {vars}.</div>",
-                        error_label = .("Error"),
-                        error_msg = .("Variables not found in data"),
-                        vars = paste(htmltools::htmlEscape(missing_vars), collapse = ", ")))
-                    self$results$error$setVisible(TRUE)
-                    return()
-                }
-                
+                # No not-in-data check here: jmvcore rejects unknown variable
+                # names by name before .run() is entered (wrapper and GUI alike),
+                # so such a branch is unreachable - see the "handles missing
+                # variable names gracefully" regression test.
+
                 # Validate that selected variables are actually categorical
                 non_categorical <- myvars[!sapply(mydata[myvars], function(x) is.factor(x) || is.character(x))]
                 if (length(non_categorical) > 0) {
@@ -233,6 +230,11 @@ reportcatClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 summaries <- purrr::map(.x = myvars, .f = catsummary)
                 summary_text <- paste(summaries, collapse = "<br><br>")
                 self$results$text$setContent(summary_text)
+                self$results$text$setVisible(TRUE)
+
+                # The gt/gtExtras render below is the one expensive step; let
+                # jamovi poll for option/data changes before committing to it.
+                private$.checkpoint()
 
                 # RESTORED: Use gtExtras as intended - it works with categorical data too
                 plot_dataset <- tryCatch({
@@ -289,14 +291,17 @@ reportcatClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 })
                 
                 self$results$text1$setContent(plot_dataset)
-                
+                self$results$text1$setVisible(TRUE)
+
                 # Add clinical interpretation
                 clinical_interpretation <- private$.generateClinicalInterpretation(myvars, mydata)
                 self$results$clinicalSummary$setContent(clinical_interpretation)
+                self$results$clinicalSummary$setVisible(TRUE)
 
                 # Add copy-ready report sentences
                 report_sentences <- private$.generateReportSentences(myvars, mydata)
                 self$results$reportSentences$setContent(report_sentences)
+                self$results$reportSentences$setVisible(TRUE)
 
                 # (aboutAnalysis is populated at the top of .run(), before the
                 # early-return branches, because it is declared visible: true.)
@@ -317,21 +322,25 @@ reportcatClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 }
                 
                 self$results$assumptions$setContent(assumptions_content)
+                self$results$assumptions$setVisible(TRUE)
             }
         },
 
-        # Clear every content item at the top of .run(). Result items are only
+        # Hide every managed panel at the top of .run(). Result items are only
         # auto-cleared by clearWith, which watches OPTIONS - and `vars` is the
         # only option this analysis has. Without an explicit reset, editing the
         # data or applying a row filter leaves the previous run's summaries on
         # screen while a validation branch prints an error above them.
+        # Visibility is the whole mechanism: every panel is declared
+        # `visible: false` in the .r.yaml, is hidden here, and is shown only by
+        # a populate path that has just called setContent() with fresh content
+        # - so nothing stale and no stray empty heading can ever render.
+        # (`visible: (!vars)` is not an option: a leading `!` fails jmvcore's
+        # visible-expression routing and the item becomes ALWAYS visible.)
         .resetOutputs = function() {
             for (item in c("todo", "text", "text1", "clinicalSummary",
-                           "reportSentences", "assumptions")) {
-                self$results[[item]]$setContent("")
-            }
-            for (item in c("error", "dataWarnings")) {
-                self$results[[item]]$setContent("")
+                           "reportSentences", "assumptions",
+                           "error", "dataWarnings")) {
                 self$results[[item]]$setVisible(FALSE)
             }
         },

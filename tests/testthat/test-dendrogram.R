@@ -67,8 +67,10 @@ test_that("dendrogram validates binary distance", {
     analysis <- dendrogramClass$new(options = options, data = data)
     expect_error(analysis$run(), NA)
 
-    # Should have an error message in clusterInfo
-    expect_match(analysis$results$clusterInfo$content, "Binary distance requires variables coded as 0/1 only")
+    # The error message goes to the notices panel (the module's messaging
+    # channel), not clusterInfo
+    expect_match(paste(analysis$results$notices$content, collapse = ""),
+                 "Binary distance requires variables coded as 0/1 only")
 })
 
 test_that("dendrogram handles heatmap plot", {

@@ -337,7 +337,8 @@ test_that("relative display anchors each PATIENT at 0, not each row", {
         v <- grab(mode)
         expect_equal(unname(v[["Total Person-Time"]]), 35, tolerance = 1e-8,
                      info = mode)
-        expect_equal(unname(v[["Mean Follow-up"]]), 17.5, tolerance = 1e-8,
+        # ("Mean Follow-up" row was dropped: identical statistic to Mean Duration)
+        expect_equal(unname(v[["Mean Duration"]]), 17.5, tolerance = 1e-8,
                      info = mode)
         expect_equal(unname(v[["Median Duration (observed)"]]), 17.5,
                      tolerance = 1e-8, info = mode)
@@ -494,7 +495,9 @@ test_that("datetime multi-episode data is invariant to timeDisplay", {
              milestone1Name = "M", personTimeAnalysis = TRUE)
         a <- ClinicoPath:::swimmerplotClass$new(options = o, data = d); a$run()
         v <- stats::setNames(a$results$summary$asDF[[2]], a$results$summary$asDF[[1]])
-        list(fu = unname(v[["Mean Follow-up"]]),
+        # ("Mean Follow-up" was dropped from the table: it duplicated
+        # "Mean Duration", the identical statistic under a second name.)
+        list(fu = unname(v[["Mean Duration"]]),
              pt = unname(v[["Total Person-Time"]]),
              ms = a$results$milestoneTable$asDF)
     }
@@ -560,4 +563,118 @@ test_that("the fallback plot reports the error that actually occurred", {
     p <- a$.__enclos_env__$private$.createFallbackPlot(pd, error_message = "BOOM-XYZ")
 
     expect_match(p$labels$subtitle, "BOOM-XYZ")
+})
+
+# ═══════════════════════════════════════════════════════════
+# Regression tests from the 2026-08 full audit fixes
+# ═══════════════════════════════════════════════════════════
+
+test_that("datetime + relative display keeps event markers (no double shift)", {
+    # Events were rebased calendar-aware, then shifted AGAIN by the anchor's raw
+    # epoch value, going hugely negative and being deleted by the window filter -
+    # every event marker silently vanished in the DEFAULT display with dates.
+    d <- data.frame(id = c("D1", "D2"), sd = c("2020-01-01", "2020-02-01"),
+                    ed = c("2020-07-01", "2020-08-01"),
+                    ev = factor(c("Scan", "Scan")),
+                    evd = c("2020-03-01", "2020-04-01"), stringsAsFactors = FALSE)
+    r <- ClinicoPath::swimmerplot(data = d, patientID = "id", startTime = "sd",
+                                  endTime = "ed", timeType = "datetime",
+                                  dateFormat = "ymd", timeUnit = "months",
+                                  timeDisplay = "relative",
+                                  showEventMarkers = TRUE, eventVar = "ev",
+                                  eventTimeVar = "evd")
+    ev <- r$plot$state$event_data
+    expect_equal(nrow(ev), 2)
+    expect_equal(unname(ev$time), c(2, 2), tolerance = 1e-6)  # 2 months after each start
+    expect_equal(nrow(r$eventMarkerTable$asDF), 1)            # one label, n = 2
+})
+
+test_that("calendar-dated milestones on a numeric timeline are refused, not epoch-anchored", {
+    # interval(<numeric anchor>, <Date>) treated the anchor as 1970 epoch seconds
+    # and published ~600-month milestone medians as real statistics.
+    d <- data.frame(id = c("R1", "R2"), s = c(0, 0), e = c(10, 20),
+                    m = c("2020-03-15", "2020-05-15"), stringsAsFactors = FALSE)
+    r <- ClinicoPath::swimmerplot(data = d, patientID = "id", startTime = "s",
+                                  endTime = "e", milestone1Name = "M",
+                                  milestone1Date = "m")
+    expect_equal(nrow(r$milestoneTable$asDF), 0)
+    expect_match(paste(r$notices$content, collapse = ""),
+                 "calendar dates on a numeric timeline")
+})
+
+test_that("export tables do not duplicate rows across reruns", {
+    d <- data.frame(id = sprintf("P%02d", 1:10), s = 0, e = 1:10)
+    o <- ClinicoPath:::swimmerplotOptions$new(patientID = "id", startTime = "s",
+         endTime = "e", exportTimeline = TRUE, exportSummary = TRUE)
+    a <- ClinicoPath:::swimmerplotClass$new(options = o, data = d)
+    a$run(); a$run()
+    expect_equal(nrow(a$results$timelineData$asDF), 10)
+    expect_equal(nrow(a$results$summaryData$asDF),
+                 length(unique(a$results$summaryData$asDF$metric)))
+})
+
+test_that("multi-episode patients keep later-episode milestones and events", {
+    d <- data.frame(id = c("M1", "M1", "M2"), s = c(0, 5, 0), e = c(3, 8, 10),
+                    mile = c(NA, 6, 2), ev = factor(rep("Scan", 3)),
+                    evt = c(1, 7, 4), stringsAsFactors = FALSE)
+    r <- ClinicoPath::swimmerplot(data = d, patientID = "id", startTime = "s",
+                                  endTime = "e", milestone1Name = "M",
+                                  milestone1Date = "mile",
+                                  showEventMarkers = TRUE, eventVar = "ev",
+                                  eventTimeVar = "evt")
+    # milestone recorded on M1's SECOND episode row must not be lost
+    expect_equal(r$milestoneTable$asDF$n_events[1], 2)
+    # event at t=7 lies inside M1's second episode; the old first-row end lookup
+    # (end = 3) dropped it
+    expect_equal(sum(r$eventMarkerTable$asDF$n_events), 3)
+})
+
+test_that("ORR/DCR use the RECIST-evaluable denominator with matching CIs and disclosure", {
+    d <- data.frame(id = sprintf("P%02d", 1:10), s = 0, e = 1:10,
+                    resp = factor(c("CR", "PR", "SD", "PD", "CR", "PR", "SD", "PD",
+                                    "NE", "weird")))
+    r <- ClinicoPath::swimmerplot(data = d, patientID = "id", startTime = "s",
+                                  endTime = "e", responseVar = "resp",
+                                  showCopyReady = TRUE)
+    am <- r$advancedMetrics$asDF
+    orr <- am[grepl("Objective Response Rate", am$metric_name), ]
+    ci <- stats::binom.test(4, 8)$conf.int * 100
+    expect_equal(orr$metric_value, 50)   # 4/8 evaluable, not 4/10
+    expect_equal(orr$confidence_interval, sprintf("%.1f - %.1f", ci[1], ci[2]))
+    nt <- paste(r$notices$content, collapse = "")
+    expect_match(nt, "excluded from the ORR and DCR denominators")
+    # copy-ready text agrees and contains no literal placeholders
+    cr <- gsub("<[^>]+>", " ", paste(r$copyReadyReport$content, collapse = ""))
+    expect_match(cr, "50.0% \\(4/8 RECIST-evaluable")
+    expect_false(grepl("\\{orr", cr))
+})
+
+test_that("an unparseable Date Format is named, not blamed on end < start", {
+    d <- data.frame(id = c("D1", "D2"), sd = c("2020-01-01", "2020-02-01"),
+                    ed = c("2020-07-01", "2020-08-01"), stringsAsFactors = FALSE)
+    r <- suppressWarnings(
+        ClinicoPath::swimmerplot(data = d, patientID = "id", startTime = "sd",
+                                 endTime = "ed", timeType = "datetime",
+                                 dateFormat = "dmy"))
+    expect_match(paste(r$notices$content, collapse = ""),
+                 "could be parsed as dates with the selected Date Format")
+})
+
+test_that("glossary and about populate even with an incomplete selection", {
+    o <- ClinicoPath:::swimmerplotOptions$new(showGlossary = TRUE, showAbout = TRUE)
+    a <- ClinicoPath:::swimmerplotClass$new(options = o, data = data.frame())
+    a$run()
+    expect_gt(nchar(paste(a$results$clinicalGlossary$content, collapse = "")), 100)
+    expect_gt(nchar(paste(a$results$aboutAnalysis$content, collapse = "")), 100)
+})
+
+test_that("ongoing arrow sits at the patient's latest end, decided by last status", {
+    d <- data.frame(id = c("A", "A", "B"), s = c(0, 5, 0), e = c(3, 9, 10),
+                    cs = c(0, 0, 1))   # A ongoing (censored), B completed
+    r <- ClinicoPath::swimmerplot(data = d, patientID = "id", startTime = "s",
+                                  endTime = "e", censorVar = "cs")
+    arrows <- r$plot$state$arrow_data
+    expect_equal(nrow(arrows), 1)
+    expect_equal(as.character(arrows$patient_id), "A")
+    expect_equal(arrows$x, 9)   # latest end, not the first censored episode's end
 })

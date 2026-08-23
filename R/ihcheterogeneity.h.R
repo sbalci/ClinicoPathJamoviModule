@@ -24,7 +24,9 @@ ihcheterogeneityOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6
             power_analysis = FALSE,
             generate_recommendations = FALSE,
             showSummary = FALSE,
-            showGlossary = FALSE, ...) {
+            showGlossary = FALSE,
+            showReportSentences = FALSE,
+            showAssumptions = FALSE, ...) {
 
             super$initialize(
                 package="ClinicoPath",
@@ -101,7 +103,6 @@ ihcheterogeneityOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6
                 analysis_type,
                 options=list(
                     "reproducibility",
-                    "bias",
                     "variability",
                     "comprehensive"),
                 default="comprehensive")
@@ -150,6 +151,14 @@ ihcheterogeneityOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6
                 "showGlossary",
                 showGlossary,
                 default=FALSE)
+            private$..showReportSentences <- jmvcore::OptionBool$new(
+                "showReportSentences",
+                showReportSentences,
+                default=FALSE)
+            private$..showAssumptions <- jmvcore::OptionBool$new(
+                "showAssumptions",
+                showAssumptions,
+                default=FALSE)
 
             self$.addOption(private$..wholesection)
             self$.addOption(private$..biopsy1)
@@ -170,6 +179,8 @@ ihcheterogeneityOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6
             self$.addOption(private$..generate_recommendations)
             self$.addOption(private$..showSummary)
             self$.addOption(private$..showGlossary)
+            self$.addOption(private$..showReportSentences)
+            self$.addOption(private$..showAssumptions)
         }),
     active = list(
         wholesection = function() private$..wholesection$value,
@@ -190,7 +201,9 @@ ihcheterogeneityOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6
         power_analysis = function() private$..power_analysis$value,
         generate_recommendations = function() private$..generate_recommendations$value,
         showSummary = function() private$..showSummary$value,
-        showGlossary = function() private$..showGlossary$value),
+        showGlossary = function() private$..showGlossary$value,
+        showReportSentences = function() private$..showReportSentences$value,
+        showAssumptions = function() private$..showAssumptions$value),
     private = list(
         ..wholesection = NA,
         ..biopsy1 = NA,
@@ -210,7 +223,9 @@ ihcheterogeneityOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6
         ..power_analysis = NA,
         ..generate_recommendations = NA,
         ..showSummary = NA,
-        ..showGlossary = NA)
+        ..showGlossary = NA,
+        ..showReportSentences = NA,
+        ..showAssumptions = NA)
 )
 
 ihcheterogeneityResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
@@ -251,22 +266,67 @@ ihcheterogeneityResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6
                 options=options,
                 name="interpretation",
                 title="Clinical Interpretation and Analysis Summary",
-                visible=TRUE))
+                visible=TRUE,
+                clearWith=list(
+                    "wholesection",
+                    "biopsy1",
+                    "biopsy2",
+                    "biopsy3",
+                    "biopsy4",
+                    "biopsies",
+                    "spatial_id",
+                    "cv_threshold",
+                    "correlation_threshold",
+                    "analysis_type",
+                    "sampling_strategy")))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="report_sentences",
                 title="Copy-Ready Report Sentences",
-                visible=TRUE))
+                visible="(showReportSentences)",
+                clearWith=list(
+                    "wholesection",
+                    "biopsy1",
+                    "biopsy2",
+                    "biopsy3",
+                    "biopsy4",
+                    "biopsies",
+                    "spatial_id",
+                    "cv_threshold",
+                    "correlation_threshold",
+                    "analysis_type")))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="assumptions",
                 title="Methodology & Assumptions",
-                visible=TRUE))
+                visible="(showAssumptions)",
+                clearWith=list(
+                    "wholesection",
+                    "biopsy1",
+                    "biopsy2",
+                    "biopsy3",
+                    "biopsy4",
+                    "biopsies",
+                    "spatial_id",
+                    "cv_threshold",
+                    "correlation_threshold",
+                    "analysis_type")))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="summary",
                 title="Summary (Plain-Language)",
-                visible=FALSE))
+                visible=FALSE,
+                clearWith=list(
+                    "wholesection",
+                    "biopsy1",
+                    "biopsy2",
+                    "biopsy3",
+                    "biopsy4",
+                    "biopsies",
+                    "spatial_id",
+                    "cv_threshold",
+                    "correlation_threshold",
+                    "analysis_type")))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="glossary",
@@ -286,8 +346,7 @@ ihcheterogeneityResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6
                     "spatial_id",
                     "cv_threshold",
                     "correlation_threshold",
-                    "analysis_type",
-                    "sampling_strategy"),
+                    "analysis_type"),
                 columns=list(
                     list(
                         `name`="metric", 
@@ -326,8 +385,7 @@ ihcheterogeneityResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6
                     "spatial_id",
                     "cv_threshold",
                     "correlation_threshold",
-                    "analysis_type",
-                    "sampling_strategy"),
+                    "analysis_type"),
                 columns=list(
                     list(
                         `name`="comparison", 
@@ -356,6 +414,7 @@ ihcheterogeneityResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6
                 options=options,
                 name="variancetable",
                 title="Variance Component Analysis",
+                visible="(variance_components || analysis_type:variability || analysis_type:comprehensive)",
                 clearWith=list(
                     "wholesection",
                     "biopsy1",
@@ -366,8 +425,7 @@ ihcheterogeneityResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6
                     "spatial_id",
                     "cv_threshold",
                     "correlation_threshold",
-                    "analysis_type",
-                    "sampling_strategy"),
+                    "analysis_type"),
                 columns=list(
                     list(
                         `name`="component", 
@@ -391,7 +449,7 @@ ihcheterogeneityResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6
                 options=options,
                 name="poweranalysistable",
                 title="Power Analysis Results",
-                visible="(power_analysis)",
+                visible="(power_analysis || analysis_type:comprehensive)",
                 clearWith=list(
                     "wholesection",
                     "biopsy1",
@@ -402,8 +460,7 @@ ihcheterogeneityResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6
                     "spatial_id",
                     "cv_threshold",
                     "correlation_threshold",
-                    "analysis_type",
-                    "sampling_strategy"),
+                    "analysis_type"),
                 columns=list(
                     list(
                         `name`="scenario", 
@@ -442,8 +499,7 @@ ihcheterogeneityResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6
                     "spatial_id",
                     "cv_threshold",
                     "correlation_threshold",
-                    "analysis_type",
-                    "sampling_strategy"),
+                    "analysis_type"),
                 columns=list(
                     list(
                         `name`="region", 
@@ -482,8 +538,7 @@ ihcheterogeneityResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6
                     "spatial_id",
                     "cv_threshold",
                     "correlation_threshold",
-                    "analysis_type",
-                    "sampling_strategy"),
+                    "analysis_type"),
                 columns=list(
                     list(
                         `name`="metric", 
@@ -527,8 +582,7 @@ ihcheterogeneityResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6
                     "spatial_id",
                     "cv_threshold",
                     "correlation_threshold",
-                    "analysis_type",
-                    "sampling_strategy"),
+                    "analysis_type"),
                 columns=list(
                     list(
                         `name`="test_type", 
@@ -558,7 +612,7 @@ ihcheterogeneityResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6
                 title="Regional Measurements Comparison",
                 width=700,
                 height=500,
-                visible="(show_variability_plots)",
+                visible="(show_variability_plots || analysis_type:variability || analysis_type:comprehensive)",
                 clearWith=list(
                     "wholesection",
                     "biopsy1",
@@ -569,8 +623,7 @@ ihcheterogeneityResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6
                     "spatial_id",
                     "cv_threshold",
                     "correlation_threshold",
-                    "analysis_type",
-                    "sampling_strategy"),
+                    "analysis_type"),
                 renderFun=".biopsyplot"))
             self$add(jmvcore::Image$new(
                 options=options,
@@ -578,7 +631,7 @@ ihcheterogeneityResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6
                 title="Sampling Variability Analysis",
                 width=600,
                 height=400,
-                visible="(show_variability_plots)",
+                visible="(show_variability_plots || analysis_type:variability || analysis_type:comprehensive)",
                 clearWith=list(
                     "wholesection",
                     "biopsy1",
@@ -589,8 +642,7 @@ ihcheterogeneityResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6
                     "spatial_id",
                     "cv_threshold",
                     "correlation_threshold",
-                    "analysis_type",
-                    "sampling_strategy"),
+                    "analysis_type"),
                 renderFun=".variabilityplot"))
             self$add(jmvcore::Image$new(
                 options=options,
@@ -598,7 +650,7 @@ ihcheterogeneityResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6
                 title="Spatial Heterogeneity Visualization",
                 width=600,
                 height=400,
-                visible="(show_variability_plots)",
+                visible="(show_variability_plots || analysis_type:variability || analysis_type:comprehensive)",
                 clearWith=list(
                     "wholesection",
                     "biopsy1",
@@ -609,8 +661,7 @@ ihcheterogeneityResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6
                     "spatial_id",
                     "cv_threshold",
                     "correlation_threshold",
-                    "analysis_type",
-                    "sampling_strategy"),
+                    "analysis_type"),
                 renderFun=".spatialplot"))}))
 
 ihcheterogeneityBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
@@ -661,7 +712,10 @@ ihcheterogeneityBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
 #'   heterogeneity differs significantly between compartments. Uses Levene's
 #'   test for variance equality and Kruskal-Wallis for distributional
 #'   differences.
-#' @param analysis_type primary focus of biopsy simulation analysis
+#' @param analysis_type Primary focus of the heterogeneity analysis. (The
+#'   former 'bias' level was merged into 'reproducibility': the two were
+#'   computationally identical - the bias table is always computed when a
+#'   reference is supplied.)
 #' @param sampling_strategy biopsy sampling strategy used
 #' @param cv_threshold Coefficient of variation threshold for acceptable
 #'   sampling variability. Typical clinical values: 15-25 percent for
@@ -683,6 +737,10 @@ ihcheterogeneityBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
 #'   analysis results
 #' @param showGlossary Display definitions of statistical terms (ICC, CV,
 #'   correlation)
+#' @param showReportSentences Display pre-formatted sentences ready for
+#'   clinical reports and publications
+#' @param showAssumptions Display analysis assumptions, data requirements, and
+#'   methodological considerations
 #' @return A results object containing:
 #' \tabular{llllll}{
 #'   \code{results$welcome} \tab \tab \tab \tab \tab Welcome screen shown when no variables selected \cr
@@ -730,7 +788,9 @@ ihcheterogeneity <- function(
     power_analysis = FALSE,
     generate_recommendations = FALSE,
     showSummary = FALSE,
-    showGlossary = FALSE) {
+    showGlossary = FALSE,
+    showReportSentences = FALSE,
+    showAssumptions = FALSE) {
 
     if ( ! requireNamespace("jmvcore", quietly=TRUE))
         stop("ihcheterogeneity requires jmvcore to be installed (restart may be required)")
@@ -774,7 +834,9 @@ ihcheterogeneity <- function(
         power_analysis = power_analysis,
         generate_recommendations = generate_recommendations,
         showSummary = showSummary,
-        showGlossary = showGlossary)
+        showGlossary = showGlossary,
+        showReportSentences = showReportSentences,
+        showAssumptions = showAssumptions)
 
     analysis <- ihcheterogeneityClass$new(
         options = options,

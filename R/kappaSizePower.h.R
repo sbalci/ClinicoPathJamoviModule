@@ -9,7 +9,7 @@ kappaSizePowerOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
             outcome = "2",
             kappa0 = 0.4,
             kappa1 = 0.6,
-            props = "0.20 , 0.80",
+            props = "0.20, 0.80",
             raters = "2",
             alpha = 0.05,
             power = 0.8, ...) {
@@ -44,7 +44,7 @@ kappaSizePowerOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
             private$..props <- jmvcore::OptionString$new(
                 "props",
                 props,
-                default="0.20 , 0.80")
+                default="0.20, 0.80")
             private$..raters <- jmvcore::OptionList$new(
                 "raters",
                 raters,
@@ -98,6 +98,7 @@ kappaSizePowerResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
     "kappaSizePowerResults",
     inherit = jmvcore::Group,
     active = list(
+        notices = function() private$.items[["notices"]],
         text1 = function() private$.items[["text1"]],
         text_summary = function() private$.items[["text_summary"]],
         text2 = function() private$.items[["text2"]]),
@@ -111,6 +112,18 @@ kappaSizePowerResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
                 refs=list(
                     "ClinicoPathJamoviModule",
                     "kappaSize"))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="notices",
+                title="Notes",
+                clearWith=list(
+                    "outcome",
+                    "kappa0",
+                    "kappa1",
+                    "props",
+                    "raters",
+                    "alpha",
+                    "power")))
             self$add(jmvcore::Preformatted$new(
                 options=options,
                 name="text1",
@@ -171,21 +184,49 @@ kappaSizePowerBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
 
 #' Power Approach for the Number of Subjects Required
 #'
-#' Power Analysis for Interobserver Agreement Analysis.
+#' Sample size for an interobserver agreement study sized to reject a null 
+#' kappa (kappa0) in favour of an alternative kappa (kappa1) at a given 
+#' two-sided significance level and power - the power approach of the 
+#' kappaSize package. Use kappaSizeCI for a target confidence-interval width, 
+#' and kappaSizeFixedN when the number of subjects is already fixed.
 #' 
-#' @param outcome Number of outcome level.
+#'
+#' @examples
+#' \donttest{
+#' # kappaSize::PowerBinary example: test kappa0 = 0.4 against kappa1 = 0.6
+#' # with a trait prevalence of 0.30, two raters, alpha 0.05 and power 0.80
+#' kappaSizePower(
+#'     outcome = "2",
+#'     kappa0 = 0.4,
+#'     kappa1 = 0.6,
+#'     props = "0.30",
+#'     raters = "2",
+#'     alpha = 0.05,
+#'     power = 0.80)
+#'}
+#' @param outcome Number of outcome levels (categories) of the rated variable.
 #' @param kappa0 The null hypothesis value of kappa - the level of agreement
 #'   the study tests against, versus the alternative kappa1. kappaSize documents
 #'   this argument as "the null hypothesis for the kappa hypothesis test". It is
 #'   NOT the anticipated value; kappaSizeCI and kappaSizeFixedN use kappa0 for
 #'   the anticipated value, which is a different quantity.
-#' @param kappa1 Expected value of kappa.
-#' @param props Proportions of outcome level.
-#' @param raters Number of raters.
-#' @param alpha Significance level.
-#' @param power Power.
+#' @param kappa1 The alternative hypothesis value of kappa - the level of
+#'   agreement the study should be able to detect against kappa0 (kappaSize:
+#'   "the alternate hypothesis for the kappa hypothesis test").
+#' @param props Anticipated share of subjects in each outcome category as a
+#'   single string, separated by commas, semicolons or spaces, using a decimal
+#'   point, and summing to 1 (for example "0.20, 0.80" for a finding present in
+#'   one case in five). For a binary outcome a single prevalence is enough.
+#'   Enter exactly one value per outcome level otherwise.
+#' @param raters Number of raters who will each rate every subject (2 to 6).
+#' @param alpha Two-sided significance level (capped at 0.20; must be below
+#'   the power).
+#' @param power Probability of rejecting kappa0 when the true agreement is
+#'   kappa1 (1 - type II error). Conventional values are 0.80 or 0.90; must
+#'   exceed alpha.
 #' @return A results object containing:
 #' \tabular{llllll}{
+#'   \code{results$notices} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$text1} \tab \tab \tab \tab \tab a preformatted \cr
 #'   \code{results$text_summary} \tab \tab \tab \tab \tab a preformatted \cr
 #'   \code{results$text2} \tab \tab \tab \tab \tab a preformatted \cr
@@ -196,7 +237,7 @@ kappaSizePower <- function(
     outcome = "2",
     kappa0 = 0.4,
     kappa1 = 0.6,
-    props = "0.20 , 0.80",
+    props = "0.20, 0.80",
     raters = "2",
     alpha = 0.05,
     power = 0.8) {

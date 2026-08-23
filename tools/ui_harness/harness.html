@@ -1,0 +1,47 @@
+<!doctype html><html><head><meta charset="utf-8"></head><body>
+<script>
+const name = new URLSearchParams(location.search).get('ui') || 'decisioncurve';
+const columns = [
+  {name:'outcome', id:1, measureType:'nominal', dataType:'text', columnType:'data'},
+  {name:'prob1', id:2, measureType:'continuous', dataType:'decimal', columnType:'data'},
+  {name:'prob2', id:3, measureType:'continuous', dataType:'decimal', columnType:'data'},
+  {name:'rule', id:4, measureType:'nominal', dataType:'text', columnType:'data'}];
+let reqId = 1; const pending = {};
+function send(frame, msgType, ...args){
+  const id = reqId++;
+  return new Promise((res, rej) => { pending[id] = {res, rej};
+    frame.contentWindow.postMessage({fRequestID:id, msgType, namespace:'opt1', args}, '*'); });
+}
+const frame = document.createElement('iframe'); frame.name='opt1'; frame.src='analysisui.html';
+frame.style.width='600px'; frame.style.height='900px'; document.body.appendChild(frame);
+// surface iframe errors (same origin)
+frame.addEventListener('load', () => {
+  frame.contentWindow.addEventListener('error', e => console.log('HARNESS-IFRAME-ERROR: ' + e.message + ' @ ' + e.filename + ':' + e.lineno + '\n' + (e.error && e.error.stack)));
+  frame.contentWindow.addEventListener('unhandledrejection', e => console.log('HARNESS-IFRAME-REJECTION: ' + (e.reason && (e.reason.stack || e.reason))));
+});
+window.addEventListener('message', async ev => {
+  const m = ev.data; if (!m || m.namespace !== 'opt1') return;
+  if (m.fResponseID) { const p = pending[m.fResponseID]; if (p) { m.success ? p.res(m.result) : p.rej(m.error); delete pending[m.fResponseID]; console.log('HARNESS: response to', m.fResponseID, m.success ? 'ok' : ('ERR ' + JSON.stringify(m.error))); } return; }
+  const respond = (result) => frame.contentWindow.postMessage({fResponseID:m.fRequestID, namespace:'opt1', success:true, result}, '*');
+  console.log('HARNESS: child request', m.msgType, JSON.stringify(m.args).slice(0,200));
+  if (m.msgType === 'frameDocumentReady') {
+    respond(null);
+    const def = await (await fetch(name + '.js')).text();
+    const locale = {locale_data:{messages:{'':{lang:'en'}}}};
+    console.log('HARNESS: sending setOptionsDefinition');
+    await send(frame, 'setOptionsDefinition', def, null, null, '2.8.1', 1, 'default');
+    console.log('HARNESS: setOptionsDefinition resolved');
+    const opts = {};
+    await send(frame, 'initialiseOptions', {id:1, options:opts});
+    console.log('HARNESS: initialiseOptions resolved');
+    setTimeout(() => { const doc = frame.contentDocument;
+      console.log('HARNESS: placeholder present =', !!doc.querySelector('.placeholder-options'), '; title =', doc.querySelector('.silky-options-title').textContent.trim(), '; errors =', doc.querySelector('.jmv-options-error-list')?.textContent);
+      console.log('HARNESS-DONE'); }, 1500);
+  } else if (m.msgType === 'requestData') {
+    const a = m.args[0];
+    if (a.requestType === 'columns') a.columns = columns;
+    else if (a.requestType === 'column') { const c = columns.find(c => c.id === a.requestData.columnId || c.name === a.requestData.columnName); a.columnFound = !!c; if (c) for (const p of a.requestData.properties) a[p] = (p==='levels' ? [{label:'0',value:0},{label:'1',value:1}] : c[p]); }
+    respond(a);
+  } else { respond(true); }
+});
+</script></body></html>

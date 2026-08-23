@@ -373,9 +373,13 @@ test_that("pairwise chunking threshold counts both table dimensions", {
     count_comparisons <-
         chisqposttestClass$private_methods$.pairwiseComparisonCount
 
-    expect_equal(count_comparisons(matrix(1, nrow = 2, ncol = 8)), 29)
-    expect_equal(count_comparisons(matrix(1, nrow = 6, ncol = 6)), 30)
-    expect_equal(count_comparisons(matrix(1, nrow = 2, ncol = 2)), 2)
+    # A dimension with fewer than 3 levels contributes no pairwise comparison:
+    # with 2 levels the only "pair" is the whole table, which the omnibus test
+    # already answers, and reporting it as a post-hoc row produced a
+    # Bonferroni-doubled p that could contradict the omnibus result.
+    expect_equal(count_comparisons(matrix(1, nrow = 2, ncol = 8)), 28)  # 0 + choose(8,2)
+    expect_equal(count_comparisons(matrix(1, nrow = 6, ncol = 6)), 30)  # choose(6,2) x 2
+    expect_equal(count_comparisons(matrix(1, nrow = 2, ncol = 2)), 0)   # nothing to decompose
 })
 
 test_that("chisqposttest source code quotes special variable names once", {

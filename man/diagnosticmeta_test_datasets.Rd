@@ -101,7 +101,7 @@ analysis.
 
 Diagnostic test accuracy meta-analysis data with intentional zero cells
 in several studies, designed for testing zero-cell correction methods
-(none, constant, treatment_arm, empirical).
+(none, constant, zero_cells, reciprocal_n).
 
 Large diagnostic test accuracy meta-analysis data with 50 studies,
 designed for testing computational efficiency, scalability, and

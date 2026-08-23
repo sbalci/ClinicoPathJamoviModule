@@ -135,3 +135,26 @@ test_that("the selected-variables note names every column the refit touches", {
             expect_match(notes[["refit"]], col, fixed = TRUE)
     }
 })
+
+test_that("the risk-group survival plot renders a readable number-at-risk table at the declared image size", {
+    skip_if_not_installed("ClinicoPath")
+    skip_if_not_installed("glmnet")
+    skip_if_not_installed("survminer")
+
+    # Regression: jamovi's 16-pt ggtheme was also applied to the risk table, whose
+    # margins/titles consumed the whole 25% strip at 600x400 and left an empty table.
+    res <- run_lassocox(lassocox_testdata(), lambda = "lambda.min", survival_plot = TRUE)
+    img <- res$survival_plot
+    expect_false(is.null(img$state))
+
+    png_file <- tempfile(fileext = ".png")
+    grDevices::png(png_file, width = 600, height = 400)
+    on.exit(grDevices::dev.off(), add = TRUE)
+    ok <- img$.render()
+    expect_true(ok)
+
+    # .survivalPlot prints and returns TRUE, so assert on the source: the risk table
+    # must NOT inherit jamovi's 16-pt ggtheme (tables.theme defaults to ggtheme).
+    src <- paste(deparse(ClinicoPath:::lassocoxClass$private_methods$.survivalPlot), collapse = "\n")
+    expect_match(src, "tables.theme = survminer::theme_cleantable()", fixed = TRUE)
+})

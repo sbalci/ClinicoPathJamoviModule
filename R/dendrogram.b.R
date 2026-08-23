@@ -64,9 +64,9 @@ dendrogramClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     }
 
                     private$.addNotice('ERROR', 'Missing Heatmap Packages', jmvcore::format(
-                        'Heatmap plot requires missing packages: {pkgs}. - Install with {install_cmd}. - Alternatively, select Linear, Circular, or Base plot type to continue.',
+                        'Heatmap plot requires missing packages: {pkgs}. - Install with {installCmd}. - Alternatively, select Linear, Circular, or Base plot type to continue.',
                         pkgs = paste(missing_heatmap, collapse = ", "),
-                        install_cmd = install_cmd
+                        installCmd = install_cmd
                     ))
                     return()
                 }
@@ -75,8 +75,8 @@ dendrogramClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             if (plotType %in% c("linear", "circular")) {
                 if (!requireNamespace("ggraph", quietly = TRUE) || !requireNamespace("igraph", quietly = TRUE)) {
                     private$.addNotice('WARNING', 'Missing Graph Packages', jmvcore::format(
-                        'ggraph and igraph packages recommended for {plot_type} plots. - Install with install.packages(c("ggraph", "igraph")). - Falling back to base plot.',
-                        plot_type = if (plotType == "linear") "linear" else "circular"
+                        'ggraph and igraph packages recommended for {plotType} plots. - Install with install.packages(c("ggraph", "igraph")). - Falling back to base plot.',
+                        plotType = if (plotType == "linear") "linear" else "circular"
                     ))
                 }
             }
@@ -168,14 +168,20 @@ dendrogramClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 names(groupData) <- rownames(clusterData)
                 
                 if (anyNA(groupData)) {
-                    warning("Group variable contains missing values and could not be matched for some observations used in clustering. These will be colored neutrally.")
+                    # A notice, not warning(): jamovi never surfaces R warnings
+                    # to the user, and the greyed-out leaves need an explanation.
+                    private$.addNotice('WARNING', .("Unmatched group values"),
+                        sprintf(
+                            .("%d observation(s) used in clustering have a missing or unmatched group value and are colored neutrally (grey) rather than being assigned to a group."),
+                            sum(is.na(groupData))))
                 }
             }
             
-            # Fill summary table
+            # Fill summary table. deleteRows() is the real jmvcore API - the old
+            # "clearRows" guard referenced a method that never existed, so rows
+            # duplicated across reruns not covered by clearWith.
             summaryTable <- self$results$summary
-            if ("clearRows" %in% names(summaryTable))
-                summaryTable$clearRows()
+            summaryTable$deleteRows()
             for (var in vars) {
                 varData <- clusterData[[var]]
                 summaryTable$addRow(rowKey = var, values = list(
@@ -216,8 +222,10 @@ dendrogramClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             effectiveClusters <- max(1, min(nClusters, maxClusters))
             clusterMembership <- stats::cutree(hclustResult, k = effectiveClusters)
 
-            # Save cluster membership to dataset if requested
-            if (self$results$clustOutput$isNotFilled()) {
+            # Save cluster membership to dataset if requested (option-gated,
+            # like every other Output export in the module)
+            if (isTRUE(self$options$clustOutput) &&
+                self$results$clustOutput$isNotFilled()) {
                 # Create full length vector with NAs
                 fullClusterMembership <- rep(NA, nrow(data))
                 # Assign clusters to complete cases
@@ -227,8 +235,10 @@ dendrogramClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             }
 
             clusterSummary <- self$results$clusterSummary
-            if ("clearRows" %in% names(clusterSummary))
-                clusterSummary$clearRows()
+            # deleteRows() (the real jmvcore API - "clearRows" never existed, so
+            # the old guard never fired and rows duplicated across reruns not
+            # covered by clearWith)
+            clusterSummary$deleteRows()
 
             clusterCounts <- as.data.frame(table(clusterMembership), stringsAsFactors = FALSE)
             names(clusterCounts) <- c("cluster", "n")
@@ -255,8 +265,8 @@ dendrogramClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
                 severity <- if (n_clustered < 10) "very small" else "small"
                 private$.addNotice(notice_type, 'Small Sample Size', jmvcore::format(
-                    '{severity_cap} sample size (n={n}) for hierarchical clustering. - Clusters may be unstable with fewer than 30 observations. - Dendrogram structure and cluster assignments should be interpreted cautiously. - Consider collecting additional data or using this as exploratory analysis only.',
-                    severity_cap = tools::toTitleCase(severity),
+                    '{severityCap} sample size (n={n}) for hierarchical clustering. - Clusters may be unstable with fewer than 30 observations. - Dendrogram structure and cluster assignments should be interpreted cautiously. - Consider collecting additional data or using this as exploratory analysis only.',
+                    severityCap = tools::toTitleCase(severity),
                     n = n_clustered
                 ))
             }
@@ -334,10 +344,10 @@ dendrogramClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
             # Success Completion Notice
             private$.addNotice('INFO', 'Analysis Complete', jmvcore::format(
-                'Hierarchical clustering completed successfully. - {n_obs} observations clustered using {n_vars} variables. - {n_clust} cluster{s} identified. - Distance: {dist}, Linkage: {link}. - Review dendrogram and cluster membership below.',
-                n_obs = nrow(clusterData),
-                n_vars = length(vars),
-                n_clust = effectiveClusters,
+                'Hierarchical clustering completed successfully. - {nObs} observations clustered using {nVars} variables. - {nClust} cluster{s} identified. - Distance: {dist}, Linkage: {link}. - Review dendrogram and cluster membership below.',
+                nObs = nrow(clusterData),
+                nVars = length(vars),
+                nClust = effectiveClusters,
                 s = if (effectiveClusters == 1) "" else "s",
                 dist = distanceMethod,
                 link = clusterMethod
