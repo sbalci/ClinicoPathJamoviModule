@@ -497,7 +497,7 @@ jjhistostatsBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             super$initialize(
                 package = "ClinicoPath",
                 name = "jjhistostats",
-                version = c(1,0,6),
+                version = c(1,0,7),
                 options = options,
                 results = jjhistostatsResults$new(options=options),
                 data = data,

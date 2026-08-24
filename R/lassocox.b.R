@@ -467,7 +467,7 @@ lassocoxClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                     }
                 }
 
-                X <- model.matrix(~ ., data = predictors[complete, , drop = FALSE])[, -1, drop = FALSE]
+                X <- .stripBackticks(model.matrix(~ ., data = predictors[complete, , drop = FALSE])[, -1, drop = FALSE])
                 if (ncol(X) == 0) {
                     jmvcore::reject(.("No valid predictors remaining after model-matrix encoding."))
                 }

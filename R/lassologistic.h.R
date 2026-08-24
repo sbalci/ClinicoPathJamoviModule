@@ -406,7 +406,8 @@ lassologisticResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                     "alpha",
                     "nfolds",
                     "standardize",
-                    "random_seed")))
+                    "random_seed",
+                    "showModelComparison")))
             self$add(jmvcore::Table$new(
                 options=options,
                 name="performance",
@@ -489,7 +490,9 @@ lassologisticResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                     "standardize",
                     "random_seed",
                     "scoringMaxPoints",
-                    "scoringMethod")))
+                    "scoringMethod",
+                    "scoreCutMethod",
+                    "scoreCutPoints")))
             self$add(jmvcore::Table$new(
                 options=options,
                 name="scoringPerformance",
@@ -516,7 +519,9 @@ lassologisticResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                     "standardize",
                     "random_seed",
                     "scoringMaxPoints",
-                    "scoringMethod")))
+                    "scoringMethod",
+                    "scoreCutMethod",
+                    "scoreCutPoints")))
             self$add(jmvcore::Table$new(
                 options=options,
                 name="methodComparison",
@@ -558,7 +563,9 @@ lassologisticResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                     "standardize",
                     "random_seed",
                     "scoringMaxPoints",
-                    "scoringMethod")))
+                    "scoringMethod",
+                    "scoreCutMethod",
+                    "scoreCutPoints")))
             self$add(jmvcore::Table$new(
                 options=options,
                 name="lookupTable",
@@ -598,7 +605,9 @@ lassologisticResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                     "standardize",
                     "random_seed",
                     "scoringMaxPoints",
-                    "scoringMethod")))
+                    "scoringMethod",
+                    "scoreCutMethod",
+                    "scoreCutPoints")))
             self$add(jmvcore::Table$new(
                 options=options,
                 name="validationTable",
@@ -732,17 +741,23 @@ lassologisticResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
             self$add(jmvcore::Html$new(
                 options=options,
                 name="lassoExplanation",
-                title="Understanding LASSO Logistic Regression",
+                title="Understanding Penalized Logistic Regression",
                 visible="(showExplanations)",
                 clearWith=list(
-                    "showExplanations")))
+                    "showExplanations",
+                    "penalty",
+                    "alpha")))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="methodologyNotes",
                 title="Methodology Notes",
                 visible="(showMethodologyNotes)",
                 clearWith=list(
-                    "showMethodologyNotes")))
+                    "showMethodologyNotes",
+                    "standardize",
+                    "scoreCutMethod",
+                    "scoreCutPoints",
+                    "scoringSystem")))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="clinicalGuidance",
@@ -836,7 +851,7 @@ lassologisticBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             super$initialize(
                 package = "ClinicoPath",
                 name = "lassologistic",
-                version = c(1,0,6),
+                version = c(1,0,7),
                 options = options,
                 results = lassologisticResults$new(options=options),
                 data = data,
@@ -860,7 +875,10 @@ lassologisticBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' @param outcome Binary outcome variable to classify. Can be factor or
 #'   numeric with exactly two observed values.
 #' @param outcomeLevel Level of outcome considered as the positive class
-#'   (event). For factor outcomes, if left empty the second level is used.
+#'   (event). In jamovi this may be left unset, in which case the second level
+#'   of a factor (or the larger of two numeric values) is treated as the event.
+#'   When calling from R the argument has no default and must be supplied; pass
+#'   NULL to get the same automatic choice.
 #' @param explanatory Variables to be considered for selection. At least 2
 #'   required. Constant variables are removed automatically.
 #' @param penalty Type of regularization penalty. LASSO (L1) produces sparse

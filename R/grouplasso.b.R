@@ -302,7 +302,7 @@ grouplassoClass <- R6::R6Class(
 
         .createDesignMatrix = function(pred_data, pred_vars) {
             # Convert factors to dummy variables and create design matrix
-            x_matrix <- model.matrix(~ . - 1, data = pred_data)
+            x_matrix <- .stripBackticks(model.matrix(~ . - 1, data = pred_data))
 
             # Preserve the assign attribute before any transformation
             assign_vec <- attr(x_matrix, "assign")

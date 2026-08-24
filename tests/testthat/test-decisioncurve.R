@@ -23,7 +23,10 @@ test_that("decisioncurve function works with basic parameters", {
   expect_no_error({
     result <- decisioncurve(
       data = test_data,
-      outcome = "Death",
+      # histopathology$Death is a character column with the levels "DOGRU"/"YANLIS";
+      # "1" never matched it, so every call below returned early on "Positive Outcome
+      # Level Required" and the assertions were testing an empty result.
+      outcome = "Outcome",
       outcomePositive = "1",
       models = "age_prob",
       decisionRuleVar = NULL,
@@ -34,7 +37,7 @@ test_that("decisioncurve function works with basic parameters", {
   # Test that function returns expected structure
   result <- decisioncurve(
     data = test_data,
-    outcome = "Death",
+    outcome = "Outcome",
     outcomePositive = "1",
     models = "age_prob",
     decisionRuleVar = NULL,
@@ -71,7 +74,10 @@ test_that("decisioncurve function works with multiple models", {
   expect_no_error({
     result <- decisioncurve(
       data = test_data,
-      outcome = "Death",
+      # histopathology$Death is a character column with the levels "DOGRU"/"YANLIS";
+      # "1" never matched it, so every call below returned early on "Positive Outcome
+      # Level Required" and the assertions were testing an empty result.
+      outcome = "Outcome",
       outcomePositive = "1",
       models = c("age_prob", "measurement_prob"),
       modelNames = "Age Model, Measurement Model",
@@ -82,7 +88,7 @@ test_that("decisioncurve function works with multiple models", {
   
   result <- decisioncurve(
     data = test_data,
-    outcome = "Death",
+    outcome = "Outcome",
     outcomePositive = "1",
     models = c("age_prob", "measurement_prob"),
     modelNames = "Age Model, Measurement Model",
@@ -113,7 +119,10 @@ test_that("decisioncurve function works with confidence intervals", {
   expect_no_error({
     result <- decisioncurve(
       data = test_data,
-      outcome = "Death",
+      # histopathology$Death is a character column with the levels "DOGRU"/"YANLIS";
+      # "1" never matched it, so every call below returned early on "Positive Outcome
+      # Level Required" and the assertions were testing an empty result.
+      outcome = "Outcome",
       outcomePositive = "1",
       models = "age_prob",
       confidenceIntervals = TRUE,
@@ -142,7 +151,10 @@ test_that("decisioncurve function works with clinical impact analysis", {
   expect_no_error({
     result <- decisioncurve(
       data = test_data,
-      outcome = "Death",
+      # histopathology$Death is a character column with the levels "DOGRU"/"YANLIS";
+      # "1" never matched it, so every call below returned early on "Positive Outcome
+      # Level Required" and the assertions were testing an empty result.
+      outcome = "Outcome",
       outcomePositive = "1",
       models = "age_prob",
       calculateClinicalImpact = TRUE,
@@ -154,7 +166,7 @@ test_that("decisioncurve function works with clinical impact analysis", {
   
   result <- decisioncurve(
     data = test_data,
-    outcome = "Death",
+    outcome = "Outcome",
     outcomePositive = "1",
     models = "age_prob",
     calculateClinicalImpact = TRUE,
@@ -185,7 +197,10 @@ test_that("decisioncurve function works with optimal threshold analysis", {
   expect_no_error({
     result <- decisioncurve(
       data = test_data,
-      outcome = "Death",
+      # histopathology$Death is a character column with the levels "DOGRU"/"YANLIS";
+      # "1" never matched it, so every call below returned early on "Positive Outcome
+      # Level Required" and the assertions were testing an empty result.
+      outcome = "Outcome",
       outcomePositive = "1",
       models = "age_prob",
       showBenefitRange = TRUE,
@@ -196,7 +211,7 @@ test_that("decisioncurve function works with optimal threshold analysis", {
   
   result <- decisioncurve(
     data = test_data,
-    outcome = "Death",
+    outcome = "Outcome",
     outcomePositive = "1",
     models = "age_prob",
     showBenefitRange = TRUE,
@@ -228,7 +243,10 @@ test_that("decisioncurve function works with weighted AUC", {
   expect_no_error({
     result <- decisioncurve(
       data = test_data,
-      outcome = "Death",
+      # histopathology$Death is a character column with the levels "DOGRU"/"YANLIS";
+      # "1" never matched it, so every call below returned early on "Positive Outcome
+      # Level Required" and the assertions were testing an empty result.
+      outcome = "Outcome",
       outcomePositive = "1",
       models = "age_prob",
       weightedAUC = TRUE,
@@ -239,7 +257,7 @@ test_that("decisioncurve function works with weighted AUC", {
   
   result <- decisioncurve(
     data = test_data,
-    outcome = "Death",
+    outcome = "Outcome",
     outcomePositive = "1",
     models = "age_prob",
     weightedAUC = TRUE,
@@ -340,7 +358,10 @@ test_that("decisioncurve function works with custom threshold ranges", {
   expect_no_error({
     result <- decisioncurve(
       data = test_data,
-      outcome = "Death",
+      # histopathology$Death is a character column with the levels "DOGRU"/"YANLIS";
+      # "1" never matched it, so every call below returned early on "Positive Outcome
+      # Level Required" and the assertions were testing an empty result.
+      outcome = "Outcome",
       outcomePositive = "1",
       models = "age_prob",
       thresholdRange = "custom",
@@ -371,7 +392,10 @@ test_that("decisioncurve function works with interventions avoided plot", {
   expect_no_error({
     result <- decisioncurve(
       data = test_data,
-      outcome = "Death",
+      # histopathology$Death is a character column with the levels "DOGRU"/"YANLIS";
+      # "1" never matched it, so every call below returned early on "Positive Outcome
+      # Level Required" and the assertions were testing an empty result.
+      outcome = "Outcome",
       outcomePositive = "1",
       models = "age_prob",
       showInterventionAvoided = TRUE,
@@ -382,7 +406,7 @@ test_that("decisioncurve function works with interventions avoided plot", {
   
   result <- decisioncurve(
     data = test_data,
-    outcome = "Death",
+    outcome = "Outcome",
     outcomePositive = "1",
     models = "age_prob",
     showInterventionAvoided = TRUE,
@@ -412,7 +436,10 @@ test_that("decisioncurve function validates parameters correctly", {
   expect_error({
     decisioncurve(
       data = test_data,
-      outcome = "Death",
+      # histopathology$Death is a character column with the levels "DOGRU"/"YANLIS";
+      # "1" never matched it, so every call below returned early on "Positive Outcome
+      # Level Required" and the assertions were testing an empty result.
+      outcome = "Outcome",
       outcomePositive = "1",
       models = "age_prob",
       thresholdRange = "custom",
@@ -444,7 +471,10 @@ test_that("decisioncurve function handles missing data appropriately", {
   expect_no_error({
     result <- decisioncurve(
       data = test_data,
-      outcome = "Death",
+      # histopathology$Death is a character column with the levels "DOGRU"/"YANLIS";
+      # "1" never matched it, so every call below returned early on "Positive Outcome
+      # Level Required" and the assertions were testing an empty result.
+      outcome = "Outcome",
       outcomePositive = "1",
       models = "age_prob",
       decisionRuleVar = NULL,
@@ -472,7 +502,10 @@ test_that("decisioncurve function works with model comparison", {
   expect_no_error({
     result <- decisioncurve(
       data = test_data,
-      outcome = "Death",
+      # histopathology$Death is a character column with the levels "DOGRU"/"YANLIS";
+      # "1" never matched it, so every call below returned early on "Positive Outcome
+      # Level Required" and the assertions were testing an empty result.
+      outcome = "Outcome",
       outcomePositive = "1",
       models = c("age_prob", "measurement_prob"),
       compareModels = TRUE,
@@ -483,7 +516,7 @@ test_that("decisioncurve function works with model comparison", {
   
   result <- decisioncurve(
     data = test_data,
-    outcome = "Death",
+    outcome = "Outcome",
     outcomePositive = "1",
     models = c("age_prob", "measurement_prob"),
     compareModels = TRUE,
@@ -512,7 +545,7 @@ test_that("decisioncurve function output structure is complete", {
   
   result <- decisioncurve(
     data = test_data,
-    outcome = "Death",
+    outcome = "Outcome",
     outcomePositive = "1",
     models = c("age_prob", "measurement_prob"),
     showBenefitRange = TRUE,
@@ -557,7 +590,8 @@ test_that("decisioncurve function works with different plot styles", {
     expect_no_error({
       result <- decisioncurve(
         data = test_data,
-        outcome = "Death",
+        # See note above: "Death" holds "DOGRU"/"YANLIS", not "1"/"0".
+        outcome = "Outcome",
         outcomePositive = "1",
         models = "age_prob",
         plotStyle = style,
@@ -584,7 +618,7 @@ test_that("decisioncurve function produces correct summary text", {
   
   result <- decisioncurve(
     data = test_data,
-    outcome = "Death",
+    outcome = "Outcome",
     outcomePositive = "1",
     models = "age_prob",
     decisionRuleVar = NULL,

@@ -1,12 +1,12 @@
 ---
 title: Common Analysis for Clinicopathological Research
 name: ClinicoPath
-version: 1.0.6.05
+version: 1.0.7.01
 jms: '1.0'
 authors:
   - Serdar Balci
 maintainer: Serdar Balci <serdarbalci@serdarbalci.com>
-date: '2026-08-23'
+date: '2026-08-25'
 type: R
 description: >-
   ClinicoPath help researchers to generate natural language summaries of their
@@ -1632,7 +1632,7 @@ analyses:
   - title: Decision Curve Analysis
     name: decisioncurve
     ns: ClinicoPath
-    menuGroup: meddecideT
+    menuGroup: meddecide
     menuTitle: Decision Curve Analysis
     menuSubgroup: Decision Curve Analysis
     menuSubtitle: Clinical Utility, Net Benefit, Threshold Analysis

@@ -251,7 +251,7 @@ ncvregcoxClass <- R6::R6Class(
                     # Backtick-escape variable names for safe formula construction
                     escaped_covs <- jmvcore::composeTerms(as.list(covariates))
                     mm_formula <- jmvcore::asFormula(paste("~", paste(escaped_covs, collapse = " + ")))
-                    X <- model.matrix(mm_formula, data = cov_data)[, -1, drop = FALSE]
+                    X <- .stripBackticks(model.matrix(mm_formula, data = cov_data)[, -1, drop = FALSE])
                 } else {
                     X <- as.matrix(cov_data)
                 }

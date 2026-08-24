@@ -14,9 +14,9 @@ decisioncurveOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
             thresholdMin = 0.05,
             thresholdMax = 0.5,
             thresholdStep = 0.01,
-            showTable = FALSE,
+            showTable = TRUE,
             selectedThresholds = "0.05, 0.10, 0.15, 0.20, 0.25, 0.30",
-            showPlot = FALSE,
+            showPlot = TRUE,
             plotStyle = "standard",
             showReferenceLinesLabels = FALSE,
             highlightRange = FALSE,
@@ -109,7 +109,7 @@ decisioncurveOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
             private$..showTable <- jmvcore::OptionBool$new(
                 "showTable",
                 showTable,
-                default=FALSE)
+                default=TRUE)
             private$..selectedThresholds <- jmvcore::OptionString$new(
                 "selectedThresholds",
                 selectedThresholds,
@@ -117,7 +117,7 @@ decisioncurveOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
             private$..showPlot <- jmvcore::OptionBool$new(
                 "showPlot",
                 showPlot,
-                default=FALSE)
+                default=TRUE)
             private$..plotStyle <- jmvcore::OptionList$new(
                 "plotStyle",
                 plotStyle,
@@ -651,7 +651,7 @@ decisioncurveResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                         `format`="zto,pvalue"),
                     list(
                         `name`="p_value_adj", 
-                        `title`="p (Holm)", 
+                        `title`="p (Holm, average NB difference)", 
                         `type`="number", 
                         `format`="zto,pvalue")),
                 clearWith=list(
@@ -955,13 +955,8 @@ decisioncurveResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                         `type`="number", 
                         `format`="zto"),
                     list(
-                        `name`="test_statistic", 
-                        `title`="Test Statistic", 
-                        `type`="number", 
-                        `format`="zto"),
-                    list(
                         `name`="p_value", 
-                        `title`="p-value", 
+                        `title`="p (Holm, mean NB difference)", 
                         `type`="number", 
                         `format`="zto,pvalue"),
                     list(
@@ -1015,7 +1010,7 @@ decisioncurveResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                         `type`="number"),
                     list(
                         `name`="reduction_vs_treat_all", 
-                        `title`="% Reduction vs Treat All", 
+                        `title`="% Fewer Treatments vs Treat All", 
                         `type`="number", 
                         `format`="pc")),
                 clearWith=list(
@@ -1176,8 +1171,8 @@ decisioncurveBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   historical reasons but the average is UNWEIGHTED: every threshold in the
 #'   range counts equally. The value therefore depends entirely on the threshold
 #'   range chosen above (on one example dataset it moved from 0.309 to 0.163 as
-#'   the range widened from 5-20\% to 1-99\%), so always report the range
-#'   alongside it. Curves may cross, so this descriptive average does not
+#'   the range widened from 5-20 percent to 1-99 percent), so always report the
+#'   range alongside it. Curves may cross, so this descriptive average does not
 #'   identify a universally best model.
 #' @param clinicalDecisionRule Add clinical decision rule analysis and
 #'   comparison with models.
@@ -1196,7 +1191,9 @@ decisioncurveBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   probabilities.
 #' @param showNetBenefitCI Display pointwise percentile-bootstrap confidence
 #'   intervals around net benefit curves. The ribbons are not simultaneous
-#'   confidence bands.
+#'   confidence bands. Identical in effect to 'confidenceIntervals': both switch
+#'   on the same case-resampling bootstrap and produce byte-identical output,
+#'   and either one enables the replication-count and confidence-level controls.
 #' @param costBenefitAnalysis Project a simple exploratory monetary payoff
 #'   using user-assigned values in one common currency. This is not an ICER,
 #'   QALY, cost-effectiveness or formal net-monetary-benefit analysis.
@@ -1267,9 +1264,9 @@ decisioncurve <- function(
     thresholdMin = 0.05,
     thresholdMax = 0.5,
     thresholdStep = 0.01,
-    showTable = FALSE,
+    showTable = TRUE,
     selectedThresholds = "0.05, 0.10, 0.15, 0.20, 0.25, 0.30",
-    showPlot = FALSE,
+    showPlot = TRUE,
     plotStyle = "standard",
     showReferenceLinesLabels = FALSE,
     highlightRange = FALSE,

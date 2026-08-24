@@ -113,11 +113,11 @@ psychopdaROC
 
 ## Prediction Models
 
-lassologistic
+- lassologistic
 
 ## Decision Curve Analysis
 
-decisioncurve
+- decisioncurve
 
 
 ## Power (menuGroup: Power)
@@ -4056,3 +4056,23 @@ lintr bug-set clean, all gates clean; 3-agent adversarial verification):
 - [ ] **[style]** `R/kappaSizeFixedN.b.R:106` still pastes `signif(sparse_min, 2)` straight into
       the sparse notice, so it inherits the scientific-notation-in-prose wart that kappaSizeCI
       just fixed with `.fmtCount()` ("below 0.01"). Port `.fmtCount` to FixedN and Power.
+
+## decisioncurve — deferred from the 2026-08-24 release review
+
+- [ ] **i18n**: 0 `.()` wraps (siblings kappaSizeFixedN/kappaSizePower have 32/37). ~110 call
+      sites in a 2,819-line file; needs `/prepare-translation decisioncurve` plus a
+      `catalog.pot` regeneration for the renamed column titles. No user-visible effect while
+      `tr.po` is 0.7% filled.
+- [ ] **`tests/testthat.R` is missing** module-wide while `tests/testthat/` holds 801 files, so
+      `R CMD check` runs no testthat file for the whole package. Needs its own pass — adding the
+      driver switches on 801 unexercised files at once.
+- [ ] `.u.yaml` still uses cost-benefit framing that the backend text deliberately softened to
+      "exploratory monetary payoff".
+- [ ] "Show reference line labels" renders no Treat All label, and the "standard" plot style does
+      not visually distinguish the reference lines.
+- [ ] Clinical Impact and Resource Utilization describe the same row from two angles
+      ("net interventions avoided" vs "% fewer treatments"); both titles are now accurate but a
+      note tying them together would help.
+- [ ] Decision Consequences shows observed counts beside per-1000 projections with no note.
+- [ ] `tools/check_state_guards.py` and `tools/theme_safe_html.py` return "0 findings" for this
+      file without their patterns ever matching it — verify they actually cover it.

@@ -530,7 +530,7 @@ jjscatterstatsBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
             super$initialize(
                 package = "ClinicoPath",
                 name = "jjscatterstats",
-                version = c(1,0,6),
+                version = c(1,0,7),
                 options = options,
                 results = jjscatterstatsResults$new(options=options),
                 data = data,

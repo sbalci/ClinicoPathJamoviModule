@@ -14,9 +14,9 @@ decisioncurve(
   thresholdMin = 0.05,
   thresholdMax = 0.5,
   thresholdStep = 0.01,
-  showTable = FALSE,
+  showTable = TRUE,
   selectedThresholds = "0.05, 0.10, 0.15, 0.20, 0.25, 0.30",
-  showPlot = FALSE,
+  showPlot = TRUE,
   plotStyle = "standard",
   showReferenceLinesLabels = FALSE,
   highlightRange = FALSE,
@@ -145,8 +145,8 @@ average net benefit over that range. The option is named weightedAUC for
 historical reasons but the average is UNWEIGHTED: every threshold in the
 range counts equally. The value therefore depends entirely on the threshold
 range chosen above (on one example dataset it moved from 0.309 to 0.163 as
-the range widened from 5-20\\% to 1-99\\%), so always report the range
-alongside it. Curves may cross, so this descriptive average does not
+the range widened from 5-20 percent to 1-99 percent), so always report the
+range alongside it. Curves may cross, so this descriptive average does not
 identify a universally best model.}
 
 \item{clinicalDecisionRule}{Add clinical decision rule analysis and
@@ -171,7 +171,9 @@ probabilities.}
 
 \item{showNetBenefitCI}{Display pointwise percentile-bootstrap confidence
 intervals around net benefit curves. The ribbons are not simultaneous
-confidence bands.}
+confidence bands. Identical in effect to 'confidenceIntervals': both switch
+on the same case-resampling bootstrap and produce byte-identical output,
+and either one enables the replication-count and confidence-level controls.}
 
 \item{costBenefitAnalysis}{Project a simple exploratory monetary payoff
 using user-assigned values in one common currency. This is not an ICER,

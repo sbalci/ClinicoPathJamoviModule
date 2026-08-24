@@ -88,7 +88,7 @@ children:
       - type: TextBox
         name: scoringMaxPoints
         format: number
-        enable: (scoringSystem)
+        enable: (scoringSystem && (scoringMethod:sullivan || scoringMethod:compare))
       - type: ComboBox
         name: scoreCutMethod
         enable: (scoringSystem)

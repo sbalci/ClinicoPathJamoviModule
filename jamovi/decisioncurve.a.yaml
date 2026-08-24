@@ -1,10 +1,10 @@
 ---
 name: decisioncurve
 title: Decision Curve Analysis
-menuGroup: meddecideT
+menuGroup: meddecide
 menuSubgroup: Decision Curve Analysis
 menuSubtitle: Clinical Utility, Net Benefit, Threshold Analysis
-version: '1.0.6'
+version: '1.0.7'
 jas: '1.2'
 
 description:
@@ -121,7 +121,7 @@ options:
     - name: showTable
       title: Show Results Table
       type: Bool
-      default: false
+      default: true
       description:
           R: >
             Display table with net benefit values at selected thresholds.
@@ -137,7 +137,7 @@ options:
     - name: showPlot
       title: Show Decision Curve Plot
       type: Bool
-      default: false
+      default: true
       description:
           R: >
             Display the decision curve plot.
@@ -294,7 +294,7 @@ options:
             The option is named weightedAUC for historical reasons but the average is
             UNWEIGHTED: every threshold in the range counts equally. The value therefore
             depends entirely on the threshold range chosen above (on one example dataset it
-            moved from 0.309 to 0.163 as the range widened from 5-20% to 1-99%), so always
+            moved from 0.309 to 0.163 as the range widened from 5-20 percent to 1-99 percent), so always
             report the range alongside it. Curves may cross, so this descriptive average does
             not identify a universally best model.
 
@@ -353,7 +353,10 @@ options:
       description:
           R: >
             Display pointwise percentile-bootstrap confidence intervals around net benefit
-            curves. The ribbons are not simultaneous confidence bands.
+            curves. The ribbons are not simultaneous confidence bands. Identical in effect to
+            'confidenceIntervals': both switch on the same case-resampling bootstrap and
+            produce byte-identical output, and either one enables the replication-count and
+            confidence-level controls.
 
     - name: costBenefitAnalysis
       title: Exploratory Monetary Payoff
@@ -429,7 +432,9 @@ options:
             approximate and conditional on the selected threshold range.
 
     - name: comparisonMethod
-      title: Comparison Statistical Test
+      # Kept as a declared option so saved .omv files still load, but there is exactly one
+      # choice, so the title says so rather than inviting the user to look for others.
+      title: Comparison Statistical Test (bootstrap only)
       type: List
       options:
         - name: bootstrap

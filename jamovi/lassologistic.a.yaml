@@ -5,7 +5,7 @@ menuGroup: meddecide
 menuSubgroup: Prediction Models
 menuTitle: LASSO Logistic
 menuSubtitle: Penalized feature selection for binary classification
-version: '1.0.6'
+version: '1.0.7'
 jas: '1.2'
 
 description:
@@ -41,8 +41,11 @@ options:
       variable: (outcome)
       description:
         R: >
-          Level of outcome considered as the positive class (event).
-          For factor outcomes, if left empty the second level is used.
+          Level of outcome considered as the positive class (event). In jamovi this
+          may be left unset, in which case the second level of a factor (or the
+          larger of two numeric values) is treated as the event. When calling from
+          R the argument has no default and must be supplied; pass NULL to get the
+          same automatic choice.
 
     - name: explanatory
       title: Explanatory Variables

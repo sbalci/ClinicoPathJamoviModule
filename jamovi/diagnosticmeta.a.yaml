@@ -3,7 +3,7 @@ name: diagnosticmeta
 title: Diagnostic Test Meta-Analysis for Pathology
 menuGroup: OncoPath
 menuSubgroup: Meta-Analysis
-version: '1.0.6'
+version: '1.0.7'
 jas: '1.2'
 
 description:

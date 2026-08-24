@@ -94,8 +94,7 @@ children:
           - type: TextBox
             name: selectedThresholds
             format: string
-            label: Thresholds for table (comma-separated)
-            enable: (showTable)
+            label: Thresholds for table (probabilities 0-1, comma-separated)
           - type: CheckBox
             name: showBenefitRange
             label: Range of benefit table
@@ -116,25 +115,25 @@ children:
           - type: ComboBox
             name: plotStyle
             label: Plot style
-            enable: (showPlot)
+            enable: (showPlot || confidenceIntervals || showNetBenefitCI)
           - type: CheckBox
             name: showReferenceLinesLabels
             label: Show reference line labels
-            enable: (showPlot)
+            enable: (showPlot || confidenceIntervals || showNetBenefitCI)
           - type: CheckBox
             name: highlightRange
             label: Highlight clinical range
-            enable: (showPlot)
+            enable: (showPlot || confidenceIntervals || showNetBenefitCI)
           - type: TextBox
             name: highlightMin
             format: number
             label: Range minimum
-            enable: (highlightRange && showPlot)
+            enable: (highlightRange && (showPlot || confidenceIntervals || showNetBenefitCI))
           - type: TextBox
             name: highlightMax
             format: number
             label: Range maximum
-            enable: (highlightRange && showPlot)
+            enable: (highlightRange && (showPlot || confidenceIntervals || showNetBenefitCI))
           - type: CheckBox
             name: showClinicalImpactPlot
             label: Clinical impact plot
@@ -194,7 +193,7 @@ children:
             label: Enhanced pairwise comparison
           - type: ComboBox
             name: comparisonMethod
-            label: Test method
+            label: Test method (bootstrap only)
             enable: (compareModels || multiModelComparison)
           - type: CheckBox
             name: weightedAUC
@@ -214,11 +213,9 @@ children:
             name: populationSize
             format: number
             label: Population size
-            enable: (calculateClinicalImpact)
           - type: CheckBox
             name: showInterventionAvoided
             label: Show interventions avoided
-            enable: (calculateClinicalImpact)
           - type: CheckBox
             name: resourceUtilization
             label: Resource utilization
@@ -237,12 +234,12 @@ children:
             name: bootReps
             format: number
             label: Bootstrap replications
-            enable: (confidenceIntervals)
+            enable: (confidenceIntervals || showNetBenefitCI || compareModels || multiModelComparison)
           - type: TextBox
             name: ciLevel
             format: number
             label: Confidence level
-            enable: (confidenceIntervals)
+            enable: (confidenceIntervals || showNetBenefitCI || compareModels || multiModelComparison)
           - type: TextBox
             name: seed
             format: number

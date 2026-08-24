@@ -42,7 +42,10 @@ lassologistic(
 numeric with exactly two observed values.}
 
 \item{outcomeLevel}{Level of outcome considered as the positive class
-(event). For factor outcomes, if left empty the second level is used.}
+(event). In jamovi this may be left unset, in which case the second level
+of a factor (or the larger of two numeric values) is treated as the event.
+When calling from R the argument has no default and must be supplied; pass
+NULL to get the same automatic choice.}
 
 \item{explanatory}{Variables to be considered for selection. At least 2
 required. Constant variables are removed automatically.}

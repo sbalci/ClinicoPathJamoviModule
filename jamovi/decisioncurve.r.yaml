@@ -194,7 +194,7 @@ items:
           type: number
           format: zto,pvalue
         - name: p_value_adj
-          title: 'p (Holm)'
+          title: 'p (Holm, average NB difference)'
           type: number
           format: zto,pvalue
       clearWith:
@@ -483,12 +483,8 @@ items:
           title: 'Median NB Difference'
           type: number
           format: zto
-        - name: test_statistic
-          title: 'Test Statistic'
-          type: number
-          format: zto
         - name: p_value
-          title: 'p-value'
+          title: 'p (Holm, mean NB difference)'
           type: number
           format: zto,pvalue
         - name: conclusion
@@ -535,7 +531,7 @@ items:
           title: 'Projected Missed Cases'
           type: number
         - name: reduction_vs_treat_all
-          title: '% Reduction vs Treat All'
+          title: '% Fewer Treatments vs Treat All'
           type: number
           format: pc
       clearWith:

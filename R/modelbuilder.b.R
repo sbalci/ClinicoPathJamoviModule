@@ -661,7 +661,7 @@ modelbuilderClass <- if (requireNamespace("jmvcore")) R6::R6Class(
                 predictor_vars <- all.vars(formula)[-1]
                 
                 # Prepare matrices for glmnet (handle factors properly)
-                X <- model.matrix(formula, data = data)[, -1, drop = FALSE]  # Remove intercept
+                X <- .stripBackticks(model.matrix(formula, data = data)[, -1, drop = FALSE])  # Remove intercept
                 y <- as.numeric(data[[outcome_var]] == self$options$outcomePositive)
                 
                 # Check for sufficient observations
@@ -705,7 +705,7 @@ modelbuilderClass <- if (requireNamespace("jmvcore")) R6::R6Class(
                     if (is.null(newdata)) {
                         newdata <- object$data
                     }
-                    X_new <- model.matrix(object$formula, data = newdata)[, -1, drop = FALSE]
+                    X_new <- .stripBackticks(model.matrix(object$formula, data = newdata)[, -1, drop = FALSE])
                     pred <- predict(object$glmnet_fit, newx = X_new, s = object$lambda, type = type)
                     as.vector(pred)
                 }
@@ -2061,6 +2061,10 @@ modelbuilderClass <- if (requireNamespace("jmvcore")) R6::R6Class(
                     # Get model summary
                     model_summary <- summary(model)
                     coefficients <- model_summary$coefficients
+                    # The model formula is built from user variable names, so glm's
+                    # coefficient rownames carry backticks for non-syntactic ones.
+                    # conf_int is indexed positionally, so this is sufficient.
+                    rownames(coefficients) <- .stripBackticks(rownames(coefficients))
 
                     # Calculate confidence intervals
                     conf_int <- confint(model, level = 0.95)

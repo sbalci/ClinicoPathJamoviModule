@@ -18,7 +18,8 @@ test_that("decisioncurve creates valid bootstrap comparisons", {
     # Use a small number of bootstrap reps for speed in test
     result <- decisioncurve(
         data = test_data,
-        outcome = "Death",
+        # See note above: "Death" holds "DOGRU"/"YANLIS", not "1"/"0".
+        outcome = "Outcome",
         outcomePositive = "1",
         models = c("mod1", "mod2"),
         compareModels = TRUE,

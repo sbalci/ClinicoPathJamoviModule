@@ -308,7 +308,7 @@ pcacoxClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 # composeTerms backtick-escapes user-supplied predictor names (Defense 1);
                 # jmvcore::asFormula allow-list validates the RHS (Defense 2 - closes C1 RCE).
                 formula_str <- paste("~ -1 +", paste(jmvcore::composeTerms(as.list(private$predictors)), collapse = " + "))
-                X <- model.matrix(jmvcore::asFormula(formula_str), data = private$clean_data)
+                X <- .stripBackticks(model.matrix(jmvcore::asFormula(formula_str), data = private$clean_data))
                 
                 # Handle missing values
                 if (any(is.na(X))) {
@@ -873,6 +873,11 @@ pcacoxClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             
             table <- self$results$coxResults
             coef_summary <- summary(private$cox_model)$coefficients
+            # composeTerms backtick-quotes non-syntactic names when it builds the
+            # Cox formula, so coxph's own coefficient names come back quoted - a
+            # second backtick source, separate from the design matrix. confint is
+            # indexed positionally, so cleaning these names is enough.
+            rownames(coef_summary) <- .stripBackticks(rownames(coef_summary))
             conf_level <- self$options$confidence_level %||% 0.95
             confint_result <- confint(private$cox_model, level = conf_level)
             

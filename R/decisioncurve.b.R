@@ -27,6 +27,141 @@ decisioncurveClass <- if (requireNamespace("jmvcore")) R6::R6Class(
 
         # The positive outcome level actually used by the analysis. Falls back to the raw
         # option only before .run() has resolved it (e.g. an early return).
+        # Plot state. The renderers read private fields, which only .run() populates -- and
+        # jamovi's render path (.createPlotObject -> do.call(private[[funName]], ...)) NEVER
+        # calls .run(). So on any render against an object that has not executed .run() in this
+        # process -- reopening a saved .omv, engine recycling, a window resize after an early
+        # return -- every renderer hit its NULL guard and returned FALSE: five blank panes, no
+        # error, nothing to tell the user why. Publishing the fields as image state and
+        # rehydrating from it on render fixes that without touching a line of plotting code.
+        #
+        # Only the six fields the renderers actually use are carried; .analysisData (the whole
+        # analysis frame) is deliberately NOT among them, so the state stays small in the .omv.
+        # What each renderer actually reads. Publishing the whole blob to all five images cost
+        # ~517 KB x 5 = 2.6 MB in the .omv on a 5,000-row, four-model analysis, because
+        # .dcaResults carries a prediction vector per model. .plotDCA -- the only plot on by
+        # default -- needs none of that, so slicing takes the common case from 517 KB to ~8 KB.
+        # TODO [i18n] decisioncurve is not internationalised: 0 .() wraps, against 32 in
+        #   kappaSizeFixedN and 37 in kappaSizePower. Scope is ~110 user-facing call sites
+        #   (35 .addNotice, 12 setNote, 7 setContent, 6 stop, 54 sprintf templates) in a
+        #   2,819-line file, most of them multi-line paste0/sprintf compositions embedded in
+        #   HTML. The library gate requires ONE COMPLETE SENTENCE per .() with {} placeholders
+        #   and no newline inside, so this is a restructuring of the user-facing text rather
+        #   than a mechanical wrap -- deliberately not attempted in the same pass that fixed
+        #   the statistics. Run /prepare-translation decisioncurve, then regenerate
+        #   jamovi/i18n/catalog.pot (the renamed column titles below are also not yet in it).
+        #   No user-visible effect today: tr.po is 193/27,581 filled (0.7%).
+
+        .plotStateSpec = function() {
+            list(
+                dcaPlot                    = c("plotData", "plotThinning"),
+                # ...plus analysisOutcomes/outcomePositive, which .calculateModelAtThreshold
+                # reads transitively -- omitting them made this the one plot that still came
+                # back blank from state.
+                clinicalImpactPlot         = c("dcaResults", "analysisOutcomes",
+                                               "outcomePositive"),
+                interventionsAvoidedPlot   = c("dcaResults", "treatAllNB"),
+                relativeUtilityPlot        = c("dcaResults", "plotData", "analysisOutcomes",
+                                               "outcomePositive"),
+                standardizedNetBenefitPlot = c("dcaResults", "plotData", "analysisOutcomes",
+                                               "outcomePositive")
+            )
+        },
+
+        .plotStateFields = function() {
+            list(dcaResults       = private$.dcaResults,
+                 plotData         = private$.plotData,
+                 plotThinning     = private$.plotThinning,
+                 treatAllNB       = private$.treatAllNB,
+                 analysisOutcomes = private$.analysisOutcomes,
+                 outcomePositive  = private$.outcomePositive)
+        },
+
+        # ColorBrewer "Set1" has exactly nine colours; ggplot2 assigns NA past the ninth and
+        # the extra curves vanish with only a console warning, which jamovi never shows. Nine
+        # strategies is reachable: models plus Treat All, Treat None and a clinical rule. Fall
+        # back to viridis, which is generated for any n and is colour-blind safe.
+        .modelColourScale = function(plot_data) {
+            n <- length(unique(plot_data$model))
+            if (n <= 9)
+                ggplot2::scale_color_brewer(palette = "Set1")
+            else
+                ggplot2::scale_color_viridis_d(option = "turbo", end = 0.92)
+        },
+
+        .plotImageNames = function() {
+            c("dcaPlot", "clinicalImpactPlot", "interventionsAvoidedPlot",
+              "relativeUtilityPlot", "standardizedNetBenefitPlot")
+        },
+
+        .publishPlotStates = function() {
+            st   <- private$.plotStateFields()
+            spec <- private$.plotStateSpec()
+            for (nm in private$.plotImageNames()) {
+                img <- self$results[[nm]]
+                if (is.null(img)) next
+                img$setState(st[spec[[nm]]])
+            }
+        },
+
+        # Drop any state left over from a previous run. Called at the top of .run() so that a
+        # run which fails or returns early leaves NO state behind: the renderers then hit their
+        # NULL guard and show an empty pane, which is correct, instead of the previous cohort.
+        .clearPlotStates = function() {
+            for (nm in private$.plotImageNames()) {
+                img <- self$results[[nm]]
+                if (!is.null(img)) img$setState(NULL)
+            }
+        },
+
+        # Called first in every renderer. A no-op when .run() has just populated the fields in
+        # this process; otherwise it restores them from the state jamovi persisted.
+        .restoreFromState = function(image) {
+            st <- tryCatch(image$state, error = function(e) NULL)
+            if (is.null(st)) return(invisible(NULL))
+            # Fill in each field ONLY if it is still empty, and only from the slice this image
+            # carries (see .plotStateSpec). Two things depend on that:
+            #   - a live .run() has already populated these fields, and must never be
+            #     overwritten by whatever state the image happens to be holding;
+            #   - the five renderers share one private environment, so a single early-return
+            #     guard on any one field made every renderer after the first skip restoring and
+            #     return FALSE -- four blank panes with the fifth drawn.
+            take <- function(field, value) {
+                if (is.null(private[[field]]) && !is.null(value)) private[[field]] <- value
+            }
+            take(".dcaResults",       st$dcaResults)
+            take(".plotData",         st$plotData)
+            take(".plotThinning",     st$plotThinning)
+            take(".treatAllNB",       st$treatAllNB)
+            take(".analysisOutcomes", st$analysisOutcomes)
+            take(".outcomePositive",  st$outcomePositive)
+            invisible(NULL)
+        },
+
+        # The results table's model columns depend only on which variables the user picked, so
+        # they belong here rather than in .run(): built in .run() the table painted a bare
+        # three-column skeleton and then visibly restructured on every run cycle.
+        # .modelColumnNames() is a pure function of the names, and the names .run() uses
+        # (names(private$.dcaResults)) are exactly self$options$models, so both paths agree.
+        .init = function() {
+            # .parseModelNames(), NOT self$options$models. .run() keys the table columns off
+            # names(private$.dcaResults), which are the parsed DISPLAY labels -- so when
+            # modelNames is set, building the columns from the raw variable names here left the
+            # table with two sets: the .init() ones permanently blank ("." in jamovi, which a
+            # clinician reads as "not computable") beside the populated ones.
+            models <- private$.parseModelNames()
+            if (is.null(models) || length(models) == 0) return(invisible(NULL))
+            tbl <- self$results$resultsTable
+            cols <- private$.modelColumnNames(models)
+            existing <- vapply(tbl$columns, function(c) c$name, character(1))
+            for (i in seq_along(models)) {
+                if (unname(cols[i]) %in% existing) next
+                tbl$addColumn(name = unname(cols[i]), title = models[i],
+                              type = "number", format = "zto")
+            }
+            invisible(NULL)
+        },
+
         .positiveLevel = function() {
             # The else branch used to read `private$.positiveLevel()`, i.e. this
             # method calling itself -- an unconditional infinite recursion that
@@ -251,23 +386,118 @@ decisioncurveClass <- if (requireNamespace("jmvcore")) R6::R6Class(
             range_type <- self$options$thresholdRange
             step <- self$options$thresholdStep
 
+            # Keep the CONFIGURED bounds. Once seq() has collapsed to a single point,
+            # min(thresholds) and max(thresholds) are both that point, so a message built from
+            # them told a user who typed 20% to 21% that "the range from 20.0% to 20.0% is
+            # narrower than the step" -- which is not the range they entered and gives them
+            # nothing to correct.
             if (range_type == "auto") {
-                thresholds <- seq(0.01, 0.99, by = step)
+                range_lo <- 0.01
+                range_hi <- 0.99
+                thresholds <- seq(range_lo, range_hi, by = step)
             } else if (range_type == "clinical") {
-                thresholds <- seq(0.05, 0.50, by = step)
+                range_lo <- 0.05
+                range_hi <- 0.50
+                thresholds <- seq(range_lo, range_hi, by = step)
             } else { # custom
                 min_thresh <- self$options$thresholdMin
                 max_thresh <- self$options$thresholdMax
-                
+
                 # Enhanced threshold range validation with clinical guidance
                 private$.validateThresholdRange(min_thresh, max_thresh)
-                
-                thresholds <- seq(min_thresh, max_thresh, by = step)
+
+                range_lo <- min_thresh
+                range_hi <- max_thresh
+                thresholds <- seq(range_lo, range_hi, by = step)
+            }
+
+            # A range narrower than the step yields a single point. Nothing downstream guarded
+            # against that: the analysis reported success, the weighted-AUC table printed
+            # "20% - 20%" with a blank average net benefit, and every statistic in the model
+            # comparison came back empty -- while the notice affirmed the threshold range. One
+            # threshold cannot describe a curve, so refuse it and say what to change.
+            if (length(thresholds) < 2) {
+                private$.addNotice(
+                    type = "ERROR",
+                    title = "Threshold Range Too Narrow",
+                    content = sprintf(
+                        'The threshold range you entered, %.1f%% to %.1f%%, is narrower than the step size of %.1f%%, so it produces only one threshold (%.1f%%) and no decision curve can be drawn. Reduce the step size to %.1f%% or less, or widen the range.',
+                        range_lo * 100,
+                        range_hi * 100,
+                        step * 100,
+                        thresholds[1] * 100,
+                        max(0.001, (range_hi - range_lo)) * 100
+                    )
+                )
+                private$.renderNotices()
+                stop(sprintf(
+                    "The threshold range you entered, %.1f%% to %.1f%%, is narrower than the step size of %.1f%%, so only one threshold (%.1f%%) is produced and no decision curve can be drawn. Reduce the step size or widen the range.",
+                    range_lo * 100, range_hi * 100, step * 100, thresholds[1] * 100),
+                    call. = FALSE)
             }
 
             return(thresholds)
         },
         
+        # "Thresholds for table" is independent of the analysed threshold range, so a row can be
+        # requested at a probability the curves were never computed over. Each such row IS
+        # computed correctly, at the exact threshold asked for -- but it sits in a table whose
+        # neighbours all come from the plotted range, with nothing on screen to say so, and the
+        # curve above it does not extend that far. Now that the table is shown by default this
+        # is the first thing many users will see.
+        .warnOnThresholdsOutsideRange = function(selected) {
+            grid <- tryCatch(private$.dcaResults[[1]]$thresholds, error = function(e) NULL)
+            if (is.null(grid) || !length(grid) || is.null(selected) || !length(selected))
+                return(invisible(NULL))
+            lo <- min(grid)
+            hi <- max(grid)
+            outside <- selected[selected < lo - 1e-12 | selected > hi + 1e-12]
+            if (!length(outside)) return(invisible(NULL))
+
+            private$.addNotice(
+                type = "WARNING",
+                title = "Table thresholds outside the analysed range",
+                content = sprintf(
+                    'The table reports %s at %s, which %s outside the analysed threshold range of %.1f%% to %.1f%%. %s computed correctly at %s exact value%s, but %s not shown on the decision curve, and the surrounding rows come from the analysed range. Widen the threshold range, or remove %s from "Thresholds for table".',
+                    if (length(outside) == 1) "a row" else "rows",
+                    paste0(sprintf("%.1f%%", outside * 100), collapse = ", "),
+                    if (length(outside) == 1) "falls" else "fall",
+                    lo * 100, hi * 100,
+                    if (length(outside) == 1) "It is" else "They are",
+                    if (length(outside) == 1) "that" else "those",
+                    if (length(outside) == 1) "" else "s",
+                    if (length(outside) == 1) "it is" else "they are",
+                    if (length(outside) == 1) "it" else "them"
+                )
+            )
+            invisible(NULL)
+        },
+
+        # Net benefit at every threshold is driven by the true positives, so the EVENT count
+        # bounds the precision of the whole curve regardless of how many patients were enrolled.
+        # Thresholds follow the usual events-per-variable rules of thumb for a binary outcome.
+        .warnOnLowEventCount = function(data, outcome_var, complete_cases) {
+            outcomes <- tryCatch(data[[outcome_var]][complete_cases], error = function(e) NULL)
+            if (is.null(outcomes)) return(invisible(NULL))
+            positive <- private$.positiveLevel()
+            if (is.null(positive)) return(invisible(NULL))
+            n_events <- sum(as.character(outcomes) == as.character(positive), na.rm = TRUE)
+            if (!is.finite(n_events) || n_events >= 25) return(invisible(NULL))
+
+            private$.addNotice(
+                type = if (n_events < 10) "STRONG_WARNING" else "WARNING",
+                title = "Few Outcome Events",
+                content = sprintf(
+                    'Only %d event%s of the outcome %s in the analysed cases. Net benefit at every threshold is driven by these events, so the curves and any confidence intervals are imprecise%s. Interpret differences between models with caution and do not choose a threshold from this curve alone.',
+                    n_events,
+                    if (n_events == 1) "" else "s",
+                    if (n_events == 1) "is present" else "are present",
+                    if (n_events < 10) " and may be unstable" else ""
+                )
+            )
+            invisible(NULL)
+        },
+
         # Validate threshold ranges with clinical context and guidance
         .validateThresholdRange = function(min_thresh, max_thresh) {
             # Basic validation
@@ -284,7 +514,11 @@ decisioncurveClass <- if (requireNamespace("jmvcore")) R6::R6Class(
                     )
                 )
                 private$.renderNotices()
-                stop("Validation failed", call. = FALSE)
+                # The banner replaces the pane that holds the notice above, so it has to carry
+                # the message itself -- "Validation failed" told the clinician nothing.
+                stop(sprintf(
+                    "Minimum threshold (%.1f%%) must be less than maximum threshold (%.1f%%). Please adjust the threshold range in Analysis Options.",
+                    min_thresh * 100, max_thresh * 100), call. = FALSE)
             }
 
             if (min_thresh <= 0 || max_thresh >= 1) {
@@ -298,7 +532,9 @@ decisioncurveClass <- if (requireNamespace("jmvcore")) R6::R6Class(
                     )
                 )
                 private$.renderNotices()
-                stop("Validation failed", call. = FALSE)
+                stop(sprintf(
+                    "Threshold probabilities must lie strictly between 0 and 1. Current settings: Min = %.1f%%, Max = %.1f%%; valid range is 0.1%% to 99.9%%.",
+                    min_thresh * 100, max_thresh * 100), call. = FALSE)
             }
             
             # Context-neutral guidance for unusual ranges. There is no universally valid
@@ -354,7 +590,9 @@ decisioncurveClass <- if (requireNamespace("jmvcore")) R6::R6Class(
         # Parse selected thresholds for table
         .parseSelectedThresholds = function() {
             threshold_str <- self$options$selectedThresholds
-            if (threshold_str == "") {
+            # is.null first: `NULL == ""` is logical(0), and `if (logical(0))` is the raw
+            # R error "argument is of length zero" rather than a message anyone can act on.
+            if (is.null(threshold_str) || !nzchar(threshold_str)) {
                 return(private$DECISIONCURVE_DEFAULTS$selected_thresholds)
             }
 
@@ -377,8 +615,18 @@ decisioncurveClass <- if (requireNamespace("jmvcore")) R6::R6Class(
                     type = "WARNING",
                     title = "Some thresholds ignored",
                     content = sprintf(
-                        "Ignored %s. Threshold probabilities must be numbers strictly between 0 and 1, separated by commas or spaces.",
-                        paste(c(unparsed, base::format(out_of_range)), collapse = ", ")
+                        "Ignored %s.%s Threshold probabilities must be numbers strictly between 0 and 1, separated by commas or spaces.",
+                        paste(c(unparsed, base::format(out_of_range)), collapse = ", "),
+                        # Percentages are the natural way for a clinician to think about a
+                        # threshold, so name that mistake explicitly rather than leaving them
+                        # to infer it from "between 0 and 1".
+                        if (length(unparsed) == 0 && length(out_of_range) > 0 &&
+                            all(out_of_range > 1 & out_of_range <= 100))
+                            sprintf(" These look like percentages: enter %s instead.",
+                                    paste(base::format(out_of_range / 100, trim = TRUE),
+                                          collapse = ", "))
+                        else
+                            ""
                     )
                 )
             }
@@ -441,7 +689,9 @@ decisioncurveClass <- if (requireNamespace("jmvcore")) R6::R6Class(
                     )
                 )
                 private$.renderNotices()
-                stop("Validation failed", call. = FALSE)
+                stop(sprintf(
+                    "Bootstrap CI calculation error: predictions and outcomes have different lengths (%d vs %d). This indicates a data processing error; please report it.",
+                    length(predictions), length(outcomes)), call. = FALSE)
             }
 
             if (n_boot < 100) {
@@ -457,7 +707,6 @@ decisioncurveClass <- if (requireNamespace("jmvcore")) R6::R6Class(
             
             # Progress reporting for large bootstrap runs
             if (n_boot >= private$DECISIONCURVE_DEFAULTS$bootstrap_progress_threshold) {
-                message(sprintf("Bootstrap confidence intervals: Running %d replications (this may take several minutes)...", n_boot))
             }
             
             n <- length(outcomes)
@@ -465,22 +714,25 @@ decisioncurveClass <- if (requireNamespace("jmvcore")) R6::R6Class(
             
             tryCatch({
                 for (i in seq_len(n_boot)) {
-                    # Progress indicators for very large bootstrap runs
-                    if (n_boot >= 10000 && i %% 2000 == 0) {
-                        message(sprintf("Bootstrap progress: %d/%d replications completed (%.1f%%)", 
-                                       i, n_boot, (i/n_boot)*100))
-                    }
-                    
+                    # Let jamovi interrupt a long run. Without this the replicate loop is
+                    # uninterruptible: 2,000 replications on 1,000 rows with two models measured
+                    # 13.8 s with no way to stop it, and a fine threshold step on a larger
+                    # cohort runs for minutes. message() was the old progress channel and jamovi
+                    # never displays it (see the note in .plotDCA).
+                    if (i %% 50 == 0) private$.checkpoint()
+
                     # Bootstrap sample with error checking
                     boot_idx <- sample(n, n, replace = TRUE)
                     boot_pred <- predictions[boot_idx]
                     boot_out <- outcomes[boot_idx]
-                    
-                    # Validate bootstrap sample has variation
-                    if (length(unique(boot_out)) < 2) {
-                        # Skip silently - this can happen randomly with very small samples or extreme prevalence
-                        next
-                    }
+
+                    # An all-one-class resample used to be discarded here. Net benefit is
+                    # TP/n - FP/n * odds, which is perfectly well defined when a resample
+                    # contains no events (it is simply -FP/n * odds) or no controls, so the
+                    # skip threw away legitimate draws -- and only from the LOWER tail, biasing
+                    # the lower confidence limit upward. Measured on n = 30 with 3 events at
+                    # B = 4000: 5.05% of draws discarded and the lower limit shifted up by as
+                    # much as 0.026, with the upper limit unchanged. Keep every resample.
 
                     # Calculate net benefits for this bootstrap sample
                     for (j in seq_along(thresholds)) {
@@ -504,12 +756,17 @@ decisioncurveClass <- if (requireNamespace("jmvcore")) R6::R6Class(
                 })
                 
                 if (n_boot >= private$DECISIONCURVE_DEFAULTS$bootstrap_progress_threshold) {
-                    message("Bootstrap confidence intervals completed successfully.")
                 }
 
                 return(list(lower = ci_lower, upper = ci_upper))
                 
             }, error = function(e) {
+                # .checkpoint() signals a restart by stop()ping with a condition carrying
+                # code == "restart" (jmvcore::createError("restarting", "restart")). It is
+                # called inside the replicate loop above, so this handler sees it -- and would
+                # turn "the user changed an option, abandon this run" into a permanent
+                # "Bootstrap CI Failed" warning with NA intervals. Re-raise it untouched.
+                if (identical(e$code, "restart")) stop(e)
                 private$.addNotice(
                     type = "WARNING",
                     title = "Bootstrap CI Failed",
@@ -547,7 +804,15 @@ decisioncurveClass <- if (requireNamespace("jmvcore")) R6::R6Class(
                 reference <- pmax(treat_all_nb, treat_none_nb)
             }
 
-            superior <- !is.na(net_benefits) & net_benefits > reference
+            # Tolerance, not a bare `>`. The model's net benefit and the treat-all reference are
+            # computed by algebraically identical but not bitwise identical routes -- tp/n and
+            # (n - sum)/n versus 1 - sum/n -- so a model that IS treat-all (every prediction
+            # above every plotted threshold) differed from it by ~1e-16 and was counted superior
+            # at 15 of 40 thresholds. That produced a "Range of Benefit: 5% to 19%" claim in the
+            # default Clinical Interpretation for a predictor generated independently of the
+            # outcome. A difference this small is not a clinical benefit at any sample size.
+            nb_tol <- 1e-10
+            superior <- !is.na(net_benefits) & (net_benefits - reference) > nb_tol
 
             if (!any(superior)) {
                 return(list(
@@ -614,17 +879,22 @@ decisioncurveClass <- if (requireNamespace("jmvcore")) R6::R6Class(
             
             valid_boot <- 0
             
-            for (i in 1:n_boot) {
+            for (i in seq_len(n_boot)) {
+                # Interruptible, like the CI bootstrap. This loop runs the full bootReps and is
+                # the slower of the two (two vectorised net-benefit sweeps per replicate).
+                if (i %% 50 == 0) private$.checkpoint()
+
                 # Bootstrap sample
                 boot_idx <- sample(n, n, replace = TRUE)
                 b_pred1 <- pred1[boot_idx]
                 b_pred2 <- pred2[boot_idx]
                 b_out <- outcomes[boot_idx]
-                
-                # Check variation
-                if (length(unique(b_out)) < 2) {
-                     next
-                }
+
+                # No single-class skip here either. The CI bootstrap above stopped discarding
+                # these draws because net benefit is well defined without events or without
+                # controls; leaving the guard here would have left the two bootstraps in the
+                # same analysis using different resample-inclusion rules, so the interval and
+                # the p-value beside it would answer slightly different questions.
                 
                 # Calculate Net Benefits (using vectorized method)
                 nb1_vals <- private$.calculateNetBenefitsVectorized(b_pred1, b_out, thresholds, positive_outcome)
@@ -690,6 +960,19 @@ decisioncurveClass <- if (requireNamespace("jmvcore")) R6::R6Class(
             private$.plotThinning <- NULL
             private$.outcomePositive <- NULL
 
+            # Clear the previous run's NARRATIVE. jamovi persists Html result content across
+            # .run() invocations: jmvcore:::Html$fromProtoBuf restores private$.content
+            # UNCONDITIONALLY -- its clearWith block only sets .stale and breaks -- whereas
+            # Table$fromProtoBuf return()s on a clearWith hit. procedureNotes and summaryText
+            # are written only on the success path, after all eleven early returns, so without
+            # this reset a failed re-run left the PREVIOUS dataset's "Analysis Complete" and
+            # full clinical interpretation on screen next to the new error. On a data-only
+            # change (an edit or a filter) they were not even greyed. Same fix as
+            # R/survival.b.R:280-286.
+            self$results$procedureNotes$setContent("")
+            self$results$summaryText$setContent("")
+            self$results$notices$setContent("")
+
             # Clear the previous run's analysis state. The five .plot* renderers read these
             # private fields directly, so without this an early return - a bad variable, a
             # non-probability column, an invalid threshold range - left the PREVIOUS run's
@@ -701,6 +984,16 @@ decisioncurveClass <- if (requireNamespace("jmvcore")) R6::R6Class(
             private$.analysisData <- NULL
             private$.analysisOutcomes <- NULL
             private$.clinicalImpactData <- NULL
+
+            # ...and the IMAGE STATE with them. Clearing only the private fields is not enough
+            # now that the renderers rehydrate from state: jamovi persists image state across
+            # run cycles (jmvcore:::Image$fromProtoBuf only drops it when a clearWith OPTION
+            # changed, and none of the five images lists `data`), so a data-only change -- a row
+            # filter, an edited cell -- that makes this run bail out early would leave the
+            # PREVIOUS cohort's state on the images, and .restoreFromState() would faithfully
+            # redraw the previous cohort's curves beside the new error notice. That is the exact
+            # failure the private-field reset above exists to prevent.
+            private$.clearPlotStates()
 
             # Fix the RNG for every bootstrap in this run. Unseeded, the same data and the
             # same options gave a different confidence interval and a different p-value on
@@ -875,6 +1168,14 @@ decisioncurveClass <- if (requireNamespace("jmvcore")) R6::R6Class(
             private$.analysisData <- analysis_data
             private$.analysisOutcomes <- outcomes
 
+            # Event count, not just row count: the guards key on n and on prevalence, so a
+            # cohort of 110 patients with 6 events (5.5% prevalence) cleared both and was
+            # reported as a clean success -- yet every threshold's net benefit rests on those
+            # six true positives. Deliberately placed AFTER the insufficient-cases guard above:
+            # raised before it, this fired on runs that were being refused anyway and told a
+            # user whose analysis had already stopped that it also had too few events.
+            private$.warnOnLowEventCount(data, outcome_var, complete_cases)
+
             n_excluded <- sum(!complete_cases)
             if (n_excluded > 0) {
                 private$.addNotice(
@@ -1019,8 +1320,6 @@ decisioncurveClass <- if (requireNamespace("jmvcore")) R6::R6Class(
             # Performance monitoring for large analyses
             n_calculations <- length(model_vars) * length(thresholds)
             if (n_calculations >= private$DECISIONCURVE_DEFAULTS$performance_threshold_count) {
-                message(sprintf("Decision curve analysis: Processing %d models \u{00D7} %d thresholds (%d total calculations)...", 
-                               length(model_vars), length(thresholds), n_calculations))
             }
 
             # Initialize results storage
@@ -1035,7 +1334,6 @@ decisioncurveClass <- if (requireNamespace("jmvcore")) R6::R6Class(
 
                 # Progress reporting for multiple models
                 if (length(model_vars) > 3) {
-                    message(sprintf("Processing model %d/%d: %s", i, length(model_vars), model_name))
                 }
 
                 # The GUI restricts this box to numeric columns, but a programmatic caller
@@ -1207,6 +1505,9 @@ decisioncurveClass <- if (requireNamespace("jmvcore")) R6::R6Class(
             private$.dcaResults <- dca_results
             private$.plotData <- plot_data
             private$.treatAllNB <- treat_all_nb
+            # ... and publish them as image state so the renderers survive a render-only
+            # invocation (see .publishPlotStates).
+            private$.publishPlotStates()
 
             # Create procedure notes
             procedure_notes <- paste0(
@@ -1298,7 +1599,6 @@ decisioncurveClass <- if (requireNamespace("jmvcore")) R6::R6Class(
             n_models <- length(model_names)
             n_cases <- sum(complete_cases)
             n_diseased_final <- sum(outcomes == outcome_positive)
-            n_healthy_final <- n_cases - n_diseased_final
             threshold_min <- min(thresholds) * 100
             threshold_max <- max(thresholds) * 100
 
@@ -1323,6 +1623,7 @@ decisioncurveClass <- if (requireNamespace("jmvcore")) R6::R6Class(
 
         .populateResultsTable = function() {
             selected_thresholds <- private$.parseSelectedThresholds()
+            private$.warnOnThresholdsOutsideRange(selected_thresholds)
             results_table <- self$results$resultsTable
 
             # Clear existing rows
@@ -1332,8 +1633,12 @@ decisioncurveClass <- if (requireNamespace("jmvcore")) R6::R6Class(
             model_names <- names(private$.dcaResults)
             model_columns <- private$.modelColumnNames(model_names)
 
+            # .init() has normally created these already; only add what is genuinely missing
+            # (a model name that changed shape between init and run).
+            existing_cols <- vapply(results_table$columns, function(c) c$name, character(1))
             for (i in seq_along(model_names)) {
                 model_name <- model_names[i]
+                if (unname(model_columns[i]) %in% existing_cols) next
                 results_table$addColumn(
                     name = unname(model_columns[i]),
                     title = model_name,
@@ -1617,7 +1922,6 @@ decisioncurveClass <- if (requireNamespace("jmvcore")) R6::R6Class(
                     model2 = r$model2,
                     nb_difference_mean = r$nb_difference_mean,
                     nb_difference_median = r$nb_difference_median,
-                    test_statistic = r$nb_difference_mean,
                     p_value = adj_p[k],
                     conclusion = conclusion
                 ))
@@ -1634,7 +1938,7 @@ decisioncurveClass <- if (requireNamespace("jmvcore")) R6::R6Class(
             if (capped) {
                 table$setNote(
                     "cap",
-                    sprintf("Bootstrap replications for this table are capped at 1000 for speed; the %d you requested are used elsewhere.",
+                    sprintf("Bootstrap replications for this table are capped at 1000 for speed; the %d you requested are not used for this table.",
                             self$options$bootReps)
                 )
             }
@@ -1978,7 +2282,10 @@ decisioncurveClass <- if (requireNamespace("jmvcore")) R6::R6Class(
                     interpretation,
                     "<p><strong>Highest Average Net Benefit Over the Selected Range:</strong> ",
                     private$.safeHtmlOutput(best_model),
-                    " (descriptive only; inspect the curves at prespecified clinical thresholds because curves may cross)</p>"
+                    " (this only ranks the models against each other; it does not mean the model ",
+                    "is useful. Whether it beats treating everyone or no one is the Range of ",
+                    "Benefit below. Inspect the curves at prespecified clinical thresholds ",
+                    "because curves may cross.)</p>"
                 )
 
                 # Range over which the leading model beats both reference strategies.
@@ -2112,6 +2419,7 @@ decisioncurveClass <- if (requireNamespace("jmvcore")) R6::R6Class(
         
         # Optimized plotting functions with performance enhancements for many models
         .plotDCA = function(image, ggtheme, theme, ...) {
+            private$.restoreFromState(image)
             if (is.null(private$.plotData) || nrow(private$.plotData) == 0) {
                 return(FALSE)
             }
@@ -2124,12 +2432,13 @@ decisioncurveClass <- if (requireNamespace("jmvcore")) R6::R6Class(
             
             if (n_models > max_models_threshold) {
                 plot_data <- private$.optimizePlotDataForManyModels(plot_data, n_models)
-                message(sprintf("Plot optimized for %d models: Using performance enhancements", n_models))
             }
 
             # Create base plot with optimized aesthetics
             p <- ggplot2::ggplot(plot_data, ggplot2::aes(x = threshold, y = net_benefit, color = model)) +
-                ggplot2::geom_line(size = if(n_models > max_models_threshold) 0.8 else 1) +
+                # linewidth, not size: `size` for lines was deprecated in ggplot2 3.4.0 and emits a
+                # deprecation warning into jamovi's Analysis Notes on every render.
+                ggplot2::geom_line(linewidth = if(n_models > max_models_threshold) 0.8 else 1) +
                 ggplot2::labs(
                     title = "Decision Curve Analysis",
                     x = "Threshold Probability",
@@ -2193,7 +2502,7 @@ decisioncurveClass <- if (requireNamespace("jmvcore")) R6::R6Class(
                     p <- p + ggplot2::geom_line(
                         data = treat_lines,
                         linetype = "dashed", 
-                        size = if(n_models > max_models_threshold) 0.6 else 0.8
+                        linewidth = if(n_models > max_models_threshold) 0.6 else 0.8
                     )
                 }
             }
@@ -2226,17 +2535,48 @@ decisioncurveClass <- if (requireNamespace("jmvcore")) R6::R6Class(
                 }
             }
 
+            # Zoom the y-axis to the decision curves. Treat-all is
+            # prevalence - (1 - prevalence) * t/(1 - t), which dives towards minus infinity as
+            # t approaches 1: with thresholdRange = "auto" the grid runs to 0.99, where that
+            # line reaches about -76 on a 27%-prevalence cohort and squashes every model curve
+            # into 0.4% of the panel height -- the clinically informative part of the figure
+            # becomes an unreadable flat band. .plotRelativeUtility already solved this; use
+            # coord_cartesian (a zoom) and NOT ylim (a scale limit, which DROPS rows and would
+            # silently truncate the reference lines).
+            model_nb <- plot_data$net_benefit[!plot_data$model %in% c("Treat All", "Treat None")]
+            model_nb <- model_nb[is.finite(model_nb)]
+            if (length(model_nb) > 0) {
+                # Pad OUTWARDS. `max * 1.1` moves the ceiling DOWN when the maximum is
+                # negative -- for a model worse than treat-none across the whole plotted range
+                # that clipped the curve and pushed the y = 0 reference line off the panel, so
+                # the reader lost the very line that shows the model is harmful. Always keep
+                # zero visible: it is the treat-none strategy.
+                span      <- max(model_nb) - min(model_nb)
+                pad       <- max(0.02, 0.1 * span)
+                y_floor   <- min(-0.05, min(model_nb) - pad)
+                y_ceiling <- max(0.05, max(model_nb) + pad)
+                if (is.finite(y_floor) && is.finite(y_ceiling) && y_ceiling > y_floor)
+                    p <- p + ggplot2::coord_cartesian(ylim = c(y_floor, y_ceiling))
+            }
+
             print(p)
             return(TRUE)
         },
 
         .plotClinicalImpact = function(image, ggtheme, theme, ...) {
+            private$.restoreFromState(image)
             if (is.null(private$.dcaResults) || (!self$options$calculateClinicalImpact && !self$options$showClinicalImpactPlot)) {
                 return(FALSE)
             }
 
-            # Get selected thresholds and models
+            # Get selected thresholds and models.
+            # .parseSelectedThresholds() calls .addNotice() on a malformed entry, and renderers
+            # run on every window resize without ever calling .renderNotices() -- so those
+            # notices piled up in private$.noticeList, invisible, growing one per resize. Keep
+            # the list exactly as .run() left it.
+            saved_notices <- private$.noticeList
             selected_thresholds <- private$.parseSelectedThresholds()
+            private$.noticeList <- saved_notices
             model_names <- names(private$.dcaResults)
             pop_size <- self$options$populationSize
 
@@ -2264,19 +2604,24 @@ decisioncurveClass <- if (requireNamespace("jmvcore")) R6::R6Class(
             if (nrow(impact_data) == 0) return(FALSE)
 
             # Reshape data for stacked bar chart (tidyr::gather namespaced below)
-            plot_data <- impact_data %>%
-                tidyr::gather(key = "outcome_type", value = "count",
-                              true_positives_per_100, false_positives_per_100) %>%
-                dplyr::mutate(
-                    outcome_type = factor(outcome_type,
-                                          levels = c("true_positives_per_100", "false_positives_per_100"),
-                                          labels = c("True Positives", "False Positives"))
-                )
+            # No magrittr pipe: %>% is not imported by this package's NAMESPACE on its own
+            # account, so this line resolved only by accident of what other analyses import.
+            # It failed outright when the renderer ran from a restored state.
+            plot_data <- tidyr::gather(impact_data, key = "outcome_type", value = "count",
+                                       true_positives_per_100, false_positives_per_100)
+            plot_data <- dplyr::mutate(
+                plot_data,
+                outcome_type = factor(outcome_type,
+                                      levels = c("true_positives_per_100", "false_positives_per_100"),
+                                      labels = c("True Positives", "False Positives"))
+            )
 
             # Create stacked bar chart showing clinical impact
             p <- ggplot2::ggplot(plot_data, ggplot2::aes(x = factor(threshold), y = count, fill = outcome_type)) +
                 ggplot2::geom_bar(stat = "identity", position = "stack") +
-                ggplot2::facet_wrap(~ model, scales = "free_y") +
+                # scales = "fixed": y is a projected patient count, so a per-panel scale made
+                # two models look alike when their counts differed by a factor of two.
+                ggplot2::facet_wrap(~ model, scales = "fixed") +
                 ggplot2::labs(
                     title = sprintf(
                         "Clinical Impact: Projected Outcomes in a Population of %s",
@@ -2296,12 +2641,10 @@ decisioncurveClass <- if (requireNamespace("jmvcore")) R6::R6Class(
         },
 
         .plotInterventionsAvoided = function(image, ggtheme, theme, ...) {
-            # Set state for plot rendering
-            plotState <- list(
-                dcaResults = private$.dcaResults,
-                thresholds = if (!is.null(private$.dcaResults)) private$.dcaResults[[1]]$thresholds else NULL
-            )
-            image$setState(plotState)
+            # This used to build a plotState and setState() it HERE, inside the renderer, where
+            # nothing can ever read it back -- a dead write that only bloated the .omv. State is
+            # published from .run() now; this restores from it.
+            private$.restoreFromState(image)
 
             if (is.null(private$.dcaResults)) {
                 return(FALSE)
@@ -2339,7 +2682,7 @@ decisioncurveClass <- if (requireNamespace("jmvcore")) R6::R6Class(
 
             # Create line plot showing interventions avoided
             p <- ggplot2::ggplot(avoided_data, ggplot2::aes(x = threshold, y = interventions_avoided, color = model)) +
-                ggplot2::geom_line(size = 1) +
+                ggplot2::geom_line(linewidth = 1) +
                 ggplot2::geom_hline(yintercept = 0, linetype = "dashed", alpha = 0.5) +
                 ggplot2::labs(
                     title = "Net Interventions Avoided vs Treat All",
@@ -2357,13 +2700,9 @@ decisioncurveClass <- if (requireNamespace("jmvcore")) R6::R6Class(
         },
 
         .plotRelativeUtility = function(image, ggtheme, theme, ...) {
-            # Set state for plot rendering
-            plotState <- list(
-                plotData = private$.plotData,
-                analysisOutcomes = private$.analysisOutcomes,
-                outcomePositive = private$.positiveLevel()
-            )
-            image$setState(plotState)
+            # State is published from .run() now (see .publishPlotStates); the setState that
+            # used to sit here ran during render, where nothing could read it back.
+            private$.restoreFromState(image)
 
             if (is.null(private$.dcaResults)) return(FALSE)
 
@@ -2424,15 +2763,16 @@ decisioncurveClass <- if (requireNamespace("jmvcore")) R6::R6Class(
                 NULL
             }
 
-            plot <- ggplot(plot_data, aes(x = threshold, y = relative_utility, color = model)) +
-                geom_line(linewidth = 1) +
-                scale_color_brewer(palette = "Set1") +
-                labs(title = "Relative Utility Curve",
+            plot <- ggplot2::ggplot(plot_data,
+                        ggplot2::aes(x = threshold, y = relative_utility, color = model)) +
+                ggplot2::geom_line(linewidth = 1) +
+                private$.modelColourScale(plot_data) +
+                ggplot2::labs(title = "Relative Utility Curve",
                      x = "Threshold Probability",
                      y = "Relative Utility (vs best default strategy)",
                      color = "Model",
                      caption = plot_caption) +
-                theme_minimal() +
+                ggplot2::theme_minimal() +
                 ggtheme +
                 ggplot2::coord_cartesian(ylim = c(y_floor, y_ceiling))
 
@@ -2441,13 +2781,9 @@ decisioncurveClass <- if (requireNamespace("jmvcore")) R6::R6Class(
         },
         
         .plotStandardizedNetBenefit = function(image, ggtheme, theme, ...) {
-            # Set state for plot rendering
-            plotState <- list(
-                plotData = private$.plotData,
-                analysisOutcomes = private$.analysisOutcomes,
-                outcomePositive = private$.positiveLevel()
-            )
-            image$setState(plotState)
+            # State is published from .run() now (see .publishPlotStates); the setState that
+            # used to sit here ran during render, where nothing could read it back.
+            private$.restoreFromState(image)
 
             if (is.null(private$.dcaResults)) return(FALSE)
 
@@ -2458,17 +2794,34 @@ decisioncurveClass <- if (requireNamespace("jmvcore")) R6::R6Class(
             
             plot_data$snb <- plot_data$net_benefit / prevalence
             
-            plot <- ggplot(plot_data, aes(x = threshold, y = snb, color = model)) +
-                geom_line(size = 1) +
-                scale_color_brewer(palette = "Set1") +
-                labs(title = "Standardized Net Benefit",
+            plot <- ggplot2::ggplot(plot_data,
+                        ggplot2::aes(x = threshold, y = snb, color = model)) +
+                # linewidth, not size: `size` for lines was deprecated in ggplot2 3.4.0 and
+                # emits a deprecation warning on every render.
+                ggplot2::geom_line(linewidth = 1) +
+                private$.modelColourScale(plot_data) +
+                ggplot2::labs(title = "Standardized Net Benefit",
                      subtitle = "Net benefit divided by outcome prevalence (dimensionless)",
                      x = "Threshold Probability",
                      y = "Standardized Net Benefit (NB / Prevalence)",
                      color = "Model",
                      caption = "A value of 1 corresponds to the maximum net benefit of perfect classification; values are not counts per 100 patients.") +
-                theme_minimal() +
+                ggplot2::theme_minimal() +
                 ggtheme
+
+            # Same y-zoom as .plotDCA and .plotRelativeUtility. Dividing by the prevalence
+            # magnifies the treat-all dive: at a prevalence of 0.047 with thresholdRange="auto"
+            # the panel spanned -2122 to 102 and the model curve occupied 0.04% of its height.
+            snb_model <- plot_data$snb[!plot_data$model %in% c("Treat All", "Treat None")]
+            snb_model <- snb_model[is.finite(snb_model)]
+            if (length(snb_model) > 0) {
+                span      <- max(snb_model) - min(snb_model)
+                pad       <- max(0.02, 0.1 * span)
+                y_floor   <- min(-0.05, min(snb_model) - pad)
+                y_ceiling <- max(0.05, max(snb_model) + pad)
+                if (is.finite(y_floor) && is.finite(y_ceiling) && y_ceiling > y_floor)
+                    plot <- plot + ggplot2::coord_cartesian(ylim = c(y_floor, y_ceiling))
+            }
             
             print(plot)
             return(TRUE)

@@ -355,7 +355,7 @@ highdimcoxClass <- if (requireNamespace('jmvcore', quietly=TRUE))
         has_factors <- any(vapply(pred_data, is.factor, logical(1)))
         if (has_factors) {
           # Use model.matrix to create proper dummy variables (no intercept)
-          pred_matrix <- model.matrix(~ . - 1, data = pred_data)
+          pred_matrix <- .stripBackticks(model.matrix(~ . - 1, data = pred_data))
         } else {
           pred_matrix <- as.matrix(pred_data)
         }

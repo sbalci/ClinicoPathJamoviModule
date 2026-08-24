@@ -169,7 +169,7 @@ survivalbartClass <- R6::R6Class(
             pred_data <- analysis_data[, pred_vars, drop = FALSE]
             
             # BART can handle factors directly, but we'll convert for consistency
-            x_matrix <- model.matrix(~ . - 1, data = pred_data)
+            x_matrix <- .stripBackticks(model.matrix(~ . - 1, data = pred_data))
 
             return(list(
                 data = analysis_data,

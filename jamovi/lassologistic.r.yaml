@@ -90,6 +90,7 @@ items:
           - nfolds
           - standardize
           - random_seed
+          - showModelComparison
 
     - name: performance
       title: Classification Performance
@@ -162,6 +163,8 @@ items:
           - random_seed
           - scoringMaxPoints
           - scoringMethod
+          - scoreCutMethod
+          - scoreCutPoints
 
     - name: scoringPerformance
       title: Scoring System Performance
@@ -187,6 +190,8 @@ items:
           - random_seed
           - scoringMaxPoints
           - scoringMethod
+          - scoreCutMethod
+          - scoreCutPoints
 
     - name: methodComparison
       title: Scoring Method Comparison
@@ -224,6 +229,8 @@ items:
           - random_seed
           - scoringMaxPoints
           - scoringMethod
+          - scoreCutMethod
+          - scoreCutPoints
 
     - name: lookupTable
       title: Score-to-Probability Lookup
@@ -259,6 +266,8 @@ items:
           - random_seed
           - scoringMaxPoints
           - scoringMethod
+          - scoreCutMethod
+          - scoreCutPoints
 
     - name: validationTable
       title: Bootstrap Internal Validation
@@ -387,11 +396,13 @@ items:
           - random_seed
 
     - name: lassoExplanation
-      title: Understanding LASSO Logistic Regression
+      title: Understanding Penalized Logistic Regression
       type: Html
       visible: (showExplanations)
       clearWith:
           - showExplanations
+          - penalty
+          - alpha
 
     - name: methodologyNotes
       title: Methodology Notes
@@ -399,6 +410,10 @@ items:
       visible: (showMethodologyNotes)
       clearWith:
           - showMethodologyNotes
+          - standardize
+          - scoreCutMethod
+          - scoreCutPoints
+          - scoringSystem
 
     - name: clinicalGuidance
       title: Clinical Interpretation Guidance

@@ -266,12 +266,12 @@ firthregressionClass <- R6::R6Class(
             pred_data <- analysis_data[, predictors, drop = FALSE]
 
             # Create model matrix for checks
-            x_matrix <- tryCatch(
+            x_matrix <- .stripBackticks(tryCatch(
                 model.matrix(~ . - 1, data = pred_data),
                 error = function(e) {
                     jmvcore::reject("Could not create model matrix: {}", e$message)
                 }
-            )
+            ))
 
             # Remove near-constant columns
             col_vars <- apply(x_matrix, 2, var, na.rm = TRUE)
@@ -507,6 +507,13 @@ firthregressionClass <- R6::R6Class(
 
             if (is.null(firth_fit)) return()
 
+            # composeTerms backtick-quotes non-syntactic variable names when it
+            # builds the formula, so logistf's own coefficient names come back
+            # quoted. Clean them ONCE here rather than at each of the display
+            # sites (.populateCoefficients, .populateComparison, the forest plot
+            # labels and the summary sentence all read names(firth_fit$coefficients)).
+            names(firth_fit$coefficients) <- .stripBackticks(names(firth_fit$coefficients))
+
             # Fit standard model for comparison
             standard_fit <- NULL
             if (isTRUE(self$options$compareStandard)) {
@@ -598,6 +605,9 @@ firthregressionClass <- R6::R6Class(
             })
 
             if (is.null(firth_fit)) return()
+
+            # Same second backtick source as the logistic branch above.
+            names(firth_fit$coefficients) <- .stripBackticks(names(firth_fit$coefficients))
 
             # Fit standard Cox for comparison
             standard_fit <- NULL

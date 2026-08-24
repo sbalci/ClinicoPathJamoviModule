@@ -533,7 +533,7 @@ adaptivelassoClass <- R6::R6Class(
 
             # Prepare predictor matrix
             pred_data <- analysis_data[, pred_vars, drop = FALSE]
-            x_matrix <- model.matrix(~ . - 1, data = pred_data)
+            x_matrix <- .stripBackticks(model.matrix(~ . - 1, data = pred_data))
 
             # Remove constant columns (zero variance) before standardization
             col_vars <- apply(x_matrix, 2, var, na.rm = TRUE)
