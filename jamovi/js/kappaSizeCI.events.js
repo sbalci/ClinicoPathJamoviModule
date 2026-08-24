@@ -1,5 +1,5 @@
-// UI events for kappaSizeFixedN. Bound from jamovi/kappaSizeFixedN.u.yaml
-// (outcome ComboBox -> events: change: ./kappaSizeFixedN.events::onChange_outcome).
+// UI events for kappaSizeCI. Bound from jamovi/kappaSizeCI.u.yaml
+// (outcome ComboBox -> events: change: ./kappaSizeCI.events::onChange_outcome).
 //
 // The proportions field must hold exactly one value per outcome level, so changing the
 // number of levels always invalidates what is typed there. Replace it with a template of

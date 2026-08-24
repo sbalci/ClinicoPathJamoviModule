@@ -122,8 +122,8 @@ decisioncurve
 
 ## Power (menuGroup: Power)
 
-kappaSizeCI
-kappaSizeFixedN
+- kappaSizeCI
+- kappaSizeFixedN
 - kappaSizePower
 
 
@@ -4024,3 +4024,35 @@ lintr bug-set clean, all gates clean; 3-agent adversarial verification):
       line can therefore appear in the Analysis result pane while the module's Notes panel
       (Cochran's rule on the agreement-pattern cells) stays quiet, and vice versa. Consider
       one sentence in the Methodology note explaining the two checks differ.
+
+## kappaSizeCI /check-function pass (2026-08-23) - out-of-scope follow-ups
+
+- [ ] **[i18n]** `R/kappaSizeCI.b.R` has **0 `.()` wraps across 69 prose strings** and 0 entries
+      in `jamovi/i18n/tr.po`, while `kappaSizeFixedN` is 32 wraps / 31 po entries and
+      `kappaSizePower` 38 / 38. One of the three analyses in the same "Power Analysis by
+      meddecide" submenu renders untranslated in a Turkish session. The in-file TODO at
+      `R/kappaSizeCI.b.R:502` says "bootstrap jamovi/i18n/" but the catalogs already exist, so
+      the note is stale - the actual route is `/prepare-translation kappasizeci`.
+- [ ] **[refactor]** `.gofCells` now lives in THREE files (`kappaSizeCI.b.R`,
+      `kappaSizeFixedN.b.R`, `kappaSizePower.b.R`). The CI and FixedN bodies are byte-identical;
+      Power differs only in `2L` vs `2` and an argument name, and all three agree to 0 (exactly)
+      across 100 configurations. They are private R6 methods so the `Collate:` shadowing hazard
+      does not apply, but the same 12-line closed form must now be kept in sync by hand. A
+      shared helper in `R/utils.R` is the obvious ask from a reviewer.
+- [ ] **[cleanup]** `jamovi/kappaSizeCI.a.yaml` carries 40 lines of commented-out schema - an
+      inert duplicate of the live `outcome` option plus a `.u.yaml` fragment. Harmless (YAML
+      comments) but noise. `remove_placeholders` was off in the profile used.
+- [ ] **[lint]** Add a repo-wide gate for a literal `%` in any `.a.yaml` `description:` block.
+      It becomes `\%` in the `.h.R` and `\\%` in the `.Rd`, where the parser eats the rest of
+      the line - 70 characters vanished from `?kappaSizeCI` this pass and neither
+      `tools::checkRd()` nor `R CMD check` flags it.
+      **The other live instance is now identified:** `jamovi/decisioncurve.a.yaml`, option
+      `weightedAUC`, `description.R`. `man/decisioncurve.Rd` currently renders
+      "...it moved from 0.309 to 0.163 as the range widened from 5-20\ alongside it. Curves..."
+      - the `%` after "5-20" eats the rest of that source line mid-sentence. One-token fix
+      (write "percent"), then `prepare()` + `document()`. `waterfall.a.yaml` also has `%` in two
+      `description.jamovi` strings, but its `description.R` strings already say "percent", and
+      only the `R` key reaches the `.Rd`, so waterfall is NOT affected.
+- [ ] **[style]** `R/kappaSizeFixedN.b.R:106` still pastes `signif(sparse_min, 2)` straight into
+      the sparse notice, so it inherits the scientific-notation-in-prose wart that kappaSizeCI
+      just fixed with `.fmtCount()` ("below 0.01"). Port `.fmtCount` to FixedN and Power.

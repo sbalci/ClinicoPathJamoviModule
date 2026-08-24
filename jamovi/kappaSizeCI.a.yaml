@@ -10,11 +10,25 @@ jas: '1.2'
 
 description:
     main: >
-        Power Analysis for Interobserver Agreement Analysis.
-    # R:
-    #     dontrun: true
-    #     usage: |
-    #         # example will be added
+        Number of subjects an interobserver agreement study needs for the confidence
+        interval around the anticipated kappa (kappa0) to reach the requested precision -
+        the confidence-interval approach of the kappaSize package. This is NOT a power
+        calculation and tests no hypothesis; use kappaSizePower to size a study for a
+        hypothesis test, and kappaSizeFixedN when the number of subjects is already fixed.
+    R:
+        dontrun: true
+        usage: |
+            # kappaSize::CIBinary example: anticipated kappa 0.60 to be reported with a
+            # 95 percent CI of [0.40, 0.80], 2 raters, trait prevalence 0.20
+            kappaSizeCI(
+                outcome = "2",
+                citype = "two_sided",
+                kappa0 = 0.60,
+                kappaL = 0.40,
+                kappaU = 0.80,
+                props = "0.20, 0.80",
+                raters = "2",
+                alpha = 0.05)
 
 options:
     - name: outcome
@@ -28,9 +42,9 @@ options:
       default: "2"
       description:
           ui: >
-            Number of outcome level.
+              Number of outcome levels (categories) of the rated variable.
           R: >
-            Number of outcome level.
+              Number of outcome levels (categories) of the rated variable.
 
 
     # - name: outcome
@@ -116,9 +130,13 @@ options:
       max: 0.99
       description:
           ui: >
-            The lower limit of the kappa.
+              Lower confidence limit you want the study to achieve for kappa. It must be
+              below kappa0; the sample size is driven by how close it sits to kappa0, not
+              by the full interval width.
           R: >
-            The lower limit of the kappa.
+              Lower confidence limit you want the study to achieve for kappa. Must be
+              strictly below kappa0. The required sample size grows roughly as one over the
+              square of the distance from kappa0 to the nearer limit.
 
     - name: kappaU
       title: kappaU
@@ -128,19 +146,28 @@ options:
       max: 0.99
       description:
           ui: >
-            The upper limit of the kappa.
+              Upper confidence limit you want the study to achieve for kappa. It must be
+              above kappa0, and is ignored for a one-sided interval.
           R: >
-            The upper limit of the kappa.
+              Upper confidence limit you want the study to achieve for kappa. Must be
+              strictly above kappa0. Ignored when citype is 'one_sided' (passed to
+              kappaSize as NA, which is how that package requests a one-sided bound).
 
     - name: props
       title: Proportions of outcome level
       type: String
-      default: '0.20 , 0.80'
+      default: '0.20, 0.80'
       description:
           ui: >
-            Proportions of outcome level.
+              Anticipated share of subjects in each outcome category, separated by commas,
+              semicolons or spaces, using a decimal point, and summing to 1 (for example
+              0.20, 0.80 for a finding present in one case in five). For a binary outcome a
+              single prevalence is enough. Enter exactly one value per outcome level otherwise.
           R: >
-            Proportions of outcome level.
+              Anticipated share of subjects in each outcome category as a single string,
+              separated by commas, semicolons or spaces, using a decimal point, and summing
+              to 1 (for example "0.20, 0.80"). For a binary outcome a single prevalence is
+              enough. Enter exactly one value per outcome level otherwise.
 
     - name: raters
       title: raters
@@ -153,10 +180,10 @@ options:
         - "6"
       default: "2"
       description:
-          ui: >
-            Number of raters.
-          R: >
-            Number of raters.
+              ui: >
+                  Number of raters who will each rate every subject (2 to 6).
+              R: >
+                  Number of raters who will each rate every subject (2 to 6).
 
 
     - name: alpha
@@ -167,8 +194,11 @@ options:
       max: 0.20
       description:
           ui: >
-            The significance level.
+              Significance level of the confidence interval - 0.05 gives a 95 percent interval
+              (capped at 0.20).
           R: >
-            The significance level.
+              Significance level of the confidence interval - 0.05 gives a 95 percent interval
+              (capped at 0.20). Two-sided intervals use qchisq(1 - alpha, 1); a one-sided
+              lower bound uses qchisq(1 - 2*alpha, 1).
 
 ...

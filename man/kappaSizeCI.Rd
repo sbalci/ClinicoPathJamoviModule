@@ -10,13 +10,13 @@ kappaSizeCI(
   kappa0 = 0.6,
   kappaL = 0.4,
   kappaU = 0.8,
-  props = "0.20 , 0.80",
+  props = "0.20, 0.80",
   raters = "2",
   alpha = 0.05
 )
 }
 \arguments{
-\item{outcome}{Number of outcome level.}
+\item{outcome}{Number of outcome levels (categories) of the rated variable.}
 
 \item{citype}{Type of confidence interval: 'two_sided' or 'one_sided'.}
 
@@ -26,15 +26,27 @@ kappaSize documents this argument as "the preliminary value of kappa". It
 is NOT a null hypothesis value; contrast kappaSizePower, where kappa0 IS
 the null being tested.}
 
-\item{kappaL}{The lower limit of the kappa.}
+\item{kappaL}{Lower confidence limit you want the study to achieve for
+kappa. Must be strictly below kappa0. The required sample size grows
+roughly as one over the square of the distance from kappa0 to the nearer
+limit.}
 
-\item{kappaU}{The upper limit of the kappa.}
+\item{kappaU}{Upper confidence limit you want the study to achieve for
+kappa. Must be strictly above kappa0. Ignored when citype is 'one_sided'
+(passed to kappaSize as NA, which is how that package requests a one-sided
+bound).}
 
-\item{props}{Proportions of outcome level.}
+\item{props}{Anticipated share of subjects in each outcome category as a
+single string, separated by commas, semicolons or spaces, using a decimal
+point, and summing to 1 (for example "0.20, 0.80"). For a binary outcome a
+single prevalence is enough. Enter exactly one value per outcome level
+otherwise.}
 
-\item{raters}{Number of raters.}
+\item{raters}{Number of raters who will each rate every subject (2 to 6).}
 
-\item{alpha}{The significance level.}
+\item{alpha}{Significance level of the confidence interval - 0.05 gives a
+95 percent interval (capped at 0.20). Two-sided intervals use qchisq(1 -
+alpha, 1); a one-sided lower bound uses qchisq(1 - 2*alpha, 1).}
 }
 \value{
 A results object containing:
@@ -46,5 +58,25 @@ A results object containing:
 }
 }
 \description{
-Power Analysis for Interobserver Agreement Analysis.
+Number of subjects an interobserver agreement study needs for the
+confidence interval around the anticipated kappa (kappa0) to reach the
+requested precision - the confidence-interval approach of the kappaSize
+package. This is NOT a power calculation and tests no hypothesis; use
+kappaSizePower to size a study for a hypothesis test, and kappaSizeFixedN
+when the number of subjects is already fixed.
+}
+\examples{
+\donttest{
+# kappaSize::CIBinary example: anticipated kappa 0.60 to be reported with a
+# 95 percent CI of [0.40, 0.80], 2 raters, trait prevalence 0.20
+kappaSizeCI(
+    outcome = "2",
+    citype = "two_sided",
+    kappa0 = 0.60,
+    kappaL = 0.40,
+    kappaU = 0.80,
+    props = "0.20, 0.80",
+    raters = "2",
+    alpha = 0.05)
+}
 }

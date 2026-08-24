@@ -7,9 +7,11 @@
 An \code{R6} class generator object for the \code{kappaSizeCIClass} backend; used internally by the jamovi analysis wrapper and not called directly.
 }
 \description{
-Calculate sample size for interobserver agreement studies using Cohen's kappa statistic.
-This function provides confidence interval-based sample size determination for studies
-evaluating agreement between raters across different numbers of outcome categories.
+Calculate sample size for interobserver agreement studies from the width of the
+confidence interval around kappa. The estimand is the intraclass (Fleiss-type) kappa of the
+common-correlation model of Donner and Eliasziw / Rotondi and Donner; for two raters with
+equal marginal frequencies it coincides with Cohen's kappa. It supports 2-5 outcome
+categories and 2-6 raters.
 }
 \details{
 The function uses the kappaSize package to calculate required sample sizes

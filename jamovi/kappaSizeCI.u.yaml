@@ -15,14 +15,16 @@ children:
           column: 1
         children:
           - type: Label
-            label: Number of Outcome Level
+            label: Number of Outcome Levels
             children:
               - type: LayoutBox
                 margin: large
                 children:
                   - type: ComboBox
                     name: outcome
-                    label: Outcome Level
+                    label: ''
+                    events:
+                      change: ./kappaSizeCI.events::onChange_outcome
       - type: LayoutBox
         margin: large
         cell:
@@ -37,7 +39,7 @@ children:
                 children:
                   - type: ComboBox
                     name: raters
-                    label: Raters
+                    label: ''
 
 
   - type: Label
@@ -48,7 +50,7 @@ children:
         children:
           - type: ComboBox
             name: citype
-            label: CI Type
+            label: ''
 
 
   - type: Label
@@ -115,5 +117,5 @@ children:
               children:
                 - type: TextBox
                   name: alpha
-                  label: 'Alpha'
+                  label: ''
                   format: number

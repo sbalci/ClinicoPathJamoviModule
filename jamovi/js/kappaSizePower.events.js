@@ -14,8 +14,20 @@ const events = {
             '4': '0.20, 0.40, 0.20, 0.20',
             '5': '0.10, 0.30, 0.20, 0.20, 0.20'
         };
-        if (templates[outcome] !== undefined)
-            ui.props.setValue(templates[outcome]);
+        const template = templates[outcome];
+        if (template === undefined)
+            return;
+
+        // Only replace what the new level count has actually invalidated. Overwriting
+        // unconditionally destroys hand-entered proportions every time this runs -- including
+        // whenever jamovi fires `change` while binding options, which would silently reset a
+        // saved .omv back to the template. A binary outcome accepts one value or two, matching
+        // .validateProportions() in the backend.
+        const current = String(ui.props.value() || '');
+        const count = current.split(/[,;|\s]+/).filter(s => s.length > 0).length;
+        const needed = outcome === '2' ? [1, 2] : [Number(outcome)];
+        if (!needed.includes(count))
+            ui.props.setValue(template);
     }
 
 };

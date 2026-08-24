@@ -60,46 +60,51 @@ Function: **`$ARGUMENTS`**
 - Error message quality and helpfulness
 - Data sanitization
 
-### CRAN Compliance & Code Hygiene (checktor)
+### CRAN Compliance & Code Hygiene (scoped, no checktor)
 
-Run the CRAN pre-submission checker `checktor` and interpret the findings for **this function only**. checktor catches issues `R CMD check` misses (hardcoded seeds, global-env writes, missing `\value`, unsafe `library()`, unrestored `par()`, etc.).
+`checktor` used to be run here. It is **package-scoped by construction** — `checktor::checktor(path)`
+and every one of its `diagnose_*()` entry points take a *package* path, never a file or a
+function — so reviewing one analysis meant scanning all ~390 `.b.R` files and then filtering
+`checktor::issues(res)` on the `location` column. That is minutes of work to surface a handful
+of rows, it drags in package-level categories (`description_issues`, `news_file`,
+`readme_relative_links`, `cran_comments_file`, `package_size`, `urls`) that no single function
+can fix, and a zero-row filter is ambiguous between *genuinely clean* and *the filter matched
+nothing*. **Do not run checktor from this command.** Run it separately, package-wide, when
+preparing a CRAN submission.
 
-**How to run (scoped to the function):**
+Instead check the same signal scoped to this one function. All of it is sub-second:
 
-```r
-# install.packages("checktor")   # once
-res <- checktor::checktor(".", verbose = FALSE, progress = FALSE)
-i   <- checktor::issues(res)     # data.frame: category, check, file, line, location, message
-#   NOTE: the `file` column is NA for several checks — parse the `location` column instead.
-fn  <- "$ARGUMENTS"
-mine <- i[grepl(fn, i$location, ignore.case = TRUE) |
-          grepl(paste0("^", fn, "(Class)?\\.Rd$"), basename(i$location)), ]
-print(mine[, c("check", "location", "message")])
+```bash
+FN=<fn>
+grep -n "set.seed(" R/$FN.b.R                       # hardcoded seed -> user-facing 'seed' option
+grep -n "<<-" R/$FN.b.R                             # see the table below before touching one
+grep -nE "^[[:space:]]*(library|require)\(" R/$FN.b.R   # never in package source
+grep -nE "\bpar\(|options\(" R/$FN.b.R              # graphics/options state must be restored
+grep -n '\\value' man/$FN.Rd                       # every exported function needs one
+grep -oE "\b[a-zA-Z0-9.]+::" R/$FN.b.R | sort -u    # each must be in DESCRIPTION Imports
+LC_ALL=C grep -n '[^\x00-\x7F]' R/$FN.b.R             # non-ASCII must be \u{} escapes
 ```
 
-For the whole-package summary use `checktor::tidy(res)` (per-check counts) and `checktor::prescribe(res)` (treatment hints). Always run `checktor` **in addition to** `devtools::check()`, never instead of it.
+`T`/`F`-as-boolean is already covered by `T_and_F_symbol_linter` in the lintr set below, so it
+needs no separate check here.
 
-**Real vs false-positive (learned on this codebase — do not blindly "fix"):**
+Interpreting the two that have real false positives:
 
-| Check | Usually REAL — fix | Often FALSE POSITIVE — leave (explain) |
+| Pattern | REAL — fix | FALSE POSITIVE — leave (say why) |
 |---|---|---|
-| `seed_setting` | hardcoded `set.seed(42)` → user-configurable `seed` **option** (add to `.a.yaml` + `.u.yaml` + `.b.R`, `is.null()` fallback to the old literal); if the arg is arithmetic (`start*100`) compute into a variable first (`set.seed(iter_seed)`) so the literal leaves the `set.seed()` call | — |
-| `globalenv_mod` | a `<<-` in a **tryCatch BODY** (not a handler) genuinely writes to `.GlobalEnv` while the method-frame local stays unchanged → a **real latent bug** (e.g. an always-`NA` statistic). Convert to `<-`. | a `<<-` inside an **error/warning-handler closure** writes to the enclosing **method frame**, not `.GlobalEnv` → functionally correct. Refactor only to satisfy the linter, never by naively swapping `<<-`→`<-` inside the handler (that silently drops the write). |
-| `globalenv_mod` (`.Random.seed`) | manual `.Random.seed` save/restore → `withr::local_seed(seed)` (with a seed) or `withr::local_preserve_seed()` (no seed). Add `withr` to Imports. | the manual save/restore is *correct* RNG hygiene — only replace it, do not delete it |
-| `value_tags` | missing `\value` → add `#' @return …` to the roxygen in the **`.b.R`** (for `xxxClass` generators, `@keywords internal` + one uniform line). Requires `devtools::document()` to regenerate the `.Rd`. | — |
-| `library_in_pkg` | real `library()`/`require()` in function bodies → delete if calls are already `pkg::`-namespaced, else `requireNamespace()` guard + namespace; declare the pkg in **Imports** (jamovi users can't install Suggests) | `library(...)` text inside `sprintf()`/string literals that generate copy-ready code for the user |
-| `option_changes` | `par()` that changes graphics settings → `oldpar <- graphics::par(no.readonly=TRUE); on.exit(graphics::par(oldpar), add=TRUE)` once per function | `options(datadist=...)` for `rms` — **leave it** (rms needs it to persist for downstream calibrate/nomogram/validate) |
-| `tf_usage` | a real `T`/`F` used as a logical shorthand → `TRUE`/`FALSE` | a local **variable or named argument** literally named `T`/`F` (e.g. Kendall tied-count, `gsDesign::nSurv(T=...)`) → **scoped rename**, never `T→TRUE`; preserve output list keys |
-| `acronyms`, `title_case` | — | checktor can't see parenthetical acronym expansions, and strips punctuation before the title-case test (so single-quoted `'jamovi'`/`'ggstatsplot'` still fire). Expanding / single-quoting is the CRAN-correct fix even though the finding persists. |
-| `globalenv_mod` (`private$x[[k]] <<-`) | — | `private` is an environment reference, so plain `<-` modifies it in place — equivalent to `<<-`; switch to `<-` |
+| `set.seed(...)` | a hardcoded literal → user-configurable `seed` **option** (`.a.yaml` + `.u.yaml` + `.b.R`, `is.null()` fallback to the old literal). If the argument is arithmetic (`start*100`), compute into a variable first (`set.seed(iter_seed)`) so no literal remains in the call. | — |
+| `<<-` | inside a **tryCatch BODY** (not a handler) it genuinely writes `.GlobalEnv` while the method-frame local stays unchanged → a **real latent bug** (e.g. an always-`NA` statistic). Convert to `<-`. | inside an **error/warning-handler closure** it writes the enclosing **method frame**, not `.GlobalEnv` → functionally correct. Never naively swap `<<-`→`<-` inside a handler; that silently drops the write. `private$x[[k]] <<- v` is equivalent to `<-` because `private` is an environment reference — switch to `<-` for clarity only. |
+| manual `.Random.seed` save/restore | — | that is *correct* RNG hygiene. Replace with `withr::local_seed()` / `withr::local_preserve_seed()` if you like, but never just delete it. |
+| `options(datadist = ...)` for `rms` | — | leave it; `rms` needs it to persist for downstream `calibrate`/`nomogram`/`validate`. |
+| `library(...)` inside a string literal | — | it is generating copy-ready code for the user, not loading a package. |
 
 **Refactor patterns that preserve GUI behaviour** (verify each is byte-identical):
 - Error handler that sets a fallback: pre-initialise the variable to the fallback **before** the tryCatch and make the handler a no-op (`error = function(e) NULL`); or capture — `err <- tryCatch({ …; NULL }, error = function(e) e); if (!is.null(err)) <fallback>`.
 - Handler that *computes* a value: `x <- tryCatch({ <real> }, error = function(e) <fallback>)`.
-- A counter/accumulator incremented in a nested function (`i <<- i+1`, `warned <<- TRUE`, `msgs <<- c(...)`): move it to an **environment** (`e <- new.env(); e$i <- 0; … e$i <- e$i + 1`), or, if it is in the same frame (a plain `for`/tryCatch body), just use `<-`.
+- A counter/accumulator incremented in a nested function (`i <<- i+1`, `warned <<- TRUE`): move it to an **environment** (`e <- new.env(); e$i <- 0; … e$i <- e$i + 1`), or, if it is in the same frame (a plain `for`/tryCatch body), just use `<-`.
 - If a fix would change numeric output or you are not confident, **leave it and report** — never break clinical GUI functionality to satisfy a linter.
 
-**Verify after fixing:** re-run `checktor`, `jmvtools::prepare()` (wires new options into `.h.R`) + `devtools::document()` (regenerates `.Rd` for `value_tags`), confirm the file parses, then **run the analysis on bundled data via `devtools::load_all()`** and drive the affected code path. For seed fixes, prove the same seed gives identical output and a different seed still runs.
+**Verify after fixing:** re-run the greps, then `jmvtools::prepare()` (wires new options into `.h.R`) + `devtools::document()` (regenerates `.Rd` for the `\value` check), confirm the file parses, then **run the analysis on bundled data via `devtools::load_all()`** and drive the affected code path. For seed fixes, prove the same seed gives identical output and a different seed still runs.
 
 ### Static Analysis & Lint Hygiene (lintr)
 
@@ -334,7 +339,7 @@ Checklist:
 
 **Clinical & Release Readiness**: READY / NEEDS_VALIDATION / NOT_READY  
 
-**CRAN Compliance (checktor)**: CLEAN / MINOR / BLOCKERS  — count only *real* findings; list checktor false positives separately  
+**CRAN Compliance (scoped hygiene greps)**: CLEAN / MINOR / BLOCKERS  — count only *real* findings; list false positives separately. Package-wide `checktor` is out of scope for a single-function review.  
 
 **Static Analysis (lintr)**: CLEAN / MINOR / REAL_BUGS  — count only linters that fire inside R6 (`seq_linter`, `equals_na_linter`, `sprintf_linter`, `unreachable_code_linter`, `duplicate_argument_linter`, `missing_argument_linter`, `T_and_F_symbol_linter`); note that `object_usage`/`vector_logic` are blind in `.b.R` and were checked manually  
 
@@ -350,17 +355,19 @@ Checklist:
 2. [Clinical safety or misuse risks (e.g., misleading defaults, lack of guards for low n/events, incorrect labels/units)]
 3. [Performance bottlenecks and major design flaws impacting reliability or maintainability]
 
-#### CHECKTOR FINDINGS (CRAN compliance)
+#### CODE-HYGIENE FINDINGS (scoped CRAN checks)
 
 **Real issues (fix, with `file:line`):**
 
-1. [check + location + one-line remedy, e.g. `seed_setting waterfall.b.R:2432 → add user 'seed' option`]
+1. [pattern + location + one-line remedy, e.g. `set.seed waterfall.b.R:2432 -> add user 'seed' option`]
 
 **False positives (leave; state why):**
 
-1. [check + location + reason, e.g. `globalenv_mod psychopdaROC.b.R:2791 → <<- writes to method frame, not .GlobalEnv`]
+1. [pattern + location + reason, e.g. `<<- psychopdaROC.b.R:2791 -> writes the method frame, not .GlobalEnv`]
 
-**Excluded by scope:** `missing_examples`, `package_size` (and `example_structure` unless requested).
+**Out of scope:** package-wide `checktor` categories (`description_issues`, `news_file`,
+`readme_relative_links`, `cran_comments_file`, `package_size`, `urls`, `missing_examples`) —
+none is attributable to a single function; raise them in a package-level CRAN pass instead.
 
 #### LINTR FINDINGS (static analysis)
 
@@ -434,8 +441,8 @@ Checklist:
 - [ ] Add natural‑language **Summary** box with copy‑ready text.
 - [ ] Add **About this analysis** panel (what/when/how/outputs).
 - [ ] Add **Caveats & assumptions** panel with contextual warnings.
-- [ ] Run `checktor` and resolve real CRAN findings (seeds → options, `<<-`/`.Random.seed`, missing `\value`, `library()`); note false positives.
-- [ ] Re-run `checktor` + `prepare()`/`document()` and drive the analysis on bundled data to confirm no functionality is lost.
+- [ ] Run the scoped hygiene greps and resolve real findings (seeds → options, `<<-` in a tryCatch body, missing `\value`, `library()` in package source, unrestored `par()`, `::` packages absent from Imports, raw non-ASCII); note false positives.
+- [ ] Re-run the greps + `prepare()`/`document()` and drive the analysis on bundled data to confirm no functionality is lost.
 - [ ] Run scoped `lintr` and fix real findings (`seq_linter` `1:ncol`/`1:nrow`/`1:min` → `seq_len`/`seq_along`; `== NA` → `is.na`; `sprintf` format/arg mismatches; unreachable code after `return()`).
 - [ ] Manually check what `lintr` cannot see inside `.b.R` (undefined/unused vars, `&`/`|` in scalar `if()`), since `object_usage_linter`/`vector_logic_linter` are blind inside `R6::R6Class`.
 - [ ] [Enhancement opportunity]

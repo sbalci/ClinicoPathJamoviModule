@@ -1508,14 +1508,19 @@ analyses:
     menuSubgroup: Power Analysis by meddecide
     menuTitle: Confidence Interval Approach for the Number of Subjects Required
     menuSubtitle: Find sample size based on Kappa confidence
-    description: |
-      Power Analysis for Interobserver Agreement Analysis.
+    description: >
+      Number of subjects an interobserver agreement study needs for the
+      confidence interval around the anticipated kappa (kappa0) to reach the
+      requested precision - the confidence-interval approach of the kappaSize
+      package. This is NOT a power calculation and tests no hypothesis; use
+      kappaSizePower to size a study for a hypothesis test, and kappaSizeFixedN
+      when the number of subjects is already fixed.
     ribbon: analyses
     category: analyses
   - title: Lowest Expected Value for a fixed sample size
     name: kappaSizeFixedN
     ns: ClinicoPath
-    menuGroup: PowerT
+    menuGroup: Power
     menuSubgroup: Power Analysis by meddecide
     menuTitle: Lowest Expected Value for a fixed sample size
     menuSubtitle: Find lower Kappa based on sample size
@@ -1627,7 +1632,7 @@ analyses:
   - title: Decision Curve Analysis
     name: decisioncurve
     ns: ClinicoPath
-    menuGroup: meddecide
+    menuGroup: meddecideT
     menuTitle: Decision Curve Analysis
     menuSubgroup: Decision Curve Analysis
     menuSubtitle: Clinical Utility, Net Benefit, Threshold Analysis

@@ -107,9 +107,9 @@ Three complementary functions for comprehensive kappa agreement study planning:
 **Internal:** `kappaSizeCI`
 **Purpose:** Sample size for kappa estimation (precision approach)
 **When to use:** Planning agreement studies, method validation, estimating true agreement
-**Approach:** "How many subjects to estimate kappa within ±X?"
+**Approach:** "How many subjects for the confidence interval around the anticipated kappa to reach the precision I need?" The sample size is driven by the distance from kappa0 to the NEARER limit, not by the full interval width, so an asymmetric interval costs whatever its tighter side costs
 **Test Data:**
-- [Comprehensive scenarios](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/kappasizeci_scenarios_comprehensive.omv) (86 scenarios)
+- [Comprehensive scenarios](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/kappasizeci_scenarios_comprehensive.omv) (25 scenarios)
 - [Relationship cases](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/kappasizeci_relationship_cases.omv)
 - [Validation cases](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/kappasizeci_validation_cases.omv)
 
