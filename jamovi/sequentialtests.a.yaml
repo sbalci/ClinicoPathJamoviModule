@@ -1,7 +1,7 @@
 ---
 name: sequentialtests
 title: Sequential Testing Analysis
-menuGroup: meddecide
+menuGroup: meddecideT
 menuSubgroup: Decision Calculators
 menuSubtitle: Sequential Test Analysis
 version: '1.0.7'
@@ -13,84 +13,56 @@ description:
         comparing three different testing strategies: serial positive (confirmation),
         serial negative (exclusion), and parallel testing. Provides comprehensive
         analysis including population flow, cost implications, and diagnostic plots.
-        
+
+        The named scenarios and their values are teaching examples only, not clinical
+        guidance or validated diagnostic pathways. Replace all example parameters with
+        estimates applicable to the intended population before interpreting results.
+
         This analysis is particularly useful for:
-        • Designing diagnostic protocols and clinical pathways
-        • Optimizing test sequencing for specific clinical contexts
+        • Exploring how diagnostic strategies behave under explicit assumptions
+        • Comparing hypothetical test sequences for teaching or planning
         • Understanding trade-offs between sensitivity and specificity
-        • Evaluating cost-effectiveness of different testing strategies
+        • Illustrating expected testing volume and cost under user-supplied assumptions
         • Teaching sequential testing concepts and Bayesian probability
-        
-    # R:
-    #     dontrun: true
-    #     usage: |
-    #         # COVID-19 testing: Rapid antigen followed by RT-PCR confirmation
-    #         # Shows how serial positive strategy improves specificity
-    #         data(sequential_testing_examples)
-    #         covid_example <- sequential_testing_examples[
-    #           sequential_testing_examples$scenario == "COVID-19 Testing" & 
-    #           sequential_testing_examples$clinical_setting == "Community screening", ]
-            
-    #         # Cancer screening: Mammography followed by tissue biopsy
-    #         # Demonstrates cost-effective screening with definitive diagnosis
-    #         breast_cancer <- sequential_testing_examples[
-    #           sequential_testing_examples$scenario == "Breast Cancer Screening", ]
-            
-    #         # Emergency medicine: Parallel testing for rapid diagnosis
-    #         # Shows how parallel strategy maximizes sensitivity
-    #         emergency_example <- sequential_testing_examples[
-    #           sequential_testing_examples$scenario == "Myocardial Infarction Rule-out", ]
-            
-    #         # Strategy comparison across different prevalence settings
-    #         data(strategy_comparison)
-            
-    #         # Cost-effectiveness analysis for resource planning
-    #         data(cost_effectiveness_examples)
-            
-    #         # Load example datasets for realistic clinical scenarios
-    #         data(sequential_testing_examples)  # 15+ clinical scenarios across specialties
-    #         data(strategy_comparison)          # Strategy performance comparisons
-    #         data(cost_effectiveness_examples)  # Economic analysis examples
-    #         data(teaching_examples)            # Educational scenarios
-    #         data(common_test_combinations)     # Reference test characteristics
 
 options:
-    # Clinical Presets
+    # Teaching examples
     - name: preset
-      title: Clinical Preset
+      title: Teaching Example
       type: List
       options:
         - name: custom
           title: Custom Values
         - name: covid_screening_confirmation
-          title: COVID-19 Screening + PCR Confirmation
+          title: Respiratory Testing (Illustrative)
         - name: breast_cancer_screening
-          title: Mammography + Biopsy (Breast Cancer)
+          title: Breast Imaging + Tissue Sampling (Illustrative)
         - name: mi_emergency_parallel
-          title: Troponin + ECG (Emergency MI)
+          title: Biomarker + ECG (Illustrative)
         - name: tb_screening_confirmation
-          title: Chest X-ray + Sputum Culture (TB)
+          title: Chest Imaging + Culture (Illustrative)
         - name: prostate_screening_exclusion
-          title: PSA + MRI (Prostate Cancer)
+          title: PSA + MRI (Illustrative)
         - name: hiv_screening_confirmation
-          title: ELISA + Western Blot (HIV)
+          title: HIV Ag/Ab + Differentiation Assay (Illustrative)
         - name: stroke_emergency_parallel
-          title: Clinical Assessment + CT (Stroke)
+          title: Clinical Assessment + CT (Illustrative)
       default: custom
       description:
           R: |
-            Select a clinical preset or use custom values. Presets load illustrative test
-            parameters for demonstration and teaching only. They are rounded, approximate
-            figures chosen to show how each strategy behaves; they are NOT validated
-            clinical parameters, are not drawn from any specific published study, and the
-            prevalence will not match your population. Replace them with values from your
-            own setting before drawing any clinical conclusion.
+            Select a teaching example or use custom values. Examples load rounded,
+            hypothetical parameters chosen only to demonstrate how each strategy behaves.
+            They are not clinical guidance, validated diagnostic pathways, or estimates from
+            a specific study, and their prevalence will not match your population. Replace
+            every value with estimates from the intended setting before interpretation.
 
     # First Test (Screening Test) Parameters
     - name: test1_name
       title: Screening Test Name
       type: String
       default: 'Screening Test'
+      description:
+          R: Display name for the first test.
       
     - name: test1_sens
       title: Sensitivity
@@ -98,6 +70,8 @@ options:
       default: 0.95
       min: 0.01
       max: 0.99
+      description:
+          R: Assumed sensitivity of the first test, entered as a proportion from 0.01 to 0.99.
       
     - name: test1_spec
       title: Specificity 
@@ -105,18 +79,24 @@ options:
       default: 0.70
       min: 0.01
       max: 0.99
+      description:
+          R: Assumed specificity of the first test, entered as a proportion from 0.01 to 0.99.
 
     - name: test1_cost
-      title: Cost
+      title: Illustrative Unit Cost
       type: Number
       default: 0
       min: 0
+      description:
+          R: Assumed unit cost of the first test in user-defined currency or cost units.
     
     # Second Test (Confirmatory Test) Parameters  
     - name: test2_name
       title: Confirmatory Test Name
       type: String
       default: 'Confirmatory Test'
+      description:
+          R: Display name for the second test.
       
     - name: test2_sens
       title: Sensitivity
@@ -124,6 +104,8 @@ options:
       default: 0.80
       min: 0.01
       max: 0.99
+      description:
+          R: Assumed sensitivity of the second test, entered as a proportion from 0.01 to 0.99.
       
     - name: test2_spec
       title: Specificity
@@ -131,12 +113,16 @@ options:
       default: 0.98
       min: 0.01
       max: 0.99
+      description:
+          R: Assumed specificity of the second test, entered as a proportion from 0.01 to 0.99.
 
     - name: test2_cost
-      title: Cost
+      title: Illustrative Unit Cost
       type: Number
       default: 0
       min: 0
+      description:
+          R: Assumed unit cost of the second test in user-defined currency or cost units.
     
     # Testing Strategy
     - name: strategy
@@ -150,6 +136,11 @@ options:
         - title: Test all subjects with both tests (parallel)
           name: parallel
       default: serial_positive
+      description:
+          R: |
+            Rule for combining results: test first-test positives, test first-test
+            negatives, or apply both tests to everyone. Combined accuracy assumes
+            conditional independence between tests.
       
     # Disease Prevalence
     - name: prevalence
@@ -158,6 +149,8 @@ options:
       default: 0.10
       min: 0.001
       max: 0.999
+      description:
+          R: Assumed pre-test disease probability, entered as a proportion from 0.001 to 0.999.
 
     - name: population_size
       title: Illustrative Population Size
@@ -174,20 +167,28 @@ options:
       title: Explanations
       type: Bool
       default: false
+      description:
+          R: Show a plain-language summary and explanation of the selected strategy.
       
     - name: show_formulas
       title: Calculation formulas
       type: Bool
       default: false
+      description:
+          R: Show the formulas used for individual and combined test metrics.
       
     - name: show_cost_analysis
       title: Cost analysis
       type: Bool
       default: false
+      description:
+          R: Show expected testing volume and cost using the illustrative population size.
       
     - name: show_plots
-      title: Show diagnostic plots
+      title: Diagnostic plots
       type: Bool
       default: false
+      description:
+          R: Show the five diagnostic-performance and population-flow plots.
 
 ...

@@ -13,7 +13,6 @@ psychopdaROCOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
             classVar = NULL,
             positiveClass = NULL,
             subGroup = NULL,
-            clinicalPreset = "none",
             method = "maximize_metric",
             metric = "youden",
             direction = ">=",
@@ -132,16 +131,6 @@ psychopdaROCOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
                     "nominal"),
                 permitted=list(
                     "factor"))
-            private$..clinicalPreset <- jmvcore::OptionList$new(
-                "clinicalPreset",
-                clinicalPreset,
-                options=list(
-                    "none",
-                    "screening",
-                    "confirmation",
-                    "balanced",
-                    "research"),
-                default="none")
             private$..method <- jmvcore::OptionList$new(
                 "method",
                 method,
@@ -530,7 +519,6 @@ psychopdaROCOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
             self$.addOption(private$..classVar)
             self$.addOption(private$..positiveClass)
             self$.addOption(private$..subGroup)
-            self$.addOption(private$..clinicalPreset)
             self$.addOption(private$..method)
             self$.addOption(private$..metric)
             self$.addOption(private$..direction)
@@ -610,7 +598,6 @@ psychopdaROCOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
         classVar = function() private$..classVar$value,
         positiveClass = function() private$..positiveClass$value,
         subGroup = function() private$..subGroup$value,
-        clinicalPreset = function() private$..clinicalPreset$value,
         method = function() private$..method$value,
         metric = function() private$..metric$value,
         direction = function() private$..direction$value,
@@ -689,7 +676,6 @@ psychopdaROCOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
         ..classVar = NA,
         ..positiveClass = NA,
         ..subGroup = NA,
-        ..clinicalPreset = NA,
         ..method = NA,
         ..metric = NA,
         ..direction = NA,
@@ -769,7 +755,6 @@ psychopdaROCResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
         instructions = function() private$.items[["instructions"]],
         procedureNotes = function() private$.items[["procedureNotes"]],
         runSummary = function() private$.items[["runSummary"]],
-        simpleResultsTable = function() private$.items[["simpleResultsTable"]],
         clinicalInterpretationTable = function() private$.items[["clinicalInterpretationTable"]],
         resultsTable = function() private$.items[["resultsTable"]],
         sensSpecTable = function() private$.items[["sensSpecTable"]],
@@ -829,45 +814,6 @@ psychopdaROCResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
                 name="runSummary",
                 title="Analysis Status",
                 visible=TRUE))
-            self$add(jmvcore::Table$new(
-                options=options,
-                name="simpleResultsTable",
-                title="ROC Analysis Summary",
-                rows=0,
-                visible=TRUE,
-                clearWith=list(
-                    "dependentVars",
-                    "classVar",
-                    "positiveClass",
-                    "subGroup",
-                    "direction",
-                    "method",
-                    "metric"),
-                columns=list(
-                    list(
-                        `name`="variable", 
-                        `title`="Variable", 
-                        `type`="text"),
-                    list(
-                        `name`="auc", 
-                        `title`="AUC", 
-                        `type`="number", 
-                        `format`="zto"),
-                    list(
-                        `name`="ci_lower", 
-                        `title`="95% CI Lower", 
-                        `type`="number", 
-                        `format`="zto"),
-                    list(
-                        `name`="ci_upper", 
-                        `title`="95% CI Upper", 
-                        `type`="number", 
-                        `format`="zto"),
-                    list(
-                        `name`="p", 
-                        `title`="p-value", 
-                        `type`="number", 
-                        `format`="zto,pvalue"))))
             self$add(jmvcore::Table$new(
                 options=options,
                 name="clinicalInterpretationTable",
@@ -1962,11 +1908,6 @@ psychopdaROCBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   treated as the positive class.
 #' @param subGroup Optional grouping variable for stratified analysis. ROC
 #'   curves will be calculated separately for each group.
-#' @param clinicalPreset Choose a preset configuration optimized for specific
-#'   clinical scenarios: Screening - High sensitivity to avoid missing cases
-#'   Confirmation - High specificity to avoid false positives Balanced - Equal
-#'   weight to sensitivity and specificity Research - Comprehensive analysis for
-#'   publication
 #' @param method Method for determining the optimal cutpoint. Different
 #'   methods optimize different aspects of classifier performance.
 #' @param metric Metric to optimize when determining the cutpoint.  Only
@@ -2133,7 +2074,6 @@ psychopdaROCBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   \code{results$instructions} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$procedureNotes} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$runSummary} \tab \tab \tab \tab \tab a html \cr
-#'   \code{results$simpleResultsTable} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$clinicalInterpretationTable} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$resultsTable} \tab \tab \tab \tab \tab an array of tables \cr
 #'   \code{results$sensSpecTable} \tab \tab \tab \tab \tab an array of htmls \cr
@@ -2172,9 +2112,9 @@ psychopdaROCBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'
 #' Tables can be converted to data frames with \code{asDF} or \code{\link{as.data.frame}}. For example:
 #'
-#' \code{results$simpleResultsTable$asDF}
+#' \code{results$clinicalInterpretationTable$asDF}
 #'
-#' \code{as.data.frame(results$simpleResultsTable)}
+#' \code{as.data.frame(results$clinicalInterpretationTable)}
 #'
 #' @export
 psychopdaROC <- function(
@@ -2186,7 +2126,6 @@ psychopdaROC <- function(
     classVar,
     positiveClass,
     subGroup = NULL,
-    clinicalPreset = "none",
     method = "maximize_metric",
     metric = "youden",
     direction = ">=",
@@ -2282,7 +2221,6 @@ psychopdaROC <- function(
         classVar = classVar,
         positiveClass = positiveClass,
         subGroup = subGroup,
-        clinicalPreset = clinicalPreset,
         method = method,
         metric = metric,
         direction = direction,

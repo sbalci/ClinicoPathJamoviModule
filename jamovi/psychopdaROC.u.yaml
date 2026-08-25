@@ -54,9 +54,6 @@ children:
         name: clinicalMode
         label: Analysis level
       - type: ComboBox
-        name: clinicalPreset
-        label: Clinical use case
-      - type: ComboBox
         name: direction
         label: Classification direction
 

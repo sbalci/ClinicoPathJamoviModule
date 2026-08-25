@@ -118,6 +118,18 @@ test_that("the independence assumption is stated for every strategy, in matching
     }
     # and it is also an unconditional notice
     expect_match(run_st()$notices$content, "Independence Assumption")
+
+    serial_positive <- run_st(strategy = "serial_positive")$notices$content
+    expect_match(serial_positive, "specificity above is too high")
+    expect_match(serial_positive, "sensitivity too low")
+
+    for (st in c("serial_negative", "parallel")) {
+        notice <- run_st(strategy = st)$notices$content
+        expect_match(notice, "sensitivity above is too high", info = st)
+        expect_match(notice, "specificity too low", info = st)
+    }
+    expect_false(grepl("combined performance may be overestimated", serial_positive,
+                       ignore.case = TRUE))
 })
 
 
@@ -145,13 +157,13 @@ test_that("notes do not go stale when the strategy changes on the same analysis 
 })
 
 
-test_that("clinical presets are applied when the analysis is called from R", {
-    # Presets are applied in the GUI by jamovi/js/sequentialtests.events.js. Nothing runs that
+test_that("teaching examples are applied when the analysis is called from R", {
+    # Examples are applied in the GUI by jamovi/js/sequentialtests.events.js. Nothing runs that
     # JavaScript from R, so `preset =` was silently ignored and the panel defaults were analysed
     # -- a user asking for the HIV scenario got 0.95/0.70 + 0.80/0.98 at 10% prevalence.
     d <- summary_of(ClinicoPath::sequentialtests(preset = "hiv_screening_confirmation"))
-    expect_equal(d$first_test[1], "ELISA")
-    expect_equal(d$second_test[1], "Western Blot")
+    expect_equal(d$first_test[1], "HIV Ag/Ab Assay")
+    expect_equal(d$second_test[1], "Differentiation Assay")
     expect_equal(d$prevalence[1], 0.02)
     expect_equal(d$combined_sens[1], 0.98 * 0.99, tolerance = 1e-12)
     expect_equal(d$combined_spec[1], 0.95 + 0.05 * 0.99, tolerance = 1e-12)
@@ -167,7 +179,7 @@ test_that("clinical presets are applied when the analysis is called from R", {
 })
 
 
-test_that("the R preset table and the JavaScript preset table agree", {
+test_that("the R teaching-example table and the JavaScript table agree", {
     # The values are necessarily duplicated: the GUI path is JavaScript and the R path is not.
     # This test is the guard that keeps the two from drifting.
     js <- paste(readLines("../../jamovi/js/sequentialtests.events.js", warn = FALSE), collapse = "\n")
@@ -209,29 +221,112 @@ test_that("the R preset table and the JavaScript preset table agree", {
 })
 
 
-test_that("presets are labelled as demonstration values, not clinical parameters", {
-    # The preset numbers are rounded teaching values with no citation and no population behind
-    # them. The option description called them "evidence-based ... from medical literature",
-    # which invites a user to treat the output as applicable to a real protocol.
+test_that("teaching examples are labelled as examples, not clinical guidance", {
+    # The example numbers are rounded teaching values with no study population behind them.
+    # Every user-facing location must prevent them being mistaken for a clinical protocol.
     presets <- c("covid_screening_confirmation", "breast_cancer_screening",
                  "mi_emergency_parallel", "tb_screening_confirmation",
                  "prostate_screening_exclusion", "hiv_screening_confirmation",
                  "stroke_emergency_parallel")
     for (ps in presets) {
         n <- ClinicoPath::sequentialtests(preset = ps)$notices$content
-        expect_match(n, "Demonstration Only", info = ps)
+        expect_match(n, "Teaching Example Values Are Not Clinical Guidance", info = ps)
         expect_match(n, "NOT validated clinical parameters", info = ps)
-        expect_match(n, "WARNING: Preset Values Are For Demonstration Only", fixed = TRUE, info = ps)
+        expect_match(n, "STRONG WARNING: Teaching Example Values Are Not Clinical Guidance",
+                     fixed = TRUE, info = ps)
+        expect_match(n, "not clinical guidance", ignore.case = TRUE, info = ps)
     }
     # but it does not nag when the user supplied their own numbers
-    expect_false(grepl("Demonstration Only", run_st()$notices$content))
+    expect_false(grepl("Teaching Example Values", run_st()$notices$content))
 
-    # the same caveat is carried in the GUI (events JS) and in the option documentation
+    # The same caveat is carried in the option panel and result guidance.
     js <- paste(readLines("../../jamovi/js/sequentialtests.events.js", warn = FALSE), collapse = " ")
-    expect_match(js, "Demonstration values only")
     a_yaml <- paste(readLines("../../jamovi/sequentialtests.a.yaml", warn = FALSE), collapse = " ")
-    expect_match(a_yaml, "demonstration and teaching only")
+    u_yaml <- paste(readLines("../../jamovi/sequentialtests.u.yaml", warn = FALSE), collapse = " ")
+    guidance <- run_st()$clinical_guidance$content
+    expect_match(a_yaml, "not clinical guidance", ignore.case = TRUE)
+    expect_match(u_yaml, "Not Clinical Guidance", fixed = TRUE)
+    expect_match(guidance, "Teaching examples only", fixed = TRUE)
     expect_false(grepl("evidence-based\\s+test parameters", a_yaml))
+    expect_false(grepl("Western Blot", paste(a_yaml, js, guidance), fixed = TRUE))
+})
+
+
+test_that("performance plot supports duplicate display names", {
+    h <- private_st(test1_name = "Same", test2_name = "Same", show_plots = TRUE)
+    h$p$.run()
+    grDevices::pdf(NULL); on.exit(grDevices::dev.off(), add = TRUE)
+    expect_true(h$p$.plot_performance(
+        h$a$results$plot_performance,
+        ggtheme = ggplot2::theme_bw()
+    ))
+})
+
+
+test_that("cost table reports and charges for the same expected test count", {
+    res <- run_st(
+        test1_sens = 0.87, test1_spec = 0.82,
+        test2_sens = 0.83, test2_spec = 0.94,
+        prevalence = 0.123, population_size = 101,
+        test1_cost = 10, test2_cost = 100,
+        show_cost_analysis = TRUE
+    )
+    d <- res$cost_analysis_table$asDF
+    second <- d[d$item == "Test 2: Confirmatory Test", ]
+    total <- d[d$item == "Total Protocol Cost", ]
+
+    expect_false(second$number_tests == floor(second$number_tests))
+    expect_equal(second$total_cost, second$number_tests * second$unit_cost, tolerance = 1e-12)
+    expect_equal(total$number_tests, sum(d$number_tests[1:2]), tolerance = 1e-12)
+    expect_equal(total$total_cost, sum(d$total_cost[1:2]), tolerance = 1e-12)
+})
+
+
+test_that("boundary warnings are reachable and severity is preserved", {
+    low <- run_st(prevalence = 0.001)$notices$content
+    high_accuracy <- run_st(test1_sens = 0.99, test2_spec = 0.99)$notices$content
+
+    expect_match(low, "STRONG WARNING: Prevalence Very Low", fixed = TRUE)
+    expect_match(high_accuracy, "WARNING: Test 1 Sensitivity High", fixed = TRUE)
+    expect_match(high_accuracy, "WARNING: Test 2 Specificity High", fixed = TRUE)
+})
+
+
+test_that("dead JavaScript guidance sink and debug logging are absent", {
+    js <- paste(readLines("../../jamovi/js/sequentialtests.events.js", warn = FALSE), collapse = "\n")
+    expect_false(grepl("ui.clinical_guidance", js, fixed = TRUE))
+    expect_false(grepl("console.log", js, fixed = TRUE))
+    expect_false(grepl("guidanceHtml", js, fixed = TRUE))
+})
+
+
+test_that("documentation and references match the repaired analysis", {
+    header <- readLines("../../R/sequentialtests.h.R", warn = FALSE)
+    r_yaml <- paste(readLines("../../jamovi/sequentialtests.r.yaml", warn = FALSE), collapse = "\n")
+    a_yaml <- paste(readLines("../../jamovi/sequentialtests.a.yaml", warn = FALSE), collapse = "\n")
+    u_yaml <- paste(readLines("../../jamovi/sequentialtests.u.yaml", warn = FALSE), collapse = "\n")
+    refs <- paste(readLines("../../jamovi/00refs.yaml", warn = FALSE), collapse = "\n")
+
+    expect_false(any(grepl("^#' @param [A-Za-z0-9_]+ \\.$", header)))
+    expect_match(r_yaml, "ConditionalDependenceDiagnosticTests", fixed = TRUE)
+    expect_match(r_yaml, "CDC_HIV_Testing_2023", fixed = TRUE)
+    expect_true(grepl(
+        "name: clinical_guidance[\\s\\S]*?visible: \\(show_explanation\\)",
+        r_yaml, perl = TRUE
+    ))
+    expect_lt(
+        regexpr("- ClinicoPathJamoviModule", r_yaml, fixed = TRUE)[1],
+        regexpr("- ConditionalDependenceDiagnosticTests", r_yaml, fixed = TRUE)[1]
+    )
+    expect_match(a_yaml, "title: Diagnostic plots", fixed = TRUE)
+    expect_true(grepl(
+        "type: CollapseBox\\n    label: Display Options\\n    collapsed: true",
+        u_yaml, perl = TRUE
+    ))
+    expect_false(grepl("    - Fagan", r_yaml, fixed = TRUE))
+    expect_false(grepl("    - sensspecwiki", r_yaml, fixed = TRUE))
+    expect_match(refs, "10.1016/S0167-5877(00)00119-7", fixed = TRUE)
+    expect_match(refs, "https://stacks.cdc.gov/view/cdc/129018", fixed = TRUE)
 })
 
 
@@ -297,6 +392,68 @@ test_that("every diagnostic plot renders", {
                  "plot_population_flow", "plot_sensitivity_analysis"))
         expect_true(h$p[[paste0(".", nm)]](h$a$results[[nm]], ggtheme = ggplot2::theme_bw()),
                     label = nm)
+})
+
+
+test_that("probability plot endpoints use pooled final classifications", {
+    render_probability_data <- function(strategy) {
+        h <- private_st(
+            strategy = strategy,
+            test1_sens = 0.60, test1_spec = 0.70,
+            test2_sens = 0.60, test2_spec = 0.70,
+            prevalence = 0.20, show_plots = TRUE
+        )
+        h$p$.run()
+        grDevices::pdf(NULL)
+        on.exit(grDevices::dev.off(), add = TRUE)
+        expect_true(h$p$.plot_probability(
+            h$a$results$plot_probability,
+            ggtheme = ggplot2::theme_bw()
+        ))
+        list(
+            data = ggplot2::last_plot()$data,
+            state = h$a$results$plot_probability$state
+        )
+    }
+
+    serial_positive <- render_probability_data("serial_positive")
+    expect_equal(
+        serial_positive$data$Probability[6],
+        100 * (1 - serial_positive$state$Combined_NPV),
+        tolerance = 1e-12
+    )
+
+    serial_negative <- render_probability_data("serial_negative")
+    expect_equal(
+        serial_negative$data$Probability[3],
+        100 * serial_negative$state$Combined_PPV,
+        tolerance = 1e-12
+    )
+    expect_equal(
+        serial_negative$data$Probability[6],
+        100 * (1 - serial_negative$state$Combined_NPV),
+        tolerance = 1e-12
+    )
+})
+
+
+test_that("translated templates interpolate dynamic values without ellipses", {
+    res <- run_st(
+        show_explanation = TRUE,
+        show_formulas = TRUE,
+        show_cost_analysis = TRUE,
+        population_size = 1234
+    )
+    rendered <- paste(
+        res$notices$content,
+        res$plain_summary$content,
+        res$explanation_text$content,
+        res$formulas_text$content,
+        paste(res$cost_analysis_table$asDF$item, collapse = " ")
+    )
+    expect_false(grepl("\u2026", rendered, fixed = TRUE))
+    expect_match(rendered, "Test 2: Confirmatory Test", fixed = TRUE)
+    expect_match(rendered, "combined specificity above is too high", fixed = TRUE)
 })
 
 

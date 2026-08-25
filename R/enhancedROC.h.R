@@ -13,8 +13,8 @@ enhancedROCOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
             direction = "auto",
             youdenOptimization = TRUE,
             customCutoffs = "",
-            sensitivityThreshold = 0.8,
-            specificityThreshold = 0.8,
+            sensitivityThreshold = 0,
+            specificityThreshold = 0,
             confidenceLevel = 95,
             bootstrapSamples = 1000,
             useBootstrap = FALSE,
@@ -44,7 +44,7 @@ enhancedROCOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
             showImbalanceWarning = FALSE,
             recommendPRC = FALSE,
             prevalence = 0.1,
-            useObservedPrevalence = FALSE,
+            useObservedPrevalence = TRUE,
             clinicalContext = "general",
             clinicalPresets = "custom",
             comprehensive_output = FALSE,
@@ -143,14 +143,14 @@ enhancedROCOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
             private$..sensitivityThreshold <- jmvcore::OptionNumber$new(
                 "sensitivityThreshold",
                 sensitivityThreshold,
-                default=0.8,
-                min=0.1,
+                default=0,
+                min=0,
                 max=1)
             private$..specificityThreshold <- jmvcore::OptionNumber$new(
                 "specificityThreshold",
                 specificityThreshold,
-                default=0.8,
-                min=0.1,
+                default=0,
+                min=0,
                 max=1)
             private$..confidenceLevel <- jmvcore::OptionNumber$new(
                 "confidenceLevel",
@@ -300,7 +300,7 @@ enhancedROCOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
             private$..useObservedPrevalence <- jmvcore::OptionBool$new(
                 "useObservedPrevalence",
                 useObservedPrevalence,
-                default=FALSE)
+                default=TRUE)
             private$..clinicalContext <- jmvcore::OptionList$new(
                 "clinicalContext",
                 clinicalContext,
@@ -1947,10 +1947,18 @@ enhancedROCBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   (Sensitivity + Specificity - 1)
 #' @param customCutoffs Comma-separated list of custom cutoffs to evaluate
 #'   (e.g., 0.1, 0.5, 0.9)
-#' @param sensitivityThreshold Minimum required sensitivity for screening
-#'   applications
-#' @param specificityThreshold Minimum required specificity for confirmatory
-#'   testing
+#' @param sensitivityThreshold Minimum sensitivity a cutoff must achieve to be
+#'   considered. 0 (the default) searches for the overall Youden optimum with no
+#'   constraint. Raising it restricts the search, which is what you want for a
+#'   screening test, but the reported cutoff is then the best one meeting your
+#'   minimum rather than the Youden maximum - a notice says so when the two
+#'   differ.
+#' @param specificityThreshold Minimum specificity a cutoff must achieve to be
+#'   considered. 0 (the default) searches for the overall Youden optimum with no
+#'   constraint. Raising it restricts the search, which is what you want for a
+#'   confirmatory test, but the reported cutoff is then the best one meeting
+#'   your minimum rather than the Youden maximum - a notice says so when the two
+#'   differ.
 #' @param confidenceLevel Confidence level for AUC confidence intervals
 #' @param bootstrapSamples Number of bootstrap samples for confidence
 #'   intervals
@@ -2001,9 +2009,15 @@ enhancedROCBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   detected
 #' @param recommendPRC Recommend using Precision-Recall curves when imbalance
 #'   is detected
-#' @param prevalence Disease prevalence for calculating predictive values
-#' @param useObservedPrevalence Use the prevalence observed in the data for
-#'   PPV/NPV and clinical impact calculations (recommended)
+#' @param prevalence Disease prevalence to assume when computing predictive
+#'   values. Used only when "Use observed prevalence" is unticked - set it to
+#'   the prevalence of the population the test will actually be used in, which
+#'   for a screening setting is usually far lower than in a case-control sample.
+#' @param useObservedPrevalence Compute PPV, NPV and the clinical impact
+#'   metrics at the prevalence observed in these data (the default). Untick it
+#'   to assume a different prevalence instead - appropriate when the sample is
+#'   enriched for cases and does not reflect the population the test will be
+#'   used in. The prevalence actually used is printed in the results.
 #' @param clinicalContext Clinical application context for interpretation
 #' @param clinicalPresets Pre-configured settings for common clinical
 #'   scenarios
@@ -2022,7 +2036,8 @@ enhancedROCBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   and predicted probabilities)
 #' @param calibrationPlot Display calibration plot with loess smoothing
 #' @param hosmerLemeshow Perform Hosmer-Lemeshow goodness-of-fit test
-#' @param hlGroups Number of groups for Hosmer-Lemeshow test
+#' @param hlGroups Number of equal-sized risk groups used both for the
+#'   Hosmer-Lemeshow test and for binning the calibration plot
 #' @param brierScore Calculate Brier score and scaled Brier score
 #' @param calibrationMetrics Calculate calibration slope, intercept, and
 #'   calibration-in-the-large
@@ -2044,7 +2059,11 @@ enhancedROCBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' @param multiClassROC Enable multi-class ROC analysis for outcomes with >2
 #'   levels
 #' @param multiClassStrategy Strategy for multi-class ROC analysis
-#' @param multiClassAveraging Method for averaging AUC across classes
+#' @param multiClassAveraging Method for averaging AUC across classes. Only
+#'   the unweighted Macro Average is computed; Weighted Average (by prevalence)
+#'   is NOT YET IMPLEMENTED - selecting it changes nothing, and the value
+#'   reported stays the unweighted macro average of the One-vs-Rest AUCs (OVR
+#'   strategy) or the Hand-Till pairwise AUC (OVO strategy)
 #' @param clinicalImpact Calculate clinical impact metrics (NNT, NND, clinical
 #'   utility)
 #' @param nntCalculation Calculate number needed to test and number needed to
@@ -2131,8 +2150,8 @@ enhancedROC <- function(
     direction = "auto",
     youdenOptimization = TRUE,
     customCutoffs = "",
-    sensitivityThreshold = 0.8,
-    specificityThreshold = 0.8,
+    sensitivityThreshold = 0,
+    specificityThreshold = 0,
     confidenceLevel = 95,
     bootstrapSamples = 1000,
     useBootstrap = FALSE,
@@ -2162,7 +2181,7 @@ enhancedROC <- function(
     showImbalanceWarning = FALSE,
     recommendPRC = FALSE,
     prevalence = 0.1,
-    useObservedPrevalence = FALSE,
+    useObservedPrevalence = TRUE,
     clinicalContext = "general",
     clinicalPresets = "custom",
     comprehensive_output = FALSE,

@@ -24,44 +24,56 @@ sequentialtests(
 )
 }
 \arguments{
-\item{preset}{Select a clinical preset or use custom values. Presets load
-illustrative test parameters for demonstration and teaching only. They are
-rounded, approximate figures chosen to show how each strategy behaves; they
-are NOT validated clinical parameters, are not drawn from any specific
-published study, and the prevalence will not match your population. Replace
-them with values from your own setting before drawing any clinical
-conclusion.}
+\item{preset}{Select a teaching example or use custom values. Examples load
+rounded, hypothetical parameters chosen only to demonstrate how each
+strategy behaves. They are not clinical guidance, validated diagnostic
+pathways, or estimates from a specific study, and their prevalence will not
+match your population. Replace every value with estimates from the intended
+setting before interpretation.}
 
-\item{test1_name}{.}
+\item{test1_name}{Display name for the first test.}
 
-\item{test1_sens}{.}
+\item{test1_sens}{Assumed sensitivity of the first test, entered as a
+proportion from 0.01 to 0.99.}
 
-\item{test1_spec}{.}
+\item{test1_spec}{Assumed specificity of the first test, entered as a
+proportion from 0.01 to 0.99.}
 
-\item{test1_cost}{.}
+\item{test1_cost}{Assumed unit cost of the first test in user-defined
+currency or cost units.}
 
-\item{test2_name}{.}
+\item{test2_name}{Display name for the second test.}
 
-\item{test2_sens}{.}
+\item{test2_sens}{Assumed sensitivity of the second test, entered as a
+proportion from 0.01 to 0.99.}
 
-\item{test2_spec}{.}
+\item{test2_spec}{Assumed specificity of the second test, entered as a
+proportion from 0.01 to 0.99.}
 
-\item{test2_cost}{.}
+\item{test2_cost}{Assumed unit cost of the second test in user-defined
+currency or cost units.}
 
-\item{strategy}{.}
+\item{strategy}{Rule for combining results: test first-test positives, test
+first-test negatives, or apply both tests to everyone. Combined accuracy
+assumes conditional independence between tests.}
 
-\item{prevalence}{.}
+\item{prevalence}{Assumed pre-test disease probability, entered as a
+proportion from 0.001 to 0.999.}
 
 \item{population_size}{Population size used to illustrate population flow
 counts. Does not affect probabilities.}
 
-\item{show_explanation}{.}
+\item{show_explanation}{Show a plain-language summary and explanation of
+the selected strategy.}
 
-\item{show_formulas}{.}
+\item{show_formulas}{Show the formulas used for individual and combined
+test metrics.}
 
-\item{show_cost_analysis}{.}
+\item{show_cost_analysis}{Show expected testing volume and cost using the
+illustrative population size.}
 
-\item{show_plots}{.}
+\item{show_plots}{Show the five diagnostic-performance and population-flow
+plots.}
 }
 \value{
 A results object containing:
@@ -98,10 +110,18 @@ analysis including population flow, cost implications, and diagnostic
 plots.
 }
 \details{
+The named scenarios and their values are teaching examples only, not
+clinical
+guidance or validated diagnostic pathways. Replace all example parameters
+with
+estimates applicable to the intended population before interpreting
+results.
+
 This analysis is particularly useful for:
-• Designing diagnostic protocols and clinical pathways
-• Optimizing test sequencing for specific clinical contexts
+• Exploring how diagnostic strategies behave under explicit assumptions
+• Comparing hypothetical test sequences for teaching or planning
 • Understanding trade-offs between sensitivity and specificity
-• Evaluating cost-effectiveness of different testing strategies
+• Illustrating expected testing volume and cost under user-supplied
+assumptions
 • Teaching sequential testing concepts and Bayesian probability
 }

@@ -13,8 +13,8 @@ enhancedROC(
   direction = "auto",
   youdenOptimization = TRUE,
   customCutoffs = "",
-  sensitivityThreshold = 0.8,
-  specificityThreshold = 0.8,
+  sensitivityThreshold = 0,
+  specificityThreshold = 0,
   confidenceLevel = 95,
   bootstrapSamples = 1000,
   useBootstrap = FALSE,
@@ -44,7 +44,7 @@ enhancedROC(
   showImbalanceWarning = FALSE,
   recommendPRC = FALSE,
   prevalence = 0.1,
-  useObservedPrevalence = FALSE,
+  useObservedPrevalence = TRUE,
   clinicalContext = "general",
   clinicalPresets = "custom",
   comprehensive_output = FALSE,
@@ -111,11 +111,19 @@ enhancedROC(
 \item{customCutoffs}{Comma-separated list of custom cutoffs to evaluate
 (e.g., 0.1, 0.5, 0.9)}
 
-\item{sensitivityThreshold}{Minimum required sensitivity for screening
-applications}
+\item{sensitivityThreshold}{Minimum sensitivity a cutoff must achieve to be
+considered. 0 (the default) searches for the overall Youden optimum with no
+constraint. Raising it restricts the search, which is what you want for a
+screening test, but the reported cutoff is then the best one meeting your
+minimum rather than the Youden maximum - a notice says so when the two
+differ.}
 
-\item{specificityThreshold}{Minimum required specificity for confirmatory
-testing}
+\item{specificityThreshold}{Minimum specificity a cutoff must achieve to be
+considered. 0 (the default) searches for the overall Youden optimum with no
+constraint. Raising it restricts the search, which is what you want for a
+confirmatory test, but the reported cutoff is then the best one meeting
+your minimum rather than the Youden maximum - a notice says so when the two
+differ.}
 
 \item{confidenceLevel}{Confidence level for AUC confidence intervals}
 
@@ -195,10 +203,16 @@ detected}
 \item{recommendPRC}{Recommend using Precision-Recall curves when imbalance
 is detected}
 
-\item{prevalence}{Disease prevalence for calculating predictive values}
+\item{prevalence}{Disease prevalence to assume when computing predictive
+values. Used only when "Use observed prevalence" is unticked - set it to
+the prevalence of the population the test will actually be used in, which
+for a screening setting is usually far lower than in a case-control sample.}
 
-\item{useObservedPrevalence}{Use the prevalence observed in the data for
-PPV/NPV and clinical impact calculations (recommended)}
+\item{useObservedPrevalence}{Compute PPV, NPV and the clinical impact
+metrics at the prevalence observed in these data (the default). Untick it
+to assume a different prevalence instead - appropriate when the sample is
+enriched for cases and does not reflect the population the test will be
+used in. The prevalence actually used is printed in the results.}
 
 \item{clinicalContext}{Clinical application context for interpretation}
 
@@ -232,7 +246,8 @@ and predicted probabilities)}
 
 \item{hosmerLemeshow}{Perform Hosmer-Lemeshow goodness-of-fit test}
 
-\item{hlGroups}{Number of groups for Hosmer-Lemeshow test}
+\item{hlGroups}{Number of equal-sized risk groups used both for the
+Hosmer-Lemeshow test and for binning the calibration plot}
 
 \item{brierScore}{Calculate Brier score and scaled Brier score}
 
@@ -266,7 +281,11 @@ levels}
 
 \item{multiClassStrategy}{Strategy for multi-class ROC analysis}
 
-\item{multiClassAveraging}{Method for averaging AUC across classes}
+\item{multiClassAveraging}{Method for averaging AUC across classes. Only
+the unweighted Macro Average is computed; Weighted Average (by prevalence)
+is NOT YET IMPLEMENTED - selecting it changes nothing, and the value
+reported stays the unweighted macro average of the One-vs-Rest AUCs (OVR
+strategy) or the Hand-Till pairwise AUC (OVO strategy)}
 
 \item{clinicalImpact}{Calculate clinical impact metrics (NNT, NND, clinical
 utility)}

@@ -112,33 +112,6 @@ options:
     # CLINICAL WORKFLOW PRESETS
     # ==========================================
     
-    - name: clinicalPreset
-      title: Clinical Use Case
-      type: List
-      options:
-        - name: none
-          title: Custom Analysis
-        - name: screening
-          title: Screening Test (Prioritize Sensitivity)
-        - name: confirmation
-          title: Confirmation Test (Prioritize Specificity)  
-        - name: balanced
-          title: Balanced Diagnostic Test
-        - name: research
-          title: Research Comparison
-      default: none
-      description:
-          R: >
-            Choose a preset configuration optimized for specific clinical scenarios:
-            Screening - High sensitivity to avoid missing cases
-            Confirmation - High specificity to avoid false positives
-            Balanced - Equal weight to sensitivity and specificity
-            Research - Comprehensive analysis for publication
-
-    # ==========================================
-    # CUTPOINT OPTIMIZATION SECTION
-    # ==========================================
-    
     - name: method
       title: Cutpoint Method
       type: List
@@ -509,7 +482,7 @@ options:
     # ==========================================
     
     - name: partialAUC
-      title: Calculate partial AUC
+      title: Partial AUC
       type: Bool
       default: false
       description:
@@ -600,7 +573,7 @@ options:
             Perform comprehensive comparison of classifier performance metrics.
 
     - name: calculateIDI
-      title: Calculate discrimination improvement
+      title: Discrimination improvement (IDI)
       type: Bool
       default: false
       description:
@@ -609,7 +582,7 @@ options:
             IDI (Integrated Discrimination Improvement) measures the average improvement in predicted probabilities.
 
     - name: calculateNRI
-      title: Calculate reclassification improvement
+      title: Reclassification improvement (NRI)
       type: Bool
       default: false
       description:

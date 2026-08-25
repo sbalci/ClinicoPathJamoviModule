@@ -108,8 +108,8 @@ sequentialtests
 
 ## ROC
 
-enhancedROC
-psychopdaROC
+- enhancedROC
+- psychopdaROC
 
 ## Prediction Models
 
@@ -4076,3 +4076,82 @@ lintr bug-set clean, all gates clean; 3-agent adversarial verification):
 - [ ] Decision Consequences shows observed counts beside per-1000 projections with no note.
 - [ ] `tools/check_state_guards.py` and `tools/theme_safe_html.py` return "0 findings" for this
       file without their patterns ever matching it — verify they actually cover it.
+
+## enhancedROC — deferred after release review (2026-08-25)
+
+Confirmed defects left open, with the reason each was not fixed in that pass.
+
+- [ ] **21 `addRow(rowKey=)` sites build rows in `.run()`** rather than `.init()`. The correct
+      fix (`rows: (predictors)` in `jamovi/enhancedROC.r.yaml` + `setRow(rowKey = predictor)`)
+      was written and reverted: it hard-errors (`rowKey 'm1' not found`) until
+      `jmvtools::prepare()` regenerates `R/enhancedROC.h.R`. Reapply together with the
+      regeneration. Six of the 23 sites are genuinely data-dependent and must stay as `addRow`
+      (cutoffAnalysis x3, multiClassAUC x2, decisionImpactSummary).
+- [ ] **`sensitivityThreshold` / `specificityThreshold` defaults** changed in `.a.yaml` from 0.8
+      to 0 (and `min` 0.1 -> 0) so the Youden search is unconstrained out of the box. Inert until
+      `prepare()`; the backend notice that discloses a binding constraint is already live.
+- [ ] **"Confidence bands" is pathologically slow** — 9 x `pROC::ci.coords` inside
+      `.plotROCCurve`'s `renderFun`, ~87 s for 2 predictors at n=5000, recomputed on every
+      redraw and resize. Move the computation into `.run()` and pass it via `setState`.
+- [ ] **20 options are disclosed as NOT YET IMPLEMENTED** and guarded, but the jamovi UI gives no
+      hint before the user ticks one. Consider greying them or grouping them under an
+      "Experimental" collapse.
+- [ ] **Notices are outside the translation catalog** — 162 `.()` wraps exist in
+      `R/enhancedROC.b.R` but none of the 44 `.addNotice()` sites uses one, so every notice, the
+      glossary panel and all plot text are English-only.
+- [ ] **`splineKnots` and `nntCalculation` are declared but never read.** `nntCalculation` now
+      has `enable: (clinicalImpact)`; both still need either an implementation or removal.
+- [ ] **`jamovi/0000.yaml` lists 10 analyses twice** (`enhancedROC`, `psychopdaROC`,
+      `classification`, `precisionrecall`, `jjridges`, `ordinalmixedmodel`, `patientdashboard`,
+      `populationhealth`, `samplingerror`, `statsplot2`). Generated file, module-wide — belongs
+      in a `prepare()` / `_updateModules.R` pass, not a single-analysis fix.
+
+
+
+---
+
+
+# Skill Usage
+
+| Skill | Example |
+|---|---|
+| `$add-r-code` | `$add-r-code add reproducible R output to tableone` |
+| `$audit-module` | `$audit-module audit the entire ClinicoPath module` |
+| `$check-function` | `$check-function validate enhancedROC with the release profile` |
+| `$check-function-full` | `$check-function-full deeply audit enhancedROC without repairing it` |
+| `$check-module` | `$check-module validate all analyses` |
+| `$checkpoint` | `$checkpoint add cancellation checkpoints to survival` |
+| `$create-function` | `$create-function create a diagnostic analysis named newroc` |
+| `$document-function` | `$document-function document enhancedROC` |
+| `$fix-function` | `$fix-function diagnose and repair enhancedROC` |
+| `$fix-notices` | `$fix-notices improve notices in enhancedROC` |
+| `$generate-test-data` | `$generate-test-data create diagnostic fixtures for enhancedROC` |
+| `$jamovi-playbooks` | `$jamovi-playbooks choose the right workflow for fixing enhancedROC` |
+| `$jamovify-function` | `$jamovify-function migrate enhancedROC to safer jmvcore helpers` |
+| `$prepare-translation` | `$prepare-translation prepare enhancedROC for Turkish` |
+| `$release-review-function` | `$release-review-function review and repair enhancedROC for release` |
+| `$review-article-stats` | `$review-article-stats review the statistics in this attached paper` |
+| `$review-function` | `$review-function review enhancedROC without making changes` |
+| `$security-audit-function` | `$security-audit-function audit enhancedROC for code injection and XSS` |
+| `$social-media-promo` | `$social-media-promo write a LinkedIn post about enhancedROC` |
+| `$update-refs` | `$update-refs synchronize references for enhancedROC` |
+## enhancedROC / psychopdaROC concordance — open decision (2026-08-25)
+
+The two ROC analyses now agree on every shared estimator. One default divergence is left open
+BY DESIGN, because closing it either way changes a statistical default:
+
+- [ ] **Direction at shipped defaults.** enhancedROC defaults to `direction: auto` and detects
+      the orientation from the data; psychopdaROC offers only `>=` / `<=` and defaults to `>=`.
+      On a marker where LOWER values indicate disease, at defaults, they report AUC 0.825 and
+      0.175 for the same data. Both warn, and both warnings are good.
+      Closing it requires a choice:
+        (a) add `auto` to psychopdaROC and default to it — matches enhancedROC, but inherits the
+            upward AUC bias of reading direction from the same data used for the estimate
+            (a null marker at n=20 reports a mean AUC of about 0.59), OR
+        (b) drop `auto` as enhancedROC's default — statistically cleaner, but changes behaviour
+            for every existing enhancedROC user.
+      The reviewer argued (b) is the better statistics and (a) is the better ergonomics. Not
+      changed unilaterally: this is a clinical-defaults decision, not a defect.
+      Implementation note for (a): `direction` is read at 18 sites in R/psychopdaROC.b.R and
+      `R/utils.R:167` hard-stops on anything but `>=`/`<=`, so `auto` must be resolved ONCE into
+      a private field early in `.run()` and every site switched to read that. Needs prepare().

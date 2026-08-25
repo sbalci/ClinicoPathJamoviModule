@@ -138,22 +138,31 @@ test_that("psychopdaROC handles clinical mode selection", {
   expect_no_error(result_advanced)
 })
 
-test_that("psychopdaROC handles clinical presets", {
-  # Screening preset
-  result_screen <- psychopdaROC(
-    data = psychopdaROC_test,
-    dependentVars = "biomarker",
-    classVar = "disease_status",
-    clinicalPreset = "screening"
-  )
-  expect_no_error(result_screen)
+test_that("the removed clinical-preset option is gone from the schema", {
+  # clinicalPreset was removed: all four presets were a byte-identical no-op
+  # because the handler wrote into `instructions` from .init(), which is then
+  # overwritten. This test used to assert only expect_no_error() on two of them,
+  # which passed throughout the entire period the option did nothing at all.
+  # Guard the removal instead, so the dead option cannot quietly return.
+  a_yaml <- readLines(test_path("..", "..", "jamovi", "psychopdaROC.a.yaml"), warn = FALSE)
+  u_yaml <- readLines(test_path("..", "..", "jamovi", "psychopdaROC.u.yaml"), warn = FALSE)
+  expect_false(any(grepl("clinicalPreset", a_yaml, fixed = TRUE)))
+  expect_false(any(grepl("clinicalPreset", u_yaml, fixed = TRUE)))
+  # The .b.R must not read it any more either.
+  b_src <- readLines(test_path("..", "..", "R", "psychopdaROC.b.R"), warn = FALSE)
+  code <- b_src[!grepl("^\\s*#", b_src)]
+  expect_false(any(grepl("clinicalPreset", code, fixed = TRUE)))
 
-  # Confirmation preset
-  result_confirm <- psychopdaROC(
-    data = psychopdaROC_test,
-    dependentVars = "biomarker",
-    classVar = "disease_status",
-    clinicalPreset = "confirmation"
-  )
-  expect_no_error(result_confirm)
+  # Passing it should eventually be a hard "unused argument" error, but the R
+  # wrapper lives in the GENERATED R/psychopdaROC.h.R, which still declares the
+  # option until someone runs jmvtools::prepare(). Skip rather than fail while
+  # the generated header is stale, so this starts guarding the moment it is
+  # regenerated instead of going red for a reason the source cannot fix.
+  h_src <- readLines(test_path("..", "..", "R", "psychopdaROC.h.R"), warn = FALSE)
+  skip_if(any(grepl("clinicalPreset", h_src, fixed = TRUE)),
+          "R/psychopdaROC.h.R is stale - run jmvtools::prepare()")
+  expect_error(
+    psychopdaROC(data = psychopdaROC_test, dependentVars = "biomarker",
+                 classVar = "disease_status", clinicalPreset = "screening"),
+    "unused argument")
 })

@@ -5,7 +5,7 @@ stage: 0
 compilerMode: tame
 children:
   - type: CollapseBox
-    label: Clinical Presets
+    label: Teaching Examples (Not Clinical Guidance)
     collapsed: false
     children:
       - type: ComboBox
@@ -24,8 +24,6 @@ children:
             format: string
             width: largest
             enable: (preset == 'custom')
-            events:
-              change: ./sequentialtests.events::onChange_test1_name
           - type: TextBox
             name: test1_sens
             format: number
@@ -51,8 +49,6 @@ children:
             format: string
             width: largest
             enable: (preset == 'custom')
-            events:
-              change: ./sequentialtests.events::onChange_test2_name
           - type: TextBox
             name: test2_sens
             format: number
@@ -85,8 +81,6 @@ children:
       - type: ComboBox
         name: strategy
         enable: (preset == 'custom')
-        events:
-          change: ./sequentialtests.events::onChange_strategy
   - type: Label
     label: Disease Parameters
     children:
@@ -100,8 +94,9 @@ children:
             enable: (preset == 'custom')
             events:
               change: ./sequentialtests.events::onChange_prevalence
-  - type: Label
+  - type: CollapseBox
     label: Display Options
+    collapsed: true
     children:
       - type: LayoutBox
         margin: large

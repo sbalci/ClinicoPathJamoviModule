@@ -26,7 +26,7 @@ test_that("COVID-19 workflow: screening to confirmation strategy", {
   expect_s3_class(result, "sequentialtestsResults")
 })
 
-test_that("COVID-19 workflow: using clinical preset", {
+test_that("COVID-19 workflow: using teaching example", {
   result <- sequentialtests(
     preset = "covid_screening_confirmation",
     population_size = 5000,
@@ -58,7 +58,7 @@ test_that("breast cancer workflow: mammography to biopsy", {
   expect_s3_class(result, "sequentialtestsResults")
 })
 
-test_that("breast cancer workflow: using clinical preset", {
+test_that("breast cancer workflow: using teaching example", {
   result <- sequentialtests(
     preset = "breast_cancer_screening",
     population_size = 50000,
@@ -91,7 +91,7 @@ test_that("MI rule-out workflow: parallel testing strategy", {
   expect_s3_class(result, "sequentialtestsResults")
 })
 
-test_that("MI rule-out workflow: using clinical preset", {
+test_that("MI rule-out workflow: using teaching example", {
   result <- sequentialtests(
     preset = "mi_emergency_parallel",
     population_size = 2000,
@@ -123,7 +123,7 @@ test_that("TB workflow: chest X-ray to sputum culture", {
   expect_s3_class(result, "sequentialtestsResults")
 })
 
-test_that("HIV workflow: ELISA to Western blot", {
+test_that("HIV teaching example uses current generic assay labels", {
   result <- sequentialtests(
     preset = "hiv_screening_confirmation",
     population_size = 10000,
@@ -346,8 +346,8 @@ test_that("publication-ready workflow: detailed reporting", {
   expect_s3_class(result, "sequentialtestsResults")
 })
 
-# Clinical Preset Comprehensive Testing ----
-test_that("all clinical presets execute without error", {
+# Teaching Example Comprehensive Testing ----
+test_that("all teaching examples execute without error", {
   presets <- c(
     "covid_screening_confirmation",
     "breast_cancer_screening",

@@ -23,40 +23,6 @@ items:
       type: Html
       visible: true
 
-    - name: simpleResultsTable
-      title: ROC Analysis Summary
-      type: Table
-      rows: 0
-      visible: true
-      clearWith:
-          - dependentVars
-          - classVar
-          - positiveClass
-          - subGroup
-          - direction
-          - method
-          - metric
-      columns:
-        - name: variable
-          title: Variable
-          type: text
-        - name: auc
-          title: AUC
-          type: number
-          format: zto
-        - name: ci_lower
-          title: 95% CI Lower
-          type: number
-          format: zto
-        - name: ci_upper
-          title: 95% CI Upper
-          type: number
-          format: zto
-        - name: p
-          title: p-value
-          type: number
-          format: zto,pvalue
-
     - name: clinicalInterpretationTable
       title: Clinical Interpretation
       type: Table

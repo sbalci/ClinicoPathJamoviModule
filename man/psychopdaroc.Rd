@@ -13,7 +13,6 @@ psychopdaROC(
   classVar,
   positiveClass,
   subGroup = NULL,
-  clinicalPreset = "none",
   method = "maximize_metric",
   metric = "youden",
   direction = ">=",
@@ -111,12 +110,6 @@ treated as the positive class.}
 
 \item{subGroup}{Optional grouping variable for stratified analysis. ROC
 curves will be calculated separately for each group.}
-
-\item{clinicalPreset}{Choose a preset configuration optimized for specific
-clinical scenarios: Screening - High sensitivity to avoid missing cases
-Confirmation - High specificity to avoid false positives Balanced - Equal
-weight to sensitivity and specificity Research - Comprehensive analysis for
-publication}
 
 \item{method}{Method for determining the optimal cutpoint. Different
 methods optimize different aspects of classifier performance.}
@@ -355,7 +348,6 @@ A results object containing:
 \code{results$instructions} \tab \tab \tab \tab \tab a html \cr
 \code{results$procedureNotes} \tab \tab \tab \tab \tab a html \cr
 \code{results$runSummary} \tab \tab \tab \tab \tab a html \cr
-\code{results$simpleResultsTable} \tab \tab \tab \tab \tab a table \cr
 \code{results$clinicalInterpretationTable} \tab \tab \tab \tab \tab a table \cr
 \code{results$resultsTable} \tab \tab \tab \tab \tab an array of tables \cr
 \code{results$sensSpecTable} \tab \tab \tab \tab \tab an array of htmls \cr
@@ -394,9 +386,9 @@ A results object containing:
 
 Tables can be converted to data frames with \code{asDF} or \code{\link{as.data.frame}}. For example:
 
-\code{results$simpleResultsTable$asDF}
+\code{results$clinicalInterpretationTable$asDF}
 
-\code{as.data.frame(results$simpleResultsTable)}
+\code{as.data.frame(results$clinicalInterpretationTable)}
 }
 \description{
 Receiver Operating Characteristic (ROC) curve analysis with optimal

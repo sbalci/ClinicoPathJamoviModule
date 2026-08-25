@@ -8,6 +8,7 @@ items:
       title: Important Information
       type: Preformatted
       clearWith:
+         - preset
          - strategy
          - prevalence
          - test1_sens
@@ -97,6 +98,7 @@ items:
       type: Table
       rows: 0
       clearWith:
+         - preset
          - strategy
          - prevalence
          - test1_sens
@@ -142,6 +144,7 @@ items:
       visible: (show_cost_analysis)
       rows: 0
       clearWith:
+         - preset
          - strategy
          - prevalence
          - test1_sens
@@ -159,8 +162,8 @@ items:
           title: 'Unit Cost'
           type: number
         - name: number_tests
-          title: 'Number of Tests'
-          type: integer
+          title: 'Expected Number of Tests'
+          type: number
         - name: total_cost
           title: 'Total Cost'
           type: number
@@ -216,15 +219,14 @@ items:
       visible: (show_plots)
 
     - name: clinical_guidance
-      title: 'Testing Strategy Notes'
+      title: 'Strategy Notes and Teaching Examples'
       type: Html
+      visible: (show_explanation)
 
 
 refs:
-    - DiagnosticTests
-    - Fagan
-    - Fagan2
-    - sensspecwiki
     - ClinicoPathJamoviModule
+    - ConditionalDependenceDiagnosticTests
+    - CDC_HIV_Testing_2023
 
 ...

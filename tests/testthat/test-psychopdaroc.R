@@ -738,7 +738,7 @@ test_that("results contain expected components", {
   
   # Check that all expected result components exist
   expected_components <- c("resultsTable", "sensSpecTable", "plotROC", 
-                          "simpleResultsTable", "aucSummaryTable")
+                          "aucSummaryTable")
   
   for (component in expected_components) {
     expect_true(component %in% names(result), 

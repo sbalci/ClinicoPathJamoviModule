@@ -7,7 +7,6 @@
 A psychopdaROCResults object containing:
 \itemize{
 \item \code{resultsTable}: Detailed results for each threshold
-\item \code{simpleResultsTable}: Summary AUC results with confidence intervals
 \item \code{sensSpecTable}: Confusion matrix at optimal cutpoint
 \item \code{plotROC}: ROC curve visualization
 \item \code{delongTest}: DeLong test results (if requested)

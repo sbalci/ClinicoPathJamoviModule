@@ -76,7 +76,6 @@
 #'
 #' @return A psychopdaROCResults object containing:
 #' - `resultsTable`: Detailed results for each threshold
-#' - `simpleResultsTable`: Summary AUC results with confidence intervals
 #' - `sensSpecTable`: Confusion matrix at optimal cutpoint
 #' - `plotROC`: ROC curve visualization
 #' - `delongTest`: DeLong test results (if requested)
@@ -252,7 +251,23 @@ psychopdaROCClass <- if (requireNamespace("jmvcore")) {
       ## Storage for ROC data and other analysis results
       .rocDataList = list(), # Store ROC curve data for each variable
       .optimalCriteriaList = list(), # Store optimal cutpoints
+      # Conditions the USER needs to know about, collected during .run() and
+      # rendered into the runSummary warning box (which is always visible).
+      #
+      # These were previously raised with bare warning(). jamovi does not surface
+      # R warnings as analysis output - they land in the undifferentiated
+      # "Analysis Notes" panel alongside package chatter, so a silently degraded
+      # feature (pROC missing -> partial AUC/bootstrap CI/smoothing quietly
+      # skipped) looked identical to a feature the user had not switched on.
+      .userWarnings = character(0),
       .prevalenceList = list(), # Store prevalence values
+      # The SAMPLE prevalence, kept separate from .prevalenceList because that one is overwritten
+      # by the user's prior when "Use prior prevalence" is ticked. The prior is documented as
+      # applying to PREDICTIVE VALUES; accuracy is not a predictive value, and letting the prior
+      # reach it silently turned the Accuracy column into expected accuracy in the assumed
+      # population (0.849 against an empirical 0.767), under an unchanged heading and
+      # contradicting this analysis's own fixedSensSpecTable.
+      .samplePrevalenceList = list(),
       .aucList = list(), # Store AUC values for clinical interpretation
       .forestPlotData = NULL, # Store forest plot data for meta-analysis
       .assumedPositiveClass = NULL, # Set when no positive class was chosen and one was guessed
@@ -270,6 +285,60 @@ psychopdaROCClass <- if (requireNamespace("jmvcore")) {
       # ============================================================================
 
       # Centralized package dependency checking
+      # Total N needed for `target_power` to detect an AUC of `auc` against 0.5.
+      #
+      # This INVERTS the module's own Hanley-McNeil power function numerically
+      # rather than using a closed form. The previous closed form was
+      #   ((z_a + z_b) / (2*qnorm(A) - 1))^2 * (1/p + 1/q) * adj^2
+      # which is in neither of the two papers the table cites, and failed three
+      # ways that were all reproduced numerically:
+      #   * internally inconsistent - it returned 141 where its OWN power formula,
+      #     printed in the adjacent cell, gives that n only 50.6% power (true 283);
+      #   * singular INSIDE the option's allowed range - 2*qnorm(A) - 1 vanishes at
+      #     A = 0.6915, i.e. expectedAUCDifference = 0.1915, so the sequence ran
+      #     141 -> 651 -> 496,622 -> 752,165,490 -> 281 as the effect GREW;
+      #   * dangerously optimistic at small effects - 62 where 1149 are needed.
+      # Inverting the power function cannot disagree with the power column, is
+      # monotone in the effect size, and has no pole.
+      .requiredNforPower = function(auc, alpha, target_power, pos_frac,
+                                    adjustment_factor = 1, n_max = 1e7) {
+        if (!is.finite(auc) || auc <= 0.5 || !is.finite(pos_frac) ||
+            pos_frac <= 0 || pos_frac >= 1) return(NA_integer_)
+        # A non-finite or non-positive adjustment means the comparison is
+        # degenerate (perfectly correlated markers). Refuse rather than return a
+        # number: adj -> 0 makes the SE vanish and yields an absurd n of 6.
+        if (!is.finite(adjustment_factor) || adjustment_factor <= 0) return(NA_integer_)
+        z_alpha <- stats::qnorm(1 - alpha / 2)
+        powr <- function(n) {
+          n_a <- n * pos_frac
+          n_n <- n * (1 - pos_frac)
+          if (n_a < 2 || n_n < 2) return(0)
+          q1 <- auc / (2 - auc)
+          q2 <- 2 * auc^2 / (1 + auc)
+          v <- (auc * (1 - auc) + (n_a - 1) * (q1 - auc^2) +
+                (n_n - 1) * (q2 - auc^2)) / (n_a * n_n)
+          se <- sqrt(max(v, 0)) * adjustment_factor
+          if (!is.finite(se) || se <= 0) return(1)
+          1 - stats::pnorm(z_alpha - (auc - 0.5) / se)
+        }
+        if (powr(n_max) < target_power) return(NA_integer_)
+        lo <- 4; hi <- 16
+        while (hi < n_max && powr(hi) < target_power) { lo <- hi; hi <- hi * 2 }
+        hi <- min(hi, n_max)
+        while (lo + 1 < hi) {                       # smallest n reaching the target
+          mid <- floor((lo + hi) / 2)
+          if (powr(mid) >= target_power) hi <- mid else lo <- mid
+        }
+        as.integer(hi)
+      },
+
+      .warnUser = function(msg) {
+        if (length(msg) && nzchar(msg)) {
+          private$.userWarnings <- unique(c(private$.userWarnings, msg))
+        }
+        invisible(NULL)
+      },
+
       .checkPackageDependencies = function(required_packages, feature_name = "this feature") {
         missing_packages <- character(0)
 
@@ -281,7 +350,9 @@ psychopdaROCClass <- if (requireNamespace("jmvcore")) {
 
         if (length(missing_packages) > 0) {
           pkg_list <- paste(missing_packages, collapse = ", ")
-          warning(sprintf("The %s package(s) are required for %s. Please install missing packages to use this functionality.", pkg_list, feature_name))
+          private$.warnUser(sprintf(
+            .("%s was skipped because the %s package is not installed. Install it and re-run to enable that output."),
+            feature_name, pkg_list))
           return(FALSE)
         }
         return(TRUE)
@@ -327,76 +398,35 @@ psychopdaROCClass <- if (requireNamespace("jmvcore")) {
         # Adjust UI visibility based on clinical mode
         if (mode == "basic") {
           # Show only essential features for clinical users
-          private$.modeInstructionsHtml <- .("
-        <h3>Basic ROC Analysis</h3>
-        <p>This simplified interface shows essential diagnostic performance metrics.
-        Results include Area Under the Curve (AUC), optimal cutpoints, and performance statistics.</p>
-        <p><strong>AUC Interpretation:</strong> 0.9+ = Excellent, 0.8-0.9 = Good, 0.7-0.8 = Fair, &lt;0.7 = Poor.
-        These labels describe discrimination in this sample only.</p>
-        <p><strong>Cutpoint caveat:</strong> unless you supplied the cutpoint yourself (Manual cutpoint method),
-        the optimal cutpoint is searched on these same data, so the sensitivity and specificity reported at it
-        are optimistically biased and will typically be lower in a new sample. The bias grows as the sample gets
-        smaller and as more candidate cutpoints are searched. The AUC is computed over all cutpoints and is not
-        affected by that search.</p>
-        ")
+          # Markup OUTSIDE .(), one complete sentence INSIDE each. A single .()
+          # wrapping the whole indented HTML block hands the translator a blob
+          # with embedded newlines and tags, which is what the i18n gate forbids.
+          private$.modeInstructionsHtml <- paste0(
+            "<h3>", .("Basic ROC Analysis"), "</h3>",
+            "<p>", .("This simplified interface shows essential diagnostic performance metrics."),
+            " ", .("Results include Area Under the Curve (AUC), optimal cutpoints, and performance statistics."), "</p>",
+            "<p><strong>", .("AUC interpretation"), ":</strong> ",
+            .("0.9 and above is excellent, 0.8 to 0.9 good, 0.7 to 0.8 fair, and below 0.7 poor."),
+            " ", .("These labels describe discrimination in this sample only."), "</p>",
+            "<p><strong>", .("Cutpoint caveat"), ":</strong> ",
+            .("Unless you supplied the cutpoint yourself using the Manual cutpoint method, the optimal cutpoint is searched on these same data, so the sensitivity and specificity reported at it are optimistically biased and will typically be lower in a new sample."),
+            " ", .("The bias grows as the sample gets smaller and as more candidate cutpoints are searched."),
+            " ", .("The AUC is computed over all cutpoints and is not affected by that search."), "</p>"
+          )
         } else if (mode == "advanced") {
-          private$.modeInstructionsHtml <- .("
-        <h3>Advanced ROC Analysis</h3>
-        <p>Advanced interface with statistical comparisons, effect sizes, and additional metrics for research applications.</p>
-        ")
+          private$.modeInstructionsHtml <- paste0(
+            "<h3>", .("Advanced ROC Analysis"), "</h3>",
+            "<p>", .("Advanced interface with statistical comparisons, effect sizes, and additional metrics for research applications."), "</p>"
+          )
         } else if (mode == "comprehensive") {
-          private$.modeInstructionsHtml <- .("
-        <h3>Comprehensive Statistical Analysis</h3>
-        <p>Full research-grade analysis with all available statistical methods, Bayesian analysis, and publication-quality outputs.</p>
-        ")
+          private$.modeInstructionsHtml <- paste0(
+            "<h3>", .("Comprehensive Statistical Analysis"), "</h3>",
+            "<p>", .("Full research-grade analysis with all available statistical methods, Bayesian analysis, and publication-quality outputs."), "</p>"
+          )
         } else {
           private$.modeInstructionsHtml <- ""
         }
         self$results$instructions$setContent(private$.modeInstructionsHtml)
-      },
-
-      # Apply clinical preset settings
-      .applyClinicalPresetSettings = function() {
-        preset <- self$options$clinicalPreset
-
-        if (preset == "screening") {
-          self$results$instructions$setContent(paste0(
-            private$.modeInstructionsHtml,
-            "<h4>Screening Test Configuration</h4>",
-            "<p>For screening, prioritize high sensitivity to minimize false negatives. ",
-            "Consider using the 'Fixed Sensitivity/Specificity Analysis' section below to review performance at fixed sensitivity thresholds.</p>",
-            "<p style='color: #856404;'><b>Note:</b> This preset provides guidance only. ",
-            "The cutpoint method is still: <b>", self$options$method, "</b> with metric: <b>", self$options$metric, "</b>. ",
-            "To change the optimization, adjust the Method and Metric options directly.</p>"
-          ))
-        } else if (preset == "confirmation") {
-          self$results$instructions$setContent(paste0(
-            private$.modeInstructionsHtml,
-            "<h4>Confirmation Test Configuration</h4>",
-            "<p>For confirmatory testing, prioritize high specificity to minimize false positives. ",
-            "Consider using the 'Fixed Sensitivity/Specificity Analysis' section below to review performance at fixed specificity thresholds.</p>",
-            "<p style='color: #856404;'><b>Note:</b> This preset provides guidance only. ",
-            "The cutpoint method is still: <b>", self$options$method, "</b> with metric: <b>", self$options$metric, "</b>. ",
-            "To change the optimization, adjust the Method and Metric options directly.</p>"
-          ))
-        } else if (preset == "balanced") {
-          self$results$instructions$setContent(paste0(
-            private$.modeInstructionsHtml,
-            "<h4>Balanced Diagnostic Test</h4>",
-            "<p>Youden's J index optimizes for balanced sensitivity and specificity. ",
-            "It weights one unit of sensitivity the same as one unit of specificity, so the cutpoint it returns does not favour either kind of error.</p>",
-            "<p style='color: #856404;'><b>Note:</b> This preset provides guidance only. ",
-            "The cutpoint method is still: <b>", self$options$method, "</b> with metric: <b>", self$options$metric, "</b>.</p>"
-          ))
-        } else if (preset == "research") {
-          self$results$instructions$setContent(paste0(
-            private$.modeInstructionsHtml,
-            "<h4>Research Analysis Configuration</h4>",
-            "<p>Comprehensive statistical analysis suitable for research publications with ",
-            "advanced metrics and comparisons.</p>",
-            "<p style='color: #856404;'><b>Note:</b> This preset provides guidance only and does not change analysis settings.</p>"
-          ))
-        }
       },
 
       # Clinical interpretation helpers
@@ -404,14 +434,30 @@ psychopdaROCClass <- if (requireNamespace("jmvcore")) {
         if (is.na(auc) || is.null(auc)) {
           return("Unknown")
         }
+        # Six bands, matching the sibling analysis enhancedROC, so the same AUC is not given
+        # two different words by two analyses in the same menu. Everything below 0.7 used to
+        # collapse into "Poor", which gave a pure-noise marker (AUC 0.50) and an emphatically
+        # backwards one (AUC 0.31, p = 5e-07) the same cell text.
+        #
+        # The bottom band reports WHAT WAS OBSERVED and does not assert that the marker is
+        # reversed. Direction here is a fixed user choice, and under the null the AUC is
+        # symmetric about 0.5, so about half of all uninformative markers fall below it by
+        # chance alone (simulated: 0.492 of 2000 null markers at n = 200). Calling those
+        # "reversed" would invite the user to flip Direction - and with it the cutpoint,
+        # sensitivity and specificity - on noise. The confidence interval in aucSummaryTable
+        # is what settles it, and the below-0.5 note there says so.
         if (auc >= 0.9) {
           return(.("Excellent"))
         } else if (auc >= 0.8) {
           return(.("Good"))
         } else if (auc >= 0.7) {
           return(.("Fair"))
-        } else {
+        } else if (auc >= 0.6) {
           return(.("Poor"))
+        } else if (auc >= 0.5) {
+          return(.("Minimal"))
+        } else {
+          return(.("Below chance"))
         }
       },
       .getClinicalRecommendation = function(auc, var) {
@@ -1317,9 +1363,12 @@ psychopdaROCClass <- if (requireNamespace("jmvcore")) {
         metricList <- numeric()
 
         # Calculate prevalence
-        n_pos <- sum(classVar == positiveClass)
-        n_neg <- sum(classVar != positiveClass)
-        prevalence <- n_pos / (n_pos + n_neg)
+        n_pos <- sum(classVar == positiveClass, na.rm = TRUE)
+        n_neg <- sum(classVar != positiveClass, na.rm = TRUE)
+        prevalence <- if ((n_pos + n_neg) > 0) n_pos / (n_pos + n_neg) else NA_real_
+
+        # Keep the observed value before any prior overwrites it - accuracy needs it.
+        private$.samplePrevalenceList[[var]] <- prevalence
 
         # Override with prior prevalence if requested
         if (self$options$usePriorPrev) {
@@ -1419,16 +1468,33 @@ psychopdaROCClass <- if (requireNamespace("jmvcore")) {
         private$.notePositiveClassGuess(resultsTable)
         private$.noteMetricTolerance(resultsTable)
         private$.noteCutpointOptimism(resultsTable)
+        # This is the table that actually shows PPV/NPV, and it is visible by
+        # default -- so the prevalence caveat belongs here, not only inside the
+        # optional Fixed Sensitivity/Specificity panel.
+        private$.notePredictiveValues(resultsTable, private$.prevalenceList[[var]])
 
         # Clear existing rows
         resultsTable$deleteRows()
+
+        # A non-finite cutpoint is not an operating point a clinician can apply to a patient.
+        # It appears when no threshold achieves a positive Youden index - typically because the
+        # Classification Direction is backwards for this marker - and the row then reads
+        # "cutpoint Inf, sensitivity 0, PPV 0", which is worse than showing nothing. Say what
+        # happened instead of printing it.
+        if (!any(is.finite(resultsToDisplay))) {
+          resultsTable$setNote(
+            key = "no_usable_cutpoint",
+            note = .("No usable cut-point exists for this marker in the classification direction currently selected: no threshold separates the groups better than chance. Check the Classification Direction and the coding of the outcome variable. The AUC and its confidence interval above are unaffected."),
+            init = FALSE
+          )
+        }
 
         # Add rows for each threshold to display
         for (threshold in resultsToDisplay) {
           # Find closest threshold in our data
           idx <- which.min(abs(confusionMatrix$x.sorted - threshold))
 
-          if (length(idx) > 0) {
+          if (length(idx) > 0 && is.finite(threshold)) {
             # Add row to results table
             resultsTable$addRow(rowKey = threshold, values = list(
               cutpoint = threshold,
@@ -1750,10 +1816,10 @@ psychopdaROCClass <- if (requireNamespace("jmvcore")) {
         # Calculate standard errors and p-values (against null hypothesis AUC = 0.5)
         aucvar <- (auc * (1 - auc) + (np - 1) * (q1 - auc^2) + (nn - 1) * (q2 - auc^2)) / (np * nn)
         zhalf <- ifelse(aucvar > 0, (auc - 0.5) / sqrt(aucvar), NA)
-        phalf <- ifelse(!is.na(zhalf), 2 * (1 - pnorm(abs(zhalf))), NA)
+        phalf <- ifelse(!is.na(zhalf), 2 * pnorm(-abs(zhalf)), NA)
         diag_S <- diag(S)
         zdelong <- ifelse(diag_S > 0, (auc - 0.5) / sqrt(diag_S), NA)
-        pdelong <- ifelse(!is.na(zdelong), 2 * (1 - pnorm(abs(zdelong))), NA)
+        pdelong <- ifelse(!is.na(zdelong), 2 * pnorm(-abs(zdelong)), NA)
 
         # Global test for difference between AUCs
         aucdiff <- L %*% auc
@@ -1876,9 +1942,13 @@ psychopdaROCClass <- if (requireNamespace("jmvcore")) {
         # hidden here and never restored, so those four options computed a plot
         # and silently threw it away. The declarative form cannot drift.
 
-        # Apply clinical mode and preset configurations
+        # Apply clinical mode configuration.
+        # The clinical use-case preset option was REMOVED: its handler wrote
+        # guidance into self$results$instructions from .init(), which is then
+        # overwritten, so all four presets were a byte-identical no-op (confirmed
+        # by full-output diff). The text it tried to show said itself that it
+        # changed no analysis setting, so nothing was lost. Use Method / Metric.
         private$.applyClinicalModeSettings()
-        private$.applyClinicalPresetSettings()
 
         # Initialize advanced plot states (enable rendering when data is ready)
         # These plots have renderFun defined in .r.yaml but need setState to activate
@@ -2005,6 +2075,69 @@ psychopdaROCClass <- if (requireNamespace("jmvcore")) {
       # If no positive class was chosen, say which level was assumed. Getting this wrong
       # inverts every sensitivity, specificity, cutpoint and AUC in the output, so it belongs
       # beside the numbers rather than only in a console warning.
+      # Degenerate-estimate caveats for the AUC tables.
+      #
+      # Three cases produced a confident-looking number with nothing to qualify it:
+      #   AUC == 1  - DeLong's interval collapses to exactly 1-1 and the variance is
+      #               0, so the CI columns showed 1.000 to 1.000 (read as extreme
+      #               precision) and p came back blank with no explanation.
+      #   tiny n    - the correct min(n_pos, n_neg) < 10 guard existed but was wired
+      #               only to the DeLong comparison table, so a single-marker run
+      #               never saw it. At the enforced floor (2 per class) the analysis
+      #               reported AUC 1.000 and "Excellent".
+      #   zero var  - a constant marker gave AUC 0.500 with a 0.500-0.500 CI and
+      #               "Sensitivity 1.000" at cutpoint Inf; grep for "zero variance"
+      #               over the whole backend returned nothing.
+      # PPV and NPV are prevalence-dependent, so they do not transfer to a
+      # population with a different disease frequency. The module DID carry that
+      # caveat -- but only inside .generateFixedSensSpecExplanation(), which
+      # renders solely when the Fixed Sensitivity/Specificity feature is switched
+      # on. The main results table, which is where PPV/NPV actually appear and is
+      # visible by default, said nothing. At 2% prevalence it reported PPV 0.13
+      # (59 false positives for 9 true positives) with no note at all.
+      .notePredictiveValues = function(table, prevalence) {
+        if (is.null(prevalence) || !is.finite(prevalence)) return(invisible(NULL))
+        extreme <- prevalence < 0.10 || prevalence > 0.90
+        msg <- sprintf(
+          .("PPV and NPV below are computed at the prevalence of this sample (%.1f%%) and do not carry over to a population where the condition is more or less common - sensitivity and specificity do, predictive values do not. Recompute them for your own setting's prevalence before quoting them."),
+          prevalence * 100)
+        if (extreme) {
+          msg <- paste(msg, sprintf(
+            .("At %.1f%% this sample is strongly imbalanced, so the %s is especially fragile: a small shift in prevalence moves it a long way."),
+            prevalence * 100,
+            if (prevalence < 0.10) .("PPV") else .("NPV")))
+        }
+        tryCatch(table$setNote("predictive_values_prevalence", msg), error = function(e) NULL)
+        invisible(NULL)
+      },
+
+      .noteDegenerateEstimates = function(table, auc_values, n_pos, n_neg, constant_vars = character(0)) {
+        finite_auc <- auc_values[is.finite(auc_values)]
+
+        if (length(finite_auc) > 0 && any(finite_auc >= 0.9995)) {
+          tryCatch(table$setNote(
+            "perfect_separation",
+            .("At least one marker separates the two classes completely in this sample (AUC 1.000). The confidence interval collapses to a single point and the p-value is undefined because the variance is zero - those columns are not showing precision, they are showing that the estimate is degenerate. Complete separation in a sample this size is far more often label leakage, an outcome-derived predictor, or overfitting than a genuinely perfect test. Validate externally before drawing any conclusion.")
+          ), error = function(e) NULL)
+        }
+
+        min_class <- suppressWarnings(min(n_pos, n_neg, na.rm = TRUE))
+        if (is.finite(min_class) && min_class < 10) {
+          tryCatch(table$setNote(
+            "small_sample",
+            sprintf(.("Only %d cases in the smaller outcome class. Below about 10 per class the AUC, its confidence interval and the p-value are all unreliable, and the interval is far wider than it looks (Hanley & McNeil 1982; Obuchowski 2004). Treat every figure in this table as provisional."), as.integer(min_class))
+          ), error = function(e) NULL)
+        }
+
+        if (length(constant_vars) > 0) {
+          tryCatch(table$setNote(
+            "constant_marker",
+            sprintf(.("These markers take the same value in every case and carry no information: %s. Their AUC of 0.500 with a zero-width interval is arithmetic, not a finding, and the accompanying sensitivity of 1.000 at an infinite cutpoint simply means every case is called positive. Remove them from the analysis."), paste(constant_vars, collapse = ", "))
+          ), error = function(e) NULL)
+        }
+        invisible(NULL)
+      },
+
       .notePositiveClassGuess = function(table) {
         if (is.null(private$.assumedPositiveClass)) return(invisible(NULL))
         tryCatch(
@@ -2100,6 +2233,9 @@ psychopdaROCClass <- if (requireNamespace("jmvcore")) {
 
       # Execute the ROC analysis
       .run = function() {
+        # jamovi reuses the R6 instance across runs, so a warning raised once
+        # would otherwise persist into every later run of the analysis.
+        private$.userWarnings <- character(0)
         # -----------------------------------------------------------------------
         # 0. SET SEED FOR REPRODUCIBILITY (preserve and restore global RNG state)
         # -----------------------------------------------------------------------
@@ -2287,10 +2423,16 @@ psychopdaROCClass <- if (requireNamespace("jmvcore")) {
         classVar <- data[[classVarEscaped]]
         if (!is.null(self$options$positiveClass) && nzchar(self$options$positiveClass) &&
             !self$options$positiveClass %in% levels(factor(classVar))) {
-          warning(paste(
-            "Selected positive class", self$options$positiveClass,
-            "not found in data. Using the last level instead."
-          ))
+          # Say only what is true. This used to assert "Using the last level
+          # instead", which flatly contradicted the hard error that .validateInputs
+          # raises for the same condition -- the user saw a note claiming a
+          # fallback had run next to a red error saying the analysis had not.
+          # .resolvePositiveClass decides what actually happens (guess at two
+          # levels, refuse at three or more); this just reports the mismatch.
+          private$.warnUser(sprintf(
+            .("The Positive Class you selected (%s) does not appear in %s. Its observed levels are: %s."),
+            self$options$positiveClass, self$options$classVar,
+            paste(levels(factor(classVar)), collapse = ", ")))
         }
         positiveClass <- private$.resolvePositiveClass(classVar)
 
@@ -2347,6 +2489,9 @@ psychopdaROCClass <- if (requireNamespace("jmvcore")) {
           "<li><strong>Positive Class:</strong> ", htmltools::htmlEscape(positiveClass), " (Prevalence: ", round(prevalence * 100, 1), "%)</li>",
           "<li><strong>Analysis Mode:</strong> ", tools::toTitleCase(self$options$clinicalMode), "</li>"
         )
+
+        # Fold in anything raised through .warnUser() during this run.
+        summary_status$warnings <- unique(c(summary_status$warnings, private$.userWarnings))
 
         if (length(summary_status$warnings) > 0) {
           run_summary_html <- paste0(
@@ -2407,12 +2552,23 @@ psychopdaROCClass <- if (requireNamespace("jmvcore")) {
           score <- NULL
         }
 
-        # Set up tolerance if needed for specific methods
+        # Set up tolerance if needed for specific methods.
+        #
+        # The two boot_metric methods MUST be in this list. cutpointr's boot
+        # wrappers pass tol_metric straight through to maximize_metric on each
+        # resample, and a NULL there makes cutpointr return optimal_cutpoint =
+        # NaN. The addRow loop then computes which.min(abs(x.sorted - NaN)) ==
+        # integer(0), its length guard fails, and NO row is ever added -- the
+        # Results table came back completely empty for both boot methods, with
+        # no error and no notice. They belong here anyway: the file's own list
+        # of metric-consuming methods (see .procedureNotes) already includes them.
         if (self$options$method %in% c(
           "maximize_metric",
           "minimize_metric",
           "maximize_loess_metric",
-          "minimize_loess_metric"
+          "minimize_loess_metric",
+          "maximize_boot_metric",
+          "minimize_boot_metric"
         )) {
           tol_metric <- self$options$tol_metric
         } else {
@@ -2580,8 +2736,8 @@ psychopdaROCClass <- if (requireNamespace("jmvcore")) {
             confusionMatrix <- results$roc_curve[[1]]
 
             # Calculate prevalence for cost-ratio method
-            n_pos <- sum(classVar == positiveClass)
-            n_neg <- sum(classVar != positiveClass)
+            n_pos <- sum(classVar == positiveClass, na.rm = TRUE)
+            n_neg <- sum(classVar != positiveClass, na.rm = TRUE)
             prevalence <- n_pos / (n_pos + n_neg)
 
             # Override with prior prevalence if requested
@@ -2853,7 +3009,9 @@ psychopdaROCClass <- if (requireNamespace("jmvcore")) {
               },
               error = function(e) {
                 # Fallback to original implementation if enhanced version fails
-                warning(paste("Enhanced DeLong test failed, using fallback:", e$message))
+                private$.warnUser(sprintf(
+                  .("The enhanced DeLong comparison failed (%s), so a fallback implementation was used; the AUC differences and p-values below come from that fallback."),
+                  conditionMessage(e)))
                 private$.deLongTest(
                   data = depVarsData_complete,
                   classVar = classVarData_complete,
@@ -2958,9 +3116,11 @@ psychopdaROCClass <- if (requireNamespace("jmvcore")) {
                 auc_diff = diff_data[i, "AUC Difference"],
                 ci_lower = diff_data[i, "CI(lower)"],
                 ci_upper = diff_data[i, "CI(upper)"],
-                # Preserve the sign of the AUC difference: |z| = sqrt(chisq_1),
-                # sign(z) = sign(AUC difference) since the standard error is positive.
-                z = sign(diff_data[i, "AUC Difference"]) * sqrt(qchisq(1 - diff_data[i, "P.Value"], df = 1)),
+                # Use the z the test actually computed (diff / se). Back-computing
+                # it from the p-value returned Inf whenever p underflowed to 0.
+                z = if ("Z" %in% colnames(diff_data)) diff_data[i, "Z"]
+                    else sign(diff_data[i, "AUC Difference"]) *
+                         sqrt(qchisq(1 - min(diff_data[i, "P.Value"], 1 - 1e-16), df = 1)),
                 p = diff_data[i, "P.Value"]
               ))
             }
@@ -2971,11 +3131,24 @@ psychopdaROCClass <- if (requireNamespace("jmvcore")) {
         # 11. CREATE SIMPLIFIED RESULTS TABLES
         # -----------------------------------------------------------------------
 
-        # Create simplified summary table
-        simpleTable <- self$results$simpleResultsTable
-        private$.notePositiveClassGuess(simpleTable)
-        private$.noteDirection(simpleTable)
-        private$.noteMetricTolerance(simpleTable)
+        # The duplicate summary table was REMOVED: it was column-for-column
+        # identical to aucSummaryTable (variable, auc, ci_lower, ci_upper, p),
+        # always visible, populated from the same loop and given the same
+        # footnotes -- users saw the same AUC table twice in the default output.
+        # Degenerate-estimate caveats (perfect separation / tiny n / constant marker).
+        # Counts come from the same classVar the CI block uses, so they reflect the
+        # rows actually analysed.
+        .degen_class <- tryCatch({
+          cv <- data[[private$.escapeVar(self$options$classVar)]]
+          c(sum(cv == positiveClass, na.rm = TRUE), sum(cv != positiveClass, na.rm = TRUE))
+        }, error = function(e) c(NA_integer_, NA_integer_))
+        .degen_const <- tryCatch({
+          nm <- names(aucList)
+          nm[vapply(nm, function(v) {
+            col <- suppressWarnings(data[[private$.escapeVar(strsplit(v, " ::: ", fixed = TRUE)[[1]][1])]])
+            is.numeric(col) && length(unique(col[!is.na(col)])) <= 1
+          }, logical(1))]
+        }, error = function(e) character(0))
 
         # Track CI method per variable for user transparency
         ci_methods_used <- list()
@@ -2998,8 +3171,12 @@ psychopdaROCClass <- if (requireNamespace("jmvcore")) {
             classVar <- data[[classVarEscaped]][subGroup == groupName]
           }
 
-          n_pos <- sum(classVar == positiveClass)
-          n_neg <- sum(classVar != positiveClass)
+          # na.rm: a SINGLE NA in the gold standard made both sums NA, which failed
+          # the valid_sample_size gate below and silently skipped the whole CI/p
+          # block - including the ci_method footnote - so every marker showed a
+          # bare AUC with blank CI and blank p and nothing said why.
+          n_pos <- sum(classVar == positiveClass, na.rm = TRUE)
+          n_neg <- sum(classVar != positiveClass, na.rm = TRUE)
 
           # Calculate AUC CI using pROC DeLong method (accurate for small samples)
           auc_lci <- NA
@@ -3034,7 +3211,7 @@ psychopdaROCClass <- if (requireNamespace("jmvcore")) {
                 auc_se_delong <- sqrt(pROC::var(roc_obj))
                 if (!is.na(auc_se_delong) && auc_se_delong > 0) {
                   z_stat <- (auc_value - 0.5) / auc_se_delong
-                  p_val <- 2 * (1 - pnorm(abs(z_stat)))
+                  p_val <- 2 * pnorm(-abs(z_stat))
                 }
               },
               error = function(e) {
@@ -3050,21 +3227,13 @@ psychopdaROCClass <- if (requireNamespace("jmvcore")) {
                   auc_lci <<- max(0, auc_value - z_critical * auc_se)
                   auc_uci <<- min(1, auc_value + z_critical * auc_se)
                   z_stat <- (auc_value - 0.5) / auc_se
-                  p_val <<- 2 * (1 - pnorm(abs(z_stat)))
+                  p_val <<- 2 * pnorm(-abs(z_stat))
                 }
               }
             )
             ci_methods_used[[var]] <- if (used_fallback) "hanley_mcneil" else "delong"
           }
 
-          # Add row to simple table
-          simpleTable$addRow(rowKey = var, values = list(
-            variable = var,
-            auc = auc_value,
-            ci_lower = auc_lci,
-            ci_upper = auc_uci,
-            p = p_val
-          ))
         }
 
         # Populate clinical interpretation table after simple table is complete
@@ -3074,6 +3243,7 @@ psychopdaROCClass <- if (requireNamespace("jmvcore")) {
         aucSummaryTable <- self$results$aucSummaryTable
         private$.notePositiveClassGuess(aucSummaryTable)
         private$.noteDirection(aucSummaryTable)
+        private$.noteDegenerateEstimates(aucSummaryTable, unlist(aucList), .degen_class[1], .degen_class[2], .degen_const)
 
         for (var in names(aucList)) {
           # Get AUC value directly from the list
@@ -3093,8 +3263,12 @@ psychopdaROCClass <- if (requireNamespace("jmvcore")) {
           }
 
           # Calculate counts and statistics
-          n_pos <- sum(classVar == positiveClass)
-          n_neg <- sum(classVar != positiveClass)
+          # na.rm: a SINGLE NA in the gold standard made both sums NA, which failed
+          # the valid_sample_size gate below and silently skipped the whole CI/p
+          # block - including the ci_method footnote - so every marker showed a
+          # bare AUC with blank CI and blank p and nothing said why.
+          n_pos <- sum(classVar == positiveClass, na.rm = TRUE)
+          n_neg <- sum(classVar != positiveClass, na.rm = TRUE)
 
           # Calculate AUC CI using pROC DeLong method (accurate for small samples)
           auc_lci <- NA
@@ -3127,7 +3301,7 @@ psychopdaROCClass <- if (requireNamespace("jmvcore")) {
                 auc_se_delong <- sqrt(pROC::var(roc_obj))
                 if (!is.na(auc_se_delong) && auc_se_delong > 0) {
                   z_stat <- (auc_value - 0.5) / auc_se_delong
-                  p_val <- 2 * (1 - pnorm(abs(z_stat)))
+                  p_val <- 2 * pnorm(-abs(z_stat))
                 }
               },
               error = function(e) {
@@ -3142,7 +3316,7 @@ psychopdaROCClass <- if (requireNamespace("jmvcore")) {
                   auc_lci <<- max(0, auc_value - z_critical * auc_se)
                   auc_uci <<- min(1, auc_value + z_critical * auc_se)
                   z_stat <- (auc_value - 0.5) / auc_se
-                  p_val <<- 2 * (1 - pnorm(abs(z_stat)))
+                  p_val <<- 2 * pnorm(-abs(z_stat))
                 }
                 if (is.null(ci_methods_used[[var]])) {
                   ci_methods_used[[var]] <<- "hanley_mcneil"
@@ -3189,7 +3363,6 @@ psychopdaROCClass <- if (requireNamespace("jmvcore")) {
             "\" will give an AUC of 1 minus the value shown, with sensitivity and specificity ",
             "swapped accordingly. Change it only if that matches what the marker means clinically."
           )
-          simpleTable$setNote("auc_below_chance", poor_disc_note)
           aucSummaryTable$setNote("auc_below_chance", poor_disc_note)
         }
 
@@ -3208,10 +3381,8 @@ psychopdaROCClass <- if (requireNamespace("jmvcore")) {
             "data 22.6% wider (SE 0.0259 against 0.0211) \u{2014} so it errs conservatively here, ",
             "but the direction is not guaranteed. Interpret these CIs with caution."
           )
-          simpleTable$setNote("ci_method_fallback", fallback_note)
           aucSummaryTable$setNote("ci_method_fallback", fallback_note)
         } else if (length(delong_vars) > 0) {
-          simpleTable$setNote("ci_method", "AUC 95% confidence intervals computed using the DeLong method.")
           aucSummaryTable$setNote("ci_method", "AUC 95% confidence intervals computed using the DeLong method.")
         }
 
@@ -3249,9 +3420,14 @@ psychopdaROCClass <- if (requireNamespace("jmvcore")) {
               if (!is.finite(plr)) plr <- NA
               if (!is.finite(nlr)) nlr <- NA
 
-              # Calculate accuracy using current variable's prevalence
-              accuracy <- (rocData$sensitivity[i] * prevalence) +
-                (rocData$specificity[i] * (1 - prevalence))
+              # Accuracy is empirical: sens*p + spec*(1-p) at the SAMPLE prevalence collapses to
+              # (TP+TN)/n. It must not follow the user's prior - that is documented as applying to
+              # predictive values, and letting it through inflated the headline accuracy whenever
+              # the assumed population was mostly negatives, which reads as the test improving.
+              sample_prev <- private$.samplePrevalenceList[[var]]
+              if (is.null(sample_prev) || !is.finite(sample_prev)) sample_prev <- prevalence
+              accuracy <- (rocData$sensitivity[i] * sample_prev) +
+                (rocData$specificity[i] * (1 - sample_prev))
 
               thresholdTable$addRow(rowKey = paste0(var, "_", i), values = list(
                 threshold = rocData$threshold[i],
@@ -3762,58 +3938,61 @@ psychopdaROCClass <- if (requireNamespace("jmvcore")) {
               panel.border = ggplot2::element_rect(color = "black", fill = NA)
             )
 
-          # Handle legend positioning for clean plots
-          if (self$options$combinePlots && length(unique(plotData$var)) > 1) {
-            if (self$options$legendPosition == "none") {
-              plot <- plot + ggplot2::theme(legend.position = "none")
-            } else {
-              legend_pos <- self$options$legendPosition
-              # Map custom positions to ggplot2 coordinate pairs
-              if (legend_pos == "topleft") {
-                plot <- plot + ggplot2::theme(
-                  legend.position = c(0.02, 0.98),
-                  legend.justification = c(0, 1),
-                  legend.title = ggplot2::element_blank(),
-                  legend.key = ggplot2::element_rect(fill = "white"),
-                  legend.background = ggplot2::element_rect(fill = "white", color = NA)
-                )
-              } else if (legend_pos == "topright") {
-                plot <- plot + ggplot2::theme(
-                  legend.position = c(0.98, 0.98),
-                  legend.justification = c(1, 1),
-                  legend.title = ggplot2::element_blank(),
-                  legend.key = ggplot2::element_rect(fill = "white"),
-                  legend.background = ggplot2::element_rect(fill = "white", color = NA)
-                )
-              } else if (legend_pos == "bottomleft") {
-                plot <- plot + ggplot2::theme(
-                  legend.position = c(0.02, 0.02),
-                  legend.justification = c(0, 0),
-                  legend.title = ggplot2::element_blank(),
-                  legend.key = ggplot2::element_rect(fill = "white"),
-                  legend.background = ggplot2::element_rect(fill = "white", color = NA)
-                )
-              } else if (legend_pos == "bottomright") {
-                plot <- plot + ggplot2::theme(
-                  legend.position = c(0.98, 0.02),
-                  legend.justification = c(1, 0),
-                  legend.title = ggplot2::element_blank(),
-                  legend.key = ggplot2::element_rect(fill = "white"),
-                  legend.background = ggplot2::element_rect(fill = "white", color = NA)
-                )
-              } else {
-                plot <- plot + ggplot2::theme(
-                  legend.position = legend_pos,
-                  legend.title = ggplot2::element_blank(),
-                  legend.key = ggplot2::element_rect(fill = "white"),
-                  legend.background = ggplot2::element_rect(fill = "white", color = NA)
-                )
-              }
-            }
-          }
         } else {
           # Use the provided theme
           plot <- plot + ggtheme
+        }
+
+        # Legend positioning. This used to live INSIDE the `if (cleanPlot)`
+        # branch, so at the default cleanPlot = FALSE every legendPosition value
+        # (including "none") changed nothing at all. It applies to both themes.
+        if (self$options$combinePlots && length(unique(plotData$var)) > 1) {
+          if (self$options$legendPosition == "none") {
+            plot <- plot + ggplot2::theme(legend.position = "none")
+          } else {
+            legend_pos <- self$options$legendPosition
+            # Map custom positions to ggplot2 coordinate pairs
+            if (legend_pos == "topleft") {
+              plot <- plot + ggplot2::theme(
+                legend.position = c(0.02, 0.98),
+                legend.justification = c(0, 1),
+                legend.title = ggplot2::element_blank(),
+                legend.key = ggplot2::element_rect(fill = "white"),
+                legend.background = ggplot2::element_rect(fill = "white", color = NA)
+              )
+            } else if (legend_pos == "topright") {
+              plot <- plot + ggplot2::theme(
+                legend.position = c(0.98, 0.98),
+                legend.justification = c(1, 1),
+                legend.title = ggplot2::element_blank(),
+                legend.key = ggplot2::element_rect(fill = "white"),
+                legend.background = ggplot2::element_rect(fill = "white", color = NA)
+              )
+            } else if (legend_pos == "bottomleft") {
+              plot <- plot + ggplot2::theme(
+                legend.position = c(0.02, 0.02),
+                legend.justification = c(0, 0),
+                legend.title = ggplot2::element_blank(),
+                legend.key = ggplot2::element_rect(fill = "white"),
+                legend.background = ggplot2::element_rect(fill = "white", color = NA)
+              )
+            } else if (legend_pos == "bottomright") {
+              plot <- plot + ggplot2::theme(
+                legend.position = c(0.98, 0.02),
+                legend.justification = c(1, 0),
+                legend.title = ggplot2::element_blank(),
+                legend.key = ggplot2::element_rect(fill = "white"),
+                legend.background = ggplot2::element_rect(fill = "white", color = NA)
+              )
+            } else {
+              plot <- plot + ggplot2::theme(
+                legend.position = legend_pos,
+                legend.title = ggplot2::element_blank(),
+                legend.key = ggplot2::element_rect(fill = "white"),
+                legend.background = ggplot2::element_rect(fill = "white", color = NA)
+              )
+            }
+          }
         }
 
         # Check if we have smoothed curves
@@ -3883,7 +4062,10 @@ psychopdaROCClass <- if (requireNamespace("jmvcore")) {
         }
 
         # Mark optimal points if not clean plot or if specifically requested
-        if (!self$options$cleanPlot || self$options$showOptimalPoint) {
+        # `!cleanPlot || showOptimalPoint` meant that with the DEFAULT cleanPlot =
+        # FALSE the first clause was always TRUE, so unticking "Show optimal point"
+        # did nothing at all. The checkbox is the control; honour it.
+        if (self$options$showOptimalPoint) {
           if (self$options$combinePlots == TRUE && length(unique(plotData$var)) > 1) {
             # For combined plot, find optimal points for each variable
             optimal_points <- data.frame()
@@ -3998,44 +4180,46 @@ psychopdaROCClass <- if (requireNamespace("jmvcore")) {
 
         # Add confidence bands if requested
         if (self$options$showConfidenceBands && !self$options$cleanPlot) {
-          # Only implemented for individual plots currently
-          if (!self$options$combinePlots || length(unique(plotData$var)) == 1) {
-            # Calculate SE bands using binomial approximation (simple approach)
-            if (nrow(plotData) > 0) {
-              var_name <- unique(plotData$var)[1]
+          # Bands are now drawn for EVERY curve on the panel, not only for a
+          # single-marker plot. Previously the whole block was skipped whenever
+          # combinePlots was on with 2+ markers -- which is the DEFAULT -- so
+          # ticking "Confidence bands" changed nothing at all for most users.
+          # One ribbon per marker, filled to match that marker's curve colour.
+          bands_data <- do.call(rbind, lapply(unique(plotData$var), function(var_name) {
+            raw <- attr(private$.rocDataList[[var_name]], "rawData")
+            if (is.null(raw)) return(NULL)
+            vd <- plotData[plotData$var == var_name, , drop = FALSE]
+            if (nrow(vd) == 0) return(NULL)
+            n_pos <- sum(raw$class == "Positive", na.rm = TRUE)
+            n_neg <- sum(raw$class == "Negative", na.rm = TRUE)
+            if (n_pos < 1 || n_neg < 1) return(NULL)
+            # Normal approximation to the binomial, pointwise in sensitivity.
+            sens_se <- sqrt(vd$sensitivity * (1 - vd$sensitivity) / n_pos)
+            data.frame(
+              x = 1 - vd$specificity,
+              ymin = pmax(0, vd$sensitivity - 1.96 * sens_se),
+              ymax = pmin(1, vd$sensitivity + 1.96 * sens_se),
+              var = var_name,
+              stringsAsFactors = FALSE
+            )
+          }))
 
-              # Get the raw data
-              if (!is.null(attr(private$.rocDataList[[var_name]], "rawData"))) {
-                rawData <- attr(private$.rocDataList[[var_name]], "rawData")
-
-                # Get counts
-                n_pos <- sum(rawData$class == "Positive")
-                n_neg <- sum(rawData$class == "Negative")
-
-                # Create confidence bands (simplified approach)
-                # This uses a normal approximation to the binomial
-                sens_se <- sqrt(plotData$sensitivity * (1 - plotData$sensitivity) / n_pos)
-                spec_se <- sqrt(plotData$specificity * (1 - plotData$specificity) / n_neg)
-
-                # Create bands data
-                bands_data <- data.frame(
-                  x = 1 - plotData$specificity,
-                  y = plotData$sensitivity,
-                  ymin = pmax(0, plotData$sensitivity - 1.96 * sens_se),
-                  ymax = pmin(1, plotData$sensitivity + 1.96 * sens_se),
-                  xmin = pmax(0, 1 - (plotData$specificity + 1.96 * spec_se)),
-                  xmax = pmin(1, 1 - (plotData$specificity - 1.96 * spec_se))
-                )
-
-                # Add confidence bands to plot
-                plot <- plot +
-                  ggplot2::geom_ribbon(
-                    data = bands_data,
-                    ggplot2::aes(x = x, y = y, ymin = ymin, ymax = ymax),
-                    alpha = 0.1, fill = "blue"
-                  )
-              }
+          if (!is.null(bands_data) && nrow(bands_data) > 0) {
+            plot <- plot +
+              ggplot2::geom_ribbon(
+                data = bands_data,
+                ggplot2::aes(x = x, ymin = ymin, ymax = ymax, fill = var),
+                alpha = 0.15, inherit.aes = FALSE, show.legend = FALSE
+              )
+            # Match the curve palette so a band is unambiguously "its" marker's.
+            if (length(unique(bands_data$var)) > 1) {
+              plot <- plot + ggplot2::scale_fill_brewer(palette = "Set1")
+            } else {
+              plot <- plot + ggplot2::scale_fill_manual(values = c("#377EB8"))
             }
+            plot <- plot + ggplot2::labs(
+              caption = .("Shaded bands are pointwise 95% normal-approximation intervals for sensitivity; they are not a simultaneous confidence region for the whole curve.")
+            )
           }
         }
 
@@ -4767,7 +4951,9 @@ psychopdaROCClass <- if (requireNamespace("jmvcore")) {
             global_p <- pchisq(z_score, df = qr(LSL_matrix)$rank, lower.tail = FALSE)
           },
           error = function(e) {
-            warning(paste("Error in global test calculation:", e$message))
+            private$.warnUser(sprintf(
+              .("The global test across all markers could not be computed (%s); its statistic and p-value are left blank."),
+              conditionMessage(e)))
             # z_score and global_p remain NA from initialization above
           }
         )
@@ -4783,6 +4969,8 @@ psychopdaROCClass <- if (requireNamespace("jmvcore")) {
           ci <- matrix(NA, nrow = n_pairs, ncol = 2)
           p_vals <- numeric(n_pairs)
           cors <- numeric(n_pairs)
+
+          z_vals <- numeric(n_pairs)
 
           ctr <- 1
           for (i in 1:(nauc - 1)) {
@@ -4801,16 +4989,24 @@ psychopdaROCClass <- if (requireNamespace("jmvcore")) {
               # P-value (Two-tailed Z-test)
               if (se_diff > 0) {
                 z_val <- diff_val / se_diff
-                p_vals[ctr] <- 2 * (1 - pnorm(abs(z_val)))
+                p_vals[ctr] <- 2 * pnorm(-abs(z_val))
               } else {
+                z_val <- if (abs(diff_val) < 1e-10) 0 else sign(diff_val) * Inf
                 p_vals[ctr] <- if (abs(diff_val) < 1e-10) 1 else 0
               }
+              # Carry z forward. The results table used to BACK-COMPUTE it as
+              # sign(diff) * sqrt(qchisq(1 - p, 1)), which returns Inf whenever p
+              # underflows to 0 (routine for |z| > ~8.3) and loses precision
+              # everywhere else. diff/se is the statistic that was actually used.
+              z_vals[ctr] <- z_val
 
               # Correlation
               denom_cor_ij <- S[i, i] * S[j, j]
               cors[ctr] <- if (denom_cor_ij > 0) S[i, j] / sqrt(denom_cor_ij) else NA
 
-              rows[ctr] <- paste(i, j, sep = " vs. ")
+              # Label by variable NAME. "1 vs. 2" gave the clinician no way to
+              # tell which two markers were being compared.
+              rows[ctr] <- paste(vars[i], vars[j], sep = " vs. ")
               ctr <- ctr + 1
             }
           }
@@ -4822,6 +5018,8 @@ psychopdaROCClass <- if (requireNamespace("jmvcore")) {
           ci <- matrix(NA, nrow = n_pairs, ncol = 2)
           p_vals <- numeric(n_pairs)
           cors <- numeric(n_pairs)
+
+          z_vals <- numeric(n_pairs)
 
           comp <- (1:nauc)[-ref]
           for (i in 1:n_pairs) {
@@ -4837,15 +5035,17 @@ psychopdaROCClass <- if (requireNamespace("jmvcore")) {
 
             if (se_diff > 0) {
               z_val <- diff_val / se_diff
-              p_vals[i] <- 2 * (1 - pnorm(abs(z_val)))
+              p_vals[i] <- 2 * pnorm(-abs(z_val))
             } else {
+              z_val <- if (abs(diff_val) < 1e-10) 0 else sign(diff_val) * Inf
               p_vals[i] <- if (abs(diff_val) < 1e-10) 1 else 0
             }
+            z_vals[i] <- z_val
 
             denom_cor_ri <- S[ref, ref] * S[idx, idx]
             cors[i] <- if (denom_cor_ri > 0) S[ref, idx] / sqrt(denom_cor_ri) else NA
 
-            rows[i] <- paste(ref, idx, sep = " vs. ")
+            rows[i] <- paste(vars[ref], vars[idx], sep = " vs. ")
           }
         }
 
@@ -4856,10 +5056,11 @@ psychopdaROCClass <- if (requireNamespace("jmvcore")) {
           "CI(upper)" = ci[, 2],
           "P.Value" = p_vals,
           "Correlation" = cors,
+          "Z" = z_vals,
           check.names = FALSE
         )
         rownames(newres) <- rows
-        colnames(newres) <- c("AUC Difference", "CI(lower)", "CI(upper)", "P.Value", "Correlation")
+        colnames(newres) <- c("AUC Difference", "CI(lower)", "CI(upper)", "P.Value", "Correlation", "Z")
 
         # Format AUC dataframe
         # We use pROC's AUC and Variance, but calculate Hanley SD for backward compatibility
@@ -4876,12 +5077,13 @@ psychopdaROCClass <- if (requireNamespace("jmvcore")) {
         auc_df <- data.frame(
           "AUC" = auc_values,
           "SD(Hanley)" = sd_hanley,
-          "P(H0: AUC=0.5)" = ifelse(sd_hanley > 0, 2 * (1 - pnorm(abs(auc_values - 0.5) / sd_hanley)), NA),
+          "P(H0: AUC=0.5)" = ifelse(sd_hanley > 0, 2 * pnorm(-abs(auc_values - 0.5) / sd_hanley), NA),
           "SD(DeLong)" = sd_delong,
-          "P(H0: AUC=0.5)" = ifelse(sd_delong > 0, 2 * (1 - pnorm(abs(auc_values - 0.5) / sd_delong)), NA),
+          "P(H0: AUC=0.5)" = ifelse(sd_delong > 0, 2 * pnorm(-abs(auc_values - 0.5) / sd_delong), NA),
           check.names = FALSE
         )
         names(auc_df) <- c("AUC", "SD(Hanley)", "P(H0: AUC=0.5)", "SD(DeLong)", "P(H0: AUC=0.5)")
+        rownames(auc_df) <- vars   # was 1..n, so the printed output named no marker
 
         ERG <- list(
           AUC = auc_df,
@@ -5089,13 +5291,10 @@ psychopdaROCClass <- if (requireNamespace("jmvcore")) {
 
                   # Required N for target power with observed effect (clamp AUC to avoid qnorm(0.5)=0 or qnorm(1)=Inf)
                   target_auc <- min(max(observed_auc, 0.501), 0.999)
-                  qnorm_term <- 2 * qnorm(target_auc) - 1
-                  required_n <- if (abs(qnorm_term) > 1e-6) {
-                    ceiling(((z_alpha + z_beta) / qnorm_term)^2 *
-                      (1 / (n_pos / n_total) + 1 / (n_neg / n_total)))
-                  } else {
-                    NA
-                  }
+                  required_n <- private$.requiredNforPower(
+                    auc = target_auc, alpha = significance_level,
+                    target_power = target_power, pos_frac = n_pos / n_total,
+                    adjustment_factor = 1)
 
                   power_adequacy <- "Not informative (post-hoc)"
                   # Observed power computed from the observed effect is a one-to-one transform of
@@ -5112,12 +5311,35 @@ psychopdaROCClass <- if (requireNamespace("jmvcore")) {
                   # Prospective power: Calculate power for expected effect with current N
                   expected_auc <- 0.5 + expected_auc_diff
 
-                  # Adjust for correlation if comparing two tests
-                  if (length(vars) > 1 && correlation != 0) {
-                    # Correlation adjustment for paired comparison
-                    adjustment_factor <- sqrt(2 * (1 - correlation))
+                  # Adjust for correlation when comparing two tests.
+                  #
+                  # The `correlation != 0` guard was a bug: it sent r = 0 down the
+                  # ELSE branch to adjustment_factor = 1, which is exactly what the
+                  # default r = 0.5 already yields (sqrt(2 * 0.5) == 1). So both ends
+                  # of the range collapsed to "no adjustment", and r = 0 -- which the
+                  # option's own help text calls "independent samples" and which
+                  # should give the LARGEST inflation, sqrt(2) = 1.414 -- silently
+                  # returned the paired answer instead.
+                  adjustment_factor <- if (length(vars) > 1) {
+                    sqrt(max(0, 2 * (1 - correlation)))
                   } else {
-                    adjustment_factor <- 1
+                    1
+                  }
+                  # r = 1 (the option's own maximum) means the two AUCs are
+                  # perfectly correlated, so their difference has zero variance:
+                  # the adjustment collapses to 0, expected_se becomes 0, z becomes
+                  # NA, and `if (NA)` threw inside a bare tryCatch(error=...) that
+                  # swallowed it -- the table came back with 0 rows and no message.
+                  # A note on the table itself, not .warnUser(): this method runs
+                  # AFTER runSummary has already been rendered, so anything
+                  # accumulated here never reaches that box. The note sits next to
+                  # the affected numbers, which is where it is needed anyway.
+                  if (!is.finite(adjustment_factor) || adjustment_factor <= 0) {
+                    tryCatch(self$results$powerAnalysisTable$setNote(
+                      "degenerate_correlation",
+                      .("A between-marker correlation of 1.0 means the two AUCs are identical, so their difference has zero variance and no sample size can be computed for it - the required N is left blank. Enter the correlation you actually expect between the two markers; 0.5 is a common default for two tests measured on the same patients.")
+                    ), error = function(e) NULL)
+                    adjustment_factor <- NA_real_
                   }
 
                   expected_se <- sqrt((expected_auc * (1 - expected_auc) +
@@ -5129,14 +5351,10 @@ psychopdaROCClass <- if (requireNamespace("jmvcore")) {
                   observed_power <- if (!is.na(z_stat_expected)) 1 - pnorm(z_alpha - abs(z_stat_expected)) else NA
 
                   clamped_auc <- min(max(expected_auc, 0.501), 0.999)
-                  qnorm_term_e <- 2 * qnorm(clamped_auc) - 1
-                  required_n <- if (abs(qnorm_term_e) > 1e-6) {
-                    ceiling(((z_alpha + z_beta) / qnorm_term_e)^2 *
-                      (1 / (n_pos / n_total) + 1 / (n_neg / n_total)) *
-                      adjustment_factor^2)
-                  } else {
-                    NA
-                  }
+                  required_n <- private$.requiredNforPower(
+                    auc = clamped_auc, alpha = significance_level,
+                    target_power = target_power, pos_frac = n_pos / n_total,
+                    adjustment_factor = adjustment_factor)
 
                   power_adequacy <- if (observed_power >= target_power) "Adequate" else "Inadequate"
                   recommendation <- if (observed_power < target_power) {
@@ -5149,21 +5367,35 @@ psychopdaROCClass <- if (requireNamespace("jmvcore")) {
                   expected_auc <- 0.5 + expected_auc_diff
 
                   # Correlation adjustment
-                  if (length(vars) > 1 && correlation != 0) {
-                    adjustment_factor <- sqrt(2 * (1 - correlation))
+                  # Same correction as the prospective branch above: r = 0 must
+                  # give the largest inflation, not fall through to no adjustment.
+                  adjustment_factor <- if (length(vars) > 1) {
+                    sqrt(max(0, 2 * (1 - correlation)))
                   } else {
-                    adjustment_factor <- 1
+                    1
+                  }
+                  # r = 1 (the option's own maximum) means the two AUCs are
+                  # perfectly correlated, so their difference has zero variance:
+                  # the adjustment collapses to 0, expected_se becomes 0, z becomes
+                  # NA, and `if (NA)` threw inside a bare tryCatch(error=...) that
+                  # swallowed it -- the table came back with 0 rows and no message.
+                  # A note on the table itself, not .warnUser(): this method runs
+                  # AFTER runSummary has already been rendered, so anything
+                  # accumulated here never reaches that box. The note sits next to
+                  # the affected numbers, which is where it is needed anyway.
+                  if (!is.finite(adjustment_factor) || adjustment_factor <= 0) {
+                    tryCatch(self$results$powerAnalysisTable$setNote(
+                      "degenerate_correlation",
+                      .("A between-marker correlation of 1.0 means the two AUCs are identical, so their difference has zero variance and no sample size can be computed for it - the required N is left blank. Enter the correlation you actually expect between the two markers; 0.5 is a common default for two tests measured on the same patients.")
+                    ), error = function(e) NULL)
+                    adjustment_factor <- NA_real_
                   }
 
                   clamped_auc_ss <- min(max(expected_auc, 0.501), 0.999)
-                  qnorm_term_ss <- 2 * qnorm(clamped_auc_ss) - 1
-                  required_n <- if (abs(qnorm_term_ss) > 1e-6) {
-                    ceiling(((z_alpha + z_beta) / qnorm_term_ss)^2 *
-                      (1 / (n_pos / n_total) + 1 / (n_neg / n_total)) *
-                      adjustment_factor^2)
-                  } else {
-                    NA
-                  }
+                  required_n <- private$.requiredNforPower(
+                    auc = clamped_auc_ss, alpha = significance_level,
+                    target_power = target_power, pos_frac = n_pos / n_total,
+                    adjustment_factor = adjustment_factor)
 
                   # Calculate what power we would have with current N
                   current_se <- sqrt((expected_auc * (1 - expected_auc) +
@@ -5345,14 +5577,49 @@ psychopdaROCClass <- if (requireNamespace("jmvcore")) {
         harm_benefit_ratio <- self$options$harmBenefitRatio # Default: 0.25
         intervention_cost <- self$options$interventionCost # Default: false
 
-        # Parse treatment threshold range (format: "min,max,step")
+        # Parse treatment threshold range (format: "min,max,step"). This is free text typed by
+        # the user, so validate it: as.numeric() on anything else yields NA and seq(NA, ...)
+        # aborts the whole analysis outside any tryCatch.
         threshold_str <- self$options$treatmentThreshold # Default: "0.05,0.5,0.05"
-        threshold_parts <- as.numeric(strsplit(threshold_str, ",")[[1]])
-        if (length(threshold_parts) == 3) {
+        threshold_parts <- suppressWarnings(as.numeric(strsplit(threshold_str, ",")[[1]]))
+        threshold_fallback <- FALSE
+        if (length(threshold_parts) == 3 && all(is.finite(threshold_parts)) &&
+            threshold_parts[3] > 0 && threshold_parts[2] >= threshold_parts[1]) {
           threshold_range <- seq(threshold_parts[1], threshold_parts[2], by = threshold_parts[3])
         } else {
-          threshold_range <- seq(0.05, 0.5, by = 0.05) # Fallback
+          threshold_range <- seq(0.05, 0.5, by = 0.05)
+          threshold_fallback <- TRUE
         }
+        threshold_range <- threshold_range[threshold_range > 0 & threshold_range < 1]
+        if (length(threshold_range) == 0) {
+          threshold_range <- seq(0.05, 0.5, by = 0.05)
+          threshold_fallback <- TRUE
+        }
+        # Cap the grid: the curve used to be a fixed 20 points, and an unbounded user step
+        # (0.001, say) would put ~1000 rows per variable on screen.
+        if (length(threshold_range) > 100) {
+          threshold_range <- threshold_range[seq(1, length(threshold_range), length.out = 100)]
+        }
+        if (threshold_fallback) {
+          self$results$decisionCurveTable$setNote(
+            key = "range_fallback",
+            note = .("The Treatment Threshold Range could not be read as \"min,max,step\" with a positive step inside 0 to 1. The default range 0.05 to 0.50 in steps of 0.05 was used instead."),
+            init = FALSE
+          )
+        }
+
+        # Both tables report Vickers & Elkin net benefit on a logistic risk fitted to these same
+        # rows. Say so: the risk model is internally fitted, so these are apparent estimates.
+        self$results$clinicalUtilityTable$setNote(
+          key = "definition",
+          note = .("Net benefit (Vickers & Elkin 2006) at the mid-point of the treatment threshold range: patients are treated when their predicted risk reaches the threshold probability. The risk model is fitted to these same data, so this is an apparent, uncorrected estimate."),
+          init = FALSE
+        )
+        self$results$decisionCurveTable$setNote(
+          key = "definition",
+          note = .("Net benefit (Vickers & Elkin 2006) across the treatment threshold range. Compare each row against Treat All and Treat None: a strategy is only worth using when it beats both. The risk model is fitted to these same data, so these are apparent, uncorrected estimates."),
+          init = FALSE
+        )
 
         # Use midpoint of threshold range as default for single analysis
         threshold_prob <- median(threshold_range)
@@ -5368,27 +5635,60 @@ psychopdaROCClass <- if (requireNamespace("jmvcore")) {
               if (requireNamespace("pROC", quietly = TRUE)) {
                 roc_obj <- pROC::roc(y_complete, x_complete, levels = c(0, 1), direction = ifelse(self$options$direction == ">=", "<", ">"), quiet = TRUE)
 
-                # Find optimal cutoff using Youden's index
-                coords <- pROC::coords(roc_obj, "best", ret = c("threshold", "sensitivity", "specificity"))
-                optimal_cutoff <- coords$threshold
-                sensitivity <- coords$sensitivity
-                specificity <- coords$specificity
+                # Net benefit, Vickers & Elkin (Med Decis Making 2006;26:565-74).
+                #
+                # This used to freeze sensitivity and specificity at the YOUDEN cutoff and vary
+                # only the odds weight. That is a different estimand: a decision curve requires
+                # the classification itself to move with the threshold - treat when predicted
+                # risk reaches pt - so the old number was "net benefit of one fixed rule, priced
+                # at pt", systematically below the true value whenever pt sat away from the
+                # Youden point (0.2152 against a hand-computed 0.2793 at pt = 0.10). It also
+                # disagreed with this analysis's own decisionCurveTable, which already used the
+                # correct rule, by about 29%.
+                nb_fit <- tryCatch(
+                  stats::glm(y_complete ~ x_complete, family = stats::binomial()),
+                  error = function(e) NULL)
+                nb_risk <- if (is.null(nb_fit)) NULL else
+                  tryCatch(as.numeric(stats::fitted(nb_fit)), error = function(e) NULL)
+                if (is.null(nb_risk) || length(nb_risk) != length(y_complete)) {
+                  next
+                }
+                n_v <- length(y_complete)
+                prevalence_v <- mean(y_complete)
 
-                # Calculate net benefit
-                # Net Benefit = (TP/N) - (FP/N) × (threshold_prob/(1-threshold_prob))
-                tp_rate <- sensitivity * prevalence
-                fp_rate <- (1 - specificity) * (1 - prevalence)
+                # A one-predictor logistic fit is invariant to the sign the user declared:
+                # glm(y ~ x) and glm(y ~ -x) give identical fitted probabilities. So the
+                # calibrated risk always runs in the DATA-OPTIMAL direction. When that contradicts
+                # the declared Classification Direction, the net benefit below describes the
+                # opposite decision rule to the one configured - and always the more favourable
+                # one - so say so rather than printing a bare verdict.
+                fitted_slope <- tryCatch(stats::coef(nb_fit)[[2]], error = function(e) NA_real_)
+                declared_up <- identical(self$options$direction, ">=")
+                if (is.finite(fitted_slope) && fitted_slope != 0 &&
+                    ((fitted_slope > 0) != declared_up)) {
+                  self$results$clinicalUtilityTable$setNote(
+                    key = paste0("dir_", var),
+                    note = sprintf(
+                      .("%s: net benefit is computed on the direction the data support, which is the opposite of the Classification Direction you selected. Under the direction you selected this marker performs worse than shown here."),
+                      var),
+                    init = FALSE
+                  )
+                }
+
+                treated <- nb_risk >= threshold_prob
+                tp_rate <- sum(treated & y_complete == 1) / n_v
+                fp_rate <- sum(treated & y_complete == 0) / n_v
 
                 net_benefit <- tp_rate - fp_rate * (threshold_prob / (1 - threshold_prob))
 
                 # Treat all strategy
-                treat_all_benefit <- prevalence - (1 - prevalence) * (threshold_prob / (1 - threshold_prob))
+                treat_all_benefit <- prevalence_v - (1 - prevalence_v) * (threshold_prob / (1 - threshold_prob))
 
                 # Treat none strategy
                 treat_none_benefit <- 0
 
                 # Standardized net benefit (guard against zero prevalence)
-                standardized_net_benefit <- if (prevalence > 1e-10) net_benefit / prevalence else NA
+                standardized_net_benefit <- if (prevalence_v > 1e-10) net_benefit / prevalence_v else NA
 
                 # Report what the net-benefit comparison shows at this one threshold, not a
                 # verdict on whether the marker should be used in patient care: the cutoff was
@@ -5411,27 +5711,71 @@ psychopdaROCClass <- if (requireNamespace("jmvcore")) {
                   clinical_utility = clinical_utility
                 ))
 
-                # Add detailed threshold analysis for decision curve
-                # Clamp away from 0 and 1 to avoid extreme t/(1-t) values
-                n_thresholds <- 20
-                threshold_range <- seq(0.01, 0.90, length.out = n_thresholds)
+                # Add detailed threshold analysis for decision curve.
+                # Clamp away from 0 and 1 to avoid extreme t/(1-t) values.
+                #
+                # NOTE the name: this grid used to be called `threshold_range`, which SHADOWED
+                # the user's Treatment Threshold Range parsed above. The rename fixed the
+                # shadowing but not the wiring - the grid stayed a hardcoded
+                # seq(0.01, 0.90, length.out = 20), so the decision curve was byte-identical
+                # whatever range the user typed. Drive it from the option.
+                detail_thresholds <- threshold_range
+                n_thresholds <- length(detail_thresholds)
 
-                for (t in threshold_range) {
-                  # Find cutoff corresponding to this threshold probability
-                  # This is simplified - real implementation would use probability calibration
-                  cutoff_index <- which.min(abs(roc_obj$thresholds - quantile(x_complete, 1 - t)))
-                  if (length(cutoff_index) > 0) {
-                    test_sensitivity <- roc_obj$sensitivities[cutoff_index]
-                    test_specificity <- roc_obj$specificities[cutoff_index]
+                # Same calibrated-risk rule the decision-curve PLOT uses, so the
+                # table and the figure can no longer disagree. The previous rule
+                # cut at quantile(x, 1 - t) -- "treat the top t fraction" -- which
+                # makes a HIGHER treatment threshold treat MORE patients, the exact
+                # opposite of what a threshold probability means. Net benefit was
+                # off by up to 4.69 against the dcurves reference.
+                # NOTE: only errors are caught here. Catching warnings too would null the risk
+                # vector on "fitted probabilities numerically 0 or 1 occurred" - the complete-
+                # separation warning - and so silently empty the decision curve for exactly the
+                # strongest markers, the ones a user most wants a curve for.
+                dca_tbl_fit <- tryCatch(
+                  suppressWarnings(stats::glm(y_complete ~ x_complete, family = stats::binomial())),
+                  error = function(e) NULL)
+                dca_tbl_risk <- if (is.null(dca_tbl_fit)) NULL else
+                  tryCatch(as.numeric(stats::fitted(dca_tbl_fit)), error = function(e) NULL)
+                n_dca_tbl <- length(y_complete)
 
-                    tp_rate_t <- test_sensitivity * prevalence
-                    fp_rate_t <- (1 - test_specificity) * (1 - prevalence)
+                for (t in detail_thresholds) {
+                  if (!is.null(dca_tbl_risk) && length(dca_tbl_risk) == n_dca_tbl) {
+                    treat_t <- dca_tbl_risk >= t
+                    tp_rate_t <- sum(treat_t & y_complete == 1) / n_dca_tbl
+                    fp_rate_t <- sum(treat_t & y_complete == 0) / n_dca_tbl
                     net_benefit_t <- tp_rate_t - fp_rate_t * (t / (1 - t))
 
-                    interventions_avoided <- round(fp_rate_t * length(y_complete))
-                    cases_detected <- round(tp_rate_t * length(y_complete))
+                    # "Interventions avoided" is the standard net reduction in
+                    # interventions relative to treating everyone, per 100 patients:
+                    #   (NB_model - NB_treat_all) / (t/(1-t)) * 100
+                    # It used to be round(fp_rate * n), i.e. the count of FALSE
+                    # POSITIVES -- unnecessary interventions PERFORMED, the exact
+                    # opposite of the column's name.
+                    # Use the complete-case prevalence, matching the rows the model curve is
+                    # computed on. `prevalence` is the all-rows value, so with any missingness
+                    # in the marker the benchmark and the curve sat on different denominators.
+                    prev_dca <- mean(y_complete)
+                    treat_all_nb_t <- prev_dca - (1 - prev_dca) * (t / (1 - t))
+                    odds_t <- t / (1 - t)
+                    interventions_avoided <- if (odds_t > 0)
+                      round((net_benefit_t - treat_all_nb_t) / odds_t * 100) else NA_integer_
+                    cases_detected <- round(tp_rate_t * n_dca_tbl)
 
-                    clinical_value <- if (net_benefit_t > t * prevalence) "Beneficial" else "Not beneficial"
+                    # A strategy is worth using when it beats BOTH default
+                    # strategies: treat everyone and treat nobody. The previous test
+                    # (net_benefit > t * prevalence) appears in no DCA literature and
+                    # disagreed with this standard rule on half the rows, every time
+                    # calling the marker useless where it was in fact the best option.
+                    clinical_value <- if (net_benefit_t > max(0, treat_all_nb_t)) {
+                      .("Beneficial")
+                    } else {
+                      .("Not beneficial")
+                    }
+                    # A net benefit means nothing without the two default strategies it has to
+                    # beat. There is no column for them in this table, so name them in the cell.
+                    clinical_value <- sprintf(
+                      .("%s (treat all: %.4f, treat none: 0)"), clinical_value, treat_all_nb_t)
 
                     self$results$decisionCurveTable$addRow(
                       rowKey = paste0(var, "_", t),
@@ -5452,12 +5796,30 @@ psychopdaROCClass <- if (requireNamespace("jmvcore")) {
                   self$results$decisionCurvePlot$addItem(key = var)
                   image <- self$results$decisionCurvePlot$get(key = var)
                   if (!is.null(image)) {
+                    # Decision curve analysis thresholds a PREDICTED RISK at the
+                    # threshold probability t. Passing the ROC curve instead forced
+                    # the renderer to guess an operating point, and the guess it
+                    # made (specificity = 1 - t) ran BACKWARDS: a higher treatment
+                    # threshold must treat FEWER patients, so specificity has to
+                    # RISE with t, but 1 - t falls. Measured cor(t, spec) = -1.000
+                    # exactly, against +0.96 for the correct rule; the plotted net
+                    # benefit was wrong by up to 0.181 and changed SIGN at t = 0.50.
+                    # Calibrate the marker to a probability once, here, and let the
+                    # renderer threshold it directly.
+                    dca_fit <- tryCatch(
+                      stats::glm(y_complete ~ x_complete, family = stats::binomial()),
+                      error = function(e) NULL, warning = function(w) NULL)
+                    dca_risk <- if (is.null(dca_fit)) NULL else
+                      tryCatch(as.numeric(stats::fitted(dca_fit)), error = function(e) NULL)
+
                     image$setState(list(
                       ready = TRUE,
                       threshold_range = threshold_range,
                       harm_benefit_ratio = harm_benefit_ratio,
                       prevalence = prevalence,
                       intervention_cost = intervention_cost,
+                      risk = dca_risk,
+                      outcome = as.integer(y_complete),
                       sensitivities = roc_obj$sensitivities,
                       specificities = roc_obj$specificities
                     ))
@@ -5871,20 +6233,36 @@ psychopdaROCClass <- if (requireNamespace("jmvcore")) {
           return(FALSE)
         }
 
-        threshold_probs <- seq(0.01, 0.99, by = 0.01)
+        # Threshold grid comes from the user's Treatment Threshold Range. The plot
+        # used to hardcode seq(0.01, 0.99, 0.01) and ignore the option entirely,
+        # so the curve never matched the range the clinical-utility TABLE used.
+        threshold_probs <- state$threshold_range
+        if (is.null(threshold_probs) || length(threshold_probs) < 2 ||
+            !all(is.finite(threshold_probs))) {
+          threshold_probs <- seq(0.05, 0.50, by = 0.05)
+        }
+        # pt = 1 makes the odds term infinite; keep strictly inside (0, 1).
+        threshold_probs <- threshold_probs[threshold_probs > 0 & threshold_probs < 1]
+        if (length(threshold_probs) < 2) threshold_probs <- seq(0.05, 0.50, by = 0.05)
+
         dc_data <- data.frame()
 
+        # Threshold the CALIBRATED RISK at t and count the resulting classifications.
+        # This is the Vickers & Elkin definition; the previous ROC-walking rule was
+        # monotonically backwards (see the note where the state is built).
+        risk <- state$risk
+        outcome <- state$outcome
+        use_risk <- !is.null(risk) && !is.null(outcome) &&
+          length(risk) == length(outcome) && length(risk) > 0 && all(is.finite(risk))
+        if (!use_risk) return(FALSE)
+        n_total_dca <- length(outcome)
+
         for (t in threshold_probs) {
-          # Interpolate sensitivity/specificity at this threshold
-          # Map threshold probability to the closest ROC operating point
-          target_spec <- 1 - t # approximate mapping
-          idx <- which.min(abs(roc_spec - target_spec))
-          sens_t <- roc_sens[idx]
-          spec_t <- roc_spec[idx]
+          treat <- risk >= t
+          tp_rate <- sum(treat & outcome == 1) / n_total_dca
+          fp_rate <- sum(treat & outcome == 0) / n_total_dca
 
           # Net benefit = TP/N - FP/N * (pt / (1 - pt))
-          tp_rate <- sens_t * prevalence
-          fp_rate <- (1 - spec_t) * (1 - prevalence)
           nb <- tp_rate - fp_rate * (t / (1 - t))
 
           # Treat All: NB = prevalence - (1-prevalence) * pt/(1-pt)
@@ -5904,20 +6282,81 @@ psychopdaROCClass <- if (requireNamespace("jmvcore")) {
           ))
         }
 
+        # --- Intervention-cost view -------------------------------------------
+        # "Intervention cost analysis" now selects the standard second DCA
+        # readout: net reduction in interventions per 100 patients, relative to
+        # treating everyone (Vickers & Elkin 2006). It was previously written
+        # into the plot state and then ignored by this renderer, so ticking it
+        # produced a byte-identical image.
+        #   reduction per 100 = (NB_model - NB_treat_all) / (pt / (1 - pt)) * 100
+        show_reduction <- isTRUE(state$intervention_cost)
+        if (show_reduction) {
+          nb_model <- dc_data$net_benefit[dc_data$strategy == "Model"]
+          nb_all <- dc_data$net_benefit[dc_data$strategy == "Treat All"]
+          pt <- dc_data$threshold[dc_data$strategy == "Model"]
+          odds <- pt / (1 - pt)
+          reduction <- ifelse(odds > 0, (nb_model - nb_all) / odds * 100, NA_real_)
+          dc_data <- data.frame(
+            threshold = pt, net_benefit = reduction,
+            strategy = "Model", type = "Model", stringsAsFactors = FALSE
+          )
+          # On this scale "treat all" is zero by construction - it is the baseline
+          # the reduction is measured against, so it is the reference line.
+          dc_data <- rbind(dc_data, data.frame(
+            threshold = pt, net_benefit = 0,
+            strategy = "Treat All (reference)", type = "Reference", stringsAsFactors = FALSE
+          ))
+        }
+
+        y_lab <- if (show_reduction) {
+          .("Net reduction in interventions per 100 patients")
+        } else {
+          .("Net Benefit")
+        }
+        plot_title <- if (show_reduction) {
+          .("Decision Curve Analysis - interventions avoided")
+        } else {
+          .("Decision Curve Analysis")
+        }
+
+        finite_nb <- dc_data$net_benefit[is.finite(dc_data$net_benefit)]
+        y_hi <- if (length(finite_nb)) max(finite_nb) else 1
+        y_lo <- if (show_reduction && length(finite_nb)) min(0, min(finite_nb)) else -0.05
+
         p <- ggplot2::ggplot(dc_data, ggplot2::aes(
           x = threshold, y = net_benefit,
           color = strategy, linetype = type
         )) +
           ggplot2::geom_line(linewidth = 1) +
-          ggplot2::coord_cartesian(ylim = c(-0.05, max(dc_data$net_benefit, na.rm = TRUE) * 1.1)) +
+          ggplot2::coord_cartesian(ylim = c(y_lo, y_hi * 1.1 + 1e-8)) +
           ggplot2::labs(
-            title = "Decision Curve Analysis",
-            x = "Threshold Probability",
-            y = "Net Benefit",
-            color = "Strategy",
-            linetype = "Type"
+            title = plot_title,
+            x = .("Threshold Probability"),
+            y = y_lab,
+            color = .("Strategy"),
+            linetype = .("Type")
           ) +
           ggplot2::theme_minimal()
+
+        # --- Harm-to-benefit reference ----------------------------------------
+        # A harm:benefit ratio IS a threshold probability: pt = h / (1 + h). Mark
+        # it, so the clinician can read the curve at the trade-off they declared
+        # instead of guessing which x-value corresponds to it. This option was
+        # also carried in the state and never read.
+        hbr <- state$harm_benefit_ratio
+        if (!is.null(hbr) && is.finite(hbr) && hbr > 0) {
+          pt_star <- hbr / (1 + hbr)
+          if (pt_star > min(threshold_probs) && pt_star < max(threshold_probs)) {
+            p <- p +
+              ggplot2::geom_vline(xintercept = pt_star, linetype = "dotted",
+                                  colour = "grey30", linewidth = 0.6) +
+              ggplot2::annotate(
+                "text", x = pt_star, y = y_hi * 1.05 + 1e-8, hjust = -0.05, size = 3,
+                colour = "grey30",
+                label = sprintf(.("harm:benefit %.2f (threshold %.0f%%)"), hbr, pt_star * 100)
+              )
+          }
+        }
 
         print(p)
         return(TRUE)

@@ -25,7 +25,7 @@ outbreak prevalences. 12 rows, 12 columns.}
 \item{sequentialtests_extreme}{Boundary cases (near-perfect and near-useless tests, very
 low and very high prevalence) for exercising edge behaviour. 8 rows, 8 columns.}
 \item{sequentialtests_infectious}{Infectious-disease screening scenarios. 6 rows, 12 columns.}
-\item{sequentialtests_preset_examples}{One row per Clinical Preset offered by the analysis.
+\item{sequentialtests_preset_examples}{One row per Teaching Example offered by the analysis.
 7 rows, 12 columns.}
 \item{sequentialtests_prevalence_sensitivity}{One test pair held fixed while prevalence is
 varied, to show how predictive values move. 9 rows, 9 columns.}
@@ -117,8 +117,8 @@ that the accompanying numbers describe that test as actually performed anywhere.
 
 Before drawing any clinical conclusion, replace every value with an estimate from your own
 setting, or from a source you have read and judged applicable to your population. The same
-warning applies to the Clinical Preset control inside the analysis, which loads equivalent
-demonstration values.
+warning applies to the Teaching Example control inside the analysis, which loads equivalent
+illustrative values. These examples are not clinical guidance or recommended pathways.
 }
 
 \section{Columns}{

@@ -288,7 +288,7 @@ children:
                   - type: TextBox
                     name: hlGroups
                     format: number
-                    enable: (calibrationAnalysis && hosmerLemeshow)
+                    enable: (calibrationAnalysis)
                   - type: CheckBox
                     name: eoRatio
                     enable: (calibrationAnalysis)
@@ -335,6 +335,7 @@ children:
             enable: (clinicalImpact)
           - type: CheckBox
             name: nntCalculation
+            enable: (clinicalImpact)
           - type: CheckBox
             name: decisionImpactTable
             enable: (clinicalImpact)

@@ -62,8 +62,7 @@
 #' psychopdaROC(data = psychopdaROC_screening,
 #'              dependentVars = c("psa_level", "ca125"),
 #'              classVar = "cancer", positiveClass = "Cancer",
-#'              refVar = "psa_level",
-#'              clinicalPreset = "screening")
+#'              refVar = "psa_level")
 #'
 #' @source Generated test data for ClinicoPath package
 "psychopdaROC_screening"

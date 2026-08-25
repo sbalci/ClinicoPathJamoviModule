@@ -88,20 +88,20 @@ options:
       description: 'Comma-separated list of custom cutoffs to evaluate (e.g., 0.1, 0.5, 0.9)'
 
     - name: sensitivityThreshold
-      title: 'Sensitivity Threshold'
+      title: 'Minimum sensitivity'
       type: Number
-      default: 0.8
-      min: 0.1
+      default: 0.0
+      min: 0.0
       max: 1.0
-      description: 'Minimum required sensitivity for screening applications'
+      description: 'Minimum sensitivity a cutoff must achieve to be considered. 0 (the default) searches for the overall Youden optimum with no constraint. Raising it restricts the search, which is what you want for a screening test, but the reported cutoff is then the best one meeting your minimum rather than the Youden maximum - a notice says so when the two differ.'
 
     - name: specificityThreshold
-      title: 'Specificity Threshold' 
+      title: 'Minimum specificity'
       type: Number
-      default: 0.8
-      min: 0.1
+      default: 0.0
+      min: 0.0
       max: 1.0
-      description: 'Minimum required specificity for confirmatory testing'
+      description: 'Minimum specificity a cutoff must achieve to be considered. 0 (the default) searches for the overall Youden optimum with no constraint. Raising it restricts the search, which is what you want for a confirmatory test, but the reported cutoff is then the best one meeting your minimum rather than the Youden maximum - a notice says so when the two differ.'
 
     # Statistical Options
     - name: confidenceLevel
@@ -326,18 +326,18 @@ options:
 
     # Clinical Context
     - name: prevalence
-      title: 'Disease Prevalence'
+      title: 'Disease prevalence'
       type: Number
       default: 0.1
       min: 0.001
       max: 0.999
-      description: 'Disease prevalence for calculating predictive values'
+      description: 'Disease prevalence to assume when computing predictive values. Used only when "Use observed prevalence" is unticked - set it to the prevalence of the population the test will actually be used in, which for a screening setting is usually far lower than in a case-control sample.'
 
     - name: useObservedPrevalence
       title: "Use observed prevalence"
       type: Bool
-      default: false
-      description: 'Use the prevalence observed in the data for PPV/NPV and clinical impact calculations (recommended)'
+      default: true
+      description: 'Compute PPV, NPV and the clinical impact metrics at the prevalence observed in these data (the default). Untick it to assume a different prevalence instead - appropriate when the sample is enriched for cases and does not reflect the population the test will be used in. The prevalence actually used is printed in the results.'
 
     - name: clinicalContext
       title: 'Clinical Context'
@@ -461,12 +461,12 @@ options:
       description: 'Perform Hosmer-Lemeshow goodness-of-fit test'
 
     - name: hlGroups
-      title: 'Hosmer-Lemeshow Groups'
+      title: 'Risk groups'
       type: Integer
       default: 10
       min: 5
       max: 20
-      description: 'Number of groups for Hosmer-Lemeshow test'
+      description: 'Number of equal-sized risk groups used both for the Hosmer-Lemeshow test and for binning the calibration plot'
 
     - name: brierScore
       title: "Brier score"
@@ -552,7 +552,7 @@ options:
           - title: 'Weighted Average (by prevalence)'
             name: weighted
       default: macro
-      description: 'Method for averaging AUC across classes'
+      description: 'Method for averaging AUC across classes. Only the unweighted Macro Average is computed; Weighted Average (by prevalence) is NOT YET IMPLEMENTED - selecting it changes nothing, and the value reported stays the unweighted macro average of the One-vs-Rest AUCs (OVR strategy) or the Hand-Till pairwise AUC (OVO strategy)'
 
     # Time-Dependent ROC Options (NOT IMPLEMENTED - COMMENTED OUT)
     # - name: timeDependentROC

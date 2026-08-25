@@ -200,16 +200,15 @@ sequentialtestsResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
                 name="",
                 title="Sequential Testing Analysis",
                 refs=list(
-                    "DiagnosticTests",
-                    "Fagan",
-                    "Fagan2",
-                    "sensspecwiki",
-                    "ClinicoPathJamoviModule"))
+                    "ClinicoPathJamoviModule",
+                    "ConditionalDependenceDiagnosticTests",
+                    "CDC_HIV_Testing_2023"))
             self$add(jmvcore::Preformatted$new(
                 options=options,
                 name="notices",
                 title="Important Information",
                 clearWith=list(
+                    "preset",
                     "strategy",
                     "prevalence",
                     "test1_sens",
@@ -315,6 +314,7 @@ sequentialtestsResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
                 title="Population Flow Analysis",
                 rows=0,
                 clearWith=list(
+                    "preset",
                     "strategy",
                     "prevalence",
                     "test1_sens",
@@ -370,6 +370,7 @@ sequentialtestsResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
                 visible="(show_cost_analysis)",
                 rows=0,
                 clearWith=list(
+                    "preset",
                     "strategy",
                     "prevalence",
                     "test1_sens",
@@ -390,8 +391,8 @@ sequentialtestsResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
                         `type`="number"),
                     list(
                         `name`="number_tests", 
-                        `title`="Number of Tests", 
-                        `type`="integer"),
+                        `title`="Expected Number of Tests", 
+                        `type`="number"),
                     list(
                         `name`="total_cost", 
                         `title`="Total Cost", 
@@ -449,7 +450,8 @@ sequentialtestsResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
             self$add(jmvcore::Html$new(
                 options=options,
                 name="clinical_guidance",
-                title="Testing Strategy Notes"))}))
+                title="Strategy Notes and Teaching Examples",
+                visible="(show_explanation)"))}))
 
 sequentialtestsBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
     "sequentialtestsBase",
@@ -482,36 +484,56 @@ sequentialtestsBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
 #' analysis including population flow, cost implications, and diagnostic 
 #' plots.
 #' 
+#' The named scenarios and their values are teaching examples only, not 
+#' clinical
+#' guidance or validated diagnostic pathways. Replace all example parameters 
+#' with
+#' estimates applicable to the intended population before interpreting 
+#' results.
+#' 
 #' This analysis is particularly useful for:
-#' • Designing diagnostic protocols and clinical pathways
-#' • Optimizing test sequencing for specific clinical contexts
+#' • Exploring how diagnostic strategies behave under explicit assumptions
+#' • Comparing hypothetical test sequences for teaching or planning
 #' • Understanding trade-offs between sensitivity and specificity
-#' • Evaluating cost-effectiveness of different testing strategies
+#' • Illustrating expected testing volume and cost under user-supplied 
+#' assumptions
 #' • Teaching sequential testing concepts and Bayesian probability
 #' 
-#' @param preset Select a clinical preset or use custom values. Presets load
-#'   illustrative test parameters for demonstration and teaching only. They are
-#'   rounded, approximate figures chosen to show how each strategy behaves; they
-#'   are NOT validated clinical parameters, are not drawn from any specific
-#'   published study, and the prevalence will not match your population. Replace
-#'   them with values from your own setting before drawing any clinical
-#'   conclusion.
-#' @param test1_name .
-#' @param test1_sens .
-#' @param test1_spec .
-#' @param test1_cost .
-#' @param test2_name .
-#' @param test2_sens .
-#' @param test2_spec .
-#' @param test2_cost .
-#' @param strategy .
-#' @param prevalence .
+#' @param preset Select a teaching example or use custom values. Examples load
+#'   rounded, hypothetical parameters chosen only to demonstrate how each
+#'   strategy behaves. They are not clinical guidance, validated diagnostic
+#'   pathways, or estimates from a specific study, and their prevalence will not
+#'   match your population. Replace every value with estimates from the intended
+#'   setting before interpretation.
+#' @param test1_name Display name for the first test.
+#' @param test1_sens Assumed sensitivity of the first test, entered as a
+#'   proportion from 0.01 to 0.99.
+#' @param test1_spec Assumed specificity of the first test, entered as a
+#'   proportion from 0.01 to 0.99.
+#' @param test1_cost Assumed unit cost of the first test in user-defined
+#'   currency or cost units.
+#' @param test2_name Display name for the second test.
+#' @param test2_sens Assumed sensitivity of the second test, entered as a
+#'   proportion from 0.01 to 0.99.
+#' @param test2_spec Assumed specificity of the second test, entered as a
+#'   proportion from 0.01 to 0.99.
+#' @param test2_cost Assumed unit cost of the second test in user-defined
+#'   currency or cost units.
+#' @param strategy Rule for combining results: test first-test positives, test
+#'   first-test negatives, or apply both tests to everyone. Combined accuracy
+#'   assumes conditional independence between tests.
+#' @param prevalence Assumed pre-test disease probability, entered as a
+#'   proportion from 0.001 to 0.999.
 #' @param population_size Population size used to illustrate population flow
 #'   counts. Does not affect probabilities.
-#' @param show_explanation .
-#' @param show_formulas .
-#' @param show_cost_analysis .
-#' @param show_plots .
+#' @param show_explanation Show a plain-language summary and explanation of
+#'   the selected strategy.
+#' @param show_formulas Show the formulas used for individual and combined
+#'   test metrics.
+#' @param show_cost_analysis Show expected testing volume and cost using the
+#'   illustrative population size.
+#' @param show_plots Show the five diagnostic-performance and population-flow
+#'   plots.
 #' @return A results object containing:
 #' \tabular{llllll}{
 #'   \code{results$notices} \tab \tab \tab \tab \tab a preformatted \cr
