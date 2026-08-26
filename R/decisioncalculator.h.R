@@ -557,7 +557,7 @@ decisioncalculatorResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::
                 width=600,
                 height=450,
                 renderFun=".plot1",
-                requiresData=TRUE,
+                requiresData=FALSE,
                 visible="(fagan)",
                 clearWith=list(
                     "TP",

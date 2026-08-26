@@ -82,7 +82,7 @@ test_that("tables do not accumulate rows across re-runs", {
     # jmvcore's addRow() with an existing rowKey DUPLICATES rather than replacing (verified
     # on a bare Table: rowCount 2 -> 4 -> 6 over three passes, after which $asDF fails with
     # "duplicate 'row.names' are not allowed"). jamovi re-runs .run() on the SAME object on
-    # every option change, and nothing in this file called deleteRows().
+    # every option change, so any table rebuilt with addRow() must call deleteRows() first.
     tbl <- jmvcore::Table$new(options = jmvcore::Options$new(), name = "t", title = "t",
                               columns = list(list(`name` = "a", `type` = "number")))
     for (i in 1:2) tbl$addRow(rowKey = i, values = list(a = i))
@@ -90,12 +90,27 @@ test_that("tables do not accumulate rows across re-runs", {
     for (i in 1:2) tbl$addRow(rowKey = i, values = list(a = i))
     expect_equal(tbl$rowCount, 4L, label = "addRow duplicates on a repeated key")
 
-    # the three tables that populate via addRow must clear first
+    # The CI tables are rebuilt with addRow() on each run, so they must clear first.
+    # multipleCutoffTable is different: its three fixed rows are created once in .init()
+    # and .run() updates them with setRow(), which cannot accumulate duplicate rows.
     src <- readLines(testthat::test_path("..", "..", "R", "decisioncalculator.b.R"))
-    for (nm in c("epirTable_ratio", "epirTable_number", "multipleCutoffTable")) {
+    for (nm in c("epirTable_ratio", "epirTable_number")) {
         expect_true(any(grepl(paste0(nm, "\\$deleteRows\\(\\)"), src)),
                     info = paste(nm, "must be cleared before addRow"))
     }
+    expect_equal(sum(grepl("multipleCutoffTable\\$addRow\\(", src)), 3L)
+    expect_equal(sum(grepl("multipleCutoffTable\\$setRow\\(", src)), 3L)
+})
+
+
+test_that("the option-only Fagan plot does not require dataset rows", {
+    spec <- yaml::read_yaml(testthat::test_path("..", "..", "jamovi",
+                                                "decisioncalculator.r.yaml"))
+    item_names <- vapply(spec$items, function(item) item$name, character(1))
+    plot <- spec$items[[which(item_names == "plot1")]]
+
+    expect_identical(plot$type, "Image")
+    expect_identical(plot$requiresData, FALSE)
 })
 
 

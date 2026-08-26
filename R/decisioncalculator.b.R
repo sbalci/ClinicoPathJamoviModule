@@ -8,20 +8,10 @@
 decisioncalculatorClass <- if (requireNamespace("jmvcore")) {
     R6::R6Class("decisioncalculatorClass",
         inherit = decisioncalculatorBase, private = list(
-            # Clinical interpretation thresholds (evidence-based cutoffs)
-            # Youden's Index thresholds based on diagnostic test literature
-            .YOUDEN_EXCELLENT = 0.8, # J > 0.8: Excellent discriminatory ability
-            .YOUDEN_GOOD = 0.6, # J > 0.6: Good discriminatory ability
-            .YOUDEN_FAIR = 0.4, # J > 0.4: Fair discriminatory ability
-            .ACCURACY_EXCELLENT = 0.9, # Accuracy > 0.9: Excellent overall performance
-            .ACCURACY_GOOD = 0.8, # Accuracy > 0.8: Good overall performance
-
             # TODO [meddecide audit 2026-05-14] - see docs/audit/MODULE_AUDIT_REPORT_20260514-1847.md
             #   [hygiene/notices] uses a plain-text Preformatted "notices" output via private$.addNotice()/.renderNotices(); NOT jmvcore::Notice objects (avoids the insert(999, Notice) serialization error)
-            #   [i18n] 0 .() wraps despite excellent notice content; high priority - /prepare-translation decisioncalculator
-            #   [statistical-validation] /review-function decisioncalculator - confirm Bayes prior-override math
-            #   [hygiene/notices] add INFO methodology summary at end of .run() (currently absent)
-            #   [testing] no tests/testthat/test-decisioncalculator.R
+            #   [hygiene/notices] uses a plain-text Preformatted output instead of
+            #   dynamically inserted jmvcore::Notice objects (serialization safety)
 
             # Notice collection helpers. A single Preformatted (plain-text) output item:
             # avoids BOTH the jmvcore::Notice serialization error from
@@ -154,15 +144,26 @@ decisioncalculatorClass <- if (requireNamespace("jmvcore")) {
                 ci <- self$options$ci
 
                 # Input validation ----
-                # Enforce mutual exclusion of CI and custom prevalence (epiR limitation)
+                # epiR estimates intervals from the study 2x2 table. When an external
+                # prevalence is supplied, those intervals remain valid for sensitivity,
+                # specificity, accuracy, likelihood ratios, DOR and Youden's J, but not
+                # for the Bayes-adjusted predictive values. The CI tables therefore omit
+                # prevalence-dependent epiR rows in that option combination.
                 if (ci && pp) {
-                    private$.addNotice("ERROR", "CI and Population Prevalence Conflict", 'Confidence intervals are unavailable when using population prevalence. \u{2022} epiR::epi.tests() computes CIs from the study sample, not an externally supplied prevalence. \u{2022} Disable either "95% Confidence Intervals" or "Use Known Population Prevalence" to proceed. \u{2022} Point estimates will still be Bayes-adjusted when prevalence is supplied.')
-                    return()
+                    private$.addNotice(
+                        "INFO",
+                        .("Partial confidence intervals with population prevalence"),
+                        .("Confidence intervals are shown for measures estimable from the study 2x2 table. Predictive values are adjusted to the supplied population prevalence, but their confidence intervals are not computed because the uncertainty of that external prevalence was not supplied.")
+                    )
                 }
 
                 # Inform user that CIs are unavailable when using population prevalence
                 if (!ci && pp) {
-                    private$.addNotice("INFO", "CI Unavailable With Population Prevalence", "Confidence intervals are not calculated when using population prevalence. \u{2022} epiR::epi.tests() provides CIs only for sample-based prevalence. \u{2022} Point estimates shown here are Bayes-adjusted to the supplied prevalence without CIs.")
+                    private$.addNotice(
+                        "INFO",
+                        .("Population-adjusted predictive values"),
+                        .("Positive and negative predictive values are adjusted to the supplied population prevalence. No confidence intervals were requested.")
+                    )
                 }
 
                 # Validate prevalence when provided programmatically
@@ -285,9 +286,18 @@ decisioncalculatorClass <- if (requireNamespace("jmvcore")) {
 
                 TestW <- FP + FN
 
-                # Warn on non-integer counts (allowed but unusual)
-                if (any(abs(c(TP, FP, TN, FN) - round(c(TP, FP, TN, FN))) > 1e-6)) {
-                    private$.addNotice("WARNING", "Non-Integer Counts", "Non-integer counts detected. \u{2022} Diagnostic test counts are typically whole numbers. \u{2022} Proceeding with calculations, but verify your inputs.")
+                # Fractional frequencies can represent weighted data, but binomial
+                # confidence intervals require integer event and trial counts unless an
+                # effective sample size or survey design is supplied.
+                fractional_counts <- any(
+                    abs(c(TP, FP, TN, FN) - round(c(TP, FP, TN, FN))) > 1e-6
+                )
+                if (fractional_counts) {
+                    private$.addNotice(
+                        "WARNING",
+                        .("Weighted or fractional counts"),
+                        .("Fractional frequencies are used for point estimates only. Confidence intervals are omitted because no effective sample size or weighting design was supplied.")
+                    )
                 }
 
                 # Continuity correction for zero-cell issues (stabilizes the LR/DOR point
@@ -396,10 +406,10 @@ decisioncalculatorClass <- if (requireNamespace("jmvcore")) {
                 BalancedAccuracy <- (Sens + Spec) / 2
 
                 # F1 Score (harmonic mean of sensitivity and PPV)
-                if (Sens > 0 && PPV > 0) {
+                if (is.finite(Sens) && is.finite(PPV) && (Sens + PPV) > 0) {
                     F1Score <- 2 * (Sens * PPV) / (Sens + PPV)
                 } else {
-                    F1Score <- 0
+                    F1Score <- NA_real_
                 }
 
                 # Matthews Correlation Coefficient (MCC)
@@ -408,7 +418,7 @@ decisioncalculatorClass <- if (requireNamespace("jmvcore")) {
                 if (mcc_denominator > 0) {
                     MCC <- mcc_numerator / mcc_denominator
                 } else {
-                    MCC <- 0
+                    MCC <- NA_real_
                 }
 
 
@@ -583,8 +593,8 @@ decisioncalculatorClass <- if (requireNamespace("jmvcore")) {
 
 
                     epirresult2 <- summary(epirresult)
-                    epirresult2 <- as.data.frame(epirresult2) %>%
-                        tibble::rownames_to_column(.data = ., var = "statsabv")
+                    epirresult2 <- as.data.frame(epirresult2) |>
+                        tibble::rownames_to_column(var = "statsabv")
 
 
                     # Map epiR statistic codes to display names via a named lookup keyed on
@@ -678,7 +688,7 @@ decisioncalculatorClass <- if (requireNamespace("jmvcore")) {
                     epirTable_ratio$deleteRows()
 
                     data_frame <- epirresult_ratio
-                    for (i in seq_along(data_frame[, 1, drop = T])) {
+                    for (i in seq_along(data_frame[, 1, drop = TRUE])) {
                         epirTable_ratio$addRow(rowKey = i, values = c(data_frame[i, ])) # This code produces a named vector/list, which is what the values argument expects
                     }
 
@@ -690,7 +700,7 @@ decisioncalculatorClass <- if (requireNamespace("jmvcore")) {
                     epirTable_number$deleteRows()
 
                     data_frame <- epirresult_number
-                    for (i in seq_along(data_frame[, 1, drop = T])) {
+                    for (i in seq_along(data_frame[, 1, drop = TRUE])) {
                         epirTable_number$addRow(rowKey = i, values = c(data_frame[i, ]))
                     }
                 }
@@ -830,8 +840,9 @@ decisioncalculatorClass <- if (requireNamespace("jmvcore")) {
                         list(name = cutoff2_metrics$cutoffName, youden = cutoff2_metrics$youden,
                              accuracy = cutoff2_metrics$accuracy)
                     )
-                    ys <- vapply(cand, function(x)
-                        if (is.null(x$youden) || !is.finite(x$youden)) NA_real_ else x$youden,
+                    ys <- vapply(cand, function(x) {
+                        if (is.null(x$youden) || !is.finite(x$youden)) NA_real_ else x$youden
+                    },
                         numeric(1))
 
                     # Uncertainty. A formal test of two cut-offs would need the paired

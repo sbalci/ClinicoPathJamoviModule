@@ -252,6 +252,29 @@ test_that("teaching examples are labelled as examples, not clinical guidance", {
 })
 
 
+test_that("dependence guidance explains direction and cites its source", {
+    guidance <- run_st(show_explanation = TRUE)$clinical_guidance$content
+
+    expect_match(guidance, "Why conditional dependence matters", fixed = TRUE)
+    expect_match(guidance, "specificity too high and combined sensitivity too low",
+                 fixed = TRUE)
+    expect_match(guidance, "sensitivity too high and combined specificity too low",
+                 fixed = TRUE)
+    expect_match(guidance, "Gardner et al. (2000)", fixed = TRUE)
+    expect_match(
+        guidance,
+        "Conditional dependence between tests affects the diagnosis and surveillance of animal diseases",
+        fixed = TRUE
+    )
+
+    r_yaml <- paste(
+        readLines("../../jamovi/sequentialtests.r.yaml", warn = FALSE),
+        collapse = "\n"
+    )
+    expect_match(r_yaml, "ConditionalDependenceDiagnosticTests", fixed = TRUE)
+})
+
+
 test_that("performance plot supports duplicate display names", {
     h <- private_st(test1_name = "Same", test2_name = "Same", show_plots = TRUE)
     h$p$.run()
@@ -474,4 +497,17 @@ test_that("every declared option is read by the backend", {
     unread <- declared[!vapply(declared, function(o)
         grepl(paste0("self\\$options\\$", o, "\\b"), backend), logical(1))]
     expect_equal(unread, character(0))
+})
+
+
+test_that("release metadata versions agree", {
+    description_version <- unname(read.dcf("../../DESCRIPTION", fields = "Version")[1, 1])
+    analysis_version <- as.character(
+        yaml::read_yaml("../../jamovi/sequentialtests.a.yaml")$version)
+    module_version <- as.character(yaml::read_yaml("../../jamovi/0000.yaml")$version)
+    citation_version <- as.character(yaml::read_yaml("../../CITATION.cff")$version)
+
+    expect_identical(analysis_version, description_version)
+    expect_identical(module_version, description_version)
+    expect_identical(citation_version, description_version)
 })

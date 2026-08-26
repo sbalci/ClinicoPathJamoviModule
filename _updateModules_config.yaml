@@ -45,8 +45,8 @@
 # ==============================================
 
 
-new_version: "1.0.7.01"
-new_date: "2026-08-25"
+new_version: "1.0.7.02"
+new_date: "2026-08-26"
 quick: false
 TEST: false
 jjstatsplot: false

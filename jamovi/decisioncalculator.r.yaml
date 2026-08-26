@@ -315,7 +315,8 @@ items:
       width:  600
       height: 450
       renderFun: .plot1
-      requiresData: true
+      # This calculator is driven entirely by numeric options, not dataset rows.
+      requiresData: false
       visible: (fagan)
       clearWith:
           - TP

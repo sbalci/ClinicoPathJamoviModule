@@ -104,7 +104,7 @@ nogoldstandard
 
 cotest
 decisioncalculator
-sequentialtests
+- sequentialtests
 
 ## ROC
 
