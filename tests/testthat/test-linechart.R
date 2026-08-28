@@ -641,17 +641,8 @@ describe("linechart Integration", {
 
     expect_true(inherits(result, "linechartResults"))
 
-    # Verify warnings about repeated measures are issued
-    expect_warning(
-      linechart(
-        data = data,
-        xvar = "visit_day",
-        yvar = "hemoglobin_g_dl",
-        groupby = "treatment_arm",
-        trendline = TRUE
-      ),
-      regexp = "independent|repeated"
-    )
+    # Verify warnings about repeated measures are issued in correlation table
+    expect_true(any(grepl("independent|repeated", result$correlation$asDF$interpretation, ignore.case = TRUE)))
   })
 
   test_that("linechart works with dose-response data", {
@@ -692,17 +683,8 @@ describe("linechart Integration", {
 
     expect_true(inherits(result, "linechartResults"))
 
-    # Verify warnings about grouped data are issued
-    expect_warning(
-      linechart(
-        data = data,
-        xvar = "time",
-        yvar = "value",
-        groupby = "treatment",
-        trendline = TRUE
-      ),
-      regexp = "grouped|independent"
-    )
+    # Verify warnings about grouped data are issued in correlation table
+    expect_true(any(grepl("grouped|independent|repeated", result$correlation$asDF$interpretation, ignore.case = TRUE)))
   })
 
   test_that("linechart produces plot without errors", {

@@ -442,12 +442,14 @@ test_that("analysis type options are consistent", {
 
 test_that("data processing pipeline works end-to-end", {
   # Create comprehensive test scenario
+  set.seed(123)
+  detailed <- sample(c("Alive_NED", "Alive_Disease", "Dead_Disease", "Dead_Other"), 
+                     200, replace = TRUE)
   pipeline_data <- data.frame(
     patient_id = 1:200,
     survival_months = rexp(200, rate = 0.1),
-    vital_status = sample(c("Alive", "Dead"), 200, replace = TRUE, prob = c(0.7, 0.3)),
-    detailed_outcome = sample(c("Alive_NED", "Alive_Disease", "Dead_Disease", "Dead_Other"), 
-                             200, replace = TRUE),
+    vital_status = ifelse(grepl("^Dead", detailed), "Dead", "Alive"),
+    detailed_outcome = detailed,
     recurrence_status = sample(c("No_Recurrence", "Recurrence"), 200, replace = TRUE),
     age = rnorm(200, 65, 10),
     gender = sample(c("Male", "Female"), 200, replace = TRUE),

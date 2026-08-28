@@ -1,13 +1,4 @@
 
-library(testthat)
-library(jmvcore)
-
-# Load the package
-if (requireNamespace("devtools", quietly = TRUE)) {
-} else {
-  stop("devtools needed to load package for tests")
-}
-
 test_that("kappaSizeCI works for binary outcomes (2 categories)", {
   results <- kappaSizeCI(
     outcome = "2",

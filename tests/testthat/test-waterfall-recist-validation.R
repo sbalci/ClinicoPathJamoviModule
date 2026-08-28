@@ -2,10 +2,6 @@
 # Created: 2025-11-23
 # Purpose: Ensure RECIST category boundaries are mathematically correct
 
-library(testthat)
-
-context("waterfall RECIST Categorization Validation")
-
 # Test 1: RECIST Boundary Values ----
 test_that("RECIST boundaries are correctly implemented", {
   skip_if_not_installed("jmvReadWrite")

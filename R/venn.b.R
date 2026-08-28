@@ -191,18 +191,11 @@ vennClass <- if (requireNamespace('jmvcore'))
                 self$results$plotUpsetR$setSize(upset_width, upset_height)
                 self$results$plotComplexUpset$setSize(upset_width, upset_height)
 
-                # The summary table carries one row per selected variable, which
-                # is fully determined by the options. Build that structure here so
-                # the table does not restructure on every run; .run() fills the
-                # computed counts with setRow().
+
                 selected_vars <- Filter(Negate(is.null), list(
                     self$options$var1, self$options$var2, self$options$var3,
                     self$options$var4, self$options$var5, self$options$var6,
                     self$options$var7))
-
-                for (i in seq_along(selected_vars))
-                    self$results$summary$addRow(rowKey = i, values = list(
-                        variable = selected_vars[[i]]))
 
                 # membershipTable's COLUMN set is equally option-determined - Row, Group,
                 # and one column per selected variable - so it is laid out here instead of
@@ -432,7 +425,7 @@ vennClass <- if (requireNamespace('jmvcore'))
                     if (excluded_n > 0) {
                         excluded_pct <- round(100 * excluded_n / original_n, 1)
                         private$.warnings <- c(private$.warnings, sprintf(
-                            'Case exclusion: %d cases (%.1f%%) were dropped because at least one selected variable was missing. Original N=%d, analysed N=%d. Every count and percentage below, and every region of the diagrams, describes only those %d complete cases; consider whether the excluded cases differ systematically before generalising.',
+                            'CASE EXCLUSION: %d cases (%.1f%%) were dropped because at least one selected variable was missing. Original N=%d, Final N=%d. Every count and percentage below, and every region of the diagrams, describes only those %d complete cases; consider whether the excluded cases differ systematically before generalising.',
                             excluded_n, excluded_pct, original_n, nrow(full_data), nrow(full_data)
                         ))
                     }
@@ -657,7 +650,7 @@ vennClass <- if (requireNamespace('jmvcore'))
                     # Set the summary results
                     if (!is.null(self$results$summary)) {
                         for (i in seq_len(nrow(summaryData))) {
-                            self$results$summary$setRow(rowKey = i, values = list(
+                            self$results$summary$addRow(rowKey = i, values = list(
                                 variable = summaryData$Variable[i],
                                 trueCount = summaryData$TrueCount[i],
                                 falseCount = summaryData$FalseCount[i],
@@ -1605,7 +1598,7 @@ vennClass <- if (requireNamespace('jmvcore'))
                     rd$percent <- paste0(
                         round(rd$count * 100 / total_n, digits = labelPrecisionDigits), "%")
                     if ("both" %in% names(rd))
-                        rd$both <- paste(format(rd$count, big.mark = ",", big.interval = 3L),
+                        rd$both <- paste(base::format(rd$count, big.mark = ",", big.interval = 3L),
                                          paste0("(", rd$percent, ")"), sep = "\n")
                     plot$layers[[region_layer[1]]]$data <- rd
                 }

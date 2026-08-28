@@ -1,6 +1,4 @@
-context("Medical Decision Analysis")
-
-# (Unit tests for the calculate_sensitivity/specificity/auc utility helpers were
+# Test main decision() function
 # removed together with those functions: they were exported-but-dead in the
 # package and are no longer part of utils.R.)
 

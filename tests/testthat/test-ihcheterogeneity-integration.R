@@ -5,8 +5,6 @@
 # Tests integration with other packages, realistic workflows,
 # and output consistency for the ihcheterogeneity jamovi function
 
-library(testthat)
-
 # Load test data
 data(ihcheterogeneity_test, package = "ClinicoPath")
 data(ihcheterogeneity_ki67, package = "ClinicoPath")
@@ -117,8 +115,8 @@ test_that("ihcheterogeneity handles data from Excel import", {
 
 test_that("ihcheterogeneity handles different data structures consistently", {
   # Test with tibble
-  library(tibble)
-  tibble_data <- as_tibble(ihcheterogeneity_test)
+  skip_if_not_installed("tibble")
+  tibble_data <- tibble::as_tibble(ihcheterogeneity_test)
 
   result_tibble <- ihcheterogeneity(
     data = tibble_data,

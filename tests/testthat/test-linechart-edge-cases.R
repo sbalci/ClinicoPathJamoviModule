@@ -17,16 +17,13 @@ test_that("linechart handles missing data in x variable", {
   test_data_na <- linechart_simple
   test_data_na$time_point[1:5] <- NA
 
-  # Should either error or warn about missing data
-  expect_warning(
-    linechart(
-      data = test_data_na,
-      xvar = "time_point",
-      yvar = "value"
-    ),
-    regexp = "missing|NA|removed",
-    ignore.case = TRUE
+  res <- linechart(
+    data = test_data_na,
+    xvar = "time_point",
+    yvar = "value"
   )
+  expect_s3_class(res, "linechartResults")
+  expect_match(lc_todo(res), "excluded because of missing values")
 })
 
 test_that("linechart handles missing data in y variable", {
@@ -36,16 +33,13 @@ test_that("linechart handles missing data in y variable", {
   test_data_na <- linechart_simple
   test_data_na$value[1:5] <- NA
 
-  # Should either error or warn about missing data
-  expect_warning(
-    linechart(
-      data = test_data_na,
-      xvar = "time_point",
-      yvar = "value"
-    ),
-    regexp = "missing|NA|removed",
-    ignore.case = TRUE
+  res <- linechart(
+    data = test_data_na,
+    xvar = "time_point",
+    yvar = "value"
   )
+  expect_s3_class(res, "linechartResults")
+  expect_match(lc_todo(res), "excluded because of missing values")
 })
 
 test_that("linechart handles missing data in group variable", {
@@ -55,17 +49,14 @@ test_that("linechart handles missing data in group variable", {
   test_data_na <- linechart_grouped
   test_data_na$treatment[1:5] <- NA
 
-  # Should either error or warn about missing data
-  expect_warning(
-    linechart(
-      data = test_data_na,
-      xvar = "time_point",
-      yvar = "lab_value",
-      groupby = "treatment"
-    ),
-    regexp = "missing|NA|removed",
-    ignore.case = TRUE
+  res <- linechart(
+    data = test_data_na,
+    xvar = "time_point",
+    yvar = "lab_value",
+    groupby = "treatment"
   )
+  expect_s3_class(res, "linechartResults")
+  expect_match(lc_todo(res), "excluded because of missing values")
 })
 
 test_that("linechart handles two time points", {
@@ -123,14 +114,13 @@ test_that("linechart handles Inf values in y", {
   inf_data <- linechart_simple
   inf_data$value[1] <- Inf
 
-  # Should either error or warn
-  expect_condition(
-    linechart(
-      data = inf_data,
-      xvar = "time_point",
-      yvar = "value"
-    )
+  res <- linechart(
+    data = inf_data,
+    xvar = "time_point",
+    yvar = "value"
   )
+  expect_s3_class(res, "linechartResults")
+  expect_match(lc_todo(res), "infinite values")
 })
 
 test_that("linechart handles -Inf values", {
@@ -140,14 +130,13 @@ test_that("linechart handles -Inf values", {
   inf_data <- linechart_simple
   inf_data$value[1] <- -Inf
 
-  # Should either error or warn
-  expect_condition(
-    linechart(
-      data = inf_data,
-      xvar = "time_point",
-      yvar = "value"
-    )
+  res <- linechart(
+    data = inf_data,
+    xvar = "time_point",
+    yvar = "value"
   )
+  expect_s3_class(res, "linechartResults")
+  expect_match(lc_todo(res), "infinite values")
 })
 
 test_that("linechart handles NaN values", {
@@ -157,14 +146,13 @@ test_that("linechart handles NaN values", {
   nan_data <- linechart_simple
   nan_data$value[1] <- NaN
 
-  # Should either error or warn
-  expect_condition(
-    linechart(
-      data = nan_data,
-      xvar = "time_point",
-      yvar = "value"
-    )
+  res <- linechart(
+    data = nan_data,
+    xvar = "time_point",
+    yvar = "value"
   )
+  expect_s3_class(res, "linechartResults")
+  expect_match(lc_todo(res), "excluded because of missing values")
 })
 
 test_that("linechart handles very small sample size", {
@@ -408,15 +396,14 @@ test_that("linechart handles empty groups after filtering", {
   empty_group_data <- linechart_grouped
   empty_group_data$lab_value[empty_group_data$treatment == "Control"] <- NA
 
-  # Should either error or warn
-  expect_condition(
-    linechart(
-      data = empty_group_data,
-      xvar = "time_point",
-      yvar = "lab_value",
-      groupby = "treatment"
-    )
+  res <- linechart(
+    data = empty_group_data,
+    xvar = "time_point",
+    yvar = "lab_value",
+    groupby = "treatment"
   )
+  expect_s3_class(res, "linechartResults")
+  expect_match(lc_todo(res), "excluded because of missing values")
 })
 
 test_that("linechart handles tibble vs data.frame", {
@@ -521,10 +508,8 @@ test_that("linechart handles empty dataset", {
     value = numeric(0)
   )
 
-  # A zero-row dataset used to return() silently, leaving a blank panel and an
-  # empty plot frame with no explanation at all.
-  expect_match(lc_todo(linechart(data = empty_data, xvar = "time", yvar = "value")),
-               "No rows to plot")
+  # reject() signals to the user why the analysis cannot proceed on an empty dataset
+  expect_error(linechart(data = empty_data, xvar = "time", yvar = "value"), "The dataset has no rows")
 })
 
 test_that("linechart handles all missing data after filtering", {

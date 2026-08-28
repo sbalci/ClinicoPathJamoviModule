@@ -5,8 +5,6 @@
 # Tests integration with other packages, realistic workflows,
 # and output consistency for the swimmerplot jamovi function
 
-library(testthat)
-
 # Load test data
 data(swimmerplot_test, package = "ClinicoPath")
 data(swimmerplot_immuno, package = "ClinicoPath")
@@ -140,8 +138,8 @@ test_that("swimmerplot handles data from Excel import", {
 
 test_that("swimmerplot handles different data structures consistently", {
   # Test with tibble
-  library(tibble)
-  tibble_data <- as_tibble(swimmerplot_test)
+  skip_if_not_installed("tibble")
+  tibble_data <- tibble::as_tibble(swimmerplot_test)
 
   result_tibble <- swimmerplot(
     data = tibble_data,

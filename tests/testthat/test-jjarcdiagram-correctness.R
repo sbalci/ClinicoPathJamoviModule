@@ -1,5 +1,3 @@
-context("test-jjarcdiagram-correctness")
-
 # Comprehensive tests for statistical correctness and numerical output validation
 # These tests verify the fixes for:
 # 1. Node-level group handling (not edge-level)
@@ -7,7 +5,7 @@ context("test-jjarcdiagram-correctness")
 # 3. Selective NA omission
 # 4. Directed network handling
 
-library(igraph)
+suppressWarnings(suppressPackageStartupMessages(library(igraph)))
 
 test_that("jjarcdiagram correctly handles node-level groups (not edge-level)", {
   skip_if_not_installed('jmvReadWrite')

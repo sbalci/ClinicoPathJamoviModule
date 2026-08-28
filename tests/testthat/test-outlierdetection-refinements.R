@@ -77,8 +77,8 @@ test_that("composite method comparison table generates", {
     
     comparison_html <- analysis$results$method_comparison$content
     
-    # Check if table headers for breakdown exist
-    expect_true(grepl("Agreement Rate", comparison_html))
+    # Check if table headers and agreement section exist
+    expect_true(grepl("Agreement Between Methods", comparison_html))
     expect_true(grepl("Outliers Detected", comparison_html))
     
     # Check if a method is listed (e.g. Mahalanobis or Z_Score_Robust)

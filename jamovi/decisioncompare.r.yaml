@@ -8,11 +8,13 @@ items:
       title: Original Data
       type: Preformatted
       visible: (od)
+      clearWith: [gold, goldPositive, goldNegative, test1, test1Positive, test1Negative, test2, test2Positive, test2Negative, test3, test3Positive, test3Negative, excludeIndeterminate, od]
 
     - name: text2
       title: Original Data
       type: Html
       visible: (od)
+      clearWith: [gold, goldPositive, goldNegative, test1, test1Positive, test1Negative, test2, test2Positive, test2Negative, test3, test3Positive, test3Negative, excludeIndeterminate, od]
 
     # Tables for Test 1
     - name: cTable1
@@ -20,6 +22,7 @@ items:
       type: Table
       visible: (length(test1) > 0)
       rows: 0
+      clearWith: [gold, goldPositive, goldNegative, test1, test1Positive, test1Negative, excludeIndeterminate]
       columns:
         - name: newtest
           title: ''
@@ -39,6 +42,7 @@ items:
       type: Table
       visible: (ci && !is.null(test1) && test1 != "")
       rows: 0
+      clearWith: [gold, goldPositive, goldNegative, test1, test1Positive, test1Negative, excludeIndeterminate, ci]
       columns:
         - name: statsnames
           title: "Decision Statistics"
@@ -64,6 +68,7 @@ items:
       type: Table
       visible: (length(test2) > 0)
       rows: 0
+      clearWith: [gold, goldPositive, goldNegative, test2, test2Positive, test2Negative, excludeIndeterminate]
       columns:
         - name: newtest
           title: ''
@@ -83,6 +88,7 @@ items:
       type: Table
       visible: (ci && !is.null(test2) && test2 != "")
       rows: 0
+      clearWith: [gold, goldPositive, goldNegative, test2, test2Positive, test2Negative, excludeIndeterminate, ci]
       columns:
         - name: statsnames
           title: "Decision Statistics"
@@ -108,6 +114,7 @@ items:
       type: Table
       visible: (length(test3) > 0)
       rows: 0
+      clearWith: [gold, goldPositive, goldNegative, test3, test3Positive, test3Negative, excludeIndeterminate]
       columns:
         - name: newtest
           title: ''
@@ -127,6 +134,7 @@ items:
       type: Table
       visible: (ci && !is.null(test3) && test3 != "")
       rows: 0
+      clearWith: [gold, goldPositive, goldNegative, test3, test3Positive, test3Negative, excludeIndeterminate, ci]
       columns:
         - name: statsnames
           title: "Decision Statistics"
@@ -155,6 +163,16 @@ items:
         - name: test
           title: 'Test'
           type: text
+        - name: 'n'
+          title: 'Analyzed N'
+          type: integer
+        - name: excluded
+          title: 'Excluded'
+          type: integer
+        - name: excludedRate
+          title: 'Excluded Rate'
+          type: number
+          format: pc
         - name: Sens
           title: 'Sensitivity'
           type: number
@@ -184,19 +202,23 @@ items:
       clearWith:
           - gold
           - goldPositive
+          - goldNegative
           - test1
           - test1Positive
+          - test1Negative
           - test2
           - test2Positive
+          - test2Negative
           - test3
           - test3Positive
+          - test3Negative
           - excludeIndeterminate
           - pp
           - pprob
 
     # Overall Percent Agreement Table
     - name: opaTable
-      title: 'Overall Percent Agreement (OPA)'
+      title: 'Overall Percent Agreement (Descriptive)'
       type: Table
       visible: (opa)
       rows: 0
@@ -204,7 +226,9 @@ items:
         note: >
           OPA = (TP + TN) / Total.
           OPA does not correct for chance agreement; consider Cohen's kappa for chance-corrected concordance.
-          Noninferiority: lower CI bound must exceed margin to declare noninferior.
+          The criterion is met when the lower CI bound exceeds the user-specified minimum OPA.
+          The criterion is optional and descriptive. It is not a noninferiority comparison,
+          regulatory guidance, or clinical guidance.
       columns:
         - name: test
           title: 'Test'
@@ -213,7 +237,10 @@ items:
           title: 'Concordant'
           type: integer
         - name: total
-          title: 'Total'
+          title: 'Analyzed N'
+          type: integer
+        - name: excluded
+          title: 'Excluded'
           type: integer
         - name: opa
           title: 'OPA'
@@ -230,22 +257,27 @@ items:
           type: number
           format: pc
         - name: niMargin
-          title: 'NI Margin'
+          title: 'OPA Criterion'
           type: number
           format: pc
         - name: niResult
-          title: 'Noninferior?'
+          title: 'Criterion Met?'
           type: text
       clearWith:
           - gold
           - goldPositive
+          - goldNegative
           - test1
           - test1Positive
+          - test1Negative
           - test2
           - test2Positive
+          - test2Negative
           - test3
           - test3Positive
+          - test3Negative
           - excludeIndeterminate
+          - useOpaCriterion
           - niMargin
           - ciMethod
 
@@ -260,8 +292,15 @@ items:
           title: 'Subgroup'
           type: text
         - name: 'n'
-          title: 'N'
+          title: 'Analyzed N'
           type: integer
+        - name: excluded
+          title: 'Excluded'
+          type: integer
+        - name: excludedRate
+          title: 'Excluded Rate'
+          type: number
+          format: pc
         - name: test
           title: 'Test'
           type: text
@@ -292,14 +331,20 @@ items:
       clearWith:
           - gold
           - goldPositive
+          - goldNegative
           - test1
           - test1Positive
+          - test1Negative
           - test2
           - test2Positive
+          - test2Negative
           - test3
           - test3Positive
+          - test3Negative
           - stratify
           - excludeIndeterminate
+          - pp
+          - pprob
 
     # Statistical Comparison Tables
     - name: mcnemarTable
@@ -316,6 +361,12 @@ items:
         - name: comparison
           title: 'Comparison'
           type: text
+        - name: 'n'
+          title: 'Paired N'
+          type: integer
+        - name: method
+          title: 'Method'
+          type: text
         - name: stat
           title: "Chi-squared"
           type: number
@@ -327,8 +378,23 @@ items:
           type: number
           format: zto,pvalue
         - name: interpretation
-          title: 'Clinical Interpretation'
+          title: 'Statistical Interpretation'
           type: text
+      clearWith:
+          - gold
+          - goldPositive
+          - goldNegative
+          - test1
+          - test1Positive
+          - test1Negative
+          - test2
+          - test2Positive
+          - test2Negative
+          - test3
+          - test3Positive
+          - test3Negative
+          - excludeIndeterminate
+          - statComp
 
     - name: diffTable
       title: 'Differences with 95% Confidence Intervals'
@@ -342,6 +408,9 @@ items:
         - name: metric
           title: 'Metric'
           type: text
+        - name: 'n'
+          title: 'Paired N'
+          type: integer
         - name: diff
           title: 'Difference'
           type: number
@@ -356,6 +425,21 @@ items:
           superTitle: '95% Confidence Interval'
           type: number
           format: pc
+      clearWith:
+          - gold
+          - goldPositive
+          - goldNegative
+          - test1
+          - test1Positive
+          - test1Negative
+          - test2
+          - test2Positive
+          - test2Negative
+          - test3
+          - test3Positive
+          - test3Negative
+          - excludeIndeterminate
+          - statComp
 
     # Plot
     - name: plot1
@@ -370,12 +454,16 @@ items:
           - plot
           - gold
           - goldPositive
+          - goldNegative
           - test1
           - test1Positive
+          - test1Negative
           - test2
           - test2Positive
+          - test2Negative
           - test3
           - test3Positive
+          - test3Negative
           - excludeIndeterminate
           - pp
           - pprob
@@ -395,12 +483,16 @@ items:
           - radarplot
           - gold
           - goldPositive
+          - goldNegative
           - test1
           - test1Positive
+          - test1Negative
           - test2
           - test2Positive
+          - test2Negative
           - test3
           - test3Positive
+          - test3Negative
           - excludeIndeterminate
           - pp
           - pprob
@@ -420,12 +512,16 @@ items:
           - heatmap
           - gold
           - goldPositive
+          - goldNegative
           - test1
           - test1Positive
+          - test1Negative
           - test2
           - test2Positive
+          - test2Negative
           - test3
           - test3Positive
+          - test3Negative
           - excludeIndeterminate
       refs:
           - ggplot2
@@ -435,30 +531,35 @@ items:
       title: 'Summary'
       type: Html
       visible: (statComp && showSummary)
+      clearWith: [gold, goldPositive, goldNegative, test1, test1Positive, test1Negative, test2, test2Positive, test2Negative, test3, test3Positive, test3Negative, excludeIndeterminate, pp, pprob, statComp, showSummary]
 
     # Report Sentence
     - name: reportSentence
       title: 'Manuscript-Ready Report'
       type: Html
       visible: (statComp && showReportSentence)
+      clearWith: [gold, goldPositive, goldNegative, test1, test1Positive, test1Negative, test2, test2Positive, test2Negative, test3, test3Positive, test3Negative, excludeIndeterminate, pp, pprob, statComp, showReportSentence]
 
     # Explanations and Glossary
     - name: explanationsContent
       title: 'Statistical Explanations & Glossary'
       type: Html
       visible: (showExplanations)
+      clearWith: [showExplanations]
 
     # Clinical Report
     - name: clinicalReport
-      title: 'Clinical Summary & Report Templates'
+      title: 'Descriptive Summary & Report Templates'
       type: Html
-      visible: true
+      visible: (showDescriptiveReport)
+      clearWith: [gold, goldPositive, goldNegative, test1, test1Positive, test1Negative, test2, test2Positive, test2Negative, test3, test3Positive, test3Negative, excludeIndeterminate, pp, pprob, statComp, showDescriptiveReport]
 
     # About This Analysis
     - name: aboutAnalysis
       title: 'About This Analysis'
       type: Html
-      visible: true
+      visible: (showExplanations)
+      clearWith: [showExplanations]
 
     # Notice outputs converted to HTML to avoid serialization errors
     - name: notices
@@ -467,21 +568,39 @@ items:
       clearWith:
           - gold
           - goldPositive
+          - goldNegative
           - test1
           - test1Positive
+          - test1Negative
           - test2
           - test2Positive
+          - test2Negative
           - test3
           - test3Positive
+          - test3Negative
           - pp
           - pprob
           - ci
           - excludeIndeterminate
           - statComp
+          - opa
+          - useOpaCriterion
+          - niMargin
+          - ciMethod
+          - stratify
 
 refs:
-    - DiagnosticTests
     - ClinicoPathJamoviModule
+    - DiagnosticTests
     - epiR
+    - forcats
+    - knitr
+    - mcnemar1947
+    - cochran1950
+    - holm1979
+    - wilson1927
+    - newcombe1998paired
+    - STARD2015
+    - jaeschke1994
 
 ...

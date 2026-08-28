@@ -31,18 +31,16 @@ test_that("lollipop handles missing values in dep variable", {
 test_that("lollipop handles all missing values in dep", {
 
   test_data_all_na <- lollipop_small
-  test_data_all_na$measurement <- NA
+  test_data_all_na$measurement <- as.numeric(NA)
 
-  expect_error(
-    lollipop(
-      data = test_data_all_na,
-      dep = "measurement",
-      group = "category",
-      highlight = NULL
-    ),
-    regexp = "missing|NA|no.*data|empty",
-    ignore.case = TRUE
+  result <- lollipop(
+    data = test_data_all_na,
+    dep = "measurement",
+    group = "category",
+    highlight = NULL
   )
+  expect_s3_class(result, "lollipopResults")
+  expect_match(result$todo$content, "No complete cases|missing|Error", ignore.case = TRUE)
 })
 
 test_that("lollipop handles missing values in group variable", {
@@ -218,7 +216,7 @@ test_that("lollipop errors on non-existent variables", {
       group = "treatment_group",
       highlight = NULL
     ),
-    regexp = "not found|does not exist|invalid",
+    regexp = "not found|does not exist|invalid|not present",
     ignore.case = TRUE
   )
 })
@@ -335,8 +333,9 @@ test_that("lollipop returns quietly on an empty dataset", {
   empty_data <- lollipop_small[0, ]
   res <- lollipop(data = empty_data, dep = "measurement", group = "category",
                   highlight = NULL)
-  # .run() exits early on zero rows, so nothing is computed and nothing crashes.
-  expect_equal(nrow(res$summary$asDF), 0L)
+  # .run() exits early on zero rows; summary table retains its .init() row skeleton
+  expect_s3_class(res, "lollipopResults")
+  expect_true(all(is.na(res$summary$asDF$value) | res$summary$asDF$value == ""))
 })
 
 # ═══════════════════════════════════════════════════════════

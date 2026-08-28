@@ -373,13 +373,13 @@ test_that("lollipop handles different clinical lab parameters", {
                   "platelet_count", "white_blood_cells", "alt", "crp")
 
   for (param in lab_params) {
-    result <- lollipop(
+    result <- do.call(lollipop, list(
       data = lollipop_test,
       dep = param,
       group = "treatment_group",
       aggregation = "mean",
       highlight = NULL
-    )
+    ))
     expect_s3_class(result, "lollipopResults")
   }
 })

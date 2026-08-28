@@ -2,7 +2,7 @@ title: Brier Score & Integrated Brier Score
 name: brierscore
 jus: '3.0'
 stage: 0
-compilerMode: aggressive
+compilerMode: tame
 children:
   - type: VariableSupplier
     persistentItems: false

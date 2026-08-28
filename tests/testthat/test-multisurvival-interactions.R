@@ -1,11 +1,11 @@
 # Fast, harness-free unit tests for multisurvival interaction helpers.
 # Source only the two self-contained helper files (no devtools::load_all,
 # no R6/jamovi harness needed) — see feedback_testing_strategy.
-suppressMessages({
+suppressWarnings(suppressMessages({
   library(testthat)
   library(survival)
   library(jmvcore)
-})
+}))
 
 # Resolve the repo root robustly regardless of how this file is executed
 # (testthat::test_file() chdirs into the test file's directory before

@@ -1,25 +1,8 @@
-library(testthat)
-
-if (requireNamespace("devtools", quietly = TRUE)) {
-} else {
-    library(ClinicoPathJamoviModule)
-}
-
-# Load data using here::here() to construct the path
-if (requireNamespace("here", quietly = TRUE)) {
-    load(here::here("data", "swimmer_unified_basic.rda"))
-    load(here::here("data", "swimmer_unified_comprehensive.rda"))
-    load(here::here("data", "swimmer_unified_datetime.rda"))
-    load(here::here("data", "swimmer_unified_events.rda"))
-    load(here::here("data", "swimmer_unified_oncology.rda"))
-} else {
-    # Fallback for when here is not installed
-    load("data/swimmer_unified_basic.rda")
-    load("data/swimmer_unified_comprehensive.rda")
-    load("data/swimmer_unified_datetime.rda")
-    load("data/swimmer_unified_events.rda")
-    load("data/swimmer_unified_oncology.rda")
-}
+data("swimmer_unified_basic", package = "ClinicoPath")
+data("swimmer_unified_comprehensive", package = "ClinicoPath")
+data("swimmer_unified_datetime", package = "ClinicoPath")
+data("swimmer_unified_events", package = "ClinicoPath")
+data("swimmer_unified_oncology", package = "ClinicoPath")
 
 
 test_that("swimmerplot runs with minimal options", {

@@ -2,11 +2,11 @@
 #' @importFrom R6 R6Class
 #' @import jmvcore
 #'
-#' @return An \code{R6} class generator object for the \code{treatmentSwitchingClass} backend; used internally by the jamovi analysis wrapper and not called directly.
+#' @return An \code{R6} class generator object for the \code{treatmentswitchingClass} backend; used internally by the jamovi analysis wrapper and not called directly.
 
-treatmentSwitchingClass <- if (requireNamespace("jmvcore")) {
+treatmentswitchingClass <- if (requireNamespace("jmvcore")) {
     R6::R6Class(
-        "treatmentSwitchingClass",
+        "treatmentswitchingClass",
         inherit = treatmentswitchingBase,
         private = list(
             # Private field declarations. R6 locks the private environment

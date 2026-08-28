@@ -1,21 +1,13 @@
 
-library(testthat)
-library(jmvcore)
-
-# Load the package
-if (requireNamespace("devtools", quietly = TRUE)) {
-} else {
-  stop("devtools needed to load package for tests")
-}
-
-test_that("kappaSizeFixedN works for binary outcomes (2 categories)", {
-  results <- kappaSizeFixedN(
+test_that("kappaSizePower works for binary outcomes (2 categories)", {
+  results <- kappaSizePower(
     outcome = "2",
-    kappa0 = 0.60,
+    kappa0 = 0.40,
+    kappa1 = 0.60,
     props = "0.30, 0.70",
     raters = "2",
     alpha = 0.05,
-    n = 100
+    power = 0.80
   )
 
   expect_true(!is.null(results$text1$content))
@@ -25,68 +17,72 @@ test_that("kappaSizeFixedN works for binary outcomes (2 categories)", {
 
   # Explanation should contain the descriptive sentence
   content2 <- gsub("\\s+", " ", results$text2$content)   # wrapped at ~78 columns
-  expect_match(content2, "expected lower bound")
-  expect_match(content2, "100 subjects")
+  expect_match(content2, "required sample size")
+  expect_match(content2, "null hypothesis kappa = 0.4")
+  expect_match(content2, "alternative kappa = 0.6")
   expect_match(content2, "2 raters")
 
   # Summary should contain kappaSize summary output
   summary_content <- results$text_summary$content
   expect_match(summary_content, "Kappa0")
-  expect_match(summary_content, "Lower Expected Limit")
+  expect_match(summary_content, "Power-Based Sample Size")
 })
 
-test_that("kappaSizeFixedN works for 3 categories", {
-  results <- kappaSizeFixedN(
+test_that("kappaSizePower works for 3 categories", {
+  results <- kappaSizePower(
     outcome = "3",
     kappa0 = 0.50,
+    kappa1 = 0.70,
     props = "0.20, 0.30, 0.50",
     raters = "3",
     alpha = 0.05,
-    n = 150
+    power = 0.80
   )
 
   expect_true(nchar(results$text1$content) > 0)
-  expect_match(results$text2$content, "expected lower bound")
-  expect_match(gsub("\\s+", " ", results$text2$content), "150 subjects")
+  expect_match(results$text2$content, "required sample size")
   expect_match(results$text2$content, "3 raters")
 })
 
-test_that("kappaSizeFixedN works for 4 categories", {
-  results <- kappaSizeFixedN(
+test_that("kappaSizePower works for 4 categories", {
+  results <- kappaSizePower(
     outcome = "4",
-    kappa0 = 0.50,
+    kappa0 = 0.40,
+    kappa1 = 0.60,
     props = "0.10, 0.20, 0.30, 0.40",
     raters = "2",
     alpha = 0.05,
-    n = 200
+    power = 0.80
   )
 
   expect_true(nchar(results$text1$content) > 0)
-  expect_match(results$text2$content, "expected lower bound")
+  expect_match(results$text2$content, "required sample size")
 })
 
-test_that("kappaSizeFixedN works for 5 categories", {
-  results <- kappaSizeFixedN(
+test_that("kappaSizePower works for 5 categories", {
+  results <- kappaSizePower(
     outcome = "5",
-    kappa0 = 0.50,
+    kappa0 = 0.40,
+    kappa1 = 0.60,
     props = "0.10, 0.20, 0.20, 0.25, 0.25",
     raters = "2",
     alpha = 0.05,
-    n = 200
+    power = 0.80
   )
 
   expect_true(nchar(results$text1$content) > 0)
-  expect_match(results$text2$content, "expected lower bound")
+  expect_match(results$text2$content, "required sample size")
 })
 
-test_that("kappaSizeFixedN integration with kappaSize package calculations", {
-  results <- kappaSizeFixedN(
+test_that("kappaSizePower integration with kappaSize package calculations", {
+  results <- kappaSizePower(
     outcome = "2",
-    kappa0 = 0.6,
+    kappa0 = 0.4,
+    kappa1 = 0.6,
     props = "0.5, 0.5",
     raters = "2",
     alpha = 0.05,
-    n = 100
+    power = 0.80
   )
 
   expect_true(nchar(results$text1$content) > 0)

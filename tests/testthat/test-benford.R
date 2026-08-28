@@ -1,5 +1,3 @@
-context("Benford's Law Analysis - benfordClass Integration Tests")
-
 # ==============================================================================
 # COMPREHENSIVE INTEGRATION TESTS FOR benfordClass
 #
@@ -11,9 +9,6 @@ context("Benford's Law Analysis - benfordClass Integration Tests")
 #
 # Previous test file tested mathematical principles, not the implementation.
 # ==============================================================================
-
-# Load required packages
-library(jmvcore)
 
 # Test data preparation
 set.seed(42)
@@ -50,11 +45,11 @@ benford_small_data <- data.frame(
 )
 
 benford_with_zeros <- data.frame(
-    values = c(0, 0, 123, 234, 345, 456, 567, 678, 789)
+    values = c(0, 0, 100:147)
 )
 
 benford_with_negatives <- data.frame(
-    values = c(-100, -50, 123, 234, 345, 456, 567)
+    values = c(-100, -50, 100:147)
 )
 
 benford_with_nas <- data.frame(
@@ -153,8 +148,8 @@ test_that("benfordClass correctly identifies manipulated uniform data as High co
     # ASSERTION: Chi-square p-value should be significant (< 0.05)
     chisq_rows <- summary_df[grepl("Chi-square", summary_df$statistic, ignore.case = TRUE), ]
     chisq_interp <- as.character(chisq_rows$interpretation[1])
-    # Extract p-value from interpretation
-    p_match <- regexpr("p-value = [0-9.e-]+", chisq_interp)
+    # Extract p-value from interpretation (handles both numeric and '< 0.0001')
+    p_match <- regexpr("p-value = (< )?[0-9.e-]+", chisq_interp)
     expect_true(p_match > 0,
                 info = "Chi-square row should contain p-value in interpretation")
 })
@@ -245,34 +240,31 @@ test_that("benfordClass uses evidence-based MAD conformity levels from Nigrini (
 test_that("benfordClass warns about small sample sizes", {
     skip_if_not_installed("benford.analysis")
 
-    # Run analysis on small dataset
+    # Run analysis on very small dataset (< 30) -> validation halts with guidance
     result <- benford(
         data = benford_small_data,
         var = values,
         digits = 1
     )
 
-    summary_df <- result$summary$asDF
+    expect_true(!is.null(result))
+    expect_match(result$dataWarning$content, "Insufficient Data")
 
-    # ASSERTION: For very small samples, may show Error row or Unreliable assessment
-    statistic_names <- as.character(summary_df$statistic)
-
-    if (any(grepl("Error", statistic_names, ignore.case = TRUE))) {
-        # Error case: benford.analysis threw an error due to insufficient data
-        error_rows <- summary_df[grepl("Error", summary_df$statistic, ignore.case = TRUE), ]
-        error_msg <- as.character(error_rows$interpretation[1])
-        expect_true(grepl("insufficient|data|observations|valid", error_msg, ignore.case = TRUE),
-                    info = sprintf("Error message should mention data issue, got: %s", error_msg))
-    } else {
-        # Analysis ran: Should flag as unreliable or mention sample size
-        assessment_rows <- summary_df[summary_df$statistic == "Assessment", ]
-        if (nrow(assessment_rows) > 0) {
-            concern_level <- as.character(assessment_rows$value[1])
-            expect_true(grepl("Unreliable|N<100|small", concern_level, ignore.case = TRUE),
-                        info = sprintf("Small samples should be flagged as unreliable, got: %s",
-                                      concern_level))
-        }
-    }
+    # Run analysis on small dataset (30 <= N < 100) -> runs with Unreliable concern level
+    set.seed(42)
+    small_30_100 <- data.frame(values = 10^runif(50, 1, 4))
+    result_small <- benford(
+        data = small_30_100,
+        var = values,
+        digits = 1
+    )
+    summary_small <- result_small$summary$asDF
+    assessment_rows <- summary_small[summary_small$statistic == "Assessment", ]
+    expect_true(nrow(assessment_rows) > 0)
+    concern_level <- as.character(assessment_rows$value[1])
+    expect_true(grepl("Unreliable|N<100|small", concern_level, ignore.case = TRUE),
+                info = sprintf("Small samples (30-99) should be flagged as unreliable, got: %s",
+                              concern_level))
 })
 
 
@@ -282,36 +274,17 @@ test_that("benfordClass warns about small sample sizes", {
 test_that("benfordClass correctly handles zeros (should be excluded)", {
     skip_if_not_installed("benford.analysis")
 
-    # Run analysis
+    # Run analysis on dataset with zero values -> validation flags non-positive values
     result <- benford(
         data = benford_with_zeros,
         var = values,
         digits = 1
     )
 
-    # ASSERTION: Result object exists
+    # ASSERTION: Result object exists and validation warns about zeros
     expect_true(!is.null(result))
-    expect_true(!is.null(result$summary))
-
-    summary_df <- result$summary$asDF
-
-    # ASSERTION: Either analysis runs successfully or validation prevents execution
-    # Both are acceptable for edge cases with limited valid data
-    if (nrow(summary_df) > 0) {
-        statistic_names <- as.character(summary_df$statistic)
-        if (any(grepl("Sample Size", statistic_names, ignore.case = TRUE))) {
-            sample_size_rows <- summary_df[summary_df$statistic == "Sample Size", ]
-            sample_size <- as.numeric(sample_size_rows$value[1])
-
-            # Original data has 9 values, 2 are zeros, so should analyze 7
-            expect_equal(sample_size, 7,
-                         info = "Sample size should exclude zero values")
-        }
-    } else {
-        # Empty summary indicates validation failed (acceptable for edge case)
-        expect_equal(nrow(summary_df), 0,
-                     info = "Empty summary is acceptable when validation fails for insufficient data")
-    }
+    expect_match(result$dataWarning$content, "Invalid Values Detected")
+    expect_match(result$dataWarning$content, "zero values")
 })
 
 
@@ -321,35 +294,17 @@ test_that("benfordClass correctly handles zeros (should be excluded)", {
 test_that("benfordClass correctly handles negative numbers (should be excluded)", {
     skip_if_not_installed("benford.analysis")
 
-    # Run analysis
+    # Run analysis on dataset with negative values -> validation flags non-positive values
     result <- benford(
         data = benford_with_negatives,
         var = values,
         digits = 1
     )
 
-    # ASSERTION: Result object exists
+    # ASSERTION: Result object exists and validation warns about negative numbers
     expect_true(!is.null(result))
-    expect_true(!is.null(result$summary))
-
-    summary_df <- result$summary$asDF
-
-    # ASSERTION: Either analysis runs successfully or validation prevents execution
-    if (nrow(summary_df) > 0) {
-        statistic_names <- as.character(summary_df$statistic)
-        if (any(grepl("Sample Size", statistic_names, ignore.case = TRUE))) {
-            sample_size_rows <- summary_df[summary_df$statistic == "Sample Size", ]
-            sample_size <- as.numeric(sample_size_rows$value[1])
-
-            # Original data has 7 values, 2 are negative, so should analyze 5
-            expect_equal(sample_size, 5,
-                         info = "Sample size should exclude negative values")
-        }
-    } else {
-        # Empty summary indicates validation failed (acceptable for edge case)
-        expect_equal(nrow(summary_df), 0,
-                     info = "Empty summary is acceptable when validation fails for insufficient data")
-    }
+    expect_match(result$dataWarning$content, "Invalid Values Detected")
+    expect_match(result$dataWarning$content, "negative values")
 })
 
 
@@ -359,35 +314,26 @@ test_that("benfordClass correctly handles negative numbers (should be excluded)"
 test_that("benfordClass correctly handles NA values (should be excluded)", {
     skip_if_not_installed("benford.analysis")
 
-    # Run analysis
+    # Run analysis on dataset with NAs
+    set.seed(42)
+    vals <- 10^runif(150, 1, 4)
+    vals[c(5, 10, 15, 20, 25)] <- NA
+    data_with_nas <- data.frame(values = vals)
+
     result <- benford(
-        data = benford_with_nas,
+        data = data_with_nas,
         var = values,
         digits = 1
     )
 
-    # ASSERTION: Result object exists
+    # ASSERTION: Result object exists and Sample Size excludes NA values
     expect_true(!is.null(result))
     expect_true(!is.null(result$summary))
 
     summary_df <- result$summary$asDF
-
-    # ASSERTION: Either analysis runs successfully or validation prevents execution
-    if (nrow(summary_df) > 0) {
-        statistic_names <- as.character(summary_df$statistic)
-        if (any(grepl("Sample Size", statistic_names, ignore.case = TRUE))) {
-            sample_size_rows <- summary_df[summary_df$statistic == "Sample Size", ]
-            sample_size <- as.numeric(sample_size_rows$value[1])
-
-            # Original data has 10 values, 2 are NA, so should analyze 8
-            expect_equal(sample_size, 8,
-                         info = "Sample size should exclude NA values")
-        }
-    } else {
-        # Empty summary indicates validation failed (acceptable for edge case)
-        expect_equal(nrow(summary_df), 0,
-                     info = "Empty summary is acceptable when validation fails for insufficient data")
-    }
+    sample_size_rows <- summary_df[summary_df$statistic == "Sample Size", ]
+    sample_size <- as.numeric(sample_size_rows$value[1])
+    expect_equal(sample_size, 145, info = "Sample size should exclude NA values")
 })
 
 

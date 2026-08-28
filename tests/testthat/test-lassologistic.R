@@ -779,8 +779,8 @@ test_that("cross-validation folds are capped by the minority class", {
   d <- data.frame(
     y  = factor(c(rep("pos", 6), rep("neg", n - 6)), levels = c("neg", "pos")),
     x1 = rnorm(n), x2 = rnorm(n), x3 = rnorm(n))
-  res <- ll(d, outcome = "y", outcomeLevel = "pos",
-            explanatory = c("x1", "x2", "x3"), nfolds = 10)
+  suppressWarnings(res <- ll(d, outcome = "y", outcomeLevel = "pos",
+            explanatory = c("x1", "x2", "x3"), nfolds = 10))
 
   ms <- res$modelSummary$asDF
   expect_equal(as.integer(ms[[2]][ms[[1]] == "CV folds"]), 6L)

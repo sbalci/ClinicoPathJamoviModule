@@ -41,7 +41,7 @@ test_that("decisioncompare handles basic two-test comparison", {
     test3Negative = NULL
   )
   expect_s3_class(result, "decisioncompareResults")
-  expect_true(length(result$results) > 0)
+  expect_gt(result$comparisonTable$rowCount, 0L)
 })
 
 test_that("decisioncompare handles three-test comparison", {

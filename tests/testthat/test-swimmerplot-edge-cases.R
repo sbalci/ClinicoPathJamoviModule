@@ -5,8 +5,6 @@
 # Tests edge cases, error conditions, and robust error handling
 # for the swimmerplot jamovi function
 
-library(testthat)
-
 # Load test data
 data(swimmerplot_test, package = "ClinicoPath")
 data(swimmerplot_small, package = "ClinicoPath")

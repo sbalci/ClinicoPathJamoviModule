@@ -2,12 +2,6 @@
 # Purpose: Automated testing of IHC heterogeneity analysis
 # Coverage: All major features, edge cases, and error handling
 
-library(testthat)
-library(jmvcore)
-
-# Test context setup
-context("IHC Heterogeneity Analysis - Comprehensive Tests")
-
 # Helper function to load test data
 load_test_data <- function(filename) {
   # These CSVs live in data-raw/non-rda/, not data/, and the path must not be

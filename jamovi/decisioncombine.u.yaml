@@ -48,9 +48,11 @@ children:
             name: test3
             maxItemCount: 1
             isTarget: true
+            enable: (test2)
           - type: LevelSelector
             name: test3Positive
             label: Positive Level
+            enable: (test2)
 
   - type: CollapseBox
     label: Display Options
@@ -64,7 +66,7 @@ children:
         label: Frequency tables
       - type: CheckBox
         name: showRecommendation
-        label: Optimal pattern recommendation
+        label: Descriptive strategy ranking
       - type: CheckBox
         name: addPatternToData
         label: Add test pattern to data

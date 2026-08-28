@@ -1,7 +1,7 @@
 ---
 name: waterfall
 title: 'Treatment Response: Patient-Level Burden'
-menuGroup: OncoPath
+menuGroup: OncoPathT
 menuSubgroup: 'Patient Follow-Up Plots'
 menuSubtitle: 'One burden value per patient or visit'
 version: '1.0.7'

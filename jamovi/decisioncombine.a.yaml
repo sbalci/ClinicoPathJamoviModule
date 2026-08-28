@@ -1,7 +1,7 @@
 ---
 name: decisioncombine
 title: Combine Medical Decision Tests
-menuGroup: meddecide
+menuGroup: meddecideT
 menuSubgroup: Decision
 menuSubtitle: Combine and evaluate test patterns
 version: '1.0.7'
@@ -11,26 +11,29 @@ description:
     main: |
         Systematic evaluation of diagnostic test combinations. Analyzes all possible
         test result patterns (2-test: 4 patterns, 3-test: 8 patterns) against a gold
-        standard to identify optimal testing strategies. Calculates sensitivity,
-        specificity, PPV, NPV, and accuracy for each pattern combination.
-        
-    # R:
-    #     dontrun: true
-    #     usage: |
-    #         # Two-test combination analysis (no third test)
-    #         # test3Positive is a required wrapper argument; pass NULL when
-    #         # only two tests are combined.
-    #         result <- decisioncombine(
-    #           data = histopathology,
-    #           gold = "Golden Standart",
-    #           goldPositive = "1",
-    #           test1 = "New Test",
-    #           test1Positive = "1",
-    #           test2 = "Rater 1",
-    #           test2Positive = "1",
-    #           test3Positive = NULL,
-    #           showIndividual = TRUE
-    #         )
+        standard and summarizes named parallel, serial, and majority strategies.
+        Calculates sensitivity, specificity, predictive values, likelihood ratios,
+        accuracy, and uncertainty intervals. Descriptive rankings are sample-dependent
+        analytical summaries, not clinical guides or validated recommendations.
+
+    R:
+        dontrun: true
+        usage: |
+            # Illustrative example only; this is not a clinical guide.
+            data(histopathology)
+            result <- decisioncombine(
+                data = histopathology,
+                gold = "Golden Standart",
+                goldPositive = "1",
+                test1 = "New Test",
+                test1Positive = "1",
+                test2 = "Rater 1",
+                test2Positive = "1",
+                test3 = NULL,
+                test3Positive = NULL,
+                showIndividual = TRUE,
+                showRecommendation = TRUE
+            )
 
 options:
     - name: data
@@ -47,7 +50,9 @@ options:
       description:
           ui: >
             Select the reference standard (e.g., biopsy, final diagnosis).
-            This represents the "truth" for comparison. Must have exactly 2 levels.
+            This represents the reference classification. Binary variables are intended;
+            with additional levels, all non-positive levels are grouped as negative and a
+            warning is shown.
           R: >
             The gold standard reference variable representing true disease status.
 
@@ -186,14 +191,15 @@ options:
             Boolean to display the decision-space (sensitivity vs specificity) scatter plot.
 
     - name: showRecommendation
-      title: Optimal pattern recommendation
+      title: Descriptive strategy ranking
       type: Bool
       default: false
       description:
           ui: >
-            Display recommendation for the optimal test combination pattern based on Youden's J index and overall performance.
+            Rank named testing strategies descriptively by observed Youden's J. This
+            sample-dependent summary is not a clinical guide or validated recommendation.
           R: >
-            Boolean to show optimal pattern recommendation table.
+            Boolean to show the descriptive strategy ranking table.
 
     - name: addPatternToData
       title: Add test pattern to data
@@ -206,7 +212,7 @@ options:
             Boolean to add test pattern column to the dataset.
 
     - name: filterStatistic
-      title: Filter by Statistic
+      title: Filter by statistic
       type: List
       options:
         - name: all
@@ -236,13 +242,15 @@ options:
       default: all
       description:
           ui: >
-            Filter the plots (bar chart, forest plot, and heatmap) to show only the selected
-            diagnostic statistic. The performance tables always show every statistic.
+            Filter the bar chart and heatmap to the selected statistic. The forest plot
+            supports sensitivity, specificity, PPV, NPV, accuracy, LR+, LR-, and diagnostic
+            OR, for which confidence intervals are available. Unsupported forest selections
+            produce an explanatory notice rather than silently showing other statistics.
           R: >
             Character indicating which statistic to display in the plots (default: all).
 
     - name: filterPattern
-      title: Filter by Pattern Type
+      title: Filter by pattern type
       type: List
       options:
         - name: all

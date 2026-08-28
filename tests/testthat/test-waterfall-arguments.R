@@ -4,8 +4,6 @@
 #
 # Tests all argument combinations and option interactions
 
-library(testthat)
-
 # Load test data
 data(waterfall_test, package = "ClinicoPath")
 data(waterfall_spider_test, package = "ClinicoPath")

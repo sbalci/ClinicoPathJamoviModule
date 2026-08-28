@@ -155,19 +155,152 @@ test_that("the cut-off comparison names the best alternative, not the first", {
                             tp2 = 105, fp2 = 10, tn2 = 100, fn2 = 5)    # much better
     rec <- as.character(r$multipleCutoffTable$asDF$recommendation[3])
 
-    expect_match(rec, "Aggressive")          # the cutoff2 label
-    expect_false(grepl("Conservative", rec)) # not the cutoff1 label
+    expect_match(rec, "Higher specificity example")
+    expect_false(grepl("Higher sensitivity example", rec))
 })
 
 
-test_that("a trivial cut-off advantage is not reported as better performance", {
+test_that("cut-off comparisons report point estimates without arbitrary grades", {
     r <- decisioncalculator(TP = TP0, TN = TN0, FP = FP0, FN = FN0, multiplecuts = TRUE,
                             tp1 = 91, fp1 = 30, tn1 = 80, fn1 = 19,
                             tp2 = 90, fp2 = 31, tn2 = 79, fn2 = 20)
     rec <- as.character(r$multipleCutoffTable$asDF$recommendation[3])
 
-    expect_match(rec, "too small to distinguish")
-    expect_false(grepl("performs better than current", rec, fixed = TRUE))
+    expect_match(rec, "Youden's J")
+    expect_false(grepl("excellent|good|fair|poor|optimal", rec, ignore.case = TRUE))
+})
+
+
+test_that("external prevalence is applied consistently to every cut-off row", {
+    p <- 0.05
+    r <- decisioncalculator(
+        TP = TP0, TN = TN0, FP = FP0, FN = FN0,
+        pp = TRUE, pprob = p, multiplecuts = TRUE,
+        tp1 = 100, fp1 = 40, tn1 = 70, fn1 = 10,
+        tp2 = 80, fp2 = 15, tn2 = 95, fn2 = 30)
+    x <- r$multipleCutoffTable$asDF
+
+    bayes <- function(se, sp)
+        p * se / (p * se + (1 - p) * (1 - sp))
+    expect_equal(x$ppv, bayes(x$sensitivity, x$specificity), tolerance = 1e-10)
+    expect_false(isTRUE(all.equal(x$ppv[1], 100 / 140)))
+})
+
+
+test_that("confidence intervals and external prevalence coexist without false PPV intervals", {
+    r <- decisioncalculator(
+        TP = TP0, TN = TN0, FP = FP0, FN = FN0,
+        ci = TRUE, pp = TRUE, pprob = 0.05)
+    ratio <- r$epirTable_ratio$asDF
+    number <- r$epirTable_number$asDF
+
+    expect_true(all(c("Test sensitivity", "Test specificity", "Diagnostic accuracy") %in%
+                        ratio$statsnames))
+    expect_false(any(ratio$statsnames %in% c(
+        "Apparent prevalence", "True prevalence", "Positive predictive value",
+        "Negative predictive value", "Proportion of subjects with outcome ruled out",
+        "Proportion of subjects with outcome ruled in",
+        "False-positive rate among outcome-negative subjects",
+        "False-negative rate among outcome-positive subjects",
+        "False-discovery proportion among test-positive subjects",
+        "False-omission proportion among test-negative subjects"
+    )))
+    expect_true(all(c("Diagnostic odds ratio", "Youden's index") %in% number$statsnames))
+    expect_match(notices_of(r), "Partial confidence intervals")
+})
+
+
+test_that("fractional frequencies retain point estimates but omit binomial intervals", {
+    r <- decisioncalculator(TP = 90.5, TN = 80.5, FP = 30.5, FN = 20.5, ci = TRUE)
+    expect_equal(r$ratioTable$asDF$Sens[1], 90.5 / (90.5 + 20.5), tolerance = 1e-12)
+    expect_equal(nrow(r$epirTable_ratio$asDF), 0L)
+    expect_equal(nrow(r$epirTable_number$asDF), 0L)
+    expect_match(notices_of(r), "Fractional frequencies are used for point estimates only")
+
+    cut <- decisioncalculator(
+        TP = 90.5, TN = 80.5, FP = 30.5, FN = 20.5,
+        multiplecuts = TRUE,
+        tp1 = 100.5, fp1 = 39.5, tn1 = 70.5, fn1 = 9.5,
+        tp2 = 80.5, fp2 = 14.5, tn2 = 95.5, fn2 = 29.5)
+    expect_match(notices_of(cut), "Cut-off intervals omitted for fractional counts")
+    expect_false(grepl("intervals do not overlap|overlaps the current",
+                       cut$multipleCutoffTable$asDF$recommendation[3]))
+})
+
+
+test_that("epiR outcome and error proportions have their correct labels", {
+    x <- decisioncalculator(TP = TP0, TN = TN0, FP = FP0, FN = FN0,
+                            ci = TRUE)$epirTable_ratio$asDF$statsnames
+    expect_true(all(c(
+        "Proportion of subjects with outcome ruled out",
+        "Proportion of subjects with outcome ruled in",
+        "False-positive rate among outcome-negative subjects",
+        "False-negative rate among outcome-positive subjects",
+        "False-discovery proportion among test-positive subjects",
+        "False-omission proportion among test-negative subjects"
+    ) %in% x))
+})
+
+
+test_that("undefined F1 and MCC are missing rather than reported as zero", {
+    x <- decisioncalculator(TP = 0, FP = 0, TN = 80, FN = 20)$advancedMetricsTable$asDF
+    expect_true(is.na(x$f1Score[1]))
+    expect_true(is.na(x$mcc[1]))
+})
+
+
+test_that("illustrative defaults use one cohort and are explicitly non-clinical", {
+    spec <- yaml::read_yaml(testthat::test_path("..", "..", "jamovi",
+                                                "decisioncalculator.a.yaml"))
+    opts <- setNames(spec$options, vapply(spec$options, `[[`, character(1), "name"))
+    n0 <- opts$TP$default + opts$FP$default + opts$TN$default + opts$FN$default
+    n1 <- opts$tp1$default + opts$fp1$default + opts$tn1$default + opts$fn1$default
+    n2 <- opts$tp2$default + opts$fp2$default + opts$tn2$default + opts$fn2$default
+    expect_equal(c(n0, n1, n2), c(220, 220, 220))
+    expect_identical(opts$showWelcome$default, FALSE)
+    expect_match(spec$description$main, "illustrative only")
+    expect_match(opts$multiplecuts$description$ui, "not clinical guides")
+})
+
+
+test_that("UI dependencies, references, and theme behavior match the repaired contract", {
+    u_path <- testthat::test_path("..", "..", "jamovi", "decisioncalculator.u.yaml")
+    u_text <- paste(readLines(u_path), collapse = "\n")
+    expect_false(grepl("enable: \\(!pp\\)|enable: \\(!ci", u_text))
+    expect_match(u_text, "enable: \\(pp\\)")
+
+    r_spec <- yaml::read_yaml(testthat::test_path("..", "..", "jamovi",
+                                                 "decisioncalculator.r.yaml"))
+    items <- setNames(r_spec$items, vapply(r_spec$items, `[[`, character(1), "name"))
+    expect_true("ci" %in% items$epirTable_ratio$clearWith)
+    expect_true(all(c("TP", "FP", "TN", "FN", "pp", "pprob") %in%
+                        items$multipleCutoffTable$clearWith))
+    expect_true("fagan" %in% items$notices$clearWith)
+    expect_true("fagan" %in% items$faganSummary$clearWith)
+    expect_identical(
+        items$ratioTable$columns[[which(vapply(
+            items$ratioTable$columns,
+            function(column) identical(column$name, "AccurT"),
+            logical(1)
+        ))]]$title,
+        "Sample Accuracy"
+    )
+    expect_identical(
+        items$multipleCutoffTable$columns[[which(vapply(
+            items$multipleCutoffTable$columns,
+            function(column) identical(column$name, "accuracy"),
+            logical(1)
+        ))]]$title,
+        "Sample Accuracy"
+    )
+    expect_identical(r_spec$refs[[1]], "ClinicoPathJamoviModule")
+    expect_false(any(c("sensspecwiki", "Fagan2") %in% unlist(r_spec)))
+
+    backend <- paste(readLines(testthat::test_path("..", "..", "R",
+                                                  "decisioncalculator.b.R")), collapse = "\n")
+    expect_match(backend, "plot1 <- plot1 \\+ ggtheme")
+    expect_false(grepl("YOUDEN_EXCELLENT|ACCURACY_EXCELLENT|>25 strong|>0.8 excellent",
+                       backend, ignore.case = TRUE))
 })
 
 
@@ -189,18 +322,66 @@ test_that("cut-offs describing different cohort sizes are flagged", {
 
 test_that("invalid counts are reported through notices, not silently computed", {
     for (case in list(
-        list(args = list(TP = -10, TN = 80, FP = 20, FN = 10), notice = "Negative Counts Detected"),
-        list(args = list(TP = 0, TN = 0, FP = 0, FN = 0),      notice = "All Counts Zero"),
-        list(args = list(TP = Inf, TN = 80, FP = 20, FN = 10), notice = "Non-Finite Counts"),
-        list(args = list(TP = 0, TN = 100, FP = 50, FN = 0),   notice = "No Diseased Subjects"),
-        list(args = list(TP = 100, TN = 0, FP = 0, FN = 50),   notice = "No Healthy Subjects"))) {
+        list(args = list(TP = -10, TN = 80, FP = 20, FN = 10), notice = "Negative counts detected"),
+        list(args = list(TP = 0, TN = 0, FP = 0, FN = 0),      notice = "All counts are zero"),
+        list(args = list(TP = Inf, TN = 80, FP = 20, FN = 10), notice = "Non-finite counts"),
+        list(args = list(TP = 0, TN = 100, FP = 50, FN = 0),   notice = "No reference-positive subjects"),
+        list(args = list(TP = 100, TN = 0, FP = 0, FN = 50),   notice = "No reference-negative subjects"))) {
         res <- do.call(decisioncalculator, case$args)
         expect_match(notices_of(res), case$notice, info = case$notice)
     }
 })
 
 
-test_that("pprob is bounded by the wrapper, so the backend's own check is unreachable", {
+test_that("non-finite illustrative cut-off counts are rejected through notices", {
+    cutoff_counts <- c("tp1", "fp1", "tn1", "fn1", "tp2", "fp2", "tn2", "fn2")
+    for (count_name in cutoff_counts) {
+        args <- list(multiplecuts = TRUE)
+        args[[count_name]] <- Inf
+        result <- do.call(decisioncalculator, args)
+        expect_match(notices_of(result), "Invalid cut-off inputs", info = count_name)
+        expect_match(notices_of(result), "finite numbers", info = count_name)
+    }
+})
+
+
+test_that("extreme prevalence and very sparse groups produce strong warnings", {
+    extreme <- decisioncalculator(TP = 90, TN = 80, FP = 30, FN = 20,
+                                  pp = TRUE, pprob = 0.001)
+    extreme_notice <- notices_of(extreme)
+    expect_match(extreme_notice, "STRONG WARNING: Extreme prevalence")
+    expect_match(extreme_notice, "0.1%")
+    expect_lt(
+        regexpr("STRONG WARNING", extreme_notice)[1],
+        regexpr("INFO:", extreme_notice)[1],
+        label = "strong warnings should be displayed before informational notices"
+    )
+
+    sparse <- decisioncalculator(TP = 1, TN = 1, FP = 1, FN = 1)
+    sparse_notice <- notices_of(sparse)
+    expect_match(sparse_notice, "STRONG WARNING: Very sparse reference groups")
+    expect_match(sparse_notice, "not a clinical adequacy threshold")
+})
+
+
+test_that("population prevalence is scoped to prevalence-dependent measures", {
+    spec <- yaml::read_yaml(testthat::test_path("..", "..", "jamovi",
+                                                "decisioncalculator.a.yaml"))
+    opts <- setNames(spec$options, vapply(spec$options, `[[`, character(1), "name"))
+    expect_match(opts$pp$description$ui, "sample accuracy")
+    expect_match(opts$pp$description$ui, "predictive values")
+
+    result <- decisioncalculator(TP = TP0, TN = TN0, FP = FP0, FN = FN0,
+                                 pp = TRUE, pprob = 0.05, fnote = TRUE)
+    expect_equal(result$ratioTable$asDF$AccurT[1],
+                 (TP0 + TN0) / (TP0 + TN0 + FP0 + FN0), tolerance = 1e-12)
+    table_text <- gsub("[[:space:]]+", " ", result$ratioTable$asString())
+    expect_match(table_text, "Sample Accuracy")
+    expect_match(table_text, "not at the supplied population prevalence")
+})
+
+
+test_that("pprob bounds are owned by the wrapper without dead backend validation", {
     # jamovi/decisioncalculator.a.yaml declares min: 0.001 / max: 0.999, enforced by jmvcore
     # in the generated wrapper before .run() is reached.
     expect_error(decisioncalculator(TP = TP0, TN = TN0, FP = FP0, FN = FN0,
@@ -209,6 +390,10 @@ test_that("pprob is bounded by the wrapper, so the backend's own check is unreac
     expect_error(decisioncalculator(TP = TP0, TN = TN0, FP = FP0, FN = FN0,
                                     pp = TRUE, pprob = 1),
                  "pprob must be between")
+
+    backend <- paste(readLines(testthat::test_path("..", "..", "R",
+                                                   "decisioncalculator.b.R")), collapse = "\n")
+    expect_false(grepl("Invalid prior probability", backend, fixed = TRUE))
 })
 
 
@@ -218,7 +403,7 @@ test_that("a zero cell continuity-corrects the ratios and says so", {
 
     expect_true(is.finite(x$LRP[1]))            # not Inf
     expect_equal(x$Spec[1], 1, tolerance = 1e-12)  # the table keeps the uncorrected value
-    expect_match(notices_of(r), "Continuity Correction Applied")
+    expect_match(notices_of(r), "Continuity correction applied")
     # and it discloses that the intervals are NOT corrected
     expect_match(notices_of(r), "not continuity-corrected")
 })

@@ -52,8 +52,8 @@ test_that("smoothed hazard curve recovers a constant hazard", {
     env$print <- function(x, ...) { captured <<- x; invisible(x) }
     environment(f) <- env
 
-    f(image = list(state = list(name1time = "mytime", name2outcome = "myoutcome",
-                                cleanData = d)))
+    suppressWarnings(f(image = list(state = list(name1time = "mytime", name2outcome = "myoutcome",
+                                cleanData = d))))
 
     expect_false(is.null(captured))
     haz <- captured$data$hazard

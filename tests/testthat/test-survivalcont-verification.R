@@ -289,7 +289,7 @@ test_that("Regression: plot axis extents follow the selected time unit", {
   on.exit(grDevices::dev.off(), add = TRUE)
   for (plot_name in c("plot4", "plot5", "plot2", "plot3", "plot6", "plot7")) {
     expect_no_error(
-      a$.__enclos_env__$private[[paste0(".", plot_name)]](a$results[[plot_name]], NULL, NULL)
+      suppressWarnings(a$.__enclos_env__$private[[paste0(".", plot_name)]](a$results[[plot_name]], NULL, NULL))
     )
   }
 })
@@ -650,10 +650,10 @@ test_that("Edge cases: small sample size and single/multiple cut-offs handled sa
   )
 
   expect_no_error({
-    res <- run_survivalcont(
+    res <- suppressWarnings(run_survivalcont(
       data = small_df, elapsedtime = "time", outcome = "status",
       contexpl = "marker", findcut = TRUE
-    )
+    ))
   })
   # Fewer than 10 events: cut-off determination must stay suppressed and said so.
   expect_equal(res$rescutTable$rowCount, 0L)

@@ -39,8 +39,6 @@ extract_plot <- function(result, plot_name = "plot") {
 # Tests that each of the 8 decision paths renders the correct plot type
 # ============================================================================
 
-context("statsplot2 - Dispatch Path Visual Tests")
-
 test_that("Path 1: Independent Factor × Continuous renders ggbetweenstats", {
   skip_if_not_installed('jmvReadWrite')
   skip_if_not_installed_vdiffr()
@@ -262,11 +260,8 @@ test_that("Path 8: Repeated Continuous × Factor renders fallback plot", {
 })
 
 # ============================================================================
-# PART 2: STATISTICAL APPROACH VISUAL TESTS (4 baselines)
-# Tests that parametric, nonparametric, robust, and Bayesian render correctly
+# PART 2: STATISTICAL APPROACH VISUAL TESTS (Parametric, Nonparametric, Robust)
 # ============================================================================
-
-context("statsplot2 - Statistical Approach Visual Tests")
 
 test_that("Parametric approach renders correctly", {
   skip_if_not_installed_vdiffr()
@@ -380,11 +375,8 @@ test_that("Bayesian approach renders correctly", {
 })
 
 # ============================================================================
-# PART 3: GROUPED PLOT VISUAL TESTS (3 baselines)
-# Tests the grvar (grouping variable) parameter
+# PART 3: GROUPED PLOT VISUAL TESTS (Facetting)
 # ============================================================================
-
-context("statsplot2 - Grouped Plot Visual Tests")
 
 test_that("Grouped plot with gender split renders correctly", {
   skip_if_not_installed_vdiffr()
@@ -474,11 +466,8 @@ test_that("Grouped repeated measures renders correctly", {
 })
 
 # ============================================================================
-# PART 4: ALLUVIAL STYLE VISUAL TESTS (2 baselines)
-# Tests both ggalluvial (t1) and easyalluvial (t2) styles
+# PART 4: ALLUVIAL STYLE VISUAL TESTS (Repeated Measures Factor × Factor)
 # ============================================================================
-
-context("statsplot2 - Alluvial Style Visual Tests")
 
 test_that("Alluvial style t1 (ggalluvial) renders correctly", {
   skip_if_not_installed_vdiffr()
@@ -535,11 +524,8 @@ test_that("Alluvial style t2 (easyalluvial) renders correctly", {
 })
 
 # ============================================================================
-# PART 5: EDGE CASE VISUAL TESTS (5 baselines)
-# Tests visual rendering under challenging conditions
+# PART 5: EDGE CASE VISUAL TESTS
 # ============================================================================
-
-context("statsplot2 - Edge Case Visual Tests")
 
 test_that("Two groups only renders correctly", {
   skip_if_not_installed_vdiffr()
@@ -683,11 +669,8 @@ test_that("Skewed distribution with nonparametric renders correctly", {
 })
 
 # ============================================================================
-# PART 6: CLINICAL SCENARIO VISUAL TESTS (4 baselines)
-# Real-world clinical research scenarios
+# PART 6: CLINICAL SCENARIO VISUAL TESTS
 # ============================================================================
-
-context("statsplot2 - Clinical Scenario Visual Tests")
 
 test_that("Clinical: Treatment response comparison renders correctly", {
   skip_if_not_installed_vdiffr()

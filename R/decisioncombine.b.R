@@ -88,36 +88,56 @@ decisioncombineClass <- if (requireNamespace("jmvcore")) {
                 num / den
             },
 
-            # TODO [meddecide audit 2026-05-14] - see docs/audit/MODULE_AUDIT_REPORT_20260514-1847.md
-            #   [hygiene/notices] custom private$.addNotice/private$.renderNotices duplicates jmvcore::Notice - consolidate
-            #     reference impl: decisioncalculator.b.R (17 jmvcore::Notice uses)
-            #   [hygiene/jmvcore] ~5 bare stop() calls - /jamovify-function decisioncombine --pattern=error --apply
-            #   [hygiene/term] private$.escapeVariableNames (~L59) is similar to jmvcore::composeTerm - swap to jmvcore
-            #   [integration] 72 declared outputs vs 21 setters (3.4×) - many pattern-specific placeholders
-            #     run /check-function-full decisioncombine to verify 2-test/3-test scenarios
-            #   [hygiene/notices] low-cell-count STRONG_WARNING is not quantified - add actual counts
-            #   [i18n] 0 .() wraps; bootstrap jamovi/i18n/ then /prepare-translation decisioncombine
-            #   [statistical-validation] /review-function decisioncombine - pattern enumeration math
-            #   [testing] no tests/testthat/test-decisioncombine.R
+            .optionSelected = function(value) {
+                !is.null(value) && length(value) == 1L && nzchar(value)
+            },
+
+            .updateIndividualVisibility = function() {
+                show <- isTRUE(self$options$showIndividual)
+                self$results$individualTest1$setVisible(
+                    show && private$.optionSelected(self$options$test1))
+                self$results$individualTest2$setVisible(
+                    show && private$.optionSelected(self$options$test2))
+                self$results$individualTest3$setVisible(
+                    show && private$.optionSelected(self$options$test3))
+            },
+
+            .clearDynamicResults = function() {
+                for (name in c("combinationTable", "combinationTableCI",
+                               "combinationTableCIRatios", "goldFreqTable",
+                               "crossTabTable", "recommendationTable")) {
+                    item <- private$.resultsItem(name)
+                    if (!is.null(item) && item$rowCount > 0) {
+                        item$deleteRows()
+                    }
+                }
+
+                for (i in seq_len(3L)) {
+                    group <- self$results[[paste0("individualTest", i)]]
+                    cont <- group[[paste0("test", i, "Contingency")]]
+                    stats <- group[[paste0("test", i, "Stats")]]
+                    cont$setRow(rowKey = "Positive", values = list(
+                        goldPos = NA_integer_, goldNeg = NA_integer_, total = NA_integer_))
+                    cont$setRow(rowKey = "Negative", values = list(
+                        goldPos = NA_integer_, goldNeg = NA_integer_, total = NA_integer_))
+                    cont$setRow(rowKey = "Total", values = list(
+                        goldPos = NA_integer_, goldNeg = NA_integer_, total = NA_integer_))
+                    for (key in c("sens", "spec", "ppv", "npv")) {
+                        stats$setRow(rowKey = key, values = list(estimate = NA_real_))
+                    }
+                }
+
+                for (name in c("barPlot", "heatmapPlot", "forestPlot",
+                               "decisionTreePlot")) {
+                    item <- private$.resultsItem(name)
+                    if (!is.null(item)) {
+                        item$setState(list(valid = FALSE))
+                    }
+                }
+            },
 
             .init = function() {
-                # Minimal initialization
                 private$.noticeList <- list()
-
-                # Control visibility of individual test performance groups
-                showIndividual <- self$options$showIndividual
-
-                # Test 1 visibility
-                hasTest1 <- !is.null(self$options$test1) && self$options$test1 != ""
-                self$results$individualTest1$setVisible(showIndividual && hasTest1)
-
-                # Test 2 visibility
-                hasTest2 <- !is.null(self$options$test2) && self$options$test2 != ""
-                self$results$individualTest2$setVisible(showIndividual && hasTest2)
-
-                # Test 3 visibility
-                hasTest3 <- !is.null(self$options$test3) && self$options$test3 != ""
-                self$results$individualTest3$setVisible(showIndividual && hasTest3)
 
                 # Initialize fixed-structure tables for Test 1, 2, 3
                 for (i in seq_len(3L)) {
@@ -136,10 +156,9 @@ decisioncombineClass <- if (requireNamespace("jmvcore")) {
                 }
             },
             .run = function() {
-                # Main analysis flow - fail fast approach
-
-                # Reset notices at start of each run to prevent accumulation across re-runs
                 private$.noticeList <- list()
+                private$.clearDynamicResults()
+                private$.updateIndividualVisibility()
 
                 # .run() has three early returns (failed validation, failed data prep, and
                 # incomplete variable selection). Rendering only at the bottom meant every
@@ -160,25 +179,21 @@ decisioncombineClass <- if (requireNamespace("jmvcore")) {
                     return() # Halt execution if validation failed
                 }
 
-                # Step 2: Prepare data
-                data_prep <- private$.prepareData()
-
-                # Halt if data preparation failed
-                if (is.null(data_prep)) {
-                    return()
+                # Each individual test uses its own gold/test complete cases. An optional
+                # co-test must never alter another test's diagnostic estimates.
+                if (self$options$showIndividual) {
+                    for (test_num in seq_len(3L)) {
+                        test_option <- self$options[[paste0("test", test_num)]]
+                        if (private$.optionSelected(test_option)) {
+                            private$.analyzeIndividualTest(test_num)
+                        }
+                    }
                 }
 
-                # Step 3: Individual test analysis (if requested)
-                if (self$options$showIndividual) {
-                    if (!is.null(self$options$test1) && self$options$test1 != "") {
-                        private$.analyzeIndividualTest(data_prep, 1)
-                    }
-                    if (!is.null(self$options$test2) && self$options$test2 != "") {
-                        private$.analyzeIndividualTest(data_prep, 2)
-                    }
-                    if (!is.null(self$options$test3) && self$options$test3 != "") {
-                        private$.analyzeIndividualTest(data_prep, 3)
-                    }
+                # Combination rules require joint complete cases across every selected test.
+                data_prep <- private$.prepareData()
+                if (is.null(data_prep)) {
+                    return()
                 }
 
                 # Step 4: Combination analysis
@@ -198,6 +213,8 @@ decisioncombineClass <- if (requireNamespace("jmvcore")) {
                 if (self$options$addPatternToData) {
                     private$.addPatternColumn(data_prep)
                 }
+
+                private$.setPlotStates()
 
                 # Notices are rendered by the on.exit handler registered above.
             },
@@ -257,7 +274,7 @@ decisioncombineClass <- if (requireNamespace("jmvcore")) {
                 }
 
                 # Check if we have at least 2 tests for combination analysis
-                has_test2 <- !is.null(self$options$test2) && self$options$test2 != ""
+                has_test2 <- private$.optionSelected(self$options$test2)
 
                 if (has_test2) {
                     if (is.null(self$options$test2Positive) || self$options$test2Positive == "") {
@@ -267,12 +284,37 @@ decisioncombineClass <- if (requireNamespace("jmvcore")) {
                 }
 
                 # Check test3 only if provided
-                has_test3 <- !is.null(self$options$test3) && self$options$test3 != ""
+                has_test3 <- private$.optionSelected(self$options$test3)
+                if (has_test3 && !has_test2) {
+                    private$.addNotice(
+                        "ERROR", "Test 2 Required Before Test 3",
+                        "Test 3 cannot be combined without Test 2. Select Test 2 and its positive level, or remove Test 3."
+                    )
+                    return(FALSE)
+                }
                 if (has_test3) {
                     if (is.null(self$options$test3Positive) || self$options$test3Positive == "") {
                         private$.addNotice("ERROR", "No Test 3 Positive Level", "Please select the positive level for Test 3.")
                         return(FALSE)
                     }
+                }
+
+                selected_vars <- c(
+                    self$options$gold,
+                    self$options$test1,
+                    if (has_test2) self$options$test2,
+                    if (has_test3) self$options$test3
+                )
+                duplicated_vars <- unique(selected_vars[duplicated(selected_vars)])
+                if (length(duplicated_vars) > 0) {
+                    private$.addNotice(
+                        "ERROR", "Variables Must Be Distinct",
+                        sprintf(
+                            "The reference standard and tests must use different variables. Select a different variable for: %s.",
+                            paste(duplicated_vars, collapse = ", ")
+                        )
+                    )
+                    return(FALSE)
                 }
 
                 # Minimum data requirement
@@ -301,8 +343,51 @@ decisioncombineClass <- if (requireNamespace("jmvcore")) {
                     vars_needed <- c(vars_needed, self$options$test3)
                 }
 
+                required_levels <- list(
+                    gold = list(
+                        var = goldVar,
+                        level = self$options$goldPositive,
+                        label = "gold standard"
+                    ),
+                    test1 = list(
+                        var = test1Var,
+                        level = self$options$test1Positive,
+                        label = "Test 1"
+                    )
+                )
+                if (private$.optionSelected(self$options$test2)) {
+                    required_levels$test2 <- list(
+                        var = self$options$test2,
+                        level = self$options$test2Positive,
+                        label = "Test 2"
+                    )
+                }
+                if (private$.optionSelected(self$options$test3)) {
+                    required_levels$test3 <- list(
+                        var = self$options$test3,
+                        level = self$options$test3Positive,
+                        label = "Test 3"
+                    )
+                }
+
                 # Get subset of data
                 subset_data <- self$data[, vars_needed, drop = FALSE]
+
+                # Validate levels against all observed values before joint complete-case
+                # deletion. A level must not appear absent merely because another test is NA.
+                for (rl in required_levels) {
+                    available <- unique(stats::na.omit(as.character(subset_data[[rl$var]])))
+                    if (!rl$level %in% available) {
+                        private$.addNotice(
+                            "ERROR", "Missing Level",
+                            sprintf(
+                                'The specified positive level "%s" is not present in variable "%s" (%s). Please select a level that exists in the data.',
+                                rl$level, rl$var, rl$label
+                            )
+                        )
+                        return(NULL)
+                    }
+                }
 
                 # Remove NAs
                 n_before <- nrow(subset_data)
@@ -322,7 +407,7 @@ decisioncombineClass <- if (requireNamespace("jmvcore")) {
                     private$.addNotice(
                         "WARNING",
                         sprintf("Removed %d case(s) with missing values", n_removed),
-                        sprintf("Complete-case analysis uses %d of %d cases (%.1f%%). Cases missing the gold standard or any selected test were excluded. If the data are not missing completely at random this can bias every estimate below; consider investigating the pattern of missingness.",
+                        sprintf("Combination analysis uses %d of %d cases (%.1f%%). Cases missing the gold standard or any selected test were excluded. Individual-test tables use their own pairwise-complete denominators. If data are not missing completely at random, investigate the missingness pattern.",
                                 n_after, n_before, 100 * n_after / n_before)
                     )
                 }
@@ -330,32 +415,6 @@ decisioncombineClass <- if (requireNamespace("jmvcore")) {
                 # Convert to factors
                 for (var in vars_needed) {
                     mydata[[var]] <- forcats::as_factor(mydata[[var]])
-                }
-
-                # Validate that specified positive levels exist in data
-                required_levels <- list(
-                    gold = list(var = goldVar, level = self$options$goldPositive, label = "gold standard"),
-                    test1 = list(var = test1Var, level = self$options$test1Positive, label = "Test 1")
-                )
-
-                if (!is.null(self$options$test2) && self$options$test2 != "") {
-                    required_levels$test2 <- list(var = self$options$test2, level = self$options$test2Positive, label = "Test 2")
-                }
-                if (!is.null(self$options$test3) && self$options$test3 != "") {
-                    required_levels$test3 <- list(var = self$options$test3, level = self$options$test3Positive, label = "Test 3")
-                }
-
-                for (rl in required_levels) {
-                    if (!rl$level %in% levels(mydata[[rl$var]])) {
-                        private$.addNotice(
-                            "ERROR", "Missing Level",
-                            sprintf(
-                                'The specified positive level "%s" is not present in variable "%s" (%s). Please select a level that exists in the data.',
-                                rl$level, rl$var, rl$label
-                            )
-                        )
-                        return(NULL)
-                    }
                 }
 
                 # A gold standard with only one observed level cannot support specificity
@@ -377,7 +436,7 @@ decisioncombineClass <- if (requireNamespace("jmvcore")) {
                 # third-category results into the negative arm, which inflates specificity
                 # and NPV exactly as it would in decision/decisioncompare.
                 for (rl in required_levels) {
-                    lv <- levels(mydata[[rl$var]])
+                    lv <- unique(stats::na.omit(as.character(subset_data[[rl$var]])))
                     if (length(lv) > 2) {
                         others <- setdiff(lv, rl$level)
                         shown <- if (length(others) <= 5) paste(others, collapse = ", ")
@@ -452,7 +511,7 @@ decisioncombineClass <- if (requireNamespace("jmvcore")) {
 
                 return(mydata)
             },
-            .analyzeIndividualTest = function(data_prep, test_num) {
+            .analyzeIndividualTest = function(test_num) {
                 # Analyze individual test performance
 
                 # Check if epiR package is available
@@ -464,14 +523,58 @@ decisioncombineClass <- if (requireNamespace("jmvcore")) {
                     return()
                 }
 
-                test_var_name <- paste0("test", test_num, "Variable2")
-
-                if (!test_var_name %in% names(data_prep)) {
+                test_var <- self$options[[paste0("test", test_num)]]
+                test_positive <- self$options[[paste0("test", test_num, "Positive")]]
+                if (!private$.optionSelected(test_var) ||
+                    !private$.optionSelected(test_positive)) {
                     return()
                 }
 
+                pair_data <- self$data[, c(self$options$gold, test_var), drop = FALSE]
+                keep <- stats::complete.cases(pair_data)
+                n_total <- nrow(pair_data)
+                n_used <- sum(keep)
+                if (n_used == 0) {
+                    private$.addNotice(
+                        "WARNING", sprintf("Test %d Has No Complete Cases", test_num),
+                        sprintf(
+                            "Test %d cannot be summarized because no case has both the test and reference-standard result.",
+                            test_num
+                        )
+                    )
+                    return()
+                }
+                if (n_used < n_total) {
+                    private$.addNotice(
+                        "INFO", sprintf("Test %d Pairwise Denominator", test_num),
+                        sprintf(
+                            "Individual Test %d statistics use %d of %d cases with both the test and reference standard observed.",
+                            test_num, n_used, n_total
+                        )
+                    )
+                }
+
+                pair_data <- pair_data[keep, , drop = FALSE]
+                data_prep <- data.frame(
+                    goldVariable2 = factor(
+                        ifelse(
+                            as.character(pair_data[[self$options$gold]]) ==
+                                self$options$goldPositive,
+                            "Positive", "Negative"
+                        ),
+                        levels = c("Positive", "Negative")
+                    ),
+                    testVariable2 = factor(
+                        ifelse(
+                            as.character(pair_data[[test_var]]) == test_positive,
+                            "Positive", "Negative"
+                        ),
+                        levels = c("Positive", "Negative")
+                    )
+                )
+
                 # Create contingency table
-                cont_table <- table(data_prep[[test_var_name]], data_prep$goldVariable2)
+                cont_table <- table(data_prep$testVariable2, data_prep$goldVariable2)
 
                 # Validate table structure
                 if (!all(dim(cont_table) == c(2, 2))) {
@@ -1050,43 +1153,44 @@ decisioncombineClass <- if (requireNamespace("jmvcore")) {
                     return()
                 }
 
-                # Convert to data frame
                 table_df <- combTable$asDF
 
-                # Find pattern with highest Youden's J
-                # Prefer patterns with reasonable cell counts to avoid unstable choices
-                table_df$min_cell <- apply(table_df[, c("tp", "fp", "fn", "tn")], 1, min)
-
-                # "Serial (all pos)" and the all-positive pattern ("+/+" / "+/+/+") are the
-                # same rule under two names. Counting both would manufacture a tie and
-                # inflate the number of candidates reported below, so collapse rows that
-                # share a 2x2 -- keeping the named strategy, which is the more useful label.
-                signature <- paste(table_df$tp, table_df$fp, table_df$fn, table_df$tn, sep = "|")
-                is_strategy <- if ("rowType" %in% names(table_df)) {
-                    table_df$rowType %in% c("Strategy", "Single test")
-                } else rep(FALSE, nrow(table_df))
-                # Sort strategies first within each signature, then drop the duplicates, so
-                # the surviving row carries the named-strategy label rather than "+/+/+".
-                table_df <- table_df[order(signature, !is_strategy), , drop = FALSE]
-                table_df <- table_df[!duplicated(paste(table_df$tp, table_df$fp,
-                                                       table_df$fn, table_df$tn,
-                                                       sep = "|")), , drop = FALSE]
-
-                stable_df <- table_df[table_df$min_cell >= 5, ]
-                if (nrow(stable_df) == 0) {
-                    stable_df <- table_df # fallback to all if none meet threshold
-                    stability_note <- "No pattern meets the minimum cell count of 5; recommendation is based on all patterns (may be unstable). "
+                # Exact +/- rows describe mutually exclusive observed result strata. Only
+                # named strategies (or the single-test rule) are actionable classifiers and
+                # are therefore eligible for the descriptive ranking.
+                if ("rowType" %in% names(table_df)) {
+                    candidates <- table_df[
+                        table_df$rowType %in% c("Strategy", "Single test"),
+                        , drop = FALSE
+                    ]
                 } else {
-                    stability_note <- ""
+                    candidates <- table_df
+                }
+                candidates <- candidates[is.finite(candidates$youden), , drop = FALSE]
+                candidates$min_cell <- apply(
+                    candidates[, c("tp", "fp", "fn", "tn"), drop = FALSE],
+                    1,
+                    min
+                )
+                candidates <- candidates[
+                    !duplicated(paste(candidates$tp, candidates$fp,
+                                      candidates$fn, candidates$tn, sep = "|")),
+                    , drop = FALSE
+                ]
+                if (nrow(candidates) == 0) {
+                    private$.addNotice(
+                        "WARNING", "Strategy Ranking Unavailable",
+                        "No named strategy has an estimable Youden index."
+                    )
+                    return()
                 }
 
-                max_youden_idx <- which.max(stable_df$youden)
-                best_pattern <- stable_df[max_youden_idx, ]
+                max_youden_idx <- which.max(candidates$youden)
+                best_pattern <- candidates[max_youden_idx, , drop = FALSE]
 
                 # An exact tie was previously broken by whichever row came first, silently.
-                tied <- stable_df$pattern[
-                    !is.na(stable_df$youden) &
-                        abs(stable_df$youden - best_pattern$youden) < 1e-9]
+                tied <- candidates$pattern[
+                    abs(candidates$youden - best_pattern$youden) < 1e-9]
                 tie_note <- if (length(tied) > 1) {
                     sprintf("%d rules tie on Youden's J (%s); \"%s\" is shown only because it comes first. ",
                             length(tied), paste(tied, collapse = ", "), best_pattern$pattern)
@@ -1096,15 +1200,31 @@ decisioncombineClass <- if (requireNamespace("jmvcore")) {
                 # and no test, so on data with no real signal it still names a winner. Say
                 # how many rules competed, and whether the winner separates from the next
                 # one by more than the width of its own interval.
-                n_candidates <- nrow(stable_df)
+                n_candidates <- nrow(candidates)
                 runner_up <- if (n_candidates > 1) {
-                    sort(stable_df$youden, decreasing = TRUE)[2]
+                    sort(candidates$youden, decreasing = TRUE)[2]
                 } else NA_real_
 
                 sel_note <- sprintf(
-                    "Selected by ranking %d candidate rule(s); no significance test or multiplicity correction is applied to that comparison. ",
+                    "Descriptive ranking of %d named candidate rule(s); every estimable rule was included, and no significance test or multiplicity correction is applied. ",
                     n_candidates
                 )
+
+                sparse_note <- ""
+                if (best_pattern$min_cell < 5) {
+                    sparse_note <- sprintf(
+                        "The highest-ranked rule has a smallest 2x2 cell count of %d, so its point estimate may be unstable. ",
+                        best_pattern$min_cell
+                    )
+                    private$.addNotice(
+                        "STRONG_WARNING", "Sparse Highest-Ranked Strategy",
+                        sprintf(
+                            'Strategy "%s" has cells TP=%d, FP=%d, FN=%d, TN=%d. It remains in the ranking, but its apparent performance may be unstable.',
+                            best_pattern$pattern, best_pattern$tp, best_pattern$fp,
+                            best_pattern$fn, best_pattern$tn
+                        )
+                    )
+                }
 
                 separation_note <- ""
                 if (is.finite(runner_up)) {
@@ -1124,10 +1244,10 @@ decisioncombineClass <- if (requireNamespace("jmvcore")) {
 
                 # Generate rationale
                 rationale <- sprintf(
-                    "%s%s%sHighest Youden's J (%.3f) among the rules compared. %s",
-                    stability_note,
+                    "%s%s%sHighest observed Youden's J (%.3f) among the named strategies. %s",
                     tie_note,
                     sel_note,
+                    sparse_note,
                     best_pattern$youden,
                     separation_note
                 )
@@ -1135,18 +1255,25 @@ decisioncombineClass <- if (requireNamespace("jmvcore")) {
                 # Grade the estimate, not the certainty -- and only when it is not already
                 # flagged as unseparated.
                 if (best_pattern$sens > 0.8 && best_pattern$spec > 0.8) {
-                    rationale <- paste0(rationale, "Observed sensitivity and specificity are both above 80%.")
+                    rationale <- paste0(rationale, "Observed sensitivity and specificity are both above 80%. ")
                 } else if (best_pattern$sens > 0.7 && best_pattern$spec > 0.7) {
-                    rationale <- paste0(rationale, "Observed sensitivity and specificity are both above 70%.")
+                    rationale <- paste0(rationale, "Observed sensitivity and specificity are both above 70%. ")
                 } else {
-                    rationale <- paste0(rationale, "Involves a trade-off between sensitivity and specificity.")
+                    rationale <- paste0(rationale, "The observed results involve a trade-off between sensitivity and specificity. ")
                 }
+                rationale <- paste0(
+                    rationale,
+                    "This sample-dependent ranking is an analytical summary, not a clinical guide or validated recommendation."
+                )
 
-                # Populate recommendation table
                 recTable <- self$results$recommendationTable
+                recTable$setNote(
+                    "scope",
+                    jmvcore::.("This is a descriptive, sample-dependent ranking of named testing strategies. It is not a clinical guide or validated recommendation.")
+                )
                 recTable$setRow(rowNo = 1, values = list(
                     pattern = best_pattern$pattern,
-                    method = "Youden's Index (Sensitivity + Specificity - 1)",
+                    method = "Descriptive Youden ranking",
                     youden = best_pattern$youden,
                     sens = best_pattern$sens,
                     spec = best_pattern$spec,
@@ -1175,21 +1302,74 @@ decisioncombineClass <- if (requireNamespace("jmvcore")) {
                 }
 
                 output <- self$results$addedPattern
-                if (output$isNotFilled()) {
-                    output$setRowNums(rownames(data_prep))
-                    output$setValues(pattern_values)
+                output$setRowNums(rownames(data_prep))
+                output$setValues(pattern_values)
+            },
+            .setPlotStates = function() {
+                if (self$results$combinationTable$rowCount == 0) {
+                    return()
+                }
+
+                combination_data <- as.data.frame(
+                    self$results$combinationTable$asDF,
+                    stringsAsFactors = FALSE
+                )
+                common_state <- list(
+                    valid = TRUE,
+                    data = combination_data,
+                    filterStatistic = self$options$filterStatistic,
+                    filterPattern = self$options$filterPattern
+                )
+
+                if (isTRUE(self$options$showBarPlot)) {
+                    self$results$barPlot$setState(common_state)
+                }
+                if (isTRUE(self$options$showHeatmap)) {
+                    self$results$heatmapPlot$setState(common_state)
+                }
+                if (isTRUE(self$options$showDecisionTree)) {
+                    self$results$decisionTreePlot$setState(common_state)
+                }
+                if (isTRUE(self$options$showForest)) {
+                    prop_data <- as.data.frame(
+                        self$results$combinationTableCI$asDF,
+                        stringsAsFactors = FALSE
+                    )
+                    ratio_table <- private$.resultsItem("combinationTableCIRatios")
+                    ratio_data <- if (!is.null(ratio_table) && ratio_table$rowCount > 0) {
+                        as.data.frame(ratio_table$asDF, stringsAsFactors = FALSE)
+                    } else {
+                        data.frame()
+                    }
+                    forest_supported <- !self$options$filterStatistic %in%
+                        c("prevalence", "balancedAccuracy", "youden")
+                    if (!forest_supported) {
+                        private$.addNotice(
+                            "INFO", "Forest Plot Not Available for Selected Statistic",
+                            sprintf(
+                                'The forest plot is not drawn for "%s" because this analysis does not calculate a confidence interval for that statistic. The bar chart and heatmap can still display it.',
+                                self$options$filterStatistic
+                            )
+                        )
+                    }
+                    self$results$forestPlot$setState(list(
+                        valid = forest_supported,
+                        proportions = prop_data,
+                        ratios = ratio_data,
+                        filterStatistic = self$options$filterStatistic
+                    ))
                 }
             },
             .plotBarChart = function(image, ...) {
-                combTable <- self$results$combinationTable
-                if (combTable$rowCount == 0) {
+                state <- image$state
+                if (!is.list(state) || !isTRUE(state$valid) || is.null(state$data)) {
                     return(FALSE)
                 }
 
-                table_df <- combTable$asDF
+                table_df <- as.data.frame(state$data, stringsAsFactors = FALSE)
 
                 # Apply statistic filter
-                stat_filter <- self$options$filterStatistic
+                stat_filter <- state$filterStatistic
                 if (stat_filter != "all") {
                     metrics <- stat_filter
                 } else {
@@ -1197,7 +1377,7 @@ decisioncombineClass <- if (requireNamespace("jmvcore")) {
                 }
 
                 # Apply pattern filter
-                pattern_filter <- self$options$filterPattern
+                pattern_filter <- state$filterPattern
                 filtered_df <- private$.applyPatternFilter(table_df, pattern_filter)
 
                 if (nrow(filtered_df) == 0) {
@@ -1243,25 +1423,29 @@ decisioncombineClass <- if (requireNamespace("jmvcore")) {
                 return(TRUE)
             },
             .plotHeatmap = function(image, ...) {
-                combTable <- self$results$combinationTable
-                if (combTable$rowCount == 0) {
+                state <- image$state
+                if (!is.list(state) || !isTRUE(state$valid) || is.null(state$data)) {
                     return(FALSE)
                 }
 
-                table_df <- combTable$asDF
-                pattern_filter <- self$options$filterPattern
+                table_df <- as.data.frame(state$data, stringsAsFactors = FALSE)
+                pattern_filter <- state$filterPattern
                 filtered_df <- private$.applyPatternFilter(table_df, pattern_filter)
 
                 if (nrow(filtered_df) == 0) {
                     return(FALSE)
                 }
 
-                # Select metrics for heatmap; honor a single-statistic filter when the selected
-                # statistic is part of the heatmap panel, otherwise show the full panel
-                # (prevalence/LR+/LR-/DOR are not on the heatmap and leave it unfiltered).
-                metrics <- c("sens", "spec", "ppv", "npv", "acc", "balancedAccuracy", "youden")
-                stat_filter <- self$options$filterStatistic
-                if (stat_filter != "all" && stat_filter %in% metrics) {
+                # The default panel contains bounded or centered metrics that share a
+                # meaningful color scale. A selected ratio is still honored as a single
+                # metric with an odds/likelihood-ratio midpoint of one.
+                metrics <- c("prevalence", "sens", "spec", "ppv", "npv", "acc",
+                             "balancedAccuracy", "youden")
+                stat_filter <- state$filterStatistic
+                if (stat_filter != "all") {
+                    if (!stat_filter %in% names(filtered_df)) {
+                        return(FALSE)
+                    }
                     metrics <- stat_filter
                 }
                 metric_data <- filtered_df[, c("pattern", metrics), drop = FALSE]
@@ -1274,10 +1458,14 @@ decisioncombineClass <- if (requireNamespace("jmvcore")) {
                     values_to = "Value"
                 )
 
+                midpoint <- if (stat_filter %in% c("lrPos", "lrNeg", "dor")) 1 else 0.5
                 p <- ggplot2::ggplot(plot_data, ggplot2::aes(x = Metric, y = pattern, fill = Value)) +
                     ggplot2::geom_tile() +
                     ggplot2::geom_text(ggplot2::aes(label = sprintf("%.2f", Value)), color = "white") +
-                    ggplot2::scale_fill_gradient2(low = "red", mid = "yellow", high = "green", midpoint = 0.5) +
+                    ggplot2::scale_fill_gradient2(
+                        low = "#b2182b", mid = "#f7f7f7", high = "#2166ac",
+                        midpoint = midpoint
+                    ) +
                     ggplot2::labs(title = "Performance Heatmap", x = "", y = "Pattern") +
                     ggplot2::theme_minimal()
 
@@ -1285,17 +1473,21 @@ decisioncombineClass <- if (requireNamespace("jmvcore")) {
                 return(TRUE)
             },
             .plotForest = function(image, ...) {
-                ciTable <- self$results$combinationTableCI
-                ratioTable <- private$.resultsItem("combinationTableCIRatios")
-                if (ciTable$rowCount == 0 && (is.null(ratioTable) || ratioTable$rowCount == 0)) {
+                state <- image$state
+                if (!is.list(state) || !isTRUE(state$valid)) {
                     return(FALSE)
                 }
 
-                # Proportions and ratios now live in separate tables; the plot shows both.
                 parts <- list()
-                if (ciTable$rowCount > 0) parts[[length(parts) + 1]] <- ciTable$asDF
-                if (!is.null(ratioTable) && ratioTable$rowCount > 0)
-                    parts[[length(parts) + 1]] <- ratioTable$asDF
+                if (is.data.frame(state$proportions) && nrow(state$proportions) > 0) {
+                    parts[[length(parts) + 1]] <- state$proportions
+                }
+                if (is.data.frame(state$ratios) && nrow(state$ratios) > 0) {
+                    parts[[length(parts) + 1]] <- state$ratios
+                }
+                if (length(parts) == 0) {
+                    return(FALSE)
+                }
                 table_df <- do.call(rbind, parts)
                 rownames(table_df) <- NULL
 
@@ -1304,7 +1496,7 @@ decisioncombineClass <- if (requireNamespace("jmvcore")) {
                 # the code directly to the label always yielded an empty plot. Statistics not
                 # present in the CI table (prevalence/balancedAccuracy/youden) leave the plot
                 # unfiltered rather than blanking it.
-                stat_filter <- self$options$filterStatistic
+                stat_filter <- state$filterStatistic
                 if (stat_filter != "all") {
                     stat_label_map <- c(
                         prevalence = "Prevalence",
@@ -1331,7 +1523,10 @@ decisioncombineClass <- if (requireNamespace("jmvcore")) {
 
                 p <- ggplot2::ggplot(table_df, ggplot2::aes(x = estimate, y = pattern, color = statistic)) +
                     ggplot2::geom_point(size = 3) +
-                    ggplot2::geom_errorbarh(ggplot2::aes(xmin = lower, xmax = upper), height = 0.2) +
+                    ggplot2::geom_errorbar(
+                        ggplot2::aes(xmin = lower, xmax = upper),
+                        orientation = "y", width = 0.2
+                    ) +
                     ggplot2::labs(
                         title = "Forest Plot - 95% Confidence Intervals",
                         x = "Estimate (95% CI)",
@@ -1347,15 +1542,12 @@ decisioncombineClass <- if (requireNamespace("jmvcore")) {
                 return(TRUE)
             },
             .plotDecisionTree = function(image, ...) {
-                combTable <- self$results$combinationTable
-                if (combTable$rowCount == 0) {
+                state <- image$state
+                if (!is.list(state) || !isTRUE(state$valid) || is.null(state$data)) {
                     return(FALSE)
                 }
 
-                table_df <- combTable$asDF
-
-                # Simple tree structure based on patterns
-                # This is a placeholder - real implementation would need tree layout algorithm
+                table_df <- as.data.frame(state$data, stringsAsFactors = FALSE)
 
                 p <- ggplot2::ggplot(table_df, ggplot2::aes(x = sens, y = spec)) +
                     ggplot2::geom_point(ggplot2::aes(size = youden, color = pattern)) +

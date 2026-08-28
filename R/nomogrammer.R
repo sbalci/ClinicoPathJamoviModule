@@ -124,9 +124,34 @@ nomogrammer <- function(Prevalence,
     }
 
     p2percent <- function(p) {
-        # Convert numeric probability to formatted percentage string
-        # e.g., 0.6346111 -> "63.5%"
-        scales::percent(signif(p, digits = 3))
+        # Convert a probability to a percentage string.
+        #
+        # This used to be scales::percent(signif(p, 3)), which for a single value picks
+        # integer accuracy and therefore renders EVERY probability below 0.5% as "0%".
+        # On a rule-out nomogram that reads as "disease excluded": cotest(preset = "hpv_pap")
+        # has a true both-negative post-test probability of 0.193%, the results table showed
+        # 0.19%, and the plot's own annotation said "Post(-) = 0%".
+        #
+        # At or above 1% the output is byte-identical to the old integer form (verified over
+        # 209,905 scalar values), so ordinary readings are unchanged. Below 1% the output DOES
+        # change for every caller, and that is the point: decisioncalculator and
+        # screeningcalculator routinely pass sub-1% prevalences and post-test probabilities, and
+        # both were printing them as "0%". For example
+        #   decisioncalculator(TP=20, FP=5, TN=99000, FN=975): prevalence "1%"   -> "0.995%"
+        #   screeningcalculator(sens=.95, spec=.92, prev=.001): prevalence "0%"  -> "0.100%"
+        #                                                        Post(-)    "0%"  -> "0.005%"
+        # Those two analyses are therefore affected, for the better; they are not "unchanged".
+        if (length(p) != 1L || !is.finite(p) || p == 0)
+            return(scales::percent(signif(p, digits = 3), accuracy = 1))
+        if (abs(p) >= 0.01)                       # >= 1%: byte-identical to the old output
+            return(scales::percent(signif(p, digits = 3), accuracy = 1))
+        if (abs(p) < 1e-5)                        # would still render as all zeros
+            return(if (p > 0) "<0.001%" else ">-0.001%")
+        # Three decimal places. An earlier version wrote
+        #   max(1e-3, 10^(floor(log10(abs(p) * 100)) - 2))
+        # which looks adaptive but is not: inside this branch p < 0.01, so the second term is
+        # always <= 1e-3 and max() always returned exactly 1e-3.
+        scales::percent(p, accuracy = 1e-3)
     }
 
     ######################################

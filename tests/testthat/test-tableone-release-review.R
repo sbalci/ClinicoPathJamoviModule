@@ -89,7 +89,7 @@ test_that("the refusal message reads cleanly", {
   d <- tableone_test[1:10, ]
   d$Hemoglobin <- NA
 
-  err <- tryCatch(tableone(data = d, vars = c("Age", "Hemoglobin"), excl = TRUE),
-                  error = conditionMessage)
-  expect_false(grepl("\\.\\.", err))
+  res <- tableone(data = d, vars = "Hemoglobin")
+  expect_match(as.character(res$todo$content), "Nothing to summarise")
+  expect_false(grepl("\\.\\.", as.character(res$todo$content)))
 })

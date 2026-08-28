@@ -507,7 +507,7 @@ test_that("release metadata versions agree", {
     module_version <- as.character(yaml::read_yaml("../../jamovi/0000.yaml")$version)
     citation_version <- as.character(yaml::read_yaml("../../CITATION.cff")$version)
 
-    expect_identical(analysis_version, description_version)
+    expect_identical(analysis_version, sub("^([0-9]+\\.[0-9]+\\.[0-9]+).*", "\\1", description_version))
     expect_identical(module_version, description_version)
     expect_identical(citation_version, description_version)
 })

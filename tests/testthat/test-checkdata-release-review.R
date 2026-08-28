@@ -70,8 +70,8 @@ test_that("the per-method flag columns say which method fired", {
   expect_true(all(df$iqrFlag %in% c("Yes", "-")))
   expect_true(all(df$madFlag %in% c("Yes", "-", "N/A")))
 
-  # a row reporting 3/3 methods must show three "Yes"
-  three <- grepl("3/3 methods", df$severity)
+  # a row reporting 3 methods must show three "Yes"
+  three <- grepl("3 (of|/) 3 methods", df$severity)
   expect_true(any(three))
   expect_true(all(df$zscoreFlag[three] == "Yes"))
   expect_true(all(df$iqrFlag[three] == "Yes"))
@@ -80,7 +80,7 @@ test_that("the per-method flag columns say which method fired", {
   # the count in the severity label must equal the number of "Yes" flags
   for (i in seq_len(nrow(df))) {
     n_yes <- sum(c(df$zscoreFlag[i], df$iqrFlag[i], df$madFlag[i]) == "Yes")
-    n_lab <- as.integer(sub(".*\\(([0-9]+)/.*", "\\1", df$severity[i]))
+    n_lab <- as.integer(sub(".*(?:\\(|flagged by )([0-9]+)(?:/| of ).*", "\\1", df$severity[i]))
     expect_equal(n_yes, n_lab, info = df$severity[i])
   }
 })
@@ -182,7 +182,7 @@ test_that("the quality score explains the clinical penalty it just applied", {
 
 test_that("the note reports which unit system was actually used", {
   auto <- as.character(cd_clinical(unitSystem = "auto")$qualityText$content)
-  expect_match(auto, "auto-detected from the data range")
+  expect_match(auto, "auto-detected from the data\\s+range")
 
   metric <- as.character(cd_clinical(unitSystem = "metric")$qualityText$content)
   expect_match(metric, "set to 'metric'")

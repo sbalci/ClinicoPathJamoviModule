@@ -1,5 +1,3 @@
-context("Medical Decision Test Comparison")
-
 # Synthetic dataset with known diagnostic characteristics
 diagnostic_sample <- local({
   pos_block <- data.frame(
@@ -84,7 +82,8 @@ test_that("decisioncompare works with 3 tests", {
   expect_true(result$cTable1$rowCount > 0)
   expect_true(result$cTable2$rowCount > 0)
   expect_true(result$cTable3$rowCount > 0)
-  expect_true(all(c("testA", "testB", "testC") %in% result$comparisonTable$rowKeys))
+  comparison <- result$comparisonTable$asDF
+  expect_true(all(c("testA", "testB", "testC") %in% comparison$test))
   expect_true(result$mcnemarTable$rowCount >= 3)
 })
 

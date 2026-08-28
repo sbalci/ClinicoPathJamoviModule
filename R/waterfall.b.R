@@ -1303,21 +1303,11 @@ waterfallClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         # Optimized for large datasets
         n_patients <- length(unique(processed_df[[patientID]]))
         
-        if (n_patients > 1000) {
-          # Use more efficient approach for large datasets
-          df_waterfall <- processed_df %>%
-            dplyr::filter(!is.na(response)) %>%  # Filter NA responses first
-            dplyr::slice_min(response, by = !!rlang::sym(patientID), with_ties = FALSE) %>%
-            dplyr::ungroup()
-        } else {
-          # Use standard approach for smaller datasets
-          df_waterfall <- processed_df %>%
-            dplyr::group_by(!!rlang::sym(patientID)) %>%
-            dplyr::filter(!is.na(response)) %>%  # Filter out NA responses first
-            dplyr::filter(response == min(response, na.rm = TRUE)) %>%
-            dplyr::slice(1) %>%  # Take first row if there are ties
-            dplyr::ungroup()
-        }
+        df_waterfall <- processed_df %>%
+          dplyr::filter(!is.na(response)) %>%
+          dplyr::group_by(!!rlang::sym(patientID)) %>%
+          dplyr::slice_min(response, with_ties = FALSE, n = 1) %>%
+          dplyr::ungroup()
         
         # Validate waterfall data
         if (nrow(df_waterfall) == 0) {

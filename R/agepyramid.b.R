@@ -314,7 +314,10 @@ agepyramidClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             # dates are not. Used by .create_age_labels() below.
             age_whole <- all(abs(mydata[["Age"]] - round(mydata[["Age"]])) < 1e-8)
 
-            # Select breaks based on age_groups option
+            # Track whether we are using the bin_width path so that .create_age_labels
+            # can produce a finite last-band label (e.g. "15-19") for uniform band widths.
+            using_bin_width_breaks <- FALSE
+
             if (age_groups == 'who') {
                 # WHO/UN standard five-year age groups: 0-4, 5-9, ... 80-84, 85+.
                 # These are the groups of the WHO World Standard Population
@@ -399,7 +402,7 @@ agepyramidClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                             "Custom age breaks are in use",
                             paste0(
                                 "The age bands come from the break points you typed (",
-                                paste(format(breaks_num, trim = TRUE, scientific = FALSE),
+                                paste(base::format(breaks_num, trim = TRUE, scientific = FALSE),
                                       collapse = ", "),
                                 ", then open-ended). 'Bin width' is ignored while 'Custom age ",
                                 "breaks' is filled in; clear that box to go back to bands of a ",
@@ -410,8 +413,10 @@ agepyramidClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                         )
                     }
                 }
-                if (is.null(breaks_seq))
+                if (is.null(breaks_seq)) {
                     breaks_seq <- private$.bin_width_breaks(max_age)
+                    using_bin_width_breaks <- TRUE
+                }
             }
 
             # Safeguard: ensure we have at least two unique breaks for cut()
@@ -484,7 +489,8 @@ agepyramidClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
             labels <- private$.create_age_labels(breaks_seq, right = use_right,
                                                  include_lowest = TRUE,
-                                                 whole_ages = age_whole)
+                                                 whole_ages = age_whole,
+                                                 max_age = if (using_bin_width_breaks) max_age else NULL)
 
             # Unequal band widths: the bars and the percentage columns are counts
             # PER BAND, so a band covering more single years collects more people
@@ -500,9 +506,9 @@ agepyramidClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     "The age bands cover different numbers of years",
                     paste0(
                         "The bands are not all the same width: '", labels[widest], "' spans ",
-                        format(band_widths[widest], trim = TRUE, scientific = FALSE),
+                        base::format(band_widths[widest], trim = TRUE, scientific = FALSE),
                         " year(s) while '", labels[narrowest], "' spans ",
-                        format(band_widths[narrowest], trim = TRUE, scientific = FALSE),
+                        base::format(band_widths[narrowest], trim = TRUE, scientific = FALSE),
                         " year(s). The bar lengths and the 'Female (%)' / 'Male (%)' columns are ",
                         "counts per band, not per year of age, so a wider band collects more ",
                         "people simply by covering more years and its bar is longer for that ",
@@ -1093,11 +1099,17 @@ agepyramidClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             # include.lowest = TRUE then closes the top of the last FINITE band, so
             # ages 0-100 in 5-year bins used to end in a "95-100" band holding six
             # single years (95 to 100) while every other band held five.
-            c(seq(from = 0, to = max_age, by = bin_width), Inf)
+            #
+            # When max_age < bin_width, seq(0, max_age, bin_width) returns only c(0),
+            # giving breaks c(0, Inf) and the label "0+" instead of "0-4". Ensure at
+            # least one finite step exists by extending to at least bin_width.
+            upper_bound <- max(max_age, bin_width)
+            c(seq(from = 0, to = upper_bound, by = bin_width), Inf)
         },
 
+
         .create_age_labels = function(breaks, right = FALSE, include_lowest = TRUE,
-                                      whole_ages = TRUE) {
+                                      whole_ages = TRUE, max_age = NULL) {
             # Labels that describe exactly the ages their band contains, under
             # EITHER closure convention.
             #
@@ -1157,8 +1169,18 @@ agepyramidClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 } else {
                     # [lower, upper), except the last band which include_lowest
                     # closes at the top when `upper` is finite.
+                    #
+                    # When `upper` is Inf but we know max_age (a finite integer),
+                    # label the last band as lower-max_age so that the span is
+                    # concrete and uniform with the preceding bands.
                     if (is.infinite(upper)) {
-                        labels[i] <- paste0(lower, "+")
+                        if (!is.null(max_age) && is.finite(max_age) &&
+                            whole(lower) && whole_ages &&
+                            max_age >= lower && (max_age - lower) >= 0) {
+                            labels[i] <- paste(lower, floor(max_age), sep = "-")
+                        } else {
+                            labels[i] <- paste0(lower, "+")
+                        }
                     } else if (is_last && include_lowest) {
                         labels[i] <- paste(lower, upper, sep = "-")
                     } else if (whole(lower) && whole(upper) && (upper - lower) == 1 && lower == 0) {

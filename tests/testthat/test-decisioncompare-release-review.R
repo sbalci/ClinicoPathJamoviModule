@@ -120,15 +120,32 @@ test_that("Cochran's Q matches DescTools", {
 })
 
 
-test_that("paired sensitivity/specificity differences match a hand-computed Wald interval", {
+test_that("paired differences match Newcombe method 10", {
     d <- make_fixture()
     dt <- run_dc(d, statComp = TRUE)$diffTable$asDF
 
     hand <- function(x, y) {
-        b <- sum(x == 1 & y == 0); cc <- sum(x == 0 & y == 1); N <- length(x)
-        dd <- (b - cc) / N
-        se <- sqrt(((b + cc) * N - (b - cc)^2) / N^3)
-        c(diff = dd, lo = max(-1, dd - qnorm(.975) * se), hi = min(1, dd + qnorm(.975) * se))
+        e <- sum(x == 1 & y == 1); f <- sum(x == 1 & y == 0)
+        g <- sum(x == 0 & y == 1); h <- sum(x == 0 & y == 0)
+        N <- length(x); z <- qnorm(.975)
+        wilson <- function(k) {
+            p <- k / N; den <- 1 + z^2 / N
+            ctr <- (p + z^2 / (2 * N)) / den
+            hw <- z * sqrt((p * (1 - p) + z^2 / (4 * N)) / N) / den
+            c(max(0, ctr - hw), min(1, ctr + hw))
+        }
+        px <- (e + f) / N; py <- (e + g) / N
+        wx <- wilson(e + f); wy <- wilson(e + g)
+        dlx <- px - wx[1]; dux <- wx[2] - px
+        dly <- py - wy[1]; duy <- wy[2] - py
+        phi_den <- sqrt((e + f) * (g + h) * (e + g) * (f + h))
+        phi_num <- e * h - f * g
+        if (phi_num > 0) phi_num <- max(phi_num - N / 2, 0)
+        phi <- if (phi_den == 0) 0 else phi_num / phi_den
+        dd <- (f - g) / N
+        c(diff = dd,
+          lo = dd - sqrt(dlx^2 - 2 * phi * dlx * duy + duy^2),
+          hi = dd + sqrt(dux^2 - 2 * phi * dux * dly + dly^2))
     }
     gp <- d$gold == "pos"; gn <- d$gold == "neg"
     ref_sens <- hand(as.integer(d$t1[gp] == "pos"), as.integer(d$t2[gp] == "pos"))
@@ -145,6 +162,28 @@ test_that("paired sensitivity/specificity differences match a hand-computed Wald
     expect_equal(g("Sensitivity")$diff,
                  ct$Sens[ct$test == "t1"][1] - ct$Sens[ct$test == "t2"][1],
                  tolerance = 1e-10)
+})
+
+
+test_that("Newcombe interval does not collapse with one-sided discordances", {
+    d <- data.frame(
+        gold = rep("pos", 50),
+        t1 = rep("pos", 50),
+        t2 = c(rep("pos", 36), rep("neg", 14)),
+        stringsAsFactors = FALSE
+    )
+    res <- call_decisioncompare(
+        data = d, gold = "gold", goldPositive = "pos", goldNegative = NULL,
+        test1 = "t1", test1Positive = "pos", test1Negative = NULL,
+        test2 = "t2", test2Positive = "pos", test2Negative = NULL,
+        test3 = NULL, test3Positive = NULL, test3Negative = NULL,
+        stratify = NULL, statComp = TRUE)
+    row <- res$diffTable$asDF
+    row <- row[row$metric == "Sensitivity", , drop = FALSE]
+    expect_equal(row$diff, 0.28, tolerance = 1e-10)
+    expect_equal(round(row$lower, 4), 0.1528)
+    expect_equal(round(row$upper, 4), 0.4167)
+    expect_gt(row$upper - row$lower, 0)
 })
 
 
@@ -213,8 +252,8 @@ test_that("excludeIndeterminate refuses to act when no negative level is named",
         excludeIndeterminate = TRUE)
 
     notices <- strip_html(res$notices$content)
-    expect_match(notices, "Cannot Exclude Indeterminate Levels Automatically")
-    expect_match(notices, "no rows were excluded")
+    expect_match(notices, "Negative Level Required for Exclusion")
+    expect_match(notices, "currently combined as Negative")
 
     # the inflation it warns about is real: 38/40 with equivocals folded in
     ct <- res$comparisonTable$asDF
@@ -282,14 +321,15 @@ test_that("a tie for best test is disclosed rather than broken silently", {
         data = d, gold = "gold", goldPositive = "pos", goldNegative = NULL,
         test1 = "t1", test1Positive = "pos", test1Negative = NULL,
         test2 = "t2", test2Positive = "pos", test2Negative = NULL,
-        test3 = NULL, test3Positive = NULL, test3Negative = NULL, stratify = NULL)
+        test3 = NULL, test3Positive = NULL, test3Negative = NULL, stratify = NULL,
+        showDescriptiveReport = TRUE)
 
     ct <- res$comparisonTable$asDF
     expect_equal(ct$Sens[ct$test == "t1"][1], ct$Sens[ct$test == "t2"][1])
 
     notices <- strip_html(res$notices$content)
-    expect_match(notices, "Tied Best-Performing Test")
-    expect_match(notices, "the data do not distinguish them")
+    expect_match(notices, "Tied Descriptive Ranking")
+    expect_match(notices, "not a clinical recommendation")
 })
 
 
@@ -299,8 +339,8 @@ test_that("the difference table names its confidence-interval method", {
     # $notes is a list of Note R6 objects keyed by note name
     notes <- paste(vapply(as.list(res$diffTable$notes),
                           function(n) n$note, character(1)), collapse = " ")
-    expect_match(notes, "Wald")
-    expect_match(notes, "correlated proportions")
+    expect_match(notes, "Newcombe's method 10")
+    expect_match(notes, "paired correlation")
     # and disambiguates itself from the OPA table's ciMethod option
     expect_match(notes, "CI Method for Agreement")
 })
@@ -308,13 +348,14 @@ test_that("the difference table names its confidence-interval method", {
 
 test_that("the manuscript-ready report does not claim a winner it cannot support", {
     d <- make_fixture()   # no pairwise comparison survives Holm in this fixture
-    res <- run_dc(d, statComp = TRUE)
+    res <- run_dc(d, statComp = TRUE, showDescriptiveReport = TRUE)
     mc <- res$mcnemarTable$asDF
     expect_false(any(mc$p < 0.05, na.rm = TRUE))
 
     txt <- strip_html(res$clinicalReport$content)
     expect_false(grepl("demonstrated optimal diagnostic performance", txt, fixed = TRUE))
-    expect_match(txt, "ranked highest on the combined Youden-index-plus-accuracy score")
+    expect_match(txt, "highest observed balanced accuracy")
+    expect_match(txt, "not evidence of superiority or a clinical recommendation")
     expect_match(txt, "should not be reported as evidence that one test outperforms")
 
     # the placeholder must be gone, replaced by a real Clopper-Pearson interval
@@ -340,10 +381,155 @@ test_that("a genuinely significant difference is reported without the hedge", {
         test1 = "t1", test1Positive = "pos", test1Negative = NULL,
         test2 = "t2", test2Positive = "pos", test2Negative = NULL,
         test3 = NULL, test3Positive = NULL, test3Negative = NULL, stratify = NULL,
-        statComp = TRUE)
+        statComp = TRUE, showDescriptiveReport = TRUE)
 
     expect_lt(res$mcnemarTable$asDF$p[1], 0.05)
     txt <- strip_html(res$clinicalReport$content)
-    expect_match(txt, "ranked highest on the combined Youden-index-plus-accuracy score")
+    expect_match(txt, "highest observed balanced accuracy")
+    expect_match(txt, "not evidence of superiority or a clinical recommendation")
     expect_false(grepl("should not be reported as evidence", txt, fixed = TRUE))
+})
+
+
+test_that("indeterminate exclusions preserve paired row alignment", {
+    d <- data.frame(
+        gold = rep(c("Pos", "Neg"), 6),
+        t1 = c("Pos", "Equivocal", "Pos", "Equivocal", "Pos", "Neg",
+               "Pos", "Neg", "Neg", "Neg", "Pos", "Neg"),
+        t2 = c("Pos", "Neg", "Neg", "Neg", "Pos", "Neg",
+               "Equivocal", "Neg", "Equivocal", "Pos", "Pos", "Neg"),
+        stringsAsFactors = FALSE
+    )
+
+    expect_warning(
+        res <- call_decisioncompare(
+            data = d, gold = "gold", goldPositive = "Pos", goldNegative = "Neg",
+            test1 = "t1", test1Positive = "Pos", test1Negative = "Neg",
+            test2 = "t2", test2Positive = "Pos", test2Negative = "Neg",
+            test3 = NULL, test3Positive = NULL, test3Negative = NULL,
+            stratify = NULL, excludeIndeterminate = TRUE, statComp = TRUE),
+        NA
+    )
+
+    comparison <- res$comparisonTable$asDF
+    comparison <- comparison[comparison$test %in% c("t1", "t2"), , drop = FALSE]
+    expect_equal(comparison$n, c(10L, 10L))
+    expect_equal(comparison$excluded, c(2L, 2L))
+    expect_equal(res$mcnemarTable$asDF$n[1], 8L)
+    expect_true(all(res$diffTable$asDF$n <= 8L))
+})
+
+
+test_that("stratified predictive values use the requested prevalence and recoding", {
+    d <- equivocal_fixture()
+    d$site <- rep(c("A", "B"), each = 30)
+    res <- call_decisioncompare(
+        data = d, gold = "gold", goldPositive = "Pos", goldNegative = "Neg",
+        test1 = "t1", test1Positive = "Pos", test1Negative = "Neg",
+        test2 = "t2", test2Positive = "Pos", test2Negative = "Neg",
+        test3 = NULL, test3Positive = NULL, test3Negative = NULL,
+        stratify = "site", excludeIndeterminate = TRUE,
+        pp = TRUE, pprob = 0.2)
+
+    st <- res$stratifiedTable$asDF
+    expect_true(all(st$n + st$excluded == 30L))
+    expect_true(all(st$excludedRate == st$excluded / 30))
+    # Bayes PPV at p=0.2; it generally differs from the raw within-stratum PPV.
+    row <- st[st$stratum == "A" & st$test == "t1", , drop = FALSE]
+    expected <- row$Sens * 0.2 / (row$Sens * 0.2 + (1 - row$Spec) * 0.8)
+    expect_equal(row$PPV, expected, tolerance = 1e-10)
+})
+
+
+test_that("duplicate test selections are rejected", {
+    d <- equivocal_fixture()
+    expect_error(
+        call_decisioncompare(
+            data = d, gold = "gold", goldPositive = "Pos", goldNegative = NULL,
+            test1 = "t1", test1Positive = "Pos", test1Negative = NULL,
+            test2 = "t1", test2Positive = "Pos", test2Negative = NULL,
+            test3 = NULL, test3Positive = NULL, test3Negative = NULL,
+            stratify = NULL),
+        "Validation failed"
+    )
+})
+
+
+test_that("the reference variable cannot be reused as a test", {
+    d <- equivocal_fixture()
+    expect_error(
+        call_decisioncompare(
+            data = d, gold = "gold", goldPositive = "Pos", goldNegative = NULL,
+            test1 = "gold", test1Positive = "Pos", test1Negative = NULL,
+            test2 = "t2", test2Positive = "Pos", test2Negative = NULL,
+            test3 = NULL, test3Positive = NULL, test3Negative = NULL,
+            stratify = NULL),
+        "Validation failed"
+    )
+})
+
+
+test_that("interpretation presets are explicitly examples rather than clinical guides", {
+    d <- equivocal_fixture()
+    res <- call_decisioncompare(
+        data = d, gold = "gold", goldPositive = "Pos", goldNegative = NULL,
+        test1 = "t1", test1Positive = "Pos", test1Negative = NULL,
+        test2 = "t2", test2Positive = "Pos", test2Negative = NULL,
+        test3 = NULL, test3Positive = NULL, test3Negative = NULL,
+        stratify = NULL, showExplanations = TRUE)
+
+    about <- strip_html(res$aboutAnalysis$content)
+    expect_match(about, "examples only")
+    expect_match(about, "not clinical guides")
+    notes <- paste(vapply(as.list(res$comparisonTable$notes),
+                          function(n) n$note, character(1)), collapse = " ")
+    expect_match(notes, "not clinical guides")
+})
+
+
+test_that("missing co-tests and stratifiers do not change standalone metrics", {
+    gold <- c(rep("pos", 50), rep("neg", 50))
+    t1 <- c(rep("neg", 20), rep("pos", 30), rep("neg", 45), rep("pos", 5))
+    complete <- data.frame(
+        gold = gold, t1 = t1, t2 = rep(c("pos", "neg"), 50),
+        site = rep(c("A", "B"), 50), stringsAsFactors = FALSE)
+
+    missing_cotest <- complete
+    missing_cotest$t2[seq_len(20)] <- NA
+    missing_stratum <- complete
+    missing_stratum$site[seq_len(20)] <- NA
+
+    run_two <- function(dat, stratify = NULL) call_decisioncompare(
+        data = dat, gold = "gold", goldPositive = "pos", goldNegative = NULL,
+        test1 = "t1", test1Positive = "pos", test1Negative = NULL,
+        test2 = "t2", test2Positive = "pos", test2Negative = NULL,
+        test3 = NULL, test3Positive = NULL, test3Negative = NULL,
+        stratify = stratify, statComp = TRUE)
+    metric <- function(res) {
+        x <- res$comparisonTable$asDF
+        x[x$test == "t1", c("n", "Sens", "Spec", "AccurT")]
+    }
+
+    baseline <- metric(run_two(complete))
+    expect_equal(metric(run_two(missing_cotest)), baseline)
+    expect_equal(metric(run_two(missing_stratum, "site")), baseline)
+    expect_equal(run_two(missing_cotest)$mcnemarTable$asDF$n[1], 80L)
+})
+
+
+test_that("narrative panels and OPA criterion are opt in", {
+    d <- make_fixture(n = 100)
+    base <- run_dc(d, opa = TRUE)
+    expect_identical(base$clinicalReport$content, "")
+    expect_identical(base$aboutAnalysis$content, "")
+    expect_true(all(is.na(base$opaTable$asDF$niMargin)))
+    expect_true(all(base$opaTable$asDF$niResult == "Not requested"))
+
+    requested <- run_dc(
+        d, opa = TRUE, useOpaCriterion = TRUE, niMargin = 75,
+        showExplanations = TRUE, showDescriptiveReport = TRUE)
+    expect_true(nzchar(paste(requested$clinicalReport$content, collapse = "")))
+    expect_true(nzchar(paste(requested$aboutAnalysis$content, collapse = "")))
+    expect_true(all(requested$opaTable$asDF$niMargin == 0.75))
+    expect_true(all(requested$opaTable$asDF$niResult %in% c("Yes", "No", "N/A")))
 })

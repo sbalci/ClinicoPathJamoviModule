@@ -914,6 +914,22 @@ lassocoxClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             table$setNote("apparent",
                 .("This C-index is apparent (training) performance from the same patients used for preprocessing, penalty selection, and model fitting. Its uncertainty does not include the modeling process. Use bootstrap optimism correction or nested cross-validation that repeats all preprocessing and tuning, followed by external validation before clinical use."))
         },
+
+        .interpretCindex = function(cindex) {
+            if (length(cindex) != 1 || is.na(cindex)) return("Not available")
+            if (cindex >= 0.8) return("Excellent discrimination")
+            if (cindex >= 0.7) return("Good discrimination")
+            if (cindex >= 0.6) return("Fair discrimination")
+            return("Poor discrimination")
+        },
+
+        .interpretHazardRatio = function(hr) {
+            if (length(hr) != 1 || is.na(hr)) return("Not available")
+            if (hr >= 3.0) return("Strong risk stratification")
+            if (hr >= 1.5) return("Moderate risk stratification")
+            return("Weak risk stratification")
+        },
+        
         
         # Enhanced plotting functions
         .cvPlot = function(image, ggtheme, theme, ...) {

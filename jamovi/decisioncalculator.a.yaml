@@ -4,7 +4,7 @@ title: Medical Decision Calculator
 menuGroup: meddecideT
 menuSubgroup: Decision Calculators
 menuSubtitle: Sensitivity, Specificity, PPV, NPV, ...
-version: '1.0.7'
+version: '1.0.8'
 jas: '1.2'
 
 description:
@@ -15,29 +15,20 @@ description:
         diagnostic performance metrics including sensitivity, specificity, 
         positive and negative predictive values, likelihood ratios, and 
         post-test probabilities. Supports confidence interval estimation and 
-        Fagan nomogram visualization for clinical decision making.
-    # R:
-    #     dontrun: true
-    #     usage: |
-    #         # Basic diagnostic test evaluation with known counts
-    #         result1 <- decisioncalculator(
-    #           TP = 90,  # True positives
-    #           FN = 10,  # False negatives  
-    #           TN = 80,  # True negatives
-    #           FP = 20   # False positives
-    #         )
-            
-    #         # Include 95 percent confidence intervals
-    #         result2 <- decisioncalculator(
-    #           TP = 90, FN = 10, TN = 80, FP = 20,
-    #           ci = TRUE
-    #         )
-            
-    #         # Complete analysis with Fagan nomogram
-    #         result3 <- decisioncalculator(
-    #           TP = 90, FN = 10, TN = 80, FP = 20,
-    #           ci = TRUE, pp = TRUE, pprob = 0.15, fagan = TRUE
-    #         )
+        Fagan nomogram visualization for educational interpretation. Presets and
+        examples are illustrative only and are not clinical guides.
+    R:
+        dontrun: true
+        usage: |
+            # Illustrative examples only; these are not clinical guides.
+            result1 <- decisioncalculator(
+              TP = 90, FN = 10, TN = 80, FP = 20
+            )
+
+            result2 <- decisioncalculator(
+              TP = 90, FN = 10, TN = 80, FP = 20,
+              ci = TRUE, pp = TRUE, pprob = 0.15, fagan = TRUE
+            )
 
 
 options:
@@ -47,9 +38,9 @@ options:
       default: 90
       description:
           ui: >
-            Number of cases correctly identified as positive (diseased) by the test.
+            Number of reference-positive cases with a positive test result.
           R: >
-            True Positive count: cases with disease that tested positive.
+            True-positive frequency relative to the stated reference standard.
 
     - name: TN
       title: 'True Negative (TN)'
@@ -57,9 +48,9 @@ options:
       default: 80
       description:
           ui: >
-            Number of cases correctly identified as negative (healthy) by the test.
+            Number of reference-negative cases with a negative test result.
           R: >
-            True Negative count: cases without disease that tested negative.
+            True-negative frequency relative to the stated reference standard.
 
     - name: FP
       title: 'False Positive (FP)'
@@ -67,9 +58,9 @@ options:
       default: 30
       description:
           ui: >
-            Number of cases incorrectly identified as positive (healthy subjects that tested positive).
+            Number of reference-negative cases with a positive test result.
           R: >
-            False Positive count: cases without disease that tested positive.
+            False-positive frequency relative to the stated reference standard.
 
     - name: FN
       title: 'False Negative (FN)'
@@ -77,9 +68,9 @@ options:
       default: 20
       description:
           ui: >
-            Number of cases incorrectly identified as negative (diseased subjects that tested negative).
+            Number of reference-positive cases with a negative test result.
           R: >
-            False Negative count: cases with disease that tested negative.
+            False-negative frequency relative to the stated reference standard.
 
     - name: pp
       title: Use known population prevalence
@@ -87,10 +78,12 @@ options:
       default: false
       description:
           ui: >
-            Use known disease prevalence from population data instead of study prevalence.
-            Enable this when your study sample may not represent the target population.
+            Use known disease prevalence from population data for predictive values,
+            post-test probabilities, and F1 score. Sensitivity, specificity, sample
+            accuracy, and MCC remain based on the entered study table.
           R: >
-            Boolean selection whether to use known population prevalence.
+            Boolean selection whether to use known population prevalence for
+            prevalence-dependent predictive measures.
 
 
 
@@ -116,7 +109,7 @@ options:
       default: false
       description:
           ui: >
-            Add detailed explanatory footnotes to all tables with clinical interpretation guidance.
+            Add detailed explanatory footnotes to the tables.
             Helpful for understanding what each statistic means.
           R: >
             Boolean selection whether to show detailed explanatory footnotes.
@@ -127,8 +120,8 @@ options:
       default: false
       description:
           ui: >
-            Calculate and display 95 percent confidence intervals for all diagnostic statistics.
-            Provides uncertainty estimates around point estimates.
+            Calculate 95 percent confidence intervals for measures estimable from integer
+            study counts. Prevalence-adjusted predictive-value intervals are omitted.
           R: >
             Boolean selection whether to calculate 95 percent confidence intervals.
 
@@ -147,7 +140,7 @@ options:
     - name: showWelcome
       title: Welcome message
       type: Bool
-      default: true
+      default: false
       description:
           ui: >
             Display introductory message with quick start guide.
@@ -161,8 +154,7 @@ options:
       default: false
       description:
           ui: >
-            Display natural-language interpretation with key findings and clinical guidance.
-            Presents results in plain English without statistical jargon.
+            Display a descriptive plain-language summary. It is educational and is not a clinical guide.
           R: >
             Boolean selection whether to show plain-language summary of results.
 
@@ -172,7 +164,7 @@ options:
       default: false
       description:
           ui: >
-            Show explanatory panels describing test evaluation methodology, assumptions, and clinical guidance.
+            Show explanatory panels describing test evaluation methodology and assumptions.
             Helpful for understanding when and how to use this analysis.
           R: >
             Boolean selection whether to show about and assumptions panels.
@@ -183,8 +175,7 @@ options:
       default: false
       description:
           ui: >
-            Display glossary defining clinical terms (sensitivity, specificity, PPV, NPV, likelihood ratios, etc.)
-            with plain-language explanations and interpretation guides.
+            Display a glossary defining diagnostic-test terms with plain-language explanations.
           R: >
             Boolean selection whether to show clinical glossary.
 
@@ -195,70 +186,93 @@ options:
       default: false
       description:
           ui: >
-            Compare multiple diagnostic cut-off scenarios to identify optimal thresholds.
-            Useful for evaluating different test interpretation criteria.
+            Descriptively compare illustrative cut-off scenarios. These examples are not clinical guides.
           R: >
             Boolean selection whether to evaluate multiple cut-off scenarios.
       
     - name: cutoff1
-      title: 'Cut-off Scenario 1 Name'
+      title: 'Cut-off scenario 1 name'
       type: String
-      default: 'Conservative'
+      default: 'Higher sensitivity example'
       description:
           ui: >
-            Descriptive name for the first cut-off scenario (e.g., 'Conservative', 'Sensitive').
+            Descriptive name for the first illustrative cut-off scenario; not clinical guidance.
           R: >
             Name identifier for cut-off scenario 1.
       
     - name: tp1
       title: 'TP (Cut-off 1)'
       type: Number
-      default: 85
+      default: 100
+      description:
+          ui: Reference-positive participants testing positive in illustrative scenario 1.
+          R: True-positive frequency for illustrative scenario 1.
       
     - name: fp1
       title: 'FP (Cut-off 1)'
       type: Number
-      default: 10
+      default: 40
+      description:
+          ui: Reference-negative participants testing positive in illustrative scenario 1.
+          R: False-positive frequency for illustrative scenario 1.
       
     - name: tn1
       title: 'TN (Cut-off 1)'
       type: Number
-      default: 190
+      default: 70
+      description:
+          ui: Reference-negative participants testing negative in illustrative scenario 1.
+          R: True-negative frequency for illustrative scenario 1.
       
     - name: fn1
       title: 'FN (Cut-off 1)'
       type: Number
-      default: 15
+      default: 10
+      description:
+          ui: Reference-positive participants testing negative in illustrative scenario 1.
+          R: False-negative frequency for illustrative scenario 1.
       
     - name: cutoff2
-      title: 'Cut-off Scenario 2 Name'
+      title: 'Cut-off scenario 2 name'
       type: String
-      default: 'Aggressive'
+      default: 'Higher specificity example'
       description:
           ui: >
-            Descriptive name for the second cut-off scenario (e.g., 'Aggressive', 'Specific').
+            Descriptive name for the second illustrative cut-off scenario; not clinical guidance.
           R: >
             Name identifier for cut-off scenario 2.
       
     - name: tp2
       title: 'TP (Cut-off 2)'
       type: Number
-      default: 95
+      default: 80
+      description:
+          ui: Reference-positive participants testing positive in illustrative scenario 2.
+          R: True-positive frequency for illustrative scenario 2.
       
     - name: fp2
       title: 'FP (Cut-off 2)'
       type: Number
-      default: 25
+      default: 15
+      description:
+          ui: Reference-negative participants testing positive in illustrative scenario 2.
+          R: False-positive frequency for illustrative scenario 2.
       
     - name: tn2
       title: 'TN (Cut-off 2)'
       type: Number
-      default: 175
+      default: 95
+      description:
+          ui: Reference-negative participants testing negative in illustrative scenario 2.
+          R: True-negative frequency for illustrative scenario 2.
       
     - name: fn2
       title: 'FN (Cut-off 2)'
       type: Number
-      default: 5
+      default: 30
+      description:
+          ui: Reference-positive participants testing negative in illustrative scenario 2.
+          R: False-negative frequency for illustrative scenario 2.
 
 
 ...

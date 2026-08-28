@@ -1,5 +1,4 @@
-
-context("Medical Decision Analysis - Misclassified Cases")
+# Medical Decision Analysis - Misclassified Cases
 
 test_that("decision function handles misclassified cases correctly", {
   skip_if_not_installed('jmvReadWrite')

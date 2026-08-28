@@ -1,4 +1,4 @@
-context("test-crosstable")
+# Tests for crosstable analysis
 
 # Load required library
 
@@ -197,7 +197,8 @@ test_that("crosstable SMD requires exactly two groups", {
   model <- crosstable(data = df, vars = "x", group = "grp",
                       sty = "gtsummary", showSMD = TRUE)
   smd <- model$smdTable$asDF
-  expect_equal(nrow(smd), 0)   # no rows for 3-group data; note explains why
+  expect_true(is.na(smd$smd[1]))
+  expect_match(model$smdTable$notes$smd$note, "require exactly two groups")
 })
 
 test_that("crosstable SMD uses the same exclusion set as the main table", {

@@ -24,6 +24,30 @@ refs:
         doi: 10.1080/01621459.1927.10502953
         url: https://doi.org/10.1080/01621459.1927.10502953
 
+    newcombe1998paired:
+        type: 'article'
+        author: Newcombe, R. G.
+        year: 1998
+        title: "Improved confidence intervals for the difference between binomial proportions based on paired data"
+        publisher: 'Statistics in Medicine'
+        volume: 17
+        issue: 22
+        pages: 2635-2650
+        doi: 10.1002/(SICI)1097-0258(19981130)17:22<2635::AID-SIM954>3.0.CO;2-C
+        url: https://doi.org/10.1002/(SICI)1097-0258(19981130)17:22%3C2635::AID-SIM954%3E3.0.CO;2-C
+
+    jaeschke1994:
+        type: 'article'
+        author: Jaeschke, R., Guyatt, G. H., Sackett, D. L., et al.
+        year: 1994
+        title: "Users' guides to the medical literature. III. How to use an article about a diagnostic test. B. What are the results and will they help me in caring for my patients?"
+        publisher: 'JAMA'
+        volume: 271
+        issue: 9
+        pages: 703-707
+        doi: 10.1001/jama.271.9.703
+        url: https://doi.org/10.1001/jama.271.9.703
+
     holm1979:
         type: 'article'
         author: Holm, S.
@@ -34,6 +58,30 @@ refs:
         pages: 65-70
         doi: 10.2307/4615733
         url: https://doi.org/10.2307/4615733
+
+    mcnemar1947:
+        type: 'article'
+        author: McNemar, Q.
+        year: 1947
+        title: "Note on the sampling error of the difference between correlated proportions or percentages"
+        publisher: 'Psychometrika'
+        volume: 12
+        issue: 2
+        pages: 153-157
+        doi: 10.1007/BF02295996
+        url: https://doi.org/10.1007/BF02295996
+
+    cochran1950:
+        type: 'article'
+        author: Cochran, W. G.
+        year: 1950
+        title: "The comparison of percentages in matched samples"
+        publisher: 'Biometrika'
+        volume: 37
+        issue: 3-4
+        pages: 256-266
+        doi: 10.1093/biomet/37.3-4.256
+        url: https://doi.org/10.1093/biomet/37.3-4.256
 
     benjaminihochberg1995:
         type: 'article'
@@ -834,6 +882,72 @@ refs:
         publisher:  Med (N Y).
         doi: 10.1016/j.medj.2020.08.001
         url: https://www.cell.com/med/fulltext/S2666-6340(20)30016-7
+
+    AltmanBland1994:
+        type: 'article'
+        author: "Altman, D. G., & Bland, J. M."
+        year: 1994
+        title: "Diagnostic tests 1: Sensitivity and specificity"
+        publisher: BMJ
+        volume: 308
+        pages: 1552
+        doi: 10.1136/bmj.308.6943.1552
+        url: https://doi.org/10.1136/bmj.308.6943.1552
+
+    DeeksAltman2004:
+        type: 'article'
+        author: "Deeks, J. J., & Altman, D. G."
+        year: 2004
+        title: "Diagnostic tests 4: Likelihood ratios"
+        publisher: BMJ
+        volume: 329
+        pages: 168-169
+        doi: 10.1136/bmj.329.7458.168
+        url: https://doi.org/10.1136/bmj.329.7458.168
+
+    Fagan1975:
+        type: 'article'
+        author: "Fagan, T. J."
+        year: 1975
+        title: "Nomogram for Bayes theorem"
+        publisher: New England Journal of Medicine
+        volume: 293
+        pages: 257
+        doi: 10.1056/NEJM197507312930513
+        url: https://doi.org/10.1056/NEJM197507312930513
+
+    STARD2015:
+        type: 'article'
+        author: "Bossuyt, P. M., Reitsma, J. B., Bruns, D. E., et al."
+        year: 2015
+        title: "STARD 2015: An updated list of essential items for reporting diagnostic accuracy studies"
+        publisher: BMJ
+        volume: 351
+        pages: h5527
+        doi: 10.1136/bmj.h5527
+        url: https://doi.org/10.1136/bmj.h5527
+
+    Buderer1996:
+        type: 'article'
+        author: "Buderer, N. M. F."
+        year: 1996
+        title: "Statistical methodology: I. Incorporating the prevalence of disease into the sample size calculation for sensitivity and specificity"
+        publisher: Academic Emergency Medicine
+        volume: 3
+        pages: 895-900
+        doi: 10.1111/j.1553-2712.1996.tb03538.x
+        url: https://doi.org/10.1111/j.1553-2712.1996.tb03538.x
+
+    HuiWalter1980:
+        type: 'article'
+        author: "Hui, S. L., & Walter, S. D."
+        year: 1980
+        title: "Estimating the error rates of diagnostic tests"
+        publisher: Biometrics
+        volume: 36
+        pages: 167-171
+        doi: 10.2307/2530502
+        url: https://doi.org/10.2307/2530502
 
 
     ConditionalDependenceDiagnosticTests:
@@ -1892,9 +2006,9 @@ refs:
 
     forcats:
         type: 'software'
-        author: ""
-        year: ""
-        title: "forcats: R package"
+        author: "Hadley Wickham and Posit Software, PBC"
+        year: 2025
+        title: "forcats: Tools for Working with Categorical Variables (Factors)"
         publisher: '[R package]. Retrieved from https://CRAN.R-project.org/package=forcats'
         url: https://CRAN.R-project.org/package=forcats
 

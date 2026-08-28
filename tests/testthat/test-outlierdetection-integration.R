@@ -1,7 +1,6 @@
 # Integration tests for outlierdetection module
 # Tests the jamovi wrapper itself, not just performance::check_outliers()
 
-context("test-outlierdetection-integration")
 
 
 test_that("Univariate mode extracts per-method scores from check_outliers()", {

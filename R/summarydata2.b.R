@@ -249,7 +249,7 @@ summarydata2Class <- if (requireNamespace("jmvcore")) R6::R6Class("summarydata2C
 
                 # Try generic parsing as last resort
                 parsed <- tryCatch({
-                    lubridate::parse_date_time(x, orders = c("ymd", "dmy", "mdy", "ymd HMS", "dmy HMS", "mdy HMS"))
+                    suppressWarnings(lubridate::parse_date_time(x, orders = c("ymd", "dmy", "mdy", "ymd HMS", "dmy HMS", "mdy HMS")))
                 }, error = function(e) NULL)
 
                 if (!is.null(parsed) && sum(!is.na(parsed)) > 0) {
@@ -285,12 +285,8 @@ summarydata2Class <- if (requireNamespace("jmvcore")) R6::R6Class("summarydata2C
                             date_parse_info[[date_var]] <- validation_result
                             # Update dataset with parsed dates
                             dataset[[date_var]] <- validation_result$parsed
-                        } else {
-                            warning(paste("Variable", date_var, "could not be parsed as a valid date format"))
                         }
-                    }, error = function(e) {
-                        warning(paste("Error processing date variable", date_var, ":", e$message))
-                    })
+                    }, error = function(e) NULL)
                 }
             }
 

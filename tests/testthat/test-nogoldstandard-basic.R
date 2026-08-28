@@ -155,13 +155,14 @@ test_that("nogoldstandard handles any positive method", {
 
 test_that("nogoldstandard handles Bayesian analysis method", {
   result <- nogoldstandard(
-    data = nogoldstandard_test,
-    test1 = "Test1",
-    test1Positive = "Positive",
-    test2 = "Test2",
-    test2Positive = "Positive",
+    data = nogoldstandard_pathology,
+    test1 = "Pathologist1",
+    test1Positive = "Malignant",
+    test2 = "Pathologist2",
+    test2Positive = "Malignant",
+    test3 = "Pathologist3",
+    test3Positive = "Malignant",
     method = "bayesian",
-    test3Positive = NULL,
     test4Positive = NULL,
     test5Positive = NULL
   )

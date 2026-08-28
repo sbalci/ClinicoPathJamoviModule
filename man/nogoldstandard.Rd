@@ -22,14 +22,17 @@ nogoldstandard(
   nboot = 1000,
   alpha = 0.05,
   verbose = FALSE,
-  seed = 0
+  seed = 0,
+  showSummary = FALSE,
+  showMethodGuide = FALSE
 )
 }
 \arguments{
 \item{data}{The data as a data frame.}
 
-\item{clinicalPreset}{Predefined clinical scenarios with optimized settings
-and method recommendations.}
+\item{clinicalPreset}{Illustrative scenario examples only. They do not
+change analysis settings and are not clinical guides, validated
+recommendations, or substitutes for a study-specific analysis plan.}
 
 \item{test1}{First diagnostic test variable.}
 
@@ -51,20 +54,35 @@ and method recommendations.}
 
 \item{test5Positive}{The positive level for Test 5.}
 
-\item{method}{Method for analyzing tests without gold standard.}
+\item{method}{Method for analyzing tests without a gold standard. Composite
+Reference uses a strict majority (more than half positive); ties with an
+even number of tests are classified as rule negative.}
 
-\item{bootstrap}{Calculate bootstrap confidence intervals.}
+\item{bootstrap}{Calculate case-resampling percentile confidence intervals.
+For latent-class and penalized-EM models, confidence intervals are reported
+only when this option is enabled because ordinary binomial intervals do not
+account for latent-variable estimation.}
 
 \item{nboot}{Number of bootstrap samples for confidence intervals.}
 
 \item{alpha}{Alpha level for confidence intervals.}
 
-\item{verbose}{Show detailed progress messages during bootstrap analysis.}
+\item{verbose}{Show detailed analysis diagnostics, including convergence,
+random starts, exclusions, and bootstrap failures when bootstrap intervals
+are enabled.}
 
 \item{seed}{Base random seed for the reproducible latent-class multi-start
-search. Each start is offset from this base, so changing it shifts the
-whole reproducible sequence; the default (0) reproduces the previous
-behaviour.}
+search and bootstrap resampling. Each start is offset from this base, so
+changing it shifts the whole reproducible sequence; the default (0)
+reproduces the previous behaviour.}
+
+\item{showSummary}{Show an optional plain-language summary. The summary
+describes the fitted quantities and their assumptions; it is not clinical
+guidance.}
+
+\item{showMethodGuide}{Show an optional educational guide to the available
+methods. The scenarios are illustrative examples, not clinical guides or
+validated recommendations.}
 }
 \value{
 A results object containing:
@@ -77,11 +95,10 @@ A results object containing:
 \code{results$prevalence} \tab \tab \tab \tab \tab a table \cr
 \code{results$test_metrics} \tab \tab \tab \tab \tab a table \cr
 \code{results$model_fit} \tab \tab \tab \tab \tab a table \cr
-\code{results$conditional_dependence} \tab \tab \tab \tab \tab Latent class analysis assumes the tests err independently given true disease status. For each pair this compares the observed two-way table with the one the fitted model implies; a residual above 3.84 (the 5 percent point of chi-squared on 1 degree of freedom) is evidence that the pair shares a source of error, which inflates the estimated accuracy. Requires four or more tests: with three the model is just-identified and reproduces every table exactly, so no residual can reveal dependence. \cr
+\code{results$conditional_dependence} \tab \tab \tab \tab \tab Latent class analysis assumes the tests are conditionally independent within each latent class. For each pair this compares the observed two-way table with the one implied by the fitted model. A residual above 3.84 is descriptive evidence against conditional independence, but this squared statistic does not identify the direction or cause of dependence and cannot determine the direction of bias in the fitted parameters. Requires four or more tests: with three the model is just-identified and no residual can diagnose dependence. \cr
 \code{results$diagnostics} \tab \tab \tab \tab \tab Detail of how the estimates were produced: sample size, method, convergence, number of random starts used, and bootstrap failures. Shown only when Verbose output is enabled. \cr
 \code{results$crosstab} \tab \tab \tab \tab \tab a table \cr
 \code{results$agreement_plot} \tab \tab \tab \tab \tab an image \cr
-\code{results$agreement_plot2} \tab \tab \tab \tab \tab an image \cr
 }
 
 Tables can be converted to data frames with \code{asDF} or \code{\link{as.data.frame}}. For example:
@@ -91,9 +108,9 @@ Tables can be converted to data frames with \code{asDF} or \code{\link{as.data.f
 \code{as.data.frame(results$agreement_stats)}
 }
 \description{
-Analysis of diagnostic tests without a gold standard reference using
-multiple statistical approaches. Implements Latent Class Analysis (Hui &
-Walter, 1980), Bayesian methods (Joseph et al., 1995),  and composite
-reference standards for estimating test performance when no perfect
-reference test exists.
+Analysis of multiple binary tests when no perfect reference exists.
+Implements a conditional-independence two-class latent class model,
+fixed-prior penalized EM point estimation, and descriptive agreement with
+self-built composite reference rules. Latent classes are unlabeled, and
+reference-rule results are not diagnostic-accuracy estimates.
 }

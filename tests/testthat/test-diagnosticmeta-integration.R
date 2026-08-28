@@ -5,8 +5,6 @@
 # Tests integration with other packages, realistic workflows,
 # and output consistency for the diagnosticmeta jamovi function
 
-library(testthat)
-
 # Load test data
 data(diagnosticmeta_test, package = "ClinicoPath")
 data(diagnosticmeta_test_categorical, package = "ClinicoPath")
@@ -293,8 +291,8 @@ test_that("diagnosticmeta comprehensive analysis workflow", {
 
 test_that("diagnosticmeta handles different data structures consistently", {
   # Test with tibble
-  library(tibble)
-  tibble_data <- as_tibble(diagnosticmeta_test)
+  skip_if_not_installed("tibble")
+  tibble_data <- tibble::as_tibble(diagnosticmeta_test)
 
   result_tibble <- diagnosticmeta(
     data = tibble_data,

@@ -554,6 +554,148 @@ superpcClass <- R6::R6Class(
             )
             
             self$results$clinical_interpretation$setContent(html)
+        },
+
+        .plot_feature_screening = function(image, ggtheme, theme, ...) {
+            if (is.null(private$.screening_results) || length(private$.screening_results) == 0) return(FALSE)
+            
+            res <- private$.screening_results
+            p_vals <- sapply(res, function(x) x$p_value)
+            hrs <- sapply(res, function(x) x$hr)
+            df <- data.frame(
+                Feature = names(res),
+                PValue = p_vals,
+                LogP = -log10(p_vals + 1e-10),
+                HR = hrs,
+                Selected = ifelse(p_vals < self$options$threshold, "Selected", "Not Selected"),
+                stringsAsFactors = FALSE
+            )
+            df <- df[order(df$PValue), ]
+            df$Feature <- factor(df$Feature, levels = df$Feature)
+            
+            if (nrow(df) > 30) df <- df[1:30, ]
+            
+            p <- ggplot2::ggplot(df, ggplot2::aes(x = Feature, y = LogP, fill = Selected)) +
+                ggplot2::geom_bar(stat = "identity") +
+                ggplot2::geom_hline(yintercept = -log10(self$options$threshold), linetype = "dashed", color = "red") +
+                ggplot2::scale_fill_manual(values = c("Selected" = "#E64B35FF", "Not Selected" = "#8491B4FF")) +
+                ggplot2::labs(title = "Feature Screening (-log10 p-value)", x = "Feature", y = "-log10(p-value)") +
+                ggplot2::theme_minimal() +
+                ggplot2::theme(axis.text.x = ggplot2::element_text(angle = 45, hjust = 1))
+            if (!is.null(ggtheme)) p <- p + ggtheme
+            print(p)
+            TRUE
+        },
+
+        .plot_pca_biplot = function(image, ggtheme, theme, ...) {
+            if (is.null(private$.pc_scores) || ncol(private$.pc_scores) < 2) return(FALSE)
+            
+            scores <- as.data.frame(private$.pc_scores[, 1:2])
+            colnames(scores) <- c("PC1", "PC2")
+            event_status <- if (!is.null(private$.analysis_data$event)) factor(private$.analysis_data$event) else factor(rep("1", nrow(scores)))
+            scores$Status <- event_status
+            
+            p <- ggplot2::ggplot(scores, ggplot2::aes(x = PC1, y = PC2, color = Status)) +
+                ggplot2::geom_point(alpha = 0.8, size = 2.5) +
+                ggplot2::scale_color_manual(values = c("0" = "#4DBBD5FF", "1" = "#E64B35FF"), 
+                                            labels = c("Censored", "Event")) +
+                ggplot2::labs(title = "Supervised PCA Biplot (PC1 vs PC2)", 
+                             x = paste0("PC1 (", round(private$.variance_explained[1], 1), "%)"),
+                             y = paste0("PC2 (", round(private$.variance_explained[2], 1), "%)")) +
+                ggplot2::theme_minimal()
+            if (!is.null(ggtheme)) p <- p + ggtheme
+            print(p)
+            TRUE
+        },
+
+        .plot_variance_explained = function(image, ggtheme, theme, ...) {
+            if (is.null(private$.variance_explained)) return(FALSE)
+            
+            ve <- private$.variance_explained
+            df <- data.frame(
+                Component = paste0("PC", seq_along(ve)),
+                Variance = ve,
+                Cumulative = cumsum(ve)
+            )
+            df$Component <- factor(df$Component, levels = df$Component)
+            
+            p <- ggplot2::ggplot(df, ggplot2::aes(x = Component, y = Variance)) +
+                ggplot2::geom_bar(stat = "identity", fill = "#3C5488FF") +
+                ggplot2::geom_line(ggplot2::aes(y = Cumulative, group = 1), color = "#E64B35FF", linewidth = 1) +
+                ggplot2::geom_point(ggplot2::aes(y = Cumulative), color = "#E64B35FF", size = 2) +
+                ggplot2::ylim(0, 100) +
+                ggplot2::labs(title = "Variance Explained by Principal Components", 
+                             x = "Principal Component", y = "% Variance Explained (Line = Cumulative %)") +
+                ggplot2::theme_minimal()
+            if (!is.null(ggtheme)) p <- p + ggtheme
+            print(p)
+            TRUE
+        },
+
+        .plot_survival_curves = function(image, ggtheme, theme, ...) {
+            if (is.null(private$.model_data) || is.null(private$.cox_model)) return(FALSE)
+            
+            risk_score <- predict(private$.cox_model, newdata = private$.model_data)
+            risk_group <- ifelse(risk_score >= median(risk_score, na.rm = TRUE), "High Risk", "Low Risk")
+            
+            surv_df <- data.frame(
+                time = private$.model_data$time,
+                event = private$.model_data$event,
+                group = factor(risk_group)
+            )
+            
+            km_fit <- tryCatch(survival::survfit(survival::Surv(time, event) ~ group, data = surv_df), error = function(e) NULL)
+            if (is.null(km_fit)) return(FALSE)
+            
+            p <- tryCatch({
+                times <- km_fit$time
+                surv <- km_fit$surv
+                strata <- rep(names(km_fit$strata), km_fit$strata)
+                k_df <- data.frame(time = times, surv = surv, strata = strata)
+                ggplot2::ggplot(k_df, ggplot2::aes(x = time, y = surv, color = strata)) +
+                    ggplot2::geom_step(linewidth = 1) +
+                    ggplot2::ylim(0, 1) +
+                    ggplot2::labs(title = "Survival Curves by Risk Groups", x = "Time", y = "Survival Probability", color = "Risk Group") +
+                    ggplot2::theme_minimal()
+            }, error = function(e) NULL)
+            
+            if (is.null(p)) return(FALSE)
+            if (!is.null(ggtheme)) p <- p + ggtheme
+            print(p)
+            TRUE
+        },
+
+        .plot_component_heatmap = function(image, ggtheme, theme, ...) {
+            if (is.null(private$.pca_result)) return(FALSE)
+            
+            loadings <- private$.pca_result$rotation
+            n_comp <- min(3, ncol(loadings))
+            loadings_sub <- loadings[, 1:n_comp, drop = FALSE]
+            
+            max_load <- apply(abs(loadings_sub), 1, max)
+            top_feats <- names(sort(max_load, decreasing = TRUE))[1:min(20, nrow(loadings_sub))]
+            loadings_top <- loadings_sub[top_feats, , drop = FALSE]
+            
+            df_list <- list()
+            for (j in 1:ncol(loadings_top)) {
+                df_list[[j]] <- data.frame(
+                    Feature = rownames(loadings_top),
+                    Component = colnames(loadings_top)[j],
+                    Loading = loadings_top[, j],
+                    stringsAsFactors = FALSE
+                )
+            }
+            df <- do.call(rbind, df_list)
+            df$Feature <- factor(df$Feature, levels = rev(top_feats))
+            
+            p <- ggplot2::ggplot(df, ggplot2::aes(x = Component, y = Feature, fill = Loading)) +
+                ggplot2::geom_tile(color = "white") +
+                ggplot2::scale_fill_gradient2(low = "#3C5488FF", mid = "white", high = "#E64B35FF", midpoint = 0) +
+                ggplot2::labs(title = "Top Feature Loadings Heatmap", x = "Component", y = "Feature", fill = "Loading") +
+                ggplot2::theme_minimal()
+            if (!is.null(ggtheme)) p <- p + ggtheme
+            print(p)
+            TRUE
         }
     ),
     

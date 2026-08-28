@@ -1,6 +1,7 @@
 #' @title Decision Calculator
 #' @importFrom R6 R6Class
 #' @import jmvcore
+#' @importFrom jmvcore .
 #' @importFrom utils data
 #'
 #' @return An \code{R6} class generator object for the \code{decisioncalculatorClass} backend; used internally by the jamovi analysis wrapper and not called directly.
@@ -8,11 +9,6 @@
 decisioncalculatorClass <- if (requireNamespace("jmvcore")) {
     R6::R6Class("decisioncalculatorClass",
         inherit = decisioncalculatorBase, private = list(
-            # TODO [meddecide audit 2026-05-14] - see docs/audit/MODULE_AUDIT_REPORT_20260514-1847.md
-            #   [hygiene/notices] uses a plain-text Preformatted "notices" output via private$.addNotice()/.renderNotices(); NOT jmvcore::Notice objects (avoids the insert(999, Notice) serialization error)
-            #   [hygiene/notices] uses a plain-text Preformatted output instead of
-            #   dynamically inserted jmvcore::Notice objects (serialization safety)
-
             # Notice collection helpers. A single Preformatted (plain-text) output item:
             # avoids BOTH the jmvcore::Notice serialization error from
             # self$results$insert(999, Notice) AND any HTML in notices (project convention:
@@ -38,14 +34,29 @@ decisioncalculatorClass <- if (requireNamespace("jmvcore")) {
                     return()
                 }
 
+                severity_order <- c(
+                    ERROR = 1L,
+                    STRONG_WARNING = 2L,
+                    WARNING = 3L,
+                    INFO = 4L
+                )
+                priorities <- unname(severity_order[vapply(
+                    private$.noticeList,
+                    `[[`,
+                    character(1),
+                    "type"
+                )])
+                priorities[is.na(priorities)] <- 5L
+                ordered_notices <- private$.noticeList[order(priorities)]
+
                 # Plain text only - notices avoid HTML by project convention; the Preformatted
                 # output item renders this literally (no markup, no injection surface).
-                blocks <- vapply(private$.noticeList, function(notice) {
+                blocks <- vapply(ordered_notices, function(notice) {
                     prefix <- switch(notice$type,
-                        ERROR          = "ERROR: ",
-                        STRONG_WARNING = "WARNING: ",
-                        WARNING        = "WARNING: ",
-                        INFO           = "INFO: ",
+                        ERROR          = paste0(.("ERROR"), ": "),
+                        STRONG_WARNING = paste0(.("STRONG WARNING"), ": "),
+                        WARNING        = paste0(.("WARNING"), ": "),
+                        INFO           = paste0(.("INFO"), ": "),
                         ""
                     )
                     paste0(prefix, notice$title, "\n", notice$content)
@@ -55,35 +66,32 @@ decisioncalculatorClass <- if (requireNamespace("jmvcore")) {
             },
             .init = function() {
                 # Welcome message
-                welcome_html <- "
-            <div style='font-family: Arial, sans-serif; max-width: 800px; line-height: 1.4;'>
-                <div style='background-color: rgba(88, 88, 88, 0.06); border: 2px solid #333; padding: 20px; margin-bottom: 20px; color: inherit;'>
-                <h2 style='margin: 0 0 10px 0; font-size: 18px; color: #333;'>Medical Decision Calculator</h2>
-                <p style='margin: 0; font-size: 14px; color: #666;'>
-                Comprehensive diagnostic test evaluation for clinical decision-making
-                </p>
-                </div>
-
-                <div style='font-size: 14px; color: #333;'>
-                <p><strong>What this tool does:</strong></p>
-                <p>Evaluates diagnostic test performance by calculating sensitivity, specificity,
-                predictive values, likelihood ratios, and advanced metrics from a 2\u{00D7}2 confusion matrix.</p>
-
-                <p><strong>To get started:</strong></p>
-                <ol style='margin: 10px 0; padding-left: 25px;'>
-                    <li>Enter your four counts: TP (True Positives), FP (False Positives), TN (True Negatives), FN (False Negatives)</li>
-                    <li>Choose whether to calculate confidence intervals (recommended)</li>
-                    <li>Optionally enable summary, glossary, or about panels for additional guidance</li>
-                </ol>
-
-                <div style='background-color: rgba(155, 155, 155, 0.06); border: 1px solid #ccc; padding: 12px; margin: 15px 0; color: inherit;'>
-                    <p style='margin: 0; font-size: 13px;'><strong>Quick Example:</strong>
-                    If you tested 200 patients (100 diseased, 100 healthy) and your test correctly
-                    identified 90 diseased (TP=90) and 80 healthy (TN=80), you have FN=10 and FP=20.</p>
-                </div>
-                </div>
-            </div>
-            "
+                welcome_html <- paste0(
+                    "<div style='font-family: Arial, sans-serif; max-width: 800px; line-height: 1.4;'>",
+                    "<div style='background-color: rgba(88, 88, 88, 0.06); border: 2px solid currentColor; padding: 20px; margin-bottom: 20px; color: inherit;'>",
+                    "<h2 style='margin: 0 0 10px 0; font-size: 18px;'>",
+                    .("Medical decision calculator"),
+                    "</h2><p style='margin: 0; font-size: 14px;'>",
+                    .("Educational description of diagnostic-test performance"),
+                    "</p></div><div style='font-size: 14px;'><p><strong>",
+                    .("What this tool does:"),
+                    "</strong></p><p>",
+                    .("Evaluates diagnostic-test performance by calculating sensitivity, specificity, predictive values, likelihood ratios, and advanced metrics from a 2×2 confusion matrix."),
+                    "</p><p><strong>",
+                    .("To get started:"),
+                    "</strong></p><ol style='margin: 10px 0; padding-left: 25px;'><li>",
+                    .("Enter the four counts: TP (true positive), FP (false positive), TN (true negative), and FN (false negative)."),
+                    "</li><li>",
+                    .("Choose whether to calculate confidence intervals."),
+                    "</li><li>",
+                    .("Optionally enable the summary, glossary, or about panels for additional guidance."),
+                    "</li></ol><div style='background-color: rgba(155, 155, 155, 0.06); border: 1px solid #ccc; padding: 12px; margin: 15px 0; color: inherit;'>",
+                    "<p style='margin: 0; font-size: 13px;'><strong>",
+                    .("Illustrative example, not clinical guidance:"),
+                    "</strong> ",
+                    .("If 200 participants include 100 reference-positive and 100 reference-negative observations, with TP=90 and TN=80, then FN=10 and FP=20."),
+                    "</p></div></div></div>"
+                )
 
                 self$results$welcome$setContent(welcome_html)
 
@@ -92,7 +100,7 @@ decisioncalculatorClass <- if (requireNamespace("jmvcore")) {
                 cTable$addRow(
                     rowKey = "Test Positive",
                     values = list(
-                        newtest = "Test Positive"
+                        newtest = .("Test positive")
                     )
                 )
 
@@ -100,7 +108,7 @@ decisioncalculatorClass <- if (requireNamespace("jmvcore")) {
                 cTable$addRow(
                     rowKey = "Test Negative",
                     values = list(
-                        newtest = "Test Negative"
+                        newtest = .("Test negative")
                     )
                 )
 
@@ -108,7 +116,7 @@ decisioncalculatorClass <- if (requireNamespace("jmvcore")) {
                 cTable$addRow(
                     rowKey = "Total",
                     values = list(
-                        newtest = "Total"
+                        newtest = .("Total")
                     )
                 )
 
@@ -126,7 +134,7 @@ decisioncalculatorClass <- if (requireNamespace("jmvcore")) {
                 )
                 multipleCutoffTable$addRow(
                     rowKey = 3,
-                    values = list(cutoffName = "Current (Reference)")
+                    values = list(cutoffName = .("Current (reference)"))
                 )
             },
             .run = function() {
@@ -157,7 +165,7 @@ decisioncalculatorClass <- if (requireNamespace("jmvcore")) {
                     )
                 }
 
-                # Inform user that CIs are unavailable when using population prevalence
+                # Explain prevalence adjustment when intervals were not requested.
                 if (!ci && pp) {
                     private$.addNotice(
                         "INFO",
@@ -166,50 +174,44 @@ decisioncalculatorClass <- if (requireNamespace("jmvcore")) {
                     )
                 }
 
-                # Validate prevalence when provided programmatically
-                if (pp && (is.na(pprob) || pprob <= 0 || pprob >= 1)) {
-                    private$.addNotice("ERROR", "Invalid Prior Probability", 'Invalid prior probability. \u{2022} Prior probability must be between 0 and 1 (exclusive). \u{2022} Update the "Prior Probability (prevalence)" value.')
-                    return()
-                }
-
                 # Reject non-finite inputs
                 if (any(!is.finite(c(TP, FP, TN, FN)))) {
-                    private$.addNotice("ERROR", "Non-Finite Counts", "Non-finite counts detected. \u{2022} TP, FP, TN, and FN must be finite numbers. \u{2022} Please check your input values.")
+                    private$.addNotice("ERROR", .("Non-finite counts"), .("TP, FP, TN, and FN must be finite numbers. Check the input values."))
                     return()
                 }
 
                 # Check for non-negative values
                 if (TP < 0 || FP < 0 || TN < 0 || FN < 0) {
-                    private$.addNotice("ERROR", "Negative Counts Detected", "Negative counts detected. \u{2022} All counts (TP, FP, TN, FN) must be non-negative. \u{2022} Please check your input values for errors.")
+                    private$.addNotice("ERROR", .("Negative counts detected"), .("All counts (TP, FP, TN, FN) must be non-negative. Check the input values."))
                     return()
                 }
 
                 # Check for at least some data
                 if (TP + FP + TN + FN == 0) {
-                    private$.addNotice("ERROR", "All Counts Zero", "All counts are zero. \u{2022} Please provide valid diagnostic test data. \u{2022} Ensure TP, FP, TN, and FN values are entered correctly.")
+                    private$.addNotice("ERROR", .("All counts are zero"), .("Provide diagnostic-test data with at least one non-zero count."))
                     return()
                 }
 
                 # Check for diseased subjects
                 if (TP + FN == 0) {
-                    private$.addNotice("ERROR", "No Diseased Subjects", "No diseased subjects detected (TP + FN = 0). \u{2022} Cannot calculate sensitivity and related metrics. \u{2022} Ensure your confusion matrix includes cases with disease present.")
+                    private$.addNotice("ERROR", .("No reference-positive subjects"), .("TP + FN equals zero, so sensitivity and related measures cannot be calculated."))
                     return()
                 }
 
                 # Check for healthy subjects
                 if (TN + FP == 0) {
-                    private$.addNotice("ERROR", "No Healthy Subjects", "No healthy subjects detected (TN + FP = 0). \u{2022} Cannot calculate specificity and related metrics. \u{2022} Ensure your confusion matrix includes cases without disease.")
+                    private$.addNotice("ERROR", .("No reference-negative subjects"), .("TN + FP equals zero, so specificity and related measures cannot be calculated."))
                     return()
                 }
 
                 # Check for positive tests
                 if (TP + FP == 0) {
-                    private$.addNotice("WARNING", "No Positive Tests", "No positive test results detected (TP + FP = 0). \u{2022} Positive Predictive Value (PPV) is undefined. \u{2022} Ensure your confusion matrix includes both positive and negative test results.")
+                    private$.addNotice("WARNING", .("No positive test results"), .("TP + FP equals zero, so positive predictive value is undefined."))
                 }
 
                 # Check for negative tests
                 if (TN + FN == 0) {
-                    private$.addNotice("WARNING", "No Negative Tests", "No negative test results detected (TN + FN = 0). \u{2022} Negative Predictive Value (NPV) is undefined. \u{2022} Ensure your confusion matrix includes both positive and negative test results.")
+                    private$.addNotice("WARNING", .("No negative test results"), .("TN + FN equals zero, so negative predictive value is undefined."))
                 }
 
 
@@ -222,7 +224,7 @@ decisioncalculatorClass <- if (requireNamespace("jmvcore")) {
 
                 table3 <- as.table(table2)
 
-                names(attributes(table3)$dimnames) <- c("Test", "Golden Standard")
+                names(attributes(table3)$dimnames) <- c("Test", "Reference standard")
 
                 # Prior Probability ----
                 # (pp and pprob already read at top of function for validation)
@@ -236,7 +238,7 @@ decisioncalculatorClass <- if (requireNamespace("jmvcore")) {
                 cTable$setRow(
                     rowKey = "Test Positive",
                     values = list(
-                        newtest = "Test Positive",
+                        newtest = .("Test positive"),
                         GP = TP,
                         GN = FP,
                         Total = TP + FP
@@ -247,7 +249,7 @@ decisioncalculatorClass <- if (requireNamespace("jmvcore")) {
                 cTable$setRow(
                     rowKey = "Test Negative",
                     values = list(
-                        newtest = "Test Negative",
+                        newtest = .("Test negative"),
                         GP = FN,
                         GN = TN,
                         Total = FN + TN
@@ -257,7 +259,7 @@ decisioncalculatorClass <- if (requireNamespace("jmvcore")) {
                 cTable$setRow(
                     rowKey = "Total",
                     values = list(
-                        newtest = "Total",
+                        newtest = .("Total"),
                         GP = TP + FN,
                         GN = FP + TN,
                         Total = TP + FP + FN + TN
@@ -315,7 +317,7 @@ decisioncalculatorClass <- if (requireNamespace("jmvcore")) {
                     TN_cc <- TN + 0.5
                     FN_cc <- FN + 0.5
 
-                    private$.addNotice("WARNING", "Continuity Correction Applied", "Zero cells detected. Applied Haldane-Anscombe 0.5 continuity correction to the likelihood ratio and diagnostic odds ratio point estimates to avoid infinite or undefined values. \u{2022} The 95% confidence intervals come from epiR::epi.tests() on the raw (uncorrected) counts, so they are not continuity-corrected and may be undefined for these statistics.")
+                    private$.addNotice("WARNING", .("Continuity correction applied"), .("A Haldane-Anscombe 0.5 correction was applied to likelihood-ratio and diagnostic-odds-ratio point estimates because a zero cell was present. Confidence intervals use the raw counts and are not continuity-corrected."))
                 }
 
                 # Calculate metrics with safe division
@@ -331,6 +333,29 @@ decisioncalculatorClass <- if (requireNamespace("jmvcore")) {
                 } else {
                     # From ConfusionMatrix
                     PriorProb <- PrevalenceD
+                }
+
+                if (PriorProb < 0.05 || PriorProb > 0.95) {
+                    private$.addNotice(
+                        "STRONG_WARNING",
+                        .("Extreme prevalence"),
+                        jmvcore::format(
+                            .("The selected prevalence is {prevalence}. Predictive values may be unstable or poorly transportable; verify them in the intended population and report the prevalence used."),
+                            prevalence = sprintf("%.1f%%", 100 * PriorProb)
+                        )
+                    )
+                }
+
+                if (DiseaseP < 10 || DiseaseN < 10) {
+                    private$.addNotice(
+                        "STRONG_WARNING",
+                        .("Very sparse reference groups"),
+                        jmvcore::format(
+                            .("Only {positive} reference-positive and {negative} reference-negative observations are available. Estimates will be imprecise; inspect confidence intervals and justify sample size for the intended precision. This warning is not a clinical adequacy threshold."),
+                            positive = DiseaseP,
+                            negative = DiseaseN
+                        )
+                    )
                 }
 
                 # CRITICAL FIX: Calculate PPV and NPV using the selected prevalence
@@ -428,7 +453,7 @@ decisioncalculatorClass <- if (requireNamespace("jmvcore")) {
                 nTable$setRow(
                     rowNo = 1,
                     values = list(
-                        tablename = "n",
+                        tablename = .("Counts"),
                         TotalPop = TotalPop,
                         DiseaseP = DiseaseP,
                         DiseaseN = DiseaseN,
@@ -446,7 +471,7 @@ decisioncalculatorClass <- if (requireNamespace("jmvcore")) {
                 ratioTable$setRow(
                     rowNo = 1,
                     values = list(
-                        tablename = "Ratios",
+                        tablename = .("Measures"),
                         Sens = Sens,
                         Spec = Spec,
                         AccurT = AccurT,
@@ -466,19 +491,19 @@ decisioncalculatorClass <- if (requireNamespace("jmvcore")) {
                 if (self$options$fnote) {
                     # nTable$addFootnote(rowKey = "1", col = "TotalPop", "Total Population")
 
-                    nTable$addFootnote(rowNo = 1, col = "TotalPop", "Total Number of Subjects")
+                    nTable$addFootnote(rowNo = 1, col = "TotalPop", .("Total number of subjects"))
 
-                    nTable$addFootnote(rowNo = 1, col = "DiseaseP", "Total Number of Subjects with Disease")
+                    nTable$addFootnote(rowNo = 1, col = "DiseaseP", .("Total number of reference-positive subjects"))
 
-                    nTable$addFootnote(rowNo = 1, col = "DiseaseN", "Total Number of Healthy Subjects")
+                    nTable$addFootnote(rowNo = 1, col = "DiseaseN", .("Total number of reference-negative subjects"))
 
-                    nTable$addFootnote(rowNo = 1, col = "TestP", "Total Number of Positive Tests")
+                    nTable$addFootnote(rowNo = 1, col = "TestP", .("Total number of positive tests"))
 
-                    nTable$addFootnote(rowNo = 1, col = "TestN", "Total Number of Negative Tests")
+                    nTable$addFootnote(rowNo = 1, col = "TestN", .("Total number of negative tests"))
 
-                    nTable$addFootnote(rowNo = 1, col = "TestT", "Total Number of True Test Results")
+                    nTable$addFootnote(rowNo = 1, col = "TestT", .("Total number of concordant test results"))
 
-                    nTable$addFootnote(rowNo = 1, col = "TestW", "Total Number of Wrong Test Results")
+                    nTable$addFootnote(rowNo = 1, col = "TestW", .("Total number of discordant test results"))
                 }
 
 
@@ -486,48 +511,61 @@ decisioncalculatorClass <- if (requireNamespace("jmvcore")) {
 
 
                 if (self$options$fnote) {
-                    ratioTable$addFootnote(rowNo = 1, col = "Sens", "Sensitivity (True Positives among Diseased)")
+                    ratioTable$addFootnote(rowNo = 1, col = "Sens", .("Sensitivity: true positives among reference-positive subjects"))
 
-                    ratioTable$addFootnote(rowNo = 1, col = "Spec", "Specificity (True Negatives among Healthy)")
+                    ratioTable$addFootnote(rowNo = 1, col = "Spec", .("Specificity: true negatives among reference-negative subjects"))
 
-                    ratioTable$addFootnote(rowNo = 1, col = "AccurT", sprintf(
-                        "Accuracy (proportion of all test results that were correct). Unlike sensitivity and specificity, accuracy depends on disease prevalence: it is computed here at the prevalence observed in this sample (%.1f%%)%s, and it will differ in a population with a different case mix.",
-                        PrevalenceD * 100,
-                        if (pp) ", not at the population prevalence shown in the Prevalence column" else ""
-                    ))
+                    accuracy_note <- if (pp) {
+                        jmvcore::format(
+                            .("Sample accuracy is the proportion of concordant results. It is computed at the prevalence observed in this sample ({prevalence}), not at the supplied population prevalence, and changes with case mix."),
+                            prevalence = sprintf("%.1f%%", PrevalenceD * 100)
+                        )
+                    } else {
+                        jmvcore::format(
+                            .("Sample accuracy is the proportion of concordant results. It is computed at the prevalence observed in this sample ({prevalence}) and changes with case mix."),
+                            prevalence = sprintf("%.1f%%", PrevalenceD * 100)
+                        )
+                    }
+                    ratioTable$addFootnote(rowNo = 1, col = "AccurT", accuracy_note)
 
                     prev_note <- if (pp) {
-                        "Prevalence used: the user-supplied population prevalence (prior probability), not the prevalence observed in this study sample."
+                        .("The user-supplied population prevalence is used, not the prevalence observed in this sample.")
                     } else {
-                        "Disease prevalence observed in this study sample."
+                        .("Prevalence observed in this study sample.")
                     }
                     ratioTable$addFootnote(rowNo = 1, col = "PrevalenceD", prev_note)
 
                     ppv_note <- if (pp) {
-                        "Positive Predictive Value (Probability of disease after a positive test using supplied population prevalence)"
+                        .("Positive predictive value using the supplied population prevalence.")
                     } else {
-                        "Positive Predictive Value (Probability of having disease after a positive test using this study population)"
+                        .("Positive predictive value using this study sample's prevalence.")
                     }
                     npv_note <- if (pp) {
-                        "Negative Predictive Value (Probability of being healthy after a negative test using supplied population prevalence)"
+                        .("Negative predictive value using the supplied population prevalence.")
                     } else {
-                        "Negative Predictive Value (Probability of being healthy after a negative test using this study population)"
+                        .("Negative predictive value using this study sample's prevalence.")
                     }
 
                     ratioTable$addFootnote(rowNo = 1, col = "PPV", ppv_note)
 
                     ratioTable$addFootnote(rowNo = 1, col = "NPV", npv_note)
 
-                    ratioTable$addFootnote(rowNo = 1, col = "PostTestProbDisease", "Post-test Probability of Having Disease (Probability of having disease after a positive test using the prevalence above). Mathematically identical to the PPV shown here.")
+                    ratioTable$addFootnote(rowNo = 1, col = "PostTestProbDisease", .("Probability of a reference-positive outcome after a positive test, using the displayed prevalence. It is identical to the PPV shown here."))
 
-                    ratioTable$addFootnote(rowNo = 1, col = "PostTestProbHealthy", "Post-test Probability of Being Healthy (Probability of being healthy after a negative test using the prevalence above). Mathematically identical to the NPV shown here.")
+                    ratioTable$addFootnote(rowNo = 1, col = "PostTestProbHealthy", .("Probability of a reference-negative outcome after a negative test, using the displayed prevalence. It is identical to the NPV shown here."))
 
-                    ratioTable$addFootnote(rowNo = 1, col = "LRP", "Positive Likelihood Ratio: How much more likely a positive result is in diseased vs healthy patients. >10 = strong evidence, >5 = moderate, >2 = weak but potentially useful.")
+                    ratioTable$addFootnote(
+                        rowNo = 1, col = "LRP",
+                        .("Positive likelihood ratio: the factor by which a positive result multiplies pre-test odds. Its practical importance depends on the clinical context and starting probability.")
+                    )
 
-                    ratioTable$addFootnote(rowNo = 1, col = "LRN", "Negative Likelihood Ratio: How much more likely a negative result is in diseased vs healthy patients. <0.1 = strong evidence against disease, <0.2 = moderate, <0.5 = weak.")
+                    ratioTable$addFootnote(
+                        rowNo = 1, col = "LRN",
+                        .("Negative likelihood ratio: the factor by which a negative result multiplies pre-test odds. Its practical importance depends on the clinical context and starting probability.")
+                    )
 
                     if (zero_cell) {
-                        ratioTable$addFootnote(rowNo = 1, col = "LRP", "A Haldane-Anscombe 0.5 continuity correction was applied to the likelihood ratios in this table because a zero cell was present. The epiR confidence-interval table below uses raw (uncorrected) counts, so its LR point estimates may differ.")
+                        ratioTable$addFootnote(rowNo = 1, col = "LRP", .("A Haldane-Anscombe 0.5 correction was applied to the likelihood ratios because a zero cell was present. The epiR confidence-interval table uses raw counts, so its point estimates may differ."))
                     }
                 }
 
@@ -537,7 +575,7 @@ decisioncalculatorClass <- if (requireNamespace("jmvcore")) {
                 advancedMetricsTable$setRow(
                     rowNo = 1,
                     values = list(
-                        tablename = "Advanced Metrics",
+                        tablename = .("Advanced measures"),
                         youdenIndex = YoudenIndex,
                         balancedAccuracy = BalancedAccuracy,
                         f1Score = F1Score,
@@ -550,27 +588,27 @@ decisioncalculatorClass <- if (requireNamespace("jmvcore")) {
                 if (self$options$fnote) {
                     advancedMetricsTable$addFootnote(
                         rowNo = 1, col = "youdenIndex",
-                        "Youden's Index: Discriminatory ability independent of prevalence. >0.8 excellent, 0.6-0.8 good, 0.4-0.6 fair, <0.4 poor."
+                        .("Youden's index equals sensitivity plus specificity minus one. It weights sensitivity and specificity equally and is descriptive, not a clinical decision threshold.")
                     )
 
                     advancedMetricsTable$addFootnote(
                         rowNo = 1, col = "balancedAccuracy",
-                        "Balanced Accuracy: Average of sensitivity and specificity. Useful for imbalanced datasets."
+                        .("Balanced accuracy is the unweighted average of sensitivity and specificity. It is descriptive and does not encode the consequences of false-positive and false-negative results.")
                     )
 
                     advancedMetricsTable$addFootnote(
                         rowNo = 1, col = "f1Score",
-                        "F1 Score: Harmonic mean of sensitivity and PPV. Ranges 0-1, higher is better."
+                        .("F1 score is the harmonic mean of sensitivity and positive predictive value. When an external prevalence is supplied, this value uses the prevalence-adjusted positive predictive value.")
                     )
 
                     advancedMetricsTable$addFootnote(
                         rowNo = 1, col = "mcc",
-                        "Matthews Correlation Coefficient: Overall test quality measure. Ranges -1 to +1. >0.8 excellent, 0.6-0.8 good, 0.4-0.6 fair."
+                        .("Matthews correlation coefficient summarizes all four cells and ranges from -1 to +1. Interpretation is context-dependent; no universal clinical cut-off is assumed.")
                     )
 
                     advancedMetricsTable$addFootnote(
                         rowNo = 1, col = "dor",
-                        "Diagnostic Odds Ratio: Overall discriminatory performance. >25 strong, 5-25 moderate, 2-5 weak, <2 poor."
+                        .("Diagnostic odds ratio compares the odds of a positive result between reference-positive and reference-negative groups. Its magnitude is descriptive and has no universal clinical cut-off.")
                     )
                 }
 
@@ -580,128 +618,93 @@ decisioncalculatorClass <- if (requireNamespace("jmvcore")) {
                 ci <- self$options$ci
 
                 if (ci) {
-                    # Check if epiR package is available
-                    if (!requireNamespace("epiR", quietly = TRUE)) {
-                        private$.addNotice("ERROR", "epiR Package Missing", 'epiR package is required for confidence intervals. \u{2022} Install with install.packages("epiR"). \u{2022} Or disable "95% Confidence Intervals" option.')
-                        return()
-                    }
-
-                    # epiR ----
-
-                    epirresult <- epiR::epi.tests(dat = table3)
-                    # self$results$text3$setContent(epirresult)
-
-
-                    epirresult2 <- summary(epirresult)
-                    epirresult2 <- as.data.frame(epirresult2) |>
-                        tibble::rownames_to_column(var = "statsabv")
-
-
-                    # Map epiR statistic codes to display names via a named lookup keyed on
-                    # the `statistic` column. Robust to epiR version changes in row count or
-                    # order; the previous positional c(<18 names>) assignment errored
-                    # ("replacement has 18 rows") or mislabelled if the summary changed shape.
-                    # Codes not listed here are dropped downstream by the ratiorows/numberrows
-                    # filters, so they need no label.
-                    stat_labels <- c(
-                        "ap"      = "Apparent prevalence",
-                        "tp"      = "True prevalence",
-                        "se"      = "Test sensitivity",
-                        "sp"      = "Test specificity",
-                        "diag.ac" = "Diagnostic accuracy",
-                        "diag.or" = "Diagnostic odds ratio",
-                        "nndx"    = "Number needed to diagnose",
-                        "youden"  = "Youden's index",
-                        "pv.pos"  = "Positive predictive value",
-                        "pv.neg"  = "Negative predictive value",
-                        "lr.pos"  = "Likelihood ratio of a positive test",
-                        "lr.neg"  = "Likelihood ratio of a negative test",
-                        "p.tpdn"  = "Proportion of subjects with the outcome ruled out",
-                        "p.tndp"  = "Proportion of subjects with the outcome ruled in",
-                        "p.dntp"  = "Proportion of false positives",
-                        "p.dptn"  = "Proportion of false negative"
-                    )
-                    epirresult2$statsnames <- unname(stat_labels[epirresult2$statistic])
-
-                    ratiorows <- c(
-                        "ap",
-                        "tp",
-                        "se",
-                        "sp",
-                        "diag.ac",
-                        "pv.pos",
-                        "pv.neg",
-                        "p.tpdn",
-                        "p.tndp",
-                        "p.dntp",
-                        "p.dptn"
-                    )
-
-
-                    numberrows <- c(
-                        "diag.or",
-                        "nndx",
-                        "youden",
-                        "lr.pos",
-                        "lr.neg"
-                    )
-
-                    epirresult_number <- epirresult2[epirresult2$statistic %in% numberrows, ]
-
-                    epirresult_ratio <- epirresult2[epirresult2$statistic %in% ratiorows, ]
-
-                    # Enhanced metrics from DiagROC - add to existing results
-                    # Add Balanced Accuracy
-                    balanced_acc_row <- data.frame(
-                        statistic = "bal.acc",
-                        est = BalancedAccuracy,
-                        lower = NA_real_,
-                        upper = NA_real_,
-                        statsabv = "bal.acc",
-                        statsnames = "Balanced accuracy (CI not computed)",
-                        stringsAsFactors = FALSE
-                    )
-
-                    # Add F1 Score
-                    f1_row <- data.frame(
-                        statistic = "f1.score",
-                        est = F1Score,
-                        lower = NA_real_, # CI not computed
-                        upper = NA_real_,
-                        statsabv = "f1.score",
-                        statsnames = "F1 score (CI not computed)",
-                        stringsAsFactors = FALSE
-                    )
-
-                    # Combine enhanced metrics with existing epiR results.
-                    # Balanced accuracy and F1 are proportions in [0, 1], so they render
-                    # correctly in this percent-formatted (format: pc) table.
-                    # MCC is intentionally excluded: it ranges [-1, +1], so pc formatting would
-                    # display it misleadingly (e.g. 0.4 as "40%", or a negative value as "-30%").
-                    # MCC is shown as a plain number in advancedMetricsTable instead.
-                    epirresult_ratio <- rbind(epirresult_ratio, balanced_acc_row, f1_row)
-
-
-                    # epirTable_ratio -----
-
                     epirTable_ratio <- self$results$epirTable_ratio
                     epirTable_ratio$deleteRows()
-
-                    data_frame <- epirresult_ratio
-                    for (i in seq_along(data_frame[, 1, drop = TRUE])) {
-                        epirTable_ratio$addRow(rowKey = i, values = c(data_frame[i, ])) # This code produces a named vector/list, which is what the values argument expects
-                    }
-
-
-                    # epirTable_number ----
-
-
                     epirTable_number <- self$results$epirTable_number
                     epirTable_number$deleteRows()
 
-                    data_frame <- epirresult_number
-                    for (i in seq_along(data_frame[, 1, drop = TRUE])) {
-                        epirTable_number$addRow(rowKey = i, values = c(data_frame[i, ]))
+                    if (!fractional_counts) {
+                        if (!requireNamespace("epiR", quietly = TRUE)) {
+                            private$.addNotice(
+                                "ERROR",
+                                .("epiR package missing"),
+                                .("The epiR package is required for confidence intervals. Install it or disable confidence intervals.")
+                            )
+                            return()
+                        }
+
+                        epirresult2 <- epiR::epi.tests(dat = table3) |>
+                            summary() |>
+                            as.data.frame() |>
+                            tibble::rownames_to_column(var = "statsabv")
+
+                        stat_labels <- c(
+                            "ap"      = .("Apparent prevalence"),
+                            "tp"      = .("True prevalence"),
+                            "se"      = .("Test sensitivity"),
+                            "sp"      = .("Test specificity"),
+                            "diag.ac" = .("Diagnostic accuracy"),
+                            "diag.or" = .("Diagnostic odds ratio"),
+                            "nndx"    = .("Number needed to diagnose"),
+                            "youden"  = .("Youden's index"),
+                            "pv.pos"  = .("Positive predictive value"),
+                            "pv.neg"  = .("Negative predictive value"),
+                            "lr.pos"  = .("Likelihood ratio of a positive test"),
+                            "lr.neg"  = .("Likelihood ratio of a negative test"),
+                            "p.rout"  = .("Proportion of subjects with outcome ruled out"),
+                            "p.rin"   = .("Proportion of subjects with outcome ruled in"),
+                            "p.tpdn"  = .("False-positive rate among outcome-negative subjects"),
+                            "p.tndp"  = .("False-negative rate among outcome-positive subjects"),
+                            "p.dntp"  = .("False-discovery proportion among test-positive subjects"),
+                            "p.dptn"  = .("False-omission proportion among test-negative subjects")
+                        )
+                        epirresult2$statsnames <- unname(stat_labels[epirresult2$statistic])
+
+                        ratiorows <- if (pp) {
+                            c("se", "sp", "diag.ac")
+                        } else {
+                            c(
+                                "ap", "tp", "se", "sp", "diag.ac", "pv.pos", "pv.neg",
+                                "p.rout", "p.rin", "p.tpdn", "p.tndp", "p.dntp", "p.dptn"
+                            )
+                        }
+                        numberrows <- c("diag.or", "nndx", "youden", "lr.pos", "lr.neg")
+
+                        epirresult_ratio <- epirresult2[
+                            epirresult2$statistic %in% ratiorows &
+                                !is.na(epirresult2$statsnames), , drop = FALSE
+                        ]
+                        epirresult_number <- epirresult2[
+                            epirresult2$statistic %in% numberrows &
+                                !is.na(epirresult2$statsnames), , drop = FALSE
+                        ]
+
+                        extra_rows <- data.frame(
+                            statistic = c("bal.acc", "f1.score"),
+                            est = c(BalancedAccuracy, F1Score),
+                            lower = NA_real_,
+                            upper = NA_real_,
+                            statsabv = c("bal.acc", "f1.score"),
+                            statsnames = c(
+                                .("Balanced accuracy (CI not computed)"),
+                                .("F1 score at selected prevalence (CI not computed)")
+                            ),
+                            stringsAsFactors = FALSE
+                        )
+                        epirresult_ratio <- rbind(epirresult_ratio, extra_rows)
+
+                        for (i in seq_len(nrow(epirresult_ratio))) {
+                            epirTable_ratio$addRow(
+                                rowKey = i,
+                                values = c(epirresult_ratio[i, ])
+                            )
+                        }
+                        for (i in seq_len(nrow(epirresult_number))) {
+                            epirTable_number$addRow(
+                                rowKey = i,
+                                values = c(epirresult_number[i, ])
+                            )
+                        }
                     }
                 }
 
@@ -711,9 +714,21 @@ decisioncalculatorClass <- if (requireNamespace("jmvcore")) {
 
                     # Helper function to calculate metrics for a cut-off
                     calculate_cutoff_metrics <- function(tp, fp, tn, fn, cutoff_name) {
-                        # Validate inputs and guard against zero/NA division
-                        if (any(is.na(c(tp, fp, tn, fn))) || any(c(tp, fp, tn, fn) < 0)) {
-                            private$.addNotice("ERROR", "Invalid Cut-off Inputs", sprintf('Invalid inputs for cut-off "%s". \u{2022} All values (TP=%s, FP=%s, TN=%s, FN=%s) must be non-negative numbers. \u{2022} Check your input values for errors.', cutoff_name, tp, fp, tn, fn))
+                        # Validate inputs and guard against non-finite/negative values.
+                        cutoff_values <- c(tp, fp, tn, fn)
+                        if (any(!is.finite(cutoff_values)) || any(cutoff_values < 0)) {
+                            private$.addNotice(
+                                "ERROR",
+                                .("Invalid cut-off inputs"),
+                                jmvcore::format(
+                                    .('All values for cut-off "{cutoff}" must be non-negative finite numbers (TP={tp}, FP={fp}, TN={tn}, FN={fn}).'),
+                                    cutoff = cutoff_name,
+                                    tp = tp,
+                                    fp = fp,
+                                    tn = tn,
+                                    fn = fn
+                                )
+                            )
                             return(NULL)
                         }
 
@@ -723,15 +738,29 @@ decisioncalculatorClass <- if (requireNamespace("jmvcore")) {
 
                         # Validate that we have cases to analyze
                         if (total == 0) {
-                            private$.addNotice("ERROR", "No Cases For Cut-off", sprintf('No cases for cut-off "%s". \u{2022} Total cases (TP+FP+TN+FN) = 0. \u{2022} Check your confusion matrix inputs.', cutoff_name))
+                            private$.addNotice(
+                                "ERROR",
+                                .("No cases for cut-off"),
+                                jmvcore::format(
+                                    .('All four frequencies for cut-off "{cutoff}" are zero.'),
+                                    cutoff = cutoff_name
+                                )
+                            )
                             return(NULL)
                         }
 
                         # Safe division with appropriate handling for zero denominators
                         sens <- if (diseased > 0) tp / diseased else NA_real_
                         spec <- if (healthy > 0) tn / healthy else NA_real_
-                        ppv <- if ((tp + fp) > 0) tp / (tp + fp) else NA_real_
-                        npv <- if ((tn + fn) > 0) tn / (tn + fn) else NA_real_
+                        if (pp && is.finite(sens) && is.finite(spec)) {
+                            ppv_den <- sens * PriorProb + (1 - spec) * (1 - PriorProb)
+                            npv_den <- spec * (1 - PriorProb) + (1 - sens) * PriorProb
+                            ppv <- if (ppv_den > 0) sens * PriorProb / ppv_den else NA_real_
+                            npv <- if (npv_den > 0) spec * (1 - PriorProb) / npv_den else NA_real_
+                        } else {
+                            ppv <- if ((tp + fp) > 0) tp / (tp + fp) else NA_real_
+                            npv <- if ((tn + fn) > 0) tn / (tn + fn) else NA_real_
+                        }
                         accuracy <- if (total > 0) (tp + tn) / total else NA_real_
 
                         # Youden index only defined when both sens and spec are available
@@ -739,26 +768,24 @@ decisioncalculatorClass <- if (requireNamespace("jmvcore")) {
 
                         # Warn if metrics are undefined
                         if (diseased == 0 || healthy == 0) {
-                            msg <- sprintf('Cut-off "%s" has incomplete data.', cutoff_name)
-                            if (diseased == 0) msg <- paste0(msg, " \u{2022} No diseased cases (TP+FN=0): Sensitivity is undefined.")
-                            if (healthy == 0) msg <- paste0(msg, " \u{2022} No healthy cases (TN+FP=0): Specificity is undefined.")
-                            msg <- paste0(msg, " \u{2022} The metrics shown for this cut-off are computed from incomplete counts.")
-                            private$.addNotice("WARNING", "Incomplete Cut-off Data", msg)
+                            if (diseased == 0) {
+                                msg <- jmvcore::format(
+                                    .('Cut-off "{cutoff}" has no reference-positive observations, so sensitivity is undefined.'),
+                                    cutoff = cutoff_name
+                                )
+                            } else {
+                                msg <- jmvcore::format(
+                                    .('Cut-off "{cutoff}" has no reference-negative observations, so specificity is undefined.'),
+                                    cutoff = cutoff_name
+                                )
+                            }
+                            private$.addNotice("WARNING", .("Incomplete cut-off data"), msg)
                         }
 
-                        # Descriptive grade of the point estimates in THIS sample.
-                        # Not a recommendation: the counts carry no interval, and the
-                        # cut-offs are graded on the same data that produced them.
                         if (is.na(youden) || is.na(accuracy)) {
-                            recommendation <- "Incomplete data - cannot be graded"
-                        } else if (youden > private$.YOUDEN_EXCELLENT && accuracy > private$.ACCURACY_EXCELLENT) {
-                            recommendation <- "Excellent in this sample"
-                        } else if (youden > private$.YOUDEN_GOOD && accuracy > private$.ACCURACY_GOOD) {
-                            recommendation <- "Good in this sample"
-                        } else if (youden > private$.YOUDEN_FAIR) {
-                            recommendation <- "Fair in this sample"
+                            recommendation <- .("Incomplete data; some measures are undefined")
                         } else {
-                            recommendation <- "Poor in this sample"
+                            recommendation <- .("Illustrative point estimates; not clinical guidance")
                         }
 
                         return(list(
@@ -788,7 +815,7 @@ decisioncalculatorClass <- if (requireNamespace("jmvcore")) {
 
                     # Skip table population if validation failed
                     if (is.null(cutoff1_metrics) || is.null(cutoff2_metrics)) {
-                        private$.addNotice("ERROR", "Cut-off Validation Failed", "Cut-off comparison cannot be performed due to invalid inputs. \u{2022} Check the error messages above for specific issues. \u{2022} Ensure all TP, FP, TN, FN values are non-negative numbers.")
+                        private$.addNotice("ERROR", .("Cut-off validation failed"), .("The cut-off comparison cannot be performed because at least one scenario has invalid frequencies."))
                         return()
                     }
 
@@ -827,14 +854,18 @@ decisioncalculatorClass <- if (requireNamespace("jmvcore")) {
                     if (length(unique(c(n_current, n1, n2))) > 1) {
                         private$.addNotice(
                             "WARNING",
-                            "Cut-offs describe different numbers of patients",
-                            sprintf("The three scenarios total %g, %g and %g cases. Moving a cut-off on one cohort cannot change how many patients there are, so these are different studies rather than different thresholds, and comparing them here treats between-study variation as if it were a threshold effect. Check the counts, or interpret each row on its own.",
-                                    n_current, n1, n2)
+                            .("Cut-offs describe different numbers of patients"),
+                            jmvcore::format(
+                                .("The three scenarios total {current}, {scenario1}, and {scenario2} cases. Moving a cut-off on one cohort cannot change its size, so these rows cannot be interpreted as thresholds applied to the same participants."),
+                                current = n_current,
+                                scenario1 = n1,
+                                scenario2 = n2
+                            )
                         )
                     }
 
                     cand <- list(
-                        list(name = "Current", youden = current_youden, accuracy = current_accuracy),
+                        list(name = .("Current"), youden = current_youden, accuracy = current_accuracy),
                         list(name = cutoff1_metrics$cutoffName, youden = cutoff1_metrics$youden,
                              accuracy = cutoff1_metrics$accuracy),
                         list(name = cutoff2_metrics$cutoffName, youden = cutoff2_metrics$youden,
@@ -851,8 +882,8 @@ decisioncalculatorClass <- if (requireNamespace("jmvcore")) {
                     # scenario's ACCURACY, so the reader can see whether the intervals
                     # overlap -- overlapping intervals mean the counts do not separate the
                     # cut-offs, whatever the point estimates suggest.
-                    wilson <- function(x, n, conf = 0.95) {
-                        if (!is.finite(x) || !is.finite(n) || n <= 0)
+                    wilson <- function(x, n, integer_counts, conf = 0.95) {
+                        if (!integer_counts || !is.finite(x) || !is.finite(n) || n <= 0)
                             return(c(NA_real_, NA_real_))
                         z <- stats::qnorm(1 - (1 - conf) / 2)
                         ph <- x / n
@@ -861,19 +892,36 @@ decisioncalculatorClass <- if (requireNamespace("jmvcore")) {
                         hw <- z * sqrt((ph * (1 - ph) + z^2 / (4 * n)) / n) / den
                         c(max(0, ctr - hw), min(1, ctr + hw))
                     }
-                    acc_ci <- list(
-                        wilson(TP + TN, n_current),
-                        wilson(self$options$tp1 + self$options$tn1, n1),
-                        wilson(self$options$tp2 + self$options$tn2, n2)
+                    integer_scenarios <- c(
+                        !fractional_counts,
+                        !any(abs(c(self$options$tp1, self$options$fp1,
+                                   self$options$tn1, self$options$fn1) -
+                                 round(c(self$options$tp1, self$options$fp1,
+                                         self$options$tn1, self$options$fn1))) > 1e-6),
+                        !any(abs(c(self$options$tp2, self$options$fp2,
+                                   self$options$tn2, self$options$fn2) -
+                                 round(c(self$options$tp2, self$options$fp2,
+                                         self$options$tn2, self$options$fn2))) > 1e-6)
                     )
+                    acc_ci <- list(
+                        wilson(TP + TN, n_current, integer_scenarios[1]),
+                        wilson(self$options$tp1 + self$options$tn1, n1,
+                               integer_scenarios[2]),
+                        wilson(self$options$tp2 + self$options$tn2, n2,
+                               integer_scenarios[3])
+                    )
+                    if (any(!integer_scenarios)) {
+                        private$.addNotice(
+                            "WARNING",
+                            .("Cut-off intervals omitted for fractional counts"),
+                            .("Accuracy intervals are not computed for scenarios containing fractional frequencies because no effective sample size or weighting design was supplied.")
+                        )
+                    }
 
-                    optimal_msg <- "Current cut-off appears optimal"
+                    optimal_msg <- .("Descriptive comparison unavailable")
                     if (any(is.finite(ys))) {
                         best <- which.max(replace(ys, !is.finite(ys), -Inf))
                         margin <- ys[best] - ys[1]                      # vs the current cut-off
-                        runner <- sort(ys[is.finite(ys)], decreasing = TRUE)
-                        gap <- if (length(runner) > 1) runner[1] - runner[2] else NA_real_
-
                         # do the best and current accuracy intervals overlap?
                         ov <- NA
                         if (best != 1L && all(is.finite(c(acc_ci[[best]], acc_ci[[1]]))))
@@ -881,26 +929,34 @@ decisioncalculatorClass <- if (requireNamespace("jmvcore")) {
                                   acc_ci[[1]][1] <= acc_ci[[best]][2]
 
                         if (best == 1L || !is.finite(margin) || margin <= 0) {
-                            optimal_msg <- sprintf("Current cut-off has the highest Youden's J (%.3f) of the three", ys[1])
-                        } else if (margin < 0.05) {
-                            optimal_msg <- sprintf("%s is higher by only %.3f Youden's J - too small to distinguish these cut-offs on these counts alone",
-                                                   cand[[best]]$name, margin)
+                            optimal_msg <- jmvcore::format(
+                                .("Current cut-off has the highest Youden's J ({youden}) of the three."),
+                                youden = sprintf("%.3f", ys[1])
+                            )
+                        } else if (isTRUE(ov)) {
+                            optimal_msg <- jmvcore::format(
+                                .("{cutoff} has the highest Youden's J, {margin} above current; its sample-accuracy interval overlaps the current cut-off's, so the difference is not established."),
+                                cutoff = cand[[best]]$name,
+                                margin = sprintf("%.3f", margin)
+                            )
+                        } else if (isFALSE(ov)) {
+                            optimal_msg <- jmvcore::format(
+                                .("{cutoff} has the highest Youden's J, {margin} above current; their sample-accuracy intervals do not overlap."),
+                                cutoff = cand[[best]]$name,
+                                margin = sprintf("%.3f", margin)
+                            )
                         } else {
-                            optimal_msg <- sprintf("%s has the highest Youden's J, %.3f above current%s%s",
-                                                   cand[[best]]$name, margin,
-                                                   if (is.finite(gap) && gap < 0.02)
-                                                       " (but barely ahead of the next cut-off)" else "",
-                                                   if (isTRUE(ov))
-                                                       "; its accuracy interval still overlaps the current cut-off's, so the difference is not established"
-                                                   else if (isFALSE(ov))
-                                                       "; their accuracy intervals do not overlap"
-                                                   else "")
+                            optimal_msg <- jmvcore::format(
+                                .("{cutoff} has the highest Youden's J, {margin} above current; paired uncertainty cannot be assessed from these summary counts."),
+                                cutoff = cand[[best]]$name,
+                                margin = sprintf("%.3f", margin)
+                            )
                         }
                     }
 
                     multipleCutoffTable$setNote(
                         "sameData",
-                        jmvcore::.("This column holds two different kinds of statement. On the two named cut-off rows it is a grade of that scenario's point estimates in this sample; the good and excellent grades require Youden's index AND accuracy to reach the band together, so a grade can be lower than either column on its own would suggest. On the Current (Reference) row it is not a grade at all: it reports which of the three cut-offs had the highest Youden's J, by how much, and whether that cut-off's accuracy interval still overlaps the current one's. Because all three cut-offs are judged on the same counts used to evaluate them, whichever row comes out ahead is optimistically biased; performance in independent data is generally lower.")
+                        jmvcore::.("The named scenarios are illustrative examples, not clinical guides. The current row reports which scenario has the highest Youden's J and whether its separately calculated accuracy interval overlaps the current row. Choosing a cut-off on the same data used to assess it is optimistically biased and does not establish clinical utility.")
                     )
 
                     multipleCutoffTable$setNote(
@@ -911,7 +967,7 @@ decisioncalculatorClass <- if (requireNamespace("jmvcore")) {
                     multipleCutoffTable$setRow(
                         rowKey = 3,
                         values = list(
-                            cutoffName = "Current (Reference)",
+                            cutoffName = .("Current (reference)"),
                             sensitivity = Sens,
                             specificity = Spec,
                             ppv = PPV,
@@ -972,9 +1028,11 @@ decisioncalculatorClass <- if (requireNamespace("jmvcore")) {
                 if (isTRUE(self$options$fagan) && !fagan_ok) {
                     private$.addNotice(
                         "WARNING",
-                        "Fagan nomogram not drawn",
-                        sprintf("The positive likelihood ratio is %.3f. A nomogram assumes a positive result raises the probability of disease (LR+ >= 1); here a positive result lowers it, so the plot would be misleading and has been omitted. This usually means the test's coding is inverted -- check that TP and FP are not swapped -- or that the test genuinely performs worse than chance.",
-                                LRP)
+                        .("Fagan nomogram not drawn"),
+                        jmvcore::format(
+                            .("The positive likelihood ratio is {lr}. A nomogram assumes that a positive result raises the probability of the outcome; here it lowers that probability, so the plot is omitted. Check the test coding."),
+                            lr = sprintf("%.3f", LRP)
+                        )
                     )
                 }
 
@@ -999,29 +1057,49 @@ decisioncalculatorClass <- if (requireNamespace("jmvcore")) {
                 fagan_item <- private$.resultsItem("faganSummary")
                 if (!is.null(fagan_item) && isTRUE(self$options$fagan)) {
                     if (!fagan_ok) {
+                        not_drawn_reason <- jmvcore::format(
+                            .("The positive likelihood ratio is {lr}, so a positive result lowers the probability of a reference-positive outcome rather than raising it."),
+                            lr = sprintf("%.3f", LRP)
+                        )
                         fagan_item$setContent(paste0(
                             "<div style='padding:12px;border-left:4px solid #c00;background-color: rgba(255, 88, 88, 0.06); color: inherit;'>",
                             "<p>", .("No nomogram is drawn for this table."), " ",
-                            sprintf(.("The positive likelihood ratio is %.3f, so a positive result lowers the probability of disease rather than raising it."), LRP),
+                            not_drawn_reason,
                             "</p></div>"))
                     } else {
                         pre <- PriorProb
                         post_pos <- PostTestProbDisease
                         post_neg <- 1 - PostTestProbHealthy
-                        src <- if (isTRUE(self$options$pp))
-                            .("the population prevalence you supplied") else .("this study's own prevalence")
+                        pretest_sentence <- if (isTRUE(self$options$pp)) {
+                            jmvcore::format(
+                                .("Pre-test probability is {prevalence}, using the population prevalence you supplied."),
+                                prevalence = sprintf("%.1f%%", 100 * pre)
+                            )
+                        } else {
+                            jmvcore::format(
+                                .("Pre-test probability is {prevalence}, using the prevalence observed in this study table."),
+                                prevalence = sprintf("%.1f%%", 100 * pre)
+                            )
+                        }
+                        positive_sentence <- jmvcore::format(
+                            .("A positive result has a likelihood ratio of {lr} and raises the probability from {prevalence} to {posttest}."),
+                            lr = sprintf("%.2f", LRP),
+                            prevalence = sprintf("%.1f%%", 100 * pre),
+                            posttest = sprintf("%.1f%%", 100 * post_pos)
+                        )
+                        negative_sentence <- jmvcore::format(
+                            .("A negative result has a likelihood ratio of {lr} and lowers the probability from {prevalence} to {posttest}."),
+                            lr = sprintf("%.3f", LRN),
+                            prevalence = sprintf("%.1f%%", 100 * pre),
+                            posttest = sprintf("%.1f%%", 100 * post_neg)
+                        )
                         fagan_item$setContent(paste0(
                             "<div style='padding:12px;border-left:4px solid #1565c0;background-color: rgba(88, 155, 255, 0.06); color: inherit;'>",
-                            "<p><b>", .("Pre-test probability"), ":</b> ",
-                            sprintf("%.1f%%", 100 * pre), " \u{2014} ", src, ".</p>",
-                            "<p><b>", .("If the test is POSITIVE"), ":</b> ",
-                            sprintf(.("likelihood ratio %.2f raises the probability from %.1f%% to <b>%.1f%%</b>."),
-                                    LRP, 100 * pre, 100 * post_pos), "</p>",
-                            "<p><b>", .("If the test is NEGATIVE"), ":</b> ",
-                            sprintf(.("likelihood ratio %.3f lowers the probability from %.1f%% to <b>%.1f%%</b>."),
-                                    LRN, 100 * pre, 100 * post_neg), "</p>",
-                            "<p style='font-size:90%;color:#555;'>",
-                            .("Read the nomogram by drawing a line from the pre-test probability on the left, through the likelihood ratio in the middle, to the post-test probability on the right. Sensitivity and specificity are properties of the test; the pre-test probability is not, so the same test moves a patient to a different endpoint in a different population."),
+                            "<p>", pretest_sentence, "</p>",
+                            "<p>", positive_sentence, "</p>",
+                            "<p>", negative_sentence, "</p>",
+                            "<p style='font-size:90%;color:inherit;'>",
+                            .("Read the nomogram by drawing a line from the pre-test probability on the left, through the likelihood ratio in the middle, to the post-test probability on the right. Sensitivity and specificity describe agreement with the reference standard; the pre-test probability depends on population context, so the same test can lead to a different endpoint in another population."),
                             "</p></div>"))
                     }
                 }
@@ -1056,6 +1134,8 @@ decisioncalculatorClass <- if (requireNamespace("jmvcore")) {
                     Verbose = TRUE
                 )
 
+                plot1 <- plot1 + ggtheme
+
                 print(plot1)
                 TRUE
             },
@@ -1063,161 +1143,115 @@ decisioncalculatorClass <- if (requireNamespace("jmvcore")) {
             # Private helper methods for summaries ----
 
             .createSummary = function(Sens, Spec, PPV, NPV, LRP, LRN, Youden, Accuracy, Prevalence) {
-                # Clinical interpretation of performance
-                performance <- if (Youden > private$.YOUDEN_EXCELLENT && Accuracy > private$.ACCURACY_EXCELLENT) {
-                    "excellent discriminatory ability"
-                } else if (Youden > private$.YOUDEN_GOOD && Accuracy > private$.ACCURACY_GOOD) {
-                    "good discriminatory ability"
-                } else if (Youden > private$.YOUDEN_FAIR) {
-                    "fair discriminatory ability"
-                } else {
-                    "limited discriminatory ability"
-                }
+                descriptive_result <- jmvcore::format(
+                    .("Youden's index is {youden} and sample accuracy is {accuracy}. These values describe the entered study table; they are not clinical grades or decision thresholds."),
+                    youden = sprintf("%.3f", Youden),
+                    accuracy = sprintf("%.1f%%", Accuracy * 100)
+                )
+                prevalence_label <- jmvcore::format(
+                    .("At {prevalence} prevalence"),
+                    prevalence = sprintf("%.1f%%", Prevalence * 100)
+                )
+                positive_update <- jmvcore::format(
+                    .("A positive result multiplies pre-test odds by {lr}."),
+                    lr = sprintf("%.2f", LRP)
+                )
+                negative_update <- jmvcore::format(
+                    .("A negative result multiplies pre-test odds by {lr}."),
+                    lr = sprintf("%.3f", LRN)
+                )
 
-                # LR interpretation
-                lr_interp <- if (LRP > 10) {
-                    "strong evidence for disease when test positive"
-                } else if (LRP > 5) {
-                    "moderate evidence for disease when test positive"
-                } else {
-                    "weak evidence for disease when test positive"
-                }
-
-                # NLR interpretation
-                nlr_interp <- if (LRN < 0.1) {
-                    "strong evidence against disease when test negative"
-                } else if (LRN < 0.2) {
-                    "moderate evidence against disease when test negative"
-                } else {
-                    "weak evidence against disease when test negative"
-                }
-
-                # Descriptive performance summary (not a recommendation)
-                recommendation <- private$.getRecommendation(Youden, Accuracy, LRP, LRN)
-
-                sprintf(
-                    "<div style='font-family: Arial, sans-serif; max-width: 800px; line-height: 1.4;'>
-                <div style='background-color: rgba(88, 88, 88, 0.06); border: 2px solid #333; padding: 15px; margin-bottom: 15px; color: inherit;'>
-                <h3 style='margin: 0 0 5px 0; font-size: 16px; color: #333;'>Diagnostic Test Performance Summary</h3>
-                </div>
-
-                <div style='font-size: 14px; color: #333;'>
-                    <p style='margin: 10px 0;'><strong>Overall Assessment:</strong> This test demonstrates %s (Youden index: %.3f, Accuracy: %.1f%%). The good and excellent grades require Youden's index and accuracy to reach that band together, so the grade can be lower than either number on its own would suggest. Accuracy is computed at the prevalence observed in this sample and will differ where the case mix differs; Youden's index does not.</p>
-
-                    <table style='width: 100%%; border-collapse: collapse; margin: 15px 0;'>
-                    <tr>
-                        <td style='border: 1px solid #ccc; padding: 10px; background-color: rgba(155, 155, 155, 0.06); color: inherit;'>
-                        <strong>Sensitivity</strong><br>
-                        <span style='font-size: 18px;'>%.1f%%</span><br>
-                        <span style='font-size: 12px; color: #666;'>True positive rate</span>
-                        </td>
-                        <td style='border: 1px solid #ccc; padding: 10px; background-color: rgba(155, 155, 155, 0.06); color: inherit;'>
-                        <strong>Specificity</strong><br>
-                        <span style='font-size: 18px;'>%.1f%%</span><br>
-                        <span style='font-size: 12px; color: #666;'>True negative rate</span>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td style='border: 1px solid #ccc; padding: 10px; background-color: rgba(155, 155, 155, 0.06); color: inherit;'>
-                        <strong>PPV</strong><br>
-                        <span style='font-size: 18px;'>%.1f%%</span><br>
-                        <span style='font-size: 12px; color: #666;'>At %.1f%% prevalence</span>
-                        </td>
-                        <td style='border: 1px solid #ccc; padding: 10px; background-color: rgba(155, 155, 155, 0.06); color: inherit;'>
-                        <strong>NPV</strong><br>
-                        <span style='font-size: 18px;'>%.1f%%</span><br>
-                        <span style='font-size: 12px; color: #666;'>At %.1f%% prevalence</span>
-                        </td>
-                    </tr>
-                    </table>
-
-                    <p style='margin: 10px 0;'><strong>Clinical Utility:</strong></p>
-                    <ul style='margin: 10px 0; padding-left: 25px;'>
-                    <li>The positive likelihood ratio of %.2f indicates %s.</li>
-                    <li>The negative likelihood ratio of %.3f indicates %s.</li>
-                    </ul>
-
-                    <div style='background-color: rgba(155, 155, 155, 0.06); border: 1px solid #ccc; padding: 12px; margin: 15px 0; color: inherit;'>
-                        <p style='margin: 0; font-weight: bold;'>Performance Summary</p>
-                        <p style='margin: 5px 0 0 0;'>%s</p>
-                    </div>
-                </div>
-                </div>",
-                    performance, Youden, Accuracy * 100,
-                    Sens * 100, Spec * 100,
-                    PPV * 100, Prevalence * 100,
-                    NPV * 100, Prevalence * 100,
-                    LRP, lr_interp,
-                    LRN, nlr_interp,
-                    recommendation
+                paste0(
+                    "<div style='font-family: Arial, sans-serif; max-width: 800px; line-height: 1.4;'>",
+                    "<div style='background-color: rgba(88, 88, 88, 0.06); border: 2px solid currentColor; padding: 15px; margin-bottom: 15px; color: inherit;'>",
+                    "<h3 style='margin: 0 0 5px 0; font-size: 16px;'>",
+                    .("Diagnostic-test performance summary"),
+                    "</h3></div><div style='font-size: 14px;'>",
+                    "<p style='margin: 10px 0;'><strong>", .("Descriptive results:"),
+                    "</strong> ", descriptive_result, "</p>",
+                    "<table style='width: 100%; border-collapse: collapse; margin: 15px 0;'><tr>",
+                    "<td style='border: 1px solid #ccc; padding: 10px; background-color: rgba(155, 155, 155, 0.06); color: inherit;'><strong>",
+                    .("Sensitivity"), "</strong><br><span style='font-size: 18px;'>",
+                    sprintf("%.1f%%", Sens * 100), "</span><br><span style='font-size: 12px;'>",
+                    .("True-positive rate"), "</span></td>",
+                    "<td style='border: 1px solid #ccc; padding: 10px; background-color: rgba(155, 155, 155, 0.06); color: inherit;'><strong>",
+                    .("Specificity"), "</strong><br><span style='font-size: 18px;'>",
+                    sprintf("%.1f%%", Spec * 100), "</span><br><span style='font-size: 12px;'>",
+                    .("True-negative rate"), "</span></td></tr><tr>",
+                    "<td style='border: 1px solid #ccc; padding: 10px; background-color: rgba(155, 155, 155, 0.06); color: inherit;'><strong>",
+                    .("PPV"), "</strong><br><span style='font-size: 18px;'>",
+                    sprintf("%.1f%%", PPV * 100), "</span><br><span style='font-size: 12px;'>",
+                    prevalence_label, "</span></td>",
+                    "<td style='border: 1px solid #ccc; padding: 10px; background-color: rgba(155, 155, 155, 0.06); color: inherit;'><strong>",
+                    .("NPV"), "</strong><br><span style='font-size: 18px;'>",
+                    sprintf("%.1f%%", NPV * 100), "</span><br><span style='font-size: 12px;'>",
+                    prevalence_label, "</span></td></tr></table>",
+                    "<p style='margin: 10px 0;'><strong>", .("Likelihood-ratio update:"),
+                    "</strong></p><ul style='margin: 10px 0; padding-left: 25px;'><li>",
+                    positive_update, "</li><li>", negative_update, "</li></ul>",
+                    "<div style='background-color: rgba(155, 155, 155, 0.06); border: 1px solid #ccc; padding: 12px; margin: 15px 0; color: inherit;'>",
+                    "<p style='margin: 0; font-weight: bold;'>", .("Interpretation caveat"),
+                    "</p><p style='margin: 5px 0 0 0;'>",
+                    .("These are single-cohort estimates. Their practical meaning depends on intended use, error consequences, prevalence, patient spectrum, and reference-standard quality. This educational summary is not a clinical guide."),
+                    "</p></div></div></div>"
                 )
             },
             .createAboutPanel = function() {
-                "<div style='font-family: Arial, sans-serif; max-width: 800px; line-height: 1.4;'>
-            <div style='background-color: rgba(88, 88, 88, 0.06); border: 2px solid #333; padding: 15px; margin-bottom: 15px; color: inherit;'>
-            <h3 style='margin: 0 0 5px 0; font-size: 16px; color: #333;'>About Diagnostic Test Evaluation</h3>
-            </div>
-
-            <div style='font-size: 14px; color: #333;'>
-            <p><strong>What does this analysis do?</strong></p>
-            <p>This function evaluates the performance of a diagnostic test by comparing test results
-            against a gold standard (reference test). It calculates sensitivity, specificity, predictive values,
-            and likelihood ratios to help determine how well the test identifies disease.</p>
-
-            <p><strong>When to use it:</strong></p>
-            <ul style='margin: 10px 0; padding-left: 25px;'>
-            <li>Validating a new diagnostic test against established gold standard</li>
-            <li>Comparing different diagnostic methods</li>
-            <li>Determining optimal test cut-off values</li>
-            <li>Clinical decision-making about test utility</li>
-            </ul>
-
-            <p><strong>Key Outputs:</strong></p>
-            <ul style='margin: 10px 0; padding-left: 25px;'>
-            <li><strong>Sensitivity:</strong> Ability to detect disease when present (avoid false negatives)</li>
-            <li><strong>Specificity:</strong> Ability to confirm absence when healthy (avoid false positives)</li>
-            <li><strong>PPV/NPV:</strong> Post-test probability after positive/negative result (depends on prevalence)</li>
-            <li><strong>Likelihood Ratios:</strong> How much test result changes disease probability</li>
-            <li><strong>Youden Index:</strong> Overall discriminatory power (optimal cut-off criterion)</li>
-            <li><strong>Advanced Metrics:</strong> Balanced Accuracy, F1 Score, MCC, DOR</li>
-            </ul>
-
-            <p><strong>References:</strong></p>
-            <ul style='margin: 10px 0; padding-left: 25px; font-size: 13px;'>
-            <li>Altman DG, Bland JM. Diagnostic tests. 1: Sensitivity and specificity. BMJ. 1994 Jun 11;308(6943):1552. doi: 10.1136/bmj.308.6943.1552. PMID: 8019315; PMCID: PMC2540489.</li>
-            <li>Deeks JJ, Altman DG. Diagnostic tests 4: likelihood ratios. BMJ 2004;329:168-169</li>
-            <li>epiR package documentation: <a href='https://cran.r-project.org/package=epiR' target='_blank'>CRAN</a></li>
-            </ul>
-            </div>
-            </div>"
+                paste0(
+                    "<div style='font-family: Arial, sans-serif; max-width: 800px; line-height: 1.4;'>",
+                    "<div style='background-color: rgba(88, 88, 88, 0.06); border: 2px solid currentColor; padding: 15px; margin-bottom: 15px; color: inherit;'>",
+                    "<h3 style='margin: 0 0 5px 0; font-size: 16px;'>",
+                    .("About diagnostic-test evaluation"),
+                    "</h3></div><div style='font-size: 14px;'><p><strong>",
+                    .("What does this analysis do?"),
+                    "</strong></p><p>",
+                    .("This function evaluates a diagnostic test against a stated reference standard. It calculates sensitivity, specificity, predictive values, and likelihood ratios. Reference standards can be imperfect, so disagreement may reflect error in either method."),
+                    "</p><p><strong>", .("When to use it:"),
+                    "</strong></p><ul style='margin: 10px 0; padding-left: 25px;'><li>",
+                    .("Describe a test against a stated reference standard."), "</li><li>",
+                    .("Explore diagnostic methods or illustrative cut-off scenarios."), "</li><li>",
+                    .("Demonstrate how prevalence changes predictive values."), "</li><li>",
+                    .("Support, but do not replace, a clinical validation plan."),
+                    "</li></ul><p><strong>", .("Key outputs:"),
+                    "</strong></p><ul style='margin: 10px 0; padding-left: 25px;'><li>",
+                    .("Sensitivity is the proportion of reference-positive observations with a positive test result."),
+                    "</li><li>",
+                    .("Specificity is the proportion of reference-negative observations with a negative test result."),
+                    "</li><li>",
+                    .("PPV and NPV are post-test probabilities and depend on prevalence."),
+                    "</li><li>",
+                    .("Likelihood ratios describe how a test result changes pre-test odds."),
+                    "</li><li>",
+                    .("Youden's index and the advanced metrics are descriptive summaries, not clinical decision thresholds."),
+                    "</li></ul><p><strong>", .("References:"),
+                    "</strong></p><ul style='margin: 10px 0; padding-left: 25px; font-size: 13px;'>",
+                    "<li>Altman DG, Bland JM. Diagnostic tests. 1: Sensitivity and specificity. BMJ. 1994;308:1552.</li>",
+                    "<li>Deeks JJ, Altman DG. Diagnostic tests 4: likelihood ratios. BMJ. 2004;329:168-169.</li>",
+                    "<li><a href='https://cran.r-project.org/package=epiR' target='_blank'>epiR package documentation</a></li>",
+                    "</ul><p><strong>", .("Scope:"), "</strong> ",
+                    .("Presets and scenarios are illustrative examples, not clinical guides. A cut-off requires external validation and consideration of harms, benefits, workflow, and the intended population."),
+                    "</p></div></div>"
+                )
             },
             .createAssumptionsPanel = function(TP, TN, FP, FN, prev) {
                 warnings <- character()
 
-                # Check sample size adequacy
-                if (TP < 10 || TN < 10) {
-                    warnings <- c(warnings, sprintf(
-                        "<li style='color: #d9534f;'><strong>Small sample size:</strong> TP=%d, TN=%d.
-                    Confidence intervals may be unreliable. Consider n >= 30 per group.</li>",
-                        TP, TN
-                    ))
-                }
-
                 # Check for extreme prevalence
                 if (prev < 0.05 || prev > 0.95) {
-                    warnings <- c(warnings, sprintf(
-                        "<li style='color: #f0ad4e;'><strong>Extreme prevalence:</strong> %.1f%%.
-                    PPV/NPV estimates may be unstable. Verify in target population.</li>",
-                        prev * 100
-                    ))
+                    warnings <- c(
+                        warnings,
+                        jmvcore::format(
+                            .("Extreme prevalence is {prevalence}. PPV and NPV estimates may be unstable; verify them in the target population."),
+                            prevalence = sprintf("%.1f%%", prev * 100)
+                        )
+                    )
                 }
 
                 # Check for zero cells
                 if (FP == 0 || FN == 0) {
                     warnings <- c(
                         warnings,
-                        "<li style='color: #f0ad4e;'><strong>Zero cells detected:</strong>
-                    Perfect sensitivity or specificity. May indicate overfitting or insufficient validation.</li>"
+                        .("Zero cells were detected. An estimated sensitivity or specificity of 100% may reflect limited validation data.")
                     )
                 }
 
@@ -1225,124 +1259,131 @@ decisioncalculatorClass <- if (requireNamespace("jmvcore")) {
                 if ((FP > 0 && FP < 5) || (FN > 0 && FN < 5)) {
                     warnings <- c(
                         warnings,
-                        "<li style='color: #f0ad4e;'><strong>Very few errors:</strong>
-                    Small counts in FP or FN cells may lead to unstable estimates.</li>"
+                        .("Very few errors were observed. Small FP or FN counts may produce unstable estimates.")
                     )
                 }
 
                 warning_html <- if (length(warnings) > 0) {
-                    sprintf("<div style='background-color: rgba(255, 202, 33, 0.23); padding: 15px; margin: 10px 0; border-left: 4px solid #f0ad4e; color: inherit;'>
-                <h4 style='margin-top: 0; color: #856404;'> Warnings</h4>
-                <ul style='margin: 10px 0; padding-left: 20px;'>%s</ul>
-                </div>", paste(warnings, collapse = "\n"))
+                    paste0(
+                        "<div style='background-color: rgba(255, 202, 33, 0.23); padding: 15px; margin: 10px 0; border-left: 4px solid #f0ad4e; color: inherit;'>",
+                        "<h4 style='margin-top: 0;'>", .("Warnings"),
+                        "</h4><ul style='margin: 10px 0; padding-left: 20px;'><li>",
+                        paste(warnings, collapse = "</li><li>"),
+                        "</li></ul></div>"
+                    )
                 } else {
-                    "<div style='background-color: rgba(33, 162, 64, 0.19); padding: 15px; margin: 10px 0; border-left: 4px solid #28a745; color: inherit;'>
-                <p style='margin: 0; color: #155724;'><strong> No issues detected</strong> - Sample size and distribution appear adequate.</p>
-                </div>"
+                    paste0(
+                        "<div style='background-color: rgba(33, 162, 64, 0.19); padding: 15px; margin: 10px 0; border-left: 4px solid #28a745; color: inherit;'>",
+                        "<p style='margin: 0;'><strong>", .("No obvious sparse-cell warning."),
+                        "</strong> ",
+                        .("Assess adequacy from the precision required for the intended use."),
+                        "</p></div>"
+                    )
                 }
 
-                sprintf(
-                    "<div style='font-family: Arial, sans-serif; max-width: 800px; line-height: 1.4;'>
-                <div style='background-color: rgba(88, 88, 88, 0.06); border: 2px solid #333; padding: 15px; margin-bottom: 15px; color: inherit;'>
-                <h3 style='margin: 0 0 5px 0; font-size: 16px; color: #333;'>Assumptions & Caveats</h3>
-                </div>
-
-                <div style='font-size: 14px; color: #333;'>
-                <p><strong>Key Assumptions:</strong></p>
-                <ul style='margin: 10px 0; padding-left: 25px;'>
-                <li><strong>Gold standard validity:</strong> Reference test must be highly accurate (near 100%% sensitivity/specificity)</li>
-                <li><strong>Independent assessment:</strong> Test and gold standard should be evaluated independently (blinded)</li>
-                <li><strong>Representative sample:</strong> Study population should match intended clinical use population</li>
-                <li><strong>Disease spectrum:</strong> Include appropriate mix of disease severity (avoid spectrum bias)</li>
-                <li><strong>Prevalence dependence:</strong> PPV/NPV vary with disease prevalence; verify in target setting</li>
-                </ul>
-
-                <p><strong>Common Pitfalls:</strong></p>
-                <ul style='margin: 10px 0; padding-left: 25px;'>
-                <li><strong>Verification bias:</strong> Not all test-positive patients receive gold standard confirmation</li>
-                <li><strong>Incorporation bias:</strong> Gold standard includes results of the test being evaluated</li>
-                <li><strong>Spectrum bias:</strong> Study population has more severe disease than clinical practice</li>
-                <li><strong>Prevalence extrapolation:</strong> Applying PPV/NPV from high-prevalence study to low-prevalence screening</li>
-                </ul>
-
-                %s
-
-                <p><strong>Sample Size Guidance:</strong></p>
-                <ul style='margin: 10px 0; padding-left: 25px;'>
-                <li>Minimum 30-50 diseased cases (for sensitivity estimation)</li>
-                <li>Minimum 30-50 healthy controls (for specificity estimation)</li>
-                <li>For rare diseases (prevalence < 5%%), consider n >= 200 total</li>
-                <li>Larger samples needed for precise CI estimation</li>
-                </ul>
-                </div>
-                </div>",
-                    warning_html
+                paste0(
+                    "<div style='font-family: Arial, sans-serif; max-width: 800px; line-height: 1.4;'>",
+                    "<div style='background-color: rgba(88, 88, 88, 0.06); border: 2px solid currentColor; padding: 15px; margin-bottom: 15px; color: inherit;'>",
+                    "<h3 style='margin: 0 0 5px 0; font-size: 16px;'>",
+                    .("Assumptions and caveats"),
+                    "</h3></div><div style='font-size: 14px;'><p><strong>",
+                    .("Key assumptions:"),
+                    "</strong></p><ul style='margin: 10px 0; padding-left: 25px;'><li>",
+                    .("An imperfect reference standard can bias every estimated measure; document its limitations and consider latent-class or discrepant-resolution methods where appropriate."),
+                    "</li><li>",
+                    .("Interpret the index test and reference standard independently and use blinding where possible."),
+                    "</li><li>",
+                    .("The study population should represent the intended-use population and relevant disease spectrum."),
+                    "</li><li>",
+                    .("PPV and NPV vary with prevalence and should be verified in the target setting."),
+                    "</li></ul><p><strong>", .("Common pitfalls:"),
+                    "</strong></p><ul style='margin: 10px 0; padding-left: 25px;'><li>",
+                    .("Verification bias occurs when reference-standard verification differs according to the index-test result."),
+                    "</li><li>",
+                    .("Incorporation bias occurs when the reference standard includes the test being evaluated."),
+                    "</li><li>",
+                    .("Spectrum bias occurs when the study population differs materially from clinical practice."),
+                    "</li><li>",
+                    .("Prevalence extrapolation can misstate PPV and NPV when study and target settings differ."),
+                    "</li></ul>", warning_html,
+                    "<p><strong>", .("Precision-based sample-size guidance:"),
+                    "</strong></p><ul style='margin: 10px 0; padding-left: 25px;'><li>",
+                    .("Choose the maximum acceptable confidence-interval half-width for sensitivity and specificity before collecting data."),
+                    "</li><li>",
+                    .("Use anticipated sensitivity, specificity, prevalence, confidence level, and expected loss or exclusions to calculate required reference-positive and reference-negative counts."),
+                    "</li><li>",
+                    .("Rare outcomes often require a larger total sample, but no universal total is adequate for every intended use."),
+                    "</li><li>",
+                    .("Report achieved confidence intervals because a nominal sample-size threshold does not guarantee adequate precision."),
+                    "</li></ul></div></div>"
                 )
             },
             .createGlossary = function() {
-                "<div style='font-family: Arial, sans-serif; max-width: 800px; line-height: 1.4;'>
-            <div style='background-color: rgba(88, 88, 88, 0.06); border: 2px solid #333; padding: 15px; margin-bottom: 15px; color: inherit;'>
-            <h3 style='margin: 0 0 5px 0; font-size: 16px; color: #333;'>Clinical Terms Glossary</h3>
-            </div>
+                entries <- list(
+                    c(
+                        .("Sensitivity (true-positive rate)"),
+                        .("Proportion of reference-positive observations with a positive test result.")
+                    ),
+                    c(
+                        .("Specificity (true-negative rate)"),
+                        .("Proportion of reference-negative observations with a negative test result.")
+                    ),
+                    c(
+                        .("PPV (positive predictive value)"),
+                        .("Probability of a reference-positive outcome after a positive test; it depends on prevalence.")
+                    ),
+                    c(
+                        .("NPV (negative predictive value)"),
+                        .("Probability of a reference-negative outcome after a negative test; it depends on prevalence.")
+                    ),
+                    c(
+                        .("LR+ (positive likelihood ratio)"),
+                        .("Factor by which a positive result multiplies pre-test odds; practical importance depends on the starting probability and intended use.")
+                    ),
+                    c(
+                        .("LR- (negative likelihood ratio)"),
+                        .("Factor by which a negative result multiplies pre-test odds; practical importance depends on the starting probability and intended use.")
+                    ),
+                    c(
+                        .("Youden's index (J)"),
+                        .("Sensitivity plus specificity minus one; it weights both equally and is not a measure of clinical utility or a universal cut-off.")
+                    ),
+                    c(
+                        .("Balanced accuracy"),
+                        .("Unweighted average of sensitivity and specificity; it does not encode different consequences for the two error types.")
+                    ),
+                    c(
+                        .("F1 score"),
+                        .("Harmonic mean of sensitivity and PPV; because PPV depends on prevalence, F1 also changes with the selected prevalence.")
+                    ),
+                    c(
+                        .("MCC (Matthews correlation coefficient)"),
+                        .("Summary measure using all four cells, ranging from -1 to +1; interpretation is context-dependent.")
+                    ),
+                    c(
+                        .("DOR (diagnostic odds ratio)"),
+                        .("Odds of a positive result in reference-positive versus reference-negative observations; no universal clinical cut-off is assumed.")
+                    )
+                )
+                terms <- vapply(entries, function(entry) {
+                    paste0(
+                        "<dt style='font-weight: bold; margin-top: 15px;'>",
+                        entry[[1]],
+                        "</dt><dd style='margin-left: 20px; margin-bottom: 10px;'>",
+                        entry[[2]],
+                        "</dd>"
+                    )
+                }, character(1))
 
-            <div style='font-size: 14px; color: #333;'>
-            <dl style='margin: 0;'>
-            <dt style='font-weight: bold; margin-top: 15px; color: #333;'>Sensitivity (True Positive Rate)</dt>
-            <dd style='margin-left: 20px; margin-bottom: 10px;'>Proportion of diseased patients correctly identified. <em>Clinical use:</em> How good is this test at catching disease?</dd>
-
-            <dt style='font-weight: bold; margin-top: 15px; color: #333;'>Specificity (True Negative Rate)</dt>
-            <dd style='margin-left: 20px; margin-bottom: 10px;'>Proportion of healthy patients correctly identified. <em>Clinical use:</em> How good is this test at confirming health?</dd>
-
-            <dt style='font-weight: bold; margin-top: 15px; color: #333;'>PPV (Positive Predictive Value)</dt>
-            <dd style='margin-left: 20px; margin-bottom: 10px;'>Probability of disease given positive test. <em>Clinical use:</em> If test is positive, how likely is disease? <strong>Depends on prevalence.</strong></dd>
-
-            <dt style='font-weight: bold; margin-top: 15px; color: #333;'>NPV (Negative Predictive Value)</dt>
-            <dd style='margin-left: 20px; margin-bottom: 10px;'>Probability of health given negative test. <em>Clinical use:</em> If test is negative, how likely is patient healthy? <strong>Depends on prevalence.</strong></dd>
-
-            <dt style='font-weight: bold; margin-top: 15px; color: #333;'>LR+ (Positive Likelihood Ratio)</dt>
-            <dd style='margin-left: 20px; margin-bottom: 10px;'>How much positive test increases odds of disease. <em>Interpretation:</em> >10 = strong evidence, 5-10 = moderate, 2-5 = weak, <2 = minimal.</dd>
-
-            <dt style='font-weight: bold; margin-top: 15px; color: #333;'>LR- (Negative Likelihood Ratio)</dt>
-            <dd style='margin-left: 20px; margin-bottom: 10px;'>How much negative test decreases odds of disease. <em>Interpretation:</em> <0.1 = strong evidence against, 0.1-0.2 = moderate, 0.2-0.5 = weak, >0.5 = minimal.</dd>
-
-            <dt style='font-weight: bold; margin-top: 15px; color: #333;'>Youden Index (J)</dt>
-            <dd style='margin-left: 20px; margin-bottom: 10px;'>Sensitivity + Specificity - 1. Range: -1 to +1. <em>Clinical use:</em> Optimal cut-off selection. >0.8 = excellent, 0.6-0.8 = good, 0.4-0.6 = fair, <0.4 = poor.</dd>
-
-            <dt style='font-weight: bold; margin-top: 15px; color: #333;'>Balanced Accuracy</dt>
-            <dd style='margin-left: 20px; margin-bottom: 10px;'>Average of sensitivity and specificity. Better than raw accuracy for imbalanced datasets. >0.9 = excellent, 0.8-0.9 = good.</dd>
-
-            <dt style='font-weight: bold; margin-top: 15px; color: #333;'>F1 Score</dt>
-            <dd style='margin-left: 20px; margin-bottom: 10px;'>Harmonic mean of sensitivity and PPV. Useful when false negatives and false positives are equally costly. >0.8 = excellent.</dd>
-
-            <dt style='font-weight: bold; margin-top: 15px; color: #333;'>MCC (Matthews Correlation Coefficient)</dt>
-            <dd style='margin-left: 20px; margin-bottom: 10px;'>Balanced measure accounting for class imbalance. Range: -1 to +1. >0.8 = excellent, 0.6-0.8 = good, 0.4-0.6 = fair.</dd>
-
-            <dt style='font-weight: bold; margin-top: 15px; color: #333;'>DOR (Diagnostic Odds Ratio)</dt>
-            <dd style='margin-left: 20px; margin-bottom: 10px;'>Odds of positive test in diseased vs healthy. <em>Interpretation:</em> >25 = strong, 5-25 = moderate, 2-5 = weak, <2 = poor discrimination.</dd>
-            </dl>
-            </div>
-            </div>"
-            },
-            # Describes where the point estimates fall. Deliberately issues no
-            # clinical verdict: the inputs are one 2x2 table at one cut-off, with
-            # no interval, no validation cohort and no account of spectrum or
-            # verification bias.
-            .getRecommendation = function(Youden, Accuracy, LRP, LRN) {
-                # PPV/NPV are Bayes-adjusted to the supplied prior when pp is on, so the
-                # prevalence they depend on is not this sample's; accuracy always is.
-                prev_source <- if (isTRUE(self$options$pp))
-                    "the population prevalence you supplied" else "the prevalence of this sample"
-                caveat <- paste0("These are single-cohort point estimates at one cut-off. Accuracy depends on the prevalence of this sample, and the predictive values on ", prev_source, ". They do not on their own establish how the test would perform elsewhere; the confidence intervals, the representativeness of the sample, and the quality and blinding of the reference standard all bear on that.")
-                band <- if (Youden > private$.YOUDEN_EXCELLENT && Accuracy > private$.ACCURACY_EXCELLENT && LRP > 10 && LRN < 0.1) {
-                    "Youden's index, accuracy and both likelihood ratios all fall in the highest bands in this sample."
-                } else if (Youden > private$.YOUDEN_GOOD && Accuracy > private$.ACCURACY_GOOD) {
-                    "Youden's index and accuracy both reach at least the good band in this sample."
-                } else if (Youden > private$.YOUDEN_FAIR) {
-                    "Youden's index reaches at least the fair band in this sample, but Youden's index and accuracy do not both reach the good band."
-                } else {
-                    "Youden's index falls in the lowest band in this sample, so positive and negative results separate diseased from healthy patients only weakly."
-                }
-                paste(band, caveat)
+                paste0(
+                    "<div style='font-family: Arial, sans-serif; max-width: 800px; line-height: 1.4;'>",
+                    "<div style='background-color: rgba(88, 88, 88, 0.06); border: 2px solid currentColor; padding: 15px; margin-bottom: 15px; color: inherit;'>",
+                    "<h3 style='margin: 0 0 5px 0; font-size: 16px;'>",
+                    .("Diagnostic-test glossary"),
+                    "</h3></div><div style='font-size: 14px;'><dl style='margin: 0;'>",
+                    paste(terms, collapse = ""),
+                    "</dl></div></div>"
+                )
             }
         )
     )

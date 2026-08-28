@@ -325,12 +325,12 @@ timeintervalClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             if (output_unit == "weeks") return(days / 7)
 
             # Calendar months/years: count whole months, then proportion of remaining month
-            whole_months <- intervals %/% months(1)
+            whole_months <- intervals %/% lubridate::period(month = 1)
             # Remaining interval after removing whole months.
-            # Use %m+% (add_with_rollback) so end-of-month start dates
+            # Use add_with_rollback so end-of-month start dates
             # (e.g. Jan 31 + 1 month) roll back to the last valid day
             # (Feb 28/29) instead of becoming NA and being dropped.
-            remainder_start <- start_dates %m+% months(whole_months)
+            remainder_start <- lubridate::add_with_rollback(start_dates, lubridate::period(month = whole_months))
             remainder_int <- lubridate::interval(remainder_start, end_dates)
             remainder_days <- lubridate::time_length(remainder_int, "days")
 

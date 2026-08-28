@@ -1,7 +1,6 @@
 # Integration tests for tableone module
 # Tests NA handling transparency and all table styles
 
-context("test-tableone-integration")
 
 
 test_that("NA handling reports original missingness when excl=TRUE", {

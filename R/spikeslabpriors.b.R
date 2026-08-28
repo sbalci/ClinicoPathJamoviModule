@@ -45,6 +45,19 @@ spikeslabpriorsClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cla
                 jmvcore::reject("No data left after removing missing values.")
             }
 
+            if (self$options$model_type == "regression") {
+                data[[outcome]] <- jmvcore::toNumeric(data[[outcome]])
+                if (is.na(sd(data[[outcome]], na.rm = TRUE)) || sd(data[[outcome]], na.rm = TRUE) == 0) {
+                    jmvcore::reject("Continuous outcome variable must have non-zero variance for linear regression.")
+                }
+            } else if (self$options$model_type == "logistic") {
+                if (is.factor(data[[outcome]]) || is.character(data[[outcome]])) {
+                    data[[outcome]] <- as.numeric(as.factor(data[[outcome]])) - 1
+                } else {
+                    data[[outcome]] <- as.numeric(data[[outcome]] != 0)
+                }
+            }
+
             # 4. Model fitting
             tryCatch({
                 res <- private$.fitModel(data)
@@ -56,6 +69,7 @@ spikeslabpriorsClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cla
                     # 6. Store result for plots (reset to NULL at the top of .run()
                     #    guards against stale renders on early-return runs).
                     private$.model_res <- res
+                    private$.model_data <- list(dep = data[[outcome]])
                 }
             }, error = function(e) {
                 jmvcore::reject(paste("Analysis error: ", e$message))
@@ -63,6 +77,7 @@ spikeslabpriorsClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cla
         },
 
         .model_res = NULL,
+        .model_data = NULL,
 
         .fitModel = function(data) {
             model_type <- self$options$model_type
@@ -120,15 +135,20 @@ spikeslabpriorsClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cla
             return(res)
         },
 
+        .getInclusionProbabilities = function(res) {
+            if (is.null(res) || is.null(res$beta)) return(numeric(0))
+            pip <- colMeans(res$beta != 0)
+            pip <- pip[names(pip) != "(Intercept)"]
+            pip
+        },
+
         .populateResults = function(res) {
-            # Extract basic info
             # BoomSpikeSlab objects usually have:
             # - beta: MCMCsamples x nvars matrix
-            # - inclusion.probabilities: vector length nvars
             
             # 1. Variable Selection Table
             table <- self$results$variableSelection
-            pip <- BoomSpikeSlab::InclusionProbabilities(res)
+            pip <- private$.getInclusionProbabilities(res)
             
             # Coefficients (posterior means)
             # res$beta usually includes intercept as first column
@@ -203,7 +223,7 @@ spikeslabpriorsClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cla
             if (is.null(private$.model_res)) return(FALSE)
             
             res <- private$.model_res
-            pip <- BoomSpikeSlab::InclusionProbabilities(res)
+            pip <- private$.getInclusionProbabilities(res)
             df <- data.frame(
                 Variable = names(pip),
                 PIP = as.numeric(pip)
@@ -252,6 +272,125 @@ spikeslabpriorsClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cla
                              x = "Variables", y = "Estimate") +
                 ggplot2::theme_minimal()
             
+            print(p)
+            TRUE
+        },
+
+        .plotModelSize = function(image, ggtheme, theme, ...) {
+            if (is.null(private$.model_res)) return(FALSE)
+            res <- private$.model_res
+            beta <- res$beta
+            beta_no_int <- beta[, colnames(beta) != "(Intercept)", drop = FALSE]
+            model_sizes <- rowSums(beta_no_int != 0)
+            df <- data.frame(Size = model_sizes)
+            p <- ggplot2::ggplot(df, ggplot2::aes(x = Size)) +
+                ggplot2::geom_bar(fill = "#3C5488FF", color = "white") +
+                ggplot2::labs(title = "Posterior Distribution of Model Size", x = "Number of Included Variables", y = "Posterior Frequency") +
+                ggplot2::theme_minimal()
+            if (!is.null(ggtheme)) p <- p + ggtheme
+            print(p)
+            TRUE
+        },
+
+        .plotVariableImportance = function(image, ggtheme, theme, ...) {
+            if (is.null(private$.model_res)) return(FALSE)
+            res <- private$.model_res
+            pip <- private$.getInclusionProbabilities(res)
+            df <- data.frame(
+                Variable = names(pip),
+                Importance = as.numeric(pip) * 100
+            )
+            df <- df[order(df$Importance, decreasing = TRUE), ]
+            df$Variable <- factor(df$Variable, levels = rev(df$Variable))
+            p <- ggplot2::ggplot(df, ggplot2::aes(x = Variable, y = Importance)) +
+                ggplot2::geom_col(fill = "#00A087FF") +
+                ggplot2::coord_flip() +
+                ggplot2::labs(title = "Variable Importance Scores", x = "Variable", y = "Importance Score (%)") +
+                ggplot2::theme_minimal()
+            if (!is.null(ggtheme)) p <- p + ggtheme
+            print(p)
+            TRUE
+        },
+
+        .plotConvergence = function(image, ggtheme, theme, ...) {
+            if (is.null(private$.model_res)) return(FALSE)
+            res <- private$.model_res
+            beta <- res$beta
+            beta_no_int <- beta[, colnames(beta) != "(Intercept)", drop = FALSE]
+            if (ncol(beta_no_int) == 0) return(FALSE)
+            var_name <- colnames(beta_no_int)[1]
+            df <- data.frame(
+                Iteration = seq_len(nrow(beta_no_int)),
+                Value = beta_no_int[, 1]
+            )
+            p <- ggplot2::ggplot(df, ggplot2::aes(x = Iteration, y = Value)) +
+                ggplot2::geom_line(color = "#4DBBD5FF", alpha = 0.8) +
+                ggplot2::labs(title = paste("MCMC Trace Plot:", var_name), x = "MCMC Iteration", y = "Parameter Value") +
+                ggplot2::theme_minimal()
+            if (!is.null(ggtheme)) p <- p + ggtheme
+            print(p)
+            TRUE
+        },
+
+        .plotPosteriorDistributions = function(image, ggtheme, theme, ...) {
+            if (is.null(private$.model_res)) return(FALSE)
+            res <- private$.model_res
+            beta <- res$beta
+            beta_no_int <- beta[, colnames(beta) != "(Intercept)", drop = FALSE]
+            if (ncol(beta_no_int) == 0) return(FALSE)
+            pip <- private$.getInclusionProbabilities(res)
+            top_vars <- names(sort(pip, decreasing = TRUE))[1:min(4, length(pip))]
+            df_list <- lapply(top_vars, function(v) {
+                data.frame(Variable = v, Value = beta_no_int[, v])
+            })
+            df <- do.call(rbind, df_list)
+            p <- ggplot2::ggplot(df, ggplot2::aes(x = Value, fill = Variable)) +
+                ggplot2::geom_density(alpha = 0.6) +
+                ggplot2::facet_wrap(~Variable, scales = "free") +
+                ggplot2::labs(title = "Posterior Densities of Selected Coefficients", x = "Coefficient Value", y = "Density") +
+                ggplot2::theme_minimal() +
+                ggplot2::theme(legend.position = "none")
+            if (!is.null(ggtheme)) p <- p + ggtheme
+            print(p)
+            TRUE
+        },
+
+        .plotModelComparison = function(image, ggtheme, theme, ...) {
+            if (is.null(private$.model_res)) return(FALSE)
+            res <- private$.model_res
+            beta <- res$beta
+            beta_no_int <- beta[, colnames(beta) != "(Intercept)", drop = FALSE]
+            model_patterns <- apply(beta_no_int != 0, 1, function(r) paste(colnames(beta_no_int)[r], collapse = "+"))
+            tab <- sort(table(model_patterns), decreasing = TRUE)[1:min(5, length(unique(model_patterns)))]
+            df <- data.frame(
+                Model = names(tab),
+                Probability = as.numeric(tab) / nrow(beta_no_int)
+            )
+            df$Model[df$Model == ""] <- "(Null Model)"
+            df$Model <- factor(df$Model, levels = rev(df$Model))
+            p <- ggplot2::ggplot(df, ggplot2::aes(x = Model, y = Probability)) +
+                ggplot2::geom_col(fill = "#E64B35FF") +
+                ggplot2::coord_flip() +
+                ggplot2::labs(title = "Top Model Posterior Probabilities", x = "Model", y = "Posterior Probability") +
+                ggplot2::theme_minimal()
+            if (!is.null(ggtheme)) p <- p + ggtheme
+            print(p)
+            TRUE
+        },
+
+        .plotPredictionPerformance = function(image, ggtheme, theme, ...) {
+            if (is.null(private$.model_res)) return(FALSE)
+            y_obs <- private$.model_data$dep
+            if (is.null(y_obs)) return(FALSE)
+            pred_y <- predict(private$.model_res)
+            if (is.matrix(pred_y)) pred_y <- colMeans(pred_y)
+            df <- data.frame(Observed = y_obs, Predicted = as.numeric(pred_y))
+            p <- ggplot2::ggplot(df, ggplot2::aes(x = Predicted, y = Observed)) +
+                ggplot2::geom_point(color = "#3C5488FF", alpha = 0.7) +
+                ggplot2::geom_abline(slope = 1, intercept = 0, linetype = "dashed", color = "red") +
+                ggplot2::labs(title = "Spike-and-Slab: Observed vs Predicted", x = "Predicted Value", y = "Observed Value") +
+                ggplot2::theme_minimal()
+            if (!is.null(ggtheme)) p <- p + ggtheme
             print(p)
             TRUE
         }

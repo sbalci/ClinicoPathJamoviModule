@@ -29,12 +29,14 @@ decisioncompare(
   heatmap = FALSE,
   opa = FALSE,
   niMargin = 75,
+  useOpaCriterion = FALSE,
   ciMethod = "wilson",
   stratify = NULL,
   statComp = FALSE,
   showSummary = FALSE,
   showExplanations = FALSE,
-  showReportSentence = FALSE
+  showReportSentence = FALSE,
+  showDescriptiveReport = FALSE
 )
 }
 \arguments{
@@ -85,9 +87,11 @@ Requires a value between 0.001 and 0.999, default 0.300.}
 \item{od}{Boolean selection whether to show frequency tables. Default is
 'false'.}
 
-\item{fnote}{.}
+\item{fnote}{Boolean indicating whether table footnotes should be
+displayed.}
 
-\item{ci}{.}
+\item{ci}{Boolean indicating whether confidence interval tables should be
+displayed.}
 
 \item{plot}{Generate comparison plot showing test performance metrics.}
 
@@ -104,8 +108,11 @@ against gold standard.}
 \item{opa}{Show overall percent agreement with 95 percent confidence
 intervals for each test.}
 
-\item{niMargin}{Noninferiority margin as percentage (default 75). Used when
-OPA is enabled.}
+\item{niMargin}{Minimum acceptable OPA percentage (default 75). Retains the
+niMargin option name for compatibility with saved analyses.}
+
+\item{useOpaCriterion}{Whether to apply the descriptive minimum OPA
+criterion.}
 
 \item{ciMethod}{CI method: wilson, logit, or exact (Clopper-Pearson).}
 
@@ -122,6 +129,9 @@ comparisons.}
 educational content.}
 
 \item{showReportSentence}{Boolean to show manuscript-ready report sentence.}
+
+\item{showDescriptiveReport}{Boolean to show the longer descriptive report
+templates.}
 }
 \value{
 A results object containing:
@@ -159,7 +169,29 @@ Tables can be converted to data frames with \code{asDF} or \code{\link{as.data.f
 \description{
 Function for comparing multiple Medical Decision Tests. Compares
 sensitivity, specificity, positive predictive value, negative predictive
-value, and other metrics between different tests against the same golden
+value, and other metrics between different tests against the same gold
 standard. Includes statistical comparison using McNemar's test and
 confidence intervals for differences.
+}
+\examples{
+\donttest{
+# Level arguments are explicit in the generated R API. Pass NULL for
+# unused negative levels and for the optional third test selectors.
+decisioncompare(
+    data = histopathology,
+    gold = "Golden Standart",
+    goldPositive = "1",
+    goldNegative = NULL,
+    test1 = "New Test",
+    test1Positive = "1",
+    test1Negative = NULL,
+    test2 = "Rater 1",
+    test2Positive = "1",
+    test2Negative = NULL,
+    test3 = NULL,
+    test3Positive = NULL,
+    test3Negative = NULL,
+    statComp = TRUE
+)
+}
 }

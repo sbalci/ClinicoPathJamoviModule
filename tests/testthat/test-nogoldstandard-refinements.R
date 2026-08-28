@@ -1,6 +1,4 @@
 
-context("nogoldstandard refinements")
-
 test_that("nogoldstandard enforces constraints and handles warnings", {
   skip_if_not_installed('jmvReadWrite')
     
@@ -45,16 +43,18 @@ test_that("nogoldstandard enforces constraints and handles warnings", {
         test1Positive = "1",
         test2 = "test2",
         test2Positive = "1",
-        test3Positive = NULL,
+        test3 = "test3",
+        test3Positive = "1",
         test4Positive = NULL,
         test5Positive = NULL,
         method = "bayesian"
     )
     
-    # There is no `warnings` item on this analysis -- reading it errored. Notices render into
-    # the `notices` Html item.
+    # There is no `warnings` item on this analysis. Notices render into the plain-text
+    # `notices` item.
     expect_true(results_tiny$notices$visible)
-    expect_match(results_tiny$notices$content, "Bayesian analysis may be unstable with N &lt; 50|Bayesian analysis may be unstable with N < 50")
+    expect_match(results_tiny$notices$content,
+                 "penalized-EM analysis has N = 20.*N < 50")
     
     # Test 3: Bootstrap Execution and CIs
     # -----------------------------------

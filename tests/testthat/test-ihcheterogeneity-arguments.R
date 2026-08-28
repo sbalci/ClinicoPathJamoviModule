@@ -5,8 +5,6 @@
 # Tests all argument combinations and option interactions
 # for the ihcheterogeneity jamovi function
 
-library(testthat)
-
 # Load test data
 data(ihcheterogeneity_test, package = "ClinicoPath")
 data(ihcheterogeneity_ki67, package = "ClinicoPath")

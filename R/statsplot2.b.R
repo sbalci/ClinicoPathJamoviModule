@@ -1364,7 +1364,8 @@ statsplot2Class <- if (requireNamespace('jmvcore'))
                         sum(grvar_col == level, na.rm = TRUE) == 0
                     })
                     if (any(empty_levels)) {
-                        warning(glue::glue("Some levels of '{prepared_data$grvar}' have no data: {paste(grvar_levels[empty_levels], collapse=', ')}. These levels will be skipped."))
+                        private$.addNotice('WARNING', 'Empty group levels skipped',
+                            glue::glue("Some levels of '{prepared_data$grvar}' have no data: {paste(grvar_levels[empty_levels], collapse=', ')}. These levels will be skipped."))
                         grvar_levels <- grvar_levels[!empty_levels]
                     }
                     

@@ -11,7 +11,8 @@ test_that("McNemar compares diagnostic CORRECTNESS, not raw positivity rates", {
     # Discriminating fixture: both tests call exactly 10 of 20 cases positive, so a
     # McNemar run on RAW POSITIVITY gives p = 1.000. They differ sharply in whether
     # those calls are right (accuracy 16/20 vs 4/20), so a McNemar run on
-    # CORRECTNESS gives p = 0.0015. The module must report the latter.
+    # CORRECTNESS gives a small exact McNemar p-value. The module must report
+    # that value rather than the raw-positivity comparison.
     gold  <- c(rep("Pos", 10), rep("Neg", 10))
     test1 <- c(rep("Pos", 8), rep("Neg", 2), rep("Pos", 2), rep("Neg", 8))
     test2 <- c(rep("Pos", 2), rep("Neg", 8), rep("Pos", 8), rep("Neg", 2))
@@ -30,14 +31,19 @@ test_that("McNemar compares diagnostic CORRECTNESS, not raw positivity rates", {
     mc <- res$mcnemarTable$asDF
     expect_equal(nrow(mc), 1L)
 
-    p_correctness <- stats::mcnemar.test(table(
+    correctness_table <- table(
         factor(test1 == gold, c(TRUE, FALSE)),
-        factor(test2 == gold, c(TRUE, FALSE))))$p.value
+        factor(test2 == gold, c(TRUE, FALSE)))
+    p_correctness <- stats::binom.test(
+        correctness_table[1, 2],
+        correctness_table[1, 2] + correctness_table[2, 1],
+        p = 0.5)$p.value
     p_positivity <- stats::mcnemar.test(table(
         factor(test1, c("Pos", "Neg")), factor(test2, c("Pos", "Neg"))))$p.value
 
     # single comparison -> Holm leaves the p-value unchanged
     expect_equal(mc$p[1], p_correctness, tolerance = 1e-9)
+    expect_equal(mc$method[1], "Exact binomial McNemar")
     expect_false(isTRUE(all.equal(mc$p[1], p_positivity)))
     expect_lt(mc$p[1], 0.05)
 })
@@ -105,7 +111,8 @@ test_that("Multi-level variables generate warnings", {
 test_that("the completion notice reports the analysed sample size", {
     skip_if_not_installed("ClinicoPath")
 
-    # 3 complete cases + 2 that are incomplete on a SELECTED variable.
+    # Each test is missing once, in different rows. Standalone metrics must use
+    # four available pairs per test; their paired comparison uses three rows.
     dat <- data.frame(
         gold  = c("Pos", "Neg", "Pos", "Neg", "Pos"),
         test1 = c("Pos", "Neg", "Pos", NA,    "Pos"),
@@ -119,9 +126,9 @@ test_that("the completion notice reports the analysed sample size", {
         test3 = NULL, test3Positive = NULL, test3Negative = NULL, stratify = NULL)
 
     notices <- gsub("<[^>]+>", " ", paste(res$notices$content, collapse = " "))
-    # 3 complete cases, of which 2 are gold-positive and 1 gold-negative
-    expect_match(notices, "3 complete cases")
-    expect_match(notices, "2 diseased and 1 healthy")
+    expect_match(notices, "5 selected rows")
+    expect_match(notices, "test1 n=4; test2 n=4")
+    expect_match(notices, "Paired comparisons use only rows determinate")
 })
 
 

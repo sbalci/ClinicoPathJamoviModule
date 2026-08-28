@@ -2,7 +2,7 @@ title: Date/DateTime Validator
 name: datevalidator
 jus: '3.0'
 stage: 0
-compilerMode: aggresive
+compilerMode: tame
 children:
   - type: VariableSupplier
     persistentItems: false

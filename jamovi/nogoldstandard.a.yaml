@@ -1,67 +1,18 @@
 ---
 name: nogoldstandard
 title: Analysis Without Gold Standard
-menuGroup: meddecide
+menuGroup: meddecideT
 menuSubgroup: Decision
 menuSubtitle: Multiple Test Analysis Without Gold Standard
-version: '1.0.7'
+version: '1.0.8'
 jas: '1.2'
 
 description:
     main: >
-        Analysis of diagnostic tests without a gold standard reference using multiple statistical approaches.
-        Implements Latent Class Analysis (Hui & Walter, 1980), Bayesian methods (Joseph et al., 1995), 
-        and composite reference standards for estimating test performance when no perfect reference test exists.
-
-    # R:
-    #     dontrun: true
-    #     usage: |
-    #         # Basic example with simulated diagnostic test data
-    #         set.seed(123)
-    #         n <- 200
-            
-    #         # Simulate disease status (latent, unknown)
-    #         disease <- rbinom(n, 1, 0.3)  # 30 percent prevalence
-            
-    #         # Simulate test results with known sensitivity/specificity
-    #         test1_result <- ifelse(disease == 1, 
-    #                                rbinom(sum(disease), 1, 0.85),     # sensitivity 0.85
-    #                                rbinom(sum(1-disease), 1, 0.15))   # 1-specificity 0.15
-    #         test1_result <- factor(test1_result, levels=c(0,1), labels=c("Negative", "Positive"))
-            
-    #         test2_result <- ifelse(disease == 1, 
-    #                                rbinom(sum(disease), 1, 0.80),     # sensitivity 0.80
-    #                                rbinom(sum(1-disease), 1, 0.10))   # 1-specificity 0.10
-    #         test2_result <- factor(test2_result, levels=c(0,1), labels=c("Negative", "Positive"))
-            
-    #         # Create data frame
-    #         test_data <- data.frame(
-    #             Test1 = test1_result,
-    #             Test2 = test2_result
-    #         )
-            
-    #         # Latent Class Analysis (recommended method)
-    #         nogoldstandard(
-    #             data = test_data,
-    #             test1 = "Test1",
-    #             test1Positive = "Positive", 
-    #             test2 = "Test2",
-    #             test2Positive = "Positive",
-    #             method = "latent_class"
-    #         )
-            
-    #         # With bootstrap confidence intervals
-    #         nogoldstandard(
-    #             data = test_data,
-    #             test1 = "Test1",
-    #             test1Positive = "Positive",
-    #             test2 = "Test2", 
-    #             test2Positive = "Positive",
-    #             method = "latent_class",
-    #             bootstrap = TRUE,
-    #             nboot = 500,
-    #             verbose = TRUE
-    #         )
+        Analysis of multiple binary tests when no perfect reference exists. Implements a
+        conditional-independence two-class latent class model, fixed-prior penalized EM
+        point estimation, and descriptive agreement with self-built composite reference rules.
+        Latent classes are unlabeled, and reference-rule results are not diagnostic-accuracy estimates.
 
 options:
     - name: data
@@ -70,23 +21,25 @@ options:
           R: The data as a data frame.
 
     - name: clinicalPreset
-      title: Clinical Scenario Preset
+      title: Illustrative Scenario Example
       type: List
       options:
         - name: none
-          title: Custom Analysis (no preset)
+          title: No example
         - name: diagnostic_validation
-          title: Diagnostic Test Validation
+          title: Diagnostic Test Validation (example)
         - name: pathology_agreement
-          title: Pathologist Agreement
+          title: Pathologist Agreement (example)
         - name: tumor_markers
-          title: Tumor Marker Evaluation
+          title: Tumor Marker Evaluation (example)
         - name: screening_evaluation
-          title: Screening Test Assessment
+          title: Screening Test Assessment (example)
       default: none
       description:
           R: >
-            Predefined clinical scenarios with optimized settings and method recommendations.
+            Illustrative scenario examples only. They do not change analysis settings and
+            are not clinical guides, validated recommendations, or substitutes for a
+            study-specific analysis plan.
 
     - name: test1
       title: Test 1
@@ -185,13 +138,13 @@ options:
       options:
         - title: Latent Class Analysis
           name: latent_class
-        - title: Composite Reference
+        - title: Composite Reference (strict majority)
           name: composite
         - title: All Tests Positive
           name: all_positive
         - title: Any Test Positive
           name: any_positive
-        - title: Bayesian Analysis
+        - title: Penalized EM (MAP-like; fixed priors; 3+ tests)
           name: bayesian
       # BEHAVIOUR CHANGE (1.0.4): the default was `all_positive`, which defines the
       # reference standard as "every test positive" and therefore fixes sensitivity and NPV
@@ -202,7 +155,9 @@ options:
       default: latent_class
       description:
           R: >
-            Method for analyzing tests without gold standard.
+            Method for analyzing tests without a gold standard. Composite Reference uses
+            a strict majority (more than half positive); ties with an even number of tests
+            are classified as rule negative.
 
     - name: bootstrap
       title: Bootstrap CI
@@ -210,7 +165,10 @@ options:
       default: false
       description:
           R: >
-            Calculate bootstrap confidence intervals.
+            Calculate case-resampling percentile confidence intervals. For latent-class
+            and penalized-EM models, confidence intervals are reported only when this
+            option is enabled because ordinary binomial intervals do not account for
+            latent-variable estimation.
 
     - name: nboot
       title: Number of Bootstrap Samples
@@ -223,7 +181,7 @@ options:
             Number of bootstrap samples for confidence intervals.
 
     - name: alpha
-      title: Alpha Level
+      title: Alpha for Confidence Intervals
       type: Number
       default: 0.05
       min: 0.01
@@ -233,12 +191,13 @@ options:
             Alpha level for confidence intervals.
 
     - name: verbose
-      title: Verbose bootstrap output
+      title: Analysis Diagnostics
       type: Bool
       default: false
       description:
           R: >
-            Show detailed progress messages during bootstrap analysis.
+            Show detailed analysis diagnostics, including convergence, random starts,
+            exclusions, and bootstrap failures when bootstrap intervals are enabled.
 
     - name: seed
       title: "Random Seed"
@@ -246,8 +205,27 @@ options:
       default: 0
       description:
           R: >
-            Base random seed for the reproducible latent-class multi-start search.
+            Base random seed for the reproducible latent-class multi-start search and
+            bootstrap resampling.
             Each start is offset from this base, so changing it shifts the whole
             reproducible sequence; the default (0) reproduces the previous behaviour.
+
+    - name: showSummary
+      title: Plain-Language Summary
+      type: Bool
+      default: false
+      description:
+          R: >
+            Show an optional plain-language summary. The summary describes the fitted
+            quantities and their assumptions; it is not clinical guidance.
+
+    - name: showMethodGuide
+      title: Method Guide
+      type: Bool
+      default: false
+      description:
+          R: >
+            Show an optional educational guide to the available methods. The scenarios
+            are illustrative examples, not clinical guides or validated recommendations.
 
 ...

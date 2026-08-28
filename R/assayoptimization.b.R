@@ -10,6 +10,8 @@ assayoptimizationClass <- R6::R6Class(
     "assayoptimizationClass",
     inherit = assayoptimizationBase,
     private = list(
+        .plot_data = NULL,
+
         .init = function() {
             
             if (is.null(self$data) || is.null(self$options$response_var)) {
@@ -145,6 +147,14 @@ assayoptimizationClass <- R6::R6Class(
                 if (self$options$method_validation) {
                     private$.performMethodValidation(response, factor_data, response_var, factors)
                 }
+
+                # Store data for plot render functions
+                private$.plot_data <- list(
+                    response = response,
+                    factor_data = factor_data,
+                    response_var = response_var,
+                    factors = factors
+                )
                 
             }, error = function(e) {
                 self$results$design_summary$setContent(paste("Analysis error:", htmltools::htmlEscape(e$message)))
@@ -740,6 +750,241 @@ assayoptimizationClass <- R6::R6Class(
             })
             
             self$results$validation_metrics$setContent(html)
+        },
+
+        .plot_design = function(image, ggtheme, theme, ...) {
+            if (is.null(private$.plot_data)) return(FALSE)
+            factors <- private$.plot_data$factors
+            factor_data <- private$.plot_data$factor_data
+            response <- private$.plot_data$response
+            if (length(factors) == 0 || nrow(factor_data) == 0) return(FALSE)
+            
+            if (length(factors) >= 2) {
+                f1 <- factors[1]
+                f2 <- factors[2]
+                df <- data.frame(
+                    x = factor_data[[f1]],
+                    y = factor_data[[f2]],
+                    Response = response
+                )
+                p <- ggplot2::ggplot(df, ggplot2::aes(x = x, y = y, color = Response)) +
+                    ggplot2::geom_point(size = 3, alpha = 0.8) +
+                    ggplot2::scale_color_viridis_c() +
+                    ggplot2::labs(title = "Experimental Design Points", x = f1, y = f2) +
+                    ggplot2::theme_minimal()
+            } else {
+                f1 <- factors[1]
+                df <- data.frame(
+                    Run = seq_along(response),
+                    x = factor_data[[f1]],
+                    Response = response
+                )
+                p <- ggplot2::ggplot(df, ggplot2::aes(x = Run, y = x, color = Response)) +
+                    ggplot2::geom_point(size = 3) +
+                    ggplot2::scale_color_viridis_c() +
+                    ggplot2::labs(title = "Experimental Design Runs", x = "Run Number", y = f1) +
+                    ggplot2::theme_minimal()
+            }
+            if (!is.null(ggtheme)) p <- p + ggtheme
+            print(p)
+            TRUE
+        },
+
+        .plot_effects = function(image, ggtheme, theme, ...) {
+            if (is.null(private$.plot_data)) return(FALSE)
+            factors <- private$.plot_data$factors
+            factor_data <- private$.plot_data$factor_data
+            response <- private$.plot_data$response
+            if (length(factors) == 0) return(FALSE)
+            
+            df_list <- list()
+            for (f in factors) {
+                vals <- factor_data[[f]]
+                if (is.numeric(vals)) {
+                    # Bin into 3 levels
+                    lvl <- cut(vals, breaks = 3, labels = c("Low", "Mid", "High"))
+                } else {
+                    lvl <- as.factor(vals)
+                }
+                agg <- aggregate(response, by = list(Level = lvl), FUN = mean, na.rm = TRUE)
+                agg$Factor <- f
+                df_list[[f]] <- agg
+            }
+            df <- do.call(rbind, df_list)
+            p <- ggplot2::ggplot(df, ggplot2::aes(x = Level, y = x, group = Factor, color = Factor)) +
+                ggplot2::geom_line(linewidth = 1) +
+                ggplot2::geom_point(size = 2.5) +
+                ggplot2::facet_wrap(~Factor, scales = "free_x") +
+                ggplot2::labs(title = "Main Factor Effects", x = "Factor Level", y = paste("Mean", private$.plot_data$response_var)) +
+                ggplot2::theme_minimal()
+            if (!is.null(ggtheme)) p <- p + ggtheme
+            print(p)
+            TRUE
+        },
+
+        .plot_response_surface = function(image, ggtheme, theme, ...) {
+            if (is.null(private$.plot_data)) return(FALSE)
+            factors <- private$.plot_data$factors
+            factor_data <- private$.plot_data$factor_data
+            response <- private$.plot_data$response
+            if (length(factors) < 2) return(FALSE)
+            
+            f1 <- factors[1]
+            f2 <- factors[2]
+            if (!is.numeric(factor_data[[f1]]) || !is.numeric(factor_data[[f2]])) return(FALSE)
+            
+            # Fit polynomial model
+            df_fit <- data.frame(y = response, x1 = factor_data[[f1]], x2 = factor_data[[f2]])
+            fit <- tryCatch(lm(y ~ x1 * x2 + I(x1^2) + I(x2^2), data = df_fit), error = function(e) NULL)
+            if (is.null(fit)) return(FALSE)
+            
+            grid_x1 <- seq(min(df_fit$x1, na.rm = TRUE), max(df_fit$x1, na.rm = TRUE), length.out = 40)
+            grid_x2 <- seq(min(df_fit$x2, na.rm = TRUE), max(df_fit$x2, na.rm = TRUE), length.out = 40)
+            grid <- expand.grid(x1 = grid_x1, x2 = grid_x2)
+            grid$y_pred <- predict(fit, newdata = grid)
+            
+            p <- ggplot2::ggplot(grid, ggplot2::aes(x = x1, y = x2, z = y_pred, fill = y_pred)) +
+                ggplot2::geom_tile() +
+                ggplot2::geom_contour(color = "white", alpha = 0.6) +
+                ggplot2::scale_fill_viridis_c() +
+                ggplot2::labs(title = "Response Surface Contour Map", x = f1, y = f2, fill = "Predicted") +
+                ggplot2::theme_minimal()
+            if (!is.null(ggtheme)) p <- p + ggtheme
+            print(p)
+            TRUE
+        },
+
+        .plot_optimization = function(image, ggtheme, theme, ...) {
+            if (is.null(private$.plot_data)) return(FALSE)
+            response <- private$.plot_data$response
+            factor_data <- private$.plot_data$factor_data
+            factors <- private$.plot_data$factors
+            if (length(response) == 0) return(FALSE)
+            
+            # Predict fitted values
+            df_fit <- data.frame(response = response, factor_data, check.names = FALSE)
+            names(df_fit)[1] <- "resp"
+            formula_str <- jmvcore::constructFormula("resp", as.list(factors))
+            fit <- tryCatch(lm(jmvcore::asFormula(formula_str), data = df_fit), error = function(e) NULL)
+            if (is.null(fit)) return(FALSE)
+            
+            pred_vals <- fitted(fit)
+            df <- data.frame(
+                Run = seq_along(response),
+                Observed = response,
+                Predicted = pred_vals
+            )
+            opt_idx <- which.max(pred_vals)
+            if (self$options$optimization_goal == "minimize_response") {
+                opt_idx <- which.min(pred_vals)
+            }
+            
+            p <- ggplot2::ggplot(df, ggplot2::aes(x = Run)) +
+                ggplot2::geom_point(ggplot2::aes(y = Observed, color = "Observed"), size = 2) +
+                ggplot2::geom_line(ggplot2::aes(y = Predicted, color = "Fitted Model"), linewidth = 1) +
+                ggplot2::geom_point(data = df[opt_idx, , drop = FALSE], ggplot2::aes(y = Predicted), color = "#E64B35FF", size = 4, shape = 18) +
+                ggplot2::annotate("text", x = opt_idx, y = df$Predicted[opt_idx], label = "Optimal Run", color = "#E64B35FF", vjust = -1) +
+                ggplot2::scale_color_manual(values = c("Observed" = "#3C5488FF", "Fitted Model" = "#00A087FF")) +
+                ggplot2::labs(title = "Optimization Trajectory across Runs", x = "Run Number", y = private$.plot_data$response_var, color = "") +
+                ggplot2::theme_minimal()
+            if (!is.null(ggtheme)) p <- p + ggtheme
+            print(p)
+            TRUE
+        },
+
+        .plot_control_chart = function(image, ggtheme, theme, ...) {
+            if (is.null(private$.plot_data)) return(FALSE)
+            response <- private$.plot_data$response
+            if (length(response) == 0) return(FALSE)
+            
+            mean_r <- mean(response, na.rm = TRUE)
+            sd_r <- sd(response, na.rm = TRUE)
+            ucl <- mean_r + 3 * sd_r
+            lcl <- mean_r - 3 * sd_r
+            uwl <- mean_r + 2 * sd_r
+            lwl <- mean_r - 2 * sd_r
+            
+            df <- data.frame(
+                Run = seq_along(response),
+                Response = response,
+                Status = ifelse(response > ucl | response < lcl, "Out of Control",
+                         ifelse(response > uwl | response < lwl, "Warning", "In Control"))
+            )
+            
+            p <- ggplot2::ggplot(df, ggplot2::aes(x = Run, y = Response)) +
+                ggplot2::geom_line(color = "gray60") +
+                ggplot2::geom_point(ggplot2::aes(color = Status), size = 2.5) +
+                ggplot2::geom_hline(yintercept = mean_r, color = "#00A087FF", linewidth = 1) +
+                ggplot2::geom_hline(yintercept = c(ucl, lcl), color = "#E64B35FF", linetype = "dashed", linewidth = 0.8) +
+                ggplot2::geom_hline(yintercept = c(uwl, lwl), color = "#F39B7FFF", linetype = "dotted", linewidth = 0.8) +
+                ggplot2::scale_color_manual(values = c("In Control" = "#3C5488FF", "Warning" = "#F39B7FFF", "Out of Control" = "#E64B35FF")) +
+                ggplot2::labs(title = "Statistical Quality Control Chart (Shewhart Individual)", 
+                             x = "Observation / Run", y = private$.plot_data$response_var) +
+                ggplot2::theme_minimal()
+            if (!is.null(ggtheme)) p <- p + ggtheme
+            print(p)
+            TRUE
+        },
+
+        .plot_diagnostics = function(image, ggtheme, theme, ...) {
+            if (is.null(private$.plot_data)) return(FALSE)
+            response <- private$.plot_data$response
+            factor_data <- private$.plot_data$factor_data
+            factors <- private$.plot_data$factors
+            if (length(response) == 0) return(FALSE)
+            
+            df_fit <- data.frame(response = response, factor_data, check.names = FALSE)
+            names(df_fit)[1] <- "resp"
+            formula_str <- jmvcore::constructFormula("resp", as.list(factors))
+            fit <- tryCatch(lm(jmvcore::asFormula(formula_str), data = df_fit), error = function(e) NULL)
+            if (is.null(fit)) return(FALSE)
+            
+            df <- data.frame(
+                Fitted = fitted(fit),
+                Residuals = residuals(fit)
+            )
+            p <- ggplot2::ggplot(df, ggplot2::aes(x = Fitted, y = Residuals)) +
+                ggplot2::geom_point(color = "#3C5488FF", size = 2, alpha = 0.8) +
+                ggplot2::geom_hline(yintercept = 0, linetype = "dashed", color = "black") +
+                ggplot2::geom_smooth(method = "loess", color = "#E64B35FF", se = FALSE, formula = y ~ x) +
+                ggplot2::labs(title = "Residuals vs Fitted Diagnostic Plot", x = "Fitted Values", y = "Residuals") +
+                ggplot2::theme_minimal()
+            if (!is.null(ggtheme)) p <- p + ggtheme
+            print(p)
+            TRUE
+        },
+
+        .plot_power = function(image, ggtheme, theme, ...) {
+            alpha_level <- self$options$alpha_level %||% 0.05
+            effect_size <- self$options$effect_size %||% 0.3
+            n_factors <- length(self$options$factors %||% 1)
+            
+            n_seq <- seq(10, 200, by = 5)
+            powers <- sapply(n_seq, function(n) {
+                tryCatch({
+                    pwr::pwr.f2.test(
+                        u = max(1, n_factors),
+                        v = max(1, n - n_factors - 1),
+                        f2 = effect_size^2 / (1 - effect_size^2),
+                        sig.level = alpha_level
+                    )$power
+                }, error = function(e) NA)
+            })
+            df <- data.frame(SampleSize = n_seq, Power = powers)
+            df <- df[!is.na(df$Power), ]
+            if (nrow(df) == 0) return(FALSE)
+            
+            target_p <- self$options$power_level %||% 0.8
+            p <- ggplot2::ggplot(df, ggplot2::aes(x = SampleSize, y = Power)) +
+                ggplot2::geom_line(color = "#3C5488FF", linewidth = 1.1) +
+                ggplot2::geom_hline(yintercept = target_p, linetype = "dashed", color = "#E64B35FF") +
+                ggplot2::annotate("text", x = max(n_seq)*0.7, y = target_p + 0.03, label = paste("Target Power =", target_p), color = "#E64B35FF") +
+                ggplot2::ylim(0, 1) +
+                ggplot2::labs(title = "Power Curve vs Sample Size", x = "Total Sample Size (N)", y = "Statistical Power (1 - \u{03B2})") +
+                ggplot2::theme_minimal()
+            if (!is.null(ggtheme)) p <- p + ggtheme
+            print(p)
+            TRUE
         }
     )
 )

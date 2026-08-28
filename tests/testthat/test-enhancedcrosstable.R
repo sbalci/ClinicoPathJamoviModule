@@ -58,7 +58,8 @@ test_that("Enhanced Cross Table - Basic functionality and parameter validation",
     {
       # This would normally be called through jamovi framework
       # We're testing the class structure exists
-      enhanced_instance <- enhancedcrosstableClass$new()
+      options <- enhancedcrosstableOptions$new()
+      enhanced_instance <- enhancedcrosstableClass$new(options = options)
     },
     NA
   )

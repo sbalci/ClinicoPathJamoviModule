@@ -4,9 +4,11 @@
 # 2. Multi-event mode requires all level selections (not NULL)
 # 3. Tests actually call outcomeorganizer() function (not just test data)
 
-library(testthat)
-library(R6)
-library(jmvcore)
+suppressPackageStartupMessages(suppressWarnings({
+  library(testthat)
+  library(R6)
+  library(jmvcore)
+}))
 
 # =============================================================================
 # Test Category 1: Binary Outcome Validation and Recoding

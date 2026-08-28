@@ -1,4 +1,3 @@
-testthat::context("outlierdetection")
 
 testthat::describe("outlierdetection", {
     
@@ -432,8 +431,6 @@ testthat::describe("outlierdetection", {
         })
     })
 })
-
-testthat::context("outlierdetection - Summary")
 
 # Test execution summary
 testthat::test_that("All outlierdetection tests completed successfully", {

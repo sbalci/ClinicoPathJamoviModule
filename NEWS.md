@@ -1,5 +1,30 @@
 # ClinicoPath News
 
+## Unreleased — `decisioncompare` aligned-population repair (2026-08-27)
+
+- Indeterminate results now remain in full-length, row-aligned recoded vectors. Per-test
+  estimates use each test's determinate denominator, while McNemar, Cochran Q, and paired
+  differences use their explicit common determinate subset. This prevents vector recycling and
+  subject misalignment when tests have different equivocal-result patterns.
+- Comparison, OPA, stratified, and paired-comparison tables now report their analyzed denominator;
+  the descriptive tables also report the excluded count and rate. The stratified table and
+  concordance heatmap reuse the same recoding as the primary tables, including custom-prevalence
+  PPV/NPV calculations.
+- Sparse McNemar comparisons use the exact binomial test; larger comparisons retain the
+  continuity-corrected chi-squared test. The output identifies the method and paired N.
+- The former "noninferiority margin" is now accurately presented as a user-specified minimum OPA
+  criterion. It is a one-sample descriptive threshold, not a noninferiority comparison, clinical
+  guide, or regulatory convention.
+- The always-visible report uses observed balanced accuracy as an explicitly descriptive ranking
+  and never treats it as evidence of superiority or a clinical recommendation. Interpretation
+  thresholds and use cases are labelled as examples only, not clinical guides.
+- Duplicate test selections and reuse of the reference variable as a test are rejected. Dynamic
+  outputs are cleared before validation, and `clearWith` dependencies now include negative-level,
+  prevalence, stratification, and reporting options.
+- Added primary references for McNemar (1947), Cochran (1950), Holm (1979), and Wilson (1927),
+  plus regression tests for unequal indeterminate patterns, exact inference, stratified
+  prevalence, input duplication, denominators, and reporting disclaimers.
+
 # ClinicoPath 1.0.6.04 -- OncoPath release (2026-08-23)
 
 The four OncoPath analyses (`waterfall`, `swimmerplot`, `diagnosticmeta`, `ihcheterogeneity`) were

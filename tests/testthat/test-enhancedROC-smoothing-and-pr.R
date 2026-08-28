@@ -147,7 +147,7 @@ test_that("the clinical impact table says where its threshold came from", {
     # NNT and net benefit move when the box is ticked; a threshold probability is a
     # harm-to-benefit exchange rate, not a base rate, so the source has to be stated.
     res <- run_er(clinicalImpact = TRUE, useObservedPrevalence = TRUE)
-    notes <- paste(unlist(lapply(res$results$clinicalImpactTable$notes, as.character)), collapse = " ")
+    notes <- paste(unlist(lapply(res$results$clinicalImpactTable$notes, function(n) if (is.character(n)) n else if (!is.null(n$note)) n$note else n$content)), collapse = " ")
     expect_match(notes, "risk threshold", fixed = TRUE)
 })
 

@@ -65,7 +65,7 @@ test_that("rerunning an analysis replaces rows and cache content", {
   analysis <- analysis_generator$new(options = options, data = d)
   analysis$run()
 
-  first_rows <- analysis$results$personTimeSummary$personTimeTable$rowCount
+  first_rows <- analysis$results$personTimeTable$rowCount
   first_cache_keys <- ls(envir = analysis$.__enclos_env__$private$.cache)
 
   expect_gt(first_rows, 0)
@@ -75,7 +75,7 @@ test_that("rerunning an analysis replaces rows and cache content", {
   analysis <- analysis_generator$new(options = options, data = d_new)
   analysis$run()
 
-  second_rows <- analysis$results$personTimeSummary$personTimeTable$rowCount
+  second_rows <- analysis$results$personTimeTable$rowCount
   second_cache_keys <- ls(envir = analysis$.__enclos_env__$private$.cache)
 
   expect_gt(second_rows, 0)
@@ -107,19 +107,15 @@ test_that("unusual user column names are safe in survival formulas", {
   expect_equal(result$medianTable$getCell(rowNo = 1, "events")$value, 4)
 })
 
-test_that("a duplicated selected column name is rejected as ambiguous", {
+test_that("selecting the same variable for elapsed time and outcome is rejected", {
   d <- data.frame(
     time = 1:6,
-    duplicate_time = 11:16,
-    status = c(1L, 0L, 1L, 0L, 1L, 0L),
-    check.names = FALSE
+    status = c(1L, 0L, 1L, 0L, 1L, 0L)
   )
-  names(d)[2] <- "time"
-
   result <- singlearm(
     data = d,
     elapsedtime = "time",
-    outcome = "status",
+    outcome = "time",
     outcomeLevel = NULL,
     dod = NULL,
     dooc = NULL,
@@ -127,7 +123,7 @@ test_that("a duplicated selected column name is rejected as ambiguous", {
     awod = NULL
   )
 
-  expect_match(result$errors$content, "duplicated in the data")
+  expect_match(result$errors$content, "Elapsed time and outcome must be different variables")
   expect_equal(result$medianTable$rowCount, 0)
 })
 

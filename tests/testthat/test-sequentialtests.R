@@ -1,7 +1,6 @@
 # Test Suite for Sequential Testing Analysis Module
 # Testing mathematical accuracy, edge cases, and clinical scenarios
 
-context("Sequential Testing Analysis - Mathematical Accuracy")
 
 # Source the implementation files
 if (file.exists("../../R/sequentialtests.h.R")) {
@@ -159,8 +158,6 @@ test_that("Extreme prevalence scenarios are handled correctly", {
   expect_true(npv > 0 && npv < 1)
 })
 
-context("Sequential Testing Analysis - Clinical Scenarios")
-
 test_that("COVID-19 testing scenario produces sensible results", {
   # Rapid test followed by RT-PCR confirmation
   rapid_sens <- 0.85
@@ -254,8 +251,6 @@ test_that("sequentialtests returns finite combined metrics for typical inputs", 
   }
 })
 
-context("Sequential Testing Analysis - Strategy Comparisons")
-
 test_that("Serial positive strategy maximizes specificity", {
   sens1 <- 0.90
   spec1 <- 0.80
@@ -302,8 +297,6 @@ test_that("Parallel testing provides balanced approach", {
   # But lower specificity than serial positive
   expect_true(parallel_spec < serial_pos_spec)
 })
-
-context("Sequential Testing Analysis - Input Validation")
 
 # Input validation helper function
 validate_probability <- function(value, name) {
@@ -437,8 +430,6 @@ test_that("Likelihood ratio calculations are mathematically sound", {
   expect_true(plr > 1) # Good test should have PLR > 1
   expect_true(nlr < 1) # Good test should have NLR < 1
 })
-
-context("Sequential Testing Analysis - Clinical Decision Making")
 
 test_that("Test strategies provide clinical decision guidance", {
   # Scenario: Need to minimize false positives (surgical decision)

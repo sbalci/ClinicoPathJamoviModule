@@ -2449,11 +2449,11 @@ diagnosticmetaClass <- R6::R6Class(
                     specificity = meta_data$spec[i] * 100,
                     spec_ci_lower = spec_ci[1] * 100,
                     spec_ci_upper = spec_ci[2] * 100,
-                    tp = meta_data$tp[i],
-                    fp = meta_data$fp[i],
-                    fn = meta_data$fn[i],
-                    tn = meta_data$tn[i],
-                    sample_size = meta_data$sample_size[i]
+                    tp = as.integer(meta_data$tp[i]),
+                    fp = as.integer(meta_data$fp[i]),
+                    fn = as.integer(meta_data$fn[i]),
+                    tn = as.integer(meta_data$tn[i]),
+                    sample_size = as.integer(meta_data$sample_size[i])
                 ))
             }
 

@@ -1,7 +1,5 @@
 # Tests for group-based colouring options in waterfall analysis
 
-library(testthat)
-
 set.seed(123)
 test_data <- data.frame(
   PatientID = paste0("PT", 1:20),

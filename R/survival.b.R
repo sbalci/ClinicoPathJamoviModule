@@ -860,8 +860,8 @@ survivalClass <- if (requireNamespace('jmvcore'))
 
                         if (timetypedata %in% names(lubridate_functions)) {
                             date_parser <- lubridate_functions[[timetypedata]]
-                            mydata[["start"]] <- date_parser(mydata[[dxdate]])
-                            mydata[["end"]] <- date_parser(mydata[[fudate]])
+                            mydata[["start"]] <- suppressWarnings(date_parser(mydata[[dxdate]]))
+                            mydata[["end"]] <- suppressWarnings(date_parser(mydata[[fudate]]))
                         } else {
                             # ERROR for invalid date format
                             jmvcore::reject(sprintf(
@@ -1939,17 +1939,17 @@ survivalClass <- if (requireNamespace('jmvcore'))
                 # Always use unstratified factors for finalfit to prevent 'not found' or C-stack errors
                 explanatory_formula <- myfactor
 
-                finalfit::finalfit(
+                tCox <- suppressWarnings(finalfit::finalfit(
                     .data = mydata,
                     dependent = myformula,
                     explanatory = explanatory_formula,
                     metrics = TRUE
-                ) -> tCox
+                ))
 
                 # Cox model convergence check
                 tryCatch({
                     cox_check_formula <- .asSurvivalFormula(paste(myformula, "~", explanatory_formula))
-                    cox_check_model <- survival::coxph(cox_check_formula, data = mydata)
+                    cox_check_model <- suppressWarnings(survival::coxph(cox_check_formula, data = mydata))
                     if (!is.null(cox_check_model$iter) && cox_check_model$iter >= 20) {
                         self$results$coxTable$setNote("convergence",
                             sprintf("Cox model used %d iterations (maximum reached). Model may not have converged; results should be interpreted with caution.", cox_check_model$iter))
@@ -2083,7 +2083,7 @@ survivalClass <- if (requireNamespace('jmvcore'))
                 # Extreme HR detection
                 tryCatch({
                     hr_strings <- data_frame$HR_univariable[data_frame$HR_univariable != "-"]
-                    hr_numeric <- as.numeric(gsub("^([0-9.]+).*", "\\1", hr_strings))
+                    hr_numeric <- suppressWarnings(as.numeric(gsub("^([0-9.]+).*", "\\1", hr_strings)))
                     hr_numeric <- hr_numeric[!is.na(hr_numeric)]
                     if (length(hr_numeric) > 0) {
                         if (any(hr_numeric > 10 | hr_numeric < 0.1)) {

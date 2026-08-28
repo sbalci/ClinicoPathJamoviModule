@@ -143,10 +143,10 @@ test_that("nogoldstandard handles all positive results", {
     )
   )
   expect_s3_class(res, "nogoldstandardResults")
-  # composite over 2 tests is any_positive (a 1-of-2 tie passes >= 0.5), so specificity
-  # and PPV are fixed at 1 by construction and are blanked rather than reported
-  expect_true(all(is.na(res$test_metrics$asDF$specificity)))
-  expect_true(all(is.na(res$test_metrics$asDF$ppv)))
+  # A strict majority over two tests is all-positive, so sensitivity and NPV are fixed
+  # at 1 by construction and are blanked rather than reported.
+  expect_true(all(is.na(res$test_metrics$asDF$sensitivity)))
+  expect_true(all(is.na(res$test_metrics$asDF$npv)))
 })
 
 test_that("nogoldstandard handles all negative results", {
@@ -164,8 +164,8 @@ test_that("nogoldstandard handles all negative results", {
     )
   )
   expect_s3_class(res, "nogoldstandardResults")
-  # default method is all_positive, whose sensitivity is fixed at 1 by construction
-  # and is therefore blanked rather than reported
+  # Two-test strict majority is all-positive, whose sensitivity is fixed at 1 by
+  # construction and is therefore blanked rather than reported.
   expect_true(all(is.na(res$test_metrics$asDF$sensitivity)))
 })
 

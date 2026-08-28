@@ -96,10 +96,9 @@ test_that("a single distinct X value is called out", {
 })
 
 test_that("an empty dataset explains itself instead of going blank", {
-    # This used to be a bare return(): no message, no welcome text (variables ARE
-    # selected so .init() writes none), and an empty plot frame.
+    # reject() signals to the user why the analysis cannot proceed on an empty dataset
     d <- data.frame(t = numeric(0), y = numeric(0))
-    expect_match(lc_todo(linechart(data = d, xvar = "t", yvar = "y")), "No rows to plot")
+    expect_error(linechart(data = d, xvar = "t", yvar = "y"), "The dataset has no rows")
 })
 
 test_that("existing guards still fire", {

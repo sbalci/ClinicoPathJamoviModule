@@ -5,8 +5,6 @@
 # Tests all argument combinations and option interactions
 # for the diagnosticmeta jamovi function
 
-library(testthat)
-
 # Load test data
 data(diagnosticmeta_test, package = "ClinicoPath")
 data(diagnosticmeta_test_categorical, package = "ClinicoPath")

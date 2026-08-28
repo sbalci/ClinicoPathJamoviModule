@@ -1,5 +1,3 @@
-context("test-jjdotplotstats-correctness")
-
 # Comprehensive end-to-end tests for statistical correctness
 # These tests verify the fixes for:
 # 1. Selective NA omission (not global)

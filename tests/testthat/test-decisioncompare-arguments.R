@@ -331,7 +331,8 @@ test_that("decisioncompare handles all options combined", {
     stratify = NULL,
     plot = TRUE, radarplot = TRUE, heatmap = TRUE,
     statComp = TRUE, opa = TRUE, od = TRUE, fnote = TRUE,
-    showSummary = TRUE, showExplanations = TRUE, showReportSentence = TRUE)
+    showSummary = TRUE, showExplanations = TRUE, showReportSentence = TRUE,
+    showDescriptiveReport = TRUE, useOpaCriterion = TRUE)
 
   with_ci <- do.call(call_decisioncompare, utils::modifyList(common, list(ci = TRUE)))
   expect_s3_class(with_ci, "decisioncompareResults")

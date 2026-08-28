@@ -1,8 +1,6 @@
 
 # Test script for ihcheterogeneity analysis
 
-# Load necessary libraries
-library(testthat)
 
 # Helper function to get correct data path
 get_data_path <- function(filename) {

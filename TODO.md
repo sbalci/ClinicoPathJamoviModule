@@ -97,13 +97,13 @@ agreement
 
 decision
 decisioncombine
-decisioncompare
-nogoldstandard
+- decisioncompare
+- nogoldstandard
 
 ## Decision Calculators
 
-cotest
-decisioncalculator
+- cotest
+- decisioncalculator
 - sequentialtests
 
 ## ROC
@@ -119,14 +119,11 @@ decisioncalculator
 
 - decisioncurve
 
-
 ## Power (menuGroup: Power)
 
 - kappaSizeCI
 - kappaSizeFixedN
 - kappaSizePower
-
-
 
 # OncoPath
 
@@ -3940,6 +3937,7 @@ BREAKING_CHANGE: zero_cell_correction option keys renamed
 `treatment_arm`->`zero_cells`, `empirical`->`reciprocal_n` (old names were
 Sweeting-2004 terms for procedures the code does not implement).
 Deferred (out of scope, this function):
+
 - [ ] i18n wrap: diagnosticmeta.b.R still has ~1 `.()` call in 3300 lines;
       run /prepare-translation diagnosticmeta (catalog refresh + wrap tables,
       notes, notices, panels) as its own pass. Note: catalog.pot/en.po/tr.po
@@ -3965,6 +3963,7 @@ user threshold everywhere (plot lines included); false "adjusted for sampling
 design effects" claim removed; Html setNote latent crash; theme-unsafe white
 cards; stale .icc_consistency; dead renderer warning()s.
 Follow-up fix pass 2026-08-23 (suite 209 pass / 0 fail / 0 error):
+
 - [x] report_sentences + assumptions gated behind new Bool options
       showReportSentences / showAssumptions (default false); generation skipped
       when off.
@@ -3983,7 +3982,6 @@ lintr bug-set clean, all gates clean; 3-agent adversarial verification):
 - [ ] i18n: 10 `.()` wraps in ~2550 lines - needs its own /prepare-translation
       pass (po catalogs also still index the removed 'bias' level title).
 - [ ] Restore menuGroup: OncoPath after GUI testing (currently OncoPathT).
-
 
 ## kappaSize family — filed from the kappaSizePower release review (2026-08-23)
 
@@ -4106,15 +4104,12 @@ Confirmed defects left open, with the reason each was not fixed in that pass.
       `populationhealth`, `samplingerror`, `statsplot2`). Generated file, module-wide — belongs
       in a `prepare()` / `_updateModules.R` pass, not a single-analysis fix.
 
-
-
 ---
-
 
 # Skill Usage
 
 | Skill | Example |
-|---|---|
+| --- | --- |
 | `$add-r-code` | `$add-r-code add reproducible R output to tableone` |
 | `$audit-module` | `$audit-module audit the entire ClinicoPath module` |
 | `$check-function` | `$check-function validate enhancedROC with the release profile` |
@@ -4135,6 +4130,7 @@ Confirmed defects left open, with the reason each was not fixed in that pass.
 | `$security-audit-function` | `$security-audit-function audit enhancedROC for code injection and XSS` |
 | `$social-media-promo` | `$social-media-promo write a LinkedIn post about enhancedROC` |
 | `$update-refs` | `$update-refs synchronize references for enhancedROC` |
+
 ## enhancedROC / psychopdaROC concordance — open decision (2026-08-25)
 
 The two ROC analyses now agree on every shared estimator. One default divergence is left open

@@ -8,6 +8,15 @@ items:
       title: 'Test Combination Performance'
       type: Table
       rows: 0
+      clearWith: &analysisInputs
+        - gold
+        - goldPositive
+        - test1
+        - test1Positive
+        - test2
+        - test2Positive
+        - test3
+        - test3Positive
       columns:
         - name: pattern
           title: 'Pattern'
@@ -74,6 +83,7 @@ items:
       title: 'Proportions with 95% Confidence Intervals'
       type: Table
       rows: 0
+      clearWith: *analysisInputs
       columns:
         - name: pattern
           title: 'Pattern'
@@ -101,6 +111,7 @@ items:
       title: 'Likelihood Ratios with 95% Confidence Intervals'
       type: Table
       rows: 0
+      clearWith: *analysisInputs
       columns:
         - name: pattern
           title: 'Pattern'
@@ -126,6 +137,7 @@ items:
       type: Table
       rows: 0
       visible: (showFrequency)
+      clearWith: *analysisInputs
       columns:
         - name: level
           title: 'Level'
@@ -144,6 +156,7 @@ items:
       type: Table
       rows: 0
       visible: (showFrequency)
+      clearWith: *analysisInputs
       columns:
         - name: testCombo
           title: 'Test Pattern'
@@ -163,6 +176,7 @@ items:
       title: 'Test 1 Performance'
       type: Group
       visible: (showIndividual)
+      clearWith: *analysisInputs
       items:
         - name: test1Contingency
           title: 'Contingency Table'
@@ -198,6 +212,7 @@ items:
       title: 'Test 2 Performance'
       type: Group
       visible: (showIndividual)
+      clearWith: *analysisInputs
       items:
         - name: test2Contingency
           title: 'Contingency Table'
@@ -233,6 +248,7 @@ items:
       title: 'Test 3 Performance'
       type: Group
       visible: (showIndividual)
+      clearWith: *analysisInputs
       items:
         - name: test3Contingency
           title: 'Contingency Table'
@@ -345,13 +361,14 @@ items:
       description: 'Decision-space scatter plot positioning each test pattern by its sensitivity and specificity, with point size scaled by Youden''s J'
 
     - name: recommendationTable
-      title: 'Optimal Pattern Recommendation'
+      title: 'Descriptive Strategy Ranking'
       type: Table
       rows: 1
       visible: (showRecommendation)
+      clearWith: *analysisInputs
       columns:
         - name: pattern
-          title: 'Recommended Pattern'
+          title: 'Highest-Ranked Strategy'
           type: text
         - name: method
           title: 'Selection Method'
@@ -373,9 +390,9 @@ items:
           type: number
           format: pc
         - name: rationale
-          title: 'Clinical Rationale'
+          title: 'Interpretation'
           type: text
-      description: 'Recommended optimal test combination pattern based on Youden index and clinical performance metrics'
+      description: 'Sample-dependent descriptive ranking of named testing strategies by observed Youden index; this is not a clinical guide or validated recommendation'
 
     - name: addedPattern
       title: 'Add Test Pattern to Data'
@@ -384,6 +401,7 @@ items:
       varDescription: 'Positive/negative result pattern across the selected diagnostic tests'
       measureType: nominal
       clearWith:
+        - addPatternToData
         - gold
         - goldPositive
         - test1
@@ -400,6 +418,9 @@ items:
 
 refs:
     - DiagnosticTests
+    - wilson1927
+    - youden1950
+    - haldane1956
     - ClinicoPathJamoviModule
 
 

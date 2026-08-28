@@ -7,6 +7,9 @@ items:
     - name: instructions
       title: 'Instructions'
       type: Html
+      # 990 words. Gated so a clinician running the calculator for the fifth time is not
+      # re-scrolling the same guidance; 56 other analyses in this module already do this.
+      visible: (showGuidance)
 
     - name: notices
       title: 'Validation Notices'
@@ -56,25 +59,37 @@ items:
           type: number
 
     - name:  dependenceInfo
-      title: 'Test Dependence Information'
+      title: 'Test Dependence'
       type: Html
-      # Must not start with '!': jmvcore routes to its R evaluator only on
-      # ^\([\$A-Za-z].*\)$, so a leading '!' returns the raw (truthy) string and the panel
-      # is permanently visible. Verified: $visible was TRUE for indep = TRUE *and* FALSE,
-      # so the conditional-dependence explanation showed even when the user had chosen
-      # independence, where it does not apply.
-      visible: (indep == FALSE)
+      # No `visible:` expression by design. This panel is now written in BOTH branches -- it
+      # states the independence assumption when independence is assumed, and the fitted joint
+      # probabilities when it is not -- so it always describes the model that was actually run.
+      #
+      # It previously carried `visible: (indep == FALSE)`, which reads the OPTION, while the
+      # content was written from the EFFECTIVE value after a worked example overrode it. That
+      # produced an empty titled box for the independent examples, and hid the dependence
+      # disclosure entirely when the user had ticked "independent" but selected a dependent
+      # example. (An even earlier version wrote `(!indep)`, which jmvcore does not route to its
+      # R evaluator at all -- ^\([\$A-Za-z].*\)$ -- so it returned the raw truthy string and the
+      # panel was permanently visible.) Removing the expression removes the whole failure mode.
       
     - name:  dependenceExplanation
       title: 'Understanding Test Dependence'
       type: Html
+      # 699 words of tutorial, same rationale as `instructions`.
+      visible: (showGuidance)
 
     - name:  explanation
       title: 'Explanation'
       type: Html
 
     - name: plot1
-      title: 'Fagan nomogram'
+      # Names the rule it plots. The nomogram is built from the PARALLEL-rule likelihood ratios
+      # (positive if either test is positive; negative only if both are negative), so its
+      # positive arm corresponds to the "Either Test Positive" row -- at the defaults 42.5%,
+      # against 89.1% in the "Both Tests Positive" row directly above it. Titled simply
+      # "Fagan nomogram" it read as though it applied to whichever row the eye landed on.
+      title: 'Fagan nomogram - parallel rule (positive if either test is positive)'
       type: Image
       width:  600
       height: 450
@@ -96,5 +111,8 @@ items:
 refs:
     - ClinicoPathJamoviModule
     - DiagnosticTests
+    - ConditionalDependenceDiagnosticTests
+    - Fagan1975
+    - DeeksAltman2004
 
 ...

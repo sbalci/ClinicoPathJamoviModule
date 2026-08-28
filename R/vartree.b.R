@@ -376,7 +376,7 @@ vartreeClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 # is an error, which would have crashed this very warning.
                 private$.addNotice('WARNING', 'Large Tree Complexity', sprintf(
                     'The selected variables allow up to %s subgroup combinations (%s); %d of them contain at least one case. A tree this wide is hard to read on screen and to print. Consider: (1) using fewer variables, (2) collapsing variable levels, or (3) using the pruning options to focus on the larger branches.',
-                    format(max_combinations, big.mark = ",", scientific = FALSE),
+                    base::format(max_combinations, big.mark = ",", scientific = FALSE),
                     var_summary, observed_combinations
                 ))
             }

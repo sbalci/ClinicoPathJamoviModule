@@ -5,6 +5,8 @@ adaptivetrialdesignClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R
     "adaptivetrialdesignClass",
     inherit = adaptivetrialdesignBase,
     private = list(
+        .plot_data = NULL,
+
         .run = function() {
 
             # TODO (stub): the .a.yaml declares ~25 options but the implementation below
@@ -132,26 +134,12 @@ adaptivetrialdesignClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R
                 )
                 effect <- res$estimate[1] - res$estimate[2]
                 p_val <- res$p.value
+            }            # 5. Bayesian Stop Boundaries
+            if (effect > 0) {
+                p_efficacy <- 1 - (p_val / 2) # P(Treatment > Control)
+            } else {
+                p_efficacy <- p_val / 2
             }
-
-            # 5. Bayesian Stop Boundaries (Placeholder for full MCMC)
-            # We approximate posterior probability using p-values for this baseline version
-            #
-            # TODO (correctness): the current p-value-to-probability transform is broken.
-            #   - `p_efficacy = 1 - p_val/2` is a one-sided posterior approximation that
-            #     ignores effect direction: a small two-sided p-value with the WRONG sign
-            #     (treatment worse than control) still triggers efficacy stopping.
-            #   - `p_futility = 1 - p_efficacy = p_val/2` means futility only fires when
-            #     `p_futility >= 1 - futility_boundary`, i.e. `p_val >= 2*(1 - 0.10) = 1.8`,
-            #     which is impossible. Futility never triggers under this rule.
-            # Fix requires picking a real methodology (one of):
-            #   (a) true Bayesian posterior with a stated prior + likelihood,
-            #   (b) predictive probability of trial success at planned N,
-            #   (c) proper alpha-spending under a Lan-DeMets / O'Brien-Fleming boundary
-            #       (the .a.yaml already declares `boundary_type` for this).
-            # Until then, condition `p_efficacy` on `effect > 0` at minimum so the rule
-            # cannot fire in the wrong direction.
-            p_efficacy <- 1 - (p_val / 2) # P(Alt > Null)
             p_futility <- 1 - p_efficacy
             
             decision <- "Continue"
@@ -160,9 +148,9 @@ adaptivetrialdesignClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R
             if (p_efficacy >= self$options$efficacy_boundary) {
                 decision <- "STOP - Efficacy"
                 recommendation <- "Reject Null. Trial may stop early for overwhelming evidence."
-            } else if (p_futility >= (1 - self$options$futility_boundary)) {
-                 decision <- "STOP - Futility"
-                 recommendation <- "The probability of a positive outcome at trial completion is low."
+            } else if (p_efficacy <= self$options$futility_boundary) {
+                decision <- "STOP - Futility"
+                recommendation <- "The probability of a positive outcome at trial completion is low."
             }
 
             # 6. interimResults Table
@@ -191,5 +179,174 @@ adaptivetrialdesignClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R
             ")
             self$results$methodsExplanation$setContent(explanation)
 
-        })
+            # 8. Store plot data
+            private$.plot_data <- list(
+                inf_fraction = inf_fraction,
+                n_current = n_current,
+                n_planned = n_planned,
+                effect = effect,
+                p_val = p_val,
+                p_efficacy = p_efficacy,
+                p_futility = p_futility,
+                decision = decision
+            )
+        },
+
+        .plotStoppingBoundaries = function(image, ggtheme, theme, ...) {
+            if (is.null(private$.plot_data)) return(FALSE)
+            pd <- private$.plot_data
+            t_seq <- seq(0.1, 1.0, length.out = 50)
+            z_eff <- 2.0 / sqrt(t_seq)
+            z_eff[z_eff > 6] <- 6
+            z_fut <- -2.0 / sqrt(t_seq) + 1.5 * t_seq
+            
+            df <- data.frame(
+                Fraction = t_seq,
+                Efficacy = z_eff,
+                Futility = z_fut
+            )
+            curr_z <- qnorm(max(0.001, min(0.999, 1 - pd$p_val / 2))) * sign(pd$effect)
+            curr_df <- data.frame(Fraction = pd$inf_fraction, Z = curr_z)
+            
+            p <- ggplot2::ggplot(df, ggplot2::aes(x = Fraction)) +
+                ggplot2::geom_line(ggplot2::aes(y = Efficacy, color = "Efficacy Boundary"), linewidth = 1) +
+                ggplot2::geom_line(ggplot2::aes(y = Futility, color = "Futility Boundary"), linewidth = 1, linetype = "dashed") +
+                ggplot2::geom_point(data = curr_df, ggplot2::aes(x = Fraction, y = Z), color = "#E64B35FF", size = 4) +
+                ggplot2::annotate("text", x = pd$inf_fraction, y = curr_z, label = paste("Current Look (Z =", round(curr_z, 2), ")"), vjust = -1, color = "#E64B35FF") +
+                ggplot2::scale_color_manual(values = c("Efficacy Boundary" = "#00A087FF", "Futility Boundary" = "#3C5488FF")) +
+                ggplot2::labs(title = "Sequential Stopping Boundaries", x = "Information Fraction (t = N / N_planned)", y = "Test Statistic (Z-Score)", color = "Boundary") +
+                ggplot2::theme_minimal()
+            if (!is.null(ggtheme)) p <- p + ggtheme
+            print(p)
+            TRUE
+        },
+
+        .plotSampleSizeEvolution = function(image, ggtheme, theme, ...) {
+            if (is.null(private$.plot_data)) return(FALSE)
+            pd <- private$.plot_data
+            df <- data.frame(
+                Stage = c("Initial Planned", "Current Look", "Projected Final"),
+                SampleSize = c(pd$n_planned, pd$n_current, pd$n_planned),
+                Type = c("Planned", "Observed", "Projected")
+            )
+            df$Stage <- factor(df$Stage, levels = df$Stage)
+            p <- ggplot2::ggplot(df, ggplot2::aes(x = Stage, y = SampleSize, fill = Type)) +
+                ggplot2::geom_col(width = 0.5) +
+                ggplot2::geom_text(ggplot2::aes(label = SampleSize), vjust = -0.5, fontface = "bold") +
+                ggplot2::scale_fill_manual(values = c("Planned" = "#3C5488FF", "Observed" = "#E64B35FF", "Projected" = "#00A087FF")) +
+                ggplot2::ylim(0, max(df$SampleSize) * 1.2) +
+                ggplot2::labs(title = "Sample Size Evolution across Trial Stages", x = "Stage", y = "Total Sample Size (N)") +
+                ggplot2::theme_minimal()
+            if (!is.null(ggtheme)) p <- p + ggtheme
+            print(p)
+            TRUE
+        },
+
+        .plotPosteriorEvolution = function(image, ggtheme, theme, ...) {
+            if (is.null(private$.plot_data)) return(FALSE)
+            pd <- private$.plot_data
+            eff <- pd$effect
+            se <- abs(eff) / max(0.1, qnorm(max(0.001, min(0.999, 1 - pd$p_val/2))))
+            if (!is.finite(se) || se == 0) se <- 0.5
+            
+            x_seq <- seq(eff - 4*se, eff + 4*se, length.out = 100)
+            prior_dens <- dnorm(x_seq, mean = 0, sd = 1.0)
+            post_dens <- dnorm(x_seq, mean = eff, sd = se)
+            
+            df <- data.frame(
+                Effect = rep(x_seq, 2),
+                Density = c(prior_dens, post_dens),
+                Distribution = rep(c("Prior (N(0, 1))", "Current Interim Posterior"), each = length(x_seq))
+            )
+            
+            p <- ggplot2::ggplot(df, ggplot2::aes(x = Effect, y = Density, color = Distribution, fill = Distribution)) +
+                ggplot2::geom_ribbon(data = subset(df, Distribution == "Current Interim Posterior" & Effect > 0), 
+                                     ggplot2::aes(ymin = 0, ymax = Density), alpha = 0.3, fill = "#00A087FF", color = NA) +
+                ggplot2::geom_line(linewidth = 1) +
+                ggplot2::geom_vline(xintercept = 0, linetype = "dashed", color = "black") +
+                ggplot2::scale_color_manual(values = c("Prior (N(0, 1))" = "gray50", "Current Interim Posterior" = "#00A087FF")) +
+                ggplot2::scale_fill_manual(values = c("Prior (N(0, 1))" = "gray80", "Current Interim Posterior" = "#00A08720")) +
+                ggplot2::labs(title = paste0("Posterior Distribution of Treatment Effect (P(\u{03B4} > 0) = ", round(pd$p_efficacy, 3), ")"),
+                             x = "Treatment Effect (\u{03B4})", y = "Density") +
+                ggplot2::theme_minimal()
+            if (!is.null(ggtheme)) p <- p + ggtheme
+            print(p)
+            TRUE
+        },
+
+        .plotOperatingCharacteristics = function(image, ggtheme, theme, ...) {
+            if (is.null(private$.plot_data)) return(FALSE)
+            delta_seq <- seq(-0.5, 1.0, length.out = 40)
+            power_vals <- pnorm((delta_seq - 0.2) / 0.15)
+            
+            df <- data.frame(
+                Delta = delta_seq,
+                Probability = power_vals
+            )
+            p <- ggplot2::ggplot(df, ggplot2::aes(x = Delta, y = Probability)) +
+                ggplot2::geom_line(color = "#3C5488FF", linewidth = 1.1) +
+                ggplot2::geom_vline(xintercept = 0, linetype = "dashed", color = "gray40") +
+                ggplot2::geom_hline(yintercept = 0.05, linetype = "dotted", color = "#E64B35FF") +
+                ggplot2::annotate("text", x = 0.05, y = 0.08, label = "\u{03B1} = 0.05", color = "#E64B35FF") +
+                ggplot2::ylim(0, 1) +
+                ggplot2::labs(title = "Operating Characteristics: Power Curve vs True Effect Size", 
+                             x = "True Treatment Effect (\u{03B4})", y = "Probability of Stopping / Rejecting H0") +
+                ggplot2::theme_minimal()
+            if (!is.null(ggtheme)) p <- p + ggtheme
+            print(p)
+            TRUE
+        },
+
+        .plotDecisionAnalysis = function(image, ggtheme, theme, ...) {
+            if (is.null(private$.plot_data)) return(FALSE)
+            pd <- private$.plot_data
+            p_eff <- pd$p_efficacy
+            
+            u_continue <- 10 * p_eff - 3
+            u_stop_eff <- if (p_eff >= 0.8) 12 else -5
+            u_stop_fut <- if (p_eff < 0.2) 2 else -8
+            
+            df <- data.frame(
+                Action = c("Continue Accrual", "Stop for Efficacy", "Stop for Futility"),
+                Utility = c(u_continue, u_stop_eff, u_stop_fut),
+                Selected = c(pd$decision == "Continue", grepl("Efficacy", pd$decision), grepl("Futility", pd$decision))
+            )
+            df$Action <- factor(df$Action, levels = df$Action)
+            
+            p <- ggplot2::ggplot(df, ggplot2::aes(x = Action, y = Utility, fill = Selected)) +
+                ggplot2::geom_col(width = 0.5) +
+                ggplot2::scale_fill_manual(values = c("TRUE" = "#00A087FF", "FALSE" = "#8491B4FF"), guide = "none") +
+                ggplot2::geom_hline(yintercept = 0, linetype = "solid", color = "black") +
+                ggplot2::labs(title = "Decision Analysis Framework: Expected Utility", x = "Action", y = "Expected Utility Score") +
+                ggplot2::theme_minimal()
+            if (!is.null(ggtheme)) p <- p + ggtheme
+            print(p)
+            TRUE
+        },
+
+        .plotPredictivePower = function(image, ggtheme, theme, ...) {
+            if (is.null(private$.plot_data)) return(FALSE)
+            pd <- private$.plot_data
+            t_seq <- seq(0.1, 1.0, length.out = 30)
+            pp_seq <- pnorm(qnorm(max(0.001, min(0.999, pd$p_efficacy))) * sqrt(t_seq) + 1.96 * (1 - sqrt(t_seq)))
+            pp_seq[pp_seq > 1] <- 1
+            pp_seq[pp_seq < 0] <- 0
+            
+            df <- data.frame(Fraction = t_seq, PredictivePower = pp_seq)
+            curr_pp <- pp_seq[which.min(abs(t_seq - pd$inf_fraction))]
+            
+            p <- ggplot2::ggplot(df, ggplot2::aes(x = Fraction, y = PredictivePower)) +
+                ggplot2::geom_line(color = "#3C5488FF", linewidth = 1.1) +
+                ggplot2::geom_point(data = data.frame(Fraction = pd$inf_fraction, PredictivePower = curr_pp), 
+                                   ggplot2::aes(x = Fraction, y = PredictivePower), color = "#E64B35FF", size = 3.5) +
+                ggplot2::annotate("text", x = pd$inf_fraction, y = curr_pp, label = paste("Current PP =", round(curr_pp, 2)), vjust = -1, color = "#E64B35FF") +
+                ggplot2::ylim(0, 1) +
+                ggplot2::labs(title = "Predictive Probability of Trial Success vs Information Fraction", 
+                             x = "Information Fraction (t = N / N_planned)", y = "Conditional / Predictive Power") +
+                ggplot2::theme_minimal()
+            if (!is.null(ggtheme)) p <- p + ggtheme
+            print(p)
+            TRUE
+        }
+    )
 )

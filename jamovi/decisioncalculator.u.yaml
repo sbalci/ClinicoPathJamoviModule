@@ -5,7 +5,7 @@ stage: 0
 compilerMode: tame
 children:
   - type: Label
-    label: "Confusion Matrix (Gold Standard vs Test Result)"
+    label: "Confusion matrix (reference standard vs test result)"
     margin: small
     children:
       - type: LayoutBox
@@ -25,7 +25,7 @@ children:
                 stretchFactor: 1
                 children:
                   - type: Label
-                    label: "Disease Present (Gold +)"
+                    label: "Reference positive"
                     style: list-inline
                   - type: TextBox
                     name: TP
@@ -43,7 +43,7 @@ children:
                 stretchFactor: 1
                 children:
                   - type: Label
-                    label: "Disease Absent (Gold -)"
+                    label: "Reference negative"
                     style: list-inline
                   - type: TextBox
                     name: FP
@@ -87,26 +87,24 @@ children:
             children:
               - type: CheckBox
                 name: ci
-                enable: (!pp)
 
   - type: CollapseBox
     label: Population Prevalence
     collapsed: true
     children:
       - type: Label
-        label: "Use Known Prevalence (instead of study prevalence)"
+        label: "Known Prevalence for Predictive Values"
         children:
           - type: LayoutBox
             margin: large
             children:
               - type: CheckBox
                 name: pp
-                enable: (!ci)
               - type: TextBox
                 name: pprob
                 label: 'Prevalence (0.001-0.999)'
                 format: number
-                enable: (!ci && pp)
+                enable: (pp)
 
   - type: CollapseBox
     label: Visualization
@@ -126,7 +124,7 @@ children:
     collapsed: true
     children:
       - type: Label
-        label: Multiple Cut-off Comparison
+        label: Illustrative cut-off comparison
         children:
           - type: LayoutBox
             margin: large
@@ -134,12 +132,12 @@ children:
               - type: CheckBox
                 name: multiplecuts
               - type: Label
-                label: "Compare different diagnostic thresholds to find optimal cut-off values"
+                label: "Examples only—not clinical guides or validated cut-off recommendations"
                 style: list-inline
                 enable: (multiplecuts)
 
       - type: Label
-        label: Cut-off Scenario 1
+        label: Illustrative scenario 1
         enable: (multiplecuts)
         children:
           - type: LayoutBox
@@ -147,7 +145,7 @@ children:
             children:
               - type: TextBox
                 name: cutoff1
-                label: 'Scenario Name'
+                label: 'Scenario name'
                 format: string
                 width: largest
           - type: LayoutBox
@@ -188,7 +186,7 @@ children:
                     format: number
 
       - type: Label
-        label: Cut-off Scenario 2
+        label: Illustrative scenario 2
         enable: (multiplecuts)
         children:
           - type: LayoutBox
@@ -196,7 +194,7 @@ children:
             children:
               - type: TextBox
                 name: cutoff2
-                label: 'Scenario Name'
+                label: 'Scenario name'
                 format: string
                 width: largest
           - type: LayoutBox

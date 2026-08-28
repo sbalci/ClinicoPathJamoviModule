@@ -202,7 +202,7 @@ test_that("bootstrap keeps the ICC row at typical study sizes", {
   d <- data.frame(A = truth + rnorm(n, 0, 3), B = truth + rnorm(n, 0, 3))
 
   res <- ClinicoPath::agreement(data = d, vars = c("A", "B"),
-                                bootstrapCI = TRUE, nBoot = 50)
+                                bootstrapCI = TRUE, nBoot = 100)
   if (res$bootstrapCITable$rowCount > 0) {
     tb <- res$bootstrapCITable$asDF
     expect_true(any(grepl("ICC", tb[[1]], ignore.case = TRUE)))

@@ -725,7 +725,7 @@ crosstableClass <- if (requireNamespace('jmvcore'))
                         .("Large dataset - the table may take a while to appear"),
                         sprintf(
                             .("The data has %s rows, well above the 50,000-row point where building this table starts to feel slow. Nothing is wrong with the results - every row is used - but the table can take a while to appear and is rebuilt each time you change an option. If you are still exploring, apply a row filter while you settle on the options and remove it for the final table."),
-                            format(n_rows, big.mark = ",", scientific = FALSE, trim = TRUE)
+                            base::format(n_rows, big.mark = ",", scientific = FALSE, trim = TRUE)
                         )
                     )
                 }

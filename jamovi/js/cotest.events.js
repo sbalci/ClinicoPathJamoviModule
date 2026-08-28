@@ -30,9 +30,31 @@ const setControlValue = (control, value) => {
     control.setValue(value);
 };
 
+// GENERATED FROM R/cotest.b.R .getPresetValues() -- keep in sync.
+//
+// These are the same numbers the backend computes with. They used to be a second,
+// independently maintained copy, and 25 of 48 fields had drifted apart: the boxes on
+// screen described one model while the results table reported another (for three
+// presets they even disagreed about conditional independence). Editing this table
+// without editing .getPresetValues() will fail the parity test in
+// tests/testthat/test-cotest.R -- "the JS and R preset tables agree field for field".
+//
+// Every value is a round ILLUSTRATIVE figure for demonstrating the calculation. None of
+// them is a pooled literature estimate and none should be used for patient care.
 const PRESET_CONFIGS = {
-    custom: {},
+    custom: {
+        test1_sens: 0.80,
+        test1_spec: 0.90,
+        test2_sens: 0.75,
+        test2_spec: 0.95,
+        prevalence: 0.10,
+        indep: false,
+        cond_dep_pos: 0.05,
+        cond_dep_neg: 0.05
+    },
     hpv_pap: {
+        test1_name: 'HPV',
+        test2_name: 'Pap cytology',
         test1_sens: 0.95,
         test1_spec: 0.85,
         test2_sens: 0.70,
@@ -40,19 +62,21 @@ const PRESET_CONFIGS = {
         prevalence: 0.05,
         indep: false,
         cond_dep_pos: 0.15,
-        cond_dep_neg: 0.10,
-        guidance: 'HPV + Pap co-testing for cervical cancer screening. HPV has high sensitivity, Pap has high specificity. Tests show moderate dependence as they examine the same tissue.'
+        cond_dep_neg: 0.10
     },
     psa_dre: {
+        test1_name: 'PSA',
+        test2_name: 'Rectal examination',
         test1_sens: 0.80,
         test1_spec: 0.70,
         test2_sens: 0.50,
         test2_spec: 0.85,
         prevalence: 0.15,
-        indep: true,
-        guidance: 'PSA + Digital Rectal Exam for prostate cancer screening. PSA is biochemical, DRE is physical - relatively independent tests with complementary strengths.'
+        indep: true
     },
     troponin_ecg: {
+        test1_name: 'Troponin',
+        test2_name: 'ECG',
         test1_sens: 0.90,
         test1_spec: 0.95,
         test2_sens: 0.70,
@@ -60,10 +84,11 @@ const PRESET_CONFIGS = {
         prevalence: 0.20,
         indep: false,
         cond_dep_pos: 0.20,
-        cond_dep_neg: 0.05,
-        guidance: 'Troponin + ECG for myocardial infarction diagnosis. Troponin is highly specific biochemical marker, ECG shows electrical changes. Moderate dependence as both reflect severity of cardiac damage.'
+        cond_dep_neg: 0.05
     },
     mammogram_ultrasound: {
+        test1_name: 'Mammography',
+        test2_name: 'Ultrasound',
         test1_sens: 0.85,
         test1_spec: 0.90,
         test2_sens: 0.80,
@@ -71,10 +96,11 @@ const PRESET_CONFIGS = {
         prevalence: 0.08,
         indep: false,
         cond_dep_pos: 0.25,
-        cond_dep_neg: 0.15,
-        guidance: 'Mammography + Ultrasound for breast cancer screening. Both are imaging modalities of the same tissue, showing significant dependence especially in dense breast tissue.'
+        cond_dep_neg: 0.15
     },
     covid_antigen_pcr: {
+        test1_name: 'Rapid antigen',
+        test2_name: 'PCR',
         test1_sens: 0.70,
         test1_spec: 0.95,
         test2_sens: 0.95,
@@ -82,10 +108,11 @@ const PRESET_CONFIGS = {
         prevalence: 0.10,
         indep: false,
         cond_dep_pos: 0.30,
-        cond_dep_neg: 0.10,
-        guidance: 'Rapid Antigen + PCR for COVID-19 diagnosis. Both tests detect SARS-CoV-2 but via different mechanisms. High dependence as both affected by viral load and sampling quality.'
+        cond_dep_neg: 0.10
     },
     tb_xray_sputum: {
+        test1_name: 'Chest radiograph',
+        test2_name: 'Sputum microscopy',
         test1_sens: 0.75,
         test1_spec: 0.80,
         test2_sens: 0.85,
@@ -93,8 +120,7 @@ const PRESET_CONFIGS = {
         prevalence: 0.12,
         indep: false,
         cond_dep_pos: 0.20,
-        cond_dep_neg: 0.08,
-        guidance: 'Chest X-ray + Sputum microscopy for tuberculosis screening. X-ray shows structural changes, sputum shows organisms. Moderate dependence as advanced disease affects both tests.'
+        cond_dep_neg: 0.08
     }
 };
 
@@ -104,6 +130,8 @@ const applyPresetConfig = (ui, presetKey) => {
     if (!config)
         return;
 
+    setControlValue(ui.test1_name, config.test1_name === undefined ? '' : config.test1_name);
+    setControlValue(ui.test2_name, config.test2_name === undefined ? '' : config.test2_name);
     setControlValue(ui.test1_sens, config.test1_sens);
     setControlValue(ui.test1_spec, config.test1_spec);
     setControlValue(ui.test2_sens, config.test2_sens);
@@ -143,10 +171,15 @@ const events = {
 
         const preset = presetControl.value();
 
-        console.log('Co-testing preset changed to:', preset);
-
-        if (preset === 'custom')
+        // Switching back to "Custom values" used to return early, leaving the worked example's
+        // numbers in the now-unlocked boxes with no disclosure anywhere: the results were
+        // byte-identical to the preset run but r$notices$content was empty. One click laundered
+        // a demonstration figure into an apparently user-entered one. Reset to the .a.yaml
+        // defaults instead, so "custom" always means values the user actually chose.
+        if (preset === 'custom') {
+            applyPresetConfig(ui, 'custom');
             return;
+        }
 
         applyPresetConfig(ui, preset);
     },

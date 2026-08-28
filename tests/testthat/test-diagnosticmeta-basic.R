@@ -5,8 +5,6 @@
 # Tests basic functionality, required arguments, and expected outputs
 # for the diagnosticmeta jamovi function
 
-library(testthat)
-
 # Load test data
 data(diagnosticmeta_test, package = "ClinicoPath")
 

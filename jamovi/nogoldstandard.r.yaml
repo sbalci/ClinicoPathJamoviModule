@@ -24,11 +24,25 @@ items:
         - nboot
         - alpha
         - seed
+        - verbose
 
     - name: instructions
       title: Instructions
       type: Html
       visible: true
+      clearWith:
+        - clinicalPreset
+        - test1
+        - test1Positive
+        - test2
+        - test2Positive
+        - test3
+        - test3Positive
+        - test4
+        - test4Positive
+        - test5
+        - test5Positive
+        - method
 
     - name: agreement_stats
       title: Agreement Statistics (Cohen's Kappa)
@@ -68,17 +82,37 @@ items:
           format: pc
 
     - name: clinical_summary
-      title: Clinical Summary
+      title: Plain-Language Summary
       type: Html
-      visible: false
+      visible: (showSummary)
+      clearWith:
+        - clinicalPreset
+        - test1
+        - test1Positive
+        - test2
+        - test2Positive
+        - test3
+        - test3Positive
+        - test4
+        - test4Positive
+        - test5
+        - test5Positive
+        - method
+        - bootstrap
+        - nboot
+        - alpha
+        - seed
+        - showSummary
 
     - name: method_guide
       title: Method Selection Guide
       type: Html
-      visible: true
+      visible: (showMethodGuide)
+      clearWith:
+        - showMethodGuide
 
     - name: prevalence
-      title: Disease Prevalence
+      title: Estimated Class or Rule Proportion
       type: Table
       rows: 1
       clearWith:
@@ -113,7 +147,7 @@ items:
           format: pc
 
     - name: test_metrics
-      title: Test Performance Metrics
+      title: Estimated Test Metrics or Rule Agreement
       type: Table
       clearWith:
         - clinicalPreset
@@ -137,31 +171,31 @@ items:
           title: Test
           type: text
         - name: sensitivity
-          title: Sensitivity
+          title: P(Test+ | Class+/Rule+)
           type: number
           format: pc
         - name: sens_ci_lower
           title: Lower CI
-          superTitle: Sensitivity
+          superTitle: Positive-Response Probability
           type: number
           format: pc
         - name: sens_ci_upper
           title: Upper CI
-          superTitle: Sensitivity
+          superTitle: Positive-Response Probability
           type: number
           format: pc
         - name: specificity  
-          title: Specificity
+          title: P(Test- | Class-/Rule-)
           type: number
           format: pc
         - name: spec_ci_lower
           title: Lower CI
-          superTitle: Specificity
+          superTitle: Negative-Response Probability
           type: number
           format: pc
         - name: spec_ci_upper
           title: Upper CI
-          superTitle: Specificity
+          superTitle: Negative-Response Probability
           type: number
           format: pc
         - name: ppv
@@ -207,6 +241,19 @@ items:
       type: Table
       rows: 0
       visible: (method=="latent_class")
+      clearWith:
+        - test1
+        - test1Positive
+        - test2
+        - test2Positive
+        - test3
+        - test3Positive
+        - test4
+        - test4Positive
+        - test5
+        - test5Positive
+        - method
+        - seed
       columns:
         - name: pair
           title: 'Test Pair'
@@ -217,7 +264,7 @@ items:
         - name: verdict
           title: 'Interpretation'
           type: text
-      description: 'Latent class analysis assumes the tests err independently given true disease status. For each pair this compares the observed two-way table with the one the fitted model implies; a residual above 3.84 (the 5 percent point of chi-squared on 1 degree of freedom) is evidence that the pair shares a source of error, which inflates the estimated accuracy. Requires four or more tests: with three the model is just-identified and reproduces every table exactly, so no residual can reveal dependence.'
+      description: 'Latent class analysis assumes the tests are conditionally independent within each latent class. For each pair this compares the observed two-way table with the one implied by the fitted model. A residual above 3.84 is descriptive evidence against conditional independence, but this squared statistic does not identify the direction or cause of dependence and cannot determine the direction of bias in the fitted parameters. Requires four or more tests: with three the model is just-identified and no residual can diagnose dependence.'
 
     - name: diagnostics
       title: 'Analysis Diagnostics'
@@ -230,6 +277,18 @@ items:
         - bootstrap
         - nboot
         - seed
+        - clinicalPreset
+        - test1
+        - test1Positive
+        - test2
+        - test2Positive
+        - test3
+        - test3Positive
+        - test4
+        - test4Positive
+        - test5
+        - test5Positive
+        - alpha
 
     - name: crosstab
       title: Test Cross-Tabulation
@@ -265,31 +324,7 @@ items:
           format: pc
 
     - name: agreement_plot
-      title: Test Agreement Plot (Base)
-      type: Image
-      renderFun: .plot
-      width: 500
-      height: 400
-      clearWith:
-        - clinicalPreset
-        - test1
-        - test1Positive
-        - test2
-        - test2Positive
-        - test3
-        - test3Positive
-        - test4
-        - test4Positive
-        - test5
-        - test5Positive
-        - method
-        - bootstrap
-        - nboot
-        - alpha
-        - seed
-
-    - name: agreement_plot2
-      title: Test Agreement Plot (ggplot2)
+      title: Test Agreement Matrix
       type: Image
       renderFun: .plot_ggplot
       width: 500
@@ -311,10 +346,6 @@ items:
         - nboot
         - alpha
         - seed
-
-
-
-
 refs: 
     - ClinicoPathJamoviModule
     - poLCA

@@ -133,7 +133,7 @@ test_that("lollipop handles biomarker panel workflow", {
   biomarkers <- c("cea", "ca125", "ca199", "afp", "psa")
 
   for (marker in biomarkers) {
-    result <- lollipop(
+    result <- do.call(lollipop, list(
       data = lollipop_biomarkers,
       dep = marker,
       group = "cancer_type",
@@ -142,7 +142,7 @@ test_that("lollipop handles biomarker panel workflow", {
       colorScheme = "clinical",
       theme = "publication",
       highlight = NULL
-    )
+    ))
     expect_s3_class(result, "lollipopResults")
   }
 })
@@ -412,7 +412,7 @@ test_that("lollipop handles multiple analyses from same dataset", {
   results <- list()
 
   for (param in lab_params) {
-    results[[param]] <- lollipop(
+    results[[param]] <- do.call(lollipop, list(
       data = lollipop_test,
       dep = param,
       group = "treatment_group",
@@ -422,7 +422,7 @@ test_that("lollipop handles multiple analyses from same dataset", {
       colorScheme = "clinical",
       theme = "publication",
       highlight = NULL
-    )
+    ))
     expect_s3_class(results[[param]], "lollipopResults")
   }
 

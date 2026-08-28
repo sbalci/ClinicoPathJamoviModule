@@ -136,19 +136,19 @@ test_that("zero false negatives (perfect sensitivity)", {
 test_that("all counts zero (invalid)", {
   # Reported as an ERROR notice, not an R condition.
   expect_no_error(res <- decisioncalculator(TP = 0, TN = 0, FP = 0, FN = 0))
-  expect_match(dcalc_notices(res), "All Counts Zero")
+  expect_match(dcalc_notices(res), "All counts are zero")
 })
 
 test_that("only disease-absent counts", {
   # Reported as an ERROR notice, not an R condition.
   expect_no_error(res <- decisioncalculator(TP = 0, TN = 100, FP = 50, FN = 0))
-  expect_match(dcalc_notices(res), "No Diseased Subjects")
+  expect_match(dcalc_notices(res), "No reference-positive subjects")
 })
 
 test_that("only disease-present counts", {
   # Reported as an ERROR notice, not an R condition.
   expect_no_error(res <- decisioncalculator(TP = 100, TN = 0, FP = 0, FN = 50))
-  expect_match(dcalc_notices(res), "No Healthy Subjects")
+  expect_match(dcalc_notices(res), "No reference-negative subjects")
 })
 
 # ═══════════════════════════════════════════════════════════
@@ -350,25 +350,25 @@ test_that("extreme test negativity (99% test negative)", {
 test_that("rejects negative TP", {
   # Reported as an ERROR notice, not an R condition.
   expect_no_error(res <- decisioncalculator(TP = -10, TN = 80, FP = 20, FN = 10))
-  expect_match(dcalc_notices(res), "Negative Counts Detected")
+  expect_match(dcalc_notices(res), "Negative counts detected")
 })
 
 test_that("rejects negative TN", {
   # Reported as an ERROR notice, not an R condition.
   expect_no_error(res <- decisioncalculator(TP = 90, TN = -80, FP = 20, FN = 10))
-  expect_match(dcalc_notices(res), "Negative Counts Detected")
+  expect_match(dcalc_notices(res), "Negative counts detected")
 })
 
 test_that("rejects negative FP", {
   # Reported as an ERROR notice, not an R condition.
   expect_no_error(res <- decisioncalculator(TP = 90, TN = 80, FP = -20, FN = 10))
-  expect_match(dcalc_notices(res), "Negative Counts Detected")
+  expect_match(dcalc_notices(res), "Negative counts detected")
 })
 
 test_that("rejects negative FN", {
   # Reported as an ERROR notice, not an R condition.
   expect_no_error(res <- decisioncalculator(TP = 90, TN = 80, FP = 20, FN = -10))
-  expect_match(dcalc_notices(res), "Negative Counts Detected")
+  expect_match(dcalc_notices(res), "Negative counts detected")
 })
 
 test_that("a non-numeric count does not yield a silently wrong result", {
@@ -398,7 +398,7 @@ test_that("rejects NULL counts", {
 test_that("rejects Inf counts", {
   # Reported as an ERROR notice, not an R condition.
   expect_no_error(res <- decisioncalculator(TP = Inf, TN = 80, FP = 20, FN = 10))
-  expect_match(dcalc_notices(res), "Non-Finite Counts")
+  expect_match(dcalc_notices(res), "Non-finite counts")
 })
 
 # ═══════════════════════════════════════════════════════════

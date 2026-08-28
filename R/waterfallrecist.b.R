@@ -659,7 +659,7 @@ waterfallrecistClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
 
                 # 95% CI for binomial proportion (Wilson score interval)
                 orr_ci <- if (n_total > 0) {
-                    prop_test <- prop.test(n_orr, n_total, correct = FALSE)
+                    prop_test <- suppressWarnings(stats::prop.test(n_orr, n_total, correct = FALSE))
                     paste0(
                         round(prop_test$conf.int[1] * 100, 1), "% - ",
                         round(prop_test$conf.int[2] * 100, 1), "%"
@@ -683,7 +683,7 @@ waterfallrecistClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                 dcr_rate <- if (n_total > 0) n_dcr / n_total * 100 else 0
 
                 dcr_ci <- if (n_total > 0) {
-                    prop_test <- prop.test(n_dcr, n_total, correct = FALSE)
+                    prop_test <- suppressWarnings(stats::prop.test(n_dcr, n_total, correct = FALSE))
                     paste0(
                         round(prop_test$conf.int[1] * 100, 1), "% - ",
                         round(prop_test$conf.int[2] * 100, 1), "%"

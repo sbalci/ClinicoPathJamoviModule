@@ -369,10 +369,10 @@ test_that("every ggpubr plot type BUILDS, not merely prints", {
         a <- jw_run(d, dep3 = "fup", addGGPubrPlot = TRUE, ggpubrPlotType = ty)
         f <- tempfile(fileext = ".png"); grDevices::png(f, 700, 550, res = 96)
         on.exit(try(grDevices::dev.off(), silent = TRUE), add = TRUE)
-        try(a$.__enclos_env__$private$.plotGGPubr(a$results$ggpubrPlot,
-                ggtheme = ggplot2::theme_bw(), theme = NULL), silent = TRUE)
+        try(suppressWarnings(a$.__enclos_env__$private$.plotGGPubr(a$results$ggpubrPlot,
+                ggtheme = ggplot2::theme_bw(), theme = NULL)), silent = TRUE)
         grDevices::dev.off(); on.exit()
-        ggplot2::ggplot_build(ggplot2::last_plot())
+        suppressWarnings(ggplot2::ggplot_build(ggplot2::last_plot()))
     }
     for (ty in c("boxplot", "violin", "paired", "line")) {
         b <- expect_no_error(build(ty))
@@ -394,8 +394,8 @@ test_that("the ggpubr palette applies where it can and is documented where it ca
                     ggpubrPlotType = ty, ggpubrPalette = pal)
         f <- tempfile(fileext = ".png"); grDevices::png(f, 700, 550, res = 96)
         on.exit(try(grDevices::dev.off(), silent = TRUE), add = TRUE)
-        try(a$.__enclos_env__$private$.plotGGPubr(a$results$ggpubrPlot,
-                ggtheme = ggplot2::theme_bw(), theme = NULL), silent = TRUE)
+        try(suppressWarnings(a$.__enclos_env__$private$.plotGGPubr(a$results$ggpubrPlot,
+                ggtheme = ggplot2::theme_bw(), theme = NULL)), silent = TRUE)
         grDevices::dev.off(); on.exit()
         unname(tools::md5sum(f))
     }

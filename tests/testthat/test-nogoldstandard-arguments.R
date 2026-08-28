@@ -17,10 +17,11 @@ test_that("nogoldstandard respects all analysis methods", {
     method = method,
     test3Positive = NULL, test4Positive = NULL, test5Positive = NULL)
 
-  for (method in c("composite", "all_positive", "any_positive", "bayesian"))
+  for (method in c("composite", "all_positive", "any_positive"))
     expect_s3_class(run(method), "nogoldstandardResults")
 
   expect_error(run("latent_class"), "at least 3 tests")
+  expect_error(run("bayesian"), "at least 3 tests")
 })
 
 test_that("nogoldstandard respects bootstrap parameter", {

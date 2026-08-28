@@ -66,7 +66,7 @@ test_that("an infinite value is removed and reported instead of silently voiding
     expect_match(sub, "widehat")                       # a real subtitle was produced
     expect_false(grepl('== "NA"', sub, fixed = TRUE))  # with numbers, not NA
     expect_match(sub, as.character(sum(fin)))          # on the finite pairs only
-    expect_match(sub, format(round(unname(ref$estimate), 2)), fixed = TRUE)
+    expect_match(sub, base::format(round(unname(ref$estimate), 2)), fixed = TRUE)
 
     # the enhanced panel quotes the same coefficient instead of "r = NaN"
     a3 <- rs_run(d, colorvar = "g")
@@ -143,7 +143,7 @@ test_that("an ordinal x variable still yields a coefficient in the ggpubr panel"
     expect_match(lab, "italic(R)", fixed = TRUE)
     expect_false(grepl("NA", lab, fixed = TRUE))
     ref <- round(unname(stats::cor.test(as.numeric(as.character(d$x)), d$y)$estimate), 2)
-    expect_match(lab, format(ref), fixed = TRUE)
+    expect_match(lab, base::format(ref), fixed = TRUE)
 
     b <- ggplot2::ggplot_build(p)
     expect_s3_class(b$layout$panel_scales_x[[1]], "ScaleContinuousPosition")

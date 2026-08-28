@@ -7,8 +7,6 @@
 # independent implementation), zero-cell corrections under their renamed keys,
 # and warnings/information delivered through the dedicated `notices` Html item.
 
-library(ClinicoPath)
-
 # Independent Wilson score interval implementation (Wilson 1927), used as the
 # reference the module's table values must reproduce.
 wilson_ref <- function(x, n, conf = 0.95) {

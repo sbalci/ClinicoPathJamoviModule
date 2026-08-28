@@ -237,7 +237,7 @@ chisqposttestClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
             private$.checkpoint()
             fisher_test <- try(
-                stats::fisher.test(subtable, simulate.p.value = TRUE, B = 1e5),
+                stats::fisher.test(subtable, simulate.p.value = TRUE, B = 2000),
                 silent = TRUE)
             if (!inherits(fisher_test, "try-error"))
                 return(list(p = fisher_test$p.value, method = "Fisher's exact (Monte Carlo)"))
@@ -263,6 +263,16 @@ chisqposttestClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             # Check if we need memory optimization for large tables
             total_comparisons <- private$.pairwiseComparisonCount(contingency_table)
             
+            # Guard against pathological tables (e.g. continuous variables with thousands of combinations)
+            if (total_comparisons > 500) {
+                private$.addNotice(
+                    "WARNING",
+                    .("Pairwise comparisons disabled for high-cardinality table"),
+                    sprintf(.("The contingency table generates %d pairwise comparisons, exceeding the safety threshold of 500. Pairwise comparisons were disabled to avoid computational freezing and extreme multiple-testing penalties. Please bin continuous variables or group factor levels."), total_comparisons)
+                )
+                return(list())
+            }
+
             # Use chunked processing for moderate-sized tables to prevent resource limits
             if (total_comparisons > 25) {
                 return(private$.robustPairwiseTestsChunked(contingency_table, method, test_selection))
@@ -1576,7 +1586,7 @@ chisqposttestClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             if (nrow(contTable) == 2 && ncol(contTable) == 2)
                 self$results$chisqTable$setNote(
                     "continuity",
-                    .("Computed without Yates' continuity correction. jamovi's Contingency Tables analysis applies that correction to 2x2 tables by default, so its chi-square and p-value for this same table will differ slightly."))
+                    .("Computed without Yates' continuity correction."))
             else
                 self$results$chisqTable$setNote("continuity", NULL)
 

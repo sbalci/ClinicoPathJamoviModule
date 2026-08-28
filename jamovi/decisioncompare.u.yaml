@@ -9,7 +9,7 @@ children:
     stretchFactor: 1
     children:
       - type: TargetLayoutBox
-        label: Golden Standard
+        label: Gold Standard
         children:
           - type: VariablesListBox
             name: gold
@@ -76,11 +76,14 @@ children:
         enable: (!pp)
       - type: CheckBox
         name: opa
+      - type: CheckBox
+        name: useOpaCriterion
+        enable: (opa)
       - type: TextBox
         name: niMargin
-        label: Noninferiority Margin (%)
+        label: Minimum acceptable OPA (%)
         format: number
-        enable: (opa)
+        enable: (opa && useOpaCriterion)
       - type: ComboBox
         name: ciMethod
         enable: (opa)
@@ -118,10 +121,14 @@ children:
         name: fnote
       - type: CheckBox
         name: showSummary
+        enable: (statComp)
       - type: CheckBox
         name: showExplanations
       - type: CheckBox
         name: showReportSentence
+        enable: (statComp)
+      - type: CheckBox
+        name: showDescriptiveReport
   - type: LayoutBox
     margin: large
     children:

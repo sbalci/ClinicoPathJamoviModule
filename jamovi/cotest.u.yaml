@@ -1,3 +1,8 @@
+# jamovi's UI binding grammar has NO `==` operator. _resolveBindPart in the analysisui bundle
+# terminates an operand only on ':', '&&', '||' or ')', so `preset == 'custom'` is parsed as an
+# OPTION NAME spelled "preset == 'custom'", which does not exist: the binding resolves to null
+# (not false), sourceNames is empty so it never re-evaluates, and every control stays enabled.
+# Official jmv uses the colon form 66 times and `==` zero times. Use `(option:value)`.
 title: Co-Testing Analysis
 name: cotest
 jus: '3.0'
@@ -5,7 +10,7 @@ stage: 0
 compilerMode: tame
 children:
   - type: CollapseBox
-    label: Clinical Presets
+    label: Worked examples (demonstration only)
     collapsed: false
     children:
       - type: ComboBox
@@ -15,56 +20,67 @@ children:
           change: ./cotest.events::onChange_preset
 
   - type: Label
-    label: Test 1 Parameters
+    label: Test 1 parameters
     children:
       - type: LayoutBox
         margin: large
         children:
           - type: TextBox
+            name: test1_name
+            label: 'Name (optional)'
+            format: string
+            stretchFactor: 1
+          - type: TextBox
             name: test1_sens
             label: 'Sensitivity (0-1)'
             format: number
-            enable: (preset == 'custom')
+            enable: (preset:custom)
             events:
               change: ./cotest.events::onChange_test1_sens
           - type: TextBox
             name: test1_spec
             label: 'Specificity (0-1)'
             format: number
-            enable: (preset == 'custom')
+            enable: (preset:custom)
             events:
               change: ./cotest.events::onChange_test1_spec
 
   - type: Label
-    label: Test 2 Parameters
+    label: Test 2 parameters
     children:
       - type: LayoutBox
         margin: large
         children:
           - type: TextBox
+            name: test2_name
+            label: 'Name (optional)'
+            format: string
+            stretchFactor: 1
+          - type: TextBox
             name: test2_sens
             label: 'Sensitivity (0-1)'
             format: number
-            enable: (preset == 'custom')
+            enable: (preset:custom)
             events:
               change: ./cotest.events::onChange_test2_sens
           - type: TextBox
             name: test2_spec
             label: 'Specificity (0-1)'
             format: number
-            enable: (preset == 'custom')
+            enable: (preset:custom)
             events:
               change: ./cotest.events::onChange_test2_spec
 
   - type: Label
-    label: Test Independence
+    label: Test independence
     children:
       - type: LayoutBox
         margin: large
         children:
           - type: CheckBox
             name: indep
-            label: 'Assume tests are conditionally independent'
+            label: 'Assume the two tests are conditionally independent'
+            enable: (preset:custom)
             events:
               change: ./cotest.events::onChange_indep
           - type: LayoutBox
@@ -72,41 +88,45 @@ children:
             children:
               - type: TextBox
                 name: cond_dep_pos
-                label: 'Conditional Dependence (Positive)'
+                label: 'Dependence among subjects with disease'
                 format: number
-                enable: (!indep)
+                enable: (preset:custom && !indep)
                 events:
                   change: ./cotest.events::onChange_cond_dep_pos
               - type: TextBox
                 name: cond_dep_neg
-                label: 'Conditional Dependence (Negative)'
+                label: 'Dependence among subjects without disease'
                 format: number
-                enable: (!indep)
+                enable: (preset:custom && !indep)
                 events:
                   change: ./cotest.events::onChange_cond_dep_neg
 
   - type: Label
-    label: Disease Prevalence
+    label: Disease prevalence
     children:
       - type: LayoutBox
         margin: large
         children:
           - type: TextBox
             name: prevalence
-            label: 'Disease Prevalence (0-1)'
+            label: 'Prevalence (0-1)'
             format: number
+            enable: (preset:custom)
             events:
               change: ./cotest.events::onChange_prevalence
 
   - type: Label
-    label: Display Options
+    label: Display options
     children:
       - type: LayoutBox
         margin: large
         children:
           - type: CheckBox
+            name: showGuidance
+            label: "Guidance and explanations"
+          - type: CheckBox
             name: fnote
             label: "Detailed footnotes"
           - type: CheckBox
             name: fagan
-            label: "Fagan nomogram (visualization)"
+            label: "Fagan nomogram"

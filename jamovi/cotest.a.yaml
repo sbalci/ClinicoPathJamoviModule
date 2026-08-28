@@ -1,60 +1,88 @@
 ---
 name:  cotest
 title: Co-Testing Analysis
-menuGroup: meddecide
+menuGroup: meddecideT
 menuSubgroup: Decision Calculators
-menuSubtitle: Analyze combined test results
-version: '1.0.7'
+menuSubtitle: Two tests run in parallel
+version: '1.0.8'
 jas: '1.2'
 
 description:
     main: >
-        Function for analyzing combined results of two concurrent diagnostic tests.
-        Calculates post-test probabilities based on various scenarios (either test positive, both positive, both negative).
-    # R:
-    #     dontrun: true
-    #     usage: |
-    #         # Basic co-testing analysis with independent tests
-    #         cotest(
-    #             test1_sens = 0.80,
-    #             test1_spec = 0.90,
-    #             test2_sens = 0.75, 
-    #             test2_spec = 0.95,
-    #             prevalence = 0.10,
-    #             indep = TRUE,
-    #             fagan = TRUE
-    #         )
-            
-    #         # Co-testing with dependent tests
-    #         cotest(
-    #             test1_sens = 0.85,
-    #             test1_spec = 0.88,
-    #             test2_sens = 0.82,
-    #             test2_spec = 0.92,
-    #             prevalence = 0.05,
-    #             indep = FALSE,
-    #             cond_dep_pos = 0.15,
-    #             cond_dep_neg = 0.10,
-    #             fnote = TRUE
-    #         )
-            
-    #         # High-stakes screening scenario
-    #         cotest(
-    #             test1_sens = 0.95,
-    #             test1_spec = 0.85,
-    #             test2_sens = 0.90,
-    #             test2_spec = 0.90,
-    #             prevalence = 0.02,
-    #             indep = TRUE,
-    #             fagan = TRUE,
-    #             fnote = TRUE
-    #         )
+        Analyses two diagnostic tests applied in parallel: both are performed on the same
+        subject at the same time, before either result is known, and the two results are then
+        combined. Reports the post-test probability of disease for every result combination
+        (either test positive, test 1 only, test 2 only, both positive, both negative),
+        optionally allowing the two tests to be conditionally dependent. For tests performed
+        one after another, where the second is ordered only after a particular first result,
+        use Sequential Test Analysis instead. Note that Sequential Test Analysis also offers a
+        parallel strategy, but its combined figures assume conditional independence; this
+        analysis is the one that models conditional dependence numerically.
+    R:
+        dontrun: false
+        usage: |
+            # Two tests run in PARALLEL: both are performed on the same subject at the same
+            # time, before either result is known, and the two results are then combined.
+            # (For tests run one after another, where the second is ordered only after a
+            # particular first result, use a sequential testing analysis instead.)
 
+            # Conditionally independent tests -- the optimistic assumption
+            res <- cotest(
+                test1_sens = 0.80,
+                test1_spec = 0.90,
+                test2_sens = 0.75,
+                test2_spec = 0.95,
+                prevalence = 0.10,
+                indep      = TRUE
+            )
+
+            # Tests that tend to err together: same specimen, same biology. Dependence is
+            # given as a correlation within each disease group (0 = independence).
+            res <- cotest(
+                test1_sens   = 0.85,
+                test1_spec   = 0.88,
+                test2_sens   = 0.82,
+                test2_spec   = 0.92,
+                prevalence   = 0.05,
+                indep        = FALSE,
+                cond_dep_pos = 0.15,
+                cond_dep_neg = 0.10,
+                fnote        = TRUE
+            )
+
+            # The built-in worked examples are FOR DEMONSTRATION ONLY. Their sensitivity,
+            # specificity, prevalence and dependence values are round illustrative numbers
+            # chosen to show how the calculation behaves. They are not pooled literature
+            # estimates, are not drawn from any guideline, have not been checked for clinical
+            # accuracy, and must not be used for patient care. Supply your own values from a
+            # validation study in a population like yours before acting on any result.
+            # Selecting one OVERRIDES every parameter argument you pass.
+            res <- cotest(preset = "hpv_pap", showGuidance = FALSE)
 
 options:
+    # Optional labels. Every panel, both tables and the copy-ready sentence otherwise say only
+    # "Test 1" / "Test 2", so a pasted manuscript sentence never states what was tested.
+    - name: test1_name
+      title: Name of test 1
+      type: String
+      default: ""
+      description:
+          R: >
+            Optional name for the first test (for example "HPV"). Used in the tables, the
+            interpretation panel and the copy-ready summary. Leave blank for "Test 1".
+
+    - name: test2_name
+      title: Name of test 2
+      type: String
+      default: ""
+      description:
+          R: >
+            Optional name for the second test (for example "Pap cytology"). Used in the tables,
+            the interpretation panel and the copy-ready summary. Leave blank for "Test 2".
+
     # Test 1 parameters
     - name: test1_sens
-      title: Test 1 Sensitivity
+      title: Test 1 sensitivity
       type: Number
       default: 0.80
       min: 0.01
@@ -64,7 +92,7 @@ options:
             Sensitivity (true positive rate) of Test 1.
 
     - name: test1_spec
-      title: Test 1 Specificity
+      title: Test 1 specificity
       type: Number
       default: 0.90
       min: 0.01
@@ -75,7 +103,7 @@ options:
 
     # Test 2 parameters
     - name: test2_sens
-      title: Test 2 Sensitivity
+      title: Test 2 sensitivity
       type: Number
       default: 0.75
       min: 0.01
@@ -85,7 +113,7 @@ options:
             Sensitivity (true positive rate) of Test 2.
 
     - name: test2_spec
-      title: Test 2 Specificity
+      title: Test 2 specificity
       type: Number
       default: 0.95
       min: 0.01
@@ -96,7 +124,7 @@ options:
 
     # Test independence assumption
     - name: indep
-      title: Independent tests
+      title: Assume conditional independence
       type: Bool
       default: false
       description:
@@ -106,7 +134,7 @@ options:
 
     # Conditional dependence parameters (visible only when indep = false)
     - name: cond_dep_pos
-      title: Conditional Dependence Positive
+      title: Dependence among subjects with disease
       type: Number
       default: 0.05
       min: -1.00
@@ -114,13 +142,15 @@ options:
       description:
           R: >
             Correlation between the two test results among subjects with disease, where 0 is
-            conditional independence and 1 is the strongest dependence the marginals allow.
-            Negative values describe tests that compensate for each other's errors; they are
-            permitted, but the feasible negative range is narrow for tests with high
-            specificity and values beyond it are truncated with a warning.
+            conditional independence. 1 is the theoretical maximum, but the largest value the
+            sensitivities you entered actually permit is often smaller (frequently around 0.5), and
+            values above it are truncated to that bound with a warning; the correlation the
+            fitted model achieved is reported as "Realized phi". Negative values describe tests
+            that compensate for each other's errors and are permitted, but their feasible range
+            is narrower still.
 
     - name: cond_dep_neg
-      title: Conditional Dependence Negative
+      title: Dependence among subjects without disease
       type: Number
       default: 0.05
       min: -1.00
@@ -128,14 +158,16 @@ options:
       description:
           R: >
             Correlation between the two test results among subjects without disease, where 0 is
-            conditional independence and 1 is the strongest dependence the marginals allow.
-            Negative values describe tests that compensate for each other's errors; they are
-            permitted, but the feasible negative range is narrow for tests with high
-            specificity and values beyond it are truncated with a warning.
+            conditional independence. 1 is the theoretical maximum, but the largest value the
+            specificities you entered actually permit is often smaller (frequently around 0.5), and
+            values above it are truncated to that bound with a warning; the correlation the
+            fitted model achieved is reported as "Realized phi". Negative values describe tests
+            that compensate for each other's errors and are permitted, but their feasible range
+            is narrower still.
 
     # Prior probability (prevalence)
     - name: prevalence
-      title: Disease Prevalence
+      title: Disease prevalence
       type: Number
       default: 0.10
       min: 0.001
@@ -146,40 +178,64 @@ options:
             Requires a value between 0.001 and 0.999.
 
     # Display options
+    - name: showGuidance
+      title: Guidance and explanations
+      type: Bool
+      default: true
+      description:
+          R: >
+            Show the introductory guidance panel and the explanation of conditional dependence.
+            Turn this off once you are familiar with the analysis to leave only the results.
+
     - name: fnote
       title: Footnotes
       type: Bool
       default: false
+      description:
+          R: >
+            Add explanatory footnotes to the Test Parameters and Co-Testing Results tables,
+            describing what each sensitivity, specificity, likelihood ratio and post-test
+            probability means.
 
     - name: fagan
       title: "Fagan nomogram"
       type: Bool
       default: false
+      description:
+          R: >
+            Draw a Fagan nomogram for the parallel decision rule (positive if either test is
+            positive, negative only if both are negative). Its positive arm corresponds to the
+            "Either Test Positive" row of the results table, not to "Both Tests Positive".
 
     # Clinical presets
     - name: preset
-      title: Clinical Preset
+      title: Worked example
       type: List
       options:
         - name: custom
-          title: Custom Values
+          title: Custom values
         - name: hpv_pap
-          title: HPV + Pap Smear (Cervical Cancer)
+          title: HPV + Pap cytology (demo only)
         - name: psa_dre
-          title: PSA + DRE (Prostate Cancer)
+          title: PSA + rectal examination (demo only)
         - name: troponin_ecg
-          title: Troponin + ECG (Myocardial Infarction)
+          title: Troponin + ECG (demo only)
         - name: mammogram_ultrasound
-          title: Mammogram + Ultrasound (Breast Cancer)
+          title: Mammography + ultrasound (demo only)
         - name: covid_antigen_pcr
-          title: Rapid Antigen + PCR (COVID-19)
+          title: Rapid antigen + PCR (demo only)
         - name: tb_xray_sputum
-          title: Chest X-ray + Sputum (Tuberculosis)
+          title: Chest radiograph + sputum (demo only)
       default: custom
       description:
           R: >
-            Select a clinical preset or use custom values. Presets load evidence-based
-            sensitivity and specificity values from medical literature with appropriate
-            dependence parameters and prevalence estimates.
+            Select a worked example, or "custom" to enter your own values. Selecting a
+            worked example OVERRIDES test1_sens, test1_spec, test2_sens, test2_spec,
+            prevalence, indep, cond_dep_pos and cond_dep_neg; any values passed for those
+            arguments are ignored, and the analysis reports which ones it discarded. The
+            worked examples fill those parameters with round ILLUSTRATIVE numbers chosen to
+            demonstrate the calculation. They are not pooled literature estimates, are not
+            taken from any guideline, have not been checked for clinical accuracy, and must
+            not be used for patient care.
 
 ...

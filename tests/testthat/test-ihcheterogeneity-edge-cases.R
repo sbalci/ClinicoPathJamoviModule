@@ -5,8 +5,6 @@
 # Tests edge cases, error conditions, and robust error handling
 # for the ihcheterogeneity jamovi function
 
-library(testthat)
-
 # Load test data
 data(ihcheterogeneity_test, package = "ClinicoPath")
 data(ihcheterogeneity_test_small, package = "ClinicoPath")

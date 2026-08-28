@@ -1,12 +1,61 @@
 msgid ""
 msgstr ""
+"Project-Id-Version: ClinicoPath\n"
+"Last-Translator: ClinicoPath translators\n"
+"Language-Team: English\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "POT-Creation-Date: 2021-07-26 12:08:06+01000\n"
 "PO-Revision-Date: 2021-07-29 16:59:59+01000\n"
-"Language: c\n"
+"Language: en\n"
 "Plural-Forms: nplurals=2; plural=(n != 1)\n"
+
+#: R/decisioncalculator.b.R
+msgid ""
+"\n"
+"            <div style='font-family: Arial, sans-serif; max-width: 800px; "
+"line-height: 1.4;'>\n"
+"                <div style='background-color: rgba(88, 88, 88, 0.06); "
+"border: 2px solid currentColor; padding: 20px; margin-bottom: 20px; color: "
+"inherit;'>\n"
+"                <h2 style='margin: 0 0 10px 0; font-size: 18px;'>Medical "
+"decision calculator</h2>\n"
+"                <p style='margin: 0; font-size: 14px;'>\n"
+"                Educational description of diagnostic-test performance\n"
+"                </p>\n"
+"                </div>\n"
+"\n"
+"                <div style='font-size: 14px;'>\n"
+"                <p><strong>What this tool does:</strong></p>\n"
+"                <p>Evaluates diagnostic test performance by calculating "
+"sensitivity, specificity,\n"
+"                predictive values, likelihood ratios, and advanced metrics "
+"from a 2\\u{00D7}2 confusion matrix.</p>\n"
+"\n"
+"                <p><strong>To get started:</strong></p>\n"
+"                <ol style='margin: 10px 0; padding-left: 25px;'>\n"
+"                    <li>Enter your four counts: TP (True Positives), FP "
+"(False Positives), TN (True Negatives), FN (False Negatives)</li>\n"
+"                    <li>Choose whether to calculate confidence intervals "
+"(recommended)</li>\n"
+"                    <li>Optionally enable summary, glossary, or about panels "
+"for additional guidance</li>\n"
+"                </ol>\n"
+"\n"
+"                <div style='background-color: rgba(155, 155, 155, 0.06); "
+"border: 1px solid #ccc; padding: 12px; margin: 15px 0; color: inherit;'>\n"
+"                    <p style='margin: 0; font-size: "
+"13px;'><strong>Illustrative example (not clinical guidance):</strong>\n"
+"                    If you tested 200 patients (100 diseased, 100 healthy) "
+"and your test correctly\n"
+"                    identified 90 diseased (TP=90) and 80 healthy (TN=80), "
+"you have FN=10 and FP=20.</p>\n"
+"                </div>\n"
+"                </div>\n"
+"            </div>\n"
+"            "
+msgstr ""
 
 #: R/chisqposttest.b.R
 msgid " %d of the %d cells had an expected count below 5."
@@ -1509,6 +1558,24 @@ msgid ""
 "those rows are blank in the table and the variable is omitted from the plot."
 msgstr ""
 
+#: R/decisioncalculator.b.R
+msgid ""
+"%s has the highest Youden's J, %.3f above current; its accuracy interval "
+"overlaps the current cut-off's, so the difference is not established"
+msgstr ""
+
+#: R/decisioncalculator.b.R
+msgid ""
+"%s has the highest Youden's J, %.3f above current; paired uncertainty cannot "
+"be assessed from these summary counts"
+msgstr ""
+
+#: R/decisioncalculator.b.R
+msgid ""
+"%s has the highest Youden's J, %.3f above current; their accuracy intervals "
+"do not overlap"
+msgstr ""
+
 #: R/singlearm.b.R
 msgid ""
 "%s is not available for competing-risks analysis: it assumes a single event "
@@ -2252,9 +2319,20 @@ msgid ""
 "independence.</li><li><strong>Parallel:</strong> Both tests are applied to "
 "everyone; either positive makes the final result positive. Accuracy is "
 "algebraically identical to serial-negative testing, but utilization "
-"differs.</li></ul><p>Test order is an input to explore, not a "
-"recommendation. Replace every example value with evidence appropriate to the "
-"intended setting.</p><p><strong>Illustrative pair labels:</strong></p><ul>"
+"differs.</li></ul><p><strong>Why conditional dependence matters:</strong> "
+"Conditional dependence means that one test result remains informative about "
+"the other even after disease status is fixed, for example because the tests "
+"share biology, specimen characteristics, or technology. When positive "
+"conditional dependence is present in both disease-status groups, "
+"independence-based serial-positive calculations can make combined "
+"specificity too high and combined sensitivity too low. For serial-negative "
+"and parallel interpretation, they can make combined sensitivity too high and "
+"combined specificity too low. Gardner et al. (2000), <em>Conditional "
+"dependence between tests affects the diagnosis and surveillance of animal "
+"diseases</em>, describes these directional effects; see the reference "
+"below.</p><p>Test order is an input to explore, not a recommendation. "
+"Replace every example value with evidence appropriate to the intended "
+"setting.</p><p><strong>Illustrative pair labels:</strong></p><ul>"
 msgstr ""
 
 #: R/sequentialtests.b.R
@@ -2264,6 +2342,15 @@ msgid ""
 "inherit;'><strong>Assumption:</strong> Combined metrics assume conditional "
 "independence between tests. With positive conditional dependence, "
 "{direction}, and PPV and NPV shift accordingly.</div>"
+msgstr ""
+
+#: R/decisioncalculator.b.R
+msgid ""
+"<div style='background-color: rgba(255, 202, 33, 0.23); padding: 15px; "
+"margin: 10px 0; border-left: 4px solid #f0ad4e; color: inherit;'>\n"
+"                <h4 style='margin-top: 0;'>Warnings</h4>\n"
+"                <ul style='margin: 10px 0; padding-left: 20px;'>%s</ul>\n"
+"                </div>"
 msgstr ""
 
 #: R/sequentialtests.b.R
@@ -2282,6 +2369,298 @@ msgid ""
 "sensitivity, specificity and prevalence you entered as exact, so they carry "
 "no confidence interval. If the two tests measure related biology, "
 "%s.</em></div>"
+msgstr ""
+
+#: R/decisioncalculator.b.R
+msgid ""
+"<div style='background-color: rgba(33, 162, 64, 0.19); padding: 15px; "
+"margin: 10px 0; border-left: 4px solid #28a745; color: inherit;'>\n"
+"                <p style='margin: 0;'><strong>No obvious sparse-cell "
+"warning</strong> - assess adequacy from the precision required for the "
+"intended use.</p>\n"
+"                </div>"
+msgstr ""
+
+#: R/decisioncalculator.b.R
+msgid ""
+"<div style='font-family: Arial, sans-serif; max-width: 800px; line-height: "
+"1.4;'>\n"
+"                <div style='background-color: rgba(88, 88, 88, 0.06); "
+"border: 2px solid currentColor; padding: 15px; margin-bottom: 15px; color: "
+"inherit;'>\n"
+"                <h3 style='margin: 0 0 5px 0; font-size: 16px;'>Assumptions "
+"and caveats</h3>\n"
+"                </div>\n"
+"\n"
+"                <div style='font-size: 14px;'>\n"
+"                <p><strong>Key Assumptions:</strong></p>\n"
+"                <ul style='margin: 10px 0; padding-left: 25px;'>\n"
+"                <li><strong>Reference-standard validity:</strong> An "
+"imperfect reference standard can bias every estimated measure; document its "
+"limitations and consider latent-class or discrepant-resolution methods where "
+"appropriate</li>\n"
+"                <li><strong>Independent assessment:</strong> Index test and "
+"reference standard should be interpreted independently and blinded where "
+"possible</li>\n"
+"                <li><strong>Representative sample:</strong> Study population "
+"should match intended clinical use population</li>\n"
+"                <li><strong>Disease spectrum:</strong> Include appropriate "
+"mix of disease severity (avoid spectrum bias)</li>\n"
+"                <li><strong>Prevalence dependence:</strong> PPV/NPV vary "
+"with disease prevalence; verify in target setting</li>\n"
+"                </ul>\n"
+"\n"
+"                <p><strong>Common Pitfalls:</strong></p>\n"
+"                <ul style='margin: 10px 0; padding-left: 25px;'>\n"
+"                <li><strong>Verification bias:</strong> Reference-standard "
+"verification differs according to the index-test result</li>\n"
+"                <li><strong>Incorporation bias:</strong> The reference "
+"standard includes results of the test being evaluated</li>\n"
+"                <li><strong>Spectrum bias:</strong> Study population has "
+"more severe disease than clinical practice</li>\n"
+"                <li><strong>Prevalence extrapolation:</strong> Applying "
+"PPV/NPV from high-prevalence study to low-prevalence screening</li>\n"
+"                </ul>\n"
+"\n"
+"                %s\n"
+"\n"
+"                <p><strong>Precision-based sample-size "
+"guidance:</strong></p>\n"
+"                <ul style='margin: 10px 0; padding-left: 25px;'>\n"
+"                <li>Choose the maximum acceptable confidence-interval "
+"half-width for sensitivity and specificity before collecting data</li>\n"
+"                <li>Use anticipated sensitivity, specificity, prevalence, "
+"confidence level, and expected loss or exclusions to calculate the required "
+"reference-positive and reference-negative counts</li>\n"
+"                <li>Rare outcomes often require a larger total sample to "
+"obtain enough reference-positive participants, but no universal total "
+"applies</li>\n"
+"                <li>Report the achieved confidence intervals; a nominal "
+"sample-size threshold does not guarantee adequate precision</li>\n"
+"                </ul>\n"
+"                </div>\n"
+"                </div>"
+msgstr ""
+
+#: R/decisioncalculator.b.R
+msgid ""
+"<div style='font-family: Arial, sans-serif; max-width: 800px; line-height: "
+"1.4;'>\n"
+"                <div style='background-color: rgba(88, 88, 88, 0.06); "
+"border: 2px solid currentColor; padding: 15px; margin-bottom: 15px; color: "
+"inherit;'>\n"
+"                <h3 style='margin: 0 0 5px 0; font-size: 16px;'>Diagnostic "
+"test performance summary</h3>\n"
+"                </div>\n"
+"\n"
+"                <div style='font-size: 14px;'>\n"
+"                    <p style='margin: 10px 0;'><strong>Descriptive "
+"results:</strong> Youden's index is %.3f and sample accuracy is %.1f%%. "
+"These values describe this table; they are not clinical grades or decision "
+"thresholds.</p>\n"
+"\n"
+"                    <table style='width: 100%%; border-collapse: collapse; "
+"margin: 15px 0;'>\n"
+"                    <tr>\n"
+"                        <td style='border: 1px solid #ccc; padding: 10px; "
+"background-color: rgba(155, 155, 155, 0.06); color: inherit;'>\n"
+"                        <strong>Sensitivity</strong><br>\n"
+"                        <span style='font-size: 18px;'>%.1f%%</span><br>\n"
+"                        <span style='font-size: 12px;'>True positive "
+"rate</span>\n"
+"                        </td>\n"
+"                        <td style='border: 1px solid #ccc; padding: 10px; "
+"background-color: rgba(155, 155, 155, 0.06); color: inherit;'>\n"
+"                        <strong>Specificity</strong><br>\n"
+"                        <span style='font-size: 18px;'>%.1f%%</span><br>\n"
+"                        <span style='font-size: 12px;'>True negative "
+"rate</span>\n"
+"                        </td>\n"
+"                    </tr>\n"
+"                    <tr>\n"
+"                        <td style='border: 1px solid #ccc; padding: 10px; "
+"background-color: rgba(155, 155, 155, 0.06); color: inherit;'>\n"
+"                        <strong>PPV</strong><br>\n"
+"                        <span style='font-size: 18px;'>%.1f%%</span><br>\n"
+"                        <span style='font-size: 12px;'>At %.1f%% "
+"prevalence</span>\n"
+"                        </td>\n"
+"                        <td style='border: 1px solid #ccc; padding: 10px; "
+"background-color: rgba(155, 155, 155, 0.06); color: inherit;'>\n"
+"                        <strong>NPV</strong><br>\n"
+"                        <span style='font-size: 18px;'>%.1f%%</span><br>\n"
+"                        <span style='font-size: 12px;'>At %.1f%% "
+"prevalence</span>\n"
+"                        </td>\n"
+"                    </tr>\n"
+"                    </table>\n"
+"\n"
+"                    <p style='margin: 10px 0;'><strong>Likelihood-ratio "
+"update:</strong></p>\n"
+"                    <ul style='margin: 10px 0; padding-left: 25px;'>\n"
+"                    <li>A positive result multiplies pre-test odds by "
+"%.2f.</li>\n"
+"                    <li>A negative result multiplies pre-test odds by "
+"%.3f.</li>\n"
+"                    </ul>\n"
+"\n"
+"                    <div style='background-color: rgba(155, 155, 155, 0.06); "
+"border: 1px solid #ccc; padding: 12px; margin: 15px 0; color: inherit;'>\n"
+"                        <p style='margin: 0; font-weight: "
+"bold;'>Interpretation caveat</p>\n"
+"                        <p style='margin: 5px 0 0 0;'>These are "
+"single-cohort estimates. Their practical meaning depends on the intended "
+"use, error consequences, prevalence, patient spectrum, and "
+"reference-standard quality. This educational summary is not a clinical "
+"guide.</p>\n"
+"                    </div>\n"
+"                </div>\n"
+"                </div>"
+msgstr ""
+
+#: R/decisioncalculator.b.R
+msgid ""
+"<div style='font-family: Arial, sans-serif; max-width: 800px; line-height: "
+"1.4;'>\n"
+"            <div style='background-color: rgba(88, 88, 88, 0.06); border: "
+"2px solid currentColor; padding: 15px; margin-bottom: 15px; color: "
+"inherit;'>\n"
+"            <h3 style='margin: 0 0 5px 0; font-size: 16px;'>About diagnostic "
+"test evaluation</h3>\n"
+"            </div>\n"
+"\n"
+"            <div style='font-size: 14px;'>\n"
+"            <p><strong>What does this analysis do?</strong></p>\n"
+"            <p>This function evaluates the performance of a diagnostic test "
+"by comparing test results\n"
+"            against a reference standard. It calculates sensitivity, "
+"specificity, predictive values,\n"
+"            and likelihood ratios. Reference standards can be imperfect; "
+"disagreement may reflect error in either method.</p>\n"
+"\n"
+"            <p><strong>When to use it:</strong></p>\n"
+"            <ul style='margin: 10px 0; padding-left: 25px;'>\n"
+"            <li>Describing a test against a stated reference standard</li>\n"
+"            <li>Exploring different diagnostic methods or cut-off "
+"scenarios</li>\n"
+"            <li>Teaching how prevalence changes predictive values</li>\n"
+"            <li>Supporting, but not replacing, a clinical validation "
+"plan</li>\n"
+"            </ul>\n"
+"\n"
+"            <p><strong>Key Outputs:</strong></p>\n"
+"            <ul style='margin: 10px 0; padding-left: 25px;'>\n"
+"            <li><strong>Sensitivity:</strong> Ability to detect disease when "
+"present (avoid false negatives)</li>\n"
+"            <li><strong>Specificity:</strong> Ability to confirm absence "
+"when healthy (avoid false positives)</li>\n"
+"            <li><strong>PPV/NPV:</strong> Post-test probability after "
+"positive/negative result (depends on prevalence)</li>\n"
+"            <li><strong>Likelihood Ratios:</strong> How much test result "
+"changes disease probability</li>\n"
+"            <li><strong>Youden Index:</strong> Overall discriminatory power "
+"(optimal cut-off criterion)</li>\n"
+"            <li><strong>Advanced Metrics:</strong> Balanced Accuracy, F1 "
+"Score, MCC, DOR</li>\n"
+"            </ul>\n"
+"\n"
+"            <p><strong>References:</strong></p>\n"
+"            <ul style='margin: 10px 0; padding-left: 25px; font-size: "
+"13px;'>\n"
+"            <li>Altman DG, Bland JM. Diagnostic tests. 1: Sensitivity and "
+"specificity. BMJ. 1994 Jun 11;308(6943):1552. doi: "
+"10.1136/bmj.308.6943.1552. PMID: 8019315; PMCID: PMC2540489.</li>\n"
+"            <li>Deeks JJ, Altman DG. Diagnostic tests 4: likelihood ratios. "
+"BMJ 2004;329:168-169</li>\n"
+"            <li>epiR package documentation: <a "
+"href='https://cran.r-project.org/package=epiR' target='_blank'>CRAN</a></li>\n"
+"            </ul>\n"
+"            <p><strong>Scope:</strong> Presets and scenarios are "
+"illustrative examples, not clinical guides. A cut-off requires external "
+"validation and consideration of harms, benefits, workflow, and the intended "
+"population.</p>\n"
+"            </div>\n"
+"            </div>"
+msgstr ""
+
+#: R/decisioncalculator.b.R
+msgid ""
+"<div style='font-family: Arial, sans-serif; max-width: 800px; line-height: "
+"1.4;'>\n"
+"            <div style='background-color: rgba(88, 88, 88, 0.06); border: "
+"2px solid currentColor; padding: 15px; margin-bottom: 15px; color: "
+"inherit;'>\n"
+"            <h3 style='margin: 0 0 5px 0; font-size: 16px;'>Diagnostic-test "
+"glossary</h3>\n"
+"            </div>\n"
+"\n"
+"            <div style='font-size: 14px;'>\n"
+"            <dl style='margin: 0;'>\n"
+"            <dt style='font-weight: bold; margin-top: 15px;'>Sensitivity "
+"(true-positive rate)</dt>\n"
+"            <dd style='margin-left: 20px; margin-bottom: 10px;'>Proportion "
+"of reference-positive subjects with a positive test result.</dd>\n"
+"\n"
+"            <dt style='font-weight: bold; margin-top: 15px;'>Specificity "
+"(true-negative rate)</dt>\n"
+"            <dd style='margin-left: 20px; margin-bottom: 10px;'>Proportion "
+"of reference-negative subjects with a negative test result.</dd>\n"
+"\n"
+"            <dt style='font-weight: bold; margin-top: 15px;'>PPV (positive "
+"predictive value)</dt>\n"
+"            <dd style='margin-left: 20px; margin-bottom: 10px;'>Probability "
+"of a reference-positive outcome after a positive test. <strong>Depends on "
+"prevalence.</strong></dd>\n"
+"\n"
+"            <dt style='font-weight: bold; margin-top: 15px;'>NPV (negative "
+"predictive value)</dt>\n"
+"            <dd style='margin-left: 20px; margin-bottom: 10px;'>Probability "
+"of a reference-negative outcome after a negative test. <strong>Depends on "
+"prevalence.</strong></dd>\n"
+"\n"
+"            <dt style='font-weight: bold; margin-top: 15px;'>LR+ (positive "
+"likelihood ratio)</dt>\n"
+"            <dd style='margin-left: 20px; margin-bottom: 10px;'>The factor "
+"by which a positive result multiplies pre-test odds. Practical importance "
+"depends on the starting probability and intended use.</dd>\n"
+"\n"
+"            <dt style='font-weight: bold; margin-top: 15px;'>LR- (negative "
+"likelihood ratio)</dt>\n"
+"            <dd style='margin-left: 20px; margin-bottom: 10px;'>The factor "
+"by which a negative result multiplies pre-test odds. Practical importance "
+"depends on the starting probability and intended use.</dd>\n"
+"\n"
+"            <dt style='font-weight: bold; margin-top: 15px;'>Youden index "
+"(J)</dt>\n"
+"            <dd style='margin-left: 20px; margin-bottom: 10px;'>Sensitivity "
+"+ specificity - 1. It weights both equally and does not represent clinical "
+"utility or a universal cut-off.</dd>\n"
+"\n"
+"            <dt style='font-weight: bold; margin-top: 15px;'>Balanced "
+"accuracy</dt>\n"
+"            <dd style='margin-left: 20px; margin-bottom: 10px;'>Unweighted "
+"average of sensitivity and specificity; it does not encode different "
+"consequences for the two error types.</dd>\n"
+"\n"
+"            <dt style='font-weight: bold; margin-top: 15px;'>F1 score</dt>\n"
+"            <dd style='margin-left: 20px; margin-bottom: 10px;'>Harmonic "
+"mean of sensitivity and PPV. Because PPV depends on prevalence, F1 also "
+"changes with the selected prevalence.</dd>\n"
+"\n"
+"            <dt style='font-weight: bold; margin-top: 15px;'>MCC (Matthews "
+"correlation coefficient)</dt>\n"
+"            <dd style='margin-left: 20px; margin-bottom: 10px;'>Summary "
+"measure using all four cells, ranging from -1 to +1. Interpretation is "
+"context-dependent.</dd>\n"
+"\n"
+"            <dt style='font-weight: bold; margin-top: 15px;'>DOR (diagnostic "
+"odds ratio)</dt>\n"
+"            <dd style='margin-left: 20px; margin-bottom: 10px;'>Odds of a "
+"positive result in reference-positive versus reference-negative "
+"participants. No universal clinical cut-off is assumed.</dd>\n"
+"            </dl>\n"
+"            </div>\n"
+"            </div>"
 msgstr ""
 
 #: R/decision.b.R
@@ -2808,11 +3187,23 @@ msgid ""
 "connection destinations</li>"
 msgstr ""
 
+#: R/decisioncalculator.b.R
+msgid ""
+"<li><strong>Very few errors:</strong> Small FP or FN counts may produce "
+"unstable estimates.</li>"
+msgstr ""
+
 #: R/jjarcdiagram.b.R
 msgid ""
 "<li><strong>Weight Interpretation:</strong> Ensure 'Edge Weight "
 "Interpretation' matches your data. Most biological/clinical networks use "
 "'Strength' mode</li>"
+msgstr ""
+
+#: R/decisioncalculator.b.R
+msgid ""
+"<li><strong>Zero cells detected:</strong> An estimated sensitivity or "
+"specificity of 100% may reflect limited validation data.</li>"
 msgstr ""
 
 #: R/lassologistic.b.R
@@ -5129,6 +5520,20 @@ msgid ""
 "following groups have fewer: {groups}."
 msgstr ""
 
+#: R/decisioncalculator.b.R
+msgid ""
+"A Haldane-Anscombe 0.5 correction was applied to likelihood-ratio and "
+"diagnostic-odds-ratio point estimates because a zero cell was present. "
+"Confidence intervals use the raw counts and are not continuity-corrected."
+msgstr ""
+
+#: R/decisioncalculator.b.R
+msgid ""
+"A Haldane-Anscombe 0.5 correction was applied to the likelihood ratios "
+"because a zero cell was present. The epiR confidence-interval table uses raw "
+"counts, so its point estimates may differ."
+msgstr ""
+
 #: R/summarydata.b.R
 msgid "A high missing-data rate may affect interpretation."
 msgstr ""
@@ -6014,6 +6419,26 @@ msgstr ""
 msgid "Accuracy Assessment Plot"
 msgstr ""
 
+#: R/decisioncalculator.b.R
+msgid ""
+"Accuracy intervals are not computed for scenarios containing fractional "
+"frequencies because no effective sample size or weighting design was "
+"supplied."
+msgstr ""
+
+#: R/decisioncalculator.b.R
+msgid ""
+"Accuracy is the proportion of concordant results. It is computed at the "
+"prevalence observed in this sample (%.1f%%) and changes with case mix."
+msgstr ""
+
+#: R/decisioncalculator.b.R
+msgid ""
+"Accuracy is the proportion of concordant results. It is computed at the "
+"prevalence observed in this sample (%.1f%%), not at the supplied population "
+"prevalence, and changes with case mix."
+msgstr ""
+
 #: pathagreement/results/referenceComparison.columns.title
 msgid "Accuracy Level"
 msgstr ""
@@ -6569,8 +6994,8 @@ msgstr ""
 
 #: decisioncalculator/options/fnote.description.ui
 msgid ""
-"Add detailed explanatory footnotes to all tables with clinical "
-"interpretation guidance. Helpful for understanding what each statistic means."
+"Add detailed explanatory footnotes to the tables. Helpful for understanding "
+"what each statistic means."
 msgstr ""
 
 #: jforester/options/arrow_labels.description
@@ -8156,6 +8581,10 @@ msgstr ""
 msgid "Advanced Markov Features"
 msgstr ""
 
+#: R/decisioncalculator.b.R
+msgid "Advanced measures"
+msgstr ""
+
 #: package/analyses/decisioncombine1.description
 msgid ""
 "Advanced medical diagnostic test combination analysis for categorical tests \n"
@@ -9018,10 +9447,6 @@ msgstr ""
 msgid "Aggregation Method"
 msgstr ""
 
-#: decisioncalculator/options/cutoff2.default
-msgid "Aggressive"
-msgstr ""
-
 #: stagemigration/options/clinicalUtilityThresholds/aggressive.title
 msgid "Aggressive (15-75 percent)"
 msgstr ""
@@ -9548,6 +9973,14 @@ msgstr ""
 msgid "All continuous"
 msgstr ""
 
+#: R/decisioncalculator.b.R
+msgid "All counts (TP, FP, TN, FN) must be non-negative. Check the input values."
+msgstr ""
+
+#: R/decisioncalculator.b.R
+msgid "All counts are zero"
+msgstr ""
+
 #: treatmentoptim/options/evidence_level/all.title
 msgid "All Evidence Levels"
 msgstr ""
@@ -9566,6 +9999,10 @@ msgstr ""
 
 #: alluvial/options/fill/all_flows.title
 msgid "All flows"
+msgstr ""
+
+#: R/decisioncalculator.b.R
+msgid "All four frequencies for cut-off \"%s\" are zero."
 msgstr ""
 
 #: treatmentoptim/options/interaction_severity/all.title
@@ -9741,6 +10178,12 @@ msgid ""
 "All times are measured FROM the landmark, not from study entry, and all "
 "estimates are conditional on being event-free at the landmark; they are not "
 "comparable with unlandmarked survival times."
+msgstr ""
+
+#: R/decisioncalculator.b.R
+msgid ""
+"All values for cut-off \"%s\" must be non-negative finite numbers (TP=%s, "
+"FP=%s, TN=%s, FN=%s)."
 msgstr ""
 
 #: extratrees/options/mtry/all.title
@@ -11664,6 +12107,7 @@ msgstr ""
 msgid "Apparent Performance"
 msgstr ""
 
+#: R/decisioncalculator.b.R
 #: R/decisioncompare.b.R
 msgid "Apparent prevalence"
 msgstr ""
@@ -13752,6 +14196,17 @@ msgstr ""
 #: treecompare/options/primary_metric/bacc.title
 #: treecompare/results/comparison_table.columns.title
 msgid "Balanced Accuracy"
+msgstr ""
+
+#: R/decisioncalculator.b.R
+msgid "Balanced accuracy (CI not computed)"
+msgstr ""
+
+#: R/decisioncalculator.b.R
+msgid ""
+"Balanced accuracy is the unweighted average of sensitivity and specificity. "
+"It is descriptive and does not encode the consequences of false-positive and "
+"false-negative results."
 msgstr ""
 
 #: R/enhancedROC.b.R
@@ -18451,6 +18906,13 @@ msgstr ""
 msgid "Calculate"
 msgstr ""
 
+#: decisioncalculator/options/ci.description.ui
+msgid ""
+"Calculate 95 percent confidence intervals for measures estimable from "
+"integer study counts. Prevalence-adjusted predictive-value intervals are "
+"omitted."
+msgstr ""
+
 #: R/waterfall.b.R
 msgid "Calculate accurate percentage changes"
 msgstr ""
@@ -18464,12 +18926,6 @@ msgid ""
 "Calculate and display 95 percent confidence intervals for all diagnostic "
 "statistics. Provides uncertainty estimates around point estimates of "
 "sensitivity, specificity, etc."
-msgstr ""
-
-#: decisioncalculator/options/ci.description.ui
-msgid ""
-"Calculate and display 95 percent confidence intervals for all diagnostic "
-"statistics. Provides uncertainty estimates around point estimates."
 msgstr ""
 
 #: stereology/options/showConfidenceIntervals.description
@@ -27681,10 +28137,6 @@ msgstr ""
 msgid "Compare Decision Tree Algorithms"
 msgstr ""
 
-#: decisioncalculator/ui[5][0][0][1].label
-msgid "Compare different diagnostic thresholds to find optimal cut-off values"
-msgstr ""
-
 #: splinehazard/options/show_model_comparison.description
 msgid "Compare different knot configurations"
 msgstr ""
@@ -27755,12 +28207,6 @@ msgstr ""
 
 #: aivalidation/ui/statisticalTests/compareModels.label
 msgid "Compare Models (DeLong Test)"
-msgstr ""
-
-#: decisioncalculator/options/multiplecuts.description.ui
-msgid ""
-"Compare multiple diagnostic cut-off scenarios to identify optimal "
-"thresholds. Useful for evaluating different test interpretation criteria."
 msgstr ""
 
 #: survival/options/compare_distributions.title
@@ -30304,6 +30750,10 @@ msgstr ""
 msgid "Concordant"
 msgstr ""
 
+#: decisioncalculator/results/nTable.columns.title
+msgid "Concordant Results"
+msgstr ""
+
 #: alluvial/results/condensationWarning.title
 msgid "Condensation Plot Information"
 msgstr ""
@@ -30730,6 +31180,14 @@ msgstr ""
 msgid ""
 "Confidence intervals are left blank: a standardised curve has no closed-form "
 "interval and would need bootstrapping."
+msgstr ""
+
+#: R/decisioncalculator.b.R
+msgid ""
+"Confidence intervals are shown for measures estimable from the study 2x2 "
+"table. Predictive values are adjusted to the supplied population prevalence, "
+"but their confidence intervals are not computed because the uncertainty of "
+"that external prevalence was not supplied."
 msgstr ""
 
 #: R/multisurvival.b.R
@@ -31419,16 +31877,16 @@ msgstr ""
 msgid "Confusion Matrix (at Optimal Thresholds)"
 msgstr ""
 
-#: decisioncalculator/ui[0].label
-msgid "Confusion Matrix (Gold Standard vs Test Result)"
-msgstr ""
-
 #: segmentationmetrics/options/plot_confusion_matrix.title
 msgid "Confusion Matrix (Multi-class)"
 msgstr ""
 
 #: ordinalroc/results/confusionMatrix.title
 msgid "Confusion Matrix (Ordinal Classification)"
+msgstr ""
+
+#: decisioncalculator/ui[0].label
+msgid "Confusion matrix (reference standard vs test result)"
 msgstr ""
 
 #: mlpathology/results/confusionmatrixplot.title
@@ -31549,7 +32007,6 @@ msgstr ""
 msgid "consensus_rating"
 msgstr ""
 
-#: decisioncalculator/options/cutoff1.default
 #: simpleSurvivalPower/results/sensitivity_analysis_table.columns.title
 #: survivalPower/results/sensitivity_analysis_table.columns.title
 msgid "Conservative"
@@ -31872,6 +32329,10 @@ msgstr ""
 #: exacttests/options/correction.title
 #: exacttests/ui[1][2]/correction.label
 msgid "Continuity correction"
+msgstr ""
+
+#: R/decisioncalculator.b.R
+msgid "Continuity correction applied"
 msgstr ""
 
 #: bayesianci/options/outcome_type/continuous.title
@@ -33712,6 +34173,7 @@ msgstr ""
 msgid "Countries (NUTS 0)"
 msgstr ""
 
+#: R/decisioncalculator.b.R
 #: contTables/ui[1][1][0][0][0].label
 #: exacttests/options/counts.title
 #: jjbarstats/options/label/counts.title
@@ -36170,6 +36632,14 @@ msgstr ""
 msgid "Currency/Unit"
 msgstr ""
 
+#: R/decisioncalculator.b.R
+msgid "Current"
+msgstr ""
+
+#: R/decisioncalculator.b.R
+msgid "Current (reference)"
+msgstr ""
+
 #: populationhealth/results/resourceAllocationTable.columns.title
 msgid "Current Allocation"
 msgstr ""
@@ -36184,6 +36654,10 @@ msgstr ""
 
 #: R/jjpiestats.b.R
 msgid "Current configuration"
+msgstr ""
+
+#: R/decisioncalculator.b.R
+msgid "Current cut-off has the highest Youden's J (%.3f) of the three"
 msgstr ""
 
 #: R/benford.b.R
@@ -37070,6 +37544,18 @@ msgstr ""
 msgid "Cut-off"
 msgstr ""
 
+#: R/decisioncalculator.b.R
+msgid ""
+"Cut-off \"%s\" has no reference-negative subjects, so specificity is "
+"undefined."
+msgstr ""
+
+#: R/decisioncalculator.b.R
+msgid ""
+"Cut-off \"%s\" has no reference-positive subjects, so sensitivity is "
+"undefined."
+msgstr ""
+
 #: ihcscoring/results/molecularclassification/checkpointanalysis.columns.title
 msgid "Cut-off (%)"
 msgstr ""
@@ -37095,6 +37581,10 @@ msgstr ""
 msgid "Cut-off Comparison"
 msgstr ""
 
+#: R/decisioncalculator.b.R
+msgid "Cut-off intervals omitted for fractional counts"
+msgstr ""
+
 #: survivalcont/ui[1][1].label
 msgid "Cut-off Options"
 msgstr ""
@@ -37107,24 +37597,20 @@ msgstr ""
 msgid "Cut-off Scenario"
 msgstr ""
 
-#: decisioncalculator/ui[5][1].label
-msgid "Cut-off Scenario 1"
-msgstr ""
-
 #: decisioncalculator/options/cutoff1.title
-msgid "Cut-off Scenario 1 Name"
-msgstr ""
-
-#: decisioncalculator/ui[5][2].label
-msgid "Cut-off Scenario 2"
+msgid "Cut-off scenario 1 name"
 msgstr ""
 
 #: decisioncalculator/options/cutoff2.title
-msgid "Cut-off Scenario 2 Name"
+msgid "Cut-off scenario 2 name"
 msgstr ""
 
 #: ihcscoring/results/multiplecutoffs/cutoffresults.columns.title
 msgid "Cut-off Threshold"
+msgstr ""
+
+#: R/decisioncalculator.b.R
+msgid "Cut-off validation failed"
 msgstr ""
 
 #: survivalcont/results/multipleCutTable.columns.title
@@ -37142,6 +37628,10 @@ msgid ""
 "counts per scenario cannot supply that. The accuracy intervals referred to "
 "above are Wilson 95% intervals computed separately per scenario, so overlap "
 "is a conservative signal that the counts do not separate the cut-offs."
+msgstr ""
+
+#: R/decisioncalculator.b.R
+msgid "Cut-offs describe different numbers of patients"
 msgstr ""
 
 #: stagemigration/options/cutpointBootstrapReps.title
@@ -39910,6 +40400,10 @@ msgstr ""
 msgid "Descriptive Cohort Summary (Copy-Ready)"
 msgstr ""
 
+#: R/decisioncalculator.b.R
+msgid "Descriptive comparison unavailable"
+msgstr ""
+
 #: singlearm/options/advancedDiagnostics.title
 msgid "Descriptive data diagnostics"
 msgstr ""
@@ -39938,14 +40432,14 @@ msgstr ""
 
 #: decisioncalculator/options/cutoff1.description.ui
 msgid ""
-"Descriptive name for the first cut-off scenario (e.g., 'Conservative', "
-"'Sensitive')."
+"Descriptive name for the first illustrative cut-off scenario; not clinical "
+"guidance."
 msgstr ""
 
 #: decisioncalculator/options/cutoff2.description.ui
 msgid ""
-"Descriptive name for the second cut-off scenario (e.g., 'Aggressive', "
-"'Specific')."
+"Descriptive name for the second illustrative cut-off scenario; not clinical "
+"guidance."
 msgstr ""
 
 #: enhancedtables/options/table_type/descriptive.title
@@ -40036,6 +40530,12 @@ msgstr ""
 
 #: tableone/results/tablestyle3.title
 msgid "Descriptive Table (arsenal)"
+msgstr ""
+
+#: decisioncalculator/options/multiplecuts.description.ui
+msgid ""
+"Descriptively compare illustrative cut-off scenarios. These examples are not "
+"clinical guides."
 msgstr ""
 
 #: package/analyses/groupedbar.menuSubgroup
@@ -40774,6 +41274,7 @@ msgstr ""
 msgid "Diagnostic (high Sens AND Spec)"
 msgstr ""
 
+#: R/decisioncalculator.b.R
 #: R/decisioncompare.b.R
 msgid "Diagnostic accuracy"
 msgstr ""
@@ -40905,10 +41406,18 @@ msgid "Diagnostic Odds Ratio"
 msgstr ""
 
 #: R/decision.b.R
+#: R/decisioncalculator.b.R
 #: R/decisioncompare.b.R
 #: likelihoodratio/ui[6]/showDiagnosticOdds.label
 #: psychopdaROC/options/metric/odds_ratio.title
 msgid "Diagnostic odds ratio"
+msgstr ""
+
+#: R/decisioncalculator.b.R
+msgid ""
+"Diagnostic odds ratio compares the odds of a positive result between "
+"reference-positive and reference-negative groups. Its magnitude is "
+"descriptive and has no universal clinical cut-off."
 msgstr ""
 
 #: mixedcox/ui[5][0].label
@@ -41798,6 +42307,10 @@ msgstr ""
 msgid "Discordant Cases Detail"
 msgstr ""
 
+#: decisioncalculator/results/nTable.columns.title
+msgid "Discordant Results"
+msgstr ""
+
 #: costeffectiveness/options/discount_costs.title
 msgid "Discount Future Costs"
 msgstr ""
@@ -41960,10 +42473,6 @@ msgstr ""
 msgid "Disease Absent"
 msgstr ""
 
-#: decisioncalculator/ui[0][0][1][1][0].label
-msgid "Disease Absent (Gold -)"
-msgstr ""
-
 #: decision/options/goldNegative.title
 #: decisioncompare/options/goldNegative.title
 msgid "Disease Absent Level"
@@ -42032,10 +42541,6 @@ msgstr ""
 #: decisioncalculator/ui[5][1][1][0][0].label
 #: decisioncalculator/ui[5][2][1][0][0].label
 msgid "Disease Present"
-msgstr ""
-
-#: decisioncalculator/ui[0][0][1][0][0].label
-msgid "Disease Present (Gold +)"
 msgstr ""
 
 #: decision/options/goldPositive.title
@@ -42208,7 +42713,6 @@ msgid ""
 msgstr ""
 
 #: decision/results/nTable.columns.title
-#: decisioncalculator/results/nTable.columns.title
 msgid "Diseased"
 msgstr ""
 
@@ -42282,6 +42786,18 @@ msgstr ""
 msgid ""
 "Display a decision-space scatter plot positioning each test pattern by its "
 "sensitivity and specificity, with point size scaled by Youden's J."
+msgstr ""
+
+#: decisioncalculator/options/showSummary.description.ui
+msgid ""
+"Display a descriptive plain-language summary. It is educational and is not a "
+"clinical guide."
+msgstr ""
+
+#: decisioncalculator/options/showGlossary.description.ui
+msgid ""
+"Display a glossary defining diagnostic-test terms with plain-language "
+"explanations."
 msgstr ""
 
 #: singlearm/options/medianline.description
@@ -42933,13 +43449,6 @@ msgstr ""
 msgid "Display future state predictions"
 msgstr ""
 
-#: decisioncalculator/options/showGlossary.description.ui
-msgid ""
-"Display glossary defining clinical terms (sensitivity, specificity, PPV, "
-"NPV, likelihood ratios, etc.) with plain-language explanations and "
-"interpretation guides."
-msgstr ""
-
 #: chisqposttest/options/showGlossary.description
 msgid "Display glossary of statistical terms with clinical interpretations"
 msgstr ""
@@ -43176,12 +43685,6 @@ msgid ""
 "Display natural language summaries alongside tables and plots. These "
 "summaries provide plain-language interpretations of the statistical results. "
 "Turn off to reduce visual clutter when summaries are not needed."
-msgstr ""
-
-#: decisioncalculator/options/showSummary.description.ui
-msgid ""
-"Display natural-language interpretation with key findings and clinical "
-"guidance. Presents results in plain English without statistical jargon."
 msgstr ""
 
 #: chisqposttest/options/showClinicalSummary.description
@@ -47666,6 +48169,10 @@ msgid ""
 "surveillance."
 msgstr ""
 
+#: R/decisioncalculator.b.R
+msgid "epiR package missing"
+msgstr ""
+
 #: decision/results/epirTable_ratio.title
 msgid "EpiR Table Ratios"
 msgstr ""
@@ -47962,6 +48469,10 @@ msgstr ""
 #: R/reportcat.b.R
 #: crosstable/results/errorNotice.title
 msgid "Error"
+msgstr ""
+
+#: R/decisioncalculator.b.R
+msgid "ERROR"
 msgstr ""
 
 #: samplingerror/results/errorComponents.columns.title
@@ -49947,6 +50458,10 @@ msgstr ""
 
 #: R/decisiongraph.b.R
 msgid "Example: Should we perform surgery or use medication?"
+msgstr ""
+
+#: decisioncalculator/ui[5][0][0][1].label
+msgid "Examples only—not clinical guides or validated cut-off recommendations"
 msgstr ""
 
 #: R/swimmerplot_html.R
@@ -51975,6 +52490,17 @@ msgstr ""
 msgid "F1 Score (Max)"
 msgstr ""
 
+#: R/decisioncalculator.b.R
+msgid "F1 score at selected prevalence (CI not computed)"
+msgstr ""
+
+#: R/decisioncalculator.b.R
+msgid ""
+"F1 score is the harmonic mean of sensitivity and positive predictive value. "
+"When an external prevalence is supplied, this value uses the "
+"prevalence-adjusted positive predictive value."
+msgstr ""
+
 #: deeplearningprediction/results/performanceAnalysis/classificationReport.columns.title
 #: deeplearningprediction/results/crossValidationResults/cvMetrics.columns.title
 #: multiclassroc/results/classMetricsTable.columns.title
@@ -52267,6 +52793,10 @@ msgstr ""
 msgid "Fagan nomogram (visualization)"
 msgstr ""
 
+#: R/decisioncalculator.b.R
+msgid "Fagan nomogram not drawn"
+msgstr ""
+
 #: decision/options/fagan.title
 #: decisioncalculator/options/fagan.title
 msgid "Fagan nomogram plot"
@@ -52407,6 +52937,22 @@ msgstr ""
 
 #: diagnosticmeta/options/false_positives.title
 msgid "False Positives (FP)"
+msgstr ""
+
+#: R/decisioncalculator.b.R
+msgid "False-discovery proportion among test-positive subjects"
+msgstr ""
+
+#: R/decisioncalculator.b.R
+msgid "False-negative rate among outcome-positive subjects"
+msgstr ""
+
+#: R/decisioncalculator.b.R
+msgid "False-omission proportion among test-negative subjects"
+msgstr ""
+
+#: R/decisioncalculator.b.R
+msgid "False-positive rate among outcome-negative subjects"
 msgstr ""
 
 #: patientdashboard/options/family_communication.title
@@ -54975,6 +55521,13 @@ msgstr ""
 msgid "Fractional Factorial"
 msgstr ""
 
+#: R/decisioncalculator.b.R
+msgid ""
+"Fractional frequencies are used for point estimates only. Confidence "
+"intervals are omitted because no effective sample size or weighting design "
+"was supplied."
+msgstr ""
+
 #: continuousrelationship/options/modelType/fp.title
 msgid "Fractional Polynomials"
 msgstr ""
@@ -57380,7 +57933,6 @@ msgid "GOF Tests"
 msgstr ""
 
 #: decision/results/cTable.columns.title
-#: decisioncalculator/results/cTable.columns.title
 #: decisioncombine/results/crossTabTable.columns.title
 #: decisioncombine/results/individualTest1/test1Contingency.columns.title
 #: decisioncombine/results/individualTest2/test2Contingency.columns.title
@@ -57392,7 +57944,6 @@ msgid "Gold Negative"
 msgstr ""
 
 #: decision/results/cTable.columns.title
-#: decisioncalculator/results/cTable.columns.title
 #: decisioncombine/results/crossTabTable.columns.title
 #: decisioncombine/results/individualTest1/test1Contingency.columns.title
 #: decisioncombine/results/individualTest2/test2Contingency.columns.title
@@ -59693,7 +60244,6 @@ msgid "Healthcare Utilization"
 msgstr ""
 
 #: decision/results/nTable.columns.title
-#: decisioncalculator/results/nTable.columns.title
 msgid "Healthy"
 msgstr ""
 
@@ -60585,6 +61135,14 @@ msgstr ""
 msgid ""
 "Higher QALYs indicate better health outcomes. Used to compare different "
 "treatments"
+msgstr ""
+
+#: decisioncalculator/options/cutoff1.default
+msgid "Higher sensitivity example"
+msgstr ""
+
+#: decisioncalculator/options/cutoff2.default
+msgid "Higher specificity example"
 msgstr ""
 
 #: door/options/rankDirection/higher.title
@@ -62496,8 +63054,24 @@ msgid ""
 "for evidence-based medicine."
 msgstr ""
 
+#: decisioncalculator/ui[5][0].label
+msgid "Illustrative cut-off comparison"
+msgstr ""
+
+#: R/decisioncalculator.b.R
+msgid "Illustrative point estimates; not clinical guidance"
+msgstr ""
+
 #: sequentialtests/options/population_size.title
 msgid "Illustrative Population Size"
+msgstr ""
+
+#: decisioncalculator/ui[5][1].label
+msgid "Illustrative scenario 1"
+msgstr ""
+
+#: decisioncalculator/ui[5][2].label
+msgid "Illustrative scenario 2"
 msgstr ""
 
 #: sequentialtests/options/test1_cost.title
@@ -64024,6 +64598,14 @@ msgstr ""
 msgid "Inclusion Probability Threshold"
 msgstr ""
 
+#: R/decisioncalculator.b.R
+msgid "Incomplete cut-off data"
+msgstr ""
+
+#: R/decisioncalculator.b.R
+msgid "Incomplete data; some measures are undefined"
+msgstr ""
+
 #: bayesiannetworkma/results/coherenceAssessment.columns.title
 msgid "Inconsistency"
 msgstr ""
@@ -64683,6 +65265,10 @@ msgstr ""
 
 #: R/jjpiestats.b.R
 msgid "Info"
+msgstr ""
+
+#: R/decisioncalculator.b.R
+msgid "INFO"
 msgstr ""
 
 #: gsdesign/results/boundaryTable.columns.title
@@ -66385,6 +66971,10 @@ msgstr ""
 msgid "Invalid competing-risk coding"
 msgstr ""
 
+#: R/decisioncalculator.b.R
+msgid "Invalid cut-off inputs"
+msgstr ""
+
 #: R/survival.b.R
 msgid ""
 "Invalid data: %d observation(s) have negative survival times (follow-up date "
@@ -66403,6 +66993,10 @@ msgstr ""
 
 #: R/multisurvival.b.R
 msgid "Invalid person-time cutpoints ignored"
+msgstr ""
+
+#: R/decisioncalculator.b.R
+msgid "Invalid prior probability"
 msgstr ""
 
 #: R/jjridges.b.R
@@ -69643,10 +70237,12 @@ msgstr ""
 msgid "Likelihood ratio nomogram"
 msgstr ""
 
+#: R/decisioncalculator.b.R
 #: R/decisioncompare.b.R
 msgid "Likelihood ratio of a negative test"
 msgstr ""
 
+#: R/decisioncalculator.b.R
 #: R/decisioncompare.b.R
 msgid "Likelihood ratio of a positive test"
 msgstr ""
@@ -72864,6 +73460,13 @@ msgid ""
 "(total disagreement) to +1 (perfect prediction)."
 msgstr ""
 
+#: R/decisioncalculator.b.R
+msgid ""
+"Matthews correlation coefficient summarizes all four cells and ranges from "
+"-1 to +1. Interpretation is context-dependent; no universal clinical cut-off "
+"is assumed."
+msgstr ""
+
 #: R/summarydata.b.R
 #: advancedanova/results/descriptives.columns.title
 #: featurequality/results/distribution_analysis.columns.title
@@ -74365,6 +74968,10 @@ msgstr ""
 msgid "Measurement Variables"
 msgstr ""
 
+#: R/decisioncalculator.b.R
+msgid "Measures"
+msgstr ""
+
 #: R/summarydata.b.R
 msgid "Measures asymmetry. 0 = symmetric, &gt;0 = right-skewed, &lt;0 = left-skewed."
 msgstr ""
@@ -74398,12 +75005,12 @@ msgstr ""
 
 #: package/analyses/agreement.menuGroup
 #: package/analyses/decision.menuGroup
-#: package/analyses/decisioncalculator.menuGroup
 #: package/analyses/nogoldstandard.menuGroup
 #: package/analyses/decisioncompare.menuGroup
 #: package/analyses/psychopdaROC.menuGroup
 #: package/analyses/decisioncombine.menuGroup
 #: package/analyses/cotest.menuGroup
+#: package/analyses/sequentialtests.menuGroup
 #: package/analyses/decisioncurve.menuGroup
 #: package/analyses/betabinomialdiagnostic.menuSubgroup
 #: package/analyses/hierarchicalbayes.menuSubgroup
@@ -74414,13 +75021,15 @@ msgstr ""
 #: betabinomialdiagnostic/options.menuSubgroup
 #: cotest/options.menuGroup
 #: decision/options.menuGroup
-#: decisioncalculator/options.menuGroup
 #: decisioncombine/options.menuGroup
 #: decisioncompare/options.menuGroup
 #: decisioncurve/options.menuGroup
+#: enhancedROC/options.menuGroup
 #: hierarchicalbayes/options.menuSubgroup
 #: lassologistic/options.menuGroup
 #: nogoldstandard/options.menuGroup
+#: psychopdaROC/options.menuGroup
+#: sequentialtests/options.menuGroup
 msgid "meddecide"
 msgstr ""
 
@@ -74539,7 +75148,7 @@ msgstr ""
 msgid "meddecideExtraT"
 msgstr ""
 
-#: package/analyses/sequentialtests.menuGroup
+#: package/analyses/decisioncalculator.menuGroup
 #: package/analyses/classification.menuGroup
 #: package/analyses/enhancedROC.menuGroup
 #: package/analyses/psychopdaROC.menuGroup
@@ -74551,13 +75160,11 @@ msgstr ""
 #: package/analyses/mageeequation.menuGroup
 #: package/analyses/latentbiomarker.menuGroup
 #: clinicalscore/options.menuGroup
-#: enhancedROC/options.menuGroup
+#: decisioncalculator/options.menuGroup
 #: latentbiomarker/options.menuGroup
 #: leaveonecenterout/options.menuGroup
 #: mageeequation/options.menuGroup
 #: misclassificationbias/options.menuGroup
-#: psychopdaROC/options.menuGroup
-#: sequentialtests/options.menuGroup
 #: timedependentdca/options.menuGroup
 msgid "meddecideT"
 msgstr ""
@@ -75150,7 +75757,8 @@ msgid ""
 "diagnostic performance metrics including sensitivity, specificity, \n"
 "positive and negative predictive values, likelihood ratios, and \n"
 "post-test probabilities. Supports confidence interval estimation and \n"
-"Fagan nomogram visualization for clinical decision making."
+"Fagan nomogram visualization for educational interpretation. Presets and\n"
+"examples are illustrative only and are not clinical guides."
 msgstr ""
 
 #: package/analyses/treemedical.title
@@ -80555,10 +81163,6 @@ msgstr ""
 msgid "Multiple Cut-off Analysis Plot"
 msgstr ""
 
-#: decisioncalculator/ui[5][0].label
-msgid "Multiple Cut-off Comparison"
-msgstr ""
-
 #: decisioncalculator/options/multiplecuts.title
 msgid "Multiple cut-off evaluation"
 msgstr ""
@@ -81763,6 +82367,10 @@ msgstr ""
 msgid "Negative Cell Count"
 msgstr ""
 
+#: R/decisioncalculator.b.R
+msgid "Negative counts detected"
+msgstr ""
+
 #: biomarkerdiscovery/results/shap_biomarker_importance.columns.title
 #: clinicalprediction/results/shap_summary.columns.title
 msgid "Negative Impact %"
@@ -81799,6 +82407,13 @@ msgid ""
 "moderate, <0.5 = weak."
 msgstr ""
 
+#: R/decisioncalculator.b.R
+msgid ""
+"Negative likelihood ratio: the factor by which a negative result multiplies "
+"pre-test odds. Its practical importance depends on the clinical context and "
+"starting probability."
+msgstr ""
+
 #: jjsyndromicplot/ui[4][0]/colorlow.label
 #: pcaloadingheatmap/ui[3][0]/colorlow.label
 #: pcaloadingtest/ui[3][0]/colorlow.label
@@ -81823,8 +82438,17 @@ msgid "Negative Predictive Value"
 msgstr ""
 
 #: R/decision.b.R
+#: R/decisioncalculator.b.R
 #: R/decisioncompare.b.R
 msgid "Negative predictive value"
+msgstr ""
+
+#: R/decisioncalculator.b.R
+msgid "Negative predictive value using the supplied population prevalence."
+msgstr ""
+
+#: R/decisioncalculator.b.R
+msgid "Negative predictive value using this study sample's prevalence."
 msgstr ""
 
 #: R/decision.b.R
@@ -82706,6 +83330,10 @@ msgstr ""
 msgid "No cases excluded."
 msgstr ""
 
+#: R/decisioncalculator.b.R
+msgid "No cases for cut-off"
+msgstr ""
+
 #: R/tableone.b.R
 msgid "No cases left"
 msgstr ""
@@ -82999,6 +83627,10 @@ msgstr ""
 msgid "No missing values in any of the selected variables."
 msgstr ""
 
+#: R/decisioncalculator.b.R
+msgid "No negative test results"
+msgstr ""
+
 #: R/multisurvival.b.R
 msgid ""
 "No nomogram is drawn for a stratified model: each stratum has its own "
@@ -83057,6 +83689,10 @@ msgstr ""
 msgid "No plot type was selected; defaulting to ggvenn output."
 msgstr ""
 
+#: R/decisioncalculator.b.R
+msgid "No positive test results"
+msgstr ""
+
 #: jsummarytools/options/cross_proportions/none.title
 msgid "No Proportions"
 msgstr ""
@@ -83075,6 +83711,14 @@ msgstr ""
 
 #: qualityoflife/options/reference_population/none.title
 msgid "No Reference Population"
+msgstr ""
+
+#: R/decisioncalculator.b.R
+msgid "No reference-negative subjects"
+msgstr ""
+
+#: R/decisioncalculator.b.R
+msgid "No reference-positive subjects"
 msgstr ""
 
 #: R/advancedraincloud.b.R
@@ -83563,6 +84207,10 @@ msgstr ""
 
 #: idi/results/decomposition.columns.title
 msgid "Non-Events Percent"
+msgstr ""
+
+#: R/decisioncalculator.b.R
+msgid "Non-finite counts"
 msgstr ""
 
 #: R/benford.b.R
@@ -84990,6 +85638,7 @@ msgid "Number at risk table"
 msgstr ""
 
 #: R/decision.b.R
+#: R/decisioncalculator.b.R
 #: R/decisioncompare.b.R
 msgid "Number needed to diagnose"
 msgstr ""
@@ -85224,26 +85873,6 @@ msgstr ""
 
 #: bayesdca/options/externalCases.description.ui
 msgid "Number of cases (positive outcomes) in external data."
-msgstr ""
-
-#: decisioncalculator/options/TN.description.ui
-msgid "Number of cases correctly identified as negative (healthy) by the test."
-msgstr ""
-
-#: decisioncalculator/options/TP.description.ui
-msgid "Number of cases correctly identified as positive (diseased) by the test."
-msgstr ""
-
-#: decisioncalculator/options/FN.description.ui
-msgid ""
-"Number of cases incorrectly identified as negative (diseased subjects that "
-"tested negative)."
-msgstr ""
-
-#: decisioncalculator/options/FP.description.ui
-msgid ""
-"Number of cases incorrectly identified as positive (healthy subjects that "
-"tested positive)."
 msgstr ""
 
 #: R/vartree.b.R
@@ -85918,6 +86547,22 @@ msgstr ""
 
 #: agreement/options/finnLevels.title
 msgid "Number of Rating Categories (Finn)"
+msgstr ""
+
+#: decisioncalculator/options/TN.description.ui
+msgid "Number of reference-negative cases with a negative test result."
+msgstr ""
+
+#: decisioncalculator/options/FP.description.ui
+msgid "Number of reference-negative cases with a positive test result."
+msgstr ""
+
+#: decisioncalculator/options/FN.description.ui
+msgid "Number of reference-positive cases with a negative test result."
+msgstr ""
+
+#: decisioncalculator/options/TP.description.ui
+msgid "Number of reference-positive cases with a positive test result."
 msgstr ""
 
 #: assayoptimization/options/replicates.title
@@ -91831,6 +92476,10 @@ msgid ""
 "scale for comparability."
 msgstr ""
 
+#: R/decisioncalculator.b.R
+msgid "Partial confidence intervals with population prevalence"
+msgstr ""
+
 #: partialcorrelation/ui.title
 msgid "Partial Correlation Analysis"
 msgstr ""
@@ -97325,6 +97974,10 @@ msgstr ""
 msgid "Population Weights"
 msgstr ""
 
+#: R/decisioncalculator.b.R
+msgid "Population-adjusted predictive values"
+msgstr ""
+
 #: differentialdiagnosis/options/prevalence_source/population_based.title
 msgid "Population-Based Estimates"
 msgstr ""
@@ -97414,6 +98067,12 @@ msgstr ""
 
 #: ihcthreshold/results/summaryTable.columns.title
 msgid "Positive % Range"
+msgstr ""
+
+#: R/decisioncalculator.b.R
+msgid ""
+"Positive and negative predictive values are adjusted to the supplied "
+"population prevalence. No confidence intervals were requested."
 msgstr ""
 
 #: ihcscoring/results/multiplecutoffs/cutoffresults.columns.title
@@ -97529,6 +98188,13 @@ msgid ""
 "weak but potentially useful."
 msgstr ""
 
+#: R/decisioncalculator.b.R
+msgid ""
+"Positive likelihood ratio: the factor by which a positive result multiplies "
+"pre-test odds. Its practical importance depends on the clinical context and "
+"starting probability."
+msgstr ""
+
 #: jjsyndromicplot/ui[4][0]/colorhigh.label
 #: pcaloadingheatmap/ui[3][0]/colorhigh.label
 #: pcaloadingtest/ui[3][0]/colorhigh.label
@@ -97590,8 +98256,17 @@ msgid "Positive Predictive Value"
 msgstr ""
 
 #: R/decision.b.R
+#: R/decisioncalculator.b.R
 #: R/decisioncompare.b.R
 msgid "Positive predictive value"
+msgstr ""
+
+#: R/decisioncalculator.b.R
+msgid "Positive predictive value using the supplied population prevalence."
+msgstr ""
+
+#: R/decisioncalculator.b.R
+msgid "Positive predictive value using this study sample's prevalence."
 msgstr ""
 
 #: R/decision.b.R
@@ -97827,12 +98502,10 @@ msgid "Post-Randomization Exclusions"
 msgstr ""
 
 #: decision/results/ratioTable.columns.title
-#: decisioncalculator/results/ratioTable.columns.title
 msgid "Post-test Disease Probability"
 msgstr ""
 
 #: decision/results/ratioTable.columns.title
-#: decisioncalculator/results/ratioTable.columns.title
 msgid "Post-test Health Probability"
 msgstr ""
 
@@ -97890,6 +98563,14 @@ msgstr ""
 
 #: likelihoodratio/results/postTestPlot.title
 msgid "Post-test Probability vs Prevalence"
+msgstr ""
+
+#: decisioncalculator/results/ratioTable.columns.title
+msgid "Post-test Reference-negative Probability"
+msgstr ""
+
+#: decisioncalculator/results/ratioTable.columns.title
+msgid "Post-test Reference-positive Probability"
 msgstr ""
 
 #: hierarchicalbayes/results/pooledEstimates.columns.title
@@ -99980,6 +100661,10 @@ msgid ""
 "is invalid."
 msgstr ""
 
+#: R/decisioncalculator.b.R
+msgid "Prevalence observed in this study sample."
+msgstr ""
+
 #: likelihoodratio/options/prevalenceRange.title
 #: likelihoodratio/ui[3][1][0].label
 msgid "Prevalence Range for Analysis"
@@ -100408,6 +101093,12 @@ msgstr ""
 msgid "Prior probability (prevalence)"
 msgstr ""
 
+#: R/decisioncalculator.b.R
+msgid ""
+"Prior probability must be between 0 and 1 (exclusive). Update the \"Prior "
+"Probability (prevalence)\" value."
+msgstr ""
+
 #: spikeslabpriors/options/prior_inclusion_prob.description
 msgid "Prior probability that each variable is included"
 msgstr ""
@@ -100721,6 +101412,18 @@ msgstr ""
 
 #: differentialdiagnosis/results/clinicalContext.columns.title
 msgid "Probability Influence"
+msgstr ""
+
+#: R/decisioncalculator.b.R
+msgid ""
+"Probability of a reference-negative outcome after a negative test, using the "
+"displayed prevalence. It is identical to the NPV shown here."
+msgstr ""
+
+#: R/decisioncalculator.b.R
+msgid ""
+"Probability of a reference-positive outcome after a positive test, using the "
+"displayed prevalence. It is identical to the PPV shown here."
 msgstr ""
 
 #: R/decision.b.R
@@ -101413,6 +102116,14 @@ msgid ""
 "treatments."
 msgstr ""
 
+#: R/decisioncalculator.b.R
+msgid "Proportion of subjects with outcome ruled in"
+msgstr ""
+
+#: R/decisioncalculator.b.R
+msgid "Proportion of subjects with outcome ruled out"
+msgstr ""
+
 #: R/decisioncompare.b.R
 msgid "Proportion of subjects with the outcome ruled in"
 msgstr ""
@@ -101717,6 +102428,10 @@ msgstr ""
 
 #: effectsize/options/interpretation.description
 msgid "Provide Cohen's (1988) interpretation guidelines"
+msgstr ""
+
+#: R/decisioncalculator.b.R
+msgid "Provide diagnostic-test data with at least one non-zero count."
 msgstr ""
 
 #: jforestmodel/options/show_interpretation.description
@@ -105222,6 +105937,15 @@ msgstr ""
 msgid "Reference Model Summary"
 msgstr ""
 
+#: decisioncalculator/ui[0][0][1][1][0].label
+msgid "Reference negative"
+msgstr ""
+
+#: decisioncalculator/results/cTable.columns.title
+#: decisioncalculator/results/nTable.columns.title
+msgid "Reference Negative"
+msgstr ""
+
 #: irecist/ui[6].label
 msgid "Reference Options"
 msgstr ""
@@ -105240,6 +105964,15 @@ msgid ""
 "Reference population mortality rates. US/Minnesota/French/Slovenian tables "
 "are from the relsurv package. Other countries use WHO Global Health "
 "Observatory life table data bundled with this module."
+msgstr ""
+
+#: decisioncalculator/ui[0][0][1][0][0].label
+msgid "Reference positive"
+msgstr ""
+
+#: decisioncalculator/results/cTable.columns.title
+#: decisioncalculator/results/nTable.columns.title
+msgid "Reference Positive"
 msgstr ""
 
 #: ihcimmune/results/tilMethodResults.columns.title
@@ -105396,6 +106129,38 @@ msgstr ""
 
 #: advancedimputation/options/mnar_type/reference_based.title
 msgid "Reference-Based Imputation"
+msgstr ""
+
+#: decisioncalculator/options/tn1.description.ui
+msgid "Reference-negative participants testing negative in illustrative scenario 1."
+msgstr ""
+
+#: decisioncalculator/options/tn2.description.ui
+msgid "Reference-negative participants testing negative in illustrative scenario 2."
+msgstr ""
+
+#: decisioncalculator/options/fp1.description.ui
+msgid "Reference-negative participants testing positive in illustrative scenario 1."
+msgstr ""
+
+#: decisioncalculator/options/fp2.description.ui
+msgid "Reference-negative participants testing positive in illustrative scenario 2."
+msgstr ""
+
+#: decisioncalculator/options/fn1.description.ui
+msgid "Reference-positive participants testing negative in illustrative scenario 1."
+msgstr ""
+
+#: decisioncalculator/options/fn2.description.ui
+msgid "Reference-positive participants testing negative in illustrative scenario 2."
+msgstr ""
+
+#: decisioncalculator/options/tp1.description.ui
+msgid "Reference-positive participants testing positive in illustrative scenario 1."
+msgstr ""
+
+#: decisioncalculator/options/tp2.description.ui
+msgid "Reference-positive participants testing positive in illustrative scenario 2."
 msgstr ""
 
 #: R/clinicalscore.b.R
@@ -110553,7 +111318,7 @@ msgstr ""
 
 #: decisioncalculator/ui[5][1][0]/cutoff1.label
 #: decisioncalculator/ui[5][2][0]/cutoff2.label
-msgid "Scenario Name"
+msgid "Scenario name"
 msgstr ""
 
 #: lassologistic/results/scoringTable.columns.title
@@ -112755,6 +113520,10 @@ msgid ""
 "Higher is better for ruling OUT disease when negative."
 msgstr ""
 
+#: R/decisioncalculator.b.R
+msgid "Sensitivity: true positives among reference-positive subjects"
+msgstr ""
+
 #: psychopdaROC/options/showCriterionPlot.title
 msgid "Sensitivity/Specificity vs threshold"
 msgstr ""
@@ -114749,9 +115518,8 @@ msgstr ""
 
 #: decisioncalculator/options/showAbout.description.ui
 msgid ""
-"Show explanatory panels describing test evaluation methodology, assumptions, "
-"and clinical guidance. Helpful for understanding when and how to use this "
-"analysis."
+"Show explanatory panels describing test evaluation methodology and "
+"assumptions. Helpful for understanding when and how to use this analysis."
 msgstr ""
 
 #: ihcbasic/options/showHeatmap.title
@@ -119558,6 +120326,10 @@ msgstr ""
 msgid ""
 "Specificity: Proportion of healthy patients correctly identified (TN rate). "
 "Higher is better for ruling IN disease when positive."
+msgstr ""
+
+#: R/decisioncalculator.b.R
+msgid "Specificity: true negatives among reference-negative subjects"
 msgstr ""
 
 #: R/lassologistic.b.R
@@ -127591,6 +128363,10 @@ msgstr ""
 msgid "Test Negative"
 msgstr ""
 
+#: R/decisioncalculator.b.R
+msgid "Test negative"
+msgstr ""
+
 #: decision/options/testNegative.title
 msgid "Test Negative Level"
 msgstr ""
@@ -127651,6 +128427,10 @@ msgstr ""
 #: R/decisioncompare.b.R
 #: sequentialtests/results/population_flow_table.columns.title
 msgid "Test Positive"
+msgstr ""
+
+#: R/decisioncalculator.b.R
+msgid "Test positive"
 msgstr ""
 
 #: bayesiandiagnostic/options/test_positive_level.title
@@ -127761,6 +128541,7 @@ msgstr ""
 msgid "Test sensitivities:"
 msgstr ""
 
+#: R/decisioncalculator.b.R
 #: R/decisioncompare.b.R
 msgid "Test sensitivity"
 msgstr ""
@@ -127789,6 +128570,7 @@ msgstr ""
 msgid "Test Spatial Randomness"
 msgstr ""
 
+#: R/decisioncalculator.b.R
 #: R/decisioncompare.b.R
 msgid "Test specificity"
 msgstr ""
@@ -128518,6 +129300,12 @@ msgid ""
 "did not give one for"
 msgstr ""
 
+#: R/decisioncalculator.b.R
+msgid ""
+"The cut-off comparison cannot be performed because at least one scenario has "
+"invalid frequencies."
+msgstr ""
+
 #: R/psychopdaROC.b.R
 msgid ""
 "The cutpoint was chosen to optimise %s on these same data. The sensitivity, "
@@ -128728,6 +129516,12 @@ msgstr ""
 msgid ""
 "The enhanced DeLong comparison failed (%s), so a fallback implementation was "
 "used; the AUC differences and p-values below come from that fallback."
+msgstr ""
+
+#: R/decisioncalculator.b.R
+msgid ""
+"The epiR package is required for confidence intervals. Install it or disable "
+"confidence intervals."
 msgstr ""
 
 #: eurostatmap/options/dataset_id.description.jamovi
@@ -129113,6 +129907,15 @@ msgstr ""
 msgid "The monetary value of health benefits minus the costs"
 msgstr ""
 
+#: R/decisioncalculator.b.R
+msgid ""
+"The named scenarios are illustrative examples, not clinical guides. The "
+"current row reports which scenario has the highest Youden's J and whether "
+"its separately calculated accuracy interval overlaps the current row. "
+"Choosing a cut-off on the same data used to assess it is optimistically "
+"biased and does not establish clinical utility."
+msgstr ""
+
 #: R/multisurvival.b.R
 msgid ""
 "The nomogram estimates the probability of the event within <b>%g months</b> "
@@ -129286,6 +130089,13 @@ msgstr ""
 msgid ""
 "The positive likelihood ratio is %.3f, so a positive result lowers the "
 "probability of disease rather than raising it."
+msgstr ""
+
+#: R/decisioncalculator.b.R
+msgid ""
+"The positive likelihood ratio is %.3f. A nomogram assumes that a positive "
+"result raises the probability of the outcome; here it lowers that "
+"probability, so the plot is omitted. Check the test coding."
 msgstr ""
 
 #: R/chisqposttest.b.R
@@ -129608,6 +130418,13 @@ msgid ""
 "conditional dependence using external evidence."
 msgstr ""
 
+#: R/decisioncalculator.b.R
+msgid ""
+"The three scenarios total %g, %g and %g cases. Moving a cut-off on one "
+"cohort cannot change its size, so these rows cannot be interpreted as "
+"thresholds applied to the same participants."
+msgstr ""
+
 #: R/decisiongraph.b.R
 msgid "The time period for each cycle in a Markov model, commonly one year."
 msgstr ""
@@ -129695,6 +130512,12 @@ msgstr ""
 
 #: R/lassologistic.b.R
 msgid "the upper tertile"
+msgstr ""
+
+#: R/decisioncalculator.b.R
+msgid ""
+"The user-supplied population prevalence is used, not the prevalence observed "
+"in this sample."
 msgstr ""
 
 #: eurostatmap/options/geo_var.description.jamovi
@@ -130146,20 +130969,6 @@ msgid ""
 "does not include the modeling process. Use bootstrap optimism correction or "
 "nested cross-validation that repeats all preprocessing and tuning, followed "
 "by external validation before clinical use."
-msgstr ""
-
-#: R/decisioncalculator.b.R
-msgid ""
-"This column holds two different kinds of statement. On the two named cut-off "
-"rows it is a grade of that scenario's point estimates in this sample; the "
-"good and excellent grades require Youden's index AND accuracy to reach the "
-"band together, so a grade can be lower than either column on its own would "
-"suggest. On the Current (Reference) row it is not a grade at all: it reports "
-"which of the three cut-offs had the highest Youden's J, by how much, and "
-"whether that cut-off's accuracy interval still overlaps the current one's. "
-"Because all three cut-offs are judged on the same counts used to evaluate "
-"them, whichever row comes out ahead is optimistically biased; performance in "
-"independent data is generally lower."
 msgstr ""
 
 #: R/checkdata.b.R
@@ -132758,6 +133567,16 @@ msgstr ""
 msgid "TN (Cut-off 2)"
 msgstr ""
 
+#: R/decisioncalculator.b.R
+msgid "TN + FN equals zero, so negative predictive value is undefined."
+msgstr ""
+
+#: R/decisioncalculator.b.R
+msgid ""
+"TN + FP equals zero, so specificity and related measures cannot be "
+"calculated."
+msgstr ""
+
 #: decisioncurve/results/benefitRangeTable.columns.title
 #: markovmultistate/results/transitionProbabilities.columns.title
 msgid "To"
@@ -133075,6 +133894,7 @@ msgid "Tornado Diagram (Sensitivity Analysis)"
 msgstr ""
 
 #: R/decision.b.R
+#: R/decisioncalculator.b.R
 #: R/decisioncombine.b.R
 #: R/decisioncompare.b.R
 #: clinicaltrialdesign/results/sample_size_breakdown.columns.title
@@ -133252,6 +134072,14 @@ msgid ""
 "negative."
 msgstr ""
 
+#: R/decisioncalculator.b.R
+msgid "Total number of concordant test results"
+msgstr ""
+
+#: R/decisioncalculator.b.R
+msgid "Total number of discordant test results"
+msgstr ""
+
 #: stereology/options/totalPoints.description
 msgid "Total number of grid points or test lines used in the measurement."
 msgstr ""
@@ -133264,6 +134092,10 @@ msgstr ""
 msgid "Total Number of Negative Test Results"
 msgstr ""
 
+#: R/decisioncalculator.b.R
+msgid "Total number of negative tests"
+msgstr ""
+
 #: R/enhancedROC.b.R
 msgid "Total number of observations in analysis"
 msgstr ""
@@ -133272,10 +134104,26 @@ msgstr ""
 msgid "Total Number of Positive Test Results"
 msgstr ""
 
+#: R/decisioncalculator.b.R
+msgid "Total number of positive tests"
+msgstr ""
+
+#: R/decisioncalculator.b.R
+msgid "Total number of reference-negative subjects"
+msgstr ""
+
+#: R/decisioncalculator.b.R
+msgid "Total number of reference-positive subjects"
+msgstr ""
+
 #: pathsampling/options/totalSamples.description
 msgid ""
 "Total number of samples examined per case. Examples: total tumor blocks "
 "examined, total lymph nodes dissected, total omentum sections."
+msgstr ""
+
+#: R/decisioncalculator.b.R
+msgid "Total number of subjects"
 msgstr ""
 
 #: R/decision.b.R
@@ -133585,6 +134433,20 @@ msgstr ""
 
 #: decisioncalculator/options/tp2.title
 msgid "TP (Cut-off 2)"
+msgstr ""
+
+#: R/decisioncalculator.b.R
+msgid ""
+"TP + FN equals zero, so sensitivity and related measures cannot be "
+"calculated."
+msgstr ""
+
+#: R/decisioncalculator.b.R
+msgid "TP + FP equals zero, so positive predictive value is undefined."
+msgstr ""
+
+#: R/decisioncalculator.b.R
+msgid "TP, FP, TN, and FN must be finite numbers. Check the input values."
 msgstr ""
 
 #: R/swimmerplot_html.R
@@ -135098,6 +135960,7 @@ msgstr ""
 msgid "True Positives (TP)"
 msgstr ""
 
+#: R/decisioncalculator.b.R
 #: R/decisioncompare.b.R
 msgid "True prevalence"
 msgstr ""
@@ -135114,7 +135977,6 @@ msgid "True Status"
 msgstr ""
 
 #: decision/results/nTable.columns.title
-#: decisioncalculator/results/nTable.columns.title
 msgid "True Test"
 msgstr ""
 
@@ -141458,6 +142320,10 @@ msgstr ""
 msgid "warning"
 msgstr ""
 
+#: R/decisioncalculator.b.R
+msgid "WARNING"
+msgstr ""
+
 #: jointmodeling/results/warnings.title
 msgid "Warning Messages"
 msgstr ""
@@ -142075,6 +142941,10 @@ msgstr ""
 
 #: netreclassification/options/weighted_nri.title
 msgid "Weighted NRI"
+msgstr ""
+
+#: R/decisioncalculator.b.R
+msgid "Weighted or fractional counts"
 msgstr ""
 
 #: pseudosurvival/options/regression_method/weighted.title
@@ -143218,7 +144088,6 @@ msgid "Wrong level specified for positive class. No observations found."
 msgstr ""
 
 #: decision/results/nTable.columns.title
-#: decisioncalculator/results/nTable.columns.title
 msgid "Wrong Test"
 msgstr ""
 
@@ -144005,8 +144874,16 @@ msgid "Youden's Index"
 msgstr ""
 
 #: R/decision.b.R
+#: R/decisioncalculator.b.R
 #: R/decisioncompare.b.R
 msgid "Youden's index"
+msgstr ""
+
+#: R/decisioncalculator.b.R
+msgid ""
+"Youden's index equals sensitivity plus specificity minus one. It weights "
+"sensitivity and specificity equally and is descriptive, not a clinical "
+"decision threshold."
 msgstr ""
 
 #: R/decision.b.R

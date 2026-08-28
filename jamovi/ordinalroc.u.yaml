@@ -2,7 +2,7 @@ title: Ordinal ROC Analysis
 name: ordinalroc
 jus: '3.0'
 stage: 0
-compilerMode: aggressive
+compilerMode: tame
 children:
   - type: VariableSupplier
     persistentItems: false

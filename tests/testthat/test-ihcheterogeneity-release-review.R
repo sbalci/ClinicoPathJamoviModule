@@ -6,8 +6,6 @@
 # checked against psych / irr / stats rather than against the module's own
 # arithmetic.
 
-library(testthat)
-
 # 25 cases where every region under-reads the whole section by 30%: a true Ki67
 # of 60% scored as 42%. Correlation and consistency-ICC are near-perfect here;
 # only absolute agreement and the bias test can see the problem.

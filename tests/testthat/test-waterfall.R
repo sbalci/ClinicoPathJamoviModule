@@ -1,9 +1,6 @@
 # Test suite for waterfall function
 # This file contains comprehensive tests for the waterfall treatment response analysis
 
-library(testthat)
-library(dplyr)
-
 # Test datasets
 test_data_percentage <- data.frame(
   PatientID = paste0("PT", 1:5),

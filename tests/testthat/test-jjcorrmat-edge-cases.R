@@ -92,13 +92,14 @@ test_that("jjcorrmat handles constant variables", {
   const_data <- jjcorrmat_test
   const_data$constant_var <- 50  # All same value
 
-  # Should error or warn about zero variance
-  expect_condition(
-    jjcorrmat(
-      data = const_data,
-      dep = c("tumor_size", "ki67_index", "constant_var")
-    )
+  # Should warn in the results panel about zero variance
+  res <- jjcorrmat(
+    data = const_data,
+    dep = c("tumor_size", "ki67_index", "constant_var")
   )
+  expect_true(!is.null(res))
+  expect_true(res$warnings$visible)
+  expect_match(res$warnings$content, "constant_var")
 })
 
 test_that("jjcorrmat handles perfect correlations", {

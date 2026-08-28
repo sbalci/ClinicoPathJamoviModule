@@ -1,5 +1,3 @@
-context("Medical Decision Calculator")
-
 # Test basic function execution
 test_that("decisioncalculator function works with basic parameters", {
   skip_if_not_installed('jmvReadWrite')

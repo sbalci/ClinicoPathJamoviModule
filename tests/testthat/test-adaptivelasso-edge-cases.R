@@ -14,6 +14,8 @@ make_data <- function(n, ..., seed = 42) {
 
 run_alasso <- function(...) {
   defaults <- list(
+    event_level = NULL,
+    censor_level = NULL,
     strata = "strata_var",
     cv_folds = 5, n_lambda = 20, random_seed = 42,
     stability_selection = FALSE,
@@ -23,6 +25,10 @@ run_alasso <- function(...) {
   )
   args <- c(list(...), defaults)
   args <- args[!duplicated(names(args))]
+  for (level_option in c("event_level", "censor_level")) {
+    if (!level_option %in% names(args))
+      args[level_option] <- list(NULL)
+  }
   do.call(adaptivelasso, args)
 }
 

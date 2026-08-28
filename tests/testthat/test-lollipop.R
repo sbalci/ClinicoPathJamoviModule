@@ -714,7 +714,7 @@ test_that("lollipop handles small sample size", {
 
 test_that("lollipop handles many groups relative to sample size", {
   many_groups <- data.frame(
-    cat = paste0("Cat_", 1:8),
+    cat = c(paste0("Cat_", 1:8), "Cat_1", "Cat_2"),
     val = rnorm(10)  # 10 observations, 8 groups
   )
 

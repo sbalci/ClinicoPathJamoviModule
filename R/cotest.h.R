@@ -6,6 +6,8 @@ cotestOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
     inherit = jmvcore::Options,
     public = list(
         initialize = function(
+            test1_name = "",
+            test2_name = "",
             test1_sens = 0.8,
             test1_spec = 0.9,
             test2_sens = 0.75,
@@ -14,6 +16,7 @@ cotestOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             cond_dep_pos = 0.05,
             cond_dep_neg = 0.05,
             prevalence = 0.1,
+            showGuidance = TRUE,
             fnote = FALSE,
             fagan = FALSE,
             preset = "custom", ...) {
@@ -24,6 +27,14 @@ cotestOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 requiresData=FALSE,
                 ...)
 
+            private$..test1_name <- jmvcore::OptionString$new(
+                "test1_name",
+                test1_name,
+                default="")
+            private$..test2_name <- jmvcore::OptionString$new(
+                "test2_name",
+                test2_name,
+                default="")
             private$..test1_sens <- jmvcore::OptionNumber$new(
                 "test1_sens",
                 test1_sens,
@@ -70,6 +81,10 @@ cotestOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 default=0.1,
                 min=0.001,
                 max=0.999)
+            private$..showGuidance <- jmvcore::OptionBool$new(
+                "showGuidance",
+                showGuidance,
+                default=TRUE)
             private$..fnote <- jmvcore::OptionBool$new(
                 "fnote",
                 fnote,
@@ -91,6 +106,8 @@ cotestOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "tb_xray_sputum"),
                 default="custom")
 
+            self$.addOption(private$..test1_name)
+            self$.addOption(private$..test2_name)
             self$.addOption(private$..test1_sens)
             self$.addOption(private$..test1_spec)
             self$.addOption(private$..test2_sens)
@@ -99,11 +116,14 @@ cotestOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             self$.addOption(private$..cond_dep_pos)
             self$.addOption(private$..cond_dep_neg)
             self$.addOption(private$..prevalence)
+            self$.addOption(private$..showGuidance)
             self$.addOption(private$..fnote)
             self$.addOption(private$..fagan)
             self$.addOption(private$..preset)
         }),
     active = list(
+        test1_name = function() private$..test1_name$value,
+        test2_name = function() private$..test2_name$value,
         test1_sens = function() private$..test1_sens$value,
         test1_spec = function() private$..test1_spec$value,
         test2_sens = function() private$..test2_sens$value,
@@ -112,10 +132,13 @@ cotestOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         cond_dep_pos = function() private$..cond_dep_pos$value,
         cond_dep_neg = function() private$..cond_dep_neg$value,
         prevalence = function() private$..prevalence$value,
+        showGuidance = function() private$..showGuidance$value,
         fnote = function() private$..fnote$value,
         fagan = function() private$..fagan$value,
         preset = function() private$..preset$value),
     private = list(
+        ..test1_name = NA,
+        ..test2_name = NA,
         ..test1_sens = NA,
         ..test1_spec = NA,
         ..test2_sens = NA,
@@ -124,6 +147,7 @@ cotestOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         ..cond_dep_pos = NA,
         ..cond_dep_neg = NA,
         ..prevalence = NA,
+        ..showGuidance = NA,
         ..fnote = NA,
         ..fagan = NA,
         ..preset = NA)
@@ -150,11 +174,15 @@ cotestResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 title="Co-Testing Analysis",
                 refs=list(
                     "ClinicoPathJamoviModule",
-                    "DiagnosticTests"))
+                    "DiagnosticTests",
+                    "ConditionalDependenceDiagnosticTests",
+                    "Fagan1975",
+                    "DeeksAltman2004"))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="instructions",
-                title="Instructions"))
+                title="Instructions",
+                visible="(showGuidance)"))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="notices",
@@ -214,12 +242,12 @@ cotestResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             self$add(jmvcore::Html$new(
                 options=options,
                 name="dependenceInfo",
-                title="Test Dependence Information",
-                visible="(indep == FALSE)"))
+                title="Test Dependence"))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="dependenceExplanation",
-                title="Understanding Test Dependence"))
+                title="Understanding Test Dependence",
+                visible="(showGuidance)"))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="explanation",
@@ -227,7 +255,7 @@ cotestResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             self$add(jmvcore::Image$new(
                 options=options,
                 name="plot1",
-                title="Fagan nomogram",
+                title="Fagan nomogram - parallel rule (positive if either test is positive)",
                 width=600,
                 height=450,
                 renderFun=".plot1",
@@ -253,7 +281,7 @@ cotestBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             super$initialize(
                 package = "ClinicoPath",
                 name = "cotest",
-                version = c(1,0,7),
+                version = c(1,0,8),
                 options = options,
                 results = cotestResults$new(options=options),
                 data = data,
@@ -268,10 +296,64 @@ cotestBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 
 #' Co-Testing Analysis
 #'
-#' Function for analyzing combined results of two concurrent diagnostic tests. 
-#' Calculates post-test probabilities based on various scenarios (either test 
-#' positive, both positive, both negative).
+#' Analyses two diagnostic tests applied in parallel: both are performed on 
+#' the same subject at the same time, before either result is known, and the 
+#' two results are then combined. Reports the post-test probability of disease 
+#' for every result combination (either test positive, test 1 only, test 2 
+#' only, both positive, both negative), optionally allowing the two tests to 
+#' be conditionally dependent. For tests performed one after another, where 
+#' the second is ordered only after a particular first result, use Sequential 
+#' Test Analysis instead. Note that Sequential Test Analysis also offers a 
+#' parallel strategy, but its combined figures assume conditional 
+#' independence; this analysis is the one that models conditional dependence 
+#' numerically.
 #' 
+#'
+#' @examples
+#' # Two tests run in PARALLEL: both are performed on the same subject at the same
+#' # time, before either result is known, and the two results are then combined.
+#' # (For tests run one after another, where the second is ordered only after a
+#' # particular first result, use a sequential testing analysis instead.)
+#'
+#' # Conditionally independent tests -- the optimistic assumption
+#' res <- cotest(
+#'     test1_sens = 0.80,
+#'     test1_spec = 0.90,
+#'     test2_sens = 0.75,
+#'     test2_spec = 0.95,
+#'     prevalence = 0.10,
+#'     indep      = TRUE
+#' )
+#'
+#' # Tests that tend to err together: same specimen, same biology. Dependence is
+#' # given as a correlation within each disease group (0 = independence).
+#' res <- cotest(
+#'     test1_sens   = 0.85,
+#'     test1_spec   = 0.88,
+#'     test2_sens   = 0.82,
+#'     test2_spec   = 0.92,
+#'     prevalence   = 0.05,
+#'     indep        = FALSE,
+#'     cond_dep_pos = 0.15,
+#'     cond_dep_neg = 0.10,
+#'     fnote        = TRUE
+#' )
+#'
+#' # The built-in worked examples are FOR DEMONSTRATION ONLY. Their sensitivity,
+#' # specificity, prevalence and dependence values are round illustrative numbers
+#' # chosen to show how the calculation behaves. They are not pooled literature
+#' # estimates, are not drawn from any guideline, have not been checked for clinical
+#' # accuracy, and must not be used for patient care. Supply your own values from a
+#' # validation study in a population like yours before acting on any result.
+#' # Selecting one OVERRIDES every parameter argument you pass.
+#' res <- cotest(preset = "hpv_pap", showGuidance = FALSE)
+#'
+#' @param test1_name Optional name for the first test (for example "HPV").
+#'   Used in the tables, the interpretation panel and the copy-ready summary.
+#'   Leave blank for "Test 1".
+#' @param test2_name Optional name for the second test (for example "Pap
+#'   cytology"). Used in the tables, the interpretation panel and the copy-ready
+#'   summary. Leave blank for "Test 2".
 #' @param test1_sens Sensitivity (true positive rate) of Test 1.
 #' @param test1_spec Specificity (true negative rate) of Test 1.
 #' @param test2_sens Sensitivity (true positive rate) of Test 2.
@@ -279,24 +361,41 @@ cotestBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' @param indep Assume tests are conditionally independent (default is false
 #'   for safety). Use true only if tests measure completely different phenomena.
 #' @param cond_dep_pos Correlation between the two test results among subjects
-#'   with disease, where 0 is conditional independence and 1 is the strongest
-#'   dependence the marginals allow. Negative values describe tests that
-#'   compensate for each other's errors; they are permitted, but the feasible
-#'   negative range is narrow for tests with high specificity and values beyond
-#'   it are truncated with a warning.
+#'   with disease, where 0 is conditional independence. 1 is the theoretical
+#'   maximum, but the largest value the sensitivities you entered actually
+#'   permit is often smaller (frequently around 0.5), and values above it are
+#'   truncated to that bound with a warning; the correlation the fitted model
+#'   achieved is reported as "Realized phi". Negative values describe tests that
+#'   compensate for each other's errors and are permitted, but their feasible
+#'   range is narrower still.
 #' @param cond_dep_neg Correlation between the two test results among subjects
-#'   without disease, where 0 is conditional independence and 1 is the strongest
-#'   dependence the marginals allow. Negative values describe tests that
-#'   compensate for each other's errors; they are permitted, but the feasible
-#'   negative range is narrow for tests with high specificity and values beyond
-#'   it are truncated with a warning.
+#'   without disease, where 0 is conditional independence. 1 is the theoretical
+#'   maximum, but the largest value the specificities you entered actually
+#'   permit is often smaller (frequently around 0.5), and values above it are
+#'   truncated to that bound with a warning; the correlation the fitted model
+#'   achieved is reported as "Realized phi". Negative values describe tests that
+#'   compensate for each other's errors and are permitted, but their feasible
+#'   range is narrower still.
 #' @param prevalence Prior probability (disease prevalence in the population).
 #'   Requires a value between 0.001 and 0.999.
-#' @param fnote .
-#' @param fagan .
-#' @param preset Select a clinical preset or use custom values. Presets load
-#'   evidence-based sensitivity and specificity values from medical literature
-#'   with appropriate dependence parameters and prevalence estimates.
+#' @param showGuidance Show the introductory guidance panel and the
+#'   explanation of conditional dependence. Turn this off once you are familiar
+#'   with the analysis to leave only the results.
+#' @param fnote Add explanatory footnotes to the Test Parameters and
+#'   Co-Testing Results tables, describing what each sensitivity, specificity,
+#'   likelihood ratio and post-test probability means.
+#' @param fagan Draw a Fagan nomogram for the parallel decision rule (positive
+#'   if either test is positive, negative only if both are negative). Its
+#'   positive arm corresponds to the "Either Test Positive" row of the results
+#'   table, not to "Both Tests Positive".
+#' @param preset Select a worked example, or "custom" to enter your own
+#'   values. Selecting a worked example OVERRIDES test1_sens, test1_spec,
+#'   test2_sens, test2_spec, prevalence, indep, cond_dep_pos and cond_dep_neg;
+#'   any values passed for those arguments are ignored, and the analysis reports
+#'   which ones it discarded. The worked examples fill those parameters with
+#'   round ILLUSTRATIVE numbers chosen to demonstrate the calculation. They are
+#'   not pooled literature estimates, are not taken from any guideline, have not
+#'   been checked for clinical accuracy, and must not be used for patient care.
 #' @return A results object containing:
 #' \tabular{llllll}{
 #'   \code{results$instructions} \tab \tab \tab \tab \tab a html \cr
@@ -317,6 +416,8 @@ cotestBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'
 #' @export
 cotest <- function(
+    test1_name = "",
+    test2_name = "",
     test1_sens = 0.8,
     test1_spec = 0.9,
     test2_sens = 0.75,
@@ -325,6 +426,7 @@ cotest <- function(
     cond_dep_pos = 0.05,
     cond_dep_neg = 0.05,
     prevalence = 0.1,
+    showGuidance = TRUE,
     fnote = FALSE,
     fagan = FALSE,
     preset = "custom") {
@@ -334,6 +436,8 @@ cotest <- function(
 
 
     options <- cotestOptions$new(
+        test1_name = test1_name,
+        test2_name = test2_name,
         test1_sens = test1_sens,
         test1_spec = test1_spec,
         test2_sens = test2_sens,
@@ -342,6 +446,7 @@ cotest <- function(
         cond_dep_pos = cond_dep_pos,
         cond_dep_neg = cond_dep_neg,
         prevalence = prevalence,
+        showGuidance = showGuidance,
         fnote = fnote,
         fagan = fagan,
         preset = preset)

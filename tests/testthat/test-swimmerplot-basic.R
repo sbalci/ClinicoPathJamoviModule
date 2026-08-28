@@ -5,8 +5,6 @@
 # Tests basic functionality, required arguments, and expected outputs
 # for the swimmerplot jamovi function
 
-library(testthat)
-
 # Load test data
 data(swimmerplot_test, package = "ClinicoPath")
 

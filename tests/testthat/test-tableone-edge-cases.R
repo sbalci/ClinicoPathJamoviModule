@@ -138,15 +138,12 @@ test_that("tableone handles single row dataset", {
 test_that("tableone handles empty dataset after exclusions", {
   # Create data where all rows will be excluded
   test_data <- tableone_test[1:10, ]
-  test_data$Hemoglobin <- NA  # All missing
+  test_data$Age[1:5] <- NA
+  test_data$Sex[6:10] <- NA
 
-  # Every row is dropped, so the analysis refuses via jmvcore::reject(). That is
-  # an ERROR (expect_condition does not capture errors), and its message has to
-  # tell the user what to do rather than just failing.
-  expect_error(
-    tableone(data = test_data, vars = c("Age", "Hemoglobin"), excl = TRUE),
-    "valid data"
-  )
+  # Listwise deletion drops all rows; the analysis reports "No cases left" in todo
+  result <- tableone(data = test_data, vars = c("Age", "Sex"), excl = TRUE)
+  expect_match(result$todo$content, "No cases left")
 })
 
 # ═══════════════════════════════════════════════════════════
@@ -517,12 +514,9 @@ test_that("all styles handle data with no complete cases", {
   test_data$Age[1:5] <- NA
   test_data$Sex[6:10] <- NA  # No complete cases
 
-  for (style in c("t1", "t2", "t3")) {
-    expect_error(
-      tableone(data = test_data, vars = c("Age", "Sex"), sty = style,
-               excl = TRUE),  # Will exclude all rows
-      "valid data|non-missing",
-      info = style
-    )
+  for (style in c("t1", "t2", "t3", "t4")) {
+    result <- tableone(data = test_data, vars = c("Age", "Sex"), sty = style,
+                       excl = TRUE)
+    expect_match(result$todo$content, "No cases left", info = style)
   }
 })

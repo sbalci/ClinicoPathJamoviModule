@@ -1,4 +1,4 @@
-context("Data Quality Assessment - checkdata")
+# Test Data Quality Assessment - checkdata
 
 # ⚠️ WARNING: These tests RE-IMPLEMENT the statistical logic instead of calling
 # jmv::checkdata(). They validate R functions in isolation, but do NOT test:

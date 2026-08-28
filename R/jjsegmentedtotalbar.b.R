@@ -1483,7 +1483,7 @@ jjsegmentedtotalbarClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R
                 test_row <- list(
                     test_name = "Pearson's Chi-square",
                     statistic = chi_test$statistic[[1]],
-                    df = chi_test$parameter[[1]],
+                    df = as.integer(chi_test$parameter[[1]]),
                     p_value = chi_test$p.value,
                     interpretation = interpretation
                 )
@@ -1510,8 +1510,8 @@ jjsegmentedtotalbarClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R
                         
                         residual_row <- list(
                             test_name = "Standardized Residuals",
-                            statistic = abs(residual_value),
-                            df = NA,
+                            statistic = residual_value,  # signed: direction matches interpretation text
+                            df = NA_integer_,
                             p_value = NA,
                             interpretation = residual_interpretation
                         )

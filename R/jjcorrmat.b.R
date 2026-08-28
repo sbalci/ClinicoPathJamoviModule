@@ -919,7 +919,7 @@ jjcorrmatClass <- if (requireNamespace('jmvcore')) R6::R6Class(
     # same analysis produced different numbers. A fixed seed makes both
     # reproducible and identical; withr restores the caller's RNG stream.
     res <- tryCatch(
-        private$.withBayesSeed(type, correlation::correlation(
+        suppressWarnings(private$.withBayesSeed(type, correlation::correlation(
             data             = cor_data,
             method           = if (type == "nonparametric") "spearman" else "pearson",
             p_adjust         = "none",
@@ -929,7 +929,7 @@ jjcorrmatClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             partial          = options_data$partial,
             partial_bayesian = type == "bayes" && options_data$partial,
             winsorize        = if (type == "robust") 0.2 else FALSE
-        )),
+        ))),
         error = function(e) NULL
     )
     if (is.null(res) || nrow(as.data.frame(res)) == 0) return(NULL)

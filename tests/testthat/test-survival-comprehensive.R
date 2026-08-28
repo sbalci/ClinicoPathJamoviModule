@@ -720,7 +720,7 @@ test_that("Parametric distribution comparison works", {
     use_parametric = TRUE,
     parametric_distribution = "weibull",
     compare_distributions = TRUE,
-    parametric_diagnostics = TRUE
+    parametric_survival_plots = TRUE
   )
 
   expect_s3_class(result, "survivalResults")

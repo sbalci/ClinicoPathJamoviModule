@@ -1,9 +1,6 @@
 # Critical numerical tests for diagnosticmeta module
 # Tests cover SROC pooled point, Deeks' test ESS, and I² heterogeneity
 
-context("test-diagnosticmeta-critical-fixes")
-
-
 test_that("SROC pooled point uses probabilities directly (no double plogis)", {
   skip_if_not_installed('jmvReadWrite')
     skip_if_not_installed("ClinicoPath")

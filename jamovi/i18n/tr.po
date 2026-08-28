@@ -1,5 +1,8 @@
 msgid ""
 msgstr ""
+"Project-Id-Version: ClinicoPath\n"
+"Last-Translator: ClinicoPath translators\n"
+"Language-Team: Turkish\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
@@ -589,6 +592,25 @@ msgstr ""
 msgid "{count} outlier(s) detected (values: {values})."
 msgstr ""
 
+#: R/decisioncalculator.b.R
+msgid ""
+"{cutoff} has the highest Youden's J, {margin} above current; its "
+"sample-accuracy interval overlaps the current cut-off's, so the difference "
+"is not established."
+msgstr ""
+
+#: R/decisioncalculator.b.R
+msgid ""
+"{cutoff} has the highest Youden's J, {margin} above current; paired "
+"uncertainty cannot be assessed from these summary counts."
+msgstr ""
+
+#: R/decisioncalculator.b.R
+msgid ""
+"{cutoff} has the highest Youden's J, {margin} above current; their "
+"sample-accuracy intervals do not overlap."
+msgstr ""
+
 #: R/jjridges.b.R
 msgid "{error}. The default quantiles (0.25, 0.5, 0.75) were drawn instead."
 msgstr ""
@@ -668,6 +690,15 @@ msgstr ""
 
 #: R/swimmerplot.b.R
 msgid "{response} Rate (%)"
+msgstr ""
+
+#: R/nogoldstandard.b.R
+msgid ""
+"{unstable} of {starts} attempted starts failed, reached the iteration limit, "
+"or returned an invalid likelihood ({failed} fitting failures; {nonconverged} "
+"unfinished fits). The selected fit is the best converged solution when one "
+"was available, but this pattern indicates an unstable likelihood surface. Do "
+"not report the estimates without additional model checks."
 msgstr ""
 
 #: R/summarydata.b.R
@@ -1098,17 +1129,22 @@ msgstr ""
 
 #: R/nogoldstandard.b.R
 msgid ""
+"%.0f%% confidence intervals are not reported for latent-model response "
+"probabilities without bootstrap refitting. Ordinary binomial intervals omit "
+"uncertainty from estimating the latent classes and can be substantially too "
+"narrow. Enable Bootstrap CI to obtain intervals."
+msgstr ""
+
+#: R/nogoldstandard.b.R
+msgid ""
 "%.0f%% intervals are bootstrap percentile intervals from %d resamples of the "
 "cases, refitting the model on each. Seed: %s."
 msgstr ""
 
 #: R/nogoldstandard.b.R
 msgid ""
-"%.0f%% intervals are normal-approximation (Wald) intervals, using the "
-"estimated number of diseased cases as the denominator for sensitivity and "
-"non-diseased for specificity. They treat the estimates as observed "
-"proportions and so understate the uncertainty of a latent-variable model; "
-"enable Bootstrap for intervals that account for the estimation itself."
+"%.0f%% intervals are Wilson score intervals for agreement with the observed "
+"reference rule."
 msgstr ""
 
 #: R/lassocox.b.R
@@ -1507,6 +1543,17 @@ msgstr ""
 msgid ""
 "%s has no variation (a single value), so its correlations are undefined: "
 "those rows are blank in the table and the variable is omitted from the plot."
+msgstr ""
+
+#: R/nogoldstandard.b.R
+msgid ""
+"%s have bivariate residuals above the descriptive threshold. This is "
+"evidence that the conditional-independence model does not reproduce those "
+"pairwise tables. Because the residual is squared, it does not show the "
+"direction or cause of the dependence and cannot determine whether fitted "
+"response probabilities are biased upward or downward. Do not interpret the "
+"latent-class parameters as diagnostic accuracy without a "
+"dependence-sensitive model or a study-specific sensitivity analysis."
 msgstr ""
 
 #: R/singlearm.b.R
@@ -2255,9 +2302,20 @@ msgid ""
 "independence.</li><li><strong>Parallel:</strong> Both tests are applied to "
 "everyone; either positive makes the final result positive. Accuracy is "
 "algebraically identical to serial-negative testing, but utilization "
-"differs.</li></ul><p>Test order is an input to explore, not a "
-"recommendation. Replace every example value with evidence appropriate to the "
-"intended setting.</p><p><strong>Illustrative pair labels:</strong></p><ul>"
+"differs.</li></ul><p><strong>Why conditional dependence matters:</strong> "
+"Conditional dependence means that one test result remains informative about "
+"the other even after disease status is fixed, for example because the tests "
+"share biology, specimen characteristics, or technology. When positive "
+"conditional dependence is present in both disease-status groups, "
+"independence-based serial-positive calculations can make combined "
+"specificity too high and combined sensitivity too low. For serial-negative "
+"and parallel interpretation, they can make combined sensitivity too high and "
+"combined specificity too low. Gardner et al. (2000), <em>Conditional "
+"dependence between tests affects the diagnosis and surveillance of animal "
+"diseases</em>, describes these directional effects; see the reference "
+"below.</p><p>Test order is an input to explore, not a recommendation. "
+"Replace every example value with evidence appropriate to the intended "
+"setting.</p><p><strong>Illustrative pair labels:</strong></p><ul>"
 msgstr ""
 
 #: R/sequentialtests.b.R
@@ -5087,20 +5145,6 @@ msgid ""
 "curved arcs connecting nodes."
 msgstr ""
 
-#: R/nogoldstandard.b.R
-msgid ""
-"A deliberately permissive reference. Specificity and PPV cannot be estimated "
-"under this rule -- they are fixed at 100% by construction -- so only "
-"sensitivity and NPV are shown, and both are inflated by the same circularity"
-msgstr ""
-
-#: R/nogoldstandard.b.R
-msgid ""
-"A deliberately strict reference. Sensitivity and NPV cannot be estimated "
-"under this rule -- they are fixed at 100% by construction -- so only "
-"specificity and PPV are shown, and both are inflated by the same circularity"
-msgstr ""
-
 #: R/decisiongraph.b.R
 msgid ""
 "A distinct condition that describes a patient's health status in a Markov "
@@ -5134,6 +5178,20 @@ msgid ""
 "following groups have fewer: {groups}."
 msgstr ""
 
+#: R/decisioncalculator.b.R
+msgid ""
+"A Haldane-Anscombe 0.5 correction was applied to likelihood-ratio and "
+"diagnostic-odds-ratio point estimates because a zero cell was present. "
+"Confidence intervals use the raw counts and are not continuity-corrected."
+msgstr ""
+
+#: R/decisioncalculator.b.R
+msgid ""
+"A Haldane-Anscombe 0.5 correction was applied to the likelihood ratios "
+"because a zero cell was present. The epiR confidence-interval table uses raw "
+"counts, so its point estimates may differ."
+msgstr ""
+
 #: R/summarydata.b.R
 msgid "A high missing-data rate may affect interpretation."
 msgstr ""
@@ -5146,6 +5204,10 @@ msgstr ""
 msgid ""
 "A large number of groups ({n}) may cause display issues. Consider grouping "
 "your data."
+msgstr ""
+
+#: R/nogoldstandard.b.R
+msgid "A latent-class EM point estimator using fixed Beta priors."
 msgstr ""
 
 #: alluvial/options/fill.description.jamovi
@@ -5178,6 +5240,16 @@ msgstr ""
 msgid ""
 "A model that describes the progression of patients through different health "
 "states over time using transition probabilities."
+msgstr ""
+
+#: R/decisioncalculator.b.R
+msgid ""
+"A negative result has a likelihood ratio of {lr} and lowers the probability "
+"from {prevalence} to {posttest}."
+msgstr ""
+
+#: R/decisioncalculator.b.R
+msgid "A negative result multiplies pre-test odds by {lr}."
 msgstr ""
 
 #: R/jjarcdiagram.b.R
@@ -5215,6 +5287,16 @@ msgstr ""
 msgid ""
 "A point in the decision tree where uncertain events occur. Represented by "
 "circles in decision trees."
+msgstr ""
+
+#: R/decisioncalculator.b.R
+msgid ""
+"A positive result has a likelihood ratio of {lr} and raises the probability "
+"from {prevalence} to {posttest}."
+msgstr ""
+
+#: R/decisioncalculator.b.R
+msgid "A positive result multiplies pre-test odds by {lr}."
 msgstr ""
 
 #: contTablesPaired/results/freqs.description
@@ -5277,6 +5359,22 @@ msgid ""
 "A spider plot shows how each patient's response changes over time: each line "
 "is one patient's treatment journey, which makes response patterns and "
 "outcome types easy to see."
+msgstr ""
+
+#: R/nogoldstandard.b.R
+msgid ""
+"A strict majority means more than half of the tests are positive. With an "
+"even number of tests, ties are classified as rule negative and must be "
+"interpreted as part of the chosen rule."
+msgstr ""
+
+#: R/nogoldstandard.b.R
+msgid ""
+"A strict majority requires more than half of the selected tests to be "
+"positive. With an even number of tests, tied cases are therefore rule "
+"negative. This is part of the rule definition, not evidence of disease "
+"absence; use an odd number of tests or a prespecified alternative if that "
+"convention is unsuitable."
 msgstr ""
 
 #: alluvial/options/fillGgalluvial.description.jamovi
@@ -5371,6 +5469,10 @@ msgstr ""
 
 #: R/chisqposttest.b.R
 msgid "A total sample size of at least n=%d is recommended to achieve 80%% power."
+msgstr ""
+
+#: R/nogoldstandard.b.R
+msgid "A two-class conditional-independence mixture model for three or more tests."
 msgstr ""
 
 #: R/chisqposttest.b.R
@@ -5485,6 +5587,10 @@ msgstr ""
 
 #: agreement/results/contingencyTableExplanation.title
 msgid "About Contingency Table & Rating Combinations"
+msgstr ""
+
+#: R/decisioncalculator.b.R
+msgid "About diagnostic-test evaluation"
 msgstr ""
 
 #: agreement/results/finnExplanation.title
@@ -5963,8 +6069,6 @@ msgstr ""
 #: clinicalscore/results/methodComparison.columns.title
 #: clinicalvalidation/results/modelcomparison.columns.title
 #: decision/results/ratioTable.columns.title
-#: decisioncalculator/results/ratioTable.columns.title
-#: decisioncalculator/results/multipleCutoffTable.columns.title
 #: decisioncombine/options/filterStatistic/acc.title
 #: decisioncombine/results/combinationTable.columns.title
 #: decisioncombine/results/recommendationTable.columns.title
@@ -6018,6 +6122,15 @@ msgstr ""
 #: dynamicprediction/options/accuracy_plot.title
 msgid "Accuracy Assessment Plot"
 msgstr ""
+
+#: R/decisioncalculator.b.R
+msgid ""
+"Accuracy intervals are not computed for scenarios containing fractional "
+"frequencies because no effective sample size or weighting design was "
+"supplied."
+msgstr ""
+"Etkin örneklem büyüklüğü veya ağırlıklandırma tasarımı belirtilmediği için "
+"kesirli frekans içeren senaryolarda doğruluk aralıkları hesaplanmaz."
 
 #: pathagreement/results/referenceComparison.columns.title
 msgid "Accuracy Level"
@@ -6111,7 +6224,7 @@ msgid "Active Clinical Alerts"
 msgstr ""
 
 #: R/nogoldstandard.b.R
-msgid "Active Clinical Preset"
+msgid "Active Illustrative Example"
 msgstr ""
 
 #: R/riverplot.b.R
@@ -6553,6 +6666,10 @@ msgstr ""
 msgid "Add Day of Year to Data"
 msgstr ""
 
+#: decisioncompare/options/fnote.description.ui
+msgid "Add definitions and prevalence-source notes to the comparison table."
+msgstr ""
+
 #: jjpubr/options/addDensity.title
 msgid "Add Density Curve"
 msgstr ""
@@ -6574,8 +6691,8 @@ msgstr ""
 
 #: decisioncalculator/options/fnote.description.ui
 msgid ""
-"Add detailed explanatory footnotes to all tables with clinical "
-"interpretation guidance. Helpful for understanding what each statistic means."
+"Add detailed explanatory footnotes to the tables. Helpful for understanding "
+"what each statistic means."
 msgstr ""
 
 #: jforester/options/arrow_labels.description
@@ -8161,6 +8278,10 @@ msgstr ""
 msgid "Advanced Markov Features"
 msgstr ""
 
+#: R/decisioncalculator.b.R
+msgid "Advanced measures"
+msgstr ""
+
 #: package/analyses/decisioncombine1.description
 msgid ""
 "Advanced medical diagnostic test combination analysis for categorical tests \n"
@@ -9023,10 +9144,6 @@ msgstr ""
 msgid "Aggregation Method"
 msgstr ""
 
-#: decisioncalculator/options/cutoff2.default
-msgid "Aggressive"
-msgstr ""
-
 #: stagemigration/options/clinicalUtilityThresholds/aggressive.title
 msgid "Aggressive (15-75 percent)"
 msgstr ""
@@ -9553,6 +9670,14 @@ msgstr ""
 msgid "All continuous"
 msgstr ""
 
+#: R/decisioncalculator.b.R
+msgid "All counts (TP, FP, TN, FN) must be non-negative. Check the input values."
+msgstr ""
+
+#: R/decisioncalculator.b.R
+msgid "All counts are zero"
+msgstr ""
+
 #: treatmentoptim/options/evidence_level/all.title
 msgid "All Evidence Levels"
 msgstr ""
@@ -9571,6 +9696,10 @@ msgstr ""
 
 #: alluvial/options/fill/all_flows.title
 msgid "All flows"
+msgstr ""
+
+#: R/decisioncalculator.b.R
+msgid "All four frequencies for cut-off \"{cutoff}\" are zero."
 msgstr ""
 
 #: treatmentoptim/options/interaction_severity/all.title
@@ -9594,7 +9723,9 @@ msgid "All methods"
 msgstr ""
 
 #: R/decisioncompare.b.R
-msgid "All metrics scaled 0-100% (LR Quality: clinical performance scale)"
+msgid ""
+"All metrics scaled 0-100%; LR scaling is illustrative only, not clinical "
+"guidance"
 msgstr ""
 
 #: vartree/options/summarylocation/allnodes.title
@@ -9620,13 +9751,6 @@ msgstr ""
 
 #: latentbiomarker/options/indicator_types/ordinal.title
 msgid "All ordinal/binary"
-msgstr ""
-
-#: R/decisioncompare.b.R
-msgid ""
-"All paired discordances fall on one side, so the normal-approximation (Wald) "
-"confidence interval collapses to zero width. This exactness is an artifact "
-"of the method at the boundary; interpret with caution."
 msgstr ""
 
 #: bayesiannetworkma/results/pairwiseComparisons.title
@@ -9725,7 +9849,7 @@ msgstr ""
 #: R/nogoldstandard.b.R
 #: decisioncombine/options/filterPattern/allPositive.title
 #: nogoldstandard/options/method/all_positive.title
-#: nogoldstandard/ui[2][0]/method/all_positive.title
+#: nogoldstandard/ui[1][0]/method/all_positive.title
 msgid "All Tests Positive"
 msgstr ""
 
@@ -9746,6 +9870,12 @@ msgid ""
 "All times are measured FROM the landmark, not from study entry, and all "
 "estimates are conditional on being event-free at the landmark; they are not "
 "comparable with unlandmarked survival times."
+msgstr ""
+
+#: R/decisioncalculator.b.R
+msgid ""
+"All values for cut-off \"{cutoff}\" must be non-negative finite numbers "
+"(TP={tp}, FP={fp}, TN={tn}, FN={fn})."
 msgstr ""
 
 #: extratrees/options/mtry/all.title
@@ -9804,6 +9934,10 @@ msgstr ""
 
 #: agreement/results/allPairsKappaTable.title
 msgid "All-Pairs Kappa (Every Rater Pair)"
+msgstr ""
+
+#: R/nogoldstandard.b.R
+msgid "All-tests-positive reference rule"
 msgstr ""
 
 #: R/nogoldstandard.b.R
@@ -9968,7 +10102,7 @@ msgstr ""
 #: kappaSizeFixedN/ui[3].label
 #: kappaSizeFixedN/ui[3][0][0]/alpha.label
 #: kappaSizePower/ui[3][0][0]/alpha.label
-#: nogoldstandard/ui[3][0]/alpha.label
+#: nogoldstandard/ui[2][0]/alpha.label
 #: pathagreement/results/krippTable.columns.title
 msgid "Alpha"
 msgstr "Alfa"
@@ -9991,12 +10125,15 @@ msgstr ""
 msgid "Alpha and Power"
 msgstr "Alfa ve Güç"
 
+#: nogoldstandard/options/alpha.title
+msgid "Alpha for Confidence Intervals"
+msgstr ""
+
 #: advancedanova/options/alpha_level.title
 #: advancedanova/ui[1][4]/alpha_level.label
 #: effectsize/options/alpha_level.title
 #: effectsize/results/results/powerAnalysisResults.columns.title
 #: icccoeff/options/alpha_level.title
-#: nogoldstandard/options/alpha.title
 #: sparsegrouplasso/options/alpha_level.title
 msgid "Alpha Level"
 msgstr ""
@@ -10186,6 +10323,13 @@ msgstr ""
 msgid "An exact test could not be computed for one comparison"
 msgstr ""
 
+#: R/decisioncalculator.b.R
+msgid ""
+"An imperfect reference standard can bias every estimated measure; document "
+"its limitations and consider latent-class or discrepant-resolution methods "
+"where appropriate."
+msgstr ""
+
 #: package/analyses/lassointro.description
 #: lassointro/options.description.main
 msgid ""
@@ -10252,6 +10396,21 @@ msgid ""
 "kinetics from paired baseline and follow-up variant allele fractions (VAF): "
 "clearance vs persistence classification, log-fold change, and MRD status as "
 "a predictor of survival by a landmark analysis."
+msgstr ""
+
+#: package/analyses/cotest.description
+#: cotest/options.description.main
+msgid ""
+"Analyses two diagnostic tests applied in parallel: both are performed on the "
+"same subject at the same time, before either result is known, and the two "
+"results are then combined. Reports the post-test probability of disease for "
+"every result combination (either test positive, test 1 only, test 2 only, "
+"both positive, both negative), optionally allowing the two tests to be "
+"conditionally dependent. For tests performed one after another, where the "
+"second is ordered only after a particular first result, use Sequential Test "
+"Analysis instead. Note that Sequential Test Analysis also offers a parallel "
+"strategy, but its combined figures assume conditional independence; this "
+"analysis is the one that models conditional dependence numerically."
 msgstr ""
 
 #: aalenhazard/results/todo.title
@@ -10416,8 +10575,19 @@ msgstr ""
 msgid "Analysis Details:"
 msgstr ""
 
+#: nogoldstandard/options/verbose.title
 #: nogoldstandard/results/diagnostics.title
 msgid "Analysis Diagnostics"
+msgstr ""
+
+#: nogoldstandard/ui[2][0]/verbose.label
+msgid "Analysis diagnostics"
+msgstr ""
+
+#: R/nogoldstandard.b.R
+msgid ""
+"Analysis diagnostics: {tests} tests analyzed with N = {n} using method "
+"'{method}'."
 msgstr ""
 
 #: R/benford.b.R
@@ -10558,7 +10728,7 @@ msgstr ""
 msgid "Analysis Method"
 msgstr ""
 
-#: nogoldstandard/ui[2][0]/method.label
+#: nogoldstandard/ui[1][0]/method.label
 msgid "Analysis method"
 msgstr ""
 
@@ -10604,22 +10774,22 @@ msgstr ""
 msgid "Analysis of category distribution balance"
 msgstr ""
 
-#: package/analyses/nogoldstandard.description
-#: nogoldstandard/options.description.main
-msgid ""
-"Analysis of diagnostic tests without a gold standard reference using "
-"multiple statistical approaches. Implements Latent Class Analysis (Hui & "
-"Walter, 1980), Bayesian methods (Joseph et al., 1995),  and composite "
-"reference standards for estimating test performance when no perfect "
-"reference test exists."
-msgstr ""
-
 #: smoothhazard/results/peak_analysis.description
 msgid "Analysis of hazard function peaks and inflection points"
 msgstr ""
 
 #: batcheffect/results/redundancy.description
 msgid "Analysis of highly correlated and redundant features"
+msgstr ""
+
+#: package/analyses/nogoldstandard.description
+#: nogoldstandard/options.description.main
+msgid ""
+"Analysis of multiple binary tests when no perfect reference exists. "
+"Implements a conditional-independence two-class latent class model, "
+"fixed-prior penalized EM point estimation, and descriptive agreement with "
+"self-built composite reference rules. Latent classes are unlabeled, and "
+"reference-rule results are not diagnostic-accuracy estimates."
 msgstr ""
 
 #: ihcscoring/results/digitalvalidation/batcheffects.description
@@ -10682,7 +10852,7 @@ msgstr ""
 #: misclassificationbias/ui[2].label
 #: mlpathology/ui[1][1].label
 #: modalitycomparison/ui[2].label
-#: nogoldstandard/ui[2].label
+#: nogoldstandard/ui[1].label
 #: optimalcutpoint/ui[1][0][0].label
 #: pagetrendtest/ui[1][2].label
 #: pathologycomposition/ui[1][0].label
@@ -11164,11 +11334,6 @@ msgstr ""
 msgid "Analyze balance between factor levels with statistical measures"
 msgstr ""
 
-#: package/analyses/cotest.menuSubtitle
-#: cotest/options.menuSubtitle
-msgid "Analyze combined test results"
-msgstr ""
-
 #: R/nogoldstandard.b.R
 msgid ""
 "Analyze diagnostic test performance when no perfect reference test (gold "
@@ -11256,6 +11421,12 @@ msgstr ""
 
 #: consortdiagram/results/armSummary.columns.title
 msgid "Analyzed (n)"
+msgstr ""
+
+#: decisioncompare/results/comparisonTable.columns.title
+#: decisioncompare/results/opaTable.columns.title
+#: decisioncompare/results/stratifiedTable.columns.title
+msgid "Analyzed N"
 msgstr ""
 
 #: package/analyses/sequentialtests.description
@@ -11589,8 +11760,12 @@ msgstr ""
 
 #: R/nogoldstandard.b.R
 #: nogoldstandard/options/method/any_positive.title
-#: nogoldstandard/ui[2][0]/method/any_positive.title
+#: nogoldstandard/ui[1][0]/method/any_positive.title
 msgid "Any Test Positive"
+msgstr ""
+
+#: R/nogoldstandard.b.R
+msgid "Any-test-positive reference rule"
 msgstr ""
 
 #: effectsize/options/export_format/apa.title
@@ -11676,6 +11851,7 @@ msgstr ""
 msgid "Apparent Performance"
 msgstr ""
 
+#: R/decisioncalculator.b.R
 #: R/decisioncompare.b.R
 msgid "Apparent prevalence"
 msgstr ""
@@ -11796,6 +11972,10 @@ msgstr ""
 
 #: jsjplot/options/transform_axis.description.jamovi
 msgid "Apply mathematical transformation to axis."
+msgstr ""
+
+#: decisioncompare/options/useOpaCriterion.title
+msgid "Apply minimum OPA criterion"
 msgstr ""
 
 #: stagemigration/options/useOptimismCorrection.title
@@ -12091,6 +12271,10 @@ msgstr ""
 msgid "Assay Optimization & Experimental Design"
 msgstr ""
 
+#: R/decisioncalculator.b.R
+msgid "Assess adequacy from the precision required for the intended use."
+msgstr ""
+
 #: simonmakuch/options/assessImmortalTimeBias.description
 msgid ""
 "Assess and correct for immortal time bias in the analysis. Compares naive "
@@ -12115,6 +12299,12 @@ msgid ""
 "quintiles and computes Kaplan-Meier survival per group. Includes calibration "
 "slope, calibration-in-the-large, and calibration plot. Requires Cox model to "
 "be fitted."
+msgstr ""
+
+#: R/nogoldstandard.b.R
+msgid ""
+"Assess conditional independence before interpreting latent-class response "
+"probabilities as accuracy."
 msgstr ""
 
 #: modelval/options/showCalibrationSlope.description
@@ -12311,12 +12501,16 @@ msgstr ""
 msgid "Association Type"
 msgstr ""
 
+#: cotest/options/indep.title
+msgid "Assume conditional independence"
+msgstr ""
+
 #: generalizedroc/options/assume_equal_variance.title
 msgid "Assume Equal Variance"
 msgstr ""
 
 #: cotest/ui[3][0]/indep.label
-msgid "Assume tests are conditionally independent"
+msgid "Assume the two tests are conditionally independent"
 msgstr ""
 
 #: competingRisksPower/options/distributionType.description
@@ -12434,6 +12628,10 @@ msgstr ""
 msgid "Assumptions & warnings"
 msgstr ""
 
+#: R/decisioncalculator.b.R
+msgid "Assumptions and caveats"
+msgstr ""
+
 #: chisqposttest/options/showAssumptionsCheck.title
 msgid "Assumptions check"
 msgstr ""
@@ -12486,6 +12684,10 @@ msgstr ""
 
 #: vusanalysis/options/test_method/asymptotic.title
 msgid "Asymptotic Z-test"
+msgstr ""
+
+#: R/decisioncalculator.b.R
+msgid "At {prevalence} prevalence"
 msgstr ""
 
 #: R/psychopdaROC.b.R
@@ -12548,6 +12750,18 @@ msgstr ""
 
 #: R/riverplot.b.R
 msgid "At least one strata variable is required"
+msgstr ""
+
+#: R/nogoldstandard.b.R
+msgid ""
+"At least three tests are required; the two-test model is not statistically "
+"identifiable."
+msgstr ""
+
+#: R/nogoldstandard.b.R
+msgid ""
+"At least three tests are required. With exactly three tests the model is "
+"just-identified, so goodness-of-fit statistics cannot test its assumptions."
 msgstr ""
 
 #: R/lassologistic.b.R
@@ -13778,6 +13992,21 @@ msgstr ""
 msgid "Balanced Accuracy"
 msgstr ""
 
+#: R/decisioncalculator.b.R
+msgid "Balanced accuracy"
+msgstr ""
+
+#: R/decisioncalculator.b.R
+msgid "Balanced accuracy (CI not computed)"
+msgstr ""
+
+#: R/decisioncalculator.b.R
+msgid ""
+"Balanced accuracy is the unweighted average of sensitivity and specificity. "
+"It is descriptive and does not encode the consequences of false-positive and "
+"false-negative results."
+msgstr ""
+
 #: R/enhancedROC.b.R
 msgid "Balanced approach for diagnostic test validation"
 msgstr ""
@@ -14708,22 +14937,13 @@ msgid ""
 "with comprehensive posterior inference and model diagnostics."
 msgstr ""
 
-#: R/nogoldstandard.b.R
 #: bayesdca/options/bayesianAnalysis.title
 #: bayesdca/ui[2][0]/bayesianAnalysis.label
-#: nogoldstandard/options/method/bayesian.title
-#: nogoldstandard/ui[2][0]/method/bayesian.title
 msgid "Bayesian Analysis"
 msgstr ""
 
 #: R/jjpiestats.b.R
 msgid "Bayesian analysis is computationally intensive."
-msgstr ""
-
-#: R/nogoldstandard.b.R
-msgid ""
-"Bayesian analysis may be unstable with N < 50. Current N = %d. Consider "
-"collecting more data."
 msgstr ""
 
 #: package/analyses/bayesiandiagnostic.menuSubtitle
@@ -14752,16 +14972,8 @@ msgstr ""
 msgid "Bayesian Analysis Type"
 msgstr ""
 
-#: R/nogoldstandard.b.R
-msgid "Bayesian Analysis:"
-msgstr ""
-
 #: R/jjbetweenstats.b.R
 msgid "Bayesian ANOVA"
-msgstr ""
-
-#: R/nogoldstandard.b.R
-msgid "Bayesian approach with prior distributions"
 msgstr ""
 
 #: package/analyses/bayesianclinical.menuTitle
@@ -15303,10 +15515,6 @@ msgstr ""
 
 #: recist/results/bestResponseTable.columns.title
 msgid "Best % Change"
-msgstr ""
-
-#: R/nogoldstandard.b.R
-msgid "Best for"
 msgstr ""
 
 #: R/waterfall.b.R
@@ -17156,7 +17364,6 @@ msgstr ""
 #: directbinomial/ui[2].label
 #: hiddenmarkov/ui[4].label
 #: mixedeffectscox/ui[6][0].label
-#: nogoldstandard/ui[3].label
 #: rmst/ui[3].label
 #: robustcorrelation/ui[4][0].label
 msgid "Bootstrap Options"
@@ -18475,6 +18682,13 @@ msgstr ""
 msgid "Calculate"
 msgstr ""
 
+#: decisioncalculator/options/ci.description.ui
+msgid ""
+"Calculate 95 percent confidence intervals for measures estimable from "
+"integer study counts. Prevalence-adjusted predictive-value intervals are "
+"omitted."
+msgstr ""
+
 #: R/waterfall.b.R
 msgid "Calculate accurate percentage changes"
 msgstr ""
@@ -18488,12 +18702,6 @@ msgid ""
 "Calculate and display 95 percent confidence intervals for all diagnostic "
 "statistics. Provides uncertainty estimates around point estimates of "
 "sensitivity, specificity, etc."
-msgstr ""
-
-#: decisioncalculator/options/ci.description.ui
-msgid ""
-"Calculate and display 95 percent confidence intervals for all diagnostic "
-"statistics. Provides uncertainty estimates around point estimates."
 msgstr ""
 
 #: stereology/options/showConfidenceIntervals.description
@@ -21773,12 +21981,12 @@ msgstr ""
 msgid "Chest Imaging + Culture (Illustrative)"
 msgstr ""
 
-#: R/sequentialtests.b.R
-msgid "Chest X-ray"
+#: cotest/options/preset/tb_xray_sputum.title
+msgid "Chest radiograph + sputum (demo only)"
 msgstr ""
 
-#: cotest/options/preset/tb_xray_sputum.title
-msgid "Chest X-ray + Sputum (Tuberculosis)"
+#: R/sequentialtests.b.R
+msgid "Chest X-ray"
 msgstr ""
 
 #: latentbiomarker/results/fitTable.columns.title
@@ -21984,6 +22192,12 @@ msgstr ""
 msgid "Choose a clinical preset for optimized settings"
 msgstr ""
 
+#: R/nogoldstandard.b.R
+msgid ""
+"Choose a method according to the estimand and assumptions in the "
+"study-specific analysis plan."
+msgstr ""
+
 #: R/benford.b.R
 msgid "Choose a naturally positive variable (e.g., lab values, measurements, counts)"
 msgstr ""
@@ -22006,10 +22220,6 @@ msgstr ""
 
 #: jjsegmentedtotalbar/ui[3][0][1].label
 msgid "Choose a template for common clinical analyses."
-msgstr ""
-
-#: R/nogoldstandard.b.R
-msgid "Choose All/Any Tests Positive based on clinical consequences of errors"
 msgstr ""
 
 #: R/nogoldstandard.b.R
@@ -22278,6 +22488,12 @@ msgstr ""
 msgid "Choose the line style for set boundaries."
 msgstr ""
 
+#: R/decisioncalculator.b.R
+msgid ""
+"Choose the maximum acceptable confidence-interval half-width for sensitivity "
+"and specificity before collecting data."
+msgstr ""
+
 #: advancedbarplot/options/theme_style.description.jamovi
 msgid "Choose the overall visual style including authentic Prism styling."
 msgstr ""
@@ -22384,6 +22600,10 @@ msgstr ""
 
 #: bbcplots/options/value_position.description.ui
 msgid "Choose where to position the data value labels."
+msgstr ""
+
+#: R/decisioncalculator.b.R
+msgid "Choose whether to calculate confidence intervals."
 msgstr ""
 
 #: oddsratio/options/diagnosticPredictor.description.main
@@ -22822,6 +23042,26 @@ msgstr ""
 
 #: enhancedROC/results/results/imbalanceMetrics.title
 msgid "Class Imbalance Metrics"
+msgstr ""
+
+#: R/nogoldstandard.b.R
+msgid ""
+"Class labels are unidentified; the high-positive class is not automatically "
+"disease. The model assumes conditionally independent errors and does NOT "
+"model conditional dependence; with exactly three tests its fit cannot be "
+"tested."
+msgstr ""
+
+#: R/nogoldstandard.b.R
+msgid ""
+"Class labels are unidentified. Calling the high-positive class disease "
+"requires a study-specific substantive justification."
+msgstr ""
+
+#: R/nogoldstandard.b.R
+msgid ""
+"Class labels remain unidentified, so diagnostic-accuracy terminology "
+"requires a study-specific substantive justification."
 msgstr ""
 
 #: classification/results/classificationMetrics/class.columns.title
@@ -23914,7 +24154,6 @@ msgstr ""
 #: consortdiagram/results/interpretation.title
 #: continuousmarkov/results/clinicalInterpretation.title
 #: curemodels/results/interpretation.title
-#: decisioncompare/results/mcnemarTable.columns.title
 #: decisioncurve/results/summaryText.title
 #: decisionpanel/results/clinicalInterpretation.title
 #: differentialdiagnosis/results/likelihoodRatios.columns.title
@@ -24177,10 +24416,6 @@ msgstr ""
 msgid "Clinical interpretation will be unreliable"
 msgstr ""
 
-#: R/nogoldstandard.b.R
-msgid "Clinical interpretation:"
-msgstr ""
-
 #: R/swimmerplot_html.R
 #: R/waterfall.b.R
 msgid "Clinical Interpretation:"
@@ -24339,7 +24574,6 @@ msgstr ""
 msgid "Clinical Prediction Models & ML Interpretability"
 msgstr ""
 
-#: cotest/options/preset.title
 #: jjpubr/options/clinicalPreset.title
 #: jjridges/options/clinicalPreset.title
 #: jjscatterstats/options/clinicalPreset.title
@@ -24359,7 +24593,6 @@ msgstr ""
 msgid "Clinical Preset Info"
 msgstr ""
 
-#: cotest/ui[0].label
 #: enhancedROC/options/clinicalPresets.title
 #: jjhistostats/ui[1][0].label
 msgid "Clinical Presets"
@@ -24624,12 +24857,7 @@ msgstr ""
 msgid "Clinical Scenario"
 msgstr ""
 
-#: nogoldstandard/ui[0]/clinicalPreset.label
-msgid "Clinical scenario"
-msgstr ""
-
 #: clinicalvalidationinteractive/options/clinical_preset.title
-#: nogoldstandard/options/clinicalPreset.title
 msgid "Clinical Scenario Preset"
 msgstr ""
 
@@ -24752,7 +24980,6 @@ msgstr ""
 #: R/jjsegmentedtotalbar.b.R
 #: R/lollipop.b.R
 #: R/multisurvival.b.R
-#: R/nogoldstandard.b.R
 #: R/reportcat.b.R
 #: R/venn.b.R
 #: chisqposttest/results/clinicalSummary.title
@@ -24764,7 +24991,6 @@ msgstr ""
 #: ihcdiagnostic/results/clinicalSummary.title
 #: jjridges/results/clinicalSummary.title
 #: jjsegmentedtotalbar/results/clinical_summary.title
-#: nogoldstandard/results/clinical_summary.title
 #: pathagreement/options/showClinicalSummary.title
 #: pathagreement/ui[2][0]/showClinicalSummary.label
 #: pathagreement/results/clinicalSummary.title
@@ -24788,10 +25014,6 @@ msgstr ""
 
 #: timeinterval/results/nlSummary.title
 msgid "Clinical Summary (Copy-Ready)"
-msgstr ""
-
-#: decisioncompare/results/clinicalReport.title
-msgid "Clinical Summary & Report Templates"
 msgstr ""
 
 #: flexparametric/results/clinicalSummary.title
@@ -25022,10 +25244,6 @@ msgstr ""
 
 #: R/decision.b.R
 msgid "Clinical validation studies"
-msgstr ""
-
-#: R/nogoldstandard.b.R
-msgid "Clinical validation: %d tests analyzed with N=%d using %s method"
 msgstr ""
 
 #: psychopdaROC/results/decisionCurveTable.columns.title
@@ -27522,6 +27740,10 @@ msgstr ""
 msgid "Common Language Effect Sizes"
 msgstr ""
 
+#: R/decisioncalculator.b.R
+msgid "Common pitfalls:"
+msgstr ""
+
 #: R/linechart.b.R
 msgid "Common Solutions"
 msgstr ""
@@ -27705,10 +27927,6 @@ msgstr ""
 msgid "Compare Decision Tree Algorithms"
 msgstr ""
 
-#: decisioncalculator/ui[5][0][0][1].label
-msgid "Compare different diagnostic thresholds to find optimal cut-off values"
-msgstr ""
-
 #: splinehazard/options/show_model_comparison.description
 msgid "Compare different knot configurations"
 msgstr ""
@@ -27779,12 +27997,6 @@ msgstr ""
 
 #: aivalidation/ui/statisticalTests/compareModels.label
 msgid "Compare Models (DeLong Test)"
-msgstr ""
-
-#: decisioncalculator/options/multiplecuts.description.ui
-msgid ""
-"Compare multiple diagnostic cut-off scenarios to identify optimal "
-"thresholds. Useful for evaluating different test interpretation criteria."
 msgstr ""
 
 #: survival/options/compare_distributions.title
@@ -27940,6 +28152,13 @@ msgstr ""
 msgid ""
 "Compare the groups deliberately: a correlation present in one group and "
 "absent (or reversed) in another is a finding in itself, not noise."
+msgstr ""
+
+#: decisioncompare/options/useOpaCriterion.description.ui
+msgid ""
+"Compare the lower OPA confidence bound with the user-specified descriptive "
+"criterion. This optional criterion is not a noninferiority comparison, "
+"regulatory guidance, or clinical guidance."
 msgstr ""
 
 #: timedependent/options/compare_models.description.ui
@@ -28972,15 +29191,20 @@ msgid "Composite Endpoint"
 msgstr ""
 
 #: R/nogoldstandard.b.R
-#: nogoldstandard/options/method/composite.title
-#: nogoldstandard/ui[2][0]/method/composite.title
-msgid "Composite Reference"
+msgid "Composite majority-vote reference rule"
 msgstr ""
 
 #: R/nogoldstandard.b.R
-msgid ""
-"Composite reference with even number of tests may result in ties. Consider "
-"using an odd number of tests or a different method."
+msgid "Composite Reference"
+msgstr ""
+
+#: nogoldstandard/options/method/composite.title
+#: nogoldstandard/ui[1][0]/method/composite.title
+msgid "Composite Reference (strict majority)"
+msgstr ""
+
+#: R/nogoldstandard.b.R
+msgid "Composite reference has incorporation bias"
 msgstr ""
 
 #: R/nogoldstandard.b.R
@@ -28994,6 +29218,10 @@ msgstr ""
 
 #: outlierdetection/options/composite_threshold.title
 msgid "Composite score threshold"
+msgstr ""
+
+#: R/nogoldstandard.b.R
+msgid "Composite ties are classified as rule negative"
 msgstr ""
 
 #: jjsegmentedtotalbar/results/composition_table.title
@@ -30044,10 +30272,7 @@ msgid "Computed Variables Added to Dataset"
 msgstr ""
 
 #: R/chisqposttest.b.R
-msgid ""
-"Computed without Yates' continuity correction. jamovi's Contingency Tables "
-"analysis applies that correction to 2x2 tables by default, so its chi-square "
-"and p-value for this same table will differ slightly."
+msgid "Computed without Yates' continuity correction."
 msgstr ""
 
 #: package/analyses/standardizedratio.description
@@ -30328,6 +30553,10 @@ msgstr ""
 msgid "Concordant"
 msgstr ""
 
+#: decisioncalculator/results/nTable.columns.title
+msgid "Concordant Results"
+msgstr ""
+
 #: alluvial/results/condensationWarning.title
 msgid "Condensation Plot Information"
 msgstr ""
@@ -30394,22 +30623,6 @@ msgstr ""
 #: lollipop/options/conditionalColor.title
 #: lollipop/ui[3][0]/conditionalColor.label
 msgid "Conditional coloring"
-msgstr ""
-
-#: cotest/ui[3][0][1]/cond_dep_neg.label
-msgid "Conditional Dependence (Negative)"
-msgstr ""
-
-#: cotest/ui[3][0][1]/cond_dep_pos.label
-msgid "Conditional Dependence (Positive)"
-msgstr ""
-
-#: cotest/options/cond_dep_neg.title
-msgid "Conditional Dependence Negative"
-msgstr ""
-
-#: cotest/options/cond_dep_pos.title
-msgid "Conditional Dependence Positive"
 msgstr ""
 
 #: entropyanalysis/results/conditionalEntropyTable.title
@@ -30593,6 +30806,10 @@ msgstr ""
 msgid "Conditional vs Population Detection"
 msgstr ""
 
+#: R/nogoldstandard.b.R
+msgid "Conditional-independence two-class mixture model"
+msgstr ""
+
 #: betabinomialdiagnostic/options/correlation_structure/conditional_dependent.title
 msgid "Conditionally Dependent Tests"
 msgstr ""
@@ -30755,6 +30972,18 @@ msgid ""
 "Confidence intervals are left blank: a standardised curve has no closed-form "
 "interval and would need bootstrapping."
 msgstr ""
+
+#: R/decisioncalculator.b.R
+msgid ""
+"Confidence intervals are shown for measures estimable from the study 2x2 "
+"table. Predictive values are adjusted to the supplied population prevalence, "
+"but their confidence intervals are not computed because the uncertainty of "
+"that external prevalence was not supplied."
+msgstr ""
+"Çalışmanın 2x2 tablosundan tahmin edilebilen ölçüler için güven aralıkları "
+"gösterilir. Öngörü değerleri belirtilen toplum prevalansına göre ayarlanır; "
+"ancak dış prevalansın belirsizliği verilmediği için bu değerlerin güven "
+"aralıkları hesaplanmaz."
 
 #: R/multisurvival.b.R
 msgid "Confidence intervals are those of that single prediction."
@@ -31207,12 +31436,32 @@ msgstr ""
 msgid "Confidence level for survival estimates and statistical tests."
 msgstr ""
 
+#: R/nogoldstandard.b.R
+msgid ""
+"Confidence limits are case-resampling percentile bootstrap intervals "
+"obtained by refitting the selected method."
+msgstr ""
+
 #: R/singlearm.b.R
 msgid ""
 "Confidence limits are left blank where the Kaplan-Meier event-free estimate "
 "is exactly 0% or 100%. The usual Greenwood-based large-sample interval "
 "degenerates at a probability boundary; the absence of observed events does "
 "not establish zero population risk."
+msgstr ""
+
+#: R/nogoldstandard.b.R
+msgid ""
+"Confidence limits are not reported for latent-model parameters without "
+"bootstrap refitting because ordinary binomial intervals do not include "
+"latent-variable estimation uncertainty. Enable Bootstrap CI to obtain "
+"intervals."
+msgstr ""
+
+#: R/nogoldstandard.b.R
+msgid ""
+"Confidence limits are Wilson score intervals for the observed proportion "
+"meeting the reference rule."
 msgstr ""
 
 #: ihcpredict/results/predictions.columns.title
@@ -31443,16 +31692,16 @@ msgstr ""
 msgid "Confusion Matrix (at Optimal Thresholds)"
 msgstr ""
 
-#: decisioncalculator/ui[0].label
-msgid "Confusion Matrix (Gold Standard vs Test Result)"
-msgstr ""
-
 #: segmentationmetrics/options/plot_confusion_matrix.title
 msgid "Confusion Matrix (Multi-class)"
 msgstr ""
 
 #: ordinalroc/results/confusionMatrix.title
 msgid "Confusion Matrix (Ordinal Classification)"
+msgstr ""
+
+#: decisioncalculator/ui[0].label
+msgid "Confusion matrix (reference standard vs test result)"
 msgstr ""
 
 #: mlpathology/results/confusionmatrixplot.title
@@ -31573,7 +31822,6 @@ msgstr ""
 msgid "consensus_rating"
 msgstr ""
 
-#: decisioncalculator/options/cutoff1.default
 #: simpleSurvivalPower/results/sensitivity_analysis_table.columns.title
 #: survivalPower/results/sensitivity_analysis_table.columns.title
 msgid "Conservative"
@@ -31585,10 +31833,6 @@ msgstr ""
 
 #: vusanalysis/options/handle_ties/conservative.title
 msgid "Conservative (Minimum)"
-msgstr ""
-
-#: R/nogoldstandard.b.R
-msgid "Conservative approach - disease present only if ALL tests are positive."
 msgstr ""
 
 #: clinicalvalidation/options/cost_matrix/diagnosis.title
@@ -31626,10 +31870,6 @@ msgid ""
 "Consider an analysis that supports grouped or elastic-net penalties when "
 "correlated predictors should be retained together; ordinary LASSO may select "
 "only one member of a correlated set."
-msgstr ""
-
-#: R/nogoldstandard.b.R
-msgid "Consider Bayesian if you have strong prior information"
 msgstr ""
 
 #: R/enhancedROC.b.R
@@ -31904,6 +32144,10 @@ msgstr ""
 #: exacttests/options/correction.title
 #: exacttests/ui[1][2]/correction.label
 msgid "Continuity correction"
+msgstr ""
+
+#: R/decisioncalculator.b.R
+msgid "Continuity correction applied"
 msgstr ""
 
 #: bayesianci/options/outcome_type/continuous.title
@@ -33744,6 +33988,7 @@ msgstr ""
 msgid "Countries (NUTS 0)"
 msgstr ""
 
+#: R/decisioncalculator.b.R
 #: contTables/ui[1][1][0][0][0].label
 #: exacttests/options/counts.title
 #: jjbarstats/options/label/counts.title
@@ -35171,6 +35416,10 @@ msgstr ""
 msgid "Criterion"
 msgstr ""
 
+#: decisioncompare/results/opaTable.columns.title
+msgid "Criterion Met?"
+msgstr ""
+
 #: likelihoodratio/results/optimalCutpoint.columns.title
 msgid "Criterion Value"
 msgstr ""
@@ -36202,6 +36451,14 @@ msgstr ""
 msgid "Currency/Unit"
 msgstr ""
 
+#: R/decisioncalculator.b.R
+msgid "Current"
+msgstr ""
+
+#: R/decisioncalculator.b.R
+msgid "Current (reference)"
+msgstr ""
+
 #: populationhealth/results/resourceAllocationTable.columns.title
 msgid "Current Allocation"
 msgstr ""
@@ -36216,6 +36473,10 @@ msgstr ""
 
 #: R/jjpiestats.b.R
 msgid "Current configuration"
+msgstr ""
+
+#: R/decisioncalculator.b.R
+msgid "Current cut-off has the highest Youden's J ({youden}) of the three."
 msgstr ""
 
 #: R/benford.b.R
@@ -36392,7 +36653,6 @@ msgid "Custom Analysis (Manual Configuration)"
 msgstr ""
 
 #: modelbuilder/options/clinicalPreset/none.title
-#: nogoldstandard/options/clinicalPreset/none.title
 msgid "Custom Analysis (no preset)"
 msgstr ""
 
@@ -36999,11 +37259,11 @@ msgstr ""
 msgid "Custom Value"
 msgstr ""
 
-#: cotest/options/preset/custom.title
 #: sequentialtests/options/preset/custom.title
 msgid "Custom Values"
 msgstr ""
 
+#: cotest/options/preset/custom.title
 #: finegray/options/predictCovariatePattern/custom.title
 msgid "Custom values"
 msgstr ""
@@ -37102,6 +37362,18 @@ msgstr ""
 msgid "Cut-off"
 msgstr ""
 
+#: R/decisioncalculator.b.R
+msgid ""
+"Cut-off \"{cutoff}\" has no reference-negative observations, so specificity "
+"is undefined."
+msgstr ""
+
+#: R/decisioncalculator.b.R
+msgid ""
+"Cut-off \"{cutoff}\" has no reference-positive observations, so sensitivity "
+"is undefined."
+msgstr ""
+
 #: ihcscoring/results/molecularclassification/checkpointanalysis.columns.title
 msgid "Cut-off (%)"
 msgstr ""
@@ -37127,6 +37399,10 @@ msgstr ""
 msgid "Cut-off Comparison"
 msgstr ""
 
+#: R/decisioncalculator.b.R
+msgid "Cut-off intervals omitted for fractional counts"
+msgstr "Kesirli sayımlar için kesim noktası aralıkları gösterilmedi"
+
 #: survivalcont/ui[1][1].label
 msgid "Cut-off Options"
 msgstr ""
@@ -37139,24 +37415,20 @@ msgstr ""
 msgid "Cut-off Scenario"
 msgstr ""
 
-#: decisioncalculator/ui[5][1].label
-msgid "Cut-off Scenario 1"
-msgstr ""
-
 #: decisioncalculator/options/cutoff1.title
-msgid "Cut-off Scenario 1 Name"
-msgstr ""
-
-#: decisioncalculator/ui[5][2].label
-msgid "Cut-off Scenario 2"
+msgid "Cut-off scenario 1 name"
 msgstr ""
 
 #: decisioncalculator/options/cutoff2.title
-msgid "Cut-off Scenario 2 Name"
+msgid "Cut-off scenario 2 name"
 msgstr ""
 
 #: ihcscoring/results/multiplecutoffs/cutoffresults.columns.title
 msgid "Cut-off Threshold"
+msgstr ""
+
+#: R/decisioncalculator.b.R
+msgid "Cut-off validation failed"
 msgstr ""
 
 #: survivalcont/results/multipleCutTable.columns.title
@@ -37174,6 +37446,10 @@ msgid ""
 "counts per scenario cannot supply that. The accuracy intervals referred to "
 "above are Wilson 95% intervals computed separately per scenario, so overlap "
 "is a conservative signal that the counts do not separate the cut-offs."
+msgstr ""
+
+#: R/decisioncalculator.b.R
+msgid "Cut-offs describe different numbers of patients"
 msgstr ""
 
 #: stagemigration/options/cutpointBootstrapReps.title
@@ -39374,6 +39650,14 @@ msgstr ""
 msgid "defined by"
 msgstr ""
 
+#: R/nogoldstandard.b.R
+msgid "Defines a case as rule positive only when every selected test is positive."
+msgstr ""
+
+#: R/nogoldstandard.b.R
+msgid "Defines a case as rule positive when at least one selected test is positive."
+msgstr ""
+
 #: singlearm/options/analysistype.description
 msgid ""
 "Defines how the four mapped categories are coded. Overall counts both death "
@@ -39588,6 +39872,10 @@ msgstr ""
 msgid "Demographic-Adjusted Ranges"
 msgstr ""
 
+#: R/decisioncalculator.b.R
+msgid "Demonstrate how prevalence changes predictive values."
+msgstr ""
+
 #: finegray/results/kmvscifPlot.description
 msgid "Demonstrates bias in using 1-KM for competing risks"
 msgstr ""
@@ -39705,6 +39993,16 @@ msgstr ""
 msgid ""
 "Departures reported below can therefore be large without indicating anything "
 "about how the data were recorded"
+msgstr ""
+
+#: cotest/options/cond_dep_pos.title
+#: cotest/ui[3][0][1]/cond_dep_pos.label
+msgid "Dependence among subjects with disease"
+msgstr ""
+
+#: cotest/options/cond_dep_neg.title
+#: cotest/ui[3][0][1]/cond_dep_neg.label
+msgid "Dependence among subjects without disease"
 msgstr ""
 
 #: R/lollipop.b.R
@@ -39886,6 +40184,10 @@ msgstr ""
 msgid "Descending"
 msgstr ""
 
+#: R/decisioncalculator.b.R
+msgid "Describe a test against a stated reference standard."
+msgstr ""
+
 #: R/nogoldstandard.b.R
 #: adaptivelasso/results/performanceMetrics.columns.title
 #: bayesianma/results/summary.columns.title
@@ -39947,6 +40249,10 @@ msgstr ""
 msgid "Descriptive Cohort Summary (Copy-Ready)"
 msgstr ""
 
+#: R/decisioncalculator.b.R
+msgid "Descriptive comparison unavailable"
+msgstr ""
+
 #: singlearm/options/advancedDiagnostics.title
 msgid "Descriptive data diagnostics"
 msgstr ""
@@ -39975,14 +40281,14 @@ msgstr ""
 
 #: decisioncalculator/options/cutoff1.description.ui
 msgid ""
-"Descriptive name for the first cut-off scenario (e.g., 'Conservative', "
-"'Sensitive')."
+"Descriptive name for the first illustrative cut-off scenario; not clinical "
+"guidance."
 msgstr ""
 
 #: decisioncalculator/options/cutoff2.description.ui
 msgid ""
-"Descriptive name for the second cut-off scenario (e.g., 'Aggressive', "
-"'Specific')."
+"Descriptive name for the second illustrative cut-off scenario; not clinical "
+"guidance."
 msgstr ""
 
 #: enhancedtables/options/table_type/descriptive.title
@@ -39991,6 +40297,14 @@ msgstr ""
 
 #: R/jjwithinstats.b.R
 msgid "Descriptive Plot (ggpubr)"
+msgstr ""
+
+#: decisioncompare/options/showDescriptiveReport.title
+msgid "Descriptive report templates"
+msgstr ""
+
+#: R/decisioncalculator.b.R
+msgid "Descriptive results:"
 msgstr ""
 
 #: R/enhancedROC.b.R
@@ -40067,6 +40381,10 @@ msgstr ""
 msgid "Descriptive statistics: mean, median, standard deviation, min/max"
 msgstr ""
 
+#: decisioncompare/results/clinicalReport.title
+msgid "Descriptive Summary & Report Templates"
+msgstr ""
+
 #: outbreakanalysis/results/descriptive_summary.title
 msgid "Descriptive Summary Statistics"
 msgstr ""
@@ -40074,6 +40392,14 @@ msgstr ""
 #: tableone/results/tablestyle3.title
 msgid "Descriptive Table (arsenal)"
 msgstr ""
+
+#: decisioncalculator/options/multiplecuts.description.ui
+msgid ""
+"Descriptively compare illustrative cut-off scenarios. These examples are not "
+"clinical guides."
+msgstr ""
+"Açıklayıcı kesim noktası senaryolarını betimsel olarak karşılaştırır. Bu "
+"örnekler klinik rehber değildir."
 
 #: package/analyses/groupedbar.menuSubgroup
 #: groupedbar/options.menuSubgroup
@@ -40156,10 +40482,6 @@ msgstr ""
 
 #: surveysurvival/ui[1][1].label
 msgid "Design Variables"
-msgstr ""
-
-#: R/nogoldstandard.b.R
-msgid "Designed for population screening test evaluation"
 msgstr ""
 
 #: R/riverplot.b.R
@@ -40811,6 +41133,7 @@ msgstr ""
 msgid "Diagnostic (high Sens AND Spec)"
 msgstr ""
 
+#: R/decisioncalculator.b.R
 #: R/decisioncompare.b.R
 msgid "Diagnostic accuracy"
 msgstr ""
@@ -40942,10 +41265,18 @@ msgid "Diagnostic Odds Ratio"
 msgstr ""
 
 #: R/decision.b.R
+#: R/decisioncalculator.b.R
 #: R/decisioncompare.b.R
 #: likelihoodratio/ui[6]/showDiagnosticOdds.label
 #: psychopdaROC/options/metric/odds_ratio.title
 msgid "Diagnostic odds ratio"
+msgstr ""
+
+#: R/decisioncalculator.b.R
+msgid ""
+"Diagnostic odds ratio compares the odds of a positive result between "
+"reference-positive and reference-negative groups. Its magnitude is "
+"descriptive and has no universal clinical cut-off."
 msgstr ""
 
 #: mixedcox/ui[5][0].label
@@ -41201,12 +41532,12 @@ msgstr ""
 msgid "Diagnostic Test Sample Size Calculator"
 msgstr ""
 
-#: nogoldstandard/options/clinicalPreset/diagnostic_validation.title
-msgid "Diagnostic Test Validation"
-msgstr ""
-
 #: enhancedROC/options/clinicalPresets/diagnostic_validation.title
 msgid "Diagnostic Test Validation (Balanced)"
+msgstr ""
+
+#: nogoldstandard/options/clinicalPreset/diagnostic_validation.title
+msgid "Diagnostic Test Validation (example)"
 msgstr ""
 
 #: likelihoodratio/ui[0][0].label
@@ -41236,16 +41567,20 @@ msgstr ""
 msgid "Diagnostic Utility"
 msgstr ""
 
-#: R/nogoldstandard.b.R
-msgid "Diagnostic validation studies with 3+ tests and N>=100"
-msgstr ""
-
 #: bayesianma/results/mcmcDiagnostics.columns.title
 msgid "Diagnostic Value"
 msgstr ""
 
 #: pathsampling/results/detectionCurve.title
 msgid "Diagnostic Yield Curve"
+msgstr ""
+
+#: R/decisioncalculator.b.R
+msgid "Diagnostic-test glossary"
+msgstr ""
+
+#: R/decisioncalculator.b.R
+msgid "Diagnostic-test performance summary"
 msgstr ""
 
 #: adaptivelasso/ui[7].label
@@ -41446,11 +41781,11 @@ msgstr ""
 
 #: R/decisioncompare.b.R
 msgid ""
-"Differences are paired (within-subject). Confidence intervals are 95% "
-"normal-approximation (Wald) intervals for the difference between two "
-"correlated proportions, computed from the discordant pair counts. They are "
-"not affected by the \"CI Method for Agreement\" option, which applies to the "
-"overall percent agreement table."
+"Differences are paired (within-subject). Confidence intervals use Newcombe's "
+"method 10, combining Wilson score intervals with the paired correlation and "
+"its recommended continuity correction. They are not affected by the \"CI "
+"Method for Agreement\" option, which applies only to overall percent "
+"agreement."
 msgstr ""
 
 #: decisioncompare/results/diffTable.title
@@ -41835,6 +42170,10 @@ msgstr ""
 msgid "Discordant Cases Detail"
 msgstr ""
 
+#: decisioncalculator/results/nTable.columns.title
+msgid "Discordant Results"
+msgstr ""
+
 #: costeffectiveness/options/discount_costs.title
 msgid "Discount Future Costs"
 msgstr ""
@@ -41997,10 +42336,6 @@ msgstr ""
 msgid "Disease Absent"
 msgstr ""
 
-#: decisioncalculator/ui[0][0][1][1][0].label
-msgid "Disease Absent (Gold -)"
-msgstr ""
-
 #: decision/options/goldNegative.title
 #: decisioncompare/options/goldNegative.title
 msgid "Disease Absent Level"
@@ -42071,10 +42406,6 @@ msgstr ""
 msgid "Disease Present"
 msgstr ""
 
-#: decisioncalculator/ui[0][0][1][0][0].label
-msgid "Disease Present (Gold +)"
-msgstr ""
-
 #: decision/options/goldPositive.title
 #: decisioncombine/options/goldPositive.title
 #: decisioncombine/ui[0][0]/goldPositive.label
@@ -42084,12 +42415,9 @@ msgstr ""
 
 #: R/sequentialtests.b.R
 #: bayesiandiagnostic/results/predictiveValues.columns.title
-#: cotest/options/prevalence.title
-#: cotest/ui[4].label
 #: decisionpanel/options/prevalence.title
 #: diagnosticsamplesize/options/prevalence.title
 #: enhancedROC/ui[3][0][0][0].label
-#: nogoldstandard/results/prevalence.title
 #: sequentialtests/options/prevalence.title
 #: sequentialtests/results/summary_table.columns.title
 #: stagemigration/options/clinicalUtilityPrevalence.title
@@ -42098,16 +42426,14 @@ msgstr ""
 msgid "Disease Prevalence"
 msgstr ""
 
+#: cotest/options/prevalence.title
+#: cotest/ui[4].label
 #: enhancedROC/options/prevalence.title
 msgid "Disease prevalence"
 msgstr ""
 
 #: decisionpanel/ui[3][1]/prevalence.label
 msgid "Disease Prevalence (0 = use sample prevalence)"
-msgstr ""
-
-#: cotest/ui[4][0]/prevalence.label
-msgid "Disease Prevalence (0-1)"
 msgstr ""
 
 #: screeningcalculator/options/prev.title
@@ -42124,10 +42450,6 @@ msgid ""
 "when \"Use observed prevalence\" is unticked - set it to the prevalence of "
 "the population the test will actually be used in, which for a screening "
 "setting is usually far lower than in a case-control sample."
-msgstr ""
-
-#: R/nogoldstandard.b.R
-msgid "Disease prevalence:"
 msgstr ""
 
 #: R/decision.b.R
@@ -42245,7 +42567,6 @@ msgid ""
 msgstr ""
 
 #: decision/results/nTable.columns.title
-#: decisioncalculator/results/nTable.columns.title
 msgid "Diseased"
 msgstr ""
 
@@ -42321,12 +42642,32 @@ msgid ""
 "sensitivity and specificity, with point size scaled by Youden's J."
 msgstr ""
 
+#: decisioncalculator/options/showSummary.description.ui
+msgid ""
+"Display a descriptive plain-language summary. It is educational and is not a "
+"clinical guide."
+msgstr ""
+"Açıklayıcı bir yalın dil özeti gösterir. Eğitim amaçlıdır ve klinik rehber "
+"değildir."
+
+#: decisioncalculator/options/showGlossary.description.ui
+msgid ""
+"Display a glossary defining diagnostic-test terms with plain-language "
+"explanations."
+msgstr ""
+
 #: singlearm/options/medianline.description
 msgid ""
 "Display a horizontal and/or vertical reference line at the Kaplan-Meier "
 "median, when estimable. On the cumulative-hazard plot the horizontal "
 "reference is log(2), corresponding to S(t) = 0.5. Median reference lines are "
 "not drawn on the competing-risk CIF or KMunicate-style plots."
+msgstr ""
+
+#: decisioncompare/options/showDescriptiveReport.description.ui
+msgid ""
+"Display a longer descriptive performance summary with methods and results "
+"templates. The text is an editable reporting aid, not clinical guidance."
 msgstr ""
 
 #: decision/options/showNaturalLanguage.description.ui
@@ -42346,8 +42687,8 @@ msgstr ""
 #: decisioncompare/options/showSummary.description.ui
 msgid ""
 "Display a plain-language summary paragraph of comparison results. Useful for "
-"understanding clinical implications at a glance without needing to interpret "
-"detailed statistical tables."
+"reading the statistical comparison at a glance without needing to interpret "
+"every table cell."
 msgstr ""
 
 #: categorize/options/showplot.description.jamovi
@@ -42970,13 +43311,6 @@ msgstr ""
 msgid "Display future state predictions"
 msgstr ""
 
-#: decisioncalculator/options/showGlossary.description.ui
-msgid ""
-"Display glossary defining clinical terms (sensitivity, specificity, PPV, "
-"NPV, likelihood ratios, etc.) with plain-language explanations and "
-"interpretation guides."
-msgstr ""
-
 #: chisqposttest/options/showGlossary.description
 msgid "Display glossary of statistical terms with clinical interpretations"
 msgstr ""
@@ -43215,12 +43549,6 @@ msgid ""
 "Turn off to reduce visual clutter when summaries are not needed."
 msgstr ""
 
-#: decisioncalculator/options/showSummary.description.ui
-msgid ""
-"Display natural-language interpretation with key findings and clinical "
-"guidance. Presents results in plain English without statistical jargon."
-msgstr ""
-
 #: chisqposttest/options/showClinicalSummary.description
 msgid "Display natural-language summary of results for clinical interpretation"
 msgstr ""
@@ -43262,7 +43590,6 @@ msgstr ""
 #: competingsurvival/ui[3][0].label
 #: conditionalsurvival/ui[1][1].label
 #: consortdiagram/ui[3].label
-#: cotest/ui[5].label
 #: datevalidator/ui[4].label
 #: decisioncalculator/ui[1].label
 #: decisioncombine/ui[1].label
@@ -43319,6 +43646,10 @@ msgstr ""
 #: treemedical/ui[4].label
 #: weightedlogrank/ui[4].label
 msgid "Display Options"
+msgstr ""
+
+#: cotest/ui[5].label
+msgid "Display options"
 msgstr ""
 
 #: pheval/ui[5][0].label
@@ -44593,6 +44924,10 @@ msgstr ""
 msgid "DOR"
 msgstr ""
 
+#: R/decisioncalculator.b.R
+msgid "DOR (diagnostic odds ratio)"
+msgstr ""
+
 #: survivalendpoints/results/derivedEndpoints.columns.title
 msgid "DOR Event"
 msgstr ""
@@ -45241,6 +45576,34 @@ msgstr ""
 
 #: R/nogoldstandard.b.R
 msgid ""
+"Each test helps construct the rule against which it is evaluated, creating "
+"incorporation bias."
+msgstr ""
+
+#: R/nogoldstandard.b.R
+msgid ""
+"Each test is part of the rule against which it is evaluated, creating "
+"incorporation bias. The negative-response probability and PPV are fixed at "
+"100% by construction and are left blank; the other values describe agreement "
+"with the rule, not diagnostic accuracy."
+msgstr ""
+
+#: R/nogoldstandard.b.R
+msgid ""
+"Each test is part of the rule against which it is evaluated, creating "
+"incorporation bias. The positive-response probability and NPV are fixed at "
+"100% by construction and are left blank; the other values describe agreement "
+"with the rule, not diagnostic accuracy."
+msgstr ""
+
+#: R/nogoldstandard.b.R
+msgid ""
+"Each test is part of the rule against which it is evaluated, so the results "
+"are affected by incorporation bias."
+msgstr ""
+
+#: R/nogoldstandard.b.R
+msgid ""
 "Each test is scored against a reference standard built from the tests "
 "themselves, so these are measures of agreement with that rule, not estimates "
 "of diagnostic accuracy. The blank column is fixed at 100% by construction "
@@ -45437,6 +45800,10 @@ msgstr ""
 #: simonmakuch/ui[9][0][0].label
 #: surveysurvival/ui[5][0].label
 msgid "Educational Content"
+msgstr ""
+
+#: R/decisioncalculator.b.R
+msgid "Educational description of diagnostic-test performance"
 msgstr ""
 
 #: dataquality/options/showExplanations.title
@@ -47524,6 +47891,12 @@ msgstr ""
 msgid "Enter the data source for proper attribution."
 msgstr ""
 
+#: R/decisioncalculator.b.R
+msgid ""
+"Enter the four counts: TP (true positive), FP (false positive), TN (true "
+"negative), and FN (false negative)."
+msgstr ""
+
 #: decisioncalculator/ui[0][0][0].label
 msgid "Enter the four key counts from your diagnostic test evaluation:"
 msgstr ""
@@ -47701,6 +48074,10 @@ msgid ""
 "epidemiological\n"
 "research including cancer registry studies, cohort studies, and population "
 "surveillance."
+msgstr ""
+
+#: R/decisioncalculator.b.R
+msgid "epiR package missing"
 msgstr ""
 
 #: decision/results/epirTable_ratio.title
@@ -47999,6 +48376,10 @@ msgstr ""
 #: R/reportcat.b.R
 #: crosstable/results/errorNotice.title
 msgid "Error"
+msgstr ""
+
+#: R/decisioncalculator.b.R
+msgid "ERROR"
 msgstr ""
 
 #: samplingerror/results/errorComponents.columns.title
@@ -48570,6 +48951,10 @@ msgstr ""
 msgid "Estimate Variance Components"
 msgstr ""
 
+#: nogoldstandard/results/prevalence.title
+msgid "Estimated Class or Rule Proportion"
+msgstr ""
+
 #: smoothhazard/results/hazard_estimates.description
 msgid "Estimated hazard function values at specified time points"
 msgstr ""
@@ -48613,6 +48998,10 @@ msgstr ""
 
 #: mageeequation/results/distributionPlot.title
 msgid "Estimated RS Distribution"
+msgstr ""
+
+#: nogoldstandard/results/test_metrics.title
+msgid "Estimated Test Metrics or Rule Agreement"
 msgstr ""
 
 #: continuousmarkov/results/intensityMatrix.title
@@ -48788,6 +49177,13 @@ msgid ""
 "Assess calibration, discrimination, and predictive accuracy at specific time "
 "points using bootstrap validation and cross-validation. TRIPOD-compliant "
 "reporting."
+msgstr ""
+
+#: R/decisioncalculator.b.R
+msgid ""
+"Evaluates diagnostic-test performance by calculating sensitivity, "
+"specificity, predictive values, likelihood ratios, and advanced metrics from "
+"a 2×2 confusion matrix."
 msgstr ""
 
 #: package/analyses/interruptedtimeseries.description
@@ -49720,6 +50116,10 @@ msgstr ""
 msgid "Evidence & References"
 msgstr ""
 
+#: R/nogoldstandard.b.R
+msgid "Evidence against conditional independence"
+msgstr ""
+
 #: clinicalalerts/results/clinicalRecommendations.columns.title
 #: clinicalvalidationinteractive/results/clinicalGuidelines.columns.title
 #: treatmentoptim/results/treatmentSelection.columns.title
@@ -49732,10 +50132,6 @@ msgstr ""
 
 #: R/summarydata.b.R
 msgid "evidence of departure from normality"
-msgstr ""
-
-#: R/nogoldstandard.b.R
-msgid "Evidence of shared error - estimates inflated"
 msgstr ""
 
 #: differentialdiagnosis/results/clinicalContext.columns.title
@@ -49950,6 +50346,30 @@ msgstr ""
 msgid "Example clinical scenarios with risk calculations"
 msgstr ""
 
+#: R/nogoldstandard.b.R
+msgid "Example context"
+msgstr ""
+
+#: R/nogoldstandard.b.R
+msgid ""
+"Example context: comparing several imperfect biomarkers or diagnostic "
+"technologies"
+msgstr ""
+
+#: R/nogoldstandard.b.R
+msgid "Example context: describing agreement among pathologists or other observers"
+msgstr ""
+
+#: R/nogoldstandard.b.R
+msgid ""
+"Example context: describing agreement with an any-positive rule across "
+"several tests"
+msgstr ""
+
+#: R/nogoldstandard.b.R
+msgid "Example context: exploring several cancer biomarkers or prognostic tests"
+msgstr ""
+
 #: R/waterfall.b.R
 msgid "Example data format with baseline:"
 msgstr ""
@@ -49964,6 +50384,14 @@ msgstr ""
 
 #: R/waterfallrecist.b.R
 msgid "Example layout"
+msgstr ""
+
+#: R/nogoldstandard.b.R
+msgid "Example method"
+msgstr ""
+
+#: R/nogoldstandard.b.R
+msgid "Example only:"
 msgstr ""
 
 #: R/benford.b.R
@@ -49985,6 +50413,12 @@ msgstr ""
 #: R/decisiongraph.b.R
 msgid "Example: Should we perform surgery or use medication?"
 msgstr ""
+
+#: decisioncalculator/ui[5][0][0][1].label
+msgid "Examples only—not clinical guides or validated cut-off recommendations"
+msgstr ""
+"Yalnızca örnektir—klinik rehber veya doğrulanmış kesim noktası önerisi "
+"değildir"
 
 #: R/swimmerplot_html.R
 msgid "Examples:"
@@ -50208,6 +50642,9 @@ msgstr ""
 msgid "Exclude variables with >20 percent missing"
 msgstr ""
 
+#: decisioncompare/results/comparisonTable.columns.title
+#: decisioncompare/results/opaTable.columns.title
+#: decisioncompare/results/stratifiedTable.columns.title
 #: studydiagram/results/summary.columns.title
 msgid "Excluded"
 msgstr ""
@@ -50240,6 +50677,11 @@ msgstr ""
 
 #: R/lassologistic.b.R
 msgid "Excluded from analysis"
+msgstr ""
+
+#: decisioncompare/results/comparisonTable.columns.title
+#: decisioncompare/results/stratifiedTable.columns.title
+msgid "Excluded Rate"
 msgstr ""
 
 #: metaanalysis/results/sensitivityAnalysis.columns.title
@@ -50911,6 +51353,7 @@ msgstr ""
 #: firthregression/ui[7].label
 #: lassocox/ui[5].label
 #: lassologistic/ui[7].label
+#: nogoldstandard/ui[3].label
 msgid "Explanatory Output"
 msgstr ""
 
@@ -50969,37 +51412,6 @@ msgstr ""
 #: causespecifichazards/ui[0][2].label
 #: parametricfrailty/ui[0][2].label
 msgid "Explanatory Variables:"
-msgstr ""
-
-#: package/analyses/tableone.menuGroup
-#: package/analyses/summarydata.menuGroup
-#: package/analyses/reportcat.menuGroup
-#: package/analyses/benford.menuGroup
-#: package/analyses/agepyramid.menuGroup
-#: package/analyses/alluvial.menuGroup
-#: package/analyses/venn.menuGroup
-#: package/analyses/vartree.menuGroup
-#: package/analyses/categorize.menuGroup
-#: package/analyses/crosstable.menuGroup
-#: package/analyses/dataquality.menuGroup
-#: package/analyses/outlierdetection.menuGroup
-#: package/analyses/checkdata.menuGroup
-#: package/analyses/chisqposttest.menuGroup
-#: agepyramid/options.menuGroup
-#: alluvial/options.menuGroup
-#: benford/options.menuGroup
-#: categorize/options.menuGroup
-#: checkdata/options.menuGroup
-#: chisqposttest/options.menuGroup
-#: crosstable/options.menuGroup
-#: dataquality/options.menuGroup
-#: outlierdetection/options.menuGroup
-#: reportcat/options.menuGroup
-#: summarydata/options.menuGroup
-#: tableone/options.menuGroup
-#: vartree/options.menuGroup
-#: venn/options.menuGroup
-msgid "Exploration"
 msgstr ""
 
 #: package/analyses/eurostatmap.menuGroup
@@ -51102,12 +51514,40 @@ msgstr ""
 msgid "ExplorationExtraD"
 msgstr ""
 
+#: package/analyses/tableone.menuGroup
+#: package/analyses/summarydata.menuGroup
+#: package/analyses/reportcat.menuGroup
+#: package/analyses/benford.menuGroup
+#: package/analyses/agepyramid.menuGroup
+#: package/analyses/alluvial.menuGroup
+#: package/analyses/venn.menuGroup
+#: package/analyses/vartree.menuGroup
+#: package/analyses/categorize.menuGroup
+#: package/analyses/crosstable.menuGroup
+#: package/analyses/dataquality.menuGroup
+#: package/analyses/outlierdetection.menuGroup
+#: package/analyses/checkdata.menuGroup
+#: package/analyses/chisqposttest.menuGroup
 #: package/analyses/nonparametric.menuGroup
 #: package/analyses/pcacomponenttest.menuGroup
 #: package/analyses/pcaloadingtest.menuGroup
+#: agepyramid/options.menuGroup
+#: alluvial/options.menuGroup
+#: benford/options.menuGroup
+#: categorize/options.menuGroup
+#: checkdata/options.menuGroup
+#: chisqposttest/options.menuGroup
+#: crosstable/options.menuGroup
+#: dataquality/options.menuGroup
 #: nonparametric/options.menuGroup
+#: outlierdetection/options.menuGroup
 #: pcacomponenttest/options.menuGroup
 #: pcaloadingtest/options.menuGroup
+#: reportcat/options.menuGroup
+#: summarydata/options.menuGroup
+#: tableone/options.menuGroup
+#: vartree/options.menuGroup
+#: venn/options.menuGroup
 msgid "ExplorationT"
 msgstr ""
 
@@ -51120,6 +51560,12 @@ msgstr ""
 msgid ""
 "Exploratory case-resampling comparison of average net benefit over the "
 "selected range"
+msgstr ""
+
+#: R/nogoldstandard.b.R
+msgid ""
+"Exploratory description of agreement with a majority-vote rule using three "
+"or more tests."
 msgstr ""
 
 #: R/lassocox.b.R
@@ -51159,8 +51605,24 @@ msgstr ""
 msgid "Exploratory Unpenalized Refit Comparison"
 msgstr ""
 
+#: R/decisioncalculator.b.R
+msgid "Explore diagnostic methods or illustrative cut-off scenarios."
+msgstr ""
+
 #: R/vartree.b.R
 msgid "Explore relationships between categorical variables in clinical data"
+msgstr ""
+
+#: R/nogoldstandard.b.R
+msgid ""
+"Exploring agreement with the permissive rule that at least one selected test "
+"is positive."
+msgstr ""
+
+#: R/nogoldstandard.b.R
+msgid ""
+"Exploring agreement with the strict rule that every selected test is "
+"positive."
 msgstr ""
 
 #: R/reportcat.b.R
@@ -51895,6 +52357,10 @@ msgstr ""
 msgid "Extrapolation Time"
 msgstr ""
 
+#: R/nogoldstandard.b.R
+msgid "Extreme fitted class proportion"
+msgstr ""
+
 #: gradientboosting/options/algorithm/xgboost.title
 msgid "Extreme Gradient Boosting (xgboost)"
 msgstr ""
@@ -51905,8 +52371,18 @@ msgid ""
 "and may destabilize cross-validation."
 msgstr ""
 
+#: R/decisioncalculator.b.R
+msgid "Extreme prevalence"
+msgstr ""
+
 #: R/decision.b.R
 msgid "Extreme prevalence affects predictive values"
+msgstr ""
+
+#: R/decisioncalculator.b.R
+msgid ""
+"Extreme prevalence is {prevalence}. PPV and NPV estimates may be unstable; "
+"verify them in the target population."
 msgstr ""
 
 #: timeinterval/options/extreme_multiplier.title
@@ -52008,8 +52484,23 @@ msgstr ""
 msgid "F1 Score"
 msgstr "F1 Skoru"
 
+#: R/decisioncalculator.b.R
+msgid "F1 score"
+msgstr ""
+
 #: enhancedROC/results/results/precisionRecallTable.columns.title
 msgid "F1 Score (Max)"
+msgstr ""
+
+#: R/decisioncalculator.b.R
+msgid "F1 score at selected prevalence (CI not computed)"
+msgstr ""
+
+#: R/decisioncalculator.b.R
+msgid ""
+"F1 score is the harmonic mean of sensitivity and positive predictive value. "
+"When an external prevalence is supplied, this value uses the "
+"prevalence-adjusted positive predictive value."
 msgstr ""
 
 #: deeplearningprediction/results/performanceAnalysis/classificationReport.columns.title
@@ -52139,6 +52630,18 @@ msgstr ""
 
 #: factoranalysis/results/results/biplotImage.title
 msgid "Factor Biplot"
+msgstr ""
+
+#: R/decisioncalculator.b.R
+msgid ""
+"Factor by which a negative result multiplies pre-test odds; practical "
+"importance depends on the starting probability and intended use."
+msgstr ""
+
+#: R/decisioncalculator.b.R
+msgid ""
+"Factor by which a positive result multiplies pre-test odds; practical "
+"importance depends on the starting probability and intended use."
 msgstr ""
 
 #: enhancedfactorvariable/options/factorComplexityAnalysis.title
@@ -52273,11 +52776,15 @@ msgid "Fagan Nomogram"
 msgstr ""
 
 #: cotest/options/fagan.title
-#: cotest/results/plot1.title
+#: cotest/ui[5][0]/fagan.label
 #: decision/ui[3]/fagan.label
 #: decision/results/plot1.title
 #: decisioncalculator/results/plot1.title
 msgid "Fagan nomogram"
+msgstr ""
+
+#: cotest/results/plot1.title
+msgid "Fagan nomogram - parallel rule (positive if either test is positive)"
 msgstr ""
 
 #: screeningcalculator/results/plot2NN.title
@@ -52300,8 +52807,8 @@ msgstr ""
 msgid "Fagan Nomogram (Third Test after Two Positives)"
 msgstr ""
 
-#: cotest/ui[5][0]/fagan.label
-msgid "Fagan nomogram (visualization)"
+#: R/decisioncalculator.b.R
+msgid "Fagan nomogram not drawn"
 msgstr ""
 
 #: decision/options/fagan.title
@@ -52444,6 +52951,22 @@ msgstr ""
 
 #: diagnosticmeta/options/false_positives.title
 msgid "False Positives (FP)"
+msgstr ""
+
+#: R/decisioncalculator.b.R
+msgid "False-discovery proportion among test-positive subjects"
+msgstr ""
+
+#: R/decisioncalculator.b.R
+msgid "False-negative rate among outcome-positive subjects"
+msgstr ""
+
+#: R/decisioncalculator.b.R
+msgid "False-omission proportion among test-negative subjects"
+msgstr ""
+
+#: R/decisioncalculator.b.R
+msgid "False-positive rate among outcome-negative subjects"
 msgstr ""
 
 #: patientdashboard/options/family_communication.title
@@ -53747,6 +54270,10 @@ msgstr ""
 msgid "Fixed-Effects (All studies measure same true effect)"
 msgstr ""
 
+#: R/nogoldstandard.b.R
+msgid "Fixed-prior point estimation; not a full Bayesian posterior analysis"
+msgstr ""
+
 #: finegray/results/influenceTable.columns.title
 msgid "Flag"
 msgstr ""
@@ -55022,6 +55549,16 @@ msgstr ""
 msgid "Fractional Factorial"
 msgstr ""
 
+#: R/decisioncalculator.b.R
+msgid ""
+"Fractional frequencies are used for point estimates only. Confidence "
+"intervals are omitted because no effective sample size or weighting design "
+"was supplied."
+msgstr ""
+"Kesirli frekanslar yalnızca nokta tahminlerinde kullanılır. Etkin örneklem "
+"büyüklüğü veya ağırlıklandırma tasarımı belirtilmediği için güven aralıkları "
+"gösterilmez."
+
 #: continuousrelationship/options/modelType/fp.title
 msgid "Fractional Polynomials"
 msgstr ""
@@ -55511,20 +56048,12 @@ msgstr ""
 msgid "Fully Stratified Parameters"
 msgstr ""
 
-#: package/analyses/cotest.description
-#: cotest/options.description.main
-msgid ""
-"Function for analyzing combined results of two concurrent diagnostic tests. "
-"Calculates post-test probabilities based on various scenarios (either test "
-"positive, both positive, both negative)."
-msgstr ""
-
 #: package/analyses/decisioncompare.description
 #: decisioncompare/options.description.main
 msgid ""
 "Function for comparing multiple Medical Decision Tests. Compares "
 "sensitivity, specificity, positive predictive value, negative predictive "
-"value, and other metrics between different tests against the same golden "
+"value, and other metrics between different tests against the same gold "
 "standard. Includes statistical comparison using McNemar's test and "
 "confidence intervals for differences."
 msgstr ""
@@ -57430,7 +57959,6 @@ msgid "GOF Tests"
 msgstr ""
 
 #: decision/results/cTable.columns.title
-#: decisioncalculator/results/cTable.columns.title
 #: decisioncombine/results/crossTabTable.columns.title
 #: decisioncombine/results/individualTest1/test1Contingency.columns.title
 #: decisioncombine/results/individualTest2/test2Contingency.columns.title
@@ -57442,7 +57970,6 @@ msgid "Gold Negative"
 msgstr ""
 
 #: decision/results/cTable.columns.title
-#: decisioncalculator/results/cTable.columns.title
 #: decisioncombine/results/crossTabTable.columns.title
 #: decisioncombine/results/individualTest1/test1Contingency.columns.title
 #: decisioncombine/results/individualTest2/test2Contingency.columns.title
@@ -57453,6 +57980,7 @@ msgstr ""
 msgid "Gold Positive"
 msgstr ""
 
+#: decisioncompare/ui[0][0].label
 #: decisionpanel/options/gold.title
 msgid "Gold Standard"
 msgstr ""
@@ -57460,6 +57988,7 @@ msgstr ""
 #: decision/ui[0][0].label
 #: decisioncombine/options/gold.title
 #: decisioncombine/ui[0][0].label
+#: decisioncompare/options/gold.title
 msgid "Gold Standard (Reference Test)"
 msgstr ""
 
@@ -57490,14 +58019,6 @@ msgstr ""
 
 #: groupedbar/options/aspectratio/golden.title
 msgid "Golden (1.618:1)"
-msgstr ""
-
-#: decisioncompare/ui[0][0].label
-msgid "Golden Standard"
-msgstr ""
-
-#: decisioncompare/options/gold.title
-msgid "Golden Standard (Reference Test)"
 msgstr ""
 
 #: frailtysurvival/options/baseline_hazard/gompertz.title
@@ -58989,8 +59510,9 @@ msgstr ""
 msgid "gtsummary (Publication-ready descriptives)"
 msgstr ""
 
-#: R/nogoldstandard.b.R
-msgid "Guidance"
+#: cotest/options/showGuidance.title
+#: cotest/ui[5][0]/showGuidance.label
+msgid "Guidance and explanations"
 msgstr ""
 
 #: clinicalnomograms/results/implementationGuide.description
@@ -59234,6 +59756,12 @@ msgstr ""
 
 #: R/psychopdaROC.b.R
 msgid "harm:benefit %.2f (threshold %.0f%%)"
+msgstr ""
+
+#: R/decisioncalculator.b.R
+msgid ""
+"Harmonic mean of sensitivity and PPV; because PPV depends on prevalence, F1 "
+"also changes with the selected prevalence."
 msgstr ""
 
 #: mendelianrandomization/options/harmonize_alleles.title
@@ -59743,7 +60271,6 @@ msgid "Healthcare Utilization"
 msgstr ""
 
 #: decision/results/nTable.columns.title
-#: decisioncalculator/results/nTable.columns.title
 msgid "Healthy"
 msgstr ""
 
@@ -60426,13 +60953,6 @@ msgstr ""
 msgid "High Estimate"
 msgstr ""
 
-#: R/nogoldstandard.b.R
-msgid ""
-"High estimated prevalence: holding sensitivity and specificity fixed, a "
-"higher prevalence raises positive predictive value and lowers negative "
-"predictive value relative to a lower-prevalence setting."
-msgstr ""
-
 #: toxicityprofile/results/socSummary.columns.title
 msgid "High Grade (%)"
 msgstr ""
@@ -60597,6 +61117,10 @@ msgid ""
 "millions of points efficiently with advanced customization options."
 msgstr ""
 
+#: R/nogoldstandard.b.R
+msgid "High-positive latent-class proportion"
+msgstr ""
+
 #: stagemigration/options/shapPatientProfiles/high_risk.title
 msgid "High-risk patients"
 msgstr ""
@@ -60635,6 +61159,14 @@ msgstr ""
 msgid ""
 "Higher QALYs indicate better health outcomes. Used to compare different "
 "treatments"
+msgstr ""
+
+#: decisioncalculator/options/cutoff1.default
+msgid "Higher sensitivity example"
+msgstr ""
+
+#: decisioncalculator/options/cutoff2.default
+msgid "Higher specificity example"
 msgstr ""
 
 #: door/options/rankDirection/higher.title
@@ -60780,10 +61312,6 @@ msgstr ""
 
 #: R/enhancedROC.b.R
 msgid "Highly significant difference (p < 0.001)"
-msgstr ""
-
-#: R/nogoldstandard.b.R
-msgid "Highly specific diagnoses where false positives are very costly"
 msgstr ""
 
 #: R/decision.b.R
@@ -61425,7 +61953,7 @@ msgid "HPD Width"
 msgstr ""
 
 #: cotest/options/preset/hpv_pap.title
-msgid "HPV + Pap Smear (Cervical Cancer)"
+msgid "HPV + Pap cytology (demo only)"
 msgstr ""
 
 #: competingRisksPower/ui[5][0]/hazardRatio.suffix
@@ -62276,6 +62804,12 @@ msgstr ""
 msgid "IDI/NRI Bootstrap Iterations"
 msgstr ""
 
+#: R/decisioncalculator.b.R
+msgid ""
+"If 200 participants include 100 reference-positive and 100 "
+"reference-negative observations, with TP=90 and TN=80, then FN=10 and FP=20."
+msgstr ""
+
 #: R/decisiongraph.b.R
 msgid ""
 "If a treatment provides 2 QALYs worth $50,000 each but costs $80,000, NMB = "
@@ -62314,14 +62848,6 @@ msgstr ""
 msgid ""
 "If the cell 'Grade 3 \\u{D7} Positive' has a residual of +3.2 (with cutoff "
 "\\u{B1}%.2f):"
-msgstr ""
-
-#: R/decisioncalculator.b.R
-msgid "If the test is NEGATIVE"
-msgstr ""
-
-#: R/decisioncalculator.b.R
-msgid "If the test is POSITIVE"
 msgstr ""
 
 #: R/decisiongraph.b.R
@@ -62546,8 +63072,56 @@ msgid ""
 "for evidence-based medicine."
 msgstr ""
 
+#: R/nogoldstandard.b.R
+msgid "Illustrative context"
+msgstr ""
+
+#: decisioncalculator/ui[5][0].label
+msgid "Illustrative cut-off comparison"
+msgstr ""
+
+#: R/nogoldstandard.b.R
+msgid "Illustrative diagnostic-test validation scenario"
+msgstr ""
+
+#: R/decisioncalculator.b.R
+msgid "Illustrative example, not clinical guidance:"
+msgstr ""
+
+#: R/nogoldstandard.b.R
+msgid "Illustrative observer-agreement scenario"
+msgstr ""
+
+#: R/decisioncalculator.b.R
+msgid "Illustrative point estimates; not clinical guidance"
+msgstr "Açıklayıcı nokta tahminleri; klinik rehber değildir"
+
 #: sequentialtests/options/population_size.title
 msgid "Illustrative Population Size"
+msgstr ""
+
+#: nogoldstandard/ui[3][0]/clinicalPreset.label
+msgid "Illustrative scenario (not clinical guidance)"
+msgstr ""
+
+#: decisioncalculator/ui[5][1].label
+msgid "Illustrative scenario 1"
+msgstr ""
+
+#: decisioncalculator/ui[5][2].label
+msgid "Illustrative scenario 2"
+msgstr ""
+
+#: nogoldstandard/options/clinicalPreset.title
+msgid "Illustrative Scenario Example"
+msgstr ""
+
+#: R/nogoldstandard.b.R
+msgid "Illustrative screening-rule scenario"
+msgstr ""
+
+#: R/nogoldstandard.b.R
+msgid "Illustrative tumor-marker scenario"
 msgstr ""
 
 #: sequentialtests/options/test1_cost.title
@@ -64074,6 +64648,14 @@ msgstr ""
 msgid "Inclusion Probability Threshold"
 msgstr ""
 
+#: R/decisioncalculator.b.R
+msgid "Incomplete cut-off data"
+msgstr ""
+
+#: R/decisioncalculator.b.R
+msgid "Incomplete data; some measures are undefined"
+msgstr ""
+
 #: bayesiannetworkma/results/coherenceAssessment.columns.title
 msgid "Inconsistency"
 msgstr ""
@@ -64090,8 +64672,10 @@ msgstr ""
 msgid "Incorporate general population mortality rates (requires cuRe package)"
 msgstr ""
 
-#: R/nogoldstandard.b.R
-msgid "Incorporates prior knowledge about test performance using Bayesian methods."
+#: R/decisioncalculator.b.R
+msgid ""
+"Incorporation bias occurs when the reference standard includes the test "
+"being evaluated."
 msgstr ""
 
 #: adaptivetrialdesign/results/sampleSizeEvolution.columns.title
@@ -64239,10 +64823,6 @@ msgstr ""
 
 #: betabinomialdiagnostic/options/correlation_structure/independent.title
 msgid "Independent Sensitivity/Specificity"
-msgstr ""
-
-#: cotest/options/indep.title
-msgid "Independent tests"
 msgstr ""
 
 #: classification/options/indep.title
@@ -64733,6 +65313,10 @@ msgstr ""
 
 #: R/jjpiestats.b.R
 msgid "Info"
+msgstr ""
+
+#: R/decisioncalculator.b.R
+msgid "INFO"
 msgstr ""
 
 #: gsdesign/results/boundaryTable.columns.title
@@ -65373,10 +65957,6 @@ msgid ""
 "evaluating %d cases. Data quality or sample size may be insufficient."
 msgstr ""
 
-#: R/nogoldstandard.b.R
-msgid "Inter-rater agreement studies with 3+ tests, exploratory analysis"
-msgstr ""
-
 #: R/pathagreement.b.R
 msgid ""
 "Inter-rater agreement was %s (\\u{03BA} = %.3f%s%s), indicating %s "
@@ -65798,6 +66378,12 @@ msgid ""
 "p-values for clinical significance assessment."
 msgstr ""
 
+#: R/decisioncalculator.b.R
+msgid ""
+"Interpret the index test and reference standard independently and use "
+"blinding where possible."
+msgstr ""
+
 #: biomarkerdiscovery/ui[7][0].label
 msgid "Interpretability & Networks"
 msgstr ""
@@ -66086,6 +66672,14 @@ msgstr ""
 
 #: stagemigration/ui[2][1].label
 msgid "Interpretation & Reports"
+msgstr ""
+
+#: R/nogoldstandard.b.R
+msgid "Interpretation Cautions"
+msgstr ""
+
+#: R/decisioncalculator.b.R
+msgid "Interpretation caveat"
 msgstr ""
 
 #: labinterpret/options/interpretation_level.title
@@ -66433,6 +67027,10 @@ msgstr ""
 
 #: R/multisurvival.b.R
 msgid "Invalid competing-risk coding"
+msgstr ""
+
+#: R/decisioncalculator.b.R
+msgid "Invalid cut-off inputs"
 msgstr ""
 
 #: R/survival.b.R
@@ -67503,6 +68101,15 @@ msgstr ""
 msgid "Kappa (κ)"
 msgstr ""
 
+#: R/nogoldstandard.b.R
+msgid ""
+"Kappa compares the selected positive/negative meanings, even when tests use "
+"different factor labels. P-values test kappa = 0 using the null-variance "
+"Wald statistic from irr::kappa2. They are unadjusted across pairs and should "
+"be treated as exploratory; interpret them cautiously in small or sparse "
+"samples. Kappa is not estimable when both tests are constant."
+msgstr ""
+
 #: cohenskappa/results/categoryStats.columns.title
 msgid "Kappa Contribution"
 msgstr ""
@@ -67521,13 +68128,6 @@ msgstr "Kappa Düzeyleri"
 
 #: cohenskappa/options/kappa_type.title
 msgid "Kappa Method"
-msgstr ""
-
-#: R/nogoldstandard.b.R
-msgid ""
-"Kappa standard errors and p-values use a large-sample normal approximation "
-"rather than the exact asymptotic SE (e.g. vcd::Kappa); interpret p-values "
-"cautiously, especially in small samples."
 msgstr ""
 
 #: cohenskappa/results/kappaTable.title
@@ -67740,6 +68340,10 @@ msgstr ""
 msgid "Key Assumptions:"
 msgstr ""
 
+#: R/decisioncalculator.b.R
+msgid "Key assumptions:"
+msgstr ""
+
 #: R/swimmerplot_html.R
 msgid "Key clinical events (surgery, assessment, progression)"
 msgstr ""
@@ -67799,6 +68403,10 @@ msgstr ""
 
 #: R/decision.b.R
 msgid "Key Output Measures"
+msgstr ""
+
+#: R/decisioncalculator.b.R
+msgid "Key outputs:"
 msgstr ""
 
 #: qtwist/results/keyReferences.title
@@ -67972,6 +68580,10 @@ msgid ""
 "Known disease prevalence in the target population (as proportion: 0.0-1.0). "
 "Examples: rare diseases (0.001-0.01), common conditions (0.05-0.20). This "
 "affects post-test probabilities and predictive values."
+msgstr ""
+
+#: decisioncalculator/ui[3][0].label
+msgid "Known Prevalence for Predictive Values"
 msgstr ""
 
 #: R/nonparametric.b.R
@@ -68954,24 +69566,26 @@ msgstr ""
 msgid "Latent Biomarker Construct + Cox Regression"
 msgstr ""
 
+#: R/nogoldstandard.b.R
 #: nogoldstandard/options/method/latent_class.title
+#: nogoldstandard/ui[1][0]/method/latent_class.title
 msgid "Latent Class Analysis"
 msgstr ""
 
 #: R/nogoldstandard.b.R
-#: nogoldstandard/ui[2][0]/method/latent_class.title
-msgid "Latent Class Analysis (Recommended)"
+msgid "Latent class analysis"
 msgstr ""
 
 #: nogoldstandard/results/conditional_dependence.description
 msgid ""
-"Latent class analysis assumes the tests err independently given true disease "
-"status. For each pair this compares the observed two-way table with the one "
-"the fitted model implies; a residual above 3.84 (the 5 percent point of "
-"chi-squared on 1 degree of freedom) is evidence that the pair shares a "
-"source of error, which inflates the estimated accuracy. Requires four or "
-"more tests: with three the model is just-identified and reproduces every "
-"table exactly, so no residual can reveal dependence."
+"Latent class analysis assumes the tests are conditionally independent within "
+"each latent class. For each pair this compares the observed two-way table "
+"with the one implied by the fitted model. A residual above 3.84 is "
+"descriptive evidence against conditional independence, but this squared "
+"statistic does not identify the direction or cause of dependence and cannot "
+"determine the direction of bias in the fitted parameters. Requires four or "
+"more tests: with three the model is just-identified and no residual can "
+"diagnose dependence."
 msgstr ""
 
 #: R/nogoldstandard.b.R
@@ -68983,6 +69597,17 @@ msgstr ""
 
 #: R/nogoldstandard.b.R
 msgid "Latent Class Analysis:"
+msgstr ""
+
+#: R/nogoldstandard.b.R
+msgid "Latent classes are unlabeled"
+msgstr ""
+
+#: R/nogoldstandard.b.R
+msgid ""
+"latent classes are unlabeled. Interpreting the high-positive class as "
+"disease, and these response probabilities as accuracy, requires a "
+"study-specific substantive justification."
 msgstr ""
 
 #: enhancedtables/options/export_format/latex.title
@@ -69029,18 +69654,6 @@ msgstr ""
 msgid ""
 "LCA model fitting failed after all attempts. Try a different method or check "
 "your data."
-msgstr ""
-
-#: R/nogoldstandard.b.R
-msgid ""
-"LCA model may not have converged properly. Results should be interpreted "
-"with caution."
-msgstr ""
-
-#: R/nogoldstandard.b.R
-msgid ""
-"LCA typically requires 100+ observations for stable results. Current N = %d. "
-"Consider using composite reference method for smaller samples."
 msgstr ""
 
 #: R/nogoldstandard.b.R
@@ -69604,10 +70217,6 @@ msgstr ""
 msgid "LHS"
 msgstr ""
 
-#: R/nogoldstandard.b.R
-msgid "Liberal approach - disease present if ANY test is positive."
-msgstr ""
-
 #: agepyramid/options/age_groups/lifecourse.title
 msgid "Life course"
 msgstr ""
@@ -69677,14 +70286,6 @@ msgstr ""
 msgid "Likelihood ratio"
 msgstr ""
 
-#: R/decisioncalculator.b.R
-msgid "likelihood ratio %.2f raises the probability from %.1f%% to <b>%.1f%%</b>."
-msgstr ""
-
-#: R/decisioncalculator.b.R
-msgid "likelihood ratio %.3f lowers the probability from %.1f%% to <b>%.1f%%</b>."
-msgstr ""
-
 #: package/analyses/likelihoodratio.title
 #: package/analyses/likelihoodratio.menuTitle
 #: differentialdiagnosis/results/likelihoodRatios.title
@@ -69711,10 +70312,12 @@ msgstr ""
 msgid "Likelihood ratio nomogram"
 msgstr ""
 
+#: R/decisioncalculator.b.R
 #: R/decisioncompare.b.R
 msgid "Likelihood ratio of a negative test"
 msgstr ""
 
+#: R/decisioncalculator.b.R
 #: R/decisioncompare.b.R
 msgid "Likelihood ratio of a positive test"
 msgstr ""
@@ -69752,6 +70355,10 @@ msgstr ""
 msgid "Likelihood ratios and diagnostic test evaluation"
 msgstr ""
 
+#: R/decisioncalculator.b.R
+msgid "Likelihood ratios describe how a test result changes pre-test odds."
+msgstr ""
+
 #: likelihoodratio/options/showLikelihoodRatios.title
 msgid "Likelihood Ratios Table"
 msgstr ""
@@ -69762,6 +70369,10 @@ msgstr ""
 
 #: decisioncombine/results/combinationTableCIRatios.title
 msgid "Likelihood Ratios with 95% Confidence Intervals"
+msgstr ""
+
+#: R/decisioncalculator.b.R
+msgid "Likelihood-ratio update:"
 msgstr ""
 
 #: treatmentswitching/results/methodComparisonTable.columns.title
@@ -69827,6 +70438,10 @@ msgstr ""
 
 #: enhancedfactorvariable/options/plotTopFactorsOnly.description
 msgid "Limit plots to top factor levels only"
+msgstr ""
+
+#: R/nogoldstandard.b.R
+msgid "Limitations"
 msgstr ""
 
 #: R/waterfall.b.R
@@ -71245,13 +71860,6 @@ msgstr ""
 msgid "Low Estimate"
 msgstr ""
 
-#: R/nogoldstandard.b.R
-msgid ""
-"Low estimated prevalence: holding sensitivity and specificity fixed, a lower "
-"prevalence raises negative predictive value and lowers positive predictive "
-"value relative to a higher-prevalence setting."
-msgstr ""
-
 #: R/multisurvival.b.R
 msgid "Low event count"
 msgstr ""
@@ -71807,6 +72415,10 @@ msgstr ""
 msgid "LR- (Negative Likelihood Ratio)"
 msgstr ""
 
+#: R/decisioncalculator.b.R
+msgid "LR- (negative likelihood ratio)"
+msgstr ""
+
 #: R/decision.b.R
 msgid ""
 "LR- <0.1 strong evidence AGAINST disease, LR- 0.1-0.2 moderate, LR- 0.2-0.5 "
@@ -71823,6 +72435,10 @@ msgstr ""
 
 #: R/decision.b.R
 msgid "LR+ (Positive Likelihood Ratio)"
+msgstr ""
+
+#: R/decisioncalculator.b.R
+msgid "LR+ (positive likelihood ratio)"
 msgstr ""
 
 #: R/decision.b.R
@@ -72137,12 +72753,12 @@ msgstr ""
 msgid "Male level"
 msgstr ""
 
-#: cotest/options/preset/mammogram_ultrasound.title
-msgid "Mammogram + Ultrasound (Breast Cancer)"
-msgstr ""
-
 #: R/sequentialtests.b.R
 msgid "Mammography"
+msgstr ""
+
+#: cotest/options/preset/mammogram_ultrasound.title
+msgid "Mammography + ultrasound (demo only)"
 msgstr ""
 
 #: classification/options/knnDistance/manhattan.title
@@ -72812,6 +73428,12 @@ msgstr ""
 msgid "Match Status"
 msgstr ""
 
+#: R/nogoldstandard.b.R
+msgid ""
+"Match the method to the estimand: latent-class parameters and agreement with "
+"a self-built rule are different quantities."
+msgstr ""
+
 #: treatmenteffects/results/matching_summary.columns.title
 msgid "Match Type"
 msgstr ""
@@ -72930,6 +73552,13 @@ msgid ""
 "Matthews Correlation Coefficient (MCC) - a balanced metric for binary "
 "classification, especially useful for imbalanced datasets. Ranges from -1 "
 "(total disagreement) to +1 (perfect prediction)."
+msgstr ""
+
+#: R/decisioncalculator.b.R
+msgid ""
+"Matthews correlation coefficient summarizes all four cells and ranges from "
+"-1 to +1. Interpretation is context-dependent; no universal clinical cut-off "
+"is assumed."
 msgstr ""
 
 #: R/summarydata.b.R
@@ -73539,6 +74168,10 @@ msgstr ""
 #: classification/results/classificationMetrics/mccTable.columns.title
 #: modelperformance/results/comparisonTable.columns.title
 msgid "MCC"
+msgstr ""
+
+#: R/decisioncalculator.b.R
+msgid "MCC (Matthews correlation coefficient)"
 msgstr ""
 
 #: advancedraincloud/options/show_mcid.title
@@ -74433,6 +75066,10 @@ msgstr ""
 msgid "Measurement Variables"
 msgstr ""
 
+#: R/decisioncalculator.b.R
+msgid "Measures"
+msgstr ""
+
 #: R/summarydata.b.R
 msgid "Measures asymmetry. 0 = symmetric, &gt;0 = right-skewed, &lt;0 = left-skewed."
 msgstr ""
@@ -74466,12 +75103,9 @@ msgstr ""
 
 #: package/analyses/agreement.menuGroup
 #: package/analyses/decision.menuGroup
-#: package/analyses/decisioncalculator.menuGroup
-#: package/analyses/nogoldstandard.menuGroup
-#: package/analyses/decisioncompare.menuGroup
 #: package/analyses/psychopdaROC.menuGroup
 #: package/analyses/decisioncombine.menuGroup
-#: package/analyses/cotest.menuGroup
+#: package/analyses/sequentialtests.menuGroup
 #: package/analyses/decisioncurve.menuGroup
 #: package/analyses/betabinomialdiagnostic.menuSubgroup
 #: package/analyses/hierarchicalbayes.menuSubgroup
@@ -74480,15 +75114,14 @@ msgstr ""
 #: package/analyses/lassologistic.menuGroup
 #: agreement/options.menuGroup
 #: betabinomialdiagnostic/options.menuSubgroup
-#: cotest/options.menuGroup
 #: decision/options.menuGroup
-#: decisioncalculator/options.menuGroup
 #: decisioncombine/options.menuGroup
-#: decisioncompare/options.menuGroup
 #: decisioncurve/options.menuGroup
+#: enhancedROC/options.menuGroup
 #: hierarchicalbayes/options.menuSubgroup
 #: lassologistic/options.menuGroup
-#: nogoldstandard/options.menuGroup
+#: psychopdaROC/options.menuGroup
+#: sequentialtests/options.menuGroup
 msgid "meddecide"
 msgstr ""
 
@@ -74607,7 +75240,10 @@ msgstr ""
 msgid "meddecideExtraT"
 msgstr ""
 
-#: package/analyses/sequentialtests.menuGroup
+#: package/analyses/decisioncalculator.menuGroup
+#: package/analyses/nogoldstandard.menuGroup
+#: package/analyses/decisioncompare.menuGroup
+#: package/analyses/cotest.menuGroup
 #: package/analyses/classification.menuGroup
 #: package/analyses/enhancedROC.menuGroup
 #: package/analyses/psychopdaROC.menuGroup
@@ -74619,13 +75255,14 @@ msgstr ""
 #: package/analyses/mageeequation.menuGroup
 #: package/analyses/latentbiomarker.menuGroup
 #: clinicalscore/options.menuGroup
-#: enhancedROC/options.menuGroup
+#: cotest/options.menuGroup
+#: decisioncalculator/options.menuGroup
+#: decisioncompare/options.menuGroup
 #: latentbiomarker/options.menuGroup
 #: leaveonecenterout/options.menuGroup
 #: mageeequation/options.menuGroup
 #: misclassificationbias/options.menuGroup
-#: psychopdaROC/options.menuGroup
-#: sequentialtests/options.menuGroup
+#: nogoldstandard/options.menuGroup
 #: timedependentdca/options.menuGroup
 msgid "meddecideT"
 msgstr ""
@@ -75209,6 +75846,10 @@ msgstr ""
 msgid "Medical Decision Calculator"
 msgstr ""
 
+#: R/decisioncalculator.b.R
+msgid "Medical decision calculator"
+msgstr ""
+
 #: package/analyses/decisioncalculator.description
 #: decisioncalculator/options.description.main
 msgid ""
@@ -75218,7 +75859,8 @@ msgid ""
 "diagnostic performance metrics including sensitivity, specificity, \n"
 "positive and negative predictive values, likelihood ratios, and \n"
 "post-test probabilities. Supports confidence interval estimation and \n"
-"Fagan nomogram visualization for clinical decision making."
+"Fagan nomogram visualization for educational interpretation. Presets and\n"
+"examples are illustrative only and are not clinical guides."
 msgstr ""
 
 #: package/analyses/treemedical.title
@@ -75596,6 +76238,7 @@ msgstr ""
 #: comprehensiveSurvivalPower/results/methodComparison.columns.title
 #: concordanceindex/results/cindexSummary.columns.title
 #: datevalidator/results/corrected_data.columns.title
+#: decisioncompare/results/mcnemarTable.columns.title
 #: dynamicprediction/results/modelComparison.columns.title
 #: epidemiosurvival/results/age_standardized_rates.columns.title
 #: generalpseudo/results/methodComparison.columns.title
@@ -76090,7 +76733,12 @@ msgstr ""
 
 #: package/analyses/lassointro.menuTitle
 #: lassointro/options.menuTitle
+#: nogoldstandard/options/showMethodGuide.title
 msgid "Method Guide"
+msgstr ""
+
+#: nogoldstandard/ui[3][0]/showMethodGuide.label
+msgid "Method guide"
 msgstr ""
 
 #: sigmametrics/options/method.title
@@ -77015,6 +77663,14 @@ msgstr ""
 
 #: ihcheterogeneity/options/correlation_threshold.title
 msgid "Minimum Acceptable Correlation"
+msgstr ""
+
+#: decisioncompare/ui[1]/niMargin.label
+msgid "Minimum acceptable OPA (%)"
+msgstr ""
+
+#: decisioncompare/options/niMargin.title
+msgid "Minimum acceptable OPA (percent)"
 msgstr ""
 
 #: decisionpanel/options/minSensitivity.title
@@ -79608,12 +80264,6 @@ msgstr ""
 msgid "Moderate early retrieval performance"
 msgstr ""
 
-#: R/nogoldstandard.b.R
-msgid ""
-"Moderate estimated prevalence: positive and negative predictive values are "
-"more balanced at this prevalence."
-msgstr ""
-
 #: R/multisurvival.b.R
 msgid "Moderate event count"
 msgstr ""
@@ -80050,6 +80700,10 @@ msgstr ""
 msgid "Most incomplete variable: {variable}, {pct}% missing"
 msgstr ""
 
+#: R/nogoldstandard.b.R
+msgid "Most latent-class starts did not converge"
+msgstr ""
+
 #: hiddenmarkov/results/viterbiStates.title
 msgid "Most Likely Hidden States (Viterbi)"
 msgstr ""
@@ -80061,16 +80715,6 @@ msgstr ""
 
 #: R/venn.b.R
 msgid "Most Prevalent:"
-msgstr ""
-
-#: R/nogoldstandard.b.R
-msgid "Most robust method using mixture models (recommended)"
-msgstr ""
-
-#: R/nogoldstandard.b.R
-msgid ""
-"Most robust method using mixture models. Estimates disease prevalence and "
-"test parameters simultaneously."
 msgstr ""
 
 #: R/waterfall.b.R
@@ -80621,10 +81265,6 @@ msgstr ""
 
 #: ihcscoring/results/cutoffplot.title
 msgid "Multiple Cut-off Analysis Plot"
-msgstr ""
-
-#: decisioncalculator/ui[5][0].label
-msgid "Multiple Cut-off Comparison"
 msgstr ""
 
 #: decisioncalculator/options/multiplecuts.title
@@ -81565,6 +82205,11 @@ msgstr ""
 msgid "Nam-D'Agostino test"
 msgstr ""
 
+#: cotest/ui[1][0]/test1_name.label
+#: cotest/ui[2][0]/test2_name.label
+msgid "Name (optional)"
+msgstr ""
+
 #: ihcpredict/options/confidenceVarName.description
 msgid "Name for exported confidence score variable"
 msgstr ""
@@ -81583,6 +82228,14 @@ msgstr ""
 
 #: jrecode/options/new_var_name.description
 msgid "Name for the recoded variable"
+msgstr ""
+
+#: cotest/options/test1_name.title
+msgid "Name of test 1"
+msgstr ""
+
+#: cotest/options/test2_name.title
+msgid "Name of test 2"
 msgstr ""
 
 #: ihcpredict/options/trainingDiagnosis.description
@@ -81831,6 +82484,10 @@ msgstr ""
 msgid "Negative Cell Count"
 msgstr ""
 
+#: R/decisioncalculator.b.R
+msgid "Negative counts detected"
+msgstr ""
+
 #: biomarkerdiscovery/results/shap_biomarker_importance.columns.title
 #: clinicalprediction/results/shap_summary.columns.title
 msgid "Negative Impact %"
@@ -81867,6 +82524,13 @@ msgid ""
 "moderate, <0.5 = weak."
 msgstr ""
 
+#: R/decisioncalculator.b.R
+msgid ""
+"Negative likelihood ratio: the factor by which a negative result multiplies "
+"pre-test odds. Its practical importance depends on the clinical context and "
+"starting probability."
+msgstr ""
+
 #: jjsyndromicplot/ui[4][0]/colorlow.label
 #: pcaloadingheatmap/ui[3][0]/colorlow.label
 #: pcaloadingtest/ui[3][0]/colorlow.label
@@ -81891,8 +82555,17 @@ msgid "Negative Predictive Value"
 msgstr ""
 
 #: R/decision.b.R
+#: R/decisioncalculator.b.R
 #: R/decisioncompare.b.R
 msgid "Negative predictive value"
+msgstr ""
+
+#: R/decisioncalculator.b.R
+msgid "Negative predictive value using the supplied population prevalence."
+msgstr ""
+
+#: R/decisioncalculator.b.R
+msgid "Negative predictive value using this study sample's prevalence."
 msgstr ""
 
 #: R/decision.b.R
@@ -81966,6 +82639,10 @@ msgstr ""
 
 #: timeinterval/ui[3]/remove_negative.label
 msgid "Negative-interval exclusion"
+msgstr ""
+
+#: nogoldstandard/results/test_metrics.columns.superTitle
+msgid "Negative-Response Probability"
 msgstr ""
 
 #: R/chisqposttest.b.R
@@ -82631,10 +83308,6 @@ msgstr ""
 msgid "Next Due"
 msgstr ""
 
-#: decisioncompare/results/opaTable.columns.title
-msgid "NI Margin"
-msgstr ""
-
 #: advancedtrials/options/ni_margin_type.title
 msgid "NI Margin Scale"
 msgstr ""
@@ -82772,6 +83445,10 @@ msgstr ""
 
 #: R/decision.b.R
 msgid "No cases excluded."
+msgstr ""
+
+#: R/decisioncalculator.b.R
+msgid "No cases for cut-off"
 msgstr ""
 
 #: R/tableone.b.R
@@ -83004,12 +83681,12 @@ msgid ""
 "that this does not prove the assumption."
 msgstr ""
 
-#: advancedtrials/options/beta_spending/none.title
-msgid "No Futility Boundary"
+#: nogoldstandard/options/clinicalPreset/none.title
+msgid "No example"
 msgstr ""
 
-#: R/nogoldstandard.b.R
-msgid "No gold standard analysis using %s method"
+#: advancedtrials/options/beta_spending/none.title
+msgid "No Futility Boundary"
 msgstr ""
 
 #: R/jjpiestats.b.R
@@ -83067,6 +83744,10 @@ msgstr ""
 msgid "No missing values in any of the selected variables."
 msgstr ""
 
+#: R/decisioncalculator.b.R
+msgid "No negative test results"
+msgstr ""
+
 #: R/multisurvival.b.R
 msgid ""
 "No nomogram is drawn for a stratified model: each stratum has its own "
@@ -83088,6 +83769,10 @@ msgid ""
 "No observations fell in the two most-deviating leading-digit bins. This does "
 "not by itself establish conformity to Benford's Law; see the MAD and "
 "chi-square results in the summary table."
+msgstr ""
+
+#: R/decisioncalculator.b.R
+msgid "No obvious sparse-cell warning."
 msgstr ""
 
 #: R/jjpiestats.b.R
@@ -83125,6 +83810,10 @@ msgstr ""
 msgid "No plot type was selected; defaulting to ggvenn output."
 msgstr ""
 
+#: R/decisioncalculator.b.R
+msgid "No positive test results"
+msgstr ""
+
 #: jsummarytools/options/cross_proportions/none.title
 msgid "No Proportions"
 msgstr ""
@@ -83143,6 +83832,14 @@ msgstr ""
 
 #: qualityoflife/options/reference_population/none.title
 msgid "No Reference Population"
+msgstr ""
+
+#: R/decisioncalculator.b.R
+msgid "No reference-negative subjects"
+msgstr ""
+
+#: R/decisioncalculator.b.R
+msgid "No reference-positive subjects"
 msgstr ""
 
 #: R/advancedraincloud.b.R
@@ -83633,6 +84330,10 @@ msgstr ""
 msgid "Non-Events Percent"
 msgstr ""
 
+#: R/decisioncalculator.b.R
+msgid "Non-finite counts"
+msgstr ""
+
 #: R/benford.b.R
 msgid "Non-finite values excluded"
 msgstr ""
@@ -84100,26 +84801,6 @@ msgstr ""
 msgid "None Specified"
 msgstr ""
 
-#: decisioncompare/results/opaTable.columns.title
-msgid "Noninferior?"
-msgstr ""
-
-#: decisioncompare/options/niMargin.title
-msgid "Noninferiority Margin ( percent)"
-msgstr ""
-
-#: decisioncompare/ui[1]/niMargin.label
-msgid "Noninferiority Margin (%)"
-msgstr ""
-
-#: decisioncompare/options/niMargin.description.ui
-msgid ""
-"Noninferiority margin for agreement rate. The test is noninferior if the "
-"lower bound of the confidence interval exceeds this margin. Default 75 "
-"percent follows regulatory convention for AI diagnostic tool validation "
-"(e.g., FDA 510(k) submissions)."
-msgstr ""
-
 #: tumorgrowth/options/modelApproach/nls.title
 msgid "Nonlinear Least Squares"
 msgstr ""
@@ -84456,13 +85137,10 @@ msgid "Not estimable"
 msgstr ""
 
 #: R/enhancedROC.b.R
+#: R/nogoldstandard.b.R
 #: R/raincloud.b.R
 #: R/waterfall.b.R
 msgid "not estimable"
-msgstr ""
-
-#: R/nogoldstandard.b.R
-msgid "not estimable - fixed at 100% by the construction of this reference rule"
 msgstr ""
 
 #: R/raincloud.b.R
@@ -84487,6 +85165,10 @@ msgstr ""
 
 #: R/clinicalscore.b.R
 msgid "NOT reported"
+msgstr ""
+
+#: R/nogoldstandard.b.R
+msgid "not reported - fixed at 100% by construction"
 msgstr ""
 
 #: R/multisurvival.b.R
@@ -84853,6 +85535,7 @@ msgstr ""
 msgid "Nottingham Score (3-9) - for Equations 1 & 2"
 msgstr ""
 
+#: R/decisioncalculator.b.R
 #: R/decisioncombine.b.R
 #: R/psychopdaROC.b.R
 #: R/sequentialtests.b.R
@@ -84891,6 +85574,10 @@ msgstr ""
 #: R/decision.b.R
 #: R/sequentialtests.b.R
 msgid "NPV (Negative Predictive Value)"
+msgstr ""
+
+#: R/decisioncalculator.b.R
+msgid "NPV (negative predictive value)"
 msgstr ""
 
 #: pathagreement/results/diagnosticAccuracyTable.columns.title
@@ -85062,6 +85749,7 @@ msgid "Number at risk table"
 msgstr ""
 
 #: R/decision.b.R
+#: R/decisioncalculator.b.R
 #: R/decisioncompare.b.R
 msgid "Number needed to diagnose"
 msgstr ""
@@ -85296,26 +85984,6 @@ msgstr ""
 
 #: bayesdca/options/externalCases.description.ui
 msgid "Number of cases (positive outcomes) in external data."
-msgstr ""
-
-#: decisioncalculator/options/TN.description.ui
-msgid "Number of cases correctly identified as negative (healthy) by the test."
-msgstr ""
-
-#: decisioncalculator/options/TP.description.ui
-msgid "Number of cases correctly identified as positive (diseased) by the test."
-msgstr ""
-
-#: decisioncalculator/options/FN.description.ui
-msgid ""
-"Number of cases incorrectly identified as negative (diseased subjects that "
-"tested negative)."
-msgstr ""
-
-#: decisioncalculator/options/FP.description.ui
-msgid ""
-"Number of cases incorrectly identified as positive (healthy subjects that "
-"tested positive)."
 msgstr ""
 
 #: R/vartree.b.R
@@ -85990,6 +86658,22 @@ msgstr "Her olguyu değerlendirecek değerlendirici sayısı (2-6)."
 
 #: agreement/options/finnLevels.title
 msgid "Number of Rating Categories (Finn)"
+msgstr ""
+
+#: decisioncalculator/options/TN.description.ui
+msgid "Number of reference-negative cases with a negative test result."
+msgstr ""
+
+#: decisioncalculator/options/FP.description.ui
+msgid "Number of reference-negative cases with a positive test result."
+msgstr ""
+
+#: decisioncalculator/options/FN.description.ui
+msgid "Number of reference-positive cases with a negative test result."
+msgstr ""
+
+#: decisioncalculator/options/TP.description.ui
+msgid "Number of reference-positive cases with a positive test result."
 msgstr ""
 
 #: assayoptimization/options/replicates.title
@@ -86733,6 +87417,12 @@ msgstr ""
 msgid "Ocean (9 colors)"
 msgstr ""
 
+#: R/decisioncalculator.b.R
+msgid ""
+"Odds of a positive result in reference-positive versus reference-negative "
+"observations; no universal clinical cut-off is assumed."
+msgstr ""
+
 #: R/clinicalscore.b.R
 #: R/misclassificationbias.b.R
 #: clinicalcalculators/options/risk_communication/odds_ratio.title
@@ -87241,6 +87931,14 @@ msgid ""
 "standardise the column."
 msgstr ""
 
+#: R/decisioncalculator.b.R
+msgid ""
+"Only {positive} reference-positive and {negative} reference-negative "
+"observations are available. Estimates will be imprecise; inspect confidence "
+"intervals and justify sample size for the intended precision. This warning "
+"is not a clinical adequacy threshold."
+msgstr ""
+
 #: R/psychopdaROC.b.R
 msgid ""
 "Only %d cases in the smaller outcome class. Below about 10 per class the "
@@ -87365,8 +88063,14 @@ msgstr ""
 #: decisioncompare/results/opaTable.notes.note
 msgid ""
 "OPA = (TP + TN) / Total. OPA does not correct for chance agreement; consider "
-"Cohen's kappa for chance-corrected concordance. Noninferiority: lower CI "
-"bound must exceed margin to declare noninferior."
+"Cohen's kappa for chance-corrected concordance. The criterion is met when "
+"the lower CI bound exceeds the user-specified minimum OPA. The criterion is "
+"optional and descriptive. It is not a noninferiority comparison, regulatory "
+"guidance, or clinical guidance."
+msgstr ""
+
+#: decisioncompare/results/opaTable.columns.title
+msgid "OPA Criterion"
 msgstr ""
 
 #: ggprism/options/prism_shape_palette/open.title
@@ -87569,10 +88273,6 @@ msgstr ""
 
 #: clinicalvalidationinteractive/results/thresholdOptimization.description
 msgid "Optimal decision thresholds for different clinical scenarios"
-msgstr ""
-
-#: R/nogoldstandard.b.R
-msgid "Optimal for assessing agreement between pathologists or observers"
 msgstr ""
 
 #: clinicalheatmap/results/optimalKAnalysis/optimalKTable.columns.title
@@ -88216,6 +88916,12 @@ msgstr ""
 
 #: R/linechart.b.R
 msgid "Optionally add a grouping variable (treatment arms, patient groups)"
+msgstr ""
+
+#: R/decisioncalculator.b.R
+msgid ""
+"Optionally enable the summary, glossary, or about panels for additional "
+"guidance."
 msgstr ""
 
 #: decisioncompare/options/test3.description.ui
@@ -89854,7 +90560,7 @@ msgid "Overall Multi-Method ICC"
 msgstr ""
 
 #: decisioncompare/results/opaTable.title
-msgid "Overall Percent Agreement (OPA)"
+msgid "Overall Percent Agreement (Descriptive)"
 msgstr ""
 
 #: decisioncompare/options/opa.title
@@ -90865,6 +91571,14 @@ msgstr ""
 msgid "P(Superiority)"
 msgstr ""
 
+#: nogoldstandard/results/test_metrics.columns.title
+msgid "P(Test- | Class-/Rule-)"
+msgstr ""
+
+#: nogoldstandard/results/test_metrics.columns.title
+msgid "P(Test+ | Class+/Rule+)"
+msgstr ""
+
 #: markovmultistate/results/transitionProbabilities.columns.title
 msgid "P(transition)"
 msgstr ""
@@ -91014,6 +91728,11 @@ msgstr ""
 
 #: cochranq/ui[0][0].label
 msgid "Paired Binary Variables (minimum 3)"
+msgstr ""
+
+#: decisioncompare/results/mcnemarTable.columns.title
+#: decisioncompare/results/diffTable.columns.title
+msgid "Paired N"
 msgstr ""
 
 #: jjwithinstats/options/ggpubrPlotType/paired.title
@@ -91178,6 +91897,10 @@ msgstr ""
 
 #: enhancedROC/results/results/rocComparisons.description
 msgid "Pairwise comparisons between ROC curves"
+msgstr ""
+
+#: R/chisqposttest.b.R
+msgid "Pairwise comparisons disabled for high-cardinality table"
 msgstr ""
 
 #: R/jjridges.b.R
@@ -91909,6 +92632,10 @@ msgid ""
 "scale for comparability."
 msgstr ""
 
+#: R/decisioncalculator.b.R
+msgid "Partial confidence intervals with population prevalence"
+msgstr "Toplum prevalansı ile kısmi güven aralıkları"
+
 #: partialcorrelation/ui.title
 msgid "Partial Correlation Analysis"
 msgstr ""
@@ -92219,7 +92946,7 @@ msgid "Pathological Grading"
 msgstr ""
 
 #: nogoldstandard/options/clinicalPreset/pathology_agreement.title
-msgid "Pathologist Agreement"
+msgid "Pathologist Agreement (example)"
 msgstr ""
 
 #: package/analyses/pathologyagreement.title
@@ -93178,6 +93905,36 @@ msgstr ""
 
 #: emfrailty/options/estimation_method/penalized_em.title
 msgid "Penalized EM"
+msgstr ""
+
+#: nogoldstandard/options/method/bayesian.title
+#: nogoldstandard/ui[1][0]/method/bayesian.title
+msgid "Penalized EM (MAP-like; fixed priors; 3+ tests)"
+msgstr ""
+
+#: R/nogoldstandard.b.R
+msgid "Penalized EM (MAP-like; Fixed Priors)"
+msgstr ""
+
+#: R/nogoldstandard.b.R
+msgid "Penalized EM (MAP-like; fixed priors)"
+msgstr ""
+
+#: R/nogoldstandard.b.R
+msgid "Penalized EM (MAP-like):"
+msgstr ""
+
+#: R/nogoldstandard.b.R
+msgid ""
+"Penalized EM requires at least 3 tests because the two-test latent-class "
+"model is not statistically identifiable."
+msgstr ""
+
+#: R/nogoldstandard.b.R
+msgid ""
+"Penalized EM requires at least 3 tests. A two-class model over two binary "
+"tests is not statistically identifiable, so its prevalence and response "
+"probabilities cannot be estimated from the data."
 msgstr ""
 
 #: package/analyses/lassologistic.menuSubtitle
@@ -95440,12 +96197,15 @@ msgid ""
 "probability of disease."
 msgstr ""
 
+#: R/nogoldstandard.b.R
 #: basegraphics/results/summary.title
 #: clinicalheatmap/results/plainSummary.title
 #: ctdnadynamics/options/showSummary.title
 #: dataquality/results/summary.title
 #: jjcoefstats/results/plainSummary.title
 #: multifocalconcordance/options/showSummary.title
+#: nogoldstandard/options/showSummary.title
+#: nogoldstandard/results/clinical_summary.title
 #: pcacomponenttest/ui[7][0]/showSummary.label
 #: pcacomponenttest/results/summary.title
 #: synopticcompleteness/options/showSummary.title
@@ -95459,6 +96219,7 @@ msgstr ""
 #: decisioncalculator/options/showSummary.title
 #: ihcheterogeneity/options/showSummary.title
 #: ihcheterogeneity/ui[4]/showSummary.label
+#: nogoldstandard/ui[3][0]/showSummary.label
 msgid "Plain-language summary"
 msgstr ""
 
@@ -97342,10 +98103,6 @@ msgstr ""
 msgid "Population Risk Stratification"
 msgstr ""
 
-#: R/nogoldstandard.b.R
-msgid "Population screening scenarios where missing cases is costly"
-msgstr ""
-
 #: decisioncurve/ui[6][0]/populationSize.label
 msgid "Population size"
 msgstr ""
@@ -97401,6 +98158,10 @@ msgstr ""
 #: epidemiosurvival/options/population_weights.title
 #: epidemiosurvival/ui[0][5].label
 msgid "Population Weights"
+msgstr ""
+
+#: R/decisioncalculator.b.R
+msgid "Population-adjusted predictive values"
 msgstr ""
 
 #: differentialdiagnosis/options/prevalence_source/population_based.title
@@ -97492,6 +98253,16 @@ msgstr ""
 
 #: ihcthreshold/results/summaryTable.columns.title
 msgid "Positive % Range"
+msgstr ""
+
+#: R/nogoldstandard.b.R
+msgid "Positive agreement with the rule:"
+msgstr ""
+
+#: R/decisioncalculator.b.R
+msgid ""
+"Positive and negative predictive values are adjusted to the supplied "
+"population prevalence. No confidence intervals were requested."
 msgstr ""
 
 #: ihcscoring/results/multiplecutoffs/cutoffresults.columns.title
@@ -97607,6 +98378,13 @@ msgid ""
 "weak but potentially useful."
 msgstr ""
 
+#: R/decisioncalculator.b.R
+msgid ""
+"Positive likelihood ratio: the factor by which a positive result multiplies "
+"pre-test odds. Its practical importance depends on the clinical context and "
+"starting probability."
+msgstr ""
+
 #: jjsyndromicplot/ui[4][0]/colorhigh.label
 #: pcaloadingheatmap/ui[3][0]/colorhigh.label
 #: pcaloadingtest/ui[3][0]/colorhigh.label
@@ -97668,8 +98446,17 @@ msgid "Positive Predictive Value"
 msgstr ""
 
 #: R/decision.b.R
+#: R/decisioncalculator.b.R
 #: R/decisioncompare.b.R
 msgid "Positive predictive value"
+msgstr ""
+
+#: R/decisioncalculator.b.R
+msgid "Positive predictive value using the supplied population prevalence."
+msgstr ""
+
+#: R/decisioncalculator.b.R
+msgid "Positive predictive value using this study sample's prevalence."
 msgstr ""
 
 #: R/decision.b.R
@@ -97740,6 +98527,14 @@ msgstr ""
 
 #: R/chisqposttest.b.R
 msgid "Positive values (+)"
+msgstr ""
+
+#: R/nogoldstandard.b.R
+msgid "Positive-response probabilities in the high-positive class:"
+msgstr ""
+
+#: nogoldstandard/results/test_metrics.columns.superTitle
+msgid "Positive-Response Probability"
 msgstr ""
 
 #: clinicalvalidation/options/outcomeLevel.title
@@ -97905,12 +98700,10 @@ msgid "Post-Randomization Exclusions"
 msgstr ""
 
 #: decision/results/ratioTable.columns.title
-#: decisioncalculator/results/ratioTable.columns.title
 msgid "Post-test Disease Probability"
 msgstr ""
 
 #: decision/results/ratioTable.columns.title
-#: decisioncalculator/results/ratioTable.columns.title
 msgid "Post-test Health Probability"
 msgstr ""
 
@@ -97968,6 +98761,14 @@ msgstr ""
 
 #: likelihoodratio/results/postTestPlot.title
 msgid "Post-test Probability vs Prevalence"
+msgstr ""
+
+#: decisioncalculator/results/ratioTable.columns.title
+msgid "Post-test Reference-negative Probability"
+msgstr ""
+
+#: decisioncalculator/results/ratioTable.columns.title
+msgid "Post-test Reference-positive Probability"
 msgstr ""
 
 #: hierarchicalbayes/results/pooledEstimates.columns.title
@@ -98508,6 +99309,7 @@ msgstr ""
 msgid "PPS vs Correlation Plot"
 msgstr ""
 
+#: R/decisioncalculator.b.R
 #: R/decisioncombine.b.R
 #: R/psychopdaROC.b.R
 #: R/sequentialtests.b.R
@@ -98550,6 +99352,10 @@ msgstr ""
 msgid "PPV (Positive Predictive Value)"
 msgstr ""
 
+#: R/decisioncalculator.b.R
+msgid "PPV (positive predictive value)"
+msgstr ""
+
 #: pathagreement/results/diagnosticAccuracyTable.columns.title
 msgid "PPV %"
 msgstr ""
@@ -98559,12 +99365,22 @@ msgstr ""
 msgid "PPV and FDR for research findings"
 msgstr ""
 
+#: R/decisioncalculator.b.R
+msgid "PPV and NPV are post-test probabilities and depend on prevalence."
+msgstr ""
+
 #: R/psychopdaROC.b.R
 msgid ""
 "PPV and NPV below are computed at the prevalence of this sample (%.1f%%) and "
 "do not carry over to a population where the condition is more or less common "
 "- sensitivity and specificity do, predictive values do not. Recompute them "
 "for your own setting's prevalence before quoting them."
+msgstr ""
+
+#: R/decisioncalculator.b.R
+msgid ""
+"PPV and NPV vary with prevalence and should be verified in the target "
+"setting."
 msgstr ""
 
 #: prauc/results/performanceAtKey.columns.title
@@ -98722,7 +99538,15 @@ msgid "Pre-test"
 msgstr ""
 
 #: R/decisioncalculator.b.R
-msgid "Pre-test probability"
+msgid ""
+"Pre-test probability is {prevalence}, using the population prevalence you "
+"supplied."
+msgstr ""
+
+#: R/decisioncalculator.b.R
+msgid ""
+"Pre-test probability is {prevalence}, using the prevalence observed in this "
+"study table."
 msgstr ""
 
 #: irecist/options/baselineReference/pretreatment.title
@@ -98799,6 +99623,10 @@ msgstr ""
 
 #: methodvalidation/options/validation_type/precision_only.title
 msgid "Precision Study Only"
+msgstr ""
+
+#: R/decisioncalculator.b.R
+msgid "Precision-based sample-size guidance:"
 msgstr ""
 
 #: package/analyses/prauc.description
@@ -99979,6 +100807,13 @@ msgstr ""
 msgid "Presets & Settings"
 msgstr ""
 
+#: R/decisioncalculator.b.R
+msgid ""
+"Presets and scenarios are illustrative examples, not clinical guides. A "
+"cut-off requires external validation and consideration of harms, benefits, "
+"workflow, and the intended population."
+msgstr ""
+
 #: conditionalsurvival/options/method/pkm.title
 msgid "Presmoothed Kaplan-Meier"
 msgstr ""
@@ -100012,6 +100847,10 @@ msgstr ""
 msgid "Prevalence (%)"
 msgstr ""
 
+#: cotest/ui[4][0]/prevalence.label
+msgid "Prevalence (0-1)"
+msgstr ""
+
 #: decisioncalculator/ui[3][0][0]/pprob.label
 msgid "Prevalence (0.001-0.999)"
 msgstr ""
@@ -100030,6 +100869,12 @@ msgstr ""
 
 #: continuousmarkov/options/prevalence_estimates.title
 msgid "Prevalence Estimates"
+msgstr ""
+
+#: R/decisioncalculator.b.R
+msgid ""
+"Prevalence extrapolation can misstate PPV and NPV when study and target "
+"settings differ."
 msgstr ""
 
 #: clinicalvalidationinteractive/results/prevalenceAnalysis.title
@@ -100060,6 +100905,10 @@ msgstr ""
 msgid ""
 "Prevalence must be greater than 0 and less than 1 (exclusive). Current value "
 "is invalid."
+msgstr ""
+
+#: R/decisioncalculator.b.R
+msgid "Prevalence observed in this study sample."
 msgstr ""
 
 #: likelihoodratio/options/prevalenceRange.title
@@ -100805,6 +101654,30 @@ msgstr ""
 msgid "Probability Influence"
 msgstr ""
 
+#: R/decisioncalculator.b.R
+msgid ""
+"Probability of a reference-negative outcome after a negative test, using the "
+"displayed prevalence. It is identical to the NPV shown here."
+msgstr ""
+
+#: R/decisioncalculator.b.R
+msgid ""
+"Probability of a reference-negative outcome after a negative test; it "
+"depends on prevalence."
+msgstr ""
+
+#: R/decisioncalculator.b.R
+msgid ""
+"Probability of a reference-positive outcome after a positive test, using the "
+"displayed prevalence. It is identical to the PPV shown here."
+msgstr ""
+
+#: R/decisioncalculator.b.R
+msgid ""
+"Probability of a reference-positive outcome after a positive test; it "
+"depends on prevalence."
+msgstr ""
+
 #: R/decision.b.R
 msgid ""
 "Probability of being healthy given negative test. Depends on prevalence and "
@@ -101472,6 +102345,14 @@ msgstr ""
 msgid "Proportion of patients with CR, PR, or SD"
 msgstr ""
 
+#: R/decisioncalculator.b.R
+msgid "Proportion of reference-negative observations with a negative test result."
+msgstr ""
+
+#: R/decisioncalculator.b.R
+msgid "Proportion of reference-positive observations with a positive test result."
+msgstr ""
+
 #: samplingerror/options/eventFrequency.description
 msgid ""
 "Proportion of sample containing the event of interest (e.g.,  percent of "
@@ -101495,6 +102376,14 @@ msgid ""
 "Proportion of subjects in treatment group who will never experience the "
 "event (cure fraction). Usually higher than control group in effective "
 "treatments."
+msgstr ""
+
+#: R/decisioncalculator.b.R
+msgid "Proportion of subjects with outcome ruled in"
+msgstr ""
+
+#: R/decisioncalculator.b.R
+msgid "Proportion of subjects with outcome ruled out"
 msgstr ""
 
 #: R/decisioncompare.b.R
@@ -101808,6 +102697,10 @@ msgstr ""
 msgid "Provide Cohen's (1988) interpretation guidelines"
 msgstr ""
 
+#: R/decisioncalculator.b.R
+msgid "Provide diagnostic-test data with at least one non-zero count."
+msgstr ""
+
 #: jforestmodel/options/show_interpretation.description
 msgid "Provide interpretation guidance"
 msgstr ""
@@ -101880,12 +102773,12 @@ msgstr ""
 msgid "ps_"
 msgstr ""
 
-#: cotest/options/preset/psa_dre.title
-msgid "PSA + DRE (Prostate Cancer)"
-msgstr ""
-
 #: sequentialtests/options/preset/prostate_screening_exclusion.title
 msgid "PSA + MRI (Illustrative)"
+msgstr ""
+
+#: cotest/options/preset/psa_dre.title
+msgid "PSA + rectal examination (demo only)"
 msgstr ""
 
 #: decisiongraph/options/psa_distributions.title
@@ -103469,7 +104362,6 @@ msgstr ""
 #: multiclassroc/options/random_seed.title
 #: netreclassification/options/random_seed.title
 #: nogoldstandard/options/seed.title
-#: nogoldstandard/ui[3][0]/seed.label
 #: ordinalroc/options/random_seed.title
 #: patientsimilarity/options/seed.title
 #: pcacomponenttest/options/seed.title
@@ -103498,6 +104390,7 @@ msgstr ""
 
 #: decisioncurve/ui[7][0]/seed.label
 #: lassocox/ui[6][0].label
+#: nogoldstandard/ui[2][0]/seed.label
 #: outlierdetection/options/seed.title
 #: statsplot2/ui[2][0]/seed.label
 #: waterfall/options/seed.title
@@ -103672,7 +104565,7 @@ msgid ""
 msgstr ""
 
 #: R/nogoldstandard.b.R
-msgid "Range from"
+msgid "Range from {minimum}% to {maximum}%"
 msgstr ""
 
 #: enhancedROC/results/results/partialAucAnalysis.columns.title
@@ -103922,7 +104815,7 @@ msgid "Ranks a random case above a random non-case %.0f%% of the time"
 msgstr ""
 
 #: cotest/options/preset/covid_antigen_pcr.title
-msgid "Rapid Antigen + PCR (COVID-19)"
+msgid "Rapid antigen + PCR (demo only)"
 msgstr ""
 
 #: R/sequentialtests.b.R
@@ -103991,6 +104884,12 @@ msgstr ""
 
 #: evalue/options/rare.title
 msgid "Rare Outcome (< 15%)"
+msgstr ""
+
+#: R/decisioncalculator.b.R
+msgid ""
+"Rare outcomes often require a larger total sample, but no universal total is "
+"adequate for every intended use."
 msgstr ""
 
 #: functionalsampling/results/functional_assessment.columns.title
@@ -104462,9 +105361,10 @@ msgstr ""
 msgid ""
 "Read the nomogram by drawing a line from the pre-test probability on the "
 "left, through the likelihood ratio in the middle, to the post-test "
-"probability on the right. Sensitivity and specificity are properties of the "
-"test; the pre-test probability is not, so the same test moves a patient to a "
-"different endpoint in a different population."
+"probability on the right. Sensitivity and specificity describe agreement "
+"with the reference standard; the pre-test probability depends on population "
+"context, so the same test can lead to a different endpoint in another "
+"population."
 msgstr ""
 
 #: decisioncalculator/results/faganSummary.title
@@ -104886,14 +105786,6 @@ msgstr ""
 msgid "Recommended Dose"
 msgstr ""
 
-#: R/nogoldstandard.b.R
-msgid "Recommended for validating new diagnostic tests against existing standards"
-msgstr ""
-
-#: R/nogoldstandard.b.R
-msgid "Recommended Method"
-msgstr ""
-
 #: adaptivetrialdesign/results/sampleSizeEvolution.columns.title
 msgid "Recommended N"
 msgstr ""
@@ -105311,6 +106203,15 @@ msgstr ""
 msgid "Reference Model Summary"
 msgstr ""
 
+#: decisioncalculator/ui[0][0][1][1][0].label
+msgid "Reference negative"
+msgstr ""
+
+#: decisioncalculator/results/cTable.columns.title
+#: decisioncalculator/results/nTable.columns.title
+msgid "Reference Negative"
+msgstr ""
+
 #: irecist/ui[6].label
 msgid "Reference Options"
 msgstr ""
@@ -105329,6 +106230,15 @@ msgid ""
 "Reference population mortality rates. US/Minnesota/French/Slovenian tables "
 "are from the relsurv package. Other countries use WHO Global Health "
 "Observatory life table data bundled with this module."
+msgstr ""
+
+#: decisioncalculator/ui[0][0][1][0][0].label
+msgid "Reference positive"
+msgstr ""
+
+#: decisioncalculator/results/cTable.columns.title
+#: decisioncalculator/results/nTable.columns.title
+msgid "Reference Positive"
 msgstr ""
 
 #: ihcimmune/results/tilMethodResults.columns.title
@@ -105487,6 +106397,38 @@ msgstr ""
 msgid "Reference-Based Imputation"
 msgstr ""
 
+#: decisioncalculator/options/tn1.description.ui
+msgid "Reference-negative participants testing negative in illustrative scenario 1."
+msgstr ""
+
+#: decisioncalculator/options/tn2.description.ui
+msgid "Reference-negative participants testing negative in illustrative scenario 2."
+msgstr ""
+
+#: decisioncalculator/options/fp1.description.ui
+msgid "Reference-negative participants testing positive in illustrative scenario 1."
+msgstr ""
+
+#: decisioncalculator/options/fp2.description.ui
+msgid "Reference-negative participants testing positive in illustrative scenario 2."
+msgstr ""
+
+#: decisioncalculator/options/fn1.description.ui
+msgid "Reference-positive participants testing negative in illustrative scenario 1."
+msgstr ""
+
+#: decisioncalculator/options/fn2.description.ui
+msgid "Reference-positive participants testing negative in illustrative scenario 2."
+msgstr ""
+
+#: decisioncalculator/options/tp1.description.ui
+msgid "Reference-positive participants testing positive in illustrative scenario 1."
+msgstr ""
+
+#: decisioncalculator/options/tp2.description.ui
+msgid "Reference-positive participants testing positive in illustrative scenario 2."
+msgstr ""
+
 #: R/clinicalscore.b.R
 msgid "Reference: Collins GS et al. TRIPOD Statement. BMJ 2015;350:g7594"
 msgstr ""
@@ -105513,6 +106455,7 @@ msgid "Reference/Target Value"
 msgstr ""
 
 #: R/enhancedROC.b.R
+#: R/nogoldstandard.b.R
 #: diagnosticsamplesize/results/references.title
 #: functionalsampling/results/references.title
 #: ihcthreshold/results/references.title
@@ -105522,6 +106465,10 @@ msgstr ""
 #: samplingerror/results/references.title
 #: stereology/results/references.title
 msgid "References"
+msgstr ""
+
+#: R/decisioncalculator.b.R
+msgid "References:"
 msgstr ""
 
 #: ihccluster/options/refinementIterations.title
@@ -106409,6 +107356,12 @@ msgstr ""
 msgid "Report & Explanations"
 msgstr ""
 
+#: R/decisioncalculator.b.R
+msgid ""
+"Report achieved confidence intervals because a nominal sample-size threshold "
+"does not guarantee adequate precision."
+msgstr ""
+
 #: singlearm/options/advancedDiagnostics.description
 msgid ""
 "Report cohort size, event count, observed event proportion, follow-up "
@@ -107203,6 +108156,13 @@ msgstr ""
 
 #: cochranq/results/responsePatternPlot.title
 msgid "Response Pattern Visualization"
+msgstr ""
+
+#: R/nogoldstandard.b.R
+msgid ""
+"Response probabilities are shown using sensitivity/specificity terminology "
+"only under the assumption that the high-positive latent class represents "
+"disease. Latent-class labels are not identified by the data."
 msgstr ""
 
 #: R/waterfall.b.R
@@ -109667,6 +110627,25 @@ msgstr ""
 msgid "Sample above (rows)"
 msgstr ""
 
+#: decisioncalculator/results/ratioTable.columns.title
+#: decisioncalculator/results/multipleCutoffTable.columns.title
+msgid "Sample Accuracy"
+msgstr ""
+
+#: R/decisioncalculator.b.R
+msgid ""
+"Sample accuracy is the proportion of concordant results. It is computed at "
+"the prevalence observed in this sample ({prevalence}) and changes with case "
+"mix."
+msgstr ""
+
+#: R/decisioncalculator.b.R
+msgid ""
+"Sample accuracy is the proportion of concordant results. It is computed at "
+"the prevalence observed in this sample ({prevalence}), not at the supplied "
+"population prevalence, and changes with case mix."
+msgstr ""
+
 #: ihcthreshold/options/sampleArea.title
 msgid "Sample Area ID"
 msgstr ""
@@ -110110,7 +111089,7 @@ msgstr ""
 msgid "samples"
 msgstr ""
 
-#: nogoldstandard/ui[3][0]/nboot.label
+#: nogoldstandard/ui[2][0]/nboot.label
 #: pathsampling/results/obsPredTable.columns.title
 #: pathsampling/results/populationDetectionTable.columns.title
 #: pathsampling/results/stratifiedDetectionTable.columns.title
@@ -110658,7 +111637,7 @@ msgstr ""
 
 #: decisioncalculator/ui[5][1][0]/cutoff1.label
 #: decisioncalculator/ui[5][2][0]/cutoff2.label
-msgid "Scenario Name"
+msgid "Scenario name"
 msgstr ""
 
 #: lassologistic/results/scoringTable.columns.title
@@ -110767,6 +111746,14 @@ msgstr ""
 #: grafify/ui.title
 #: grafify/results.title
 msgid "Scientific Visualization with Grafify"
+msgstr ""
+
+#: R/nogoldstandard.b.R
+msgid "Scope warning:"
+msgstr ""
+
+#: R/decisioncalculator.b.R
+msgid "Scope:"
 msgstr ""
 
 #: explainableai/results/validationmetrics/validationtable.columns.title
@@ -111050,7 +112037,7 @@ msgid "Screening Test"
 msgstr ""
 
 #: nogoldstandard/options/clinicalPreset/screening_evaluation.title
-msgid "Screening Test Assessment"
+msgid "Screening Test Assessment (example)"
 msgstr ""
 
 #: package/analyses/screeningcalculator.title
@@ -112029,8 +113016,9 @@ msgstr ""
 msgid ""
 "Select the most reliable diagnostic method available (e.g., biopsy, final "
 "pathology,  expert consensus). This is the \"truth\" against which we "
-"compare other tests.  Must be categorical with exactly 2 levels "
-"(positive/negative)."
+"compare other tests.  The selected positive level is compared with the "
+"remaining levels; if indeterminate values should be excluded, also select "
+"explicit negative levels."
 msgstr ""
 
 #: survivalcont/options/num_cutoffs.description
@@ -112358,10 +113346,6 @@ msgstr ""
 msgid "Selection Step"
 msgstr ""
 
-#: R/nogoldstandard.b.R
-msgid "Selection Tips"
-msgstr ""
-
 #: package/analyses/grouplasso.menuSubtitle
 #: grouplasso/options.menuSubtitle
 msgid "Selects or removes pre-defined biological/categorical groups together."
@@ -112466,6 +113450,7 @@ msgstr ""
 
 #: R/clinicalscore.b.R
 #: R/decision.b.R
+#: R/decisioncalculator.b.R
 #: R/decisioncombine.b.R
 #: R/decisioncompare.b.R
 #: R/lassologistic.b.R
@@ -112511,8 +113496,6 @@ msgstr ""
 #: misclassificationbias/results/rangeTable.columns.title
 #: multiclassdiagnostics/results/perClassMetrics.columns.title
 #: multiclassroc/results/classMetricsTable.columns.title
-#: nogoldstandard/results/test_metrics.columns.title
-#: nogoldstandard/results/test_metrics.columns.superTitle
 #: ordinalroc/results/cumulativeAUC.columns.title
 #: ordinalroc/results/optimalThresholds.columns.title
 #: pathagreement/results/categoryTable.columns.title
@@ -112570,6 +113553,10 @@ msgstr ""
 #: R/lassologistic.b.R
 msgid "Sensitivity (Recall)"
 msgstr "Duyarlılık (Recall)"
+
+#: R/decisioncalculator.b.R
+msgid "Sensitivity (true-positive rate)"
+msgstr ""
 
 #: segmentationmetrics/options/sensitivity_specificity.title
 msgid "Sensitivity & Specificity (Pixel-wise)"
@@ -112731,6 +113718,12 @@ msgstr ""
 msgid "Sensitivity Analysis Results"
 msgstr ""
 
+#: R/nogoldstandard.b.R
+msgid ""
+"Sensitivity analysis showing how the fixed penalties affect a "
+"conditional-independence fit."
+msgstr ""
+
 #: qtwist/options/show_sensitivity_table.title
 msgid "Sensitivity Analysis Table"
 msgstr ""
@@ -112771,6 +113764,12 @@ msgstr ""
 msgid "Sensitivity in Controls"
 msgstr ""
 
+#: R/decisioncalculator.b.R
+msgid ""
+"Sensitivity is the proportion of reference-positive observations with a "
+"positive test result."
+msgstr ""
+
 #: bayesianci/results/sensitivityAnalysis.columns.title
 #: bayesianma/results/sensitivityAnalysis.columns.title
 msgid "Sensitivity Measure"
@@ -112782,6 +113781,12 @@ msgstr ""
 
 #: stagemigration/results/informativeCensoringSensitivity.columns.title
 msgid "Sensitivity Parameter"
+msgstr ""
+
+#: R/decisioncalculator.b.R
+msgid ""
+"Sensitivity plus specificity minus one; it weights both equally and is not a "
+"measure of clinical utility or a universal cut-off."
 msgstr ""
 
 #: misclassificationbias/options/senRange.title
@@ -112858,6 +113863,10 @@ msgstr ""
 msgid ""
 "Sensitivity: Proportion of diseased patients correctly identified (TP rate). "
 "Higher is better for ruling OUT disease when negative."
+msgstr ""
+
+#: R/decisioncalculator.b.R
+msgid "Sensitivity: true positives among reference-positive subjects"
 msgstr ""
 
 #: psychopdaROC/options/showCriterionPlot.title
@@ -113640,6 +114649,12 @@ msgstr ""
 
 #: modalitycomparison/options/confidence_intervals.title
 msgid "Show 95 percent Confidence Intervals"
+msgstr ""
+
+#: decisioncompare/options/ci.description.ui
+msgid ""
+"Show 95 percent confidence intervals for per-test diagnostic accuracy "
+"estimates."
 msgstr ""
 
 #: modalitycomparison/ui[2][0]/confidence_intervals.label
@@ -114854,9 +115869,8 @@ msgstr ""
 
 #: decisioncalculator/options/showAbout.description.ui
 msgid ""
-"Show explanatory panels describing test evaluation methodology, assumptions, "
-"and clinical guidance. Helpful for understanding when and how to use this "
-"analysis."
+"Show explanatory panels describing test evaluation methodology and "
+"assumptions. Helpful for understanding when and how to use this analysis."
 msgstr ""
 
 #: ihcbasic/options/showHeatmap.title
@@ -117650,14 +118664,6 @@ msgid ""
 "datasets with few categories"
 msgstr ""
 
-#: R/nogoldstandard.b.R
-msgid ""
-"Simple and intuitive. Not an accuracy estimate: each test helps build the "
-"standard it is judged against, which inflates its apparent performance. "
-"Needs 3+ tests -- with 2 a tie counts as diseased, making it identical to "
-"Any Test Positive"
-msgstr ""
-
 #: patientreported/options/change_analysis/simple_change.title
 #: qualityoflife/options/change_analysis/simple_change.title
 msgid "Simple Change Scores"
@@ -119372,10 +120378,6 @@ msgstr ""
 msgid "Specialized for competing events scenarios"
 msgstr ""
 
-#: R/nogoldstandard.b.R
-msgid "Specialized for tumor marker validation studies"
-msgstr ""
-
 #: simpleSurvivalPower/ui[4].label
 #: survivalPower/ui[4].label
 msgid "Specialized Methods"
@@ -119528,6 +120530,7 @@ msgstr ""
 
 #: R/clinicalscore.b.R
 #: R/decision.b.R
+#: R/decisioncalculator.b.R
 #: R/decisioncombine.b.R
 #: R/decisioncompare.b.R
 #: R/lassologistic.b.R
@@ -119573,8 +120576,6 @@ msgstr ""
 #: misclassificationbias/results/rangeTable.columns.title
 #: multiclassdiagnostics/results/perClassMetrics.columns.title
 #: multiclassroc/results/classMetricsTable.columns.title
-#: nogoldstandard/results/test_metrics.columns.title
-#: nogoldstandard/results/test_metrics.columns.superTitle
 #: ordinalroc/results/cumulativeAUC.columns.title
 #: ordinalroc/results/optimalThresholds.columns.title
 #: pathagreement/results/categoryTable.columns.title
@@ -119614,6 +120615,10 @@ msgstr ""
 msgid "Specificity (0-1)"
 msgstr ""
 
+#: R/decisioncalculator.b.R
+msgid "Specificity (true-negative rate)"
+msgstr ""
+
 #: pathagreement/results/diagnosticAccuracyTable.columns.title
 msgid "Specificity %"
 msgstr ""
@@ -119642,6 +120647,12 @@ msgstr ""
 msgid "Specificity in Controls"
 msgstr ""
 
+#: R/decisioncalculator.b.R
+msgid ""
+"Specificity is the proportion of reference-negative observations with a "
+"negative test result."
+msgstr ""
+
 #: rocreg/options/covariate_effects/specificity.title
 msgid "Specificity Only (Non-diseased Group)"
 msgstr ""
@@ -119663,6 +120674,10 @@ msgstr ""
 msgid ""
 "Specificity: Proportion of healthy patients correctly identified (TN rate). "
 "Higher is better for ruling IN disease when positive."
+msgstr ""
+
+#: R/decisioncalculator.b.R
+msgid "Specificity: true negatives among reference-negative subjects"
 msgstr ""
 
 #: R/lassologistic.b.R
@@ -119839,6 +120854,12 @@ msgstr ""
 #: treeadvanced/options/plot_palette/Spectral.title
 #: treemedical/options/plot_palette/Spectral.title
 msgid "Spectral"
+msgstr ""
+
+#: R/decisioncalculator.b.R
+msgid ""
+"Spectrum bias occurs when the study population differs materially from "
+"clinical practice."
 msgstr ""
 
 #: R/gsdesign.b.R
@@ -121119,10 +122140,6 @@ msgid ""
 "later."
 msgstr ""
 
-#: R/nogoldstandard.b.R
-msgid "Start with Latent Class Analysis for most diagnostic studies"
-msgstr ""
-
 #: R/waterfall.b.R
 msgid ""
 "Start with percentage data if available, or use raw measurements with proper "
@@ -121516,6 +122533,30 @@ msgstr ""
 msgid "Statistical Assumptions & Warnings"
 msgstr ""
 
+#: R/nogoldstandard.b.R
+msgid "Statistical background"
+msgstr ""
+
+#: R/nogoldstandard.b.R
+msgid "Statistical background: All-tests-positive rule"
+msgstr ""
+
+#: R/nogoldstandard.b.R
+msgid "Statistical background: Any-test-positive rule"
+msgstr ""
+
+#: R/nogoldstandard.b.R
+msgid "Statistical background: Composite reference rule"
+msgstr ""
+
+#: R/nogoldstandard.b.R
+msgid "Statistical background: Latent class analysis"
+msgstr ""
+
+#: R/nogoldstandard.b.R
+msgid "Statistical background: Penalized EM"
+msgstr ""
+
 #: adaptivetrialdesign/results/dmbRecommendations.columns.title
 msgid "Statistical Basis"
 msgstr ""
@@ -121680,6 +122721,7 @@ msgstr ""
 msgid "Statistical Guidance"
 msgstr ""
 
+#: decisioncompare/results/mcnemarTable.columns.title
 #: enhancedcrosstable/results/interpretation.title
 #: jggstats/results/interpretation.title
 #: nonparametric/results/tests.columns.title
@@ -123186,10 +124228,6 @@ msgstr ""
 msgid "Strength of Evidence"
 msgstr ""
 
-#: R/nogoldstandard.b.R
-msgid "Strengths"
-msgstr ""
-
 #: R/riverplot.b.R
 msgid ""
 "Strengths: Clear flow patterns, handles multiple time points, supports "
@@ -123245,6 +124283,10 @@ msgstr ""
 msgid ""
 "Strong partial correlations suggest a direct relationship that persists even "
 "after controlling for other factors"
+msgstr ""
+
+#: R/decisioncalculator.b.R
+msgid "STRONG WARNING"
 msgstr ""
 
 #: R/sequentialtests.b.R
@@ -123324,8 +124366,8 @@ msgstr ""
 
 #: R/nogoldstandard.b.R
 msgid ""
-"Studies where you have prior information about expected "
-"sensitivity/specificity"
+"Studies with at least three tests whose errors are plausibly independent "
+"within each latent class."
 msgstr ""
 
 #: bayesiandiagnostic/results/metaAnalysisResults.columns.title
@@ -124186,6 +125228,12 @@ msgstr ""
 msgid "Summary Lower CI"
 msgstr ""
 
+#: R/decisioncalculator.b.R
+msgid ""
+"Summary measure using all four cells, ranging from -1 to +1; interpretation "
+"is context-dependent."
+msgstr ""
+
 #: clinicaldashboard/results/summaryMetrics.title
 msgid "Summary Metrics"
 msgstr ""
@@ -124644,6 +125692,10 @@ msgstr ""
 
 #: classification/ui[8].label
 msgid "Support Vector Machine (SVM)"
+msgstr ""
+
+#: R/decisioncalculator.b.R
+msgid "Support, but do not replace, a clinical validation plan."
 msgstr ""
 
 #: R/jjcorrmat.b.R
@@ -127010,20 +128062,20 @@ msgstr ""
 
 #: R/nogoldstandard.b.R
 msgid ""
-"Test '%s' has categories with <5 observations. Results may be unstable. "
-"Consider combining categories if clinically appropriate."
+"Test '{test}' has a category with fewer than 5 observations. Estimates may "
+"be unstable. Combine categories only when substantively defensible."
 msgstr ""
 
 #: R/nogoldstandard.b.R
 msgid ""
-"Test '%s' shows extreme imbalance (minority category %.1f%%). This may "
-"affect parameter estimation."
+"Test '{test}' is extremely imbalanced: the minority category is "
+"{percentage}% of observations. This may destabilize parameter estimation."
 msgstr ""
 
 #: decisioncompare/ui[0][1].label
 #: decisionpanel/options/test1.title
 #: nogoldstandard/options/test1.title
-#: nogoldstandard/ui[1][0].label
+#: nogoldstandard/ui[0][0].label
 msgid "Test 1"
 msgstr ""
 
@@ -127058,7 +128110,7 @@ msgid "Test 1 Negative Level"
 msgstr ""
 
 #: cotest/ui[1].label
-msgid "Test 1 Parameters"
+msgid "Test 1 parameters"
 msgstr ""
 
 #: decisioncombine/results/individualTest1.title
@@ -127078,7 +128130,7 @@ msgid "Test 1 Positive Level"
 msgstr ""
 
 #: cotest/options/test1_sens.title
-msgid "Test 1 Sensitivity"
+msgid "Test 1 sensitivity"
 msgstr ""
 
 #: R/sequentialtests.b.R
@@ -127102,7 +128154,7 @@ msgid ""
 msgstr ""
 
 #: cotest/options/test1_spec.title
-msgid "Test 1 Specificity"
+msgid "Test 1 specificity"
 msgstr ""
 
 #: R/sequentialtests.b.R
@@ -127132,7 +128184,7 @@ msgstr ""
 #: decisioncompare/ui[0][2].label
 #: decisionpanel/options/test2.title
 #: nogoldstandard/options/test2.title
-#: nogoldstandard/ui[1][1].label
+#: nogoldstandard/ui[0][1].label
 msgid "Test 2"
 msgstr ""
 
@@ -127170,7 +128222,7 @@ msgid "Test 2 Negative Level"
 msgstr ""
 
 #: cotest/ui[2].label
-msgid "Test 2 Parameters"
+msgid "Test 2 parameters"
 msgstr ""
 
 #: decisioncombine/results/individualTest2.title
@@ -127190,7 +128242,7 @@ msgid "Test 2 Positive Level"
 msgstr ""
 
 #: cotest/options/test2_sens.title
-msgid "Test 2 Sensitivity"
+msgid "Test 2 sensitivity"
 msgstr ""
 
 #: R/sequentialtests.b.R
@@ -127214,7 +128266,7 @@ msgid ""
 msgstr ""
 
 #: cotest/options/test2_spec.title
-msgid "Test 2 Specificity"
+msgid "Test 2 specificity"
 msgstr ""
 
 #: R/sequentialtests.b.R
@@ -127258,7 +128310,7 @@ msgstr ""
 #: decisioncombine/ui[0][3].label
 #: decisioncompare/options/test3.title
 #: decisionpanel/options/test3.title
-#: nogoldstandard/ui[1][2].label
+#: nogoldstandard/ui[0][2].label
 msgid "Test 3 (Optional)"
 msgstr ""
 
@@ -127280,7 +128332,7 @@ msgid "Test 4"
 msgstr ""
 
 #: decisionpanel/options/test4.title
-#: nogoldstandard/ui[1][3].label
+#: nogoldstandard/ui[0][3].label
 msgid "Test 4 (Optional)"
 msgstr ""
 
@@ -127289,7 +128341,7 @@ msgid "Test 5"
 msgstr ""
 
 #: decisionpanel/options/test5.title
-#: nogoldstandard/ui[1][4].label
+#: nogoldstandard/ui[0][4].label
 msgid "Test 5 (Optional)"
 msgstr ""
 
@@ -127302,15 +128354,8 @@ msgid "Test age interaction"
 msgstr ""
 
 #: R/nogoldstandard.b.R
-msgid "Test Agreement Matrix"
-msgstr ""
-
 #: nogoldstandard/results/agreement_plot.title
-msgid "Test Agreement Plot (Base)"
-msgstr ""
-
-#: nogoldstandard/results/agreement_plot2.title
-msgid "Test Agreement Plot (ggplot2)"
+msgid "Test Agreement Matrix"
 msgstr ""
 
 #: sequentialtests/options/strategy/serial_negative.title
@@ -127414,7 +128459,7 @@ msgid "Test Dates"
 msgstr ""
 
 #: cotest/results/dependenceInfo.title
-msgid "Test Dependence Information"
+msgid "Test Dependence"
 msgstr ""
 
 #: likelihoodratio/options/testDirection.title
@@ -127621,7 +128666,7 @@ msgid ""
 msgstr ""
 
 #: cotest/ui[3].label
-msgid "Test Independence"
+msgid "Test independence"
 msgstr ""
 
 #: distributionfit/options/test_loglogistic.title
@@ -127696,6 +128741,10 @@ msgstr ""
 msgid "Test Negative"
 msgstr ""
 
+#: R/decisioncalculator.b.R
+msgid "Test negative"
+msgstr ""
+
 #: decision/options/testNegative.title
 msgid "Test Negative Level"
 msgstr ""
@@ -127747,15 +128796,15 @@ msgstr ""
 msgid "Test Performance Comparison"
 msgstr ""
 
-#: nogoldstandard/results/test_metrics.title
-msgid "Test Performance Metrics"
-msgstr ""
-
 #: R/decision.b.R
 #: R/decisioncombine.b.R
 #: R/decisioncompare.b.R
 #: sequentialtests/results/population_flow_table.columns.title
 msgid "Test Positive"
+msgstr ""
+
+#: R/decisioncalculator.b.R
+msgid "Test positive"
 msgstr ""
 
 #: bayesiandiagnostic/options/test_positive_level.title
@@ -127862,10 +128911,7 @@ msgstr ""
 msgid "Test Selection and Main Options"
 msgstr ""
 
-#: R/nogoldstandard.b.R
-msgid "Test sensitivities:"
-msgstr ""
-
+#: R/decisioncalculator.b.R
 #: R/decisioncompare.b.R
 msgid "Test sensitivity"
 msgstr ""
@@ -127894,6 +128940,7 @@ msgstr ""
 msgid "Test Spatial Randomness"
 msgstr ""
 
+#: R/decisioncalculator.b.R
 #: R/decisioncompare.b.R
 msgid "Test specificity"
 msgstr ""
@@ -128148,6 +129195,10 @@ msgstr ""
 
 #: treatmentmeta/results/heterogeneity.description
 msgid "Tests and measures of between-study heterogeneity"
+msgstr ""
+
+#: R/nogoldstandard.b.R
+msgid "Tests do not appear to err independently"
 msgstr ""
 
 #: factoranalysis/results/results/adequacyTable.description
@@ -128579,6 +129630,14 @@ msgid ""
 "sample size of %d."
 msgstr ""
 
+#: R/chisqposttest.b.R
+msgid ""
+"The contingency table generates %d pairwise comparisons, exceeding the "
+"safety threshold of 500. Pairwise comparisons were disabled to avoid "
+"computational freezing and extreme multiple-testing penalties. Please bin "
+"continuous variables or group factor levels."
+msgstr ""
+
 #: survivalcont/options/contexpl.description
 msgid "The continuous explanatory variable to be used in the analysis."
 msgstr ""
@@ -128634,6 +129693,12 @@ msgstr ""
 msgid ""
 "the cut points you supplied, and the sample median for the predictors you "
 "did not give one for"
+msgstr ""
+
+#: R/decisioncalculator.b.R
+msgid ""
+"The cut-off comparison cannot be performed because at least one scenario has "
+"invalid frequencies."
 msgstr ""
 
 #: R/psychopdaROC.b.R
@@ -128852,6 +129917,12 @@ msgid ""
 "used; the AUC differences and p-values below come from that fallback."
 msgstr ""
 
+#: R/decisioncalculator.b.R
+msgid ""
+"The epiR package is required for confidence intervals. Install it or disable "
+"confidence intervals."
+msgstr ""
+
 #: eurostatmap/options/dataset_id.description.jamovi
 msgid "The Eurostat dataset identifier to retrieve data from."
 msgstr ""
@@ -128895,6 +129966,14 @@ msgid ""
 "The factor level of the outcome variable that represents the positive case "
 "(event = 1). Required to avoid relying on alphabetic level order, which can "
 "silently invert calibration and AUC interpretation."
+msgstr ""
+
+#: R/nogoldstandard.b.R
+msgid ""
+"The fitted high-positive class contains {proportion}% of analyzed cases. "
+"This is a diagnostic warning, not a clinical threshold: class orientation is "
+"uncertain and predictive values and response-probability estimates can be "
+"unstable near the boundary."
 msgstr ""
 
 #: R/multisurvival.b.R
@@ -129059,6 +130138,14 @@ msgid ""
 "how precisely this sample pins the AUC down."
 msgstr ""
 
+#: R/nogoldstandard.b.R
+msgid ""
+"The latent-class analysis has N = {n}. N < 100 is a general stability "
+"warning, not a clinical adequacy threshold; precision also depends on class "
+"balance, response patterns, and the number of tests. Inspect bootstrap "
+"intervals and convergence, and consider collecting more observations."
+msgstr ""
+
 #: venn/options/var1true.description.jamovi
 msgid "The level in `var1` that represents the true condition."
 msgstr ""
@@ -129218,6 +130305,24 @@ msgid ""
 "KMunicate-style plot manages its own y-axis."
 msgstr ""
 
+#: R/nogoldstandard.b.R
+msgid ""
+"The model assumes conditional independence within each latent class. A large "
+"bivariate residual is evidence against that assumption but does not "
+"determine the direction of bias."
+msgstr ""
+
+#: R/nogoldstandard.b.R
+msgid ""
+"The model cannot determine which class is disease. Results are oriented so "
+"that the class with the higher average selected-positive probability is the "
+"high-positive class. Calling that class diseased, and the response "
+"probabilities sensitivity and specificity, requires the substantive "
+"assumption that selected-positive results are more common in diseased people "
+"for most tests. If tests perform below chance or positive levels are "
+"reversed, the clinical interpretation is inverted."
+msgstr ""
+
 #: R/multisurvival.b.R
 msgid "The model could not be evaluated under this adjustment method."
 msgstr ""
@@ -129237,6 +130342,26 @@ msgstr ""
 
 #: R/decisiongraph.b.R
 msgid "The monetary value of health benefits minus the costs"
+msgstr ""
+
+#: R/decisioncalculator.b.R
+msgid ""
+"The named scenarios are illustrative examples, not clinical guides. The "
+"current row reports which scenario has the highest Youden's J and whether "
+"its separately calculated accuracy interval overlaps the current row. "
+"Choosing a cut-off on the same data used to assess it is optimistically "
+"biased and does not establish clinical utility."
+msgstr ""
+"Adlandırılmış senaryolar açıklayıcı örneklerdir; klinik rehber değildir. "
+"Güncel satır, hangi senaryonun en yüksek Youden J değerine sahip olduğunu ve "
+"ayrı hesaplanan doğruluk aralığının güncel satırla örtüşüp örtüşmediğini "
+"bildirir. Kesim noktasını aynı veriler üzerinde seçmek iyimser yanlılığa yol "
+"açar ve klinik yararı kanıtlamaz."
+
+#: R/nogoldstandard.b.R
+msgid ""
+"The negative-response probability and PPV are fixed at 100% by construction "
+"and therefore are left blank."
 msgstr ""
 
 #: R/multisurvival.b.R
@@ -129314,14 +130439,6 @@ msgid ""
 "groups ({nGroups}), so default labels were used."
 msgstr ""
 
-#: R/nogoldstandard.b.R
-msgid ""
-"The only method here that estimates accuracy rather than agreement with a "
-"self-built reference; provides model fit statistics. Assumes the tests are "
-"conditionally independent given true status -- it does NOT model conditional "
-"dependence"
-msgstr ""
-
 #: R/clinicalscore.b.R
 msgid "The optimal cutoff divides patients into high-risk vs low-risk groups"
 msgstr ""
@@ -129395,6 +130512,14 @@ msgid ""
 "analysis."
 msgstr ""
 
+#: R/nogoldstandard.b.R
+msgid ""
+"The penalized-EM analysis has N = {n}. N < 50 is a general stability "
+"warning, not a clinical adequacy threshold; fixed priors may have "
+"substantial influence. Inspect bootstrap intervals and consider collecting "
+"more observations."
+msgstr ""
+
 #: advancedSurvivalPower/options/accrual_time.description
 msgid ""
 "The period over which participants are recruited, in years. Only used for "
@@ -129405,10 +130530,6 @@ msgstr ""
 msgid "The point-scoring guide and the nomogram plot are shown below."
 msgstr ""
 
-#: R/decisioncalculator.b.R
-msgid "the population prevalence you supplied"
-msgstr ""
-
 #: R/psychopdaROC.b.R
 msgid ""
 "The Positive Class you selected (%s) does not appear in %s. Its observed "
@@ -129417,8 +130538,21 @@ msgstr ""
 
 #: R/decisioncalculator.b.R
 msgid ""
-"The positive likelihood ratio is %.3f, so a positive result lowers the "
-"probability of disease rather than raising it."
+"The positive likelihood ratio is {lr}, so a positive result lowers the "
+"probability of a reference-positive outcome rather than raising it."
+msgstr ""
+
+#: R/decisioncalculator.b.R
+msgid ""
+"The positive likelihood ratio is {lr}. A nomogram assumes that a positive "
+"result raises the probability of the outcome; here it lowers that "
+"probability, so the plot is omitted. Check the test coding."
+msgstr ""
+
+#: R/nogoldstandard.b.R
+msgid ""
+"The positive-response probability and NPV are fixed at 100% by construction "
+"and therefore are left blank."
 msgstr ""
 
 #: R/chisqposttest.b.R
@@ -129507,6 +130641,30 @@ msgid ""
 "mean more in the treatment group."
 msgstr ""
 
+#: R/nogoldstandard.b.R
+msgid ""
+"The reference rule is a majority vote of the same tests being evaluated, so "
+"each test helps decide the answer against which it is compared. This "
+"incorporation bias can materially distort the displayed agreement "
+"probabilities, but its magnitude and direction are study-specific. Treat "
+"these as agreement with the majority rule, not as diagnostic accuracy."
+msgstr ""
+
+#: R/nogoldstandard.b.R
+msgid ""
+"The reference rule is defined as \"%s\", so each test is compared against a "
+"rule built from its own result. %s are therefore fixed at 100%% by "
+"construction on every dataset and are left blank rather than reported as "
+"findings. The remaining values are also affected by this circularity and "
+"describe agreement with the rule, not diagnostic accuracy."
+msgstr ""
+
+#: R/nogoldstandard.b.R
+msgid ""
+"The remaining values describe agreement with the rule and are not estimates "
+"of diagnostic accuracy."
+msgstr ""
+
 #: R/kappaSizePower.b.R
 msgid ""
 "The requested power is {power}. A study powered below 50% is more likely to "
@@ -129542,6 +130700,12 @@ msgid ""
 "category; no patient was dropped."
 msgstr ""
 
+#: R/nogoldstandard.b.R
+msgid ""
+"The results describe agreement with the majority-vote rule and are not "
+"estimates of diagnostic accuracy."
+msgstr ""
+
 #: R/jjridges.b.R
 msgid "The ridge plot displays the distribution of"
 msgstr ""
@@ -129575,6 +130739,13 @@ msgid ""
 "using install.packages(\"scattermore\")"
 msgstr ""
 
+#: R/nogoldstandard.b.R
+msgid ""
+"The scenarios and method examples below are illustrative examples only. They "
+"are not clinical guides, validated recommendations, or substitutes for a "
+"study-specific statistical analysis plan."
+msgstr ""
+
 #: R/clinicalscore.b.R
 msgid ""
 "The score-to-risk lookup table maps each possible total score to the "
@@ -129605,6 +130776,13 @@ msgstr ""
 msgid ""
 "The selected post-hoc method (%s) is not yet implemented; pairwise Wilcoxon "
 "tests with '%s' adjustment were used instead."
+msgstr ""
+
+#: R/decisioncalculator.b.R
+msgid ""
+"The selected prevalence is {prevalence}. Predictive values may be unstable "
+"or poorly transportable; verify them in the intended population and report "
+"the prevalence used."
 msgstr ""
 
 #: R/lassocox.b.R
@@ -129724,6 +130902,12 @@ msgid ""
 "medium effect size (w = 0.3)."
 msgstr ""
 
+#: R/decisioncalculator.b.R
+msgid ""
+"The study population should represent the intended-use population and "
+"relevant disease spectrum."
+msgstr ""
+
 #: R/reportcat.b.R
 msgid ""
 "The summary table could not be produced. The variable summaries above are "
@@ -129753,6 +130937,13 @@ msgid ""
 "The tests have similar marginal sensitivity and specificity. Similar "
 "marginal performance does not establish redundancy or independence; assess "
 "conditional dependence using external evidence."
+msgstr ""
+
+#: R/decisioncalculator.b.R
+msgid ""
+"The three scenarios total {current}, {scenario1}, and {scenario2} cases. "
+"Moving a cut-off on one cohort cannot change its size, so these rows cannot "
+"be interpreted as thresholds applied to the same participants."
 msgstr ""
 
 #: R/decisiongraph.b.R
@@ -129842,6 +131033,12 @@ msgstr ""
 
 #: R/lassologistic.b.R
 msgid "the upper tertile"
+msgstr ""
+
+#: R/decisioncalculator.b.R
+msgid ""
+"The user-supplied population prevalence is used, not the prevalence observed "
+"in this sample."
 msgstr ""
 
 #: eurostatmap/options/geo_var.description.jamovi
@@ -130014,11 +131211,25 @@ msgid ""
 "group."
 msgstr ""
 
+#: R/nogoldstandard.b.R
+msgid ""
+"These are fixed-prior penalized-EM point estimates, not posterior summaries. "
+"Accuracy terminology also assumes that the high-positive latent class "
+"represents disease."
+msgstr ""
+
 #: R/multisurvival.b.R
 msgid ""
 "These are model-based predictions. They rely on the Cox model being "
 "correctly specified and on proportional hazards holding, and they adjust "
 "only for variables in the model - not for anything unmeasured."
+msgstr ""
+
+#: R/decisioncalculator.b.R
+msgid ""
+"These are single-cohort estimates. Their practical meaning depends on "
+"intended use, error consequences, prevalence, patient spectrum, and "
+"reference-standard quality. This educational summary is not a clinical guide."
 msgstr ""
 
 #: R/multisurvival.b.R
@@ -130072,6 +131283,12 @@ msgstr ""
 msgid ""
 "These summaries are suitable for baseline characteristics tables, data "
 "quality assessment, and descriptive analysis in clinical research."
+msgstr ""
+
+#: R/nogoldstandard.b.R
+msgid ""
+"These values describe agreement with a majority-vote rule built from the "
+"same tests. They are not estimates of diagnostic accuracy."
 msgstr ""
 
 #: R/waterfall.b.R
@@ -130183,6 +131400,13 @@ msgid ""
 "assessment."
 msgstr ""
 
+#: R/nogoldstandard.b.R
+msgid ""
+"This analysis estimates latent-class parameters or describes agreement with "
+"a reference rule built from the selected tests. Interpretation depends on "
+"the chosen method and its assumptions."
+msgstr ""
+
 #: R/enhancedROC.b.R
 msgid ""
 "This analysis evaluated %d predictor(s) using %d observations in a %s "
@@ -130256,12 +131480,6 @@ msgstr ""
 msgid "This analysis tracks "
 msgstr ""
 
-#: R/nogoldstandard.b.R
-msgid ""
-"This analysis uses advanced statistical methods to estimate test "
-"sensitivity, specificity, and disease prevalence from imperfect test results."
-msgstr ""
-
 #: R/jjpiestats.b.R
 msgid ""
 "This analysis uses custom settings for pie chart generation with statistical "
@@ -130298,20 +131516,6 @@ msgid ""
 "by external validation before clinical use."
 msgstr ""
 
-#: R/decisioncalculator.b.R
-msgid ""
-"This column holds two different kinds of statement. On the two named cut-off "
-"rows it is a grade of that scenario's point estimates in this sample; the "
-"good and excellent grades require Youden's index AND accuracy to reach the "
-"band together, so a grade can be lower than either column on its own would "
-"suggest. On the Current (Reference) row it is not a grade at all: it reports "
-"which of the three cut-offs had the highest Youden's J, by how much, and "
-"whether that cut-off's accuracy interval still overlaps the current one's. "
-"Because all three cut-offs are judged on the same counts used to evaluate "
-"them, whichever row comes out ahead is optimistically biased; performance in "
-"independent data is generally lower."
-msgstr ""
-
 #: R/checkdata.b.R
 msgid ""
 "This component cost {points} points. Plausibility bounds are "
@@ -130346,6 +131550,14 @@ msgstr ""
 msgid ""
 "This function creates lollipop charts for categorical data visualization "
 "with clinical applications."
+msgstr ""
+
+#: R/decisioncalculator.b.R
+msgid ""
+"This function evaluates a diagnostic test against a stated reference "
+"standard. It calculates sensitivity, specificity, predictive values, and "
+"likelihood ratios. Reference standards can be imperfect, so disagreement may "
+"reflect error in either method."
 msgstr ""
 
 #: package/analyses/tableone.description
@@ -130411,6 +131623,14 @@ msgstr ""
 "Bu bir GÜÇ hesaplamasıdır: belirtilen anlamlılık düzeyi ve güçte, iki yönlü "
 "bir testte kappa0'ı kappa1 lehine REDDETMEK için gereken olgu sayısını verir."
 
+#: R/nogoldstandard.b.R
+msgid ""
+"This is not an accuracy estimate: each test helps build the rule against "
+"which it is evaluated, creating incorporation bias. Strict majority means "
+"more than half positive; with an even number of tests, tied cases are rule "
+"negative. With two tests this is identical to the all-tests-positive rule."
+msgstr ""
+
 #: R/singlearm.b.R
 msgid ""
 "This is not median survival. It is the first time at which the estimated "
@@ -130420,12 +131640,38 @@ msgid ""
 "half the cohort has had the event of interest by then."
 msgstr ""
 
+#: R/nogoldstandard.b.R
+msgid ""
+"This is not posterior sampling, priors are not configurable, intervals are "
+"not credible intervals, and latent-class labels remain unidentified."
+msgstr ""
+
+#: R/nogoldstandard.b.R
+msgid ""
+"This is not posterior sampling, the priors are not configurable, and its "
+"intervals are bootstrap confidence intervals rather than Bayesian credible "
+"intervals."
+msgstr ""
+
 #: R/kappaSizeFixedN.b.R
 msgid ""
 "This is the bound the study reaches if the agreement it observes lands "
 "exactly on kappa0. Roughly half of such studies will observe less agreement "
 "than anticipated and end with a lower bound below the figure shown, so read "
 "it as a planning expectation rather than a guarantee."
+msgstr ""
+
+#: R/nogoldstandard.b.R
+msgid ""
+"This is the fitted proportion of the high-positive latent class. It is not "
+"automatically disease prevalence because latent-class labels are "
+"unidentified."
+msgstr ""
+
+#: R/nogoldstandard.b.R
+msgid ""
+"This is the proportion of analyzed cases meeting the selected reference "
+"rule, not an estimate of disease prevalence."
 msgstr ""
 
 #: R/advancedraincloud.b.R
@@ -130457,6 +131703,40 @@ msgstr ""
 msgid ""
 "This level of agreement is poor to fair and requires improvement through "
 "additional training or revised criteria before clinical use."
+msgstr ""
+
+#: R/nogoldstandard.b.R
+msgid "This method cannot estimate accuracy"
+msgstr ""
+
+#: R/nogoldstandard.b.R
+msgid ""
+"This method defines a case as rule positive only when every selected test is "
+"positive."
+msgstr ""
+
+#: R/nogoldstandard.b.R
+msgid ""
+"This method defines a case as rule positive when at least one selected test "
+"is positive."
+msgstr ""
+
+#: R/nogoldstandard.b.R
+msgid ""
+"This method defines rule-positive cases by majority vote of the selected "
+"tests."
+msgstr ""
+
+#: R/nogoldstandard.b.R
+msgid ""
+"This method fits the same conditional-independence two-class model using "
+"fixed Beta penalties and returns one MAP-like point estimate."
+msgstr ""
+
+#: R/nogoldstandard.b.R
+msgid ""
+"This method fits two unobserved classes and estimates each test's "
+"selected-positive probability within each class."
 msgstr ""
 
 #: R/nogoldstandard.b.R
@@ -130536,6 +131816,12 @@ msgstr ""
 msgid "This sample size cannot demonstrate agreement."
 msgstr "Bu örneklem büyüklüğü uyumu gösteremez."
 
+#: R/nogoldstandard.b.R
+msgid ""
+"This scenario is illustrative, does not change settings, and is not a "
+"clinical guide or validated recommendation."
+msgstr ""
+
 #: R/clinicalscore.b.R
 msgid ""
 "This scoring system should be validated on an independent cohort before "
@@ -130578,10 +131864,6 @@ msgstr ""
 msgid ""
 "This strategy raises combined specificity above that of either test alone "
 "and lowers combined sensitivity: fewer false positives, more missed cases."
-msgstr ""
-
-#: R/decisioncalculator.b.R
-msgid "this study's own prevalence"
 msgstr ""
 
 #: R/psychopdaROC.b.R
@@ -132910,6 +134192,16 @@ msgstr ""
 msgid "TN (Cut-off 2)"
 msgstr ""
 
+#: R/decisioncalculator.b.R
+msgid "TN + FN equals zero, so negative predictive value is undefined."
+msgstr ""
+
+#: R/decisioncalculator.b.R
+msgid ""
+"TN + FP equals zero, so specificity and related measures cannot be "
+"calculated."
+msgstr ""
+
 #: decisioncurve/results/benefitRangeTable.columns.title
 #: markovmultistate/results/transitionProbabilities.columns.title
 msgid "To"
@@ -132917,7 +134209,6 @@ msgstr ""
 
 #: R/benford.b.R
 #: R/linechart.b.R
-#: R/nogoldstandard.b.R
 msgid "to"
 msgstr ""
 
@@ -132987,6 +134278,10 @@ msgstr ""
 msgid ""
 "To generate the plot, add a time variable (such as months from baseline, "
 "starting at 0) and enable 'Spider plot' in the options panel."
+msgstr ""
+
+#: R/decisioncalculator.b.R
+msgid "To get started:"
 msgstr ""
 
 #: pathsampling/results/incrementalYieldTable.columns.title
@@ -133227,6 +134522,7 @@ msgid "Tornado Diagram (Sensitivity Analysis)"
 msgstr ""
 
 #: R/decision.b.R
+#: R/decisioncalculator.b.R
 #: R/decisioncombine.b.R
 #: R/decisioncompare.b.R
 #: clinicaltrialdesign/results/sample_size_breakdown.columns.title
@@ -133243,7 +134539,6 @@ msgstr ""
 #: decisioncompare/results/cTable1.columns.title
 #: decisioncompare/results/cTable2.columns.title
 #: decisioncompare/results/cTable3.columns.title
-#: decisioncompare/results/opaTable.columns.title
 #: fragilityindex/results/countsTable.columns.title
 #: greyzoneroc/results/classificationBreakdown.columns.title
 #: ihcdiagnostic/results/confusionMatrix.columns.title
@@ -133404,6 +134699,14 @@ msgid ""
 "negative."
 msgstr ""
 
+#: R/decisioncalculator.b.R
+msgid "Total number of concordant test results"
+msgstr ""
+
+#: R/decisioncalculator.b.R
+msgid "Total number of discordant test results"
+msgstr ""
+
 #: stereology/options/totalPoints.description
 msgid "Total number of grid points or test lines used in the measurement."
 msgstr ""
@@ -133416,6 +134719,10 @@ msgstr ""
 msgid "Total Number of Negative Test Results"
 msgstr ""
 
+#: R/decisioncalculator.b.R
+msgid "Total number of negative tests"
+msgstr ""
+
 #: R/enhancedROC.b.R
 msgid "Total number of observations in analysis"
 msgstr ""
@@ -133424,10 +134731,26 @@ msgstr ""
 msgid "Total Number of Positive Test Results"
 msgstr ""
 
+#: R/decisioncalculator.b.R
+msgid "Total number of positive tests"
+msgstr ""
+
+#: R/decisioncalculator.b.R
+msgid "Total number of reference-negative subjects"
+msgstr ""
+
+#: R/decisioncalculator.b.R
+msgid "Total number of reference-positive subjects"
+msgstr ""
+
 #: pathsampling/options/totalSamples.description
 msgid ""
 "Total number of samples examined per case. Examples: total tumor blocks "
 "examined, total lymph nodes dissected, total omentum sections."
+msgstr ""
+
+#: R/decisioncalculator.b.R
+msgid "Total number of subjects"
 msgstr ""
 
 #: R/decision.b.R
@@ -133737,6 +135060,20 @@ msgstr ""
 
 #: decisioncalculator/options/tp2.title
 msgid "TP (Cut-off 2)"
+msgstr ""
+
+#: R/decisioncalculator.b.R
+msgid ""
+"TP + FN equals zero, so sensitivity and related measures cannot be "
+"calculated."
+msgstr ""
+
+#: R/decisioncalculator.b.R
+msgid "TP + FP equals zero, so positive predictive value is undefined."
+msgstr ""
+
+#: R/decisioncalculator.b.R
+msgid "TP, FP, TN, and FN must be finite numbers. Check the input values."
 msgstr ""
 
 #: R/swimmerplot_html.R
@@ -134235,6 +135572,12 @@ msgstr ""
 #: psychopdaROC/results/clinicalUtilityTable.columns.title
 #: stagemigration/results/clinicalUtilityNetBenefit.columns.title
 msgid "Treat All Net Benefit"
+msgstr ""
+
+#: R/nogoldstandard.b.R
+msgid ""
+"Treat all preset scenarios and examples as illustrative, not as clinical "
+"guidance."
 msgstr ""
 
 #: circos/options/symmetric.title
@@ -135108,7 +136451,7 @@ msgid "Troponin"
 msgstr ""
 
 #: cotest/options/preset/troponin_ecg.title
-msgid "Troponin + ECG (Myocardial Infarction)"
+msgid "Troponin + ECG (demo only)"
 msgstr ""
 
 #: groomecompare/options/eventValue/TRUE.title
@@ -135250,6 +136593,7 @@ msgstr ""
 msgid "True Positives (TP)"
 msgstr ""
 
+#: R/decisioncalculator.b.R
 #: R/decisioncompare.b.R
 msgid "True prevalence"
 msgstr ""
@@ -135266,12 +136610,19 @@ msgid "True Status"
 msgstr ""
 
 #: decision/results/nTable.columns.title
-#: decisioncalculator/results/nTable.columns.title
 msgid "True Test"
 msgstr ""
 
 #: misclassificationbias/results/correctedTable.columns.title
 msgid "True Unexposed"
+msgstr ""
+
+#: R/decisioncalculator.b.R
+msgid "True-negative rate"
+msgstr ""
+
+#: R/decisioncalculator.b.R
+msgid "True-positive rate"
 msgstr ""
 
 #: comprehensiveSurvivalPower/options/accrual_distribution/truncated_exponential.title
@@ -135414,7 +136765,7 @@ msgid "Tumor Growth Models"
 msgstr ""
 
 #: nogoldstandard/options/clinicalPreset/tumor_markers.title
-msgid "Tumor Marker Evaluation"
+msgid "Tumor Marker Evaluation (example)"
 msgstr ""
 
 #: multiplexanalysis/options/biomarker_panel/tumor.title
@@ -135574,6 +136925,11 @@ msgstr ""
 msgid "Two Sample (Group Comparison)"
 msgstr ""
 
+#: package/analyses/cotest.menuSubtitle
+#: cotest/options.menuSubtitle
+msgid "Two tests run in parallel"
+msgstr ""
+
 #: simpleSurvivalPower/options/study_design/two_arm_parallel.title
 #: survivalPower/options/study_design/two_arm_parallel.title
 msgid "Two-arm Parallel"
@@ -135675,6 +137031,10 @@ msgstr ""
 
 #: polychoriccorr/options/method/two_step.title
 msgid "Two-step estimation"
+msgstr ""
+
+#: R/nogoldstandard.b.R
+msgid "Two-test composite reduces to the all-positive rule"
 msgstr ""
 
 #: agreement/options/finnModel/twoway.title
@@ -136238,6 +137598,10 @@ msgstr ""
 
 #: tidyplots/ui[3].label
 msgid "Uncertainty & Spread"
+msgstr ""
+
+#: nogoldstandard/ui[2].label
+msgid "Uncertainty and Diagnostics"
 msgstr ""
 
 #: bayesianci/results/clinicalInterpretation.columns.title
@@ -137087,6 +138451,12 @@ msgstr ""
 msgid "Unweighted (Standard)"
 msgstr ""
 
+#: R/decisioncalculator.b.R
+msgid ""
+"Unweighted average of sensitivity and specificity; it does not encode "
+"different consequences for the two error types."
+msgstr ""
+
 #: waterfall/ui[2][1][4][0].label
 msgid "Update Data"
 msgstr ""
@@ -137538,6 +138908,13 @@ msgstr ""
 msgid "Use All Features"
 msgstr ""
 
+#: R/decisioncalculator.b.R
+msgid ""
+"Use anticipated sensitivity, specificity, prevalence, confidence level, and "
+"expected loss or exclusions to calculate required reference-positive and "
+"reference-negative counts."
+msgstr ""
+
 #: tidyplots/options/useAutoSize.title
 msgid "Use Automatic Size"
 msgstr ""
@@ -137652,10 +139029,6 @@ msgstr ""
 msgid "Use compact formatting to reduce table size."
 msgstr ""
 
-#: R/nogoldstandard.b.R
-msgid "Use Composite Reference for quick exploratory analysis"
-msgstr ""
-
 #: mantelhaenszel/options/continuity_correction.title
 msgid "Use Continuity Correction"
 msgstr ""
@@ -137758,14 +139131,6 @@ msgstr ""
 msgid "Use Firth penalized logistic regression"
 msgstr ""
 
-#: R/nogoldstandard.b.R
-msgid "Use for evaluating screening programs with multiple tests"
-msgstr ""
-
-#: R/nogoldstandard.b.R
-msgid "Use for inter-rater reliability studies in pathology"
-msgstr ""
-
 #: R/decisiongraph.b.R
 msgid "Use for: Economic evaluation comparing treatments"
 msgstr ""
@@ -137828,8 +139193,14 @@ msgstr ""
 msgid "Use inverse probability weighting"
 msgstr ""
 
-#: decision/options/pp.description.ui
 #: decisioncalculator/options/pp.description.ui
+msgid ""
+"Use known disease prevalence from population data for predictive values, "
+"post-test probabilities, and F1 score. Sensitivity, specificity, sample "
+"accuracy, and MCC remain based on the entered study table."
+msgstr ""
+
+#: decision/options/pp.description.ui
 msgid ""
 "Use known disease prevalence from population data instead of study "
 "prevalence. Enable this when your study sample may not represent the target "
@@ -137840,10 +139211,6 @@ msgstr ""
 #: decision/ui[2]/pp.label
 #: decisioncalculator/options/pp.title
 msgid "Use known population prevalence"
-msgstr ""
-
-#: decisioncalculator/ui[3][0].label
-msgid "Use Known Prevalence (instead of study prevalence)"
 msgstr ""
 
 #: multisurvival/options/uselandmark.title
@@ -138208,16 +139575,8 @@ msgid ""
 "expression, population counts)"
 msgstr ""
 
-#: R/nogoldstandard.b.R
-msgid "Use when evaluating new biomarkers or diagnostic technologies"
-msgstr ""
-
 #: decision/ui[2][0].label
 msgid "Use when sample doesn't represent target population disease prevalence"
-msgstr ""
-
-#: R/nogoldstandard.b.R
-msgid "Use when validating cancer biomarkers or prognostic tests"
 msgstr ""
 
 #: R/jjpiestats.b.R
@@ -138268,6 +139627,14 @@ msgstr ""
 msgid "User-specified cutpoint value"
 msgstr ""
 
+#: decisioncompare/options/niMargin.description.ui
+msgid ""
+"User-specified descriptive criterion for overall percent agreement. The "
+"criterion is met when the lower 95 percent confidence bound exceeds this "
+"value. This is not a noninferiority comparison against another test and is "
+"not regulatory or clinical guidance."
+msgstr ""
+
 #: qtwist/options/tau_selection/user_specified.title
 msgid "User-Specified Value"
 msgstr ""
@@ -138278,10 +139645,6 @@ msgstr ""
 
 #: R/nogoldstandard.b.R
 msgid "Uses majority vote of available tests as pseudo-gold standard."
-msgstr ""
-
-#: R/nogoldstandard.b.R
-msgid "Uses prior knowledge, handles uncertainty well, good for smaller samples"
 msgstr ""
 
 #: mixedcox/options/tint.title
@@ -140730,16 +142093,14 @@ msgid ""
 "variables, commonly used in clinical research to analyze:"
 msgstr ""
 
-#: nogoldstandard/options/verbose.title
-msgid "Verbose bootstrap output"
-msgstr ""
-
-#: nogoldstandard/ui[3][0]/verbose.label
-msgid "Verbose output"
-msgstr ""
-
 #: treecompare/options/verbose_output.title
 msgid "Verbose Progress"
+msgstr ""
+
+#: R/decisioncalculator.b.R
+msgid ""
+"Verification bias occurs when reference-standard verification differs "
+"according to the index-test result."
 msgstr ""
 
 #: R/waterfall.b.R
@@ -140805,6 +142166,12 @@ msgstr ""
 
 #: enhancedfactorvariable/options/plotOrientation/vertical.title
 msgid "Vertical Bars"
+msgstr ""
+
+#: R/decisioncalculator.b.R
+msgid ""
+"Very few errors were observed. Small FP or FN counts may produce unstable "
+"estimates."
 msgstr ""
 
 #: R/venn.b.R
@@ -140898,6 +142265,10 @@ msgstr "Çok küçük örneklem büyüklüğü."
 
 #: R/reportcat.b.R
 msgid "Very sparse categories (fewer than 5 cases) may need combination"
+msgstr ""
+
+#: R/decisioncalculator.b.R
+msgid "Very sparse reference groups"
 msgstr ""
 
 #: R/linechart.b.R
@@ -141612,6 +142983,10 @@ msgstr ""
 msgid "warning"
 msgstr ""
 
+#: R/decisioncalculator.b.R
+msgid "WARNING"
+msgstr ""
+
 #: jointmodeling/results/warnings.title
 msgid "Warning Messages"
 msgstr ""
@@ -141733,6 +143108,7 @@ msgstr ""
 msgid "Warning/Recommendation"
 msgstr ""
 
+#: R/decisioncalculator.b.R
 #: R/jjpiestats.b.R
 #: bayesiandiagnostic/results/convergenceDiagnostics.columns.title
 #: classification/results/warnings.title
@@ -142231,6 +143607,10 @@ msgstr ""
 msgid "Weighted NRI"
 msgstr ""
 
+#: R/decisioncalculator.b.R
+msgid "Weighted or fractional counts"
+msgstr "Ağırlıklı veya kesirli sayımlar"
+
 #: pseudosurvival/options/regression_method/weighted.title
 msgid "Weighted Regression"
 msgstr ""
@@ -142402,6 +143782,10 @@ msgstr ""
 msgid "What are standardized residuals?"
 msgstr ""
 
+#: R/decisioncalculator.b.R
+msgid "What does this analysis do?"
+msgstr ""
+
 #: patientfollowupintro/options/showLimitations.title
 msgid "What each analysis cannot do"
 msgstr ""
@@ -142452,6 +143836,10 @@ msgstr ""
 
 #: R/benford.b.R
 msgid "WHAT THIS LIST IS:"
+msgstr ""
+
+#: R/decisioncalculator.b.R
+msgid "What this tool does:"
 msgstr ""
 
 #: comprehensiveSurvivalPower/options/calculation_type.title
@@ -142566,6 +143954,10 @@ msgstr ""
 
 #: agreement/options/showIotaGuide.title
 msgid "When to use iota coefficient"
+msgstr ""
+
+#: R/decisioncalculator.b.R
+msgid "When to use it:"
 msgstr ""
 
 #: agreement/options/showKendallWGuide.title
@@ -143236,6 +144628,16 @@ msgid ""
 "tests if you need to test the model's fit."
 msgstr ""
 
+#: R/nogoldstandard.b.R
+msgid ""
+"With two tests, a strict majority requires both tests to be positive; a "
+"one-positive tie is rule negative. This is identical to the "
+"all-tests-positive rule, so the positive-response probability and NPV are "
+"fixed at 100% by construction and are left blank. Add a third test for a "
+"non-degenerate majority rule; all values from a self-built rule describe "
+"agreement, not diagnostic accuracy."
+msgstr ""
+
 #: R/lassocox.b.R
 msgid ""
 "With very small samples, consider univariable analyses or use "
@@ -143309,6 +144711,14 @@ msgstr ""
 msgid "Word/RTF"
 msgstr ""
 
+#: cotest/options/preset.title
+msgid "Worked example"
+msgstr ""
+
+#: cotest/ui[0].label
+msgid "Worked examples (demonstration only)"
+msgstr ""
+
 #: patientdashboard/results/workflowAnalysisTable.title
 msgid "Workflow Analysis"
 msgstr ""
@@ -143377,7 +144787,6 @@ msgid "Wrong level specified for positive class. No observations found."
 msgstr ""
 
 #: decision/results/nTable.columns.title
-#: decisioncalculator/results/nTable.columns.title
 msgid "Wrong Test"
 msgstr ""
 
@@ -144164,8 +145573,33 @@ msgid "Youden's Index"
 msgstr ""
 
 #: R/decision.b.R
+#: R/decisioncalculator.b.R
 #: R/decisioncompare.b.R
 msgid "Youden's index"
+msgstr ""
+
+#: R/decisioncalculator.b.R
+msgid "Youden's index (J)"
+msgstr ""
+
+#: R/decisioncalculator.b.R
+msgid ""
+"Youden's index and the advanced metrics are descriptive summaries, not "
+"clinical decision thresholds."
+msgstr ""
+
+#: R/decisioncalculator.b.R
+msgid ""
+"Youden's index equals sensitivity plus specificity minus one. It weights "
+"sensitivity and specificity equally and is descriptive, not a clinical "
+"decision threshold."
+msgstr ""
+
+#: R/decisioncalculator.b.R
+msgid ""
+"Youden's index is {youden} and sample accuracy is {accuracy}. These values "
+"describe the entered study table; they are not clinical grades or decision "
+"thresholds."
 msgstr ""
 
 #: R/decision.b.R
@@ -144343,6 +145777,12 @@ msgstr ""
 #: treatmentmeta/results/pooled_effects.columns.title
 #: treatmentmeta/results/meta_regression.columns.title
 msgid "Z-value"
+msgstr ""
+
+#: R/decisioncalculator.b.R
+msgid ""
+"Zero cells were detected. An estimated sensitivity or specificity of 100% "
+"may reflect limited validation data."
 msgstr ""
 
 #: bayesiannetworkma/options/zero_events_correction.title

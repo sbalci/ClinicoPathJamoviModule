@@ -6,8 +6,6 @@
 # checked against mada / metafor / a hand-coded primary-source formula rather
 # than against the module's own arithmetic.
 
-library(testthat)
-
 studies <- function() data.frame(
   study = paste0("S", 1:10),
   tp = c(40, 90, 20, 60, 15, 55, 33, 71, 25, 48),

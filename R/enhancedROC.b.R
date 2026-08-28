@@ -835,7 +835,7 @@ enhancedROCClass <- R6::R6Class(
                 boot_res$R <- sum(ok)
             }
 
-            boot_ci <- boot::boot.ci(boot_res, conf = conf_level, type = boot_type)
+            boot_ci <- suppressWarnings(boot::boot.ci(boot_res, conf = conf_level, type = boot_type))
             limits <- switch(boot_type,
                 bca = boot_ci$bca[4:5],
                 perc = boot_ci$percent[4:5],

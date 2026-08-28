@@ -22,10 +22,12 @@ render_arc <- function(data, ...) {
 
   grDevices::pdf(NULL)
   on.exit(grDevices::dev.off(), add = TRUE)
-  analysis$.__enclos_env__$private$.plot(
-    analysis$results$plot,
-    ggtheme = ggplot2::theme_bw(),
-    theme = NULL
+  suppressWarnings(
+    analysis$.__enclos_env__$private$.plot(
+      analysis$results$plot,
+      ggtheme = ggplot2::theme_bw(),
+      theme = NULL
+    )
   )
 }
 

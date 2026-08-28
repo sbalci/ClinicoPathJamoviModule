@@ -53,8 +53,8 @@ test_that("the comparison count is the sum over both dimensions", {
     data = cq_data())$.__enclos_env__$private
 
   expect_equal(priv$.pairwiseComparisonCount(matrix(0, 3, 3)), 6)   # 3 + 3
-  expect_equal(priv$.pairwiseComparisonCount(matrix(0, 2, 2)), 2)   # 1 + 1
-  expect_equal(priv$.pairwiseComparisonCount(matrix(0, 4, 2)), 7)   # 6 + 1
+  expect_equal(priv$.pairwiseComparisonCount(matrix(0, 2, 2)), 0)   # 0 + 0 (2-level dimension is tested by omnibus)
+  expect_equal(priv$.pairwiseComparisonCount(matrix(0, 4, 2)), 6)   # 6 + 0
   expect_equal(priv$.pairwiseComparisonCount(matrix(0, 1, 3)), 3)   # 0 + 3
 })
 
@@ -119,11 +119,11 @@ test_that("the expected-count warning does not leak to the caller", {
   data(histopathology, package = "ClinicoPath")
   h <- as.data.frame(histopathology)
 
-  expect_silent(invisible(chisqposttest(data = h, rows = "Grade", cols = "LVI",
+  expect_silent(invisible(chisqposttest(data = h, rows = "Race", cols = "LVI",
                                         counts = NULL)))
 
   # ... and the condition IS still reported to the user
-  res <- chisqposttest(data = h, rows = "Grade", cols = "LVI", counts = NULL,
+  res <- chisqposttest(data = h, rows = "Race", cols = "LVI", counts = NULL,
                        showAssumptionsCheck = TRUE)
   panel <- gsub("<[^>]*>", " ", as.character(res$assumptionsCheck$content))
   expect_match(panel, "Expected counts")

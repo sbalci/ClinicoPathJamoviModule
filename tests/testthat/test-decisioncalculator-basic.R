@@ -137,7 +137,7 @@ test_that("decisioncalculator handles high-performance biomarker", {
 
 test_that("decisioncalculator flags negative counts", {
   expect_no_error(res <- decisioncalculator(TP = -10, TN = 80, FP = 20, FN = 10))
-  expect_match(dcalc_notices(res), "Negative Counts Detected")
+  expect_match(dcalc_notices(res), "Negative counts detected")
   # and does not present numbers computed from them
   expect_true(is.na(res$ratioTable$asDF$Sens[1]))
 })

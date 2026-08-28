@@ -14,33 +14,38 @@ decisioncalculator(
   fnote = FALSE,
   ci = FALSE,
   fagan = FALSE,
-  showWelcome = TRUE,
+  showWelcome = FALSE,
   showSummary = FALSE,
   showAbout = FALSE,
   showGlossary = FALSE,
   multiplecuts = FALSE,
-  cutoff1 = "Conservative",
-  tp1 = 85,
-  fp1 = 10,
-  tn1 = 190,
-  fn1 = 15,
-  cutoff2 = "Aggressive",
-  tp2 = 95,
-  fp2 = 25,
-  tn2 = 175,
-  fn2 = 5
+  cutoff1 = "Higher sensitivity example",
+  tp1 = 100,
+  fp1 = 40,
+  tn1 = 70,
+  fn1 = 10,
+  cutoff2 = "Higher specificity example",
+  tp2 = 80,
+  fp2 = 15,
+  tn2 = 95,
+  fn2 = 30
 )
 }
 \arguments{
-\item{TP}{True Positive count: cases with disease that tested positive.}
+\item{TP}{True-positive frequency relative to the stated reference
+standard.}
 
-\item{TN}{True Negative count: cases without disease that tested negative.}
+\item{TN}{True-negative frequency relative to the stated reference
+standard.}
 
-\item{FP}{False Positive count: cases without disease that tested positive.}
+\item{FP}{False-positive frequency relative to the stated reference
+standard.}
 
-\item{FN}{False Negative count: cases with disease that tested negative.}
+\item{FN}{False-negative frequency relative to the stated reference
+standard.}
 
-\item{pp}{Boolean selection whether to use known population prevalence.}
+\item{pp}{Boolean selection whether to use known population prevalence for
+prevalence-dependent predictive measures.}
 
 \item{pprob}{Prior probability (disease prevalence in the community).
 Requires a value between 0.001 and 0.999, default 0.300.}
@@ -68,23 +73,23 @@ scenarios.}
 
 \item{cutoff1}{Name identifier for cut-off scenario 1.}
 
-\item{tp1}{.}
+\item{tp1}{True-positive frequency for illustrative scenario 1.}
 
-\item{fp1}{.}
+\item{fp1}{False-positive frequency for illustrative scenario 1.}
 
-\item{tn1}{.}
+\item{tn1}{True-negative frequency for illustrative scenario 1.}
 
-\item{fn1}{.}
+\item{fn1}{False-negative frequency for illustrative scenario 1.}
 
 \item{cutoff2}{Name identifier for cut-off scenario 2.}
 
-\item{tp2}{.}
+\item{tp2}{True-positive frequency for illustrative scenario 2.}
 
-\item{fp2}{.}
+\item{fp2}{False-positive frequency for illustrative scenario 2.}
 
-\item{tn2}{.}
+\item{tn2}{True-negative frequency for illustrative scenario 2.}
 
-\item{fn2}{.}
+\item{fn2}{False-negative frequency for illustrative scenario 2.}
 }
 \value{
 A results object containing:
@@ -119,5 +124,19 @@ Negatives (TN), and False Negatives (FN). Calculates comprehensive
 diagnostic performance metrics including sensitivity, specificity,
 positive and negative predictive values, likelihood ratios, and
 post-test probabilities. Supports confidence interval estimation and
-Fagan nomogram visualization for clinical decision making.
+Fagan nomogram visualization for educational interpretation. Presets and
+examples are illustrative only and are not clinical guides.
+}
+\examples{
+\donttest{
+# Illustrative examples only; these are not clinical guides.
+result1 <- decisioncalculator(
+  TP = 90, FN = 10, TN = 80, FP = 20
+)
+
+result2 <- decisioncalculator(
+  TP = 90, FN = 10, TN = 80, FP = 20,
+  ci = TRUE, pp = TRUE, pprob = 0.15, fagan = TRUE
+)
+}
 }

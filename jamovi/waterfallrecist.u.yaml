@@ -2,7 +2,7 @@ title: 'Treatment Response: Lesion-Level RECIST v1.1 Algorithm'
 name: waterfallrecist
 jus: '3.0'
 stage: 0
-compilerMode: aggressive
+compilerMode: tame
 children:
   - type: VariableSupplier
     persistentItems: false

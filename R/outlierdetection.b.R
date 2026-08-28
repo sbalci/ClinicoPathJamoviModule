@@ -919,8 +919,8 @@ outlierdetectionClass <- if (requireNamespace("jmvcore")) R6::R6Class("outlierde
                 }
 
                 # Robust Mahalanobis is routed through bigutilsr, which is not
-                # installed with this module, so without this guard the user got a
-                # raw "install.packages()" error they cannot act on inside jamovi.
+                # installed with this module, so without this guard the user gets
+                # a raw R error they cannot act on inside jamovi.
                 if (method == "mahalanobis_robust") {
                     if (!requireNamespace("bigutilsr", quietly = TRUE)) {
                         jmvcore::reject("Robust Mahalanobis distance is computed through the bigutilsr package, which is not installed with this module, so no result can be produced for this method. Choose Minimum covariance determinant (MCD) for a robust multivariate distance, or Mahalanobis distance for the classical one.")
@@ -1284,10 +1284,10 @@ outlierdetectionClass <- if (requireNamespace("jmvcore")) R6::R6Class("outlierde
             # sampled could be found.
             subsampled <- !is.null(original_n) && original_n != n_total
             scope_text <- if (subsampled) {
-                sprintf("a random subsample of %d observations drawn from the %d complete cases",
+                sprintf("a random subsample of %d observations drawn from the %d-observation dataset",
                         n_total, original_n)
             } else {
-                sprintf("the %d complete cases analysed", n_total)
+                sprintf("your dataset of %d observations", n_total)
             }
             sampling_caveat <- if (subsampled) {
                 sprintf(paste0(

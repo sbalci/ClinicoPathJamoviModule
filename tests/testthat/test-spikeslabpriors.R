@@ -6,12 +6,12 @@ test_that('spikeslabpriors analysis works', {
   set.seed(123)
   n <- 50
   data <- data.frame(
-    outcome = sample(c('A', 'B'), n, replace = TRUE),
-    predictors1 = sample(c('A', 'B'), n, replace = TRUE),
-    predictors2 = sample(c('A', 'B'), n, replace = TRUE),
-    predictors3 = sample(c('A', 'B'), n, replace = TRUE),
+    outcome = rnorm(n, 50, 10),
+    predictors1 = rnorm(n),
+    predictors2 = rnorm(n),
+    predictors3 = rnorm(n),
     time_variable = runif(n, 1, 100),
-    status_variable = sample(c('A', 'B'), n, replace = TRUE),
+    status_variable = sample(c(0, 1), n, replace = TRUE),
     group_structure = sample(c('A', 'B'), n, replace = TRUE)
   )
 

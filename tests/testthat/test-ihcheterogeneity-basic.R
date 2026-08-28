@@ -5,8 +5,6 @@
 # Tests basic functionality, required arguments, and expected outputs
 # for the ihcheterogeneity jamovi function
 
-library(testthat)
-
 # Load test data
 data(ihcheterogeneity_test, package = "ClinicoPath")
 

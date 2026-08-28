@@ -76,13 +76,24 @@ test_that("an unattainable dependence parameter is truncated and says so as a wa
     # severity with no statement of the consequence.
     n <- notices_of(run_ct(indep = FALSE, cond_dep_pos = 0.90, cond_dep_neg = 0.90))
     expect_match(n, "not attainable")
-    expect_match(n, "more strongly dependent model than you specified")
     # rendered as a Warning, not a Note
     expect_match(n, "Warning:[^.]*dependence parameter")
+    # quantifies the truncation instead of asserting a direction
+    expect_match(n, "truncated from [0-9.]+ to its bound [0-9.]+")
+    expect_match(n, "not the one you specified")
 
     # and not raised at all when the parameter is feasible
     expect_false(grepl("not attainable", notices_of(run_ct(indep = FALSE,
                        cond_dep_pos = 0.05, cond_dep_neg = 0.05))))
+
+    # The old wording asserted "a more strongly dependent model than you specified" and told the
+    # user to "lower the value". Both are wrong for a negative parameter: truncating rho = -0.20
+    # yields a realized correlation of SMALLER magnitude, and lowering it makes the truncation
+    # worse. Direction claims must not come back.
+    neg <- notices_of(run_ct(indep = FALSE, cond_dep_pos = -0.20, cond_dep_neg = -0.10))
+    expect_false(grepl("more strongly dependent", neg))
+    expect_false(grepl("Lower the value", neg))
+    expect_match(neg, "Move the value toward 0")
 })
 
 
@@ -215,24 +226,44 @@ test_that("repeated runs do not duplicate rows, footnotes or notices", {
 
 test_that("notice text does not inject raw angle brackets into the notices HTML", {
     # The notices panel is assembled by string concatenation and written with setContent(), so a
-    # bare "<" in a message lands in the markup.
+    # bare "<" in a message lands in the markup. Messages interpolate context labels such as
+    # "P(Test1+, Test2- | Disease-)", so .escapeHtml() now runs over every message.
     res <- run_ct(indep = TRUE, test1_spec = 0.01, test2_spec = 0.01, prevalence = 0.6)
     inner <- gsub("<(/?)(div|h4|ul|li|strong|p|br|em)[^>]*>", "", paste(res$notices$content, collapse = " "))
     expect_false(grepl("[<>]", inner))
 })
 
 
-test_that("dependenceInfo is shown only for the dependent model", {
-    # jamovi's visible: expression parser requires "(" followed by a letter or "$"; the shipped
-    # "(!indep)" failed that regex, so jmvcore returned the raw string, which is truthy, and the
-    # panel was displayed even under conditional independence.
-    if (!grepl("indep == FALSE", paste(readLines("../../jamovi/cotest.r.yaml"), collapse = "\n")))
-        skip("jamovi/cotest.r.yaml has not been updated")
-    if (isTRUE(ClinicoPath::cotest(indep = TRUE)$dependenceInfo$visible))
-        skip("dependenceInfo visibility not recompiled yet - run jmvtools::prepare()")
+test_that("the dependence panel always describes the model that was actually fitted", {
+    # History: the panel was first gated on `(!indep)`, which jmvcore does not route to its R
+    # evaluator (^\\([\\$A-Za-z].*\\)$), so it returned the raw truthy string and the panel was
+    # permanently visible. That was replaced with `(indep == FALSE)`, which evaluates -- but
+    # reads the OPTION, while the content was written from the EFFECTIVE value after a worked
+    # example overrode it. Measured on the shipped code: preset = "troponin_ecg" gave a visible
+    # panel with 0 characters of content, and preset = "hpv_pap" with indep = TRUE computed 807
+    # characters of dependence disclosure and then hid it.
+    #
+    # Both failure modes came from a visibility expression that could disagree with the content.
+    # There is no expression now; the panel is written in both branches. Assert the content.
+    ind <- ClinicoPath::cotest(indep = TRUE)$dependenceInfo$content
+    expect_true(nzchar(ind))
+    expect_match(ind, "conditionally independent")
+    expect_false(grepl("Realized phi", ind))
 
-    expect_false(ClinicoPath::cotest(indep = TRUE)$dependenceInfo$visible)
-    expect_true(ClinicoPath::cotest(indep = FALSE)$dependenceInfo$visible)
+    dep <- ClinicoPath::cotest(indep = FALSE, cond_dep_pos = 0.15,
+                               cond_dep_neg = 0.10)$dependenceInfo$content
+    expect_true(nzchar(dep))
+    expect_match(dep, "Realized phi")
+
+    # the regression that mattered: a worked example must never leave the panel empty, and must
+    # never hide a dependent fit behind the user's stale checkbox
+    for (nm in c("troponin_ecg", "psa_dre", "hpv_pap", "covid_antigen_pcr")) {
+        for (flag in c(TRUE, FALSE)) {
+            res <- ClinicoPath::cotest(preset = nm, indep = flag)
+            expect_true(nzchar(res$dependenceInfo$content),
+                        info = paste0(nm, " / indep=", flag, ": empty dependence panel"))
+        }
+    }
 })
 
 
@@ -332,12 +363,231 @@ test_that("the results table states that its inputs carry no uncertainty", {
 })
 
 
-test_that("every declared option is read by the backend", {
+test_that("every declared option is consumed somewhere", {
+    # No dead schema entries. An option counts as consumed if the backend reads it OR the
+    # results schema gates on it -- `showGuidance` is a pure display gate with no backend
+    # logic, exactly like the 72 other `visible: (showExplanations)` gates in this module,
+    # so requiring a `self$options$` read would force a no-op read just to satisfy a test.
     a_yaml <- readLines("../../jamovi/cotest.a.yaml")
     declared <- sub("^    - name: ", "", grep("^    - name: [A-Za-z0-9_]+$", a_yaml, value = TRUE))
     declared <- setdiff(declared, "data")
     backend <- paste(readLines("../../R/cotest.b.R"), collapse = "\n")
-    unread <- declared[!vapply(declared, function(o)
-        grepl(paste0("self\\$options\\$", o, "\\b"), backend), logical(1))]
-    expect_equal(unread, character(0))
+    schema  <- paste(c(readLines("../../jamovi/cotest.r.yaml"),
+                       readLines("../../jamovi/cotest.u.yaml")), collapse = "\n")
+
+    read_by_backend <- vapply(declared, function(o)
+        grepl(paste0("self\\$options\\$", o, "\\b"), backend), logical(1))
+    gated_in_schema <- vapply(declared, function(o)
+        grepl(paste0("(visible|enable): \\([^)]*\\b", o, "\\b"), schema), logical(1))
+
+    expect_equal(declared[!(read_by_backend | gated_in_schema)], character(0))
+
+    # and the display-only options really are display-only: changing one must not move a number
+    base <- as.data.frame(ClinicoPath::cotest()$cotestResultsTable)
+    for (o in declared[!read_by_backend]) {
+        alt <- as.data.frame(do.call(ClinicoPath::cotest,
+                                     stats::setNames(list(FALSE), o))$cotestResultsTable)
+        expect_equal(alt$postProb, base$postProb, tolerance = 1e-12,
+                     info = paste(o, "is documented as display-only but changed a result"))
+    }
+})
+
+
+# ---------------------------------------------------------------------------
+# Regressions from the /review-function pass
+# ---------------------------------------------------------------------------
+
+test_that("a probability of exactly 1 or 0 is footnoted as structural, not reported as certainty", {
+    # Clamping an infeasible dependence to its Frechet bound drives one joint cell to zero, so
+    # the likelihood ratio is Inf or 0 and the table printed a bare "100.00%" with Inf odds -
+    # a diagnostic certainty the model never claimed. Reachable from ordinary inputs.
+    opts <- ClinicoPath:::cotestOptions$new(test1_sens = 0.85, test1_spec = 0.99,
+                                            test2_sens = 0.80, test2_spec = 0.90,
+                                            prevalence = 0.10, indep = FALSE,
+                                            cond_dep_pos = 0.10, cond_dep_neg = 0.40)
+    a <- ClinicoPath:::cotestClass$new(options = opts, data = data.frame(x = 1))
+    p <- a$.__enclos_env__$private
+    p$.init(); p$.run()
+
+    d <- as.data.frame(a$results$cotestResultsTable)
+    certain <- which(is.finite(d$postProb) & (d$postProb == 1 | d$postProb == 0))
+    expect_gt(length(certain), 0)          # the configuration must still reach the regime
+    for (i in certain) {
+        fn <- a$results$cotestResultsTable$getCell(rowNo = i, col = "postProb")$footnotes
+        expect_gt(length(fn), 0)
+        expect_true(any(grepl("Not an estimate", unlist(fn), fixed = TRUE)))
+    }
+})
+
+test_that("direction of effect is read off the ratio, never asserted", {
+    # Two worse-than-chance tests: LR+ < 1 and LR- > 1, so "increase"/"reduced to" invert.
+    res <- ClinicoPath::cotest(test1_sens = 0.30, test1_spec = 0.50,
+                               test2_sens = 0.35, test2_spec = 0.55,
+                               prevalence = 0.10, indep = TRUE)
+    txt <- gsub("<[^>]+>", " ", res$explanation$content)
+    d <- as.data.frame(res$cotestResultsTable)
+
+    expect_lt(d$relativeProbability[d$scenario == "Both Tests Positive"], 1)
+    expect_gt(d$relativeProbability[d$scenario == "Both Tests Negative"], 1)
+    expect_false(grepl("0.5x increase", txt, fixed = TRUE))
+    expect_false(grepl("reduced to 1.55", txt, fixed = TRUE))
+
+    # and the ordinary case still reads naturally
+    ok <- gsub("<[^>]+>", " ", ClinicoPath::cotest(indep = TRUE)$explanation$content)
+    expect_match(ok, "increase")
+    expect_match(ok, "reduced to")
+})
+
+test_that("the copy-ready sentence quotes the correlation actually fitted", {
+    # Requested 0.50 is not attainable with these marginals; the model fits 0.35 and the
+    # Test Dependence panel already said so while the pasteable sentence said 0.50.
+    res <- ClinicoPath::cotest(test1_sens = 0.95, test1_spec = 0.90,
+                               test2_sens = 0.70, test2_spec = 0.85,
+                               prevalence = 0.02, indep = FALSE,
+                               cond_dep_pos = 0.5, cond_dep_neg = 0.1)
+    sentence <- gsub("<[^>]+>", " ", res$explanation$content)
+    panel    <- gsub("<[^>]+>", " ", res$dependenceInfo$content)
+
+    realized <- as.numeric(sub(".*Realized phi .disease.: *(-?[0-9.]+).*", "\\1", panel))
+    expect_true(is.finite(realized))
+    expect_match(sentence, sprintf("correlation %.2f among diseased", realized))
+    expect_match(sentence, "requested 0.50")
+
+    # when nothing is truncated, no parenthetical is added
+    plain <- gsub("<[^>]+>", " ", ClinicoPath::cotest(indep = FALSE, cond_dep_pos = 0.05,
+                                                      cond_dep_neg = 0.05)$explanation$content)
+    expect_false(grepl("truncated to the largest", plain))
+})
+
+test_that("no NA leaks into the prose as NA% or NAx", {
+    res <- ClinicoPath::cotest(test1_sens = 0.30, test1_spec = 0.90,
+                               test2_sens = 0.30, test2_spec = 0.90,
+                               prevalence = 0.10, indep = FALSE,
+                               cond_dep_pos = -1, cond_dep_neg = -1)
+    txt <- gsub("<[^>]+>", " ", res$explanation$content)
+    expect_true(any(is.na(as.data.frame(res$cotestResultsTable)$postProb)))  # still reachable
+    expect_false(grepl("NA%", txt, fixed = TRUE))
+    expect_false(grepl("NAx", txt, fixed = TRUE))
+    expect_match(txt, "not estimable")
+})
+
+test_that("a sub-1% post-test probability is not printed as 0%", {
+    # p2percent used integer accuracy, so a 0.19% both-negative probability appeared on the
+    # nomogram as "Post(-) = 0%" - on a rule-out plot that reads as "excluded".
+    res <- ClinicoPath::cotest(preset = "hpv_pap", fagan = TRUE)
+    bn <- as.data.frame(res$cotestResultsTable)$postProb[5]
+    expect_lt(bn, 0.01); expect_gt(bn, 0)
+    expect_true(isTRUE(res$plot1$state$drawable))
+    expect_true(res$plot1$.render())
+    # >= 1% output must be unchanged for the other two nomogrammer callers
+    expect_equal(scales::percent(signif(0.6346111, 3), accuracy = 1), "64%")
+})
+
+test_that("the rendered nomogram states its rule and marks a worked example", {
+    demo <- ClinicoPath::cotest(preset = "hpv_pap", fagan = TRUE)$plot1$state$Caption
+    expect_match(demo, "Parallel rule")
+    expect_match(demo, "DEMONSTRATION ONLY")
+    own <- ClinicoPath::cotest(fagan = TRUE)$plot1$state$Caption
+    expect_match(own, "Parallel rule")
+    expect_false(grepl("DEMONSTRATION", own))
+})
+
+test_that("the dependence essay does not contradict the safety default or the bias direction", {
+    txt <- gsub("<[^>]+>", " ", ClinicoPath::cotest()$dependenceExplanation$content)
+    # it used to list "You have limited information about how the tests interact" as a reason
+    # to ASSUME independence - the opposite of the a.yaml's stated "default is false for safety"
+    expect_false(grepl("limited information about how the tests interact", txt))
+    expect_match(txt, "has to be justified")
+    # and it claimed independence exaggerates positive post-test probabilities, which is
+    # backwards for the headline parallel-rule row in ~85% of ordinary parameter sets
+    expect_false(grepl("unrealistically narrow confidence", txt))
+    expect_match(txt, "Either test positive")
+})
+
+test_that("independence really does bias the two extreme rows in the directions the essay states", {
+    # The essay now makes four falsifiable claims. Check the two it states as universal.
+    set.seed(11); over_bp <- 0; under_bn <- 0; n <- 0
+    for (i in 1:120) {
+        s1 <- runif(1,.6,.95); c1 <- runif(1,.7,.98)
+        s2 <- runif(1,.6,.95); c2 <- runif(1,.7,.98)
+        pv <- runif(1,.01,.3); rp <- runif(1,.05,.35); rn <- runif(1,.05,.35)
+        A <- as.data.frame(ClinicoPath::cotest(test1_sens=s1, test1_spec=c1, test2_sens=s2,
+              test2_spec=c2, prevalence=pv, indep=TRUE)$cotestResultsTable)$postProb
+        B <- as.data.frame(ClinicoPath::cotest(test1_sens=s1, test1_spec=c1, test2_sens=s2,
+              test2_spec=c2, prevalence=pv, indep=FALSE, cond_dep_pos=rp,
+              cond_dep_neg=rn)$cotestResultsTable)$postProb
+        if (anyNA(A) || anyNA(B)) next
+        n <- n + 1
+        over_bp  <- over_bp  + (A[4] > B[4])   # both positive: independence too HIGH
+        under_bn <- under_bn + (A[5] < B[5])   # both negative: independence too LOW
+    }
+    expect_gt(n, 100)
+    expect_equal(over_bp, n)
+    expect_equal(under_bn, n)
+})
+
+test_that("a worked example marks both tables, and a preset cannot swap the model in silence", {
+    demo <- ClinicoPath::cotest(preset = "hpv_pap")
+    nt <- function(tbl) paste(vapply(tbl$notes, function(z) z$note, character(1)), collapse = " ")
+    expect_match(nt(demo$cotestResultsTable), "Demonstration only")
+    expect_match(nt(demo$testParamsTable), "Demonstration only")
+    expect_false(grepl("Demonstration only", nt(ClinicoPath::cotest()$cotestResultsTable)))
+
+    # under a dependent model the marginal LRs must not be presented as multipliable
+    expect_match(nt(ClinicoPath::cotest(indep = FALSE)$testParamsTable), "their product")
+    expect_false(grepl("their product", nt(ClinicoPath::cotest(indep = TRUE)$testParamsTable)))
+
+    # indep is a Bool defaulting FALSE, so the schema-default test could never see a
+    # deliberate indep = FALSE; psa_dre forces TRUE and used to swap the model silently
+    swap <- ClinicoPath::cotest(preset = "psa_dre", indep = FALSE, cond_dep_pos = 0.30)
+    expect_match(gsub("<[^>]+>", " ", swap$notices$content), "selects which model is fitted")
+})
+
+test_that("one clamp raises one notice, and the notices panel has no duplicate heading", {
+    n <- notices_of(run_ct(indep = FALSE, cond_dep_pos = 0.90, cond_dep_neg = 0.90))
+    expect_false(grepl("adjusted from", n))            # the info-severity duplicate is gone
+    expect_match(n, "not attainable")                  # the informative one survives
+    raw <- ClinicoPath::cotest(indep = FALSE, cond_dep_pos = 0.90,
+                               cond_dep_neg = 0.90)$notices$content
+    expect_false(grepl("<h4[^>]*>Validation Notices", raw))
+})
+
+test_that("the two tests can be named, and the defaults are byte-identical to the old labels", {
+    named <- ClinicoPath::cotest(test1_name = "HPV", test2_name = "Pap cytology")
+    expect_equal(as.data.frame(named$testParamsTable)$test, c("HPV", "Pap cytology"))
+    expect_true(any(grepl("^HPV Positive Only$", as.data.frame(named$cotestResultsTable)$scenario)))
+    expect_match(gsub("<[^>]+>", " ", named$explanation$content), "Co-testing with HPV")
+
+    plain <- ClinicoPath::cotest()
+    expect_equal(as.data.frame(plain$testParamsTable)$test, c("Test 1", "Test 2"))
+    expect_equal(as.data.frame(plain$cotestResultsTable)$scenario,
+                 c("Either Test Positive (Parallel Rule)", "Test 1 Positive Only",
+                   "Test 2 Positive Only", "Both Tests Positive", "Both Tests Negative"))
+
+    # a name reaches HTML, so it must be escaped
+    xss <- ClinicoPath::cotest(test1_name = "<script>x</script>")
+    expect_false(grepl("<script>", xss$explanation$content, fixed = TRUE))
+})
+
+test_that("post-test odds and the likelihood ratios are defined without turning anything on", {
+    plain <- ClinicoPath::cotest()
+    nt <- paste(vapply(plain$testParamsTable$notes, function(z) z$note, character(1)), collapse = " ")
+    expect_match(nt, "LR\\+ is how many times")          # was behind the fnote checkbox
+    expect_match(gsub("<[^>]+>", " ", ClinicoPath::cotest(indep = FALSE)$dependenceInfo$content),
+                 "Phi is the correlation")               # phi was printed but never defined
+    withnotes <- ClinicoPath::cotest(fnote = TRUE)
+    expect_gt(length(withnotes$cotestResultsTable$getCell(rowKey = "both_pos",
+                                                          col = "orValue")$footnotes), 0)
+})
+
+test_that("the guidance prose can be switched off without touching a number", {
+    on  <- ClinicoPath::cotest(showGuidance = TRUE)
+    off <- ClinicoPath::cotest(showGuidance = FALSE)
+    expect_equal(as.data.frame(off$cotestResultsTable)$postProb,
+                 as.data.frame(on$cotestResultsTable)$postProb, tolerance = 1e-12)
+    r_yaml <- paste(readLines("../../jamovi/cotest.r.yaml"), collapse = "\n")
+    expect_match(r_yaml, "visible: \\(showGuidance\\)")
+    # gated by the declarative expression, never by setVisible() from the backend
+    expect_false(grepl("instructions\\$setVisible|dependenceExplanation\\$setVisible",
+                       paste(readLines("../../R/cotest.b.R"), collapse = "\n")))
 })

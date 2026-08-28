@@ -61,7 +61,7 @@ analysis.}
 \item{showDecisionTree}{Boolean to display the decision-space (sensitivity
 vs specificity) scatter plot.}
 
-\item{showRecommendation}{Boolean to show optimal pattern recommendation
+\item{showRecommendation}{Boolean to show the descriptive strategy ranking
 table.}
 
 \item{addPatternToData}{Boolean to add test pattern column to the dataset.}
@@ -90,7 +90,7 @@ A results object containing:
 \code{results$heatmapPlot} \tab \tab \tab \tab \tab Color-coded heatmap showing all diagnostic metrics for each test pattern \cr
 \code{results$forestPlot} \tab \tab \tab \tab \tab Forest plot displaying 95 percent confidence intervals for key diagnostic metrics \cr
 \code{results$decisionTreePlot} \tab \tab \tab \tab \tab Decision-space scatter plot positioning each test pattern by its sensitivity and specificity, with point size scaled by Youden's J \cr
-\code{results$recommendationTable} \tab \tab \tab \tab \tab Recommended optimal test combination pattern based on Youden index and clinical performance metrics \cr
+\code{results$recommendationTable} \tab \tab \tab \tab \tab Sample-dependent descriptive ranking of named testing strategies by observed Youden index; this is not a clinical guide or validated recommendation \cr
 \code{results$addedPattern} \tab \tab \tab \tab \tab an output \cr
 \code{results$notices} \tab \tab \tab \tab \tab a html \cr
 }
@@ -106,6 +106,28 @@ Systematic evaluation of diagnostic test combinations. Analyzes all
 possible
 test result patterns (2-test: 4 patterns, 3-test: 8 patterns) against a
 gold
-standard to identify optimal testing strategies. Calculates sensitivity,
-specificity, PPV, NPV, and accuracy for each pattern combination.
+standard and summarizes named parallel, serial, and majority strategies.
+Calculates sensitivity, specificity, predictive values, likelihood ratios,
+accuracy, and uncertainty intervals. Descriptive rankings are
+sample-dependent
+analytical summaries, not clinical guides or validated recommendations.
+}
+\examples{
+\donttest{
+# Illustrative example only; this is not a clinical guide.
+data(histopathology)
+result <- decisioncombine(
+    data = histopathology,
+    gold = "Golden Standart",
+    goldPositive = "1",
+    test1 = "New Test",
+    test1Positive = "1",
+    test2 = "Rater 1",
+    test2Positive = "1",
+    test3 = NULL,
+    test3Positive = NULL,
+    showIndividual = TRUE,
+    showRecommendation = TRUE
+)
+}
 }

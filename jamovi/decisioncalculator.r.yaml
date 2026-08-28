@@ -28,31 +28,38 @@ items:
         - fp2
         - tn2
         - fn2
+        - fagan
 
     - name: welcome
       title: ""
       type: Html
       visible: (showWelcome)
+      clearWith:
+        - showWelcome
 
     - name: summary
       title: "Summary"
       type: Html
       visible: (showSummary)
+      clearWith: [TP, FP, TN, FN, pp, pprob, showSummary]
 
     - name: about
       title: "About This Analysis"
       type: Html
       visible: (showAbout)
+      clearWith: [showAbout]
 
     - name: assumptions
       title: "Assumptions & Caveats"
       type: Html
       visible: (showAbout)
+      clearWith: [TP, FP, TN, FN, pp, pprob, showAbout]
 
     - name: glossary
       title: "Clinical Terms Glossary"
       type: Html
       visible: (showGlossary)
+      clearWith: [showGlossary]
 
     - name:  cTable
       title: ''
@@ -64,14 +71,15 @@ items:
           title: ''
           type: text
         - name: GP
-          title: 'Gold Positive'
+          title: 'Reference Positive'
           type: number
         - name: GN
-          title: 'Gold Negative'
+          title: 'Reference Negative'
           type: number
         - name: Total
           title: 'Total'
           type: number
+      clearWith: [TP, FP, TN, FN]
 
 
     - name:  nTable
@@ -88,10 +96,10 @@ items:
           title: 'Total'
           type: number
         - name: DiseaseP
-          title: 'Diseased'
+          title: 'Reference Positive'
           type: number
         - name: DiseaseN
-          title: 'Healthy'
+          title: 'Reference Negative'
           type: number
         - name: TestP
           title: 'Positive Tests'
@@ -100,10 +108,10 @@ items:
           title: 'Negative Tests'
           type: number
         - name: TestT
-          title: 'True Test'
+          title: 'Concordant Results'
           type: number
         - name: TestW
-          title: 'Wrong Test'
+          title: 'Discordant Results'
           type: number
       clearWith:
           - TP
@@ -112,6 +120,7 @@ items:
           - FN
           - pp
           - pprob
+          - fnote
 
 
     - name:  ratioTable
@@ -133,7 +142,7 @@ items:
           type: number
           format: pc
         - name: AccurT
-          title: 'Accuracy'
+          title: 'Sample Accuracy'
           type: number
           format: pc
         - name: PrevalenceD
@@ -149,11 +158,11 @@ items:
           type: number
           format: pc
         - name: PostTestProbDisease
-          title: 'Post-test Disease Probability'
+          title: 'Post-test Reference-positive Probability'
           type: number
           format: pc
         - name: PostTestProbHealthy
-          title: 'Post-test Health Probability'
+          title: 'Post-test Reference-negative Probability'
           type: number
           format: pc
         - name: LRP
@@ -171,6 +180,7 @@ items:
           - FN
           - pp
           - pprob
+          - fnote
 
     - name: advancedMetricsTable
       title: 'Advanced Diagnostic Metrics'
@@ -204,6 +214,7 @@ items:
           - FN
           - pp
           - pprob
+          - fnote
 
     # - name:  text3
     #   title: epiR
@@ -255,9 +266,10 @@ items:
           - FN
           - pp
           - pprob
+          - ci
       refs:
           - epiR
-          - sensspecwiki
+          - AltmanBland1994
 
 
     - name: epirTable_number
@@ -287,9 +299,10 @@ items:
           - FN
           - pp
           - pprob
+          - ci
       refs:
           - epiR
-          - sensspecwiki
+          - DeeksAltman2004
 
 
     # - name:  table1
@@ -307,6 +320,7 @@ items:
         - FN
         - pp
         - pprob
+        - fagan
       description: 'Plain-language reading of the Fagan nomogram: the pre-test probability, the likelihood ratios, and where a positive or a negative result moves the probability of disease.'
 
     - name: plot1
@@ -328,8 +342,7 @@ items:
           - fagan
       refs:
           - Fagan
-          - Fagan2
-          - sensspecwiki
+          - Fagan1975
           
     # Multiple cut-off comparison table (DiagROC inspired)
     - name: multipleCutoffTable
@@ -358,7 +371,7 @@ items:
           type: number
           format: pc
         - name: accuracy
-          title: "Accuracy"
+          title: "Sample Accuracy"
           type: number
           format: pc
         - name: youden
@@ -369,6 +382,12 @@ items:
           type: text
       clearWith:
           - multiplecuts
+          - TP
+          - FP
+          - TN
+          - FN
+          - pp
+          - pprob
           - cutoff1
           - cutoff2
           - tp1
@@ -395,11 +414,15 @@ items:
     #       - fagan
     #   refs:
     #       - Fagan
-    #       - Fagan2
 
 refs:
-    - DiagnosticTests
-    - sensspecwiki
     - ClinicoPathJamoviModule
+    - DiagnosticTests
+    - AltmanBland1994
+    - DeeksAltman2004
+    - Fagan1975
+    - STARD2015
+    - Buderer1996
+    - HuiWalter1980
 
 ...

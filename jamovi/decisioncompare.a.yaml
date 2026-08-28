@@ -1,69 +1,38 @@
 ---
 name: decisioncompare
 title: Compare Medical Decision Tests
-menuGroup: meddecide
+menuGroup: meddecideT
 menuSubgroup: Decision
 menuSubtitle: Compare sensitivity, specificity, PPV, NPV, ...
-version: '1.0.7'
+version: '1.0.8'
 jas: '1.2'
 
 description:
     main: >
         Function for comparing multiple Medical Decision Tests. Compares sensitivity, specificity, positive predictive value,
-        negative predictive value, and other metrics between different tests against the same golden standard.
+        negative predictive value, and other metrics between different tests against the same gold standard.
         Includes statistical comparison using McNemar's test and confidence intervals for differences.
-        
-
-    # R:
-    #     dontrun: true
-    #     usage: |
-    #         # Basic comparison of two diagnostic tests
-    #         data('histopathology')
-            
-
-    #         # Example 1: Compare imaging vs blood test performance
-    #         result1 <- decisioncompare(
-    #             data = histopathology,
-    #             gold = "Golden Standart",
-    #             goldPositive = "1",
-    #             test1 = "New Test", 
-    #             test1Positive = "1",
-    #             test2 = "Rater 1",
-    #             test2Positive = "1",
-    #             ci = TRUE,
-    #             plot = TRUE
-    #         )
-            
-
-    #         # Example 2: Three-test comparison with statistical analysis
-    #         result2 <- decisioncompare(
-    #             data = histopathology,
-    #             gold = "Golden Standart",
-    #             goldPositive = "1", 
-    #             test1 = "New Test",
-    #             test1Positive = "1",
-    #             test2 = "Rater 1", 
-    #             test2Positive = "1",
-    #             test3 = "Rater 2",
-    #             test3Positive = "1",
-    #             statComp = TRUE,
-    #             radarplot = TRUE
-    #         )
-            
-
-    #         # Example 3: Using custom prevalence for clinical setting
-    #         result3 <- decisioncompare(
-    #             data = histopathology,
-    #             gold = "Golden Standart",
-    #             goldPositive = "1",
-    #             test1 = "New Test",
-    #             test1Positive = "1", 
-    #             test2 = "Rater 1",
-    #             test2Positive = "1",
-    #             pp = TRUE,
-    #             pprob = 0.15,  # 15 percent prevalence in screening population
-    #             od = TRUE      # Show original frequency tables
-    #         )
+    R:
+        dontrun: true
+        usage: |
+            # Level arguments are explicit in the generated R API. Pass NULL for
+            # unused negative levels and for the optional third test selectors.
+            decisioncompare(
+                data = histopathology,
+                gold = "Golden Standart",
+                goldPositive = "1",
+                goldNegative = NULL,
+                test1 = "New Test",
+                test1Positive = "1",
+                test1Negative = NULL,
+                test2 = "Rater 1",
+                test2Positive = "1",
+                test2Negative = NULL,
+                test3 = NULL,
+                test3Positive = NULL,
+                test3Negative = NULL,
+                statComp = TRUE
+            )
 
 options:
 
@@ -73,7 +42,7 @@ options:
           R: The data as a data frame.
 
     - name: gold
-      title: Golden Standard (Reference Test)
+      title: Gold Standard (Reference Test)
       type: Variable
       default: NULL
       suggested: [ nominal ]
@@ -82,7 +51,8 @@ options:
           ui: >
             Select the most reliable diagnostic method available (e.g., biopsy, final pathology, 
             expert consensus). This is the "truth" against which we compare other tests. 
-            Must be categorical with exactly 2 levels (positive/negative).
+            The selected positive level is compared with the remaining levels; if
+            indeterminate values should be excluded, also select explicit negative levels.
           R: >
             The gold standard reference variable representing true disease status.
 
@@ -269,11 +239,17 @@ options:
       title: Footnotes
       type: Bool
       default: false
+      description:
+          ui: Add definitions and prevalence-source notes to the comparison table.
+          R: Boolean indicating whether table footnotes should be displayed.
 
     - name: ci
       title: '95 percent CI'
       type: Bool
       default: false
+      description:
+          ui: Show 95 percent confidence intervals for per-test diagnostic accuracy estimates.
+          R: Boolean indicating whether confidence interval tables should be displayed.
 
     - name: plot
       title: "Comparison plot"
@@ -333,19 +309,32 @@ options:
             Show overall percent agreement with 95 percent confidence intervals for each test.
 
     - name: niMargin
-      title: Noninferiority Margin ( percent)
+      title: Minimum acceptable OPA (percent)
       type: Number
       default: 75
       min: 50
       max: 99
       description:
           ui: >
-            Noninferiority margin for agreement rate. The test is noninferior if the
-            lower bound of the confidence interval exceeds this margin. Default 75 percent
-            follows regulatory convention for AI diagnostic tool validation
-            (e.g., FDA 510(k) submissions).
+            User-specified descriptive criterion for overall percent agreement. The
+            criterion is met when the lower 95 percent confidence bound exceeds this value.
+            This is not a noninferiority comparison against another test and is not
+            regulatory or clinical guidance.
           R: >
-            Noninferiority margin as percentage (default 75). Used when OPA is enabled.
+            Minimum acceptable OPA percentage (default 75). Retains the niMargin option
+            name for compatibility with saved analyses.
+
+    - name: useOpaCriterion
+      title: Apply minimum OPA criterion
+      type: Bool
+      default: false
+      description:
+          ui: >
+            Compare the lower OPA confidence bound with the user-specified descriptive
+            criterion. This optional criterion is not a noninferiority comparison,
+            regulatory guidance, or clinical guidance.
+          R: >
+            Whether to apply the descriptive minimum OPA criterion.
 
     - name: ciMethod
       title: CI Method for Agreement
@@ -401,8 +390,8 @@ options:
       description:
           ui: >
             Display a plain-language summary paragraph of comparison results.
-            Useful for understanding clinical implications at a glance without
-            needing to interpret detailed statistical tables.
+            Useful for reading the statistical comparison at a glance without
+            needing to interpret every table cell.
           R: >
             Boolean to show natural language summary of statistical comparisons.
 
@@ -428,4 +417,15 @@ options:
             Useful for drafting methods and results sections of research papers.
           R: >
             Boolean to show manuscript-ready report sentence.
+
+    - name: showDescriptiveReport
+      title: "Descriptive report templates"
+      type: Bool
+      default: false
+      description:
+          ui: >
+            Display a longer descriptive performance summary with methods and results
+            templates. The text is an editable reporting aid, not clinical guidance.
+          R: >
+            Boolean to show the longer descriptive report templates.
 ...

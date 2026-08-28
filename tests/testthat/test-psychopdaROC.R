@@ -6,8 +6,10 @@
 # includes advanced ROC analysis features like IDI/NRI, DeLong test, multiple
 # cutpoint optimization methods, and comprehensive plotting capabilities.
 
-library(testthat)
-library(jmvcore)
+suppressPackageStartupMessages(suppressWarnings({
+  library(testthat)
+  library(jmvcore)
+}))
 if (!exists(".")) . <- function(x, ...) x
 
 # These used to source("../../R/psychopdaROC.h.R") and ".b.R" -- capitalised paths that do not
@@ -539,14 +541,14 @@ test_that("function handles small sample sizes", {
   data <- create_roc_test_data(n = 20)
   
   expect_no_error({
-    result <- psychopdaROC(
+    suppressWarnings(result <- psychopdaROC(
       data = data,
       dependentVars = "test1",
       classVar = "outcome",
       positiveClass = "Disease"
     ,
       refVar = NULL
-    )
+    ))
   })
 })
 
@@ -561,14 +563,14 @@ test_that("function handles imbalanced classes", {
   )
   
   expect_no_error({
-    result <- psychopdaROC(
+    suppressWarnings(result <- psychopdaROC(
       data = data,
       dependentVars = "test_vals",
       classVar = "outcome",
       positiveClass = "Disease"
     ,
       refVar = NULL
-    )
+    ))
   })
 })
 
@@ -583,14 +585,14 @@ test_that("function handles perfect separation", {
   )
   
   expect_no_error({
-    result <- psychopdaROC(
+    suppressWarnings(result <- psychopdaROC(
       data = data,
       dependentVars = "test_vals", 
       classVar = "outcome",
       positiveClass = "Disease"
     ,
       refVar = NULL
-    )
+    ))
   })
 })
 
@@ -605,7 +607,7 @@ test_that("utility functions work correctly", {
   # Test raw to probability conversion
   values <- c(1, 2, 3, 4, 5)
   actual <- c(0, 0, 1, 1, 1)
-  probs <- raw_to_prob(values, actual, direction = ">=")
+  probs <- suppressWarnings(raw_to_prob(values, actual, direction = ">="))
   expect_type(probs, "double")
   expect_equal(length(probs), length(values))
   expect_true(all(probs >= 0 & probs <= 1, na.rm = TRUE))

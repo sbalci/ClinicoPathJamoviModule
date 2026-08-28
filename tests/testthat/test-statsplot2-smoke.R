@@ -1,6 +1,3 @@
-
-context("StatsPlot2 Smoke Test")
-
 # Notices are rendered into a single `notices` output by .addNotice()/.renderNotices(),
 # the project convention. module$get("<noticeName>") is left over from the older
 # jmvcore::Notice design where each notice was its own named result item; it returns

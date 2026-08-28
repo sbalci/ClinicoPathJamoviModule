@@ -5,8 +5,6 @@
 # Tests core functionality of the waterfall analysis function
 # including basic execution, required arguments, and expected outputs
 
-library(testthat)
-
 # Load test data
 data(waterfall_test, package = "ClinicoPath")
 data(waterfall_spider_test, package = "ClinicoPath")

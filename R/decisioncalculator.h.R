@@ -15,21 +15,21 @@ decisioncalculatorOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::
             fnote = FALSE,
             ci = FALSE,
             fagan = FALSE,
-            showWelcome = TRUE,
+            showWelcome = FALSE,
             showSummary = FALSE,
             showAbout = FALSE,
             showGlossary = FALSE,
             multiplecuts = FALSE,
-            cutoff1 = "Conservative",
-            tp1 = 85,
-            fp1 = 10,
-            tn1 = 190,
-            fn1 = 15,
-            cutoff2 = "Aggressive",
-            tp2 = 95,
-            fp2 = 25,
-            tn2 = 175,
-            fn2 = 5, ...) {
+            cutoff1 = "Higher sensitivity example",
+            tp1 = 100,
+            fp1 = 40,
+            tn1 = 70,
+            fn1 = 10,
+            cutoff2 = "Higher specificity example",
+            tp2 = 80,
+            fp2 = 15,
+            tn2 = 95,
+            fn2 = 30, ...) {
 
             super$initialize(
                 package="ClinicoPath",
@@ -78,7 +78,7 @@ decisioncalculatorOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::
             private$..showWelcome <- jmvcore::OptionBool$new(
                 "showWelcome",
                 showWelcome,
-                default=TRUE)
+                default=FALSE)
             private$..showSummary <- jmvcore::OptionBool$new(
                 "showSummary",
                 showSummary,
@@ -98,43 +98,43 @@ decisioncalculatorOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::
             private$..cutoff1 <- jmvcore::OptionString$new(
                 "cutoff1",
                 cutoff1,
-                default="Conservative")
+                default="Higher sensitivity example")
             private$..tp1 <- jmvcore::OptionNumber$new(
                 "tp1",
                 tp1,
-                default=85)
+                default=100)
             private$..fp1 <- jmvcore::OptionNumber$new(
                 "fp1",
                 fp1,
-                default=10)
+                default=40)
             private$..tn1 <- jmvcore::OptionNumber$new(
                 "tn1",
                 tn1,
-                default=190)
+                default=70)
             private$..fn1 <- jmvcore::OptionNumber$new(
                 "fn1",
                 fn1,
-                default=15)
+                default=10)
             private$..cutoff2 <- jmvcore::OptionString$new(
                 "cutoff2",
                 cutoff2,
-                default="Aggressive")
+                default="Higher specificity example")
             private$..tp2 <- jmvcore::OptionNumber$new(
                 "tp2",
                 tp2,
-                default=95)
+                default=80)
             private$..fp2 <- jmvcore::OptionNumber$new(
                 "fp2",
                 fp2,
-                default=25)
+                default=15)
             private$..tn2 <- jmvcore::OptionNumber$new(
                 "tn2",
                 tn2,
-                default=175)
+                default=95)
             private$..fn2 <- jmvcore::OptionNumber$new(
                 "fn2",
                 fn2,
-                default=5)
+                default=30)
 
             self$.addOption(private$..TP)
             self$.addOption(private$..TN)
@@ -240,9 +240,14 @@ decisioncalculatorResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::
                 name="",
                 title="Medical Decision Calculator",
                 refs=list(
+                    "ClinicoPathJamoviModule",
                     "DiagnosticTests",
-                    "sensspecwiki",
-                    "ClinicoPathJamoviModule"))
+                    "AltmanBland1994",
+                    "DeeksAltman2004",
+                    "Fagan1975",
+                    "STARD2015",
+                    "Buderer1996",
+                    "HuiWalter1980"))
             self$add(jmvcore::Preformatted$new(
                 options=options,
                 name="notices",
@@ -266,32 +271,55 @@ decisioncalculatorResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::
                     "tp2",
                     "fp2",
                     "tn2",
-                    "fn2")))
+                    "fn2",
+                    "fagan")))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="welcome",
                 title="",
-                visible="(showWelcome)"))
+                visible="(showWelcome)",
+                clearWith=list(
+                    "showWelcome")))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="summary",
                 title="Summary",
-                visible="(showSummary)"))
+                visible="(showSummary)",
+                clearWith=list(
+                    "TP",
+                    "FP",
+                    "TN",
+                    "FN",
+                    "pp",
+                    "pprob",
+                    "showSummary")))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="about",
                 title="About This Analysis",
-                visible="(showAbout)"))
+                visible="(showAbout)",
+                clearWith=list(
+                    "showAbout")))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="assumptions",
                 title="Assumptions & Caveats",
-                visible="(showAbout)"))
+                visible="(showAbout)",
+                clearWith=list(
+                    "TP",
+                    "FP",
+                    "TN",
+                    "FN",
+                    "pp",
+                    "pprob",
+                    "showAbout")))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="glossary",
                 title="Clinical Terms Glossary",
-                visible="(showGlossary)"))
+                visible="(showGlossary)",
+                clearWith=list(
+                    "showGlossary")))
             self$add(jmvcore::Table$new(
                 options=options,
                 name="cTable",
@@ -304,16 +332,21 @@ decisioncalculatorResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::
                         `type`="text"),
                     list(
                         `name`="GP", 
-                        `title`="Gold Positive", 
+                        `title`="Reference Positive", 
                         `type`="number"),
                     list(
                         `name`="GN", 
-                        `title`="Gold Negative", 
+                        `title`="Reference Negative", 
                         `type`="number"),
                     list(
                         `name`="Total", 
                         `title`="Total", 
-                        `type`="number"))))
+                        `type`="number")),
+                clearWith=list(
+                    "TP",
+                    "FP",
+                    "TN",
+                    "FN")))
             self$add(jmvcore::Table$new(
                 options=options,
                 name="nTable",
@@ -331,11 +364,11 @@ decisioncalculatorResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::
                         `type`="number"),
                     list(
                         `name`="DiseaseP", 
-                        `title`="Diseased", 
+                        `title`="Reference Positive", 
                         `type`="number"),
                     list(
                         `name`="DiseaseN", 
-                        `title`="Healthy", 
+                        `title`="Reference Negative", 
                         `type`="number"),
                     list(
                         `name`="TestP", 
@@ -347,11 +380,11 @@ decisioncalculatorResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::
                         `type`="number"),
                     list(
                         `name`="TestT", 
-                        `title`="True Test", 
+                        `title`="Concordant Results", 
                         `type`="number"),
                     list(
                         `name`="TestW", 
-                        `title`="Wrong Test", 
+                        `title`="Discordant Results", 
                         `type`="number")),
                 clearWith=list(
                     "TP",
@@ -359,7 +392,8 @@ decisioncalculatorResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::
                     "TN",
                     "FN",
                     "pp",
-                    "pprob")))
+                    "pprob",
+                    "fnote")))
             self$add(jmvcore::Table$new(
                 options=options,
                 name="ratioTable",
@@ -383,7 +417,7 @@ decisioncalculatorResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::
                         `format`="pc"),
                     list(
                         `name`="AccurT", 
-                        `title`="Accuracy", 
+                        `title`="Sample Accuracy", 
                         `type`="number", 
                         `format`="pc"),
                     list(
@@ -403,12 +437,12 @@ decisioncalculatorResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::
                         `format`="pc"),
                     list(
                         `name`="PostTestProbDisease", 
-                        `title`="Post-test Disease Probability", 
+                        `title`="Post-test Reference-positive Probability", 
                         `type`="number", 
                         `format`="pc"),
                     list(
                         `name`="PostTestProbHealthy", 
-                        `title`="Post-test Health Probability", 
+                        `title`="Post-test Reference-negative Probability", 
                         `type`="number", 
                         `format`="pc"),
                     list(
@@ -425,7 +459,8 @@ decisioncalculatorResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::
                     "TN",
                     "FN",
                     "pp",
-                    "pprob")))
+                    "pprob",
+                    "fnote")))
             self$add(jmvcore::Table$new(
                 options=options,
                 name="advancedMetricsTable",
@@ -464,7 +499,8 @@ decisioncalculatorResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::
                     "TN",
                     "FN",
                     "pp",
-                    "pprob")))
+                    "pprob",
+                    "fnote")))
             self$add(jmvcore::Table$new(
                 options=options,
                 name="epirTable_ratio",
@@ -499,10 +535,11 @@ decisioncalculatorResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::
                     "TN",
                     "FN",
                     "pp",
-                    "pprob"),
+                    "pprob",
+                    "ci"),
                 refs=list(
                     "epiR",
-                    "sensspecwiki")))
+                    "AltmanBland1994")))
             self$add(jmvcore::Table$new(
                 options=options,
                 name="epirTable_number",
@@ -534,10 +571,11 @@ decisioncalculatorResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::
                     "TN",
                     "FN",
                     "pp",
-                    "pprob"),
+                    "pprob",
+                    "ci"),
                 refs=list(
                     "epiR",
-                    "sensspecwiki")))
+                    "DeeksAltman2004")))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="faganSummary",
@@ -549,7 +587,8 @@ decisioncalculatorResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::
                     "FP",
                     "FN",
                     "pp",
-                    "pprob")))
+                    "pprob",
+                    "fagan")))
             self$add(jmvcore::Image$new(
                 options=options,
                 name="plot1",
@@ -569,8 +608,7 @@ decisioncalculatorResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::
                     "fagan"),
                 refs=list(
                     "Fagan",
-                    "Fagan2",
-                    "sensspecwiki")))
+                    "Fagan1975")))
             self$add(jmvcore::Table$new(
                 options=options,
                 name="multipleCutoffTable",
@@ -604,7 +642,7 @@ decisioncalculatorResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::
                         `format`="pc"),
                     list(
                         `name`="accuracy", 
-                        `title`="Accuracy", 
+                        `title`="Sample Accuracy", 
                         `type`="number", 
                         `format`="pc"),
                     list(
@@ -617,6 +655,12 @@ decisioncalculatorResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::
                         `type`="text")),
                 clearWith=list(
                     "multiplecuts",
+                    "TP",
+                    "FP",
+                    "TN",
+                    "FN",
+                    "pp",
+                    "pprob",
                     "cutoff1",
                     "cutoff2",
                     "tp1",
@@ -636,7 +680,7 @@ decisioncalculatorBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
             super$initialize(
                 package = "ClinicoPath",
                 name = "decisioncalculator",
-                version = c(1,0,7),
+                version = c(1,0,8),
                 options = options,
                 results = decisioncalculatorResults$new(options=options),
                 data = data,
@@ -657,13 +701,32 @@ decisioncalculatorBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
 #' diagnostic performance metrics including sensitivity, specificity, 
 #' positive and negative predictive values, likelihood ratios, and 
 #' post-test probabilities. Supports confidence interval estimation and 
-#' Fagan nomogram visualization for clinical decision making.
+#' Fagan nomogram visualization for educational interpretation. Presets and
+#' examples are illustrative only and are not clinical guides.
 #' 
-#' @param TP True Positive count: cases with disease that tested positive.
-#' @param TN True Negative count: cases without disease that tested negative.
-#' @param FP False Positive count: cases without disease that tested positive.
-#' @param FN False Negative count: cases with disease that tested negative.
-#' @param pp Boolean selection whether to use known population prevalence.
+#'
+#' @examples
+#' \donttest{
+#' # Illustrative examples only; these are not clinical guides.
+#' result1 <- decisioncalculator(
+#'   TP = 90, FN = 10, TN = 80, FP = 20
+#' )
+#'
+#' result2 <- decisioncalculator(
+#'   TP = 90, FN = 10, TN = 80, FP = 20,
+#'   ci = TRUE, pp = TRUE, pprob = 0.15, fagan = TRUE
+#' )
+#'}
+#' @param TP True-positive frequency relative to the stated reference
+#'   standard.
+#' @param TN True-negative frequency relative to the stated reference
+#'   standard.
+#' @param FP False-positive frequency relative to the stated reference
+#'   standard.
+#' @param FN False-negative frequency relative to the stated reference
+#'   standard.
+#' @param pp Boolean selection whether to use known population prevalence for
+#'   prevalence-dependent predictive measures.
 #' @param pprob Prior probability (disease prevalence in the community).
 #'   Requires a value between 0.001 and 0.999, default 0.300.
 #' @param fnote Boolean selection whether to show detailed explanatory
@@ -680,15 +743,15 @@ decisioncalculatorBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
 #' @param multiplecuts Boolean selection whether to evaluate multiple cut-off
 #'   scenarios.
 #' @param cutoff1 Name identifier for cut-off scenario 1.
-#' @param tp1 .
-#' @param fp1 .
-#' @param tn1 .
-#' @param fn1 .
+#' @param tp1 True-positive frequency for illustrative scenario 1.
+#' @param fp1 False-positive frequency for illustrative scenario 1.
+#' @param tn1 True-negative frequency for illustrative scenario 1.
+#' @param fn1 False-negative frequency for illustrative scenario 1.
 #' @param cutoff2 Name identifier for cut-off scenario 2.
-#' @param tp2 .
-#' @param fp2 .
-#' @param tn2 .
-#' @param fn2 .
+#' @param tp2 True-positive frequency for illustrative scenario 2.
+#' @param fp2 False-positive frequency for illustrative scenario 2.
+#' @param tn2 True-negative frequency for illustrative scenario 2.
+#' @param fn2 False-negative frequency for illustrative scenario 2.
 #' @return A results object containing:
 #' \tabular{llllll}{
 #'   \code{results$notices} \tab \tab \tab \tab \tab a preformatted \cr
@@ -725,21 +788,21 @@ decisioncalculator <- function(
     fnote = FALSE,
     ci = FALSE,
     fagan = FALSE,
-    showWelcome = TRUE,
+    showWelcome = FALSE,
     showSummary = FALSE,
     showAbout = FALSE,
     showGlossary = FALSE,
     multiplecuts = FALSE,
-    cutoff1 = "Conservative",
-    tp1 = 85,
-    fp1 = 10,
-    tn1 = 190,
-    fn1 = 15,
-    cutoff2 = "Aggressive",
-    tp2 = 95,
-    fp2 = 25,
-    tn2 = 175,
-    fn2 = 5) {
+    cutoff1 = "Higher sensitivity example",
+    tp1 = 100,
+    fp1 = 40,
+    tn1 = 70,
+    fn1 = 10,
+    cutoff2 = "Higher specificity example",
+    tp2 = 80,
+    fp2 = 15,
+    tn2 = 95,
+    fn2 = 30) {
 
     if ( ! requireNamespace("jmvcore", quietly=TRUE))
         stop("decisioncalculator requires jmvcore to be installed (restart may be required)")

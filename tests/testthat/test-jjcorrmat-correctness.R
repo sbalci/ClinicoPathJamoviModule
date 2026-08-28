@@ -1,4 +1,4 @@
-context("test-jjcorrmat-correctness")
+# test-jjcorrmat-correctness
 
 # Comprehensive end-to-end tests for statistical correctness
 # These tests verify the fixes for:

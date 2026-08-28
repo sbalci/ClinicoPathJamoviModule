@@ -5,8 +5,6 @@
 # Tests edge cases, error conditions, and robust error handling
 # for the diagnosticmeta jamovi function
 
-library(testthat)
-
 # Load test data
 data(diagnosticmeta_test, package = "ClinicoPath")
 data(diagnosticmeta_test_small, package = "ClinicoPath")
@@ -38,14 +36,14 @@ test_that("diagnosticmeta handles very small sample sizes", {
   # Only 3 studies
   small_data <- diagnosticmeta_test_small[1:3, ]
 
-  result <- diagnosticmeta(
+  suppressWarnings(result <- diagnosticmeta(
     data = small_data,
     study = "study",
     true_positives = "true_positives",
     false_positives = "false_positives",
     false_negatives = "false_negatives",
     true_negatives = "true_negatives"
-  )
+  ))
 
   # Should complete but may have warnings or notices
   expect_s3_class(result, "diagnosticmetaResults")

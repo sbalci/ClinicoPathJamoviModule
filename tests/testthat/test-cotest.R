@@ -42,14 +42,16 @@ test_that("cotest handles independent tests correctly", {
 
   expect_s3_class(result, "cotestResults")
 
-  # For independent tests, dependenceInfo should not be visible. The assertion used to
-  # compare against the literal string "(!indep)" -- i.e. it was written to match the bug,
-  # where the expression failed to evaluate and left the panel permanently visible.
-  # `visible:` lives in the .r.yaml, so it only takes effect after jmvtools::prepare().
-  if (isTRUE(result$dependenceInfo$visible)) {
-    skip("dependenceInfo visibility not recompiled yet - run jmvtools::prepare()")
-  }
-  expect_false(isTRUE(result$dependenceInfo$visible))
+  # The dependence panel is now written in BOTH branches and carries no `visible:`
+  # expression, so it always describes the model that was actually fitted. Under
+  # independence it must SAY so rather than being blank or absent -- the previous
+  # conditional-visibility scheme could leave an empty titled box on screen.
+  #
+  # The self-cancelling `skip()` that used to guard this assertion is gone: it skipped
+  # exactly when the panel was wrongly visible, so the test could never fail.
+  expect_true(nzchar(result$dependenceInfo$content))
+  expect_match(result$dependenceInfo$content, "conditionally independent")
+  expect_false(grepl("Realized phi", result$dependenceInfo$content))
 })
 
 test_that("cotest handles dependent tests correctly", {
@@ -523,4 +525,254 @@ test_that("cotest clinical scenario examples", {
   )
 
   expect_s3_class(cardiac_biomarkers, "cotestResults")
+})
+
+
+# ---------------------------------------------------------------------------
+# Worked examples: one source of truth
+# ---------------------------------------------------------------------------
+
+# The preset numbers exist twice -- in R/cotest.b.R .getPresetValues(), which computes the
+# results, and in jamovi/js/cotest.events.js, which writes them into the input boxes the user
+# reads. They were independently maintained and drifted apart in 25 of 48 fields; three presets
+# even disagreed about conditional independence, so the boxes on screen described one model
+# while the results table reported another (tb_xray_sputum: inputs implying 91.5% for "both
+# positive" against a printed 45.5%). This test is the only thing keeping them together.
+
+parse_js_presets <- function() {
+    js <- readLines("../../jamovi/js/cotest.events.js", warn = FALSE)
+    from <- grep("^const PRESET_CONFIGS = \\{", js)
+    to   <- from - 1 + grep("^\\};", js[from:length(js)])[1]
+    stopifnot(length(from) == 1, !is.na(to))
+    js <- js[(from + 1):(to - 1)]
+
+    out <- list(); cur <- NULL
+    for (ln in js) {
+        if (grepl("^    (\\w+): \\{\\},?\\s*$", ln)) {         # one-line empty block
+            cur <- NULL
+            next
+        }
+        if (grepl("^    (\\w+): \\{\\s*$", ln)) {
+            cur <- sub("^    (\\w+):.*$", "\\1", ln)
+            out[[cur]] <- list()
+        } else if (grepl("^    \\},?\\s*$", ln)) {
+            cur <- NULL
+        } else if (!is.null(cur) && grepl("^\\s+\\w+:", ln)) {
+            k <- sub("^\\s*(\\w+):.*$", "\\1", ln)
+            v <- trimws(gsub(",\\s*$", "", sub("^[^:]*:", "", ln)))
+            out[[cur]][[k]] <- if (v == "true") TRUE
+                               else if (v == "false") FALSE
+                               else if (grepl("^'.*'$", v)) gsub("^'|'$", "", v)   # string values
+                               else as.numeric(v)
+        }
+    }
+    # `custom` carries the schema defaults so that returning to it clears the previous example;
+    # it is not a worked example and has no counterpart in .getPresetValues().
+    out[names(out) != "custom"]
+}
+
+test_that("the JS and R preset tables agree field for field", {
+    skip_if_not(file.exists("../../jamovi/js/cotest.events.js"))
+    js <- parse_js_presets()
+
+    a <- ClinicoPath:::cotestClass$new(options = ClinicoPath:::cotestOptions$new(),
+                                       data = data.frame(x = 1))
+    getR <- a$.__enclos_env__$private$.getPresetValues
+
+    # Derive the preset list from the SCHEMA, not from a literal in this file. An earlier
+    # version hardcoded both the six names and the eight fields, so it compared JS against
+    # the literal rather than against R: adding a 7th preset to .getPresetValues() alone
+    # passed, while the GUI would have written nothing into the boxes and the backend would
+    # have computed with the new numbers -- the exact divergence this test exists to prevent.
+    a_yaml <- readLines("../../jamovi/cotest.a.yaml", warn = FALSE)
+    i <- grep("^    - name: preset$", a_yaml)
+    j <- i - 1 + grep("^      default:", a_yaml[i:length(a_yaml)])[1]
+    presets <- setdiff(sub("^\\s*- name: ", "", grep("^        - name: ", a_yaml[i:j], value = TRUE)),
+                       "custom")
+    expect_gt(length(presets), 0)
+
+    # and derive the fields from what R actually stores, so a 9th parameter is compared too
+    fields <- setdiff(unique(unlist(lapply(presets, function(nm) names(getR(nm))))),
+                      c("label", "note"))
+    expect_true(all(c("test1_sens", "prevalence", "indep") %in% fields))
+
+    expect_setequal(names(js), presets)
+
+    for (nm in presets) {
+        r <- getR(nm)
+        expect_false(is.null(r), info = paste(nm, "is offered in the .a.yaml but unknown to R"))
+        for (f in fields)
+            expect_identical(js[[nm]][[f]], r[[f]],
+                             info = paste0(nm, "$", f, ": events.js and .getPresetValues() disagree"))
+    }
+})
+
+test_that("applyPresetConfig writes every field the backend overrides", {
+    # The table can be perfectly in sync and still not reach the boxes: the parity test above
+    # parses PRESET_CONFIGS only, so deleting the single line that fills the prevalence control
+    # left it green while every preset silently kept the previous prevalence on screen.
+    js <- readLines("../../jamovi/js/cotest.events.js", warn = FALSE)
+    from <- grep("^const applyPresetConfig", js)
+    to   <- from - 1 + grep("^\\};", js[from:length(js)])[1]
+    expect_length(from, 1)
+    expect_false(is.na(to))
+    body <- paste(js[from:to], collapse = "\n")
+    for (f in c("test1_sens", "test1_spec", "test2_sens", "test2_spec",
+                "prevalence", "indep", "cond_dep_pos", "cond_dep_neg"))
+        expect_match(body, paste0("ui\\.", f),
+                     info = paste0("applyPresetConfig never writes ", f,
+                                   ", so the box will not match what the backend computes"))
+})
+
+test_that("the custom preset holds the schema defaults, so switching back clears the example", {
+    # Returning to "Custom values" used to leave the worked example's numbers in the unlocked
+    # boxes with no disclosure: identical results, empty notices, one click.
+    js <- paste(readLines("../../jamovi/js/cotest.events.js", warn = FALSE), collapse = "\n")
+    blk <- regmatches(js, regexpr("custom: \\{[^}]*\\}", js, perl = TRUE))
+    expect_length(blk, 1)
+    expect_match(blk, "test1_sens")
+
+    a_yaml <- readLines("../../jamovi/cotest.a.yaml", warn = FALSE)
+    for (nm in c("test1_sens", "test1_spec", "test2_sens", "test2_spec", "prevalence")) {
+        i <- grep(paste0("^    - name: ", nm, "$"), a_yaml)
+        d <- as.numeric(sub("^      default: ", "", a_yaml[i + 3]))
+        got <- as.numeric(sub(".*", "", regmatches(blk,
+                    regexpr(paste0(nm, ": [0-9.]+"), blk))))
+        got <- as.numeric(sub(paste0(nm, ": "), "", regmatches(blk,
+                    regexpr(paste0(nm, ": [0-9.]+"), blk))))
+        expect_equal(got, d, info = paste(nm, "custom block does not match the .a.yaml default"))
+    }
+})
+
+test_that("UI enable expressions use jamovi's binding grammar, not ==", {
+    # jamovi's _resolveBindPart terminates an operand only on ':', '&&', '||' or ')'. There is
+    # no '==' operator: `preset == 'custom'` parses as an option NAME that does not exist, the
+    # binding resolves to null (not FALSE), sourceNames is empty so it never re-evaluates, and
+    # every control stays enabled. On a CheckBox it is worse -- the click handler is
+    # `if (!getPropertyValue("enable")) preventDefault()`, so !null blocks the click and the
+    # box becomes permanently greyed AND unclickable. Official jmv uses the colon form 66
+    # times and '==' zero times.
+    u <- readLines("../../jamovi/cotest.u.yaml", warn = FALSE)
+    exprs <- grep("^\\s*(enable|visible):", u, value = TRUE)
+    expect_gt(length(exprs), 0)
+    expect_false(any(grepl("==", exprs)),
+                 info = paste("jamovi's UI grammar has no '==' operator:",
+                              paste(grep("==", exprs, value = TRUE), collapse = " | ")))
+    # and every operand must reference a real option
+    opts <- names(ClinicoPath:::cotestOptions$new()$.__enclos_env__$private)
+    opts <- sub("^\\.\\.", "", grep("^\\.\\.", opts, value = TRUE))
+    for (e in exprs) {
+        body <- sub("^.*?\\((.*)\\).*$", "\\1", e)
+        for (tok in unlist(strsplit(body, "\\s*(&&|\\|\\|)\\s*"))) {
+            nm <- sub("^!", "", trimws(sub(":.*$", "", tok)))
+            expect_true(nm %in% opts,
+                        info = paste0("'", nm, "' in `", trimws(e), "` is not an option name"))
+        }
+    }
+})
+
+test_that("every worked example is labelled as a demonstration, in the UI and in the results", {
+    # A demonstration figure quoted as if it were evidence is the failure mode this guards.
+    a_yaml <- paste(readLines("../../jamovi/cotest.a.yaml", warn = FALSE), collapse = "\n")
+    expect_match(a_yaml, "must not be used for\\s+patient care")
+    # every non-custom option title carries the marker
+    titles <- regmatches(a_yaml, gregexpr("- name: (hpv_pap|psa_dre|troponin_ecg|mammogram_ultrasound|covid_antigen_pcr|tb_xray_sputum)\\n          title: [^\\n]*", a_yaml, perl = TRUE))[[1]]
+    expect_length(titles, 6)
+    expect_true(all(grepl("demo only", titles, fixed = TRUE)))
+
+    for (nm in c("hpv_pap", "psa_dre", "troponin_ecg",
+                 "mammogram_ultrasound", "covid_antigen_pcr", "tb_xray_sputum")) {
+        res <- ClinicoPath::cotest(preset = nm)
+        txt <- gsub("<[^>]+>", " ", paste(res$notices$content, collapse = " "))
+        expect_match(txt, "Worked example in use",
+                     info = paste(nm, "did not disclose that a worked example was in use"))
+        expect_match(txt, "not values to use for patient care", info = nm)
+    }
+})
+
+test_that("a worked example computes what the input boxes show", {
+    # events.js writes the preset into the controls; the backend recomputes from its own table.
+    # Passing the JS values explicitly with preset = "custom" must reproduce the preset run.
+    js <- parse_js_presets()
+    for (nm in names(js)) {
+        v <- js[[nm]]
+        manual <- do.call(ClinicoPath::cotest,
+                          c(list(preset = "custom"), v[intersect(names(v),
+                            c("test1_sens", "test1_spec", "test2_sens", "test2_spec",
+                              "prevalence", "indep", "cond_dep_pos", "cond_dep_neg"))]))
+        viapreset <- ClinicoPath::cotest(preset = nm)
+        expect_equal(as.data.frame(manual$cotestResultsTable)$postProb,
+                     as.data.frame(viapreset$cotestResultsTable)$postProb,
+                     tolerance = 1e-12,
+                     info = paste(nm, "displayed inputs do not reproduce the reported results"))
+    }
+})
+
+test_that("every control a worked example overrides is disabled while it is selected", {
+    # Locking only sensitivity/specificity left prevalence and the independence checkbox
+    # editable but discarded: cotest(preset = "hpv_pap", prevalence = 0.40) and
+    # prevalence = 0.001 returned byte-identical tables.
+    # Colon form, not `==`: jamovi's binding grammar has no equality operator, so
+    # `(preset == 'custom')` resolves to null, disables nothing, and on the indep CheckBox
+    # makes the control permanently greyed and unclickable. See the grammar test below.
+    u <- readLines("../../jamovi/cotest.u.yaml", warn = FALSE)
+    for (nm in c("test1_sens", "test1_spec", "test2_sens", "test2_spec",
+                 "prevalence", "indep", "cond_dep_pos", "cond_dep_neg")) {
+        i <- grep(paste0("name: ", nm, "$"), u)
+        expect_length(i, 1)
+        blk <- paste(u[i:min(i + 6, length(u))], collapse = " ")
+        expect_match(blk, "enable: \\(preset:custom",
+                     info = paste(nm, "is overridden by a worked example but stays editable"))
+    }
+})
+
+test_that("footnotes do not accumulate over repeated run cycles", {
+    # addFootnote() appends with no dedup and neither table declares clearWith, so this is
+    # only safe because setRow() -- which clears each cell's footnotes -- runs BEFORE
+    # .addFootnotes() on every path. Lock that ordering.
+    opts <- ClinicoPath:::cotestOptions$new(fnote = TRUE)
+    a <- ClinicoPath:::cotestClass$new(options = opts, data = data.frame(x = 1))
+    p <- a$.__enclos_env__$private
+    p$.init()
+    counts <- vapply(1:4, function(i) {
+        p$.run()
+        length(a$results$testParamsTable$getCell(rowKey = "test1", col = "sens")$footnotes)
+    }, numeric(1))
+    expect_equal(counts, rep(1, 4))
+
+    # the headline parallel-rule row must be footnoted too -- it was the one row the loop skipped
+    expect_gt(length(a$results$cotestResultsTable$getCell(rowKey = "either_pos",
+                                                          col = "postProb")$footnotes), 0)
+})
+
+test_that("the Fagan nomogram is titled with the rule it actually plots", {
+    # It is built from the parallel-rule likelihood ratios, so its positive arm is the
+    # "Either Test Positive" row (42.5% at the defaults), not "Both Tests Positive" (89.1%).
+    r_yaml <- paste(readLines("../../jamovi/cotest.r.yaml", warn = FALSE), collapse = "\n")
+    expect_match(r_yaml, "title: 'Fagan nomogram - parallel rule")
+
+    res <- ClinicoPath::cotest(fagan = TRUE)
+    ct <- as.data.frame(res$cotestResultsTable)
+    either <- ct$postProb[ct$scenario == "Either Test Positive (Parallel Rule)"]
+    plr <- res$plot1$state$Plr_PositiveRule
+    odds <- 0.10 / 0.90 * plr
+    expect_equal(unname(odds / (1 + odds)), unname(either), tolerance = 1e-9)
+})
+
+test_that("every Collate entry matches a tracked filename exactly (case included)", {
+    # cotest sources R/nomogrammer.R for the Fagan plot. git tracked it as `nomogrammer.r`
+    # while DESCRIPTION's Collate said `nomogrammer.R`; macOS is case-insensitive so this was
+    # invisible locally, but on a case-sensitive filesystem R CMD build fails outright with
+    # "files in 'Collate' field missing from 'R'".
+    skip_if_not(nzchar(Sys.which("git")))
+    root <- normalizePath("../..")
+    tracked <- system2("git", c("-C", shQuote(root), "ls-files", "R/"), stdout = TRUE)
+    tracked <- sub("^R/", "", tracked[startsWith(tracked, "R/")])
+    desc <- paste(readLines(file.path(root, "DESCRIPTION")), collapse = "\n")
+    tail_txt <- substring(desc, regexpr("Collate:", desc))   # match and extract on the SAME string
+    collate <- gsub("'", "", regmatches(tail_txt, gregexpr("'[^']+'", tail_txt))[[1]])
+    skip_if(length(collate) == 0)
+    expect_true("nomogrammer.R" %in% tracked)
+    expect_true("nomogrammer.R" %in% collate)
+    expect_equal(setdiff(collate, tracked), character(0))
 })

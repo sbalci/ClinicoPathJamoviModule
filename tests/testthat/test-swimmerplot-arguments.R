@@ -5,8 +5,6 @@
 # Tests all argument combinations and option interactions
 # for the swimmerplot jamovi function
 
-library(testthat)
-
 # Load test data
 data(swimmerplot_test, package = "ClinicoPath")
 data(swimmerplot_immuno, package = "ClinicoPath")

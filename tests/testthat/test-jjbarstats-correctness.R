@@ -1,5 +1,3 @@
-context("test-jjbarstats-correctness")
-
 # Comprehensive end-to-end tests for statistical correctness
 # These tests verify the fixes for:
 # 1. Weighted data handling (counts column)
@@ -485,7 +483,7 @@ test_that("jjbarstats auto-switch to Fisher is triggered correctly for low count
 
   # Check expected counts
   manual_table <- xtabs(count ~ outcome + group, data = low_count_data)
-  expected_counts <- chisq.test(manual_table)$expected
+  expected_counts <- suppressWarnings(chisq.test(manual_table)$expected)
 
   # Verify that at least some expected counts are < 5
   expect_true(any(expected_counts < 5))

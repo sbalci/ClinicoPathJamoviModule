@@ -22,7 +22,9 @@ nogoldstandardOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
             nboot = 1000,
             alpha = 0.05,
             verbose = FALSE,
-            seed = 0, ...) {
+            seed = 0,
+            showSummary = FALSE,
+            showMethodGuide = FALSE, ...) {
 
             super$initialize(
                 package="ClinicoPath",
@@ -133,6 +135,14 @@ nogoldstandardOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
                 "seed",
                 seed,
                 default=0)
+            private$..showSummary <- jmvcore::OptionBool$new(
+                "showSummary",
+                showSummary,
+                default=FALSE)
+            private$..showMethodGuide <- jmvcore::OptionBool$new(
+                "showMethodGuide",
+                showMethodGuide,
+                default=FALSE)
 
             self$.addOption(private$..clinicalPreset)
             self$.addOption(private$..test1)
@@ -151,6 +161,8 @@ nogoldstandardOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
             self$.addOption(private$..alpha)
             self$.addOption(private$..verbose)
             self$.addOption(private$..seed)
+            self$.addOption(private$..showSummary)
+            self$.addOption(private$..showMethodGuide)
         }),
     active = list(
         clinicalPreset = function() private$..clinicalPreset$value,
@@ -169,7 +181,9 @@ nogoldstandardOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
         nboot = function() private$..nboot$value,
         alpha = function() private$..alpha$value,
         verbose = function() private$..verbose$value,
-        seed = function() private$..seed$value),
+        seed = function() private$..seed$value,
+        showSummary = function() private$..showSummary$value,
+        showMethodGuide = function() private$..showMethodGuide$value),
     private = list(
         ..clinicalPreset = NA,
         ..test1 = NA,
@@ -187,7 +201,9 @@ nogoldstandardOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
         ..nboot = NA,
         ..alpha = NA,
         ..verbose = NA,
-        ..seed = NA)
+        ..seed = NA,
+        ..showSummary = NA,
+        ..showMethodGuide = NA)
 )
 
 nogoldstandardResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
@@ -205,8 +221,7 @@ nogoldstandardResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
         conditional_dependence = function() private$.items[["conditional_dependence"]],
         diagnostics = function() private$.items[["diagnostics"]],
         crosstab = function() private$.items[["crosstab"]],
-        agreement_plot = function() private$.items[["agreement_plot"]],
-        agreement_plot2 = function() private$.items[["agreement_plot2"]]),
+        agreement_plot = function() private$.items[["agreement_plot"]]),
     private = list(),
     public=list(
         initialize=function(options) {
@@ -237,12 +252,26 @@ nogoldstandardResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
                     "bootstrap",
                     "nboot",
                     "alpha",
-                    "seed")))
+                    "seed",
+                    "verbose")))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="instructions",
                 title="Instructions",
-                visible=TRUE))
+                visible=TRUE,
+                clearWith=list(
+                    "clinicalPreset",
+                    "test1",
+                    "test1Positive",
+                    "test2",
+                    "test2Positive",
+                    "test3",
+                    "test3Positive",
+                    "test4",
+                    "test4Positive",
+                    "test5",
+                    "test5Positive",
+                    "method")))
             self$add(jmvcore::Table$new(
                 options=options,
                 name="agreement_stats",
@@ -287,17 +316,37 @@ nogoldstandardResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
             self$add(jmvcore::Html$new(
                 options=options,
                 name="clinical_summary",
-                title="Clinical Summary",
-                visible=FALSE))
+                title="Plain-Language Summary",
+                visible="(showSummary)",
+                clearWith=list(
+                    "clinicalPreset",
+                    "test1",
+                    "test1Positive",
+                    "test2",
+                    "test2Positive",
+                    "test3",
+                    "test3Positive",
+                    "test4",
+                    "test4Positive",
+                    "test5",
+                    "test5Positive",
+                    "method",
+                    "bootstrap",
+                    "nboot",
+                    "alpha",
+                    "seed",
+                    "showSummary")))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="method_guide",
                 title="Method Selection Guide",
-                visible=TRUE))
+                visible="(showMethodGuide)",
+                clearWith=list(
+                    "showMethodGuide")))
             self$add(jmvcore::Table$new(
                 options=options,
                 name="prevalence",
-                title="Disease Prevalence",
+                title="Estimated Class or Rule Proportion",
                 rows=1,
                 clearWith=list(
                     "clinicalPreset",
@@ -335,7 +384,7 @@ nogoldstandardResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
             self$add(jmvcore::Table$new(
                 options=options,
                 name="test_metrics",
-                title="Test Performance Metrics",
+                title="Estimated Test Metrics or Rule Agreement",
                 clearWith=list(
                     "clinicalPreset",
                     "test1",
@@ -360,36 +409,36 @@ nogoldstandardResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
                         `type`="text"),
                     list(
                         `name`="sensitivity", 
-                        `title`="Sensitivity", 
+                        `title`="P(Test+ | Class+/Rule+)", 
                         `type`="number", 
                         `format`="pc"),
                     list(
                         `name`="sens_ci_lower", 
                         `title`="Lower CI", 
-                        `superTitle`="Sensitivity", 
+                        `superTitle`="Positive-Response Probability", 
                         `type`="number", 
                         `format`="pc"),
                     list(
                         `name`="sens_ci_upper", 
                         `title`="Upper CI", 
-                        `superTitle`="Sensitivity", 
+                        `superTitle`="Positive-Response Probability", 
                         `type`="number", 
                         `format`="pc"),
                     list(
                         `name`="specificity", 
-                        `title`="Specificity", 
+                        `title`="P(Test- | Class-/Rule-)", 
                         `type`="number", 
                         `format`="pc"),
                     list(
                         `name`="spec_ci_lower", 
                         `title`="Lower CI", 
-                        `superTitle`="Specificity", 
+                        `superTitle`="Negative-Response Probability", 
                         `type`="number", 
                         `format`="pc"),
                     list(
                         `name`="spec_ci_upper", 
                         `title`="Upper CI", 
-                        `superTitle`="Specificity", 
+                        `superTitle`="Negative-Response Probability", 
                         `type`="number", 
                         `format`="pc"),
                     list(
@@ -439,6 +488,19 @@ nogoldstandardResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
                 title="Conditional Independence Check (Bivariate Residuals)",
                 rows=0,
                 visible="(method==\"latent_class\")",
+                clearWith=list(
+                    "test1",
+                    "test1Positive",
+                    "test2",
+                    "test2Positive",
+                    "test3",
+                    "test3Positive",
+                    "test4",
+                    "test4Positive",
+                    "test5",
+                    "test5Positive",
+                    "method",
+                    "seed"),
                 columns=list(
                     list(
                         `name`="pair", 
@@ -462,7 +524,19 @@ nogoldstandardResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
                     "method",
                     "bootstrap",
                     "nboot",
-                    "seed")))
+                    "seed",
+                    "clinicalPreset",
+                    "test1",
+                    "test1Positive",
+                    "test2",
+                    "test2Positive",
+                    "test3",
+                    "test3Positive",
+                    "test4",
+                    "test4Positive",
+                    "test5",
+                    "test5Positive",
+                    "alpha")))
             self$add(jmvcore::Table$new(
                 options=options,
                 name="crosstab",
@@ -502,31 +576,7 @@ nogoldstandardResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
             self$add(jmvcore::Image$new(
                 options=options,
                 name="agreement_plot",
-                title="Test Agreement Plot (Base)",
-                renderFun=".plot",
-                width=500,
-                height=400,
-                clearWith=list(
-                    "clinicalPreset",
-                    "test1",
-                    "test1Positive",
-                    "test2",
-                    "test2Positive",
-                    "test3",
-                    "test3Positive",
-                    "test4",
-                    "test4Positive",
-                    "test5",
-                    "test5Positive",
-                    "method",
-                    "bootstrap",
-                    "nboot",
-                    "alpha",
-                    "seed")))
-            self$add(jmvcore::Image$new(
-                options=options,
-                name="agreement_plot2",
-                title="Test Agreement Plot (ggplot2)",
+                title="Test Agreement Matrix",
                 renderFun=".plot_ggplot",
                 width=500,
                 height=400,
@@ -556,7 +606,7 @@ nogoldstandardBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
             super$initialize(
                 package = "ClinicoPath",
                 name = "nogoldstandard",
-                version = c(1,0,7),
+                version = c(1,0,8),
                 options = options,
                 results = nogoldstandardResults$new(options=options),
                 data = data,
@@ -571,15 +621,16 @@ nogoldstandardBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
 
 #' Analysis Without Gold Standard
 #'
-#' Analysis of diagnostic tests without a gold standard reference using 
-#' multiple statistical approaches. Implements Latent Class Analysis (Hui & 
-#' Walter, 1980), Bayesian methods (Joseph et al., 1995),  and composite 
-#' reference standards for estimating test performance when no perfect 
-#' reference test exists.
+#' Analysis of multiple binary tests when no perfect reference exists. 
+#' Implements a conditional-independence two-class latent class model, 
+#' fixed-prior penalized EM point estimation, and descriptive agreement with 
+#' self-built composite reference rules. Latent classes are unlabeled, and 
+#' reference-rule results are not diagnostic-accuracy estimates.
 #' 
 #' @param data The data as a data frame.
-#' @param clinicalPreset Predefined clinical scenarios with optimized settings
-#'   and method recommendations.
+#' @param clinicalPreset Illustrative scenario examples only. They do not
+#'   change analysis settings and are not clinical guides, validated
+#'   recommendations, or substitutes for a study-specific analysis plan.
 #' @param test1 First diagnostic test variable.
 #' @param test1Positive The positive level for Test 1.
 #' @param test2 Second diagnostic test variable.
@@ -590,15 +641,28 @@ nogoldstandardBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
 #' @param test4Positive The positive level for Test 4.
 #' @param test5 Fifth diagnostic test variable (optional).
 #' @param test5Positive The positive level for Test 5.
-#' @param method Method for analyzing tests without gold standard.
-#' @param bootstrap Calculate bootstrap confidence intervals.
+#' @param method Method for analyzing tests without a gold standard. Composite
+#'   Reference uses a strict majority (more than half positive); ties with an
+#'   even number of tests are classified as rule negative.
+#' @param bootstrap Calculate case-resampling percentile confidence intervals.
+#'   For latent-class and penalized-EM models, confidence intervals are reported
+#'   only when this option is enabled because ordinary binomial intervals do not
+#'   account for latent-variable estimation.
 #' @param nboot Number of bootstrap samples for confidence intervals.
 #' @param alpha Alpha level for confidence intervals.
-#' @param verbose Show detailed progress messages during bootstrap analysis.
+#' @param verbose Show detailed analysis diagnostics, including convergence,
+#'   random starts, exclusions, and bootstrap failures when bootstrap intervals
+#'   are enabled.
 #' @param seed Base random seed for the reproducible latent-class multi-start
-#'   search. Each start is offset from this base, so changing it shifts the
-#'   whole reproducible sequence; the default (0) reproduces the previous
-#'   behaviour.
+#'   search and bootstrap resampling. Each start is offset from this base, so
+#'   changing it shifts the whole reproducible sequence; the default (0)
+#'   reproduces the previous behaviour.
+#' @param showSummary Show an optional plain-language summary. The summary
+#'   describes the fitted quantities and their assumptions; it is not clinical
+#'   guidance.
+#' @param showMethodGuide Show an optional educational guide to the available
+#'   methods. The scenarios are illustrative examples, not clinical guides or
+#'   validated recommendations.
 #' @return A results object containing:
 #' \tabular{llllll}{
 #'   \code{results$notices} \tab \tab \tab \tab \tab a preformatted \cr
@@ -609,11 +673,10 @@ nogoldstandardBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
 #'   \code{results$prevalence} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$test_metrics} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$model_fit} \tab \tab \tab \tab \tab a table \cr
-#'   \code{results$conditional_dependence} \tab \tab \tab \tab \tab Latent class analysis assumes the tests err independently given true disease status. For each pair this compares the observed two-way table with the one the fitted model implies; a residual above 3.84 (the 5 percent point of chi-squared on 1 degree of freedom) is evidence that the pair shares a source of error, which inflates the estimated accuracy. Requires four or more tests: with three the model is just-identified and reproduces every table exactly, so no residual can reveal dependence. \cr
+#'   \code{results$conditional_dependence} \tab \tab \tab \tab \tab Latent class analysis assumes the tests are conditionally independent within each latent class. For each pair this compares the observed two-way table with the one implied by the fitted model. A residual above 3.84 is descriptive evidence against conditional independence, but this squared statistic does not identify the direction or cause of dependence and cannot determine the direction of bias in the fitted parameters. Requires four or more tests: with three the model is just-identified and no residual can diagnose dependence. \cr
 #'   \code{results$diagnostics} \tab \tab \tab \tab \tab Detail of how the estimates were produced: sample size, method, convergence, number of random starts used, and bootstrap failures. Shown only when Verbose output is enabled. \cr
 #'   \code{results$crosstab} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$agreement_plot} \tab \tab \tab \tab \tab an image \cr
-#'   \code{results$agreement_plot2} \tab \tab \tab \tab \tab an image \cr
 #' }
 #'
 #' Tables can be converted to data frames with \code{asDF} or \code{\link{as.data.frame}}. For example:
@@ -641,7 +704,9 @@ nogoldstandard <- function(
     nboot = 1000,
     alpha = 0.05,
     verbose = FALSE,
-    seed = 0) {
+    seed = 0,
+    showSummary = FALSE,
+    showMethodGuide = FALSE) {
 
     if ( ! requireNamespace("jmvcore", quietly=TRUE))
         stop("nogoldstandard requires jmvcore to be installed (restart may be required)")
@@ -683,7 +748,9 @@ nogoldstandard <- function(
         nboot = nboot,
         alpha = alpha,
         verbose = verbose,
-        seed = seed)
+        seed = seed,
+        showSummary = showSummary,
+        showMethodGuide = showMethodGuide)
 
     analysis <- nogoldstandardClass$new(
         options = options,

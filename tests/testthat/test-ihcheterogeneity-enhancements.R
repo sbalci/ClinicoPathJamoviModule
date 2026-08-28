@@ -1,4 +1,3 @@
-context("ihcheterogeneity enhancements")
 
 test_that("escapeVar handles variables with special characters", {
   skip_if_not_installed('jmvReadWrite')
