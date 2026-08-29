@@ -1,49 +1,6 @@
 # fix-function
 
 
-
-
-
-
-jjwithinstats
-lollipop
-raincloud
-hullplot
-jjcorrmat
-jjscatterstats
-jjhistostats
-jjridges
-jwaffle
-linechart
-jjarcdiagram
-multisurvival
-singlearm
-survival
-survivalcont
-datetimeconverter
-outcomeorganizer
-timeinterval
-oddsratio
-agreement
-decision
-decisioncombine
-decisioncompare
-nogoldstandard
-cotest
-decisioncalculator
-sequentialtests
-enhancedROC
-psychopdaROC
-lassologistic
-decisioncurve
-kappaSizeCI
-kappaSizeFixedN
-kappaSizePower
-ihcheterogeneity
-diagnosticmeta
-swimmerplot
-waterfall
-
 # prepare-translation
 
 reportcat
