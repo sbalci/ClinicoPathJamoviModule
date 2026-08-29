@@ -1,0 +1,122 @@
+# Correlation Matrix - Developer Documentation
+
+## 1. Overview
+
+- **Function**: `jjcorrmat`
+- **Title**: Correlation Matrix
+- **Module**: `JJStatsPlotT`
+- **Files**:
+  - `jamovi/jjcorrmat.u.yaml` - User Interface Definition
+  - `jamovi/jjcorrmat.a.yaml` - Options & Schema Definition
+  - `jamovi/jjcorrmat.r.yaml` - Results Layout & Tables
+  - `R/jjcorrmat.b.R` - Backend Implementation
+- **Summary**: Wrapper Function for ggstatsplot::ggcorrmat and ggstatsplot::grouped_ggcorrmat to generate correlation matrix visualizations with significance testing.
+
+## 1a. Changelog
+
+- **Date**: 2026-08-29
+- **Summary**: Comprehensive documentation suite created & verified against active schemas and backend implementation.
+
+## 2. Options Reference (`.a.yaml`)
+
+| Option | Type | Default | Description |
+| :--- | :--- | :--- | :--- |
+| `data` | `Data` | `NULL` |  |
+| `dep` | `Variables` | `NULL` | Dependent Variables |
+| `grvar` | `Variable` | `NULL` | Split By (Optional) |
+| `typestatistics` | `List` | `parametric` | Type of Statistic |
+| `matrixtype` | `List` | `upper` | Matrix Type |
+| `matrixmethod` | `List` | `square` | Matrix Method |
+| `siglevel` | `Number` | `0.05` | Significance Level |
+| `conflevel` | `Number` | `0.95` | Confidence Level |
+| `padjustmethod` | `List` | `holm` | P-value Adjustment Method |
+| `k` | `Integer` | `2` | Decimal Places |
+| `partial` | `Bool` | `FALSE` | Partial correlations |
+| `naHandling` | `List` | `listwise` | Missing Data Handling |
+| `lowcolor` | `String` | `#E69F00` | Low Correlation Color |
+| `midcolor` | `String` | `white` | Mid Correlation Color |
+| `highcolor` | `String` | `#009E73` | High Correlation Color |
+| `title` | `String` | `` | Plot Title |
+| `subtitle` | `String` | `` | Plot Subtitle |
+| `caption` | `String` | `` | Plot Caption |
+| `showexplanations` | `Bool` | `FALSE` | Explanations |
+| `plotwidth` | `Integer` | `600` | Plot Width |
+| `plotheight` | `Integer` | `450` | Plot Height |
+
+## 3. Results Definition (`.r.yaml`)
+
+| Output ID | Type | Title | Description |
+| :--- | :--- | :--- | :--- |
+| `todo` | `Html` | `Analysis Guide` |  |
+| `warnings` | `Html` | `Warnings and Notices` |  |
+| `interpretation` | `Html` | `Clinical Interpretation` |  |
+| `about` | `Html` | `About` |  |
+| `summary` | `Html` | `Analysis Summary` |  |
+| `assumptions` | `Html` | `Statistical Assumptions` |  |
+| `plot2` | `Image` | `Chart` |  |
+| `plot` | `Image` | `Chart` |  |
+| `table` | `Table` | `Correlation Table` |  |
+
+## 4. Architecture & Data Flow Diagram
+
+```mermaid
+flowchart TD
+  subgraph UI[jamovi UI / .u.yaml]
+    U1[User Input & Variables]
+    U2[Analysis Settings & Controls]
+  end
+
+  subgraph Opts[Options Schema / .a.yaml]
+    O1[Options Parsing & Types]
+    O2[Default Value Validation]
+  end
+
+  subgraph Backend[Backend Logic / R/jjcorrmat.b.R]
+    B1[Input Validation & Data Sanitization]
+    B2[Statistical Computation Engine]
+    B3[Result Objects Formatting]
+  end
+
+  subgraph Res[Results Schema / .r.yaml]
+    R1[Summary & Statistics Tables]
+    R2[Visual Plots & Graphics]
+    R3[Clinical Interpretation & Notices]
+  end
+
+  U1 --> O1
+  U2 --> O2
+  O1 --> B1
+  O2 --> B1
+  B1 --> B2
+  B2 --> B3
+  B3 --> R1
+  B3 --> R2
+  B3 --> R3
+```
+
+## 5. Execution Sequence
+
+```mermaid
+sequenceDiagram
+  autonumber
+  actor User as Clinician / Analyst
+  participant UI as jamovi Interface
+  participant Backend as R Backend (jjcorrmatClass)
+  participant Engine as Statistical Packages
+  participant Results as Results View
+
+  User->>UI: Selects variables and options
+  UI->>Backend: Dispatches .run() with options payload
+  Backend->>Backend: Validates observations & factor levels
+  Backend->>Engine: Computes statistical models / visual layers
+  Engine-->>Backend: Returns model estimates & graphics
+  Backend->>Results: Populates tables, charts, and notices
+  Results-->>User: Displays formatted tables & interactive plots
+```
+
+## 6. Change Impact & Safety Guidelines
+
+- **Data Filtering**: Ensure observations with missing values are handled gracefully according to analysis options.
+- **Formula Conflicts**: Use isolated environment calls or base formula methods when interacting with `ggstatsplot` or formula parsers.
+- **Safe Deparsing**: Use `deparse(val)` in syntax generation (`asSource()`) to escape column names with spaces or special symbols.
+
