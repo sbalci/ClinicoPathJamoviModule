@@ -2,13 +2,13 @@ msgid ""
 msgstr ""
 "Project-Id-Version: ClinicoPath\n"
 "Last-Translator: ClinicoPath translators\n"
-"Language-Team: Source\n"
+"Language-Team: English\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "POT-Creation-Date: 2021-07-26 12:08:06+01000\n"
 "PO-Revision-Date: 2021-07-29 16:59:59+01000\n"
-"Language: c\n"
+"Language: en\n"
 "Plural-Forms: nplurals=2; plural=(n != 1)\n"
 
 #: R/chisqposttest.b.R
@@ -2370,8 +2370,8 @@ msgid ""
 "(<em>{lrnegnote}</em>)</p><p><strong>Key Findings:</strong> Predictive "
 "values are post-test probabilities. After a positive result the probability "
 "of disease is the positive predictive value (PPV {ppv}). After a negative "
-"result the probability of disease falls to <strong>{postneg}</strong>, and "
-"the probability of being disease-free is the negative predictive value (NPV "
+"result the probability of disease is <strong>{postneg}</strong>, and the "
+"probability of being disease-free is the negative predictive value (NPV "
 "{npv}).</p></div>"
 msgstr ""
 
@@ -6246,12 +6246,6 @@ msgstr ""
 msgid "Accuracy: Overall correctness (recommended for balanced datasets)"
 msgstr ""
 
-#: R/decision.b.R
-msgid ""
-"Accuracy: Overall proportion of correct test results. Consider prevalence "
-"dependency."
-msgstr ""
-
 #: nonparametric/results/powerAnalysis.columns.title
 #: pathsampling/results/powerTable.columns.title
 msgid "Achieved Power"
@@ -10000,7 +9994,7 @@ msgid "All-Pairs Cohen's Kappa"
 msgstr ""
 
 #: agreement/options/allPairsKappa.title
-msgid "All-pairs cohen's kappa (every rater pair)"
+msgid "All-pairs Cohen's kappa (every rater pair)"
 msgstr ""
 
 #: agreement/results/allPairsKappaTable.title
@@ -19093,7 +19087,7 @@ msgid "Calculate Expected Values"
 msgstr ""
 
 #: agreement/options/finn.title
-msgid "Calculate finn coefficient (variance-based agreement)"
+msgid "Calculate Finn coefficient (variance-based agreement)"
 msgstr ""
 
 #: jiwillsurvive/options/derive_followup.description.jamovi
@@ -19113,7 +19107,7 @@ msgid "Calculate Goodman-Kruskal Gamma"
 msgstr ""
 
 #: agreement/options/gwet.title
-msgid "Calculate gwet's AC1/AC2"
+msgid "Calculate Gwet's AC1/AC2"
 msgstr ""
 
 #: ihcbasic/options/computeHScore.title
@@ -19193,7 +19187,7 @@ msgid "Calculate iota coefficient (multivariate agreement)"
 msgstr ""
 
 #: agreement/options/kendallW.title
-msgid "Calculate kendall's W (concordance for rankings)"
+msgid "Calculate Kendall's W (concordance for rankings)"
 msgstr ""
 
 #: entropyanalysis/options/calculate_kl_divergence.title
@@ -19201,7 +19195,7 @@ msgid "Calculate KL Divergence"
 msgstr ""
 
 #: agreement/options/kripp.title
-msgid "Calculate krippendorff's alpha"
+msgid "Calculate Krippendorff's alpha"
 msgstr ""
 
 #: agreement/options/lightKappa.title
@@ -19487,7 +19481,7 @@ msgid "Calculate RMST Metrics"
 msgstr ""
 
 #: agreement/options/robinsonA.title
-msgid "Calculate robinson's A (ordinal agreement index)"
+msgid "Calculate Robinson's A (ordinal agreement index)"
 msgstr ""
 
 #: enhancedROC/options/convexHull.description
@@ -22041,12 +22035,6 @@ msgstr ""
 msgid "Check that time variables contain valid numeric or date values"
 msgstr ""
 
-#: R/decision.b.R
-msgid ""
-"Check that variable names are correct. Ensure the data has been loaded "
-"properly."
-msgstr ""
-
 #: R/enhancedROC.b.R
 msgid "Check that your outcome variable has both positive and negative cases."
 msgstr ""
@@ -22765,11 +22753,19 @@ msgid ""
 msgstr ""
 
 #: R/decision.b.R
+msgid "Choose which gold-standard level means disease absent"
+msgstr ""
+
+#: R/decision.b.R
 msgid "Choose which level indicates disease is present"
 msgstr ""
 
 #: R/decision.b.R
 msgid "Choose which level represents a positive test result"
+msgstr ""
+
+#: R/decision.b.R
+msgid "Choose which test level means a negative result"
 msgstr ""
 
 #: waterfall/options/inputType.description.jamovi
@@ -31051,6 +31047,10 @@ msgstr ""
 #: kappaSizeCI/ui.title
 #: kappaSizeCI/results.title
 msgid "Confidence Interval Approach for the Number of Subjects Required"
+msgstr ""
+
+#: agreement/options/allPairsCI.title
+msgid "Confidence interval for each pair"
 msgstr ""
 
 #: brierscore/options/ci_method.title
@@ -50283,6 +50283,12 @@ msgstr ""
 msgid "Evidence against conditional independence"
 msgstr ""
 
+#: R/decision.b.R
+msgid ""
+"evidence AGAINST disease when positive, which usually means the level chosen "
+"as test-positive is inverted"
+msgstr ""
+
 #: clinicalalerts/results/clinicalRecommendations.columns.title
 #: clinicalvalidationinteractive/results/clinicalGuidelines.columns.title
 #: treatmentoptim/results/treatmentSelection.columns.title
@@ -58169,10 +58175,6 @@ msgstr ""
 msgid "Gold Standard Frequency Distribution"
 msgstr ""
 
-#: R/decision.b.R
-msgid "Gold standard has {n} level(s) beyond positive: {lvls}"
-msgstr ""
-
 #: R/decisioncombine.b.R
 msgid "Gold Standard Has Only One Outcome"
 msgstr ""
@@ -64125,10 +64127,6 @@ msgstr ""
 
 #: timedependent/options/roc_method/incident_static.title
 msgid "Incident/Static (I/S)"
-msgstr ""
-
-#: agreement/options/allPairsCI.title
-msgid "Include 95% CI for each pair"
 msgstr ""
 
 #: enhancedfrequency/options/categoricalDiagnostics.description
@@ -75430,7 +75428,6 @@ msgstr ""
 #: package/analyses/hierarchicalbayes.menuSubgroup
 #: package/analyses/enhancedROC.menuGroup
 #: package/analyses/lassologistic.menuGroup
-#: agreement/options.menuGroup
 #: betabinomialdiagnostic/options.menuSubgroup
 #: cotest/options.menuGroup
 #: decision/options.menuGroup
@@ -75568,6 +75565,7 @@ msgstr ""
 #: package/analyses/clinicalscore.menuGroup
 #: package/analyses/mageeequation.menuGroup
 #: package/analyses/latentbiomarker.menuGroup
+#: agreement/options.menuGroup
 #: clinicalscore/options.menuGroup
 #: latentbiomarker/options.menuGroup
 #: leaveonecenterout/options.menuGroup
@@ -83848,6 +83846,10 @@ msgstr ""
 msgid "No Change Analysis"
 msgstr ""
 
+#: R/decision.b.R
+msgid "no change in the probability of disease"
+msgstr ""
+
 #: R/linechart.b.R
 msgid "No clear linear trend was detected (R² = {r2})."
 msgstr ""
@@ -88382,16 +88384,15 @@ msgstr ""
 
 #: R/decision.b.R
 msgid ""
-"Only \"{pos}\" (disease-present) and \"{neg}\" (disease-absent) will be "
-"used. Rows with excluded levels will be removed. To include all levels, "
-"leave \"Disease absent level\" empty."
+"Only \"{pos}\" (disease-present) and \"{neg}\" (disease-absent) take part. "
+"Cases at any other level are removed, not counted as disease-absent, because "
+"an indeterminate result is not a negative result."
 msgstr ""
 
 #: R/decision.b.R
 msgid ""
-"Only \"{pos}\" (test-positive) and \"{neg}\" (test-negative) will be used. "
-"Rows with excluded levels will be removed. To include all levels, leave "
-"\"Test negative level\" empty."
+"Only \"{pos}\" (test-positive) and \"{neg}\" (test-negative) take part. "
+"Cases at any other level are removed, not counted as negative."
 msgstr ""
 
 #: R/decisioncombine.b.R
@@ -98249,8 +98250,16 @@ msgstr ""
 msgid "Points & Color Scheme"
 msgstr ""
 
+#: R/decision.b.R
+msgid "Points AGAINST disease when positive: the test-positive level may be inverted"
+msgstr ""
+
 #: clinicalnomograms/options/points_scale.title
 msgid "Points Scale"
+msgstr ""
+
+#: R/decision.b.R
+msgid "Points TOWARD disease when negative: the test-positive level may be inverted"
 msgstr ""
 
 #: jforestmodel/options/family/poisson.title
@@ -100926,8 +100935,9 @@ msgstr ""
 msgid ""
 "Predictive values are computed at this sample's observed prevalence of "
 "{prevalence}. If the sample was enriched or case-control, that prevalence is "
-"not the clinical one and these predictive values do not transfer - supply a "
-"population prior under Prior Probability to obtain values for your setting."
+"not the clinical one and these predictive values do not transfer - tick "
+"Known population prevalence under Population Prevalence Settings to obtain "
+"values for your setting."
 msgstr ""
 
 #: R/decision.b.R
@@ -101473,10 +101483,11 @@ msgstr ""
 
 #: R/decision.b.R
 msgid ""
-"Prevalence: the user-supplied population prior probability (Prior "
-"Probability option), NOT this sample's observed prevalence. Predictive "
-"values, which are the post-test probabilities, are computed from this prior; "
-"sensitivity and specificity are not affected by it."
+"Prevalence: the user-supplied population prevalence (Known population "
+"prevalence, under Population Prevalence Settings), NOT this sample's "
+"observed prevalence. Predictive values, which are the post-test "
+"probabilities, are computed from this prior; sensitivity and specificity are "
+"not affected by it."
 msgstr ""
 
 #: bayesiannetworkma/options/clinical_context/prevention.title
@@ -102199,8 +102210,8 @@ msgstr ""
 
 #: R/decision.b.R
 msgid ""
-"Probability of being healthy given negative test. Depends on prevalence and "
-"sensitivity."
+"Probability of being healthy given a negative test. Depends on prevalence, "
+"sensitivity and specificity."
 msgstr ""
 
 #: samplingerror/options/detectionSensitivity.description
@@ -102225,8 +102236,8 @@ msgstr ""
 
 #: R/decision.b.R
 msgid ""
-"Probability of disease given positive test. Depends on prevalence and "
-"specificity."
+"Probability of disease given a positive test. Depends on prevalence, "
+"sensitivity and specificity."
 msgstr ""
 
 #: R/decision.b.R
@@ -103232,8 +103243,9 @@ msgstr ""
 
 #: R/decision.b.R
 msgid ""
-"Provides uncertainty estimates using epiR package. Cannot be used with "
-"population prevalence."
+"Provides uncertainty estimates using the epiR package. These intervals "
+"describe the observed sample; when a population prevalence is supplied they "
+"do not apply to the prior-adjusted predictive values in the main table."
 msgstr ""
 
 #: multiplexanalysis/options/proximity_threshold.title
@@ -107759,6 +107771,10 @@ msgstr ""
 
 #: tidyplots/options/removeYAxisTitle.title
 msgid "Remove Y Axis Title"
+msgstr ""
+
+#: R/decision.b.R
+msgid "Removed {n} case(s) with an explicit missing level"
 msgstr ""
 
 #: R/decisioncombine.b.R
@@ -113261,6 +113277,13 @@ msgstr ""
 msgid "Select a dependent (outcome) variable to populate this panel."
 msgstr ""
 
+#: R/decision.b.R
+msgid ""
+"Select a different variable for the test under evaluation. Comparing a "
+"variable against itself always yields perfect agreement and tells you "
+"nothing about the test."
+msgstr ""
+
 #: R/benford.b.R
 msgid "Select a numeric variable containing naturally occurring numbers"
 msgstr ""
@@ -113379,6 +113402,10 @@ msgstr ""
 msgid "Select multiple continuous variables for parallel coordinates"
 msgstr ""
 
+#: R/decision.b.R
+msgid "Select New Test"
+msgstr ""
+
 #: advancedbarplot/options/y_var.description.jamovi
 msgid "Select numeric variable for bar heights."
 msgstr ""
@@ -113435,10 +113462,6 @@ msgstr ""
 
 #: R/decision.b.R
 msgid "Select Test positive level"
-msgstr ""
-
-#: R/decision.b.R
-msgid "Select Test Variable"
 msgstr ""
 
 #: R/nogoldstandard.b.R
@@ -113546,8 +113569,10 @@ msgstr ""
 #: decision/options/goldNegative.description.ui
 msgid ""
 "Select the level that indicates disease is absent in your gold standard "
-"variable. If not specified, all levels other than the Disease Present level "
-"will be treated as negative."
+"variable. Only the disease-present and disease-absent levels take part; "
+"cases at any other level are excluded from the analysis, not counted as "
+"disease-absent. With a two-level variable this is inferred; with three or "
+"more levels you must choose it."
 msgstr ""
 
 #: decisioncompare/options/goldPositive.description.ui
@@ -113565,8 +113590,10 @@ msgstr ""
 
 #: decision/options/testNegative.description.ui
 msgid ""
-"Select the level that represents a negative test result. If not specified, "
-"all levels other than the Test Positive level will be treated as negative."
+"Select the level that represents a negative test result. Only the "
+"test-positive and test-negative levels take part; cases at any other level "
+"are excluded from the analysis, not counted as negative. With a two-level "
+"variable this is inferred; with three or more levels you must choose it."
 msgstr ""
 
 #: decisioncompare/options/test1Positive.description.ui
@@ -113888,10 +113915,6 @@ msgstr ""
 #: R/lassocox.b.R
 #: adaptivelasso/results/coefficients.title
 msgid "Selected Variables and Coefficients"
-msgstr ""
-
-#: R/decision.b.R
-msgid "Selected variables are not available in the data"
 msgstr ""
 
 #: rmstregression/results/tauSelection.columns.title
@@ -118832,6 +118855,10 @@ msgstr ""
 msgid "Showing how many cases fall into each combination of categorical variables"
 msgstr ""
 
+#: R/decision.b.R
+msgid "Showing the first {shown} of {total} level combinations."
+msgstr ""
+
 #: R/waterfall.b.R
 msgid "Shows best response for each patient as vertical bars"
 msgstr ""
@@ -123340,9 +123367,9 @@ msgstr ""
 
 #: R/decision.b.R
 msgid ""
-"Statistical estimates may be unstable. Consider Fisher's exact test for "
-"small samples. Collect more data for stable estimates of "
-"sensitivity/specificity."
+"Statistical estimates may be unstable. Enable 95% confidence intervals: the "
+"exact (Clopper-Pearson) intervals shown there remain valid with small cells "
+"and will be wide enough to show it."
 msgstr ""
 
 #: stagemigration/results/multiStateSummary.columns.title
@@ -129815,10 +129842,6 @@ msgid "Test Variable"
 msgstr ""
 
 #: R/decision.b.R
-msgid "Test variable has {n} level(s) beyond positive: {lvls}"
-msgstr ""
-
-#: R/decision.b.R
 msgid "Test variable levels excluded from analysis: {lvls}"
 msgstr ""
 
@@ -130787,6 +130810,18 @@ msgid ""
 "and p-value are left blank."
 msgstr ""
 
+#: R/decision.b.R
+msgid "The gold standard and the test are the same variable"
+msgstr ""
+
+#: R/decision.b.R
+msgid ""
+"The gold standard has more than one level besides \"{pos}\" ({lvls}), so the "
+"disease-absent level cannot be inferred. Select it under Disease absent "
+"level. Levels you do not name are excluded from the analysis rather than "
+"counted as disease-absent."
+msgstr ""
+
 #: decision/options/gold.description.ui
 msgid ""
 "The gold standard reference variable (true disease status).  This should be "
@@ -131713,6 +131748,14 @@ msgstr ""
 msgid "The test '%s' has an AUC of %.3f"
 msgstr ""
 
+#: R/decision.b.R
+msgid ""
+"The test has more than one level besides \"{pos}\" ({lvls}), so the "
+"test-negative level cannot be inferred. Select it under Test negative level. "
+"Levels you do not name are excluded from the analysis rather than counted as "
+"negative."
+msgstr ""
+
 #: R/sequentialtests.b.R
 msgid ""
 "The tests have similar marginal sensitivity and specificity. Similar "
@@ -132017,6 +132060,13 @@ msgid ""
 "reference-standard quality. This educational summary is not a clinical guide."
 msgstr ""
 
+#: R/decision.b.R
+msgid ""
+"These cases carry a level that codes missingness rather than a result. They "
+"are excluded rather than counted as negative, which would have biased "
+"sensitivity and specificity."
+msgstr ""
+
 #: R/multisurvival.b.R
 msgid ""
 "These define separate baseline hazards and have no point scale, so the "
@@ -132118,18 +132168,6 @@ msgstr ""
 
 #: R/reportcat.b.R
 msgid "These will be excluded from analysis."
-msgstr ""
-
-#: R/decision.b.R
-msgid ""
-"These will be treated as disease-absent (negative). If this is incorrect, "
-"explicitly select the \"Disease absent level\"."
-msgstr ""
-
-#: R/decision.b.R
-msgid ""
-"These will be treated as test-negative. If this is incorrect, explicitly "
-"select the \"Test negative level\"."
 msgstr ""
 
 #: R/kappaSizeFixedN.b.R
@@ -139020,7 +139058,15 @@ msgid "Uniform Weighting"
 msgstr ""
 
 #: R/decision.b.R
+msgid "Uninformative: a negative result does not change the probability of disease"
+msgstr ""
+
+#: R/decision.b.R
 msgid "Uninformative: a negative result leaves the probability of disease unchanged"
+msgstr ""
+
+#: R/decision.b.R
+msgid "Uninformative: a positive result does not change the probability of disease"
 msgstr ""
 
 #: R/decision.b.R
@@ -143109,7 +143155,7 @@ msgid ""
 msgstr ""
 
 #: R/decision.b.R
-msgid "Very high disease prevalence ({pct})"
+msgid "Very high disease prevalence observed in this sample ({pct})"
 msgstr ""
 
 #: R/survivalcont.b.R
@@ -143135,7 +143181,7 @@ msgid "Very large sample size."
 msgstr ""
 
 #: R/decision.b.R
-msgid "Very low disease prevalence ({pct})"
+msgid "Very low disease prevalence observed in this sample ({pct})"
 msgstr ""
 
 #: R/lassocox.b.R
@@ -144856,7 +144902,7 @@ msgid "When to use all-pairs kappa"
 msgstr ""
 
 #: agreement/options/showBhapkarGuide.title
-msgid "When to use bhapkar test"
+msgid "When to use Bhapkar test"
 msgstr ""
 
 #: agreement/options/showBlandAltmanGuide.title
@@ -144880,11 +144926,11 @@ msgid "When to use Consistency vs Absolute Agreement"
 msgstr ""
 
 #: agreement/options/showFinnGuide.title
-msgid "When to use finn coefficient"
+msgid "When to use Finn coefficient"
 msgstr ""
 
 #: agreement/options/showGwetGuide.title
-msgid "When to use gwet's AC"
+msgid "When to use Gwet's AC"
 msgstr ""
 
 #: agreement/options/showHierarchicalGuide.title
@@ -144908,11 +144954,11 @@ msgid "When to use it:"
 msgstr ""
 
 #: agreement/options/showKendallWGuide.title
-msgid "When to use kendall's W"
+msgid "When to use Kendall's W"
 msgstr ""
 
 #: agreement/options/showKrippGuide.title
-msgid "When to use krippendorff's alpha"
+msgid "When to use Krippendorff's alpha"
 msgstr ""
 
 #: agreement/options/showLightKappaGuide.title
@@ -144920,11 +144966,11 @@ msgid "When to use light's kappa"
 msgstr ""
 
 #: agreement/options/showLinCCCGuide.title
-msgid "When to use lin's CCC"
+msgid "When to use Lin's CCC"
 msgstr ""
 
 #: agreement/options/showMaxwellREGuide.title
-msgid "When to use maxwell's RE"
+msgid "When to use Maxwell's RE"
 msgstr ""
 
 #: agreement/options/showMeanPearsonGuide.title
@@ -144976,7 +145022,7 @@ msgid "When to Use Ridge Plots:"
 msgstr ""
 
 #: agreement/options/showRobinsonAGuide.title
-msgid "When to use robinson's A"
+msgid "When to use Robinson's A"
 msgstr ""
 
 #: agreement/options/showSampleSizeGuide.title
