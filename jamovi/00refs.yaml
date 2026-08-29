@@ -24,6 +24,30 @@ refs:
         doi: 10.1080/01621459.1927.10502953
         url: https://doi.org/10.1080/01621459.1927.10502953
 
+    youden1950:
+        type: 'article'
+        author: Youden, W. J.
+        year: 1950
+        title: "Index for rating diagnostic tests"
+        publisher: 'Cancer'
+        volume: 3
+        issue: 1
+        pages: 32-35
+        doi: "10.1002/1097-0142(1950)3:1<32::AID-CNCR2820030106>3.0.CO;2-3"
+        url: https://doi.org/10.1002/1097-0142%281950%293%3A1%3C32%3A%3AAID-CNCR2820030106%3E3.0.CO%3B2-3
+
+    haldane1956:
+        type: 'article'
+        author: Haldane, J. B. S.
+        year: 1956
+        title: "The estimation and significance of the logarithm of a ratio of frequencies"
+        publisher: 'Annals of Human Genetics'
+        volume: 20
+        issue: 4
+        pages: 309-311
+        doi: 10.1111/j.1469-1809.1955.tb01285.x
+        url: https://doi.org/10.1111/j.1469-1809.1955.tb01285.x
+
     newcombe1998paired:
         type: 'article'
         author: Newcombe, R. G.

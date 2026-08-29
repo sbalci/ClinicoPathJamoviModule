@@ -718,6 +718,7 @@ items:
           - wght
           - allPairsCI
           - multipleTestCorrection
+          - confLevel
 
     - name: allPairsKappaExplanation
       title: "About All-Pairs Kappa Analysis"
@@ -762,6 +763,7 @@ items:
           format: zto
       clearWith:
           - vars
+          - confLevel
 
     - name: itemModalAgreementExplanation
       title: "About Per-Category Item-Modal Agreement"
@@ -1209,6 +1211,7 @@ items:
       clearWith:
           - vars
           - gwetWeights
+          - confLevel
 
     - name: gwetExplanation
       title: "About Gwet's AC Coefficient"
@@ -1431,6 +1434,7 @@ items:
           - vars
           - tdiCoverage
           - tdiLimit
+          - confLevel
 
     - name: tdiExplanation
       title: "About Total Deviation Index (TDI)"
@@ -1536,6 +1540,7 @@ items:
       clearWith:
           - vars
           - interIntraSeparator
+          - confLevel
 
     - name: interIntraRaterInterTable
       title: "Inter-Rater Reliability (Between Raters)"
@@ -1574,6 +1579,7 @@ items:
       clearWith:
           - vars
           - interIntraSeparator
+          - confLevel
 
     - name: interIntraRaterExplanation
       title: "About Inter/Intra-Rater Reliability"
@@ -1668,6 +1674,7 @@ items:
           - vars
           - specificPositiveCategory
           - specificAllCategories
+          - confLevel
 
     - name: specificAgreementExplanation
       title: "About Specific Agreement Indices"
@@ -1904,6 +1911,7 @@ items:
       clearWith:
           - vars
           - subgroupVariable
+          - confLevel
 
     - name: subgroupForestPlotImage
       title: 'Forest Plot of Agreement by Subgroup'

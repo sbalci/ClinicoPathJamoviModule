@@ -58,7 +58,6 @@ known_data_3_tests <- data.frame(
 
 test_that("decisioncombine reports expected metrics for a two-test pattern", {
   skip_if_not_installed("jmvReadWrite")
-  skip_on_cran()
 
   result <- decisioncombine(
     data = known_data_2_tests,
@@ -102,7 +101,6 @@ test_that("decisioncombine reports expected metrics for a two-test pattern", {
 
 
 test_that("clinical strategies are summarised for two-test combinations", {
-  skip_on_cran()
 
   result <- decisioncombine(
     data = known_data_2_tests,
@@ -148,30 +146,9 @@ test_that("clinical strategies are summarised for two-test combinations", {
 })
 
 
-# test_that("performance visualisation stores plot state", {
-#   skip_on_cran()
-#
-#   result <- decisioncombine(
-#     data = known_data_2_tests,
-#     gold = "gold",
-#     goldPositive = "P",
-#     test1 = "test1",
-#     test1Positive = "P",
-#     test2 = "test2",
-#     test2Positive = "P",
-#     showPlot = TRUE
-#   )
-#
-#   plot_state <- result$performancePlot$state
-#   expect_false(is.null(plot_state))
-#   expect_true(length(plot_state) >= 1)
-#   patterns <- vapply(plot_state, function(x) x$pattern, character(1))
-#   expect_true("+/+" %in% patterns)
-# })
 
 
 test_that("input validation detects mismatched positive level", {
-  skip_on_cran()
 
   expect_no_error(
     decisioncombine(
@@ -189,7 +166,6 @@ test_that("input validation detects mismatched positive level", {
 
 
 test_that("majority rule strategy is calculated for three tests", {
-  skip_on_cran()
 
   result <- decisioncombine(
     data = known_data_3_tests,

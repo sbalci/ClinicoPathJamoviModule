@@ -101,13 +101,19 @@ test_that("a constant test1 still yields valid combinations, with zero cells fla
     test2 = "rater2", test2Positive = "Positive", test3Positive = NULL)
 
   # Every patient is test1-positive, so no "-/x" pattern has any members. The analysis
-  # still runs; the empty cells are disclosed as continuity corrections.
+  # still runs, and those rows report NO likelihood ratio: a pattern containing zero
+  # patients must not have one manufactured for it by the continuity correction, which
+  # is what used to happen here.
   expect_gt(res$combinationTable$rowCount, 0L)
-  expect_match(dc_notices(res), "Continuity Correction")
+  expect_match(dc_notices(res), "Sparse Cell Counts")
 
   ct <- res$combinationTable$asDF
   # test1 alone can never be negative, so "-/+" and "-/-" hold nobody
   expect_equal(sum(ct$tp[ct$pattern == "-/+"], ct$fp[ct$pattern == "-/+"]), 0)
+  empty <- ct[(ct$tp + ct$fp) == 0, , drop = FALSE]
+  expect_gt(nrow(empty), 0)
+  expect_true(all(is.na(empty$lrPos)))
+  expect_true(all(is.na(empty$dor)))
 })
 
 test_that("a positive level absent from test2 halts with an explanatory notice", {
@@ -392,11 +398,11 @@ test_that("a gold standard with more than two levels is flagged, not silently di
     test2 = "rater2", test2Positive = "Positive", test3Positive = NULL)
 
   # It runs -- one-vs-rest is a legitimate choice -- but folding "Borderline" into the
-  # negative arm inflates specificity and NPV, and that used to happen silently.
+  # negative arm can bias the diagnostic estimates, and that used to happen silently.
   expect_gt(res$combinationTable$rowCount, 0L)
   expect_match(dc_notices(res), "has 3 levels")
   expect_match(dc_notices(res), "counted as NEGATIVE")
-  expect_match(dc_notices(res), "inflates specificity and NPV")
+  expect_match(dc_notices(res), "can bias sensitivity, specificity")
 })
 
 test_that("decisioncombine handles single observation per pattern cell", {

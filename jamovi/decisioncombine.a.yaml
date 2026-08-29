@@ -1,10 +1,10 @@
 ---
 name: decisioncombine
 title: Combine Medical Decision Tests
-menuGroup: meddecideT
+menuGroup: meddecide
 menuSubgroup: Decision
 menuSubtitle: Combine and evaluate test patterns
-version: '1.0.7'
+version: '1.0.8'
 jas: '1.2'
 
 description:
@@ -191,32 +191,50 @@ options:
             Boolean to display the decision-space (sensitivity vs specificity) scatter plot.
 
     - name: showRecommendation
-      title: Descriptive strategy ranking
+      title: Descriptive candidate-rule ranking
       type: Bool
       default: false
       description:
           ui: >
-            Rank named testing strategies descriptively by observed Youden's J. This
-            sample-dependent summary is not a clinical guide or validated recommendation.
+            Rank eligible exact-pattern rules and named parallel, serial, and majority
+            strategies descriptively by observed Youden's J. This sample-dependent summary
+            is not a clinical guide or validated recommendation.
           R: >
-            Boolean to show the descriptive strategy ranking table.
+            Boolean to show the descriptive candidate-rule ranking table.
 
-    - name: addPatternToData
-      title: Add test pattern to data
-      type: Bool
-      default: false
+    # BREAKING_CHANGE (release review): was `addPatternToData`, type Bool. jmvcore's
+    # Output element resolves its own enabled state with options$get(<element name>), so
+    # an Output result item called `addedPattern` requires an OPTION of the same name and
+    # of type Output. Driven by a differently-named Bool, the backend computed and stored
+    # the column while `enabled` stayed FALSE and jamovi never wrote it to the dataset --
+    # invisible to R-side tests, because the values really are in the result object.
+    - name: addedPattern
+      title: Test pattern column
+      type: Output
       description:
           ui: >
             Add a new column to the dataset containing the test combination pattern for each case (e.g., "+/+", "+/-", "-/-").
           R: >
-            Boolean to add test pattern column to the dataset.
+            Output variable receiving the combined test pattern for each case.
+
+    - name: showAbout
+      title: About this analysis
+      type: Bool
+      default: false
+      description:
+          ui: >
+            Show explanatory panels describing what a pattern row and a strategy row mean,
+            how to read each column, and the study-design assumptions and biases that affect
+            diagnostic accuracy estimates.
+          R: >
+            Boolean to show the about-this-analysis and assumptions panels.
 
     - name: filterStatistic
       title: Filter by statistic
       type: List
       options:
         - name: all
-          title: All Statistics
+          title: Default Metric Set
         - name: prevalence
           title: Prevalence
         - name: sens
@@ -242,12 +260,16 @@ options:
       default: all
       description:
           ui: >
-            Filter the bar chart and heatmap to the selected statistic. The forest plot
+            Select one metric, or use the plot-specific default metric set. The bar chart
+            defaults to sensitivity, specificity, PPV, NPV, and accuracy; the heatmap also
+            includes prevalence, balanced accuracy, and Youden's J. The forest plot
             supports sensitivity, specificity, PPV, NPV, accuracy, LR+, LR-, and diagnostic
             OR, for which confidence intervals are available. Unsupported forest selections
-            produce an explanatory notice rather than silently showing other statistics.
+            produce an explanatory notice rather than silently showing other statistics. The
+            decision-space plot has fixed sensitivity and specificity axes and is unaffected.
           R: >
-            Character indicating which statistic to display in the plots (default: all).
+            Character indicating which statistic to display in the plots; `all` uses each
+            plot's default metric set.
 
     - name: filterPattern
       title: Filter by pattern type
@@ -264,10 +286,14 @@ options:
       default: all
       description:
           ui: >
-            Filter the bar chart and heatmap by pattern type: all patterns, all tests positive
-            (+/+, +/+/+), all tests negative (-/-, -/-/-), or mixed/discordant patterns. The
-            performance tables always show every pattern.
+            Filter the bar chart, heatmap and forest plot by pattern type: all patterns, all
+            tests positive (+/+, +/+/+), all tests negative (-/-, -/-/-), or mixed/discordant
+            patterns. Named strategy rows are not result patterns and are excluded whenever a
+            specific pattern type is selected. The performance tables always show every
+            pattern, and the decision-space plot always shows every row so patterns remain
+            comparable.
           R: >
-            Character indicating which pattern type to display in the plots (default: all).
+            Character indicating which pattern type to display in the bar chart, heatmap and
+            forest plot (default: all).
 
 ...

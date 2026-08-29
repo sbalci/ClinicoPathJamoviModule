@@ -155,9 +155,12 @@ test_that("the Fagan nomogram renders when a cell is zero", {
 
 
 test_that("rows dropped by level are not reported as missing values", {
-    # 40 'Equivocal' rows, nothing actually missing.
+    # `missingDataSummary` is visible: (od), so od = TRUE is the only state in
+    # which a user reads this panel. It used to be written unconditionally, i.e.
+    # also into a hidden element; that dead write is gone, so the assertion has
+    # to ask for the panel it is inspecting.
     dx <- mk_2x2(80, 10, 20, 90, extra_gold_level = 40L)
-    ms <- strip_html(run_decision(dx, goldNegative = "Absent")$missingDataSummary$content)
+    ms <- strip_html(run_decision(dx, goldNegative = "Absent", od = TRUE)$missingDataSummary$content)
 
     expect_match(ms, "40 case")
     expect_match(ms, "NOT missing values")
@@ -165,8 +168,21 @@ test_that("rows dropped by level are not reported as missing values", {
 
     # genuinely missing rows are still attributed to missingness
     dm <- mk_2x2(80, 10, 20, 90); dm$test[1:5] <- NA
-    ms2 <- strip_html(run_decision(dm)$missingDataSummary$content)
+    ms2 <- strip_html(run_decision(dm, od = TRUE)$missingDataSummary$content)
     expect_match(ms2, "5 case\\(s\\).*removed for missing values")
+})
+
+test_that("the level/missing distinction reaches the user without the raw-data panel", {
+    # With od = FALSE the panel is hidden, so the notices pane is the only
+    # channel that carries this. Both causes must still be told apart there.
+    dx <- mk_2x2(80, 10, 20, 90, extra_gold_level = 40L)
+    nx <- strip_html(run_decision(dx, goldNegative = "Absent")$notices$content)
+    expect_match(nx, "excluded from analysis")
+    expect_match(nx, "Equivocal")
+
+    dm <- mk_2x2(80, 10, 20, 90); dm$test[1:5] <- NA
+    nm <- strip_html(run_decision(dm)$notices$content)
+    expect_match(nm, "missing diagnostic data")
 })
 
 

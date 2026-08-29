@@ -9,10 +9,10 @@
 # - Systematic evaluation of all test result patterns (2-test: 4 patterns, 3-test: 8 patterns)
 # - Performance metrics for each pattern (sensitivity, specificity, PPV, NPV, accuracy)
 # - Individual test statistics for comparison
-# - Pattern filtering (parallel, serial, majority rule strategies)
-# - Statistic filtering (best sensitivity, specificity, Youden's J, etc.)
-# - Multiple visualizations (bar plot, heatmap, forest plot, decision tree)
-# - Optimal pattern recommendations for clinical decision-making
+# - Pattern-type filtering (all-positive, all-negative, or mixed exact patterns)
+# - Metric filtering for visualizations
+# - Multiple visualizations (bar plot, heatmap, forest plot, decision space)
+# - A sample-dependent, descriptive ranking of eligible candidate rules
 
 library(ClinicoPath)
 
@@ -35,10 +35,9 @@ basic_combination <- decisioncombine(
 
 # Interpretation:
 # - Four patterns evaluated: +/+, +/-, -/+, -/-
-# - +/+ (both positive): highest specificity, lowest sensitivity
-# - -/- (both negative): highest sensitivity, lowest specificity
-# - Mixed patterns show intermediate performance
-# - Compare patterns to identify optimal combination strategy
+# - Each exact-pattern row treats occurrence of that pattern as a positive classification
+# - The named Parallel and Serial rows implement OR and AND rules directly
+# - Compare estimates and uncertainty; do not assume a pattern is best from its label alone
 
 # ═══════════════════════════════════════════════════════════
 # Example 2: Two-Test Analysis with Individual Statistics
@@ -59,7 +58,7 @@ individual_stats <- decisioncombine(
 
 # Interpretation:
 # - Individual test statistics provide baseline performance
-# - Combination patterns may outperform individual tests
+# - Combination rules can be compared descriptively with individual tests
 # - Frequency tables show distribution of pattern occurrences
 # - Compare individual vs combined performance to justify multi-test strategy
 
@@ -85,10 +84,9 @@ threetest_combination <- decisioncombine(
 
 # Interpretation:
 # - Eight patterns: +/+/+, +/+/-, +/-/+, +/-/-, -/+/+, -/+/-, -/-/+, -/-/-
-# - +/+/+ (all positive): very high specificity, may miss some cases
-# - -/-/- (all negative): very high sensitivity, may overdiagnose
-# - Intermediate patterns balance sensitivity and specificity
-# - More patterns provide more granular decision options
+# - Each exact-pattern row is evaluated as a one-versus-rest classification rule
+# - Named Parallel, Serial, and Majority rows represent clinically recognizable rules
+# - Performance depends on the observed data and requires uncertainty-aware interpretation
 
 # ═══════════════════════════════════════════════════════════
 # Example 4: Parallel Testing Strategy (Either Test Positive)
@@ -105,16 +103,15 @@ parallel_strategy <- decisioncombine(
   test1Positive = "Positive",
   test2 = "specific_test",
   test2Positive = "Positive",
-  filterPattern = "parallel",
   showIndividual = TRUE,
   showBarPlot = TRUE
 )
 
 # Interpretation:
 # - Parallel = Test1+ OR Test2+ (either positive → call positive)
-# - Maximizes sensitivity (few false negatives)
-# - Lower specificity (more false positives)
-# - Appropriate for screening where missing disease is costly
+# - Its sensitivity is at least that of each component test in the same complete cases
+# - Its specificity is no greater than that of each component test
+# - Inspect the named Parallel row; the pattern filter does not select strategies
 # - Combines +/+, +/-, and -/+ patterns
 
 # ═══════════════════════════════════════════════════════════
@@ -132,7 +129,6 @@ serial_strategy <- decisioncombine(
   test1Positive = "Positive",
   test2 = "confirmatory_test",
   test2Positive = "Positive",
-  filterPattern = "serial",
   showIndividual = TRUE,
   showBarPlot = TRUE,
   showRecommendation = TRUE
@@ -140,9 +136,9 @@ serial_strategy <- decisioncombine(
 
 # Interpretation:
 # - Serial = Test1+ AND Test2+ (both must be positive → call positive)
-# - Maximizes specificity (few false positives)
-# - Lower sensitivity (more false negatives)
-# - Appropriate for confirmation where false positives are costly
+# - Its specificity is at least that of each component test in the same complete cases
+# - Its sensitivity is no greater than that of each component test
+# - Inspect the named Serial row; clinical use requires context beyond these estimates
 # - Only +/+ pattern considered positive
 
 # ═══════════════════════════════════════════════════════════
@@ -160,7 +156,6 @@ majority_rule <- decisioncombine(
   test2Positive = "Positive",
   test3 = "imaging",
   test3Positive = "Positive",
-  filterPattern = "majority",
   showIndividual = TRUE,
   showBarPlot = TRUE,
   showRecommendation = TRUE
@@ -168,15 +163,15 @@ majority_rule <- decisioncombine(
 
 # Interpretation:
 # - Majority rule: >=2 of 3 tests positive → call positive
-# - Balances sensitivity and specificity
+# - Produces a middle decision threshold between Serial and Parallel rules
 # - Patterns: +/+/+, +/+/-, +/-/+, -/+/+ are positive
 # - Patterns: +/-/-, -/+/-, -/-/+, -/-/- are negative
-# - Provides democratic decision when tests may disagree
+# - Whether that threshold is useful depends on the tests, population, and consequences
 
 # ═══════════════════════════════════════════════════════════
-# Example 7: Filter by Sensitivity (Find Highest Sensitivity Pattern)
+# Example 7: Display Sensitivity in the Plots
 # ═══════════════════════════════════════════════════════════
-# Clinical scenario: Identify pattern with best sensitivity for screening
+# Clinical scenario: Compare sensitivity estimates across candidate rules
 
 filter_sensitivity <- decisioncombine(
   data = decisioncombine_pathology,
@@ -192,15 +187,14 @@ filter_sensitivity <- decisioncombine(
 )
 
 # Interpretation:
-# - Highlights pattern with highest sensitivity
-# - Usually -/- or mixed patterns (lower threshold for calling positive)
-# - Trade-off: high sensitivity often means lower specificity
-# - Use for screening where missing disease is most costly
+# - Restricts supported plots to the sensitivity metric
+# - It does not select or recommend the row with the largest sensitivity
+# - Interpret estimates with their denominators and confidence intervals
 
 # ═══════════════════════════════════════════════════════════
-# Example 8: Filter by Specificity (Find Highest Specificity Pattern)
+# Example 8: Display Specificity in the Plots
 # ═══════════════════════════════════════════════════════════
-# Clinical scenario: Identify pattern with best specificity for confirmation
+# Clinical scenario: Compare specificity estimates across candidate rules
 
 filter_specificity <- decisioncombine(
   data = decisioncombine_pathology,
@@ -216,15 +210,14 @@ filter_specificity <- decisioncombine(
 )
 
 # Interpretation:
-# - Highlights pattern with highest specificity
-# - Usually +/+ pattern (both tests must agree)
-# - Trade-off: high specificity often means lower sensitivity
-# - Use for confirmation where false positives are most costly
+# - Restricts supported plots to the specificity metric
+# - It does not select or recommend the row with the largest specificity
+# - Interpret estimates with their denominators and confidence intervals
 
 # ═══════════════════════════════════════════════════════════
-# Example 9: Filter by Youden's J (Best Overall Balance)
+# Example 9: Display Youden's J in Supported Plots
 # ═══════════════════════════════════════════════════════════
-# Clinical scenario: Find pattern with best overall balance
+# Clinical scenario: Compare observed sensitivity-specificity summaries
 
 filter_youden <- decisioncombine(
   data = decisioncombine_pathology,
@@ -242,10 +235,10 @@ filter_youden <- decisioncombine(
 
 # Interpretation:
 # - Youden's J = Sensitivity + Specificity - 1
-# - Maximizes sum of sensitivity and specificity
-# - Often identifies mixed patterns (+/- or -/+) as optimal
-# - Appropriate when sensitivity and specificity equally important
-# - Recommendation table shows clinical guidance
+# - The filter displays Youden's J; it does not select a rule
+# - The ranking table reports the largest eligible observed value descriptively
+# - No significance test or multiplicity correction establishes a superior rule
+# - The ranking is not clinical guidance or a validated recommendation
 
 # ═══════════════════════════════════════════════════════════
 # Example 10: Comprehensive Visualization (All Plot Types)
@@ -271,7 +264,7 @@ comprehensive_viz <- decisioncombine(
 # - Bar plot: Compare metrics across patterns
 # - Heatmap: Visual pattern of performance (color-coded)
 # - Forest plot: Metrics with confidence intervals
-# - Decision tree: Hierarchical decision pathway
+# - Decision space: Sensitivity-versus-specificity positions
 # - Multiple visualizations provide complementary insights
 
 # ═══════════════════════════════════════════════════════════
@@ -355,7 +348,7 @@ imaging_comparison <- decisioncombine(
 # - Combined reading (+/+ pattern) increases specificity
 # - Either positive (parallel) increases sensitivity
 # - Cost considerations: is dual imaging worth the improvement?
-# - Pattern recommendation guides which combination strategy to use
+# - Candidate-rule ranking is descriptive and does not determine clinical use
 
 # ═══════════════════════════════════════════════════════════
 # Example 14: Complete Publication-Ready Analysis
@@ -381,11 +374,11 @@ publication_analysis <- decisioncombine(
   showForest = TRUE,
   showDecisionTree = TRUE,
 
-  # Provide recommendations
+  # Show the descriptive candidate-rule ranking
   showRecommendation = TRUE,
 
   # Add pattern to dataset for further analysis
-  addPatternToData = TRUE
+
 )
 
 # Reporting guidelines for publication:
@@ -394,19 +387,18 @@ publication_analysis <- decisioncombine(
 # 3. Present all patterns with 95% CI for key metrics
 # 4. Visualize with multiple plot types (bar, heatmap, forest)
 # 5. State clinical context and decision criteria
-# 6. Justify chosen combination strategy (parallel, serial, etc.)
+# 6. Pre-specify and justify any chosen combination strategy
 # 7. Discuss trade-offs between sensitivity and specificity
 # 8. Consider costs and consequences of false positives/negatives
-# 9. Include decision tree showing clinical pathway
+# 9. Include the decision-space plot when it supports the reporting objective
 # 10. Follow STARD guidelines for diagnostic accuracy studies
 
 # ═══════════════════════════════════════════════════════════
-# Example 15: Sensitivity Analysis - Comparing Strategies
+# Example 15: Descriptive Comparison of Named Strategies
 # ═══════════════════════════════════════════════════════════
-# Clinical scenario: Compare different combination strategies for same data
-
-# Strategy 1: All positive (any positive result)
-all_positive <- decisioncombine(
+# Clinical scenario: Compare rules on one common analysis population. The performance
+# table contains exact-pattern rules plus named Parallel and Serial strategies.
+strategy_comparison <- decisioncombine(
   data = decisioncombine_discordant,
   gold = "gold_standard",
   goldPositive = "Positive",
@@ -414,115 +406,56 @@ all_positive <- decisioncombine(
   test1Positive = "Positive",
   test2 = "specific_test",
   test2Positive = "Positive",
-  filterPattern = "allPositive",
-  showIndividual = TRUE
+  showIndividual = TRUE,
+  showBarPlot = TRUE,
+  showRecommendation = TRUE
 )
 
-# Strategy 2: Parallel (either test positive - same as all positive for 2 tests)
-parallel <- decisioncombine(
-  data = decisioncombine_discordant,
-  gold = "gold_standard",
-  goldPositive = "Positive",
-  test1 = "sensitive_test",
-  test1Positive = "Positive",
-  test2 = "specific_test",
-  test2Positive = "Positive",
-  filterPattern = "parallel",
-  showIndividual = TRUE
-)
-
-# Strategy 3: Serial (both tests positive)
-serial <- decisioncombine(
-  data = decisioncombine_discordant,
-  gold = "gold_standard",
-  goldPositive = "Positive",
-  test1 = "sensitive_test",
-  test1Positive = "Positive",
-  test2 = "specific_test",
-  test2Positive = "Positive",
-  filterPattern = "serial",
-  showIndividual = TRUE
-)
-
-# Strategy 4: All negative (both tests negative)
-all_negative <- decisioncombine(
-  data = decisioncombine_discordant,
-  gold = "gold_standard",
-  goldPositive = "Positive",
-  test1 = "sensitive_test",
-  test1Positive = "Positive",
-  test2 = "specific_test",
-  test2Positive = "Positive",
-  filterPattern = "allNegative",
-  showIndividual = TRUE
-)
-
-# Strategy 5: Mixed patterns only
-mixed_only <- decisioncombine(
-  data = decisioncombine_discordant,
-  gold = "gold_standard",
-  goldPositive = "Positive",
-  test1 = "sensitive_test",
-  test1Positive = "Positive",
-  test2 = "specific_test",
-  test2Positive = "Positive",
-  filterPattern = "mixed",
-  showIndividual = TRUE
-)
-
-# Interpretation of sensitivity analysis:
-# - All positive/Parallel: Highest sensitivity, lowest specificity
-# - Serial/Both positive: Highest specificity, lowest sensitivity
-# - All negative: Opposite interpretation (negative = disease absent)
-# - Mixed patterns: Intermediate performance, may be optimal
-# - Compare metrics across strategies to inform clinical decision
-# - Choose strategy based on clinical consequences:
-#   * Screening → maximize sensitivity (parallel)
-#   * Confirmation → maximize specificity (serial)
-#   * General use → balance (Youden optimal pattern)
+# Interpretation:
+# - Parallel calls positive when either test is positive
+# - Serial calls positive only when both tests are positive
+# - The pattern filter affects visualized exact-pattern types, not named strategies
+# - Compare estimates and uncertainty against pre-specified clinical consequences
+# - Treat the candidate-rule ranking as exploratory and sample-dependent
 
 # ═══════════════════════════════════════════════════════════
 # Additional Notes and Best Practices
 # ═══════════════════════════════════════════════════════════
 
 # 1. Pattern Interpretation (Two Tests):
-#    - +/+ (Both positive): Highest specificity, use for confirmation
-#    - -/- (Both negative): Highest sensitivity when called negative
-#    - +/- or -/+ (Mixed): Intermediate performance, may be optimal
+#    - Each row treats one exact observed pattern as a positive classification rule
+#    - +/+, -/-, +/-, and -/+ are not interchangeable with strategy labels
+#    - Parallel and Serial are reported as separate named rows
 #    - Pattern frequency matters: rare patterns may be unreliable
 
 # 2. Pattern Interpretation (Three Tests):
-#    - +/+/+ (All positive): Very high specificity
-#    - -/-/- (All negative): Very high sensitivity when called negative
-#    - 2 of 3 positive: Majority rule, balanced approach
-#    - 1 of 3 positive: High sensitivity, lower specificity
-#    - More patterns provide more decision granularity
+#    - Eight exact patterns are evaluated as one-versus-rest rules
+#    - Majority calls positive when at least two of three tests are positive
+#    - Parallel and Serial use thresholds of at least one and all three positives
+#    - Estimated performance depends on the data; inspect uncertainty and cell counts
 
 # 3. Combination Strategies:
-#    - Parallel testing: Maximize sensitivity (screening)
+#    - Parallel testing: lower decision threshold
 #      * Call positive if ANY test positive
 #      * Sensitivity >= individual test sensitivities
 #      * Specificity <= individual test specificities
-#    - Serial testing: Maximize specificity (confirmation)
+#    - Serial testing: higher decision threshold
 #      * Call positive only if ALL tests positive
 #      * Specificity >= individual test specificities
 #      * Sensitivity <= individual test sensitivities
-#    - Majority rule: Balance sensitivity and specificity
+#    - Majority rule: intermediate threshold
 #      * Applicable only with >=3 tests
-#      * Democratic decision reduces individual test errors
+#      * It does not guarantee improved accuracy or independent errors
 
-# 4. Statistic Filtering Guidelines:
-#    - Sensitivity: Choose when false negatives most costly (screening)
-#    - Specificity: Choose when false positives most costly (confirmation)
-#    - PPV: Choose when positive predictive value most important
-#    - NPV: Choose when negative predictive value most important
-#    - Youden's J: Choose for balanced approach (general use)
-#    - Accuracy: Choose when equal costs for FP and FN
-#    - Balanced accuracy: Choose with class imbalance
+# 4. Statistic Filtering:
+#    - The option controls which metric supported plots display
+#    - It does not optimize, choose, or validate a rule
+#    - Predictive values depend on prevalence in the analyzed sample
+#    - The forest plot supports only metrics for which this analysis computes intervals
 
 # 5. Clinical Context Considerations:
-#    - Screening programs: Prioritize sensitivity (parallel strategy)
-#    - Confirmatory diagnosis: Prioritize specificity (serial strategy)
+#    - Screening programs may prioritize sensitivity
+#    - Confirmatory diagnosis may prioritize specificity
 #    - Resource constraints: Consider cost of additional testing
 #    - Prevalence: Affects PPV and NPV interpretation
 #    - Consequences: Weight costs of false positives vs false negatives
@@ -545,13 +478,13 @@ mixed_only <- decisioncombine(
 #    - Bar plot: Easy comparison of metrics across patterns
 #    - Heatmap: Quick identification of hot/cold spots
 #    - Forest plot: Shows precision with confidence intervals
-#    - Decision tree: Clarifies hierarchical decision pathway
+#    - Decision space: Shows sensitivity-versus-specificity positions
 #    - Use multiple visualizations for comprehensive understanding
 
 # 9. Individual Test Statistics:
 #    - Always show for context and comparison
-#    - Combination should improve upon individual tests
-#    - If no improvement, reconsider combination strategy
+#    - A combination is not guaranteed to improve individual-test performance
+#    - Compare like-for-like denominators when missing values differ
 #    - Consider whether improvement justifies added complexity/cost
 
 # 10. Frequency Analysis:
@@ -561,15 +494,14 @@ mixed_only <- decisioncombine(
 #     - High discordance (+/- and -/+) suggests poor agreement
 #     - Frequency affects practical utility of patterns
 
-# 11. Recommendation Interpretation:
-#     - Recommendations based on statistical optimality
-#     - May not align with clinical priorities
-#     - Consider clinical context when choosing pattern
-#     - Trade-offs between sensitivity/specificity are explicit
-#     - Use recommendations as starting point, not final decision
+# 11. Candidate-Rule Ranking Interpretation:
+#     - Ranks eligible observed Youden values without multiplicity correction
+#     - Includes exact-pattern rules and named strategies after duplicate rules are removed
+#     - Does not establish superiority, transportability, or clinical utility
+#     - Use it as an exploratory summary, not as a recommendation
 
 # 12. Adding Pattern to Dataset:
-#     - addPatternToData = TRUE creates new variable
+#     - addedPattern = TRUE creates new variable
 #     - Useful for downstream analyses (survival, regression)
 #     - Pattern variable shows test combination result
 #     - Can be used to stratify or subset analyses

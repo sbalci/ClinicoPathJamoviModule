@@ -20,8 +20,6 @@ items:
         - testPositive
         - goldNegative
         - testNegative
-        - goldNegative
-        - testNegative
 
     # Notice outputs converted to HTML to avoid serialization errors
     - name: notices
@@ -99,6 +97,10 @@ items:
       clearWith:
         - gold
         - newtest
+        - goldPositive
+        - testPositive
+        - goldNegative
+        - testNegative
 
     # - name:  text2
     #   title: Original Data
@@ -289,6 +291,13 @@ items:
       title: 'Data Quality Summary'
       type: Html
       visible: (od)
+      clearWith:
+        - gold
+        - newtest
+        - goldPositive
+        - testPositive
+        - goldNegative
+        - testNegative
 
 
     # - name:  ratioTable2
@@ -372,6 +381,13 @@ items:
       clearWith:
           - pp
           - pprob
+          - gold
+          - newtest
+          - goldPositive
+          - testPositive
+          - goldNegative
+          - testNegative
+          - ci
       refs: epiR
 
 
@@ -399,6 +415,13 @@ items:
       clearWith:
           - pp
           - pprob
+          - gold
+          - newtest
+          - goldPositive
+          - testPositive
+          - goldNegative
+          - testNegative
+          - ci
       refs: epiR
 
     # - name:  plotcontent
@@ -431,6 +454,12 @@ items:
           - pp
           - pprob
           - fagan
+          - gold
+          - newtest
+          - goldPositive
+          - testPositive
+          - goldNegative
+          - testNegative
       refs:
           - Fagan
           - Fagan2
@@ -441,21 +470,49 @@ items:
       title: 'Clinical Summary'
       type: Html
       visible: (showNaturalLanguage)
+      clearWith:
+        - gold
+        - newtest
+        - goldPositive
+        - testPositive
+        - goldNegative
+        - testNegative
 
     - name: clinicalInterpretation
       title: 'Clinical Interpretation Guide'
       type: Html
       visible: (showClinicalInterpretation)
+      clearWith:
+        - gold
+        - newtest
+        - goldPositive
+        - testPositive
+        - goldNegative
+        - testNegative
 
     - name: reportTemplate
       title: 'Copy-Ready Report'
       type: Html
       visible: (showReportTemplate)
+      clearWith:
+        - gold
+        - newtest
+        - goldPositive
+        - testPositive
+        - goldNegative
+        - testNegative
 
     - name: aboutAnalysis
       title: 'About This Analysis'
       type: Html
       visible: (showAboutAnalysis)
+      clearWith:
+        - gold
+        - newtest
+        - goldPositive
+        - testPositive
+        - goldNegative
+        - testNegative
 
     # Misclassified Cases Analysis ----
 
@@ -463,6 +520,13 @@ items:
       title: 'Misclassified Cases Analysis'
       type: Html
       visible: (showMisclassified)
+      clearWith:
+        - gold
+        - newtest
+        - goldPositive
+        - testPositive
+        - goldNegative
+        - testNegative
 
     - name: confusionMatrixSummary
       title: 'Confusion Matrix Summary'
@@ -480,6 +544,13 @@ items:
           title: 'Percentage'
           type: number
           format: pc
+      clearWith:
+        - gold
+        - newtest
+        - goldPositive
+        - testPositive
+        - goldNegative
+        - testNegative
 
     - name: falsePositiveTable
       title: 'False Positive Cases (Test+ but Disease-)'
@@ -496,6 +567,13 @@ items:
         - name: test_value
           title: 'Test Result'
           type: text
+      clearWith:
+        - gold
+        - newtest
+        - goldPositive
+        - testPositive
+        - goldNegative
+        - testNegative
 
     - name: falseNegativeTable
       title: 'False Negative Cases (Test- but Disease+)'
@@ -512,11 +590,25 @@ items:
         - name: test_value
           title: 'Test Result'
           type: text
+      clearWith:
+        - gold
+        - newtest
+        - goldPositive
+        - testPositive
+        - goldNegative
+        - testNegative
 
     - name: misclassificationInterpretation
       title: 'Interpretation of Misclassified Cases'
       type: Html
       visible: (showMisclassified)
+      clearWith:
+        - gold
+        - newtest
+        - goldPositive
+        - testPositive
+        - goldNegative
+        - testNegative
 
     - name: saveClassifications
       title: 'Classification Groups'
@@ -529,6 +621,8 @@ items:
         - newtest
         - goldPositive
         - testPositive
+        - goldNegative
+        - testNegative
 
 
 refs:

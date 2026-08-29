@@ -2247,7 +2247,8 @@ agreementResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "vars",
                     "wght",
                     "allPairsCI",
-                    "multipleTestCorrection")))
+                    "multipleTestCorrection",
+                    "confLevel")))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="allPairsKappaExplanation",
@@ -2294,7 +2295,8 @@ agreementResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                         `type`="number", 
                         `format`="zto")),
                 clearWith=list(
-                    "vars")))
+                    "vars",
+                    "confLevel")))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="itemModalAgreementExplanation",
@@ -2819,7 +2821,8 @@ agreementResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                         `format`="zto,pvalue")),
                 clearWith=list(
                     "vars",
-                    "gwetWeights")))
+                    "gwetWeights",
+                    "confLevel")))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="gwetExplanation",
@@ -3082,7 +3085,8 @@ agreementResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 clearWith=list(
                     "vars",
                     "tdiCoverage",
-                    "tdiLimit")))
+                    "tdiLimit",
+                    "confLevel")))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="tdiExplanation",
@@ -3206,7 +3210,8 @@ agreementResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                         `type`="text")),
                 clearWith=list(
                     "vars",
-                    "interIntraSeparator")))
+                    "interIntraSeparator",
+                    "confLevel")))
             self$add(jmvcore::Table$new(
                 options=options,
                 name="interIntraRaterInterTable",
@@ -3253,7 +3258,8 @@ agreementResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                         `type`="text")),
                 clearWith=list(
                     "vars",
-                    "interIntraSeparator")))
+                    "interIntraSeparator",
+                    "confLevel")))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="interIntraRaterExplanation",
@@ -3361,7 +3367,8 @@ agreementResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 clearWith=list(
                     "vars",
                     "specificPositiveCategory",
-                    "specificAllCategories")))
+                    "specificAllCategories",
+                    "confLevel")))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="specificAgreementExplanation",
@@ -3618,7 +3625,8 @@ agreementResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                         `type`="text")),
                 clearWith=list(
                     "vars",
-                    "subgroupVariable")))
+                    "subgroupVariable",
+                    "confLevel")))
             self$add(jmvcore::Image$new(
                 options=options,
                 name="subgroupForestPlotImage",

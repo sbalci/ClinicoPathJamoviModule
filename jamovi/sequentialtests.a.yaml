@@ -1,10 +1,10 @@
 ---
 name: sequentialtests
 title: Sequential Testing Analysis
-menuGroup: meddecideT
+menuGroup: meddecide
 menuSubgroup: Decision Calculators
 menuSubtitle: Sequential Test Analysis
-version: '1.0.7'
+version: '1.0.8'
 jas: '1.2'
 
 description:

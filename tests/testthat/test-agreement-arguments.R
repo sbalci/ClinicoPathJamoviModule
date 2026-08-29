@@ -67,6 +67,9 @@ test_that("kendallW option calculates Kendall's W", {
     kendallW = TRUE
   )
   expect_s3_class(result, "agreementResults")
+  # Not just "an object came back": factor raters used to reach irr::kendall as a
+  # CHARACTER matrix, which ranks the labels rather than the levels.
+  expect_false(is.na(result$kendallWTable$asDF$w[1]))
 })
 
 test_that("robinsonA option calculates Robinson's A", {
@@ -76,6 +79,8 @@ test_that("robinsonA option calculates Robinson's A", {
     robinsonA = TRUE
   )
   expect_s3_class(result, "agreementResults")
+  # Returned an all-NA row for every factor rater until the coercion fix.
+  expect_false(is.na(result$robinsonATable$asDF$robinsonA[1]))
 })
 
 test_that("meanSpearman option calculates Mean Spearman Rho", {
@@ -86,6 +91,8 @@ test_that("meanSpearman option calculates Mean Spearman Rho", {
     meanSpearman = TRUE
   )
   expect_s3_class(result, "agreementResults")
+  # Returned an all-NA row for every factor rater until the coercion fix.
+  expect_false(is.na(result$meanSpearmanTable$asDF$meanRho[1]))
 })
 
 # Weighted Kappa Options
@@ -250,4 +257,28 @@ test_that("bootstrap option works", {
     bootstrap = TRUE
   )
   expect_s3_class(result, "agreementResults")
+})
+
+
+test_that("ordinal factor raters are ranked by level, not by label", {
+  # Regression guard for the as.matrix() character-coercion bug. A >=10-level
+  # ordinal scale is the case that exposed it: with single-character labels the
+  # broken and correct paths coincide, so a 3-level fixture cannot catch it.
+  lev <- as.character(1:12)
+  set.seed(1)
+  d <- data.frame(
+    R1 = factor(sample(lev, 40, TRUE), levels = lev, ordered = TRUE),
+    R2 = factor(sample(lev, 40, TRUE), levels = lev, ordered = TRUE),
+    R3 = factor(sample(lev, 40, TRUE), levels = lev, ordered = TRUE)
+  )
+  result <- agreement(data = d, vars = c("R1", "R2", "R3"),
+                      kendallW = TRUE, robinsonA = TRUE, meanSpearman = TRUE)
+
+  # the value irr::kendall gives for a genuinely numeric matrix
+  expected_w <- irr::kendall(
+    vapply(d, as.numeric, numeric(nrow(d))), correct = TRUE)$value
+
+  expect_equal(result$kendallWTable$asDF$w[1], expected_w, tolerance = 1e-8)
+  expect_false(is.na(result$robinsonATable$asDF$robinsonA[1]))
+  expect_false(is.na(result$meanSpearmanTable$asDF$meanRho[1]))
 })

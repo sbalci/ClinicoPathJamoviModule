@@ -217,8 +217,13 @@ test_that("fixed decision tables are populated without changing row structure", 
     test2 = "test2",
     test2Positive = "pos",
     test3 = NULL,
-    test3Positive = NULL,
-    addPatternToData = TRUE
+    test3Positive = NULL
   )
+  # isFilled() alone is what masked the original defect: the backend stored the values, so
+  # this passed, while jmvcore's Output$enabled resolved through options$get("addedPattern")
+  # -- an option that did not exist -- and jamovi never wrote the column. `enabled` is
+  # driven by the Output control in the GUI and cannot be set through the R wrapper (a
+  # `type: Output` option is not a wrapper argument), so the schema half of that check
+  # lives in test-decisioncombine-release-review.R instead.
   expect_true(pattern_result$addedPattern$isFilled())
 })

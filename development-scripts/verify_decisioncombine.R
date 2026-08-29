@@ -323,8 +323,7 @@ create_options <- function(
   test1 = "test1", test1Positive = "Pos",
   test2 = NULL, test2Positive = NULL,
   test3 = NULL, test3Positive = NULL,
-  showIndividual = FALSE, showFrequency = FALSE, showRecommendation = FALSE,
-  addPatternToData = FALSE
+  showIndividual = FALSE, showFrequency = FALSE, showRecommendation = FALSE
 ) {
     list(
         gold = gold, goldPositive = goldPositive,
@@ -338,7 +337,6 @@ create_options <- function(
         showForest = FALSE,
         showDecisionTree = FALSE,
         showRecommendation = showRecommendation,
-        addPatternToData = addPatternToData,
         filterStatistic = "all",
         filterPattern = "all"
     )

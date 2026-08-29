@@ -227,8 +227,6 @@ decisionResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "goldPositive",
                     "testPositive",
                     "goldNegative",
-                    "testNegative",
-                    "goldNegative",
                     "testNegative")))
             self$add(jmvcore::Html$new(
                 options=options,
@@ -297,7 +295,11 @@ decisionResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                         `type`="integer")),
                 clearWith=list(
                     "gold",
-                    "newtest")))
+                    "newtest",
+                    "goldPositive",
+                    "testPositive",
+                    "goldNegative",
+                    "testNegative")))
             self$add(jmvcore::Table$new(
                 options=options,
                 name="cTable",
@@ -447,7 +449,14 @@ decisionResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 options=options,
                 name="missingDataSummary",
                 title="Data Quality Summary",
-                visible="(od)"))
+                visible="(od)",
+                clearWith=list(
+                    "gold",
+                    "newtest",
+                    "goldPositive",
+                    "testPositive",
+                    "goldNegative",
+                    "testNegative")))
             self$add(jmvcore::Table$new(
                 options=options,
                 name="epirTable_ratio",
@@ -478,7 +487,14 @@ decisionResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                         `format`="pc")),
                 clearWith=list(
                     "pp",
-                    "pprob"),
+                    "pprob",
+                    "gold",
+                    "newtest",
+                    "goldPositive",
+                    "testPositive",
+                    "goldNegative",
+                    "testNegative",
+                    "ci"),
                 refs="epiR"))
             self$add(jmvcore::Table$new(
                 options=options,
@@ -507,7 +523,14 @@ decisionResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                         `type`="number")),
                 clearWith=list(
                     "pp",
-                    "pprob"),
+                    "pprob",
+                    "gold",
+                    "newtest",
+                    "goldPositive",
+                    "testPositive",
+                    "goldNegative",
+                    "testNegative",
+                    "ci"),
                 refs="epiR"))
             self$add(jmvcore::Image$new(
                 options=options,
@@ -521,7 +544,13 @@ decisionResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 clearWith=list(
                     "pp",
                     "pprob",
-                    "fagan"),
+                    "fagan",
+                    "gold",
+                    "newtest",
+                    "goldPositive",
+                    "testPositive",
+                    "goldNegative",
+                    "testNegative"),
                 refs=list(
                     "Fagan",
                     "Fagan2")))
@@ -529,27 +558,62 @@ decisionResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 options=options,
                 name="naturalLanguageSummary",
                 title="Clinical Summary",
-                visible="(showNaturalLanguage)"))
+                visible="(showNaturalLanguage)",
+                clearWith=list(
+                    "gold",
+                    "newtest",
+                    "goldPositive",
+                    "testPositive",
+                    "goldNegative",
+                    "testNegative")))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="clinicalInterpretation",
                 title="Clinical Interpretation Guide",
-                visible="(showClinicalInterpretation)"))
+                visible="(showClinicalInterpretation)",
+                clearWith=list(
+                    "gold",
+                    "newtest",
+                    "goldPositive",
+                    "testPositive",
+                    "goldNegative",
+                    "testNegative")))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="reportTemplate",
                 title="Copy-Ready Report",
-                visible="(showReportTemplate)"))
+                visible="(showReportTemplate)",
+                clearWith=list(
+                    "gold",
+                    "newtest",
+                    "goldPositive",
+                    "testPositive",
+                    "goldNegative",
+                    "testNegative")))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="aboutAnalysis",
                 title="About This Analysis",
-                visible="(showAboutAnalysis)"))
+                visible="(showAboutAnalysis)",
+                clearWith=list(
+                    "gold",
+                    "newtest",
+                    "goldPositive",
+                    "testPositive",
+                    "goldNegative",
+                    "testNegative")))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="misclassifiedHeading",
                 title="Misclassified Cases Analysis",
-                visible="(showMisclassified)"))
+                visible="(showMisclassified)",
+                clearWith=list(
+                    "gold",
+                    "newtest",
+                    "goldPositive",
+                    "testPositive",
+                    "goldNegative",
+                    "testNegative")))
             self$add(jmvcore::Table$new(
                 options=options,
                 name="confusionMatrixSummary",
@@ -569,7 +633,14 @@ decisionResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                         `name`="percentage", 
                         `title`="Percentage", 
                         `type`="number", 
-                        `format`="pc"))))
+                        `format`="pc")),
+                clearWith=list(
+                    "gold",
+                    "newtest",
+                    "goldPositive",
+                    "testPositive",
+                    "goldNegative",
+                    "testNegative")))
             self$add(jmvcore::Table$new(
                 options=options,
                 name="falsePositiveTable",
@@ -588,7 +659,14 @@ decisionResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     list(
                         `name`="test_value", 
                         `title`="Test Result", 
-                        `type`="text"))))
+                        `type`="text")),
+                clearWith=list(
+                    "gold",
+                    "newtest",
+                    "goldPositive",
+                    "testPositive",
+                    "goldNegative",
+                    "testNegative")))
             self$add(jmvcore::Table$new(
                 options=options,
                 name="falseNegativeTable",
@@ -607,12 +685,26 @@ decisionResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     list(
                         `name`="test_value", 
                         `title`="Test Result", 
-                        `type`="text"))))
+                        `type`="text")),
+                clearWith=list(
+                    "gold",
+                    "newtest",
+                    "goldPositive",
+                    "testPositive",
+                    "goldNegative",
+                    "testNegative")))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="misclassificationInterpretation",
                 title="Interpretation of Misclassified Cases",
-                visible="(showMisclassified)"))
+                visible="(showMisclassified)",
+                clearWith=list(
+                    "gold",
+                    "newtest",
+                    "goldPositive",
+                    "testPositive",
+                    "goldNegative",
+                    "testNegative")))
             self$add(jmvcore::Output$new(
                 options=options,
                 name="saveClassifications",
@@ -624,7 +716,9 @@ decisionResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "gold",
                     "newtest",
                     "goldPositive",
-                    "testPositive")))}))
+                    "testPositive",
+                    "goldNegative",
+                    "testNegative")))}))
 
 decisionBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
     "decisionBase",

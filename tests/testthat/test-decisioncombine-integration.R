@@ -452,7 +452,6 @@ test_that("decisioncombine workflow: add pattern to data and downstream analysis
     test1Positive = "Positive",
     test2 = "rater2",
     test2Positive = "Positive",
-    addPatternToData = TRUE,
     test3Positive = NULL
   )
 

@@ -322,18 +322,6 @@ msgid ""
 msgstr ""
 
 #: package/analyses/jjridges.description
-msgid ""
-"'Create advanced ridgeline plots combining features from ggridges and "
-"ggstatsplot.\n"
-"Visualize distributions across groups with multiple style options, "
-"annotations,\n"
-"statistical overlays, and publication-ready formatting. Supports both basic "
-"and\n"
-"complex ridge plots with inside plots, double ridgelines, and color "
-"gradients.'"
-msgstr ""
-
-#: package/analyses/jjridges.description
 #: jjridges/options.description.main
 msgid ""
 "'Create advanced ridgeline plots.\n"
@@ -373,12 +361,6 @@ msgid ""
 "relationships in clinical data such as disease subtypes, treatment outcomes, "
 "or risk category distributions. Each square represents a proportion of the "
 "total sample, making it easy to see relative frequencies across categories.'"
-msgstr ""
-
-#: package/analyses/jjriverplot.description
-msgid ""
-"'Function for generating river plots (alluvial diagrams) to visualize\n"
-"flows and transitions over time or between categories.'"
 msgstr ""
 
 #: R/chisqposttest.b.R
@@ -523,12 +505,6 @@ msgstr ""
 msgid "). Consider reducing groups or using faceting for clarity."
 msgstr ""
 
-#: package/analyses/flexparametricadv.title
-#: package/analyses/flexparametricadv.menuTitle
-#: package/analyses/flexparametricadvanced.title
-msgid "[DEPRECATED] Advanced Flexible Parametric Survival Models"
-msgstr ""
-
 #: stagemigration/ui[8][13].label
 msgid "[Experimental] Cure Models"
 msgstr ""
@@ -664,6 +640,12 @@ msgstr ""
 msgid "{n} rows"
 msgstr ""
 
+#: R/decisioncombine.b.R
+msgid ""
+"{n} rules tie on Youden's J ({rules}); \"{shown}\" is displayed only because "
+"it comes first."
+msgstr ""
+
 #: R/advancedraincloud.b.R
 msgid "{name} must be a numeric value between {min} and {max}."
 msgstr ""
@@ -699,6 +681,10 @@ msgid ""
 "unfinished fits). The selected fit is the best converged solution when one "
 "was available, but this pattern indicates an unstable likelihood surface. Do "
 "not report the estimates without additional model checks."
+msgstr ""
+
+#: R/decisioncombine.b.R
+msgid "{variable} has {n} levels"
 msgstr ""
 
 #: R/summarydata.b.R
@@ -2379,15 +2365,16 @@ msgid ""
 "<div style='margin: 15px; padding: 15px; border: 2px dashed #2196F3; "
 "background-color: rgba(33, 152, 239, 0.13); color: inherit;'><h3 "
 "style='color: #1976D2; margin-top: 0;'>Copy-Ready Clinical Report</h3><div "
-"style='background: white; padding: 10px; border-radius: 5px; font-family: "
-"Arial, sans-serif;'><p><strong>DIAGNOSTIC TEST EVALUATION</strong></p><p>We "
-"evaluated the diagnostic performance of %s compared to the gold standard %s. "
-"The test demonstrated a sensitivity of %.1f%% and specificity of %.1f%% %s. "
-"At a disease prevalence of %.1f%%, the positive predictive value was %.1f%% "
-"and the negative predictive value was %.1f%%. The positive likelihood ratio "
-"of %.1f provides %s.</p></div><p style='font-size: 12px; color: "
-"#666;'><em>Copy the text above for your clinical report. Modify as needed "
-"for your specific context.</em></p></div>"
+"style='background: rgba(255, 255, 255, 0.06); color: inherit; padding: 10px; "
+"border-radius: 5px; font-family: Arial, sans-serif;'><p><strong>DIAGNOSTIC "
+"TEST EVALUATION</strong></p><p>We evaluated the diagnostic performance of %s "
+"compared to the gold standard %s. The test demonstrated a sensitivity of "
+"%.1f%% and specificity of %.1f%% %s. At a disease prevalence of %.1f%%, the "
+"positive predictive value was %.1f%% and the negative predictive value was "
+"%.1f%%. The positive likelihood ratio of %.1f provides %s.</p></div><p "
+"style='font-size: 12px; color: inherit; opacity: 0.75;'><em>Copy the text "
+"above for your clinical report. Modify as needed for your specific "
+"context.</em></p></div>"
 msgstr ""
 
 #: R/decision.b.R
@@ -4639,7 +4626,7 @@ msgstr ""
 #: waterfallrecist/results/recistSummary/orrConfirmed.columns.title
 #: waterfallrecist/results/recistSummary/dcrConfirmed.columns.title
 msgid "95% CI"
-msgstr ""
+msgstr "%95 GA"
 
 #: misclassificationbias/results/biasAnalysis.columns.superTitle
 msgid "95% CI (Adjusted)"
@@ -5166,6 +5153,10 @@ msgid ""
 "recode shown above counts the outcome column alone."
 msgstr ""
 
+#: R/decisioncombine.b.R
+msgid "A gold standard variable is required. Select a reference test."
+msgstr ""
+
 #: R/decisiongraph.b.R
 msgid ""
 "A graph showing the probability that each intervention is cost-effective "
@@ -5190,6 +5181,15 @@ msgid ""
 "A Haldane-Anscombe 0.5 correction was applied to the likelihood ratios "
 "because a zero cell was present. The epiR confidence-interval table uses raw "
 "counts, so its point estimates may differ."
+msgstr ""
+
+#: R/decisioncombine.b.R
+msgid ""
+"A Haldane-Anscombe continuity correction of 0.5 was applied to {n} "
+"pattern(s) with at least one zero cell ({patterns}). The correction affects "
+"LR+, LR-, the diagnostic odds ratio and their confidence intervals only; "
+"sensitivity, specificity, PPV and NPV on the same rows use the observed "
+"counts."
 msgstr ""
 
 #: R/summarydata.b.R
@@ -5271,6 +5271,34 @@ msgid ""
 "A p-value adjustment was requested, but only one comparison is being made, "
 "so there is nothing to adjust for. Adjustment applies to the pairwise "
 "comparisons shown when there are three or more groups."
+msgstr ""
+
+#: R/decisioncombine.b.R
+msgid ""
+"A PATTERN row (\"+/-\") is a mutually exclusive group of patients: those "
+"whose results were exactly that. It can be read as a rule -- \"call positive "
+"only when the results are exactly this\" -- and the ranking treats it that "
+"way, but then every column refers to that exact pattern. Sensitivity is the "
+"share of diseased patients showing it; Specificity the share of non-diseased "
+"patients showing anything else; LR- the likelihood ratio for \"any other "
+"pattern\" rather than for a negative test."
+msgstr ""
+
+#: R/decisioncombine.b.R
+msgid ""
+"A pattern row (e.g. \"+/-\") is a mutually exclusive group of patients. It "
+"can still be read as a rule -- \"call positive only when the results are "
+"exactly this\" -- and the ranking treats it that way, but every column then "
+"refers to that exact pattern: Sensitivity is the proportion of diseased "
+"patients showing it, Specificity the proportion of non-diseased patients "
+"showing anything else, and LR- the likelihood ratio for \"any other "
+"pattern\" rather than for a negative test. Accuracy and NPV on such a row "
+"are dominated by the patients who did not show the pattern, so a rare "
+"pattern reports both close to 1 minus the prevalence however uninformative "
+"it is -- read Youden's J there, not Accuracy. The named rows -- Parallel "
+"(>=1 pos), Serial (all pos) and, with three tests, Majority (>=2/3 pos) -- "
+"are the strategies you would normally apply to a patient; Serial (all pos) "
+"is numerically identical to the all-positive pattern row."
 msgstr ""
 
 #: R/benford.b.R
@@ -5359,6 +5387,14 @@ msgid ""
 "A spider plot shows how each patient's response changes over time: each line "
 "is one patient's treatment journey, which makes response patterns and "
 "outcome types easy to see."
+msgstr ""
+
+#: R/decisioncombine.b.R
+msgid ""
+"A STRATEGY row is a rule you would normally apply to a patient. Parallel "
+"(>=1 pos) calls positive if any test is positive, which raises sensitivity "
+"and lowers specificity. Serial (all pos) requires every test to be positive, "
+"which does the reverse. Majority (>=2/3 pos) needs two of three."
 msgstr ""
 
 #: R/nogoldstandard.b.R
@@ -5722,6 +5758,7 @@ msgstr ""
 #: datetimeconverter/results/aboutPanel.title
 #: decision/results/aboutAnalysis.title
 #: decisioncalculator/results/about.title
+#: decisioncombine/results/about.title
 #: decisioncompare/results/aboutAnalysis.title
 #: diagnosticmeta/results/about.title
 #: flexparametric/ui[1][4][0]/showExplanations.label
@@ -5753,6 +5790,8 @@ msgstr ""
 #: decision/options/showAboutAnalysis.title
 #: decision/ui[4]/showAboutAnalysis.label
 #: decisioncalculator/options/showAbout.title
+#: decisioncombine/options/showAbout.title
+#: decisioncombine/ui[1]/showAbout.label
 #: swimmerplot/options/showAbout.title
 #: tableone/options/showAbout.title
 #: venn/options/aboutAnalysis.title
@@ -6060,6 +6099,7 @@ msgid "Accrual Time (years):"
 msgstr ""
 
 #: R/clinicalscore.b.R
+#: R/decisioncombine.b.R
 #: R/decisioncompare.b.R
 #: R/lassologistic.b.R
 #: biomarkerdiscovery/results/signature_performance.columns.title
@@ -6119,6 +6159,19 @@ msgstr ""
 msgid "Accuracy Analysis"
 msgstr ""
 
+#: R/decisioncombine.b.R
+msgid ""
+"Accuracy and NPV on a pattern row are dominated by the patients who did NOT "
+"show that pattern, so a rare pattern reports both close to 1 minus the "
+"prevalence however uninformative it is. A pattern seen in 5 of 50 diseased "
+"and 10 of 150 non-diseased patients reports Accuracy 0.73 and NPV 0.76 "
+"against a prevalence of 0.25, while its Youden's J is 0.03. Read Youden's J "
+"or Balanced Accuracy on these rows, not Accuracy. PPV and LR+ are the two "
+"columns that read cleanly: PPV is the probability of disease given exactly "
+"that result combination, and LR+ is the likelihood ratio for that "
+"combination."
+msgstr ""
+
 #: dynamicprediction/options/accuracy_plot.title
 msgid "Accuracy Assessment Plot"
 msgstr ""
@@ -6134,6 +6187,19 @@ msgstr ""
 
 #: pathagreement/results/referenceComparison.columns.title
 msgid "Accuracy Level"
+msgstr ""
+
+#: R/decisioncombine.b.R
+msgid ""
+"Accuracy measured on clearly diseased versus clearly healthy patients is "
+"higher than accuracy in the population the test is actually used on, which "
+"is full of early, partial and equivocal presentations. A case-control "
+"(two-gate) design inflates sensitivity and specificity and makes the "
+"Prevalence column an artefact of the sampling ratio rather than of any "
+"clinical population, so PPV is inflated while NPV is DEFLATED relative to a "
+"low-prevalence setting. At sensitivity and specificity of 0.90, a 50% "
+"sampled prevalence gives PPV 0.90 and NPV 0.90, while a true 5% prevalence "
+"gives PPV 0.32 and NPV 0.99."
 msgstr ""
 
 #: methodvalidation/options/validation_type/accuracy_only.title
@@ -6472,7 +6538,7 @@ msgstr ""
 msgid "Add a horizontal reference line at y=0 for residual plots."
 msgstr ""
 
-#: decisioncombine/options/addPatternToData.description.ui
+#: decisioncombine/options/addedPattern.description.ui
 msgid ""
 "Add a new column to the dataset containing the test combination pattern for "
 "each case (e.g., \"+/+\", \"+/-\", \"-/-\")."
@@ -7128,15 +7194,6 @@ msgstr ""
 
 #: jjsegmentedtotalbar/options/show_statistical_tests.description.jamovi
 msgid "Add statistical tests comparing proportions across categories."
-msgstr ""
-
-#: decisioncombine/options/addPatternToData.title
-#: decisioncombine/ui[1]/addPatternToData.label
-msgid "Add test pattern to data"
-msgstr ""
-
-#: decisioncombine/results/addedPattern.title
-msgid "Add Test Pattern to Data"
 msgstr ""
 
 #: eurostatmap/options/add_to_data.description.jamovi
@@ -8282,26 +8339,10 @@ msgstr ""
 msgid "Advanced measures"
 msgstr ""
 
-#: package/analyses/decisioncombine1.description
-msgid ""
-"Advanced medical diagnostic test combination analysis for categorical tests \n"
-"with comprehensive clinical interpretation. This function systematically \n"
-"evaluates all possible test result combinations (2-test: 4 patterns, \n"
-"3-test: 8 patterns) against a gold standard using state-of-the-art \n"
-"statistical methods. Features include Wilson score confidence intervals \n"
-"for enhanced accuracy, performance heatmaps, decision trees, and \n"
-"publication-quality visualizations with clinical decision thresholds. \n"
-"Provides actionable recommendations for screening vs. confirmatory testing \n"
-"strategies with detailed clinical interpretation guidelines. Essential for \n"
-"evidence-based diagnostic protocol development and categorical test \n"
-"validation studies."
-msgstr ""
-
 #: comprehensiveSurvivalPower/ui[5].label
 msgid "Advanced Method Parameters"
 msgstr ""
 
-#: package/analyses/flexparametricadvanced.menuSubgroup
 #: comprehensiveSurvivalPower/options/method_category/advanced.title
 msgid "Advanced Methods"
 msgstr ""
@@ -8423,10 +8464,6 @@ msgstr ""
 msgid "Advanced Parameters"
 msgstr ""
 
-#: package/analyses/flexparametricadvanced.menuSubtitle
-msgid "Advanced parametric survival modeling with flexible baseline hazards"
-msgstr ""
-
 #: pcacox/ui[2].label
 msgid "Advanced PC Settings"
 msgstr ""
@@ -8482,8 +8519,6 @@ msgstr ""
 msgid "Advanced Research Analysis"
 msgstr ""
 
-#: package/analyses/jjridges.title
-#: package/analyses/jjridges.menuTitle
 #: jjridges/ui.title
 #: jjridges/results.title
 msgid "Advanced Ridge Plot"
@@ -8555,7 +8590,6 @@ msgstr ""
 
 #: package/analyses/desctools.title
 #: package/analyses/desctools.menuTitle
-#: package/analyses/enhancednonparametric.menuSubgroup
 #: package/analyses/nonparametric.menuSubgroup
 #: desctools/options.title
 #: desctools/ui.title
@@ -8631,11 +8665,6 @@ msgstr ""
 #: stagemigration/ui.title
 #: stagemigration/results.title
 msgid "Advanced TNM Stage Migration Analysis"
-msgstr ""
-
-#: package/analyses/stagemigration1.title
-#: package/analyses/stagemigration1.menuTitle
-msgid "Advanced TNM Stage Migration Analysis 1"
 msgstr ""
 
 #: package/analyses/outcomeorganizer.description
@@ -9767,6 +9796,7 @@ msgid ""
 "C-index instead of risk groups."
 msgstr ""
 
+#: R/decisioncombine.b.R
 #: decisioncombine/options/filterPattern/all.title
 msgid "All Patterns"
 msgstr ""
@@ -9824,7 +9854,6 @@ msgstr ""
 msgid "All Standard Metrics"
 msgstr ""
 
-#: decisioncombine/options/filterStatistic/all.title
 #: enhancedtables/options/stats_continuous/all.title
 #: jsummarytools/options/stats_to_include/all.title
 msgid "All Statistics"
@@ -9842,10 +9871,12 @@ msgstr ""
 msgid "All Tests"
 msgstr ""
 
+#: R/decisioncombine.b.R
 #: decisioncombine/options/filterPattern/allNegative.title
 msgid "All Tests Negative"
 msgstr ""
 
+#: R/decisioncombine.b.R
 #: R/nogoldstandard.b.R
 #: decisioncombine/options/filterPattern/allPositive.title
 #: nogoldstandard/options/method/all_positive.title
@@ -9896,6 +9927,10 @@ msgstr ""
 
 #: enhancedfrequency/results/results/combinedSummary.description
 msgid "All variables combined in a single summary table"
+msgstr ""
+
+#: R/decisioncombine.b.R
+msgid "All Zero Counts"
 msgstr ""
 
 #: advancedtrials/options/biomarker_strategy/all_comers.title
@@ -12202,6 +12237,13 @@ msgstr ""
 msgid "Arm-Based"
 msgstr ""
 
+#: R/decisioncombine.b.R
+msgid ""
+"Around 100 cases or more is the usual target for a stable diagnostic "
+"accuracy estimate; this sample supports preliminary estimates, particularly "
+"once it is divided across the result patterns."
+msgstr ""
+
 #: jjsyndromicplot/ui[3][0][0].label
 msgid "Arrow & Text Settings"
 msgstr ""
@@ -12632,6 +12674,10 @@ msgstr ""
 msgid "Assumptions and caveats"
 msgstr ""
 
+#: decisioncombine/results/assumptions.title
+msgid "Assumptions and Caveats"
+msgstr ""
+
 #: chisqposttest/options/showAssumptionsCheck.title
 msgid "Assumptions check"
 msgstr ""
@@ -12646,6 +12692,10 @@ msgstr ""
 
 #: chisqposttest/results/assumptionsCheck.title
 msgid "Assumptions Validation"
+msgstr ""
+
+#: R/decisioncombine.b.R
+msgid "Assumptions, biases and requirements"
 msgstr ""
 
 #: stagemigration/options/winRatioConfidenceMethod/asymptotic.title
@@ -12735,6 +12785,16 @@ msgstr ""
 msgid ""
 "At least 3 studies with complete diagnostic test data are required ({n} "
 "found)."
+msgstr ""
+
+#: R/decisioncombine.b.R
+msgid "At least four cases are required for analysis."
+msgstr ""
+
+#: R/decisioncombine.b.R
+msgid ""
+"At least four complete cases are required for combination analysis; only "
+"{used} of {total} cases remain after excluding missing values."
 msgstr ""
 
 #: R/psychopdaROC.b.R
@@ -13981,6 +14041,7 @@ msgstr ""
 msgid "Balanced"
 msgstr ""
 
+#: R/decisioncombine.b.R
 #: decisioncalculator/results/advancedMetricsTable.columns.title
 #: decisioncombine/options/filterStatistic/balancedAccuracy.title
 #: decisioncombine/results/combinationTable.columns.title
@@ -13990,7 +14051,7 @@ msgstr ""
 #: treecompare/options/primary_metric/bacc.title
 #: treecompare/results/comparison_table.columns.title
 msgid "Balanced Accuracy"
-msgstr ""
+msgstr "Dengeli Doğruluk"
 
 #: R/decisioncalculator.b.R
 msgid "Balanced accuracy"
@@ -13998,6 +14059,12 @@ msgstr ""
 
 #: R/decisioncalculator.b.R
 msgid "Balanced accuracy (CI not computed)"
+msgstr ""
+
+#: R/decisioncombine.b.R
+msgid ""
+"Balanced Accuracy and Youden's J are the same statistic on two scales: "
+"Balanced Accuracy = (J + 1) / 2."
 msgstr ""
 
 #: R/decisioncalculator.b.R
@@ -14104,7 +14171,7 @@ msgid "Bar Chart"
 msgstr ""
 
 #: decisioncombine/options/showBarPlot.title
-#: decisioncombine/ui[1][4]/showBarPlot.label
+#: decisioncombine/ui[1][5]/showBarPlot.label
 msgid "Bar chart"
 msgstr ""
 
@@ -14645,7 +14712,6 @@ msgid "Basic power analysis - Easy to use for beginners"
 msgstr ""
 
 #: package/analyses/advancedSurvivalPower.description
-#: package/analyses/powersurvival.description
 msgid ""
 "Basic power analysis for survival studies with simple and complex design "
 "options.\n"
@@ -20558,9 +20624,7 @@ msgstr ""
 msgid "Categorical NRI (with risk groups)"
 msgstr ""
 
-#: package/analyses/jjriverplot.menuSubgroup
 #: package/analyses/riverplot.menuSubgroup
-#: package/analyses/jjsankeyfier.menuSubgroup
 #: riverplot/options.menuSubgroup
 msgid "Categorical Over Time"
 msgstr ""
@@ -22056,11 +22120,6 @@ msgstr ""
 msgid "Chi-square p-value is approximate at this sample size"
 msgstr ""
 
-#: package/analyses/chisqposttestaddon.title
-#: package/analyses/chisqposttestaddon.menuTitle
-msgid "Chi-Square Post-Hoc Analysis"
-msgstr ""
-
 #: R/chisqposttest.b.R
 msgid "Chi-Square Post-Hoc Analysis Guide"
 msgstr ""
@@ -23141,7 +23200,6 @@ msgstr ""
 msgid "Classical Survival Power Analysis (Intermediate)"
 msgstr ""
 
-#: package/analyses/classification.menuSubtitle
 #: classification/results/printRandForest/randomForestModel.columns.title
 #: clinicalprediction/options/problem_type/classification.title
 #: decision/results/confusionMatrixSummary.columns.title
@@ -24648,7 +24706,6 @@ msgid "Clinical range (5 percent to 50 percent)"
 msgstr ""
 
 #: adaptivetrialdesign/results/dmbRecommendations.columns.title
-#: decisioncombine/results/recommendationTable.columns.title
 msgid "Clinical Rationale"
 msgstr ""
 
@@ -25525,10 +25582,6 @@ msgstr ""
 msgid "ClinicoPath Predictions"
 msgstr ""
 
-#: package/analyses/ggflowchart.menuSubgroup
-msgid "ClinicoPath Reports"
-msgstr ""
-
 #: package/analyses/toxicityprofile.menuSubgroup
 #: toxicityprofile/options.menuSubgroup
 msgid "ClinicoPath Safety Analysis"
@@ -25610,7 +25663,6 @@ msgstr ""
 #: package/analyses/mediansurvival.menuGroup
 #: package/analyses/splinehazard.menuGroup
 #: package/analyses/distributionfit.menuGroup
-#: package/analyses/flexiblebaseline.menuGroup
 #: package/analyses/stratifiedparametric.menuGroup
 #: package/analyses/smoothtimevary.menuGroup
 #: package/analyses/dynamiccoeff.menuGroup
@@ -25655,7 +25707,6 @@ msgstr ""
 #: package/analyses/effectsize.menuGroup
 #: package/analyses/factoranalysis.menuGroup
 #: package/analyses/enhancedtwowayfrequency.menuGroup
-#: package/analyses/ordinalmixedmodel.menuGroup
 #: package/analyses/interruptedtimeseries.menuGroup
 #: assayoptimization/options.menuGroup
 #: bayesianci/options.menuGroup
@@ -25715,10 +25766,6 @@ msgstr ""
 #: treatmentoptim/options.menuGroup
 #: treatmentswitching/options.menuGroup
 msgid "ClinicoPathD"
-msgstr ""
-
-#: package/analyses/enhancednonparametric.menuGroup
-msgid "ClinicoPathD Descriptives"
 msgstr ""
 
 #: package/analyses/advancedanova.menuGroup
@@ -27329,21 +27376,12 @@ msgstr ""
 msgid "Combine Medical Decision Tests"
 msgstr ""
 
-#: package/analyses/decisioncombine1.title
-#: package/analyses/decisioncombine1.menuTitle
-msgid "Combine Medical Decision Tests 1"
-msgstr ""
-
 #: psychopdaROC/options/combinePlots.title
 msgid "Combine multiple ROC curves"
 msgstr ""
 
 #: enhancedfrequency/options/combineRareCategories.title
 msgid "Combine Rare Categories"
-msgstr ""
-
-#: package/analyses/decisioncombine1.menuSubtitle
-msgid "Combine tests and evaluate performance"
 msgstr ""
 
 #: R/sequentialtests.b.R
@@ -28907,10 +28945,26 @@ msgstr ""
 msgid "Complete Values"
 msgstr ""
 
+#: R/decisioncombine.b.R
+msgid ""
+"Complete-case analysis uses {used} of {total} cases ({percent}%) for the "
+"combination analysis. Cases missing the gold standard or any selected test "
+"were excluded. Individual-test tables use their own pairwise-complete "
+"denominators. If data are not missing completely at random, investigate the "
+"missingness pattern."
+msgstr ""
+
 #: R/lassocox.b.R
 msgid ""
 "Complete-case analysis was used. Even a small excluded fraction can bias "
 "results when missingness is informative."
+msgstr ""
+
+#: R/decisioncombine.b.R
+msgid ""
+"Complete-case analysis: a patient missing the reference standard or any "
+"selected test is excluded from the combination table. The number excluded is "
+"reported above when it is not zero."
 msgstr ""
 
 #: synopticcompleteness/options/completeThreshold.title
@@ -29311,7 +29365,6 @@ msgid "Comprehensive analysis for research applications"
 msgstr ""
 
 #: package/analyses/stagemigration.description
-#: package/analyses/stagemigration1.description
 #: stagemigration/options.description.main
 msgid ""
 "Comprehensive analysis for validating TNM staging system improvements using "
@@ -29479,19 +29532,6 @@ msgid ""
 "\n"
 "For datetime conversion with component extraction (year, month, day, hour, "
 "minute, second), see the DateTime Converter module."
-msgstr ""
-
-#: package/analyses/datecorrection.description
-msgid ""
-"Comprehensive date field correction and standardization using multiple R "
-"packages (datefixR, anytime, lubridate).\n"
-"This module handles messy date formats commonly found in clinical databases: "
-"different separators, \n"
-"month representations, missing components, and ambiguous formats. Provides "
-"standardized date outputs\n"
-"with detailed correction reports and quality assessment. Perfect for "
-"clinical research data preprocessing\n"
-"and database standardization workflows."
 msgstr ""
 
 #: nonparametric/options/descriptive_plots.title
@@ -29900,7 +29940,6 @@ msgid ""
 msgstr ""
 
 #: package/analyses/comprehensiveSurvivalPower.description
-#: package/analyses/survivalPowerComprehensive.description
 #: comprehensiveSurvivalPower/options.description.main
 msgid ""
 "Comprehensive power analysis and sample size calculation for survival "
@@ -30021,8 +30060,6 @@ msgstr ""
 msgid "Comprehensive summary and interpretation of cause-specific hazards analysis"
 msgstr ""
 
-#: package/analyses/survivalPowerComprehensive.title
-#: package/analyses/survivalPowerComprehensive.menuTitle
 #: comprehensiveSurvivalPower/ui.title
 #: comprehensiveSurvivalPower/results.title
 msgid "Comprehensive Survival Power Analysis"
@@ -31026,6 +31063,13 @@ msgid ""
 "Confidence intervals use a large-sample normal (z) approximation and may be "
 "too narrow for small samples; interpret with caution when group sizes are "
 "small."
+msgstr ""
+
+#: R/decisioncombine.b.R
+msgid ""
+"Confidence intervals will be wide, and dividing this sample across four or "
+"eight result patterns leaves very few cases per pattern. Interpret the "
+"pattern rows as exploratory."
 msgstr ""
 
 #: R/linechart.b.R
@@ -32070,11 +32114,6 @@ msgstr ""
 msgid "CONSORT Flow Diagram"
 msgstr ""
 
-#: package/analyses/jconsort.title
-#: package/analyses/jconsort.menuTitle
-msgid "CONSORT Flowchart"
-msgstr ""
-
 #: aalenhazard/options/constant_effects.title
 msgid "Constant Effects Variables"
 msgstr ""
@@ -32134,6 +32173,7 @@ msgstr ""
 msgid "Continuing Common Source"
 msgstr ""
 
+#: R/decisioncombine.b.R
 #: clinicaltrialdesign/options/continuity_correction.title
 #: likelihoodratio/options/correctContinuity.title
 #: nonparametric/options/continuity_correction.title
@@ -32736,10 +32776,6 @@ msgstr ""
 msgid ""
 "Controls which analyses are included (basic: core stats only, comprehensive: "
 "all methods)"
-msgstr ""
-
-#: package/analyses/chisqposttestaddon.menuGroup
-msgid "conttablesplusD"
 msgstr ""
 
 #: waterfall/options/sortDirection/conventional.title
@@ -34848,19 +34884,6 @@ msgstr ""
 msgid "Create interactive plot"
 msgstr ""
 
-#: package/analyses/jjstreamgraph.description
-msgid ""
-"Create interactive StreamGraphs for visualizing temporal trends in clinical "
-"data.\n"
-"Perfect for patient biomarker evolution, treatment response monitoring, "
-"population \n"
-"health indicators, and resource utilization over time. Features clinical "
-"presets,\n"
-"interactive legends, and copy-ready clinical reports. Uses the streamgraph R "
-"\n"
-"package for smooth, flowing visualizations with hover effects."
-msgstr ""
-
 #: clinicalnomograms/options/interactive_nomogram.description.ui
 msgid "Create interactive web-based nomogram"
 msgstr ""
@@ -35186,16 +35209,6 @@ msgid ""
 "geom_segment() and geom_point() for optimal visual presentation."
 msgstr ""
 
-#: package/analyses/ggflowchart.description
-msgid ""
-"Creates modern flowcharts using ggflowchart package with ggplot2 styling.\n"
-"This module provides an alternative flowchart approach using the ggflowchart "
-"\n"
-"package for creating publication-ready flowcharts with ggplot2 aesthetics.\n"
-"Complements the existing DiagrammeR-based flowchart module with modern \n"
-"ggplot2 integration and customizable styling options."
-msgstr ""
-
 #: package/analyses/tinytable.description
 #: tinytable/options.description.main
 msgid ""
@@ -35207,7 +35220,6 @@ msgid ""
 "presentation in clinical research publications and reports."
 msgstr ""
 
-#: package/analyses/ggoncoplot.description
 #: package/analyses/jjoncoplot.description
 #: jjoncoplot/options.description.main
 msgid ""
@@ -35249,12 +35261,6 @@ msgid ""
 "coefficient selection, standardized coefficients, and various styling "
 "options. Essential  for presenting regression results in clinical research "
 "and epidemiological studies."
-msgstr ""
-
-#: package/analyses/jflowchart.description
-msgid ""
-"Creates professional flowcharts for research workflows using DiagrammeR or "
-"ggplot2"
 msgstr ""
 
 #: package/analyses/studydiagram.description
@@ -35305,13 +35311,6 @@ msgid ""
 "that reveals patterns traditional box plots might miss, including "
 "multimodality\n"
 "and distribution shape. Based on the ggdist R-Bloggers tutorial."
-msgstr ""
-
-#: package/analyses/jjsankeyfier.description
-msgid ""
-"Creates Sankey and Alluvial diagrams for visualizing flows and transitions "
-"using the ggsankey package with ggplot2 integration for categorical data "
-"flow analysis."
 msgstr ""
 
 #: spatialanalysis/ui[1][0][11].label
@@ -38125,7 +38124,6 @@ msgid "Data Points & Geometry"
 msgstr ""
 
 #: package/analyses/timeinterval.menuSubgroup
-#: package/analyses/datecorrection.menuSubgroup
 #: package/analyses/datetimeconverter.menuSubgroup
 #: package/analyses/outcomeorganizer.menuSubgroup
 #: package/analyses/survivalendpoints.menuSubgroup
@@ -38611,11 +38609,6 @@ msgstr ""
 msgid "Date Components"
 msgstr ""
 
-#: package/analyses/datecorrection.title
-#: package/analyses/datecorrection.menuTitle
-msgid "Date Field Correction"
-msgstr ""
-
 #: groupsummary/options/dateFormat.title
 #: timeinterval/options/time_format.title
 msgid "Date Format"
@@ -39050,7 +39043,6 @@ msgstr ""
 #: package/analyses/screeningcalculator.menuSubgroup
 #: package/analyses/decisiongraph.menuSubgroup
 #: package/analyses/decisionpanel.menuSubgroup
-#: package/analyses/decisioncombine1.menuSubgroup
 #: adaptivetrialdesign/results/interimResults.columns.title
 #: decision/options.menuSubgroup
 #: decisioncombine/options.menuSubgroup
@@ -39290,11 +39282,12 @@ msgstr ""
 msgid "Decision Rule Positive Level"
 msgstr ""
 
-#: decisioncombine/ui[1][4]/showDecisionTree.label
-msgid "Decision space (sens vs spec)"
+#: R/decisioncombine.b.R
+msgid "Decision Space - Sensitivity vs Specificity"
 msgstr ""
 
 #: decisioncombine/options/showDecisionTree.title
+#: decisioncombine/ui[1][5]/showDecisionTree.label
 msgid "Decision space (sensitivity vs specificity)"
 msgstr ""
 
@@ -39346,8 +39339,6 @@ msgstr ""
 msgid "Decision Timing Recommendation"
 msgstr ""
 
-#: package/analyses/classification.title
-#: package/analyses/classification.menuTitle
 #: classification/results.title
 msgid "Decision tree"
 msgstr ""
@@ -39574,6 +39565,10 @@ msgstr ""
 
 #: missingdata/options/imputation_method.title
 msgid "Default Imputation Method"
+msgstr ""
+
+#: decisioncombine/options/filterStatistic/all.title
+msgid "Default Metric Set"
 msgstr ""
 
 #: ggprism/options/prism_theme/default.title
@@ -40094,28 +40089,6 @@ msgstr ""
 msgid "Dependent Variables (Multiple)"
 msgstr ""
 
-#: package/analyses/flexparametricadvanced.description
-msgid ""
-"DEPRECATED: This function has been consolidated into the enhanced flexrstpm2 "
-"function \n"
-"for better functionality and maintainability. Please use flexrstpm2 "
-"(SurvivalT > ClinicoPath Survival) \n"
-"instead, which includes all features from this function plus additional "
-"capabilities."
-msgstr ""
-
-#: package/analyses/flexparametricadv.description
-msgid ""
-"DEPRECATED: This function has been consolidated into the enhanced flexrstpm2 "
-"function  for better functionality and maintainability. Please use "
-"flexrstpm2 (SurvivalT > ClinicoPath Survival)  instead, which includes all "
-"features from this function plus additional capabilities.\n"
-"This function will be removed in a future version. The enhanced flexrstpm2 "
-"provides: - All features from flexparametricadv - Better integration with "
-"rstpm2 package - Enhanced clinical interpretation - Improved user interface "
-"organization"
-msgstr ""
-
 #: flexrstpm2/options/derivative_analysis.title
 #: flexrstpm2/ui[1][2][0]/derivative_analysis.label
 msgid "Derivative Analysis"
@@ -40239,6 +40212,15 @@ msgstr ""
 
 #: decisioncurve/results/weightedAUCTable.title
 msgid "Descriptive Average Net Benefit Over Threshold Range"
+msgstr ""
+
+#: decisioncombine/options/showRecommendation.title
+#: decisioncombine/ui[1]/showRecommendation.label
+msgid "Descriptive candidate-rule ranking"
+msgstr ""
+
+#: decisioncombine/results/recommendationTable.title
+msgid "Descriptive Candidate-Rule Ranking"
 msgstr ""
 
 #: R/singlearm.b.R
@@ -40393,6 +40375,10 @@ msgstr ""
 msgid "Descriptive Table (arsenal)"
 msgstr ""
 
+#: R/decisioncombine.b.R
+msgid "Descriptive Youden ranking"
+msgstr ""
+
 #: decisioncalculator/options/multiplecuts.description.ui
 msgid ""
 "Descriptively compare illustrative cut-off scenarios. These examples are not "
@@ -40411,10 +40397,6 @@ msgstr ""
 #: package/analyses/survivalPower.menuSubgroup
 #: package/analyses/competingRisksPower.menuSubgroup
 #: package/analyses/comprehensiveSurvivalPower.menuSubgroup
-#: package/analyses/powersurvival.menuSubgroup
-#: package/analyses/survivalpower.menuSubgroup
-#: package/analyses/powercomprisk.menuSubgroup
-#: package/analyses/survivalPowerComprehensive.menuSubgroup
 #: package/analyses/simpleSurvivalPower.menuSubgroup
 #: advancedSurvivalPower/options.menuSubgroup
 #: classicalSurvivalPower/options.menuSubgroup
@@ -41146,6 +41128,14 @@ msgstr ""
 msgid "Diagnostic Accuracy by Rater"
 msgstr ""
 
+#: R/decisioncombine.b.R
+msgid ""
+"Diagnostic accuracy estimates are shaped by how the study was designed, not "
+"only by how the tests perform. The three biases below dominate real "
+"pathology accuracy studies and none of them is detectable from the data in "
+"front of this analysis."
+msgstr ""
+
 #: pathagreement/ui[7][2]/pathologyContext.label
 msgid "Diagnostic Accuracy Metrics (requires reference standard)"
 msgstr ""
@@ -41287,7 +41277,7 @@ msgstr ""
 #: decisioncombine/results/combinationTable.columns.title
 #: enhancedROC/results/results/clinicalApplicationMetrics.columns.title
 msgid "Diagnostic OR"
-msgstr ""
+msgstr "Tanısal Odds Oranı (DOR)"
 
 #: imagingcorrelation/results/patternRecognitionTable.title
 msgid "Diagnostic Pattern Recognition"
@@ -41318,6 +41308,7 @@ msgstr ""
 msgid "Diagnostic Performance by Marker"
 msgstr ""
 
+#: R/decisioncombine.b.R
 #: ihcdiagnostic/results/diagnosticPlot.title
 msgid "Diagnostic Performance Comparison"
 msgstr ""
@@ -41912,10 +41903,6 @@ msgstr ""
 #: pcacox/options.menuSubgroup
 #: plscox/options.menuSubgroup
 msgid "Dimension Reduction Cox"
-msgstr ""
-
-#: package/analyses/principalcox.menuSubgroup
-msgid "Dimension Reduction Cox (Drafts)"
 msgstr ""
 
 #: spikeslabpriors/results/dimensionSummary.title
@@ -43812,12 +43799,6 @@ msgstr ""
 msgid "Display Receiver Operating Characteristic curve."
 msgstr ""
 
-#: decisioncombine/options/showRecommendation.description.ui
-msgid ""
-"Display recommendation for the optimal test combination pattern based on "
-"Youden's J index and overall performance."
-msgstr ""
-
 #: relativesurvival/options/plot_relative.description.ui
 msgid "Display relative survival curve"
 msgstr ""
@@ -44919,10 +44900,11 @@ msgstr ""
 msgid "DOOR Probability"
 msgstr ""
 
+#: R/decisioncombine.b.R
 #: hierarchicalbayes/results/studySummary.columns.title
 #: likelihoodratio/results/stratifiedAnalysis.columns.title
 msgid "DOR"
-msgstr ""
+msgstr "DOR"
 
 #: R/decisioncalculator.b.R
 msgid "DOR (diagnostic odds ratio)"
@@ -45130,7 +45112,6 @@ msgstr ""
 
 #: package/analyses/competingsurvival.menuSubgroup
 #: package/analyses/oneSurvival.menuSubgroup
-#: package/analyses/classification.menuSubgroup
 #: competingsurvival/options.menuSubgroup
 #: oneSurvival/options.menuSubgroup
 msgid "Drafts"
@@ -45600,6 +45581,13 @@ msgstr ""
 msgid ""
 "Each test is part of the rule against which it is evaluated, so the results "
 "are affected by incorporation bias."
+msgstr ""
+
+#: R/decisioncombine.b.R
+msgid ""
+"Each test is reduced to two levels. Any level that is not the one chosen as "
+"positive counts as negative, so equivocal and indeterminate results are "
+"folded into the negative arm unless you recode them as missing first."
 msgstr ""
 
 #: R/nogoldstandard.b.R
@@ -47465,15 +47453,6 @@ msgstr ""
 msgid "Enhanced Non-Parametric Statistical Methods"
 msgstr ""
 
-#: package/analyses/enhancednonparametric.title
-#: package/analyses/enhancednonparametric.menuTitle
-msgid "Enhanced Non-Parametric Tests"
-msgstr ""
-
-#: package/analyses/enhancednonparametric.menuSubtitle
-msgid "Enhanced Non-Parametric Tests with Effect Sizes and Post Hoc Analysis"
-msgstr ""
-
 #: outcomeorganizer/results.title
 msgid "Enhanced Outcome Organizer for Survival Analysis"
 msgstr ""
@@ -47532,16 +47511,6 @@ msgstr ""
 #: timeroc/options.title
 #: timeroc/ui.title
 msgid "Enhanced ROC Analysis"
-msgstr ""
-
-#: package/analyses/enhancedROC.description
-msgid ""
-"Enhanced ROC analysis toolkit with BlueSky integration for comprehensive\n"
-"diagnostic performance evaluation. Includes ROC curve analysis, Youden Index\n"
-"optimization, sensitivity/specificity analysis, optimal cutoff "
-"determination,\n"
-"and comparative ROC analysis. Essential for biomarker validation, diagnostic\n"
-"test evaluation, and clinical decision support in medical research."
 msgstr ""
 
 #: factoranalysis/results/results/comprehensiveResults.description
@@ -48894,7 +48863,11 @@ msgstr ""
 #: tumorgrowth/results/modelTable.columns.title
 #: winratio/results/mainTable.columns.title
 msgid "Estimate"
-msgstr ""
+msgstr "Tahmin"
+
+#: R/decisioncombine.b.R
+msgid "Estimate (95% CI)"
+msgstr "Tahmin (%95 GA)"
 
 #: treatmentmeta/results/bayesian_results.columns.title
 msgid "Estimate (Mean/Median)"
@@ -50055,6 +50028,22 @@ msgid ""
 "everyone to one group: %s. Only the AUC of 0.500 is interpretable."
 msgstr ""
 
+#: R/decisioncombine.b.R
+msgid ""
+"Every complete case has gold standard \"{level}\", so this sample contains "
+"no disease-absent cases. Specificity and NPV cannot be estimated and are "
+"reported as blank. Diagnostic accuracy assessment requires both diseased and "
+"non-diseased cases."
+msgstr ""
+
+#: R/decisioncombine.b.R
+msgid ""
+"Every complete case has gold standard \"{level}\", so this sample contains "
+"no disease-present cases. Sensitivity and PPV cannot be estimated and are "
+"reported as blank. Diagnostic accuracy assessment requires both diseased and "
+"non-diseased cases."
+msgstr ""
+
 #: R/multisurvival.b.R
 msgid ""
 "Every one of the %s patients is set to <i>%s</i> = each level in turn%s, a "
@@ -50067,6 +50056,26 @@ msgid ""
 "Every pattern and strategy is reported together with no adjustment for "
 "multiple comparisons. Treat the best-looking row as a hypothesis to confirm "
 "in new data, not as an established result."
+msgstr ""
+
+#: R/decisioncombine.b.R
+msgid ""
+"Every row is estimated directly from the observed joint results, not derived "
+"from the individual tests' sensitivity and specificity. These figures "
+"therefore do not assume the tests are conditionally independent given "
+"disease status, and they remain valid when the tests share biology or "
+"technology. They do assume this sample's case mix resembles the population "
+"the rule would be used in."
+msgstr ""
+
+#: R/decisioncombine.b.R
+msgid ""
+"Every row is estimated directly from the observed joint results, not derived "
+"from the individual tests' sensitivity and specificity. These figures "
+"therefore do NOT require the tests to be conditionally independent given "
+"disease status, and they stay valid when the tests share biology, specimen "
+"or technology. That is the main difference from a sequential-testing "
+"calculator, which must assume independence and warns about it."
 msgstr ""
 
 #: R/multisurvival.b.R
@@ -51551,11 +51560,6 @@ msgstr ""
 msgid "ExplorationT"
 msgstr ""
 
-#: package/analyses/ggflowchart.menuGroup
-#: package/analyses/jjsankeyfier.menuGroup
-msgid "ExplorationT2"
-msgstr ""
-
 #: decisioncurve/results/modelComparisonEnhanced.description
 msgid ""
 "Exploratory case-resampling comparison of average net benefit over the "
@@ -52355,6 +52359,22 @@ msgstr ""
 #: flexrstpm2/options/extrapolation_time.title
 #: flexrstpm2/ui[1][2][0]/extrapolation_time.label
 msgid "Extrapolation Time"
+msgstr ""
+
+#: R/decisioncombine.b.R
+msgid "Extreme Disease Prevalence"
+msgstr ""
+
+#: R/decisioncombine.b.R
+msgid ""
+"Extreme disease prevalence in the combination analysis: {percent}% "
+"({diseased}/{observed} complete cases). PPV and NPV are highly sensitive to "
+"prevalence and may not generalize to populations with different disease "
+"rates. Sensitivity and specificity can also vary across settings and case "
+"mix, and with so few cases in one arm the likelihood ratios and diagnostic "
+"odds ratios for every pattern rest on a very small denominator. "
+"Individual-test tables use their own pairwise denominators, so their "
+"prevalence may differ."
 msgstr ""
 
 #: R/nogoldstandard.b.R
@@ -53506,11 +53526,11 @@ msgid "Filled Triangle"
 msgstr ""
 
 #: decisioncombine/options/filterPattern.title
-msgid "Filter by Pattern Type"
+msgid "Filter by pattern type"
 msgstr ""
 
 #: decisioncombine/options/filterStatistic.title
-msgid "Filter by Statistic"
+msgid "Filter by statistic"
 msgstr ""
 
 #: R/benford.b.R
@@ -53523,16 +53543,12 @@ msgstr ""
 
 #: decisioncombine/options/filterPattern.description.ui
 msgid ""
-"Filter the bar chart and heatmap by pattern type: all patterns, all tests "
-"positive (+/+, +/+/+), all tests negative (-/-, -/-/-), or mixed/discordant "
-"patterns. The performance tables always show every pattern."
-msgstr ""
-
-#: decisioncombine/options/filterStatistic.description.ui
-msgid ""
-"Filter the plots (bar chart, forest plot, and heatmap) to show only the "
-"selected diagnostic statistic. The performance tables always show every "
-"statistic."
+"Filter the bar chart, heatmap and forest plot by pattern type: all patterns, "
+"all tests positive (+/+, +/+/+), all tests negative (-/-, -/-/-), or "
+"mixed/discordant patterns. Named strategy rows are not result patterns and "
+"are excluded whenever a specific pattern type is selected. The performance "
+"tables always show every pattern, and the decision-space plot always shows "
+"every row so patterns remain comparable."
 msgstr ""
 
 #: enhancedfactorvariable/ui[2].label
@@ -54388,11 +54404,6 @@ msgstr ""
 msgid "Flexible (default)"
 msgstr ""
 
-#: package/analyses/flexiblebaseline.title
-#: package/analyses/flexiblebaseline.menuTitle
-msgid "Flexible Baseline Distributions"
-msgstr ""
-
 #: modelval/options/showFlexibleCalibration.title
 #: modelval/ui[2][0]/showFlexibleCalibration.label
 msgid "Flexible Calibration Curve"
@@ -54428,10 +54439,6 @@ msgstr ""
 
 #: timeupdatedsurvival/options/modelType/flexparam.title
 msgid "Flexible Parametric Model"
-msgstr ""
-
-#: package/analyses/flexparametricadvanced.menuTitle
-msgid "Flexible Parametric Models"
 msgstr ""
 
 #: flexrstpm2/ui.title
@@ -54544,10 +54551,6 @@ msgid ""
 "trajectory patterns and transition probabilities between stages."
 msgstr ""
 
-#: package/analyses/jjriverplot.menuSubtitle
-msgid "Flow and Transition Visualization"
-msgstr ""
-
 #: consortdiagram/results/armSummary.title
 msgid "Flow by Treatment Arm"
 msgstr ""
@@ -54610,10 +54613,6 @@ msgstr ""
 msgid "Flow visualization emphasizes relative frequency and distribution patterns."
 msgstr ""
 
-#: package/analyses/jjsankeyfier.menuSubtitle
-msgid "Flow Visualization with ggsankeyfier"
-msgstr ""
-
 #: R/riverplot.b.R
 msgid ""
 "Flow width represents frequency or volume - not clinical importance or "
@@ -54660,7 +54659,7 @@ msgstr ""
 #: diagnosticmeta/results/individualstudies.columns.title
 #: prauc/results/optimalThresholds.columns.title
 msgid "FN"
-msgstr ""
+msgstr "FN"
 
 #: R/sequentialtests.b.R
 msgid ""
@@ -55262,11 +55261,15 @@ msgstr ""
 
 #: agreement/options/subgroupForestPlot.title
 #: decisioncombine/options/showForest.title
-#: decisioncombine/ui[1][4]/showForest.label
+#: decisioncombine/ui[1][5]/showForest.label
 #: diagnosticmeta/options/forest_plot.title
 #: psychopdaROC/options/forestPlot.title
 #: psychopdaROC/ui[13][0]/forestPlot.label
 msgid "Forest plot"
+msgstr ""
+
+#: R/decisioncombine.b.R
+msgid "Forest Plot - 95% Confidence Intervals"
 msgstr ""
 
 #: decisioncombine/results/forestPlot.title
@@ -55319,6 +55322,10 @@ msgstr ""
 
 #: jforester/results/interpretation.title
 msgid "Forest Plot Interpretation"
+msgstr ""
+
+#: R/decisioncombine.b.R
+msgid "Forest Plot Not Available for Selected Statistic"
 msgstr ""
 
 #: agreement/results/subgroupForestPlotImage.title
@@ -55529,7 +55536,7 @@ msgstr ""
 #: diagnosticmeta/results/individualstudies.columns.title
 #: prauc/results/optimalThresholds.columns.title
 msgid "FP"
-msgstr ""
+msgstr "FP"
 
 #: R/sequentialtests.b.R
 msgid ""
@@ -56056,10 +56063,6 @@ msgid ""
 "value, and other metrics between different tests against the same gold "
 "standard. Includes statistical comparison using McNemar's test and "
 "confidence intervals for differences."
-msgstr ""
-
-#: package/analyses/statsplot2.description
-msgid "Function for Generating Plots and Graphs Based on Variable Types."
 msgstr ""
 
 #: package/analyses/agreement.description
@@ -57493,8 +57496,6 @@ msgstr ""
 msgid "Genomic Landscape Plot"
 msgstr ""
 
-#: package/analyses/ggoncoplot.title
-#: package/analyses/ggoncoplot.menuTitle
 #: package/analyses/jjoncoplot.title
 #: package/analyses/jjoncoplot.menuTitle
 #: jjoncoplot/options.title
@@ -57696,11 +57697,6 @@ msgstr ""
 
 #: autoeda/options/analysis_type/ggeda_overview.title
 msgid "ggEDA: Enhanced Overview"
-msgstr ""
-
-#: package/analyses/ggflowchart.title
-#: package/analyses/ggflowchart.menuTitle
-msgid "ggFlowchart"
 msgstr ""
 
 #: package/analyses/jggheatmap.menuSubtitle
@@ -57985,6 +57981,10 @@ msgstr ""
 msgid "Gold Standard"
 msgstr ""
 
+#: R/decisioncombine.b.R
+msgid "gold standard"
+msgstr ""
+
 #: decision/ui[0][0].label
 #: decisioncombine/options/gold.title
 #: decisioncombine/ui[0][0].label
@@ -57998,6 +57998,10 @@ msgstr ""
 
 #: decisioncombine/results/goldFreqTable.title
 msgid "Gold Standard Frequency Distribution"
+msgstr ""
+
+#: R/decisioncombine.b.R
+msgid "Gold Standard Has Only One Outcome"
 msgstr ""
 
 #: trichotomousroc/options/outcome.title
@@ -58307,11 +58311,6 @@ msgstr ""
 
 #: ggprism/ui[1][1][0].label
 msgid "GraphPad Prism Theme"
-msgstr ""
-
-#: package/analyses/statsplot2.title
-#: package/analyses/statsplot2.menuTitle
-msgid "Graphs and Plots"
 msgstr ""
 
 #: jcomplexupset/options/theme_style/theme_gray.title
@@ -60307,7 +60306,7 @@ msgid "Heat Colors"
 msgstr ""
 
 #: decisioncombine/options/showHeatmap.title
-#: decisioncombine/ui[1][4]/showHeatmap.label
+#: decisioncombine/ui[1][5]/showHeatmap.label
 #: explainableai/options/plot_type/heatmap.title
 #: tidyplots/options/plotType/heatmap.title
 msgid "Heatmap"
@@ -61226,6 +61225,10 @@ msgstr ""
 msgid "Highest values found in"
 msgstr ""
 
+#: decisioncombine/results/recommendationTable.columns.title
+msgid "Highest-Ranked Rule"
+msgstr ""
+
 #: economistplots/options/show_quartiles.description.jamovi
 msgid "Highlight 25th, 50th, and 75th percentiles."
 msgstr ""
@@ -61312,12 +61315,6 @@ msgstr ""
 
 #: R/enhancedROC.b.R
 msgid "Highly significant difference (p < 0.001)"
-msgstr ""
-
-#: R/decision.b.R
-msgid ""
-"Highly unbalanced test results. Consider the appropriateness of the selected "
-"positive level."
 msgstr ""
 
 #: R/riverplot.b.R
@@ -62844,10 +62841,28 @@ msgid ""
 "category stays empty."
 msgstr ""
 
+#: R/decisioncombine.b.R
+msgid ""
+"If one of the tests being evaluated also contributed to establishing the "
+"reference standard, that test is being compared against itself and its "
+"apparent accuracy is inflated. This is easy to do accidentally when the "
+"reference is a final diagnosis assembled from all available information."
+msgstr ""
+
 #: R/chisqposttest.b.R
 msgid ""
 "If the cell 'Grade 3 \\u{D7} Positive' has a residual of +3.2 (with cutoff "
 "\\u{B1}%.2f):"
+msgstr ""
+
+#: R/decisioncombine.b.R
+msgid ""
+"If the reference standard was obtained mainly on patients whose test was "
+"positive, then test-negative patients of BOTH disease states are "
+"under-represented: the missing false negatives inflate sensitivity, and the "
+"missing true negatives deflate specificity. This is the usual situation when "
+"the reference standard is a biopsy or resection that is only performed after "
+"a positive test."
 msgstr ""
 
 #: R/decisiongraph.b.R
@@ -64678,6 +64693,10 @@ msgid ""
 "being evaluated."
 msgstr ""
 
+#: R/decisioncombine.b.R
+msgid "Incorporation bias."
+msgstr ""
+
 #: adaptivetrialdesign/results/sampleSizeEvolution.columns.title
 msgid "Increase Factor"
 msgstr ""
@@ -65155,6 +65174,12 @@ msgstr ""
 #: diagnosticmeta/options/show_individual_studies.title
 #: diagnosticmeta/ui[1][0][0]/show_individual_studies.label
 msgid "Individual study results"
+msgstr ""
+
+#: R/decisioncombine.b.R
+msgid ""
+"Individual Test {test} statistics use {used} of {total} cases with both the "
+"test and reference standard observed."
 msgstr ""
 
 #: decisionpanel/ui[3][1]/testCosts.label
@@ -65769,6 +65794,14 @@ msgstr ""
 msgid "Insufficient baseline or follow-up observations to compute change scores."
 msgstr ""
 
+#: R/decisioncombine.b.R
+msgid "Insufficient Complete Cases"
+msgstr ""
+
+#: R/decisioncombine.b.R
+msgid "Insufficient Data"
+msgstr ""
+
 #: R/waterfall.b.R
 msgid "Insufficient data for clinical interpretation"
 msgstr ""
@@ -66154,10 +66187,6 @@ msgstr ""
 msgid "Interactive study flow diagram"
 msgstr ""
 
-#: package/analyses/jjstreamgraph.menuSubtitle
-msgid "Interactive Temporal Flow Visualization"
-msgstr ""
-
 #: package/analyses/clinicalvalidationinteractive.menuSubtitle
 #: clinicalvalidationinteractive/options.menuSubtitle
 msgid "Interactive validation with real-time parameter optimization"
@@ -66462,6 +66491,7 @@ msgstr ""
 #: coxphw/results/diagnostics.columns.title
 #: coxrobust/results/influenceMeasures.columns.title
 #: curemodels/results/goodnessOfFit.columns.title
+#: decisioncombine/results/recommendationTable.columns.title
 #: diagnosticmeta/results/publicationbias.columns.title
 #: directbinomial/results/modelSummary.columns.title
 #: directbinomial/results/goodnessOfFit.columns.title
@@ -67029,6 +67059,16 @@ msgstr ""
 msgid "Invalid competing-risk coding"
 msgstr ""
 
+#: R/decisioncombine.b.R
+msgid "Invalid Counts"
+msgstr ""
+
+#: R/decisioncombine.b.R
+msgid ""
+"Invalid counts were detected for Test {test}. The individual analysis was "
+"skipped."
+msgstr ""
+
 #: R/decisioncalculator.b.R
 msgid "Invalid cut-off inputs"
 msgstr ""
@@ -67505,6 +67545,14 @@ msgstr ""
 msgid "Iterative scoring"
 msgstr ""
 
+#: R/decisioncombine.b.R
+msgid ""
+"Its advantage is not established: the lower bound of this rule's Youden's J "
+"({lower}) falls at or below the next-best rule's point estimate "
+"({runnerUp}), so the ranking may reflect sampling variation rather than a "
+"real difference."
+msgstr ""
+
 #: irecist/results/pseudoprogressionTable.columns.title
 msgid "iUPD Time"
 msgstr ""
@@ -67624,43 +67672,11 @@ msgstr ""
 msgid "Jittered"
 msgstr ""
 
-#: package/analyses/hullplot.menuGroup
-#: package/analyses/raincloud.menuGroup
-#: package/analyses/advancedraincloud.menuGroup
-#: package/analyses/jjhistostats.menuGroup
-#: package/analyses/jjscatterstats.menuGroup
-#: package/analyses/jjcorrmat.menuGroup
-#: package/analyses/jjdotplotstats.menuGroup
-#: package/analyses/jjbetweenstats.menuGroup
-#: package/analyses/jjwithinstats.menuGroup
 #: package/analyses/jjbarstats.menuGroup
 #: package/analyses/jjpiestats.menuGroup
-#: package/analyses/jwaffle.menuGroup
 #: package/analyses/statsplot2.menuGroup
-#: package/analyses/linechart.menuGroup
-#: package/analyses/lollipop.menuGroup
-#: package/analyses/jjarcdiagram.menuGroup
-#: package/analyses/jjridges.menuGroup
-#: package/analyses/jjsegmentedtotalbar.menuGroup
-#: package/analyses/jjdotchart.menuGroup
-#: advancedraincloud/options.menuGroup
-#: hullplot/options.menuGroup
-#: jjarcdiagram/options.menuGroup
 #: jjbarstats/options.menuGroup
-#: jjbetweenstats/options.menuGroup
-#: jjcorrmat/options.menuGroup
-#: jjdotchart/options.menuGroup
-#: jjdotplotstats/options.menuGroup
-#: jjhistostats/options.menuGroup
 #: jjpiestats/options.menuGroup
-#: jjridges/options.menuGroup
-#: jjscatterstats/options.menuGroup
-#: jjsegmentedtotalbar/options.menuGroup
-#: jjwithinstats/options.menuGroup
-#: jwaffle/options.menuGroup
-#: linechart/options.menuGroup
-#: lollipop/options.menuGroup
-#: raincloud/options.menuGroup
 #: statsplot2/options.menuGroup
 msgid "JJStatsPlot"
 msgstr ""
@@ -67668,7 +67684,6 @@ msgstr ""
 #: package/analyses/ggprism.menuGroup
 #: package/analyses/jviolin.menuGroup
 #: package/analyses/parallelplot.menuGroup
-#: package/analyses/statsplot2.menuGroup
 #: package/analyses/jjtreemap.menuGroup
 #: package/analyses/tidyplots.menuGroup
 #: package/analyses/grafify.menuGroup
@@ -67709,19 +67724,48 @@ msgstr ""
 msgid "JJStatsPlotD"
 msgstr ""
 
+#: package/analyses/hullplot.menuGroup
+#: package/analyses/raincloud.menuGroup
+#: package/analyses/advancedraincloud.menuGroup
+#: package/analyses/jjhistostats.menuGroup
+#: package/analyses/jjscatterstats.menuGroup
 #: package/analyses/jjsyndromicplot.menuGroup
 #: package/analyses/pcaloadingheatmap.menuGroup
-#: package/analyses/jjstreamgraph.menuGroup
-#: package/analyses/jjriverplot.menuGroup
-#: package/analyses/basegraphics.menuGroup
+#: package/analyses/jjcorrmat.menuGroup
+#: package/analyses/jjdotplotstats.menuGroup
+#: package/analyses/jjbetweenstats.menuGroup
+#: package/analyses/jjwithinstats.menuGroup
+#: package/analyses/jwaffle.menuGroup
+#: package/analyses/linechart.menuGroup
+#: package/analyses/lollipop.menuGroup
+#: package/analyses/jjarcdiagram.menuGroup
 #: package/analyses/jjridges.menuGroup
+#: package/analyses/basegraphics.menuGroup
+#: package/analyses/jjsegmentedtotalbar.menuGroup
 #: package/analyses/jjpubr.menuGroup
 #: package/analyses/jjcoefstats.menuGroup
+#: package/analyses/jjdotchart.menuGroup
+#: advancedraincloud/options.menuGroup
 #: basegraphics/options.menuGroup
+#: hullplot/options.menuGroup
+#: jjarcdiagram/options.menuGroup
+#: jjbetweenstats/options.menuGroup
 #: jjcoefstats/options.menuGroup
+#: jjcorrmat/options.menuGroup
+#: jjdotchart/options.menuGroup
+#: jjdotplotstats/options.menuGroup
+#: jjhistostats/options.menuGroup
 #: jjpubr/options.menuGroup
+#: jjridges/options.menuGroup
+#: jjscatterstats/options.menuGroup
+#: jjsegmentedtotalbar/options.menuGroup
 #: jjsyndromicplot/options.menuGroup
+#: jjwithinstats/options.menuGroup
+#: jwaffle/options.menuGroup
+#: linechart/options.menuGroup
+#: lollipop/options.menuGroup
 #: pcaloadingheatmap/options.menuGroup
+#: raincloud/options.menuGroup
 msgid "JJStatsPlotT"
 msgstr ""
 
@@ -69866,7 +69910,6 @@ msgid "Left/right shift indicates lower/higher average values"
 msgstr ""
 
 #: package/analyses/classicalSurvivalPower.description
-#: package/analyses/survivalpower.description
 msgid ""
 "Legacy power analysis and sample size calculation for survival studies using "
 "Lachin-Foulkes and\n"
@@ -70369,7 +70412,7 @@ msgstr ""
 
 #: decisioncombine/results/combinationTableCIRatios.title
 msgid "Likelihood Ratios with 95% Confidence Intervals"
-msgstr ""
+msgstr "Olabilirlik Oranları ve %95 Güven Aralıkları"
 
 #: R/decisioncalculator.b.R
 msgid "Likelihood-ratio update:"
@@ -72060,7 +72103,7 @@ msgstr ""
 #: survivalcont/results/multipleMedianTable.columns.title
 #: survivalcont/results/multipleSurvTable.columns.title
 msgid "Lower"
-msgstr ""
+msgstr "Alt"
 
 #: clinicalvalidation/results/performancetable.columns.title
 #: conditionalinference/results/nodeDetails.columns.title
@@ -72403,13 +72446,14 @@ msgstr ""
 msgid "LR Test Statistic"
 msgstr ""
 
+#: R/decisioncombine.b.R
 #: decisioncombine/options/filterStatistic/lrNeg.title
 #: decisioncombine/results/combinationTable.columns.title
 #: differentialdiagnosis/results/diagnosticProbabilities.columns.title
 #: enhancedROC/results/results/clinicalApplicationMetrics.columns.title
 #: likelihoodratio/results/stratifiedAnalysis.columns.title
 msgid "LR-"
-msgstr ""
+msgstr "LR-"
 
 #: R/decision.b.R
 msgid "LR- (Negative Likelihood Ratio)"
@@ -72425,13 +72469,14 @@ msgid ""
 "weak"
 msgstr ""
 
+#: R/decisioncombine.b.R
 #: decisioncombine/options/filterStatistic/lrPos.title
 #: decisioncombine/results/combinationTable.columns.title
 #: differentialdiagnosis/results/diagnosticProbabilities.columns.title
 #: enhancedROC/results/results/clinicalApplicationMetrics.columns.title
 #: likelihoodratio/results/stratifiedAnalysis.columns.title
 msgid "LR+"
-msgstr ""
+msgstr "LR+"
 
 #: R/decision.b.R
 msgid "LR+ (Positive Likelihood Ratio)"
@@ -72452,7 +72497,18 @@ msgid ""
 "LR+, LR- and the diagnostic odds ratio are computed with a Haldane-Anscombe "
 "0.5 continuity correction when a cell is zero, so they stay finite; "
 "sensitivity, specificity, PPV and NPV on the same row use the observed "
-"counts. The two therefore need not agree exactly at a zero cell."
+"counts. The two therefore need not agree exactly at a zero cell. A pattern "
+"that no patient exhibits is left blank instead of corrected, because a "
+"likelihood ratio for a row containing no patients is undefined."
+msgstr ""
+
+#: R/decisioncombine.b.R
+msgid ""
+"LR+, LR- and the diagnostic odds ratio use a Haldane-Anscombe 0.5 correction "
+"when a cell is zero, so they stay finite; the proportions on the same row "
+"use the observed counts. A pattern that no patient exhibits is left BLANK "
+"rather than corrected: with no predicted positives, LR+ and the odds ratio "
+"are undefined and are not invented."
 msgstr ""
 
 #: mixedeffectscox/results/modelComparison.columns.title
@@ -72716,6 +72772,10 @@ msgstr ""
 #: R/pathagreement.b.R
 msgid "Majority"
 msgstr ""
+
+#: R/decisioncombine.b.R
+msgid "Majority (>=2/3 pos)"
+msgstr "Çoğunluk (>=2/3 poz)"
 
 #: R/pathagreement.b.R
 msgid "Majority (>=50%)"
@@ -75101,27 +75161,11 @@ msgstr ""
 msgid "Mechanism Testing"
 msgstr ""
 
-#: package/analyses/agreement.menuGroup
-#: package/analyses/decision.menuGroup
-#: package/analyses/psychopdaROC.menuGroup
 #: package/analyses/decisioncombine.menuGroup
-#: package/analyses/sequentialtests.menuGroup
-#: package/analyses/decisioncurve.menuGroup
 #: package/analyses/betabinomialdiagnostic.menuSubgroup
 #: package/analyses/hierarchicalbayes.menuSubgroup
-#: package/analyses/enhancedROC.menuGroup
-#: package/analyses/precisionrecall.menuGroup
-#: package/analyses/lassologistic.menuGroup
-#: agreement/options.menuGroup
 #: betabinomialdiagnostic/options.menuSubgroup
-#: decision/options.menuGroup
-#: decisioncombine/options.menuGroup
-#: decisioncurve/options.menuGroup
-#: enhancedROC/options.menuGroup
 #: hierarchicalbayes/options.menuSubgroup
-#: lassologistic/options.menuGroup
-#: psychopdaROC/options.menuGroup
-#: sequentialtests/options.menuGroup
 msgid "meddecide"
 msgstr ""
 
@@ -75240,29 +75284,40 @@ msgstr ""
 msgid "meddecideExtraT"
 msgstr ""
 
+#: package/analyses/agreement.menuGroup
+#: package/analyses/decision.menuGroup
 #: package/analyses/decisioncalculator.menuGroup
 #: package/analyses/nogoldstandard.menuGroup
 #: package/analyses/decisioncompare.menuGroup
-#: package/analyses/cotest.menuGroup
-#: package/analyses/classification.menuGroup
-#: package/analyses/enhancedROC.menuGroup
 #: package/analyses/psychopdaROC.menuGroup
-#: package/analyses/decisioncombine1.menuGroup
+#: package/analyses/cotest.menuGroup
+#: package/analyses/sequentialtests.menuGroup
+#: package/analyses/decisioncurve.menuGroup
+#: package/analyses/enhancedROC.menuGroup
 #: package/analyses/timedependentdca.menuGroup
+#: package/analyses/lassologistic.menuGroup
 #: package/analyses/leaveonecenterout.menuGroup
 #: package/analyses/misclassificationbias.menuGroup
 #: package/analyses/clinicalscore.menuGroup
 #: package/analyses/mageeequation.menuGroup
 #: package/analyses/latentbiomarker.menuGroup
+#: agreement/options.menuGroup
 #: clinicalscore/options.menuGroup
 #: cotest/options.menuGroup
+#: decision/options.menuGroup
 #: decisioncalculator/options.menuGroup
+#: decisioncombine/options.menuGroup
 #: decisioncompare/options.menuGroup
+#: decisioncurve/options.menuGroup
+#: enhancedROC/options.menuGroup
+#: lassologistic/options.menuGroup
 #: latentbiomarker/options.menuGroup
 #: leaveonecenterout/options.menuGroup
 #: mageeequation/options.menuGroup
 #: misclassificationbias/options.menuGroup
 #: nogoldstandard/options.menuGroup
+#: psychopdaROC/options.menuGroup
+#: sequentialtests/options.menuGroup
 #: timedependentdca/options.menuGroup
 msgid "meddecideT"
 msgstr ""
@@ -76976,6 +77031,7 @@ msgstr ""
 msgid "Methods:"
 msgstr ""
 
+#: R/decisioncombine.b.R
 #: adaptivelasso/results/performanceMetrics.columns.title
 #: agreement/results/bootstrapCITable.columns.title
 #: agreement/results/concordanceF1Table.columns.title
@@ -78531,6 +78587,10 @@ msgstr ""
 msgid "Missing Indicator Method"
 msgstr ""
 
+#: R/decisioncombine.b.R
+msgid "Missing Level"
+msgstr ""
+
 #: datevalidator/options/month_impute.title
 msgid "Missing Month Imputation"
 msgstr ""
@@ -78793,6 +78853,7 @@ msgstr ""
 msgid "Mixed-Effects Variance Components"
 msgstr ""
 
+#: R/decisioncombine.b.R
 #: decisioncombine/options/filterPattern/mixed.title
 msgid "Mixed/Discordant"
 msgstr ""
@@ -80350,10 +80411,6 @@ msgstr ""
 msgid "Modern Clean"
 msgstr ""
 
-#: package/analyses/ggflowchart.menuSubtitle
-msgid "Modern ggplot2 Flowcharts"
-msgstr ""
-
 #: tinytable/results/table.title
 msgid "Modern Table"
 msgstr ""
@@ -80405,7 +80462,6 @@ msgstr ""
 msgid "Molecular Classification Results"
 msgstr ""
 
-#: package/analyses/ggoncoplot.menuSubgroup
 #: package/analyses/jjoncoplot.menuSubgroup
 #: jjoncoplot/options.menuSubgroup
 msgid "Molecular Pathology Plots"
@@ -80986,10 +81042,6 @@ msgstr ""
 
 #: spikeslabpriors/options/clinical_context/multi_omics.title
 msgid "Multi-omics Integration"
-msgstr ""
-
-#: package/analyses/datecorrection.menuSubtitle
-msgid "Multi-Package Date Standardization"
 msgstr ""
 
 #: semimarkov/options/modelType/multiphase.title
@@ -82456,6 +82508,7 @@ msgstr ""
 msgid "Need at least 5 cases in each outcome class."
 msgstr ""
 
+#: R/decisioncombine.b.R
 #: R/sequentialtests.b.R
 #: ppv/results/confusion.columns.content
 msgid "Negative"
@@ -83439,6 +83492,13 @@ msgstr ""
 msgid "No better than predicting the base rate"
 msgstr ""
 
+#: R/decisioncombine.b.R
+msgid ""
+"No candidate rule has an estimable Youden index with at least 10 "
+"disease-present and 10 disease-absent cases. Youden's J needs both reference "
+"groups to be reasonably sized before a ranking means anything."
+msgstr ""
+
 #: R/enhancedROC.b.R
 msgid "No case observations found for predictor"
 msgstr ""
@@ -83475,6 +83535,10 @@ msgstr ""
 msgid "No Clustering"
 msgstr ""
 
+#: R/decisioncombine.b.R
+msgid "No Complete Cases"
+msgstr ""
+
 #: R/nogoldstandard.b.R
 msgid "No complete cases available"
 msgstr ""
@@ -83487,6 +83551,10 @@ msgstr ""
 msgid ""
 "No complete cases found. Please check for missing values in selected "
 "variables."
+msgstr ""
+
+#: R/decisioncombine.b.R
+msgid "No complete cases remain after removing missing data."
 msgstr ""
 
 #: R/jjpiestats.b.R
@@ -83597,6 +83665,14 @@ msgstr ""
 msgid "No CV"
 msgstr ""
 
+#: R/decisioncombine.b.R
+msgid "No Data"
+msgstr ""
+
+#: R/decisioncombine.b.R
+msgid "No data are available. Load data before running the analysis."
+msgstr ""
+
 #: R/jjridges.b.R
 msgid "No data available for analysis"
 msgstr ""
@@ -83689,6 +83765,14 @@ msgstr ""
 msgid "No Futility Boundary"
 msgstr ""
 
+#: R/decisioncombine.b.R
+msgid "No Gold Positive Level"
+msgstr ""
+
+#: R/decisioncombine.b.R
+msgid "No Gold Standard"
+msgstr ""
+
 #: R/jjpiestats.b.R
 msgid "No grouping variable - single pie chart"
 msgstr ""
@@ -83769,6 +83853,12 @@ msgid ""
 "No observations fell in the two most-deviating leading-digit bins. This does "
 "not by itself establish conformity to Benford's Law; see the MAD and "
 "chi-square results in the summary table."
+msgstr ""
+
+#: R/decisioncombine.b.R
+msgid ""
+"No observations were found for pattern \"{pattern}\". This combination was "
+"skipped."
 msgstr ""
 
 #: R/decisioncalculator.b.R
@@ -83868,6 +83958,14 @@ msgstr ""
 msgid "No results below were produced for this variable."
 msgstr ""
 
+#: R/decisioncombine.b.R
+msgid "No Rows Match the Pattern Filter"
+msgstr ""
+
+#: R/decisioncombine.b.R
+msgid "No Rule Performs Better Than Chance"
+msgstr ""
+
 #: parallelplot/options/scaling/none.title
 msgid "No scaling"
 msgstr ""
@@ -83960,6 +84058,22 @@ msgstr ""
 msgid "No terminal event observed; point estimate remains 0"
 msgstr ""
 
+#: R/decisioncombine.b.R
+msgid "No Test 1"
+msgstr ""
+
+#: R/decisioncombine.b.R
+msgid "No Test 1 Positive Level"
+msgstr ""
+
+#: R/decisioncombine.b.R
+msgid "No Test 2 Positive Level"
+msgstr ""
+
+#: R/decisioncombine.b.R
+msgid "No Test 3 Positive Level"
+msgstr ""
+
 #: R/jjbetweenstats.b.R
 msgid ""
 "No test statistic is displayed: switch on 'Statistical results' to show it "
@@ -84029,6 +84143,12 @@ msgstr ""
 
 #: R/lassocox.b.R
 msgid "No valid explanatory variables remain after removing constant predictors."
+msgstr ""
+
+#: R/decisioncombine.b.R
+msgid ""
+"No valid observations were found for Test {test}. The individual analysis "
+"was skipped."
 msgstr ""
 
 #: R/chisqposttest.b.R
@@ -84755,6 +84875,15 @@ msgstr ""
 
 #: R/multisurvival.b.R
 msgid "None of the"
+msgstr ""
+
+#: R/decisioncombine.b.R
+msgid ""
+"None of the {n} eligible candidate rules has a Youden's J above zero, so "
+"none discriminates better than chance in this sample and no rule is ranked. "
+"A rule with a negative Youden's J is anti-predictive: its result would have "
+"to be reversed to carry information. Review the positive-level assignments "
+"for the reference standard and each test before interpreting these results."
 msgstr ""
 
 #: R/waterfall.b.R
@@ -85563,7 +85692,7 @@ msgstr ""
 #: psychopdaROC/results/fixedSensSpecTable.columns.title
 #: sequentialtests/results/individual_tests_table.columns.title
 msgid "NPV"
-msgstr ""
+msgstr "NPV"
 
 #: ihcdiagnostic/results/diagnosticPerformance.columns.title
 #: outbreakanalysis/results/case_definition_analysis.columns.title
@@ -87351,6 +87480,14 @@ msgstr ""
 msgid "Observed Risk"
 msgstr ""
 
+#: R/decisioncombine.b.R
+msgid "Observed sensitivity and specificity are both above 70%."
+msgstr ""
+
+#: R/decisioncombine.b.R
+msgid "Observed sensitivity and specificity are both above 80%."
+msgstr ""
+
 #: hiddenmarkov/options/state.title
 #: hiddenmarkov/ui[0][1].label
 #: hiddenmarkov/results/misclassification.columns.title
@@ -87604,14 +87741,9 @@ msgstr ""
 msgid "Oncology Trial"
 msgstr ""
 
-#: package/analyses/waterfall.menuGroup
-#: package/analyses/swimmerplot.menuGroup
-#: package/analyses/ihcheterogeneity.menuGroup
-#: package/analyses/diagnosticmeta.menuGroup
 #: diagnosticmeta/options.menuGroup
 #: ihcheterogeneity/options.menuGroup
 #: swimmerplot/options.menuGroup
-#: waterfall/options.menuGroup
 msgid "OncoPath"
 msgstr ""
 
@@ -87693,25 +87825,19 @@ msgstr ""
 msgid "OncoPathExtraD"
 msgstr ""
 
-#: package/analyses/jconsort.menuGroup
-#: package/analyses/jflowchart.menuGroup
-msgid "OncoPathologyD"
-msgstr ""
-
-#: package/analyses/ggoncoplot.menuGroup
-#: package/analyses/flexparametricadv.menuGroup
-msgid "OncoPathologyT"
-msgstr ""
-
+#: package/analyses/waterfall.menuGroup
 #: package/analyses/aeplot.menuGroup
+#: package/analyses/swimmerplot.menuGroup
 #: package/analyses/clinicalheatmap.menuGroup
 #: package/analyses/biomarkerresponse.menuGroup
 #: package/analyses/classification.menuGroup
 #: package/analyses/stagemigration.menuGroup
 #: package/analyses/dendrogram.menuGroup
 #: package/analyses/patientsimilarity.menuGroup
+#: package/analyses/ihcheterogeneity.menuGroup
 #: package/analyses/pathologyagreement.menuGroup
 #: package/analyses/pathsampling.menuGroup
+#: package/analyses/diagnosticmeta.menuGroup
 #: package/analyses/clinicalcalculators.menuGroup
 #: package/analyses/ihccluster.menuGroup
 #: package/analyses/tumorgrowth.menuGroup
@@ -87748,15 +87874,11 @@ msgstr ""
 #: studydiagram/options.menuGroup
 #: survivalendpoints/options.menuGroup
 #: tumorgrowth/options.menuGroup
+#: waterfall/options.menuGroup
 #: waterfallrecist/options.menuGroup
 msgid "OncoPathT"
 msgstr ""
 
-#: package/analyses/stagemigration1.menuGroup
-msgid "OncoPathT2"
-msgstr ""
-
-#: package/analyses/ggoncoplot.menuSubtitle
 #: package/analyses/jjoncoplot.menuSubtitle
 #: jjoncoplot/options.menuSubtitle
 msgid "Oncoplot, Mutation Landscape, Clinical Annotations"
@@ -87915,6 +88037,10 @@ msgstr ""
 
 #: R/swimmerplot.b.R
 msgid "Ongoing-treatment arrows not drawn"
+msgstr ""
+
+#: R/decisioncombine.b.R
+msgid "Only {n} cases in the smaller reference-standard group"
 msgstr ""
 
 #: R/lassocox.b.R
@@ -88324,15 +88450,6 @@ msgstr ""
 
 #: decisionpanel/results/optimalPanelsBySize.title
 msgid "Optimal Panels by Size"
-msgstr ""
-
-#: decisioncombine/results/recommendationTable.title
-msgid "Optimal Pattern Recommendation"
-msgstr ""
-
-#: decisioncombine/options/showRecommendation.title
-#: decisioncombine/ui[1]/showRecommendation.label
-msgid "Optimal pattern recommendation"
 msgstr ""
 
 #: ordinalroc/results/optimalThresholds.description
@@ -89468,6 +89585,10 @@ msgstr ""
 
 #: screeningevaluation/options/target_disease/other.title
 msgid "Other Condition"
+msgstr ""
+
+#: R/decisioncombine.b.R
+msgid "Other requirements"
 msgstr ""
 
 #: stagemigration/options/cancerType/other.title
@@ -92086,6 +92207,10 @@ msgstr ""
 msgid "PAR Calculation Method"
 msgstr ""
 
+#: R/decisioncombine.b.R
+msgid "Parallel (>=1 pos)"
+msgstr "Paralel (>=1 poz)"
+
 #: decisionpanel/options/strategies/parallel.title
 msgid "Parallel (cotest) only"
 msgstr ""
@@ -93421,6 +93546,7 @@ msgstr ""
 msgid "patients/subjects"
 msgstr ""
 
+#: R/decisioncombine.b.R
 #: checkdata/results/patterns.columns.title
 #: decisioncombine/results/combinationTable.columns.title
 #: decisioncombine/results/combinationTableCI.columns.title
@@ -93430,7 +93556,7 @@ msgstr ""
 #: pathsampling/results/cassetteDistribution.columns.title
 #: spatialanalysis/results/ripley.columns.title
 msgid "Pattern"
-msgstr ""
+msgstr "Örüntü"
 
 #: missingdataexplorer/options/pattern_analysis.title
 msgid "Pattern Analysis"
@@ -95188,6 +95314,10 @@ msgstr ""
 msgid "Performance Grade"
 msgstr ""
 
+#: R/decisioncombine.b.R
+msgid "Performance Heatmap"
+msgstr ""
+
 #: psychopdaROC/results/clinicalInterpretationTable.columns.title
 #: screeningevaluation/results/quality_indicators.columns.title
 msgid "Performance Level"
@@ -95425,18 +95555,6 @@ msgid ""
 "functions in competing risks analysis using the timereg package. This  "
 "method provides direct modeling of cumulative incidence without  "
 "proportional subdistribution hazards assumptions."
-msgstr ""
-
-#: package/analyses/enhancednonparametric.description
-msgid ""
-"Performs enhanced non-parametric statistical tests specifically designed for "
-"digital pathology and biomarker analysis. This module provides comprehensive "
-"non-parametric testing with proper effect size calculations, assumption "
-"checking, and post hoc analysis - addressing critical gaps identified in 30% "
-"of pathology studies that use these methods. Includes enhanced  Mann-Whitney "
-"U tests, Kruskal-Wallis tests with Dunn's post hoc testing, and proper  "
-"multiple comparison corrections commonly needed in biomarker expression "
-"analysis."
 msgstr ""
 
 #: package/analyses/flexcomprisk.description
@@ -98232,6 +98350,7 @@ msgstr ""
 msgid "positive"
 msgstr ""
 
+#: R/decisioncombine.b.R
 #: R/sequentialtests.b.R
 msgid "Positive"
 msgstr ""
@@ -98263,6 +98382,13 @@ msgstr ""
 msgid ""
 "Positive and negative predictive values are adjusted to the supplied "
 "population prevalence. No confidence intervals were requested."
+msgstr ""
+
+#: R/decisioncombine.b.R
+msgid ""
+"Positive and negative predictive values are calculated using the sample "
+"prevalence. Interpret them cautiously if the sample does not represent the "
+"target clinical population."
 msgstr ""
 
 #: ihcscoring/results/multiplecutoffs/cutoffresults.columns.title
@@ -98354,6 +98480,10 @@ msgstr ""
 
 #: rocreg/options/positive_level.title
 msgid "Positive Level (Disease)"
+msgstr ""
+
+#: R/decisioncombine.b.R
+msgid "Positive Levels May Be Inverted"
 msgstr ""
 
 #: decision/results/ratioTable.columns.title
@@ -98979,16 +99109,10 @@ msgid "Potentially Informative"
 msgstr ""
 
 #: R/gsdesign.b.R
-#: package/analyses/kappaSizeCI.menuGroup
-#: package/analyses/kappaSizeFixedN.menuGroup
-#: package/analyses/kappaSizePower.menuGroup
 #: adaptivetrialdesign/results/operatingCharacteristics.columns.title
 #: advancedSurvivalPower/options/calc_type/power.title
 #: competingRisksPower/results/powerCurveTable.columns.title
 #: comprehensiveSurvivalPower/results/methodComparison.columns.title
-#: kappaSizeCI/options.menuGroup
-#: kappaSizeFixedN/options.menuGroup
-#: kappaSizePower/options.menuGroup
 #: kappaSizePower/ui[3][1][0]/power.label
 msgid "Power"
 msgstr "Güç"
@@ -99088,7 +99212,6 @@ msgid ""
 msgstr ""
 
 #: package/analyses/competingRisksPower.description
-#: package/analyses/powercomprisk.description
 msgid ""
 "Power analysis and sample size calculations for competing risks studies. "
 "Calculates power for testing\n"
@@ -99122,23 +99245,8 @@ msgstr "meddecide ile Güç Analizi"
 msgid "Power Analysis Curves"
 msgstr ""
 
-#: package/analyses/powercomprisk.title
-#: package/analyses/powercomprisk.menuTitle
-msgid "Power Analysis for Competing Risks Studies"
-msgstr ""
-
 #: pathsampling/results/powerAnalysisText.title
 msgid "Power Analysis for Sample Size Planning"
-msgstr ""
-
-#: package/analyses/powersurvival.title
-#: package/analyses/powersurvival.menuTitle
-#: package/analyses/survivalpower.menuSubtitle
-msgid "Power Analysis for Survival Studies"
-msgstr ""
-
-#: package/analyses/powersurvival.menuSubtitle
-msgid "Power analysis for survival studies"
 msgstr ""
 
 #: comprehensiveSurvivalPower/results/instructions.title
@@ -99280,6 +99388,15 @@ msgstr ""
 msgid "Power/sample size sensitivity across parameter ranges"
 msgstr ""
 
+#: package/analyses/kappaSizeCI.menuGroup
+#: package/analyses/kappaSizeFixedN.menuGroup
+#: package/analyses/kappaSizePower.menuGroup
+#: kappaSizeCI/options.menuGroup
+#: kappaSizeFixedN/options.menuGroup
+#: kappaSizePower/options.menuGroup
+msgid "PowerT"
+msgstr ""
+
 #: jpps/results/correlation_comparison.columns.title
 msgid "PPS Advantage"
 msgstr ""
@@ -99338,7 +99455,7 @@ msgstr ""
 #: psychopdaROC/results/fixedSensSpecTable.columns.title
 #: sequentialtests/results/individual_tests_table.columns.title
 msgid "PPV"
-msgstr ""
+msgstr "PPV"
 
 #: ihcdiagnostic/results/diagnosticPerformance.columns.title
 #: outbreakanalysis/results/case_definition_analysis.columns.title
@@ -99377,6 +99494,18 @@ msgid ""
 "for your own setting's prevalence before quoting them."
 msgstr ""
 
+#: R/decisioncombine.b.R
+msgid ""
+"PPV and NPV depend on prevalence, so they transfer to another population "
+"only if its disease rate is similar. Sensitivity, specificity and the "
+"likelihood ratios are less prevalence-dependent, though not independent of "
+"it. LR+ and LR- are the more useful numbers to carry elsewhere not because "
+"they are more stable -- being functions of sensitivity and specificity, they "
+"inherit exactly the same dependence -- but because they convert a pre-test "
+"probability into a post-test probability at whatever prevalence the new "
+"setting has."
+msgstr ""
+
 #: R/decisioncalculator.b.R
 msgid ""
 "PPV and NPV vary with prevalence and should be verified in the target "
@@ -99397,6 +99526,10 @@ msgstr ""
 
 #: bayesiandiagnostic/results/predictiveValues.columns.title
 msgid "PPV Upper"
+msgstr ""
+
+#: R/decisioncombine.b.R
+msgid "PPV/NPV Interpretation"
 msgstr ""
 
 #: recist/results/stratifiedTable.columns.title
@@ -100822,6 +100955,7 @@ msgstr ""
 msgid "Pretty Breaks"
 msgstr ""
 
+#: R/decisioncombine.b.R
 #: continuousmarkov/results/prevalenceTable.columns.title
 #: decision/results/ratioTable.columns.title
 #: decisioncalculator/results/ratioTable.columns.title
@@ -100840,7 +100974,7 @@ msgstr ""
 #: semimarkov/results/stateProbabilities.columns.title
 #: sequentialtests/ui[6][0]/prevalence.label
 msgid "Prevalence"
-msgstr ""
+msgstr "Prevalans"
 
 #: clinicalvalidationinteractive/results/prevalenceAnalysis.columns.title
 #: epidemiosurvival/results/population_attributable_risk.columns.title
@@ -100887,6 +101021,20 @@ msgstr ""
 
 #: R/sequentialtests.b.R
 msgid "Prevalence Invalid"
+msgstr ""
+
+#: R/decisioncombine.b.R
+msgid ""
+"Prevalence is identical in every row: it is the disease rate in the whole "
+"sample, not the rate within that pattern."
+msgstr ""
+
+#: R/decisioncombine.b.R
+msgid ""
+"Prevalence is the same in every row: it is the disease rate in the whole "
+"sample, not the rate within that pattern. Balanced Accuracy and Youden's J "
+"are the same statistic on two scales (Balanced Accuracy = (J + 1) / 2), so "
+"ranking by one is identical to ranking by the other."
 msgstr ""
 
 #: R/sequentialtests.b.R
@@ -101183,27 +101331,11 @@ msgstr ""
 msgid "Principal Component Analysis Plot"
 msgstr ""
 
-#: package/analyses/principalcox.menuTitle
-msgid "Principal Component Cox"
-msgstr ""
-
 #: package/analyses/pcacox.title
-#: package/analyses/principalcox.title
 #: pcacox/options.title
 #: pcacox/ui.title
 #: pcacox/results.title
 msgid "Principal Component Cox Models"
-msgstr ""
-
-#: package/analyses/principalcox.description
-msgid ""
-"Principal Component Cox models address the challenges of high-dimensional "
-"survival data by using principal component analysis (PCA) to reduce "
-"dimensionality before fitting Cox regression models. This approach is "
-"particularly useful when the number of covariates is large relative to "
-"sample size, helping to avoid overfitting while retaining important patterns "
-"in the data. The method supports various PCA approaches including standard "
-"PCA, sparse PCA, and supervised PCA for survival data."
 msgstr ""
 
 #: factoranalysis/options/method/pc.title
@@ -102604,7 +102736,7 @@ msgstr "Sonuç düzeylerinin oranları"
 
 #: decisioncombine/results/combinationTableCI.title
 msgid "Proportions with 95% Confidence Intervals"
-msgstr ""
+msgstr "Oranlar ve %95 Güven Aralıkları"
 
 #: bayesianma/options/proposal_variance.title
 msgid "Proposal Variance"
@@ -104710,6 +104842,13 @@ msgstr ""
 msgid "Rank Distribution:"
 msgstr ""
 
+#: decisioncombine/options/showRecommendation.description.ui
+msgid ""
+"Rank eligible exact-pattern rules and named parallel, serial, and majority "
+"strategies descriptively by observed Youden's J. This sample-dependent "
+"summary is not a clinical guide or validated recommendation."
+msgstr ""
+
 #: survivalfeaturerank/options/rankBy.title
 msgid "Rank Features By"
 msgstr ""
@@ -105367,6 +105506,10 @@ msgid ""
 "population."
 msgstr ""
 
+#: R/decisioncombine.b.R
+msgid "Reading the columns"
+msgstr ""
+
 #: decisioncalculator/results/faganSummary.title
 msgid "Reading the Nomogram"
 msgstr ""
@@ -105792,16 +105935,6 @@ msgstr ""
 
 #: adaptivetrialdesign/results/predictivePower.columns.title
 msgid "Recommended N (Predictive)"
-msgstr ""
-
-#: decisioncombine/results/recommendationTable.description
-msgid ""
-"Recommended optimal test combination pattern based on Youden index and "
-"clinical performance metrics"
-msgstr ""
-
-#: decisioncombine/results/recommendationTable.columns.title
-msgid "Recommended Pattern"
 msgstr ""
 
 #: sigmametrics/results/controlPlanning.columns.title
@@ -107238,6 +107371,10 @@ msgstr ""
 
 #: tidyplots/options/removeYAxisTitle.title
 msgid "Remove Y Axis Title"
+msgstr ""
+
+#: R/decisioncombine.b.R
+msgid "Removed {n} case(s) with missing values"
 msgstr ""
 
 #: R/lassocox.b.R
@@ -109352,11 +109489,6 @@ msgid ""
 "approaches recommended at this time."
 msgstr ""
 
-#: package/analyses/jjriverplot.title
-#: package/analyses/jjriverplot.menuTitle
-msgid "River Plots"
-msgstr ""
-
 #: R/riverplot.b.R
 #: package/analyses/riverplot.title
 #: package/analyses/riverplot.menuTitle
@@ -110296,11 +110428,10 @@ msgstr ""
 #: datevalidator/results/corrected_data.columns.title
 #: decision/results/falsePositiveTable.columns.title
 #: decision/results/falseNegativeTable.columns.title
-#: decisioncombine/results/combinationTable.columns.title
 #: jggheatmap/results/matrixtab.columns.title
 #: mageeequation/results/individualTable.columns.title
 msgid "Row"
-msgstr ""
+msgstr "Satır"
 
 #: ihccluster/options/heatmapScale/row.title
 msgid "Row (by marker)"
@@ -110375,6 +110506,10 @@ msgstr ""
 msgid "Row Proportions"
 msgstr ""
 
+#: decisioncombine/results/combinationTable.columns.title
+msgid "Row type"
+msgstr "Satır Türü"
+
 #: enhancedtwowayfrequency/options/rowVar.title
 #: enhancedtwowayfrequency/ui[0][0].label
 #: enhancedtwowayfrequency/results/observedFrequencies.columns.title
@@ -110441,16 +110576,6 @@ msgstr ""
 
 #: statsplot2/ui[2][0]/sampleSize.label
 msgid "Rows to keep"
-msgstr ""
-
-#: R/decisioncombine.b.R
-msgid ""
-"Rows whose label is a result pattern (e.g. \"+/-\") are mutually exclusive "
-"groups, not decision rules: for those rows \"Sensitivity\" is the proportion "
-"of diseased patients showing that exact pattern, and the columns should be "
-"read that way. The named rows -- Parallel (>=1 pos), Majority (>=2/3 pos), "
-"and the all-positive pattern, which is the Serial (AND) rule -- are the "
-"strategies you can apply to a patient."
 msgstr ""
 
 #: chisqposttest/options/excl.description
@@ -110803,6 +110928,13 @@ msgstr ""
 msgid "Sample Size Adequacy:"
 msgstr ""
 
+#: R/decisioncombine.b.R
+msgid ""
+"Sample size and cell counts are reported as notices when they fall below the "
+"usual thresholds. Read the confidence intervals rather than the point "
+"estimates whenever they do."
+msgstr ""
+
 #: clinicaltrialdesign/results/sample_size_breakdown.title
 #: competingRisksPower/results/sampleSizeBreakdown.title
 msgid "Sample Size Breakdown"
@@ -111005,6 +111137,10 @@ msgstr ""
 msgid "Sample size: %s"
 msgstr ""
 
+#: R/decisioncombine.b.R
+msgid "Sample size: n = {n} complete cases"
+msgstr ""
+
 #: jforester/options/sample_sizes.title
 #: jforester/ui[0][4].label
 msgid "Sample Sizes"
@@ -111059,6 +111195,13 @@ msgstr ""
 
 #: extratrees/options/replace.title
 msgid "Sample with Replacement"
+msgstr ""
+
+#: decisioncombine/results/recommendationTable.description
+msgid ""
+"Sample-dependent descriptive ranking of eligible exact-pattern rules and "
+"named testing strategies by observed Youden index; this is not a clinical "
+"guide or validated recommendation"
 msgstr ""
 
 #: R/lassocox.b.R
@@ -111179,11 +111322,6 @@ msgstr ""
 
 #: riverplot/options/plotType/sankey.title
 msgid "Sankey (directed flows)"
-msgstr ""
-
-#: package/analyses/jjsankeyfier.title
-#: package/analyses/jjsankeyfier.menuTitle
-msgid "Sankey & Alluvial Diagrams"
 msgstr ""
 
 #: stagemigration/ui[19][0][0]/showSankeyDiagram.label
@@ -112819,6 +112957,18 @@ msgstr ""
 msgid "Select numeric variable for segment values."
 msgstr ""
 
+#: decisioncombine/options/filterStatistic.description.ui
+msgid ""
+"Select one metric, or use the plot-specific default metric set. The bar "
+"chart defaults to sensitivity, specificity, PPV, NPV, and accuracy; the "
+"heatmap also includes prevalence, balanced accuracy, and Youden's J. The "
+"forest plot supports sensitivity, specificity, PPV, NPV, accuracy, LR+, LR-, "
+"and diagnostic OR, for which confidence intervals are available. Unsupported "
+"forest selections produce an explanatory notice rather than silently showing "
+"other statistics. The decision-space plot has fixed sensitivity and "
+"specificity axes and is unaffected."
+msgstr ""
+
 #: advancedbarplot/options/chart_approach.description.jamovi
 msgid ""
 "Select one of 7 professional bar chart approaches including BBC News and "
@@ -112883,6 +113033,10 @@ msgstr ""
 
 #: spatialanalysis/options/analysis_scope.description.ui
 msgid "Select the depth and focus of spatial analysis"
+msgstr ""
+
+#: R/decisioncombine.b.R
+msgid "Select the disease-present level for the gold standard."
 msgstr ""
 
 #: autoeda/options/eda_engine.description.jamovi
@@ -113035,6 +113189,18 @@ msgid ""
 "will be divided into equal quantiles based on this selection."
 msgstr ""
 
+#: R/decisioncombine.b.R
+msgid "Select the positive level for Test 1."
+msgstr ""
+
+#: R/decisioncombine.b.R
+msgid "Select the positive level for Test 2."
+msgstr ""
+
+#: R/decisioncombine.b.R
+msgid "Select the positive level for Test 3."
+msgstr ""
+
 #: bbcplots/options/y_var.description.ui
 msgid "Select the primary variable to visualize (values, measurements, counts)."
 msgstr ""
@@ -113042,7 +113208,9 @@ msgstr ""
 #: decisioncombine/options/gold.description.ui
 msgid ""
 "Select the reference standard (e.g., biopsy, final diagnosis). This "
-"represents the \"truth\" for comparison. Must have exactly 2 levels."
+"represents the reference classification. Binary variables are intended; with "
+"additional levels, all non-positive levels are grouped as negative and a "
+"warning is shown."
 msgstr ""
 
 #: advancedSurvivalPower/options/study_design.description
@@ -113521,7 +113689,7 @@ msgstr ""
 #: trichotomousroc/results/thresholdsTable.columns.title
 #: trichotomousroc/results/categorySensitivitiesTable.columns.title
 msgid "Sensitivity"
-msgstr ""
+msgstr "Duyarlılık"
 
 #: R/misclassificationbias.b.R
 msgid ""
@@ -114021,6 +114189,10 @@ msgstr ""
 #: comprehensiveSurvivalPower/options/study_design/sequential.title
 msgid "Sequential/Group Sequential"
 msgstr ""
+
+#: R/decisioncombine.b.R
+msgid "Serial (all pos)"
+msgstr "Seri (tümü poz)"
 
 #: R/sequentialtests.b.R
 msgid "serial negative (exclusion) strategy"
@@ -115871,6 +116043,13 @@ msgstr ""
 msgid ""
 "Show explanatory panels describing test evaluation methodology and "
 "assumptions. Helpful for understanding when and how to use this analysis."
+msgstr ""
+
+#: decisioncombine/options/showAbout.description.ui
+msgid ""
+"Show explanatory panels describing what a pattern row and a strategy row "
+"mean, how to read each column, and the study-design assumptions and biases "
+"that affect diagnostic accuracy estimates."
 msgstr ""
 
 #: ihcbasic/options/showHeatmap.title
@@ -118935,6 +119114,10 @@ msgstr ""
 msgid "Single SNP Analysis"
 msgstr ""
 
+#: R/decisioncombine.b.R
+msgid "Single test"
+msgstr "Tek test"
+
 #: bayesiandiagnostic/options/analysis_type/single_test.title
 msgid "Single Test Evaluation"
 msgstr ""
@@ -119212,12 +119395,6 @@ msgstr ""
 msgid "Small cell counts (<5) may cause unstable results"
 msgstr ""
 
-#: R/decision.b.R
-msgid ""
-"Small cell counts detected (< 5). Results may be unstable. Consider "
-"collecting more data or using exact methods."
-msgstr ""
-
 #: R/riverplot.b.R
 msgid ""
 "Small dataset (n<20): Flow patterns may be unstable. Consider larger sample "
@@ -119273,12 +119450,6 @@ msgstr ""
 msgid "Small sample size"
 msgstr ""
 
-#: R/decision.b.R
-msgid ""
-"Small sample size (< 30). Confidence intervals may be wide. Interpret "
-"results cautiously."
-msgstr ""
-
 #: R/survivalcont.b.R
 msgid ""
 "Small sample size (n = {n}). Consider larger sample for more reliable "
@@ -119303,6 +119474,10 @@ msgstr ""
 msgid ""
 "Small sample size detected. Results may be less reliable with fewer than 100 "
 "observations."
+msgstr ""
+
+#: R/decisioncombine.b.R
+msgid "Small sample: n = {n} complete cases"
 msgstr ""
 
 #: treatmentmeta/options/small_study_correction.title
@@ -119961,6 +120136,10 @@ msgstr ""
 #: R/kappaSizePower.b.R
 msgid "Sparse categories."
 msgstr "Seyrek kategoriler."
+
+#: R/decisioncombine.b.R
+msgid "Sparse Cell Counts"
+msgstr ""
 
 #: R/lassocox.b.R
 msgid "Sparse coefficient estimation"
@@ -120862,6 +121041,10 @@ msgid ""
 "clinical practice."
 msgstr ""
 
+#: R/decisioncombine.b.R
+msgid "Spectrum bias."
+msgstr ""
+
 #: R/gsdesign.b.R
 msgid "spending"
 msgstr ""
@@ -121477,7 +121660,6 @@ msgid "Stage Labels (Customization)"
 msgstr ""
 
 #: package/analyses/stagemigration.menuSubgroup
-#: package/analyses/stagemigration1.menuSubgroup
 #: pathsampling/results/stageMigrationText.title
 #: stagemigration/options.menuSubgroup
 msgid "Stage Migration Analysis"
@@ -122310,7 +122492,6 @@ msgid "State Variable"
 msgstr ""
 
 #: package/analyses/stagemigration.menuSubtitle
-#: package/analyses/stagemigration1.menuSubtitle
 #: stagemigration/options.menuSubtitle
 msgid "State-of-the-Art Staging System Validation"
 msgstr ""
@@ -122334,6 +122515,7 @@ msgstr ""
 msgid "Static Map"
 msgstr ""
 
+#: R/decisioncombine.b.R
 #: R/nonparametric.b.R
 #: aalenhazard/results/goodnessOfFit.columns.title
 #: adaptivelasso/results/modelDiagnostics.columns.title
@@ -122448,7 +122630,7 @@ msgstr ""
 #: treatmentmeta/results/pcurve_results.columns.title
 #: tumorbudding/results/survivalTable.columns.title
 msgid "Statistic"
-msgstr ""
+msgstr "İstatistik"
 
 #: ihcscoring/results/multiplecutoffs/comparisonstats.columns.title
 #: ihcscoring/results/cpsanalysis/cpscomparison.columns.title
@@ -123736,6 +123918,7 @@ msgid "Strata Variables:"
 msgstr ""
 
 #: R/clinicalscore.b.R
+#: R/decisioncombine.b.R
 #: R/psychopdaROC.b.R
 #: costeffectiveness/results/strategySummary.columns.title
 #: costeffectiveness/results/incrementalAnalysis.columns.title
@@ -123752,7 +123935,7 @@ msgstr ""
 #: decisionpanel/results/crossValidation.columns.title
 #: enhancedROC/results/results/multiClassAUC.columns.title
 msgid "Strategy"
-msgstr ""
+msgstr "Strateji"
 
 #: bayesdca/results/comparisonTable.title
 #: decisionpanel/results/strategyComparisonPlot.title
@@ -123769,6 +123952,10 @@ msgstr ""
 
 #: sequentialtests/results/clinical_guidance.title
 msgid "Strategy Notes and Teaching Examples"
+msgstr ""
+
+#: R/decisioncombine.b.R
+msgid "Strategy Ranking Unavailable"
 msgstr ""
 
 #: costeffectiveness/results/strategySummary.title
@@ -124209,11 +124396,6 @@ msgstr ""
 msgid "Stream:"
 msgstr ""
 
-#: package/analyses/jjstreamgraph.title
-#: package/analyses/jjstreamgraph.menuTitle
-msgid "StreamGraphs"
-msgstr ""
-
 #: pathologyagreement/results/correlationtable.columns.title
 #: qualityoflife/results/domain_correlations.columns.title
 #: stagemigration/results/executiveSummary.columns.title
@@ -124392,8 +124574,6 @@ msgstr ""
 msgid "Study Data"
 msgstr ""
 
-#: package/analyses/jconsort.menuSubgroup
-#: package/analyses/jflowchart.menuSubgroup
 #: package/analyses/studydiagram.menuSubgroup
 #: package/analyses/consortdiagram.menuSubgroup
 #: package/analyses/door.menuSubgroup
@@ -124495,11 +124675,6 @@ msgstr ""
 
 #: studydiagram/results/summary.title
 msgid "Study Flow Summary"
-msgstr ""
-
-#: package/analyses/jflowchart.title
-#: package/analyses/jflowchart.menuTitle
-msgid "Study Flowchart"
 msgstr ""
 
 #: bayesiandiagnostic/options/study_id.title
@@ -125645,10 +125820,6 @@ msgstr ""
 msgid "Supervised PCA Cox"
 msgstr ""
 
-#: package/analyses/principalcox.menuSubtitle
-msgid "Supervised PCA for Cox regression with high-dimensional data"
-msgstr ""
-
 #: package/analyses/superpc.description
 #: superpc/options.description.main
 msgid ""
@@ -125829,30 +126000,14 @@ msgstr ""
 msgid "Survey-Weighted Survival Summary"
 msgstr ""
 
-#: package/analyses/singlearm.menuGroup
-#: package/analyses/survival.menuGroup
-#: package/analyses/survivalcont.menuGroup
-#: package/analyses/multisurvival.menuGroup
-#: package/analyses/oddsratio.menuGroup
-#: package/analyses/timeinterval.menuGroup
-#: package/analyses/datetimeconverter.menuGroup
-#: package/analyses/outcomeorganizer.menuGroup
-#: datetimeconverter/options.menuGroup
 #: jiwillsurvive/results/survivalTable.columns.title
 #: jiwillsurvive/results/kmTable.columns.title
 #: marginalrecurrent/results/survivalFunction.columns.title
-#: multisurvival/options.menuGroup
-#: oddsratio/options.menuGroup
-#: outcomeorganizer/options.menuGroup
 #: semimarkov/results/reliabilityAnalysis.columns.title
 #: simonmakuch/results/survivalEstimates.columns.title
-#: singlearm/options.menuGroup
-#: survival/options.menuGroup
 #: survival/results/survTable.columns.title
-#: survivalcont/options.menuGroup
 #: survivalcont/results/survTable.columns.title
 #: survivalcont/results/multipleSurvTable.columns.title
-#: timeinterval/options.menuGroup
 msgid "Survival"
 msgstr ""
 
@@ -125894,7 +126049,6 @@ msgstr ""
 #: package/analyses/flexparametric.menuSubgroup
 #: package/analyses/splinehazard.menuSubgroup
 #: package/analyses/distributionfit.menuSubgroup
-#: package/analyses/flexiblebaseline.menuSubgroup
 #: package/analyses/stratifiedparametric.menuSubgroup
 #: package/analyses/smoothtimevary.menuSubgroup
 #: package/analyses/dynamiccoeff.menuSubgroup
@@ -125999,8 +126153,6 @@ msgstr ""
 msgid "Survival Analysis Overview"
 msgstr ""
 
-#: package/analyses/survivalpower.title
-#: package/analyses/survivalpower.menuTitle
 #: classicalSurvivalPower/ui.title
 msgid "Survival Analysis Power & Sample Size"
 msgstr ""
@@ -126748,7 +126900,6 @@ msgstr ""
 #: package/analyses/epidemiosurvival.menuGroup
 #: package/analyses/advancedtrials.menuGroup
 #: package/analyses/superpc.menuGroup
-#: package/analyses/flexparametricadvanced.menuGroup
 #: package/analyses/spatialbayesiansurvival.menuGroup
 #: package/analyses/competingRisksPower.menuGroup
 #: package/analyses/comprehensiveSurvivalPower.menuGroup
@@ -126823,7 +126974,14 @@ msgstr ""
 msgid "SurvivalExtraD"
 msgstr ""
 
-#: package/analyses/datecorrection.menuGroup
+#: package/analyses/singlearm.menuGroup
+#: package/analyses/survival.menuGroup
+#: package/analyses/survivalcont.menuGroup
+#: package/analyses/multisurvival.menuGroup
+#: package/analyses/oddsratio.menuGroup
+#: package/analyses/timeinterval.menuGroup
+#: package/analyses/datetimeconverter.menuGroup
+#: package/analyses/outcomeorganizer.menuGroup
 #: package/analyses/competingsurvival.menuGroup
 #: package/analyses/lassocox.menuGroup
 #: package/analyses/timeroc.menuGroup
@@ -126837,13 +126995,8 @@ msgstr ""
 #: package/analyses/pcacox.menuGroup
 #: package/analyses/plscox.menuGroup
 #: package/analyses/conditionalsurvival.menuGroup
-#: package/analyses/principalcox.menuGroup
 #: package/analyses/survivalPower.menuGroup
 #: package/analyses/ncvregcox.menuGroup
-#: package/analyses/powersurvival.menuGroup
-#: package/analyses/survivalpower.menuGroup
-#: package/analyses/powercomprisk.menuGroup
-#: package/analyses/survivalPowerComprehensive.menuGroup
 #: package/analyses/datevalidator.menuGroup
 #: package/analyses/groomecompare.menuGroup
 #: package/analyses/rpasurvival.menuGroup
@@ -126852,6 +127005,7 @@ msgstr ""
 #: adaptivelasso/options.menuGroup
 #: competingsurvival/options.menuGroup
 #: conditionalsurvival/options.menuGroup
+#: datetimeconverter/options.menuGroup
 #: datevalidator/options.menuGroup
 #: firthregression/options.menuGroup
 #: groomecompare/options.menuGroup
@@ -126859,13 +127013,20 @@ msgstr ""
 #: highdimcox/options.menuGroup
 #: lassocox/options.menuGroup
 #: lassointro/options.menuGroup
+#: multisurvival/options.menuGroup
 #: ncvregcox/options.menuGroup
+#: oddsratio/options.menuGroup
+#: outcomeorganizer/options.menuGroup
 #: pcacox/options.menuGroup
 #: plscox/options.menuGroup
 #: relativesurvival/options.menuGroup
 #: rpasurvival/options.menuGroup
+#: singlearm/options.menuGroup
 #: sparsegrouplasso/options.menuGroup
+#: survival/options.menuGroup
 #: survivalPower/options.menuGroup
+#: survivalcont/options.menuGroup
+#: timeinterval/options.menuGroup
 #: timeroc/options.menuGroup
 msgid "SurvivalT"
 msgstr ""
@@ -127126,8 +127287,11 @@ msgstr ""
 msgid ""
 "Systematic evaluation of diagnostic test combinations. Analyzes all possible\n"
 "test result patterns (2-test: 4 patterns, 3-test: 8 patterns) against a gold\n"
-"standard to identify optimal testing strategies. Calculates sensitivity,\n"
-"specificity, PPV, NPV, and accuracy for each pattern combination."
+"standard and summarizes named parallel, serial, and majority strategies.\n"
+"Calculates sensitivity, specificity, predictive values, likelihood ratios,\n"
+"accuracy, and uncertainty intervals. Descriptive rankings are "
+"sample-dependent\n"
+"analytical summaries, not clinical guides or validated recommendations."
 msgstr ""
 
 #: explainableai/options/perturbation_method/systematic.title
@@ -128072,6 +128236,21 @@ msgid ""
 "{percentage}% of observations. This may destabilize parameter estimation."
 msgstr ""
 
+#: R/decisioncombine.b.R
+msgid ""
+"Test {test} cannot be summarized because no case has both the test and "
+"reference-standard result."
+msgstr ""
+
+#: R/decisioncombine.b.R
+msgid "Test {test} Has No Complete Cases"
+msgstr ""
+
+#: R/decisioncombine.b.R
+msgid "Test {test} Pairwise Denominator"
+msgstr ""
+
+#: R/decisioncombine.b.R
 #: decisioncompare/ui[0][1].label
 #: decisionpanel/options/test1.title
 #: nogoldstandard/options/test1.title
@@ -128091,6 +128270,10 @@ msgstr ""
 #: decisioncombine/ui[0][1].label
 #: decisioncompare/options/test1.title
 msgid "Test 1 (Required)"
+msgstr ""
+
+#: R/decisioncombine.b.R
+msgid "Test 1 is required. Select at least one test variable."
 msgstr ""
 
 #: R/sequentialtests.b.R
@@ -128181,6 +128364,7 @@ msgstr ""
 msgid "Test 1: {name}"
 msgstr ""
 
+#: R/decisioncombine.b.R
 #: decisioncompare/ui[0][2].label
 #: decisionpanel/options/test2.title
 #: nogoldstandard/options/test2.title
@@ -128241,6 +128425,10 @@ msgstr ""
 msgid "Test 2 Positive Level"
 msgstr ""
 
+#: R/decisioncombine.b.R
+msgid "Test 2 Required Before Test 3"
+msgstr ""
+
 #: cotest/options/test2_sens.title
 msgid "Test 2 sensitivity"
 msgstr ""
@@ -128293,6 +128481,7 @@ msgstr ""
 msgid "Test 2: {name}"
 msgstr ""
 
+#: R/decisioncombine.b.R
 #: decisioncompare/ui[0][3].label
 #: nogoldstandard/options/test3.title
 msgid "Test 3"
@@ -128312,6 +128501,12 @@ msgstr ""
 #: decisionpanel/options/test3.title
 #: nogoldstandard/ui[0][2].label
 msgid "Test 3 (Optional)"
+msgstr ""
+
+#: R/decisioncombine.b.R
+msgid ""
+"Test 3 cannot be combined without Test 2. Select Test 2 and its positive "
+"level, or remove Test 3."
 msgstr ""
 
 #: decisioncompare/options/test3Negative.title
@@ -128420,7 +128615,7 @@ msgstr ""
 
 #: decisioncombine/results/combinationTable.title
 msgid "Test Combination Performance"
-msgstr ""
+msgstr "Test Kombinasyonlarının Performansı"
 
 #: decisioncompare/results/plot1.title
 msgid "Test Comparison"
@@ -128787,8 +128982,17 @@ msgstr ""
 msgid "Test Parameters"
 msgstr ""
 
+#: R/decisioncombine.b.R
 #: decisioncombine/results/crossTabTable.columns.title
 msgid "Test Pattern"
+msgstr ""
+
+#: decisioncombine/options/addedPattern.title
+msgid "Test pattern column"
+msgstr ""
+
+#: decisioncombine/results/addedPattern.title
+msgid "Test Pattern Column"
 msgstr ""
 
 #: R/sequentialtests.b.R
@@ -129566,6 +129770,14 @@ msgstr ""
 "yaklaşımı geçersizleşir. N'yi artırın, daha az uç bir prevalans kullanın "
 "veya anlamlılık düzeyini yükseltin."
 
+#: R/decisioncombine.b.R
+msgid ""
+"The candidate-rule ranking is a descriptive argmax over observed Youden's J "
+"with no significance test and no multiplicity correction. On data with no "
+"real signal it will still name a winner. It is a hypothesis to confirm in "
+"new data, not a validated recommendation."
+msgstr ""
+
 #: R/jjpiestats.b.R
 msgid ""
 "The chart subtitle still reports an uncorrected Pearson chi-square - no "
@@ -130021,6 +130233,13 @@ msgid ""
 "{cmd}"
 msgstr ""
 
+#: R/decisioncombine.b.R
+msgid ""
+"The forest plot is not drawn for \"{statistic}\" because this analysis does "
+"not calculate a confidence interval for that statistic. The bar chart and "
+"heatmap can still display it."
+msgstr ""
+
 #: R/lassologistic.b.R
 msgid ""
 "The generated scoring system reaches %d points for a single factor. A usable "
@@ -130098,6 +130317,24 @@ msgid ""
 "extreme values are present. Lower the confidence level to at most {maxci} "
 "for this sample size, or choose the Equal-tailed interval or Robust Z-score "
 "method, which work at this sample size."
+msgstr ""
+
+#: R/decisioncombine.b.R
+msgid ""
+"The highest observed Youden's J among the eligible candidate rules was "
+"{youden}."
+msgstr ""
+
+#: R/decisioncombine.b.R
+msgid ""
+"The highest-ranked rule is an all-negative result pattern, or every named "
+"strategy performs at or below chance while an exact pattern does not. Both "
+"are the signature of a reversed positive level: if the level chosen as "
+"positive for one or more tests is actually the negative result, the "
+"arithmetic still works but the winning rule reads as \"call the patient "
+"positive when the tests are negative\", which is not a rule anyone can "
+"apply. Check the positive level selected for the reference standard and for "
+"each test before interpreting this ranking."
 msgstr ""
 
 #: R/ihcheterogeneity.b.R
@@ -130439,6 +130676,10 @@ msgid ""
 "groups ({nGroups}), so default labels were used."
 msgstr ""
 
+#: R/decisioncombine.b.R
+msgid "The observed results involve a trade-off between sensitivity and specificity."
+msgstr ""
+
 #: R/clinicalscore.b.R
 msgid "The optimal cutoff divides patients into high-risk vs low-risk groups"
 msgstr ""
@@ -130510,6 +130751,21 @@ msgid ""
 "so the single-variable pie chart cannot be drawn. Disable the \"Paired\" "
 "option to display this chart, or use the grouped charts for the paired "
 "analysis."
+msgstr ""
+
+#: R/decisioncombine.b.R
+msgid ""
+"The pattern-type and statistic filters affect the plots only. The "
+"performance tables always show every row."
+msgstr ""
+
+#: R/decisioncombine.b.R
+msgid ""
+"The pattern-type filter \"{filter}\" matches none of the rows in this "
+"analysis, so the bar chart, heatmap and forest plot are blank. Pattern "
+"filters apply to exact result patterns such as \"+/+\"; a single-test "
+"analysis has no such rows, and the named strategies are not result patterns. "
+"Set the pattern filter back to \"All Patterns\" to see the plots."
 msgstr ""
 
 #: R/nogoldstandard.b.R
@@ -130624,6 +130880,10 @@ msgid ""
 "during a specific time period."
 msgstr ""
 
+#: R/decisioncombine.b.R
+msgid "The ranking"
+msgstr ""
+
 #: R/decisiongraph.b.R
 msgid "The rate used to convert future costs and benefits to present values"
 msgstr ""
@@ -130657,6 +130917,12 @@ msgid ""
 "construction on every dataset and are left blank rather than reported as "
 "findings. The remaining values are also affected by this circularity and "
 "describe agreement with the rule, not diagnostic accuracy."
+msgstr ""
+
+#: R/decisioncombine.b.R
+msgid ""
+"The reference standard and tests must use different variables. Select a "
+"different variable for: {variables}."
 msgstr ""
 
 #: R/nogoldstandard.b.R
@@ -130719,6 +130985,17 @@ msgstr ""
 
 #: R/chisqposttest.b.R
 msgid "the row and column variables"
+msgstr ""
+
+#: R/decisioncombine.b.R
+msgid ""
+"The rows are not independent: every rule is scored on the same patients, so "
+"the differences between them are correlated. A formal comparison needs a "
+"paired procedure -- McNemar's test applied SEPARATELY within the diseased "
+"patients to compare sensitivity and within the non-diseased patients to "
+"compare specificity, because a single McNemar over the whole sample compares "
+"positivity rates rather than accuracy. Paired PPV and NPV comparisons need a "
+"generalised score test instead. This analysis performs neither."
 msgstr ""
 
 #: R/survival.b.R
@@ -130884,6 +131161,12 @@ msgid ""
 "zero or a negative value is rejected rather than drawn."
 msgstr ""
 
+#: R/decisioncombine.b.R
+msgid ""
+"The specified positive level \"{level}\" is not defined for variable "
+"\"{variable}\" ({label}). Select a level that exists in the data."
+msgstr ""
+
 #: R/waterfall.b.R
 msgid ""
 "The spider plot draws each patient's tumour trajectory over time, so it "
@@ -131012,6 +131295,10 @@ msgstr ""
 
 #: R/vartree.b.R
 msgid "The tree displays hierarchical relationships between categorical variables"
+msgstr ""
+
+#: R/decisioncombine.b.R
+msgid "The two kinds of row"
 msgstr ""
 
 #: advancedSurvivalPower/options/alpha.description
@@ -131273,6 +131560,17 @@ msgid ""
 "selected."
 msgstr ""
 
+#: R/decisioncombine.b.R
+msgid ""
+"These rows have a 2-by-2 cell count below 5 (smallest cell {minimum}): "
+"{rows}. Their likelihood ratios, diagnostic odds ratios and confidence "
+"intervals rest on very few cases and may be unstable even when they look "
+"informative. Sensitivity, specificity and Youden's J on the same rows can "
+"still be sound, because those depend on the size of the two reference groups "
+"rather than on the smallest cell. Treat the ratio columns as exploratory and "
+"validate them in a larger independent sample."
+msgstr ""
+
 #: R/summarydata.b.R
 msgid ""
 "These statistics help assess data distribution, identify unusual values, and "
@@ -131411,6 +131709,14 @@ msgstr ""
 msgid ""
 "This analysis evaluated %d predictor(s) using %d observations in a %s "
 "context."
+msgstr ""
+
+#: R/decisioncombine.b.R
+msgid ""
+"This analysis evaluates every way two or three diagnostic tests can be "
+"combined, scoring each against the reference standard on the same patients. "
+"With a single test selected it reports that one test alone, and the two row "
+"kinds described below do not arise."
 msgstr ""
 
 #: R/jjsegmentedtotalbar.b.R
@@ -131614,6 +131920,20 @@ msgid ""
 "assignments against the source imaging."
 msgstr ""
 
+#: R/decisioncombine.b.R
+msgid ""
+"This is a descriptive ranking of {n} candidate rule(s) scored on at least 10 "
+"disease-present and 10 disease-absent cases with a Youden's J above zero; no "
+"significance test or multiplicity correction was applied."
+msgstr ""
+
+#: R/decisioncombine.b.R
+msgid ""
+"This is a descriptive, sample-dependent ranking of exact-pattern rules and "
+"named testing strategies. It is not a clinical guide or validated "
+"recommendation."
+msgstr ""
+
 #: R/kappaSizePower.b.R
 msgid ""
 "This is a POWER calculation: it returns the number of subjects needed to "
@@ -131812,9 +132132,25 @@ msgid ""
 "correlation."
 msgstr ""
 
+#: R/decisioncombine.b.R
+msgid ""
+"This sample has {pos} disease-present and {neg} disease-absent complete "
+"cases. Sensitivity and PPV are limited by the disease-present count and "
+"specificity and NPV by the disease-absent count, so with fewer than 10 in "
+"one group the statistics that depend on it are driven by single patients and "
+"their confidence intervals span most of the possible range. Every likelihood "
+"ratio and diagnostic odds ratio inherits that instability."
+msgstr ""
+
 #: R/kappaSizeFixedN.b.R
 msgid "This sample size cannot demonstrate agreement."
 msgstr "Bu örneklem büyüklüğü uyumu gösteremez."
+
+#: R/decisioncombine.b.R
+msgid ""
+"This sample-dependent ranking is an analytical summary, not a clinical guide "
+"or validated recommendation."
+msgstr ""
 
 #: R/nogoldstandard.b.R
 msgid ""
@@ -133016,10 +133352,6 @@ msgstr ""
 msgid "Time Series and Trend Analysis"
 msgstr ""
 
-#: package/analyses/jjstreamgraph.menuSubgroup
-msgid "Time Series Visualization"
-msgstr ""
-
 #: markovmultistate/ui[2].label
 #: semimarkov/ui[2].label
 msgid "Time Settings"
@@ -134176,7 +134508,7 @@ msgstr ""
 #: diagnosticmeta/results/individualstudies.columns.title
 #: prauc/results/optimalThresholds.columns.title
 msgid "TN"
-msgstr ""
+msgstr "TN"
 
 #: R/sequentialtests.b.R
 msgid ""
@@ -135046,7 +135378,7 @@ msgstr ""
 #: diagnosticmeta/results/individualstudies.columns.title
 #: prauc/results/optimalThresholds.columns.title
 msgid "TP"
-msgstr ""
+msgstr "TP"
 
 #: R/sequentialtests.b.R
 msgid ""
@@ -136930,6 +137262,20 @@ msgstr ""
 msgid "Two tests run in parallel"
 msgstr ""
 
+#: R/decisioncombine.b.R
+msgid ""
+"Two things that assumption-free estimation does not buy. Precision: the "
+"sample is split across four or eight pattern cells instead of being pooled "
+"into two marginal proportions, so the intervals are wider -- that width is "
+"what the assumption was paying for. Transport: these numbers carry to "
+"another population only if the whole joint distribution of results given "
+"disease status carries over, which is a stronger requirement than each "
+"test's sensitivity and specificity carrying over. Parallel and Serial "
+"figures here will also generally NOT match the textbook independence "
+"formulas computed by hand from the individual tests, and will usually be "
+"worse when the tests are correlated."
+msgstr ""
+
 #: simpleSurvivalPower/options/study_design/two_arm_parallel.title
 #: survivalPower/options/study_design/two_arm_parallel.title
 msgid "Two-arm Parallel"
@@ -138119,10 +138465,6 @@ msgstr ""
 msgid "Unified framework for survival models through transformations"
 msgstr ""
 
-#: package/analyses/survivalPowerComprehensive.menuSubtitle
-msgid "Unified power analysis for all survival study types"
-msgstr ""
-
 #: comprehensiveSurvivalPower/options/accrual_distribution/uniform.title
 #: comprehensiveSurvivalPower/options/covariate_distribution/uniform.title
 #: nonparametricregression/options/kernel_type/uniform.title
@@ -138531,7 +138873,7 @@ msgstr ""
 #: survivalcont/results/multipleMedianTable.columns.title
 #: survivalcont/results/multipleSurvTable.columns.title
 msgid "Upper"
-msgstr ""
+msgstr "Üst"
 
 #: clinicalvalidation/results/performancetable.columns.title
 #: conditionalinference/results/nodeDetails.columns.title
@@ -140057,6 +140399,7 @@ msgstr ""
 msgid "Validity Type"
 msgstr ""
 
+#: R/decisioncombine.b.R
 #: R/decisioncompare.b.R
 #: R/lassocox.b.R
 #: R/nonparametric.b.R
@@ -140792,6 +141135,17 @@ msgid ""
 "\"{available_vars}\""
 msgstr ""
 
+#: R/decisioncombine.b.R
+msgid ""
+"Variable \"{variable}\" ({label}) has {n} levels: {levels}. Only "
+"\"{positive}\" is treated as positive; every other level ({others}) is "
+"counted as NEGATIVE. If any of those levels represent equivocal or "
+"indeterminate results, this recoding can bias sensitivity, specificity, "
+"predictive values, and likelihood ratios and make them difficult to "
+"interpret. Recode the variable to two levels and set equivocal results to "
+"missing if that is not what you intend."
+msgstr ""
+
 #: enhancedcorrelation/results/text.columns.title
 #: jjcorrmat/results/table.columns.title
 #: missingdataexplorer/results/correlation_matrix.columns.title
@@ -141384,10 +141738,6 @@ msgstr ""
 msgid "Variable Type"
 msgstr ""
 
-#: package/analyses/statsplot2.menuSubgroup
-msgid "Variable Type Based Graphs and Plots"
-msgstr ""
-
 #: sparsegrouplasso/options/group_definition/variable_type.title
 msgid "Variable Type-Based"
 msgstr ""
@@ -141690,6 +142040,10 @@ msgstr ""
 
 #: missingdataexplorer/results/missing_patterns.columns.title
 msgid "Variables Missing"
+msgstr ""
+
+#: R/decisioncombine.b.R
+msgid "Variables Must Be Distinct"
 msgstr ""
 
 #: R/jjradarplot.b.R
@@ -142097,6 +142451,10 @@ msgstr ""
 msgid "Verbose Progress"
 msgstr ""
 
+#: R/decisioncombine.b.R
+msgid "Verification (work-up) bias."
+msgstr ""
+
 #: R/decisioncalculator.b.R
 msgid ""
 "Verification bias occurs when reference-standard verification differs "
@@ -142190,12 +142548,6 @@ msgid ""
 "specified."
 msgstr ""
 
-#: R/decision.b.R
-msgid ""
-"Very high disease prevalence (> 95%). Negative predictive value may be "
-"unreliable. Verify your data coding."
-msgstr ""
-
 #: R/survivalcont.b.R
 msgid ""
 "Very high event rate ({rate}%). Consider competing risks or cause-specific "
@@ -142213,12 +142565,6 @@ msgstr ""
 #: R/kappaSizePower.b.R
 msgid "Very large sample size."
 msgstr "Çok büyük örneklem büyüklüğü."
-
-#: R/decision.b.R
-msgid ""
-"Very low disease prevalence (< 5%). Positive predictive value may be "
-"unreliable. Consider the clinical context carefully."
-msgstr ""
 
 #: R/lassocox.b.R
 msgid ""
@@ -142262,6 +142608,10 @@ msgstr ""
 #: R/kappaSizePower.b.R
 msgid "Very small sample size."
 msgstr "Çok küçük örneklem büyüklüğü."
+
+#: R/decisioncombine.b.R
+msgid "Very small sample: n = {n} complete cases"
+msgstr ""
 
 #: R/reportcat.b.R
 msgid "Very sparse categories (fewer than 5 cases) may need combination"
@@ -142685,7 +143035,7 @@ msgstr ""
 msgid "Visualization Types:"
 msgstr ""
 
-#: decisioncombine/ui[1][4].label
+#: decisioncombine/ui[1][5].label
 #: decisioncompare/ui[3].label
 #: ihcbasic/ui[3][0].label
 #: ihccluster/ui[8].label
@@ -143816,6 +144166,7 @@ msgstr ""
 msgid "What it reports:"
 msgstr ""
 
+#: R/decisioncombine.b.R
 #: R/jjpiestats.b.R
 msgid "What this analysis does"
 msgstr ""
@@ -143824,6 +144175,10 @@ msgstr ""
 #: R/reportcat.b.R
 #: R/waterfall.b.R
 msgid "What This Analysis Does"
+msgstr ""
+
+#: R/decisioncombine.b.R
+msgid "What this analysis does NOT assume"
 msgstr ""
 
 #: haralicktexture/results/about.description
@@ -144575,6 +144930,17 @@ msgstr ""
 msgid ""
 "With fewer than 10 events, results should be interpreted cautiously. "
 "Consider longer follow-up or pooled analysis."
+msgstr ""
+
+#: R/decisioncombine.b.R
+msgid ""
+"With fewer than 20 complete cases every proportion rests on a handful of "
+"patients, so one reclassified case moves sensitivity or specificity by "
+"several percentage points and the 95% confidence intervals are very wide. "
+"Read the intervals rather than the point estimates. Diagnostic accuracy "
+"studies usually need on the order of 100 cases before the intervals narrow "
+"usefully, and combination analysis splits those cases across four or eight "
+"patterns."
 msgstr ""
 
 #: R/jjcorrmat.b.R
@@ -145609,6 +145975,7 @@ msgid ""
 "to 1 if both sensitivity and specificity are high (i.e. close to 1)."
 msgstr ""
 
+#: R/decisioncombine.b.R
 #: aivalidation/results/performanceTable.columns.title
 #: decisioncombine/options/filterStatistic/youden.title
 #: decisioncombine/results/combinationTable.columns.title
@@ -145621,7 +145988,7 @@ msgstr ""
 #: psychopdaROC/results/thresholdTable.columns.title
 #: psychopdaROC/results/fixedSensSpecTable.columns.title
 msgid "Youden's J"
-msgstr ""
+msgstr "Youden J"
 
 #: aivalidation/options/youdensJ.title
 #: aivalidation/ui/performanceMetrics/youdensJ.label

@@ -1,7 +1,7 @@
 ---
 name:  cotest
 title: Co-Testing Analysis
-menuGroup: meddecideT
+menuGroup: meddecide
 menuSubgroup: Decision Calculators
 menuSubtitle: Two tests run in parallel
 version: '1.0.8'

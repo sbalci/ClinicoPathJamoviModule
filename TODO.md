@@ -4151,3 +4151,74 @@ BY DESIGN, because closing it either way changes a statistical default:
       Implementation note for (a): `direction` is read at 18 sites in R/psychopdaROC.b.R and
       `R/utils.R:167` hard-stops on anything but `>=`/`<=`, so `auto` must be resolved ONCE into
       a private field early in `.run()` and every site switched to read that. Needs prepare().
+
+## [ui-schema] 9 dead `enable:` expressions -- controls permanently enabled (2026-08-28)
+
+Found while fixing `decisioncombine` I2. jamovi's client treats a value as a data binding
+ONLY if it starts with `(` AND ends with `)` (`isValueDataBound`: `t.startsWith("(") &&
+t.endsWith(")")`). A paren-less value is stored as a literal string, and controls disable
+only on strict `=== false`, so the control is **permanently enabled** -- silently, with no
+compiler error and no console warning.
+
+Fix = wrap each in parentheses (note `(!x)` is correct, `!(x)` is not):
+
+- [ ] `jamovi/advancedbarplot.u.yaml`   `stat_method`         `add_statistics` -> `(add_statistics)`
+- [ ] `jamovi/advancedbarplot.u.yaml`   `value_format`        `show_values` -> `(show_values)`
+- [ ] `jamovi/advancedraincloud.u.yaml` `mcid_value`          `show_mcid` -> `(show_mcid)`
+- [ ] `jamovi/advancedraincloud.u.yaml` `effect_size_type`    `show_effect_size` -> `(show_effect_size)`
+- [ ] `jamovi/advancedraincloud.u.yaml` `baseline_group`      `show_change_scores` -> `(show_change_scores)`
+- [ ] `jamovi/advancedraincloud.u.yaml` `responder_threshold` `show_change_scores` -> `(show_change_scores)`
+- [ ] `jamovi/advancedraincloud.u.yaml` `cv_band_1`           `show_cv_bands` -> `(show_cv_bands)`
+- [ ] `jamovi/advancedraincloud.u.yaml` `cv_band_2`           `show_cv_bands` -> `(show_cv_bands)`
+- [ ] `jamovi/clinicalalerts.u.yaml`    `custom_thresholds`   `!use_clinical_defaults` -> `(!use_clinical_defaults)`
+
+Gate to add: the python walk in the audit transcript, or extend
+`tools/check_uyaml_duplicate_names.py`.
+
+## [docs] `jamovi_u_yaml_guide.md` teaches the broken paren-less `enable:` form (2026-08-28)
+
+- [ ] `vignettes/jamovi_u_yaml_guide.md` lines ~204, 252, 268, 284, 302, 373, 562, 717, 883, 888
+      show `enable: performBootstrap` (no parens), which never binds. Fix the examples and
+      add two rules to the "Two schema traps" section (~line 413):
+      1. the whole expression must be wrapped in outer parens (`isValueDataBound`);
+      2. there is NO operator precedence -- operands fold strictly left-to-right, so
+         `(a || b && c)` is `((a || b) && c)`. Parenthesize inner groups.
+      Distinct from the R-side `.r.yaml visible:` routing trap -- different parser.
+
+## [i18n] jmvtools::i18nUpdate() is incremental, not a full rewrite (2026-08-28)
+
+- [ ] Record in `vignettes/` that `jmvtools::i18nUpdate()` touched only 77 lines per catalog
+      and preserved all 193 tr.po translations. Prior guidance assumed it rewrites all
+      ~28k entries, which discouraged running it; it is safe to run after adding msgids.
+
+## [schema] 19 phantom analyses registered in jamovi/0000.yaml with no .a.yaml source (2026-08-28)
+
+Found during the `decisioncombine` release review. `jamovi/0000.yaml` registers 420 analyses;
+19 have no `jamovi/<name>.a.yaml` at all. `0000.yaml` is GENERATED, so the fix is a
+regeneration (`jmvtools::prepare()`), not a hand edit -- but note prepare() appears to add
+without removing, so the stale blocks may need deletion at the source before regenerating.
+
+Why it matters beyond tidiness: each phantom's `description:` is still extracted into
+`catalog.pot` / `en.po` / `tr.po`, so translators are asked to translate text for analyses
+that do not exist. In `decisioncombine1`'s case the stale description promises
+"state-of-the-art statistical methods" and "Provides actionable recommendations" -- language
+the live analysis deliberately removed in favour of "descriptive ... not a clinical guide".
+A menu entry or a translated string making that promise is a clinical-safety wording problem,
+not just noise.
+
+- [ ] ggoncoplot, jconsort, jflowchart, ggflowchart, datecorrection, jjstreamgraph,
+      jjriverplot, jjsankeyfier, enhancednonparametric, flexiblebaseline, chisqposttestaddon,
+      flexparametricadv, principalcox, flexparametricadvanced, powersurvival, powercomprisk,
+      survivalPowerComprehensive, decisioncombine1, stagemigration1
+- [ ] Gate: assert every `analyses:` entry in 0000.yaml has a matching `.a.yaml`.
+
+## [i18n] decisioncombine Turkish translation is 2/206 and mixes languages in one table header (2026-08-28)
+
+- [ ] Only "Specificity"->"Ozgulluk" and "Accuracy"->"Dogruluk" are translated, both inherited
+      from other analyses. They sit in the SAME combinationTable header row as 15 untranslated
+      siblings, so a Turkish user sees a half-Turkish header. Translate the whole
+      `.metricLabel` family (R/decisioncombine.b.R:126-136) as one atomic unit, or none of it.
+- [ ] `i18n-plans/decisioncombine-tr-translation-plan.md` tables 53-64 and 71-86: 8 of 24
+      "English source" rows are not msgids anywhere in the catalog and 4 more belong to other
+      analyses. Regenerate the tables mechanically from the 206 catalog entries whose `#:`
+      refs contain decisioncombine.

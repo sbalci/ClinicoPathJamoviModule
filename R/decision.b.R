@@ -9,9 +9,9 @@
 #'   3. View results in tables and plots
 #' @importFrom R6 R6Class
 #' @import jmvcore
-#' @importFrom stats quantile qnorm
+#' @importFrom stats binom.test
 #' @importFrom dplyr %>% mutate case_when
-#' @importFrom forcats as_factor fct_relevel
+#' @importFrom forcats as_factor
 #' @importFrom epiR epi.tests
 #' @return An \code{R6} class generator object for the \code{decisionClass} backend; used internally by the jamovi analysis wrapper and not called directly.
 
@@ -132,10 +132,14 @@ decisionClass <- if (requireNamespace("jmvcore"))
 
                 # Map notice types to colors and icons
                 typeStyles <- list(
-                    ERROR = list(color = "#dc2626", bgcolor = "#fef2f2", border = "#fca5a5", icon = ""),
-                    STRONG_WARNING = list(color = "#ea580c", bgcolor = "#fff7ed", border = "#fdba74", icon = ""),
-                    WARNING = list(color = "#ca8a04", bgcolor = "#fefce8", border = "#fde047", icon = ""),
-                    INFO = list(color = "#2563eb", bgcolor = "#eff6ff", border = "#93c5fd", icon = "")
+                    # Translucent rgba tints, not opaque pastels: they composite over
+                    # either jamovi theme instead of painting a white block into the
+                    # dark one. Same palette as the reference implementation in
+                    # waterfall.b.R.
+                    ERROR = list(color = "#dc2626", bgcolor = "rgba(220, 38, 38, 0.10)", border = "#fca5a5", icon = ""),
+                    STRONG_WARNING = list(color = "#ea580c", bgcolor = "rgba(234, 88, 12, 0.10)", border = "#fdba74", icon = ""),
+                    WARNING = list(color = "#ca8a04", bgcolor = "rgba(202, 138, 4, 0.12)", border = "#fde047", icon = ""),
+                    INFO = list(color = "#2563eb", bgcolor = "rgba(37, 99, 235, 0.08)", border = "#93c5fd", icon = "")
                 )
 
                 html <- "<div style='margin: 10px 0;'>"
@@ -149,7 +153,7 @@ decisionClass <- if (requireNamespace("jmvcore"))
                         "padding: 12px; margin: 8px 0; border-radius: 4px;'>",
                         "<strong style='color: ", style$color, ";'>",
                         style$icon, " ", private$.safeHtmlOutput(notice$title), "</strong><br>",
-                        "<span style='color: #374151;'>", private$.safeHtmlOutput(notice$content), "</span>",
+                        "<span style='color: inherit;'>", private$.safeHtmlOutput(notice$content), "</span>",
                         "</div>"
                     )
                 }
@@ -161,39 +165,11 @@ decisionClass <- if (requireNamespace("jmvcore"))
 
             # Enhanced input validation for categorical diagnostic data
             .validateCategoricalInputs = function() {
-                # Check for required variables with helpful messages
-                if (length(self$options$gold) == 0) {
-                    private$.addNotice(
-                        type = "ERROR",
-                        title = "No gold standard variable selected",
-                        content = "Select a reference variable (e.g., biopsy result, final diagnosis). This represents the true disease status."
-                    )
-                    return(FALSE)
-                }
-                if (length(self$options$newtest) == 0) {
-                    private$.addNotice(
-                        type = "ERROR",
-                        title = "No test variable selected",
-                        content = "Select the diagnostic test you want to evaluate. This is typically a new, faster, or less expensive test."
-                    )
-                    return(FALSE)
-                }
-                if (length(self$options$goldPositive) == 0) {
-                    private$.addNotice(
-                        type = "ERROR",
-                        title = "No disease-present level selected for gold standard",
-                        content = "Select the level that indicates disease is present. This represents the condition you want to detect."
-                    )
-                    return(FALSE)
-                }
-                if (length(self$options$testPositive) == 0) {
-                    private$.addNotice(
-                        type = "ERROR",
-                        title = "No positive level selected for test variable",
-                        content = "Select the level that represents a positive test result. This should indicate suspected disease presence."
-                    )
-                    return(FALSE)
-                }
+                # No "variable not selected" branches here: .run() returns before
+                # calling this method unless gold, newtest, goldPositive and
+                # testPositive are all set (each is a scalar option, so its length
+                # check summing to 4 means all four are present). The unselected
+                # state is handled by the `welcome` panel instead.
 
                 # Check data availability
                 if (is.null(self$data) || nrow(self$data) == 0) {
@@ -508,8 +484,17 @@ decisionClass <- if (requireNamespace("jmvcore"))
                         )
                     ) %>%
                     dplyr::mutate(
-                        testVariable2 = forcats::fct_relevel(testVariable2, "Positive"),
-                        goldVariable2 = forcats::fct_relevel(goldVariable2, "Positive")
+                        # intersect(), not fct_relevel(): a cohort filtered down to a
+                        # single disease category has no "Positive" level, and
+                        # fct_relevel() warns about it straight into jamovi's Analysis
+                        # Notes as raw package chatter -- on exactly the run that
+                        # otherwise shows nothing. Same ordering and same one-level
+                        # result; the structural 2x2 check below still raises the
+                        # real error.
+                        testVariable2 = factor(testVariable2,
+                                               levels = intersect(c("Positive", "Negative"), testVariable2)),
+                        goldVariable2 = factor(goldVariable2,
+                                               levels = intersect(c("Positive", "Negative"), goldVariable2))
                     )
 
                 # Remove rows with NA in recoded variables (excluded levels when explicit negative specified)
@@ -702,7 +687,7 @@ decisionClass <- if (requireNamespace("jmvcore"))
                 )
                 
                 # Generate template
-                template_string <- .("<div style='margin: 15px; padding: 15px; border: 2px dashed #2196F3; background-color: rgba(33, 152, 239, 0.13); color: inherit;'><h3 style='color: #1976D2; margin-top: 0;'>Copy-Ready Clinical Report</h3><div style='background: white; padding: 10px; border-radius: 5px; font-family: Arial, sans-serif;'><p><strong>DIAGNOSTIC TEST EVALUATION</strong></p><p>We evaluated the diagnostic performance of %s compared to the gold standard %s. The test demonstrated a sensitivity of %.1f%% and specificity of %.1f%% %s. At a disease prevalence of %.1f%%, the positive predictive value was %.1f%% and the negative predictive value was %.1f%%. The positive likelihood ratio of %.1f provides %s.</p></div><p style='font-size: 12px; color: #666;'><em>Copy the text above for your clinical report. Modify as needed for your specific context.</em></p></div>")
+                template_string <- .("<div style='margin: 15px; padding: 15px; border: 2px dashed #2196F3; background-color: rgba(33, 152, 239, 0.13); color: inherit;'><h3 style='color: #1976D2; margin-top: 0;'>Copy-Ready Clinical Report</h3><div style='background: rgba(255, 255, 255, 0.06); color: inherit; padding: 10px; border-radius: 5px; font-family: Arial, sans-serif;'><p><strong>DIAGNOSTIC TEST EVALUATION</strong></p><p>We evaluated the diagnostic performance of %s compared to the gold standard %s. The test demonstrated a sensitivity of %.1f%% and specificity of %.1f%% %s. At a disease prevalence of %.1f%%, the positive predictive value was %.1f%% and the negative predictive value was %.1f%%. The positive likelihood ratio of %.1f provides %s.</p></div><p style='font-size: 12px; color: inherit; opacity: 0.75;'><em>Copy the text above for your clinical report. Modify as needed for your specific context.</em></p></div>")
 
                 # Escape user-derived variable names before HTML interpolation
                 test_name_safe <- private$.safeHtmlOutput(test_name)
@@ -722,41 +707,45 @@ decisionClass <- if (requireNamespace("jmvcore"))
                 return(template)
             },
             
-            # Enhanced misuse detection and warnings
+            # Misuse detection.
+            #
+            # These used to be assembled into an HTML panel prepended to
+            # clinicalInterpretation, which is visible: (showClinicalInterpretation)
+            # and defaults to FALSE -- so the warnings a clinician most needs were
+            # the ones hidden behind an opt-in checkbox. They now go to the
+            # always-visible notices pane.
+            #
+            # The small-cell (< 5) and small-sample checks that used to live here
+            # were duplicates of .validateSampleSize(), which already covers both
+            # and already writes to notices. Only the three checks unique to this
+            # function remain.
             .detectMisuse = function(conf_table, prevalence, n_total) {
-                warnings <- c()
-                
-                # Check for small cell counts
-                if (any(conf_table < 5)) {
-                    warnings <- c(warnings, 
-                        .("Small cell counts detected (< 5). Results may be unstable. Consider collecting more data or using exact methods."))
-                }
-                
-                # Check for extreme prevalence
                 if (!is.na(prevalence) && prevalence < 0.05) {
-                    warnings <- c(warnings,
-                        .("Very low disease prevalence (< 5%). Positive predictive value may be unreliable. Consider the clinical context carefully."))
+                    private$.addNotice(
+                        type = "STRONG_WARNING",
+                        title = sprintf('Very low disease prevalence (%.1f%%)', 100 * prevalence),
+                        content = "Positive predictive value is unstable at this prevalence and will not transfer to a population with a different one. Sensitivity and specificity are unaffected. Consider supplying a population prior under Population Prevalence Settings."
+                    )
                 }
 
                 if (!is.na(prevalence) && prevalence > 0.95) {
-                    warnings <- c(warnings,
-                        .("Very high disease prevalence (> 95%). Negative predictive value may be unreliable. Verify your data coding."))
+                    private$.addNotice(
+                        type = "STRONG_WARNING",
+                        title = sprintf('Very high disease prevalence (%.1f%%)', 100 * prevalence),
+                        content = "Negative predictive value is unstable at this prevalence. Verify that the level selected as disease-present is the one you meant."
+                    )
                 }
 
-                # Check for small sample size
-                if (!is.na(n_total) && n_total < 30) {
-                    warnings <- c(warnings,
-                        .("Small sample size (< 30). Confidence intervals may be wide. Interpret results cautiously."))
-                }
-
-                # Check for unbalanced data
-                pos_ratio <- sum(conf_table[1,]) / n_total
+                pos_ratio <- sum(conf_table[1, ]) / n_total
                 if (!is.na(pos_ratio) && (pos_ratio < 0.1 || pos_ratio > 0.9)) {
-                    warnings <- c(warnings,
-                        .("Highly unbalanced test results. Consider the appropriateness of the selected positive level."))
+                    private$.addNotice(
+                        type = "WARNING",
+                        title = sprintf('Highly unbalanced test results (%.1f%% positive)', 100 * pos_ratio),
+                        content = "Check that the level selected under Test Positive Level is the one you meant: this analysis has no numeric cut-point, it simply treats that level as a positive result."
+                    )
                 }
-                
-                return(warnings)
+
+                invisible(NULL)
             },
             
             # Generate About This Analysis content
@@ -1089,6 +1078,14 @@ decisionClass <- if (requireNamespace("jmvcore"))
                 # N runs (same pattern fixed in survival.b.R).
                 private$.noticeList <- list()
 
+                # Render whatever was collected however this method exits. Five
+                # early return()s sit between here and the end of .run(), and each
+                # one used to discard every notice the validators had raised -- a
+                # failed run showed empty tables and no explanation at all. on.exit
+                # also fires while an error unwinds, so the ERROR notices added
+                # inside the confusion-matrix handler reach the user too.
+                on.exit(private$.renderNotices(), add = TRUE)
+
                 # Early return if variables not selected
                 if (length(self$options$testPositive) + length(self$options$newtest) +
                     length(self$options$goldPositive) + length(self$options$gold) < 4)
@@ -1116,12 +1113,11 @@ decisionClass <- if (requireNamespace("jmvcore"))
                 private$.checkDataSize(mydata)
 
                 # Enhanced missing data reporting
+                # missingDataSummary is visible: (od), so it is written once, under the
+                # `if (od)` guard further down. Writing it here as well only filled a
+                # hidden element -- and the WARNING notice raised in .prepareAnalysisData()
+                # is what actually tells the user cases were dropped.
                 missing_analysis <- private$.analyzeMissingData(original_data, mydata)
-                if (nrow(original_data) != nrow(mydata)) {
-                    # Missing data summary is already shown via missingDataSummary HTML output
-                    # No need for console message - users see it in the results panel
-                    self$results$missingDataSummary$setContent(missing_analysis)
-                }
 
                 # Table 1 ----
 
@@ -1714,34 +1710,9 @@ decisionClass <- if (requireNamespace("jmvcore"))
                     self$results$reportTemplate$setContent(content_results$report_template)
                 }
                 
-                # Detect misuse and display warnings
-                tryCatch({
-                    warnings <- private$.detectMisuse(conf_table, PrevalenceD, TotalPop)
-                    
-                    if (length(warnings) > 0) {
-                        warning_text <- paste(warnings, collapse = "<br>")
-                        warning_panel <- sprintf(
-                            "<div style='margin: 10px; padding: 10px; border-left: 4px solid #FF5722; background-color: rgba(255, 33, 67, 0.09); color: inherit;'><h4 style='color: #D32F2F; margin-top: 0;'>Analysis Warnings</h4>%s</div>",
-                            warning_text
-                        )
-                        
-                        # Prepend warnings to clinical interpretation.
-                        # Read the generated clinical summary from content_results (guarded);
-                        # the previous `clinical_summary` reference was undefined and threw,
-                        # so the enclosing tryCatch swallowed it and misuse warnings were never shown.
-                        if ("clinicalInterpretation" %in% names(self$results)) {
-                            current_content <- if (!is.null(content_results) &&
-                                                   !is.null(content_results$clinical_summary)) {
-                                content_results$clinical_summary
-                            } else {
-                                ""
-                            }
-                            self$results$clinicalInterpretation$setContent(paste0(warning_panel, current_content))
-                        }
-                    }
-                }, error = function(e) {
-                    # Silently handle misuse detection errors
-                })
+                # Detect misuse. Emits notices directly, so there is nothing to
+                # splice into an opt-in HTML panel any more.
+                private$.detectMisuse(conf_table, PrevalenceD, TotalPop)
 
                 # Misclassified Cases Analysis and Output
                 tryCatch({
@@ -1774,6 +1745,14 @@ decisionClass <- if (requireNamespace("jmvcore"))
                 ci <- self$options$ci
 
                 if (ci) {
+                    # addRow() appends and accepts a duplicate rowKey, and clearWith
+                    # cannot see a variable change that leaves pp/pprob untouched, so
+                    # without this the CI tables list every statistic twice on re-run.
+                    # Cleared before the tryCatch so a failed epiR call leaves the
+                    # tables empty rather than showing the previous run's numbers.
+                    self$results$epirTable_ratio$deleteRows()
+                    self$results$epirTable_number$deleteRows()
+
                     # epiR confidence intervals with error handling
                     epir_success <- FALSE
                     epirresult_ratio <- NULL
@@ -1960,8 +1939,8 @@ decisionClass <- if (requireNamespace("jmvcore"))
                     image1$setState(plotData1)
                 }
 
-                # Render all collected notices as HTML (last step)
-                private$.renderNotices()
+                # Notices are rendered by the on.exit() handler registered at the
+                # top of .run(), so every exit path gets them -- not just this one.
 
             },
 

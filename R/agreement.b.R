@@ -33,35 +33,30 @@ agreementClass <- if (requireNamespace("jmvcore")) {
             .init = function() {
                 # Pre-initialize tables with column formatting and notes
 
-                # Set confidence level in table titles where relevant
+                # Every CI listed below is computed at confLevel, but the .r.yaml
+                # titles carry the literal "95%" default. Four tables used to be
+                # retitled here one hand-written block each, and the other seven
+                # were simply missed: at confLevel = 0.80 their interval narrowed
+                # while the header still read "95% CI". Retitle them all from one
+                # list so a new CI table cannot silently inherit the wrong label.
                 conf_pct <- round(self$options$confLevel * 100, 0)
 
-                # Update ICC table CI column titles
-                if (!is.null(self$results$iccTable)) {
-                    iccTable <- self$results$iccTable
-                    iccTable$getColumn("ci_lower")$setSuperTitle(paste0(conf_pct, "% CI"))
-                    iccTable$getColumn("ci_upper")$setSuperTitle(paste0(conf_pct, "% CI"))
+                # CI columns sharing one spanning "N% CI" super-header
+                for (nm in c("iccTable", "linCCCTable", "bootstrapCITable")) {
+                    tbl <- self$results[[nm]]
+                    if (is.null(tbl)) next
+                    for (col in c("ci_lower", "ci_upper"))
+                        tbl$getColumn(col)$setSuperTitle(paste0(conf_pct, "% CI"))
                 }
 
-                # Update CCC table CI column titles
-                if (!is.null(self$results$linCCCTable)) {
-                    cccTable <- self$results$linCCCTable
-                    cccTable$getColumn("ci_lower")$setSuperTitle(paste0(conf_pct, "% CI"))
-                    cccTable$getColumn("ci_upper")$setSuperTitle(paste0(conf_pct, "% CI"))
-                }
-
-                # Update bootstrap CI table titles
-                if (!is.null(self$results$bootstrapCITable)) {
-                    bootTable <- self$results$bootstrapCITable
-                    bootTable$getColumn("ci_lower")$setSuperTitle(paste0(conf_pct, "% CI"))
-                    bootTable$getColumn("ci_upper")$setSuperTitle(paste0(conf_pct, "% CI"))
-                }
-
-                # Update Gwet CI column titles
-                if (!is.null(self$results$gwetTable)) {
-                    gwetTable <- self$results$gwetTable
-                    gwetTable$getColumn("ci_lower")$setTitle(paste0(conf_pct, "% CI Lower"))
-                    gwetTable$getColumn("ci_upper")$setTitle(paste0(conf_pct, "% CI Upper"))
+                # CI columns titled individually
+                for (nm in c("gwetTable", "allPairsKappaTable", "itemModalAgreementTable",
+                             "tdiTable", "specificAgreementTable", "subgroupAgreementTable",
+                             "interIntraRaterIntraTable", "interIntraRaterInterTable")) {
+                    tbl <- self$results[[nm]]
+                    if (is.null(tbl)) next
+                    tbl$getColumn("ci_lower")$setTitle(paste0(conf_pct, "% CI Lower"))
+                    tbl$getColumn("ci_upper")$setTitle(paste0(conf_pct, "% CI Upper"))
                 }
             },
             .createSummary = function(result1, result2, wght, exct, ci_lo = NA_real_, ci_hi = NA_real_) {
@@ -1488,12 +1483,15 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                 }
 
                 # Convert factors to numeric if needed (preserving ordinal structure)
-                ratings_matrix <- as.matrix(ratings_clean)
-                for (i in seq_len(ncol(ratings_matrix))) {
-                    if (is.factor(ratings_clean[[i]]) || is.ordered(ratings_clean[[i]])) {
-                        ratings_matrix[, i] <- as.numeric(ratings_clean[[i]])
-                    }
-                }
+                # Build the matrix FROM the converted columns. as.matrix() on a
+                # data.frame holding any factor returns a CHARACTER matrix, and
+                # assigning numerics into it silently coerces them straight back,
+                # so the in-place loop this replaced was a no-op: Spearman and
+                # Robinson's A died on "non-numeric argument" and returned an
+                # all-NA row, and Kendall's W ranked the LABELS lexicographically
+                # (0.497 instead of 0.570 on a 12-level scale - correct only while
+                # every level is a single character).
+                ratings_matrix <- vapply(ratings_clean, as.numeric, numeric(nrow(ratings_clean)))
 
                 # Calculate Kendall's W
                 tryCatch(
@@ -1735,12 +1733,15 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                 }
 
                 # Convert factors to numeric (preserving ordinal structure)
-                ratings_matrix <- as.matrix(ratings_clean)
-                for (i in seq_len(ncol(ratings_matrix))) {
-                    if (is.factor(ratings_clean[[i]]) || is.ordered(ratings_clean[[i]])) {
-                        ratings_matrix[, i] <- as.numeric(ratings_clean[[i]])
-                    }
-                }
+                # Build the matrix FROM the converted columns. as.matrix() on a
+                # data.frame holding any factor returns a CHARACTER matrix, and
+                # assigning numerics into it silently coerces them straight back,
+                # so the in-place loop this replaced was a no-op: Spearman and
+                # Robinson's A died on "non-numeric argument" and returned an
+                # all-NA row, and Kendall's W ranked the LABELS lexicographically
+                # (0.497 instead of 0.570 on a 12-level scale - correct only while
+                # every level is a single character).
+                ratings_matrix <- vapply(ratings_clean, as.numeric, numeric(nrow(ratings_clean)))
 
                 n_raters <- ncol(ratings_matrix)
                 n_subjects <- nrow(ratings_matrix)
@@ -2089,12 +2090,15 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                 }
 
                 # Convert factors to numeric (preserving ordinal structure)
-                ratings_matrix <- as.matrix(ratings_clean)
-                for (i in seq_len(ncol(ratings_matrix))) {
-                    if (is.factor(ratings_clean[[i]]) || is.ordered(ratings_clean[[i]])) {
-                        ratings_matrix[, i] <- as.numeric(ratings_clean[[i]])
-                    }
-                }
+                # Build the matrix FROM the converted columns. as.matrix() on a
+                # data.frame holding any factor returns a CHARACTER matrix, and
+                # assigning numerics into it silently coerces them straight back,
+                # so the in-place loop this replaced was a no-op: Spearman and
+                # Robinson's A died on "non-numeric argument" and returned an
+                # all-NA row, and Kendall's W ranked the LABELS lexicographically
+                # (0.497 instead of 0.570 on a 12-level scale - correct only while
+                # every level is a single character).
+                ratings_matrix <- vapply(ratings_clean, as.numeric, numeric(nrow(ratings_clean)))
 
                 n_raters <- ncol(ratings_matrix)
                 n_subjects <- nrow(ratings_matrix)

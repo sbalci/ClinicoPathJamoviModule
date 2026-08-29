@@ -132,7 +132,6 @@ test_that("decisioncombine adds pattern to data", {
     test1Positive = "Positive",
     test2 = "rater2",
     test2Positive = "Positive",
-    addPatternToData = TRUE,
     test3Positive = NULL
   )
 

@@ -2,9 +2,9 @@
 
 
 
-jjbetweenstats
-jjdotchart
-jjdotplotstats
+
+
+
 jjwithinstats
 lollipop
 raincloud

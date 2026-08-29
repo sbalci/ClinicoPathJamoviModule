@@ -1,10 +1,10 @@
 ---
 name:  decision
 title: Medical Decision
-menuGroup: meddecideT
+menuGroup: meddecide
 menuSubgroup: Decision
 menuSubtitle: Sensitivity, Specificity, PPV, NPV
-version: '1.0.7'
+version: '1.0.8'
 jas: '1.2'
 
 description:
@@ -251,6 +251,8 @@ options:
         - newtest
         - goldPositive
         - testPositive
+        - goldNegative
+        - testNegative
       description:
           ui: >
             Save the classification results (True Positive, False Positive, False Negative, True Negative)

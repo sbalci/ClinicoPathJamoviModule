@@ -21,7 +21,7 @@ decisioncombine(
   showForest = FALSE,
   showDecisionTree = FALSE,
   showRecommendation = FALSE,
-  addPatternToData = FALSE,
+  showAbout = FALSE,
   filterStatistic = "all",
   filterPattern = "all"
 )
@@ -61,16 +61,17 @@ analysis.}
 \item{showDecisionTree}{Boolean to display the decision-space (sensitivity
 vs specificity) scatter plot.}
 
-\item{showRecommendation}{Boolean to show the descriptive strategy ranking
-table.}
+\item{showRecommendation}{Boolean to show the descriptive candidate-rule
+ranking table.}
 
-\item{addPatternToData}{Boolean to add test pattern column to the dataset.}
+\item{showAbout}{Boolean to show the about-this-analysis and assumptions
+panels.}
 
 \item{filterStatistic}{Character indicating which statistic to display in
-the plots (default: all).}
+the plots; \code{all} uses each plot's default metric set.}
 
 \item{filterPattern}{Character indicating which pattern type to display in
-the plots (default: all).}
+the bar chart, heatmap and forest plot (default: all).}
 }
 \value{
 A results object containing:
@@ -90,8 +91,10 @@ A results object containing:
 \code{results$heatmapPlot} \tab \tab \tab \tab \tab Color-coded heatmap showing all diagnostic metrics for each test pattern \cr
 \code{results$forestPlot} \tab \tab \tab \tab \tab Forest plot displaying 95 percent confidence intervals for key diagnostic metrics \cr
 \code{results$decisionTreePlot} \tab \tab \tab \tab \tab Decision-space scatter plot positioning each test pattern by its sensitivity and specificity, with point size scaled by Youden's J \cr
-\code{results$recommendationTable} \tab \tab \tab \tab \tab Sample-dependent descriptive ranking of named testing strategies by observed Youden index; this is not a clinical guide or validated recommendation \cr
+\code{results$recommendationTable} \tab \tab \tab \tab \tab Sample-dependent descriptive ranking of eligible exact-pattern rules and named testing strategies by observed Youden index; this is not a clinical guide or validated recommendation \cr
 \code{results$addedPattern} \tab \tab \tab \tab \tab an output \cr
+\code{results$about} \tab \tab \tab \tab \tab a html \cr
+\code{results$assumptions} \tab \tab \tab \tab \tab a html \cr
 \code{results$notices} \tab \tab \tab \tab \tab a html \cr
 }
 

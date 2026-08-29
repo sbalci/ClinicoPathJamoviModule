@@ -1,218 +1,312 @@
-# decisioncombine Turkish (TR) Translation Plan
+# `decisioncombine` Turkish Translation Plan
 
-## File Status Summary
+## Scope and implementation status
 
-**SANITIZED_FN**: `decisioncombine`
+Target analysis: `decisioncombine`
 
-### Target files found:
-- ✅ `jamovi/decisioncombine.a.yaml` (options)
-- ✅ `jamovi/decisioncombine.u.yaml` (UI)  
-- ✅ `jamovi/decisioncombine.r.yaml` (results)
-- ✅ `R/decisioncombine.b.R` (backend)
+Files reviewed:
 
-### NAMESPACE Status:
-- ✅ `importFrom(jmvcore, .)` already present (line 854)
+- `R/decisioncombine.b.R`
+- `jamovi/decisioncombine.a.yaml`
+- `jamovi/decisioncombine.u.yaml`
+- `jamovi/decisioncombine.r.yaml`
+- `jamovi/i18n/catalog.pot`
+- `jamovi/i18n/en.po`
+- `jamovi/i18n/tr.po`
 
-## Required String Wrapping Patches
+The backend imports `jmvcore::.` through roxygen. User-facing validation notices,
+recommendation explanations, strategy labels, table labels, and plot labels are wrapped
+for extraction. Dynamic values use named `{placeholder}` tokens with
+`jmvcore::format()` so translators can reorder them safely. Programmatic identifiers,
+result keys, option values, and internal `Positive`/`Negative` comparison values remain
+untranslated.
 
-### High Priority: Error & Warning Messages
+## Terminology
 
-**File**: `R/decisioncombine.b.R`
+Use formal medical Turkish and keep the following translations consistent:
+
+| English | Turkish |
+|---|---|
+| Gold standard | Altın standart |
+| Sensitivity | Duyarlılık |
+| Specificity | Özgüllük |
+| Positive predictive value (PPV) | Pozitif öngörü değeri (PPV) |
+| Negative predictive value (NPV) | Negatif öngörü değeri (NPV) |
+| Accuracy | Doğruluk |
+| Balanced accuracy | Dengeli doğruluk |
+| Youden's J | Youden J indeksi |
+| Positive likelihood ratio | Pozitif olabilirlik oranı |
+| Negative likelihood ratio | Negatif olabilirlik oranı |
+| Diagnostic odds ratio | Tanısal odds oranı |
+| Confidence interval | Güven aralığı |
+| Complete-case analysis | Tam olgu analizi |
+| Parallel strategy | Paralel strateji |
+| Serial strategy | Seri strateji |
+| Majority rule | Çoğunluk kuralı |
+| Test pattern | Test deseni |
+
+Preserve statistical abbreviations used in the output (`PPV`, `NPV`, `LR+`, `LR-`,
+`DOR`) and preserve placeholders exactly, including their braces.
+
+## High-priority message translations
+
+Generated mechanically from `jamovi/i18n/catalog.pot`: every entry whose `#:` reference
+lines include `R/decisioncombine.b.R`. 108 rows. A blank Turkish cell is untranslated and
+is outstanding work; filled cells were carried over from the previous revision of this
+plan or from `tr.po`. Some rows are shared msgids that other analyses also reference, so
+a translation there changes those analyses too.
+
+| English source | Suggested Turkish |
+|---|---|
+| {n} rules tie on Youden's J ({rules}); "{shown}" is displayed only because it comes first. |  |
+| {variable} has {n} levels |  |
+| A gold standard variable is required. Select a reference test. |  |
+| A Haldane-Anscombe continuity correction of 0.5 was applied to {n} pattern(s) with at least one zero cell ({patterns}). The correction affects LR+, LR-, the diagnostic odds ratio and their confidence intervals only; sensitivity, specificity, PPV and NPV on the same rows use the observed counts. |  |
+| Accuracy | Doğruluk |
+| All Zero Counts |  |
+| At least four cases are required for analysis. |  |
+| At least four complete cases are required for combination analysis; only {used} of {total} cases remain after excluding missing values. |  |
+| Balanced Accuracy |  |
+| Complete-case analysis uses {used} of {total} cases ({percent}%) for the combination analysis. Cases missing the gold standard or any selected test were excluded. Individual-test tables use their own pairwise-complete denominators. If data are not missing completely at random, investigate the missingness pattern. |  |
+| Continuity Correction |  |
+| Decision Space - Sensitivity vs Specificity |  |
+| Descriptive Youden ranking |  |
+| Diagnostic Performance Comparison |  |
+| DOR |  |
+| epiR Package Missing |  |
+| Estimate (95% CI) |  |
+| Every complete case has gold standard "{level}", so this sample contains no disease-absent cases. Specificity and NPV cannot be estimated and are reported as blank. Diagnostic accuracy assessment requires both diseased and non-diseased cases. |  |
+| Every complete case has gold standard "{level}", so this sample contains no disease-present cases. Sensitivity and PPV cannot be estimated and are reported as blank. Diagnostic accuracy assessment requires both diseased and non-diseased cases. |  |
+| Every pattern and strategy is reported together with no adjustment for multiple comparisons. Treat the best-looking row as a hypothesis to confirm in new data, not as an established result. |  |
+| Extreme Disease Prevalence |  |
+| Extreme disease prevalence in the combination analysis: {percent}% ({diseased}/{observed} complete cases). PPV and NPV are highly sensitive to prevalence and may not generalize to populations with different disease rates. Sensitivity and specificity can also vary across settings and case mix, and with so few cases in one arm the likelihood ratios and diagnostic odds ratios for every pattern rest on a very small denominator. Individual-test tables use their own pairwise denominators, so their prevalence may differ. |  |
+| Forest Plot - 95% Confidence Intervals |  |
+| Forest Plot Not Available for Selected Statistic |  |
+| gold standard |  |
+| Gold Standard Has Only One Outcome |  |
+| Individual Test {test} statistics use {used} of {total} cases with both the test and reference standard observed. |  |
+| Insufficient Complete Cases |  |
+| Insufficient Data |  |
+| Invalid Counts |  |
+| Invalid counts were detected for pattern "{pattern}". This combination was skipped. |  |
+| Invalid counts were detected for Test {test}. The individual analysis was skipped. |  |
+| Its advantage is not established: the lower bound of this rule's Youden's J ({lower}) falls at or below the next-best rule's point estimate ({runnerUp}), so the ranking may reflect sampling variation rather than a real difference. |  |
+| LR- |  |
+| LR+ |  |
+| LR+, LR- and the diagnostic odds ratio are computed with a Haldane-Anscombe 0.5 continuity correction when a cell is zero, so they stay finite; sensitivity, specificity, PPV and NPV on the same row use the observed counts. The two therefore need not agree exactly at a zero cell. |  |
+| Majority (>=2/3 pos) |  |
+| Missing Level | Eksik Düzey |
+| Negative |  |
+| No candidate rule has an estimable Youden index with all 2-by-2 cell counts at least 5. |  |
+| No Complete Cases | Tam Olgu Yok |
+| No complete cases remain after removing missing data. | Eksik veriler çıkarıldıktan sonra tam olgu kalmadı. |
+| No Data |  |
+| No data are available. Load data before running the analysis. |  |
+| No Gold Positive Level |  |
+| No Gold Standard |  |
+| No observations were found for pattern "{pattern}". This combination was skipped. |  |
+| No Rule Performs Better Than Chance |  |
+| No Test 1 |  |
+| No Test 1 Positive Level |  |
+| No Test 2 Positive Level |  |
+| No Test 3 Positive Level |  |
+| No valid observations were found for Test {test}. The individual analysis was skipped. |  |
+| None of the {n} eligible candidate rules has a Youden's J above zero, so none discriminates better than chance in this sample and no rule is ranked. A rule with a negative Youden's J is anti-predictive: its result would have to be reversed to carry information. Review the positive-level assignments for the reference standard and each test before interpreting these results. |  |
+| NPV |  |
+| Observed sensitivity and specificity are both above 70%. |  |
+| Observed sensitivity and specificity are both above 80%. |  |
+| Parallel (>=1 pos) |  |
+| Pattern | Desen |
+| Pattern "{pattern}" produced no variation and was omitted from the combination results. |  |
+| Pattern Omitted |  |
+| Performance Heatmap | Performans Isı Haritası |
+| Positive |  |
+| Positive and negative predictive values are calculated using the sample prevalence. Interpret them cautiously if the sample does not represent the target clinical population. |  |
+| PPV |  |
+| PPV/NPV Interpretation |  |
+| Prevalence |  |
+| Removed {n} case(s) with missing values |  |
+| Rows whose label is a result pattern (e.g. "+/-") are mutually exclusive groups, not decision rules: for those rows "Sensitivity" is the proportion of diseased patients showing that exact pattern, and the columns should be read that way. The named rows -- Parallel (>=1 pos), Majority (>=2/3 pos), and the all-positive pattern, which is the Serial (AND) rule -- are the strategies you can apply to a patient. |  |
+| Select the disease-present level for the gold standard. |  |
+| Select the positive level for Test 1. |  |
+| Select the positive level for Test 2. | Test 2 için pozitif düzeyi seçin. |
+| Select the positive level for Test 3. | Test 3 için pozitif düzeyi seçin. |
+| Sensitivity |  |
+| Serial (all pos) |  |
+| Single test |  |
+| Sparse Strategy Counts | Seyrek Strateji Sayımları |
+| Specificity | Özgüllük |
+| Strategy |  |
+| Strategy Ranking Unavailable | Strateji Sıralaması Kullanılamıyor |
+| Test {test} cannot be summarized because no case has both the test and reference-standard result. |  |
+| Test {test} Has No Complete Cases |  |
+| Test {test} Pairwise Denominator |  |
+| Test 1 |  |
+| Test 1 is required. Select at least one test variable. |  |
+| Test 2 |  |
+| Test 2 Required Before Test 3 |  |
+| Test 3 |  |
+| Test 3 cannot be combined without Test 2. Select Test 2 and its positive level, or remove Test 3. |  |
+| Test Negative |  |
+| Test Pattern |  |
+| Test Positive |  |
+| The epiR package is required for combination analysis. Install it with install.packages("epiR"). |  |
+| The epiR package is required for diagnostic test analysis. Install it with install.packages("epiR") or disable individual test statistics. |  |
+| The forest plot is not drawn for "{statistic}" because this analysis does not calculate a confidence interval for that statistic. The bar chart and heatmap can still display it. |  |
+| The highest observed Youden's J among the eligible candidate rules was {youden}. |  |
+| The observed results involve a trade-off between sensitivity and specificity. |  |
+| The reference standard and tests must use different variables. Select a different variable for: {variables}. |  |
+| The specified positive level "{level}" is not defined for variable "{variable}" ({label}). Select a level that exists in the data. |  |
+| These testing strategies have a 2-by-2 cell count below 5 (smallest cell {minimum}): {strategies}. Their likelihood-ratio and diagnostic-odds-ratio estimates and confidence intervals may be unstable, and they are excluded from the candidate-rule ranking. Treat these results as exploratory and validate them in a larger independent sample. |  |
+| This is a descriptive ranking of {n} candidate rule(s) with all 2-by-2 cell counts at least 5 and a Youden's J above zero; no significance test or multiplicity correction was applied. |  |
+| This is a descriptive, sample-dependent ranking of exact-pattern rules and named testing strategies. It is not a clinical guide or validated recommendation. |  |
+| This sample-dependent ranking is an analytical summary, not a clinical guide or validated recommendation. |  |
+| Total |  |
+| Value |  |
+| Variable "{variable}" ({label}) has {n} levels: {levels}. Only "{positive}" is treated as positive; every other level ({others}) is counted as NEGATIVE. If any of those levels represent equivocal or indeterminate results, this recoding can bias sensitivity, specificity, predictive values, and likelihood ratios and make them difficult to interpret. Recode the variable to two levels and set equivocal results to missing if that is not what you intend. |  |
+| Variables Must Be Distinct |  |
+| Youden's J |  |
+
+Long notices should be translated as complete sentences. Do not split a sentence around
+a placeholder or concatenate translated fragments.
+
+## UI and output translations
+
+Generated mechanically from `jamovi/i18n/catalog.pot`: every entry whose `#:` reference
+lines point at `decisioncombine/...` or `package/analyses/decisioncombine...` (the
+`.a.yaml`, `.u.yaml` and `.r.yaml` strings) and not at the backend. 98 rows, same blank-cell
+convention as above.
+
+| English source | Suggested Turkish |
+|---|---|
+| 95% CI |  |
+| Add a new column to the dataset containing the test combination pattern for each case (e.g., "+/+", "+/-", "-/-"). |  |
+| Advanced medical diagnostic test combination analysis for categorical tests  with comprehensive clinical interpretation. This function systematically  evaluates all possible test result combinations (2-test: 4 patterns,  3-test: 8 patterns) against a gold standard using state-of-the-art  statistical methods. Features include Wilson score confidence intervals  for enhanced accuracy, performance heatmaps, decision trees, and  publication-quality visualizations with clinical decision thresholds.  Provides actionable recommendations for screening vs. confirmatory testing  strategies with detailed clinical interpretation guidelines. Essential for  evidence-based diagnostic protocol development and categorical test  validation studies. |  |
+| All Patterns |  |
+| All Tests Negative |  |
+| All Tests Positive |  |
+| Bar chart |  |
+| Bar Chart - Performance Comparison |  |
+| Color-coded heatmap showing all diagnostic metrics for each test pattern |  |
+| Combine and evaluate test patterns |  |
+| Combine Medical Decision Tests |  |
+| Combine Medical Decision Tests 1 |  |
+| Combine tests and evaluate performance |  |
+| Contingency Table |  |
+| Count |  |
+| Counts and diagnostic performance metrics for each test combination pattern and clinical strategy, including prevalence, balanced accuracy, Youden's J, likelihood ratios, and diagnostic odds ratios |  |
+| Cross-tabulation showing how test combination patterns align with gold standard results |  |
+| Decision |  |
+| Decision space (sensitivity vs specificity) |  |
+| Decision Space: Sensitivity vs Specificity |  |
+| Decision-space scatter plot positioning each test pattern by its sensitivity and specificity, with point size scaled by Youden's J |  |
+| Default Metric Set |  |
+| Descriptive candidate-rule ranking |  |
+| Descriptive Candidate-Rule Ranking |  |
+| Diagnostic OR |  |
+| Diagnostic Statistics |  |
+| Disease Present Level |  |
+| Display a decision-space scatter plot positioning each test pattern by its sensitivity and specificity, with point size scaled by Youden's J. |  |
+| Display diagnostic statistics for each individual test before combinations. |  |
+| Display forest plot showing confidence intervals for key diagnostic metrics across patterns. |  |
+| Display frequency distribution tables for the gold standard and cross-tabulation of test results. |  |
+| Display grouped bar chart comparing performance metrics across test combinations. |  |
+| Display heatmap showing all metrics for all test patterns with color-coded performance values. |  |
+| Display Options |  |
+| Estimate | Tahmin |
+| Filter by pattern type |  |
+| Filter by statistic |  |
+| Filter the bar chart, heatmap and forest plot by pattern type: all patterns, all tests positive (+/+, +/+/+), all tests negative (-/-, -/-/-), or mixed/discordant patterns. Named strategy rows are not result patterns and are excluded whenever a specific pattern type is selected. The performance tables always show every pattern, and the decision-space plot always shows every row so patterns remain comparable. |  |
+| Filters |  |
+| First diagnostic test to evaluate. Must have at least 2 levels. |  |
+| FN |  |
+| Forest plot |  |
+| Forest Plot - Confidence Intervals |  |
+| Forest plot displaying 95 percent confidence intervals for key diagnostic metrics |  |
+| FP |  |
+| Frequency distribution of the gold standard (reference) test showing counts and percentages for each level |  |
+| Frequency tables |  |
+| Gold Negative |  |
+| Gold Positive |  |
+| Gold Standard (Reference Test) |  |
+| Gold Standard Frequency Distribution |  |
+| Grouped bar chart comparing sensitivity, specificity, PPV, NPV, and accuracy across test combinations |  |
+| Heatmap |  |
+| Heatmap - All Metrics by Pattern |  |
+| Highest-Ranked Rule |  |
+| Individual test statistics |  |
+| Interpretation |  |
+| Level |  |
+| Likelihood Ratios with 95% Confidence Intervals |  |
+| Log-scale 95 percent confidence intervals for LR+, LR- and the diagnostic odds ratio. These are ratios on an unbounded scale, so they are reported separately from the proportions above rather than sharing a column with them. |  |
+| Lower |  |
+| meddecideT |  |
+| Mixed/Discordant |  |
+| Notices |  |
+| Optional third test for 3-way combination analysis (8 patterns). |  |
+| Pattern type |  |
+| Percent |  |
+| Positive Level |  |
+| Proportions with 95% Confidence Intervals |  |
+| Rank eligible exact-pattern rules and named parallel, serial, and majority strategies descriptively by observed Youden's J. This sample-dependent summary is not a clinical guide or validated recommendation. |  |
+| Row |  |
+| Sample-dependent descriptive ranking of eligible exact-pattern rules and named testing strategies by observed Youden index; this is not a clinical guide or validated recommendation |  |
+| Second diagnostic test for combination analysis. Leave empty for single test only. |  |
+| Select one metric, or use the plot-specific default metric set. The bar chart defaults to sensitivity, specificity, PPV, NPV, and accuracy; the heatmap also includes prevalence, balanced accuracy, and Youden's J. The forest plot supports sensitivity, specificity, PPV, NPV, accuracy, LR+, LR-, and diagnostic OR, for which confidence intervals are available. Unsupported forest selections produce an explanatory notice rather than silently showing other statistics. The decision-space plot has fixed sensitivity and specificity axes and is unaffected. |  |
+| Select the level indicating disease presence (e.g., "1", "positive", "malignant"). |  |
+| Select the level representing a positive result for Test 1. |  |
+| Select the reference standard (e.g., biopsy, final diagnosis). This represents the reference classification. Binary variables are intended; with additional levels, all non-positive levels are grouped as negative and a warning is shown. |  |
+| Selection Method |  |
+| Statistic |  |
+| Systematic evaluation of diagnostic test combinations. Analyzes all possible test result patterns (2-test: 4 patterns, 3-test: 8 patterns) against a gold standard and summarizes named parallel, serial, and majority strategies. Calculates sensitivity, specificity, predictive values, likelihood ratios, accuracy, and uncertainty intervals. Descriptive rankings are sample-dependent analytical summaries, not clinical guides or validated recommendations. |  |
+| Test 1 (Required) |  |
+| Test 1 Performance |  |
+| Test 1 Positive Level |  |
+| Test 2 (Required for Combinations) |  |
+| Test 2 Performance |  |
+| Test 2 Positive Level |  |
+| Test 3 (Optional) |  |
+| Test 3 Performance |  |
+| Test 3 Positive Level |  |
+| Test Combination Performance | Test Kombinasyonu Performansı |
+| Test pattern column | Test deseni sütunu |
+| Test Pattern Column |  |
+| Test Results Cross-Tabulation |  |
+| TN |  |
+| TP |  |
+| Upper |  |
+| Visualizations |  |
+| Wilson score 95 percent confidence intervals for sensitivity, specificity, PPV, NPV and accuracy, shown as percentages to match the combination table above. Likelihood ratios and the diagnostic odds ratio are unbounded ratios rather than proportions, so they appear in their own table below. |  |
+
+## Quality-assurance checklist
+
+- [x] Backend translation import is declared through roxygen.
+- [x] Validation errors and warnings are wrapped.
+- [x] Recommendation rationale sentences and placeholders are wrapped.
+- [x] Plot titles, axes, legends, captions, and metric display labels are wrapped.
+- [x] YAML labels are human-readable and extractable.
+- [x] Internal option/result identifiers remain stable.
+- [ ] Update `catalog.pot`, `en.po`, and `tr.po` after the final source changes. NOT DONE.
+  Verified 2026-08-28 against the working tree: 16 `.()` strings in `R/decisioncombine.b.R`
+  are absent from all three catalogs, and a further set of msgids whose only reference is
+  `R/decisioncombine.b.R` are still in the catalogs but no longer occur in the source
+  (18 at the time of writing; the backend is still being edited, so re-count before extracting).
+  Both tables above therefore describe the catalog as extracted, not the current source.
+- [x] Preserve named placeholders during extraction; new Turkish entries remain queued for translation review.
+- [ ] Translate the queued entries. Of the 206 `decisioncombine` msgids in `catalog.pot`,
+  all 206 exist in `en.po` and `tr.po`, but `tr.po` carries only 2 non-empty translations
+  (`Accuracy`, `Specificity`) and `en.po` carries 0.
+- [ ] Open the analysis under Turkish locale and check long notices and plot labels for clipping.
+- [ ] Confirm decimal and percent formatting follows jamovi locale behavior.
+
+## Catalog maintenance
+
+From the package root, extract after source and YAML changes:
 
 ```r
-# Current (lines ~47, 54, 58, etc.)
-stop(paste("Analysis failed:", conditionMessage(e), "Please check your data and variable selections."))
-stop("Gold standard variable is required. Please select a gold standard variable from your dataset.")
-stop("Data contains no (complete) rows. Please check your dataset for missing values.")
-
-# Should be:
-stop(.("Analysis failed: {error}. Please check your data and variable selections.", error = conditionMessage(e)))
-stop(.("Gold standard variable is required. Please select a gold standard variable from your dataset."))
-stop(.("Data contains no (complete) rows. Please check your dataset for missing values."))
+jmvtools::i18nUpdate("en")
+jmvtools::i18nUpdate("tr")
 ```
 
-**Additional error messages to wrap**:
-```r
-stop(.("At least one test variable is required for analysis. Please select Test 1 and optionally Test 2 and Test 3."))
-stop(.("Positive level for gold standard must be specified. Please select the positive level from the dropdown."))
-stop(.("Positive level for Test 1 ({test1}) must be specified.", test1 = self$options$test1))
-stop(.("Positive level for Test 2 ({test2}) must be specified.", test2 = self$options$test2))
-stop(.("Positive level for Test 3 ({test3}) must be specified.", test3 = self$options$test3))
-warning(.("Test variable '{test_var}' has only one level: {levels}. This may limit diagnostic analysis.", 
-         test_var = test_var, levels = paste(test_levels, collapse = ", ")))
-```
-
-### High Priority: Plot Titles and Labels
-
-```r
-# Performance Heatmap (lines ~X)
-ggplot2::labs(
-    title = .("Diagnostic Test Combination Performance Matrix"),
-    subtitle = .("Performance metrics across {n} test combination patterns", n = length(unique(plotData$patterns))),
-    caption = .("Wilson confidence intervals used for enhanced accuracy")
-)
-
-# Error plot titles
-ggplot2::labs(title = .("Performance Heatmap - Data Error"))
-ggplot2::labs(title = .("Decision Tree - Data Error"))
-ggplot2::labs(title = .("Venn Diagram - Data Error"))
-ggplot2::labs(title = .("Forest Plot - Data Error"))
-```
-
-### Medium Priority: HTML Content Strings
-
-The backend contains extensive HTML generation that should be wrapped:
-
-```r
-# Clinical interpretation content (example patterns)
-'<h3>Clinical Summary</h3>' → '<h3>{0}</h3>', .("Clinical Summary")
-'<h4>Key Findings</h4>' → '<h4>{0}</h4>', .("Key Findings")
-'<li>Systematic evaluation of all test combinations</li>' → 
-    '<li>{0}</li>', .("Systematic evaluation of all test combinations")
-```
-
-## Turkish Translation Catalog
-
-### Core Medical/Statistical Terms
-
-| English | Turkish | Notes |
-|---------|---------|-------|
-| Gold standard | Altın standart | Medical term, widely used |
-| Sensitivity | Duyarlılık | Standard medical term |
-| Specificity | Özgüllük | Standard medical term |
-| Positive Predictive Value (PPV) | Pozitif Prediktif Değer (PPD) | |
-| Negative Predictive Value (NPV) | Negatif Prediktif Değer (NPD) | |
-| Confidence Interval (CI) | Güven Aralığı (GA) | |
-| Test combination | Test kombinasyonu | |
-| Diagnostic performance | Tanısal performans | |
-| Performance matrix | Performans matrisi | |
-| Wilson confidence intervals | Wilson güven aralıkları | |
-
-### Error Messages - Turkish Translations
-
-| Status | msgid | Suggested Turkish |
-|---------|--------|------------------|
-| missing | "Gold standard variable is required. Please select a gold standard variable from your dataset." | "Altın standart değişkeni gereklidir. Veri setinizden bir altın standart değişkeni seçiniz." |
-| missing | "Data contains no (complete) rows. Please check your dataset for missing values." | "Veri seti tamamlanmış satır içermemektedir. Eksik değerler için veri setinizi kontrol ediniz." |
-| missing | "At least one test variable is required for analysis." | "Analiz için en az bir test değişkeni gereklidir." |
-| missing | "Positive level for gold standard must be specified." | "Altın standart için pozitif seviye belirtilmelidir." |
-| missing | "Performance Heatmap - Data Error" | "Performans Isı Haritası - Veri Hatası" |
-| missing | "Decision Tree - Data Error" | "Karar Ağacı - Veri Hatası" |
-| missing | "Diagnostic Test Combination Performance Matrix" | "Tanısal Test Kombinasyon Performans Matrisi" |
-
-### UI Elements - Turkish Translations
-
-| Status | msgid | Suggested Turkish |
-|---------|--------|------------------|
-| missing | "Show Original Data Tables" | "Orijinal Veri Tablolarını Göster" |
-| missing | "Show Individual Test Results" | "Bireysel Test Sonuçlarını Göster" |
-| missing | "Show Advanced Visualizations" | "Gelişmiş Görselleştirmeleri Göster" |
-| missing | "Export Test Combination Pattern to Dataset" | "Test Kombinasyon Desenini Veri Setine Aktar" |
-| missing | "Performance Heatmap" | "Performans Isı Haritası" |
-| missing | "Clinical Decision Tree" | "Klinik Karar Ağacı" |
-| missing | "Test Agreement Venn Diagram" | "Test Uyumu Venn Diyagramı" |
-| missing | "Forest Plot with Wilson CIs" | "Wilson GA'lı Orman Grafiği" |
-
-### Clinical Content - Turkish Translations
-
-| Status | msgid | Suggested Turkish |
-|---------|--------|------------------|
-| missing | "Clinical Summary" | "Klinik Özet" |
-| missing | "Key Findings" | "Temel Bulgular" |
-| missing | "Systematic evaluation of all test combinations" | "Tüm test kombinasyonlarının sistematik değerlendirmesi" |
-| missing | "Wilson score confidence intervals" | "Wilson skoru güven aralıkları" |
-| missing | "Performance-based optimal pattern identification" | "Performans tabanlı optimal desen tanımlama" |
-| missing | "Publication-quality visualizations" | "Yayın kalitesinde görselleştirmeler" |
-| missing | "Clinical decision recommendations" | "Klinik karar önerileri" |
-
-## Style Guide for Turkish Medical Translation
-
-### Terminology Consistency
-```
-Diagnostic test → Tanısal test
-Test combination → Test kombinasyonu
-Performance metrics → Performans metrikleri
-Statistical analysis → İstatistiksel analiz
-Clinical validation → Klinik doğrulama
-Evidence-based → Kanıt temelli
-```
-
-### Number and Statistical Formatting
-```
-95% Confidence Interval → %95 Güven Aralığı
-p-value → p-değeri
-Sample size → Örneklem büyüklüğü
-Effect size → Etki büyüklüğü
-```
-
-### Medical Context
-- Use formal medical Turkish throughout
-- Maintain scientific precision over colloquial terms
-- Keep statistical abbreviations in English when commonly used (CI, PPV, NPV)
-- Use Turkish medical terminology for pathology-specific terms
-
-## Implementation Steps
-
-### 1. Create/Update Catalogs
-```r
-jmvtools::i18nCreate("en"); jmvtools::i18nUpdate("en")
-jmvtools::i18nCreate("tr"); jmvtools::i18nUpdate("tr")
-```
-
-### 2. Prepare POT Template
-```bash
-cp jamovi/i18n/en.po jamovi/i18n/catalog.pot
-# Edit header: Language: c\n
-```
-
-### 3. Backend Code Patches Required
-
-**Priority 1 - Error Messages**: Apply `.()` wrappers to all `stop()`, `warning()`, and `message()` calls
-**Priority 2 - Plot Labels**: Wrap all plot titles, axis labels, and legends  
-**Priority 3 - HTML Content**: Wrap clinical interpretation text and UI messages
-
-### 4. QA Checklist
-
-- ✅ NAMESPACE imports `.` from jmvcore
-- ✅ All target YAML files exist
-- ✅ English and Turkish catalogs created
-- ⚠️ Backend strings need `.()` wrapping (Priority 1 work)
-- ⚠️ Plot visualization strings need wrapping
-- ⚠️ HTML content strings need wrapping
-
-### 5. Weblate Integration Steps
-
-1. **Create repo**: `decisioncombine-i18n` 
-2. **Add files**: `catalog.pot`, `README.md`
-3. **Collaborators**: Add Weblate bot
-4. **Webhooks**: `https://hosted.weblate.org/hooks/github/`
-5. **Contact**: Ask jamovi dev team to add project to Weblate
-
-## Ready-to-Run Commands
-
-### String Extraction
-```r
-jmvtools::i18nCreate("en"); jmvtools::i18nUpdate("en")
-jmvtools::i18nCreate("tr"); jmvtools::i18nUpdate("tr")
-```
-
-### POT Preparation
-```bash
-cp jamovi/i18n/en.po jamovi/i18n/catalog.pot
-```
-
-### Find Unwrapped Strings (Heuristic)
-```bash
-grep -nE '\"[^\"\n]+' R/decisioncombine.b.R | grep -v '\\.\('
-```
-
-## Deliverables Status
-
-- ✅ Files located and analyzed
-- ✅ Translation catalogs created (18,936 unique strings found)
-- ✅ Turkish medical terminology guide provided
-- ✅ Implementation patches identified
-- ✅ QA checklist provided
-- ✅ Weblate integration steps documented
-
-**Next Action**: Apply `.()` wrappers to high-priority strings in `R/decisioncombine.b.R` as detailed above.
+Catalog updates must retain existing translations. Any new untranslated entry should use
+the terminology above and should be reviewed in the running jamovi analysis before release.
