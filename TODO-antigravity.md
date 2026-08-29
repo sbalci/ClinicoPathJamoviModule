@@ -2,71 +2,12 @@
 # prepare-translation
 
 
+
 # generate-test-data
 
 
-reportcat
-summarydata
-tableone
-benford
-checkdata
-dataquality
-outlierdetection
-agepyramid
-alluvial
-vartree
-venn
-chisqposttest
-crosstable
-categorize
-statsplot2
-jjbarstats
-jjpiestats
-jjsegmentedtotalbar
-advancedraincloud
-jjbetweenstats
-jjdotchart
-jjdotplotstats
-jjwithinstats
-lollipop
-raincloud
-hullplot
-jjcorrmat
-jjscatterstats
-jjhistostats
-jjridges
-jwaffle
-linechart
-jjarcdiagram
-multisurvival
-singlearm
-survival
-survivalcont
-datetimeconverter
-outcomeorganizer
-timeinterval
-oddsratio
-agreement
-decision
-decisioncombine
-decisioncompare
-nogoldstandard
-cotest
-decisioncalculator
-sequentialtests
-enhancedROC
-psychopdaROC
-lassologistic
-decisioncurve
-kappaSizeCI
-kappaSizeFixedN
-kappaSizePower
-ihcheterogeneity
-diagnosticmeta
-swimmerplot
-waterfall
-
 # document-function
+
 
 reportcat
 summarydata
