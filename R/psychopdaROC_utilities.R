@@ -40,13 +40,16 @@ bootstrapNRI <- function(new_values, ref_values, actual,
     }
 
     # Original NRI calculation
-    original_nri <- computeNRI(new_values, ref_values, actual, direction, thresholds)
+    original_nri <- computeNRI(
+        new_values, ref_values, actual, direction, thresholds, warn = FALSE
+    )
 
     # Bootstrap
     boot_nri <- numeric(n_boot)
     boot_event_nri <- numeric(n_boot)
     boot_non_event_nri <- numeric(n_boot)
     valid_boots <- 0
+    warning_boots <- 0L
 
     for (i in 1:n_boot) {
         boot_idx <- sample(n, n, replace = TRUE)
@@ -73,7 +76,10 @@ bootstrapNRI <- function(new_values, ref_values, actual,
         # "many bootstraps failed" warning could never fire from this path
         # either. Same defect as bootstrapIDI() in utils.R.
         res_i <- tryCatch({
-            r <- computeNRI(boot_new, boot_ref, boot_actual, direction, thresholds)
+            r <- computeNRI(
+                boot_new, boot_ref, boot_actual, direction, thresholds, warn = FALSE
+            )
+            if (isTRUE(r$fit_warning)) warning_boots <- warning_boots + 1L
             if (is.null(r$nri) || is.na(r$nri)) NULL else r
         }, error = function(e) NULL)
 
@@ -95,8 +101,31 @@ bootstrapNRI <- function(new_values, ref_values, actual,
     boot_event_nri <- boot_event_nri[valid_idx]
     boot_non_event_nri <- boot_non_event_nri[valid_idx]
 
+    if (length(boot_nri) == 0L) {
+        warning("All bootstrap replicates failed; no confidence interval or p-value can be computed.",
+                call. = FALSE)
+        return(list(
+            nri = original_nri$nri,
+            event_nri = original_nri$event_nri,
+            non_event_nri = original_nri$non_event_nri,
+            ci_lower = NA_real_, ci_upper = NA_real_, p_value = NA_real_,
+            n_valid_boots = 0L,
+            fit_warning = isTRUE(original_nri$fit_warning),
+            fit_warning_boots = warning_boots
+        ))
+    }
+
     if (length(boot_nri) < n_boot * 0.5) {
         warning("Many bootstrap samples failed - results may be unreliable")
+    }
+    if (isTRUE(original_nri$fit_warning) || warning_boots > 0L) {
+        warning(sprintf(
+            paste0(
+                "Logistic calibration showed separation or non-convergence in the original ",
+                "fit or %d of %d bootstrap replicates; NRI and its interval may be unstable."
+            ),
+            warning_boots, n_boot
+        ), call. = FALSE)
     }
 
     # Calculate confidence intervals
@@ -124,7 +153,9 @@ bootstrapNRI <- function(new_values, ref_values, actual,
         ci_lower = as.numeric(ci_lower),
         ci_upper = as.numeric(ci_upper),
         p_value = p_value,
-        n_valid_boots = valid_boots
+        n_valid_boots = valid_boots,
+        fit_warning = isTRUE(original_nri$fit_warning),
+        fit_warning_boots = warning_boots
     ))
 }
 
@@ -137,10 +168,21 @@ bootstrapNRI <- function(new_values, ref_values, actual,
 #' @param thresholds Risk category thresholds (NULL for continuous NRI)
 #' @return List containing NRI components
 computeNRI <- function(new_values, ref_values, actual,
-                       direction = ">=", thresholds = NULL) {
+                       direction = ">=", thresholds = NULL, warn = TRUE) {
     # Convert to probabilities
-    new_probs <- raw_to_prob(new_values, actual, direction)
-    ref_probs <- raw_to_prob(ref_values, actual, direction)
+    new_probs <- raw_to_prob(new_values, actual, direction, warn = FALSE)
+    ref_probs <- raw_to_prob(ref_values, actual, direction, warn = FALSE)
+    fit_warning <- length(attr(new_probs, "fit_warnings")) > 0L ||
+        length(attr(ref_probs, "fit_warnings")) > 0L
+    if (isTRUE(warn) && fit_warning) {
+        warning(
+            paste0(
+                "Logistic calibration showed separation or non-convergence; ",
+                "NRI may be unstable."
+            ),
+            call. = FALSE
+        )
+    }
 
     # Identify events and non-events
     events <- actual == 1
@@ -148,7 +190,8 @@ computeNRI <- function(new_values, ref_values, actual,
 
     # Check for sufficient data
     if (sum(events) == 0 || sum(non_events) == 0) {
-        return(list(nri = NA, event_nri = NA, non_event_nri = NA))
+        return(list(nri = NA, event_nri = NA, non_event_nri = NA,
+                    fit_warning = fit_warning))
     }
 
     # Unusable predicted probabilities must yield NA, not 0.
@@ -159,9 +202,12 @@ computeNRI <- function(new_values, ref_values, actual,
     # new marker reclassifies nobody", a substantive negative finding
     # manufactured out of a fitting failure.
     if (all(is.na(new_probs)) || all(is.na(ref_probs))) {
-        warning("computeNRI: predicted probabilities are unavailable (the logistic fit failed); returning NA rather than an NRI of 0.",
-                call. = FALSE)
-        return(list(nri = NA, event_nri = NA, non_event_nri = NA))
+        if (isTRUE(warn)) {
+            warning("computeNRI: predicted probabilities are unavailable (the logistic fit failed); returning NA rather than an NRI of 0.",
+                    call. = FALSE)
+        }
+        return(list(nri = NA, event_nri = NA, non_event_nri = NA,
+                    fit_warning = TRUE))
     }
 
     if (is.null(thresholds) || length(thresholds) == 0) {
@@ -218,7 +264,8 @@ computeNRI <- function(new_values, ref_values, actual,
         p_up_events = p_up_events,
         p_down_events = p_down_events,
         p_up_non_events = p_up_non_events,
-        p_down_non_events = p_down_non_events
+        p_down_non_events = p_down_non_events,
+        fit_warning = fit_warning
     ))
 }
 

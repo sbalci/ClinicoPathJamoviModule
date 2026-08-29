@@ -91,7 +91,7 @@ oddsratio
 
 ## Agreement
 
-agreement
+- agreement
 
 ## Decision
 

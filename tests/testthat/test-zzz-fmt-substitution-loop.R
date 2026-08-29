@@ -22,6 +22,17 @@ test_that(".fmt is byte-identical to jmvcore::format for brace-free values", {
                          info = paste("format:", f, "value:", format(v)))
 })
 
+test_that(".fmt permits a placeholder named fmt", {
+    # `fmt` used to be the wrapper's first formal argument. Passing fmt = "dmy"
+    # therefore replaced the template itself and reduced the whole message to
+    # "dmy", which hid swimmerplot's date-validation guidance.
+    template <- "Dates could not be parsed with the selected format ({fmt})."
+    expect_identical(
+        ClinicoPath:::.fmt(template, fmt = "dmy"),
+        "Dates could not be parsed with the selected format (dmy)."
+    )
+})
+
 test_that(".fmt terminates when a value contains its own placeholder", {
     # Without the guard this call never returns. A plain expect_* would hang the
     # whole suite, so failure here shows up as a hung run, not a red test -- which

@@ -43,10 +43,16 @@ performance.}
 under evaluation.}
 
 \item{goldNegative}{The level indicating absence of disease in the gold
-standard variable.}
+standard variable. The compiler forbids a default on a Level option, so R
+callers must pass it explicitly; pass NULL only for a two-level variable,
+where it is inferred. With three or more levels a NULL raises an error
+rather than pooling them.}
 
 \item{testNegative}{The level representing a negative result for the test
-under evaluation.}
+under evaluation. The compiler forbids a default on a Level option, so R
+callers must pass it explicitly; pass NULL only for a two-level variable,
+where it is inferred. With three or more levels a NULL raises an error
+rather than pooling them.}
 
 \item{pp}{Boolean selection whether to use known population prevalence
 instead of study prevalence.}

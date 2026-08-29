@@ -3732,17 +3732,44 @@ psychopdaROCClass <- if (requireNamespace("jmvcore")) {
                     variable = var, refVar = refVar,
                     idi = NaN, ci_lower = NaN, ci_upper = NaN, p = NaN
                   ))
+                  self$results$idiTable$setNote(
+                    key = paste0("insufficient_", make.names(var)),
+                    note = .fmt(
+                      .("IDI for {variable} was not computed because fewer than 10 complete cases were available."),
+                      variable = var
+                    ),
+                    init = FALSE
+                  )
                   next
                 }
 
                 # Calculate IDI
-                idi_result <- bootstrapIDI(
-                  new_values = var_values[cc],
-                  ref_values = ref_values[cc],
-                  actual = actual_binary[cc],
-                  direction = direction,
-                  n_boot = boot_runs
+                idi_warnings <- character(0)
+                idi_result <- withCallingHandlers(
+                  bootstrapIDI(
+                    new_values = var_values[cc],
+                    ref_values = ref_values[cc],
+                    actual = actual_binary[cc],
+                    direction = direction,
+                    n_boot = boot_runs
+                  ),
+                  warning = function(w) {
+                    idi_warnings <<- c(idi_warnings, conditionMessage(w))
+                    invokeRestart("muffleWarning")
+                  }
                 )
+
+                if (length(idi_warnings) > 0L) {
+                  self$results$idiTable$setNote(
+                    key = paste0("fit_", make.names(var)),
+                    note = .fmt(
+                      .("IDI caution for {variable}: {details}"),
+                      variable = var,
+                      details = paste(unique(idi_warnings), collapse = " ")
+                    ),
+                    init = FALSE
+                  )
+                }
 
                 # Add to IDI table
                 self$results$idiTable$addRow(rowKey = var, values = list(
@@ -3785,18 +3812,45 @@ psychopdaROCClass <- if (requireNamespace("jmvcore")) {
                     nri = NaN, event_nri = NaN, non_event_nri = NaN,
                     ci_lower = NaN, ci_upper = NaN, p = NaN
                   ))
+                  self$results$nriTable$setNote(
+                    key = paste0("insufficient_", make.names(var)),
+                    note = .fmt(
+                      .("NRI for {variable} was not computed because fewer than 10 complete cases were available."),
+                      variable = var
+                    ),
+                    init = FALSE
+                  )
                   next
                 }
 
                 # Calculate NRI
-                nri_result <- bootstrapNRI(
-                  new_values = var_values[cc],
-                  ref_values = ref_values[cc],
-                  actual = actual_binary[cc],
-                  direction = direction,
-                  thresholds = thresholds,
-                  n_boot = boot_runs
+                nri_warnings <- character(0)
+                nri_result <- withCallingHandlers(
+                  bootstrapNRI(
+                    new_values = var_values[cc],
+                    ref_values = ref_values[cc],
+                    actual = actual_binary[cc],
+                    direction = direction,
+                    thresholds = thresholds,
+                    n_boot = boot_runs
+                  ),
+                  warning = function(w) {
+                    nri_warnings <<- c(nri_warnings, conditionMessage(w))
+                    invokeRestart("muffleWarning")
+                  }
                 )
+
+                if (length(nri_warnings) > 0L) {
+                  self$results$nriTable$setNote(
+                    key = paste0("fit_", make.names(var)),
+                    note = .fmt(
+                      .("NRI caution for {variable}: {details}"),
+                      variable = var,
+                      details = paste(unique(nri_warnings), collapse = " ")
+                    ),
+                    init = FALSE
+                  )
+                }
 
                 # Add to NRI table
                 self$results$nriTable$addRow(rowKey = var, values = list(

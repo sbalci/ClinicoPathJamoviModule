@@ -69,7 +69,9 @@ config <- validate_config(config)
 global <- config$global
 modes <- config$modes
 modules_config <- config$modules
-required_packages <- config$required_packages %||% c("xfun", "fs", "jmvtools", "devtools", "purrr", "yaml", "digest")
+required_packages <- config$required_packages %||% c(
+  "xfun", "fs", "jmvtools", "devtools", "desc", "purrr", "yaml", "digest"
+)
 
 # Handle simplified top-level configuration (new format) or nested format (old format)
 new_version <- config$new_version %||% global$new_version
@@ -90,6 +92,7 @@ copy_vignettes <- modes$copy_vignettes %||% TRUE
 copy_data_files <- modes$copy_data_files %||% TRUE
 copy_test_files <- modes$copy_test_files %||% TRUE
 copy_r_files <- modes$copy_r_files %||% TRUE
+copy_i18n_files <- modes$copy_i18n_files %||% TRUE
 
 # NAMESPACE-DESCRIPTION synchronization modes
 sync_namespace_description <- modes$sync_namespace_description %||% FALSE
@@ -1356,8 +1359,13 @@ if (!WIP) {
                error = function(e) warning("⚠️ Error documenting omv for ", module_name, ": ", e$message))
     }
 
-    # Copy R files
-    if (copy_r_files && length(module_cfg$r_files) > 0) {
+    # Copy R files. A module may also select individual umbrella helper symbols
+    # and explicitly prune files/imports left behind by earlier manifests.
+    has_r_assets <- length(module_cfg$r_files) > 0L ||
+      length(module_cfg$r_symbol_files) > 0L ||
+      length(module_cfg$prune_r_files) > 0L ||
+      length(module_cfg$prune_imports) > 0L
+    if (copy_r_files && has_r_assets) {
       cat("  📁 Copying", module_name, "R files...\n")
       r_dir <- file.path(module_dir, "R")
       if (!dir.exists(r_dir)) {
@@ -1365,6 +1373,8 @@ if (!WIP) {
       }
 
       tryCatch({
+        prune_configured_module_r_files(module_dir, module_cfg$prune_r_files)
+
         for (r_file in module_cfg$r_files) {
           source_path <- file.path(main_repo_dir, "R", r_file)
           if (file.exists(source_path)) {
@@ -1373,11 +1383,34 @@ if (!WIP) {
             warning("⚠️ R file not found: ", source_path)
           }
         }
+
+        distribute_selected_r_symbols(
+          module_dir, main_repo_dir, module_cfg$r_symbol_files
+        )
+        prune_configured_module_imports(module_dir, module_cfg$prune_imports)
       }, error = function(e) {
         warning("⚠️ Error copying R files for ", module_name, ": ", e$message)
       })
     } else if (!copy_r_files) {
       cat("  ⏭️ Skipping", module_name, "R files (copy_r_files: false)\n")
+    }
+
+    # Translation catalogs are authoring assets under the umbrella's jamovi/i18n/
+    # directory. They are not analysis YAML and therefore are not copied by the
+    # normal module-file loop below. Keep their distribution explicit so a
+    # generated module cannot appear translation-ready while shipping no catalog.
+    if (copy_i18n_files && length(module_cfg$i18n_files) > 0L) {
+      cat("  🌐 Copying", module_name, "translation catalogs...\n")
+      tryCatch({
+        distribute_module_i18n(
+          module_dir, main_repo_dir, module_cfg$i18n_files
+        )
+      }, error = function(e) {
+        warning("⚠️ Error copying i18n files for ", module_name, ": ", e$message)
+      })
+    } else if (!copy_i18n_files) {
+      cat("  ⏭️ Skipping", module_name,
+          "translation catalogs (copy_i18n_files: false)\n")
     }
 
     # Copy test files

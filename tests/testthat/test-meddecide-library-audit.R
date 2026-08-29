@@ -105,14 +105,73 @@ test_that("audit-sensitive output strings remain export-safe", {
   )
   expect_match(
     no_gold_text,
-    'jmvcore::format(.("Error in plot: {msg}")',
+    '.fmt(.("Error in plot: {msg}")',
     fixed = TRUE
   )
   expect_match(
     no_gold_text,
-    'jmvcore::format(.("Error in ggplot: {msg}")',
+    '.fmt(.("Error in ggplot: {msg}")',
     fixed = TRUE
   )
+})
+
+test_that("agreement has no declared-but-unpopulated audit headings", {
+  root <- audit_source_root()
+  results_text <- paste(
+    readLines(file.path(root, "jamovi", "agreement.r.yaml"), warn = FALSE),
+    collapse = "\n"
+  )
+
+  expect_false(grepl("name: allPairsKappaHeading", results_text, fixed = TRUE))
+  expect_false(grepl("name: itemModalAgreementHeading", results_text, fixed = TRUE))
+})
+
+test_that("meddecide updater manifest includes all translation catalogs", {
+  root <- audit_source_root()
+  config <- yaml::read_yaml(file.path(root, "_updateModules_config.yaml"))
+
+  expect_setequal(
+    unlist(config$modules$meddecide$i18n_files, use.names = FALSE),
+    c("catalog.pot", "en.po", "tr.po")
+  )
+  expect_true(isTRUE(config$modes$copy_i18n_files))
+})
+
+test_that("IDI and NRI consolidate unstable calibration warnings", {
+  actual <- rep(c(0, 1), each = 20)
+  reference <- c(seq(-20, -1), seq(1, 20))
+  candidate <- reference + seq_along(reference) / 100
+
+  raw <- expect_silent(raw_to_prob(reference, actual, warn = FALSE))
+  expect_gt(length(attr(raw, "fit_warnings")), 0L)
+
+  idi_warnings <- character(0)
+  set.seed(1708)
+  idi <- withCallingHandlers(
+    bootstrapIDI(candidate, reference, actual, n_boot = 30),
+    warning = function(w) {
+      idi_warnings <<- c(idi_warnings, conditionMessage(w))
+      invokeRestart("muffleWarning")
+    }
+  )
+  expect_lte(length(idi_warnings), 2L)
+  expect_true(any(grepl("Logistic calibration", idi_warnings, fixed = TRUE)))
+  expect_true(isTRUE(idi$fit_warning))
+  expect_equal(idi$fit_warning_boots, 30L)
+
+  nri_warnings <- character(0)
+  set.seed(1708)
+  nri <- withCallingHandlers(
+    bootstrapNRI(candidate, reference, actual, n_boot = 30),
+    warning = function(w) {
+      nri_warnings <<- c(nri_warnings, conditionMessage(w))
+      invokeRestart("muffleWarning")
+    }
+  )
+  expect_length(nri_warnings, 1L)
+  expect_match(nri_warnings, "Logistic calibration", fixed = TRUE)
+  expect_true(isTRUE(nri$fit_warning))
+  expect_equal(nri$fit_warning_boots, 30L)
 })
 
 test_that("meddecide sources do not request whole dependency namespaces", {

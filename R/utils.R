@@ -85,11 +85,11 @@ utils::globalVariables(c(
 #' placeholder name hangs; a value containing a DIFFERENT supplied name substitutes and
 #' terminates; an UNKNOWN `{name}` renders as an ellipsis; a bare `{ }` is left literal.
 #'
-#' @param fmt Format string, normally wrapped in `.()`.
+#' @param .format_string Format string, normally wrapped in `.()`.
 #' @param ... Named placeholder values.
 #' @return The interpolated string.
 #' @keywords internal
-.fmt <- function(fmt, ...) {
+.fmt <- function(.format_string, ...) {
     values <- list(...)
     risky <- vapply(values, function(v) {
         v <- tryCatch(as.character(v), error = function(e) "")
@@ -105,10 +105,10 @@ utils::globalVariables(c(
             v <- gsub("{", "(", v, fixed = TRUE)
             gsub("}", ")", v, fixed = TRUE)
         })
-        return(do.call(jmvcore::format, c(list(fmt), values)))
+        return(do.call(jmvcore::format, c(list(.format_string), values)))
     }
 
-    do.call(jmvcore::format, c(list(fmt), values))
+    do.call(jmvcore::format, c(list(.format_string), values))
 }
 
 #' Escape variable names containing special characters for formulas
@@ -207,8 +207,11 @@ NULL
 #' @param direction Direction of test (">=" or "<=")
 #' @keywords internal
 #' @return Vector of predicted probabilities
+#' @param warn Logical; emit a consolidated warning when logistic calibration
+#'   shows separation, non-convergence, or fitting failure. Bootstrap callers
+#'   set this to `FALSE` and report one aggregate diagnostic instead.
 #' @export
-raw_to_prob <- function(values, actual, direction = ">=") {
+raw_to_prob <- function(values, actual, direction = ">=", warn = TRUE) {
     # Validate inputs
     if (length(values) != length(actual)) {
         stop("Values and actual must have the same length")
@@ -235,28 +238,17 @@ raw_to_prob <- function(values, actual, direction = ">=") {
     # This is the statistically correct approach for IDI/NRI calculations
     predictor <- if (direction == "<=") -values_clean else values_clean
 
-    glm_result <- tryCatch({
-        model <- stats::glm(actual_clean ~ predictor, family = binomial(link = "logit"))
-        # Predict for ALL original values (including those with NA in actual)
-        new_predictor <- if (direction == "<=") -values else values
-        stats::predict(model, newdata = data.frame(predictor = new_predictor), type = "response")
-    }, warning = function(w) {
-        # Refit with warnings muted, but PASS THE WARNING ON.
-        #
-        # This used to swallow it silently. The two warnings glm raises here are
-        # exactly the ones the caller needs to know about: "fitted probabilities
-        # numerically 0 or 1 occurred" means separation, and "algorithm did not
-        # converge" means the fit is unusable. Both produce predicted risks that
-        # look plausible and are not, and IDI/NRI are computed from them.
-        warning(sprintf(
-            "raw_to_prob: logistic fit reported '%s'. Predicted probabilities may be unreliable (separation or non-convergence); interpret IDI/NRI with caution.",
-            conditionMessage(w)), call. = FALSE)
-        suppressWarnings({
+    fit_warnings <- character(0)
+    glm_result <- tryCatch(
+        withCallingHandlers({
             model <- stats::glm(actual_clean ~ predictor, family = binomial(link = "logit"))
             new_predictor <- if (direction == "<=") -values else values
             stats::predict(model, newdata = data.frame(predictor = new_predictor), type = "response")
-        })
-    }, error = function(e) {
+        }, warning = function(w) {
+            fit_warnings <<- c(fit_warnings, conditionMessage(w))
+            invokeRestart("muffleWarning")
+        }),
+        error = function(e) {
         # Fail rather than substitute a non-probability.
         #
         # The previous fallback returned rank(x)/(n+1) -- the empirical
@@ -265,13 +257,24 @@ raw_to_prob <- function(values, actual, direction = ">=") {
         # P(Y = 1 | x) in any sense. Feeding that to IDI (a difference of mean
         # predicted risk between events and non-events) or to NRI category cuts
         # silently swaps a calibrated risk scale for a uniform rank scale.
-        warning(sprintf(
-            "raw_to_prob: logistic regression failed (%s); returning NA rather than a rank-based substitute, which would not be a probability.",
-            conditionMessage(e)), call. = FALSE)
+        fit_warnings <<- c(fit_warnings, paste("fit failed:", conditionMessage(e)))
         rep(NA_real_, length(values))
     })
 
     probs <- as.numeric(glm_result)
+    fit_warnings <- unique(fit_warnings)
+    attr(probs, "fit_warnings") <- fit_warnings
+
+    if (isTRUE(warn) && length(fit_warnings) > 0L) {
+        warning(sprintf(
+            paste0(
+                "raw_to_prob: logistic calibration reported %s. Predicted probabilities ",
+                "may be unreliable (separation or non-convergence); interpret IDI/NRI ",
+                "with caution."
+            ),
+            paste(sprintf("'%s'", fit_warnings), collapse = "; ")
+        ), call. = FALSE)
+    }
 
     # Ensure probabilities are in [0,1] range
     probs[!is.na(probs) & probs < 0] <- 0
@@ -314,8 +317,10 @@ bootstrapIDI <- function(new_values, ref_values, actual,
     }
     
     # Original IDI calculation
-    new_probs <- raw_to_prob(new_values, actual, direction)
-    ref_probs <- raw_to_prob(ref_values, actual, direction)
+    new_probs <- raw_to_prob(new_values, actual, direction, warn = FALSE)
+    ref_probs <- raw_to_prob(ref_values, actual, direction, warn = FALSE)
+    original_fit_warning <- length(attr(new_probs, "fit_warnings")) > 0L ||
+        length(attr(ref_probs, "fit_warnings")) > 0L
     
     # Calculate discrimination slopes
     events <- actual == 1
@@ -336,6 +341,7 @@ bootstrapIDI <- function(new_values, ref_values, actual,
     # Bootstrap
     boot_idi <- numeric(n_boot)
     valid_boots <- 0
+    warning_boots <- 0L
     
     for (i in 1:n_boot) {
         boot_idx <- sample(n, n, replace = TRUE)
@@ -360,8 +366,12 @@ bootstrapIDI <- function(new_values, ref_values, actual,
         # tails. It also meant the "many bootstraps failed" warning below could
         # never fire from this path.
         boot_idi[i] <- tryCatch({
-            boot_new_probs <- raw_to_prob(boot_new, boot_actual, direction)
-            boot_ref_probs <- raw_to_prob(boot_ref, boot_actual, direction)
+            boot_new_probs <- raw_to_prob(boot_new, boot_actual, direction, warn = FALSE)
+            boot_ref_probs <- raw_to_prob(boot_ref, boot_actual, direction, warn = FALSE)
+            if (length(attr(boot_new_probs, "fit_warnings")) > 0L ||
+                length(attr(boot_ref_probs, "fit_warnings")) > 0L) {
+                warning_boots <- warning_boots + 1L
+            }
 
             # Calculate IDI
             boot_events <- boot_actual == 1
@@ -388,12 +398,23 @@ bootstrapIDI <- function(new_values, ref_values, actual,
         warning("All bootstrap replicates failed; no confidence interval or p-value can be computed.",
                 call. = FALSE)
         return(list(idi = original_idi, ci_lower = NA_real_, ci_upper = NA_real_,
-                    p_value = NA_real_, n_valid_boots = 0))
+                    p_value = NA_real_, n_valid_boots = 0,
+                    fit_warning = original_fit_warning,
+                    fit_warning_boots = warning_boots))
     }
 
     if (length(boot_idi_valid) < n_boot * 0.5) {
         warning(sprintf("Only %d of %d bootstrap replicates succeeded - results may be unreliable",
                         length(boot_idi_valid), n_boot), call. = FALSE)
+    }
+    if (original_fit_warning || warning_boots > 0L) {
+        warning(sprintf(
+            paste0(
+                "Logistic calibration showed separation or non-convergence in the original ",
+                "fit or %d of %d bootstrap replicates; IDI and its interval may be unstable."
+            ),
+            warning_boots, n_boot
+        ), call. = FALSE)
     }
     
     # Calculate confidence intervals
@@ -418,7 +439,9 @@ bootstrapIDI <- function(new_values, ref_values, actual,
         ci_lower = as.numeric(ci_lower),
         ci_upper = as.numeric(ci_upper),
         p_value = p_value,
-        n_valid_boots = valid_boots
+        n_valid_boots = valid_boots,
+        fit_warning = original_fit_warning,
+        fit_warning_boots = warning_boots
     ))
 }
 

@@ -258,15 +258,15 @@ decisionResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     list(
                         `name`="gold_pos", 
                         `title`="", 
-                        `type`="number"),
+                        `type`="integer"),
                     list(
                         `name`="gold_neg", 
                         `title`="", 
-                        `type`="number"),
+                        `type`="integer"),
                     list(
                         `name`="row_total", 
                         `title`="Total", 
-                        `type`="number")),
+                        `type`="integer")),
                 clearWith=list(
                     "gold",
                     "newtest",
@@ -747,9 +747,15 @@ decisionBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' @param testPositive The level representing a positive result for the test
 #'   under evaluation.
 #' @param goldNegative The level indicating absence of disease in the gold
-#'   standard variable.
+#'   standard variable. The compiler forbids a default on a Level option, so R
+#'   callers must pass it explicitly; pass NULL only for a two-level variable,
+#'   where it is inferred. With three or more levels a NULL raises an error
+#'   rather than pooling them.
 #' @param testNegative The level representing a negative result for the test
-#'   under evaluation.
+#'   under evaluation. The compiler forbids a default on a Level option, so R
+#'   callers must pass it explicitly; pass NULL only for a two-level variable,
+#'   where it is inferred. With three or more levels a NULL raises an error
+#'   rather than pooling them.
 #' @param pp Boolean selection whether to use known population prevalence
 #'   instead of study prevalence.
 #' @param pprob Population disease prevalence as a proportion between 0.001

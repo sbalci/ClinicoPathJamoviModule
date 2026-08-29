@@ -88,6 +88,7 @@ modes:
                               # The self-contained strict dependency-guard test + testthat.R runner are
                               # shipped regardless to modules with no pre-existing functional tests.
   copy_r_files: true         # Enable/disable R utility file copying
+  copy_i18n_files: true      # Copy each module's configured gettext catalogs from jamovi/i18n/
   use_legacy_copying: false   # Use legacy hardcoded file lists instead of config-based copying
 
   # Build-time integrity checks (added with the submodule critical review)
@@ -124,6 +125,10 @@ modules:
       - "hullplot_survey_data.rda"
   meddecide:
     directory: "/Users/serdarbalci/Documents/GitHub/meddecide"
+    i18n_files:
+      - "catalog.pot"
+      - "en.po"
+      - "tr.po"
     r_files:
       - "utils.R"
       - "error_handling.R"
@@ -207,13 +212,30 @@ modules:
   OncoPath:
     directory: "/Users/serdarbalci/Documents/GitHub/OncoPath"
     r_files:
-      - "utils.R"
-      # Shared RECIST v1.1 assessment engine used by the lesion-level response
-      # analyses. Must ship wherever waterfallrecist ships.
-      - "recist_engine.R"
       # Static/guidance HTML builders extracted from swimmerplot.b.R.
       # Must ship wherever swimmerplot ships.
       - "swimmerplot_html.R"
+    # The production analyses call only these three shared utilities. Generate a
+    # minimal file directly from the umbrella definitions so unrelated helpers
+    # such as raw_to_prob(), bootstrapIDI(), and the startup hook cannot leak into
+    # OncoPath or drift in a separately maintained template.
+    r_symbol_files:
+      - source: "utils.R"
+        destination: "utils.R"
+        symbols:
+          - ".quietly"
+          - ".fmt"
+          - "%||%"
+    # Explicit removal matters because changing r_files alone does not delete a
+    # helper copied by an earlier updateModules run.
+    prune_r_files:
+      - "recist_engine.R"
+      - "zzz_imports.R"
+    # These remain legitimate umbrella dependencies but have no production
+    # OncoPath call site. document() removes their stale NAMESPACE directives.
+    prune_imports:
+      - "cluster"
+      - "tidyr"
       # ihc_utilities.R intentionally NOT shipped to production OncoPath: its
       # consumers (ihcimmune/ihcbasic/ihcadvanced/ihcdiagnostic) are dev-routed to
       # menuGroup OncoPathD/T, and the one production analysis here
@@ -282,6 +304,7 @@ required_packages:
   - fs
   - jmvtools
   - devtools
+  - desc
   - purrr
   - digest
   - yaml

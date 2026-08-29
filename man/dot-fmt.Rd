@@ -4,10 +4,10 @@
 \alias{.fmt}
 \title{Interpolate a translated string without risking an unbounded substitution loop}
 \usage{
-.fmt(fmt, ...)
+.fmt(.format_string, ...)
 }
 \arguments{
-\item{fmt}{Format string, normally wrapped in \code{.()}.}
+\item{.format_string}{Format string, normally wrapped in \code{.()}.}
 
 \item{...}{Named placeholder values.}
 }

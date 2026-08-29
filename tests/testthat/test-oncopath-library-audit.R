@@ -84,6 +84,33 @@ test_that("disabled clinical presets and orphan stage migration files stay remov
   }
 })
 
+test_that("umbrella updater keeps the production OncoPath helper boundary minimal", {
+  skip_if_no_oncopath_source()
+  package <- read.dcf(oncopath_file("DESCRIPTION"), fields = "Package")[[1]]
+  skip_if(package == "OncoPath", "updater configuration belongs to the umbrella")
+  config_path <- oncopath_file("_updateModules_config.yaml")
+  skip_if_not(file.exists(config_path), "updater configuration unavailable")
+
+  oncopath <- yaml::read_yaml(config_path)$modules$OncoPath
+  symbol_file <- oncopath$r_symbol_files[[1]]
+  expect_equal(symbol_file$source, "utils.R")
+  expect_equal(symbol_file$destination, "utils.R")
+  expect_setequal(
+    unlist(symbol_file$symbols, use.names = FALSE),
+    c(".quietly", ".fmt", "%||%")
+  )
+  expect_setequal(
+    unlist(oncopath$prune_r_files, use.names = FALSE),
+    c("recist_engine.R", "zzz_imports.R")
+  )
+  expect_setequal(
+    unlist(oncopath$prune_imports, use.names = FALSE),
+    c("cluster", "tidyr")
+  )
+  expect_false("utils.R" %in% unlist(oncopath$r_files, use.names = FALSE))
+  expect_false("recist_engine.R" %in% unlist(oncopath$r_files, use.names = FALSE))
+})
+
 test_that("swimmer controls and errors follow jamovi UI and i18n conventions", {
   skip_if_no_oncopath_source()
   schema <- read_oncopath("jamovi", "swimmerplot.a.yaml")
@@ -108,7 +135,7 @@ test_that("diagnostic SROC labels match the implemented mada model", {
 
   expect_match(analysis_schema, "Proportional-hazards SROC analysis", fixed = TRUE)
   expect_match(result_schema, "Proportional-Hazards SROC Model Results", fixed = TRUE)
-  expect_match(source, "mada::phm(mada_data)", fixed = TRUE)
+  expect_match(source, "mada::phm(mada_data, correction = 0.5", fixed = TRUE)
   expect_match(source, "Diagnostic accuracy parameter (theta)", fixed = TRUE)
   expect_match(source, "Between-study variance (tau^2)", fixed = TRUE)
   expect_false(grepl("HSROC Threshold", source, fixed = TRUE))
@@ -135,10 +162,16 @@ test_that("diagnostic source remains ASCII-clean and renders real symbols", {
 
   expect_false(any(as.integer(bytes) > 127L))
   source <- rawToChar(bytes)
+  code <- paste(
+    strsplit(source, "\n", fixed = TRUE)[[1]][
+      !grepl("^\\s*#", strsplit(source, "\n", fixed = TRUE)[[1]])
+    ],
+    collapse = "\n"
+  )
   # &lt; &gt; &amp; are REQUIRED to keep the HTML well-formed; what must not appear is
   # an entity standing in for a symbol, which is what [[GE]]/[[TIMES]] exist for.
-  expect_false(grepl("&(?!lt;|gt;|amp;)[A-Za-z]+;", source, perl = TRUE))
-  expect_false(grepl("&#[0-9A-Fa-fxX]+;", source))
+  expect_false(grepl("&(?!lt;|gt;|amp;)[A-Za-z]+;", code, perl = TRUE))
+  expect_false(grepl("&#[0-9A-Fa-fxX]+;", code))
   expect_match(source, '"[[GE]]" = intToUtf8(0x2265)', fixed = TRUE)
   expect_match(source, '"[[TIMES]]" = intToUtf8(0x00D7)', fixed = TRUE)
   expect_match(source, "private$.renderSymbols(html)", fixed = TRUE)

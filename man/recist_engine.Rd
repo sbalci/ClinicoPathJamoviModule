@@ -35,16 +35,14 @@ progression}, a qualitative judgement no count can establish. Callers should
 expose an override variable and pass it through the context.
 }
 
-\section{Callers, and why this file can look orphaned}{
+\section{Callers and distribution}{
 
 In this umbrella package every primitive here is live: \code{waterfallrecist}
 calls all of them and \code{recist} calls \code{recist_context()} and
-\code{recist_select_target_lesions()}. The generated \pkg{OncoPath} submodule,
-however, currently ships this file WITHOUT either of those two analyses, so a
-reader of that package alone sees no callers. That is staging, not debris: the
-engine is here ahead of a forthcoming lesion-level RECIST v1.1 analysis, and
-\code{jamovi/0000.yaml} already advertises it. Do not prune it as dead code
-from the submodule.
+\code{recist_select_target_lesions()}. The production \pkg{OncoPath} module
+does not currently ship those lesion-level analyses, so the updater excludes
+this engine there. It remains available to JamoviTest and the umbrella until
+a production caller is promoted.
 }
 
 \references{

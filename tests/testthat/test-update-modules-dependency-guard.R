@@ -207,3 +207,110 @@ testthat::test_that("distributed dependency guard scanner matches updater", {
     updater_result$parse_errors
   )
 })
+
+testthat::test_that("selected helper distribution writes only configured symbols", {
+  skip_if_dependency_guard_utils_missing()
+  root <- tempfile("selected-helper-source-")
+  module <- tempfile("selected-helper-module-")
+  dir.create(file.path(root, "R"), recursive = TRUE)
+  dir.create(file.path(module, "R"), recursive = TRUE)
+  on.exit(unlink(c(root, module), recursive = TRUE), add = TRUE)
+  writeLines(c(
+    "needed <- function(x) x + 1L",
+    "also_needed <- function(x) needed(x)",
+    "`%or%` <- function(x, y) if (is.null(x)) y else x",
+    "must_not_ship <- function() stop('unused')"
+  ), file.path(root, "R", "helpers.R"))
+
+  dependency_guard_env$distribute_selected_r_symbols(
+    module, root,
+    list(list(
+      source = "helpers.R",
+      destination = "helpers.R",
+      symbols = c("needed", "also_needed", "%or%")
+    ))
+  )
+
+  distributed <- paste(
+    readLines(file.path(module, "R", "helpers.R"), warn = FALSE),
+    collapse = "\n"
+  )
+  testthat::expect_match(distributed, "needed <- function", fixed = TRUE)
+  testthat::expect_match(distributed, "also_needed <- function", fixed = TRUE)
+  testthat::expect_match(distributed, "`%or%` <- function", fixed = TRUE)
+  testthat::expect_false(grepl("must_not_ship", distributed, fixed = TRUE))
+})
+
+testthat::test_that("configured translation catalogs are distributed verbatim", {
+  skip_if_dependency_guard_utils_missing()
+  testthat::skip_if_not_installed("fs")
+  root <- tempfile("i18n-source-")
+  module <- tempfile("i18n-module-")
+  dir.create(file.path(root, "jamovi", "i18n"), recursive = TRUE)
+  dir.create(module, recursive = TRUE)
+  on.exit(unlink(c(root, module), recursive = TRUE), add = TRUE)
+
+  catalogs <- c("catalog.pot", "en.po", "tr.po")
+  for (catalog in catalogs) {
+    writeLines(paste("fixture", catalog), file.path(root, "jamovi", "i18n", catalog))
+  }
+
+  written <- dependency_guard_env$distribute_module_i18n(
+    module, root, catalogs
+  )
+
+  testthat::expect_setequal(basename(written), catalogs)
+  for (catalog in catalogs) {
+    testthat::expect_identical(
+      readLines(file.path(module, "jamovi", "i18n", catalog), warn = FALSE),
+      readLines(file.path(root, "jamovi", "i18n", catalog), warn = FALSE)
+    )
+  }
+})
+
+testthat::test_that("translation distribution rejects missing or nested paths", {
+  skip_if_dependency_guard_utils_missing()
+  root <- tempfile("i18n-source-")
+  module <- tempfile("i18n-module-")
+  dir.create(file.path(root, "jamovi", "i18n"), recursive = TRUE)
+  dir.create(module, recursive = TRUE)
+  on.exit(unlink(c(root, module), recursive = TRUE), add = TRUE)
+
+  testthat::expect_error(
+    dependency_guard_env$distribute_module_i18n(module, root, "missing.po"),
+    "do not exist"
+  )
+  testthat::expect_error(
+    dependency_guard_env$distribute_module_i18n(module, root, "nested/tr.po"),
+    "plain file names"
+  )
+})
+
+testthat::test_that("configured pruning removes only named stale files and Imports", {
+  skip_if_dependency_guard_utils_missing()
+  testthat::skip_if_not_installed("desc")
+  module <- tempfile("module-pruning-")
+  dir.create(file.path(module, "R"), recursive = TRUE)
+  on.exit(unlink(module, recursive = TRUE), add = TRUE)
+  writeLines("stale <- TRUE", file.path(module, "R", "stale.R"))
+  writeLines("keep <- TRUE", file.path(module, "R", "keep.R"))
+  writeLines(c(
+    "Package: FixtureModule",
+    "Version: 0.0.1",
+    "Imports: cluster, tidyr, stats"
+  ), file.path(module, "DESCRIPTION"))
+
+  removed_files <- dependency_guard_env$prune_configured_module_r_files(
+    module, "stale.R"
+  )
+  removed_imports <- dependency_guard_env$prune_configured_module_imports(
+    module, c("cluster", "tidyr")
+  )
+
+  testthat::expect_equal(basename(removed_files), "stale.R")
+  testthat::expect_false(file.exists(file.path(module, "R", "stale.R")))
+  testthat::expect_true(file.exists(file.path(module, "R", "keep.R")))
+  testthat::expect_setequal(removed_imports, c("cluster", "tidyr"))
+  remaining <- desc::desc(file.path(module, "DESCRIPTION"))$get_deps()
+  testthat::expect_equal(remaining$package[remaining$type == "Imports"], "stats")
+})

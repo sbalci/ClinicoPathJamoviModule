@@ -251,9 +251,10 @@ diagnosticmetaClass <- R6::R6Class(
             # text (HTML banners in .populateWelcome/.populateAbout, table
             # notes, sprintf-formatted summaries in .generateSummary /
             # .generateBasicSummary, all interpretation/explanation panels).
-            # Currently zero `.()` calls wrap the literals, so the strings are
-            # not extractable for translation. Run `/prepare-translation
-            # diagnosticmeta` to wrap them and produce the .po file.
+            # Translation coverage remains incomplete: the fatal minimum-study
+            # rejection is wrapped, but notices, HTML panels, table notes, and
+            # generated interpretations are not yet extractable. Run `/prepare-translation
+            # diagnosticmeta` before declaring localization complete.
 
             # Reset the notices accumulator and clear any banner content left
             # from the previous run cycle; every .addNotice() below re-renders.

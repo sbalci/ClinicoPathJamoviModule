@@ -171,7 +171,7 @@ test_that("ihcheterogeneity variancetable keeps its four .init() rows", {
 })
 
 
-test_that("swimmerplot summary keeps six fixed rows plus conditional response rows", {
+test_that("swimmerplot summary keeps five fixed rows plus conditional response rows", {
   skip_if_not(analysis_available("swimmerplot"), "package not loaded")
 
   set.seed(11)
@@ -181,12 +181,12 @@ test_that("swimmerplot summary keeps six fixed rows plus conditional response ro
                    stringsAsFactors = FALSE)
 
   base <- swimmerplot(data = sw, patientID = "id", startTime = "start", endTime = "end")
-  expect_equal(base$summary$rowCount, 6L)
+  expect_equal(base$summary$rowCount, 5L)
 
   # the conditional response rows are keyed by level and must not duplicate
   withresp <- swimmerplot(data = sw, patientID = "id", startTime = "start",
                           endTime = "end", responseVar = "resp")
-  expect_gt(withresp$summary$rowCount, 6L)
+  expect_gt(withresp$summary$rowCount, 5L)
 })
 
 

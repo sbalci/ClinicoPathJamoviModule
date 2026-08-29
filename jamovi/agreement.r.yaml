@@ -660,14 +660,6 @@ items:
 
     # ---- All-Pairs Cohen's Kappa Table (every rater pair) ----
 
-    - name: allPairsKappaHeading
-      title: All-Pairs Cohen's Kappa
-      type: Preformatted
-      visible: (allPairsKappa || showAllPairsKappaGuide)
-      clearWith:
-          - allPairsKappa
-          - showAllPairsKappaGuide
-
     - name: allPairsKappaTable
       title: "All-Pairs Kappa (Every Rater Pair)"
       type: Table
@@ -728,14 +720,6 @@ items:
           - showAllPairsKappaGuide
 
     # ---- Per-Category Item-Modal Agreement ----
-
-    - name: itemModalAgreementHeading
-      title: Per-Category Item-Modal Agreement
-      type: Preformatted
-      visible: (itemModalCategoryAgreement || showItemModalGuide)
-      clearWith:
-          - itemModalCategoryAgreement
-          - showItemModalGuide
 
     - name: itemModalAgreementTable
       title: "Agreement by Item Modal Category"

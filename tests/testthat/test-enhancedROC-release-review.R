@@ -167,7 +167,7 @@ test_that("comparison options explain themselves instead of silently doing nothi
 })
 
 
-test_that("unimplemented options are labelled as such in the documentation", {
+test_that("unimplemented options are documented but not exposed in the GUI", {
     # 19 options reach the public R wrapper and man/enhancedROC.Rd described them as working
     # features ("Calculate Harrell's concordance index for time-to-event outcomes"), while the
     # backend only lists them in a "planned features" notice. None has a UI control, so this
@@ -185,12 +185,14 @@ test_that("unimplemented options are labelled as such in the documentation", {
         expect_true(nzchar(blk), label = paste("found block for", o))
         expect_match(blk, "NOT YET IMPLEMENTED", info = o)
     }
-    # All 20 have LIVE checkboxes in jamovi/enhancedroc.u.yaml, so a GUI user can tick one and
-    # receive nothing. That makes it a warning, not the INFO it used to be filed as.
+    # Keep the dormant options for backward-compatible R calls, but do not offer
+    # controls that cannot produce the promised result in the jamovi interface.
     u_yaml <- paste(readLines("../../jamovi/enhancedroc.u.yaml", warn = FALSE), collapse = "\n")
     for (o in unimplemented)
-        expect_match(u_yaml, sprintf("(?m)^\\s*name:\\s*%s\\s*$", o), info = o,
-                     all = FALSE, perl = TRUE)
+        expect_false(grepl(sprintf("(?m)^\\s*name:\\s*%s\\s*$", o), u_yaml,
+                           perl = TRUE), info = o)
+    expect_false(grepl("(?m)^\\s*name:\\s*multiClassAveraging\\s*$", u_yaml,
+                       perl = TRUE))
 
     res <- run_er(data = er_data(), predictors = "m1", harrellCIndex = TRUE)
     n <- notices_of(res)
