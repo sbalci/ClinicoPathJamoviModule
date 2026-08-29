@@ -37,7 +37,7 @@ advancedraincloudClass <- if (requireNamespace("jmvcore")) {
             .validate_numeric_range = function(value, name, min, max) {
                 if (!is.null(value)) {
                     if (!is.numeric(value) || value < min || value > max) {
-                        jmvcore::reject(jmvcore::format(
+                        jmvcore::reject(.fmt(
                             .("{name} must be a numeric value between {min} and {max}."),
                             name = name, min = min, max = max), code = "")
                     }
@@ -46,7 +46,7 @@ advancedraincloudClass <- if (requireNamespace("jmvcore")) {
             .validate_numeric_positive = function(value, name) {
                 if (!is.null(value)) {
                     if (!is.numeric(value) || value <= 0) {
-                        jmvcore::reject(jmvcore::format(
+                        jmvcore::reject(.fmt(
                             .("{name} must be a positive numeric value."), name = name),
                             code = "")
                     }
@@ -54,7 +54,7 @@ advancedraincloudClass <- if (requireNamespace("jmvcore")) {
             },
             .validate_numeric_type = function(value, name) {
                 if (!is.null(value) && !is.numeric(value)) {
-                    jmvcore::reject(jmvcore::format(
+                    jmvcore::reject(.fmt(
                         .("{name} must be a numeric value."), name = name), code = "")
                 }
             },
@@ -486,7 +486,7 @@ advancedraincloudClass <- if (requireNamespace("jmvcore")) {
                 if (!is.null(self$options$trial_arms) && self$options$trial_arms != "") {
                     arm_labels <- trimws(strsplit(self$options$trial_arms, ",")[[1]])
                     if (length(arm_labels) != length(x_levels)) {
-                        private$.addAnalysisNote(jmvcore::format(
+                        private$.addAnalysisNote(.fmt(
                             .("Treatment arm labels were ignored: {nLabels} label(s) were provided for {nGroups} group(s). Provide one comma-separated label per group."),
                             nLabels = length(arm_labels),
                             nGroups = length(x_levels)))
@@ -497,7 +497,7 @@ advancedraincloudClass <- if (requireNamespace("jmvcore")) {
                     self$options$show_longitudinal && !is.null(id_var) && id_var != "") {
                     time_labels <- trimws(strsplit(self$options$time_labels, ",")[[1]])
                     if (length(time_labels) != length(x_levels)) {
-                        private$.addAnalysisNote(jmvcore::format(
+                        private$.addAnalysisNote(.fmt(
                             .("Time point labels were ignored: {nLabels} label(s) were provided for {nPoints} time point(s). Provide one comma-separated label per time point."),
                             nLabels = length(time_labels),
                             nPoints = length(x_levels)))
@@ -599,7 +599,7 @@ advancedraincloudClass <- if (requireNamespace("jmvcore")) {
                         ))
                     },
                     error = function(e) {
-                        stop(jmvcore::format(
+                        stop(.fmt(
                             .("Failed to create the base plot: {error}. Please check your variable selections."),
                             error = conditionMessage(e)))
                     }
@@ -614,7 +614,7 @@ advancedraincloudClass <- if (requireNamespace("jmvcore")) {
                 n_groups <- length(unique(analysis_data[[x_var]]))
                 if (n_groups > private$.constants$MAX_GROUPS_FOR_DISPLAY) {
                     # Console-only; the user-facing note is added in .run().
-                    warning(jmvcore::format(
+                    warning(.fmt(
                         .("A large number of groups ({n}) may cause display issues. Consider grouping your data."),
                         n = n_groups))
                 }
@@ -651,7 +651,7 @@ advancedraincloudClass <- if (requireNamespace("jmvcore")) {
 
                         # Inform user about exclusions
                         if (excluded_n > 0) {
-                            message(jmvcore::format(
+                            message(.fmt(
                                 .("Longitudinal analysis excluded {n} observation(s) with missing ID values ({percent}%)."),
                                 n = excluded_n,
                                 percent = round((excluded_n / original_n) * 100, 1)))
@@ -669,14 +669,14 @@ advancedraincloudClass <- if (requireNamespace("jmvcore")) {
                             warning(.("No repeated IDs found after data cleaning. Longitudinal connections require subjects with multiple observations."))
                         } else if (repeated_ids < 3) {
                             # Console-only; the user-facing note is added in .run().
-                            warning(jmvcore::format(
+                            warning(.fmt(
                                 .("Very few subjects with repeated measures ({n}) remain after data cleaning. Longitudinal connections may not be meaningful."),
                                 n = repeated_ids))
                             rain_params$id.long.var <- id_var
                         } else {
                             # Proper longitudinal structure detected
                             rain_params$id.long.var <- id_var
-                            message(jmvcore::format(
+                            message(.fmt(
                                 .("Longitudinal connections were enabled for {repeated}/{total} subjects with repeated measures."),
                                 repeated = repeated_ids, total = total_ids))
                         }
@@ -739,7 +739,7 @@ advancedraincloudClass <- if (requireNamespace("jmvcore")) {
                     if (!is.null(rain_err)) {
                         # Set fallback flag for any ggrain error
                         use_fallback <- TRUE
-                        warning(jmvcore::format(
+                        warning(.fmt(
                             .("ggrain failed with error: {error}. Using the standard-geometry fallback."),
                             error = conditionMessage(rain_err)))
                     }
@@ -853,7 +853,7 @@ advancedraincloudClass <- if (requireNamespace("jmvcore")) {
                     },
                     error = function(e) {
                         # Fallback to default ggplot2 colors if palette generation fails
-                        warning(jmvcore::format(
+                        warning(.fmt(
                             .("Color palette generation failed, so default colors were used: {error}"),
                             error = conditionMessage(e)))
                         private$.appendPlotNote(
@@ -874,7 +874,7 @@ advancedraincloudClass <- if (requireNamespace("jmvcore")) {
                             }
                         },
                         error = function(e) {
-                            warning(jmvcore::format(
+                            warning(.fmt(
                                 .("Covariate color-scale generation failed, so defaults were used: {error}"),
                                 error = conditionMessage(e)))
                             private$.appendPlotNote(
@@ -1043,7 +1043,7 @@ advancedraincloudClass <- if (requireNamespace("jmvcore")) {
                         names(arm_labels) <- x_levels
                         p <- p + ggplot2::scale_x_discrete(labels = arm_labels)
                     } else {
-                        warning(jmvcore::format(
+                        warning(.fmt(
                             .("The number of trial-arm labels ({nLabels}) does not match the number of groups ({nGroups}), so default labels were used."),
                             nLabels = length(arm_labels),
                             nGroups = length(x_levels)))
@@ -1062,7 +1062,7 @@ advancedraincloudClass <- if (requireNamespace("jmvcore")) {
                             names(time_labels) <- x_levels
                             p <- p + ggplot2::scale_x_discrete(labels = time_labels)
                         } else {
-                            warning(jmvcore::format(
+                            warning(.fmt(
                                 .("The number of time-point labels ({nLabels}) does not match the number of time points ({nPoints}), so default labels were used."),
                                 nLabels = length(time_labels),
                                 nPoints = length(x_levels)))
@@ -1664,7 +1664,7 @@ advancedraincloudClass <- if (requireNamespace("jmvcore")) {
                             cleaning_report,
                             "<div style='background-color: rgba(255, 202, 33, 0.23); padding: 20px; border-radius: 8px; margin-bottom: 20px; color: inherit;'>",
                             "<h3 style='color: #856404; margin-top: 0;'> Change Score Analysis</h3>",
-                            "<p>", jmvcore::format(
+                            "<p>", .fmt(
                                 .("Baseline group '{group}' was not found in the complete data. Available groups: {available}."),
                                 group = htmltools::htmlEscape(baseline_group),
                                 available = available_groups), "</p>",

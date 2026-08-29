@@ -449,7 +449,7 @@ oddsratioClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
                 missing_columns <- setdiff(selected_columns, names(self$data))
                 if (length(missing_columns) > 0) {
-                    jmvcore::reject(jmvcore::format(
+                    jmvcore::reject(.fmt(
                         .("Selected variable(s) not found in the data: {variables}."),
                         variables = paste(missing_columns, collapse = ", ")
                     ))
@@ -472,7 +472,7 @@ oddsratioClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                         "",
                         paste(validation_results$errors, collapse = "; ")
                     )
-                    critical_message <- jmvcore::format(
+                    critical_message <- .fmt(
                         .("Critical validation errors detected: {errors}. Ensure the outcome variable has exactly 2 levels, explanatory variables have sufficient variation, and consider removing rows with missing data."),
                         errors = validation_error)
                     # Surface the critical error in the dedicated 'errors' Html output
@@ -634,7 +634,7 @@ oddsratioClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 }
                 if (nlevels(observed_outcome) != 2 ||
                     !(self$options$outcomeLevel %in% levels(observed_outcome))) {
-                    jmvcore::reject(jmvcore::format(
+                    jmvcore::reject(.fmt(
                         .("After removing incomplete cases for the selected model, the outcome must retain exactly two observed levels including the selected positive level '{level}'."),
                         level = self$options$outcomeLevel
                     ))
@@ -646,7 +646,7 @@ oddsratioClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     logical(1)
                 )
                 if (any(no_variation)) {
-                    jmvcore::reject(jmvcore::format(
+                    jmvcore::reject(.fmt(
                         .("The following explanatory variable(s) have no variation after complete-case filtering: {variables}."),
                         variables = paste(self$options$explanatory[no_variation], collapse = ", ")
                     ))
@@ -658,7 +658,7 @@ oddsratioClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     logical(1)
                 )
                 if (any(non_finite)) {
-                    jmvcore::reject(jmvcore::format(
+                    jmvcore::reject(.fmt(
                         .("The following numeric explanatory variable(s) contain infinite values: {variables}. Replace infinite values before fitting the model."),
                         variables = paste(self$options$explanatory[non_finite], collapse = ", ")
                     ))
@@ -742,7 +742,7 @@ oddsratioClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                             metrics = TRUE
                         ),
                         error = function(e) {
-                            message <- jmvcore::format(
+                            message <- .fmt(
                                 .("Standard logistic regression could not be fitted: {message}. Review outcome coding, predictor variation, sparse categories, and separation; consider Firth penalized regression when appropriate."),
                                 message = conditionMessage(e)
                             )
@@ -2296,7 +2296,7 @@ oddsratioClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             fit <- tryCatch({
                 logistf::logistf(f, data = .data)
             }, error = function(e) {
-                jmvcore::reject(jmvcore::format(
+                jmvcore::reject(.fmt(
                     .("Error fitting Firth model: {message}"), message = conditionMessage(e)))
             })
             

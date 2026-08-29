@@ -95,8 +95,8 @@ agreement
 
 ## Decision
 
-decision
-decisioncombine
+- decision
+- decisioncombine
 - decisioncompare
 - nogoldstandard
 

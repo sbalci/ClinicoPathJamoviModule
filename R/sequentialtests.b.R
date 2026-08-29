@@ -1792,11 +1792,13 @@ sequentialtestsClass <- if (requireNamespace('jmvcore'))
                 self$results$notices$setContent(paste(blocks, collapse = "\n\n"))
             },
 
-            # jmvcore::format() takes named replacements through `...`; passing a single list
+            # .fmt() takes named replacements through `...`; passing a single list
             # produces an ellipsis character. Keep replacement values together at call sites,
             # then expand them here so translated templates retain reorderable {name} tokens.
             .formatTranslated = function(template, values) {
-                do.call(jmvcore::format, c(list(str = template), values))
+                # .fmt, not jmvcore::format: the substituter re-scans after each
+                # replacement, so a value containing its own placeholder loops forever.
+                do.call(.fmt, c(list(template), values))
             },
 
             # HTML sanitization for security (used by Html output items: plain_summary,

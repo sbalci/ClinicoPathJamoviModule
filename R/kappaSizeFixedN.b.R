@@ -85,7 +85,7 @@ kappaSizeFixedNClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cla
             if (has_bound && kappaL_val <= 0) {
                 warn <- paste0(warn, block(red_div,
                     .("This sample size cannot demonstrate agreement."),
-                    jmvcore::format(
+                    .fmt(
                         .("The expected lower bound is {bound}, at or below zero, so even if the study observes the anticipated kappa it will not be able to rule out agreement no better than chance. Enrol more subjects, add raters, or relax the significance level."),
                         bound = private$.fmtBound(kappaL_val))))
             }
@@ -101,7 +101,7 @@ kappaSizeFixedNClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cla
                     .("Consider collapsing rare categories or enrolling more subjects.")
                 warn <- paste0(warn, block(warn_div,
                     .("Sparse categories."),
-                    jmvcore::format(
+                    .fmt(
                         .("At this sample size the agreement-pattern cells (for example, exactly k of the raters calling the finding present, or all raters agreeing on one category) are too sparse at the reported lower bound: the smallest expected count is {min} and {below} of {total} cells are below 5. The calculation rests on a large-sample chi-square approximation, so the bound shown is less dependable here."),
                         min = signif(sparse_min, 2), below = sparse_below5, total = sparse_total),
                     remedy))
@@ -123,8 +123,8 @@ kappaSizeFixedNClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cla
             k <- length(tokens)
             if (k == 0) return("")
             if (k == 1) return(tokens)
-            if (k == 2) return(jmvcore::format(.("{a} and {b}"), a = tokens[1], b = tokens[2]))
-            jmvcore::format(.("{head} and {last}"),
+            if (k == 2) return(.fmt(.("{a} and {b}"), a = tokens[1], b = tokens[2]))
+            .fmt(.("{head} and {last}"),
                             head = paste(tokens[-k], collapse = ", "), last = tokens[k])
         },
 
@@ -165,13 +165,13 @@ kappaSizeFixedNClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cla
             if (outcome == 2) {
                 if (!(length(props4) %in% c(1L, 2L)))
                     jmvcore::reject(
-                        jmvcore::format(
+                        .fmt(
                             .("For a binary outcome enter either one prevalence value or two proportions that sum to 1 (received {got})."),
                             got = length(props4)),
                         code = NULL)
             } else if (length(props4) != outcome) {
                 jmvcore::reject(
-                    jmvcore::format(
+                    .fmt(
                         .("Enter exactly {k} proportions for {k} outcome levels (received {got})."),
                         k = outcome, got = length(props4)),
                     code = NULL)
@@ -184,7 +184,7 @@ kappaSizeFixedNClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cla
             # predicate (abs(sum - 1) >= 0.001) so its message is never bypassed at sum = 1.001.
             if (length(props4) >= 2 && abs(sum(props4) - 1) >= 0.001)
                 jmvcore::reject(
-                    jmvcore::format(
+                    .fmt(
                         .("Proportions must sum to 1 (current sum = {sum})."),
                         sum = round(sum(props4), 4)),
                     code = NULL)
@@ -193,7 +193,7 @@ kappaSizeFixedNClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cla
             # hang its search loop (the test statistic becomes NaN).
             if (!is.finite(n) || n < 11)
                 jmvcore::reject(
-                    jmvcore::format(
+                    .fmt(
                         .("Sample size (N) must be a whole number of at least 11. The kappaSize method is a large-sample approximation and its engine refuses any study of 10 or fewer subjects (received {n})."),
                         n = n),
                     code = NULL)
@@ -251,7 +251,7 @@ kappaSizeFixedNClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cla
                 ),
                 error = function(e)
                     jmvcore::reject(
-                        jmvcore::format(
+                        .fmt(
                             .("kappaSize could not compute the expected lower bound: {error}"),
                             error = conditionMessage(e)),
                         code = NULL)
@@ -270,7 +270,7 @@ kappaSizeFixedNClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cla
                      else NA_real_
             if (!has_bound || !all(is.finite(cells)) || any(cells < 0))
                 jmvcore::reject(
-                    jmvcore::format(
+                    .fmt(
                         .("The calculation did not converge to a usable answer: the search returned {bound}, which is below the lowest agreement the model allows for these prevalences (every agreement pattern must keep a non-negative probability). With this combination of sample size, anticipated kappa and category prevalences the large-sample approximation breaks down. Increase N, use a less extreme prevalence, or raise the significance level."),
                         bound = if (has_bound) private$.fmtBound(kappaL_val) else "NA"),
                     code = NULL)
@@ -286,10 +286,10 @@ kappaSizeFixedNClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cla
                 paste(dedupe(utils::capture.output(summary(result))), collapse = "\n"))
 
             prev_txt <- if (outcome == 2 && length(parsed$tokens) == 1) {
-                jmvcore::format(.("Further suppose that the prevalence of the trait is {p}."),
+                .fmt(.("Further suppose that the prevalence of the trait is {p}."),
                                 p = parsed$tokens[1])
             } else {
-                jmvcore::format(
+                .fmt(
                     .("Further suppose that the proportions of the outcome categories are {props}."),
                     props = private$.formatProps(parsed$tokens))
             }
@@ -299,17 +299,17 @@ kappaSizeFixedNClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cla
             # value of kappa that the study can expect to rule out") said the opposite.
             text2 <- paste0(
                 private$.wrap(paste(
-                    jmvcore::format(
+                    .fmt(
                         .("Researchers anticipate an agreement of kappa = {kappa0} and have access to {n} subjects, each rated by {raters} raters."),
                         kappa0 = kappa0, n = base::format(n, scientific = FALSE),
                         raters = raters),
                     prev_txt)),
                 "\n",
-                private$.wrap(jmvcore::format(
+                private$.wrap(.fmt(
                     .("They would like to know how low the one-sided {conf}% lower confidence bound for kappa can be expected to fall - the smallest agreement the study would still be unable to rule out; every value below it is excluded."),
                     conf = base::format(100 * (1 - alpha), scientific = FALSE))),
                 "\n",
-                private$.wrap(jmvcore::format(
+                private$.wrap(.fmt(
                     .("The expected lower bound for kappa is {bound}."),
                     bound = private$.fmtBound(kappaL_val))),
                 if (kappaL_val <= 0)

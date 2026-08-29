@@ -57,7 +57,7 @@ options:
             The gold standard reference variable representing true disease status.
 
     - name: goldPositive
-      title: Disease Present Level
+      title: Disease present level
       type: Level
       variable: (gold)
       description:

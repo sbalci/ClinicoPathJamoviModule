@@ -521,7 +521,7 @@ decisioncombineClass <- if (requireNamespace("jmvcore")) {
                     private$.addNotice(
                         "ERROR",
                         .("Variables Must Be Distinct"),
-                        jmvcore::format(
+                        .fmt(
                             .("The reference standard and tests must use different variables. Select a different variable for: {variables}."),
                             variables = paste(duplicated_vars, collapse = ", ")
                         )
@@ -592,7 +592,7 @@ decisioncombineClass <- if (requireNamespace("jmvcore")) {
                         private$.addNotice(
                             "ERROR",
                             .("Missing Level"),
-                            jmvcore::format(
+                            .fmt(
                                 .('The specified positive level "{level}" is not defined for variable "{variable}" ({label}). Select a level that exists in the data.'),
                                 level = sl$level,
                                 variable = sl$var,
@@ -607,7 +607,7 @@ decisioncombineClass <- if (requireNamespace("jmvcore")) {
                     private$.addNotice(
                         "ERROR",
                         .("Insufficient Complete Cases"),
-                        jmvcore::format(
+                        .fmt(
                             .("At least four complete cases are required for combination analysis; only {used} of {total} cases remain after excluding missing values."),
                             used = n_complete,
                             total = nrow(selected_data)
@@ -685,11 +685,11 @@ decisioncombineClass <- if (requireNamespace("jmvcore")) {
                     n_removed <- n_before - n_after
                     private$.addNotice(
                         "WARNING",
-                        jmvcore::format(
+                        .fmt(
                             .("Removed {n} case(s) with missing values"),
                             n = n_removed
                         ),
-                        jmvcore::format(
+                        .fmt(
                             .("Complete-case analysis uses {used} of {total} cases ({percent}%) for the combination analysis. Cases missing the gold standard or any selected test were excluded. Individual-test tables use their own pairwise-complete denominators. If data are not missing completely at random, investigate the missingness pattern."),
                             used = n_after,
                             total = n_before,
@@ -710,12 +710,12 @@ decisioncombineClass <- if (requireNamespace("jmvcore")) {
                 if (length(gold_levels_present) < 2) {
                     one_class_message <- if (identical(
                         gold_levels_present[1], self$options$goldPositive)) {
-                        jmvcore::format(
+                        .fmt(
                             .('Every complete case has gold standard "{level}", so this sample contains no disease-absent cases. Specificity and NPV cannot be estimated and are reported as blank. Diagnostic accuracy assessment requires both diseased and non-diseased cases.'),
                             level = gold_levels_present[1]
                         )
                     } else {
-                        jmvcore::format(
+                        .fmt(
                             .('Every complete case has gold standard "{level}", so this sample contains no disease-present cases. Sensitivity and PPV cannot be estimated and are reported as blank. Diagnostic accuracy assessment requires both diseased and non-diseased cases.'),
                             level = gold_levels_present[1]
                         )
@@ -739,12 +739,12 @@ decisioncombineClass <- if (requireNamespace("jmvcore")) {
                                  else paste(c(others[1:5], "..."), collapse = ", ")
                         private$.addNotice(
                             "STRONG_WARNING",
-                            jmvcore::format(
+                            .fmt(
                                 .("{variable} has {n} levels"),
                                 variable = rl$var,
                                 n = length(lv)
                             ),
-                            jmvcore::format(
+                            .fmt(
                                 .('Variable "{variable}" ({label}) has {n} levels: {levels}. Only "{positive}" is treated as positive; every other level ({others}) is counted as NEGATIVE. If any of those levels represent equivocal or indeterminate results, this recoding can bias sensitivity, specificity, predictive values, and likelihood ratios and make them difficult to interpret. Recode the variable to two levels and set equivocal results to missing if that is not what you intend.'),
                                 variable = rl$var,
                                 label = rl$label,
@@ -781,19 +781,19 @@ decisioncombineClass <- if (requireNamespace("jmvcore")) {
                 if (n_used < 20) {
                     private$.addNotice(
                         "STRONG_WARNING",
-                        jmvcore::format(.("Very small sample: n = {n} complete cases"), n = n_used),
+                        .fmt(.("Very small sample: n = {n} complete cases"), n = n_used),
                         .("With fewer than 20 complete cases every proportion rests on a handful of patients, so one reclassified case moves sensitivity or specificity by several percentage points and the 95% confidence intervals are very wide. Read the intervals rather than the point estimates. Diagnostic accuracy studies usually need on the order of 100 cases before the intervals narrow usefully, and combination analysis splits those cases across four or eight patterns.")
                     )
                 } else if (n_used < 50) {
                     private$.addNotice(
                         "WARNING",
-                        jmvcore::format(.("Small sample: n = {n} complete cases"), n = n_used),
+                        .fmt(.("Small sample: n = {n} complete cases"), n = n_used),
                         .("Confidence intervals will be wide, and dividing this sample across four or eight result patterns leaves very few cases per pattern. Interpret the pattern rows as exploratory.")
                     )
                 } else if (n_used < 100) {
                     private$.addNotice(
                         "INFO",
-                        jmvcore::format(.("Sample size: n = {n} complete cases"), n = n_used),
+                        .fmt(.("Sample size: n = {n} complete cases"), n = n_used),
                         .("Around 100 cases or more is the usual target for a stable diagnostic accuracy estimate; this sample supports preliminary estimates, particularly once it is divided across the result patterns.")
                     )
                 }
@@ -805,11 +805,11 @@ decisioncombineClass <- if (requireNamespace("jmvcore")) {
                 if (min(n_gold_pos, n_gold_neg) > 0 && min(n_gold_pos, n_gold_neg) < 10) {
                     private$.addNotice(
                         "STRONG_WARNING",
-                        jmvcore::format(
+                        .fmt(
                             .("Only {n} cases in the smaller reference-standard group"),
                             n = min(n_gold_pos, n_gold_neg)
                         ),
-                        jmvcore::format(
+                        .fmt(
                             .("This sample has {pos} disease-present and {neg} disease-absent complete cases. Sensitivity and PPV are limited by the disease-present count and specificity and NPV by the disease-absent count, so with fewer than 10 in one group the statistics that depend on it are driven by single patients and their confidence intervals span most of the possible range. Every likelihood ratio and diagnostic odds ratio inherits that instability."),
                             pos = n_gold_pos,
                             neg = n_gold_neg
@@ -830,7 +830,7 @@ decisioncombineClass <- if (requireNamespace("jmvcore")) {
                     private$.addNotice(
                         "STRONG_WARNING",
                         .("Extreme Disease Prevalence"),
-                        jmvcore::format(
+                        .fmt(
                             # "among observed reference results" would overstate the
                             # denominator: mydata is already joint complete cases, so this
                             # is the set the combination table is scored on, which is
@@ -910,11 +910,11 @@ decisioncombineClass <- if (requireNamespace("jmvcore")) {
                 if (n_used == 0) {
                     private$.addNotice(
                         "WARNING",
-                        jmvcore::format(
+                        .fmt(
                             .("Test {test} Has No Complete Cases"),
                             test = test_num
                         ),
-                        jmvcore::format(
+                        .fmt(
                             .("Test {test} cannot be summarized because no case has both the test and reference-standard result."),
                             test = test_num
                         )
@@ -924,11 +924,11 @@ decisioncombineClass <- if (requireNamespace("jmvcore")) {
                 if (n_used < n_total) {
                     private$.addNotice(
                         "INFO",
-                        jmvcore::format(
+                        .fmt(
                             .("Test {test} Pairwise Denominator"),
                             test = test_num
                         ),
-                        jmvcore::format(
+                        .fmt(
                             .("Individual Test {test} statistics use {used} of {total} cases with both the test and reference standard observed."),
                             test = test_num,
                             used = n_used,
@@ -975,7 +975,7 @@ decisioncombineClass <- if (requireNamespace("jmvcore")) {
                     private$.addNotice(
                         "WARNING",
                         .("Invalid Counts"),
-                        jmvcore::format(
+                        .fmt(
                             .("Invalid counts were detected for Test {test}. The individual analysis was skipped."),
                             test = test_num
                         )
@@ -988,7 +988,7 @@ decisioncombineClass <- if (requireNamespace("jmvcore")) {
                     private$.addNotice(
                         "WARNING",
                         .("All Zero Counts"),
-                        jmvcore::format(
+                        .fmt(
                             .("No valid observations were found for Test {test}. The individual analysis was skipped."),
                             test = test_num
                         )
@@ -1168,7 +1168,7 @@ decisioncombineClass <- if (requireNamespace("jmvcore")) {
                 private$.addNotice(
                     "INFO",
                     .("Continuity Correction"),
-                    jmvcore::format(
+                    .fmt(
                         .("A Haldane-Anscombe continuity correction of 0.5 was applied to {n} pattern(s) with at least one zero cell ({patterns}). The correction affects LR+, LR-, the diagnostic odds ratio and their confidence intervals only; sensitivity, specificity, PPV and NPV on the same rows use the observed counts."),
                         n = length(patterns),
                         patterns = paste(patterns, collapse = ", ")
@@ -1209,7 +1209,7 @@ decisioncombineClass <- if (requireNamespace("jmvcore")) {
                 private$.addNotice(
                     "STRONG_WARNING",
                     .("Sparse Cell Counts"),
-                    jmvcore::format(
+                    .fmt(
                         .("These rows have a 2-by-2 cell count below 5 (smallest cell {minimum}): {rows}. Their likelihood ratios, diagnostic odds ratios and confidence intervals rest on very few cases and may be unstable even when they look informative. Sensitivity, specificity and Youden's J on the same rows can still be sound, because those depend on the size of the two reference groups rather than on the smallest cell. Treat the ratio columns as exploratory and validate them in a larger independent sample."),
                         minimum = minimum_cell,
                         rows = paste(affected, collapse = ", ")
@@ -1259,7 +1259,7 @@ decisioncombineClass <- if (requireNamespace("jmvcore")) {
                     private$.addNotice(
                         "WARNING",
                         .("All Zero Counts"),
-                        jmvcore::format(
+                        .fmt(
                             .('No observations were found for pattern "{pattern}". This combination was skipped.'),
                             pattern = pattern_name
                         )
@@ -1731,7 +1731,7 @@ decisioncombineClass <- if (requireNamespace("jmvcore")) {
                     private$.addNotice(
                         "STRONG_WARNING",
                         .("No Rule Performs Better Than Chance"),
-                        jmvcore::format(
+                        .fmt(
                             .("None of the {n} eligible candidate rules has a Youden's J above zero, so none discriminates better than chance in this sample and no rule is ranked. A rule with a negative Youden's J is anti-predictive: its result would have to be reversed to carry information. Review the positive-level assignments for the reference standard and each test before interpreting these results."),
                             n = n_estimable
                         )
@@ -1749,7 +1749,7 @@ decisioncombineClass <- if (requireNamespace("jmvcore")) {
                 if (length(tied) > 1) {
                     rationale_parts <- c(
                         rationale_parts,
-                        jmvcore::format(
+                        .fmt(
                             .('{n} rules tie on Youden\'s J ({rules}); "{shown}" is displayed only because it comes first.'),
                             n = length(tied),
                             rules = paste(tied, collapse = ", "),
@@ -1771,7 +1771,7 @@ decisioncombineClass <- if (requireNamespace("jmvcore")) {
 
                 rationale_parts <- c(
                     rationale_parts,
-                    jmvcore::format(
+                    .fmt(
                         # The eligibility criteria stated here must match the filters
                         # applied above exactly: the count is meaningless if the reader
                         # cannot reproduce which rules it counts.
@@ -1794,8 +1794,8 @@ decisioncombineClass <- if (requireNamespace("jmvcore")) {
                     if (is.finite(j_lower) && j_lower <= runner_up) {
                         rationale_parts <- c(
                             rationale_parts,
-                            jmvcore::format(
-                                # jmvcore::format()'s placeholder regex does not match
+                            .fmt(
+                                # .fmt()'s placeholder regex does not match
                                 # underscores, so a placeholder named runner_up shipped to the
                                 # user as literal braces with no warning -- in the one
                                 # sentence that tells a clinician the top-ranked rule's
@@ -1811,7 +1811,7 @@ decisioncombineClass <- if (requireNamespace("jmvcore")) {
 
                 rationale_parts <- c(
                     rationale_parts,
-                    jmvcore::format(
+                    .fmt(
                         .("The highest observed Youden's J among the eligible candidate rules was {youden}."),
                         youden = base::format(
                             round(best_pattern$youden, 3),
@@ -1931,7 +1931,7 @@ decisioncombineClass <- if (requireNamespace("jmvcore")) {
                     private$.addNotice(
                         "WARNING",
                         .("No Rows Match the Pattern Filter"),
-                        jmvcore::format(
+                        .fmt(
                             .("The pattern-type filter \"{filter}\" matches none of the rows in this analysis, so the bar chart, heatmap and forest plot are blank. Pattern filters apply to exact result patterns such as \"+/+\"; a single-test analysis has no such rows, and the named strategies are not result patterns. Set the pattern filter back to \"All Patterns\" to see the plots."),
                             filter = private$.patternFilterLabel(self$options$filterPattern)
                         )
@@ -1964,7 +1964,7 @@ decisioncombineClass <- if (requireNamespace("jmvcore")) {
                         private$.addNotice(
                             "INFO",
                             .("Forest Plot Not Available for Selected Statistic"),
-                            jmvcore::format(
+                            .fmt(
                                 .('The forest plot is not drawn for "{statistic}" because this analysis does not calculate a confidence interval for that statistic. The bar chart and heatmap can still display it.'),
                                 statistic = private$.metricLabel(
                                     self$options$filterStatistic

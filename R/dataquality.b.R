@@ -607,7 +607,7 @@ dataqualityClass <- if (requireNamespace("jmvcore")) R6::R6Class("dataqualityCla
                     ),
                     nrow(analysis_data), ncol(analysis_data),
                     # base:: is REQUIRED here: `@import jmvcore` brings
-                    # jmvcore::format(str, ..., context) into this namespace, which
+                    # .fmt(str, ..., context) into this namespace, which
                     # masks base::format and silently swallows big.mark/scientific.
                     base::format(n_cells, big.mark = ",", scientific = FALSE)
                 )

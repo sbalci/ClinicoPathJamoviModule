@@ -2037,7 +2037,7 @@ checkdataClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 } else {
                     sprintf(.("set to '%s'"), self$options$unitSystem)
                 }
-                clinical_note <- jmvcore::format(
+                clinical_note <- .fmt(
                     .("This component cost {points} points. Plausibility bounds are general-population rules of thumb, not validated reference ranges, so they may not suit paediatric, ICU, oncology or athlete populations. Which checks run is decided by matching the variable NAME, so non-standard naming can skip a check or apply the wrong one, and units were {units}. Confirm each flag against your study protocol before acting on it."),
                     points = component_scores$clinical$penalty,
                     units = unit_note)

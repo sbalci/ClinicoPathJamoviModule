@@ -339,7 +339,7 @@ decisioncalculatorClass <- if (requireNamespace("jmvcore")) {
                     private$.addNotice(
                         "STRONG_WARNING",
                         .("Extreme prevalence"),
-                        jmvcore::format(
+                        .fmt(
                             .("The selected prevalence is {prevalence}. Predictive values may be unstable or poorly transportable; verify them in the intended population and report the prevalence used."),
                             prevalence = sprintf("%.1f%%", 100 * PriorProb)
                         )
@@ -350,7 +350,7 @@ decisioncalculatorClass <- if (requireNamespace("jmvcore")) {
                     private$.addNotice(
                         "STRONG_WARNING",
                         .("Very sparse reference groups"),
-                        jmvcore::format(
+                        .fmt(
                             .("Only {positive} reference-positive and {negative} reference-negative observations are available. Estimates will be imprecise; inspect confidence intervals and justify sample size for the intended precision. This warning is not a clinical adequacy threshold."),
                             positive = DiseaseP,
                             negative = DiseaseN
@@ -516,12 +516,12 @@ decisioncalculatorClass <- if (requireNamespace("jmvcore")) {
                     ratioTable$addFootnote(rowNo = 1, col = "Spec", .("Specificity: true negatives among reference-negative subjects"))
 
                     accuracy_note <- if (pp) {
-                        jmvcore::format(
+                        .fmt(
                             .("Sample accuracy is the proportion of concordant results. It is computed at the prevalence observed in this sample ({prevalence}), not at the supplied population prevalence, and changes with case mix."),
                             prevalence = sprintf("%.1f%%", PrevalenceD * 100)
                         )
                     } else {
-                        jmvcore::format(
+                        .fmt(
                             .("Sample accuracy is the proportion of concordant results. It is computed at the prevalence observed in this sample ({prevalence}) and changes with case mix."),
                             prevalence = sprintf("%.1f%%", PrevalenceD * 100)
                         )
@@ -720,7 +720,7 @@ decisioncalculatorClass <- if (requireNamespace("jmvcore")) {
                             private$.addNotice(
                                 "ERROR",
                                 .("Invalid cut-off inputs"),
-                                jmvcore::format(
+                                .fmt(
                                     .('All values for cut-off "{cutoff}" must be non-negative finite numbers (TP={tp}, FP={fp}, TN={tn}, FN={fn}).'),
                                     cutoff = cutoff_name,
                                     tp = tp,
@@ -741,7 +741,7 @@ decisioncalculatorClass <- if (requireNamespace("jmvcore")) {
                             private$.addNotice(
                                 "ERROR",
                                 .("No cases for cut-off"),
-                                jmvcore::format(
+                                .fmt(
                                     .('All four frequencies for cut-off "{cutoff}" are zero.'),
                                     cutoff = cutoff_name
                                 )
@@ -769,12 +769,12 @@ decisioncalculatorClass <- if (requireNamespace("jmvcore")) {
                         # Warn if metrics are undefined
                         if (diseased == 0 || healthy == 0) {
                             if (diseased == 0) {
-                                msg <- jmvcore::format(
+                                msg <- .fmt(
                                     .('Cut-off "{cutoff}" has no reference-positive observations, so sensitivity is undefined.'),
                                     cutoff = cutoff_name
                                 )
                             } else {
-                                msg <- jmvcore::format(
+                                msg <- .fmt(
                                     .('Cut-off "{cutoff}" has no reference-negative observations, so specificity is undefined.'),
                                     cutoff = cutoff_name
                                 )
@@ -855,7 +855,7 @@ decisioncalculatorClass <- if (requireNamespace("jmvcore")) {
                         private$.addNotice(
                             "WARNING",
                             .("Cut-offs describe different numbers of patients"),
-                            jmvcore::format(
+                            .fmt(
                                 .("The three scenarios total {current}, {scenario1}, and {scenario2} cases. Moving a cut-off on one cohort cannot change its size, so these rows cannot be interpreted as thresholds applied to the same participants."),
                                 current = n_current,
                                 scenario1 = n1,
@@ -929,24 +929,24 @@ decisioncalculatorClass <- if (requireNamespace("jmvcore")) {
                                   acc_ci[[1]][1] <= acc_ci[[best]][2]
 
                         if (best == 1L || !is.finite(margin) || margin <= 0) {
-                            optimal_msg <- jmvcore::format(
+                            optimal_msg <- .fmt(
                                 .("Current cut-off has the highest Youden's J ({youden}) of the three."),
                                 youden = sprintf("%.3f", ys[1])
                             )
                         } else if (isTRUE(ov)) {
-                            optimal_msg <- jmvcore::format(
+                            optimal_msg <- .fmt(
                                 .("{cutoff} has the highest Youden's J, {margin} above current; its sample-accuracy interval overlaps the current cut-off's, so the difference is not established."),
                                 cutoff = cand[[best]]$name,
                                 margin = sprintf("%.3f", margin)
                             )
                         } else if (isFALSE(ov)) {
-                            optimal_msg <- jmvcore::format(
+                            optimal_msg <- .fmt(
                                 .("{cutoff} has the highest Youden's J, {margin} above current; their sample-accuracy intervals do not overlap."),
                                 cutoff = cand[[best]]$name,
                                 margin = sprintf("%.3f", margin)
                             )
                         } else {
-                            optimal_msg <- jmvcore::format(
+                            optimal_msg <- .fmt(
                                 .("{cutoff} has the highest Youden's J, {margin} above current; paired uncertainty cannot be assessed from these summary counts."),
                                 cutoff = cand[[best]]$name,
                                 margin = sprintf("%.3f", margin)
@@ -1029,7 +1029,7 @@ decisioncalculatorClass <- if (requireNamespace("jmvcore")) {
                     private$.addNotice(
                         "WARNING",
                         .("Fagan nomogram not drawn"),
-                        jmvcore::format(
+                        .fmt(
                             .("The positive likelihood ratio is {lr}. A nomogram assumes that a positive result raises the probability of the outcome; here it lowers that probability, so the plot is omitted. Check the test coding."),
                             lr = sprintf("%.3f", LRP)
                         )
@@ -1057,7 +1057,7 @@ decisioncalculatorClass <- if (requireNamespace("jmvcore")) {
                 fagan_item <- private$.resultsItem("faganSummary")
                 if (!is.null(fagan_item) && isTRUE(self$options$fagan)) {
                     if (!fagan_ok) {
-                        not_drawn_reason <- jmvcore::format(
+                        not_drawn_reason <- .fmt(
                             .("The positive likelihood ratio is {lr}, so a positive result lowers the probability of a reference-positive outcome rather than raising it."),
                             lr = sprintf("%.3f", LRP)
                         )
@@ -1071,23 +1071,23 @@ decisioncalculatorClass <- if (requireNamespace("jmvcore")) {
                         post_pos <- PostTestProbDisease
                         post_neg <- 1 - PostTestProbHealthy
                         pretest_sentence <- if (isTRUE(self$options$pp)) {
-                            jmvcore::format(
+                            .fmt(
                                 .("Pre-test probability is {prevalence}, using the population prevalence you supplied."),
                                 prevalence = sprintf("%.1f%%", 100 * pre)
                             )
                         } else {
-                            jmvcore::format(
+                            .fmt(
                                 .("Pre-test probability is {prevalence}, using the prevalence observed in this study table."),
                                 prevalence = sprintf("%.1f%%", 100 * pre)
                             )
                         }
-                        positive_sentence <- jmvcore::format(
+                        positive_sentence <- .fmt(
                             .("A positive result has a likelihood ratio of {lr} and raises the probability from {prevalence} to {posttest}."),
                             lr = sprintf("%.2f", LRP),
                             prevalence = sprintf("%.1f%%", 100 * pre),
                             posttest = sprintf("%.1f%%", 100 * post_pos)
                         )
-                        negative_sentence <- jmvcore::format(
+                        negative_sentence <- .fmt(
                             .("A negative result has a likelihood ratio of {lr} and lowers the probability from {prevalence} to {posttest}."),
                             lr = sprintf("%.3f", LRN),
                             prevalence = sprintf("%.1f%%", 100 * pre),
@@ -1143,20 +1143,20 @@ decisioncalculatorClass <- if (requireNamespace("jmvcore")) {
             # Private helper methods for summaries ----
 
             .createSummary = function(Sens, Spec, PPV, NPV, LRP, LRN, Youden, Accuracy, Prevalence) {
-                descriptive_result <- jmvcore::format(
+                descriptive_result <- .fmt(
                     .("Youden's index is {youden} and sample accuracy is {accuracy}. These values describe the entered study table; they are not clinical grades or decision thresholds."),
                     youden = sprintf("%.3f", Youden),
                     accuracy = sprintf("%.1f%%", Accuracy * 100)
                 )
-                prevalence_label <- jmvcore::format(
+                prevalence_label <- .fmt(
                     .("At {prevalence} prevalence"),
                     prevalence = sprintf("%.1f%%", Prevalence * 100)
                 )
-                positive_update <- jmvcore::format(
+                positive_update <- .fmt(
                     .("A positive result multiplies pre-test odds by {lr}."),
                     lr = sprintf("%.2f", LRP)
                 )
-                negative_update <- jmvcore::format(
+                negative_update <- .fmt(
                     .("A negative result multiplies pre-test odds by {lr}."),
                     lr = sprintf("%.3f", LRN)
                 )
@@ -1240,7 +1240,7 @@ decisioncalculatorClass <- if (requireNamespace("jmvcore")) {
                 if (prev < 0.05 || prev > 0.95) {
                     warnings <- c(
                         warnings,
-                        jmvcore::format(
+                        .fmt(
                             .("Extreme prevalence is {prevalence}. PPV and NPV estimates may be unstable; verify them in the target population."),
                             prevalence = sprintf("%.1f%%", prev * 100)
                         )

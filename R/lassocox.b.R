@@ -86,15 +86,15 @@ lassocoxClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             #      accept an underscore, so `{n_obs}` stays literal even when the
             #      matching named dot is supplied correctly.
             # Verified 2026-08-20:
-            #   jmvcore::format("n = {n_obs}", list(n_obs = 242))  -> "n = {n_obs}"
-            #   jmvcore::format("n = {n_obs}", n_obs = 242)        -> "n = {n_obs}"
-            #   jmvcore::format("n = {nObs}",  nObs  = 242)        -> "n = 242"
+            #   .fmt("n = {n_obs}", list(n_obs = 242))  -> "n = {n_obs}"
+            #   .fmt("n = {n_obs}", n_obs = 242)        -> "n = {n_obs}"
+            #   .fmt("n = {nObs}",  nObs  = 242)        -> "n = 242"
             # Both were wrong throughout this file (24 list() sites, 9 underscored
             # tokens) and are now fixed. Keep new strings camelCase.
             if (length(missing_packages) > 0) {
                 pkg_list <- paste(missing_packages, collapse = ", ")
                 install_cmd <- paste0("install.packages(c(", paste0("'", missing_packages, "'", collapse = ", "), "))")
-                error_msg <- jmvcore::format(
+                error_msg <- .fmt(
                     .("The following required packages are not installed: {pkgs}\n\nPlease install them using:\n{cmd}"),
                     pkgs = pkg_list, cmd = install_cmd)
 
@@ -294,7 +294,7 @@ lassocoxClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                 outcome_chr <- as.character(outcome_raw)
                 observed_levels <- sort(unique(outcome_chr[!is.na(outcome_chr)]))
                 if (length(observed_levels) != 2) {
-                    jmvcore::reject(jmvcore::format(.('Outcome variable must have exactly 2 observed values. Found {n} level(s): {levels}. For competing events, construct an explicit binary cause-specific status in which the event of interest is 1 and every non-event observation is 0; do not omit other event types.'),
+                    jmvcore::reject(.fmt(.('Outcome variable must have exactly 2 observed values. Found {n} level(s): {levels}. For competing events, construct an explicit binary cause-specific status in which the event of interest is 1 and every non-event observation is 0; do not omit other event types.'),
                         n = length(observed_levels), levels = paste(observed_levels, collapse = ", ")))
                 }
 
@@ -305,7 +305,7 @@ lassocoxClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                 } else {
                     event_level_used <- as.character(outcome_level_opt)
                     if (!(event_level_used %in% observed_levels)) {
-                        jmvcore::reject(jmvcore::format(.("Selected event level ('{level}') is not present in observed outcome data."),
+                        jmvcore::reject(.fmt(.("Selected event level ('{level}') is not present in observed outcome data."),
                             level = event_level_used))
                     }
                 }
@@ -322,7 +322,7 @@ lassocoxClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                 } else {
                     censor_level_used <- as.character(censor_level_opt)
                     if (!(censor_level_used %in% observed_levels)) {
-                        jmvcore::reject(jmvcore::format(.("Selected censored level ('{level}') is not present in observed outcome data."),
+                        jmvcore::reject(.fmt(.("Selected censored level ('{level}') is not present in observed outcome data."),
                             level = censor_level_used))
                     }
                 }
@@ -340,7 +340,7 @@ lassocoxClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                 outcome_num <- jmvcore::toNumeric(outcome_raw)
                 observed_levels <- sort(unique(outcome_num[!is.na(outcome_num)]))
                 if (length(observed_levels) != 2) {
-                    jmvcore::reject(jmvcore::format(.('Numeric outcome must have exactly 2 observed values. Found {n} value(s): {values}. For competing events, construct an explicit binary cause-specific status in which the event of interest is 1 and every non-event observation is 0; do not omit other event types.'),
+                    jmvcore::reject(.fmt(.('Numeric outcome must have exactly 2 observed values. Found {n} value(s): {values}. For competing events, construct an explicit binary cause-specific status in which the event of interest is 1 and every non-event observation is 0; do not omit other event types.'),
                         n = length(observed_levels), values = paste(observed_levels, collapse = ", ")))
                 }
 
@@ -396,7 +396,7 @@ lassocoxClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                 constant_var_names <- names(predictors)[constant_vars]
                 predictors <- predictors[, !constant_vars, drop = FALSE]
                 explanatory_vars <- names(predictors)
-                warning(jmvcore::format(.('Removed constant explanatory variables: {vars}'),
+                warning(.fmt(.('Removed constant explanatory variables: {vars}'),
                     vars = paste(constant_var_names, collapse = ", ")))
             }
             if (ncol(predictors) == 0) {
@@ -412,11 +412,11 @@ lassocoxClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             n_excluded <- length(complete) - n_complete
 
             if (n_complete < 10) {
-                jmvcore::reject(jmvcore::format(.('Too few complete cases for analysis ({n}). Need at least 10 complete observations.'),
+                jmvcore::reject(.fmt(.('Too few complete cases for analysis ({n}). Need at least 10 complete observations.'),
                     n = n_complete))
             }
             if (n_excluded > 0) {
-                warning(jmvcore::format(.('Excluded {n} row(s) with missing values in time/outcome/predictors (complete-case analysis).'),
+                warning(.fmt(.('Excluded {n} row(s) with missing values in time/outcome/predictors (complete-case analysis).'),
                     n = n_excluded))
             }
 
@@ -441,13 +441,13 @@ lassocoxClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             n_events <- sum(status_cc == 1)
             n_censored <- sum(status_cc == 0)
             if (n_events < 3 || n_censored < 3) {
-                jmvcore::reject(jmvcore::format(
+                jmvcore::reject(.fmt(
                     .('Stratified cross-validation requires at least 3 events and 3 censored observations. Found {nEvents} events and {nCensored} censored observations. This is a computational minimum, not evidence that the sample is adequate for prediction modeling.'),
                     nEvents = n_events, nCensored = n_censored))
             }
 
             if (n_events < 10 || n_censored < 10) {
-                warning(jmvcore::format(
+                warning(.fmt(
                     .('Only {nEvents} events and {nCensored} censored observations are available. Cross-validation and selected coefficients may be highly unstable; no fixed event count guarantees reliable prediction modeling.'),
                     nEvents = n_events, nCensored = n_censored))
             }
@@ -461,7 +461,7 @@ lassocoxClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                     for (var_name in names(factor_vars)[factor_vars]) {
                         factor_levels <- length(unique(predictors[complete, var_name]))
                         if (factor_levels < 2) {
-                            jmvcore::reject(jmvcore::format(.("Factor variable '{var}' has insufficient variation in complete cases."),
+                            jmvcore::reject(.fmt(.("Factor variable '{var}' has insufficient variation in complete cases."),
                                 var = var_name))
                         }
                     }
@@ -480,18 +480,18 @@ lassocoxClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                 }
                 X <- X[, valid_cols, drop = FALSE]
             }, error = function(e) {
-                jmvcore::reject(jmvcore::format(.('Error creating design matrix: {msg}. Check factor coding and missing values.'),
+                jmvcore::reject(.fmt(.('Error creating design matrix: {msg}. Check factor coding and missing values.'),
                     msg = e$message))
             })
 
             if (length(factor_predictors) > 0) {
-                warning(jmvcore::format(
+                warning(.fmt(
                     .('Categorical predictors are represented by indicator columns and LASSO selects those columns individually rather than selecting each factor as a group. Factor(s): {vars}.'),
                     vars = paste(factor_predictors, collapse = ", ")))
             }
 
             if (n_events < ncol(X)) {
-                warning(jmvcore::format(
+                warning(.fmt(
                     .('There are {nEvents} events for {nColumns} encoded predictor columns. Regularization permits fitting in this setting but does not guarantee stable selection or performance; use resampling that repeats the entire modeling process.'),
                     nEvents = n_events, nColumns = ncol(X)))
             }
@@ -610,12 +610,12 @@ lassocoxClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             nfolds_requested <- as.integer(self$options$nfolds)
             nfolds <- min(nfolds_requested, data$n_events, data$n_censored)
             if (nfolds < 3) {
-                jmvcore::reject(jmvcore::format(
+                jmvcore::reject(.fmt(
                     .('Cannot form stratified cross-validation folds: at least 3 folds require at least 3 events and 3 censored observations. Found {nEvents} events and {nCensored} censored observations.'),
                     nEvents = data$n_events, nCensored = data$n_censored))
             }
             if (nfolds != nfolds_requested) {
-                warning(jmvcore::format(
+                warning(.fmt(
                     .('Reduced the number of CV folds from {requested} to {used} so every fold contains event and censored observations.'),
                     requested = nfolds_requested, used = nfolds))
             }
@@ -660,7 +660,7 @@ lassocoxClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                 }
                 
             }, error = function(e) {
-                jmvcore::reject(jmvcore::format(.('Error in cross-validation: {msg}'), msg = e$message))
+                jmvcore::reject(.fmt(.('Error in cross-validation: {msg}'), msg = e$message))
             })
             
             # Respect the selected rule exactly. In particular, an empty model at
@@ -688,7 +688,7 @@ lassocoxClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                 ))
                 
             }, error = function(e) {
-                jmvcore::reject(jmvcore::format(.('Error fitting final model: {msg}'), msg = e$message))
+                jmvcore::reject(.fmt(.('Error fitting final model: {msg}'), msg = e$message))
             })
             
             # Extract coefficients and selected variables. Use glmnet's fitted degrees
@@ -708,7 +708,7 @@ lassocoxClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             }
 
             if (length(selected_vars) == 0) {
-                warning(jmvcore::format(
+                warning(.fmt(
                     .('The {rule} rule retained no predictor columns. The valid empty model has been preserved; choose a different lambda rule only as a prespecified modeling decision, not because the empty result is inconvenient.'),
                     rule = lambda_rule_used))
             }
@@ -1149,7 +1149,7 @@ lassocoxClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
 
             }, error = function(e) {
                 # Handle any errors gracefully using grid graphics
-                text_warning <- jmvcore::format(.("Error creating survival plot:\n{msg}\n\nPlease check your data and model parameters."), msg = e$message)
+                text_warning <- .fmt(.("Error creating survival plot:\n{msg}\n\nPlease check your data and model parameters."), msg = e$message)
                 
                 grid::grid.newpage()
                 vp <- grid::viewport(width = 0.9, height = 0.9, x = 0.5, y = 0.5)
@@ -2055,7 +2055,7 @@ lassocoxClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             if (length(failures) > 0) {
                 table$setNote(
                     "failed",
-                    jmvcore::format(
+                    .fmt(
                         .("Some rows could not be computed ({detail}). Empty cells mean the model could not be fitted, not that it performed poorly."),
                         detail = paste(failures, collapse = "; ")
                     )
@@ -2104,13 +2104,13 @@ lassocoxClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             summary_text <- paste0(
                 "<div style='background-color: rgba(33, 137, 255, 0.07); border: 1px solid #b8d4f0; border-radius: 6px; padding: 14px; margin-bottom: 12px; color: inherit;'>",
                 "<h4 style='margin-top: 0;'>", .("Results Summary"), "</h4>",
-                "<p>", jmvcore::format(
+                "<p>", .fmt(
                     .("LASSO Cox regression was performed on {nObs} observations ({nEvents} events) with {nTotal} candidate predictors using {lambdaMethod} for lambda selection."),
                     nObs = n_obs, nEvents = n_events, nTotal = n_total, lambdaMethod = lambda_method), " ",
-                jmvcore::format(
+                .fmt(
                     .("The model selected {nSelected} of {nTotal} variables: {varList}."),
                     nSelected = n_selected, nTotal = n_total, varList = var_list), "</p>",
-                "<p>", jmvcore::format(
+                "<p>", .fmt(
                     .("The apparent development-sample C-index was {cindex}."),
                     cindex = cindex_text), " ",
                 if (nzchar(empty_model_note)) paste0(" ", empty_model_note) else "", "</p>",

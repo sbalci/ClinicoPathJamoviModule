@@ -835,7 +835,7 @@ raincloudClass <- if (requireNamespace("jmvcore")) R6::R6Class("raincloudClass",
             if (any(group_ns < 2)) {
                 return(paste0(
                     "<div style='background-color: rgba(216, 33, 50, 0.18);color: inherit;padding:12px;border-radius:8px;'>",
-                    jmvcore::format(
+                    .fmt(
                         .("A group comparison needs at least two observations in every group. The following groups have fewer: {groups}."),
                         groups = htmltools::htmlEscape(paste(
                             sprintf("%s (n=%d)", names(group_ns)[group_ns < 2],
@@ -904,7 +904,7 @@ raincloudClass <- if (requireNamespace("jmvcore")) R6::R6Class("raincloudClass",
             if (test_key %in% c("ttest", "wilcoxon") && n_groups != 2) {
                 return(paste0(
                     "<div style='background-color: rgba(255, 202, 33, 0.23);padding:12px;border-radius:8px; color: inherit;'>",
-                    jmvcore::format(
+                    .fmt(
                         .("The selected test (t-test or Wilcoxon) requires exactly two groups, but the grouping variable has {n} levels. Choose ANOVA or Kruskal-Wallis, or use Automatic selection."),
                         n = n_groups),
                     "</div>"

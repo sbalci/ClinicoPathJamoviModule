@@ -4,7 +4,7 @@ title: Medical Decision
 menuGroup: meddecide
 menuSubgroup: Decision
 menuSubtitle: Sensitivity, Specificity, PPV, NPV
-version: '1.0.8'
+version: '1.1.0'
 jas: '1.2'
 
 description:
@@ -39,7 +39,7 @@ options:
 
 
     - name: goldPositive
-      title: Disease Present Level
+      title: Disease present level
       type: Level
       variable: (gold)
       description:
@@ -63,7 +63,7 @@ options:
             The diagnostic test variable being evaluated for performance.
 
     - name: testPositive
-      title: Test Positive Level
+      title: Test positive level
       type: Level
       variable: (newtest)
       description:
@@ -74,33 +74,43 @@ options:
             The level representing a positive result for the test under evaluation.
 
     - name: goldNegative
-      title: Disease Absent Level
+      title: Disease absent level
       type: Level
       variable: (gold)
       description:
           ui: >
             Select the level that indicates disease is absent in your gold standard variable.
-            If not specified, all levels other than the Disease Present level will be treated as negative.
+            Only the disease-present and disease-absent levels take part; cases at any other
+            level are excluded from the analysis, not counted as disease-absent. With a
+            two-level variable this is inferred; with three or more levels you must choose it.
           R: >
             The level indicating absence of disease in the gold standard variable.
+            The compiler forbids a default on a Level option, so R callers must pass it
+            explicitly; pass NULL only for a two-level variable, where it is inferred.
+            With three or more levels a NULL raises an error rather than pooling them.
 
     - name: testNegative
-      title: Test Negative Level
+      title: Test negative level
       type: Level
       variable: (newtest)
       description:
           ui: >
             Select the level that represents a negative test result.
-            If not specified, all levels other than the Test Positive level will be treated as negative.
+            Only the test-positive and test-negative levels take part; cases at any other
+            level are excluded from the analysis, not counted as negative. With a two-level
+            variable this is inferred; with three or more levels you must choose it.
           R: >
             The level representing a negative result for the test under evaluation.
+            The compiler forbids a default on a Level option, so R callers must pass it
+            explicitly; pass NULL only for a two-level variable, where it is inferred.
+            With three or more levels a NULL raises an error rather than pooling them.
 
 
 
 
 
     - name: pp
-      title: Use known population prevalence
+      title: Known population prevalence
       type: Bool
       default: false
       description:
@@ -111,7 +121,7 @@ options:
             Boolean selection whether to use known population prevalence instead of study prevalence.
 
     - name: pprob
-      title: Population Disease Prevalence
+      title: Population disease prevalence
       type: Number
       default: 0.300
       min: 0.001
@@ -228,7 +238,7 @@ options:
             Boolean selection whether to show detailed misclassified cases tables.
 
     - name: maxCasesShow
-      title: 'Maximum Cases to Display'
+      title: 'Maximum cases to display'
       type: Integer
       default: 50
       min: 10
@@ -241,7 +251,7 @@ options:
             Maximum number of misclassified cases to display in tables.
 
     - name: saveClassifications
-      title: 'Save Classifications to Data'
+      title: 'Save classifications to data'
       type: Output
       varTitle: "Classification Group"
       varDescription: "Classification of each case: True Positive, False Positive, False Negative, or True Negative"

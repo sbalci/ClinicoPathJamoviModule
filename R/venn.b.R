@@ -1970,7 +1970,7 @@ vennClass <- if (requireNamespace('jmvcore'))
                     private$.populateTableSafely(table, membership_data, column_mapping)
 
                     if (n_all > max_rows) {
-                        try({ table$setNote("truncated", jmvcore::format(
+                        try({ table$setNote("truncated", .fmt(
                             "Showing the first {shown} of {total} cases. Enable <b>Add membership groups to data</b> to get the group for every case as a dataset column; rendering one table row per case is slow and is capped here.",
                             shown = max_rows, total = n_all)) }, silent = TRUE)
                     } else {

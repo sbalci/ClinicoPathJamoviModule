@@ -44,7 +44,6 @@ children:
           - type: CheckBox
             name: ci
             label: 95% confidence intervals
-            enable: (!pp)
           - type: CheckBox
             name: fnote
             label: Explanatory footnotes
@@ -59,13 +58,12 @@ children:
         label: Use when sample doesn't represent target population disease prevalence
       - type: CheckBox
         name: pp
-        label: Use known population prevalence
-        enable: (!ci)
+        label: Known population prevalence
       - type: TextBox
         name: pprob
-        label: Disease Prevalence in Target Population (0.0-1.0)
+        label: Disease prevalence in target population (0.0-1.0)
         format: number
-        enable: (!ci && pp)
+        enable: (pp)
   - type: CollapseBox
     label: Visualization
     collapsed: true
@@ -102,7 +100,7 @@ children:
         margin: small
         children:
           - type: Label
-            label: 'Maximum Cases to Display:'
+            label: 'Maximum cases to display:'
             fitToGrid: true
           - type: TextBox
             name: maxCasesShow

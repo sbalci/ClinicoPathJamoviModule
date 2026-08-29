@@ -207,7 +207,7 @@ timeintervalClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             }
 
             if (best_score < 0.5) {
-                jmvcore::reject(jmvcore::format(
+                jmvcore::reject(.fmt(
                     .("Could not detect a common date format for columns '{start}' and '{end}'. Please select the correct format manually."),
                     start = start_name, end = end_name
                 ))
@@ -230,7 +230,7 @@ timeintervalClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 "myd" = lubridate::myd,
                 "dmy" = lubridate::dmy,
                 "dym" = lubridate::dym,
-                jmvcore::reject(jmvcore::format(
+                jmvcore::reject(.fmt(
                     .("Unsupported date format: {format}"), format = format))
             )
 
@@ -243,7 +243,7 @@ timeintervalClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 }
                 return(parsed_dates)
             }, error = function(e) {
-                jmvcore::reject(jmvcore::format(
+                jmvcore::reject(.fmt(
                     .("Error parsing dates with format {format}: {message}"),
                     format = format, message = conditionMessage(e)))
             })
@@ -254,14 +254,14 @@ timeintervalClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             successful <- sum(!is.na(parsed_dates))
             
             if (total_non_missing == 0) {
-                jmvcore::reject(jmvcore::format(
+                jmvcore::reject(.fmt(
                     .("Column '{column}' contains only missing values; cannot calculate time intervals."),
                     column = column_name))
             }
             
             if (successful == 0) {
                 sample_values <- paste(utils::head(unique(original_vector), 3), collapse = ", ")
-                jmvcore::reject(jmvcore::format(
+                jmvcore::reject(.fmt(
                     .("Date parsing failed for column '{column}' using format '{format}'. Example values: {examples}"),
                     column = column_name, format = format_label, examples = sample_values
                 ))
@@ -269,7 +269,7 @@ timeintervalClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             
             success_rate <- successful / total_non_missing
             if (success_rate < 0.8) {
-                jmvcore::reject(jmvcore::format(
+                jmvcore::reject(.fmt(
                     .("Only {percent}% of non-missing values in '{column}' were parsed with format '{format}'. Please verify that the selected format matches all values or standardise the column."),
                     percent = round(100 * success_rate, 1), column = column_name, format = format_label
                 ))
@@ -496,7 +496,7 @@ timeintervalClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
             # CRITICAL FIX: Validate parsing success
             if (all(is.na(start_dates)) || all(is.na(end_dates))) {
-                jmvcore::reject(jmvcore::format(
+                jmvcore::reject(.fmt(
                     .("Date parsing failed. All values became NA using format '{format}'.\nPlease verify:\n- Date format setting matches your data\n- Date columns contain valid date values\n- Dates are not stored as numeric codes without proper formatting"),
                     format = detected_format
                 ))
@@ -533,7 +533,7 @@ timeintervalClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     "Row ", example_rows, ": Start=", base::format(start_dates_raw[example_rows]),
                     ", End=", base::format(end_dates_raw[example_rows])
                 )
-                jmvcore::reject(jmvcore::format(
+                jmvcore::reject(.fmt(
                     .("Negative time intervals detected (end date before start date) in {count} rows.\nPlease correct the dates or enable 'Remove Negative Intervals'.\nExamples:\n{examples}"),
                     count = length(negative_idx), examples = paste(examples, collapse = "\n")
                 ))

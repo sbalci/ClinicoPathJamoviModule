@@ -73,7 +73,7 @@ options:
             False-negative frequency relative to the stated reference standard.
 
     - name: pp
-      title: Use known population prevalence
+      title: Known population prevalence
       type: Bool
       default: false
       description:

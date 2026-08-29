@@ -112,7 +112,7 @@ decisioncompareClass <- if (requireNamespace("jmvcore")) {
                         private$.addNotice(
                             type = "WARNING",
                             title = "Metric Unavailable",
-                            content = jmvcore::format("Unable to compute {metric} for {test}: denominator is zero. The result is set to NA.",
+                            content = .fmt("Unable to compute {metric} for {test}: denominator is zero. The result is set to NA.",
                                 metric = metric_label, test = test_label
                             )
                         )
@@ -1397,7 +1397,7 @@ decisioncompareClass <- if (requireNamespace("jmvcore")) {
                         },
                         error = function(e) {
                             n_sample <- sum(conf_table)
-                            enhanced_msg <- jmvcore::format("Could not calculate confidence intervals for {test} (n={n}). This may be due to insufficient sample size or extreme values. Error: {error}",
+                            enhanced_msg <- .fmt("Could not calculate confidence intervals for {test} (n={n}). This may be due to insufficient sample size or extreme values. Error: {error}",
                                 test = testVariable, n = n_sample, error = conditionMessage(e)
                             )
                             # Surface the failure so the empty CI table is not silent.
@@ -1725,7 +1725,7 @@ decisioncompareClass <- if (requireNamespace("jmvcore")) {
                         n2 <- length(test2_results)
                         comparison <- comparison_name
                         error <- conditionMessage(e)
-                        enhanced_msg <- jmvcore::format("Could not perform McNemar's test for {comparison} (n1={n1}, n2={n2}). This may be due to insufficient discordant pairs or identical test results. Error: {error}",
+                        enhanced_msg <- .fmt("Could not perform McNemar's test for {comparison} (n1={n1}, n2={n2}). This may be due to insufficient discordant pairs or identical test results. Error: {error}",
                             comparison = comparison, n1 = n1, n2 = n2, error = error
                         )
                         private$.addNotice(
@@ -1757,7 +1757,7 @@ decisioncompareClass <- if (requireNamespace("jmvcore")) {
                     private$.addNotice(
                         type = "WARNING",
                         title = "Paired Difference Unavailable",
-                        content = jmvcore::format("Unable to compute paired differences for {comparison}: no observations with complete data across both tests and the gold standard.",
+                        content = .fmt("Unable to compute paired differences for {comparison}: no observations with complete data across both tests and the gold standard.",
                             comparison = comparison_name
                         )
                     )
@@ -1769,7 +1769,7 @@ decisioncompareClass <- if (requireNamespace("jmvcore")) {
                         private$.addNotice(
                             type = "WARNING",
                             title = "Metric Difference Unavailable",
-                            content = jmvcore::format("Unable to compute {metric} difference for {comparison}: insufficient paired data.",
+                            content = .fmt("Unable to compute {metric} difference for {comparison}: insufficient paired data.",
                                 metric = metric_label, comparison = comparison_name
                             )
                         )
@@ -1792,7 +1792,7 @@ decisioncompareClass <- if (requireNamespace("jmvcore")) {
                         diffTable$addFootnote(
                             rowKey = row_key,
                             col = "diff",
-                            jmvcore::format(jmvcore::.("Small paired sample/discordant counts; CI may be unstable (n={n}, discordant counts: {counts})."),
+                            .fmt(jmvcore::.("Small paired sample/discordant counts; CI may be unstable (n={n}, discordant counts: {counts})."),
                                 n = result$n,
                                 counts = paste(result$counts, collapse = ", ")
                             )

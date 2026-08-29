@@ -600,9 +600,13 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                         }
 
                         # Highlight diagonal
-                        for (d in 1:min(nrow(confusion), ncol(confusion))) {
+                        # seq_len, not 1:min(): on a 0x0 table 1:0 is c(1, 0), and the
+                        # d = 0 pass makes rownames(...)[0] character(0), so the if()
+                        # condition is logical(0) and R aborts. The three image()/axis()
+                        # calls just above were already seq_len()-ed; this one was missed.
+                        for (d in seq_len(min(nrow(confusion), ncol(confusion)))) {
                             if (rownames(confusion)[d] == colnames(confusion)[d]) {
-                                rect(d - 0.5, d - 0.5, d + 0.5, d + 0.5, lwd = 2, border = "black")
+                                graphics::rect(d - 0.5, d - 0.5, d + 0.5, d + 0.5, lwd = 2, border = "black")
                             }
                         }
 
@@ -1761,8 +1765,9 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                             n_pairs <- n_raters * (n_raters - 1) / 2
                             pairwise_A <- numeric(n_pairs)
                             idx <- 1L
-                            for (i in 1:(n_raters - 1)) {
+                            for (i in seq_len(n_raters - 1)) {
                                 for (j in (i + 1):n_raters) {
+                                    private$.checkpoint()
                                     pair_result <- private$.robinsonAPairwise(ratings_matrix[, i], ratings_matrix[, j])
                                     pairwise_A[idx] <- pair_result$A
                                     idx <- idx + 1L
@@ -1845,24 +1850,30 @@ agreementClass <- if (requireNamespace("jmvcore")) {
 
                 n <- length(x)
 
-                # Count concordant and discordant pairs
+                # Count concordant and discordant pairs.
+                #
+                # The inner loop over j is vectorised: same arithmetic, same counts,
+                # but n-1 R-level iterations instead of n(n-1)/2. The nested-scalar
+                # version cost 1.8 s for a single rater pair at n = 4000, and this
+                # helper is called once per pair - 10 pairs for 5 raters - so a large
+                # series froze the jamovi UI for ~25 s with no way to cancel.
+                # Verified identical (C, D, tied) on 200 randomised inputs and on the
+                # bundled agreement_multiRater data; 0.26 s at n = 4000.
                 C <- 0 # Concordant
                 D <- 0 # Discordant
                 tied <- 0 # Tied
 
-                for (i in 1:(n - 1)) {
-                    for (j in (i + 1):n) {
-                        diff_x <- x[i] - x[j]
-                        diff_y <- y[i] - y[j]
+                for (i in seq_len(n - 1)) {
+                    j <- (i + 1):n
+                    diff_x <- x[i] - x[j]
+                    diff_y <- y[i] - y[j]
 
-                        if (sign(diff_x) == sign(diff_y) && diff_x != 0 && diff_y != 0) {
-                            C <- C + 1
-                        } else if (sign(diff_x) != sign(diff_y) && diff_x != 0 && diff_y != 0) {
-                            D <- D + 1
-                        } else {
-                            tied <- tied + 1
-                        }
-                    }
+                    nonzero <- diff_x != 0 & diff_y != 0
+                    concordant <- sign(diff_x) == sign(diff_y)
+
+                    C <- C + sum(nonzero & concordant)
+                    D <- D + sum(nonzero & !concordant)
+                    tied <- tied + sum(!nonzero)
                 }
 
                 # Calculate Robinson's A
@@ -4009,7 +4020,7 @@ agreementClass <- if (requireNamespace("jmvcore")) {
             </div>
             "
 
-                html <- jmvcore::format(html_content)
+                html <- .fmt(html_content)
                 self$results$raterProfileExplanation$setContent(html)
             },
             .raterProfilePlot = function(image, ggtheme, theme, ...) {
@@ -4170,7 +4181,7 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                         <li>Evaluate agreement across anatomical sites</li>
                     </ul>
                 </div></div>"
-                self$results$subgroupExplanation$setContent(jmvcore::format(html))
+                self$results$subgroupExplanation$setContent(.fmt(html))
             },
             .subgroupForestPlot = function(image, ggtheme, theme, ...) {
                 plotState <- image$state
@@ -4439,7 +4450,7 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                     <p style='margin: 0;'><strong>Dendrogram height:</strong> Lower = more similar. High first split = distinct rater groups.</p>
                     <p style='margin: 5px 0 0 0;'><strong>Cluster heatmap:</strong> Dark diagonal blocks = tight clusters. Off-diagonal = between-cluster differences.</p>
                 </div></div>"
-                self$results$raterClusterExplanation$setContent(jmvcore::format(html))
+                self$results$raterClusterExplanation$setContent(.fmt(html))
             },
             .raterDendrogram = function(image, ggtheme, theme, ...) {
                 oldpar <- graphics::par(no.readonly = TRUE)
@@ -4677,7 +4688,7 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                     <p style='margin: 5px 0 0 0;'><strong>Cluster heatmap:</strong> Dark diagonal blocks = tight clusters (similar cases). Off-diagonal = between-cluster differences.</p>
                     <p style='margin: 5px 0 0 0;'><strong>Low within-cluster similarity:</strong> Cases in cluster are difficult/controversial - low agreement among raters.</p>
                 </div></div>"
-                self$results$caseClusterExplanation$setContent(jmvcore::format(html))
+                self$results$caseClusterExplanation$setContent(.fmt(html))
             },
             .caseDendrogram = function(image, ggtheme, theme, ...) {
                 oldpar <- graphics::par(no.readonly = TRUE)

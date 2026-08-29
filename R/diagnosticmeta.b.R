@@ -366,7 +366,7 @@ diagnosticmetaClass <- R6::R6Class(
                 # analysis-level error. Writing this into the instructions panel
                 # left the pane looking healthy, so a hard stop read as advice.
                 jmvcore::reject(
-                    jmvcore::format(
+                    .fmt(
                         .("At least 3 studies with complete diagnostic test data are required ({n} found)."),
                         n = nrow(meta_data)),
                     code = "insufficient_studies")

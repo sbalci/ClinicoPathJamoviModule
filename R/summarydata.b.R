@@ -113,14 +113,14 @@ summarydataClass <- if (requireNamespace("jmvcore")) R6::R6Class("summarydataCla
                     vars_to_remove <- c(vars_to_remove, var)
                     warning_msgs <- c(warning_msgs, paste0("Variable '", htmltools::htmlEscape(var), "' is not numeric"))
                     private$.addNotice("STRONG_WARNING", .("Variable excluded"),
-                        jmvcore::format(
+                        .fmt(
                             .("{variable} was excluded from the summary because it is not a numeric column. Change its measure type to continuous, or remove it from the Variables list."),
                             variable = var))
                 } else if (all(is.na(self$data[[var]]))) {
                     vars_to_remove <- c(vars_to_remove, var)
                     warning_msgs <- c(warning_msgs, paste0("Variable '", htmltools::htmlEscape(var), "' contains only missing values"))
                     private$.addNotice("STRONG_WARNING", .("Variable excluded"),
-                        jmvcore::format(
+                        .fmt(
                             .("{variable} was excluded from the summary because every value in it is missing. Check the import and any active row filter for this column."),
                             variable = var))
                 }
@@ -213,7 +213,7 @@ summarydataClass <- if (requireNamespace("jmvcore")) R6::R6Class("summarydataCla
                         # only the cause that actually applies.
                         n_valid <- length(valid_data)
                         distribution_assessment <- if (n_valid < 3 || n_valid > 5000)
-                            jmvcore::format(
+                            .fmt(
                                 .("Normality was not assessed: the Shapiro-Wilk test needs between 3 and 5000 non-missing observations, and this variable has {n}. Inspect the distribution visually instead."),
                                 n = n_valid)
                         else
@@ -387,7 +387,7 @@ summarydataClass <- if (requireNamespace("jmvcore")) R6::R6Class("summarydataCla
 
         # Substitute a column name into a translatable template.
         #
-        # jmvcore::format() re-scans the string after EVERY substitution, so any
+        # .fmt() re-scans the string after EVERY substitution, so any
         # "{word}" inside a substituted value is picked up as a further
         # placeholder. Column names are user data: a column named "{n}" printed
         # the value of n in place of its own name, and "Ki67 {IHC}" printed
@@ -396,7 +396,7 @@ summarydataClass <- if (requireNamespace("jmvcore")) R6::R6Class("summarydataCla
         # opaque. sub(fixed = TRUE) uses the replacement literally, so a name
         # containing "\\" or "&" survives intact.
         .fmtVar = function(template, var, ...) {
-            out <- jmvcore::format(template, variable = "\001", ...)
+            out <- .fmt(template, variable = "\001", ...)
             sub("\001", htmltools::htmlEscape(var), out, fixed = TRUE)
         },
 
@@ -573,13 +573,13 @@ summarydataClass <- if (requireNamespace("jmvcore")) R6::R6Class("summarydataCla
                 # "patient records" was an unearned claim: nothing here establishes
                 # that a row is a patient, and in pathology series a row is very
                 # often a block, a core or a repeated measurement.
-                jmvcore::format(
+                .fmt(
                     .("Analysis of {nvars} continuous variable(s) from {nobs} records"),
                     nvars = n_vars, nobs = total_obs), "</p>",
 
                 "<p><strong>", .("Data Quality Assessment"), ":</strong></p>",
                 "<ul style='margin: 5px 0 10px 20px;'>",
-                "<li>", jmvcore::format(.("Average missing data: {pct}%"), pct = avg_missing), "</li>",
+                "<li>", .fmt(.("Average missing data: {pct}%"), pct = avg_missing), "</li>",
                 if (n_vars > 1) paste0("<li>", private$.fmtVar(
                     .("Most incomplete variable: {variable}, {pct}% missing"),
                     worst_var, pct = worst_missing), "</li>") else "",
@@ -716,18 +716,18 @@ summarydataClass <- if (requireNamespace("jmvcore")) R6::R6Class("summarydataCla
                 } else if (length(result$outliers) == 0) {
                     report_html <- paste0(report_html,
                         "<p><strong>", safe_var, ":</strong> ",
-                        jmvcore::format(
+                        .fmt(
                             .("No outliers detected (expected range {lower} to {upper})."),
                             lower = result$lower_bound, upper = result$upper_bound), "</p>")
                 } else {
                     report_html <- paste0(report_html,
                         "<p><strong>", safe_var, ":</strong> ",
-                        jmvcore::format(
+                        .fmt(
                             .("{count} outlier(s) detected (values: {values})."),
                             count = length(result$outliers),
                             values = paste(private$.fmtNum(result$values), collapse = ", ")),
                         "<br><span style='color: inherit; font-size: 0.9em;'>",
-                        jmvcore::format(
+                        .fmt(
                             .("Expected range: {lower} to {upper}"),
                             lower = result$lower_bound, upper = result$upper_bound),
                         "</span></p>")
@@ -811,11 +811,11 @@ summarydataClass <- if (requireNamespace("jmvcore")) R6::R6Class("summarydataCla
                         # the template must not also supply "="; it rendered
                         # "(p = < 0.001)" in the one block labelled copy-ready.
                         sw_sentence <- if (sw_test$p.value < 0.001)
-                            jmvcore::format(
+                            .fmt(
                                 .("The Shapiro-Wilk test showed {verdict} (p &lt; 0.001)."),
                                 verdict = verdict$short)
                         else
-                            jmvcore::format(
+                            .fmt(
                                 .("The Shapiro-Wilk test showed {verdict} (p = {p})."),
                                 verdict = verdict$short,
                                 p = private$.fmtP(sw_test$p.value))

@@ -17,7 +17,7 @@ children:
             isTarget: true
           - type: LevelSelector
             name: goldPositive
-            label: Disease Present Level
+            label: Disease present level
 
       - type: TargetLayoutBox
         label: Test 1 (Required)

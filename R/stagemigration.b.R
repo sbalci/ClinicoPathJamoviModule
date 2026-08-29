@@ -425,7 +425,7 @@ stagemigrationClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
             # When internationalization is implemented:
             #   1. Wrap all setContent/setNote/addRow text strings with .()
             #   2. Create jamovi/i18n/en.po and jamovi/i18n/tr.po catalogs
-            #   3. Use .("text with {placeholder}") + jmvcore::format() for dynamic messages
+            #   3. Use .("text with {placeholder}") + .fmt() for dynamic messages
             #   4. Turkish medical terms: C-indeksi, Tehlike Orani, Guven Araligi
             #   Priority: LOW (depends on module-wide i18n effort).
 

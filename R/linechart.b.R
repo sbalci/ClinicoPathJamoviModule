@@ -312,7 +312,7 @@ linechartClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
 
             # Enhanced minimum data requirements with suggestions
             if (nrow(data) < 3) {
-                jmvcore::reject(jmvcore::format(
+                jmvcore::reject(.fmt(
                     .("At least 3 complete observations are required for line chart analysis. The current dataset has {n} observation(s). Consider checking for missing values or selecting different variables."),
                     n = nrow(data)))
             }
@@ -550,7 +550,7 @@ linechartClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                 table$addRow(rowKey = row_num, values = list(
                     measure = .("R-squared (Effect Size)"),
                     value = correlation_stats$r_squared,
-                    interpretation = jmvcore::format(
+                    interpretation = .fmt(
                         .("{percent}% of variance explained. {interpretation}"),
                         percent = round(correlation_stats$r_squared * 100, 1),
                         interpretation = private$.interpretEffectSize(correlation_stats$r_squared))
@@ -562,11 +562,11 @@ linechartClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                 slope_interpretation <- if (slope_is_zero) {
                     .("No linear trend: The estimated regression slope is effectively zero at numerical precision.")
                 } else if (correlation_stats$slope > 0) {
-                    jmvcore::format(
+                    .fmt(
                         .("Positive trend: Each unit increase in X corresponds to an average {slope} unit increase in Y."),
                         slope = private$.fmtNum(abs(correlation_stats$slope)))
                 } else {
-                    jmvcore::format(
+                    .fmt(
                         .("Negative trend: Each unit increase in X corresponds to an average {slope} unit decrease in Y."),
                         slope = private$.fmtNum(abs(correlation_stats$slope)))
                 }
@@ -655,17 +655,17 @@ linechartClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             strength <- private$.correlationStrength(r)
 
             copy_ready <- if (correlation_is_zero) {
-                jmvcore::format(
+                .fmt(
                     .("The analysis found a negligible correlation between the variables (r = {r}, {p}). The correlation explains {variance}% of the variance, and the relationship is not statistically significant."),
                     r = round(r, 3), p = sig_level,
                     variance = round(r_squared * 100, 1))
             } else if (is_significant) {
-                jmvcore::format(
+                .fmt(
                     .("The analysis found a {strength} {direction} correlation between the variables (r = {r}, {p}). The correlation explains {variance}% of the variance, and the relationship is statistically significant."),
                     strength = strength, direction = direction, r = round(r, 3),
                     p = sig_level, variance = round(r_squared * 100, 1))
             } else {
-                jmvcore::format(
+                .fmt(
                     .("The analysis found a {strength} {direction} correlation between the variables (r = {r}, {p}). The correlation explains {variance}% of the variance, and the relationship is not statistically significant."),
                     strength = strength, direction = direction, r = round(r, 3),
                     p = sig_level, variance = round(r_squared * 100, 1))
@@ -722,7 +722,7 @@ linechartClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             } else {
                 .("Very small effect size")
             }
-            jmvcore::format(
+            .fmt(
                 .("{label}. Whether an association of this magnitude matters in a given setting depends on the outcome and the context, and cannot be read off R-squared alone."),
                 label = label)
         },
@@ -1218,7 +1218,7 @@ linechartClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                 if (!is.null(correlation_stats$slope)) {
                     slope_is_zero <- isTRUE(correlation_stats$slope_is_zero)
                     trend_sentence <- if (slope_is_zero) {
-                        jmvcore::format(
+                        .fmt(
                             .("No clear linear trend was detected (R\u00b2 = {r2})."),
                             r2 = round(correlation_stats$r_squared, 3))
                     } else {
@@ -1227,7 +1227,7 @@ linechartClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                         } else {
                             .("decreasing")
                         }
-                        jmvcore::format(
+                        .fmt(
                             .("A {strength} {direction} trend was detected (R\u00b2 = {r2})."),
                             strength = private$.correlationStrength(
                                 correlation_stats$pearson_r),

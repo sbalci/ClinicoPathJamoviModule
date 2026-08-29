@@ -61,6 +61,56 @@ utils::globalVariables(c(
     )
 }
 
+#' Interpolate a translated string without risking an unbounded substitution loop
+#'
+#' `jmvcore::format()` re-scans the ENTIRE string from position 1 after each
+#' substitution. If a substituted value contains its own placeholder -- e.g.
+#' `jmvcore::format("LR ({value})", value = "x {value} y")` -- the substituter finds
+#' that placeholder again, substitutes again, and never terminates. The loop runs in
+#' code that does not poll R's interrupt handler, so it survives `setTimeLimit()` and
+#' has to be SIGKILLed; inside jamovi it freezes the analysis engine rather than
+#' raising an error.
+#'
+#' Two realistic ways in: a translator copies a `{placeholder}` into the msgstr of the
+#' very string that placeholder belongs to, or a dataset carries a column/level named
+#' literally `{n}` that is then interpolated by name.
+#'
+#' This wrapper is a pass-through. When no supplied value contains a brace -- the
+#' overwhelming majority of calls -- it delegates untouched and the output is
+#' byte-identical to calling `jmvcore::format()` directly. Only when a value actually
+#' contains a `{` are that value's braces neutralised, so a pathological input
+#' degrades to slightly different text instead of hanging.
+#'
+#' Verified trigger conditions (R, jmvcore 2.7.x): a value containing its OWN
+#' placeholder name hangs; a value containing a DIFFERENT supplied name substitutes and
+#' terminates; an UNKNOWN `{name}` renders as an ellipsis; a bare `{ }` is left literal.
+#'
+#' @param fmt Format string, normally wrapped in `.()`.
+#' @param ... Named placeholder values.
+#' @return The interpolated string.
+#' @keywords internal
+.fmt <- function(fmt, ...) {
+    values <- list(...)
+    risky <- vapply(values, function(v) {
+        v <- tryCatch(as.character(v), error = function(e) "")
+        length(v) > 0L && any(grepl("{", v, fixed = TRUE), na.rm = TRUE)
+    }, logical(1))
+
+    if (any(risky)) {
+        # Only the offending values are touched, and only their braces. A brace in a
+        # variable name or an error message is display text, never markup, so replacing
+        # it with a lookalike keeps the message readable and cannot re-enter the loop.
+        values[risky] <- lapply(values[risky], function(v) {
+            v <- as.character(v)
+            v <- gsub("{", "(", v, fixed = TRUE)
+            gsub("}", ")", v, fixed = TRUE)
+        })
+        return(do.call(jmvcore::format, c(list(fmt), values)))
+    }
+
+    do.call(jmvcore::format, c(list(fmt), values))
+}
+
 #' Escape variable names containing special characters for formulas
 #'
 #' Adds backticks around names that contain anything other than

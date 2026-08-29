@@ -63,7 +63,7 @@ dendrogramClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                         paste0('install.packages(c("', paste(missing_heatmap, collapse = '", "'), '"))')
                     }
 
-                    private$.addNotice('ERROR', 'Missing Heatmap Packages', jmvcore::format(
+                    private$.addNotice('ERROR', 'Missing Heatmap Packages', .fmt(
                         'Heatmap plot requires missing packages: {pkgs}. - Install with {installCmd}. - Alternatively, select Linear, Circular, or Base plot type to continue.',
                         pkgs = paste(missing_heatmap, collapse = ", "),
                         installCmd = install_cmd
@@ -74,7 +74,7 @@ dendrogramClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
             if (plotType %in% c("linear", "circular")) {
                 if (!requireNamespace("ggraph", quietly = TRUE) || !requireNamespace("igraph", quietly = TRUE)) {
-                    private$.addNotice('WARNING', 'Missing Graph Packages', jmvcore::format(
+                    private$.addNotice('WARNING', 'Missing Graph Packages', .fmt(
                         'ggraph and igraph packages recommended for {plotType} plots. - Install with install.packages(c("ggraph", "igraph")). - Falling back to base plot.',
                         plotType = if (plotType == "linear") "linear" else "circular"
                     ))
@@ -130,7 +130,7 @@ dendrogramClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             removedRows <- sum(!completeCases)
 
             if (sum(completeCases) < 2) {
-                private$.addNotice('ERROR', 'Insufficient Complete Observations', jmvcore::format(
+                private$.addNotice('ERROR', 'Insufficient Complete Observations', .fmt(
                     'Insufficient complete observations for clustering (n={n}, minimum 2 required). - Current dataset has {total} observations with {removed} removed due to missing values. - Remove missing values or collect additional complete cases.',
                     n = sum(completeCases),
                     total = nrow(data),
@@ -146,14 +146,14 @@ dendrogramClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             groupLevels <- NULL
             if (colorGroups) {
                 if (is.null(group) || group == "") {
-                    private$.addNotice('ERROR', 'Grouping Variable Required', jmvcore::format(
+                    private$.addNotice('ERROR', 'Grouping Variable Required', .fmt(
                         'Grouping variable required when "Color by groups" is enabled. - Please select a grouping variable in the "Grouping & Colors" panel. - Alternatively, disable "Color by groups" to continue without group coloring.'
                     ))
                     return()
                 }
 
                 if (!group %in% names(data)) {
-                    private$.addNotice('ERROR', 'Grouping Variable Not Found', jmvcore::format(
+                    private$.addNotice('ERROR', 'Grouping Variable Not Found', .fmt(
                         'Grouping variable "{group}" not found in dataset. - Available variables: {vars}. - Please select a valid grouping variable or disable "Color by groups".',
                         group = group,
                         vars = paste(names(data)[1:min(10, length(names(data)))], collapse = ", ")
@@ -264,7 +264,7 @@ dendrogramClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 notice_type <- if (n_clustered < 10) 'STRONG_WARNING' else 'WARNING'
 
                 severity <- if (n_clustered < 10) "very small" else "small"
-                private$.addNotice(notice_type, 'Small Sample Size', jmvcore::format(
+                private$.addNotice(notice_type, 'Small Sample Size', .fmt(
                     '{severityCap} sample size (n={n}) for hierarchical clustering. - Clusters may be unstable with fewer than 30 observations. - Dendrogram structure and cluster assignments should be interpreted cautiously. - Consider collecting additional data or using this as exploratory analysis only.',
                     severityCap = tools::toTitleCase(severity),
                     n = n_clustered
@@ -343,7 +343,7 @@ dendrogramClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             self$results$clusterInfo$setContent(clusterInfoText)
 
             # Success Completion Notice
-            private$.addNotice('INFO', 'Analysis Complete', jmvcore::format(
+            private$.addNotice('INFO', 'Analysis Complete', .fmt(
                 'Hierarchical clustering completed successfully. - {nObs} observations clustered using {nVars} variables. - {nClust} cluster{s} identified. - Distance: {dist}, Linkage: {link}. - Review dendrogram and cluster membership below.',
                 nObs = nrow(clusterData),
                 nVars = length(vars),
@@ -809,7 +809,7 @@ dendrogramClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 if (any(nonBinary)) {
                     badVars <- names(clusterData)[nonBinary]
                     result$ok <- FALSE
-                    result$message <- jmvcore::format(
+                    result$message <- .fmt(
                         'Binary distance requires variables coded as 0/1 only. \u{2022} Non-binary values detected in: {vars}. \u{2022} Please recode variables to binary (0/1) or select a different distance method (e.g., Euclidean, Manhattan).',
                         vars = paste(badVars, collapse = ", ")
                     )
@@ -1109,7 +1109,7 @@ dendrogramClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     "Centroid/median methods compute cluster centers as geometric centroids, which requires Euclidean geometry. Non-Euclidean distances cause inversions (negative heights)."
                 }
 
-                result$message <- jmvcore::format(
+                result$message <- .fmt(
                     'Invalid distance/linkage combination: {method} clustering requires Euclidean distance. \u{2022} Current distance: {dist}. \u{2022} Why this matters: {reason} \u{2022} Solutions: Change distance to Euclidean, OR change clustering to Complete/Average/Single linkage.',
                     method = clusterMethod,
                     dist = distanceMethod,

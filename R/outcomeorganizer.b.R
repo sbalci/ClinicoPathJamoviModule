@@ -403,7 +403,7 @@ outcomeorganizerClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     # assignment mydata[["myoutcome"]] <- numeric(0) errors with
                     # "replacement has 0 rows, data has n".
                     if (is.null(recurrence_level)) {
-                        jmvcore::reject(jmvcore::format(
+                        jmvcore::reject(.fmt(
                             .('A recurrence/progression variable is selected for {analysis} analysis, but no recurrence event level was chosen. Please select the level that indicates recurrence/progression in the "Event Level" option under the Recurrence/Progression Variable.'),
                             analysis = toupper(analysistype)))
                     }
@@ -545,7 +545,7 @@ outcomeorganizerClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     unmapped <- setdiff(as.character(unique(outcome1[!is.na(outcome1)])),
                                         as.character(c(dod, dooc, awd, awod)))
                     if (length(unmapped) > 0)
-                        jmvcore::reject(jmvcore::format(
+                        jmvcore::reject(.fmt(
                             .("Outcome level(s) not assigned to any state: {levels}. Assign every level to one of the four states; unassigned levels would otherwise be dropped from the analysis."),
                             levels = paste(unmapped, collapse = ", ")))
 
@@ -565,7 +565,7 @@ outcomeorganizerClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     # Reaching here left myoutcome entirely NA and the run failed
                     # with the misleading "all values are NA", which reads as a
                     # data problem rather than an unsupported combination.
-                    jmvcore::reject(jmvcore::format(
+                    jmvcore::reject(.fmt(
                         .("'{analysis}' is not available with Multiple Event Levels enabled. Recurrence-based endpoints (RFS, PFS, DFS, TTP) are built from the Recurrence/Progression variable together with the outcome, not from the four vital-status categories. Turn Multiple Event Levels off and select a Recurrence/Progression variable, or choose Overall Survival, Cause-Specific, Competing Risks or Multistate."),
                         analysis = toupper(analysistype)))
                 }
@@ -574,7 +574,7 @@ outcomeorganizerClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 # This catches cases where selected levels don't match any data values
                 n_recoded <- sum(!is.na(mydata[["myoutcome"]]))
                 if (n_recoded == 0) {
-                    jmvcore::reject(jmvcore::format(
+                    jmvcore::reject(.fmt(
                         .('Outcome recoding failed: all values are NA. This usually means the selected outcome levels ("{dod}", "{dooc}", "{awd}", "{awod}") do not match the actual values in your data. Available values in outcome variable: {available}. Please verify your level selections are correct.'),
                         dod = dod, dooc = dooc, awd = awd, awod = awod,
                         available = paste(unique(outcome1[!is.na(outcome1)]), collapse = ", ")))

@@ -331,7 +331,7 @@ swimmerplotClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6Class
             if (length(missing_vars) > 0) {
                 return(list(
                     error = TRUE,
-                    message = jmvcore::format(.("Missing required variables: {vars}"), vars = paste(missing_vars, collapse = ", "))
+                    message = .fmt(.("Missing required variables: {vars}"), vars = paste(missing_vars, collapse = ", "))
                 ))
             }
             
@@ -348,7 +348,7 @@ swimmerplotClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6Class
             }, error = function(e) {
                 return(list(
                     error = TRUE,
-                    message = jmvcore::format(.("Error processing core variables: {message}"), message = e$message)
+                    message = .fmt(.("Error processing core variables: {message}"), message = e$message)
                 ))
             })
             
@@ -383,10 +383,10 @@ swimmerplotClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6Class
 
                 # Check for other parsing errors
                 if (isTRUE(start_parsed$error)) {
-                    return(list(error = TRUE, message = jmvcore::format(.("Start time parsing: {message}"), message = start_parsed$message)))
+                    return(list(error = TRUE, message = .fmt(.("Start time parsing: {message}"), message = start_parsed$message)))
                 }
                 if (isTRUE(end_parsed$error)) {
-                    return(list(error = TRUE, message = jmvcore::format(.("End time parsing: {message}"), message = end_parsed$message)))
+                    return(list(error = TRUE, message = .fmt(.("End time parsing: {message}"), message = end_parsed$message)))
                 }
                 
                 patient_data$start_time <- start_parsed$value
@@ -397,7 +397,7 @@ swimmerplotClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6Class
                 # filter with a message about end < start - misdirecting the
                 # user away from the actual cause. Name it here instead.
                 if (all(is.na(patient_data$start_time)) || all(is.na(patient_data$end_time))) {
-                    return(list(error = TRUE, message = jmvcore::format(
+                    return(list(error = TRUE, message = .fmt(
                         .("None of the start/end values could be parsed as dates with the selected Date Format ({fmt}). Choose the format that matches how your dates are written (e.g. 2023-01-15 needs YYYY-MM-DD)."),
                         fmt = self$options$dateFormat)))
                 }
@@ -1874,7 +1874,7 @@ swimmerplotClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6Class
                 for (response in names(stats$response_counts)) {
                     row_key <- paste0("response_", response)
                     row_values <- list(
-                        metric = jmvcore::format(.("{response} Rate (%)"), response = response),
+                        metric = .fmt(.("{response} Rate (%)"), response = response),
                         value = round(stats$response_percentages[[response]], 1)
                     )
                     if (any(vapply(summary_table$rowKeys, identical, logical(1), row_key)))
@@ -1925,7 +1925,7 @@ swimmerplotClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6Class
                     incidence_rate = round(person_time_data$followup_density[i], 3)
                 ))
             }
-            self$results$personTimeTable$setNote("density", jmvcore::format(
+            self$results$personTimeTable$setNote("density", .fmt(
                 .("Follow-up density = patients per 100 {unit} of person-time (a descriptive measure, not an event rate). Times are in {unit}."),
                 unit = self$options$timeUnit))
         },
@@ -2289,7 +2289,7 @@ swimmerplotClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6Class
                         en_exp <- suppressWarnings(lubridate::time_length(
                             lubridate::interval(origin, per_patient$end_time),
                             unit = self$options$timeUnit))
-                        tbl$setNote("scale", jmvcore::format(
+                        tbl$setNote("scale", .fmt(
                             .("Start/End are offsets from the earliest start date ({origin}), in {unit}; Duration is in {unit}."),
                             origin = format(origin, "%Y-%m-%d"),
                             unit = self$options$timeUnit))
@@ -2600,7 +2600,7 @@ swimmerplotClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6Class
 
             # Add labels with clinical context
             is_date_scale <- inherits(patient_data$start_time, c("Date", "POSIXct"))
-            x_label <- if (is_date_scale) .("Date") else jmvcore::format(.("Time ({unit})"), unit = self$options$timeUnit)
+            x_label <- if (is_date_scale) .("Date") else .fmt(.("Time ({unit})"), unit = self$options$timeUnit)
             p <- p + ggplot2::labs(
                 title = .("Patient Timeline Analysis"),
                 subtitle = sprintf(.("N=%d patients | Median duration: %.1f %s | Total person-time: %.1f %s"),

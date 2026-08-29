@@ -400,7 +400,7 @@ decisionResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                         `format`="pc"),
                     list(
                         `name`="AccurT", 
-                        `title`="Accuracy", 
+                        `title`="Sample Accuracy", 
                         `type`="number", 
                         `format`="pc"),
                     list(
@@ -416,16 +416,6 @@ decisionResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     list(
                         `name`="NPV", 
                         `title`="Negative Predictive Value", 
-                        `type`="number", 
-                        `format`="pc"),
-                    list(
-                        `name`="PostTestProbDisease", 
-                        `title`="Post-test Disease Probability", 
-                        `type`="number", 
-                        `format`="pc"),
-                    list(
-                        `name`="PostTestProbHealthy", 
-                        `title`="Post-test Health Probability", 
                         `type`="number", 
                         `format`="pc"),
                     list(
@@ -728,7 +718,7 @@ decisionBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             super$initialize(
                 package = "ClinicoPath",
                 name = "decision",
-                version = c(1,0,7),
+                version = c(1,0,8),
                 options = options,
                 results = decisionResults$new(options=options),
                 data = data,

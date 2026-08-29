@@ -1803,7 +1803,7 @@ nonparametricClass <- R6::R6Class(
             
             # Add basic summary
             summary_parts <- c(summary_parts, 
-                jmvcore::format(.("The {} was conducted to compare groups."), test_name)
+                .fmt(.("The {} was conducted to compare groups."), test_name)
             )
             
             # Add effect size information if available
@@ -1817,7 +1817,7 @@ nonparametricClass <- R6::R6Class(
                 )
                 
                 summary_parts <- c(summary_parts,
-                    jmvcore::format(.("Effect sizes were calculated using {}."), effect_name)
+                    .fmt(.("Effect sizes were calculated using {}."), effect_name)
                 )
             }
             
@@ -1831,7 +1831,7 @@ nonparametricClass <- R6::R6Class(
                 )
                 
                 summary_parts <- c(summary_parts,
-                    jmvcore::format(.("Pairwise comparisons were conducted using {}."), posthoc_name)
+                    .fmt(.("Pairwise comparisons were conducted using {}."), posthoc_name)
                 )
             }
             
@@ -1924,13 +1924,13 @@ nonparametricClass <- R6::R6Class(
             # Mann-Whitney U test validation
             if (test_type == "mann_whitney" && n_groups != 2) {
                 self$results$tests$setNote("warning",
-                    jmvcore::format(.("Mann-Whitney U test requires exactly 2 groups, but {} groups found. Consider using Kruskal-Wallis test for 3+ groups."), n_groups))
+                    .fmt(.("Mann-Whitney U test requires exactly 2 groups, but {} groups found. Consider using Kruskal-Wallis test for 3+ groups."), n_groups))
             }
             
             # Kruskal-Wallis test validation  
             if (test_type == "kruskal_wallis" && n_groups < 3) {
                 self$results$tests$setNote("warning",
-                    jmvcore::format(.("Kruskal-Wallis test is designed for 3+ groups, but only {} groups found. Consider using Mann-Whitney U test for 2 groups."), n_groups))
+                    .fmt(.("Kruskal-Wallis test is designed for 3+ groups, but only {} groups found. Consider using Mann-Whitney U test for 2 groups."), n_groups))
             }
             
             # Paired test validation
@@ -1947,7 +1947,7 @@ nonparametricClass <- R6::R6Class(
                 }
                 if (n_groups < 3) {
                     self$results$tests$setNote("warning",
-                        jmvcore::format(.("Friedman test is designed for 3+ related groups, but only {} groups found."), n_groups))
+                        .fmt(.("Friedman test is designed for 3+ related groups, but only {} groups found."), n_groups))
                 }
             }
             
@@ -1962,7 +1962,7 @@ nonparametricClass <- R6::R6Class(
             small_groups <- sum(group_sizes < 5)
             if (small_groups > 0) {
                 self$results$tests$setNote("warning",
-                    jmvcore::format(.("{} group(s) have fewer than 5 observations. Results may be unreliable for small samples."), small_groups))
+                    .fmt(.("{} group(s) have fewer than 5 observations. Results may be unreliable for small samples."), small_groups))
             }
             
             # Effect size appropriateness warnings
@@ -1972,7 +1972,7 @@ nonparametricClass <- R6::R6Class(
                 # Cliff's Delta is best for 2-group comparisons
                 if (effect_method == "cliff_delta" && n_groups != 2) {
                     self$results$effectsizes$setNote("warning",
-                        jmvcore::format(.("Cliff's Delta is designed for 2-group comparisons, but {} groups found. Consider using Eta-squared for multi-group comparisons."), n_groups))
+                        .fmt(.("Cliff's Delta is designed for 2-group comparisons, but {} groups found. Consider using Eta-squared for multi-group comparisons."), n_groups))
                 }
                 
                 # Eta-squared is best for multi-group comparisons  

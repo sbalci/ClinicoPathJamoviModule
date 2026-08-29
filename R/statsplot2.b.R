@@ -287,7 +287,7 @@ statsplot2Class <- if (requireNamespace('jmvcore'))
                             # Warning for borderline cases - surfaced via the notices output
                             # (base warning() is not reliably shown in the jamovi UI).
                             if (unique_vals > 10) {
-                                private$.addNotice('WARNING', 'Borderline Variable Type', jmvcore::format(
+                                private$.addNotice('WARNING', 'Borderline Variable Type', .fmt(
                                     "Variable has {} unique integer values (borderline categorical/continuous). Treating as categorical. To force continuous, convert to numeric with decimals.",
                                     unique_vals
                                 ))

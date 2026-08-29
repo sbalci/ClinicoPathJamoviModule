@@ -64,13 +64,13 @@ items:
           type: text
         - name: gold_pos
           title: ''
-          type: number
+          type: integer
         - name: gold_neg
           title: ''
-          type: number
+          type: integer
         - name: row_total
           title: Total
-          type: number
+          type: integer
       clearWith:
         - gold
         - newtest
@@ -246,7 +246,7 @@ items:
           type: number
           format: pc
         - name: AccurT
-          title: 'Accuracy'
+          title: 'Sample Accuracy'
           type: number
           format: pc
         - name: PrevalenceD
@@ -259,14 +259,6 @@ items:
           format: pc
         - name: NPV
           title: 'Negative Predictive Value'
-          type: number
-          format: pc
-        - name: PostTestProbDisease
-          title: 'Post-test Disease Probability'
-          type: number
-          format: pc
-        - name: PostTestProbHealthy
-          title: 'Post-test Health Probability'
           type: number
           format: pc
         - name: LRP

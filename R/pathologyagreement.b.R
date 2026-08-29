@@ -1341,7 +1341,7 @@ pathologyagreementClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                 }
 
                 # Build arguments - base R deparse() emits a valid, properly-escaped R string
-                # literal (quotes + backslashes handled). jmvcore::format(context = "R") does NOT
+                # literal (quotes + backslashes handled). .fmt(context = "R") does NOT
                 # quote strings, which corrupted the syntax pane (unquoted/broken R) for column
                 # names containing spaces, " or \.
                 dep1_arg <- paste0("dep1 = ", deparse(dep1))

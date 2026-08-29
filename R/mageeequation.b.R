@@ -124,7 +124,7 @@ mageeequationClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6Cla
             }
 
             private$.addNotice("INFO", .("Analysis Complete"),
-                jmvcore::format(.("Magee Equations computed for {} patients. Risk cutoffs: Low <= {}, High >= {} (TAILORx)."),
+                .fmt(.("Magee Equations computed for {} patients. Risk cutoffs: Low <= {}, High >= {} (TAILORx)."),
                     prepared$n, self$options$lowCutoff, self$options$highCutoff))
             private$.renderNotices()
         },
@@ -339,7 +339,7 @@ mageeequationClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6Cla
             }
 
             table$setNote("cutoffs",
-                jmvcore::format(.("Risk cutoffs: Low <= {}, Intermediate {}-{}, High >= {}"),
+                .fmt(.("Risk cutoffs: Low <= {}, Intermediate {}-{}, High >= {}"),
                     self$options$lowCutoff, self$options$lowCutoff + 1,
                     self$options$highCutoff - 1, self$options$highCutoff))
         },
@@ -364,7 +364,7 @@ mageeequationClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6Cla
 
             if (length(idx) > 200) {
                 table$setNote("truncated",
-                    jmvcore::format(.("Showing first 200 of {} patients."), length(idx)))
+                    .fmt(.("Showing first 200 of {} patients."), length(idx)))
             }
         },
 

@@ -307,7 +307,7 @@ test_that("Population Prevalence Adjustment", {
     res <- analysis$results$ratioTable$rows[["1"]]
     
     expect_equal(res$PrevalenceD, 0.05)
-    expect_equal(res$PostTestProbDisease, 0.2962963, tolerance=1e-5)
+    expect_equal(res$PPV, 0.2962963, tolerance=1e-5)
 })
 
 test_that("Misclassification Analysis", {

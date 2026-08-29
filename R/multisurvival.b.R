@@ -1710,7 +1710,7 @@ multisurvivalClass <- if (requireNamespace('jmvcore'))
                   mydata[["start"]] <- func(mydata[[dxdate]])
                   mydata[["end"]] <- func(mydata[[fudate]])
               } else {
-                  jmvcore::reject(jmvcore::format(
+                  jmvcore::reject(.fmt(
                       .("Unsupported time type format: {format}. Supported formats are: {supported}"),
                       format = timetypedata,
                       supported = paste(names(lubridate_functions), collapse = ", ")))
@@ -1723,7 +1723,7 @@ multisurvivalClass <- if (requireNamespace('jmvcore'))
 
           if (sum(!is.na(mydata[["start"]])) == 0 ||
               sum(!is.na(mydata[["end"]])) == 0)  {
-            jmvcore::reject(jmvcore::format(
+            jmvcore::reject(.fmt(
               .("Time difference cannot be calculated. Make sure that time type in variables are correct. Currently it is: {format}"),
               format = self$options$timetypedata
             ))
@@ -1750,7 +1750,7 @@ multisurvivalClass <- if (requireNamespace('jmvcore'))
           # Notice Disabled per user request (serialization issues)
           # notice <- jmvcore::Notice$new(...)
           
-          error_msg <- jmvcore::format(
+          error_msg <- .fmt(
               .("Negative Survival Times Detected: {count} observation(s) have negative time values. This typically indicates:\n\u2022 Follow-up date occurs before diagnosis date\n\u2022 Incorrect date variable selection (dates reversed)\n\u2022 Data entry errors in date fields\n\nTo Fix:\n1. Verify 'Diagnosis Date' and 'Follow-up Date' are correctly assigned\n2. Check that diagnosis always precedes follow-up\n3. Review date formats and ensure consistency\n4. Examine observations with negative times for data errors"),
               count = n_negative
           )
@@ -2324,11 +2324,11 @@ multisurvivalClass <- if (requireNamespace('jmvcore'))
             dropped <- rc_total - n_obs
             dropped_ev <- if (!is.null(rc$n_event)) rc$n_event - n_events else NA_integer_
             if (!is.na(dropped) && dropped > 0)
-              recode_note <- paste0(" ", jmvcore::format(
+              recode_note <- paste0(" ", .fmt(
                 .("A further {rows} row(s){events} were excluded from the model because the follow-up time or at least one selected covariate was missing; the outcome recode shown above counts the outcome column alone."),
                 rows = dropped,
                 events = if (!is.na(dropped_ev) && dropped_ev > 0)
-                  paste0(" ", jmvcore::format(.("({count} of them events)"), count = dropped_ev)) else ""
+                  paste0(" ", .fmt(.("({count} of them events)"), count = dropped_ev)) else ""
               ))
           }
 
@@ -3974,7 +3974,7 @@ multisurvivalClass <- if (requireNamespace('jmvcore'))
         tbl$addRow(rowKey = "optimism", values = list(
           metric = .("Optimism (bootstrap)"),
           value = res$optimism,
-          detail = jmvcore::format(.("Mean over {b} resamples"), b = res$n_boot)
+          detail = .fmt(.("Mean over {b} resamples"), b = res$n_boot)
         ))
         tbl$addRow(rowKey = "corrected", values = list(
           metric = .("Optimism-corrected C-index"),
@@ -5405,7 +5405,7 @@ Patients were then divided at empirical quantile cutpoints into {as.character(le
         private$.addHtmlMessage(
           "warning",
           .("Adjusted curves unavailable"),
-          paste(jmvcore::format(.("Adjustment method: {method}."), method = method), detail,
+          paste(.fmt(.("Adjustment method: {method}."), method = method), detail,
                 .("No adjusted curve or table is shown; nothing was substituted for it. Choose Average (standardised over the observed patients) or Conditional Mean instead."))
         )
         return(NULL)
@@ -5856,7 +5856,7 @@ Patients were then divided at empirical quantile cutpoints into {as.character(le
               x = paste0("Time (", self$options$timetypeoutput, ")"),
               y = .("Cumulative incidence"),
               colour = self$options$adjexplanatory,
-              title = jmvcore::format(.("Adjusted Cumulative Incidence for {variable}"),
+              title = .fmt(.("Adjusted Cumulative Incidence for {variable}"),
                                       variable = self$options$adjexplanatory),
               subtitle = private$.adjustedEstimandNote(self$options$ac_method),
               caption = .("Cumulative incidence, not 1 - Kaplan-Meier: competing events are accounted for.")) +
@@ -5892,7 +5892,7 @@ Patients were then divided at empirical quantile cutpoints into {as.character(le
             y = .("Adjusted survival"),
             colour = self$options$adjexplanatory,
             fill = self$options$adjexplanatory,
-            title = jmvcore::format(.("Adjusted Survival Curves for {variable}"),
+            title = .fmt(.("Adjusted Survival Curves for {variable}"),
                                     variable = self$options$adjexplanatory),
             subtitle = private$.adjustedEstimandNote(method)) +
           ggplot2::theme_bw() +
@@ -7758,7 +7758,7 @@ Patients were then divided at empirical quantile cutpoints into {as.character(le
                 self$results$nomogramSummary$setContent(summary_html)
 
             }, error = function(e) {
-                error_msg <- jmvcore::format(
+                error_msg <- .fmt(
                     .("Nomogram calculation error: {message}"),
                     message = htmltools::htmlEscape(conditionMessage(e)))
                 self$results$nomogramSummary$setContent(error_msg)

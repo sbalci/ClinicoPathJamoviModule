@@ -718,7 +718,7 @@ survivalClass <- if (requireNamespace('jmvcore'))
                     }
                 }, error = function(e) {
                     # Log error but don't break the analysis
-                    warning(jmvcore::format(
+                    warning(.fmt(
                         .("Table population failed: {message}"),
                         message = conditionMessage(e)
                     ))
@@ -1904,7 +1904,7 @@ survivalClass <- if (requireNamespace('jmvcore'))
                             return()
                         }
                     } else {
-                        warning(jmvcore::format(
+                        warning(.fmt(
                             .("Stratification variable {variable} not found. Using standard Cox regression."),
                             variable = strata_var
                         ))
@@ -2283,7 +2283,7 @@ survivalClass <- if (requireNamespace('jmvcore'))
                     return(residuals_df)
                     
                 }, error = function(e) {
-                    warning(jmvcore::format(
+                    warning(.fmt(
                         .("Error calculating residuals: {message}"),
                         message = conditionMessage(e)
                     ))
@@ -2438,7 +2438,7 @@ survivalClass <- if (requireNamespace('jmvcore'))
                     self$results$survivalExportSummary$setContent(export_summary)
                     
                 }, error = function(e) {
-                    warning(jmvcore::format(
+                    warning(.fmt(
                         .("Error exporting survival data: {message}"),
                         message = conditionMessage(e)
                     ))
@@ -2724,7 +2724,7 @@ survivalClass <- if (requireNamespace('jmvcore'))
                 original_names_mapping <- labelled_data$original_names_mapping
                 title2 <- .survivalDisplayName(self$options$explanatory, original_names_mapping)
 
-                pairwiseTable$setTitle(jmvcore::format(
+                pairwiseTable$setTitle(.fmt(
                     .("Pairwise comparisons: {factor}"),
                     factor = title2
                 ))
@@ -3493,7 +3493,7 @@ survivalClass <- if (requireNamespace('jmvcore'))
                         ylim = c(
                             self$options$ybegin_plot,
                             self$options$yend_plot),
-                        title = jmvcore::format(
+                        title = .fmt(
                             .("Survival curves for {group}"),
                             group = title2
                         ),
@@ -3572,7 +3572,7 @@ survivalClass <- if (requireNamespace('jmvcore'))
                         ylim = c(
                             self$options$ybegin_plot,
                             self$options$yend_plot),
-                        title = jmvcore::format(
+                        title = .fmt(
                             .("Cumulative events for {group}"),
                             group = title2
                         ),
@@ -3649,7 +3649,7 @@ survivalClass <- if (requireNamespace('jmvcore'))
                         xlim = c(0, self$options$endplot),
                         # For cumulative hazard, use NULL to allow auto-scaling beyond 1.0
                         ylim = NULL,
-                        title = jmvcore::format(
+                        title = .fmt(
                             .("Cumulative hazard for {group}"),
                             group = title2
                         ),
@@ -3720,7 +3720,7 @@ survivalClass <- if (requireNamespace('jmvcore'))
                             explanatory = myfactor,
                             xlab = paste0('log(Time) (', self$options$timetypeoutput, ')'),
                             ylab = 'log(-log(Survival))',
-                            title = jmvcore::format(
+                            title = .fmt(
                                 .("Log-log plot for {group}"),
                                 group = title2
                             ),
@@ -3757,7 +3757,7 @@ survivalClass <- if (requireNamespace('jmvcore'))
                         ggplot2::labs(
                             x = paste0('log(Time) (', self$options$timetypeoutput, ')'),
                             y = 'log(-log(Survival))',
-                            title = jmvcore::format(
+                            title = .fmt(
                                 .("Log-log plot for {group}"),
                                 group = title2
                             ),
@@ -3877,7 +3877,7 @@ survivalClass <- if (requireNamespace('jmvcore'))
                     TRUE
                     
                 }, error = function(e) {
-                    warning(jmvcore::format(
+                    warning(.fmt(
                         .("Error creating residuals plot: {message}"),
                         message = conditionMessage(e)
                     ))
@@ -4391,12 +4391,12 @@ survivalClass <- if (requireNamespace('jmvcore'))
                         time_unit <- self$options$timetypeoutput
 
                         if (is.na(median_val) || median_val == "NR") {
-                            clinical_meaning <- jmvcore::format(
+                            clinical_meaning <- .fmt(
                                 .("In the {group} group the median was not reached: fewer than half of the patients had the event during the observed follow-up. This may reflect genuinely long survival, but short follow-up or heavy censoring produces the same result, so it should be read together with the number at risk over time."),
                                 group = group_name
                             )
                         } else {
-                            clinical_meaning <- jmvcore::format(
+                            clinical_meaning <- .fmt(
                                 .("In the {group} group, half of the patients had the event by {median} {unit} (95% CI {lower} to {upper})."),
                                 group = group_name,
                                 median = median_val,
@@ -4491,13 +4491,13 @@ survivalClass <- if (requireNamespace('jmvcore'))
                             } else if (p_val < 0.001) {
                                 .("p < 0.001")
                             } else {
-                                jmvcore::format(.("p = {p}"), p = base::format(round(p_val, 3), nsmall = 3))
+                                .fmt(.("p = {p}"), p = base::format(round(p_val, 3), nsmall = 3))
                             }
 
                             crosses_one <- !is.na(ci_lower) && !is.na(ci_upper) &&
                                            ci_lower < 1 && ci_upper > 1
 
-                            clinical_meaning <- jmvcore::format(
+                            clinical_meaning <- .fmt(
                                 .("{comparison}: hazard ratio {hr} (95% CI {lower} to {upper}, {stats}) - {direction} in the compared group relative to the reference. The hazard ratio is a relative rate, not a cumulative risk difference; the absolute benefit or harm depends on the baseline risk, the endpoint and the length of follow-up.{cinote}"),
                                 comparison = comparison,
                                 hr = round(hr, 2),
@@ -4623,14 +4623,14 @@ survivalClass <- if (requireNamespace('jmvcore'))
                             # "Not reached" is a statement about the observed
                             # follow-up, not a favourable prognosis -- short
                             # follow-up produces the same result.
-                            sentence <- jmvcore::format(
+                            sentence <- .fmt(
                                 .("Median survival was not reached for the {group} group: fewer than half of the patients had the event during the observed follow-up."),
                                 group = group_name
                             )
                         } else {
                             # The unit is user-selectable; this sentence used to
                             # say "months" whatever the user had chosen.
-                            sentence <- jmvcore::format(
+                            sentence <- .fmt(
                                 .("Median survival for the {group} group was {median} {unit} (95% CI: {lower} to {upper} {unit})."),
                                 group = group_name,
                                 median = median_val,
@@ -4716,7 +4716,7 @@ survivalClass <- if (requireNamespace('jmvcore'))
                                            ci_lower < 1 && ci_upper > 1
 
                             sentence <- if (crosses_one) {
-                                jmvcore::format(
+                                .fmt(
                                     .("Cox regression estimated a hazard ratio of {hr} for {comparison} (95% CI: {lower} to {upper}, p = {p}); the interval includes 1, so these data are compatible with both a lower and a higher hazard."),
                                     comparison = comparison,
                                     hr = round(hr, 2),
@@ -4725,7 +4725,7 @@ survivalClass <- if (requireNamespace('jmvcore'))
                                     p = round(p_val, 3)
                                 )
                             } else {
-                                jmvcore::format(
+                                .fmt(
                                     .("Cox regression estimated {direction} for {comparison}, with a hazard ratio of {hr} (95% CI: {lower} to {upper}, p = {p}), which was {significance}."),
                                     direction = direction,
                                     comparison = comparison,
@@ -4768,7 +4768,7 @@ survivalClass <- if (requireNamespace('jmvcore'))
                                 ci_lower <- round(surv_at_time[[j, "lower"]] * 100, 1)
                                 ci_upper <- round(surv_at_time[[j, "upper"]] * 100, 1)
                                 
-                                sentence <- jmvcore::format(
+                                sentence <- .fmt(
                                     .("Survival at {time} {unit} for the {group} group was {survival}% (95% CI: {lower}% to {upper}%)."),
                                     time = time_point,
                                     unit = time_unit,
@@ -4806,7 +4806,7 @@ survivalClass <- if (requireNamespace('jmvcore'))
                     }
                 }, error = function(e) {
                     # Log warning but continue
-                    warning(jmvcore::format(
+                    warning(.fmt(
                         .("Could not access median survival data: {message}"),
                         message = conditionMessage(e)
                     ))
@@ -4822,7 +4822,7 @@ survivalClass <- if (requireNamespace('jmvcore'))
                     }
                 }, error = function(e) {
                     # Log warning but continue
-                    warning(jmvcore::format(
+                    warning(.fmt(
                         .("Could not access Cox regression data: {message}"),
                         message = conditionMessage(e)
                     ))
@@ -4838,7 +4838,7 @@ survivalClass <- if (requireNamespace('jmvcore'))
                     }
                 }, error = function(e) {
                     # Log warning but continue
-                    warning(jmvcore::format(
+                    warning(.fmt(
                         .("Could not access survival probability data: {message}"),
                         message = conditionMessage(e)
                     ))
@@ -5888,7 +5888,7 @@ survivalClass <- if (requireNamespace('jmvcore'))
 
                 }, error = function(e) {
                     self$results$ageAdjustedCoxTable$setNote("error",
-                        jmvcore::format(
+                        .fmt(
                             .("Age-adjusted Cox regression failed: {message}"),
                             message = conditionMessage(e)
                         ))
@@ -5939,7 +5939,7 @@ survivalClass <- if (requireNamespace('jmvcore'))
 
                     }, error = function(e) {
                         self$results$ageInteractionTable$setNote("error",
-                            jmvcore::format(
+                            .fmt(
                                 .("Age interaction test failed: {message}"),
                                 message = conditionMessage(e)
                             ))
@@ -6113,7 +6113,7 @@ survivalClass <- if (requireNamespace('jmvcore'))
 
                 }, error = function(e) {
                     self$results$ageTimeScaleTable$setNote("error",
-                        jmvcore::format(
+                        .fmt(
                             .("Age-as-time-scale analysis failed: {message}"),
                             message = conditionMessage(e)
                         ))
@@ -6353,7 +6353,7 @@ survivalClass <- if (requireNamespace('jmvcore'))
 
                 }, error = function(e) {
                     self$results$ageStandardizationTable$setNote("error",
-                        jmvcore::format(
+                        .fmt(
                             .("Age standardization failed: {message}"),
                             message = conditionMessage(e)
                         ))

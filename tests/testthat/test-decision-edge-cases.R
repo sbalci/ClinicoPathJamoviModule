@@ -112,18 +112,51 @@ test_that("decision handles missing data", {
               any(is.na(decision_missing$NewTest)))
 })
 
-test_that("decision handles multilevel variables", {
-  # With indeterminate level treated as negative
+notices_text <- function(res)
+  gsub("[[:space:]]+", " ", gsub("<[^>]+>", " ", paste(res$notices$content, collapse = " ")))
+
+test_that("an ambiguous third level is refused, not silently pooled into negative", {
+  # NewTest is Negative/Positive/Indeterminate. Pooling Indeterminate into the
+  # negative arm used to be the default, and it inflates the specificity
+  # denominator with cases the test was never right about. The level must now be
+  # named; an indeterminate result is not a negative result.
   result <- decision(
     data = decision_multilevel,
-    gold = "GoldStandard",
-    goldPositive = "Positive",
-    newtest = "NewTest",
-    testPositive = "Positive",
-    goldNegative = NULL,
-    testNegative = NULL
+    gold = "GoldStandard", goldPositive = "Positive", goldNegative = NULL,
+    newtest = "NewTest",   testPositive = "Positive", testNegative = NULL
   )
   expect_s3_class(result, "decisionResults")
+  expect_match(notices_text(result), "cannot be inferred")
+  expect_match(notices_text(result), "Indeterminate")
+})
+
+test_that("naming the negative level excludes the third level rather than pooling it", {
+  result <- decision(
+    data = decision_multilevel,
+    gold = "GoldStandard", goldPositive = "Positive", goldNegative = "Negative",
+    newtest = "NewTest",   testPositive = "Positive", testNegative = "Negative"
+  )
+  expect_s3_class(result, "decisionResults")
+  expect_match(notices_text(result), "excluded from analysis")
+
+  # The excluded cases must not appear in any denominator.
+  n <- as.data.frame(result$nTable)
+  kept <- sum(decision_multilevel$NewTest %in% c("Positive", "Negative") &
+              decision_multilevel$GoldStandard %in% c("Positive", "Negative"))
+  expect_equal(n$TotalPop[1], kept)
+})
+
+test_that("a two-level variable still infers its negative level with no ceremony", {
+  # The naming requirement must bite only where the name is genuinely ambiguous,
+  # otherwise every ordinary binary analysis breaks for no statistical gain.
+  result <- decision(
+    data = decision_small,
+    gold = "GoldStandard", goldPositive = "Positive", goldNegative = NULL,
+    newtest = "NewTest",   testPositive = "Positive", testNegative = NULL
+  )
+  expect_s3_class(result, "decisionResults")
+  expect_false(grepl("cannot be inferred", notices_text(result)))
+  expect_equal(as.data.frame(result$nTable)$TotalPop[1], nrow(decision_small))
 })
 
 test_that("omitting a required variable shows the welcome panel, not an error", {

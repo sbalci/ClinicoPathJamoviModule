@@ -4144,12 +4144,17 @@ children:
     children:
       - type: CheckBox
         name: pp
-        enable: (!ci)              # Disabled when ci is checked
       - type: TextBox
         name: pprob
         format: number
-        enable: (!ci && pp)        # Multiple conditions
+        enable: (pp)               # Gated on its own checkbox only
 ```
+
+> This panel used to disable `pp` whenever `ci` was checked, and gate `pprob` on
+> `(!ci && pp)`. That mutual exclusion was removed: Clopper-Pearson intervals for
+> sensitivity and specificity are prevalence-independent, so they stay valid when a
+> population prior is supplied. For a genuine multi-condition example see
+> "Conditional Enabling" below.
 
 ### Advanced UI Patterns and Features
 

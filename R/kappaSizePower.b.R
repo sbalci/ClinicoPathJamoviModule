@@ -64,17 +64,17 @@ kappaSizePowerClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
         # Build the study-explanation paragraph (plain text; generic across cardinalities).
         .buildExplanation = function(kappa0, kappa1, alpha, power, raters, props) {
             prev <- if (length(props) == 1) {
-                jmvcore::format(
+                .fmt(
                     .("Further suppose that the prevalence of the trait is {p}."),
                     p = props[1])
             } else if (length(props) == 2) {
                 # The user never said which category is the "trait"; with "0.80, 0.20" the
                 # old sentence claimed the lesion was present in 80% of cases.
-                jmvcore::format(
+                .fmt(
                     .("Further suppose that the two categories occur in {p1} and {p2} of subjects (the required sample size is the same whichever category is called positive)."),
                     p1 = props[1], p2 = props[2])
             } else {
-                jmvcore::format(
+                .fmt(
                     .("Further suppose that the prevalences of the categories are {head} and {last}."),
                     head = paste0(props[-length(props)], collapse = ", "),
                     last = props[length(props)])
@@ -85,7 +85,7 @@ kappaSizePowerClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
                     .("This is a POWER calculation: it returns the number of subjects needed to REJECT kappa0 in favour of kappa1 in a two-sided test at the stated significance level and power."),
                     .("It answers a different question from the confidence-interval approach (kappaSizeCI), which sizes a study to achieve a target interval width, so the two will not agree on a sample size for the same study - pick the one that matches how the result will be reported."))),
                 "\n\n",
-                private$.wrap(jmvcore::format(
+                private$.wrap(.fmt(
                     .("Researchers would like to determine the required sample size to test the null hypothesis kappa = {kappa0} against the alternative kappa = {kappa1} at a two-sided significance level of {alpha} with power {power}, in a study of interobserver agreement with {raters} raters."),
                     kappa0 = kappa0, kappa1 = kappa1, alpha = alpha, power = power,
                     raters = raters)),
@@ -117,7 +117,7 @@ kappaSizePowerClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
             if (isTRUE(kappa1 < kappa0)) {
                 warn <- paste0(warn, block(warn_div,
                     .("Alternative below the null."),
-                    jmvcore::format(
+                    .fmt(
                         .("The alternative kappa ({kappa1}) is BELOW the null ({kappa0}). This sizes a study to demonstrate that agreement is WORSE than the null value, not better. If you meant to detect an improvement, swap the two values - the required sample size is not the same either way."),
                         kappa0 = kappa0, kappa1 = kappa1)))
             }
@@ -130,7 +130,7 @@ kappaSizePowerClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
             if (abs(kappa1 - kappa0) < 0.05) {
                 warn <- paste0(warn, block(warn_div,
                     .("Small kappa difference."),
-                    jmvcore::format(
+                    .fmt(
                         .("The null and alternative kappa differ by only {delta}. Check that kappa0 is the agreement you want to rule OUT (not the agreement you expect to observe) and that kappa1 is a clinically meaningful difference from it; very close values need very large studies."),
                         delta = signif(abs(kappa1 - kappa0), 3))))
             }
@@ -141,7 +141,7 @@ kappaSizePowerClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
             if (has_n && n_required > 2000) {
                 warn <- paste0(warn, block(warn_div,
                     .("Very large sample size."),
-                    jmvcore::format(
+                    .fmt(
                         .("The design needs {n} subjects; few agreement studies can enrol this many. A rare finding (prevalence far from 0.5), a small difference between kappa0 and kappa1, and a high power target all inflate the sample size - revisit whichever of these is not a firm requirement."),
                         n = n_required)))
             }
@@ -152,7 +152,7 @@ kappaSizePowerClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
             if (has_n && n_required < 10) {
                 warn <- paste0(warn, block(warn_div,
                     .("Very small sample size."),
-                    jmvcore::format(
+                    .fmt(
                         .("The required sample size is only {n} {subjects}. The large-sample approximation behind this method does not hold for such small studies; treat the figure as a lower bound, not a plan."),
                         n = n_required, subjects = private$.subjects(n_required))))
             }
@@ -160,7 +160,7 @@ kappaSizePowerClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
             if (is.finite(power) && power < 0.5) {
                 warn <- paste0(warn, block(warn_div,
                     .("Low power."),
-                    jmvcore::format(
+                    .fmt(
                         .("The requested power is {power}. A study powered below 50% is more likely to miss the alternative kappa than to detect it; conventional values are 0.80 or 0.90."),
                         power = power)))
             }
@@ -180,7 +180,7 @@ kappaSizePowerClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
                 }
                 warn <- paste0(warn, block(warn_div,
                     .("Sparse categories."),
-                    jmvcore::format(
+                    .fmt(
                         .("At the required sample size the agreement-pattern cells (for example, exactly k of the raters calling the finding present, or all raters agreeing on one category) are too sparse: the smallest expected count is {min} and {below} of {total} cells are below 5. The calculation rests on a large-sample chi-square approximation, so the sample size shown is less dependable here."),
                         min = signif(sparse_min, 2), below = sparse_below5, total = sparse_total),
                     remedy))
@@ -193,7 +193,7 @@ kappaSizePowerClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
                 .("It answers 'how many subjects do I need to reject kappa0 in favour of kappa1?' - not how precisely kappa will be estimated; for a target interval width use kappaSizeCI instead."),
                 .("Note that kappa0 here is the null hypothesis value, whereas in kappaSizeCI and kappaSizeFixedN it is the agreement you anticipate observing."),
                 if (has_n)
-                    jmvcore::format(
+                    .fmt(
                         .("Required sample size: <b>{n}</b> {subjects}, each rated by all {raters} raters."),
                         n = n_required, subjects = private$.subjects(n_required), raters = raters)
                 else "")
@@ -254,7 +254,7 @@ kappaSizePowerClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
                         code = "props_count_mismatch")
             } else if (length(props) != outcome) {
                 jmvcore::reject(
-                    jmvcore::format(
+                    .fmt(
                         .("Enter exactly {k} proportions for {k} outcome levels (received {got})."),
                         k = outcome, got = length(props)),
                     code = "props_count_mismatch")
@@ -262,7 +262,7 @@ kappaSizePowerClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
 
             if (length(props) >= 2 && abs(sum(props) - 1) >= 0.001)
                 jmvcore::reject(
-                    jmvcore::format(
+                    .fmt(
                         .("Proportions must sum to 1 (current sum = {sum})."),
                         sum = round(sum(props), 4)),
                     code = "props_sum")
@@ -278,7 +278,7 @@ kappaSizePowerClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
             # generated option classes reject them at construction.)
             if (alpha >= power)
                 jmvcore::reject(
-                    jmvcore::format(
+                    .fmt(
                         .("The significance level ({alpha}) must be below the power ({power}). A study whose power does not exceed its type I error rate provides no evidence, and the sample size cannot be computed for it. Conventional values are alpha 0.05 and power 0.80."),
                         alpha = alpha, power = power),
                     code = "alpha_ge_power")
@@ -308,7 +308,7 @@ kappaSizePowerClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
                     power  = power),
                 error = function(e)
                     jmvcore::reject(
-                        jmvcore::format(
+                        .fmt(
                             .("Sample size calculation failed: {error}"),
                             error = conditionMessage(e)),
                         code = "kappasize_error"))
@@ -333,7 +333,7 @@ kappaSizePowerClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
             self$results$text2$setContent(paste0(
                 private$.buildExplanation(kappa0, kappa1, alpha, power, raters, props),
                 if (is.finite(n_required))
-                    paste0("\n", jmvcore::format(
+                    paste0("\n", .fmt(
                         .("The required sample size is {n} {subjects}."),
                         n = n_required, subjects = private$.subjects(n_required)))
                 else ""))

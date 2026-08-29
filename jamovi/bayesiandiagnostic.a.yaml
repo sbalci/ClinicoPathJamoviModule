@@ -46,7 +46,7 @@ options:
       permitted: [factor, numeric]
 
     - name: test_positive_level
-      title: Test Positive Level
+      title: Test positive level
       type: Level
       variable: (test_results)
 
@@ -100,7 +100,7 @@ options:
       default: null
 
     - name: comparison_positive_level
-      title: Comparison Test Positive Level
+      title: Comparison test positive level
       type: Level
       variable: (comparison_test)
 

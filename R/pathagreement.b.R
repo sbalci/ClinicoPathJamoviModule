@@ -5534,11 +5534,11 @@ pathagreementClass <- if (requireNamespace("jmvcore")) {
                     return("")
                 }
 
-                # Build vars argument - jmvcore::format(..., context = "R") produces a valid R
+                # Build vars argument - .fmt(..., context = "R") produces a valid R
                 # string literal that handles embedded quotes/backslashes correctly. This is the
                 # idiomatic G-category codegen escape (replaces a manual paste0('"', v, '"') wrap
                 # that corrupted the syntax pane when column names contained " or \).
-                vars_arg <- paste0("vars = c(", paste(sapply(vars, function(v) jmvcore::format("{}", v, context = "R")), collapse = ", "), ")")
+                vars_arg <- paste0("vars = c(", paste(sapply(vars, function(v) .fmt("{}", v, context = "R")), collapse = ", "), ")")
 
                 # Get other arguments using base helper (if available)
                 args <- ""

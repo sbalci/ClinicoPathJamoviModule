@@ -272,7 +272,7 @@ jjscatterstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         # and plot3 (set includeGrvar = TRUE for the grouped-plot default title).
         .resolveLabels = function(includeGrvar = FALSE) {
             if (!is.null(self$options$mytitle) && self$options$mytitle != "") {
-                title <- jmvcore::format(self$options$mytitle)
+                title <- .fmt(self$options$mytitle)
             } else if (includeGrvar) {
                 title <- paste(self$options$dep, "vs", self$options$group, "by", self$options$grvar)
             } else {
@@ -280,13 +280,13 @@ jjscatterstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             }
 
             if (!is.null(self$options$xtitle) && self$options$xtitle != "") {
-                xtitle <- jmvcore::format(self$options$xtitle)
+                xtitle <- .fmt(self$options$xtitle)
             } else {
                 xtitle <- self$options$dep
             }
 
             if (!is.null(self$options$ytitle) && self$options$ytitle != "") {
-                ytitle <- jmvcore::format(self$options$ytitle)
+                ytitle <- .fmt(self$options$ytitle)
             } else {
                 ytitle <- self$options$group
             }

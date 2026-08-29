@@ -4009,7 +4009,7 @@ singlearmClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                                  color = "#DE8F05", alpha = 0.4, size = 1) +
               ggplot2::labs(
                 title = .("Smoothed Hazard Function"),
-                subtitle = jmvcore::format(
+                subtitle = .fmt(
                   .("Person-time weighted local-constant LOESS, span = {span}. Each point is one interval's events / person-time at risk."),
                   span = round(adaptive_span, 2)
                 ),
@@ -4099,7 +4099,7 @@ singlearmClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
         # Memory footprint: a note about this machine, not a property of the
         # data, so it is reported without a grade like the other two ungraded
         # rows. It also called plain format(), which inside this package is
-        # jmvcore::format(str, ..., context) because the NAMESPACE imports all
+        # .fmt(str, ..., context) because the NAMESPACE imports all
         # of jmvcore -- so format.object_size never ran, the cell received a raw
         # object_size, and the old grader read its BYTE count as megabytes and
         # labelled a 2 KB data set "Large".

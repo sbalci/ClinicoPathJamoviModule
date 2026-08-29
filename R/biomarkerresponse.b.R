@@ -1588,9 +1588,9 @@ biomarkerresponseClass <- if (requireNamespace("jmvcore")) {
                 # producing invalid R syntax (backticks have no meaning inside
                 # double-quoted strings). For string-arg contexts you don't need
                 # backticks at all - only proper string quoting. Replacement:
-                #   biomarker_arg <- jmvcore::format('biomarker = {}', biomarker, context = "R")
-                #   response_arg  <- jmvcore::format('response = {}',  response,  context = "R")
-                #   groupVariable_arg <- jmvcore::format(',\n    groupVariable = {}',
+                #   biomarker_arg <- .fmt('biomarker = {}', biomarker, context = "R")
+                #   response_arg  <- .fmt('response = {}',  response,  context = "R")
+                #   groupVariable_arg <- .fmt(',\n    groupVariable = {}',
                 #                                       groupVariable, context = "R")
                 # That removes the manual escaping helpers (lines ~1535-1547,
                 # ~1555-1561) and produces correctly quoted R for any name. NOT

@@ -512,7 +512,7 @@ nogoldstandardClass <- if (requireNamespace("jmvcore")) {
                         private$.addNotice(
                             "STRONG_WARNING",
                             .("Extreme fitted class proportion"),
-                            jmvcore::format(
+                            .fmt(
                                 .("The fitted high-positive class contains {proportion}% of analyzed cases. This is a diagnostic warning, not a clinical threshold: class orientation is uncertain and predictive values and response-probability estimates can be unstable near the boundary."),
                                 proportion = base::format(round(100 * results$prevalence, 1), nsmall = 1)
                             )
@@ -1097,7 +1097,7 @@ nogoldstandardClass <- if (requireNamespace("jmvcore")) {
                     private$.addNotice(
                         "STRONG_WARNING",
                         .("Most latent-class starts did not converge"),
-                        jmvcore::format(
+                        .fmt(
                             .("{unstable} of {starts} attempted starts failed, reached the iteration limit, or returned an invalid likelihood ({failed} fitting failures; {nonconverged} unfinished fits). The selected fit is the best converged solution when one was available, but this pattern indicates an unstable likelihood surface. Do not report the estimates without additional model checks."),
                             unstable = unstable_starts,
                             nonconverged = nonconverged_starts,
@@ -1712,7 +1712,7 @@ nogoldstandardClass <- if (requireNamespace("jmvcore")) {
                     },
                     error = function(e) {
                         # In case of error, create a simpler plot
-                        message(jmvcore::format(.("Error in plot: {msg}"), msg = e$message))
+                        message(.fmt(.("Error in plot: {msg}"), msg = e$message))
 
                         # Simple fallback plot
                         try(
@@ -1812,7 +1812,7 @@ nogoldstandardClass <- if (requireNamespace("jmvcore")) {
                     },
                     error = function(e) {
                         # In case of error, create a simpler plot
-                        message(jmvcore::format(.("Error in ggplot: {msg}"), msg = e$message))
+                        message(.fmt(.("Error in ggplot: {msg}"), msg = e$message))
 
                         # Try base R fallback
                         try(
@@ -1858,7 +1858,7 @@ nogoldstandardClass <- if (requireNamespace("jmvcore")) {
                     private$.addNotice(
                         "STRONG_WARNING",
                         "LCA Sample Size",
-                        jmvcore::format(
+                        .fmt(
                             .("The latent-class analysis has N = {n}. N < 100 is a general stability warning, not a clinical adequacy threshold; precision also depends on class balance, response patterns, and the number of tests. Inspect bootstrap intervals and convergence, and consider collecting more observations."),
                             n = n_obs
                         )
@@ -1869,7 +1869,7 @@ nogoldstandardClass <- if (requireNamespace("jmvcore")) {
                     private$.addNotice(
                         "STRONG_WARNING",
                         "Penalized EM Sample Size",
-                        jmvcore::format(
+                        .fmt(
                             .("The penalized-EM analysis has N = {n}. N < 50 is a general stability warning, not a clinical adequacy threshold; fixed priors may have substantial influence. Inspect bootstrap intervals and consider collecting more observations."),
                             n = n_obs
                         )
@@ -1885,7 +1885,7 @@ nogoldstandardClass <- if (requireNamespace("jmvcore")) {
                         private$.addNotice(
                             "WARNING",
                             "Small Test Categories",
-                            jmvcore::format(
+                            .fmt(
                                 .("Test '{test}' has a category with fewer than 5 observations. Estimates may be unstable. Combine categories only when substantively defensible."),
                                 test = test_name
                             )
@@ -1898,7 +1898,7 @@ nogoldstandardClass <- if (requireNamespace("jmvcore")) {
                         private$.addNotice(
                             "WARNING",
                             "Extreme Test Imbalance",
-                            jmvcore::format(
+                            .fmt(
                                 .("Test '{test}' is extremely imbalanced: the minority category is {percentage}% of observations. This may destabilize parameter estimation."),
                                 test = test_name,
                                 percentage = base::format(round(min_prop * 100, 1), nsmall = 1)
@@ -1930,7 +1930,7 @@ nogoldstandardClass <- if (requireNamespace("jmvcore")) {
                     private$.addNotice(
                         "INFO",
                         "Clinical Validation",
-                        jmvcore::format(
+                        .fmt(
                             .("Analysis diagnostics: {tests} tests analyzed with N = {n} using method '{method}'."),
                             tests = n_tests,
                             n = n_obs,
@@ -2119,7 +2119,7 @@ nogoldstandardClass <- if (requireNamespace("jmvcore")) {
                 sens_range <- if (length(finite_sens) == 0) {
                     .("not estimable")
                 } else {
-                    jmvcore::format(
+                    .fmt(
                         .("Range from {minimum}% to {maximum}%"),
                         minimum = base::format(round(min(finite_sens) * 100, 1), nsmall = 1),
                         maximum = base::format(round(max(finite_sens) * 100, 1), nsmall = 1)

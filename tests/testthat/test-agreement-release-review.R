@@ -247,3 +247,51 @@ test_that("one benchmark scale is used across the whole analysis", {
     c("Slight", "Fair", "Moderate", "Substantial", "Almost perfect",
       "Error calculating agreement")))
 })
+
+
+# ── Release review 2026-08-29: vectorised Robinson's A, seq_len confusion diagonal ──
+
+test_that("Robinson's A matches an independent concordant/discordant count", {
+  # .robinsonAPairwise counts C/D with a vectorised inner loop. This pins the
+  # published value against a naive scalar reference written from the definition
+  # A = (C - D) / (C + D), so a future "optimisation" cannot drift the statistic.
+  d <- agr_fixture(n = 60, seed = 5)
+  x <- as.numeric(d$r1)
+  y <- as.numeric(d$r2)
+
+  C <- 0; D <- 0
+  for (i in seq_len(length(x) - 1)) {
+    for (j in (i + 1):length(x)) {
+      dx <- x[i] - x[j]; dy <- y[i] - y[j]
+      if (dx != 0 && dy != 0) {
+        if (sign(dx) == sign(dy)) C <- C + 1 else D <- D + 1
+      }
+    }
+  }
+  expected <- (C - D) / (C + D)
+
+  res <- agreement(data = d, vars = c("r1", "r2"), robinsonA = TRUE)
+  expect_equal(res$robinsonATable$asDF$robinsonA[1], expected, tolerance = 1e-10)
+})
+
+test_that("Robinson's A reports no significance test for more than two raters", {
+  # The pairwise A values share raters, so their spread is not a null distribution.
+  # se/z/p must stay NA rather than carrying an invalid test.
+  d <- agr_fixture(n = 80, seed = 7)
+  d$r3 <- factor(ifelse(runif(nrow(d)) < 0.7, as.character(d$r1),
+                        sample(levels(d$r1), nrow(d), TRUE)), levels = levels(d$r1))
+  res <- agreement(data = d, vars = c("r1", "r2", "r3"), robinsonA = TRUE)
+  t <- res$robinsonATable$asDF
+  expect_false(is.na(t$robinsonA[1]))
+  expect_true(is.na(t$se[1]) && is.na(t$z[1]) && is.na(t$p[1]))
+})
+
+test_that("the confusion-matrix heatmap renders (seq_len diagonal path)", {
+  # The diagonal-highlight loop used 1:min(nrow, ncol); on a degenerate table
+  # 1:0 walks backwards and the if() sees logical(0). Drive the renderer.
+  d <- agr_fixture(n = 50, seed = 3)
+  res <- agreement(data = d, vars = c("r1", "r2"),
+                   confusionMatrix = TRUE, agreementHeatmap = TRUE)
+  expect_gt(nrow(res$confusionMatrixTable$asDF), 0)
+  expect_silent(invisible(res$agreementHeatmapPlot$.render()))
+})

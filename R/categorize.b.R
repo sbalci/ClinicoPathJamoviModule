@@ -492,7 +492,7 @@ categorizeClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 paste0("<div style='padding: 15px; background-color: rgba(216, 33, 50, 0.18); border-left: 4px solid #dc3545; color: inherit; border-radius: 5px;'><strong>Error:</strong> ", msg, "</div>")
 
             if (!(varname %in% names(self$data))) {
-                self$results$notices$setContent(.errBox(jmvcore::format(
+                self$results$notices$setContent(.errBox(.fmt(
                     "Variable '{}' not found in dataset. Please select a valid variable from the data.",
                     htmltools::htmlEscape(varname))))
                 return()
@@ -502,7 +502,7 @@ categorizeClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
             # Check if numeric
             if (!is.numeric(x)) {
-                self$results$notices$setContent(.errBox(jmvcore::format(
+                self$results$notices$setContent(.errBox(.fmt(
                     "Variable '{}' is not numeric. Categorization requires a continuous numeric variable.",
                     htmltools::htmlEscape(varname))))
                 return()
@@ -516,7 +516,7 @@ categorizeClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
             # Basic sanity check for variability
             if (sum(!is.na(x_clean)) < 2 || sd(x_clean, na.rm = TRUE) == 0) {
-                self$results$notices$setContent(.errBox(jmvcore::format(
+                self$results$notices$setContent(.errBox(.fmt(
                     "Variable '{}' has zero variability (constant value). Cannot create categories from a constant variable.",
                     htmltools::htmlEscape(varname))))
                 return()
@@ -574,7 +574,7 @@ categorizeClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             # Validate breaks with detailed error messages
             validation <- private$.validateBreaks(breaks, method)
             if (!validation$valid) {
-                self$results$notices$setContent(.errBox(jmvcore::format(
+                self$results$notices$setContent(.errBox(.fmt(
                     "Break point validation failed: {}",
                     htmltools::htmlEscape(validation$message))))
                 return()
@@ -639,7 +639,7 @@ categorizeClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 # and shrinks in proportion after that (3% at n = 100000) -
                 # report the count that is actually used, not a fixed share.
                 n_subsample <- min(ceiling(0.1 * length(x_clean)), 3000L)
-                notice_html$jenksSubsample <- .noticeBox("WARNING", jmvcore::format(
+                notice_html$jenksSubsample <- .noticeBox("WARNING", .fmt(
                     "Natural-breaks approximation: with {} observations the break points were computed on a random subsample of {} values (plus the minimum and maximum) rather than the full data, because the exact algorithm is too slow at this size. The subsample is drawn with a fixed seed, so repeated runs give the same break points, but they are an approximation to the optimum. Quantile binning uses every observation if exact boundaries matter.",
                     length(x_clean), n_subsample))
             }
@@ -648,7 +648,7 @@ categorizeClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             if (self$options$labels == "custom" && self$options$customlabels != "") {
                 custom_labels <- trimws(strsplit(self$options$customlabels, ",")[[1]])
                 if (length(custom_labels) != n_categories) {
-                    notice_html$labelMismatch <- .noticeBox("WARNING", jmvcore::format(
+                    notice_html$labelMismatch <- .noticeBox("WARNING", .fmt(
                         "Custom labels mismatch: provided {} labels but have {} categories. Using numbered labels instead.",
                         length(custom_labels), n_categories))
                 } else if (anyDuplicated(custom_labels) > 0) {
@@ -659,7 +659,7 @@ categorizeClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
             # WARNING: Bin collapse
             if (method %in% c("equal", "quantile", "jenks") && n_categories != nbins) {
-                notice_html$binCollapse <- .noticeBox("WARNING", jmvcore::format(
+                notice_html$binCollapse <- .noticeBox("WARNING", .fmt(
                     "Bin collapse: requested {} categories but only {} distinct bins could be created due to tied values or limited range. Interpretations based on '{}-tiles' (e.g., quartiles, tertiles) may be misleading; verify bin boundaries before use.",
                     nbins, n_categories, nbins))
             }
@@ -691,7 +691,7 @@ categorizeClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             # the count beside it. .generateLabels() now guarantees unique
             # labels; this catches anything it cannot.
             if (nlevels(x_cat) != n_categories) {
-                self$results$notices$setContent(.errBox(jmvcore::format(
+                self$results$notices$setContent(.errBox(.fmt(
                     "Category labels collided: {} break points define {} intervals but only {} distinct categories were produced, so two or more intervals would be merged into one row. The frequency table and the added variable would not match the break points, so no results are shown. Choose a different label style (Numbered or Lettered), or reduce the number of categories so the boundaries are further apart.",
                     length(breaks), n_categories, nlevels(x_cat))))
                 return()
@@ -724,7 +724,7 @@ categorizeClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     # exactly, so below + above == n_outside by construction.
                     below <- sum(!is.na(x) & is.na(x_cat) & x < min(breaks))
                     above <- n_outside - below
-                    notice_html$outOfRange <- .noticeBox("WARNING", jmvcore::format(
+                    notice_html$outOfRange <- .noticeBox("WARNING", .fmt(
                         "Excluded {} observation(s) ({}%) that fall outside the break points [{}, {}]: {} below and {} above. These are not counted in any category. Turn off 'Out-of-range value exclusion' to extend the outer breaks and keep every case.",
                         n_outside,
                         round(100 * n_outside / sum(!is.na(x)), 1),
@@ -735,7 +735,7 @@ categorizeClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 if (n_boundary > 0) {
                     open_end <- if (isTRUE(self$options$rightclosed))
                         base::format(min(breaks)) else base::format(max(breaks))
-                    notice_html$boundaryDropped <- .noticeBox("STRONG_WARNING", jmvcore::format(
+                    notice_html$boundaryDropped <- .noticeBox("STRONG_WARNING", .fmt(
                         "Boundary values not categorized: {} observation(s) ({}%) are exactly equal to {} and fall outside every interval, because 'Lowest value in first bin' is switched off. They are not counted in any category. Switch that option on to keep them.",
                         n_boundary,
                         round(100 * n_boundary / sum(!is.na(x)), 1),
@@ -756,7 +756,7 @@ categorizeClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 sliver_cut <- 0.02 * n_valid_for_check
                 small_bins <- sum(bin_counts < 5 | bin_counts <= sliver_cut)
                 if (small_bins > 0) {
-                    notice_html$smallBins <- .noticeBox("STRONG_WARNING", jmvcore::format(
+                    notice_html$smallBins <- .noticeBox("STRONG_WARNING", .fmt(
                         "Small bins detected: {} of {} bin(s) hold fewer than 5 observations or under 2% of the sample (smallest bin n = {}). Estimates within such groups are very imprecise and tests involving them have little power; consider reducing the number of categories or using quantile binning for more even group sizes.",
                         small_bins, length(bin_counts), min(bin_counts)))
                 }
@@ -775,7 +775,7 @@ categorizeClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             # STRONG_WARNING: a mean+/-SD boundary fell outside the data range
             if (method == "meansd" && length(private$.meansdDropped) > 0) {
                 which_band <- paste(private$.meansdDropped, collapse = " and ")
-                notice_html$meansdCollapse <- .noticeBox("STRONG_WARNING", jmvcore::format(
+                notice_html$meansdCollapse <- .noticeBox("STRONG_WARNING", .fmt(
                     "Mean\u{00B1}SD boundary outside the data: the {} boundary (mean +/- {} SD) lies beyond the observed range, so that band cannot be formed and {} categories were created instead of the usual 4. This happens on skewed distributions (CRP, ferritin, tumour burden). Quantile or natural-breaks binning gives bands that always fall inside the data.",
                     which_band, sdmult, n_categories))
             }
@@ -789,7 +789,7 @@ categorizeClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 outliers <- sum(x_clean < (q1 - 3 * iqr) | x_clean > (q3 + 3 * iqr))
 
                 if (outliers > 0) {
-                    notice_html$outlierSensitivity <- .noticeBox("WARNING", jmvcore::format(
+                    notice_html$outlierSensitivity <- .noticeBox("WARNING", .fmt(
                         "Outlier sensitivity: detected {} extreme outlier(s). Mean\u{00B1}SD binning is sensitive to outliers, which can create poorly distributed categories. Consider using quantile or natural breaks methods.",
                         outliers))
                 }
@@ -1002,7 +1002,7 @@ categorizeClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             }
 
             # INFO: Analysis complete with methodological note
-            notice_html$analysisComplete <- .noticeBox("INFO", jmvcore::format(
+            notice_html$analysisComplete <- .noticeBox("INFO", .fmt(
                 "Categorization completed: {} observations placed into {} groups using {} method. Note: Categorization reduces statistical power and may obscure dose-response relationships (Altman & Royston, BMJ 2006;332:1080). Continuous analyses are generally preferred unless there is strong clinical justification.",
                 n_valid_obs, n_categories, self$options$method))
 

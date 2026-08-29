@@ -3197,7 +3197,7 @@ enhancedROCClass <- R6::R6Class(
             nnd_text <- ""
             if (!is.na(best_cutoff$youden_index) && best_cutoff$youden_index > 0) {
                 nnd <- ceiling(1 / best_cutoff$youden_index)
-                nnd_text <- paste0(" ", jmvcore::format(
+                nnd_text <- paste0(" ", .fmt(
                     .("The Number Needed to Diagnose (1/Youden) was {nnd}. This is a prevalence-free index of discriminating power, not a count of patients to test: the number that must actually be tested to find one additional case also depends on disease prevalence in the population."),
                     nnd = nnd
                 ))
@@ -4901,7 +4901,7 @@ enhancedROCClass <- R6::R6Class(
             impact_threshold <- min(max(impact_prevalence, 0.01), 0.99)
             impactTable$setNote(
                 "threshold_source",
-                jmvcore::format(
+                .fmt(
                     .("Net benefit and number needed to treat are evaluated at a risk threshold of {thr}, taken from the disease prevalence {src}. A threshold of {thr} means accepting {ratio} unnecessary positive results for each additional case found. If that trade-off does not match your setting, untick \u{2018}Use observed prevalence\u{2019} and enter the threshold you want in the Disease Prevalence box."),
                     thr = sprintf("%.3f", impact_threshold),
                     src = if (isTRUE(self$options$useObservedPrevalence)) .("observed in these data") else .("you entered"),

@@ -240,7 +240,7 @@ jjridgesClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             
             # Check minimum sample size
             if (nrow(self$data) < private$.MIN_SAMPLE_SIZE) {
-                warnings <- c(warnings, jmvcore::format(
+                warnings <- c(warnings, .fmt(
                     .("Sample size (n={n}) is below recommended minimum of {min} for reliable ridge plot analysis"),
                     n = nrow(self$data), min = private$.MIN_SAMPLE_SIZE))
             }
@@ -267,7 +267,7 @@ jjridgesClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             group_counts <- table(plot_data$y)
             small_groups <- group_counts[group_counts < private$.MIN_GROUP_SIZE]
             if (length(small_groups) > 0) {
-                warnings <- c(warnings, jmvcore::format(
+                warnings <- c(warnings, .fmt(
                     .("Groups with fewer than {min} observations may show unreliable density estimates: {groups}"),
                     min = private$.MIN_GROUP_SIZE, groups = paste(names(small_groups), collapse = ", ")))
             }
@@ -277,7 +277,7 @@ jjridgesClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 z_scores <- abs(scale(plot_data$x))
                 outlier_prop <- sum(z_scores > 3, na.rm = TRUE) / length(z_scores)
                 if (outlier_prop > private$.MAX_OUTLIER_PROP) {
-                    warnings <- c(warnings, jmvcore::format(
+                    warnings <- c(warnings, .fmt(
                         .("High proportion of extreme outliers detected ({pct}%). Consider reviewing data quality or using robust statistical options."),
                         pct = round(outlier_prop * 100, 1)))
                 }
@@ -343,7 +343,7 @@ jjridgesClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 private$.addNotice(
                     "WARNING",
                     .("Invalid quantiles"),
-                    jmvcore::format(
+                    .fmt(
                         .("{error}. The default quantiles (0.25, 0.5, 0.75) were drawn instead."),
                         error = conditionMessage(e)))
                 c(0.25, 0.5, 0.75)

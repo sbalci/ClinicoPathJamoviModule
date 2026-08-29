@@ -617,7 +617,7 @@ jjwithinstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 private$.accumulateDataMessage(
                     paste0(
                         "<br>",
-                        jmvcore::format(
+                        .fmt(
                             .("Variables not found in the dataset: {vars}."),
                             vars = private$.safeHtmlOutput(paste(missing_vars, collapse = ", "))),
                         "<br>")
@@ -1217,7 +1217,7 @@ jjwithinstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 # htmlEscape e$message - ggwithinstats errors may include user column-name fragments
                 error_msg <- paste0(
                     "<br>",
-                    jmvcore::format(
+                    .fmt(
                         .("The within-subjects plot could not be created: {error}"),
                         error = private$.safeHtmlOutput(e$message)),
                     .("<br><br>Please check that:"),
@@ -1447,7 +1447,7 @@ jjwithinstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 # ggpubr messages may embed user column-name fragments.
                 error_msg <- paste0(
                     "<br>",
-                    jmvcore::format(
+                    .fmt(
                         .("The ggpubr plot could not be created: {error}"),
                         error = private$.safeHtmlOutput(e$message)),
                     .("<br>The primary within-subjects plot above is unaffected.<br><hr>")

@@ -88,7 +88,7 @@ nonparametricregressionClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R
                     tableFit$addRow(rowKey=3, values=list(statistic="Effective df", value=model$enp, interpretation="Complexity of the smooth"))
                     
                 } else {
-                    self$results$methodsExplanation$setContent(jmvcore::format("LOESS Error: {}", htmltools::htmlEscape(conditionMessage(model))))
+                    self$results$methodsExplanation$setContent(.fmt("LOESS Error: {}", htmltools::htmlEscape(conditionMessage(model))))
                 }
             } else if (regType == "spline" && length(predVars) == 1) {
                 
@@ -110,7 +110,7 @@ nonparametricregressionClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R
                     ))
                 }
             } else {
-                 self$results$methodsExplanation$setContent(jmvcore::format("Method {} with {} predictors is not yet fully implemented in this preview. Try LOESS or univariate Spline.", regType, length(predVars)))
+                 self$results$methodsExplanation$setContent(.fmt("Method {} with {} predictors is not yet fully implemented in this preview. Try LOESS or univariate Spline.", regType, length(predVars)))
             }
 
             # 6. Methods Explanation
